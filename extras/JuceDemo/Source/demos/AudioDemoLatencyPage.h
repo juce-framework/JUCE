@@ -3,7 +3,7 @@
 
   This is an automatically generated file created by the Jucer!
 
-  Creation date:  1 May 2011 1:54:50pm
+  Creation date:  21 Sep 2012 12:09:45pm
 
   Be careful when adding custom code to these files, as only the code within
   the "//[xyz]" and "//[/xyz]" sections will be retained when the file is loaded
@@ -19,8 +19,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCER_HEADER_AUDIODEMOLATENCYPAGE_AUDIODEMOLATENCYPAGE_7C897E97__
-#define __JUCER_HEADER_AUDIODEMOLATENCYPAGE_AUDIODEMOLATENCYPAGE_7C897E97__
+#ifndef __JUCER_HEADER_AUDIODEMOLATENCYPAGE_AUDIODEMOLATENCYPAGE_B3E72FB8__
+#define __JUCER_HEADER_AUDIODEMOLATENCYPAGE_AUDIODEMOLATENCYPAGE_B3E72FB8__
 
 //[Headers]     -- You can add your own extra header files here --
 #include "../jucedemo_headers.h"
@@ -56,9 +56,6 @@ public:
 
 
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
     //[UserVariables]   -- You can add your own custom variables in this section.
     AudioDeviceManager& deviceManager;
@@ -72,10 +69,8 @@ private:
 
 
     //==============================================================================
-    // (prevent copy constructor and operator= being generated..)
-    AudioDemoLatencyPage (const AudioDemoLatencyPage&);
-    const AudioDemoLatencyPage& operator= (const AudioDemoLatencyPage&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioDemoLatencyPage);
 };
 
 
-#endif   // __JUCER_HEADER_AUDIODEMOLATENCYPAGE_AUDIODEMOLATENCYPAGE_7C897E97__
+#endif   // __JUCER_HEADER_AUDIODEMOLATENCYPAGE_AUDIODEMOLATENCYPAGE_B3E72FB8__

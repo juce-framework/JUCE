@@ -232,11 +232,10 @@ int StretchableLayoutManager::fitComponentsIntoSpace (const int startIndex,
                                                       int startPos)
 {
     // calculate the total sizes
-    int i;
     double totalIdealSize = 0.0;
     int totalMinimums = 0;
 
-    for (i = startIndex; i < endIndex; ++i)
+    for (int i = startIndex; i < endIndex; ++i)
     {
         ItemLayoutProperties* const layout = items.getUnchecked (i);
 
@@ -258,7 +257,7 @@ int StretchableLayoutManager::fitComponentsIntoSpace (const int startIndex,
         int numHavingTakenExtraSpace = 0;
 
         // first figure out how many comps want a slice of the extra space..
-        for (i = startIndex; i < endIndex; ++i)
+        for (int i = startIndex; i < endIndex; ++i)
         {
             ItemLayoutProperties* const layout = items.getUnchecked (i);
 
@@ -274,7 +273,7 @@ int StretchableLayoutManager::fitComponentsIntoSpace (const int startIndex,
         }
 
         // ..share out the extra space..
-        for (i = startIndex; i < endIndex; ++i)
+        for (int i = startIndex; i < endIndex; ++i)
         {
             ItemLayoutProperties* const layout = items.getUnchecked (i);
 
@@ -307,7 +306,7 @@ int StretchableLayoutManager::fitComponentsIntoSpace (const int startIndex,
     }
 
     // ..and calculate the end position
-    for (i = startIndex; i < endIndex; ++i)
+    for (int i = startIndex; i < endIndex; ++i)
     {
         ItemLayoutProperties* const layout = items.getUnchecked(i);
         startPos += layout->currentSize;

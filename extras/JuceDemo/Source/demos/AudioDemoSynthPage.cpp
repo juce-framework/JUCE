@@ -3,7 +3,7 @@
 
   This is an automatically generated file created by the Jucer!
 
-  Creation date:  1 May 2011 12:06:00pm
+  Creation date:  21 Sep 2012 12:10:20pm
 
   Be careful when adding custom code to these files, as only the code within
   the "//[xyz]" and "//[/xyz]" sections will be retained when the file is loaded
@@ -257,13 +257,13 @@ AudioDemoSynthPage::AudioDemoSynthPage (AudioDeviceManager& deviceManager_)
     addAndMakeVisible (keyboardComponent = new MidiKeyboardComponent (keyboardState, MidiKeyboardComponent::horizontalKeyboard));
 
     addAndMakeVisible (sineButton = new ToggleButton (String::empty));
-    sineButton->setButtonText (L"Use sine wave");
+    sineButton->setButtonText ("Use sine wave");
     sineButton->setRadioGroupId (321);
     sineButton->addListener (this);
     sineButton->setToggleState (true, false);
 
     addAndMakeVisible (sampledButton = new ToggleButton (String::empty));
-    sampledButton->setButtonText (L"Use sampled sound");
+    sampledButton->setButtonText ("Use sampled sound");
     sampledButton->setRadioGroupId (321);
     sampledButton->addListener (this);
 

@@ -204,14 +204,19 @@ void Thread::setCurrentThreadAffinityMask (const uint32 affinityMask)
 //==============================================================================
 struct SleepEvent
 {
-    SleepEvent()
-        : handle (CreateEvent (0, 0, 0,
-                    #if JUCE_DEBUG
-                       _T("Juce Sleep Event")))
-                    #else
-                       0))
-                    #endif
+    SleepEvent() noexcept
+        : handle (CreateEvent (nullptr, FALSE, FALSE,
+                              #if JUCE_DEBUG
+                               _T("JUCE Sleep Event")))
+                              #else
+                               nullptr))
+                              #endif
+    {}
+
+    ~SleepEvent() noexcept
     {
+        CloseHandle (handle);
+        handle = 0;
     }
 
     HANDLE handle;
@@ -221,7 +226,7 @@ static SleepEvent sleepEvent;
 
 void JUCE_CALLTYPE Thread::sleep (const int millisecs)
 {
-    if (millisecs >= 10)
+    if (millisecs >= 10 || sleepEvent.handle == 0)
     {
         Sleep ((DWORD) millisecs);
     }
@@ -287,7 +292,7 @@ static void* currentModuleHandle = nullptr;
 void* Process::getCurrentModuleInstanceHandle() noexcept
 {
     if (currentModuleHandle == nullptr)
-        currentModuleHandle = GetModuleHandle (0);
+        currentModuleHandle = GetModuleHandleA (nullptr);
 
     return currentModuleHandle;
 }
@@ -317,10 +322,10 @@ void Process::terminate()
     ExitProcess (0);
 }
 
-bool juce_IsRunningInWine()
+bool juce_isRunningInWine()
 {
-    HMODULE ntdll = GetModuleHandle (_T("ntdll.dll"));
-    return ntdll != 0 && GetProcAddress (ntdll, "wine_get_version") != 0;
+    HMODULE ntdll = GetModuleHandleA ("ntdll");
+    return ntdll != 0 && GetProcAddress (ntdll, "wine_get_version") != nullptr;
 }
 
 //==============================================================================

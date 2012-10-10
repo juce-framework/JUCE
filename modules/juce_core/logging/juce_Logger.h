@@ -51,14 +51,11 @@ public:
     //==============================================================================
     /** Sets the current logging class to use.
 
-        Note that the object passed in won't be deleted when no longer needed.
+        Note that the object passed in will not be owned or deleted by the logger, so
+        the caller must make sure that it is not deleted while still being used.
         A null pointer can be passed-in to disable any logging.
-
-        If deleteOldLogger is set to true, the existing logger will be
-        deleted (if there is one).
     */
-    static void JUCE_CALLTYPE setCurrentLogger (Logger* newLogger,
-                                                bool deleteOldLogger = false);
+    static void JUCE_CALLTYPE setCurrentLogger (Logger* newLogger) noexcept;
 
     /** Writes a string to the current logger.
 
@@ -84,7 +81,6 @@ protected:
     Logger();
 
     /** This is overloaded by subclasses to implement custom logging behaviour.
-
         @see setCurrentLogger
     */
     virtual void logMessage (const String& message) = 0;

@@ -77,27 +77,37 @@ namespace AiffFileHelpers
             values.set ("Loop1EndIdentifier",   String (ByteOrder::swapIfLittleEndian (releaseLoop.endIdentifier)));
         }
 
+        static uint16 getValue16 (const StringPairArray& values, const char* name, const char* def)
+        {
+            return ByteOrder::swapIfLittleEndian ((uint16) values.getValue (name, def).getIntValue());
+        }
+
+        static int8 getValue8 (const StringPairArray& values, const char* name, const char* def)
+        {
+            return (int8) values.getValue (name, def).getIntValue();
+        }
+
         static void create (MemoryBlock& block, const StringPairArray& values)
         {
             if (values.getAllKeys().contains ("MidiUnityNote", true))
             {
                 block.setSize ((sizeof (InstChunk) + 3) & ~(size_t) 3, true);
-                InstChunk* const inst = static_cast <InstChunk*> (block.getData());
+                InstChunk& inst = *static_cast <InstChunk*> (block.getData());
 
-                inst->baseNote      = (int8) values.getValue ("MidiUnityNote", "60").getIntValue();
-                inst->detune        = (int8) values.getValue ("Detune", "0").getIntValue();
-                inst->lowNote       = (int8) values.getValue ("LowNote", "0").getIntValue();
-                inst->highNote      = (int8) values.getValue ("HighNote", "127").getIntValue();
-                inst->lowVelocity   = (int8) values.getValue ("LowVelocity", "1").getIntValue();
-                inst->highVelocity  = (int8) values.getValue ("HighVelocity", "127").getIntValue();
-                inst->gain          = (int16) ByteOrder::swapIfLittleEndian ((uint16) values.getValue ("Gain", "0").getIntValue());
+                inst.baseNote      = getValue8 (values, "MidiUnityNote", "60");
+                inst.detune        = getValue8 (values, "Detune", "0");
+                inst.lowNote       = getValue8 (values, "LowNote", "0");
+                inst.highNote      = getValue8 (values, "HighNote", "127");
+                inst.lowVelocity   = getValue8 (values, "LowVelocity", "1");
+                inst.highVelocity  = getValue8 (values, "HighVelocity", "127");
+                inst.gain          = (int16) getValue16 (values, "Gain", "0");
 
-                inst->sustainLoop.type              = ByteOrder::swapIfLittleEndian ((uint16) values.getValue ("Loop0Type", "0").getIntValue());
-                inst->sustainLoop.startIdentifier   = ByteOrder::swapIfLittleEndian ((uint16) values.getValue ("Loop0StartIdentifier", "0").getIntValue());
-                inst->sustainLoop.endIdentifier     = ByteOrder::swapIfLittleEndian ((uint16) values.getValue ("Loop0EndIdentifier", "0").getIntValue());
-                inst->releaseLoop.type              = ByteOrder::swapIfLittleEndian ((uint16) values.getValue ("Loop1Type", "0").getIntValue());
-                inst->releaseLoop.startIdentifier   = ByteOrder::swapIfLittleEndian ((uint16) values.getValue ("Loop1StartIdentifier", "0").getIntValue());
-                inst->releaseLoop.endIdentifier     = ByteOrder::swapIfLittleEndian ((uint16) values.getValue ("Loop1EndIdentifier", "0").getIntValue());
+                inst.sustainLoop.type              = getValue16 (values, "Loop0Type", "0");
+                inst.sustainLoop.startIdentifier   = getValue16 (values, "Loop0StartIdentifier", "0");
+                inst.sustainLoop.endIdentifier     = getValue16 (values, "Loop0EndIdentifier", "0");
+                inst.releaseLoop.type              = getValue16 (values, "Loop1Type", "0");
+                inst.releaseLoop.startIdentifier   = getValue16 (values, "Loop1StartIdentifier", "0");
+                inst.releaseLoop.endIdentifier     = getValue16 (values, "Loop1EndIdentifier", "0");
             }
         }
 

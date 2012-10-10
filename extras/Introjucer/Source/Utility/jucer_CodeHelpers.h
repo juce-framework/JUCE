@@ -48,6 +48,11 @@ namespace CodeHelpers
 
     void createStringMatcher (OutputStream& out, const String& utf8PointerVariable,
                               const StringArray& strings, const StringArray& codeToExecute, const int indentLevel);
+
+    String getLeadingWhitespace (String line);
+    int getBraceCount (String::CharPointerType line);
+    bool getIndentForCurrentBlock (CodeDocument::Position pos, const String& tab,
+                                   String& blockIndent, String& lastLineIndent);
 }
 
 

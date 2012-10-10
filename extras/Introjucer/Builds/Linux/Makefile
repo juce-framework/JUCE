@@ -92,6 +92,10 @@ clean:
 	-@rm -rf $(OBJDIR)/*
 	-@rm -rf $(OBJDIR)
 
+strip:
+	@echo Stripping The Introjucer
+	-@strip --strip-unneeded $(OUTDIR)/$(TARGET)
+
 $(OBJDIR)/jucer_AppearanceSettings_788d9889.o: ../../Source/Application/jucer_AppearanceSettings.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo "Compiling jucer_AppearanceSettings.cpp"

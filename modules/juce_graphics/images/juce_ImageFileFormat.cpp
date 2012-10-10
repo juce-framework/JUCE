@@ -23,31 +23,51 @@
   ==============================================================================
 */
 
+struct DefaultImageFormats
+{
+    static ImageFileFormat** get()
+    {
+        static DefaultImageFormats formats;
+        return formats.formats;
+    }
+
+private:
+    DefaultImageFormats() noexcept
+    {
+        formats[0] = &png;
+        formats[1] = &jpg;
+        formats[2] = &gif;
+        formats[3] = nullptr;
+    }
+
+    PNGImageFormat  png;
+    JPEGImageFormat jpg;
+    GIFImageFormat  gif;
+
+    ImageFileFormat* formats[4];
+};
+
 ImageFileFormat* ImageFileFormat::findImageFormatForStream (InputStream& input)
 {
-    struct DefaultImageFormats
-    {
-        PNGImageFormat  png;
-        JPEGImageFormat jpg;
-        GIFImageFormat  gif;
-    };
-
-    static DefaultImageFormats defaultImageFormats;
-
-    ImageFileFormat* formats[] = { &defaultImageFormats.png,
-                                   &defaultImageFormats.jpg,
-                                   &defaultImageFormats.gif };
-
     const int64 streamPos = input.getPosition();
 
-    for (int i = 0; i < numElementsInArray (formats); ++i)
+    for (ImageFileFormat** i = DefaultImageFormats::get(); *i != nullptr; ++i)
     {
-        const bool found = formats[i]->canUnderstand (input);
+        const bool found = (*i)->canUnderstand (input);
         input.setPosition (streamPos);
 
         if (found)
-            return formats[i];
+            return *i;
     }
+
+    return nullptr;
+}
+
+ImageFileFormat* ImageFileFormat::findImageFormatForFileExtension (const File& file)
+{
+    for (ImageFileFormat** i = DefaultImageFormats::get(); *i != nullptr; ++i)
+        if ((*i)->usesFileExtension (file))
+            return *i;
 
     return nullptr;
 }

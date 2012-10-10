@@ -28,13 +28,13 @@ namespace OpenGLRendering
 
 struct Target
 {
-    Target (OpenGLContext& context_, GLuint frameBufferID_, int width, int height) noexcept
-        : context (context_), frameBufferID (frameBufferID_), bounds (width, height)
+    Target (OpenGLContext& c, GLuint frameBufferID_, int width, int height) noexcept
+        : context (c), frameBufferID (frameBufferID_), bounds (width, height)
     {}
 
-    Target (OpenGLContext& context_, OpenGLFrameBuffer& frameBuffer_, const Point<int>& origin) noexcept
-        : context (context_), frameBufferID (frameBuffer_.getFrameBufferID()),
-          bounds (origin.x, origin.y, frameBuffer_.getWidth(), frameBuffer_.getHeight())
+    Target (OpenGLContext& c, OpenGLFrameBuffer& fb, const Point<int>& origin) noexcept
+        : context (c), frameBufferID (fb.getFrameBufferID()),
+          bounds (origin.x, origin.y, fb.getWidth(), fb.getHeight())
     {
         jassert (frameBufferID != 0); // trying to render into an uninitialised framebuffer object.
     }
@@ -737,8 +737,8 @@ struct StateHelpers
     //==============================================================================
     struct ActiveTextures
     {
-        ActiveTextures (const OpenGLContext& context_) noexcept
-            : texturesEnabled (0), currentActiveTexture (0), context (context_)
+        ActiveTextures (const OpenGLContext& c) noexcept
+            : texturesEnabled (0), currentActiveTexture (0), context (c)
         {}
 
         void clear() noexcept
@@ -928,8 +928,8 @@ struct StateHelpers
     //==============================================================================
     struct ShaderQuadQueue
     {
-        ShaderQuadQueue (const OpenGLContext& context_) noexcept
-            : context (context_), numVertices (0)
+        ShaderQuadQueue (const OpenGLContext& c) noexcept
+            : context (c), numVertices (0)
         {}
 
         ~ShaderQuadQueue() noexcept
@@ -1050,8 +1050,8 @@ struct StateHelpers
     //==============================================================================
     struct CurrentShader
     {
-        CurrentShader (OpenGLContext& context_) noexcept
-            : context (context_),
+        CurrentShader (OpenGLContext& c) noexcept
+            : context (c),
               activeShader (nullptr)
         {
             const char programValueID[] = "GraphicsContextPrograms";
@@ -1631,8 +1631,8 @@ private:
 
     struct TargetSaver
     {
-        TargetSaver (const OpenGLContext& context_)
-            : context (context_), oldFramebuffer (OpenGLFrameBuffer::getCurrentFrameBufferTarget())
+        TargetSaver (const OpenGLContext& c)
+            : context (c), oldFramebuffer (OpenGLFrameBuffer::getCurrentFrameBufferTarget())
         {
             glGetIntegerv (GL_VIEWPORT, oldViewport);
         }

@@ -28,7 +28,7 @@ ChildProcess::~ChildProcess() {}
 
 bool ChildProcess::waitForProcessToFinish (const int timeoutMs) const
 {
-    const int64 timeoutTime = Time::getMillisecondCounter() + timeoutMs;
+    const uint32 timeoutTime = Time::getMillisecondCounter() + (uint32) timeoutMs;
 
     do
     {

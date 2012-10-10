@@ -43,7 +43,7 @@
     @see SelectableObject
 */
 template <class SelectableItemType>
-class JUCE_API  SelectedItemSet   : public ChangeBroadcaster
+class SelectedItemSet   : public ChangeBroadcaster
 {
 public:
     //==============================================================================
@@ -269,6 +269,9 @@ public:
     }
 
     const Array <SelectableItemType>& getItemArray() const noexcept         { return selectedItems; }
+
+    SelectableItemType* begin() const noexcept                              { return selectedItems.begin(); }
+    SelectableItemType* end() const noexcept                                { return selectedItems.end(); }
 
     //==============================================================================
     /** Can be overridden to do special handling when an item is selected.

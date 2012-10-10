@@ -75,6 +75,12 @@ public:
     /** Appends some text, with a specified font and colour. */
     void append (const String& textToAppend, const Font& font, const Colour& colour);
 
+    /** Appends another AttributedString to this one.
+        Note that this will only append the text, fonts, and colours - it won't copy any
+        other properties such as justification, line-spacing, etc from the other object.
+    */
+    void append (const AttributedString& other);
+
     /** Resets the string, clearing all text and attributes.
         Note that this won't affect global settings like the justification type,
         word-wrap mode, etc.
@@ -171,6 +177,8 @@ public:
         ScopedPointer<Font> font;
         ScopedPointer<Colour> colour;
 
+        friend class AttributedString;
+        Attribute (const Attribute&, int);
         Attribute& operator= (const Attribute&);
 
         JUCE_LEAK_DETECTOR (Attribute);

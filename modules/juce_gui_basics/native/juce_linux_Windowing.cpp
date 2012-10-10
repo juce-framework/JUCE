@@ -25,10 +25,57 @@
 
 extern Display* display;
 extern XContext windowHandleXContext;
+typedef void (*WindowMessageReceiveCallback) (XEvent&);
+extern WindowMessageReceiveCallback dispatchWindowMessage;
+
 
 //==============================================================================
-namespace Atoms
+struct Atoms
 {
+    Atoms()
+    {
+        Protocols                       = getIfExists ("WM_PROTOCOLS");
+        ProtocolList [TAKE_FOCUS]       = getIfExists ("WM_TAKE_FOCUS");
+        ProtocolList [DELETE_WINDOW]    = getIfExists ("WM_DELETE_WINDOW");
+        ProtocolList [PING]             = getIfExists ("_NET_WM_PING");
+        ChangeState                     = getIfExists ("WM_CHANGE_STATE");
+        State                           = getIfExists ("WM_STATE");
+        UserTime                        = getCreating ("_NET_WM_USER_TIME");
+        ActiveWin                       = getCreating ("_NET_ACTIVE_WINDOW");
+        Pid                             = getCreating ("_NET_WM_PID");
+        WindowType                      = getIfExists ("_NET_WM_WINDOW_TYPE");
+        WindowState                     = getIfExists ("_NET_WM_STATE");
+
+        XdndAware                       = getCreating ("XdndAware");
+        XdndEnter                       = getCreating ("XdndEnter");
+        XdndLeave                       = getCreating ("XdndLeave");
+        XdndPosition                    = getCreating ("XdndPosition");
+        XdndStatus                      = getCreating ("XdndStatus");
+        XdndDrop                        = getCreating ("XdndDrop");
+        XdndFinished                    = getCreating ("XdndFinished");
+        XdndSelection                   = getCreating ("XdndSelection");
+
+        XdndTypeList                    = getCreating ("XdndTypeList");
+        XdndActionList                  = getCreating ("XdndActionList");
+        XdndActionCopy                  = getCreating ("XdndActionCopy");
+        XdndActionDescription           = getCreating ("XdndActionDescription");
+
+        allowedMimeTypes[0]             = getCreating ("text/plain");
+        allowedMimeTypes[1]             = getCreating ("text/uri-list");
+
+        allowedActions[0]               = getCreating ("XdndActionMove");
+        allowedActions[1]               = XdndActionCopy;
+        allowedActions[2]               = getCreating ("XdndActionLink");
+        allowedActions[3]               = getCreating ("XdndActionAsk");
+        allowedActions[4]               = getCreating ("XdndActionPrivate");
+    }
+
+    static const Atoms& get()
+    {
+        static Atoms atoms;
+        return atoms;
+    }
+
     enum ProtocolItems
     {
         TAKE_FOCUS = 0,
@@ -36,64 +83,46 @@ namespace Atoms
         PING = 2
     };
 
-    static Atom Protocols, ProtocolList[3], ChangeState, State,
-                ActiveWin, Pid, WindowType, WindowState,
-                XdndAware, XdndEnter, XdndLeave, XdndPosition, XdndStatus,
-                XdndDrop, XdndFinished, XdndSelection, XdndTypeList, XdndActionList,
-                XdndActionDescription, XdndActionCopy,
-                allowedActions[5],
-                allowedMimeTypes[2];
+    Atom Protocols, ProtocolList[3], ChangeState, State, UserTime,
+         ActiveWin, Pid, WindowType, WindowState,
+         XdndAware, XdndEnter, XdndLeave, XdndPosition, XdndStatus,
+         XdndDrop, XdndFinished, XdndSelection, XdndTypeList, XdndActionList,
+         XdndActionDescription, XdndActionCopy,
+         allowedActions[5],
+         allowedMimeTypes[2];
 
-    const unsigned long DndVersion = 3;
+    static const unsigned long DndVersion;
 
-    Atom getIfExists (const char* name)    { return XInternAtom (display, name, True); }
-    Atom getCreating (const char* name)    { return XInternAtom (display, name, False); }
+    static Atom getIfExists (const char* name)    { return XInternAtom (display, name, True); }
+    static Atom getCreating (const char* name)    { return XInternAtom (display, name, False); }
+};
 
-    //==============================================================================
-    void initialiseAtoms()
+const unsigned long Atoms::DndVersion = 3;
+
+//==============================================================================
+struct GetXProperty
+{
+    GetXProperty (Window window, Atom atom, long offset, long length, bool shouldDelete, Atom requestedType)
+        : data (nullptr)
     {
-        static bool atomsInitialised = false;
-
-        if (! atomsInitialised)
-        {
-            atomsInitialised = true;
-
-            Protocols                       = getIfExists ("WM_PROTOCOLS");
-            ProtocolList [TAKE_FOCUS]       = getIfExists ("WM_TAKE_FOCUS");
-            ProtocolList [DELETE_WINDOW]    = getIfExists ("WM_DELETE_WINDOW");
-            ProtocolList [PING]             = getIfExists ("_NET_WM_PING");
-            ChangeState                     = getIfExists ("WM_CHANGE_STATE");
-            State                           = getIfExists ("WM_STATE");
-            ActiveWin                       = getCreating ("_NET_ACTIVE_WINDOW");
-            Pid                             = getCreating ("_NET_WM_PID");
-            WindowType                      = getIfExists ("_NET_WM_WINDOW_TYPE");
-            WindowState                     = getIfExists ("_NET_WM_STATE");
-
-            XdndAware                       = getCreating ("XdndAware");
-            XdndEnter                       = getCreating ("XdndEnter");
-            XdndLeave                       = getCreating ("XdndLeave");
-            XdndPosition                    = getCreating ("XdndPosition");
-            XdndStatus                      = getCreating ("XdndStatus");
-            XdndDrop                        = getCreating ("XdndDrop");
-            XdndFinished                    = getCreating ("XdndFinished");
-            XdndSelection                   = getCreating ("XdndSelection");
-
-            XdndTypeList                    = getCreating ("XdndTypeList");
-            XdndActionList                  = getCreating ("XdndActionList");
-            XdndActionCopy                  = getCreating ("XdndActionCopy");
-            XdndActionDescription           = getCreating ("XdndActionDescription");
-
-            allowedMimeTypes[0]             = getCreating ("text/plain");
-            allowedMimeTypes[1]             = getCreating ("text/uri-list");
-
-            allowedActions[0]               = getCreating ("XdndActionMove");
-            allowedActions[1]               = XdndActionCopy;
-            allowedActions[2]               = getCreating ("XdndActionLink");
-            allowedActions[3]               = getCreating ("XdndActionAsk");
-            allowedActions[4]               = getCreating ("XdndActionPrivate");
-        }
+        success = (XGetWindowProperty (display, window, atom, offset, length,
+                                       (Bool) shouldDelete, requestedType, &actualType,
+                                       &actualFormat, &numItems, &bytesLeft, &data) == Success)
+                    && data != nullptr;
     }
-}
+
+    ~GetXProperty()
+    {
+        if (data != nullptr)
+            XFree (data);
+    }
+
+    bool success;
+    unsigned char* data;
+    unsigned long numItems, bytesLeft;
+    Atom actualType;
+    int actualFormat;
+};
 
 //==============================================================================
 namespace Keys
@@ -224,14 +253,14 @@ namespace XSHMHelpers
 namespace XRender
 {
     typedef Status (*tXRenderQueryVersion) (Display*, int*, int*);
-    typedef XRenderPictFormat* (*tXrenderFindStandardFormat) (Display*, int);
+    typedef XRenderPictFormat* (*tXRenderFindStandardFormat) (Display*, int);
     typedef XRenderPictFormat* (*tXRenderFindFormat) (Display*, unsigned long, XRenderPictFormat*, int);
     typedef XRenderPictFormat* (*tXRenderFindVisualFormat) (Display*, Visual*);
 
-    static tXRenderQueryVersion xRenderQueryVersion = 0;
-    static tXrenderFindStandardFormat xRenderFindStandardFormat = 0;
-    static tXRenderFindFormat xRenderFindFormat = 0;
-    static tXRenderFindVisualFormat xRenderFindVisualFormat = 0;
+    static tXRenderQueryVersion xRenderQueryVersion = nullptr;
+    static tXRenderFindStandardFormat xRenderFindStandardFormat = nullptr;
+    static tXRenderFindFormat xRenderFindFormat = nullptr;
+    static tXRenderFindVisualFormat xRenderFindVisualFormat = nullptr;
 
     static bool isAvailable()
     {
@@ -242,57 +271,54 @@ namespace XRender
             ScopedXLock xlock;
             hasLoaded = true;
 
-            void* h = dlopen ("libXrender.so", RTLD_GLOBAL | RTLD_NOW);
-
-            if (h != 0)
+            if (void* h = dlopen ("libXrender.so", RTLD_GLOBAL | RTLD_NOW))
             {
                 xRenderQueryVersion         = (tXRenderQueryVersion)        dlsym (h, "XRenderQueryVersion");
-                xRenderFindStandardFormat   = (tXrenderFindStandardFormat)  dlsym (h, "XrenderFindStandardFormat");
+                xRenderFindStandardFormat   = (tXRenderFindStandardFormat)  dlsym (h, "XRenderFindStandardFormat");
                 xRenderFindFormat           = (tXRenderFindFormat)          dlsym (h, "XRenderFindFormat");
                 xRenderFindVisualFormat     = (tXRenderFindVisualFormat)    dlsym (h, "XRenderFindVisualFormat");
             }
 
-            if (xRenderQueryVersion != 0
-                 && xRenderFindStandardFormat != 0
-                 && xRenderFindFormat != 0
-                 && xRenderFindVisualFormat != 0)
+            if (xRenderQueryVersion != nullptr
+                 && xRenderFindStandardFormat != nullptr
+                 && xRenderFindFormat != nullptr
+                 && xRenderFindVisualFormat != nullptr)
             {
                 int major, minor;
                 if (xRenderQueryVersion (display, &major, &minor))
                     return true;
             }
 
-            xRenderQueryVersion = 0;
+            xRenderQueryVersion = nullptr;
         }
 
-        return xRenderQueryVersion != 0;
+        return xRenderQueryVersion != nullptr;
     }
 
     static XRenderPictFormat* findPictureFormat()
     {
         ScopedXLock xlock;
-
         XRenderPictFormat* pictFormat = nullptr;
 
         if (isAvailable())
         {
             pictFormat = xRenderFindStandardFormat (display, PictStandardARGB32);
 
-            if (pictFormat == 0)
+            if (pictFormat == nullptr)
             {
                 XRenderPictFormat desiredFormat;
                 desiredFormat.type = PictTypeDirect;
                 desiredFormat.depth = 32;
 
                 desiredFormat.direct.alphaMask = 0xff;
-                desiredFormat.direct.redMask = 0xff;
+                desiredFormat.direct.redMask   = 0xff;
                 desiredFormat.direct.greenMask = 0xff;
-                desiredFormat.direct.blueMask = 0xff;
+                desiredFormat.direct.blueMask  = 0xff;
 
                 desiredFormat.direct.alpha = 24;
-                desiredFormat.direct.red = 16;
+                desiredFormat.direct.red   = 16;
                 desiredFormat.direct.green = 8;
-                desiredFormat.direct.blue = 0;
+                desiredFormat.direct.blue  = 0;
 
                 pictFormat = xRenderFindFormat (display,
                                                 PictFormatType | PictFormatDepth
@@ -347,7 +373,7 @@ namespace Visuals
                                                &desiredVisual,
                                                &numVisuals);
 
-        if (xvinfos != 0)
+        if (xvinfos != nullptr)
         {
             for (int i = 0; i < numVisuals; i++)
             {
@@ -389,13 +415,13 @@ namespace Visuals
                         XVisualInfo* xvinfos = XGetVisualInfo (display,
                                                                VisualScreenMask | VisualDepthMask | VisualBitsPerRGBMask,
                                                                &desiredVisual, &numVisuals);
-                        if (xvinfos != 0)
+                        if (xvinfos != nullptr)
                         {
                             for (int i = 0; i < numVisuals; ++i)
                             {
                                 XRenderPictFormat* pictVisualFormat = XRender::xRenderFindVisualFormat (display, xvinfos[i].visual);
 
-                                if (pictVisualFormat != 0
+                                if (pictVisualFormat != nullptr
                                      && pictVisualFormat->type == PictTypeDirect
                                      && pictVisualFormat->direct.alphaMask)
                                 {
@@ -410,27 +436,27 @@ namespace Visuals
                     }
                 }
                #endif
-                if (visual == 0)
+                if (visual == nullptr)
                 {
                     visual = findVisualWithDepth (32);
-                    if (visual != 0)
+                    if (visual != nullptr)
                         matchedDepth = 32;
                 }
             }
            #endif
         }
 
-        if (visual == 0 && desiredDepth >= 24)
+        if (visual == nullptr && desiredDepth >= 24)
         {
             visual = findVisualWithDepth (24);
-            if (visual != 0)
+            if (visual != nullptr)
                 matchedDepth = 24;
         }
 
-        if (visual == 0 && desiredDepth >= 16)
+        if (visual == nullptr && desiredDepth >= 16)
         {
             visual = findVisualWithDepth (16);
-            if (visual != 0)
+            if (visual != nullptr)
                 matchedDepth = 16;
         }
 
@@ -468,7 +494,7 @@ public:
 
             xImage = XShmCreateImage (display, visual, imageDepth, ZPixmap, 0, &segmentInfo, w, h);
 
-            if (xImage != 0)
+            if (xImage != nullptr)
             {
                 if ((segmentInfo.shmid = shmget (IPC_PRIVATE,
                                                  xImage->bytes_per_line * xImage->height,
@@ -589,7 +615,7 @@ public:
         return nullptr;
     }
 
-    ImageType* createType() const                       { return new NativeImageType(); }
+    ImageType* createType() const     { return new NativeImageType(); }
 
     void blitToWindow (Window window, int dx, int dy, int dw, int dh, int sx, int sy)
     {
@@ -612,14 +638,14 @@ public:
 
         if (imageDepth == 16)
         {
-            const uint32 rMask = xImage->red_mask;
-            const uint32 rShiftL = jmax (0, getShiftNeeded (rMask));
+            const uint32 rMask   = xImage->red_mask;
+            const uint32 gMask   = xImage->green_mask;
+            const uint32 bMask   = xImage->blue_mask;
+            const uint32 rShiftL = jmax (0,  getShiftNeeded (rMask));
             const uint32 rShiftR = jmax (0, -getShiftNeeded (rMask));
-            const uint32 gMask = xImage->green_mask;
-            const uint32 gShiftL = jmax (0, getShiftNeeded (gMask));
+            const uint32 gShiftL = jmax (0,  getShiftNeeded (gMask));
             const uint32 gShiftR = jmax (0, -getShiftNeeded (gMask));
-            const uint32 bMask = xImage->blue_mask;
-            const uint32 bShiftL = jmax (0, getShiftNeeded (bMask));
+            const uint32 bShiftL = jmax (0,  getShiftNeeded (bMask));
             const uint32 bShiftR = jmax (0, -getShiftNeeded (bMask));
 
             const Image::BitmapData srcData (Image (this), Image::BitmapData::readOnly);
@@ -745,11 +771,12 @@ public:
         : ComponentPeer (comp, windowStyleFlags),
           windowH (0), parentWindow (0),
           fullScreen (false), mapped (false),
-          visual (0), depth (0)
+          visual (nullptr), depth (0)
     {
         // it's dangerous to create a window on a thread other than the message thread..
         jassert (MessageManager::getInstance()->currentThreadHasLockedMessageManager());
 
+        dispatchWindowMessage = windowMessageReceive;
         repainter = new LinuxRepaintManager (this);
 
         createWindow (parentToAddTo);
@@ -763,10 +790,23 @@ public:
         jassert (MessageManager::getInstance()->currentThreadHasLockedMessageManager());
 
         deleteIconPixmaps();
-
         destroyWindow();
-
         windowH = 0;
+    }
+
+    // (this callback is hooked up in the messaging code)
+    static void windowMessageReceive (XEvent& event)
+    {
+        if (event.xany.window != None)
+        {
+            if (LinuxComponentPeer* const peer = getPeerFor (event.xany.window))
+                peer->handleWindowMessage (event);
+        }
+        else if (event.xany.type == KeymapNotify)
+        {
+            const XKeymapEvent& keymapEvent = (const XKeymapEvent&) event.xkeymap;
+            memcpy (Keys::keyStates, keymapEvent.key_vector, 32);
+        }
     }
 
     //==============================================================================
@@ -828,7 +868,7 @@ public:
                 clientMsg.window = windowH;
                 clientMsg.type = ClientMessage;
                 clientMsg.format = 32;
-                clientMsg.message_type = Atoms::WindowState;
+                clientMsg.message_type = Atoms::get().WindowState;
                 clientMsg.data.l[0] = 0;  // Remove
                 clientMsg.data.l[1] = fs;
                 clientMsg.data.l[2] = 0;
@@ -912,7 +952,7 @@ public:
             clientMsg.window = windowH;
             clientMsg.type = ClientMessage;
             clientMsg.format = 32;
-            clientMsg.message_type = Atoms::ChangeState;
+            clientMsg.message_type = Atoms::get().ChangeState;
             clientMsg.data.l[0] = IconicState;
 
             ScopedXLock xlock;
@@ -926,28 +966,15 @@ public:
 
     bool isMinimised() const
     {
-        bool minimised = false;
-
-        unsigned char* stateProp;
-        unsigned long nitems, bytesLeft;
-        Atom actualType;
-        int actualFormat;
-
         ScopedXLock xlock;
-        if (XGetWindowProperty (display, windowH, Atoms::State, 0, 64, False,
-                                Atoms::State, &actualType, &actualFormat, &nitems, &bytesLeft,
-                                &stateProp) == Success
-            && actualType == Atoms::State
-            && actualFormat == 32
-            && nitems > 0)
-        {
-            if (((unsigned long*) stateProp)[0] == IconicState)
-                minimised = true;
+        const Atoms& atoms = Atoms::get();
+        GetXProperty prop (windowH, atoms.State, 0, 64, false, atoms.State);
 
-            XFree (stateProp);
-        }
-
-        return minimised;
+        return prop.success
+                && prop.actualType == atoms.State
+                && prop.actualFormat == 32
+                && prop.numItems > 0
+                && ((unsigned long*) prop.data)[0] == IconicState;
     }
 
     void setFullScreen (const bool shouldBeFullScreen)
@@ -982,7 +1009,7 @@ public:
         ScopedXLock xlock;
         if (XQueryTree (display, windowH, &root, &parent, &windowList, &windowListSize) != 0)
         {
-            if (windowList != 0)
+            if (windowList != nullptr)
                 XFree (windowList);
 
             return parent == possibleParent;
@@ -1014,7 +1041,7 @@ public:
             }
         }
 
-        if (windowList != 0)
+        if (windowList != nullptr)
             XFree (windowList);
 
         return result;
@@ -1068,21 +1095,21 @@ public:
             grabFocus();
         }
 
-        XEvent ev;
-        ev.xclient.type = ClientMessage;
-        ev.xclient.serial = 0;
-        ev.xclient.send_event = True;
-        ev.xclient.message_type = Atoms::ActiveWin;
-        ev.xclient.window = windowH;
-        ev.xclient.format = 32;
-        ev.xclient.data.l[0] = 2;
-        ev.xclient.data.l[1] = CurrentTime;
-        ev.xclient.data.l[2] = 0;
-        ev.xclient.data.l[3] = 0;
-        ev.xclient.data.l[4] = 0;
-
         {
             ScopedXLock xlock;
+            XEvent ev;
+            ev.xclient.type = ClientMessage;
+            ev.xclient.serial = 0;
+            ev.xclient.send_event = True;
+            ev.xclient.message_type = Atoms::get().ActiveWin;
+            ev.xclient.window = windowH;
+            ev.xclient.format = 32;
+            ev.xclient.data.l[0] = 2;
+            ev.xclient.data.l[1] = getUserTime();
+            ev.xclient.data.l[2] = 0;
+            ev.xclient.data.l[3] = 0;
+            ev.xclient.data.l[4] = 0;
+
             XSendEvent (display, RootWindow (display, DefaultScreen (display)),
                         False, SubstructureRedirectMask | SubstructureNotifyMask, &ev);
 
@@ -1134,7 +1161,7 @@ public:
             && atts.map_state == IsViewable
             && ! isFocused())
         {
-            XSetInputFocus (display, windowH, RevertToParent, CurrentTime);
+            XSetInputFocus (display, windowH, RevertToParent, getUserTime());
             isActiveApplication = true;
         }
     }
@@ -1211,24 +1238,24 @@ public:
     }
 
     //==============================================================================
-    void handleWindowMessage (XEvent* event)
+    void handleWindowMessage (XEvent& event)
     {
-        switch (event->xany.type)
+        switch (event.xany.type)
         {
-            case KeyPressEventType:     handleKeyPressEvent ((XKeyEvent*) &event->xkey); break;
-            case KeyRelease:            handleKeyReleaseEvent ((const XKeyEvent*) &event->xkey); break;
-            case ButtonPress:           handleButtonPressEvent ((const XButtonPressedEvent*) &event->xbutton); break;
-            case ButtonRelease:         handleButtonReleaseEvent ((const XButtonReleasedEvent*) &event->xbutton); break;
-            case MotionNotify:          handleMotionNotifyEvent ((const XPointerMovedEvent*) &event->xmotion); break;
-            case EnterNotify:           handleEnterNotifyEvent ((const XEnterWindowEvent*) &event->xcrossing); break;
-            case LeaveNotify:           handleLeaveNotifyEvent ((const XLeaveWindowEvent*) &event->xcrossing); break;
+            case KeyPressEventType:     handleKeyPressEvent (event.xkey); break;
+            case KeyRelease:            handleKeyReleaseEvent (event.xkey); break;
+            case ButtonPress:           handleButtonPressEvent (event.xbutton); break;
+            case ButtonRelease:         handleButtonReleaseEvent (event.xbutton); break;
+            case MotionNotify:          handleMotionNotifyEvent (event.xmotion); break;
+            case EnterNotify:           handleEnterNotifyEvent (event.xcrossing); break;
+            case LeaveNotify:           handleLeaveNotifyEvent (event.xcrossing); break;
             case FocusIn:               handleFocusInEvent(); break;
             case FocusOut:              handleFocusOutEvent(); break;
-            case Expose:                handleExposeEvent ((XExposeEvent*) &event->xexpose); break;
-            case MappingNotify:         handleMappingNotify ((XMappingEvent*) &event->xmapping); break;
-            case ClientMessage:         handleClientMessageEvent ((XClientMessageEvent*) &event->xclient, event); break;
+            case Expose:                handleExposeEvent (event.xexpose); break;
+            case MappingNotify:         handleMappingNotify (event.xmapping); break;
+            case ClientMessage:         handleClientMessageEvent (event.xclient, event); break;
             case SelectionNotify:       handleDragAndDropSelection (event); break;
-            case ConfigureNotify:       handleConfigureNotifyEvent ((XConfigureEvent*) &event->xconfigure); break;
+            case ConfigureNotify:       handleConfigureNotifyEvent (event.xconfigure); break;
             case ReparentNotify:        handleReparentNotifyEvent(); break;
             case GravityNotify:         handleGravityNotify(); break;
 
@@ -1255,7 +1282,7 @@ public:
                #if JUCE_USE_XSHM
                 {
                     ScopedXLock xlock;
-                    if (event->xany.type == XShmGetEventBase (display))
+                    if (event.xany.type == XShmGetEventBase (display))
                         repainter->notifyPaintCompleted();
                 }
                #endif
@@ -1263,7 +1290,7 @@ public:
         }
     }
 
-    void handleKeyPressEvent (XKeyEvent* const keyEvent)
+    void handleKeyPressEvent (XKeyEvent& keyEvent)
     {
         char utf8 [64] = { 0 };
         juce_wchar unicodeChar = 0;
@@ -1273,18 +1300,18 @@ public:
 
         {
             ScopedXLock xlock;
-            updateKeyStates (keyEvent->keycode, true);
+            updateKeyStates (keyEvent.keycode, true);
 
             const char* oldLocale = ::setlocale (LC_ALL, 0);
             ::setlocale (LC_ALL, "");
-            XLookupString (keyEvent, utf8, sizeof (utf8), &sym, 0);
+            XLookupString (&keyEvent, utf8, sizeof (utf8), &sym, 0);
             ::setlocale (LC_ALL, oldLocale);
 
             unicodeChar = *CharPointer_UTF8 (utf8);
             keyCode = (int) unicodeChar;
 
             if (keyCode < 0x20)
-                keyCode = XkbKeycodeToKeysym (display, keyEvent->keycode, 0, currentModifiers.isShiftDown() ? 1 : 0);
+                keyCode = XkbKeycodeToKeysym (display, keyEvent.keycode, 0, currentModifiers.isShiftDown() ? 1 : 0);
 
             keyDownChange = (sym != NoSymbol) && ! updateKeyModifiersFromSym (sym, true);
         }
@@ -1362,7 +1389,7 @@ public:
             handleKeyPress (keyCode, unicodeChar);
     }
 
-    static bool isKeyReleasePartOfAutoRepeat (const XKeyEvent* const keyReleaseEvent)
+    static bool isKeyReleasePartOfAutoRepeat (const XKeyEvent& keyReleaseEvent)
     {
         if (XPending (display))
         {
@@ -1371,23 +1398,23 @@ public:
 
             // Look for a subsequent key-down event with the same timestamp and keycode
             return e.type == KeyPressEventType
-                    && e.xkey.keycode == keyReleaseEvent->keycode
-                    && e.xkey.time == keyReleaseEvent->time;
+                    && e.xkey.keycode == keyReleaseEvent.keycode
+                    && e.xkey.time == keyReleaseEvent.time;
         }
 
         return false;
     }
 
-    void handleKeyReleaseEvent (const XKeyEvent* const keyEvent)
+    void handleKeyReleaseEvent (const XKeyEvent& keyEvent)
     {
         if (! isKeyReleasePartOfAutoRepeat (keyEvent))
         {
-            updateKeyStates (keyEvent->keycode, false);
+            updateKeyStates (keyEvent.keycode, false);
             KeySym sym;
 
             {
                 ScopedXLock xlock;
-                sym = XkbKeycodeToKeysym (display, keyEvent->keycode, 0, 0);
+                sym = XkbKeycodeToKeysym (display, keyEvent.keycode, 0, 0);
             }
 
             const ModifierKeys oldMods (currentModifiers);
@@ -1401,7 +1428,13 @@ public:
         }
     }
 
-    void handleWheelEvent (const XButtonPressedEvent* const buttonPressEvent, const float amount)
+    template <typename EventType>
+    static Point<int> getMousePos (const EventType& e) noexcept
+    {
+        return Point<int> (e.x, e.y);
+    }
+
+    void handleWheelEvent (const XButtonPressedEvent& buttonPressEvent, const float amount)
     {
         MouseWheelDetails wheel;
         wheel.deltaX = 0.0f;
@@ -1409,23 +1442,21 @@ public:
         wheel.isReversed = false;
         wheel.isSmooth = false;
 
-        handleMouseWheel (0, Point<int> (buttonPressEvent->x, buttonPressEvent->y),
-                          getEventTime (buttonPressEvent->time), wheel);
+        handleMouseWheel (0, getMousePos (buttonPressEvent), getEventTime (buttonPressEvent), wheel);
     }
 
-    void handleButtonPressEvent (const XButtonPressedEvent* const buttonPressEvent, int buttonModifierFlag)
+    void handleButtonPressEvent (const XButtonPressedEvent& buttonPressEvent, int buttonModifierFlag)
     {
         currentModifiers = currentModifiers.withFlags (buttonModifierFlag);
         toFront (true);
-        handleMouseEvent (0, Point<int> (buttonPressEvent->x, buttonPressEvent->y), currentModifiers,
-                          getEventTime (buttonPressEvent->time));
+        handleMouseEvent (0, getMousePos (buttonPressEvent), currentModifiers, getEventTime (buttonPressEvent));
     }
 
-    void handleButtonPressEvent (const XButtonPressedEvent* const buttonPressEvent)
+    void handleButtonPressEvent (const XButtonPressedEvent& buttonPressEvent)
     {
-        updateKeyModifiers (buttonPressEvent->state);
+        updateKeyModifiers (buttonPressEvent.state);
 
-        switch (pointerMap [buttonPressEvent->button - Button1])
+        switch (pointerMap [buttonPressEvent.button - Button1])
         {
             case Keys::WheelUp:         handleWheelEvent (buttonPressEvent,  50.0f / 256.0f); break;
             case Keys::WheelDown:       handleWheelEvent (buttonPressEvent, -50.0f / 256.0f); break;
@@ -1438,11 +1469,11 @@ public:
         clearLastMousePos();
     }
 
-    void handleButtonReleaseEvent (const XButtonReleasedEvent* const buttonRelEvent)
+    void handleButtonReleaseEvent (const XButtonReleasedEvent& buttonRelEvent)
     {
-        updateKeyModifiers (buttonRelEvent->state);
+        updateKeyModifiers (buttonRelEvent.state);
 
-        switch (pointerMap [buttonRelEvent->button - Button1])
+        switch (pointerMap [buttonRelEvent.button - Button1])
         {
             case Keys::LeftButton:      currentModifiers = currentModifiers.withoutFlags (ModifierKeys::leftButtonModifier); break;
             case Keys::RightButton:     currentModifiers = currentModifiers.withoutFlags (ModifierKeys::rightButtonModifier); break;
@@ -1450,16 +1481,15 @@ public:
             default: break;
         }
 
-        handleMouseEvent (0, Point<int> (buttonRelEvent->x, buttonRelEvent->y), currentModifiers,
-                          getEventTime (buttonRelEvent->time));
+        handleMouseEvent (0, getMousePos (buttonRelEvent), currentModifiers, getEventTime (buttonRelEvent));
 
         clearLastMousePos();
     }
 
-    void handleMotionNotifyEvent (const XPointerMovedEvent* const movedEvent)
+    void handleMotionNotifyEvent (const XPointerMovedEvent& movedEvent)
     {
-        updateKeyModifiers (movedEvent->state);
-        const Point<int> mousePos (movedEvent->x_root, movedEvent->y_root);
+        updateKeyModifiers (movedEvent.state);
+        const Point<int> mousePos (movedEvent.x_root, movedEvent.y_root);
 
         if (lastMousePos != mousePos)
         {
@@ -1489,31 +1519,31 @@ public:
                 }
             }
 
-            handleMouseEvent (0, mousePos - getScreenPosition(), currentModifiers, getEventTime (movedEvent->time));
+            handleMouseEvent (0, mousePos - getScreenPosition(), currentModifiers, getEventTime (movedEvent));
         }
     }
 
-    void handleEnterNotifyEvent (const XEnterWindowEvent* const enterEvent)
+    void handleEnterNotifyEvent (const XEnterWindowEvent& enterEvent)
     {
         clearLastMousePos();
 
         if (! currentModifiers.isAnyMouseButtonDown())
         {
-            updateKeyModifiers (enterEvent->state);
-            handleMouseEvent (0, Point<int> (enterEvent->x, enterEvent->y), currentModifiers, getEventTime (enterEvent->time));
+            updateKeyModifiers (enterEvent.state);
+            handleMouseEvent (0, getMousePos (enterEvent), currentModifiers, getEventTime (enterEvent));
         }
     }
 
-    void handleLeaveNotifyEvent (const XLeaveWindowEvent* const leaveEvent)
+    void handleLeaveNotifyEvent (const XLeaveWindowEvent& leaveEvent)
     {
         // Suppress the normal leave if we've got a pointer grab, or if
         // it's a bogus one caused by clicking a mouse button when running
         // in a Window manager
-        if (((! currentModifiers.isAnyMouseButtonDown()) && leaveEvent->mode == NotifyNormal)
-             || leaveEvent->mode == NotifyUngrab)
+        if (((! currentModifiers.isAnyMouseButtonDown()) && leaveEvent.mode == NotifyNormal)
+             || leaveEvent.mode == NotifyUngrab)
         {
-            updateKeyModifiers (leaveEvent->state);
-            handleMouseEvent (0, Point<int> (leaveEvent->x, leaveEvent->y), currentModifiers, getEventTime (leaveEvent->time));
+            updateKeyModifiers (leaveEvent.state);
+            handleMouseEvent (0, getMousePos (leaveEvent), currentModifiers, getEventTime (leaveEvent));
         }
     }
 
@@ -1531,37 +1561,37 @@ public:
             handleFocusLoss();
     }
 
-    void handleExposeEvent (XExposeEvent* exposeEvent)
+    void handleExposeEvent (XExposeEvent& exposeEvent)
     {
         // Batch together all pending expose events
         XEvent nextEvent;
         ScopedXLock xlock;
 
-        if (exposeEvent->window != windowH)
+        if (exposeEvent.window != windowH)
         {
             Window child;
-            XTranslateCoordinates (display, exposeEvent->window, windowH,
-                                   exposeEvent->x, exposeEvent->y, &exposeEvent->x, &exposeEvent->y,
+            XTranslateCoordinates (display, exposeEvent.window, windowH,
+                                   exposeEvent.x, exposeEvent.y, &exposeEvent.x, &exposeEvent.y,
                                    &child);
         }
 
-        repaint (Rectangle<int> (exposeEvent->x, exposeEvent->y,
-                                 exposeEvent->width, exposeEvent->height));
+        repaint (Rectangle<int> (exposeEvent.x, exposeEvent.y,
+                                 exposeEvent.width, exposeEvent.height));
 
         while (XEventsQueued (display, QueuedAfterFlush) > 0)
         {
             XPeekEvent (display, &nextEvent);
-            if (nextEvent.type != Expose || nextEvent.xany.window != exposeEvent->window)
+            if (nextEvent.type != Expose || nextEvent.xany.window != exposeEvent.window)
                 break;
 
             XNextEvent (display, &nextEvent);
-            XExposeEvent* nextExposeEvent = (XExposeEvent*) &nextEvent.xexpose;
-            repaint (Rectangle<int> (nextExposeEvent->x, nextExposeEvent->y,
-                                     nextExposeEvent->width, nextExposeEvent->height));
+            const XExposeEvent& nextExposeEvent = (const XExposeEvent&) nextEvent.xexpose;
+            repaint (Rectangle<int> (nextExposeEvent.x, nextExposeEvent.y,
+                                     nextExposeEvent.width, nextExposeEvent.height));
         }
     }
 
-    void handleConfigureNotifyEvent (XConfigureEvent* const confEvent)
+    void handleConfigureNotifyEvent (XConfigureEvent& confEvent)
     {
         updateBounds();
         updateBorderSize();
@@ -1577,8 +1607,8 @@ public:
                 currentModalComp->inputAttemptWhenModal();
         }
 
-        if (confEvent->window == windowH
-             && confEvent->above != 0
+        if (confEvent.window == windowH
+             && confEvent.above != 0
              && isFrontWindow())
         {
             handleBroughtToFront();
@@ -1610,73 +1640,75 @@ public:
         handleMovedOrResized();
     }
 
-    void handleMappingNotify (XMappingEvent* const mappingEvent)
+    void handleMappingNotify (XMappingEvent& mappingEvent)
     {
-        if (mappingEvent->request != MappingPointer)
+        if (mappingEvent.request != MappingPointer)
         {
             // Deal with modifier/keyboard mapping
             ScopedXLock xlock;
-            XRefreshKeyboardMapping (mappingEvent);
+            XRefreshKeyboardMapping (&mappingEvent);
             updateModifierMappings();
         }
     }
 
-    void handleClientMessageEvent (XClientMessageEvent* const clientMsg, XEvent* event)
+    void handleClientMessageEvent (XClientMessageEvent& clientMsg, XEvent& event)
     {
-        if (clientMsg->message_type == Atoms::Protocols && clientMsg->format == 32)
-        {
-            const Atom atom = (Atom) clientMsg->data.l[0];
+        const Atoms& atoms = Atoms::get();
 
-            if (atom == Atoms::ProtocolList [Atoms::PING])
+        if (clientMsg.message_type == atoms.Protocols && clientMsg.format == 32)
+        {
+            const Atom atom = (Atom) clientMsg.data.l[0];
+
+            if (atom == atoms.ProtocolList [Atoms::PING])
             {
                 Window root = RootWindow (display, DefaultScreen (display));
 
-                clientMsg->window = root;
+                clientMsg.window = root;
 
-                XSendEvent (display, root, False, NoEventMask, event);
+                XSendEvent (display, root, False, NoEventMask, &event);
                 XFlush (display);
             }
-            else if (atom == Atoms::ProtocolList [Atoms::TAKE_FOCUS])
+            else if (atom == atoms.ProtocolList [Atoms::TAKE_FOCUS])
             {
                 if ((getStyleFlags() & juce::ComponentPeer::windowIgnoresKeyPresses) == 0)
                 {
                     XWindowAttributes atts;
 
                     ScopedXLock xlock;
-                    if (clientMsg->window != 0
-                         && XGetWindowAttributes (display, clientMsg->window, &atts))
+                    if (clientMsg.window != 0
+                         && XGetWindowAttributes (display, clientMsg.window, &atts))
                     {
                         if (atts.map_state == IsViewable)
-                            XSetInputFocus (display, clientMsg->window, RevertToParent, clientMsg->data.l[1]);
+                            XSetInputFocus (display, clientMsg.window, RevertToParent, clientMsg.data.l[1]);
                     }
                 }
             }
-            else if (atom == Atoms::ProtocolList [Atoms::DELETE_WINDOW])
+            else if (atom == atoms.ProtocolList [Atoms::DELETE_WINDOW])
             {
                 handleUserClosingWindow();
             }
         }
-        else if (clientMsg->message_type == Atoms::XdndEnter)
+        else if (clientMsg.message_type == atoms.XdndEnter)
         {
             handleDragAndDropEnter (clientMsg);
         }
-        else if (clientMsg->message_type == Atoms::XdndLeave)
+        else if (clientMsg.message_type == atoms.XdndLeave)
         {
             resetDragAndDrop();
         }
-        else if (clientMsg->message_type == Atoms::XdndPosition)
+        else if (clientMsg.message_type == atoms.XdndPosition)
         {
             handleDragAndDropPosition (clientMsg);
         }
-        else if (clientMsg->message_type == Atoms::XdndDrop)
+        else if (clientMsg.message_type == atoms.XdndDrop)
         {
             handleDragAndDropDrop (clientMsg);
         }
-        else if (clientMsg->message_type == Atoms::XdndStatus)
+        else if (clientMsg.message_type == atoms.XdndStatus)
         {
             handleDragAndDropStatus (clientMsg);
         }
-        else if (clientMsg->message_type == Atoms::XdndFinished)
+        else if (clientMsg.message_type == atoms.XdndFinished)
         {
             resetDragAndDrop();
         }
@@ -1796,7 +1828,7 @@ private:
                 }
 
                 {
-                    ScopedPointer<LowLevelGraphicsContext> context (peer->component.getLookAndFeel()
+                    ScopedPointer<LowLevelGraphicsContext> context (peer->getComponent().getLookAndFeel()
                                                                       .createGraphicsContext (image, -totalArea.getPosition(), adjustedList));
                     peer->handlePaint (*context);
                 }
@@ -1894,19 +1926,13 @@ private:
         switch (sym)
         {
             case XK_Shift_L:
-            case XK_Shift_R:
-                modifier = ModifierKeys::shiftModifier;
-                break;
+            case XK_Shift_R:        modifier = ModifierKeys::shiftModifier; break;
 
             case XK_Control_L:
-            case XK_Control_R:
-                modifier = ModifierKeys::ctrlModifier;
-                break;
+            case XK_Control_R:      modifier = ModifierKeys::ctrlModifier; break;
 
             case XK_Alt_L:
-            case XK_Alt_R:
-                modifier = ModifierKeys::altModifier;
-                break;
+            case XK_Alt_R:          modifier = ModifierKeys::altModifier; break;
 
             case XK_Num_Lock:
                 if (press)
@@ -1945,9 +1971,7 @@ private:
         Keys::AltMask = 0;
         Keys::NumLockMask = 0;
 
-        XModifierKeymap* mapping = XGetModifierMapping (display);
-
-        if (mapping)
+        if (XModifierKeymap* const mapping = XGetModifierMapping (display))
         {
             for (int i = 0; i < 8; i++)
             {
@@ -2074,7 +2098,7 @@ private:
 
         netHints[1] = Atoms::getIfExists ("_KDE_NET_WM_WINDOW_TYPE_OVERRIDE");
 
-        xchangeProperty (windowH, Atoms::WindowType, XA_ATOM, 32, &netHints, 2);
+        xchangeProperty (windowH, Atoms::get().WindowType, XA_ATOM, 32, &netHints, 2);
 
         int numHints = 0;
 
@@ -2085,13 +2109,12 @@ private:
             netHints [numHints++] = Atoms::getIfExists ("_NET_WM_STATE_ABOVE");
 
         if (numHints > 0)
-            xchangeProperty (windowH, Atoms::WindowState, XA_ATOM, 32, &netHints, numHints);
+            xchangeProperty (windowH, Atoms::get().WindowState, XA_ATOM, 32, &netHints, numHints);
     }
 
     void createWindow (Window parentToAddTo)
     {
         ScopedXLock xlock;
-        Atoms::initialiseAtoms();
         resetDragAndDrop();
 
         // Get defaults for various properties
@@ -2101,7 +2124,7 @@ private:
         // Try to obtain a 32-bit visual or fallback to 24 or 16
         visual = Visuals::findVisualFormat ((styleFlags & windowIsSemiTransparent) ? 32 : 24, depth);
 
-        if (visual == 0)
+        if (visual == nullptr)
         {
             Logger::outputDebugString ("ERROR: System doesn't support 32, 24 or 16 bit RGB display.\n");
             Process::terminate();
@@ -2159,18 +2182,20 @@ private:
 
         setTitle (component.getName());
 
+        const Atoms& atoms = Atoms::get();
+
         // Associate the PID, allowing to be shut down when something goes wrong
         unsigned long pid = getpid();
-        xchangeProperty (windowH, Atoms::Pid, XA_CARDINAL, 32, &pid, 1);
+        xchangeProperty (windowH, atoms.Pid, XA_CARDINAL, 32, &pid, 1);
 
         // Set window manager protocols
-        xchangeProperty (windowH, Atoms::Protocols, XA_ATOM, 32, Atoms::ProtocolList, 2);
+        xchangeProperty (windowH, atoms.Protocols, XA_ATOM, 32, atoms.ProtocolList, 2);
 
         // Set drag and drop flags
-        xchangeProperty (windowH, Atoms::XdndTypeList, XA_ATOM, 32, Atoms::allowedMimeTypes, numElementsInArray (Atoms::allowedMimeTypes));
-        xchangeProperty (windowH, Atoms::XdndActionList, XA_ATOM, 32, Atoms::allowedActions, numElementsInArray (Atoms::allowedActions));
-        xchangeProperty (windowH, Atoms::XdndActionDescription, XA_STRING, 8, "", 0);
-        xchangeProperty (windowH, Atoms::XdndAware, XA_ATOM, 32, &Atoms::DndVersion, 1);
+        xchangeProperty (windowH, atoms.XdndTypeList, XA_ATOM, 32, atoms.allowedMimeTypes, numElementsInArray (atoms.allowedMimeTypes));
+        xchangeProperty (windowH, atoms.XdndActionList, XA_ATOM, 32, atoms.allowedActions, numElementsInArray (atoms.allowedActions));
+        xchangeProperty (windowH, atoms.XdndActionDescription, XA_STRING, 8, "", 0);
+        xchangeProperty (windowH, atoms.XdndAware, XA_ATOM, 32, &Atoms::DndVersion, 1);
 
         initialisePointerMap();
         updateModifierMappings();
@@ -2202,6 +2227,12 @@ private:
                  | ExposureMask | StructureNotifyMask | FocusChangeMask;
     }
 
+    template <typename EventType>
+    static int64 getEventTime (const EventType& t)
+    {
+        return getEventTime (t.time);
+    }
+
     static int64 getEventTime (::Time t)
     {
         static int64 eventTimeOffset = 0x12345678;
@@ -2211,6 +2242,12 @@ private:
             eventTimeOffset = Time::currentTimeMillis() - thisMessageTime;
 
         return eventTimeOffset + thisMessageTime;
+    }
+
+    long getUserTime() const
+    {
+        GetXProperty prop (windowH, Atoms::get().UserTime, 0, 65536, false, XA_CARDINAL);
+        return prop.success ? *(long*) prop.data : 0;
     }
 
     void updateBorderSize()
@@ -2226,22 +2263,14 @@ private:
 
             if (hints != None)
             {
-                unsigned char* data = nullptr;
-                unsigned long nitems, bytesLeft;
-                Atom actualType;
-                int actualFormat;
+                GetXProperty prop (windowH, hints, 0, 4, false, XA_CARDINAL);
 
-                if (XGetWindowProperty (display, windowH, hints, 0, 4, False,
-                                        XA_CARDINAL, &actualType, &actualFormat, &nitems, &bytesLeft,
-                                        &data) == Success)
+                if (prop.success && prop.actualFormat == 32)
                 {
-                    const unsigned long* const sizes = (const unsigned long*) data;
+                    const unsigned long* const sizes = (const unsigned long*) prop.data;
 
-                    if (actualFormat == 32)
-                        windowBorder = BorderSize<int> ((int) sizes[2], (int) sizes[0],
-                                                        (int) sizes[3], (int) sizes[1]);
-
-                    XFree (data);
+                    windowBorder = BorderSize<int> ((int) sizes[2], (int) sizes[0],
+                                                    (int) sizes[3], (int) sizes[1]);
                 }
             }
         }
@@ -2292,7 +2321,7 @@ private:
     void sendDragAndDropStatus (const bool acceptDrop, Atom dropAction)
     {
         XClientMessageEvent msg = { 0 };
-        msg.message_type = Atoms::XdndStatus;
+        msg.message_type = Atoms::get().XdndStatus;
         msg.data.l[1] = (acceptDrop ? 1 : 0) | 2; // 2 indicates that we want to receive position messages
         msg.data.l[4] = dropAction;
 
@@ -2302,20 +2331,20 @@ private:
     void sendDragAndDropLeave()
     {
         XClientMessageEvent msg = { 0 };
-        msg.message_type = Atoms::XdndLeave;
+        msg.message_type = Atoms::get().XdndLeave;
         sendDragAndDropMessage (msg);
     }
 
     void sendDragAndDropFinish()
     {
         XClientMessageEvent msg = { 0 };
-        msg.message_type = Atoms::XdndFinished;
+        msg.message_type = Atoms::get().XdndFinished;
         sendDragAndDropMessage (msg);
     }
 
-    void handleDragAndDropStatus (const XClientMessageEvent* const clientMsg)
+    void handleDragAndDropStatus (const XClientMessageEvent& clientMsg)
     {
-        if ((clientMsg->data.l[1] & 1) == 0)
+        if ((clientMsg.data.l[1] & 1) == 0)
         {
             sendDragAndDropLeave();
 
@@ -2326,28 +2355,29 @@ private:
         }
     }
 
-    void handleDragAndDropPosition (const XClientMessageEvent* const clientMsg)
+    void handleDragAndDropPosition (const XClientMessageEvent& clientMsg)
     {
         if (dragAndDropSourceWindow == 0)
             return;
 
-        dragAndDropSourceWindow = clientMsg->data.l[0];
+        dragAndDropSourceWindow = clientMsg.data.l[0];
 
-        Point<int> dropPos ((int) clientMsg->data.l[2] >> 16,
-                            (int) clientMsg->data.l[2] & 0xffff);
+        Point<int> dropPos ((int) clientMsg.data.l[2] >> 16,
+                            (int) clientMsg.data.l[2] & 0xffff);
         dropPos -= getScreenPosition();
 
         if (dragInfo.position != dropPos)
         {
             dragInfo.position = dropPos;
 
-            Atom targetAction = Atoms::XdndActionCopy;
+            const Atoms& atoms = Atoms::get();
+            Atom targetAction = atoms.XdndActionCopy;
 
-            for (int i = numElementsInArray (Atoms::allowedActions); --i >= 0;)
+            for (int i = numElementsInArray (atoms.allowedActions); --i >= 0;)
             {
-                if ((Atom) clientMsg->data.l[4] == Atoms::allowedActions[i])
+                if ((Atom) clientMsg.data.l[4] == atoms.allowedActions[i])
                 {
-                    targetAction = Atoms::allowedActions[i];
+                    targetAction = atoms.allowedActions[i];
                     break;
                 }
             }
@@ -2362,7 +2392,7 @@ private:
         }
     }
 
-    void handleDragAndDropDrop (const XClientMessageEvent* const clientMsg)
+    void handleDragAndDropDrop (const XClientMessageEvent& clientMsg)
     {
         if (dragInfo.files.size() == 0)
             updateDraggedFileList (clientMsg);
@@ -2376,13 +2406,13 @@ private:
             handleDragDrop (dragInfoCopy);
     }
 
-    void handleDragAndDropEnter (const XClientMessageEvent* const clientMsg)
+    void handleDragAndDropEnter (const XClientMessageEvent& clientMsg)
     {
         dragInfo.files.clear();
         srcMimeTypeAtomList.clear();
 
         dragAndDropCurrentMimeType = 0;
-        const unsigned long dndCurrentVersion = static_cast <unsigned long> (clientMsg->data.l[1] & 0xff000000) >> 24;
+        const unsigned long dndCurrentVersion = static_cast <unsigned long> (clientMsg.data.l[1] & 0xff000000) >> 24;
 
         if (dndCurrentVersion < 3 || dndCurrentVersion > Atoms::DndVersion)
         {
@@ -2390,40 +2420,31 @@ private:
             return;
         }
 
-        dragAndDropSourceWindow = clientMsg->data.l[0];
+        dragAndDropSourceWindow = clientMsg.data.l[0];
 
-        if ((clientMsg->data.l[1] & 1) != 0)
+        if ((clientMsg.data.l[1] & 1) != 0)
         {
-            Atom actual;
-            int format;
-            unsigned long count = 0, remaining = 0;
-            unsigned char* data = 0;
-
             ScopedXLock xlock;
-            XGetWindowProperty (display, dragAndDropSourceWindow, Atoms::XdndTypeList,
-                                0, 0x8000000L, False, XA_ATOM, &actual, &format,
-                                &count, &remaining, &data);
+            GetXProperty prop (dragAndDropSourceWindow, Atoms::get().XdndTypeList, 0, 0x8000000L, false, XA_ATOM);
 
-            if (data != 0)
+            if (prop.success
+                 && prop.actualType == XA_ATOM
+                 && prop.actualFormat == 32
+                 && prop.numItems != 0)
             {
-                if (actual == XA_ATOM && format == 32 && count != 0)
-                {
-                    const unsigned long* const types = (const unsigned long*) data;
+                const unsigned long* const types = (const unsigned long*) prop.data;
 
-                    for (unsigned int i = 0; i < count; ++i)
-                        if (types[i] != None)
-                            srcMimeTypeAtomList.add (types[i]);
-                }
-
-                XFree (data);
+                for (unsigned long i = 0; i < prop.numItems; ++i)
+                    if (types[i] != None)
+                        srcMimeTypeAtomList.add (types[i]);
             }
         }
 
         if (srcMimeTypeAtomList.size() == 0)
         {
             for (int i = 2; i < 5; ++i)
-                if (clientMsg->data.l[i] != None)
-                    srcMimeTypeAtomList.add (clientMsg->data.l[i]);
+                if (clientMsg.data.l[i] != None)
+                    srcMimeTypeAtomList.add (clientMsg.data.l[i]);
 
             if (srcMimeTypeAtomList.size() == 0)
             {
@@ -2432,19 +2453,20 @@ private:
             }
         }
 
+        const Atoms& atoms = Atoms::get();
         for (int i = 0; i < srcMimeTypeAtomList.size() && dragAndDropCurrentMimeType == 0; ++i)
-            for (int j = 0; j < numElementsInArray (Atoms::allowedMimeTypes); ++j)
-                if (srcMimeTypeAtomList[i] == Atoms::allowedMimeTypes[j])
-                    dragAndDropCurrentMimeType = Atoms::allowedMimeTypes[j];
+            for (int j = 0; j < numElementsInArray (atoms.allowedMimeTypes); ++j)
+                if (srcMimeTypeAtomList[i] == atoms.allowedMimeTypes[j])
+                    dragAndDropCurrentMimeType = atoms.allowedMimeTypes[j];
 
         handleDragAndDropPosition (clientMsg);
     }
 
-    void handleDragAndDropSelection (const XEvent* const evt)
+    void handleDragAndDropSelection (const XEvent& evt)
     {
         dragInfo.files.clear();
 
-        if (evt->xselection.property != 0)
+        if (evt.xselection.property != 0)
         {
             StringArray lines;
 
@@ -2453,27 +2475,16 @@ private:
 
                 for (;;)
                 {
-                    Atom actual;
-                    uint8* data = 0;
-                    unsigned long count = 0, remaining = 0;
-                    int format = 0;
-                    ScopedXLock xlock;
+                    GetXProperty prop (evt.xany.window, evt.xselection.property,
+                                       dropData.getSize() / 4, 65536, true, AnyPropertyType);
 
-                    if (XGetWindowProperty (display, evt->xany.window, evt->xselection.property,
-                                            dropData.getSize() / 4, 65536, 1, AnyPropertyType, &actual,
-                                            &format, &count, &remaining, &data) == Success)
-                    {
-                        dropData.append (data, count * format / 8);
-                        XFree (data);
-
-                        if (remaining == 0)
-                            break;
-                    }
-                    else
-                    {
-                        XFree (data);
+                    if (! prop.success)
                         break;
-                    }
+
+                    dropData.append (prop.data, prop.numItems * prop.actualFormat / 8);
+
+                    if (prop.bytesLeft <= 0)
+                        break;
                 }
 
                 lines.addLines (dropData.toString());
@@ -2487,7 +2498,7 @@ private:
         }
     }
 
-    void updateDraggedFileList (const XClientMessageEvent* const clientMsg)
+    void updateDraggedFileList (const XClientMessageEvent& clientMsg)
     {
         dragInfo.files.clear();
 
@@ -2496,11 +2507,11 @@ private:
         {
             ScopedXLock xlock;
             XConvertSelection (display,
-                               Atoms::XdndSelection,
+                               Atoms::get().XdndSelection,
                                dragAndDropCurrentMimeType,
                                Atoms::getCreating ("JXSelectionWindowProperty"),
                                windowH,
-                               clientMsg->data.l[2]);
+                               clientMsg.data.l[2]);
         }
     }
 
@@ -2601,75 +2612,46 @@ ComponentPeer* Component::createNewPeer (int styleFlags, void* nativeWindowToAtt
     return new LinuxComponentPeer (*this, styleFlags, (Window) nativeWindowToAttachTo);
 }
 
-
-//==============================================================================
-// (this callback is hooked up in the messaging code)
-void juce_windowMessageReceive (XEvent* event)
-{
-    if (event->xany.window != None)
-    {
-        LinuxComponentPeer* const peer = LinuxComponentPeer::getPeerFor (event->xany.window);
-
-        if (ComponentPeer::isValidPeer (peer))
-            peer->handleWindowMessage (event);
-    }
-    else
-    {
-        switch (event->xany.type)
-        {
-            case KeymapNotify:
-            {
-                const XKeymapEvent* const keymapEvent = (const XKeymapEvent*) &event->xkeymap;
-                memcpy (Keys::keyStates, keymapEvent->key_vector, 32);
-                break;
-            }
-
-            default:
-                break;
-        }
-    }
-}
-
 //==============================================================================
 void Desktop::Displays::findDisplays()
 {
     if (display == 0)
         return;
 
+    ScopedXLock xlock;
+
   #if JUCE_USE_XINERAMA
     int major_opcode, first_event, first_error;
 
-    ScopedXLock xlock;
     if (XQueryExtension (display, "XINERAMA", &major_opcode, &first_event, &first_error))
     {
         typedef Bool (*tXineramaIsActive) (::Display*);
         typedef XineramaScreenInfo* (*tXineramaQueryScreens) (::Display*, int*);
 
-        static tXineramaIsActive xXineramaIsActive = 0;
-        static tXineramaQueryScreens xXineramaQueryScreens = 0;
+        static tXineramaIsActive xineramaIsActive = nullptr;
+        static tXineramaQueryScreens xineramaQueryScreens = nullptr;
 
-        if (xXineramaIsActive == 0 || xXineramaQueryScreens == 0)
+        if (xineramaIsActive == nullptr || xineramaQueryScreens == nullptr)
         {
             void* h = dlopen ("libXinerama.so", RTLD_GLOBAL | RTLD_NOW);
 
-            if (h == 0)
+            if (h == nullptr)
                 h = dlopen ("libXinerama.so.1", RTLD_GLOBAL | RTLD_NOW);
 
-            if (h != 0)
+            if (h != nullptr)
             {
-                xXineramaIsActive = (tXineramaIsActive) dlsym (h, "XineramaIsActive");
-                xXineramaQueryScreens = (tXineramaQueryScreens) dlsym (h, "XineramaQueryScreens");
+                xineramaIsActive = (tXineramaIsActive) dlsym (h, "XineramaIsActive");
+                xineramaQueryScreens = (tXineramaQueryScreens) dlsym (h, "XineramaQueryScreens");
             }
         }
 
-        if (xXineramaIsActive != 0
-            && xXineramaQueryScreens != 0
-            && xXineramaIsActive (display))
+        if (xineramaIsActive != nullptr
+            && xineramaQueryScreens != nullptr
+            && xineramaIsActive (display))
         {
             int numMonitors = 0;
-            XineramaScreenInfo* const screens = xXineramaQueryScreens (display, &numMonitors);
 
-            if (screens != nullptr)
+            if (XineramaScreenInfo* const screens = xineramaQueryScreens (display, &numMonitors))
             {
                 for (int index = 0; index < numMonitors; ++index)
                 {
@@ -2706,31 +2688,19 @@ void Desktop::Displays::findDisplays()
 
             for (int i = 0; i < numMonitors; ++i)
             {
-                Window root = RootWindow (display, i);
+                GetXProperty prop (RootWindow (display, i), hints, 0, 4, false, XA_CARDINAL);
 
-                unsigned long nitems, bytesLeft;
-                Atom actualType;
-                int actualFormat;
-                unsigned char* data = nullptr;
-
-                if (XGetWindowProperty (display, root, hints, 0, 4, False,
-                                        XA_CARDINAL, &actualType, &actualFormat, &nitems, &bytesLeft,
-                                        &data) == Success)
+                if (prop.success && prop.actualType == XA_CARDINAL && prop.actualFormat == 32 && prop.numItems == 4)
                 {
-                    const long* const position = (const long*) data;
+                    const long* const position = (const long*) prop.data;
 
-                    if (actualType == XA_CARDINAL && actualFormat == 32 && nitems == 4)
-                    {
-                        Display d;
-                        d.userArea = d.totalArea = Rectangle<int> (position[0], position[1],
-                                                                   position[2], position[3]);
-                        d.isMain = (displays.size() == 0);
-                        d.scale = 1.0;
+                    Display d;
+                    d.userArea = d.totalArea = Rectangle<int> (position[0], position[1],
+                                                               position[2], position[3]);
+                    d.isMain = (displays.size() == 0);
+                    d.scale = 1.0;
 
-                        displays.add (d);
-                    }
-
-                    XFree (data);
+                    displays.add (d);
                 }
             }
         }
@@ -2805,18 +2775,14 @@ void Desktop::setScreenSaverEnabled (const bool isEnabled)
         screenSaverAllowed = isEnabled;
 
         typedef void (*tXScreenSaverSuspend) (Display*, Bool);
-        static tXScreenSaverSuspend xScreenSaverSuspend = 0;
+        static tXScreenSaverSuspend xScreenSaverSuspend = nullptr;
 
-        if (xScreenSaverSuspend == 0)
-        {
-            void* h = dlopen ("libXss.so", RTLD_GLOBAL | RTLD_NOW);
-
-            if (h != 0)
+        if (xScreenSaverSuspend == nullptr)
+            if (void* h = dlopen ("libXss.so", RTLD_GLOBAL | RTLD_NOW))
                 xScreenSaverSuspend = (tXScreenSaverSuspend) dlsym (h, "XScreenSaverSuspend");
-        }
 
         ScopedXLock xlock;
-        if (xScreenSaverSuspend != 0)
+        if (xScreenSaverSuspend != nullptr)
             xScreenSaverSuspend (display, ! isEnabled);
     }
 }
@@ -2827,11 +2793,13 @@ bool Desktop::isScreenSaverEnabled()
 }
 
 //==============================================================================
-void* MouseCursor::createMouseCursorFromImage (const Image& image, int hotspotX, int hotspotY)
+void* CustomMouseCursorInfo::create() const
 {
     ScopedXLock xlock;
     const unsigned int imageW = image.getWidth();
     const unsigned int imageH = image.getHeight();
+    int hotspotX = hotspot.x;
+    int hotspotY = hotspot.y;
 
   #if JUCE_USE_XCURSOR
     {
@@ -2840,36 +2808,33 @@ void* MouseCursor::createMouseCursorFromImage (const Image& image, int hotspotX,
         typedef void (*tXcursorImageDestroy) (XcursorImage*);
         typedef Cursor (*tXcursorImageLoadCursor) (Display*, const XcursorImage*);
 
-        static tXcursorSupportsARGB xXcursorSupportsARGB = 0;
-        static tXcursorImageCreate xXcursorImageCreate = 0;
-        static tXcursorImageDestroy xXcursorImageDestroy = 0;
-        static tXcursorImageLoadCursor xXcursorImageLoadCursor = 0;
+        static tXcursorSupportsARGB    xcursorSupportsARGB    = nullptr;
+        static tXcursorImageCreate     xcursorImageCreate     = nullptr;
+        static tXcursorImageDestroy    xcursorImageDestroy    = nullptr;
+        static tXcursorImageLoadCursor xcursorImageLoadCursor = nullptr;
         static bool hasBeenLoaded = false;
 
         if (! hasBeenLoaded)
         {
             hasBeenLoaded = true;
-            void* h = dlopen ("libXcursor.so", RTLD_GLOBAL | RTLD_NOW);
 
-            if (h != 0)
+            if (void* h = dlopen ("libXcursor.so", RTLD_GLOBAL | RTLD_NOW))
             {
-                xXcursorSupportsARGB    = (tXcursorSupportsARGB)    dlsym (h, "XcursorSupportsARGB");
-                xXcursorImageCreate     = (tXcursorImageCreate)     dlsym (h, "XcursorImageCreate");
-                xXcursorImageLoadCursor = (tXcursorImageLoadCursor) dlsym (h, "XcursorImageLoadCursor");
-                xXcursorImageDestroy    = (tXcursorImageDestroy)    dlsym (h, "XcursorImageDestroy");
+                xcursorSupportsARGB    = (tXcursorSupportsARGB)    dlsym (h, "XcursorSupportsARGB");
+                xcursorImageCreate     = (tXcursorImageCreate)     dlsym (h, "XcursorImageCreate");
+                xcursorImageLoadCursor = (tXcursorImageLoadCursor) dlsym (h, "XcursorImageLoadCursor");
+                xcursorImageDestroy    = (tXcursorImageDestroy)    dlsym (h, "XcursorImageDestroy");
 
-                if (xXcursorSupportsARGB == 0 || xXcursorImageCreate == 0
-                      || xXcursorImageLoadCursor == 0 || xXcursorImageDestroy == 0
-                      || ! xXcursorSupportsARGB (display))
-                    xXcursorSupportsARGB = 0;
+                if (xcursorSupportsARGB == nullptr || xcursorImageCreate == nullptr
+                      || xcursorImageLoadCursor == nullptr || xcursorImageDestroy == nullptr
+                      || ! xcursorSupportsARGB (display))
+                    xcursorSupportsARGB = nullptr;
             }
         }
 
-        if (xXcursorSupportsARGB != 0)
+        if (xcursorSupportsARGB != nullptr)
         {
-            XcursorImage* xcImage = xXcursorImageCreate (imageW, imageH);
-
-            if (xcImage != 0)
+            if (XcursorImage* xcImage = xcursorImageCreate (imageW, imageH))
             {
                 xcImage->xhot = hotspotX;
                 xcImage->yhot = hotspotY;
@@ -2879,10 +2844,10 @@ void* MouseCursor::createMouseCursorFromImage (const Image& image, int hotspotX,
                     for (int x = 0; x < (int) imageW; ++x)
                         *dest++ = image.getPixelAt (x, y).getARGB();
 
-                void* result = (void*) xXcursorImageLoadCursor (display, xcImage);
-                xXcursorImageDestroy (xcImage);
+                void* result = (void*) xcursorImageLoadCursor (display, xcImage);
+                xcursorImageDestroy (xcImage);
 
-                if (result != 0)
+                if (result != nullptr)
                     return result;
             }
         }
@@ -2930,16 +2895,13 @@ void* MouseCursor::createMouseCursorFromImage (const Image& image, int hotspotX,
 
             const Colour c (im.getPixelAt (x, y));
 
-            if (c.getAlpha() >= 128)
-                maskPlane[offset] |= mask;
-
-            if (c.getBrightness() >= 0.5f)
-                sourcePlane[offset] |= mask;
+            if (c.getAlpha() >= 128)        maskPlane[offset]   |= mask;
+            if (c.getBrightness() >= 0.5f)  sourcePlane[offset] |= mask;
         }
     }
 
     Pixmap sourcePixmap = XCreatePixmapFromBitmapData (display, root, sourcePlane.getData(), cursorW, cursorH, 0xffff, 0, 1);
-    Pixmap maskPixmap = XCreatePixmapFromBitmapData (display, root, maskPlane.getData(), cursorW, cursorH, 0xffff, 0, 1);
+    Pixmap maskPixmap   = XCreatePixmapFromBitmapData (display, root, maskPlane.getData(),   cursorW, cursorH, 0xffff, 0, 1);
 
     XColor white, black;
     black.red = black.green = black.blue = 0;
@@ -2956,7 +2918,7 @@ void* MouseCursor::createMouseCursorFromImage (const Image& image, int hotspotX,
 void MouseCursor::deleteMouseCursor (void* const cursorHandle, const bool)
 {
     ScopedXLock xlock;
-    if (cursorHandle != 0)
+    if (cursorHandle != nullptr)
         XFreeCursor (display, (Cursor) cursorHandle);
 }
 
@@ -2966,8 +2928,9 @@ void* MouseCursor::createStandardMouseCursor (MouseCursor::StandardCursorType ty
 
     switch (type)
     {
-        case NormalCursor:                  return None; // Use parent cursor
-        case NoCursor:                      return createMouseCursorFromImage (Image (Image::ARGB, 16, 16, true), 0, 0);
+        case NormalCursor:
+        case ParentCursor:                  return None; // Use parent cursor
+        case NoCursor:                      return CustomMouseCursorInfo (Image (Image::ARGB, 16, 16, true), 0, 0).create();
 
         case WaitCursor:                    shape = XC_watch; break;
         case IBeamCursor:                   shape = XC_xterm; break;
@@ -2992,7 +2955,7 @@ void* MouseCursor::createStandardMouseCursor (MouseCursor::StandardCursorType ty
               132,117,151,116,132,146,248,60,209,138,98,22,203,114,34,236,37,52,77,217, 247,154,191,119,110,240,193,128,193,95,163,56,60,234,98,135,2,0,59 };
             const int dragHandDataSize = 99;
 
-            return createMouseCursorFromImage (ImageFileFormat::loadFrom (dragHandData, dragHandDataSize), 8, 7);
+            return CustomMouseCursorInfo (ImageFileFormat::loadFrom (dragHandData, dragHandDataSize), 8, 7).create();
         }
 
         case CopyingCursor:
@@ -3003,7 +2966,7 @@ void* MouseCursor::createStandardMouseCursor (MouseCursor::StandardCursorType ty
               252,114,147,74,83,5,50,68,147,208,217,16,71,149,252,124,5,0,59,0,0 };
             const int copyCursorSize = 119;
 
-            return createMouseCursorFromImage (ImageFileFormat::loadFrom (copyCursorData, copyCursorSize), 1, 3);
+            return CustomMouseCursorInfo (ImageFileFormat::loadFrom (copyCursorData, copyCursorSize), 1, 3).create();
         }
 
         default:
@@ -3017,9 +2980,7 @@ void* MouseCursor::createStandardMouseCursor (MouseCursor::StandardCursorType ty
 
 void MouseCursor::showInWindow (ComponentPeer* peer) const
 {
-    LinuxComponentPeer* const lp = dynamic_cast <LinuxComponentPeer*> (peer);
-
-    if (lp != 0)
+    if (LinuxComponentPeer* const lp = dynamic_cast <LinuxComponentPeer*> (peer))
         lp->showMouseCursor ((Cursor) getHandle());
 }
 

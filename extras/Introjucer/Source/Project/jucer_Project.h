@@ -98,6 +98,8 @@ public:
     Value getProjectPreprocessorDefs()                  { return getProjectValue (Ids::defines); }
     StringPairArray getPreprocessorDefs() const;
 
+    Value getProjectUserNotes()                         { return getProjectValue (Ids::userNotes); }
+
     //==============================================================================
     File getGeneratedCodeFolder() const                 { return getFile().getSiblingFile ("JuceLibraryCode"); }
     File getAppIncludeFile() const                      { return getGeneratedCodeFolder().getChildFile (getJuceSourceHFilename()); }
@@ -252,6 +254,9 @@ public:
 
     //==============================================================================
     String getFileTemplate (const String& templateName);
+
+    //==============================================================================
+    PropertiesFile& getStoredProperties() const;
 
     //==============================================================================
     void valueTreePropertyChanged (ValueTree& tree, const Identifier& property);

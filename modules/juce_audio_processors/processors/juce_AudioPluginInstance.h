@@ -51,16 +51,19 @@ public:
     virtual ~AudioPluginInstance() {}
 
     //==============================================================================
-    /** Fills-in the appropriate parts of this plugin description object.
-    */
+    /** Fills-in the appropriate parts of this plugin description object. */
     virtual void fillInPluginDescription (PluginDescription& description) const = 0;
 
     /** Returns a pointer to some kind of platform-specific data about the plugin.
-
         E.g. For a VST, this value can be cast to an AEffect*. For an AudioUnit, it can be
         cast to an AudioUnit handle.
     */
-    virtual void* getPlatformSpecificData()         { return nullptr; }
+    virtual void* getPlatformSpecificData()                 { return nullptr; }
+
+    /** For some formats (currently AudioUnit), this forces a reload of the list of
+        available parameters.
+    */
+    virtual void refreshParameterList() {}
 
 protected:
     //==============================================================================

@@ -50,7 +50,8 @@ public:
     void prepareExporter (ProjectExporter&, ProjectSaver&) const;
     void createPropertyEditors (ProjectExporter&, PropertyListBuilder&) const;
     void getConfigFlags (Project&, OwnedArray<Project::ConfigFlag>& flags) const;
-    void getLocalCompiledFiles (Array<File>& files) const;
+    void getLocalCompiledFiles (const File& localModuleFolder, Array<File>& files) const;
+    File getLocalFolderFor (Project&) const;
 
     static String getInfoFileName()     { return "juce_module_info"; }
 
@@ -61,7 +62,6 @@ private:
     mutable Array<File> sourceFiles;
 
     File getInclude (const File& folder) const;
-    File getLocalIncludeFolder (ProjectSaver& projectSaver) const;
     static bool fileTargetMatches (ProjectExporter& exporter, const String& target);
 
     struct FileSorter
@@ -93,10 +93,9 @@ public:
     ModuleList& operator= (const ModuleList&);
 
     //==============================================================================
-    void rescan (const File& newModulesFolder);
+    Result rescan (const File& newModulesFolder);
     void rescan();
     File getModulesFolder() const     { return moduleFolder; }
-    File getModuleFolder (const String& uid) const;
 
     bool loadFromWebsite();
 

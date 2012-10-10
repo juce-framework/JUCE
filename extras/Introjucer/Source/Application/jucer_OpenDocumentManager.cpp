@@ -33,8 +33,8 @@
 class UnknownDocument  : public OpenDocumentManager::Document
 {
 public:
-    UnknownDocument (Project* project_, const File& file_)
-       : project (project_), file (file_)
+    UnknownDocument (Project* p, const File& f)
+       : project (p), file (f)
     {
         reloadFromFile();
     }
@@ -48,8 +48,8 @@ public:
 
     //==============================================================================
     bool loadedOk() const                           { return true; }
-    bool isForFile (const File& file_) const        { return file == file_; }
-    bool isForNode (const ValueTree& node_) const   { return false; }
+    bool isForFile (const File& f) const            { return file == f; }
+    bool isForNode (const ValueTree&) const         { return false; }
     bool refersToProject (Project& p) const         { return project == &p; }
     Project* getProject() const                     { return project; }
     bool needsSaving() const                        { return false; }
@@ -191,9 +191,7 @@ FileBasedDocument::SaveResult OpenDocumentManager::saveIfNeededAndUserAgrees (Op
 
 bool OpenDocumentManager::closeDocument (int index, bool saveIfNeeded)
 {
-    Document* doc = documents [index];
-
-    if (doc != nullptr)
+    if (Document* doc = documents [index])
     {
         if (saveIfNeeded)
         {
@@ -304,12 +302,12 @@ void OpenDocumentManager::fileHasBeenRenamed (const File& oldFile, const File& n
 //==============================================================================
 RecentDocumentList::RecentDocumentList()
 {
-    JucerApplication::getApp().openDocumentManager.addListener (this);
+    IntrojucerApp::getApp().openDocumentManager.addListener (this);
 }
 
 RecentDocumentList::~RecentDocumentList()
 {
-    JucerApplication::getApp().openDocumentManager.removeListener (this);
+    IntrojucerApp::getApp().openDocumentManager.removeListener (this);
 }
 
 void RecentDocumentList::clear()
@@ -378,7 +376,7 @@ static void restoreDocList (Project& project, Array <OpenDocumentManager::Docume
 {
     if (xml != nullptr)
     {
-        OpenDocumentManager& odm = JucerApplication::getApp().openDocumentManager;
+        OpenDocumentManager& odm = IntrojucerApp::getApp().openDocumentManager;
 
         forEachXmlChildElementWithTagName (*xml, e, "DOC")
         {
@@ -386,9 +384,7 @@ static void restoreDocList (Project& project, Array <OpenDocumentManager::Docume
 
             if (file.exists())
             {
-                OpenDocumentManager::Document* doc = odm.openFile (&project, file);
-
-                if (doc != nullptr)
+                if (OpenDocumentManager::Document* doc = odm.openFile (&project, file))
                 {
                     doc->restoreState (e->getStringAttribute ("state"));
 

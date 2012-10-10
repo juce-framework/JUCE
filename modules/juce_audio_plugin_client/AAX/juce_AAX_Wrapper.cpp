@@ -31,7 +31,9 @@
 
 #if JucePlugin_Build_AAX && (JUCE_INCLUDED_AAX_IN_MM || defined (_WIN32) || defined (_WIN64))
 
-#if defined (__APPLE_CPP__) || defined(__APPLE_CC__)
+#ifdef _MSC_VER
+ #include <windows.h>
+#else
  #include <Cocoa/Cocoa.h>
 #endif
 
@@ -49,18 +51,6 @@
 #include "AAX_CBinaryDisplayDelegate.h"
 #include "AAX_CEffectGUI.h"
 #include "AAX_IViewContainer.h"
-
-#if JUCE_WINDOWS
-static HINSTANCE moduleInstance = 0;
-
-extern "C" BOOL WINAPI DllMain (HINSTANCE instance, DWORD selector, LPVOID)
-{
-    if (selector == DLL_PROCESS_ATTACH)
-        moduleInstance = instance;
-
-    return true;
-}
-#endif
 
 using juce::Component;
 
@@ -140,10 +130,6 @@ struct AAXClasses
     private:
         static void initialise()
         {
-           #if JUCE_WINDOWS
-            Process::setCurrentModuleInstanceHandle (moduleInstance);
-           #endif
-
             initialiseJuce_GUI();
         }
 
@@ -336,12 +322,13 @@ struct AAXClasses
         class ContentWrapperComponent  : public juce::Component
         {
         public:
-            ContentWrapperComponent (JuceAAX_GUI& owner_, AudioProcessor* plugin)
-                : owner (owner_)
+            ContentWrapperComponent (JuceAAX_GUI& gui, AudioProcessor* plugin)
+                : owner (gui)
             {
                 setOpaque (true);
-                addAndMakeVisible (pluginEditor = plugin->createEditor());
+                addAndMakeVisible (pluginEditor = plugin->createEditorIfNeeded());
                 setBounds (pluginEditor->getLocalBounds());
+                setBroughtToFrontOnMouseClick (true);
             }
 
             ~ContentWrapperComponent()
@@ -391,6 +378,9 @@ struct AAXClasses
         JuceAAX_Parameters()
         {
             pluginInstance = createPluginFilter();
+
+            if (pluginInstance != nullptr)
+                pluginInstance->wrapperType = AudioProcessor::wrapperType_AAX;
         }
 
         static AAX_CEffectParameters* AAX_CALLBACK Create()   { return new JuceAAX_Parameters(); }
@@ -520,7 +510,12 @@ struct AAXClasses
 
         properties->AddProperty (AAX_eProperty_ManufacturerID,      JucePlugin_AAXManufacturerCode);
         properties->AddProperty (AAX_eProperty_ProductID,           JucePlugin_AAXProductId);
+
+       #if JucePlugin_AAXDisableBypass
+        properties->AddProperty (AAX_eProperty_CanBypass,           false);
+       #else
         properties->AddProperty (AAX_eProperty_CanBypass,           true);
+       #endif
 
         properties->AddProperty (AAX_eProperty_InputStemFormat,     getFormatForChans (numInputs));
         properties->AddProperty (AAX_eProperty_OutputStemFormat,    getFormatForChans (numOutputs));
@@ -564,7 +559,7 @@ struct AAXClasses
 };
 
 //==============================================================================
-AAX_Result JUCE_CDECL GetEffectDescriptions (AAX_ICollection* const collection)
+AAX_Result JUCE_CDECL GetEffectDescriptions (AAX_ICollection* collection)
 {
     AAXClasses::JUCELibraryRefCount libraryRefCount;
 

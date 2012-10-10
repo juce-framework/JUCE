@@ -35,7 +35,7 @@ ScopedPointer<ApplicationCommandManager> commandManager;
 
 //==============================================================================
 MainWindow::MainWindow()
-    : DocumentWindow (JucerApplication::getApp().getApplicationName(),
+    : DocumentWindow (IntrojucerApp::getApp().getApplicationName(),
                       Colour::greyLevel (0.6f),
                       DocumentWindow::allButtons,
                       false)
@@ -44,7 +44,7 @@ MainWindow::MainWindow()
     createProjectContentCompIfNeeded();
 
    #if ! JUCE_MAC
-    setMenuBar (JucerApplication::getApp().menuModel);
+    setMenuBar (IntrojucerApp::getApp().menuModel);
    #endif
 
     setResizable (true, false);
@@ -58,7 +58,7 @@ MainWindow::MainWindow()
     {
         commandManager->getKeyMappings()->resetToDefaultMappings();
 
-        ScopedPointer <XmlElement> keys (getAppProperties().getXmlValue ("keyMappings"));
+        ScopedPointer <XmlElement> keys (getGlobalProperties().getXmlValue ("keyMappings"));
 
         if (keys != nullptr)
             commandManager->getKeyMappings()->restoreFromXml (*keys);
@@ -71,6 +71,8 @@ MainWindow::MainWindow()
 
     //getPeer()->setCurrentRenderingEngine (0);
     getLookAndFeel().setColour (ColourSelector::backgroundColourId, Colours::transparentBlack);
+
+    setResizeLimits (600, 500, 32000, 32000);
 }
 
 MainWindow::~MainWindow()
@@ -82,7 +84,7 @@ MainWindow::~MainWindow()
     removeKeyListener (commandManager->getKeyMappings());
 
     // save the current size and position to our settings file..
-    getAppProperties().setValue ("lastMainWindowPos", getWindowStateAsString());
+    getGlobalProperties().setValue ("lastMainWindowPos", getWindowStateAsString());
 
     clearContentComponent();
     currentProject = nullptr;
@@ -93,7 +95,7 @@ void MainWindow::createProjectContentCompIfNeeded()
     if (getProjectContentComponent() == nullptr)
     {
         clearContentComponent();
-        setContentOwned (JucerApplication::getApp().createProjectContentComponent(), false);
+        setContentOwned (IntrojucerApp::getApp().createProjectContentComponent(), false);
         jassert (getProjectContentComponent() != nullptr);
     }
 }
@@ -115,7 +117,7 @@ ProjectContentComponent* MainWindow::getProjectContentComponent() const
 
 void MainWindow::closeButtonPressed()
 {
-    JucerApplication::getApp().mainWindowList.closeWindow (this);
+    IntrojucerApp::getApp().mainWindowList.closeWindow (this);
 }
 
 bool MainWindow::closeProject (Project* project)
@@ -125,7 +127,7 @@ bool MainWindow::closeProject (Project* project)
     if (project == nullptr)
         return true;
 
-    getAppProperties().setValue (getProjectWindowPosName(), getWindowStateAsString());
+    project->getStoredProperties().setValue (getProjectWindowPosName(), getWindowStateAsString());
 
     ProjectContentComponent* const pcc = getProjectContentComponent();
 
@@ -136,7 +138,7 @@ bool MainWindow::closeProject (Project* project)
         pcc->hideEditor();
     }
 
-    if (! JucerApplication::getApp().openDocumentManager.closeAllDocumentsUsingProject (*project, true))
+    if (! IntrojucerApp::getApp().openDocumentManager.closeAllDocumentsUsingProject (*project, true))
         return false;
 
     FileBasedDocument::SaveResult r = project->saveIfNeededAndUserAgrees();
@@ -169,10 +171,10 @@ void MainWindow::restoreWindowPosition()
     String windowState;
 
     if (currentProject != nullptr)
-        windowState = getAppProperties().getValue (getProjectWindowPosName());
+        windowState = currentProject->getStoredProperties().getValue (getProjectWindowPosName());
 
     if (windowState.isEmpty())
-        windowState = getAppProperties().getValue ("lastMainWindowPos");
+        windowState = getGlobalProperties().getValue ("lastMainWindowPos");
 
     restoreWindowStateFromString (windowState);
 }
@@ -180,7 +182,7 @@ void MainWindow::restoreWindowPosition()
 bool MainWindow::canOpenFile (const File& file) const
 {
     return file.hasFileExtension (Project::projectFileExtension)
-             || JucerApplication::getApp().openDocumentManager.canOpenFile (file);
+             || IntrojucerApp::getApp().openDocumentManager.canOpenFile (file);
 }
 
 bool MainWindow::openFile (const File& file)
@@ -233,12 +235,12 @@ void MainWindow::activeWindowStatusChanged()
     if (getProjectContentComponent() != nullptr)
         getProjectContentComponent()->updateMissingFileStatuses();
 
-    JucerApplication::getApp().openDocumentManager.reloadModifiedFiles();
+    IntrojucerApp::getApp().openDocumentManager.reloadModifiedFiles();
 }
 
 void MainWindow::updateTitle (const String& documentName)
 {
-    String name (JucerApplication::getApp().getApplicationName());
+    String name (IntrojucerApp::getApp().getApplicationName());
 
     if (currentProject != nullptr)
         name << " - " << currentProject->getDocumentTitle();
@@ -259,7 +261,7 @@ void MainWindow::showNewProjectWizard()
 //==============================================================================
 ApplicationCommandTarget* MainWindow::getNextCommandTarget()
 {
-    return 0;
+    return nullptr;
 }
 
 void MainWindow::getAllCommands (Array <CommandID>& commands)

@@ -30,7 +30,7 @@
 class CoreGraphicsContext   : public LowLevelGraphicsContext
 {
 public:
-    CoreGraphicsContext (CGContextRef context_, const float flipHeight_, const float targetScale_);
+    CoreGraphicsContext (CGContextRef context, const float flipHeight, const float targetScale);
     ~CoreGraphicsContext();
 
     //==============================================================================

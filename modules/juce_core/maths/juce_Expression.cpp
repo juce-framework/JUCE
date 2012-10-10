@@ -95,8 +95,7 @@ struct Expression::Helpers
     class EvaluationError  : public std::exception
     {
     public:
-        EvaluationError (const String& description_)
-            : description (description_)
+        EvaluationError (const String& desc)  : description (desc)
         {
             DBG ("Expression::EvaluationError: " + description);
         }
@@ -108,8 +107,8 @@ struct Expression::Helpers
     class Constant  : public Term
     {
     public:
-        Constant (const double value_, const bool isResolutionTarget_)
-            : value (value_), isResolutionTarget (isResolutionTarget_) {}
+        Constant (const double val, const bool resolutionTarget)
+            : value (val), isResolutionTarget (resolutionTarget) {}
 
         Type getType() const noexcept                { return constantType; }
         Term* clone() const                          { return new Constant (value, isResolutionTarget); }
@@ -199,7 +198,7 @@ struct Expression::Helpers
     class SymbolTerm  : public Term
     {
     public:
-        explicit SymbolTerm (const String& symbol_) : symbol (symbol_) {}
+        explicit SymbolTerm (const String& sym) : symbol (sym) {}
 
         TermPtr resolve (const Scope& scope, int recursionDepth)
         {
@@ -232,10 +231,10 @@ struct Expression::Helpers
     class Function  : public Term
     {
     public:
-        explicit Function (const String& functionName_)  : functionName (functionName_) {}
+        explicit Function (const String& name)  : functionName (name) {}
 
-        Function (const String& functionName_, const Array<Expression>& parameters_)
-            : functionName (functionName_), parameters (parameters_)
+        Function (const String& name, const Array<Expression>& params)
+            : functionName (name), parameters (params)
         {}
 
         Type getType() const noexcept   { return functionType; }
@@ -351,8 +350,8 @@ struct Expression::Helpers
         class EvaluationVisitor  : public Scope::Visitor
         {
         public:
-            EvaluationVisitor (const TermPtr& input_, const int recursionCount_)
-                : input (input_), output (input_), recursionCount (recursionCount_) {}
+            EvaluationVisitor (const TermPtr& t, const int recursion)
+                : input (t), output (t), recursionCount (recursion) {}
 
             void visit (const Scope& scope)   { output = input->resolve (scope, recursionCount); }
 
@@ -367,8 +366,8 @@ struct Expression::Helpers
         class SymbolVisitingVisitor  : public Scope::Visitor
         {
         public:
-            SymbolVisitingVisitor (const TermPtr& input_, SymbolVisitor& visitor_, const int recursionCount_)
-                : input (input_), visitor (visitor_), recursionCount (recursionCount_) {}
+            SymbolVisitingVisitor (const TermPtr& t, SymbolVisitor& v, const int recursion)
+                : input (t), visitor (v), recursionCount (recursion) {}
 
             void visit (const Scope& scope)   { input->visitAllSymbols (visitor, scope, recursionCount); }
 
@@ -383,8 +382,8 @@ struct Expression::Helpers
         class SymbolRenamingVisitor   : public Scope::Visitor
         {
         public:
-            SymbolRenamingVisitor (const TermPtr& input_, const Expression::Symbol& symbol_, const String& newName_, const int recursionCount_)
-                : input (input_), symbol (symbol_), newName (newName_), recursionCount (recursionCount_)  {}
+            SymbolRenamingVisitor (const TermPtr& t, const Expression::Symbol& symbol_, const String& newName_, const int recursionCount_)
+                : input (t), symbol (symbol_), newName (newName_), recursionCount (recursionCount_)  {}
 
             void visit (const Scope& scope)   { input->renameSymbol (symbol, newName, scope, recursionCount); }
 
@@ -406,9 +405,9 @@ struct Expression::Helpers
     class Negate  : public Term
     {
     public:
-        explicit Negate (const TermPtr& input_) : input (input_)
+        explicit Negate (const TermPtr& t) : input (t)
         {
-            jassert (input_ != nullptr);
+            jassert (t != nullptr);
         }
 
         Type getType() const noexcept                           { return operatorType; }
@@ -425,10 +424,10 @@ struct Expression::Helpers
         String getName() const          { return "-"; }
         TermPtr negated()               { return input; }
 
-        TermPtr createTermToEvaluateInput (const Scope& scope, const Term* input_, double overallTarget, Term* topLevelTerm) const
+        TermPtr createTermToEvaluateInput (const Scope& scope, const Term* t, double overallTarget, Term* topLevelTerm) const
         {
-            (void) input_;
-            jassert (input_ == input);
+            (void) t;
+            jassert (t == input);
 
             const Term* const dest = findDestinationFor (topLevelTerm, this);
 
@@ -814,15 +813,15 @@ struct Expression::Helpers
             char opType;
             if (readOperator ("+-", &opType))
             {
-                TermPtr term (readUnaryExpression());
+                TermPtr e (readUnaryExpression());
 
-                if (term == nullptr)
+                if (e == nullptr)
                     throw ParseError ("Expected expression after \"" + String::charToString ((juce_wchar) (uint8) opType) + "\"");
 
                 if (opType == '-')
-                    term = term->negated();
+                    e = e->negated();
 
-                return term;
+                return e;
             }
 
             return readPrimaryExpression();

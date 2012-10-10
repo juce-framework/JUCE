@@ -560,14 +560,13 @@ public:
     void audioCallback (const AudioBufferList* inInputData,
                         AudioBufferList* outOutputData)
     {
-        int i;
         const ScopedLock sl (callbackLock);
 
         if (callback != nullptr)
         {
             if (inputDevice == 0)
             {
-                for (i = numInputChans; --i >= 0;)
+                for (int i = numInputChans; --i >= 0;)
                 {
                     const CallbackDetailsForChannel& info = inputChannelInfo[i];
                     float* dest = tempInputBuffers [i];
@@ -612,7 +611,7 @@ public:
                                                      bufferSize);
                 }
 
-                for (i = numOutputChans; --i >= 0;)
+                for (int i = numOutputChans; --i >= 0;)
                 {
                     const CallbackDetailsForChannel& info = outputChannelInfo[i];
                     const float* src = tempOutputBuffers [i];
@@ -633,7 +632,7 @@ public:
         }
         else
         {
-            for (i = jmin (numOutputChans, numOutputChannelInfos); --i >= 0;)
+            for (int i = jmin (numOutputChans, numOutputChannelInfos); --i >= 0;)
             {
                 const CallbackDetailsForChannel& info = outputChannelInfo[i];
                 float* dest = ((float*) outOutputData->mBuffers[info.streamNum].mData)

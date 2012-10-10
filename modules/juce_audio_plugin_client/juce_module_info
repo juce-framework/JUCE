@@ -1,7 +1,7 @@
 {
   "id":             "juce_audio_plugin_client",
   "name":           "JUCE audio plugin wrapper classes",
-  "version":        "2.0.24",
+  "version":        "2.0.27",
   "description":    "Classes for building VST, RTAS and AU plugins.",
   "website":        "http://www.juce.com/juce",
   "license":        "GPL/Commercial",
@@ -25,7 +25,8 @@
                       { "file": "AU/juce_AU_Resources.r", "target": "xcode" },
                       { "file": "AU/juce_AU_Wrapper.mm", "target": "xcode" },
                       { "file": "AAX/juce_AAX_Wrapper.cpp", "target": "xcode, msvc" },
-                      { "file": "AAX/juce_AAX_Wrapper.mm", "target": "xcode" }
+                      { "file": "AAX/juce_AAX_Wrapper.mm", "target": "xcode" },
+                      { "file": "utility/juce_PluginUtilities.cpp" }
                     ],
 
   "browse":         [ "AU/*.cpp",

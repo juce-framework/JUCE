@@ -253,6 +253,9 @@ public:
     /** Returns true if the editor is currently focused and active. */
     bool isBeingEdited() const noexcept;
 
+    /** Returns the currently-visible text editor, or nullptr if none is open. */
+    TextEditor* getCurrentTextEditor() const noexcept;
+
 protected:
     //==============================================================================
     /** Creates the TextEditor component that will be used when the user has clicked on the label.

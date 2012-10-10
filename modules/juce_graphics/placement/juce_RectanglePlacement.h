@@ -42,8 +42,8 @@ class JUCE_API  RectanglePlacement
 {
 public:
     //==============================================================================
-    /** Creates a RectanglePlacement object using a combination of flags. */
-    inline RectanglePlacement (int flags_) noexcept : flags (flags_) {}
+    /** Creates a RectanglePlacement object using a combination of flags from the Flags enum. */
+    inline RectanglePlacement (int placementFlags) noexcept  : flags (placementFlags) {}
 
     /** Creates a copy of another RectanglePlacement object. */
     RectanglePlacement (const RectanglePlacement& other) noexcept;
@@ -56,7 +56,7 @@ public:
 
     //==============================================================================
     /** Flag values that can be combined and used in the constructor. */
-    enum
+    enum Flags
     {
         //==============================================================================
         /** Indicates that the source rectangle's left edge should be aligned with the left edge of the target rectangle. */

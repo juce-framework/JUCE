@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 LowLevelGraphicsSoftwareRenderer::LowLevelGraphicsSoftwareRenderer (const Image& image)
     : savedState (new RenderingHelpers::SoftwareRendererSavedState (image, image.getBounds()))
 {

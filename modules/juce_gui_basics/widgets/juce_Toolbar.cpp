@@ -441,8 +441,7 @@ void Toolbar::updateAllItemPositions (const bool animate)
     {
         StretchableObjectResizer resizer;
 
-        int i;
-        for (i = 0; i < items.size(); ++i)
+        for (int i = 0; i < items.size(); ++i)
         {
             ToolbarItemComponent* const tc = items.getUnchecked(i);
 
@@ -473,7 +472,7 @@ void Toolbar::updateAllItemPositions (const bool animate)
 
         int totalLength = 0;
 
-        for (i = 0; i < resizer.getNumItems(); ++i)
+        for (int i = 0; i < resizer.getNumItems(); ++i)
             totalLength += (int) resizer.getItemSize (i);
 
         const bool itemsOffTheEnd = totalLength > getLength();
@@ -495,7 +494,7 @@ void Toolbar::updateAllItemPositions (const bool animate)
                                              : getLength();
 
         int pos = 0, activeIndex = 0;
-        for (i = 0; i < items.size(); ++i)
+        for (int i = 0; i < items.size(); ++i)
         {
             ToolbarItemComponent* const tc = items.getUnchecked(i);
 
@@ -821,5 +820,5 @@ void Toolbar::showCustomisationDialog (ToolbarItemFactory& factory, const int op
     setEditingActive (true);
 
     (new CustomisationDialog (factory, this, optionFlags))
-        ->enterModalState (true, 0, true);
+        ->enterModalState (true, nullptr, true);
 }

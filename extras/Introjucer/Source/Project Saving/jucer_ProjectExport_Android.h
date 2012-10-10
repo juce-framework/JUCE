@@ -46,8 +46,7 @@ public:
     }
 
     //==============================================================================
-    AndroidProjectExporter (Project& project_, const ValueTree& settings_)
-        : ProjectExporter (project_, settings_)
+    AndroidProjectExporter (Project& p, const ValueTree& t)    : ProjectExporter (p, t)
     {
         name = getNameAndroid();
 
@@ -73,28 +72,13 @@ public:
     }
 
     //==============================================================================
-    int getLaunchPreferenceOrderForCurrentOS()
-    {
-       #if JUCE_ANDROID
-        return 1;
-       #else
-        return 0;
-       #endif
-    }
-
+    bool launchProject()                        { return false; }
     bool isAndroid() const                      { return true; }
-    bool isPossibleForCurrentProject()          { return projectType.isGUIApplication(); }
     bool usesMMFiles() const                    { return false; }
     bool canCopeWithDuplicateFiles()            { return false; }
 
-    void launchProject()
+    void createExporterProperties (PropertyListBuilder& props)
     {
-    }
-
-    void createPropertyEditors (PropertyListBuilder& props)
-    {
-        ProjectExporter::createPropertyEditors (props);
-
         props.add (new TextPropertyComponent (getActivityClassPathValue(), "Android Activity class name", 256, false),
                    "The full java class name to use for the app's Activity class.");
 
@@ -238,10 +222,8 @@ protected:
         Value getArchitecturesValue()           { return getValue (Ids::androidArchitectures); }
         String getArchitectures() const         { return config [Ids::androidArchitectures]; }
 
-        void createPropertyEditors (PropertyListBuilder& props)
+        void createConfigProperties (PropertyListBuilder& props)
         {
-            createBasicPropertyEditors (props);
-
             props.add (new TextPropertyComponent (getArchitecturesValue(), "Architectures", 256, false),
                        "A list of the ARM architectures to build (for a fat binary).");
         }
@@ -270,7 +252,9 @@ private:
         //screens->setAttribute ("android:xlargeScreens", "true");
         screens->setAttribute ("android:anyDensity", "true");
 
-        manifest->createNewChildElement ("uses-sdk")->setAttribute ("android:minSdkVersion", getMinimumSDKVersionString());
+        XmlElement* sdk = manifest->createNewChildElement ("uses-sdk");
+        sdk->setAttribute ("android:minSdkVersion", getMinimumSDKVersionString());
+        sdk->setAttribute ("android:targetSdkVersion", "11");
 
         {
             const StringArray permissions (getPermissionsRequired());
@@ -289,6 +273,7 @@ private:
         XmlElement* app = manifest->createNewChildElement ("application");
         app->setAttribute ("android:label", "@string/app_name");
         app->setAttribute ("android:icon", "@drawable/icon");
+        app->setAttribute ("android:hardwareAccelerated", "false"); // (using the 2D acceleration slows down openGL)
 
         XmlElement* act = app->createNewChildElement ("activity");
         act->setAttribute ("android:name", getActivityName());
@@ -395,7 +380,7 @@ private:
            << "# Don't edit this file! Your changes will be overwritten when you re-save the Introjucer project!" << newLine
            << newLine
            << "APP_STL := gnustl_static" << newLine
-           << "APP_CPPFLAGS += -fsigned-char -fexceptions -frtti" << newLine
+           << "APP_CPPFLAGS += -fsigned-char -fexceptions -frtti -Wno-psabi" << newLine
            << "APP_PLATFORM := " << getAppPlatform() << newLine;
 
         overwriteFileIfDifferentOrThrow (file, mo);

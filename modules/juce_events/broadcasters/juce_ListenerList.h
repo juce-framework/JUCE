@@ -281,8 +281,8 @@ public:
     {
     public:
         //==============================================================================
-        Iterator (const ListType& list_) noexcept
-            : list (list_), index (list_.size())
+        Iterator (const ListType& listToIterate) noexcept
+            : list (listToIterate), index (listToIterate.size())
         {}
 
         ~Iterator() noexcept {}

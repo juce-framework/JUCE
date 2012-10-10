@@ -310,16 +310,22 @@
     <ClCompile Include="..\..\Source\BinaryData\jucer_AudioPluginFilterTemplate.cpp">
       <Filter>The Introjucer\BinaryData</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Source\BinaryData\jucer_ContentCompTemplate.cpp">
+      <Filter>The Introjucer\BinaryData</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\Source\BinaryData\jucer_MainConsoleAppTemplate.cpp">
       <Filter>The Introjucer\BinaryData</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Source\BinaryData\jucer_MainTemplate.cpp">
+    <ClCompile Include="..\..\Source\BinaryData\jucer_MainTemplate_NoWindow.cpp">
+      <Filter>The Introjucer\BinaryData</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\BinaryData\jucer_MainTemplate_Window.cpp">
+      <Filter>The Introjucer\BinaryData</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\BinaryData\jucer_NewComponentTemplate.cpp">
       <Filter>The Introjucer\BinaryData</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\BinaryData\jucer_NewCppFileTemplate.cpp">
-      <Filter>The Introjucer\BinaryData</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\BinaryData\jucer_WindowTemplate.cpp">
       <Filter>The Introjucer\BinaryData</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_core\text\juce_CharacterFunctions.cpp">
@@ -341,6 +347,9 @@
       <Filter>Juce Modules\juce_core\text</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_core\text\juce_StringPool.cpp">
+      <Filter>Juce Modules\juce_core\text</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_core\text\juce_TextDiff.cpp">
       <Filter>Juce Modules\juce_core\text</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_core\maths\juce_BigInteger.cpp">
@@ -868,6 +877,9 @@
     <ClCompile Include="..\..\..\..\modules\juce_gui_basics\layout\juce_ComponentMovementWatcher.cpp">
       <Filter>Juce Modules\juce_gui_basics\layout</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_gui_basics\layout\juce_ConcertinaPanel.cpp">
+      <Filter>Juce Modules\juce_gui_basics\layout</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_gui_basics\layout\juce_GroupComponent.cpp">
       <Filter>Juce Modules\juce_gui_basics\layout</Filter>
     </ClCompile>
@@ -1323,10 +1335,16 @@
     <ClInclude Include="..\..\Source\BinaryData\jucer_AudioPluginFilterTemplate.h">
       <Filter>The Introjucer\BinaryData</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\Source\BinaryData\jucer_ContentCompTemplate.h">
+      <Filter>The Introjucer\BinaryData</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\BinaryData\jucer_NewComponentTemplate.h">
+      <Filter>The Introjucer\BinaryData</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\Source\BinaryData\jucer_NewCppFileTemplate.h">
       <Filter>The Introjucer\BinaryData</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\BinaryData\jucer_WindowTemplate.h">
+    <ClInclude Include="..\..\Source\BinaryData\jucer_NewInlineComponentTemplate.h">
       <Filter>The Introjucer\BinaryData</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_core\text\juce_CharacterFunctions.h">
@@ -1363,6 +1381,9 @@
       <Filter>Juce Modules\juce_core\text</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_core\text\juce_StringPool.h">
+      <Filter>Juce Modules\juce_core\text</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_core\text\juce_TextDiff.h">
       <Filter>Juce Modules\juce_core\text</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_core\maths\juce_BigInteger.h">
@@ -2016,6 +2037,9 @@
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\layout\juce_ComponentMovementWatcher.h">
       <Filter>Juce Modules\juce_gui_basics\layout</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_gui_basics\layout\juce_ConcertinaPanel.h">
+      <Filter>Juce Modules\juce_gui_basics\layout</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\layout\juce_GroupComponent.h">
       <Filter>Juce Modules\juce_gui_basics\layout</Filter>
     </ClInclude>
@@ -2232,6 +2256,9 @@
     <ClInclude Include="..\..\..\..\modules\juce_gui_extra\code_editor\juce_CPlusPlusCodeTokeniser.h">
       <Filter>Juce Modules\juce_gui_extra\code_editor</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_gui_extra\code_editor\juce_CPlusPlusCodeTokeniserFunctions.h">
+      <Filter>Juce Modules\juce_gui_extra\code_editor</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_gui_extra\documents\juce_FileBasedDocument.h">
       <Filter>Juce Modules\juce_gui_extra\documents</Filter>
     </ClInclude>
@@ -2294,10 +2321,13 @@
     <None Include="..\..\Source\BinaryData\AudioPluginXCodeScript.txt">
       <Filter>The Introjucer\BinaryData</Filter>
     </None>
-    <None Include="..\..\Source\BinaryData\brushed_aluminium.png">
+    <None Include="..\..\Source\BinaryData\background_tile.png">
       <Filter>The Introjucer\BinaryData</Filter>
     </None>
-    <None Include="..\..\Source\BinaryData\dark_scheme.xml">
+    <None Include="..\..\Source\BinaryData\colourscheme_dark.xml">
+      <Filter>The Introjucer\BinaryData</Filter>
+    </None>
+    <None Include="..\..\Source\BinaryData\colourscheme_light.xml">
       <Filter>The Introjucer\BinaryData</Filter>
     </None>
     <None Include="..\..\Source\BinaryData\juce_icon.png">

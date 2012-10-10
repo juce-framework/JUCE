@@ -289,7 +289,7 @@ void Desktop::setMousePosition (const Point<int>&)
 
 Desktop::DisplayOrientation Desktop::getCurrentOrientation() const
 {
-    return convertToJuceOrientation ([[UIApplication sharedApplication] statusBarOrientation]);
+    return Orientations::convertToJuce ([[UIApplication sharedApplication] statusBarOrientation]);
 }
 
 void Desktop::Displays::findDisplays()

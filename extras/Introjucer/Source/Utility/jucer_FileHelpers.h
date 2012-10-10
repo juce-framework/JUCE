@@ -41,20 +41,25 @@ namespace FileHelpers
 
     String unixStylePath (const String& path);
     String windowsStylePath (const String& path);
+    String currentOSStylePath (const String& path);
 
     bool shouldPathsBeRelative (String path1, String path2);
     bool isAbsolutePath (const String& path);
 
     // A windows-aware version of File::getRelativePath()
     String getRelativePathFrom (const File& file, const File& sourceFolder);
+
+    // removes "/../" bits from the middle of the path
+    String simplifyPath (String::CharPointerType path);
+    String simplifyPath (const String& path);
 }
 
 //==============================================================================
 class FileModificationDetector
 {
 public:
-    FileModificationDetector (const File& file_)
-        : file (file_)
+    FileModificationDetector (const File& f)
+        : file (f)
     {
     }
 

@@ -55,6 +55,11 @@ namespace pnglibNamespace
    using std::free;
   #endif
 
+  #if JUCE_CLANG
+   #pragma clang diagnostic push
+   #pragma clang diagnostic ignored "-Wsign-conversion"
+  #endif
+
   using std::abs;
   #define PNG_INTERNAL
   #define NO_DUMMY_DECL
@@ -79,6 +84,10 @@ namespace pnglibNamespace
   #include "pnglib/pngwrite.c"
   #include "pnglib/pngwtran.c"
   #include "pnglib/pngwutil.c"
+
+  #if JUCE_CLANG
+   #pragma clang diagnostic pop
+  #endif
 #else
   extern "C"
   {
@@ -124,7 +133,8 @@ namespace PNGHelpers
 PNGImageFormat::PNGImageFormat()    {}
 PNGImageFormat::~PNGImageFormat()   {}
 
-String PNGImageFormat::getFormatName()  { return "PNG"; }
+String PNGImageFormat::getFormatName()                   { return "PNG"; }
+bool PNGImageFormat::usesFileExtension (const File& f)   { return f.hasFileExtension ("png"); }
 
 bool PNGImageFormat::canUnderstand (InputStream& in)
 {

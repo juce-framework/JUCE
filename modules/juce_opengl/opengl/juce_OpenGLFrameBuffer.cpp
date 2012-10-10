@@ -150,7 +150,7 @@ class OpenGLFrameBuffer::SavedState
 public:
     SavedState (OpenGLFrameBuffer& buffer, const int w, const int h)
         : width (w), height (h),
-          data (w * h)
+          data ((size_t) (w * h))
     {
         buffer.readPixels (data, Rectangle<int> (w, h));
     }

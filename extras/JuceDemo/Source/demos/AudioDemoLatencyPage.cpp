@@ -3,7 +3,7 @@
 
   This is an automatically generated file created by the Jucer!
 
-  Creation date:  1 May 2011 1:54:50pm
+  Creation date:  21 Sep 2012 12:09:45pm
 
   Be careful when adding custom code to these files, as only the code within
   the "//[xyz]" and "//[/xyz]" sections will be retained when the file is loaded
@@ -152,7 +152,7 @@ public:
             // We need to clear the output buffers, in case they're full of junk..
             for (int i = 0; i < numOutputChannels; ++i)
                 if (outputChannelData[i] != 0)
-                    zeromem (outputChannelData[i], sizeof (float) * numSamples);
+                    zeromem (outputChannelData[i], sizeof (float) * (size_t) numSamples);
         }
     }
 
@@ -289,7 +289,7 @@ AudioDemoLatencyPage::AudioDemoLatencyPage (AudioDeviceManager& deviceManager_)
     addAndMakeVisible (liveAudioDisplayComp = new LiveAudioInputDisplayComp());
 
     addAndMakeVisible (startTestButton = new TextButton (String::empty));
-    startTestButton->setButtonText (L"Test Latency");
+    startTestButton->setButtonText ("Test Latency");
     startTestButton->addListener (this);
 
     addAndMakeVisible (testResultsBox = new TextEditor (String::empty));
@@ -302,7 +302,7 @@ AudioDemoLatencyPage::AudioDemoLatencyPage (AudioDeviceManager& deviceManager_)
     testResultsBox->setColour (TextEditor::backgroundColourId, Colour (0x32ffffff));
     testResultsBox->setColour (TextEditor::outlineColourId, Colour (0x1c000000));
     testResultsBox->setColour (TextEditor::shadowColourId, Colour (0x16000000));
-    testResultsBox->setText (L"Running this test measures the round-trip latency between the audio output and input devices you\'ve got selected.\n\nIt\'ll play a sound, then try to measure the time at which the sound arrives back at the audio input. Obviously for this to work you need to have your microphone somewhere near your speakers...");
+    testResultsBox->setText ("Running this test measures the round-trip latency between the audio output and input devices you\'ve got selected.\n\nIt\'ll play a sound, then try to measure the time at which the sound arrives back at the audio input. Obviously for this to work you need to have your microphone somewhere near your speakers...");
 
 
     //[UserPreSize]

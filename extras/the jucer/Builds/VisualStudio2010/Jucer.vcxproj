@@ -181,6 +181,9 @@
     <ClCompile Include="..\..\..\..\modules\juce_core\text\juce_StringPool.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_core\text\juce_TextDiff.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_core\maths\juce_BigInteger.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
@@ -664,6 +667,9 @@
     <ClCompile Include="..\..\..\..\modules\juce_gui_basics\layout\juce_ComponentMovementWatcher.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_gui_basics\layout\juce_ConcertinaPanel.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_gui_basics\layout\juce_GroupComponent.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
@@ -1022,6 +1028,7 @@
     <ClInclude Include="..\..\..\..\modules\juce_core\text\juce_StringArray.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\text\juce_StringPairArray.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\text\juce_StringPool.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_core\text\juce_TextDiff.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\maths\juce_BigInteger.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\maths\juce_Expression.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\maths\juce_MathsFunctions.h"/>
@@ -1233,6 +1240,7 @@
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\layout\juce_ComponentBoundsConstrainer.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\layout\juce_ComponentBuilder.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\layout\juce_ComponentMovementWatcher.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_gui_basics\layout\juce_ConcertinaPanel.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\layout\juce_GroupComponent.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\layout\juce_MultiDocumentPanel.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\layout\juce_ResizableBorderComponent.h"/>
@@ -1305,6 +1313,7 @@
     <ClInclude Include="..\..\..\..\modules\juce_gui_extra\code_editor\juce_CodeEditorComponent.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_gui_extra\code_editor\juce_CodeTokeniser.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_gui_extra\code_editor\juce_CPlusPlusCodeTokeniser.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_gui_extra\code_editor\juce_CPlusPlusCodeTokeniserFunctions.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_gui_extra\documents\juce_FileBasedDocument.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_gui_extra\embedding\juce_ActiveXControlComponent.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_gui_extra\embedding\juce_NSViewComponent.h"/>

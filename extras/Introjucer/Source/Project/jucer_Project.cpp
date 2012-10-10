@@ -47,14 +47,15 @@ namespace Tags
 const char* Project::projectFileExtension = ".jucer";
 
 //==============================================================================
-Project::Project (const File& file_)
+Project::Project (const File& f)
     : FileBasedDocument (projectFileExtension,
                          String ("*") + projectFileExtension,
                          "Choose a Jucer project to load",
                          "Save Jucer project"),
       projectRoot (Tags::projectRoot)
 {
-    setFile (file_);
+    Logger::writeToLog ("Loading project: " + f.getFullPathName());
+    setFile (f);
     removeDefunctExporters();
     setMissingDefaultValues();
 
@@ -66,7 +67,7 @@ Project::Project (const File& file_)
 Project::~Project()
 {
     projectRoot.removeListener (this);
-    JucerApplication::getApp().openDocumentManager.closeAllDocumentsUsingProject (*this, false);
+    IntrojucerApp::getApp().openDocumentManager.closeAllDocumentsUsingProject (*this, false);
 }
 
 //==============================================================================
@@ -123,6 +124,11 @@ void Project::setMissingDefaultValues()
 
     if (! projectRoot.getChildWithName (Tags::modulesGroup).isValid())
         addDefaultModules (false);
+
+    if (getBundleIdentifier().toString().isEmpty())
+        getBundleIdentifier() = getDefaultBundleIdentifier();
+
+    IntrojucerApp::getApp().updateNewlyOpenedProject (*this);
 }
 
 void Project::updateOldStyleConfigList()
@@ -290,13 +296,12 @@ File Project::resolveFilename (String filename) const
     if (filename.isEmpty())
         return File::nonexistent;
 
-    filename = replacePreprocessorDefs (getPreprocessorDefs(), filename)
-                .replaceCharacter ('\\', '/');
+    filename = replacePreprocessorDefs (getPreprocessorDefs(), filename);
 
     if (FileHelpers::isAbsolutePath (filename))
-        return File::createFileWithoutCheckingPath (filename); // (avoid assertions for windows-style paths)
+        return File::createFileWithoutCheckingPath (FileHelpers::currentOSStylePath (filename)); // (avoid assertions for windows-style paths)
 
-    return getFile().getSiblingFile (filename);
+    return getFile().getSiblingFile (FileHelpers::currentOSStylePath (filename));
 }
 
 String Project::getRelativePathForFile (const File& file) const
@@ -366,12 +371,15 @@ void Project::createPropertyEditors (PropertyListBuilder& props)
     }
 
     props.add (new TextPropertyComponent (getBundleIdentifier(), "Bundle Identifier", 256, false),
-               "A unique identifier for this product, mainly for use in Mac builds. It should be something like 'com.yourcompanyname.yourproductname'");
+               "A unique identifier for this product, mainly for use in OSX/iOS builds. It should be something like 'com.yourcompanyname.yourproductname'");
 
     getProjectType().createPropertyEditors (*this, props);
 
     props.add (new TextPropertyComponent (getProjectPreprocessorDefs(), "Preprocessor definitions", 32768, false),
                "Extra preprocessor definitions. Use the form \"NAME1=value NAME2=value\", using whitespace or commas to separate the items - to include a space or comma in a definition, precede it with a backslash.");
+
+    props.add (new TextPropertyComponent (getProjectUserNotes(), "Notes", 32768, true),
+               "Extra comments: This field is not used for code or project generation, it's just a space where you can express your thoughts.");
 }
 
 String Project::getVersionAsHex() const
@@ -434,8 +442,6 @@ Project::Item Project::Item::createCopy()         { Item i (*this); i.state = i.
 String Project::Item::getID() const               { return state [Ids::ID]; }
 void Project::Item::setID (const String& newID)   { state.setProperty (Ids::ID, newID, nullptr); }
 
-String Project::Item::getImageFileID() const      { return "id:" + getID(); }
-
 Image Project::Item::loadAsImageFile() const
 {
     return isValid() ? ImageCache::getFromFile (getFile())
@@ -454,7 +460,7 @@ Project::Item Project::Item::createGroup (Project& project, const String& name, 
 bool Project::Item::isFile() const          { return state.hasType (Tags::file); }
 bool Project::Item::isGroup() const         { return state.hasType (Tags::group) || isMainGroup(); }
 bool Project::Item::isMainGroup() const     { return state.hasType (Tags::projectMainGroup); }
-bool Project::Item::isImageFile() const     { return isFile() && getFile().hasFileExtension ("png;jpg;jpeg;gif;drawable"); }
+bool Project::Item::isImageFile() const     { return isFile() && ImageFileFormat::findImageFormatForFileExtension (getFile()) != nullptr; }
 
 Project::Item Project::Item::findItemWithID (const String& targetId) const
 {
@@ -538,7 +544,7 @@ bool Project::Item::renameFile (const File& newFile)
          || (newFile.exists() && ! oldFile.exists()))
     {
         setFile (newFile);
-        JucerApplication::getApp().openDocumentManager.fileHasBeenRenamed (oldFile, newFile);
+        IntrojucerApp::getApp().openDocumentManager.fileHasBeenRenamed (oldFile, newFile);
         return true;
     }
 
@@ -965,4 +971,9 @@ bool Project::ExporterIterator::next()
     }
 
     return true;
+}
+
+PropertiesFile& Project::getStoredProperties() const
+{
+    return getAppSettings().getProjectProperties (getProjectUID());
 }

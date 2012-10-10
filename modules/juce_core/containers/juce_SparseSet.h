@@ -221,13 +221,12 @@ public:
         SparseSet newItems;
         newItems.addRange (range);
 
-        int i;
-        for (i = getNumRanges(); --i >= 0;)
+        for (int i = getNumRanges(); --i >= 0;)
             newItems.removeRange (getRange (i));
 
         removeRange (range);
 
-        for (i = newItems.getNumRanges(); --i >= 0;)
+        for (int i = newItems.getNumRanges(); --i >= 0;)
             addRange (newItems.getRange(i));
     }
 

@@ -671,8 +671,7 @@ public:
         {
             HeapBlock <NPVariant> params (numParameters);
 
-            int i;
-            for (i = 0; i < numParameters; ++i)
+            for (int i = 0; i < numParameters; ++i)
                 createNPVariantFromValue (npp, params[i], parameters[i]);
 
             if (browser.invoke (npp, source, getIdentifierFromString (methodName),
@@ -682,7 +681,7 @@ public:
                 browser.releasevariantvalue (&result);
             }
 
-            for (i = 0; i < numParameters; ++i)
+            for (int i = 0; i < numParameters; ++i)
                 browser.releasevariantvalue (&params[i]);
         }
         else

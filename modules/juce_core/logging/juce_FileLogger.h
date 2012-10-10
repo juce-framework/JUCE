@@ -59,47 +59,75 @@ public:
     */
     FileLogger (const File& fileToWriteTo,
                 const String& welcomeMessage,
-                const int maxInitialFileSizeBytes = 128 * 1024);
+                const int64 maxInitialFileSizeBytes = 128 * 1024);
 
     /** Destructor. */
     ~FileLogger();
 
     //==============================================================================
-    void logMessage (const String& message);
-
-    File getLogFile() const               { return logFile; }
+    /** Returns the file that this logger is writing to. */
+    const File& getLogFile() const noexcept               { return logFile; }
 
     //==============================================================================
     /** Helper function to create a log file in the correct place for this platform.
 
-        On Windows this will return a logger with a path such as:
-        c:\\Documents and Settings\\username\\Application Data\\[logFileSubDirectoryName]\\[logFileName]
+        The method might return nullptr if the file can't be created for some reason.
 
-        On the Mac it'll create something like:
-        ~/Library/Logs/[logFileName]
-
-        The method might return 0 if the file can't be created for some reason.
-
-        @param logFileSubDirectoryName      if a subdirectory is needed, this is what it will be called -
-                                            it's best to use the something like the name of your application here.
-        @param logFileName                  the name of the file to create, e.g. "MyAppLog.txt". Don't just
-                                            call it "log.txt" because if it goes in a directory with logs
-                                            from other applications (as it will do on the Mac) then no-one
-                                            will know which one is yours!
+        @param logFileSubDirectoryName      the name of the subdirectory to create inside the logs folder (as
+                                            returned by getSystemLogFileFolder). It's best to use something
+                                            like the name of your application here.
+        @param logFileName                  the name of the file to create, e.g. "MyAppLog.txt".
         @param welcomeMessage               a message that will be written to the log when it's opened.
         @param maxInitialFileSizeBytes      (see the FileLogger constructor for more info on this)
     */
     static FileLogger* createDefaultAppLogger (const String& logFileSubDirectoryName,
                                                const String& logFileName,
                                                const String& welcomeMessage,
-                                               const int maxInitialFileSizeBytes = 128 * 1024);
+                                               const int64 maxInitialFileSizeBytes = 128 * 1024);
+
+    /** Helper function to create a log file in the correct place for this platform.
+
+        The filename used is based on the root and suffix strings provided, along with a
+        time and date string, meaning that a new, empty log file will be always be created
+        rather than appending to an exising one.
+
+        The method might return nullptr if the file can't be created for some reason.
+
+        @param logFileSubDirectoryName      the name of the subdirectory to create inside the logs folder (as
+                                            returned by getSystemLogFileFolder). It's best to use something
+                                            like the name of your application here.
+        @param logFileNameRoot              the start of the filename to use, e.g. "MyAppLog_". This will have
+                                            a timestamp and the logFileNameSuffix appended to it
+        @param logFileNameSuffix            the file suffix to use, e.g. ".txt"
+        @param welcomeMessage               a message that will be written to the log when it's opened.
+    */
+    static FileLogger* createDateStampedLogger (const String& logFileSubDirectoryName,
+                                                const String& logFileNameRoot,
+                                                const String& logFileNameSuffix,
+                                                const String& welcomeMessage);
+
+    //==============================================================================
+    /** Returns an OS-specific folder where log-files should be stored.
+
+        On Windows this will return a logger with a path such as:
+        c:\\Documents and Settings\\username\\Application Data\\[logFileSubDirectoryName]\\[logFileName]
+
+        On the Mac it'll create something like:
+        ~/Library/Logs/[logFileSubDirectoryName]/[logFileName]
+
+        @see createDefaultAppLogger
+    */
+    static File getSystemLogFileFolder();
+
+    // (implementation of the Logger virtual method)
+    void logMessage (const String&);
 
 private:
     //==============================================================================
     File logFile;
     CriticalSection logLock;
 
-    void trimFileSize (int maxFileSizeBytes) const;
+    void trimFileSize (int64 maxFileSizeBytes) const;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FileLogger);
 };

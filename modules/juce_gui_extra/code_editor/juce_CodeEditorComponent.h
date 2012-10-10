@@ -37,11 +37,8 @@ class CodeTokeniser;
     files.
 */
 class JUCE_API  CodeEditorComponent   : public Component,
-                                        public TextInputTarget,
-                                        private Timer,
-                                        private ScrollBar::Listener,
-                                        private CodeDocument::Listener,
-                                        private AsyncUpdater
+                                        public ApplicationCommandTarget,
+                                        public TextInputTarget
 {
 public:
     //==============================================================================
@@ -138,6 +135,7 @@ public:
     bool undo();
     bool redo();
 
+    void selectRegion (const CodeDocument::Position& start, const CodeDocument::Position& end);
     bool selectAll();
     void deselectAll();
 
@@ -145,6 +143,7 @@ public:
     void scrollBy (int deltaLines);
     void scrollToColumn (int newFirstColumnOnScreen);
     void scrollToKeepCaretOnScreen();
+    void scrollToKeepLinesOnScreen (const Range<int>& linesToShow);
 
     void insertTextAtCaret (const String& textToInsert);
     void insertTabAtCaret();
@@ -154,6 +153,7 @@ public:
 
     //==============================================================================
     Range<int> getHighlightedRegion() const;
+    bool isHighlightActive() const noexcept;
     void setHighlightedRegion (const Range<int>& newRange);
     String getTextInRange (const Range<int>& range) const;
 
@@ -301,6 +301,15 @@ public:
     */
     virtual void performPopupMenuAction (int menuItemID);
 
+    /** Specifies a commmand-manager which the editor will notify whenever the state
+        of any of its commands changes.
+        If you're making use of the editor's ApplicationCommandTarget interface, then
+        you should also use this to tell it which command manager it should use. Make
+        sure that the manager does not go out of scope while the editor is using it. You
+        can pass a nullptr here to disable this.
+    */
+    void setCommandManager (ApplicationCommandManager* newManager) noexcept;
+
     //==============================================================================
     /** @internal */
     void paint (Graphics&);
@@ -326,6 +335,14 @@ public:
     bool isTextInputActive() const;
     /** @internal */
     void setTemporaryUnderlining (const Array <Range<int> >&);
+    /** @internal */
+    ApplicationCommandTarget* getNextCommandTarget();
+    /** @internal */
+    void getAllCommands (Array<CommandID>&);
+    /** @internal */
+    void getCommandInfo (CommandID, ApplicationCommandInfo&);
+    /** @internal */
+    bool perform (const InvocationInfo&);
 
 private:
     //==============================================================================
@@ -339,11 +356,16 @@ private:
     bool useSpacesForTabs, showLineNumbers;
     double xOffset;
 
-    CodeDocument::Position caretPos;
-    CodeDocument::Position selectionStart, selectionEnd;
+    CodeDocument::Position caretPos, selectionStart, selectionEnd;
 
     ScopedPointer<CaretComponent> caret;
     ScrollBar verticalScrollBar, horizontalScrollBar;
+    ApplicationCommandManager* appCommandManager;
+
+    class Pimpl;
+    friend class Pimpl;
+    friend class ScopedPointer<Pimpl>;
+    ScopedPointer<Pimpl> pimpl;
 
     class GutterComponent;
     friend class GutterComponent;
@@ -366,22 +388,19 @@ private:
     class CodeEditorLine;
     OwnedArray <CodeEditorLine> lines;
     void rebuildLineTokens();
+    void rebuildLineTokensAsync();
+    void codeDocumentChanged (int start, int end);
 
     OwnedArray <CodeDocument::Iterator> cachedIterators;
     void clearCachedIterators (int firstLineToBeInvalid);
     void updateCachedIterators (int maxLineNum);
-    void getIteratorForPosition (int position, CodeDocument::Iterator& result);
-
-    void timerCallback();
-    void scrollBarMoved (ScrollBar*, double);
-    void handleAsyncUpdate();
-    void codeDocumentChanged (const CodeDocument::Position&, const CodeDocument::Position&);
+    void getIteratorForPosition (int position, CodeDocument::Iterator&);
 
     void moveLineDelta (int delta, bool selecting);
     int getGutterSize() const noexcept;
 
     //==============================================================================
-    void insertText (const String& textToInsert);
+    void insertText (const String&);
     void updateCaretPosition();
     void updateScrollBars();
     void scrollToLineInternal (int line);
@@ -390,6 +409,7 @@ private:
     void cut();
     void indentSelectedLines (int spacesToAdd);
     bool skipBackwardsToPreviousTab();
+    bool performCommand (int);
 
     int indexToColumn (int line, int index) const noexcept;
     int columnToIndex (int line, int column) const noexcept;

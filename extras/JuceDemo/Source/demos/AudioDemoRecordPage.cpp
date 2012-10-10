@@ -3,7 +3,7 @@
 
   This is an automatically generated file created by the Jucer!
 
-  Creation date:  1 May 2011 12:08:25pm
+  Creation date:  21 Sep 2012 12:10:11pm
 
   Be careful when adding custom code to these files, as only the code within
   the "//[xyz]" and "//[/xyz]" sections will be retained when the file is loaded
@@ -146,7 +146,7 @@ AudioDemoRecordPage::AudioDemoRecordPage (AudioDeviceManager& deviceManager_)
     addAndMakeVisible (liveAudioDisplayComp = new LiveAudioInputDisplayComp());
 
     addAndMakeVisible (explanationLabel = new Label (String::empty,
-                                                     L"This page demonstrates how to record a wave file from the live audio input..\n\nPressing record will start recording a file in your \"Documents\" folder."));
+                                                     "This page demonstrates how to record a wave file from the live audio input..\n\nPressing record will start recording a file in your \"Documents\" folder."));
     explanationLabel->setFont (Font (15.0000f, Font::plain));
     explanationLabel->setJustificationType (Justification::topLeft);
     explanationLabel->setEditable (false, false, false);
@@ -154,7 +154,7 @@ AudioDemoRecordPage::AudioDemoRecordPage (AudioDeviceManager& deviceManager_)
     explanationLabel->setColour (TextEditor::backgroundColourId, Colour (0x0));
 
     addAndMakeVisible (recordButton = new TextButton (String::empty));
-    recordButton->setButtonText (L"Record");
+    recordButton->setButtonText ("Record");
     recordButton->addListener (this);
     recordButton->setColour (TextButton::buttonColourId, Colour (0xffff5c5c));
     recordButton->setColour (TextButton::textColourOnId, Colours::black);

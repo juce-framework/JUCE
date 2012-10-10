@@ -3,7 +3,7 @@
 
   This is an automatically generated file created by the Jucer!
 
-  Creation date:  1 May 2011 12:07:35pm
+  Creation date:  21 Sep 2012 12:10:28pm
 
   Be careful when adding custom code to these files, as only the code within
   the "//[xyz]" and "//[/xyz]" sections will be retained when the file is loaded
@@ -19,8 +19,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCER_HEADER_AUDIODEMOTABCOMPONENT_AUDIODEMOTABCOMPONENT_ADE99E0E__
-#define __JUCER_HEADER_AUDIODEMOTABCOMPONENT_AUDIODEMOTABCOMPONENT_ADE99E0E__
+#ifndef __JUCER_HEADER_AUDIODEMOTABCOMPONENT_AUDIODEMOTABCOMPONENT_3A306AC8__
+#define __JUCER_HEADER_AUDIODEMOTABCOMPONENT_AUDIODEMOTABCOMPONENT_3A306AC8__
 
 //[Headers]     -- You can add your own extra header files here --
 #include "../jucedemo_headers.h"
@@ -82,9 +82,6 @@ public:
 
 
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
     //[UserVariables]   -- You can add your own custom variables in this section.
     AudioDeviceManager deviceManager;
@@ -95,10 +92,8 @@ private:
 
 
     //==============================================================================
-    // (prevent copy constructor and operator= being generated..)
-    AudioDemoTabComponent (const AudioDemoTabComponent&);
-    const AudioDemoTabComponent& operator= (const AudioDemoTabComponent&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioDemoTabComponent);
 };
 
 
-#endif   // __JUCER_HEADER_AUDIODEMOTABCOMPONENT_AUDIODEMOTABCOMPONENT_ADE99E0E__
+#endif   // __JUCER_HEADER_AUDIODEMOTABCOMPONENT_AUDIODEMOTABCOMPONENT_3A306AC8__

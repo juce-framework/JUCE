@@ -328,7 +328,7 @@ String StringArray::joinIntoString (const String& separator, int start, int numb
         return strings.getReference (start);
 
     const size_t separatorBytes = separator.getCharPointer().sizeInBytes() - sizeof (String::CharPointerType::CharType);
-    size_t bytesNeeded = separatorBytes * (last - start - 1);
+    size_t bytesNeeded = separatorBytes * (size_t) (last - start - 1);
 
     for (int i = start; i < last; ++i)
         bytesNeeded += strings.getReference(i).getCharPointer().sizeInBytes() - sizeof (String::CharPointerType::CharType);
@@ -371,7 +371,7 @@ int StringArray::addTokens (const String& text, const String& breakCharacters, c
             String::CharPointerType tokenEnd (CharacterFunctions::findEndOfToken (t,
                                                                                   breakCharacters.getCharPointer(),
                                                                                   quoteCharacters.getCharPointer()));
-            add (String (t, tokenEnd));
+            strings.add (String (t, tokenEnd));
             ++num;
 
             if (tokenEnd.isEmpty())
@@ -392,35 +392,22 @@ int StringArray::addLines (const String& sourceText)
 
     while (! finished)
     {
-        String::CharPointerType startOfLine (text);
-        size_t numChars = 0;
-
-        for (;;)
+        for (String::CharPointerType startOfLine (text);;)
         {
-            const juce_wchar c = text.getAndAdvance();
+            const String::CharPointerType endOfLine (text);
 
-            if (c == 0)
+            switch (text.getAndAdvance())
             {
-                finished = true;
-                break;
+                case 0:     finished = true; break;
+                case '\n':  break;
+                case '\r':  if (*text == '\n') ++text; break;
+                default:    continue;
             }
 
-            if (c == '\n')
-                break;
-
-            if (c == '\r')
-            {
-                if (*text == '\n')
-                    ++text;
-
-                break;
-            }
-
-            ++numChars;
+            strings.add (String (startOfLine, endOfLine));
+            ++numLines;
+            break;
         }
-
-        add (String (startOfLine, numChars));
-        ++numLines;
     }
 
     return numLines;

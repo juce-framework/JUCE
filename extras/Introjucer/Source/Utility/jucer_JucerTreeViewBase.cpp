@@ -28,10 +28,53 @@
 
 
 //==============================================================================
-JucerTreeViewBase::JucerTreeViewBase()
-    : textX (0)
+void TreePanelBase::setRoot (JucerTreeViewBase* root)
+{
+    rootItem = root;
+    tree.setRootItem (root);
+    tree.getRootItem()->setOpen (true);
+
+    if (project != nullptr)
+    {
+        const ScopedPointer<XmlElement> treeOpenness (project->getStoredProperties()
+                                                          .getXmlValue (opennessStateKey));
+        if (treeOpenness != nullptr)
+        {
+            tree.restoreOpennessState (*treeOpenness, true);
+
+            for (int i = tree.getNumSelectedItems(); --i >= 0;)
+            {
+                JucerTreeViewBase* item = dynamic_cast<JucerTreeViewBase*> (tree.getSelectedItem (i));
+
+                if (item != nullptr)
+                    item->cancelDelayedSelectionTimer();
+            }
+        }
+    }
+}
+
+void TreePanelBase::saveOpenness()
+{
+    if (project != nullptr)
+    {
+        const ScopedPointer<XmlElement> opennessState (tree.getOpennessState (true));
+
+        if (opennessState != nullptr)
+            project->getStoredProperties().setValue (opennessStateKey, opennessState);
+        else
+            project->getStoredProperties().removeValue (opennessStateKey);
+    }
+}
+
+//==============================================================================
+JucerTreeViewBase::JucerTreeViewBase()  : textX (0)
 {
     setLinesDrawnForSubItems (false);
+}
+
+JucerTreeViewBase::~JucerTreeViewBase()
+{
+    masterReference.clear();
 }
 
 void JucerTreeViewBase::refreshSubItems()
@@ -168,15 +211,16 @@ void JucerTreeViewBase::showDocument()  {}
 void JucerTreeViewBase::showPopupMenu() {}
 void JucerTreeViewBase::showMultiSelectionPopupMenu() {}
 
-static void treeViewMenuItemChosen (int resultCode, JucerTreeViewBase* item)
+static void treeViewMenuItemChosen (int resultCode, WeakReference<JucerTreeViewBase> item)
 {
-    item->handlePopupMenuResult (resultCode);
+    if (item != nullptr)
+        item->handlePopupMenuResult (resultCode);
 }
 
 void JucerTreeViewBase::launchPopupMenu (PopupMenu& m)
 {
     m.showMenuAsync (PopupMenu::Options(),
-                     ModalCallbackFunction::create (treeViewMenuItemChosen, this));
+                     ModalCallbackFunction::create (treeViewMenuItemChosen, WeakReference<JucerTreeViewBase> (this)));
 }
 
 void JucerTreeViewBase::handlePopupMenuResult (int)
@@ -197,7 +241,7 @@ ProjectContentComponent* JucerTreeViewBase::getProjectContentComponent() const
         c = c->getParentComponent();
     }
 
-    return 0;
+    return nullptr;
 }
 
 //==============================================================================

@@ -59,7 +59,7 @@ public:
         lastWidth  = bounds.getWidth();
         lastHeight = bounds.getHeight();
 
-        view = [[JuceGLView alloc] initWithFrame: getCGRectFor (bounds)];
+        view = [[JuceGLView alloc] initWithFrame: convertToCGRect (bounds)];
         view.opaque = YES;
         view.hidden = NO;
         view.backgroundColor = [UIColor blackColor];
@@ -142,7 +142,7 @@ public:
 
     void updateWindowPosition (const Rectangle<int>& bounds)
     {
-        view.frame = getCGRectFor (bounds);
+        view.frame = convertToCGRect (bounds);
 
         if (lastWidth != bounds.getWidth() || lastHeight != bounds.getHeight())
         {
@@ -173,14 +173,6 @@ private:
     bool useDepthBuffer;
 
     //==============================================================================
-    static CGRect getCGRectFor (const Rectangle<int>& bounds)
-    {
-        return CGRectMake ((CGFloat) bounds.getX(),
-                           (CGFloat) bounds.getY(),
-                           (CGFloat) bounds.getWidth(),
-                           (CGFloat) bounds.getHeight());
-    }
-
     void createGLBuffers()
     {
         glGenFramebuffers (1, &frameBufferHandle);

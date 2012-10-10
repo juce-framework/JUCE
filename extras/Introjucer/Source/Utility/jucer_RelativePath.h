@@ -47,13 +47,13 @@ public:
         : root (unknown)
     {}
 
-    RelativePath (const String& path_, const RootFolder root_)
-        : path (path_.replaceCharacter ('\\', '/')), root (root_)
+    RelativePath (const String& relPath, const RootFolder rootType)
+        : path (FileHelpers::unixStylePath (relPath)), root (rootType)
     {
     }
 
-    RelativePath (const File& file, const File& rootFolder, const RootFolder root_)
-        : path (FileHelpers::getRelativePathFrom (file, rootFolder).replaceCharacter ('\\', '/')), root (root_)
+    RelativePath (const File& file, const File& rootFolder, const RootFolder rootType)
+        : path (FileHelpers::unixStylePath (FileHelpers::getRelativePathFrom (file, rootFolder))), root (rootType)
     {
     }
 

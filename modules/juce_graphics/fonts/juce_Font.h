@@ -432,6 +432,7 @@ private:
     class SharedFontInternal;
     ReferenceCountedObjectPtr <SharedFontInternal> font;
     void dupeInternalIfShared();
+    void checkTypefaceSuitability();
 
     JUCE_LEAK_DETECTOR (Font);
 };

@@ -3,7 +3,7 @@
 
   This is an automatically generated file created by the Jucer!
 
-  Creation date:  1 May 2011 12:06:00pm
+  Creation date:  21 Sep 2012 12:10:20pm
 
   Be careful when adding custom code to these files, as only the code within
   the "//[xyz]" and "//[/xyz]" sections will be retained when the file is loaded
@@ -19,8 +19,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCER_HEADER_AUDIODEMOSYNTHPAGE_AUDIODEMOSYNTHPAGE_1E55DCCB__
-#define __JUCER_HEADER_AUDIODEMOSYNTHPAGE_AUDIODEMOSYNTHPAGE_1E55DCCB__
+#ifndef __JUCER_HEADER_AUDIODEMOSYNTHPAGE_AUDIODEMOSYNTHPAGE_D17DA22__
+#define __JUCER_HEADER_AUDIODEMOSYNTHPAGE_AUDIODEMOSYNTHPAGE_D17DA22__
 
 //[Headers]     -- You can add your own extra header files here --
 #include "../jucedemo_headers.h"
@@ -56,9 +56,6 @@ public:
 
 
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
     //[UserVariables]   -- You can add your own custom variables in this section.
     AudioDeviceManager& deviceManager;
@@ -75,10 +72,8 @@ private:
 
 
     //==============================================================================
-    // (prevent copy constructor and operator= being generated..)
-    AudioDemoSynthPage (const AudioDemoSynthPage&);
-    const AudioDemoSynthPage& operator= (const AudioDemoSynthPage&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioDemoSynthPage);
 };
 
 
-#endif   // __JUCER_HEADER_AUDIODEMOSYNTHPAGE_AUDIODEMOSYNTHPAGE_1E55DCCB__
+#endif   // __JUCER_HEADER_AUDIODEMOSYNTHPAGE_AUDIODEMOSYNTHPAGE_D17DA22__

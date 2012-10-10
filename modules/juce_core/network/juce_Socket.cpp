@@ -97,7 +97,7 @@ namespace SocketHelpers
            #if JUCE_WINDOWS
             bytesThisTime = recv (handle, static_cast<char*> (destBuffer) + bytesRead, maxBytesToRead - bytesRead, 0);
            #else
-            while ((bytesThisTime = (int) ::read (handle, addBytesToPointer (destBuffer, bytesRead), maxBytesToRead - bytesRead)) < 0
+            while ((bytesThisTime = (int) ::read (handle, addBytesToPointer (destBuffer, bytesRead), (size_t) (maxBytesToRead - bytesRead))) < 0
                      && errno == EINTR
                      && connected)
             {
@@ -230,7 +230,7 @@ namespace SocketHelpers
         }
 
         setSocketBlockingState (handle, false);
-        const int result = ::connect (handle, info->ai_addr, (int) info->ai_addrlen);
+        const int result = ::connect (handle, info->ai_addr, (socklen_t) info->ai_addrlen);
         freeaddrinfo (info);
 
         if (result < 0)
@@ -301,7 +301,7 @@ int StreamingSocket::write (const void* sourceBuffer, const int numBytesToWrite)
    #else
     int result;
 
-    while ((result = (int) ::write (handle, sourceBuffer, numBytesToWrite)) < 0
+    while ((result = (int) ::write (handle, sourceBuffer, (size_t) numBytesToWrite)) < 0
             && errno == EINTR)
     {
     }
@@ -564,7 +564,7 @@ int DatagramSocket::write (const void* sourceBuffer, const int numBytesToWrite)
     jassert (serverAddress != nullptr && connected);
 
     return connected ? (int) sendto (handle, (const char*) sourceBuffer,
-                                     numBytesToWrite, 0,
+                                     (size_t) numBytesToWrite, 0,
                                      static_cast <const struct addrinfo*> (serverAddress)->ai_addr,
                                      static_cast <const struct addrinfo*> (serverAddress)->ai_addrlen)
                      : -1;

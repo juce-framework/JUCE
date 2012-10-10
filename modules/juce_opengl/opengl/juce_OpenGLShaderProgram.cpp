@@ -62,9 +62,9 @@ bool OpenGLShaderProgram::addShader (const char* const code, GLenum type)
     if (status == GL_FALSE)
     {
         GLchar infoLog [16384];
-        GLsizei infologLength = 0;
-        context.extensions.glGetShaderInfoLog (shaderID, sizeof (infoLog), &infologLength, infoLog);
-        errorLog = String (infoLog, infologLength);
+        GLsizei infoLogLength = 0;
+        context.extensions.glGetShaderInfoLog (shaderID, sizeof (infoLog), &infoLogLength, infoLog);
+        errorLog = String (infoLog, (size_t) infoLogLength);
 
        #if JUCE_DEBUG
         DBG (errorLog);
@@ -90,9 +90,9 @@ bool OpenGLShaderProgram::link() noexcept
     if (status == GL_FALSE)
     {
         GLchar infoLog [16384];
-        GLsizei infologLength = 0;
-        context.extensions.glGetProgramInfoLog (programID, sizeof (infoLog), &infologLength, infoLog);
-        errorLog = String (infoLog, infologLength);
+        GLsizei infoLogLength = 0;
+        context.extensions.glGetProgramInfoLog (programID, sizeof (infoLog), &infoLogLength, infoLog);
+        errorLog = String (infoLog, (size_t) infoLogLength);
 
        #if JUCE_DEBUG
         DBG (errorLog);

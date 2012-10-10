@@ -125,9 +125,9 @@ struct ObjCClass
     template <typename Type>
     static Type getIvar (id self, const char* name)
     {
-        Type v = Type();
-        object_getInstanceVariable (self, name, (void**) &v);
-        return v;
+        void* v = nullptr;
+        object_getInstanceVariable (self, name, &v);
+        return static_cast <Type> (v);
     }
 
     Class cls;

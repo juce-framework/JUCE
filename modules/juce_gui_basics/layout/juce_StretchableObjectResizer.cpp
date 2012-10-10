@@ -84,7 +84,7 @@ void StretchableObjectResizer::resizeToFit (const double targetSize)
         {
             const double availableExtraSpace = maxSize - currentSize;
             const double targetAmountOfExtraSpace = thisIterationTarget - currentSize;
-            const double scale = targetAmountOfExtraSpace / availableExtraSpace;
+            const double scale = availableExtraSpace > 0 ? targetAmountOfExtraSpace / availableExtraSpace : 1.0;
 
             for (int i = 0; i < items.size(); ++i)
             {

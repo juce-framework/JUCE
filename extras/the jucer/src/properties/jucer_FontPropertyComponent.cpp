@@ -121,7 +121,7 @@ const String FontPropertyComponent::getTypefaceNameCode (const String& typefaceN
     else if (typefaceName == defaultMono)
         return "Font::getDefaultMonospacedFontName(), ";
 
-    return "L\"" + typefaceName + "\", ";
+    return "\"" + typefaceName + "\", ";
 }
 
 const String FontPropertyComponent::getFontStyleCode (const Font& font)

@@ -25,58 +25,6 @@
 
 namespace LookAndFeelHelpers
 {
-    static void createRoundedPath (Path& p,
-                                   const float x, const float y,
-                                   const float w, const float h,
-                                   const float cs,
-                                   const bool curveTopLeft, const bool curveTopRight,
-                                   const bool curveBottomLeft, const bool curveBottomRight) noexcept
-    {
-        const float cs2 = 2.0f * cs;
-
-        if (curveTopLeft)
-        {
-            p.startNewSubPath (x, y + cs);
-            p.addArc (x, y, cs2, cs2, float_Pi * 1.5f, float_Pi * 2.0f);
-        }
-        else
-        {
-            p.startNewSubPath (x, y);
-        }
-
-        if (curveTopRight)
-        {
-            p.lineTo (x + w - cs, y);
-            p.addArc (x + w - cs2, y, cs2, cs2, 0.0f, float_Pi * 0.5f);
-        }
-        else
-        {
-            p.lineTo (x + w, y);
-        }
-
-        if (curveBottomRight)
-        {
-            p.lineTo (x + w, y + h - cs);
-            p.addArc (x + w - cs2, y + h - cs2, cs2, cs2, float_Pi * 0.5f, float_Pi);
-        }
-        else
-        {
-            p.lineTo (x + w, y + h);
-        }
-
-        if (curveBottomLeft)
-        {
-            p.lineTo (x + cs, y + h);
-            p.addArc (x, y + h - cs2, cs2, cs2, float_Pi, float_Pi * 1.5f);
-        }
-        else
-        {
-            p.lineTo (x, y + h);
-        }
-
-        p.closeSubPath();
-    }
-
     static Colour createBaseColour (const Colour& buttonColour,
                                     const bool hasKeyboardFocus,
                                     const bool isMouseOverButton,
@@ -85,10 +33,8 @@ namespace LookAndFeelHelpers
         const float sat = hasKeyboardFocus ? 1.3f : 0.9f;
         const Colour baseColour (buttonColour.withMultipliedSaturation (sat));
 
-        if (isButtonDown)
-            return baseColour.contrasting (0.2f);
-        else if (isMouseOverButton)
-            return baseColour.contrasting (0.1f);
+        if (isButtonDown)      return baseColour.contrasting (0.2f);
+        if (isMouseOverButton) return baseColour.contrasting (0.1f);
 
         return baseColour;
     }
@@ -106,16 +52,16 @@ namespace LookAndFeelHelpers
         tl.createLayoutWithBalancedLineLengths (s, (float) maxToolTipWidth);
         return tl;
     }
+
+    static Typeface::Ptr getTypefaceForFontFromLookAndFeel (const Font& font)
+    {
+        return LookAndFeel::getDefaultLookAndFeel().getTypefaceForFont (font);
+    }
 }
 
 //==============================================================================
 typedef Typeface::Ptr (*GetTypefaceForFont) (const Font&);
 extern GetTypefaceForFont juce_getTypefaceForFont;
-
-static Typeface::Ptr getTypefaceForFontFromLookAndFeel (const Font& font)
-{
-    return LookAndFeel::getDefaultLookAndFeel().getTypefaceForFont (font);
-}
 
 //==============================================================================
 LookAndFeel::LookAndFeel()
@@ -219,6 +165,9 @@ LookAndFeel::LookAndFeel()
         Toolbar::labelTextColourId,                 0xff000000,
         Toolbar::editingModeOutlineColourId,        0xffff0000,
 
+        DrawableButton::backgroundColourId,         0x00000000,
+        DrawableButton::backgroundOnColourId,       0xaabbbbff,
+
         HyperlinkButton::textColourId,              0xcc1111ee,
 
         GroupComponent::outlineColourId,            0x66000000,
@@ -262,9 +211,9 @@ LookAndFeel::LookAndFeel()
     };
 
     for (int i = 0; i < numElementsInArray (standardColours); i += 2)
-        setColour (standardColours [i], Colour ((uint32) standardColours [i + 1]));
+        setColour ((int) standardColours [i], Colour ((uint32) standardColours [i + 1]));
 
-    juce_getTypefaceForFont = getTypefaceForFontFromLookAndFeel;
+    juce_getTypefaceForFont = LookAndFeelHelpers::getTypefaceForFontFromLookAndFeel;
 }
 
 LookAndFeel::~LookAndFeel()
@@ -340,7 +289,16 @@ void LookAndFeel::setDefaultSansSerifTypefaceName (const String& newName)
 //==============================================================================
 MouseCursor LookAndFeel::getMouseCursorFor (Component& component)
 {
-    return component.getMouseCursor();
+    MouseCursor m (component.getMouseCursor());
+
+    Component* parent = component.getParentComponent();
+    while (parent != nullptr && m == MouseCursor::ParentCursor)
+    {
+        m = parent->getMouseCursor();
+        parent = parent->getParentComponent();
+    }
+
+    return m;
 }
 
 LowLevelGraphicsContext* LookAndFeel::createGraphicsContext (const Image& imageToRenderOn, const Point<int>& origin, const RectangleList& initialClip)
@@ -1685,6 +1643,19 @@ void LookAndFeel::layoutFilenameComponent (FilenameComponent& filenameComp,
     filenameBox->setBounds (0, 0, browseButton->getX(), filenameComp.getHeight());
 }
 
+//==============================================================================
+void LookAndFeel::drawConcertinaPanelHeader (Graphics& g, const Rectangle<int>& area,
+                                             bool isMouseOver, bool /*isMouseDown*/,
+                                             ConcertinaPanel&, Component& panel)
+{
+    g.fillAll (Colours::grey.withAlpha (isMouseOver ? 0.9f : 0.7f));
+    g.setColour (Colours::black.withAlpha (0.5f));
+    g.drawRect (area);
+
+    g.setColour (Colours::white);
+    g.setFont (Font (area.getHeight() * 0.7f).boldened());
+    g.drawFittedText (panel.getName(), 4, 0, area.getWidth() - 6, area.getHeight(), Justification::centredLeft, 1);
+}
 
 //==============================================================================
 void LookAndFeel::drawImageButton (Graphics& g, Image* image,
@@ -2840,11 +2811,11 @@ void LookAndFeel::drawShinyButtonShape (Graphics& g,
     const float cs = jmin (maxCornerSize, w * 0.5f, h * 0.5f);
 
     Path outline;
-    LookAndFeelHelpers::createRoundedPath (outline, x, y, w, h, cs,
-                                            ! (flatOnLeft  || flatOnTop),
-                                            ! (flatOnRight || flatOnTop),
-                                            ! (flatOnLeft  || flatOnBottom),
-                                            ! (flatOnRight || flatOnBottom));
+    outline.addRoundedRectangle (x, y, w, h, cs, cs,
+                                 ! (flatOnLeft  || flatOnTop),
+                                 ! (flatOnRight || flatOnTop),
+                                 ! (flatOnLeft  || flatOnBottom),
+                                 ! (flatOnRight || flatOnBottom));
 
     ColourGradient cg (baseColour, 0.0f, y,
                        baseColour.overlaidWith (Colour (0x070000ff)), 0.0f, y + h,
@@ -2972,11 +2943,11 @@ void LookAndFeel::drawGlassLozenge (Graphics& g,
     const int intEdge = (int) edgeBlurRadius;
 
     Path outline;
-    LookAndFeelHelpers::createRoundedPath (outline, x, y, width, height, cs,
-                                            ! (flatOnLeft || flatOnTop),
-                                            ! (flatOnRight || flatOnTop),
-                                            ! (flatOnLeft || flatOnBottom),
-                                            ! (flatOnRight || flatOnBottom));
+    outline.addRoundedRectangle (x, y, width, height, cs, cs,
+                                 ! (flatOnLeft || flatOnTop),
+                                 ! (flatOnRight || flatOnTop),
+                                 ! (flatOnLeft || flatOnBottom),
+                                 ! (flatOnRight || flatOnBottom));
 
     {
         ColourGradient cg (colour.darker (0.2f), 0, y,
@@ -3022,15 +2993,16 @@ void LookAndFeel::drawGlassLozenge (Graphics& g,
         const float rightIndent = flatOnTop || flatOnRight ? 0.0f : cs * 0.4f;
 
         Path highlight;
-        LookAndFeelHelpers::createRoundedPath (highlight,
-                                               x + leftIndent,
-                                               y + cs * 0.1f,
-                                               width - (leftIndent + rightIndent),
-                                               height * 0.4f, cs * 0.4f,
-                                               ! (flatOnLeft || flatOnTop),
-                                               ! (flatOnRight || flatOnTop),
-                                               ! (flatOnLeft || flatOnBottom),
-                                               ! (flatOnRight || flatOnBottom));
+        highlight.addRoundedRectangle (x + leftIndent,
+                                       y + cs * 0.1f,
+                                       width - (leftIndent + rightIndent),
+                                       height * 0.4f,
+                                       cs * 0.4f,
+                                       cs * 0.4f,
+                                       ! (flatOnLeft || flatOnTop),
+                                       ! (flatOnRight || flatOnTop),
+                                       ! (flatOnLeft || flatOnBottom),
+                                       ! (flatOnRight || flatOnBottom));
 
         g.setGradientFill (ColourGradient (colour.brighter (10.0f), 0, y + height * 0.06f,
                                            Colours::transparentWhite, 0, y + height * 0.4f, false));

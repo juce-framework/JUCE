@@ -257,6 +257,8 @@ void MainHostWindow::menuItemSelected (int menuItemID, int /*topLevelMenuIndex*/
         else if (menuItemID == 204)     pluginSortMethod = KnownPluginList::sortByFileSystemLocation;
 
         appProperties->getUserSettings()->setValue ("pluginSortMethod", (int) pluginSortMethod);
+
+        menuItemsChanged();
     }
     else
     {
@@ -411,11 +413,16 @@ void MainHostWindow::showAudioSettings()
 
     audioSettingsComp.setSize (500, 450);
 
-    DialogWindow::showModalDialog ("Audio Settings",
-                                   &audioSettingsComp,
-                                   this,
-                                   Colours::azure,
-                                   true);
+    DialogWindow::LaunchOptions o;
+    o.content.setNonOwned (&audioSettingsComp);
+    o.dialogTitle                   = "Audio Settings";
+    o.componentToCentreAround       = this;
+    o.dialogBackgroundColour        = Colours::azure;
+    o.escapeKeyTriggersCloseButton  = true;
+    o.useNativeTitleBar             = false;
+    o.resizable                     = false;
+
+    o.runModal();
 
     ScopedPointer<XmlElement> audioState (deviceManager.createStateXml());
 

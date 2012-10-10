@@ -83,7 +83,16 @@ void PreferencesPanel::addSettingsPage (const String& title, const void* imageDa
 void PreferencesPanel::showInDialogBox (const String& dialogTitle, int dialogWidth, int dialogHeight, const Colour& backgroundColour)
 {
     setSize (dialogWidth, dialogHeight);
-    DialogWindow::showDialog (dialogTitle, this, 0, backgroundColour, false);
+
+    DialogWindow::LaunchOptions o;
+    o.content.setNonOwned (this);
+    o.dialogTitle                   = dialogTitle;
+    o.dialogBackgroundColour        = backgroundColour;
+    o.escapeKeyTriggersCloseButton  = false;
+    o.useNativeTitleBar             = false;
+    o.resizable                     = false;
+
+    o.launchAsync();
 }
 
 //==============================================================================

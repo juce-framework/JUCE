@@ -50,6 +50,22 @@ public:
     /** This is a handy method for checking whether a string is a c++ reserved keyword. */
     static bool isReservedKeyword (const String& token) noexcept;
 
+    /** The token values returned by this tokeniser. */
+    enum TokenType
+    {
+        tokenType_error = 0,
+        tokenType_comment,
+        tokenType_keyword,
+        tokenType_operator,
+        tokenType_identifier,
+        tokenType_integer,
+        tokenType_float,
+        tokenType_string,
+        tokenType_bracket,
+        tokenType_punctuation,
+        tokenType_preprocessor
+    };
+
 private:
     //==============================================================================
     JUCE_LEAK_DETECTOR (CPlusPlusCodeTokeniser);

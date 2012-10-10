@@ -23,19 +23,9 @@
   ==============================================================================
 */
 
-RelativeTime::RelativeTime (const double seconds_) noexcept
-    : seconds (seconds_)
-{
-}
-
-RelativeTime::RelativeTime (const RelativeTime& other) noexcept
-    : seconds (other.seconds)
-{
-}
-
-RelativeTime::~RelativeTime() noexcept
-{
-}
+RelativeTime::RelativeTime (const double secs) noexcept           : seconds (secs) {}
+RelativeTime::RelativeTime (const RelativeTime& other) noexcept   : seconds (other.seconds) {}
+RelativeTime::~RelativeTime() noexcept {}
 
 //==============================================================================
 const RelativeTime RelativeTime::milliseconds (const int milliseconds) noexcept   { return RelativeTime (milliseconds * 0.001); }
@@ -53,6 +43,24 @@ double RelativeTime::inDays() const noexcept        { return seconds / (60.0 * 6
 double RelativeTime::inWeeks() const noexcept       { return seconds / (60.0 * 60.0 * 24.0 * 7.0); }
 
 //==============================================================================
+RelativeTime& RelativeTime::operator= (const RelativeTime& other) noexcept      { seconds = other.seconds; return *this; }
+
+const RelativeTime& RelativeTime::operator+= (const RelativeTime& t) noexcept   { seconds += t.seconds; return *this; }
+const RelativeTime& RelativeTime::operator-= (const RelativeTime& t) noexcept   { seconds -= t.seconds; return *this; }
+const RelativeTime& RelativeTime::operator+= (const double secs) noexcept       { seconds += secs; return *this; }
+const RelativeTime& RelativeTime::operator-= (const double secs) noexcept       { seconds -= secs; return *this; }
+
+RelativeTime operator+ (const RelativeTime& t1, const RelativeTime& t2) noexcept   { RelativeTime t (t1); return t += t2; }
+RelativeTime operator- (const RelativeTime& t1, const RelativeTime& t2) noexcept   { RelativeTime t (t1); return t -= t2; }
+
+bool operator== (const RelativeTime& t1, const RelativeTime& t2) noexcept       { return t1.inSeconds() == t2.inSeconds(); }
+bool operator!= (const RelativeTime& t1, const RelativeTime& t2) noexcept       { return t1.inSeconds() != t2.inSeconds(); }
+bool operator>  (const RelativeTime& t1, const RelativeTime& t2) noexcept       { return t1.inSeconds() >  t2.inSeconds(); }
+bool operator<  (const RelativeTime& t1, const RelativeTime& t2) noexcept       { return t1.inSeconds() <  t2.inSeconds(); }
+bool operator>= (const RelativeTime& t1, const RelativeTime& t2) noexcept       { return t1.inSeconds() >= t2.inSeconds(); }
+bool operator<= (const RelativeTime& t1, const RelativeTime& t2) noexcept       { return t1.inSeconds() <= t2.inSeconds(); }
+
+//==============================================================================
 String RelativeTime::getDescription (const String& returnValueForZeroTime) const
 {
     if (seconds < 0.001 && seconds > -0.001)
@@ -68,16 +76,16 @@ String RelativeTime::getDescription (const String& returnValueForZeroTime) const
     int n = std::abs ((int) inWeeks());
     if (n > 0)
     {
-        result << n << (n == 1 ? TRANS(" week ")
-                               : TRANS(" weeks "));
+        result << n << TRANS (n == 1 ? " week "
+                                     : " weeks ");
         ++fieldsShown;
     }
 
     n = std::abs ((int) inDays()) % 7;
     if (n > 0)
     {
-        result << n << (n == 1 ? TRANS(" day ")
-                               : TRANS(" days "));
+        result << n << TRANS (n == 1 ? " day "
+                                     : " days ");
         ++fieldsShown;
     }
 
@@ -86,8 +94,8 @@ String RelativeTime::getDescription (const String& returnValueForZeroTime) const
         n = std::abs ((int) inHours()) % 24;
         if (n > 0)
         {
-            result << n << (n == 1 ? TRANS(" hr ")
-                                   : TRANS(" hrs "));
+            result << n << TRANS (n == 1 ? " hr "
+                                         : " hrs ");
             ++fieldsShown;
         }
 
@@ -96,8 +104,8 @@ String RelativeTime::getDescription (const String& returnValueForZeroTime) const
             n = std::abs ((int) inMinutes()) % 60;
             if (n > 0)
             {
-                result << n << (n == 1 ? TRANS(" min ")
-                                       : TRANS(" mins "));
+                result << n << TRANS (n == 1 ? " min "
+                                             : " mins ");
                 ++fieldsShown;
             }
 
@@ -106,8 +114,8 @@ String RelativeTime::getDescription (const String& returnValueForZeroTime) const
                 n = std::abs ((int) inSeconds()) % 60;
                 if (n > 0)
                 {
-                    result << n << (n == 1 ? TRANS(" sec ")
-                                           : TRANS(" secs "));
+                    result << n << TRANS (n == 1 ? " sec "
+                                                 : " secs ");
                     ++fieldsShown;
                 }
 
@@ -115,7 +123,7 @@ String RelativeTime::getDescription (const String& returnValueForZeroTime) const
                 {
                     n = std::abs ((int) inMilliseconds()) % 1000;
                     if (n > 0)
-                        result << n << TRANS(" ms");
+                        result << n << TRANS (" ms");
                 }
             }
         }
@@ -123,45 +131,3 @@ String RelativeTime::getDescription (const String& returnValueForZeroTime) const
 
     return result.trimEnd();
 }
-
-//==============================================================================
-RelativeTime& RelativeTime::operator= (const RelativeTime& other) noexcept
-{
-    seconds = other.seconds;
-    return *this;
-}
-
-//==============================================================================
-const RelativeTime& RelativeTime::operator+= (const RelativeTime& timeToAdd) noexcept
-{
-    seconds += timeToAdd.seconds;
-    return *this;
-}
-
-const RelativeTime& RelativeTime::operator-= (const RelativeTime& timeToSubtract) noexcept
-{
-    seconds -= timeToSubtract.seconds;
-    return *this;
-}
-
-const RelativeTime& RelativeTime::operator+= (const double secondsToAdd) noexcept
-{
-    seconds += secondsToAdd;
-    return *this;
-}
-
-const RelativeTime& RelativeTime::operator-= (const double secondsToSubtract) noexcept
-{
-    seconds -= secondsToSubtract;
-    return *this;
-}
-
-bool operator== (const RelativeTime& t1, const RelativeTime& t2) noexcept { return t1.inSeconds() == t2.inSeconds(); }
-bool operator!= (const RelativeTime& t1, const RelativeTime& t2) noexcept { return t1.inSeconds() != t2.inSeconds(); }
-bool operator>  (const RelativeTime& t1, const RelativeTime& t2) noexcept { return t1.inSeconds() >  t2.inSeconds(); }
-bool operator<  (const RelativeTime& t1, const RelativeTime& t2) noexcept { return t1.inSeconds() <  t2.inSeconds(); }
-bool operator>= (const RelativeTime& t1, const RelativeTime& t2) noexcept { return t1.inSeconds() >= t2.inSeconds(); }
-bool operator<= (const RelativeTime& t1, const RelativeTime& t2) noexcept { return t1.inSeconds() <= t2.inSeconds(); }
-
-RelativeTime operator+ (const RelativeTime&  t1, const RelativeTime& t2) noexcept   { RelativeTime t (t1); return t += t2; }
-RelativeTime operator- (const RelativeTime&  t1, const RelativeTime& t2) noexcept   { RelativeTime t (t1); return t -= t2; }

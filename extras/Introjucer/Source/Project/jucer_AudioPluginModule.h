@@ -51,7 +51,10 @@ namespace
     Value getPluginAUCocoaViewClassName (Project& project)        { return project.getProjectValue ("pluginAUViewClass"); }
     Value getPluginAUMainType (Project& project)                  { return project.getProjectValue ("pluginAUMainType"); }
     Value getPluginRTASCategory (Project& project)                { return project.getProjectValue ("pluginRTASCategory"); }
+    Value getPluginRTASBypassDisabled (Project& project)          { return project.getProjectValue ("pluginRTASDisableBypass"); }
+    Value getPluginRTASMultiMonoDisabled (Project& project)       { return project.getProjectValue ("pluginRTASDisableMultiMono"); }
     Value getPluginAAXCategory (Project& project)                 { return project.getProjectValue ("pluginAAXCategory"); }
+    Value getPluginAAXBypassDisabled (Project& project)           { return project.getProjectValue ("pluginAAXDisableBypass"); }
 
     String getPluginRTASCategoryCode (Project& project)
     {
@@ -100,6 +103,7 @@ namespace
         Project& project = projectSaver.getProject();
 
         StringPairArray flags;
+        //flags.set ("JUCE_MODAL_LOOPS_PERMITTED",             "0");
         flags.set ("JucePlugin_Build_VST",                   valueToBool (shouldBuildVST  (project)));
         flags.set ("JucePlugin_Build_AU",                    valueToBool (shouldBuildAU   (project)));
         flags.set ("JucePlugin_Build_RTAS",                  valueToBool (shouldBuildRTAS (project)));
@@ -118,6 +122,7 @@ namespace
         flags.set ("JucePlugin_SilenceInProducesSilenceOut", valueToBool (getPluginSilenceInProducesSilenceOut (project)));
         flags.set ("JucePlugin_TailLengthSeconds",           String (static_cast <double> (getPluginTailLengthSeconds (project).getValue())));
         flags.set ("JucePlugin_EditorRequiresKeyboardFocus", valueToBool (getPluginEditorNeedsKeyFocus (project)));
+        flags.set ("JucePlugin_Version",                     project.getVersionString());
         flags.set ("JucePlugin_VersionCode",                 project.getVersionAsHex());
         flags.set ("JucePlugin_VersionString",               project.getVersionString().quoted());
         flags.set ("JucePlugin_VSTUniqueID",                 "JucePlugin_PluginCode");
@@ -132,11 +137,14 @@ namespace
         flags.set ("JucePlugin_RTASCategory",                getPluginRTASCategoryCode (project));
         flags.set ("JucePlugin_RTASManufacturerCode",        "JucePlugin_ManufacturerCode");
         flags.set ("JucePlugin_RTASProductId",               "JucePlugin_PluginCode");
+        flags.set ("JucePlugin_RTASDisableBypass",           valueToBool (getPluginRTASBypassDisabled (project)));
+        flags.set ("JucePlugin_RTASDisableMultiMono",        valueToBool (getPluginRTASMultiMonoDisabled (project)));
         flags.set ("JucePlugin_AAXIdentifier",               project.getAAXIdentifier().toString());
         flags.set ("JucePlugin_AAXManufacturerCode",         "JucePlugin_ManufacturerCode");
         flags.set ("JucePlugin_AAXProductId",                "JucePlugin_PluginCode");
         flags.set ("JucePlugin_AAXPluginId",                 "JucePlugin_PluginCode");
         flags.set ("JucePlugin_AAXCategory",                 getPluginAAXCategory (project).toString());
+        flags.set ("JucePlugin_AAXDisableBypass",            valueToBool (getPluginAAXBypassDisabled (project)));
 
         MemoryOutputStream mem;
 
@@ -281,6 +289,7 @@ namespace RTASHelpers
                                 "AlturaPorts/TDMPlugIns/DSPManager/Interfaces",
                                 "AlturaPorts/SADriver/Interfaces",
                                 "AlturaPorts/DigiPublic/Interfaces",
+                                "AlturaPorts/DigiPublic",
                                 "AlturaPorts/Fic/Interfaces/DAEClient",
                                 "AlturaPorts/NewFileLibs/Cmn",
                                 "AlturaPorts/NewFileLibs/DOA",
@@ -295,6 +304,7 @@ namespace RTASHelpers
         else if (exporter.isXcode())
         {
             exporter.extraSearchPaths.add ("$(DEVELOPER_DIR)/Headers/FlatCarbon");
+            exporter.extraSearchPaths.add ("$(SDKROOT)/Developer/Headers/FlatCarbon");
 
             const char* p[] = { "AlturaPorts/TDMPlugIns/PlugInLibrary/Controls",
                                 "AlturaPorts/TDMPlugIns/PlugInLibrary/CoreClasses",
@@ -350,9 +360,12 @@ namespace RTASHelpers
 
                 exporter.msvcExtraPreprocessorDefs.set ("JucePlugin_WinBag_path", winbag);
 
-                String msvcPathToRTASFolder (exporter.getJucePathFromTargetFolder()
-                                                     .getChildFile ("juce_audio_plugin_client/RTAS")
-                                                     .toWindowsStyle() + "\\");
+                RelativePath juceFolder (exporter.getJucePathFromTargetFolder());
+                if (juceFolder.getFileName() != "modules")
+                    juceFolder = juceFolder.getChildFile ("modules");
+
+                String msvcPathToRTASFolder (juceFolder.getChildFile ("juce_audio_plugin_client/RTAS")
+                                                       .toWindowsStyle() + "\\");
 
                 exporter.msvcDelayLoadedDLLs = "DAE.dll; DigiExt.dll; DSI.dll; PluginLib.dll; DSPManager.dll";
 
@@ -518,7 +531,8 @@ namespace AAXHelpers
 
             if (exporter.isVisualStudio())
             {
-                exporter.msvcTargetSuffix = ".aax";
+                exporter.msvcTargetSuffix = ".aaxplugin";
+                exporter.msvcNeedsDLLRuntimeLib = true;
             }
             else
             {

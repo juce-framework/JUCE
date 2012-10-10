@@ -97,7 +97,7 @@ public:
         while (bytesRead < maxBytesToRead)
         {
             const int bytesThisTime = maxBytesToRead - bytesRead;
-            const int numRead = (int) ::read (pipeIn, destBuffer, bytesThisTime);
+            const int numRead = (int) ::read (pipeIn, destBuffer, (size_t) bytesThisTime);
 
             if (numRead <= 0)
             {
@@ -140,7 +140,7 @@ public:
         while (bytesWritten < numBytesToWrite && ! hasExpired (timeoutEnd))
         {
             const int bytesThisTime = numBytesToWrite - bytesWritten;
-            const int numWritten = (int) ::write (pipeOut, sourceBuffer, bytesThisTime);
+            const int numWritten = (int) ::write (pipeOut, sourceBuffer, (size_t) bytesThisTime);
 
             if (numWritten <= 0)
             {
@@ -172,7 +172,7 @@ private:
 
     static uint32 getTimeoutEnd (const int timeOutMilliseconds)
     {
-        return timeOutMilliseconds >= 0 ? Time::getMillisecondCounter() + timeOutMilliseconds : 0;
+        return timeOutMilliseconds >= 0 ? Time::getMillisecondCounter() + (uint32) timeOutMilliseconds : 0;
     }
 
     static bool hasExpired (const uint32 timeoutEnd)

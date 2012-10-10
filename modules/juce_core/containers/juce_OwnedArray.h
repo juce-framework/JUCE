@@ -133,7 +133,7 @@ public:
     /** Returns a pointer to the object at this index in the array, without checking whether the index is in-range.
 
         This is a faster and less safe version of operator[] which doesn't check the index passed in, so
-        it can be used when you're sure the index if always going to be legal.
+        it can be used when you're sure the index is always going to be legal.
     */
     inline ObjectClass* getUnchecked (const int index) const noexcept
     {
@@ -317,7 +317,7 @@ public:
             if (isPositiveAndBelow (indexToInsertAt, numUsed))
             {
                 insertPos += indexToInsertAt;
-                const int numberToMove = numUsed - indexToInsertAt;
+                const size_t numberToMove = (size_t) (numUsed - indexToInsertAt);
                 memmove (insertPos + numberOfElements, insertPos, numberToMove * sizeof (ObjectClass*));
             }
             else

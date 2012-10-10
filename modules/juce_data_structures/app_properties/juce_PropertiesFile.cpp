@@ -103,17 +103,17 @@ File PropertiesFile::Options::getDefaultFile() const
 
 
 //==============================================================================
-PropertiesFile::PropertiesFile (const File& file_, const Options& options_)
-    : PropertySet (options_.ignoreCaseOfKeyNames),
-      file (file_), options (options_),
+PropertiesFile::PropertiesFile (const File& f, const Options& o)
+    : PropertySet (o.ignoreCaseOfKeyNames),
+      file (f), options (o),
       loadedOk (false), needsWriting (false)
 {
     initialise();
 }
 
-PropertiesFile::PropertiesFile (const Options& options_)
-    : PropertySet (options_.ignoreCaseOfKeyNames),
-      file (options_.getDefaultFile()), options (options_),
+PropertiesFile::PropertiesFile (const Options& o)
+    : PropertySet (o.ignoreCaseOfKeyNames),
+      file (o.getDefaultFile()), options (o),
       loadedOk (false), needsWriting (false)
 {
     initialise();

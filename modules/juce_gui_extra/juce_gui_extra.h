@@ -58,6 +58,9 @@ namespace juce
 #ifndef __JUCE_CPLUSPLUSCODETOKENISER_JUCEHEADER__
  #include "code_editor/juce_CPlusPlusCodeTokeniser.h"
 #endif
+#ifndef __JUCE_CPLUSPLUSCODETOKENISERFUNCTIONS_JUCEHEADER__
+ #include "code_editor/juce_CPlusPlusCodeTokeniserFunctions.h"
+#endif
 #ifndef __JUCE_ACTIVEXCONTROLCOMPONENT_JUCEHEADER__
  #include "embedding/juce_ActiveXControlComponent.h"
 #endif

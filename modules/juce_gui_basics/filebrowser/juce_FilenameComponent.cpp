@@ -100,7 +100,8 @@ void FilenameComponent::setDefaultBrowseTarget (const File& newDefaultDirectory)
 void FilenameComponent::buttonClicked (Button*)
 {
    #if JUCE_MODAL_LOOPS_PERMITTED
-    FileChooser fc (TRANS("Choose a new file"),
+    FileChooser fc (isDir ? TRANS ("Choose a new directory")
+                          : TRANS ("Choose a new file"),
                     getCurrentFile() == File::nonexistent ? defaultBrowseFile
                                                           : getCurrentFile(),
                     wildcard);

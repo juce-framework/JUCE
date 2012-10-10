@@ -101,7 +101,7 @@ public:
         uint32 lastUseTime;
     };
 
-    int cacheTimeout;
+    unsigned int cacheTimeout;
 
     juce_DeclareSingleton_SingleThreaded_Minimal (ImageCache::Pimpl);
 
@@ -159,5 +159,6 @@ Image ImageCache::getFromMemory (const void* imageData, const int dataSize)
 
 void ImageCache::setCacheTimeout (const int millisecs)
 {
-    Pimpl::getInstance()->cacheTimeout = millisecs;
+    jassert (millisecs >= 0);
+    Pimpl::getInstance()->cacheTimeout = (unsigned int) millisecs;
 }

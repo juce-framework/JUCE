@@ -37,6 +37,12 @@ namespace OggVorbisNamespace
   #pragma warning (disable: 4267 4127 4244 4996 4100 4701 4702 4013 4133 4206 4305 4189 4706 4995 4365)
  #endif
 
+ #if JUCE_CLANG
+  #pragma clang diagnostic push
+  #pragma clang diagnostic ignored "-Wconversion"
+  #pragma clang diagnostic ignored "-Wshadow"
+ #endif
+
  #include "oggvorbis/vorbisenc.h"
  #include "oggvorbis/codec.h"
  #include "oggvorbis/vorbisfile.h"
@@ -67,6 +73,10 @@ namespace OggVorbisNamespace
 
  #if JUCE_MSVC
   #pragma warning (pop)
+ #endif
+
+ #if JUCE_CLANG
+  #pragma clang diagnostic pop
  #endif
 #else
  #include <vorbis/vorbisenc.h>
@@ -127,7 +137,7 @@ public:
     {
         while (numSamples > 0)
         {
-            const int numAvailable = reservoirStart + samplesInReservoir - startSampleInFile;
+            const int numAvailable = (int) (reservoirStart + samplesInReservoir - startSampleInFile);
 
             if (startSampleInFile >= reservoirStart && numAvailable > 0)
             {
@@ -139,7 +149,7 @@ public:
                     if (destSamples[i] != nullptr)
                         memcpy (destSamples[i] + startOffsetInDestBuffer,
                                 reservoir.getSampleData (i, (int) (startSampleInFile - reservoirStart)),
-                                sizeof (float) * numToUse);
+                                sizeof (float) * (size_t) numToUse);
 
                 startSampleInFile += numToUse;
                 numSamples -= numToUse;
@@ -178,7 +188,7 @@ public:
                     {
                         memcpy (reservoir.getSampleData (i, offset),
                                 dataIn[i],
-                                sizeof (float) * samps);
+                                sizeof (float) * (size_t) samps);
                     }
 
                     numToRead -= samps;
@@ -194,7 +204,7 @@ public:
         {
             for (int i = numDestChannels; --i >= 0;)
                 if (destSamples[i] != nullptr)
-                    zeromem (destSamples[i] + startOffsetInDestBuffer, sizeof (int) * numSamples);
+                    zeromem (destSamples[i] + startOffsetInDestBuffer, sizeof (int) * (size_t) numSamples);
         }
 
         return true;
@@ -203,7 +213,7 @@ public:
     //==============================================================================
     static size_t oggReadCallback (void* ptr, size_t size, size_t nmemb, void* datasource)
     {
-        return (size_t) (static_cast <InputStream*> (datasource)->read (ptr, (int) (size * nmemb)) / size);
+        return (size_t) (static_cast <InputStream*> (datasource)->read (ptr, (int) (size * nmemb))) / size;
     }
 
     static int oggSeekCallback (void* datasource, OggVorbisNamespace::ogg_int64_t offset, int whence)

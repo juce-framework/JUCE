@@ -11,14 +11,15 @@
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
 
+AudioProcessor* JUCE_CALLTYPE createPluginFilter();
+
+
 //==============================================================================
 /** A demo synth sound that's just a basic sine wave.. */
 class SineWaveSound : public SynthesiserSound
 {
 public:
-    SineWaveSound()
-    {
-    }
+    SineWaveSound() {}
 
     bool appliesToNote (const int /*midiNoteNumber*/)           { return true; }
     bool appliesToChannel (const int /*midiChannel*/)           { return true; }
@@ -273,7 +274,7 @@ void JuceDemoPluginAudioProcessor::processBlock (AudioSampleBuffer& buffer, Midi
     // ask the host for the current time so we can display it...
     AudioPlayHead::CurrentPositionInfo newTime;
 
-    if (getPlayHead() != 0 && getPlayHead()->getCurrentPosition (newTime))
+    if (getPlayHead() != nullptr && getPlayHead()->getCurrentPosition (newTime))
     {
         // Successfully got the current time from the host..
         lastPosInfo = newTime;
@@ -318,7 +319,7 @@ void JuceDemoPluginAudioProcessor::setStateInformation (const void* data, int si
     // This getXmlFromBinary() helper function retrieves our XML from the binary blob..
     ScopedPointer<XmlElement> xmlState (getXmlFromBinary (data, sizeInBytes));
 
-    if (xmlState != 0)
+    if (xmlState != nullptr)
     {
         // make sure that it's actually our type of XML object..
         if (xmlState->hasTagName ("MYPLUGINSETTINGS"))
@@ -355,20 +356,20 @@ bool JuceDemoPluginAudioProcessor::isOutputChannelStereoPair (int /*index*/) con
 
 bool JuceDemoPluginAudioProcessor::acceptsMidi() const
 {
-#if JucePlugin_WantsMidiInput
+   #if JucePlugin_WantsMidiInput
     return true;
-#else
+   #else
     return false;
-#endif
+   #endif
 }
 
 bool JuceDemoPluginAudioProcessor::producesMidi() const
 {
-#if JucePlugin_ProducesMidiOutput
+   #if JucePlugin_ProducesMidiOutput
     return true;
-#else
+   #else
     return false;
-#endif
+   #endif
 }
 
 //==============================================================================

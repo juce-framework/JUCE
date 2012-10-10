@@ -104,25 +104,6 @@ ProjectExporter* ProjectExporter::createExporter (Project& project, const ValueT
     return exp;
 }
 
-ProjectExporter* ProjectExporter::createPlatformDefaultExporter (Project& project)
-{
-    ScopedPointer <ProjectExporter> best;
-    int bestPref = 0;
-
-    for (Project::ExporterIterator exporter (project); exporter.next();)
-    {
-        const int pref = exporter->getLaunchPreferenceOrderForCurrentOS();
-
-        if (pref > bestPref)
-        {
-            bestPref = pref;
-            best = exporter.exporter;
-        }
-    }
-
-    return best.release();
-}
-
 bool ProjectExporter::canProjectBeLaunched (Project* project)
 {
     if (project != nullptr)
@@ -137,7 +118,8 @@ bool ProjectExporter::canProjectBeLaunched (Project* project)
             MSVCProjectExporterVC2008::getValueTreeTypeName(),
             MSVCProjectExporterVC2010::getValueTreeTypeName(),
            #elif JUCE_LINUX
-            MakefileProjectExporter::getValueTreeTypeName(),
+            // (this doesn't currently launch.. not really sure what it would do on linux)
+            //MakefileProjectExporter::getValueTreeTypeName(),
            #endif
 
             nullptr
@@ -268,6 +250,11 @@ void ProjectExporter::createPropertyEditors (PropertyListBuilder& props)
         props.add (new ChoicePropertyComponent (getBigIconImageItemID(), "Icon (large)", choices, ids),
                    "Sets an icon to use for the executable.");
     }
+
+    createExporterProperties (props);
+
+    props.add (new TextPropertyComponent (getUserNotes(), "Notes", 32768, true),
+               "Extra comments: This field is not used for code or project generation, it's just a space where you can express your thoughts.");
 }
 
 StringPairArray ProjectExporter::getAllPreprocessorDefs (const ProjectExporter::BuildConfiguration& config) const
@@ -512,7 +499,7 @@ String ProjectExporter::BuildConfiguration::getGCCOptimisationFlag() const
     return String (level <= 1 ? "0" : (level == 2 ? "s" : "3"));
 }
 
-void ProjectExporter::BuildConfiguration::createBasicPropertyEditors (PropertyListBuilder& props)
+void ProjectExporter::BuildConfiguration::createPropertyEditors (PropertyListBuilder& props)
 {
     props.add (new TextPropertyComponent (getNameValue(), "Name", 96, false),
                "The name of this configuration.");
@@ -540,6 +527,11 @@ void ProjectExporter::BuildConfiguration::createBasicPropertyEditors (PropertyLi
     props.add (new TextPropertyComponent (getBuildConfigPreprocessorDefs(), "Preprocessor definitions", 32768, true),
                "Extra preprocessor definitions. Use the form \"NAME1=value NAME2=value\", using whitespace, commas, or "
                "new-lines to separate the items - to include a space or comma in a definition, precede it with a backslash.");
+
+    createConfigProperties (props);
+
+    props.add (new TextPropertyComponent (getUserNotes(), "Notes", 32768, true),
+               "Extra comments: This field is not used for code or project generation, it's just a space where you can express your thoughts.");
 }
 
 StringPairArray ProjectExporter::BuildConfiguration::getAllPreprocessorDefs() const

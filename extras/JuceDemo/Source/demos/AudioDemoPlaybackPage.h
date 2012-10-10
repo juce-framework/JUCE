@@ -3,7 +3,7 @@
 
   This is an automatically generated file created by the Jucer!
 
-  Creation date:  1 May 2011 12:08:14pm
+  Creation date:  21 Sep 2012 12:10:00pm
 
   Be careful when adding custom code to these files, as only the code within
   the "//[xyz]" and "//[/xyz]" sections will be retained when the file is loaded
@@ -19,8 +19,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCER_HEADER_AUDIODEMOPLAYBACKPAGE_AUDIODEMOPLAYBACKPAGE_81B4F279__
-#define __JUCER_HEADER_AUDIODEMOPLAYBACKPAGE_AUDIODEMOPLAYBACKPAGE_81B4F279__
+#ifndef __JUCER_HEADER_AUDIODEMOPLAYBACKPAGE_AUDIODEMOPLAYBACKPAGE_4C42D63__
+#define __JUCER_HEADER_AUDIODEMOPLAYBACKPAGE_AUDIODEMOPLAYBACKPAGE_4C42D63__
 
 //[Headers]     -- You can add your own extra header files here --
 #include "../jucedemo_headers.h"
@@ -39,8 +39,8 @@ class DemoThumbnailComp;
 */
 class AudioDemoPlaybackPage  : public Component,
                                public FileBrowserListener,
-                               public ButtonListener,
-                               public SliderListener
+                               public SliderListener,
+                               public ButtonListener
 {
 public:
     //==============================================================================
@@ -60,13 +60,10 @@ public:
 
     void paint (Graphics& g);
     void resized();
-    void buttonClicked (Button* buttonThatWasClicked);
     void sliderValueChanged (Slider* sliderThatWasMoved);
+    void buttonClicked (Button* buttonThatWasClicked);
 
 
-
-    //==============================================================================
-    juce_UseDebuggingNewOperator
 
 private:
     //[UserVariables]   -- You can add your own custom variables in this section.
@@ -84,18 +81,16 @@ private:
 
     //==============================================================================
     Label* zoomLabel;
+    Label* explanation;
+    Slider* zoomSlider;
     DemoThumbnailComp* thumbnail;
     TextButton* startStopButton;
     FileTreeComponent* fileTreeComp;
-    Label* explanation;
-    Slider* zoomSlider;
 
 
     //==============================================================================
-    // (prevent copy constructor and operator= being generated..)
-    AudioDemoPlaybackPage (const AudioDemoPlaybackPage&);
-    const AudioDemoPlaybackPage& operator= (const AudioDemoPlaybackPage&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioDemoPlaybackPage);
 };
 
 
-#endif   // __JUCER_HEADER_AUDIODEMOPLAYBACKPAGE_AUDIODEMOPLAYBACKPAGE_81B4F279__
+#endif   // __JUCER_HEADER_AUDIODEMOPLAYBACKPAGE_AUDIODEMOPLAYBACKPAGE_4C42D63__

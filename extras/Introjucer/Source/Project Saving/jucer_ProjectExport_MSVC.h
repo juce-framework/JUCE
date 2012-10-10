@@ -33,8 +33,8 @@
 class MSVCProjectExporterBase   : public ProjectExporter
 {
 public:
-    MSVCProjectExporterBase (Project& project_, const ValueTree& settings_, const char* const folderName)
-        : ProjectExporter (project_, settings_)
+    MSVCProjectExporterBase (Project& p, const ValueTree& t, const char* const folderName)
+        : ProjectExporter (p, t)
     {
         if (getTargetLocationString().isEmpty())
             getTargetLocationValue() = getDefaultBuildsRootFolder() + folderName;
@@ -48,15 +48,21 @@ public:
     }
 
     //==============================================================================
-    bool isPossibleForCurrentProject()          { return true; }
     bool usesMMFiles() const                    { return false; }
     bool isVisualStudio() const                 { return true; }
     bool canCopeWithDuplicateFiles()            { return false; }
 
-    void createPropertyEditors (PropertyListBuilder& props)
+    bool launchProject()
     {
-        ProjectExporter::createPropertyEditors (props);
+       #if JUCE_WINDOWS
+        return getSLNFile().startAsProcess();
+       #else
+        return false;
+       #endif
+    }
 
+    void createExporterProperties (PropertyListBuilder& props)
+    {
         if (projectType.isLibrary())
         {
             const char* const libTypes[] = { "Static Library (.lib)", "Dynamic Library (.dll)", 0 };
@@ -71,6 +77,7 @@ protected:
     mutable File rcFile, iconFile;
 
     File getProjectFile (const String& extension) const   { return getTargetFolder().getChildFile (project.getProjectFilenameRoot()).withFileExtension (extension); }
+    File getSLNFile() const             { return getProjectFile (".sln"); }
 
     Value getLibraryType()              { return getSetting (Ids::libraryType); }
     String getLibraryString() const     { return getSettingString (Ids::libraryType); }
@@ -156,10 +163,8 @@ protected:
             return target;
         }
 
-        void createPropertyEditors (PropertyListBuilder& props)
+        void createConfigProperties (PropertyListBuilder& props)
         {
-            createBasicPropertyEditors (props);
-
             const char* const warningLevelNames[] = { "Low", "Medium", "High", nullptr };
             const int warningLevels[] = { 2, 3, 4, 0 };
 
@@ -529,17 +534,6 @@ public:
     static const char* getValueTreeTypeName()       { return "VS2008"; }
     int getVisualStudioVersion() const              { return 9; }
 
-    void launchProject()                            { getSLNFile().startAsProcess(); }
-
-    int getLaunchPreferenceOrderForCurrentOS()
-    {
-       #if JUCE_WINDOWS
-        return 4;
-       #else
-        return 0;
-       #endif
-    }
-
     static MSVCProjectExporterVC2008* createForSettings (Project& project, const ValueTree& settings)
     {
         if (settings.hasType (getValueTreeTypeName()))
@@ -594,7 +588,6 @@ protected:
     virtual String getSolutionVersionString() const   { return "10.00" + newLine + "# Visual C++ Express 2008"; }
 
     File getVCProjFile() const    { return getProjectFile (".vcproj"); }
-    File getSLNFile() const       { return getProjectFile (".sln"); }
 
     //==============================================================================
     void fillInProjectXml (XmlElement& projectXml) const
@@ -870,8 +863,8 @@ protected:
 class MSVCProjectExporterVC2005   : public MSVCProjectExporterVC2008
 {
 public:
-    MSVCProjectExporterVC2005 (Project& project_, const ValueTree& settings_)
-        : MSVCProjectExporterVC2008 (project_, settings_, "VisualStudio2005")
+    MSVCProjectExporterVC2005 (Project& p, const ValueTree& t)
+        : MSVCProjectExporterVC2008 (p, t, "VisualStudio2005")
     {
         name = getName();
     }
@@ -879,15 +872,6 @@ public:
     static const char* getName()                    { return "Visual Studio 2005"; }
     static const char* getValueTreeTypeName()       { return "VS2005"; }
     int getVisualStudioVersion() const              { return 8; }
-
-    int getLaunchPreferenceOrderForCurrentOS()
-    {
-       #if JUCE_WINDOWS
-        return 2;
-       #else
-        return 0;
-       #endif
-    }
 
     static MSVCProjectExporterVC2005* createForSettings (Project& project, const ValueTree& settings)
     {
@@ -908,8 +892,8 @@ protected:
 class MSVCProjectExporterVC2010   : public MSVCProjectExporterBase
 {
 public:
-    MSVCProjectExporterVC2010 (Project& project_, const ValueTree& settings_)
-        : MSVCProjectExporterBase (project_, settings_, "VisualStudio2010")
+    MSVCProjectExporterVC2010 (Project& p, const ValueTree& t)
+        : MSVCProjectExporterBase (p, t, "VisualStudio2010")
     {
         name = getName();
     }
@@ -917,17 +901,6 @@ public:
     static const char* getName()                    { return "Visual Studio 2010"; }
     static const char* getValueTreeTypeName()       { return "VS2010"; }
     int getVisualStudioVersion() const              { return 10; }
-
-    int getLaunchPreferenceOrderForCurrentOS()
-    {
-       #if JUCE_WINDOWS
-        return 3;
-       #else
-        return 0;
-       #endif
-    }
-
-    void launchProject()                            { getSLNFile().startAsProcess(); }
 
     static MSVCProjectExporterVC2010* createForSettings (Project& project, const ValueTree& settings)
     {
@@ -982,9 +955,9 @@ protected:
         bool is64Bit() const                    { return config [Ids::winArchitecture].toString() == get64BitArchName(); }
 
         //==============================================================================
-        void createPropertyEditors (PropertyListBuilder& props)
+        void createConfigProperties (PropertyListBuilder& props)
         {
-            MSVCBuildConfiguration::createPropertyEditors (props);
+            MSVCBuildConfiguration::createConfigProperties (props);
 
             const char* const archTypes[] = { get32BitArchName(), get64BitArchName(), nullptr };
             props.add (new ChoicePropertyComponent (getArchitectureType(), "Architecture",
@@ -1005,7 +978,6 @@ protected:
     //==============================================================================
     File getVCProjFile() const            { return getProjectFile (".vcxproj"); }
     File getVCProjFiltersFile() const     { return getProjectFile (".vcxproj.filters"); }
-    File getSLNFile() const               { return getProjectFile (".sln"); }
 
     String createConfigName (const BuildConfiguration& config) const
     {

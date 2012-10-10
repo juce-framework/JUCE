@@ -72,6 +72,8 @@ public:
         /** Time signature denominator, e.g. the 4 of a 3/4 time sig */
         int timeSigDenominator;
 
+        /** The current play position, in samples from the start of the edit. */
+        int64 timeInSamples;
         /** The current play position, in seconds from the start of the edit. */
         double timeInSeconds;
 

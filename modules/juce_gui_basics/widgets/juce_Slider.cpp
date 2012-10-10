@@ -576,9 +576,14 @@ public:
             valueBox->addListener (this);
 
             if (style == LinearBar)
+            {
                 valueBox->addMouseListener (&owner, false);
+                valueBox->setMouseCursor (MouseCursor::ParentCursor);
+            }
             else
+            {
                 valueBox->setTooltip (owner.getTooltip());
+            }
         }
         else
         {
@@ -1567,6 +1572,3 @@ void Slider::mouseWheelMove (const MouseEvent& e, const MouseWheelDetails& wheel
     if (! (isEnabled() && pimpl->mouseWheelMove (e, wheel)))
         Component::mouseWheelMove (e, wheel);
 }
-
-void SliderListener::sliderDragStarted (Slider*)  {} // (can't write Slider::Listener due to idiotic VC2005 bug)
-void SliderListener::sliderDragEnded (Slider*)    {}

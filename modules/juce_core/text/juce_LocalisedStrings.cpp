@@ -180,9 +180,8 @@ String translate (const String& text, const String& resultIfNotFound)
 {
     const SpinLock::ScopedLockType sl (currentMappingsLock);
 
-    const LocalisedStrings* const currentMappings = LocalisedStrings::getCurrentMappings();
-    if (currentMappings != nullptr)
-        return currentMappings->translate (text, resultIfNotFound);
+    if (const LocalisedStrings* const mappings = LocalisedStrings::getCurrentMappings())
+        return mappings->translate (text, resultIfNotFound);
 
     return resultIfNotFound;
 }

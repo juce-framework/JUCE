@@ -325,11 +325,10 @@ void RelativeCoordinatePositionerBase::registerMarkerListListener (MarkerList* c
 
 void RelativeCoordinatePositionerBase::unregisterListeners()
 {
-    int i;
-    for (i = sourceComponents.size(); --i >= 0;)
+    for (int i = sourceComponents.size(); --i >= 0;)
         sourceComponents.getUnchecked(i)->removeComponentListener (this);
 
-    for (i = sourceMarkerLists.size(); --i >= 0;)
+    for (int i = sourceMarkerLists.size(); --i >= 0;)
         sourceMarkerLists.getUnchecked(i)->removeListener (this);
 
     sourceComponents.clear();

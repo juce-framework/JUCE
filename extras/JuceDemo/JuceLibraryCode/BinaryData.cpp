@@ -2147,20 +2147,15 @@ const char* getNamedResource (const char* resourceNameUTF8, int& numBytes) throw
     unsigned int hash = 0;
     if (resourceNameUTF8 != 0)
         while (*resourceNameUTF8 != 0)
-            hash = 31 * hash + *resourceNameUTF8++;
+            hash = 31 * hash + (unsigned int) *resourceNameUTF8++;
 
     switch (hash)
     {
-        case 0x62032efa:
-        case 0x877c5941:  numBytes = 46348; return cello_wav;
-        case 0xaec3f52f:
-        case 0x5ef7e0f0:  numBytes = 5239; return demo_table_data_xml;
-        case 0xae303c7c:
-        case 0xae3ee894:  numBytes = 83876; return icons_zip;
-        case 0xdf2195d7:
-        case 0xc23b6643:  numBytes = 15290; return juce_png;
-        case 0xdd644959:
-        case 0x0ff8e16f:  numBytes = 1126; return treedemo_xml;
+        case 0x62032efa:  numBytes = 46348; return cello_wav;
+        case 0xaec3f52f:  numBytes = 5239; return demo_table_data_xml;
+        case 0xae303c7c:  numBytes = 83876; return icons_zip;
+        case 0xdf2195d7:  numBytes = 15290; return juce_png;
+        case 0xdd644959:  numBytes = 1126; return treedemo_xml;
         default: break;
     }
 

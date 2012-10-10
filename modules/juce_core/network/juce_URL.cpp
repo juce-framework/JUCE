@@ -160,8 +160,7 @@ namespace URLHelpers
 
             data << "--" << boundary;
 
-            int i;
-            for (i = 0; i < url.getParameterNames().size(); ++i)
+            for (int i = 0; i < url.getParameterNames().size(); ++i)
             {
                 data << "\r\nContent-Disposition: form-data; name=\""
                      << url.getParameterNames() [i]
@@ -171,7 +170,7 @@ namespace URLHelpers
                      << boundary;
             }
 
-            for (i = 0; i < url.getFilesToUpload().size(); ++i)
+            for (int i = 0; i < url.getFilesToUpload().size(); ++i)
             {
                 const File file (url.getFilesToUpload().getAllValues() [i]);
                 const String paramName (url.getFilesToUpload().getAllKeys() [i]);

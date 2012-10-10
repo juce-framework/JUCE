@@ -271,24 +271,24 @@ void DrawableComposite::ValueTreeWrapper::resetBoundingBoxToContentArea (UndoMan
 
 RelativeRectangle DrawableComposite::ValueTreeWrapper::getContentArea() const
 {
-    MarkerList::ValueTreeWrapper markersX (getMarkerList (true));
-    MarkerList::ValueTreeWrapper markersY (getMarkerList (false));
+    MarkerList::ValueTreeWrapper marksX (getMarkerList (true));
+    MarkerList::ValueTreeWrapper marksY (getMarkerList (false));
 
-    return RelativeRectangle (markersX.getMarker (markersX.getMarkerState (0)).position,
-                              markersX.getMarker (markersX.getMarkerState (1)).position,
-                              markersY.getMarker (markersY.getMarkerState (0)).position,
-                              markersY.getMarker (markersY.getMarkerState (1)).position);
+    return RelativeRectangle (marksX.getMarker (marksX.getMarkerState (0)).position,
+                              marksX.getMarker (marksX.getMarkerState (1)).position,
+                              marksY.getMarker (marksY.getMarkerState (0)).position,
+                              marksY.getMarker (marksY.getMarkerState (1)).position);
 }
 
 void DrawableComposite::ValueTreeWrapper::setContentArea (const RelativeRectangle& newArea, UndoManager* undoManager)
 {
-    MarkerList::ValueTreeWrapper markersX (getMarkerListCreating (true, nullptr));
-    MarkerList::ValueTreeWrapper markersY (getMarkerListCreating (false, nullptr));
+    MarkerList::ValueTreeWrapper marksX (getMarkerListCreating (true, nullptr));
+    MarkerList::ValueTreeWrapper marksY (getMarkerListCreating (false, nullptr));
 
-    markersX.setMarker (MarkerList::Marker (contentLeftMarkerName, newArea.left), undoManager);
-    markersX.setMarker (MarkerList::Marker (contentRightMarkerName, newArea.right), undoManager);
-    markersY.setMarker (MarkerList::Marker (contentTopMarkerName, newArea.top), undoManager);
-    markersY.setMarker (MarkerList::Marker (contentBottomMarkerName, newArea.bottom), undoManager);
+    marksX.setMarker (MarkerList::Marker (contentLeftMarkerName, newArea.left), undoManager);
+    marksX.setMarker (MarkerList::Marker (contentRightMarkerName, newArea.right), undoManager);
+    marksY.setMarker (MarkerList::Marker (contentTopMarkerName, newArea.top), undoManager);
+    marksY.setMarker (MarkerList::Marker (contentBottomMarkerName, newArea.bottom), undoManager);
 }
 
 MarkerList::ValueTreeWrapper DrawableComposite::ValueTreeWrapper::getMarkerList (bool xAxis) const

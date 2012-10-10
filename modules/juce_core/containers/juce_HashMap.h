@@ -336,8 +336,8 @@ private:
     class HashEntry
     {
     public:
-        HashEntry (KeyTypeParameter key_, ValueTypeParameter value_, HashEntry* const nextEntry_)
-            : key (key_), value (value_), nextEntry (nextEntry_)
+        HashEntry (KeyTypeParameter k, ValueTypeParameter val, HashEntry* const next)
+            : key (k), value (val), nextEntry (next)
         {}
 
         const KeyType key;

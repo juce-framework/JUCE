@@ -59,6 +59,7 @@ JuceUpdater::JuceUpdater (ModuleList& moduleList_, const String& message)
 
     addAndMakeVisible (&availableVersionsList);
     availableVersionsList.setModel (this);
+    availableVersionsList.setColour (ListBox::backgroundColourId, Colours::white.withAlpha (0.4f));
 
     updateInstallButtonStatus();
     versionsToDownload = ValueTree ("modules");
@@ -75,33 +76,18 @@ JuceUpdater::~JuceUpdater()
     filenameComp.removeListener (this);
 }
 
-//==============================================================================
-class UpdateDialogWindow : public DialogWindow
-{
-public:
-    UpdateDialogWindow (JuceUpdater* updater, Component* componentToCentreAround)
-        : DialogWindow ("JUCE Module Updater",
-                        Colours::lightgrey, true, true)
-    {
-        setUsingNativeTitleBar (true);
-        setContentOwned (updater, true);
-        centreAroundComponent (componentToCentreAround, getWidth(), getHeight());
-        setResizable (true, true);
-    }
-
-    void closeButtonPressed()
-    {
-        setVisible (false);
-    }
-
-private:
-    JUCE_DECLARE_NON_COPYABLE (UpdateDialogWindow);
-};
-
 void JuceUpdater::show (ModuleList& moduleList, Component* mainWindow, const String& message)
 {
-    UpdateDialogWindow w (new JuceUpdater (moduleList, message), mainWindow);
-    w.runModalLoop();
+    DialogWindow::LaunchOptions o;
+    o.content.setOwned (new JuceUpdater (moduleList, message));
+    o.dialogTitle                   = "JUCE Module Updater";
+    o.dialogBackgroundColour        = Colours::lightgrey;
+    o.componentToCentreAround       = mainWindow;
+    o.escapeKeyTriggersCloseButton  = true;
+    o.useNativeTitleBar             = true;
+    o.resizable                     = true;
+
+    o.runModal();
 }
 
 void JuceUpdater::resized()
@@ -125,7 +111,9 @@ void JuceUpdater::resized()
 
 void JuceUpdater::paint (Graphics& g)
 {
-    g.fillAll (Colours::white);
+    g.setGradientFill (ColourGradient (Colour::greyLevel (0.85f), 0, 0,
+                                       Colour::greyLevel (0.65f), 0, (float) getHeight(), false));
+    g.fillAll();
 }
 
 void JuceUpdater::buttonClicked (Button* b)
@@ -314,9 +302,6 @@ Component* JuceUpdater::refreshComponentForRow (int rowNumber, bool isRowSelecte
 
         void paint (Graphics& g)
         {
-            g.setColour (Colours::green.withAlpha (0.12f));
-
-            g.fillRect (0, 1, getWidth(), getHeight() - 2);
             g.setColour (Colours::black);
             g.setFont (getHeight() * 0.7f);
 
@@ -329,7 +314,7 @@ Component* JuceUpdater::refreshComponentForRow (int rowNumber, bool isRowSelecte
 
         void resized()
         {
-            toggle.setBounds (getLocalBounds().reduced (2));
+            toggle.setBounds (2, 2, getHeight() - 4, getHeight() - 4);
         }
 
     private:

@@ -379,6 +379,7 @@ Rectangle<int> Desktop::Displays::getTotalBounds (bool userAreasOnly) const
     return getRectangleList (userAreasOnly).getBounds();
 }
 
+bool operator== (const Desktop::Displays::Display& d1, const Desktop::Displays::Display& d2) noexcept;
 bool operator== (const Desktop::Displays::Display& d1, const Desktop::Displays::Display& d2) noexcept
 {
     return d1.userArea == d2.userArea
@@ -387,6 +388,7 @@ bool operator== (const Desktop::Displays::Display& d1, const Desktop::Displays::
         && d1.isMain == d2.isMain;
 }
 
+bool operator!= (const Desktop::Displays::Display& d1, const Desktop::Displays::Display& d2) noexcept;
 bool operator!= (const Desktop::Displays::Display& d1, const Desktop::Displays::Display& d2) noexcept
 {
     return ! (d1 == d2);

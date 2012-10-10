@@ -80,12 +80,9 @@
 #endif
 
 //==============================================================================
-#if __LP64__ && (defined(__APPLE_CPP__) || defined(__APPLE_CC__))  // (disable VSTs and RTAS in a 64-bit mac build)
+#if _WIN64 || (__LP64__ && (defined(__APPLE_CPP__) || defined(__APPLE_CC__)))
  #undef JucePlugin_Build_RTAS
-#endif
-
-#if _WIN64    // (disable RTAS in a 64-bit windows build)
- #undef JucePlugin_Build_RTAS
+ #define JucePlugin_Build_RTAS 0
 #endif
 
 //==============================================================================
@@ -103,4 +100,9 @@
 
 #if JucePlugin_Build_AAX && ! defined (JucePlugin_AAXIdentifier)
  #error "You need to define the JucePlugin_AAXIdentifier value!"
+#endif
+
+#if defined (__ppc__)
+ #undef JucePlugin_Build_AAX
+ #define JucePlugin_Build_AAX 0
 #endif

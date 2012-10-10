@@ -1139,6 +1139,17 @@
             </FileConfiguration>
           </File>
           <File RelativePath="..\..\..\..\modules\juce_core\text\juce_StringPool.h"/>
+          <File RelativePath="..\..\..\..\modules\juce_core\text\juce_TextDiff.cpp">
+            <FileConfiguration Name="Debug|Win32"
+                               ExcludedFromBuild="true">
+              <Tool Name="VCCLCompilerTool"/>
+            </FileConfiguration>
+            <FileConfiguration Name="Release|Win32"
+                               ExcludedFromBuild="true">
+              <Tool Name="VCCLCompilerTool"/>
+            </FileConfiguration>
+          </File>
+          <File RelativePath="..\..\..\..\modules\juce_core\text\juce_TextDiff.h"/>
         </Filter>
         <Filter Name="maths">
           <File RelativePath="..\..\..\..\modules\juce_core\maths\juce_BigInteger.cpp">
@@ -3097,6 +3108,17 @@
             </FileConfiguration>
           </File>
           <File RelativePath="..\..\..\..\modules\juce_gui_basics\layout\juce_ComponentMovementWatcher.h"/>
+          <File RelativePath="..\..\..\..\modules\juce_gui_basics\layout\juce_ConcertinaPanel.cpp">
+            <FileConfiguration Name="Debug|Win32"
+                               ExcludedFromBuild="true">
+              <Tool Name="VCCLCompilerTool"/>
+            </FileConfiguration>
+            <FileConfiguration Name="Release|Win32"
+                               ExcludedFromBuild="true">
+              <Tool Name="VCCLCompilerTool"/>
+            </FileConfiguration>
+          </File>
+          <File RelativePath="..\..\..\..\modules\juce_gui_basics\layout\juce_ConcertinaPanel.h"/>
           <File RelativePath="..\..\..\..\modules\juce_gui_basics\layout\juce_GroupComponent.cpp">
             <FileConfiguration Name="Debug|Win32"
                                ExcludedFromBuild="true">
@@ -3950,6 +3972,7 @@
             </FileConfiguration>
           </File>
           <File RelativePath="..\..\..\..\modules\juce_gui_extra\code_editor\juce_CPlusPlusCodeTokeniser.h"/>
+          <File RelativePath="..\..\..\..\modules\juce_gui_extra\code_editor\juce_CPlusPlusCodeTokeniserFunctions.h"/>
         </Filter>
         <Filter Name="documents">
           <File RelativePath="..\..\..\..\modules\juce_gui_extra\documents\juce_FileBasedDocument.cpp">
@@ -4157,6 +4180,7 @@
       <File RelativePath="..\..\..\..\modules\juce_graphics\juce_graphics.cpp"/>
       <File RelativePath="..\..\..\..\modules\juce_gui_basics\juce_gui_basics.cpp"/>
       <File RelativePath="..\..\..\..\modules\juce_gui_extra\juce_gui_extra.cpp"/>
+      <File RelativePath="..\..\..\..\modules\juce_audio_plugin_client\utility\juce_PluginUtilities.cpp"/>
       <File RelativePath="..\..\..\..\modules\juce_audio_plugin_client\RTAS\juce_RTAS_DigiCode1.cpp">
         <FileConfiguration Name="Debug|Win32">
           <Tool Name="VCCLCompilerTool"

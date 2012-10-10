@@ -53,9 +53,9 @@ public:
     static const char* getValueTreeTypeName (bool iOS)      { return iOS ? "XCODE_IPHONE" : "XCODE_MAC"; }
 
     //==============================================================================
-    XCodeProjectExporter (Project& project_, const ValueTree& settings_, const bool iOS_)
-        : ProjectExporter (project_, settings_),
-          iOS (iOS_)
+    XCodeProjectExporter (Project& p, const ValueTree& t, const bool isIOS)
+        : ProjectExporter (p, t),
+          iOS (isIOS)
     {
         name = iOS ? getNameiOS() : getNameMac();
 
@@ -83,14 +83,8 @@ public:
     Value  getPostBuildScriptValue()        { return getSetting (Ids::postbuildCommand); }
     String getPostBuildScript() const       { return settings   [Ids::postbuildCommand]; }
 
-    int getLaunchPreferenceOrderForCurrentOS()
-    {
-       #if JUCE_MAC
-        return iOS ? 1 : 2;
-       #else
-        return 0;
-       #endif
-    }
+    Value  getPreBuildScriptValue()         { return getSetting (Ids::prebuildCommand); }
+    String getPreBuildScript() const        { return settings   [Ids::prebuildCommand]; }
 
     bool isAvailableOnCurrentOS()
     {
@@ -101,20 +95,18 @@ public:
        #endif
     }
 
-    bool isPossibleForCurrentProject()      { return projectType.isGUIApplication() || ! iOS; }
     bool usesMMFiles() const                { return true; }
     bool isXcode() const                    { return true; }
     bool isOSX() const                      { return ! iOS; }
     bool canCopeWithDuplicateFiles()        { return true; }
 
-    void createPropertyEditors (PropertyListBuilder& props)
+    void createExporterProperties (PropertyListBuilder& props)
     {
-        ProjectExporter::createPropertyEditors (props);
-
         if (projectType.isGUIApplication() && ! iOS)
         {
             props.add (new TextPropertyComponent (getSetting ("documentExtensions"), "Document file extensions", 128, false),
-                       "A comma-separated list of file extensions for documents that your app can open.");
+                       "A comma-separated list of file extensions for documents that your app can open. "
+                       "Using a leading '.' is optional, and the extensions are not case-sensitive.");
         }
         else if (iOS)
         {
@@ -142,13 +134,20 @@ public:
                                                     StringArray (libTypes), Array<var> (libTypeValues)));
         }
 
+        props.add (new TextPropertyComponent (getPreBuildScriptValue(), "Pre-build shell script", 32768, true),
+                   "Some shell-script that will be run before a build starts.");
+
         props.add (new TextPropertyComponent (getPostBuildScriptValue(), "Post-build shell script", 32768, true),
                    "Some shell-script that will be run after a build completes.");
     }
 
-    void launchProject()
+    bool launchProject()
     {
-        getProjectBundle().startAsProcess();
+       #if JUCE_MAC
+        return getProjectBundle().startAsProcess();
+       #else
+        return false;
+       #endif
     }
 
     //==============================================================================
@@ -183,8 +182,8 @@ protected:
     class XcodeBuildConfiguration  : public BuildConfiguration
     {
     public:
-        XcodeBuildConfiguration (Project& project, const ValueTree& settings, const bool iOS_)
-            : BuildConfiguration (project, settings), iOS (iOS_)
+        XcodeBuildConfiguration (Project& p, const ValueTree& t, const bool isIOS)
+            : BuildConfiguration (p, t), iOS (isIOS)
         {
             if (iOS)
             {
@@ -217,10 +216,8 @@ protected:
         Value  getCppLibTypeValue()                    { return getValue (Ids::cppLibType); }
         String getCppLibType() const                   { return config   [Ids::cppLibType]; }
 
-        void createPropertyEditors (PropertyListBuilder& props)
+        void createConfigProperties (PropertyListBuilder& props)
         {
-            createBasicPropertyEditors (props);
-
             if (iOS)
             {
                 const char* iosVersions[]      = { "Use Default",     "3.2", "4.0", "4.1", "4.2", "4.3", "5.0", "5.1", 0 };
@@ -356,6 +353,8 @@ private:
         addConfigList (projectConfigs, createID ("__projList"));
         addConfigList (targetConfigs, createID ("__configList"));
 
+        addShellScriptBuildPhase ("Pre-build script", getPreBuildScript());
+
         if (! isStaticLibrary())
             addBuildPhase ("PBXResourcesBuildPhase", resourceIDs);
 
@@ -367,7 +366,7 @@ private:
         if (! isStaticLibrary())
             addBuildPhase ("PBXFrameworksBuildPhase", frameworkIDs);
 
-        addShellScriptPhase();
+        addShellScriptBuildPhase ("Post-build script", getPostBuildScript());
 
         addTargetObject();
         addProjectObject();
@@ -530,6 +529,7 @@ private:
         {
             dict->createNewChildElement ("key")->addTextElement ("CFBundleDocumentTypes");
             XmlElement* dict2 = dict->createNewChildElement ("array")->createNewChildElement ("dict");
+            XmlElement* arrayTag = nullptr;
 
             for (int i = 0; i < documentExtensions.size(); ++i)
             {
@@ -537,11 +537,17 @@ private:
                 if (ex.startsWithChar ('.'))
                     ex = ex.substring (1);
 
-                dict2->createNewChildElement ("key")->addTextElement ("CFBundleTypeExtensions");
-                dict2->createNewChildElement ("array")->createNewChildElement ("string")->addTextElement (ex);
-                addPlistDictionaryKey (dict2, "CFBundleTypeName", ex);
-                addPlistDictionaryKey (dict2, "CFBundleTypeRole", "Editor");
-                addPlistDictionaryKey (dict2, "NSPersistentStoreTypeKey", "XML");
+                if (arrayTag == nullptr)
+                {
+                    dict2->createNewChildElement ("key")->addTextElement ("CFBundleTypeExtensions");
+                    arrayTag = dict2->createNewChildElement ("array");
+
+                    addPlistDictionaryKey (dict2, "CFBundleTypeName", ex);
+                    addPlistDictionaryKey (dict2, "CFBundleTypeRole", "Editor");
+                    addPlistDictionaryKey (dict2, "NSPersistentStoreTypeKey", "XML");
+                }
+
+                arrayTag->createNewChildElement ("string")->addTextElement (ex);
             }
         }
 
@@ -726,6 +732,8 @@ private:
         if (config.getCppLibType().isNotEmpty())
             s.add ("CLANG_CXX_LIBRARY = " + config.getCppLibType().quoted());
 
+        s.add ("COMBINE_HIDPI_IMAGES = YES");
+
         {
             StringArray linkerFlags, librarySearchPaths;
             getLinkerFlags (config, linkerFlags, librarySearchPaths);
@@ -838,7 +846,7 @@ private:
                 const Identifier propertyName (o.getPropertyName(j));
                 String val (o.getProperty (propertyName).toString());
 
-                if (val.isEmpty() || (val.containsAnyOf (" \t;<>()=,&+-_\r\n")
+                if (val.isEmpty() || (val.containsAnyOf (" \t;<>()=,&+-_@~\r\n")
                                         && ! (val.trimStart().startsWithChar ('(')
                                                 || val.trimStart().startsWithChar ('{'))))
                     val = val.quoted();
@@ -889,11 +897,11 @@ private:
             sourceIDs.add (fileID);
 
         ValueTree* v = new ValueTree (fileID);
-        v->setProperty ("isa", "PBXBuildFile", 0);
-        v->setProperty ("fileRef", fileRefID, 0);
+        v->setProperty ("isa", "PBXBuildFile", nullptr);
+        v->setProperty ("fileRef", fileRefID, nullptr);
 
         if (inhibitWarnings)
-            v->setProperty ("settings", "{COMPILER_FLAGS = \"-w\"; }", 0);
+            v->setProperty ("settings", "{COMPILER_FLAGS = \"-w\"; }", nullptr);
 
         pbxBuildFiles.add (v);
         return fileID;
@@ -922,11 +930,11 @@ private:
         const String fileRefID (createFileRefID (pathString));
 
         ScopedPointer<ValueTree> v (new ValueTree (fileRefID));
-        v->setProperty ("isa", "PBXFileReference", 0);
-        v->setProperty ("lastKnownFileType", getFileType (path), 0);
-        v->setProperty (Ids::name, pathString.fromLastOccurrenceOf ("/", false, false), 0);
-        v->setProperty ("path", sanitisePath (pathString), 0);
-        v->setProperty ("sourceTree", sourceTree, 0);
+        v->setProperty ("isa", "PBXFileReference", nullptr);
+        v->setProperty ("lastKnownFileType", getFileType (path), nullptr);
+        v->setProperty (Ids::name, pathString.fromLastOccurrenceOf ("/", false, false), nullptr);
+        v->setProperty ("path", sanitisePath (pathString), nullptr);
+        v->setProperty ("sourceTree", sourceTree, nullptr);
 
         const int existing = pbxFileReferences.indexOfSorted (*this, v);
 
@@ -971,7 +979,7 @@ private:
         return "file" + file.getFileExtension();
     }
 
-    String addFile (const RelativePath& path, bool shouldBeCompiled, bool inhibitWarnings) const
+    String addFile (const RelativePath& path, bool shouldBeCompiled, bool shouldBeAddedToBinaryResources, bool inhibitWarnings) const
     {
         const String pathAsString (path.toUnixStyle());
         const String refID (addFileReference (path.toUnixStyle()));
@@ -982,6 +990,16 @@ private:
                 rezFileIDs.add (addBuildFile (pathAsString, refID, false, inhibitWarnings));
             else
                 addBuildFile (pathAsString, refID, true, inhibitWarnings);
+        }
+        else if (! shouldBeAddedToBinaryResources)
+        {
+            const String fileType (getFileType (path));
+
+            if (fileType.startsWith ("image.") || fileType.startsWith ("text.") || fileType.startsWith ("file."))
+            {
+                resourceIDs.add (addBuildFile (pathAsString, refID, false, false));
+                resourceFileRefs.add (refID);
+            }
         }
 
         return refID;
@@ -1006,19 +1024,17 @@ private:
         {
             if (projectItem.shouldBeAddedToTargetProject())
             {
-                String itemPath (projectItem.getFilePath());
-                bool inhibitWarnings = projectItem.shouldInhibitWarnings();
+                const String itemPath (projectItem.getFilePath());
+                RelativePath path;
 
                 if (itemPath.startsWith ("${"))
-                {
-                    const RelativePath path (itemPath, RelativePath::unknown);
-                    return addFile (path, projectItem.shouldBeCompiled(), inhibitWarnings);
-                }
+                    path = RelativePath (itemPath, RelativePath::unknown);
                 else
-                {
-                    const RelativePath path (projectItem.getFile(), getTargetFolder(), RelativePath::buildTargetFolder);
-                    return addFile (path, projectItem.shouldBeCompiled(), inhibitWarnings);
-                }
+                    path = RelativePath (projectItem.getFile(), getTargetFolder(), RelativePath::buildTargetFolder);
+
+                return addFile (path, projectItem.shouldBeCompiled(),
+                                projectItem.shouldBeAddedToBinaryResources(),
+                                projectItem.shouldInhibitWarnings());
             }
         }
 
@@ -1037,10 +1053,10 @@ private:
     void addGroup (const String& groupID, const String& groupName, const StringArray& childIDs) const
     {
         ValueTree* v = new ValueTree (groupID);
-        v->setProperty ("isa", "PBXGroup", 0);
-        v->setProperty ("children", "(" + indentList (childIDs, ",") + " )", 0);
-        v->setProperty (Ids::name, groupName, 0);
-        v->setProperty ("sourceTree", "<group>", 0);
+        v->setProperty ("isa", "PBXGroup", nullptr);
+        v->setProperty ("children", "(" + indentList (childIDs, ",") + " )", nullptr);
+        v->setProperty (Ids::name, groupName, nullptr);
+        v->setProperty ("sourceTree", "<group>", nullptr);
         pbxGroups.add (v);
     }
 
@@ -1069,29 +1085,29 @@ private:
     void addBuildProduct (const String& fileType, const String& binaryName) const
     {
         ValueTree* v = new ValueTree (createID ("__productFileID"));
-        v->setProperty ("isa", "PBXFileReference", 0);
-        v->setProperty ("explicitFileType", fileType, 0);
-        v->setProperty ("includeInIndex", (int) 0, 0);
-        v->setProperty ("path", sanitisePath (binaryName), 0);
-        v->setProperty ("sourceTree", "BUILT_PRODUCTS_DIR", 0);
+        v->setProperty ("isa", "PBXFileReference", nullptr);
+        v->setProperty ("explicitFileType", fileType, nullptr);
+        v->setProperty ("includeInIndex", (int) 0, nullptr);
+        v->setProperty ("path", sanitisePath (binaryName), nullptr);
+        v->setProperty ("sourceTree", "BUILT_PRODUCTS_DIR", nullptr);
         pbxFileReferences.add (v);
     }
 
     void addTargetConfig (const String& configName, const StringArray& buildSettings) const
     {
         ValueTree* v = new ValueTree (createID ("targetconfigid_" + configName));
-        v->setProperty ("isa", "XCBuildConfiguration", 0);
-        v->setProperty ("buildSettings", "{" + indentList (buildSettings, ";") + " }", 0);
-        v->setProperty (Ids::name, configName, 0);
+        v->setProperty ("isa", "XCBuildConfiguration", nullptr);
+        v->setProperty ("buildSettings", "{" + indentList (buildSettings, ";") + " }", nullptr);
+        v->setProperty (Ids::name, configName, nullptr);
         targetConfigs.add (v);
     }
 
     void addProjectConfig (const String& configName, const StringArray& buildSettings) const
     {
         ValueTree* v = new ValueTree (createID ("projectconfigid_" + configName));
-        v->setProperty ("isa", "XCBuildConfiguration", 0);
-        v->setProperty ("buildSettings", "{" + indentList (buildSettings, ";") + " }", 0);
-        v->setProperty (Ids::name, configName, 0);
+        v->setProperty ("isa", "XCBuildConfiguration", nullptr);
+        v->setProperty ("buildSettings", "{" + indentList (buildSettings, ";") + " }", nullptr);
+        v->setProperty (Ids::name, configName, nullptr);
         projectConfigs.add (v);
     }
 
@@ -1103,47 +1119,47 @@ private:
             configIDs.add (configsToUse[i]->getType().toString());
 
         ValueTree* v = new ValueTree (listID);
-        v->setProperty ("isa", "XCConfigurationList", 0);
-        v->setProperty ("buildConfigurations", "(" + indentList (configIDs, ",") + " )", 0);
-        v->setProperty ("defaultConfigurationIsVisible", (int) 0, 0);
+        v->setProperty ("isa", "XCConfigurationList", nullptr);
+        v->setProperty ("buildConfigurations", "(" + indentList (configIDs, ",") + " )", nullptr);
+        v->setProperty ("defaultConfigurationIsVisible", (int) 0, nullptr);
 
         if (configsToUse[0] != nullptr)
-            v->setProperty ("defaultConfigurationName", configsToUse[0]->getProperty (Ids::name), 0);
+            v->setProperty ("defaultConfigurationName", configsToUse[0]->getProperty (Ids::name), nullptr);
 
         misc.add (v);
     }
 
-    ValueTree* addBuildPhase (const String& phaseType, const StringArray& fileIds) const
+    ValueTree& addBuildPhase (const String& phaseType, const StringArray& fileIds) const
     {
         String phaseId (createID (phaseType + "resbuildphase"));
         buildPhaseIDs.add (phaseId);
 
         ValueTree* v = new ValueTree (phaseId);
-        v->setProperty ("isa", phaseType, 0);
-        v->setProperty ("buildActionMask", "2147483647", 0);
-        v->setProperty ("files", "(" + indentList (fileIds, ",") + " )", 0);
-        v->setProperty ("runOnlyForDeploymentPostprocessing", (int) 0, 0);
+        v->setProperty ("isa", phaseType, nullptr);
+        v->setProperty ("buildActionMask", "2147483647", nullptr);
+        v->setProperty ("files", "(" + indentList (fileIds, ",") + " )", nullptr);
+        v->setProperty ("runOnlyForDeploymentPostprocessing", (int) 0, nullptr);
         misc.add (v);
-        return v;
+        return *v;
     }
 
     void addTargetObject() const
     {
         ValueTree* const v = new ValueTree (createID ("__target"));
-        v->setProperty ("isa", "PBXNativeTarget", 0);
-        v->setProperty ("buildConfigurationList", createID ("__configList"), 0);
-        v->setProperty ("buildPhases", "(" + indentList (buildPhaseIDs, ",") + " )", 0);
-        v->setProperty ("buildRules", "( )", 0);
-        v->setProperty ("dependencies", "( )", 0);
-        v->setProperty (Ids::name, projectName, 0);
-        v->setProperty ("productName", projectName, 0);
-        v->setProperty ("productReference", createID ("__productFileID"), 0);
+        v->setProperty ("isa", "PBXNativeTarget", nullptr);
+        v->setProperty ("buildConfigurationList", createID ("__configList"), nullptr);
+        v->setProperty ("buildPhases", "(" + indentList (buildPhaseIDs, ",") + " )", nullptr);
+        v->setProperty ("buildRules", "( )", nullptr);
+        v->setProperty ("dependencies", "( )", nullptr);
+        v->setProperty (Ids::name, projectName, nullptr);
+        v->setProperty ("productName", projectName, nullptr);
+        v->setProperty ("productReference", createID ("__productFileID"), nullptr);
 
         if (xcodeProductInstallPath.isNotEmpty())
-            v->setProperty ("productInstallPath", xcodeProductInstallPath, 0);
+            v->setProperty ("productInstallPath", xcodeProductInstallPath, nullptr);
 
         jassert (xcodeProductType.isNotEmpty());
-        v->setProperty ("productType", xcodeProductType, 0);
+        v->setProperty ("productType", xcodeProductType, nullptr);
 
         misc.add (v);
     }
@@ -1151,28 +1167,29 @@ private:
     void addProjectObject() const
     {
         ValueTree* const v = new ValueTree (createID ("__root"));
-        v->setProperty ("isa", "PBXProject", 0);
-        v->setProperty ("buildConfigurationList", createID ("__projList"), 0);
-        v->setProperty ("compatibilityVersion", "Xcode 3.2", 0);
-        v->setProperty ("hasScannedForEncodings", (int) 0, 0);
-        v->setProperty ("mainGroup", createID ("__mainsourcegroup"), 0);
-        v->setProperty ("projectDirPath", "\"\"", 0);
-        v->setProperty ("projectRoot", "\"\"", 0);
-        v->setProperty ("targets", "( " + createID ("__target") + " )", 0);
+        v->setProperty ("isa", "PBXProject", nullptr);
+        v->setProperty ("buildConfigurationList", createID ("__projList"), nullptr);
+        v->setProperty ("attributes", "{ LastUpgradeCheck = 0440; }", nullptr);
+        v->setProperty ("compatibilityVersion", "Xcode 3.2", nullptr);
+        v->setProperty ("hasScannedForEncodings", (int) 0, nullptr);
+        v->setProperty ("mainGroup", createID ("__mainsourcegroup"), nullptr);
+        v->setProperty ("projectDirPath", "\"\"", nullptr);
+        v->setProperty ("projectRoot", "\"\"", nullptr);
+        v->setProperty ("targets", "( " + createID ("__target") + " )", nullptr);
         misc.add (v);
     }
 
-    void addShellScriptPhase() const
+    void addShellScriptBuildPhase (const String& name, const String& script) const
     {
-        if (getPostBuildScript().isNotEmpty())
+        if (script.trim().isNotEmpty())
         {
-            ValueTree* const v = addBuildPhase ("PBXShellScriptBuildPhase", StringArray());
-            v->setProperty (Ids::name, "Post-build script", 0);
-            v->setProperty ("shellPath", "/bin/sh", 0);
-            v->setProperty ("shellScript", getPostBuildScript().replace ("\\", "\\\\")
-                                                               .replace ("\"", "\\\"")
-                                                               .replace ("\r\n", "\\n")
-                                                               .replace ("\n", "\\n"), 0);
+            ValueTree& v = addBuildPhase ("PBXShellScriptBuildPhase", StringArray());
+            v.setProperty (Ids::name, name, nullptr);
+            v.setProperty ("shellPath", "/bin/sh", nullptr);
+            v.setProperty ("shellScript", script.replace ("\\", "\\\\")
+                                                .replace ("\"", "\\\"")
+                                                .replace ("\r\n", "\\n")
+                                                .replace ("\n", "\\n"), nullptr);
         }
     }
 

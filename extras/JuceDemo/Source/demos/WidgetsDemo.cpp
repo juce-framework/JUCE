@@ -242,7 +242,7 @@ public:
         colourSelector->setColour (ColourSelector::backgroundColourId, Colours::transparentBlack);
         colourSelector->setSize (300, 400);
 
-        CallOutBox::launchAsynchronously (*this, colourSelector, nullptr);
+        CallOutBox::launchAsynchronously (colourSelector, getScreenBounds(), nullptr);
     }
 
     void changeListenerCallback (ChangeBroadcaster* source)
@@ -284,8 +284,7 @@ static Component* createSlidersPage()
     const int numSliders = 11;
     Slider* sliders [numSliders];
 
-    int i;
-    for (i = 0; i < numSliders; ++i)
+    for (int i = 0; i < numSliders; ++i)
     {
         if (i == 2)
             page->addAndMakeVisible (sliders[i] = new SnappingSlider ("slider"));
@@ -347,7 +346,7 @@ static Component* createSlidersPage()
     sliders[10]->setSliderStyle (Slider::ThreeValueVertical);
     sliders[10]->setBounds (440, 110, 40, 160);
 
-    for (i = 7; i <= 10; ++i)
+    for (int i = 7; i <= 10; ++i)
     {
         sliders[i]->setTextBoxStyle (Slider::NoTextBox, false, 0, 0);
         sliders[i]->setPopupDisplayEnabled (true, page);
@@ -362,7 +361,7 @@ static Component* createSlidersPage()
     */
     Value sharedValue;
     sharedValue = Random::getSystemRandom().nextDouble() * 100;
-    for (i = 0; i < 7; ++i)
+    for (int i = 0; i < 7; ++i)
         sliders[i]->getValueObject().referTo (sharedValue);
 
     // ..and now we'll do the same for all our min/max slider values..
@@ -370,7 +369,7 @@ static Component* createSlidersPage()
     sharedValueMin = Random::getSystemRandom().nextDouble() * 40.0;
     sharedValueMax = Random::getSystemRandom().nextDouble() * 40.0 + 60.0;
 
-    for (i = 7; i <= 10; ++i)
+    for (int i = 7; i <= 10; ++i)
     {
         sliders[i]->getMaxValueObject().referTo (sharedValueMax);
         sliders[i]->getMinValueObject().referTo (sharedValueMin);
@@ -513,7 +512,8 @@ public:
         db = new DrawableButton ("Button 4", DrawableButton::ImageOnButtonBackground);
         db->setImages (&normal, &over, &down);
         db->setClickingTogglesState (true);
-        db->setBackgroundColours (Colours::white, Colours::yellow);
+        db->setColour (DrawableButton::backgroundColourId, Colours::white);
+        db->setColour (DrawableButton::backgroundOnColourId, Colours::yellow);
         db->setBounds (200, 70, 50, 50);
         db->setTooltip ("this is a DrawableButton on a standard button background");
         db->addListener (buttonListener);
@@ -994,28 +994,6 @@ public:
     }
 };
 
-//==============================================================================
-/** A DialogWindow containing a ColourSelector component */
-class ColourSelectorDialogWindow  : public DialogWindow
-{
-public:
-    ColourSelectorDialogWindow()
-        : DialogWindow ("Colour selector demo", Colours::lightgrey, true)
-    {
-        setContentOwned (new ColourSelector(), false);
-        centreWithSize (400, 400);
-        setResizable (true, true);
-    }
-
-    void closeButtonPressed()
-    {
-        // we expect this component to be run within a modal loop, so when the close
-        // button is clicked, we can make it invisible to cause the loop to exit and the
-        // calling code will delete this object.
-        setVisible (false);
-    }
-};
-
 #if JUCE_MAC
 
 //==============================================================================
@@ -1108,6 +1086,11 @@ public:
         transformSlider.setBounds (440, 10, 180, 24);
         transformSlider.setTooltip ("Applies a transform to the components");
         transformSlider.addListener (this);
+    }
+
+    ~WidgetsDemo()
+    {
+        PopupMenu::dismissAllActiveMenus();
     }
 
     void resized()
@@ -1286,13 +1269,18 @@ public:
         }
         else if (result == 120)
         {
-           #if JUCE_MODAL_LOOPS_PERMITTED
-            ColourSelectorDialogWindow colourDialog;
+            DialogWindow::LaunchOptions o;
 
-            // this will run an event loop until the dialog's closeButtonPressed()
-            // method causes the loop to exit.
-            colourDialog.runModalLoop();
-           #endif
+            o.content.setOwned (new ColourSelector());
+            o.content->setSize (400, 400);
+
+            o.dialogTitle                   = "Colour Selector Demo";
+            o.dialogBackgroundColour        = Colours::grey;
+            o.escapeKeyTriggersCloseButton  = true;
+            o.useNativeTitleBar             = false;
+            o.resizable                     = true;
+
+            o.launchAsync();
         }
         else if (result == 140)
         {

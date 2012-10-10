@@ -148,6 +148,18 @@ public:
         shouldDelete = takeOwnership;
     }
 
+    /** Makes this OptionalScopedPointer point at a new object, and take ownership of that object. */
+    void setOwned (ObjectType* newObject)
+    {
+        set (newObject, true);
+    }
+
+    /** Makes this OptionalScopedPointer point at a new object, but will not take ownership of that object. */
+    void setNonOwned (ObjectType* newObject)
+    {
+        set (newObject, false);
+    }
+
     /** Returns true if the target object will be deleted when this pointer
         object is deleted.
     */

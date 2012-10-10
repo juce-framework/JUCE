@@ -72,20 +72,20 @@ bool FILTERCLASSNAME::isOutputChannelStereoPair (int index) const
 
 bool FILTERCLASSNAME::acceptsMidi() const
 {
-#if JucePlugin_WantsMidiInput
+   #if JucePlugin_WantsMidiInput
     return true;
-#else
+   #else
     return false;
-#endif
+   #endif
 }
 
 bool FILTERCLASSNAME::producesMidi() const
 {
-#if JucePlugin_ProducesMidiOutput
+   #if JucePlugin_ProducesMidiOutput
     return true;
-#else
+   #else
     return false;
-#endif
+   #endif
 }
 
 int FILTERCLASSNAME::getNumPrograms()

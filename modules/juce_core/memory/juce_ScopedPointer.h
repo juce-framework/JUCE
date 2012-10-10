@@ -127,7 +127,7 @@ public:
         If this ScopedPointer already points to an object, that object
         will first be deleted.
 
-        The pointer that you pass is may be null.
+        The pointer that you pass in may be a nullptr.
     */
     ScopedPointer& operator= (ObjectType* const newObjectToTakePossessionOf)
     {
@@ -168,7 +168,7 @@ public:
     {
         // Two ScopedPointers should never be able to refer to the same object - if
         // this happens, you must have done something dodgy!
-        jassert (object != other.object);
+        jassert (object != other.object || this == other.getAddress());
 
         std::swap (object, other.object);
     }
@@ -226,5 +226,12 @@ bool operator!= (const ScopedPointer<ObjectType>& pointer1, ObjectType* const po
 {
     return static_cast <ObjectType*> (pointer1) != pointer2;
 }
+
+//==============================================================================
+#ifndef DOXYGEN
+// NB: This is just here to prevent any silly attempts to call deleteAndZero() on a ScopedPointer.
+template <typename Type>
+void deleteAndZero (ScopedPointer<Type>&)  { static_jassert (sizeof (Type) == 12345); }
+#endif
 
 #endif   // __JUCE_SCOPEDPOINTER_JUCEHEADER__

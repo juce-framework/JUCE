@@ -549,12 +549,44 @@ int CodeDocument::getMaximumLineLength() noexcept
 
 void CodeDocument::deleteSection (const Position& startPosition, const Position& endPosition)
 {
-    remove (startPosition.getPosition(), endPosition.getPosition(), true);
+    deleteSection (startPosition.getPosition(), endPosition.getPosition());
+}
+
+void CodeDocument::deleteSection (const int start, const int end)
+{
+    remove (start, end, true);
 }
 
 void CodeDocument::insertText (const Position& position, const String& text)
 {
-    insert (text, position.getPosition(), true);
+    insertText (position.getPosition(), text);
+}
+
+void CodeDocument::insertText (const int insertIndex, const String& text)
+{
+    insert (text, insertIndex, true);
+}
+
+void CodeDocument::replaceSection (const int start, const int end, const String& newText)
+{
+    insertText (start, newText);
+    const int newTextLen = newText.length();
+    deleteSection (start + newTextLen, end + newTextLen);
+}
+
+void CodeDocument::applyChanges (const String& newContent)
+{
+    TextDiff diff (getAllContent(), newContent);
+
+    for (int i = 0; i < diff.changes.size(); ++i)
+    {
+        const TextDiff::Change& c = diff.changes.getReference(i);
+
+        if (c.isDeletion())
+            remove (c.start, c.start + c.length, true);
+        else
+            insert (c.insertedText, c.start, true);
+    }
 }
 
 void CodeDocument::replaceAllContent (const String& newContent)
@@ -631,9 +663,14 @@ namespace CodeDocumentHelpers
         return (CharacterFunctions::isLetterOrDigit (character) || character == '_')
                     ? 2 : (CharacterFunctions::isWhitespace (character) ? 0 : 1);
     }
+
+    static bool isTokenCharacter (const juce_wchar c) noexcept
+    {
+        return CharacterFunctions::isLetterOrDigit (c) || c == '.' || c == '_';
+    }
 }
 
-const CodeDocument::Position CodeDocument::findWordBreakAfter (const Position& position) const noexcept
+CodeDocument::Position CodeDocument::findWordBreakAfter (const Position& position) const noexcept
 {
     Position p (position);
     const int maxDistance = 256;
@@ -671,7 +708,7 @@ const CodeDocument::Position CodeDocument::findWordBreakAfter (const Position& p
     return p;
 }
 
-const CodeDocument::Position CodeDocument::findWordBreakBefore (const Position& position) const noexcept
+CodeDocument::Position CodeDocument::findWordBreakBefore (const Position& position) const noexcept
 {
     Position p (position);
     const int maxDistance = 256;
@@ -711,6 +748,24 @@ const CodeDocument::Position CodeDocument::findWordBreakBefore (const Position& 
     return p;
 }
 
+void CodeDocument::findTokenContaining (const Position& pos, Position& start, Position& end) const noexcept
+{
+    end = pos;
+    while (CodeDocumentHelpers::isTokenCharacter (end.getCharacter()))
+        end.moveBy (1);
+
+    start = end;
+    while (start.getIndexInLine() > 0
+            && CodeDocumentHelpers::isTokenCharacter (start.movedBy (-1).getCharacter()))
+        start.moveBy (-1);
+}
+
+void CodeDocument::findLineContaining  (const Position& pos, Position& s, Position& e) const noexcept
+{
+    s.setLineAndIndex (pos.getLineNumber(), 0);
+    e.setLineAndIndex (pos.getLineNumber() + 1, 0);
+}
+
 void CodeDocument::checkLastLineStatus()
 {
     while (lines.size() > 0
@@ -733,14 +788,6 @@ void CodeDocument::checkLastLineStatus()
 //==============================================================================
 void CodeDocument::addListener    (CodeDocument::Listener* const l) noexcept   { listeners.add (l); }
 void CodeDocument::removeListener (CodeDocument::Listener* const l) noexcept   { listeners.remove (l); }
-
-void CodeDocument::sendListenerChangeMessage (const int startLine, const int endLine)
-{
-    Position startPos (*this, startLine, 0);
-    Position endPos (*this, endLine, 0);
-
-    listeners.call (&CodeDocument::Listener::codeDocumentChanged, startPos, endPos);
-}
 
 //==============================================================================
 class CodeDocumentInsertAction   : public UndoableAction
@@ -834,7 +881,7 @@ void CodeDocument::insert (const String& text, const int insertPos, const bool u
                     p.setPosition (p.getPosition() + newTextLength);
             }
 
-            sendListenerChangeMessage (firstAffectedLine, lastAffectedLine);
+            listeners.call (&CodeDocument::Listener::codeDocumentTextInserted, text, insertPos);
         }
     }
 }
@@ -936,6 +983,6 @@ void CodeDocument::remove (const int startPos, const int endPos, const bool undo
                 p.setPosition (totalChars);
         }
 
-        sendListenerChangeMessage (firstAffectedLine, lastAffectedLine);
+        listeners.call (&CodeDocument::Listener::codeDocumentTextDeleted, startPos, endPos);
     }
 }

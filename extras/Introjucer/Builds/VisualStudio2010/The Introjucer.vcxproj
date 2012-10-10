@@ -157,16 +157,22 @@
     <ClCompile Include="..\..\Source\BinaryData\jucer_AudioPluginFilterTemplate.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="..\..\Source\BinaryData\jucer_ContentCompTemplate.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="..\..\Source\BinaryData\jucer_MainConsoleAppTemplate.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="..\..\Source\BinaryData\jucer_MainTemplate.cpp">
+    <ClCompile Include="..\..\Source\BinaryData\jucer_MainTemplate_NoWindow.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\BinaryData\jucer_MainTemplate_Window.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\BinaryData\jucer_NewComponentTemplate.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\Source\BinaryData\jucer_NewCppFileTemplate.cpp">
-      <ExcludedFromBuild>true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\BinaryData\jucer_WindowTemplate.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_core\text\juce_CharacterFunctions.cpp">
@@ -188,6 +194,9 @@
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_core\text\juce_StringPool.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_core\text\juce_TextDiff.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_core\maths\juce_BigInteger.cpp">
@@ -688,6 +697,9 @@
     <ClCompile Include="..\..\..\..\modules\juce_gui_basics\layout\juce_ComponentMovementWatcher.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_gui_basics\layout\juce_ConcertinaPanel.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_gui_basics\layout\juce_GroupComponent.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
@@ -1008,8 +1020,10 @@
     <ClInclude Include="..\..\Source\Code Editor\jucer_SourceCodeEditor.h"/>
     <ClInclude Include="..\..\Source\BinaryData\jucer_AudioPluginEditorTemplate.h"/>
     <ClInclude Include="..\..\Source\BinaryData\jucer_AudioPluginFilterTemplate.h"/>
+    <ClInclude Include="..\..\Source\BinaryData\jucer_ContentCompTemplate.h"/>
+    <ClInclude Include="..\..\Source\BinaryData\jucer_NewComponentTemplate.h"/>
     <ClInclude Include="..\..\Source\BinaryData\jucer_NewCppFileTemplate.h"/>
-    <ClInclude Include="..\..\Source\BinaryData\jucer_WindowTemplate.h"/>
+    <ClInclude Include="..\..\Source\BinaryData\jucer_NewInlineComponentTemplate.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\text\juce_CharacterFunctions.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\text\juce_CharPointer_ASCII.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\text\juce_CharPointer_UTF16.h"/>
@@ -1022,6 +1036,7 @@
     <ClInclude Include="..\..\..\..\modules\juce_core\text\juce_StringArray.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\text\juce_StringPairArray.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\text\juce_StringPool.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_core\text\juce_TextDiff.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\maths\juce_BigInteger.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\maths\juce_Expression.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\maths\juce_MathsFunctions.h"/>
@@ -1239,6 +1254,7 @@
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\layout\juce_ComponentBoundsConstrainer.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\layout\juce_ComponentBuilder.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\layout\juce_ComponentMovementWatcher.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_gui_basics\layout\juce_ConcertinaPanel.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\layout\juce_GroupComponent.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\layout\juce_MultiDocumentPanel.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\layout\juce_ResizableBorderComponent.h"/>
@@ -1311,6 +1327,7 @@
     <ClInclude Include="..\..\..\..\modules\juce_gui_extra\code_editor\juce_CodeEditorComponent.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_gui_extra\code_editor\juce_CodeTokeniser.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_gui_extra\code_editor\juce_CPlusPlusCodeTokeniser.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_gui_extra\code_editor\juce_CPlusPlusCodeTokeniserFunctions.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_gui_extra\documents\juce_FileBasedDocument.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_gui_extra\embedding\juce_ActiveXControlComponent.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_gui_extra\embedding\juce_NSViewComponent.h"/>
@@ -1333,8 +1350,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\Source\BinaryData\AudioPluginXCodeScript.txt"/>
-    <None Include="..\..\Source\BinaryData\brushed_aluminium.png"/>
-    <None Include="..\..\Source\BinaryData\dark_scheme.xml"/>
+    <None Include="..\..\Source\BinaryData\background_tile.png"/>
+    <None Include="..\..\Source\BinaryData\colourscheme_dark.xml"/>
+    <None Include="..\..\Source\BinaryData\colourscheme_light.xml"/>
     <None Include="..\..\Source\BinaryData\juce_icon.png"/>
     <None Include="..\..\..\..\modules\juce_core\juce_module_info"/>
     <None Include="..\..\..\..\modules\juce_cryptography\juce_module_info"/>

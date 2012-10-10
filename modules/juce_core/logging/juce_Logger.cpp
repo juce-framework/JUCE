@@ -23,25 +23,20 @@
   ==============================================================================
 */
 
-Logger::Logger()
-{
-}
+Logger::Logger() {}
 
 Logger::~Logger()
 {
+    // You're deleting this logger while it's still being used!
+    // Always call Logger::setCurrentLogger (nullptr) before deleting the active logger.
+    jassert (currentLogger != this);
 }
 
-//==============================================================================
 Logger* Logger::currentLogger = nullptr;
 
-void Logger::setCurrentLogger (Logger* const newLogger,
-                               const bool deleteOldLogger)
+void Logger::setCurrentLogger (Logger* const newLogger) noexcept
 {
-    Logger* const oldLogger = currentLogger;
     currentLogger = newLogger;
-
-    if (deleteOldLogger)
-        delete oldLogger;
 }
 
 void Logger::writeToLog (const String& message)
@@ -53,10 +48,10 @@ void Logger::writeToLog (const String& message)
 }
 
 #if JUCE_LOG_ASSERTIONS
-void JUCE_API logAssertion (const char* filename, const int lineNum) noexcept
+void JUCE_API logAssertion (const char* const filename, const int lineNum) noexcept
 {
     String m ("JUCE Assertion failure in ");
-    m << filename << ", line " << lineNum;
+    m << File (filename).getFileName() << ':' << lineNum;
 
     Logger::writeToLog (m);
 }

@@ -47,8 +47,7 @@ public:
 
 
     //==============================================================================
-    MakefileProjectExporter (Project& project_, const ValueTree& settings_)
-        : ProjectExporter (project_, settings_)
+    MakefileProjectExporter (Project& p, const ValueTree& t)   : ProjectExporter (p, t)
     {
         name = getNameLinux();
 
@@ -57,28 +56,13 @@ public:
     }
 
     //==============================================================================
-    int getLaunchPreferenceOrderForCurrentOS()
-    {
-       #if JUCE_LINUX
-        return 1;
-       #else
-        return 0;
-       #endif
-    }
-
-    bool isPossibleForCurrentProject()          { return true; }
+    bool launchProject()                        { return false; }
     bool usesMMFiles() const                    { return false; }
     bool isLinux() const                        { return true; }
     bool canCopeWithDuplicateFiles()            { return false; }
 
-    void launchProject()
+    void createExporterProperties (PropertyListBuilder&)
     {
-        // what to do on linux?
-    }
-
-    void createPropertyEditors (PropertyListBuilder& props)
-    {
-        ProjectExporter::createPropertyEditors (props);
     }
 
     //==============================================================================
@@ -105,9 +89,8 @@ protected:
             setValueIfVoid (getLibrarySearchPathValue(), "/usr/X11R6/lib/");
         }
 
-        void createPropertyEditors (PropertyListBuilder& props)
+        void createConfigProperties (PropertyListBuilder&)
         {
-            createBasicPropertyEditors (props);
         }
     };
 
@@ -297,6 +280,11 @@ private:
             << "\t-@rm -f $(OUTDIR)/$(TARGET)" << newLine
             << "\t-@rm -rf $(OBJDIR)/*" << newLine
             << "\t-@rm -rf $(OBJDIR)" << newLine
+            << newLine;
+
+        out << "strip:" << newLine
+            << "\t@echo Stripping " << projectName << newLine
+            << "\t-@strip --strip-unneeded $(OUTDIR)/$(TARGET)" << newLine
             << newLine;
 
         for (int i = 0; i < files.size(); ++i)

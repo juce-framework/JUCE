@@ -31,9 +31,9 @@
 
 #if JucePlugin_Build_RTAS
 
-#include "juce_RTAS_DigiCode_Header.h"
+ #include "juce_RTAS_DigiCode_Header.h"
 
-/*
+ /*
     This file is used to include and build the required digidesign CPP files without your project
     needing to reference the files directly. Because these files will be found via your include path,
     this means that the project doesn't have to change to cope with people's SDKs being in different
@@ -46,47 +46,27 @@
 
     If you get an error building the includes statements below, check your paths - there's a full
     list of the necessary Digidesign paths in juce_RTAS_Wrapper.cpp
-*/
+ */
 
-#if WINDOWS_VERSION
-//==============================================================================
-
- #undef _UNICODE
- #undef UNICODE
-
- #if JucePlugin_Build_VST
+ #if WINDOWS_VERSION
+  #undef _UNICODE
+  #undef UNICODE
 
   #define DllMain DllMainRTAS
   #include <DLLMain.cpp>
   #undef DllMain
+  #include <DefaultSwap.cpp>
 
-  extern BOOL WINAPI DllMainVST (HINSTANCE instance, DWORD dwReason, LPVOID);
-
-  // This overloaded DllMain can work as either an RTAS or a VST..
-  extern "C" BOOL WINAPI DllMain (HINSTANCE hInstance, DWORD ul_reason_for_call, LPVOID lpReserved)
-  {
-     if (GetModuleHandleA ("DAE.DLL") != 0)
-         return DllMainRTAS (hInstance, ul_reason_for_call, lpReserved);
-     else
-         return DllMainVST (hInstance, ul_reason_for_call, lpReserved);
-  }
  #else
-  #include <DLLMain.cpp>
+  #include <PlugInInitialize.cpp>
+  #include <Dispatcher.cpp>
  #endif
 
- #include <DefaultSwap.cpp>
+ #else
 
-#else
- //==============================================================================
- #include <PlugInInitialize.cpp>
- #include <Dispatcher.cpp>
-#endif
-
-#else
-
-#if _MSC_VER
- short __stdcall NewPlugIn (void*)                          { return 0; }
- short __stdcall _PI_GetRoutineDescriptor (long, void*)     { return 0; }
-#endif
+ #if _MSC_VER
+  short __stdcall NewPlugIn (void*)                          { return 0; }
+  short __stdcall _PI_GetRoutineDescriptor (long, void*)     { return 0; }
+ #endif
 
 #endif

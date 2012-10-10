@@ -3,7 +3,7 @@
 
   This is an automatically generated file created by the Jucer!
 
-  Creation date:  1 May 2011 12:07:57pm
+  Creation date:  21 Sep 2012 12:12:19pm
 
   Be careful when adding custom code to these files, as only the code within
   the "//[xyz]" and "//[/xyz]" sections will be retained when the file is loaded
@@ -19,8 +19,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCER_HEADER_RENDERINGTESTCOMPONENT_RENDERINGTESTCOMPONENT_ABDF1DF__
-#define __JUCER_HEADER_RENDERINGTESTCOMPONENT_RENDERINGTESTCOMPONENT_ABDF1DF__
+#ifndef __JUCER_HEADER_RENDERINGTESTCOMPONENT_RENDERINGTESTCOMPONENT_1C802450__
+#define __JUCER_HEADER_RENDERINGTESTCOMPONENT_RENDERINGTESTCOMPONENT_1C802450__
 
 //[Headers]     -- You can add your own extra header files here --
 #include "../jucedemo_headers.h"
@@ -62,9 +62,6 @@ public:
     static const int demoPng_pngSize;
 
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
     //[UserVariables]   -- You can add your own custom variables in this section.
     friend class RenderingTestCanvas;
@@ -96,10 +93,8 @@ private:
 
 
     //==============================================================================
-    // (prevent copy constructor and operator= being generated..)
-    RenderingTestComponent (const RenderingTestComponent&);
-    const RenderingTestComponent& operator= (const RenderingTestComponent&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (RenderingTestComponent);
 };
 
 
-#endif   // __JUCER_HEADER_RENDERINGTESTCOMPONENT_RENDERINGTESTCOMPONENT_ABDF1DF__
+#endif   // __JUCER_HEADER_RENDERINGTESTCOMPONENT_RENDERINGTESTCOMPONENT_1C802450__

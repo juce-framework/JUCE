@@ -43,8 +43,7 @@ class JUCE_API  KnownPluginList   : public ChangeBroadcaster
 {
 public:
     //==============================================================================
-    /** Creates an empty list.
-    */
+    /** Creates an empty list. */
     KnownPluginList();
 
     /** Destructor. */
@@ -64,8 +63,7 @@ public:
     */
     PluginDescription* getType (int index) const noexcept           { return types [index]; }
 
-    /** Looks for a type in the list which comes from this file.
-    */
+    /** Looks for a type in the list which comes from this file. */
     PluginDescription* getTypeForFile (const String& fileOrIdentifier) const;
 
     /** Looks for a type in the list which matches a plugin type ID.
@@ -104,7 +102,6 @@ public:
     bool isListingUpToDate (const String& possiblePluginFileOrIdentifier) const;
 
     /** Scans and adds a bunch of files that might have been dragged-and-dropped.
-
         If any types are found in the files, their descriptions are returned in the array.
     */
     void scanAndAddDragAndDroppedFiles (AudioPluginFormatManager& formatManager,
@@ -131,13 +128,10 @@ public:
 
         Use getIndexChosenByMenu() to find out the type that was chosen.
     */
-    void addToMenu (PopupMenu& menu,
-                    const SortMethod sortMethod) const;
+    void addToMenu (PopupMenu& menu, const SortMethod sortMethod) const;
 
     /** Converts a menu item index that has been chosen into its index in this list.
-
         Returns -1 if it's not an ID that was used.
-
         @see addToMenu
     */
     int getIndexChosenByMenu (int menuResultCode) const;
@@ -153,6 +147,19 @@ public:
     /** Recreates the state of this list from its stored XML format. */
     void recreateFromXml (const XmlElement& xml);
 
+    //==============================================================================
+    /** A structure that recursively holds a tree of plugins.
+        @see KnownPluginList::createTree()
+    */
+    struct PluginTree
+    {
+        String folder; /**< The name of this folder in the tree */
+        OwnedArray <PluginTree> subFolders;
+        Array <const PluginDescription*> plugins;
+    };
+
+    /** Creates a PluginTree object containing all the known plugins. */
+    PluginTree* createTree (const SortMethod sortMethod) const;
 
 private:
     //==============================================================================

@@ -216,7 +216,7 @@
             <Tool Name="VCCLCompilerTool"/>
           </FileConfiguration>
         </File>
-        <File RelativePath="..\..\Source\BinaryData\brushed_aluminium.png">
+        <File RelativePath="..\..\Source\BinaryData\background_tile.png">
           <FileConfiguration Name="Debug|Win32"
                              ExcludedFromBuild="true">
             <Tool Name="VCCLCompilerTool"/>
@@ -226,7 +226,17 @@
             <Tool Name="VCCLCompilerTool"/>
           </FileConfiguration>
         </File>
-        <File RelativePath="..\..\Source\BinaryData\dark_scheme.xml">
+        <File RelativePath="..\..\Source\BinaryData\colourscheme_dark.xml">
+          <FileConfiguration Name="Debug|Win32"
+                             ExcludedFromBuild="true">
+            <Tool Name="VCCLCompilerTool"/>
+          </FileConfiguration>
+          <FileConfiguration Name="Release|Win32"
+                             ExcludedFromBuild="true">
+            <Tool Name="VCCLCompilerTool"/>
+          </FileConfiguration>
+        </File>
+        <File RelativePath="..\..\Source\BinaryData\colourscheme_light.xml">
           <FileConfiguration Name="Debug|Win32"
                              ExcludedFromBuild="true">
             <Tool Name="VCCLCompilerTool"/>
@@ -277,6 +287,26 @@
             <Tool Name="VCCLCompilerTool"/>
           </FileConfiguration>
         </File>
+        <File RelativePath="..\..\Source\BinaryData\jucer_ContentCompTemplate.cpp">
+          <FileConfiguration Name="Debug|Win32"
+                             ExcludedFromBuild="true">
+            <Tool Name="VCCLCompilerTool"/>
+          </FileConfiguration>
+          <FileConfiguration Name="Release|Win32"
+                             ExcludedFromBuild="true">
+            <Tool Name="VCCLCompilerTool"/>
+          </FileConfiguration>
+        </File>
+        <File RelativePath="..\..\Source\BinaryData\jucer_ContentCompTemplate.h">
+          <FileConfiguration Name="Debug|Win32"
+                             ExcludedFromBuild="true">
+            <Tool Name="VCCLCompilerTool"/>
+          </FileConfiguration>
+          <FileConfiguration Name="Release|Win32"
+                             ExcludedFromBuild="true">
+            <Tool Name="VCCLCompilerTool"/>
+          </FileConfiguration>
+        </File>
         <File RelativePath="..\..\Source\BinaryData\jucer_MainConsoleAppTemplate.cpp">
           <FileConfiguration Name="Debug|Win32"
                              ExcludedFromBuild="true">
@@ -287,7 +317,37 @@
             <Tool Name="VCCLCompilerTool"/>
           </FileConfiguration>
         </File>
-        <File RelativePath="..\..\Source\BinaryData\jucer_MainTemplate.cpp">
+        <File RelativePath="..\..\Source\BinaryData\jucer_MainTemplate_NoWindow.cpp">
+          <FileConfiguration Name="Debug|Win32"
+                             ExcludedFromBuild="true">
+            <Tool Name="VCCLCompilerTool"/>
+          </FileConfiguration>
+          <FileConfiguration Name="Release|Win32"
+                             ExcludedFromBuild="true">
+            <Tool Name="VCCLCompilerTool"/>
+          </FileConfiguration>
+        </File>
+        <File RelativePath="..\..\Source\BinaryData\jucer_MainTemplate_Window.cpp">
+          <FileConfiguration Name="Debug|Win32"
+                             ExcludedFromBuild="true">
+            <Tool Name="VCCLCompilerTool"/>
+          </FileConfiguration>
+          <FileConfiguration Name="Release|Win32"
+                             ExcludedFromBuild="true">
+            <Tool Name="VCCLCompilerTool"/>
+          </FileConfiguration>
+        </File>
+        <File RelativePath="..\..\Source\BinaryData\jucer_NewComponentTemplate.cpp">
+          <FileConfiguration Name="Debug|Win32"
+                             ExcludedFromBuild="true">
+            <Tool Name="VCCLCompilerTool"/>
+          </FileConfiguration>
+          <FileConfiguration Name="Release|Win32"
+                             ExcludedFromBuild="true">
+            <Tool Name="VCCLCompilerTool"/>
+          </FileConfiguration>
+        </File>
+        <File RelativePath="..\..\Source\BinaryData\jucer_NewComponentTemplate.h">
           <FileConfiguration Name="Debug|Win32"
                              ExcludedFromBuild="true">
             <Tool Name="VCCLCompilerTool"/>
@@ -317,17 +377,7 @@
             <Tool Name="VCCLCompilerTool"/>
           </FileConfiguration>
         </File>
-        <File RelativePath="..\..\Source\BinaryData\jucer_WindowTemplate.cpp">
-          <FileConfiguration Name="Debug|Win32"
-                             ExcludedFromBuild="true">
-            <Tool Name="VCCLCompilerTool"/>
-          </FileConfiguration>
-          <FileConfiguration Name="Release|Win32"
-                             ExcludedFromBuild="true">
-            <Tool Name="VCCLCompilerTool"/>
-          </FileConfiguration>
-        </File>
-        <File RelativePath="..\..\Source\BinaryData\jucer_WindowTemplate.h">
+        <File RelativePath="..\..\Source\BinaryData\jucer_NewInlineComponentTemplate.h">
           <FileConfiguration Name="Debug|Win32"
                              ExcludedFromBuild="true">
             <Tool Name="VCCLCompilerTool"/>
@@ -424,6 +474,17 @@
             </FileConfiguration>
           </File>
           <File RelativePath="..\..\..\..\modules\juce_core\text\juce_StringPool.h"/>
+          <File RelativePath="..\..\..\..\modules\juce_core\text\juce_TextDiff.cpp">
+            <FileConfiguration Name="Debug|Win32"
+                               ExcludedFromBuild="true">
+              <Tool Name="VCCLCompilerTool"/>
+            </FileConfiguration>
+            <FileConfiguration Name="Release|Win32"
+                               ExcludedFromBuild="true">
+              <Tool Name="VCCLCompilerTool"/>
+            </FileConfiguration>
+          </File>
+          <File RelativePath="..\..\..\..\modules\juce_core\text\juce_TextDiff.h"/>
         </Filter>
         <Filter Name="maths">
           <File RelativePath="..\..\..\..\modules\juce_core\maths\juce_BigInteger.cpp">
@@ -2454,6 +2515,17 @@
             </FileConfiguration>
           </File>
           <File RelativePath="..\..\..\..\modules\juce_gui_basics\layout\juce_ComponentMovementWatcher.h"/>
+          <File RelativePath="..\..\..\..\modules\juce_gui_basics\layout\juce_ConcertinaPanel.cpp">
+            <FileConfiguration Name="Debug|Win32"
+                               ExcludedFromBuild="true">
+              <Tool Name="VCCLCompilerTool"/>
+            </FileConfiguration>
+            <FileConfiguration Name="Release|Win32"
+                               ExcludedFromBuild="true">
+              <Tool Name="VCCLCompilerTool"/>
+            </FileConfiguration>
+          </File>
+          <File RelativePath="..\..\..\..\modules\juce_gui_basics\layout\juce_ConcertinaPanel.h"/>
           <File RelativePath="..\..\..\..\modules\juce_gui_basics\layout\juce_GroupComponent.cpp">
             <FileConfiguration Name="Debug|Win32"
                                ExcludedFromBuild="true">
@@ -3307,6 +3379,7 @@
             </FileConfiguration>
           </File>
           <File RelativePath="..\..\..\..\modules\juce_gui_extra\code_editor\juce_CPlusPlusCodeTokeniser.h"/>
+          <File RelativePath="..\..\..\..\modules\juce_gui_extra\code_editor\juce_CPlusPlusCodeTokeniserFunctions.h"/>
         </Filter>
         <Filter Name="documents">
           <File RelativePath="..\..\..\..\modules\juce_gui_extra\documents\juce_FileBasedDocument.cpp">

@@ -387,6 +387,17 @@
             </FileConfiguration>
           </File>
           <File RelativePath="..\..\..\..\modules\juce_core\text\juce_StringPool.h"/>
+          <File RelativePath="..\..\..\..\modules\juce_core\text\juce_TextDiff.cpp">
+            <FileConfiguration Name="Debug|Win32"
+                               ExcludedFromBuild="true">
+              <Tool Name="VCCLCompilerTool"/>
+            </FileConfiguration>
+            <FileConfiguration Name="Release|Win32"
+                               ExcludedFromBuild="true">
+              <Tool Name="VCCLCompilerTool"/>
+            </FileConfiguration>
+          </File>
+          <File RelativePath="..\..\..\..\modules\juce_core\text\juce_TextDiff.h"/>
         </Filter>
         <Filter Name="maths">
           <File RelativePath="..\..\..\..\modules\juce_core\maths\juce_BigInteger.cpp">
@@ -2345,6 +2356,17 @@
             </FileConfiguration>
           </File>
           <File RelativePath="..\..\..\..\modules\juce_gui_basics\layout\juce_ComponentMovementWatcher.h"/>
+          <File RelativePath="..\..\..\..\modules\juce_gui_basics\layout\juce_ConcertinaPanel.cpp">
+            <FileConfiguration Name="Debug|Win32"
+                               ExcludedFromBuild="true">
+              <Tool Name="VCCLCompilerTool"/>
+            </FileConfiguration>
+            <FileConfiguration Name="Release|Win32"
+                               ExcludedFromBuild="true">
+              <Tool Name="VCCLCompilerTool"/>
+            </FileConfiguration>
+          </File>
+          <File RelativePath="..\..\..\..\modules\juce_gui_basics\layout\juce_ConcertinaPanel.h"/>
           <File RelativePath="..\..\..\..\modules\juce_gui_basics\layout\juce_GroupComponent.cpp">
             <FileConfiguration Name="Debug|Win32"
                                ExcludedFromBuild="true">
@@ -3198,6 +3220,7 @@
             </FileConfiguration>
           </File>
           <File RelativePath="..\..\..\..\modules\juce_gui_extra\code_editor\juce_CPlusPlusCodeTokeniser.h"/>
+          <File RelativePath="..\..\..\..\modules\juce_gui_extra\code_editor\juce_CPlusPlusCodeTokeniserFunctions.h"/>
         </Filter>
         <Filter Name="documents">
           <File RelativePath="..\..\..\..\modules\juce_gui_extra\documents\juce_FileBasedDocument.cpp">

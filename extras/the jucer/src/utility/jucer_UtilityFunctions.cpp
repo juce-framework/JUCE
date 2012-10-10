@@ -28,64 +28,85 @@
 
 
 //==============================================================================
-const String replaceCEscapeChars (const String& s)
+static void writeEscapeChars (OutputStream& out, const char* utf8, const int numBytes,
+                              const int maxCharsOnLine, const bool breakAtNewLines,
+                              const bool replaceSingleQuotes, const bool allowStringBreaks)
 {
-    const int len = s.length();
-
-    String r;
-    r.preallocateBytes (4 * len + 4);
+    int charsOnLine = 0;
     bool lastWasHexEscapeCode = false;
 
-    for (int i = 0; i < len; ++i)
+    for (int i = 0; i < numBytes || numBytes < 0; ++i)
     {
-        const juce_wchar c = s[i];
+        const unsigned char c = (unsigned char) utf8[i];
+        bool startNewLine = false;
 
         switch (c)
         {
-        case '\t':
-            r << "\\t";
-            lastWasHexEscapeCode = false;
-            break;
-        case '\r':
-            r << "\\r";
-            lastWasHexEscapeCode = false;
-            break;
-        case '\n':
-            r <<  "\\n";
-            lastWasHexEscapeCode = false;
-            break;
-        case '\\':
-            r << "\\\\";
-            lastWasHexEscapeCode = false;
-            break;
-        case '\'':
-            r << "\\\'";
-            lastWasHexEscapeCode = false;
-            break;
-        case '\"':
-            r << "\\\"";
-            lastWasHexEscapeCode = false;
-            break;
+            case '\t':  out << "\\t";  lastWasHexEscapeCode = false; charsOnLine += 2; break;
+            case '\r':  out << "\\r";  lastWasHexEscapeCode = false; charsOnLine += 2; break;
+            case '\n':  out << "\\n";  lastWasHexEscapeCode = false; charsOnLine += 2; startNewLine = breakAtNewLines; break;
+            case '\\':  out << "\\\\"; lastWasHexEscapeCode = false; charsOnLine += 2; break;
+            case '\"':  out << "\\\""; lastWasHexEscapeCode = false; charsOnLine += 2; break;
 
-        default:
-            if (c < 128 &&
-                 ! (lastWasHexEscapeCode
-                     && String ("0123456789abcdefABCDEF").containsChar (c))) // (have to avoid following a hex escape sequence with a valid hex digit)
-            {
-                r << c;
-                lastWasHexEscapeCode = false;
-            }
-            else
-            {
+            case 0:
+                if (numBytes < 0)
+                    return;
+
+                out << "\\0";
                 lastWasHexEscapeCode = true;
-                r << "\\x" << String::toHexString ((int) c);
-            }
+                charsOnLine += 2;
+                break;
 
-            break;
+            case '\'':
+                if (replaceSingleQuotes)
+                {
+                    out << "\\\'";
+                    lastWasHexEscapeCode = false;
+                    charsOnLine += 2;
+                    break;
+                }
+
+                // deliberate fall-through...
+
+            default:
+                if (c >= 32 && c < 127 && ! (lastWasHexEscapeCode  // (have to avoid following a hex escape sequence with a valid hex digit)
+                                               && CharacterFunctions::getHexDigitValue (c) >= 0))
+                {
+                    out << (char) c;
+                    lastWasHexEscapeCode = false;
+                    ++charsOnLine;
+                }
+                else if (allowStringBreaks && lastWasHexEscapeCode && c >= 32 && c < 127)
+                {
+                    out << "\"\"" << (char) c;
+                    lastWasHexEscapeCode = false;
+                    charsOnLine += 3;
+                }
+                else
+                {
+                    out << (c < 16 ? "\\x0" : "\\x") << String::toHexString ((int) c);
+                    lastWasHexEscapeCode = true;
+                    charsOnLine += 4;
+                }
+
+                break;
+        }
+
+        if ((startNewLine || (maxCharsOnLine > 0 && charsOnLine >= maxCharsOnLine))
+             && (numBytes < 0 || i < numBytes - 1))
+        {
+            charsOnLine = 0;
+            out << "\"" << newLine << "\"";
+            lastWasHexEscapeCode = false;
         }
     }
+}
 
-    return r;
+static String addEscapeChars (const String& s)
+{
+    MemoryOutputStream out;
+    writeEscapeChars (out, s.toUTF8().getAddress(), -1, -1, false, true, true);
+    return out.toUTF8();
 }
 
 const String quotedString (const String& s)
@@ -125,7 +146,10 @@ const String quotedString (const String& s)
         }
     }
 
-    return "L\"" + replaceCEscapeChars (s) + "\"";
+    if (CharPointer_ASCII::isValidString (s.toUTF8(), std::numeric_limits<int>::max()))
+        return addEscapeChars (s).quoted();
+    else
+        return "CharPointer_UTF8 (" + addEscapeChars (s).quoted() + ")";
 }
 
 const String replaceStringTranslations (String s, JucerDocument* document)

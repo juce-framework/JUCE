@@ -348,21 +348,18 @@ bool XmlElement::writeToFile (const File& file,
                               const String& encodingType,
                               const int lineWrapLength) const
 {
-    if (file.hasWriteAccess())
+    TemporaryFile tempFile (file);
+
     {
-        TemporaryFile tempFile (file);
-        ScopedPointer <FileOutputStream> out (tempFile.getFile().createOutputStream());
+        FileOutputStream out (tempFile.getFile());
 
-        if (out != nullptr)
-        {
-            writeToStream (*out, dtdToUse, false, true, encodingType, lineWrapLength);
-            out = nullptr;
+        if (! out.openedOk())
+            return false;
 
-            return tempFile.overwriteTargetFileWithTemporary();
-        }
+        writeToStream (out, dtdToUse, false, true, encodingType, lineWrapLength);
     }
 
-    return false;
+    return tempFile.overwriteTargetFileWithTemporary();
 }
 
 //==============================================================================

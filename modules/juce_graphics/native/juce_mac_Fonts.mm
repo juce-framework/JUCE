@@ -130,7 +130,7 @@ namespace CoreTextTypeLayout
         {
             if (advances == nullptr)
             {
-                local.malloc (numGlyphs);
+                local.malloc ((size_t) numGlyphs);
                 CTRunGetAdvances (run, CFRangeMake (0, 0), local);
                 advances = local;
             }
@@ -142,7 +142,7 @@ namespace CoreTextTypeLayout
 
     struct Glyphs
     {
-        Glyphs (CTRunRef run, const int numGlyphs)
+        Glyphs (CTRunRef run, const size_t numGlyphs)
             : glyphs (CTRunGetGlyphsPtr (run))
         {
             if (glyphs == nullptr)
@@ -159,7 +159,7 @@ namespace CoreTextTypeLayout
 
     struct Positions
     {
-        Positions (CTRunRef run, const int numGlyphs)
+        Positions (CTRunRef run, const size_t numGlyphs)
             : points (CTRunGetPositionsPtr (run))
         {
             if (points == nullptr)
@@ -383,9 +383,9 @@ namespace CoreTextTypeLayout
                     glyphRun->colour = Colour::fromFloatRGBA (components[0], components[1], components[2], components[3]);
                 }
 
-                const CoreTextTypeLayout::Glyphs glyphs (run, numGlyphs);
+                const CoreTextTypeLayout::Glyphs glyphs (run, (size_t) numGlyphs);
                 const CoreTextTypeLayout::Advances advances (run, numGlyphs);
-                const CoreTextTypeLayout::Positions positions (run, numGlyphs);
+                const CoreTextTypeLayout::Positions positions (run, (size_t) numGlyphs);
 
                 for (CFIndex k = 0; k < numGlyphs; ++k)
                     glyphRun->glyphs.add (TextLayout::Glyph (glyphs.glyphs[k], Point<float> (positions.points[k].x,
@@ -426,8 +426,8 @@ public:
 
             fontRef = CTFontCopyGraphicsFont (ctFontRef, nullptr);
 
-            const int totalHeight = abs (CGFontGetAscent (fontRef)) + abs (CGFontGetDescent (fontRef));
-            const float ctTotalHeight = abs (CTFontGetAscent (ctFontRef)) + abs (CTFontGetDescent (ctFontRef));
+            const int totalHeight = std::abs (CGFontGetAscent (fontRef)) + std::abs (CGFontGetDescent (fontRef));
+            const float ctTotalHeight = std::abs (CTFontGetAscent (ctFontRef)) + std::abs (CTFontGetDescent (ctFontRef));
             unitsToHeightScaleFactor = 1.0f / ctTotalHeight;
             fontHeightToCGSizeFactor = CGFontGetUnitsPerEm (fontRef) / (float) totalHeight;
 
@@ -511,7 +511,7 @@ public:
                 CFIndex length = CTRunGetGlyphCount (run);
 
                 const CoreTextTypeLayout::Advances advances (run, length);
-                const CoreTextTypeLayout::Glyphs glyphs (run, length);
+                const CoreTextTypeLayout::Glyphs glyphs (run, (size_t) length);
 
                 for (int j = 0; j < length; ++j)
                 {

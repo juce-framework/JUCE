@@ -71,8 +71,9 @@
     c:\yourdirectory\PT_80_SDK\AlturaPorts\NewFileLibs\DOA
     c:\yourdirectory\PT_80_SDK\AlturaPorts\AlturaSource\PPC_H
     c:\yourdirectory\PT_80_SDK\AlturaPorts\AlturaSource\AppSupport
+    c:\yourdirectory\PT_80_SDK\AlturaPorts\DigiPublic
     c:\yourdirectory\PT_80_SDK\AvidCode\AVX2sdk\AVX\avx2\avx2sdk\inc
-    C:\yourdirectory\PT_80_SDK\xplat\AVX\avx2\avx2sdk\inc
+    c:\yourdirectory\PT_80_SDK\xplat\AVX\avx2\avx2sdk\inc
 
    NB. If you hit a huge pile of bugs around here, make sure that you've not got the
    Apple QuickTime headers before the PT headers in your path, because there are
@@ -87,6 +88,7 @@
 #include <CPluginControl.h>
 #include <CPluginControl_OnOff.h>
 #include <FicProcessTokens.h>
+#include <ExternalVersionDefines.h>
 
 //==============================================================================
 #ifdef _MSC_VER
@@ -154,7 +156,9 @@ public:
     {
         asyncUpdater = new InternalAsyncUpdater (*this);
         juceFilter = createPluginFilter();
-        jassert (juceFilter != 0);
+        jassert (juceFilter != nullptr);
+
+        juceFilter->wrapperType = AudioProcessor::wrapperType_RTAS;
 
         AddChunk (juceChunkType, "Juce Audio Plugin Data");
 
@@ -517,8 +521,7 @@ protected:
             juceFilter->setPlayConfigDetails (fNumInputs, fNumOutputs,
                                               sampleRate, mRTGlobals->mHWBufferSizeInSamples);
 
-            juceFilter->prepareToPlay (sampleRate,
-                                       mRTGlobals->mHWBufferSizeInSamples);
+            juceFilter->prepareToPlay (sampleRate, mRTGlobals->mHWBufferSizeInSamples);
 
             prepared = true;
         }
@@ -704,7 +707,7 @@ protected:
         Cmn_Int64 ticks = 0;
         Cmn_Bool isPlaying = false;
 
-        if (midiTransport != 0)
+        if (midiTransport != nullptr)
         {
             midiTransport->GetCurrentTempo (&bpm);
             midiTransport->IsTransportPlaying (&isPlaying);
@@ -719,6 +722,14 @@ protected:
                 midiTransport->GetCurrentTDMSampleLocation (&sampleLocation);
 
             midiTransport->GetCustomTickPosition (&ticks, sampleLocation);
+
+            info.timeInSamples = (int64) sampleLocation;
+            info.timeInSeconds = sampleLocation / sampleRate;
+        }
+        else
+        {
+            info.timeInSamples = 0;
+            info.timeInSeconds = 0;
         }
 
         info.bpm = bpm;
@@ -731,10 +742,6 @@ protected:
         info.isLooping = false;
         info.ppqLoopStart = 0;
         info.ppqLoopEnd = 0;
-
-        // xxx incorrect if there are tempo changes, but there's no
-        // other way of getting this info..
-        info.timeInSeconds = ticks * (60.0 / 960000.0) / bpm;
 
         double framesPerSec = 24.0;
 
@@ -939,7 +946,14 @@ public:
             type->DefineStemFormats (getFormatForChans (channelConfigs [i][0] != 0 ? channelConfigs [i][0] : channelConfigs [i][1]),
                                      getFormatForChans (channelConfigs [i][1] != 0 ? channelConfigs [i][1] : channelConfigs [i][0]));
 
+           #if ! JucePlugin_RTASDisableBypass
             type->AddGestalt (pluginGestalt_CanBypass);
+           #endif
+
+           #if JucePlugin_RTASDisableMultiMono
+            type->AddGestalt (pluginGestalt_DoesntSupportMultiMono);
+           #endif
+
             type->AddGestalt (pluginGestalt_SupportsVariableQuanta);
             type->AttachEffectProcessCreator (createNewProcess);
 

@@ -100,7 +100,7 @@ public:
     class Int8
     {
     public:
-        inline Int8 (void* data_) noexcept  : data (static_cast <int8*> (data_))  {}
+        inline Int8 (void* d) noexcept  : data (static_cast <int8*> (d))  {}
 
         inline void advance() noexcept                          { ++data; }
         inline void skip (int numSamples) noexcept              { data += numSamples; }
@@ -125,7 +125,7 @@ public:
     class UInt8
     {
     public:
-        inline UInt8 (void* data_) noexcept  : data (static_cast <uint8*> (data_))  {}
+        inline UInt8 (void* d) noexcept  : data (static_cast <uint8*> (d))  {}
 
         inline void advance() noexcept                          { ++data; }
         inline void skip (int numSamples) noexcept              { data += numSamples; }
@@ -150,7 +150,7 @@ public:
     class Int16
     {
     public:
-        inline Int16 (void* data_) noexcept  : data (static_cast <uint16*> (data_))  {}
+        inline Int16 (void* d) noexcept  : data (static_cast <uint16*> (d))  {}
 
         inline void advance() noexcept                          { ++data; }
         inline void skip (int numSamples) noexcept              { data += numSamples; }
@@ -175,7 +175,7 @@ public:
     class Int24
     {
     public:
-        inline Int24 (void* data_) noexcept  : data (static_cast <char*> (data_))  {}
+        inline Int24 (void* d) noexcept  : data (static_cast <char*> (d))  {}
 
         inline void advance() noexcept                          { data += 3; }
         inline void skip (int numSamples) noexcept              { data += 3 * numSamples; }
@@ -200,7 +200,7 @@ public:
     class Int32
     {
     public:
-        inline Int32 (void* data_) noexcept  : data (static_cast <uint32*> (data_))  {}
+        inline Int32 (void* d) noexcept  : data (static_cast <uint32*> (d))  {}
 
         inline void advance() noexcept                          { ++data; }
         inline void skip (int numSamples) noexcept              { data += numSamples; }
@@ -225,7 +225,7 @@ public:
     class Float32
     {
     public:
-        inline Float32 (void* data_) noexcept : data (static_cast <float*> (data_))  {}
+        inline Float32 (void* d) noexcept  : data (static_cast <float*> (d))  {}
 
         inline void advance() noexcept                          { ++data; }
         inline void skip (int numSamples) noexcept              { data += numSamples; }
@@ -275,7 +275,7 @@ public:
     public:
         inline Interleaved() noexcept : numInterleavedChannels (1) {}
         inline Interleaved (const Interleaved& other) noexcept : numInterleavedChannels (other.numInterleavedChannels) {}
-        inline Interleaved (const int numInterleavedChannels_) noexcept : numInterleavedChannels (numInterleavedChannels_) {}
+        inline Interleaved (const int numInterleavedChans) noexcept : numInterleavedChannels (numInterleavedChans) {}
         inline void copyFrom (const Interleaved& other) noexcept { numInterleavedChannels = other.numInterleavedChannels; }
         template <class SampleFormatType> inline void advanceData (SampleFormatType& s) noexcept                    { s.skip (numInterleavedChannels); }
         template <class SampleFormatType> inline void advanceDataBy (SampleFormatType& s, int numSamples) noexcept  { s.skip (numInterleavedChannels * numSamples); }

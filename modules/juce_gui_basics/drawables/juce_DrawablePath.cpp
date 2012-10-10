@@ -174,20 +174,20 @@ void DrawablePath::ValueTreeWrapper::setUsesNonZeroWinding (bool b, UndoManager*
     state.setProperty (nonZeroWinding, b, undoManager);
 }
 
-void DrawablePath::ValueTreeWrapper::readFrom (const RelativePointPath& relativePath, UndoManager* undoManager)
+void DrawablePath::ValueTreeWrapper::readFrom (const RelativePointPath& p, UndoManager* undoManager)
 {
-    setUsesNonZeroWinding (relativePath.usesNonZeroWinding, undoManager);
+    setUsesNonZeroWinding (p.usesNonZeroWinding, undoManager);
 
     ValueTree pathTree (getPathState());
     pathTree.removeAllChildren (undoManager);
 
-    for (int i = 0; i < relativePath.elements.size(); ++i)
-        pathTree.addChild (relativePath.elements.getUnchecked(i)->createTree(), -1, undoManager);
+    for (int i = 0; i < p.elements.size(); ++i)
+        pathTree.addChild (p.elements.getUnchecked(i)->createTree(), -1, undoManager);
 }
 
-void DrawablePath::ValueTreeWrapper::writeTo (RelativePointPath& relativePath) const
+void DrawablePath::ValueTreeWrapper::writeTo (RelativePointPath& p) const
 {
-    relativePath.usesNonZeroWinding = usesNonZeroWinding();
+    p.usesNonZeroWinding = usesNonZeroWinding();
     RelativePoint points[3];
 
     const ValueTree pathTree (state.getChildWithName (path));
@@ -210,7 +210,7 @@ void DrawablePath::ValueTreeWrapper::writeTo (RelativePointPath& relativePath) c
         else if (t == Element::cubicToElement)       newElement = new RelativePointPath::CubicTo (points[0], points[1], points[2]);
         else                                         jassertfalse;
 
-        relativePath.addElement (newElement);
+        p.addElement (newElement);
     }
 }
 

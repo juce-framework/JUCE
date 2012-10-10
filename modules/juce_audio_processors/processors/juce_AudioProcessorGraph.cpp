@@ -665,8 +665,7 @@ private:
 
     void markAnyUnusedBuffersAsFree (const int stepIndex)
     {
-        int i;
-        for (i = 0; i < nodeIds.size(); ++i)
+        for (int i = 0; i < nodeIds.size(); ++i)
         {
             if (isNodeBusy (nodeIds.getUnchecked(i))
                  && ! isBufferNeededLater (stepIndex, -1,
@@ -677,7 +676,7 @@ private:
             }
         }
 
-        for (i = 0; i < midiNodeIds.size(); ++i)
+        for (int i = 0; i < midiNodeIds.size(); ++i)
         {
             if (isNodeBusy (midiNodeIds.getUnchecked(i))
                  && ! isBufferNeededLater (stepIndex, -1,
@@ -1296,8 +1295,7 @@ void AudioProcessorGraph::processBlock (AudioSampleBuffer& buffer, MidiBuffer& m
     currentMidiInputBuffer = &midiMessages;
     currentMidiOutputBuffer.clear();
 
-    int i;
-    for (i = 0; i < renderingOps.size(); ++i)
+    for (int i = 0; i < renderingOps.size(); ++i)
     {
         GraphRenderingOps::AudioGraphRenderingOp* const op
             = (GraphRenderingOps::AudioGraphRenderingOp*) renderingOps.getUnchecked(i);
@@ -1305,7 +1303,7 @@ void AudioProcessorGraph::processBlock (AudioSampleBuffer& buffer, MidiBuffer& m
         op->perform (renderingBuffers, midiBuffers, numSamples);
     }
 
-    for (i = 0; i < buffer.getNumChannels(); ++i)
+    for (int i = 0; i < buffer.getNumChannels(); ++i)
         buffer.copyFrom (i, 0, currentAudioOutputBuffer, i, 0, numSamples);
 
     midiMessages.clear();

@@ -32,9 +32,9 @@ class OpenGLContext::NativeContext
 public:
     NativeContext (Component& component,
                    const OpenGLPixelFormat& pixelFormat,
-                   void* contextToShareWith_)
+                   void* shareContext)
         : renderContext (0), embeddedWindow (0), swapFrames (0), bestVisual (0),
-          contextToShareWith (contextToShareWith_)
+          contextToShareWith (shareContext)
     {
         ScopedXLock xlock;
         XSync (display, False);

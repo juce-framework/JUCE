@@ -35,15 +35,15 @@ bool File::copyInternal (const File& dest) const
     NSFileManager* fm = [NSFileManager defaultManager];
 
     return [fm fileExistsAtPath: juceStringToNS (fullPath)]
-#if defined (MAC_OS_X_VERSION_10_6) && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_6
+           #if defined (MAC_OS_X_VERSION_10_6) && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_6
             && [fm copyItemAtPath: juceStringToNS (fullPath)
                            toPath: juceStringToNS (dest.getFullPathName())
                             error: nil];
-#else
+           #else
             && [fm copyPath: juceStringToNS (fullPath)
                      toPath: juceStringToNS (dest.getFullPathName())
                     handler: nil];
-#endif
+           #endif
 }
 
 void File::findFileSystemRoots (Array<File>& destArray)
@@ -73,7 +73,7 @@ namespace FileHelpers
 
     static bool isHiddenFile (const String& path)
     {
-      #if defined (MAC_OS_X_VERSION_10_6) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_6
+       #if defined (MAC_OS_X_VERSION_10_6) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_6
         JUCE_AUTORELEASEPOOL
         NSNumber* hidden = nil;
         NSError* err = nil;
@@ -81,25 +81,25 @@ namespace FileHelpers
         return [[NSURL fileURLWithPath: juceStringToNS (path)]
                     getResourceValue: &hidden forKey: NSURLIsHiddenKey error: &err]
                 && [hidden boolValue];
-      #elif JUCE_IOS
+       #elif JUCE_IOS
         return File (path).getFileName().startsWithChar ('.');
-      #else
+       #else
         FSRef ref;
         LSItemInfoRecord info;
 
         return FSPathMakeRefWithOptions ((const UInt8*) path.toUTF8().getAddress(), kFSPathMakeRefDoNotFollowLeafSymlink, &ref, 0) == noErr
                  && LSCopyItemInfoForRef (&ref, kLSRequestBasicFlagsOnly, &info) == noErr
                  && (info.flags & kLSItemInfoIsInvisible) != 0;
-      #endif
+       #endif
     }
 
-  #if JUCE_IOS
+   #if JUCE_IOS
     String getIOSSystemLocation (NSSearchPathDirectory type)
     {
         return nsStringToJuce ([NSSearchPathForDirectoriesInDomains (type, NSUserDomainMask, YES)
                                 objectAtIndex: 0]);
     }
-  #endif
+   #endif
 
     static bool launchExecutable (const String& pathAndArguments)
     {
@@ -233,7 +233,7 @@ File File::getSpecialLocation (const SpecialLocationType type)
             buffer.calloc (size + 8);
 
             _NSGetExecutablePath (buffer.getData(), &size);
-            return String::fromUTF8 (buffer, size);
+            return String::fromUTF8 (buffer, (int) size);
         }
 
         default:
@@ -351,11 +351,11 @@ public:
             if (fnmatch (wildcardUTF8, filenameFound.toUTF8(), FNM_CASEFOLD) != 0)
                 continue;
 
-            const String path (parentDir + filenameFound);
-            updateStatInfoForFile (path, isDir, fileSize, modTime, creationTime, isReadOnly);
+            const String fullPath (parentDir + filenameFound);
+            updateStatInfoForFile (fullPath, isDir, fileSize, modTime, creationTime, isReadOnly);
 
             if (isHidden != nullptr)
-                *isHidden = FileHelpers::isHiddenFile (path);
+                *isHidden = FileHelpers::isHiddenFile (fullPath);
 
             return true;
         }
@@ -368,8 +368,8 @@ private:
     JUCE_DECLARE_NON_COPYABLE (Pimpl);
 };
 
-DirectoryIterator::NativeIterator::NativeIterator (const File& directory, const String& wildCard)
-    : pimpl (new DirectoryIterator::NativeIterator::Pimpl (directory, wildCard))
+DirectoryIterator::NativeIterator::NativeIterator (const File& directory, const String& wildcard)
+    : pimpl (new DirectoryIterator::NativeIterator::Pimpl (directory, wildcard))
 {
 }
 

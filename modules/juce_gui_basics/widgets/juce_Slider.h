@@ -88,7 +88,6 @@ public:
     };
 
     /** The position of the slider's text-entry box.
-
         @see setTextBoxStyle
     */
     enum TextEntryBoxPosition
@@ -111,8 +110,7 @@ public:
     */
     explicit Slider (const String& componentName);
 
-    /** Creates a slider with some explicit options.
-    */
+    /** Creates a slider with some explicit options. */
     Slider (SliderStyle style, TextEntryBoxPosition textBoxPosition);
 
     /** Destructor. */
@@ -505,7 +503,7 @@ public:
 
         @see Slider::addListener, Slider::removeListener
     */
-    class JUCE_API  Listener
+    class Listener
     {
     public:
         //==============================================================================
@@ -533,13 +531,12 @@ public:
 
             @see sliderDragEnded, Slider::startedDragging
         */
-        virtual void sliderDragStarted (Slider* slider);
+        virtual void sliderDragStarted (Slider*) {}
 
         /** Called after a drag operation has finished.
-
             @see sliderDragStarted, Slider::stoppedDragging
         */
-        virtual void sliderDragEnded (Slider* slider);
+        virtual void sliderDragEnded (Slider*) {}
     };
 
     /** Adds a listener to be called when this slider's value changes. */
@@ -816,7 +813,7 @@ protected:
 
 private:
     //==============================================================================
-    class Pimpl;
+    JUCE_PUBLIC_IN_DLL_BUILD (class Pimpl);
     friend class Pimpl;
     friend class ScopedPointer<Pimpl>;
     ScopedPointer<Pimpl> pimpl;

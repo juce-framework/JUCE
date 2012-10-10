@@ -516,34 +516,33 @@ public:
     {
         while (--maxBytesToRead >= 0 && *dataToTest != 0)
         {
-            const signed char byte = (signed char) *dataToTest;
+            const signed char byte = (signed char) *dataToTest++;
 
             if (byte < 0)
             {
-                uint32 n = (uint32) (uint8) byte;
-                uint32 mask = 0x7f;
-                uint32 bit = 0x40;
+                uint8 bit = 0x40;
                 int numExtraValues = 0;
 
-                while ((n & bit) != 0)
+                while ((byte & bit) != 0)
                 {
-                    if (bit <= 0x10)
+                    if (bit < 8)
                         return false;
 
-                    mask >>= 1;
                     ++numExtraValues;
                     bit >>= 1;
-                }
 
-                n &= mask;
-
-                while (--numExtraValues >= 0)
-                {
-                    const uint32 nextByte = (uint32) (uint8) *dataToTest++;
-
-                    if ((nextByte & 0xc0) != 0x80)
+                    if (bit == 8 && (numExtraValues > maxBytesToRead
+                                       || *CharPointer_UTF8 (dataToTest - 1) > 0x10ffff))
                         return false;
                 }
+
+                maxBytesToRead -= numExtraValues;
+                if (maxBytesToRead < 0)
+                    return false;
+
+                while (--numExtraValues >= 0)
+                    if ((*dataToTest++ & 0xc0) != 0x80)
+                        return false;
             }
         }
 

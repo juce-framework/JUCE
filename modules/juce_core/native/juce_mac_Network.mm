@@ -160,8 +160,8 @@ public:
             if (available > 0)
             {
                 const ScopedLock sl (dataLock);
-                [data getBytes: dest length: available];
-                [data replaceBytesInRange: NSMakeRange (0, available) withBytes: nil length: 0];
+                [data getBytes: dest length: (NSUInteger) available];
+                [data replaceBytesInRange: NSMakeRange (0, (NSUInteger) available) withBytes: nil length: 0];
 
                 numDone += available;
                 numBytes -= available;

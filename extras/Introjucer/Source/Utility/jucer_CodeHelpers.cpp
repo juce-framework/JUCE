@@ -62,8 +62,7 @@ namespace CodeHelpers
         else
             s = s.replaceCharacters (".,;/@", "_____");
 
-        int i;
-        for (i = s.length(); --i > 0;)
+        for (int i = s.length(); --i > 0;)
             if (CharacterFunctions::isLetter (s[i])
                  && CharacterFunctions::isLetter (s[i - 1])
                  && CharacterFunctions::isUpperCase (s[i])
@@ -86,7 +85,7 @@ namespace CodeHelpers
         if (capitalise)
             n = n.toLowerCase();
 
-        for (i = 1; i < words.size(); ++i)
+        for (int i = 1; i < words.size(); ++i)
         {
             if (capitalise && words[i].length() > 1)
                 n << words[i].substring (0, 1).toUpperCase()
@@ -344,27 +343,22 @@ namespace CodeHelpers
         const char* t = s.toUTF8();
         unsigned int hash = 0;
         while (*t != 0)
-            hash = hashMultiplier * hash + *t++;
+            hash = hashMultiplier * hash + (unsigned int) *t++;
 
         return hash;
     }
 
     static int findBestHashMultiplier (const StringArray& strings)
     {
-        StringArray allStrings;
-
-        for (int i = strings.size(); --i >= 0;)
-            allStrings.addTokens (strings[i], "|", "");
-
         int v = 31;
 
         for (;;)
         {
             SortedSet <unsigned int> hashes;
             bool collision = false;
-            for (int i = allStrings.size(); --i >= 0;)
+            for (int i = strings.size(); --i >= 0;)
             {
-                const unsigned int hash = calculateHash (allStrings[i], v);
+                const unsigned int hash = calculateHash (strings[i], v);
                 if (hashes.contains (hash))
                 {
                     collision = true;
@@ -393,28 +387,77 @@ namespace CodeHelpers
         out << indent << "unsigned int hash = 0;" << newLine
             << indent << "if (" << utf8PointerVariable << " != 0)" << newLine
             << indent << "    while (*" << utf8PointerVariable << " != 0)" << newLine
-            << indent << "        hash = " << hashMultiplier << " * hash + *" << utf8PointerVariable << "++;" << newLine
+            << indent << "        hash = " << hashMultiplier << " * hash + (unsigned int) *" << utf8PointerVariable << "++;" << newLine
             << newLine
             << indent << "switch (hash)" << newLine
             << indent << "{" << newLine;
 
         for (int i = 0; i < strings.size(); ++i)
         {
-            StringArray matchingStrings;
-            matchingStrings.addTokens (strings[i], "|", "");
-
-            for (int j = 0; j < matchingStrings.size(); ++j)
-            {
-                out << indent << "    case 0x" << hexString8Digits (calculateHash (matchingStrings[j], hashMultiplier)) << ":";
-
-                if (j < matchingStrings.size() - 1)
-                    out << newLine;
-            }
-
-            out << "  " << codeToExecute[i] << newLine;
+            out << indent << "    case 0x" << hexString8Digits (calculateHash (strings[i], hashMultiplier))
+                << ":  " << codeToExecute[i] << newLine;
         }
 
         out << indent << "    default: break;" << newLine
             << indent << "}" << newLine << newLine;
+    }
+
+    String getLeadingWhitespace (String line)
+    {
+        line = line.removeCharacters ("\r\n");
+        const String::CharPointerType endOfLeadingWS (line.getCharPointer().findEndOfWhitespace());
+        return String (line.getCharPointer(), endOfLeadingWS);
+    }
+
+    int getBraceCount (String::CharPointerType line)
+    {
+        int braces = 0;
+
+        for (;;)
+        {
+            const juce_wchar c = line.getAndAdvance();
+
+            if (c == 0)                         break;
+            else if (c == '{')                  ++braces;
+            else if (c == '}')                  --braces;
+            else if (c == '/')                  { if (*line == '/') break; }
+            else if (c == '"' || c == '\'')     { while (! (line.isEmpty() || line.getAndAdvance() == c)) {} }
+        }
+
+        return braces;
+    }
+
+    bool getIndentForCurrentBlock (CodeDocument::Position pos, const String& tab,
+                                   String& blockIndent, String& lastLineIndent)
+    {
+        int braceCount = 0;
+        bool indentFound = false;
+
+        while (pos.getLineNumber() > 0)
+        {
+            pos = pos.movedByLines (-1);
+
+            const String line (pos.getLineText());
+            const String trimmedLine (line.trimStart());
+
+            braceCount += getBraceCount (trimmedLine.getCharPointer());
+
+            if (braceCount > 0)
+            {
+                blockIndent = getLeadingWhitespace (line);
+                if (! indentFound)
+                    lastLineIndent = blockIndent + tab;
+
+                return true;
+            }
+
+            if ((! indentFound) && trimmedLine.isNotEmpty())
+            {
+                indentFound = true;
+                lastLineIndent = getLeadingWhitespace (line);
+            }
+        }
+
+        return false;
     }
 }

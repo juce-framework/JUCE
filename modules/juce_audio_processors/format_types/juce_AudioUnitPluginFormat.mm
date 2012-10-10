@@ -161,9 +161,7 @@ namespace AudioUnitFormatHelpers
                 desc.componentSubType = stringToOSType (tokens[1]);
                 desc.componentManufacturer = stringToOSType (tokens[2]);
 
-                ComponentRecord* comp = FindNextComponent (0, &desc);
-
-                if (comp != nullptr)
+                if (ComponentRecord* comp = FindNextComponent (0, &desc))
                 {
                     getAUDetails (comp, name, manufacturer);
                     return true;
@@ -295,9 +293,7 @@ public:
 
             if (getComponentDescFromFile (fileOrIdentifier, componentDesc, pluginName, version, manufacturer))
             {
-                ComponentRecord* const comp = FindNextComponent (0, &componentDesc);
-
-                if (comp != nullptr)
+                if (ComponentRecord* const comp = FindNextComponent (0, &componentDesc))
                 {
                     audioUnit = (AudioUnit) OpenComponent (comp);
 
@@ -330,7 +326,7 @@ public:
 
     void initialise()
     {
-        refreshParameterListFromPlugin();
+        refreshParameterList();
         updateNumChannels();
         setPluginCallbacks();
         setPlayConfigDetails (numInputBusChannels * numInputBusses,
@@ -393,6 +389,10 @@ public:
                 if (sampleRateOut != sr)
                     AudioUnitSetProperty (audioUnit, kAudioUnitProperty_SampleRate, kAudioUnitScope_Output, i, &sr, sizeof (sr));
             }
+
+            UInt32 frameSize = (UInt32) estimatedSamplesPerBlock;
+            AudioUnitSetProperty (audioUnit, kAudioUnitProperty_MaximumFramesPerSlice, kAudioUnitScope_Global, 0,
+                                  &frameSize, sizeof (frameSize));
 
             setPlayConfigDetails (numInputBusChannels * numInputBusses,
                                   numOutputBusChannels * numOutputBusses,
@@ -600,7 +600,7 @@ public:
 
     const String getParameterName (int index)
     {
-        AudioUnitParameterInfo info = { 0 };
+        AudioUnitParameterInfo info;
         UInt32 sz = sizeof (info);
         String name;
 
@@ -610,9 +610,16 @@ public:
                                   parameterIds [index], &info, &sz) == noErr)
         {
             if ((info.flags & kAudioUnitParameterFlag_HasCFNameString) != 0)
+            {
                 name = String::fromCFString (info.cfNameString);
+
+                if ((info.flags & kAudioUnitParameterFlag_CFNameRelease) != 0)
+                    CFRelease (info.cfNameString);
+            }
             else
+            {
                 name = String (info.name, sizeof (info.name));
+            }
         }
 
         return name;
@@ -772,7 +779,7 @@ public:
         }
     }
 
-    void refreshParameterListFromPlugin()
+    void refreshParameterList()
     {
         parameterIds.clear();
 
@@ -934,7 +941,7 @@ private:
             }
 
             if (outCurrentSampleInTimeLine != nullptr)
-                *outCurrentSampleInTimeLine = roundToInt (result.timeInSeconds * getSampleRate());
+                *outCurrentSampleInTimeLine = (Float64) result.timeInSamples;
 
             if (outIsCycling != nullptr)        *outIsCycling = false;
             if (outCycleStartBeat != nullptr)   *outCycleStartBeat = 0;
@@ -1390,9 +1397,8 @@ void AudioUnitPluginFormat::findAllTypesForFile (OwnedArray <PluginDescription>&
     try
     {
         ScopedPointer <AudioPluginInstance> createdInstance (createInstanceFromDescription (desc));
-        AudioUnitPluginInstance* const auInstance = dynamic_cast <AudioUnitPluginInstance*> ((AudioPluginInstance*) createdInstance);
 
-        if (auInstance != nullptr)
+        if (AudioUnitPluginInstance* const auInstance = dynamic_cast <AudioUnitPluginInstance*> ((AudioPluginInstance*) createdInstance))
         {
             auInstance->fillInPluginDescription (desc);
             results.add (new PluginDescription (desc));
@@ -1487,7 +1493,7 @@ bool AudioUnitPluginFormat::doesPluginStillExist (const PluginDescription& desc)
 
 FileSearchPath AudioUnitPluginFormat::getDefaultLocationsToSearch()
 {
-    return FileSearchPath ("/(Default AudioUnit locations)");
+    return FileSearchPath();
 }
 
 #undef log

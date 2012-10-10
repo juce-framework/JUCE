@@ -2002,11 +2002,10 @@ private:
         const int jsbound = (frame.mode == 1) ? (frame.modeExt << 2) + 4 : frame.layer2SubBandLimit;
         const AllocationTable* allocTable = frame.allocationTable;
         uint8 scfsi[32][2];
-        int i;
 
         if (frame.numChannels == 2)
         {
-            for (i = 0; i < jsbound; ++i)
+            for (int i = 0; i < jsbound; ++i)
             {
                 const int16 step = allocTable->bits;
                 allocTable += (1 << step);
@@ -2014,7 +2013,7 @@ private:
                 si.allocation[i][1] = getBitsUint8 (step);
             }
 
-            for (i = jsbound; i < sblimit; ++i)
+            for (int i = jsbound; i < sblimit; ++i)
             {
                 const int16 step = allocTable->bits;
                 const uint8 b0 = getBitsUint8 (step);
@@ -2023,7 +2022,7 @@ private:
                 si.allocation[i][1] = b0;
             }
 
-            for (i = 0; i < sblimit; ++i)
+            for (int i = 0; i < sblimit; ++i)
             {
                 scfsi[i][0] = si.allocation[i][0] ? getBitsUint8 (2) : 0;
                 scfsi[i][1] = si.allocation[i][1] ? getBitsUint8 (2) : 0;
@@ -2031,18 +2030,18 @@ private:
         }
         else
         {
-            for (i = 0; i < sblimit; ++i)
+            for (int i = 0; i < sblimit; ++i)
             {
                 const int16 step = allocTable->bits;
                 allocTable += (1 << step);
                 si.allocation[i][0] = getBitsUint8 (step);
             }
 
-            for (i = 0; i < sblimit; ++i)
+            for (int i = 0; i < sblimit; ++i)
                 scfsi[i][0] = si.allocation[i][0] ? getBitsUint8 (2) : 0;
         }
 
-        for (i = 0; i < sblimit; ++i)
+        for (int i = 0; i < sblimit; ++i)
         {
             for (int ch = 0; ch < frame.numChannels; ++ch)
             {
@@ -2084,9 +2083,8 @@ private:
     {
         const AllocationTable* allocTable = frame.allocationTable;
         const int jsbound = (frame.mode == 1) ? (frame.modeExt << 2) + 4 : frame.layer2SubBandLimit;
-        int i;
 
-        for (i = 0; i < jsbound; ++i)
+        for (int i = 0; i < jsbound; ++i)
         {
             const int16 step = allocTable->bits;
 
@@ -2124,7 +2122,7 @@ private:
             allocTable += (1 << step);
         }
 
-        for (i = jsbound; i < frame.layer2SubBandLimit; ++i)
+        for (int i = jsbound; i < frame.layer2SubBandLimit; ++i)
         {
             const int16 step = allocTable->bits;
             const uint8 ba = si.allocation[i][0];
@@ -2176,7 +2174,7 @@ private:
         }
 
         for (int ch = 0; ch < frame.numChannels; ++ch)
-            for (i = frame.layer2SubBandLimit; i < 32; ++i)
+            for (int i = frame.layer2SubBandLimit; i < 32; ++i)
                 fraction[ch][0][i] = fraction[ch][1][i] = fraction[ch][2][i] = 0;
     }
 

@@ -434,8 +434,15 @@ void Path::addRectangle (const float x, const float y,
 
 void Path::addRoundedRectangle (const float x, const float y,
                                 const float w, const float h,
-                                float csx,
-                                float csy)
+                                float csx, float csy)
+{
+    addRoundedRectangle (x, y, w, h, csx, csy, true, true, true, true);
+}
+
+void Path::addRoundedRectangle (const float x, const float y, const float w, const float h,
+                                float csx, float csy,
+                                const bool curveTopLeft, const bool curveTopRight,
+                                const bool curveBottomLeft, const bool curveBottomRight)
 {
     csx = jmin (csx, w * 0.5f);
     csy = jmin (csy, h * 0.5f);
@@ -444,15 +451,46 @@ void Path::addRoundedRectangle (const float x, const float y,
     const float x2 = x + w;
     const float y2 = y + h;
 
-    startNewSubPath (x + csx, y);
-    lineTo (x2 - csx, y);
-    cubicTo (x2 - cs45x, y, x2, y + cs45y, x2, y + csy);
-    lineTo (x2, y2 - csy);
-    cubicTo (x2, y2 - cs45y, x2 - cs45x, y2, x2 - csx, y2);
-    lineTo (x + csx, y2);
-    cubicTo (x + cs45x, y2, x, y2 - cs45y, x, y2 - csy);
-    lineTo (x, y + csy);
-    cubicTo (x, y + cs45y, x + cs45x, y, x + csx, y);
+    if (curveTopLeft)
+    {
+        startNewSubPath (x, y + csy);
+        cubicTo (x, y + cs45y, x + cs45x, y, x + csx, y);
+    }
+    else
+    {
+        startNewSubPath (x, y);
+    }
+
+    if (curveTopRight)
+    {
+        lineTo (x2 - csx, y);
+        cubicTo (x2 - cs45x, y, x2, y + cs45y, x2, y + csy);
+    }
+    else
+    {
+        lineTo (x2, y);
+    }
+
+    if (curveBottomRight)
+    {
+        lineTo (x2, y2 - csy);
+        cubicTo (x2, y2 - cs45y, x2 - cs45x, y2, x2 - csx, y2);
+    }
+    else
+    {
+        lineTo (x2, y2);
+    }
+
+    if (curveBottomLeft)
+    {
+        lineTo (x + csx, y2);
+        cubicTo (x + cs45x, y2, x, y2 - cs45y, x, y2 - csy);
+    }
+    else
+    {
+        lineTo (x, y2);
+    }
+
     closeSubPath();
 }
 
@@ -903,15 +941,15 @@ AffineTransform Path::getTransformToScaleToFit (const float x, const float y,
                                                 const bool preserveProportions,
                                                 const Justification& justification) const
 {
-    Rectangle<float> bounds (getBounds());
+    Rectangle<float> boundsRect (getBounds());
 
     if (preserveProportions)
     {
-        if (w <= 0 || h <= 0 || bounds.isEmpty())
+        if (w <= 0 || h <= 0 || boundsRect.isEmpty())
             return AffineTransform::identity;
 
         float newW, newH;
-        const float srcRatio = bounds.getHeight() / bounds.getWidth();
+        const float srcRatio = boundsRect.getHeight() / boundsRect.getWidth();
 
         if (srcRatio > h / w)
         {
@@ -935,17 +973,17 @@ AffineTransform Path::getTransformToScaleToFit (const float x, const float y,
         else if (justification.testFlags (Justification::bottom))   newYCentre += h - newH * 0.5f;
         else                                                        newYCentre += h * 0.5f;
 
-        return AffineTransform::translation (bounds.getWidth()  * -0.5f - bounds.getX(),
-                                             bounds.getHeight() * -0.5f - bounds.getY())
-                    .scaled (newW / bounds.getWidth(),
-                             newH / bounds.getHeight())
+        return AffineTransform::translation (boundsRect.getWidth()  * -0.5f - boundsRect.getX(),
+                                             boundsRect.getHeight() * -0.5f - boundsRect.getY())
+                    .scaled (newW / boundsRect.getWidth(),
+                             newH / boundsRect.getHeight())
                     .translated (newXCentre, newYCentre);
     }
     else
     {
-        return AffineTransform::translation (-bounds.getX(), -bounds.getY())
-                    .scaled (w / bounds.getWidth(),
-                             h / bounds.getHeight())
+        return AffineTransform::translation (-boundsRect.getX(), -boundsRect.getY())
+                    .scaled (w / boundsRect.getWidth(),
+                             h / boundsRect.getHeight())
                     .translated (x, y);
     }
 }

@@ -71,9 +71,7 @@ public:
     //==============================================================================
     void paint (Graphics&)
     {
-        ComponentPeer* const peer = component.getPeer();
-
-        if (peer != nullptr)
+        if (ComponentPeer* const peer = component.getPeer())
             peer->addMaskedRegion (peer->getComponent().getLocalArea (&component, component.getLocalBounds()));
     }
 
@@ -200,7 +198,8 @@ public:
                     JUCE_CHECK_OPENGL_ERROR
                 }
 
-                context.makeActive();
+                if (! context.isActive())
+                    context.makeActive();
             }
 
             JUCE_CHECK_OPENGL_ERROR
@@ -353,9 +352,7 @@ void OpenGLContext::NativeContext::renderCallback()
 {
     isInsideGLCallback = true;
 
-    CachedImage* const c = CachedImage::get (component);
-
-    if (c != nullptr)
+    if (CachedImage* const c = CachedImage::get (component))
         c->renderFrame();
 
     isInsideGLCallback = false;
@@ -455,8 +452,8 @@ private:
     void detach()
     {
         Component& comp = *getComponent();
-        CachedImage* oldCachedImage = CachedImage::get (comp);
-        if (oldCachedImage != nullptr)
+
+        if (CachedImage* const oldCachedImage = CachedImage::get (comp))
             oldCachedImage->stop(); // (must stop this before detaching it from the component)
 
         comp.setCachedComponentImage (nullptr);
@@ -565,13 +562,8 @@ void OpenGLContext::deactivateCurrentContext()      { NativeContext::deactivateC
 
 void OpenGLContext::triggerRepaint()
 {
-    CachedImage* const cachedImage = getCachedImage();
-
-    if (cachedImage != nullptr)
-    {
+    if (CachedImage* const cachedImage = getCachedImage())
         cachedImage->triggerRepaint();
-        cachedImage->component.repaint();
-    }
 }
 
 void OpenGLContext::swapBuffers()

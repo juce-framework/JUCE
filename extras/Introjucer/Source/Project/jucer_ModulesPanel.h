@@ -32,16 +32,16 @@ class ModulesPanel  : public PropertyComponent,
                       public ButtonListener
 {
 public:
-    ModulesPanel (Project& project_)
+    ModulesPanel (Project& p)
         : PropertyComponent ("Modules", 500),
-          project (project_),
+          project (p),
           modulesLocation ("modules", ModuleList::getLocalModulesFolder (&project),
                            true, true, false, "*", String::empty,
                            "Select a folder containing your JUCE modules..."),
           modulesLabel (String::empty, "Module source folder:"),
           updateModulesButton ("Check for module updates..."),
           moduleListBox (moduleList),
-          copyingMessage (project_, moduleList)
+          copyingMessage (p, moduleList)
     {
         moduleList.rescan (ModuleList::getLocalModulesFolder (&project));
 
@@ -138,17 +138,17 @@ public:
                                       public ListBoxModel
     {
     public:
-        ModuleSelectionListBox (ModuleList& list_)
-            : list (list_), owner (nullptr)
+        ModuleSelectionListBox (ModuleList& ml)
+            : list (ml), owner (nullptr)
         {
             setColour (ListBox::backgroundColourId, Colours::white.withAlpha (0.4f));
             setTooltip ("Use this list to select which modules should be included in your app.\n"
                         "Any modules which have missing dependencies will be shown in red.");
         }
 
-        void setOwner (ModulesPanel* owner_)
+        void setOwner (ModulesPanel* newOwner)
         {
-            owner = owner_;
+            owner = newOwner;
             setModel (this);
         }
 
@@ -225,8 +225,8 @@ public:
     class ModuleSettingsPanel  : public PropertyPanel
     {
     public:
-        ModuleSettingsPanel (Project& project_, ModuleList& moduleList_, const String& moduleID_)
-            : project (project_), moduleList (moduleList_), moduleID (moduleID_)
+        ModuleSettingsPanel (Project& p, ModuleList& list, const String& modID)
+            : project (p), moduleList (list), moduleID (modID)
         {
             refreshAll();
         }
@@ -296,8 +296,8 @@ public:
         class ModuleInfoComponent  : public PropertyComponent
         {
         public:
-            ModuleInfoComponent (Project& project_, ModuleList& moduleList_, const String& moduleID_)
-                : PropertyComponent ("Module", 100), project (project_), moduleList (moduleList_), moduleID (moduleID_)
+            ModuleInfoComponent (Project& p, ModuleList& list, const String& modID)
+                : PropertyComponent ("Module", 100), project (p), moduleList (list), moduleID (modID)
             {
             }
 
@@ -336,9 +336,9 @@ public:
                                               public ButtonListener
         {
         public:
-            MissingDependenciesComponent (Project& project_, ModuleList& moduleList_, const String& moduleID_)
+            MissingDependenciesComponent (Project& p, ModuleList& list, const String& modID)
                 : PropertyComponent ("Dependencies", 100),
-                  project (project_), moduleList (moduleList_), moduleID (moduleID_),
+                  project (p), moduleList (list), moduleID (modID),
                   fixButton ("Enable Required Modules")
             {
                 const ModuleList::Module* module = moduleList.findModuleInfo (moduleID);
@@ -402,8 +402,8 @@ public:
                                public Timer
     {
     public:
-        ModuleCopyingInfo (Project& project_, ModuleList& list_)
-            : project (project_), list (list_),
+        ModuleCopyingInfo (Project& p, ModuleList& modules)
+            : project (p), list (modules),
               copyModeButton ("Set Copying Mode...")
         {
             addAndMakeVisible (&copyModeButton);

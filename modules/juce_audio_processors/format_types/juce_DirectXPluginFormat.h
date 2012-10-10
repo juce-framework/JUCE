@@ -47,11 +47,12 @@ public:
 
     //==============================================================================
     String getName() const                { return "DirectX"; }
-    void findAllTypesForFile (OwnedArray <PluginDescription>& results, const String& fileOrIdentifier);
-    AudioPluginInstance* createInstanceFromDescription (const PluginDescription& desc);
+    void findAllTypesForFile (OwnedArray <PluginDescription>&, const String& fileOrIdentifier);
+    AudioPluginInstance* createInstanceFromDescription (const PluginDescription&);
     bool fileMightContainThisPluginType (const String& fileOrIdentifier);
     String getNameOfPluginFromIdentifier (const String& fileOrIdentifier)  { return fileOrIdentifier; }
     FileSearchPath getDefaultLocationsToSearch();
+    bool canScanForPlugins() const        { return true; }
 
 private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DirectXPluginFormat);

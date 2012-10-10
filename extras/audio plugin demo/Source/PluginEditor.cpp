@@ -122,17 +122,15 @@ static const String timeToTimecodeString (const double seconds)
 {
     const double absSecs = fabs (seconds);
 
-    const int hours = (int) (absSecs / (60.0 * 60.0));
+    const int hours =  (int) (absSecs / (60.0 * 60.0));
     const int mins  = ((int) (absSecs / 60.0)) % 60;
     const int secs  = ((int) absSecs) % 60;
 
-    String s;
-    if (seconds < 0)
-        s = "-";
+    String s (seconds < 0 ? "-" : "");
 
     s << String (hours).paddedLeft ('0', 2) << ":"
-      << String (mins).paddedLeft ('0', 2) << ":"
-      << String (secs).paddedLeft ('0', 2) << ":"
+      << String (mins) .paddedLeft ('0', 2) << ":"
+      << String (secs) .paddedLeft ('0', 2) << ":"
       << String (roundToInt (absSecs * 1000) % 1000).paddedLeft ('0', 3);
 
     return s;
@@ -149,7 +147,7 @@ static const String ppqToBarsBeatsString (double ppq, double /*lastBarPPQ*/, int
 
     const int bar    = ((int) ppq) / ppqPerBar + 1;
     const int beat   = ((int) beats) + 1;
-    const int ticks  = ((int) (fmod (beats, 1.0) * 960.0));
+    const int ticks  = ((int) (fmod (beats, 1.0) * 960.0 + 0.5));
 
     String s;
     s << bar << '|' << beat << '|' << ticks;

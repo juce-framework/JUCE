@@ -56,6 +56,7 @@ OBJECTS := \
   $(OBJDIR)/juce_graphics_f9afc18.o \
   $(OBJDIR)/juce_gui_basics_90929794.o \
   $(OBJDIR)/juce_gui_extra_b81d9e1c.o \
+  $(OBJDIR)/juce_PluginUtilities_65545a8.o \
   $(OBJDIR)/juce_VST_Wrapper_8aa348b1.o \
 
 .PHONY: clean
@@ -72,6 +73,10 @@ clean:
 	-@rm -f $(OUTDIR)/$(TARGET)
 	-@rm -rf $(OBJDIR)/*
 	-@rm -rf $(OBJDIR)
+
+strip:
+	@echo Stripping JuceDemoPlugin
+	-@strip --strip-unneeded $(OUTDIR)/$(TARGET)
 
 $(OBJDIR)/PluginProcessor_a059e380.o: ../../Source/PluginProcessor.cpp
 	-@mkdir -p $(OBJDIR)
@@ -136,6 +141,11 @@ $(OBJDIR)/juce_gui_basics_90929794.o: ../../../../modules/juce_gui_basics/juce_g
 $(OBJDIR)/juce_gui_extra_b81d9e1c.o: ../../../../modules/juce_gui_extra/juce_gui_extra.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo "Compiling juce_gui_extra.cpp"
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/juce_PluginUtilities_65545a8.o: ../../../../modules/juce_audio_plugin_client/utility/juce_PluginUtilities.cpp
+	-@mkdir -p $(OBJDIR)
+	@echo "Compiling juce_PluginUtilities.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_VST_Wrapper_8aa348b1.o: ../../../../modules/juce_audio_plugin_client/VST/juce_VST_Wrapper.cpp

@@ -45,7 +45,9 @@ public:
     /** The set of available standard mouse cursors. */
     enum StandardCursorType
     {
-        NoCursor = 0,                   /**< An invisible cursor. */
+        ParentCursor = 0,               /**< Indicates that the component's parent's cursor should be used. */
+
+        NoCursor,                       /**< An invisible cursor. */
         NormalCursor,                   /**< The stardard arrow cursor. */
 
         WaitCursor,                     /**< The normal hourglass or spinning-beachball 'busy' cursor. */
@@ -68,7 +70,9 @@ public:
         TopLeftCornerResizeCursor,      /**< A platform-specific cursor for resizing the top-left-corner of a window. */
         TopRightCornerResizeCursor,     /**< A platform-specific cursor for resizing the top-right-corner of a window. */
         BottomLeftCornerResizeCursor,   /**< A platform-specific cursor for resizing the bottom-left-corner of a window. */
-        BottomRightCornerResizeCursor   /**< A platform-specific cursor for resizing the bottom-right-corner of a window. */
+        BottomRightCornerResizeCursor,  /**< A platform-specific cursor for resizing the bottom-right-corner of a window. */
+
+        NumStandardCursorTypes
     };
 
     //==============================================================================
@@ -89,19 +93,32 @@ public:
     */
     MouseCursor (const Image& image, int hotSpotX, int hotSpotY);
 
+    /** Creates a custom cursor from an image.
+
+        @param image    the image to use for the cursor - if this is bigger than the
+                        system can manage, it might get scaled down first, and might
+                        also have to be turned to black-and-white if it can't do colour
+                        cursors.
+        @param hotSpotX the x position of the cursor's hotspot within the image
+        @param hotSpotY the y position of the cursor's hotspot within the image
+        @param dpiFactor the factor by which this image is larger than the target
+                         screen size of the cursor.
+    */
+    MouseCursor (const Image& image, int hotSpotX, int hotSpotY, float scaleFactor);
+
     //==============================================================================
     /** Creates a copy of another cursor object. */
-    MouseCursor (const MouseCursor& other);
+    MouseCursor (const MouseCursor&);
 
     /** Copies this cursor from another object. */
-    MouseCursor& operator= (const MouseCursor& other);
+    MouseCursor& operator= (const MouseCursor&);
 
     /** Destructor. */
     ~MouseCursor();
 
    #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
-    MouseCursor (MouseCursor&& other) noexcept;
-    MouseCursor& operator= (MouseCursor&& other) noexcept;
+    MouseCursor (MouseCursor&&) noexcept;
+    MouseCursor& operator= (MouseCursor&&) noexcept;
    #endif
 
     /** Checks whether two mouse cursors are the same.
@@ -110,7 +127,7 @@ public:
         recognised as the same, only MouseCursor objects that have been
         copied from the same object.
     */
-    bool operator== (const MouseCursor& other) const noexcept;
+    bool operator== (const MouseCursor&) const noexcept;
 
     /** Checks whether two mouse cursors are the same.
 
@@ -118,7 +135,13 @@ public:
         recognised as the same, only MouseCursor objects that have been
         copied from the same object.
     */
-    bool operator!= (const MouseCursor& other) const noexcept;
+    bool operator!= (const MouseCursor&) const noexcept;
+
+    /** Checks whether this cursor is of the standard type mentioned. */
+    bool operator== (StandardCursorType type) const noexcept;
+
+    /** Checks whether this cursor is of the standard type mentioned. */
+    bool operator!= (StandardCursorType type) const noexcept;
 
     //==============================================================================
     /** Makes the system show its default 'busy' cursor.
@@ -155,7 +178,6 @@ private:
     void showInAllWindows() const;
     void* getHandle() const noexcept;
 
-    static void* createMouseCursorFromImage (const Image& image, int hotspotX, int hotspotY);
     static void* createStandardMouseCursor (MouseCursor::StandardCursorType type);
     static void deleteMouseCursor (void* cursorHandle, bool isStandard);
 

@@ -2,17 +2,7 @@
                             The Juce Polymorphic Plugin Project!
                             ====================================
 
-(c) 2008 by Raw Material Software, visit www.rawmaterialsoftware.com for more info.
-
------------------------------------------------------------------------------------------------------
-
-This file contains as much detail as I could possibly think of about the sometimes fiddly process of setting
-up your build environment to build plugins...
-
-If you follow all these steps and still hit a build error, don't despair! There's a thread at the juce
-forum where we'll post any extra hints, tips, or problems that people have stumbled upon:
-http://www.rawmaterialsoftware.com/juceforum/viewtopic.php?p=23546
-
+(c) 2012 by Raw Material Software, visit www.rawmaterialsoftware.com for more info.
 
 -----------------------------------------------------------------------------------------------------
 
@@ -27,7 +17,6 @@ Also included are some helper classes that make it easy to create a stand-alone 
 run your plugin without a host. This might be useful in its own right, but can also be very 
 handy when developing your plugin, because you can build, test and debug it without needing
 to keep restarting a 3rd-party host.
-
 
                                     How does it work?
                                     =================
@@ -61,8 +50,15 @@ their SDK. Visit http://www.digidesign.com for more info.
                                     Getting Started
                                     ===============
 
-There's also a 'demo' folder - this contains an example plugin which can be built in all
-the different formats.
+The best advice for creating a plugin is to USE THE INTROJUCER! This will auto-generate a
+cross-platform project for you with all the correct settings, and some framework classes to
+get you started.
+
+If you choose to go it alone and not use the introjucer, then you'll have a lot of painful
+project set-up to do, and will need to scour this document and the juce forum for the details.
+
+There's a demo plugin in the juce/extras folder - this contains an example plugin which can 
+be built in all the different formats.
 
 Have a look at the demo classes to see how it works, and then to create a real plugin, 
 you'll need to replace the demo files with your own code.
@@ -73,11 +69,6 @@ formats can be a bit of a pain. Please let me know if you find there's anything 
 from these instructions or anything I could change to help smooth the build process along
 a bit.
 
-I'd recommend NOT putting your own plugin code inside the demo plugin directory - it's 
-much neater to keep it somewhere separate and to alter the projects to point to your 
-files instead of the demo ones. That way when new versions of this library come out, it'll 
-make it easier to update to the latest code.
-
 
 -----------------------------------------------------------------------------------------------------
 
@@ -86,7 +77,6 @@ make it easier to update to the latest code.
 
 - Visit http://www.steinberg.net and jump through whatever hoops are necessary to download 
   and install the VST SDK.
-- Make sure your include path contains an entry for the "vstsdk2.4" folder containing the SDK.
 
 -----------------------------------------------------------------------------------------------------
 
@@ -97,64 +87,38 @@ make it easier to update to the latest code.
   agreements and NDAs.
 - From the Digidesign website, download their latest Plug-In SDK
 - Install the SDK and build some of the demo plugins to make sure it all works.
-- In Visual Studio: Add all of these to your include path:
-    c:\yourdirectory\PT_80_SDK\AlturaPorts\TDMPlugins\PluginLibrary\EffectClasses
-    c:\yourdirectory\PT_80_SDK\AlturaPorts\TDMPlugins\PluginLibrary\ProcessClasses
-    c:\yourdirectory\PT_80_SDK\AlturaPorts\TDMPlugins\PluginLibrary\ProcessClasses\Interfaces
-    c:\yourdirectory\PT_80_SDK\AlturaPorts\TDMPlugins\PluginLibrary\Utilities
-    c:\yourdirectory\PT_80_SDK\AlturaPorts\TDMPlugins\PluginLibrary\RTASP_Adapt
-    c:\yourdirectory\PT_80_SDK\AlturaPorts\TDMPlugins\PluginLibrary\CoreClasses
-    c:\yourdirectory\PT_80_SDK\AlturaPorts\TDMPlugins\PluginLibrary\Controls
-    c:\yourdirectory\PT_80_SDK\AlturaPorts\TDMPlugins\PluginLibrary\Meters
-    c:\yourdirectory\PT_80_SDK\AlturaPorts\TDMPlugins\PluginLibrary\ViewClasses
-    c:\yourdirectory\PT_80_SDK\AlturaPorts\TDMPlugins\PluginLibrary\DSPClasses
-    c:\yourdirectory\PT_80_SDK\AlturaPorts\TDMPlugins\PluginLibrary\Interfaces
-    c:\yourdirectory\PT_80_SDK\AlturaPorts\TDMPlugins\common
-    c:\yourdirectory\PT_80_SDK\AlturaPorts\TDMPlugins\common\Platform
-    c:\yourdirectory\PT_80_SDK\AlturaPorts\TDMPlugins\SignalProcessing\Public
-    C:\yourdirectory\PT_80_SDK\AlturaPorts\TDMPlugIns\DSPManager\Interfaces
-    c:\yourdirectory\PT_80_SDK\AlturaPorts\SADriver\Interfaces
-    c:\yourdirectory\PT_80_SDK\AlturaPorts\DigiPublic\Interfaces
-    c:\yourdirectory\PT_80_SDK\AlturaPorts\Fic\Interfaces\DAEClient
-    c:\yourdirectory\PT_80_SDK\AlturaPorts\NewFileLibs\Cmn
-    c:\yourdirectory\PT_80_SDK\AlturaPorts\NewFileLibs\DOA
-    c:\yourdirectory\PT_80_SDK\AlturaPorts\AlturaSource\PPC_H
-    c:\yourdirectory\PT_80_SDK\AlturaPorts\AlturaSource\AppSupport
-    c:\yourdirectory\PT_80_SDK\AvidCode\AVX2sdk\AVX\avx2\avx2sdk\inc
-    C:\yourdirectory\PT_80_SDK\xplat\AVX\avx2\avx2sdk\inc
-- In Visual Studio: Using the Digidesign demo projects in the SDK, make sure you've compiled 
+- In Visual Studio: Using the Digidesign demo projects in the SDK, make sure you've compiled
   debug and release versions of the following static libraries:
     DAE.lib, DigiExt.lib, DSI.lib, PlugInLib.lib.
 - In XCode: After installing the Digidesign SDK, make sure you've run the config_SDK_for_Mac 
   command in the SDK's root directory. This sets up some of the tools that it needs.
-- In XCode: If you're using the Digi files CommonDebugSettings.xcconfig and CommonReleaseSettings.xcconfig,
-  then you'll probably have to remove the "-x c++" option from their OTHER_CFLAGS setting, because
-  that prevents it compiling obj-C. Also, you might need to comment-out the GCC_PREFIX_HEADER setting,
-  unless you can persuade precompiled headers to work (I've never managed to get them working myself..)
-  You'll also probably want to add a "MacBag" setting to these files, rather than putting it into
-  your project - e.g. "MacBag = /Users/jules/SDKs/PT_80_SDK/MacBag"
 
 
 -----------------------------------------------------------------------------------------------------
 
                         Choosing the formats to build
                         =============================
-                        
-Each plugin project needs to contain a JucePluginCharacteristics.h file, which holds all the
-plugin-specific build details. In here, there are three macros that you can set to enable each
-of the available formats:
+
+Each plugin project needs to contain an AppConfig.h file, which holds all the plugin-specific build details. 
+(The introjucer will auto-generate this file for you when you create a project). In here, there are three macros
+that you can set to enable each of the available formats:
 
 #define JucePlugin_Build_VST     1
 #define JucePlugin_Build_RTAS    1
 #define JucePlugin_Build_AU      1
 
-You can set these to 0 to disable the formats that you don't want to build, and this will avoid
-any compilation problems if, for example, you don't have the appropriate SDK for a particular format.
+The introjucer contains options in its config panel that let you set these values automatically without
+needing to manually change any files.
+
 
 -----------------------------------------------------------------------------------------------------
 
-                        Creating a PC VST/RTAS plugin in Visual Studio
-                        ==============================================
+                    Manually Creating a PC VST/RTAS plugin in Visual Studio
+                    =======================================================
+
+
+NOTE! That the following tips are provided only for the case where you're not using the introjucer..
+If you're sensible, you'll let the introjucer do all the heavy lifting, and won't need to read this.
 
 
 - First try loading the VST demo project in JuceAudioPlugin/demo/build. Hopefully this
@@ -172,6 +136,31 @@ any compilation problems if, for example, you don't have the appropriate SDK for
   your JucePluginCharacteristics.h file.
 
 - If you're doing an RTAS, change these project settings (these can all be ignored if you're only doing a VST):
+    - Make sure all of these are on your include path:
+        c:\yourdirectory\PT_80_SDK\AlturaPorts\TDMPlugins\PluginLibrary\EffectClasses
+        c:\yourdirectory\PT_80_SDK\AlturaPorts\TDMPlugins\PluginLibrary\ProcessClasses
+        c:\yourdirectory\PT_80_SDK\AlturaPorts\TDMPlugins\PluginLibrary\ProcessClasses\Interfaces
+        c:\yourdirectory\PT_80_SDK\AlturaPorts\TDMPlugins\PluginLibrary\Utilities
+        c:\yourdirectory\PT_80_SDK\AlturaPorts\TDMPlugins\PluginLibrary\RTASP_Adapt
+        c:\yourdirectory\PT_80_SDK\AlturaPorts\TDMPlugins\PluginLibrary\CoreClasses
+        c:\yourdirectory\PT_80_SDK\AlturaPorts\TDMPlugins\PluginLibrary\Controls
+        c:\yourdirectory\PT_80_SDK\AlturaPorts\TDMPlugins\PluginLibrary\Meters
+        c:\yourdirectory\PT_80_SDK\AlturaPorts\TDMPlugins\PluginLibrary\ViewClasses
+        c:\yourdirectory\PT_80_SDK\AlturaPorts\TDMPlugins\PluginLibrary\DSPClasses
+        c:\yourdirectory\PT_80_SDK\AlturaPorts\TDMPlugins\PluginLibrary\Interfaces
+        c:\yourdirectory\PT_80_SDK\AlturaPorts\TDMPlugins\common
+        c:\yourdirectory\PT_80_SDK\AlturaPorts\TDMPlugins\common\Platform
+        c:\yourdirectory\PT_80_SDK\AlturaPorts\TDMPlugins\SignalProcessing\Public
+        C:\yourdirectory\PT_80_SDK\AlturaPorts\TDMPlugIns\DSPManager\Interfaces
+        c:\yourdirectory\PT_80_SDK\AlturaPorts\SADriver\Interfaces
+        c:\yourdirectory\PT_80_SDK\AlturaPorts\DigiPublic\Interfaces
+        c:\yourdirectory\PT_80_SDK\AlturaPorts\Fic\Interfaces\DAEClient
+        c:\yourdirectory\PT_80_SDK\AlturaPorts\NewFileLibs\Cmn
+        c:\yourdirectory\PT_80_SDK\AlturaPorts\NewFileLibs\DOA
+        c:\yourdirectory\PT_80_SDK\AlturaPorts\AlturaSource\PPC_H
+        c:\yourdirectory\PT_80_SDK\AlturaPorts\AlturaSource\AppSupport
+        c:\yourdirectory\PT_80_SDK\AvidCode\AVX2sdk\AVX\avx2\avx2sdk\inc
+        C:\yourdirectory\PT_80_SDK\xplat\AVX\avx2\avx2sdk\inc
     - Set "C++/Code Generation/Runtime Library" to be "Multi-threaded DLL" or "Multi-threaded Debug DLL"
     - Set the "Linker/Input/Module Definition file" to point to "wrapper/RTAS/juce_RTAS_WinExports.def"
     - Under "Linker/Input/Delay loaded DLLs", add the following: 
@@ -216,8 +205,10 @@ any compilation problems if, for example, you don't have the appropriate SDK for
                             Creating a Mac AU/VST/RTAS plugin in XCode
                             ==========================================
 
+NOTE! That the following tips are provided only for the case where you're not using the introjucer..
+If you're sensible, you'll let the introjucer do all the heavy lifting, and won't need to read this.
 
-- Some of the RTAS SDK files in the demo project might be highlighted red to indicate that they're 
+- Some of the RTAS SDK files in the demo project might be highlighted red to indicate that they're
   missing - if you're not bulding an RTAS, then you can just delete them from the project. If you are
   building an RTAS and have the SDK, you might need to update their paths to match your SDK location.
 - For an AU, there are a bunch of Apple cpp files that need to be included directly in your project - these
@@ -311,7 +302,13 @@ If you also want to build an RTAS, then carry on reading...
     "$(MacBag)/../AlturaPorts/TDMPlugIns/SignalProcessing/**" 
     "$(MacBag)/../AvidCode/AVX2sdk/AVX/avx2/avx2sdk/inc" 
     "$(MacBag)/../AvidCode/AVX2sdk/AVX/avx2/avx2sdk/utils"
-- If you get include errors compiling some of the DigiDesign code, you may need to 
+- If you're using the Digi files CommonDebugSettings.xcconfig and CommonReleaseSettings.xcconfig,
+  then you'll probably have to remove the "-x c++" option from their OTHER_CFLAGS setting, because
+  that prevents it compiling obj-C. Also, you might need to comment-out the GCC_PREFIX_HEADER setting,
+  unless you can persuade precompiled headers to work (I've never managed to get them working myself..)
+  You'll also probably want to add a "MacBag" setting to these files, rather than putting it into
+  your project - e.g. "MacBag = /Users/jules/SDKs/PT_80_SDK/MacBag"
+- If you get include errors compiling some of the DigiDesign code, you may need to
   add "/Developer/Headers/FlatCarbon" to your header search path.
 - In the SDK, find the PluginLibrary.xcodeproj file, and add this to your "External frameworks and Libraries".
   If you've already compiled this library, you can open its item in your XCode project treeview, to find 

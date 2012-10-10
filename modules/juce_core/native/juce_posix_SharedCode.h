@@ -67,9 +67,9 @@ void CriticalSection::exit() const noexcept
 class WaitableEventImpl
 {
 public:
-    WaitableEventImpl (const bool manualReset_)
+    WaitableEventImpl (const bool useManualReset)
         : triggered (false),
-          manualReset (manualReset_)
+          manualReset (useManualReset)
     {
         pthread_cond_init (&condition, 0);
 
@@ -205,7 +205,7 @@ File File::getCurrentWorkingDirectory()
 
     char localBuffer [1024];
     char* cwd = getcwd (localBuffer, sizeof (localBuffer) - 1);
-    int bufferSize = 4096;
+    size_t bufferSize = 4096;
 
     while (cwd == nullptr && errno == ERANGE)
     {
@@ -500,7 +500,7 @@ int FileOutputStream::writeInternal (const void* const data, const int numBytes)
 
     if (fileHandle != 0)
     {
-        result = ::write (getFD (fileHandle), data, numBytes);
+        result = ::write (getFD (fileHandle), data, (size_t) numBytes);
 
         if (result == -1)
             status = getResultForErrno();
@@ -573,10 +573,16 @@ MemoryMappedFile::~MemoryMappedFile()
 }
 
 //==============================================================================
+#if JUCE_PROJUCER_LIVE_BUILD
+extern "C" const char* juce_getCurrentExecutablePath();
+#endif
+
 File juce_getExecutableFile();
 File juce_getExecutableFile()
 {
-   #if JUCE_ANDROID
+   #if JUCE_PROJUCER_LIVE_BUILD
+    return File (juce_getCurrentExecutablePath());
+   #elif JUCE_ANDROID
     return File (android.appFile);
    #else
     struct DLAddrReader
@@ -695,7 +701,7 @@ String juce_getOutputFromCommand (const String& command)
 class InterProcessLock::Pimpl
 {
 public:
-    Pimpl (const String& name, const int timeOutMillisecs)
+    Pimpl (const String& lockName, const int timeOutMillisecs)
         : handle (0), refCount (1)
     {
        #if JUCE_IOS
@@ -712,7 +718,7 @@ public:
              tempFolder = "/tmp";
         #endif
 
-        const File temp (tempFolder.getChildFile (name));
+        const File temp (tempFolder.getChildFile (lockName));
 
         temp.create();
         handle = open (temp.getFullPathName().toUTF8(), O_RDWR);
@@ -773,8 +779,7 @@ public:
     int handle, refCount;
 };
 
-InterProcessLock::InterProcessLock (const String& name_)
-    : name (name_)
+InterProcessLock::InterProcessLock (const String& nm)  : name (nm)
 {
 }
 
@@ -1027,7 +1032,7 @@ public:
         {
             int childState;
             const int pid = waitpid (childPID, &childState, WNOHANG);
-            return pid > 0 && ! (WIFEXITED (childState) || WIFSIGNALED (childState));
+            return pid == 0 || ! (WIFEXITED (childState) || WIFSIGNALED (childState));
         }
 
         return false;
@@ -1041,7 +1046,7 @@ public:
             readHandle = fdopen (pipeHandle, "r");
 
         if (readHandle != 0)
-            return fread (dest, 1, numBytes, readHandle);
+            return (int) fread (dest, 1, (size_t) numBytes, readHandle);
 
         return 0;
     }

@@ -43,8 +43,7 @@ class CodeDocumentLine;
 class JUCE_API  CodeDocument
 {
 public:
-    /** Creates a new, empty document.
-    */
+    /** Creates a new, empty document. */
     CodeDocument();
 
     /** Destructor. */
@@ -178,7 +177,6 @@ public:
         */
         String getLineText() const;
 
-        //==============================================================================
     private:
         CodeDocument* owner;
         int characterPos, line, indexInLine;
@@ -205,16 +203,29 @@ public:
     int getMaximumLineLength() noexcept;
 
     /** Deletes a section of the text.
-
         This operation is undoable.
     */
     void deleteSection (const Position& startPosition, const Position& endPosition);
 
-    /** Inserts some text into the document at a given position.
+    /** Deletes a section of the text.
+        This operation is undoable.
+    */
+    void deleteSection (int startIndex, int endIndex);
 
+    /** Inserts some text into the document at a given position.
         This operation is undoable.
     */
     void insertText (const Position& position, const String& text);
+
+    /** Inserts some text into the document at a given position.
+        This operation is undoable.
+    */
+    void insertText (int insertIndex, const String& text);
+
+    /** Replaces a section of the text with a new string.
+        This operation is undoable.
+    */
+    void replaceSection (int startIndex, int endIndex, const String& newText);
 
     /** Clears the document and replaces it with some new text.
 
@@ -222,6 +233,11 @@ public:
         might want to also call clearUndoHistory() and setSavePoint() after using this method.
     */
     void replaceAllContent (const String& newContent);
+
+    /** Analyses the changes between the current content and some new text, and applies
+        those changes.
+    */
+    void applyChanges (const String& newContent);
 
     /** Replaces the editor's contents with the contents of a stream.
         This will also reset the undo history and save point marker.
@@ -292,10 +308,13 @@ public:
 
     //==============================================================================
     /** Searches for a word-break. */
-    const Position findWordBreakAfter (const Position& position) const noexcept;
-
+    Position findWordBreakAfter (const Position& position) const noexcept;
     /** Searches for a word-break. */
-    const Position findWordBreakBefore (const Position& position) const noexcept;
+    Position findWordBreakBefore (const Position& position) const noexcept;
+    /** Finds the token that contains the given position. */
+    void findTokenContaining (const Position& pos, Position& start, Position& end) const noexcept;
+    /** Finds the line that contains the given position. */
+    void findLineContaining  (const Position& pos, Position& start, Position& end) const noexcept;
 
     //==============================================================================
     /** An object that receives callbacks from the CodeDocument when its text changes.
@@ -307,10 +326,11 @@ public:
         Listener() {}
         virtual ~Listener() {}
 
-        /** Called by a CodeDocument when it is altered.
-        */
-        virtual void codeDocumentChanged (const Position& affectedTextStart,
-                                          const Position& affectedTextEnd) = 0;
+        /** Called by a CodeDocument when text is added. */
+        virtual void codeDocumentTextInserted (const String& newText, int insertIndex) = 0;
+
+        /** Called by a CodeDocument when text is deleted. */
+        virtual void codeDocumentTextDeleted (int startIndex, int endIndex) = 0;
     };
 
     /** Registers a listener object to receive callbacks when the document changes.
@@ -386,8 +406,6 @@ private:
     int maximumLineLength;
     ListenerList <Listener> listeners;
     String newLineChars;
-
-    void sendListenerChangeMessage (int startLine, int endLine);
 
     void insert (const String& text, int insertPos, bool undoable);
     void remove (int startPos, int endPos, bool undoable);

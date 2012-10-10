@@ -58,6 +58,7 @@ public:
     String getName() const                                      { return "Internal"; }
     bool fileMightContainThisPluginType (const String&)         { return false; }
     FileSearchPath getDefaultLocationsToSearch()                { return FileSearchPath(); }
+    bool canScanForPlugins() const                              { return false; }
     void findAllTypesForFile (OwnedArray <PluginDescription>&, const String&)     {}
     bool doesPluginStillExist (const PluginDescription&)        { return true; }
     String getNameOfPluginFromIdentifier (const String& fileOrIdentifier)   { return fileOrIdentifier; }
