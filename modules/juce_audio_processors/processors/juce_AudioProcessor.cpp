@@ -24,7 +24,8 @@
 */
 
 AudioProcessor::AudioProcessor()
-    : playHead (nullptr),
+    : wrapperType (wrapperType_Undefined),
+      playHead (nullptr),
       sampleRate (0),
       blockSize (0),
       numInputChannels (0),

@@ -2973,6 +2973,8 @@ const XmlElement* VSTPluginFormat::getVSTXML (AudioPluginInstance* plugin)
 {
     if (VSTPluginInstance* const vst = dynamic_cast <VSTPluginInstance*> (plugin))
         return vst->getVSTXML();
+
+    return nullptr;
 }
 
 #endif

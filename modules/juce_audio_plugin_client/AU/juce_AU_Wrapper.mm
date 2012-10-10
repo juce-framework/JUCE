@@ -143,6 +143,8 @@ public:
         juceFilter = createPluginFilter();
         jassert (juceFilter != nullptr);
 
+        juceFilter->wrapperType = AudioProcessor::wrapperType_AudioUnit;
+
         juceFilter->setPlayHead (this);
         juceFilter->addListener (this);
 

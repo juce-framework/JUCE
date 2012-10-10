@@ -156,7 +156,9 @@ public:
     {
         asyncUpdater = new InternalAsyncUpdater (*this);
         juceFilter = createPluginFilter();
-        jassert (juceFilter != 0);
+        jassert (juceFilter != nullptr);
+
+        juceFilter->wrapperType = AudioProcessor::wrapperType_RTAS;
 
         AddChunk (juceChunkType, "Juce Audio Plugin Data");
 

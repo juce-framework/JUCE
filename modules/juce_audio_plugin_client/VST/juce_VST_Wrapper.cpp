@@ -173,11 +173,10 @@ namespace
         {
             const MOUSEHOOKSTRUCTEX& hs = *(MOUSEHOOKSTRUCTEX*) lParam;
 
-            Component* const comp = Desktop::getInstance().findComponentAt (Point<int> (hs.pt.x,
-                                                                                        hs.pt.y));
-            if (comp != nullptr && comp->getWindowHandle() != 0)
-                return PostMessage ((HWND) comp->getWindowHandle(), WM_MOUSEWHEEL,
-                                    hs.mouseData & 0xffff0000, (hs.pt.x & 0xffff) | (hs.pt.y << 16));
+            if (Component* const comp = Desktop::getInstance().findComponentAt (Point<int> (hs.pt.x, hs.pt.y)))
+                if (comp->getWindowHandle() != 0)
+                    return PostMessage ((HWND) comp->getWindowHandle(), WM_MOUSEWHEEL,
+                                        hs.mouseData & 0xffff0000, (hs.pt.x & 0xffff) | (hs.pt.y << 16));
         }
 
         return CallNextHookEx (mouseWheelHook, nCode, wParam, lParam);
@@ -562,12 +561,8 @@ public:
 
                 // copy back any temp channels that may have been used..
                 for (i = 0; i < numOut; ++i)
-                {
-                    const float* const chan = tempChannels.getUnchecked(i);
-
-                    if (chan != nullptr)
+                    if (const float* const chan = tempChannels.getUnchecked(i))
                         memcpy (outputs[i], chan, sizeof (float) * numSamples);
-                }
             }
         }
 
@@ -673,7 +668,7 @@ public:
     bool getCurrentPosition (AudioPlayHead::CurrentPositionInfo& info)
     {
         const VstTimeInfo* const ti = getTimeInfo (kVstPpqPosValid | kVstTempoValid | kVstBarsValid | kVstCyclePosValid
-                                                   | kVstTimeSigValid | kVstSmpteValid | kVstClockValid);
+                                                    | kVstTimeSigValid | kVstSmpteValid | kVstClockValid);
 
         if (ti == nullptr || ti->sampleRate <= 0)
             return false;
@@ -840,9 +835,8 @@ public:
         return filter != nullptr && filter->isParameterAutomatable ((int) index);
     }
 
-    class ChannelConfigComparator
+    struct ChannelConfigComparator
     {
-    public:
         static int compareElements (const short* const first, const short* const second) noexcept
         {
             if (first[0] < second[0])  return -1;
@@ -953,18 +947,18 @@ public:
 
     VstInt32 setChunk (void* data, VstInt32 byteSize, bool onlyRestoreCurrentProgramData)
     {
-        if (filter == nullptr)
-            return 0;
-
-        chunkMemory.setSize (0);
-        chunkMemoryTime = 0;
-
-        if (byteSize > 0 && data != nullptr)
+        if (filter != nullptr)
         {
-            if (onlyRestoreCurrentProgramData)
-                filter->setCurrentProgramStateInformation (data, byteSize);
-            else
-                filter->setStateInformation (data, byteSize);
+            chunkMemory.setSize (0);
+            chunkMemoryTime = 0;
+
+            if (byteSize > 0 && data != nullptr)
+            {
+                if (onlyRestoreCurrentProgramData)
+                    filter->setCurrentProgramStateInformation (data, byteSize);
+                else
+                    filter->setStateInformation (data, byteSize);
+            }
         }
 
         return 0;
@@ -1036,9 +1030,7 @@ public:
 
         if (editorComp == nullptr)
         {
-            AudioProcessorEditor* const ed = filter->createEditorIfNeeded();
-
-            if (ed != nullptr)
+            if (AudioProcessorEditor* const ed = filter->createEditorIfNeeded())
             {
                 cEffect.flags |= effFlagsHasEditor;
                 ed->setOpaque (true);
@@ -1065,8 +1057,7 @@ public:
 
         if (editorComp != nullptr)
         {
-            Component* const modalComponent = Component::getCurrentlyModalComponent();
-            if (modalComponent != nullptr)
+            if (Component* const modalComponent = Component::getCurrentlyModalComponent())
             {
                 modalComponent->exitModalState (0);
 
@@ -1236,8 +1227,8 @@ public:
                #endif
             }
 
-            if (editorComp->getPeer() != nullptr)
-                editorComp->getPeer()->handleMovedOrResized();
+            if (ComponentPeer* peer = editorComp->getPeer())
+                peer->handleMovedOrResized();
         }
     }
 
@@ -1309,9 +1300,7 @@ public:
 
         void resized()
         {
-            Component* const editor = getChildComponent(0);
-
-            if (editor != nullptr)
+            if (Component* const editor = getChildComponent(0))
                 editor->setBounds (getLocalBounds());
         }
 
@@ -1463,10 +1452,10 @@ namespace
                 MessageManagerLock mmLock;
                #endif
 
-                AudioProcessor* const filter = createPluginFilter();
-
-                if (filter != nullptr)
+                if (AudioProcessor* const filter = createPluginFilter())
                 {
+                    filter->wrapperType = AudioProcessor::wrapperType_VST;
+
                     JuceVSTWrapper* const wrapper = new JuceVSTWrapper (audioMaster, filter);
                     return wrapper->getAeffect();
                 }

@@ -77,6 +77,8 @@ public:
             JUCEApplication::quit();
         }
 
+        filter->wrapperType = AudioProcessor::wrapperType_Standalone;
+
         filter->setPlayConfigDetails (JucePlugin_MaxNumInputChannels,
                                       JucePlugin_MaxNumOutputChannels,
                                       44100, 512);

@@ -378,6 +378,9 @@ struct AAXClasses
         JuceAAX_Parameters()
         {
             pluginInstance = createPluginFilter();
+
+            if (pluginInstance != nullptr)
+                pluginInstance->wrapperType = AudioProcessor::wrapperType_AAX;
         }
 
         static AAX_CEffectParameters* AAX_CALLBACK Create()   { return new JuceAAX_Parameters(); }
