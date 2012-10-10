@@ -173,10 +173,10 @@ TextLayout::~TextLayout()
 
 float TextLayout::getHeight() const noexcept
 {
-    const Line* const lastLine = lines.getLast();
+    if (const Line* const lastLine = lines.getLast())
+        return lastLine->lineOrigin.y + lastLine->descent;
 
-    return lastLine != nullptr ? lastLine->lineOrigin.y + lastLine->descent
-                               : 0;
+    return 0.0f;
 }
 
 TextLayout::Line& TextLayout::getLine (const int index) const
@@ -238,7 +238,7 @@ namespace TextLayoutHelpers
 {
     struct FontAndColour
     {
-        FontAndColour (const Font* font_) noexcept   : font (font_), colour (0xff000000) {}
+        FontAndColour (const Font* f) noexcept   : font (f), colour (0xff000000) {}
 
         const Font* font;
         Colour colour;
@@ -251,8 +251,8 @@ namespace TextLayoutHelpers
 
     struct RunAttribute
     {
-        RunAttribute (const FontAndColour& fontAndColour_, const Range<int>& range_) noexcept
-            : fontAndColour (fontAndColour_), range (range_)
+        RunAttribute (const FontAndColour& fc, const Range<int>& r) noexcept
+            : fontAndColour (fc), range (r)
         {}
 
         FontAndColour fontAndColour;
@@ -261,10 +261,10 @@ namespace TextLayoutHelpers
 
     struct Token
     {
-        Token (const String& t, const Font& f, const Colour& c, const bool isWhitespace_)
+        Token (const String& t, const Font& f, const Colour& c, const bool whitespace)
             : text (t), font (f), colour (c),
               area (font.getStringWidthFloat (t), f.getHeight()),
-              isWhitespace (isWhitespace_),
+              isWhitespace (whitespace),
               isNewLine (t.containsChar ('\n') || t.containsChar ('\r'))
         {}
 
@@ -385,7 +385,7 @@ namespace TextLayoutHelpers
 
                 for (int i = 0; i < layout.getNumLines(); ++i)
                 {
-                    float dx = totalW - getLineWidth (i);
+                    float dx = totalW - layout.getLine(i).getLineBoundsX().getLength();
 
                     if (isCentred)
                         dx /= 2.0f;
@@ -497,21 +497,6 @@ namespace TextLayoutHelpers
                 else
                     break;
             }
-        }
-
-        float getLineWidth (const int lineNumber) const noexcept
-        {
-            float maxW = 0;
-
-            for (int i = tokens.size(); --i >= 0;)
-            {
-                const Token& t = *tokens.getUnchecked (i);
-
-                if (t.line == lineNumber && ! t.isWhitespace)
-                    maxW = jmax (maxW, t.area.getRight());
-            }
-
-            return maxW;
         }
 
         void addTextRuns (const AttributedString& text)
