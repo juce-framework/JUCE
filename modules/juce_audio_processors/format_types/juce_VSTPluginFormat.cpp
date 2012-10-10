@@ -454,15 +454,14 @@ public:
         eff->dispatcher (eff, effClose, 0, 0, 0, 0);
     }
 
-    static String getDLLResource (const File& dll, const char* type, int resID)
+    static String getDLLResource (const File& dllFile, const String& type, int resID)
     {
-        DynamicLibrary dll (dll.getFullPathName());
-
-        HMODULE dllModule = dll.getNativeHandle();
+        DynamicLibrary dll (dllFile.getFullPathName());
+        HMODULE dllModule = (HMODULE) dll.getNativeHandle();
 
         if (dllModule != INVALID_HANDLE_VALUE)
         {
-            HRSRC res = FindResource (dllModule, MAKEINTRESOURCE (resID), type);
+            HRSRC res = FindResource (dllModule, MAKEINTRESOURCE (resID), type.toWideCharPointer());
 
             if (res != 0)
             {
@@ -470,7 +469,7 @@ public:
 
                 if (hGlob)
                 {
-                    const char* data = LockResource (hGlob);
+                    const char* data = static_cast <const char*> (LockResource (hGlob));
                     return String::fromUTF8 (data, SizeofResource (dllModule, res));
                 }
             }
