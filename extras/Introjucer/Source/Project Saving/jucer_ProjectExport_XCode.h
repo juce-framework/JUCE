@@ -787,9 +787,9 @@ private:
                 String def (defines.getAllKeys()[i]);
                 const String value (defines.getAllValues()[i]);
                 if (value.isNotEmpty())
-                    def << "=" << value;
+                    def << "=" << value.replace ("\"", "\\\"");
 
-                defsList.add (def.quoted());
+                defsList.add ("\"" + def + "\"");
             }
 
             s.add ("GCC_PREPROCESSOR_DEFINITIONS = (" + indentList (defsList, ",") + ")");
