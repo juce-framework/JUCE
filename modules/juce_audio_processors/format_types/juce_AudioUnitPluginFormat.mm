@@ -1100,7 +1100,8 @@ public:
     {
         const bool wasValid = isValid();
 
-        wrapper.setVisible (false);
+        // NB: making the wrapper invisible before removing it causes
+        // strange internal crashes in some Apple AUs.
         removeChildComponent (&wrapper);
         wrapper.setView (nil);
 
