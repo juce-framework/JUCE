@@ -42,9 +42,10 @@ namespace
 
             for (CFIndex i = 0; i < numValues; ++i)
                 extensionsArray.add ("." + String::fromCFString ((CFStringRef) CFArrayGetValueAtIndex (extensions, i)));
+
+            CFRelease (extensions);
         }
 
-        CFRelease (extensions);
         return extensionsArray;
     }
 }
