@@ -301,6 +301,15 @@ bool DirectoryIterator::NativeIterator::next (String& filenameFound,
 
 
 //==============================================================================
+static bool isFileExecutable (const String& filename)
+{
+    juce_statStruct info;
+
+    return juce_stat (filename, info)
+            && S_ISREG (info.st_mode)
+            && access (filename.toUTF8(), X_OK) == 0;
+}
+
 bool Process::openDocument (const String& fileName, const String& parameters)
 {
     String cmdString (fileName.replace (" ", "\\ ",false));
@@ -308,11 +317,13 @@ bool Process::openDocument (const String& fileName, const String& parameters)
 
     if (URL::isProbablyAWebsiteURL (fileName)
          || cmdString.startsWithIgnoreCase ("file:")
-         || URL::isProbablyAnEmailAddress (fileName))
+         || URL::isProbablyAnEmailAddress (fileName)
+         || File::createFileWithoutCheckingPath (fileName).isDirectory()
+         || ! isFileExecutable (fileName))
     {
         // create a command that tries to launch a bunch of likely browsers
-        const char* const browserNames[] = { "xdg-open", "/etc/alternatives/x-www-browser", "firefox", "mozilla", "konqueror", "opera" };
-
+        const char* const browserNames[] = { "xdg-open", "/etc/alternatives/x-www-browser", "firefox", "mozilla",
+                                             "google-chrome", "chromium-browser", "opera", "konqueror" };
         StringArray cmdLines;
 
         for (int i = 0; i < numElementsInArray (browserNames); ++i)
