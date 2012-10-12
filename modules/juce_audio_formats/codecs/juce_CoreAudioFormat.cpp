@@ -33,8 +33,8 @@ namespace
     StringArray findFileExtensionsForCoreAudioCodecs()
     {
         StringArray extensionsArray;
-        CFMutableArrayRef extensions = CFArrayCreateMutable (0, 0, 0);
-        UInt32 sizeOfArray = sizeof (CFMutableArrayRef);
+        CFArrayRef extensions = nullptr;
+        UInt32 sizeOfArray = sizeof (extensions);
 
         if (AudioFileGetGlobalInfo (kAudioFileGlobalInfo_AllExtensions, 0, 0, &sizeOfArray, &extensions) == noErr)
         {
