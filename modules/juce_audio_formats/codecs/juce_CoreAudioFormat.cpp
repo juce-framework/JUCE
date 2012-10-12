@@ -62,9 +62,9 @@ public:
 
         OSStatus status = AudioFileOpenWithCallbacks (this,
                                                       &readCallback,
-                                                      0,        // write needs to be null to avoid permisisions errors
+                                                      nullptr,  // write needs to be null to avoid permisisions errors
                                                       &getSizeCallback,
-                                                      0,        // setSize needs to be null to avoid permisisions errors
+                                                      nullptr,  // setSize needs to be null to avoid permisisions errors
                                                       0,        // AudioFileTypeID inFileTypeHint
                                                       &audioFileID);
         if (status == noErr)
