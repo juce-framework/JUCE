@@ -273,6 +273,9 @@ public:
     /** Fills a rectangle with the current colour or brush. */
     void fillRect (const Rectangle<int>& rectangle) const;
 
+    /** Fills a rectangle with the current colour or brush. */
+    void fillRect (const Rectangle<float>& rectangle) const;
+
     /** Fills a rectangle with the current colour or brush.
 
         This uses sub-pixel positioning so is slower than the fillRect method which
@@ -327,8 +330,16 @@ public:
 
         @see fillRect
     */
-    void drawRect (const Rectangle<int>& rectangle,
-                   int lineThickness = 1) const;
+    void drawRect (const Rectangle<int>& rectangle, int lineThickness = 1) const;
+
+    /** Draws four lines to form a rectangular outline, using the current colour or brush.
+
+        The lines are drawn inside the given rectangle, and greater line thicknesses
+        extend inwards.
+
+        @see fillRect
+    */
+    void drawRect (const Rectangle<float>& rectangle, float lineThickness = 1.0f) const;
 
     /** Uses the current colour or brush to draw the outline of a rectangle with rounded corners.
 
