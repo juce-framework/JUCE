@@ -303,7 +303,7 @@ public:
                     audioUnit = (AudioUnit) OpenComponent (comp);
 
                     wantsMidiMessages = componentDesc.componentType == kAudioUnitType_MusicDevice
-                        || componentDesc.componentType == kAudioUnitType_MusicEffect;
+                                     || componentDesc.componentType == kAudioUnitType_MusicEffect;
                 }
             }
 
@@ -323,7 +323,9 @@ public:
 
         if (audioUnit != 0)
         {
-            AudioUnitUninitialize (audioUnit);
+            if (prepared)
+                releaseResources();
+
             CloseComponent (audioUnit);
             audioUnit = 0;
         }
@@ -450,6 +452,7 @@ public:
             wasPlaying = false;
 
             prepared = (AudioUnitInitialize (audioUnit) == noErr);
+            jassert (prepared);
         }
     }
 
@@ -1165,9 +1168,9 @@ class AudioUnitPluginWindowCocoa    : public AudioProcessorEditor,
                                       public Timer
 {
 public:
-    AudioUnitPluginWindowCocoa (AudioUnitPluginInstance& plugin_, const bool createGenericViewIfNeeded)
-        : AudioProcessorEditor (&plugin_),
-          plugin (plugin_)
+    AudioUnitPluginWindowCocoa (AudioUnitPluginInstance& p, const bool createGenericViewIfNeeded)
+        : AudioProcessorEditor (&p),
+          plugin (p)
     {
         addAndMakeVisible (&wrapper);
 
@@ -1180,15 +1183,13 @@ public:
 
     ~AudioUnitPluginWindowCocoa()
     {
-        const bool wasValid = isValid();
-
-        // NB: making the wrapper invisible before removing it causes
-        // strange internal crashes in some Apple AUs.
-        removeChildComponent (&wrapper);
-        wrapper.setView (nil);
-
-        if (wasValid)
+        if (isValid())
+        {
+            wrapper.setVisible (false);
+            removeChildComponent (&wrapper);
+            wrapper.setView (nil);
             plugin.editorBeingDeleted (this);
+        }
     }
 
     bool isValid() const        { return wrapper.getView() != nil; }
@@ -1262,7 +1263,7 @@ private:
             }
         }
 
-        if (createGenericViewIfNeeded && (pluginView == 0))
+        if (createGenericViewIfNeeded && (pluginView == nil))
         {
             {
                 // This forces CoreAudio.component to be loaded, otherwise the AUGenericView will assert
