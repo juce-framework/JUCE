@@ -70,9 +70,12 @@ namespace AudioUnitFormatHelpers
         return String (s, 4);
     }
 
-    OSType stringToOSType (const String& s1)
+    OSType stringToOSType (String s)
     {
-        const String s (s1 + "    ");
+        if (s.trim().length() >= 4) // (to avoid trimming leading spaces)
+            s = s.trim();
+
+        s += "    ";
 
         return (((OSType) (unsigned char) s[0]) << 24)
              | (((OSType) (unsigned char) s[1]) << 16)
@@ -155,13 +158,12 @@ namespace AudioUnitFormatHelpers
 
             StringArray tokens;
             tokens.addTokens (s, ",", String::empty);
-            tokens.trim();
             tokens.removeEmptyStrings();
 
             if (tokens.size() == 3)
             {
-                desc.componentType = stringToOSType (tokens[0]);
-                desc.componentSubType = stringToOSType (tokens[1]);
+                desc.componentType         = stringToOSType (tokens[0]);
+                desc.componentSubType      = stringToOSType (tokens[1]);
                 desc.componentManufacturer = stringToOSType (tokens[2]);
 
                 if (ComponentRecord* comp = FindNextComponent (0, &desc))
