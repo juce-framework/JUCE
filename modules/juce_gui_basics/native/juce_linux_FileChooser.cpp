@@ -45,18 +45,37 @@ void FileChooser::showPlatformDialog (Array<File>& results,
                                       FilePreviewComponent* previewComponent)
 {
     const String separator (":");
-    String command ("zenity --file-selection");
 
-    if (title.isNotEmpty())         command << " --title=\"" << title << "\"";
-    if (file != File::nonexistent)  command << " --filename=\"" << file.getFullPathName () << "\"";
-    if (isDirectory)                command << " --directory";
-    if (isSave)                     command << " --save";
-    if (selectMultipleFiles)        command << " --multiple --separator=" << separator;
+    StringArray args;
+    args.add ("zenity");
+    args.add ("--file-selection");
 
-    command << " 2>&1";
+    if (title.isNotEmpty())         args.add ("--title=" + title);
+    if (isDirectory)                args.add ("--directory");
+    if (isSave)                     args.add ("--save");
+
+    if (selectMultipleFiles)
+    {
+       args.add ("--multiple");
+       args.add ("--separator=" + separator);
+    }
+
+    const File previousWorkingDirectory (File::getCurrentWorkingDirectory());
+
+    if (file.isDirectory())
+    {
+        file.setAsCurrentWorkingDirectory();
+    }
+    else if (file.exists())
+    {
+        file.getParentDirectory().setAsCurrentWorkingDirectory();
+        args.add ("--filename=" + file.getFileName());
+    }
+
+    args.add ("2>&1");
 
     ChildProcess child;
-    if (child.start (command))
+    if (child.start (args))
     {
         const String result (child.readAllProcessOutput().trim());
 
@@ -75,4 +94,6 @@ void FileChooser::showPlatformDialog (Array<File>& results,
 
         child.waitForProcessToFinish (60 * 1000);
     }
+
+    previousWorkingDirectory.setAsCurrentWorkingDirectory();
 }

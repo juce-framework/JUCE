@@ -563,6 +563,11 @@ bool ChildProcess::start (const String& command)
     return activeProcess != nullptr;
 }
 
+bool ChildProcess::start (const StringArray& args)
+{
+    return start (args.joinIntoString (" "));
+}
+
 bool ChildProcess::isRunning() const
 {
     return activeProcess != nullptr && activeProcess->isRunning();

@@ -1000,7 +1000,8 @@ public:
 
                 Array<char*> argv;
                 for (int i = 0; i < arguments.size(); ++i)
-                    argv.add (arguments[i].toUTF8().getAddress());
+                    if (arguments[i].isNotEmpty())
+                        argv.add (arguments[i].toUTF8().getAddress());
 
                 argv.add (nullptr);
 
@@ -1069,12 +1070,15 @@ bool ChildProcess::start (const String& command)
 {
     StringArray tokens;
     tokens.addTokens (command, true);
-    tokens.removeEmptyStrings (true);
+    return start (tokens);
+}
 
-    if (tokens.size() == 0)
+bool ChildProcess::start (const StringArray& args)
+{
+    if (args.size() == 0)
         return false;
 
-    activeProcess = new ActiveProcess (tokens);
+    activeProcess = new ActiveProcess (args);
 
     if (activeProcess->childPID == 0)
         activeProcess = nullptr;
