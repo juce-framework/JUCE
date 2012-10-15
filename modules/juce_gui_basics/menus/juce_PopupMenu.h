@@ -418,6 +418,7 @@ public:
         const PopupMenu& menu;
         int index;
 
+        MenuItemIterator& operator= (const MenuItemIterator&);
         JUCE_LEAK_DETECTOR (MenuItemIterator);
     };
 
