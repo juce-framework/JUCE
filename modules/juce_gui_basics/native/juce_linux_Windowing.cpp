@@ -2304,6 +2304,7 @@ private:
         dragAndDropCurrentMimeType = 0;
         dragAndDropSourceWindow = 0;
         srcMimeTypeAtomList.clear();
+        finishAfterDropDataReceived = false;
     }
 
     void sendDragAndDropMessage (XClientMessageEvent& msg)
@@ -2366,23 +2367,23 @@ private:
                             (int) clientMsg.data.l[2] & 0xffff);
         dropPos -= getScreenPosition();
 
+        const Atoms& atoms = Atoms::get();
+        Atom targetAction = atoms.XdndActionCopy;
+
+        for (int i = numElementsInArray (atoms.allowedActions); --i >= 0;)
+        {
+            if ((Atom) clientMsg.data.l[4] == atoms.allowedActions[i])
+            {
+                targetAction = atoms.allowedActions[i];
+                break;
+            }
+        }
+
+        sendDragAndDropStatus (true, targetAction);
+
         if (dragInfo.position != dropPos)
         {
             dragInfo.position = dropPos;
-
-            const Atoms& atoms = Atoms::get();
-            Atom targetAction = atoms.XdndActionCopy;
-
-            for (int i = numElementsInArray (atoms.allowedActions); --i >= 0;)
-            {
-                if ((Atom) clientMsg.data.l[4] == atoms.allowedActions[i])
-                {
-                    targetAction = atoms.allowedActions[i];
-                    break;
-                }
-            }
-
-            sendDragAndDropStatus (true, targetAction);
 
             if (dragInfo.files.size() == 0)
                 updateDraggedFileList (clientMsg);
@@ -2395,8 +2396,19 @@ private:
     void handleDragAndDropDrop (const XClientMessageEvent& clientMsg)
     {
         if (dragInfo.files.size() == 0)
+        {
+            // no data, transaction finished in handleDragAndDropSelection()
+            finishAfterDropDataReceived = true;
             updateDraggedFileList (clientMsg);
+        }
+        else
+        {
+            handleDragAndDropDataReceived();  // data was already received
+        }
+    }
 
+    void handleDragAndDropDataReceived()
+    {
         DragInfo dragInfoCopy (dragInfo);
 
         sendDragAndDropFinish();
@@ -2466,7 +2478,7 @@ private:
     {
         dragInfo.files.clear();
 
-        if (evt.xselection.property != 0)
+        if (evt.xselection.property != None)
         {
             StringArray lines;
 
@@ -2495,6 +2507,9 @@ private:
 
             dragInfo.files.trim();
             dragInfo.files.removeEmptyStrings();
+
+            if (finishAfterDropDataReceived)
+                handleDragAndDropDataReceived();
         }
     }
 
@@ -2518,6 +2533,7 @@ private:
     DragInfo dragInfo;
     Atom dragAndDropCurrentMimeType;
     Window dragAndDropSourceWindow;
+    bool finishAfterDropDataReceived;
 
     Array <Atom> srcMimeTypeAtomList;
 
