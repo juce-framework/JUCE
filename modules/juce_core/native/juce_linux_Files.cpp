@@ -129,6 +129,30 @@ File File::getLinkedTarget() const
 }
 
 //==============================================================================
+static File resolveXDGFolder (const char* const type, const char* const fallbackFolder)
+{
+    StringArray confLines;
+    File ("~/.config/user-dirs.dirs").readLines (confLines);
+
+    for (int i = 0; i < confLines.size(); ++i)
+    {
+        const String line (confLines[i].trimStart());
+
+        if (line.startsWith (type))
+        {
+            // eg. resolve XDG_MUSIC_DIR="$HOME/Music" to /home/user/Music
+            const File f (line.replace ("$HOME", File ("~").getFullPathName())
+                              .fromFirstOccurrenceOf ("=", false, false)
+                              .trim().unquoted());
+
+            if (f.isDirectory())
+                return f;
+        }
+    }
+
+    return File (fallbackFolder);
+}
+
 const char* const* juce_argv = nullptr;
 int juce_argc = 0;
 
@@ -136,65 +160,59 @@ File File::getSpecialLocation (const SpecialLocationType type)
 {
     switch (type)
     {
-    case userHomeDirectory:
-    {
-        const char* homeDir = getenv ("HOME");
-
-        if (homeDir == nullptr)
+        case userHomeDirectory:
         {
-            struct passwd* const pw = getpwuid (getuid());
-            if (pw != nullptr)
-                homeDir = pw->pw_dir;
+            const char* homeDir = getenv ("HOME");
+
+            if (homeDir == nullptr)
+            {
+                struct passwd* const pw = getpwuid (getuid());
+                if (pw != nullptr)
+                    homeDir = pw->pw_dir;
+            }
+
+            return File (CharPointer_UTF8 (homeDir));
         }
 
-        return File (CharPointer_UTF8 (homeDir));
-    }
+        case userDocumentsDirectory:          return resolveXDGFolder ("XDG_DOCUMENTS_DIR", "~");
+        case userMusicDirectory:              return resolveXDGFolder ("XDG_MUSIC_DIR",     "~");
+        case userMoviesDirectory:             return resolveXDGFolder ("XDG_VIDEOS_DIR",    "~");
+        case userPicturesDirectory:           return resolveXDGFolder ("XDG_PICTURES_DIR",  "~");
+        case userDesktopDirectory:            return resolveXDGFolder ("XDG_DESKTOP_DIR",   "~/Desktop");
+        case userApplicationDataDirectory:    return File ("~");
+        case commonApplicationDataDirectory:  return File ("/var");
+        case globalApplicationsDirectory:     return File ("/usr");
 
-    case userDocumentsDirectory:
-    case userMusicDirectory:
-    case userMoviesDirectory:
-    case userApplicationDataDirectory:
-        return File ("~");
-
-    case userDesktopDirectory:
-        return File ("~/Desktop");
-
-    case commonApplicationDataDirectory:
-        return File ("/var");
-
-    case globalApplicationsDirectory:
-        return File ("/usr");
-
-    case tempDirectory:
-    {
-        File tmp ("/var/tmp");
-
-        if (! tmp.isDirectory())
+        case tempDirectory:
         {
-            tmp = "/tmp";
+            File tmp ("/var/tmp");
 
             if (! tmp.isDirectory())
-                tmp = File::getCurrentWorkingDirectory();
+            {
+                tmp = "/tmp";
+
+                if (! tmp.isDirectory())
+                    tmp = File::getCurrentWorkingDirectory();
+            }
+
+            return tmp;
         }
 
-        return tmp;
-    }
+        case invokedExecutableFile:
+            if (juce_argv != nullptr && juce_argc > 0)
+                return File (CharPointer_UTF8 (juce_argv[0]));
+            // deliberate fall-through...
 
-    case invokedExecutableFile:
-        if (juce_argv != nullptr && juce_argc > 0)
-            return File (CharPointer_UTF8 (juce_argv[0]));
-        // deliberate fall-through...
+        case currentExecutableFile:
+        case currentApplicationFile:
+            return juce_getExecutableFile();
 
-    case currentExecutableFile:
-    case currentApplicationFile:
-        return juce_getExecutableFile();
+        case hostApplicationPath:
+            return juce_readlink ("/proc/self/exe", juce_getExecutableFile());
 
-    case hostApplicationPath:
-        return juce_readlink ("/proc/self/exe", juce_getExecutableFile());
-
-    default:
-        jassertfalse; // unknown type?
-        break;
+        default:
+            jassertfalse; // unknown type?
+            break;
     }
 
     return File::nonexistent;

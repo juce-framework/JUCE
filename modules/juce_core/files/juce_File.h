@@ -834,6 +834,9 @@ public:
 
         /** The most likely place where a user might store their movie files. */
         userMoviesDirectory,
+
+        /** The most likely place where a user might store their picture files. */
+        userPicturesDirectory
     };
 
     /** Finds the location of a special type of file or directory, such as a home folder or

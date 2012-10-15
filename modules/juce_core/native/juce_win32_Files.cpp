@@ -510,8 +510,9 @@ File JUCE_CALLTYPE File::getSpecialLocation (const SpecialLocationType type)
         case userApplicationDataDirectory:      csidlType = CSIDL_APPDATA; break;
         case commonApplicationDataDirectory:    csidlType = CSIDL_COMMON_APPDATA; break;
         case globalApplicationsDirectory:       csidlType = CSIDL_PROGRAM_FILES; break;
-        case userMusicDirectory:                csidlType = 0x0d /*CSIDL_MYMUSIC*/; break;
-        case userMoviesDirectory:               csidlType = 0x0e /*CSIDL_MYVIDEO*/; break;
+        case userMusicDirectory:                csidlType = 0x0d; /*CSIDL_MYMUSIC*/ break;
+        case userMoviesDirectory:               csidlType = 0x0e; /*CSIDL_MYVIDEO*/ break;
+        case userPicturesDirectory:             csidlType = 0x27; /*CSIDL_MYPICTURES*/ break;
 
         case tempDirectory:
         {
