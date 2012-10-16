@@ -23,20 +23,6 @@
   ==============================================================================
 */
 
-#if JUCE_MSVC
- #pragma warning (push)
- #pragma warning (disable: 4514)
-#endif
-
-#if JUCE_MSVC
- #pragma warning (pop)
-
- #ifdef _INC_TIME_INL
-  #define USE_NEW_SECURE_TIME_FNS
- #endif
-#endif
-
-//==============================================================================
 namespace TimeHelpers
 {
     static struct tm millisToLocal (const int64 millis) noexcept
@@ -76,7 +62,7 @@ namespace TimeHelpers
             time_t now = static_cast <time_t> (seconds);
 
           #if JUCE_WINDOWS
-           #ifdef USE_NEW_SECURE_TIME_FNS
+           #ifdef _INC_TIME_INL
             if (now >= 0 && now <= 0x793406fff)
                 localtime_s (&result, &now);
             else
@@ -200,39 +186,24 @@ Time& Time::operator= (const Time& other) noexcept
 //==============================================================================
 int64 Time::currentTimeMillis() noexcept
 {
-    static uint32 lastCounterResult = 0xffffffff;
-    static int64 correction = 0;
+  #if JUCE_WINDOWS
+    struct _timeb t;
+   #ifdef _INC_TIME_INL
+    _ftime_s (&t);
+   #else
+    _ftime (&t);
+   #endif
+    return ((int64) t.time) * 1000 + t.millitm;
+  #else
+    struct timeval tv;
+    gettimeofday (&tv, nullptr);
+    return ((int64) tv.tv_sec) * 1000 + tv.tv_usec / 1000;
+  #endif
+}
 
-    const uint32 now = getMillisecondCounter();
-
-    // check the counter hasn't wrapped (also triggered the first time this function is called)
-    if (now < lastCounterResult)
-    {
-        // double-check it's actually wrapped, in case multi-cpu machines have timers that drift a bit.
-        if (lastCounterResult == 0xffffffff || now < lastCounterResult - 10)
-        {
-            // get the time once using normal library calls, and store the difference needed to
-            // turn the millisecond counter into a real time.
-          #if JUCE_WINDOWS
-            struct _timeb t;
-           #ifdef USE_NEW_SECURE_TIME_FNS
-            _ftime_s (&t);
-           #else
-            _ftime (&t);
-           #endif
-            correction = (((int64) t.time) * 1000 + t.millitm) - now;
-          #else
-            struct timeval tv;
-            struct timezone tz;
-            gettimeofday (&tv, &tz);
-            correction = (((int64) tv.tv_sec) * 1000 + tv.tv_usec / 1000) - now;
-          #endif
-        }
-    }
-
-    lastCounterResult = now;
-
-    return correction + now;
+Time JUCE_CALLTYPE Time::getCurrentTime() noexcept
+{
+    return Time (currentTimeMillis());
 }
 
 //==============================================================================
@@ -300,13 +271,6 @@ double Time::highResolutionTicksToSeconds (const int64 ticks) noexcept
 int64 Time::secondsToHighResolutionTicks (const double seconds) noexcept
 {
     return (int64) (seconds * (double) getHighResolutionTicksPerSecond());
-}
-
-
-//==============================================================================
-Time JUCE_CALLTYPE Time::getCurrentTime() noexcept
-{
-    return Time (currentTimeMillis());
 }
 
 //==============================================================================
@@ -378,12 +342,10 @@ int Time::getHoursInAmPmFormat() const noexcept
 {
     const int hours = getHours();
 
-    if (hours == 0)
-        return 12;
-    else if (hours <= 12)
-        return hours;
-    else
-        return hours - 12;
+    if (hours == 0)  return 12;
+    if (hours <= 12) return hours;
+
+    return hours - 12;
 }
 
 bool Time::isAfternoon() const noexcept
@@ -403,7 +365,7 @@ String Time::getTimeZone() const noexcept
   #if JUCE_WINDOWS
     _tzset();
 
-   #ifdef USE_NEW_SECURE_TIME_FNS
+   #ifdef _INC_TIME_INL
     for (int i = 0; i < 2; ++i)
     {
         char name[128] = { 0 };
