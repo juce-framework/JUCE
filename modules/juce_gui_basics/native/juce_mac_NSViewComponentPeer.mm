@@ -997,7 +997,7 @@ public:
         else
             dragInfo.files = getDroppedFiles (pasteboard, contentType);
 
-        if (dragInfo.files.size() > 0 || dragInfo.text.isNotEmpty())
+        if (! dragInfo.isEmpty())
         {
             switch (type)
             {

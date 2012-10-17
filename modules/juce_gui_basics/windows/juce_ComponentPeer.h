@@ -307,6 +307,9 @@ public:
         StringArray files;
         String text;
         Point<int> position;
+
+        bool isEmpty() const noexcept       { return files.size() == 0 && text.isEmpty(); }
+        void clear() noexcept               { files.clear(); text = String::empty; }
     };
 
     bool handleDragMove (const DragInfo&);

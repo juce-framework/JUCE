@@ -1028,8 +1028,7 @@ public:
             if (ownerInfo == nullptr)
                 return S_FALSE;
 
-            ownerInfo->dragInfo.files.clear();
-            ownerInfo->dragInfo.text = String::empty;
+            ownerInfo->dragInfo.clear();
 
             DroppedData textData (dataObject, CF_UNICODETEXT);
 
