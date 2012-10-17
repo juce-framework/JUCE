@@ -199,6 +199,11 @@ public:
     */
     void updateMatchedPairs();
 
+    /** Forces a sort of the sequence.
+        You may need to call this if you've manually modified the timestamps of some
+        events such that the overall order now needs updating.
+    */
+    void sort();
 
     //==============================================================================
     /** Copies all the messages for a particular midi channel to another sequence.

@@ -38,7 +38,7 @@ public:
 
     bool loadedOk() const                           { return true; }
     bool isForFile (const File& file) const         { return getFile() == file; }
-    bool isForNode (const ValueTree& node) const    { return false; }
+    bool isForNode (const ValueTree&) const         { return false; }
     bool refersToProject (Project& p) const         { return project == &p; }
     Project* getProject() const                     { return project; }
     String getName() const                          { return getFile().getFileName(); }

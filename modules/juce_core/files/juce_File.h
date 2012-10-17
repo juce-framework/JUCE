@@ -605,8 +605,8 @@ public:
 
         Attempts to load the entire file as a zero-terminated string.
 
-        This makes use of InputStream::readEntireStreamAsString, which should
-        automatically cope with unicode/acsii file formats.
+        This makes use of InputStream::readEntireStreamAsString, which can
+        read either UTF-16 or UTF-8 file formats.
     */
     String loadFileAsString() const;
 

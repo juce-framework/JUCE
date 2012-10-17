@@ -217,7 +217,7 @@ public:
     virtual int readCompressedInt();
 
     //==============================================================================
-    /** Reads a UTF8 string from the stream, up to the next linefeed or carriage return.
+    /** Reads a UTF-8 string from the stream, up to the next linefeed or carriage return.
 
         This will read up to the next "\n" or "\r\n" or end-of-stream.
 
@@ -227,10 +227,10 @@ public:
     */
     virtual String readNextLine();
 
-    /** Reads a zero-terminated UTF8 string from the stream.
+    /** Reads a zero-terminated UTF-8 string from the stream.
 
-        This will read characters from the stream until it hits a zero character or
-        end-of-stream.
+        This will read characters from the stream until it hits a null character
+        or end-of-stream.
 
         @see OutputStream::writeString, readEntireStreamAsString
     */
@@ -238,8 +238,8 @@ public:
 
     /** Tries to read the whole stream and turn it into a string.
 
-        This will read from the stream's current position until the end-of-stream, and
-        will try to make an educated guess about whether it's unicode or an 8-bit encoding.
+        This will read from the stream's current position until the end-of-stream.
+        It can read from either UTF-16 or UTF-8 formats.
     */
     virtual String readEntireStreamAsString();
 
