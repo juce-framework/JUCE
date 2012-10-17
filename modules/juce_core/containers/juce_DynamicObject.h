@@ -50,6 +50,8 @@ public:
     /** Destructor. */
     virtual ~DynamicObject();
 
+    typedef ReferenceCountedObjectPtr<DynamicObject> Ptr;
+
     //==============================================================================
     /** Returns true if the object has a property with this name.
         Note that if the property is actually a method, this will return false.
@@ -57,7 +59,6 @@ public:
     virtual bool hasProperty (const Identifier& propertyName) const;
 
     /** Returns a named property.
-
         This returns a void if no such property exists.
     */
     virtual var getProperty (const Identifier& propertyName) const;
