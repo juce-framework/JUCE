@@ -104,7 +104,7 @@ public:
 
  #define START_JUCE_APPLICATION(AppClass) \
     static juce::JUCEApplicationBase* juce_CreateApplication() { return new AppClass(); } \
-    JUCE_MAIN_FUNCTION \
+    extern "C" JUCE_MAIN_FUNCTION \
     { \
         juce::JUCEApplication::createInstance = &juce_CreateApplication; \
         return juce::JUCEApplication::main (JUCE_MAIN_FUNCTION_ARGS); \
