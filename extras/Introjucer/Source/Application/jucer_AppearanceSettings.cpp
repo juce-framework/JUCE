@@ -343,7 +343,7 @@ struct AppearanceEditor
 
     //==============================================================================
     class EditorPanel  : public Component,
-                         private Button::Listener
+                         private ButtonListener
     {
     public:
         EditorPanel()

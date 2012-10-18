@@ -264,7 +264,7 @@ bool GenericCodeEditorComponent::perform (const InvocationInfo& info)
 //==============================================================================
 class GenericCodeEditorComponent::FindPanel  : public Component,
                                                private TextEditor::Listener,
-                                               private Button::Listener
+                                               private ButtonListener
 {
 public:
     FindPanel()
