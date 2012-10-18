@@ -23,14 +23,19 @@
   ==============================================================================
 */
 
+static bool exeIsAvailable (const char* const executable)
+{
+     ChildProcess child;
+     const bool ok = child.start ("which " + String (executable))
+                       && child.readAllProcessOutput().trim().isNotEmpty();
+
+     child.waitForProcessToFinish (60 * 1000);
+     return ok;
+}
+
 bool FileChooser::isPlatformDialogAvailable()
 {
-    ChildProcess child;
-    const bool ok = child.start ("which zenity")
-                     && child.readAllProcessOutput().trim().isNotEmpty();
-
-    child.waitForProcessToFinish (60 * 1000);
-    return ok;
+    return exeIsAvailable ("zenity") || exeIsAvailable ("kdialog");
 }
 
 void FileChooser::showPlatformDialog (Array<File>& results,
@@ -44,19 +49,85 @@ void FileChooser::showPlatformDialog (Array<File>& results,
                                       bool selectMultipleFiles,
                                       FilePreviewComponent* previewComponent)
 {
-    const String separator (":");
-    String command ("zenity --file-selection");
+    String separator;
+    StringArray args;
 
-    if (title.isNotEmpty())         command << " --title=\"" << title << "\"";
-    if (file != File::nonexistent)  command << " --filename=\"" << file.getFullPathName () << "\"";
-    if (isDirectory)                command << " --directory";
-    if (isSave)                     command << " --save";
-    if (selectMultipleFiles)        command << " --multiple --separator=" << separator;
+    const File previousWorkingDirectory (File::getCurrentWorkingDirectory());
+    const bool isKdeFullSession = SystemStats::getEnvironmentVariable ("KDE_FULL_SESSION", String::empty)
+                                    .equalsIgnoreCase ("true");
 
-    command << " 2>&1";
+    if (exeIsAvailable ("kdialog") && (isKdeFullSession || ! exeIsAvailable ("zenity")))
+    {
+        // use kdialog for KDE sessions or if zenity is missing
+        args.add ("kdialog");
+
+        if (title.isNotEmpty())
+            args.add ("--title=" + title);
+
+        if (selectMultipleFiles)
+        {
+            separator = "\n";
+            args.add ("--multiple");
+            args.add ("--separate-output");
+            args.add ("--getopenfilename");
+        }
+        else
+        {
+            if (isSave)             args.add ("--getsavefilename");
+            else if (isDirectory)   args.add ("--getexistingdirectory");
+            else                    args.add ("--getopenfilename");
+        }
+
+        String startPath;
+
+        if (file.exists() || file.getParentDirectory().exists())
+        {
+            startPath = file.getFullPathName();
+        }
+        else
+        {
+            startPath = File::getSpecialLocation (File::userHomeDirectory).getFullPathName();
+
+            if (isSave)
+                startPath += "/" + file.getFileName();
+        }
+
+        args.add (startPath);
+    }
+    else
+    {
+        // zenity
+        args.add ("zenity");
+        args.add ("--file-selection");
+
+        if (title.isNotEmpty())
+            args.add ("--title=" + title);
+
+        if (selectMultipleFiles)
+        {
+            separator = ":";
+            args.add ("--multiple");
+            args.add ("--separator=" + separator);
+        }
+        else
+        {
+            if (isDirectory)  args.add ("--directory");
+            if (isSave)       args.add ("--save");
+        }
+
+        if (file.isDirectory())
+            file.setAsCurrentWorkingDirectory();
+        else if (file.getParentDirectory().exists())
+            file.getParentDirectory().setAsCurrentWorkingDirectory();
+        else
+            File::getSpecialLocation (File::userHomeDirectory).setAsCurrentWorkingDirectory();
+
+        if (! file.getFileName().isEmpty())
+            args.add ("--filename=" + file.getFileName());
+    }
 
     ChildProcess child;
-    if (child.start (command))
+    if (child.start (args))
     {
         const String result (child.readAllProcessOutput().trim());
 
@@ -75,4 +146,6 @@ void FileChooser::showPlatformDialog (Array<File>& results,
 
         child.waitForProcessToFinish (60 * 1000);
     }
+
+    previousWorkingDirectory.setAsCurrentWorkingDirectory();
 }

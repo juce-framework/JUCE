@@ -233,10 +233,10 @@ extern XContext windowHandleXContext;
 
 typedef void (*EventProcPtr) (XEvent* ev);
 
-static bool xErrorTriggered;
-
 namespace
 {
+    static bool xErrorTriggered = false;
+
     int temporaryErrorHandler (Display*, XErrorEvent*)
     {
         xErrorTriggered = true;
@@ -489,15 +489,13 @@ public:
     bool open()
     {
         bool ok = false;
-        const String filename (file.getFullPathName());
 
         if (file.hasFileExtension (".vst"))
         {
-            const char* const utf8 = filename.toUTF8().getAddress();
-            CFURLRef url = CFURLCreateFromFileSystemRepresentation (0, (const UInt8*) utf8,
-                                                                    strlen (utf8), file.isDirectory());
+            const char* const utf8 = file.getFullPathName().toUTF8().getAddress();
 
-            if (url != 0)
+            if (CFURLRef url = CFURLCreateFromFileSystemRepresentation (0, (const UInt8*) utf8,
+                                                                        strlen (utf8), file.isDirectory()))
             {
                 bundleRef = CFBundleCreate (kCFAllocatorDefault, url);
                 CFRelease (url);
@@ -513,9 +511,7 @@ public:
 
                         if (moduleMain != 0)
                         {
-                            CFTypeRef name = CFBundleGetValueForInfoDictionaryKey (bundleRef, CFSTR("CFBundleName"));
-
-                            if (name != 0)
+                            if (CFTypeRef name = CFBundleGetValueForInfoDictionaryKey (bundleRef, CFSTR("CFBundleName")))
                             {
                                 if (CFGetTypeID (name) == CFStringGetTypeID())
                                 {
@@ -557,7 +553,7 @@ public:
         {
             FSRef fn;
 
-            if (FSPathMakeRef ((UInt8*) filename.toUTF8().getAddress(), &fn, 0) == noErr)
+            if (FSPathMakeRef ((UInt8*) file.getFullPathName().toUTF8().getAddress(), &fn, 0) == noErr)
             {
                 resFileId = FSOpenResFile (&fn, fsRdPerm);
 

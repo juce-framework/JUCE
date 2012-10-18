@@ -770,10 +770,9 @@ public:
     void removeAllInstancesOf (ParameterType valueToRemove)
     {
         const ScopedLockType lock (getLock());
-        ElementType* const e = data.elements;
 
         for (int i = numUsed; --i >= 0;)
-            if (valueToRemove == e[i])
+            if (valueToRemove == data.elements[i])
                 remove (i);
     }
 

@@ -141,7 +141,6 @@ ProjectExporter::ProjectExporter (Project& project_, const ValueTree& settings_)
       makefileIsDLL (false),
       msvcIsDLL (false),
       msvcIsWindowsSubsystem (true),
-      msvcNeedsDLLRuntimeLib (false),
       settings (settings_),
       project (project_),
       projectType (project_.getProjectType()),

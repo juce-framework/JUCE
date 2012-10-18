@@ -153,6 +153,9 @@ protected:
         Value getWholeProgramOptValue()             { return getValue (Ids::wholeProgramOptimisation); }
         bool shouldDisableWholeProgramOpt() const   { return static_cast<int> (config [Ids::wholeProgramOptimisation]) > 0; }
 
+        Value getUsingRuntimeLibDLL()               { return getValue (Ids::useRuntimeLibDLL); }
+        bool isUsingRuntimeLibDLL() const           { return config [Ids::useRuntimeLibDLL]; }
+
         String getOutputFilename (const String& suffix, bool forceSuffix) const
         {
             const String target (File::createLegalFileName (getTargetBinaryNameString().trim()));
@@ -175,6 +178,7 @@ protected:
                                              "Always disable link-time code generation", nullptr };
             const var wpoValues[] = { var(), var (1) };
 
+            props.add (new BooleanPropertyComponent (getUsingRuntimeLibDLL(), "Runtime Library", "Use DLL version of runtime library"));
             props.add (new ChoicePropertyComponent (getWholeProgramOptValue(), "Whole Program Optimisation",
                                                     StringArray (wpoNames), Array<var> (wpoValues, numElementsInArray (wpoValues))));
 
@@ -739,8 +743,8 @@ protected:
 
             compiler->setAttribute ("AdditionalIncludeDirectories", replacePreprocessorTokens (config, getHeaderSearchPaths (config).joinIntoString (";")));
             compiler->setAttribute ("PreprocessorDefinitions", getPreprocessorDefs (config, ";"));
-            compiler->setAttribute ("RuntimeLibrary", msvcNeedsDLLRuntimeLib ? (isDebug ? 3 : 2) // MT DLL
-                                                                             : (isDebug ? 1 : 0)); // MT static
+            compiler->setAttribute ("RuntimeLibrary", config.isUsingRuntimeLibDLL() ? (isDebug ? 3 : 2) // MT DLL
+                                                                                    : (isDebug ? 1 : 0)); // MT static
             compiler->setAttribute ("RuntimeTypeInfo", "true");
             compiler->setAttribute ("UsePrecompiledHeader", "0");
             compiler->setAttribute ("PrecompiledHeaderFile", getIntDirFile (config.getOutputFilename (".pch", true)));
@@ -1141,8 +1145,8 @@ protected:
                 includePaths.add ("%(AdditionalIncludeDirectories)");
                 cl->createNewChildElement ("AdditionalIncludeDirectories")->addTextElement (includePaths.joinIntoString (";"));
                 cl->createNewChildElement ("PreprocessorDefinitions")->addTextElement (getPreprocessorDefs (config, ";") + ";%(PreprocessorDefinitions)");
-                cl->createNewChildElement ("RuntimeLibrary")->addTextElement (msvcNeedsDLLRuntimeLib ? (isDebug ? "MultiThreadedDebugDLL" : "MultiThreadedDLL")
-                                                                                                     : (isDebug ? "MultiThreadedDebug"    : "MultiThreaded"));
+                cl->createNewChildElement ("RuntimeLibrary")->addTextElement (config.isUsingRuntimeLibDLL() ? (isDebug ? "MultiThreadedDebugDLL" : "MultiThreadedDLL")
+                                                                                                            : (isDebug ? "MultiThreadedDebug"    : "MultiThreaded"));
                 cl->createNewChildElement ("RuntimeTypeInfo")->addTextElement ("true");
                 cl->createNewChildElement ("PrecompiledHeader");
                 cl->createNewChildElement ("AssemblerListingLocation")->addTextElement ("$(IntDir)\\");

@@ -130,9 +130,9 @@ ImagePixelData::Ptr NativeImageType::create (Image::PixelFormat format, int widt
 class SubsectionPixelData  : public ImagePixelData
 {
 public:
-    SubsectionPixelData (ImagePixelData* const image_, const Rectangle<int>& area_)
-        : ImagePixelData (image_->pixelFormat, area_.getWidth(), area_.getHeight()),
-          image (image_), area (area_)
+    SubsectionPixelData (ImagePixelData* const im, const Rectangle<int>& r)
+        : ImagePixelData (im->pixelFormat, r.getWidth(), r.getHeight()),
+          image (im), area (r)
     {
     }
 
@@ -158,7 +158,7 @@ public:
 
         {
             Graphics g (newImage);
-            g.drawImageAt (Image (this), -area.getX(), -area.getY());
+            g.drawImageAt (Image (this), 0, 0);
         }
 
         newImage.getPixelData()->incReferenceCount();

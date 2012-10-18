@@ -57,6 +57,15 @@ public:
     */
     bool start (const String& command);
 
+    /** Attempts to launch a child process command.
+
+        The first argument should be the name of the executable file, followed by any other
+        arguments that are needed.
+        If the process has already been launched, this will launch it again. If a problem
+        occurs, the method will return false.
+    */
+    bool start (const StringArray& arguments);
+
     /** Returns true if the child process is alive. */
     bool isRunning() const;
 

@@ -965,9 +965,7 @@ void Desktop::setKioskComponent (Component* kioskModeComponent, bool enableOrDis
 
     displays.refresh();
 
-    ComponentPeer* const peer = kioskModeComponent->getPeer();
-
-    if (peer != nullptr)
+    if (ComponentPeer* const peer = kioskModeComponent->getPeer())
         peer->setFullScreen (enableOrDisable);
 }
 

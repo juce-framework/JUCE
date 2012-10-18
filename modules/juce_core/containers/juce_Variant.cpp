@@ -345,20 +345,15 @@ var::var (const var& valueToCopy)  : type (valueToCopy.type)
     type->createCopy (value, valueToCopy.value);
 }
 
-var::var (const int value_) noexcept       : type (&VariantType_Int::instance)    { value.intValue = value_; }
-var::var (const int64 value_) noexcept     : type (&VariantType_Int64::instance)  { value.int64Value = value_; }
-var::var (const bool value_) noexcept      : type (&VariantType_Bool::instance)   { value.boolValue = value_; }
-var::var (const double value_) noexcept    : type (&VariantType_Double::instance) { value.doubleValue = value_; }
-var::var (MethodFunction method_) noexcept : type (&VariantType_Method::instance) { value.methodValue = method_; }
-
-var::var (const String& value_)        : type (&VariantType_String::instance) { new (value.stringValue) String (value_); }
-var::var (const char* const value_)    : type (&VariantType_String::instance) { new (value.stringValue) String (value_); }
-var::var (const wchar_t* const value_) : type (&VariantType_String::instance) { new (value.stringValue) String (value_); }
-
-var::var (const Array<var>& value_)  : type (&VariantType_Array::instance)
-{
-    value.arrayValue = new Array<var> (value_);
-}
+var::var (const int v) noexcept       : type (&VariantType_Int::instance)    { value.intValue = v; }
+var::var (const int64 v) noexcept     : type (&VariantType_Int64::instance)  { value.int64Value = v; }
+var::var (const bool v) noexcept      : type (&VariantType_Bool::instance)   { value.boolValue = v; }
+var::var (const double v) noexcept    : type (&VariantType_Double::instance) { value.doubleValue = v; }
+var::var (MethodFunction m) noexcept  : type (&VariantType_Method::instance) { value.methodValue = m; }
+var::var (const Array<var>& v)        : type (&VariantType_Array::instance)  { value.arrayValue = new Array<var> (v); }
+var::var (const String& v)            : type (&VariantType_String::instance) { new (value.stringValue) String (v); }
+var::var (const char* const v)        : type (&VariantType_String::instance) { new (value.stringValue) String (v); }
+var::var (const wchar_t* const v)     : type (&VariantType_String::instance) { new (value.stringValue) String (v); }
 
 var::var (ReferenceCountedObject* const object)  : type (&VariantType_Object::instance)
 {
@@ -423,9 +418,9 @@ var& var::operator= (var&& other) noexcept
     return *this;
 }
 
-var::var (String&& value_)  : type (&VariantType_String::instance)
+var::var (String&& v)  : type (&VariantType_String::instance)
 {
-    new (value.stringValue) String (static_cast<String&&> (value_));
+    new (value.stringValue) String (static_cast<String&&> (v));
 }
 
 var& var::operator= (String&& v)

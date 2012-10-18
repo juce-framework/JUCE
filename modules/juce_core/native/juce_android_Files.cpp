@@ -99,33 +99,34 @@ File File::getSpecialLocation (const SpecialLocationType type)
 {
     switch (type)
     {
-    case userHomeDirectory:
-    case userDocumentsDirectory:
-    case userMusicDirectory:
-    case userMoviesDirectory:
-    case userApplicationDataDirectory:
-    case userDesktopDirectory:
-        return File (android.appDataDir);
+        case userHomeDirectory:
+        case userDocumentsDirectory:
+        case userMusicDirectory:
+        case userMoviesDirectory:
+        case userPicturesDirectory:
+        case userApplicationDataDirectory:
+        case userDesktopDirectory:
+            return File (android.appDataDir);
 
-    case commonApplicationDataDirectory:
-        return File (android.appDataDir);
+        case commonApplicationDataDirectory:
+            return File (android.appDataDir);
 
-    case globalApplicationsDirectory:
-        return File ("/system/app");
+        case globalApplicationsDirectory:
+            return File ("/system/app");
 
-    case tempDirectory:
-        //return File (AndroidStatsHelpers::getSystemProperty ("java.io.tmpdir"));
-        return File (android.appDataDir).getChildFile (".temp");
+        case tempDirectory:
+            //return File (AndroidStatsHelpers::getSystemProperty ("java.io.tmpdir"));
+            return File (android.appDataDir).getChildFile (".temp");
 
-    case invokedExecutableFile:
-    case currentExecutableFile:
-    case currentApplicationFile:
-    case hostApplicationPath:
-        return juce_getExecutableFile();
+        case invokedExecutableFile:
+        case currentExecutableFile:
+        case currentApplicationFile:
+        case hostApplicationPath:
+            return juce_getExecutableFile();
 
-    default:
-        jassertfalse; // unknown type?
-        break;
+        default:
+            jassertfalse; // unknown type?
+            break;
     }
 
     return File::nonexistent;

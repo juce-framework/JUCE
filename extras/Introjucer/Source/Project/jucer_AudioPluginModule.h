@@ -350,7 +350,6 @@ namespace RTASHelpers
             if (exporter.isVisualStudio())
             {
                 exporter.msvcTargetSuffix = ".dpm";
-                exporter.msvcNeedsDLLRuntimeLib = true;
 
                 String winbag (getRTASFolderRelativePath (exporter).getChildFile ("WinBag").toWindowsStyle());
 
@@ -375,6 +374,7 @@ namespace RTASHelpers
                 for (ProjectExporter::ConfigIterator config (exporter); config.next();)
                 {
                     config->getValue (Ids::msvcModuleDefinitionFile) = msvcPathToRTASFolder + "juce_RTAS_WinExports.def";
+                    config->getValue (Ids::useRuntimeLibDLL) = true;
 
                     if (config->getValue (Ids::postbuildCommand).toString().isEmpty())
                         config->getValue (Ids::postbuildCommand) = "copy /Y \"" + msvcPathToRTASFolder + "juce_RTAS_WinResources.rsr"
@@ -532,7 +532,9 @@ namespace AAXHelpers
             if (exporter.isVisualStudio())
             {
                 exporter.msvcTargetSuffix = ".aaxplugin";
-                exporter.msvcNeedsDLLRuntimeLib = true;
+
+                for (ProjectExporter::ConfigIterator config (exporter); config.next();)
+                    config->getValue (Ids::useRuntimeLibDLL) = true;
             }
             else
             {

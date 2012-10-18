@@ -205,13 +205,13 @@ public:
     virtual void maximiseButtonPressed();
 
     //==============================================================================
-    /** Returns the close button, (or 0 if there isn't one). */
+    /** Returns the close button, (or nullptr if there isn't one). */
     Button* getCloseButton() const noexcept;
 
-    /** Returns the minimise button, (or 0 if there isn't one). */
+    /** Returns the minimise button, (or nullptr if there isn't one). */
     Button* getMinimiseButton() const noexcept;
 
-    /** Returns the maximise button, (or 0 if there isn't one). */
+    /** Returns the maximise button, (or nullptr if there isn't one). */
     Button* getMaximiseButton() const noexcept;
 
     //==============================================================================
@@ -231,7 +231,7 @@ public:
     //==============================================================================
    #ifndef DOXYGEN
     /** @internal */
-    void paint (Graphics& g);
+    void paint (Graphics&);
     /** @internal */
     void resized();
     /** @internal */
@@ -241,7 +241,7 @@ public:
     /** @internal */
     BorderSize<int> getContentComponentBorder();
     /** @internal */
-    void mouseDoubleClick (const MouseEvent& e);
+    void mouseDoubleClick (const MouseEvent&);
     /** @internal */
     void userTriedToCloseWindow();
     /** @internal */

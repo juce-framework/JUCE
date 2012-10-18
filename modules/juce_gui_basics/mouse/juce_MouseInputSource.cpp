@@ -60,9 +60,7 @@ public:
 
     Component* findComponentAt (const Point<int>& screenPos)
     {
-        ComponentPeer* const peer = getPeer();
-
-        if (peer != nullptr)
+        if (ComponentPeer* const peer = getPeer())
         {
             Component& comp = peer->getComponent();
             const Point<int> relativePos (comp.getLocalPoint (nullptr, screenPos));
@@ -148,9 +146,7 @@ public:
 
         if (buttonState.isAnyMouseButtonDown())
         {
-            Component* const current = getComponentUnderMouse();
-
-            if (current != nullptr)
+            if (Component* const current = getComponentUnderMouse())
             {
                 const ModifierKeys oldMods (getCurrentModifiers());
                 buttonState = newButtonState; // must change this before calling sendMouseUp, in case it runs a modal loop
@@ -167,9 +163,7 @@ public:
         {
             Desktop::getInstance().incrementMouseClickCounter();
 
-            Component* const current = getComponentUnderMouse();
-
-            if (current != nullptr)
+            if (Component* const current = getComponentUnderMouse())
             {
                 registerMouseDown (screenPos, time, current, buttonState);
                 sendMouseDown (current, screenPos, time);
@@ -232,11 +226,9 @@ public:
         if (newScreenPos != lastScreenPos || forceUpdate)
         {
             cancelPendingUpdate();
-
             lastScreenPos = newScreenPos;
-            Component* const current = getComponentUnderMouse();
 
-            if (current != nullptr)
+            if (Component* const current = getComponentUnderMouse())
             {
                 if (isDragging())
                 {
@@ -272,8 +264,7 @@ public:
         {
             setPeer (newPeer, screenPos, time);
 
-            ComponentPeer* peer = getPeer();
-            if (peer != nullptr)
+            if (ComponentPeer* peer = getPeer())
             {
                 if (setButtons (screenPos, time, newMods))
                     return; // some modal events have been dispatched, so the current event is now out-of-date
@@ -300,8 +291,7 @@ public:
 
         if (! isDragging())
         {
-            Component* current = getComponentUnderMouse();
-            if (current != nullptr)
+            if (Component* current = getComponentUnderMouse())
                 sendMouseWheel (current, screenPos, time, wheel);
         }
     }
@@ -359,8 +349,7 @@ public:
             if ((! enable) && ((! isCursorVisibleUntilOffscreen) || ! unboundedMouseOffset.isOrigin()))
             {
                 // when released, return the mouse to within the component's bounds
-                Component* current = getComponentUnderMouse();
-                if (current != nullptr)
+                if (Component* current = getComponentUnderMouse())
                     Desktop::setMousePosition (current->getScreenBounds()
                                                  .getConstrainedPoint (lastScreenPos));
             }
@@ -416,8 +405,7 @@ public:
     {
         MouseCursor mc (MouseCursor::NormalCursor);
 
-        Component* current = getComponentUnderMouse();
-        if (current != nullptr)
+        if (Component* current = getComponentUnderMouse())
             mc = current->getLookAndFeel().getMouseCursorFor (*current);
 
         showMouseCursor (mc, forcedUpdate);

@@ -215,7 +215,7 @@ public:
 
                     if (firstLoop && readBufferStart < startSampleInFile)
                     {
-                        bufferStart += (startSampleInFile - readBufferStart) * stride;
+                        bufferStart += stride * (int) (startSampleInFile - readBufferStart);
 
                         if (bufferStart > bufferEnd)
                             bufferStart = bufferEnd;

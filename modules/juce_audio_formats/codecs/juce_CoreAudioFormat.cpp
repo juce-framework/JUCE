@@ -33,8 +33,8 @@ namespace
     StringArray findFileExtensionsForCoreAudioCodecs()
     {
         StringArray extensionsArray;
-        CFMutableArrayRef extensions = CFArrayCreateMutable (0, 0, 0);
-        UInt32 sizeOfArray = sizeof (CFMutableArrayRef);
+        CFArrayRef extensions = nullptr;
+        UInt32 sizeOfArray = sizeof (extensions);
 
         if (AudioFileGetGlobalInfo (kAudioFileGlobalInfo_AllExtensions, 0, 0, &sizeOfArray, &extensions) == noErr)
         {
@@ -42,9 +42,10 @@ namespace
 
             for (CFIndex i = 0; i < numValues; ++i)
                 extensionsArray.add ("." + String::fromCFString ((CFStringRef) CFArrayGetValueAtIndex (extensions, i)));
+
+            CFRelease (extensions);
         }
 
-        CFRelease (extensions);
         return extensionsArray;
     }
 }
@@ -62,9 +63,9 @@ public:
 
         OSStatus status = AudioFileOpenWithCallbacks (this,
                                                       &readCallback,
-                                                      0,        // write needs to be null to avoid permisisions errors
+                                                      nullptr,  // write needs to be null to avoid permisisions errors
                                                       &getSizeCallback,
-                                                      0,        // setSize needs to be null to avoid permisisions errors
+                                                      nullptr,  // setSize needs to be null to avoid permisisions errors
                                                       0,        // AudioFileTypeID inFileTypeHint
                                                       &audioFileID);
         if (status == noErr)

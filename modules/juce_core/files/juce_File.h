@@ -605,8 +605,8 @@ public:
 
         Attempts to load the entire file as a zero-terminated string.
 
-        This makes use of InputStream::readEntireStreamAsString, which should
-        automatically cope with unicode/acsii file formats.
+        This makes use of InputStream::readEntireStreamAsString, which can
+        read either UTF-16 or UTF-8 file formats.
     */
     String loadFileAsString() const;
 
@@ -834,6 +834,9 @@ public:
 
         /** The most likely place where a user might store their movie files. */
         userMoviesDirectory,
+
+        /** The most likely place where a user might store their picture files. */
+        userPicturesDirectory
     };
 
     /** Finds the location of a special type of file or directory, such as a home folder or
