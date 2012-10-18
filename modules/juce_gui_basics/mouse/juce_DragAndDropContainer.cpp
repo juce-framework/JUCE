@@ -396,8 +396,7 @@ void DragAndDropContainer::startDragging (const var& sourceDescription,
        #if JUCE_WINDOWS
         // Under heavy load, the layered window's paint callback can often be lost by the OS,
         // so forcing a repaint at least once makes sure that the window becomes visible..
-        ComponentPeer* const peer = dragImageComponent->getPeer();
-        if (peer != nullptr)
+        if (ComponentPeer* const peer = dragImageComponent->getPeer())
             peer->performAnyPendingRepaintsNow();
        #endif
     }

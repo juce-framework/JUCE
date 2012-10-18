@@ -283,9 +283,7 @@ public:
                 case WM_RBUTTONDBLCLK:
                     if (ax->isShowing())
                     {
-                        ComponentPeer* const peer = ax->getPeer();
-
-                        if (peer != nullptr)
+                        if (ComponentPeer* const peer = ax->getPeer())
                         {
                             ActiveXHelpers::offerActiveXMouseEventToPeer (peer, hwnd, message, lParam);
 
