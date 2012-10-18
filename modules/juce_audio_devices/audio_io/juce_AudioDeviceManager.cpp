@@ -159,6 +159,12 @@ void AudioDeviceManager::createAudioDeviceTypes (OwnedArray <AudioIODeviceType>&
     addIfNotNull (list, AudioIODeviceType::createAudioIODeviceType_Android());
 }
 
+void AudioDeviceManager::addAudioDeviceType (AudioIODeviceType* newDeviceType)
+{
+    jassert (newDeviceType != nullptr);
+    availableDeviceTypes.add (newDeviceType);
+}
+
 //==============================================================================
 String AudioDeviceManager::initialise (const int numInputChannelsNeeded,
                                        const int numOutputChannelsNeeded,
