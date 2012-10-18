@@ -81,6 +81,7 @@ namespace Ids
     DECLARE_ID (prebuildCommand);
     DECLARE_ID (postbuildCommand);
     DECLARE_ID (generateManifest);
+    DECLARE_ID (useRuntimeLibDLL);
     DECLARE_ID (wholeProgramOptimisation);
     DECLARE_ID (juceLinkage);
     DECLARE_ID (buildVST);

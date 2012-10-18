@@ -146,7 +146,7 @@ public:
     //==============================================================================
     String msvcTargetSuffix;
     StringPairArray msvcExtraPreprocessorDefs;
-    bool msvcIsDLL, msvcIsWindowsSubsystem, msvcNeedsDLLRuntimeLib;
+    bool msvcIsDLL, msvcIsWindowsSubsystem;
     String msvcDelayLoadedDLLs;
 
     //==============================================================================
