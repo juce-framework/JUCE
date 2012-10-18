@@ -233,9 +233,8 @@ public:
             for (int i = 0; i < numNeeded; ++i)
             {
                 const int row = i + firstIndex;
-                RowComponent* const rowComp = getComponentForRow (row);
 
-                if (rowComp != nullptr)
+                if (RowComponent* const rowComp = getComponentForRow (row))
                 {
                     rowComp->setBounds (0, row * rowH, w, rowH);
                     rowComp->update (row, owner.isRowSelected (row));
@@ -500,7 +499,7 @@ void ListBox::deselectRow (const int row)
 }
 
 void ListBox::setSelectedRows (const SparseSet<int>& setOfRowsToBeSelected,
-                               const bool sendNotificationEventToModel)
+                               const NotificationType sendNotificationEventToModel)
 {
     selected = setOfRowsToBeSelected;
     selected.removeRange (Range <int> (totalItems, std::numeric_limits<int>::max()));
@@ -510,7 +509,7 @@ void ListBox::setSelectedRows (const SparseSet<int>& setOfRowsToBeSelected,
 
     viewport->updateContents();
 
-    if ((model != nullptr) && sendNotificationEventToModel)
+    if ((model != nullptr) && sendNotificationEventToModel == sendNotification)
         model->selectedRowsChanged (lastRowSelected);
 }
 
@@ -624,8 +623,10 @@ int ListBox::getInsertionIndexForPosition (const int x, const int y) const noexc
 
 Component* ListBox::getComponentForRowNumber (const int row) const noexcept
 {
-    RowComponent* const listRowComp = viewport->getComponentForRowIfOnscreen (row);
-    return listRowComp != nullptr ? static_cast <Component*> (listRowComp->customComponent) : nullptr;
+    if (RowComponent* const listRowComp = viewport->getComponentForRowIfOnscreen (row))
+        return static_cast <Component*> (listRowComp->customComponent);
+
+    return nullptr;
 }
 
 int ListBox::getRowNumberOfComponent (Component* const rowComponent) const noexcept
@@ -907,10 +908,7 @@ Image ListBox::createSnapshotOfSelectedRows (int& imageX, int& imageY)
 
 void ListBox::startDragAndDrop (const MouseEvent& e, const var& dragDescription, bool allowDraggingToOtherWindows)
 {
-    DragAndDropContainer* const dragContainer
-        = DragAndDropContainer::findParentDragContainerFor (this);
-
-    if (dragContainer != nullptr)
+    if (DragAndDropContainer* const dragContainer = DragAndDropContainer::findParentDragContainerFor (this))
     {
         int x, y;
         Image dragImage (createSnapshotOfSelectedRows (x, y));

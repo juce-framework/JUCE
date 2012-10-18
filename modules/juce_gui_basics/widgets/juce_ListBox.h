@@ -286,7 +286,7 @@ public:
         @see getSelectedRows
     */
     void setSelectedRows (const SparseSet<int>& setOfRowsToBeSelected,
-                          bool sendNotificationEventToModel = true);
+                          NotificationType sendNotificationEventToModel = sendNotification);
 
     /** Checks whether a row is selected.
     */
@@ -568,6 +568,11 @@ private:
 
     void selectRowInternal (int rowNumber, bool dontScrollToShowThisRow,
                             bool deselectOthersFirst, bool isMouseClick);
+
+   #if JUCE_CATCH_DEPRECATED_CODE_MISUSE
+    // This method's bool parameter has changed: see the new method signature.
+    JUCE_DEPRECATED (void setSelectedRows (const SparseSet<int>&, bool));
+   #endif
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ListBox);
 };

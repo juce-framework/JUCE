@@ -360,7 +360,7 @@ private:
         else if (v >= slider->getMaximum())
             speed = -fabsf (speed);
 
-        slider->setValue (v, false);
+        slider->setValue (v, dontSendNotification);
     }
 };
 
@@ -536,8 +536,8 @@ RenderingTestComponent::RenderingTestComponent ()
 
     //[Constructor] You can add your own custom stuff here..
     testTypeComboBox->setSelectedId (2);
-    sizeSlider->setValue (1.0, false);
-    opacitySlider->setValue (1.0, false);
+    sizeSlider->setValue (1.0, dontSendNotification);
+    opacitySlider->setValue (1.0, dontSendNotification);
     highQualityToggle->setToggleState (true, false);
     //[/Constructor]
 }

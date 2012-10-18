@@ -144,12 +144,12 @@ public:
             // keep the current values inside the new range..
             if (style != TwoValueHorizontal && style != TwoValueVertical)
             {
-                setValue (getValue(), false, false);
+                setValue (getValue(), dontSendNotification);
             }
             else
             {
-                setMinValue (getMinValue(), false, false, false);
-                setMaxValue (getMaxValue(), false, false, false);
+                setMinValue (getMinValue(), dontSendNotification, false);
+                setMaxValue (getMaxValue(), dontSendNotification, false);
             }
 
             updateText();
@@ -165,7 +165,7 @@ public:
         return currentValue.getValue();
     }
 
-    void setValue (double newValue, const bool sendUpdateMessage, const bool sendMessageSynchronously)
+    void setValue (double newValue, const NotificationType notification)
     {
         // for a two-value style slider, you should use the setMinValue() and setMaxValue()
         // methods to set the two values.
@@ -200,13 +200,12 @@ public:
             if (popupDisplay != nullptr)
                 popupDisplay->updatePosition (owner.getTextFromValue (newValue));
 
-            if (sendUpdateMessage)
-                triggerChangeMessage (sendMessageSynchronously);
+            triggerChangeMessage (notification);
         }
     }
 
-    void setMinValue (double newValue, const bool sendUpdateMessage,
-                      const bool sendMessageSynchronously, const bool allowNudgingOfOtherValues)
+    void setMinValue (double newValue, const NotificationType notification,
+                      const bool allowNudgingOfOtherValues)
     {
         // The minimum value only applies to sliders that are in two- or three-value mode.
         jassert (style == TwoValueHorizontal || style == TwoValueVertical
@@ -217,14 +216,14 @@ public:
         if (style == TwoValueHorizontal || style == TwoValueVertical)
         {
             if (allowNudgingOfOtherValues && newValue > (double) valueMax.getValue())
-                setMaxValue (newValue, sendUpdateMessage, sendMessageSynchronously, false);
+                setMaxValue (newValue, notification, false);
 
             newValue = jmin ((double) valueMax.getValue(), newValue);
         }
         else
         {
             if (allowNudgingOfOtherValues && newValue > lastCurrentValue)
-                setValue (newValue, sendUpdateMessage, sendMessageSynchronously);
+                setValue (newValue, notification);
 
             newValue = jmin (lastCurrentValue, newValue);
         }
@@ -238,13 +237,12 @@ public:
             if (popupDisplay != nullptr)
                 popupDisplay->updatePosition (owner.getTextFromValue (newValue));
 
-            if (sendUpdateMessage)
-                triggerChangeMessage (sendMessageSynchronously);
+            triggerChangeMessage (notification);
         }
     }
 
-    void setMaxValue (double newValue, const bool sendUpdateMessage,
-                      const bool sendMessageSynchronously, const bool allowNudgingOfOtherValues)
+    void setMaxValue (double newValue, const NotificationType notification,
+                      const bool allowNudgingOfOtherValues)
     {
         // The maximum value only applies to sliders that are in two- or three-value mode.
         jassert (style == TwoValueHorizontal || style == TwoValueVertical
@@ -255,14 +253,14 @@ public:
         if (style == TwoValueHorizontal || style == TwoValueVertical)
         {
             if (allowNudgingOfOtherValues && newValue < (double) valueMin.getValue())
-                setMinValue (newValue, sendUpdateMessage, sendMessageSynchronously, false);
+                setMinValue (newValue, notification, false);
 
             newValue = jmax ((double) valueMin.getValue(), newValue);
         }
         else
         {
             if (allowNudgingOfOtherValues && newValue < lastCurrentValue)
-                setValue (newValue, sendUpdateMessage, sendMessageSynchronously);
+                setValue (newValue, notification);
 
             newValue = jmax (lastCurrentValue, newValue);
         }
@@ -276,12 +274,11 @@ public:
             if (popupDisplay != nullptr)
                 popupDisplay->updatePosition (owner.getTextFromValue (valueMax.getValue()));
 
-            if (sendUpdateMessage)
-                triggerChangeMessage (sendMessageSynchronously);
+            triggerChangeMessage (notification);
         }
     }
 
-    void setMinAndMaxValues (double newMinValue, double newMaxValue, bool sendUpdateMessage, bool sendMessageSynchronously)
+    void setMinAndMaxValues (double newMinValue, double newMaxValue, const NotificationType notification)
     {
         // The maximum value only applies to sliders that are in two- or three-value mode.
         jassert (style == TwoValueHorizontal || style == TwoValueVertical
@@ -301,8 +298,7 @@ public:
             valueMax = newMaxValue;
             owner.repaint();
 
-            if (sendUpdateMessage)
-                triggerChangeMessage (sendMessageSynchronously);
+            triggerChangeMessage (notification);
         }
     }
 
@@ -324,14 +320,17 @@ public:
         return valueMax.getValue();
     }
 
-    void triggerChangeMessage (const bool synchronous)
+    void triggerChangeMessage (const NotificationType notification)
     {
-        if (synchronous)
-            handleAsyncUpdate();
-        else
-            triggerAsyncUpdate();
+        if (notification != dontSendNotification)
+        {
+            if (notification == sendNotificationSync)
+                handleAsyncUpdate();
+            else
+                triggerAsyncUpdate();
 
-        owner.valueChanged();
+            owner.valueChanged();
+        }
     }
 
     void handleAsyncUpdate()
@@ -370,7 +369,7 @@ public:
             const double delta = (button == incButton) ? interval : -interval;
 
             sendDragStart();
-            setValue (owner.snapValue (getValue() + delta, false), true, true);
+            setValue (owner.snapValue (getValue() + delta, false), sendNotificationSync);
             sendDragEnd();
         }
     }
@@ -380,12 +379,12 @@ public:
         if (value.refersToSameSourceAs (currentValue))
         {
             if (style != TwoValueHorizontal && style != TwoValueVertical)
-                setValue (currentValue.getValue(), false, false);
+                setValue (currentValue.getValue(), dontSendNotification);
         }
         else if (value.refersToSameSourceAs (valueMin))
-            setMinValue (valueMin.getValue(), false, false, true);
+            setMinValue (valueMin.getValue(), dontSendNotification, true);
         else if (value.refersToSameSourceAs (valueMax))
-            setMaxValue (valueMax.getValue(), false, false, true);
+            setMaxValue (valueMax.getValue(), dontSendNotification, true);
     }
 
     void labelTextChanged (Label* label)
@@ -395,7 +394,7 @@ public:
         if (newValue != (double) currentValue.getValue())
         {
             sendDragStart();
-            setValue (newValue, true, true);
+            setValue (newValue, sendNotificationSync);
             sendDragEnd();
         }
 
@@ -905,25 +904,25 @@ public:
             if (sliderBeingDragged == 0)
             {
                 setValue (owner.snapValue (valueWhenLastDragged, true),
-                          ! sendChangeOnlyOnRelease, true);
+                          sendChangeOnlyOnRelease ? dontSendNotification : sendNotificationSync);
             }
             else if (sliderBeingDragged == 1)
             {
                 setMinValue (owner.snapValue (valueWhenLastDragged, true),
-                             ! sendChangeOnlyOnRelease, false, true);
+                             sendChangeOnlyOnRelease ? dontSendNotification : sendNotificationAsync, true);
 
                 if (e.mods.isShiftDown())
-                    setMaxValue (getMinValue() + minMaxDiff, false, false, true);
+                    setMaxValue (getMinValue() + minMaxDiff, dontSendNotification, true);
                 else
                     minMaxDiff = (double) valueMax.getValue() - (double) valueMin.getValue();
             }
             else if (sliderBeingDragged == 2)
             {
                 setMaxValue (owner.snapValue (valueWhenLastDragged, true),
-                             ! sendChangeOnlyOnRelease, false, true);
+                             sendChangeOnlyOnRelease ? dontSendNotification : sendNotificationAsync, true);
 
                 if (e.mods.isShiftDown())
-                    setMinValue (getMaxValue() - minMaxDiff, false, false, true);
+                    setMinValue (getMaxValue() - minMaxDiff, dontSendNotification, true);
                 else
                     minMaxDiff = (double) valueMax.getValue() - (double) valueMin.getValue();
             }
@@ -942,7 +941,7 @@ public:
             restoreMouseIfHidden();
 
             if (sendChangeOnlyOnRelease && valueOnMouseDown != (double) currentValue.getValue())
-                triggerChangeMessage (false);
+                triggerChangeMessage (sendNotificationAsync);
 
             sendDragEnd();
             popupDisplay = nullptr;
@@ -967,7 +966,7 @@ public:
              && maximum >= doubleClickReturnValue)
         {
             sendDragStart();
-            setValue (doubleClickReturnValue, true, true);
+            setValue (doubleClickReturnValue, sendNotificationSync);
             sendDragEnd();
         }
     }
@@ -994,7 +993,7 @@ public:
                     delta = -delta;
 
                 sendDragStart();
-                setValue (owner.snapValue (value + delta, false), true, true);
+                setValue (owner.snapValue (value + delta, false), sendNotificationSync);
                 sendDragEnd();
             }
 
@@ -1427,27 +1426,27 @@ Value& Slider::getMaxValueObject() noexcept     { return pimpl->valueMax; }
 
 double Slider::getValue() const                 { return pimpl->getValue(); }
 
-void Slider::setValue (double newValue, bool sendUpdateMessage, bool sendMessageSynchronously)
+void Slider::setValue (double newValue, const NotificationType notification)
 {
-    pimpl->setValue (newValue, sendUpdateMessage, sendMessageSynchronously);
+    pimpl->setValue (newValue, notification);
 }
 
 double Slider::getMinValue() const      { return pimpl->getMinValue(); }
 double Slider::getMaxValue() const      { return pimpl->getMaxValue(); }
 
-void Slider::setMinValue (double newValue, bool sendUpdateMessage, bool sendMessageSynchronously, bool allowNudgingOfOtherValues)
+void Slider::setMinValue (double newValue, const NotificationType notification, bool allowNudgingOfOtherValues)
 {
-    pimpl->setMinValue (newValue, sendUpdateMessage, sendMessageSynchronously, allowNudgingOfOtherValues);
+    pimpl->setMinValue (newValue, notification, allowNudgingOfOtherValues);
 }
 
-void Slider::setMaxValue (double newValue, bool sendUpdateMessage, bool sendMessageSynchronously, bool allowNudgingOfOtherValues)
+void Slider::setMaxValue (double newValue, const NotificationType notification, bool allowNudgingOfOtherValues)
 {
-    pimpl->setMaxValue (newValue, sendUpdateMessage, sendMessageSynchronously, allowNudgingOfOtherValues);
+    pimpl->setMaxValue (newValue, notification, allowNudgingOfOtherValues);
 }
 
-void Slider::setMinAndMaxValues (double newMinValue, double newMaxValue, bool sendUpdateMessage, bool sendMessageSynchronously)
+void Slider::setMinAndMaxValues (double newMinValue, double newMaxValue, const NotificationType notification)
 {
-    pimpl->setMinAndMaxValues (newMinValue, newMaxValue, sendUpdateMessage, sendMessageSynchronously);
+    pimpl->setMinAndMaxValues (newMinValue, newMaxValue, notification);
 }
 
 void Slider::setDoubleClickReturnValue (bool isDoubleClickEnabled,  double valueToSetOnDoubleClick)

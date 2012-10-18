@@ -52,6 +52,9 @@ namespace juce
 #ifndef __JUCE_MESSAGEMANAGER_JUCEHEADER__
  #include "messages/juce_MessageManager.h"
 #endif
+#ifndef __JUCE_NOTIFICATIONTYPE_JUCEHEADER__
+ #include "messages/juce_NotificationType.h"
+#endif
 #ifndef __JUCE_ACTIONBROADCASTER_JUCEHEADER__
  #include "broadcasters/juce_ActionBroadcaster.h"
 #endif

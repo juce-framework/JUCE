@@ -330,7 +330,7 @@ void AudioDemoPlaybackPage::showFile (const File& file)
 {
     loadFileIntoTransport (file);
 
-    zoomSlider->setValue (0, false, false);
+    zoomSlider->setValue (0, dontSendNotification);
     thumbnail->setFile (file);
 }
 
