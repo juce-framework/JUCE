@@ -2178,7 +2178,7 @@ private:
         if (isOpen || getWindowHandle() == 0)
             return;
 
-        JUCE_VST_LOG ("Opening VST UI: " + plugin.name);
+        JUCE_VST_LOG ("Opening VST UI: " + plugin.getName());
         isOpen = true;
 
         ERect* rect = nullptr;
