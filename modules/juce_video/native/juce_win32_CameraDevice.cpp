@@ -252,7 +252,7 @@ public:
         if (imageNeedsFlipping)
         {
             const ScopedLock sl (imageSwapLock);
-            swapVariables (loadingImage, activeImage);
+            std::swap (loadingImage, activeImage);
             imageNeedsFlipping = false;
         }
 

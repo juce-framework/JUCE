@@ -61,7 +61,7 @@ private:
     AudioDeviceManager* const manager;
     float level;
 
-    JUCE_DECLARE_NON_COPYABLE (SimpleDeviceManagerInputLevelMeter);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SimpleDeviceManagerInputLevelMeter);
 };
 
 
@@ -917,7 +917,7 @@ public:
 private:
     ScopedPointer<ChannelSelectorListBox> inputChanList, outputChanList;
 
-    JUCE_DECLARE_NON_COPYABLE (AudioDeviceSettingsPanel);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioDeviceSettingsPanel);
 };
 
 

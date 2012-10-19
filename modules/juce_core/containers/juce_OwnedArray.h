@@ -712,8 +712,8 @@ public:
         if (isPositiveAndBelow (index1, numUsed)
              && isPositiveAndBelow (index2, numUsed))
         {
-            swapVariables (data.elements [index1],
-                           data.elements [index2]);
+            std::swap (data.elements [index1],
+                       data.elements [index2]);
         }
     }
 
@@ -773,7 +773,7 @@ public:
         const ScopedLockType lock2 (otherArray.getLock());
 
         data.swapWith (otherArray.data);
-        swapVariables (numUsed, otherArray.numUsed);
+        std::swap (numUsed, otherArray.numUsed);
     }
 
     //==============================================================================
