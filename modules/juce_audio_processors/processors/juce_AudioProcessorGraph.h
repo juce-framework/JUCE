@@ -320,6 +320,7 @@ public:
         const String getOutputChannelName (int channelIndex) const;
         bool isInputChannelStereoPair (int index) const;
         bool isOutputChannelStereoPair (int index) const;
+        bool silenceInProducesSilenceOut() const;
         bool acceptsMidi() const;
         bool producesMidi() const;
 
@@ -364,6 +365,7 @@ public:
     const String getOutputChannelName (int channelIndex) const;
     bool isInputChannelStereoPair (int index) const;
     bool isOutputChannelStereoPair (int index) const;
+    bool silenceInProducesSilenceOut() const;
 
     bool acceptsMidi() const;
     bool producesMidi() const;

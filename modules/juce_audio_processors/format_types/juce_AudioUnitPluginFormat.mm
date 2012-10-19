@@ -367,6 +367,19 @@ public:
 
     void* getPlatformSpecificData()             { return audioUnit; }
     const String getName() const                { return pluginName; }
+
+    bool silenceInProducesSilenceOut() const
+    {
+        Float64 tail = 0;
+        UInt32 tailSize = sizeof (tail);
+
+        if (audioUnit != 0)
+            AudioUnitGetProperty (audioUnit, kAudioUnitProperty_TailTime, kAudioUnitScope_Global,
+                                  0, &tail, &tailSize);
+
+        return tail <= 0;
+    }
+
     bool acceptsMidi() const                    { return wantsMidiMessages; }
     bool producesMidi() const                   { return producesMidiMessages; }
 

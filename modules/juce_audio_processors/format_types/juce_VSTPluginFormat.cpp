@@ -871,8 +871,8 @@ public:
         setLatencySamples (effect->initialDelay);
     }
 
-    void* getPlatformSpecificData()         { return effect; }
-    const String getName() const            { return name; }
+    void* getPlatformSpecificData()  { return effect; }
+    const String getName() const     { return name; }
 
     int getUID() const
     {
@@ -884,8 +884,13 @@ public:
         return uid;
     }
 
-    bool acceptsMidi() const                { return wantsMidiMessages; }
-    bool producesMidi() const               { return dispatch (effCanDo, 0, 0, (void*) "sendVstMidiEvent", 0) > 0; }
+    bool silenceInProducesSilenceOut() const
+    {
+        return effect == nullptr || (effect->flags & effFlagsNoSoundInStop) != 0;
+    }
+
+    bool acceptsMidi() const    { return wantsMidiMessages; }
+    bool producesMidi() const   { return dispatch (effCanDo, 0, 0, (void*) "sendVstMidiEvent", 0) > 0; }
 
     //==============================================================================
     void prepareToPlay (double rate, int samplesPerBlockExpected)
