@@ -158,8 +158,14 @@ void AudioSourcePlayer::audioDeviceIOCallback (const float** inputChannelData,
 
 void AudioSourcePlayer::audioDeviceAboutToStart (AudioIODevice* device)
 {
-    sampleRate = device->getCurrentSampleRate();
-    bufferSize = device->getCurrentBufferSizeSamples();
+    prepareToPlay (device->getCurrentSampleRate(),
+                   device->getCurrentBufferSizeSamples());
+}
+
+void AudioSourcePlayer::prepareToPlay (double newSampleRate, int newBufferSize)
+{
+    sampleRate = newSampleRate;
+    bufferSize = newBufferSize;
     zeromem (channels, sizeof (channels));
 
     if (source != nullptr)
