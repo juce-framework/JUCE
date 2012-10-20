@@ -2516,7 +2516,7 @@ private:
             if (Atoms::isMimeTypeFile (dragAndDropCurrentMimeType))
             {
                 for (int i = 0; i < lines.size(); ++i)
-                    dragInfo.files.add (URL::removeEscapeChars (lines[i].fromFirstOccurrenceOf ("file://", false, true)));
+                    dragInfo.files.add (URL::removeEscapeChars (lines[i].replace ("file://", String::empty, true)));
 
                 dragInfo.files.trim();
                 dragInfo.files.removeEmptyStrings();
