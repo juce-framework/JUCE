@@ -23,8 +23,8 @@
   ==============================================================================
 */
 
-ComboBox::ItemInfo::ItemInfo (const String& name_, int itemId_, bool isEnabled_, bool isHeading_)
-    : name (name_), itemId (itemId_), isEnabled (isEnabled_), isHeading (isHeading_)
+ComboBox::ItemInfo::ItemInfo (const String& nm, int iid, bool enabled, bool heading)
+    : name (nm), itemId (iid), isEnabled (enabled), isHeading (heading)
 {
 }
 
@@ -148,9 +148,7 @@ void ComboBox::addSectionHeading (const String& headingName)
 
 void ComboBox::setItemEnabled (const int itemId, const bool shouldBeEnabled)
 {
-    ItemInfo* const item = getItemForId (itemId);
-
-    if (item != nullptr)
+    if (ItemInfo* const item = getItemForId (itemId))
         item->isEnabled = shouldBeEnabled;
 }
 
@@ -162,12 +160,10 @@ bool ComboBox::isItemEnabled (int itemId) const noexcept
 
 void ComboBox::changeItemText (const int itemId, const String& newText)
 {
-    ItemInfo* const item = getItemForId (itemId);
-
-    jassert (item != nullptr);
-
-    if (item != nullptr)
+    if (ItemInfo* const item = getItemForId (itemId))
         item->name = newText;
+    else
+        jassertfalse;
 }
 
 void ComboBox::clear (const bool dontSendChangeMessage)
@@ -219,16 +215,18 @@ int ComboBox::getNumItems() const noexcept
 
 String ComboBox::getItemText (const int index) const
 {
-    const ItemInfo* const item = getItemForIndex (index);
+    if (const ItemInfo* const item = getItemForIndex (index))
+        return item->name;
 
-    return item != nullptr ? item->name : String::empty;
+    return String::empty;
 }
 
 int ComboBox::getItemId (const int index) const noexcept
 {
-    const ItemInfo* const item = getItemForIndex (index);
+    if (const ItemInfo* const item = getItemForIndex (index))
+        return item->itemId;
 
-    return item != nullptr ? item->itemId : 0;
+    return 0;
 }
 
 int ComboBox::indexOfItemId (const int itemId) const noexcept
@@ -292,12 +290,13 @@ void ComboBox::setSelectedId (const int newItemId, const bool dontSendChangeMess
 
 bool ComboBox::selectIfEnabled (const int index)
 {
-    const ItemInfo* const item = getItemForIndex (index);
-
-    if (item != nullptr && item->isEnabled)
+    if (const ItemInfo* const item = getItemForIndex (index))
     {
-        setSelectedItemIndex (index);
-        return true;
+        if (item->isEnabled)
+        {
+            setSelectedItemIndex (index);
+            return true;
+        }
     }
 
     return false;

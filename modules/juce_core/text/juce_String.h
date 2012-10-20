@@ -647,7 +647,7 @@ public:
     */
     String fromFirstOccurrenceOf (const String& substringToStartFrom,
                                   bool includeSubStringInResult,
-                                        bool ignoreCase) const;
+                                  bool ignoreCase) const;
 
     /** Returns a section of the string starting from the last occurrence of a given substring.
 

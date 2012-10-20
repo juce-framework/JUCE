@@ -700,12 +700,10 @@ void AudioDeviceManager::audioDeviceIOCallbackInt (const float** inputChannelDat
 
             for (int chan = 0; chan < numOutputChannels; ++chan)
             {
-                const float* const src = tempChans [chan];
-                float* const dst = outputChannelData [chan];
-
-                if (src != nullptr && dst != nullptr)
-                    for (int j = 0; j < numSamples; ++j)
-                        dst[j] += src[j];
+                if (const float* const src = tempChans [chan])
+                    if (float* const dst = outputChannelData [chan])
+                        for (int j = 0; j < numSamples; ++j)
+                            dst[j] += src[j];
             }
         }
 

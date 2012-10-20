@@ -117,8 +117,8 @@ void JUCEApplication::sendUnhandledException (const std::exception* const e,
                                               const char* const sourceFile,
                                               const int lineNumber)
 {
-    if (JUCEApplicationBase::getInstance() != nullptr)
-        JUCEApplicationBase::getInstance()->unhandledException (e, sourceFile, lineNumber);
+    if (JUCEApplicationBase* const app = JUCEApplicationBase::getInstance())
+        app->unhandledException (e, sourceFile, lineNumber);
 }
 
 //==============================================================================
