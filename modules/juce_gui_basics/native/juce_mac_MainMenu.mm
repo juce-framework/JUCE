@@ -73,6 +73,7 @@ public:
         [item setTag: tag];
 
         NSMenu* sub = createMenu (child, name, menuId, tag);
+        appendRecentFilesIfNeeded (name, sub);
 
         [parent setSubmenu: sub forItem: item];
         [sub setAutoenablesItems: false];
@@ -111,6 +112,8 @@ public:
 
         for (PopupMenu::MenuItemIterator iter (menuToCopy); iter.next();)
             addMenuItem (iter, menu, menuId, tag);
+
+        appendRecentFilesIfNeeded (name, menu);
 
         [menu setAutoenablesItems: false];
         [menu update];
@@ -269,6 +272,10 @@ public:
     NSObject* callback;
 
 private:
+    static void appendRecentFilesIfNeeded (const String& menuName, NSMenu* menu)
+    {
+    }
+
     //==============================================================================
     NSMenu* createMenu (const PopupMenu menu,
                         const String& menuName,
@@ -288,6 +295,7 @@ private:
         for (PopupMenu::MenuItemIterator iter (menu); iter.next();)
             addMenuItem (iter, m, topLevelMenuId, topLevelIndex);
 
+        appendRecentFilesIfNeeded (menuName, m);
         [m update];
         return m;
     }

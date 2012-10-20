@@ -214,7 +214,7 @@ public:
 
             if (OK (AudioObjectGetPropertyData (deviceID, &pa, 0, 0, &size, ranges)))
             {
-                bufferSizes.add ((int) ranges[0].mMinimum);
+                bufferSizes.add ((int) (ranges[0].mMinimum + 15) & ~15);
 
                 for (int i = 32; i < 2048; i += 32)
                 {
