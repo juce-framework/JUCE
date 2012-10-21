@@ -88,6 +88,11 @@ bool FILTERCLASSNAME::producesMidi() const
    #endif
 }
 
+bool FILTERCLASSNAME::silenceInProducesSilenceOut() const
+{
+    return false;
+}
+
 int FILTERCLASSNAME::getNumPrograms()
 {
     return 0;
