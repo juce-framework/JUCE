@@ -302,7 +302,10 @@ bool AudioPlayHead::CurrentPositionInfo::operator== (const CurrentPositionInfo& 
         && isRecording == other.isRecording
         && bpm == other.bpm
         && timeSigNumerator == other.timeSigNumerator
-        && timeSigDenominator == other.timeSigDenominator;
+        && timeSigDenominator == other.timeSigDenominator
+        && ppqLoopStart == other.ppqLoopStart
+        && ppqLoopEnd == other.ppqLoopEnd
+        && isLooping == other.isLooping;
 }
 
 bool AudioPlayHead::CurrentPositionInfo::operator!= (const CurrentPositionInfo& other) const noexcept
