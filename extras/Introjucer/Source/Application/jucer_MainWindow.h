@@ -74,6 +74,8 @@ public:
     void getCommandInfo (CommandID commandID, ApplicationCommandInfo& result);
     bool perform (const InvocationInfo& info);
 
+    bool shouldDropFilesWhenDraggedExternally (const DragAndDropTarget::SourceDetails& sourceDetails,
+                                               StringArray& files, bool& canMoveFiles);
 private:
     ScopedPointer <Project> currentProject;
 

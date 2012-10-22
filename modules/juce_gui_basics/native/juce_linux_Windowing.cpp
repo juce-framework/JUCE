@@ -58,6 +58,7 @@ struct Atoms
         XdndTypeList                    = getCreating ("XdndTypeList");
         XdndActionList                  = getCreating ("XdndActionList");
         XdndActionCopy                  = getCreating ("XdndActionCopy");
+        XdndActionPrivate               = getCreating ("XdndActionPrivate");
         XdndActionDescription           = getCreating ("XdndActionDescription");
 
         allowedMimeTypes[0]             = getCreating ("UTF8_STRING");
@@ -65,11 +66,14 @@ struct Atoms
         allowedMimeTypes[2]             = getCreating ("text/plain");
         allowedMimeTypes[3]             = getCreating ("text/uri-list");
 
+        externalAllowedFileMimeTypes[0] = getCreating ("text/uri-list");
+        externalAllowedTextMimeTypes[0] = getCreating ("text/plain");
+
         allowedActions[0]               = getCreating ("XdndActionMove");
         allowedActions[1]               = XdndActionCopy;
         allowedActions[2]               = getCreating ("XdndActionLink");
         allowedActions[3]               = getCreating ("XdndActionAsk");
-        allowedActions[4]               = getCreating ("XdndActionPrivate");
+        allowedActions[4]               = XdndActionPrivate;
     }
 
     static const Atoms& get()
@@ -89,9 +93,11 @@ struct Atoms
          ActiveWin, Pid, WindowType, WindowState,
          XdndAware, XdndEnter, XdndLeave, XdndPosition, XdndStatus,
          XdndDrop, XdndFinished, XdndSelection, XdndTypeList, XdndActionList,
-         XdndActionDescription, XdndActionCopy,
+         XdndActionDescription, XdndActionCopy, XdndActionPrivate,
          allowedActions[5],
-         allowedMimeTypes[4];
+         allowedMimeTypes[4],
+         externalAllowedFileMimeTypes[1],
+         externalAllowedTextMimeTypes[1];
 
     static const unsigned long DndVersion;
 
@@ -774,6 +780,15 @@ namespace PixmapHelpers
     }
 }
 
+static void* createDraggingHandCursor()
+{
+    static unsigned char dragHandData[] = { 71,73,70,56,57,97,16,0,16,0,145,2,0,0,0,0,255,255,255,0,
+      0,0,0,0,0,33,249,4,1,0,0,2,0,44,0,0,0,0,16,0, 16,0,0,2,52,148,47,0,200,185,16,130,90,12,74,139,107,84,123,39,
+      132,117,151,116,132,146,248,60,209,138,98,22,203,114,34,236,37,52,77,217, 247,154,191,119,110,240,193,128,193,95,163,56,60,234,98,135,2,0,59 };
+    const int dragHandDataSize = 99;
+
+    return CustomMouseCursorInfo (ImageFileFormat::loadFrom (dragHandData, dragHandDataSize), 8, 7).create();
+}
 
 //==============================================================================
 class LinuxComponentPeer  : public ComponentPeer
@@ -1270,6 +1285,8 @@ public:
             case ConfigureNotify:       handleConfigureNotifyEvent (event.xconfigure); break;
             case ReparentNotify:        handleReparentNotifyEvent(); break;
             case GravityNotify:         handleGravityNotify(); break;
+            case SelectionClear:        handleExternalSelectionClear(); break;
+            case SelectionRequest:      handleExternalSelectionRequest (event); break;
 
             case CirculateNotify:
             case CreateNotify:
@@ -1284,10 +1301,6 @@ public:
 
             case UnmapNotify:
                 mapped = false;
-                break;
-
-            case SelectionClear:
-            case SelectionRequest:
                 break;
 
             default:
@@ -1493,6 +1506,9 @@ public:
             default: break;
         }
 
+        if (dragState.dragging)
+            handleExternalDragButtonReleaseEvent (buttonRelEvent);
+
         handleMouseEvent (0, getMousePos (buttonRelEvent), currentModifiers, getEventTime (buttonRelEvent));
 
         clearLastMousePos();
@@ -1530,6 +1546,9 @@ public:
                     parentWindow = 0;
                 }
             }
+
+            if (dragState.dragging)
+                handleExternalDragMotionNotify();
 
             handleMouseEvent (0, mousePos - getScreenPosition(), currentModifiers, getEventTime (movedEvent));
         }
@@ -1718,12 +1737,40 @@ public:
         }
         else if (clientMsg.message_type == atoms.XdndStatus)
         {
-            handleDragAndDropStatus (clientMsg);
+            handleExternalDragAndDropStatus (clientMsg);
         }
         else if (clientMsg.message_type == atoms.XdndFinished)
         {
-            resetDragAndDrop();
+            externalResetDragAndDrop();
         }
+    }
+
+    bool externalDragTextInit (const String& text)
+    {
+        if (dragState.dragging)
+            return false;
+
+        return externalDragInit (true, text);
+    }
+
+    bool externalDragFileInit (const StringArray& files, bool /*canMoveFiles*/)
+    {
+        if (dragState.dragging)
+            return false;
+
+        StringArray uriList;
+
+        for (int i = 0; i < files.size(); ++i)
+        {
+            const String& f = files[i];
+
+            if (f.matchesWildcard ("?*://*", false))
+                uriList.add (f);
+            else
+                uriList.add ("file://" + f);
+        }
+
+        return externalDragInit (false, uriList.joinIntoString ("\r\n"));
     }
 
     //==============================================================================
@@ -2128,6 +2175,7 @@ private:
     {
         ScopedXLock xlock;
         resetDragAndDrop();
+        resetExternalDragState();
 
         // Get defaults for various properties
         const int screen = DefaultScreen (display);
@@ -2308,6 +2356,46 @@ private:
     }
 
     //==============================================================================
+    struct DragState
+    {
+        bool isText;
+        bool dragging;         // currently performing outgoing external dnd as Xdnd source, have grabbed mouse
+        bool expectingStatus;  // XdndPosition sent, waiting for XdndStatus
+        Window targetWindow;   // potential drop target
+        Rectangle<int> silentRect;
+        bool canDrop;          // target window signals it will accept the drop
+        int xdndVersion;       // negotiated version with target
+        String textOrFiles;
+
+        void reset()
+        {
+            isText           = false;
+            dragging         = false;
+            expectingStatus  = false;
+            canDrop          = false;
+            silentRect       = Rectangle<int>();
+            targetWindow     = None;
+            xdndVersion      = -1;
+            textOrFiles      = String::empty;
+        }
+
+        const Atom* getMimeTypes() const noexcept   { return isText ? Atoms::get().externalAllowedTextMimeTypes
+                                                                    : Atoms::get().externalAllowedFileMimeTypes; }
+
+        int getNumMimeTypes() const noexcept { return isText ? numElementsInArray (Atoms::get().externalAllowedTextMimeTypes)
+                                                             : numElementsInArray (Atoms::get().externalAllowedFileMimeTypes); }
+
+        bool matchesTarget (Atom targetType) const
+        {
+            for (int i = getNumMimeTypes(); --i >= 0;)
+                if (getMimeTypes()[i] == targetType)
+                    return true;
+
+            return false;
+        }
+    };
+
+    //==============================================================================
     void resetDragAndDrop()
     {
         dragInfo.clear();
@@ -2316,6 +2404,11 @@ private:
         dragAndDropSourceWindow = 0;
         srcMimeTypeAtomList.clear();
         finishAfterDropDataReceived = false;
+    }
+
+    void resetExternalDragState()
+    {
+        dragState.reset();
     }
 
     void sendDragAndDropMessage (XClientMessageEvent& msg)
@@ -2330,6 +2423,63 @@ private:
         XSendEvent (display, dragAndDropSourceWindow, False, 0, (XEvent*) &msg);
     }
 
+    bool sendExternalDragAndDropMessage (XClientMessageEvent& msg, const Window targetWindow)
+    {
+        msg.type      = ClientMessage;
+        msg.display   = display;
+        msg.window    = targetWindow;
+        msg.format    = 32;
+        msg.data.l[0] = windowH;
+
+        ScopedXLock xlock;
+        return XSendEvent (display, targetWindow, False, 0, (XEvent*) &msg) != 0;
+    }
+
+    void sendExternalDragAndDropDrop (const Window targetWindow)
+    {
+        XClientMessageEvent msg = { 0 };
+        msg.message_type = Atoms::get().XdndDrop;
+        msg.data.l[2] = CurrentTime;
+
+        sendExternalDragAndDropMessage (msg, targetWindow);
+    }
+
+    void sendExternalDragAndDropEnter (const Window targetWindow)
+    {
+        XClientMessageEvent msg = { 0 };
+        msg.message_type = Atoms::get().XdndEnter;
+
+        const Atoms& atoms = Atoms::get();
+
+        const Atom* mimeTypes  = dragState.getMimeTypes();
+        const int numMimeTypes = dragState.getNumMimeTypes();
+
+        msg.data.l[1] = dragState.xdndVersion << 24 | numMimeTypes > 3;
+        msg.data.l[2] = numMimeTypes > 0 ? mimeTypes[0] : 0;
+        msg.data.l[3] = numMimeTypes > 1 ? mimeTypes[1] : 0;
+        msg.data.l[4] = numMimeTypes > 2 ? mimeTypes[2] : 0;
+
+        sendExternalDragAndDropMessage (msg, targetWindow);
+    }
+
+    void sendExternalDragAndDropPosition (const Window targetWindow)
+    {
+        XClientMessageEvent msg = { 0 };
+        msg.message_type = Atoms::get().XdndPosition;
+
+        const Point<int> mousePos (Desktop::getInstance().getMousePosition());
+
+        if (dragState.silentRect.contains (mousePos)) // we've been asked to keep silent
+            return;
+
+        msg.data.l[1] = 0;
+        msg.data.l[2] = (mousePos.x << 16) | mousePos.y;
+        msg.data.l[3] = CurrentTime;
+        msg.data.l[4] = Atoms::get().XdndActionCopy; // this is all JUCE currently supports
+
+        dragState.expectingStatus = sendExternalDragAndDropMessage (msg, targetWindow);
+    }
+
     void sendDragAndDropStatus (const bool acceptDrop, Atom dropAction)
     {
         XClientMessageEvent msg = { 0 };
@@ -2340,11 +2490,11 @@ private:
         sendDragAndDropMessage (msg);
     }
 
-    void sendDragAndDropLeave()
+    void sendExternalDragAndDropLeave (const Window targetWindow)
     {
         XClientMessageEvent msg = { 0 };
         msg.message_type = Atoms::get().XdndLeave;
-        sendDragAndDropMessage (msg);
+        sendExternalDragAndDropMessage (msg, targetWindow);
     }
 
     void sendDragAndDropFinish()
@@ -2354,17 +2504,114 @@ private:
         sendDragAndDropMessage (msg);
     }
 
-    void handleDragAndDropStatus (const XClientMessageEvent& clientMsg)
+    void handleExternalSelectionClear()
     {
-        if ((clientMsg.data.l[1] & 1) == 0)
+        if (dragState.dragging)
+            externalResetDragAndDrop();
+    }
+
+    void handleExternalSelectionRequest (const XEvent& evt)
+    {
+        Atom targetType = evt.xselectionrequest.target;
+
+        XEvent s;
+        s.xselection.type = SelectionNotify;
+        s.xselection.requestor = evt.xselectionrequest.requestor;
+        s.xselection.selection = evt.xselectionrequest.selection;
+        s.xselection.target = targetType;
+        s.xselection.property = None;
+        s.xselection.time = evt.xselectionrequest.time;
+
+        if (dragState.matchesTarget (targetType))
         {
-            sendDragAndDropLeave();
+            s.xselection.property = evt.xselectionrequest.property;
 
-            if (! dragInfo.isEmpty())
-                handleDragExit (dragInfo);
-
-            dragInfo.clear();
+            xchangeProperty (evt.xselectionrequest.requestor,
+                             evt.xselectionrequest.property,
+                             targetType, 8,
+                             dragState.textOrFiles.toUTF8().getAddress(),
+                             dragState.textOrFiles.getNumBytesAsUTF8());
         }
+
+        XSendEvent (display, evt.xselectionrequest.requestor, True, 0, &s);
+    }
+
+    void handleExternalDragAndDropStatus (const XClientMessageEvent& clientMsg)
+    {
+        if (dragState.expectingStatus)
+        {
+            dragState.expectingStatus = false;
+            dragState.canDrop = false;
+            dragState.silentRect = Rectangle<int>();
+
+            if ((clientMsg.data.l[1] & 1) != 0
+                 && (clientMsg.data.l[4] == Atoms::get().XdndActionCopy
+                      || clientMsg.data.l[4] == Atoms::get().XdndActionPrivate))
+            {
+                if ((clientMsg.data.l[1] & 2) == 0) // target requests silent rectangle
+                    dragState.silentRect.setBounds (clientMsg.data.l[2] >> 16,
+                                                    clientMsg.data.l[2] & 0xffff,
+                                                    clientMsg.data.l[3] >> 16,
+                                                    clientMsg.data.l[3] & 0xffff);
+
+                dragState.canDrop = true;
+            }
+        }
+    }
+
+    void handleExternalDragButtonReleaseEvent (const XButtonReleasedEvent& buttonRelEvent)
+    {
+        if (dragState.dragging)
+            XUngrabPointer (display, CurrentTime);
+
+        if (dragState.canDrop)
+        {
+            sendExternalDragAndDropDrop (dragState.targetWindow);
+        }
+        else
+        {
+            sendExternalDragAndDropLeave (dragState.targetWindow);
+            externalResetDragAndDrop();
+        }
+    }
+
+    void handleExternalDragMotionNotify()
+    {
+        Window targetWindow = externalFindDragTargetWindow (RootWindow (display, DefaultScreen (display)));
+
+        if (dragState.targetWindow != targetWindow)
+        {
+            if (dragState.targetWindow != None)
+                sendExternalDragAndDropLeave (dragState.targetWindow);
+
+            dragState.canDrop = false;
+            dragState.silentRect = Rectangle<int>();
+
+            if (targetWindow == None)
+                return;
+
+            GetXProperty prop (targetWindow, Atoms::get().XdndAware,
+                               0, 2, false, AnyPropertyType);
+
+            if (prop.success
+                 && prop.data != None
+                 && prop.actualFormat == 32
+                 && prop.numItems == 1)
+            {
+                dragState.xdndVersion = jmin ((int) prop.data[0], (int) Atoms::DndVersion);
+            }
+            else
+            {
+                dragState.xdndVersion = -1;
+                return;
+            }
+
+            sendExternalDragAndDropEnter (targetWindow);
+            dragState.targetWindow = targetWindow;
+        }
+
+        if (! dragState.expectingStatus)
+            sendExternalDragAndDropPosition (targetWindow);
     }
 
     void handleDragAndDropPosition (const XClientMessageEvent& clientMsg)
@@ -2425,7 +2672,7 @@ private:
         sendDragAndDropFinish();
         resetDragAndDrop();
 
-        if (dragInfoCopy.files.size() > 0 || dragInfoCopy.text.isNotEmpty())
+        if (! dragInfoCopy.isEmpty())
             handleDragDrop (dragInfoCopy);
     }
 
@@ -2499,7 +2746,7 @@ private:
                 for (;;)
                 {
                     GetXProperty prop (evt.xany.window, evt.xselection.property,
-                                       dropData.getSize() / 4, 65536, true, AnyPropertyType);
+                                       dropData.getSize() / 4, 65536, false, AnyPropertyType);
 
                     if (! prop.success)
                         break;
@@ -2548,6 +2795,84 @@ private:
         }
     }
 
+    static bool isWindowDnDAware (Window w)
+    {
+        int numProperties = 0;
+        Atom* const atoms = XListProperties (display, w, &numProperties);
+
+        bool dndAwarePropFound = false;
+        for (int i = 0; i < numProperties; ++i)
+            if (atoms[i] == Atoms::get().XdndAware)
+                dndAwarePropFound = true;
+
+        if (atoms != nullptr)
+            XFree (atoms);
+
+        return dndAwarePropFound;
+    }
+
+    Window externalFindDragTargetWindow (Window targetWindow)
+    {
+        if (targetWindow == None)
+            return None;
+
+        if (isWindowDnDAware (targetWindow))
+            return targetWindow;
+
+        Window child, phonyWin;
+        int phony;
+        unsigned int uphony;
+
+        XQueryPointer (display, targetWindow, &phonyWin, &child,
+                       &phony, &phony, &phony, &phony, &uphony);
+
+        return externalFindDragTargetWindow (child);
+    }
+
+    bool externalDragInit (bool isText, const String& textOrFiles)
+    {
+        ScopedXLock xlock;
+
+        resetExternalDragState();
+        dragState.isText = isText;
+        dragState.textOrFiles = textOrFiles;
+
+        const int pointerGrabMask = Button1MotionMask | ButtonReleaseMask;
+
+        if (XGrabPointer (display, windowH, True, pointerGrabMask,
+                          GrabModeAsync, GrabModeAsync, None, None, CurrentTime) == GrabSuccess)
+        {
+            // No other method of changing the pointer seems to work, this call is needed from this very context
+            XChangeActivePointerGrab (display, pointerGrabMask, (Cursor) createDraggingHandCursor(), CurrentTime);
+
+            const Atoms& atoms = Atoms::get();
+            XSetSelectionOwner (display, atoms.XdndSelection, windowH, CurrentTime);
+
+            // save the available types to XdndTypeList
+            xchangeProperty (windowH, atoms.XdndTypeList, XA_ATOM, 32,
+                             dragState.getMimeTypes(),
+                             dragState.getNumMimeTypes());
+
+            dragState.dragging = true;
+            handleExternalDragMotionNotify();
+            return true;
+        }
+
+        return false;
+    }
+
+    void externalResetDragAndDrop()
+    {
+        if (dragState.dragging)
+        {
+            ScopedXLock xlock;
+            XUngrabPointer (display, CurrentTime);
+        }
+
+        resetExternalDragState();
+    }
+
+    DragState dragState;
     DragInfo dragInfo;
     Atom dragAndDropCurrentMimeType;
     Window dragAndDropSourceWindow;
@@ -2981,16 +3306,7 @@ void* MouseCursor::createStandardMouseCursor (MouseCursor::StandardCursorType ty
         case BottomLeftCornerResizeCursor:  shape = XC_bottom_left_corner; break;
         case BottomRightCornerResizeCursor: shape = XC_bottom_right_corner; break;
         case CrosshairCursor:               shape = XC_crosshair; break;
-
-        case DraggingHandCursor:
-        {
-            static unsigned char dragHandData[] = { 71,73,70,56,57,97,16,0,16,0,145,2,0,0,0,0,255,255,255,0,
-              0,0,0,0,0,33,249,4,1,0,0,2,0,44,0,0,0,0,16,0, 16,0,0,2,52,148,47,0,200,185,16,130,90,12,74,139,107,84,123,39,
-              132,117,151,116,132,146,248,60,209,138,98,22,203,114,34,236,37,52,77,217, 247,154,191,119,110,240,193,128,193,95,163,56,60,234,98,135,2,0,59 };
-            const int dragHandDataSize = 99;
-
-            return CustomMouseCursorInfo (ImageFileFormat::loadFrom (dragHandData, dragHandDataSize), 8, 7).create();
-        }
+        case DraggingHandCursor:            return createDraggingHandCursor();
 
         case CopyingCursor:
         {
@@ -3033,13 +3349,31 @@ Image juce_createIconForFile (const File& file)
 //==============================================================================
 bool DragAndDropContainer::performExternalDragDropOfFiles (const StringArray& files, const bool canMoveFiles)
 {
-    jassertfalse;    // not implemented!
+    if (files.size() == 0)
+        return false;
+
+    if (MouseInputSource* draggingSource = Desktop::getInstance().getDraggingMouseSource(0))
+        if (Component* sourceComp = draggingSource->getComponentUnderMouse())
+            if (LinuxComponentPeer* const lp = dynamic_cast <LinuxComponentPeer*> (sourceComp->getPeer()))
+                return lp->externalDragFileInit (files, canMoveFiles);
+
+    // This method must be called in response to a component's mouseDown or mouseDrag event!
+    jassertfalse;
     return false;
 }
 
 bool DragAndDropContainer::performExternalDragDropOfText (const String& text)
 {
-    jassertfalse;    // not implemented!
+    if (text.isEmpty())
+        return false;
+
+    if (MouseInputSource* draggingSource = Desktop::getInstance().getDraggingMouseSource(0))
+        if (Component* sourceComp = draggingSource->getComponentUnderMouse())
+            if (LinuxComponentPeer* const lp = dynamic_cast <LinuxComponentPeer*> (sourceComp->getPeer()))
+                return lp->externalDragTextInit (text);
+
+    // This method must be called in response to a component's mouseDown or mouseDrag event!
+    jassertfalse;
     return false;
 }
 

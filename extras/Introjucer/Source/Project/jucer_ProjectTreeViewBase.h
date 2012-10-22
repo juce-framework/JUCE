@@ -92,6 +92,8 @@ public:
 
     static void getAllSelectedNodesInTree (Component* componentInTree, OwnedArray <Project::Item>& selectedNodes);
 
+    File getDraggableFile() const      { return getFile(); }
+
     //==============================================================================
     Project::Item item;
 

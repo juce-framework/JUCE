@@ -58,7 +58,8 @@ public:
     virtual Icon getIcon() const = 0;
     virtual float getIconSize() const;
     virtual void paintContent (Graphics& g, const Rectangle<int>& area);
-    virtual int getMillisecsAllowedForDragGesture()    { return 120; };
+    virtual int getMillisecsAllowedForDragGesture()     { return 120; };
+    virtual File getDraggableFile() const               { return File::nonexistent; }
 
     void refreshSubItems();
     virtual void deleteItem();
