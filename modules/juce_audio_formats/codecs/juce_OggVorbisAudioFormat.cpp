@@ -501,7 +501,7 @@ int OggVorbisAudioFormat::estimateOggFileQuality (const File& source)
 
             for (int i = qualities.size(); --i >= 0;)
             {
-                const int diff = std::fabs (qualities[i].getIntValue() - approxBitsPerSecond);
+                const int diff = std::abs (qualities[i].getIntValue() - approxBitsPerSecond);
 
                 if (diff < bestDiff)
                 {
