@@ -1725,6 +1725,7 @@ public:
         }
         else if (clientMsg.message_type == atoms.XdndLeave)
         {
+            handleDragExit (dragInfo);
             resetDragAndDrop();
         }
         else if (clientMsg.message_type == atoms.XdndPosition)
@@ -2175,7 +2176,6 @@ private:
     {
         ScopedXLock xlock;
         resetDragAndDrop();
-        resetExternalDragState();
 
         // Get defaults for various properties
         const int screen = DefaultScreen (display);
@@ -2358,26 +2358,20 @@ private:
     //==============================================================================
     struct DragState
     {
+        DragState() noexcept
+           : isText (false), dragging (false), expectingStatus (false),
+             canDrop (false), targetWindow (None), xdndVersion (-1)
+        {
+        }
+
         bool isText;
         bool dragging;         // currently performing outgoing external dnd as Xdnd source, have grabbed mouse
         bool expectingStatus;  // XdndPosition sent, waiting for XdndStatus
-        Window targetWindow;   // potential drop target
-        Rectangle<int> silentRect;
         bool canDrop;          // target window signals it will accept the drop
+        Window targetWindow;   // potential drop target
         int xdndVersion;       // negotiated version with target
+        Rectangle<int> silentRect;
         String textOrFiles;
-
-        void reset()
-        {
-            isText           = false;
-            dragging         = false;
-            expectingStatus  = false;
-            canDrop          = false;
-            silentRect       = Rectangle<int>();
-            targetWindow     = None;
-            xdndVersion      = -1;
-            textOrFiles      = String::empty;
-        }
 
         const Atom* getMimeTypes() const noexcept   { return isText ? Atoms::get().externalAllowedTextMimeTypes
                                                                     : Atoms::get().externalAllowedFileMimeTypes; }
@@ -2408,7 +2402,7 @@ private:
 
     void resetExternalDragState()
     {
-        dragState.reset();
+        dragState = DragState();
     }
 
     void sendDragAndDropMessage (XClientMessageEvent& msg)
@@ -2836,6 +2830,7 @@ private:
         resetExternalDragState();
         dragState.isText = isText;
         dragState.textOrFiles = textOrFiles;
+        dragState.targetWindow = windowH;
 
         const int pointerGrabMask = Button1MotionMask | ButtonReleaseMask;
 
