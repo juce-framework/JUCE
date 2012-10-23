@@ -918,7 +918,7 @@ void AudioDeviceManager::playTestSound()
         AudioSampleBuffer* const newSound = new AudioSampleBuffer (1, soundLength);
         float* samples = newSound->getSampleData (0);
 
-        const double frequency = MidiMessage::getMidiNoteInHertz (80);
+        const double frequency = 440.0;
         const float amplitude = 0.5f;
 
         const double phasePerSample = double_Pi * 2.0 / (sampleRate / frequency);
