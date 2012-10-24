@@ -273,7 +273,7 @@ namespace DirectWriteTypeLayout
         }
     }
 
-    void setupLayout (const AttributedString& text, const float& maxWidth, const float& maxHeight,
+    void setupLayout (const AttributedString& text, const float maxWidth, const float maxHeight,
                       ID2D1RenderTarget* const renderTarget, IDWriteFactory* const directWriteFactory,
                       IDWriteFontCollection* const fontCollection, IDWriteTextLayout** dwTextLayout)
     {
@@ -334,7 +334,7 @@ namespace DirectWriteTypeLayout
         HRESULT hr = direct2dFactory->CreateDCRenderTarget (&d2dRTProp, renderTarget.resetAndGetPointerAddress());
 
         ComSmartPtr<IDWriteTextLayout> dwTextLayout;
-        setupLayout(text, layout.getWidth(), 1.0e7f, renderTarget, directWriteFactory, fontCollection, dwTextLayout.resetAndGetPointerAddress());
+        setupLayout (text, layout.getWidth(), 1.0e7f, renderTarget, directWriteFactory, fontCollection, dwTextLayout.resetAndGetPointerAddress());
 
         UINT32 actualLineCount = 0;
         hr = dwTextLayout->GetLineMetrics (nullptr, 0, &actualLineCount);
@@ -382,6 +382,20 @@ bool TextLayout::createNativeLayout (const AttributedString& text)
 
     if (factories.d2dFactory != nullptr && factories.systemFonts != nullptr)
     {
+       #if JUCE_64BIT
+        // There's a mysterious bug in 64-bit Windows that causes garbage floating-point
+        // values to be returned to DrawGlyphRun the first time that it gets used.
+        // In lieu of a better plan, this bodge uses a dummy call to work around this.
+        static bool hasBeenCalled = false;
+        if (! hasBeenCalled)
+        {
+            hasBeenCalled = true;
+            TextLayout dummy;
+            DirectWriteTypeLayout::createLayout (dummy, text, factories.directWriteFactory,
+                                                 factories.d2dFactory, factories.systemFonts);
+        }
+       #endif
+
         DirectWriteTypeLayout::createLayout (*this, text, factories.directWriteFactory,
                                              factories.d2dFactory, factories.systemFonts);
         return true;
