@@ -23,8 +23,8 @@
   ==============================================================================
 */
 
-#ifndef WASAPI_ENABLE_LOGGING
- #define WASAPI_ENABLE_LOGGING 0
+#ifndef JUCE_WASAPI_LOGGING
+ #define JUCE_WASAPI_LOGGING 0
 #endif
 
 //==============================================================================
@@ -37,45 +37,43 @@ void logFailure (HRESULT hr)
     jassert (hr != 0x800401f0); // If you hit this, it means you're trying to call from
                                 // a thread which hasn't been initialised with CoInitialize().
 
-   #if WASAPI_ENABLE_LOGGING
+   #if JUCE_WASAPI_LOGGING
     if (FAILED (hr))
     {
-        String e;
-        e << Time::getCurrentTime().toString (true, true, true, true)
-          << " -- WASAPI error: ";
+        const char* m = nullptr;
 
         switch (hr)
         {
-            case E_POINTER:                                 e << "E_POINTER"; break;
-            case E_INVALIDARG:                              e << "E_INVALIDARG"; break;
-            case AUDCLNT_E_NOT_INITIALIZED:                 e << "AUDCLNT_E_NOT_INITIALIZED"; break;
-            case AUDCLNT_E_ALREADY_INITIALIZED:             e << "AUDCLNT_E_ALREADY_INITIALIZED"; break;
-            case AUDCLNT_E_WRONG_ENDPOINT_TYPE:             e << "AUDCLNT_E_WRONG_ENDPOINT_TYPE"; break;
-            case AUDCLNT_E_DEVICE_INVALIDATED:              e << "AUDCLNT_E_DEVICE_INVALIDATED"; break;
-            case AUDCLNT_E_NOT_STOPPED:                     e << "AUDCLNT_E_NOT_STOPPED"; break;
-            case AUDCLNT_E_BUFFER_TOO_LARGE:                e << "AUDCLNT_E_BUFFER_TOO_LARGE"; break;
-            case AUDCLNT_E_OUT_OF_ORDER:                    e << "AUDCLNT_E_OUT_OF_ORDER"; break;
-            case AUDCLNT_E_UNSUPPORTED_FORMAT:              e << "AUDCLNT_E_UNSUPPORTED_FORMAT"; break;
-            case AUDCLNT_E_INVALID_SIZE:                    e << "AUDCLNT_E_INVALID_SIZE"; break;
-            case AUDCLNT_E_DEVICE_IN_USE:                   e << "AUDCLNT_E_DEVICE_IN_USE"; break;
-            case AUDCLNT_E_BUFFER_OPERATION_PENDING:        e << "AUDCLNT_E_BUFFER_OPERATION_PENDING"; break;
-            case AUDCLNT_E_THREAD_NOT_REGISTERED:           e << "AUDCLNT_E_THREAD_NOT_REGISTERED"; break;
-            case AUDCLNT_E_EXCLUSIVE_MODE_NOT_ALLOWED:      e << "AUDCLNT_E_EXCLUSIVE_MODE_NOT_ALLOWED"; break;
-            case AUDCLNT_E_ENDPOINT_CREATE_FAILED:          e << "AUDCLNT_E_ENDPOINT_CREATE_FAILED"; break;
-            case AUDCLNT_E_SERVICE_NOT_RUNNING:             e << "AUDCLNT_E_SERVICE_NOT_RUNNING"; break;
-            case AUDCLNT_E_EVENTHANDLE_NOT_EXPECTED:        e << "AUDCLNT_E_EVENTHANDLE_NOT_EXPECTED"; break;
-            case AUDCLNT_E_EXCLUSIVE_MODE_ONLY:             e << "AUDCLNT_E_EXCLUSIVE_MODE_ONLY"; break;
-            case AUDCLNT_E_BUFDURATION_PERIOD_NOT_EQUAL:    e << "AUDCLNT_E_BUFDURATION_PERIOD_NOT_EQUAL"; break;
-            case AUDCLNT_E_EVENTHANDLE_NOT_SET:             e << "AUDCLNT_E_EVENTHANDLE_NOT_SET"; break;
-            case AUDCLNT_E_INCORRECT_BUFFER_SIZE:           e << "AUDCLNT_E_INCORRECT_BUFFER_SIZE"; break;
-            case AUDCLNT_E_BUFFER_SIZE_ERROR:               e << "AUDCLNT_E_BUFFER_SIZE_ERROR"; break;
-            case AUDCLNT_S_BUFFER_EMPTY:                    e << "AUDCLNT_S_BUFFER_EMPTY"; break;
-            case AUDCLNT_S_THREAD_ALREADY_REGISTERED:       e << "AUDCLNT_S_THREAD_ALREADY_REGISTERED"; break;
-            default:                                        e << String::toHexString ((int) hr); break;
+            case E_POINTER:                                 m = "E_POINTER"; break;
+            case E_INVALIDARG:                              m = "E_INVALIDARG"; break;
+            case AUDCLNT_E_NOT_INITIALIZED:                 m = "AUDCLNT_E_NOT_INITIALIZED"; break;
+            case AUDCLNT_E_ALREADY_INITIALIZED:             m = "AUDCLNT_E_ALREADY_INITIALIZED"; break;
+            case AUDCLNT_E_WRONG_ENDPOINT_TYPE:             m = "AUDCLNT_E_WRONG_ENDPOINT_TYPE"; break;
+            case AUDCLNT_E_DEVICE_INVALIDATED:              m = "AUDCLNT_E_DEVICE_INVALIDATED"; break;
+            case AUDCLNT_E_NOT_STOPPED:                     m = "AUDCLNT_E_NOT_STOPPED"; break;
+            case AUDCLNT_E_BUFFER_TOO_LARGE:                m = "AUDCLNT_E_BUFFER_TOO_LARGE"; break;
+            case AUDCLNT_E_OUT_OF_ORDER:                    m = "AUDCLNT_E_OUT_OF_ORDER"; break;
+            case AUDCLNT_E_UNSUPPORTED_FORMAT:              m = "AUDCLNT_E_UNSUPPORTED_FORMAT"; break;
+            case AUDCLNT_E_INVALID_SIZE:                    m = "AUDCLNT_E_INVALID_SIZE"; break;
+            case AUDCLNT_E_DEVICE_IN_USE:                   m = "AUDCLNT_E_DEVICE_IN_USE"; break;
+            case AUDCLNT_E_BUFFER_OPERATION_PENDING:        m = "AUDCLNT_E_BUFFER_OPERATION_PENDING"; break;
+            case AUDCLNT_E_THREAD_NOT_REGISTERED:           m = "AUDCLNT_E_THREAD_NOT_REGISTERED"; break;
+            case AUDCLNT_E_EXCLUSIVE_MODE_NOT_ALLOWED:      m = "AUDCLNT_E_EXCLUSIVE_MODE_NOT_ALLOWED"; break;
+            case AUDCLNT_E_ENDPOINT_CREATE_FAILED:          m = "AUDCLNT_E_ENDPOINT_CREATE_FAILED"; break;
+            case AUDCLNT_E_SERVICE_NOT_RUNNING:             m = "AUDCLNT_E_SERVICE_NOT_RUNNING"; break;
+            case AUDCLNT_E_EVENTHANDLE_NOT_EXPECTED:        m = "AUDCLNT_E_EVENTHANDLE_NOT_EXPECTED"; break;
+            case AUDCLNT_E_EXCLUSIVE_MODE_ONLY:             m = "AUDCLNT_E_EXCLUSIVE_MODE_ONLY"; break;
+            case AUDCLNT_E_BUFDURATION_PERIOD_NOT_EQUAL:    m = "AUDCLNT_E_BUFDURATION_PERIOD_NOT_EQUAL"; break;
+            case AUDCLNT_E_EVENTHANDLE_NOT_SET:             m = "AUDCLNT_E_EVENTHANDLE_NOT_SET"; break;
+            case AUDCLNT_E_INCORRECT_BUFFER_SIZE:           m = "AUDCLNT_E_INCORRECT_BUFFER_SIZE"; break;
+            case AUDCLNT_E_BUFFER_SIZE_ERROR:               m = "AUDCLNT_E_BUFFER_SIZE_ERROR"; break;
+            case AUDCLNT_S_BUFFER_EMPTY:                    m = "AUDCLNT_S_BUFFER_EMPTY"; break;
+            case AUDCLNT_S_THREAD_ALREADY_REGISTERED:       m = "AUDCLNT_S_THREAD_ALREADY_REGISTERED"; break;
+            default:                                        break;
         }
 
-        DBG (e);
-        jassertfalse;
+        Logger::writeToLog ("WASAPI error: " + (m != nullptr ? String (m)
+                                                             : String::toHexString ((int) hr)));
     }
    #endif
 }
@@ -872,7 +870,6 @@ public:
                     sampleRateChanged = true;
             }
 
-            JUCE_TRY
             {
                 const ScopedLock sl (startStopLock);
 
@@ -882,7 +879,6 @@ public:
                 else
                     outs.clear();
             }
-            JUCE_CATCH_EXCEPTION
 
             if (outputDevice != nullptr)
             {

@@ -57,6 +57,9 @@ public:
     */
     static void JUCE_CALLTYPE setCurrentLogger (Logger* newLogger) noexcept;
 
+    /** Returns the current logger, or nullptr if none has been set. */
+    static Logger* getCurrentLogger() noexcept;
+
     /** Writes a string to the current logger.
 
         This will pass the string to the logger's logMessage() method if a logger

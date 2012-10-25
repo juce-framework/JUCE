@@ -34,10 +34,8 @@ Logger::~Logger()
 
 Logger* Logger::currentLogger = nullptr;
 
-void Logger::setCurrentLogger (Logger* const newLogger) noexcept
-{
-    currentLogger = newLogger;
-}
+void Logger::setCurrentLogger (Logger* const newLogger) noexcept    { currentLogger = newLogger; }
+Logger* Logger::getCurrentLogger()  noexcept                        { return currentLogger; }
 
 void Logger::writeToLog (const String& message)
 {

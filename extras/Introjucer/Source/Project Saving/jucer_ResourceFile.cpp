@@ -124,7 +124,7 @@ static String getComment()
             << newLine
             << "*/" << newLine
             << newLine;
-    
+
     return comment;
 }
 
@@ -170,7 +170,7 @@ bool ResourceFile::writeCpp (MemoryOutputStream& cpp, const File& headerFile, in
 {
     const int maxFileSize = 10 * 1024 * 1024;
     const bool isFirstFile = (i == 0);
-    
+
     cpp << "/* ==================================== " << resourceFileIdentifierString << " ===================================="
         << getComment()
         << "namespace " << className << newLine
@@ -204,13 +204,13 @@ bool ResourceFile::writeCpp (MemoryOutputStream& cpp, const File& headerFile, in
             cpp << newLine << newLine
                 << "const char* " << variableName << " = (const char*) " << tempVariable << ";" << newLine;
         }
-        
+
         ++i;
-        
+
         if (cpp.getPosition() > maxFileSize)
             break;
     }
-    
+
     if (isFirstFile)
     {
         if (i < files.size())
@@ -223,7 +223,7 @@ bool ResourceFile::writeCpp (MemoryOutputStream& cpp, const File& headerFile, in
                 << "namespace " << className << newLine
                 << "{";
         }
-        
+
         cpp << newLine
             << newLine
             << "const char* getNamedResource (const char*, int&) throw();" << newLine
@@ -244,7 +244,7 @@ bool ResourceFile::writeCpp (MemoryOutputStream& cpp, const File& headerFile, in
             << "    return 0;" << newLine
             << "}" << newLine;
     }
-    
+
     cpp << newLine
         << "}" << newLine;
 
@@ -259,17 +259,17 @@ bool ResourceFile::write (const File& cppFile, Array<File>& filesCreated)
         MemoryOutputStream mo;
         if (! (writeHeader (mo) && FileHelpers::overwriteFileWithNewDataIfDifferent (headerFile, mo)))
             return false;
-        
+
         filesCreated.add (headerFile);
     }
- 
+
     int i = 0;
     int fileIndex = 0;
-    
+
     for (;;)
     {
         File cpp (cppFile);
-        
+
         if (fileIndex > 0)
             cpp = cpp.getSiblingFile (cppFile.getFileNameWithoutExtension() + String (fileIndex + 1))
                      .withFileExtension (cppFile.getFileExtension());
@@ -277,10 +277,10 @@ bool ResourceFile::write (const File& cppFile, Array<File>& filesCreated)
         MemoryOutputStream mo;
         if (! (writeCpp (mo, headerFile, i) && FileHelpers::overwriteFileWithNewDataIfDifferent (cpp, mo)))
             return false;
-        
+
         filesCreated.add (cpp);
         ++fileIndex;
-        
+
         if (i >= files.size())
             break;
     }

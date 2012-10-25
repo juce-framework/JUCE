@@ -470,13 +470,13 @@ private:
             resourceFile.setClassName ("BinaryData");
 
             Array<File> binaryDataFiles;
-            
+
             if (resourceFile.write (binaryDataCpp, binaryDataFiles))
             {
                 for (int i = 0; i < binaryDataFiles.size(); ++i)
                 {
                     const File& f = binaryDataFiles.getReference(i);
-                
+
                     filesCreated.add (f);
                     generatedFilesGroup.addFile (f, -1, ! f.hasFileExtension (".h"));
                 }

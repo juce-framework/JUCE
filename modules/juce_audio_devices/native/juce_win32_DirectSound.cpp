@@ -990,15 +990,11 @@ public:
 
             if (isStarted)
             {
-                JUCE_TRY
-                {
-                    callback->audioDeviceIOCallback (const_cast <const float**> (inputBuffers.getArrayOfChannels()),
-                                                     inputBuffers.getNumChannels(),
-                                                     outputBuffers.getArrayOfChannels(),
-                                                     outputBuffers.getNumChannels(),
-                                                     bufferSizeSamples);
-                }
-                JUCE_CATCH_EXCEPTION
+                callback->audioDeviceIOCallback (const_cast <const float**> (inputBuffers.getArrayOfChannels()),
+                                                 inputBuffers.getNumChannels(),
+                                                 outputBuffers.getArrayOfChannels(),
+                                                 outputBuffers.getNumChannels(),
+                                                 bufferSizeSamples);
             }
             else
             {
