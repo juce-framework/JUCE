@@ -902,7 +902,7 @@ public:
         vstHostTime.timeSigDenominator = 4;
         vstHostTime.sampleRate = rate;
         vstHostTime.samplePos = 0;
-        vstHostTime.flags = kVstNanosValid;  /*| kVstTransportPlaying | kVstTempoValid | kVstTimeSigValid*/;
+        vstHostTime.flags = kVstNanosValid | kVstAutomationWriting | kVstAutomationReading;
 
         initialise();
 
@@ -973,10 +973,48 @@ public:
                 vstHostTime.barStartPos        = position.ppqPositionOfLastBarStart;
                 vstHostTime.flags |= kVstTempoValid | kVstTimeSigValid | kVstPpqPosValid | kVstBarsValid;
 
-                if (position.isPlaying)
-                    vstHostTime.flags |= kVstTransportPlaying;
+                VstInt32 newTransportFlags = 0;
+                if (position.isPlaying)     newTransportFlags |= kVstTransportPlaying;
+                if (position.isRecording)   newTransportFlags |= kVstTransportRecording;
+
+                if (newTransportFlags != (vstHostTime.flags & (kVstTransportPlaying | kVstTransportRecording)))
+                    vstHostTime.flags = (vstHostTime.flags & ~(kVstTransportPlaying | kVstTransportRecording)) | newTransportFlags | kVstTransportChanged;
                 else
-                    vstHostTime.flags &= ~kVstTransportPlaying;
+                    vstHostTime.flags &= ~kVstTransportChanged;
+
+                switch (position.frameRate)
+                {
+                    case AudioPlayHead::fps24:
+                        vstHostTime.smpteFrameRate = 0;
+                        vstHostTime.smpteOffset = (long) (position.timeInSeconds * 80 * 24 + 0.5);
+                        vstHostTime.flags |= kVstSmpteValid;
+                        break;
+
+                    case AudioPlayHead::fps25:
+                        vstHostTime.smpteFrameRate = 1;
+                        vstHostTime.smpteOffset = (long) (position.timeInSeconds * 80 * 25 + 0.5);
+                        vstHostTime.flags |= kVstSmpteValid;
+                        break;
+
+                    case AudioPlayHead::fps30:
+                        vstHostTime.smpteFrameRate = 3;
+                        vstHostTime.smpteOffset = (long) (position.timeInSeconds * 80 * 30 + 0.5);
+                        vstHostTime.flags |= kVstSmpteValid;
+                        break;
+
+                    default: break;
+                }
+
+                if (position.isLooping)
+                {
+                    vstHostTime.cycleStartPos = position.ppqLoopStart;
+                    vstHostTime.cycleEndPos = position.ppqLoopEnd;
+                    vstHostTime.flags |= kVstCyclePosValid;
+                }
+                else
+                {
+                    vstHostTime.flags &= ~kVstCyclePosValid;
+                }
             }
 
             vstHostTime.nanoSeconds = getVSTHostTimeNanoseconds();
@@ -1456,7 +1494,7 @@ public:
                     if (i != oldProg)
                     {
                         const fxProgram* const prog = (const fxProgram*) (((const char*) (set->programs)) + i * progLen);
-                        if (((const char*) prog) - ((const char*) set) >= dataSize)
+                        if (((const char*) prog) - ((const char*) set) >= (ssize_t) dataSize)
                             return false;
 
                         if (vst_swap (set->numPrograms) > 0)
@@ -1471,7 +1509,7 @@ public:
                     setCurrentProgram (oldProg);
 
                 const fxProgram* const prog = (const fxProgram*) (((const char*) (set->programs)) + oldProg * progLen);
-                if (((const char*) prog) - ((const char*) set) >= dataSize)
+                if (((const char*) prog) - ((const char*) set) >= (ssize_t) dataSize)
                     return false;
 
                 if (! restoreProgramSettings (prog))
