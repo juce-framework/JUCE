@@ -89,7 +89,22 @@ public:
             {
                 forEachXmlChildElementWithTagName (*fontsInfo, e, "dir")
                 {
-                    fontDirs.add (e->getAllSubText().trim());
+                    String fontPath (e->getAllSubText().trim());
+
+                    if (fontPath.isNotEmpty())
+                    {
+                        if (e->getStringAttribute ("prefix") == "xdg")
+                        {
+                            String xdgDataHome (SystemStats::getEnvironmentVariable ("XDG_DATA_HOME", String::empty));
+
+                            if (xdgDataHome.trimStart().isEmpty())
+                                xdgDataHome = "~/.local/share";
+
+                            fontPath = File (xdgDataHome).getChildFile (fontPath).getFullPathName();
+                        }
+
+                        fontDirs.add (fontPath);
+                    }
                 }
             }
         }
@@ -97,7 +112,7 @@ public:
         if (fontDirs.size() == 0)
             fontDirs.add ("/usr/X11R6/lib/X11/fonts");
 
-        fontDirs.removeEmptyStrings (true);
+        fontDirs.removeDuplicates (false);
     }
 
     bool next()
