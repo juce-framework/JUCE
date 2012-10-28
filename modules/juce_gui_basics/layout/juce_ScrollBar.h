@@ -50,7 +50,7 @@ class Viewport;
     @see ScrollBar::Listener
 */
 class JUCE_API  ScrollBar  : public Component,
-                             private AsyncUpdater,
+                             public AsyncUpdater,
                              private Timer
 {
 public:
@@ -325,8 +325,6 @@ private:
     void handleAsyncUpdate();
     void updateThumbPosition();
     void timerCallback();
-
-    friend class Viewport;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ScrollBar);
 };
