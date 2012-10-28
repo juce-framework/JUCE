@@ -70,9 +70,7 @@ bool StretchableLayoutManager::getItemLayout (const int itemIndex,
                                               double& maximumSize,
                                               double& preferredSize) const
 {
-    const ItemLayoutProperties* const layout = getInfoFor (itemIndex);
-
-    if (layout != nullptr)
+    if (const ItemLayoutProperties* const layout = getInfoFor (itemIndex))
     {
         minimumSize = layout->minSize;
         maximumSize = layout->maxSize;
@@ -96,21 +94,15 @@ int StretchableLayoutManager::getItemCurrentPosition (const int itemIndex) const
     int pos = 0;
 
     for (int i = 0; i < itemIndex; ++i)
-    {
-        const ItemLayoutProperties* const layout = getInfoFor (i);
-
-        if (layout != nullptr)
+        if (const ItemLayoutProperties* const layout = getInfoFor (i))
             pos += layout->currentSize;
-    }
 
     return pos;
 }
 
 int StretchableLayoutManager::getItemCurrentAbsoluteSize (const int itemIndex) const
 {
-    const ItemLayoutProperties* const layout = getInfoFor (itemIndex);
-
-    if (layout != nullptr)
+    if (const ItemLayoutProperties* const layout = getInfoFor (itemIndex))
         return layout->currentSize;
 
     return 0;
@@ -118,9 +110,7 @@ int StretchableLayoutManager::getItemCurrentAbsoluteSize (const int itemIndex) c
 
 double StretchableLayoutManager::getItemCurrentRelativeSize (const int itemIndex) const
 {
-    const ItemLayoutProperties* const layout = getInfoFor (itemIndex);
-
-    if (layout != nullptr)
+    if (const ItemLayoutProperties* const layout = getInfoFor (itemIndex))
         return -layout->currentSize / (double) totalSize;
 
     return 0;
@@ -165,13 +155,9 @@ void StretchableLayoutManager::layOutComponents (Component** const components,
 
     for (int i = 0; i < numComponents; ++i)
     {
-        const ItemLayoutProperties* const layout = getInfoFor (i);
-
-        if (layout != nullptr)
+        if (const ItemLayoutProperties* const layout = getInfoFor (i))
         {
-            Component* const c = components[i];
-
-            if (c != nullptr)
+            if (Component* const c = components[i])
             {
                 if (i == numComponents - 1)
                 {

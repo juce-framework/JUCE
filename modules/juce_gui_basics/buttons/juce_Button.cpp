@@ -26,7 +26,7 @@
 class Button::RepeatTimer  : public Timer
 {
 public:
-    RepeatTimer (Button& owner_) : owner (owner_)   {}
+    RepeatTimer (Button& b) : owner (b)   {}
     void timerCallback()    { owner.repeatTimerCallback(); }
 
 private:
@@ -192,26 +192,28 @@ void Button::setRadioGroupId (const int newGroupId)
 
 void Button::turnOffOtherButtonsInGroup (const bool sendChangeNotification)
 {
-    Component* const p = getParentComponent();
-
-    if (p != nullptr && radioGroupId != 0)
+    if (Component* const p = getParentComponent())
     {
-        WeakReference<Component> deletionWatcher (this);
-
-        for (int i = p->getNumChildComponents(); --i >= 0;)
+        if (radioGroupId != 0)
         {
-            Component* const c = p->getChildComponent (i);
+            WeakReference<Component> deletionWatcher (this);
 
-            if (c != this)
+            for (int i = p->getNumChildComponents(); --i >= 0;)
             {
-                Button* const b = dynamic_cast <Button*> (c);
+                Component* const c = p->getChildComponent (i);
 
-                if (b != nullptr && b->getRadioGroupId() == radioGroupId)
+                if (c != this)
                 {
-                    b->setToggleState (false, sendChangeNotification);
+                    if (Button* const b = dynamic_cast <Button*> (c))
+                    {
+                        if (b->getRadioGroupId() == radioGroupId)
+                        {
+                            b->setToggleState (false, sendChangeNotification);
 
-                    if (deletionWatcher == nullptr)
-                        return;
+                            if (deletionWatcher == nullptr)
+                                return;
+                        }
+                    }
                 }
             }
         }

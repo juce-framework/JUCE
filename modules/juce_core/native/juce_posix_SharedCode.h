@@ -528,9 +528,7 @@ Result FileOutputStream::truncate()
 //==============================================================================
 String SystemStats::getEnvironmentVariable (const String& name, const String& defaultValue)
 {
-    const char* s = ::getenv (name.toUTF8());
-
-    if (s != nullptr)
+    if (const char* s = ::getenv (name.toUTF8()))
         return String::fromUTF8 (s);
 
     return defaultValue;
