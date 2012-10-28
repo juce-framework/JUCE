@@ -357,7 +357,7 @@ public:
     void update()
     {
         getLastText() = userText.getText();
-        resultText.setText (CodeHelpers::stringLiteral (getLastText()), false);
+        resultText.setText (CodeHelpers::stringLiteral (getLastText(), 100), false);
     }
 
     void resized()
