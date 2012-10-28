@@ -11,6 +11,7 @@
 		0F242B74AEB50B9C33B5E546 = { isa = PBXBuildFile; fileRef = 71EDA2F9C7ACDF625B840274; };
 		651E9E554EE669F755503CD9 = { isa = PBXBuildFile; fileRef = 89BE7D12224043BD11510870; };
 		59D707C6BFB8DDAB38398B4E = { isa = PBXBuildFile; fileRef = 2215814E81D68382A2659093; };
+		24F22CA01673D509C8D2595D = { isa = PBXBuildFile; fileRef = 197ABCA5D235C012225833FB; };
 		E0DA84A74FBC8FEA743CEC28 = { isa = PBXBuildFile; fileRef = 292D265400A63B191B93428C; };
 		478ABAE2C6404C2175CAEFDD = { isa = PBXBuildFile; fileRef = 20015A8127372B4AF9F1A9A4; };
 		DE359ADFBA6E13CD4938EE7D = { isa = PBXBuildFile; fileRef = 98362403845C0976BEAAE71D; };
@@ -124,6 +125,7 @@
 		184057B03008D72671894ED7 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_XmlElement.cpp"; path = "../../../../modules/juce_core/xml/juce_XmlElement.cpp"; sourceTree = "SOURCE_ROOT"; };
 		18DCE822FF9B4B7761AC9E09 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_StringPairArray.cpp"; path = "../../../../modules/juce_core/text/juce_StringPairArray.cpp"; sourceTree = "SOURCE_ROOT"; };
 		193BA5B4D0759D406DC4400A = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_DirectoryIterator.h"; path = "../../../../modules/juce_core/files/juce_DirectoryIterator.h"; sourceTree = "SOURCE_ROOT"; };
+		197ABCA5D235C012225833FB = { isa = PBXFileReference; lastKnownFileType = file.xib; name = RecentFilesMenuTemplate.xib; path = RecentFilesMenuTemplate.xib; sourceTree = "SOURCE_ROOT"; };
 		19C6453ECF66E9253839345C = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "jucer_Colours.h"; path = "../../src/utility/jucer_Colours.h"; sourceTree = "SOURCE_ROOT"; };
 		1A734B3497D65CAFF82C87AD = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "jucer_PrefsPanel.cpp"; path = "../../src/ui/jucer_PrefsPanel.cpp"; sourceTree = "SOURCE_ROOT"; };
 		1A98D1F65F0BBD67058935C7 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_StretchableLayoutManager.h"; path = "../../../../modules/juce_gui_basics/layout/juce_StretchableLayoutManager.h"; sourceTree = "SOURCE_ROOT"; };
@@ -1644,6 +1646,7 @@
 				BCCA9224BBA2DC97107B3304 ); name = "Juce Library Code"; sourceTree = "<group>"; };
 		35E78DF3B882743C2D418E5B = { isa = PBXGroup; children = (
 				F2E48F527D479CFD9A23F54A,
+				197ABCA5D235C012225833FB,
 				292D265400A63B191B93428C,
 				2CCAAE22C308769866A5A9FD ); name = Resources; sourceTree = "<group>"; };
 		680BC5D164A7D17AAD7A2932 = { isa = PBXGroup; children = (
@@ -1731,6 +1734,7 @@
 				C4428643C14DD60BA895A378,
 				EB7F74BF01346F8C6BCC31A7 ); defaultConfigurationIsVisible = 0; defaultConfigurationName = Debug; };
 		C06AC70106231834669512C5 = { isa = PBXResourcesBuildPhase; buildActionMask = 2147483647; files = (
+				24F22CA01673D509C8D2595D,
 				E0DA84A74FBC8FEA743CEC28,
 				3F8D676A427504E43DFBBCA7 ); runOnlyForDeploymentPostprocessing = 0; };
 		394C2D5A71955036D265B490 = { isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (
