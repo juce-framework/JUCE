@@ -932,6 +932,11 @@ public:
     void addToDock() const;
    #endif
 
+   #if JUCE_WINDOWS
+    /** Windows ONLY - Creates a win32 .LNK shortcut file that links to this file. */
+    bool createLink (const String& description, const File& linkFileToCreate) const;
+   #endif
+
 private:
     //==============================================================================
     String fullPath;

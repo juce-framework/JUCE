@@ -587,30 +587,40 @@ File File::getLinkedTarget() const
 
     if (! exists())
         p += ".lnk";
-    else if (getFileExtension() != ".lnk")
+    else if (! hasFileExtension (".lnk"))
         return result;
 
     ComSmartPtr <IShellLink> shellLink;
-    if (SUCCEEDED (shellLink.CoCreateInstance (CLSID_ShellLink)))
-    {
-        ComSmartPtr <IPersistFile> persistFile;
-        if (SUCCEEDED (shellLink.QueryInterface (persistFile)))
-        {
-            if (SUCCEEDED (persistFile->Load (p.toWideCharPointer(), STGM_READ))
-                 && SUCCEEDED (shellLink->Resolve (0, SLR_ANY_MATCH | SLR_NO_UI)))
-            {
-                WIN32_FIND_DATA winFindData;
-                WCHAR resolvedPath [MAX_PATH];
+    ComSmartPtr <IPersistFile> persistFile;
 
-                if (SUCCEEDED (shellLink->GetPath (resolvedPath, MAX_PATH, &winFindData, SLGP_UNCPRIORITY)))
-                    result = File (resolvedPath);
-            }
-        }
+    if (SUCCEEDED (shellLink.CoCreateInstance (CLSID_ShellLink))
+         && SUCCEEDED (shellLink.QueryInterface (persistFile))
+         && SUCCEEDED (persistFile->Load (p.toWideCharPointer(), STGM_READ))
+         && SUCCEEDED (shellLink->Resolve (0, SLR_ANY_MATCH | SLR_NO_UI)))
+    {
+        WIN32_FIND_DATA winFindData;
+        WCHAR resolvedPath [MAX_PATH];
+
+        if (SUCCEEDED (shellLink->GetPath (resolvedPath, MAX_PATH, &winFindData, SLGP_UNCPRIORITY)))
+            result = File (resolvedPath);
     }
 
     return result;
 }
 
+bool File::createLink (const String& description, const File& linkFileToCreate) const
+{
+    linkFileToCreate.deleteFile();
+
+    ComSmartPtr <IShellLink> shellLink;
+    ComSmartPtr <IPersistFile> persistFile;
+
+    return SUCCEEDED (shellLink.CoCreateInstance (CLSID_ShellLink))
+        && SUCCEEDED (shellLink->SetPath (getFullPathName().toWideCharPointer()))
+        && SUCCEEDED (shellLink->SetDescription (description.toWideCharPointer()))
+        && SUCCEEDED (shellLink.QueryInterface (persistFile))
+        && SUCCEEDED (persistFile->Save (linkFileToCreate.getFullPathName().toWideCharPointer(), TRUE));
+}
 
 //==============================================================================
 class DirectoryIterator::NativeIterator::Pimpl
