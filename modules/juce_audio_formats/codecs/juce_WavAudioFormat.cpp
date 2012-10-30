@@ -580,7 +580,7 @@ public:
                         }
                         else
                         {
-                            input->skipNextBytes (6); // skip over bitsPerSample
+                            input->skipNextBytes (4); // skip over size and bitsPerSample
                             metadataValues.set ("ChannelMask", String (input->readInt()));
 
                             ExtensibleWavSubFormat subFormat;
