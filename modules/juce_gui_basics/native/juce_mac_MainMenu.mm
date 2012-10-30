@@ -299,7 +299,8 @@ private:
                     {
                         if (NSArray* items = [object itemArray])
                         {
-                            recentItem = [findRecentFilesItem (items) retain];
+                            NSMenuItem* item = findRecentFilesItem (items);
+                            recentItem = [item retain];
                             break;
                         }
                     }
