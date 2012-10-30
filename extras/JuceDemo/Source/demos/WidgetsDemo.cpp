@@ -293,7 +293,7 @@ static Component* createSlidersPage()
 
         sliders[i]->setRange (0.0, 100.0, 0.1);
         sliders[i]->setPopupMenuEnabled (true);
-        sliders[i]->setValue (Random::getSystemRandom().nextDouble() * 100.0, false, false);
+        sliders[i]->setValue (Random::getSystemRandom().nextDouble() * 100.0, dontSendNotification);
     }
 
     sliders[0]->setSliderStyle (Slider::LinearVertical);
@@ -655,7 +655,7 @@ public:
 
         addAndMakeVisible (&depthSlider);
         depthSlider.setRange (10.0, 200.0, 1.0);
-        depthSlider.setValue (50, false);
+        depthSlider.setValue (50, dontSendNotification);
         depthSlider.setSliderStyle (Slider::LinearHorizontal);
         depthSlider.setTextBoxStyle (Slider::TextBoxLeft, false, 80, 20);
         depthSlider.addListener (this);

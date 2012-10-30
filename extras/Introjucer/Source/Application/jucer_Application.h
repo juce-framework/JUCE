@@ -98,7 +98,7 @@ public:
         mainWindowList.createWindowIfNoneAreOpen();
 
        #if JUCE_MAC
-        MenuBarModel::setMacMainMenu (menuModel);
+        MenuBarModel::setMacMainMenu (menuModel, nullptr, "Open Recent");
        #endif
     }
 
@@ -245,7 +245,7 @@ public:
 
         PopupMenu recentFiles;
         getAppSettings().recentFiles.createPopupMenuItems (recentFiles, recentProjectsBaseID, true, true);
-        menu.addSubMenu ("Open recent file", recentFiles);
+        menu.addSubMenu ("Open Recent", recentFiles);
 
         menu.addSeparator();
         menu.addCommandItem (commandManager, CommandIDs::closeDocument);

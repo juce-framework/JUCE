@@ -67,10 +67,8 @@ public:
 
     bool useTimeslice (const int elapsed)
     {
-        Component* const c = proxy != nullptr ? static_cast <Component*> (proxy)
-                                              : static_cast <Component*> (component);
-
-        if (c != nullptr)
+        if (Component* const c = proxy != nullptr ? static_cast <Component*> (proxy)
+                                                  : static_cast <Component*> (component))
         {
             msElapsed += elapsed;
             double newProgress = msElapsed / (double) msTotal;
@@ -146,9 +144,7 @@ public:
             setAlpha (c.getAlpha());
             setInterceptsMouseClicks (false, false);
 
-            Component* const parent = c.getParentComponent();
-
-            if (parent != nullptr)
+            if (Component* const parent = c.getParentComponent())
                 parent->addAndMakeVisible (this);
             else if (c.isOnDesktop() && c.getPeer() != nullptr)
                 addToDesktop (c.getPeer()->getStyleFlags() | ComponentPeer::windowIgnoresKeyPresses);
@@ -282,9 +278,7 @@ void ComponentAnimator::cancelAllAnimations (const bool moveComponentsToTheirFin
 void ComponentAnimator::cancelAnimation (Component* const component,
                                          const bool moveComponentToItsFinalPosition)
 {
-    AnimationTask* const at = findTaskFor (component);
-
-    if (at != nullptr)
+    if (AnimationTask* const at = findTaskFor (component))
     {
         if (moveComponentToItsFinalPosition)
             at->moveToFinalDestination();
@@ -297,9 +291,8 @@ void ComponentAnimator::cancelAnimation (Component* const component,
 Rectangle<int> ComponentAnimator::getComponentDestination (Component* const component)
 {
     jassert (component != nullptr);
-    AnimationTask* const at = findTaskFor (component);
 
-    if (at != nullptr)
+    if (AnimationTask* const at = findTaskFor (component))
         return at->destination;
 
     return component->getBounds();

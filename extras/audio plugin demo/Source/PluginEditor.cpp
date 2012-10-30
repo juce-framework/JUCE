@@ -94,8 +94,8 @@ void JuceDemoPluginAudioProcessorEditor::timerCallback()
     if (lastDisplayedPosition != newPos)
         displayPositionInfo (newPos);
 
-    gainSlider.setValue (ourProcessor->gain, false);
-    delaySlider.setValue (ourProcessor->delay, false);
+    gainSlider.setValue (ourProcessor->gain, dontSendNotification);
+    delaySlider.setValue (ourProcessor->delay, dontSendNotification);
 }
 
 // This is our Slider::Listener callback, when the user drags a slider.

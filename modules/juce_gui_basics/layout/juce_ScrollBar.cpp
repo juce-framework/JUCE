@@ -95,7 +95,8 @@ void ScrollBar::setRangeLimits (const double newMinimum, const double newMaximum
     setRangeLimits (Range<double> (newMinimum, newMaximum));
 }
 
-bool ScrollBar::setCurrentRange (const Range<double>& newRange)
+bool ScrollBar::setCurrentRange (const Range<double>& newRange,
+                                 const NotificationType notification)
 {
     const Range<double> constrainedRange (totalRange.constrainRange (newRange));
 
@@ -104,7 +105,12 @@ bool ScrollBar::setCurrentRange (const Range<double>& newRange)
         visibleRange = constrainedRange;
 
         updateThumbPosition();
-        triggerAsyncUpdate();
+
+        if (notification != dontSendNotification)
+            triggerAsyncUpdate();
+
+        if (notification == sendNotificationSync)
+            handleUpdateNowIfNeeded();
 
         return true;
     }

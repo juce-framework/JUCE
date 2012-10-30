@@ -1056,9 +1056,9 @@ private:
 
                         if (granularity >= 0)
                         {
-                            granularity = jmax (1, (int) granularity);
+                            granularity = jmax (16, (int) granularity);
 
-                            for (int i = jmax ((int) minSize, (int) granularity); i < jmin (6400, (int) maxSize); i += granularity)
+                            for (int i = jmax ((int) (minSize + 15) & ~15, (int) granularity); i < jmin (6400, (int) maxSize); i += granularity)
                                 bufferSizes.addIfNotAlreadyThere (granularity * (i / granularity));
                         }
                         else if (granularity < 0)

@@ -266,6 +266,9 @@ public:
     */
     void setLatencySamples (int newLatency);
 
+    /** Returns true if a silent input always produces a silent output (i.e. it has no tail). */
+    virtual bool silenceInProducesSilenceOut() const = 0;
+
     /** Returns true if the processor wants midi messages. */
     virtual bool acceptsMidi() const = 0;
 

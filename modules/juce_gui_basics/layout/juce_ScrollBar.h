@@ -50,7 +50,7 @@ class Viewport;
     @see ScrollBar::Listener
 */
 class JUCE_API  ScrollBar  : public Component,
-                             private AsyncUpdater,
+                             public AsyncUpdater,
                              private Timer
 {
 public:
@@ -137,10 +137,14 @@ public:
         asynchronous call to ScrollBar::Listener::scrollBarMoved() for all the listeners that
         are registered.
 
+        The notification parameter can be used to optionally send or inhibit a callback to
+        any scrollbar listeners.
+
         @returns true if the range was changed, or false if nothing was changed.
         @see getCurrentRange. setCurrentRangeStart
     */
-    bool setCurrentRange (const Range<double>& newRange);
+    bool setCurrentRange (const Range<double>& newRange,
+                          NotificationType notification = sendNotificationAsync);
 
     /** Changes the position of the scrollbar's 'thumb'.
 
@@ -321,8 +325,6 @@ private:
     void handleAsyncUpdate();
     void updateThumbPosition();
     void timerCallback();
-
-    friend class Viewport;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ScrollBar);
 };

@@ -159,6 +159,12 @@ void AudioDeviceManager::createAudioDeviceTypes (OwnedArray <AudioIODeviceType>&
     addIfNotNull (list, AudioIODeviceType::createAudioIODeviceType_Android());
 }
 
+void AudioDeviceManager::addAudioDeviceType (AudioIODeviceType* newDeviceType)
+{
+    jassert (newDeviceType != nullptr);
+    availableDeviceTypes.add (newDeviceType);
+}
+
 //==============================================================================
 String AudioDeviceManager::initialise (const int numInputChannelsNeeded,
                                        const int numOutputChannelsNeeded,
@@ -694,12 +700,10 @@ void AudioDeviceManager::audioDeviceIOCallbackInt (const float** inputChannelDat
 
             for (int chan = 0; chan < numOutputChannels; ++chan)
             {
-                const float* const src = tempChans [chan];
-                float* const dst = outputChannelData [chan];
-
-                if (src != nullptr && dst != nullptr)
-                    for (int j = 0; j < numSamples; ++j)
-                        dst[j] += src[j];
+                if (const float* const src = tempChans [chan])
+                    if (float* const dst = outputChannelData [chan])
+                        for (int j = 0; j < numSamples; ++j)
+                            dst[j] += src[j];
             }
         }
 
@@ -914,7 +918,7 @@ void AudioDeviceManager::playTestSound()
         AudioSampleBuffer* const newSound = new AudioSampleBuffer (1, soundLength);
         float* samples = newSound->getSampleData (0);
 
-        const double frequency = MidiMessage::getMidiNoteInHertz (80);
+        const double frequency = 440.0;
         const float amplitude = 0.5f;
 
         const double phasePerSample = double_Pi * 2.0 / (sampleRate / frequency);

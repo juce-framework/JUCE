@@ -213,15 +213,35 @@ namespace CodeHelpers
                                     false, true, false);
     }
 
-    String stringLiteral (const String& text)
+    String stringLiteral (const String& text, int maxLineLength)
     {
         if (text.isEmpty())
             return "String::empty";
 
-        if (CharPointer_ASCII::isValidString (text.toUTF8(), std::numeric_limits<int>::max()))
-            return CodeHelpers::addEscapeChars (text).quoted();
-        else
-            return "CharPointer_UTF8 (" + CodeHelpers::addEscapeChars (text).quoted() + ")";
+        StringArray lines;
+        lines.add (text);
+
+        if (maxLineLength > 0)
+        {
+            while (lines [lines.size() - 1].length() > maxLineLength)
+            {
+                String& lastLine = lines.getReference (lines.size() - 1);
+                const String start (lastLine.substring (0, maxLineLength));
+                const String end (lastLine.substring (maxLineLength));
+                lastLine = start;
+                lines.add (end);
+            }
+        }
+
+        for (int i = 0; i < lines.size(); ++i)
+            lines.getReference(i) = "\"" + addEscapeChars (lines.getReference(i)) + "\"";
+
+        String result (lines.joinIntoString (newLine));
+
+        if (! CharPointer_ASCII::isValidString (text.toUTF8(), std::numeric_limits<int>::max()))
+            result = "CharPointer_UTF8 (" + result + ")";
+
+        return result;
     }
 
     String alignFunctionCallParams (const String& call, const StringArray& parameters, const int maxLineLength)

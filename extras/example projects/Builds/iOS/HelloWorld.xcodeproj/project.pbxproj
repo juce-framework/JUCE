@@ -456,6 +456,7 @@
 		B3978067F1432E1A2618A5DB = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Main.cpp; path = ../../Source/Main.cpp; sourceTree = "SOURCE_ROOT"; };
 		B39A0E62D1C43A61243F6864 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_MouseInputSource.cpp"; path = "../../../../modules/juce_gui_basics/mouse/juce_MouseInputSource.cpp"; sourceTree = "SOURCE_ROOT"; };
 		B3AE3983352E66690C865088 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_FillType.cpp"; path = "../../../../modules/juce_graphics/colour/juce_FillType.cpp"; sourceTree = "SOURCE_ROOT"; };
+		B3CEFD554B22D2764327CC70 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_NotificationType.h"; path = "../../../../modules/juce_events/messages/juce_NotificationType.h"; sourceTree = "SOURCE_ROOT"; };
 		B4A651618E07F64027C2DB75 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_TimeSliceThread.h"; path = "../../../../modules/juce_core/threads/juce_TimeSliceThread.h"; sourceTree = "SOURCE_ROOT"; };
 		B531D38613FDEC368336A51E = { isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = Info.plist; path = Info.plist; sourceTree = "SOURCE_ROOT"; };
 		B5880B8DE2B7362EF263D82A = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_PerformanceCounter.cpp"; path = "../../../../modules/juce_core/time/juce_PerformanceCounter.cpp"; sourceTree = "SOURCE_ROOT"; };
@@ -885,7 +886,8 @@
 				29610D1C68DD1FA2043A0D95,
 				1B9D255022E9F460E5F710C5,
 				6501D18FEF031C7FEF45F39E,
-				D53B158241A875303FC52D8B ); name = messages; sourceTree = "<group>"; };
+				D53B158241A875303FC52D8B,
+				B3CEFD554B22D2764327CC70 ); name = messages; sourceTree = "<group>"; };
 		A9B3363B5E302799D0945C6C = { isa = PBXGroup; children = (
 				8414F7B17DA39B4D0B4C3739,
 				C894801E6F257C0E84E5C03F,

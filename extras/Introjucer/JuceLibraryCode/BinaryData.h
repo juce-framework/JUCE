@@ -25,10 +25,10 @@ namespace BinaryData
     const int            jucer_AudioPluginEditorTemplate_hSize = 799;
 
     extern const char*   jucer_AudioPluginFilterTemplate_cpp;
-    const int            jucer_AudioPluginFilterTemplate_cppSize = 4473;
+    const int            jucer_AudioPluginFilterTemplate_cppSize = 4559;
 
     extern const char*   jucer_AudioPluginFilterTemplate_h;
-    const int            jucer_AudioPluginFilterTemplate_hSize = 2400;
+    const int            jucer_AudioPluginFilterTemplate_hSize = 2447;
 
     extern const char*   jucer_ContentCompTemplate_cpp;
     const int            jucer_ContentCompTemplate_cppSize = 886;
@@ -59,6 +59,9 @@ namespace BinaryData
 
     extern const char*   jucer_NewInlineComponentTemplate_h;
     const int            jucer_NewInlineComponentTemplate_hSize = 1627;
+
+    extern const char*   RecentFilesMenuTemplate_xib;
+    const int            RecentFilesMenuTemplate_xibSize = 10044;
 
     // If you provide the name of one of the binary resource variables above, this function will
     // return the corresponding data and its size (or a null pointer if the name isn't found).

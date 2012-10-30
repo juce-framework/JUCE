@@ -29,7 +29,6 @@
 #include "../jucer_Headers.h"
 #include "../Utility/jucer_JucerTreeViewBase.h"
 #include "jucer_Project.h"
-#include "../Project Saving/jucer_ResourceFile.h"
 
 
 //==============================================================================
@@ -91,6 +90,8 @@ public:
     int getMillisecsAllowedForDragGesture();
 
     static void getAllSelectedNodesInTree (Component* componentInTree, OwnedArray <Project::Item>& selectedNodes);
+
+    File getDraggableFile() const      { return getFile(); }
 
     //==============================================================================
     Project::Item item;

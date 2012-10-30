@@ -1713,6 +1713,9 @@
     <ClInclude Include="..\..\..\..\modules\juce_events\messages\juce_MessageManager.h">
       <Filter>Juce Modules\juce_events\messages</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_events\messages\juce_NotificationType.h">
+      <Filter>Juce Modules\juce_events\messages</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_events\timers\juce_MultiTimer.h">
       <Filter>Juce Modules\juce_events\timers</Filter>
     </ClInclude>
@@ -2331,6 +2334,9 @@
       <Filter>The Introjucer\BinaryData</Filter>
     </None>
     <None Include="..\..\Source\BinaryData\juce_icon.png">
+      <Filter>The Introjucer\BinaryData</Filter>
+    </None>
+    <None Include="..\..\Source\BinaryData\RecentFilesMenuTemplate.xib">
       <Filter>The Introjucer\BinaryData</Filter>
     </None>
     <None Include="..\..\..\..\modules\juce_core\juce_module_info">

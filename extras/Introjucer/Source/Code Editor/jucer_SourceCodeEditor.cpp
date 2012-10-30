@@ -264,7 +264,7 @@ bool GenericCodeEditorComponent::perform (const InvocationInfo& info)
 //==============================================================================
 class GenericCodeEditorComponent::FindPanel  : public Component,
                                                private TextEditor::Listener,
-                                               private Button::Listener
+                                               private ButtonListener
 {
 public:
     FindPanel()
@@ -334,7 +334,7 @@ public:
     {
         setSearchString (editor.getText());
 
-        if (CppCodeEditorComponent* ed = getOwner())
+        if (GenericCodeEditorComponent* ed = getOwner())
             ed->findNext (true, false);
     }
 
@@ -347,13 +347,13 @@ public:
 
     void textEditorEscapeKeyPressed (TextEditor&)
     {
-        if (CppCodeEditorComponent* ed = getOwner())
+        if (GenericCodeEditorComponent* ed = getOwner())
             ed->hideFindPanel();
     }
 
-    CppCodeEditorComponent* getOwner() const
+    GenericCodeEditorComponent* getOwner() const
     {
-        return findParentComponentOfClass <CppCodeEditorComponent>();
+        return findParentComponentOfClass <GenericCodeEditorComponent>();
     }
 
     TextEditor editor;

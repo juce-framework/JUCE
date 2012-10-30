@@ -82,6 +82,8 @@ public:
     void audioDeviceStopped();
     /** @internal */
     void handleIncomingMidiMessage (MidiInput* source, const MidiMessage& message);
+    /** @internal */
+    void prepareToPlay (double sampleRate, int blockSize, int numChansIn, int numChansOut);
 
 private:
     //==============================================================================

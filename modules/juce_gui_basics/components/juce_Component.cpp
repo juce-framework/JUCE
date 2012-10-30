@@ -1953,10 +1953,11 @@ Image Component::createComponentSnapshot (const Rectangle<int>& areaToGrab,
     if (clipImageToComponentBounds)
         r = r.getIntersection (getLocalBounds());
 
+    if (r.isEmpty())
+        return Image();
+
     Image componentImage (flags.opaqueFlag ? Image::RGB : Image::ARGB,
-                          jmax (1, r.getWidth()),
-                          jmax (1, r.getHeight()),
-                          true);
+                          r.getWidth(), r.getHeight(), true);
 
     Graphics imageContext (componentImage);
     imageContext.setOrigin (-r.getX(), -r.getY());

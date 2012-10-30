@@ -38,7 +38,7 @@ namespace CodeHelpers
     String makeHeaderGuardName (const File& file);
     String makeBinaryDataIdentifierName (const File& file);
 
-    String stringLiteral (const String& text);
+    String stringLiteral (const String& text, int maxLineLength = -1);
 
     String colourToCode (const Colour& col);
     String alignFunctionCallParams (const String& call, const StringArray& parameters, int maxLineLength);

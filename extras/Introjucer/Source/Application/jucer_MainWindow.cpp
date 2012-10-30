@@ -29,6 +29,7 @@
 #include "jucer_OpenDocumentManager.h"
 #include "../Code Editor/jucer_SourceCodeEditor.h"
 #include "../Project/jucer_NewProjectWizard.h"
+#include "../Utility/jucer_JucerTreeViewBase.h"
 
 ScopedPointer<ApplicationCommandManager> commandManager;
 
@@ -226,6 +227,35 @@ void MainWindow::filesDropped (const StringArray& filenames, int mouseX, int mou
         if (canOpenFile (f) && openFile (f))
             break;
     }
+}
+
+bool MainWindow::shouldDropFilesWhenDraggedExternally (const DragAndDropTarget::SourceDetails& sourceDetails,
+                                                       StringArray& files, bool& canMoveFiles)
+{
+    if (TreeView* tv = dynamic_cast <TreeView*> (sourceDetails.sourceComponent.get()))
+    {
+        Array<JucerTreeViewBase*> selected;
+
+        for (int i = tv->getNumSelectedItems(); --i >= 0;)
+            if (JucerTreeViewBase* b = dynamic_cast <JucerTreeViewBase*> (tv->getSelectedItem(i)))
+                selected.add (b);
+
+        if (selected.size() > 0)
+        {
+            for (int i = selected.size(); --i >= 0;)
+            {
+                const File f (selected.getUnchecked(i)->getDraggableFile());
+
+                if (f.existsAsFile())
+                    files.add (f.getFullPathName());
+            }
+
+            canMoveFiles = false;
+            return files.size() > 0;
+        }
+    }
+
+    return false;
 }
 
 void MainWindow::activeWindowStatusChanged()

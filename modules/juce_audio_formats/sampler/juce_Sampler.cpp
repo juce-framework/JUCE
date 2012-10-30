@@ -23,7 +23,7 @@
   ==============================================================================
 */
 
-//==============================================================================
+
 SamplerSound::SamplerSound (const String& name_,
                             AudioFormatReader& source,
                             const BigInteger& midiNotes_,
@@ -61,7 +61,6 @@ SamplerSound::~SamplerSound()
 {
 }
 
-//==============================================================================
 bool SamplerSound::appliesToNote (const int midiNoteNumber)
 {
     return midiNotes [midiNoteNumber];
@@ -71,7 +70,6 @@ bool SamplerSound::appliesToChannel (const int /*midiChannel*/)
 {
     return true;
 }
-
 
 //==============================================================================
 SamplerVoice::SamplerVoice()
@@ -103,10 +101,8 @@ void SamplerVoice::startNote (const int midiNoteNumber,
 
     if (sound != nullptr)
     {
-        const double targetFreq = MidiMessage::getMidiNoteInHertz (midiNoteNumber);
-        const double naturalFreq = MidiMessage::getMidiNoteInHertz (sound->midiRootNote);
-
-        pitchRatio = (targetFreq * sound->sourceSampleRate) / (naturalFreq * getSampleRate());
+        pitchRatio = pow (2.0, (midiNoteNumber - sound->midiRootNote) / 12.0)
+                        * sound->sourceSampleRate / getSampleRate();
 
         sourceSamplePosition = 0.0;
         lgain = velocity;
@@ -127,13 +123,9 @@ void SamplerVoice::startNote (const int midiNoteNumber,
         }
 
         if (sound->releaseSamples > 0)
-        {
             releaseDelta = (float) (-pitchRatio / sound->releaseSamples);
-        }
         else
-        {
             releaseDelta = 0.0f;
-        }
     }
 }
 
@@ -162,9 +154,7 @@ void SamplerVoice::controllerMoved (const int /*controllerNumber*/,
 //==============================================================================
 void SamplerVoice::renderNextBlock (AudioSampleBuffer& outputBuffer, int startSample, int numSamples)
 {
-    const SamplerSound* const playingSound = static_cast <SamplerSound*> (getCurrentlyPlayingSound().get());
-
-    if (playingSound != nullptr)
+    if (const SamplerSound* const playingSound = static_cast <SamplerSound*> (getCurrentlyPlayingSound().get()))
     {
         const float* const inL = playingSound->data->getSampleData (0, 0);
         const float* const inR = playingSound->data->getNumChannels() > 1

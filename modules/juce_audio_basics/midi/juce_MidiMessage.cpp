@@ -951,8 +951,7 @@ String MidiMessage::getMidiNoteName (int note, bool useSharps, bool includeOctav
 
 const double MidiMessage::getMidiNoteInHertz (int noteNumber, const double frequencyOfA) noexcept
 {
-    noteNumber -= 12 * 6 + 9; // now 0 = A
-    return frequencyOfA * pow (2.0, noteNumber / 12.0);
+    return frequencyOfA * pow (2.0, (noteNumber - 69) / 12.0);
 }
 
 String MidiMessage::getGMInstrumentName (const int n)

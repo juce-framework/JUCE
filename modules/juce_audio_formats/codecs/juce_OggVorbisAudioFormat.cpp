@@ -92,6 +92,16 @@ namespace OggVorbisNamespace
 static const char* const oggFormatName = "Ogg-Vorbis file";
 static const char* const oggExtensions[] = { ".ogg", 0 };
 
+const char* const OggVorbisAudioFormat::encoderName = "encoder";
+const char* const OggVorbisAudioFormat::id3title = "id3title";
+const char* const OggVorbisAudioFormat::id3artist = "id3artist";
+const char* const OggVorbisAudioFormat::id3album = "id3album";
+const char* const OggVorbisAudioFormat::id3comment = "id3comment";
+const char* const OggVorbisAudioFormat::id3date = "id3date";
+const char* const OggVorbisAudioFormat::id3genre = "id3genre";
+const char* const OggVorbisAudioFormat::id3trackNumber = "id3trackNumber";
+
+
 //==============================================================================
 class OggReader : public AudioFormatReader
 {
@@ -257,7 +267,7 @@ public:
                const unsigned int numChannels_,
                const unsigned int bitsPerSample_,
                const int qualityIndex,
-               const StringPairArray& metadataValues)
+               const StringPairArray& metadata)
         : AudioFormatWriter (out, TRANS (oggFormatName), sampleRate_, numChannels_, bitsPerSample_),
           ok (false)
     {
@@ -270,9 +280,14 @@ public:
         {
             vorbis_comment_init (&vc);
 
-            const String encoder (metadataValues [OggVorbisAudioFormat::encoderName]);
-            if (encoder.isNotEmpty())
-                vorbis_comment_add_tag (&vc, "ENCODER", const_cast <char*> (encoder.toUTF8().getAddress()));
+            addMetadata (metadata, OggVorbisAudioFormat::encoderName, "ENCODER");
+            addMetadata (metadata, OggVorbisAudioFormat::id3title, "TITLE");
+            addMetadata (metadata, OggVorbisAudioFormat::id3artist, "ARTIST");
+            addMetadata (metadata, OggVorbisAudioFormat::id3album, "ALBUM");
+            addMetadata (metadata, OggVorbisAudioFormat::id3comment, "COMMENT");
+            addMetadata (metadata, OggVorbisAudioFormat::id3date, "DATE");
+            addMetadata (metadata, OggVorbisAudioFormat::id3genre, "GENRE");
+            addMetadata (metadata, OggVorbisAudioFormat::id3trackNumber, "TRACKNUMBER");
 
             vorbis_analysis_init (&vd, &vi);
             vorbis_block_init (&vd, &vb);
@@ -398,6 +413,14 @@ private:
     OggVorbisNamespace::vorbis_dsp_state vd;
     OggVorbisNamespace::vorbis_block vb;
 
+    void addMetadata (const StringPairArray& metadata, const char* name, const char* vorbisName)
+    {
+        const String s (metadata [name]);
+
+        if (s.isNotEmpty())
+            vorbis_comment_add_tag (&vc, vorbisName, const_cast <char*> (s.toUTF8().getAddress()));
+    }
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OggWriter);
 };
 
@@ -427,8 +450,6 @@ Array<int> OggVorbisAudioFormat::getPossibleBitDepths()
 bool OggVorbisAudioFormat::canDoStereo()    { return true; }
 bool OggVorbisAudioFormat::canDoMono()      { return true; }
 bool OggVorbisAudioFormat::isCompressed()   { return true; }
-
-const char* const OggVorbisAudioFormat::encoderName = "encoder";
 
 AudioFormatReader* OggVorbisAudioFormat::createReaderFor (InputStream* in, const bool deleteStreamIfOpeningFails)
 {
@@ -465,30 +486,35 @@ StringArray OggVorbisAudioFormat::getQualityOptions()
 
 int OggVorbisAudioFormat::estimateOggFileQuality (const File& source)
 {
-    FileInputStream* const in = source.createInputStream();
-
-    if (in != nullptr)
+    if (FileInputStream* const in = source.createInputStream())
     {
         ScopedPointer <AudioFormatReader> r (createReaderFor (in, true));
 
         if (r != nullptr)
         {
-            const int64 numSamps = r->lengthInSamples;
-            r = nullptr;
+            const double lengthSecs = r->lengthInSamples / r->sampleRate;
+            const int approxBitsPerSecond = (int) (source.getSize() * 8 / lengthSecs);
 
-            const int64 fileNumSamps = source.getSize() / 4;
-            const double ratio = numSamps / (double) fileNumSamps;
+            const StringArray qualities (getQualityOptions());
+            int bestIndex = 0;
+            int bestDiff = 10000;
 
-            if (ratio > 12.0)
-                return 0;
-            else if (ratio > 6.0)
-                return 1;
-            else
-                return 2;
+            for (int i = qualities.size(); --i >= 0;)
+            {
+                const int diff = std::abs (qualities[i].getIntValue() - approxBitsPerSecond);
+
+                if (diff < bestDiff)
+                {
+                    bestDiff = diff;
+                    bestIndex = i;
+                }
+            }
+
+            return bestIndex;
         }
     }
 
-    return 1;
+    return 0;
 }
 
 #endif

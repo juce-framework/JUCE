@@ -372,6 +372,11 @@ bool JuceDemoPluginAudioProcessor::producesMidi() const
    #endif
 }
 
+bool JuceDemoPluginAudioProcessor::silenceInProducesSilenceOut() const
+{
+    return false;
+}
+
 //==============================================================================
 // This creates new instances of the plugin..
 AudioProcessor* JUCE_CALLTYPE createPluginFilter()

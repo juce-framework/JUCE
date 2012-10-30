@@ -387,6 +387,16 @@
             <Tool Name="VCCLCompilerTool"/>
           </FileConfiguration>
         </File>
+        <File RelativePath="..\..\Source\BinaryData\RecentFilesMenuTemplate.xib">
+          <FileConfiguration Name="Debug|Win32"
+                             ExcludedFromBuild="true">
+            <Tool Name="VCCLCompilerTool"/>
+          </FileConfiguration>
+          <FileConfiguration Name="Release|Win32"
+                             ExcludedFromBuild="true">
+            <Tool Name="VCCLCompilerTool"/>
+          </FileConfiguration>
+        </File>
       </Filter>
     </Filter>
     <Filter Name="Juce Modules">
@@ -1429,6 +1439,7 @@
             </FileConfiguration>
           </File>
           <File RelativePath="..\..\..\..\modules\juce_events\messages\juce_MessageManager.h"/>
+          <File RelativePath="..\..\..\..\modules\juce_events\messages\juce_NotificationType.h"/>
         </Filter>
         <Filter Name="timers">
           <File RelativePath="..\..\..\..\modules\juce_events\timers\juce_MultiTimer.cpp">

@@ -116,7 +116,7 @@ int64 ResourceFile::getTotalDataSize() const
     return total;
 }
 
-bool ResourceFile::write (const File& cppFile, OutputStream& cpp, OutputStream& header)
+static String getComment()
 {
     String comment;
     comment << newLine << newLine
@@ -125,18 +125,16 @@ bool ResourceFile::write (const File& cppFile, OutputStream& cpp, OutputStream& 
             << "*/" << newLine
             << newLine;
 
+    return comment;
+}
+
+bool ResourceFile::writeHeader (MemoryOutputStream& header)
+{
     header << "/* ========================================================================================="
-           << comment;
+           << getComment()
+           << "namespace " << className << newLine
+           << "{" << newLine;
 
-    cpp << "/* ==================================== " << resourceFileIdentifierString << " ===================================="
-        << comment;
-
-    const String namespaceName (className);
-
-    cpp    << "namespace " << namespaceName << newLine << "{" << newLine;
-    header << "namespace " << namespaceName << newLine << "{" << newLine;
-
-    StringArray returnCodes;
     bool containsAnyImages = false;
 
     for (int i = 0; i < files.size(); ++i)
@@ -150,8 +148,6 @@ bool ResourceFile::write (const File& cppFile, OutputStream& cpp, OutputStream& 
 
         if (fileStream.openedOk())
         {
-            returnCodes.add ("numBytes = " + String (dataSize) + "; return " + variableName + ";");
-
             containsAnyImages = containsAnyImages
                                  || (ImageFileFormat::findImageFormatForStream (fileStream) != nullptr);
 
@@ -159,6 +155,42 @@ bool ResourceFile::write (const File& cppFile, OutputStream& cpp, OutputStream& 
 
             header << "    extern const char*   " << variableName << ";" << newLine;
             header << "    const int            " << variableName << "Size = " << (int) dataSize << ";" << newLine << newLine;
+        }
+    }
+
+    header << "    // If you provide the name of one of the binary resource variables above, this function will" << newLine
+           << "    // return the corresponding data and its size (or a null pointer if the name isn't found)." << newLine
+           << "    const char* getNamedResource (const char* resourceNameUTF8, int& dataSizeInBytes) throw();" << newLine
+           << "}" << newLine;
+
+    return true;
+}
+
+bool ResourceFile::writeCpp (MemoryOutputStream& cpp, const File& headerFile, int& i)
+{
+    const int maxFileSize = 10 * 1024 * 1024;
+    const bool isFirstFile = (i == 0);
+
+    cpp << "/* ==================================== " << resourceFileIdentifierString << " ===================================="
+        << getComment()
+        << "namespace " << className << newLine
+        << "{" << newLine;
+
+    bool containsAnyImages = false;
+
+    while (i < files.size())
+    {
+        const File& file = files.getReference(i);
+        const String variableName (variableNames[i]);
+
+        FileInputStream fileStream (file);
+
+        if (fileStream.openedOk())
+        {
+            containsAnyImages = containsAnyImages
+                                 || (ImageFileFormat::findImageFormatForStream (fileStream) != nullptr);
+
+            const String tempVariable ("temp_" + String::toHexString (file.hashCode()));
 
             cpp  << newLine << "//================== " << file.getFileName() << " ==================" << newLine
                 << "static const unsigned char " << tempVariable << "[] =" << newLine;
@@ -172,49 +204,86 @@ bool ResourceFile::write (const File& cppFile, OutputStream& cpp, OutputStream& 
             cpp << newLine << newLine
                 << "const char* " << variableName << " = (const char*) " << tempVariable << ";" << newLine;
         }
+
+        ++i;
+
+        if (cpp.getPosition() > maxFileSize)
+            break;
+    }
+
+    if (isFirstFile)
+    {
+        if (i < files.size())
+        {
+            cpp << newLine
+                << "}" << newLine
+                << newLine
+                << "#include \"" << headerFile.getFileName() << "\"" << newLine
+                << newLine
+                << "namespace " << className << newLine
+                << "{";
+        }
+
+        cpp << newLine
+            << newLine
+            << "const char* getNamedResource (const char*, int&) throw();" << newLine
+            << "const char* getNamedResource (const char* resourceNameUTF8, int& numBytes) throw()" << newLine
+            << "{" << newLine;
+
+        StringArray returnCodes;
+        for (int j = 0; j < files.size(); ++j)
+        {
+            const File& file = files.getReference(j);
+            const int64 dataSize = file.getSize();
+            returnCodes.add ("numBytes = " + String (dataSize) + "; return " + variableNames[j] + ";");
+        }
+
+        CodeHelpers::createStringMatcher (cpp, "resourceNameUTF8", variableNames, returnCodes, 4);
+
+        cpp << "    numBytes = 0;" << newLine
+            << "    return 0;" << newLine
+            << "}" << newLine;
     }
 
     cpp << newLine
-        << newLine
-        << "const char* getNamedResource (const char*, int&) throw();" << newLine
-        << "const char* getNamedResource (const char* resourceNameUTF8, int& numBytes) throw()" << newLine
-        << "{" << newLine;
-
-    CodeHelpers::createStringMatcher (cpp, "resourceNameUTF8", variableNames, returnCodes, 4);
-
-    cpp << "    numBytes = 0;" << newLine
-        << "    return 0;" << newLine
-        << "}" << newLine
-        << newLine
         << "}" << newLine;
-
-    header << "    // If you provide the name of one of the binary resource variables above, this function will" << newLine
-           << "    // return the corresponding data and its size (or a null pointer if the name isn't found)." << newLine
-           << "    const char* getNamedResource (const char* resourceNameUTF8, int& dataSizeInBytes) throw();" << newLine
-           << "}" << newLine;
 
     return true;
 }
 
-bool ResourceFile::write (const File& cppFile)
+bool ResourceFile::write (const File& cppFile, Array<File>& filesCreated)
 {
-    TemporaryFile tempH (cppFile.withFileExtension (".h"), TemporaryFile::useHiddenFile);
-    TemporaryFile tempCpp (cppFile, TemporaryFile::useHiddenFile);
+    const File headerFile (cppFile.withFileExtension (".h"));
 
-    ScopedPointer <FileOutputStream> cppOut (tempCpp.getFile().createOutputStream (32768));
-    ScopedPointer <FileOutputStream> hppOut (tempH.getFile().createOutputStream (32768));
-
-    if (cppOut != nullptr && hppOut != nullptr)
     {
-        if (write (cppFile, *cppOut, *hppOut))
-        {
-            cppOut = nullptr;
-            hppOut = nullptr;
+        MemoryOutputStream mo;
+        if (! (writeHeader (mo) && FileHelpers::overwriteFileWithNewDataIfDifferent (headerFile, mo)))
+            return false;
 
-            return (tempCpp.getFile().hasIdenticalContentTo (tempCpp.getTargetFile()) || tempCpp.overwriteTargetFileWithTemporary())
-                && (tempH.getFile().hasIdenticalContentTo (tempH.getTargetFile()) || tempH.overwriteTargetFileWithTemporary());
-        }
+        filesCreated.add (headerFile);
     }
 
-    return false;
+    int i = 0;
+    int fileIndex = 0;
+
+    for (;;)
+    {
+        File cpp (cppFile);
+
+        if (fileIndex > 0)
+            cpp = cpp.getSiblingFile (cppFile.getFileNameWithoutExtension() + String (fileIndex + 1))
+                     .withFileExtension (cppFile.getFileExtension());
+
+        MemoryOutputStream mo;
+        if (! (writeCpp (mo, headerFile, i) && FileHelpers::overwriteFileWithNewDataIfDifferent (cpp, mo)))
+            return false;
+
+        filesCreated.add (cpp);
+        ++fileIndex;
+
+        if (i >= files.size())
+            break;
+    }
+
+    return true;
 }

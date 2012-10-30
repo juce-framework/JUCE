@@ -48,7 +48,7 @@ public:
     void refresh()
     {
         paramHasChanged = false;
-        slider.setValue (owner.getParameter (index), false);
+        slider.setValue (owner.getParameter (index), dontSendNotification);
     }
 
     void audioProcessorChanged (AudioProcessor*)  {}

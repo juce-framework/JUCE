@@ -142,10 +142,12 @@ public:
     bool isSelected() const noexcept;
 
     /** Selects or deselects the item.
-        This will cause a callback to itemSelectionChanged()
+        If shouldNotify == sendNotification, then a callback will be made
+        to itemSelectionChanged()
     */
     void setSelected (bool shouldBeSelected,
-                      bool deselectOtherItemsFirst);
+                      bool deselectOtherItemsFirst,
+                      NotificationType shouldNotify = sendNotification);
 
     /** Returns the rectangle that this item occupies.
 

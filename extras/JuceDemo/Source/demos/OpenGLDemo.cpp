@@ -45,7 +45,7 @@ public:
 
         speedSlider.setRange (-10.0, 10.0, 0.1);
         speedSlider.setPopupMenuEnabled (true);
-        speedSlider.setValue (Random::getSystemRandom().nextDouble() * 3.0, false, false);
+        speedSlider.setValue (Random::getSystemRandom().nextDouble() * 3.0, dontSendNotification);
         speedSlider.setSliderStyle (Slider::LinearHorizontal);
         speedSlider.setTextBoxStyle (Slider::TextBoxLeft, false, 80, 20);
         addAndMakeVisible (&speedSlider);
@@ -53,7 +53,7 @@ public:
 
         sizeSlider.setRange (0.2, 2.0, 0.01);
         sizeSlider.setPopupMenuEnabled (true);
-        sizeSlider.setValue (Random::getSystemRandom().nextDouble() + 0.5, false, false);
+        sizeSlider.setValue (Random::getSystemRandom().nextDouble() + 0.5, dontSendNotification);
         sizeSlider.setSliderStyle (Slider::LinearHorizontal);
         sizeSlider.setTextBoxStyle (Slider::TextBoxLeft, false, 80, 20);
         addAndMakeVisible (&sizeSlider);

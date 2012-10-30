@@ -154,6 +154,7 @@ public:
     void create (const OwnedArray<LibraryModule>&) const
     {
         infoPlistFile = getTargetFolder().getChildFile ("Info.plist");
+        menuXibFile = getTargetFolder().getChildFile ("RecentFilesMenuTemplate.xib");
 
         createIconFile();
 
@@ -275,7 +276,7 @@ private:
     mutable OwnedArray<ValueTree> pbxBuildFiles, pbxFileReferences, pbxGroups, misc, projectConfigs, targetConfigs;
     mutable StringArray buildPhaseIDs, resourceIDs, sourceIDs, frameworkIDs;
     mutable StringArray frameworkFileIDs, rezFileIDs, resourceFileRefs;
-    mutable File infoPlistFile, iconFile;
+    mutable File infoPlistFile, menuXibFile, iconFile;
     const bool iOS;
 
     static String sanitisePath (const String& path)
@@ -299,6 +300,18 @@ private:
             RelativePath plistPath (infoPlistFile, getTargetFolder(), RelativePath::buildTargetFolder);
             addFileReference (plistPath.toUnixStyle());
             resourceFileRefs.add (createFileRefID (plistPath));
+        }
+
+        if (! iOS)
+        {
+            MemoryOutputStream xib;
+            xib << BinaryData::RecentFilesMenuTemplate_xib;
+            overwriteFileIfDifferentOrThrow (menuXibFile, xib);
+
+            RelativePath menuXibPath (menuXibFile, getTargetFolder(), RelativePath::buildTargetFolder);
+            addFileReference (menuXibPath.toUnixStyle());
+            resourceIDs.add (addBuildFile (menuXibPath, false, false));
+            resourceFileRefs.add (createFileRefID (menuXibPath));
         }
 
         if (iconFile.exists())

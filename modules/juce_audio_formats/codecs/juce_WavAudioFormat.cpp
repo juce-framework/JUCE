@@ -467,6 +467,10 @@ namespace WavFileHelpers
         uint8  data4[8];
     } JUCE_PACKED;
 
+    static const ExtensibleWavSubFormat pcmFormat       = { 0x00000001, 0x0000, 0x0010, { 0x80, 0x00, 0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71 } };
+    static const ExtensibleWavSubFormat IEEEFloatFormat = { 0x00000003, 0x0000, 0x0010, { 0x80, 0x00, 0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71 } };
+    static const ExtensibleWavSubFormat ambisonicFormat = { 0x00000001, 0x0721, 0x11d3, { 0x86, 0x44, 0xC8, 0xC1, 0xCA, 0x00, 0x00, 0x00 } };
+
     struct DataSize64Chunk   // chunk ID = 'ds64' if data size > 0xffffffff, 'JUNK' otherwise
     {
         uint32 riffSizeLow;     // low 4 byte size of RF64 block
@@ -585,17 +589,10 @@ public:
                             subFormat.data3 = (uint16) input->readShort();
                             input->read (subFormat.data4, sizeof (subFormat.data4));
 
-                            const ExtensibleWavSubFormat pcmFormat
-                                = { 0x00000001, 0x0000, 0x0010, { 0x80, 0x00, 0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71 } };
-
-                            if (memcmp (&subFormat, &pcmFormat, sizeof (subFormat)) != 0)
-                            {
-                                const ExtensibleWavSubFormat ambisonicFormat
-                                    = { 0x00000001, 0x0721, 0x11d3, { 0x86, 0x44, 0xC8, 0xC1, 0xCA, 0x00, 0x00, 0x00 } };
-
-                                if (memcmp (&subFormat, &ambisonicFormat, sizeof (subFormat)) != 0)
-                                    bytesPerFrame = 0;
-                            }
+                            if (memcmp (&subFormat, &pcmFormat, sizeof (subFormat)) != 0
+                                 && memcmp (&subFormat, &IEEEFloatFormat, sizeof (subFormat)) != 0
+                                 && memcmp (&subFormat, &ambisonicFormat, sizeof (subFormat)) != 0)
+                                bytesPerFrame = 0;
                         }
                     }
                     else if (format != 1)
@@ -957,12 +954,6 @@ private:
             output->writeShort (22); // cbSize (size of  the extension)
             output->writeShort ((short) bitsPerSample); // wValidBitsPerSample
             output->writeInt (getChannelMask ((int) numChannels));
-
-            const ExtensibleWavSubFormat pcmFormat
-                = { 0x00000001, 0x0000, 0x0010, { 0x80, 0x00, 0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71 } };
-
-            const ExtensibleWavSubFormat IEEEFloatFormat
-                = { 0x00000003, 0x0000, 0x0010, { 0x80, 0x00, 0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71 } };
 
             const ExtensibleWavSubFormat& subFormat = bitsPerSample < 32 ? pcmFormat : IEEEFloatFormat;
 

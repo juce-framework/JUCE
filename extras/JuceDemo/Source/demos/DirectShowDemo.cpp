@@ -99,7 +99,7 @@ private:
         void timerCallback()
         {
             if (! position.isMouseButtonDown())
-                position.setValue (dshowComp.getPosition(), false);
+                position.setValue (dshowComp.getPosition(), dontSendNotification);
         }
 
     private:

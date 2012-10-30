@@ -75,11 +75,11 @@ void AudioSourcePlayer::audioDeviceIOCallback (const float** inputChannelData,
 
     if (source != nullptr)
     {
-        int i, numActiveChans = 0, numInputs = 0, numOutputs = 0;
+        int numActiveChans = 0, numInputs = 0, numOutputs = 0;
 
         // messy stuff needed to compact the channels down into an array
         // of non-zero pointers..
-        for (i = 0; i < totalNumInputChannels; ++i)
+        for (int i = 0; i < totalNumInputChannels; ++i)
         {
             if (inputChannelData[i] != nullptr)
             {
@@ -89,7 +89,7 @@ void AudioSourcePlayer::audioDeviceIOCallback (const float** inputChannelData,
             }
         }
 
-        for (i = 0; i < totalNumOutputChannels; ++i)
+        for (int i = 0; i < totalNumOutputChannels; ++i)
         {
             if (outputChannelData[i] != nullptr)
             {
@@ -107,14 +107,14 @@ void AudioSourcePlayer::audioDeviceIOCallback (const float** inputChannelData,
             tempBuffer.setSize (numInputs - numOutputs, numSamples,
                                 false, false, true);
 
-            for (i = 0; i < numOutputs; ++i)
+            for (int i = 0; i < numOutputs; ++i)
             {
                 channels[numActiveChans] = outputChans[i];
                 memcpy (channels[numActiveChans], inputChans[i], sizeof (float) * (size_t) numSamples);
                 ++numActiveChans;
             }
 
-            for (i = numOutputs; i < numInputs; ++i)
+            for (int i = numOutputs; i < numInputs; ++i)
             {
                 channels[numActiveChans] = tempBuffer.getSampleData (i - numOutputs, 0);
                 memcpy (channels[numActiveChans], inputChans[i], sizeof (float) * (size_t) numSamples);
@@ -123,14 +123,14 @@ void AudioSourcePlayer::audioDeviceIOCallback (const float** inputChannelData,
         }
         else
         {
-            for (i = 0; i < numInputs; ++i)
+            for (int i = 0; i < numInputs; ++i)
             {
                 channels[numActiveChans] = outputChans[i];
                 memcpy (channels[numActiveChans], inputChans[i], sizeof (float) * (size_t) numSamples);
                 ++numActiveChans;
             }
 
-            for (i = numInputs; i < numOutputs; ++i)
+            for (int i = numInputs; i < numOutputs; ++i)
             {
                 channels[numActiveChans] = outputChans[i];
                 zeromem (channels[numActiveChans], sizeof (float) * (size_t) numSamples);
@@ -143,7 +143,7 @@ void AudioSourcePlayer::audioDeviceIOCallback (const float** inputChannelData,
         AudioSourceChannelInfo info (&buffer, 0, numSamples);
         source->getNextAudioBlock (info);
 
-        for (i = info.buffer->getNumChannels(); --i >= 0;)
+        for (int i = info.buffer->getNumChannels(); --i >= 0;)
             buffer.applyGainRamp (i, info.startSample, info.numSamples, lastGain, gain);
 
         lastGain = gain;
@@ -158,8 +158,14 @@ void AudioSourcePlayer::audioDeviceIOCallback (const float** inputChannelData,
 
 void AudioSourcePlayer::audioDeviceAboutToStart (AudioIODevice* device)
 {
-    sampleRate = device->getCurrentSampleRate();
-    bufferSize = device->getCurrentBufferSizeSamples();
+    prepareToPlay (device->getCurrentSampleRate(),
+                   device->getCurrentBufferSizeSamples());
+}
+
+void AudioSourcePlayer::prepareToPlay (double newSampleRate, int newBufferSize)
+{
+    sampleRate = newSampleRate;
+    bufferSize = newBufferSize;
     zeromem (channels, sizeof (channels));
 
     if (source != nullptr)

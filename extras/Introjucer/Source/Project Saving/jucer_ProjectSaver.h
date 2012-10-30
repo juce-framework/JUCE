@@ -469,13 +469,17 @@ private:
         {
             resourceFile.setClassName ("BinaryData");
 
-            if (resourceFile.write (binaryDataCpp))
-            {
-                filesCreated.add (binaryDataH);
-                filesCreated.add (binaryDataCpp);
+            Array<File> binaryDataFiles;
 
-                generatedFilesGroup.addFile (binaryDataCpp, -1, true);
-                generatedFilesGroup.addFile (binaryDataH,   -1, false);
+            if (resourceFile.write (binaryDataCpp, binaryDataFiles))
+            {
+                for (int i = 0; i < binaryDataFiles.size(); ++i)
+                {
+                    const File& f = binaryDataFiles.getReference(i);
+
+                    filesCreated.add (f);
+                    generatedFilesGroup.addFile (f, -1, ! f.hasFileExtension (".h"));
+                }
             }
             else
             {

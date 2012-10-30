@@ -23,8 +23,7 @@
   ==============================================================================
 */
 
-TextButton::TextButton (const String& name,
-                        const String& toolTip)
+TextButton::TextButton (const String& name, const String& toolTip)
     : Button (name)
 {
     setTooltip (toolTip);
@@ -38,15 +37,17 @@ void TextButton::paintButton (Graphics& g,
                               bool isMouseOverButton,
                               bool isButtonDown)
 {
-    getLookAndFeel().drawButtonBackground (g, *this,
-                                           findColour (getToggleState() ? buttonOnColourId
-                                                                        : buttonColourId),
-                                           isMouseOverButton,
-                                           isButtonDown);
+    LookAndFeel& lf = getLookAndFeel();
 
-    getLookAndFeel().drawButtonText (g, *this,
-                                     isMouseOverButton,
-                                     isButtonDown);
+    lf.drawButtonBackground (g, *this,
+                             findColour (getToggleState() ? buttonOnColourId
+                                                          : buttonColourId),
+                             isMouseOverButton,
+                             isButtonDown);
+
+    lf.drawButtonText (g, *this,
+                       isMouseOverButton,
+                       isButtonDown);
 }
 
 void TextButton::colourChanged()
