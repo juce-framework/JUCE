@@ -99,6 +99,7 @@ namespace pnglibNamespace
 
 #undef max
 #undef min
+#undef fdopen
 
 #if JUCE_MSVC
  #pragma warning (pop)

@@ -1041,6 +1041,10 @@ public:
     {
         jassert (dest != nullptr);
 
+        #ifdef fdopen
+         #error // the zlib headers define this function as NULL!
+        #endif
+
         if (readHandle == 0 && childPID != 0)
             readHandle = fdopen (pipeHandle, "r");
 
