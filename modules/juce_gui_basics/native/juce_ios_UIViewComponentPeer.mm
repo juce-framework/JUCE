@@ -808,7 +808,7 @@ void UIViewComponentPeer::handleTouches (UIEvent* event, const bool isDown, cons
 
         if (isCancel)
         {
-            currentTouches.clear();
+            currentTouches.clearTouch (touchIndex);
             modsToSend = currentModifiers = currentModifiers.withoutMouseButtons();
         }
 
