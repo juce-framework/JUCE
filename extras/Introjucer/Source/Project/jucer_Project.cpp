@@ -382,12 +382,18 @@ void Project::createPropertyEditors (PropertyListBuilder& props)
                "Extra comments: This field is not used for code or project generation, it's just a space where you can express your thoughts.");
 }
 
-String Project::getVersionAsHex() const
+static StringArray getConfigs (const Project& p)
 {
     StringArray configs;
-    configs.addTokens (getVersionString(), ",.", String::empty);
+    configs.addTokens (p.getVersionString(), ",.", String::empty);
     configs.trim();
     configs.removeEmptyStrings();
+    return configs;
+}
+
+String Project::getVersionAsHex() const
+{
+    const StringArray configs (getConfigs (*this));
 
     int value = (configs[0].getIntValue() << 16) + (configs[1].getIntValue() << 8) + configs[2].getIntValue();
 
@@ -395,6 +401,18 @@ String Project::getVersionAsHex() const
         value = (value << 8) + configs[3].getIntValue();
 
     return "0x" + String::toHexString (value);
+}
+
+String Project::getVersionAsDecimal() const
+{
+    const StringArray configs (getConfigs (*this));
+
+    int value = (configs[0].getIntValue() * 100) + (configs[1].getIntValue() * 10) + configs[2].getIntValue();
+
+    if (configs.size() >= 4)
+        value = (value * 10) + configs[3].getIntValue();
+
+    return String (value);
 }
 
 StringPairArray Project::getPreprocessorDefs() const

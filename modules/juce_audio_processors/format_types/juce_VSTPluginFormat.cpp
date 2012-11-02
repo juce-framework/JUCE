@@ -1862,8 +1862,8 @@ private:
 
             while (v != 0)
             {
-                versionBits [n++] = (v & 0xff);
-                v >>= 8;
+                versionBits [n++] = v % 10;
+                v /= 10;
             }
 
             s << 'V';
