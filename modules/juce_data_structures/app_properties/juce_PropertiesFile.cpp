@@ -108,7 +108,7 @@ PropertiesFile::PropertiesFile (const File& f, const Options& o)
       file (f), options (o),
       loadedOk (false), needsWriting (false)
 {
-    initialise();
+    reload();
 }
 
 PropertiesFile::PropertiesFile (const Options& o)
@@ -116,17 +116,18 @@ PropertiesFile::PropertiesFile (const Options& o)
       file (o.getDefaultFile()), options (o),
       loadedOk (false), needsWriting (false)
 {
-    initialise();
+    reload();
 }
 
-void PropertiesFile::initialise()
+bool PropertiesFile::reload()
 {
     ProcessScopedLock pl (createProcessLock());
 
     if (pl != nullptr && ! pl->isLocked())
-        return; // locking failure..
+        return false; // locking failure..
 
     loadedOk = (! file.exists()) || loadAsBinary() || loadAsXml();
+    return loadedOk;
 }
 
 PropertiesFile::~PropertiesFile()
