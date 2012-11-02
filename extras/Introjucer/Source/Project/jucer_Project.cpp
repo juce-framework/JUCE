@@ -403,18 +403,6 @@ String Project::getVersionAsHex() const
     return "0x" + String::toHexString (value);
 }
 
-String Project::getVersionAsDecimal() const
-{
-    const StringArray configs (getConfigs (*this));
-
-    int value = (configs[0].getIntValue() * 100) + (configs[1].getIntValue() * 10) + configs[2].getIntValue();
-
-    if (configs.size() >= 4)
-        value = (value * 10) + configs[3].getIntValue();
-
-    return String (value);
-}
-
 StringPairArray Project::getPreprocessorDefs() const
 {
     return parsePreprocessorDefs (projectRoot [Ids::defines]);
