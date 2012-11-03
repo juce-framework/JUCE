@@ -368,7 +368,7 @@ public:
     }
 
     bool getProductString (char* text)  { return getEffectName (text); }
-    VstInt32 getVendorVersion()         { return JucePlugin_VersionCode; }
+    VstInt32 getVendorVersion()         { return (VstInt32) convertHexVersionToDecimal (JucePlugin_VersionCode); }
     VstPlugCategory getPlugCategory()   { return JucePlugin_VSTCategory; }
     bool keysRequired()                 { return (JucePlugin_EditorRequiresKeyboardFocus) != 0; }
 
