@@ -116,13 +116,15 @@ static QTMovie* openMovieFromStream (InputStream* movieStream, File& movieFile)
     return movie;
 }
 
-bool QuickTimeMovieComponent::loadMovie (const File& movieFile_, const bool showController)
+bool QuickTimeMovieComponent::loadMovie (const File& file, const bool showController)
 {
-    return loadMovie ((InputStream*) movieFile_.createInputStream(), showController);
+    return loadMovie (file.createInputStream(), showController);
 }
 
 bool QuickTimeMovieComponent::loadMovie (InputStream* movieStream, const bool showController)
 {
+    const ScopedPointer<InputStream> movieStreamDeleter (movieStream);
+
     closeMovie();
 
     if (getPeer() == nullptr)
@@ -132,6 +134,9 @@ bool QuickTimeMovieComponent::loadMovie (InputStream* movieStream, const bool sh
         jassertfalse;
         return false;
     }
+
+    if (movieStream == nullptr)
+        return false;
 
     movie = openMovieFromStream (movieStream, movieFile);
 
