@@ -87,6 +87,7 @@ public:
     bool isVertical() const noexcept
     {
         return style == LinearVertical
+            || style == LinearBarVertical
             || style == TwoValueVertical
             || style == ThreeValueVertical;
     }
@@ -574,7 +575,7 @@ public:
 
             valueBox->addListener (this);
 
-            if (style == LinearBar)
+            if (style == LinearBar || style == LinearBarVertical)
             {
                 valueBox->addMouseListener (&owner, false);
                 valueBox->setMouseCursor (MouseCursor::ParentCursor);
@@ -748,7 +749,7 @@ public:
         if (style == RotaryHorizontalDrag
             || style == RotaryVerticalDrag
             || style == IncDecButtons
-            || ((style == LinearHorizontal || style == LinearVertical || style == LinearBar)
+            || ((style == LinearHorizontal || style == LinearVertical || style == LinearBar || style == LinearBarVertical)
                 && ! snapsToMousePos))
         {
             const int mouseDiff = (style == RotaryHorizontalDrag
@@ -873,7 +874,7 @@ public:
     {
         if ((! menuShown)
              && maximum > minimum
-             && ! (style == LinearBar && e.mouseWasClicked() && valueBox != nullptr && valueBox->isEditable()))
+             && ! ((style == LinearBar || style == LinearBarVertical) && e.mouseWasClicked() && valueBox != nullptr && valueBox->isEditable()))
         {
             if (style == Rotary)
             {
@@ -1076,7 +1077,7 @@ public:
                                      style, owner);
             }
 
-            if (style == LinearBar && valueBox == nullptr)
+            if ((style == LinearBar || style == LinearBarVertical) && valueBox == nullptr)
             {
                 g.setColour (owner.findColour (Slider::textBoxOutlineColourId));
                 g.drawRect (0, 0, owner.getWidth(), owner.getHeight(), 1);
@@ -1097,7 +1098,7 @@ public:
         const int tbw = jmax (0, jmin (textBoxWidth,  localBounds.getWidth() - minXSpace));
         const int tbh = jmax (0, jmin (textBoxHeight, localBounds.getHeight() - minYSpace));
 
-        if (style == LinearBar)
+        if (style == LinearBar || style == LinearBarVertical)
         {
             if (valueBox != nullptr)
                 valueBox->setBounds (localBounds);
@@ -1132,7 +1133,7 @@ public:
 
         const int indent = lf.getSliderThumbRadius (owner);
 
-        if (style == LinearBar)
+        if (style == LinearBar || style == LinearBarVertical)
         {
             const int barIndent = 1;
             sliderRegionStart = barIndent;
