@@ -54,7 +54,7 @@
     If you're not interested in VSTs, you can disable them by setting the
     JUCE_PLUGINHOST_VST flag to 0.
 */
-#include <pluginterfaces/vst2.x/aeffectx.h>
+#include "pluginterfaces/vst2.x/aeffectx.h"
 
 #if JUCE_MSVC
  #pragma warning (pop)
@@ -713,12 +713,12 @@ class VSTPluginInstance     : public AudioPluginInstance,
 public:
     VSTPluginInstance (const ModuleHandle::Ptr& module_)
         : effect (nullptr),
+          module (module_),
           name (module_->pluginName),
           wantsMidiMessages (false),
           initialised (false),
           isPowerOn (false),
-          tempBuffer (1, 1),
-          module (module_)
+          tempBuffer (1, 1)
     {
         try
         {
