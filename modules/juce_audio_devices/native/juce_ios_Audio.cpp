@@ -157,15 +157,15 @@ public:
     int getOutputLatencyInSamples()               { return 0; } //xxx
     int getInputLatencyInSamples()                { return 0; } //xxx
 
-    void start (AudioIODeviceCallback* callback_)
+    void start (AudioIODeviceCallback* newCallback)
     {
-        if (isRunning && callback != callback_)
+        if (isRunning && callback != newCallback)
         {
-            if (callback_ != nullptr)
-                callback_->audioDeviceAboutToStart (this);
+            if (newCallback != nullptr)
+                newCallback->audioDeviceAboutToStart (this);
 
             const ScopedLock sl (callbackLock);
-            callback = callback_;
+            callback = newCallback;
         }
     }
 
@@ -325,7 +325,12 @@ private:
             CFNumberGetValue (routeChangeReasonRef, kCFNumberSInt32Type, &routeChangeReason);
 
             if (routeChangeReason == kAudioSessionRouteChangeReason_OldDeviceUnavailable)
-                fixAudioRouteIfSetToReceiver();
+            {
+                const ScopedLock sl (callbackLock);
+
+                if (callback != nullptr)
+                    callback->audioDeviceError ("Old device unavailable");
+            }
         }
 
         updateDeviceInfo();
@@ -378,12 +383,10 @@ private:
         {
             close();
 
-            {
-                const ScopedLock sl (callbackLock);
+            const ScopedLock sl (callbackLock);
 
-                if (callback != nullptr)
-                    callback->audioDeviceError ("iOS audio session interruption");
-            }
+            if (callback != nullptr)
+                callback->audioDeviceError ("iOS audio session interruption");
         }
 
         if (interruptionType == kAudioSessionEndInterruption)
