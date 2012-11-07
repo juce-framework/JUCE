@@ -107,7 +107,7 @@ EdgeTable::EdgeTable (const Rectangle<int>& rectangleToAdd)
      lineStrideElements ((juce_edgeTableDefaultEdgesPerLine << 1) + 1),
      needToCheckEmptinesss (true)
 {
-    table.malloc ((size_t) jmax (1, bounds.getHeight()) * lineStrideElements);
+    table.malloc ((size_t) (jmax (1, bounds.getHeight()) * lineStrideElements));
     table[0] = 0;
 
     const int x1 = rectangleToAdd.getX() << 8;
@@ -131,7 +131,7 @@ EdgeTable::EdgeTable (const RectangleList& rectanglesToAdd)
      lineStrideElements ((juce_edgeTableDefaultEdgesPerLine << 1) + 1),
      needToCheckEmptinesss (true)
 {
-    table.malloc ((size_t) jmax (1, bounds.getHeight()) * lineStrideElements);
+    table.malloc ((size_t) (jmax (1, bounds.getHeight()) * lineStrideElements));
 
     int* t = table;
     for (int i = bounds.getHeight(); --i >= 0;)
@@ -169,7 +169,7 @@ EdgeTable::EdgeTable (const Rectangle<float>& rectangleToAdd)
      needToCheckEmptinesss (true)
 {
     jassert (! rectangleToAdd.isEmpty());
-    table.malloc ((size_t) jmax (1, bounds.getHeight()) * lineStrideElements);
+    table.malloc ((size_t) (jmax (1, bounds.getHeight()) * lineStrideElements));
     table[0] = 0;
 
     const int x1 = roundToInt (rectangleToAdd.getX() * 256.0f);
@@ -249,7 +249,7 @@ EdgeTable& EdgeTable::operator= (const EdgeTable& other)
     lineStrideElements = other.lineStrideElements;
     needToCheckEmptinesss = other.needToCheckEmptinesss;
 
-    table.malloc ((size_t) jmax (1, bounds.getHeight()) * lineStrideElements);
+    table.malloc ((size_t) (jmax (1, bounds.getHeight()) * lineStrideElements));
     copyEdgeTableData (table, lineStrideElements, other.table, lineStrideElements, bounds.getHeight());
     return *this;
 }
@@ -263,7 +263,7 @@ void EdgeTable::copyEdgeTableData (int* dest, const int destLineStride, const in
 {
     while (--numLines >= 0)
     {
-        memcpy (dest, src, (src[0] * 2 + 1) * sizeof (int));
+        memcpy (dest, src, (size_t) (src[0] * 2 + 1) * sizeof (int));
         src += srcLineStride;
         dest += destLineStride;
     }
@@ -383,7 +383,7 @@ void EdgeTable::addEdgePoint (const int x, const int y, const int winding)
             line = table + lineStrideElements * y;
         }
 
-        memmove (line + (n + 3), line + (n + 1), sizeof (int) * ((numPoints << 1) - n));
+        memmove (line + (n + 3), line + (n + 1), sizeof (int) * (size_t) ((numPoints << 1) - n));
     }
 
     line [n + 1] = x;
@@ -438,7 +438,7 @@ void EdgeTable::intersectWithEdgeTableLine (const int y, const int* otherLine)
     }
 
     ++otherLine;
-    const size_t lineSizeBytes = (dest[0] * 2 + 1) * sizeof (int);
+    const size_t lineSizeBytes = (size_t) (dest[0] * 2 + 1) * sizeof (int);
     int* temp = static_cast<int*> (alloca (lineSizeBytes));
     memcpy (temp, dest, lineSizeBytes);
 
@@ -570,7 +570,7 @@ void EdgeTable::clipEdgeTableLineToRange (int* dest, const int x1, const int x2)
         if (itemsRemoved > 0)
         {
             dest[0] -= itemsRemoved;
-            memmove (dest + 1, lastItem, dest[0] * (sizeof (int) * 2));
+            memmove (dest + 1, lastItem, (size_t) dest[0] * (sizeof (int) * 2));
         }
 
         dest[1] = x1;
@@ -690,7 +690,7 @@ void EdgeTable::clipLineToMask (int x, int y, const uint8* mask, int maskStride,
         return;
     }
 
-    int* tempLine = static_cast<int*> (alloca ((numPixels * 2 + 4) * sizeof (int)));
+    int* tempLine = static_cast<int*> (alloca ((size_t) (numPixels * 2 + 4) * sizeof (int)));
     int destIndex = 0, lastLevel = 0;
 
     while (--numPixels >= 0)

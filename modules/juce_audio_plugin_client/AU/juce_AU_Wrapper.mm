@@ -161,11 +161,11 @@ public:
 
         CAStreamBasicDescription streamDescription;
         streamDescription.mSampleRate = GetSampleRate();
-        streamDescription.SetCanonical (channelConfigs[0][1], false);
+        streamDescription.SetCanonical ((UInt32) channelConfigs[0][1], false);
         Outputs().GetIOElement(0)->SetStreamFormat (streamDescription);
 
        #if ! JucePlugin_IsSynth
-        streamDescription.SetCanonical (channelConfigs[0][0], false);
+        streamDescription.SetCanonical ((UInt32) channelConfigs[0][0], false);
         Inputs().GetIOElement(0)->SetStreamFormat (streamDescription);
        #endif
     }
@@ -313,7 +313,7 @@ public:
 
             if (state.getSize() > 0)
             {
-                CFDataRef ourState = CFDataCreate (kCFAllocatorDefault, (const UInt8*) state.getData(), state.getSize());
+                CFDataRef ourState = CFDataCreate (kCFAllocatorDefault, (const UInt8*) state.getData(), (CFIndex) state.getSize());
                 CFDictionarySetValue (dict, JUCE_STATE_DICTIONARY_KEY, ourState);
                 CFRelease (ourState);
             }
@@ -391,9 +391,9 @@ public:
              && juceFilter != nullptr
              && index < juceFilter->getNumParameters())
         {
-            outParameterInfo.flags = kAudioUnitParameterFlag_IsWritable
-                                      | kAudioUnitParameterFlag_IsReadable
-                                      | kAudioUnitParameterFlag_HasCFNameString;
+            outParameterInfo.flags = (UInt32) (kAudioUnitParameterFlag_IsWritable
+                                                | kAudioUnitParameterFlag_IsReadable
+                                                | kAudioUnitParameterFlag_HasCFNameString);
 
             const String name (juceFilter->getParameterName (index));
 
@@ -523,8 +523,8 @@ public:
         if (CallHostMusicalTimeLocation (&outDeltaSampleOffsetToNextBeat, &num, &den,
                                          &outCurrentMeasureDownBeat) == noErr)
         {
-            info.timeSigNumerator = (int) num;
-            info.timeSigDenominator = den;
+            info.timeSigNumerator   = (int) num;
+            info.timeSigDenominator = (int) den;
             info.ppqPositionOfLastBarStart = outCurrentMeasureDownBeat;
         }
 
@@ -590,9 +590,9 @@ public:
     ComponentResult Initialize()
     {
        #if ! JucePlugin_IsSynth
-        const int numIns = GetInput(0) != 0 ? GetInput(0)->GetStreamFormat().mChannelsPerFrame : 0;
+        const int numIns  = GetInput(0)  != 0 ? (int) GetInput(0)->GetStreamFormat().mChannelsPerFrame : 0;
        #endif
-        const int numOuts = GetOutput(0) != 0 ? GetOutput(0)->GetStreamFormat().mChannelsPerFrame : 0;
+        const int numOuts = GetOutput(0) != 0 ? (int) GetOutput(0)->GetStreamFormat().mChannelsPerFrame : 0;
 
         bool isValidChannelConfig = false;
 
@@ -642,26 +642,26 @@ public:
         {
             juceFilter->setPlayConfigDetails (
                  #if ! JucePlugin_IsSynth
-                  GetInput(0)->GetStreamFormat().mChannelsPerFrame,
+                  (int) GetInput(0)->GetStreamFormat().mChannelsPerFrame,
                  #else
                   0,
                  #endif
-                  GetOutput(0)->GetStreamFormat().mChannelsPerFrame,
+                  (int) GetOutput(0)->GetStreamFormat().mChannelsPerFrame,
                   GetSampleRate(),
-                  GetMaxFramesPerSlice());
+                  (int) GetMaxFramesPerSlice());
 
             bufferSpace.setSize (juceFilter->getNumInputChannels() + juceFilter->getNumOutputChannels(),
-                                 GetMaxFramesPerSlice() + 32);
+                                 (int) GetMaxFramesPerSlice() + 32);
 
-            juceFilter->prepareToPlay (GetSampleRate(), GetMaxFramesPerSlice());
+            juceFilter->prepareToPlay (GetSampleRate(), (int) GetMaxFramesPerSlice());
 
             midiEvents.ensureSize (2048);
             midiEvents.clear();
             incomingEvents.ensureSize (2048);
             incomingEvents.clear();
 
-            channels.calloc (jmax (juceFilter->getNumInputChannels(),
-                                   juceFilter->getNumOutputChannels()) + 4);
+            channels.calloc ((size_t) jmax (juceFilter->getNumInputChannels(),
+                                            juceFilter->getNumOutputChannels()) + 4);
 
             prepared = true;
         }
@@ -753,7 +753,7 @@ public:
 
                         const float* src = ((const float*) buf.mData) + subChan;
 
-                        for (int j = numSamples; --j >= 0;)
+                        for (int j = (int) numSamples; --j >= 0;)
                         {
                             *dest++ = *src;
                             src += buf.mNumberChannels;
@@ -772,7 +772,7 @@ public:
             }
 
             {
-                AudioSampleBuffer buffer (channels, jmax (numIn, numOut), numSamples);
+                AudioSampleBuffer buffer (channels, jmax (numIn, numOut), (int) numSamples);
 
                 const ScopedLock sl (juceFilter->getCallbackLock());
 
@@ -827,7 +827,7 @@ public:
                             const float* src = bufferSpace.getSampleData (nextSpareBufferChan++);
                             float* dest = ((float*) buf.mData) + subChan;
 
-                            for (int j = numSamples; --j >= 0;)
+                            for (int j = (int) numSamples; --j >= 0;)
                             {
                                 *dest = *src++;
                                 dest += buf.mNumberChannels;
@@ -838,7 +838,7 @@ public:
             }
 
            #if ! JucePlugin_SilenceInProducesSilenceOut
-            ioActionFlags &= ~kAudioUnitRenderAction_OutputIsSilence;
+            ioActionFlags &= (AudioUnitRenderActionFlags) ~kAudioUnitRenderAction_OutputIsSilence;
            #endif
         }
 
@@ -859,7 +859,7 @@ protected:
                                      (juce::uint8) inData1,
                                      (juce::uint8) inData2 };
 
-        incomingEvents.addEvent (data, 3, inStartFrame);
+        incomingEvents.addEvent (data, 3, (int) inStartFrame);
        #endif
 
         return noErr;
@@ -869,7 +869,7 @@ protected:
     {
        #if JucePlugin_WantsMidiInput
         const ScopedLock sl (incomingMidiLock);
-        incomingEvents.addEvent (inData, inLength, 0);
+        incomingEvents.addEvent (inData, (int) inLength, 0);
        #endif
         return noErr;
     }

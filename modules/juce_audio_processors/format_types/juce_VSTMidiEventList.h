@@ -79,7 +79,7 @@ public:
             }
 
             e->deltaFrames = frameOffset;
-            memcpy (e->midiData, midiData, numBytes);
+            memcpy (e->midiData, midiData, (size_t) numBytes);
         }
         else
         {
@@ -89,7 +89,7 @@ public:
                 delete[] se->sysexDump;
 
             se->sysexDump = new char [numBytes];
-            memcpy (se->sysexDump, midiData, numBytes);
+            memcpy (se->sysexDump, midiData, (size_t) numBytes);
 
             se->type = kVstSysExType;
             se->byteSize = sizeof (VstMidiSysexEvent);
@@ -134,7 +134,7 @@ public:
         {
             numEventsNeeded = (numEventsNeeded + 32) & ~31;
 
-            const int size = 20 + sizeof (VstEvent*) * numEventsNeeded;
+            const size_t size = 20 + sizeof (VstEvent*) * (size_t) numEventsNeeded;
 
             if (events == nullptr)
                 events.calloc (size, 1);
