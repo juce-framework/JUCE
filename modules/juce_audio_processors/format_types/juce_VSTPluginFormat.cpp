@@ -2876,13 +2876,19 @@ FileSearchPath VSTPluginFormat::getDefaultLocationsToSearch()
 {
    #if JUCE_MAC
     return FileSearchPath ("~/Library/Audio/Plug-Ins/VST;/Library/Audio/Plug-Ins/VST");
+   #elif JUCE_LINUX
+    return FileSearchPath ("/usr/lib/vst");
    #elif JUCE_WINDOWS
     const String programFiles (File::getSpecialLocation (File::globalApplicationsDirectory).getFullPathName());
 
-    return FileSearchPath (WindowsRegistry::getValue ("HKLM\\Software\\VST\\VSTPluginsPath",
-                                                      programFiles + "\\Steinberg\\VstPlugins"));
-   #elif JUCE_LINUX
-    return FileSearchPath ("/usr/lib/vst");
+    FileSearchPath paths;
+    paths.add (WindowsRegistry::getValue ("HKLM\\Software\\VST\\VSTPluginsPath",
+                                          programFiles + "\\Steinberg\\VstPlugins"));
+    paths.removeNonExistentPaths();
+
+    paths.add (WindowsRegistry::getValue ("HKLM\\Software\\VST\\VSTPluginsPath",
+                                          programFiles + "\\VstPlugins"));
+    return paths;
    #endif
 }
 
