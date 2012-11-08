@@ -2506,9 +2506,7 @@ public:
 
     void restore()
     {
-        StateObjectType* const top = stack.getLast();
-
-        if (top != nullptr)
+        if (StateObjectType* const top = stack.getLast())
         {
             currentState = top;
             stack.removeLast (1, false);

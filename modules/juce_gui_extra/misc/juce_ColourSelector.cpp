@@ -203,6 +203,7 @@ public:
     void paint (Graphics& g)
     {
         ColourGradient cg;
+        cg.isRadial = false;
         cg.point1.setXY (0.0f, (float) edge);
         cg.point2.setXY (0.0f, (float) (getHeight() - edge));
 

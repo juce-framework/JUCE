@@ -61,6 +61,7 @@ namespace zlibNamespace
   #include "zlib/trees.c"
   #include "zlib/zutil.c"
   #undef Byte
+  #undef fdopen
 
   #if JUCE_CLANG
    #pragma clang diagnostic pop

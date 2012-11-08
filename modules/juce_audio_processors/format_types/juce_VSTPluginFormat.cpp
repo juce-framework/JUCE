@@ -54,7 +54,7 @@
     If you're not interested in VSTs, you can disable them by setting the
     JUCE_PLUGINHOST_VST flag to 0.
 */
-#include <pluginterfaces/vst2.x/aeffectx.h>
+#include "pluginterfaces/vst2.x/aeffectx.h"
 
 #if JUCE_MSVC
  #pragma warning (pop)
@@ -713,12 +713,12 @@ class VSTPluginInstance     : public AudioPluginInstance,
 public:
     VSTPluginInstance (const ModuleHandle::Ptr& module_)
         : effect (nullptr),
+          module (module_),
           name (module_->pluginName),
           wantsMidiMessages (false),
           initialised (false),
           isPowerOn (false),
-          tempBuffer (1, 1),
-          module (module_)
+          tempBuffer (1, 1)
     {
         try
         {
@@ -1862,8 +1862,8 @@ private:
 
             while (v != 0)
             {
-                versionBits [n++] = (v & 0xff);
-                v >>= 8;
+                versionBits [n++] = v % 10;
+                v /= 10;
             }
 
             s << 'V';
@@ -2876,13 +2876,19 @@ FileSearchPath VSTPluginFormat::getDefaultLocationsToSearch()
 {
    #if JUCE_MAC
     return FileSearchPath ("~/Library/Audio/Plug-Ins/VST;/Library/Audio/Plug-Ins/VST");
+   #elif JUCE_LINUX
+    return FileSearchPath ("/usr/lib/vst");
    #elif JUCE_WINDOWS
     const String programFiles (File::getSpecialLocation (File::globalApplicationsDirectory).getFullPathName());
 
-    return FileSearchPath (WindowsRegistry::getValue ("HKLM\\Software\\VST\\VSTPluginsPath",
-                                                      programFiles + "\\Steinberg\\VstPlugins"));
-   #elif JUCE_LINUX
-    return FileSearchPath ("/usr/lib/vst");
+    FileSearchPath paths;
+    paths.add (WindowsRegistry::getValue ("HKLM\\Software\\VST\\VSTPluginsPath",
+                                          programFiles + "\\Steinberg\\VstPlugins"));
+    paths.removeNonExistentPaths();
+
+    paths.add (WindowsRegistry::getValue ("HKLM\\Software\\VST\\VSTPluginsPath",
+                                          programFiles + "\\VstPlugins"));
+    return paths;
    #endif
 }
 

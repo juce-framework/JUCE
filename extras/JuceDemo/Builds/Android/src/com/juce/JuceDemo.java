@@ -410,7 +410,7 @@ public final class JuceDemo   extends Activity
         bounds.right++;
 
         final int w = bounds.width();
-        final int h = bounds.height();
+        final int h = Math.max (1, bounds.height());
 
         Bitmap bm = Bitmap.createBitmap (w, h, Bitmap.Config.ARGB_8888);
 
