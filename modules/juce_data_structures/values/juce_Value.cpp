@@ -23,39 +23,100 @@
   ==============================================================================
 */
 
+class SharedValueSourceUpdater  : public ReferenceCountedObject,
+                                  private AsyncUpdater
+{
+public:
+    SharedValueSourceUpdater() : insideCallback (false) {}
+
+    typedef ReferenceCountedObjectPtr<SharedValueSourceUpdater> Ptr;
+
+    void update (Value::ValueSource* source)
+    {
+        sourcesToUpdate.add (source);
+
+        if (! insideCallback)
+            triggerAsyncUpdate();
+    }
+
+    static SharedValueSourceUpdater* getOrCreateSharedUpdater()
+    {
+        Ptr& p = getSharedUpdater();
+
+        if (p == nullptr)
+            p = new SharedValueSourceUpdater();
+
+        return p;
+    }
+
+    static void releaseIfUnused()
+    {
+        if (Ptr& p = getSharedUpdater())
+            if (p->getReferenceCount() == 1)
+                p = nullptr;
+    }
+
+private:
+    ReferenceCountedArray<Value::ValueSource> sourcesToUpdate;
+    bool insideCallback;
+
+    static Ptr& getSharedUpdater()
+    {
+        static Ptr updater;
+        return updater;
+    }
+
+    void handleAsyncUpdate()
+    {
+        int maxLoops = 10;
+        const ScopedValueSetter<bool> inside (insideCallback, true, false);
+        const Ptr localRef (this);
+
+        while (sourcesToUpdate.size() > 0 && --maxLoops >= 0)
+        {
+            ReferenceCountedArray<Value::ValueSource> sources;
+            sources.swapWithArray (sourcesToUpdate);
+
+            for (int i = 0; i < sources.size(); ++i)
+                sources.getObjectPointerUnchecked(i)->sendChangeMessage (true);
+        }
+    }
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SharedValueSourceUpdater);
+};
+
 Value::ValueSource::ValueSource()
 {
 }
 
 Value::ValueSource::~ValueSource()
 {
+    asyncUpdater = nullptr;
+    SharedValueSourceUpdater::releaseIfUnused();
 }
 
 void Value::ValueSource::sendChangeMessage (const bool synchronous)
 {
-    if (synchronous)
+    const int numListeners = valuesWithListeners.size();
+
+    if (numListeners > 0)
     {
-        // (hold a local reference to this object in case it's freed during the callbacks)
-        const ReferenceCountedObjectPtr<ValueSource> localRef (this);
-
-        for (int i = valuesWithListeners.size(); --i >= 0;)
+        if (synchronous)
         {
-            Value* const v = valuesWithListeners[i];
+            asyncUpdater = nullptr;
+            const ReferenceCountedObjectPtr<ValueSource> localRef (this);
 
-            if (v != nullptr)
-                v->callListeners();
+            for (int i = numListeners; --i >= 0;)
+                if (Value* const v = valuesWithListeners[i])
+                    v->callListeners();
+        }
+        else if (asyncUpdater == nullptr)
+        {
+            SharedValueSourceUpdater* const updater = SharedValueSourceUpdater::getOrCreateSharedUpdater();
+            asyncUpdater = updater;
+            updater->update (this);
         }
     }
-    else
-    {
-        if (valuesWithListeners.size() > 0)
-            triggerAsyncUpdate();
-    }
-}
-
-void Value::ValueSource::handleAsyncUpdate()
-{
-    sendChangeMessage (true);
 }
 
 //==============================================================================
