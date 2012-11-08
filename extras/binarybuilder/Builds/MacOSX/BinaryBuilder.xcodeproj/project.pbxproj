@@ -8,7 +8,7 @@
 
 		4B72EFB0E9D74CA7227F6CAB = { isa = PBXBuildFile; fileRef = 57DDB771ED96A256F190ADF8; };
 		0D53D8B0AEE37C02C147344B = { isa = PBXBuildFile; fileRef = F769CD634476C91F4C9D0596; };
-		81B96C6F01483EC95FA3F4E3 = { isa = PBXBuildFile; fileRef = 2191D574636B337A4B401322; };
+		542006E949BB022F198DF0F2 = { isa = PBXBuildFile; fileRef = 1A71A586C0F50B6B328D877B; };
 		3C6FF7689E2FD827A48E2303 = { isa = PBXBuildFile; fileRef = 50B7C64414A3E778021F5EC4; };
 		C2DE1EFF2E1C56D19E98B19C = { isa = PBXBuildFile; fileRef = 99D2B02E18E9A768F9F5CDFB; };
 		03B9EFAF851F4AA9FFAB3C94 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_MACAddress.h"; path = "../../../../modules/juce_core/network/juce_MACAddress.h"; sourceTree = "SOURCE_ROOT"; };
@@ -22,11 +22,11 @@
 		15479B80D763DB99DC87A458 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_Variant.cpp"; path = "../../../../modules/juce_core/containers/juce_Variant.cpp"; sourceTree = "SOURCE_ROOT"; };
 		1761B118FB418B2B066CBDAD = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_android_Misc.cpp"; path = "../../../../modules/juce_core/native/juce_android_Misc.cpp"; sourceTree = "SOURCE_ROOT"; };
 		1A434AFFED05E38D305475C1 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_WaitableEvent.h"; path = "../../../../modules/juce_core/threads/juce_WaitableEvent.h"; sourceTree = "SOURCE_ROOT"; };
+		1A71A586C0F50B6B328D877B = { isa = PBXFileReference; lastKnownFileType = file.nib; name = RecentFilesMenuTemplate.nib; path = RecentFilesMenuTemplate.nib; sourceTree = "SOURCE_ROOT"; };
 		1B88F3A284B3A5FD25489A98 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_InputSource.h"; path = "../../../../modules/juce_core/streams/juce_InputSource.h"; sourceTree = "SOURCE_ROOT"; };
 		1D886F01F02A6BFEA8CBD11F = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_DirectoryIterator.h"; path = "../../../../modules/juce_core/files/juce_DirectoryIterator.h"; sourceTree = "SOURCE_ROOT"; };
 		213DF50804C369804C6B6E92 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_TextDiff.h"; path = "../../../../modules/juce_core/text/juce_TextDiff.h"; sourceTree = "SOURCE_ROOT"; };
 		215E4CE58F1A210E7F4565C4 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_FileLogger.cpp"; path = "../../../../modules/juce_core/logging/juce_FileLogger.cpp"; sourceTree = "SOURCE_ROOT"; };
-		2191D574636B337A4B401322 = { isa = PBXFileReference; lastKnownFileType = file.xib; name = RecentFilesMenuTemplate.xib; path = RecentFilesMenuTemplate.xib; sourceTree = "SOURCE_ROOT"; };
 		22B4E9953D4D43C9556ACB1C = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = "juce_mac_Network.mm"; path = "../../../../modules/juce_core/native/juce_mac_Network.mm"; sourceTree = "SOURCE_ROOT"; };
 		22F1E16DF7F08080FA90C783 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_Range.h"; path = "../../../../modules/juce_core/maths/juce_Range.h"; sourceTree = "SOURCE_ROOT"; };
 		2380227B913CC9B13FDFFAD4 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_MemoryInputStream.cpp"; path = "../../../../modules/juce_core/streams/juce_MemoryInputStream.cpp"; sourceTree = "SOURCE_ROOT"; };
@@ -421,7 +421,7 @@
 				99D2B02E18E9A768F9F5CDFB,
 				D6C3594C8BEC94040AF108FE ); name = "Juce Library Code"; sourceTree = "<group>"; };
 		87ECE820BF4D73DD50D614CB = { isa = PBXGroup; children = (
-				2191D574636B337A4B401322 ); name = Resources; sourceTree = "<group>"; };
+				1A71A586C0F50B6B328D877B ); name = Resources; sourceTree = "<group>"; };
 		E28F51A0038F01E08E22F853 = { isa = PBXGroup; children = (
 				57DDB771ED96A256F190ADF8,
 				F769CD634476C91F4C9D0596 ); name = Frameworks; sourceTree = "<group>"; };
@@ -504,7 +504,7 @@
 				3C712C667F851F9061100DD7,
 				145C0C90E41D8DECE4DD66AD ); defaultConfigurationIsVisible = 0; defaultConfigurationName = Debug; };
 		7B52CBCC65AE087EEFB2C437 = { isa = PBXResourcesBuildPhase; buildActionMask = 2147483647; files = (
-				81B96C6F01483EC95FA3F4E3 ); runOnlyForDeploymentPostprocessing = 0; };
+				542006E949BB022F198DF0F2 ); runOnlyForDeploymentPostprocessing = 0; };
 		77D79017A9F2C7F35DD55196 = { isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (
 				3C6FF7689E2FD827A48E2303,
 				C2DE1EFF2E1C56D19E98B19C ); runOnlyForDeploymentPostprocessing = 0; };

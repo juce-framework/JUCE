@@ -240,8 +240,8 @@
             file="Source/BinaryData/jucer_NewCppFileTemplate.h"/>
       <FILE id="teqnin" name="jucer_NewInlineComponentTemplate.h" compile="0"
             resource="1" file="Source/BinaryData/jucer_NewInlineComponentTemplate.h"/>
-      <FILE id="ZIDSB1" name="RecentFilesMenuTemplate.xib" compile="0" resource="1"
-            file="Source/BinaryData/RecentFilesMenuTemplate.xib"/>
+      <FILE id="TNXogM" name="RecentFilesMenuTemplate.nib" compile="0" resource="1"
+            file="Source/BinaryData/RecentFilesMenuTemplate.nib"/>
     </GROUP>
   </MAINGROUP>
   <JUCEOPTIONS JUCE_ASIO="disabled" JUCE_WASAPI="disabled" JUCE_DIRECTSOUND="disabled"
