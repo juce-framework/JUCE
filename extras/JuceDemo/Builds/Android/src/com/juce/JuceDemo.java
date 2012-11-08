@@ -45,6 +45,8 @@ import java.net.URL;
 import java.net.HttpURLConnection;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
+import android.media.MediaScannerConnection;
+import android.media.MediaScannerConnection.MediaScannerConnectionClient;
 
 //==============================================================================
 public final class JuceDemo   extends Activity
@@ -526,5 +528,36 @@ public final class JuceDemo   extends Activity
 
         return isRegion ? locale.getDisplayCountry  (java.util.Locale.US)
                         : locale.getDisplayLanguage (java.util.Locale.US);
+    }
+
+    //==============================================================================
+    private final class SingleMediaScanner  implements MediaScannerConnectionClient
+    {
+        public SingleMediaScanner (Context context, String filename)
+        {
+            file = filename;
+            msc = new MediaScannerConnection (context, this);
+            msc.connect();
+        }
+
+        @Override
+        public void onMediaScannerConnected()
+        {
+            msc.scanFile (file, null);
+        }
+
+        @Override
+        public void onScanCompleted (String path, Uri uri)
+        {
+            msc.disconnect();
+        }
+
+        private MediaScannerConnection msc;
+        private String file;
+    }
+
+    public final void scanFile (String filename)
+    {
+        new SingleMediaScanner (this, filename);
     }
 }
