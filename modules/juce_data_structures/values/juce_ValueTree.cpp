@@ -987,6 +987,7 @@ ValueTree ValueTree::readFromStream (InputStream& input)
     }
 
     const int numChildren = input.readCompressedInt();
+    v.object->children.ensureStorageAllocated (numChildren);
 
     for (int i = 0; i < numChildren; ++i)
     {

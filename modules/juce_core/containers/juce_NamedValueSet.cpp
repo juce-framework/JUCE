@@ -149,8 +149,10 @@ const var& NamedValueSet::operator[] (const Identifier& name) const
 
 var NamedValueSet::getWithDefault (const Identifier& name, const var& defaultReturnValue) const
 {
-    const var* const v = getVarPointer (name);
-    return v != nullptr ? *v : defaultReturnValue;
+    if (const var* const v = getVarPointer (name))
+        return *v;
+
+    return defaultReturnValue;
 }
 
 var* NamedValueSet::getVarPointer (const Identifier& name) const noexcept
