@@ -35,6 +35,7 @@ struct ThreadSafeNSOpenGLViewClass  : public ObjCClass <NSOpenGLView>
         addMethod (@selector (_surfaceNeedsUpdate:), surfaceNeedsUpdate, "v@:@");
         addMethod (@selector (rightMouseDown:),      rightMouseDown,     "v@:@");
         addMethod (@selector (rightMouseUp:),        rightMouseUp,       "v@:@");
+        addMethod (@selector (acceptsFirstMouse:),   acceptsFirstMouse,  "v@:@");
 
         registerClass();
     }
@@ -86,6 +87,7 @@ private:
         sendSuperclassMessage (self, @selector (dealloc));
     }
 
+    static BOOL acceptsFirstMouse (id, SEL, NSEvent*)               { return YES; }
     static void surfaceNeedsUpdate (id self, SEL, NSNotification*)  { setNeedsUpdateLocked (self, YES); }
     static void update (id self, SEL)                               { setNeedsUpdateLocked (self, YES); }
     static void reshape (id self, SEL)                              { setNeedsUpdateLocked (self, YES); }
