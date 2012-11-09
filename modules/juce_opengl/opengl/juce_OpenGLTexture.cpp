@@ -24,7 +24,7 @@
 */
 
 OpenGLTexture::OpenGLTexture()
-    : textureID (0), width (0), height (0)
+    : textureID (0), width (0), height (0), ownerContext (nullptr)
 {
 }
 
@@ -40,9 +40,11 @@ bool OpenGLTexture::isValidSize (int width, int height)
 
 void OpenGLTexture::create (const int w, const int h, const void* pixels, GLenum type)
 {
+    ownerContext = OpenGLContext::getCurrentContext();
+
     // Texture objects can only be created when the current thread has an active OpenGL
     // context. You'll need to create this object in one of the OpenGLContext's callbacks.
-    jassert (OpenGLHelpers::isContextActive());
+    jassert (ownerContext != nullptr);
 
     jassert (isValidSize (w, h)); // Perhaps these dimensions must be a power-of-two?
 
@@ -140,10 +142,10 @@ void OpenGLTexture::loadARGBFlipped (const PixelARGB* pixels, int w, int h)
 
 void OpenGLTexture::release()
 {
-    if (textureID != 0)
+    if (textureID != 0
+         && ownerContext == OpenGLContext::getCurrentContext())
     {
-        if (OpenGLHelpers::isContextActive())
-            glDeleteTextures (1, &textureID);
+        glDeleteTextures (1, &textureID);
 
         textureID = 0;
         width = 0;

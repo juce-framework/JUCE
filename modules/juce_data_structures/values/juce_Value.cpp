@@ -82,7 +82,7 @@ private:
         }
     }
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SharedValueSourceUpdater);
+    JUCE_DECLARE_NON_COPYABLE (SharedValueSourceUpdater);
 };
 
 Value::ValueSource::ValueSource()

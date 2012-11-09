@@ -862,7 +862,7 @@ private:
                 if (val.isEmpty() || (val.containsAnyOf (" \t;<>()=,&+-_@~\r\n")
                                         && ! (val.trimStart().startsWithChar ('(')
                                                 || val.trimStart().startsWithChar ('{'))))
-                    val = val.quoted();
+                    val = "\"" + val + "\"";
 
                 output << propertyName.toString() << " = " << val << "; ";
             }
