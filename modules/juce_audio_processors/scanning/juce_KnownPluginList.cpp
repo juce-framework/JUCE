@@ -99,7 +99,7 @@ namespace
 
 bool KnownPluginList::isListingUpToDate (const String& fileOrIdentifier) const
 {
-    if (getTypeForFile (fileOrIdentifier) == 0)
+    if (getTypeForFile (fileOrIdentifier) == nullptr)
         return false;
 
     for (int i = types.size(); --i >= 0;)
@@ -121,8 +121,6 @@ bool KnownPluginList::scanAndAddFile (const String& fileOrIdentifier,
                                       OwnedArray <PluginDescription>& typesFound,
                                       AudioPluginFormat& format)
 {
-    bool addedOne = false;
-
     if (dontRescanIfAlreadyInList
          && getTypeForFile (fileOrIdentifier) != nullptr)
     {
@@ -145,6 +143,9 @@ bool KnownPluginList::scanAndAddFile (const String& fileOrIdentifier,
             return false;
     }
 
+    if (blacklist.contains (fileOrIdentifier))
+        return false;
+
     OwnedArray <PluginDescription> found;
     format.findAllTypesForFile (found, fileOrIdentifier);
 
@@ -153,14 +154,11 @@ bool KnownPluginList::scanAndAddFile (const String& fileOrIdentifier,
         PluginDescription* const desc = found.getUnchecked(i);
         jassert (desc != nullptr);
 
-        if (addType (*desc))
-        {
-            addedOne = true;
-            typesFound.add (new PluginDescription (*desc));
-        }
+        addType (*desc);
+        typesFound.add (new PluginDescription (*desc));
     }
 
-    return addedOne;
+    return found.size() > 0;
 }
 
 void KnownPluginList::scanAndAddDragAndDroppedFiles (AudioPluginFormatManager& formatManager,
@@ -196,10 +194,44 @@ void KnownPluginList::scanAndAddDragAndDroppedFiles (AudioPluginFormatManager& f
     }
 }
 
+const StringArray& KnownPluginList::getBlacklistedFiles() const
+{
+    return blacklist;
+}
+
+void KnownPluginList::addToBlacklist (const String& pluginID)
+{
+    if (! blacklist.contains (pluginID))
+    {
+        blacklist.add (pluginID);
+        sendChangeMessage();
+    }
+}
+
+void KnownPluginList::removeFromBlacklist (const String& pluginID)
+{
+    const int index = blacklist.indexOf (pluginID);
+
+    if (index >= 0)
+    {
+        blacklist.remove (index);
+        sendChangeMessage();
+    }
+}
+
+void KnownPluginList::clearBlacklistedFiles()
+{
+    if (blacklist.size() > 0)
+    {
+        blacklist.clear();
+        sendChangeMessage();
+    }
+}
+
 //==============================================================================
 struct PluginSorter
 {
-    PluginSorter (KnownPluginList::SortMethod method_) noexcept  : method (method_) {}
+    PluginSorter (KnownPluginList::SortMethod sortMethod) noexcept  : method (sortMethod) {}
 
     int compareElements (const PluginDescription* const first,
                          const PluginDescription* const second) const
@@ -248,12 +280,16 @@ XmlElement* KnownPluginList::createXml() const
     for (int i = 0; i < types.size(); ++i)
         e->addChildElement (types.getUnchecked(i)->createXml());
 
+    for (int i = 0; i < blacklist.size(); ++i)
+        e->createNewChildElement ("BLACKLISTED")->setAttribute ("id", blacklist[i]);
+
     return e;
 }
 
 void KnownPluginList::recreateFromXml (const XmlElement& xml)
 {
     clear();
+    clearBlacklistedFiles();
 
     if (xml.hasTagName ("KNOWNPLUGINS"))
     {
@@ -261,7 +297,9 @@ void KnownPluginList::recreateFromXml (const XmlElement& xml)
         {
             PluginDescription info;
 
-            if (info.loadFromXml (*e))
+            if (e->hasTagName ("BLACKLISTED"))
+                blacklist.add (e->getStringAttribute ("id"));
+            else if (info.loadFromXml (*e))
                 addType (info);
         }
     }
