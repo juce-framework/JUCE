@@ -875,7 +875,7 @@ public:
 
                 String error (setup.manager->setAudioDeviceSetup (config, true));
 
-                if (! error.isEmpty())
+                if (error.isNotEmpty())
                 {
                     //xxx
                 }
