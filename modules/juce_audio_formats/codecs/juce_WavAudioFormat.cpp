@@ -500,8 +500,6 @@ public:
         using namespace WavFileHelpers;
         uint64 len = 0;
         uint64 end = 0;
-        bool hasGotType = false;
-        bool hasGotData = false;
         int cueNoteIndex = 0;
         int cueLabelIndex = 0;
         int cueRegionIndex = 0;
@@ -598,8 +596,6 @@ public:
                     {
                         bytesPerFrame = 0;
                     }
-
-                    hasGotType = true;
                 }
                 else if (chunkType == chunkName ("data"))
                 {
@@ -608,8 +604,6 @@ public:
 
                     dataChunkStart = input->getPosition();
                     lengthInSamples = (bytesPerFrame > 0) ? (dataLength / bytesPerFrame) : 0;
-
-                    hasGotData = true;
                 }
                 else if (chunkType == chunkName ("bext"))
                 {

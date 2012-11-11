@@ -2443,12 +2443,10 @@ private:
         XClientMessageEvent msg = { 0 };
         msg.message_type = Atoms::get().XdndEnter;
 
-        const Atoms& atoms = Atoms::get();
-
         const Atom* mimeTypes  = dragState.getMimeTypes();
         const int numMimeTypes = dragState.getNumMimeTypes();
 
-        msg.data.l[1] = dragState.xdndVersion << 24 | numMimeTypes > 3;
+        msg.data.l[1] = (dragState.xdndVersion << 24) | (numMimeTypes > 3);
         msg.data.l[2] = numMimeTypes > 0 ? mimeTypes[0] : 0;
         msg.data.l[3] = numMimeTypes > 1 ? mimeTypes[1] : 0;
         msg.data.l[4] = numMimeTypes > 2 ? mimeTypes[2] : 0;
@@ -2539,8 +2537,8 @@ private:
             dragState.silentRect = Rectangle<int>();
 
             if ((clientMsg.data.l[1] & 1) != 0
-                 && (clientMsg.data.l[4] == Atoms::get().XdndActionCopy
-                      || clientMsg.data.l[4] == Atoms::get().XdndActionPrivate))
+                 && ((Atom) clientMsg.data.l[4] == Atoms::get().XdndActionCopy
+                      || (Atom) clientMsg.data.l[4] == Atoms::get().XdndActionPrivate))
             {
                 if ((clientMsg.data.l[1] & 2) == 0) // target requests silent rectangle
                     dragState.silentRect.setBounds (clientMsg.data.l[2] >> 16,

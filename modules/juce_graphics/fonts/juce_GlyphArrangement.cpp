@@ -439,12 +439,10 @@ void GlyphArrangement::addFittedText (const Font& f,
 
             float lineY = y;
             float widthPerLine = lineWidth / numLines;
-            int lastLineStartIndex = 0;
 
             for (int line = 0; line < numLines; ++line)
             {
                 int i = startIndex;
-                lastLineStartIndex = i;
                 float lineStartX = glyphs.getReference (startIndex).getLeft();
 
                 if (line == numLines - 1)
