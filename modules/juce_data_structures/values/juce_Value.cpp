@@ -27,63 +27,63 @@ class SharedValueSourceUpdater  : public ReferenceCountedObject,
                                   private AsyncUpdater
 {
 public:
-    SharedValueSourceUpdater() : insideCallback (false) {}
+    SharedValueSourceUpdater() : sourcesBeingIterated (nullptr) {}
+    ~SharedValueSourceUpdater()  { masterReference.clear(); }
 
-    typedef ReferenceCountedObjectPtr<SharedValueSourceUpdater> Ptr;
-
-    void update (Value::ValueSource* source)
+    void update (Value::ValueSource* const source)
     {
-        sourcesToUpdate.add (source);
+        sourcesNeedingAnUpdate.add (source);
 
-        if (! insideCallback)
+        if (sourcesBeingIterated == nullptr)
             triggerAsyncUpdate();
     }
 
-    static SharedValueSourceUpdater* getOrCreateSharedUpdater()
+    void valueDeleted (Value::ValueSource* const source)
     {
-        Ptr& p = getSharedUpdater();
+        sourcesNeedingAnUpdate.removeValue (source);
 
-        if (p == nullptr)
-            p = new SharedValueSourceUpdater();
-
-        return p;
+        if (sourcesBeingIterated != nullptr)
+            sourcesBeingIterated->removeValue (source);
     }
 
-    static void releaseIfUnused()
-    {
-        if (Ptr& p = getSharedUpdater())
-            if (p->getReferenceCount() == 1)
-                p = nullptr;
-    }
+    WeakReference<SharedValueSourceUpdater>::Master masterReference;
 
 private:
-    ReferenceCountedArray<Value::ValueSource> sourcesToUpdate;
-    bool insideCallback;
-
-    static Ptr& getSharedUpdater()
-    {
-        static Ptr updater;
-        return updater;
-    }
+    typedef SortedSet<Value::ValueSource*> SourceSet;
+    SourceSet sourcesNeedingAnUpdate;
+    SourceSet* sourcesBeingIterated;
 
     void handleAsyncUpdate()
     {
-        int maxLoops = 10;
-        const ScopedValueSetter<bool> inside (insideCallback, true, false);
-        const Ptr localRef (this);
+        const ReferenceCountedObjectPtr<SharedValueSourceUpdater> localRef (this);
 
-        while (sourcesToUpdate.size() > 0 && --maxLoops >= 0)
         {
-            ReferenceCountedArray<Value::ValueSource> sources;
-            sources.swapWithArray (sourcesToUpdate);
+            const ScopedValueSetter<SourceSet*> inside (sourcesBeingIterated, nullptr, nullptr);
+            int maxLoops = 10;
 
-            for (int i = 0; i < sources.size(); ++i)
-                sources.getObjectPointerUnchecked(i)->sendChangeMessage (true);
+            while (sourcesNeedingAnUpdate.size() > 0)
+            {
+                if (--maxLoops == 0)
+                {
+                    triggerAsyncUpdate();
+                    break;
+                }
+
+                SourceSet sources;
+                sources.swapWith (sourcesNeedingAnUpdate);
+                sourcesBeingIterated = &sources;
+
+                for (int i = sources.size(); --i >= 0;)
+                    if (i < sources.size())
+                        sources.getUnchecked(i)->sendChangeMessage (true);
+            }
         }
     }
 
-    JUCE_DECLARE_NON_COPYABLE (SharedValueSourceUpdater);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SharedValueSourceUpdater);
 };
+
+static WeakReference<SharedValueSourceUpdater> sharedUpdater;
 
 Value::ValueSource::ValueSource()
 {
@@ -91,8 +91,8 @@ Value::ValueSource::ValueSource()
 
 Value::ValueSource::~ValueSource()
 {
-    asyncUpdater = nullptr;
-    SharedValueSourceUpdater::releaseIfUnused();
+    if (asyncUpdater != nullptr)
+        static_cast <SharedValueSourceUpdater*> (asyncUpdater.get())->valueDeleted (this);
 }
 
 void Value::ValueSource::sendChangeMessage (const bool synchronous)
@@ -103,17 +103,30 @@ void Value::ValueSource::sendChangeMessage (const bool synchronous)
     {
         if (synchronous)
         {
-            asyncUpdater = nullptr;
             const ReferenceCountedObjectPtr<ValueSource> localRef (this);
+            asyncUpdater = nullptr;
 
             for (int i = numListeners; --i >= 0;)
                 if (Value* const v = valuesWithListeners[i])
                     v->callListeners();
         }
-        else if (asyncUpdater == nullptr)
+        else
         {
-            SharedValueSourceUpdater* const updater = SharedValueSourceUpdater::getOrCreateSharedUpdater();
-            asyncUpdater = updater;
+            SharedValueSourceUpdater* updater = static_cast <SharedValueSourceUpdater*> (asyncUpdater.get());
+
+            if (updater == nullptr)
+            {
+                if (sharedUpdater == nullptr)
+                {
+                    asyncUpdater = updater = new SharedValueSourceUpdater();
+                    sharedUpdater = updater;
+                }
+                else
+                {
+                    asyncUpdater = updater = sharedUpdater.get();
+                }
+            }
+
             updater->update (this);
         }
     }
@@ -279,8 +292,11 @@ void Value::removeListener (ValueListener* const listener)
 
 void Value::callListeners()
 {
-    Value v (*this); // (create a copy in case this gets deleted by a callback)
-    listeners.call (&ValueListener::valueChanged, v);
+    if (listeners.size() > 0)
+    {
+        Value v (*this); // (create a copy in case this gets deleted by a callback)
+        listeners.call (&ValueListener::valueChanged, v);
+    }
 }
 
 OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, const Value& value)

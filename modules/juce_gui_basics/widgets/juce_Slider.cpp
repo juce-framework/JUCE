@@ -53,7 +53,7 @@ public:
         sendChangeOnlyOnRelease (false),
         popupDisplayEnabled (false),
         menuEnabled (false),
-        menuShown (false),
+        useDragEvents (false),
         scrollWheelEnabled (true),
         snapsToMousePos (true),
         parentForPopupDisplay (nullptr)
@@ -630,8 +630,6 @@ public:
 
     void showPopupMenu()
     {
-        menuShown = true;
-
         PopupMenu m;
         m.setLookAndFeel (&owner.getLookAndFeel());
         m.addItem (1, TRANS ("Velocity-sensitive mode"), true, isVelocityBased);
@@ -824,6 +822,7 @@ public:
     {
         mouseWasHidden = false;
         incDecDragged = false;
+        useDragEvents = false;
         mouseDragStartPos = mousePosWhenLastDragged = e.getPosition();
 
         if (owner.isEnabled())
@@ -832,9 +831,13 @@ public:
             {
                 showPopupMenu();
             }
+            else if (canDoubleClickToValue() && e.mods.isAltDown())
+            {
+                mouseDoubleClick();
+            }
             else if (maximum > minimum)
             {
-                menuShown = false;
+                useDragEvents = true;
 
                 if (valueBox != nullptr)
                     valueBox->hideEditor (true);
@@ -872,7 +875,7 @@ public:
 
     void mouseDrag (const MouseEvent& e)
     {
-        if ((! menuShown)
+        if (useDragEvents
              && maximum > minimum
              && ! ((style == LinearBar || style == LinearBarVertical) && e.mouseWasClicked() && valueBox != nullptr && valueBox->isEditable()))
         {
@@ -935,7 +938,7 @@ public:
     void mouseUp()
     {
         if (owner.isEnabled()
-             && (! menuShown)
+             && useDragEvents
              && (maximum > minimum)
              && (style != IncDecButtons || incDecDragged))
         {
@@ -959,12 +962,17 @@ public:
         }
     }
 
+    bool canDoubleClickToValue() const
+    {
+        return doubleClickToValue
+                && style != IncDecButtons
+                && minimum <= doubleClickReturnValue
+                && maximum >= doubleClickReturnValue;
+    }
+
     void mouseDoubleClick()
     {
-        if (doubleClickToValue
-             && style != IncDecButtons
-             && minimum <= doubleClickReturnValue
-             && maximum >= doubleClickReturnValue)
+        if (canDoubleClickToValue())
         {
             sendDragStart();
             setValue (doubleClickReturnValue, sendNotificationSync);
@@ -1219,20 +1227,20 @@ public:
     int textBoxWidth, textBoxHeight;
     IncDecButtonMode incDecButtonMode;
 
-    bool editableText : 1;
-    bool doubleClickToValue : 1;
-    bool isVelocityBased : 1;
-    bool userKeyOverridesVelocity : 1;
-    bool rotaryStop : 1;
-    bool incDecButtonsSideBySide : 1;
-    bool sendChangeOnlyOnRelease : 1;
-    bool popupDisplayEnabled : 1;
-    bool menuEnabled : 1;
-    bool menuShown : 1;
-    bool mouseWasHidden : 1;
-    bool incDecDragged : 1;
-    bool scrollWheelEnabled : 1;
-    bool snapsToMousePos : 1;
+    bool editableText;
+    bool doubleClickToValue;
+    bool isVelocityBased;
+    bool userKeyOverridesVelocity;
+    bool rotaryStop;
+    bool incDecButtonsSideBySide;
+    bool sendChangeOnlyOnRelease;
+    bool popupDisplayEnabled;
+    bool menuEnabled;
+    bool useDragEvents;
+    bool mouseWasHidden;
+    bool incDecDragged;
+    bool scrollWheelEnabled;
+    bool snapsToMousePos;
 
     ScopedPointer<Label> valueBox;
     ScopedPointer<Button> incButton, decButton;
