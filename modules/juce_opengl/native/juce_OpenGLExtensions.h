@@ -55,7 +55,8 @@
     EXT_FUNCTION (glCheckFramebufferStatus, GLenum, (GLenum p1), (p1))\
     EXT_FUNCTION (glFramebufferTexture2D,   void, (GLenum p1, GLenum p2, GLenum p3, GLuint p4, GLint p5), (p1, p2, p3, p4, p5))\
     EXT_FUNCTION (glFramebufferRenderbuffer,  void, (GLenum p1, GLenum p2, GLenum p3, GLuint p4), (p1, p2, p3, p4))\
-    EXT_FUNCTION (glGetFramebufferAttachmentParameteriv, void, (GLenum p1, GLenum p2, GLenum p3, GLint* p4), (p1, p2, p3, p4))
+    EXT_FUNCTION (glGetFramebufferAttachmentParameteriv, void, (GLenum p1, GLenum p2, GLenum p3, GLint* p4), (p1, p2, p3, p4))\
+    EXT_FUNCTION (glBlendEquation,          void, (GLenum p1), (p1))
 
 #if JUCE_USE_OPENGL_SHADERS
  #define JUCE_GL_EXTENSION_FUNCTIONS1(USE_FUNCTION, EXT_FUNCTION) \
