@@ -24,7 +24,7 @@
                       "effects/*",
                       "native/*" ],
 
-  "OSXFrameworks":  "Cocoa",
+  "OSXFrameworks":  "Cocoa QuartzCore",
   "iOSFrameworks":  "CoreGraphics CoreText QuartzCore",
   "LinuxLibs":      "X11 Xinerama Xext freetype"
 }
