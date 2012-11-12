@@ -1857,7 +1857,7 @@ private:
 
         if (v != 0)
         {
-            int versionBits[4];
+            int versionBits[32];
             int n = 0;
 
             while (v != 0)
@@ -1867,6 +1867,9 @@ private:
             }
 
             s << 'V';
+
+            while (n > 1 && versionBits [n - 1] == 0)
+                --n;
 
             while (n > 0)
             {
