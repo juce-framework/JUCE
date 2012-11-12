@@ -45,6 +45,7 @@ PluginListComponent::PluginListComponent (AudioPluginFormatManager& manager,
     updateList();
 
     PluginDirectoryScanner::applyBlacklistingsFromDeadMansPedal (list, deadMansPedalFile);
+    deadMansPedalFile.deleteFile();
 }
 
 PluginListComponent::~PluginListComponent()

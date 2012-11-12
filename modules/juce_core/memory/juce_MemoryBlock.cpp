@@ -53,9 +53,9 @@ MemoryBlock::MemoryBlock (const MemoryBlock& other)
 }
 
 MemoryBlock::MemoryBlock (const void* const dataToInitialiseFrom, const size_t sizeInBytes)
-    : size (jmax ((size_t) 0, sizeInBytes))
+    : size (sizeInBytes)
 {
-    jassert (sizeInBytes >= 0);
+    jassert (((ssize_t) sizeInBytes) >= 0);
 
     if (size > 0)
     {

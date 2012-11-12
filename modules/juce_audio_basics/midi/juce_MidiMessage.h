@@ -891,7 +891,7 @@ public:
         The frequencyOfA parameter is an optional frequency for 'A', normally 440-444Hz for concert pitch.
         @see getMidiNoteName
     */
-    static const double getMidiNoteInHertz (int noteNumber, const double frequencyOfA = 440.0) noexcept;
+    static double getMidiNoteInHertz (int noteNumber, const double frequencyOfA = 440.0) noexcept;
 
     /** Returns the standard name of a GM instrument.
 

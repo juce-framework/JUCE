@@ -875,7 +875,7 @@ public:
 
                 String error (setup.manager->setAudioDeviceSetup (config, true));
 
-                if (! error.isEmpty())
+                if (error.isNotEmpty())
                 {
                     //xxx
                 }
@@ -954,7 +954,7 @@ AudioDeviceSelectorComponent::AudioDeviceSelectorComponent (AudioDeviceManager& 
         addAndMakeVisible (deviceTypeDropDown);
         deviceTypeDropDown->addListener (this);
 
-        deviceTypeDropDownLabel = new Label (String::empty, TRANS ("audio device type:"));
+        deviceTypeDropDownLabel = new Label (String::empty, TRANS ("Audio device type:"));
         deviceTypeDropDownLabel->setJustificationType (Justification::centredRight);
         deviceTypeDropDownLabel->attachToComponent (deviceTypeDropDown, true);
     }
@@ -963,10 +963,10 @@ AudioDeviceSelectorComponent::AudioDeviceSelectorComponent (AudioDeviceManager& 
     {
         addAndMakeVisible (midiInputsList
                             = new MidiInputSelectorComponentListBox (deviceManager,
-                                                                     TRANS("(no midi inputs available)"),
+                                                                     TRANS("(No MIDI inputs available)"),
                                                                      0, 0));
 
-        midiInputsLabel = new Label (String::empty, TRANS ("active midi inputs:"));
+        midiInputsLabel = new Label (String::empty, TRANS ("Active MIDI inputs:"));
         midiInputsLabel->setJustificationType (Justification::topRight);
         midiInputsLabel->attachToComponent (midiInputsList, true);
     }
@@ -981,7 +981,7 @@ AudioDeviceSelectorComponent::AudioDeviceSelectorComponent (AudioDeviceManager& 
         addAndMakeVisible (midiOutputSelector = new ComboBox (String::empty));
         midiOutputSelector->addListener (this);
 
-        midiOutputLabel = new Label ("lm", TRANS("Midi Output:"));
+        midiOutputLabel = new Label ("lm", TRANS("MIDI Output:"));
         midiOutputLabel->attachToComponent (midiOutputSelector, true);
     }
     else

@@ -949,7 +949,7 @@ String MidiMessage::getMidiNoteName (int note, bool useSharps, bool includeOctav
     return String::empty;
 }
 
-const double MidiMessage::getMidiNoteInHertz (int noteNumber, const double frequencyOfA) noexcept
+double MidiMessage::getMidiNoteInHertz (int noteNumber, const double frequencyOfA) noexcept
 {
     return frequencyOfA * pow (2.0, (noteNumber - 69) / 12.0);
 }

@@ -455,7 +455,7 @@ void MidiKeyboardComponent::drawWhiteNote (int midiNoteNumber,
 
     const String text (getWhiteNoteText (midiNoteNumber));
 
-    if (! text.isEmpty())
+    if (text.isNotEmpty())
     {
         g.setColour (textColour);
         g.setFont (Font (jmin (12.0f, keyWidth * 0.9f)).withHorizontalScale (0.8f));
