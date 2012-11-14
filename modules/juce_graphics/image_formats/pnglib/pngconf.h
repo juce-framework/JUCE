@@ -36,9 +36,9 @@
 #define PNG_NO_READ_sPLT 1
 
 #define png_error(a, b) png_err(a)
-#define png_warning(a, b)
+#define png_warning(a, b) (void)0
 #define png_chunk_error(a, b) png_err(a)
-#define png_chunk_warning(a, b)
+#define png_chunk_warning(a, b) png_warning(a, b)
 
 //==============================================================================
 

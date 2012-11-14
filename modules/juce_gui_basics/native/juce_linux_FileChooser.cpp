@@ -41,13 +41,13 @@ bool FileChooser::isPlatformDialogAvailable()
 void FileChooser::showPlatformDialog (Array<File>& results,
                                       const String& title,
                                       const File& file,
-                                      const String& filters,
+                                      const String& /* filters */,
                                       bool isDirectory,
-                                      bool selectsFiles,
+                                      bool /* selectsFiles */,
                                       bool isSave,
-                                      bool warnAboutOverwritingExistingFiles,
+                                      bool /* warnAboutOverwritingExistingFiles */,
                                       bool selectMultipleFiles,
-                                      FilePreviewComponent* previewComponent)
+                                      FilePreviewComponent* /* previewComponent */)
 {
     String separator;
     StringArray args;

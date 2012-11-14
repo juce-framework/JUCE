@@ -963,7 +963,7 @@ public:
         return screenPosition - getScreenPosition();
     }
 
-    void setAlpha (float newAlpha)
+    void setAlpha (float /* newAlpha */)
     {
         //xxx todo!
     }
@@ -1109,7 +1109,7 @@ public:
         return BorderSize<int>();
     }
 
-    bool setAlwaysOnTop (bool alwaysOnTop)
+    bool setAlwaysOnTop (bool /* alwaysOnTop */)
     {
         return false;
     }
@@ -1507,7 +1507,7 @@ public:
         }
 
         if (dragState.dragging)
-            handleExternalDragButtonReleaseEvent (buttonRelEvent);
+            handleExternalDragButtonReleaseEvent();
 
         handleMouseEvent (0, getMousePos (buttonRelEvent), currentModifiers, getEventTime (buttonRelEvent));
 
@@ -2551,7 +2551,7 @@ private:
         }
     }
 
-    void handleExternalDragButtonReleaseEvent (const XButtonReleasedEvent& buttonRelEvent)
+    void handleExternalDragButtonReleaseEvent()
     {
         if (dragState.dragging)
             XUngrabPointer (display, CurrentTime);
@@ -2952,7 +2952,7 @@ ModifierKeys ModifierKeys::getCurrentModifiersRealtime() noexcept
 
 
 //==============================================================================
-void Desktop::setKioskComponent (Component* kioskModeComponent, bool enableOrDisable, bool allowMenusAndBars)
+void Desktop::setKioskComponent (Component* kioskModeComponent, bool enableOrDisable, bool /* allowMenusAndBars */)
 {
     if (enableOrDisable)
         kioskModeComponent->setBounds (Desktop::getInstance().getDisplays().getMainDisplay().totalArea);
@@ -3334,7 +3334,7 @@ void MouseCursor::showInAllWindows() const
 }
 
 //==============================================================================
-Image juce_createIconForFile (const File& file)
+Image juce_createIconForFile (const File& /* file */)
 {
     return Image::null;
 }
@@ -3380,16 +3380,16 @@ void LookAndFeel::playAlertSound()
 //==============================================================================
 void JUCE_CALLTYPE NativeMessageBox::showMessageBox (AlertWindow::AlertIconType iconType,
                                                      const String& title, const String& message,
-                                                     Component* associatedComponent)
+                                                     Component* /* associatedComponent */)
 {
-    AlertWindow::showMessageBox (AlertWindow::NoIcon, title, message);
+    AlertWindow::showMessageBox (iconType, title, message);
 }
 
 void JUCE_CALLTYPE NativeMessageBox::showMessageBoxAsync (AlertWindow::AlertIconType iconType,
                                                           const String& title, const String& message,
-                                                          Component* associatedComponent)
+                                                          Component* /* associatedComponent */)
 {
-    AlertWindow::showMessageBoxAsync (AlertWindow::NoIcon, title, message);
+    AlertWindow::showMessageBoxAsync (iconType, title, message);
 }
 
 bool JUCE_CALLTYPE NativeMessageBox::showOkCancelBox (AlertWindow::AlertIconType iconType,

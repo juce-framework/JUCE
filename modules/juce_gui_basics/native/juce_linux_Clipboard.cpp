@@ -48,12 +48,12 @@ namespace ClipboardHelpers
     //==============================================================================
     // Read the content of a window property as either a locale-dependent string or an utf8 string
     // works only for strings shorter than 1000000 bytes
-    static String readWindowProperty (Window window, Atom prop, Atom fmt)
+    static String readWindowProperty (Window window, Atom prop)
     {
         String returnData;
         char* clipData;
         Atom actualType;
-        int  actualFormat;
+        int actualFormat;
         unsigned long numItems, bytesLeft;
 
         if (XGetWindowProperty (display, window, prop,
@@ -100,8 +100,7 @@ namespace ClipboardHelpers
                     jassert (event.xselection.requestor == juce_messageWindowHandle);
 
                     selectionContent = readWindowProperty (event.xselection.requestor,
-                                                           event.xselection.property,
-                                                           requestedFormat);
+                                                           event.xselection.property);
                     return true;
                 }
                 else
