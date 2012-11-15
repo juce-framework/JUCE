@@ -149,8 +149,12 @@ AffineTransform AffineTransform::scaled (const float factorX, const float factor
 
 AffineTransform AffineTransform::scale (const float factorX, const float factorY) noexcept
 {
-    return AffineTransform (factorX, 0, 0,
-                            0, factorY, 0);
+    return AffineTransform (factorX, 0, 0, 0, factorY, 0);
+}
+
+AffineTransform AffineTransform::scale (const float factor) noexcept
+{
+    return AffineTransform (factor, 0, 0, 0, factor, 0);
 }
 
 AffineTransform AffineTransform::scaled (const float factorX, const float factorY,
