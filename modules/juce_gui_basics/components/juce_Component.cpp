@@ -696,8 +696,8 @@ public:
             Graphics imG (image);
             LowLevelGraphicsContext& lg = imG.getInternalContext();
 
-            for (RectangleList::Iterator i (validArea); i.next();)
-                lg.excludeClipRectangle (*i.getRectangle());
+            for (const Rectangle<int>* i = validArea.begin(), * const e = validArea.end(); i != e; ++i)
+                lg.excludeClipRectangle (*i);
 
             if (! lg.isClipEmpty())
             {

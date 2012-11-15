@@ -1881,10 +1881,8 @@ private:
 
                 if (peer->depth == 32)
                 {
-                    RectangleList::Iterator i (originalRepaintRegion);
-
-                    while (i.next())
-                        image.clear (*i.getRectangle() - totalArea.getPosition());
+                    for (const Rectangle<int>* i = originalRepaintRegion.begin(), * const e = originalRepaintRegion.end(); i != e; ++i)
+                        image.clear (*i - totalArea.getPosition());
                 }
 
                 {
@@ -1896,17 +1894,16 @@ private:
                 if (! peer->maskedRegion.isEmpty())
                     originalRepaintRegion.subtract (peer->maskedRegion);
 
-                for (RectangleList::Iterator i (originalRepaintRegion); i.next();)
+                for (const Rectangle<int>* i = originalRepaintRegion.begin(), * const e = originalRepaintRegion.end(); i != e; ++i)
                 {
                    #if JUCE_USE_XSHM
                     shmCompletedDrawing = false;
                    #endif
-                    const Rectangle<int>& r = *i.getRectangle();
 
                     static_cast<XBitmapImage*> (image.getPixelData())
                         ->blitToWindow (peer->windowH,
-                                        r.getX(), r.getY(), r.getWidth(), r.getHeight(),
-                                        r.getX() - totalArea.getX(), r.getY() - totalArea.getY());
+                                        i->getX(), i->getY(), i->getWidth(), i->getHeight(),
+                                        i->getX() - totalArea.getX(), i->getY() - totalArea.getY());
                 }
             }
 
