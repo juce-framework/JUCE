@@ -118,7 +118,7 @@ public:
         return true;
     }
 
-    void clearRegionInFrameBuffer (const RectangleList& list, const double scale)
+    void clearRegionInFrameBuffer (const RectangleList& list, const float scale)
     {
         glClearColor (0, 0, 0, 0);
         glEnable (GL_SCISSOR_TEST);
@@ -129,7 +129,7 @@ public:
 
         for (const Rectangle<int>* i = list.begin(), * const e = list.end(); i != e; ++i)
         {
-            const Rectangle<int> r (*i * scale);
+            const Rectangle<int> r ((i->toFloat() * scale).getSmallestIntegerContainer());
             glScissor (r.getX(), imageH - r.getBottom(), r.getWidth(), r.getHeight());
             glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
         }
@@ -214,7 +214,7 @@ public:
 
         if (! invalid.isEmpty())
         {
-            clearRegionInFrameBuffer (invalid, scale);
+            clearRegionInFrameBuffer (invalid, (float) scale);
 
             {
                 ScopedPointer<LowLevelGraphicsContext> g (createOpenGLGraphicsContext (context, cachedImageFrameBuffer));

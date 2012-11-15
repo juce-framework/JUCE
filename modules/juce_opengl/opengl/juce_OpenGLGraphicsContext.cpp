@@ -1835,7 +1835,7 @@ public:
             else if (transform.isIntegerScaling)
             {
                 cloneClipIfMultiplyReferenced();
-                clip = clip->clipToRectangle (transform.transformed (r));
+                clip = clip->clipToRectangle (transform.transformed (r).getSmallestIntegerContainer());
             }
             else
             {
@@ -1865,7 +1865,7 @@ public:
                 RectangleList scaledList;
 
                 for (const Rectangle<int>* i = r.begin(), * const e = r.end(); i != e; ++i)
-                    scaledList.add (transform.transformed (*i));
+                    scaledList.add (transform.transformed (*i).getSmallestIntegerContainer());
 
                 clip = clip->clipToRectangleList (scaledList);
             }

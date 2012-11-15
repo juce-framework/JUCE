@@ -122,9 +122,9 @@ public:
     }
 
     template <typename Type>
-    Rectangle<Type> transformed (const Rectangle<Type>& r) const noexcept
+    Rectangle<float> transformed (const Rectangle<Type>& r) const noexcept
     {
-        return r.transformed (complexTransform);
+        return r.toFloat().transformed (complexTransform);
     }
 
     Rectangle<int> deviceSpaceToUserSpace (const Rectangle<int>& r) const noexcept
