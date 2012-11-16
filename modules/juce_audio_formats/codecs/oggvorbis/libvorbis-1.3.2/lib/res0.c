@@ -393,7 +393,7 @@ static int local_book_besterror(codebook *book,int *a){
 }
 
 static int _encodepart(oggpack_buffer *opb,int *vec, int n,
-                       codebook *book,long *acc){
+                       codebook *book,long* /* acc */){
   int i,bits=0;
   int dim=book->dim;
   int step=n/dim;
@@ -536,12 +536,12 @@ static long **_2class(vorbis_block *vb,vorbis_look_residue *vl,int **in,
 }
 
 static int _01forward(oggpack_buffer *opb,
-                      vorbis_block *vb,vorbis_look_residue *vl,
+                      vorbis_block*, vorbis_look_residue *vl,
                       int **in,int ch,
                       long **partword,
                       int (*encode)(oggpack_buffer *,int *,int,
                                     codebook *,long *),
-                      int submap){
+                      int /* submap */){
   long i,j,k,s;
   vorbis_look_residue0 *look=(vorbis_look_residue0 *)vl;
   vorbis_info_residue0 *info=look->info;

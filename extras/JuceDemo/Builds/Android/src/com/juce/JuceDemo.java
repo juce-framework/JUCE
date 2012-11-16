@@ -299,20 +299,52 @@ public final class JuceDemo   extends Activity
         private boolean opaque;
 
         //==============================================================================
-        private native void handleMouseDown (float x, float y, long time);
-        private native void handleMouseDrag (float x, float y, long time);
-        private native void handleMouseUp (float x, float y, long time);
+        private native void handleMouseDown (int index, float x, float y, long time);
+        private native void handleMouseDrag (int index, float x, float y, long time);
+        private native void handleMouseUp   (int index, float x, float y, long time);
 
         @Override
         public boolean onTouchEvent (MotionEvent event)
         {
-            switch (event.getAction())
+            int action = event.getAction();
+            long time = event.getEventTime();
+
+            switch (action & MotionEvent.ACTION_MASK)
             {
-                case MotionEvent.ACTION_DOWN:  handleMouseDown (event.getX(), event.getY(), event.getEventTime()); return true;
-                case MotionEvent.ACTION_MOVE:  handleMouseDrag (event.getX(), event.getY(), event.getEventTime()); return true;
+                case MotionEvent.ACTION_DOWN:
+                    handleMouseDown (event.getPointerId(0), event.getX(), event.getY(), time);
+                    return true;
+
                 case MotionEvent.ACTION_CANCEL:
-                case MotionEvent.ACTION_UP:    handleMouseUp (event.getX(), event.getY(), event.getEventTime()); return true;
-                default: break;
+                case MotionEvent.ACTION_UP:
+                    handleMouseUp (event.getPointerId(0), event.getX(), event.getY(), time);
+                    return true;
+
+                case MotionEvent.ACTION_MOVE:
+                {
+                    int n = event.getPointerCount();
+                    for (int i = 0; i < n; ++i)
+                        handleMouseDrag (event.getPointerId(i), event.getX(i), event.getY(i), time);
+
+                    return true;
+                }
+
+                case MotionEvent.ACTION_POINTER_UP:
+                {
+                    int i = (action & MotionEvent.ACTION_POINTER_INDEX_MASK) >> MotionEvent.ACTION_POINTER_INDEX_SHIFT;
+                    handleMouseUp (event.getPointerId(i), event.getX(i), event.getY(i), time);
+                    return true;
+                }
+
+                case MotionEvent.ACTION_POINTER_DOWN:
+                {
+                    int i = (action & MotionEvent.ACTION_POINTER_INDEX_MASK) >> MotionEvent.ACTION_POINTER_INDEX_SHIFT;
+                    handleMouseDown (event.getPointerId(i), event.getX(i), event.getY(i), time);
+                    return true;
+                }
+
+                default:
+                    break;
             }
 
             return false;

@@ -101,8 +101,8 @@ public:
                         cursors.
         @param hotSpotX the x position of the cursor's hotspot within the image
         @param hotSpotY the y position of the cursor's hotspot within the image
-        @param dpiFactor the factor by which this image is larger than the target
-                         screen size of the cursor.
+        @param scaleFactor the factor by which this image is larger than the target
+                           screen size of the cursor.
     */
     MouseCursor (const Image& image, int hotSpotX, int hotSpotY, float scaleFactor);
 

@@ -173,6 +173,9 @@ public:
     static AffineTransform scale (float factorX,
                                   float factorY) noexcept;
 
+    /** Returns a new transform which is a re-scale about the origin. */
+    static AffineTransform scale (float factor) noexcept;
+
     /** Returns a new transform which is a re-scale centred around the point provided. */
     static AffineTransform scale (float factorX, float factorY,
                                   float pivotX, float pivotY) noexcept;

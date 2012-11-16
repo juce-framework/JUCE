@@ -471,7 +471,7 @@ public:
         NP_CGContext* const cgContext = (window != nullptr) ? (NP_CGContext*) window->window : nullptr;
         log ("NP_CGContext: " + String::toHexString ((pointer_sized_int) cgContext));
 
-       #ifndef __LP64__
+       #if JUCE_USE_NPAPI_CARBON_UI
         WindowRef windowRef = cgContext != nullptr ? (WindowRef) cgContext->window : 0;
 
         if (windowRef != 0)
@@ -999,10 +999,10 @@ NPError NPP_New (NPMIMEType pluginType, NPP npp, ::uint16 mode, ::int16 argc, ch
   #if JUCE_MAC
     browser.setvalue (npp, (NPPVariable) NPNVpluginDrawingModel, (void*) NPDrawingModelCoreGraphics);
 
-   #ifdef __LP64__
-    browser.setvalue (npp, (NPPVariable) 1001 /*NPPVpluginEventModel*/, (void*) 1 /*NPEventModelCocoa*/);
-   #else
+   #if JUCE_USE_NPAPI_CARBON_UI
     browser.setvalue (npp, (NPPVariable) 1001 /*NPPVpluginEventModel*/, 0 /*NPEventModelCarbon*/);
+   #else
+    browser.setvalue (npp, (NPPVariable) 1001 /*NPPVpluginEventModel*/, (void*) 1 /*NPEventModelCocoa*/);
    #endif
   #endif
 

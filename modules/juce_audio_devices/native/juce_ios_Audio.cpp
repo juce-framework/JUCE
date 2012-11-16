@@ -23,10 +23,10 @@
   ==============================================================================
 */
 
-class IPhoneAudioIODevice  : public AudioIODevice
+class iOSAudioIODevice  : public AudioIODevice
 {
 public:
-    IPhoneAudioIODevice (const String& deviceName)
+    iOSAudioIODevice (const String& deviceName)
         : AudioIODevice (deviceName, "Audio"),
           actualBufferSize (0),
           isRunning (false),
@@ -43,7 +43,7 @@ public:
         updateDeviceInfo();
     }
 
-    ~IPhoneAudioIODevice()
+    ~iOSAudioIODevice()
     {
         getSessionHolder().activeDevices.removeFirstMatchingValue (this);
         close();
@@ -362,13 +362,13 @@ private:
 
         static void interruptionListenerCallback (void* client, UInt32 interruptionType)
         {
-            const Array <IPhoneAudioIODevice*>& activeDevices = static_cast <AudioSessionHolder*> (client)->activeDevices;
+            const Array <iOSAudioIODevice*>& activeDevices = static_cast <AudioSessionHolder*> (client)->activeDevices;
 
             for (int i = activeDevices.size(); --i >= 0;)
                 activeDevices.getUnchecked(i)->interruptionListener (interruptionType);
         }
 
-        Array <IPhoneAudioIODevice*> activeDevices;
+        Array <iOSAudioIODevice*> activeDevices;
     };
 
     static AudioSessionHolder& getSessionHolder()
@@ -401,12 +401,12 @@ private:
     static OSStatus processStatic (void* client, AudioUnitRenderActionFlags* flags, const AudioTimeStamp* time,
                                    UInt32 /*busNumber*/, UInt32 numFrames, AudioBufferList* data)
     {
-        return static_cast <IPhoneAudioIODevice*> (client)->process (flags, time, numFrames, data);
+        return static_cast <iOSAudioIODevice*> (client)->process (flags, time, numFrames, data);
     }
 
     static void routingChangedStatic (void* client, AudioSessionPropertyID, UInt32 /*inDataSize*/, const void* propertyValue)
     {
-        static_cast <IPhoneAudioIODevice*> (client)->routingChanged (propertyValue);
+        static_cast <iOSAudioIODevice*> (client)->routingChanged (propertyValue);
     }
 
     //==================================================================================================
@@ -495,17 +495,15 @@ private:
         }
     }
 
-    JUCE_DECLARE_NON_COPYABLE (IPhoneAudioIODevice);
+    JUCE_DECLARE_NON_COPYABLE (iOSAudioIODevice);
 };
 
 
 //==============================================================================
-class IPhoneAudioIODeviceType  : public AudioIODeviceType
+class iOSAudioIODeviceType  : public AudioIODeviceType
 {
 public:
-    //==============================================================================
-    IPhoneAudioIODeviceType()
-        : AudioIODeviceType ("iPhone Audio")
+    iOSAudioIODeviceType()  : AudioIODeviceType ("iOS Audio")
     {
     }
 
@@ -513,7 +511,7 @@ public:
 
     StringArray getDeviceNames (bool wantInputNames) const
     {
-        return StringArray ("iPhone Audio");
+        return StringArray ("iOS Audio");
     }
 
     int getDefaultDeviceIndex (bool forInput) const
@@ -532,18 +530,18 @@ public:
                                  const String& inputDeviceName)
     {
         if (outputDeviceName.isNotEmpty() || inputDeviceName.isNotEmpty())
-            return new IPhoneAudioIODevice (outputDeviceName.isNotEmpty() ? outputDeviceName
-                                                                          : inputDeviceName);
+            return new iOSAudioIODevice (outputDeviceName.isNotEmpty() ? outputDeviceName
+                                                                       : inputDeviceName);
 
         return nullptr;
     }
 
 private:
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (IPhoneAudioIODeviceType);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (iOSAudioIODeviceType);
 };
 
 //==============================================================================
 AudioIODeviceType* AudioIODeviceType::createAudioIODeviceType_iOSAudio()
 {
-    return new IPhoneAudioIODeviceType();
+    return new iOSAudioIODeviceType();
 }

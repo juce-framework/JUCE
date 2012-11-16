@@ -930,7 +930,7 @@ public:
         return wantInputNames ? inputNames : outputNames;
     }
 
-    int getDefaultDeviceIndex (bool forInput) const
+    int getDefaultDeviceIndex (bool /* forInput */) const
     {
         jassert (hasScanned); // need to call scanForDevices() before doing this
         return 0;

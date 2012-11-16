@@ -118,7 +118,7 @@ void SystemTrayIconComponent::paint (Graphics& g)
                            RectanglePlacement::xLeft | RectanglePlacement::yTop | RectanglePlacement::onlyReduceInSize, false);
 }
 
-void SystemTrayIconComponent::setIconTooltip (const String& tooltip)
+void SystemTrayIconComponent::setIconTooltip (const String& /* tooltip */)
 {
     // xxx not yet implemented!
 }

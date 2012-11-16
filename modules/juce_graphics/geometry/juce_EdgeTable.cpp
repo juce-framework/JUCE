@@ -140,10 +140,8 @@ EdgeTable::EdgeTable (const RectangleList& rectanglesToAdd)
         t += lineStrideElements;
     }
 
-    for (RectangleList::Iterator iter (rectanglesToAdd); iter.next();)
+    for (const Rectangle<int>* r = rectanglesToAdd.begin(), * const e = rectanglesToAdd.end(); r != e; ++r)
     {
-        const Rectangle<int>* const r = iter.getRectangle();
-
         const int x1 = r->getX() << 8;
         const int x2 = r->getRight() << 8;
         int y = r->getY() - bounds.getY();

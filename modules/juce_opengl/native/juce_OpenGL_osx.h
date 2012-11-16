@@ -43,6 +43,12 @@ struct ThreadSafeNSOpenGLViewClass  : public ObjCClass <NSOpenGLView>
     static void init (id self)
     {
         object_setInstanceVariable (self, "lock", new CriticalSection());
+
+       #if defined (MAC_OS_X_VERSION_10_7) && (MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_7)
+        if ([self respondsToSelector: @selector (setWantsBestResolutionOpenGLSurface:)])
+            [self setWantsBestResolutionOpenGLSurface: YES];
+       #endif
+
         setNeedsUpdate (self, YES);
     }
 

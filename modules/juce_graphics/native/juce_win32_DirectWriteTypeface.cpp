@@ -178,7 +178,7 @@ public:
         const float pathAscent  = (1024.0f * dwFontMetrics.ascent)  / designUnitsPerEm;
         const float pathDescent = (1024.0f * dwFontMetrics.descent) / designUnitsPerEm;
         const float pathScale   = 1.0f / (std::abs (pathAscent) + std::abs (pathDescent));
-        pathTransform = AffineTransform::scale (pathScale, pathScale);
+        pathTransform = AffineTransform::scale (pathScale);
     }
 
     float getAscent() const     { return ascent; }

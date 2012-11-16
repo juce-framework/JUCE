@@ -175,7 +175,7 @@ static vorbis_info_floor *floor1_unpack (vorbis_info *vi,oggpack_buffer *opb){
   return(NULL);
 }
 
-static vorbis_look_floor *floor1_look(vorbis_dsp_state *vd,
+static vorbis_look_floor *floor1_look(vorbis_dsp_state* /* vd */,
                                       vorbis_info_floor *in){
 
   int *sortpointer[VIF_POSIT+2];

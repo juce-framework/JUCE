@@ -486,7 +486,7 @@ void CoreGraphicsContext::drawImage (const Image& sourceImage, const AffineTrans
         CGContextDrawImage (context, imageRect, image);
     }
 
-    CGImageRelease (image); // (This causes a memory bug in iPhone sim 3.0 - try upgrading to a later version if you hit this)
+    CGImageRelease (image); // (This causes a memory bug in iOS sim 3.0 - try upgrading to a later version if you hit this)
     CGContextRestoreGState (context);
 }
 

@@ -30,7 +30,8 @@
 /** Creates a graphics context object that will render into the given OpenGL target.
     The caller is responsible for deleting this object when no longer needed.
 */
-LowLevelGraphicsContext* createOpenGLGraphicsContext (OpenGLContext& target);
+LowLevelGraphicsContext* createOpenGLGraphicsContext (OpenGLContext& target,
+                                                      int width, int height);
 
 /** Creates a graphics context object that will render into the given OpenGL target.
     The caller is responsible for deleting this object when no longer needed.

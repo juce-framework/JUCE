@@ -275,13 +275,12 @@ String File::getVersion() const
 //==============================================================================
 File File::getLinkedTarget() const
 {
-  #if JUCE_IOS || (defined (MAC_OS_X_VERSION_10_5) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_5)
+   #if JUCE_IOS || (defined (MAC_OS_X_VERSION_10_5) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_5)
     NSString* dest = [[NSFileManager defaultManager] destinationOfSymbolicLinkAtPath: juceStringToNS (getFullPathName()) error: nil];
-
-  #else
+   #else
     // (the cast here avoids a deprecation warning)
     NSString* dest = [((id) [NSFileManager defaultManager]) pathContentOfSymbolicLinkAtPath: juceStringToNS (getFullPathName())];
-  #endif
+   #endif
 
     if (dest != nil)
         return File (nsStringToJuce (dest));
@@ -295,9 +294,9 @@ bool File::moveToTrash() const
     if (! exists())
         return true;
 
-  #if JUCE_IOS
-    return deleteFile(); //xxx is there a trashcan on the iPhone?
-  #else
+   #if JUCE_IOS
+    return deleteFile(); //xxx is there a trashcan on the iOS?
+   #else
     JUCE_AUTORELEASEPOOL
 
     NSString* p = juceStringToNS (getFullPathName());
@@ -308,7 +307,7 @@ bool File::moveToTrash() const
                          destination: nsEmptyString()
                                files: [NSArray arrayWithObject: [p lastPathComponent]]
                                  tag: nil ];
-  #endif
+   #endif
 }
 
 //==============================================================================

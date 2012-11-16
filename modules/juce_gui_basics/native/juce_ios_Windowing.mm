@@ -224,13 +224,13 @@ int JUCE_CALLTYPE NativeMessageBox::showYesNoCancelBox (AlertWindow::AlertIconTy
 //==============================================================================
 bool DragAndDropContainer::performExternalDragDropOfFiles (const StringArray& files, const bool canMoveFiles)
 {
-    jassertfalse;    // no such thing on the iphone!
+    jassertfalse;    // no such thing on iOS!
     return false;
 }
 
 bool DragAndDropContainer::performExternalDragDropOfText (const String& text)
 {
-    jassertfalse;    // no such thing on the iphone!
+    jassertfalse;    // no such thing on iOS!
     return false;
 }
 
