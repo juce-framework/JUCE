@@ -435,8 +435,10 @@ public:
         {
             vstXml = XmlDocument::parse (file.withFileExtension ("vstxml"));
 
+           #if JUCE_WINDOWS
             if (vstXml == nullptr)
                 vstXml = XmlDocument::parse (getDLLResource (file, "VSTXML", 1));
+           #endif
         }
 
         return moduleMain != nullptr;
@@ -454,6 +456,7 @@ public:
         eff->dispatcher (eff, effClose, 0, 0, 0, 0);
     }
 
+   #if JUCE_WINDOWS
     static String getDLLResource (const File& dllFile, const String& type, int resID)
     {
         DynamicLibrary dll (dllFile.getFullPathName());
@@ -461,13 +464,9 @@ public:
 
         if (dllModule != INVALID_HANDLE_VALUE)
         {
-            HRSRC res = FindResource (dllModule, MAKEINTRESOURCE (resID), type.toWideCharPointer());
-
-            if (res != 0)
+            if (HRSRC res = FindResource (dllModule, MAKEINTRESOURCE (resID), type.toWideCharPointer()))
             {
-                HGLOBAL hGlob = LoadResource (dllModule, res);
-
-                if (hGlob)
+                if (HGLOBAL hGlob = LoadResource (dllModule, res))
                 {
                     const char* data = static_cast <const char*> (LockResource (hGlob));
                     return String::fromUTF8 (data, SizeofResource (dllModule, res));
@@ -477,6 +476,7 @@ public:
 
         return String::empty;
     }
+   #endif
 #else
    #if JUCE_PPC
     CFragConnectionID fragId;
