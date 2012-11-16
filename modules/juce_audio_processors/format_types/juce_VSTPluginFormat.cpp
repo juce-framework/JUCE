@@ -2347,9 +2347,6 @@ private:
                 SetWindowLongPtr (pluginHWND, GWLP_WNDPROC, (LONG_PTR) originalWndProc);
             #pragma warning (pop)
 
-            if (pluginHWND != 0 && IsWindow (pluginHWND))
-                DestroyWindow (pluginHWND);
-
             pluginHWND = 0;
            #elif JUCE_LINUX
             pluginWindow = 0;
