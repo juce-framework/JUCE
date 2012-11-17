@@ -153,7 +153,7 @@ struct AAXClasses
         {
         }
 
-        void process (const float* const* inputs, float* const* outputs, const int bufferSize)
+        void process (const float* const* inputs, float* const* outputs, const int bufferSize, const bool isBypass)
         {
             const int numIns  = pluginInstance->getNumInputChannels();
             const int numOuts = pluginInstance->getNumOutputChannels();
@@ -181,11 +181,11 @@ struct AAXClasses
                 for (int i = numOuts; i < numIns; ++i)
                     channels[i] = const_cast <float*> (inputs[i]);
 
-                process (channels, numIns, bufferSize);
+                process (channels, numIns, bufferSize, isBypass);
             }
         }
 
-        void process (float* const* channels, const int numChans, const int bufferSize)
+        void process (float* const* channels, const int numChans, const int bufferSize, const bool isBypass)
         {
             AudioSampleBuffer buffer (channels, numChans, bufferSize);
 
@@ -194,21 +194,14 @@ struct AAXClasses
 
             {
                 const ScopedLock sl (pluginInstance->getCallbackLock());
-                pluginInstance->processBlock (buffer, midiBuffer);
-            }
-        }
-
-        void bypass (float* const* inputs, float* const* outputs, int bufferSize)
-        {
-            const int numIns  = pluginInstance->getNumInputChannels();
-            const int numOuts = pluginInstance->getNumOutputChannels();
-
-            for (int i = 0; i < numOuts; ++i)
-            {
-                if (i < numIns)
-                    memcpy (outputs[i], inputs[i], sizeof (float) * bufferSize);
+                if (isBypass)
+                {
+                    pluginInstance->bypassedProcessBlock (buffer, midiBuffer);
+                }
                 else
-                    zeromem (outputs[i], sizeof (float) * bufferSize);
+                {
+                    pluginInstance->processBlock (buffer, midiBuffer);
+                }
             }
         }
 
@@ -487,10 +480,8 @@ struct AAXClasses
         {
             const JUCEAlgorithmContext& i = **iter;
 
-            if (*(i.bypass) != 0)
-                i.pluginInstance->bypass  (i.inputChannels, i.outputChannels, *(i.bufferSize));
-            else
-                i.pluginInstance->process (i.inputChannels, i.outputChannels, *(i.bufferSize));
+            const bool isBypass = *(i.bypass) != 0;
+            i.pluginInstance->process (i.inputChannels, i.outputChannels, *(i.bufferSize), isBypass);
         }
     }
 

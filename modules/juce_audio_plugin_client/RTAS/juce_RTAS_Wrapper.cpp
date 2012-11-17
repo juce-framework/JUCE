@@ -536,12 +536,6 @@ protected:
             return;
         }
 
-        if (mBypassed)
-        {
-            bypassBuffers (inputs, outputs, numSamples);
-            return;
-        }
-
        #if JucePlugin_WantsMidiInput
         midiEvents.clear();
 
@@ -605,7 +599,10 @@ protected:
 
                 AudioSampleBuffer chans (channels, totalChans, numSamples);
 
-                juceFilter->processBlock (chans, midiEvents);
+                if (mBypassed)
+                    juceFilter->bypassedProcessBlock (chans, midiEvents);
+                else
+                    juceFilter->processBlock (chans, midiEvents);
             }
         }
 

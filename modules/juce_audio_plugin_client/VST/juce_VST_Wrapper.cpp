@@ -268,6 +268,7 @@ public:
          chunkMemoryTime (0),
          speakerIn (kSpeakerArrEmpty),
          speakerOut (kSpeakerArrEmpty),
+         isBypassed (false),
          numInChans (JucePlugin_MaxNumInputChannels),
          numOutChans (JucePlugin_MaxNumOutputChannels),
          isProcessing (false),
@@ -406,6 +407,8 @@ public:
             // This tells Wavelab to use the UI thread to invoke open/close,
             // like all other hosts do.
             result = -1;
+        } else if (strcmp (text, "bypass") == 0) {
+            result = 1;
         }
 
         return result;
@@ -450,6 +453,11 @@ public:
             if (isPair)
                 properties.flags |= kVstPinIsStereo;
         }
+    }
+
+    bool setBypass (bool onOff) {
+        isBypassed = onOff;
+        return true;
     }
 
     //==============================================================================
@@ -556,7 +564,10 @@ public:
 
                 {
                     AudioSampleBuffer chans (channels, jmax (numIn, numOut), numSamples);
-                    filter->processBlock (chans, midiEvents);
+                    if (isBypassed)
+                        filter->bypassedProcessBlock (chans, midiEvents);
+                    else
+                        filter->processBlock (chans, midiEvents);
                 }
 
                 // copy back any temp channels that may have been used..
@@ -1368,6 +1379,7 @@ private:
     MidiBuffer midiEvents;
     VSTMidiEventList outgoingEvents;
     VstSpeakerArrangementType speakerIn, speakerOut;
+    bool isBypassed;
     int numInChans, numOutChans;
     bool isProcessing, hasShutdown, firstProcessCallback, shouldDeleteEditor;
     HeapBlock<float*> channels;
