@@ -536,12 +536,6 @@ protected:
             return;
         }
 
-        if (mBypassed)
-        {
-            bypassBuffers (inputs, outputs, numSamples);
-            return;
-        }
-
         juceFilter->m_hasSideChain = false;
         juceFilter->m_playPositionSamples = mRTGlobals->mRTASPlayPosition;
 
@@ -608,7 +602,10 @@ protected:
 
                 AudioSampleBuffer chans (channels, totalChans, numSamples);
 
-                juceFilter->processBlock (chans, midiEvents);
+                if (mBypassed)
+                    juceFilter->bypassedProcessBlock (chans, midiEvents);
+                else
+                    juceFilter->processBlock (chans, midiEvents);
             }
         }
 
