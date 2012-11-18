@@ -271,6 +271,7 @@ public:
          numInChans (JucePlugin_MaxNumInputChannels),
          numOutChans (JucePlugin_MaxNumOutputChannels),
          isProcessing (false),
+         isBypassed (false),
          hasShutdown (false),
          firstProcessCallback (true),
          shouldDeleteEditor (false),
@@ -397,7 +398,8 @@ public:
            #endif
         }
         else if (strcmp (text, "receiveVstTimeInfo") == 0
-                 || strcmp (text, "conformsToWindowRules") == 0)
+                 || strcmp (text, "conformsToWindowRules") == 0
+                 || strcmp (text, "bypass") == 0)
         {
             result = 1;
         }
@@ -450,6 +452,12 @@ public:
             if (isPair)
                 properties.flags |= kVstPinIsStereo;
         }
+    }
+
+    bool setBypass (bool b)
+    {
+        isBypassed = b;
+        return true;
     }
 
     //==============================================================================
@@ -556,7 +564,11 @@ public:
 
                 {
                     AudioSampleBuffer chans (channels, jmax (numIn, numOut), numSamples);
-                    filter->processBlock (chans, midiEvents);
+
+                    if (isBypassed)
+                        filter->processBlockBypassed (chans, midiEvents);
+                    else
+                        filter->processBlock (chans, midiEvents);
                 }
 
                 // copy back any temp channels that may have been used..
@@ -1369,7 +1381,7 @@ private:
     VSTMidiEventList outgoingEvents;
     VstSpeakerArrangementType speakerIn, speakerOut;
     int numInChans, numOutChans;
-    bool isProcessing, hasShutdown, firstProcessCallback, shouldDeleteEditor;
+    bool isProcessing, isBypassed, hasShutdown, firstProcessCallback, shouldDeleteEditor;
     HeapBlock<float*> channels;
     Array<float*> tempChannels;  // see note in processReplacing()
 
@@ -1466,6 +1478,10 @@ namespace
 
                     JuceVSTWrapper* const wrapper = new JuceVSTWrapper (audioMaster, filter);
                     return wrapper->getAeffect();
+                }
+                else
+                {
+                    jassertfalse; // your createPluginFilter() method must return an object!
                 }
             }
         }
