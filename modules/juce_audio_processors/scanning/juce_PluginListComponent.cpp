@@ -43,6 +43,9 @@ PluginListComponent::PluginListComponent (AudioPluginFormatManager& manager,
     setSize (400, 600);
     list.addChangeListener (this);
     updateList();
+
+    PluginDirectoryScanner::applyBlacklistingsFromDeadMansPedal (list, deadMansPedalFile);
+    deadMansPedalFile.deleteFile();
 }
 
 PluginListComponent::~PluginListComponent()
@@ -60,7 +63,7 @@ void PluginListComponent::resized()
 {
     listBox.setBounds (0, 0, getWidth(), getHeight() - 30);
     optionsButton.changeWidthToFitText (24);
-    optionsButton.setTopLeftPosition (8, getHeight() - 28);
+    optionsButton.setTopLeftPosition (0, getHeight() - 28);
 }
 
 void PluginListComponent::changeListenerCallback (ChangeBroadcaster*)
@@ -76,7 +79,7 @@ void PluginListComponent::updateList()
 
 int PluginListComponent::getNumRows()
 {
-    return list.getNumTypes();
+    return list.getNumTypes() + list.getBlacklistedFiles().size();
 }
 
 void PluginListComponent::paintListBoxItem (int row, Graphics& g, int width, int height, bool rowIsSelected)
@@ -84,46 +87,60 @@ void PluginListComponent::paintListBoxItem (int row, Graphics& g, int width, int
     if (rowIsSelected)
         g.fillAll (findColour (TextEditor::highlightColourId));
 
-    if (const PluginDescription* const pd = list.getType (row))
+    String name, desc;
+    bool isBlacklisted = false;
+
+    if (row >= list.getNumTypes())
+    {
+        isBlacklisted = true;
+        name = list.getBlacklistedFiles() [row - list.getNumTypes()];
+        desc = TRANS("Deactivated after failing to initialise correctly");
+    }
+    else if (const PluginDescription* const pd = list.getType (row))
+    {
+        name = pd->name;
+
+        desc << pd->pluginFormatName
+             << (pd->isInstrument ? " instrument" : " effect")
+             << " - " << pd->numInputChannels  << (pd->numInputChannels  == 1 ? " in"  : " ins")
+             << " / " << pd->numOutputChannels << (pd->numOutputChannels == 1 ? " out" : " outs");
+
+        if (pd->manufacturerName.isNotEmpty())  desc << " - " << pd->manufacturerName;
+        if (pd->version.isNotEmpty())           desc << " - " << pd->version;
+        if (pd->category.isNotEmpty())          desc << " - category: '" << pd->category << '\'';
+    }
+
+    if (name.isNotEmpty())
     {
         GlyphArrangement ga;
-        ga.addCurtailedLineOfText (Font (height * 0.7f, Font::bold), pd->name, 8.0f, height * 0.8f, width - 10.0f, true);
+        ga.addCurtailedLineOfText (Font (height * 0.7f, Font::bold), name, 8.0f, height * 0.8f, width - 10.0f, true);
 
-        g.setColour (Colours::black);
+        g.setColour (isBlacklisted ? Colours::red : Colours::black);
         ga.draw (g);
 
         const Rectangle<float> bb (ga.getBoundingBox (0, -1, false));
 
-        String desc;
-        desc << pd->pluginFormatName
-             << (pd->isInstrument ? " instrument" : " effect")
-             << " - "
-             << pd->numInputChannels << (pd->numInputChannels == 1 ? " in" : " ins")
-             << " / "
-             << pd->numOutputChannels << (pd->numOutputChannels == 1 ? " out" : " outs");
-
-        if (pd->manufacturerName.isNotEmpty())
-            desc << " - " << pd->manufacturerName;
-
-        if (pd->version.isNotEmpty())
-            desc << " - " << pd->version;
-
-         if (pd->category.isNotEmpty())
-            desc << " - category: '" << pd->category << '\'';
-
-        g.setColour (Colours::grey);
-
         ga.clear();
         ga.addCurtailedLineOfText (Font (height * 0.6f), desc,
-                                   bb.getRight() + 10.0f, height * 0.8f,
+                                   jmax (bb.getRight() + 10.0f, width / 3.0f), height * 0.8f,
                                    width - bb.getRight() - 12.0f, true);
+
+        g.setColour (isBlacklisted ? Colours::red : Colours::grey);
         ga.draw (g);
     }
 }
 
+static void removePluginItem (KnownPluginList& list, int index)
+{
+    if (index < list.getNumTypes())
+        list.removeType (index);
+    else
+        list.removeFromBlacklist (list.getBlacklistedFiles() [index - list.getNumTypes()]);
+}
+
 void PluginListComponent::deleteKeyPressed (int lastRowSelected)
 {
-    list.removeType (lastRowSelected);
+    removePluginItem (list, lastRowSelected);
 }
 
 void PluginListComponent::removeSelected()
@@ -132,15 +149,22 @@ void PluginListComponent::removeSelected()
 
     for (int i = list.getNumTypes(); --i >= 0;)
         if (selected.contains (i))
-            list.removeType (i);
+            removePluginItem (list, i);
+}
+
+bool PluginListComponent::canShowSelectedFolder() const
+{
+    if (const PluginDescription* const desc = list.getType (listBox.getSelectedRow()))
+        return File::createFileWithoutCheckingPath (desc->fileOrIdentifier).exists();
+
+    return false;
 }
 
 void PluginListComponent::showSelectedFolder()
 {
-    const PluginDescription* const desc = list.getType (listBox.getSelectedRow());
-
-    if (desc != nullptr && File (desc->fileOrIdentifier).existsAsFile())
-        File (desc->fileOrIdentifier).getParentDirectory().startAsProcess();
+    if (canShowSelectedFolder())
+        if (const PluginDescription* const desc = list.getType (listBox.getSelectedRow()))
+            File (desc->fileOrIdentifier).getParentDirectory().startAsProcess();
 }
 
 void PluginListComponent::removeMissingPlugins()
@@ -180,7 +204,7 @@ void PluginListComponent::buttonClicked (Button* button)
         PopupMenu menu;
         menu.addItem (1, TRANS("Clear list"));
         menu.addItem (5, TRANS("Remove selected plugin from list"), listBox.getNumSelectedRows() > 0);
-        menu.addItem (6, TRANS("Show folder containing selected plugin"), listBox.getNumSelectedRows() > 0);
+        menu.addItem (6, TRANS("Show folder containing selected plugin"), canShowSelectedFolder());
         menu.addItem (7, TRANS("Remove any plugins whose files no longer exist"));
         menu.addSeparator();
         menu.addItem (2, TRANS("Sort alphabetically"));
@@ -292,7 +316,7 @@ void PluginListComponent::scanFinished (const StringArray& failedFiles)
     StringArray shortNames;
 
     for (int i = 0; i < failedFiles.size(); ++i)
-        shortNames.add (File (failedFiles[i]).getFileName());
+        shortNames.add (File::createFileWithoutCheckingPath (failedFiles[i]).getFileName());
 
     currentScanner = nullptr; // mustn't delete this before using the failed files array
 

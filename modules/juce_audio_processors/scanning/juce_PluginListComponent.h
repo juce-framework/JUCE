@@ -97,6 +97,7 @@ private:
     void updateList();
     void removeSelected();
     void showSelectedFolder();
+    bool canShowSelectedFolder() const;
     void removeMissingPlugins();
 
     void buttonClicked (Button*);

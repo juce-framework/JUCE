@@ -297,11 +297,8 @@ public:
         {
             if (! maskedRegion.isEmpty())
             {
-                for (RectangleList::Iterator i (maskedRegion); i.next();)
-                {
-                    const Rectangle<int>& r = *i.getRectangle();
-                    ExcludeClipRect (hdc, r.getX(), r.getY(), r.getRight(), r.getBottom());
-                }
+                for (const Rectangle<int>* i = maskedRegion.begin(), * const e = maskedRegion.end(); i != e; ++i)
+                    ExcludeClipRect (hdc, i->getX(), i->getY(), i->getRight(), i->getBottom());
             }
 
             RECT windowBounds;
@@ -328,11 +325,8 @@ public:
             {
                 savedDC = SaveDC (dc);
 
-                for (RectangleList::Iterator i (maskedRegion); i.next();)
-                {
-                    const Rectangle<int>& r = *i.getRectangle();
-                    ExcludeClipRect (dc, r.getX(), r.getY(), r.getRight(), r.getBottom());
-                }
+                for (const Rectangle<int>* i = maskedRegion.begin(), * const e = maskedRegion.end(); i != e; ++i)
+                    ExcludeClipRect (dc, i->getX(), i->getY(), i->getRight(), i->getBottom());
             }
 
             StretchDIBits (dc,
@@ -1497,10 +1491,8 @@ private:
 
                 if (transparent)
                 {
-                    RectangleList::Iterator i (contextClip);
-
-                    while (i.next())
-                        offscreenImage.clear (*i.getRectangle());
+                    for (const Rectangle<int>* i = contextClip.begin(), * const e = contextClip.end(); i != e; ++i)
+                        offscreenImage.clear (*i);
                 }
 
                 // if the component's not opaque, this won't draw properly unless the platform can support this

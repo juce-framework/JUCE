@@ -579,7 +579,7 @@ public:
         then to use that to iterate the string.
         @see getCharPointer
     */
-    const juce_wchar operator[] (int index) const noexcept;
+    juce_wchar operator[] (int index) const noexcept;
 
     /** Returns the final character of the string.
         If the string is empty this will return 0.

@@ -822,7 +822,7 @@ private:
 //==============================================================================
 class TextEditor::TextHolderComponent  : public Component,
                                          public Timer,
-                                         private ValueListener
+                                         public ValueListener
 {
 public:
     TextHolderComponent (TextEditor& ed)  : owner (ed)
@@ -962,6 +962,7 @@ TextEditor::~TextEditor()
         if (ComponentPeer* const peer = getPeer())
             peer->dismissPendingTextInput();
 
+    textValue.removeListener (textHolder);
     textValue.referTo (Value());
     clearInternal (0);
     viewport = nullptr;

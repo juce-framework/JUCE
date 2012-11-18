@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-//==============================================================================
 static const char* const wavFormatName = "WAV file";
 static const char* const wavExtensions[] = { ".wav", ".bwf", 0 };
 
@@ -94,12 +93,12 @@ namespace WavFileHelpers
 
             values.set (WavAudioFormat::bwavTimeReference, String (time));
             values.set (WavAudioFormat::bwavCodingHistory,
-                        String::fromUTF8 (codingHistory, totalSize - offsetof (BWAVChunk, codingHistory)));
+                        String::fromUTF8 (codingHistory, totalSize - (int) offsetof (BWAVChunk, codingHistory)));
         }
 
         static MemoryBlock createFrom (const StringPairArray& values)
         {
-            const size_t sizeNeeded = sizeof (BWAVChunk) + values [WavAudioFormat::bwavCodingHistory].getNumBytesAsUTF8();
+            const size_t sizeNeeded = sizeof (BWAVChunk) + (size_t) values [WavAudioFormat::bwavCodingHistory].getNumBytesAsUTF8();
             MemoryBlock data ((sizeNeeded + 3) & ~3);
             data.fillWith (0);
 
@@ -182,7 +181,7 @@ namespace WavFileHelpers
             setValue (values, "NumSampleLoops",    numSampleLoops);
             setValue (values, "SamplerData",       samplerData);
 
-            for (uint32 i = 0; i < numSampleLoops; ++i)
+            for (int i = 0; i < (int) numSampleLoops; ++i)
             {
                 if ((uint8*) (loops + (i + 1)) > ((uint8*) this) + totalSize)
                     break;
@@ -214,7 +213,7 @@ namespace WavFileHelpers
 
             if (numLoops > 0)
             {
-                const size_t sizeNeeded = sizeof (SMPLChunk) + (numLoops - 1) * sizeof (SampleLoop);
+                const size_t sizeNeeded = sizeof (SMPLChunk) + (size_t) (numLoops - 1) * sizeof (SampleLoop);
                 data.setSize ((sizeNeeded + 3) & ~3, true);
 
                 SMPLChunk* const s = static_cast <SMPLChunk*> (data.getData());
@@ -324,7 +323,7 @@ namespace WavFileHelpers
         {
             values.set ("NumCuePoints", String (ByteOrder::swapIfBigEndian (numCues)));
 
-            for (uint32 i = 0; i < numCues; ++i)
+            for (int i = 0; i < (int) numCues; ++i)
             {
                 if ((uint8*) (cues + (i + 1)) > ((uint8*) this) + totalSize)
                     break;
@@ -344,7 +343,7 @@ namespace WavFileHelpers
 
             if (numCues > 0)
             {
-                const size_t sizeNeeded = sizeof (CueChunk) + (numCues - 1) * sizeof (Cue);
+                const size_t sizeNeeded = sizeof (CueChunk) + (size_t) (numCues - 1) * sizeof (Cue);
                 data.setSize ((sizeNeeded + 3) & ~3, true);
 
                 CueChunk* const c = static_cast <CueChunk*> (data.getData());
@@ -501,8 +500,6 @@ public:
         using namespace WavFileHelpers;
         uint64 len = 0;
         uint64 end = 0;
-        bool hasGotType = false;
-        bool hasGotData = false;
         int cueNoteIndex = 0;
         int cueLabelIndex = 0;
         int cueRegionIndex = 0;
@@ -517,7 +514,7 @@ public:
         else if (firstChunkType == chunkName ("RIFF"))
         {
             len = (uint64) (uint32) input->readInt();
-            end = input->getPosition() + len;
+            end = len + (uint64) input->getPosition();
         }
         else
         {
@@ -537,7 +534,7 @@ public:
 
                 const int64 chunkEnd = input->getPosition() + length + (length & 1);
                 len = (uint64) input->readInt64();
-                end = startOfRIFFChunk + len;
+                end = len + (uint64) startOfRIFFChunk;
                 dataLength = input->readInt64();
                 input->setPosition (chunkEnd);
             }
@@ -561,7 +558,7 @@ public:
                     if (bitsPerSample > 64)
                     {
                         bytesPerFrame = bytesPerSec / (int) sampleRate;
-                        bitsPerSample = 8 * bytesPerFrame / numChannels;
+                        bitsPerSample = 8 * (unsigned int) bytesPerFrame / numChannels;
                     }
                     else
                     {
@@ -599,8 +596,6 @@ public:
                     {
                         bytesPerFrame = 0;
                     }
-
-                    hasGotType = true;
                 }
                 else if (chunkType == chunkName ("data"))
                 {
@@ -609,8 +604,6 @@ public:
 
                     dataChunkStart = input->getPosition();
                     lengthInSamples = (bytesPerFrame > 0) ? (dataLength / bytesPerFrame) : 0;
-
-                    hasGotData = true;
                 }
                 else if (chunkType == chunkName ("bext"))
                 {
@@ -726,7 +719,7 @@ public:
         {
             for (int i = numDestChannels; --i >= 0;)
                 if (destSamples[i] != nullptr)
-                    zeromem (destSamples[i] + startOffsetInDestBuffer, sizeof (int) * numSamples);
+                    zeromem (destSamples[i] + startOffsetInDestBuffer, sizeof (int) * (size_t) numSamples);
 
             numSamples = (int) samplesAvailable;
         }
@@ -829,7 +822,7 @@ public:
         if (writeFailed)
             return false;
 
-        const size_t bytes = numChannels * numSamples * bitsPerSample / 8;
+        const size_t bytes = numChannels * (unsigned int) numSamples * bitsPerSample / 8;
         tempBlock.ensureSize (bytes, false);
 
         switch (bitsPerSample)
@@ -898,14 +891,14 @@ private:
         const bool isRF64 = (bytesWritten >= literal64bit (0x100000000));
         const bool isWaveFmtEx = isRF64 || (numChannels > 2);
 
-        int64 riffChunkSize = 4 /* 'RIFF' */ + 8 + 40 /* WAVEFORMATEX */
-                               + 8 + audioDataSize + (audioDataSize & 1)
-                               + (bwavChunk.getSize() > 0 ? (8  + bwavChunk.getSize()) : 0)
-                               + (smplChunk.getSize() > 0 ? (8  + smplChunk.getSize()) : 0)
-                               + (instChunk.getSize() > 0 ? (8  + instChunk.getSize()) : 0)
-                               + (cueChunk .getSize() > 0 ? (8  + cueChunk .getSize()) : 0)
-                               + (listChunk.getSize() > 0 ? (12 + listChunk.getSize()) : 0)
-                               + (8 + 28); // (ds64 chunk)
+        int64 riffChunkSize = (int64) (4 /* 'RIFF' */ + 8 + 40 /* WAVEFORMATEX */
+                                       + 8 + audioDataSize + (audioDataSize & 1)
+                                       + (bwavChunk.getSize() > 0 ? (8  + bwavChunk.getSize()) : 0)
+                                       + (smplChunk.getSize() > 0 ? (8  + smplChunk.getSize()) : 0)
+                                       + (instChunk.getSize() > 0 ? (8  + instChunk.getSize()) : 0)
+                                       + (cueChunk .getSize() > 0 ? (8  + cueChunk .getSize()) : 0)
+                                       + (listChunk.getSize() > 0 ? (12 + listChunk.getSize()) : 0)
+                                       + (8 + 28)); // (ds64 chunk)
 
         riffChunkSize += (riffChunkSize & 1);
 
@@ -925,7 +918,7 @@ private:
             output->writeInt (chunkName ("ds64"));
             output->writeInt (28);  // chunk size for uncompressed data (no table)
             output->writeInt64 (riffChunkSize);
-            output->writeInt64 (audioDataSize);
+            output->writeInt64 ((int64) audioDataSize);
             output->writeRepeatedByte (0, 12);
         }
 
@@ -1052,7 +1045,8 @@ AudioFormatWriter* WavAudioFormat::createWriterFor (OutputStream* out, double sa
                                                     const StringPairArray& metadataValues, int /*qualityOptionIndex*/)
 {
     if (getPossibleBitDepths().contains (bitsPerSample))
-        return new WavAudioFormatWriter (out, sampleRate, (int) numChannels, bitsPerSample, metadataValues);
+        return new WavAudioFormatWriter (out, sampleRate, (unsigned int) numChannels,
+                                         (unsigned int) bitsPerSample, metadataValues);
 
     return nullptr;
 }

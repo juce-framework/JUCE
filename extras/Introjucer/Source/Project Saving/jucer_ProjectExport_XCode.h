@@ -154,7 +154,7 @@ public:
     void create (const OwnedArray<LibraryModule>&) const
     {
         infoPlistFile = getTargetFolder().getChildFile ("Info.plist");
-        menuXibFile = getTargetFolder().getChildFile ("RecentFilesMenuTemplate.xib");
+        menuNibFile = getTargetFolder().getChildFile ("RecentFilesMenuTemplate.nib");
 
         createIconFile();
 
@@ -276,7 +276,7 @@ private:
     mutable OwnedArray<ValueTree> pbxBuildFiles, pbxFileReferences, pbxGroups, misc, projectConfigs, targetConfigs;
     mutable StringArray buildPhaseIDs, resourceIDs, sourceIDs, frameworkIDs;
     mutable StringArray frameworkFileIDs, rezFileIDs, resourceFileRefs;
-    mutable File infoPlistFile, menuXibFile, iconFile;
+    mutable File infoPlistFile, menuNibFile, iconFile;
     const bool iOS;
 
     static String sanitisePath (const String& path)
@@ -304,14 +304,14 @@ private:
 
         if (! iOS)
         {
-            MemoryOutputStream xib;
-            xib << BinaryData::RecentFilesMenuTemplate_xib;
-            overwriteFileIfDifferentOrThrow (menuXibFile, xib);
+            MemoryOutputStream nib;
+            nib.write (BinaryData::RecentFilesMenuTemplate_nib, BinaryData::RecentFilesMenuTemplate_nibSize);
+            overwriteFileIfDifferentOrThrow (menuNibFile, nib);
 
-            RelativePath menuXibPath (menuXibFile, getTargetFolder(), RelativePath::buildTargetFolder);
-            addFileReference (menuXibPath.toUnixStyle());
-            resourceIDs.add (addBuildFile (menuXibPath, false, false));
-            resourceFileRefs.add (createFileRefID (menuXibPath));
+            RelativePath menuNibPath (menuNibFile, getTargetFolder(), RelativePath::buildTargetFolder);
+            addFileReference (menuNibPath.toUnixStyle());
+            resourceIDs.add (addBuildFile (menuNibPath, false, false));
+            resourceFileRefs.add (createFileRefID (menuNibPath));
         }
 
         if (iconFile.exists())
@@ -862,7 +862,7 @@ private:
                 if (val.isEmpty() || (val.containsAnyOf (" \t;<>()=,&+-_@~\r\n")
                                         && ! (val.trimStart().startsWithChar ('(')
                                                 || val.trimStart().startsWithChar ('{'))))
-                    val = val.quoted();
+                    val = "\"" + val + "\"";
 
                 output << propertyName.toString() << " = " << val << "; ";
             }

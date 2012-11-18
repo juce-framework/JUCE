@@ -35,7 +35,7 @@ public:
         pixelStride = format == Image::RGB ? 3 : ((format == Image::ARGB) ? 4 : 1);
         lineStride = (pixelStride * jmax (1, width) + 3) & ~3;
 
-        imageData.allocate (lineStride * jmax (1, height), clearImage);
+        imageData.allocate ((size_t) (lineStride * jmax (1, height)), clearImage);
 
         CGColorSpaceRef colourSpace = (format == Image::SingleChannel) ? CGColorSpaceCreateDeviceGray()
                                                                        : CGColorSpaceCreateDeviceRGB();
@@ -486,7 +486,7 @@ void CoreGraphicsContext::drawImage (const Image& sourceImage, const AffineTrans
         CGContextDrawImage (context, imageRect, image);
     }
 
-    CGImageRelease (image); // (This causes a memory bug in iPhone sim 3.0 - try upgrading to a later version if you hit this)
+    CGImageRelease (image); // (This causes a memory bug in iOS sim 3.0 - try upgrading to a later version if you hit this)
     CGContextRestoreGState (context);
 }
 

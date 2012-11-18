@@ -489,7 +489,9 @@ protected:
 
         if (iconFile != File::nonexistent)
            mo << newLine
-              << "IDI_ICON1 ICON DISCARDABLE " << iconFile.getFileName().quoted();
+              << "IDI_ICON1 ICON DISCARDABLE " << iconFile.getFileName().quoted()
+              << newLine
+              << "IDI_ICON2 ICON DISCARDABLE " << iconFile.getFileName().quoted();
 
         overwriteFileIfDifferentOrThrow (rcFile, mo);
     }

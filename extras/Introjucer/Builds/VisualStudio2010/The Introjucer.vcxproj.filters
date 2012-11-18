@@ -2336,7 +2336,7 @@
     <None Include="..\..\Source\BinaryData\juce_icon.png">
       <Filter>The Introjucer\BinaryData</Filter>
     </None>
-    <None Include="..\..\Source\BinaryData\RecentFilesMenuTemplate.xib">
+    <None Include="..\..\Source\BinaryData\RecentFilesMenuTemplate.nib">
       <Filter>The Introjucer\BinaryData</Filter>
     </None>
     <None Include="..\..\..\..\modules\juce_core\juce_module_info">

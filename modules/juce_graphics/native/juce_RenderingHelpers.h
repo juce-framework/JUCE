@@ -41,14 +41,14 @@ class TranslationOrTransform
 {
 public:
     TranslationOrTransform (int x, int y) noexcept
-        : xOffset (x), yOffset (y), isOnlyTranslated (true)
+        : xOffset (x), yOffset (y), isOnlyTranslated (true), isIntegerScaling (true)
     {
     }
 
     TranslationOrTransform (const TranslationOrTransform& other) noexcept
         : complexTransform (other.complexTransform),
           xOffset (other.xOffset), yOffset (other.yOffset),
-          isOnlyTranslated (other.isOnlyTranslated)
+          isOnlyTranslated (other.isOnlyTranslated), isIntegerScaling (other.isIntegerScaling)
     {
     }
 
@@ -91,6 +91,7 @@ public:
         {
             complexTransform = getTransformWith (t);
             isOnlyTranslated = false;
+            isIntegerScaling = isIntegerScale (complexTransform);
         }
     }
 
@@ -120,6 +121,12 @@ public:
                              static_cast <Type> (yOffset));
     }
 
+    template <typename Type>
+    Rectangle<float> transformed (const Rectangle<Type>& r) const noexcept
+    {
+        return r.toFloat().transformed (complexTransform);
+    }
+
     Rectangle<int> deviceSpaceToUserSpace (const Rectangle<int>& r) const noexcept
     {
         return isOnlyTranslated ? r.translated (-xOffset, -yOffset)
@@ -128,7 +135,7 @@ public:
 
     AffineTransform complexTransform;
     int xOffset, yOffset;
-    bool isOnlyTranslated;
+    bool isOnlyTranslated, isIntegerScaling;
 
 private:
     static inline bool isIntegerTranslation (const AffineTransform& t) noexcept
@@ -136,6 +143,19 @@ private:
         const int tx = (int) (t.getTranslationX() * 256.0f);
         const int ty = (int) (t.getTranslationY() * 256.0f);
         return ((tx | ty) & 0xf8) == 0;
+    }
+
+    static inline bool isIntegerScale (const AffineTransform& t) noexcept
+    {
+        if (t.mat01 != 0 || t.mat10 != 0)
+            return false;
+
+        const int tx = (int) (t.getTranslationX() * 256.0f);
+        const int ty = (int) (t.getTranslationY() * 256.0f);
+        const int txs = (int) (t.mat00 * 256.0f);
+        const int tys = (int) (t.mat11 * 256.0f);
+
+        return ((tx | ty | txs | tys) & 0xf8) == 0;
     }
 };
 
@@ -1664,8 +1684,8 @@ namespace ClipRegions
             RectangleList inverse (edgeTable.getMaximumBounds());
 
             if (inverse.subtract (r))
-                for (RectangleList::Iterator iter (inverse); iter.next();)
-                    edgeTable.excludeRectangle (*iter.getRectangle());
+                for (const Rectangle<int>* i = inverse.begin(), * const e = inverse.end(); i != e; ++i)
+                    edgeTable.excludeRectangle (*i);
 
             return edgeTable.isEmpty() ? nullptr : this;
         }
@@ -1947,17 +1967,14 @@ namespace ClipRegions
         template <class Renderer>
         void iterate (Renderer& r) const noexcept
         {
-            RectangleList::Iterator iter (clip);
-
-            while (iter.next())
+            for (const Rectangle<int>* i = clip.begin(), * const e = clip.end(); i != e; ++i)
             {
-                const Rectangle<int> rect (*iter.getRectangle());
-                const int x = rect.getX();
-                const int w = rect.getWidth();
+                const int x = i->getX();
+                const int w = i->getWidth();
                 jassert (w > 0);
-                const int bottom = rect.getBottom();
+                const int bottom = i->getBottom();
 
-                for (int y = rect.getY(); y < bottom; ++y)
+                for (int y = i->getY(); y < bottom; ++y)
                 {
                     r.setEdgeTableYPos (y);
                     r.handleEdgeTableLineFull (x, w);
@@ -1977,11 +1994,9 @@ namespace ClipRegions
             template <class Renderer>
             void iterate (Renderer& r) const noexcept
             {
-                RectangleList::Iterator iter (clip);
-
-                while (iter.next())
+                for (const Rectangle<int>* i = clip.begin(), * const e = clip.end(); i != e; ++i)
                 {
-                    const Rectangle<int> rect (iter.getRectangle()->getIntersection (area));
+                    const Rectangle<int> rect (i->getIntersection (area));
 
                     if (! rect.isEmpty())
                     {
@@ -2018,14 +2033,13 @@ namespace ClipRegions
             void iterate (Renderer& r) const noexcept
             {
                 const RenderingHelpers::FloatRectangleRasterisingInfo f (area);
-                RectangleList::Iterator iter (clip);
 
-                while (iter.next())
+                for (const Rectangle<int>* i = clip.begin(), * const e = clip.end(); i != e; ++i)
                 {
-                    const int clipLeft   = iter.getRectangle()->getX();
-                    const int clipRight  = iter.getRectangle()->getRight();
-                    const int clipTop    = iter.getRectangle()->getY();
-                    const int clipBottom = iter.getRectangle()->getBottom();
+                    const int clipLeft   = i->getX();
+                    const int clipRight  = i->getRight();
+                    const int clipTop    = i->getY();
+                    const int clipBottom = i->getBottom();
 
                     if (f.totalBottom > clipTop && f.totalTop < clipBottom && f.totalRight > clipLeft && f.totalLeft < clipRight)
                     {

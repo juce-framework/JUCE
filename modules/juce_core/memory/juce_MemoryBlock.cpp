@@ -53,9 +53,9 @@ MemoryBlock::MemoryBlock (const MemoryBlock& other)
 }
 
 MemoryBlock::MemoryBlock (const void* const dataToInitialiseFrom, const size_t sizeInBytes)
-    : size (jmax ((size_t) 0, sizeInBytes))
+    : size (sizeInBytes)
 {
-    jassert (sizeInBytes >= 0);
+    jassert (((ssize_t) sizeInBytes) >= 0);
 
     if (size > 0)
     {
@@ -369,7 +369,7 @@ String MemoryBlock::toBase64Encoding() const
 
     String destString ((unsigned int) size); // store the length, followed by a '.', and then the data.
     const int initialLen = destString.length();
-    destString.preallocateBytes (sizeof (String::CharPointerType::CharType) * (initialLen + 2 + numChars));
+    destString.preallocateBytes (sizeof (String::CharPointerType::CharType) * (size_t) (initialLen + 2 + numChars));
 
     String::CharPointerType d (destString.getCharPointer());
     d += initialLen;

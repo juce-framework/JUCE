@@ -268,10 +268,10 @@ public:
          chunkMemoryTime (0),
          speakerIn (kSpeakerArrEmpty),
          speakerOut (kSpeakerArrEmpty),
-         isBypassed (false),
          numInChans (JucePlugin_MaxNumInputChannels),
          numOutChans (JucePlugin_MaxNumOutputChannels),
          isProcessing (false),
+         isBypassed (false),
          hasShutdown (false),
          firstProcessCallback (true),
          shouldDeleteEditor (false),
@@ -369,7 +369,7 @@ public:
     }
 
     bool getProductString (char* text)  { return getEffectName (text); }
-    VstInt32 getVendorVersion()         { return (VstInt32) convertHexVersionToDecimal (JucePlugin_VersionCode); }
+    VstInt32 getVendorVersion()         { return convertHexVersionToDecimal (JucePlugin_VersionCode); }
     VstPlugCategory getPlugCategory()   { return JucePlugin_VSTCategory; }
     bool keysRequired()                 { return (JucePlugin_EditorRequiresKeyboardFocus) != 0; }
 
@@ -398,7 +398,8 @@ public:
            #endif
         }
         else if (strcmp (text, "receiveVstTimeInfo") == 0
-                 || strcmp (text, "conformsToWindowRules") == 0)
+                 || strcmp (text, "conformsToWindowRules") == 0
+                 || strcmp (text, "bypass") == 0)
         {
             result = 1;
         }
@@ -407,8 +408,6 @@ public:
             // This tells Wavelab to use the UI thread to invoke open/close,
             // like all other hosts do.
             result = -1;
-        } else if (strcmp (text, "bypass") == 0) {
-            result = 1;
         }
 
         return result;
@@ -455,8 +454,9 @@ public:
         }
     }
 
-    bool setBypass (bool onOff) {
-        isBypassed = onOff;
+    bool setBypass (bool b)
+    {
+        isBypassed = b;
         return true;
     }
 
@@ -478,7 +478,7 @@ public:
 
         AudioSampleBuffer temp (numIn, numSamples);
         for (int i = numIn; --i >= 0;)
-            memcpy (temp.getSampleData (i), outputs[i], sizeof (float) * numSamples);
+            memcpy (temp.getSampleData (i), outputs[i], sizeof (float) * (size_t) numSamples);
 
         processReplacing (inputs, outputs, numSamples);
 
@@ -526,7 +526,7 @@ public:
             if (filter->isSuspended())
             {
                 for (int i = 0; i < numOut; ++i)
-                    zeromem (outputs[i], sizeof (float) * numSamples);
+                    zeromem (outputs[i], sizeof (float) * (size_t) numSamples);
             }
             else
             {
@@ -554,7 +554,7 @@ public:
                     }
 
                     if (i < numIn && chan != inputs[i])
-                        memcpy (chan, inputs[i], sizeof (float) * numSamples);
+                        memcpy (chan, inputs[i], sizeof (float) * (size_t) numSamples);
 
                     channels[i] = chan;
                 }
@@ -564,8 +564,9 @@ public:
 
                 {
                     AudioSampleBuffer chans (channels, jmax (numIn, numOut), numSamples);
+
                     if (isBypassed)
-                        filter->bypassedProcessBlock (chans, midiEvents);
+                        filter->processBlockBypassed (chans, midiEvents);
                     else
                         filter->processBlock (chans, midiEvents);
                 }
@@ -573,7 +574,7 @@ public:
                 // copy back any temp channels that may have been used..
                 for (i = 0; i < numOut; ++i)
                     if (const float* const chan = tempChannels.getUnchecked(i))
-                        memcpy (outputs[i], chan, sizeof (float) * numSamples);
+                        memcpy (outputs[i], chan, sizeof (float) * (size_t) numSamples);
             }
         }
 
@@ -628,7 +629,7 @@ public:
         if (filter != nullptr)
         {
             isProcessing = true;
-            channels.calloc (numInChans + numOutChans);
+            channels.calloc ((size_t) (numInChans + numOutChans));
 
             double rate = getSampleRate();
             jassert (rate > 0);
@@ -1379,9 +1380,8 @@ private:
     MidiBuffer midiEvents;
     VSTMidiEventList outgoingEvents;
     VstSpeakerArrangementType speakerIn, speakerOut;
-    bool isBypassed;
     int numInChans, numOutChans;
-    bool isProcessing, hasShutdown, firstProcessCallback, shouldDeleteEditor;
+    bool isProcessing, isBypassed, hasShutdown, firstProcessCallback, shouldDeleteEditor;
     HeapBlock<float*> channels;
     Array<float*> tempChannels;  // see note in processReplacing()
 
@@ -1393,12 +1393,12 @@ private:
     HWND hostWindow;
    #endif
 
-    static inline long convertHexVersionToDecimal (const unsigned int hexVersion)
+    static inline VstInt32 convertHexVersionToDecimal (const unsigned int hexVersion)
     {
-        return (long) (((hexVersion >> 24) & 0xff) * 1000
-                     + ((hexVersion >> 16) & 0xff) * 100
-                     + ((hexVersion >> 8)  & 0xff) * 10
-                     + (hexVersion & 0xff));
+        return (VstInt32) (((hexVersion >> 24) & 0xff) * 1000
+                           + ((hexVersion >> 16) & 0xff) * 100
+                           + ((hexVersion >> 8)  & 0xff) * 10
+                           + (hexVersion & 0xff));
     }
 
     //==============================================================================
@@ -1478,6 +1478,10 @@ namespace
 
                     JuceVSTWrapper* const wrapper = new JuceVSTWrapper (audioMaster, filter);
                     return wrapper->getAeffect();
+                }
+                else
+                {
+                    jassertfalse; // your createPluginFilter() method must return an object!
                 }
             }
         }

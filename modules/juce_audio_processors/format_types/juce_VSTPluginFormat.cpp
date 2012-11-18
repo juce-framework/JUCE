@@ -54,7 +54,7 @@
     If you're not interested in VSTs, you can disable them by setting the
     JUCE_PLUGINHOST_VST flag to 0.
 */
-#include <pluginterfaces/vst2.x/aeffectx.h>
+#include "pluginterfaces/vst2.x/aeffectx.h"
 
 #if JUCE_MSVC
  #pragma warning (pop)
@@ -435,8 +435,10 @@ public:
         {
             vstXml = XmlDocument::parse (file.withFileExtension ("vstxml"));
 
+           #if JUCE_WINDOWS
             if (vstXml == nullptr)
                 vstXml = XmlDocument::parse (getDLLResource (file, "VSTXML", 1));
+           #endif
         }
 
         return moduleMain != nullptr;
@@ -454,6 +456,7 @@ public:
         eff->dispatcher (eff, effClose, 0, 0, 0, 0);
     }
 
+   #if JUCE_WINDOWS
     static String getDLLResource (const File& dllFile, const String& type, int resID)
     {
         DynamicLibrary dll (dllFile.getFullPathName());
@@ -461,13 +464,9 @@ public:
 
         if (dllModule != INVALID_HANDLE_VALUE)
         {
-            HRSRC res = FindResource (dllModule, MAKEINTRESOURCE (resID), type.toWideCharPointer());
-
-            if (res != 0)
+            if (HRSRC res = FindResource (dllModule, MAKEINTRESOURCE (resID), type.toWideCharPointer()))
             {
-                HGLOBAL hGlob = LoadResource (dllModule, res);
-
-                if (hGlob)
+                if (HGLOBAL hGlob = LoadResource (dllModule, res))
                 {
                     const char* data = static_cast <const char*> (LockResource (hGlob));
                     return String::fromUTF8 (data, SizeofResource (dllModule, res));
@@ -477,6 +476,7 @@ public:
 
         return String::empty;
     }
+   #endif
 #else
    #if JUCE_PPC
     CFragConnectionID fragId;
@@ -713,12 +713,12 @@ class VSTPluginInstance     : public AudioPluginInstance,
 public:
     VSTPluginInstance (const ModuleHandle::Ptr& module_)
         : effect (nullptr),
+          module (module_),
           name (module_->pluginName),
           wantsMidiMessages (false),
           initialised (false),
           isPowerOn (false),
-          tempBuffer (1, 1),
-          module (module_)
+          tempBuffer (1, 1)
     {
         try
         {
@@ -1857,7 +1857,7 @@ private:
 
         if (v != 0)
         {
-            int versionBits[4];
+            int versionBits[32];
             int n = 0;
 
             while (v != 0)
@@ -1867,6 +1867,9 @@ private:
             }
 
             s << 'V';
+
+            while (n > 1 && versionBits [n - 1] == 0)
+                --n;
 
             while (n > 0)
             {
@@ -2343,9 +2346,6 @@ private:
             if (pluginHWND != 0 && IsWindow (pluginHWND))
                 SetWindowLongPtr (pluginHWND, GWLP_WNDPROC, (LONG_PTR) originalWndProc);
             #pragma warning (pop)
-
-            if (pluginHWND != 0 && IsWindow (pluginHWND))
-                DestroyWindow (pluginHWND);
 
             pluginHWND = 0;
            #elif JUCE_LINUX
@@ -2876,13 +2876,19 @@ FileSearchPath VSTPluginFormat::getDefaultLocationsToSearch()
 {
    #if JUCE_MAC
     return FileSearchPath ("~/Library/Audio/Plug-Ins/VST;/Library/Audio/Plug-Ins/VST");
+   #elif JUCE_LINUX
+    return FileSearchPath ("/usr/lib/vst");
    #elif JUCE_WINDOWS
     const String programFiles (File::getSpecialLocation (File::globalApplicationsDirectory).getFullPathName());
 
-    return FileSearchPath (WindowsRegistry::getValue ("HKLM\\Software\\VST\\VSTPluginsPath",
-                                                      programFiles + "\\Steinberg\\VstPlugins"));
-   #elif JUCE_LINUX
-    return FileSearchPath ("/usr/lib/vst");
+    FileSearchPath paths;
+    paths.add (WindowsRegistry::getValue ("HKLM\\Software\\VST\\VSTPluginsPath",
+                                          programFiles + "\\Steinberg\\VstPlugins"));
+    paths.removeNonExistentPaths();
+
+    paths.add (WindowsRegistry::getValue ("HKLM\\Software\\VST\\VSTPluginsPath",
+                                          programFiles + "\\VstPlugins"));
+    return paths;
    #endif
 }
 

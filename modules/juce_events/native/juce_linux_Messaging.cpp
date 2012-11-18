@@ -224,7 +224,7 @@ namespace LinuxErrorHandling
 
     //==============================================================================
     // Usually happens when client-server connection is broken
-    int ioErrorHandler (Display* display)
+    int ioErrorHandler (Display*)
     {
         DBG ("ERROR: connection to X server broken.. terminating.");
 
@@ -364,7 +364,7 @@ bool MessageManager::postMessageToSystemQueue (MessageManager::MessageBase* cons
     return true;
 }
 
-void MessageManager::broadcastMessage (const String& value)
+void MessageManager::broadcastMessage (const String& /* value */)
 {
     /* TODO */
 }

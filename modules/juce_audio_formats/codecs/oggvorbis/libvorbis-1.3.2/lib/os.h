@@ -155,10 +155,10 @@ static __inline int vorbis_ftoi(double f){
         return _mm_cvtsd_si32(_mm_load_sd(&f));
 }
 
-static __inline void vorbis_fpu_setround(vorbis_fpu_control *fpu){
+static __inline void vorbis_fpu_setround(vorbis_fpu_control*){
 }
 
-static __inline void vorbis_fpu_restore(vorbis_fpu_control fpu){
+static __inline void vorbis_fpu_restore(vorbis_fpu_control){
 }
 
 #endif /* Special MSVC x64 implementation */

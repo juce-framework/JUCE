@@ -207,9 +207,8 @@ void AudioProcessor::suspendProcessing (const bool shouldBeSuspended)
     suspended = shouldBeSuspended;
 }
 
-void AudioProcessor::reset()
-{
-}
+void AudioProcessor::reset() {}
+void AudioProcessor::processBlockBypassed (AudioSampleBuffer&, MidiBuffer&) {}
 
 //==============================================================================
 void AudioProcessor::editorBeingDeleted (AudioProcessorEditor* const editor) noexcept

@@ -35,6 +35,7 @@ struct ThreadSafeNSOpenGLViewClass  : public ObjCClass <NSOpenGLView>
         addMethod (@selector (_surfaceNeedsUpdate:), surfaceNeedsUpdate, "v@:@");
         addMethod (@selector (rightMouseDown:),      rightMouseDown,     "v@:@");
         addMethod (@selector (rightMouseUp:),        rightMouseUp,       "v@:@");
+        addMethod (@selector (acceptsFirstMouse:),   acceptsFirstMouse,  "v@:@");
 
         registerClass();
     }
@@ -42,6 +43,12 @@ struct ThreadSafeNSOpenGLViewClass  : public ObjCClass <NSOpenGLView>
     static void init (id self)
     {
         object_setInstanceVariable (self, "lock", new CriticalSection());
+
+       #if defined (MAC_OS_X_VERSION_10_7) && (MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_7)
+        if ([self respondsToSelector: @selector (setWantsBestResolutionOpenGLSurface:)])
+            [self setWantsBestResolutionOpenGLSurface: YES];
+       #endif
+
         setNeedsUpdate (self, YES);
     }
 
@@ -86,6 +93,7 @@ private:
         sendSuperclassMessage (self, @selector (dealloc));
     }
 
+    static BOOL acceptsFirstMouse (id, SEL, NSEvent*)               { return YES; }
     static void surfaceNeedsUpdate (id self, SEL, NSNotification*)  { setNeedsUpdateLocked (self, YES); }
     static void update (id self, SEL)                               { setNeedsUpdateLocked (self, YES); }
     static void reshape (id self, SEL)                              { setNeedsUpdateLocked (self, YES); }

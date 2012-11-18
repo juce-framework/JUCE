@@ -1227,16 +1227,6 @@ void PopupMenu::addColouredItem (const int itemResultID,
 }
 
 //==============================================================================
-void PopupMenu::addCustomItem (const int itemResultID, CustomComponent* const customComponent)
-{
-    jassert (itemResultID != 0);    // 0 is used as a return value to indicate that the user
-                                    // didn't pick anything, so you shouldn't use it as the id
-                                    // for an item..
-
-    items.add (new Item (itemResultID, String::empty, true, false, Image::null,
-                         Colours::black, false, customComponent, nullptr, nullptr));
-}
-
 class PopupMenu::NormalComponentWrapper : public PopupMenu::CustomComponent
 {
 public:
@@ -1266,14 +1256,27 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (NormalComponentWrapper);
 };
 
+void PopupMenu::addCustomItem (const int itemResultID, CustomComponent* const customComponent)
+{
+    jassert (itemResultID != 0);    // 0 is used as a return value to indicate that the user
+                                    // didn't pick anything, so you shouldn't use it as the id
+                                    // for an item..
+
+    items.add (new Item (itemResultID, String::empty, true, false, Image::null,
+                         Colours::black, false, customComponent, nullptr, nullptr));
+}
+
 void PopupMenu::addCustomItem (const int itemResultID,
                                Component* customComponent,
                                int idealWidth, int idealHeight,
-                               const bool triggerMenuItemAutomaticallyWhenClicked)
+                               const bool triggerMenuItemAutomaticallyWhenClicked,
+                               const PopupMenu* subMenu)
 {
-    addCustomItem (itemResultID,
-                   new NormalComponentWrapper (customComponent, idealWidth, idealHeight,
-                                               triggerMenuItemAutomaticallyWhenClicked));
+    items.add (new Item (itemResultID, String::empty, true, false, Image::null,
+                         Colours::black, false,
+                         new NormalComponentWrapper (customComponent, idealWidth, idealHeight,
+                                                     triggerMenuItemAutomaticallyWhenClicked),
+                         subMenu, nullptr));
 }
 
 //==============================================================================

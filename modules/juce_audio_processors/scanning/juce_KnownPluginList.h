@@ -114,6 +114,19 @@ public:
                                         OwnedArray <PluginDescription>& typesFound);
 
     //==============================================================================
+    /** Returns the list of blacklisted files. */
+    const StringArray& getBlacklistedFiles() const;
+
+    /** Adds a plugin ID to the black-list. */
+    void addToBlacklist (const String& pluginID);
+
+    /** Removes a plugin ID from the black-list. */
+    void removeFromBlacklist (const String& pluginID);
+
+    /** Clears all the blacklisted files. */
+    void clearBlacklistedFiles();
+
+    //==============================================================================
     /** Sort methods used to change the order of the plugins in the list.
     */
     enum SortMethod
@@ -169,6 +182,7 @@ public:
 private:
     //==============================================================================
     OwnedArray <PluginDescription> types;
+    StringArray blacklist;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (KnownPluginList);
 };

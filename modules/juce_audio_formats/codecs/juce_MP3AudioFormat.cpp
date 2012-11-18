@@ -2829,7 +2829,7 @@ private:
             ts += 2;
         }
 
-        int bt = granule.blockType;
+        const int bt = granule.blockType;
         if (bt == 2)
         {
             for (; sb < (int) granule.maxb; sb += 2, ts += 2, rawout1 += 36, rawout2 += 36)
@@ -2972,7 +2972,7 @@ public:
             {
                 decodedStart = decodedEnd = 0;
                 const int64 streamPos = stream.currentFrameIndex * 1152;
-                int toSkip = startSampleInFile - streamPos;
+                int toSkip = (int) (startSampleInFile - streamPos);
                 jassert (toSkip >= 0);
 
                 while (toSkip > 0)

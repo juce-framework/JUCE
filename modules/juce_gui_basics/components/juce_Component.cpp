@@ -696,8 +696,8 @@ public:
             Graphics imG (image);
             LowLevelGraphicsContext& lg = imG.getInternalContext();
 
-            for (RectangleList::Iterator i (validArea); i.next();)
-                lg.excludeClipRectangle (*i.getRectangle());
+            for (const Rectangle<int>* i = validArea.begin(), * const e = validArea.end(); i != e; ++i)
+                lg.excludeClipRectangle (*i);
 
             if (! lg.isClipEmpty())
             {
@@ -1911,12 +1911,12 @@ void Component::paintEntireComponent (Graphics& g, const bool ignoreAlphaLevel)
                            (int) (scale * getWidth()), (int) (scale * getHeight()), ! flags.opaqueFlag);
         {
             Graphics g2 (effectImage);
-            g2.addTransform (AffineTransform::scale (scale, scale));
+            g2.addTransform (AffineTransform::scale (scale));
             paintComponentAndChildren (g2);
         }
 
         g.saveState();
-        g.addTransform (AffineTransform::scale (1.0f / scale, 1.0f / scale));
+        g.addTransform (AffineTransform::scale (1.0f / scale));
         effect->applyEffect (effectImage, g, scale, ignoreAlphaLevel ? 1.0f : getAlpha());
         g.restoreState();
     }

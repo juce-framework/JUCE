@@ -143,7 +143,7 @@ public:
         return Range (jmin (start, newEnd), newEnd);
     }
 
-    /** Returns a range with the same length as this one, but moved to have the given start position. */
+    /** Returns a range with the same length as this one, but moved to have the given end position. */
     Range movedToEndAt (const ValueType newEnd) const noexcept
     {
         return Range (start + (newEnd - end), newEnd);

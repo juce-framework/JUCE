@@ -387,7 +387,7 @@
             <Tool Name="VCCLCompilerTool"/>
           </FileConfiguration>
         </File>
-        <File RelativePath="..\..\Source\BinaryData\RecentFilesMenuTemplate.xib">
+        <File RelativePath="..\..\Source\BinaryData\RecentFilesMenuTemplate.nib">
           <FileConfiguration Name="Debug|Win32"
                              ExcludedFromBuild="true">
             <Tool Name="VCCLCompilerTool"/>

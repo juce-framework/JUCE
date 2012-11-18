@@ -191,7 +191,7 @@ private:
   #endif
 
   #if JUCE_PPC || JUCE_IOS
-    // None of these atomics are available for PPC or for iPhoneOS 3.1 or earlier!!
+    // None of these atomics are available for PPC or for iOS 3.1 or earlier!!
     template <typename Type> static Type OSAtomicAdd64Barrier (Type b, JUCE_MAC_ATOMICS_VOLATILE Type* a) noexcept  { jassertfalse; return *a += b; }
     template <typename Type> static Type OSAtomicIncrement64Barrier (JUCE_MAC_ATOMICS_VOLATILE Type* a) noexcept    { jassertfalse; return ++*a; }
     template <typename Type> static Type OSAtomicDecrement64Barrier (JUCE_MAC_ATOMICS_VOLATILE Type* a) noexcept    { jassertfalse; return --*a; }

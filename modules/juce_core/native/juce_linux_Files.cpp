@@ -110,7 +110,7 @@ namespace
 {
     File juce_readlink (const String& file, const File& defaultFile)
     {
-        const int size = 8192;
+        const size_t size = 8192;
         HeapBlock<char> buffer;
         buffer.malloc (size + 4);
 

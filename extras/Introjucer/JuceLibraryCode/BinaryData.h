@@ -60,8 +60,8 @@ namespace BinaryData
     extern const char*   jucer_NewInlineComponentTemplate_h;
     const int            jucer_NewInlineComponentTemplate_hSize = 1627;
 
-    extern const char*   RecentFilesMenuTemplate_xib;
-    const int            RecentFilesMenuTemplate_xibSize = 10044;
+    extern const char*   RecentFilesMenuTemplate_nib;
+    const int            RecentFilesMenuTemplate_nibSize = 2842;
 
     // If you provide the name of one of the binary resource variables above, this function will
     // return the corresponding data and its size (or a null pointer if the name isn't found).

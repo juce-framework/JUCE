@@ -1097,7 +1097,7 @@ private:
             else if (t.startsWithIgnoreCase ("scale"))
             {
                 if (tokens.size() == 1)
-                    trans = AffineTransform::scale (numbers[0], numbers[0]);
+                    trans = AffineTransform::scale (numbers[0]);
                 else
                     trans = AffineTransform::scale (numbers[0], numbers[1]);
             }

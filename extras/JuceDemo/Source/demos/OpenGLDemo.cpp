@@ -109,14 +109,8 @@ public:
     {
         OpenGLHelpers::clear (Colours::darkgrey.withAlpha (1.0f));
 
-        {
-            MessageManagerLock mm (Thread::getCurrentThread());
-            if (! mm.lockWasGained())
-                return;
-
-            updateTextureImage();  // this will update our dynamically-changing texture image.
-            drawBackground2DStuff(); // draws some 2D content to demonstrate the OpenGLGraphicsContext class
-        }
+        updateTextureImage();  // this will update our dynamically-changing texture image.
+        drawBackground2DStuff(); // draws some 2D content to demonstrate the OpenGLGraphicsContext class
 
         // Having used the juce 2D renderer, it will have messed-up a whole load of GL state, so
         // we'll put back any important settings before doing our normal GL 3D drawing..
@@ -127,8 +121,8 @@ public:
         glEnable (GL_TEXTURE_2D);
 
        #if JUCE_USE_OPENGL_FIXED_FUNCTION
-        OpenGLHelpers::prepareFor2D (getWidth(), getHeight());
-        OpenGLHelpers::setPerspective (45.0, getWidth() / (double) getHeight(), 0.1, 100.0);
+        OpenGLHelpers::prepareFor2D (getContextWidth(), getContextHeight());
+        OpenGLHelpers::setPerspective (45.0, getContextWidth() / (double) getContextHeight(), 0.1, 100.0);
 
         glTranslatef (0.0f, 0.0f, -5.0f);
         draggableOrientation.applyToOpenGLMatrix();
@@ -173,11 +167,14 @@ public:
     void drawBackground2DStuff()
     {
         // Create an OpenGLGraphicsContext that will draw into this GL window..
-        ScopedPointer<LowLevelGraphicsContext> glRenderer (createOpenGLGraphicsContext (openGLContext));
+        ScopedPointer<LowLevelGraphicsContext> glRenderer (createOpenGLGraphicsContext (openGLContext,
+                                                                                        getContextWidth(),
+                                                                                        getContextHeight()));
 
         if (glRenderer != nullptr)
         {
             Graphics g (glRenderer);
+            g.addTransform (AffineTransform::scale ((float) getScale()));
 
             // This stuff just creates a spinning star shape and fills it..
             Path p;
@@ -193,6 +190,10 @@ public:
             g.fillPath (p);
         }
     }
+
+    double getScale() const         { return Desktop::getInstance().getDisplays().getDisplayContaining (getScreenBounds().getCentre()).scale; }
+    int getContextWidth() const     { return roundToInt (getScale() * getWidth()); }
+    int getContextHeight() const    { return roundToInt (getScale() * getHeight()); }
 
     void timerCallback()
     {

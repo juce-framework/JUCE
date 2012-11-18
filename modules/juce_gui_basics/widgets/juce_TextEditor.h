@@ -552,7 +552,7 @@ public:
     {
     public:
         /** Creates a filter that limits the length of text, and/or the characters that it can contain.
-            @param maxTextLength        if this is > 0, it sets a maximum length limit; if <= 0, no
+            @param maxNumChars          if this is > 0, it sets a maximum length limit; if <= 0, no
                                         limit is set
             @param allowedCharacters    if this is non-empty, then only characters that occur in
                                         this string are allowed to be entered into the editor.

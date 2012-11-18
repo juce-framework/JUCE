@@ -524,7 +524,7 @@ size_t String::getByteOffsetOfEnd() const noexcept
     return (size_t) (((char*) text.findTerminatingNull().getAddress()) - (char*) text.getAddress());
 }
 
-const juce_wchar String::operator[] (int index) const noexcept
+juce_wchar String::operator[] (int index) const noexcept
 {
     jassert (index == 0 || (index > 0 && index <= (int) text.lengthUpTo ((size_t) index + 1)));
     return text [index];
@@ -2289,7 +2289,7 @@ public:
             expect (s5.containsWholeWordIgnoreCase (L"Word"));
             expect (s5.containsWholeWordIgnoreCase ("Word3"));
             expect (! s5.containsWholeWordIgnoreCase (L"Wordx"));
-            expect (!s5.containsWholeWordIgnoreCase ("xWord2"));
+            expect (! s5.containsWholeWordIgnoreCase ("xWord2"));
             expect (s5.containsNonWhitespaceChars());
             expect (s5.containsOnly ("ordw23 "));
             expect (! String (" \n\r\t").containsNonWhitespaceChars());
