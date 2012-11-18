@@ -146,7 +146,7 @@ public:
         }
 
         juceFilter = createPluginFilter();
-        jassert (juceFilter != nullptr);
+        jassert (juceFilter != nullptr);   // your createPluginFilter() method must return an object!
 
         juceFilter->wrapperType = AudioProcessor::wrapperType_AudioUnit;
 
@@ -851,7 +851,7 @@ public:
             }
             else if (ShouldBypassEffect())
             {
-                juceFilter->bypassedProcessBlock (buffer, midiEvents);
+                juceFilter->processBlockBypassed (buffer, midiEvents);
             }
             else
             {

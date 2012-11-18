@@ -161,16 +161,16 @@ public:
     virtual void processBlock (AudioSampleBuffer& buffer,
                                MidiBuffer& midiMessages) = 0;
 
-    /** Renders the next block with bypassed processing.
-        Defaults to pass-thru, but latency inducing plugins should override
-        this method to at least generate the latency of the plugin.
-        (otherwise when bypassed the plugin would shift the signal forward
-         in time, possibly creating pre-echo effects and odd timings)
-        Users may also use this method to create cross-fade or morph between
-        the wet (not bypassed) and dry (bypassed) signals.
+    /** Renders the next block when the processor is being bypassed.
+        The default implementation of this method will pass-through any incoming audio, but
+        you may override this method e.g. to add latency compensation to the data to match
+        the processor's latency characteristics. This will avoid situations where bypassing
+        will shift the signal forward in time, possibly creating pre-echo effects and odd timings.
+        Another use for this method would be to cross-fade or morph between the wet (not bypassed)
+        and dry (bypassed) signals.
     */
-    virtual void bypassedProcessBlock (AudioSampleBuffer& buffer,
-                                       MidiBuffer& midiMessages) {}
+    virtual void processBlockBypassed (AudioSampleBuffer& buffer,
+                                       MidiBuffer& midiMessages);
 
     //==============================================================================
     /** Returns the current AudioPlayHead object that should be used to find

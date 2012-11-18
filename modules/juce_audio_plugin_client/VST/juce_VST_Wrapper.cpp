@@ -269,10 +269,10 @@ public:
          chunkMemoryTime (0),
          speakerIn (kSpeakerArrEmpty),
          speakerOut (kSpeakerArrEmpty),
-         isBypassed (false),
          numInChans (JucePlugin_MaxNumInputChannels),
          numOutChans (JucePlugin_MaxNumOutputChannels),
          isProcessing (false),
+         isBypassed (false),
          hasShutdown (false),
          firstProcessCallback (true),
          shouldDeleteEditor (false),
@@ -399,7 +399,8 @@ public:
            #endif
         }
         else if (strcmp (text, "receiveVstTimeInfo") == 0
-                 || strcmp (text, "conformsToWindowRules") == 0)
+                 || strcmp (text, "conformsToWindowRules") == 0
+                 || strcmp (text, "bypass") == 0)
         {
             result = 1;
         }
@@ -408,8 +409,6 @@ public:
             // This tells Wavelab to use the UI thread to invoke open/close,
             // like all other hosts do.
             result = -1;
-        } else if (strcmp (text, "bypass") == 0) {
-            result = 1;
         }
 
         return result;
@@ -456,8 +455,9 @@ public:
         }
     }
 
-    bool setBypass (bool onOff) {
-        isBypassed = onOff;
+    bool setBypass (bool b)
+    {
+        isBypassed = b;
         return true;
     }
 
@@ -579,8 +579,9 @@ public:
                         filter->m_playPositionSamples = ti->samplePos;
                     }
                     nextExpectedPlayPosition = filter->m_playPositionSamples + numSamples;
+
                     if (isBypassed)
-                        filter->bypassedProcessBlock (chans, midiEvents);
+                        filter->processBlockBypassed (chans, midiEvents);
                     else
                         filter->processBlock (chans, midiEvents);
                 }
@@ -1395,9 +1396,8 @@ private:
     MidiBuffer midiEvents;
     VSTMidiEventList outgoingEvents;
     VstSpeakerArrangementType speakerIn, speakerOut;
-    bool isBypassed;
     int numInChans, numOutChans;
-    bool isProcessing, hasShutdown, firstProcessCallback, shouldDeleteEditor;
+    bool isProcessing, isBypassed, hasShutdown, firstProcessCallback, shouldDeleteEditor;
     HeapBlock<float*> channels;
     Array<float*> tempChannels;  // see note in processReplacing()
 
@@ -1494,6 +1494,10 @@ namespace
 
                     JuceVSTWrapper* const wrapper = new JuceVSTWrapper (audioMaster, filter);
                     return wrapper->getAeffect();
+                }
+                else
+                {
+                    jassertfalse; // your createPluginFilter() method must return an object!
                 }
             }
         }
