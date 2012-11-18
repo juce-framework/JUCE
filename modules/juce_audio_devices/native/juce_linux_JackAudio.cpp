@@ -107,7 +107,8 @@ namespace
 static const char** getJackPorts (jack_client_t* const client, const bool forInput)
 {
     return juce::jack_get_ports (client, nullptr, nullptr,
-                                 forInput ? JackPortIsInput : JackPortIsOutput);
+                                 forInput ? JackPortIsOutput : JackPortIsInput);
+                                    // (NB: This looks like it's the wrong way round, but it is correct!)
 }
 
 //==============================================================================
