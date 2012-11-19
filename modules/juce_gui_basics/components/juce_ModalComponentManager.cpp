@@ -236,7 +236,7 @@ void ModalComponentManager::bringModalComponentsToFront (bool topOneShouldGrabFo
 class ModalComponentManager::ReturnValueRetriever     : public ModalComponentManager::Callback
 {
 public:
-    ReturnValueRetriever (int& value_, bool& finished_) : value (value_), finished (finished_) {}
+    ReturnValueRetriever (int& v, bool& done) : value (v), finished (done) {}
 
     void modalStateFinished (int returnValue)
     {
@@ -256,29 +256,28 @@ int ModalComponentManager::runEventLoopForCurrentComponent()
     // This can only be run from the message thread!
     jassert (MessageManager::getInstance()->isThisTheMessageThread());
 
-    Component* currentlyModal = getModalComponent (0);
-
-    if (currentlyModal == nullptr)
-        return 0;
-
-    WeakReference<Component> prevFocused (Component::getCurrentlyFocusedComponent());
-
     int returnValue = 0;
-    bool finished = false;
-    attachCallback (currentlyModal, new ReturnValueRetriever (returnValue, finished));
 
-    JUCE_TRY
+    if (Component* currentlyModal = getModalComponent (0))
     {
-        while (! finished)
-        {
-            if  (! MessageManager::getInstance()->runDispatchLoopUntil (20))
-                break;
-        }
-    }
-    JUCE_CATCH_EXCEPTION
+        WeakReference<Component> prevFocused (Component::getCurrentlyFocusedComponent());
 
-    if (prevFocused != nullptr)
-        prevFocused->grabKeyboardFocus();
+        bool finished = false;
+        attachCallback (currentlyModal, new ReturnValueRetriever (returnValue, finished));
+
+        JUCE_TRY
+        {
+            while (! finished)
+            {
+                if  (! MessageManager::getInstance()->runDispatchLoopUntil (20))
+                    break;
+            }
+        }
+        JUCE_CATCH_EXCEPTION
+
+        if (prevFocused != nullptr && ! prevFocused->isCurrentlyBlockedByAnotherModalComponent())
+            prevFocused->grabKeyboardFocus();
+    }
 
     return returnValue;
 }
