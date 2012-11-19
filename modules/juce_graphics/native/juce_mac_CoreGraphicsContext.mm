@@ -193,7 +193,7 @@ bool CoreGraphicsContext::clipToRectangle (const Rectangle<int>& r)
     return ! isClipEmpty();
 }
 
-bool CoreGraphicsContext::clipToRectangleList (const RectangleList& clipRegion)
+bool CoreGraphicsContext::clipToRectangleListWithoutTest (const RectangleList& clipRegion)
 {
     if (clipRegion.isEmpty())
     {
@@ -205,26 +205,28 @@ bool CoreGraphicsContext::clipToRectangleList (const RectangleList& clipRegion)
     else
     {
         const int numRects = clipRegion.getNumRectangles();
-
         HeapBlock <CGRect> rects (numRects);
-        for (int i = 0; i < numRects; ++i)
-        {
-            const Rectangle<int>& r = clipRegion.getRectangle(i);
-            rects[i] = CGRectMake (r.getX(), flipHeight - r.getBottom(), r.getWidth(), r.getHeight());
-        }
+
+        int i = 0;
+        for (const Rectangle<int>* r = clipRegion.begin(), * const e = clipRegion.end(); r != e; ++r)
+            rects[i++] = CGRectMake (r->getX(), flipHeight - r->getBottom(), r->getWidth(), r->getHeight());
 
         CGContextClipToRects (context, rects, numRects);
         lastClipRectIsValid = false;
-        return ! isClipEmpty();
+        return true;
     }
+}
+
+bool CoreGraphicsContext::clipToRectangleList (const RectangleList& clipRegion)
+{
+    return clipToRectangleList (clipRegion) && ! isClipEmpty();
 }
 
 void CoreGraphicsContext::excludeClipRectangle (const Rectangle<int>& r)
 {
     RectangleList remaining (getClipBounds());
     remaining.subtract (r);
-    clipToRectangleList (remaining);
-    lastClipRectIsValid = false;
+    clipToRectangleListWithoutTest (remaining);
 }
 
 void CoreGraphicsContext::clipToPath (const Path& path, const AffineTransform& transform)
@@ -297,9 +299,7 @@ void CoreGraphicsContext::restoreState()
 {
     CGContextRestoreGState (context);
 
-    SavedState* const top = stateStack.getLast();
-
-    if (top != nullptr)
+    if (SavedState* const top = stateStack.getLast())
     {
         state = top;
         stateStack.removeLast (1, false);
@@ -557,9 +557,7 @@ void CoreGraphicsContext::setFont (const Font& newFont)
         state->fontRef = 0;
         state->font = newFont;
 
-        OSXTypeface* osxTypeface = dynamic_cast <OSXTypeface*> (state->font.getTypeface());
-
-        if (osxTypeface != nullptr)
+        if (OSXTypeface* osxTypeface = dynamic_cast <OSXTypeface*> (state->font.getTypeface()))
         {
             state->fontRef = osxTypeface->fontRef;
             CGContextSetFont (context, state->fontRef);
@@ -791,11 +789,9 @@ Image juce_loadWithCoreImage (InputStream& input)
 
   #if JUCE_IOS
     JUCE_AUTORELEASEPOOL
-    UIImage* uiImage = [UIImage imageWithData: [NSData dataWithBytesNoCopy: data.getData()
-                                                                    length: data.getSize()
-                                                              freeWhenDone: NO]];
-
-    if (uiImage != nil)
+    if (UIImage* uiImage = [UIImage imageWithData: [NSData dataWithBytesNoCopy: data.getData()
+                                                                        length: data.getSize()
+                                                                  freeWhenDone: NO]])
     {
         CGImageRef loadedImage = uiImage.CGImage;
 
