@@ -1041,10 +1041,11 @@ struct StateHelpers
         {
             context.extensions.glBufferData (GL_ARRAY_BUFFER, numVertices * sizeof (VertexInfo), vertexData, GL_DYNAMIC_DRAW);
             glDrawElements (GL_TRIANGLES, (numVertices * 3) / 2, GL_UNSIGNED_SHORT, 0);
+            JUCE_CHECK_OPENGL_ERROR
             numVertices = 0;
         }
 
-        ShaderQuadQueue& operator= (const ShaderQuadQueue&);
+        JUCE_DECLARE_NON_COPYABLE (ShaderQuadQueue);
     };
 
     //==============================================================================

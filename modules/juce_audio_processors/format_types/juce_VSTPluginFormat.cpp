@@ -2254,11 +2254,10 @@ private:
 
         #pragma warning (pop)
 
-        int w, h;
         RECT r;
         GetWindowRect (pluginHWND, &r);
-        w = r.right - r.left;
-        h = r.bottom - r.top;
+        int w = r.right - r.left;
+        int h = r.bottom - r.top;
 
         if (rect != nullptr)
         {
