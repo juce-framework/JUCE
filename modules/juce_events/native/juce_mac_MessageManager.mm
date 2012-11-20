@@ -122,9 +122,7 @@ private:
     private:
         static NSApplicationTerminateReply applicationShouldTerminate (id /*self*/, SEL, NSApplication*)
         {
-            JUCEApplicationBase* const app = JUCEApplicationBase::getInstance();
-
-            if (app != nullptr)
+            if (JUCEApplicationBase* const app = JUCEApplicationBase::getInstance())
             {
                 app->systemRequestedQuit();
 
@@ -142,9 +140,7 @@ private:
 
         static BOOL application_openFile (id /*self*/, SEL, NSApplication*, NSString* filename)
         {
-            JUCEApplicationBase* const app = JUCEApplicationBase::getInstance();
-
-            if (app != nullptr)
+            if (JUCEApplicationBase* const app = JUCEApplicationBase::getInstance())
             {
                 app->anotherInstanceStarted (quotedIfContainsSpaces (filename));
                 return YES;
@@ -155,9 +151,7 @@ private:
 
         static void application_openFiles (id /*self*/, SEL, NSApplication*, NSArray* filenames)
         {
-            JUCEApplicationBase* const app = JUCEApplicationBase::getInstance();
-
-            if (app != nullptr)
+            if (JUCEApplicationBase* const app = JUCEApplicationBase::getInstance())
             {
                 StringArray files;
                 for (unsigned int i = 0; i < [filenames count]; ++i)

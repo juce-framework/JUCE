@@ -30,8 +30,7 @@ public:
 
     void messageCallback()
     {
-        MessageManager* const mm = MessageManager::instance;
-        if (mm != nullptr)
+        if (MessageManager* const mm = MessageManager::instance)
             mm->quitMessageReceived = true;
     }
 
