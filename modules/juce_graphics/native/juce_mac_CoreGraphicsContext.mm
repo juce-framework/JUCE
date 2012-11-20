@@ -219,7 +219,7 @@ bool CoreGraphicsContext::clipToRectangleListWithoutTest (const RectangleList& c
 
 bool CoreGraphicsContext::clipToRectangleList (const RectangleList& clipRegion)
 {
-    return clipToRectangleList (clipRegion) && ! isClipEmpty();
+    return clipToRectangleListWithoutTest (clipRegion) && ! isClipEmpty();
 }
 
 void CoreGraphicsContext::excludeClipRectangle (const Rectangle<int>& r)
