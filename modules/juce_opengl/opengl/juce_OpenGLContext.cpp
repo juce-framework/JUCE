@@ -476,6 +476,7 @@ private:
                                                              context.contextToShareWith);
         comp.setCachedComponentImage (newCachedImage);
         newCachedImage->start(); // (must wait until this is attached before starting its thread)
+        newCachedImage->updateViewportSize (true);
     }
 
     void detach()
