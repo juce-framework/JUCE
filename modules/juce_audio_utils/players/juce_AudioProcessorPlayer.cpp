@@ -78,7 +78,7 @@ void AudioProcessorPlayer::audioDeviceIOCallback (const float** const inputChann
 
     incomingMidi.clear();
     messageCollector.removeNextBlockOfMessages (incomingMidi, numSamples);
-    int i, totalNumChans = 0;
+    int totalNumChans = 0;
 
     if (numInputChannels > numOutputChannels)
     {
@@ -88,14 +88,14 @@ void AudioProcessorPlayer::audioDeviceIOCallback (const float** const inputChann
         tempBuffer.setSize (numInputChannels - numOutputChannels, numSamples,
                             false, false, true);
 
-        for (i = 0; i < numOutputChannels; ++i)
+        for (int i = 0; i < numOutputChannels; ++i)
         {
             channels[totalNumChans] = outputChannelData[i];
             memcpy (channels[totalNumChans], inputChannelData[i], sizeof (float) * (size_t) numSamples);
             ++totalNumChans;
         }
 
-        for (i = numOutputChannels; i < numInputChannels; ++i)
+        for (int i = numOutputChannels; i < numInputChannels; ++i)
         {
             channels[totalNumChans] = tempBuffer.getSampleData (i - numOutputChannels, 0);
             memcpy (channels[totalNumChans], inputChannelData[i], sizeof (float) * (size_t) numSamples);
@@ -104,14 +104,14 @@ void AudioProcessorPlayer::audioDeviceIOCallback (const float** const inputChann
     }
     else
     {
-        for (i = 0; i < numInputChannels; ++i)
+        for (int i = 0; i < numInputChannels; ++i)
         {
             channels[totalNumChans] = outputChannelData[i];
             memcpy (channels[totalNumChans], inputChannelData[i], sizeof (float) * (size_t) numSamples);
             ++totalNumChans;
         }
 
-        for (i = numInputChannels; i < numOutputChannels; ++i)
+        for (int i = numInputChannels; i < numOutputChannels; ++i)
         {
             channels[totalNumChans] = outputChannelData[i];
             zeromem (channels[totalNumChans], sizeof (float) * (size_t) numSamples);
@@ -129,7 +129,7 @@ void AudioProcessorPlayer::audioDeviceIOCallback (const float** const inputChann
 
         if (processor->isSuspended())
         {
-            for (i = 0; i < numOutputChannels; ++i)
+            for (int i = 0; i < numOutputChannels; ++i)
                 zeromem (outputChannelData[i], sizeof (float) * (size_t) numSamples);
         }
         else
@@ -150,7 +150,7 @@ void AudioProcessorPlayer::prepareToPlay (double newSampleRate, int newBlockSize
     numOutputChans = numChansOut;
 
     messageCollector.reset (sampleRate);
-    zeromem (channels, sizeof (channels));
+    channels.calloc (jmax (numChansIn, numChansOut) + 2);
 
     if (processor != nullptr)
     {

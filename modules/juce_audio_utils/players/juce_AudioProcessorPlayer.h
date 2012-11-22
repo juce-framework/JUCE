@@ -94,7 +94,7 @@ private:
     bool isPrepared;
 
     int numInputChans, numOutputChans;
-    float* channels [128];
+    HeapBlock<float*> channels;
     AudioSampleBuffer tempBuffer;
 
     MidiBuffer incomingMidi;
