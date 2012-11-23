@@ -981,25 +981,37 @@ private:
         return false;
     }
 
+    String getLastDriverError() const
+    {
+        jassert (asioObject != nullptr);
+        char buffer [512] = { 0 };
+        asioObject->getErrorMessage (buffer);
+        return String (buffer, sizeof (buffer) - 1);
+    }
+
     String initDriver()
     {
-        if (asioObject != nullptr)
+        if (asioObject == nullptr)
+            return "No Driver";
+
+        const bool initOk = (bool) asioObject->init (juce_messageWindowHandle);
+        String driverError;
+
+        // Get error message if init() failed, or if it's a buggy Denon driver,
+        // which returns true from init() even when it fails.
+        if ((! initOk) || getName().containsIgnoreCase ("denon dj"))
+            driverError = getLastDriverError();
+
+        if ((! initOk) && driverError.isEmpty())
+            driverError = "Driver failed to initialise";
+
+        if (driverError.isEmpty())
         {
-            char buffer [256] = { 0 };
-
-            if (! asioObject->init (juce_messageWindowHandle))
-            {
-                asioObject->getErrorMessage (buffer);
-                return String (buffer, sizeof (buffer) - 1);
-            }
-
-            // just in case any daft drivers expect this to be called..
-            asioObject->getDriverName (buffer);
-
-            return String::empty;
+            char buffer [512];
+            asioObject->getDriverName (buffer); // just in case any flimsy drivers expect this to be called..
         }
 
-        return "No Driver";
+        return driverError;
     }
 
     String openDevice()
