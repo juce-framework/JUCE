@@ -60,5 +60,7 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (%%className%%);
 };
 
+//[EndFile] You can add extra defines here...
+//[/EndFile]
 
 #endif   // %%headerGuard%%
