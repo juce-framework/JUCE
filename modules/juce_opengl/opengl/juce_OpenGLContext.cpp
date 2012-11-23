@@ -142,6 +142,7 @@ public:
     bool renderFrame()
     {
         ScopedPointer<MessageManagerLock> mmLock;
+
         if (context.renderComponents && needsUpdate)
         {
             mmLock = new MessageManagerLock (this);  // need to acquire this before locking the context.
@@ -332,7 +333,7 @@ public:
         const int defaultFPS = 60;
 
         const int elapsed = (int) (Time::getMillisecondCounter() - frameRenderStartTime);
-        wait (jmax (1, (1000 / defaultFPS) - elapsed));
+        wait (jmax (1, (1000 / defaultFPS - 1) - elapsed));
     }
 
     //==============================================================================
@@ -475,6 +476,7 @@ private:
                                                              context.contextToShareWith);
         comp.setCachedComponentImage (newCachedImage);
         newCachedImage->start(); // (must wait until this is attached before starting its thread)
+        newCachedImage->updateViewportSize (true);
     }
 
     void detach()

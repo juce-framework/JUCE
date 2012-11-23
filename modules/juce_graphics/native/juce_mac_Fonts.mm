@@ -23,7 +23,8 @@
   ==============================================================================
 */
 
-#if JUCE_IOS || (JUCE_MAC && MAC_OS_X_VERSION_MIN_REQUIRED > MAC_OS_X_VERSION_10_4)
+#if (! defined (JUCE_CORETEXT_AVAILABLE)) \
+     && (JUCE_IOS || (JUCE_MAC && MAC_OS_X_VERSION_MIN_REQUIRED > MAC_OS_X_VERSION_10_4))
  #define JUCE_CORETEXT_AVAILABLE 1
 #endif
 
