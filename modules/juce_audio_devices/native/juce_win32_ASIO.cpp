@@ -994,7 +994,7 @@ private:
         if (asioObject == nullptr)
             return "No Driver";
 
-        const bool initOk = (bool) asioObject->init (juce_messageWindowHandle);
+        const bool initOk = !! asioObject->init (juce_messageWindowHandle);
         String driverError;
 
         // Get error message if init() failed, or if it's a buggy Denon driver,
