@@ -452,7 +452,7 @@ public:
 
     ~JackAudioIODeviceType()
     {
-        activeDeviceTypes.removeFirstOccurrenceOf (this);
+        activeDeviceTypes.removeFirstMatchingValue (this);
     }
 
     void scanForDevices()
