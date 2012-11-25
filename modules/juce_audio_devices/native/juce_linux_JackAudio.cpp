@@ -116,8 +116,6 @@ static const char** getJackPorts (jack_client_t* const client, const bool forInp
 class JackAudioIODeviceType;
 static Array<JackAudioIODeviceType*> activeDeviceTypes;
 
-static void portConnectCallback (jack_port_id_t, jack_port_id_t, int, void*);
-
 //==============================================================================
 class JackAudioIODevice   : public AudioIODevice
 {
@@ -273,7 +271,6 @@ public:
         }
 
         updateActivePorts();
-
         return lastError;
     }
 
@@ -426,6 +423,8 @@ private:
         jack_Log ("JackAudioIODevice::errorCallback " + String (msg));
     }
 
+    static void portConnectCallback (jack_port_id_t, jack_port_id_t, int, void*);
+
     bool isOpen_;
     jack_client_t* client;
     String lastError;
@@ -448,6 +447,12 @@ public:
         : AudioIODeviceType ("JACK"),
           hasScanned (false)
     {
+        activeDeviceTypes.add (this);
+    }
+
+    ~JackAudioIODeviceType()
+    {
+        activeDeviceTypes.removeFirstOccurrenceOf (this);
     }
 
     void scanForDevices()
@@ -566,7 +571,7 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (JackAudioIODeviceType);
 };
 
-static void portConnectCallback (jack_port_id_t, jack_port_id_t, int, void*)
+void JackAudioIODevice::portConnectCallback (jack_port_id_t, jack_port_id_t, int, void*)
 {
     for (int i = activeDeviceTypes.size(); --i >= 0;)
         if (JackAudioIODeviceType* d = activeDeviceTypes[i])
