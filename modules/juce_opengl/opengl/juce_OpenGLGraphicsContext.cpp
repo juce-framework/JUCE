@@ -1889,6 +1889,10 @@ public:
             {
                 clip = clip->excludeClipRectangle (transform.translated (r));
             }
+            else if (transform.isIntegerScaling)
+            {
+                clip = clip->excludeClipRectangle (transform.transformed (r).getSmallestIntegerContainer());
+            }
             else
             {
                 Path p;
