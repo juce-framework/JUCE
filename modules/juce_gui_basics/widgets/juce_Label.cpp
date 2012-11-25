@@ -192,7 +192,12 @@ void Label::componentVisibilityChanged (Component& component)
 void Label::textWasEdited() {}
 void Label::textWasChanged() {}
 void Label::editorShown (TextEditor*) {}
-void Label::editorAboutToBeHidden (TextEditor*) {}
+
+void Label::editorAboutToBeHidden (TextEditor*)
+{
+    if (ComponentPeer* const peer = getPeer())
+        peer->dismissPendingTextInput();
+}
 
 void Label::showEditor()
 {

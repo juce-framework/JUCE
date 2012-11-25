@@ -94,6 +94,7 @@ DECLARE_JNI_CLASS (CanvasMinimal, "android/graphics/Canvas");
  METHOD (hasFocus,      "hasFocus",         "()Z") \
  METHOD (invalidate,    "invalidate",       "(IIII)V") \
  METHOD (containsPoint, "containsPoint",    "(II)Z") \
+ METHOD (showKeyboard,  "showKeyboard",     "(Z)V") \
  METHOD (createGLView,  "createGLView",     "()L" JUCE_ANDROID_ACTIVITY_CLASSPATH "$OpenGLView;") \
 
 DECLARE_JNI_CLASS (ComponentPeerView, JUCE_ANDROID_ACTIVITY_CLASSPATH "$ComponentPeerView");
@@ -356,6 +357,15 @@ public:
         handleMouseEvent (index, lastMousePos, currentModifiers, time);
     }
 
+    void handleKeyDownCallback (int k, int kc)
+    {
+        handleKeyPress (k, kc);
+    }
+
+    void handleKeyUpCallback (int k, int kc)
+    {
+    }
+
     //==============================================================================
     bool isFocused() const
     {
@@ -375,10 +385,15 @@ public:
             handleFocusLoss();
     }
 
-    void textInputRequired (const Point<int>& position)
+    void textInputRequired (const Point<int>&)
     {
-        // TODO
+        view.callVoidMethod (ComponentPeerView.showKeyboard, true);
     }
+
+    void dismissPendingTextInput()
+    {
+        view.callVoidMethod (ComponentPeerView.showKeyboard, false);
+     }
 
     //==============================================================================
     void handlePaintCallback (JNIEnv* env, jobject canvas)
@@ -548,8 +563,7 @@ Point<int> AndroidComponentPeer::lastMousePos;
 #define JUCE_VIEW_CALLBACK(returnType, javaMethodName, params, juceMethodInvocation) \
   JUCE_JNI_CALLBACK (JUCE_JOIN_MACRO (JUCE_ANDROID_ACTIVITY_CLASSNAME, _00024ComponentPeerView), javaMethodName, returnType, params) \
   { \
-      AndroidComponentPeer* const peer = AndroidComponentPeer::findPeerForJavaView (env, view); \
-      if (peer != nullptr) \
+      if (AndroidComponentPeer* const peer = AndroidComponentPeer::findPeerForJavaView (env, view)) \
           peer->juceMethodInvocation; \
   }
 
@@ -559,6 +573,8 @@ JUCE_VIEW_CALLBACK (void, handleMouseDrag,  (JNIEnv* env, jobject view, jint i, 
 JUCE_VIEW_CALLBACK (void, handleMouseUp,    (JNIEnv* env, jobject view, jint i, jfloat x, jfloat y, jlong time),  handleMouseUpCallback (i, (float) x, (float) y, (int64) time))
 JUCE_VIEW_CALLBACK (void, viewSizeChanged,  (JNIEnv* env, jobject view),                                          handleMovedOrResized())
 JUCE_VIEW_CALLBACK (void, focusChanged,     (JNIEnv* env, jobject view, jboolean hasFocus),                       handleFocusChangeCallback (hasFocus))
+JUCE_VIEW_CALLBACK (void, handleKeyDown,    (JNIEnv* env, jobject view, jint k, jint kc),                         handleKeyDownCallback ((int) k, (int) kc))
+JUCE_VIEW_CALLBACK (void, handleKeyUp,      (JNIEnv* env, jobject view, jint k, jint kc),                         handleKeyUpCallback ((int) k, (int) kc))
 
 //==============================================================================
 ComponentPeer* Component::createNewPeer (int styleFlags, void*)
@@ -756,9 +772,9 @@ String SystemClipboard::getTextFromClipboard()
 const int extendedKeyModifier       = 0x10000;
 
 const int KeyPress::spaceKey        = ' ';
-const int KeyPress::returnKey       = 0x0d;
-const int KeyPress::escapeKey       = 0x1b;
-const int KeyPress::backspaceKey    = 0x7f;
+const int KeyPress::returnKey       = 66;
+const int KeyPress::escapeKey       = 4;
+const int KeyPress::backspaceKey    = 67;
 const int KeyPress::leftKey         = extendedKeyModifier + 1;
 const int KeyPress::rightKey        = extendedKeyModifier + 2;
 const int KeyPress::upKey           = extendedKeyModifier + 3;
@@ -769,7 +785,7 @@ const int KeyPress::endKey          = extendedKeyModifier + 7;
 const int KeyPress::homeKey         = extendedKeyModifier + 8;
 const int KeyPress::deleteKey       = extendedKeyModifier + 9;
 const int KeyPress::insertKey       = -1;
-const int KeyPress::tabKey          = 9;
+const int KeyPress::tabKey          = 61;
 const int KeyPress::F1Key           = extendedKeyModifier + 10;
 const int KeyPress::F2Key           = extendedKeyModifier + 11;
 const int KeyPress::F3Key           = extendedKeyModifier + 12;
