@@ -777,17 +777,11 @@ public:
                     insideDrawRect = false;
                 }
 
-               #if 1
-                static PerformanceCounter pc ("Software renderer blit");
-                pc.start();
-               #endif
-
                 CGColorSpaceRef colourSpace = CGColorSpaceCreateDeviceRGB();
                 CGImageRef image = juce_createCoreGraphicsImage (temp, false, colourSpace, false);
                 CGColorSpaceRelease (colourSpace);
                 CGContextDrawImage (cg, CGRectMake (r.origin.x, r.origin.y, clipW, clipH), image);
                 CGImageRelease (image);
-                pc.stop();
             }
         }
     }
