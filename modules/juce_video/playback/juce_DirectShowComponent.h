@@ -204,8 +204,6 @@ private:
     friend class ScopedPointer <DirectShowComponentWatcher>;
     ScopedPointer <DirectShowComponentWatcher> componentWatcher;
 
-    bool needToUpdateViewport, needToRecreateNativeWindow;
-
     //==============================================================================
     void updateContextPosition();
     void showContext (bool shouldBeVisible);

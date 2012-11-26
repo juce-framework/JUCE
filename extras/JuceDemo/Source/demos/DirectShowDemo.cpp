@@ -76,7 +76,7 @@ private:
             startTimer (1000 / 50);
         }
 
-        void buttonClicked (Button* buttonThatWasClicked)
+        void buttonClicked (Button*)
         {
             if (dshowComp.isPlaying())
                 dshowComp.stop();
@@ -84,7 +84,7 @@ private:
                 dshowComp.play();
         }
 
-        void sliderValueChanged (Slider* sliderThatWasMoved)
+        void sliderValueChanged (Slider*)
         {
             dshowComp.setPosition (position.getValue());
         }
