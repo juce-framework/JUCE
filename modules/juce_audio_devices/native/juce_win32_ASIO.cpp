@@ -510,8 +510,6 @@ public:
         }
 
         error = String::empty;
-        needToReset = false;
-        isReSync = false;
         err = 0;
         buffersCreated = false;
 
@@ -538,9 +536,6 @@ public:
 
             if (needToReset)
             {
-                if (isReSync)
-                    JUCE_ASIO_LOG ("Resync request");
-
                 JUCE_ASIO_LOG ("! Resetting ASIO after sample rate change");
                 removeCurrentDriver();
 
@@ -551,7 +546,6 @@ public:
                     JUCE_ASIO_LOG ("ASIOInit: " + error);
 
                 needToReset = false;
-                isReSync = false;
             }
 
             numActiveInputChans = 0;
@@ -737,8 +731,6 @@ public:
         }
 
         needToReset = false;
-        isReSync = false;
-
         return error;
     }
 
@@ -755,7 +747,6 @@ public:
             deviceIsOpen = false;
             isStarted = false;
             needToReset = false;
-            isReSync = false;
 
             JUCE_ASIO_LOG ("ASIO - stopping");
 
@@ -851,12 +842,6 @@ public:
         startTimer (500);
     }
 
-    void resyncRequest() noexcept
-    {
-        isReSync = true;
-        resetRequest();
-    }
-
     void timerCallback()
     {
         if (! insideControlPanelModalLoop)
@@ -920,7 +905,7 @@ private:
     bool deviceIsOpen, isStarted, buffersCreated;
     bool volatile isASIOOpen;
     bool volatile calledback;
-    bool volatile littleEndian, postOutput, needToReset, isReSync;
+    bool volatile littleEndian, postOutput, needToReset;
     bool volatile insideControlPanelModalLoop;
     bool volatile shouldUsePreferredSize;
 
@@ -1018,7 +1003,6 @@ private:
         JUCE_ASIO_LOG ("opening ASIO device: " + getName());
 
         needToReset = false;
-        isReSync = false;
         outputChannelNames.clear();
         inputChannelNames.clear();
         bufferSizes.clear();
@@ -1235,8 +1219,6 @@ private:
 
         deviceIsOpen = false;
         needToReset = false;
-        isReSync = false;
-
         return error;
     }
 
@@ -1272,21 +1254,6 @@ private:
         const int bi = bufferIndex;
 
         const ScopedLock sl (callbackLock);
-
-        if (needToReset)
-        {
-            needToReset = false;
-
-            if (isReSync)
-            {
-                JUCE_ASIO_LOG ("! ASIO resync");
-                isReSync = false;
-            }
-            else
-            {
-                startTimer (20);
-            }
-        }
 
         if (bi >= 0)
         {
@@ -1377,14 +1344,9 @@ private:
 
         case kAsioBufferSizeChange:
         case kAsioResetRequest:
-            if (currentASIODev[deviceIndex] != nullptr)
-                currentASIODev[deviceIndex]->resetRequest();
-
-            return 1;
-
         case kAsioResyncRequest:
             if (currentASIODev[deviceIndex] != nullptr)
-                currentASIODev[deviceIndex]->resyncRequest();
+                currentASIODev[deviceIndex]->resetRequest();
 
             return 1;
 
