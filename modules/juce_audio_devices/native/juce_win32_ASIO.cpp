@@ -65,8 +65,9 @@ namespace ASIODebugging
         logMessage ("ASIO error: " + context + " - " + err);
     }
    #else
-    #define JUCE_ASIO_LOG(a) {}
-    #define JUCE_ASIO_LOG_ERROR(a, b) {}
+    static void dummyLog() {}
+    #define JUCE_ASIO_LOG(a)            ASIODebugging::dummyLog()
+    #define JUCE_ASIO_LOG_ERROR(a, b)   ASIODebugging::dummyLog()
    #endif
 }
 
