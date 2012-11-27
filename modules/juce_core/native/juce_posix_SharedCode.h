@@ -1005,6 +1005,7 @@ public:
                 // we're the child process..
                 close (pipeHandles[0]);   // close the read handle
                 dup2 (pipeHandles[1], 1); // turns the pipe into stdout
+                dup2 (pipeHandles[1], 2); //  + stderr
                 close (pipeHandles[1]);
 
                 Array<char*> argv;
