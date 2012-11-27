@@ -419,6 +419,7 @@ namespace AUHelpers
         {
             exporter.extraSearchPaths.add ("$(DEVELOPER_DIR)/Extras/CoreAudio/PublicUtility");
             exporter.extraSearchPaths.add ("$(DEVELOPER_DIR)/Extras/CoreAudio/AudioUnits/AUPublic/Utility");
+            exporter.extraSearchPaths.add ("$(DEVELOPER_DIR)/Extras/CoreAudio/AudioUnits/AUPublic/AUBase");
 
             exporter.xcodeFrameworks.addTokens ("AudioUnit CoreAudioKit", false);
             exporter.xcodeExcludedFiles64Bit = "\"*Carbon*.cpp\"";
@@ -479,7 +480,7 @@ namespace AUHelpers
                                                 JUCE_AU_PUBLIC "Utility/AUSilentTimeout.h",
                                                 JUCE_AU_PUBLIC "Utility/AUTimestampGenerator.h", 0 };
 
-                for (const char** f = appleAUFiles; *f != 0; ++f)
+                for (const char** f = appleAUFiles; *f != nullptr; ++f)
                 {
                     const RelativePath file (*f, RelativePath::projectFolder);
                     subGroup.addRelativeFile (file, -1, file.hasFileExtension ("cpp;mm"));
