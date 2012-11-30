@@ -55,6 +55,7 @@ namespace Ids
     DECLARE_ID (time);
     DECLARE_ID (extraCompilerFlags);
     DECLARE_ID (extraLinkerFlags);
+    DECLARE_ID (externalLibraries);
     DECLARE_ID (extraDefs);
     DECLARE_ID (projectType);
     DECLARE_ID (libraryType);
