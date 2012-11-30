@@ -142,6 +142,12 @@ public:
     */
     typename Point<ValueType>::FloatType getAngle() const noexcept          { return start.getAngleToPoint (end); }
 
+    /** Casts this line to float coordinates. */
+    Line<float> toFloat() const noexcept                                    { return Line<float> (start.toFloat(), end.toFloat()); }
+
+    /** Casts this line to double coordinates. */
+    Line<double> toDouble() const noexcept                                  { return Line<double> (start.toDouble(), end.toDouble()); }
+
     //==============================================================================
     /** Compares two lines. */
     bool operator== (const Line& other) const noexcept                      { return start == other.start && end == other.end; }
