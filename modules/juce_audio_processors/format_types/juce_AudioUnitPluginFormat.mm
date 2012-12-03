@@ -910,9 +910,9 @@ private:
     {
         if (currentBuffer != nullptr)
         {
-            jassert (inNumberFrames == currentBuffer->getNumSamples()); // if this ever happens, might need to add extra handling
+            jassert (inNumberFrames == (UInt32) currentBuffer->getNumSamples()); // if this ever happens, might need to add extra handling
 
-            for (int i = 0; i < ioData->mNumberBuffers; ++i)
+            for (UInt32 i = 0; i < ioData->mNumberBuffers; ++i)
             {
                 const int bufferChannel = inBusNumber * numInputBusChannels + i;
 
@@ -940,7 +940,7 @@ private:
             const double time = Time::getMillisecondCounterHiRes() * 0.001;
             const MIDIPacket* packet = &pktlist->packet[0];
 
-            for (int i = 0; i < pktlist->numPackets; ++i)
+            for (UInt32 i = 0; i < pktlist->numPackets; ++i)
             {
                 midiConcatenator.pushMidiData (packet->data, (int) packet->length, time, (void*) nullptr, *this);
                 packet = MIDIPacketNext (packet);
@@ -1110,7 +1110,7 @@ private:
             int maximumNumIns = 0;
             int maximumNumOuts = 0;
 
-            for (int i = 0; i < supportedChannelsSize / sizeof (AUChannelInfo); ++i)
+            for (int i = 0; i < (int) (supportedChannelsSize / sizeof (AUChannelInfo)); ++i)
             {
                 const int inChannels  = (int) supportedChannels[i].inChannels;
                 const int outChannels = (int) supportedChannels[i].outChannels;

@@ -1823,7 +1823,7 @@ private:
 
         String s;
 
-        if (v == 0 || v == -1)
+        if (v == 0 || (int) v == -1)
             v = getVersionNumber();
 
         if (v != 0)
@@ -2576,7 +2576,7 @@ private:
             return true;
         }
 
-        void mouseDown (int x, int y)
+        void handleMouseDown (int x, int y)
         {
             if (! alreadyInside)
             {
@@ -2591,7 +2591,7 @@ private:
             }
         }
 
-        void paint()
+        void handlePaint()
         {
             if (ComponentPeer* const peer = getPeer())
             {

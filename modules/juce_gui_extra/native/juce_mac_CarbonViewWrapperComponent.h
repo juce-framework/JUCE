@@ -55,8 +55,8 @@ public:
 
     virtual HIViewRef attachView (WindowRef windowRef, HIViewRef rootView) = 0;
     virtual void removeView (HIViewRef embeddedView) = 0;
-    virtual void mouseDown (int, int) {}
-    virtual void paint() {}
+    virtual void handleMouseDown (int, int) {}
+    virtual void handlePaint() {}
 
     virtual bool getEmbeddedViewSize (int& w, int& h)
     {
