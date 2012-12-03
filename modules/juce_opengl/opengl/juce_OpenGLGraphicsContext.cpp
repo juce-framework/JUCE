@@ -464,12 +464,12 @@ public:
                              fullHeightProportion - halfPixelY);
         }
 
-        void setMatrix (const AffineTransform& trans, const OpenGLTextureFromImage& image,
+        void setMatrix (const AffineTransform& trans, const OpenGLTextureFromImage& im,
                         const float targetX, const float targetY) const
         {
             setMatrix (trans,
-                       image.imageWidth, image.imageHeight,
-                       image.fullWidthProportion, image.fullHeightProportion,
+                       im.imageWidth, im.imageHeight,
+                       im.fullWidthProportion, im.fullHeightProportion,
                        targetX, targetY);
         }
 
@@ -1593,10 +1593,10 @@ private:
 
     struct ShaderFillOperation
     {
-        ShaderFillOperation (const ClipRegion_Mask& clip, const FillType& fill, const bool clampTiledImages)
-            : state (clip.state)
+        ShaderFillOperation (const ClipRegion_Mask& clipMask, const FillType& fill, const bool clampTiledImages)
+            : state (clipMask.state)
         {
-            const GLuint maskTextureID = clip.mask.getTextureID();
+            const GLuint maskTextureID = clipMask.mask.getTextureID();
 
             if (fill.isColour())
             {
@@ -1605,17 +1605,17 @@ private:
                 state.activeTextures.bindTexture (maskTextureID);
 
                 state.setShader (state.currentShader.programs->solidColourMasked);
-                state.currentShader.programs->solidColourMasked.maskParams.setBounds (clip.maskArea, state.target, 0);
+                state.currentShader.programs->solidColourMasked.maskParams.setBounds (clipMask.maskArea, state.target, 0);
             }
             else if (fill.isGradient())
             {
-                state.setShaderForGradientFill (*fill.gradient, fill.transform, maskTextureID, &clip.maskArea);
+                state.setShaderForGradientFill (*fill.gradient, fill.transform, maskTextureID, &clipMask.maskArea);
             }
             else
             {
                 jassert (fill.isTiledImage());
                 image = new OpenGLTextureFromImage (fill.image);
-                state.setShaderForTiledImageFill (*image, fill.transform, maskTextureID, &clip.maskArea, clampTiledImages);
+                state.setShaderForTiledImageFill (*image, fill.transform, maskTextureID, &clipMask.maskArea, clampTiledImages);
             }
         }
 
@@ -1770,9 +1770,9 @@ private:
 
     struct ShaderFillOperation
     {
-        ShaderFillOperation (const ClipRegion_RectangleList& clip, const FillType& fill,
+        ShaderFillOperation (const ClipRegion_RectangleList& clipList, const FillType& fill,
                              const bool replaceContents, const bool clampTiledImages)
-            : state (clip.state)
+            : state (clipList.state)
         {
             if (fill.isColour())
             {

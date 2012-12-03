@@ -701,7 +701,8 @@ bool Process::openDocument (const String& fileName, const String& parameters)
 
     JUCE_TRY
     {
-        hInstance = ShellExecute (0, 0, fileName.toWideCharPointer(), parameters.toWideCharPointer(), 0, SW_SHOWDEFAULT);
+        hInstance = ShellExecute (0, 0, fileName.toWideCharPointer(),
+                                  parameters.toWideCharPointer(), 0, SW_SHOWDEFAULT);
     }
     JUCE_CATCH_ALL
 
@@ -730,25 +731,25 @@ void File::revealToUser() const
 class NamedPipe::Pimpl
 {
 public:
-    Pimpl (const String& file, const bool isPipe_)
-        : pipeH (0),
+    Pimpl (const String& file, const bool createPipe)
+        : pipeH (INVALID_HANDLE_VALUE),
           cancelEvent (CreateEvent (0, FALSE, FALSE, 0)),
           connected (false),
-          isPipe (isPipe_)
+          ownsPipe (createPipe)
     {
-        pipeH = isPipe ? CreateNamedPipe (file.toWideCharPointer(),
-                                          PIPE_ACCESS_DUPLEX | FILE_FLAG_OVERLAPPED, 0,
-                                          PIPE_UNLIMITED_INSTANCES, 4096, 4096, 0, 0)
-                       : CreateFile (file.toWideCharPointer(),
-                                     GENERIC_READ | GENERIC_WRITE, 0, 0,
-                                     OPEN_EXISTING, FILE_FLAG_OVERLAPPED, 0);
+        pipeH = createPipe ? CreateNamedPipe (file.toWideCharPointer(),
+                                              PIPE_ACCESS_DUPLEX | FILE_FLAG_OVERLAPPED, 0,
+                                              PIPE_UNLIMITED_INSTANCES, 4096, 4096, 0, 0)
+                           : CreateFile (file.toWideCharPointer(),
+                                         GENERIC_READ | GENERIC_WRITE, 0, 0,
+                                         OPEN_EXISTING, FILE_FLAG_OVERLAPPED, 0);
     }
 
     ~Pimpl()
     {
         disconnectPipe();
 
-        if (pipeH != 0)
+        if (pipeH != INVALID_HANDLE_VALUE)
             CloseHandle (pipeH);
 
         CloseHandle (cancelEvent);
@@ -756,7 +757,7 @@ public:
 
     bool connect (const int timeOutMs)
     {
-        if (! isPipe)
+        if (! ownsPipe)
             return true;
 
         if (! connected)
@@ -764,11 +765,7 @@ public:
             OVERLAPPED over = { 0 };
             over.hEvent = CreateEvent (0, TRUE, FALSE, 0);
 
-            if (ConnectNamedPipe (pipeH, &over))
-            {
-                connected = false;  // yes, you read that right. In overlapped mode it should always return 0.
-            }
-            else
+            if (ConnectNamedPipe (pipeH, &over) == 0)
             {
                 const DWORD err = GetLastError();
 
@@ -801,10 +798,8 @@ public:
         }
     }
 
-    bool isConnected() const noexcept  { return connected; }
-
     HANDLE pipeH, cancelEvent;
-    bool connected, isPipe;
+    bool connected, ownsPipe;
 };
 
 NamedPipe::NamedPipe()
@@ -818,7 +813,7 @@ NamedPipe::~NamedPipe()
 
 bool NamedPipe::isOpen() const
 {
-    return pimpl != nullptr && pimpl->connected;
+    return pimpl != nullptr;
 }
 
 void NamedPipe::cancelPendingReads()
@@ -894,13 +889,13 @@ int NamedPipe::read (void* destBuffer, const int maxBytesToRead, const int timeO
                 {
                     bytesRead = (int) numRead;
                 }
-                else if ((GetLastError() == ERROR_BROKEN_PIPE || GetLastError() == ERROR_PIPE_NOT_CONNECTED) && pimpl->isPipe)
+                else if ((GetLastError() == ERROR_BROKEN_PIPE || GetLastError() == ERROR_PIPE_NOT_CONNECTED) && pimpl->ownsPipe)
                 {
                     pimpl->disconnectPipe();
                     waitAgain = true;
                 }
             }
-            else if (pimpl->isPipe)
+            else if (pimpl->ownsPipe)
             {
                 waitAgain = true;
 
@@ -921,46 +916,53 @@ int NamedPipe::write (const void* sourceBuffer, int numBytesToWrite, int timeOut
 {
     int bytesWritten = -1;
 
-    if (pimpl != nullptr && pimpl->connect (timeOutMilliseconds))
+    if (pimpl != nullptr)
     {
-        if (numBytesToWrite <= 0)
-            return 0;
-
-        OVERLAPPED over = { 0 };
-        over.hEvent = CreateEvent (0, TRUE, FALSE, 0);
-
-        unsigned long numWritten;
-
-        if (WriteFile (pimpl->pipeH, sourceBuffer, (DWORD) numBytesToWrite, &numWritten, &over))
+        if (! pimpl->connect (timeOutMilliseconds))
         {
-            bytesWritten = (int) numWritten;
+            pimpl = nullptr;
         }
-        else if (GetLastError() == ERROR_IO_PENDING)
+        else
         {
-            HANDLE handles[] = { over.hEvent, pimpl->cancelEvent };
-            DWORD waitResult;
+            if (numBytesToWrite <= 0)
+                return 0;
 
-            waitResult = WaitForMultipleObjects (2, handles, FALSE,
-                                                 timeOutMilliseconds >= 0 ? timeOutMilliseconds
-                                                                          : INFINITE);
+            OVERLAPPED over = { 0 };
+            over.hEvent = CreateEvent (0, TRUE, FALSE, 0);
 
-            if (waitResult != WAIT_OBJECT_0)
-            {
-                CancelIo (pimpl->pipeH);
-                WaitForSingleObject (over.hEvent, INFINITE);
-            }
+            unsigned long numWritten;
 
-            if (GetOverlappedResult (pimpl->pipeH, &over, &numWritten, FALSE))
+            if (WriteFile (pimpl->pipeH, sourceBuffer, (DWORD) numBytesToWrite, &numWritten, &over))
             {
                 bytesWritten = (int) numWritten;
             }
-            else if (GetLastError() == ERROR_BROKEN_PIPE && pimpl->isPipe)
+            else if (GetLastError() == ERROR_IO_PENDING)
             {
-                pimpl->disconnectPipe();
-            }
-        }
+                HANDLE handles[] = { over.hEvent, pimpl->cancelEvent };
+                DWORD waitResult;
 
-        CloseHandle (over.hEvent);
+                waitResult = WaitForMultipleObjects (2, handles, FALSE,
+                                                     timeOutMilliseconds >= 0 ? timeOutMilliseconds
+                                                                              : INFINITE);
+
+                if (waitResult != WAIT_OBJECT_0)
+                {
+                    CancelIo (pimpl->pipeH);
+                    WaitForSingleObject (over.hEvent, INFINITE);
+                }
+
+                if (GetOverlappedResult (pimpl->pipeH, &over, &numWritten, FALSE))
+                {
+                    bytesWritten = (int) numWritten;
+                }
+                else if (GetLastError() == ERROR_BROKEN_PIPE && pimpl->ownsPipe)
+                {
+                    pimpl->disconnectPipe();
+                }
+            }
+
+            CloseHandle (over.hEvent);
+        }
     }
 
     return bytesWritten;

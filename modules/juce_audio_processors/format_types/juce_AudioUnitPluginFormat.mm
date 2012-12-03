@@ -220,7 +220,7 @@ namespace AudioUnitFormatHelpers
                 const short resFileId = CFBundleOpenBundleResourceMap (bundleRef);
                 UseResFile (resFileId);
 
-                for (int i = 1; i <= Count1Resources ('thng'); ++i)
+                for (ResourceIndex i = 1; i <= Count1Resources ('thng'); ++i)
                 {
                     if (Handle h = Get1IndResource ('thng', i))
                     {
@@ -276,8 +276,8 @@ class AudioUnitPluginWindowCocoa;
 class AudioUnitPluginInstance     : public AudioPluginInstance
 {
 public:
-    AudioUnitPluginInstance (const String& fileOrIdentifier)
-        : fileOrIdentifier (fileOrIdentifier),
+    AudioUnitPluginInstance (const String& fileOrId)
+        : fileOrIdentifier (fileOrId),
           wantsMidiMessages (false),
           producesMidiMessages (false),
           wasPlaying (false),
@@ -1408,9 +1408,9 @@ private:
         {
             log ("Opening AU GUI: " + owner.plugin.getName());
 
-            AudioUnitCarbonView viewComponent = owner.getViewComponent();
+            AudioUnitCarbonView carbonView = owner.getViewComponent();
 
-            if (viewComponent == 0)
+            if (carbonView == 0)
                 return 0;
 
             Float32Point pos = { 0, 0 };
@@ -1418,7 +1418,7 @@ private:
 
             HIViewRef pluginView = 0;
 
-            AudioUnitCarbonViewCreate (viewComponent,
+            AudioUnitCarbonViewCreate (carbonView,
                                        owner.getAudioUnit(),
                                        windowRef,
                                        rootView,

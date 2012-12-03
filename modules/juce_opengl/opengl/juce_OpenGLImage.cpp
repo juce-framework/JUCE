@@ -142,9 +142,9 @@ private:
     template <class ReaderType, class WriterType>
     struct DataReleaser  : public Image::BitmapData::BitmapDataReleaser
     {
-        DataReleaser (OpenGLFrameBuffer& frameBuffer, int x, int y, int w, int h)
+        DataReleaser (OpenGLFrameBuffer& fb, int x, int y, int w, int h)
             : data (w * h),
-              writer (frameBuffer, x, y, w, h)
+              writer (fb, x, y, w, h)
         {}
 
         ~DataReleaser()
