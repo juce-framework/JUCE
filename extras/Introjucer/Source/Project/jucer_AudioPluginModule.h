@@ -73,8 +73,12 @@ namespace
         String s (getPluginAUMainType (project).toString());
 
         if (s.isEmpty())
-            s = static_cast <bool> (getPluginIsSynth (project).getValue()) ? "kAudioUnitType_MusicDevice"
-                                                                           : "kAudioUnitType_Effect";
+        {
+            if (getPluginIsSynth (project).getValue())              s = "kAudioUnitType_MusicDevice";
+            else if (getPluginWantsMidiInput (project).getValue())  s = "kAudioUnitType_MusicEffect";
+            else                                                    s = "kAudioUnitType_Effect";
+        }
+
         return s;
     }
 
