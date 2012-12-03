@@ -1321,7 +1321,8 @@ public:
 
                 break;
 
-            case audioMasterPinConnected:       return isValidChannel (index, value == 0) ? 1 : 0;
+            case audioMasterPinConnected:
+                return isValidChannel (index, value == 0) ? 0 : 1; // (yes, 0 = true)
 
             // none of these are handled (yet)..
             case audioMasterBeginEdit:
