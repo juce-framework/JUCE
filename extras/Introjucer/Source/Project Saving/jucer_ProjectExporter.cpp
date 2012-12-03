@@ -204,10 +204,13 @@ bool ProjectExporter::shouldFileBeCompiledByDefault (const RelativePath& file) c
 void ProjectExporter::createPropertyEditors (PropertyListBuilder& props)
 {
     props.add (new TextPropertyComponent (getTargetLocationValue(), "Target Project Folder", 1024, false),
-               "The location of the folder in which the " + name + " project will be created. This path can be absolute, but it's much more sensible to make it relative to the jucer project directory.");
+               "The location of the folder in which the " + name + " project will be created. "
+               "This path can be absolute, but it's much more sensible to make it relative to the jucer project directory.");
 
     props.add (new TextPropertyComponent (getJuceFolderValue(), "Local JUCE folder", 1024, false),
-               "The location of the Juce library folder that the " + name + " project will use to when compiling. This can be an absolute path, or relative to the jucer project folder, but it must be valid on the filesystem of the machine you use to actually do the compiling.");
+               "The location of the Juce library folder that the " + name + " project will use to when compiling. "
+               "This can be an absolute path, or relative to the jucer project folder, but it must be valid on the "
+               "filesystem of the machine you use to actually do the compiling.");
 
     OwnedArray<LibraryModule> modules;
     ModuleList moduleList;
@@ -221,9 +224,16 @@ void ProjectExporter::createPropertyEditors (PropertyListBuilder& props)
                "or new-lines to separate the items - to include a space or comma in a definition, precede it with a backslash.");
 
     props.add (new TextPropertyComponent (getExtraCompilerFlags(), "Extra compiler flags", 2048, true),
-               "Extra command-line flags to be passed to the compiler. This string can contain references to preprocessor definitions in the form ${NAME_OF_DEFINITION}, which will be replaced with their values.");
+               "Extra command-line flags to be passed to the compiler. This string can contain references to preprocessor definitions in the "
+               "form ${NAME_OF_DEFINITION}, which will be replaced with their values.");
+
     props.add (new TextPropertyComponent (getExtraLinkerFlags(), "Extra linker flags", 2048, true),
-               "Extra command-line flags to be passed to the linker. You might want to use this for adding additional libraries. This string can contain references to preprocessor definitions in the form ${NAME_OF_VALUE}, which will be replaced with their values.");
+               "Extra command-line flags to be passed to the linker. You might want to use this for adding additional libraries. "
+               "This string can contain references to preprocessor definitions in the form ${NAME_OF_VALUE}, which will be replaced with their values.");
+
+    props.add (new TextPropertyComponent (getExternalLibraries(), "External libraries to link", 2048, true),
+               "Additional libraries to link (one per line). You should not add any platform specific decoration to these names. "
+               "This string can contain references to preprocessor definitions in the form ${NAME_OF_VALUE}, which will be replaced with their values.");
 
     {
         OwnedArray<Project::Item> images;

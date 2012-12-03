@@ -113,6 +113,9 @@ static const char** getJackPorts (jack_client_t* const client, const bool forInp
     return nullptr;
 }
 
+class JackAudioIODeviceType;
+static Array<JackAudioIODeviceType*> activeDeviceTypes;
+
 //==============================================================================
 class JackAudioIODevice   : public AudioIODevice
 {
@@ -267,8 +270,6 @@ public:
             }
         }
 
-        updateActivePorts();
-
         return lastError;
     }
 
@@ -368,7 +369,7 @@ private:
 
         if (callback != nullptr)
         {
-            if ((numActiveInputChannels + numActiveOutputChannels) > 0)
+            if ((numActiveInChans + numActiveOutChans) > 0)
                 callback->audioDeviceIOCallback (const_cast <const float**> (inChans.getData()), numActiveInChans,
                                                  outChans, numActiveOutChans, numSamples);
         }
@@ -389,26 +390,37 @@ private:
 
     void updateActivePorts()
     {
-        // This function is called on open(), and from jack as callback on external
-        // jack port changes. Jules, is there any risk that this can happen in a
-        // separate thread from the audio thread, meaning we need a critical section?
-        // the below two activeOut/InputChannels are used in process()
-        activeOutputChannels.clear();
-        activeInputChannels.clear();
+        BigInteger newOutputChannels, newInputChannels;
 
         for (int i = 0; i < outputPorts.size(); ++i)
             if (juce::jack_port_connected ((jack_port_t*) outputPorts.getUnchecked(i)))
-                activeOutputChannels.setBit (i);
+                newOutputChannels.setBit (i);
 
         for (int i = 0; i < inputPorts.size(); ++i)
             if (juce::jack_port_connected ((jack_port_t*) inputPorts.getUnchecked(i)))
-                activeInputChannels.setBit (i);
+                newInputChannels.setBit (i);
+
+        if (newOutputChannels != activeOutputChannels
+             || newInputChannels != activeInputChannels)
+        {
+            AudioIODeviceCallback* const oldCallback = callback;
+
+            stop();
+
+            activeOutputChannels = newOutputChannels;
+            activeInputChannels  = newInputChannels;
+
+            if (oldCallback != nullptr)
+                start (oldCallback);
+
+            sendDeviceChangedCallback();
+        }
     }
 
-    static void portConnectCallback (jack_port_id_t, jack_port_id_t, int, void* callbackArgument)
+    static void portConnectCallback (jack_port_id_t, jack_port_id_t, int, void* arg)
     {
-        if (callbackArgument != nullptr)
-            static_cast<JackAudioIODevice*> (callbackArgument)->updateActivePorts();
+        if (JackAudioIODevice* device = static_cast <JackAudioIODevice*> (arg))
+            device->updateActivePorts();
     }
 
     static void threadInitCallback (void* /* callbackArgument */)
@@ -432,6 +444,8 @@ private:
         jack_Log ("JackAudioIODevice::errorCallback " + String (msg));
     }
 
+    static void sendDeviceChangedCallback();
+
     bool isOpen_;
     jack_client_t* client;
     String lastError;
@@ -454,6 +468,12 @@ public:
         : AudioIODeviceType ("JACK"),
           hasScanned (false)
     {
+        activeDeviceTypes.add (this);
+    }
+
+    ~JackAudioIODeviceType()
+    {
+        activeDeviceTypes.removeFirstMatchingValue (this);
     }
 
     void scanForDevices()
@@ -563,12 +583,21 @@ public:
         return nullptr;
     }
 
+    void portConnectionChange()    { callDeviceChangeListeners(); }
+
 private:
     StringArray inputNames, outputNames, inputIds, outputIds;
     bool hasScanned;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (JackAudioIODeviceType);
 };
+
+void JackAudioIODevice::sendDeviceChangedCallback()
+{
+    for (int i = activeDeviceTypes.size(); --i >= 0;)
+        if (JackAudioIODeviceType* d = activeDeviceTypes[i])
+            d->portConnectionChange();
+}
 
 //==============================================================================
 AudioIODeviceType* AudioIODeviceType::createAudioIODeviceType_JACK()

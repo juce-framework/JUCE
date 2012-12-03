@@ -57,13 +57,17 @@ public:
         uint32 block[16], s[8];
         memcpy (s, state, sizeof (s));
 
+        for (int i = 0; i < 16; ++i)
+            block[i] = ByteOrder::bigEndianInt (addBytesToPointer (data, i * 4));
+
         for (uint32 j = 0; j < 64; j += 16)
         {
-            #define JUCE_SHA256(i) s[(7 - i) & 7] += S1 (s[(4 - i) & 7]) + ch (s[(4 - i) & 7], s[(5 - i) & 7], s[(6 - i) & 7]) + constants[i + j] \
-                                                        + (j != 0 ? (block[i & 15] += s1 (block[(i - 2) & 15]) + block[(i - 7) & 15] + s0 (block[(i - 15) & 15])) \
-                                                                  : (block[i] = ByteOrder::bigEndianInt (addBytesToPointer (data, i * 4)))); \
-                                   s[(3 - i) & 7] += s[(7 - i) & 7]; \
-                                   s[(7 - i) & 7] += S0 (s[(0 - i) & 7]) + maj (s[(0 - i) & 7], s[(1 - i) & 7], s[(2 - i) & 7])
+            #define JUCE_SHA256(i) \
+                s[(7 - i) & 7] += S1 (s[(4 - i) & 7]) + ch (s[(4 - i) & 7], s[(5 - i) & 7], s[(6 - i) & 7]) + constants[i + j] \
+                                     + (j != 0 ? (block[i & 15] += s1 (block[(i - 2) & 15]) + block[(i - 7) & 15] + s0 (block[(i - 15) & 15])) \
+                                               : block[i]); \
+                s[(3 - i) & 7] += s[(7 - i) & 7]; \
+                s[(7 - i) & 7] += S0 (s[(0 - i) & 7]) + maj (s[(0 - i) & 7], s[(1 - i) & 7], s[(2 - i) & 7])
 
             JUCE_SHA256(0);  JUCE_SHA256(1);  JUCE_SHA256(2);  JUCE_SHA256(3);  JUCE_SHA256(4);  JUCE_SHA256(5);  JUCE_SHA256(6);  JUCE_SHA256(7);
             JUCE_SHA256(8);  JUCE_SHA256(9);  JUCE_SHA256(10); JUCE_SHA256(11); JUCE_SHA256(12); JUCE_SHA256(13); JUCE_SHA256(14); JUCE_SHA256(15);

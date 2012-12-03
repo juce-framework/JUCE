@@ -84,6 +84,9 @@ public:
     Value getExtraLinkerFlags()                 { return getSetting (Ids::extraLinkerFlags); }
     String getExtraLinkerFlagsString() const    { return getSettingString (Ids::extraLinkerFlags).replaceCharacters ("\r\n", "  "); }
 
+    Value getExternalLibraries()                { return getSetting (Ids::externalLibraries); }
+    String getExternalLibrariesString() const   { return getSettingString (Ids::externalLibraries).replaceCharacters ("\r\n", " ;"); }
+
     Value getUserNotes()                        { return getSetting (Ids::userNotes); }
 
     // This adds the quotes, and may return angle-brackets, eg: <foo/bar.h> or normal quotes.

@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-//======================================================================
 namespace DirectShowHelpers
 {
     bool checkDShowAvailability()
@@ -62,23 +61,12 @@ namespace DirectShowHelpers
 
             HRESULT hr = baseFilter.CoCreateInstance (CLSID_VideoMixingRenderer);
 
-            if (SUCCEEDED (hr))
-                hr = graphBuilder->AddFilter (baseFilter, L"VMR-7");
-
-            if (SUCCEEDED (hr))
-                hr = baseFilter.QueryInterface (filterConfig);
-
-            if (SUCCEEDED (hr))
-                hr = filterConfig->SetRenderingMode (VMRMode_Windowless);
-
-            if (SUCCEEDED (hr))
-                hr = baseFilter.QueryInterface (windowlessControl);
-
-            if (SUCCEEDED (hr))
-                hr = windowlessControl->SetVideoClippingWindow (hwnd);
-
-            if (SUCCEEDED (hr))
-                hr = windowlessControl->SetAspectRatioMode (VMR_ARMODE_LETTER_BOX);
+            if (SUCCEEDED (hr))   hr = graphBuilder->AddFilter (baseFilter, L"VMR-7");
+            if (SUCCEEDED (hr))   hr = baseFilter.QueryInterface (filterConfig);
+            if (SUCCEEDED (hr))   hr = filterConfig->SetRenderingMode (VMRMode_Windowless);
+            if (SUCCEEDED (hr))   hr = baseFilter.QueryInterface (windowlessControl);
+            if (SUCCEEDED (hr))   hr = windowlessControl->SetVideoClippingWindow (hwnd);
+            if (SUCCEEDED (hr))   hr = windowlessControl->SetAspectRatioMode (VMR_ARMODE_LETTER_BOX);
 
             return hr;
         }
@@ -134,21 +122,12 @@ namespace DirectShowHelpers
 
             HRESULT hr = baseFilter.CoCreateInstance (CLSID_EnhancedVideoRenderer);
 
-            if (SUCCEEDED (hr))
-                hr = graphBuilder->AddFilter (baseFilter, L"EVR");
-
-            if (SUCCEEDED (hr))
-                hr = baseFilter.QueryInterface (getService);
-
-            if (SUCCEEDED (hr))
-                hr = getService->GetService (MR_VIDEO_RENDER_SERVICE, IID_IMFVideoDisplayControl,
-                                             (LPVOID*) videoDisplayControl.resetAndGetPointerAddress());
-
-            if (SUCCEEDED (hr))
-                hr = videoDisplayControl->SetVideoWindow (hwnd);
-
-            if (SUCCEEDED (hr))
-                hr = videoDisplayControl->SetAspectRatioMode (MFVideoARMode_PreservePicture);
+            if (SUCCEEDED (hr))   hr = graphBuilder->AddFilter (baseFilter, L"EVR");
+            if (SUCCEEDED (hr))   hr = baseFilter.QueryInterface (getService);
+            if (SUCCEEDED (hr))   hr = getService->GetService (MR_VIDEO_RENDER_SERVICE, IID_IMFVideoDisplayControl,
+                                                               (LPVOID*) videoDisplayControl.resetAndGetPointerAddress());
+            if (SUCCEEDED (hr))   hr = videoDisplayControl->SetVideoWindow (hwnd);
+            if (SUCCEEDED (hr))   hr = videoDisplayControl->SetAspectRatioMode (MFVideoARMode_PreservePicture);
 
             return hr;
         }
@@ -194,7 +173,7 @@ namespace DirectShowHelpers
 
 
 //======================================================================
-class DirectShowComponent::DirectShowContext
+class DirectShowComponent::DirectShowContext    : public AsyncUpdater
 {
 public:
     DirectShowContext (DirectShowComponent& component_, VideoRendererType type_)
@@ -205,7 +184,9 @@ public:
           hasVideo (false),
           videoWidth (0),
           videoHeight (0),
-          type (type_)
+          type (type_),
+          needToUpdateViewport (true),
+          needToRecreateNativeWindow (false)
     {
         CoInitialize (0);
 
@@ -272,6 +253,42 @@ public:
             videoRenderer->setVideoWindow (hwnd);
     }
 
+    void handleAsyncUpdate()
+    {
+        if (hwnd  != 0)
+        {
+            if (needToRecreateNativeWindow)
+            {
+                peerChanged();
+                needToRecreateNativeWindow = false;
+            }
+
+            if (needToUpdateViewport)
+            {
+                updateVideoPosition();
+                needToUpdateViewport = false;
+            }
+
+            repaint();
+        }
+        else
+        {
+            triggerAsyncUpdate();
+        }
+    }
+
+    void recreateNativeWindowAsync()
+    {
+        needToRecreateNativeWindow = true;
+        triggerAsyncUpdate();
+    }
+
+    void updateContextPosition()
+    {
+        needToUpdateViewport = true;
+        triggerAsyncUpdate();
+    }
+
     //======================================================================
     bool loadFile (const String& fileOrURLPath)
     {
@@ -329,6 +346,7 @@ public:
         if (SUCCEEDED (hr))
         {
             state = stoppedState;
+            pause();
             return true;
         }
 
@@ -491,9 +509,17 @@ private:
 
     ScopedPointer <DirectShowHelpers::VideoRenderer> videoRenderer;
 
+    bool needToUpdateViewport, needToRecreateNativeWindow;
+
     //======================================================================
     class NativeWindowClass   : private DeletedAtShutdown
     {
+    public:
+        bool isRegistered() const noexcept              { return atom != 0; }
+        LPCTSTR getWindowClassName() const noexcept     { return (LPCTSTR) MAKELONG (atom, 0); }
+
+        juce_DeclareSingleton_SingleThreaded_Minimal (NativeWindowClass);
+
     private:
         NativeWindowClass()
             : atom (0)
@@ -527,29 +553,21 @@ private:
 
         static LRESULT CALLBACK wndProc (HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
         {
-            DirectShowContext* c = (DirectShowContext*) GetWindowLongPtr (hwnd, GWLP_USERDATA);
-
-            if (c != nullptr)
+            if (DirectShowContext* const c = (DirectShowContext*) GetWindowLongPtr (hwnd, GWLP_USERDATA))
             {
                 switch (msg)
                 {
-                    case WM_ERASEBKGND:       return 1;
-                    case WM_DISPLAYCHANGE:    c->displayResolutionChanged(); break;
-                    case graphEventID:        c->graphEventProc(); return 0;
-                    default:                  break;
+                    case WM_NCHITTEST:          return HTTRANSPARENT;
+                    case WM_ERASEBKGND:         return 1;
+                    case WM_DISPLAYCHANGE:      c->displayResolutionChanged(); break;
+                    case graphEventID:          c->graphEventProc(); return 0;
+                    default:                    break;
                 }
             }
 
             return DefWindowProc (hwnd, msg, wParam, lParam);
         }
 
-    public:
-        bool isRegistered() const noexcept              { return atom != 0; }
-        LPCTSTR getWindowClassName() const noexcept     { return (LPCTSTR) MAKELONG (atom, 0); }
-
-        juce_DeclareSingleton_SingleThreaded_Minimal (NativeWindowClass);
-
-    private:
         ATOM atom;
 
         JUCE_DECLARE_NON_COPYABLE (NativeWindowClass);
@@ -621,11 +639,7 @@ private:
     {
         jassert (nativeWindow == nullptr);
 
-        ComponentPeer* topLevelPeer = component.getTopLevelComponent()->getPeer();
-
-        jassert (topLevelPeer != nullptr);
-
-        if (topLevelPeer != nullptr)
+        if (ComponentPeer* const topLevelPeer = component.getTopLevelComponent()->getPeer())
         {
             nativeWindow = new NativeWindow ((HWND) topLevelPeer->getNativeHandle(), this);
 
@@ -642,6 +656,10 @@ private:
             {
                 nativeWindow = nullptr;
             }
+        }
+        else
+        {
+            jassertfalse;
         }
 
         return false;
@@ -701,9 +719,9 @@ juce_ImplementSingleton_SingleThreaded (DirectShowComponent::DirectShowContext::
 class DirectShowComponent::DirectShowComponentWatcher   : public ComponentMovementWatcher
 {
 public:
-    DirectShowComponentWatcher (DirectShowComponent* const owner_)
-        : ComponentMovementWatcher (owner_),
-          owner (owner_)
+    DirectShowComponentWatcher (DirectShowComponent* const c)
+        : ComponentMovementWatcher (c),
+          owner (c)
     {
     }
 
@@ -725,7 +743,6 @@ public:
             owner->showContext (owner->isShowing());
     }
 
-    //======================================================================
 private:
     DirectShowComponent* const owner;
 
@@ -736,9 +753,7 @@ private:
 //======================================================================
 DirectShowComponent::DirectShowComponent (VideoRendererType type)
     : videoLoaded (false),
-      looping (false),
-      needToUpdateViewport (true),
-      needToRecreateNativeWindow (false)
+      looping (false)
 {
     setOpaque (true);
     context = new DirectShowContext (*this, type);
@@ -758,13 +773,13 @@ bool DirectShowComponent::isDirectShowAvailable()
 
 void DirectShowComponent::recreateNativeWindowAsync()
 {
-    needToRecreateNativeWindow = true;
+    context->recreateNativeWindowAsync();
     repaint();
 }
 
 void DirectShowComponent::updateContextPosition()
 {
-    needToUpdateViewport = true;
+    context->updateContextPosition();
 
     if (getWidth() > 0 && getHeight() > 0)
     {
@@ -784,23 +799,9 @@ void DirectShowComponent::paint (Graphics& g)
 {
     if (videoLoaded)
     {
-        if (needToRecreateNativeWindow)
-        {
-            context->peerChanged();
-            needToRecreateNativeWindow = false;
-        }
+        context->handleUpdateNowIfNeeded();
 
-        if (needToUpdateViewport)
-        {
-            context->updateVideoPosition();
-            needToUpdateViewport = false;
-        }
-
-        context->repaint();
-
-        ComponentPeer* const peer = getPeer();
-
-        if (peer != nullptr)
+        if (ComponentPeer* const peer = getPeer())
             peer->addMaskedRegion (getScreenBounds() - peer->getScreenPosition());
     }
     else

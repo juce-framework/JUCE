@@ -2153,6 +2153,11 @@ public:
                 cloneClipIfMultiplyReferenced();
                 clip = clip->clipToRectangle (transform.translated (r));
             }
+            else if (transform.isIntegerScaling)
+            {
+                cloneClipIfMultiplyReferenced();
+                clip = clip->clipToRectangle (transform.transformed (r).getSmallestIntegerContainer());
+            }
             else
             {
                 Path p;
@@ -2175,6 +2180,16 @@ public:
                 offsetList.offsetAll (transform.xOffset, transform.yOffset);
                 clip = clip->clipToRectangleList (offsetList);
             }
+            else if (transform.isIntegerScaling)
+            {
+                cloneClipIfMultiplyReferenced();
+                RectangleList scaledList;
+
+                for (const Rectangle<int>* i = r.begin(), * const e = r.end(); i != e; ++i)
+                    scaledList.add (transform.transformed (*i).getSmallestIntegerContainer());
+
+                clip = clip->clipToRectangleList (scaledList);
+            }
             else
             {
                 clipToPath (r.toPath(), AffineTransform::identity);
@@ -2193,6 +2208,10 @@ public:
             if (transform.isOnlyTranslated)
             {
                 clip = clip->excludeClipRectangle (transform.translated (r));
+            }
+            else if (transform.isIntegerScaling)
+            {
+                clip = clip->excludeClipRectangle (transform.transformed (r).getSmallestIntegerContainer());
             }
             else
             {
@@ -2288,32 +2307,56 @@ public:
     }
 
     //==============================================================================
+    void fillTargetRect (const Rectangle<int>& r, const bool replaceContents)
+    {
+        if (fillType.isColour())
+        {
+            Image::BitmapData destData (image, Image::BitmapData::readWrite);
+            clip->fillRectWithColour (destData, r, fillType.colour.getPixelARGB(), replaceContents);
+        }
+        else
+        {
+            const Rectangle<int> clipped (clip->getClipBounds().getIntersection (r));
+
+            if (! clipped.isEmpty())
+                fillShape (new ClipRegions::RectangleListRegion (clipped), false);
+        }
+    }
+
+    void fillTargetRect (const Rectangle<float>& r)
+    {
+        if (fillType.isColour())
+        {
+            Image::BitmapData destData (image, Image::BitmapData::readWrite);
+            clip->fillRectWithColour (destData, r, fillType.colour.getPixelARGB());
+        }
+        else
+        {
+            const Rectangle<float> clipped (clip->getClipBounds().toFloat().getIntersection (r));
+
+            if (! clipped.isEmpty())
+                fillShape (new ClipRegions::EdgeTableRegion (clipped), false);
+        }
+    }
+
+    template <typename CoordType>
+    void fillRectAsPath (const Rectangle<CoordType>& r)
+    {
+        Path p;
+        p.addRectangle (r);
+        fillPath (p, AffineTransform::identity);
+    }
+
     void fillRect (const Rectangle<int>& r, const bool replaceContents)
     {
         if (clip != nullptr)
         {
             if (transform.isOnlyTranslated)
-            {
-                if (fillType.isColour())
-                {
-                    Image::BitmapData destData (image, Image::BitmapData::readWrite);
-                    clip->fillRectWithColour (destData, transform.translated (r), fillType.colour.getPixelARGB(), replaceContents);
-                }
-                else
-                {
-                    const Rectangle<int> totalClip (clip->getClipBounds());
-                    const Rectangle<int> clipped (totalClip.getIntersection (transform.translated (r)));
-
-                    if (! clipped.isEmpty())
-                        fillShape (new ClipRegions::RectangleListRegion (clipped), false);
-                }
-            }
+                fillTargetRect (transform.translated (r), replaceContents);
+            else if (transform.isIntegerScaling)
+                fillTargetRect (transform.transformed (r).getSmallestIntegerContainer(), replaceContents);
             else
-            {
-                Path p;
-                p.addRectangle (r);
-                fillPath (p, AffineTransform::identity);
-            }
+                fillRectAsPath (r);
         }
     }
 
@@ -2322,27 +2365,11 @@ public:
         if (clip != nullptr)
         {
             if (transform.isOnlyTranslated)
-            {
-                if (fillType.isColour())
-                {
-                    Image::BitmapData destData (image, Image::BitmapData::readWrite);
-                    clip->fillRectWithColour (destData, transform.translated (r), fillType.colour.getPixelARGB());
-                }
-                else
-                {
-                    const Rectangle<float> totalClip (clip->getClipBounds().toFloat());
-                    const Rectangle<float> clipped (totalClip.getIntersection (transform.translated (r)));
-
-                    if (! clipped.isEmpty())
-                        fillShape (new ClipRegions::EdgeTableRegion (clipped), false);
-                }
-            }
+                fillTargetRect (transform.translated (r));
+            else if (transform.isIntegerScaling)
+                fillTargetRect (transform.transformed (r));
             else
-            {
-                Path p;
-                p.addRectangle (r);
-                fillPath (p, AffineTransform::identity);
-            }
+                fillRectAsPath (r);
         }
     }
 

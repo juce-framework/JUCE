@@ -23,10 +23,9 @@
   ==============================================================================
 */
 
-TooltipWindow::TooltipWindow (Component* const parent_,
-                              const int millisecondsBeforeTipAppears_)
+TooltipWindow::TooltipWindow (Component* const parentComp, const int delayMs)
     : Component ("tooltip"),
-      millisecondsBeforeTipAppears (millisecondsBeforeTipAppears_),
+      millisecondsBeforeTipAppears (delayMs),
       mouseClicks (0),
       mouseWheelMoves (0),
       lastHideTime (0),
@@ -39,8 +38,8 @@ TooltipWindow::TooltipWindow (Component* const parent_,
     setAlwaysOnTop (true);
     setOpaque (true);
 
-    if (parent_ != nullptr)
-        parent_->addChildComponent (this);
+    if (parentComp != nullptr)
+        parentComp->addChildComponent (this);
 }
 
 TooltipWindow::~TooltipWindow()
@@ -120,10 +119,9 @@ String TooltipWindow::getTipFor (Component* const c)
          && Process::isForegroundProcess()
          && ! ModifierKeys::getCurrentModifiers().isAnyMouseButtonDown())
     {
-        TooltipClient* const ttc = dynamic_cast <TooltipClient*> (c);
-
-        if (ttc != nullptr && ! c->isCurrentlyBlockedByAnotherModalComponent())
-            return ttc->getTooltip();
+        if (TooltipClient* const ttc = dynamic_cast <TooltipClient*> (c))
+            if (! c->isCurrentlyBlockedByAnotherModalComponent())
+                return ttc->getTooltip();
     }
 
     return String::empty;
@@ -148,7 +146,7 @@ void TooltipWindow::timerCallback()
 
     Desktop& desktop = Desktop::getInstance();
     const int clickCount = desktop.getMouseButtonClickCounter();
-    const int wheelCount = desktop.getMouseButtonClickCounter();
+    const int wheelCount = desktop.getMouseWheelMoveCounter();
     const bool mouseWasClicked = (clickCount > mouseClicks || wheelCount > mouseWheelMoves);
     mouseClicks = clickCount;
     mouseWheelMoves = wheelCount;

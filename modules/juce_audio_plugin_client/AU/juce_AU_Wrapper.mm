@@ -849,10 +849,12 @@ public:
                 for (int j = 0; j < numOut; ++j)
                     zeromem (channels [j], sizeof (float) * numSamples);
             }
+           #if ! JucePlugin_IsSynth
             else if (ShouldBypassEffect())
             {
                 juceFilter->processBlockBypassed (buffer, midiEvents);
             }
+           #endif
             else
             {
                 juceFilter->processBlock (buffer, midiEvents);

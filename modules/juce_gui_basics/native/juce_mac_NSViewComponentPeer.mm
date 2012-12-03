@@ -728,16 +728,17 @@ public:
         if (! component.isOpaque())
             CGContextClearRect (cg, CGContextGetClipBoundingBox (cg));
 
+        float displayScale = 1.0f;
+
+       #if defined (MAC_OS_X_VERSION_10_7) && (MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_7)
+        NSScreen* screen = [[view window] screen];
+        if ([screen respondsToSelector: @selector (backingScaleFactor)])
+            displayScale = screen.backingScaleFactor;
+       #endif
+
        #if USE_COREGRAPHICS_RENDERING
         if (usingCoreGraphics)
         {
-            float displayScale = 1.0f;
-
-           #if defined (MAC_OS_X_VERSION_10_7) && (MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_7)
-            NSScreen* screen = [[view window] screen];
-            if ([screen respondsToSelector: @selector (backingScaleFactor)])
-                displayScale = screen.backingScaleFactor;
-           #endif
 
             CoreGraphicsContext context (cg, (float) [view frame].size.height, displayScale);
 
@@ -748,22 +749,28 @@ public:
         else
        #endif
         {
-            const int xOffset = -roundToInt (r.origin.x);
-            const int yOffset = -roundToInt ([view frame].size.height - (r.origin.y + r.size.height));
+            const Point<int> offset (-roundToInt (r.origin.x),
+                                     -roundToInt ([view frame].size.height - (r.origin.y + r.size.height)));
             const int clipW = (int) (r.size.width  + 0.5f);
             const int clipH = (int) (r.size.height + 0.5f);
 
             RectangleList clip;
-            getClipRects (clip, xOffset, yOffset, clipW, clipH);
+            getClipRects (clip, offset, clipW, clipH);
 
             if (! clip.isEmpty())
             {
                 Image temp (component.isOpaque() ? Image::RGB : Image::ARGB,
-                            clipW, clipH, ! component.isOpaque());
+                            clipW * displayScale, clipH * displayScale, ! component.isOpaque());
 
                 {
+                    if (displayScale != 1.0f)
+                        clip.scaleAll (roundToInt (displayScale));
+
                     ScopedPointer<LowLevelGraphicsContext> context (component.getLookAndFeel()
-                                                                        .createGraphicsContext (temp, Point<int> (xOffset, yOffset), clip));
+                                                                      .createGraphicsContext (temp, offset * displayScale, clip));
+
+                    if (displayScale != 1.0f)
+                        context->addTransform (AffineTransform::scale (displayScale));
 
                     insideDrawRect = true;
                     handlePaint (*context);
@@ -1153,7 +1160,7 @@ private:
         object_setInstanceVariable (viewOrWindow, "owner", newOwner);
     }
 
-    void getClipRects (RectangleList& clip, const int xOffset, const int yOffset, const int clipW, const int clipH)
+    void getClipRects (RectangleList& clip, const Point<int> offset, const int clipW, const int clipH)
     {
         const NSRect* rects = nullptr;
         NSInteger numRects = 0;
@@ -1163,8 +1170,8 @@ private:
         const CGFloat viewH = [view frame].size.height;
 
         for (int i = 0; i < numRects; ++i)
-            clip.addWithoutMerging (clipBounds.getIntersection (Rectangle<int> (roundToInt (rects[i].origin.x) + xOffset,
-                                                                                roundToInt (viewH - (rects[i].origin.y + rects[i].size.height)) + yOffset,
+            clip.addWithoutMerging (clipBounds.getIntersection (Rectangle<int> (roundToInt (rects[i].origin.x) + offset.x,
+                                                                                roundToInt (viewH - (rects[i].origin.y + rects[i].size.height)) + offset.y,
                                                                                 roundToInt (rects[i].size.width),
                                                                                 roundToInt (rects[i].size.height))));
     }

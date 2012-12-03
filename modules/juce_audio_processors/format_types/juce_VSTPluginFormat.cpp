@@ -1140,10 +1140,8 @@ public:
 
     bool isValidChannel (int index, bool isInput) const
     {
-        if (isInput)
-            return index < getNumInputChannels();
-        else
-            return index < getNumOutputChannels();
+        return isInput ? (index < getNumInputChannels())
+                       : (index < getNumOutputChannels());
     }
 
     //==============================================================================
@@ -1183,33 +1181,9 @@ public:
         }
     }
 
-    const String getParameterName (int index)
-    {
-        if (effect != nullptr)
-        {
-            jassert (index >= 0 && index < effect->numParams);
-
-            char nm [256] = { 0 };
-            dispatch (effGetParamName, index, 0, nm, 0);
-            return String (nm).trim();
-        }
-
-        return String::empty;
-    }
-
-    const String getParameterText (int index)
-    {
-        if (effect != nullptr)
-        {
-            jassert (index >= 0 && index < effect->numParams);
-
-            char nm [256] = { 0 };
-            dispatch (effGetParamDisplay, index, 0, nm, 0);
-            return String (nm).trim();
-        }
-
-        return String::empty;
-    }
+    const String getParameterName (int index)       { return getTextForOpcode (index, effGetParamName); }
+    const String getParameterText (int index)       { return getTextForOpcode (index, effGetParamDisplay); }
+    String getParameterLabel (int index) const      { return getTextForOpcode (index, effGetParamLabel); }
 
     bool isParameterAutomatable (int index) const
     {
@@ -1720,6 +1694,17 @@ private:
         return false;
     }
 
+    String getTextForOpcode (const int index, const AEffectOpcodes opcode) const
+    {
+        if (effect == nullptr)
+            return String::empty;
+
+        jassert (index >= 0 && index < effect->numParams);
+        char nm [256] = { 0 };
+        dispatch (opcode, index, 0, nm, 0);
+        return String (CharPointer_UTF8 (nm)).trim();
+    }
+
     String getCurrentProgramName()
     {
         String name;
@@ -1818,20 +1803,6 @@ private:
         float* p = (float*) (((char*) m.getData()) + 64);
         for (int i = 0; i < getNumParameters(); ++i)
             setParameter (i, p[i]);
-    }
-
-    String getParameterLabel (int index) const
-    {
-        if (effect != nullptr)
-        {
-            jassert (index >= 0 && index < effect->numParams);
-
-            char nm [256] = { 0 };
-            dispatch (effGetParamLabel, index, 0, nm, 0);
-            return String (nm).trim();
-        }
-
-        return String::empty;
     }
 
     VstIntPtr getVstDirectory() const

@@ -167,6 +167,13 @@ private:
         for (int i = 0; i < linuxLibs.size(); ++i)
             out << " -l" << linuxLibs[i];
 
+        StringArray libraries;
+        libraries.addTokens (getExternalLibrariesString(), ";", "\"'");
+        libraries.removeEmptyStrings();
+
+        if (libraries.size() != 0)
+            out << " -l" << replacePreprocessorTokens (config, libraries.joinIntoString (" -l")).trim();
+
         out << " " << replacePreprocessorTokens (config, getExtraLinkerFlagsString()).trim()
             << newLine;
     }

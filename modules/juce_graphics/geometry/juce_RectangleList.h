@@ -212,6 +212,14 @@ public:
     /** Adds an x and y value to all the co-ordinates. */
     void offsetAll (int dx, int dy) noexcept;
 
+    /** Scales all the co-ordinates. */
+    template <typename ScaleType>
+    void scaleAll (ScaleType scaleFactor) noexcept
+    {
+        for (Rectangle<int>* r = rects.begin(), * const e = rects.end(); r != e; ++r)
+            *r *= scaleFactor;
+    }
+
     //==============================================================================
     /** Creates a Path object to represent this region. */
     Path toPath() const;

@@ -1508,11 +1508,7 @@ void LookAndFeel::drawRotarySlider (Graphics& g,
 
         {
             Path filledArc;
-            filledArc.addPieSegment (rx, ry, rw, rw,
-                                    rotaryStartAngle,
-                                    angle,
-                                    thickness);
-
+            filledArc.addPieSegment (rx, ry, rw, rw, rotaryStartAngle, angle, thickness);
             g.fillPath (filledArc);
         }
 
@@ -1619,8 +1615,8 @@ void LookAndFeel::drawTooltip (Graphics& g, const String& text, int width, int h
     g.drawRect (0, 0, width, height, 1);
    #endif
 
-    const TextLayout tl (LookAndFeelHelpers::layoutTooltipText (text, findColour (TooltipWindow::textColourId)));
-    tl.draw (g, Rectangle<float> ((float) width, (float) height));
+    LookAndFeelHelpers::layoutTooltipText (text, findColour (TooltipWindow::textColourId))
+        .draw (g, Rectangle<float> ((float) width, (float) height));
 }
 
 //==============================================================================
@@ -1635,9 +1631,7 @@ void LookAndFeel::layoutFilenameComponent (FilenameComponent& filenameComp,
 {
     browseButton->setSize (80, filenameComp.getHeight());
 
-    TextButton* const tb = dynamic_cast <TextButton*> (browseButton);
-
-    if (tb != nullptr)
+    if (TextButton* const tb = dynamic_cast <TextButton*> (browseButton))
         tb->changeWidthToFitText();
 
     browseButton->setTopRightPosition (filenameComp.getWidth(), 0);
