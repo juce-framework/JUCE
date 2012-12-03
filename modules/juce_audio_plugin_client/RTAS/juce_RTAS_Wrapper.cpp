@@ -527,7 +527,9 @@ protected:
         }
 
         juceFilter->m_hasSideChain = false;
-        juceFilter->m_playPositionSamples = mRTGlobals->mRTASPlayPosition;
+        long long samplePos;
+        midiTransport->GetCurrentRTASSampleLocation (&samplePos);
+        juceFilter->m_playPositionSamples = samplePos;
 
        #if JucePlugin_WantsMidiInput
         midiEvents.clear();
