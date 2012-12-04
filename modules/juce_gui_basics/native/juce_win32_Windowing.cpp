@@ -357,7 +357,7 @@ private:
         return bitsPerPixel > 24;
     }
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WindowsBitmapImage);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WindowsBitmapImage)
 };
 
 //==============================================================================
@@ -984,7 +984,7 @@ public:
             HWNDComponentPeer& owner;
             ComponentPeer::DragInfo dragInfo;
 
-            JUCE_DECLARE_NON_COPYABLE (OwnerInfo);
+            JUCE_DECLARE_NON_COPYABLE (OwnerInfo)
         };
 
         ScopedPointer<OwnerInfo> ownerInfo;
@@ -1054,7 +1054,7 @@ public:
             return S_OK;
         }
 
-        JUCE_DECLARE_NON_COPYABLE (JuceDropTarget);
+        JUCE_DECLARE_NON_COPYABLE (JuceDropTarget)
     };
 
 private:
@@ -1098,7 +1098,7 @@ private:
     private:
         Image image;
 
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TemporaryImage);
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TemporaryImage)
     };
 
     TemporaryImage offscreenImageGenerator;
@@ -1217,7 +1217,7 @@ private:
             return false;
         }
 
-        JUCE_DECLARE_NON_COPYABLE (WindowClassHolder);
+        JUCE_DECLARE_NON_COPYABLE (WindowClassHolder)
     };
 
     //==============================================================================
@@ -2676,13 +2676,13 @@ private:
             }
         }
 
-        JUCE_DECLARE_NON_COPYABLE (IMEHandler);
+        JUCE_DECLARE_NON_COPYABLE (IMEHandler)
     };
 
     IMEHandler imeHandler;
 
     //==============================================================================
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (HWNDComponentPeer);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (HWNDComponentPeer)
 };
 
 ModifierKeys HWNDComponentPeer::currentModifiers;

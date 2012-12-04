@@ -69,7 +69,7 @@ private:
 
 
     //==============================================================================
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioDemoLatencyPage);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioDemoLatencyPage)
 };
 
 

@@ -1855,7 +1855,7 @@ private:
     Colour colour;
     Path normalShape, toggledShape;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (GlassWindowButton);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (GlassWindowButton)
 };
 
 Button* LookAndFeel::createDocumentWindowButton (int buttonType)

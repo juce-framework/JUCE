@@ -110,7 +110,7 @@ private:
     AudioSampleBuffer tempBuffer;
     float lastGain, gain;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioSourcePlayer);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioSourcePlayer)
 };
 
 

@@ -101,7 +101,7 @@ private:
     ThumbnailCacheEntry* findThumbFor (int64 hash) const;
     int findOldestThumb() const;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioThumbnailCache);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioThumbnailCache)
 };
 
 

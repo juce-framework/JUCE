@@ -330,7 +330,7 @@ private:
             return nil;
         }
 
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (RecentFilesMenuItem);
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (RecentFilesMenuItem)
     };
 
     ScopedPointer<RecentFilesMenuItem> recent;
@@ -439,7 +439,7 @@ private:
         }
 
     private:
-        JUCE_DECLARE_NON_COPYABLE (AsyncMenuUpdater);
+        JUCE_DECLARE_NON_COPYABLE (AsyncMenuUpdater)
     };
 
     class AsyncCommandInvoker  : public CallbackMessage
@@ -458,7 +458,7 @@ private:
     private:
         const int commandId, topLevelIndex;
 
-        JUCE_DECLARE_NON_COPYABLE (AsyncCommandInvoker);
+        JUCE_DECLARE_NON_COPYABLE (AsyncCommandInvoker)
     };
 
     //==============================================================================

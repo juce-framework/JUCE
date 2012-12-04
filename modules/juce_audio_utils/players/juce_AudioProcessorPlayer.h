@@ -100,7 +100,7 @@ private:
     MidiBuffer incomingMidi;
     MidiMessageCollector messageCollector;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioProcessorPlayer);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioProcessorPlayer)
 };
 
 

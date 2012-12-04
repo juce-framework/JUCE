@@ -298,7 +298,7 @@ private:
         owner.codeDocumentChanged (start, end);
     }
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Pimpl);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Pimpl)
 };
 
 //==============================================================================

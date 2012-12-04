@@ -120,7 +120,7 @@ public:
     private:
         const OpenGLContext& context;
 
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Uniform);
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Uniform)
     };
 
     /** Represents an openGL vertex attribute value.
@@ -148,7 +148,7 @@ private:
     const OpenGLContext& context;
     String errorLog;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OpenGLShaderProgram);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OpenGLShaderProgram)
 };
 
 #endif   // __JUCE_OPENGLSHADERPROGRAM_JUCEHEADER__

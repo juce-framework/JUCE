@@ -84,7 +84,7 @@ private:
 
     AudioDeviceManager& owner;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CallbackHandler);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CallbackHandler)
 };
 
 

@@ -82,7 +82,7 @@ private:
     static const char* getProjectWindowPosName()   { return "projectWindowPos"; }
     void createProjectContentCompIfNeeded();
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainWindow);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainWindow)
 };
 
 //==============================================================================
@@ -113,7 +113,7 @@ public:
     OwnedArray<MainWindow> windows;
 
 private:
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainWindowList);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainWindowList)
 };
 
 

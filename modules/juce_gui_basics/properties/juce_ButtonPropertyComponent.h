@@ -75,7 +75,7 @@ public:
 private:
     TextButton button;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ButtonPropertyComponent);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ButtonPropertyComponent)
 };
 
 

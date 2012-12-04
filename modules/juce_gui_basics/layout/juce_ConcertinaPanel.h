@@ -114,7 +114,7 @@ private:
     void setLayout (const PanelSizes&, bool animate);
     void panelHeaderDoubleClicked (Component*);
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ConcertinaPanel);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ConcertinaPanel)
 };
 
 

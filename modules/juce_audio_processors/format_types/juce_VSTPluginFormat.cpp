@@ -195,7 +195,7 @@ public:
 private:
     const bool isMessageThread;
 
-    JUCE_DECLARE_NON_COPYABLE (IdleCallRecursionPreventer);
+    JUCE_DECLARE_NON_COPYABLE (IdleCallRecursionPreventer)
 };
 
 class VSTPluginWindow;
@@ -698,7 +698,7 @@ public:
 #endif
 
 private:
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ModuleHandle);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ModuleHandle)
 };
 
 static const int defaultVSTSampleRateValue = 44100;
@@ -1880,7 +1880,7 @@ private:
         isPowerOn = on;
     }
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (VSTPluginInstance);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (VSTPluginInstance)
 };
 
 //==============================================================================
@@ -2611,7 +2611,7 @@ private:
         VSTPluginWindow& owner;
         bool alreadyInside;
 
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (InnerWrapperComponent);
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (InnerWrapperComponent)
     };
 
     friend class InnerWrapperComponent;
@@ -2628,7 +2628,7 @@ private:
     }
 #endif
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (VSTPluginWindow);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (VSTPluginWindow)
 };
 
 //==============================================================================

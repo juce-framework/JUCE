@@ -96,7 +96,7 @@ private:
     friend class ScopedPointer <GZIPCompressorHelper>;
     ScopedPointer <GZIPCompressorHelper> helper;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (GZIPCompressorOutputStream);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (GZIPCompressorOutputStream)
 };
 
 #endif   // __JUCE_GZIPCOMPRESSOROUTPUTSTREAM_JUCEHEADER__

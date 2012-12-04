@@ -178,7 +178,7 @@ private:
 
     Array <ColourPoint> colours;
 
-    JUCE_LEAK_DETECTOR (ColourGradient);
+    JUCE_LEAK_DETECTOR (ColourGradient)
 };
 
 

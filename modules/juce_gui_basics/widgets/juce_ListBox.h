@@ -553,8 +553,8 @@ public:
 
 private:
     //==============================================================================
-    JUCE_PUBLIC_IN_DLL_BUILD (class ListViewport);
-    JUCE_PUBLIC_IN_DLL_BUILD (class RowComponent);
+    JUCE_PUBLIC_IN_DLL_BUILD (class ListViewport)
+    JUCE_PUBLIC_IN_DLL_BUILD (class RowComponent)
     friend class ListViewport;
     friend class TableListBox;
     ListBoxModel* model;
@@ -574,7 +574,7 @@ private:
     JUCE_DEPRECATED (void setSelectedRows (const SparseSet<int>&, bool));
    #endif
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ListBox);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ListBox)
 };
 
 

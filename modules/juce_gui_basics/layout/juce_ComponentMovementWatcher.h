@@ -91,7 +91,7 @@ private:
     void unregister();
     void registerWithParentComps();
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ComponentMovementWatcher);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ComponentMovementWatcher)
 };
 
 

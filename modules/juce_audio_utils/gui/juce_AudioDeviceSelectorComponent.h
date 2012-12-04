@@ -102,7 +102,7 @@ private:
     void changeListenerCallback (ChangeBroadcaster*);
     void updateAllControls();
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioDeviceSelectorComponent);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioDeviceSelectorComponent)
 };
 
 

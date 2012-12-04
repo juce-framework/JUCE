@@ -130,7 +130,7 @@ private:
     friend class ScopedPointer<TopLevelItem>;
     ScopedPointer<TopLevelItem> treeItem;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (KeyMappingEditorComponent);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (KeyMappingEditorComponent)
 };
 
 

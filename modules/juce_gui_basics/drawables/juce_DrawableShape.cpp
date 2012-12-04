@@ -79,7 +79,7 @@ private:
     const DrawableShape::RelativeFillType fill;
     const bool isMainFill;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (RelativePositioner);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (RelativePositioner)
 };
 
 void DrawableShape::setFill (const FillType& newFill)

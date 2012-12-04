@@ -101,7 +101,7 @@ private:
     //==============================================================================
     DropShadow shadow;
 
-    JUCE_LEAK_DETECTOR (DropShadowEffect);
+    JUCE_LEAK_DETECTOR (DropShadowEffect)
 };
 
 

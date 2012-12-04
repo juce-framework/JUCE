@@ -631,7 +631,7 @@ private:
     BigInteger changingParams;
    #endif
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioProcessor);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioProcessor)
 };
 
 

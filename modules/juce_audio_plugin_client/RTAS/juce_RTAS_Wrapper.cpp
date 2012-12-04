@@ -413,7 +413,7 @@ public:
 
             Component* getEditor() const        { return getChildComponent (0); }
 
-            JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (EditorCompWrapper);
+            JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (EditorCompWrapper)
         };
     };
 
@@ -883,7 +883,7 @@ private:
         AudioProcessor* const juceFilter;
         const int index;
 
-        JUCE_DECLARE_NON_COPYABLE (JucePluginControl);
+        JUCE_DECLARE_NON_COPYABLE (JucePluginControl)
     };
 };
 

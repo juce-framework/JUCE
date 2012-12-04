@@ -197,7 +197,7 @@ private:
     bool readNextMessageInt();
     void run();
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (InterprocessConnection);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (InterprocessConnection)
 };
 
 #endif   // __JUCE_INTERPROCESSCONNECTION_JUCEHEADER__

@@ -962,7 +962,7 @@ private:
         presetsArray.clear();
     }
 
-    JUCE_DECLARE_NON_COPYABLE (JuceAU);
+    JUCE_DECLARE_NON_COPYABLE (JuceAU)
 };
 
 //==============================================================================
@@ -1122,7 +1122,7 @@ public:
     };
 
 private:
-    JUCE_DECLARE_NON_COPYABLE (EditorCompHolder);
+    JUCE_DECLARE_NON_COPYABLE (EditorCompHolder)
 };
 
 void JuceAU::deleteActiveEditors()

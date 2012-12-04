@@ -76,7 +76,7 @@ private:
     void setShadowImage (const Image&, int num, int w, int h, int sx, int sy);
     void bringShadowWindowsToFront();
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DropShadower);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DropShadower)
 };
 
 

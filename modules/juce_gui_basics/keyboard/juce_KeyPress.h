@@ -250,7 +250,7 @@ private:
     ModifierKeys mods;
     juce_wchar textCharacter;
 
-    JUCE_LEAK_DETECTOR (KeyPress);
+    JUCE_LEAK_DETECTOR (KeyPress)
 };
 
 

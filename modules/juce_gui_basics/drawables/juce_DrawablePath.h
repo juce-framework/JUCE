@@ -142,7 +142,7 @@ private:
     void applyRelativePath (const RelativePointPath&, Expression::Scope*);
 
     DrawablePath& operator= (const DrawablePath&);
-    JUCE_LEAK_DETECTOR (DrawablePath);
+    JUCE_LEAK_DETECTOR (DrawablePath)
 };
 
 

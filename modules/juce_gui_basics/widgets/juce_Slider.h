@@ -804,7 +804,7 @@ protected:
 
 private:
     //==============================================================================
-    JUCE_PUBLIC_IN_DLL_BUILD (class Pimpl);
+    JUCE_PUBLIC_IN_DLL_BUILD (class Pimpl)
     friend class Pimpl;
     friend class ScopedPointer<Pimpl>;
     ScopedPointer<Pimpl> pimpl;
@@ -825,7 +825,7 @@ private:
     JUCE_DEPRECATED (void setMinAndMaxValues (double, double, bool));
    #endif
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Slider);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Slider)
 };
 
 /** This typedef is just for compatibility with old code - newer code should use the Slider::Listener class directly. */

@@ -138,7 +138,7 @@ private:
 
     mutable Array <ThreadRecursionCount> readerThreads;
 
-    JUCE_DECLARE_NON_COPYABLE (ReadWriteLock);
+    JUCE_DECLARE_NON_COPYABLE (ReadWriteLock)
 };
 
 

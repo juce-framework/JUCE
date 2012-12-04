@@ -226,7 +226,7 @@ private:
     ActionSet* getNextSet() const noexcept;
     void clearFutureTransactions();
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (UndoManager);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (UndoManager)
 };
 
 

@@ -75,7 +75,7 @@ private:
     void valueTreeParentChanged (ValueTree&)                        { updateColourScheme(); }
     void valueTreeRedirected (ValueTree&)                           { updateColourScheme(); }
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AppearanceSettings);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AppearanceSettings)
 };
 
 //==============================================================================

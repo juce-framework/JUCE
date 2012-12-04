@@ -99,7 +99,7 @@ private:
     //==============================================================================
     Point<int> mouseDownWithinTarget;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ComponentDragger);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ComponentDragger)
 };
 
 #endif   // __JUCE_COMPONENTDRAGGER_JUCEHEADER__

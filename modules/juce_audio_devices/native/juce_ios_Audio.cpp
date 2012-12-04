@@ -495,7 +495,7 @@ private:
         }
     }
 
-    JUCE_DECLARE_NON_COPYABLE (iOSAudioIODevice);
+    JUCE_DECLARE_NON_COPYABLE (iOSAudioIODevice)
 };
 
 
@@ -537,7 +537,7 @@ public:
     }
 
 private:
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (iOSAudioIODeviceType);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (iOSAudioIODeviceType)
 };
 
 //==============================================================================

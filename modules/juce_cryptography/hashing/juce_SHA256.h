@@ -101,7 +101,7 @@ private:
     uint8 result [32];
     void process (const void*, size_t);
 
-    JUCE_LEAK_DETECTOR (SHA256);
+    JUCE_LEAK_DETECTOR (SHA256)
 };
 
 

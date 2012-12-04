@@ -111,7 +111,7 @@ private:
     Colour colour;
     Thread::ThreadID threadId;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (BouncingBallComp);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (BouncingBallComp)
 };
 
 
@@ -163,7 +163,7 @@ public:
 private:
     int interval;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DemoThread);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DemoThread)
 };
 
 
@@ -204,7 +204,7 @@ public:
     }
 
 private:
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DemoThreadPoolJob);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DemoThreadPoolJob)
 };
 
 //==============================================================================

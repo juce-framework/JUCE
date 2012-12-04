@@ -96,7 +96,7 @@ public:
 private:
     ByteOrder();
 
-    JUCE_DECLARE_NON_COPYABLE (ByteOrder);
+    JUCE_DECLARE_NON_COPYABLE (ByteOrder)
 };
 
 

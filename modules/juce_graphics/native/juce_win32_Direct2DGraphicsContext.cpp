@@ -704,7 +704,7 @@ public:
         ComSmartPtr <ID2D1GradientStopCollection> gradientStops;
 
     private:
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SavedState);
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SavedState)
     };
 
     //==============================================================================
@@ -848,5 +848,5 @@ private:
         return matrix;
     }
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Direct2DLowLevelGraphicsContext);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Direct2DLowLevelGraphicsContext)
 };

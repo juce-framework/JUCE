@@ -60,7 +60,7 @@ private:
     Colour colour;
     Path path;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ArrowButton);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ArrowButton)
 };
 
 

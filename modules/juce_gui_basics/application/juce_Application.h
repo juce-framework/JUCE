@@ -261,7 +261,7 @@ private:
     int appReturnValue;
     bool stillInitialising;
 
-    JUCE_DECLARE_NON_COPYABLE (JUCEApplication);
+    JUCE_DECLARE_NON_COPYABLE (JUCEApplication)
 };
 
 

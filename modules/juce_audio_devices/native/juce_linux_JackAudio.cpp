@@ -589,7 +589,7 @@ private:
     StringArray inputNames, outputNames, inputIds, outputIds;
     bool hasScanned;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (JackAudioIODeviceType);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (JackAudioIODeviceType)
 };
 
 void JackAudioIODevice::sendDeviceChangedCallback()

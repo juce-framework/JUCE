@@ -92,7 +92,7 @@ private:
     const Image topLeft, bottomRight, filler;
     const int type;   // 0 = left, 1 = right, 2 = top, 3 = bottom. left + right are full-height
 
-    JUCE_DECLARE_NON_COPYABLE (ShadowWindow);
+    JUCE_DECLARE_NON_COPYABLE (ShadowWindow)
 };
 
 

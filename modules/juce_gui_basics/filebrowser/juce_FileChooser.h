@@ -186,7 +186,7 @@ private:
                                     FilePreviewComponent* previewComponent);
     static bool isPlatformDialogAvailable();
 
-    JUCE_LEAK_DETECTOR (FileChooser);
+    JUCE_LEAK_DETECTOR (FileChooser)
 };
 
 

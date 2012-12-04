@@ -160,7 +160,7 @@ private:
     void paint (Graphics& g);
     void resized();
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ColourSelector);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ColourSelector)
 
    #if JUCE_CATCH_DEPRECATED_CODE_MISUSE
     // This constructor is here temporarily to prevent old code compiling, because the parameters

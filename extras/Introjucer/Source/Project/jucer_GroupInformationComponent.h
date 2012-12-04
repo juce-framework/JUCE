@@ -158,7 +158,7 @@ private:
         ToggleButton compileButton, resourceButton;
     };
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (GroupInformationComponent);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (GroupInformationComponent)
 };
 
 

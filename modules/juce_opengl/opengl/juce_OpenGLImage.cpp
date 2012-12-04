@@ -136,7 +136,7 @@ private:
         OpenGLFrameBuffer& frameBuffer;
         const Rectangle<int> area;
 
-        JUCE_DECLARE_NON_COPYABLE (Writer);
+        JUCE_DECLARE_NON_COPYABLE (Writer)
     };
 
     template <class ReaderType, class WriterType>
@@ -165,7 +165,7 @@ private:
         WriterType writer;
     };
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OpenGLFrameBufferImage);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OpenGLFrameBufferImage)
 };
 
 

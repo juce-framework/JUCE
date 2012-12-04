@@ -157,7 +157,7 @@ private:
     AnimationTask* findTaskFor (Component* component) const noexcept;
     void timerCallback();
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ComponentAnimator);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ComponentAnimator)
 };
 
 

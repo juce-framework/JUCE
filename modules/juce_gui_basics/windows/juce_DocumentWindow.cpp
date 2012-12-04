@@ -38,7 +38,7 @@ public:
 private:
     DocumentWindow& owner;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ButtonListenerProxy);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ButtonListenerProxy)
 };
 
 //==============================================================================

@@ -68,7 +68,7 @@ public:
 
 private:
     //==============================================================================
-    JUCE_LEAK_DETECTOR (CPlusPlusCodeTokeniser);
+    JUCE_LEAK_DETECTOR (CPlusPlusCodeTokeniser)
 };
 
 

@@ -115,7 +115,7 @@ private:
     //==============================================================================
     NamedValueSet properties;
 
-    JUCE_LEAK_DETECTOR (DynamicObject);
+    JUCE_LEAK_DETECTOR (DynamicObject)
 };
 
 

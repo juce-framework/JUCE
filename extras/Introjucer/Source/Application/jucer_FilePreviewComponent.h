@@ -115,7 +115,7 @@ private:
         facts.removeEmptyStrings (true);
     }
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ItemPreviewComponent);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ItemPreviewComponent)
 };
 
 

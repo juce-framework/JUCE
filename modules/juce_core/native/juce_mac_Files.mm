@@ -365,7 +365,7 @@ private:
     String parentDir, wildCard;
     NSDirectoryEnumerator* enumerator;
 
-    JUCE_DECLARE_NON_COPYABLE (Pimpl);
+    JUCE_DECLARE_NON_COPYABLE (Pimpl)
 };
 
 DirectoryIterator::NativeIterator::NativeIterator (const File& directory, const String& wildcard)

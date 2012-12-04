@@ -180,7 +180,7 @@ private:
         return timeoutEnd != 0 && Time::getMillisecondCounter() >= timeoutEnd;
     }
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Pimpl);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Pimpl)
 };
 
 NamedPipe::NamedPipe()

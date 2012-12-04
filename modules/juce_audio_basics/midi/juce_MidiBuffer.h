@@ -222,7 +222,7 @@ public:
         const MidiBuffer& buffer;
         const uint8* data;
 
-        JUCE_DECLARE_NON_COPYABLE (Iterator);
+        JUCE_DECLARE_NON_COPYABLE (Iterator)
     };
 
 private:
@@ -234,7 +234,7 @@ private:
     uint8* getData() const noexcept;
     uint8* findEventAfter (uint8*, int samplePosition) const noexcept;
 
-    JUCE_LEAK_DETECTOR (MidiBuffer);
+    JUCE_LEAK_DETECTOR (MidiBuffer)
 };
 
 

@@ -116,7 +116,7 @@ struct RegistryKeyWrapper
     const wchar_t* wideCharValueName;
     String valueName;
 
-    JUCE_DECLARE_NON_COPYABLE (RegistryKeyWrapper);
+    JUCE_DECLARE_NON_COPYABLE (RegistryKeyWrapper)
 };
 
 uint32 WindowsRegistry::getBinaryValue (const String& regValuePath, MemoryBlock& result)

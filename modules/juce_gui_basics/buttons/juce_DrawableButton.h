@@ -178,7 +178,7 @@ private:
     Drawable* currentImage;
     int edgeIndent;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DrawableButton);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DrawableButton)
 };
 
 

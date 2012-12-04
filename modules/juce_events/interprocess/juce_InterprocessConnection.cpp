@@ -204,7 +204,7 @@ struct ConnectionStateMessage  : public MessageManager::MessageBase
     WeakReference<InterprocessConnection> owner;
     bool connectionMade;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ConnectionStateMessage);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ConnectionStateMessage)
 };
 
 void InterprocessConnection::connectionMadeInt()

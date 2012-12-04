@@ -30,8 +30,8 @@ Drawable::Drawable()
 }
 
 Drawable::Drawable (const Drawable& other)
+    : Component (other.getName())
 {
-    setName (other.getName());
     setComponentID (other.getComponentID());
 }
 

@@ -182,7 +182,7 @@ private:
     TextEditor ed;
     JucerTreeViewBase& item;
 
-    JUCE_DECLARE_NON_COPYABLE (RenameTreeItemCallback);
+    JUCE_DECLARE_NON_COPYABLE (RenameTreeItemCallback)
 };
 
 void JucerTreeViewBase::showRenameBox()
@@ -254,7 +254,7 @@ public:
 
 private:
     JucerTreeViewBase& owner;
-    JUCE_DECLARE_NON_COPYABLE (ItemSelectionTimer);
+    JUCE_DECLARE_NON_COPYABLE (ItemSelectionTimer)
 };
 
 void JucerTreeViewBase::itemSelectionChanged (bool isNowSelected)

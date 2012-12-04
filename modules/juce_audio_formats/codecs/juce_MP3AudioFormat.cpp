@@ -2926,7 +2926,7 @@ private:
         samplesDone += 32;
     }
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MP3Stream);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MP3Stream)
 };
 
 //==============================================================================
@@ -3104,7 +3104,7 @@ private:
         return numFrames * 1152;
     }
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MP3Reader);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MP3Reader)
 };
 
 }

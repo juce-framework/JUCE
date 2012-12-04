@@ -256,7 +256,7 @@ private:
     int getMaximumSizeOfItems (int startIndex, int endIndex) const;
     void updatePrefSizesToMatchCurrentPositions();
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (StretchableLayoutManager);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (StretchableLayoutManager)
 };
 
 

@@ -398,7 +398,7 @@ private:
     bool selectIfEnabled (int index);
     static void popupMenuFinishedCallback (int, ComboBox*);
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ComboBox);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ComboBox)
 };
 
 /** This typedef is just for compatibility with old code - newer code should use the ComboBox::Listener class directly. */

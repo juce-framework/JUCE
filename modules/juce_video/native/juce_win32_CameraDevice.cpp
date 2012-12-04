@@ -690,7 +690,7 @@ private:
     private:
         DShowCameraDeviceInteral& owner;
 
-        JUCE_DECLARE_NON_COPYABLE (GrabberCallback);
+        JUCE_DECLARE_NON_COPYABLE (GrabberCallback)
     };
 
     ComSmartPtr <GrabberCallback> callback;
@@ -698,7 +698,7 @@ private:
     CriticalSection listenerLock;
 
     //==============================================================================
-    JUCE_DECLARE_NON_COPYABLE (DShowCameraDeviceInteral);
+    JUCE_DECLARE_NON_COPYABLE (DShowCameraDeviceInteral)
 };
 
 

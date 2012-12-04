@@ -76,7 +76,7 @@ inline Type* createCopyIfNotNull (const Type* pointer)     { return pointer != n
  private:
      void* pool;
 
-     JUCE_DECLARE_NON_COPYABLE (ScopedAutoReleasePool);
+     JUCE_DECLARE_NON_COPYABLE (ScopedAutoReleasePool)
  };
 
  /** A macro that can be used to easily declare a local ScopedAutoReleasePool object for RAII-based obj-C autoreleasing. */

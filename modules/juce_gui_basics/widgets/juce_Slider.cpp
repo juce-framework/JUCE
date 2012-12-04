@@ -1287,7 +1287,7 @@ public:
         Font font;
         String text;
 
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PopupDisplayComponent);
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PopupDisplayComponent)
     };
 
     ScopedPointer <PopupDisplayComponent> popupDisplay;

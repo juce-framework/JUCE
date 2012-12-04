@@ -141,7 +141,7 @@ private:
     OwnedArray<DrawableButton> buttons;
     int buttonSize;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PreferencesPanel);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PreferencesPanel)
 };
 
 

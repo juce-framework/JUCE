@@ -360,7 +360,7 @@ public:
     bool volatile shadersAvailable;
     bool volatile needsUpdate;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CachedImage);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CachedImage)
 };
 
 //==============================================================================

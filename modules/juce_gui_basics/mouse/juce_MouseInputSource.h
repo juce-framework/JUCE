@@ -179,7 +179,7 @@ private:
 
     static Point<int> getCurrentMousePosition();
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MouseInputSource);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MouseInputSource)
 };
 
 

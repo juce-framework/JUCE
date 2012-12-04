@@ -360,7 +360,7 @@ private:
     //==============================================================================
     Array <String> strings;
 
-    JUCE_LEAK_DETECTOR (StringArray);
+    JUCE_LEAK_DETECTOR (StringArray)
 };
 
 

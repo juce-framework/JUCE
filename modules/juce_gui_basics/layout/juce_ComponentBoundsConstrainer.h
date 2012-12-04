@@ -193,7 +193,7 @@ private:
     int minOffTop, minOffLeft, minOffBottom, minOffRight;
     double aspectRatio;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ComponentBoundsConstrainer);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ComponentBoundsConstrainer)
 };
 
 

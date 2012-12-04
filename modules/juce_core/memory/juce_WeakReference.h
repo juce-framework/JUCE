@@ -141,7 +141,7 @@ public:
     private:
         ObjectType* volatile owner;
 
-        JUCE_DECLARE_NON_COPYABLE (SharedPointer);
+        JUCE_DECLARE_NON_COPYABLE (SharedPointer)
     };
 
     typedef ReferenceCountedObjectPtr<SharedPointer> SharedRef;
@@ -195,7 +195,7 @@ public:
     private:
         SharedRef sharedPointer;
 
-        JUCE_DECLARE_NON_COPYABLE (Master);
+        JUCE_DECLARE_NON_COPYABLE (Master)
     };
 
 private:

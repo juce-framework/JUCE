@@ -464,7 +464,7 @@ private:
 
     void updateLayout (bool onlyIncreaseSize);
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AlertWindow);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AlertWindow)
 };
 
 #endif   // __JUCE_ALERTWINDOW_JUCEHEADER__

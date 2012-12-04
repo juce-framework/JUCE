@@ -302,7 +302,7 @@ private:
         filter = nullptr;
     }
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (StandaloneFilterWindow);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (StandaloneFilterWindow)
 };
 
 #endif   // __JUCE_STANDALONEFILTERWINDOW_JUCEHEADER__

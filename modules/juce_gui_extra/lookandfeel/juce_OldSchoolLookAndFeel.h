@@ -150,7 +150,7 @@ private:
     //==============================================================================
     DropShadowEffect scrollbarShadow;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OldSchoolLookAndFeel);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OldSchoolLookAndFeel)
 };
 
 

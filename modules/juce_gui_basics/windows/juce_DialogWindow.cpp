@@ -89,7 +89,7 @@ public:
     }
 
 private:
-    JUCE_DECLARE_NON_COPYABLE (DefaultDialogWindow);
+    JUCE_DECLARE_NON_COPYABLE (DefaultDialogWindow)
 };
 
 DialogWindow::LaunchOptions::LaunchOptions() noexcept

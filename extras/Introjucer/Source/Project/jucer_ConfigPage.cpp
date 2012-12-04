@@ -150,10 +150,10 @@ namespace ProjectSettingsTreeClasses
         private:
             PropertyGroup group;
 
-            JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SettingsComp);
+            JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SettingsComp)
         };
 
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ConfigItem);
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ConfigItem)
     };
 
     //==============================================================================
@@ -278,10 +278,10 @@ namespace ProjectSettingsTreeClasses
         private:
             PropertyGroup group;
 
-            JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SettingsComp);
+            JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SettingsComp)
         };
 
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ExporterItem);
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ExporterItem)
     };
 
     //==============================================================================
@@ -329,10 +329,10 @@ namespace ProjectSettingsTreeClasses
             var lastProjectType;
             PropertyGroup group;
 
-            JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SettingsComp);
+            JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SettingsComp)
         };
 
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ModulesItem);
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ModulesItem)
     };
 
     //==============================================================================
@@ -460,10 +460,10 @@ namespace ProjectSettingsTreeClasses
             var lastProjectType;
             PropertyGroup group;
 
-            JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SettingsComp);
+            JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SettingsComp)
         };
 
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (RootItem);
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (RootItem)
     };
 }
 

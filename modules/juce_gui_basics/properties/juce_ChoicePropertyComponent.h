@@ -118,7 +118,7 @@ private:
     void createComboBox();
     void comboBoxChanged (ComboBox*);
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ChoicePropertyComponent);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ChoicePropertyComponent)
 };
 
 

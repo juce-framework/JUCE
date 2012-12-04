@@ -158,7 +158,7 @@ private:
 
     void setWindowActive (bool isNowActive);
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TopLevelWindow);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TopLevelWindow)
 };
 
 

@@ -158,7 +158,7 @@ private:
     StringArray files;
     int maxNumberOfItems;
 
-    JUCE_LEAK_DETECTOR (RecentlyOpenedFilesList);
+    JUCE_LEAK_DETECTOR (RecentlyOpenedFilesList)
 };
 
 

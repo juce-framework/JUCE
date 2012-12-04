@@ -143,7 +143,7 @@ private:
     const float fixedSize;
     const bool drawBar;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Spacer);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Spacer)
 };
 
 //==============================================================================
@@ -235,7 +235,7 @@ private:
     const int height;
     Array <int> oldIndexes;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MissingItemsComponent);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MissingItemsComponent)
 };
 
 

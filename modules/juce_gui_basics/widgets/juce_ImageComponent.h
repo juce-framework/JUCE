@@ -75,7 +75,7 @@ private:
     Image image;
     RectanglePlacement placement;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ImageComponent);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ImageComponent)
 };
 
 

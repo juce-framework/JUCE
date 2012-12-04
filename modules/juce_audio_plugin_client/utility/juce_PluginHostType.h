@@ -145,5 +145,5 @@ private:
         return UnknownHost;
     }
 
-    JUCE_DECLARE_NON_COPYABLE (PluginHostType);
+    JUCE_DECLARE_NON_COPYABLE (PluginHostType)
 };

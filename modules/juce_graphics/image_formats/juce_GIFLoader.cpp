@@ -406,7 +406,7 @@ private:
         return true;
     }
 
-    JUCE_DECLARE_NON_COPYABLE (GIFLoader);
+    JUCE_DECLARE_NON_COPYABLE (GIFLoader)
 };
 
 #endif

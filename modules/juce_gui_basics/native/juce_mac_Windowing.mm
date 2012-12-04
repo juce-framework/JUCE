@@ -285,7 +285,7 @@ public:
     juce_DeclareSingleton_SingleThreaded_Minimal (DisplaySettingsChangeCallback);
 
 private:
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DisplaySettingsChangeCallback);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DisplaySettingsChangeCallback)
 };
 
 juce_ImplementSingleton_SingleThreaded (DisplaySettingsChangeCallback);

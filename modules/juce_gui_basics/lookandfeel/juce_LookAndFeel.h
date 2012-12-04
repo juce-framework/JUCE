@@ -676,7 +676,7 @@ private:
     class GlassWindowButton;
     class SliderLabelComp;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LookAndFeel);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LookAndFeel)
 };
 
 

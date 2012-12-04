@@ -95,7 +95,7 @@ private:
     void deleteKeyPressed (int currentSelectedRow);
     void returnKeyPressed (int currentSelectedRow);
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FileListComponent);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FileListComponent)
 };
 
 

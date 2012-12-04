@@ -69,7 +69,7 @@ protected:
     //==============================================================================
     AudioPluginInstance() {}
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioPluginInstance);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioPluginInstance)
 };
 
 

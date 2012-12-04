@@ -407,7 +407,7 @@ private:
     void setLowestVisibleKeyFloat (float noteNumber);
     Rectangle<int> getWhiteNotePos (int noteNumber) const;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MidiKeyboardComponent);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MidiKeyboardComponent)
 };
 
 

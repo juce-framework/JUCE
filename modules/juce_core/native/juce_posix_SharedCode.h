@@ -156,7 +156,7 @@ private:
     bool triggered;
     const bool manualReset;
 
-    JUCE_DECLARE_NON_COPYABLE (WaitableEventImpl);
+    JUCE_DECLARE_NON_COPYABLE (WaitableEventImpl)
 };
 
 WaitableEvent::WaitableEvent (const bool manualReset) noexcept
@@ -638,7 +638,8 @@ String File::getVolumeLabel() const
         char            mountPointSpace [MAXPATHLEN];
     } attrBuf;
 
-    struct attrlist attrList = { 0 };
+    struct attrlist attrList;
+    zerostruct (attrList); // (can't use "= { 0 }" on this object because it's typedef'ed as a C struct)
     attrList.bitmapcount = ATTR_BIT_MAP_COUNT;
     attrList.volattr = ATTR_VOL_INFO | ATTR_VOL_NAME;
 
@@ -734,7 +735,9 @@ public:
 
         if (handle != 0)
         {
-            struct flock fl = { 0 };
+            struct flock fl;
+            zerostruct (fl);
+
             fl.l_whence = SEEK_SET;
             fl.l_type = F_WRLCK;
 
@@ -772,7 +775,9 @@ public:
        #if ! JUCE_IOS
         if (handle != 0)
         {
-            struct flock fl = { 0 };
+            struct flock fl;
+            zerostruct (fl);
+
             fl.l_whence = SEEK_SET;
             fl.l_type = F_UNLCK;
 
@@ -1077,7 +1082,7 @@ private:
     int pipeHandle;
     FILE* readHandle;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ActiveProcess);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ActiveProcess)
 };
 
 bool ChildProcess::start (const String& command)

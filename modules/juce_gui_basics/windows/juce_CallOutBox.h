@@ -145,7 +145,7 @@ private:
 
     void refreshPath();
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CallOutBox);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CallOutBox)
 };
 
 

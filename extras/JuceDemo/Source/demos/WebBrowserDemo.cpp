@@ -55,7 +55,7 @@ public:
 private:
     TextEditor& addressTextBox;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DemoBrowserComponent);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DemoBrowserComponent)
 };
 
 
@@ -131,7 +131,7 @@ private:
     TextEditor addressTextBox;
     TextButton goButton, backButton, forwardButton;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WebBrowserDemo);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WebBrowserDemo)
 };
 
 

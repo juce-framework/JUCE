@@ -59,7 +59,7 @@ private:
 
     // Avoid the leak-detector because for plugins, the host can unload our DLL with undelivered
     // messages still in the system event queue. These aren't harmful, but can cause annoying assertions.
-    JUCE_DECLARE_NON_COPYABLE (Message);
+    JUCE_DECLARE_NON_COPYABLE (Message)
 };
 
 

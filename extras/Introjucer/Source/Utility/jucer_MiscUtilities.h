@@ -128,7 +128,7 @@ public:
     Array <PropertyComponent*> components;
 
 private:
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PropertyListBuilder);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PropertyListBuilder)
 };
 
 //==============================================================================
@@ -166,7 +166,7 @@ public:
 protected:
     Value sourceValue;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ValueSourceFilter);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ValueSourceFilter)
 };
 
 //==============================================================================
@@ -214,7 +214,7 @@ private:
     String windowPosProperty;
     ScopedPointer<Component>& owner;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FloatingToolWindow);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FloatingToolWindow)
 };
 
 //==============================================================================
@@ -394,7 +394,7 @@ private:
     const Colour defaultColour;
     const bool canResetToDefault;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ColourEditorComponent);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ColourEditorComponent)
 };
 
 //==============================================================================

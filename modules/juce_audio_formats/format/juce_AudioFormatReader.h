@@ -258,7 +258,7 @@ protected:
 private:
     String formatName;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioFormatReader);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioFormatReader)
 };
 
 

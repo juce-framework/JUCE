@@ -247,7 +247,7 @@ private:
                         const int millisecsSinceKeyPressed, Component* originator) const;
 
     KeyPressMappingSet& operator= (const KeyPressMappingSet&);
-    JUCE_LEAK_DETECTOR (KeyPressMappingSet);
+    JUCE_LEAK_DETECTOR (KeyPressMappingSet)
 };
 
 

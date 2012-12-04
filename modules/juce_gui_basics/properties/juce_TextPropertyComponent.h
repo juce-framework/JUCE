@@ -106,7 +106,7 @@ private:
     void textWasEdited();
     void createEditor (int maxNumChars, bool isMultiLine);
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TextPropertyComponent);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TextPropertyComponent)
 };
 
 

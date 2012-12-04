@@ -434,7 +434,8 @@ public:
             AudioUnitReset (audioUnit, kAudioUnitScope_Global, 0);
 
             {
-                AudioStreamBasicDescription stream = { 0 };
+                AudioStreamBasicDescription stream;
+                zerostruct (stream); // (can't use "= { 0 }" on this object because it's typedef'ed as a C struct)
                 stream.mSampleRate       = sampleRate_;
                 stream.mFormatID         = kAudioFormatLinearPCM;
                 stream.mFormatFlags      = kAudioFormatFlagsNativeFloatPacked | kAudioFormatFlagIsNonInterleaved | kAudioFormatFlagsNativeEndian;
@@ -869,7 +870,9 @@ private:
         if (audioUnit != 0)
         {
             {
-                AURenderCallbackStruct info = { 0 };
+                AURenderCallbackStruct info;
+                zerostruct (info); // (can't use "= { 0 }" on this object because it's typedef'ed as a C struct)
+
                 info.inputProcRefCon = this;
                 info.inputProc = renderGetInputCallback;
 
@@ -880,7 +883,9 @@ private:
 
             if (producesMidiMessages)
             {
-                AUMIDIOutputCallbackStruct info = { 0 };
+                AUMIDIOutputCallbackStruct info;
+                zerostruct (info);
+
                 info.userData = this;
                 info.midiOutputCallback = renderMidiOutputCallback;
 
@@ -889,7 +894,9 @@ private:
             }
 
             {
-                HostCallbackInfo info = { 0 };
+                HostCallbackInfo info;
+                zerostruct (info);
+
                 info.hostUserData = this;
                 info.beatAndTempoProc = getBeatAndTempoCallback;
                 info.musicalTimeLocationProc = getMusicalTimeLocationCallback;
@@ -1175,7 +1182,7 @@ private:
         return false;
     }
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioUnitPluginInstance);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioUnitPluginInstance)
 };
 
 //==============================================================================
@@ -1326,7 +1333,7 @@ public:
                                       kAudioUnitScope_Global, 0, &propertySize, NULL) == noErr
              && propertySize > 0)
         {
-            ComponentDescription views [propertySize / sizeof (ComponentDescription)];
+            HeapBlock<ComponentDescription> views (propertySize / sizeof (ComponentDescription));
 
             if (AudioUnitGetProperty (plugin.audioUnit, kAudioUnitProperty_GetUIComponentList,
                                       kAudioUnitScope_Global, 0, &views[0], &propertySize) == noErr)
@@ -1437,13 +1444,13 @@ private:
     private:
         AudioUnitPluginWindowCarbon& owner;
 
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (InnerWrapperComponent);
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (InnerWrapperComponent)
     };
 
     friend class InnerWrapperComponent;
     ScopedPointer<InnerWrapperComponent> innerWrapper;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioUnitPluginWindowCarbon);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioUnitPluginWindowCarbon)
 };
 
 #endif
@@ -1533,7 +1540,9 @@ StringArray AudioUnitPluginFormat::searchPathsForPlugins (const FileSearchPath& 
 
     for (;;)
     {
-        ComponentDescription desc = { 0 };
+        ComponentDescription desc;
+        zerostruct (desc);
+
         comp = FindNextComponent (comp, &desc);
 
         if (comp == 0)

@@ -284,7 +284,7 @@ private:
     }
 
     UniformTextSection& operator= (const UniformTextSection& other);
-    JUCE_LEAK_DETECTOR (UniformTextSection);
+    JUCE_LEAK_DETECTOR (UniformTextSection)
 };
 
 //==============================================================================
@@ -710,7 +710,7 @@ private:
         return (x - 0.0001f) >= wordWrapWidth;
     }
 
-    JUCE_LEAK_DETECTOR (Iterator);
+    JUCE_LEAK_DETECTOR (Iterator)
 };
 
 
@@ -759,7 +759,7 @@ private:
     const Font font;
     const Colour colour;
 
-    JUCE_DECLARE_NON_COPYABLE (InsertAction);
+    JUCE_DECLARE_NON_COPYABLE (InsertAction)
 };
 
 //==============================================================================
@@ -816,7 +816,7 @@ private:
     const int oldCaretPos, newCaretPos;
     Array <UniformTextSection*> removedSections;
 
-    JUCE_DECLARE_NON_COPYABLE (RemoveAction);
+    JUCE_DECLARE_NON_COPYABLE (RemoveAction)
 };
 
 //==============================================================================
@@ -862,7 +862,7 @@ public:
 private:
     TextEditor& owner;
 
-    JUCE_DECLARE_NON_COPYABLE (TextHolderComponent);
+    JUCE_DECLARE_NON_COPYABLE (TextHolderComponent)
 };
 
 //==============================================================================
@@ -897,7 +897,7 @@ private:
     float lastWordWrapWidth;
     bool rentrant;
 
-    JUCE_DECLARE_NON_COPYABLE (TextEditorViewport);
+    JUCE_DECLARE_NON_COPYABLE (TextEditorViewport)
 };
 
 //==============================================================================

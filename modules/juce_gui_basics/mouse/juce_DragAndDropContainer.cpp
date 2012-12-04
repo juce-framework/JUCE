@@ -298,7 +298,7 @@ private:
         }
     }
 
-    JUCE_DECLARE_NON_COPYABLE (DragImageComponent);
+    JUCE_DECLARE_NON_COPYABLE (DragImageComponent)
 };
 
 

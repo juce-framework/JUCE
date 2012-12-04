@@ -485,7 +485,7 @@ private:
     JUCE_DEPRECATED (void addButtonListener (Listener*));
     JUCE_DEPRECATED (void removeButtonListener (Listener*));
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Button);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Button)
 };
 
 #ifndef DOXYGEN

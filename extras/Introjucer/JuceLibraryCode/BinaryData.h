@@ -28,7 +28,7 @@ namespace BinaryData
     const int            jucer_AudioPluginFilterTemplate_cppSize = 4559;
 
     extern const char*   jucer_AudioPluginFilterTemplate_h;
-    const int            jucer_AudioPluginFilterTemplate_hSize = 2447;
+    const int            jucer_AudioPluginFilterTemplate_hSize = 2446;
 
     extern const char*   jucer_ContentCompTemplate_cpp;
     const int            jucer_ContentCompTemplate_cppSize = 886;
@@ -43,22 +43,22 @@ namespace BinaryData
     const int            jucer_MainTemplate_NoWindow_cppSize = 1947;
 
     extern const char*   jucer_MainTemplate_Window_cpp;
-    const int            jucer_MainTemplate_Window_cppSize = 3614;
+    const int            jucer_MainTemplate_Window_cppSize = 3613;
 
     extern const char*   jucer_NewComponentTemplate_cpp;
     const int            jucer_NewComponentTemplate_cppSize = 1389;
 
     extern const char*   jucer_NewComponentTemplate_h;
-    const int            jucer_NewComponentTemplate_hSize = 649;
+    const int            jucer_NewComponentTemplate_hSize = 648;
 
     extern const char*   jucer_NewCppFileTemplate_cpp;
-    const int            jucer_NewCppFileTemplate_cppSize = 260;
+    const int            jucer_NewCppFileTemplate_cppSize = 262;
 
     extern const char*   jucer_NewCppFileTemplate_h;
     const int            jucer_NewCppFileTemplate_hSize = 308;
 
     extern const char*   jucer_NewInlineComponentTemplate_h;
-    const int            jucer_NewInlineComponentTemplate_hSize = 1627;
+    const int            jucer_NewInlineComponentTemplate_hSize = 1626;
 
     extern const char*   RecentFilesMenuTemplate_nib;
     const int            RecentFilesMenuTemplate_nibSize = 2842;

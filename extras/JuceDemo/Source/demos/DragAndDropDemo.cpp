@@ -268,7 +268,7 @@ private:
     DragAndDropDemoSource source;
     DragAndDropDemoTarget target;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DragAndDropDemo);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DragAndDropDemo)
 };
 
 

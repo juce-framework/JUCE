@@ -90,7 +90,7 @@ private:
     ToggleButton button;
     String onText, offText;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (BooleanPropertyComponent);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (BooleanPropertyComponent)
 };
 
 

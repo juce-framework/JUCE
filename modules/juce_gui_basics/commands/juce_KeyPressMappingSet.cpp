@@ -30,7 +30,8 @@ KeyPressMappingSet::KeyPressMappingSet (ApplicationCommandManager& cm)
 }
 
 KeyPressMappingSet::KeyPressMappingSet (const KeyPressMappingSet& other)
-    : commandManager (other.commandManager)
+    : ChangeBroadcaster(),
+      commandManager (other.commandManager)
 {
     Desktop::getInstance().addFocusChangeListener (this);
 }

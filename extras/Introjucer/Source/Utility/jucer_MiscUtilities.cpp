@@ -426,7 +426,7 @@ public:
 
     ApplicationCommandTarget::InvocationInfo info;
 
-    JUCE_DECLARE_NON_COPYABLE (AsyncCommandRetrier);
+    JUCE_DECLARE_NON_COPYABLE (AsyncCommandRetrier)
 };
 
 bool reinvokeCommandAfterCancellingModalComps (const ApplicationCommandTarget::InvocationInfo& info)

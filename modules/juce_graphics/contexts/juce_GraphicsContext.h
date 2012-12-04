@@ -662,7 +662,7 @@ public:
     private:
         Graphics& context;
 
-        JUCE_DECLARE_NON_COPYABLE (ScopedSaveState);
+        JUCE_DECLARE_NON_COPYABLE (ScopedSaveState)
     };
 
     //==============================================================================
@@ -729,7 +729,7 @@ private:
     bool saveStatePending;
     void saveStateIfPending();
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Graphics);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Graphics)
 };
 
 

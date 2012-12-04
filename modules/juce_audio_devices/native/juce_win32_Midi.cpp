@@ -179,7 +179,7 @@ private:
         MIDIHDR hdr;
         char data [256];
 
-        JUCE_DECLARE_NON_COPYABLE (MidiHeader);
+        JUCE_DECLARE_NON_COPYABLE (MidiHeader)
     };
 
     enum { numHeaders = 32 };
@@ -213,7 +213,7 @@ private:
         return t * 0.001;
     }
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MidiInCollector);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MidiInCollector)
 };
 
 Array <MidiInCollector*, CriticalSection> MidiInCollector::activeMidiCollectors;
@@ -313,7 +313,7 @@ struct MidiOutHandle
     static Array<MidiOutHandle*> activeHandles;
 
 private:
-    JUCE_LEAK_DETECTOR (MidiOutHandle);
+    JUCE_LEAK_DETECTOR (MidiOutHandle)
 };
 
 Array<MidiOutHandle*> MidiOutHandle::activeHandles;

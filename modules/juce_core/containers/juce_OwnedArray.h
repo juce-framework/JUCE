@@ -860,7 +860,7 @@ private:
             delete data.elements [--numUsed];
     }
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OwnedArray);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OwnedArray)
 };
 
 

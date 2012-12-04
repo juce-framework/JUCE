@@ -219,7 +219,7 @@ private:
     void* movie;
 #endif
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (QuickTimeMovieComponent);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (QuickTimeMovieComponent)
 };
 
 #endif

@@ -223,7 +223,7 @@ private:
     //==============================================================================
     String newLineString;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OutputStream);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OutputStream)
 };
 
 //==============================================================================

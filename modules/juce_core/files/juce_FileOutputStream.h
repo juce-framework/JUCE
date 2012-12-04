@@ -110,7 +110,7 @@ private:
     int64 setPositionInternal (int64 newPosition);
     int writeInternal (const void* data, int numBytes);
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FileOutputStream);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FileOutputStream)
 };
 
 #endif   // __JUCE_FILEOUTPUTSTREAM_JUCEHEADER__

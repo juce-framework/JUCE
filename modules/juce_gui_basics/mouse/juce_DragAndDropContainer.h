@@ -177,7 +177,7 @@ private:
 
     JUCE_DEPRECATED (virtual bool shouldDropFilesWhenDraggedExternally (const String&, Component*, StringArray&, bool&)) { return false; }
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DragAndDropContainer);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DragAndDropContainer)
 };
 
 

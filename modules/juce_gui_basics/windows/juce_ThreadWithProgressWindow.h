@@ -152,7 +152,7 @@ private:
     CriticalSection messageLock;
     const int timeOutMsWhenCancelling;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ThreadWithProgressWindow);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ThreadWithProgressWindow)
 };
 
 #endif   // __JUCE_THREADWITHPROGRESSWINDOW_JUCEHEADER__

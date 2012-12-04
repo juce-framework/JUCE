@@ -109,7 +109,7 @@ private:
                                         // override the call and use it as a sign that they're being deleted, which breaks everything..
     }
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (NSViewAttachment);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (NSViewAttachment)
 };
 
 //==============================================================================

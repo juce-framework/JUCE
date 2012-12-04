@@ -111,7 +111,7 @@ public:
 
 private:
     WindowsRegistry();
-    JUCE_DECLARE_NON_COPYABLE (WindowsRegistry);
+    JUCE_DECLARE_NON_COPYABLE (WindowsRegistry)
 };
 
 #endif

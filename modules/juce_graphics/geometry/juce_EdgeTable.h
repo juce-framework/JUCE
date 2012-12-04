@@ -204,7 +204,7 @@ private:
     void sanitiseLevels (bool useNonZeroWinding) noexcept;
     static void copyEdgeTableData (int* dest, int destLineStride, const int* src, int srcLineStride, int numLines) noexcept;
 
-    JUCE_LEAK_DETECTOR (EdgeTable);
+    JUCE_LEAK_DETECTOR (EdgeTable)
 };
 
 

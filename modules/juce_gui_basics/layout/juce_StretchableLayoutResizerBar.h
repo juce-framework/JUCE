@@ -91,7 +91,7 @@ private:
     int itemIndex, mouseDownPos;
     bool isVertical;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (StretchableLayoutResizerBar);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (StretchableLayoutResizerBar)
 };
 
 

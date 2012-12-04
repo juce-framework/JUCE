@@ -266,7 +266,7 @@ private:
         int bufferSize, bufferIndex;
         float feedback, last, damp1, damp2;
 
-        JUCE_DECLARE_NON_COPYABLE (CombFilter);
+        JUCE_DECLARE_NON_COPYABLE (CombFilter)
     };
 
     //==============================================================================
@@ -306,7 +306,7 @@ private:
         HeapBlock<float> buffer;
         int bufferSize, bufferIndex;
 
-        JUCE_DECLARE_NON_COPYABLE (AllPassFilter);
+        JUCE_DECLARE_NON_COPYABLE (AllPassFilter)
     };
 
     enum { numCombs = 8, numAllPasses = 4, numChannels = 2 };
@@ -314,7 +314,7 @@ private:
     CombFilter comb [numChannels][numCombs];
     AllPassFilter allPass [numChannels][numAllPasses];
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Reverb);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Reverb)
 };
 
 

@@ -73,7 +73,7 @@ public:
     }
 
 private:
-    JUCE_DECLARE_NON_COPYABLE (Term);
+    JUCE_DECLARE_NON_COPYABLE (Term)
 };
 
 
@@ -360,7 +360,7 @@ struct Expression::Helpers
             const int recursionCount;
 
         private:
-            JUCE_DECLARE_NON_COPYABLE (EvaluationVisitor);
+            JUCE_DECLARE_NON_COPYABLE (EvaluationVisitor)
         };
 
         class SymbolVisitingVisitor  : public Scope::Visitor
@@ -376,7 +376,7 @@ struct Expression::Helpers
             SymbolVisitor& visitor;
             const int recursionCount;
 
-            JUCE_DECLARE_NON_COPYABLE (SymbolVisitingVisitor);
+            JUCE_DECLARE_NON_COPYABLE (SymbolVisitingVisitor)
         };
 
         class SymbolRenamingVisitor   : public Scope::Visitor
@@ -393,12 +393,12 @@ struct Expression::Helpers
             const String newName;
             const int recursionCount;
 
-            JUCE_DECLARE_NON_COPYABLE (SymbolRenamingVisitor);
+            JUCE_DECLARE_NON_COPYABLE (SymbolRenamingVisitor)
         };
 
         SymbolTerm* getSymbol() const  { return static_cast <SymbolTerm*> (left.get()); }
 
-        JUCE_DECLARE_NON_COPYABLE (DotOperator);
+        JUCE_DECLARE_NON_COPYABLE (DotOperator)
     };
 
     //==============================================================================
@@ -469,7 +469,7 @@ struct Expression::Helpers
         }
 
     private:
-        JUCE_DECLARE_NON_COPYABLE (Add);
+        JUCE_DECLARE_NON_COPYABLE (Add)
     };
 
     //==============================================================================
@@ -497,7 +497,7 @@ struct Expression::Helpers
         }
 
     private:
-        JUCE_DECLARE_NON_COPYABLE (Subtract);
+        JUCE_DECLARE_NON_COPYABLE (Subtract)
     };
 
     //==============================================================================
@@ -522,7 +522,7 @@ struct Expression::Helpers
         }
 
     private:
-        JUCE_DECLARE_NON_COPYABLE (Multiply);
+        JUCE_DECLARE_NON_COPYABLE (Multiply)
     };
 
     //==============================================================================
@@ -550,7 +550,7 @@ struct Expression::Helpers
         }
 
     private:
-        JUCE_DECLARE_NON_COPYABLE (Divide);
+        JUCE_DECLARE_NON_COPYABLE (Divide)
     };
 
     //==============================================================================
@@ -634,7 +634,7 @@ struct Expression::Helpers
     private:
         const Symbol& symbol;
 
-        JUCE_DECLARE_NON_COPYABLE (SymbolCheckVisitor);
+        JUCE_DECLARE_NON_COPYABLE (SymbolCheckVisitor)
     };
 
     //==============================================================================
@@ -647,7 +647,7 @@ struct Expression::Helpers
     private:
         Array<Symbol>& list;
 
-        JUCE_DECLARE_NON_COPYABLE (SymbolListVisitor);
+        JUCE_DECLARE_NON_COPYABLE (SymbolListVisitor)
     };
 
     //==============================================================================
@@ -911,7 +911,7 @@ struct Expression::Helpers
             return e;
         }
 
-        JUCE_DECLARE_NON_COPYABLE (Parser);
+        JUCE_DECLARE_NON_COPYABLE (Parser)
     };
 };
 

@@ -287,7 +287,7 @@ private:
     bool changedSinceSave;
     String fileExtension, fileWildcard, openFileDialogTitle, saveFileDialogTitle;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FileBasedDocument);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FileBasedDocument)
 };
 
 

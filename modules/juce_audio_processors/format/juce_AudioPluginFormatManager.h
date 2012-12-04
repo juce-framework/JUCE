@@ -92,7 +92,7 @@ private:
     //==============================================================================
     OwnedArray <AudioPluginFormat> formats;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioPluginFormatManager);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioPluginFormatManager)
 };
 
 

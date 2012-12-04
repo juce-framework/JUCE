@@ -160,7 +160,7 @@ namespace DirectWriteTypeLayout
             style = getFontFaceName (dwFont);
         }
 
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CustomDirectWriteTextRenderer);
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CustomDirectWriteTextRenderer)
     };
 
     //==================================================================================================

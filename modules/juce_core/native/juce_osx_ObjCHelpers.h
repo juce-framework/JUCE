@@ -138,7 +138,7 @@ private:
         return root + String::toHexString (juce::Random::getSystemRandom().nextInt64());
     }
 
-    JUCE_DECLARE_NON_COPYABLE (ObjCClass);
+    JUCE_DECLARE_NON_COPYABLE (ObjCClass)
 };
 
 

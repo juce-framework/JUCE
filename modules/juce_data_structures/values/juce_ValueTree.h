@@ -514,7 +514,7 @@ private:
 
     private:
         ElementComparator& comparator;
-        JUCE_DECLARE_NON_COPYABLE (ComparatorAdapter);
+        JUCE_DECLARE_NON_COPYABLE (ComparatorAdapter)
     };
 
     void createListOfChildren (OwnedArray<ValueTree>&) const;

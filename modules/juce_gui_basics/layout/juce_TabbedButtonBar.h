@@ -128,7 +128,7 @@ protected:
 private:
     void calcAreas (Rectangle<int>&, Rectangle<int>&) const;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TabBarButton);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TabBarButton)
 };
 
 
@@ -334,7 +334,7 @@ private:
     void showExtraItemsMenu();
     static void extraItemsMenuCallback (int, TabbedButtonBar*);
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TabbedButtonBar);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TabbedButtonBar)
 };
 
 

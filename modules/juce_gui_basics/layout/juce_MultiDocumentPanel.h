@@ -67,7 +67,7 @@ private:
     void updateOrder();
     MultiDocumentPanel* getOwner() const noexcept;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MultiDocumentPanelWindow);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MultiDocumentPanelWindow)
 };
 
 
@@ -301,7 +301,7 @@ private:
 
     void addWindow (Component* component);
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MultiDocumentPanel);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MultiDocumentPanel)
 };
 
 

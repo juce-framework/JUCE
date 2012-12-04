@@ -134,7 +134,7 @@ private:
         friend class ScopedPointer<Pimpl>;
         ScopedPointer<Pimpl> pimpl;
 
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (NativeIterator);
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (NativeIterator)
     };
 
     friend class ScopedPointer<NativeIterator::Pimpl>;
@@ -148,7 +148,7 @@ private:
     ScopedPointer <DirectoryIterator> subIterator;
     File currentFile;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DirectoryIterator);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DirectoryIterator)
 };
 
 #endif   // __JUCE_DIRECTORYITERATOR_JUCEHEADER__

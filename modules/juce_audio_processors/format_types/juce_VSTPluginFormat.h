@@ -94,7 +94,7 @@ public:
 private:
     void recursiveFileSearch (StringArray&, const File&, bool recursive);
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (VSTPluginFormat);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (VSTPluginFormat)
 };
 
 

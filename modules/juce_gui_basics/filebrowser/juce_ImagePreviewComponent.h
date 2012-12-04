@@ -62,7 +62,7 @@ private:
 
     void getThumbSize (int& w, int& h) const;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ImagePreviewComponent);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ImagePreviewComponent)
 };
 
 

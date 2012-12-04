@@ -153,7 +153,7 @@ private:
         var value;
 
     private:
-        JUCE_LEAK_DETECTOR (NamedValue);
+        JUCE_LEAK_DETECTOR (NamedValue)
     };
 
     friend class LinkedListPointer<NamedValue>;

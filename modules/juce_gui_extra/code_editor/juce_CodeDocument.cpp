@@ -819,7 +819,7 @@ private:
     const String text;
     const int insertPos;
 
-    JUCE_DECLARE_NON_COPYABLE (CodeDocumentInsertAction);
+    JUCE_DECLARE_NON_COPYABLE (CodeDocumentInsertAction)
 };
 
 void CodeDocument::insert (const String& text, const int insertPos, const bool undoable)
@@ -914,7 +914,7 @@ private:
     const int startPos, endPos;
     const String removedText;
 
-    JUCE_DECLARE_NON_COPYABLE (CodeDocumentDeleteAction);
+    JUCE_DECLARE_NON_COPYABLE (CodeDocumentDeleteAction)
 };
 
 void CodeDocument::remove (const int startPos, const int endPos, const bool undoable)

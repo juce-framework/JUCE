@@ -210,7 +210,7 @@ private:
                   const Time& creationTime, bool isReadOnly);
     void setTypeFlags (int newFlags);
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DirectoryContentsList);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DirectoryContentsList)
 };
 
 

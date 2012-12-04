@@ -231,7 +231,7 @@ private:
         JUCE_CHECK_OPENGL_ERROR
     }
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (NativeContext);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (NativeContext)
 };
 
 //==============================================================================

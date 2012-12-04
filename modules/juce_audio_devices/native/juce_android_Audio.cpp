@@ -392,7 +392,7 @@ private:
         }
     }
 
-    JUCE_DECLARE_NON_COPYABLE (AndroidAudioIODevice);
+    JUCE_DECLARE_NON_COPYABLE (AndroidAudioIODevice)
 };
 
 //==============================================================================
@@ -426,7 +426,7 @@ public:
     }
 
 private:
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AndroidAudioIODeviceType);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AndroidAudioIODeviceType)
 };
 
 

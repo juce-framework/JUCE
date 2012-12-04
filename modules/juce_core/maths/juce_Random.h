@@ -130,7 +130,7 @@ private:
     //==============================================================================
     int64 seed;
 
-    JUCE_LEAK_DETECTOR (Random);
+    JUCE_LEAK_DETECTOR (Random)
 };
 
 

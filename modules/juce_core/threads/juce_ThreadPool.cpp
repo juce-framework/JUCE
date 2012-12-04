@@ -76,7 +76,7 @@ public:
 private:
     ThreadPool& pool;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ThreadPoolThread);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ThreadPoolThread)
 };
 
 //==============================================================================

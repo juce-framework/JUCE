@@ -181,7 +181,7 @@ private:
 
     Marker* getMarkerByName (const String& name) const noexcept;
 
-    JUCE_LEAK_DETECTOR (MarkerList);
+    JUCE_LEAK_DETECTOR (MarkerList)
 };
 
 

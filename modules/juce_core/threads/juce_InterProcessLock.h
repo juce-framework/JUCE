@@ -109,7 +109,7 @@ public:
         InterProcessLock& ipLock;
         bool lockWasSuccessful;
 
-        JUCE_DECLARE_NON_COPYABLE (ScopedLockType);
+        JUCE_DECLARE_NON_COPYABLE (ScopedLockType)
     };
 
 private:
@@ -121,7 +121,7 @@ private:
     CriticalSection lock;
     String name;
 
-    JUCE_DECLARE_NON_COPYABLE (InterProcessLock);
+    JUCE_DECLARE_NON_COPYABLE (InterProcessLock)
 };
 
 

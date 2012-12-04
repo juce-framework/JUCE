@@ -76,7 +76,7 @@ private:
     bool shouldBeShown() const;
     void timerCallback();
 
-    JUCE_DECLARE_NON_COPYABLE (CaretComponent);
+    JUCE_DECLARE_NON_COPYABLE (CaretComponent)
 };
 
 

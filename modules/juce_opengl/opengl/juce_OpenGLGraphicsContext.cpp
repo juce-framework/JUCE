@@ -144,7 +144,7 @@ private:
     private:
         uint8* currentLine;
 
-        JUCE_DECLARE_NON_COPYABLE (EdgeTableAlphaMap);
+        JUCE_DECLARE_NON_COPYABLE (EdgeTableAlphaMap)
     };
 };
 
@@ -707,7 +707,7 @@ struct StateHelpers
         const PixelARGB colour;
         int currentY;
 
-        JUCE_DECLARE_NON_COPYABLE (EdgeTableRenderer);
+        JUCE_DECLARE_NON_COPYABLE (EdgeTableRenderer)
     };
 
     template <class QuadQueueType>
@@ -731,7 +731,7 @@ struct StateHelpers
         QuadQueueType& quadQueue;
         const PixelARGB colour;
 
-        JUCE_DECLARE_NON_COPYABLE (FloatRectangleRenderer);
+        JUCE_DECLARE_NON_COPYABLE (FloatRectangleRenderer)
     };
 
     //==============================================================================
@@ -1045,7 +1045,7 @@ struct StateHelpers
             numVertices = 0;
         }
 
-        JUCE_DECLARE_NON_COPYABLE (ShaderQuadQueue);
+        JUCE_DECLARE_NON_COPYABLE (ShaderQuadQueue)
     };
 
     //==============================================================================
@@ -1364,7 +1364,7 @@ public:
 
     GLState& state;
 
-    JUCE_DECLARE_NON_COPYABLE (ClipRegionBase);
+    JUCE_DECLARE_NON_COPYABLE (ClipRegionBase)
 };
 
 
@@ -1627,7 +1627,7 @@ private:
         GLState& state;
         ScopedPointer<OpenGLTextureFromImage> image;
 
-        JUCE_DECLARE_NON_COPYABLE (ShaderFillOperation);
+        JUCE_DECLARE_NON_COPYABLE (ShaderFillOperation)
     };
 
     struct TargetSaver
@@ -1680,7 +1680,7 @@ private:
         ClipRegion_Mask& owner;
         const PixelARGB originalColour;
 
-        JUCE_DECLARE_NON_COPYABLE (FloatRectangleRenderer);
+        JUCE_DECLARE_NON_COPYABLE (FloatRectangleRenderer)
     };
 
     ClipRegion_Mask& operator= (const ClipRegion_Mask&);
@@ -1801,10 +1801,10 @@ private:
         GLState& state;
         ScopedPointer<OpenGLTextureFromImage> image;
 
-        JUCE_DECLARE_NON_COPYABLE (ShaderFillOperation);
+        JUCE_DECLARE_NON_COPYABLE (ShaderFillOperation)
     };
 
-    JUCE_DECLARE_NON_COPYABLE (ClipRegion_RectangleList);
+    JUCE_DECLARE_NON_COPYABLE (ClipRegion_RectangleList)
 };
 
 //==============================================================================
@@ -2191,7 +2191,7 @@ private:
     GLState glState;
     RenderingHelpers::SavedStateStack<SavedState> stack;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ShaderContext);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ShaderContext)
 };
 
 #endif
@@ -2236,7 +2236,7 @@ private:
     Target target;
     Image image;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (NonShaderContext);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (NonShaderContext)
 };
 
 LowLevelGraphicsContext* createOpenGLContext (const Target&);

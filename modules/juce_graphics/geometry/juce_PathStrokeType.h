@@ -198,7 +198,7 @@ private:
     JointStyle jointStyle;
     EndCapStyle endStyle;
 
-    JUCE_LEAK_DETECTOR (PathStrokeType);
+    JUCE_LEAK_DETECTOR (PathStrokeType)
 };
 
 #endif   // __JUCE_PATHSTROKETYPE_JUCEHEADER__

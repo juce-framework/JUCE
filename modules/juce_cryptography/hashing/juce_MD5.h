@@ -108,7 +108,7 @@ private:
     void processData (const void*, size_t) noexcept;
     void processStream (InputStream&, int64);
 
-    JUCE_LEAK_DETECTOR (MD5);
+    JUCE_LEAK_DETECTOR (MD5)
 };
 
 

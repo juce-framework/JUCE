@@ -55,7 +55,7 @@ public:
     virtual CodeEditorComponent::ColourScheme getDefaultColourScheme() = 0;
 
 private:
-    JUCE_LEAK_DETECTOR (CodeTokeniser);
+    JUCE_LEAK_DETECTOR (CodeTokeniser)
 };
 
 

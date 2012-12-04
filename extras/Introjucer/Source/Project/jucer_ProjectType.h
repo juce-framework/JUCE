@@ -65,7 +65,7 @@ protected:
 private:
     const String type, desc;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ProjectType);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ProjectType)
 };
 
 

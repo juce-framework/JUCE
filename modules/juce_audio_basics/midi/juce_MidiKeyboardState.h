@@ -202,7 +202,7 @@ private:
     void noteOnInternal (int midiChannel, int midiNoteNumber, float velocity);
     void noteOffInternal (int midiChannel, int midiNoteNumber);
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MidiKeyboardState);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MidiKeyboardState)
 };
 
 

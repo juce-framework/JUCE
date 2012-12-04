@@ -547,7 +547,7 @@ namespace TextLayoutHelpers
         OwnedArray<Token> tokens;
         int totalLines;
 
-        JUCE_DECLARE_NON_COPYABLE (TokenList);
+        JUCE_DECLARE_NON_COPYABLE (TokenList)
     };
 }
 

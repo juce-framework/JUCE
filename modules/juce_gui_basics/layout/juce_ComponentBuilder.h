@@ -145,7 +145,7 @@ public:
         friend class ComponentBuilder;
         ComponentBuilder* builder;
 
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TypeHandler);
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TypeHandler)
     };
 
     //==============================================================================
@@ -242,7 +242,7 @@ private:
     void valueTreeChildOrderChanged (ValueTree&);
     void valueTreeParentChanged (ValueTree&);
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ComponentBuilder);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ComponentBuilder)
 };
 
 #endif   // __JUCE_COMPONENTBUILDER_JUCEHEADER__

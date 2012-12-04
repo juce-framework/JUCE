@@ -301,7 +301,7 @@ private:
     //==============================================================================
     Array <SelectableItemType> selectedItems;
 
-    JUCE_LEAK_DETECTOR (SelectedItemSet <SelectableItemType>);
+    JUCE_LEAK_DETECTOR (SelectedItemSet <SelectableItemType>)
 };
 
 

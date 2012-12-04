@@ -210,7 +210,7 @@ private:
     void recreateNativeWindowAsync();
 
     //==============================================================================
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DirectShowComponent);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DirectShowComponent)
 };
 
 #endif

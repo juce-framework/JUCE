@@ -138,7 +138,7 @@ private:
     int row;
     bool selected, isDragging, selectRowOnMouseUp;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (RowComponent);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (RowComponent)
 };
 
 
@@ -328,7 +328,7 @@ private:
     int firstIndex, firstWholeIndex, lastWholeIndex;
     bool hasUpdated;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ListViewport);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ListViewport)
 };
 
 enum { defaultListRowHeight = 22 };

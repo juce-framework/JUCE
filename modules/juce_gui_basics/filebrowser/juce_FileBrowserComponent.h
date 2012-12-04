@@ -244,7 +244,7 @@ private:
     void sendListenerChangeMessage();
     bool isFileOrDirSuitable (const File& f) const;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FileBrowserComponent);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FileBrowserComponent)
 };
 
 

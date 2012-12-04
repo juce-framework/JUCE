@@ -253,7 +253,7 @@ private:
     String formatName;
     friend class ThreadedWriter;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioFormatWriter);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioFormatWriter)
 };
 
 #endif   // __JUCE_AUDIOFORMATWRITER_JUCEHEADER__

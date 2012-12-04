@@ -689,7 +689,7 @@ public:
         const Path& path;
         size_t index;
 
-        JUCE_DECLARE_NON_COPYABLE (Iterator);
+        JUCE_DECLARE_NON_COPYABLE (Iterator)
     };
 
     //==============================================================================
@@ -762,7 +762,7 @@ private:
     static const float cubicMarker;
     static const float closeSubPathMarker;
 
-    JUCE_LEAK_DETECTOR (Path);
+    JUCE_LEAK_DETECTOR (Path)
 };
 
 #endif   // __JUCE_PATH_JUCEHEADER__

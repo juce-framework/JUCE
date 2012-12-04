@@ -126,7 +126,7 @@ private:
                bool deleteSelfAfterUse);
     void hide (bool fadeOut);
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (BubbleMessageComponent);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (BubbleMessageComponent)
 };
 
 

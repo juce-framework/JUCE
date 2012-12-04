@@ -69,7 +69,7 @@ public:
 
 private:
     //==============================================================================
-    JUCE_LEAK_DETECTOR (InputSource);
+    JUCE_LEAK_DETECTOR (InputSource)
 };
 
 

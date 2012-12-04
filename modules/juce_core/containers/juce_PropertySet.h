@@ -209,7 +209,7 @@ private:
     CriticalSection lock;
     bool ignoreCaseOfKeys;
 
-    JUCE_LEAK_DETECTOR (PropertySet);
+    JUCE_LEAK_DETECTOR (PropertySet)
 };
 
 

@@ -104,7 +104,7 @@ private:
     //==============================================================================
     uint8 uuid[16];
 
-    JUCE_LEAK_DETECTOR (Uuid);
+    JUCE_LEAK_DETECTOR (Uuid)
 };
 
 

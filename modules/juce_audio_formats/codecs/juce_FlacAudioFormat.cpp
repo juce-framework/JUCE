@@ -305,7 +305,7 @@ private:
     int reservoirStart, samplesInReservoir;
     bool ok, scanningForLength;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FlacReader);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FlacReader)
 };
 
 
@@ -476,7 +476,7 @@ public:
 private:
     FlacNamespace::FLAC__StreamEncoder* encoder;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FlacWriter);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FlacWriter)
 };
 
 

@@ -204,7 +204,7 @@ private:
     bool isActive, isBeingDragged, isBeingUsedAsAButton;
     Rectangle<int> contentArea;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ToolbarItemComponent);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ToolbarItemComponent)
 };
 
 

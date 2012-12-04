@@ -142,7 +142,7 @@ protected:
 
     // (use the copyCoefficientsFrom() method instead of this operator)
     IIRFilter& operator= (const IIRFilter&);
-    JUCE_LEAK_DETECTOR (IIRFilter);
+    JUCE_LEAK_DETECTOR (IIRFilter)
 };
 
 

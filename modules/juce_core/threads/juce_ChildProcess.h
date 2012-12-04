@@ -95,7 +95,7 @@ private:
     friend class ScopedPointer<ActiveProcess>;
     ScopedPointer<ActiveProcess> activeProcess;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ChildProcess);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ChildProcess)
 };
 
 

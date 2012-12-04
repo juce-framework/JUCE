@@ -75,7 +75,7 @@ public:
 
 private:
     //==============================================================================
-    JUCE_LEAK_DETECTOR (SynthesiserSound);
+    JUCE_LEAK_DETECTOR (SynthesiserSound)
 };
 
 
@@ -231,7 +231,7 @@ private:
     bool keyIsDown; // the voice may still be playing when the key is not down (i.e. sustain pedal)
     bool sostenutoPedalDown;
 
-    JUCE_LEAK_DETECTOR (SynthesiserVoice);
+    JUCE_LEAK_DETECTOR (SynthesiserVoice)
 };
 
 
@@ -487,7 +487,7 @@ private:
     virtual int findFreeVoice (const bool) const { return 0; }
    #endif
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Synthesiser);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Synthesiser)
 };
 
 

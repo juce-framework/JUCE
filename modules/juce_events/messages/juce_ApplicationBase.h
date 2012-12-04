@@ -168,7 +168,7 @@ private:
     //==============================================================================
     static JUCEApplicationBase* appInstance;
 
-    JUCE_DECLARE_NON_COPYABLE (JUCEApplicationBase);
+    JUCE_DECLARE_NON_COPYABLE (JUCEApplicationBase)
 };
 
 

@@ -107,7 +107,7 @@ private:
     void readBufferSection (int64 start, int length, int bufferOffset);
     int useTimeSlice();
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (BufferingAudioSource);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (BufferingAudioSource)
 };
 
 

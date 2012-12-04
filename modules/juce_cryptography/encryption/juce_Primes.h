@@ -67,7 +67,7 @@ public:
 private:
     Primes();
 
-    JUCE_DECLARE_NON_COPYABLE (Primes);
+    JUCE_DECLARE_NON_COPYABLE (Primes)
 };
 
 

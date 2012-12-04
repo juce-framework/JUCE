@@ -374,7 +374,7 @@ private:
         return true;
     }
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ALSADevice);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ALSADevice)
 };
 
 //==============================================================================
@@ -669,7 +669,7 @@ private:
             channelNamesIn.add ("channel " + String ((int) i + 1));
     }
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ALSAThread);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ALSAThread)
 };
 
 
@@ -1001,7 +1001,7 @@ private:
         return s;
     }*/
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ALSAAudioIODeviceType);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ALSAAudioIODeviceType)
 };
 
 //==============================================================================

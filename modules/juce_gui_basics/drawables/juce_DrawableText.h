@@ -153,7 +153,7 @@ private:
     const AffineTransform getArrangementAndTransform (GlyphArrangement& glyphs) const;
 
     DrawableText& operator= (const DrawableText&);
-    JUCE_LEAK_DETECTOR (DrawableText);
+    JUCE_LEAK_DETECTOR (DrawableText)
 };
 
 

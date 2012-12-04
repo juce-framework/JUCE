@@ -429,7 +429,7 @@ namespace DragHelpers
         WeakReference<Component> target;
         const ComponentPeer::DragInfo info;
 
-        JUCE_DECLARE_NON_COPYABLE (AsyncDropMessage);
+        JUCE_DECLARE_NON_COPYABLE (AsyncDropMessage)
     };
 }
 

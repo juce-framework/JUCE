@@ -109,7 +109,7 @@ protected:
     ListenerList <FileBrowserListener> listeners;
 
 private:
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DirectoryContentsDisplayComponent);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DirectoryContentsDisplayComponent)
 };
 
 

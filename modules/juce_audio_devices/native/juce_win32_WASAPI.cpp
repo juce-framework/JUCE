@@ -281,7 +281,7 @@ private:
     private:
         WASAPIDeviceBase& owner;
 
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SessionEventCallback);
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SessionEventCallback)
     };
 
     ComSmartPtr <IAudioSessionControl> audioSessionControl;
@@ -391,7 +391,7 @@ private:
         return false;
     }
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WASAPIDeviceBase);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WASAPIDeviceBase)
 };
 
 //==============================================================================
@@ -509,7 +509,7 @@ public:
     ScopedPointer <AudioData::Converter> converter;
 
 private:
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WASAPIInputDevice);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WASAPIInputDevice)
 };
 
 //==============================================================================
@@ -596,7 +596,7 @@ public:
     ScopedPointer <AudioData::Converter> converter;
 
 private:
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WASAPIOutputDevice);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WASAPIOutputDevice)
 };
 
 //==============================================================================
@@ -957,7 +957,7 @@ private:
     }
 
     //==============================================================================
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WASAPIAudioIODevice);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WASAPIAudioIODevice)
 };
 
 
@@ -1153,7 +1153,7 @@ private:
     }
 
     //==============================================================================
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WASAPIAudioIODeviceType);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WASAPIAudioIODeviceType)
 };
 
 }

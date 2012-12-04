@@ -218,7 +218,7 @@ public:
     }
 
 private:
-    JUCE_DECLARE_NON_COPYABLE (MouseDragAutoRepeater);
+    JUCE_DECLARE_NON_COPYABLE (MouseDragAutoRepeater)
 };
 
 void Desktop::beginDragAutoRepeat (const int interval)

@@ -203,7 +203,7 @@ struct AAXClasses
         MidiBuffer midiBuffer;
         Array<float*> channelList;
 
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PluginInstanceInfo);
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PluginInstanceInfo)
     };
 
     //==============================================================================
@@ -347,13 +347,13 @@ struct AAXClasses
             ScopedPointer<AudioProcessorEditor> pluginEditor;
             JuceAAX_GUI& owner;
 
-            JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ContentWrapperComponent);
+            JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ContentWrapperComponent)
         };
 
         ScopedPointer<ContentWrapperComponent> component;
 
         JUCELibraryRefCount juceCount;
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (JuceAAX_GUI);
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (JuceAAX_GUI)
     };
 
     //==============================================================================
@@ -461,7 +461,7 @@ struct AAXClasses
 
         ScopedPointer<AudioProcessor> pluginInstance;
 
-        JUCE_DECLARE_NON_COPYABLE (JuceAAX_Parameters);
+        JUCE_DECLARE_NON_COPYABLE (JuceAAX_Parameters)
     };
 
     //==============================================================================

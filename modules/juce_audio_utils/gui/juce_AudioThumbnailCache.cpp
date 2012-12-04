@@ -52,7 +52,7 @@ public:
     MemoryBlock data;
 
 private:
-    JUCE_LEAK_DETECTOR (ThumbnailCacheEntry);
+    JUCE_LEAK_DETECTOR (ThumbnailCacheEntry)
 };
 
 //==============================================================================
