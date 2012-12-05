@@ -829,11 +829,12 @@ public:
 
     void audioProcessorParameterChanged (AudioProcessor*, int index, float newValue)
     {
-        setParameterAutomated (index, newValue);
+        if (audioMaster != nullptr)
+            audioMaster (&cEffect, audioMasterAutomate, index, 0, 0, newValue);
     }
 
     void audioProcessorParameterChangeGestureBegin (AudioProcessor*, int index)   { beginEdit (index); }
-    void audioProcessorParameterChangeGestureEnd (AudioProcessor*, int index)     { endEdit (index); }
+    void audioProcessorParameterChangeGestureEnd   (AudioProcessor*, int index)   { endEdit   (index); }
 
     void audioProcessorChanged (AudioProcessor*)
     {
@@ -1367,7 +1368,7 @@ public:
         JuceVSTWrapper& wrapper;
         FakeMouseMoveGenerator fakeMouseGenerator;
 
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (EditorCompWrapper);
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (EditorCompWrapper)
     };
 
     //==============================================================================
@@ -1446,7 +1447,7 @@ private:
             tempChannels.insertMultiple (0, 0, filter->getNumInputChannels() + filter->getNumOutputChannels());
     }
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (JuceVSTWrapper);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (JuceVSTWrapper)
 };
 
 //==============================================================================
