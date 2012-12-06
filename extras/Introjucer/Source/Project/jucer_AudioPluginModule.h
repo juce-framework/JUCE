@@ -378,7 +378,9 @@ namespace RTASHelpers
                 for (ProjectExporter::ConfigIterator config (exporter); config.next();)
                 {
                     config->getValue (Ids::msvcModuleDefinitionFile) = msvcPathToRTASFolder + "juce_RTAS_WinExports.def";
-                    config->getValue (Ids::useRuntimeLibDLL) = true;
+
+                    if (config->getValue (Ids::useRuntimeLibDLL).getValue().isVoid())
+                        config->getValue (Ids::useRuntimeLibDLL) = true;
 
                     if (config->getValue (Ids::postbuildCommand).toString().isEmpty())
                         config->getValue (Ids::postbuildCommand) = "copy /Y \"" + msvcPathToRTASFolder + "juce_RTAS_WinResources.rsr"
@@ -539,7 +541,8 @@ namespace AAXHelpers
                 exporter.msvcTargetSuffix = ".aaxplugin";
 
                 for (ProjectExporter::ConfigIterator config (exporter); config.next();)
-                    config->getValue (Ids::useRuntimeLibDLL) = true;
+                    if (config->getValue (Ids::useRuntimeLibDLL).getValue().isVoid())
+                        config->getValue (Ids::useRuntimeLibDLL) = true;
             }
             else
             {
