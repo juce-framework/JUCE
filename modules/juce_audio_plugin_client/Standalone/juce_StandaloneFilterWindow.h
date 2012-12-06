@@ -26,13 +26,7 @@
 #ifndef __JUCE_STANDALONEFILTERWINDOW_JUCEHEADER__
 #define __JUCE_STANDALONEFILTERWINDOW_JUCEHEADER__
 
-
-//==============================================================================
-/** Somewhere in the codebase of your plugin, you need to implement this function
-    and make it create an instance of the filter subclass that you're building.
-*/
-extern AudioProcessor* JUCE_CALLTYPE createPluginFilter();
-
+extern AudioProcessor* JUCE_CALLTYPE createPluginFilterOfType (AudioProcessor::WrapperType);
 
 //==============================================================================
 /**
@@ -67,7 +61,7 @@ public:
 
         JUCE_TRY
         {
-            filter = createPluginFilter();
+            filter = createPluginFilterOfType (AudioProcessor::wrapperType_Standalone);
         }
         JUCE_CATCH_ALL
 
@@ -76,8 +70,6 @@ public:
             jassertfalse    // Your filter didn't create correctly! In a standalone app that's not too great.
             JUCEApplication::quit();
         }
-
-        filter->wrapperType = AudioProcessor::wrapperType_Standalone;
 
         filter->setPlayConfigDetails (JucePlugin_MaxNumInputChannels,
                                       JucePlugin_MaxNumOutputChannels,
@@ -163,7 +155,7 @@ public:
     {
         deleteFilter();
 
-        filter = createPluginFilter();
+        filter = createPluginFilterOfType (AudioProcessor::wrapperType_Standalone);
 
         if (filter != nullptr)
         {

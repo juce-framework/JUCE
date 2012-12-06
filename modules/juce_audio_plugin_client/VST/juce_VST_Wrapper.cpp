@@ -1451,13 +1451,6 @@ private:
 };
 
 //==============================================================================
-/** Somewhere in the codebase of your plugin, you need to implement this function
-    and make it create an instance of the filter subclass that you're building.
-*/
-extern AudioProcessor* JUCE_CALLTYPE createPluginFilter();
-
-
-//==============================================================================
 namespace
 {
     AEffect* pluginEntryPoint (audioMasterCallback audioMaster)
@@ -1473,17 +1466,9 @@ namespace
                 MessageManagerLock mmLock;
                #endif
 
-                if (AudioProcessor* const filter = createPluginFilter())
-                {
-                    filter->wrapperType = AudioProcessor::wrapperType_VST;
-
-                    JuceVSTWrapper* const wrapper = new JuceVSTWrapper (audioMaster, filter);
-                    return wrapper->getAeffect();
-                }
-                else
-                {
-                    jassertfalse; // your createPluginFilter() method must return an object!
-                }
+                AudioProcessor* const filter = createPluginFilterOfType (AudioProcessor::wrapperType_VST);
+                JuceVSTWrapper* const wrapper = new JuceVSTWrapper (audioMaster, filter);
+                return wrapper->getAeffect();
             }
         }
         catch (...)

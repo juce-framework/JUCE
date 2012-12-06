@@ -31,3 +31,5 @@ using namespace juce;
  #define Point     juce::Point
  #define Component juce::Component
 #endif
+
+extern AudioProcessor* JUCE_CALLTYPE createPluginFilterOfType (AudioProcessor::WrapperType);

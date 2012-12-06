@@ -55,12 +55,6 @@
 using juce::Component;
 
 //==============================================================================
-/** Somewhere in the codebase of your plugin, you need to implement this function
-    and make it return a new instance of the filter subclass that you're building.
-*/
-extern AudioProcessor* JUCE_CALLTYPE createPluginFilter();
-
-//==============================================================================
 struct AAXClasses
 {
     static void check (AAX_Result result)
@@ -362,10 +356,7 @@ struct AAXClasses
     public:
         JuceAAX_Parameters()
         {
-            pluginInstance = createPluginFilter();
-            jassert (pluginInstance != nullptr);  // your createPluginFilter() method must return an object!
-
-            pluginInstance->wrapperType = AudioProcessor::wrapperType_AAX;
+            pluginInstance = createPluginFilterOfType (AudioProcessor::wrapperType_AAX);
         }
 
         static AAX_CEffectParameters* AAX_CALLBACK Create()   { return new JuceAAX_Parameters(); }

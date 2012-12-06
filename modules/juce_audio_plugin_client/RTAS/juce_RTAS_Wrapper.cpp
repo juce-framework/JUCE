@@ -133,14 +133,7 @@ const int midiBufferSize = 1024;
 const OSType juceChunkType = 'juce';
 static const int bypassControlIndex = 1;
 
-//==============================================================================
-/** Somewhere in the codebase of your plugin, you need to implement this function
-    and make it return a new instance of the filter subclass that you're building.
-*/
-extern AudioProcessor* JUCE_CALLTYPE createPluginFilter();
-
 static int numInstances = 0;
-
 
 //==============================================================================
 class JucePlugInProcess  : public CEffectProcessMIDI,
@@ -155,10 +148,7 @@ public:
           sampleRate (44100.0)
     {
         asyncUpdater = new InternalAsyncUpdater (*this);
-        juceFilter = createPluginFilter();
-        jassert (juceFilter != nullptr);  // your createPluginFilter() method must return an object!
-
-        juceFilter->wrapperType = AudioProcessor::wrapperType_RTAS;
+        juceFilter = createPluginFilterOfType (AudioProcessor::wrapperType_RTAS);
 
         AddChunk (juceChunkType, "Juce Audio Plugin Data");
 

@@ -592,6 +592,9 @@ public:
     */
     WrapperType wrapperType;
 
+    /** @internal */
+    static void setTypeOfNextNewPlugin (WrapperType);
+
 protected:
     //==============================================================================
     /** Helper function that just converts an xml element into a binary blob.

@@ -1573,7 +1573,7 @@ bool AudioUnitPluginFormat::fileMightContainThisPluginType (const String& fileOr
     if (AudioUnitFormatHelpers::getComponentDescFromIdentifier (fileOrIdentifier, desc, name, version, manufacturer))
         return FindNextComponent (0, &desc) != 0;
 
-    const File f (fileOrIdentifier);
+    const File f (File::createFileWithoutCheckingPath (fileOrIdentifier));
 
     return f.hasFileExtension (".component")
              && f.isDirectory();
