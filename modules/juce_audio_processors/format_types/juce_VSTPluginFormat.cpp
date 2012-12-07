@@ -1198,7 +1198,7 @@ public:
 
     //==============================================================================
     int getNumPrograms()          { return effect != nullptr ? effect->numPrograms : 0; }
-    int getCurrentProgram()       { return dispatch (effGetProgram, 0, 0, 0, 0); }
+    int getCurrentProgram()       { return (int) dispatch (effGetProgram, 0, 0, 0, 0); }
 
     void setCurrentProgram (int newIndex)
     {
@@ -1296,7 +1296,7 @@ public:
 
             case audioMasterSizeWindow:
                 if (AudioProcessorEditor* ed = getActiveEditor())
-                    ed->setSize (index, value);
+                    ed->setSize (index, (int) value);
 
                 return 1;
 
@@ -1355,7 +1355,7 @@ public:
     }
 
     // handles non plugin-specific callbacks..
-    static VstIntPtr handleGeneralCallback (VstInt32 opcode, VstInt32 /*index*/, VstInt32 /*value*/, void *ptr, float /*opt*/)
+    static VstIntPtr handleGeneralCallback (VstInt32 opcode, VstInt32 /*index*/, VstIntPtr /*value*/, void *ptr, float /*opt*/)
     {
         switch (opcode)
         {
