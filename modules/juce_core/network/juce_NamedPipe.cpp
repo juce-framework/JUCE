@@ -23,14 +23,34 @@
   ==============================================================================
 */
 
+NamedPipe::NamedPipe()
+{
+}
+
+NamedPipe::~NamedPipe()
+{
+    close();
+}
+
 bool NamedPipe::openExisting (const String& pipeName)
 {
+    close();
+
+    ScopedWriteLock sl (lock);
     currentPipeName = pipeName;
     return openInternal (pipeName, false);
 }
 
+bool NamedPipe::isOpen() const
+{
+    return pimpl != nullptr;
+}
+
 bool NamedPipe::createNewPipe (const String& pipeName)
 {
+    close();
+
+    ScopedWriteLock sl (lock);
     currentPipeName = pipeName;
     return openInternal (pipeName, true);
 }

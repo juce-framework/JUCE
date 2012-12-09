@@ -191,8 +191,7 @@ struct ConnectionStateMessage  : public MessageManager::MessageBase
 
     void messageCallback()
     {
-        InterprocessConnection* const ipc = owner;
-        if (ipc != nullptr)
+        if (InterprocessConnection* const ipc = owner)
         {
             if (connectionMade)
                 ipc->connectionMade();
@@ -300,6 +299,7 @@ bool InterprocessConnection::readNextMessageInt()
     }
     else if (bytes < 0)
     {
+        if (socket != nullptr)
         {
             const ScopedLock sl (pipeAndSocketLock);
             socket = nullptr;
