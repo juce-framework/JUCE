@@ -40,33 +40,36 @@ ReadWriteLock::~ReadWriteLock() noexcept
 //==============================================================================
 void ReadWriteLock::enterRead() const noexcept
 {
+    while (! tryEnterRead())
+        waitEvent.wait (100);
+}
+
+bool ReadWriteLock::tryEnterRead() const noexcept
+{
     const Thread::ThreadID threadId = Thread::getCurrentThreadId();
+
     const SpinLock::ScopedLockType sl (accessLock);
 
-    for (;;)
+    for (int i = 0; i < readerThreads.size(); ++i)
     {
-        for (int i = 0; i < readerThreads.size(); ++i)
+        ThreadRecursionCount& trc = readerThreads.getReference(i);
+
+        if (trc.threadID == threadId)
         {
-            ThreadRecursionCount& trc = readerThreads.getReference(i);
-
-            if (trc.threadID == threadId)
-            {
-                trc.count++;
-                return;
-            }
+            trc.count++;
+            return true;
         }
-
-        if (numWriters + numWaitingWriters == 0
-             || (threadId == writerThreadId && numWriters > 0))
-        {
-            ThreadRecursionCount trc = { threadId, 1 };
-            readerThreads.add (trc);
-            return;
-        }
-
-        const SpinLock::ScopedUnlockType ul (accessLock);
-        waitEvent.wait (100);
     }
+
+    if (numWriters + numWaitingWriters == 0
+         || (threadId == writerThreadId && numWriters > 0))
+    {
+        ThreadRecursionCount trc = { threadId, 1 };
+        readerThreads.add (trc);
+        return true;
+    }
+
+    return false;
 }
 
 void ReadWriteLock::exitRead() const noexcept
