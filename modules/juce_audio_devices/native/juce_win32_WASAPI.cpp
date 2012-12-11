@@ -87,6 +87,64 @@ bool check (HRESULT hr)
 }
 
 //==============================================================================
+namespace
+{
+    enum EDataFlow
+    {
+        eRender = 0,
+        eCapture = (eRender + 1),
+        eAll = (eCapture + 1)
+    };
+
+    enum { DEVICE_STATE_ACTIVE = 1 };
+
+    struct __declspec (uuid ("D666063F-1587-4E43-81F1-B948E807363F")) IMMDevice : public IUnknown
+    {
+        virtual HRESULT STDMETHODCALLTYPE Activate(REFIID, DWORD, PROPVARIANT*, void**) = 0;
+        virtual HRESULT STDMETHODCALLTYPE OpenPropertyStore(DWORD, IPropertyStore**) = 0;
+        virtual HRESULT STDMETHODCALLTYPE GetId(LPWSTR*) = 0;
+        virtual HRESULT STDMETHODCALLTYPE GetState(DWORD*) = 0;
+    };
+
+    struct __declspec (uuid ("1BE09788-6894-4089-8586-9A2A6C265AC5")) IMMEndpoint : public IUnknown
+    {
+        virtual HRESULT STDMETHODCALLTYPE GetDataFlow(EDataFlow*) = 0;
+    };
+
+    struct IMMDeviceCollection : public IUnknown
+    {
+        virtual HRESULT STDMETHODCALLTYPE GetCount(UINT*) = 0;
+        virtual HRESULT STDMETHODCALLTYPE Item(UINT, IMMDevice**) = 0;
+    };
+
+    enum ERole
+    {
+        eConsole = 0,
+        eMultimedia = (eConsole + 1),
+        eCommunications = (eMultimedia + 1)
+    };
+
+    struct IMMNotificationClient : public IUnknown
+    {
+        virtual HRESULT STDMETHODCALLTYPE OnDeviceStateChanged(LPCWSTR, DWORD) = 0;
+        virtual HRESULT STDMETHODCALLTYPE OnDeviceAdded(LPCWSTR) = 0;
+        virtual HRESULT STDMETHODCALLTYPE OnDeviceRemoved(LPCWSTR) = 0;
+        virtual HRESULT STDMETHODCALLTYPE OnDefaultDeviceChanged(EDataFlow, ERole, LPCWSTR) = 0;
+        virtual HRESULT STDMETHODCALLTYPE OnPropertyValueChanged(LPCWSTR, const PROPERTYKEY) = 0;
+    };
+
+    struct __declspec (uuid ("A95664D2-9614-4F35-A746-DE8DB63617E6")) IMMDeviceEnumerator : public IUnknown
+    {
+        virtual HRESULT STDMETHODCALLTYPE EnumAudioEndpoints(EDataFlow, DWORD, IMMDeviceCollection**) = 0;
+        virtual HRESULT STDMETHODCALLTYPE GetDefaultAudioEndpoint(EDataFlow, ERole, IMMDevice**) = 0;
+        virtual HRESULT STDMETHODCALLTYPE GetDevice(LPCWSTR, IMMDevice**) = 0;
+        virtual HRESULT STDMETHODCALLTYPE RegisterEndpointNotificationCallback(IMMNotificationClient*) = 0;
+        virtual HRESULT STDMETHODCALLTYPE UnregisterEndpointNotificationCallback(IMMNotificationClient*) = 0;
+    };
+
+    struct __declspec (uuid ("BCDE0395-E52F-467C-8E3D-C4579291692E")) MMDeviceEnumerator;
+}
+
 String getDeviceID (IMMDevice* const device)
 {
     String s;
@@ -185,7 +243,7 @@ public:
         CloseHandle (clientEvent);
     }
 
-    bool isOk() const noexcept    { return defaultBufferSize > 0 && defaultSampleRate > 0; }
+    bool isOk() const noexcept   { return defaultBufferSize > 0 && defaultSampleRate > 0; }
 
     bool openClient (const double newSampleRate, const BigInteger& newChannels)
     {

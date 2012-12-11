@@ -60,7 +60,6 @@
   #pragma warning (push)
   #pragma warning (disable: 4201)
   #include <MMReg.h>
-  #include <mmdeviceapi.h>
   #include <Audioclient.h>
   #include <Audiopolicy.h>
   #include <Avrt.h>
