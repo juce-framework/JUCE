@@ -34,6 +34,20 @@
 */
 namespace DummyNamespaceStatementToCatchSyntaxErrors {}
 
+#ifndef JUCE_MODULE_AVAILABLE_juce_core
+ /* If you fail to make sure that all your compile units are building JUCE with the same set of
+    option flags, then there's a risk that different compile units will treat the classes as having
+    different memory layouts, leading to very nasty memory corruption errors when they all get
+    linked together. That's why it's best to always include the Introjucer-generated AppConfig.h
+    file before any juce headers.
+ */
+ #ifdef _MSC_VER
+  #pragma message ("Have you included your AppConfig.h file before including the JUCE headers?")
+ #else
+  #warning "Have you included your AppConfig.h file before including the JUCE headers?"
+ #endif
+#endif
+
 //==============================================================================
 #include "system/juce_TargetPlatform.h"
 
