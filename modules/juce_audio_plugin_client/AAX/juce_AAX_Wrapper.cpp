@@ -503,7 +503,6 @@ struct AAXClasses
     {
         descriptor.AddName (JucePlugin_Desc);
         descriptor.AddName (JucePlugin_Name);
-        descriptor.AddName (FourCharConst (JucePlugin_PluginCode).asString);
         descriptor.AddCategory (JucePlugin_AAXCategory);
 
         check (descriptor.AddProcPtr ((void*) JuceAAX_GUI::Create,        kAAX_ProcPtrID_Create_EffectGUI));
