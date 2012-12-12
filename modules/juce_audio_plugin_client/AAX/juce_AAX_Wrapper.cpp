@@ -62,20 +62,6 @@ struct AAXClasses
         jassert (result == AAX_SUCCESS); (void) result;
     }
 
-    struct FourCharConst
-    {
-        FourCharConst (const uint32 n) noexcept
-        {
-            asString[0] = (char) (n >> 24);
-            asString[1] = (char) (n >> 16);
-            asString[2] = (char) (n >> 8);
-            asString[3] = (char) n;
-            asString[4] = 0;
-        }
-
-        char asString[5];
-    };
-
     static AAX_EStemFormat getFormatForChans (const int numChans) noexcept
     {
         switch (numChans)
@@ -542,7 +528,6 @@ AAX_Result JUCE_CDECL GetEffectDescriptions (AAX_ICollection* collection)
         collection->SetManufacturerName (JucePlugin_Manufacturer);
         collection->AddPackageName (JucePlugin_Desc);
         collection->AddPackageName (JucePlugin_Name);
-        collection->AddPackageName (AAXClasses::FourCharConst (JucePlugin_PluginCode).asString);
         collection->SetPackageVersion (JucePlugin_VersionCode);
 
         return AAX_SUCCESS;
