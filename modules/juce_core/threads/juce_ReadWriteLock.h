@@ -82,8 +82,7 @@ public:
     /** Tries to lock this object for reading.
 
         Multiple threads can simulaneously lock the object for reading, but if another
-        thread has it locked for writing, then this will block until it releases the
-        lock.
+        thread has it locked for writing, then this will fail and return false.
 
         @returns true if the lock is successfully gained.
         @see exitRead, ScopedReadLock
