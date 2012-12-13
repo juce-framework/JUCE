@@ -711,20 +711,19 @@ bool Process::openDocument (const String& fileName, const String& parameters)
 
 void File::revealToUser() const
 {
-   #if JUCE_MINGW
-    jassertfalse; // not supported in MinGW..
-   #else
-    #pragma warning (push)
-    #pragma warning (disable: 4090) // (alignment warning)
-    ITEMIDLIST* const itemIDList = ILCreateFromPath (fullPath.toWideCharPointer());
-    #pragma warning (pop)
+    DynamicLibrary dll ("Shell32.dll");
+    JUCE_LOAD_WINAPI_FUNCTION (dll, ILCreateFromPathW, ilCreateFromPathW, ITEMIDLIST*, (LPCWSTR))
+    JUCE_LOAD_WINAPI_FUNCTION (dll, ILFree, ilFree, void, (ITEMIDLIST*))
+    JUCE_LOAD_WINAPI_FUNCTION (dll, SHOpenFolderAndSelectItems, shOpenFolderAndSelectItems, HRESULT, (ITEMIDLIST*, UINT, void*, DWORD))
 
-    if (itemIDList != nullptr)
+    if (ilCreateFromPathW != nullptr && shOpenFolderAndSelectItems != nullptr && ilFree != nullptr)
     {
-        SHOpenFolderAndSelectItems (itemIDList, 0, nullptr, 0);
-        ILFree (itemIDList);
+        if (ITEMIDLIST* const itemIDList = ilCreateFromPathW (fullPath.toWideCharPointer()))
+        {
+            shOpenFolderAndSelectItems (itemIDList, 0, nullptr, 0);
+            ilFree (itemIDList);
+        }
     }
-   #endif
 }
 
 //==============================================================================

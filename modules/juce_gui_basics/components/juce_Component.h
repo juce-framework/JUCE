@@ -1547,7 +1547,10 @@ public:
 
         If not overridden, a component will forward this message to its parent, so
         that parent components can collect mouse-wheel messages that happen to
-        child components which aren't interested in them.
+        child components which aren't interested in them. (Bear in mind that if
+        you attach a component as a mouse-listener to other components, then
+        those wheel moves will also end up calling this method and being passed up
+        to the parents, which may not be what you intended to happen).
 
         @param event   details about the mouse event
         @param wheel   details about the mouse wheel movement

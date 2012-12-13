@@ -40,11 +40,7 @@ namespace DirectWriteTypeLayout
 
         JUCE_COMRESULT QueryInterface (REFIID refId, void** result)
         {
-           #if ! JUCE_MINGW
             if (refId == __uuidof (IDWritePixelSnapping))   { AddRef(); *result = dynamic_cast <IDWritePixelSnapping*> (this); return S_OK; }
-           #else
-            jassertfalse; // need to find a mingw equivalent of __uuidof to make this possible
-           #endif
 
             return ComBaseClassHelper<IDWriteTextRenderer>::QueryInterface (refId, result);
         }

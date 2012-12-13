@@ -126,7 +126,6 @@
  #if JUCE_MSVC && ! JUCE_DONT_AUTOLINK_TO_WIN32_LIBRARIES
   #pragma comment (lib, "kernel32.lib")
   #pragma comment (lib, "user32.lib")
-  #pragma comment (lib, "shell32.lib")
   #pragma comment (lib, "wininet.lib")
   #pragma comment (lib, "advapi32.lib")
   #pragma comment (lib, "ws2_32.lib")
