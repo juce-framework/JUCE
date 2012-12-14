@@ -624,7 +624,7 @@ public:
 
     void audioProcessorChanged (AudioProcessor*)
     {
-        // xxx is there an AU equivalent?
+        PropertyChanged (kAudioUnitProperty_Latency, kAudioUnitScope_Global, 0);
     }
 
     bool StreamFormatWritable (AudioUnitScope, AudioUnitElement)
