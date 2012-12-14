@@ -315,7 +315,7 @@ private:
     void shiftLeft (int bits, int startBit);
     void shiftRight (int bits, int startBit);
 
-    JUCE_LEAK_DETECTOR (BigInteger);
+    JUCE_LEAK_DETECTOR (BigInteger)
 };
 
 /** Writes a BigInteger to an OutputStream as a UTF8 decimal string. */

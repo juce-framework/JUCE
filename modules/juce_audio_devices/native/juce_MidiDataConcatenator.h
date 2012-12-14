@@ -170,7 +170,7 @@ private:
     int pendingBytes;
     uint8 runningStatus;
 
-    JUCE_DECLARE_NON_COPYABLE (MidiDataConcatenator);
+    JUCE_DECLARE_NON_COPYABLE (MidiDataConcatenator)
 };
 
 #endif   // __JUCE_MIDIDATACONCATENATOR_JUCEHEADER__

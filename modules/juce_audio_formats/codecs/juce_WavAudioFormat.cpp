@@ -768,7 +768,7 @@ private:
     int64 dataChunkStart, dataLength;
     bool isRF64;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WavAudioFormatReader);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WavAudioFormatReader)
 };
 
 //==============================================================================
@@ -998,7 +998,7 @@ private:
         usesFloatingPointData = (bitsPerSample == 32);
     }
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WavAudioFormatWriter);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WavAudioFormatWriter)
 };
 
 //==============================================================================

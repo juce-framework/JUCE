@@ -128,7 +128,7 @@ public:
     int numAllocated;
 
 private:
-    JUCE_DECLARE_NON_COPYABLE (ArrayAllocationBase);
+    JUCE_DECLARE_NON_COPYABLE (ArrayAllocationBase)
 };
 
 

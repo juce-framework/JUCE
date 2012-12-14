@@ -179,7 +179,7 @@ private:
     SystemStats();
     static const CPUFlags& getCPUFlags();
 
-    JUCE_DECLARE_NON_COPYABLE (SystemStats);
+    JUCE_DECLARE_NON_COPYABLE (SystemStats)
 };
 
 

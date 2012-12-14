@@ -147,7 +147,7 @@ private:
 
     Image getCurrentImage() const;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ImageButton);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ImageButton)
 };
 
 

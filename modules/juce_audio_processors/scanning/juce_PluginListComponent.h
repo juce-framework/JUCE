@@ -103,7 +103,7 @@ private:
     void buttonClicked (Button*);
     void changeListenerCallback (ChangeBroadcaster*);
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PluginListComponent);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PluginListComponent)
 };
 
 

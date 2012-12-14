@@ -155,7 +155,7 @@ private:
     static void okToOverwriteFileCallback (int result, FileChooserDialogBox*);
     static void createNewFolderCallback (int result, FileChooserDialogBox*, Component::SafePointer<AlertWindow>);
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FileChooserDialogBox);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FileChooserDialogBox)
 };
 
 

@@ -120,7 +120,7 @@ private:
                 && tlw->isShowing();
     }
 
-    JUCE_DECLARE_NON_COPYABLE (TopLevelWindowManager);
+    JUCE_DECLARE_NON_COPYABLE (TopLevelWindowManager)
 };
 
 juce_ImplementSingleton_SingleThreaded (TopLevelWindowManager)

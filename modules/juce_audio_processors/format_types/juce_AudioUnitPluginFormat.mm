@@ -220,7 +220,7 @@ namespace AudioUnitFormatHelpers
                 const short resFileId = CFBundleOpenBundleResourceMap (bundleRef);
                 UseResFile (resFileId);
 
-                for (int i = 1; i <= Count1Resources ('thng'); ++i)
+                for (ResourceIndex i = 1; i <= Count1Resources ('thng'); ++i)
                 {
                     if (Handle h = Get1IndResource ('thng', i))
                     {
@@ -276,8 +276,8 @@ class AudioUnitPluginWindowCocoa;
 class AudioUnitPluginInstance     : public AudioPluginInstance
 {
 public:
-    AudioUnitPluginInstance (const String& fileOrIdentifier)
-        : fileOrIdentifier (fileOrIdentifier),
+    AudioUnitPluginInstance (const String& fileOrId)
+        : fileOrIdentifier (fileOrId),
           wantsMidiMessages (false),
           producesMidiMessages (false),
           wasPlaying (false),
@@ -434,7 +434,8 @@ public:
             AudioUnitReset (audioUnit, kAudioUnitScope_Global, 0);
 
             {
-                AudioStreamBasicDescription stream = { 0 };
+                AudioStreamBasicDescription stream;
+                zerostruct (stream); // (can't use "= { 0 }" on this object because it's typedef'ed as a C struct)
                 stream.mSampleRate       = sampleRate_;
                 stream.mFormatID         = kAudioFormatLinearPCM;
                 stream.mFormatFlags      = kAudioFormatFlagsNativeFloatPacked | kAudioFormatFlagIsNonInterleaved | kAudioFormatFlagsNativeEndian;
@@ -869,7 +870,9 @@ private:
         if (audioUnit != 0)
         {
             {
-                AURenderCallbackStruct info = { 0 };
+                AURenderCallbackStruct info;
+                zerostruct (info); // (can't use "= { 0 }" on this object because it's typedef'ed as a C struct)
+
                 info.inputProcRefCon = this;
                 info.inputProc = renderGetInputCallback;
 
@@ -880,7 +883,9 @@ private:
 
             if (producesMidiMessages)
             {
-                AUMIDIOutputCallbackStruct info = { 0 };
+                AUMIDIOutputCallbackStruct info;
+                zerostruct (info);
+
                 info.userData = this;
                 info.midiOutputCallback = renderMidiOutputCallback;
 
@@ -889,7 +894,9 @@ private:
             }
 
             {
-                HostCallbackInfo info = { 0 };
+                HostCallbackInfo info;
+                zerostruct (info);
+
                 info.hostUserData = this;
                 info.beatAndTempoProc = getBeatAndTempoCallback;
                 info.musicalTimeLocationProc = getMusicalTimeLocationCallback;
@@ -910,9 +917,9 @@ private:
     {
         if (currentBuffer != nullptr)
         {
-            jassert (inNumberFrames == currentBuffer->getNumSamples()); // if this ever happens, might need to add extra handling
+            jassert (inNumberFrames == (UInt32) currentBuffer->getNumSamples()); // if this ever happens, might need to add extra handling
 
-            for (int i = 0; i < ioData->mNumberBuffers; ++i)
+            for (UInt32 i = 0; i < ioData->mNumberBuffers; ++i)
             {
                 const int bufferChannel = inBusNumber * numInputBusChannels + i;
 
@@ -940,7 +947,7 @@ private:
             const double time = Time::getMillisecondCounterHiRes() * 0.001;
             const MIDIPacket* packet = &pktlist->packet[0];
 
-            for (int i = 0; i < pktlist->numPackets; ++i)
+            for (UInt32 i = 0; i < pktlist->numPackets; ++i)
             {
                 midiConcatenator.pushMidiData (packet->data, (int) packet->length, time, (void*) nullptr, *this);
                 packet = MIDIPacketNext (packet);
@@ -1110,7 +1117,7 @@ private:
             int maximumNumIns = 0;
             int maximumNumOuts = 0;
 
-            for (int i = 0; i < supportedChannelsSize / sizeof (AUChannelInfo); ++i)
+            for (int i = 0; i < (int) (supportedChannelsSize / sizeof (AUChannelInfo)); ++i)
             {
                 const int inChannels  = (int) supportedChannels[i].inChannels;
                 const int outChannels = (int) supportedChannels[i].outChannels;
@@ -1175,7 +1182,7 @@ private:
         return false;
     }
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioUnitPluginInstance);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioUnitPluginInstance)
 };
 
 //==============================================================================
@@ -1326,7 +1333,7 @@ public:
                                       kAudioUnitScope_Global, 0, &propertySize, NULL) == noErr
              && propertySize > 0)
         {
-            ComponentDescription views [propertySize / sizeof (ComponentDescription)];
+            HeapBlock<ComponentDescription> views (propertySize / sizeof (ComponentDescription));
 
             if (AudioUnitGetProperty (plugin.audioUnit, kAudioUnitProperty_GetUIComponentList,
                                       kAudioUnitScope_Global, 0, &views[0], &propertySize) == noErr)
@@ -1408,9 +1415,9 @@ private:
         {
             log ("Opening AU GUI: " + owner.plugin.getName());
 
-            AudioUnitCarbonView viewComponent = owner.getViewComponent();
+            AudioUnitCarbonView carbonView = owner.getViewComponent();
 
-            if (viewComponent == 0)
+            if (carbonView == 0)
                 return 0;
 
             Float32Point pos = { 0, 0 };
@@ -1418,7 +1425,7 @@ private:
 
             HIViewRef pluginView = 0;
 
-            AudioUnitCarbonViewCreate (viewComponent,
+            AudioUnitCarbonViewCreate (carbonView,
                                        owner.getAudioUnit(),
                                        windowRef,
                                        rootView,
@@ -1437,13 +1444,13 @@ private:
     private:
         AudioUnitPluginWindowCarbon& owner;
 
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (InnerWrapperComponent);
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (InnerWrapperComponent)
     };
 
     friend class InnerWrapperComponent;
     ScopedPointer<InnerWrapperComponent> innerWrapper;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioUnitPluginWindowCarbon);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioUnitPluginWindowCarbon)
 };
 
 #endif
@@ -1533,7 +1540,9 @@ StringArray AudioUnitPluginFormat::searchPathsForPlugins (const FileSearchPath& 
 
     for (;;)
     {
-        ComponentDescription desc = { 0 };
+        ComponentDescription desc;
+        zerostruct (desc);
+
         comp = FindNextComponent (comp, &desc);
 
         if (comp == 0)
@@ -1564,7 +1573,7 @@ bool AudioUnitPluginFormat::fileMightContainThisPluginType (const String& fileOr
     if (AudioUnitFormatHelpers::getComponentDescFromIdentifier (fileOrIdentifier, desc, name, version, manufacturer))
         return FindNextComponent (0, &desc) != 0;
 
-    const File f (fileOrIdentifier);
+    const File f (File::createFileWithoutCheckingPath (fileOrIdentifier));
 
     return f.hasFileExtension (".component")
              && f.isDirectory();

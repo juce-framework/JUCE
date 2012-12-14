@@ -671,38 +671,38 @@ private:
     {
         int i, j;
         for (i = -256; i < 118 + 4; ++i)
-            powToGains[i + 256] = pow (2.0, -0.25 * (i + 210));
+            powToGains[i + 256] = (float) pow (2.0, -0.25 * (i + 210));
 
         for (i = 0; i < 8207; ++i)
-            nToThe4Over3[i] = pow ((double) i, 4.0 / 3.0);
+            nToThe4Over3[i] = (float) pow ((double) i, 4.0 / 3.0);
 
         for (i = 0; i < 8; ++i)
         {
             static double Ci[] = { -0.6, -0.535, -0.33, -0.185, -0.095, -0.041, -0.0142, -0.0037 };
             const double sq = sqrt (1.0 + Ci[i] * Ci[i]);
-            antiAliasingCs[i] = 1.0 / sq;
-            antiAliasingCa[i] = Ci[i] / sq;
+            antiAliasingCs[i] = (float) (1.0 / sq);
+            antiAliasingCa[i] = (float) (Ci[i] / sq);
         }
 
         for (i = 0; i < 18; ++i)
         {
-            win[0][i] = win[1][i] = 0.5 * sin (double_Pi / 72.0 * (2 * i + 1)) / cos (double_Pi * (2 * i + 19) / 72.0);
-            win[0][i + 18] = win[3][i + 18] = 0.5 * sin (double_Pi / 72.0 * (2 * (i + 18) + 1)) / cos (double_Pi * (2 * (i + 18) + 19) / 72.0);
+            win[0][i] = win[1][i] = (float) (0.5 * sin (double_Pi / 72.0 * (2 * i + 1)) / cos (double_Pi * (2 * i + 19) / 72.0));
+            win[0][i + 18] = win[3][i + 18] = (float) (0.5 * sin (double_Pi / 72.0 * (2 * (i + 18) + 1)) / cos (double_Pi * (2 * (i + 18) + 19) / 72.0));
         }
 
         const double piOver72 = double_Pi;
 
         for (i = 0; i < 6; ++i)
         {
-            win[1][i + 18] = 0.5 / cos (piOver72 * (2 * (i + 18) + 19));
-            win[3][i + 12] = 0.5 / cos (piOver72 * (2 * (i + 12) + 19));
-            win[1][i + 24] = 0.5 * sin (double_Pi / 24.0 * (2 * i + 13)) / cos (piOver72 * (2 * (i + 24) + 19));
+            win[1][i + 18] = (float) (0.5 / cos (piOver72 * (2 * (i + 18) + 19)));
+            win[3][i + 12] = (float) (0.5 / cos (piOver72 * (2 * (i + 12) + 19)));
+            win[1][i + 24] = (float) (0.5 * sin (double_Pi / 24.0 * (2 * i + 13)) / cos (piOver72 * (2 * (i + 24) + 19)));
             win[1][i + 30] = win[3][i] = 0;
-            win[3][i + 6] = 0.5 * sin (double_Pi / 24.0 * (2 * i + 1)) / cos (piOver72 * (2 * (i + 6) + 19));
+            win[3][i + 6]  = (float) (0.5 * sin (double_Pi / 24.0 * (2 * i + 1)) / cos (piOver72 * (2 * (i + 6) + 19)));
         }
 
         for (i = 0; i < 12; ++i)
-            win[2][i] = 0.5 * sin (double_Pi / 24.0 * (2 * i + 1)) / cos (double_Pi * (2 * i + 7) / 24.0);
+            win[2][i] = (float) (0.5 * sin (double_Pi / 24.0 * (2 * i + 1)) / cos (double_Pi * (2 * i + 7) / 24.0));
 
         for (j = 0; j < 4; ++j)
         {
@@ -716,10 +716,10 @@ private:
         for (i = 0; i < 16; ++i)
         {
             const double t = tan (i * double_Pi / 12.0);
-            tan1_1[i] = t / (1.0 + t);
-            tan2_1[i] = 1.0 / (1.0 + t);
-            tan1_2[i] = sqrt2 * t / (1.0 + t);
-            tan2_2[i] = sqrt2 / (1.0 + t);
+            tan1_1[i] = (float) (t / (1.0 + t));
+            tan2_1[i] = (float) (1.0 / (1.0 + t));
+            tan1_2[i] = (float) (sqrt2 * t / (1.0 + t));
+            tan2_2[i] = (float) (sqrt2 / (1.0 + t));
 
             for (j = 0; j < 2; ++j)
             {
@@ -735,10 +735,10 @@ private:
                         p2 = pow (base, i * 0.5);
                 }
 
-                pow1_1[j][i] = p1;
-                pow2_1[j][i] = p2;
-                pow1_2[j][i] = sqrt2 * p1;
-                pow2_2[j][i] = sqrt2 * p2;
+                pow1_1[j][i] = (float) p1;
+                pow2_1[j][i] = (float) p2;
+                pow1_2[j][i] = (float) (sqrt2 * p1);
+                pow2_2[j][i] = (float) (sqrt2 * p2);
             }
         }
 
@@ -1670,7 +1670,7 @@ private:
 
     uint32 getOneBit() noexcept
     {
-        const uint8 result = *bufferPointer << bitIndex;
+        const uint8 result = (uint8) (*bufferPointer << bitIndex);
         ++bitIndex;
         bufferPointer += (bitIndex >> 3);
         bitIndex &= 7;
@@ -2450,7 +2450,7 @@ private:
     {
         const int shift = 1 + granule.scaleFactorScale;
         float* xrpnt = (float*) xr;
-        int i, part2remain = granule.part2_3Length - part2bits;
+        int part2remain = granule.part2_3Length - part2bits;
 
         zeromem (xrpnt, sizeof (float) * (&xr[32][0] - xrpnt));
 
@@ -2481,7 +2481,7 @@ private:
             }
         }
 
-        for (i = 0; i < 3; ++i)
+        for (int i = 0; i < 3; ++i)
             if (l[i] < 0)
                 l[i] = 0;
 
@@ -2507,7 +2507,7 @@ private:
                 mapEnd = constants.mapEnd [sampleRate][1];
             }
 
-            for (i = 0; i < 2; ++i)
+            for (int i = 0; i < 2; ++i)
             {
                 const BitsToTableMap* h = huffmanTables1 + granule.tableSelect[i];
 
@@ -2603,7 +2603,7 @@ private:
                         val -= a;
                 }
 
-                for (i = 0; i < 4; ++i)
+                for (int i = 0; i < 4; ++i)
                 {
                     if ((i & 1) == 0)
                     {
@@ -2675,11 +2675,11 @@ private:
             static const int pretab2[] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 
             const int* pretab = (const int*) (granule.preflag ? pretab1 : pretab2);
-            int i, max = -1, cb = 0, mc = 0;
+            int max = -1, cb = 0, mc = 0;
             int* map = constants.map [sampleRate][2];
             float v = 0;
 
-            for (i = 0; i < 3; ++i)
+            for (int i = 0; i < 3; ++i)
             {
                 const BitsToTableMap* h = huffmanTables1 + granule.tableSelect[i];
 
@@ -2757,7 +2757,7 @@ private:
                         values -= a;
                 }
 
-                for (i = 0; i < 4; ++i)
+                for (int i = 0; i < 4; ++i)
                 {
                     if ((i & 1) == 0)
                     {
@@ -2926,7 +2926,7 @@ private:
         samplesDone += 32;
     }
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MP3Stream);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MP3Stream)
 };
 
 //==============================================================================
@@ -2963,7 +2963,7 @@ public:
 
         if (currentPosition != startSampleInFile)
         {
-            if (! stream.seek (startSampleInFile / 1152 - 1))
+            if (! stream.seek ((int) (startSampleInFile / 1152 - 1)))
             {
                 currentPosition = -1;
                 createEmptyDecodedData();
@@ -3104,7 +3104,7 @@ private:
         return numFrames * 1152;
     }
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MP3Reader);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MP3Reader)
 };
 
 }

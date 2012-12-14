@@ -176,11 +176,10 @@ public:
             const float input = samples[i] * gain;
             float output = 0;
 
-            int j;
-            for (j = 0; j < numCombs; ++j)  // accumulate the comb filters in parallel
+            for (int j = 0; j < numCombs; ++j)  // accumulate the comb filters in parallel
                 output += comb[0][j].process (input);
 
-            for (j = 0; j < numAllPasses; ++j)  // run the allpass filters in series
+            for (int j = 0; j < numAllPasses; ++j)  // run the allpass filters in series
                 output = allPass[0][j].process (output);
 
             samples[i] = output * wet1 + input * dry;
@@ -205,7 +204,7 @@ private:
         shouldUpdateDamping = false;
 
         if (isFrozen (parameters.freezeMode))
-            setDamping (1.0f, 0.0f);
+            setDamping (0.0f, 1.0f);
         else
             setDamping (parameters.damping * dampScaleFactor,
                         parameters.roomSize * roomScaleFactor + roomOffset);
@@ -267,7 +266,7 @@ private:
         int bufferSize, bufferIndex;
         float feedback, last, damp1, damp2;
 
-        JUCE_DECLARE_NON_COPYABLE (CombFilter);
+        JUCE_DECLARE_NON_COPYABLE (CombFilter)
     };
 
     //==============================================================================
@@ -307,7 +306,7 @@ private:
         HeapBlock<float> buffer;
         int bufferSize, bufferIndex;
 
-        JUCE_DECLARE_NON_COPYABLE (AllPassFilter);
+        JUCE_DECLARE_NON_COPYABLE (AllPassFilter)
     };
 
     enum { numCombs = 8, numAllPasses = 4, numChannels = 2 };
@@ -315,7 +314,7 @@ private:
     CombFilter comb [numChannels][numCombs];
     AllPassFilter allPass [numChannels][numAllPasses];
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Reverb);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Reverb)
 };
 
 

@@ -184,7 +184,7 @@ private:
     OwnedArray <PluginDescription> types;
     StringArray blacklist;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (KnownPluginList);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (KnownPluginList)
 };
 
 

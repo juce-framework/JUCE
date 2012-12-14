@@ -32,7 +32,7 @@ public:
 private:
     Button& owner;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (RepeatTimer);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (RepeatTimer)
 };
 
 //==============================================================================

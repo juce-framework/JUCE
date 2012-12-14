@@ -220,7 +220,7 @@ private:
     void setLevels (const MinMaxValue* const* values, int thumbIndex, int numChans, int numValues);
     void createChannels (int length);
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioThumbnail);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioThumbnail)
 };
 
 

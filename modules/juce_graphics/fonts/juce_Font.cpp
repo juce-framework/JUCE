@@ -143,7 +143,7 @@ private:
     Typeface::Ptr defaultFace;
     size_t counter;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TypefaceCache);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TypefaceCache)
 };
 
 juce_ImplementSingleton_SingleThreaded (TypefaceCache)

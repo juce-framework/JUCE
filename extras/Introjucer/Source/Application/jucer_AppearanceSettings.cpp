@@ -433,7 +433,7 @@ struct AppearanceEditor
             }
         }
 
-        JUCE_DECLARE_NON_COPYABLE (EditorPanel);
+        JUCE_DECLARE_NON_COPYABLE (EditorPanel)
     };
 
     //==============================================================================

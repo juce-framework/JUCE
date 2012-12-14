@@ -135,7 +135,7 @@ private:
     void recalculateCoordinates (Expression::Scope*);
 
     DrawableImage& operator= (const DrawableImage&);
-    JUCE_LEAK_DETECTOR (DrawableImage);
+    JUCE_LEAK_DETECTOR (DrawableImage)
 };
 
 

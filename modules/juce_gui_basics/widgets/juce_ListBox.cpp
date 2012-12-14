@@ -27,30 +27,30 @@ class ListBox::RowComponent  : public Component,
                                public TooltipClient
 {
 public:
-    RowComponent (ListBox& owner_)
-        : owner (owner_), row (-1),
+    RowComponent (ListBox& lb)
+        : owner (lb), row (-1),
           selected (false), isDragging (false), selectRowOnMouseUp (false)
     {
     }
 
     void paint (Graphics& g)
     {
-        if (owner.getModel() != nullptr)
-            owner.getModel()->paintListBoxItem (row, g, getWidth(), getHeight(), selected);
+        if (ListBoxModel* m = owner.getModel())
+            m->paintListBoxItem (row, g, getWidth(), getHeight(), selected);
     }
 
-    void update (const int row_, const bool selected_)
+    void update (const int newRow, const bool nowSelected)
     {
-        if (row != row_ || selected != selected_)
+        if (row != newRow || selected != nowSelected)
         {
             repaint();
-            row = row_;
-            selected = selected_;
+            row = newRow;
+            selected = nowSelected;
         }
 
-        if (owner.getModel() != nullptr)
+        if (ListBoxModel* m = owner.getModel())
         {
-            customComponent = owner.getModel()->refreshComponentForRow (row_, selected_, customComponent.release());
+            customComponent = m->refreshComponentForRow (newRow, nowSelected, customComponent.release());
 
             if (customComponent != nullptr)
             {
@@ -71,8 +71,8 @@ public:
             {
                 owner.selectRowsBasedOnModifierKeys (row, e.mods, false);
 
-                if (owner.getModel() != nullptr)
-                    owner.getModel()->listBoxItemClicked (row, e);
+                if (ListBoxModel* m = owner.getModel())
+                    m->listBoxItemClicked (row, e);
             }
             else
             {
@@ -87,31 +87,35 @@ public:
         {
             owner.selectRowsBasedOnModifierKeys (row, e.mods, true);
 
-            if (owner.getModel() != nullptr)
-                owner.getModel()->listBoxItemClicked (row, e);
+            if (ListBoxModel* m = owner.getModel())
+                m->listBoxItemClicked (row, e);
         }
     }
 
     void mouseDoubleClick (const MouseEvent& e)
     {
-        if (owner.getModel() != nullptr && isEnabled())
-            owner.getModel()->listBoxItemDoubleClicked (row, e);
+        if (ListBoxModel* m = owner.getModel())
+            if (isEnabled())
+                m->listBoxItemDoubleClicked (row, e);
     }
 
     void mouseDrag (const MouseEvent& e)
     {
-        if (isEnabled() && owner.getModel() != nullptr && ! (e.mouseWasClicked() || isDragging))
+        if (ListBoxModel* m = owner.getModel())
         {
-            const SparseSet<int> selectedRows (owner.getSelectedRows());
-
-            if (selectedRows.size() > 0)
+            if (isEnabled() && ! (e.mouseWasClicked() || isDragging))
             {
-                const var dragDescription (owner.getModel()->getDragSourceDescription (selectedRows));
+                const SparseSet<int> selectedRows (owner.getSelectedRows());
 
-                if (! (dragDescription.isVoid() || (dragDescription.isString() && dragDescription.toString().isEmpty())))
+                if (selectedRows.size() > 0)
                 {
-                    isDragging = true;
-                    owner.startDragAndDrop (e, dragDescription, true);
+                    const var dragDescription (m->getDragSourceDescription (selectedRows));
+
+                    if (! (dragDescription.isVoid() || (dragDescription.isString() && dragDescription.toString().isEmpty())))
+                    {
+                        isDragging = true;
+                        owner.startDragAndDrop (e, dragDescription, true);
+                    }
                 }
             }
         }
@@ -125,8 +129,8 @@ public:
 
     String getTooltip()
     {
-        if (owner.getModel() != nullptr)
-            return owner.getModel()->getTooltipForRow (row);
+        if (ListBoxModel* m = owner.getModel())
+            return m->getTooltipForRow (row);
 
         return String::empty;
     }
@@ -138,7 +142,7 @@ private:
     int row;
     bool selected, isDragging, selectRowOnMouseUp;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (RowComponent);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (RowComponent)
 };
 
 
@@ -146,8 +150,8 @@ private:
 class ListBox::ListViewport  : public Viewport
 {
 public:
-    ListViewport (ListBox& owner_)
-        : owner (owner_)
+    ListViewport (ListBox& lb)
+        : owner (lb)
     {
         setWantsKeyboardFocus (false);
 
@@ -184,8 +188,8 @@ public:
     {
         updateVisibleArea (true);
 
-        if (owner.getModel() != nullptr)
-            owner.getModel()->listWasScrolled();
+        if (ListBoxModel* m = owner.getModel())
+            m->listWasScrolled();
     }
 
     void updateVisibleArea (const bool makeSureItUpdatesContent)
@@ -328,15 +332,15 @@ private:
     int firstIndex, firstWholeIndex, lastWholeIndex;
     bool hasUpdated;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ListViewport);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ListViewport)
 };
 
 enum { defaultListRowHeight = 22 };
 
 //==============================================================================
-ListBox::ListBox (const String& name, ListBoxModel* const model_)
+ListBox::ListBox (const String& name, ListBoxModel* const m)
     : Component (name),
-      model (model_),
+      model (m),
       totalItems (0),
       rowHeight (defaultListRowHeight),
       minimumRowWidth (0),
@@ -401,7 +405,7 @@ void ListBox::paintOverChildren (Graphics& g)
 
 void ListBox::resized()
 {
-    viewport->setBoundsInset (BorderSize<int> (outlineThickness + ((headerComponent != nullptr) ? headerComponent->getHeight() : 0),
+    viewport->setBoundsInset (BorderSize<int> (outlineThickness + (headerComponent != nullptr ? headerComponent->getHeight() : 0),
                                                outlineThickness, outlineThickness, outlineThickness));
 
     viewport->setSingleStepSizes (20, getRowHeight());
@@ -509,7 +513,7 @@ void ListBox::setSelectedRows (const SparseSet<int>& setOfRowsToBeSelected,
 
     viewport->updateContents();
 
-    if ((model != nullptr) && sendNotificationEventToModel == sendNotification)
+    if (model != nullptr && sendNotificationEventToModel == sendNotification)
         model->selectedRowsChanged (lastRowSelected);
 }
 
@@ -593,7 +597,7 @@ bool ListBox::isRowSelected (const int row) const
 
 int ListBox::getLastRowSelected() const
 {
-    return (isRowSelected (lastRowSelected)) ? lastRowSelected : -1;
+    return isRowSelected (lastRowSelected) ? lastRowSelected : -1;
 }
 
 //==============================================================================
@@ -839,9 +843,9 @@ void ListBox::colourChanged()
     repaint();
 }
 
-void ListBox::setOutlineThickness (const int outlineThickness_)
+void ListBox::setOutlineThickness (const int newThickness)
 {
-    outlineThickness = outlineThickness_;
+    outlineThickness = newThickness;
     resized();
 }
 

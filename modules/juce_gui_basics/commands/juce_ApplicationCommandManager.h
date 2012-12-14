@@ -321,7 +321,7 @@ private:
     virtual short getFirstCommandTarget() { return 0; }
    #endif
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ApplicationCommandManager);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ApplicationCommandManager)
 };
 
 

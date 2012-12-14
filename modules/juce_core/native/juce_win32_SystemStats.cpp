@@ -403,4 +403,14 @@ static String getLocaleValue (LCID locale, LCTYPE key, const char* defaultValue)
 
 String SystemStats::getUserLanguage()     { return getLocaleValue (LOCALE_USER_DEFAULT, LOCALE_SISO639LANGNAME,  "en"); }
 String SystemStats::getUserRegion()       { return getLocaleValue (LOCALE_USER_DEFAULT, LOCALE_SISO3166CTRYNAME, "US"); }
-String SystemStats::getDisplayLanguage()  { return getLocaleValue (MAKELCID (GetUserDefaultUILanguage(), SORT_DEFAULT), LOCALE_SISO639LANGNAME, "en"); }
+
+String SystemStats::getDisplayLanguage()
+{
+    DynamicLibrary dll ("kernel32.dll");
+    JUCE_LOAD_WINAPI_FUNCTION (dll, GetUserDefaultUILanguage, getUserDefaultUILanguage, LANGID, (void))
+
+    if (getUserDefaultUILanguage != nullptr)
+        return getLocaleValue (MAKELCID (getUserDefaultUILanguage(), SORT_DEFAULT), LOCALE_SISO639LANGNAME, "en");
+
+    return "en";
+}

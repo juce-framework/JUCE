@@ -222,7 +222,9 @@ namespace XSHMHelpers
                 trappedErrorCode = 0;
                 XErrorHandler oldHandler = XSetErrorHandler (errorTrapHandler);
 
-                XShmSegmentInfo segmentInfo = { 0 };
+                XShmSegmentInfo segmentInfo;
+                zerostruct (segmentInfo);
+
                 XImage* xImage = XShmCreateImage (display, DefaultVisual (display, DefaultScreen (display)),
                                                   24, ZPixmap, 0, &segmentInfo, 50, 50);
 
@@ -719,7 +721,7 @@ private:
         return 0;
     }
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (XBitmapImage);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (XBitmapImage)
 };
 
 //==============================================================================
@@ -1926,7 +1928,7 @@ private:
        #if JUCE_USE_XSHM
         bool useARGBImagesForRendering, shmCompletedDrawing;
        #endif
-        JUCE_DECLARE_NON_COPYABLE (LinuxRepaintManager);
+        JUCE_DECLARE_NON_COPYABLE (LinuxRepaintManager)
     };
 
     ScopedPointer <LinuxRepaintManager> repainter;
@@ -2054,7 +2056,9 @@ private:
 
         if (hints != None)
         {
-            MotifWmHints motifHints = { 0 };
+            MotifWmHints motifHints;
+            zerostruct (motifHints);
+
             motifHints.flags = 2; /* MWM_HINTS_DECORATIONS */
             motifHints.decorations = 0;
 
@@ -2090,7 +2094,9 @@ private:
 
         if (hints != None)
         {
-            MotifWmHints motifHints = { 0 };
+            MotifWmHints motifHints;
+            zerostruct (motifHints);
+
             motifHints.flags = 1 | 2; /* MWM_HINTS_FUNCTIONS | MWM_HINTS_DECORATIONS */
             motifHints.decorations = 2 /* MWM_DECOR_BORDER */ | 8 /* MWM_DECOR_TITLE */ | 16; /* MWM_DECOR_MENU */
 
@@ -2428,7 +2434,9 @@ private:
 
     void sendExternalDragAndDropDrop (const Window targetWindow)
     {
-        XClientMessageEvent msg = { 0 };
+        XClientMessageEvent msg;
+        zerostruct (msg);
+
         msg.message_type = Atoms::get().XdndDrop;
         msg.data.l[2] = CurrentTime;
 
@@ -2437,7 +2445,9 @@ private:
 
     void sendExternalDragAndDropEnter (const Window targetWindow)
     {
-        XClientMessageEvent msg = { 0 };
+        XClientMessageEvent msg;
+        zerostruct (msg);
+
         msg.message_type = Atoms::get().XdndEnter;
 
         const Atom* mimeTypes  = dragState.getMimeTypes();
@@ -2453,7 +2463,9 @@ private:
 
     void sendExternalDragAndDropPosition (const Window targetWindow)
     {
-        XClientMessageEvent msg = { 0 };
+        XClientMessageEvent msg;
+        zerostruct (msg);
+
         msg.message_type = Atoms::get().XdndPosition;
 
         const Point<int> mousePos (Desktop::getInstance().getMousePosition());
@@ -2471,7 +2483,9 @@ private:
 
     void sendDragAndDropStatus (const bool acceptDrop, Atom dropAction)
     {
-        XClientMessageEvent msg = { 0 };
+        XClientMessageEvent msg;
+        zerostruct (msg);
+
         msg.message_type = Atoms::get().XdndStatus;
         msg.data.l[1] = (acceptDrop ? 1 : 0) | 2; // 2 indicates that we want to receive position messages
         msg.data.l[4] = dropAction;
@@ -2481,14 +2495,18 @@ private:
 
     void sendExternalDragAndDropLeave (const Window targetWindow)
     {
-        XClientMessageEvent msg = { 0 };
+        XClientMessageEvent msg;
+        zerostruct (msg);
+
         msg.message_type = Atoms::get().XdndLeave;
         sendExternalDragAndDropMessage (msg, targetWindow);
     }
 
     void sendDragAndDropFinish()
     {
-        XClientMessageEvent msg = { 0 };
+        XClientMessageEvent msg;
+        zerostruct (msg);
+
         msg.message_type = Atoms::get().XdndFinished;
         sendDragAndDropMessage (msg);
     }
@@ -2903,7 +2921,7 @@ private:
         lastMousePos = Point<int> (0x100000, 0x100000);
     }
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LinuxComponentPeer);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LinuxComponentPeer)
 };
 
 ModifierKeys LinuxComponentPeer::currentModifiers;

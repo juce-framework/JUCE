@@ -241,7 +241,7 @@ protected:
     private:
         DrawableType& owner;
 
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Positioner);
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Positioner)
     };
 
     Drawable (const Drawable&);
@@ -251,7 +251,7 @@ private:
     void nonConstDraw (Graphics& g, float opacity, const AffineTransform& transform);
 
     Drawable& operator= (const Drawable&);
-    JUCE_LEAK_DETECTOR (Drawable);
+    JUCE_LEAK_DETECTOR (Drawable)
 };
 
 

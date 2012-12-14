@@ -105,7 +105,7 @@ private:
         AudioProcessor& owner;
         const int index;
 
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ParamSlider);
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ParamSlider)
     };
 
     AudioProcessor& owner;
@@ -113,7 +113,7 @@ private:
     bool volatile paramHasChanged;
     ParamSlider slider;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ProcessorParameterPropertyComp);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ProcessorParameterPropertyComp)
 };
 
 

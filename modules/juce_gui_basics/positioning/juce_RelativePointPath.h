@@ -91,7 +91,7 @@ public:
         const ElementType type;
 
     private:
-        JUCE_DECLARE_NON_COPYABLE (ElementBase);
+        JUCE_DECLARE_NON_COPYABLE (ElementBase)
     };
 
     //==============================================================================
@@ -107,7 +107,7 @@ public:
         RelativePoint startPos;
 
     private:
-        JUCE_DECLARE_NON_COPYABLE (StartSubPath);
+        JUCE_DECLARE_NON_COPYABLE (StartSubPath)
     };
 
     //==============================================================================
@@ -121,7 +121,7 @@ public:
         ElementBase* clone() const;
 
     private:
-        JUCE_DECLARE_NON_COPYABLE (CloseSubPath);
+        JUCE_DECLARE_NON_COPYABLE (CloseSubPath)
     };
 
     //==============================================================================
@@ -137,7 +137,7 @@ public:
         RelativePoint endPoint;
 
     private:
-        JUCE_DECLARE_NON_COPYABLE (LineTo);
+        JUCE_DECLARE_NON_COPYABLE (LineTo)
     };
 
     //==============================================================================
@@ -153,7 +153,7 @@ public:
         RelativePoint controlPoints[2];
 
     private:
-        JUCE_DECLARE_NON_COPYABLE (QuadraticTo);
+        JUCE_DECLARE_NON_COPYABLE (QuadraticTo)
     };
 
     //==============================================================================
@@ -169,7 +169,7 @@ public:
         RelativePoint controlPoints[3];
 
     private:
-        JUCE_DECLARE_NON_COPYABLE (CubicTo);
+        JUCE_DECLARE_NON_COPYABLE (CubicTo)
     };
 
     //==============================================================================
@@ -187,7 +187,7 @@ private:
     void applyTo (DrawablePath& path) const;
 
     RelativePointPath& operator= (const RelativePointPath&);
-    JUCE_LEAK_DETECTOR (RelativePointPath);
+    JUCE_LEAK_DETECTOR (RelativePointPath)
 };
 
 

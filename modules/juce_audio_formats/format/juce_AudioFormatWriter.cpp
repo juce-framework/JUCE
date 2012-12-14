@@ -271,7 +271,7 @@ private:
     int64 samplesWritten;
     volatile bool isRunning;
 
-    JUCE_DECLARE_NON_COPYABLE (Buffer);
+    JUCE_DECLARE_NON_COPYABLE (Buffer)
 };
 
 AudioFormatWriter::ThreadedWriter::ThreadedWriter (AudioFormatWriter* writer, TimeSliceThread& backgroundThread, int numSamplesToBuffer)

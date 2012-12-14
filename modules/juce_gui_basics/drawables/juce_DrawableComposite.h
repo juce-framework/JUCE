@@ -155,7 +155,7 @@ private:
     void updateBoundsToFitChildren();
 
     DrawableComposite& operator= (const DrawableComposite&);
-    JUCE_LEAK_DETECTOR (DrawableComposite);
+    JUCE_LEAK_DETECTOR (DrawableComposite)
 };
 
 

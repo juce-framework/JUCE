@@ -265,7 +265,7 @@ private:
         return File (path + ".ttf");
     }
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AndroidTypeface);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AndroidTypeface)
 };
 
 //==============================================================================

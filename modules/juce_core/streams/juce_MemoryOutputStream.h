@@ -122,7 +122,7 @@ private:
     void trimExternalBlockSize();
     void prepareToWrite (int numBytes);
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MemoryOutputStream);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MemoryOutputStream)
 };
 
 /** Copies all the data that has been written to a MemoryOutputStream into another stream. */

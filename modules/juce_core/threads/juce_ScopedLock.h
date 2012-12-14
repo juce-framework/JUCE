@@ -79,7 +79,7 @@ private:
     //==============================================================================
     const LockType& lock_;
 
-    JUCE_DECLARE_NON_COPYABLE (GenericScopedLock);
+    JUCE_DECLARE_NON_COPYABLE (GenericScopedLock)
 };
 
 
@@ -152,7 +152,7 @@ private:
     //==============================================================================
     const LockType& lock_;
 
-    JUCE_DECLARE_NON_COPYABLE (GenericScopedUnlock);
+    JUCE_DECLARE_NON_COPYABLE (GenericScopedUnlock)
 };
 
 
@@ -227,7 +227,7 @@ private:
     const LockType& lock_;
     const bool lockWasSuccessful;
 
-    JUCE_DECLARE_NON_COPYABLE (GenericScopedTryLock);
+    JUCE_DECLARE_NON_COPYABLE (GenericScopedTryLock)
 };
 
 

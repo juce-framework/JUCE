@@ -66,7 +66,7 @@ public:
     ScopedPointer<Component> content;
     CallOutBox callout;
 
-    JUCE_DECLARE_NON_COPYABLE (CallOutBoxCallback);
+    JUCE_DECLARE_NON_COPYABLE (CallOutBoxCallback)
 };
 
 CallOutBox& CallOutBox::launchAsynchronously (Component* content,

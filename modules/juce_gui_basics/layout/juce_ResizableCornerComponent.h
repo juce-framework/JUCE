@@ -87,7 +87,7 @@ private:
     ComponentBoundsConstrainer* constrainer;
     Rectangle<int> originalBounds;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ResizableCornerComponent);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ResizableCornerComponent)
 };
 
 

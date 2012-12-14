@@ -245,7 +245,7 @@ private:
     snd_midi_event_t* midiParser;
     int maxEventSize;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MidiOutputDevice);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MidiOutputDevice)
 };
 
 StringArray MidiOutput::getDevices()
@@ -381,7 +381,7 @@ private:
     snd_seq_t* const seqHandle;
     MidiInputCallback* const callback;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MidiInputThread);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MidiInputThread)
 };
 
 //==============================================================================

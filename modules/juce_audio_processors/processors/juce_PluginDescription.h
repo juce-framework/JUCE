@@ -136,7 +136,7 @@ public:
 
 private:
     //==============================================================================
-    JUCE_LEAK_DETECTOR (PluginDescription);
+    JUCE_LEAK_DETECTOR (PluginDescription)
 };
 
 

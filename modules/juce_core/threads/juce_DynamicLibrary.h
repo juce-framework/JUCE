@@ -75,7 +75,7 @@ public:
 private:
     void* handle;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DynamicLibrary);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DynamicLibrary)
 };
 
 

@@ -205,7 +205,7 @@ private:
     String parentDir, wildCard;
     DIR* dir;
 
-    JUCE_DECLARE_NON_COPYABLE (Pimpl);
+    JUCE_DECLARE_NON_COPYABLE (Pimpl)
 };
 
 

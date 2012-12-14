@@ -269,7 +269,7 @@ private:
         return g;
     }
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (GlyphCache);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (GlyphCache)
 };
 
 //==============================================================================
@@ -312,7 +312,7 @@ public:
 private:
     ScopedPointer <EdgeTable> edgeTable;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CachedGlyphEdgeTable);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CachedGlyphEdgeTable)
 };
 
 //==============================================================================
@@ -478,7 +478,7 @@ namespace GradientPixelIterators
         bool vertical, horizontal;
         enum { numScaleBits = 12 };
 
-        JUCE_DECLARE_NON_COPYABLE (Linear);
+        JUCE_DECLARE_NON_COPYABLE (Linear)
     };
 
     //==============================================================================
@@ -521,7 +521,7 @@ namespace GradientPixelIterators
         const double gx1, gy1;
         double maxDist, invScale, dy;
 
-        JUCE_DECLARE_NON_COPYABLE (Radial);
+        JUCE_DECLARE_NON_COPYABLE (Radial)
     };
 
     //==============================================================================
@@ -562,7 +562,7 @@ namespace GradientPixelIterators
         double tM10, tM00, lineYM01, lineYM11;
         const AffineTransform inverseTransform;
 
-        JUCE_DECLARE_NON_COPYABLE (TransformedRadial);
+        JUCE_DECLARE_NON_COPYABLE (TransformedRadial)
     };
 }
 
@@ -737,7 +737,7 @@ namespace EdgeTableFillers
             } while (--width > 0);
         }
 
-        JUCE_DECLARE_NON_COPYABLE (SolidColour);
+        JUCE_DECLARE_NON_COPYABLE (SolidColour)
     };
 
     //==============================================================================
@@ -818,7 +818,7 @@ namespace EdgeTableFillers
             p = addBytesToPointer (p, destData.pixelStride);
         }
 
-        JUCE_DECLARE_NON_COPYABLE (Gradient);
+        JUCE_DECLARE_NON_COPYABLE (Gradient)
     };
 
     //==============================================================================
@@ -979,7 +979,7 @@ namespace EdgeTableFillers
             }
         }
 
-        JUCE_DECLARE_NON_COPYABLE (ImageFill);
+        JUCE_DECLARE_NON_COPYABLE (ImageFill)
     };
 
     //==============================================================================
@@ -1443,7 +1443,7 @@ namespace EdgeTableFillers
             const float pixelOffset;
             const int pixelOffsetInt;
 
-            JUCE_DECLARE_NON_COPYABLE (TransformedImageSpanInterpolator);
+            JUCE_DECLARE_NON_COPYABLE (TransformedImageSpanInterpolator)
         };
 
         //==============================================================================
@@ -1458,7 +1458,7 @@ namespace EdgeTableFillers
         HeapBlock <SrcPixelType> scratchBuffer;
         size_t scratchSize;
 
-        JUCE_DECLARE_NON_COPYABLE (TransformedImageFill);
+        JUCE_DECLARE_NON_COPYABLE (TransformedImageFill)
     };
 
 
@@ -2017,7 +2017,7 @@ namespace ClipRegions
             const RectangleList& clip;
             const Rectangle<int> area;
 
-            JUCE_DECLARE_NON_COPYABLE (SubRectangleIterator);
+            JUCE_DECLARE_NON_COPYABLE (SubRectangleIterator)
         };
 
         //==============================================================================
@@ -2107,7 +2107,7 @@ namespace ClipRegions
             const RectangleList& clip;
             const Rectangle<float>& area;
 
-            JUCE_DECLARE_NON_COPYABLE (SubRectangleIteratorFloat);
+            JUCE_DECLARE_NON_COPYABLE (SubRectangleIteratorFloat)
         };
 
         inline Ptr toEdgeTable() const   { return new EdgeTableRegion (clip); }
@@ -2575,7 +2575,7 @@ private:
     ScopedPointer<StateObjectType> currentState;
     OwnedArray<StateObjectType> stack;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SavedStateStack);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SavedStateStack)
 };
 
 }

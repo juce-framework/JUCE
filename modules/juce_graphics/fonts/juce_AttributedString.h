@@ -181,7 +181,7 @@ public:
         Attribute (const Attribute&, int);
         Attribute& operator= (const Attribute&);
 
-        JUCE_LEAK_DETECTOR (Attribute);
+        JUCE_LEAK_DETECTOR (Attribute)
     };
 
     /** Returns the number of attributes that have been added to this string. */
@@ -213,7 +213,7 @@ private:
     ReadingDirection readingDirection;
     OwnedArray<Attribute> attributes;
 
-    JUCE_LEAK_DETECTOR (AttributedString);
+    JUCE_LEAK_DETECTOR (AttributedString)
 };
 
 #endif   // __JUCE_ATTRIBUTEDSTRING_JUCEHEADER__

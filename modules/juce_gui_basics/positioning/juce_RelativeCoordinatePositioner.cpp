@@ -89,7 +89,7 @@ public:
 private:
     Component& component;
 
-    JUCE_DECLARE_NON_COPYABLE (MarkerListScope);
+    JUCE_DECLARE_NON_COPYABLE (MarkerListScope)
 };
 
 //==============================================================================
@@ -232,7 +232,7 @@ private:
     RelativeCoordinatePositionerBase& positioner;
     bool& ok;
 
-    JUCE_DECLARE_NON_COPYABLE (DependencyFinderScope);
+    JUCE_DECLARE_NON_COPYABLE (DependencyFinderScope)
 };
 
 //==============================================================================

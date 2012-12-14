@@ -74,7 +74,7 @@ public:
     bool isActive, autoDelete;
 
 private:
-    JUCE_DECLARE_NON_COPYABLE (ModalItem);
+    JUCE_DECLARE_NON_COPYABLE (ModalItem)
 };
 
 //==============================================================================
@@ -248,7 +248,7 @@ private:
     int& value;
     bool& finished;
 
-    JUCE_DECLARE_NON_COPYABLE (ReturnValueRetriever);
+    JUCE_DECLARE_NON_COPYABLE (ReturnValueRetriever)
 };
 
 int ModalComponentManager::runEventLoopForCurrentComponent()

@@ -564,7 +564,7 @@ public:
         }
 
     private:
-        JUCE_DECLARE_NON_COPYABLE (ConverterInstance);
+        JUCE_DECLARE_NON_COPYABLE (ConverterInstance)
 
         const int sourceChannels, destChannels;
     };
@@ -637,7 +637,7 @@ public:
 
 private:
     AudioDataConverters();
-    JUCE_DECLARE_NON_COPYABLE (AudioDataConverters);
+    JUCE_DECLARE_NON_COPYABLE (AudioDataConverters)
 };
 
 

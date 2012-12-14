@@ -98,7 +98,7 @@ private:
     int length, attackSamples, releaseSamples;
     int midiRootNote;
 
-    JUCE_LEAK_DETECTOR (SamplerSound);
+    JUCE_LEAK_DETECTOR (SamplerSound)
 };
 
 
@@ -147,7 +147,7 @@ private:
     float lgain, rgain, attackReleaseLevel, attackDelta, releaseDelta;
     bool isInAttack, isInRelease;
 
-    JUCE_LEAK_DETECTOR (SamplerVoice);
+    JUCE_LEAK_DETECTOR (SamplerVoice)
 };
 
 

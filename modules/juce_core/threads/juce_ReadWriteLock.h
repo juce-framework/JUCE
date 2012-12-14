@@ -79,6 +79,16 @@ public:
     */
     void enterRead() const noexcept;
 
+    /** Tries to lock this object for reading.
+
+        Multiple threads can simulaneously lock the object for reading, but if another
+        thread has it locked for writing, then this will fail and return false.
+
+        @returns true if the lock is successfully gained.
+        @see exitRead, ScopedReadLock
+    */
+    bool tryEnterRead() const noexcept;
+
     /** Releases the read-lock.
 
         If the caller thread hasn't got the lock, this can have unpredictable results.
@@ -106,6 +116,7 @@ public:
         This is like enterWrite(), but doesn't block - it returns true if it manages
         to obtain the lock.
 
+        @returns true if the lock is successfully gained.
         @see enterWrite
     */
     bool tryEnterWrite() const noexcept;
@@ -138,7 +149,7 @@ private:
 
     mutable Array <ThreadRecursionCount> readerThreads;
 
-    JUCE_DECLARE_NON_COPYABLE (ReadWriteLock);
+    JUCE_DECLARE_NON_COPYABLE (ReadWriteLock)
 };
 
 

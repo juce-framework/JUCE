@@ -586,7 +586,7 @@ private:
         }
     }
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OSXTypeface);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OSXTypeface)
 };
 
 StringArray Font::findAllTypefaceNames()
@@ -1061,7 +1061,7 @@ private:
     ScopedPointer <CharToGlyphMapper> charToGlyphMapper;
    #endif
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OSXTypeface);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OSXTypeface)
 };
 
 StringArray Font::findAllTypefaceNames()

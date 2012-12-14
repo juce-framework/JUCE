@@ -195,7 +195,7 @@ private:
 
     void updateMouseZone (const MouseEvent& e);
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ResizableBorderComponent);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ResizableBorderComponent)
 };
 
 

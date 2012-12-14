@@ -153,7 +153,7 @@ private:
     static inline uint32 S0 (const uint32 x) noexcept     { return rotate (x, 2)  ^ rotate (x, 13) ^ rotate (x, 22); }
     static inline uint32 S1 (const uint32 x) noexcept     { return rotate (x, 6)  ^ rotate (x, 11) ^ rotate (x, 25); }
 
-    JUCE_DECLARE_NON_COPYABLE (SHA256Processor);
+    JUCE_DECLARE_NON_COPYABLE (SHA256Processor)
 };
 
 //==============================================================================

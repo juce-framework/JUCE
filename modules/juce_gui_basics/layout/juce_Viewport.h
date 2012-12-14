@@ -270,7 +270,7 @@ private:
     virtual int visibleAreaChanged (int, int, int, int) { return 0; }
    #endif
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Viewport);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Viewport)
 };
 
 

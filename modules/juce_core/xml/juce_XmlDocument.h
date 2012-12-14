@@ -176,7 +176,7 @@ private:
     String expandExternalEntity (const String& entity);
     String getParameterEntity (const String& entity);
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (XmlDocument);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (XmlDocument)
 };
 
 

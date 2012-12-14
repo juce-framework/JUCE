@@ -423,7 +423,7 @@ private:
     void allocateData();
     void allocateChannels (float* const* dataToReferTo, int offset);
 
-    JUCE_LEAK_DETECTOR (AudioSampleBuffer);
+    JUCE_LEAK_DETECTOR (AudioSampleBuffer)
 };
 
 

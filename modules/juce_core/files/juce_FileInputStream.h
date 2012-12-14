@@ -90,7 +90,7 @@ private:
     void closeHandle();
     size_t readInternal (void* buffer, size_t numBytes);
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FileInputStream);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FileInputStream)
 };
 
 #endif   // __JUCE_FILEINPUTSTREAM_JUCEHEADER__

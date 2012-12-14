@@ -41,7 +41,7 @@ private:
     WeakReference<ApplicationCommandTarget> owner;
     const InvocationInfo info;
 
-    JUCE_DECLARE_NON_COPYABLE (CommandMessage);
+    JUCE_DECLARE_NON_COPYABLE (CommandMessage)
 };
 
 //==============================================================================

@@ -64,7 +64,7 @@ private:
     OptionalScopedPointer<AudioSource> input;
     OwnedArray <IIRFilter> iirFilters;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (IIRFilterAudioSource);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (IIRFilterAudioSource)
 };
 
 

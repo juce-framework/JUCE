@@ -182,14 +182,14 @@ private:
         ObjectHolder* next;
         Type object;
 
-        JUCE_DECLARE_NON_COPYABLE (ObjectHolder);
+        JUCE_DECLARE_NON_COPYABLE (ObjectHolder)
     };
 
     mutable Atomic<ObjectHolder*> first;
     SpinLock lock;
    #endif
 
-    JUCE_DECLARE_NON_COPYABLE (ThreadLocalValue);
+    JUCE_DECLARE_NON_COPYABLE (ThreadLocalValue)
 };
 
 

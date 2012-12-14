@@ -63,7 +63,7 @@ public:
 private:
     static Array <DeletedAtShutdown*>& getObjects();
 
-    JUCE_DECLARE_NON_COPYABLE (DeletedAtShutdown);
+    JUCE_DECLARE_NON_COPYABLE (DeletedAtShutdown)
 };
 
 #endif   // __JUCE_DELETEDATSHUTDOWN_JUCEHEADER__

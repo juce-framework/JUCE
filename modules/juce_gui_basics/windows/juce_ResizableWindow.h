@@ -386,7 +386,7 @@ private:
     JUCE_DEPRECATED (void getContentComponentBorder (int& left, int& top, int& right, int& bottom));
    #endif
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ResizableWindow);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ResizableWindow)
 };
 
 

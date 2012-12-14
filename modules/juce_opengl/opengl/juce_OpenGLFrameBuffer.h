@@ -147,7 +147,7 @@ private:
     friend class ScopedPointer<SavedState>;
     ScopedPointer<SavedState> savedState;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OpenGLFrameBuffer);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OpenGLFrameBuffer)
 };
 
 

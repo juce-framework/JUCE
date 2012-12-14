@@ -128,7 +128,7 @@ private:
     ThreadPool* pool;
     bool shouldStop, isActive, shouldBeDeleted;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ThreadPoolJob);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ThreadPoolJob)
 };
 
 
@@ -308,7 +308,7 @@ private:
     // whether the jobs should be deleted - see the new method for details.
     void removeAllJobs (bool, int, bool);
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ThreadPool);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ThreadPool)
 };
 
 

@@ -565,7 +565,7 @@ private:
                 IntrojucerApp::getApp().closeModalCompsAndQuit();
         }
 
-        JUCE_DECLARE_NON_COPYABLE (AsyncQuitRetrier);
+        JUCE_DECLARE_NON_COPYABLE (AsyncQuitRetrier)
     };
 };
 

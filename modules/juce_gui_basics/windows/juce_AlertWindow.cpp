@@ -246,7 +246,7 @@ public:
 private:
     int bestWidth;
 
-    JUCE_DECLARE_NON_COPYABLE (AlertTextComp);
+    JUCE_DECLARE_NON_COPYABLE (AlertTextComp)
 };
 
 void AlertWindow::addTextBlock (const String& textBlock)

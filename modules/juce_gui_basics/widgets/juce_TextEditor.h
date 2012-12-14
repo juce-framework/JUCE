@@ -565,7 +565,7 @@ public:
 
         String filterNewText (TextEditor&, const String&);
 
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LengthAndCharacterRestriction);
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LengthAndCharacterRestriction)
     };
 
     /** Sets an input filter that should be applied to this editor.
@@ -643,7 +643,7 @@ protected:
 private:
     //==============================================================================
     class Iterator;
-    JUCE_PUBLIC_IN_DLL_BUILD (class UniformTextSection);
+    JUCE_PUBLIC_IN_DLL_BUILD (class UniformTextSection)
     class TextHolderComponent;
     class InsertAction;
     class RemoveAction;
@@ -721,7 +721,7 @@ private:
     bool undoOrRedo (bool shouldUndo);
     UndoManager* getUndoManager() noexcept;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TextEditor);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TextEditor)
 };
 
 /** This typedef is just for compatibility with old code - newer code should use the TextEditor::Listener class directly. */

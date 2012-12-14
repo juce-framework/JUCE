@@ -242,7 +242,7 @@ private:
 
     bool tryToInvoke (const InvocationInfo&, bool async);
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ApplicationCommandTarget);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ApplicationCommandTarget)
 };
 
 

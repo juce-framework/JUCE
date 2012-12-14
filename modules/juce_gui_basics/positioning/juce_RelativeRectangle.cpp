@@ -131,7 +131,7 @@ public:
 private:
     const RelativeRectangle& rect;
 
-    JUCE_DECLARE_NON_COPYABLE (RelativeRectangleLocalScope);
+    JUCE_DECLARE_NON_COPYABLE (RelativeRectangleLocalScope)
 };
 
 const Rectangle<float> RelativeRectangle::resolve (const Expression::Scope* scope) const
@@ -237,7 +237,7 @@ public:
 private:
     RelativeRectangle rectangle;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (RelativeRectangleComponentPositioner);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (RelativeRectangleComponentPositioner)
 };
 
 void RelativeRectangle::applyToComponent (Component& component) const

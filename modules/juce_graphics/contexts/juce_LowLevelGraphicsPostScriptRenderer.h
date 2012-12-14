@@ -119,7 +119,7 @@ protected:
     void writeTransform (const AffineTransform& trans) const;
     void writeImage (const Image& im, int sx, int sy, int maxW, int maxH) const;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LowLevelGraphicsPostScriptRenderer);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LowLevelGraphicsPostScriptRenderer)
 };
 
 

@@ -153,7 +153,7 @@ private:
     StringArray keys, values;
     bool ignoreCase;
 
-    JUCE_LEAK_DETECTOR (StringPairArray);
+    JUCE_LEAK_DETECTOR (StringPairArray)
 };
 
 

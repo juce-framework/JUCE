@@ -149,7 +149,7 @@ private:
     bool isRecording;
     String name;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CameraDevice);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CameraDevice)
 };
 
 /** This typedef is just for compatibility with old code - newer code should use the CameraDevice::Listener class directly. */

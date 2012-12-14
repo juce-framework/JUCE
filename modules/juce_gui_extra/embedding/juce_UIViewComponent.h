@@ -80,7 +80,7 @@ private:
     friend class Pimpl;
     ScopedPointer<Pimpl> pimpl;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (UIViewComponent);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (UIViewComponent)
 };
 
 #endif

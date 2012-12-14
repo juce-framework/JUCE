@@ -98,7 +98,7 @@ private:
     bool maintainShapeProportions;
     float outlineWidth;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ShapeButton);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ShapeButton)
 };
 
 

@@ -47,7 +47,7 @@ private:
     const String message;
     ActionListener* const listener;
 
-    JUCE_DECLARE_NON_COPYABLE (ActionMessage);
+    JUCE_DECLARE_NON_COPYABLE (ActionMessage)
 };
 
 //==============================================================================

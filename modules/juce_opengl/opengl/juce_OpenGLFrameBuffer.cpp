@@ -141,7 +141,7 @@ private:
             || status == GL_FRAMEBUFFER_COMPLETE;
     }
 
-    JUCE_DECLARE_NON_COPYABLE (Pimpl);
+    JUCE_DECLARE_NON_COPYABLE (Pimpl)
 };
 
 //==============================================================================
@@ -170,7 +170,7 @@ private:
     const int width, height;
     HeapBlock <PixelARGB> data;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SavedState);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SavedState)
 };
 
 //==============================================================================

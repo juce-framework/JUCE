@@ -368,7 +368,7 @@ public:
         ScopedPointer<BitmapDataReleaser> dataReleaser;
 
     private:
-        JUCE_DECLARE_NON_COPYABLE (BitmapData);
+        JUCE_DECLARE_NON_COPYABLE (BitmapData)
     };
 
     //==============================================================================
@@ -418,7 +418,7 @@ private:
     //==============================================================================
     ReferenceCountedObjectPtr<ImagePixelData> image;
 
-    JUCE_LEAK_DETECTOR (Image);
+    JUCE_LEAK_DETECTOR (Image)
 };
 
 
@@ -460,7 +460,7 @@ public:
     typedef ReferenceCountedObjectPtr<ImagePixelData> Ptr;
 
 private:
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ImagePixelData);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ImagePixelData)
 };
 
 //==============================================================================

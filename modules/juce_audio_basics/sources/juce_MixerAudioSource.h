@@ -97,7 +97,7 @@ private:
     double currentSampleRate;
     int bufferSizeExpected;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MixerAudioSource);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MixerAudioSource)
 };
 
 

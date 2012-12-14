@@ -285,7 +285,7 @@ private:
     private:
         DynamicLibrary library;
 
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Engine);
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Engine)
     };
 
     //==================================================================================================
@@ -437,7 +437,7 @@ private:
             static_cast <Player*> (context)->bufferList.bufferReturned();
         }
 
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Player);
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Player)
     };
 
     //==================================================================================================
@@ -561,7 +561,7 @@ private:
             static_cast <Recorder*> (context)->bufferList.bufferReturned();
         }
 
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Recorder);
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Recorder)
     };
 
 
@@ -578,7 +578,7 @@ private:
         return result == SL_RESULT_SUCCESS;
     }
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OpenSLAudioIODevice);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OpenSLAudioIODevice)
 };
 
 
@@ -612,7 +612,7 @@ public:
     }
 
 private:
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OpenSLAudioDeviceType);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OpenSLAudioDeviceType)
 };
 
 

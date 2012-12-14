@@ -108,7 +108,7 @@ private:
 
     bool open (bool openInExclusiveMode);
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AppleRemoteDevice);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AppleRemoteDevice)
 };
 
 #endif

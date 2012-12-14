@@ -151,7 +151,7 @@ private:
     //==============================================================================
     ValueType top, left, bottom, right;
 
-    JUCE_LEAK_DETECTOR (BorderSize);
+    JUCE_LEAK_DETECTOR (BorderSize)
 };
 
 

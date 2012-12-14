@@ -60,7 +60,7 @@ private:
     //==============================================================================
     AudioProcessor* const owner;
 
-    JUCE_DECLARE_NON_COPYABLE (AudioProcessorEditor);
+    JUCE_DECLARE_NON_COPYABLE (AudioProcessorEditor)
 };
 
 

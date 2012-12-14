@@ -257,7 +257,7 @@ public:
         const RectangleList& owner;
         int index;
 
-        JUCE_DECLARE_NON_COPYABLE (Iterator);
+        JUCE_DECLARE_NON_COPYABLE (Iterator)
     };
 
 private:
@@ -265,7 +265,7 @@ private:
     friend class Iterator;
     Array <Rectangle<int> > rects;
 
-    JUCE_LEAK_DETECTOR (RectangleList);
+    JUCE_LEAK_DETECTOR (RectangleList)
 };
 
 

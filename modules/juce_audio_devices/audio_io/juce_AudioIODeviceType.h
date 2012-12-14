@@ -179,7 +179,7 @@ private:
     String typeName;
     ListenerList<Listener> listeners;
 
-    JUCE_DECLARE_NON_COPYABLE (AudioIODeviceType);
+    JUCE_DECLARE_NON_COPYABLE (AudioIODeviceType)
 };
 
 

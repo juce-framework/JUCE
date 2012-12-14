@@ -259,7 +259,7 @@ public:
 
 private:
     //==============================================================================
-    JUCE_LEAK_DETECTOR (AffineTransform);
+    JUCE_LEAK_DETECTOR (AffineTransform)
 };
 
 #endif   // __JUCE_AFFINETRANSFORM_JUCEHEADER__

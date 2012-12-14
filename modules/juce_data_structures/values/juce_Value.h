@@ -197,7 +197,7 @@ public:
         SortedSet <Value*> valuesWithListeners;
         ReferenceCountedObjectPtr<ReferenceCountedObject> asyncUpdater;
 
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ValueSource);
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ValueSource)
     };
 
 

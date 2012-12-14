@@ -176,7 +176,7 @@ public:
 private:
     TabbedButtonBar& owner;
 
-    JUCE_DECLARE_NON_COPYABLE (BehindFrontTabComp);
+    JUCE_DECLARE_NON_COPYABLE (BehindFrontTabComp)
 };
 
 

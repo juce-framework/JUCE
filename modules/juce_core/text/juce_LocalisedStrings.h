@@ -181,7 +181,7 @@ private:
 
     void loadFromText (const String& fileContents);
 
-    JUCE_LEAK_DETECTOR (LocalisedStrings);
+    JUCE_LEAK_DETECTOR (LocalisedStrings)
 };
 
 //==============================================================================

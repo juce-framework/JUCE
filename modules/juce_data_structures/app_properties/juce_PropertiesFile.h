@@ -238,7 +238,7 @@ private:
     bool loadAsBinary();
     bool loadAsBinary (InputStream&);
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PropertiesFile);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PropertiesFile)
 };
 
 #endif   // __JUCE_PROPERTIESFILE_JUCEHEADER__

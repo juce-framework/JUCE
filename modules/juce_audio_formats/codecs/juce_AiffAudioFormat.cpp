@@ -471,7 +471,7 @@ public:
     bool littleEndian;
 
 private:
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AiffAudioFormatReader);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AiffAudioFormatReader)
 };
 
 //==============================================================================
@@ -655,7 +655,7 @@ private:
         jassert (output->getPosition() == headerLen);
     }
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AiffAudioFormatWriter);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AiffAudioFormatWriter)
 };
 
 //==============================================================================

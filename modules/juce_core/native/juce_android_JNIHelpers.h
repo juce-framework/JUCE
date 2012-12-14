@@ -196,7 +196,7 @@ private:
     void initialise (JNIEnv*);
     void release (JNIEnv*);
 
-    JUCE_DECLARE_NON_COPYABLE (JNIClassBase);
+    JUCE_DECLARE_NON_COPYABLE (JNIClassBase)
 };
 
 //==============================================================================

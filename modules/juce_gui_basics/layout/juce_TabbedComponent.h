@@ -216,7 +216,7 @@ private:
     friend class ButtonBar;
     void changeCallback (int newCurrentTabIndex, const String& newTabName);
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TabbedComponent);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TabbedComponent)
 };
 
 

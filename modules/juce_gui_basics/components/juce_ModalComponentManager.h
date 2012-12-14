@@ -143,7 +143,7 @@ private:
     void endModal (Component*, int returnValue);
     void endModal (Component*);
 
-    JUCE_DECLARE_NON_COPYABLE (ModalComponentManager);
+    JUCE_DECLARE_NON_COPYABLE (ModalComponentManager)
 };
 
 //==============================================================================
@@ -291,7 +291,7 @@ private:
         const FunctionType function;
         ParamType param;
 
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FunctionCaller1);
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FunctionCaller1)
     };
 
     template <typename ParamType1, typename ParamType2>
@@ -310,7 +310,7 @@ private:
         ParamType1 param1;
         ParamType2 param2;
 
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FunctionCaller2);
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FunctionCaller2)
     };
 
     template <typename ComponentType>
@@ -331,7 +331,7 @@ private:
         const FunctionType function;
         WeakReference<Component> comp;
 
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ComponentCaller1);
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ComponentCaller1)
     };
 
     template <typename ComponentType, typename ParamType1>
@@ -353,12 +353,12 @@ private:
         WeakReference<Component> comp;
         ParamType1 param1;
 
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ComponentCaller2);
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ComponentCaller2)
     };
 
     ModalCallbackFunction();
     ~ModalCallbackFunction();
-    JUCE_DECLARE_NON_COPYABLE (ModalCallbackFunction);
+    JUCE_DECLARE_NON_COPYABLE (ModalCallbackFunction)
 };
 
 

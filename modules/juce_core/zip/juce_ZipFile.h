@@ -210,7 +210,7 @@ public:
         friend class OwnedArray<Item>;
         OwnedArray<Item> items;
 
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Builder);
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Builder)
     };
 
 private:
@@ -240,7 +240,7 @@ private:
 
     void init();
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ZipFile);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ZipFile)
 };
 
 #endif   // __JUCE_ZIPFILE_JUCEHEADER__

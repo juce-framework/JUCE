@@ -148,7 +148,7 @@ public:
     private:
         Pimpl& pimpl;
 
-        JUCE_DECLARE_NON_COPYABLE (ScopedDiscOpener);
+        JUCE_DECLARE_NON_COPYABLE (ScopedDiscOpener)
     };
 
     DiskState getDiskState()

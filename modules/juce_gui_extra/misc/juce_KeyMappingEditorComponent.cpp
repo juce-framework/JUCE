@@ -132,7 +132,7 @@ public:
     private:
         KeyMappingEditorComponent& owner;
 
-        JUCE_DECLARE_NON_COPYABLE (KeyEntryWindow);
+        JUCE_DECLARE_NON_COPYABLE (KeyEntryWindow)
     };
 
     static void assignNewKeyCallback (int result, ChangeKeyButton* button, KeyPress newKey)
@@ -195,7 +195,7 @@ private:
     const int keyNum;
     ScopedPointer<KeyEntryWindow> currentKeyEntryWindow;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ChangeKeyButton);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ChangeKeyButton)
 };
 
 //==============================================================================
@@ -258,7 +258,7 @@ private:
 
     enum { maxNumAssignments = 3 };
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ItemComponent);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ItemComponent)
 };
 
 //==============================================================================
@@ -278,7 +278,7 @@ private:
     KeyMappingEditorComponent& owner;
     const CommandID commandID;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MappingItem);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MappingItem)
 };
 
 
@@ -327,7 +327,7 @@ private:
     KeyMappingEditorComponent& owner;
     String categoryName;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CategoryItem);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CategoryItem)
 };
 
 //==============================================================================

@@ -153,7 +153,7 @@ private:
         return (DISPID) (pointer_sized_int) s.getAddress();
     }
 
-    JUCE_DECLARE_NON_COPYABLE (IDispatchHelper);
+    JUCE_DECLARE_NON_COPYABLE (IDispatchHelper)
 };
 
 //==============================================================================
@@ -208,7 +208,7 @@ private:
     int refCount;
     IDispatchHelper iDispatchHelper;
 
-    JUCE_DECLARE_NON_COPYABLE (IDispatchWrappingDynamicObject);
+    JUCE_DECLARE_NON_COPYABLE (IDispatchWrappingDynamicObject)
 };
 
 
@@ -349,7 +349,7 @@ public:
 private:
     IDispatch* const source;
 
-    JUCE_DECLARE_NON_COPYABLE (DynamicObjectWrappingIDispatch);
+    JUCE_DECLARE_NON_COPYABLE (DynamicObjectWrappingIDispatch)
 };
 
 
@@ -527,7 +527,7 @@ private:
     HWND parentHWND;
     IWebBrowser2* browser;
 
-    JUCE_DECLARE_NON_COPYABLE (AXBrowserPluginHolderComponent);
+    JUCE_DECLARE_NON_COPYABLE (AXBrowserPluginHolderComponent)
 };
 
 //==============================================================================
@@ -742,7 +742,7 @@ private:
     ScopedPointer<AXBrowserPluginHolderComponent> holderComp;
     IDispatchHelper iDispatchHelper;
 
-    JUCE_DECLARE_NON_COPYABLE (JuceActiveXObject);
+    JUCE_DECLARE_NON_COPYABLE (JuceActiveXObject)
 };
 
 //==============================================================================
@@ -780,7 +780,7 @@ public:
 private:
     int refCount;
 
-    JUCE_DECLARE_NON_COPYABLE (JuceActiveXObjectFactory);
+    JUCE_DECLARE_NON_COPYABLE (JuceActiveXObjectFactory)
 };
 
 //==============================================================================

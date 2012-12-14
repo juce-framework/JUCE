@@ -104,7 +104,7 @@ namespace DirectShowHelpers
     private:
         ComSmartPtr <IVMRWindowlessControl> windowlessControl;
 
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (VMR7);
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (VMR7)
     };
 
 
@@ -166,7 +166,7 @@ namespace DirectShowHelpers
     private:
         ComSmartPtr <IMFVideoDisplayControl> videoDisplayControl;
 
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (EVR);
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (EVR)
     };
 #endif
 }
@@ -570,7 +570,7 @@ private:
 
         ATOM atom;
 
-        JUCE_DECLARE_NON_COPYABLE (NativeWindowClass);
+        JUCE_DECLARE_NON_COPYABLE (NativeWindowClass)
     };
 
     //======================================================================
@@ -629,7 +629,7 @@ private:
         HWND hwnd;
         HDC hdc;
 
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (NativeWindow);
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (NativeWindow)
     };
 
     ScopedPointer<NativeWindow> nativeWindow;
@@ -709,7 +709,7 @@ private:
         return false;
     }
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DirectShowContext);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DirectShowContext)
 };
 
 juce_ImplementSingleton_SingleThreaded (DirectShowComponent::DirectShowContext::NativeWindowClass);
@@ -746,7 +746,7 @@ public:
 private:
     DirectShowComponent* const owner;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DirectShowComponentWatcher);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DirectShowComponentWatcher)
 };
 
 

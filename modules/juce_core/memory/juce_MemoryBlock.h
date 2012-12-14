@@ -250,7 +250,7 @@ private:
     size_t size;
     static const char* const encodingTable;
 
-    JUCE_LEAK_DETECTOR (MemoryBlock);
+    JUCE_LEAK_DETECTOR (MemoryBlock)
 };
 
 

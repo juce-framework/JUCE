@@ -70,7 +70,7 @@ private:
     float radius;
     Colour colour;
 
-    JUCE_LEAK_DETECTOR (GlowEffect);
+    JUCE_LEAK_DETECTOR (GlowEffect)
 };
 
 

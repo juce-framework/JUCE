@@ -95,7 +95,7 @@ private:
     Rectangle<int> originalBounds;
     const Edge edge;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ResizableEdgeComponent);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ResizableEdgeComponent)
 };
 
 

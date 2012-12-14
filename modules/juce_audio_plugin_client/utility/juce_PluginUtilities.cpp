@@ -24,7 +24,8 @@
 */
 
 #if _MSC_VER
-#include <windows.h>
+ #include <windows.h>
+#endif
 
 // Your project must contain an AppConfig.h file with your project-specific settings in it,
 // and your header search path must make it accessible to the module's files.
@@ -32,6 +33,8 @@
 
 #include "../utility/juce_CheckSettingMacros.h"
 #include "juce_IncludeModuleHeaders.h"
+
+#if _MSC_VER
 
 #if JucePlugin_Build_RTAS
  extern "C" BOOL WINAPI DllMainRTAS (HINSTANCE, DWORD, LPVOID);
@@ -57,3 +60,21 @@ extern "C" BOOL WINAPI DllMain (HINSTANCE instance, DWORD reason, LPVOID reserve
 }
 
 #endif
+
+//==============================================================================
+/** Somewhere in the codebase of your plugin, you need to implement this function
+    and make it return a new instance of the filter subclass that you're building.
+*/
+extern AudioProcessor* JUCE_CALLTYPE createPluginFilter();
+
+AudioProcessor* JUCE_CALLTYPE createPluginFilterOfType (AudioProcessor::WrapperType type)
+{
+    AudioProcessor::setTypeOfNextNewPlugin (type);
+    AudioProcessor* const pluginInstance = createPluginFilter();
+    AudioProcessor::setTypeOfNextNewPlugin (AudioProcessor::wrapperType_Undefined);
+
+    // your createPluginFilter() method must return an object!
+    jassert (pluginInstance != nullptr && pluginInstance->wrapperType == type);
+
+    return pluginInstance;
+}

@@ -79,7 +79,7 @@ private:
     SortedSet <ActionListener*> actionListeners;
     CriticalSection actionListenerLock;
 
-    JUCE_DECLARE_NON_COPYABLE (ActionBroadcaster);
+    JUCE_DECLARE_NON_COPYABLE (ActionBroadcaster)
 };
 
 

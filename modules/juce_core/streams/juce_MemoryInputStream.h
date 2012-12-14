@@ -91,7 +91,7 @@ private:
 
     void createInternalCopy();
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MemoryInputStream);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MemoryInputStream)
 };
 
 #endif   // __JUCE_MEMORYINPUTSTREAM_JUCEHEADER__

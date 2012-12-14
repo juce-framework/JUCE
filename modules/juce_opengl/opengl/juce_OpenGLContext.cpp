@@ -28,7 +28,7 @@ class OpenGLContext::CachedImage  : public CachedComponentImage,
 {
 public:
     CachedImage (OpenGLContext& c, Component& comp,
-                 const OpenGLPixelFormat& pixelFormat, void* contextToShareWith)
+                 const OpenGLPixelFormat& pixFormat, void* contextToShare)
         : Thread ("OpenGL Rendering"),
           context (c), component (comp),
           scale (1.0),
@@ -39,7 +39,7 @@ public:
          #endif
           needsUpdate (true)
     {
-        nativeContext = new NativeContext (component, pixelFormat, contextToShareWith);
+        nativeContext = new NativeContext (component, pixFormat, contextToShare);
 
         if (nativeContext->createdOk())
             context.nativeContext = nativeContext;
@@ -118,7 +118,7 @@ public:
         return true;
     }
 
-    void clearRegionInFrameBuffer (const RectangleList& list, const float scale)
+    void clearRegionInFrameBuffer (const RectangleList& list, const float scaleFactor)
     {
         glClearColor (0, 0, 0, 0);
         glEnable (GL_SCISSOR_TEST);
@@ -129,7 +129,7 @@ public:
 
         for (const Rectangle<int>* i = list.begin(), * const e = list.end(); i != e; ++i)
         {
-            const Rectangle<int> r ((i->toFloat() * scale).getSmallestIntegerContainer());
+            const Rectangle<int> r ((i->toFloat() * scaleFactor).getSmallestIntegerContainer());
             glScissor (r.getX(), imageH - r.getBottom(), r.getWidth(), r.getHeight());
             glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
         }
@@ -248,9 +248,9 @@ public:
         JUCE_CHECK_OPENGL_ERROR
     }
 
-    void paintOwner (LowLevelGraphicsContext& context)
+    void paintOwner (LowLevelGraphicsContext& llgc)
     {
-        Graphics g (&context);
+        Graphics g (&llgc);
 
        #if JUCE_ENABLE_REPAINT_DEBUGGING
         g.saveState();
@@ -360,7 +360,7 @@ public:
     bool volatile shadersAvailable;
     bool volatile needsUpdate;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CachedImage);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CachedImage)
 };
 
 //==============================================================================
@@ -703,40 +703,40 @@ void OpenGLContext::copyTexture (const Rectangle<int>& targetClipArea,
 
             struct ProgramBuilder
             {
-                ProgramBuilder (OpenGLShaderProgram& program)
+                ProgramBuilder (OpenGLShaderProgram& prog)
                 {
-                    program.addShader ("attribute " JUCE_HIGHP " vec2 position;"
-                                       "uniform " JUCE_HIGHP " vec2 screenSize;"
-                                       "varying " JUCE_HIGHP " vec2 pixelPos;"
-                                       "void main()"
-                                       "{"
-                                        "pixelPos = position;"
-                                        JUCE_HIGHP " vec2 scaled = position / (0.5 * screenSize.xy);"
-                                        "gl_Position = vec4 (scaled.x - 1.0, 1.0 - scaled.y, 0, 1.0);"
-                                       "}",
-                                       GL_VERTEX_SHADER);
+                    prog.addShader ("attribute " JUCE_HIGHP " vec2 position;"
+                                    "uniform " JUCE_HIGHP " vec2 screenSize;"
+                                    "varying " JUCE_HIGHP " vec2 pixelPos;"
+                                    "void main()"
+                                    "{"
+                                    "pixelPos = position;"
+                                    JUCE_HIGHP " vec2 scaled = position / (0.5 * screenSize.xy);"
+                                    "gl_Position = vec4 (scaled.x - 1.0, 1.0 - scaled.y, 0, 1.0);"
+                                    "}",
+                                    GL_VERTEX_SHADER);
 
-                    program.addShader ("uniform sampler2D imageTexture;"
-                                       "uniform " JUCE_HIGHP " float textureBounds[4];"
-                                       "varying " JUCE_HIGHP " vec2 pixelPos;"
-                                       "void main()"
-                                       "{"
-                                        JUCE_HIGHP " vec2 texturePos = (pixelPos - vec2 (textureBounds[0], textureBounds[1]))"
-                                                                         "/ vec2 (textureBounds[2], textureBounds[3]);"
-                                        "gl_FragColor = texture2D (imageTexture, vec2 (texturePos.x, 1.0 - texturePos.y));"
-                                       "}",
-                                       GL_FRAGMENT_SHADER);
-                    program.link();
+                    prog.addShader ("uniform sampler2D imageTexture;"
+                                    "uniform " JUCE_HIGHP " float textureBounds[4];"
+                                    "varying " JUCE_HIGHP " vec2 pixelPos;"
+                                    "void main()"
+                                    "{"
+                                     JUCE_HIGHP " vec2 texturePos = (pixelPos - vec2 (textureBounds[0], textureBounds[1]))"
+                                                                      "/ vec2 (textureBounds[2], textureBounds[3]);"
+                                     "gl_FragColor = texture2D (imageTexture, vec2 (texturePos.x, 1.0 - texturePos.y));"
+                                    "}",
+                                    GL_FRAGMENT_SHADER);
+                    prog.link();
                 }
             };
 
             struct Params
             {
-                Params (OpenGLShaderProgram& program)
-                    : positionAttribute (program, "position"),
-                      screenSize (program, "screenSize"),
-                      imageTexture (program, "imageTexture"),
-                      textureBounds (program, "textureBounds")
+                Params (OpenGLShaderProgram& prog)
+                    : positionAttribute (prog, "position"),
+                      screenSize (prog, "screenSize"),
+                      imageTexture (prog, "imageTexture"),
+                      textureBounds (prog, "textureBounds")
                 {}
 
                 void set (const float targetWidth, const float targetHeight, const Rectangle<float>& bounds) const

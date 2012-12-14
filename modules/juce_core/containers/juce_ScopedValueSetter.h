@@ -90,7 +90,7 @@ private:
     ValueType& value;
     const ValueType originalValue;
 
-    JUCE_DECLARE_NON_COPYABLE (ScopedValueSetter);
+    JUCE_DECLARE_NON_COPYABLE (ScopedValueSetter)
 };
 
 

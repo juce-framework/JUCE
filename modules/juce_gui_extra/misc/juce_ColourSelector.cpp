@@ -43,7 +43,7 @@ public:
     }
 
 private:
-    JUCE_DECLARE_NON_COPYABLE (ColourComponentSlider);
+    JUCE_DECLARE_NON_COPYABLE (ColourComponentSlider)
 };
 
 //==============================================================================
@@ -64,7 +64,7 @@ public:
     }
 
 private:
-    JUCE_DECLARE_NON_COPYABLE (ColourSpaceMarker);
+    JUCE_DECLARE_NON_COPYABLE (ColourSpaceMarker)
 };
 
 //==============================================================================
@@ -153,7 +153,7 @@ private:
                           edge * 2, edge * 2);
     }
 
-    JUCE_DECLARE_NON_COPYABLE (ColourSpaceView);
+    JUCE_DECLARE_NON_COPYABLE (ColourSpaceView)
 };
 
 //==============================================================================
@@ -187,7 +187,7 @@ public:
     }
 
 private:
-    JUCE_DECLARE_NON_COPYABLE (HueSelectorMarker);
+    JUCE_DECLARE_NON_COPYABLE (HueSelectorMarker)
 };
 
 //==============================================================================
@@ -242,7 +242,7 @@ private:
     HueSelectorMarker marker;
     const int edge;
 
-    JUCE_DECLARE_NON_COPYABLE (HueSelectorComp);
+    JUCE_DECLARE_NON_COPYABLE (HueSelectorComp)
 };
 
 //==============================================================================
@@ -303,7 +303,7 @@ private:
         }
     }
 
-    JUCE_DECLARE_NON_COPYABLE (SwatchComponent);
+    JUCE_DECLARE_NON_COPYABLE (SwatchComponent)
 };
 
 //==============================================================================

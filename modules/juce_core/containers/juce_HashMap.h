@@ -344,7 +344,7 @@ private:
         ValueType value;
         HashEntry* nextEntry;
 
-        JUCE_DECLARE_NON_COPYABLE (HashEntry);
+        JUCE_DECLARE_NON_COPYABLE (HashEntry)
     };
 
 public:
@@ -421,7 +421,7 @@ public:
         HashEntry* entry;
         int index;
 
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Iterator);
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Iterator)
     };
 
 private:
@@ -440,7 +440,7 @@ private:
         return hash;
     }
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (HashMap);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (HashMap)
 };
 
 

@@ -116,7 +116,7 @@ public:
 private:
     InputStream& source;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (JuceIStream);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (JuceIStream)
 };
 
 //==============================================================================
@@ -327,7 +327,7 @@ private:
         }
     }
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WMAudioReader);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WMAudioReader)
 };
 
 }

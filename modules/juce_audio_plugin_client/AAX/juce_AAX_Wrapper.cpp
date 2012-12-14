@@ -55,32 +55,12 @@
 using juce::Component;
 
 //==============================================================================
-/** Somewhere in the codebase of your plugin, you need to implement this function
-    and make it return a new instance of the filter subclass that you're building.
-*/
-extern AudioProcessor* JUCE_CALLTYPE createPluginFilter();
-
-//==============================================================================
 struct AAXClasses
 {
     static void check (AAX_Result result)
     {
         jassert (result == AAX_SUCCESS); (void) result;
     }
-
-    struct FourCharConst
-    {
-        FourCharConst (const uint32 n) noexcept
-        {
-            asString[0] = (char) (n >> 24);
-            asString[1] = (char) (n >> 16);
-            asString[2] = (char) (n >> 8);
-            asString[3] = (char) n;
-            asString[4] = 0;
-        }
-
-        char asString[5];
-    };
 
     static AAX_EStemFormat getFormatForChans (const int numChans) noexcept
     {
@@ -203,7 +183,7 @@ struct AAXClasses
         MidiBuffer midiBuffer;
         Array<float*> channelList;
 
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PluginInstanceInfo);
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PluginInstanceInfo)
     };
 
     //==============================================================================
@@ -347,13 +327,13 @@ struct AAXClasses
             ScopedPointer<AudioProcessorEditor> pluginEditor;
             JuceAAX_GUI& owner;
 
-            JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ContentWrapperComponent);
+            JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ContentWrapperComponent)
         };
 
         ScopedPointer<ContentWrapperComponent> component;
 
         JUCELibraryRefCount juceCount;
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (JuceAAX_GUI);
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (JuceAAX_GUI)
     };
 
     //==============================================================================
@@ -362,10 +342,7 @@ struct AAXClasses
     public:
         JuceAAX_Parameters()
         {
-            pluginInstance = createPluginFilter();
-            jassert (pluginInstance != nullptr);  // your createPluginFilter() method must return an object!
-
-            pluginInstance->wrapperType = AudioProcessor::wrapperType_AAX;
+            pluginInstance = createPluginFilterOfType (AudioProcessor::wrapperType_AAX);
         }
 
         static AAX_CEffectParameters* AAX_CALLBACK Create()   { return new JuceAAX_Parameters(); }
@@ -461,7 +438,7 @@ struct AAXClasses
 
         ScopedPointer<AudioProcessor> pluginInstance;
 
-        JUCE_DECLARE_NON_COPYABLE (JuceAAX_Parameters);
+        JUCE_DECLARE_NON_COPYABLE (JuceAAX_Parameters)
     };
 
     //==============================================================================
@@ -512,7 +489,6 @@ struct AAXClasses
     {
         descriptor.AddName (JucePlugin_Desc);
         descriptor.AddName (JucePlugin_Name);
-        descriptor.AddName (FourCharConst (JucePlugin_PluginCode).asString);
         descriptor.AddCategory (JucePlugin_AAXCategory);
 
         check (descriptor.AddProcPtr ((void*) JuceAAX_GUI::Create,        kAAX_ProcPtrID_Create_EffectGUI));
@@ -552,7 +528,6 @@ AAX_Result JUCE_CDECL GetEffectDescriptions (AAX_ICollection* collection)
         collection->SetManufacturerName (JucePlugin_Manufacturer);
         collection->AddPackageName (JucePlugin_Desc);
         collection->AddPackageName (JucePlugin_Name);
-        collection->AddPackageName (AAXClasses::FourCharConst (JucePlugin_PluginCode).asString);
         collection->SetPackageVersion (JucePlugin_VersionCode);
 
         return AAX_SUCCESS;

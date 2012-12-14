@@ -160,18 +160,18 @@ namespace juce
         etc..
 
     private:
-        JUCE_DECLARE_NON_COPYABLE (MyClass);
+        JUCE_DECLARE_NON_COPYABLE (MyClass)
     };@endcode
 */
 #define JUCE_DECLARE_NON_COPYABLE(className) \
     className (const className&);\
-    className& operator= (const className&)
+    className& operator= (const className&);
 
 /** This is a shorthand way of writing both a JUCE_DECLARE_NON_COPYABLE and
     JUCE_LEAK_DETECTOR macro for a class.
 */
 #define JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(className) \
-    JUCE_DECLARE_NON_COPYABLE(className);\
+    JUCE_DECLARE_NON_COPYABLE(className) \
     JUCE_LEAK_DETECTOR(className)
 
 /** This macro can be added to class definitions to disable the use of new/delete to

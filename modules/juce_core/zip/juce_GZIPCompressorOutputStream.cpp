@@ -111,7 +111,7 @@ private:
         return false;
     }
 
-    JUCE_DECLARE_NON_COPYABLE (GZIPCompressorHelper);
+    JUCE_DECLARE_NON_COPYABLE (GZIPCompressorHelper)
 };
 
 //==============================================================================

@@ -81,7 +81,7 @@ private:
     void valueTreeChildOrderChanged (ValueTree&);
     void valueTreeParentChanged (ValueTree&);
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (JuceUpdater);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (JuceUpdater)
 };
 
 #endif   // __JUCER_JUCEUPDATER_JUCEHEADER__

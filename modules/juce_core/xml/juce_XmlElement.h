@@ -722,7 +722,7 @@ private:
     void getChildElementsAsArray (XmlElement**) const noexcept;
     void reorderChildElements (XmlElement**, int) noexcept;
 
-    JUCE_LEAK_DETECTOR (XmlElement);
+    JUCE_LEAK_DETECTOR (XmlElement)
 };
 
 

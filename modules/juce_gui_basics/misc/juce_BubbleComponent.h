@@ -161,7 +161,7 @@ private:
     int allowablePlacements;
     DropShadowEffect shadow;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (BubbleComponent);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (BubbleComponent)
 };
 
 

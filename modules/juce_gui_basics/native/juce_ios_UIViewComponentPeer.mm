@@ -251,7 +251,7 @@ public:
     MultiTouchMapper<UITouch*> currentTouches;
 
 private:
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (UIViewComponentPeer);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (UIViewComponentPeer)
 };
 
 //==============================================================================

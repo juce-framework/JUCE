@@ -516,7 +516,7 @@ public:
         TreeViewItem& treeViewItem;
         ScopedPointer <XmlElement> oldOpenness;
 
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OpennessRestorer);
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OpennessRestorer)
     };
 
 private:
@@ -558,7 +558,7 @@ private:
     virtual int itemDropped (const String&, Component*, int) { return 0; }
    #endif
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TreeViewItem);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TreeViewItem)
 };
 
 
@@ -855,7 +855,7 @@ private:
     void moveIntoSelectedItem();
     void moveByPages (int numPages);
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TreeView);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TreeView)
 };
 
 #endif   // __JUCE_TREEVIEW_JUCEHEADER__

@@ -760,16 +760,19 @@ public:
             if (! clip.isEmpty())
             {
                 Image temp (component.isOpaque() ? Image::RGB : Image::ARGB,
-                            clipW * displayScale, clipH * displayScale, ! component.isOpaque());
+                            roundToInt (clipW * displayScale),
+                            roundToInt (clipH * displayScale),
+                            ! component.isOpaque());
 
                 {
-                    if (displayScale != 1.0f)
-                        clip.scaleAll (roundToInt (displayScale));
+                    const int intScale = roundToInt (displayScale);
+                    if (intScale != 1)
+                        clip.scaleAll (intScale);
 
                     ScopedPointer<LowLevelGraphicsContext> context (component.getLookAndFeel()
-                                                                      .createGraphicsContext (temp, offset * displayScale, clip));
+                                                                      .createGraphicsContext (temp, offset * intScale, clip));
 
-                    if (displayScale != 1.0f)
+                    if (intScale != 1)
                         context->addTransform (AffineTransform::scale (displayScale));
 
                     insideDrawRect = true;
@@ -1277,7 +1280,7 @@ private:
         return true;
     }
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (NSViewComponentPeer);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (NSViewComponentPeer)
 };
 
 int NSViewComponentPeer::insideToFrontCall = 0;

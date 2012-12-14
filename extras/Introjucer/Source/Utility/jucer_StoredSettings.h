@@ -72,7 +72,7 @@ private:
     void updateGlobalProps();
     void loadSwatchColours();
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (StoredSettings);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (StoredSettings)
 };
 
 StoredSettings& getAppSettings();

@@ -42,7 +42,7 @@ public:
 private:
     Image image;
 
-    JUCE_DECLARE_NON_COPYABLE (DragOverlayComp);
+    JUCE_DECLARE_NON_COPYABLE (DragOverlayComp)
 };
 
 

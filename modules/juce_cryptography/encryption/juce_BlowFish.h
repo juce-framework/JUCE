@@ -66,7 +66,7 @@ private:
 
     uint32 F (uint32) const noexcept;
 
-    JUCE_LEAK_DETECTOR (BlowFish);
+    JUCE_LEAK_DETECTOR (BlowFish)
 };
 
 

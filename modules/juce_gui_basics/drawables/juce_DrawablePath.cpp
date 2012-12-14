@@ -121,7 +121,7 @@ public:
 private:
     DrawablePath& owner;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (RelativePositioner);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (RelativePositioner)
 };
 
 void DrawablePath::setPath (const RelativePointPath& newRelativePath)

@@ -111,12 +111,6 @@ static const int numChannelConfigs = sizeof (channelConfigs) / sizeof (*channelC
 #endif
 
 //==============================================================================
-/** Somewhere in the codebase of your plugin, you need to implement this function
-    and make it create an instance of the filter subclass that you're building.
-*/
-extern AudioProcessor* JUCE_CALLTYPE createPluginFilter();
-
-//==============================================================================
 class JuceAU   : public JuceAUBaseClass,
                  public AudioProcessorListener,
                  public AudioPlayHead,
@@ -145,10 +139,7 @@ public:
             initialiseJuce_GUI();
         }
 
-        juceFilter = createPluginFilter();
-        jassert (juceFilter != nullptr);   // your createPluginFilter() method must return an object!
-
-        juceFilter->wrapperType = AudioProcessor::wrapperType_AudioUnit;
+        juceFilter = createPluginFilterOfType (AudioProcessor::wrapperType_AudioUnit);
 
         juceFilter->setPlayHead (this);
         juceFilter->addListener (this);
@@ -1028,7 +1019,7 @@ private:
         presetsArray.clear();
     }
 
-    JUCE_DECLARE_NON_COPYABLE (JuceAU);
+    JUCE_DECLARE_NON_COPYABLE (JuceAU)
 };
 
 //==============================================================================
@@ -1188,7 +1179,7 @@ public:
     };
 
 private:
-    JUCE_DECLARE_NON_COPYABLE (EditorCompHolder);
+    JUCE_DECLARE_NON_COPYABLE (EditorCompHolder)
 };
 
 void JuceAU::deleteActiveEditors()

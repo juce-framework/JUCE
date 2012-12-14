@@ -255,7 +255,7 @@ private:
     AudioSampleBuffer reservoir;
     int reservoirStart, samplesInReservoir;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OggReader);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OggReader)
 };
 
 //==============================================================================
@@ -421,7 +421,7 @@ private:
             vorbis_comment_add_tag (&vc, vorbisName, const_cast <char*> (s.toUTF8().getAddress()));
     }
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OggWriter);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OggWriter)
 };
 
 

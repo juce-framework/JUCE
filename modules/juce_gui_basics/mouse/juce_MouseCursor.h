@@ -181,7 +181,7 @@ private:
     static void* createStandardMouseCursor (MouseCursor::StandardCursorType type);
     static void deleteMouseCursor (void* cursorHandle, bool isStandard);
 
-    JUCE_LEAK_DETECTOR (MouseCursor);
+    JUCE_LEAK_DETECTOR (MouseCursor)
 };
 
 #endif   // __JUCE_MOUSECURSOR_JUCEHEADER__

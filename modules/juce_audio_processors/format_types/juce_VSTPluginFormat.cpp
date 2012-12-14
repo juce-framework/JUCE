@@ -195,7 +195,7 @@ public:
 private:
     const bool isMessageThread;
 
-    JUCE_DECLARE_NON_COPYABLE (IdleCallRecursionPreventer);
+    JUCE_DECLARE_NON_COPYABLE (IdleCallRecursionPreventer)
 };
 
 class VSTPluginWindow;
@@ -686,11 +686,11 @@ public:
     {
         if (fragId != 0)
         {
-            eff->dispatcher = (AEffectDispatcherProc) newMachOFromCFM ((void*) eff->dispatcher);
-            eff->process = (AEffectProcessProc) newMachOFromCFM ((void*) eff->process);
-            eff->setParameter = (AEffectSetParameterProc) newMachOFromCFM ((void*) eff->setParameter);
-            eff->getParameter = (AEffectGetParameterProc) newMachOFromCFM ((void*) eff->getParameter);
-            eff->processReplacing = (AEffectProcessProc) newMachOFromCFM ((void*) eff->processReplacing);
+            eff->dispatcher       = (AEffectDispatcherProc)   newMachOFromCFM ((void*) eff->dispatcher);
+            eff->process          = (AEffectProcessProc)      newMachOFromCFM ((void*) eff->process);
+            eff->setParameter     = (AEffectSetParameterProc) newMachOFromCFM ((void*) eff->setParameter);
+            eff->getParameter     = (AEffectGetParameterProc) newMachOFromCFM ((void*) eff->getParameter);
+            eff->processReplacing = (AEffectProcessProc)      newMachOFromCFM ((void*) eff->processReplacing);
         }
     }
    #endif
@@ -698,7 +698,7 @@ public:
 #endif
 
 private:
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ModuleHandle);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ModuleHandle)
 };
 
 static const int defaultVSTSampleRateValue = 44100;
@@ -1198,7 +1198,7 @@ public:
 
     //==============================================================================
     int getNumPrograms()          { return effect != nullptr ? effect->numPrograms : 0; }
-    int getCurrentProgram()       { return dispatch (effGetProgram, 0, 0, 0, 0); }
+    int getCurrentProgram()       { return (int) dispatch (effGetProgram, 0, 0, 0, 0); }
 
     void setCurrentProgram (int newIndex)
     {
@@ -1296,7 +1296,7 @@ public:
 
             case audioMasterSizeWindow:
                 if (AudioProcessorEditor* ed = getActiveEditor())
-                    ed->setSize (index, value);
+                    ed->setSize (index, (int) value);
 
                 return 1;
 
@@ -1321,7 +1321,8 @@ public:
 
                 break;
 
-            case audioMasterPinConnected:       return isValidChannel (index, value == 0) ? 1 : 0;
+            case audioMasterPinConnected:
+                return isValidChannel (index, value == 0) ? 0 : 1; // (yes, 0 = true)
 
             // none of these are handled (yet)..
             case audioMasterBeginEdit:
@@ -1354,7 +1355,7 @@ public:
     }
 
     // handles non plugin-specific callbacks..
-    static VstIntPtr handleGeneralCallback (VstInt32 opcode, VstInt32 /*index*/, VstInt32 /*value*/, void *ptr, float /*opt*/)
+    static VstIntPtr handleGeneralCallback (VstInt32 opcode, VstInt32 /*index*/, VstIntPtr /*value*/, void *ptr, float /*opt*/)
     {
         switch (opcode)
         {
@@ -1407,9 +1408,9 @@ public:
     }
 
     //==============================================================================
-    int dispatch (const int opcode, const int index, const int value, void* const ptr, float opt) const
+    VstIntPtr dispatch (const int opcode, const int index, const int value, void* const ptr, float opt) const
     {
-        int result = 0;
+        VstIntPtr result = 0;
 
         if (effect != nullptr)
         {
@@ -1419,7 +1420,7 @@ public:
             try
             {
                #if JUCE_MAC
-                const int oldResFile = CurResFile();
+                const ResFileRefNum oldResFile = CurResFile();
 
                 if (module->resFileId != 0)
                     UseResFile (module->resFileId);
@@ -1428,7 +1429,7 @@ public:
                 result = effect->dispatcher (effect, opcode, index, value, ptr, opt);
 
                #if JUCE_MAC
-                const int newResFile = CurResFile();
+                const ResFileRefNum newResFile = CurResFile();
                 if (newResFile != oldResFile)  // avoid confusing the parent app's resource file with the plug-in's
                 {
                     module->resFileId = newResFile;
@@ -1633,7 +1634,7 @@ public:
         if (usesChunks())
         {
             void* data = nullptr;
-            const int bytes = dispatch (effGetChunk, isPreset ? 1 : 0, 0, &data, 0.0f);
+            const VstIntPtr bytes = dispatch (effGetChunk, isPreset ? 1 : 0, 0, &data, 0.0f);
 
             if (data != nullptr && bytes <= maxSizeMB * 1024 * 1024)
             {
@@ -1707,14 +1708,14 @@ private:
 
     String getCurrentProgramName()
     {
-        String name;
+        String progName;
 
         if (effect != nullptr)
         {
             {
                 char nm[256] = { 0 };
                 dispatch (effGetProgramName, 0, 0, nm, 0);
-                name = String (CharPointer_UTF8 (nm)).trim();
+                progName = String (CharPointer_UTF8 (nm)).trim();
             }
 
             const int index = getCurrentProgram();
@@ -1724,11 +1725,11 @@ private:
                 while (programNames.size() < index)
                     programNames.add (String::empty);
 
-                programNames.set (index, name);
+                programNames.set (index, progName);
             }
         }
 
-        return name;
+        return progName;
     }
 
     void setParamsInProgramBlock (fxProgram* const prog)
@@ -1819,11 +1820,11 @@ private:
 
     String getVersion() const
     {
-        unsigned int v = dispatch (effGetVendorVersion, 0, 0, 0, 0);
+        unsigned int v = (unsigned int) dispatch (effGetVendorVersion, 0, 0, 0, 0);
 
         String s;
 
-        if (v == 0 || v == -1)
+        if (v == 0 || (int) v == -1)
             v = getVersionNumber();
 
         if (v != 0)
@@ -1879,7 +1880,7 @@ private:
         isPowerOn = on;
     }
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (VSTPluginInstance);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (VSTPluginInstance)
 };
 
 //==============================================================================
@@ -2327,7 +2328,7 @@ private:
     }
 
     //==============================================================================
-    int dispatch (const int opcode, const int index, const int value, void* const ptr, float opt)
+    VstIntPtr dispatch (const int opcode, const int index, const int value, void* const ptr, float opt)
     {
         return plugin.dispatch (opcode, index, value, ptr, opt);
     }
@@ -2576,7 +2577,7 @@ private:
             return true;
         }
 
-        void mouseDown (int x, int y)
+        void handleMouseDown (int x, int y)
         {
             if (! alreadyInside)
             {
@@ -2591,16 +2592,16 @@ private:
             }
         }
 
-        void paint()
+        void handlePaint()
         {
             if (ComponentPeer* const peer = getPeer())
             {
                 const Point<int> pos (getScreenPosition() - peer->getScreenPosition());
                 ERect r;
-                r.left = pos.getX();
-                r.right = r.left + getWidth();
-                r.top = pos.getY();
-                r.bottom = r.top + getHeight();
+                r.left   = (VstInt16) pos.getX();
+                r.top    = (VstInt16) pos.getY();
+                r.right  = (VstInt16) (r.left + getWidth());
+                r.bottom = (VstInt16) (r.top + getHeight());
 
                 owner.dispatch (effEditDraw, 0, 0, &r, 0);
             }
@@ -2610,7 +2611,7 @@ private:
         VSTPluginWindow& owner;
         bool alreadyInside;
 
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (InnerWrapperComponent);
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (InnerWrapperComponent)
     };
 
     friend class InnerWrapperComponent;
@@ -2627,7 +2628,7 @@ private:
     }
 #endif
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (VSTPluginWindow);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (VSTPluginWindow)
 };
 
 //==============================================================================
@@ -2698,7 +2699,7 @@ void VSTPluginFormat::findAllTypesForFile (OwnedArray <PluginDescription>& resul
             for (;;)
             {
                 char shellEffectName [64] = { 0 };
-                const int uid = instance->dispatch (effShellGetNextPlugin, 0, 0, shellEffectName, 0);
+                const int uid = (int) instance->dispatch (effShellGetNextPlugin, 0, 0, shellEffectName, 0);
 
                 if (uid == 0)
                     break;

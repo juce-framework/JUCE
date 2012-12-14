@@ -115,7 +115,7 @@ private:
     ScopedPointer <Pimpl> control;
     bool mouseEventsAllowed;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ActiveXControlComponent);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ActiveXControlComponent)
 };
 
 #endif

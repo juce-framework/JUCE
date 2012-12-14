@@ -356,14 +356,14 @@ public:
     private:
         LinkedListPointer* endOfList;
 
-        JUCE_DECLARE_NON_COPYABLE (Appender);
+        JUCE_DECLARE_NON_COPYABLE (Appender)
     };
 
 private:
     //==============================================================================
     ObjectType* item;
 
-    JUCE_DECLARE_NON_COPYABLE (LinkedListPointer);
+    JUCE_DECLARE_NON_COPYABLE (LinkedListPointer)
 };
 
 

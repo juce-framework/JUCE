@@ -381,7 +381,7 @@ private:
         owner.recalculateIfNeeded();
     }
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ContentComponent);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ContentComponent)
 };
 
 //==============================================================================
@@ -426,7 +426,7 @@ public:
 private:
     int lastX;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TreeViewport);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TreeViewport)
 };
 
 
@@ -951,7 +951,7 @@ public:
     int lastIndex;
 
 private:
-    JUCE_DECLARE_NON_COPYABLE (InsertPointHighlight);
+    JUCE_DECLARE_NON_COPYABLE (InsertPointHighlight)
 };
 
 //==============================================================================
@@ -978,7 +978,7 @@ public:
     }
 
 private:
-    JUCE_DECLARE_NON_COPYABLE (TargetGroupHighlight);
+    JUCE_DECLARE_NON_COPYABLE (TargetGroupHighlight)
 };
 
 //==============================================================================

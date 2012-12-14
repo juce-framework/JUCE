@@ -23,8 +23,15 @@
   ==============================================================================
 */
 
+static ThreadLocalValue<AudioProcessor::WrapperType> wrapperTypeBeingCreated;
+
+void AudioProcessor::setTypeOfNextNewPlugin (AudioProcessor::WrapperType type)
+{
+    wrapperTypeBeingCreated = type;
+}
+
 AudioProcessor::AudioProcessor()
-    : wrapperType (wrapperType_Undefined),
+    : wrapperType (wrapperTypeBeingCreated.get()),
       playHead (nullptr),
       sampleRate (0),
       blockSize (0),

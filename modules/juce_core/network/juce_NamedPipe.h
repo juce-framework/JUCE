@@ -26,6 +26,7 @@
 #ifndef __JUCE_NAMEDPIPE_JUCEHEADER__
 #define __JUCE_NAMEDPIPE_JUCEHEADER__
 
+#include "../threads/juce_ReadWriteLock.h"
 
 //==============================================================================
 /**
@@ -85,19 +86,16 @@ public:
     */
     int write (const void* sourceBuffer, int numBytesToWrite, int timeOutMilliseconds);
 
-    /** If any threads are currently blocked on a read operation, this tells them to abort. */
-    void cancelPendingReads();
-
 private:
     //==============================================================================
-    class Pimpl;
+    JUCE_PUBLIC_IN_DLL_BUILD (class Pimpl)
     ScopedPointer<Pimpl> pimpl;
     String currentPipeName;
-    CriticalSection lock;
+    ReadWriteLock lock;
 
     bool openInternal (const String& pipeName, const bool createPipe);
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (NamedPipe);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (NamedPipe)
 };
 
 

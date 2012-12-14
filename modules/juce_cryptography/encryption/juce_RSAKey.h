@@ -108,7 +108,7 @@ private:
     //==============================================================================
     static BigInteger findBestCommonDivisor (const BigInteger& p, const BigInteger& q);
 
-    JUCE_LEAK_DETECTOR (RSAKey);
+    JUCE_LEAK_DETECTOR (RSAKey)
 };
 
 

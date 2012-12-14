@@ -198,10 +198,8 @@ namespace FileHelpers
 
             return toks.joinIntoString ("/");
         }
-        else
-        {
-            return p;
-        }
+
+        return p;
     }
 
     String simplifyPath (const String& path)

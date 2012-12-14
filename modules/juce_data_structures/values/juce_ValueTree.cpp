@@ -501,7 +501,7 @@ public:
         var oldValue;
         const bool isAddingNewProperty : 1, isDeletingProperty : 1;
 
-        JUCE_DECLARE_NON_COPYABLE (SetPropertyAction);
+        JUCE_DECLARE_NON_COPYABLE (SetPropertyAction)
     };
 
     //==============================================================================
@@ -554,7 +554,7 @@ public:
         const int childIndex;
         const bool isDeleting;
 
-        JUCE_DECLARE_NON_COPYABLE (AddOrRemoveChildAction);
+        JUCE_DECLARE_NON_COPYABLE (AddOrRemoveChildAction)
     };
 
     //==============================================================================
@@ -596,7 +596,7 @@ public:
         const Ptr parent;
         const int startIndex, endIndex;
 
-        JUCE_DECLARE_NON_COPYABLE (MoveChildAction);
+        JUCE_DECLARE_NON_COPYABLE (MoveChildAction)
     };
 
     //==============================================================================
@@ -608,7 +608,7 @@ public:
 
 private:
     SharedObject& operator= (const SharedObject&);
-    JUCE_LEAK_DETECTOR (SharedObject);
+    JUCE_LEAK_DETECTOR (SharedObject)
 };
 
 //==============================================================================
@@ -814,7 +814,7 @@ private:
     void valueTreeChildOrderChanged (ValueTree&) {}
     void valueTreeParentChanged (ValueTree&) {}
 
-    JUCE_DECLARE_NON_COPYABLE (ValueTreePropertyValueSource);
+    JUCE_DECLARE_NON_COPYABLE (ValueTreePropertyValueSource)
 };
 
 Value ValueTree::getPropertyAsValue (const Identifier& name, UndoManager* const undoManager)

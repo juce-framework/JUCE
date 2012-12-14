@@ -103,7 +103,7 @@ private:
 
     void callListeners();
 
-    JUCE_DECLARE_NON_COPYABLE (ChangeBroadcaster);
+    JUCE_DECLARE_NON_COPYABLE (ChangeBroadcaster)
 };
 
 

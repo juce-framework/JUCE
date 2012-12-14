@@ -116,7 +116,7 @@ private:
     void changed();
     void updateButtons();
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FileSearchPathListComponent);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FileSearchPathListComponent)
 };
 
 

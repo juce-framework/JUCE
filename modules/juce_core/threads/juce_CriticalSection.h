@@ -114,7 +114,7 @@ private:
     mutable pthread_mutex_t internal;
    #endif
 
-    JUCE_DECLARE_NON_COPYABLE (CriticalSection);
+    JUCE_DECLARE_NON_COPYABLE (CriticalSection)
 };
 
 
@@ -149,7 +149,7 @@ public:
     typedef ScopedLockType ScopedUnlockType;
 
 private:
-    JUCE_DECLARE_NON_COPYABLE (DummyCriticalSection);
+    JUCE_DECLARE_NON_COPYABLE (DummyCriticalSection)
 };
 
 //==============================================================================

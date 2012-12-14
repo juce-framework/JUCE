@@ -57,7 +57,7 @@ struct CurrentThreadHolder   : public ReferenceCountedObject
     typedef ReferenceCountedObjectPtr <CurrentThreadHolder> Ptr;
     ThreadLocalValue<Thread*> value;
 
-    JUCE_DECLARE_NON_COPYABLE (CurrentThreadHolder);
+    JUCE_DECLARE_NON_COPYABLE (CurrentThreadHolder)
 };
 
 static char currentThreadHolderLock [sizeof (SpinLock)]; // (statically initialised to zeros).

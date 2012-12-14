@@ -340,7 +340,7 @@ private:
                                             OpenStreamProgressCallback* progressCallback,
                                             void* progressCallbackContext, const String& headers,
                                             const int timeOutMs, StringPairArray* responseHeaders);
-    JUCE_LEAK_DETECTOR (URL);
+    JUCE_LEAK_DETECTOR (URL)
 };
 
 

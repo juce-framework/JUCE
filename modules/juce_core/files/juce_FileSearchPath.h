@@ -160,7 +160,7 @@ private:
 
     void init (const String& path);
 
-    JUCE_LEAK_DETECTOR (FileSearchPath);
+    JUCE_LEAK_DETECTOR (FileSearchPath)
 };
 
 #endif   // __JUCE_FILESEARCHPATH_JUCEHEADER__

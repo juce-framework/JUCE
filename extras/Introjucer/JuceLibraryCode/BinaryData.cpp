@@ -479,7 +479,7 @@ static const unsigned char temp_62b91564[] =
 "\r\n"
 "private:\r\n"
 "    //==============================================================================\r\n"
-"    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FILTERCLASSNAME);\r\n"
+"    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FILTERCLASSNAME)\r\n"
 "};\r\n"
 "\r\n"
 "#endif  // HEADERGUARD\r\n";
@@ -744,7 +744,7 @@ static const unsigned char temp_b2f1a7c0[] =
 "        */\r\n"
 "\r\n"
 "    private:\r\n"
-"        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainWindow);\r\n"
+"        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainWindow)\r\n"
 "    };\r\n"
 "\r\n"
 "private:\r\n"
@@ -843,7 +843,7 @@ static const unsigned char temp_5f1192a2[] =
 "    void resized();\r\n"
 "\r\n"
 "private:\r\n"
-"    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (COMPONENTCLASS);\r\n"
+"    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (COMPONENTCLASS)\r\n"
 "};\r\n"
 "\r\n"
 "\r\n"
@@ -863,7 +863,7 @@ static const unsigned char temp_79decf5f[] =
 "  ==============================================================================\r\n"
 "*/\r\n"
 "\r\n"
-"INCLUDE_CORRESPONDING_HEADER";
+"INCLUDE_CORRESPONDING_HEADER\r\n";
 
 const char* jucer_NewCppFileTemplate_cpp = (const char*) temp_79decf5f;
 
@@ -952,7 +952,7 @@ static const unsigned char temp_627c3689[] =
 "    }\r\n"
 "\r\n"
 "private:\r\n"
-"    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (COMPONENTCLASS);\r\n"
+"    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (COMPONENTCLASS)\r\n"
 "};\r\n"
 "\r\n"
 "\r\n"
@@ -1018,17 +1018,17 @@ const char* getNamedResource (const char* resourceNameUTF8, int& numBytes) throw
         case 0x27c5a93a:  numBytes = 1008; return jucer_AudioPluginEditorTemplate_cpp;
         case 0x4d0721bf:  numBytes = 799; return jucer_AudioPluginEditorTemplate_h;
         case 0x51b49ac5:  numBytes = 4559; return jucer_AudioPluginFilterTemplate_cpp;
-        case 0x488afa0a:  numBytes = 2447; return jucer_AudioPluginFilterTemplate_h;
+        case 0x488afa0a:  numBytes = 2446; return jucer_AudioPluginFilterTemplate_h;
         case 0x0b66646c:  numBytes = 886; return jucer_ContentCompTemplate_cpp;
         case 0x6fa10171:  numBytes = 924; return jucer_ContentCompTemplate_h;
         case 0x8905395b:  numBytes = 470; return jucer_MainConsoleAppTemplate_cpp;
         case 0x5e5ea047:  numBytes = 1947; return jucer_MainTemplate_NoWindow_cpp;
-        case 0x400bc026:  numBytes = 3614; return jucer_MainTemplate_Window_cpp;
+        case 0x400bc026:  numBytes = 3613; return jucer_MainTemplate_Window_cpp;
         case 0xf4842835:  numBytes = 1389; return jucer_NewComponentTemplate_cpp;
-        case 0xe7bf237a:  numBytes = 649; return jucer_NewComponentTemplate_h;
-        case 0x02a2a077:  numBytes = 260; return jucer_NewCppFileTemplate_cpp;
+        case 0xe7bf237a:  numBytes = 648; return jucer_NewComponentTemplate_h;
+        case 0x02a2a077:  numBytes = 262; return jucer_NewCppFileTemplate_cpp;
         case 0x0842c43c:  numBytes = 308; return jucer_NewCppFileTemplate_h;
-        case 0x36e634a1:  numBytes = 1627; return jucer_NewInlineComponentTemplate_h;
+        case 0x36e634a1:  numBytes = 1626; return jucer_NewInlineComponentTemplate_h;
         case 0xa41e649d:  numBytes = 2842; return RecentFilesMenuTemplate_nib;
         default: break;
     }

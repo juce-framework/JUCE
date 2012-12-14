@@ -87,7 +87,7 @@ public:
         //==============================================================================
         friend class MidiMessageSequence;
         MidiEventHolder (const MidiMessage& message);
-        JUCE_LEAK_DETECTOR (MidiEventHolder);
+        JUCE_LEAK_DETECTOR (MidiEventHolder)
     };
 
     //==============================================================================
@@ -274,7 +274,7 @@ private:
     friend class MidiFile;
     OwnedArray <MidiEventHolder> list;
 
-    JUCE_LEAK_DETECTOR (MidiMessageSequence);
+    JUCE_LEAK_DETECTOR (MidiMessageSequence)
 };
 
 

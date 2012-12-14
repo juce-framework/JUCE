@@ -328,7 +328,7 @@ public:
             ModuleList& moduleList;
             String moduleID;
 
-            JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ModuleInfoComponent);
+            JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ModuleInfoComponent)
         };
 
         //==============================================================================
@@ -392,7 +392,7 @@ public:
             StringArray missingDependencies;
             TextButton fixButton;
 
-            JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MissingDependenciesComponent);
+            JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MissingDependenciesComponent)
         };
     };
 

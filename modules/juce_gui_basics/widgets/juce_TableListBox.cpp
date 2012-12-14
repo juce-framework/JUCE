@@ -203,7 +203,7 @@ private:
     int row;
     bool isSelected, isDragging, selectRowOnMouseUp;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (RowComp);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (RowComp)
 };
 
 
@@ -240,7 +240,7 @@ private:
 
     enum { autoSizeColumnId = 0xf836743, autoSizeAllId = 0xf836744 };
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Header);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Header)
 };
 
 //==============================================================================

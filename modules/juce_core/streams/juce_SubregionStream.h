@@ -83,7 +83,7 @@ private:
     OptionalScopedPointer<InputStream> source;
     const int64 startPositionInSourceStream, lengthOfSourceStream;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SubregionStream);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SubregionStream)
 };
 
 #endif   // __JUCE_SUBREGIONSTREAM_JUCEHEADER__

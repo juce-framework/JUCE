@@ -40,7 +40,7 @@ public:
                           const OwnedArray <MidiBuffer>& sharedMidiBuffers,
                           const int numSamples) = 0;
 
-    JUCE_LEAK_DETECTOR (AudioGraphRenderingOp);
+    JUCE_LEAK_DETECTOR (AudioGraphRenderingOp)
 };
 
 //==============================================================================
@@ -59,7 +59,7 @@ public:
 private:
     const int channelNum;
 
-    JUCE_DECLARE_NON_COPYABLE (ClearChannelOp);
+    JUCE_DECLARE_NON_COPYABLE (ClearChannelOp)
 };
 
 //==============================================================================
@@ -79,7 +79,7 @@ public:
 private:
     const int srcChannelNum, dstChannelNum;
 
-    JUCE_DECLARE_NON_COPYABLE (CopyChannelOp);
+    JUCE_DECLARE_NON_COPYABLE (CopyChannelOp)
 };
 
 //==============================================================================
@@ -99,7 +99,7 @@ public:
 private:
     const int srcChannelNum, dstChannelNum;
 
-    JUCE_DECLARE_NON_COPYABLE (AddChannelOp);
+    JUCE_DECLARE_NON_COPYABLE (AddChannelOp)
 };
 
 //==============================================================================
@@ -118,7 +118,7 @@ public:
 private:
     const int bufferNum;
 
-    JUCE_DECLARE_NON_COPYABLE (ClearMidiBufferOp);
+    JUCE_DECLARE_NON_COPYABLE (ClearMidiBufferOp)
 };
 
 //==============================================================================
@@ -138,7 +138,7 @@ public:
 private:
     const int srcBufferNum, dstBufferNum;
 
-    JUCE_DECLARE_NON_COPYABLE (CopyMidiBufferOp);
+    JUCE_DECLARE_NON_COPYABLE (CopyMidiBufferOp)
 };
 
 //==============================================================================
@@ -159,7 +159,7 @@ public:
 private:
     const int srcBufferNum, dstBufferNum;
 
-    JUCE_DECLARE_NON_COPYABLE (AddMidiBufferOp);
+    JUCE_DECLARE_NON_COPYABLE (AddMidiBufferOp)
 };
 
 //==============================================================================
@@ -193,7 +193,7 @@ private:
     const int channel, bufferSize;
     int readIndex, writeIndex;
 
-    JUCE_DECLARE_NON_COPYABLE (DelayChannelOp);
+    JUCE_DECLARE_NON_COPYABLE (DelayChannelOp)
 };
 
 
@@ -236,7 +236,7 @@ private:
     int totalChans;
     int midiBufferToUse;
 
-    JUCE_DECLARE_NON_COPYABLE (ProcessBufferOp);
+    JUCE_DECLARE_NON_COPYABLE (ProcessBufferOp)
 };
 
 //==============================================================================
@@ -737,7 +737,7 @@ private:
         }
     }
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (RenderingOpSequenceCalculator);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (RenderingOpSequenceCalculator)
 };
 
 //==============================================================================
@@ -779,7 +779,7 @@ private:
         const uint32 destNodeId;
         SortedSet<uint32> srcNodes;
 
-        JUCE_DECLARE_NON_COPYABLE (Entry);
+        JUCE_DECLARE_NON_COPYABLE (Entry)
     };
 
     OwnedArray<Entry> entries;
@@ -849,7 +849,7 @@ private:
         return result;
     }
 
-    JUCE_DECLARE_NON_COPYABLE (ConnectionLookupTable);
+    JUCE_DECLARE_NON_COPYABLE (ConnectionLookupTable)
 };
 
 //==============================================================================

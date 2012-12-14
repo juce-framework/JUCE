@@ -116,7 +116,7 @@ struct RegistryKeyWrapper
     const wchar_t* wideCharValueName;
     String valueName;
 
-    JUCE_DECLARE_NON_COPYABLE (RegistryKeyWrapper);
+    JUCE_DECLARE_NON_COPYABLE (RegistryKeyWrapper)
 };
 
 uint32 WindowsRegistry::getBinaryValue (const String& regValuePath, MemoryBlock& result)
@@ -131,7 +131,7 @@ String WindowsRegistry::getValue (const String& regValuePath, const String& defa
 
 String WindowsRegistry::getValueWow64 (const String& regValuePath, const String& defaultValue)
 {
-    return RegistryKeyWrapper::getValue (regValuePath, defaultValue, KEY_WOW64_64KEY);
+    return RegistryKeyWrapper::getValue (regValuePath, defaultValue, 0x100 /*KEY_WOW64_64KEY*/);
 }
 
 bool WindowsRegistry::setValue (const String& regValuePath, const String& value)

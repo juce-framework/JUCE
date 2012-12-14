@@ -127,7 +127,7 @@ private:
           void blahBlah();
 
       private:
-          JUCE_LEAK_DETECTOR (MyClass);
+          JUCE_LEAK_DETECTOR (MyClass)
       };
       @endcode
 

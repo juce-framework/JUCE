@@ -129,7 +129,7 @@ private:
 
     void trimFileSize (int64 maxFileSizeBytes) const;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FileLogger);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FileLogger)
 };
 
 

@@ -411,7 +411,7 @@ private:
     void remove (int startPos, int endPos, bool undoable);
     void checkLastLineStatus();
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CodeDocument);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CodeDocument)
 };
 
 

@@ -546,6 +546,12 @@ void ProjectContentComponent::getCommandInfo (const CommandID commandID, Applica
     if (currentDocument != nullptr)
         documentName = " '" + currentDocument->getName().substring (0, 32) + "'";
 
+   #if JUCE_MAC
+    const ModifierKeys cmdCtrl (ModifierKeys::ctrlModifier | ModifierKeys::commandModifier);
+   #else
+    const ModifierKeys cmdCtrl (ModifierKeys::ctrlModifier | ModifierKeys::altModifier);
+   #endif
+
     switch (commandID)
     {
     case CommandIDs::saveProject:
@@ -575,41 +581,25 @@ void ProjectContentComponent::getCommandInfo (const CommandID commandID, Applica
                         "Closes the current document",
                         CommandCategories::general, 0);
         result.setActive (contentView != nullptr);
-       #if JUCE_MAC
-        result.defaultKeypresses.add (KeyPress ('w', ModifierKeys::commandModifier | ModifierKeys::ctrlModifier, 0));
-       #else
-        result.defaultKeypresses.add (KeyPress ('w', ModifierKeys::commandModifier | ModifierKeys::shiftModifier, 0));
-       #endif
+        result.defaultKeypresses.add (KeyPress ('w', cmdCtrl, 0));
         break;
 
     case CommandIDs::goToPreviousDoc:
         result.setInfo ("Previous Document", "Go to previous document", CommandCategories::general, 0);
         result.setActive (recentDocumentList.canGoToPrevious());
-       #if JUCE_MAC
-        result.defaultKeypresses.add (KeyPress (KeyPress::leftKey, ModifierKeys::commandModifier | ModifierKeys::ctrlModifier, 0));
-       #else
-        result.defaultKeypresses.add (KeyPress (KeyPress::leftKey, ModifierKeys::ctrlModifier | ModifierKeys::shiftModifier, 0));
-       #endif
+        result.defaultKeypresses.add (KeyPress (KeyPress::leftKey, cmdCtrl, 0));
         break;
 
     case CommandIDs::goToNextDoc:
         result.setInfo ("Next Document", "Go to next document", CommandCategories::general, 0);
         result.setActive (recentDocumentList.canGoToNext());
-       #if JUCE_MAC
-        result.defaultKeypresses.add (KeyPress (KeyPress::rightKey, ModifierKeys::commandModifier | ModifierKeys::ctrlModifier, 0));
-       #else
-        result.defaultKeypresses.add (KeyPress (KeyPress::rightKey, ModifierKeys::ctrlModifier | ModifierKeys::shiftModifier, 0));
-       #endif
+        result.defaultKeypresses.add (KeyPress (KeyPress::rightKey, cmdCtrl, 0));
         break;
 
     case CommandIDs::goToCounterpart:
         result.setInfo ("Open corresponding header or cpp file", "Open counterpart file", CommandCategories::general, 0);
         result.setActive (canGoToCounterpart());
-       #if JUCE_MAC
-        result.defaultKeypresses.add (KeyPress (KeyPress::upKey, ModifierKeys::commandModifier | ModifierKeys::ctrlModifier, 0));
-       #else
-        result.defaultKeypresses.add (KeyPress (KeyPress::upKey, ModifierKeys::ctrlModifier | ModifierKeys::shiftModifier, 0));
-       #endif
+        result.defaultKeypresses.add (KeyPress (KeyPress::upKey, cmdCtrl, 0));
         break;
 
     case CommandIDs::openInIDE:

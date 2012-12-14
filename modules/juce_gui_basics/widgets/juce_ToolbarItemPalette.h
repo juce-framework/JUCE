@@ -73,7 +73,7 @@ private:
     void replaceComponent (ToolbarItemComponent* comp);
     void addComponent (int itemId, int index);
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ToolbarItemPalette);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ToolbarItemPalette)
 };
 
 

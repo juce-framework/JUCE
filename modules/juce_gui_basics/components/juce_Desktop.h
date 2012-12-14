@@ -427,7 +427,7 @@ private:
     Desktop();
     ~Desktop();
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Desktop);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Desktop)
 };
 
 

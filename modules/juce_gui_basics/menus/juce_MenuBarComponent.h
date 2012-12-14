@@ -117,7 +117,7 @@ private:
     void menuDismissed (int topLevelIndex, int itemId);
     static void menuBarMenuDismissedCallback (int, MenuBarComponent*, int);
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MenuBarComponent);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MenuBarComponent)
 };
 
 #endif   // __JUCE_MENUBARCOMPONENT_JUCEHEADER__

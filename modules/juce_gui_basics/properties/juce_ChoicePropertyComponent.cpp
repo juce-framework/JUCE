@@ -27,23 +27,28 @@ class ChoicePropertyComponent::RemapperValueSource    : public Value::ValueSourc
                                                         private ValueListener
 {
 public:
-    RemapperValueSource (const Value& sourceValue_, const Array<var>& mappings_)
-       : sourceValue (sourceValue_),
-         mappings (mappings_)
+    RemapperValueSource (const Value& source, const Array<var>& map)
+       : sourceValue (source), mappings (map)
     {
         sourceValue.addListener (this);
     }
 
     var getValue() const
     {
-        return mappings.indexOf (sourceValue.getValue()) + 1;
+        const var targetValue (sourceValue.getValue());
+
+        for (int i = 0; i < mappings.size(); ++i)
+            if (mappings.getReference(i).equalsWithSameType (targetValue))
+                return i + 1;
+
+        return mappings.indexOf (targetValue) + 1;
     }
 
     void setValue (const var& newValue)
     {
-        const var remappedVal (mappings [(int) newValue - 1]);
+        const var remappedVal (mappings [static_cast <int> (newValue) - 1]);
 
-        if (remappedVal != sourceValue)
+        if (! remappedVal.equalsWithSameType (sourceValue))
             sourceValue = remappedVal;
     }
 
@@ -56,7 +61,7 @@ protected:
         sendChangeMessage (true);
     }
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (RemapperValueSource);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (RemapperValueSource)
 };
 
 
@@ -69,10 +74,10 @@ ChoicePropertyComponent::ChoicePropertyComponent (const String& name)
 
 ChoicePropertyComponent::ChoicePropertyComponent (const Value& valueToControl,
                                                   const String& name,
-                                                  const StringArray& choices_,
+                                                  const StringArray& choiceList,
                                                   const Array <var>& correspondingValues)
     : PropertyComponent (name),
-      choices (choices_),
+      choices (choiceList),
       isCustomClass (false)
 {
     // The array of corresponding values must contain one value for each of the items in
@@ -81,7 +86,8 @@ ChoicePropertyComponent::ChoicePropertyComponent (const Value& valueToControl,
 
     createComboBox();
 
-    comboBox.getSelectedIdAsValue().referTo (Value (new RemapperValueSource (valueToControl, correspondingValues)));
+    comboBox.getSelectedIdAsValue().referTo (Value (new RemapperValueSource (valueToControl,
+                                                                             correspondingValues)));
 }
 
 ChoicePropertyComponent::~ChoicePropertyComponent()

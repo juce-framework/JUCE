@@ -113,7 +113,7 @@ private:
 
     void timerCallback();
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ProgressBar);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ProgressBar)
 };
 
 

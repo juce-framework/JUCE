@@ -93,7 +93,7 @@ private:
     Drawable* getImageToUse() const;
     void setCurrentImage (Drawable*);
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ToolbarButton);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ToolbarButton)
 };
 
 

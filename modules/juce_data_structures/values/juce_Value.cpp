@@ -80,7 +80,7 @@ private:
         }
     }
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SharedValueSourceUpdater);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SharedValueSourceUpdater)
 };
 
 static WeakReference<SharedValueSourceUpdater> sharedUpdater;
@@ -162,7 +162,7 @@ public:
 private:
     var value;
 
-    JUCE_DECLARE_NON_COPYABLE (SimpleValueSource);
+    JUCE_DECLARE_NON_COPYABLE (SimpleValueSource)
 };
 
 

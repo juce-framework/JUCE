@@ -72,7 +72,7 @@ public:
 private:
     Array<IDType> currentTouches;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MultiTouchMapper);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MultiTouchMapper)
 };
 
 #endif   // __JUCE_MULTITOUCHMAPPER_JUCEHEADER__

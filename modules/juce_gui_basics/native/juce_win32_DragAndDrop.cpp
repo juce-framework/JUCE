@@ -121,7 +121,7 @@ namespace DragAndDropHelpers
             }
         }
 
-        JUCE_DECLARE_NON_COPYABLE (JuceEnumFormatEtc);
+        JUCE_DECLARE_NON_COPYABLE (JuceEnumFormatEtc)
     };
 
     //==============================================================================
@@ -214,7 +214,7 @@ namespace DragAndDropHelpers
         const FORMATETC* const format;
         const STGMEDIUM* const medium;
 
-        JUCE_DECLARE_NON_COPYABLE (JuceDataObject);
+        JUCE_DECLARE_NON_COPYABLE (JuceDataObject)
     };
 
     //==============================================================================

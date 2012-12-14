@@ -109,7 +109,7 @@ private:
     float* stackPos;
     size_t index, stackSize;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PathFlatteningIterator);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PathFlatteningIterator)
 };
 
 

@@ -73,7 +73,7 @@ private:
     Reverb reverb;
     volatile bool bypass;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ReverbAudioSource);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ReverbAudioSource)
 };
 
 

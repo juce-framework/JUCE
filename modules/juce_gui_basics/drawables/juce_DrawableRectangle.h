@@ -100,7 +100,7 @@ private:
     void recalculateCoordinates (Expression::Scope*);
 
     DrawableRectangle& operator= (const DrawableRectangle&);
-    JUCE_LEAK_DETECTOR (DrawableRectangle);
+    JUCE_LEAK_DETECTOR (DrawableRectangle)
 };
 
 

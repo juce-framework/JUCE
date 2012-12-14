@@ -168,10 +168,10 @@ private:
         Component::BailOutChecker& checker;
         const WeakReference<Component> safePointer;
 
-        JUCE_DECLARE_NON_COPYABLE (BailOutChecker2);
+        JUCE_DECLARE_NON_COPYABLE (BailOutChecker2)
     };
 
-    JUCE_DECLARE_NON_COPYABLE (MouseListenerList);
+    JUCE_DECLARE_NON_COPYABLE (MouseListenerList)
 };
 
 
@@ -733,7 +733,7 @@ private:
     RectangleList validArea;
     Component& owner;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (StandardCachedComponentImage);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (StandardCachedComponentImage)
 };
 
 void Component::setCachedComponentImage (CachedComponentImage* newCachedImage)

@@ -234,7 +234,7 @@ public:
     {
         JUCE_AUTORELEASEPOOL
         checkThreadIsAttached();
-        bool ok = true;
+        bool readOk = true;
 
         while (numSamples > 0)
         {
@@ -253,7 +253,7 @@ public:
 
                 if (err != noErr)
                 {
-                    ok = false;
+                    readOk = false;
                     break;
                 }
             }
@@ -266,7 +266,7 @@ public:
             OSStatus err = MovieAudioExtractionFillBuffer (extractor, &actualNumFrames, bufferList, &outFlags);
             if (err != noErr)
             {
-                ok = false;
+                readOk = false;
                 break;
             }
 
@@ -302,7 +302,7 @@ public:
         }
 
         detachThread();
-        return ok;
+        return readOk;
     }
 
     bool ok;
@@ -339,7 +339,7 @@ private:
        #endif
     }
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (QTAudioReader);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (QTAudioReader)
 };
 
 

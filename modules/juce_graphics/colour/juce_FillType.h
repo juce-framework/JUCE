@@ -146,7 +146,7 @@ public:
     bool operator!= (const FillType& other) const;
 
 private:
-    JUCE_LEAK_DETECTOR (FillType);
+    JUCE_LEAK_DETECTOR (FillType)
 };
 
 

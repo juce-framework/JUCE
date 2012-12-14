@@ -39,7 +39,7 @@ public:
          bug, mainJuceLogo;
 
 private:
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Icons);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Icons)
 };
 
 const Icons& getIcons();

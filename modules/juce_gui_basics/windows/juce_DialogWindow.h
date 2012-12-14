@@ -258,7 +258,7 @@ protected:
 private:
     bool escapeKeyTriggersCloseButton;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DialogWindow);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DialogWindow)
 };
 
 #endif   // __JUCE_DIALOGWINDOW_JUCEHEADER__

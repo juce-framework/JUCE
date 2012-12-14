@@ -257,7 +257,7 @@ private:
 
     TextButton typeButton;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TreeViewDemo);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TreeViewDemo)
 };
 
 

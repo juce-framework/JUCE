@@ -118,7 +118,7 @@ private:
     ImageCache();
     ~ImageCache();
 
-    JUCE_DECLARE_NON_COPYABLE (ImageCache);
+    JUCE_DECLARE_NON_COPYABLE (ImageCache)
 };
 
 #endif   // __JUCE_IMAGECACHE_JUCEHEADER__

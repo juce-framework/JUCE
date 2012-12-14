@@ -98,7 +98,7 @@ private:
     MidiBuffer incomingMessages;
     double sampleRate;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MidiMessageCollector);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MidiMessageCollector)
 };
 
 

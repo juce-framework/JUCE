@@ -72,7 +72,7 @@ public:
         Component* findSiblingComponent (const String& componentID) const;
 
     private:
-        JUCE_DECLARE_NON_COPYABLE (ComponentScope);
+        JUCE_DECLARE_NON_COPYABLE (ComponentScope)
     };
 
 protected:
@@ -90,7 +90,7 @@ private:
     void registerMarkerListListener (MarkerList* const list);
     void unregisterListeners();
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (RelativeCoordinatePositionerBase);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (RelativeCoordinatePositionerBase)
 };
 
 

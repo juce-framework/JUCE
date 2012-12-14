@@ -164,7 +164,7 @@ private:
 
     StreamingSocket (const String& hostname, int portNumber, int handle);
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (StreamingSocket);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (StreamingSocket)
 };
 
 
@@ -293,7 +293,7 @@ private:
 
     DatagramSocket (const String& hostname, int portNumber, int handle, int localPortNumber);
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DatagramSocket);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DatagramSocket)
 };
 
 

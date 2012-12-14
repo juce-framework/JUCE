@@ -619,6 +619,9 @@ public:
     */
     WrapperType wrapperType;
 
+    /** @internal */
+    static void setTypeOfNextNewPlugin (WrapperType);
+
 protected:
     //==============================================================================
     /** Helper function that just converts an xml element into a binary blob.
@@ -658,7 +661,7 @@ private:
     BigInteger changingParams;
    #endif
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioProcessor);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioProcessor)
 };
 
 

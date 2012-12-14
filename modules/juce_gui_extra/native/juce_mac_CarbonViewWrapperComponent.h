@@ -55,8 +55,8 @@ public:
 
     virtual HIViewRef attachView (WindowRef windowRef, HIViewRef rootView) = 0;
     virtual void removeView (HIViewRef embeddedView) = 0;
-    virtual void mouseDown (int, int) {}
-    virtual void paint() {}
+    virtual void handleMouseDown (int, int) {}
+    virtual void handlePaint() {}
 
     virtual bool getEmbeddedViewSize (int& w, int& h)
     {
@@ -75,10 +75,10 @@ public:
         if (wrapperWindow == 0)
         {
             Rect r;
-            r.left   = getScreenX();
-            r.top    = getScreenY();
-            r.right  = r.left + getWidth();
-            r.bottom = r.top + getHeight();
+            r.left   = (short) getScreenX();
+            r.top    = (short) getScreenY();
+            r.right  = (short) (r.left + getWidth());
+            r.bottom = (short) (r.top + getHeight());
 
             CreateNewWindow (kDocumentWindowClass,
                              (WindowAttributes) (kWindowStandardHandlerAttribute | kWindowCompositingAttribute
@@ -195,10 +195,10 @@ public:
             if (wrapperWindow != 0)
             {
                 Rect wr;
-                wr.left   = getScreenX();
-                wr.top    = getScreenY();
-                wr.right  = wr.left + getWidth();
-                wr.bottom = wr.top + getHeight();
+                wr.left   = (short) getScreenX();
+                wr.top    = (short) getScreenY();
+                wr.right  = (short) (wr.left + getWidth());
+                wr.bottom = (short) (wr.top + getHeight());
 
                 SetWindowBounds (wrapperWindow, kWindowContentRgn, &wr);
                 ShowWindow (wrapperWindow);

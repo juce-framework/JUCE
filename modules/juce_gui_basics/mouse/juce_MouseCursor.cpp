@@ -40,7 +40,7 @@ struct CustomMouseCursorInfo
     float scaleFactor;
 
 private:
-    JUCE_DECLARE_NON_COPYABLE (CustomMouseCursorInfo);
+    JUCE_DECLARE_NON_COPYABLE (CustomMouseCursorInfo)
 };
 
 class MouseCursor::SharedCursorHandle
@@ -123,7 +123,7 @@ private:
         return cursors [type];
     }
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SharedCursorHandle);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SharedCursorHandle)
 };
 
 SpinLock MouseCursor::SharedCursorHandle::lock;

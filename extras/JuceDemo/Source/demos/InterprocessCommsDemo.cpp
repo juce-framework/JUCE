@@ -302,7 +302,7 @@ private:
 
     ScopedPointer<DemoInterprocessConnectionServer> server;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (InterprocessCommsDemo);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (InterprocessCommsDemo)
 };
 
 

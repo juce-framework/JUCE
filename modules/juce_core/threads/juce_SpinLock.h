@@ -83,7 +83,7 @@ private:
     //==============================================================================
     mutable Atomic<int> lock;
 
-    JUCE_DECLARE_NON_COPYABLE (SpinLock);
+    JUCE_DECLARE_NON_COPYABLE (SpinLock)
 };
 
 

@@ -166,7 +166,10 @@
 //==============================================================================
 // Compiler type macros.
 
-#ifdef __GNUC__
+#ifdef __clang__
+ #define JUCE_CLANG 1
+ #define JUCE_GCC 1
+#elif defined (__GNUC__)
   #define JUCE_GCC 1
 #elif defined (_MSC_VER)
   #define JUCE_MSVC 1
@@ -188,10 +191,6 @@
   #endif
 #else
   #error unknown compiler
-#endif
-
-#ifdef __clang__
- #define JUCE_CLANG 1
 #endif
 
 #endif   // __JUCE_TARGETPLATFORM_JUCEHEADER__

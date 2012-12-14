@@ -100,7 +100,7 @@ public:
         void prepare (double sampleRate, int blockSize, AudioProcessorGraph*);
         void unprepare();
 
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Node);
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Node)
     };
 
     //==============================================================================
@@ -146,7 +146,7 @@ public:
 
     private:
         //==============================================================================
-        JUCE_LEAK_DETECTOR (Connection);
+        JUCE_LEAK_DETECTOR (Connection)
     };
 
     //==============================================================================
@@ -349,7 +349,7 @@ public:
         const IODeviceType type;
         AudioProcessorGraph* graph;
 
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioGraphIOProcessor);
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioGraphIOProcessor)
     };
 
     //==============================================================================
@@ -410,7 +410,7 @@ private:
     void buildRenderingSequence();
     bool isAnInputTo (uint32 possibleInputId, uint32 possibleDestinationId, int recursionCheck) const;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioProcessorGraph);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioProcessorGraph)
 };
 
 

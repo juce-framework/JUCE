@@ -44,7 +44,7 @@ struct FTLibWrapper     : public ReferenceCountedObject
 
     typedef ReferenceCountedObjectPtr <FTLibWrapper> Ptr;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FTLibWrapper);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FTLibWrapper)
 };
 
 //==============================================================================
@@ -68,7 +68,7 @@ struct FTFaceWrapper     : public ReferenceCountedObject
 
     typedef ReferenceCountedObjectPtr <FTFaceWrapper> Ptr;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FTFaceWrapper);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FTFaceWrapper)
 };
 
 //==============================================================================
@@ -139,7 +139,7 @@ private:
     int index;
     ScopedPointer<DirectoryIterator> iter;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LinuxFontFileIterator);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LinuxFontFileIterator)
 };
 
 //==============================================================================
@@ -198,7 +198,7 @@ public:
         const int faceIndex;
         const bool isMonospaced, isSansSerif;
 
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (KnownTypeface);
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (KnownTypeface)
     };
 
     //==============================================================================
@@ -302,7 +302,7 @@ private:
         return false;
     }
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FTTypefaceList);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FTTypefaceList)
 };
 
 juce_ImplementSingleton_SingleThreaded (FTTypefaceList)
@@ -466,7 +466,7 @@ private:
         }
     }
 
-    JUCE_DECLARE_NON_COPYABLE (FreeTypeTypeface);
+    JUCE_DECLARE_NON_COPYABLE (FreeTypeTypeface)
 };
 
 //==============================================================================
@@ -549,7 +549,7 @@ private:
         return pickBestFont (allFonts, targets);
     }
 
-    JUCE_DECLARE_NON_COPYABLE (DefaultFontNames);
+    JUCE_DECLARE_NON_COPYABLE (DefaultFontNames)
 };
 
 Typeface::Ptr Font::getDefaultTypefaceForFont (const Font& font)

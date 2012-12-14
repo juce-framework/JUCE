@@ -67,7 +67,7 @@ public:
 
 private:
     //==============================================================================
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (BrowserPluginComponent);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (BrowserPluginComponent)
 };
 
 #endif   // __JUCE_BROWSERPLUGINCOMPONENT_JUCEHEADER__

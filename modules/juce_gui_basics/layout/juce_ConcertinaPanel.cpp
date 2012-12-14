@@ -271,7 +271,7 @@ private:
         return *panel;
     }
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PanelHolder);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PanelHolder)
 };
 
 //==============================================================================

@@ -99,7 +99,7 @@ private:
 
     void applyFilter (float* samples, int num, FilterState& fs);
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ResamplingAudioSource);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ResamplingAudioSource)
 };
 
 

@@ -59,7 +59,7 @@ public:
                                         const StringPairArray& metadataValues,
                                         int qualityOptionIndex);
 private:
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FlacAudioFormat);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FlacAudioFormat)
 };
 
 

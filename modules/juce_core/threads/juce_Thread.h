@@ -283,7 +283,7 @@ private:
     void threadEntryPoint();
     static bool setThreadPriority (void*, int);
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Thread);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Thread)
 };
 
 #endif   // __JUCE_THREAD_JUCEHEADER__

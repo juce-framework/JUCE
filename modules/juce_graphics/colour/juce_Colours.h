@@ -104,7 +104,7 @@ private:
     // static values in it.
     Colours();
 
-    JUCE_DECLARE_NON_COPYABLE (Colours);
+    JUCE_DECLARE_NON_COPYABLE (Colours)
 };
 
 #endif   // __JUCE_COLOURS_JUCEHEADER__

@@ -1547,7 +1547,10 @@ public:
 
         If not overridden, a component will forward this message to its parent, so
         that parent components can collect mouse-wheel messages that happen to
-        child components which aren't interested in them.
+        child components which aren't interested in them. (Bear in mind that if
+        you attach a component as a mouse-listener to other components, then
+        those wheel moves will also end up calling this method and being passed up
+        to the parents, which may not be what you intended to happen).
 
         @param event   details about the mouse event
         @param wheel   details about the mouse wheel movement
@@ -2136,7 +2139,7 @@ public:
     private:
         const WeakReference<Component> safePointer;
 
-        JUCE_DECLARE_NON_COPYABLE (BailOutChecker);
+        JUCE_DECLARE_NON_COPYABLE (BailOutChecker)
     };
 
     //==============================================================================
@@ -2169,7 +2172,7 @@ public:
     private:
         Component& component;
 
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Positioner);
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Positioner)
     };
 
     /** Returns the Positioner object that has been set for this component.
@@ -2307,7 +2310,7 @@ private:
     /* Components aren't allowed to have copy constructors, as this would mess up parent hierarchies.
        You might need to give your subclasses a private dummy constructor to avoid compiler warnings.
     */
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Component);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Component)
 
     //==============================================================================
    #if JUCE_CATCH_DEPRECATED_CODE_MISUSE

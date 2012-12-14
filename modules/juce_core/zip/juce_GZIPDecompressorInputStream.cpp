@@ -157,7 +157,7 @@ private:
     uint8* data;
     size_t dataSize;
 
-    JUCE_DECLARE_NON_COPYABLE (GZIPDecompressHelper);
+    JUCE_DECLARE_NON_COPYABLE (GZIPDecompressHelper)
 };
 
 //==============================================================================

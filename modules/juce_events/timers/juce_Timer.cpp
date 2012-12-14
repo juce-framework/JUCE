@@ -286,7 +286,7 @@ private:
     }
    #endif
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TimerThread);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TimerThread)
 };
 
 Timer::TimerThread* Timer::TimerThread::instance = nullptr;
