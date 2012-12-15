@@ -40,12 +40,18 @@ extern "C"
 
 namespace CoreTextTypeLayout
 {
-    static String findBestAvailableStyle (const String& typefaceName, const String& style)
+    static String findBestAvailableStyle (const Font& font, CGAffineTransform& requiredTransform)
     {
-        const StringArray availableStyles (Font::findAllTypefaceStyles (typefaceName));
+        const StringArray availableStyles (Font::findAllTypefaceStyles (font.getTypefaceName()));
+        const String style (font.getTypefaceStyle());
 
         if (! availableStyles.contains (style))
+        {
+            if (font.isItalic())
+                requiredTransform = { 1.0f, 0, 0.25f, 1.0f, 0, 0 }; // Fake-up an italic font if there isn't a real one.
+
             return availableStyles[0];
+        }
 
         return style;
     }
@@ -54,12 +60,13 @@ namespace CoreTextTypeLayout
    #if JUCE_MAC && ((! defined (MAC_OS_X_VERSION_10_7)) || MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_7)
     static CTFontRef getFontWithTrait (CTFontRef ctFontRef, CTFontSymbolicTraits trait)
     {
-        CTFontRef newFont = CTFontCreateCopyWithSymbolicTraits (ctFontRef, 0.0f, nullptr, trait, trait);
-        if (newFont == nullptr)
-            return ctFontRef;
+        if (CTFontRef newFont = CTFontCreateCopyWithSymbolicTraits (ctFontRef, 0.0f, nullptr, trait, trait))
+        {
+            CFRelease (ctFontRef);
+            return newFont;
+        }
 
-        CFRelease (ctFontRef);
-        return newFont;
+        return ctFontRef;
     }
 
     static CTFontRef useStyleFallbackIfNecessary (CTFontRef ctFontRef, CFStringRef cfFontFamily,
@@ -81,11 +88,11 @@ namespace CoreTextTypeLayout
     }
    #endif
 
-    static CTFontRef createCTFont (const Font& font, const float fontSize, const bool applyScaleFactor)
+    static CTFontRef createCTFont (const Font& font, const float fontSize,
+                                   CGAffineTransform& transformRequired, const bool applyScaleFactor)
     {
         CFStringRef cfFontFamily = FontStyleHelpers::getConcreteFamilyName (font).toCFString();
-        CFStringRef cfFontStyle = findBestAvailableStyle (font.getTypefaceName(),
-                                                          font.getTypefaceStyle()).toCFString();
+        CFStringRef cfFontStyle = findBestAvailableStyle (font, transformRequired).toCFString();
         CFStringRef keys[] = { kCTFontFamilyNameAttribute, kCTFontStyleNameAttribute };
         CFTypeRef values[] = { cfFontFamily, cfFontStyle };
 
@@ -199,29 +206,29 @@ namespace CoreTextTypeLayout
             Range<int> range (attr->range);
             range.setEnd (jmin (range.getEnd(), (int) CFAttributedStringGetLength (attribString)));
 
-            if (attr->getFont() != nullptr)
+            if (const Font* const f = attr->getFont())
             {
-                const Font& f = *attr->getFont();
-                CTFontRef ctFontRef = createCTFont (f, f.getHeight(), true);
+                CGAffineTransform transform;
+                CTFontRef ctFontRef = createCTFont (*f, f->getHeight(), transform, true);
 
                 CFAttributedStringSetAttribute (attribString, CFRangeMake (range.getStart(), range.getLength()),
                                                 kCTFontAttributeName, ctFontRef);
                 CFRelease (ctFontRef);
             }
 
-            if (attr->getColour() != nullptr)
+            if (const Colour* const col = attr->getColour())
             {
                #if JUCE_IOS
-                const CGFloat components[] = { attr->getColour()->getFloatRed(),
-                                               attr->getColour()->getFloatGreen(),
-                                               attr->getColour()->getFloatBlue(),
-                                               attr->getColour()->getFloatAlpha() };
+                const CGFloat components[] = { col->getFloatRed(),
+                                               col->getFloatGreen(),
+                                               col->getFloatBlue(),
+                                               col->getFloatAlpha() };
                 CGColorRef colour = CGColorCreate (rgbColourSpace, components);
                #else
-                CGColorRef colour = CGColorCreateGenericRGB (attr->getColour()->getFloatRed(),
-                                                             attr->getColour()->getFloatGreen(),
-                                                             attr->getColour()->getFloatBlue(),
-                                                             attr->getColour()->getFloatAlpha());
+                CGColorRef colour = CGColorCreateGenericRGB (col->getFloatRed(),
+                                                             col->getFloatGreen(),
+                                                             col->getFloatBlue(),
+                                                             col->getFloatAlpha());
                #endif
 
                 CFAttributedStringSetAttribute (attribString,
@@ -415,7 +422,7 @@ public:
           ascent (0.0f),
           unitsToHeightScaleFactor (0.0f)
     {
-        ctFontRef = CoreTextTypeLayout::createCTFont (font, 1024.0f, false);
+        ctFontRef = CoreTextTypeLayout::createCTFont (font, 1024.0f, renderingTransform, false);
 
         if (ctFontRef != nullptr)
         {
@@ -423,7 +430,7 @@ public:
             const float totalSize = ascent + std::abs ((float) CTFontGetDescent (ctFontRef));
             ascent /= totalSize;
 
-            pathTransform = AffineTransform::identity.scale (1.0f / totalSize, 1.0f / totalSize);
+            pathTransform = AffineTransform::identity.scale (1.0f / totalSize);
 
             fontRef = CTFontCopyGraphicsFont (ctFontRef, nullptr);
 
@@ -718,7 +725,7 @@ public:
         float totalSize = ascent + std::abs ((float) [nsFont descender]);
         ascent /= totalSize;
 
-        pathTransform = AffineTransform::identity.scale (1.0f / totalSize, 1.0f / totalSize);
+        pathTransform = AffineTransform::identity.scale (1.0f / totalSize);
 
       #if SUPPORT_ONLY_10_4_FONTS
         ATSFontRef atsFont = ATSFontFindFromName ((CFStringRef) [nsFont fontName], kATSOptionFlagsDefault);
