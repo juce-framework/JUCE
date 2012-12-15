@@ -246,6 +246,12 @@ bool Desktop::isScreenSaverEnabled()
 }
 
 //==============================================================================
+bool juce_areThereAnyAlwaysOnTopWindows()
+{
+    return false;
+}
+
+//==============================================================================
 Image juce_createIconForFile (const File& file)
 {
     return Image::null;

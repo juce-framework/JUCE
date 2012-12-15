@@ -326,6 +326,24 @@ void Desktop::Displays::findDisplays()
 }
 
 //==============================================================================
+bool juce_areThereAnyAlwaysOnTopWindows()
+{
+    NSArray* windows = [NSApp windows];
+
+    for (unsigned int i = 0; i < [windows count]; ++i)
+    {
+        const NSInteger level = [((NSWindow*) [windows objectAtIndex: i]) level];
+
+        if (level == NSFloatingWindowLevel
+             || level == NSStatusWindowLevel
+             || level == NSModalPanelWindowLevel)
+            return true;
+    }
+
+    return false;
+}
+
+//==============================================================================
 Image juce_createIconForFile (const File& file)
 {
     JUCE_AUTORELEASEPOOL

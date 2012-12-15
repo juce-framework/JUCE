@@ -704,6 +704,12 @@ void Desktop::setKioskComponent (Component* kioskModeComponent, bool enableOrDis
 }
 
 //==============================================================================
+bool juce_areThereAnyAlwaysOnTopWindows()
+{
+    return false;
+}
+
+//==============================================================================
 void Desktop::Displays::findDisplays()
 {
     Display d;
