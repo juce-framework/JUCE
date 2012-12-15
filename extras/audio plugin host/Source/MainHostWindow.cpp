@@ -116,6 +116,8 @@ MainHostWindow::MainHostWindow()
    #else
     setMenuBar (this);
    #endif
+
+    commandManager->setFirstCommandTarget (this);
 }
 
 MainHostWindow::~MainHostWindow()
