@@ -554,8 +554,8 @@ namespace GradientPixelIterators
 
             if (x >= maxDist)
                 return lookupTable [numEntries];
-            else
-                return lookupTable [jmin (numEntries, roundToInt (std::sqrt (x) * invScale))];
+
+            return lookupTable [jmin (numEntries, roundToInt (std::sqrt (x) * invScale))];
         }
 
     private:
