@@ -160,7 +160,7 @@ namespace DirectWriteTypeLayout
     };
 
     //==================================================================================================
-    float getFontHeightToEmSizeFactor (IDWriteFont* const dwFont)
+    static float getFontHeightToEmSizeFactor (IDWriteFont* const dwFont)
     {
         ComSmartPtr<IDWriteFontFace> dwFontFace;
         dwFont->CreateFontFace (dwFontFace.resetAndGetPointerAddress());

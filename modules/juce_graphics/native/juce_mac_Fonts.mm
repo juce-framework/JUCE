@@ -28,6 +28,8 @@
  #define JUCE_CORETEXT_AVAILABLE 1
 #endif
 
+const float referenceFontSize = 1024.0f;
+
 #if JUCE_CORETEXT_AVAILABLE
 
 #if JUCE_MAC && MAC_OS_X_VERSION_MAX_ALLOWED == MAC_OS_X_VERSION_10_5
@@ -70,14 +72,14 @@ namespace CoreTextTypeLayout
     }
 
     static CTFontRef useStyleFallbackIfNecessary (CTFontRef ctFontRef, CFStringRef cfFontFamily,
-                                                  const float fontSize, const Font& font)
+                                                  const float fontSizePoints, const Font& font)
     {
         CFStringRef cfActualFontFamily = (CFStringRef) CTFontCopyAttribute (ctFontRef, kCTFontFamilyNameAttribute);
 
         if (CFStringCompare (cfFontFamily, cfActualFontFamily, 0) != kCFCompareEqualTo)
         {
             CFRelease (ctFontRef);
-            ctFontRef = CTFontCreateWithName (cfFontFamily, fontSize, nullptr);
+            ctFontRef = CTFontCreateWithName (cfFontFamily, fontSizePoints, nullptr);
 
             if (font.isItalic())   ctFontRef = getFontWithTrait (ctFontRef, kCTFontItalicTrait);
             if (font.isBold())     ctFontRef = getFontWithTrait (ctFontRef, kCTFontBoldTrait);
@@ -88,8 +90,24 @@ namespace CoreTextTypeLayout
     }
    #endif
 
-    static CTFontRef createCTFont (const Font& font, const float fontSize,
-                                   CGAffineTransform& transformRequired, const bool applyScaleFactor)
+    static float getFontTotalHeight (CTFontRef font)
+    {
+        return std::abs ((float) CTFontGetAscent (font)) + std::abs ((float) CTFontGetDescent (font));
+    }
+
+    static float getHeightToPointsFactor (CTFontRef font)
+    {
+        return referenceFontSize / getFontTotalHeight (font);
+    }
+
+    static CTFontRef getFontWithPointSize (CTFontRef font, float size)
+    {
+        CTFontRef newFont = CTFontCreateCopyWithAttributes (font, size, nullptr, nullptr);
+        CFRelease (font);
+        return newFont;
+    }
+
+    static CTFontRef createCTFont (const Font& font, const float fontSizePoints, CGAffineTransform& transformRequired)
     {
         CFStringRef cfFontFamily = FontStyleHelpers::getConcreteFamilyName (font).toCFString();
         CFStringRef cfFontStyle = findBestAvailableStyle (font, transformRequired).toCFString();
@@ -106,26 +124,14 @@ namespace CoreTextTypeLayout
         CTFontDescriptorRef ctFontDescRef = CTFontDescriptorCreateWithAttributes (fontDescAttributes);
         CFRelease (fontDescAttributes);
 
-        CTFontRef ctFontRef = CTFontCreateWithFontDescriptor (ctFontDescRef, fontSize, nullptr);
+        CTFontRef ctFontRef = CTFontCreateWithFontDescriptor (ctFontDescRef, fontSizePoints, nullptr);
         CFRelease (ctFontDescRef);
 
        #if JUCE_MAC && ((! defined (MAC_OS_X_VERSION_10_7)) || MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_7)
-        ctFontRef = useStyleFallbackIfNecessary (ctFontRef, cfFontFamily, fontSize, font);
+        ctFontRef = useStyleFallbackIfNecessary (ctFontRef, cfFontFamily, fontSizePoints, font);
        #endif
 
         CFRelease (cfFontFamily);
-
-        if (applyScaleFactor)
-        {
-            CGFontRef cgFontRef = CTFontCopyGraphicsFont (ctFontRef, nullptr);
-            const int totalHeight = std::abs (CGFontGetAscent (cgFontRef)) + std::abs (CGFontGetDescent (cgFontRef));
-            const float factor = CGFontGetUnitsPerEm (cgFontRef) / (float) totalHeight;
-            CGFontRelease (cgFontRef);
-
-            CTFontRef newFont = CTFontCreateCopyWithAttributes (ctFontRef, fontSize * factor, nullptr, nullptr);
-            CFRelease (ctFontRef);
-            ctFontRef = newFont;
-        }
 
         return ctFontRef;
     }
@@ -209,7 +215,8 @@ namespace CoreTextTypeLayout
             if (const Font* const f = attr->getFont())
             {
                 CGAffineTransform transform;
-                CTFontRef ctFontRef = createCTFont (*f, f->getHeight(), transform, true);
+                CTFontRef ctFontRef = createCTFont (*f, referenceFontSize, transform);
+                ctFontRef = getFontWithPointSize (ctFontRef, f->getHeight() * getHeightToPointsFactor (ctFontRef));
 
                 CFAttributedStringSetAttribute (attribString, CFRangeMake (range.getStart(), range.getLength()),
                                                 kCTFontAttributeName, ctFontRef);
@@ -362,21 +369,18 @@ namespace CoreTextTypeLayout
                 if (CFDictionaryGetValueIfPresent (runAttributes, kCTFontAttributeName, (const void **) &ctRunFont))
                 {
                     CFStringRef cfsFontName = CTFontCopyPostScriptName (ctRunFont);
-                    CTFontRef ctFontRef = CTFontCreateWithName (cfsFontName, 1024, nullptr);
+                    CTFontRef ctFontRef = CTFontCreateWithName (cfsFontName, referenceFontSize, nullptr);
                     CFRelease (cfsFontName);
 
-                    CGFontRef cgFontRef = CTFontCopyGraphicsFont (ctFontRef, nullptr);
+                    const float fontHeightToPointsFactor = getHeightToPointsFactor (ctFontRef);
                     CFRelease (ctFontRef);
-                    const int totalHeight = std::abs (CGFontGetAscent (cgFontRef)) + std::abs (CGFontGetDescent (cgFontRef));
-                    const float fontHeightToCGSizeFactor = CGFontGetUnitsPerEm (cgFontRef) / (float) totalHeight;
-                    CGFontRelease (cgFontRef);
 
                     CFStringRef cfsFontFamily = (CFStringRef) CTFontCopyAttribute (ctRunFont, kCTFontFamilyNameAttribute);
                     CFStringRef cfsFontStyle  = (CFStringRef) CTFontCopyAttribute (ctRunFont, kCTFontStyleNameAttribute);
 
                     glyphRun->font = Font (String::fromCFString (cfsFontFamily),
                                            String::fromCFString (cfsFontStyle),
-                                           CTFontGetSize (ctRunFont) / fontHeightToCGSizeFactor);
+                                           CTFontGetSize (ctRunFont) / fontHeightToPointsFactor);
 
                     CFRelease (cfsFontStyle);
                     CFRelease (cfsFontFamily);
@@ -415,29 +419,27 @@ public:
         : Typeface (font.getTypefaceName(),
           font.getTypefaceStyle()),
           fontRef (nullptr),
-          fontHeightToCGSizeFactor (1.0f),
+          fontHeightToPointsFactor (1.0f),
           renderingTransform (CGAffineTransformIdentity),
           ctFontRef (nullptr),
           attributedStringAtts (nullptr),
           ascent (0.0f),
           unitsToHeightScaleFactor (0.0f)
     {
-        ctFontRef = CoreTextTypeLayout::createCTFont (font, 1024.0f, renderingTransform, false);
+        ctFontRef = CoreTextTypeLayout::createCTFont (font, referenceFontSize, renderingTransform);
 
         if (ctFontRef != nullptr)
         {
-            ascent = std::abs ((float) CTFontGetAscent (ctFontRef));
-            const float totalSize = ascent + std::abs ((float) CTFontGetDescent (ctFontRef));
-            ascent /= totalSize;
+            const float ctAscent  = std::abs ((float) CTFontGetAscent (ctFontRef));
+            const float ctDescent = std::abs ((float) CTFontGetDescent (ctFontRef));
+            const float ctTotalHeight = ctAscent + ctDescent;
 
-            pathTransform = AffineTransform::identity.scale (1.0f / totalSize);
+            ascent = ctAscent / ctTotalHeight;
+            unitsToHeightScaleFactor = 1.0f / ctTotalHeight;
+            pathTransform = AffineTransform::identity.scale (unitsToHeightScaleFactor);
 
             fontRef = CTFontCopyGraphicsFont (ctFontRef, nullptr);
-
-            const int totalHeight = std::abs (CGFontGetAscent (fontRef)) + std::abs (CGFontGetDescent (fontRef));
-            const float ctTotalHeight = std::abs (CTFontGetAscent (ctFontRef)) + std::abs (CTFontGetDescent (ctFontRef));
-            unitsToHeightScaleFactor = 1.0f / ctTotalHeight;
-            fontHeightToCGSizeFactor = CGFontGetUnitsPerEm (fontRef) / (float) totalHeight;
+            fontHeightToPointsFactor = referenceFontSize / ctTotalHeight;
 
             const short zero = 0;
             CFNumberRef numberRef = CFNumberCreate (0, kCFNumberShortType, &zero);
@@ -462,8 +464,9 @@ public:
             CFRelease (ctFontRef);
     }
 
-    float getAscent() const     { return ascent; }
-    float getDescent() const    { return 1.0f - ascent; }
+    float getAscent() const                 { return ascent; }
+    float getDescent() const                { return 1.0f - ascent; }
+    float getHeightToPointsFactor() const   { return fontHeightToPointsFactor; }
 
     float getStringWidth (const String& text)
     {
@@ -565,7 +568,7 @@ public:
     //==============================================================================
     CGFontRef fontRef;
 
-    float fontHeightToCGSizeFactor;
+    float fontHeightToPointsFactor;
     CGAffineTransform renderingTransform;
 
 private:
@@ -717,7 +720,7 @@ public:
                                    juceStringToNS (style), NSFontFaceAttribute, nil];
 
         NSFontDescriptor* nsFontDesc = [NSFontDescriptor fontDescriptorWithFontAttributes: nsDict];
-        nsFont = [NSFont fontWithDescriptor: nsFontDesc size: 1024];
+        nsFont = [NSFont fontWithDescriptor: nsFontDesc size: referenceFontSize];
 
         [nsFont retain];
 
@@ -737,7 +740,7 @@ public:
 
         const float totalHeight = std::abs ([nsFont ascender]) + std::abs ([nsFont descender]);
         unitsToHeightScaleFactor = 1.0f / totalHeight;
-        fontHeightToCGSizeFactor = 1024.0f / totalHeight;
+        fontHeightToPointsFactor = referenceFontSize / totalHeight;
       #else
        #if SUPPORT_10_4_FONTS
         if (NEW_CGFONT_FUNCTIONS_UNAVAILABLE)
@@ -751,16 +754,15 @@ public:
 
             const float totalHeight = std::abs ([nsFont ascender]) + std::abs ([nsFont descender]);
             unitsToHeightScaleFactor = 1.0f / totalHeight;
-            fontHeightToCGSizeFactor = 1024.0f / totalHeight;
+            fontHeightToPointsFactor = referenceFontSize / totalHeight;
         }
         else
        #endif
         {
             fontRef = CGFontCreateWithFontName ((CFStringRef) [nsFont fontName]);
 
-            const int totalHeight = abs (CGFontGetAscent (fontRef)) + abs (CGFontGetDescent (fontRef));
-            unitsToHeightScaleFactor = 1.0f / totalHeight;
-            fontHeightToCGSizeFactor = CGFontGetUnitsPerEm (fontRef) / (float) totalHeight;
+            unitsToHeightScaleFactor = 1.0f / getFontTotalHeight (fontRef);
+            fontHeightToPointsFactor = getHeightToPointsFactor (fontRef);
         }
       #endif
     }
@@ -775,8 +777,9 @@ public:
             CGFontRelease (fontRef);
     }
 
-    float getAscent() const    { return ascent; }
-    float getDescent() const   { return 1.0f - ascent; }
+    float getAscent() const                 { return ascent; }
+    float getDescent() const                { return 1.0f - ascent; }
+    float getHeightToPointsFactor() const   { return fontHeightToPointsFactor; }
 
     float getStringWidth (const String& text)
     {
@@ -928,7 +931,7 @@ public:
 
     //==============================================================================
     CGFontRef fontRef;
-    float fontHeightToCGSizeFactor;
+    float fontHeightToPointsFactor;
     CGAffineTransform renderingTransform;
 
 private:

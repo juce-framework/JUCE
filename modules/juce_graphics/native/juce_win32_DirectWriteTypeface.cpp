@@ -181,8 +181,9 @@ public:
         pathTransform = AffineTransform::scale (pathScale);
     }
 
-    float getAscent() const     { return ascent; }
-    float getDescent() const    { return 1.0f - ascent; }
+    float getAscent() const                 { return ascent; }
+    float getDescent() const                { return 1.0f - ascent; }
+    float getHeightToPointsFactor() const   { return unitsToHeightScaleFactor; }
 
     float getStringWidth (const String& text)
     {
@@ -250,7 +251,6 @@ public:
     }
 
     IDWriteFontFace* getIDWriteFontFace() const noexcept    { return dwFontFace; }
-    float getFontHeightToEmSizeFactor() const noexcept      { return unitsToHeightScaleFactor; }
 
 private:
     ComSmartPtr<IDWriteFontFace> dwFontFace;

@@ -304,15 +304,9 @@ bool CustomTypeface::writeToStream (OutputStream& outputStream)
 }
 
 //==============================================================================
-float CustomTypeface::getAscent() const
-{
-    return ascent;
-}
-
-float CustomTypeface::getDescent() const
-{
-    return 1.0f - ascent;
-}
+float CustomTypeface::getAscent() const                 { return ascent; }
+float CustomTypeface::getDescent() const                { return 1.0f - ascent; }
+float CustomTypeface::getHeightToPointsFactor() const   { return ascent; }
 
 float CustomTypeface::getStringWidth (const String& text)
 {

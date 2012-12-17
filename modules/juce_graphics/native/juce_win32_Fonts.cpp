@@ -210,13 +210,14 @@ public:
           fontH (0),
           previousFontH (0),
           dc (CreateCompatibleDC (0)),
-          ascent (1.0f),
+          ascent (1.0f), heightToPointsFactor (1.0f),
           defaultGlyph (-1)
     {
         loadFont();
 
         if (GetTextMetrics (dc, &tm))
         {
+            heightToPointsFactor = 256.0f / tm.tmHeight;
             ascent = tm.tmAscent / (float) tm.tmHeight;
             defaultGlyph = getGlyphForChar (dc, tm.tmDefaultChar);
             createKerningPairs (dc, (float) tm.tmHeight);
@@ -232,8 +233,9 @@ public:
             DeleteObject (fontH);
     }
 
-    float getAscent() const     { return ascent; }
-    float getDescent() const    { return 1.0f - ascent; }
+    float getAscent() const                 { return ascent; }
+    float getDescent() const                { return 1.0f - ascent; }
+    float getHeightToPointsFactor() const   { return heightToPointsFactor; }
 
     float getStringWidth (const String& text)
     {
@@ -352,7 +354,7 @@ private:
     HGDIOBJ previousFontH;
     HDC dc;
     TEXTMETRIC tm;
-    float ascent;
+    float ascent, heightToPointsFactor;
     int defaultGlyph;
 
     struct KerningPair
@@ -492,7 +494,7 @@ Typeface::Ptr Typeface::createSystemTypefaceFor (const Font& font)
 
     if (factories.systemFonts != nullptr)
         return new WindowsDirectWriteTypeface (font, factories.systemFonts);
-    else
    #endif
-        return new WindowsTypeface (font);
+
+    return new WindowsTypeface (font);
 }
