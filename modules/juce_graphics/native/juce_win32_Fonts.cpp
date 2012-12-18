@@ -217,7 +217,7 @@ public:
 
         if (GetTextMetrics (dc, &tm))
         {
-            heightToPointsFactor = 256.0f / tm.tmHeight;
+            heightToPointsFactor = (72.0f / GetDeviceCaps (dc, LOGPIXELSY)) * heightInPoints / (float) tm.tmHeight;
             ascent = tm.tmAscent / (float) tm.tmHeight;
             defaultGlyph = getGlyphForChar (dc, tm.tmDefaultChar);
             createKerningPairs (dc, (float) tm.tmHeight);
@@ -355,7 +355,7 @@ private:
     HDC dc;
     TEXTMETRIC tm;
     float ascent, heightToPointsFactor;
-    int defaultGlyph;
+    int defaultGlyph, heightInPoints;
 
     struct KerningPair
     {
@@ -403,7 +403,8 @@ private:
                 OUTLINETEXTMETRIC otm;
                 if (GetOutlineTextMetrics (dc, sizeof (otm), &otm) != 0)
                 {
-                    lf.lfHeight = -(int) otm.otmEMSquare;
+                    heightInPoints = otm.otmEMSquare;
+                    lf.lfHeight = -(int) heightInPoints;
                     fontH = CreateFontIndirect (&lf);
 
                     SelectObject (dc, fontH);
