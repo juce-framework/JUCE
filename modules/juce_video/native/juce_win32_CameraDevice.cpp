@@ -677,7 +677,8 @@ private:
     class GrabberCallback   : public ComBaseClassHelperBase <ISampleGrabberCB>
     {
     public:
-        GrabberCallback (DShowCameraDeviceInteral& cam)  : owner (cam) {}
+        GrabberCallback (DShowCameraDeviceInteral& cam)
+            : ComBaseClassHelperBase <ISampleGrabberCB> (0), owner (cam) {}
 
         STDMETHODIMP SampleCB (double, IMediaSample*)  { return E_FAIL; }
 

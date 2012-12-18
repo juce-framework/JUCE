@@ -27,15 +27,15 @@
 #if JUCE_USE_DIRECTWRITE
 namespace DirectWriteTypeLayout
 {
-    class CustomDirectWriteTextRenderer   : public ComBaseClassHelper <IDWriteTextRenderer>
+    class CustomDirectWriteTextRenderer   : public ComBaseClassHelper<IDWriteTextRenderer>
     {
     public:
-        CustomDirectWriteTextRenderer (IDWriteFontCollection* const fontCollection_)
-            : fontCollection (fontCollection_),
+        CustomDirectWriteTextRenderer (IDWriteFontCollection* const fonts)
+            : ComBaseClassHelper<IDWriteTextRenderer> (0),
+              fontCollection (fonts),
               currentLine (-1),
               lastOriginY (-10000.0f)
         {
-            resetReferenceCount();
         }
 
         JUCE_COMRESULT QueryInterface (REFIID refId, void** result)
