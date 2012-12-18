@@ -43,12 +43,8 @@ void TreePanelBase::setRoot (JucerTreeViewBase* root)
             tree.restoreOpennessState (*treeOpenness, true);
 
             for (int i = tree.getNumSelectedItems(); --i >= 0;)
-            {
-                JucerTreeViewBase* item = dynamic_cast<JucerTreeViewBase*> (tree.getSelectedItem (i));
-
-                if (item != nullptr)
+                if (JucerTreeViewBase* item = dynamic_cast<JucerTreeViewBase*> (tree.getSelectedItem (i)))
                     item->cancelDelayedSelectionTimer();
-            }
         }
     }
 }
@@ -229,17 +225,9 @@ void JucerTreeViewBase::handlePopupMenuResult (int)
 
 ProjectContentComponent* JucerTreeViewBase::getProjectContentComponent() const
 {
-    Component* c = getOwnerView();
-
-    while (c != nullptr)
-    {
-        ProjectContentComponent* pcc = dynamic_cast <ProjectContentComponent*> (c);
-
-        if (pcc != nullptr)
+    for (Component* c = getOwnerView(); c != nullptr; c = c->getParentComponent())
+        if (ProjectContentComponent* pcc = dynamic_cast <ProjectContentComponent*> (c))
             return pcc;
-
-        c = c->getParentComponent();
-    }
 
     return nullptr;
 }

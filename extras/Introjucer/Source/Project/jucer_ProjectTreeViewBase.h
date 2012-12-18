@@ -103,7 +103,8 @@ protected:
     void treeChildrenChanged (const ValueTree& parentTree);
     virtual ProjectTreeViewBase* createSubItem (const Project::Item& node) = 0;
 
-    Icon getIcon() const { return item.getIcon().withContrastingColourTo (getBackgroundColour()); }
+    Icon getIcon() const           { return item.getIcon().withContrastingColourTo (getBackgroundColour()); }
+    bool isIconCrossedOut() const  { return item.isIconCrossedOut(); }
 
     //==============================================================================
     void triggerAsyncRename (const Project::Item& itemToRename);

@@ -270,25 +270,25 @@ void ProjectContentComponent::deleteProjectTabs()
 
 TreeView* ProjectContentComponent::getFilesTreeView() const
 {
-    FileTreeTab* ft = dynamic_cast<FileTreeTab*> (treeViewTabs.getTabContentComponent (0));
-    return ft != nullptr ? &(ft->tree) : nullptr;
+    if (FileTreeTab* ft = dynamic_cast<FileTreeTab*> (treeViewTabs.getTabContentComponent (0)))
+        return &(ft->tree);
+
+    return nullptr;
 }
 
 ProjectTreeViewBase* ProjectContentComponent::getFilesTreeRoot() const
 {
-    TreeView* tv = getFilesTreeView();
-    return tv != nullptr ? dynamic_cast <ProjectTreeViewBase*> (tv->getRootItem()) : nullptr;
+    if (TreeView* tv = getFilesTreeView())
+        return dynamic_cast <ProjectTreeViewBase*> (tv->getRootItem());
+
+    return nullptr;
 }
 
 void ProjectContentComponent::saveTreeViewState()
 {
     for (int i = treeViewTabs.getNumTabs(); --i >= 0;)
-    {
-        TreePanelBase* t = dynamic_cast<TreePanelBase*> (treeViewTabs.getTabContentComponent (i));
-
-        if (t != nullptr)
+        if (TreePanelBase* t = dynamic_cast<TreePanelBase*> (treeViewTabs.getTabContentComponent (i)))
             t->saveOpenness();
-    }
 }
 
 void ProjectContentComponent::saveOpenDocumentList()
@@ -328,9 +328,7 @@ void ProjectContentComponent::changeListenerCallback (ChangeBroadcaster*)
 
 void ProjectContentComponent::updateMissingFileStatuses()
 {
-    ProjectTreeViewBase* p = getFilesTreeRoot();
-
-    if (p != nullptr)
+    if (ProjectTreeViewBase* p = getFilesTreeRoot())
         p->checkFileStatus();
 }
 
@@ -386,9 +384,7 @@ void ProjectContentComponent::hideDocument (OpenDocumentManager::Document* doc)
 {
     if (doc == currentDocument)
     {
-        OpenDocumentManager::Document* replacement = recentDocumentList.getClosestPreviousDocOtherThan (doc);
-
-        if (replacement != nullptr)
+        if (OpenDocumentManager::Document* replacement = recentDocumentList.getClosestPreviousDocOtherThan (doc))
             showDocument (replacement, true);
         else
             hideEditor();
@@ -474,9 +470,7 @@ bool ProjectContentComponent::saveProject()
 
 void ProjectContentComponent::closeProject()
 {
-    MainWindow* const mw = findParentComponentOfClass<MainWindow>();
-
-    if (mw != nullptr)
+    if (MainWindow* const mw = findParentComponentOfClass<MainWindow>())
         mw->closeCurrentProject();
 }
 
@@ -492,17 +486,13 @@ void ProjectContentComponent::openInIDE()
 
 void ProjectContentComponent::deleteSelectedTreeItems()
 {
-    TreePanelBase* const tree = dynamic_cast<TreePanelBase*> (treeViewTabs.getCurrentContentComponent());
-
-    if (tree != nullptr)
+    if (TreePanelBase* const tree = dynamic_cast<TreePanelBase*> (treeViewTabs.getCurrentContentComponent()))
         tree->deleteSelectedItems();
 }
 
 void ProjectContentComponent::updateMainWindowTitle()
 {
-    MainWindow* mw = findParentComponentOfClass<MainWindow>();
-
-    if (mw != nullptr)
+    if (MainWindow* mw = findParentComponentOfClass<MainWindow>())
         mw->updateTitle (currentDocument != nullptr ? currentDocument->getName() : String::empty);
 }
 

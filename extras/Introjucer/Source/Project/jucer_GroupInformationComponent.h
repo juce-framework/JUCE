@@ -36,7 +36,6 @@ class GroupInformationComponent  : public Component,
                                    private ValueTree::Listener
 {
 public:
-    //==============================================================================
     GroupInformationComponent (const Project::Item& group)
         : item (group)
     {
@@ -76,7 +75,6 @@ public:
         g.fillRect (0, 0, width, height - 1);
     }
 
-
     Component* refreshComponentForRow (int rowNumber, bool isRowSelected, Component* existingComponentToUpdate)
     {
         if (rowNumber < getNumRows())
@@ -99,15 +97,21 @@ public:
     }
 
     //==============================================================================
-    void valueTreePropertyChanged (ValueTree&, const Identifier&)    { list.updateContent(); }
-    void valueTreeChildAdded (ValueTree&, ValueTree&)                { list.updateContent(); }
-    void valueTreeChildRemoved (ValueTree&, ValueTree&)              { list.updateContent(); }
-    void valueTreeChildOrderChanged (ValueTree&)                     { list.updateContent(); }
-    void valueTreeParentChanged (ValueTree&)                         { list.updateContent(); }
+    void valueTreePropertyChanged (ValueTree&, const Identifier&)    { itemChanged(); }
+    void valueTreeChildAdded (ValueTree&, ValueTree&)                { itemChanged(); }
+    void valueTreeChildRemoved (ValueTree&, ValueTree&)              { itemChanged(); }
+    void valueTreeChildOrderChanged (ValueTree&)                     { itemChanged(); }
+    void valueTreeParentChanged (ValueTree&)                         { itemChanged(); }
 
 private:
     Project::Item item;
     ListBox list;
+
+    void itemChanged()
+    {
+        list.updateContent();
+        repaint();
+    }
 
     //==============================================================================
     class FileOptionComponent  : public Component
@@ -133,7 +137,8 @@ private:
             int x = getHeight() + 6;
 
             item.getIcon().withContrastingColourTo (Colours::grey)
-                .draw (g, Rectangle<float> (2.0f, 2.0f, x - 4.0f, getHeight() - 4.0f));
+                .draw (g, Rectangle<float> (3.0f, 2.0f, x - 6.0f, getHeight() - 4.0f),
+                       item.isIconCrossedOut());
 
             g.setColour (Colours::black);
             g.setFont (getHeight() * 0.6f);

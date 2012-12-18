@@ -331,16 +331,12 @@ String Project::getRelativePathForFile (const File& file) const
 //==============================================================================
 const ProjectType& Project::getProjectType() const
 {
-    const ProjectType* type = ProjectType::findType (getProjectTypeString());
-    jassert (type != nullptr);
+    if (const ProjectType* type = ProjectType::findType (getProjectTypeString()))
+        return *type;
 
-    if (type == nullptr)
-    {
-        type = ProjectType::findType (ProjectType::getGUIAppTypeName());
-        jassert (type != nullptr);
-    }
-
-    return *type;
+    const ProjectType* guiType = ProjectType::findType (ProjectType::getGUIAppTypeName());
+    jassert (guiType != nullptr);
+    return *guiType;
 }
 
 //==============================================================================
@@ -795,12 +791,19 @@ Icon Project::Item::getIcon() const
 
         return Icon (icons.document, Colours::yellow);
     }
-    else if (isMainGroup())
-    {
+
+    if (isMainGroup())
         return Icon (icons.juceLogo, Colours::orange);
-    }
 
     return Icon (icons.folder, Colours::darkgrey);
+}
+
+bool Project::Item::isIconCrossedOut() const
+{
+    return isFile()
+            && ! (shouldBeCompiled()
+                   || shouldBeAddedToBinaryResources()
+                   || getFile().hasFileExtension (headerFileExtensions));
 }
 
 //==============================================================================

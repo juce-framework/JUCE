@@ -271,9 +271,10 @@ bool ModuleList::Module::operator!= (const Module& other) const
 
 LibraryModule* ModuleList::loadModule (const String& uid) const
 {
-    const Module* const m = findModuleInfo (uid);
+    if (const Module* const m = findModuleInfo (uid))
+        return m->create();
 
-    return m != nullptr ? m->create() : nullptr;
+    return nullptr;
 }
 
 const ModuleList::Module* ModuleList::findModuleInfo (const String& uid) const
