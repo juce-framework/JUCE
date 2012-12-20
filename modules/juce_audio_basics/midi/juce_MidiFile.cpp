@@ -92,47 +92,43 @@ namespace MidiFileHelpers
                                          const MidiMessageSequence& tempoEvents,
                                          const int timeFormat)
     {
-        if (timeFormat > 0)
+        if (timeFormat < 0)
+            return time / (-(timeFormat >> 8) * (timeFormat & 0xff));
+
+        double lastTime = 0.0, correctedTime = 0.0;
+        const double tickLen = 1.0 / (timeFormat & 0x7fff);
+        double secsPerTick = 0.5 * tickLen;
+        const int numEvents = tempoEvents.getNumEvents();
+
+        for (int i = 0; i < numEvents; ++i)
         {
-            double lastTime = 0.0, correctedTime = 0.0;
-            const double tickLen = 1.0 / (timeFormat & 0x7fff);
-            double secsPerTick = 0.5 * tickLen;
-            const int numEvents = tempoEvents.getNumEvents();
+            const MidiMessage& m = tempoEvents.getEventPointer(i)->message;
+            const double eventTime = m.getTimeStamp();
 
-            for (int i = 0; i < numEvents; ++i)
+            if (eventTime >= time)
+                break;
+
+            correctedTime += (eventTime - lastTime) * secsPerTick;
+            lastTime = eventTime;
+
+            if (m.isTempoMetaEvent())
+                secsPerTick = tickLen * m.getTempoSecondsPerQuarterNote();
+
+            while (i + 1 < numEvents)
             {
-                const MidiMessage& m = tempoEvents.getEventPointer(i)->message;
-                const double eventTime = m.getTimeStamp();
+                const MidiMessage& m2 = tempoEvents.getEventPointer(i + 1)->message;
 
-                if (eventTime >= time)
+                if (m2.getTimeStamp() != eventTime)
                     break;
 
-                correctedTime += (eventTime - lastTime) * secsPerTick;
-                lastTime = eventTime;
+                if (m2.isTempoMetaEvent())
+                    secsPerTick = tickLen * m2.getTempoSecondsPerQuarterNote();
 
-                if (m.isTempoMetaEvent())
-                    secsPerTick = tickLen * m.getTempoSecondsPerQuarterNote();
-
-                while (i + 1 < numEvents)
-                {
-                    const MidiMessage& m2 = tempoEvents.getEventPointer(i + 1)->message;
-
-                    if (m2.getTimeStamp() != eventTime)
-                        break;
-
-                    if (m2.isTempoMetaEvent())
-                        secsPerTick = tickLen * m2.getTempoSecondsPerQuarterNote();
-
-                    ++i;
-                }
+                ++i;
             }
+        }
 
-            return correctedTime + (time - lastTime) * secsPerTick;
-        }
-        else
-        {
-            return time / (((timeFormat & 0x7fff) >> 8) * (timeFormat & 0xff));
-        }
+        return correctedTime + (time - lastTime) * secsPerTick;
     }
 
     // a comparator that puts all the note-offs before note-ons that have the same time
@@ -336,17 +332,20 @@ void MidiFile::convertTimestampTicksToSeconds()
     findAllTempoEvents (tempoEvents);
     findAllTimeSigEvents (tempoEvents);
 
-    for (int i = 0; i < tracks.size(); ++i)
+    if (timeFormat != 0)
     {
-        const MidiMessageSequence& ms = *tracks.getUnchecked(i);
-
-        for (int j = ms.getNumEvents(); --j >= 0;)
+        for (int i = 0; i < tracks.size(); ++i)
         {
-            MidiMessage& m = ms.getEventPointer(j)->message;
+            const MidiMessageSequence& ms = *tracks.getUnchecked(i);
 
-            m.setTimeStamp (MidiFileHelpers::convertTicksToSeconds (m.getTimeStamp(),
-                                                                    tempoEvents,
-                                                                    timeFormat));
+            for (int j = ms.getNumEvents(); --j >= 0;)
+            {
+                MidiMessage& m = ms.getEventPointer(j)->message;
+
+                m.setTimeStamp (MidiFileHelpers::convertTicksToSeconds (m.getTimeStamp(),
+                                                                        tempoEvents,
+                                                                        timeFormat));
+            }
         }
     }
 }
