@@ -132,8 +132,9 @@ public:
 
                 const int columnId = owner.getHeader().getColumnIdAtX (e.x);
 
-                if (columnId != 0 && owner.getModel() != nullptr)
-                    owner.getModel()->cellClicked (row, columnId, e);
+                if (columnId != 0)
+                    if (TableListBoxModel* model = owner.getModel())
+                        model->cellClicked (row, columnId, e);
             }
             else
             {
@@ -169,8 +170,9 @@ public:
 
             const int columnId = owner.getHeader().getColumnIdAtX (e.x);
 
-            if (columnId != 0 && owner.getModel() != nullptr)
-                owner.getModel()->cellClicked (row, columnId, e);
+            if (columnId != 0)
+                if (TableListBoxModel* model = owner.getModel())
+                    model->cellClicked (row, columnId, e);
         }
     }
 
@@ -178,16 +180,18 @@ public:
     {
         const int columnId = owner.getHeader().getColumnIdAtX (e.x);
 
-        if (columnId != 0 && owner.getModel() != nullptr)
-            owner.getModel()->cellDoubleClicked (row, columnId, e);
+        if (columnId != 0)
+            if (TableListBoxModel* model = owner.getModel())
+                model->cellDoubleClicked (row, columnId, e);
     }
 
     String getTooltip()
     {
         const int columnId = owner.getHeader().getColumnIdAtX (getMouseXYRelative().getX());
 
-        if (columnId != 0 && owner.getModel() != nullptr)
-            return owner.getModel()->getCellTooltip (row, columnId);
+        if (columnId != 0)
+            if (TableListBoxModel* model = owner.getModel())
+                return model->getCellTooltip (row, columnId);
 
         return String::empty;
     }
@@ -334,15 +338,15 @@ Rectangle<int> TableListBox::getCellPosition (const int columnId, const int rowN
 
 Component* TableListBox::getCellComponent (int columnId, int rowNumber) const
 {
-    RowComp* const rowComp = dynamic_cast <RowComp*> (getComponentForRowNumber (rowNumber));
-    return rowComp != nullptr ? rowComp->findChildComponentForColumn (columnId) : 0;
+    if (RowComp* const rowComp = dynamic_cast <RowComp*> (getComponentForRowNumber (rowNumber)))
+        return rowComp->findChildComponentForColumn (columnId);
+
+    return nullptr;
 }
 
 void TableListBox::scrollToEnsureColumnIsOnscreen (const int columnId)
 {
-    ScrollBar* const scrollbar = getHorizontalScrollBar();
-
-    if (scrollbar != nullptr)
+    if (ScrollBar* const scrollbar = getHorizontalScrollBar())
     {
         const Rectangle<int> pos (header->getColumnPosition (header->getIndexOfColumnId (columnId, true)));
 
@@ -447,12 +451,8 @@ void TableListBox::updateColumnComponents() const
     const int firstRow = getRowContainingPosition (0, 0);
 
     for (int i = firstRow + getNumRowsOnScreen() + 2; --i >= firstRow;)
-    {
-        RowComp* const rowComp = dynamic_cast <RowComp*> (getComponentForRowNumber (i));
-
-        if (rowComp != nullptr)
+        if (RowComp* const rowComp = dynamic_cast <RowComp*> (getComponentForRowNumber (i)))
             rowComp->resized();
-    }
 }
 
 //==============================================================================

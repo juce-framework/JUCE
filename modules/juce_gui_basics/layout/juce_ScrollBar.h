@@ -153,16 +153,14 @@ public:
         This sets both the position and size of the thumb - to just set the position without
         changing the size, you can use setCurrentRangeStart().
 
-        If this method call actually changes the scrollbar's position, it will trigger an
-        asynchronous call to ScrollBar::Listener::scrollBarMoved() for all the listeners that
-        are registered.
-
         @param newStart     the top (or left) of the thumb, in the range
                             getMinimumRangeLimit() <= newStart <= getMaximumRangeLimit(). If the
                             value is beyond these limits, it will be clipped.
         @param newSize      the size of the thumb, such that
                             getMinimumRangeLimit() <= newStart + newSize <= getMaximumRangeLimit(). If the
                             size is beyond these limits, it will be clipped.
+        @param notification specifies if and how a callback should be made to any listeners
+                            if the range actually changes
         @see setCurrentRangeStart, getCurrentRangeStart, getCurrentRangeSize
     */
     void setCurrentRange (double newStart, double newSize,
