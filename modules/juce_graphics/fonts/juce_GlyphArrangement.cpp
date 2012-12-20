@@ -478,7 +478,7 @@ void GlyphArrangement::addFittedText (const Font& f,
                                     // can't find a suitable break, so try looking backwards..
                                     i = searchStartIndex;
 
-                                    for (int back = 1; back < jmin (5, i - startIndex - 1); ++back)
+                                    for (int back = 1; back < jmin (7, i - startIndex - 1); ++back)
                                     {
                                         if (glyphs.getReference (i - back).isWhitespace()
                                              || glyphs.getReference (i - back).getCharacter() == '-')
