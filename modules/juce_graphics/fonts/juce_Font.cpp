@@ -446,6 +446,13 @@ Font Font::withHeight (const float newHeight) const
     return f;
 }
 
+Font Font::withPointHeight (float heightInPoints) const
+{
+    Font f (*this);
+    f.setHeight (heightInPoints / getTypeface()->getHeightToPointsFactor());
+    return f;
+}
+
 void Font::setHeight (float newHeight)
 {
     newHeight = FontValues::limitFontHeight (newHeight);

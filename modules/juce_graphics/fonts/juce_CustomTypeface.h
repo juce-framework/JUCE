@@ -120,6 +120,7 @@ public:
     // The following methods implement the basic Typeface behaviour.
     float getAscent() const;
     float getDescent() const;
+    float getHeightToPointsFactor() const;
     float getStringWidth (const String& text);
     void getGlyphPositions (const String& text, Array <int>& glyphs, Array<float>& xOffsets);
     bool getOutlineForGlyph (int glyphNumber, Path& path);

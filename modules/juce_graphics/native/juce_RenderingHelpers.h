@@ -554,8 +554,8 @@ namespace GradientPixelIterators
 
             if (x >= maxDist)
                 return lookupTable [numEntries];
-            else
-                return lookupTable [jmin (numEntries, roundToInt (std::sqrt (x) * invScale))];
+
+            return lookupTable [jmin (numEntries, roundToInt (std::sqrt (x) * invScale))];
         }
 
     private:
@@ -564,6 +564,12 @@ namespace GradientPixelIterators
 
         JUCE_DECLARE_NON_COPYABLE (TransformedRadial)
     };
+}
+
+#define JUCE_PERFORM_PIXEL_OP_LOOP(op) \
+{ \
+    const int destStride = destData.pixelStride;  \
+    do { dest->op; dest = addBytesToPointer (dest, destStride); } while (--width > 0); \
 }
 
 //==============================================================================
@@ -576,9 +582,9 @@ namespace EdgeTableFillers
     {
     public:
         SolidColour (const Image::BitmapData& image, const PixelARGB& colour)
-            : data (image), sourceColour (colour)
+            : destData (image), sourceColour (colour)
         {
-            if (sizeof (PixelType) == 3 && data.pixelStride == sizeof (PixelType))
+            if (sizeof (PixelType) == 3 && destData.pixelStride == sizeof (PixelType))
             {
                 areRGBComponentsEqual = sourceColour.getRed() == sourceColour.getGreen()
                                             && sourceColour.getGreen() == sourceColour.getBlue();
@@ -591,7 +597,7 @@ namespace EdgeTableFillers
 
         forcedinline void setEdgeTableYPos (const int y) noexcept
         {
-            linePixels = (PixelType*) data.getLinePointer (y);
+            linePixels = (PixelType*) destData.getLinePointer (y);
         }
 
         forcedinline void handleEdgeTablePixel (const int x, const int alphaLevel) const noexcept
@@ -634,7 +640,7 @@ namespace EdgeTableFillers
         }
 
     private:
-        const Image::BitmapData& data;
+        const Image::BitmapData& destData;
         PixelType* linePixels;
         PixelARGB sourceColour;
         PixelRGB filler [4];
@@ -642,27 +648,17 @@ namespace EdgeTableFillers
 
         forcedinline PixelType* getPixel (const int x) const noexcept
         {
-            return addBytesToPointer (linePixels, x * data.pixelStride);
-        }
-
-        forcedinline void incDestPixelPointer (PixelType*& p) const noexcept
-        {
-            p = addBytesToPointer (p, data.pixelStride);
+            return addBytesToPointer (linePixels, x * destData.pixelStride);
         }
 
         inline void blendLine (PixelType* dest, const PixelARGB& colour, int width) const noexcept
         {
-            do
-            {
-                dest->blend (colour);
-                incDestPixelPointer (dest);
-            }
-            while (--width > 0);
+            JUCE_PERFORM_PIXEL_OP_LOOP (blend (colour))
         }
 
         forcedinline void replaceLine (PixelRGB* dest, const PixelARGB& colour, int width) const noexcept
         {
-            if (data.pixelStride == sizeof (*dest))
+            if (destData.pixelStride == sizeof (*dest))
             {
                 if (areRGBComponentsEqual)  // if all the component values are the same, we can cheat..
                 {
@@ -701,40 +697,21 @@ namespace EdgeTableFillers
             }
             else
             {
-                do
-                {
-                    dest->set (colour);
-                    incDestPixelPointer (dest);
-                }
-                while (--width > 0);
+                JUCE_PERFORM_PIXEL_OP_LOOP (set (colour))
             }
         }
 
         forcedinline void replaceLine (PixelAlpha* dest, const PixelARGB& colour, int width) const noexcept
         {
-            if (data.pixelStride == sizeof (*dest))
-            {
+            if (destData.pixelStride == sizeof (*dest))
                 memset (dest, colour.getAlpha(), (size_t) width);
-            }
             else
-            {
-                do
-                {
-                    dest->setAlpha (colour.getAlpha());
-                    incDestPixelPointer (dest);
-                }
-                while (--width > 0);
-            }
+                JUCE_PERFORM_PIXEL_OP_LOOP (setAlpha (colour.getAlpha()))
         }
 
         forcedinline void replaceLine (PixelARGB* dest, const PixelARGB& colour, int width) const noexcept
         {
-            do
-            {
-                dest->set (colour);
-                incDestPixelPointer (dest);
-
-            } while (--width > 0);
+            JUCE_PERFORM_PIXEL_OP_LOOP (set (colour))
         }
 
         JUCE_DECLARE_NON_COPYABLE (SolidColour)
@@ -774,34 +751,15 @@ namespace EdgeTableFillers
             PixelType* dest = getPixel (x);
 
             if (alphaLevel < 0xff)
-            {
-                do
-                {
-                    dest->blend (GradientType::getPixel (x++), (uint32) alphaLevel);
-                    incDestPixelPointer (dest);
-                } while (--width > 0);
-            }
+                JUCE_PERFORM_PIXEL_OP_LOOP (blend (GradientType::getPixel (x++), (uint32) alphaLevel))
             else
-            {
-                do
-                {
-                    dest->blend (GradientType::getPixel (x++));
-                    incDestPixelPointer (dest);
-                }
-                while (--width > 0);
-            }
+                JUCE_PERFORM_PIXEL_OP_LOOP (blend (GradientType::getPixel (x++)))
         }
 
         void handleEdgeTableLineFull (int x, int width) const noexcept
         {
             PixelType* dest = getPixel (x);
-
-            do
-            {
-                dest->blend (GradientType::getPixel (x++));
-                incDestPixelPointer (dest);
-            }
-            while (--width > 0);
+            JUCE_PERFORM_PIXEL_OP_LOOP (blend (GradientType::getPixel (x++)))
         }
 
     private:
@@ -811,11 +769,6 @@ namespace EdgeTableFillers
         forcedinline PixelType* getPixel (const int x) const noexcept
         {
             return addBytesToPointer (linePixels, x * destData.pixelStride);
-        }
-
-        forcedinline void incDestPixelPointer (PixelType*& p) const noexcept
-        {
-            p = addBytesToPointer (p, destData.pixelStride);
         }
 
         JUCE_DECLARE_NON_COPYABLE (Gradient)
@@ -873,26 +826,14 @@ namespace EdgeTableFillers
 
             if (alphaLevel < 0xfe)
             {
-                do
-                {
-                    dest->blend (*getSrcPixel (repeatPattern ? (x++ % srcData.width) : x++), (uint32) alphaLevel);
-                    incDestPixelPointer (dest);
-                } while (--width > 0);
+                JUCE_PERFORM_PIXEL_OP_LOOP (blend (*getSrcPixel (repeatPattern ? (x++ % srcData.width) : x++), (uint32) alphaLevel))
             }
             else
             {
                 if (repeatPattern)
-                {
-                    do
-                    {
-                        dest->blend (*getSrcPixel (x++ % srcData.width));
-                        incDestPixelPointer (dest);
-                    } while (--width > 0);
-                }
+                    JUCE_PERFORM_PIXEL_OP_LOOP (blend (*getSrcPixel (x++ % srcData.width)))
                 else
-                {
                     copyRow (dest, getSrcPixel (x), width);
-                }
             }
         }
 
@@ -905,26 +846,14 @@ namespace EdgeTableFillers
 
             if (extraAlpha < 0xfe)
             {
-                do
-                {
-                    dest->blend (*getSrcPixel (repeatPattern ? (x++ % srcData.width) : x++), (uint32) extraAlpha);
-                    incDestPixelPointer (dest);
-                } while (--width > 0);
+                JUCE_PERFORM_PIXEL_OP_LOOP (blend (*getSrcPixel (repeatPattern ? (x++ % srcData.width) : x++), (uint32) extraAlpha))
             }
             else
             {
                 if (repeatPattern)
-                {
-                    do
-                    {
-                        dest->blend (*getSrcPixel (x++ % srcData.width));
-                        incDestPixelPointer (dest);
-                    } while (--width > 0);
-                }
+                    JUCE_PERFORM_PIXEL_OP_LOOP (blend (*getSrcPixel (x++ % srcData.width)))
                 else
-                {
                     copyRow (dest, getSrcPixel (x), width);
-                }
             }
         }
 
@@ -957,11 +886,6 @@ namespace EdgeTableFillers
             return addBytesToPointer (sourceLineStart, x * srcData.pixelStride);
         }
 
-        forcedinline void incDestPixelPointer (DestPixelType*& p) const noexcept
-        {
-            p = addBytesToPointer (p, destData.pixelStride);
-        }
-
         forcedinline void copyRow (DestPixelType* dest, SrcPixelType const* src, int width) const noexcept
         {
             if (srcData.pixelStride == 3 && destData.pixelStride == 3)
@@ -970,11 +894,14 @@ namespace EdgeTableFillers
             }
             else
             {
+                const int destStride = destData.pixelStride;
+                const int srcStride = srcData.pixelStride;
+
                 do
                 {
                     dest->blend (*src);
-                    incDestPixelPointer (dest);
-                    src = addBytesToPointer (src, srcData.pixelStride);
+                    dest = addBytesToPointer (dest, destStride);
+                    src = addBytesToPointer (src, srcStride);
                 } while (--width > 0);
             }
         }
@@ -1042,21 +969,9 @@ namespace EdgeTableFillers
             alphaLevel >>= 8;
 
             if (alphaLevel < 0xfe)
-            {
-                do
-                {
-                    dest->blend (*span++, (uint32) alphaLevel);
-                    incDestPixelPointer (dest);
-                } while (--width > 0);
-            }
+                JUCE_PERFORM_PIXEL_OP_LOOP (blend (*span++, (uint32) alphaLevel))
             else
-            {
-                do
-                {
-                    dest->blend (*span++);
-                    incDestPixelPointer (dest);
-                } while (--width > 0);
-            }
+                JUCE_PERFORM_PIXEL_OP_LOOP (blend (*span++))
         }
 
         forcedinline void handleEdgeTableLineFull (const int x, int width) noexcept
@@ -1084,11 +999,6 @@ namespace EdgeTableFillers
         forcedinline DestPixelType* getDestPixel (const int x) const noexcept
         {
             return addBytesToPointer (linePixels, x * destData.pixelStride);
-        }
-
-        forcedinline void incDestPixelPointer (DestPixelType*& p) const noexcept
-        {
-            p = addBytesToPointer (p, destData.pixelStride);
         }
 
         //==============================================================================

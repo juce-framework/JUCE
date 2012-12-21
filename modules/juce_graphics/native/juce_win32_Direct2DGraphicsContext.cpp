@@ -547,7 +547,7 @@ public:
             {
                 WindowsDirectWriteTypeface* typeface = dynamic_cast<WindowsDirectWriteTypeface*> (font.getTypeface());
                 currentFontFace = typeface->getIDWriteFontFace();
-                fontHeightToEmSizeFactor = typeface->getFontHeightToEmSizeFactor();
+                fontHeightToEmSizeFactor = typeface->unitsToHeightScaleFactor();
             }
         }
 

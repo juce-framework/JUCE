@@ -215,6 +215,9 @@ public:
     /** Returns a copy of this font with a new height. */
     Font withHeight (float height) const;
 
+    /** Returns a copy of this font with a new height, specified in points. */
+    Font withPointHeight (float heightInPoints) const;
+
     /** Changes the font's height.
         @see getHeight, withHeight, setHeightWithoutChangingWidth
     */

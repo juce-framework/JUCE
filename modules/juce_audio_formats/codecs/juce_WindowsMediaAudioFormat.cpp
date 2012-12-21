@@ -29,10 +29,9 @@ namespace WindowsMediaCodec
 class JuceIStream   : public ComBaseClassHelper <IStream>
 {
 public:
-    JuceIStream (InputStream& source_) noexcept
-        : source (source_)
+    JuceIStream (InputStream& in) noexcept
+        : ComBaseClassHelper <IStream> (0), source (in)
     {
-        resetReferenceCount();
     }
 
     JUCE_COMRESULT Commit (DWORD)                        { return S_OK; }

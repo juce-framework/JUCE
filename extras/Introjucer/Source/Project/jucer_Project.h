@@ -187,6 +187,7 @@ public:
         UndoManager* getUndoManager() const              { return project.getUndoManagerFor (state); }
 
         Icon getIcon() const;
+        bool isIconCrossedOut() const;
 
         Project& project;
         ValueTree state;

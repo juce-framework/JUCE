@@ -58,7 +58,7 @@ struct Icon
     Icon (const Path& p, const Colour& c)  : path (&p), colour (c) {}
     Icon (const Path* p, const Colour& c)  : path (p),  colour (c) {}
 
-    void draw (Graphics& g, const Rectangle<float>& area) const
+    void draw (Graphics& g, const Rectangle<float>& area, bool isCrossedOut) const
     {
         if (path != nullptr)
         {
@@ -66,6 +66,13 @@ struct Icon
 
             const RectanglePlacement placement (RectanglePlacement::centred | RectanglePlacement::onlyReduceInSize);
             g.fillPath (*path, placement.getTransformToFit (path->getBounds(), area));
+
+            if (isCrossedOut)
+            {
+                g.setColour (Colours::red.withAlpha (0.8f));
+                g.drawLine ((float) area.getX(), area.getY() + area.getHeight() * 0.2f,
+                            (float) area.getRight(), area.getY() + area.getHeight() * 0.8f, 3.0f);
+            }
         }
     }
 

@@ -130,8 +130,7 @@ public:
         if (rowIsSelected)
             g.fillAll (Colours::lightblue);
 
-        Font font (fonts [rowNumber]);
-        font.setHeight (height * 0.7f);
+        Font font = fonts[rowNumber].withPointHeight (height * 0.6f);
 
         g.setFont (font);
         g.setColour (Colours::black);

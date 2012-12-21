@@ -790,10 +790,7 @@ public:
 
     void toBehind (ComponentPeer* other)
     {
-        HWNDComponentPeer* const otherPeer = dynamic_cast <HWNDComponentPeer*> (other);
-        jassert (otherPeer != nullptr); // wrong type of window?
-
-        if (otherPeer != nullptr)
+        if (HWNDComponentPeer* const otherPeer = dynamic_cast <HWNDComponentPeer*> (other))
         {
             setMinimised (false);
 
@@ -803,6 +800,10 @@ public:
                 SetWindowPos (hwnd, otherPeer->hwnd, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE | SWP_NOSENDCHANGING);
             else if (otherPeer->getComponent().isAlwaysOnTop())
                 SetWindowPos (hwnd, HWND_TOP,        0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE | SWP_NOSENDCHANGING);
+        }
+        else
+        {
+            jassertfalse; // wrong type of window?
         }
     }
 
@@ -2665,9 +2666,7 @@ private:
 
         void moveCandidateWindowToLeftAlignWithSelection (HIMC hImc, ComponentPeer& peer, TextInputTarget* target) const
         {
-            Component* const targetComp = dynamic_cast <Component*> (target);
-
-            if (targetComp != nullptr)
+            if (Component* const targetComp = dynamic_cast <Component*> (target))
             {
                 const Rectangle<int> area (peer.getComponent().getLocalArea (targetComp, target->getCaretRectangle()));
 
@@ -2778,6 +2777,37 @@ bool Process::isForegroundProcess()
 void Process::makeForegroundProcess()
 {
     // is this possible in Windows?
+}
+
+//==============================================================================
+static BOOL CALLBACK enumAlwaysOnTopWindows (HWND hwnd, LPARAM lParam)
+{
+    if (IsWindowVisible (hwnd))
+    {
+        DWORD processID = 0;
+        GetWindowThreadProcessId (hwnd, &processID);
+
+        if (processID == GetCurrentProcessId())
+        {
+            WINDOWINFO info;
+
+            if (GetWindowInfo (hwnd, &info)
+                 && (info.dwExStyle & WS_EX_TOPMOST) != 0)
+            {
+                *reinterpret_cast <bool*> (lParam) = true;
+                return FALSE;
+            }
+        }
+    }
+
+    return TRUE;
+}
+
+bool juce_areThereAnyAlwaysOnTopWindows()
+{
+    bool anyAlwaysOnTopFound = false;
+    EnumWindows (&enumAlwaysOnTopWindows, (LPARAM) &anyAlwaysOnTopFound);
+    return anyAlwaysOnTopFound;
 }
 
 //==============================================================================

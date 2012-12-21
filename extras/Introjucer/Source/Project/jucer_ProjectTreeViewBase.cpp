@@ -77,9 +77,7 @@ void ProjectTreeViewBase::browseToAddExistingFiles()
 
 void ProjectTreeViewBase::addFiles (const StringArray& files, int insertIndex)
 {
-    ProjectTreeViewBase* p = dynamic_cast <ProjectTreeViewBase*> (getParentItem());
-
-    if (p != nullptr)
+    if (ProjectTreeViewBase* p = dynamic_cast <ProjectTreeViewBase*> (getParentItem()))
         p->addFiles (files, insertIndex);
 }
 
@@ -99,9 +97,7 @@ ProjectTreeViewBase* ProjectTreeViewBase::findTreeViewItem (const Project::Item&
 
     for (int i = getNumSubItems(); --i >= 0;)
     {
-        ProjectTreeViewBase* pg = dynamic_cast <ProjectTreeViewBase*> (getSubItem(i));
-
-        if (pg != nullptr)
+        if (ProjectTreeViewBase* pg = dynamic_cast <ProjectTreeViewBase*> (getSubItem(i)))
         {
             pg = pg->findTreeViewItem (itemToFind);
 
@@ -120,16 +116,14 @@ void ProjectTreeViewBase::triggerAsyncRename (const Project::Item& itemToRename)
     class RenameMessage  : public CallbackMessage
     {
     public:
-        RenameMessage (TreeView* const tree_, const Project::Item& itemToRename_)
-            : tree (tree_), itemToRename (itemToRename_)  {}
+        RenameMessage (TreeView* const t, const Project::Item& item)
+            : tree (t), itemToRename (item)  {}
 
         void messageCallback()
         {
             if (tree != nullptr)
             {
-                ProjectTreeViewBase* pg = dynamic_cast <ProjectTreeViewBase*> (tree->getRootItem());
-
-                if (pg != nullptr)
+                if (ProjectTreeViewBase* pg = dynamic_cast <ProjectTreeViewBase*> (tree->getRootItem()))
                 {
                     pg = pg->findTreeViewItem (itemToRename);
 
@@ -179,9 +173,7 @@ void ProjectTreeViewBase::deleteAllSelectedItems()
 
     for (int i = 0; i < numSelected; ++i)
     {
-        const ProjectTreeViewBase* const p = dynamic_cast <ProjectTreeViewBase*> (tree->getSelectedItem (i));
-
-        if (p != nullptr)
+        if (const ProjectTreeViewBase* const p = dynamic_cast <ProjectTreeViewBase*> (tree->getSelectedItem (i)))
         {
             itemsToRemove.add (new Project::Item (p->item));
 
@@ -215,10 +207,7 @@ void ProjectTreeViewBase::deleteAllSelectedItems()
             filesToTrash.clear();
     }
 
-    ProjectTreeViewBase* treeRootItem = dynamic_cast <ProjectTreeViewBase*> (tree->getRootItem());
-    jassert (treeRootItem != nullptr);
-
-    if (treeRootItem != nullptr)
+    if (ProjectTreeViewBase* treeRootItem = dynamic_cast <ProjectTreeViewBase*> (tree->getRootItem()))
     {
         OpenDocumentManager& om = IntrojucerApp::getApp().openDocumentManager;
 
@@ -236,14 +225,16 @@ void ProjectTreeViewBase::deleteAllSelectedItems()
 
         for (int i = itemsToRemove.size(); --i >= 0;)
         {
-            ProjectTreeViewBase* itemToRemove = treeRootItem->findTreeViewItem (*itemsToRemove.getUnchecked(i));
-
-            if (itemToRemove != nullptr)
+            if (ProjectTreeViewBase* itemToRemove = treeRootItem->findTreeViewItem (*itemsToRemove.getUnchecked(i)))
             {
                 om.closeFile (itemToRemove->getFile(), false);
                 itemToRemove->deleteItem();
             }
         }
+    }
+    else
+    {
+        jassertfalse;
     }
 }
 
@@ -322,12 +313,8 @@ void ProjectTreeViewBase::getAllSelectedNodesInTree (Component* componentInTree,
         const int numSelected = tree->getNumSelectedItems();
 
         for (int i = 0; i < numSelected; ++i)
-        {
-            const ProjectTreeViewBase* const p = dynamic_cast <ProjectTreeViewBase*> (tree->getSelectedItem (i));
-
-            if (p != nullptr)
+            if (const ProjectTreeViewBase* const p = dynamic_cast <ProjectTreeViewBase*> (tree->getSelectedItem (i)))
                 selectedNodes.add (new Project::Item (p->item));
-        }
     }
 }
 
@@ -416,12 +403,8 @@ void ProjectTreeViewBase::itemOpennessChanged (bool isNowOpen)
 void ProjectTreeViewBase::addSubItems()
 {
     for (int i = 0; i < item.getNumChildren(); ++i)
-    {
-        ProjectTreeViewBase* p = createSubItem (item.getChild(i));
-
-        if (p != nullptr)
+        if (ProjectTreeViewBase* p = createSubItem (item.getChild(i)))
             addSubItem (p);
-    }
 }
 
 static void treeViewMultiSelectItemChosen (int resultCode, ProjectTreeViewBase* item)

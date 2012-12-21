@@ -130,7 +130,7 @@ class WindowsDirectWriteTypeface  : public Typeface
 public:
     WindowsDirectWriteTypeface (const Font& font, IDWriteFontCollection* fontCollection)
         : Typeface (font.getTypefaceName(), font.getTypefaceStyle()),
-          ascent (0.0f)
+          unitsToHeightScaleFactor (1.0f), heightToPointsFactor (1.0f), ascent (0.0f)
     {
         jassert (fontCollection != nullptr);
 
@@ -175,14 +175,19 @@ public:
         ascent /= totalSize;
         unitsToHeightScaleFactor = designUnitsPerEm / totalSize;
 
+        HDC tempDC = GetDC (0);
+        heightToPointsFactor = (72.0f / GetDeviceCaps (tempDC, LOGPIXELSY)) * unitsToHeightScaleFactor;
+        ReleaseDC (0, tempDC);
+
         const float pathAscent  = (1024.0f * dwFontMetrics.ascent)  / designUnitsPerEm;
         const float pathDescent = (1024.0f * dwFontMetrics.descent) / designUnitsPerEm;
         const float pathScale   = 1.0f / (std::abs (pathAscent) + std::abs (pathDescent));
         pathTransform = AffineTransform::scale (pathScale);
     }
 
-    float getAscent() const     { return ascent; }
-    float getDescent() const    { return 1.0f - ascent; }
+    float getAscent() const                 { return ascent; }
+    float getDescent() const                { return 1.0f - ascent; }
+    float getHeightToPointsFactor() const   { return heightToPointsFactor; }
 
     float getStringWidth (const String& text)
     {
@@ -250,18 +255,17 @@ public:
     }
 
     IDWriteFontFace* getIDWriteFontFace() const noexcept    { return dwFontFace; }
-    float getFontHeightToEmSizeFactor() const noexcept      { return unitsToHeightScaleFactor; }
 
 private:
     ComSmartPtr<IDWriteFontFace> dwFontFace;
-    float unitsToHeightScaleFactor, ascent;
+    float unitsToHeightScaleFactor, heightToPointsFactor, ascent;
     int designUnitsPerEm;
     AffineTransform pathTransform;
 
     class PathGeometrySink  : public ComBaseClassHelper<IDWriteGeometrySink>
     {
     public:
-        PathGeometrySink()   { resetReferenceCount(); }
+        PathGeometrySink() : ComBaseClassHelper<IDWriteGeometrySink> (0) {}
 
         void __stdcall AddBeziers (const D2D1_BEZIER_SEGMENT *beziers, UINT beziersCount)
         {

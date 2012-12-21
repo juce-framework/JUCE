@@ -97,13 +97,11 @@ template <class ComClass>
 class ComBaseClassHelperBase   : public ComClass
 {
 public:
-    ComBaseClassHelperBase()  : refCount (1) {}
+    ComBaseClassHelperBase (unsigned int initialRefCount)  : refCount (initialRefCount) {}
     virtual ~ComBaseClassHelperBase() {}
 
     ULONG __stdcall AddRef()    { return ++refCount; }
     ULONG __stdcall Release()   { const ULONG r = --refCount; if (r == 0) delete this; return r; }
-
-    void resetReferenceCount() noexcept     { refCount = 0; }
 
 protected:
     ULONG refCount;
@@ -115,7 +113,7 @@ template <class ComClass>
 class ComBaseClassHelper   : public ComBaseClassHelperBase <ComClass>
 {
 public:
-    ComBaseClassHelper() {}
+    ComBaseClassHelper (unsigned int initialRefCount = 1) : ComBaseClassHelperBase <ComClass> (initialRefCount) {}
     ~ComBaseClassHelper() {}
 
     JUCE_COMRESULT QueryInterface (REFIID refId, void** result)

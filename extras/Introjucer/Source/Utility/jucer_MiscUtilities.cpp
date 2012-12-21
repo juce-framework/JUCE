@@ -271,8 +271,8 @@ FloatingLabelComponent::FloatingLabelComponent()
 
 void FloatingLabelComponent::remove()
 {
-    if (getParentComponent() != nullptr)
-        getParentComponent()->removeChildComponent (this);
+    if (Component* p = getParentComponent())
+        p->removeChildComponent (this);
 }
 
 void FloatingLabelComponent::update (Component* parent, const String& text, const Colour& textColour,
@@ -401,8 +401,8 @@ bool cancelAnyModalComponents()
     const int numModal = mm.getNumModalComponents();
 
     for (int i = numModal; --i >= 0;)
-        if (mm.getModalComponent(i) != nullptr)
-            mm.getModalComponent(i)->exitModalState (0);
+        if (Component* c = mm.getModalComponent(i))
+            c->exitModalState (0);
 
     return numModal > 0;
 }

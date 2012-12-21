@@ -1259,7 +1259,7 @@ public:
         updateHostDisplay();
     }
 
-    VstIntPtr handleCallback (VstInt32 opcode, VstInt32 index, VstInt32 value, void* ptr, float opt)
+    VstIntPtr handleCallback (VstInt32 opcode, VstInt32 index, VstIntPtr value, void* ptr, float opt)
     {
         switch (opcode)
         {

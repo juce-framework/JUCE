@@ -260,9 +260,14 @@ private:
         aw.setMessage (TRANS("Testing:\n\n") + scanner.getNextPluginFileThatWillBeScanned());
 
         if (scanner.scanNextFile (true) && aw.isCurrentlyModal())
+        {
             progress = scanner.getProgress();
+            startTimer (20);
+        }
         else
+        {
             owner.scanFinished (scanner.getFailedFiles());
+        }
     }
 
     PluginListComponent& owner;

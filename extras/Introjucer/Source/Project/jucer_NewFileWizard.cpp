@@ -249,9 +249,7 @@ void NewFileWizard::addWizardsToMenu (PopupMenu& m) const
 
 bool NewFileWizard::runWizardFromMenu (int chosenMenuItemID, const Project::Item& projectGroupToAddTo) const
 {
-    Type* wiz = wizards [chosenMenuItemID - menuBaseID];
-
-    if (wiz != nullptr)
+    if (Type* wiz = wizards [chosenMenuItemID - menuBaseID])
     {
         wiz->createNewFile (projectGroupToAddTo);
         return true;

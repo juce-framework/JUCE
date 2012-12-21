@@ -3160,6 +3160,12 @@ bool Desktop::isScreenSaverEnabled()
 }
 
 //==============================================================================
+bool juce_areThereAnyAlwaysOnTopWindows()
+{
+    return false; // XXX should be implemented
+}
+
+//==============================================================================
 void* CustomMouseCursorInfo::create() const
 {
     ScopedXLock xlock;

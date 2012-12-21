@@ -35,22 +35,18 @@ void SettingsTreeViewItemBase::showSettingsPage (Component* content)
     content->setComponentID (getUniqueName());
 
     ScopedPointer<Component> comp (content);
-    ProjectContentComponent* pcc = getProjectContentComponent();
 
-    if (pcc != nullptr)
+    if (ProjectContentComponent* pcc = getProjectContentComponent())
         pcc->setEditorComponent (new PropertyPanelViewport (comp.release()), nullptr);
 }
 
 void SettingsTreeViewItemBase::closeSettingsPage()
 {
-    ProjectContentComponent* pcc = getProjectContentComponent();
-
-    if (pcc != nullptr)
+    if (ProjectContentComponent* pcc = getProjectContentComponent())
     {
-        PropertyPanelViewport* ppv = dynamic_cast<PropertyPanelViewport*> (pcc->getEditorComponent());
-
-        if (ppv != nullptr && ppv->viewport.getViewedComponent()->getComponentID() == getUniqueName())
-            pcc->hideEditor();
+        if (PropertyPanelViewport* ppv = dynamic_cast<PropertyPanelViewport*> (pcc->getEditorComponent()))
+            if (ppv->viewport.getViewedComponent()->getComponentID() == getUniqueName())
+                pcc->hideEditor();
     }
 }
 

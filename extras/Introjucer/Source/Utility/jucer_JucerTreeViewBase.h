@@ -57,6 +57,7 @@ public:
     virtual bool isMissing() = 0;
     virtual Icon getIcon() const = 0;
     virtual float getIconSize() const;
+    virtual bool isIconCrossedOut() const               { return false; }
     virtual void paintContent (Graphics& g, const Rectangle<int>& area);
     virtual int getMillisecsAllowedForDragGesture()     { return 120; };
     virtual File getDraggableFile() const               { return File::nonexistent; }
@@ -84,8 +85,10 @@ public:
     private:
         static TreeViewItem& getTopLevelItem (TreeViewItem& item)
         {
-            TreeViewItem* const p = item.getParentItem();
-            return p != nullptr ? getTopLevelItem (*p) : item;
+            if (TreeViewItem* const p = item.getParentItem())
+                return getTopLevelItem (*p);
+
+            return item;
         }
     };
 
@@ -199,7 +202,8 @@ public:
 
     void paintIcon (Graphics& g)
     {
-        item.getIcon().draw (g, Rectangle<float> (4.0f, 2.0f, item.getIconSize(), getHeight() - 4.0f));
+        item.getIcon().draw (g, Rectangle<float> (4.0f, 2.0f, item.getIconSize(), getHeight() - 4.0f),
+                             item.isIconCrossedOut());
     }
 
     void resized()

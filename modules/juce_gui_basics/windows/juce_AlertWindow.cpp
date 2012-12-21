@@ -32,6 +32,8 @@ static juce_wchar getDefaultPasswordChar() noexcept
    #endif
 }
 
+extern bool juce_areThereAnyAlwaysOnTopWindows();
+
 //==============================================================================
 AlertWindow::AlertWindow (const String& title,
                           const String& message,
@@ -42,23 +44,12 @@ AlertWindow::AlertWindow (const String& title,
      associatedComponent (comp),
      escapeKeyCancels (true)
 {
+    setAlwaysOnTop (juce_areThereAnyAlwaysOnTopWindows());
+
     if (message.isEmpty())
         text = " "; // to force an update if the message is empty
 
     setMessage (message);
-
-    Desktop& desktop = Desktop::getInstance();
-    for (int i = desktop.getNumComponents(); --i >= 0;)
-    {
-        if (Component* const c = desktop.getComponent (i))
-        {
-            if (c->isAlwaysOnTop() && c->isShowing())
-            {
-                setAlwaysOnTop (true);
-                break;
-            }
-        }
-    }
 
     AlertWindow::lookAndFeelChanged();
     constrainer.setMinimumOnscreenAmounts (0x10000, 0x10000, 0x10000, 0x10000);
