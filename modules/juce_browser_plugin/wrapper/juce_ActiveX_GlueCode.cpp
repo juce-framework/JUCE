@@ -175,8 +175,8 @@ public:
 
     HRESULT __stdcall QueryInterface (REFIID id, void __RPC_FAR* __RPC_FAR* result)
     {
-        if (id == IID_IUnknown)         { AddRef(); *result = (IUnknown*)  this; return S_OK; }
-        else if (id == IID_IDispatch)   { AddRef(); *result = (IDispatch*) this; return S_OK; }
+        if (id == IID_IUnknown)    { AddRef(); *result = (IUnknown*)  this; return S_OK; }
+        if (id == IID_IDispatch)   { AddRef(); *result = (IDispatch*) this; return S_OK; }
 
         *result = 0;
         return E_NOINTERFACE;
@@ -595,12 +595,12 @@ public:
 
     HRESULT __stdcall QueryInterface (REFIID id, void __RPC_FAR* __RPC_FAR* result)
     {
-        if (id == IID_IUnknown)                 { AddRef(); *result = (IUnknown*) this; return S_OK; }
-        else if (id == IID_IDispatch)           { AddRef(); *result = (IDispatch*) this; return S_OK; }
-        else if (id == IID_IObjectWithSite)     { AddRef(); *result = (IObjectWithSite*) this; return S_OK; }
-        else if (id == IID_IObjectSafety)       { AddRef(); *result = (IObjectSafety*) this; return S_OK; }
-        else if (id == IID_IOleInPlaceObject)   { AddRef(); *result = (IOleInPlaceObject*) this; return S_OK; }
-        else if (id == IID_IOleWindow)          { AddRef(); *result = (IOleWindow*) (IOleInPlaceObject*) this; return S_OK; }
+        if (id == IID_IUnknown)            { AddRef(); *result = (IUnknown*) this; return S_OK; }
+        if (id == IID_IDispatch)           { AddRef(); *result = (IDispatch*) this; return S_OK; }
+        if (id == IID_IObjectWithSite)     { AddRef(); *result = (IObjectWithSite*) this; return S_OK; }
+        if (id == IID_IObjectSafety)       { AddRef(); *result = (IObjectSafety*) this; return S_OK; }
+        if (id == IID_IOleInPlaceObject)   { AddRef(); *result = (IOleInPlaceObject*) this; return S_OK; }
+        if (id == IID_IOleWindow)          { AddRef(); *result = (IOleWindow*) (IOleInPlaceObject*) this; return S_OK; }
 
         *result = 0;
         return E_NOINTERFACE;
@@ -754,8 +754,8 @@ public:
 
     HRESULT __stdcall QueryInterface (REFIID id, void __RPC_FAR* __RPC_FAR* result)
     {
-        if (id == IID_IUnknown)             { AddRef(); *result = (IUnknown*) this; return S_OK; }
-        else if (id == IID_IClassFactory)   { AddRef(); *result = (IClassFactory*) this; return S_OK; }
+        if (id == IID_IUnknown)        { AddRef(); *result = (IUnknown*) this; return S_OK; }
+        if (id == IID_IClassFactory)   { AddRef(); *result = (IClassFactory*) this; return S_OK; }
 
         *result = nullptr;
         return E_NOINTERFACE;

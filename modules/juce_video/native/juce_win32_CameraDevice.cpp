@@ -680,6 +680,14 @@ private:
         GrabberCallback (DShowCameraDeviceInteral& cam)
             : ComBaseClassHelperBase <ISampleGrabberCB> (0), owner (cam) {}
 
+        JUCE_COMRESULT QueryInterface (REFIID refId, void** result)
+        {
+            if (refId == IID_ISampleGrabberCB)
+                return castToType <ISampleGrabberCB> (result);
+
+            return ComBaseClassHelperBase<ISampleGrabberCB>::QueryInterface (refId, result);
+        }
+
         STDMETHODIMP SampleCB (double, IMediaSample*)  { return E_FAIL; }
 
         STDMETHODIMP BufferCB (double time, BYTE* buffer, long bufferSize)
