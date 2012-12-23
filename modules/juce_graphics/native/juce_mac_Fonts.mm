@@ -705,6 +705,16 @@ StringArray Font::findAllTypefaceStyles (const String& family)
   {
 #endif
 
+static float getFontTotalHeight (CGFontRef font)
+{
+    return std::abs ((float) CGFontGetAscent (font)) + std::abs ((float) CGFontGetDescent (font));
+}
+
+static float getHeightToPointsFactor (CGFontRef font)
+{
+    return referenceFontSize / getFontTotalHeight (font);
+}
+
 //==============================================================================
 class OSXTypeface  : public Typeface
 {
@@ -762,7 +772,7 @@ public:
             fontRef = CGFontCreateWithFontName ((CFStringRef) [nsFont fontName]);
 
             unitsToHeightScaleFactor = 1.0f / getFontTotalHeight (fontRef);
-            fontHeightToPointsFactor = getHeightToPointsFactor (fontRef);
+            fontHeightToPointsFactor = juce::getHeightToPointsFactor (fontRef);
         }
       #endif
     }
