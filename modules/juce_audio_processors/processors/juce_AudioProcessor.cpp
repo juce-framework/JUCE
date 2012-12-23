@@ -32,6 +32,8 @@ void AudioProcessor::setTypeOfNextNewPlugin (AudioProcessor::WrapperType type)
 
 AudioProcessor::AudioProcessor()
     : wrapperType (wrapperTypeBeingCreated.get()),
+      m_isInitialized (false),
+      m_hasSideChain (false),
       playHead (nullptr),
       sampleRate (0),
       blockSize (0),
@@ -39,8 +41,7 @@ AudioProcessor::AudioProcessor()
       numOutputChannels (0),
       latencySamples (0),
       suspended (false),
-      nonRealtime (false),
-      m_isInitialized (false)
+      nonRealtime (false)
 {
 }
 

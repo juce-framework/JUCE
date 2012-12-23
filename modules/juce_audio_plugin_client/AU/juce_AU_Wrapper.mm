@@ -717,8 +717,6 @@ public:
         if (!HasInput(0))
             return kAudioUnitErr_NoConnection;
 
-        juceFilter->m_playPositionSamples = inTimeStamp.mSampleTime;
-
 #if SrJucePlugin_WantSideChain
         const bool hasSideChain = HasInput(1);
 #else // SrJucePlugin_WantSideChain
@@ -840,7 +838,7 @@ public:
                 for (int j = 0; j < numOut; ++j)
                     zeromem (channels [j], sizeof (float) * numSamples);
             }
-           #if ! JucePlugin_IsSynth
+           #if !JucePlugin_IsSynth && !SrJucePlugin_WantSideChain
             else if (ShouldBypassEffect())
             {
                 juceFilter->processBlockBypassed (buffer, midiEvents);

@@ -516,11 +516,6 @@ protected:
             return;
         }
 
-        juceFilter->m_hasSideChain = false;
-        long long samplePos;
-        midiTransport->GetCurrentRTASSampleLocation (&samplePos);
-        juceFilter->m_playPositionSamples = samplePos;
-
        #if JucePlugin_WantsMidiInput
         midiEvents.clear();
 

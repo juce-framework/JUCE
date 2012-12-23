@@ -71,10 +71,6 @@ protected:
     AudioProcessor();
 
 public:
-    bool m_isInitialized;
-    bool m_hasSideChain; // wrapper fills this in
-    int m_playPositionSamples;
-
     virtual ParamInfo parameterInfo(int i) const = 0;
     virtual float getParameterValue(int index) const = 0;
     virtual void setParameterValue(int index, float value) = 0;
@@ -621,6 +617,9 @@ public:
 
     /** @internal */
     static void setTypeOfNextNewPlugin (WrapperType);
+
+    bool m_isInitialized;
+    bool m_hasSideChain; // wrapper fills in if plugin has side-chain
 
 protected:
     //==============================================================================
