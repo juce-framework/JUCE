@@ -40,7 +40,8 @@ namespace DirectWriteTypeLayout
 
         JUCE_COMRESULT QueryInterface (REFIID refId, void** result)
         {
-            if (refId == __uuidof (IDWritePixelSnapping))   { AddRef(); *result = dynamic_cast <IDWritePixelSnapping*> (this); return S_OK; }
+            if (refId == __uuidof (IDWritePixelSnapping))
+                return castToType <IDWritePixelSnapping> (result);
 
             return ComBaseClassHelper<IDWriteTextRenderer>::QueryInterface (refId, result);
         }

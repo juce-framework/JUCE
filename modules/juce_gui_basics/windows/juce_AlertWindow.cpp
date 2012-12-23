@@ -32,8 +32,6 @@ static juce_wchar getDefaultPasswordChar() noexcept
    #endif
 }
 
-extern bool juce_areThereAnyAlwaysOnTopWindows();
-
 //==============================================================================
 AlertWindow::AlertWindow (const String& title,
                           const String& message,

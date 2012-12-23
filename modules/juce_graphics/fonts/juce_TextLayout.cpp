@@ -521,8 +521,8 @@ namespace TextLayoutHelpers
 
                         if (attr.range.contains (i))
                         {
-                            if (attr.getFont() != nullptr)    newFontAndColour.font   = attr.getFont();
-                            if (attr.getColour() != nullptr)  newFontAndColour.colour = *attr.getColour();
+                            if (const Font* f = attr.getFont())      newFontAndColour.font   = f;
+                            if (const Colour* c = attr.getColour())  newFontAndColour.colour = *c;
                         }
                     }
 

@@ -105,6 +105,21 @@ public:
 
 protected:
     ULONG refCount;
+
+    JUCE_COMRESULT QueryInterface (REFIID refId, void** result)
+    {
+        if (refId == IID_IUnknown)
+            return castToType <IUnknown> (result);
+
+        *result = 0;
+        return E_NOINTERFACE;
+    }
+
+    template <class Type>
+    JUCE_COMRESULT castToType (void** result)
+    {
+        this->AddRef(); *result = dynamic_cast <Type*> (this); return S_OK;
+    }
 };
 
 /** Handy base class for writing COM objects, providing ref-counting and a basic QueryInterface method.
@@ -118,11 +133,10 @@ public:
 
     JUCE_COMRESULT QueryInterface (REFIID refId, void** result)
     {
-        if (refId == __uuidof (ComClass))   { this->AddRef(); *result = dynamic_cast <ComClass*> (this); return S_OK; }
-        if (refId == IID_IUnknown)          { this->AddRef(); *result = dynamic_cast <IUnknown*> (this); return S_OK; }
+        if (refId == __uuidof (ComClass))
+            return castToType <ComClass> (result);
 
-        *result = 0;
-        return E_NOINTERFACE;
+        return ComBaseClassHelperBase <ComClass>::QueryInterface (refId, result);
     }
 };
 

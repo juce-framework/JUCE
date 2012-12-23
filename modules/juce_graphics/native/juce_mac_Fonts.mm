@@ -761,8 +761,9 @@ public:
         {
             fontRef = CGFontCreateWithFontName ((CFStringRef) [nsFont fontName]);
 
-            unitsToHeightScaleFactor = 1.0f / getFontTotalHeight (fontRef);
-            fontHeightToPointsFactor = getHeightToPointsFactor (fontRef);
+            const float totalHeight = std::abs ((float) CGFontGetAscent (fontRef)) + std::abs ((float) CGFontGetDescent (fontRef));
+            unitsToHeightScaleFactor = 1.0f / totalHeight;
+            fontHeightToPointsFactor = referenceFontSize / totalHeight;
         }
       #endif
     }

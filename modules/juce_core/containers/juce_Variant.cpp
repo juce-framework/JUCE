@@ -454,8 +454,10 @@ bool operator!= (const var& v1, const char* const v2)       { return v1.toString
 //==============================================================================
 var var::operator[] (const Identifier& propertyName) const
 {
-    DynamicObject* const o = getDynamicObject();
-    return o != nullptr ? o->getProperty (propertyName) : var::null;
+    if (DynamicObject* const o = getDynamicObject())
+        return o->getProperty (propertyName);
+
+    return var::null;
 }
 
 var var::operator[] (const char* const propertyName) const
@@ -465,14 +467,18 @@ var var::operator[] (const char* const propertyName) const
 
 var var::getProperty (const Identifier& propertyName, const var& defaultReturnValue) const
 {
-    DynamicObject* const o = getDynamicObject();
-    return o != nullptr ? o->getProperties().getWithDefault (propertyName, defaultReturnValue) : defaultReturnValue;
+    if (DynamicObject* const o = getDynamicObject())
+        return o->getProperties().getWithDefault (propertyName, defaultReturnValue);
+
+    return defaultReturnValue;
 }
 
 var var::invoke (const Identifier& method, const var* arguments, int numArguments) const
 {
-    DynamicObject* const o = getDynamicObject();
-    return o != nullptr ? o->invokeMethod (method, arguments, numArguments) : var::null;
+    if (DynamicObject* const o = getDynamicObject())
+        return o->invokeMethod (method, arguments, numArguments);
+
+    return var::null;
 }
 
 var var::invokeMethod (DynamicObject* const target, const var* const arguments, const int numArguments) const
@@ -522,8 +528,10 @@ var var::call (const Identifier& method, const var& arg1, const var& arg2, const
 //==============================================================================
 int var::size() const
 {
-    const Array<var>* const array = getArray();
-    return array != nullptr ? array->size() : 0;
+    if (const Array<var>* const array = getArray())
+        return array->size();
+
+    return 0;
 }
 
 const var& var::operator[] (int arrayIndex) const
@@ -574,9 +582,7 @@ void var::append (const var& n)
 
 void var::remove (const int index)
 {
-    Array<var>* const array = getArray();
-
-    if (array != nullptr)
+    if (Array<var>* const array = getArray())
         array->remove (index);
 }
 
@@ -592,8 +598,10 @@ void var::resize (const int numArrayElementsWanted)
 
 int var::indexOf (const var& n) const
 {
-    const Array<var>* const array = getArray();
-    return array != nullptr ? array->indexOf (n) : -1;
+    if (const Array<var>* const array = getArray())
+        return array->indexOf (n);
+
+    return -1;
 }
 
 //==============================================================================

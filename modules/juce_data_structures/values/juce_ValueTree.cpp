@@ -482,13 +482,10 @@ public:
         {
             if (! (isAddingNewProperty || isDeletingProperty))
             {
-                SetPropertyAction* const next = dynamic_cast <SetPropertyAction*> (nextAction);
-
-                if (next != nullptr && next->target == target && next->name == name
-                     && ! (next->isAddingNewProperty || next->isDeletingProperty))
-                {
-                    return new SetPropertyAction (target, name, next->newValue, oldValue, false, false);
-                }
+                if (SetPropertyAction* const next = dynamic_cast <SetPropertyAction*> (nextAction))
+                    if (next->target == target && next->name == name
+                          && ! (next->isAddingNewProperty || next->isDeletingProperty))
+                        return new SetPropertyAction (target, name, next->newValue, oldValue, false, false);
             }
 
             return nullptr;

@@ -23,8 +23,6 @@
   ==============================================================================
 */
 
-extern bool juce_areThereAnyAlwaysOnTopWindows();
-
 namespace FileChooserHelpers
 {
     struct FileChooserCallbackInfo

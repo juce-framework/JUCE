@@ -70,9 +70,7 @@ public:
                         options.escapeKeyTriggersCloseButton, true)
     {
         setUsingNativeTitleBar (options.useNativeTitleBar);
-
-        if (! JUCEApplication::isStandaloneApp())
-            setAlwaysOnTop (true); // for a plugin, make it always-on-top because the host windows are often top-level
+        setAlwaysOnTop (juce_areThereAnyAlwaysOnTopWindows());
 
         if (options.content.willDeleteObject())
             setContentOwned (options.content.release(), true);
