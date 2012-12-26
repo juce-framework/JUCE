@@ -171,9 +171,14 @@ public:
         for (int i = viewerComps.size(); --i >= 0;)
             viewerComps.getUnchecked(i)->ownerDeleted();
 
+        if (sampleGrabber != nullptr)
+        {
+            sampleGrabber->SetCallback (nullptr, 0);
+            sampleGrabber = nullptr;
+        }
+
         callback = nullptr;
         graphBuilder = nullptr;
-        sampleGrabber = nullptr;
         mediaControl = nullptr;
         filter = nullptr;
         captureGraphBuilder = nullptr;
