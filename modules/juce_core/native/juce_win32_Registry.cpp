@@ -112,6 +112,23 @@ struct RegistryKeyWrapper
         return defaultValue;
     }
 
+    static bool valueExists (const String& regValuePath, const DWORD wow64Flags)
+    {
+        const RegistryKeyWrapper key (regValuePath, false, wow64Flags);
+
+        if (key.key == 0)
+            return false;
+
+        unsigned char buffer [512];
+        unsigned long bufferSize = sizeof (buffer);
+        DWORD type = 0;
+
+        const LONG result = RegQueryValueEx (key.key, key.wideCharValueName,
+                                             0, &type, buffer, &bufferSize);
+
+        return result == ERROR_SUCCESS || result == ERROR_MORE_DATA;
+    }
+
     HKEY key;
     const wchar_t* wideCharValueName;
     String valueName;
@@ -132,6 +149,11 @@ String WindowsRegistry::getValue (const String& regValuePath, const String& defa
 String WindowsRegistry::getValueWow64 (const String& regValuePath, const String& defaultValue)
 {
     return RegistryKeyWrapper::getValue (regValuePath, defaultValue, 0x100 /*KEY_WOW64_64KEY*/);
+}
+
+bool WindowsRegistry::valueExistsWow64 (const String& regValuePath)
+{
+    return RegistryKeyWrapper::valueExists (regValuePath, 0x100 /*KEY_WOW64_64KEY*/);
 }
 
 bool WindowsRegistry::setValue (const String& regValuePath, const String& value)
@@ -157,19 +179,7 @@ bool WindowsRegistry::setValue (const String& regValuePath, const MemoryBlock& v
 
 bool WindowsRegistry::valueExists (const String& regValuePath)
 {
-    const RegistryKeyWrapper key (regValuePath, false, 0);
-
-    if (key.key == 0)
-        return false;
-
-    unsigned char buffer [512];
-    unsigned long bufferSize = sizeof (buffer);
-    DWORD type = 0;
-
-    const LONG result = RegQueryValueEx (key.key, key.wideCharValueName,
-                                         0, &type, buffer, &bufferSize);
-
-    return result == ERROR_SUCCESS || result == ERROR_MORE_DATA;
+    return RegistryKeyWrapper::valueExists (regValuePath, 0);
 }
 
 void WindowsRegistry::deleteValue (const String& regValuePath)
