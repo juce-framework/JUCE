@@ -520,19 +520,23 @@ public:
 
     void redirectMouseMove (NSEvent* ev)
     {
-       #if defined (MAC_OS_X_VERSION_10_6) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_6
-        if ([NSWindow windowNumberAtPoint: [[ev window] convertBaseToScreen: [ev locationInWindow]]
-              belowWindowWithWindowNumber: 0] != [window windowNumber])
+        currentModifiers = currentModifiers.withoutMouseButtons();
+
+       #if defined (MAC_OS_X_VERSION_10_6) && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_6
+        if ([NSWindow respondsToSelector: @selector (windowNumberAtPoint:belowWindowWithWindowNumber:)]
+             && [NSWindow windowNumberAtPoint: [[ev window] convertBaseToScreen: [ev locationInWindow]]
+                  belowWindowWithWindowNumber: 0] != [window windowNumber])
         {
-            [[NSCursor arrowCursor] set];
+            // moved into another window which overlaps this one, so trigger an exit
+            handleMouseEvent (0, Point<int> (-1, -1), currentModifiers, getMouseTime (ev));
         }
         else
        #endif
         {
-            currentModifiers = currentModifiers.withoutMouseButtons();
             sendMouseEvent (ev);
-            showArrowCursorIfNeeded();
         }
+
+        showArrowCursorIfNeeded();
     }
 
     void redirectMouseEnter (NSEvent* ev)
@@ -884,10 +888,11 @@ public:
 
     static void showArrowCursorIfNeeded()
     {
-        MouseInputSource& mouse = Desktop::getInstance().getMainMouseSource();
+        Desktop& desktop = Desktop::getInstance();
+        MouseInputSource& mouse = desktop.getMainMouseSource();
 
         if (mouse.getComponentUnderMouse() == nullptr
-             && Desktop::getInstance().findComponentAt (mouse.getScreenPosition()) == nullptr)
+             && desktop.findComponentAt (mouse.getScreenPosition()) == nullptr)
         {
             [[NSCursor arrowCursor] set];
         }
