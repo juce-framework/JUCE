@@ -133,8 +133,8 @@ public:
                 const int columnId = owner.getHeader().getColumnIdAtX (e.x);
 
                 if (columnId != 0)
-                    if (TableListBoxModel* model = owner.getModel())
-                        model->cellClicked (row, columnId, e);
+                    if (TableListBoxModel* m = owner.getModel())
+                        m->cellClicked (row, columnId, e);
             }
             else
             {
@@ -171,8 +171,8 @@ public:
             const int columnId = owner.getHeader().getColumnIdAtX (e.x);
 
             if (columnId != 0)
-                if (TableListBoxModel* model = owner.getModel())
-                    model->cellClicked (row, columnId, e);
+                if (TableListBoxModel* m = owner.getModel())
+                    m->cellClicked (row, columnId, e);
         }
     }
 
@@ -181,8 +181,8 @@ public:
         const int columnId = owner.getHeader().getColumnIdAtX (e.x);
 
         if (columnId != 0)
-            if (TableListBoxModel* model = owner.getModel())
-                model->cellDoubleClicked (row, columnId, e);
+            if (TableListBoxModel* m = owner.getModel())
+                m->cellDoubleClicked (row, columnId, e);
     }
 
     String getTooltip()
@@ -190,8 +190,8 @@ public:
         const int columnId = owner.getHeader().getColumnIdAtX (getMouseXYRelative().getX());
 
         if (columnId != 0)
-            if (TableListBoxModel* model = owner.getModel())
-                return model->getCellTooltip (row, columnId);
+            if (TableListBoxModel* m = owner.getModel())
+                return m->getCellTooltip (row, columnId);
 
         return String::empty;
     }

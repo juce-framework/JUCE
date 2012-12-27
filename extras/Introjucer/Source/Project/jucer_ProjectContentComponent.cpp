@@ -647,7 +647,7 @@ void ProjectContentComponent::getCommandInfo (const CommandID commandID, Applica
     }
 }
 
-bool ProjectContentComponent::isCommandActive (const CommandID commandID)
+bool ProjectContentComponent::isCommandActive (const CommandID)
 {
     return project != nullptr;
 }

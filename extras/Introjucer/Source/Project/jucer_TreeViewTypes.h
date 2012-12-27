@@ -36,8 +36,8 @@ public:
     SourceFileTreeViewItem (const Project::Item& item);
     ~SourceFileTreeViewItem();
 
-    bool acceptsFileDrop (const StringArray& files) const                   { return false; }
-    bool acceptsDragItems (const OwnedArray <Project::Item>& selectedNodes) { return false; }
+    bool acceptsFileDrop (const StringArray&) const                     { return false; }
+    bool acceptsDragItems (const OwnedArray <Project::Item>&)           { return false; }
     ProjectTreeViewBase* createSubItem (const Project::Item& child);
     void showDocument();
     void showPopupMenu();
@@ -54,7 +54,7 @@ public:
     ~GroupTreeViewItem();
 
     bool isRoot() const                                                 { return item.isMainGroup(); }
-    bool acceptsFileDrop (const StringArray& files) const               { return true; }
+    bool acceptsFileDrop (const StringArray&) const                     { return true; }
     bool acceptsDragItems (const OwnedArray <Project::Item>& selectedNodes);
     void checkFileStatus();
     void moveSelectedItemsTo (OwnedArray <Project::Item>& selectedNodes, int insertIndex);

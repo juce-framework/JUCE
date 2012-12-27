@@ -218,7 +218,7 @@ void SourceFileTreeViewItem::setName (const String& newName)
     }
 }
 
-ProjectTreeViewBase* SourceFileTreeViewItem::createSubItem (const Project::Item& child)
+ProjectTreeViewBase* SourceFileTreeViewItem::createSubItem (const Project::Item&)
 {
     jassertfalse
     return nullptr;

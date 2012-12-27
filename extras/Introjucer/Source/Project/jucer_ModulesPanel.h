@@ -193,7 +193,7 @@ public:
                 flipRow (row);
         }
 
-        void listBoxItemDoubleClicked (int row, const MouseEvent& e)
+        void listBoxItemDoubleClicked (int row, const MouseEvent&)
         {
             flipRow (row);
         }

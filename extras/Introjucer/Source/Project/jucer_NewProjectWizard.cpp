@@ -235,11 +235,11 @@ public:
     String getName()          { return "Audio Plug-In"; }
     String getDescription()   { return "Creates an audio plugin project"; }
 
-    void addSetupItems (Component& setupComp, OwnedArray<Component>& itemsCreated)
+    void addSetupItems (Component&, OwnedArray<Component>& /*itemsCreated*/)
     {
     }
 
-    Result processResultsFromSetupItems (Component& setupComp)
+    Result processResultsFromSetupItems (Component&)
     {
         return Result::ok();
     }

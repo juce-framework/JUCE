@@ -218,7 +218,7 @@ bool MainWindow::isInterestedInFileDrag (const StringArray& filenames)
     return false;
 }
 
-void MainWindow::filesDropped (const StringArray& filenames, int mouseX, int mouseY)
+void MainWindow::filesDropped (const StringArray& filenames, int /*mouseX*/, int /*mouseY*/)
 {
     for (int i = filenames.size(); --i >= 0;)
     {

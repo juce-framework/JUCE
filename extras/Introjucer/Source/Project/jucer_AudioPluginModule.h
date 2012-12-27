@@ -345,7 +345,7 @@ namespace RTASHelpers
         }
     }
 
-    static inline void prepareExporter (ProjectExporter& exporter, ProjectSaver& projectSaver, const File& moduleFolder)
+    static inline void prepareExporter (ProjectExporter& exporter, ProjectSaver& projectSaver, const File& /*moduleFolder*/)
     {
         if (isExporterSupported (exporter))
         {
@@ -370,7 +370,8 @@ namespace RTASHelpers
                 String msvcPathToRTASFolder (juceFolder.getChildFile ("juce_audio_plugin_client/RTAS")
                                                        .toWindowsStyle() + "\\");
 
-                exporter.msvcDelayLoadedDLLs = "DAE.dll; DigiExt.dll; DSI.dll; PluginLib.dll; DSPManager.dll";
+                exporter.msvcDelayLoadedDLLs = "DAE.dll; DigiExt.dll; DSI.dll; PluginLib.dll; "
+                                               "DSPManager.dll; DSPManager.dll; DSPManagerClientLib.dll; RTASClientLib.dll";
 
                 if (! exporter.getExtraLinkerFlagsString().contains ("/FORCE:multiple"))
                     exporter.getExtraLinkerFlags() = exporter.getExtraLinkerFlags().toString() + " /FORCE:multiple";
@@ -528,7 +529,7 @@ namespace AAXHelpers
         exporter.addToExtraSearchPaths (aaxFolder.getChildFile ("Interfaces").getChildFile ("ACF"));
     }
 
-    static inline void prepareExporter (ProjectExporter& exporter, ProjectSaver& projectSaver, const File& moduleFolder)
+    static inline void prepareExporter (ProjectExporter& exporter, ProjectSaver& projectSaver, const File& /*moduleFolder*/)
     {
         if (isExporterSupported (exporter))
         {

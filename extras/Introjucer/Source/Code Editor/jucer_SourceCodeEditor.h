@@ -119,7 +119,7 @@ public:
             return true;
         }
 
-        Document* openFile (Project* project, const File& file) { return new SourceCodeDocument (project, file); }
+        Document* openFile (Project* p, const File& file)   { return new SourceCodeDocument (p, file); }
     };
 
 protected:

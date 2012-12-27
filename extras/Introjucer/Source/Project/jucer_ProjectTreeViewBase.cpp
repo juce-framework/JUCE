@@ -81,7 +81,7 @@ void ProjectTreeViewBase::addFiles (const StringArray& files, int insertIndex)
         p->addFiles (files, insertIndex);
 }
 
-void ProjectTreeViewBase::moveSelectedItemsTo (OwnedArray <Project::Item>& selectedNodes, int insertIndex)
+void ProjectTreeViewBase::moveSelectedItemsTo (OwnedArray <Project::Item>&, int /*insertIndex*/)
 {
     jassertfalse;
 }
@@ -116,8 +116,8 @@ void ProjectTreeViewBase::triggerAsyncRename (const Project::Item& itemToRename)
     class RenameMessage  : public CallbackMessage
     {
     public:
-        RenameMessage (TreeView* const t, const Project::Item& item)
-            : tree (t), itemToRename (item)  {}
+        RenameMessage (TreeView* const t, const Project::Item& i)
+            : tree (t), itemToRename (i)  {}
 
         void messageCallback()
         {
@@ -357,18 +357,18 @@ void ProjectTreeViewBase::treeChildrenChanged (const ValueTree& parentTree)
     }
 }
 
-void ProjectTreeViewBase::valueTreePropertyChanged (ValueTree& tree, const Identifier& property)
+void ProjectTreeViewBase::valueTreePropertyChanged (ValueTree& tree, const Identifier&)
 {
     if (tree == item.state)
         repaintItem();
 }
 
-void ProjectTreeViewBase::valueTreeChildAdded (ValueTree& parentTree, ValueTree& childWhichHasBeenAdded)
+void ProjectTreeViewBase::valueTreeChildAdded (ValueTree& parentTree, ValueTree&)
 {
     treeChildrenChanged (parentTree);
 }
 
-void ProjectTreeViewBase::valueTreeChildRemoved (ValueTree& parentTree, ValueTree& childWhichHasBeenRemoved)
+void ProjectTreeViewBase::valueTreeChildRemoved (ValueTree& parentTree, ValueTree&)
 {
     treeChildrenChanged (parentTree);
 }
@@ -378,7 +378,7 @@ void ProjectTreeViewBase::valueTreeChildOrderChanged (ValueTree& parentTree)
     treeChildrenChanged (parentTree);
 }
 
-void ProjectTreeViewBase::valueTreeParentChanged (ValueTree& tree)
+void ProjectTreeViewBase::valueTreeParentChanged (ValueTree&)
 {
 }
 

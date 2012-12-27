@@ -69,8 +69,8 @@ public:
     Project& getProject() noexcept              { return project; }
     const Project& getProject() const noexcept  { return project; }
 
-    Value getSetting (const Identifier& name)   { return settings.getPropertyAsValue (name, project.getUndoManagerFor (settings)); }
-    String getSettingString (const Identifier& name) const  { return settings [name]; }
+    Value getSetting (const Identifier& nm)     { return settings.getPropertyAsValue (nm, project.getUndoManagerFor (settings)); }
+    String getSettingString (const Identifier& nm) const  { return settings [nm]; }
 
     Value getJuceFolderValue()                  { return getSetting (Ids::juceFolder); }
     String getJuceFolderString() const          { return getSettingString (Ids::juceFolder); }
@@ -200,7 +200,7 @@ public:
 
         Value getUserNotes()                                { return getValue (Ids::userNotes); }
 
-        Value getValue (const Identifier& name)             { return config.getPropertyAsValue (name, getUndoManager()); }
+        Value getValue (const Identifier& nm)               { return config.getPropertyAsValue (nm, getUndoManager()); }
         UndoManager* getUndoManager() const                 { return project.getUndoManagerFor (config); }
 
         void createPropertyEditors (PropertyListBuilder&);

@@ -246,13 +246,13 @@ int JuceUpdater::getNumRows()
     return latestList.modules.size();
 }
 
-void JuceUpdater::paintListBoxItem (int rowNumber, Graphics& g, int width, int height, bool rowIsSelected)
+void JuceUpdater::paintListBoxItem (int /*rowNumber*/, Graphics& g, int /*width*/, int /*height*/, bool rowIsSelected)
 {
     if (rowIsSelected)
         g.fillAll (findColour (TextEditor::highlightColourId));
 }
 
-Component* JuceUpdater::refreshComponentForRow (int rowNumber, bool isRowSelected, Component* existingComponentToUpdate)
+Component* JuceUpdater::refreshComponentForRow (int rowNumber, bool /*isRowSelected*/, Component* existingComponentToUpdate)
 {
     class UpdateListComponent  : public Component
     {
@@ -327,9 +327,7 @@ Component* JuceUpdater::refreshComponentForRow (int rowNumber, bool isRowSelecte
     if (c == nullptr)
         c = new UpdateListComponent (*this);
 
-    ModuleList::Module* m = latestList.modules [rowNumber];
-
-    if (m != nullptr)
+    if (ModuleList::Module* m = latestList.modules [rowNumber])
         c->setModule (m,
                       moduleList.findModuleInfo (m->uid),
                       versionsToDownload.getPropertyAsValue (m->uid, nullptr));

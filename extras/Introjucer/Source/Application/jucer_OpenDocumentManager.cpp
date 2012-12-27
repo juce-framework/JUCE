@@ -42,8 +42,8 @@ public:
     //==============================================================================
     struct Type  : public OpenDocumentManager::DocumentType
     {
-        bool canOpenFile (const File&)                              { return true; }
-        Document* openFile (Project* project, const File& file)     { return new UnknownDocument (project, file); }
+        bool canOpenFile (const File&)                     { return true; }
+        Document* openFile (Project* p, const File& f)     { return new UnknownDocument (p, f); }
     };
 
     //==============================================================================
@@ -62,7 +62,7 @@ public:
     Component* createViewer()                       { return createEditor(); }
     void fileHasBeenRenamed (const File& newFile)   { file = newFile; }
     String getState() const                         { return String::empty; }
-    void restoreState (const String& state)         {}
+    void restoreState (const String&)               {}
 
     String getType() const
     {
