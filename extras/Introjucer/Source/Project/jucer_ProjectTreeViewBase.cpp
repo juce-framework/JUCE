@@ -98,12 +98,8 @@ ProjectTreeViewBase* ProjectTreeViewBase::findTreeViewItem (const Project::Item&
     for (int i = getNumSubItems(); --i >= 0;)
     {
         if (ProjectTreeViewBase* pg = dynamic_cast <ProjectTreeViewBase*> (getSubItem(i)))
-        {
-            pg = pg->findTreeViewItem (itemToFind);
-
-            if (pg != nullptr)
-                return pg;
-        }
+            if (ProjectTreeViewBase* found = pg->findTreeViewItem (itemToFind))
+                return found;
     }
 
     setOpen (wasOpen);
@@ -122,15 +118,9 @@ void ProjectTreeViewBase::triggerAsyncRename (const Project::Item& itemToRename)
         void messageCallback()
         {
             if (tree != nullptr)
-            {
-                if (ProjectTreeViewBase* pg = dynamic_cast <ProjectTreeViewBase*> (tree->getRootItem()))
-                {
-                    pg = pg->findTreeViewItem (itemToRename);
-
-                    if (pg != nullptr)
-                        pg->showRenameBox();
-                }
-            }
+                if (ProjectTreeViewBase* root = dynamic_cast <ProjectTreeViewBase*> (tree->getRootItem()))
+                    if (ProjectTreeViewBase* found = root->findTreeViewItem (itemToRename))
+                        found->showRenameBox();
         }
 
     private:

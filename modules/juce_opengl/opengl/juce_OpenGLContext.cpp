@@ -37,7 +37,7 @@ public:
          #else
           shadersAvailable (false),
          #endif
-          needsUpdate (true)
+          needsUpdate (1)
     {
         nativeContext = new NativeContext (component, pixFormat, contextToShare);
 
@@ -90,7 +90,7 @@ public:
 
     void triggerRepaint()
     {
-        needsUpdate = true;
+        needsUpdate = 1;
 
        #if JUCE_ANDROID
         if (nativeContext != nullptr)
@@ -143,7 +143,9 @@ public:
     {
         ScopedPointer<MessageManagerLock> mmLock;
 
-        if (context.renderComponents && needsUpdate)
+        const bool isUpdating = needsUpdate.compareAndSetBool (0, 1);
+
+        if (context.renderComponents && isUpdating)
         {
             mmLock = new MessageManagerLock (this);  // need to acquire this before locking the context.
             if (! mmLock->lockWasGained())
@@ -166,9 +168,8 @@ public:
 
         if (context.renderComponents)
         {
-            if (needsUpdate)
+            if (isUpdating)
             {
-                needsUpdate = false;
                 paintComponent();
                 mmLock = nullptr;
             }
@@ -357,8 +358,8 @@ public:
     ReferenceCountedArray<ReferenceCountedObject> associatedObjects;
 
     WaitableEvent canPaintNowFlag, finishedPaintingFlag;
-    bool volatile shadersAvailable;
-    bool volatile needsUpdate;
+    bool shadersAvailable;
+    Atomic<int> needsUpdate;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CachedImage)
 };
