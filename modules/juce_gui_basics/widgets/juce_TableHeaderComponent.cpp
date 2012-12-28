@@ -383,9 +383,7 @@ void TableHeaderComponent::setSortColumnId (const int columnId, const bool sortF
         for (int i = columns.size(); --i >= 0;)
             columns.getUnchecked(i)->propertyFlags &= ~(sortedForwards | sortedBackwards);
 
-        ColumnInfo* const ci = getInfoForId (columnId);
-
-        if (ci != nullptr)
+        if (ColumnInfo* const ci = getInfoForId (columnId))
             ci->propertyFlags |= (sortForwards ? sortedForwards : sortedBackwards);
 
         reSortTable();
@@ -451,9 +449,7 @@ void TableHeaderComponent::restoreFromString (const String& storedVersion)
         {
             const int tabId = col->getIntAttribute ("id");
 
-            ColumnInfo* const ci = getInfoForId (tabId);
-
-            if (ci != nullptr)
+            if (ColumnInfo* const ci = getInfoForId (tabId))
             {
                 columns.move (columns.indexOf (ci), index);
                 ci->width = col->getIntAttribute ("width");
@@ -609,9 +605,7 @@ void TableHeaderComponent::mouseDrag (const MouseEvent& e)
 
     if (columnIdBeingResized != 0)
     {
-        const ColumnInfo* const ci = getInfoForId (columnIdBeingResized);
-
-        if (ci != nullptr)
+        if (const ColumnInfo* const ci = getInfoForId (columnIdBeingResized))
         {
             int w = jlimit (ci->minimumWidth, ci->maximumWidth,
                             initialColumnWidth + e.getDistanceFromDragStartX());

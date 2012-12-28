@@ -727,12 +727,13 @@ public:
         {
             for (CFIndex i = 0; i < CFArrayGetCount (presets); ++i)
             {
-                const AUPreset* p = (const AUPreset*) CFArrayGetValueAtIndex (presets, i);
-
-                if (p != nullptr && p->presetNumber == index)
+                if (const AUPreset* p = (const AUPreset*) CFArrayGetValueAtIndex (presets, i))
                 {
-                    s = String::fromCFString (p->presetName);
-                    break;
+                    if (p->presetNumber == index)
+                    {
+                        s = String::fromCFString (p->presetName);
+                        break;
+                    }
                 }
             }
 

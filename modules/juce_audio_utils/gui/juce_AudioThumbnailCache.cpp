@@ -99,9 +99,8 @@ int AudioThumbnailCache::findOldestThumb() const
 bool AudioThumbnailCache::loadThumb (AudioThumbnailBase& thumb, const int64 hashCode)
 {
     const ScopedLock sl (lock);
-    ThumbnailCacheEntry* te = findThumbFor (hashCode);
 
-    if (te != nullptr)
+    if (ThumbnailCacheEntry* te = findThumbFor (hashCode))
     {
         te->lastUsed = Time::getMillisecondCounter();
 

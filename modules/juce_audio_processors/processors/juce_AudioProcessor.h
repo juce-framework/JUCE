@@ -634,6 +634,8 @@ private:
     BigInteger changingParams;
    #endif
 
+    AudioProcessorListener* getListenerLocked (int) const noexcept;
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioProcessor)
 };
 

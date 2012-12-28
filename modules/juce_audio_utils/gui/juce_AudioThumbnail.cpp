@@ -211,12 +211,8 @@ private:
     void createReader()
     {
         if (reader == nullptr && source != nullptr)
-        {
-            InputStream* audioFileStream = source->createInputStream();
-
-            if (audioFileStream != nullptr)
+            if (InputStream* audioFileStream = source->createInputStream())
                 reader = owner.formatManagerToUse.createReaderFor (audioFileStream);
-        }
     }
 
     bool readNextBlock()

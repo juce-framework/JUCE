@@ -119,22 +119,19 @@ void AudioProcessor::setParameterNotifyingHost (const int parameterIndex,
     sendParamChangeMessageToListeners (parameterIndex, newValue);
 }
 
+AudioProcessorListener* AudioProcessor::getListenerLocked (const int index) const noexcept
+{
+    const ScopedLock sl (listenerLock);
+    return listeners [index];
+}
+
 void AudioProcessor::sendParamChangeMessageToListeners (const int parameterIndex, const float newValue)
 {
     jassert (isPositiveAndBelow (parameterIndex, getNumParameters()));
 
     for (int i = listeners.size(); --i >= 0;)
-    {
-        AudioProcessorListener* l;
-
-        {
-            const ScopedLock sl (listenerLock);
-            l = listeners [i];
-        }
-
-        if (l != nullptr)
+        if (AudioProcessorListener* l = getListenerLocked (i))
             l->audioProcessorParameterChanged (this, parameterIndex, newValue);
-    }
 }
 
 void AudioProcessor::beginParameterChangeGesture (int parameterIndex)
@@ -149,17 +146,8 @@ void AudioProcessor::beginParameterChangeGesture (int parameterIndex)
    #endif
 
     for (int i = listeners.size(); --i >= 0;)
-    {
-        AudioProcessorListener* l;
-
-        {
-            const ScopedLock sl (listenerLock);
-            l = listeners [i];
-        }
-
-        if (l != nullptr)
+        if (AudioProcessorListener* l = getListenerLocked (i))
             l->audioProcessorParameterChangeGestureBegin (this, parameterIndex);
-    }
 }
 
 void AudioProcessor::endParameterChangeGesture (int parameterIndex)
@@ -175,33 +163,15 @@ void AudioProcessor::endParameterChangeGesture (int parameterIndex)
    #endif
 
     for (int i = listeners.size(); --i >= 0;)
-    {
-        AudioProcessorListener* l;
-
-        {
-            const ScopedLock sl (listenerLock);
-            l = listeners [i];
-        }
-
-        if (l != nullptr)
+        if (AudioProcessorListener* l = getListenerLocked (i))
             l->audioProcessorParameterChangeGestureEnd (this, parameterIndex);
-    }
 }
 
 void AudioProcessor::updateHostDisplay()
 {
     for (int i = listeners.size(); --i >= 0;)
-    {
-        AudioProcessorListener* l;
-
-        {
-            const ScopedLock sl (listenerLock);
-            l = listeners [i];
-        }
-
-        if (l != nullptr)
+        if (AudioProcessorListener* l = getListenerLocked (i))
             l->audioProcessorChanged (this);
-    }
 }
 
 String AudioProcessor::getParameterLabel (int) const        { return String::empty; }

@@ -315,9 +315,8 @@ struct AppearanceEditor
             if (fontsToScan.size() == 0)
             {
                 getAppSettings().monospacedFontNames = fontsFound;
-                DialogWindow* w = findParentComponentOfClass<DialogWindow>();
 
-                if (w != nullptr)
+                if (DialogWindow* w = findParentComponentOfClass<DialogWindow>())
                     w->setContentOwned (new EditorPanel(), false);
             }
             else

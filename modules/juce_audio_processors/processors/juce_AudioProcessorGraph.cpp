@@ -789,9 +789,8 @@ private:
                                int recursionCheck) const noexcept
     {
         int index;
-        const Entry* const entry = findEntry (possibleDestinationId, index);
 
-        if (entry != nullptr)
+        if (const Entry* const entry = findEntry (possibleDestinationId, index))
         {
             const SortedSet<uint32>& srcNodes = entry->srcNodes;
 
@@ -917,10 +916,8 @@ void AudioProcessorGraph::Node::unprepare()
 
 void AudioProcessorGraph::Node::setParentGraph (AudioProcessorGraph* const graph) const
 {
-    AudioProcessorGraph::AudioGraphIOProcessor* const ioProc
-        = dynamic_cast <AudioProcessorGraph::AudioGraphIOProcessor*> (processor.get());
-
-    if (ioProc != nullptr)
+    if (AudioProcessorGraph::AudioGraphIOProcessor* const ioProc
+            = dynamic_cast <AudioProcessorGraph::AudioGraphIOProcessor*> (processor.get()))
         ioProc->setParentGraph (graph);
 }
 
