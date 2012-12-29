@@ -1787,6 +1787,7 @@ private:
             else
             {
                 jassert (fill.isTiledImage());
+                state.shaderQuadQueue.flush();
                 image = new OpenGLTextureFromImage (fill.image);
                 state.setShaderForTiledImageFill (*image, fill.transform, 0, nullptr, clampTiledImages);
             }
