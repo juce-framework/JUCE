@@ -187,7 +187,9 @@ bool ComponentPeer::handleKeyPress (const int keyCode, const juce_wchar textChar
             {
                 currentlyFocused->moveKeyboardFocusToSibling (isTab);
                 keyWasUsed = (currentlyFocused != Component::getCurrentlyFocusedComponent());
-                break;
+                
+                if (keyWasUsed || deletionChecker == nullptr)
+                    break;
             }
         }
     }
