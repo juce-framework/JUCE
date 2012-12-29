@@ -91,8 +91,17 @@ struct Flipper
             for (int x = 0; x < w; ++x)
                 dst[x].set (src[x]);
 
+            if (textureW > w)
+                dst[w].set (PixelARGB (0));
+
             srcData += lineStride;
         }
+
+        // for textures which are larger than the area of interest, clear the pixels that lie
+        // just outside the actual image, so that the texture interpolation doesn't read junk.
+        if (textureH > h)
+            zeromem (dataCopy + textureW * (textureH - 1 - h),
+                     sizeof (PixelARGB) * jmin (textureW, w + 1));
     }
 };
 
