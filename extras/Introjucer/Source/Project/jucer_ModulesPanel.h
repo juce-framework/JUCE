@@ -168,9 +168,7 @@ public:
             if (rowIsSelected)
                 g.fillAll (findColour (TextEditor::highlightColourId));
 
-            const ModuleList::Module* const m = list.modules [rowNumber];
-
-            if (m != nullptr)
+            if (const ModuleList::Module* const m = list.modules [rowNumber])
             {
                 const float tickSize = height * 0.7f;
 
@@ -193,7 +191,7 @@ public:
                 flipRow (row);
         }
 
-        void listBoxItemDoubleClicked (int row, const MouseEvent& e)
+        void listBoxItemDoubleClicked (int row, const MouseEvent&)
         {
             flipRow (row);
         }
@@ -210,9 +208,7 @@ public:
 
         void flipRow (int row)
         {
-            const ModuleList::Module* const m = list.modules [row];
-
-            if (m != nullptr)
+            if (const ModuleList::Module* const m = list.modules [row])
                 owner->setEnabled (m, ! owner->isEnabled (m));
         }
 
@@ -246,9 +242,9 @@ public:
 
                 if (project.isModuleEnabled (moduleID))
                 {
-                    const ModuleList::Module* m = moduleList.findModuleInfo (moduleID);
-                    if (m != nullptr && moduleList.getExtraDependenciesNeeded (project, *m).size() > 0)
-                        props.add (new MissingDependenciesComponent (project, moduleList, moduleID));
+                    if (const ModuleList::Module* m = moduleList.findModuleInfo (moduleID))
+                        if (moduleList.getExtraDependenciesNeeded (project, *m).size() > 0)
+                            props.add (new MissingDependenciesComponent (project, moduleList, moduleID));
                 }
 
                 props.add (new BooleanPropertyComponent (project.shouldShowAllModuleFilesInProject (moduleID),
@@ -308,9 +304,7 @@ public:
                 g.setColour (Colours::white.withAlpha (0.4f));
                 g.fillRect (0, 0, getWidth(), getHeight() - 1);
 
-                const ModuleList::Module* module = moduleList.findModuleInfo (moduleID);
-
-                if (module != nullptr)
+                if (const ModuleList::Module* module = moduleList.findModuleInfo (moduleID))
                 {
                     String text;
                     text << module->name << newLine << "Version: " << module->version << newLine << newLine
@@ -341,9 +335,7 @@ public:
                   project (p), moduleList (list), moduleID (modID),
                   fixButton ("Enable Required Modules")
             {
-                const ModuleList::Module* module = moduleList.findModuleInfo (moduleID);
-
-                if (module != nullptr)
+                if (const ModuleList::Module* module = moduleList.findModuleInfo (moduleID))
                     missingDependencies = moduleList.getExtraDependenciesNeeded (project, *module);
 
                 addAndMakeVisible (&fixButton);
@@ -375,8 +367,7 @@ public:
                 for (int i = missingDependencies.size(); --i >= 0;)
                     project.addModule (missingDependencies[i], isModuleCopiedLocally);
 
-                ModulesPanel* mp = findParentComponentOfClass<ModulesPanel>();
-                if (mp != nullptr)
+                if (ModulesPanel* mp = findParentComponentOfClass<ModulesPanel>())
                     mp->refresh();
             }
 

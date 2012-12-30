@@ -69,13 +69,13 @@ public:
         return item.getNumChildren();
     }
 
-    void paintListBoxItem (int rowNumber, Graphics& g, int width, int height, bool rowIsSelected)
+    void paintListBoxItem (int /*rowNumber*/, Graphics& g, int width, int height, bool /*rowIsSelected*/)
     {
         g.setColour (Colours::white.withAlpha (0.4f));
         g.fillRect (0, 0, width, height - 1);
     }
 
-    Component* refreshComponentForRow (int rowNumber, bool isRowSelected, Component* existingComponentToUpdate)
+    Component* refreshComponentForRow (int rowNumber, bool /*isRowSelected*/, Component* existingComponentToUpdate)
     {
         if (rowNumber < getNumRows())
         {

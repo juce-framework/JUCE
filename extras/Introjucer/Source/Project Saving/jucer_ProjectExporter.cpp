@@ -333,19 +333,19 @@ ProjectExporter::BuildConfiguration::Ptr ProjectExporter::getConfiguration (int 
     return createBuildConfig (getConfigurations().getChild (index));
 }
 
-bool ProjectExporter::hasConfigurationNamed (const String& name) const
+bool ProjectExporter::hasConfigurationNamed (const String& nameToFind) const
 {
     const ValueTree configs (getConfigurations());
     for (int i = configs.getNumChildren(); --i >= 0;)
-        if (configs.getChild(i) [Ids::name].toString() == name)
+        if (configs.getChild(i) [Ids::name].toString() == nameToFind)
             return true;
 
     return false;
 }
 
-String ProjectExporter::getUniqueConfigName (String name) const
+String ProjectExporter::getUniqueConfigName (String nm) const
 {
-    String nameRoot (name);
+    String nameRoot (nm);
     while (CharacterFunctions::isDigit (nameRoot.getLastCharacter()))
         nameRoot = nameRoot.dropLastCharacters (1);
 
@@ -353,9 +353,9 @@ String ProjectExporter::getUniqueConfigName (String name) const
 
     int suffix = 2;
     while (hasConfigurationNamed (name))
-        name = nameRoot + " " + String (suffix++);
+        nm = nameRoot + " " + String (suffix++);
 
-    return name;
+    return nm;
 }
 
 void ProjectExporter::addNewConfiguration (const BuildConfiguration* configToCopy)

@@ -130,14 +130,14 @@ namespace ProjectSettingsTreeClasses
         class SettingsComp  : public Component
         {
         public:
-            SettingsComp (ProjectExporter::BuildConfiguration* config, const String& exporterName)
+            SettingsComp (ProjectExporter::BuildConfiguration* conf, const String& expName)
             {
                 addAndMakeVisible (&group);
 
                 PropertyListBuilder props;
-                config->createPropertyEditors (props);
+                conf->createPropertyEditors (props);
                 group.setProperties (props);
-                group.setName (exporterName + " / " + config->getName());
+                group.setName (expName + " / " + conf->getName());
                 parentSizeChanged();
             }
 
@@ -258,14 +258,14 @@ namespace ProjectSettingsTreeClasses
         class SettingsComp  : public Component
         {
         public:
-            SettingsComp (ProjectExporter* exporter)
+            SettingsComp (ProjectExporter* exp)
             {
                 addAndMakeVisible (&group);
 
                 PropertyListBuilder props;
-                exporter->createPropertyEditors (props);
+                exp->createPropertyEditors (props);
                 group.setProperties (props);
-                group.setName ("Export target: " + exporter->getName());
+                group.setName ("Export target: " + exp->getName());
                 parentSizeChanged();
             }
 

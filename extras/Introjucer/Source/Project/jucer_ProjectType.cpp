@@ -104,7 +104,7 @@ public:
     {
     }
 
-    void createPropertyEditors (Project& project, PropertyListBuilder& props) const
+    void createPropertyEditors (Project&, PropertyListBuilder&) const
     {
     }
 

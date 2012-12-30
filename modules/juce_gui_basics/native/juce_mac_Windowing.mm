@@ -107,7 +107,7 @@ private:
 
 void JUCE_CALLTYPE NativeMessageBox::showMessageBox (AlertWindow::AlertIconType iconType,
                                                      const String& title, const String& message,
-                                                     Component* associatedComponent)
+                                                     Component* /*associatedComponent*/)
 {
     OSXMessageBox box (iconType, title, message, "OK", nullptr, nullptr, nullptr, false);
     (void) box.getResult();
@@ -115,7 +115,7 @@ void JUCE_CALLTYPE NativeMessageBox::showMessageBox (AlertWindow::AlertIconType 
 
 void JUCE_CALLTYPE NativeMessageBox::showMessageBoxAsync (AlertWindow::AlertIconType iconType,
                                                           const String& title, const String& message,
-                                                          Component* associatedComponent)
+                                                          Component* /*associatedComponent*/)
 {
     new OSXMessageBox (iconType, title, message, "OK", nullptr, nullptr, nullptr, true);
 }

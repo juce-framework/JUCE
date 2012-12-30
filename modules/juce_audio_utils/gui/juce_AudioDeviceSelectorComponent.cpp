@@ -411,9 +411,7 @@ public:
 
         updateControlPanelButton();
 
-        AudioIODevice* const currentDevice = setup.manager->getCurrentAudioDevice();
-
-        if (currentDevice != nullptr)
+        if (AudioIODevice* const currentDevice = setup.manager->getCurrentAudioDevice())
         {
             if (setup.maxNumOutputChannels > 0
                  && setup.minNumOutputChannels < setup.manager->getCurrentAudioDevice()->getOutputChannelNames().size())
@@ -688,9 +686,7 @@ public:
         {
             items.clear();
 
-            AudioIODevice* const currentDevice = setup.manager->getCurrentAudioDevice();
-
-            if (currentDevice != nullptr)
+            if (AudioIODevice* const currentDevice = setup.manager->getCurrentAudioDevice())
             {
                 if (type == audioInputType)
                     items = currentDevice->getInputChannelNames();
@@ -1041,9 +1037,7 @@ void AudioDeviceSelectorComponent::comboBoxChanged (ComboBox* comboBoxThatHasCha
 {
     if (comboBoxThatHasChanged == deviceTypeDropDown)
     {
-        AudioIODeviceType* const type = deviceManager.getAvailableDeviceTypes() [deviceTypeDropDown->getSelectedId() - 1];
-
-        if (type != nullptr)
+        if (AudioIODeviceType* const type = deviceManager.getAvailableDeviceTypes() [deviceTypeDropDown->getSelectedId() - 1])
         {
             audioDeviceSettingsComp = nullptr;
 
@@ -1074,11 +1068,9 @@ void AudioDeviceSelectorComponent::updateAllControls()
         audioDeviceSettingsCompType = deviceManager.getCurrentAudioDeviceType();
         audioDeviceSettingsComp = nullptr;
 
-        AudioIODeviceType* const type
-            = deviceManager.getAvailableDeviceTypes() [deviceTypeDropDown == nullptr
-                                                        ? 0 : deviceTypeDropDown->getSelectedId() - 1];
-
-        if (type != nullptr)
+        if (AudioIODeviceType* const type
+                = deviceManager.getAvailableDeviceTypes() [deviceTypeDropDown == nullptr
+                                                            ? 0 : deviceTypeDropDown->getSelectedId() - 1])
         {
             AudioDeviceSetupDetails details;
             details.manager = &deviceManager;

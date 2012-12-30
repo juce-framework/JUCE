@@ -277,7 +277,7 @@ File Project::getLastDocumentOpened()                   { return lastDocumentOpe
 void Project::setLastDocumentOpened (const File& file)  { lastDocumentOpened = file; }
 
 //==============================================================================
-void Project::valueTreePropertyChanged (ValueTree& tree, const Identifier& property)
+void Project::valueTreePropertyChanged (ValueTree&, const Identifier& property)
 {
     if (property == Ids::projectType)
         setMissingDefaultValues();

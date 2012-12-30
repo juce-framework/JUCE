@@ -519,7 +519,7 @@ private:
             }
         }
 
-        static void menuNeedsUpdate (id self, SEL, NSMenu* menu)
+        static void menuNeedsUpdate (id, SEL, NSMenu* menu)
         {
             if (instance != nullptr)
                 instance->updateMenus (menu);

@@ -85,7 +85,7 @@ Font JucerTreeViewBase::getFont() const
     return Font (getItemHeight() * 0.6f);
 }
 
-void JucerTreeViewBase::paintItem (Graphics& g, int width, int height)
+void JucerTreeViewBase::paintItem (Graphics& g, int /*width*/, int /*height*/)
 {
     if (isSelected())
         g.fillAll (getOwnerView()->findColour (treeviewHighlightColourId));
@@ -96,7 +96,7 @@ float JucerTreeViewBase::getIconSize() const
     return jmin (getItemHeight() - 4.0f, 18.0f);
 }
 
-void JucerTreeViewBase::paintOpenCloseButton (Graphics& g, int width, int height, bool isMouseOver)
+void JucerTreeViewBase::paintOpenCloseButton (Graphics& g, int width, int height, bool /*isMouseOver*/)
 {
     Path p;
 
@@ -264,7 +264,7 @@ void JucerTreeViewBase::invokeShowDocument()
     showDocument();
 }
 
-void JucerTreeViewBase::itemDoubleClicked (const MouseEvent& e)
+void JucerTreeViewBase::itemDoubleClicked (const MouseEvent&)
 {
     invokeShowDocument();
 }

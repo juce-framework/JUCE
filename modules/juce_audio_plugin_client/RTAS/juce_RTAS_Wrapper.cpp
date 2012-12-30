@@ -111,6 +111,9 @@
  #pragma comment(lib, PT_LIB_PATH "DigiExt.lib")
  #pragma comment(lib, PT_LIB_PATH "DSI.lib")
  #pragma comment(lib, PT_LIB_PATH "PluginLib.lib")
+ #pragma comment(lib, PT_LIB_PATH "DSPManager.lib")
+ #pragma comment(lib, PT_LIB_PATH "DSPManagerClientLib.lib")
+ #pragma comment(lib, PT_LIB_PATH "RTASClientLib.lib")
 #endif
 
 #undef Component

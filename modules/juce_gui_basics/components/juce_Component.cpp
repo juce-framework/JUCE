@@ -358,8 +358,10 @@ struct Component::ComponentHelpers
 
     static Rectangle<int> getParentOrMainMonitorBounds (const Component& comp)
     {
-        return comp.getParentComponent() != nullptr ? comp.getParentComponent()->getLocalBounds()
-                                                    : Desktop::getInstance().getDisplays().getMainDisplay().userArea;
+        if (Component* p = comp.getParentComponent())
+            return p->getLocalBounds();
+
+        return Desktop::getInstance().getDisplays().getMainDisplay().userArea;
     }
 };
 
@@ -498,8 +500,10 @@ bool Component::isShowing() const
     if (parentComponent != nullptr)
         return parentComponent->isShowing();
 
-    const ComponentPeer* const peer = getPeer();
-    return peer != nullptr && ! peer->isMinimised();
+    if (const ComponentPeer* const peer = getPeer())
+        return ! peer->isMinimised();
+
+    return false;
 }
 
 

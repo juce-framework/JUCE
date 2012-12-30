@@ -141,9 +141,7 @@ void AudioFormatReader::read (AudioSampleBuffer* buffer,
         {
             for (int j = 0; j < 2; ++j)
             {
-                float* const d = reinterpret_cast <float*> (chans[j]);
-
-                if (d != nullptr)
+                if (float* const d = reinterpret_cast <float*> (chans[j]))
                 {
                     const float multiplier = 1.0f / 0x7fffffff;
 

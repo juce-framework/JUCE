@@ -74,7 +74,7 @@ public:
     ImageType* createType() const    { return new NativeImageType(); }
 
     //==============================================================================
-    static CGImageRef createImage (const Image& juceImage, const bool forAlpha,
+    static CGImageRef createImage (const Image& juceImage, const bool /*forAlpha*/,
                                    CGColorSpaceRef colourSpace, const bool mustOutliveSource)
     {
         const Image::BitmapData srcData (juceImage, Image::BitmapData::readOnly);

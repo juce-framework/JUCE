@@ -11,7 +11,8 @@
               companyName="Raw Material Software Ltd.">
   <EXPORTFORMATS>
     <XCODE_MAC targetFolder="Builds/MacOSX" vstFolder="~/SDKs/vstsdk2.4" rtasFolder="~/SDKs/PT_80_SDK"
-               juceFolder="../../../juce" objCExtraSuffix="JSLvvV6j" bigIcon="f4hwldS">
+               juceFolder="../../../juce" objCExtraSuffix="JSLvvV6j" bigIcon="f4hwldS"
+               extraCompilerFlags="-Wall -Wno-missing-field-initializers -Wno-strict-aliasing">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="JuceDemo"
                        osxSDK="default" osxCompatibility="default" defines="JUCE_UNIT_TESTS=1"

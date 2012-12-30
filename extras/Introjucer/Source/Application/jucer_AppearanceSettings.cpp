@@ -48,6 +48,11 @@ namespace AppearanceColours
         { "Selected Text Bkgd", CodeEditorComponent::highlightColourId, false, false },
         { "Caret",              CaretComponent::caretColourId, false, true }
     };
+
+    enum
+    {
+        numColours = sizeof (AppearanceColours::colours) / sizeof (AppearanceColours::colours[0])
+    };
 }
 
 //==============================================================================
@@ -56,7 +61,7 @@ AppearanceSettings::AppearanceSettings (bool updateAppWhenChanged)
 {
     IntrojucerLookAndFeel lf;
 
-    for (int i = 0; i < sizeof (AppearanceColours::colours) / sizeof (AppearanceColours::colours[0]); ++i)
+    for (int i = 0; i < AppearanceColours::numColours; ++i)
         getColourValue (AppearanceColours::colours[i].name) = lf.findColour (AppearanceColours::colours[i].colourID).toString();
 
     CodeDocument doc;
@@ -192,7 +197,7 @@ void AppearanceSettings::updateColourScheme()
 
 void AppearanceSettings::applyToLookAndFeel (LookAndFeel& lf) const
 {
-    for (int i = 0; i < sizeof (AppearanceColours::colours) / sizeof (AppearanceColours::colours[0]); ++i)
+    for (int i = 0; i < AppearanceColours::numColours; ++i)
     {
         Colour col;
         if (getColour (AppearanceColours::colours[i].name, col))
@@ -222,7 +227,7 @@ void AppearanceSettings::applyToCodeEditor (CodeEditorComponent& editor) const
     editor.setColourScheme (cs);
     editor.setFont (getCodeFont());
 
-    for (int i = 0; i < sizeof (AppearanceColours::colours) / sizeof (AppearanceColours::colours[0]); ++i)
+    for (int i = 0; i < AppearanceColours::numColours; ++i)
     {
         if (AppearanceColours::colours[i].applyToEditorOnly)
         {
@@ -310,9 +315,8 @@ struct AppearanceEditor
             if (fontsToScan.size() == 0)
             {
                 getAppSettings().monospacedFontNames = fontsFound;
-                DialogWindow* w = findParentComponentOfClass<DialogWindow>();
 
-                if (w != nullptr)
+                if (DialogWindow* w = findParentComponentOfClass<DialogWindow>())
                     w->setContentOwned (new EditorPanel(), false);
             }
             else
@@ -547,9 +551,9 @@ Rectangle<int> IntrojucerLookAndFeel::getPropertyComponentContentPosition (Prope
     return LookAndFeel::getPropertyComponentContentPosition (component);
 }
 
-int IntrojucerLookAndFeel::getTabButtonOverlap (int tabDepth)                          { return -1; }
+int IntrojucerLookAndFeel::getTabButtonOverlap (int /*tabDepth*/)                      { return -1; }
 int IntrojucerLookAndFeel::getTabButtonSpaceAroundImage()                              { return 1; }
-int IntrojucerLookAndFeel::getTabButtonBestWidth (TabBarButton& button, int tabDepth)  { return 120; }
+int IntrojucerLookAndFeel::getTabButtonBestWidth (TabBarButton&, int /*tabDepth*/)     { return 120; }
 
 void IntrojucerLookAndFeel::createTabTextLayout (const TabBarButton& button, const Rectangle<int>& textArea, GlyphArrangement& textLayout)
 {
@@ -700,8 +704,8 @@ void IntrojucerLookAndFeel::fillWithBackgroundTexture (Component& c, Graphics& g
 }
 
 void IntrojucerLookAndFeel::drawConcertinaPanelHeader (Graphics& g, const Rectangle<int>& area,
-                                                       bool isMouseOver, bool isMouseDown,
-                                                       ConcertinaPanel& concertina, Component& panel)
+                                                       bool isMouseOver, bool /*isMouseDown*/,
+                                                       ConcertinaPanel&, Component& panel)
 {
     const Colour bkg (findColour (mainBackgroundColourId));
 

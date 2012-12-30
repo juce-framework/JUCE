@@ -81,7 +81,7 @@ void ProjectTreeViewBase::addFiles (const StringArray& files, int insertIndex)
         p->addFiles (files, insertIndex);
 }
 
-void ProjectTreeViewBase::moveSelectedItemsTo (OwnedArray <Project::Item>& selectedNodes, int insertIndex)
+void ProjectTreeViewBase::moveSelectedItemsTo (OwnedArray <Project::Item>&, int /*insertIndex*/)
 {
     jassertfalse;
 }
@@ -98,12 +98,8 @@ ProjectTreeViewBase* ProjectTreeViewBase::findTreeViewItem (const Project::Item&
     for (int i = getNumSubItems(); --i >= 0;)
     {
         if (ProjectTreeViewBase* pg = dynamic_cast <ProjectTreeViewBase*> (getSubItem(i)))
-        {
-            pg = pg->findTreeViewItem (itemToFind);
-
-            if (pg != nullptr)
-                return pg;
-        }
+            if (ProjectTreeViewBase* found = pg->findTreeViewItem (itemToFind))
+                return found;
     }
 
     setOpen (wasOpen);
@@ -116,21 +112,15 @@ void ProjectTreeViewBase::triggerAsyncRename (const Project::Item& itemToRename)
     class RenameMessage  : public CallbackMessage
     {
     public:
-        RenameMessage (TreeView* const t, const Project::Item& item)
-            : tree (t), itemToRename (item)  {}
+        RenameMessage (TreeView* const t, const Project::Item& i)
+            : tree (t), itemToRename (i)  {}
 
         void messageCallback()
         {
             if (tree != nullptr)
-            {
-                if (ProjectTreeViewBase* pg = dynamic_cast <ProjectTreeViewBase*> (tree->getRootItem()))
-                {
-                    pg = pg->findTreeViewItem (itemToRename);
-
-                    if (pg != nullptr)
-                        pg->showRenameBox();
-                }
-            }
+                if (ProjectTreeViewBase* root = dynamic_cast <ProjectTreeViewBase*> (tree->getRootItem()))
+                    if (ProjectTreeViewBase* found = root->findTreeViewItem (itemToRename))
+                        found->showRenameBox();
         }
 
     private:
@@ -357,18 +347,18 @@ void ProjectTreeViewBase::treeChildrenChanged (const ValueTree& parentTree)
     }
 }
 
-void ProjectTreeViewBase::valueTreePropertyChanged (ValueTree& tree, const Identifier& property)
+void ProjectTreeViewBase::valueTreePropertyChanged (ValueTree& tree, const Identifier&)
 {
     if (tree == item.state)
         repaintItem();
 }
 
-void ProjectTreeViewBase::valueTreeChildAdded (ValueTree& parentTree, ValueTree& childWhichHasBeenAdded)
+void ProjectTreeViewBase::valueTreeChildAdded (ValueTree& parentTree, ValueTree&)
 {
     treeChildrenChanged (parentTree);
 }
 
-void ProjectTreeViewBase::valueTreeChildRemoved (ValueTree& parentTree, ValueTree& childWhichHasBeenRemoved)
+void ProjectTreeViewBase::valueTreeChildRemoved (ValueTree& parentTree, ValueTree&)
 {
     treeChildrenChanged (parentTree);
 }
@@ -378,7 +368,7 @@ void ProjectTreeViewBase::valueTreeChildOrderChanged (ValueTree& parentTree)
     treeChildrenChanged (parentTree);
 }
 
-void ProjectTreeViewBase::valueTreeParentChanged (ValueTree& tree)
+void ProjectTreeViewBase::valueTreeParentChanged (ValueTree&)
 {
 }
 

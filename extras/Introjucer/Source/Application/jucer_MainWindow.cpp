@@ -130,9 +130,7 @@ bool MainWindow::closeProject (Project* project)
 
     project->getStoredProperties().setValue (getProjectWindowPosName(), getWindowStateAsString());
 
-    ProjectContentComponent* const pcc = getProjectContentComponent();
-
-    if (pcc != nullptr)
+    if (ProjectContentComponent* const pcc = getProjectContentComponent())
     {
         pcc->saveTreeViewState();
         pcc->saveOpenDocumentList();
@@ -218,7 +216,7 @@ bool MainWindow::isInterestedInFileDrag (const StringArray& filenames)
     return false;
 }
 
-void MainWindow::filesDropped (const StringArray& filenames, int mouseX, int mouseY)
+void MainWindow::filesDropped (const StringArray& filenames, int /*mouseX*/, int /*mouseY*/)
 {
     for (int i = filenames.size(); --i >= 0;)
     {
@@ -262,8 +260,8 @@ void MainWindow::activeWindowStatusChanged()
 {
     DocumentWindow::activeWindowStatusChanged();
 
-    if (getProjectContentComponent() != nullptr)
-        getProjectContentComponent()->updateMissingFileStatuses();
+    if (ProjectContentComponent* const pcc = getProjectContentComponent())
+        pcc->updateMissingFileStatuses();
 
     IntrojucerApp::getApp().openDocumentManager.reloadModifiedFiles();
 }
@@ -506,10 +504,9 @@ void MainWindowList::saveCurrentlyOpenProjectList()
     Desktop& desktop = Desktop::getInstance();
     for (int i = 0; i < desktop.getNumComponents(); ++i)
     {
-        MainWindow* const mw = dynamic_cast <MainWindow*> (desktop.getComponent(i));
-
-        if (mw != nullptr && mw->getProject() != nullptr)
-            projects.add (mw->getProject()->getFile());
+        if (MainWindow* const mw = dynamic_cast <MainWindow*> (desktop.getComponent(i)))
+            if (Project* p = mw->getProject())
+                projects.add (p->getFile());
     }
 
     getAppSettings().setLastProjects (projects);
