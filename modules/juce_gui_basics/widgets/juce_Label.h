@@ -28,6 +28,17 @@
 
 #include "juce_TextEditor.h"
 
+// Some DAWs in Windows (Cubase for example) don't pass many keystrokes
+// to the plugin editors.
+// JUCE_LABEL_EDITOR_IN_NEW_WINDOW enables a work-around for this problem,
+// causing the label to pop out to a temporary top-level window when edited.
+#ifndef JUCE_LABEL_EDITOR_IN_NEW_WINDOW
+ #if JUCE_WINDOWS && (JucePlugin_Build_VST || JucePlugin_Build_RTAS)
+  #define JUCE_LABEL_EDITOR_IN_NEW_WINDOW 1
+ #else
+  #define JUCE_LABEL_EDITOR_IN_NEW_WINDOW 0
+ #endif
+#endif // JUCE_LABEL_EDITOR_IN_NEW_WINDOW
 
 //==============================================================================
 /**
@@ -320,6 +331,12 @@ private:
     ScopedPointer<TextEditor> editor;
     ListenerList<Listener> listeners;
     WeakReference<Component> ownerComponent;
+
+#if JUCE_LABEL_EDITOR_IN_NEW_WINDOW
+    Component* parentBeforeOnDesktop;
+    Rectangle<int> boundsBeforeOnDesktop;
+#endif // JUCE_LABEL_EDITOR_IN_NEW_WINDOW
+
     int horizontalBorderSize, verticalBorderSize;
     float minimumHorizontalScale;
     bool editSingleClick : 1;
@@ -329,6 +346,10 @@ private:
 
     bool updateFromTextEditorContents (TextEditor&);
     void callChangeListeners();
+
+#if JUCE_LABEL_EDITOR_IN_NEW_WINDOW
+    static bool hostNeedsEditorInNewWindow();
+#endif // JUCE_LABEL_EDITOR_IN_NEW_WINDOW
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Label)
 };
