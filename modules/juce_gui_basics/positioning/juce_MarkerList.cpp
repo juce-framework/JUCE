@@ -245,15 +245,11 @@ void MarkerList::ValueTreeWrapper::removeMarker (const ValueTree& marker, UndoMa
 
 double MarkerList::getMarkerPosition (const Marker& marker, Component* parentComponent) const
 {
-    if (parentComponent != nullptr)
-    {
-        RelativeCoordinatePositionerBase::ComponentScope scope (*parentComponent);
-        return marker.position.resolve (&scope);
-    }
-    else
-    {
+    if (parentComponent == nullptr)
         return marker.position.resolve (nullptr);
-    }
+
+    RelativeCoordinatePositionerBase::ComponentScope scope (*parentComponent);
+    return marker.position.resolve (&scope);
 }
 
 //==============================================================================

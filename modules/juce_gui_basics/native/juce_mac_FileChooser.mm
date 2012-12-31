@@ -91,8 +91,7 @@ public:
     TemporaryMainMenuWithStandardCommands()
         : oldMenu (MenuBarModel::getMacMainMenu()), oldAppleMenu (nullptr)
     {
-        const PopupMenu* appleMenu = MenuBarModel::getMacExtraAppleItemsMenu();
-        if (appleMenu != nullptr)
+        if (const PopupMenu* appleMenu = MenuBarModel::getMacExtraAppleItemsMenu())
             oldAppleMenu = new PopupMenu (*appleMenu);
 
         MenuBarModel::setMacMainMenu (nullptr);

@@ -93,9 +93,7 @@ private:
 
     static BOOL prepareTrack (id self, SEL, DRTrack*, DRBurn*, NSDictionary*)
     {
-        AudioSourceHolder* const source = getSource (self);
-
-        if (source != nullptr)
+        if (AudioSourceHolder* const source = getSource (self))
         {
             source->source->prepareToPlay (44100 / 75, 44100);
             source->readPosition = 0;
@@ -106,9 +104,7 @@ private:
 
     static BOOL prepareTrackForVerification (id self, SEL, DRTrack*)
     {
-        AudioSourceHolder* const source = getSource (self);
-
-        if (source != nullptr)
+        if (AudioSourceHolder* const source = getSource (self))
             source->source->prepareToPlay (44100 / 75, 44100);
 
         return true;
@@ -118,9 +114,7 @@ private:
                                          uint32_t bufferLength, uint64_t /*address*/,
                                          uint32_t /*blockSize*/, uint32_t* /*flags*/)
     {
-        AudioSourceHolder* const source = getSource (self);
-
-        if (source != nullptr)
+        if (AudioSourceHolder* const source = getSource (self))
         {
             const int numSamples = jmin ((int) bufferLength / 4,
                                          (source->lengthInFrames * (44100 / 75)) - source->readPosition);

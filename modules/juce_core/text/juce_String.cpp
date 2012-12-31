@@ -2070,10 +2070,9 @@ String String::fromUTF8 (const char* const buffer, int bufferSizeBytes)
 {
     if (buffer != nullptr)
     {
-        if (bufferSizeBytes < 0)
-            return String (CharPointer_UTF8 (buffer));
-        else if (bufferSizeBytes > 0)
-            return String (CharPointer_UTF8 (buffer), CharPointer_UTF8 (buffer + bufferSizeBytes));
+        if (bufferSizeBytes < 0) return String (CharPointer_UTF8 (buffer));
+        if (bufferSizeBytes > 0) return String (CharPointer_UTF8 (buffer),
+                                                CharPointer_UTF8 (buffer + bufferSizeBytes));
     }
 
     return String::empty;

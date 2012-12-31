@@ -65,10 +65,8 @@ public:
 
     static XCodeProjectExporter* createForSettings (Project& project, const ValueTree& settings)
     {
-        if (settings.hasType (getValueTreeTypeName (false)))
-            return new XCodeProjectExporter (project, settings, false);
-        else if (settings.hasType (getValueTreeTypeName (true)))
-            return new XCodeProjectExporter (project, settings, true);
+        if (settings.hasType (getValueTreeTypeName (false)))  return new XCodeProjectExporter (project, settings, false);
+        if (settings.hasType (getValueTreeTypeName (true)))   return new XCodeProjectExporter (project, settings, true);
 
         return nullptr;
     }
@@ -981,21 +979,21 @@ public:
 private:
     static String getFileType (const RelativePath& file)
     {
-        if (file.hasFileExtension ("cpp;cc;cxx"))                return "sourcecode.cpp.cpp";
-        else if (file.hasFileExtension (".mm"))                  return "sourcecode.cpp.objcpp";
-        else if (file.hasFileExtension (".m"))                   return "sourcecode.c.objc";
-        else if (file.hasFileExtension (headerFileExtensions))   return "sourcecode.c.h";
-        else if (file.hasFileExtension (".framework"))           return "wrapper.framework";
-        else if (file.hasFileExtension (".jpeg;.jpg"))           return "image.jpeg";
-        else if (file.hasFileExtension ("png;gif"))              return "image" + file.getFileExtension();
-        else if (file.hasFileExtension ("html;htm"))             return "text.html";
-        else if (file.hasFileExtension ("xml;zip;wav"))          return "file" + file.getFileExtension();
-        else if (file.hasFileExtension ("txt;rtf"))              return "text" + file.getFileExtension();
-        else if (file.hasFileExtension ("plist"))                return "text.plist.xml";
-        else if (file.hasFileExtension ("app"))                  return "wrapper.application";
-        else if (file.hasFileExtension ("component;vst;plugin")) return "wrapper.cfbundle";
-        else if (file.hasFileExtension ("xcodeproj"))            return "wrapper.pb-project";
-        else if (file.hasFileExtension ("a"))                    return "archive.ar";
+        if (file.hasFileExtension ("cpp;cc;cxx"))           return "sourcecode.cpp.cpp";
+        if (file.hasFileExtension (".mm"))                  return "sourcecode.cpp.objcpp";
+        if (file.hasFileExtension (".m"))                   return "sourcecode.c.objc";
+        if (file.hasFileExtension (headerFileExtensions))   return "sourcecode.c.h";
+        if (file.hasFileExtension (".framework"))           return "wrapper.framework";
+        if (file.hasFileExtension (".jpeg;.jpg"))           return "image.jpeg";
+        if (file.hasFileExtension ("png;gif"))              return "image" + file.getFileExtension();
+        if (file.hasFileExtension ("html;htm"))             return "text.html";
+        if (file.hasFileExtension ("xml;zip;wav"))          return "file" + file.getFileExtension();
+        if (file.hasFileExtension ("txt;rtf"))              return "text" + file.getFileExtension();
+        if (file.hasFileExtension ("plist"))                return "text.plist.xml";
+        if (file.hasFileExtension ("app"))                  return "wrapper.application";
+        if (file.hasFileExtension ("component;vst;plugin")) return "wrapper.cfbundle";
+        if (file.hasFileExtension ("xcodeproj"))            return "wrapper.pb-project";
+        if (file.hasFileExtension ("a"))                    return "archive.ar";
 
         return "file" + file.getFileExtension();
     }

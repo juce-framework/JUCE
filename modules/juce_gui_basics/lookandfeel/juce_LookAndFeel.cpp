@@ -2045,9 +2045,7 @@ int LookAndFeel::getTabButtonBestWidth (TabBarButton& button, int tabDepth)
     int width = Font (tabDepth * 0.6f).getStringWidth (button.getButtonText().trim())
                   + getTabButtonOverlap (tabDepth) * 2;
 
-    Component* const extraComponent = button.getExtraComponent();
-
-    if (extraComponent != nullptr)
+    if (Component* const extraComponent = button.getExtraComponent())
         width += button.getTabbedButtonBar().isVertical() ? extraComponent->getHeight()
                                                           : extraComponent->getWidth();
 
@@ -2526,10 +2524,8 @@ void LookAndFeel::drawFileBrowserRow (Graphics& g, int width, int height,
     }
     else
     {
-        const Drawable* d = isDirectory ? getDefaultFolderImage()
-                                        : getDefaultDocumentFileImage();
-
-        if (d != nullptr)
+        if (const Drawable* d = isDirectory ? getDefaultFolderImage()
+                                            : getDefaultDocumentFileImage())
             d->drawWithin (g, Rectangle<float> (2.0f, 2.0f, x - 4.0f, height - 4.0f),
                            RectanglePlacement::centred | RectanglePlacement::onlyReduceInSize, 1.0f);
     }

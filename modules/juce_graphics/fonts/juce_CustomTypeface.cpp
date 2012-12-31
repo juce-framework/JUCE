@@ -194,11 +194,10 @@ void CustomTypeface::addKerningPair (const juce_wchar char1, const juce_wchar ch
 {
     if (extraAmount != 0)
     {
-        GlyphInfo* const g = findGlyph (char1, true);
-        jassert (g != nullptr); // can only add kerning pairs for characters that exist!
-
-        if (g != nullptr)
+        if (GlyphInfo* const g = findGlyph (char1, true))
             g->addKerningPair (char2, extraAmount);
+        else
+            jassertfalse; // can only add kerning pairs for characters that exist!
     }
 }
 

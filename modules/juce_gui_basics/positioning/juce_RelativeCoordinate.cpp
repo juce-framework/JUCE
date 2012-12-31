@@ -116,8 +116,8 @@ double RelativeCoordinate::resolve (const Expression::Scope* scope) const
     {
         if (scope != nullptr)
             return term.evaluate (*scope);
-        else
-            return term.evaluate();
+
+        return term.evaluate();
     }
     catch (Expression::ParseError&)
     {}

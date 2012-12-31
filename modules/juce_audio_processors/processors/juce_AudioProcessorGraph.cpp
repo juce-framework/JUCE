@@ -857,14 +857,14 @@ struct ConnectionSorter
     static int compareElements (const AudioProcessorGraph::Connection* const first,
                                 const AudioProcessorGraph::Connection* const second) noexcept
     {
-        if      (first->sourceNodeId < second->sourceNodeId)                return -1;
-        else if (first->sourceNodeId > second->sourceNodeId)                return 1;
-        else if (first->destNodeId < second->destNodeId)                    return -1;
-        else if (first->destNodeId > second->destNodeId)                    return 1;
-        else if (first->sourceChannelIndex < second->sourceChannelIndex)    return -1;
-        else if (first->sourceChannelIndex > second->sourceChannelIndex)    return 1;
-        else if (first->destChannelIndex < second->destChannelIndex)        return -1;
-        else if (first->destChannelIndex > second->destChannelIndex)        return 1;
+        if (first->sourceNodeId < second->sourceNodeId)                return -1;
+        if (first->sourceNodeId > second->sourceNodeId)                return 1;
+        if (first->destNodeId < second->destNodeId)                    return -1;
+        if (first->destNodeId > second->destNodeId)                    return 1;
+        if (first->sourceChannelIndex < second->sourceChannelIndex)    return -1;
+        if (first->sourceChannelIndex > second->sourceChannelIndex)    return 1;
+        if (first->destChannelIndex < second->destChannelIndex)        return -1;
+        if (first->destChannelIndex > second->destChannelIndex)        return 1;
 
         return 0;
     }

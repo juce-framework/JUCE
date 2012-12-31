@@ -160,10 +160,10 @@ public:
             if (w != getWidth() || h != getHeight())
             {
                 startTimer (50);
-
                 setSize (w, h);
-                if (getParentComponent() != nullptr)
-                    getParentComponent()->setSize (w, h);
+
+                if (Component* p = getParentComponent())
+                    p->setSize (w, h);
             }
             else
             {

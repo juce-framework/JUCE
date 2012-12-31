@@ -54,8 +54,8 @@ void BubbleComponent::setPosition (Component* componentToPointTo)
 {
     jassert (componentToPointTo != nullptr);
 
-    if (getParentComponent() != nullptr)
-        setPosition (getParentComponent()->getLocalArea (componentToPointTo, componentToPointTo->getLocalBounds()));
+    if (Component* p = getParentComponent())
+        setPosition (p->getLocalArea (componentToPointTo, componentToPointTo->getLocalBounds()));
     else
         setPosition (componentToPointTo->getScreenBounds());
 }

@@ -199,9 +199,7 @@ bool AudioCDReader::readSamples (int** destSamples, int numDestChannels, int sta
         {
             reader = nullptr;
 
-            FileInputStream* const in = tracks [track].createInputStream();
-
-            if (in != nullptr)
+            if (FileInputStream* const in = tracks [track].createInputStream())
             {
                 BufferedInputStream* const bin = new BufferedInputStream (in, 65536, true);
 
