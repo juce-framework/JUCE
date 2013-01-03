@@ -295,7 +295,7 @@ void Button::clicked()
 {
 }
 
-void Button::clicked (const ModifierKeys& /*modifiers*/)
+void Button::clicked (const ModifierKeys&)
 {
     clicked();
 }

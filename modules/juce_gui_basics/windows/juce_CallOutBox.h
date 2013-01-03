@@ -103,7 +103,7 @@ public:
         @param contentComponent     the component to display inside the call-out. This should
                                     already have a size set (although the call-out will also
                                     update itself when the component's size is changed later).
-                                    This copmonent will be owned by the callout box and deleted
+                                    This component will be owned by the callout box and deleted
                                     later when the box is dismissed.
         @param areaToPointTo        the area that the call-out's arrow should point towards. If
                                     a parentComponent is supplied, then this is relative to that

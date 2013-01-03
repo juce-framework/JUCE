@@ -860,9 +860,11 @@ CGImageRef juce_createCoreGraphicsImage (const Image& juceImage, const bool forA
 
 CGContextRef juce_getImageContext (const Image& image)
 {
-    CoreGraphicsImage* const cgi = dynamic_cast <CoreGraphicsImage*> (image.getPixelData());
-    jassert (cgi != nullptr);
-    return cgi != nullptr ? cgi->context : 0;
+    if (CoreGraphicsImage* const cgi = dynamic_cast <CoreGraphicsImage*> (image.getPixelData()))
+        return cgi->context;
+
+    jassertfalse;
+    return 0;
 }
 
 #endif

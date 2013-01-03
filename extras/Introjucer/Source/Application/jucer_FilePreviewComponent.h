@@ -81,12 +81,12 @@ private:
             if (input != nullptr)
             {
                 const int64 totalSize = input->getTotalLength();
-                ImageFileFormat* format = ImageFileFormat::findImageFormatForStream (*input);
-                input = nullptr;
 
                 String formatName;
-                if (format != nullptr)
+                if (ImageFileFormat* format = ImageFileFormat::findImageFormatForStream (*input))
                     formatName = " " + format->getFormatName();
+
+                input = nullptr;
 
                 Image image (ImageCache::getFromFile (file));
 
