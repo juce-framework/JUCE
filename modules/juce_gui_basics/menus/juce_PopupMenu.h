@@ -480,7 +480,8 @@ public:
 
         @see CustomComponent
     */
-    void addCustomItem (int itemResultID, CustomComponent* customComponent);
+    void addCustomItem (int itemResultID, CustomComponent* customComponent,
+                        const PopupMenu* optionalSubMenu = nullptr);
 
 private:
     //==============================================================================
