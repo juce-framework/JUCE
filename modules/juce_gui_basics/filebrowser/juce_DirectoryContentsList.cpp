@@ -211,10 +211,8 @@ bool DirectoryContentsList::checkNextFile (bool& hasChanged)
 
             return true;
         }
-        else
-        {
-            fileFindHandle = nullptr;
-        }
+
+        fileFindHandle = nullptr;
     }
 
     return false;
