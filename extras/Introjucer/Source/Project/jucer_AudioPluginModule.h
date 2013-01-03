@@ -462,6 +462,8 @@ namespace AUHelpers
                                                 JUCE_AU_PUBLIC "AUBase/AUBase.h",
                                                 JUCE_AU_PUBLIC "AUBase/AUDispatch.cpp",
                                                 JUCE_AU_PUBLIC "AUBase/AUDispatch.h",
+                                                JUCE_AU_PUBLIC "AUBase/AUPlugInDispatch.cpp",
+                                                JUCE_AU_PUBLIC "AUBase/AUPlugInDispatch.h",
                                                 JUCE_AU_PUBLIC "AUBase/AUInputElement.cpp",
                                                 JUCE_AU_PUBLIC "AUBase/AUInputElement.h",
                                                 JUCE_AU_PUBLIC "AUBase/AUOutputElement.cpp",

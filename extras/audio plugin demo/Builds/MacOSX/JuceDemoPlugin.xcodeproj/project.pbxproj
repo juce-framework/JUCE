@@ -32,6 +32,7 @@
 		64AD03BB3A52EC9E2C030B8E = { isa = PBXBuildFile; fileRef = 0906F59C839873ADC151A188; settings = {COMPILER_FLAGS = "-w"; }; };
 		7B4173581D4B03969E995CA5 = { isa = PBXBuildFile; fileRef = 4A6A465D7BC825BB91F562C3; settings = {COMPILER_FLAGS = "-w"; }; };
 		F979285E6636E6CD0669E164 = { isa = PBXBuildFile; fileRef = ED5C52722B9653FA3B009C01; settings = {COMPILER_FLAGS = "-w"; }; };
+		9DF250E9FBA4779BC6913B60 = { isa = PBXBuildFile; fileRef = 8A413A16A86724E5F72C3A64; settings = {COMPILER_FLAGS = "-w"; }; };
 		5677D9A2B913014EB1B3E3B3 = { isa = PBXBuildFile; fileRef = 3031159E3E89066250B1D48A; settings = {COMPILER_FLAGS = "-w"; }; };
 		C74F334B15AD60AC06A086B7 = { isa = PBXBuildFile; fileRef = 534561E5F94B5D7A093485DF; settings = {COMPILER_FLAGS = "-w"; }; };
 		CB8698D8E9F64AD71C0608E4 = { isa = PBXBuildFile; fileRef = A5985F8B03893AA7EFD0273A; settings = {COMPILER_FLAGS = "-w"; }; };
@@ -212,6 +213,7 @@
 		29917AAA580F21BF2798D071 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_DirectoryContentsDisplayComponent.h"; path = "../../../../modules/juce_gui_basics/filebrowser/juce_DirectoryContentsDisplayComponent.h"; sourceTree = "SOURCE_ROOT"; };
 		29BA2BABEFBB624A9EEE83F3 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_android_Misc.cpp"; path = "../../../../modules/juce_core/native/juce_android_Misc.cpp"; sourceTree = "SOURCE_ROOT"; };
 		2A073A793701BE742D5D8CA9 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_AudioThumbnailBase.h"; path = "../../../../modules/juce_audio_utils/gui/juce_AudioThumbnailBase.h"; sourceTree = "SOURCE_ROOT"; };
+		2A64B8476158FF7987B18117 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = AUPlugInDispatch.h; path = Extras/CoreAudio/AudioUnits/AUPublic/AUBase/AUPlugInDispatch.h; sourceTree = "DEVELOPER_DIR"; };
 		2AA4939A70E1E1D6B907DA87 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_ImageConvolutionKernel.h"; path = "../../../../modules/juce_graphics/images/juce_ImageConvolutionKernel.h"; sourceTree = "SOURCE_ROOT"; };
 		2AA92DC1171DAF0BA4BB0E63 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_audio_formats.h"; path = "../../../../modules/juce_audio_formats/juce_audio_formats.h"; sourceTree = "SOURCE_ROOT"; };
 		2B2D54521D69CF4407471A56 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = AUBase.cpp; path = Extras/CoreAudio/AudioUnits/AUPublic/AUBase/AUBase.cpp; sourceTree = "DEVELOPER_DIR"; };
@@ -536,6 +538,7 @@
 		8983E39490E8EF99EB09C783 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_linux_Messaging.cpp"; path = "../../../../modules/juce_events/native/juce_linux_Messaging.cpp"; sourceTree = "SOURCE_ROOT"; };
 		899ACC40FF89BB35307F3BAC = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_ActionBroadcaster.cpp"; path = "../../../../modules/juce_events/broadcasters/juce_ActionBroadcaster.cpp"; sourceTree = "SOURCE_ROOT"; };
 		89E2E6BA6057311E66E8A8BF = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_ArrayAllocationBase.h"; path = "../../../../modules/juce_core/containers/juce_ArrayAllocationBase.h"; sourceTree = "SOURCE_ROOT"; };
+		8A413A16A86724E5F72C3A64 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = AUPlugInDispatch.cpp; path = Extras/CoreAudio/AudioUnits/AUPublic/AUBase/AUPlugInDispatch.cpp; sourceTree = "DEVELOPER_DIR"; };
 		8AE97D16E9DA460011B379BA = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_DropShadower.h"; path = "../../../../modules/juce_gui_basics/misc/juce_DropShadower.h"; sourceTree = "SOURCE_ROOT"; };
 		8AEC8C684E53D6E14FC97605 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_win32_HiddenMessageWindow.h"; path = "../../../../modules/juce_events/native/juce_win32_HiddenMessageWindow.h"; sourceTree = "SOURCE_ROOT"; };
 		8B184C08A51AA14F56E42152 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = AUBase.h; path = Extras/CoreAudio/AudioUnits/AUPublic/AUBase/AUBase.h; sourceTree = "DEVELOPER_DIR"; };
@@ -1913,6 +1916,8 @@
 				728F423CEB1B9E6CA8545895,
 				ED5C52722B9653FA3B009C01,
 				519C6BF83160A6B581905C58,
+				8A413A16A86724E5F72C3A64,
+				2A64B8476158FF7987B18117,
 				4550EB50BD17ADECC674C83C,
 				3031159E3E89066250B1D48A,
 				A62DF2CD31D7890E1B54B18C,
@@ -2092,6 +2097,7 @@
 				64AD03BB3A52EC9E2C030B8E,
 				7B4173581D4B03969E995CA5,
 				F979285E6636E6CD0669E164,
+				9DF250E9FBA4779BC6913B60,
 				5677D9A2B913014EB1B3E3B3,
 				C74F334B15AD60AC06A086B7,
 				CB8698D8E9F64AD71C0608E4,
