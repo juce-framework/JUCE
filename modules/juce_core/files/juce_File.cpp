@@ -286,10 +286,11 @@ String File::getPathUpToLastSlash() const
 
     if (lastSlash > 0)
         return fullPath.substring (0, lastSlash);
-    else if (lastSlash == 0)
+
+    if (lastSlash == 0)
         return separatorString;
-    else
-        return fullPath;
+
+    return fullPath;
 }
 
 File File::getParentDirectory() const
@@ -312,8 +313,8 @@ String File::getFileNameWithoutExtension() const
 
     if (lastDot > lastSlash)
         return fullPath.substring (lastSlash, lastDot);
-    else
-        return fullPath.substring (lastSlash);
+
+    return fullPath.substring (lastSlash);
 }
 
 bool File::isAChildOf (const File& potentialParent) const

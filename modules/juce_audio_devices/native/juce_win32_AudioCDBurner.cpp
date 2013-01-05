@@ -166,8 +166,8 @@ public:
 
         if (type == 0)
             return noDisc;
-        else
-            return readOnlyDiskPresent;
+
+        return readOnlyDiskPresent;
     }
 
     int getIntProperty (const LPOLESTR name, const int defaultReturn) const

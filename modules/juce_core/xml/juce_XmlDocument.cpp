@@ -841,8 +841,8 @@ String XmlDocument::getParameterEntity (const String& entity)
 
             if (ent.equalsIgnoreCase ("system"))
                 return getFileContents (tokenisedDTD [i + 2].trimCharactersAtEnd (">"));
-            else
-                return ent.trim().unquoted();
+
+            return ent.trim().unquoted();
         }
     }
 

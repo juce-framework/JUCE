@@ -139,8 +139,8 @@ public:
         if (isPositiveAndBelow (rangeIndex, getNumRanges()))
             return Range<Type> (values.getUnchecked (rangeIndex << 1),
                                 values.getUnchecked ((rangeIndex << 1) + 1));
-        else
-            return Range<Type>();
+
+        return Range<Type>();
     }
 
     /** Returns the range between the lowest and highest values in the set.

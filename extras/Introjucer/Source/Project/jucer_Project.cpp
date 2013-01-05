@@ -517,16 +517,16 @@ String Project::Item::getFilePath() const
 {
     if (isFile())
         return state [Ids::file].toString();
-    else
-        return String::empty;
+
+    return String::empty;
 }
 
 File Project::Item::getFile() const
 {
     if (isFile())
         return project.resolveFilename (state [Ids::file].toString());
-    else
-        return File::nonexistent;
+
+    return File::nonexistent;
 }
 
 void Project::Item::setFile (const File& file)
@@ -675,8 +675,8 @@ struct ItemSorterWithGroupsAtStart
 
         if (firstIsGroup == secondIsGroup)
             return first [Ids::name].toString().compareIgnoreCase (second [Ids::name].toString());
-        else
-            return firstIsGroup ? -1 : 1;
+
+        return firstIsGroup ? -1 : 1;
     }
 };
 

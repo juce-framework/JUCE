@@ -77,8 +77,8 @@ int SubregionStream::read (void* destBuffer, int maxBytesToRead)
 
 bool SubregionStream::isExhausted()
 {
-    if (lengthOfSourceStream >= 0)
-        return (getPosition() >= lengthOfSourceStream) || source->isExhausted();
-    else
-        return source->isExhausted();
+    if (lengthOfSourceStream >= 0 && getPosition() >= lengthOfSourceStream)
+        return true;
+
+    return source->isExhausted();
 }
