@@ -571,7 +571,7 @@ int DatagramSocket::write (const void* sourceBuffer, const int numBytesToWrite)
     return connected ? (int) sendto (handle, (const char*) sourceBuffer,
                                      (size_t) numBytesToWrite, 0,
                                      static_cast <const struct addrinfo*> (serverAddress)->ai_addr,
-                                     static_cast <const struct addrinfo*> (serverAddress)->ai_addrlen)
+                                     (juce_socklen_t) static_cast <const struct addrinfo*> (serverAddress)->ai_addrlen)
                      : -1;
 }
 
