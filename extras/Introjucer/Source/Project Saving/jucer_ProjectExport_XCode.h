@@ -704,17 +704,17 @@ private:
         if (xcodeOtherRezFlags.isNotEmpty())
             s.add ("OTHER_REZFLAGS = \"" + xcodeOtherRezFlags + "\"");
 
+        if (config.getTargetBinaryRelativePathString().isNotEmpty())
+        {
+            RelativePath binaryPath (config.getTargetBinaryRelativePathString(), RelativePath::projectFolder);
+            binaryPath = binaryPath.rebased (projectFolder, getTargetFolder(), RelativePath::buildTargetFolder);
+
+            s.add ("DSTROOT = " + sanitisePath (binaryPath.toUnixStyle()));
+            s.add ("SYMROOT = " + sanitisePath (binaryPath.toUnixStyle()));
+        }
+
         if (projectType.isLibrary())
         {
-            if (config.getTargetBinaryRelativePathString().isNotEmpty())
-            {
-                RelativePath binaryPath (config.getTargetBinaryRelativePathString(), RelativePath::projectFolder);
-                binaryPath = binaryPath.rebased (projectFolder, getTargetFolder(), RelativePath::buildTargetFolder);
-
-                s.add ("DSTROOT = " + sanitisePath (binaryPath.toUnixStyle()));
-                s.add ("SYMROOT = " + sanitisePath (binaryPath.toUnixStyle()));
-            }
-
             s.add ("CONFIGURATION_BUILD_DIR = \"$(BUILD_DIR)\"");
             s.add ("DEPLOYMENT_LOCATION = YES");
         }

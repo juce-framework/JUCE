@@ -83,6 +83,7 @@ public:
     Value getVersionValue()                             { return getProjectValue (Ids::version); }
     String getVersionString() const                     { return projectRoot [Ids::version]; }
     String getVersionAsHex() const;
+    int getVersionAsHexInteger() const;
 
     Value getBundleIdentifier()                         { return getProjectValue (Ids::bundleIdentifier); }
     String getDefaultBundleIdentifier()                 { return "com.yourcompany." + CodeHelpers::makeValidIdentifier (getTitle(), false, true, false); }
