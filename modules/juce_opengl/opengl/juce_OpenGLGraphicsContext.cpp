@@ -734,17 +734,12 @@ struct StateHelpers
     struct ActiveTextures
     {
         ActiveTextures (const OpenGLContext& c) noexcept
-            : texturesEnabled (0), currentActiveTexture (0), context (c)
+            : texturesEnabled (0), currentActiveTexture (-1), context (c)
         {}
 
         void clear() noexcept
         {
             zeromem (currentTextureID, sizeof (currentTextureID));
-        }
-
-        void clearCurrent() noexcept
-        {
-            currentTextureID [currentActiveTexture] = 0;
         }
 
         template <class QuadQueueType>
@@ -826,6 +821,8 @@ struct StateHelpers
 
         void bindTexture (const GLuint textureID) noexcept
         {
+            jassert (currentActiveTexture >= 0);
+
             if (currentTextureID [currentActiveTexture] != textureID)
             {
                 currentTextureID [currentActiveTexture] = textureID;
@@ -873,12 +870,6 @@ struct StateHelpers
             }
 
             return textures.removeAndReturn (0);
-        }
-
-        void releaseTexture (ActiveTextures& activeTextures, OpenGLTexture* texture)
-        {
-            activeTextures.clearCurrent();
-            textures.add (texture);
         }
 
         void resetGradient() noexcept
