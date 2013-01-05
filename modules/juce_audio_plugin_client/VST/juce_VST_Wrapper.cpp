@@ -262,9 +262,9 @@ class JuceVSTWrapper  : public AudioEffectX,
 {
 public:
     //==============================================================================
-    JuceVSTWrapper (audioMasterCallback audioMaster, AudioProcessor* const filter_)
-       : AudioEffectX (audioMaster, filter_->getNumPrograms(), filter_->getNumParameters()),
-         filter (filter_),
+    JuceVSTWrapper (audioMasterCallback audioMaster, AudioProcessor* const af)
+       : AudioEffectX (audioMaster, af->getNumPrograms(), af->getNumParameters()),
+         filter (af),
          chunkMemoryTime (0),
          speakerIn (kSpeakerArrEmpty),
          speakerOut (kSpeakerArrEmpty),
@@ -313,7 +313,7 @@ public:
             hasShutdown = true;
 
             delete filter;
-            filter = 0;
+            filter = nullptr;
 
             jassert (editorComp == 0);
 
@@ -1172,10 +1172,8 @@ public:
 
                 return (VstIntPtr) (pointer_sized_int) &editorSize;
             }
-            else
-            {
-                return 0;
-            }
+
+            return 0;
         }
 
         return AudioEffectX::dispatcher (opCode, index, value, ptr, opt);
@@ -1258,8 +1256,8 @@ public:
                                public AsyncUpdater
     {
     public:
-        EditorCompWrapper (JuceVSTWrapper& wrapper_, AudioProcessorEditor* editor)
-            : wrapper (wrapper_)
+        EditorCompWrapper (JuceVSTWrapper& w, AudioProcessorEditor* editor)
+            : wrapper (w)
         {
             setOpaque (true);
             editor->setOpaque (true);
@@ -1396,10 +1394,14 @@ private:
 
     static inline VstInt32 convertHexVersionToDecimal (const unsigned int hexVersion)
     {
+       #if JUCE_VST_RETURN_HEX_VERSION_NUMBER_DIRECTLY
+        return (VstInt32) hexVersion;
+       #else
         return (VstInt32) (((hexVersion >> 24) & 0xff) * 1000
-                           + ((hexVersion >> 16) & 0xff) * 100
-                           + ((hexVersion >> 8)  & 0xff) * 10
-                           + (hexVersion & 0xff));
+                         + ((hexVersion >> 16) & 0xff) * 100
+                         + ((hexVersion >> 8)  & 0xff) * 10
+                         + (hexVersion & 0xff));
+       #endif
     }
 
     //==============================================================================
@@ -1416,7 +1418,7 @@ private:
                 class MessageThreadCallback  : public CallbackMessage
                 {
                 public:
-                    MessageThreadCallback (bool& triggered_) : triggered (triggered_) {}
+                    MessageThreadCallback (bool& tr) : triggered (tr) {}
 
                     void messageCallback()
                     {
