@@ -1490,7 +1490,11 @@ private:
 
 //==============================================================================
 JUCE_COMPONENT_ENTRY (JuceAU, JucePlugin_AUExportPrefix, Entry)
-JUCE_FACTORY_ENTRY   (JuceAU, JucePlugin_AUExportPrefix)
+
+#if MAC_OS_X_VERSION_MAX_ALLOWED > MAC_OS_X_VERSION_10_6
+ JUCE_FACTORY_ENTRY   (JuceAU, JucePlugin_AUExportPrefix)
+#endif
+
 
 #if BUILD_AU_CARBON_UI
  JUCE_COMPONENT_ENTRY (JuceAUView, JucePlugin_AUExportPrefix, ViewEntry)
