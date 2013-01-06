@@ -111,7 +111,7 @@ public:
                                int buttonW, int buttonH,
                                ComboBox& box);
 
-    virtual const Font getComboBoxFont (ComboBox& box);
+    virtual Font getComboBoxFont (ComboBox& box);
 
     //==============================================================================
     virtual void drawLinearSlider (Graphics& g,

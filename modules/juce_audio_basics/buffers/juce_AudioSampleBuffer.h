@@ -256,6 +256,20 @@ public:
                         float startGain,
                         float endGain) noexcept;
 
+    /** Applies a range of gains to a region of all channels.
+
+        The gain that is applied to each sample will vary from
+        startGain on the first sample to endGain on the last Sample,
+        so it can be used to do basic fades.
+
+        For speed, this doesn't check whether the sample numbers
+        are in-range, so be careful!
+    */
+    void applyGainRamp (int startSample,
+                        int numSamples,
+                        float startGain,
+                        float endGain) noexcept;
+
     /** Adds samples from another buffer to this one.
 
         @param destChannel          the channel within this buffer to add the samples to

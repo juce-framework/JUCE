@@ -101,12 +101,8 @@ void Desktop::setDefaultLookAndFeel (LookAndFeel* newDefaultLookAndFeel)
     currentLookAndFeel = newDefaultLookAndFeel;
 
     for (int i = getNumComponents(); --i >= 0;)
-    {
-        Component* const c = getComponent (i);
-
-        if (c != nullptr)
+        if (Component* const c = getComponent (i))
             c->sendLookAndFeelChange();
-    }
 }
 
 //==============================================================================
@@ -304,9 +300,7 @@ void Desktop::sendMouseMove()
 
         lastFakeMouseMove = getMousePosition();
 
-        Component* const target = findComponentAt (lastFakeMouseMove);
-
-        if (target != nullptr)
+        if (Component* const target = findComponentAt (lastFakeMouseMove))
         {
             Component::BailOutChecker checker (target);
             const Point<int> pos (target->getLocalPoint (nullptr, lastFakeMouseMove));
@@ -405,11 +399,8 @@ void Desktop::Displays::refresh()
     if (oldDisplays != displays)
     {
         for (int i = ComponentPeer::getNumPeers(); --i >= 0;)
-        {
-            ComponentPeer* const p = ComponentPeer::getPeer (i);
-            if (p != nullptr)
-                p->handleScreenSizeChange();
-        }
+            if (ComponentPeer* const peer = ComponentPeer::getPeer (i))
+                peer->handleScreenSizeChange();
     }
 }
 

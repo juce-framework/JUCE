@@ -69,8 +69,8 @@ public:
         memcpy (data.elements, other.getRawDataPointer(), numUsed * sizeof (ObjectClass*));
 
         for (int i = numUsed; --i >= 0;)
-            if (data.elements[i] != nullptr)
-                data.elements[i]->incReferenceCount();
+            if (ObjectClass* o = data.elements[i])
+                o->incReferenceCount();
     }
 
     /** Creates a copy of another array */
@@ -83,8 +83,8 @@ public:
         memcpy (data.elements, other.getRawDataPointer(), numUsed * sizeof (ObjectClass*));
 
         for (int i = numUsed; --i >= 0;)
-            if (data.elements[i] != nullptr)
-                data.elements[i]->incReferenceCount();
+            if (ObjectClass* o = data.elements[i])
+                o->incReferenceCount();
     }
 
     /** Copies another array into this one.
@@ -126,8 +126,8 @@ public:
         const ScopedLockType lock (getLock());
 
         while (numUsed > 0)
-            if (data.elements [--numUsed] != nullptr)
-                data.elements [numUsed]->decReferenceCount();
+            if (ObjectClass* o = data.elements [--numUsed])
+                o->decReferenceCount();
 
         jassert (numUsed == 0);
         data.setAllocatedSize (0);
@@ -382,8 +382,8 @@ public:
 
             if (indexToChange < numUsed)
             {
-                if (data.elements [indexToChange] != nullptr)
-                    data.elements [indexToChange]->decReferenceCount();
+                if (ObjectClass* o = data.elements [indexToChange])
+                    o->decReferenceCount();
 
                 data.elements [indexToChange] = newObject;
             }
@@ -531,8 +531,8 @@ public:
         {
             ObjectClass** const e = data.elements + indexToRemove;
 
-            if (*e != nullptr)
-                (*e)->decReferenceCount();
+            if (ObjectClass* o = *e)
+                o->decReferenceCount();
 
             --numUsed;
             const int numberToShift = numUsed - indexToRemove;
@@ -563,10 +563,10 @@ public:
         {
             ObjectClass** const e = data.elements + indexToRemove;
 
-            if (*e != nullptr)
+            if (ObjectClass* o = *e)
             {
-                removedItem = *e;
-                (*e)->decReferenceCount();
+                removedItem = o;
+                o->decReferenceCount();
             }
 
             --numUsed;
@@ -624,9 +624,9 @@ public:
             int i;
             for (i = start; i < endIndex; ++i)
             {
-                if (data.elements[i] != nullptr)
+                if (ObjectClass* o = data.elements[i])
                 {
-                    data.elements[i]->decReferenceCount();
+                    o->decReferenceCount();
                     data.elements[i] = nullptr; // (in case one of the destructors accesses this array and hits a dangling pointer)
                 }
             }

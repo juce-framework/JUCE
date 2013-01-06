@@ -585,7 +585,7 @@ namespace MainMenuHelpers
         // this can't be used in a plugin!
         jassert (JUCEApplication::isStandaloneApp());
 
-        if (JUCEApplication::getInstance() != nullptr)
+        if (JUCEApplication* app = JUCEApplication::getInstance())
         {
             JUCE_AUTORELEASEPOOL
 
@@ -598,7 +598,7 @@ namespace MainMenuHelpers
             [mainMenu setSubmenu: appMenu forItem: item];
 
             [NSApp setMainMenu: mainMenu];
-            MainMenuHelpers::createStandardAppMenu (appMenu, JUCEApplication::getInstance()->getApplicationName(), extraItems);
+            MainMenuHelpers::createStandardAppMenu (appMenu, app->getApplicationName(), extraItems);
 
             [appMenu release];
             [mainMenu release];

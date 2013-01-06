@@ -387,7 +387,7 @@ static StringArray getConfigs (const Project& p)
     return configs;
 }
 
-String Project::getVersionAsHex() const
+int Project::getVersionAsHexInteger() const
 {
     const StringArray configs (getConfigs (*this));
 
@@ -396,7 +396,12 @@ String Project::getVersionAsHex() const
     if (configs.size() >= 4)
         value = (value << 8) + configs[3].getIntValue();
 
-    return "0x" + String::toHexString (value);
+    return value;
+}
+
+String Project::getVersionAsHex() const
+{
+    return "0x" + String::toHexString (getVersionAsHexInteger());
 }
 
 StringPairArray Project::getPreprocessorDefs() const

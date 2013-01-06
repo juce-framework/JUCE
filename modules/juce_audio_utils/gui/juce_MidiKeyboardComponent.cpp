@@ -26,10 +26,10 @@
 class MidiKeyboardUpDownButton  : public Button
 {
 public:
-    MidiKeyboardUpDownButton (MidiKeyboardComponent& owner_, const int delta_)
+    MidiKeyboardUpDownButton (MidiKeyboardComponent& comp, const int d)
         : Button (String::empty),
-          owner (owner_),
-          delta (delta_)
+          owner (comp),
+          delta (d)
     {
         setOpaque (true);
     }
@@ -161,11 +161,11 @@ void MidiKeyboardComponent::setLowestVisibleKeyFloat (float noteNumber)
     }
 }
 
-void MidiKeyboardComponent::setScrollButtonsVisible (const bool canScroll_)
+void MidiKeyboardComponent::setScrollButtonsVisible (const bool newCanScroll)
 {
-    if (canScroll != canScroll_)
+    if (canScroll != newCanScroll)
     {
-        canScroll = canScroll_;
+        canScroll = newCanScroll;
         resized();
     }
 }
@@ -193,10 +193,10 @@ void MidiKeyboardComponent::setMidiChannelsToDisplay (const int midiChannelMask)
     shouldCheckState = true;
 }
 
-void MidiKeyboardComponent::setVelocity (const float velocity_, const bool useMousePositionForVelocity_)
+void MidiKeyboardComponent::setVelocity (const float v, const bool useMousePosition)
 {
-    velocity = jlimit (0.0f, 1.0f, velocity_);
-    useMousePositionForVelocity = useMousePositionForVelocity_;
+    velocity = jlimit (0.0f, 1.0f, v);
+    useMousePositionForVelocity = useMousePosition;
 }
 
 //==============================================================================
@@ -223,7 +223,7 @@ void MidiKeyboardComponent::getKeyPosition (int midiNoteNumber, const float keyW
                                     1.0f };
 
     const int octave = midiNoteNumber / 12;
-    const int note = midiNoteNumber % 12;
+    const int note   = midiNoteNumber % 12;
 
     x = roundToInt (octave * 7.0f * keyWidth_ + notePos [note] * keyWidth_);
     w = roundToInt (widths [note] * keyWidth_);
@@ -352,7 +352,7 @@ void MidiKeyboardComponent::paint (Graphics& g)
     const Colour lineColour (findColour (keySeparatorLineColourId));
     const Colour textColour (findColour (textLabelColourId));
 
-    int x, w, octave;
+    int octave;
 
     for (octave = 0; octave < 128; octave += 12)
     {
@@ -372,11 +372,13 @@ void MidiKeyboardComponent::paint (Graphics& g)
     }
 
     float x1 = 0.0f, y1 = 0.0f, x2 = 0.0f, y2 = 0.0f;
+    const int width = getWidth();
+    const int height = getHeight();
 
     if (orientation == verticalKeyboardFacingLeft)
     {
-        x1 = getWidth() - 1.0f;
-        x2 = getWidth() - 5.0f;
+        x1 = width - 1.0f;
+        x2 = width - 5.0f;
     }
     else if (orientation == verticalKeyboardFacingRight)
         x2 = 5.0f;
@@ -386,13 +388,14 @@ void MidiKeyboardComponent::paint (Graphics& g)
     g.setGradientFill (ColourGradient (Colours::black.withAlpha (0.3f), x1, y1,
                                        Colours::transparentBlack, x2, y2, false));
 
+    int x, w;
     getKeyPos (rangeEnd, x, w);
     x += w;
 
     switch (orientation)
     {
         case horizontalKeyboard:            g.fillRect (0, 0, x, 5); break;
-        case verticalKeyboardFacingLeft:    g.fillRect (getWidth() - 5, 0, 5, x); break;
+        case verticalKeyboardFacingLeft:    g.fillRect (width - 5, 0, 5, x); break;
         case verticalKeyboardFacingRight:   g.fillRect (0, 0, 5, x); break;
         default: break;
     }
@@ -401,9 +404,9 @@ void MidiKeyboardComponent::paint (Graphics& g)
 
     switch (orientation)
     {
-        case horizontalKeyboard:            g.fillRect (0, getHeight() - 1, x, 1); break;
+        case horizontalKeyboard:            g.fillRect (0, height - 1, x, 1); break;
         case verticalKeyboardFacingLeft:    g.fillRect (0, 0, 1, x); break;
-        case verticalKeyboardFacingRight:   g.fillRect (getWidth() - 1, 0, 1, x); break;
+        case verticalKeyboardFacingRight:   g.fillRect (width - 1, 0, 1, x); break;
         default: break;
     }
 
@@ -423,8 +426,8 @@ void MidiKeyboardComponent::paint (Graphics& g)
                 switch (orientation)
                 {
                     case horizontalKeyboard:            pos.setBounds (x, 0, w, blackNoteLength); break;
-                    case verticalKeyboardFacingLeft:    pos.setBounds (getWidth() - blackNoteLength, x, blackNoteLength, w); break;
-                    case verticalKeyboardFacingRight:   pos.setBounds (0, getHeight() - x - w, blackNoteLength, w); break;
+                    case verticalKeyboardFacingLeft:    pos.setBounds (width - blackNoteLength, x, blackNoteLength, w); break;
+                    case verticalKeyboardFacingRight:   pos.setBounds (0, height - x - w, blackNoteLength, w); break;
                     default: break;
                 }
 
@@ -444,11 +447,8 @@ void MidiKeyboardComponent::drawWhiteNote (int midiNoteNumber,
 {
     Colour c (Colours::transparentWhite);
 
-    if (isDown)
-        c = findColour (keyDownOverlayColourId);
-
-    if (isOver)
-        c = c.overlaidWith (findColour (mouseOverKeyOverlayColourId));
+    if (isDown)  c = findColour (keyDownOverlayColourId);
+    if (isOver)  c = c.overlaidWith (findColour (mouseOverKeyOverlayColourId));
 
     g.setColour (c);
     g.fillRect (x, y, w, h);
@@ -499,11 +499,8 @@ void MidiKeyboardComponent::drawBlackNote (int /*midiNoteNumber*/,
 {
     Colour c (noteFillColour);
 
-    if (isDown)
-        c = c.overlaidWith (findColour (keyDownOverlayColourId));
-
-    if (isOver)
-        c = c.overlaidWith (findColour (mouseOverKeyOverlayColourId));
+    if (isDown)  c = c.overlaidWith (findColour (keyDownOverlayColourId));
+    if (isOver)  c = c.overlaidWith (findColour (mouseOverKeyOverlayColourId));
 
     g.setColour (c);
     g.fillRect (x, y, w, h);
@@ -528,9 +525,9 @@ void MidiKeyboardComponent::drawBlackNote (int /*midiNoteNumber*/,
     }
 }
 
-void MidiKeyboardComponent::setOctaveForMiddleC (const int octaveNumForMiddleC_)
+void MidiKeyboardComponent::setOctaveForMiddleC (const int octaveNum)
 {
-    octaveNumForMiddleC = octaveNumForMiddleC_;
+    octaveNumForMiddleC = octaveNum;
     repaint();
 }
 
@@ -667,16 +664,26 @@ void MidiKeyboardComponent::handleNoteOff (MidiKeyboardState*, int /*midiChannel
 //==============================================================================
 void MidiKeyboardComponent::resetAnyKeysInUse()
 {
-    if (keysPressed.countNumberOfSetBits() > 0 || mouseDownNotes.size() > 0)
+    if (! keysPressed.isZero())
     {
-        state.allNotesOff (midiChannel);
-        keysPressed.clear();
+        for (int i = 128; --i >= 0;)
+            if (keysPressed[i])
+                state.noteOff (midiChannel, i);
 
-        for (int i = mouseDownNotes.size(); --i >= 0;)
+        keysPressed.clear();
+    }
+
+    for (int i = mouseDownNotes.size(); --i >= 0;)
+    {
+        const int noteDown = mouseDownNotes.getUnchecked(i);
+
+        if (noteDown >= 0)
         {
+            state.noteOff (midiChannel, noteDown);
             mouseDownNotes.set (i, -1);
-            mouseOverNotes.set (i, -1);
         }
+
+        mouseOverNotes.set (i, -1);
     }
 }
 
@@ -789,7 +796,7 @@ void MidiKeyboardComponent::mouseWheelMove (const MouseEvent&, const MouseWheelD
 {
     const float amount = (orientation == horizontalKeyboard && wheel.deltaX != 0)
                             ? wheel.deltaX : (orientation == verticalKeyboardFacingLeft ? wheel.deltaY
-                                                                                         : -wheel.deltaY);
+                                                                                        : -wheel.deltaY);
 
     setLowestVisibleKeyFloat (firstKey - amount * keyWidth);
 }

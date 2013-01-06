@@ -518,9 +518,7 @@ void XmlDocument::readChildElements (XmlElement* parent)
             else
             {
                 // this is some other element, so parse and add it..
-                XmlElement* const n = readNextElement (true);
-
-                if (n != nullptr)
+                if (XmlElement* const n = readNextElement (true))
                     childAppender.append (n);
                 else
                     break;

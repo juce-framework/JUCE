@@ -341,7 +341,7 @@ void LookAndFeel::drawButtonBackground (Graphics& g,
                       button.isConnectedOnBottom());
 }
 
-const Font LookAndFeel::getFontForTextButton (TextButton& button)
+Font LookAndFeel::getTextButtonFont (TextButton& button)
 {
     return button.getFont();
 }
@@ -349,7 +349,7 @@ const Font LookAndFeel::getFontForTextButton (TextButton& button)
 void LookAndFeel::drawButtonText (Graphics& g, TextButton& button,
                                   bool /*isMouseOverButton*/, bool /*isButtonDown*/)
 {
-    Font font (getFontForTextButton (button));
+    Font font (getTextButtonFont (button));
     g.setFont (font);
     g.setColour (button.findColour (button.getToggleState() ? TextButton::textColourOnId
                                                             : TextButton::textColourOffId)
@@ -929,7 +929,7 @@ void LookAndFeel::drawBubble (Graphics& g, BubbleComponent& comp,
 
 
 //==============================================================================
-const Font LookAndFeel::getPopupMenuFont()
+Font LookAndFeel::getPopupMenuFont()
 {
     return Font (17.0f);
 }
@@ -1131,7 +1131,7 @@ void LookAndFeel::drawMenuBarBackground (Graphics& g, int width, int height,
     }
 }
 
-const Font LookAndFeel::getMenuBarFont (MenuBarComponent& menuBar, int /*itemIndex*/, const String& /*itemText*/)
+Font LookAndFeel::getMenuBarFont (MenuBarComponent& menuBar, int /*itemIndex*/, const String& /*itemText*/)
 {
     return Font (menuBar.getHeight() * 0.7f);
 }
@@ -1261,7 +1261,7 @@ void LookAndFeel::drawComboBox (Graphics& g, int width, int height,
     }
 }
 
-const Font LookAndFeel::getComboBoxFont (ComboBox& box)
+Font LookAndFeel::getComboBoxFont (ComboBox& box)
 {
     return Font (jmin (15.0f, box.getHeight() * 0.85f));
 }
@@ -1281,6 +1281,11 @@ void LookAndFeel::positionComboBoxText (ComboBox& box, Label& label)
 }
 
 //==============================================================================
+Font LookAndFeel::getLabelFont (Label& label)
+{
+    return label.getFont();
+}
+
 void LookAndFeel::drawLabel (Graphics& g, Label& label)
 {
     g.fillAll (label.findColour (Label::backgroundColourId));
@@ -1288,26 +1293,27 @@ void LookAndFeel::drawLabel (Graphics& g, Label& label)
     if (! label.isBeingEdited())
     {
         const float alpha = label.isEnabled() ? 1.0f : 0.5f;
+        const Font font (getLabelFont (label));
 
         g.setColour (label.findColour (Label::textColourId).withMultipliedAlpha (alpha));
-        g.setFont (label.getFont());
+        g.setFont (font);
         g.drawFittedText (label.getText(),
                           label.getHorizontalBorderSize(),
                           label.getVerticalBorderSize(),
                           label.getWidth() - 2 * label.getHorizontalBorderSize(),
                           label.getHeight() - 2 * label.getVerticalBorderSize(),
                           label.getJustificationType(),
-                          jmax (1, (int) (label.getHeight() / label.getFont().getHeight())),
+                          jmax (1, (int) (label.getHeight() / font.getHeight())),
                           label.getMinimumHorizontalScale());
 
         g.setColour (label.findColour (Label::outlineColourId).withMultipliedAlpha (alpha));
-        g.drawRect (0, 0, label.getWidth(), label.getHeight());
     }
     else if (label.isEnabled())
     {
         g.setColour (label.findColour (Label::outlineColourId));
-        g.drawRect (0, 0, label.getWidth(), label.getHeight());
     }
+
+    g.drawRect (label.getLocalBounds());
 }
 
 //==============================================================================
@@ -2045,9 +2051,7 @@ int LookAndFeel::getTabButtonBestWidth (TabBarButton& button, int tabDepth)
     int width = Font (tabDepth * 0.6f).getStringWidth (button.getButtonText().trim())
                   + getTabButtonOverlap (tabDepth) * 2;
 
-    Component* const extraComponent = button.getExtraComponent();
-
-    if (extraComponent != nullptr)
+    if (Component* const extraComponent = button.getExtraComponent())
         width += button.getTabbedButtonBar().isVertical() ? extraComponent->getHeight()
                                                           : extraComponent->getWidth();
 
@@ -2526,10 +2530,8 @@ void LookAndFeel::drawFileBrowserRow (Graphics& g, int width, int height,
     }
     else
     {
-        const Drawable* d = isDirectory ? getDefaultFolderImage()
-                                        : getDefaultDocumentFileImage();
-
-        if (d != nullptr)
+        if (const Drawable* d = isDirectory ? getDefaultFolderImage()
+                                            : getDefaultDocumentFileImage())
             d->drawWithin (g, Rectangle<float> (2.0f, 2.0f, x - 4.0f, height - 4.0f),
                            RectanglePlacement::centred | RectanglePlacement::onlyReduceInSize, 1.0f);
     }

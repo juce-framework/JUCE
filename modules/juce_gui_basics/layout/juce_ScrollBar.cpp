@@ -410,12 +410,12 @@ bool ScrollBar::keyPressed (const KeyPress& key)
 {
     if (isVisible())
     {
-        if (key == KeyPress::upKey || key == KeyPress::leftKey)         return moveScrollbarInSteps (-1);
-        else if (key == KeyPress::downKey || key == KeyPress::rightKey) return moveScrollbarInSteps (1);
-        else if (key == KeyPress::pageUpKey)                            return moveScrollbarInPages (-1);
-        else if (key == KeyPress::pageDownKey)                          return moveScrollbarInPages (1);
-        else if (key == KeyPress::homeKey)                              return scrollToTop();
-        else if (key == KeyPress::endKey)                               return scrollToBottom();
+        if (key == KeyPress::upKey || key == KeyPress::leftKey)    return moveScrollbarInSteps (-1);
+        if (key == KeyPress::downKey || key == KeyPress::rightKey) return moveScrollbarInSteps (1);
+        if (key == KeyPress::pageUpKey)                            return moveScrollbarInPages (-1);
+        if (key == KeyPress::pageDownKey)                          return moveScrollbarInPages (1);
+        if (key == KeyPress::homeKey)                              return scrollToTop();
+        if (key == KeyPress::endKey)                               return scrollToBottom();
     }
 
     return false;

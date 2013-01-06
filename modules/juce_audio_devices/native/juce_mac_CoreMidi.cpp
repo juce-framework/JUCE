@@ -432,9 +432,7 @@ MidiInput* MidiInput::openDevice (int index, MidiInputCallback* callback)
 
             if (CHECK_ERROR (MIDIObjectGetStringProperty (endPoint, kMIDIPropertyName, &name)))
             {
-                MIDIClientRef client = getGlobalMidiClient();
-
-                if (client != 0)
+                if (MIDIClientRef client = getGlobalMidiClient())
                 {
                     MIDIPortRef port;
                     ScopedPointer <MidiPortAndCallback> mpc (new MidiPortAndCallback (*callback));
@@ -473,9 +471,8 @@ MidiInput* MidiInput::createNewDevice (const String& deviceName, MidiInputCallba
 
     using namespace CoreMidiHelpers;
     MidiInput* mi = nullptr;
-    MIDIClientRef client = getGlobalMidiClient();
 
-    if (client != 0)
+    if (MIDIClientRef client = getGlobalMidiClient())
     {
         ScopedPointer <MidiPortAndCallback> mpc (new MidiPortAndCallback (*callback));
         mpc->active = false;

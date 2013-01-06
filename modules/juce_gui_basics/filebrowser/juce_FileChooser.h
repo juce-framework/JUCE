@@ -100,14 +100,14 @@ public:
                     method to find out what it was. Returns false if they cancelled instead.
         @see browseForFileToSave, browseForDirectory
     */
-    bool browseForFileToOpen (FilePreviewComponent* previewComponent = 0);
+    bool browseForFileToOpen (FilePreviewComponent* previewComponent = nullptr);
 
     /** Same as browseForFileToOpen, but allows the user to select multiple files.
 
         The files that are returned can be obtained by calling getResults(). See
         browseForFileToOpen() for more info about the behaviour of this method.
     */
-    bool browseForMultipleFilesToOpen (FilePreviewComponent* previewComponent = 0);
+    bool browseForMultipleFilesToOpen (FilePreviewComponent* previewComponent = nullptr);
 
     /** Shows a dialog box to choose a file to save.
 
@@ -141,7 +141,7 @@ public:
         The files that are returned can be obtained by calling getResults(). See
         browseForFileToOpen() for more info about the behaviour of this method.
     */
-    bool browseForMultipleFilesOrDirectories (FilePreviewComponent* previewComponent = 0);
+    bool browseForMultipleFilesOrDirectories (FilePreviewComponent* previewComponent = nullptr);
 
     //==============================================================================
     /** Returns the last file that was chosen by one of the browseFor methods.

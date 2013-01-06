@@ -365,7 +365,7 @@ void OldSchoolLookAndFeel::drawComboBox (Graphics& g, int width, int height,
     }
 }
 
-const Font OldSchoolLookAndFeel::getComboBoxFont (ComboBox& box)
+Font OldSchoolLookAndFeel::getComboBoxFont (ComboBox& box)
 {
     Font f (jmin (15.0f, box.getHeight() * 0.85f));
     f.setHorizontalScale (0.9f);

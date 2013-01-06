@@ -81,14 +81,11 @@ void GroupTreeViewItem::checkFileStatus()
 
 ProjectTreeViewBase* GroupTreeViewItem::createSubItem (const Project::Item& child)
 {
-    if (child.isGroup())
-        return new GroupTreeViewItem (child);
-
-    if (child.isFile())
-        return new SourceFileTreeViewItem (child);
+    if (child.isGroup())   return new GroupTreeViewItem (child);
+    if (child.isFile())    return new SourceFileTreeViewItem (child);
 
     jassertfalse
-    return 0;
+    return nullptr;
 }
 
 void GroupTreeViewItem::showDocument()
@@ -101,6 +98,14 @@ void GroupTreeViewItem::showPopupMenu()
 {
     PopupMenu m;
     addCreateFileMenuItems (m);
+
+    m.addSeparator();
+
+    if (isOpen())
+        m.addItem (4, "Collapse all Sub-groups");
+    else
+        m.addItem (5, "Expand all Sub-groups");
+
     m.addSeparator();
     m.addItem (3, "Sort Contents Alphabetically");
     m.addSeparator();
@@ -112,6 +117,15 @@ void GroupTreeViewItem::showPopupMenu()
     launchPopupMenu (m);
 }
 
+static void openOrCloseAllSubGroups (TreeViewItem& item, bool shouldOpen)
+{
+    item.setOpen (shouldOpen);
+
+    for (int i = item.getNumSubItems(); --i >= 0;)
+        if (TreeViewItem* sub = item.getSubItem(i))
+            openOrCloseAllSubGroups (*sub, shouldOpen);
+}
+
 void GroupTreeViewItem::handlePopupMenuResult (int resultCode)
 {
     switch (resultCode)
@@ -119,6 +133,8 @@ void GroupTreeViewItem::handlePopupMenuResult (int resultCode)
         case 1:     triggerAsyncRename (item); break;
         case 2:     deleteAllSelectedItems(); break;
         case 3:     item.sortAlphabetically (false); break;
+        case 4:     openOrCloseAllSubGroups (*this, false); break;
+        case 5:     openOrCloseAllSubGroups (*this, true); break;
         default:    processCreateFileMenuItem (resultCode); break;
     }
 }

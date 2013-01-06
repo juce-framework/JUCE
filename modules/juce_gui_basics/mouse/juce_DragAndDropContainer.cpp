@@ -67,10 +67,9 @@ public:
         {
             mouseDragSource->removeMouseListener (this);
 
-            DragAndDropTarget* const current = getCurrentlyOver();
-
-            if (current != nullptr && current->isInterestedInDragSource (sourceDetails))
-                current->itemDragExit (sourceDetails);
+            if (DragAndDropTarget* const current = getCurrentlyOver())
+                if (current->isInterestedInDragSource (sourceDetails))
+                    current->itemDragExit (sourceDetails);
         }
     }
 
@@ -103,8 +102,8 @@ public:
             if (wasVisible) // fade the component and remove it - it'll be deleted later by the timer callback
                 dismissWithAnimation (finalTarget == nullptr);
 
-            if (getParentComponent() != nullptr)
-                getParentComponent()->removeChildComponent (this);
+            if (Component* parent = getParentComponent())
+                parent->removeChildComponent (this);
 
             if (finalTarget != nullptr)
             {
@@ -135,11 +134,9 @@ public:
 
         if (newTargetComp != currentlyOverComp)
         {
-            DragAndDropTarget* const lastTarget = getCurrentlyOver();
-
-            if (lastTarget != nullptr && details.sourceComponent != nullptr
-                  && lastTarget->isInterestedInDragSource (details))
-                lastTarget->itemDragExit (details);
+            if (DragAndDropTarget* const lastTarget = getCurrentlyOver())
+                if (details.sourceComponent != nullptr && lastTarget->isInterestedInDragSource (details))
+                    lastTarget->itemDragExit (details);
 
             currentlyOverComp = newTargetComp;
 
@@ -206,13 +203,14 @@ private:
 
         while (hit != nullptr)
         {
-            DragAndDropTarget* const ddt = dynamic_cast <DragAndDropTarget*> (hit);
-
-            if (ddt != nullptr && ddt->isInterestedInDragSource (details))
+            if (DragAndDropTarget* const ddt = dynamic_cast <DragAndDropTarget*> (hit))
             {
-                relativePos = hit->getLocalPoint (nullptr, screenPos);
-                resultComponent = hit;
-                return ddt;
+                if (ddt->isInterestedInDragSource (details))
+                {
+                    relativePos = hit->getLocalPoint (nullptr, screenPos);
+                    resultComponent = hit;
+                    return ddt;
+                }
             }
 
             hit = hit->getParentComponent();
@@ -226,18 +224,17 @@ private:
     {
         Point<int> newPos (screenPos - imageOffset);
 
-        if (getParentComponent() != nullptr)
-            newPos = getParentComponent()->getLocalPoint (nullptr, newPos);
+        if (Component* p = getParentComponent())
+            newPos = p->getLocalPoint (nullptr, newPos);
 
         setTopLeftPosition (newPos);
     }
 
     void sendDragMove (DragAndDropTarget::SourceDetails& details) const
     {
-        DragAndDropTarget* const target = getCurrentlyOver();
-
-        if (target != nullptr && target->isInterestedInDragSource (details))
-            target->itemDragMove (details);
+        if (DragAndDropTarget* const target = getCurrentlyOver())
+            if (target->isInterestedInDragSource (details))
+                target->itemDragMove (details);
     }
 
     struct ExternalDragAndDropMessage  : public CallbackMessage

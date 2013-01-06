@@ -96,10 +96,7 @@ void SamplerVoice::startNote (const int midiNoteNumber,
                               SynthesiserSound* s,
                               const int /*currentPitchWheelPosition*/)
 {
-    const SamplerSound* const sound = dynamic_cast <const SamplerSound*> (s);
-    jassert (sound != nullptr); // this object can only play SamplerSounds!
-
-    if (sound != nullptr)
+    if (const SamplerSound* const sound = dynamic_cast <const SamplerSound*> (s))
     {
         pitchRatio = pow (2.0, (midiNoteNumber - sound->midiRootNote) / 12.0)
                         * sound->sourceSampleRate / getSampleRate();
@@ -126,6 +123,10 @@ void SamplerVoice::startNote (const int midiNoteNumber,
             releaseDelta = (float) (-pitchRatio / sound->releaseSamples);
         else
             releaseDelta = 0.0f;
+    }
+    else
+    {
+        jassertfalse; // this object can only play SamplerSounds!
     }
 }
 

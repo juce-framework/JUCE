@@ -172,6 +172,41 @@ StringArray getSearchPathsFromString (const String& searchPath)
     return s;
 }
 
+void addPlistDictionaryKey (XmlElement* xml, const String& key, const String& value)
+{
+    forEachXmlChildElementWithTagName (*xml, e, "key")
+    {
+        if (e->getAllSubText().trim().equalsIgnoreCase (key))
+        {
+            if (e->getNextElement() != nullptr && e->getNextElement()->hasTagName ("key"))
+            {
+                // try to fix broken plist format..
+                xml->removeChildElement (e, true);
+                break;
+            }
+            else
+            {
+                return; // (value already exists)
+            }
+        }
+    }
+
+    xml->createNewChildElement ("key")   ->addTextElement (key);
+    xml->createNewChildElement ("string")->addTextElement (value);
+}
+
+void addPlistDictionaryKeyBool (XmlElement* xml, const String& key, const bool value)
+{
+    xml->createNewChildElement ("key")->addTextElement (key);
+    xml->createNewChildElement (value ? "true" : "false");
+}
+
+void addPlistDictionaryKeyInt (XmlElement* xml, const String& key, int value)
+{
+    xml->createNewChildElement ("key")->addTextElement (key);
+    xml->createNewChildElement ("integer")->addTextElement (String (value));
+}
+
 //==============================================================================
 void autoScrollForMouseEvent (const MouseEvent& e, bool scrollX, bool scrollY)
 {

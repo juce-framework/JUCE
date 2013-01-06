@@ -82,6 +82,20 @@ namespace
         return s;
     }
 
+    String getAUMainTypeCode (Project& project)
+    {
+        String s (getPluginAUMainType (project).toString());
+
+        if (s.isEmpty())
+        {
+            if (getPluginIsSynth (project).getValue())              s = "aumu";
+            else if (getPluginWantsMidiInput (project).getValue())  s = "aumf";
+            else                                                    s = "aufx";
+        }
+
+        return s;
+    }
+
     int countMaxPluginChannels (const String& configString, bool isInput)
     {
         StringArray configs;
@@ -462,6 +476,8 @@ namespace AUHelpers
                                                 JUCE_AU_PUBLIC "AUBase/AUBase.h",
                                                 JUCE_AU_PUBLIC "AUBase/AUDispatch.cpp",
                                                 JUCE_AU_PUBLIC "AUBase/AUDispatch.h",
+                                                JUCE_AU_PUBLIC "AUBase/AUPlugInDispatch.cpp",
+                                                JUCE_AU_PUBLIC "AUBase/AUPlugInDispatch.h",
                                                 JUCE_AU_PUBLIC "AUBase/AUInputElement.cpp",
                                                 JUCE_AU_PUBLIC "AUBase/AUInputElement.h",
                                                 JUCE_AU_PUBLIC "AUBase/AUOutputElement.cpp",
@@ -493,6 +509,28 @@ namespace AUHelpers
                     subGroup.addRelativeFile (file, -1, file.hasFileExtension ("cpp;mm"));
                     subGroup.getChild (subGroup.getNumChildren() - 1).getShouldInhibitWarningsValue() = true;
                 }
+            }
+
+            if (exporter.isXcode())
+            {
+                XmlElement plistKey ("key");
+                plistKey.addTextElement ("AudioComponents");
+
+                XmlElement plistEntry ("array");
+                XmlElement* dict = plistEntry.createNewChildElement ("dict");
+
+                Project& project = exporter.getProject();
+
+                addPlistDictionaryKey (dict, "name", getPluginName (project).toString());
+                addPlistDictionaryKey (dict, "description", getPluginDesc (project).toString());
+                addPlistDictionaryKey (dict, "factoryFunction", getPluginAUExportPrefix (project).toString() + "Factory");
+                addPlistDictionaryKey (dict, "manufacturer", getPluginManufacturerCode (project).toString().trim().substring (0, 4));
+                addPlistDictionaryKey (dict, "type", getAUMainTypeCode (project));
+                addPlistDictionaryKey (dict, "subtype", getPluginCode (project).toString().trim().substring (0, 4));
+                addPlistDictionaryKeyInt (dict, "version", project.getVersionAsHexInteger());
+
+                exporter.xcodeExtraPListEntries.add (plistKey);
+                exporter.xcodeExtraPListEntries.add (plistEntry);
             }
         }
     }

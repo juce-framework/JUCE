@@ -424,7 +424,7 @@ public:
     };
 
     //==============================================================================
-    /** A user-defined copmonent that can be used as an item in a popup menu.
+    /** A user-defined component that can be used as an item in a popup menu.
         @see PopupMenu::addCustomItem
     */
     class JUCE_API  CustomComponent  : public Component,
@@ -480,7 +480,8 @@ public:
 
         @see CustomComponent
     */
-    void addCustomItem (int itemResultID, CustomComponent* customComponent);
+    void addCustomItem (int itemResultID, CustomComponent* customComponent,
+                        const PopupMenu* optionalSubMenu = nullptr);
 
 private:
     //==============================================================================

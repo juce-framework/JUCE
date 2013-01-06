@@ -1284,8 +1284,8 @@ protected:
     String getProjectType() const
     {
         if (projectType.isGUIApplication() || projectType.isCommandLineApp())   return "Application";
-        else if (isLibraryDLL())                                                return "DynamicLibrary";
-        else if (projectType.isLibrary())                                       return "StaticLibrary";
+        if (isLibraryDLL())                                                     return "DynamicLibrary";
+        if (projectType.isLibrary())                                            return "StaticLibrary";
 
         jassertfalse;
         return String::empty;

@@ -286,16 +286,16 @@ void Synthesiser::noteOff (const int midiChannel,
 
         if (voice->getCurrentlyPlayingNote() == midiNoteNumber)
         {
-            SynthesiserSound* const sound = voice->getCurrentlyPlayingSound();
-
-            if (sound != nullptr
-                 && sound->appliesToNote (midiNoteNumber)
-                 && sound->appliesToChannel (midiChannel))
+            if (SynthesiserSound* const sound = voice->getCurrentlyPlayingSound())
             {
-                voice->keyIsDown = false;
+                if (sound->appliesToNote (midiNoteNumber)
+                     && sound->appliesToChannel (midiChannel))
+                {
+                    voice->keyIsDown = false;
 
-                if (! (sustainPedalsDown [midiChannel] || voice->sostenutoPedalDown))
-                    stopVoice (voice, allowTailOff);
+                    if (! (sustainPedalsDown [midiChannel] || voice->sostenutoPedalDown))
+                        stopVoice (voice, allowTailOff);
+                }
             }
         }
     }
