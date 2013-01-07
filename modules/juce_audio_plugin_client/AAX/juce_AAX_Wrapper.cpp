@@ -51,8 +51,11 @@
 #include "AAX_CBinaryDisplayDelegate.h"
 #include "AAX_CEffectGUI.h"
 #include "AAX_IViewContainer.h"
+#include "AAX_ITransport.h"
 
 using juce::Component;
+
+const int32_t juceChunkType = 'juce';
 
 //==============================================================================
 struct AAXClasses
@@ -337,12 +340,16 @@ struct AAXClasses
     };
 
     //==============================================================================
-    class JuceAAX_Parameters   : public AAX_CEffectParameters
+    class JuceAAX_Parameters   : public AAX_CEffectParameters,
+                                 public juce::AudioPlayHead
     {
     public:
         JuceAAX_Parameters()
         {
             pluginInstance = createPluginFilterOfType (AudioProcessor::wrapperType_AAX);
+            pluginInstance->setPlayHead (this);
+
+            AAX_CEffectParameters::GetNumberOfChunks (&juceChunkIndex);
         }
 
         static AAX_CEffectParameters* AAX_CALLBACK Create()   { return new JuceAAX_Parameters(); }
@@ -350,11 +357,59 @@ struct AAXClasses
         AAX_Result EffectInit()
         {
             addBypassParameter();
-
-            // add other params..
-
             preparePlugin();
 
+            return AAX_SUCCESS;
+        }
+
+        AAX_Result GetNumberOfChunks (int32_t* numChunks) const
+        {
+            // The juceChunk is the last chunk.
+            *numChunks = juceChunkIndex + 1;
+            return AAX_SUCCESS;
+        }
+
+        AAX_Result GetChunkIDFromIndex (int32_t index, AAX_CTypeID* chunkID) const
+        {
+            if (index != juceChunkIndex)
+                return AAX_CEffectParameters::GetChunkIDFromIndex (index, chunkID);
+
+            *chunkID = juceChunkType;
+            return AAX_SUCCESS;
+        }
+
+        AAX_Result GetChunkSize (AAX_CTypeID chunkID, uint32_t* oSize) const
+        {
+            if (chunkID != juceChunkType)
+                return AAX_CEffectParameters::GetChunkSize (chunkID, oSize);
+
+            tempFilterData.setSize (0);
+            pluginInstance->getStateInformation (tempFilterData);
+            *oSize = tempFilterData.getSize();
+            return AAX_SUCCESS;
+        }
+
+        AAX_Result GetChunk (AAX_CTypeID chunkID, AAX_SPlugInChunk* oChunk) const
+        {
+            if (chunkID != juceChunkType)
+                return AAX_CEffectParameters::GetChunk (chunkID, oChunk);
+
+            if (tempFilterData.getSize() == 0)
+                pluginInstance->getStateInformation (tempFilterData);
+
+            oChunk->fSize = tempFilterData.getSize();
+            tempFilterData.copyTo (oChunk->fData, 0, tempFilterData.getSize());
+            tempFilterData.setSize (0);
+
+            return AAX_SUCCESS;
+        }
+
+        AAX_Result SetChunk (AAX_CTypeID chunkID, const AAX_SPlugInChunk* chunk)
+        {
+            if (chunkID != juceChunkType)
+                return AAX_CEffectParameters::SetChunk (chunkID, chunk);
+
+            pluginInstance->setStateInformation ((void*) chunk->fData, chunk->fSize);
             return AAX_SUCCESS;
         }
 
@@ -395,6 +450,36 @@ struct AAXClasses
 
         AudioProcessor& getPluginInstance() const noexcept   { return *pluginInstance; }
 
+        bool getCurrentPosition (juce::AudioPlayHead::CurrentPositionInfo& info)
+        {
+            const AAX_ITransport& transport = *Transport();
+            check (transport.GetCurrentTempo (&info.bpm));
+
+            int32_t num, denom;
+            transport.GetCurrentMeter (&num, &denom);
+            info.timeSigNumerator = num;
+            info.timeSigDenominator = denom;
+
+            check (transport.GetCurrentNativeSampleLocation (&info.timeInSamples));
+            info.timeInSeconds = info.timeInSamples / getSampleRate();
+
+            int64_t ticks;
+            check (transport.GetCurrentTickPosition (&ticks));
+            info.ppqPosition = ticks / 960000.0;
+
+            int64_t loopStartTick, loopEndTick;
+            check (transport.GetCurrentLoopPosition (&info.isLooping, &loopStartTick, &loopEndTick));
+            info.ppqLoopStart = loopStartTick / 960000.0;
+            info.ppqLoopEnd   = loopEndTick   / 960000.0;
+
+            // No way to get these: (?)
+            info.isRecording = false;
+            info.ppqPositionOfLastBarStart = 0;
+            info.editOriginTime = 0;
+
+            return true;
+        }
+
     private:
         void addBypassParameter()
         {
@@ -415,9 +500,6 @@ struct AAXClasses
 
         void preparePlugin() const
         {
-            AAX_CSampleRate sampleRate;
-            check (Controller()->GetSampleRate (&sampleRate));
-
             AAX_EStemFormat inputStemFormat = AAX_eStemFormat_None;
             check (Controller()->GetInputStemFormat (&inputStemFormat));
             const int numberOfInputChannels = getNumChannelsForStemFormat (inputStemFormat);
@@ -429,14 +511,29 @@ struct AAXClasses
             int32_t bufferSize = 0;
             check (Controller()->GetSignalLatency (&bufferSize));
 
+            const AAX_CSampleRate sampleRate = getSampleRate();
+
             AudioProcessor& audioProcessor = getPluginInstance();
             audioProcessor.setPlayConfigDetails (numberOfInputChannels, numberOfOutputChannels, sampleRate, bufferSize);
             audioProcessor.prepareToPlay (sampleRate, bufferSize);
         }
 
+        AAX_CSampleRate getSampleRate() const
+        {
+            AAX_CSampleRate sampleRate;
+            check (Controller()->GetSampleRate (&sampleRate));
+            return sampleRate;
+        }
+
         JUCELibraryRefCount juceCount;
 
         ScopedPointer<AudioProcessor> pluginInstance;
+
+        int32_t juceChunkIndex;
+
+        // tempFilterData is initialized in GetChunkSize.
+        // To avoid generating it again in GetChunk, we keep it as a member.
+        mutable juce::MemoryBlock tempFilterData;
 
         JUCE_DECLARE_NON_COPYABLE (JuceAAX_Parameters)
     };
