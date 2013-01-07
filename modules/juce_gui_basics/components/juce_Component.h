@@ -1918,7 +1918,7 @@ public:
 
     /** Ends a component's modal state.
 
-        If this component is currently modal, this will turn of its modalness, and return
+        If this component is currently modal, this will turn off its modalness, and return
         a value to the runModalLoop() method that might have be running its modal loop.
 
         @see runModalLoop, enterModalState, isCurrentlyModal
