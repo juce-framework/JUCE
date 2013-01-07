@@ -212,9 +212,7 @@ void Label::editorAboutToBeHidden (TextEditor*)
 bool Label::hostNeedsEditorInNewWindow()
 {
     PluginHostType pluginHostType;
-    if (pluginHostType.isCubase())
-        return true;
-    if (pluginHostType.isWavelab())
+    if (pluginHostType.isSteinberg())
         return true;
     if (pluginHostType.type == PluginHostType::DigidesignProTools)
         return true;

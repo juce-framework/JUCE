@@ -53,6 +53,7 @@ public:
         SteinbergCubase5,
         SteinbergCubase5Bridged,
         SteinbergCubaseGeneric,
+        SteinbergNuendo,
         SteinbergWavelab5,
         SteinbergWavelab6,
         SteinbergWavelab7,
@@ -82,6 +83,7 @@ public:
     bool isWaveBurner() const noexcept       { return type == WaveBurner; }
     bool isDigitalPerformer() const noexcept { return type == DigitalPerformer; }
     bool isReaper() const noexcept           { return type == Reaper; }
+    bool isSteinberg() const noexcept        { return isCubase() || type == SteinbergNuendo || isWavelab(); }
 
     //==============================================================================
     static String getHostPath()
@@ -106,6 +108,7 @@ private:
         if (hostFilename.containsIgnoreCase ("Pro Tools"))         return DigidesignProTools;
         if (hostFilename.containsIgnoreCase ("Cubase 4"))          return SteinbergCubase4;
         if (hostFilename.containsIgnoreCase ("Cubase 5"))          return SteinbergCubase5;
+        if (hostFilename.containsIgnoreCase ("Nuendo"))            return SteinbergNuendo;
         if (hostPath.containsIgnoreCase     ("Wavelab 7"))         return SteinbergWavelab7;
         if (hostFilename.containsIgnoreCase ("Wavelab"))           return SteinbergWavelabGeneric;
         if (hostFilename.containsIgnoreCase ("WaveBurner"))        return WaveBurner;
@@ -128,6 +131,7 @@ private:
         if (hostFilename.containsIgnoreCase ("Cubase4"))        return SteinbergCubase4;
         if (hostFilename.containsIgnoreCase ("Cubase5"))        return SteinbergCubase5;
         if (hostFilename.containsIgnoreCase ("Cubase"))         return SteinbergCubaseGeneric;
+        if (hostFilename.containsIgnoreCase ("Nuendo"))         return SteinbergNuendo;
         if (hostFilename.containsIgnoreCase ("VSTBridgeApp"))   return SteinbergCubase5Bridged;
         if (hostPath.containsIgnoreCase     ("Wavelab 5"))      return SteinbergWavelab5;
         if (hostPath.containsIgnoreCase     ("Wavelab 6"))      return SteinbergWavelab6;
