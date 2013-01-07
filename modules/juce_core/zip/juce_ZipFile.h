@@ -141,7 +141,7 @@ public:
         The stream must not be used after the ZipFile object that created
         has been deleted.
     */
-    InputStream* createStreamForEntry (ZipEntry& entry);
+    InputStream* createStreamForEntry (const ZipEntry& entry);
 
     //==============================================================================
     /** Uncompresses all of the files in the zip file.
