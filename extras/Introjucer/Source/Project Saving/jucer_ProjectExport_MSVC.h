@@ -1204,6 +1204,11 @@ protected:
                     link->createNewChildElement ("EnableCOMDATFolding")->addTextElement ("true");
                 }
 
+                const StringArray librarySearchPaths (config.getLibrarySearchPaths());
+                if (librarySearchPaths.size() > 0)
+                    link->createNewChildElement ("AdditionalLibraryDirectories")->addTextElement (replacePreprocessorTokens (config, librarySearchPaths.joinIntoString (";"))
+                                                                                                    + ";%(AdditionalLibraryDirectories)");
+
                 String externalLibraries (getExternalLibrariesString());
                 if (externalLibraries.isNotEmpty())
                     link->createNewChildElement ("AdditionalDependencies")->addTextElement (replacePreprocessorTokens (config, externalLibraries).trim()
