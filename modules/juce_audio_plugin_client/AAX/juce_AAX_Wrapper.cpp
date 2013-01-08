@@ -40,6 +40,11 @@
 #include "../utility/juce_IncludeModuleHeaders.h"
 #undef Component
 
+#ifdef __clang__
+ #pragma clang diagnostic push
+ #pragma clang diagnostic ignored "-Wnon-virtual-dtor"
+#endif
+
 #include "AAX_Exports.cpp"
 #include "AAX_ICollection.h"
 #include "AAX_IComponentDescriptor.h"
@@ -52,6 +57,10 @@
 #include "AAX_CEffectGUI.h"
 #include "AAX_IViewContainer.h"
 #include "AAX_ITransport.h"
+
+#ifdef __clang__
+ #pragma clang diagnostic pop
+#endif
 
 using juce::Component;
 
@@ -274,15 +283,14 @@ struct AAXClasses
             return AAX_ERROR_NULL_OBJECT;
         }
 
-        AAX_Result ParameterUpdated (AAX_CParamID iParameterID)
+        AAX_Result ParameterUpdated (AAX_CParamID /*paramID*/)
         {
 
             return AAX_SUCCESS;
         }
 
-        AAX_Result SetControlHighlightInfo (AAX_CParamID iParameterID, AAX_CBoolean iIsHighlighted, AAX_EHighlightColor iColor)
+        AAX_Result SetControlHighlightInfo (AAX_CParamID /*paramID*/, AAX_CBoolean /*isHighlighted*/, AAX_EHighlightColor)
         {
-
             return AAX_SUCCESS;
         }
 
@@ -385,7 +393,7 @@ struct AAXClasses
 
             tempFilterData.setSize (0);
             pluginInstance->getStateInformation (tempFilterData);
-            *oSize = tempFilterData.getSize();
+            *oSize = (uint32_t) tempFilterData.getSize();
             return AAX_SUCCESS;
         }
 
@@ -397,7 +405,7 @@ struct AAXClasses
             if (tempFilterData.getSize() == 0)
                 pluginInstance->getStateInformation (tempFilterData);
 
-            oChunk->fSize = tempFilterData.getSize();
+            oChunk->fSize = (uint32_t) tempFilterData.getSize();
             tempFilterData.copyTo (oChunk->fData, 0, tempFilterData.getSize());
             tempFilterData.setSize (0);
 
@@ -613,6 +621,7 @@ struct AAXClasses
 };
 
 //==============================================================================
+AAX_Result JUCE_CDECL GetEffectDescriptions (AAX_ICollection*);
 AAX_Result JUCE_CDECL GetEffectDescriptions (AAX_ICollection* collection)
 {
     AAXClasses::JUCELibraryRefCount libraryRefCount;
