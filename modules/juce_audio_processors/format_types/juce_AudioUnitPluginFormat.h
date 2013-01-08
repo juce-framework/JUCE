@@ -28,7 +28,7 @@
 
 #include "../format/juce_AudioPluginFormat.h"
 
-#if JUCE_PLUGINHOST_AU && JUCE_MAC
+#if (JUCE_PLUGINHOST_AU && JUCE_MAC) || DOXYGEN
 
 //==============================================================================
 /**
