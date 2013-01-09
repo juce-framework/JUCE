@@ -138,64 +138,15 @@ struct AAXClasses
     };
 
     //==============================================================================
+    class JuceAAX_Processor;
+
     struct PluginInstanceInfo
     {
-        PluginInstanceInfo (AudioProcessor& p)  : pluginInstance (p) {}
+        PluginInstanceInfo (JuceAAX_Processor& p)  : parameters (p) {}
 
-        void process (const float* const* inputs, float* const* outputs, const int bufferSize, const bool bypass)
-        {
-            const int numIns  = pluginInstance.getNumInputChannels();
-            const int numOuts = pluginInstance.getNumOutputChannels();
+        JuceAAX_Processor& parameters;
 
-            if (numOuts >= numIns)
-            {
-                for (int i = 0; i < numIns; ++i)
-                    memcpy (outputs[i], inputs[i], bufferSize * sizeof (float));
-
-                process (outputs, numOuts, bufferSize, bypass);
-            }
-            else
-            {
-                if (channelList.size() <= numIns)
-                    channelList.insertMultiple (-1, nullptr, 1 + numIns - channelList.size());
-
-                float** channels = channelList.getRawDataPointer();
-
-                for (int i = 0; i < numOuts; ++i)
-                {
-                    memcpy (outputs[i], inputs[i], bufferSize * sizeof (float));
-                    channels[i] = outputs[i];
-                }
-
-                for (int i = numOuts; i < numIns; ++i)
-                    channels[i] = const_cast <float*> (inputs[i]);
-
-                process (channels, numIns, bufferSize, bypass);
-            }
-        }
-
-        void process (float* const* channels, const int numChans, const int bufferSize, const bool bypass)
-        {
-            AudioSampleBuffer buffer (channels, numChans, bufferSize);
-
-            // XXX need to do midi..
-            midiBuffer.clear();
-
-            {
-                const ScopedLock sl (pluginInstance.getCallbackLock());
-
-                if (bypass)
-                    pluginInstance.processBlockBypassed (buffer, midiBuffer);
-                else
-                    pluginInstance.processBlock (buffer, midiBuffer);
-            }
-        }
-
-        AudioProcessor& pluginInstance;
-        MidiBuffer midiBuffer;
-        Array<float*> channelList;
-
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PluginInstanceInfo)
+        JUCE_DECLARE_NON_COPYABLE (PluginInstanceInfo)
     };
 
     //==============================================================================
@@ -236,7 +187,7 @@ struct AAXClasses
         {
             if (component == nullptr)
             {
-                if (JuceAAX_Parameters* params = dynamic_cast <JuceAAX_Parameters*> (GetEffectParameters()))
+                if (JuceAAX_Processor* params = dynamic_cast <JuceAAX_Processor*> (GetEffectParameters()))
                     component = new ContentWrapperComponent (*this, params->getPluginInstance());
                 else
                     jassertfalse;
@@ -348,11 +299,11 @@ struct AAXClasses
     };
 
     //==============================================================================
-    class JuceAAX_Parameters   : public AAX_CEffectParameters,
-                                 public juce::AudioPlayHead
+    class JuceAAX_Processor   : public AAX_CEffectParameters,
+                                public juce::AudioPlayHead
     {
     public:
-        JuceAAX_Parameters()
+        JuceAAX_Processor()
         {
             pluginInstance = createPluginFilterOfType (AudioProcessor::wrapperType_AAX);
             pluginInstance->setPlayHead (this);
@@ -360,7 +311,7 @@ struct AAXClasses
             AAX_CEffectParameters::GetNumberOfChunks (&juceChunkIndex);
         }
 
-        static AAX_CEffectParameters* AAX_CALLBACK Create()   { return new JuceAAX_Parameters(); }
+        static AAX_CEffectParameters* AAX_CALLBACK Create()   { return new JuceAAX_Processor(); }
 
         AAX_Result EffectInit()
         {
@@ -433,7 +384,7 @@ struct AAXClasses
                     jassert (numObjects == 1); // not sure how to handle more than one..
 
                     for (size_t i = 0; i < numObjects; ++i)
-                        new (objects + i) PluginInstanceInfo (*pluginInstance);
+                        new (objects + i) PluginInstanceInfo (const_cast<JuceAAX_Processor&> (*this));
 
                     break;
                 }
@@ -488,7 +439,56 @@ struct AAXClasses
             return true;
         }
 
+        void process (const float* const* inputs, float* const* outputs, const int bufferSize, const bool bypass)
+        {
+            const int numIns  = pluginInstance->getNumInputChannels();
+            const int numOuts = pluginInstance->getNumOutputChannels();
+
+            if (numOuts >= numIns)
+            {
+                for (int i = 0; i < numIns; ++i)
+                    memcpy (outputs[i], inputs[i], bufferSize * sizeof (float));
+
+                process (outputs, numOuts, bufferSize, bypass);
+            }
+            else
+            {
+                if (channelList.size() <= numIns)
+                    channelList.insertMultiple (-1, nullptr, 1 + numIns - channelList.size());
+
+                float** channels = channelList.getRawDataPointer();
+
+                for (int i = 0; i < numOuts; ++i)
+                {
+                    memcpy (outputs[i], inputs[i], bufferSize * sizeof (float));
+                    channels[i] = outputs[i];
+                }
+
+                for (int i = numOuts; i < numIns; ++i)
+                    channels[i] = const_cast <float*> (inputs[i]);
+
+                process (channels, numIns, bufferSize, bypass);
+            }
+        }
+
     private:
+        void process (float* const* channels, const int numChans, const int bufferSize, const bool bypass)
+        {
+            AudioSampleBuffer buffer (channels, numChans, bufferSize);
+
+            // XXX need to do midi..
+            midiBuffer.clear();
+
+            {
+                const ScopedLock sl (pluginInstance->getCallbackLock());
+
+                if (bypass)
+                    pluginInstance->processBlockBypassed (buffer, midiBuffer);
+                else
+                    pluginInstance->processBlock (buffer, midiBuffer);
+            }
+        }
+
         void addBypassParameter()
         {
             AAX_CString bypassID;
@@ -536,14 +536,15 @@ struct AAXClasses
         JUCELibraryRefCount juceCount;
 
         ScopedPointer<AudioProcessor> pluginInstance;
-
+        MidiBuffer midiBuffer;
+        Array<float*> channelList;
         int32_t juceChunkIndex;
 
         // tempFilterData is initialized in GetChunkSize.
         // To avoid generating it again in GetChunk, we keep it as a member.
         mutable juce::MemoryBlock tempFilterData;
 
-        JUCE_DECLARE_NON_COPYABLE (JuceAAX_Parameters)
+        JUCE_DECLARE_NON_COPYABLE (JuceAAX_Processor)
     };
 
     //==============================================================================
@@ -554,8 +555,8 @@ struct AAXClasses
         {
             const JUCEAlgorithmContext& i = **iter;
 
-            i.pluginInstance->process (i.inputChannels, i.outputChannels,
-                                       *(i.bufferSize), *(i.bypass) != 0);
+            i.pluginInstance->parameters.process (i.inputChannels, i.outputChannels,
+                                                  *(i.bufferSize), *(i.bypass) != 0);
         }
     }
 
@@ -597,7 +598,7 @@ struct AAXClasses
         descriptor.AddCategory (JucePlugin_AAXCategory);
 
         check (descriptor.AddProcPtr ((void*) JuceAAX_GUI::Create,        kAAX_ProcPtrID_Create_EffectGUI));
-        check (descriptor.AddProcPtr ((void*) JuceAAX_Parameters::Create, kAAX_ProcPtrID_Create_EffectParameters));
+        check (descriptor.AddProcPtr ((void*) JuceAAX_Processor::Create,  kAAX_ProcPtrID_Create_EffectParameters));
 
         const short channelConfigs[][2] = { JucePlugin_PreferredChannelConfigurations };
         const int numConfigs = numElementsInArray (channelConfigs);
