@@ -91,16 +91,17 @@
 //==============================================================================
 #define JuceUICreationClass   JucePlugin_AUCocoaViewClassName
 
-#define juceFilterObjectPropertyID 0x1a45ffe9
 static Array<void*> activePlugins, activeUIs;
+
+static const AudioUnitPropertyID juceFilterObjectPropertyID = 0x1a45ffe9;
 
 static const short channelConfigs[][2] = { JucePlugin_PreferredChannelConfigurations };
 static const int numChannelConfigs = sizeof (channelConfigs) / sizeof (*channelConfigs);
 
 #if JucePlugin_IsSynth
- #define JuceAUBaseClass MusicDeviceBase
+ typedef MusicDeviceBase  JuceAUBaseClass;
 #else
- #define JuceAUBaseClass AUMIDIEffectBase
+ typedef AUMIDIEffectBase JuceAUBaseClass;
 #endif
 
 // This macro can be set if you need to override this internal name for some reason..
@@ -205,10 +206,10 @@ public:
             }
             else if (inID == kAudioUnitProperty_CocoaUI)
             {
-              #if MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_5
+               #if MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_5
                 // (On 10.4, there's a random obj-c dispatching crash when trying to load a cocoa UI)
                 if (SystemStats::getOperatingSystemType() >= SystemStats::MacOSX_10_5)
-              #endif
+               #endif
                 {
                     outDataSize = sizeof (AudioUnitCocoaViewInfo);
                     outWritable = true;
@@ -359,11 +360,11 @@ public:
 
             for (int i = 0; i < numChannelConfigs; ++i)
             {
-              #if JucePlugin_IsSynth
+               #if JucePlugin_IsSynth
                 channelInfo[i].inChannels = 0;
-              #else
+               #else
                 channelInfo[i].inChannels = channelConfigs[i][0];
-              #endif
+               #endif
                 channelInfo[i].outChannels = channelConfigs[i][1];
             }
         }
@@ -404,10 +405,8 @@ public:
 
             return noErr;
         }
-        else
-        {
-            return kAudioUnitErr_InvalidParameter;
-        }
+
+        return kAudioUnitErr_InvalidParameter;
     }
 
     ComponentResult GetParameter (AudioUnitParameterID inID,
@@ -1426,7 +1425,10 @@ private:
 
 //==============================================================================
 JUCE_COMPONENT_ENTRY (JuceAU, JucePlugin_AUExportPrefix, Entry)
+
+#if ! JUCE_DISABLE_AU_FACTORY_ENTRY  // (You might need to disable this for old Xcode 3 builds)
 JUCE_FACTORY_ENTRY   (JuceAU, JucePlugin_AUExportPrefix)
+#endif
 
 #if BUILD_AU_CARBON_UI
  JUCE_COMPONENT_ENTRY (JuceAUView, JucePlugin_AUExportPrefix, ViewEntry)
