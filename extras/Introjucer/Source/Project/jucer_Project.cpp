@@ -346,7 +346,7 @@ void Project::createPropertyEditors (PropertyListBuilder& props)
                "The name of the project.");
 
     props.add (new TextPropertyComponent (getVersionValue(), "Project Version", 16, false),
-               "The project's version number, This should be in the format major.minor.point");
+               "The project's version number, This should be in the format major.minor.point[.point]");
 
     props.add (new TextPropertyComponent (getCompanyName(), "Company Name", 256, false),
                "Your company name, which will be added to the properties of the binary where possible");

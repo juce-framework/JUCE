@@ -732,58 +732,61 @@ void Path::addBubble (const Rectangle<float>& bodyArea,
                       const float cornerSize,
                       const float arrowBaseWidth)
 {
-    const float cornerSize2 = 2.0f * cornerSize;
+    const float halfW = bodyArea.getWidth() / 2.0f;
+    const float halfH = bodyArea.getHeight() / 2.0f;
+    const float cornerSizeW = jmin (cornerSize, halfW);
+    const float cornerSizeH = jmin (cornerSize, halfH);
+    const float cornerSizeW2 = 2.0f * cornerSizeW;
+    const float cornerSizeH2 = 2.0f * cornerSizeH;
 
-    startNewSubPath (bodyArea.getX() + cornerSize, bodyArea.getY());
+    startNewSubPath (bodyArea.getX() + cornerSizeW, bodyArea.getY());
 
-    const float targetLimitX = bodyArea.getX() + cornerSize + arrowBaseWidth;
-    const float targetLimitW = bodyArea.getWidth() - cornerSize2 - arrowBaseWidth * 2.0f;
+    const Rectangle<float> targetLimit (bodyArea.reduced (jmin (halfW - 1.0f, cornerSizeW + arrowBaseWidth),
+                                                          jmin (halfH - 1.0f, cornerSizeH + arrowBaseWidth)));
 
-    const float targetLimitY = bodyArea.getY() + cornerSize + arrowBaseWidth;
-    const float targetLimitH = bodyArea.getHeight() - cornerSize2 - arrowBaseWidth * 2.0f;
-
-    if (Rectangle<float> (targetLimitX, maximumArea.getY(),
-                          targetLimitW, bodyArea.getY() - maximumArea.getY()).contains (arrowTip))
+    if (Rectangle<float> (targetLimit.getX(), maximumArea.getY(),
+                          targetLimit.getWidth(), bodyArea.getY() - maximumArea.getY()).contains (arrowTip))
     {
         lineTo (arrowTip.x - arrowBaseWidth, bodyArea.getY());
         lineTo (arrowTip.x, arrowTip.y);
         lineTo (arrowTip.x + arrowBaseWidth, bodyArea.getY());
     }
 
-    lineTo (bodyArea.getRight() - cornerSize, bodyArea.getY());
-    addArc (bodyArea.getRight() - cornerSize2, bodyArea.getY(), cornerSize2, cornerSize2, 0, float_Pi * 0.5f);
+    lineTo (bodyArea.getRight() - cornerSizeW, bodyArea.getY());
+    addArc (bodyArea.getRight() - cornerSizeW2, bodyArea.getY(), cornerSizeW2, cornerSizeH2, 0, float_Pi * 0.5f);
 
-    if (Rectangle<float> (bodyArea.getRight(), targetLimitY,
-                          maximumArea.getRight() - bodyArea.getRight(), targetLimitH).contains (arrowTip))
+    if (Rectangle<float> (bodyArea.getRight(), targetLimit.getY(),
+                          maximumArea.getRight() - bodyArea.getRight(), targetLimit.getHeight()).contains (arrowTip))
     {
         lineTo (bodyArea.getRight(), arrowTip.y - arrowBaseWidth);
         lineTo (arrowTip.x, arrowTip.y);
         lineTo (bodyArea.getRight(), arrowTip.y + arrowBaseWidth);
     }
 
-    lineTo (bodyArea.getRight(), bodyArea.getBottom() - cornerSize);
-    addArc (bodyArea.getRight() - cornerSize2, bodyArea.getBottom() - cornerSize2, cornerSize2, cornerSize2, float_Pi * 0.5f, float_Pi);
+    lineTo (bodyArea.getRight(), bodyArea.getBottom() - cornerSizeH);
+    addArc (bodyArea.getRight() - cornerSizeW2, bodyArea.getBottom() - cornerSizeH2, cornerSizeW2, cornerSizeH2, float_Pi * 0.5f, float_Pi);
 
-    if (Rectangle<float> (targetLimitX, bodyArea.getBottom(),
-                          targetLimitW, maximumArea.getBottom() - bodyArea.getBottom()).contains (arrowTip))
+    if (Rectangle<float> (targetLimit.getX(), bodyArea.getBottom(),
+                          targetLimit.getWidth(), maximumArea.getBottom() - bodyArea.getBottom()).contains (arrowTip))
     {
         lineTo (arrowTip.x + arrowBaseWidth, bodyArea.getBottom());
         lineTo (arrowTip.x, arrowTip.y);
         lineTo (arrowTip.x - arrowBaseWidth, bodyArea.getBottom());
     }
 
-    lineTo (bodyArea.getX() + cornerSize, bodyArea.getBottom());
-    addArc (bodyArea.getX(), bodyArea.getBottom() - cornerSize2, cornerSize2, cornerSize2, float_Pi, float_Pi * 1.5f);
+    lineTo (bodyArea.getX() + cornerSizeW, bodyArea.getBottom());
+    addArc (bodyArea.getX(), bodyArea.getBottom() - cornerSizeH2, cornerSizeW2, cornerSizeH2, float_Pi, float_Pi * 1.5f);
 
-    if (Rectangle<float> (maximumArea.getX(), targetLimitY, bodyArea.getX() - maximumArea.getX(), targetLimitH).contains (arrowTip))
+    if (Rectangle<float> (maximumArea.getX(), targetLimit.getY(),
+                          bodyArea.getX() - maximumArea.getX(), targetLimit.getHeight()).contains (arrowTip))
     {
         lineTo (bodyArea.getX(), arrowTip.y + arrowBaseWidth);
         lineTo (arrowTip.x, arrowTip.y);
         lineTo (bodyArea.getX(), arrowTip.y - arrowBaseWidth);
     }
 
-    lineTo (bodyArea.getX(), bodyArea.getY() + cornerSize);
-    addArc (bodyArea.getX(), bodyArea.getY(), cornerSize2, cornerSize2, float_Pi * 1.5f, float_Pi * 2.0f - 0.05f);
+    lineTo (bodyArea.getX(), bodyArea.getY() + cornerSizeH);
+    addArc (bodyArea.getX(), bodyArea.getY(), cornerSizeW2, cornerSizeH2, float_Pi * 1.5f, float_Pi * 2.0f - 0.05f);
 
     closeSubPath();
 }
