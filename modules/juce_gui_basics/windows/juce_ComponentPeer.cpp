@@ -539,6 +539,11 @@ void ComponentPeer::handleUserClosingWindow()
     component.userTriedToCloseWindow();
 }
 
+bool ComponentPeer::setDocumentEditedStatus (bool)
+{
+    return false;
+}
+
 //==============================================================================
 void ComponentPeer::clearMaskedRegion()
 {

@@ -119,6 +119,15 @@ public:
     /** Changes the title of the window. */
     virtual void setTitle (const String& title) = 0;
 
+    /** If this type of window is capable of indicating that the document in it has been
+        edited, then this changes its status.
+
+        For example in OSX, this changes the appearance of the close button.
+        @returns true if the window has a mechanism for showing this, or false if not.
+    */
+    virtual bool setDocumentEditedStatus (bool edited);
+
+    //==============================================================================
     /** Moves the window without changing its size.
 
         If the native window is contained in another window, then the co-ordinates are

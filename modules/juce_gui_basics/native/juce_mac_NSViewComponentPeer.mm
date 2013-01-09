@@ -204,6 +204,15 @@ public:
             [window setTitle: juceStringToNS (title)];
     }
 
+    bool setDocumentEditedStatus (bool edited)
+    {
+        if (! hasNativeTitleBar())
+            return false;
+
+        [window setDocumentEdited: edited];
+        return true;
+    }
+
     void setPosition (int x, int y)
     {
         setBounds (x, y, component.getWidth(), component.getHeight(), false);
