@@ -60,6 +60,7 @@ namespace Ids
     DECLARE_ID (projectType);
     DECLARE_ID (libraryType);
     DECLARE_ID (isDebug);
+    DECLARE_ID (alwaysGenerateDebugSymbols);
     DECLARE_ID (targetName);
     DECLARE_ID (binaryPath);
     DECLARE_ID (optimisation);
