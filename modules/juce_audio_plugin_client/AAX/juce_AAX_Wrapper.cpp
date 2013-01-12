@@ -54,9 +54,12 @@
 #include "AAX_Errors.h"
 #include "AAX_CBinaryTaperDelegate.h"
 #include "AAX_CBinaryDisplayDelegate.h"
+#include "AAX_CLinearTaperDelegate.h"
+#include "AAX_CNumberDisplayDelegate.h"
 #include "AAX_CEffectGUI.h"
 #include "AAX_IViewContainer.h"
 #include "AAX_ITransport.h"
+#include "AAX_UtilsNative.h"
 
 #ifdef __clang__
  #pragma clang diagnostic pop
@@ -236,7 +239,6 @@ struct AAXClasses
 
         AAX_Result ParameterUpdated (AAX_CParamID /*paramID*/)
         {
-
             return AAX_SUCCESS;
         }
 
@@ -300,13 +302,15 @@ struct AAXClasses
 
     //==============================================================================
     class JuceAAX_Processor   : public AAX_CEffectParameters,
-                                public juce::AudioPlayHead
+                                public juce::AudioPlayHead,
+                                public AudioProcessorListener
     {
     public:
         JuceAAX_Processor()
         {
             pluginInstance = createPluginFilterOfType (AudioProcessor::wrapperType_AAX);
             pluginInstance->setPlayHead (this);
+            pluginInstance->addListener (this);
 
             AAX_CEffectParameters::GetNumberOfChunks (&juceChunkIndex);
         }
@@ -316,6 +320,7 @@ struct AAXClasses
         AAX_Result EffectInit()
         {
             addBypassParameter();
+            addAudioProcessorParameters();
             preparePlugin();
 
             return AAX_SUCCESS;
@@ -407,6 +412,19 @@ struct AAXClasses
             //return AAX_ERROR_INVALID_FIELD_INDEX;
         }
 
+        AAX_Result UpdateParameterNormalizedValue (AAX_CParamID paramID, double value, AAX_EUpdateSource source)
+        {
+            AAX_Result result = AAX_CEffectParameters::UpdateParameterNormalizedValue (paramID, value, source);
+
+            if (AAX::IsParameterIDEqual (paramID, cDefaultMasterBypassID) == false)
+            {
+                const int parameterIndex = atoi (paramID);
+                pluginInstance->setParameter (parameterIndex, (float) value);
+            }
+
+            return result;
+        }
+
         AudioProcessor& getPluginInstance() const noexcept   { return *pluginInstance; }
 
         bool getCurrentPosition (juce::AudioPlayHead::CurrentPositionInfo& info)
@@ -437,6 +455,26 @@ struct AAXClasses
             info.editOriginTime = 0;
 
             return true;
+        }
+
+        void audioProcessorParameterChanged (AudioProcessor* /*processor*/, int parameterIndex, float newValue)
+        {
+            SetParameterNormalizedValue (IndexAsParamID (parameterIndex), (double) newValue);
+        }
+
+        void audioProcessorChanged (AudioProcessor* /*processor*/)
+        {
+            // TODO
+        }
+
+        void audioProcessorParameterChangeGestureBegin (AudioProcessor* /*processor*/, int parameterIndex)
+        {
+            TouchParameter (IndexAsParamID (parameterIndex));
+        }
+
+        void audioProcessorParameterChangeGestureEnd (AudioProcessor* /*processor*/, int parameterIndex)
+        {
+            ReleaseParameter (IndexAsParamID (parameterIndex));
         }
 
         void process (const float* const* inputs, float* const* outputs, const int bufferSize, const bool bypass)
@@ -472,6 +510,35 @@ struct AAXClasses
         }
 
     private:
+        struct IndexAsParamID
+        {
+            inline explicit IndexAsParamID (int i) noexcept : index (i) {}
+
+            operator AAX_CParamID() noexcept
+            {
+                jassert (index >= 0);
+
+                char* t = name + sizeof (name);
+                *--t = 0;
+                int v = index;
+
+                do
+                {
+                    *--t = (char) ('0' + (v % 10));
+                    v /= 10;
+
+                } while (v > 0);
+
+                return static_cast <AAX_CParamID> (t);
+            }
+
+        private:
+            int index;
+            char name[32];
+
+            JUCE_DECLARE_NON_COPYABLE (IndexAsParamID)
+        };
+
         void process (float* const* channels, const int numChans, const int bufferSize, const bool bypass)
         {
             AudioSampleBuffer buffer (channels, numChans, bufferSize);
@@ -491,10 +558,7 @@ struct AAXClasses
 
         void addBypassParameter()
         {
-            AAX_CString bypassID;
-            GetMasterBypassParameter (&bypassID);
-
-            AAX_IParameter* masterBypass = new AAX_CParameter<bool> (bypassID.CString(),
+            AAX_IParameter* masterBypass = new AAX_CParameter<bool> (cDefaultMasterBypassID,
                                                                      AAX_CString ("Master Bypass"),
                                                                      false,
                                                                      AAX_CBinaryTaperDelegate<bool>(),
@@ -503,7 +567,31 @@ struct AAXClasses
             masterBypass->SetNumberOfSteps (2);
             masterBypass->SetType (AAX_eParameterType_Discrete);
             mParameterManager.AddParameter (masterBypass);
-            mPacketDispatcher.RegisterPacket (bypassID.CString(), JUCEAlgorithmIDs::bypass);
+            mPacketDispatcher.RegisterPacket (cDefaultMasterBypassID, JUCEAlgorithmIDs::bypass);
+        }
+
+        void addAudioProcessorParameters()
+        {
+            AudioProcessor& audioProcessor = getPluginInstance();
+            const int numParameters = audioProcessor.getNumParameters();
+
+            for (int parameterIndex = 0; parameterIndex < numParameters; ++parameterIndex)
+            {
+                if (audioProcessor.isParameterAutomatable (parameterIndex))
+                {
+                    AAX_IParameter* parameter
+                        = new AAX_CParameter<float> (IndexAsParamID (parameterIndex),
+                                                     audioProcessor.getParameterName (parameterIndex).toUTF8().getAddress(),
+                                                     0.0f,
+                                                     AAX_CLinearTaperDelegate<float, 0>(),
+                                                     AAX_CNumberDisplayDelegate<float, 3>(),
+                                                     true);
+
+                    parameter->SetNumberOfSteps (0x7FFFFFFF);
+                    parameter->SetType (AAX_eParameterType_Continuous);
+                    mParameterManager.AddParameter (parameter);
+                }
+            }
         }
 
         void preparePlugin() const
