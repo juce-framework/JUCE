@@ -134,7 +134,8 @@ protected:
 
 //==============================================================================
 class SourceCodeEditor  : public DocumentEditorComponent,
-                          private ValueTree::Listener
+                          private ValueTree::Listener,
+                          private CodeDocument::Listener
 {
 public:
     SourceCodeEditor (OpenDocumentManager::Document* document);
@@ -158,7 +159,11 @@ private:
     void valueTreeParentChanged (ValueTree&);
     void valueTreeRedirected (ValueTree&);
 
+    void codeDocumentTextInserted (const String&, int);
+    void codeDocumentTextDeleted (int, int);
+
     void updateColourScheme();
+    void checkSaveState();
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SourceCodeEditor);
 };

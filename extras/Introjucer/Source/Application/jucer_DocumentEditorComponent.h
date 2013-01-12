@@ -46,6 +46,8 @@ public:
 protected:
     OpenDocumentManager::Document* document;
 
+    void setEditedState (bool hasBeenEdited);
+
 private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DocumentEditorComponent)
 };

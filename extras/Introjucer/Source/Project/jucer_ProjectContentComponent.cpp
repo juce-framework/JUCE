@@ -368,7 +368,6 @@ bool ProjectContentComponent::showDocument (OpenDocumentManager::Document* doc, 
         contentView->grabKeyboardFocus();
 
     return opened;
-
 }
 
 void ProjectContentComponent::hideEditor()
@@ -426,6 +425,8 @@ void ProjectContentComponent::saveDocument()
         currentDocument->save();
     else
         saveProject();
+
+    updateMainWindowTitle();
 }
 
 bool ProjectContentComponent::goToPreviousFile()
@@ -493,7 +494,23 @@ void ProjectContentComponent::deleteSelectedTreeItems()
 void ProjectContentComponent::updateMainWindowTitle()
 {
     if (MainWindow* mw = findParentComponentOfClass<MainWindow>())
-        mw->updateTitle (currentDocument != nullptr ? currentDocument->getName() : String::empty);
+    {
+        String title;
+        bool edited = false;
+
+        if (currentDocument != nullptr)
+        {
+            title = currentDocument->getName();
+            edited = currentDocument->needsSaving();
+        }
+
+        if (ComponentPeer* peer = mw->getPeer())
+            if (! peer->setDocumentEditedStatus (edited))
+                if (edited)
+                    title << "*";
+
+        mw->updateTitle (title);
+    }
 }
 
 void ProjectContentComponent::showBubbleMessage (const Rectangle<int>& pos, const String& text)

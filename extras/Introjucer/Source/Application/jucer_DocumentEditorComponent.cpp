@@ -29,8 +29,8 @@
 
 
 //==============================================================================
-DocumentEditorComponent::DocumentEditorComponent (OpenDocumentManager::Document* document_)
-    : document (document_)
+DocumentEditorComponent::DocumentEditorComponent (OpenDocumentManager::Document* doc)
+    : document (doc)
 {
     IntrojucerApp::getApp().openDocumentManager.addListener (this);
 }
@@ -54,4 +54,10 @@ void DocumentEditorComponent::documentAboutToClose (OpenDocumentManager::Documen
 
         jassertfalse
     }
+}
+
+void DocumentEditorComponent::setEditedState (bool /*hasBeenEdited*/)
+{
+    if (ProjectContentComponent* pcc = findParentComponentOfClass<ProjectContentComponent>())
+        pcc->updateMainWindowTitle();
 }
