@@ -65,6 +65,26 @@
  #pragma clang diagnostic pop
 #endif
 
+#if JUCE_WINDOWS
+ #ifndef JucePlugin_AAXLibs_path
+  #error "You need to define the JucePlugin_AAXLibs_path macro. (This is best done via the introjucer)"
+ #endif
+
+ #if JUCE_DEBUG
+  #define JUCE_AAX_LIB_PATH "\\Debug\\"
+ #else
+  #define JUCE_AAX_LIB_PATH "\\Release\\"
+ #endif
+
+ #if JUCE_64BIT
+  #define JUCE_AAX_LIB "AAXLibrary_x64.lib"
+ #else
+  #define JUCE_AAX_LIB "AAXLibrary.lib"
+ #endif
+
+ #pragma comment(lib, JucePlugin_AAXLibs_path JUCE_AAX_LIB_PATH JUCE_AAX_LIB)
+#endif
+
 using juce::Component;
 
 const int32_t juceChunkType = 'juce';
