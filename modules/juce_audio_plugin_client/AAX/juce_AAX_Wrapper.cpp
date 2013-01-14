@@ -602,12 +602,12 @@ struct AAXClasses
                     AAX_IParameter* parameter
                         = new AAX_CParameter<float> (IndexAsParamID (parameterIndex),
                                                      audioProcessor.getParameterName (parameterIndex).toUTF8().getAddress(),
-                                                     0.0f,
+                                                     audioProcessor.getParameter (parameterIndex),
                                                      AAX_CLinearTaperDelegate<float, 0>(),
                                                      AAX_CNumberDisplayDelegate<float, 3>(),
                                                      true);
 
-                    parameter->SetNumberOfSteps (0x7FFFFFFF);
+                    parameter->SetNumberOfSteps (0x7fffffff);
                     parameter->SetType (AAX_eParameterType_Continuous);
                     mParameterManager.AddParameter (parameter);
                 }
