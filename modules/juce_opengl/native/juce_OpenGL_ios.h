@@ -66,6 +66,8 @@ public:
         view.userInteractionEnabled = NO;
 
         glLayer = (CAEAGLLayer*) [view layer];
+        glLayer.contentsScale = Desktop::getInstance().getDisplays().getMainDisplay().scale;
+
         [((UIView*) peer->getNativeHandle()) addSubview: view];
 
         context = [EAGLContext alloc];
