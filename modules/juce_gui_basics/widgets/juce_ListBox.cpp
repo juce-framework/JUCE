@@ -933,7 +933,7 @@ void ListBox::startDragAndDrop (const MouseEvent& e, const var& dragDescription,
 Component* ListBoxModel::refreshComponentForRow (int, bool, Component* existingComponentToUpdate)
 {
     (void) existingComponentToUpdate;
-    jassert (existingComponentToUpdate == nullptr); // indicates a failure in the code the recycles the components
+    jassert (existingComponentToUpdate == nullptr); // indicates a failure in the code that recycles the components
     return nullptr;
 }
 

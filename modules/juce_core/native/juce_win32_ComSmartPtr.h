@@ -136,7 +136,7 @@ public:
     JUCE_COMRESULT QueryInterface (REFIID refId, void** result)
     {
         if (refId == __uuidof (ComClass))
-            return this->castToType <ComClass> (result);
+            return this->template castToType <ComClass> (result);
 
         return ComBaseClassHelperBase <ComClass>::QueryInterface (refId, result);
     }
