@@ -165,8 +165,8 @@ double AudioTransportSource::getCurrentPosition() const
 {
     if (sampleRate > 0.0)
         return getNextReadPosition() / sampleRate;
-    else
-        return 0.0;
+
+    return 0.0;
 }
 
 double AudioTransportSource::getLengthInSeconds() const

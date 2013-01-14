@@ -76,8 +76,8 @@ namespace FileHelpers
 
         if (file.exists())
             return file.replaceWithData (data, numBytes);
-        else
-            return file.appendData (data, numBytes);
+
+        return file.appendData (data, numBytes);
     }
 
     bool overwriteFileWithNewDataIfDifferent (const File& file, const MemoryOutputStream& newData)

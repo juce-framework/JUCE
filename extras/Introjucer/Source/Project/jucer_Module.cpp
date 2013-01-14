@@ -479,8 +479,8 @@ File LibraryModule::getLocalFolderFor (Project& project) const
 {
     if (project.shouldCopyModuleFilesLocally (getID()).getValue())
         return project.getGeneratedCodeFolder().getChildFile ("modules").getChildFile (getID());
-    else
-        return moduleFolder;
+
+    return moduleFolder;
 }
 
 void LibraryModule::prepareExporter (ProjectExporter& exporter, ProjectSaver& projectSaver) const

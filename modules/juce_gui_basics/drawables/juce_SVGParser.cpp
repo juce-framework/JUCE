@@ -1026,10 +1026,10 @@ private:
                 return Colour ((uint8) (hex [0] * 0x11),
                                (uint8) (hex [1] * 0x11),
                                (uint8) (hex [2] * 0x11));
-            else
-                return Colour ((uint8) ((hex [0] << 4) + hex [1]),
-                               (uint8) ((hex [2] << 4) + hex [3]),
-                               (uint8) ((hex [4] << 4) + hex [5]));
+
+            return Colour ((uint8) ((hex [0] << 4) + hex [1]),
+                           (uint8) ((hex [2] << 4) + hex [3]),
+                           (uint8) ((hex [4] << 4) + hex [5]));
         }
         else if (s [index] == 'r'
                   && s [index + 1] == 'g'

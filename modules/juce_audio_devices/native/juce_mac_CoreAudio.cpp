@@ -900,8 +900,8 @@ public:
     {
         if (internal->inputDevice != 0)
             return internal->inputDevice->inChanNames;
-        else
-            return internal->inChanNames;
+
+        return internal->inChanNames;
     }
 
     bool isOpen()    { return isOpen_; }

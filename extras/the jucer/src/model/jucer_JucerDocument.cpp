@@ -442,8 +442,8 @@ Result JucerDocument::saveDocument (const File& file)
 
     if (ok)
         return Result::ok();
-    else
-        return Result::fail (TRANS("Couldn't write to the file."));
+
+    return Result::fail (TRANS("Couldn't write to the file."));
 }
 
 //==============================================================================

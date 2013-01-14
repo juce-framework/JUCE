@@ -63,7 +63,9 @@ public:
 
     HRESULT CoCreateInstance (REFCLSID classUUID, DWORD dwClsContext = CLSCTX_INPROC_SERVER)
     {
-        return ::CoCreateInstance (classUUID, 0, dwClsContext, __uuidof (ComClass), (void**) resetAndGetPointerAddress());
+        HRESULT hr = ::CoCreateInstance (classUUID, 0, dwClsContext, __uuidof (ComClass), (void**) resetAndGetPointerAddress());
+        jassert (hr != CO_E_NOTINITIALIZED); // You haven't called CoInitialize for the current thread!
+        return hr;
     }
 
     template <class OtherComClass>
@@ -134,7 +136,7 @@ public:
     JUCE_COMRESULT QueryInterface (REFIID refId, void** result)
     {
         if (refId == __uuidof (ComClass))
-            return castToType <ComClass> (result);
+            return this->template castToType <ComClass> (result);
 
         return ComBaseClassHelperBase <ComClass>::QueryInterface (refId, result);
     }

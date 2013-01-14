@@ -2137,8 +2137,8 @@ private:
     {
         if (MessageManager::getInstance()->currentThreadHasLockedMessageManager())
             return callback (userData);
-        else
-            return MessageManager::getInstance()->callFunctionOnMessageThread (callback, userData);
+
+        return MessageManager::getInstance()->callFunctionOnMessageThread (callback, userData);
     }
 
     static Point<int> getPointFromLParam (LPARAM lParam) noexcept

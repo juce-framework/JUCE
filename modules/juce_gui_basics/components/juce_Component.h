@@ -1918,7 +1918,7 @@ public:
 
     /** Ends a component's modal state.
 
-        If this component is currently modal, this will turn of its modalness, and return
+        If this component is currently modal, this will turn off its modalness, and return
         a value to the runModalLoop() method that might have be running its modal loop.
 
         @see runModalLoop, enterModalState, isCurrentlyModal
@@ -2053,8 +2053,8 @@ public:
 
     //==============================================================================
     /** Components can implement this method to provide a MarkerList.
-        The default implementation of this method returns 0, but you can override it to
-        return a pointer to the component's marker list. If xAxis is true, it should
+        The default implementation of this method returns nullptr, but you can override
+        it to return a pointer to the component's marker list. If xAxis is true, it should
         return the X marker list; if false, it should return the Y markers.
     */
     virtual MarkerList* getMarkers (bool xAxis);

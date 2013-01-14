@@ -259,7 +259,7 @@ public:
 
     /** Creates a component that will be used to represent this item.
 
-        You don't have to implement this method - if it returns 0 then no component
+        You don't have to implement this method - if it returns nullptr then no component
         will be used for the item, and you can just draw it using the paintItem()
         callback. But if you do return a component, it will be positioned in the
         treeview so that it can be used to represent this item.
@@ -605,7 +605,7 @@ public:
 
     /** Returns the tree's root item.
 
-        This will be the last object passed to setRootItem(), or 0 if none has been set.
+        This will be the last object passed to setRootItem(), or nullptr if none has been set.
     */
     TreeViewItem* getRootItem() const noexcept                      { return rootItem; }
 

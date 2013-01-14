@@ -269,12 +269,9 @@ void Toolbar::clear()
 
 ToolbarItemComponent* Toolbar::createItem (ToolbarItemFactory& factory, const int itemId)
 {
-    if (itemId == ToolbarItemFactory::separatorBarId)
-        return new Spacer (itemId, 0.1f, true);
-    else if (itemId == ToolbarItemFactory::spacerId)
-        return new Spacer (itemId, 0.5f, false);
-    else if (itemId == ToolbarItemFactory::flexibleSpacerId)
-        return new Spacer (itemId, 0, false);
+    if (itemId == ToolbarItemFactory::separatorBarId)    return new Spacer (itemId, 0.1f, true);
+    if (itemId == ToolbarItemFactory::spacerId)          return new Spacer (itemId, 0.5f, false);
+    if (itemId == ToolbarItemFactory::flexibleSpacerId)  return new Spacer (itemId, 0.0f, false);
 
     return factory.createItem (itemId);
 }
@@ -336,8 +333,10 @@ int Toolbar::getNumItems() const noexcept
 
 int Toolbar::getItemId (const int itemIndex) const noexcept
 {
-    ToolbarItemComponent* const tc = getItemComponent (itemIndex);
-    return tc != nullptr ? tc->getItemId() : 0;
+    if (ToolbarItemComponent* const tc = getItemComponent (itemIndex))
+        return tc->getItemId();
+
+    return 0;
 }
 
 ToolbarItemComponent* Toolbar::getItemComponent (const int itemIndex) const noexcept
@@ -350,16 +349,17 @@ ToolbarItemComponent* Toolbar::getNextActiveComponent (int index, const int delt
     for (;;)
     {
         index += delta;
-        ToolbarItemComponent* const tc = getItemComponent (index);
 
-        if (tc == nullptr)
-            break;
-
-        if (tc->isActive)
-            return tc;
+        if (ToolbarItemComponent* const tc = getItemComponent (index))
+        {
+            if (tc->isActive)
+                return tc;
+        }
+        else
+        {
+            return nullptr;
+        }
     }
-
-    return nullptr;
 }
 
 void Toolbar::setStyle (const ToolbarItemStyle& newStyle)

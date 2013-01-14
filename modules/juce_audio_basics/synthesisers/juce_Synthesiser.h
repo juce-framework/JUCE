@@ -107,7 +107,7 @@ public:
 
     /** Returns the sound that this voice is currently playing.
 
-        Returns 0 if it's not playing.
+        Returns nullptr if it's not playing.
     */
     SynthesiserSound::Ptr getCurrentlyPlayingSound() const            { return currentlyPlayingSound; }
 
@@ -454,7 +454,7 @@ protected:
     /** Searches through the voices to find one that's not currently playing, and which
         can play the given sound.
 
-        Returns 0 if all voices are busy and stealing isn't enabled.
+        Returns nullptr if all voices are busy and stealing isn't enabled.
 
         This can be overridden to implement custom voice-stealing algorithms.
     */

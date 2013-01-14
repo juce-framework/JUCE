@@ -64,9 +64,11 @@ bool DirectoryIterator::next (bool* const isDirResult, bool* const isHiddenResul
     }
 
     String filename;
-    bool isDirectory, isHidden;
+    bool isDirectory, isHidden = false;
 
-    while (fileFinder.next (filename, &isDirectory, &isHidden, fileSize, modTime, creationTime, isReadOnly))
+    while (fileFinder.next (filename, &isDirectory,
+                            (isHiddenResult != nullptr || (whatToLookFor & File::ignoreHiddenFiles) != 0) ? &isHidden : nullptr,
+                            fileSize, modTime, creationTime, isReadOnly))
     {
         ++index;
 

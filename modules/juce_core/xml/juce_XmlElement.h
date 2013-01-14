@@ -480,7 +480,7 @@ public:
         It's not very efficient to iterate the sub-elements by index - see
         getNextElement() for an example of how best to iterate.
 
-        @returns the n'th child of this element, or 0 if the index is out-of-range
+        @returns the n'th child of this element, or nullptr if the index is out-of-range
         @see getNextElement, isTextElement, getChildByName
     */
     XmlElement* getChildElement (int index) const noexcept;
@@ -488,7 +488,7 @@ public:
     /** Returns the first sub-element with a given tag-name.
 
         @param tagNameToLookFor     the tag name of the element you want to find
-        @returns the first element with this tag name, or 0 if none is found
+        @returns the first element with this tag name, or nullptr if none is found
         @see getNextElement, isTextElement, getChildElement
     */
     XmlElement* getChildByName (const String& tagNameToLookFor) const noexcept;

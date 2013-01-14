@@ -223,8 +223,8 @@ String URL::toString (const bool includeGetParameters) const
 {
     if (includeGetParameters && parameterNames.size() > 0)
         return url + "?" + URLHelpers::getMangledParameters (*this);
-    else
-        return url;
+
+    return url;
 }
 
 bool URL::isWellFormed() const

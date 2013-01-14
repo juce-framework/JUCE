@@ -1222,8 +1222,8 @@ bool TreeViewItem::isOpen() const noexcept
 {
     if (openness == opennessDefault)
         return ownerView != nullptr && ownerView->defaultOpenness;
-    else
-        return openness == opennessOpen;
+
+    return openness == opennessOpen;
 }
 
 void TreeViewItem::setOpen (const bool shouldBeOpen)

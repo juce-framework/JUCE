@@ -109,14 +109,10 @@ public:
     float getPositionOfValue (const double value) const
     {
         if (isHorizontal() || isVertical())
-        {
             return getLinearSliderPos (value);
-        }
-        else
-        {
-            jassertfalse; // not a valid call on a slider that doesn't work linearly!
-            return 0.0f;
-        }
+
+        jassertfalse; // not a valid call on a slider that doesn't work linearly!
+        return 0.0f;
     }
 
     void setRange (const double newMin, const double newMax, const double newInt)
@@ -684,7 +680,8 @@ public:
 
             if (normalPosDistance >= minPosDistance && maxPosDistance >= minPosDistance)
                 return 1;
-            else if (normalPosDistance >= maxPosDistance)
+
+            if (normalPosDistance >= maxPosDistance)
                 return 2;
         }
 
@@ -1489,8 +1486,8 @@ String Slider::getTextFromValue (double v)
 {
     if (getNumDecimalPlacesToDisplay() > 0)
         return String (v, getNumDecimalPlacesToDisplay()) + getTextValueSuffix();
-    else
-        return String (roundToInt (v)) + getTextValueSuffix();
+
+    return String (roundToInt (v)) + getTextValueSuffix();
 }
 
 double Slider::getValueFromText (const String& text)

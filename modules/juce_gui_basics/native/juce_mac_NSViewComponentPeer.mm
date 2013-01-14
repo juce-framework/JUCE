@@ -204,6 +204,15 @@ public:
             [window setTitle: juceStringToNS (title)];
     }
 
+    bool setDocumentEditedStatus (bool edited)
+    {
+        if (! hasNativeTitleBar())
+            return false;
+
+        [window setDocumentEdited: edited];
+        return true;
+    }
+
     void setPosition (int x, int y)
     {
         setBounds (x, y, component.getWidth(), component.getHeight(), false);
@@ -1616,12 +1625,11 @@ private:
 
     static NSDragOperation draggingUpdated (id self, SEL, id <NSDraggingInfo> sender)
     {
-        NSViewComponentPeer* const owner = getOwner (self);
+        if (NSViewComponentPeer* const owner = getOwner (self))
+            if (owner->sendDragCallback (0, sender))
+                return NSDragOperationCopy | NSDragOperationMove | NSDragOperationGeneric;
 
-        if (owner != nullptr && owner->sendDragCallback (0, sender))
-            return NSDragOperationCopy | NSDragOperationMove | NSDragOperationGeneric;
-        else
-            return NSDragOperationNone;
+        return NSDragOperationNone;
     }
 
     static void draggingEnded (id self, SEL s, id <NSDraggingInfo> sender)

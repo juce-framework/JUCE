@@ -148,8 +148,8 @@ const String quotedString (const String& s)
 
     if (CharPointer_ASCII::isValidString (s.toUTF8(), std::numeric_limits<int>::max()))
         return addEscapeChars (s).quoted();
-    else
-        return "CharPointer_UTF8 (" + addEscapeChars (s).quoted() + ")";
+
+    return "CharPointer_UTF8 (" + addEscapeChars (s).quoted() + ")";
 }
 
 const String replaceStringTranslations (String s, JucerDocument* document)

@@ -92,8 +92,8 @@ public:
         // to keep everything running smoothly..
         if ((++totalEventCount & 1) != 0)
             return dispatchNextXEvent() || dispatchNextInternalMessage();
-        else
-            return dispatchNextInternalMessage() || dispatchNextXEvent();
+
+        return dispatchNextInternalMessage() || dispatchNextXEvent();
     }
 
     // Wait for an event (either XEvent, or an internal Message)

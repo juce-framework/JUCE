@@ -139,13 +139,16 @@ protected:
             setValueIfVoid (shouldGenerateManifestValue(), true);
         }
 
-        Value getWarningLevelValue()            { return getValue (Ids::winWarningLevel); }
-        int getWarningLevel() const             { return config [Ids::winWarningLevel]; }
+        Value getWarningLevelValue()                { return getValue (Ids::winWarningLevel); }
+        int getWarningLevel() const                 { return config [Ids::winWarningLevel]; }
 
         Value getPrebuildCommand()                  { return getValue (Ids::prebuildCommand); }
         String getPrebuildCommandString() const     { return config [Ids::prebuildCommand]; }
         Value getPostbuildCommand()                 { return getValue (Ids::postbuildCommand); }
         String getPostbuildCommandString() const    { return config [Ids::postbuildCommand]; }
+
+        Value shouldGenerateDebugSymbolsValue()     { return getValue (Ids::alwaysGenerateDebugSymbols); }
+        bool shouldGenerateDebugSymbols() const     { return config [Ids::alwaysGenerateDebugSymbols]; }
 
         Value shouldGenerateManifestValue()         { return getValue (Ids::generateManifest); }
         bool shouldGenerateManifest() const         { return config [Ids::generateManifest]; }
@@ -190,6 +193,9 @@ protected:
                 props.add (new ChoicePropertyComponent (getWholeProgramOptValue(), "Whole Program Optimisation",
                                                         StringArray (wpoNames), Array<var> (wpoValues, numElementsInArray (wpoValues))));
             }
+
+            if (! isDebug())
+                props.add (new BooleanPropertyComponent (shouldGenerateDebugSymbolsValue(), "Debug Symbols", "Force generation of debug symbols"));
 
             props.add (new TextPropertyComponent (getPrebuildCommand(),  "Pre-build Command",  2048, false));
             props.add (new TextPropertyComponent (getPostbuildCommand(), "Post-build Command", 2048, false));
@@ -787,7 +793,7 @@ protected:
             linker->setAttribute ("SuppressStartupBanner", "true");
 
             linker->setAttribute ("IgnoreDefaultLibraryNames", isDebug ? "libcmt.lib, msvcrt.lib" : "");
-            linker->setAttribute ("GenerateDebugInformation", isDebug ? "true" : "false");
+            linker->setAttribute ("GenerateDebugInformation", (isDebug || config.shouldGenerateDebugSymbols()) ? "true" : "false");
             linker->setAttribute ("ProgramDatabaseFile", getIntDirFile (config.getOutputFilename (".pdb", true)));
             linker->setAttribute ("SubSystem", msvcIsWindowsSubsystem ? "2" : "1");
 
@@ -1153,7 +1159,7 @@ protected:
                 const int optimiseLevel = config.getOptimisationLevelInt();
                 cl->createNewChildElement ("Optimization")->addTextElement (optimiseLevel <= 1 ? "Disabled"
                                                                                                : optimiseLevel == 2 ? "MinSpace"
-                                                                                                                    : "MaxSpeed");
+                                                                                                                    : "Full");
 
                 if (isDebug && optimiseLevel <= 1)
                     cl->createNewChildElement ("DebugInformationFormat")->addTextElement (is64Bit (config) ? "ProgramDatabase"
@@ -1191,7 +1197,7 @@ protected:
                 link->createNewChildElement ("SuppressStartupBanner")->addTextElement ("true");
                 link->createNewChildElement ("IgnoreSpecificDefaultLibraries")->addTextElement (isDebug ? "libcmt.lib; msvcrt.lib;;%(IgnoreSpecificDefaultLibraries)"
                                                                                                         : "%(IgnoreSpecificDefaultLibraries)");
-                link->createNewChildElement ("GenerateDebugInformation")->addTextElement (isDebug ? "true" : "false");
+                link->createNewChildElement ("GenerateDebugInformation")->addTextElement ((isDebug || config.shouldGenerateDebugSymbols()) ? "true" : "false");
                 link->createNewChildElement ("ProgramDatabaseFile")->addTextElement (getIntDirFile (config.getOutputFilename (".pdb", true)));
                 link->createNewChildElement ("SubSystem")->addTextElement (msvcIsWindowsSubsystem ? "Windows" : "Console");
 
@@ -1203,6 +1209,11 @@ protected:
                     link->createNewChildElement ("OptimizeReferences")->addTextElement ("true");
                     link->createNewChildElement ("EnableCOMDATFolding")->addTextElement ("true");
                 }
+
+                const StringArray librarySearchPaths (config.getLibrarySearchPaths());
+                if (librarySearchPaths.size() > 0)
+                    link->createNewChildElement ("AdditionalLibraryDirectories")->addTextElement (replacePreprocessorTokens (config, librarySearchPaths.joinIntoString (";"))
+                                                                                                    + ";%(AdditionalLibraryDirectories)");
 
                 String externalLibraries (getExternalLibrariesString());
                 if (externalLibraries.isNotEmpty())

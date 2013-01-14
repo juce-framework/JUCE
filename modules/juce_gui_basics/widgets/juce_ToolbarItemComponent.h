@@ -76,7 +76,7 @@ public:
     */
     int getItemId() const noexcept                                  { return itemId; }
 
-    /** Returns the toolbar that contains this component, or 0 if it's not currently
+    /** Returns the toolbar that contains this component, or nullptr if it's not currently
         inside one.
     */
     Toolbar* getToolbar() const;

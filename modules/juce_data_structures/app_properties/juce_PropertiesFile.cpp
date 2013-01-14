@@ -171,8 +171,8 @@ bool PropertiesFile::save()
 
     if (options.storageFormat == storeAsXML)
         return saveAsXml();
-    else
-        return saveAsBinary();
+
+    return saveAsBinary();
 }
 
 bool PropertiesFile::loadAsXml()

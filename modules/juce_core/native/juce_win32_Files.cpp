@@ -480,8 +480,8 @@ bool File::isOnHardDisk() const
 
     if (fullPath.toLowerCase()[0] <= 'b' && fullPath[1] == ':')
         return n != DRIVE_REMOVABLE;
-    else
-        return n != DRIVE_CDROM && n != DRIVE_REMOTE;
+
+    return n != DRIVE_CDROM && n != DRIVE_REMOTE;
 }
 
 bool File::isOnRemovableDrive() const

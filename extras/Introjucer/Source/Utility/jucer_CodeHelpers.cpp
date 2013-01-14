@@ -193,8 +193,8 @@ namespace CodeHelpers
     {
         if (includePath.startsWithChar ('<') || includePath.startsWithChar ('"'))
             return "#include " + includePath;
-        else
-            return "#include \"" + includePath + "\"";
+
+        return "#include \"" + includePath + "\"";
     }
 
     String makeHeaderGuardName (const File& file)

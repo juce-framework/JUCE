@@ -89,7 +89,7 @@ public:
     /** Returns one of the markers in the list, by its index. */
     const Marker* getMarker (int index) const noexcept;
 
-    /** Returns a named marker, or 0 if no such name is found.
+    /** Returns a named marker, or nullptr if no such name is found.
         Note that name comparisons are case-sensitive.
     */
     const Marker* getMarker (const String& name) const noexcept;

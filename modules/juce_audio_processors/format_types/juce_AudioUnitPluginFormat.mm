@@ -1596,8 +1596,8 @@ bool AudioUnitPluginFormat::doesPluginStillExist (const PluginDescription& desc)
 {
     if (desc.fileOrIdentifier.startsWithIgnoreCase (AudioUnitFormatHelpers::auIdentifierPrefix))
         return fileMightContainThisPluginType (desc.fileOrIdentifier);
-    else
-        return File (desc.fileOrIdentifier).exists();
+
+    return File (desc.fileOrIdentifier).exists();
 }
 
 FileSearchPath AudioUnitPluginFormat::getDefaultLocationsToSearch()

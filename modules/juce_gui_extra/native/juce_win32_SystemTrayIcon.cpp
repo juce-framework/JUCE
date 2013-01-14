@@ -158,12 +158,10 @@ public:
 
     static LRESULT CALLBACK hookedWndProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
     {
-        Pimpl* const p = getPimpl (hwnd);
-
-        if (p != nullptr)
+        if (Pimpl* const p = getPimpl (hwnd))
             return p->windowProc  (hwnd, message, wParam, lParam);
-        else
-            return DefWindowProcW (hwnd, message, wParam, lParam);
+
+        return DefWindowProcW (hwnd, message, wParam, lParam);
    }
 
     LRESULT windowProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)

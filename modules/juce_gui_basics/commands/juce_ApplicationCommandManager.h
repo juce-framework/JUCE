@@ -77,8 +77,8 @@ class Desktop;
     component hierarchy for those that also implement the ApplicationCommandTarget interface.
     If an ApplicationCommandTarget isn't interested in the command that is being invoked, then
     the next one in line will be tried (see the ApplicationCommandTarget::getNextCommandTarget()
-    method), and so on until ApplicationCommandTarget::getNextCommandTarget() returns 0. At this
-    point if the command still hasn't been performed, it will be passed to the current
+    method), and so on until ApplicationCommandTarget::getNextCommandTarget() returns nullptr.
+    At this point if the command still hasn't been performed, it will be passed to the current
     JUCEApplication object (which is itself an ApplicationCommandTarget).
 
     To exert some custom control over which ApplicationCommandTarget is chosen to invoke a command,
@@ -298,7 +298,7 @@ public:
     /** Examines this component and all its parents in turn, looking for the first one
         which is a ApplicationCommandTarget.
 
-        Returns the first ApplicationCommandTarget that it finds, or 0 if none of them implement
+        Returns the first ApplicationCommandTarget that it finds, or nullptr if none of them implement
         that class.
     */
     static ApplicationCommandTarget* findTargetForComponent (Component* component);

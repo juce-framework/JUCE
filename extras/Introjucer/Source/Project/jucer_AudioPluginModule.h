@@ -187,6 +187,13 @@ namespace
             exporter.getSetting (Ids::postbuildCommand) = String::fromUTF8 (BinaryData::AudioPluginXCodeScript_txt,
                                                                             BinaryData::AudioPluginXCodeScript_txtSize);
     }
+
+    String createEscapedStringForVersion (ProjectExporter& exporter, const String& text)
+    {
+        // (VS10 automatically adds escape characters to the quotes for this definition)
+        return exporter.getVisualStudioVersion() < 10 ? CodeHelpers::addEscapeChars (text.quoted())
+                                                      : CodeHelpers::addEscapeChars (text).quoted();
+    }
 }
 
 //==============================================================================
@@ -370,12 +377,7 @@ namespace RTASHelpers
                 exporter.msvcTargetSuffix = ".dpm";
 
                 String winbag (getRTASFolderRelativePath (exporter).getChildFile ("WinBag").toWindowsStyle());
-
-                // (VS10 automatically adds escape characters to the quotes for this definition)
-                winbag = (exporter.getVisualStudioVersion() < 10) ? CodeHelpers::addEscapeChars (winbag.quoted())
-                                                                  : CodeHelpers::addEscapeChars (winbag).quoted();
-
-                exporter.msvcExtraPreprocessorDefs.set ("JucePlugin_WinBag_path", winbag);
+                exporter.msvcExtraPreprocessorDefs.set ("JucePlugin_WinBag_path", createEscapedStringForVersion (exporter, winbag));
 
                 RelativePath juceFolder (exporter.getJucePathFromTargetFolder());
                 if (juceFolder.getFileName() != "modules")
@@ -573,7 +575,7 @@ namespace AAXHelpers
         {
             fixMissingAAXValues (exporter);
 
-            const RelativePath aaxFolder (getAAXFolderPath (exporter));
+            const RelativePath aaxLibsFolder (getAAXFolderPath (exporter).getChildFile ("Libs"));
 
             if (exporter.isVisualStudio())
             {
@@ -582,11 +584,15 @@ namespace AAXHelpers
                 for (ProjectExporter::ConfigIterator config (exporter); config.next();)
                     if (config->getValue (Ids::useRuntimeLibDLL).getValue().isVoid())
                         config->getValue (Ids::useRuntimeLibDLL) = true;
+
+                exporter.msvcExtraPreprocessorDefs
+                    .set ("JucePlugin_AAXLibs_path",
+                          createEscapedStringForVersion (exporter, aaxLibsFolder.toWindowsStyle()));
             }
             else
             {
-                exporter.xcodeExtraLibrariesDebug.add   (aaxFolder.getChildFile ("Libs/Debug/libAAXLibrary.a"));
-                exporter.xcodeExtraLibrariesRelease.add (aaxFolder.getChildFile ("Libs/Release/libAAXLibrary.a"));
+                exporter.xcodeExtraLibrariesDebug.add   (aaxLibsFolder.getChildFile ("Debug/libAAXLibrary.a"));
+                exporter.xcodeExtraLibrariesRelease.add (aaxLibsFolder.getChildFile ("Release/libAAXLibrary.a"));
             }
 
             writePluginCharacteristicsFile (projectSaver);

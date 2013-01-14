@@ -26,6 +26,7 @@
 #include "jucer_SourceCodeEditor.h"
 #include "../Application/jucer_OpenDocumentManager.h"
 
+
 //==============================================================================
 SourceCodeDocument::SourceCodeDocument (Project* p, const File& f)
     : modDetector (f), project (p)
@@ -104,6 +105,9 @@ SourceCodeEditor::SourceCodeEditor (OpenDocumentManager::Document* doc)
 
 SourceCodeEditor::~SourceCodeEditor()
 {
+    if (editor != nullptr)
+        editor->getDocument().removeListener (this);
+
     getAppSettings().appearance.settings.removeListener (this);
 
     if (SourceCodeDocument* doc = dynamic_cast <SourceCodeDocument*> (getDocument()))
@@ -120,6 +124,9 @@ void SourceCodeEditor::createEditor (CodeDocument& codeDocument)
 
 void SourceCodeEditor::setEditor (CodeEditorComponent* newEditor)
 {
+    if (editor != nullptr)
+        editor->getDocument().removeListener (this);
+
     addAndMakeVisible (editor = newEditor);
 
     editor->setFont (AppearanceSettings::getDefaultCodeFont());
@@ -127,6 +134,8 @@ void SourceCodeEditor::setEditor (CodeEditorComponent* newEditor)
 
     updateColourScheme();
     getAppSettings().appearance.settings.addListener (this);
+
+    editor->getDocument().addListener (this);
 }
 
 void SourceCodeEditor::scrollToKeepRangeOnScreen (const Range<int>& range)
@@ -160,6 +169,11 @@ void SourceCodeEditor::resized()
 
 void SourceCodeEditor::updateColourScheme()     { getAppSettings().appearance.applyToCodeEditor (*editor); }
 
+void SourceCodeEditor::checkSaveState()
+{
+    setEditedState (getDocument()->needsSaving());
+}
+
 void SourceCodeEditor::valueTreePropertyChanged (ValueTree&, const Identifier&)   { updateColourScheme(); }
 void SourceCodeEditor::valueTreeChildAdded (ValueTree&, ValueTree&)               { updateColourScheme(); }
 void SourceCodeEditor::valueTreeChildRemoved (ValueTree&, ValueTree&)             { updateColourScheme(); }
@@ -167,6 +181,8 @@ void SourceCodeEditor::valueTreeChildOrderChanged (ValueTree&)                  
 void SourceCodeEditor::valueTreeParentChanged (ValueTree&)                        { updateColourScheme(); }
 void SourceCodeEditor::valueTreeRedirected (ValueTree&)                           { updateColourScheme(); }
 
+void SourceCodeEditor::codeDocumentTextInserted (const String&, int)              { checkSaveState(); }
+void SourceCodeEditor::codeDocumentTextDeleted (int, int)                         { checkSaveState(); }
 
 //==============================================================================
 GenericCodeEditorComponent::GenericCodeEditorComponent (const File& f, CodeDocument& codeDocument,

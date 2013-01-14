@@ -439,8 +439,8 @@ struct Expression::Helpers
         {
             if (input->getOperatorPrecedence() > 0)
                 return "-(" + input->toString() + ")";
-            else
-                return "-" + input->toString();
+
+            return "-" + input->toString();
         }
 
     private:
@@ -492,8 +492,8 @@ struct Expression::Helpers
 
             if (input == left)
                 return new Add (newDest, right->clone());
-            else
-                return new Subtract (left->clone(), newDest);
+
+            return new Subtract (left->clone(), newDest);
         }
 
     private:
@@ -545,8 +545,8 @@ struct Expression::Helpers
 
             if (input == left)
                 return new Multiply (newDest, right->clone());
-            else
-                return new Divide (left->clone(), newDest);
+
+            return new Divide (left->clone(), newDest);
         }
 
     private:
