@@ -59,6 +59,7 @@
 #include "AAX_CEffectGUI.h"
 #include "AAX_IViewContainer.h"
 #include "AAX_ITransport.h"
+#include "AAX_IMIDINode.h"
 #include "AAX_UtilsNative.h"
 
 #ifdef __clang__
@@ -179,6 +180,7 @@ struct AAXClasses
         float** outputChannels;
         int32_t* bufferSize;
         int32_t* bypass;
+        AAX_IMIDINode* midiNodeIn;
 
         PluginInstanceInfo* pluginInstance;
         int32_t* isPrepared;
@@ -192,6 +194,7 @@ struct AAXClasses
             outputChannels  = AAX_FIELD_INDEX (JUCEAlgorithmContext, outputChannels),
             bufferSize      = AAX_FIELD_INDEX (JUCEAlgorithmContext, bufferSize),
             bypass          = AAX_FIELD_INDEX (JUCEAlgorithmContext, bypass),
+            midiNodeIn      = AAX_FIELD_INDEX (JUCEAlgorithmContext, midiNodeIn),
             pluginInstance  = AAX_FIELD_INDEX (JUCEAlgorithmContext, pluginInstance),
             preparedFlag    = AAX_FIELD_INDEX (JUCEAlgorithmContext, isPrepared)
         };
@@ -497,7 +500,8 @@ struct AAXClasses
             ReleaseParameter (IndexAsParamID (parameterIndex));
         }
 
-        void process (const float* const* inputs, float* const* outputs, const int bufferSize, const bool bypass)
+        void process (const float* const* inputs, float* const* outputs, const int bufferSize,
+                      const bool bypass, AAX_IMIDINode* midiNodeIn)
         {
             const int numIns  = pluginInstance->getNumInputChannels();
             const int numOuts = pluginInstance->getNumOutputChannels();
@@ -507,7 +511,7 @@ struct AAXClasses
                 for (int i = 0; i < numIns; ++i)
                     memcpy (outputs[i], inputs[i], bufferSize * sizeof (float));
 
-                process (outputs, numOuts, bufferSize, bypass);
+                process (outputs, numOuts, bufferSize, bypass, midiNodeIn);
             }
             else
             {
@@ -525,7 +529,7 @@ struct AAXClasses
                 for (int i = numOuts; i < numIns; ++i)
                     channels[i] = const_cast <float*> (inputs[i]);
 
-                process (channels, numIns, bufferSize, bypass);
+                process (channels, numIns, bufferSize, bypass, midiNodeIn);
             }
         }
 
@@ -559,12 +563,27 @@ struct AAXClasses
             JUCE_DECLARE_NON_COPYABLE (IndexAsParamID)
         };
 
-        void process (float* const* channels, const int numChans, const int bufferSize, const bool bypass)
+        void process (float* const* channels, const int numChans, const int bufferSize,
+                      const bool bypass, AAX_IMIDINode* midiNodeIn)
         {
             AudioSampleBuffer buffer (channels, numChans, bufferSize);
 
-            // XXX need to do midi..
             midiBuffer.clear();
+
+           #if JucePlugin_WantsMidiInput
+            {
+                AAX_CMidiStream* const midiStream = midiNodeIn->GetNodeBuffer();
+                const uint32_t numMidiEvents = midiStream->mBufferSize;
+
+                for (uint32_t i = 0; i < numMidiEvents; ++i)
+                {
+                    const AAX_CMidiPacket& m = midiStream->mBuffer[i];
+                    jassert ((int) m.mTimestamp < bufferSize);
+                    midiBuffer.addEvent (m.mData, (int) m.mLength,
+                                         jlimit (0, (int) bufferSize - 1, (int) m.mTimestamp));
+                }
+            }
+           #endif
 
             {
                 const ScopedLock sl (pluginInstance->getCallbackLock());
@@ -664,7 +683,8 @@ struct AAXClasses
             const JUCEAlgorithmContext& i = **iter;
 
             i.pluginInstance->parameters.process (i.inputChannels, i.outputChannels,
-                                                  *(i.bufferSize), *(i.bypass) != 0);
+                                                  *(i.bufferSize), *(i.bypass) != 0,
+                                                  i.midiNodeIn);
         }
     }
 
@@ -676,6 +696,11 @@ struct AAXClasses
         check (desc.AddAudioOut (JUCEAlgorithmIDs::outputChannels));
         check (desc.AddAudioBufferLength (JUCEAlgorithmIDs::bufferSize));
         check (desc.AddDataInPort (JUCEAlgorithmIDs::bypass, sizeof (int32_t)));
+
+       #if JucePlugin_WantsMidiInput
+        check (desc.AddMIDINode (JUCEAlgorithmIDs::midiNodeIn, AAX_eMIDINodeType_LocalInput,
+                                 JucePlugin_Name, 0xffff));
+       #endif
 
         check (desc.AddPrivateData (JUCEAlgorithmIDs::pluginInstance, sizeof (PluginInstanceInfo)));
 
