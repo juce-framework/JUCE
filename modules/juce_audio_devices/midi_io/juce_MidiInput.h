@@ -129,7 +129,7 @@ public:
         This will attempt to create a new midi input device with the specified name,
         for other apps to connect to.
 
-        Returns 0 if a device can't be created.
+        Returns nullptr if a device can't be created.
 
         @param deviceName   the name to use for the new device
         @param callback     the object that will receive the midi messages from this device.

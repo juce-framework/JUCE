@@ -170,7 +170,7 @@ public:
                                             by your app.
         @param numOutputChannelsNeeded      a minimum number of output channels to open
         @param savedState                   either a previously-saved state that was produced
-                                            by createStateXml(), or 0 if you want the manager
+                                            by createStateXml(), or nullptr if you want the manager
                                             to choose the best device to open.
         @param selectDefaultDeviceOnFailure if true, then if the device specified in the XML
                                             fails to open, then a default device will be used

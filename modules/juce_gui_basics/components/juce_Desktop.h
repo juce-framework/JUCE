@@ -175,7 +175,7 @@ public:
     /** Returns the component that is currently being used in kiosk-mode.
 
         This is the component that was last set by setKioskModeComponent(). If none
-        has been set, this returns 0.
+        has been set, this returns nullptr.
     */
     Component* getKioskModeComponent() const noexcept               { return kioskModeComponent; }
 
@@ -201,7 +201,7 @@ public:
         This will drill down into top-level windows to find the child component at
         the given position.
 
-        Returns 0 if the co-ordinates are inside a non-Juce window.
+        Returns nullptr if the co-ordinates are inside a non-Juce window.
     */
     Component* findComponentAt (const Point<int>& screenPosition) const;
 

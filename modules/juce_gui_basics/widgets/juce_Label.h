@@ -148,7 +148,7 @@ public:
     /** If this label has been attached to another component using attachToComponent, this
         returns the other component.
 
-        Returns 0 if the label is not attached.
+        Returns nullptr if the label is not attached.
     */
     Component* getAttachedComponent() const;
 

@@ -74,7 +74,7 @@ public:
         This will attempt to create a new midi output device that other apps can connect
         to and use as their midi input.
 
-        Returns 0 if a device can't be created.
+        Returns nullptr if a device can't be created.
 
         @param deviceName   the name to use for the new device
     */

@@ -175,7 +175,7 @@ public:
 
         @param nameOfList   the name that was passed into the addComboBox() method
                             when creating the drop-down
-        @returns the ComboBox component, or 0 if none was found for the given name.
+        @returns the ComboBox component, or nullptr if none was found for the given name.
     */
     ComboBox* getComboBoxComponent (const String& nameOfList) const;
 
