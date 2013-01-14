@@ -669,7 +669,8 @@ struct AAXClasses
     }
 
     //==============================================================================
-    static void createDescriptor (AAX_IComponentDescriptor& desc, int numInputs, int numOutputs)
+    static void createDescriptor (AAX_IComponentDescriptor& desc, int channelConfigIndex,
+                                  int numInputs, int numOutputs)
     {
         check (desc.AddAudioIn  (JUCEAlgorithmIDs::inputChannels));
         check (desc.AddAudioOut (JUCEAlgorithmIDs::outputChannels));
@@ -694,7 +695,9 @@ struct AAXClasses
         properties->AddProperty (AAX_eProperty_InputStemFormat,     getFormatForChans (numInputs));
         properties->AddProperty (AAX_eProperty_OutputStemFormat,    getFormatForChans (numOutputs));
 
-        properties->AddProperty (AAX_eProperty_PlugInID_Native,     JucePlugin_AAXPluginId + (numInputs + 256 * numOutputs));
+        // This value needs to match the RTAS wrapper's Type ID, so that
+        // the host knows that the RTAS/AAX plugins are equivalent.
+        properties->AddProperty (AAX_eProperty_PlugInID_Native,     'jcaa' + channelConfigIndex);
 
         check (desc.AddProcessProc_Native (algorithmProcessCallback, properties));
     }
@@ -719,7 +722,7 @@ struct AAXClasses
         {
             if (AAX_IComponentDescriptor* const desc = descriptor.NewComponentDescriptor())
             {
-                createDescriptor (*desc,
+                createDescriptor (*desc, i,
                                   channelConfigs [i][0],
                                   channelConfigs [i][1]);
 
