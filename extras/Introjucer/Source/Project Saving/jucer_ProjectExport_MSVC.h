@@ -1159,7 +1159,7 @@ protected:
                 const int optimiseLevel = config.getOptimisationLevelInt();
                 cl->createNewChildElement ("Optimization")->addTextElement (optimiseLevel <= 1 ? "Disabled"
                                                                                                : optimiseLevel == 2 ? "MinSpace"
-                                                                                                                    : "MaxSpeed");
+                                                                                                                    : "Full");
 
                 if (isDebug && optimiseLevel <= 1)
                     cl->createNewChildElement ("DebugInformationFormat")->addTextElement (is64Bit (config) ? "ProgramDatabase"
