@@ -71,19 +71,21 @@
   #error "You need to define the JucePlugin_AAXLibs_path macro. (This is best done via the introjucer)"
  #endif
 
- #if JUCE_DEBUG
-  #define JUCE_AAX_LIB_PATH "\\Debug\\"
- #else
-  #define JUCE_AAX_LIB_PATH "\\Release\\"
- #endif
-
  #if JUCE_64BIT
-  #define JUCE_AAX_LIB "AAXLibrary_x64.lib"
+  #define JUCE_AAX_LIB "AAXLibrary_x64"
  #else
-  #define JUCE_AAX_LIB "AAXLibrary.lib"
+  #define JUCE_AAX_LIB "AAXLibrary"
  #endif
 
- #pragma comment(lib, JucePlugin_AAXLibs_path JUCE_AAX_LIB_PATH JUCE_AAX_LIB)
+ #if JUCE_DEBUG
+  #define JUCE_AAX_LIB_PATH   "\\Debug\\"
+  #define JUCE_AAX_LIB_SUFFIX "_D"
+ #else
+  #define JUCE_AAX_LIB_PATH   "\\Release\\"
+  #define JUCE_AAX_LIB_SUFFIX ""
+ #endif
+
+ #pragma comment(lib, JucePlugin_AAXLibs_path JUCE_AAX_LIB_PATH JUCE_AAX_LIB JUCE_AAX_LIB_SUFFIX ".lib")
 #endif
 
 using juce::Component;
