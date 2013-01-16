@@ -215,8 +215,7 @@ void setNativeHostWindowSize (void* nsWindow, Component* component, int newWidth
     JUCE_AUTORELEASEPOOL
 
    #if JUCE_64BIT
-    NSView* hostView = (NSView*) nsWindow;
-    if (hostView != nil)
+    if (NSView* hostView = (NSView*) nsWindow)
     {
         // xxx is this necessary, or do the hosts detect a change in the child view and do this automatically?
         [hostView setFrameSize: NSMakeSize ([hostView frame].size.width + (newWidth - component->getWidth()),
@@ -224,9 +223,8 @@ void setNativeHostWindowSize (void* nsWindow, Component* component, int newWidth
     }
    #else
 
-    HIViewRef dummyView = (HIViewRef) (void*) (pointer_sized_int)
-                            component->getProperties() ["dummyViewRef"].toString().getHexValue64();
-    if (dummyView != 0)
+    if (HIViewRef dummyView = (HIViewRef) (void*) (pointer_sized_int)
+                                 component->getProperties() ["dummyViewRef"].toString().getHexValue64())
     {
         HIRect frameRect;
         HIViewGetFrame (dummyView, &frameRect);

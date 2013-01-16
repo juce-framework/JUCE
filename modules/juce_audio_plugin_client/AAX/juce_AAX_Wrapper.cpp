@@ -248,7 +248,7 @@ struct AAXClasses
             }
         }
 
-        virtual AAX_Result GetViewSize (AAX_Point* const viewSize) const
+        virtual AAX_Result GetViewSize (AAX_Point* viewSize) const
         {
             if (component != nullptr)
             {
