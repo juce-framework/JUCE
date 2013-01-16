@@ -612,8 +612,8 @@ public:
     */
     Rectangle constrainedWithin (const Rectangle& areaToFitWithin) const noexcept
     {
-        const int newW = jmin (w, areaToFitWithin.getWidth());
-        const int newH = jmin (h, areaToFitWithin.getHeight());
+        const ValueType newW (jmin (w, areaToFitWithin.getWidth()));
+        const ValueType newH (jmin (h, areaToFitWithin.getHeight()));
 
         return Rectangle (jlimit (areaToFitWithin.getX(), areaToFitWithin.getRight()  - newW, pos.x),
                           jlimit (areaToFitWithin.getY(), areaToFitWithin.getBottom() - newH, pos.y),
