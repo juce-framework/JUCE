@@ -61,7 +61,8 @@ public:
         MagixSamplitude,
         FruityLoops,
         WaveBurner,
-        DigitalPerformer
+        DigitalPerformer,
+        StudioOne
     };
 
     const HostType type;
@@ -82,6 +83,7 @@ public:
     bool isWaveBurner() const noexcept       { return type == WaveBurner; }
     bool isDigitalPerformer() const noexcept { return type == DigitalPerformer; }
     bool isReaper() const noexcept           { return type == Reaper; }
+    bool isStudioOne() const noexcept        { return type == StudioOne; }
 
     //==============================================================================
     static String getHostPath()
@@ -111,6 +113,7 @@ private:
         if (hostFilename.containsIgnoreCase ("WaveBurner"))        return WaveBurner;
         if (hostFilename.contains           ("Digital Performer")) return DigitalPerformer;
         if (hostFilename.containsIgnoreCase ("reaper"))            return Reaper;
+        if (hostPath.containsIgnoreCase     ("Studio One"))        return StudioOne;
 
       #elif JUCE_WINDOWS
         if (hostFilename.containsIgnoreCase ("Live 6."))        return AbletonLive6;
@@ -136,6 +139,7 @@ private:
         if (hostFilename.containsIgnoreCase ("rm-host"))        return MuseReceptorGeneric;
         if (hostFilename.startsWithIgnoreCase ("Sam"))          return MagixSamplitude;
         if (hostFilename.startsWith         ("FL"))             return FruityLoops;
+        if (hostPath.containsIgnoreCase     ("Studio One"))     return StudioOne;
 
        #elif JUCE_LINUX
         jassertfalse   // not yet done!
