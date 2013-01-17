@@ -954,6 +954,15 @@ public:
         midiEventsToSend.freeEvents();
     }
 
+    void reset()
+    {
+        if (isPowerOn)
+        {
+            setPower (false);
+            setPower (true);
+        }
+    }
+
     void processBlock (AudioSampleBuffer& buffer, MidiBuffer& midiMessages)
     {
         const int numSamples = buffer.getNumSamples();
