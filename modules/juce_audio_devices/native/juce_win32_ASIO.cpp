@@ -910,6 +910,16 @@ private:
     bool volatile shouldUsePreferredSize;
 
     //==============================================================================
+    static String convertASIOString (char* const text, int length)
+    {
+        if (CharPointer_UTF8::isValidString (text, length))
+            return String::fromUTF8 (text, length);
+
+        WCHAR wideVersion [64] = { 0 };
+        MultiByteToWideChar (CP_ACP, 0, text, length, wideVersion, numElementsInArray (wideVersion));
+        return wideVersion;
+    }
+
     void removeCurrentDriver()
     {
         if (asioObject != nullptr)
@@ -1152,7 +1162,7 @@ private:
                             channelInfo.isInput = 1;
                             asioObject->getChannelInfo (&channelInfo);
 
-                            inputChannelNames.add (String (CharPointer_UTF8 (channelInfo.name)));
+                            inputChannelNames.add (convertASIOString (channelInfo.name, sizeof (channelInfo.name)));
                         }
 
                         for (i = 0; i < totalNumOutputChans; ++i)
@@ -1162,7 +1172,7 @@ private:
                             channelInfo.isInput = 0;
                             asioObject->getChannelInfo (&channelInfo);
 
-                            outputChannelNames.add (String (CharPointer_UTF8 (channelInfo.name)));
+                            outputChannelNames.add (convertASIOString (channelInfo.name, sizeof (channelInfo.name)));
                             outputFormat[i] = ASIOSampleFormat (channelInfo.type);
 
                             if (i < 2)
