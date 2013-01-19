@@ -993,24 +993,12 @@ public:
 
                 switch (position.frameRate)
                 {
-                    case AudioPlayHead::fps24:
-                        vstHostTime.smpteFrameRate = 0;
-                        vstHostTime.smpteOffset = (long) (position.timeInSeconds * 80 * 24 + 0.5);
-                        vstHostTime.flags |= kVstSmpteValid;
-                        break;
-
-                    case AudioPlayHead::fps25:
-                        vstHostTime.smpteFrameRate = 1;
-                        vstHostTime.smpteOffset = (long) (position.timeInSeconds * 80 * 25 + 0.5);
-                        vstHostTime.flags |= kVstSmpteValid;
-                        break;
-
-                    case AudioPlayHead::fps30:
-                        vstHostTime.smpteFrameRate = 3;
-                        vstHostTime.smpteOffset = (long) (position.timeInSeconds * 80 * 30 + 0.5);
-                        vstHostTime.flags |= kVstSmpteValid;
-                        break;
-
+                    case AudioPlayHead::fps24:       setHostTimeFrameRate (0, 24.0,  position.timeInSeconds); break;
+                    case AudioPlayHead::fps25:       setHostTimeFrameRate (1, 25.0,  position.timeInSeconds); break;
+                    case AudioPlayHead::fps2997:     setHostTimeFrameRate (2, 29.97, position.timeInSeconds); break;
+                    case AudioPlayHead::fps30:       setHostTimeFrameRate (3, 30.0,  position.timeInSeconds); break;
+                    case AudioPlayHead::fps2997drop: setHostTimeFrameRate (4, 29.97, position.timeInSeconds); break;
+                    case AudioPlayHead::fps30drop:   setHostTimeFrameRate (5, 30.0,  position.timeInSeconds); break;
                     default: break;
                 }
 
@@ -1689,6 +1677,13 @@ private:
     VstTimeInfo vstHostTime;
 
     //==============================================================================
+    void setHostTimeFrameRate (long frameRateIndex, double frameRate, double currentTime) noexcept
+    {
+        vstHostTime.flags |= kVstSmpteValid;
+        vstHostTime.smpteFrameRate  = frameRateIndex;
+        vstHostTime.smpteOffset     = (long) (currentTime * 80.0 * frameRate + 0.5);
+    }
+
     bool restoreProgramSettings (const fxProgram* const prog)
     {
         if (vst_swap (prog->chunkMagic) == 'CcnK' && vst_swap (prog->fxMagic) == 'FxCk')
