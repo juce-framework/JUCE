@@ -165,7 +165,7 @@ public:
 
             if (Component* const current = getComponentUnderMouse())
             {
-                registerMouseDown (screenPos, time, current, buttonState);
+                registerMouseDown (screenPos, time, *current, buttonState);
                 sendMouseDown (current, screenPos, time);
             }
         }
@@ -429,19 +429,20 @@ private:
 
     struct RecentMouseDown
     {
-        RecentMouseDown() noexcept  : component (nullptr) {}
+        RecentMouseDown() noexcept  : peerID (0) {}
 
         Point<int> position;
         Time time;
-        Component* component;
         ModifierKeys buttons;
+        uint32 peerID;
 
         bool canBePartOfMultipleClickWith (const RecentMouseDown& other, const int maxTimeBetweenMs) const
         {
             return time - other.time < RelativeTime::milliseconds (maxTimeBetweenMs)
                     && abs (position.x - other.position.x) < 8
                     && abs (position.y - other.position.y) < 8
-                    && buttons == other.buttons;;
+                    && buttons == other.buttons
+                    && peerID == other.peerID;
         }
     };
 
@@ -450,15 +451,20 @@ private:
     bool mouseMovedSignificantlySincePressed;
 
     void registerMouseDown (const Point<int>& screenPos, const Time& time,
-                            Component* const component, const ModifierKeys& modifiers) noexcept
+                            Component& component, const ModifierKeys& modifiers) noexcept
     {
         for (int i = numElementsInArray (mouseDowns); --i > 0;)
             mouseDowns[i] = mouseDowns[i - 1];
 
         mouseDowns[0].position = screenPos;
         mouseDowns[0].time = time;
-        mouseDowns[0].component = component;
         mouseDowns[0].buttons = modifiers.withOnlyMouseButtons();
+
+        if (ComponentPeer* const peer = component.getPeer())
+            mouseDowns[0].peerID = peer->getUniqueID();
+        else
+            mouseDowns[0].peerID = 0;
+
         mouseMovedSignificantlySincePressed = false;
     }
 
