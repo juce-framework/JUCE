@@ -213,7 +213,7 @@ public:
     protected:
 
     private:
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (BuildConfiguration);
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (BuildConfiguration)
     };
 
     void addNewConfiguration (const BuildConfiguration* configToCopy);
@@ -235,7 +235,7 @@ public:
 
     private:
         ProjectExporter& exporter;
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ConfigIterator);
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ConfigIterator)
     };
 
     struct ConstConfigIterator
@@ -252,7 +252,7 @@ public:
 
     private:
         const ProjectExporter& exporter;
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ConstConfigIterator);
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ConstConfigIterator)
     };
 
     int getNumConfigurations() const;
@@ -334,7 +334,7 @@ protected:
     static Image rescaleImageForIcon (Image image, int iconSize);
 
 private:
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ProjectExporter);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ProjectExporter)
 };
 
 

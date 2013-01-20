@@ -63,7 +63,7 @@ public:
         ProjectSaver& saver;
         Result result;
 
-        JUCE_DECLARE_NON_COPYABLE (SaveThread);
+        JUCE_DECLARE_NON_COPYABLE (SaveThread)
     };
 
     Result save (bool showProgressBox)
@@ -593,11 +593,11 @@ private:
         ScopedPointer<ProjectExporter> exporter;
         const OwnedArray<LibraryModule>& modules;
 
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ExporterJob);
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ExporterJob)
     };
 
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ProjectSaver);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ProjectSaver)
 };
 
 

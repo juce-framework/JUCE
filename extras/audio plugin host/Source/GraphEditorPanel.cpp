@@ -205,7 +205,7 @@ private:
         return findParentComponentOfClass<GraphEditorPanel>();
     }
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PinComponent);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PinComponent)
 };
 
 //==============================================================================
@@ -698,7 +698,7 @@ private:
         distanceFromEnd = juce_hypot (x - (x2 - getX()), y - (y2 - getY()));
     }
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ConnectorComponent);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ConnectorComponent)
 };
 
 
@@ -1008,7 +1008,7 @@ public:
 private:
     String tip;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TooltipBar);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TooltipBar)
 };
 
 //==============================================================================

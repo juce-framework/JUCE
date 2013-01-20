@@ -65,7 +65,7 @@ private:
     bool writeCpp (MemoryOutputStream&, const File& headerFile, int& index);
     void addResourcesFromProjectItem (const Project::Item& node);
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ResourceFile);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ResourceFile)
 };
 
 

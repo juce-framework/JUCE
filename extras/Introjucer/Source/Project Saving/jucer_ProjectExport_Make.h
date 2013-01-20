@@ -319,7 +319,7 @@ private:
                 + "_" + String::toHexString (file.toUnixStyle().hashCode()) + ".o";
     }
 
-    JUCE_DECLARE_NON_COPYABLE (MakefileProjectExporter);
+    JUCE_DECLARE_NON_COPYABLE (MakefileProjectExporter)
 };
 
 

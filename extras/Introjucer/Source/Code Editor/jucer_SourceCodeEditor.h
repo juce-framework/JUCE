@@ -165,7 +165,7 @@ private:
     void updateColourScheme();
     void checkSaveState();
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SourceCodeEditor);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SourceCodeEditor)
 };
 
 
@@ -201,7 +201,7 @@ private:
     class FindPanel;
     ScopedPointer<FindPanel> findPanel;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (GenericCodeEditorComponent);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (GenericCodeEditorComponent)
 };
 
 //==============================================================================
@@ -215,7 +215,7 @@ public:
     void insertTextAtCaret (const String& newText);
 
 private:
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CppCodeEditorComponent);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CppCodeEditorComponent)
 };
 
 
