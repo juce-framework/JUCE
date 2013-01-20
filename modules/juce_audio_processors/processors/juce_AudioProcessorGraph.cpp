@@ -979,6 +979,8 @@ AudioProcessorGraph::Node* AudioProcessorGraph::addNode (AudioProcessor* const n
             lastNodeId = nodeId;
     }
 
+    newProcessor->setPlayHead (getPlayHead());
+
     Node* const n = new Node (nodeId, newProcessor);
     nodes.add (n);
     triggerAsyncUpdate();
