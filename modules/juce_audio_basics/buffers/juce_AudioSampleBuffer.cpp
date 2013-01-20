@@ -292,6 +292,11 @@ void AudioSampleBuffer::applyGain (const int startSample,
         applyGain (i, startSample, numSamples, gain);
 }
 
+void AudioSampleBuffer::applyGain (const float gain) noexcept
+{
+    applyGain (0, size, gain);
+}
+
 void AudioSampleBuffer::applyGainRamp (const int startSample,
                                        const int numSamples,
                                        const float startGain,

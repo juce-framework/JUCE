@@ -35,7 +35,7 @@
 
     E.g. a KeyPress might represent CTRL+C, SHIFT+ALT+H, Spacebar, Escape, etc.
 
-    @see Component, KeyListener, Button::addShortcut, KeyPressMappingManager
+    @see Component, KeyListener, KeyPressMappingSet, Button::addShortcut
 */
 class JUCE_API  KeyPress
 {

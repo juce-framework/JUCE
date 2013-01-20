@@ -536,7 +536,7 @@ protected:
                                                       : (".\\" + filename);
     }
 
-    JUCE_DECLARE_NON_COPYABLE (MSVCProjectExporterBase);
+    JUCE_DECLARE_NON_COPYABLE (MSVCProjectExporterBase)
 };
 
 
@@ -545,7 +545,8 @@ class MSVCProjectExporterVC2008   : public MSVCProjectExporterBase
 {
 public:
     //==============================================================================
-    MSVCProjectExporterVC2008 (Project& project_, const ValueTree& settings_, const char* folderName = "VisualStudio2008")
+    MSVCProjectExporterVC2008 (Project& project_, const ValueTree& settings_,
+                               const char* folderName = "VisualStudio2008")
         : MSVCProjectExporterBase (project_, settings_, folderName)
     {
         name = getName();
@@ -883,7 +884,7 @@ protected:
     }
 
     //==============================================================================
-    JUCE_DECLARE_NON_COPYABLE (MSVCProjectExporterVC2008);
+    JUCE_DECLARE_NON_COPYABLE (MSVCProjectExporterVC2008)
 };
 
 
@@ -913,22 +914,24 @@ protected:
     String getProjectVersionString() const    { return "8.00"; }
     String getSolutionVersionString() const   { return "9.00" + newLine + "# Visual C++ Express 2005"; }
 
-    JUCE_DECLARE_NON_COPYABLE (MSVCProjectExporterVC2005);
+    JUCE_DECLARE_NON_COPYABLE (MSVCProjectExporterVC2005)
 };
 
 //==============================================================================
 class MSVCProjectExporterVC2010   : public MSVCProjectExporterBase
 {
 public:
-    MSVCProjectExporterVC2010 (Project& p, const ValueTree& t)
-        : MSVCProjectExporterBase (p, t, "VisualStudio2010")
+    MSVCProjectExporterVC2010 (Project& p, const ValueTree& t, const char* folderName = "VisualStudio2010")
+        : MSVCProjectExporterBase (p, t, folderName)
     {
         name = getName();
     }
 
-    static const char* getName()                    { return "Visual Studio 2010"; }
-    static const char* getValueTreeTypeName()       { return "VS2010"; }
-    int getVisualStudioVersion() const              { return 10; }
+    static const char* getName()                { return "Visual Studio 2010"; }
+    static const char* getValueTreeTypeName()   { return "VS2010"; }
+    int getVisualStudioVersion() const          { return 10; }
+    virtual String getPlatformToolset() const   { return "Windows7.1SDK"; }
+    virtual String getSolutionComment() const   { return "# Visual Studio 2010"; }
 
     static MSVCProjectExporterVC2010* createForSettings (Project& project, const ValueTree& settings)
     {
@@ -946,6 +949,8 @@ public:
         {
             XmlElement projectXml ("Project");
             fillInProjectXml (projectXml);
+            addPlatformToolsetToPropertyGroup (projectXml);
+
             writeXmlOrThrow (projectXml, getVCProjFile(), "utf-8", 100);
         }
 
@@ -957,7 +962,7 @@ public:
 
         {
             MemoryOutputStream mo;
-            writeSolutionFile (mo, "11.00", "# Visual Studio 2010", getVCProjFile());
+            writeSolutionFile (mo, "11.00", getSolutionComment(), getVCProjFile());
 
             overwriteFileIfDifferentOrThrow (getSLNFile(), mo);
         }
@@ -992,6 +997,9 @@ protected:
                                                     StringArray (archTypes), Array<var> (archTypes)));
         }
     };
+
+    virtual void addPlatformToolsetToPropertyGroup (XmlElement&) const {}
+
 
     BuildConfiguration::Ptr createBuildConfig (const ValueTree& settings) const
     {
@@ -1064,7 +1072,7 @@ protected:
                 e->createNewChildElement ("WholeProgramOptimization")->addTextElement ("true");
 
             if (is64Bit (config))
-                e->createNewChildElement ("PlatformToolset")->addTextElement ("Windows7.1SDK");
+                e->createNewChildElement ("PlatformToolset")->addTextElement (getPlatformToolset());
         }
 
         {
@@ -1431,8 +1439,46 @@ protected:
         }
     }
 
-    //==============================================================================
-    JUCE_DECLARE_NON_COPYABLE (MSVCProjectExporterVC2010);
+    JUCE_DECLARE_NON_COPYABLE (MSVCProjectExporterVC2010)
+};
+
+//==============================================================================
+class MSVCProjectExporterVC2012 : public MSVCProjectExporterVC2010
+{
+public:
+    MSVCProjectExporterVC2012 (Project& p, const ValueTree& t)
+        : MSVCProjectExporterVC2010 (p, t, "VisualStudio2012")
+    {
+        name = getName();
+    }
+
+    static const char* getName()                { return "Visual Studio 2012"; }
+    static const char* getValueTreeTypeName()   { return "VS2012"; }
+    int getVisualStudioVersion() const          { return 11; }
+    String getPlatformToolset() const           { return "v110_xp"; }
+    String getSolutionComment() const           { return "# Visual Studio 2012"; }
+
+    static MSVCProjectExporterVC2012* createForSettings (Project& project, const ValueTree& settings)
+    {
+        if (settings.hasType (getValueTreeTypeName()))
+            return new MSVCProjectExporterVC2012 (project, settings);
+
+        return nullptr;
+    }
+
+private:
+    void addPlatformToolsetToPropertyGroup (XmlElement& project) const
+    {
+        forEachXmlChildElementWithTagName (project, e, "PropertyGroup")
+        {
+            XmlElement* platformToolset (new XmlElement ("PlatformToolset"));
+            platformToolset->addTextElement (getPlatformToolset());
+
+            e->addChildElement (platformToolset);
+        }
+    }
+
+    JUCE_DECLARE_NON_COPYABLE (MSVCProjectExporterVC2012)
 };
 
 

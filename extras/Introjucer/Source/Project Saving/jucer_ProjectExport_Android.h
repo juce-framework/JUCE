@@ -648,7 +648,7 @@ private:
     }
 
     //==============================================================================
-    JUCE_DECLARE_NON_COPYABLE (AndroidProjectExporter);
+    JUCE_DECLARE_NON_COPYABLE (AndroidProjectExporter)
 };
 
 

@@ -37,7 +37,7 @@ class Component;
     You can add a key listener to a component to be informed when that component
     gets key events. See the Component::addListener method for more details.
 
-    @see KeyPress, Component::addKeyListener, KeyPressMappingManager
+    @see KeyPress, Component::addKeyListener, KeyPressMappingSet
 */
 class JUCE_API  KeyListener
 {

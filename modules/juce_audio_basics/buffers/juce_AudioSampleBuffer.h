@@ -241,6 +241,9 @@ public:
                     int numSamples,
                     float gain) noexcept;
 
+    /** Applies a gain multiple to all the audio data. */
+    void applyGain (float gain) noexcept;
+
     /** Applies a range of gains to a region of a channel.
 
         The gain that is applied to each sample will vary from

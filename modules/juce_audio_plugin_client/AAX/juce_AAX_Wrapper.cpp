@@ -71,19 +71,21 @@
   #error "You need to define the JucePlugin_AAXLibs_path macro. (This is best done via the introjucer)"
  #endif
 
- #if JUCE_DEBUG
-  #define JUCE_AAX_LIB_PATH "\\Debug\\"
- #else
-  #define JUCE_AAX_LIB_PATH "\\Release\\"
- #endif
-
  #if JUCE_64BIT
-  #define JUCE_AAX_LIB "AAXLibrary_x64.lib"
+  #define JUCE_AAX_LIB "AAXLibrary_x64"
  #else
-  #define JUCE_AAX_LIB "AAXLibrary.lib"
+  #define JUCE_AAX_LIB "AAXLibrary"
  #endif
 
- #pragma comment(lib, JucePlugin_AAXLibs_path JUCE_AAX_LIB_PATH JUCE_AAX_LIB)
+ #if JUCE_DEBUG
+  #define JUCE_AAX_LIB_PATH   "\\Debug\\"
+  #define JUCE_AAX_LIB_SUFFIX "_D"
+ #else
+  #define JUCE_AAX_LIB_PATH   "\\Release\\"
+  #define JUCE_AAX_LIB_SUFFIX ""
+ #endif
+
+ #pragma comment(lib, JucePlugin_AAXLibs_path JUCE_AAX_LIB_PATH JUCE_AAX_LIB JUCE_AAX_LIB_SUFFIX ".lib")
 #endif
 
 using juce::Component;
@@ -248,7 +250,7 @@ struct AAXClasses
             }
         }
 
-        virtual AAX_Result GetViewSize (AAX_Point* const viewSize) const
+        virtual AAX_Result GetViewSize (AAX_Point* viewSize) const
         {
             if (component != nullptr)
             {
@@ -577,7 +579,10 @@ struct AAXClasses
 
                 for (uint32_t i = 0; i < numMidiEvents; ++i)
                 {
-                    const AAX_CMidiPacket& m = midiStream->mBuffer[i];
+                    // (This 8-byte alignment is a workaround to a bug in the AAX SDK. Hopefully can be
+                    // removed in future when the packet structure size is fixed)
+                    const AAX_CMidiPacket& m = *addBytesToPointer (midiStream->mBuffer,
+                                                                   i * ((sizeof (AAX_CMidiPacket) + 7) & ~7));
                     jassert ((int) m.mTimestamp < bufferSize);
                     midiBuffer.addEvent (m.mData, (int) m.mLength,
                                          jlimit (0, (int) bufferSize - 1, (int) m.mTimestamp));

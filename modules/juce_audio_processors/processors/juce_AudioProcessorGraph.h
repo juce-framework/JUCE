@@ -360,6 +360,7 @@ public:
     void prepareToPlay (double sampleRate, int estimatedSamplesPerBlock);
     void releaseResources();
     void processBlock (AudioSampleBuffer&, MidiBuffer&);
+    void reset();
 
     const String getInputChannelName (int channelIndex) const;
     const String getOutputChannelName (int channelIndex) const;
@@ -395,8 +396,6 @@ private:
     uint32 lastNodeId;
     AudioSampleBuffer renderingBuffers;
     OwnedArray <MidiBuffer> midiBuffers;
-
-    CriticalSection renderLock;
     Array<void*> renderingOps;
 
     friend class AudioGraphIOProcessor;

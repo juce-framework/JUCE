@@ -69,7 +69,7 @@ private:
     FilterGraph& graph;
     ScopedPointer<ConnectorComponent> draggingConnector;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (GraphEditorPanel);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (GraphEditorPanel)
 };
 
 
@@ -106,7 +106,7 @@ private:
     Component* keyboardComp;
     Component* statusBar;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (GraphDocumentComponent);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (GraphDocumentComponent)
 };
 
 //==============================================================================

@@ -53,6 +53,8 @@ public:
         SteinbergCubase5,
         SteinbergCubase5Bridged,
         SteinbergCubaseGeneric,
+        SteinbergCubase6,
+        SteinbergCubase7,
         SteinbergNuendo,
         SteinbergWavelab5,
         SteinbergWavelab6,
@@ -62,14 +64,15 @@ public:
         MagixSamplitude,
         FruityLoops,
         WaveBurner,
-        DigitalPerformer
+        DigitalPerformer,
+        StudioOne
     };
 
     const HostType type;
 
     //==============================================================================
     bool isAbletonLive() const noexcept      { return type == AbletonLive6 || type == AbletonLive7 || type == AbletonLive8 || type == AbletonLiveGeneric; }
-    bool isCubase() const noexcept           { return type == SteinbergCubase4 || type == SteinbergCubase5 || type == SteinbergCubase5Bridged || type == SteinbergCubaseGeneric; }
+    bool isCubase() const noexcept           { return type == SteinbergCubase4 || type == SteinbergCubase5 || type == SteinbergCubase5Bridged || type == SteinbergCubase6 || type == SteinbergCubase7 || type == SteinbergCubaseGeneric; }
     bool isCubaseBridged() const noexcept    { return type == SteinbergCubase5Bridged; }
     bool isTracktion() const noexcept        { return type == MackieTracktion3 || type == MackieTracktionGeneric; }
     bool isSonar() const noexcept            { return type == CakewalkSonar8 || type == CakewalkSonarGeneric; }
@@ -83,6 +86,7 @@ public:
     bool isWaveBurner() const noexcept       { return type == WaveBurner; }
     bool isDigitalPerformer() const noexcept { return type == DigitalPerformer; }
     bool isReaper() const noexcept           { return type == Reaper; }
+    bool isStudioOne() const noexcept        { return type == StudioOne; }
     bool isSteinberg() const noexcept        { return isCubase() || type == SteinbergNuendo || isWavelab(); }
 
     //==============================================================================
@@ -108,12 +112,16 @@ private:
         if (hostFilename.containsIgnoreCase ("Pro Tools"))         return DigidesignProTools;
         if (hostFilename.containsIgnoreCase ("Cubase 4"))          return SteinbergCubase4;
         if (hostFilename.containsIgnoreCase ("Cubase 5"))          return SteinbergCubase5;
+        if (hostFilename.containsIgnoreCase ("Cubase 6"))          return SteinbergCubase6;
+        if (hostFilename.containsIgnoreCase ("Cubase 7"))          return SteinbergCubase7;
+        if (hostFilename.containsIgnoreCase ("Cubase"))            return SteinbergCubaseGeneric;
         if (hostFilename.containsIgnoreCase ("Nuendo"))            return SteinbergNuendo;
         if (hostPath.containsIgnoreCase     ("Wavelab 7"))         return SteinbergWavelab7;
         if (hostFilename.containsIgnoreCase ("Wavelab"))           return SteinbergWavelabGeneric;
         if (hostFilename.containsIgnoreCase ("WaveBurner"))        return WaveBurner;
         if (hostFilename.contains           ("Digital Performer")) return DigitalPerformer;
         if (hostFilename.containsIgnoreCase ("reaper"))            return Reaper;
+        if (hostPath.containsIgnoreCase     ("Studio One"))        return StudioOne;
 
       #elif JUCE_WINDOWS
         if (hostFilename.containsIgnoreCase ("Live 6."))        return AbletonLive6;
@@ -130,6 +138,8 @@ private:
         if (hostFilename.containsIgnoreCase ("reaper"))         return Reaper;
         if (hostFilename.containsIgnoreCase ("Cubase4"))        return SteinbergCubase4;
         if (hostFilename.containsIgnoreCase ("Cubase5"))        return SteinbergCubase5;
+        if (hostFilename.containsIgnoreCase ("Cubase6"))        return SteinbergCubase6;
+        if (hostFilename.containsIgnoreCase ("Cubase7"))        return SteinbergCubase7;
         if (hostFilename.containsIgnoreCase ("Cubase"))         return SteinbergCubaseGeneric;
         if (hostFilename.containsIgnoreCase ("Nuendo"))         return SteinbergNuendo;
         if (hostFilename.containsIgnoreCase ("VSTBridgeApp"))   return SteinbergCubase5Bridged;
@@ -140,6 +150,7 @@ private:
         if (hostFilename.containsIgnoreCase ("rm-host"))        return MuseReceptorGeneric;
         if (hostFilename.startsWithIgnoreCase ("Sam"))          return MagixSamplitude;
         if (hostFilename.startsWith         ("FL"))             return FruityLoops;
+        if (hostPath.containsIgnoreCase     ("Studio One"))     return StudioOne;
 
        #elif JUCE_LINUX
         jassertfalse   // not yet done!

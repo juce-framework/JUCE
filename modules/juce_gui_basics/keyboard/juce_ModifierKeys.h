@@ -106,7 +106,7 @@ public:
     */
     inline bool isCtrlDown() const noexcept             { return testFlags (ctrlModifier); }
 
-    /** Checks whether the shift key's flag is set. */
+    /** Checks whether the ALT key's flag is set. */
     inline bool isAltDown() const noexcept              { return testFlags (altModifier); }
 
     //==============================================================================
