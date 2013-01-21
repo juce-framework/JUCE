@@ -515,7 +515,7 @@ struct AAXClasses
                 for (int i = 0; i < numIns; ++i)
                     memcpy (outputs[i], inputs[i], bufferSize * sizeof (float));
 
-                process (outputs, numOuts, bufferSize, bypass, midiNodeIn, midiNoteOut);
+                process (outputs, numOuts, bufferSize, bypass, midiNodeIn, midiNodeOut);
             }
             else
             {
@@ -533,7 +533,7 @@ struct AAXClasses
                 for (int i = numOuts; i < numIns; ++i)
                     channels[i] = const_cast <float*> (inputs[i]);
 
-                process (channels, numIns, bufferSize, bypass, midiNodeIn, midiNoteOut);
+                process (channels, numIns, bufferSize, bypass, midiNodeIn, midiNodeOut);
             }
         }
 
