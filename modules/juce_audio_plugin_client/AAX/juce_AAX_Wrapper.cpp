@@ -733,6 +733,7 @@ struct AAXClasses
         check (desc.AddMIDINode (JUCEAlgorithmIDs::midiNodeIn, AAX_eMIDINodeType_LocalInput,
                                  JucePlugin_Name, 0xffff));
        #endif
+
        #if JucePlugin_ProducesMidiOutput
         check (desc.AddMIDINode (JUCEAlgorithmIDs::midiNodeOut, AAX_eMIDINodeType_LocalOutput,
                                  JucePlugin_Name " Out", 0xffff));
