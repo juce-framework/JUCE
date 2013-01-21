@@ -602,16 +602,27 @@ struct AAXClasses
             }
 
            #if JucePlugin_ProducesMidiOutput
-            MidiBuffer::Iterator it (midiBuffer);
-            MidiMessage msg;
-            int pos;
-            while (it.getNextEvent (msg, pos))
             {
+                const juce::uint8* midiEventData;
+                int midiEventSize, midiEventPosition;
+                MidiBuffer::Iterator i (midiBuffer);
+
                 AAX_CMidiPacket packet;
-                packet.mTimestamp = pos;
-                packet.mLength = msg.getRawDataSize();
-                memcpy (packet.mData, msg.getRawData(), packet.mLength);
-                check (midiNodeOut->PostMIDIPacket (&packet));
+                packet.mIsImmediate = false;
+
+                while (i.getNextEvent (midiEventData, midiEventSize, midiEventPosition))
+                {
+                    jassert (isPositiveAndBelow (midiEventPosition, bufferSize));
+
+                    if (midiEventSize <= 4)
+                    {
+                        packet.mTimestamp   = (uint32_t) midiEventPosition;
+                        packet.mLength      = (uint32_t) midiEventSize;
+                        memcpy (packet.mData, midiEventData, midiEventSize);
+
+                        check (midiNodeOut->PostMIDIPacket (&packet));
+                    }
+                }
             }
            #endif
         }
