@@ -8,7 +8,7 @@ original=$CONFIGURATION_BUILD_DIR/$FULL_PRODUCT_NAME
 copyAU=`nm -g "$CONFIGURATION_BUILD_DIR/$EXECUTABLE_PATH" | grep -i 'AudioUnit' | wc -l`
 copyVST=`nm -g "$CONFIGURATION_BUILD_DIR/$EXECUTABLE_PATH" | grep -i 'VSTPlugin' | wc -l`
 copyRTAS=`nm -g "$CONFIGURATION_BUILD_DIR/$EXECUTABLE_PATH" | grep -i 'CProcess' | wc -l`
-copyAAX=`nm -g "$CONFIGURATION_BUILD_DIR/$EXECUTABLE_PATH" | grep -i 'GetEffectDescriptions' | wc -l`
+copyAAX=`nm -g "$CONFIGURATION_BUILD_DIR/$EXECUTABLE_PATH" | grep -i 'ACFStartup' | wc -l`
 
 if [ $copyAU -gt 0 ]; then
   echo "Copying to AudioUnit folder..."
