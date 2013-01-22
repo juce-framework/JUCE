@@ -203,9 +203,9 @@ void PluginListComponent::buttonClicked (Button* button)
     {
         PopupMenu menu;
         menu.addItem (1, TRANS("Clear list"));
-        menu.addItem (5, TRANS("Remove selected plugin from list"), listBox.getNumSelectedRows() > 0);
-        menu.addItem (6, TRANS("Show folder containing selected plugin"), canShowSelectedFolder());
-        menu.addItem (7, TRANS("Remove any plugins whose files no longer exist"));
+        menu.addItem (5, TRANS("Remove selected plug-in from list"), listBox.getNumSelectedRows() > 0);
+        menu.addItem (6, TRANS("Show folder containing selected plug-in"), canShowSelectedFolder());
+        menu.addItem (7, TRANS("Remove any plug-ins whose files no longer exist"));
         menu.addSeparator();
         menu.addItem (2, TRANS("Sort alphabetically"));
         menu.addItem (3, TRANS("Sort by category"));
@@ -217,7 +217,7 @@ void PluginListComponent::buttonClicked (Button* button)
             AudioPluginFormat* const format = formatManager.getFormat (i);
 
             if (format->canScanForPlugins())
-                menu.addItem (10 + i, "Scan for new or updated " + format->getName() + " plugins...");
+                menu.addItem (10 + i, "Scan for new or updated " + format->getName() + " plug-ins");
         }
 
         menu.showMenuAsync (PopupMenu::Options().withTargetComponent (&optionsButton),
@@ -242,8 +242,8 @@ class PluginListComponent::Scanner    : private Timer
 public:
     Scanner (PluginListComponent& plc, AudioPluginFormat& format, const FileSearchPath& path)
         : owner (plc),
-          aw (TRANS("Scanning for plugins..."),
-              TRANS("Searching for all possible plugin files..."), AlertWindow::NoIcon),
+          aw (TRANS("Scanning for plug-ins..."),
+              TRANS("Searching for all possible plug-in files..."), AlertWindow::NoIcon),
           progress (0.0),
           scanner (owner.list, format, path, true, owner.deadMansPedalFile)
     {
