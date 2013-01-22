@@ -348,23 +348,20 @@ public:
     void updateSampleRates()
     {
         // find a list of sample rates..
-        const double possibleSampleRates[] = { 44100.0, 48000.0, 88200.0, 96000.0, 176400.0, 192000.0 };
+        const int possibleSampleRates[] = { 44100, 48000, 88200, 96000, 176400, 192000 };
         sampleRates.clear();
 
         if (asioObject != nullptr)
         {
             for (int index = 0; index < numElementsInArray (possibleSampleRates); ++index)
             {
-                const long err = asioObject->canSampleRate (possibleSampleRates[index]);
+                const long err = asioObject->canSampleRate ((double) possibleSampleRates[index]);
+                JUCE_ASIO_LOG_ERROR ("canSampleRate " + String (possibleSampleRates[index]), err);
 
                 if (err == 0)
                 {
-                    sampleRates.add ((int) possibleSampleRates[index]);
-                    JUCE_ASIO_LOG ("rate: " + String ((int) possibleSampleRates[index]));
-                }
-                else if (err != ASE_NoClock)
-                {
-                    JUCE_ASIO_LOG_ERROR ("CanSampleRate", err);
+                    sampleRates.add (possibleSampleRates[index]);
+                    JUCE_ASIO_LOG ("rate: " + String (possibleSampleRates[index]));
                 }
             }
 
@@ -373,6 +370,7 @@ public:
                 double cr = 0;
                 const long err = asioObject->getSampleRate (&cr);
                 JUCE_ASIO_LOG ("No sample rates supported - current rate: " + String ((int) cr));
+                JUCE_ASIO_LOG_ERROR ("getSampleRate", err);
 
                 if (err == 0)
                     sampleRates.add ((int) cr);
@@ -442,7 +440,7 @@ public:
             else
             {
                 bufferSizeSamples = 1024;
-                JUCE_ASIO_LOG_ERROR ("GetBufferSize1", err);
+                JUCE_ASIO_LOG_ERROR ("getBufferSize1", err);
             }
 
             shouldUsePreferredSize = false;
@@ -488,7 +486,8 @@ public:
         if (numSources > 1 && ! isSourceSet)
         {
             JUCE_ASIO_LOG ("setting clock source");
-            asioObject->setClockSource (clocks[0].index);
+            err = asioObject->setClockSource (clocks[0].index);
+            JUCE_ASIO_LOG_ERROR ("setClockSource1", err);
             Thread::sleep (20);
         }
         else
@@ -497,16 +496,11 @@ public:
                 JUCE_ASIO_LOG ("ASIO - no clock sources!");
         }
 
-        double cr = 0;
-        err = asioObject->getSampleRate (&cr);
-        if (err == 0)
         {
+            double cr = 0;
+            err = asioObject->getSampleRate (&cr);
+            JUCE_ASIO_LOG_ERROR ("getSampleRate", err);
             currentSampleRate = cr;
-        }
-        else
-        {
-            JUCE_ASIO_LOG_ERROR ("GetSampleRate", err);
-            currentSampleRate = 0;
         }
 
         error = String::empty;
@@ -523,7 +517,7 @@ public:
                 JUCE_ASIO_LOG ("trying to set a clock source..");
                 Thread::sleep (10);
                 err = asioObject->setClockSource (clocks[0].index);
-                JUCE_ASIO_LOG_ERROR ("SetClock", err);
+                JUCE_ASIO_LOG_ERROR ("setClockSource2", err);
 
                 Thread::sleep (10);
                 err = asioObject->setSampleRate (sampleRate);
