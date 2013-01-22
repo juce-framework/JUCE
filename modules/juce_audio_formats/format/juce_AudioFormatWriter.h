@@ -219,7 +219,7 @@ protected:
     /** True if it's a floating-point format, false if it's fixed-point. */
     bool usesFloatingPointData;
 
-    /** The output stream for Use by subclasses. */
+    /** The output stream for use by subclasses. */
     OutputStream* output;
 
     /** Used by AudioFormatWriter subclasses to copy data to different formats. */

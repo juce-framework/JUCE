@@ -220,9 +220,7 @@ namespace DirectWriteTypeLayout
         range.startPosition = attr.range.getStart();
         range.length = jmin (attr.range.getLength(), textLen - attr.range.getStart());
 
-        const Font* const font = attr.getFont();
-
-        if (font != nullptr)
+        if (const Font* const font = attr.getFont())
         {
             BOOL fontFound = false;
             uint32 fontIndex;
@@ -256,13 +254,13 @@ namespace DirectWriteTypeLayout
             textLayout->SetFontSize (font->getHeight() * fontHeightToEmSizeFactor, range);
         }
 
-        if (attr.getColour() != nullptr)
+        if (const Colour* const colour = attr.getColour())
         {
             ComSmartPtr<ID2D1SolidColorBrush> d2dBrush;
-            renderTarget->CreateSolidColorBrush (D2D1::ColorF (D2D1::ColorF (attr.getColour()->getFloatRed(),
-                                                                             attr.getColour()->getFloatGreen(),
-                                                                             attr.getColour()->getFloatBlue(),
-                                                                             attr.getColour()->getFloatAlpha())),
+            renderTarget->CreateSolidColorBrush (D2D1::ColorF (D2D1::ColorF (colour->getFloatRed(),
+                                                                             colour->getFloatGreen(),
+                                                                             colour->getFloatBlue(),
+                                                                             colour->getFloatAlpha())),
                                                  d2dBrush.resetAndGetPointerAddress());
 
             // We need to call SetDrawingEffect with a legimate brush to get DirectWrite to break text based on colours
