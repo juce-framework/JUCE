@@ -1321,6 +1321,9 @@ public:
             case audioMasterPinConnected:
                 return isValidChannel (index, value == 0) ? 0 : 1; // (yes, 0 = true)
 
+            case audioMasterGetCurrentProcessLevel:
+                return isNonRealtime() ? 4 : 0;
+
             // none of these are handled (yet)..
             case audioMasterBeginEdit:
             case audioMasterEndEdit:
@@ -1331,7 +1334,6 @@ public:
             case audioMasterGetPreviousPlug:
             case audioMasterGetNextPlug:
             case audioMasterWillReplaceOrAccumulate:
-            case audioMasterGetCurrentProcessLevel:
             case audioMasterOfflineStart:
             case audioMasterOfflineRead:
             case audioMasterOfflineWrite:

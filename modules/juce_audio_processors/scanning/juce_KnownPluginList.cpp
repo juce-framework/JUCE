@@ -323,7 +323,32 @@ struct PluginTreeUtils
             addPlugin (tree, pd, path);
         }
 
-        optimise (tree);
+        optimiseFolders (tree, false);
+    }
+
+    static void optimiseFolders (KnownPluginList::PluginTree& tree, bool concatenateName)
+    {
+        for (int i = tree.subFolders.size(); --i >= 0;)
+        {
+            KnownPluginList::PluginTree& sub = *tree.subFolders.getUnchecked(i);
+            optimiseFolders (sub, concatenateName || (tree.subFolders.size() > 1));
+
+            if (sub.plugins.size() == 0)
+            {
+                for (int j = 0; j < sub.subFolders.size(); ++j)
+                {
+                    KnownPluginList::PluginTree* const s = sub.subFolders.getUnchecked(j);
+
+                    if (concatenateName)
+                        s->folder = sub.folder + "/" + s->folder;
+
+                    tree.subFolders.add (s);
+                }
+
+                sub.subFolders.clear (false);
+                tree.subFolders.remove (i);
+            }
+        }
     }
 
     static void buildTreeByCategory (KnownPluginList::PluginTree& tree,
@@ -395,25 +420,6 @@ struct PluginTreeUtils
             newFolder->folder = firstSubFolder;
             tree.subFolders.add (newFolder);
             addPlugin (*newFolder, pd, remainingPath);
-        }
-    }
-
-    // removes any deeply nested folders that don't contain any actual plugins
-    static void optimise (KnownPluginList::PluginTree& tree)
-    {
-        for (int i = tree.subFolders.size(); --i >= 0;)
-        {
-            KnownPluginList::PluginTree& sub = *tree.subFolders.getUnchecked(i);
-            optimise (sub);
-
-            if (sub.plugins.size() == 0)
-            {
-                for (int j = 0; j < sub.subFolders.size(); ++j)
-                    tree.subFolders.add (sub.subFolders.getUnchecked(j));
-
-                sub.subFolders.clear (false);
-                tree.subFolders.remove (i);
-            }
         }
     }
 

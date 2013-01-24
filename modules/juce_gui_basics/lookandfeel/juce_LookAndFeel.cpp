@@ -165,6 +165,8 @@ LookAndFeel::LookAndFeel()
         Toolbar::labelTextColourId,                 0xff000000,
         Toolbar::editingModeOutlineColourId,        0xffff0000,
 
+        DrawableButton::textColourId,               0xff000000,
+        DrawableButton::textColourOnId,             0xff000000,
         DrawableButton::backgroundColourId,         0x00000000,
         DrawableButton::backgroundOnColourId,       0xaabbbbff,
 
@@ -206,8 +208,6 @@ LookAndFeel::LookAndFeel()
         FileSearchPathListComponent::backgroundColourId,        0xffffffff,
 
         FileChooserDialogBox::titleTextColourId,                0xff000000,
-
-        DrawableButton::textColourId,                           0xff000000,
     };
 
     for (int i = 0; i < numElementsInArray (standardColours); i += 2)
