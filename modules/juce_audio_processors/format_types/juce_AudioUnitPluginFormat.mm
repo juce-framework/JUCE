@@ -288,6 +288,7 @@ public:
           numInputBusses (0),
           numOutputBusses (0),
           audioUnit (0),
+          parameterListenerRef (0),
           midiConcatenator (2048)
     {
         using namespace AudioUnitFormatHelpers;
@@ -322,6 +323,12 @@ public:
         const ScopedLock sl (lock);
 
         jassert (AudioUnitFormatHelpers::insideCallback == 0);
+
+        if (parameterListenerRef != 0)
+        {
+            AUListenerDispose (parameterListenerRef);
+            parameterListenerRef = 0;
+        }
 
         if (audioUnit != 0)
         {
@@ -580,19 +587,26 @@ public:
     bool isOutputChannelStereoPair (int index) const   { return isPositiveAndBelow (index, getNumOutputChannels()); }
 
     //==============================================================================
-    int getNumParameters()              { return parameterIds.size(); }
+    int getNumParameters()              { return parameters.size(); }
 
     float getParameter (int index)
     {
         const ScopedLock sl (lock);
 
-        Float32 value = 0.0f;
+        AudioUnitParameterValue value = 0;
 
-        if (audioUnit != 0 && isPositiveAndBelow (index, parameterIds.size()))
-            AudioUnitGetParameter (audioUnit,
-                                   (UInt32) parameterIds.getUnchecked (index),
-                                   kAudioUnitScope_Global, 0,
-                                   &value);
+        if (audioUnit != 0)
+        {
+            if (const ParamInfo* p = parameters[index])
+            {
+                AudioUnitGetParameter (audioUnit,
+                                       p->paramID,
+                                       kAudioUnitScope_Global, 0,
+                                       &value);
+
+                value = (value - p->minValue) / (p->maxValue - p->minValue);
+            }
+        }
 
         return value;
     }
@@ -601,25 +615,28 @@ public:
     {
         const ScopedLock sl (lock);
 
-        if (audioUnit != 0 && isPositiveAndBelow (index, parameterIds.size()))
+        if (audioUnit != 0)
         {
-            AudioUnitSetParameter (audioUnit,
-                                   (UInt32) parameterIds.getUnchecked (index),
-                                   kAudioUnitScope_Global, 0,
-                                   newValue, 0);
+            if (const ParamInfo* p = parameters[index])
+            {
+                AudioUnitSetParameter (audioUnit, p->paramID, kAudioUnitScope_Global, 0,
+                                       p->minValue + (p->maxValue - p->minValue) * newValue, 0);
 
-            sendParameterChangeEvent (index);
+                sendParameterChangeEvent (index);
+            }
         }
     }
 
     void sendParameterChangeEvent (int index)
     {
-        jassert (audioUnit != 0 && isPositiveAndBelow (index, parameterIds.size()));
+        jassert (audioUnit != 0);
+
+        const ParamInfo& p = *parameters.getUnchecked (index);
 
         AudioUnitEvent ev;
         ev.mEventType                        = kAudioUnitEvent_ParameterValueChange;
         ev.mArgument.mParameter.mAudioUnit   = audioUnit;
-        ev.mArgument.mParameter.mParameterID = (UInt32) parameterIds.getUnchecked (index);
+        ev.mArgument.mParameter.mParameterID = p.paramID;
         ev.mArgument.mParameter.mScope       = kAudioUnitScope_Global;
         ev.mArgument.mParameter.mElement     = 0;
 
@@ -628,51 +645,26 @@ public:
 
     void sendAllParametersChangedEvents()
     {
-        for (int i = 0; i < parameterIds.size(); ++i)
+        for (int i = 0; i < parameters.size(); ++i)
             sendParameterChangeEvent (i);
     }
 
     const String getParameterName (int index)
     {
-        AudioUnitParameterInfo info;
-        UInt32 sz = sizeof (info);
-        String name;
+        if (const ParamInfo* p = parameters[index])
+            return p->name;
 
-        if (AudioUnitGetProperty (audioUnit,
-                                  kAudioUnitProperty_ParameterInfo,
-                                  kAudioUnitScope_Global,
-                                  parameterIds [index], &info, &sz) == noErr)
-        {
-            if ((info.flags & kAudioUnitParameterFlag_HasCFNameString) != 0)
-            {
-                name = String::fromCFString (info.cfNameString);
-
-                if ((info.flags & kAudioUnitParameterFlag_CFNameRelease) != 0)
-                    CFRelease (info.cfNameString);
-            }
-            else
-            {
-                name = String (info.name, sizeof (info.name));
-            }
-        }
-
-        return name;
+        return String::empty;
     }
 
     const String getParameterText (int index)   { return String (getParameter (index)); }
 
     bool isParameterAutomatable (int index) const
     {
-        AudioUnitParameterInfo info;
-        UInt32 sz = sizeof (info);
+        if (const ParamInfo* p = parameters[index])
+            return p->automatable;
 
-        if (AudioUnitGetProperty (audioUnit, kAudioUnitProperty_ParameterInfo,
-                                  kAudioUnitScope_Global, parameterIds [index], &info, &sz) == noErr)
-        {
-            return (info.flags & kAudioUnitParameterFlag_NonRealTime) == 0;
-        }
-
-        return true;
+        return false;
     }
 
     //==============================================================================
@@ -816,7 +808,7 @@ public:
 
     void refreshParameterList()
     {
-        parameterIds.clear();
+        parameters.clear();
 
         if (audioUnit != 0)
         {
@@ -826,10 +818,44 @@ public:
 
             if (paramListSize > 0)
             {
-                parameterIds.insertMultiple (0, 0, paramListSize / sizeof (int));
+                const size_t numParams = paramListSize / sizeof (int);
+
+                HeapBlock<UInt32> ids;
+                ids.calloc (numParams);
 
                 AudioUnitGetProperty (audioUnit, kAudioUnitProperty_ParameterList, kAudioUnitScope_Global,
-                                      0, parameterIds.getRawDataPointer(), &paramListSize);
+                                      0, ids, &paramListSize);
+
+                for (int i = 0; i < numParams; ++i)
+                {
+                    AudioUnitParameterInfo info;
+                    UInt32 sz = sizeof (info);
+
+                    if (AudioUnitGetProperty (audioUnit,
+                                              kAudioUnitProperty_ParameterInfo,
+                                              kAudioUnitScope_Global,
+                                              ids[i], &info, &sz) == noErr)
+                    {
+                        ParamInfo* const param = new ParamInfo();
+                        parameters.add (param);
+                        param->paramID = ids[i];
+                        param->minValue = info.minValue;
+                        param->maxValue = info.maxValue;
+                        param->automatable = (info.flags & kAudioUnitParameterFlag_NonRealTime) == 0;
+
+                        if ((info.flags & kAudioUnitParameterFlag_HasCFNameString) != 0)
+                        {
+                            param->name = String::fromCFString (info.cfNameString);
+
+                            if ((info.flags & kAudioUnitParameterFlag_CFNameRelease) != 0)
+                                CFRelease (info.cfNameString);
+                        }
+                        else
+                        {
+                            param->name = String (info.name, sizeof (info.name));
+                        }
+                    }
+                }
             }
         }
     }
@@ -860,7 +886,17 @@ private:
     int numInputBusChannels, numOutputBusChannels, numInputBusses, numOutputBusses;
 
     AudioUnit audioUnit;
-    Array <int> parameterIds;
+    AUParameterListenerRef parameterListenerRef;
+
+    struct ParamInfo
+    {
+        UInt32 paramID;
+        String name;
+        AudioUnitParameterValue minValue, maxValue;
+        bool automatable;
+    };
+
+    OwnedArray <ParamInfo> parameters;
 
     MidiDataConcatenator midiConcatenator;
     CriticalSection midiInLock;
@@ -906,7 +942,41 @@ private:
                 AudioUnitSetProperty (audioUnit, kAudioUnitProperty_HostCallbacks,
                                       kAudioUnitScope_Global, 0, &info, sizeof (info));
             }
+
+            AUListenerCreate (parameterListenerCallback, this, nullptr, nullptr, 0, &parameterListenerRef);
+
+            for (int i = 0; i < parameters.size(); ++i)
+            {
+                const ParamInfo& p = *parameters.getUnchecked(i);
+
+                AudioUnitParameter paramToAdd;
+                paramToAdd.mAudioUnit = audioUnit;
+                paramToAdd.mParameterID = p.paramID;
+                paramToAdd.mScope = kAudioUnitScope_Global;
+                paramToAdd.mElement = 0;
+
+                AUListenerAddParameter (parameterListenerRef, nullptr, &paramToAdd);
+            }
         }
+    }
+
+    void parameterChanged (const AudioUnitParameter* param, AudioUnitParameterValue newValue)
+    {
+        for (int i = 0; i < parameters.size(); ++i)
+        {
+            const ParamInfo& p = *parameters.getUnchecked(i);
+
+            if (p.paramID == param->mParameterID)
+            {
+                sendParamChangeMessageToListeners (i, (newValue - p.minValue) / (p.maxValue - p.minValue));
+                break;
+            }
+        }
+    }
+
+    static void parameterListenerCallback (void* userData, void*, const AudioUnitParameter* param, AudioUnitParameterValue newValue)
+    {
+        ((AudioUnitPluginInstance*) userData)->parameterChanged (param, newValue);
     }
 
     //==============================================================================
