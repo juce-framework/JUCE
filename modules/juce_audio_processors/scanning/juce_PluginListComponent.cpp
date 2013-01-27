@@ -31,7 +31,8 @@ PluginListComponent::PluginListComponent (AudioPluginFormatManager& manager,
       list (listToEdit),
       deadMansPedalFile (deadMansPedal),
       optionsButton ("Options..."),
-      propertiesToUse (properties)
+      propertiesToUse (properties),
+      scanOnBackgroundThread (false)
 {
     listBox.setModel (this);
     addAndMakeVisible (&listBox);
@@ -57,6 +58,11 @@ void PluginListComponent::setOptionsButtonText (const String& newText)
 {
     optionsButton.setButtonText (newText);
     resized();
+}
+
+void PluginListComponent::setScansOnMessageThread (bool useMessageThread) noexcept
+{
+    scanOnBackgroundThread = ! useMessageThread;
 }
 
 void PluginListComponent::resized()
@@ -237,42 +243,79 @@ void PluginListComponent::filesDropped (const StringArray& files, int, int)
 }
 
 //==============================================================================
-class PluginListComponent::Scanner    : private Timer
+class PluginListComponent::Scanner    : private Timer,
+                                        private Thread
 {
 public:
-    Scanner (PluginListComponent& plc, AudioPluginFormat& format, const FileSearchPath& path)
-        : owner (plc),
+    Scanner (PluginListComponent& plc,
+             AudioPluginFormat& format,
+             const FileSearchPath& path,
+             bool useThread)
+        : Thread ("plugin_scan"),
+          owner (plc),
           aw (TRANS("Scanning for plug-ins..."),
               TRANS("Searching for all possible plug-in files..."), AlertWindow::NoIcon),
-          progress (0.0),
+          progress (0.0), finished (false),
           scanner (owner.list, format, path, true, owner.deadMansPedalFile)
     {
         aw.addButton (TRANS("Cancel"), 0, KeyPress (KeyPress::escapeKey));
         aw.addProgressBarComponent (progress);
         aw.enterModalState();
 
+        if (useThread)
+            startThread();
+
         startTimer (20);
+    }
+
+    ~Scanner()
+    {
+        stopThread (10000);
     }
 
 private:
     void timerCallback()
     {
-        aw.setMessage (TRANS("Testing:\n\n") + scanner.getNextPluginFileThatWillBeScanned());
+        if (! isThreadRunning())
+        {
+            if (doNextScan())
+                startTimer (20);
+        }
 
-        if (scanner.scanNextFile (true) && aw.isCurrentlyModal())
+        if (! aw.isCurrentlyModal())
+            finished = true;
+
+        if (finished)
+            owner.scanFinished (scanner.getFailedFiles());
+        else
+            aw.setMessage (progressMessage);
+    }
+
+    void run()
+    {
+        while (doNextScan() && ! threadShouldExit())
+        {}
+    }
+
+    bool doNextScan()
+    {
+        progressMessage = TRANS("Testing:\n\n") + scanner.getNextPluginFileThatWillBeScanned();
+
+        if (scanner.scanNextFile (true))
         {
             progress = scanner.getProgress();
-            startTimer (20);
+            return true;
         }
-        else
-        {
-            owner.scanFinished (scanner.getFailedFiles());
-        }
+
+        finished = true;
+        return false;
     }
 
     PluginListComponent& owner;
     AlertWindow aw;
+    String progressMessage;
     double progress;
+    bool finished;
     PluginDirectoryScanner scanner;
 };
 
@@ -312,7 +355,7 @@ void PluginListComponent::scanFor (AudioPluginFormat* format)
             propertiesToUse->saveIfNeeded();
         }
 
-        currentScanner = new Scanner (*this, *format, path);
+        currentScanner = new Scanner (*this, *format, path, scanOnBackgroundThread);
     }
 }
 

@@ -68,7 +68,7 @@ bool KnownPluginList::addType (const PluginDescription& type)
         }
     }
 
-    types.add (new PluginDescription (type));
+    types.insert (0, new PluginDescription (type));
     sendChangeMessage();
     return true;
 }
@@ -116,6 +116,11 @@ bool KnownPluginList::isListingUpToDate (const String& fileOrIdentifier) const
     return true;
 }
 
+void KnownPluginList::setCustomScanner (CustomScanner* newScanner)
+{
+    scanner = newScanner;
+}
+
 bool KnownPluginList::scanAndAddFile (const String& fileOrIdentifier,
                                       const bool dontRescanIfAlreadyInList,
                                       OwnedArray <PluginDescription>& typesFound,
@@ -147,7 +152,11 @@ bool KnownPluginList::scanAndAddFile (const String& fileOrIdentifier,
         return false;
 
     OwnedArray <PluginDescription> found;
-    format.findAllTypesForFile (found, fileOrIdentifier);
+
+    if (scanner != nullptr)
+        scanner->findPluginTypesFor (format, found, fileOrIdentifier);
+    else
+        format.findAllTypesForFile (found, fileOrIdentifier);
 
     for (int i = 0; i < found.size(); ++i)
     {
@@ -167,29 +176,39 @@ void KnownPluginList::scanAndAddDragAndDroppedFiles (AudioPluginFormatManager& f
 {
     for (int i = 0; i < files.size(); ++i)
     {
+        const String filenameOrID (files[i]);
+        bool found = false;
+
         for (int j = 0; j < formatManager.getNumFormats(); ++j)
         {
             AudioPluginFormat* const format = formatManager.getFormat (j);
 
-            if (scanAndAddFile (files[i], true, typesFound, *format))
-                return;
+            if (format->fileMightContainThisPluginType (filenameOrID)
+                 && scanAndAddFile (filenameOrID, true, typesFound, *format))
+            {
+                found = true;
+                break;
+            }
         }
 
-        const File f (files[i]);
-
-        if (f.isDirectory())
+        if (! found)
         {
-            StringArray s;
+            const File f (filenameOrID);
 
+            if (f.isDirectory())
             {
-                Array<File> subFiles;
-                f.findChildFiles (subFiles, File::findFilesAndDirectories, false);
+                StringArray s;
 
-                for (int j = 0; j < subFiles.size(); ++j)
-                    s.add (subFiles.getReference(j).getFullPathName());
+                {
+                    Array<File> subFiles;
+                    f.findChildFiles (subFiles, File::findFilesAndDirectories, false);
+
+                    for (int j = 0; j < subFiles.size(); ++j)
+                        s.add (subFiles.getReference(j).getFullPathName());
+                }
+
+                scanAndAddDragAndDroppedFiles (formatManager, s, typesFound);
             }
-
-            scanAndAddDragAndDroppedFiles (formatManager, s, typesFound);
         }
     }
 }
@@ -485,3 +504,7 @@ int KnownPluginList::getIndexChosenByMenu (const int menuResultCode) const
     const int i = menuResultCode - menuIdBase;
     return isPositiveAndBelow (i, types.size()) ? i : -1;
 }
+
+//==============================================================================
+KnownPluginList::CustomScanner::CustomScanner() {}
+KnownPluginList::CustomScanner::~CustomScanner() {}

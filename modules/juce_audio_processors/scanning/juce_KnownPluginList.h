@@ -179,10 +179,25 @@ public:
     /** Creates a PluginTree object containing all the known plugins. */
     PluginTree* createTree (const SortMethod sortMethod) const;
 
+    //==============================================================================
+    class CustomScanner
+    {
+    public:
+        CustomScanner();
+        virtual ~CustomScanner();
+
+        virtual void findPluginTypesFor (AudioPluginFormat& format,
+                                         OwnedArray <PluginDescription>& result,
+                                         const String& fileOrIdentifier) = 0;
+    };
+
+    void setCustomScanner (CustomScanner* scanner);
+
 private:
     //==============================================================================
     OwnedArray <PluginDescription> types;
     StringArray blacklist;
+    ScopedPointer<CustomScanner> scanner;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (KnownPluginList)
 };
