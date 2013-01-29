@@ -276,6 +276,14 @@ public:
 
     ValueTree settings;
 
+    //==============================================================================
+    enum OptimisationLevel
+    {
+        optimisationOff = 1,
+        optimiseMinSize = 2,
+        optimiseMaxSpeed = 3
+    };
+
 protected:
     //==============================================================================
     String name;

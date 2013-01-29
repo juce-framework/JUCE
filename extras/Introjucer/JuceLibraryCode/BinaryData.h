@@ -7,7 +7,7 @@
 namespace BinaryData
 {
     extern const char*   AudioPluginXCodeScript_txt;
-    const int            AudioPluginXCodeScript_txtSize = 2112;
+    const int            AudioPluginXCodeScript_txtSize = 2101;
 
     extern const char*   background_tile_png;
     const int            background_tile_pngSize = 151;

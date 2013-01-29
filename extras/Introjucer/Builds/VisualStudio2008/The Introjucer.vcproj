@@ -86,7 +86,7 @@
             TypeLibraryName="$(IntDir)\Introjucer.tlb"
             HeaderFileName=""/>
       <Tool Name="VCCLCompilerTool"
-            Optimization="2"
+            Optimization="3"
             InlineFunctionExpansion="1"
             StringPooling="true"
             AdditionalIncludeDirectories="..\..\JuceLibraryCode"

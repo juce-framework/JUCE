@@ -403,7 +403,7 @@ void ProjectExporter::createDefaultConfigs()
 
         config->getNameValue() = debugConfig ? "Debug" : "Release";
         config->isDebugValue() = debugConfig;
-        config->getOptimisationLevel() = debugConfig ? 1 : 2;
+        config->getOptimisationLevel() = debugConfig ? optimisationOff : optimiseMinSize;
         config->getTargetBinaryName() = project.getProjectFilenameRoot();
     }
 }
@@ -508,8 +508,12 @@ ProjectExporter::BuildConfiguration::~BuildConfiguration()
 
 String ProjectExporter::BuildConfiguration::getGCCOptimisationFlag() const
 {
-    const int level = getOptimisationLevelInt();
-    return String (level <= 1 ? "0" : (level == 2 ? "s" : "3"));
+    switch (getOptimisationLevelInt())
+    {
+        case optimiseMaxSpeed:  return "3";
+        case optimiseMinSize:   return "s";
+        default:                return "0";
+    }
 }
 
 void ProjectExporter::BuildConfiguration::createPropertyEditors (PropertyListBuilder& props)
@@ -520,8 +524,8 @@ void ProjectExporter::BuildConfiguration::createPropertyEditors (PropertyListBui
     props.add (new BooleanPropertyComponent (isDebugValue(), "Debug mode", "Debugging enabled"),
                "If enabled, this means that the configuration should be built with debug synbols.");
 
-    const char* optimisationLevels[] = { "No optimisation", "Optimise for size and speed", "Optimise for maximum speed", 0 };
-    const int optimisationLevelValues[] = { 1, 2, 3, 0 };
+    const char* optimisationLevels[] = { "No optimisation", "Minimise size", "Maximise speed", 0 };
+    const int optimisationLevelValues[] = { optimisationOff, optimiseMinSize, optimiseMaxSpeed, 0 };
     props.add (new ChoicePropertyComponent (getOptimisationLevel(), "Optimisation",
                                             StringArray (optimisationLevels), Array<var> (optimisationLevelValues)),
                "The optimisation level for this configuration");
