@@ -72,6 +72,14 @@
  static void _clearfp() {}
 #endif
 
+#ifndef JUCE_VST_WRAPPER_LOAD_CUSTOM_MAIN
+ #define JUCE_VST_WRAPPER_LOAD_CUSTOM_MAIN
+#endif
+
+#ifndef JUCE_VST_WRAPPER_INVOKE_MAIN
+ #define JUCE_VST_WRAPPER_INVOKE_MAIN  effect = module->moduleMain (&audioMaster);
+#endif
+
 //==============================================================================
 const int fxbVersionNum = 1;
 
@@ -337,7 +345,7 @@ class ModuleHandle    : public ReferenceCountedObject
 public:
     //==============================================================================
     File file;
-    MainCall moduleMain;
+    MainCall moduleMain, customMain;
     String pluginName;
     ScopedPointer<XmlElement> vstXml;
 
@@ -380,7 +388,8 @@ public:
     //==============================================================================
     ModuleHandle (const File& file_)
         : file (file_),
-          moduleMain (0)
+          moduleMain (nullptr),
+          customMain (nullptr)
          #if JUCE_MAC
           #if JUCE_PPC
            , fragId (0)
@@ -430,6 +439,8 @@ public:
 
         if (moduleMain == nullptr)
             moduleMain = (MainCall) module.getFunction ("main");
+
+        JUCE_VST_WRAPPER_LOAD_CUSTOM_MAIN
 
         if (moduleMain != nullptr)
         {
@@ -506,10 +517,12 @@ public:
                     {
                         moduleMain = (MainCall) CFBundleGetFunctionPointerForName (bundleRef, CFSTR("main_macho"));
 
-                        if (moduleMain == 0)
+                        if (moduleMain == nullptr)
                             moduleMain = (MainCall) CFBundleGetFunctionPointerForName (bundleRef, CFSTR("VSTPluginMain"));
 
-                        if (moduleMain != 0)
+                        JUCE_VST_WRAPPER_LOAD_CUSTOM_MAIN
+
+                        if (moduleMain != nullptr)
                         {
                             if (CFTypeRef name = CFBundleGetValueForInfoDictionaryKey (bundleRef, CFSTR("CFBundleName")))
                             {
@@ -611,7 +624,7 @@ public:
        #if JUCE_PPC
         if (fragId != 0)
         {
-            if (moduleMain != 0)
+            if (moduleMain != nullptr)
                 disposeMachOFromCFM ((void*) moduleMain);
 
             CloseConnection (&fragId);
@@ -744,7 +757,7 @@ public:
            #endif
           #endif
             {
-                effect = module->moduleMain (&audioMaster);
+                JUCE_VST_WRAPPER_INVOKE_MAIN
             }
 
             if (effect != nullptr && effect->magic == kEffectMagic)

@@ -317,6 +317,8 @@ private:
     double progress;
     bool finished;
     PluginDirectoryScanner scanner;
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Scanner)
 };
 
 void PluginListComponent::scanFor (AudioPluginFormat* format)
