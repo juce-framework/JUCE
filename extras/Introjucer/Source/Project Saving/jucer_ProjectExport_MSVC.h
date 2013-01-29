@@ -1170,14 +1170,21 @@ protected:
                 midl->createNewChildElement ("HeaderFileName");
             }
 
+            bool isUsingEditAndContinue = false;
+
             {
                 XmlElement* cl = group->createNewChildElement ("ClCompile");
 
                 cl->createNewChildElement ("Optimization")->addTextElement (getOptimisationLevelString (config.getOptimisationLevelInt()));
 
                 if (isDebug && config.getOptimisationLevelInt() <= optimisationOff)
-                    cl->createNewChildElement ("DebugInformationFormat")->addTextElement (is64Bit (config) ? "ProgramDatabase"
-                                                                                                           : "EditAndContinue");
+                {
+                    isUsingEditAndContinue = ! is64Bit (config);
+
+                    cl->createNewChildElement ("DebugInformationFormat")
+                            ->addTextElement (isUsingEditAndContinue ? "EditAndContinue"
+                                                                     : "ProgramDatabase");
+                }
 
                 StringArray includePaths (getHeaderSearchPaths (config));
                 includePaths.add ("%(AdditionalIncludeDirectories)");
@@ -1217,6 +1224,9 @@ protected:
 
                 if (! is64Bit (config))
                     link->createNewChildElement ("TargetMachine")->addTextElement ("MachineX86");
+
+                if (isUsingEditAndContinue)
+                    link->createNewChildElement ("ImageHasSafeExceptionHandlers")->addTextElement ("false");
 
                 if (! isDebug)
                 {
