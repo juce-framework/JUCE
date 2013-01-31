@@ -186,7 +186,10 @@ public:
         CustomScanner();
         virtual ~CustomScanner();
 
-        virtual void findPluginTypesFor (AudioPluginFormat& format,
+        /** Attempts to load the given file and find a list of plugins in it.
+            @returns true if the plugin loaded, false if it crashed
+        */
+        virtual bool findPluginTypesFor (AudioPluginFormat& format,
                                          OwnedArray <PluginDescription>& result,
                                          const String& fileOrIdentifier) = 0;
     };

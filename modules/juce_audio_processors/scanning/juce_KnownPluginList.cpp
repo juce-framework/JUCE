@@ -154,9 +154,14 @@ bool KnownPluginList::scanAndAddFile (const String& fileOrIdentifier,
     OwnedArray <PluginDescription> found;
 
     if (scanner != nullptr)
-        scanner->findPluginTypesFor (format, found, fileOrIdentifier);
+    {
+        if (! scanner->findPluginTypesFor (format, found, fileOrIdentifier))
+            addToBlacklist (fileOrIdentifier);
+    }
     else
+    {
         format.findAllTypesForFile (found, fileOrIdentifier);
+    }
 
     for (int i = 0; i < found.size(); ++i)
     {
