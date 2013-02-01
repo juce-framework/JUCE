@@ -26,6 +26,20 @@
 #ifndef __JUCE_HIGHRESOLUTIONTIMER_JUCEHEADER__
 #define __JUCE_HIGHRESOLUTIONTIMER_JUCEHEADER__
 
+/**
+    A high-resolution periodic timer.
+
+    This provides accurately-timed regular callbacks. Unlike the normal Timer
+    class, this one uses a dedicated thread, not the message thread, so is
+    far more stable and precise.
+
+    You should only use this class in situations where you really need accuracy,
+    because unlike the normal Timer class, which is very lightweight and cheap
+    to start/stop, the HighResolutionTimer will use far more resources, and
+    starting/stopping it may involve launching and killing threads.
+
+    @see Timer
+*/
 class JUCE_API  HighResolutionTimer
 {
 protected:
