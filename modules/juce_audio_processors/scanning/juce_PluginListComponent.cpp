@@ -366,12 +366,12 @@ private:
         return false;
     }
 
-    ScopedPointer<PluginDirectoryScanner> scanner;
-    AlertWindow pathChooserWindow, progressWindow;
-    FileSearchPathListComponent pathList;
     PluginListComponent& owner;
     AudioPluginFormat& formatToScan;
     PropertiesFile* propertiesToUse;
+    ScopedPointer<PluginDirectoryScanner> scanner;
+    AlertWindow pathChooserWindow, progressWindow;
+    FileSearchPathListComponent pathList;
     String progressMessage;
     double progress;
     bool shouldUseThread, finished;
