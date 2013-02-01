@@ -582,3 +582,55 @@ bool ChildProcess::kill()
 {
     return activeProcess == nullptr || activeProcess->killProcess();
 }
+
+//==============================================================================
+struct HighResolutionTimer::Pimpl
+{
+    Pimpl (HighResolutionTimer& t) noexcept  : owner (t), periodMs (0)
+    {
+    }
+
+    ~Pimpl()
+    {
+        jassert (periodMs == 0);
+    }
+
+    void start (int newPeriod)
+    {
+        if (newPeriod != periodMs)
+        {
+            stop();
+            periodMs = newPeriod;
+
+            TIMECAPS tc;
+            if (timeGetDevCaps (&tc, sizeof (tc)) == TIMERR_NOERROR)
+            {
+                const int actualPeriod = jlimit ((int) tc.wPeriodMin, (int) tc.wPeriodMax, newPeriod);
+
+                timerID = timeSetEvent (actualPeriod, tc.wPeriodMin, callbackFunction, (DWORD_PTR) this,
+                                        TIME_PERIODIC | TIME_CALLBACK_FUNCTION | TIME_KILL_SYNCHRONOUS);
+            }
+        }
+    }
+
+    void stop()
+    {
+        periodMs = 0;
+        timeKillEvent (timerID);
+    }
+
+    HighResolutionTimer& owner;
+    int periodMs;
+
+private:
+    unsigned int timerID;
+
+    static void __stdcall callbackFunction (UINT, UINT, DWORD_PTR userInfo, DWORD_PTR, DWORD_PTR)
+    {
+        if (Pimpl* const timer = reinterpret_cast<Pimpl*> (userInfo))
+            if (timer->periodMs != 0)
+                timer->owner.hiResTimerCallback();
+    }
+
+    JUCE_DECLARE_NON_COPYABLE (Pimpl)
+};

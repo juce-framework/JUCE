@@ -421,16 +421,6 @@ public:
 
     bool open()
     {
-       #if JUCE_WINDOWS
-        static bool timePeriodSet = false;
-
-        if (! timePeriodSet)
-        {
-            timePeriodSet = true;
-            timeBeginPeriod (2);
-        }
-       #endif
-
         pluginName = file.getFileNameWithoutExtension();
 
         module.open (file.getFullPathName());

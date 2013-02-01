@@ -1119,3 +1119,140 @@ bool ChildProcess::kill()
 {
     return activeProcess == nullptr || activeProcess->killProcess();
 }
+
+//==============================================================================
+struct HighResolutionTimer::Pimpl
+{
+    Pimpl (HighResolutionTimer& t)  : owner (t), thread (0), shouldStop (false)
+    {
+    }
+
+    ~Pimpl()
+    {
+        jassert (thread == 0);
+    }
+
+    void start (int newPeriod)
+    {
+        periodMs = newPeriod;
+
+        if (thread == 0)
+        {
+            shouldStop = false;
+
+            if (pthread_create (&thread, nullptr, timerThread, this) == 0)
+                setThreadToRealtime (thread, newPeriod);
+            else
+                jassertfalse;
+        }
+    }
+
+    void stop()
+    {
+        if (thread != 0)
+        {
+            shouldStop = true;
+
+            while (thread != 0 && thread != pthread_self())
+                Thread::yield();
+        }
+    }
+
+    HighResolutionTimer& owner;
+    int volatile periodMs;
+
+private:
+    pthread_t thread;
+    bool volatile shouldStop;
+
+    static void* timerThread (void* param)
+    {
+        int dummy;
+        pthread_setcancelstate (PTHREAD_CANCEL_ENABLE, &dummy);
+
+        reinterpret_cast<Pimpl*> (param)->timerThread();
+        return nullptr;
+    }
+
+    void timerThread()
+    {
+        Clock clock (periodMs);
+
+        while (! shouldStop)
+        {
+            clock.wait();
+            owner.hiResTimerCallback();
+        }
+
+        periodMs = 0;
+        thread = 0;
+    }
+
+    struct Clock
+    {
+       #if JUCE_MAC || JUCE_IOS
+        Clock (double millis)
+        {
+            mach_timebase_info_data_t timebase;
+            (void) mach_timebase_info (&timebase);
+            delta = (((uint64_t) (millis * 1000000.0)) * timebase.numer) / timebase.denom;
+            time = mach_absolute_time();
+        }
+
+        void wait()
+        {
+            time += delta;
+            mach_wait_until (time);
+        }
+
+        uint64_t time, delta;
+
+       #else
+        Clock (double millis)
+            : delta ((int64) (millis * 1000000))
+        {
+            struct timespec t;
+            clock_gettime (CLOCK_MONOTONIC, &t);
+            time = 1000000000 * (int64) t.tv_sec + t.tv_nsec;
+        }
+
+        void wait()
+        {
+            time += delta;
+
+            struct timespec t;
+            t.tv_sec  = (time_t) (time / 1000000000);
+            t.tv_nsec = (long)   (time % 1000000000);
+
+            clock_nanosleep (CLOCK_MONOTONIC, TIMER_ABSTIME, &t, nullptr);
+        }
+
+        int64 time, delta;
+       #endif
+    };
+
+    static bool setThreadToRealtime (pthread_t thread, uint64 periodMs)
+    {
+       #if JUCE_MAC || JUCE_IOS
+        thread_time_constraint_policy_data_t policy;
+        policy.period      = (uint32_t) (periodMs * 1000000);
+        policy.computation = 50000;
+        policy.constraint  = policy.period;
+        policy.preemptible = true;
+
+        return thread_policy_set (pthread_mach_thread_np (thread),
+                                  THREAD_TIME_CONSTRAINT_POLICY,
+                                  (thread_policy_t) &policy,
+                                  THREAD_TIME_CONSTRAINT_POLICY_COUNT) == KERN_SUCCESS;
+
+       #else
+        (void) periodMs;
+        struct sched_param param;
+        param.sched_priority = sched_get_priority_max (SCHED_RR);
+        return pthread_setschedparam (thread, SCHED_RR, &param) == 0;
+
+       #endif
+    }
+
+    JUCE_DECLARE_NON_COPYABLE (Pimpl)
+};
