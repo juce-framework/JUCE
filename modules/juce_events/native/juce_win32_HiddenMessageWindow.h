@@ -125,6 +125,7 @@ private:
 
     void timerCallback()
     {
+        stopTimer();
         systemDeviceChanged();
     }
 };
