@@ -1023,6 +1023,30 @@ public:
         }
     }
 
+    bool keyPressed (const KeyPress&)
+    {
+        if (PluginHostType().isAbletonLive())
+        {
+            static NSTimeInterval lastEventTime = 0; // check we're not recursively sending the same event
+            NSTimeInterval eventTime = [[NSApp currentEvent] timestamp];
+
+            if (lastEventTime != eventTime)
+            {
+                lastEventTime = eventTime;
+
+                NSView* view = (NSView*) getWindowHandle();
+                NSView* hostView = [view superview];
+                NSWindow* hostWindow = [hostView window];
+
+                [hostWindow makeFirstResponder: hostView];
+                [hostView keyDown: [NSApp currentEvent]];
+                [hostWindow makeFirstResponder: view];
+            }
+        }
+
+        return false;
+    }
+
     //==============================================================================
     struct JuceUIViewClass  : public ObjCClass <NSView>
     {
@@ -1383,10 +1407,12 @@ private:
                 // If we have an unused keypress, move the key-focus to a host window
                 // and re-inject the event..
                 static NSTimeInterval lastEventTime = 0; // check we're not recursively sending the same event
+                NSTimeInterval eventTime = [[NSApp currentEvent] timestamp];
 
-                if (lastEventTime != [[NSApp currentEvent] timestamp])
+                if (lastEventTime != eventTime)
                 {
-                    lastEventTime = [[NSApp currentEvent] timestamp];
+                    lastEventTime = eventTime;
+
                     [[hostWindow parentWindow] makeKeyWindow];
                     [NSApp postEvent: [NSApp currentEvent] atStart: YES];
                 }
