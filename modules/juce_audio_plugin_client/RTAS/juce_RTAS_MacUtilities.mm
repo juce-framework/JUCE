@@ -52,6 +52,8 @@ void* attachSubWindow (void* hostWindowRef, Component* comp)
 {
     JUCE_AUTORELEASEPOOL
 
+    HIWindowChangeClass ((WindowRef) hostWindowRef, kFloatingWindowClass);
+
     NSWindow* hostWindow = [[NSWindow alloc] initWithWindowRef: hostWindowRef];
     [hostWindow retain];
     [hostWindow setCanHide: YES];
