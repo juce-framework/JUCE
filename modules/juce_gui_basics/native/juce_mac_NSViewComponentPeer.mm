@@ -1811,9 +1811,15 @@ void ModifierKeys::updateCurrentModifiers() noexcept
 
 
 //==============================================================================
-void Desktop::createMouseInputSources()
+bool Desktop::addMouseInputSource()
 {
-    mouseSources.add (new MouseInputSource (0, true));
+    if (mouseSources.size() == 0)
+    {
+        mouseSources.add (new MouseInputSource (0, true));
+        return true;
+    }
+
+    return false;
 }
 
 //==============================================================================

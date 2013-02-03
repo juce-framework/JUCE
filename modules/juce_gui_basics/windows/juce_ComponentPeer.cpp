@@ -80,22 +80,37 @@ void ComponentPeer::updateCurrentModifiers() noexcept
 }
 
 //==============================================================================
+MouseInputSource* ComponentPeer::getOrCreateMouseInputSource (int touchIndex)
+{
+    jassert (touchIndex >= 0 && touchIndex < 100); // sanity-check on number of fingers
+
+    Desktop& desktop = Desktop::getInstance();
+
+    for (;;)
+    {
+        if (MouseInputSource* mouse = desktop.getMouseSource (touchIndex))
+            return mouse;
+
+        if (! desktop.addMouseInputSource())
+        {
+            jassertfalse; // not enough mouse sources!
+            return nullptr;
+        }
+    }
+}
+
 void ComponentPeer::handleMouseEvent (const int touchIndex, const Point<int>& positionWithinPeer,
                                       const ModifierKeys& newMods, const int64 time)
 {
-    MouseInputSource* const mouse = Desktop::getInstance().getMouseSource (touchIndex);
-    jassert (mouse != nullptr); // not enough sources!
-
-    mouse->handleEvent (this, positionWithinPeer, time, newMods);
+    if (MouseInputSource* mouse = getOrCreateMouseInputSource (touchIndex))
+        mouse->handleEvent (this, positionWithinPeer, time, newMods);
 }
 
 void ComponentPeer::handleMouseWheel (const int touchIndex, const Point<int>& positionWithinPeer,
                                       const int64 time, const MouseWheelDetails& wheel)
 {
-    MouseInputSource* const mouse = Desktop::getInstance().getMouseSource (touchIndex);
-    jassert (mouse != nullptr); // not enough sources!
-
-    mouse->handleWheel (this, positionWithinPeer, time, wheel);
+    if (MouseInputSource* mouse = getOrCreateMouseInputSource (touchIndex))
+        mouse->handleWheel (this, positionWithinPeer, time, wheel);
 }
 
 //==============================================================================

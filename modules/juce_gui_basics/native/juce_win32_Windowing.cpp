@@ -2915,13 +2915,17 @@ int JUCE_CALLTYPE NativeMessageBox::showYesNoCancelBox (AlertWindow::AlertIconTy
 }
 
 //==============================================================================
-void Desktop::createMouseInputSources()
+bool Desktop::addMouseInputSource()
 {
-    mouseSources.add (new MouseInputSource (0, true));
+    const int numSources = mouseSources.size();
 
-    if (canUseMultiTouch())
-        for (int i = 1; i <= 10; ++i)
-            mouseSources.add (new MouseInputSource (i, false));
+    if (numSources == 0 || canUseMultiTouch())
+    {
+        mouseSources.add (new MouseInputSource (numSources, numSources == 0));
+        return true;
+    }
+
+    return false;
 }
 
 Point<int> MouseInputSource::getCurrentMousePosition()
