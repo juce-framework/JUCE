@@ -1151,6 +1151,11 @@ private:
     ValueTree& addBuildPhase (const String& phaseType, const StringArray& fileIds) const
     {
         String phaseId (createID (phaseType + "resbuildphase"));
+
+        int n = 0;
+        while (buildPhaseIDs.contains (phaseId))
+            phaseId = createID (phaseType + "resbuildphase" + String (++n));
+
         buildPhaseIDs.add (phaseId);
 
         ValueTree* v = new ValueTree (phaseId);
