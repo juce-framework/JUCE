@@ -107,6 +107,10 @@ void GroupTreeViewItem::showPopupMenu()
         m.addItem (5, "Expand all Sub-groups");
 
     m.addSeparator();
+    m.addItem (6, "Enable compiling of all enclosed files");
+    m.addItem (7, "Disable compiling of all enclosed files");
+
+    m.addSeparator();
     m.addItem (3, "Sort Contents Alphabetically");
     m.addSeparator();
     m.addItem (1, "Rename...");
@@ -126,6 +130,15 @@ static void openOrCloseAllSubGroups (TreeViewItem& item, bool shouldOpen)
             openOrCloseAllSubGroups (*sub, shouldOpen);
 }
 
+static void setFilesToCompile (Project::Item item, const bool shouldCompile)
+{
+    if (item.isFile())
+        item.getShouldCompileValue() = shouldCompile;
+
+    for (int i = item.getNumChildren(); --i >= 0;)
+        setFilesToCompile (item.getChild (i), shouldCompile);
+}
+
 void GroupTreeViewItem::handlePopupMenuResult (int resultCode)
 {
     switch (resultCode)
@@ -135,6 +148,8 @@ void GroupTreeViewItem::handlePopupMenuResult (int resultCode)
         case 3:     item.sortAlphabetically (false); break;
         case 4:     openOrCloseAllSubGroups (*this, false); break;
         case 5:     openOrCloseAllSubGroups (*this, true); break;
+        case 6:     setFilesToCompile (item, true); break;
+        case 7:     setFilesToCompile (item, false); break;
         default:    processCreateFileMenuItem (resultCode); break;
     }
 }
