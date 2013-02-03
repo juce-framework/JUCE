@@ -31,25 +31,6 @@
 
 
 //==============================================================================
-FilterConnection::FilterConnection (FilterGraph& owner_)
-    : owner (owner_)
-{
-}
-
-FilterConnection::FilterConnection (const FilterConnection& other)
-    : sourceFilterID (other.sourceFilterID),
-      sourceChannel (other.sourceChannel),
-      destFilterID (other.destFilterID),
-      destChannel (other.destChannel),
-      owner (other.owner)
-{
-}
-
-FilterConnection::~FilterConnection()
-{
-}
-
-//==============================================================================
 const int FilterGraph::midiChannelNumber = 0x1000;
 
 FilterGraph::FilterGraph (AudioPluginFormatManager& formatManager_)
@@ -339,9 +320,7 @@ void FilterGraph::createNodeFromXml (const XmlElement& xml)
 
     AudioProcessorGraph::Node::Ptr node (graph.addNode (instance, xml.getIntAttribute ("uid")));
 
-    const XmlElement* const state = xml.getChildByName ("STATE");
-
-    if (state != nullptr)
+    if (const XmlElement* const state = xml.getChildByName ("STATE"))
     {
         MemoryBlock m;
         m.fromBase64Encoding (state->getAllSubText());
@@ -359,13 +338,10 @@ XmlElement* FilterGraph::createXml() const
 {
     XmlElement* xml = new XmlElement ("FILTERGRAPH");
 
-    int i;
-    for (i = 0; i < graph.getNumNodes(); ++i)
-    {
+    for (int i = 0; i < graph.getNumNodes(); ++i)
         xml->addChildElement (createNodeXml (graph.getNode (i)));
-    }
 
-    for (i = 0; i < graph.getNumConnections(); ++i)
+    for (int i = 0; i < graph.getNumConnections(); ++i)
     {
         const AudioProcessorGraph::Connection* const fc = graph.getConnection(i);
 
