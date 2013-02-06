@@ -3086,9 +3086,15 @@ void Desktop::Displays::findDisplays()
 }
 
 //==============================================================================
-void Desktop::createMouseInputSources()
+bool Desktop::addMouseInputSource()
 {
-    mouseSources.add (new MouseInputSource (0, true));
+    if (mouseSources.size() == 0)
+    {
+        mouseSources.add (new MouseInputSource (0, true));
+        return true;
+    }
+
+    return false;
 }
 
 bool Desktop::canUseSemiTransparentWindows() noexcept

@@ -428,55 +428,44 @@ namespace NumberToStringConverters
 
     static char* doubleToString (char* buffer, const int numChars, double n, int numDecPlaces, size_t& len) noexcept
     {
-        if (numDecPlaces > 0)
+        if (numDecPlaces > 0 && numDecPlaces < 7 && n > -1.0e20 && n < 1.0e20)
         {
-            if (numDecPlaces < 7 && n > -1.0e20 && n < 1.0e20)
+            char* const end = buffer + numChars;
+            char* t = end;
+            int64 v = (int64) (pow (10.0, numDecPlaces) * std::abs (n) + 0.5);
+            *--t = (char) 0;
+
+            while (numDecPlaces >= 0 || v > 0)
             {
-                char* const end = buffer + numChars;
-                char* t = end;
-                int64 v = (int64) (pow (10.0, numDecPlaces) * std::abs (n) + 0.5);
-                *--t = (char) 0;
+                if (numDecPlaces == 0)
+                    *--t = '.';
 
-                while (numDecPlaces >= 0 || v > 0)
-                {
-                    if (numDecPlaces == 0)
-                        *--t = '.';
+                *--t = (char) ('0' + (v % 10));
 
-                    *--t = (char) ('0' + (v % 10));
-
-                    v /= 10;
-                    --numDecPlaces;
-                }
-
-                if (n < 0)
-                    *--t = '-';
-
-                len = (size_t) (end - t - 1);
-                return t;
+                v /= 10;
+                --numDecPlaces;
             }
-            else
-            {
-                // Use a locale-free sprintf where possible (not available on linux AFAICT)
-               #if JUCE_MSVC
-                len = (size_t) _sprintf_l (buffer, "%.*f", _create_locale (LC_NUMERIC, "C"), numDecPlaces, n);
-               #elif JUCE_MAC || JUCE_IOS
-                len = (size_t)  sprintf_l (buffer, nullptr, "%.*f", numDecPlaces, n);
-               #else
-                len = (size_t)  sprintf (buffer, "%.*f", numDecPlaces, n);
-               #endif
-            }
+
+            if (n < 0)
+                *--t = '-';
+
+            len = (size_t) (end - t - 1);
+            return t;
         }
-        else
-        {
-            // Use a locale-free sprintf where possible (not available on linux AFAICT)
-           #if JUCE_MSVC
-            len = (size_t) _sprintf_l (buffer, "%.9g", _create_locale (LC_NUMERIC, "C"), n);
-           #elif JUCE_MAC || JUCE_IOS
-            len = (size_t)  sprintf_l (buffer, nullptr, "%.9g", n);
-           #else
-            len = (size_t)  sprintf (buffer, "%.9g", n);
-           #endif
-        }
+
+       // Use a locale-free sprintf where possible (not available on linux AFAICT)
+       #if JUCE_MSVC
+        static _locale_t cLocale = _create_locale (LC_NUMERIC, "C");
+
+        len = (size_t) (numDecPlaces > 0 ? _sprintf_l (buffer, "%.*f", cLocale, numDecPlaces, n)
+                                         : _sprintf_l (buffer, "%.9g", cLocale, n));
+       #elif JUCE_MAC || JUCE_IOS
+        len = (size_t) (numDecPlaces > 0 ? sprintf_l (buffer, nullptr, "%.*f", numDecPlaces, n)
+                                         : sprintf_l (buffer, nullptr, "%.9g", n));
+       #else
+        len = (size_t) (numDecPlaces > 0 ? sprintf (buffer, "%.*f", numDecPlaces, n)
+                                         : sprintf (buffer, "%.9g", n));
+       #endif
 
         return buffer;
     }

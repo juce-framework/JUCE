@@ -376,6 +376,9 @@ namespace juce
 #ifndef __JUCE_DYNAMICLIBRARY_JUCEHEADER__
  #include "threads/juce_DynamicLibrary.h"
 #endif
+#ifndef __JUCE_HIGHRESOLUTIONTIMER_JUCEHEADER__
+ #include "threads/juce_HighResolutionTimer.h"
+#endif
 #ifndef __JUCE_INTERPROCESSLOCK_JUCEHEADER__
  #include "threads/juce_InterProcessLock.h"
 #endif

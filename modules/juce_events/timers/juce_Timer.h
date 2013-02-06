@@ -48,7 +48,7 @@
     structure is very similar to the Timer class, but contains multiple timers
     internally, each one identified by an ID number.
 
-    @see MultiTimer
+    @see HighResolutionTimer, MultiTimer
 */
 class JUCE_API  Timer
 {

@@ -256,7 +256,7 @@ public:
             y += dh;
         }
 
-        const int maxBoxHeight = 100;//(getHeight() - y - dh * 2) / numBoxes;
+        const int maxBoxHeight = 100;
 
         if (outputChanList != nullptr)
         {

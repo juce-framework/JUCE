@@ -50,7 +50,7 @@ public:
 
         Linux       = 0x2000,
         Android     = 0x3000,
-        iOS         = 0x5000,
+        iOS         = 0x8000,
 
         MacOSX_10_4 = 0x1004,
         MacOSX_10_5 = 0x1005,

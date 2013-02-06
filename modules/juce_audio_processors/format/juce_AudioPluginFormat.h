@@ -34,8 +34,7 @@ class PluginDescription;
 /**
     The base class for a type of plugin format, such as VST, AudioUnit, LADSPA, etc.
 
-    Use the static getNumFormats() and getFormat() calls to find the types
-    of format that are available.
+    @see AudioFormatManager
 */
 class JUCE_API  AudioPluginFormat
 {

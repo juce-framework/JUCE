@@ -218,7 +218,7 @@ public:
         ObjectType* const oldItem = item;
         item = newItem;
         item->nextListItem = oldItem->nextListItem.item;
-        oldItem->nextListItem = (ObjectType*) 0;
+        oldItem->nextListItem.item = nullptr;
         return oldItem;
     }
 
@@ -259,7 +259,7 @@ public:
         if (oldItem != nullptr)
         {
             item = oldItem->nextListItem;
-            oldItem->nextListItem = (ObjectType*) 0;
+            oldItem->nextListItem.item = nullptr;
         }
 
         return oldItem;
@@ -270,9 +270,7 @@ public:
     */
     void remove (ObjectType* const itemToRemove)
     {
-        LinkedListPointer* const l = findPointerTo (itemToRemove);
-
-        if (l != nullptr)
+        if (LinkedListPointer* const l = findPointerTo (itemToRemove))
             l->removeNext();
     }
 

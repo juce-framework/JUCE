@@ -730,10 +730,8 @@ public:
             minimiseStorageAfterRemoval();
             return removed;
         }
-        else
-        {
-            return ElementType();
-        }
+
+        return ElementType();
     }
 
     /** Removes an item from the array.

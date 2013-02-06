@@ -139,14 +139,18 @@ void AudioProcessorPlayer::audioDeviceIOCallback (const float** const inputChann
     }
 }
 
-void AudioProcessorPlayer::prepareToPlay (double newSampleRate, int newBlockSize,
-                                          int numChansIn, int numChansOut)
+void AudioProcessorPlayer::audioDeviceAboutToStart (AudioIODevice* const device)
 {
+    const double newSampleRate = device->getCurrentSampleRate();
+    const int newBlockSize     = device->getCurrentBufferSizeSamples();
+    const int numChansIn       = device->getActiveInputChannels().countNumberOfSetBits();
+    const int numChansOut      = device->getActiveOutputChannels().countNumberOfSetBits();
+
     const ScopedLock sl (lock);
 
     sampleRate = newSampleRate;
-    blockSize = newBlockSize;
-    numInputChans = numChansIn;
+    blockSize  = newBlockSize;
+    numInputChans  = numChansIn;
     numOutputChans = numChansOut;
 
     messageCollector.reset (sampleRate);
@@ -161,14 +165,6 @@ void AudioProcessorPlayer::prepareToPlay (double newSampleRate, int newBlockSize
         setProcessor (nullptr);
         setProcessor (oldProcessor);
     }
-}
-
-void AudioProcessorPlayer::audioDeviceAboutToStart (AudioIODevice* const device)
-{
-    prepareToPlay (device->getCurrentSampleRate(),
-                   device->getCurrentBufferSizeSamples(),
-                   device->getActiveInputChannels().countNumberOfSetBits(),
-                   device->getActiveOutputChannels().countNumberOfSetBits());
 }
 
 void AudioProcessorPlayer::audioDeviceStopped()

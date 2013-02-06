@@ -745,8 +745,7 @@ protected:
         {
             XmlElement* compiler = createToolElement (xml, "VCCLCompilerTool");
 
-            const int optimiseLevel = config.getOptimisationLevelInt();
-            compiler->setAttribute ("Optimization", optimiseLevel <= 1 ? "0" : (optimiseLevel == 2 ? "1" : "3"));
+            compiler->setAttribute ("Optimization", getOptimisationLevelString (config.getOptimisationLevelInt()));
 
             if (isDebug)
             {
@@ -881,6 +880,16 @@ protected:
         for (ConstConfigIterator config (*this); config.next();)
             createConfig (*xml.createNewChildElement ("Configuration"),
                           dynamic_cast <const MSVCBuildConfiguration&> (*config));
+    }
+
+    static const char* getOptimisationLevelString (int level)
+    {
+        switch (level)
+        {
+            case optimiseMaxSpeed:  return "3";
+            case optimiseMinSize:   return "1";
+            default:                return "0";
+        }
     }
 
     //==============================================================================
@@ -1161,17 +1170,21 @@ protected:
                 midl->createNewChildElement ("HeaderFileName");
             }
 
+            bool isUsingEditAndContinue = false;
+
             {
                 XmlElement* cl = group->createNewChildElement ("ClCompile");
 
-                const int optimiseLevel = config.getOptimisationLevelInt();
-                cl->createNewChildElement ("Optimization")->addTextElement (optimiseLevel <= 1 ? "Disabled"
-                                                                                               : optimiseLevel == 2 ? "MinSpace"
-                                                                                                                    : "Full");
+                cl->createNewChildElement ("Optimization")->addTextElement (getOptimisationLevelString (config.getOptimisationLevelInt()));
 
-                if (isDebug && optimiseLevel <= 1)
-                    cl->createNewChildElement ("DebugInformationFormat")->addTextElement (is64Bit (config) ? "ProgramDatabase"
-                                                                                                           : "EditAndContinue");
+                if (isDebug && config.getOptimisationLevelInt() <= optimisationOff)
+                {
+                    isUsingEditAndContinue = ! is64Bit (config);
+
+                    cl->createNewChildElement ("DebugInformationFormat")
+                            ->addTextElement (isUsingEditAndContinue ? "EditAndContinue"
+                                                                     : "ProgramDatabase");
+                }
 
                 StringArray includePaths (getHeaderSearchPaths (config));
                 includePaths.add ("%(AdditionalIncludeDirectories)");
@@ -1211,6 +1224,9 @@ protected:
 
                 if (! is64Bit (config))
                     link->createNewChildElement ("TargetMachine")->addTextElement ("MachineX86");
+
+                if (isUsingEditAndContinue)
+                    link->createNewChildElement ("ImageHasSafeExceptionHandlers")->addTextElement ("false");
 
                 if (! isDebug)
                 {
@@ -1308,6 +1324,16 @@ protected:
 
         jassertfalse;
         return String::empty;
+    }
+
+    static const char* getOptimisationLevelString (int level)
+    {
+        switch (level)
+        {
+            case optimiseMaxSpeed:  return "Full";
+            case optimiseMinSize:   return "MinSpace";
+            default:                return "Disabled";
+        }
     }
 
     //==============================================================================

@@ -31,7 +31,8 @@ PluginListComponent::PluginListComponent (AudioPluginFormatManager& manager,
       list (listToEdit),
       deadMansPedalFile (deadMansPedal),
       optionsButton ("Options..."),
-      propertiesToUse (properties)
+      propertiesToUse (properties),
+      scanOnBackgroundThread (false)
 {
     listBox.setModel (this);
     addAndMakeVisible (&listBox);
@@ -57,6 +58,11 @@ void PluginListComponent::setOptionsButtonText (const String& newText)
 {
     optionsButton.setButtonText (newText);
     resized();
+}
+
+void PluginListComponent::setScansOnMessageThread (bool useMessageThread) noexcept
+{
+    scanOnBackgroundThread = ! useMessageThread;
 }
 
 void PluginListComponent::resized()
@@ -113,7 +119,8 @@ void PluginListComponent::paintListBoxItem (int row, Graphics& g, int width, int
     if (name.isNotEmpty())
     {
         GlyphArrangement ga;
-        ga.addCurtailedLineOfText (Font (height * 0.7f, Font::bold), name, 8.0f, height * 0.8f, width - 10.0f, true);
+        ga.addCurtailedLineOfText (Font (height * 0.7f, Font::bold),
+                                   name, 8.0f, height * 0.8f, width - 10.0f, true);
 
         g.setColour (isBlacklisted ? Colours::red : Colours::black);
         ga.draw (g);
@@ -237,83 +244,145 @@ void PluginListComponent::filesDropped (const StringArray& files, int, int)
 }
 
 //==============================================================================
-class PluginListComponent::Scanner    : private Timer
+class PluginListComponent::Scanner    : private Timer,
+                                        private Thread
 {
 public:
-    Scanner (PluginListComponent& plc, AudioPluginFormat& format, const FileSearchPath& path)
-        : owner (plc),
-          aw (TRANS("Scanning for plug-ins..."),
-              TRANS("Searching for all possible plug-in files..."), AlertWindow::NoIcon),
-          progress (0.0),
-          scanner (owner.list, format, path, true, owner.deadMansPedalFile)
+    Scanner (PluginListComponent& plc,
+             AudioPluginFormat& format,
+             PropertiesFile* properties,
+             bool useThread)
+        : Thread ("plugin_scan"),
+          owner (plc), formatToScan (format), propertiesToUse (properties),
+          pathChooserWindow (TRANS("Select folders to scan..."), String::empty, AlertWindow::NoIcon),
+          progressWindow (TRANS("Scanning for plug-ins..."),
+                          TRANS("Searching for all possible plug-in files..."), AlertWindow::NoIcon),
+          progress (0.0), shouldUseThread (useThread), finished (false)
     {
-        aw.addButton (TRANS("Cancel"), 0, KeyPress (KeyPress::escapeKey));
-        aw.addProgressBarComponent (progress);
-        aw.enterModalState();
+        FileSearchPath path (formatToScan.getDefaultLocationsToSearch());
+
+        if (path.getNumPaths() > 0) // if the path is empty, then paths aren't used for this format.
+        {
+            if (propertiesToUse != nullptr)
+                path = propertiesToUse->getValue ("lastPluginScanPath_" + formatToScan.getName(), path.toString());
+
+            pathList.setSize (500, 300);
+            pathList.setPath (path);
+
+            pathChooserWindow.addCustomComponent (&pathList);
+            pathChooserWindow.addButton (TRANS("Scan"),   1, KeyPress (KeyPress::returnKey));
+            pathChooserWindow.addButton (TRANS("Cancel"), 0, KeyPress (KeyPress::escapeKey));
+
+            pathChooserWindow.enterModalState (true,
+                ModalCallbackFunction::forComponent (startScanCallback, &pathChooserWindow, this),
+                false);
+        }
+        else
+        {
+            startScan();
+        }
+    }
+
+    ~Scanner()
+    {
+        stopThread (10000);
+    }
+
+private:
+    static void startScanCallback (int result, AlertWindow* alert, Scanner* scanner)
+    {
+        if (alert != nullptr && scanner != nullptr)
+        {
+            if (result != 0)
+                scanner->startScan();
+            else
+                scanner->finishedScan();
+        }
+    }
+
+    void startScan()
+    {
+        pathChooserWindow.setVisible (false);
+
+        scanner = new PluginDirectoryScanner (owner.list, formatToScan, pathList.getPath(),
+                                              true, owner.deadMansPedalFile);
+
+        if (propertiesToUse != nullptr)
+        {
+            propertiesToUse->setValue ("lastPluginScanPath_" + formatToScan.getName(), pathList.getPath().toString());
+            propertiesToUse->saveIfNeeded();
+        }
+
+        progressWindow.addButton (TRANS("Cancel"), 0, KeyPress (KeyPress::escapeKey));
+        progressWindow.addProgressBarComponent (progress);
+        progressWindow.enterModalState();
+
+        if (shouldUseThread)
+            startThread();
 
         startTimer (20);
     }
 
-private:
+    void finishedScan()
+    {
+        owner.scanFinished (scanner != nullptr ? scanner->getFailedFiles()
+                                               : StringArray());
+    }
+
     void timerCallback()
     {
-        aw.setMessage (TRANS("Testing:\n\n") + scanner.getNextPluginFileThatWillBeScanned());
+        if (! isThreadRunning())
+        {
+            if (doNextScan())
+                startTimer (20);
+        }
 
-        if (scanner.scanNextFile (true) && aw.isCurrentlyModal())
-        {
-            progress = scanner.getProgress();
-            startTimer (20);
-        }
+        if (! progressWindow.isCurrentlyModal())
+            finished = true;
+
+        if (finished)
+            finishedScan();
         else
+            progressWindow.setMessage (progressMessage);
+    }
+
+    void run()
+    {
+        while (doNextScan() && ! threadShouldExit())
+        {}
+    }
+
+    bool doNextScan()
+    {
+        progressMessage = TRANS("Testing:\n\n") + scanner->getNextPluginFileThatWillBeScanned();
+
+        if (scanner->scanNextFile (true))
         {
-            owner.scanFinished (scanner.getFailedFiles());
+            progress = scanner->getProgress();
+            return true;
         }
+
+        finished = true;
+        return false;
     }
 
     PluginListComponent& owner;
-    AlertWindow aw;
+    AudioPluginFormat& formatToScan;
+    PropertiesFile* propertiesToUse;
+    ScopedPointer<PluginDirectoryScanner> scanner;
+    AlertWindow pathChooserWindow, progressWindow;
+    FileSearchPathListComponent pathList;
+    String progressMessage;
     double progress;
-    PluginDirectoryScanner scanner;
+    bool shouldUseThread, finished;
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Scanner)
 };
 
 void PluginListComponent::scanFor (AudioPluginFormat* format)
 {
     if (format != nullptr)
-    {
-        FileSearchPath path (format->getDefaultLocationsToSearch());
-
-        if (path.getNumPaths() > 0) // if the path is empty, then paths aren't used for this format.
-        {
-           #if JUCE_MODAL_LOOPS_PERMITTED
-            if (propertiesToUse != nullptr)
-                path = propertiesToUse->getValue ("lastPluginScanPath_" + format->getName(), path.toString());
-
-            AlertWindow aw (TRANS("Select folders to scan..."), String::empty, AlertWindow::NoIcon);
-            FileSearchPathListComponent pathList;
-            pathList.setSize (500, 300);
-            pathList.setPath (path);
-
-            aw.addCustomComponent (&pathList);
-            aw.addButton (TRANS("Scan"), 1, KeyPress (KeyPress::returnKey));
-            aw.addButton (TRANS("Cancel"), 0, KeyPress (KeyPress::escapeKey));
-
-            if (aw.runModalLoop() == 0)
-                return;
-
-            path = pathList.getPath();
-           #else
-            jassertfalse; // XXX this method needs refactoring to work without modal loops..
-           #endif
-        }
-
-        if (propertiesToUse != nullptr)
-        {
-            propertiesToUse->setValue ("lastPluginScanPath_" + format->getName(), path.toString());
-            propertiesToUse->saveIfNeeded();
-        }
-
-        currentScanner = new Scanner (*this, *format, path);
-    }
+        currentScanner = new Scanner (*this, *format, propertiesToUse, scanOnBackgroundThread);
 }
 
 void PluginListComponent::scanFinished (const StringArray& failedFiles)

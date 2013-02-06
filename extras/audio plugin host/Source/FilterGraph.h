@@ -34,33 +34,6 @@ const char* const filenameWildcard = "*.filtergraph";
 
 //==============================================================================
 /**
-    Represents a connection between two pins in a FilterGraph.
-*/
-class FilterConnection
-{
-public:
-    //==============================================================================
-    FilterConnection (FilterGraph& owner);
-    FilterConnection (const FilterConnection& other);
-    ~FilterConnection();
-
-    //==============================================================================
-    uint32 sourceFilterID;
-    int sourceChannel;
-    uint32 destFilterID;
-    int destChannel;
-
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
-private:
-    FilterGraph& owner;
-
-    FilterConnection& operator= (const FilterConnection&);
-};
-
-//==============================================================================
-/**
     A collection of filters and some connections between them.
 */
 class FilterGraph   : public FileBasedDocument
