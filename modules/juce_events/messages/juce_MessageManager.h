@@ -82,7 +82,7 @@ public:
     */
     bool hasStopMessageBeenSent() const noexcept        { return quitMessagePosted; }
 
-   #if JUCE_MODAL_LOOPS_PERMITTED
+   #if JUCE_MODAL_LOOPS_PERMITTED || DOXYGEN
     /** Synchronously dispatches messages until a given time has elapsed.
 
         Returns false if a quit message has been posted by a call to stopDispatchLoop(),
