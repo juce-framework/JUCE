@@ -155,6 +155,9 @@ static NSMutableArray* createAllowedTypesArray (const StringArray& filters)
     for (int i = 0; i < filters.size(); ++i)
         [filterArray addObject: juceStringToNS (filters[i].replace ("*.", ""))];
 
+    if (filters.size() == 0)
+        [filterArray addObject: juceStringToNS ("*")];
+
     return filterArray;
 }
 
@@ -195,9 +198,7 @@ void FileChooser::showPlatformDialog (Array<File>& results,
                                         : [NSOpenPanel openPanel];
 
     [panel setTitle: juceStringToNS (title)];
-
-    if (filters->size() != 0)
-        [panel setAllowedFileTypes: createAllowedTypesArray (*filters)];
+    [panel setAllowedFileTypes: createAllowedTypesArray (*filters)];
 
     if (! isSaveDialogue)
     {
