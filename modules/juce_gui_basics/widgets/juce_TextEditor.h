@@ -532,7 +532,7 @@ public:
     /** Base class for input filters that can be applied to a TextEditor to restrict
         the text that can be entered.
     */
-    class InputFilter
+    class JUCE_API  InputFilter
     {
     public:
         InputFilter() {}
