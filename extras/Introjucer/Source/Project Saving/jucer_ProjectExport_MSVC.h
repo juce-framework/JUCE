@@ -65,10 +65,11 @@ public:
     {
         if (projectType.isLibrary())
         {
-            const char* const libTypes[] = { "Static Library (.lib)", "Dynamic Library (.dll)", 0 };
-            const int libTypeValues[] = { 1, 2, 0 };
+            const char* const libTypes[] = { "Static Library (.lib)", "Dynamic Library (.dll)", nullptr };
+            const int libTypeValues[] = { 1, 2 };
             props.add (new ChoicePropertyComponent (getLibraryType(), "Library Type",
-                                                    StringArray (libTypes), Array<var> (libTypeValues)));
+                                                    StringArray (libTypes),
+                                                    Array<var> (libTypeValues, numElementsInArray (libTypeValues))));
         }
     }
 
@@ -172,10 +173,10 @@ protected:
         void createConfigProperties (PropertyListBuilder& props)
         {
             const char* const warningLevelNames[] = { "Low", "Medium", "High", nullptr };
-            const int warningLevels[] = { 2, 3, 4, 0 };
+            const int warningLevels[] = { 2, 3, 4 };
 
             props.add (new ChoicePropertyComponent (getWarningLevelValue(), "Warning Level",
-                                                    StringArray (warningLevelNames), Array<var> (warningLevels)));
+                                                    StringArray (warningLevelNames), Array<var> (warningLevels, numElementsInArray (warningLevels))));
 
             {
                 const char* const runtimeNames[] = { "(Default)", "Use static runtime", "Use DLL runtime", nullptr };
@@ -1001,14 +1002,15 @@ protected:
         {
             MSVCBuildConfiguration::createConfigProperties (props);
 
-            const char* const archTypes[] = { get32BitArchName(), get64BitArchName(), nullptr };
+            const char* const archTypes[] = { get32BitArchName(), get64BitArchName() };
+
             props.add (new ChoicePropertyComponent (getArchitectureType(), "Architecture",
-                                                    StringArray (archTypes), Array<var> (archTypes)));
+                                                    StringArray (archTypes, numElementsInArray (archTypes)),
+                                                    Array<var> (archTypes, numElementsInArray (archTypes))));
         }
     };
 
     virtual void addPlatformToolsetToPropertyGroup (XmlElement&) const {}
-
 
     BuildConfiguration::Ptr createBuildConfig (const ValueTree& settings) const
     {
@@ -1481,8 +1483,15 @@ public:
     static const char* getName()                { return "Visual Studio 2012"; }
     static const char* getValueTreeTypeName()   { return "VS2012"; }
     int getVisualStudioVersion() const          { return 11; }
-    String getPlatformToolset() const           { return "v110_xp"; }
     String getSolutionComment() const           { return "# Visual Studio 2012"; }
+
+    String getPlatformToolset() const
+    {
+        const String s (settings [Ids::toolset].toString());
+        return s.isNotEmpty() ? s : "v110";
+    }
+
+    Value getPlatformToolsetValue()             { return getSetting (Ids::toolset); }
 
     static MSVCProjectExporterVC2012* createForSettings (Project& project, const ValueTree& settings)
     {
@@ -1490,6 +1499,18 @@ public:
             return new MSVCProjectExporterVC2012 (project, settings);
 
         return nullptr;
+    }
+
+    void createExporterProperties (PropertyListBuilder& props)
+    {
+        MSVCProjectExporterVC2010::createExporterProperties (props);
+
+        const char* const toolsetNames[] = { "(default)", "vs110", "vs110_xp", "Windows7.1SDK", nullptr };
+        const var toolsets[]             = { var(),       "vs110", "vs110_xp", "Windows7.1SDK" };
+
+        props.add (new ChoicePropertyComponent (getPlatformToolsetValue(), "Platform Toolset",
+                                                StringArray (toolsetNames),
+                                                Array<var> (toolsets, numElementsInArray (toolsets))));
     }
 
 private:
