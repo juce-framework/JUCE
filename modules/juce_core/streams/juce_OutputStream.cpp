@@ -265,34 +265,34 @@ void OutputStream::setNewLineString (const String& newLineString_)
 }
 
 //==============================================================================
-OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, const int number)
+JUCE_API OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, const int number)
 {
     return stream << String (number);
 }
 
-OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, const int64 number)
+JUCE_API OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, const int64 number)
 {
     return stream << String (number);
 }
 
-OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, const double number)
+JUCE_API OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, const double number)
 {
     return stream << String (number);
 }
 
-OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, const char character)
+JUCE_API OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, const char character)
 {
     stream.writeByte (character);
     return stream;
 }
 
-OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, const char* const text)
+JUCE_API OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, const char* const text)
 {
     stream.write (text, (int) strlen (text));
     return stream;
 }
 
-OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, const MemoryBlock& data)
+JUCE_API OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, const MemoryBlock& data)
 {
     if (data.getSize() > 0)
         stream.write (data.getData(), (int) data.getSize());
@@ -300,7 +300,7 @@ OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, const MemoryBlock&
     return stream;
 }
 
-OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, const File& fileToRead)
+JUCE_API OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, const File& fileToRead)
 {
     FileInputStream in (fileToRead);
 
@@ -310,13 +310,13 @@ OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, const File& fileTo
     return stream;
 }
 
-OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, InputStream& streamToRead)
+JUCE_API OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, InputStream& streamToRead)
 {
     stream.writeFromInputStream (streamToRead, -1);
     return stream;
 }
 
-OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, const NewLine&)
+JUCE_API OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, const NewLine&)
 {
     return stream << stream.getNewLineString();
 }
