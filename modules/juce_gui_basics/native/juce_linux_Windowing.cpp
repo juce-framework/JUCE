@@ -1519,41 +1519,13 @@ public:
     void handleMotionNotifyEvent (const XPointerMovedEvent& movedEvent)
     {
         updateKeyModifiers (movedEvent.state);
-        const Point<int> mousePos (movedEvent.x_root, movedEvent.y_root);
 
-        if (lastMousePos != mousePos)
-        {
-            lastMousePos = mousePos;
+        lastMousePos = Point<int> (movedEvent.x_root, movedEvent.y_root);
 
-            if (parentWindow != 0 && (styleFlags & windowHasTitleBar) == 0)
-            {
-                Window wRoot = 0, wParent = 0;
+        if (dragState.dragging)
+            handleExternalDragMotionNotify();
 
-                {
-                    ScopedXLock xlock;
-                    unsigned int numChildren;
-                    Window* wChild = nullptr;
-                    XQueryTree (display, windowH, &wRoot, &wParent, &wChild, &numChildren);
-                }
-
-                if (wParent != 0
-                     && wParent != windowH
-                     && wParent != wRoot)
-                {
-                    parentWindow = wParent;
-                    updateBounds();
-                }
-                else
-                {
-                    parentWindow = 0;
-                }
-            }
-
-            if (dragState.dragging)
-                handleExternalDragMotionNotify();
-
-            handleMouseEvent (0, mousePos - getScreenPosition(), currentModifiers, getEventTime (movedEvent));
-        }
+        handleMouseEvent (0, getMousePos (movedEvent), currentModifiers, getEventTime (movedEvent));
     }
 
     void handleEnterNotifyEvent (const XEnterWindowEvent& enterEvent)
