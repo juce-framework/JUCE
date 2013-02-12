@@ -41,8 +41,16 @@
 
 /** This macro defines the C calling convention used as the standard for Juce calls. */
 #if JUCE_MSVC
- #define JUCE_CALLTYPE   __stdcall
- #define JUCE_CDECL      __cdecl
+ #ifdef JUCE_DLL_BUILD
+  #define JUCE_CALLTYPE   __stdcall __declspec (dllexport)
+  #define JUCE_CDECL      __cdecl   __declspec (dllexport)
+ #elif defined (JUCE_DLL)
+  #define JUCE_CALLTYPE   __stdcall __declspec (dllimport)
+  #define JUCE_CDECL      __cdecl   __declspec (dllimport)
+ #else
+  #define JUCE_CALLTYPE   __stdcall
+  #define JUCE_CDECL      __cdecl
+ #endif
 #else
  #define JUCE_CALLTYPE
  #define JUCE_CDECL

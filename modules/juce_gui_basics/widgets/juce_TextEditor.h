@@ -282,7 +282,7 @@ public:
 
         @see TextEditor::addListener
     */
-    class Listener
+    class JUCE_API  Listener
     {
     public:
         /** Destructor. */
