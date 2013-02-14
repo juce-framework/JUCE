@@ -150,13 +150,20 @@ private:
 
 static NSMutableArray* createAllowedTypesArray (const StringArray& filters)
 {
+    if (filters.size() == 0)
+        return nil;
+
     NSMutableArray* filterArray = [[[NSMutableArray alloc] init] autorelease];
 
     for (int i = 0; i < filters.size(); ++i)
-        [filterArray addObject: juceStringToNS (filters[i].replace ("*.", ""))];
+    {
+        const String f (filters[i].replace ("*.", ""));
 
-    if (filters.size() == 0)
-        [filterArray addObject: juceStringToNS ("*")];
+        if (f == "*")
+            return nil;
+
+        [filterArray addObject: juceStringToNS (f)];
+    }
 
     return filterArray;
 }
