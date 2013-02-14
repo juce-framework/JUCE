@@ -133,6 +133,9 @@ public:
     //==============================================================================
     /** Fills-in the given structure with details about the transport's
         position at the start of the current processing block.
+
+        This method must ONLY be called from within your AudioProcessor::processBlock()
+        method. Calling it at any other time will probably cause a nasty crash.
     */
     virtual bool getCurrentPosition (CurrentPositionInfo& result) = 0;
 };
