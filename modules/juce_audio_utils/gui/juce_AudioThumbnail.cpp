@@ -376,10 +376,9 @@ public:
                       const double rate, const int numChans, const int sampsPerThumbSample,
                       LevelDataSource* levelData, const OwnedArray<ThumbData>& chans)
     {
-        refillCache (area.getWidth(), startTime, endTime, rate,
-                     numChans, sampsPerThumbSample, levelData, chans);
-
-        if (isPositiveAndBelow (channelNum, numChannelsCached))
+        if (refillCache (area.getWidth(), startTime, endTime, rate,
+                         numChans, sampsPerThumbSample, levelData, chans)
+             && isPositiveAndBelow (channelNum, numChannelsCached))
         {
             const Rectangle<int> clip (g.getClipBounds().getIntersection (area.withWidth (jmin (numSamplesCached, area.getWidth()))));
 
@@ -412,7 +411,7 @@ private:
     int numChannelsCached, numSamplesCached;
     bool cacheNeedsRefilling;
 
-    void refillCache (const int numSamples, double startTime, const double endTime,
+    bool refillCache (const int numSamples, double startTime, const double endTime,
                       const double rate, const int numChans, const int sampsPerThumbSample,
                       LevelDataSource* levelData, const OwnedArray<ThumbData>& chans)
     {
@@ -421,7 +420,7 @@ private:
         if (numSamples <= 0 || timePerPixel <= 0.0 || rate <= 0)
         {
             invalidate();
-            return;
+            return false;
         }
 
         if (numSamples == numSamplesCached
@@ -430,7 +429,7 @@ private:
              && timePerPixel == cachedTimePerPixel
              && ! cacheNeedsRefilling)
         {
-            return;
+            return ! cacheNeedsRefilling;
         }
 
         numSamplesCached = numSamples;
@@ -497,6 +496,8 @@ private:
                 }
             }
         }
+
+        return true;
     }
 
     MinMaxValue* getData (const int channelNum, const int cacheIndex) noexcept

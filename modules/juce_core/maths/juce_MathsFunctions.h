@@ -441,7 +441,7 @@ inline int nextPowerOfTwo (int n) noexcept
     The divisor must be greater than zero.
 */
 template <typename IntegerType>
-int negativeAwareModulo (IntegerType dividend, const IntegerType divisor) noexcept
+IntegerType negativeAwareModulo (IntegerType dividend, const IntegerType divisor) noexcept
 {
     jassert (divisor > 0);
     dividend %= divisor;
