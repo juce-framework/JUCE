@@ -742,7 +742,7 @@ bool AudioThumbnail::isFullyLoaded() const noexcept
 
 double AudioThumbnail::getProportionComplete() const noexcept
 {
-    return jlimit (0.0, 1.0, numSamplesFinished / (double) totalSamples);
+    return jlimit (0.0, 1.0, numSamplesFinished / (double) jmax ((int64) 1, totalSamples));
 }
 
 int64 AudioThumbnail::getNumSamplesFinished() const noexcept
