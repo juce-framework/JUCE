@@ -546,36 +546,37 @@ String SystemStats::getEnvironmentVariable (const String& name, const String& de
 }
 
 //==============================================================================
-MemoryMappedFile::MemoryMappedFile (const File& file, MemoryMappedFile::AccessMode mode)
-    : address (nullptr),
-      length (0),
-      fileHandle (0)
+void MemoryMappedFile::openInternal (const File& file, AccessMode mode)
 {
     jassert (mode == readOnly || mode == readWrite);
+
+    if (range.getStart() > 0)
+    {
+        const long pageSize = sysconf (_SC_PAGE_SIZE);
+        range.setStart (range.getStart() - (range.getStart() % pageSize));
+    }
 
     fileHandle = open (file.getFullPathName().toUTF8(),
                        mode == readWrite ? (O_CREAT + O_RDWR) : O_RDONLY, 00644);
 
     if (fileHandle != -1)
     {
-        const int64 fileSize = file.getSize();
-
-        void* m = mmap (0, (size_t) fileSize,
+        void* m = mmap (0, (size_t) range.getLength(),
                         mode == readWrite ? (PROT_READ | PROT_WRITE) : PROT_READ,
-                        MAP_SHARED, fileHandle, 0);
+                        MAP_SHARED, fileHandle,
+                        (off_t) range.getStart());
 
         if (m != MAP_FAILED)
-        {
             address = m;
-            length = (size_t) fileSize;
-        }
+        else
+            range = Range<int64>();
     }
 }
 
 MemoryMappedFile::~MemoryMappedFile()
 {
     if (address != nullptr)
-        munmap (address, length);
+        munmap (address, range.getLength());
 
     if (fileHandle != 0)
         close (fileHandle);

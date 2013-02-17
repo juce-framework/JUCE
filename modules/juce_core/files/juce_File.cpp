@@ -881,6 +881,19 @@ File File::createTempFile (const String& fileNameEnding)
     return tempFile;
 }
 
+//==============================================================================
+MemoryMappedFile::MemoryMappedFile (const File& file, MemoryMappedFile::AccessMode mode)
+    : address (nullptr), range (0, file.getSize()), fileHandle (0)
+{
+    openInternal (file, mode);
+}
+
+MemoryMappedFile::MemoryMappedFile (const File& file, const Range<int64>& fileRange, AccessMode mode)
+    : address (nullptr), range (fileRange.getIntersectionWith (Range<int64> (0, file.getSize()))), fileHandle (0)
+{
+    openInternal (file, mode);
+}
+
 
 //==============================================================================
 #if JUCE_UNIT_TESTS
