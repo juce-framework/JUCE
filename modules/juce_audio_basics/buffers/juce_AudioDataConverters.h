@@ -422,8 +422,7 @@ public:
         {
             static_jassert (Constness::isConst == 0); // trying to write to a const pointer! For a writeable one, use AudioData::NonConst instead!
 
-            Pointer dest (*this);
-            while (--numSamples >= 0)
+            for (Pointer dest (*this); --numSamples >= 0;)
             {
                 dest.data.copyFromSameType (source.data);
                 dest.advance();
@@ -465,6 +464,55 @@ public:
         {
             Pointer dest (*this);
             dest.clear (dest.data, numSamples);
+        }
+
+        /** Scans a block of data, returning the lowest and highest levels as floats */
+        void findMinAndMax (size_t numSamples, float& minValue, float& maxValue) const noexcept
+        {
+            if (numSamples == 0)
+            {
+                minValue = maxValue = 0;
+                return;
+            }
+
+            Pointer dest (*this);
+
+            if (isFloatingPoint())
+            {
+                float mn = dest.getAsFloat();
+                dest.advance();
+                float mx = mn;
+
+                while (--numSamples > 0)
+                {
+                    const float v = dest.getAsFloat();
+                    dest.advance();
+
+                    if (mx < v)  mx = v;
+                    if (v < mn)  mn = v;
+                }
+
+                minValue = mn;
+                maxValue = mx;
+            }
+            else
+            {
+                int32 mn = dest.getAsInt32();
+                dest.advance();
+                int32 mx = mn;
+
+                while (--numSamples > 0)
+                {
+                    const int v = dest.getAsInt32();
+                    dest.advance();
+
+                    if (mx < v)  mx = v;
+                    if (v < mn)  mn = v;
+                }
+
+                minValue = mn * (float) (1.0 / (1.0 + Int32::maxValue));
+                maxValue = mx * (float) (1.0 / (1.0 + Int32::maxValue));
+            }
         }
 
         /** Returns true if the pointer is using a floating-point format. */
