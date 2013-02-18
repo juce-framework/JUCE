@@ -105,6 +105,9 @@ namespace juce
 #ifndef __JUCE_AUDIOSUBSECTIONREADER_JUCEHEADER__
  #include "format/juce_AudioSubsectionReader.h"
 #endif
+#ifndef __JUCE_MEMORYMAPPEDAUDIOFORMATREADER_JUCEHEADER__
+ #include "format/juce_MemoryMappedAudioFormatReader.h"
+#endif
 #include "codecs/juce_AiffAudioFormat.h"
 #include "codecs/juce_CoreAudioFormat.h"
 #include "codecs/juce_FlacAudioFormat.h"

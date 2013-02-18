@@ -51,7 +51,7 @@ public:
     explicit AudioThumbnailCache (int maxNumThumbsToStore);
 
     /** Destructor. */
-    ~AudioThumbnailCache();
+    virtual ~AudioThumbnailCache();
 
     //==============================================================================
     /** Clears out any stored thumbnails.
@@ -87,6 +87,12 @@ public:
 
     /** Returns the thread that client thumbnails can use. */
     TimeSliceThread& getTimeSliceThread() noexcept      { return thread; }
+
+protected:
+    /** */
+    virtual void saveNewlyFinishedThumbnail (const AudioThumbnailBase&, int64 hashCode);
+    /** */
+    virtual bool loadNewThumb (AudioThumbnailBase&, int64 hashCode);
 
 private:
     //==============================================================================

@@ -120,6 +120,8 @@ public:
     AudioFormatReader* createReaderFor (InputStream* sourceStream,
                                         bool deleteStreamIfOpeningFails);
 
+    MemoryMappedAudioFormatReader* createMemoryMappedReader (const File& file);
+
     AudioFormatWriter* createWriterFor (OutputStream* streamToWriteTo,
                                         double sampleRateToUse,
                                         unsigned int numberOfChannels,

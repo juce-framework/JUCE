@@ -109,7 +109,7 @@ bool AudioThumbnailCache::loadThumb (AudioThumbnailBase& thumb, const int64 hash
         return true;
     }
 
-    return false;
+    return loadNewThumb (thumb, hashCode);
 }
 
 void AudioThumbnailCache::storeThumb (const AudioThumbnailBase& thumb,
@@ -130,6 +130,8 @@ void AudioThumbnailCache::storeThumb (const AudioThumbnailBase& thumb,
 
     MemoryOutputStream out (te->data, false);
     thumb.saveTo (out);
+
+    saveNewlyFinishedThumbnail (thumb, hashCode);
 }
 
 void AudioThumbnailCache::clear()
@@ -167,4 +169,13 @@ void AudioThumbnailCache::writeToStream (OutputStream& out)
 
     for (int i = 0; i < thumbs.size(); ++i)
         thumbs.getUnchecked(i)->write (out);
+}
+
+void AudioThumbnailCache::saveNewlyFinishedThumbnail (const AudioThumbnailBase&, int64)
+{
+}
+
+bool AudioThumbnailCache::loadNewThumb (AudioThumbnailBase&, int64)
+{
+    return false;
 }
