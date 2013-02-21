@@ -432,13 +432,11 @@ public:
             jassert (! usesFloatingPointData); // (would need to add support for this if it's possible)
 
             if (littleEndian)
-                copySampleData<AudioData::LittleEndian> (bitsPerSample, usesFloatingPointData,
-                                                         destSamples, startOffsetInDestBuffer, numDestChannels,
-                                                         tempBuffer, (int) numChannels, numThisTime);
+                copySampleData<AudioData::LittleEndian> (bitsPerSample, destSamples, startOffsetInDestBuffer,
+                                                         numDestChannels, tempBuffer, (int) numChannels, numThisTime);
             else
-                copySampleData<AudioData::BigEndian> (bitsPerSample, usesFloatingPointData,
-                                                      destSamples, startOffsetInDestBuffer, numDestChannels,
-                                                      tempBuffer, (int) numChannels, numThisTime);
+                copySampleData<AudioData::BigEndian> (bitsPerSample, destSamples, startOffsetInDestBuffer,
+                                                      numDestChannels, tempBuffer, (int) numChannels, numThisTime);
 
 
             startOffsetInDestBuffer += numThisTime;
@@ -449,8 +447,7 @@ public:
     }
 
     template <typename Endianness>
-    static void copySampleData (unsigned int bitsPerSample, const bool usesFloatingPointData,
-                                int* const* destSamples, int startOffsetInDestBuffer, int numDestChannels,
+    static void copySampleData (unsigned int bitsPerSample, int* const* destSamples, int startOffsetInDestBuffer, int numDestChannels,
                                 const void* sourceData, int numChannels, int numSamples) noexcept
     {
         switch (bitsPerSample)
@@ -680,11 +677,11 @@ public:
 
         if (littleEndian)
             AiffAudioFormatReader::copySampleData<AudioData::LittleEndian>
-                    (bitsPerSample, usesFloatingPointData, destSamples, startOffsetInDestBuffer,
+                    (bitsPerSample, destSamples, startOffsetInDestBuffer,
                      numDestChannels, sampleToPointer (startSampleInFile), (int) numChannels, numSamples);
         else
             AiffAudioFormatReader::copySampleData<AudioData::BigEndian>
-                    (bitsPerSample, usesFloatingPointData, destSamples, startOffsetInDestBuffer,
+                    (bitsPerSample, destSamples, startOffsetInDestBuffer,
                      numDestChannels, sampleToPointer (startSampleInFile), (int) numChannels, numSamples);
 
         return true;
@@ -712,8 +709,7 @@ public:
             case 8:     scanMinAndMax<AudioData::UInt8> (startSampleInFile, numSamples, min0, max0, min1, max1); break;
             case 16:    scanMinAndMax<AudioData::Int16> (startSampleInFile, numSamples, min0, max0, min1, max1); break;
             case 24:    scanMinAndMax<AudioData::Int24> (startSampleInFile, numSamples, min0, max0, min1, max1); break;
-            case 32:    if (usesFloatingPointData) scanMinAndMax<AudioData::Float32> (startSampleInFile, numSamples, min0, max0, min1, max1);
-                        else                       scanMinAndMax<AudioData::Int32>   (startSampleInFile, numSamples, min0, max0, min1, max1); break;
+            case 32:    scanMinAndMax<AudioData::Int32> (startSampleInFile, numSamples, min0, max0, min1, max1); break;
             default:    jassertfalse; break;
         }
     }
