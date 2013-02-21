@@ -107,7 +107,7 @@ public:
         let this pass through without being overwritten or cleared.
 
         Also note that the buffer may have more channels than are strictly necessary,
-        but your should only read/write from the ones that your filter is supposed to
+        but you should only read/write from the ones that your filter is supposed to
         be using.
 
         The number of samples in these buffers is NOT guaranteed to be the same for every

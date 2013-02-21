@@ -654,8 +654,10 @@ bool File::startAsProcess (const String& parameters) const
 //==============================================================================
 FileInputStream* File::createInputStream() const
 {
-    if (existsAsFile())
-        return new FileInputStream (*this);
+    ScopedPointer<FileInputStream> fin (new FileInputStream (*this));
+
+    if (fin->openedOk())
+        return fin.release();
 
     return nullptr;
 }
