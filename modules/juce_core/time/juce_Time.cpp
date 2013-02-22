@@ -109,7 +109,7 @@ namespace TimeHelpers
 
             if (numChars > 0)
                 return String (StringType (buffer),
-                               StringType (buffer) + numChars);
+                               StringType (buffer) + (int) numChars);
         }
     }
 

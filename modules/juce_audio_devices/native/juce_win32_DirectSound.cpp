@@ -252,7 +252,7 @@ public:
         {
             JUCE_DS_LOG ("closing output: " + name);
             HRESULT hr = pOutputBuffer->Stop();
-            JUCE_DS_LOG_ERROR (hr);
+            JUCE_DS_LOG_ERROR (hr); (void) hr;
 
             pOutputBuffer->Release();
             pOutputBuffer = nullptr;
