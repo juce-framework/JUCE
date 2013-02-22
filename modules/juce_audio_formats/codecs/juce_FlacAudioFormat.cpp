@@ -492,14 +492,17 @@ FlacAudioFormat::~FlacAudioFormat()
 
 Array<int> FlacAudioFormat::getPossibleSampleRates()
 {
-    const int rates[] = { 22050, 32000, 44100, 48000, 88200, 96000, 176400, 192000, 352800, 384000, 0 };
-    return Array <int> (rates);
+    const int rates[] = { 8000, 11025, 12000, 16000, 22050, 32000, 44100, 48000,
+                          88200, 96000, 176400, 192000, 352800, 384000 };
+
+    return Array<int> (rates, numElementsInArray (rates));
 }
 
 Array<int> FlacAudioFormat::getPossibleBitDepths()
 {
-    const int depths[] = { 16, 24, 0 };
-    return Array <int> (depths);
+    const int depths[] = { 16, 24 };
+
+    return Array<int> (depths, numElementsInArray (depths));
 }
 
 bool FlacAudioFormat::canDoStereo()     { return true; }
