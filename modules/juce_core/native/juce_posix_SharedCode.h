@@ -190,7 +190,7 @@ void JUCE_CALLTYPE Thread::sleep (int millisecs)
     struct timespec time;
     time.tv_sec = millisecs / 1000;
     time.tv_nsec = (millisecs % 1000) * 1000000;
-    nanosleep (&time, 0);
+    nanosleep (&time, nullptr);
 }
 
 
@@ -1168,8 +1168,10 @@ private:
 
     static void* timerThread (void* param)
     {
+       #if ! JUCE_ANDROID
         int dummy;
         pthread_setcancelstate (PTHREAD_CANCEL_ENABLE, &dummy);
+       #endif
 
         reinterpret_cast<Pimpl*> (param)->timerThread();
         return nullptr;
@@ -1192,7 +1194,7 @@ private:
     struct Clock
     {
        #if JUCE_MAC || JUCE_IOS
-        Clock (double millis)
+        Clock (double millis) noexcept
         {
             mach_timebase_info_data_t timebase;
             (void) mach_timebase_info (&timebase);
@@ -1200,7 +1202,7 @@ private:
             time = mach_absolute_time();
         }
 
-        void wait()
+        void wait() noexcept
         {
             time += delta;
             mach_wait_until (time);
@@ -1208,16 +1210,29 @@ private:
 
         uint64_t time, delta;
 
+       #elif JUCE_ANDROID
+        Clock (double millis) noexcept  : delta ((uint64) (millis * 1000000))
+        {
+        }
+
+        void wait() noexcept
+        {
+            struct timespec t;
+            t.tv_sec  = (time_t) (delta / 1000000000);
+            t.tv_nsec = (long)   (delta % 1000000000);
+            nanosleep (&t, nullptr);
+        }
+
+        uint64 delta;
        #else
-        Clock (double millis)
-            : delta ((int64) (millis * 1000000))
+        Clock (double millis) noexcept  : delta ((uint64) (millis * 1000000))
         {
             struct timespec t;
             clock_gettime (CLOCK_MONOTONIC, &t);
             time = 1000000000 * (int64) t.tv_sec + t.tv_nsec;
         }
 
-        void wait()
+        void wait() noexcept
         {
             time += delta;
 
@@ -1228,7 +1243,7 @@ private:
             clock_nanosleep (CLOCK_MONOTONIC, TIMER_ABSTIME, &t, nullptr);
         }
 
-        int64 time, delta;
+        uint64 time, delta;
        #endif
     };
 
