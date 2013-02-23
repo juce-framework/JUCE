@@ -26,16 +26,16 @@
 class AudioThumbnailCache::ThumbnailCacheEntry
 {
 public:
-    ThumbnailCacheEntry (const int64 hash_)
-        : hash (hash_),
+    ThumbnailCacheEntry (const int64 hashCode)
+        : hash (hashCode),
           lastUsed (Time::getMillisecondCounter())
     {
     }
 
     ThumbnailCacheEntry (InputStream& in)
-        : lastUsed (0)
+        : hash (in.readInt64()),
+          lastUsed (0)
     {
-        hash = in.readInt64();
         const int64 len = in.readInt64();
         in.readIntoMemoryBlock (data, (ssize_t) len);
     }

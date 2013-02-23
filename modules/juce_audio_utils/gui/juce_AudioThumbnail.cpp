@@ -573,12 +573,12 @@ void AudioThumbnail::createChannels (const int length)
 }
 
 //==============================================================================
-void AudioThumbnail::loadFrom (InputStream& rawInput)
+bool AudioThumbnail::loadFrom (InputStream& rawInput)
 {
     BufferedInputStream input (rawInput, 4096);
 
     if (input.readByte() != 'j' || input.readByte() != 'a' || input.readByte() != 't' || input.readByte() != 'm')
-        return;
+        return false;
 
     const ScopedLock sl (lock);
     clearChannelData();
@@ -596,6 +596,8 @@ void AudioThumbnail::loadFrom (InputStream& rawInput)
     for (int i = 0; i < numThumbnailSamples; ++i)
         for (int chan = 0; chan < numChannels; ++chan)
             channels.getUnchecked(chan)->getData(i)->read (input);
+
+    return true;
 }
 
 void AudioThumbnail::saveTo (OutputStream& output) const

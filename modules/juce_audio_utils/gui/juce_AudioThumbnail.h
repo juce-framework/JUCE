@@ -119,7 +119,7 @@ public:
         previously have been created by the saveTo() method.
         @see saveTo
     */
-    void loadFrom (InputStream& input);
+    bool loadFrom (InputStream& input);
 
     /** Saves the low res thumbnail data to an output stream.
 

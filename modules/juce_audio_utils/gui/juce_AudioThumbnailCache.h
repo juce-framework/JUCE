@@ -54,8 +54,7 @@ public:
     virtual ~AudioThumbnailCache();
 
     //==============================================================================
-    /** Clears out any stored thumbnails.
-    */
+    /** Clears out any stored thumbnails. */
     void clear();
 
     /** Reloads the specified thumb if this cache contains the appropriate stored
@@ -89,9 +88,14 @@ public:
     TimeSliceThread& getTimeSliceThread() noexcept      { return thread; }
 
 protected:
-    /** */
+    /** This can be overridden to provide a custom callback for saving thumbnails
+        once they have finished being loaded.
+    */
     virtual void saveNewlyFinishedThumbnail (const AudioThumbnailBase&, int64 hashCode);
-    /** */
+
+    /** This can be overridden to provide a custom callback for loading thumbnails
+        from pre-saved files to save the cache the trouble of having to create them.
+    */
     virtual bool loadNewThumb (AudioThumbnailBase&, int64 hashCode);
 
 private:
