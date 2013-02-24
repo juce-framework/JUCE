@@ -731,7 +731,7 @@ JUCE_API String& JUCE_CALLTYPE operator<< (String& s1, const double number)     
 
 JUCE_API OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, const String& text)
 {
-    const int numBytes = text.getNumBytesAsUTF8();
+    const size_t numBytes = text.getNumBytesAsUTF8();
 
    #if (JUCE_STRING_UTF_TYPE == 8)
     stream.write (text.getCharPointer().getAddress(), numBytes);
@@ -2020,36 +2020,36 @@ const wchar_t* String::toWideCharPointer() const
 template <class CharPointerType_Src, class CharPointerType_Dest>
 struct StringCopier
 {
-    static int copyToBuffer (const CharPointerType_Src& source, typename CharPointerType_Dest::CharType* const buffer, const int maxBufferSizeBytes)
+    static size_t copyToBuffer (const CharPointerType_Src& source, typename CharPointerType_Dest::CharType* const buffer, const size_t maxBufferSizeBytes)
     {
-        jassert (maxBufferSizeBytes >= 0); // keep this value positive, or no characters will be copied!
+        jassert (((ssize_t) maxBufferSizeBytes) >= 0); // keep this value positive!
 
         if (buffer == nullptr)
-            return (int) (CharPointerType_Dest::getBytesRequiredFor (source) + sizeof (typename CharPointerType_Dest::CharType));
+            return CharPointerType_Dest::getBytesRequiredFor (source) + sizeof (typename CharPointerType_Dest::CharType);
 
         return CharPointerType_Dest (buffer).writeWithDestByteLimit (source, maxBufferSizeBytes);
     }
 };
 
-int String::copyToUTF8 (CharPointer_UTF8::CharType* const buffer, const int maxBufferSizeBytes) const noexcept
+size_t String::copyToUTF8 (CharPointer_UTF8::CharType* const buffer, size_t maxBufferSizeBytes) const noexcept
 {
     return StringCopier <CharPointerType, CharPointer_UTF8>::copyToBuffer (text, buffer, maxBufferSizeBytes);
 }
 
-int String::copyToUTF16 (CharPointer_UTF16::CharType* const buffer, int maxBufferSizeBytes) const noexcept
+size_t String::copyToUTF16 (CharPointer_UTF16::CharType* const buffer, size_t maxBufferSizeBytes) const noexcept
 {
     return StringCopier <CharPointerType, CharPointer_UTF16>::copyToBuffer (text, buffer, maxBufferSizeBytes);
 }
 
-int String::copyToUTF32 (CharPointer_UTF32::CharType* const buffer, int maxBufferSizeBytes) const noexcept
+size_t String::copyToUTF32 (CharPointer_UTF32::CharType* const buffer, size_t maxBufferSizeBytes) const noexcept
 {
     return StringCopier <CharPointerType, CharPointer_UTF32>::copyToBuffer (text, buffer, maxBufferSizeBytes);
 }
 
 //==============================================================================
-int String::getNumBytesAsUTF8() const noexcept
+size_t String::getNumBytesAsUTF8() const noexcept
 {
-    return (int) CharPointer_UTF8::getBytesRequiredFor (text);
+    return CharPointer_UTF8::getBytesRequiredFor (text);
 }
 
 String String::fromUTF8 (const char* const buffer, int bufferSizeBytes)

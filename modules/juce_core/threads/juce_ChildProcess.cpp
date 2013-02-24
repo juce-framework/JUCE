@@ -52,7 +52,7 @@ String ChildProcess::readAllProcessOutput()
         if (num <= 0)
             break;
 
-        result.write (buffer, num);
+        result.write (buffer, (size_t) num);
     }
 
     return result.toString();

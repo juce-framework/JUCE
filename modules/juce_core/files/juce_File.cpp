@@ -672,9 +672,11 @@ FileOutputStream* File::createOutputStream (const int bufferSize) const
 
 //==============================================================================
 bool File::appendData (const void* const dataToAppend,
-                       const int numberOfBytes) const
+                       const size_t numberOfBytes) const
 {
-    if (numberOfBytes <= 0)
+    jassert (((ssize_t) numberOfBytes) >= 0);
+
+    if (numberOfBytes == 0)
         return true;
 
     FileOutputStream out (*this, 8192);
@@ -682,11 +684,9 @@ bool File::appendData (const void* const dataToAppend,
 }
 
 bool File::replaceWithData (const void* const dataToWrite,
-                            const int numberOfBytes) const
+                            const size_t numberOfBytes) const
 {
-    jassert (numberOfBytes >= 0); // a negative number of bytes??
-
-    if (numberOfBytes <= 0)
+    if (numberOfBytes == 0)
         return deleteFile();
 
     TemporaryFile tempFile (*this, TemporaryFile::useHiddenFile);

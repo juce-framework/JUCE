@@ -135,7 +135,7 @@ void FileChooser::showPlatformDialog (Array<File>& results, const String& title_
 
     const String title (title_);
     HeapBlock<WCHAR> files;
-    const int charsAvailableForResult = 32768;
+    const size_t charsAvailableForResult = 32768;
     files.calloc (charsAvailableForResult + 1);
     int filenameOffset = 0;
 
@@ -215,12 +215,12 @@ void FileChooser::showPlatformDialog (Array<File>& results, const String& title_
             info.customComponent->enterModalState();
         }
 
-        const int filterSpaceNumChars = 2048;
+        const size_t filterSpaceNumChars = 2048;
         HeapBlock<WCHAR> filters;
         filters.calloc (filterSpaceNumChars);
-        const int bytesWritten = filter.copyToUTF16 (filters.getData(), filterSpaceNumChars * sizeof (WCHAR));
+        const size_t bytesWritten = filter.copyToUTF16 (filters.getData(), filterSpaceNumChars * sizeof (WCHAR));
         filter.copyToUTF16 (filters + (bytesWritten / sizeof (WCHAR)),
-                            (int) ((filterSpaceNumChars - 1) * sizeof (WCHAR) - bytesWritten));
+                            ((filterSpaceNumChars - 1) * sizeof (WCHAR) - bytesWritten));
 
         OPENFILENAMEW of = { 0 };
         String localPath (info.initialPath);
@@ -234,7 +234,7 @@ void FileChooser::showPlatformDialog (Array<File>& results, const String& title_
         of.lpstrFilter = filters.getData();
         of.nFilterIndex = 1;
         of.lpstrFile = files;
-        of.nMaxFile = charsAvailableForResult;
+        of.nMaxFile = (DWORD) charsAvailableForResult;
         of.lpstrInitialDir = localPath.toWideCharPointer();
         of.lpstrTitle = title.toWideCharPointer();
         of.Flags = flags;

@@ -324,15 +324,16 @@ public:
     /** Copies characters from one string to another, up to a null terminator
         or a given byte size limit. */
     template <typename DestCharPointerType, typename SrcCharPointerType>
-    static int copyWithDestByteLimit (DestCharPointerType& dest, SrcCharPointerType src, int maxBytes) noexcept
+    static size_t copyWithDestByteLimit (DestCharPointerType& dest, SrcCharPointerType src, size_t maxBytesToWrite) noexcept
     {
         typename DestCharPointerType::CharType const* const startAddress = dest.getAddress();
+        ssize_t maxBytes = (ssize_t) maxBytesToWrite;
         maxBytes -= sizeof (typename DestCharPointerType::CharType); // (allow for a terminating null)
 
         for (;;)
         {
             const juce_wchar c = src.getAndAdvance();
-            const int bytesNeeded = (int) DestCharPointerType::getBytesRequiredFor (c);
+            const size_t bytesNeeded = DestCharPointerType::getBytesRequiredFor (c);
 
             maxBytes -= bytesNeeded;
             if (c == 0 || maxBytes < 0)
@@ -343,7 +344,8 @@ public:
 
         dest.writeNull();
 
-        return (int) ((size_t) getAddressDifference (dest.getAddress(), startAddress) + sizeof (typename DestCharPointerType::CharType));
+        return (size_t) getAddressDifference (dest.getAddress(), startAddress)
+                 + sizeof (typename DestCharPointerType::CharType);
     }
 
     /** Copies characters from one string to another, up to a null terminator

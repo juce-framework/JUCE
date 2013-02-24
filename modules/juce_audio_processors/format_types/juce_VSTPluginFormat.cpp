@@ -1393,7 +1393,7 @@ public:
                 if (JUCEApplication* app = JUCEApplication::getInstance())
                     hostName = app->getApplicationName();
 
-                hostName.copyToUTF8 ((char*) ptr, jmin (kVstMaxVendorStrLen, kVstMaxProductStrLen) - 1);
+                hostName.copyToUTF8 ((char*) ptr, (size_t) jmin (kVstMaxVendorStrLen, kVstMaxProductStrLen) - 1);
                 break;
             }
 

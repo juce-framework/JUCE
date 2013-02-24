@@ -59,7 +59,7 @@ namespace WindowsFileHelpers
         const size_t numBytes = CharPointer_UTF16::getBytesRequiredFor (path.getCharPointer()) + 4;
         HeapBlock<WCHAR> pathCopy;
         pathCopy.calloc (numBytes, 1);
-        path.copyToUTF16 (pathCopy, (int) numBytes);
+        path.copyToUTF16 (pathCopy, numBytes);
 
         if (PathStripToRoot (pathCopy))
             path = static_cast <const WCHAR*> (pathCopy);
@@ -184,7 +184,7 @@ bool File::moveToTrash() const
     const size_t numBytes = CharPointer_UTF16::getBytesRequiredFor (fullPath.getCharPointer()) + 8;
     HeapBlock<WCHAR> doubleNullTermPath;
     doubleNullTermPath.calloc (numBytes, 1);
-    fullPath.copyToUTF16 (doubleNullTermPath, (int) numBytes);
+    fullPath.copyToUTF16 (doubleNullTermPath, numBytes);
 
     SHFILEOPSTRUCT fos = { 0 };
     fos.wFunc = FO_DELETE;
@@ -278,7 +278,7 @@ void FileOutputStream::closeHandle()
     CloseHandle ((HANDLE) fileHandle);
 }
 
-int FileOutputStream::writeInternal (const void* buffer, int numBytes)
+ssize_t FileOutputStream::writeInternal (const void* buffer, size_t numBytes)
 {
     if (fileHandle != nullptr)
     {
@@ -286,7 +286,7 @@ int FileOutputStream::writeInternal (const void* buffer, int numBytes)
         if (! WriteFile ((HANDLE) fileHandle, buffer, (DWORD) numBytes, &actualNum, 0))
             status = WindowsFileHelpers::getResultForLastError();
 
-        return (int) actualNum;
+        return (ssize_t) actualNum;
     }
 
     return 0;

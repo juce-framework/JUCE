@@ -65,20 +65,20 @@ namespace CoreMidiHelpers
     {
         String result (getMidiObjectName (endpoint));
 
-        MIDIEntityRef entity = nullptr;
+        MIDIEntityRef entity = 0;  // NB: don't attempt to use nullptr for refs - it fails in some types of build.
         MIDIEndpointGetEntity (endpoint, &entity);
 
-        if (entity == nullptr)
+        if (entity == 0)
             return result; // probably virtual
 
         if (result.isEmpty())
             result = getMidiObjectName (entity);  // endpoint name is empty - try the entity
 
         // now consider the device's name
-        MIDIDeviceRef device = nullptr;
+        MIDIDeviceRef device = 0;
         MIDIEntityGetDevice (entity, &device);
 
-        if (device != nullptr)
+        if (device != 0)
         {
             const String deviceName (getMidiObjectName (device));
 
@@ -174,7 +174,7 @@ namespace CoreMidiHelpers
                                             : MIDIGetDestination (i);
             String name;
 
-            if (dest != nullptr)
+            if (dest != 0)
                 name = getConnectedEndpointName (dest);
 
             if (name.isEmpty())
@@ -201,9 +201,9 @@ namespace CoreMidiHelpers
 
     static MIDIClientRef getGlobalMidiClient()
     {
-        static MIDIClientRef globalMidiClient = nullptr;
+        static MIDIClientRef globalMidiClient = 0;
 
-        if (globalMidiClient == nullptr)
+        if (globalMidiClient == 0)
         {
             // Since OSX 10.6, the MIDIClientCreate function will only work
             // correctly when called from the message thread!
@@ -228,16 +228,16 @@ namespace CoreMidiHelpers
 
         ~MidiPortAndEndpoint()
         {
-            if (port != nullptr)
+            if (port != 0)
                 MIDIPortDispose (port);
 
-            if (port == nullptr && endPoint != nullptr) // if port == nullptr, it means we created the endpoint, so it's safe to delete it
+            if (port == 0 && endPoint != 0) // if port == nullptr, it means we created the endpoint, so it's safe to delete it
                 MIDIEndpointDispose (endPoint);
         }
 
         void send (const MIDIPacketList* const packets)
         {
-            if (port != nullptr)
+            if (port != 0)
                 MIDISend (port, endPoint, packets);
             else
                 MIDIReceived (endPoint, packets);
@@ -269,7 +269,7 @@ namespace CoreMidiHelpers
                 activeCallbacks.removeFirstMatchingValue (this);
             }
 
-            if (portAndEndpoint != nullptr && portAndEndpoint->port != nullptr)
+            if (portAndEndpoint != 0 && portAndEndpoint->port != 0)
                 CHECK_ERROR (MIDIPortDisconnectSource (portAndEndpoint->port, portAndEndpoint->endPoint));
         }
 
@@ -325,7 +325,7 @@ MidiOutput* MidiOutput::openDevice (int index)
             MIDIClientRef client = CoreMidiHelpers::getGlobalMidiClient();
             MIDIPortRef port;
 
-            if (client != nullptr && CHECK_ERROR (MIDIOutputPortCreate (client, pname, &port)))
+            if (client != 0 && CHECK_ERROR (MIDIOutputPortCreate (client, pname, &port)))
             {
                 mo = new MidiOutput();
                 mo->internal = new CoreMidiHelpers::MidiPortAndEndpoint (port, endPoint);
@@ -346,10 +346,10 @@ MidiOutput* MidiOutput::createNewDevice (const String& deviceName)
     MIDIEndpointRef endPoint;
     CFStringRef name = deviceName.toCFString();
 
-    if (client != nullptr && CHECK_ERROR (MIDISourceCreate (client, name, &endPoint)))
+    if (client != 0 && CHECK_ERROR (MIDISourceCreate (client, name, &endPoint)))
     {
         mo = new MidiOutput();
-        mo->internal = new CoreMidiHelpers::MidiPortAndEndpoint (nullptr, endPoint);
+        mo->internal = new CoreMidiHelpers::MidiPortAndEndpoint (0, endPoint);
     }
 
     CFRelease (name);
@@ -489,7 +489,7 @@ MidiInput* MidiInput::createNewDevice (const String& deviceName, MidiInputCallba
 
         if (CHECK_ERROR (MIDIDestinationCreate (client, name, midiInputProc, mpc, &endPoint)))
         {
-            mpc->portAndEndpoint = new MidiPortAndEndpoint (nullptr, endPoint);
+            mpc->portAndEndpoint = new MidiPortAndEndpoint (0, endPoint);
 
             mi = new MidiInput (deviceName);
             mpc->input = mi;

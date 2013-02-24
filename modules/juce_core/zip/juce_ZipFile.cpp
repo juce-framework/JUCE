@@ -520,7 +520,7 @@ private:
                 return false;
 
             checksum = juce_crc32 (checksum, buffer, (unsigned int) bytesRead);
-            target.write (buffer, bytesRead);
+            target.write (buffer, (size_t) bytesRead);
         }
 
         return true;

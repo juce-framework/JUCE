@@ -400,7 +400,7 @@ private:
 
     static void writeSpaces (OutputStream& out, int numSpaces)
     {
-        out.writeRepeatedByte (' ', numSpaces);
+        out.writeRepeatedByte (' ', (size_t) numSpaces);
     }
 
     static void writeArray (OutputStream& out, const Array<var>& array,

@@ -84,11 +84,11 @@ public:
         types of data which use this to do the work.
 
         @param dataToWrite      the target buffer to receive the data. This must not be null.
-        @param numberOfBytes    the number of bytes to write. This must not be negative.
+        @param numberOfBytes    the number of bytes to write.
         @returns false if the write operation fails for some reason
     */
     virtual bool write (const void* dataToWrite,
-                        int numberOfBytes) = 0;
+                        size_t numberOfBytes) = 0;
 
     //==============================================================================
     /** Writes a single byte to the stream.
@@ -160,7 +160,7 @@ public:
     virtual void writeDoubleBigEndian (double value);
 
     /** Writes a byte to the output stream a given number of times. */
-    virtual void writeRepeatedByte (uint8 byte, int numTimesToRepeat);
+    virtual void writeRepeatedByte (uint8 byte, size_t numTimesToRepeat);
 
     /** Writes a condensed binary encoding of a 32-bit integer.
 

@@ -236,7 +236,7 @@ namespace DragAndDropHelpers
 
             for (int i = 0; i < fileNames.size(); ++i)
             {
-                const int bytesWritten = fileNames[i].copyToUTF16 (fname, 2048);
+                const size_t bytesWritten = fileNames[i].copyToUTF16 (fname, 2048);
                 fname = reinterpret_cast<WCHAR*> (addBytesToPointer (fname, bytesWritten));
             }
 
@@ -285,7 +285,7 @@ bool DragAndDropContainer::performExternalDragDropOfText (const String& text)
     medium.hGlobal = GlobalAlloc (GMEM_MOVEABLE | GMEM_ZEROINIT, numBytes + 2);
     WCHAR* const data = static_cast <WCHAR*> (GlobalLock (medium.hGlobal));
 
-    text.copyToUTF16 (data, (int) numBytes);
+    text.copyToUTF16 (data, numBytes);
     format.cfFormat = CF_UNICODETEXT;
 
     GlobalUnlock (medium.hGlobal);

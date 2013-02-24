@@ -436,8 +436,8 @@ public:
     static void setPinProperties (VstPinProperties& properties, const String& name,
                                   VstSpeakerArrangementType type, const bool isPair)
     {
-        name.copyToUTF8 (properties.label, kVstMaxLabelLen - 1);
-        name.copyToUTF8 (properties.shortLabel, kVstMaxShortLabelLen - 1);
+        name.copyToUTF8 (properties.label, (size_t) (kVstMaxLabelLen - 1));
+        name.copyToUTF8 (properties.shortLabel, (size_t) (kVstMaxShortLabelLen - 1));
 
         if (type != kSpeakerArrEmpty)
         {

@@ -620,7 +620,7 @@ bool MidiMessage::isSysEx() const noexcept
     return *data == 0xf0;
 }
 
-MidiMessage MidiMessage::createSysExMessage (const uint8* sysexData, const int dataSize)
+MidiMessage MidiMessage::createSysExMessage (const void* sysexData, const int dataSize)
 {
     HeapBlock<uint8> m ((size_t) dataSize + 2);
 

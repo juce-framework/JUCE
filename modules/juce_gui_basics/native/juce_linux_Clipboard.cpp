@@ -135,7 +135,8 @@ namespace ClipboardHelpers
         reply.time = evt.time;
 
         HeapBlock <char> data;
-        int propertyFormat = 0, numDataItems = 0;
+        int propertyFormat = 0;
+        size_t numDataItems = 0;
 
         if (evt.selection == XA_PRIMARY || evt.selection == ClipboardHelpers::atom_CLIPBOARD)
         {
@@ -167,7 +168,7 @@ namespace ClipboardHelpers
 
         if (data != nullptr)
         {
-            const int maxReasonableSelectionSize = 1000000;
+            const size_t maxReasonableSelectionSize = 1000000;
 
             // for very big chunks of data, we should use the "INCR" protocol , which is a pain in the *ss
             if (evt.property != None && numDataItems < maxReasonableSelectionSize)

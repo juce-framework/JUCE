@@ -80,7 +80,7 @@ void LagrangeInterpolator::reset() noexcept
 }
 
 int LagrangeInterpolator::process (const double actualRatio, const float* in,
-                                  float* out, const int numOut) noexcept
+                                   float* out, const int numOut) noexcept
 {
     if (actualRatio == 1.0)
     {
@@ -132,7 +132,7 @@ int LagrangeInterpolator::process (const double actualRatio, const float* in,
     }
 
     subSamplePos = pos;
-    return in - originalIn;
+    return (int) (in - originalIn);
 }
 
 int LagrangeInterpolator::processAdding (const double actualRatio, const float* in,
@@ -197,5 +197,5 @@ int LagrangeInterpolator::processAdding (const double actualRatio, const float* 
     }
 
     subSamplePos = pos;
-    return in - originalIn;
+    return (int) (in - originalIn);
 }

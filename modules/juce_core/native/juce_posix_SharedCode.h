@@ -494,19 +494,19 @@ void FileOutputStream::closeHandle()
     }
 }
 
-int FileOutputStream::writeInternal (const void* const data, const int numBytes)
+ssize_t FileOutputStream::writeInternal (const void* const data, const size_t numBytes)
 {
     ssize_t result = 0;
 
     if (fileHandle != 0)
     {
-        result = ::write (getFD (fileHandle), data, (size_t) numBytes);
+        result = ::write (getFD (fileHandle), data, numBytes);
 
         if (result == -1)
             status = getResultForErrno();
     }
 
-    return (int) result;
+    return result;
 }
 
 void FileOutputStream::flushInternal()
