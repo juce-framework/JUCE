@@ -12,7 +12,7 @@
   <Configurations>
     <Configuration Name="Debug|Win32"
                    OutputDirectory=".\Debug"
-                   IntermediateDirectory="$(OutDir)"
+                   IntermediateDirectory="$(Configuration)"
                    ConfigurationType="4"
                    UseOfMFC="0"
                    ATLMinimizesCRunTimeLibraryUsage="false"
@@ -54,7 +54,7 @@
     </Configuration>
     <Configuration Name="Release|Win32"
                    OutputDirectory=".\Release"
-                   IntermediateDirectory="$(OutDir)"
+                   IntermediateDirectory="$(Configuration)"
                    ConfigurationType="4"
                    UseOfMFC="0"
                    ATLMinimizesCRunTimeLibraryUsage="false"

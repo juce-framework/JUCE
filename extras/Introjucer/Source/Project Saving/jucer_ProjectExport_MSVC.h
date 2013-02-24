@@ -165,7 +165,7 @@ protected:
         String getIntermediatesPath() const
         {
             const String path (config [Ids::intermediatesPath].toString());
-            return path.isNotEmpty() ? path : "$(OutDir)";
+            return path.isNotEmpty() ? path : "$(Configuration)";
         }
 
         String getOutputFilename (const String& suffix, bool forceSuffix) const
