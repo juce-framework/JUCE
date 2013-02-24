@@ -160,6 +160,14 @@ protected:
         Value getUsingRuntimeLibDLL()               { return getValue (Ids::useRuntimeLibDLL); }
         bool isUsingRuntimeLibDLL() const           { return config [Ids::useRuntimeLibDLL]; }
 
+        Value getIntermediatesPathValue()           { return getValue (Ids::intermediatesPath); }
+
+        String getIntermediatesPath() const
+        {
+            const String path (config [Ids::intermediatesPath].toString());
+            return path.isNotEmpty() ? path : "$(OutDir)";
+        }
+
         String getOutputFilename (const String& suffix, bool forceSuffix) const
         {
             const String target (File::createLegalFileName (getTargetBinaryNameString().trim()));
@@ -172,6 +180,11 @@ protected:
 
         void createConfigProperties (PropertyListBuilder& props)
         {
+            props.add (new TextPropertyComponent (getIntermediatesPathValue(), "Intermediates path", 2048, false),
+                       "An optional path to a folder to use for the intermediate build files. Note that Visual Studio allows "
+                       "you to use macros in this path, e.g. \"$(TEMP)\\MyAppBuildFiles\\$(Configuration)\", which is a handy way to "
+                       "send them to the user's temp folder.");
+
             const char* const warningLevelNames[] = { "Low", "Medium", "High", nullptr };
             const int warningLevels[] = { 2, 3, 4 };
 
@@ -215,16 +228,11 @@ protected:
     }
 
     //==============================================================================
-    String getIntermediatesPath (const BuildConfiguration& config) const
-    {
-        return prependDot (File::createLegalFileName (config.getName().trim()));
-    }
-
     String getConfigTargetPath (const BuildConfiguration& config) const
     {
         const String binaryPath (config.getTargetBinaryRelativePathString().trim());
         if (binaryPath.isEmpty())
-            return getIntermediatesPath (config);
+            return prependDot (File::createLegalFileName (config.getName().trim()));
 
         RelativePath binaryRelPath (binaryPath, RelativePath::projectFolder);
 
@@ -711,7 +719,7 @@ protected:
 
         xml.setAttribute ("Name", createConfigName (config));
         xml.setAttribute ("OutputDirectory", FileHelpers::windowsStylePath (getConfigTargetPath (config)));
-        xml.setAttribute ("IntermediateDirectory", FileHelpers::windowsStylePath (getIntermediatesPath (config)));
+        xml.setAttribute ("IntermediateDirectory", FileHelpers::windowsStylePath (config.getIntermediatesPath()));
         xml.setAttribute ("ConfigurationType", isLibraryDLL() ? "2" : (projectType.isLibrary() ? "4" : "1"));
         xml.setAttribute ("UseOfMFC", "0");
         xml.setAttribute ("ATLMinimizesCRunTimeLibraryUsage", "false");
@@ -1127,7 +1135,7 @@ protected:
                 {
                     XmlElement* intdir = props->createNewChildElement ("IntDir");
                     setConditionAttribute (*intdir, config);
-                    intdir->addTextElement (getIntermediatesPath (config) + "\\");
+                    intdir->addTextElement (config.getIntermediatesPath() + "\\");
                 }
 
                 {

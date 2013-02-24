@@ -45,6 +45,7 @@ namespace Ids
     DECLARE_ID (initialState);
     DECLARE_ID (juceFolder);
     DECLARE_ID (targetFolder);
+    DECLARE_ID (intermediatesPath);
     DECLARE_ID (vstFolder);
     DECLARE_ID (rtasFolder);
     DECLARE_ID (auFolder);
