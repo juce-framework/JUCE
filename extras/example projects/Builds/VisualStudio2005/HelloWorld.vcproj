@@ -373,6 +373,17 @@
           <File RelativePath="..\..\..\..\modules\juce_core\threads\juce_ChildProcess.h"/>
           <File RelativePath="..\..\..\..\modules\juce_core\threads\juce_CriticalSection.h"/>
           <File RelativePath="..\..\..\..\modules\juce_core\threads\juce_DynamicLibrary.h"/>
+          <File RelativePath="..\..\..\..\modules\juce_core\threads\juce_HighResolutionTimer.cpp">
+            <FileConfiguration Name="Debug|Win32"
+                               ExcludedFromBuild="true">
+              <Tool Name="VCCLCompilerTool"/>
+            </FileConfiguration>
+            <FileConfiguration Name="Release|Win32"
+                               ExcludedFromBuild="true">
+              <Tool Name="VCCLCompilerTool"/>
+            </FileConfiguration>
+          </File>
+          <File RelativePath="..\..\..\..\modules\juce_core\threads\juce_HighResolutionTimer.h"/>
           <File RelativePath="..\..\..\..\modules\juce_core\threads\juce_InterProcessLock.h"/>
           <File RelativePath="..\..\..\..\modules\juce_core\threads\juce_Process.h"/>
           <File RelativePath="..\..\..\..\modules\juce_core\threads\juce_ReadWriteLock.cpp">

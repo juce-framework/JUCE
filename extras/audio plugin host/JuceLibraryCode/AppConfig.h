@@ -87,6 +87,10 @@
  //#define JUCE_USE_MP3AUDIOFORMAT
 #endif
 
+#ifndef    JUCE_USE_LAME_AUDIO_FORMAT
+ //#define JUCE_USE_LAME_AUDIO_FORMAT
+#endif
+
 #ifndef    JUCE_USE_WINDOWS_MEDIA_FORMAT
  //#define JUCE_USE_WINDOWS_MEDIA_FORMAT
 #endif

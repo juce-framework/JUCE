@@ -747,6 +747,7 @@ private:
 
         s.add ("GCC_VERSION = " + gccVersion);
         s.add ("CLANG_CXX_LANGUAGE_STANDARD = \"c++0x\"");
+        s.add ("CLANG_LINK_OBJC_RUNTIME = NO");
 
         if (config.getCppLibType().isNotEmpty())
             s.add ("CLANG_CXX_LIBRARY = " + config.getCppLibType().quoted());

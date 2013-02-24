@@ -150,6 +150,9 @@ public:
     }
 
     //==============================================================================
+    AudioProcessor* getAudioProcessor() const noexcept      { return filter; }
+    AudioDeviceManager* getDeviceManager() const noexcept   { return deviceManager; }
+
     /** Deletes and re-creates the filter and its UI. */
     void resetFilter()
     {

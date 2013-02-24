@@ -310,12 +310,17 @@ Result FileOutputStream::truncate()
 }
 
 //==============================================================================
-MemoryMappedFile::MemoryMappedFile (const File& file, MemoryMappedFile::AccessMode mode)
-    : address (nullptr),
-      length (0),
-      fileHandle (nullptr)
+void MemoryMappedFile::openInternal (const File& file, AccessMode mode)
 {
     jassert (mode == readOnly || mode == readWrite);
+
+    if (range.getStart() > 0)
+    {
+        SYSTEM_INFO systemInfo;
+        GetNativeSystemInfo (&systemInfo);
+
+        range.setStart (range.getStart() - (range.getStart() % systemInfo.dwAllocationGranularity));
+    }
 
     DWORD accessMode = GENERIC_READ, createType = OPEN_EXISTING;
     DWORD protect = PAGE_READONLY, access = FILE_MAP_READ;
@@ -334,15 +339,16 @@ MemoryMappedFile::MemoryMappedFile (const File& file, MemoryMappedFile::AccessMo
     if (h != INVALID_HANDLE_VALUE)
     {
         fileHandle = (void*) h;
-        const int64 fileSize = file.getSize();
 
-        HANDLE mappingHandle = CreateFileMapping (h, 0, protect, (DWORD) (fileSize >> 32), (DWORD) fileSize, 0);
+        HANDLE mappingHandle = CreateFileMapping (h, 0, protect, (DWORD) (range.getEnd() >> 32), (DWORD) range.getEnd(), 0);
+
         if (mappingHandle != 0)
         {
-            address = MapViewOfFile (mappingHandle, access, 0, 0, (SIZE_T) fileSize);
+            address = MapViewOfFile (mappingHandle, access, (DWORD) (range.getStart() >> 32),
+                                     (DWORD) range.getStart(), (SIZE_T) range.getLength());
 
-            if (address != nullptr)
-                length = (size_t) fileSize;
+            if (address == nullptr)
+                range = Range<int64>();
 
             CloseHandle (mappingHandle);
         }

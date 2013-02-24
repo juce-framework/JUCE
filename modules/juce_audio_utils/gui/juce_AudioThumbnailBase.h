@@ -83,7 +83,7 @@ public:
         previously have been created by the saveTo() method.
         @see saveTo
     */
-    virtual void loadFrom (InputStream& input) = 0;
+    virtual bool loadFrom (InputStream& input) = 0;
 
     /** Saves the low res thumbnail data to an output stream.
 

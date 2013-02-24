@@ -112,6 +112,7 @@ namespace juce
 #include "codecs/juce_OggVorbisAudioFormat.cpp"
 #include "codecs/juce_QuickTimeAudioFormat.cpp"
 #include "codecs/juce_WavAudioFormat.cpp"
+#include "codecs/juce_LAMEEncoderAudioFormat.cpp"
 
 #if JUCE_WINDOWS && JUCE_USE_WINDOWS_MEDIA_FORMAT
  #include "codecs/juce_WindowsMediaAudioFormat.cpp"

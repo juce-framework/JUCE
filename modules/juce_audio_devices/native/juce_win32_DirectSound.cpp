@@ -125,15 +125,17 @@ extern "C"
         STDMETHOD(Stop)                 (THIS) PURE;
         STDMETHOD(Unlock)               (THIS_ LPVOID, DWORD, LPVOID, DWORD) PURE;
     };
+
+    #undef INTERFACE
 }
 
-//==============================================================================
 namespace juce
 {
 
-namespace
+//==============================================================================
+namespace DSoundLogging
 {
-    String getDSErrorMessage (HRESULT hr)
+    String getErrorMessage (HRESULT hr)
     {
         const char* result = nullptr;
 
@@ -163,31 +165,37 @@ namespace
     }
 
     //==============================================================================
-    #define DS_DEBUGGING 1
+   #if JUCE_DIRECTSOUND_LOGGING
+    static void logMessage (String message)
+    {
+        message = "DSOUND: " + message;
+        DBG (message);
+        Logger::writeToLog (message);
+    }
 
-   #ifdef DS_DEBUGGING
-    #define CATCH JUCE_CATCH_EXCEPTION
-    #undef log
-    #define log(a) Logger::writeToLog(a);
-    #undef logError
-    #define logError(a) logDSError(a, __LINE__);
-
-    static void logDSError (HRESULT hr, int lineNum)
+    static void logError (HRESULT hr, int lineNum)
     {
         if (FAILED (hr))
         {
-            String error ("DS error at line ");
-            error << lineNum << " - " << getDSErrorMessage (hr);
-            log (error);
+            String error ("Error at line ");
+            error << lineNum << ": " << getErrorMessage (hr);
+            logMessage (error);
         }
     }
+
+    #define CATCH JUCE_CATCH_EXCEPTION
+    #define JUCE_DS_LOG(a)        DSoundLogging::logMessage(a);
+    #define JUCE_DS_LOG_ERROR(a)  DSoundLogging::logError(a, __LINE__);
    #else
     #define CATCH JUCE_CATCH_ALL
-    #define log(a)
-    #define logError(a)
+    #define JUCE_DS_LOG(a)
+    #define JUCE_DS_LOG_ERROR(a)
    #endif
+}
 
-    //==============================================================================
+//==============================================================================
+namespace
+{
     #define DSOUND_FUNCTION(functionName, params) \
         typedef HRESULT (WINAPI *type##functionName) params; \
         static type##functionName ds##functionName = nullptr;
@@ -242,9 +250,9 @@ public:
     {
         if (pOutputBuffer != nullptr)
         {
-            log ("closing dsound out: " + name);
+            JUCE_DS_LOG ("closing output: " + name);
             HRESULT hr = pOutputBuffer->Stop();
-            logError (hr);
+            JUCE_DS_LOG_ERROR (hr); (void) hr;
 
             pOutputBuffer->Release();
             pOutputBuffer = nullptr;
@@ -259,8 +267,8 @@ public:
 
     String open()
     {
-        log ("opening dsound out device: " + name + "  rate=" + String (sampleRate)
-              + " bits=" + String (bitDepth) + " buf=" + String (bufferSizeSamples));
+        JUCE_DS_LOG ("opening output: " + name + "  rate=" + String (sampleRate)
+                       + " bits=" + String (bitDepth) + " buf=" + String (bufferSizeSamples));
 
         pDirectSound = nullptr;
         pOutputBuffer = nullptr;
@@ -279,7 +287,7 @@ public:
             const int numChannels = 2;
 
             hr = pDirectSound->SetCooperativeLevel (GetDesktopWindow(), 2 /* DSSCL_PRIORITY */);
-            logError (hr);
+            JUCE_DS_LOG_ERROR (hr);
 
             if (SUCCEEDED (hr))
             {
@@ -291,9 +299,9 @@ public:
                 primaryDesc.dwBufferBytes = 0;
                 primaryDesc.lpwfxFormat = 0;
 
-                log ("opening dsound out step 2");
+                JUCE_DS_LOG ("co-op level set");
                 hr = pDirectSound->CreateSoundBuffer (&primaryDesc, &pPrimaryBuffer, 0);
-                logError (hr);
+                JUCE_DS_LOG_ERROR (hr);
 
                 if (SUCCEEDED (hr))
                 {
@@ -307,7 +315,7 @@ public:
                     wfFormat.cbSize = 0;
 
                     hr = pPrimaryBuffer->SetFormat (&wfFormat);
-                    logError (hr);
+                    JUCE_DS_LOG_ERROR (hr);
 
                     if (SUCCEEDED (hr))
                     {
@@ -319,18 +327,18 @@ public:
                         secondaryDesc.lpwfxFormat = &wfFormat;
 
                         hr = pDirectSound->CreateSoundBuffer (&secondaryDesc, &pOutputBuffer, 0);
-                        logError (hr);
+                        JUCE_DS_LOG_ERROR (hr);
 
                         if (SUCCEEDED (hr))
                         {
-                            log ("opening dsound out step 3");
+                            JUCE_DS_LOG ("buffer created");
 
                             DWORD dwDataLen;
                             unsigned char* pDSBuffData;
 
                             hr = pOutputBuffer->Lock (0, (DWORD) totalBytesPerBuffer,
                                                       (LPVOID*) &pDSBuffData, &dwDataLen, 0, 0, 0);
-                            logError (hr);
+                            JUCE_DS_LOG_ERROR (hr);
 
                             if (SUCCEEDED (hr))
                             {
@@ -357,7 +365,7 @@ public:
             }
         }
 
-        error = getDSErrorMessage (hr);
+        error = DSoundLogging::getErrorMessage (hr);
         close();
         return error;
     }
@@ -391,7 +399,7 @@ public:
             if (SUCCEEDED (hr))
                 break;
 
-            logError (hr);
+            JUCE_DS_LOG_ERROR (hr);
             jassertfalse;
             return true;
         }
@@ -467,7 +475,7 @@ public:
             else
             {
                 jassertfalse;
-                logError (hr);
+                JUCE_DS_LOG_ERROR (hr);
             }
 
             bytesEmpty -= bytesPerBuffer;
@@ -527,9 +535,9 @@ public:
 
         if (pInputBuffer != nullptr)
         {
-            log ("closing dsound in: " + name);
+            JUCE_DS_LOG ("closing input: " + name);
             hr = pInputBuffer->Stop();
-            logError (hr);
+            JUCE_DS_LOG_ERROR (hr);
 
             pInputBuffer->Release();
             pInputBuffer = nullptr;
@@ -550,8 +558,8 @@ public:
 
     String open()
     {
-        log ("opening dsound in device: " + name
-              + "  rate=" + String (sampleRate) + " bits=" + String (bitDepth) + " buf=" + String (bufferSizeSamples));
+        JUCE_DS_LOG ("opening input: " + name
+                       + "  rate=" + String (sampleRate) + " bits=" + String (bitDepth) + " buf=" + String (bufferSizeSamples));
 
         pDirectSound = nullptr;
         pDirectSoundCapture = nullptr;
@@ -584,7 +592,7 @@ public:
             captureDesc.dwBufferBytes = (DWORD) totalBytesPerBuffer;
             captureDesc.lpwfxFormat = &wfFormat;
 
-            log ("opening dsound in step 2");
+            JUCE_DS_LOG ("object created");
             hr = pDirectSoundCapture->CreateCaptureBuffer (&captureDesc, &pInputBuffer, 0);
 
             if (SUCCEEDED (hr))
@@ -596,8 +604,8 @@ public:
             }
         }
 
-        logError (hr);
-        const String error (getDSErrorMessage (hr));
+        JUCE_DS_LOG_ERROR (hr);
+        const String error (DSoundLogging::getErrorMessage (hr));
         close();
 
         return error;
@@ -619,7 +627,7 @@ public:
 
         DWORD capturePos, readPos;
         HRESULT hr = pInputBuffer->GetCurrentPosition (&capturePos, &readPos);
-        logError (hr);
+        JUCE_DS_LOG_ERROR (hr);
 
         if (FAILED (hr))
             return true;
@@ -677,7 +685,7 @@ public:
             }
             else
             {
-                logError (hr);
+                JUCE_DS_LOG_ERROR (hr);
                 jassertfalse;
             }
 
@@ -1186,7 +1194,7 @@ String DSoundAudioIODevice::openDevice (const BigInteger& inputChannels,
     }
     else
     {
-        log (error);
+        JUCE_DS_LOG ("Opening failed: " + error);
     }
 
     SetThreadPriority (GetCurrentThread(), oldThreadPri);
@@ -1208,7 +1216,6 @@ public:
         initialiseDSoundFunctions();
     }
 
-    //==============================================================================
     void scanForDevices()
     {
         hasScanned = true;
@@ -1233,12 +1240,11 @@ public:
     {
         jassert (hasScanned); // need to call scanForDevices() before doing this
 
-        DSoundAudioIODevice* const d = dynamic_cast <DSoundAudioIODevice*> (device);
-        if (d == 0)
-            return -1;
+        if (DSoundAudioIODevice* const d = dynamic_cast <DSoundAudioIODevice*> (device))
+            return asInput ? d->inputDeviceIndex
+                           : d->outputDeviceIndex;
 
-        return asInput ? d->inputDeviceIndex
-                       : d->outputDeviceIndex;
+        return -1;
     }
 
     bool hasSeparateInputsAndOutputs() const    { return true; }
@@ -1260,7 +1266,6 @@ public:
     }
 
 private:
-    //==============================================================================
     DSoundDeviceList deviceList;
     bool hasScanned;
 
@@ -1276,7 +1281,6 @@ private:
         }
     }
 
-    //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DSoundAudioIODeviceType)
 };
 
@@ -1285,6 +1289,3 @@ AudioIODeviceType* AudioIODeviceType::createAudioIODeviceType_DirectSound()
 {
     return new DSoundAudioIODeviceType();
 }
-
-#undef log
-#undef logError

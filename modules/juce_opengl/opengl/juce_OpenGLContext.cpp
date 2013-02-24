@@ -309,6 +309,8 @@ public:
         associatedObjectNames.clear();
         associatedObjects.clear();
 
+        cachedImageFrameBuffer.release();
+
         nativeContext->initialiseOnRenderThread();
         glViewport (0, 0, component.getWidth(), component.getHeight());
 

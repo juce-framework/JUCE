@@ -654,8 +654,10 @@ bool File::startAsProcess (const String& parameters) const
 //==============================================================================
 FileInputStream* File::createInputStream() const
 {
-    if (existsAsFile())
-        return new FileInputStream (*this);
+    ScopedPointer<FileInputStream> fin (new FileInputStream (*this));
+
+    if (fin->openedOk())
+        return fin.release();
 
     return nullptr;
 }
@@ -879,6 +881,19 @@ File File::createTempFile (const String& fileNameEnding)
         return createTempFile (fileNameEnding);
 
     return tempFile;
+}
+
+//==============================================================================
+MemoryMappedFile::MemoryMappedFile (const File& file, MemoryMappedFile::AccessMode mode)
+    : address (nullptr), range (0, file.getSize()), fileHandle (0)
+{
+    openInternal (file, mode);
+}
+
+MemoryMappedFile::MemoryMappedFile (const File& file, const Range<int64>& fileRange, AccessMode mode)
+    : address (nullptr), range (fileRange.getIntersectionWith (Range<int64> (0, file.getSize()))), fileHandle (0)
+{
+    openInternal (file, mode);
 }
 
 

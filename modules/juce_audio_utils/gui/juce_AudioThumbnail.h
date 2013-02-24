@@ -119,7 +119,7 @@ public:
         previously have been created by the saveTo() method.
         @see saveTo
     */
-    void loadFrom (InputStream& input);
+    bool loadFrom (InputStream& input);
 
     /** Saves the low res thumbnail data to an output stream.
 
@@ -167,6 +167,9 @@ public:
 
     /** Returns true if the low res preview is fully generated. */
     bool isFullyLoaded() const noexcept;
+
+    /** Returns a value between 0 and 1 to indicate the progress towards loading the entire file. */
+    double getProportionComplete() const noexcept;
 
     /** Returns the number of samples that have been set in the thumbnail. */
     int64 getNumSamplesFinished() const noexcept;

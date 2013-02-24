@@ -237,13 +237,15 @@ protected:
         typedef AudioData::Pointer <DestSampleType, AudioData::NativeEndian, AudioData::NonInterleaved, AudioData::NonConst>    DestType;
         typedef AudioData::Pointer <SourceSampleType, SourceEndianness, AudioData::Interleaved, AudioData::Const>               SourceType;
 
-        static void read (int** destData, int destOffset, int numDestChannels, const void* sourceData, int numSourceChannels, int numSamples) noexcept
+        template <typename TargetType>
+        static void read (TargetType* const* destData, int destOffset, int numDestChannels,
+                          const void* sourceData, int numSourceChannels, int numSamples) noexcept
         {
             for (int i = 0; i < numDestChannels; ++i)
             {
-                if (destData[i] != nullptr)
+                if (void* targetChan = destData[i])
                 {
-                    DestType dest (destData[i]);
+                    DestType dest (targetChan);
                     dest += destOffset;
 
                     if (i < numSourceChannels)
@@ -254,6 +256,26 @@ protected:
             }
         }
     };
+
+    /** Used by AudioFormatReader subclasses to clear any parts of the data blocks that lie
+        beyond the end of their available length.
+    */
+    static void clearSamplesBeyondAvailableLength (int** destSamples, int numDestChannels,
+                                                   int startOffsetInDestBuffer, int64 startSampleInFile,
+                                                   int& numSamples, int64 fileLengthInSamples)
+    {
+        jassert (destSamples != nullptr);
+        const int64 samplesAvailable = fileLengthInSamples - startSampleInFile;
+
+        if (samplesAvailable < numSamples)
+        {
+            for (int i = numDestChannels; --i >= 0;)
+                if (destSamples[i] != nullptr)
+                    zeromem (destSamples[i] + startOffsetInDestBuffer, sizeof (int) * (size_t) numSamples);
+
+            numSamples = (int) samplesAvailable;
+        }
+    }
 
 private:
     String formatName;

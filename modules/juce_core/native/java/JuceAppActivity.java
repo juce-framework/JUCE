@@ -81,9 +81,6 @@ public final class JuceAppActivity   extends Activity
     @Override
     protected final void onPause()
     {
-        if (viewHolder != null)
-            viewHolder.onPause();
-
         suspendApp();
         super.onPause();
     }

@@ -101,7 +101,6 @@ private:
     //==============================================================================
     AudioPluginFormatManager& formatManager;
     AudioProcessorGraph graph;
-    AudioProcessorPlayer player;
 
     uint32 lastUID;
     uint32 getNextUID() noexcept;

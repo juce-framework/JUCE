@@ -407,16 +407,8 @@ public:
     bool readSamples (int** destSamples, int numDestChannels, int startOffsetInDestBuffer,
                       int64 startSampleInFile, int numSamples)
     {
-        const int64 samplesAvailable = lengthInSamples - startSampleInFile;
-
-        if (samplesAvailable < numSamples)
-        {
-            for (int i = numDestChannels; --i >= 0;)
-                if (destSamples[i] != nullptr)
-                    zeromem (destSamples[i] + startOffsetInDestBuffer, sizeof (int) * (size_t) numSamples);
-
-            numSamples = (int) samplesAvailable;
-        }
+        clearSamplesBeyondAvailableLength (destSamples, numDestChannels, startOffsetInDestBuffer,
+                                           startSampleInFile, numSamples, lengthInSamples);
 
         if (numSamples <= 0)
             return true;
@@ -440,33 +432,32 @@ public:
             jassert (! usesFloatingPointData); // (would need to add support for this if it's possible)
 
             if (littleEndian)
-            {
-                switch (bitsPerSample)
-                {
-                    case 8:     ReadHelper<AudioData::Int32, AudioData::Int8,  AudioData::LittleEndian>::read (destSamples, startOffsetInDestBuffer, numDestChannels, tempBuffer, (int) numChannels, numThisTime); break;
-                    case 16:    ReadHelper<AudioData::Int32, AudioData::Int16, AudioData::LittleEndian>::read (destSamples, startOffsetInDestBuffer, numDestChannels, tempBuffer, (int) numChannels, numThisTime); break;
-                    case 24:    ReadHelper<AudioData::Int32, AudioData::Int24, AudioData::LittleEndian>::read (destSamples, startOffsetInDestBuffer, numDestChannels, tempBuffer, (int) numChannels, numThisTime); break;
-                    case 32:    ReadHelper<AudioData::Int32, AudioData::Int32, AudioData::LittleEndian>::read (destSamples, startOffsetInDestBuffer, numDestChannels, tempBuffer, (int) numChannels, numThisTime); break;
-                    default:    jassertfalse; break;
-                }
-            }
+                copySampleData<AudioData::LittleEndian> (bitsPerSample, destSamples, startOffsetInDestBuffer,
+                                                         numDestChannels, tempBuffer, (int) numChannels, numThisTime);
             else
-            {
-                switch (bitsPerSample)
-                {
-                    case 8:     ReadHelper<AudioData::Int32, AudioData::Int8,  AudioData::BigEndian>::read (destSamples, startOffsetInDestBuffer, numDestChannels, tempBuffer, (int) numChannels, numThisTime); break;
-                    case 16:    ReadHelper<AudioData::Int32, AudioData::Int16, AudioData::BigEndian>::read (destSamples, startOffsetInDestBuffer, numDestChannels, tempBuffer, (int) numChannels, numThisTime); break;
-                    case 24:    ReadHelper<AudioData::Int32, AudioData::Int24, AudioData::BigEndian>::read (destSamples, startOffsetInDestBuffer, numDestChannels, tempBuffer, (int) numChannels, numThisTime); break;
-                    case 32:    ReadHelper<AudioData::Int32, AudioData::Int32, AudioData::BigEndian>::read (destSamples, startOffsetInDestBuffer, numDestChannels, tempBuffer, (int) numChannels, numThisTime); break;
-                    default:    jassertfalse; break;
-                }
-            }
+                copySampleData<AudioData::BigEndian> (bitsPerSample, destSamples, startOffsetInDestBuffer,
+                                                      numDestChannels, tempBuffer, (int) numChannels, numThisTime);
+
 
             startOffsetInDestBuffer += numThisTime;
             numSamples -= numThisTime;
         }
 
         return true;
+    }
+
+    template <typename Endianness>
+    static void copySampleData (unsigned int bitsPerSample, int* const* destSamples, int startOffsetInDestBuffer, int numDestChannels,
+                                const void* sourceData, int numChannels, int numSamples) noexcept
+    {
+        switch (bitsPerSample)
+        {
+            case 8:     ReadHelper<AudioData::Int32, AudioData::Int8,  Endianness>::read (destSamples, startOffsetInDestBuffer, numDestChannels, sourceData, numChannels, numSamples); break;
+            case 16:    ReadHelper<AudioData::Int32, AudioData::Int16, Endianness>::read (destSamples, startOffsetInDestBuffer, numDestChannels, sourceData, numChannels, numSamples); break;
+            case 24:    ReadHelper<AudioData::Int32, AudioData::Int24, Endianness>::read (destSamples, startOffsetInDestBuffer, numDestChannels, sourceData, numChannels, numSamples); break;
+            case 32:    ReadHelper<AudioData::Int32, AudioData::Int32, Endianness>::read (destSamples, startOffsetInDestBuffer, numDestChannels, sourceData, numChannels, numSamples); break;
+            default:    jassertfalse; break;
+        }
     }
 
     int bytesPerFrame;
@@ -662,6 +653,100 @@ private:
 };
 
 //==============================================================================
+class MemoryMappedAiffReader   : public MemoryMappedAudioFormatReader
+{
+public:
+    MemoryMappedAiffReader (const File& file, const AiffAudioFormatReader& reader)
+        : MemoryMappedAudioFormatReader (file, reader, reader.dataChunkStart,
+                                         reader.bytesPerFrame * reader.lengthInSamples, reader.bytesPerFrame),
+          littleEndian (reader.littleEndian)
+    {
+    }
+
+    bool readSamples (int** destSamples, int numDestChannels, int startOffsetInDestBuffer,
+                      int64 startSampleInFile, int numSamples)
+    {
+        clearSamplesBeyondAvailableLength (destSamples, numDestChannels, startOffsetInDestBuffer,
+                                           startSampleInFile, numSamples, lengthInSamples);
+
+        if (map == nullptr || ! mappedSection.contains (Range<int64> (startSampleInFile, startSampleInFile + numSamples)))
+        {
+            jassertfalse; // you must make sure that the window contains all the samples you're going to attempt to read.
+            return false;
+        }
+
+        if (littleEndian)
+            AiffAudioFormatReader::copySampleData<AudioData::LittleEndian>
+                    (bitsPerSample, destSamples, startOffsetInDestBuffer,
+                     numDestChannels, sampleToPointer (startSampleInFile), (int) numChannels, numSamples);
+        else
+            AiffAudioFormatReader::copySampleData<AudioData::BigEndian>
+                    (bitsPerSample, destSamples, startOffsetInDestBuffer,
+                     numDestChannels, sampleToPointer (startSampleInFile), (int) numChannels, numSamples);
+
+        return true;
+    }
+
+    void readMaxLevels (int64 startSampleInFile, int64 numSamples,
+                        float& min0, float& max0, float& min1, float& max1)
+    {
+        if (numSamples <= 0)
+        {
+            min0 = max0 = min1 = max1 = 0;
+            return;
+        }
+
+        if (map == nullptr || ! mappedSection.contains (Range<int64> (startSampleInFile, startSampleInFile + numSamples)))
+        {
+            jassertfalse; // you must make sure that the window contains all the samples you're going to attempt to read.
+
+            min0 = max0 = min1 = max1 = 0;
+            return;
+        }
+
+        switch (bitsPerSample)
+        {
+            case 8:     scanMinAndMax<AudioData::UInt8> (startSampleInFile, numSamples, min0, max0, min1, max1); break;
+            case 16:    scanMinAndMax<AudioData::Int16> (startSampleInFile, numSamples, min0, max0, min1, max1); break;
+            case 24:    scanMinAndMax<AudioData::Int24> (startSampleInFile, numSamples, min0, max0, min1, max1); break;
+            case 32:    scanMinAndMax<AudioData::Int32> (startSampleInFile, numSamples, min0, max0, min1, max1); break;
+            default:    jassertfalse; break;
+        }
+    }
+
+private:
+    const bool littleEndian;
+
+    template <typename SampleType>
+    void scanMinAndMax (int64 startSampleInFile, int64 numSamples,
+                        float& min0, float& max0, float& min1, float& max1) const noexcept
+    {
+        if (littleEndian)
+            scanMinAndMax2<SampleType, AudioData::LittleEndian> (startSampleInFile, numSamples, min0, max0, min1, max1);
+        else
+            scanMinAndMax2<SampleType, AudioData::BigEndian> (startSampleInFile, numSamples, min0, max0, min1, max1);
+    }
+
+    template <typename SampleType, typename Endianness>
+    void scanMinAndMax2 (int64 startSampleInFile, int64 numSamples,
+                         float& min0, float& max0, float& min1, float& max1) const noexcept
+    {
+        typedef AudioData::Pointer <SampleType, Endianness, AudioData::Interleaved, AudioData::Const> SourceType;
+
+        SourceType (sampleToPointer (startSampleInFile), (int) numChannels)
+            .findMinAndMax ((size_t) numSamples, min0, max0);
+
+        if (numChannels > 1)
+            SourceType (addBytesToPointer (sampleToPointer (startSampleInFile), bitsPerSample / 8), (int) numChannels)
+                  .findMinAndMax ((size_t) numSamples, min1, max1);
+        else
+            min1 = max1 = 0;
+    }
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MemoryMappedAiffReader)
+};
+
+//==============================================================================
 AiffAudioFormat::AiffAudioFormat()
     : AudioFormat (TRANS (aiffFormatName), StringArray (aiffExtensions))
 {
@@ -707,6 +792,19 @@ AudioFormatReader* AiffAudioFormat::createReaderFor (InputStream* sourceStream, 
 
     if (! deleteStreamIfOpeningFails)
         w->input = nullptr;
+
+    return nullptr;
+}
+
+MemoryMappedAudioFormatReader* AiffAudioFormat::createMemoryMappedReader (const File& file)
+{
+    if (FileInputStream* fin = file.createInputStream())
+    {
+        AiffAudioFormatReader reader (fin);
+
+        if (reader.lengthInSamples > 0)
+            return new MemoryMappedAiffReader (file, reader);
+    }
 
     return nullptr;
 }

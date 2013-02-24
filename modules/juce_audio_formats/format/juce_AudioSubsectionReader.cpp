@@ -51,17 +51,8 @@ AudioSubsectionReader::~AudioSubsectionReader()
 bool AudioSubsectionReader::readSamples (int** destSamples, int numDestChannels, int startOffsetInDestBuffer,
                                          int64 startSampleInFile, int numSamples)
 {
-    if (startSampleInFile + numSamples > length)
-    {
-        for (int i = numDestChannels; --i >= 0;)
-            if (destSamples[i] != nullptr)
-                zeromem (destSamples[i], sizeof (int) * (size_t) numSamples);
-
-        numSamples = jmin (numSamples, (int) (length - startSampleInFile));
-
-        if (numSamples <= 0)
-            return true;
-    }
+    clearSamplesBeyondAvailableLength (destSamples, numDestChannels, startOffsetInDestBuffer,
+                                       startSampleInFile, numSamples, length);
 
     return source->readSamples (destSamples, numDestChannels, startOffsetInDestBuffer,
                                 startSampleInFile + startSample, numSamples);

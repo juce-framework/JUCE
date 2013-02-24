@@ -52,7 +52,11 @@ void* attachSubWindow (void* hostWindowRef, Component* comp)
 {
     JUCE_AUTORELEASEPOOL
 
+   #if 0
+    // This was suggested as a way to improve passing keypresses to the host, but
+    // a side-effect seems to be occasional rendering artifacts.
     HIWindowChangeClass ((WindowRef) hostWindowRef, kFloatingWindowClass);
+   #endif
 
     NSWindow* hostWindow = [[NSWindow alloc] initWithWindowRef: hostWindowRef];
     [hostWindow retain];
@@ -65,8 +69,6 @@ void* attachSubWindow (void* hostWindowRef, Component* comp)
     f.size.width = comp->getWidth();
     f.size.height = comp->getHeight();
     [content setFrame: f];
-
-    NSRect hostWindowScreenFrame = [[hostWindow screen] frame];
 
     const int mainScreenHeight = [[[NSScreen screens] objectAtIndex: 0] frame].size.height;
 

@@ -382,6 +382,9 @@
     <ClCompile Include="..\..\..\..\modules\juce_core\threads\juce_ChildProcess.cpp">
       <Filter>Juce Modules\juce_core\threads</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_core\threads\juce_HighResolutionTimer.cpp">
+      <Filter>Juce Modules\juce_core\threads</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_core\threads\juce_ReadWriteLock.cpp">
       <Filter>Juce Modules\juce_core\threads</Filter>
     </ClCompile>
@@ -1486,6 +1489,9 @@
       <Filter>Juce Modules\juce_core\threads</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_core\threads\juce_DynamicLibrary.h">
+      <Filter>Juce Modules\juce_core\threads</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_core\threads\juce_HighResolutionTimer.h">
       <Filter>Juce Modules\juce_core\threads</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_core\threads\juce_InterProcessLock.h">

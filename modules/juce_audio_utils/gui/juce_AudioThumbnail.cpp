@@ -376,10 +376,9 @@ public:
                       const double rate, const int numChans, const int sampsPerThumbSample,
                       LevelDataSource* levelData, const OwnedArray<ThumbData>& chans)
     {
-        refillCache (area.getWidth(), startTime, endTime, rate,
-                     numChans, sampsPerThumbSample, levelData, chans);
-
-        if (isPositiveAndBelow (channelNum, numChannelsCached))
+        if (refillCache (area.getWidth(), startTime, endTime, rate,
+                         numChans, sampsPerThumbSample, levelData, chans)
+             && isPositiveAndBelow (channelNum, numChannelsCached))
         {
             const Rectangle<int> clip (g.getClipBounds().getIntersection (area.withWidth (jmin (numSamplesCached, area.getWidth()))));
 
@@ -412,7 +411,7 @@ private:
     int numChannelsCached, numSamplesCached;
     bool cacheNeedsRefilling;
 
-    void refillCache (const int numSamples, double startTime, const double endTime,
+    bool refillCache (const int numSamples, double startTime, const double endTime,
                       const double rate, const int numChans, const int sampsPerThumbSample,
                       LevelDataSource* levelData, const OwnedArray<ThumbData>& chans)
     {
@@ -421,7 +420,7 @@ private:
         if (numSamples <= 0 || timePerPixel <= 0.0 || rate <= 0)
         {
             invalidate();
-            return;
+            return false;
         }
 
         if (numSamples == numSamplesCached
@@ -430,7 +429,7 @@ private:
              && timePerPixel == cachedTimePerPixel
              && ! cacheNeedsRefilling)
         {
-            return;
+            return ! cacheNeedsRefilling;
         }
 
         numSamplesCached = numSamples;
@@ -497,6 +496,8 @@ private:
                 }
             }
         }
+
+        return true;
     }
 
     MinMaxValue* getData (const int channelNum, const int cacheIndex) noexcept
@@ -572,12 +573,12 @@ void AudioThumbnail::createChannels (const int length)
 }
 
 //==============================================================================
-void AudioThumbnail::loadFrom (InputStream& rawInput)
+bool AudioThumbnail::loadFrom (InputStream& rawInput)
 {
     BufferedInputStream input (rawInput, 4096);
 
     if (input.readByte() != 'j' || input.readByte() != 'a' || input.readByte() != 't' || input.readByte() != 'm')
-        return;
+        return false;
 
     const ScopedLock sl (lock);
     clearChannelData();
@@ -595,6 +596,8 @@ void AudioThumbnail::loadFrom (InputStream& rawInput)
     for (int i = 0; i < numThumbnailSamples; ++i)
         for (int chan = 0; chan < numChannels; ++chan)
             channels.getUnchecked(chan)->getData(i)->read (input);
+
+    return true;
 }
 
 void AudioThumbnail::saveTo (OutputStream& output) const
@@ -738,6 +741,11 @@ double AudioThumbnail::getTotalLength() const noexcept
 bool AudioThumbnail::isFullyLoaded() const noexcept
 {
     return numSamplesFinished >= totalSamples - samplesPerThumbSample;
+}
+
+double AudioThumbnail::getProportionComplete() const noexcept
+{
+    return jlimit (0.0, 1.0, numSamplesFinished / (double) jmax ((int64) 1, totalSamples));
 }
 
 int64 AudioThumbnail::getNumSamplesFinished() const noexcept

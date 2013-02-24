@@ -85,26 +85,32 @@ namespace TimeHelpers
                                  : (value - ((value / modulo) + 1) * modulo));
     }
 
-    static int doFTime (CharPointer_UTF32 dest, const size_t maxChars,
-                        const String& format, const struct tm* const tm) noexcept
+    static inline String formatString (const String& format, const struct tm* const tm)
     {
        #if JUCE_ANDROID
-        HeapBlock <char> tempDest;
-        tempDest.calloc (maxChars + 2);
-        const int result = (int) strftime (tempDest, maxChars, format.toUTF8(), tm);
-        if (result > 0)
-            dest.writeAll (CharPointer_UTF8 (tempDest.getData()));
-        return result;
+        typedef CharPointer_UTF8  StringType;
        #elif JUCE_WINDOWS
-        HeapBlock <wchar_t> tempDest;
-        tempDest.calloc (maxChars + 2);
-        const int result = (int) wcsftime (tempDest, maxChars, format.toWideCharPointer(), tm);
-        if (result > 0)
-            dest.writeAll (CharPointer_UTF16 (tempDest.getData()));
-        return result;
+        typedef CharPointer_UTF16 StringType;
        #else
-        return (int) wcsftime (dest.getAddress(), maxChars, format.toUTF32(), tm);
+        typedef CharPointer_UTF32 StringType;
        #endif
+
+        for (size_t bufferSize = 256; ; bufferSize += 256)
+        {
+            HeapBlock<StringType::CharType> buffer (bufferSize);
+
+           #if JUCE_ANDROID
+            const size_t numChars = strftime (buffer, bufferSize - 1, format.toUTF8(), tm);
+           #elif JUCE_WINDOWS
+            const size_t numChars = wcsftime (buffer, bufferSize - 1, format.toWideCharPointer(), tm);
+           #else
+            const size_t numChars = wcsftime (buffer, bufferSize - 1, format.toUTF32(), tm);
+           #endif
+
+            if (numChars > 0)
+                return String (StringType (buffer),
+                               StringType (buffer) + (int) numChars);
+        }
     }
 
     static uint32 lastMSCounterValue = 0;
@@ -313,18 +319,8 @@ String Time::toString (const bool includeDate,
 
 String Time::formatted (const String& format) const
 {
-    size_t bufferSize = 128;
-    HeapBlock<juce_wchar> buffer (128);
-
     struct tm t (TimeHelpers::millisToLocal (millisSinceEpoch));
-
-    while (TimeHelpers::doFTime (CharPointer_UTF32 (buffer.getData()), bufferSize, format, &t) <= 0)
-    {
-        bufferSize += 128;
-        buffer.malloc (bufferSize);
-    }
-
-    return CharPointer_UTF32 (buffer.getData());
+    return TimeHelpers::formatString (format, &t);
 }
 
 //==============================================================================

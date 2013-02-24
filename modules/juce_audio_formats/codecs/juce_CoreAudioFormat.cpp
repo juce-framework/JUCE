@@ -123,17 +123,8 @@ public:
     bool readSamples (int** destSamples, int numDestChannels, int startOffsetInDestBuffer,
                       int64 startSampleInFile, int numSamples)
     {
-        jassert (destSamples != nullptr);
-        const int64 samplesAvailable = lengthInSamples - startSampleInFile;
-
-        if (samplesAvailable < numSamples)
-        {
-            for (int i = numDestChannels; --i >= 0;)
-                if (destSamples[i] != nullptr)
-                    zeromem (destSamples[i] + startOffsetInDestBuffer, sizeof (int) * (size_t) numSamples);
-
-            numSamples = (int) samplesAvailable;
-        }
+        clearSamplesBeyondAvailableLength (destSamples, numDestChannels, startOffsetInDestBuffer,
+                                           startSampleInFile, numSamples, lengthInSamples);
 
         if (numSamples <= 0)
             return true;

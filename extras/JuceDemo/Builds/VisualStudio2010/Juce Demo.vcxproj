@@ -78,6 +78,7 @@
       <ProgramDatabaseFile>$(IntDir)\JuceDemo.pdb</ProgramDatabaseFile>
       <SubSystem>Windows</SubSystem>
       <TargetMachine>MachineX86</TargetMachine>
+      <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
     </Link>
     <Bscmake>
       <SuppressStartupBanner>true</SuppressStartupBanner>
@@ -170,6 +171,9 @@
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_audio_basics\effects\juce_IIRFilter.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_basics\effects\juce_LagrangeInterpolator.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_audio_basics\sources\juce_BufferingAudioSource.cpp">
@@ -295,6 +299,9 @@
     <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\juce_FlacAudioFormat.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\juce_LAMEEncoderAudioFormat.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\juce_MP3AudioFormat.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
@@ -413,6 +420,9 @@
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_core\threads\juce_ChildProcess.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_core\threads\juce_HighResolutionTimer.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_core\threads\juce_ReadWriteLock.cpp">
@@ -1224,6 +1234,7 @@
     <ClInclude Include="..\..\..\..\modules\juce_audio_basics\midi\juce_MidiMessageSequence.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_basics\effects\juce_Decibels.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_basics\effects\juce_IIRFilter.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_basics\effects\juce_LagrangeInterpolator.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_basics\effects\juce_Reverb.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_basics\sources\juce_AudioSource.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_basics\sources\juce_BufferingAudioSource.h"/>
@@ -1254,9 +1265,11 @@
     <ClInclude Include="..\..\..\..\modules\juce_audio_formats\format\juce_AudioFormatReaderSource.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_formats\format\juce_AudioFormatWriter.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_formats\format\juce_AudioSubsectionReader.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\format\juce_MemoryMappedAudioFormatReader.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\juce_AiffAudioFormat.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\juce_CoreAudioFormat.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\juce_FlacAudioFormat.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\juce_LAMEEncoderAudioFormat.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\juce_MP3AudioFormat.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\juce_OggVorbisAudioFormat.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\juce_QuickTimeAudioFormat.h"/>
@@ -1337,6 +1350,7 @@
     <ClInclude Include="..\..\..\..\modules\juce_core\threads\juce_ChildProcess.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\threads\juce_CriticalSection.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\threads\juce_DynamicLibrary.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_core\threads\juce_HighResolutionTimer.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\threads\juce_InterProcessLock.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\threads\juce_Process.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\threads\juce_ReadWriteLock.h"/>

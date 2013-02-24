@@ -42,6 +42,8 @@ class DefaultHashFunctions
 public:
     /** Generates a simple hash from an integer. */
     static int generateHash (const int key, const int upperLimit) noexcept        { return std::abs (key) % upperLimit; }
+    /** Generates a simple hash from an int64. */
+    static int generateHash (const int64 key, const int upperLimit) noexcept      { return std::abs ((int) key) % upperLimit; }
     /** Generates a simple hash from a string. */
     static int generateHash (const String& key, const int upperLimit) noexcept    { return (int) (((uint32) key.hashCode()) % (uint32) upperLimit); }
     /** Generates a simple hash from a variant. */

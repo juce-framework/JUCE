@@ -28,7 +28,7 @@
 
 #include "juce_AudioFormatReader.h"
 #include "juce_AudioFormatWriter.h"
-
+#include "juce_MemoryMappedAudioFormatReader.h"
 
 //==============================================================================
 /**
@@ -112,6 +112,13 @@ public:
     */
     virtual AudioFormatReader* createReaderFor (InputStream* sourceStream,
                                                 bool deleteStreamIfOpeningFails) = 0;
+
+    /** Attempts to create a MemoryMappedAudioFormatReader, if possible for this
+        format.
+
+        If the format does not support this, the method will return nullptr;
+    */
+    virtual MemoryMappedAudioFormatReader* createMemoryMappedReader (const File& file);
 
     /** Tries to create an object that can write to a stream with this audio format.
 
