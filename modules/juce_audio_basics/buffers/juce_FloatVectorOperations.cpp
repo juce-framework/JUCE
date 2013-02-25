@@ -29,7 +29,7 @@ namespace FloatVectorHelpers
 {
     static bool sse2Present = false;
 
-    static bool isSSE2Available()
+    static bool isSSE2Available() noexcept
     {
         if (sse2Present)
             return true;
@@ -38,9 +38,16 @@ namespace FloatVectorHelpers
         return sse2Present;
     }
 
-    inline static bool isAligned (const void* p)
+    inline static bool isAligned (const void* p) noexcept
     {
         return (((pointer_sized_int) p) & 15) == 0;
+    }
+
+    inline static void mmEmpty() noexcept
+    {
+       #if ! JUCE_64BIT
+        _mm_empty();
+       #endif
     }
 }
 
@@ -50,7 +57,7 @@ namespace FloatVectorHelpers
         const int numLongOps = num / 4;
 
 #define JUCE_FINISH_SSE_OP(normalOp) \
-        _mm_empty(); \
+        FloatVectorHelpers::mmEmpty(); \
         num &= 3; \
         if (num == 0) return; \
     } \
@@ -72,10 +79,10 @@ namespace FloatVectorHelpers
 #define JUCE_LOAD_SRC(srcLoad, dstLoad)      const __m128 s = srcLoad (src);
 #define JUCE_LOAD_SRC_DEST(srcLoad, dstLoad) const __m128 d = dstLoad (dest); const __m128 s = srcLoad (src);
 
-#define JUCE_PERFORM_SSE_OP_DEST(normalOp, sseOp) \
+#define JUCE_PERFORM_SSE_OP_DEST(normalOp, sseOp, locals) \
     JUCE_BEGIN_SSE_OP \
-    if (FloatVectorHelpers::isAligned (dest))   JUCE_SSE_LOOP (sseOp, dummy, _mm_load_ps,  _mm_store_ps,  JUCE_LOAD_DEST, JUCE_INCREMENT_DEST) \
-    else                                        JUCE_SSE_LOOP (sseOp, dummy, _mm_loadu_ps, _mm_storeu_ps, JUCE_LOAD_DEST, JUCE_INCREMENT_DEST) \
+    if (FloatVectorHelpers::isAligned (dest))   JUCE_SSE_LOOP (sseOp, dummy, _mm_load_ps,  _mm_store_ps,  locals, JUCE_INCREMENT_DEST) \
+    else                                        JUCE_SSE_LOOP (sseOp, dummy, _mm_loadu_ps, _mm_storeu_ps, locals, JUCE_INCREMENT_DEST) \
     JUCE_FINISH_SSE_OP (normalOp)
 
 #define JUCE_PERFORM_SSE_OP_SRC_DEST(normalOp, sseOp, locals, increment) \
@@ -101,6 +108,15 @@ namespace FloatVectorHelpers
 void FloatVectorOperations::clear (float* dest, const int num) noexcept
 {
     zeromem (dest, num * sizeof (float));
+}
+
+void FloatVectorOperations::fill (float* dest, float valueToFill, int num) noexcept
+{
+   #if JUCE_USE_SSE_INTRINSICS
+    const __m128 val = _mm_load1_ps (&valueToFill);
+   #endif
+
+    JUCE_PERFORM_SSE_OP_DEST (dest[i] = valueToFill, val, JUCE_LOAD_NONE)
 }
 
 void FloatVectorOperations::copy (float* dest, const float* src, const int num) noexcept
@@ -133,7 +149,8 @@ void FloatVectorOperations::add (float* dest, float amount, int num) noexcept
    #endif
 
     JUCE_PERFORM_SSE_OP_DEST (dest[i] += amount,
-                              _mm_add_ps (d, amountToAdd))
+                              _mm_add_ps (d, amountToAdd),
+                              JUCE_LOAD_DEST)
 }
 
 void FloatVectorOperations::addWithMultiply (float* dest, const float* src, float multiplier, int num) noexcept
@@ -161,7 +178,8 @@ void FloatVectorOperations::multiply (float* dest, float multiplier, int num) no
    #endif
 
     JUCE_PERFORM_SSE_OP_DEST (dest[i] *= multiplier,
-                              _mm_mul_ps (d, mult))
+                              _mm_mul_ps (d, mult),
+                              JUCE_LOAD_DEST)
 }
 
 void FloatVectorOperations::convertFixedToFloat (float* dest, const int* src, float multiplier, int num) noexcept
@@ -171,8 +189,7 @@ void FloatVectorOperations::convertFixedToFloat (float* dest, const int* src, fl
    #endif
 
     JUCE_PERFORM_SSE_OP_SRC_DEST (dest[i] = src[i] * multiplier,
-                                  _mm_mul_ps (mult, _mm_movelh_ps (_mm_cvt_pi2ps (_mm_setzero_ps(), ((const __m64*) src)[0]),
-                                                                   _mm_cvt_pi2ps (_mm_setzero_ps(), ((const __m64*) src)[1]))),
+                                  _mm_mul_ps (mult, _mm_cvtepi32_ps (_mm_loadu_si128 ((const __m128i*) src))),
                                   JUCE_LOAD_NONE, JUCE_INCREMENT_SRC_DEST)
 }
 
@@ -206,7 +223,7 @@ void FloatVectorOperations::findMinAndMax (const float* src, int num, float& min
             float mns[4], mxs[4];
             _mm_storeu_ps (mns, mn);
             _mm_storeu_ps (mxs, mx);
-            _mm_empty();
+            FloatVectorHelpers::mmEmpty();
 
             localMin = jmin (mns[0], mns[1], mns[2], mns[3]);
             localMax = jmax (mxs[0], mxs[1], mxs[2], mxs[3]);

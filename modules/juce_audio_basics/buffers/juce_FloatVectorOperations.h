@@ -29,6 +29,8 @@
 
 //==============================================================================
 /**
+    A collection of simple vector operations on arrays of floats, accelerated with
+    SIMD instructions where possible.
 */
 class JUCE_API  FloatVectorOperations
 {
@@ -36,6 +38,9 @@ public:
     //==============================================================================
     /** Clears a vector of floats. */
     static void clear (float* dest, int numValues) noexcept;
+
+    /** Copies a repeated value into a vector of floats. */
+    static void fill (float* dest, float valueToFill, int numValues) noexcept;
 
     /** Copies a vector of floats. */
     static void copy (float* dest, const float* src, int numValues) noexcept;

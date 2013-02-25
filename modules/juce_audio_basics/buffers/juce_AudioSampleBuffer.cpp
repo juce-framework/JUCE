@@ -174,7 +174,7 @@ void AudioSampleBuffer::setSize (const int newNumChannels,
 
             const int numChansToCopy = jmin (numChannels, newNumChannels);
             for (int i = 0; i < numChansToCopy; ++i)
-                FloatVectorOperations::copy (newChannels[i], channels[i], numSamplesToCopy);
+                FloatVectorOperations::copy (newChannels[i], channels[i], (int) numSamplesToCopy);
 
             allocatedData.swapWith (newData);
             allocatedBytes = newTotalBytes;
