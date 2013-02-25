@@ -160,13 +160,8 @@ protected:
         Value getUsingRuntimeLibDLL()               { return getValue (Ids::useRuntimeLibDLL); }
         bool isUsingRuntimeLibDLL() const           { return config [Ids::useRuntimeLibDLL]; }
 
+        String getIntermediatesPath() const         { return config [Ids::intermediatesPath].toString(); }
         Value getIntermediatesPathValue()           { return getValue (Ids::intermediatesPath); }
-
-        String getIntermediatesPath() const
-        {
-            const String path (config [Ids::intermediatesPath].toString());
-            return path.isNotEmpty() ? path : "$(Configuration)";
-        }
 
         String getOutputFilename (const String& suffix, bool forceSuffix) const
         {
@@ -719,7 +714,10 @@ protected:
 
         xml.setAttribute ("Name", createConfigName (config));
         xml.setAttribute ("OutputDirectory", FileHelpers::windowsStylePath (getConfigTargetPath (config)));
-        xml.setAttribute ("IntermediateDirectory", FileHelpers::windowsStylePath (config.getIntermediatesPath()));
+
+        if (config.getIntermediatesPath().isNotEmpty())
+            xml.setAttribute ("IntermediateDirectory", FileHelpers::windowsStylePath (config.getIntermediatesPath()));
+
         xml.setAttribute ("ConfigurationType", isLibraryDLL() ? "2" : (projectType.isLibrary() ? "4" : "1"));
         xml.setAttribute ("UseOfMFC", "0");
         xml.setAttribute ("ATLMinimizesCRunTimeLibraryUsage", "false");
@@ -1129,13 +1127,14 @@ protected:
                 {
                     XmlElement* outdir = props->createNewChildElement ("OutDir");
                     setConditionAttribute (*outdir, config);
-                    outdir->addTextElement (getConfigTargetPath (config) + "\\");
+                    outdir->addTextElement (FileHelpers::windowsStylePath (getConfigTargetPath (config)) + "\\");
                 }
 
+                if (config.getIntermediatesPath().isNotEmpty())
                 {
                     XmlElement* intdir = props->createNewChildElement ("IntDir");
                     setConditionAttribute (*intdir, config);
-                    intdir->addTextElement (config.getIntermediatesPath() + "\\");
+                    intdir->addTextElement (FileHelpers::windowsStylePath (config.getIntermediatesPath()) + "\\");
                 }
 
                 {

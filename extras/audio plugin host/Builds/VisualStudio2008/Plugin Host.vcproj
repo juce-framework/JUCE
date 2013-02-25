@@ -12,7 +12,6 @@
   <Configurations>
     <Configuration Name="Debug|Win32"
                    OutputDirectory=".\Debug"
-                   IntermediateDirectory="$(Configuration)"
                    ConfigurationType="1"
                    UseOfMFC="0"
                    ATLMinimizesCRunTimeLibraryUsage="false"
@@ -68,7 +67,6 @@
     </Configuration>
     <Configuration Name="Release|Win32"
                    OutputDirectory=".\Release"
-                   IntermediateDirectory="$(Configuration)"
                    ConfigurationType="1"
                    UseOfMFC="0"
                    ATLMinimizesCRunTimeLibraryUsage="false"
@@ -164,6 +162,17 @@
             </FileConfiguration>
           </File>
           <File RelativePath="..\..\..\..\modules\juce_audio_basics\buffers\juce_AudioSampleBuffer.h"/>
+          <File RelativePath="..\..\..\..\modules\juce_audio_basics\buffers\juce_FloatVectorOperations.cpp">
+            <FileConfiguration Name="Debug|Win32"
+                               ExcludedFromBuild="true">
+              <Tool Name="VCCLCompilerTool"/>
+            </FileConfiguration>
+            <FileConfiguration Name="Release|Win32"
+                               ExcludedFromBuild="true">
+              <Tool Name="VCCLCompilerTool"/>
+            </FileConfiguration>
+          </File>
+          <File RelativePath="..\..\..\..\modules\juce_audio_basics\buffers\juce_FloatVectorOperations.h"/>
         </Filter>
         <Filter Name="midi">
           <File RelativePath="..\..\..\..\modules\juce_audio_basics\midi\juce_MidiBuffer.cpp">
