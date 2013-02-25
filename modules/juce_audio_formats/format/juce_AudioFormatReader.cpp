@@ -161,17 +161,28 @@ void AudioFormatReader::read (AudioSampleBuffer* buffer,
 }
 
 template <typename SampleType>
+static inline void getChannelMinAndMax (SampleType* channel, const int numSamples, SampleType& mn, SampleType& mx)
+{
+    findMinAndMax (channel, numSamples, mn, mx);
+}
+
+static inline void getChannelMinAndMax (float* channel, const int numSamples, float& mn, float& mx)
+{
+    FloatVectorOperations::findMinAndMax (channel, numSamples, mn, mx);
+}
+
+template <typename SampleType>
 static void getStereoMinAndMax (SampleType* const* channels, const int numChannels, const int numSamples,
                                 SampleType& lmin, SampleType& lmax, SampleType& rmin, SampleType& rmax)
 {
     SampleType bufMin, bufMax;
-    findMinAndMax (channels[0], numSamples, bufMin, bufMax);
+    getChannelMinAndMax (channels[0], numSamples, bufMin, bufMax);
     lmax = jmax (lmax, bufMax);
     lmin = jmin (lmin, bufMin);
 
     if (numChannels > 1)
     {
-        findMinAndMax (channels[1], numSamples, bufMin, bufMax);
+        getChannelMinAndMax (channels[1], numSamples, bufMin, bufMax);
         rmax = jmax (rmax, bufMax);
         rmin = jmin (rmin, bufMin);
     }

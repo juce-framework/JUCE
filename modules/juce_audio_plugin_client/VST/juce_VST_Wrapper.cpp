@@ -526,7 +526,7 @@ public:
             if (filter->isSuspended())
             {
                 for (int i = 0; i < numOut; ++i)
-                    zeromem (outputs[i], sizeof (float) * (size_t) numSamples);
+                    FloatVectorOperations::clear (outputs[i], numSamples);
             }
             else
             {

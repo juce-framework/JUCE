@@ -700,7 +700,7 @@ void AudioThumbnail::addBlock (const int64 startSample, const AudioSampleBuffer&
             {
                 float low, high;
                 const int start = i * samplesPerThumbSample;
-                findMinAndMax (sourceData + start, jmin (samplesPerThumbSample, numSamples - start), low, high);
+                FloatVectorOperations::findMinAndMax (sourceData + start, jmin (samplesPerThumbSample, numSamples - start), low, high);
                 dest[i].setFloat (low, high);
             }
         }

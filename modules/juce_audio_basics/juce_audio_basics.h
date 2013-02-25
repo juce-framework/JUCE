@@ -39,6 +39,9 @@ namespace juce
 #ifndef __JUCE_AUDIOSAMPLEBUFFER_JUCEHEADER__
  #include "buffers/juce_AudioSampleBuffer.h"
 #endif
+#ifndef __JUCE_FLOATVECTOROPERATIONS_JUCEHEADER__
+ #include "buffers/juce_FloatVectorOperations.h"
+#endif
 #ifndef __JUCE_DECIBELS_JUCEHEADER__
  #include "effects/juce_Decibels.h"
 #endif

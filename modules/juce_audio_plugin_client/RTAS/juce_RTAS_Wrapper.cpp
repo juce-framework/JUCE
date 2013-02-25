@@ -562,7 +562,7 @@ protected:
             if (juceFilter->isSuspended())
             {
                 for (int i = 0; i < numOut; ++i)
-                    zeromem (outputs [i], sizeof (float) * numSamples);
+                    FloatVectorOperations::clear (outputs [i], numSamples);
             }
             else
             {
@@ -573,7 +573,7 @@ protected:
                         channels[i] = outputs [i];
 
                         if (i < numIn && inputs != outputs)
-                            memcpy (outputs [i], inputs[i], sizeof (float) * numSamples);
+                            FloatVectorOperations::copy (outputs [i], inputs[i], numSamples);
                     }
 
                     for (; i < numIn; ++i)
@@ -813,9 +813,9 @@ private:
         for (int i = fNumOutputs; --i >= 0;)
         {
             if (i < fNumInputs)
-                memcpy (outputs[i], inputs[i], numSamples * sizeof (float));
+                FloatVectorOperations::copy (outputs[i], inputs[i], numSamples);
             else
-                zeromem (outputs[i], numSamples * sizeof (float));
+                FloatVectorOperations::clear (outputs[i], numSamples);
         }
     }
 
