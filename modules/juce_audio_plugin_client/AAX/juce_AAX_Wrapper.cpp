@@ -676,11 +676,12 @@ struct AAXClasses
             const int numberOfOutputChannels = getNumChannelsForStemFormat (outputStemFormat);
 
             AudioProcessor& audioProcessor = getPluginInstance();
-            check (Controller()->SetSignalLatency (audioProcessor.getLatencySamples()));
 
             const AAX_CSampleRate sampleRate = getSampleRate();
             audioProcessor.setPlayConfigDetails (numberOfInputChannels, numberOfOutputChannels, sampleRate, 0);
             audioProcessor.prepareToPlay (sampleRate, bufferSize);
+
+            check (Controller()->SetSignalLatency (audioProcessor.getLatencySamples()));
         }
 
         AAX_CSampleRate getSampleRate() const
