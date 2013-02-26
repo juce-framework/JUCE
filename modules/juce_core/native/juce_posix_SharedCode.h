@@ -567,9 +567,14 @@ void MemoryMappedFile::openInternal (const File& file, AccessMode mode)
                         (off_t) range.getStart());
 
         if (m != MAP_FAILED)
+        {
             address = m;
+            madvise (m, (size_t) range.getLength(), MADV_SEQUENTIAL);
+        }
         else
+        {
             range = Range<int64>();
+        }
     }
 }
 
