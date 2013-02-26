@@ -107,16 +107,24 @@ namespace FloatVectorHelpers
 
 void FloatVectorOperations::clear (float* dest, const int num) noexcept
 {
+   #if JUCE_USE_VDSP_FRAMEWORK
+    vDSP_vclr (dest, 1, num);
+   #else
     zeromem (dest, num * sizeof (float));
+   #endif
 }
 
 void FloatVectorOperations::fill (float* dest, float valueToFill, int num) noexcept
 {
-   #if JUCE_USE_SSE_INTRINSICS
-    const __m128 val = _mm_load1_ps (&valueToFill);
-   #endif
+   #if JUCE_USE_VDSP_FRAMEWORK
+    vDSP_vfill (&valueToFill, dest, 1, num);
+   #else
+    #if JUCE_USE_SSE_INTRINSICS
+     const __m128 val = _mm_load1_ps (&valueToFill);
+    #endif
 
     JUCE_PERFORM_SSE_OP_DEST (dest[i] = valueToFill, val, JUCE_LOAD_NONE)
+   #endif
 }
 
 void FloatVectorOperations::copy (float* dest, const float* src, const int num) noexcept
@@ -126,20 +134,28 @@ void FloatVectorOperations::copy (float* dest, const float* src, const int num) 
 
 void FloatVectorOperations::copyWithMultiply (float* dest, const float* src, float multiplier, int num) noexcept
 {
-   #if JUCE_USE_SSE_INTRINSICS
-    const __m128 mult = _mm_load1_ps (&multiplier);
-   #endif
+   #if JUCE_USE_VDSP_FRAMEWORK
+    vDSP_vsmul (src, 1, &multiplier, dest, 1, num);
+   #else
+    #if JUCE_USE_SSE_INTRINSICS
+     const __m128 mult = _mm_load1_ps (&multiplier);
+    #endif
 
     JUCE_PERFORM_SSE_OP_SRC_DEST (dest[i] = src[i] * multiplier,
                                   _mm_mul_ps (mult, s),
                                   JUCE_LOAD_SRC, JUCE_INCREMENT_SRC_DEST)
+   #endif
 }
 
 void FloatVectorOperations::add (float* dest, const float* src, int num) noexcept
 {
+   #if JUCE_USE_VDSP_FRAMEWORK
+    vDSP_vadd (src, 1, dest, 1, dest, 1, num);
+   #else
     JUCE_PERFORM_SSE_OP_SRC_DEST (dest[i] += src[i],
                                   _mm_add_ps (d, s),
                                   JUCE_LOAD_SRC_DEST, JUCE_INCREMENT_SRC_DEST)
+   #endif
 }
 
 void FloatVectorOperations::add (float* dest, float amount, int num) noexcept
@@ -166,20 +182,28 @@ void FloatVectorOperations::addWithMultiply (float* dest, const float* src, floa
 
 void FloatVectorOperations::multiply (float* dest, const float* src, int num) noexcept
 {
+   #if JUCE_USE_VDSP_FRAMEWORK
+    vDSP_vmul (src, 1, dest, 1, dest, 1, num);
+   #else
     JUCE_PERFORM_SSE_OP_SRC_DEST (dest[i] *= src[i],
                                   _mm_mul_ps (d, s),
                                   JUCE_LOAD_SRC_DEST, JUCE_INCREMENT_SRC_DEST)
+   #endif
 }
 
 void FloatVectorOperations::multiply (float* dest, float multiplier, int num) noexcept
 {
-   #if JUCE_USE_SSE_INTRINSICS
-    const __m128 mult = _mm_load1_ps (&multiplier);
-   #endif
+   #if JUCE_USE_VDSP_FRAMEWORK
+    vDSP_vsmul (dest, 1, &multiplier, dest, 1, num);
+   #else
+    #if JUCE_USE_SSE_INTRINSICS
+     const __m128 mult = _mm_load1_ps (&multiplier);
+    #endif
 
     JUCE_PERFORM_SSE_OP_DEST (dest[i] *= multiplier,
                               _mm_mul_ps (d, mult),
                               JUCE_LOAD_DEST)
+   #endif
 }
 
 void FloatVectorOperations::convertFixedToFloat (float* dest, const int* src, float multiplier, int num) noexcept

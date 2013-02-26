@@ -17,5 +17,8 @@
                       "midi/*",
                       "effects/*",
                       "sources/*",
-                      "synthesisers/*" ]
+                      "synthesisers/*" ],
+
+  "OSXFrameworks":  "vecLib",
+  "iOSFrameworks":  "vecLib"
 }
