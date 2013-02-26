@@ -104,6 +104,27 @@ public:
         newList->addChangeListener (this);
     }
 
+    bool selectFile (const File& target)
+    {
+        if (file == target)
+        {
+            setSelected (true, true);
+            return true;
+        }
+
+        if (target.isAChildOf (file))
+        {
+            setOpen (true);
+
+            for (int i = 0; i < getNumSubItems(); ++i)
+                if (FileListTreeItem* f = dynamic_cast <FileListTreeItem*> (getSubItem (i)))
+                    if (f->selectFile (target))
+                        return true;
+        }
+
+        return false;
+    }
+
     void changeListenerCallback (ChangeBroadcaster*)
     {
         clearSubItems();
@@ -231,10 +252,10 @@ void FileTreeComponent::refresh()
 //==============================================================================
 File FileTreeComponent::getSelectedFile (const int index) const
 {
-    const FileListTreeItem* const item = dynamic_cast <const FileListTreeItem*> (getSelectedItem (index));
+    if (const FileListTreeItem* const item = dynamic_cast <const FileListTreeItem*> (getSelectedItem (index)))
+        return item->file;
 
-    return item != nullptr ? item->file
-                           : File::nonexistent;
+    return File::nonexistent;
 }
 
 void FileTreeComponent::deselectAllFiles()
@@ -254,16 +275,7 @@ void FileTreeComponent::setDragAndDropDescription (const String& description)
 
 void FileTreeComponent::setSelectedFile (const File& target)
 {
-    for (int i = getNumSelectedItems(); --i >= 0;)
-    {
-        FileListTreeItem* t = dynamic_cast <FileListTreeItem*> (getSelectedItem (i));
-
-        if (t != nullptr && t->file == target)
-        {
-            t->setSelected (true, true);
-            return;
-        }
-    }
-
-    clearSelectedItems();
+    if (FileListTreeItem* t = dynamic_cast <FileListTreeItem*> (getRootItem()))
+        if (! t->selectFile (target))
+            clearSelectedItems();
 }
