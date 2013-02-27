@@ -64,124 +64,86 @@ void CriticalSection::exit() const noexcept
 
 
 //==============================================================================
-class WaitableEventImpl
+WaitableEvent::WaitableEvent (const bool useManualReset) noexcept
+    : triggered (false), manualReset (useManualReset)
 {
-public:
-    WaitableEventImpl (const bool useManualReset)
-        : triggered (false),
-          manualReset (useManualReset)
-    {
-        pthread_cond_init (&condition, 0);
+    pthread_cond_init (&condition, 0);
 
-        pthread_mutexattr_t atts;
-        pthread_mutexattr_init (&atts);
-       #if ! JUCE_ANDROID
-        pthread_mutexattr_setprotocol (&atts, PTHREAD_PRIO_INHERIT);
-       #endif
-        pthread_mutex_init (&mutex, &atts);
-    }
-
-    ~WaitableEventImpl()
-    {
-        pthread_cond_destroy (&condition);
-        pthread_mutex_destroy (&mutex);
-    }
-
-    bool wait (const int timeOutMillisecs) noexcept
-    {
-        pthread_mutex_lock (&mutex);
-
-        if (! triggered)
-        {
-            if (timeOutMillisecs < 0)
-            {
-                do
-                {
-                    pthread_cond_wait (&condition, &mutex);
-                }
-                while (! triggered);
-            }
-            else
-            {
-                struct timeval now;
-                gettimeofday (&now, 0);
-
-                struct timespec time;
-                time.tv_sec  = now.tv_sec  + (timeOutMillisecs / 1000);
-                time.tv_nsec = (now.tv_usec + ((timeOutMillisecs % 1000) * 1000)) * 1000;
-
-                if (time.tv_nsec >= 1000000000)
-                {
-                    time.tv_nsec -= 1000000000;
-                    time.tv_sec++;
-                }
-
-                do
-                {
-                    if (pthread_cond_timedwait (&condition, &mutex, &time) == ETIMEDOUT)
-                    {
-                        pthread_mutex_unlock (&mutex);
-                        return false;
-                    }
-                }
-                while (! triggered);
-            }
-        }
-
-        if (! manualReset)
-            triggered = false;
-
-        pthread_mutex_unlock (&mutex);
-        return true;
-    }
-
-    void signal() noexcept
-    {
-        pthread_mutex_lock (&mutex);
-        triggered = true;
-        pthread_cond_broadcast (&condition);
-        pthread_mutex_unlock (&mutex);
-    }
-
-    void reset() noexcept
-    {
-        pthread_mutex_lock (&mutex);
-        triggered = false;
-        pthread_mutex_unlock (&mutex);
-    }
-
-private:
-    pthread_cond_t condition;
-    pthread_mutex_t mutex;
-    bool triggered;
-    const bool manualReset;
-
-    JUCE_DECLARE_NON_COPYABLE (WaitableEventImpl)
-};
-
-WaitableEvent::WaitableEvent (const bool manualReset) noexcept
-    : internal (new WaitableEventImpl (manualReset))
-{
+    pthread_mutexattr_t atts;
+    pthread_mutexattr_init (&atts);
+   #if ! JUCE_ANDROID
+    pthread_mutexattr_setprotocol (&atts, PTHREAD_PRIO_INHERIT);
+   #endif
+    pthread_mutex_init (&mutex, &atts);
 }
 
 WaitableEvent::~WaitableEvent() noexcept
 {
-    delete static_cast <WaitableEventImpl*> (internal);
+    pthread_cond_destroy (&condition);
+    pthread_mutex_destroy (&mutex);
 }
 
 bool WaitableEvent::wait (const int timeOutMillisecs) const noexcept
 {
-    return static_cast <WaitableEventImpl*> (internal)->wait (timeOutMillisecs);
+    pthread_mutex_lock (&mutex);
+
+    if (! triggered)
+    {
+        if (timeOutMillisecs < 0)
+        {
+            do
+            {
+                pthread_cond_wait (&condition, &mutex);
+            }
+            while (! triggered);
+        }
+        else
+        {
+            struct timeval now;
+            gettimeofday (&now, 0);
+
+            struct timespec time;
+            time.tv_sec  = now.tv_sec  + (timeOutMillisecs / 1000);
+            time.tv_nsec = (now.tv_usec + ((timeOutMillisecs % 1000) * 1000)) * 1000;
+
+            if (time.tv_nsec >= 1000000000)
+            {
+                time.tv_nsec -= 1000000000;
+                time.tv_sec++;
+            }
+
+            do
+            {
+                if (pthread_cond_timedwait (&condition, &mutex, &time) == ETIMEDOUT)
+                {
+                    pthread_mutex_unlock (&mutex);
+                    return false;
+                }
+            }
+            while (! triggered);
+        }
+    }
+
+    if (! manualReset)
+        triggered = false;
+
+    pthread_mutex_unlock (&mutex);
+    return true;
 }
 
 void WaitableEvent::signal() const noexcept
 {
-    static_cast <WaitableEventImpl*> (internal)->signal();
+    pthread_mutex_lock (&mutex);
+    triggered = true;
+    pthread_cond_broadcast (&condition);
+    pthread_mutex_unlock (&mutex);
 }
 
 void WaitableEvent::reset() const noexcept
 {
-    static_cast <WaitableEventImpl*> (internal)->reset();
+    pthread_mutex_lock (&mutex);
+    triggered = false;
+    pthread_mutex_unlock (&mutex);
 }
 
 //==============================================================================
