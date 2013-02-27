@@ -101,7 +101,7 @@ namespace FloatVectorHelpers
 
 
 #else
- #define JUCE_PERFORM_SSE_OP_DEST(normalOp, unused1)                       for (int i = 0; i < num; ++i) normalOp;
+ #define JUCE_PERFORM_SSE_OP_DEST(normalOp, unused1, unused2)              for (int i = 0; i < num; ++i) normalOp;
  #define JUCE_PERFORM_SSE_OP_SRC_DEST(normalOp, sseOp, locals, increment)  for (int i = 0; i < num; ++i) normalOp;
 #endif
 

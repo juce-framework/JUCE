@@ -42,7 +42,7 @@
 #endif
 
 #if ! JUCE_INTEL
- #define JUCE_USE_SSE_INTRINSICS 0
+ #undef JUCE_USE_SSE_INTRINSICS
 #endif
 
 #if JUCE_USE_SSE_INTRINSICS
