@@ -678,7 +678,8 @@ struct AAXClasses
             AudioProcessor& audioProcessor = getPluginInstance();
 
             const AAX_CSampleRate sampleRate = getSampleRate();
-            audioProcessor.setPlayConfigDetails (numberOfInputChannels, numberOfOutputChannels, sampleRate, 0);
+            const int bufferSize = 0; // how to get this?
+            audioProcessor.setPlayConfigDetails (numberOfInputChannels, numberOfOutputChannels, sampleRate, bufferSize);
             audioProcessor.prepareToPlay (sampleRate, bufferSize);
 
             check (Controller()->SetSignalLatency (audioProcessor.getLatencySamples()));

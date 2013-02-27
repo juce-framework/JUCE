@@ -37,37 +37,37 @@ class JUCE_API  FloatVectorOperations
 public:
     //==============================================================================
     /** Clears a vector of floats. */
-    static void clear (float* dest, int numValues) noexcept;
+    static void JUCE_CALLTYPE clear (float* dest, int numValues) noexcept;
 
     /** Copies a repeated value into a vector of floats. */
-    static void fill (float* dest, float valueToFill, int numValues) noexcept;
+    static void JUCE_CALLTYPE fill (float* dest, float valueToFill, int numValues) noexcept;
 
     /** Copies a vector of floats. */
-    static void copy (float* dest, const float* src, int numValues) noexcept;
+    static void JUCE_CALLTYPE copy (float* dest, const float* src, int numValues) noexcept;
 
     /** Copies a vector of floats, multiplying each value by a given multiplier */
-    static void copyWithMultiply (float* dest, const float* src, float multiplier, int numValues) noexcept;
+    static void JUCE_CALLTYPE copyWithMultiply (float* dest, const float* src, float multiplier, int numValues) noexcept;
 
     /** Adds the source values to the destination values. */
-    static void add (float* dest, const float* src, int numValues) noexcept;
+    static void JUCE_CALLTYPE add (float* dest, const float* src, int numValues) noexcept;
 
     /** Adds a fixed value to the destination values. */
-    static void add (float* dest, float amount, int numValues) noexcept;
+    static void JUCE_CALLTYPE add (float* dest, float amount, int numValues) noexcept;
 
     /** Multiplies each source value by the given multiplier, then adds it to the destination value. */
-    static void addWithMultiply (float* dest, const float* src, float multiplier, int numValues) noexcept;
+    static void JUCE_CALLTYPE addWithMultiply (float* dest, const float* src, float multiplier, int numValues) noexcept;
 
     /** Multiplies the destination values by the source values. */
-    static void multiply (float* dest, const float* src, int numValues) noexcept;
+    static void JUCE_CALLTYPE multiply (float* dest, const float* src, int numValues) noexcept;
 
     /** Multiplies each of the destination values by a fixed multiplier. */
-    static void multiply (float* dest, float multiplier, int numValues) noexcept;
+    static void JUCE_CALLTYPE multiply (float* dest, float multiplier, int numValues) noexcept;
 
     /** Converts a stream of integers to floats, multiplying each one by the given multiplier. */
-    static void convertFixedToFloat (float* dest, const int* src, float multiplier, int numValues) noexcept;
+    static void JUCE_CALLTYPE convertFixedToFloat (float* dest, const int* src, float multiplier, int numValues) noexcept;
 
     /** Finds the miniumum and maximum values in the given array. */
-    static void findMinAndMax (const float* src, int numValues, float& minResult, float& maxResult) noexcept;
+    static void JUCE_CALLTYPE findMinAndMax (const float* src, int numValues, float& minResult, float& maxResult) noexcept;
 };
 
 

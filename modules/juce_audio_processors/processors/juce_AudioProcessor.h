@@ -591,7 +591,7 @@ public:
     WrapperType wrapperType;
 
     /** @internal */
-    static void setTypeOfNextNewPlugin (WrapperType);
+    static void JUCE_CALLTYPE setTypeOfNextNewPlugin (WrapperType);
 
 protected:
     //==============================================================================

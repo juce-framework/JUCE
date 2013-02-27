@@ -25,7 +25,7 @@
 
 static ThreadLocalValue<AudioProcessor::WrapperType> wrapperTypeBeingCreated;
 
-void AudioProcessor::setTypeOfNextNewPlugin (AudioProcessor::WrapperType type)
+void JUCE_CALLTYPE AudioProcessor::setTypeOfNextNewPlugin (AudioProcessor::WrapperType type)
 {
     wrapperTypeBeingCreated = type;
 }

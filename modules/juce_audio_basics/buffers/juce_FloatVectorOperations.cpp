@@ -105,7 +105,7 @@ namespace FloatVectorHelpers
  #define JUCE_PERFORM_SSE_OP_SRC_DEST(normalOp, sseOp, locals, increment)  for (int i = 0; i < num; ++i) normalOp;
 #endif
 
-void FloatVectorOperations::clear (float* dest, const int num) noexcept
+void JUCE_CALLTYPE FloatVectorOperations::clear (float* dest, int num) noexcept
 {
    #if JUCE_USE_VDSP_FRAMEWORK
     vDSP_vclr (dest, 1, num);
@@ -114,7 +114,7 @@ void FloatVectorOperations::clear (float* dest, const int num) noexcept
    #endif
 }
 
-void FloatVectorOperations::fill (float* dest, float valueToFill, int num) noexcept
+void JUCE_CALLTYPE FloatVectorOperations::fill (float* dest, float valueToFill, int num) noexcept
 {
    #if JUCE_USE_VDSP_FRAMEWORK
     vDSP_vfill (&valueToFill, dest, 1, num);
@@ -127,12 +127,12 @@ void FloatVectorOperations::fill (float* dest, float valueToFill, int num) noexc
    #endif
 }
 
-void FloatVectorOperations::copy (float* dest, const float* src, const int num) noexcept
+void JUCE_CALLTYPE FloatVectorOperations::copy (float* dest, const float* src, int num) noexcept
 {
     memcpy (dest, src, num * sizeof (float));
 }
 
-void FloatVectorOperations::copyWithMultiply (float* dest, const float* src, float multiplier, int num) noexcept
+void JUCE_CALLTYPE FloatVectorOperations::copyWithMultiply (float* dest, const float* src, float multiplier, int num) noexcept
 {
    #if JUCE_USE_VDSP_FRAMEWORK
     vDSP_vsmul (src, 1, &multiplier, dest, 1, num);
@@ -147,7 +147,7 @@ void FloatVectorOperations::copyWithMultiply (float* dest, const float* src, flo
    #endif
 }
 
-void FloatVectorOperations::add (float* dest, const float* src, int num) noexcept
+void JUCE_CALLTYPE FloatVectorOperations::add (float* dest, const float* src, int num) noexcept
 {
    #if JUCE_USE_VDSP_FRAMEWORK
     vDSP_vadd (src, 1, dest, 1, dest, 1, num);
@@ -158,7 +158,7 @@ void FloatVectorOperations::add (float* dest, const float* src, int num) noexcep
    #endif
 }
 
-void FloatVectorOperations::add (float* dest, float amount, int num) noexcept
+void JUCE_CALLTYPE FloatVectorOperations::add (float* dest, float amount, int num) noexcept
 {
    #if JUCE_USE_SSE_INTRINSICS
     const __m128 amountToAdd = _mm_load1_ps (&amount);
@@ -169,7 +169,7 @@ void FloatVectorOperations::add (float* dest, float amount, int num) noexcept
                               JUCE_LOAD_DEST)
 }
 
-void FloatVectorOperations::addWithMultiply (float* dest, const float* src, float multiplier, int num) noexcept
+void JUCE_CALLTYPE FloatVectorOperations::addWithMultiply (float* dest, const float* src, float multiplier, int num) noexcept
 {
    #if JUCE_USE_SSE_INTRINSICS
     const __m128 mult = _mm_load1_ps (&multiplier);
@@ -180,7 +180,7 @@ void FloatVectorOperations::addWithMultiply (float* dest, const float* src, floa
                                   JUCE_LOAD_SRC_DEST, JUCE_INCREMENT_SRC_DEST)
 }
 
-void FloatVectorOperations::multiply (float* dest, const float* src, int num) noexcept
+void JUCE_CALLTYPE FloatVectorOperations::multiply (float* dest, const float* src, int num) noexcept
 {
    #if JUCE_USE_VDSP_FRAMEWORK
     vDSP_vmul (src, 1, dest, 1, dest, 1, num);
@@ -191,7 +191,7 @@ void FloatVectorOperations::multiply (float* dest, const float* src, int num) no
    #endif
 }
 
-void FloatVectorOperations::multiply (float* dest, float multiplier, int num) noexcept
+void JUCE_CALLTYPE FloatVectorOperations::multiply (float* dest, float multiplier, int num) noexcept
 {
    #if JUCE_USE_VDSP_FRAMEWORK
     vDSP_vsmul (dest, 1, &multiplier, dest, 1, num);
@@ -206,7 +206,7 @@ void FloatVectorOperations::multiply (float* dest, float multiplier, int num) no
    #endif
 }
 
-void FloatVectorOperations::convertFixedToFloat (float* dest, const int* src, float multiplier, int num) noexcept
+void JUCE_CALLTYPE FloatVectorOperations::convertFixedToFloat (float* dest, const int* src, float multiplier, int num) noexcept
 {
    #if JUCE_USE_SSE_INTRINSICS
     const __m128 mult = _mm_load1_ps (&multiplier);
@@ -217,7 +217,7 @@ void FloatVectorOperations::convertFixedToFloat (float* dest, const int* src, fl
                                   JUCE_LOAD_NONE, JUCE_INCREMENT_SRC_DEST)
 }
 
-void FloatVectorOperations::findMinAndMax (const float* src, int num, float& minResult, float& maxResult) noexcept
+void JUCE_CALLTYPE FloatVectorOperations::findMinAndMax (const float* src, int num, float& minResult, float& maxResult) noexcept
 {
    #if JUCE_USE_SSE_INTRINSICS
     const int numLongOps = num / 4;

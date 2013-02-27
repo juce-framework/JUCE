@@ -58,7 +58,7 @@ void AudioSampleBuffer::allocateData()
         chan += size;
     }
 
-    channels [numChannels] = 0;
+    channels [numChannels] = nullptr;
 }
 
 AudioSampleBuffer::AudioSampleBuffer (float* const* dataToReferTo,
@@ -120,7 +120,7 @@ void AudioSampleBuffer::allocateChannels (float* const* const dataToReferTo, int
         channels[i] = dataToReferTo[i] + offset;
     }
 
-    channels [numChannels] = 0;
+    channels [numChannels] = nullptr;
 }
 
 AudioSampleBuffer& AudioSampleBuffer::operator= (const AudioSampleBuffer& other) noexcept
