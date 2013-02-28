@@ -47,11 +47,10 @@ public:
     void loadImage (const Image& image);
 
     /** Creates a texture from a raw array of pixels.
-        The width and height provided must be valid - i.e. power-of-two unless
-        the underlying GL system allows otherwise.
+        If width and height are not powers-of-two, the texture will be created with a
+        larger size, and only the subsection (0, 0, width, height) will be initialised.
         The data is sent directly to the OpenGL driver without being flipped vertically,
         so the first pixel will be mapped onto texture coordinate (0, 0).
-        bottom-left corner of the texture
     */
     void loadARGB (const PixelARGB* pixels, int width, int height);
 
@@ -63,11 +62,10 @@ public:
     void loadARGBFlipped (const PixelARGB* pixels, int width, int height);
 
     /** Creates an alpha-channel texture from an array of alpha values.
-        The width and height provided must be valid - i.e. power-of-two unless
-        the underlying GL system allows otherwise.
+        If width and height are not powers-of-two, the texture will be created with a
+        larger size, and only the subsection (0, 0, width, height) will be initialised.
         The data is sent directly to the OpenGL driver without being flipped vertically,
         so the first pixel will be mapped onto texture coordinate (0, 0).
-        bottom-left corner of the texture
     */
     void loadAlpha (const uint8* pixels, int width, int height);
 
@@ -112,7 +110,7 @@ private:
     int width, height;
     OpenGLContext* ownerContext;
 
-    void create (int w, int h, const void*, GLenum type);
+    void create (int w, int h, const void*, GLenum, bool topLeft);
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OpenGLTexture)
 };

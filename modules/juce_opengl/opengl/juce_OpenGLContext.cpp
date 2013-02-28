@@ -244,7 +244,7 @@ public:
         glBindTexture (GL_TEXTURE_2D, cachedImageFrameBuffer.getTextureID());
 
         const Rectangle<int> cacheBounds (cachedImageFrameBuffer.getWidth(), cachedImageFrameBuffer.getHeight());
-        context.copyTexture (cacheBounds, cacheBounds, cacheBounds.getWidth(), cacheBounds.getHeight());
+        context.copyTexture (cacheBounds, cacheBounds, cacheBounds.getWidth(), cacheBounds.getHeight(), false);
         glBindTexture (GL_TEXTURE_2D, 0);
         JUCE_CHECK_OPENGL_ERROR
     }
@@ -672,7 +672,8 @@ void OpenGLContext::setAssociatedObject (const char* name, ReferenceCountedObjec
 
 void OpenGLContext::copyTexture (const Rectangle<int>& targetClipArea,
                                  const Rectangle<int>& anchorPosAndTextureSize,
-                                 const int contextWidth, const int contextHeight)
+                                 const int contextWidth, const int contextHeight,
+                                 bool flippedVertically)
 {
     if (contextWidth <= 0 || contextHeight <= 0)
         return;
@@ -722,12 +723,13 @@ void OpenGLContext::copyTexture (const Rectangle<int>& targetClipArea,
 
                     prog.addShader ("uniform sampler2D imageTexture;"
                                     "uniform " JUCE_HIGHP " float textureBounds[4];"
+                                    "uniform " JUCE_HIGHP " vec2 vOffsetAndScale;"
                                     "varying " JUCE_HIGHP " vec2 pixelPos;"
                                     "void main()"
                                     "{"
                                      JUCE_HIGHP " vec2 texturePos = (pixelPos - vec2 (textureBounds[0], textureBounds[1]))"
                                                                       "/ vec2 (textureBounds[2], textureBounds[3]);"
-                                     "gl_FragColor = texture2D (imageTexture, vec2 (texturePos.x, 1.0 - texturePos.y));"
+                                     "gl_FragColor = texture2D (imageTexture, vec2 (texturePos.x, vOffsetAndScale.x + vOffsetAndScale.y * texturePos.y));"
                                     "}",
                                     GL_FRAGMENT_SHADER);
                     prog.link();
@@ -740,19 +742,23 @@ void OpenGLContext::copyTexture (const Rectangle<int>& targetClipArea,
                     : positionAttribute (prog, "position"),
                       screenSize (prog, "screenSize"),
                       imageTexture (prog, "imageTexture"),
-                      textureBounds (prog, "textureBounds")
+                      textureBounds (prog, "textureBounds"),
+                      vOffsetAndScale (prog, "vOffsetAndScale")
                 {}
 
-                void set (const float targetWidth, const float targetHeight, const Rectangle<float>& bounds) const
+                void set (const float targetWidth, const float targetHeight, const Rectangle<float>& bounds, bool flippedVertically) const
                 {
                     const GLfloat m[] = { bounds.getX(), bounds.getY(), bounds.getWidth(), bounds.getHeight() };
                     textureBounds.set (m, 4);
                     imageTexture.set (0);
                     screenSize.set (targetWidth, targetHeight);
+
+                    vOffsetAndScale.set (flippedVertically ? 0.0f : 1.0f,
+                                         flippedVertically ? 1.0f : -1.0f);
                 }
 
                 OpenGLShaderProgram::Attribute positionAttribute;
-                OpenGLShaderProgram::Uniform screenSize, imageTexture, textureBounds;
+                OpenGLShaderProgram::Uniform screenSize, imageTexture, textureBounds, vOffsetAndScale;
             };
 
             OpenGLShaderProgram program;
@@ -767,7 +773,7 @@ void OpenGLContext::copyTexture (const Rectangle<int>& targetClipArea,
         const GLshort vertices[] = { left, bottom, right, bottom, left, top, right, top };
 
         const OverlayShaderProgram& program = OverlayShaderProgram::select (*this);
-        program.params.set ((float) contextWidth, (float) contextHeight, anchorPosAndTextureSize.toFloat());
+        program.params.set ((float) contextWidth, (float) contextHeight, anchorPosAndTextureSize.toFloat(), flippedVertically);
 
         extensions.glVertexAttribPointer (program.params.positionAttribute.attributeID, 2, GL_SHORT, GL_FALSE, 4, vertices);
         extensions.glEnableVertexAttribArray (program.params.positionAttribute.attributeID);
