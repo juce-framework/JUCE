@@ -68,37 +68,37 @@ void MemoryOutputStream::reset() noexcept
     size = 0;
 }
 
-void MemoryOutputStream::prepareToWrite (int numBytes)
+void MemoryOutputStream::prepareToWrite (size_t numBytes)
 {
     jassert (numBytes >= 0);
-    size_t storageNeeded = position + (size_t) numBytes;
+    size_t storageNeeded = position + numBytes;
 
     if (storageNeeded >= data.getSize())
         data.ensureSize ((storageNeeded + jmin (storageNeeded / 2, (size_t) (1024 * 1024)) + 32) & ~31u);
 }
 
-bool MemoryOutputStream::write (const void* const buffer, int howMany)
+bool MemoryOutputStream::write (const void* const buffer, size_t howMany)
 {
-    jassert (buffer != nullptr && howMany >= 0);
+    jassert (buffer != nullptr && ((ssize_t) howMany) >= 0);
 
     if (howMany > 0)
     {
         prepareToWrite (howMany);
-        memcpy (static_cast<char*> (data.getData()) + position, buffer, (size_t) howMany);
-        position += (size_t) howMany;
+        memcpy (static_cast<char*> (data.getData()) + position, buffer, howMany);
+        position += howMany;
         size = jmax (size, position);
     }
 
     return true;
 }
 
-void MemoryOutputStream::writeRepeatedByte (uint8 byte, int howMany)
+void MemoryOutputStream::writeRepeatedByte (uint8 byte, size_t howMany)
 {
     if (howMany > 0)
     {
         prepareToWrite (howMany);
-        memset (static_cast<char*> (data.getData()) + position, byte, (size_t) howMany);
-        position += (size_t) howMany;
+        memset (static_cast<char*> (data.getData()) + position, byte, howMany);
+        position += howMany;
         size = jmax (size, position);
     }
 }
@@ -160,7 +160,8 @@ String MemoryOutputStream::toString() const
 
 OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, const MemoryOutputStream& streamToRead)
 {
-    const int dataSize = (int) streamToRead.getDataSize();
+    const size_t dataSize = streamToRead.getDataSize();
+
     if (dataSize > 0)
         stream.write (streamToRead.getData(), dataSize);
 

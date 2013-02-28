@@ -42,6 +42,23 @@ AudioFormatWriter::~AudioFormatWriter()
     delete output;
 }
 
+static void convertFloatsToInts (int* dest, const float* src, int numSamples) noexcept
+{
+    while (--numSamples >= 0)
+    {
+        const double samp = *src++;
+
+        if (samp <= -1.0)
+            *dest = std::numeric_limits<int>::min();
+        else if (samp >= 1.0)
+            *dest = std::numeric_limits<int>::max();
+        else
+            *dest = roundToInt (std::numeric_limits<int>::max() * samp);
+
+        ++dest;
+    }
+}
+
 bool AudioFormatWriter::writeFromAudioReader (AudioFormatReader& reader,
                                               int64 startSample,
                                               int64 numSamplesToRead)
@@ -70,31 +87,12 @@ bool AudioFormatWriter::writeFromAudioReader (AudioFormatReader& reader,
 
             while (*bufferChan != nullptr)
             {
-                int* b = *bufferChan++;
+                void* const b = *bufferChan++;
 
                 if (isFloatingPoint())
-                {
-                    // int -> float
-                    const double factor = 1.0 / std::numeric_limits<int>::max();
-
-                    for (int i = 0; i < numToDo; ++i)
-                        reinterpret_cast<float*> (b)[i] = (float) (factor * b[i]);
-                }
+                    FloatVectorOperations::convertFixedToFloat ((float*) b, (int*) b, 1.0f / 0x7fffffff, numToDo);
                 else
-                {
-                    // float -> int
-                    for (int i = 0; i < numToDo; ++i)
-                    {
-                        const double samp = *(const float*) b;
-
-                        if (samp <= -1.0)
-                            *b++ = std::numeric_limits<int>::min();
-                        else if (samp >= 1.0)
-                            *b++ = std::numeric_limits<int>::max();
-                        else
-                            *b++ = roundToInt (std::numeric_limits<int>::max() * samp);
-                    }
-                }
+                    convertFloatsToInts ((int*) b, (float*) b, numToDo);
             }
         }
 
@@ -130,39 +128,60 @@ bool AudioFormatWriter::writeFromAudioSource (AudioSource& source, int numSample
     return true;
 }
 
-bool AudioFormatWriter::writeFromAudioSampleBuffer (const AudioSampleBuffer& source, int startSample, int numSamples)
+bool AudioFormatWriter::writeFromFloatArrays (const float** channels, int numSourceChannels, int numSamples)
 {
-    jassert (startSample >= 0 && startSample + numSamples <= source.getNumSamples() && source.getNumChannels() > 0);
-
     if (numSamples <= 0)
         return true;
 
-    HeapBlock<int> tempBuffer;
-    HeapBlock<int*> chans (numChannels + 1);
-    chans [numChannels] = 0;
-
     if (isFloatingPoint())
+        return write ((const int**) channels, numSamples);
+
+    int* chans [256];
+    int scratch [4096];
+
+    jassert (numSourceChannels < numElementsInArray (chans));
+    const int maxSamples = (int) (numElementsInArray (scratch) / numSourceChannels);
+
+    for (int i = 0; i < numSourceChannels; ++i)
+        chans[i] = scratch + (i * maxSamples);
+
+    chans[numSourceChannels] = nullptr;
+    int startSample = 0;
+
+    while (numSamples > 0)
     {
-        for (int i = (int) numChannels; --i >= 0;)
-            chans[i] = reinterpret_cast<int*> (source.getSampleData (i, startSample));
-    }
-    else
-    {
-        tempBuffer.malloc (((size_t) numSamples) * (size_t) numChannels);
+        const int numToDo = jmin (numSamples, maxSamples);
 
-        for (unsigned int i = 0; i < numChannels; ++i)
-        {
-            typedef AudioData::Pointer <AudioData::Int32, AudioData::NativeEndian, AudioData::NonInterleaved, AudioData::NonConst> DestSampleType;
-            typedef AudioData::Pointer <AudioData::Float32, AudioData::NativeEndian, AudioData::NonInterleaved, AudioData::Const> SourceSampleType;
+        for (int i = 0; i < numSourceChannels; ++i)
+            convertFloatsToInts (chans[i], channels[i] + startSample, numToDo);
 
-            chans[i] = tempBuffer + (int) i * numSamples;
-            DestSampleType destData (chans[i]);
-            SourceSampleType sourceData (source.getSampleData ((int) i, startSample));
-            destData.convertSamples (sourceData, numSamples);
-        }
+        if (! write ((const int**) chans, numToDo))
+            return false;
+
+        startSample += numToDo;
+        numSamples  -= numToDo;
     }
 
-    return write ((const int**) chans.getData(), numSamples);
+    return true;
+}
+
+bool AudioFormatWriter::writeFromAudioSampleBuffer (const AudioSampleBuffer& source, int startSample, int numSamples)
+{
+    const int numSourceChannels = source.getNumChannels();
+    jassert (startSample >= 0 && startSample + numSamples <= source.getNumSamples() && numSourceChannels > 0);
+
+    if (startSample == 0)
+        return writeFromFloatArrays ((const float**) source.getArrayOfChannels(), numSourceChannels, numSamples);
+
+    const float* chans [256];
+    jassert (numChannels < numElementsInArray (chans));
+
+    for (int i = 0; i < numSourceChannels; ++i)
+        chans[i] = source.getSampleData (i, startSample);
+
+    chans[numSourceChannels] = nullptr;
+
+    return writeFromFloatArrays (chans, numSourceChannels, numSamples);
 }
 
 //==============================================================================

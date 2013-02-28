@@ -193,7 +193,7 @@ namespace AiffFileHelpers
                     out.writeShortBigEndian ((short) identifier);
                     out.writeIntBigEndian (offset);
 
-                    const int labelLength = jmin (254, label.getNumBytesAsUTF8()); // seems to need null terminator even though it's a pstring
+                    const size_t labelLength = jmin ((size_t) 254, label.getNumBytesAsUTF8()); // seems to need null terminator even though it's a pstring
                     out.writeByte ((char) labelLength + 1);
                     out.write (label.toUTF8(), labelLength);
                     out.writeByte (0);
@@ -226,7 +226,7 @@ namespace AiffFileHelpers
 
                     const String comment (values.getValue (prefix + "Text", String::empty));
 
-                    const int commentLength = jmin (comment.getNumBytesAsUTF8(), 65534);
+                    const size_t commentLength = jmin (comment.getNumBytesAsUTF8(), (size_t) 65534);
                     out.writeShortBigEndian ((short) commentLength + 1);
                     out.write (comment.toUTF8(), commentLength);
                     out.writeByte (0);
@@ -527,7 +527,7 @@ public:
         }
 
         if (bytesWritten + bytes >= (size_t) 0xfff00000
-             || ! output->write (tempBlock.getData(), (int) bytes))
+             || ! output->write (tempBlock.getData(), bytes))
         {
             // failed to write to disk, so let's try writing the header.
             // If it's just run out of disk space, then if it does manage

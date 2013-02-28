@@ -96,9 +96,6 @@ public:
     id delegate;
 
 private:
-    CFRunLoopRef runLoop;
-    CFRunLoopSourceRef runLoopSource;
-
     //==============================================================================
     struct AppDelegateClass   : public ObjCClass <NSObject>
     {

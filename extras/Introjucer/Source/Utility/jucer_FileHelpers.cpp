@@ -30,11 +30,11 @@
 //==============================================================================
 namespace FileHelpers
 {
-    static int64 calculateMemoryHashCode (const void* data, const int numBytes)
+    static int64 calculateMemoryHashCode (const void* data, const size_t numBytes)
     {
         int64 t = 0;
 
-        for (int i = 0; i < numBytes; ++i)
+        for (size_t i = 0; i < numBytes; ++i)
             t = t * 65599 + static_cast <const uint8*> (data)[i];
 
         return t;
@@ -68,7 +68,7 @@ namespace FileHelpers
         return stream != nullptr ? calculateStreamHashCode (*stream) : 0;
     }
 
-    bool overwriteFileWithNewDataIfDifferent (const File& file, const void* data, int numBytes)
+    bool overwriteFileWithNewDataIfDifferent (const File& file, const void* data, size_t numBytes)
     {
         if (file.getSize() == numBytes
               && calculateMemoryHashCode (data, numBytes) == calculateFileHashCode (file))

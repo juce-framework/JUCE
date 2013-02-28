@@ -131,13 +131,13 @@ public:
 
 protected:
     //==============================================================================
-    CriticalSection processLock;
+    SpinLock processLock;
 
     void setCoefficients (double c1, double c2, double c3,
                           double c4, double c5, double c6) noexcept;
 
     bool active;
-    float coefficients[6];
+    float coefficients[5];
     float v1, v2;
 
     // (use the copyCoefficientsFrom() method instead of this operator)

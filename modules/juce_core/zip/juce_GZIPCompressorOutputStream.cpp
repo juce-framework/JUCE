@@ -46,7 +46,7 @@ public:
             zlibNamespace::deflateEnd (&stream);
     }
 
-    bool write (const uint8* data, unsigned int dataSize, OutputStream& out)
+    bool write (const uint8* data, size_t dataSize, OutputStream& out)
     {
         // When you call flush() on a gzip stream, the stream is closed, and you can
         // no longer continue to write data to it!
@@ -62,7 +62,7 @@ public:
     void finish (OutputStream& out)
     {
         const uint8* data = nullptr;
-        unsigned int dataSize = 0;
+        size_t dataSize = 0;
 
         while (! finished)
             doNextBlock (data, dataSize, out, Z_FINISH);
@@ -76,9 +76,10 @@ private:
     bool isFirstDeflate, streamIsValid, finished;
     zlibNamespace::Bytef buffer[32768];
 
-    bool doNextBlock (const uint8*& data, unsigned int& dataSize, OutputStream& out, const int flushMode)
+    bool doNextBlock (const uint8*& data, size_t& dataSize, OutputStream& out, const int flushMode)
     {
         using namespace zlibNamespace;
+
         if (streamIsValid)
         {
             stream.next_in   = const_cast <uint8*> (data);
@@ -99,8 +100,8 @@ private:
                 {
                     data += dataSize - stream.avail_in;
                     dataSize = stream.avail_in;
-                    const int bytesDone = ((int) sizeof (buffer)) - (int) stream.avail_out;
-                    return bytesDone <= 0 || out.write (buffer, bytesDone);
+                    const ssize_t bytesDone = sizeof (buffer) - (ssize_t) stream.avail_out;
+                    return bytesDone <= 0 || out.write (buffer, (size_t) bytesDone);
                 }
 
                 default:
@@ -136,12 +137,11 @@ void GZIPCompressorOutputStream::flush()
     destStream->flush();
 }
 
-bool GZIPCompressorOutputStream::write (const void* destBuffer, int howMany)
+bool GZIPCompressorOutputStream::write (const void* destBuffer, size_t howMany)
 {
     jassert (destBuffer != nullptr && howMany >= 0);
 
-    return helper->write (static_cast <const uint8*> (destBuffer),
-                          (unsigned int) howMany, *destStream);
+    return helper->write (static_cast <const uint8*> (destBuffer), howMany, *destStream);
 }
 
 int64 GZIPCompressorOutputStream::getPosition()
@@ -182,8 +182,8 @@ public:
                     for (int k = (int) data.getSize(); --k >= 0;)
                         data[k] = (char) rng.nextInt (255);
 
-                    original.write (data.getData(), (int) data.getSize());
-                    zipper  .write (data.getData(), (int) data.getSize());
+                    original << data;
+                    zipper   << data;
                 }
             }
 

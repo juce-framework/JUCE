@@ -1096,7 +1096,7 @@ public:
         The number returned does NOT include the trailing zero.
         @see toUTF8, copyToUTF8
     */
-    int getNumBytesAsUTF8() const noexcept;
+    size_t getNumBytesAsUTF8() const noexcept;
 
     //==============================================================================
     /** Copies the string to a buffer as UTF-8 characters.
@@ -1114,7 +1114,7 @@ public:
                                 end, and will return the number of bytes that were actually used.
         @see CharPointer_UTF8::writeWithDestByteLimit
     */
-    int copyToUTF8 (CharPointer_UTF8::CharType* destBuffer, int maxBufferSizeBytes) const noexcept;
+    size_t copyToUTF8 (CharPointer_UTF8::CharType* destBuffer, size_t maxBufferSizeBytes) const noexcept;
 
     /** Copies the string to a buffer as UTF-16 characters.
 
@@ -1131,7 +1131,7 @@ public:
                                 end, and will return the number of bytes that were actually used.
         @see CharPointer_UTF16::writeWithDestByteLimit
     */
-    int copyToUTF16 (CharPointer_UTF16::CharType* destBuffer, int maxBufferSizeBytes) const noexcept;
+    size_t copyToUTF16 (CharPointer_UTF16::CharType* destBuffer, size_t maxBufferSizeBytes) const noexcept;
 
     /** Copies the string to a buffer as UTF-32 characters.
 
@@ -1148,7 +1148,7 @@ public:
                                 end, and will return the number of bytes that were actually used.
         @see CharPointer_UTF32::writeWithDestByteLimit
     */
-    int copyToUTF32 (CharPointer_UTF32::CharType* destBuffer, int maxBufferSizeBytes) const noexcept;
+    size_t copyToUTF32 (CharPointer_UTF32::CharType* destBuffer, size_t maxBufferSizeBytes) const noexcept;
 
     //==============================================================================
     /** Increases the string's internally allocated storage.

@@ -391,6 +391,7 @@ void Process::setDockIconVisible (bool isVisible)
     [NSApp setActivationPolicy: isVisible ? NSApplicationActivationPolicyRegular
                                           : NSApplicationActivationPolicyProhibited];
    #else
+    (void) isVisible;
     jassertfalse; // sorry, not available in 10.5!
    #endif
 }

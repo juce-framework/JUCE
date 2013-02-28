@@ -408,7 +408,7 @@ void MidiFile::writeTrack (OutputStream& mainOut, const int trackNum)
                 MidiFileHelpers::writeVariableLengthInt (out, (uint32) dataSize);
             }
 
-            out.write (data, dataSize);
+            out.write (data, (size_t) dataSize);
             lastStatusByte = statusByte;
         }
     }
@@ -416,7 +416,7 @@ void MidiFile::writeTrack (OutputStream& mainOut, const int trackNum)
     {
         out.writeByte (0); // (tick delta)
         const MidiMessage m (MidiMessage::endOfTrack());
-        out.write (m.getRawData(), m.getRawDataSize());
+        out.write (m.getRawData(), (size_t) m.getRawDataSize());
     }
 
     mainOut.writeIntBigEndian ((int) ByteOrder::bigEndianInt ("MTrk"));

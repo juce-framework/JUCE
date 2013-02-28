@@ -391,7 +391,7 @@ public:
 
     bool writeData (const void* const data, const int size) const
     {
-        return output->write (data, size);
+        return output->write (data, (size_t) size);
     }
 
     static void packUint32 (FlacNamespace::FLAC__uint32 val, FlacNamespace::FLAC__byte* b, const int bytes)

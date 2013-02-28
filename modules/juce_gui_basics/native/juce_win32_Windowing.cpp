@@ -3025,7 +3025,7 @@ void SystemClipboard::copyTextToClipboard (const String& text)
                 {
                     if (WCHAR* const data = static_cast <WCHAR*> (GlobalLock (bufH)))
                     {
-                        text.copyToUTF16 (data, (int) bytesNeeded);
+                        text.copyToUTF16 (data, bytesNeeded);
                         GlobalUnlock (bufH);
 
                         SetClipboardData (CF_UNICODETEXT, bufH);

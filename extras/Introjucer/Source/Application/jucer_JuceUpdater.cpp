@@ -257,8 +257,7 @@ Component* JuceUpdater::refreshComponentForRow (int rowNumber, bool /*isRowSelec
     class UpdateListComponent  : public Component
     {
     public:
-        UpdateListComponent (JuceUpdater& updater_)
-            : updater (updater_)
+        UpdateListComponent()
         {
             addChildComponent (&toggle);
             toggle.setWantsKeyboardFocus (false);
@@ -318,14 +317,13 @@ Component* JuceUpdater::refreshComponentForRow (int rowNumber, bool /*isRowSelec
         }
 
     private:
-        JuceUpdater& updater;
         ToggleButton toggle;
         String name, status;
     };
 
     UpdateListComponent* c = dynamic_cast <UpdateListComponent*> (existingComponentToUpdate);
     if (c == nullptr)
-        c = new UpdateListComponent (*this);
+        c = new UpdateListComponent();
 
     if (ModuleList::Module* m = latestList.modules [rowNumber])
         c->setModule (m,

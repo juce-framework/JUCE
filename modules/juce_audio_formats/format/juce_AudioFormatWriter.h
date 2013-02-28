@@ -130,6 +130,9 @@ public:
     bool writeFromAudioSampleBuffer (const AudioSampleBuffer& source,
                                      int startSample, int numSamples);
 
+    /** Writes some samples from a set of float data channels. */
+    bool writeFromFloatArrays (const float** channels, int numChannels, int numSamples);
+
     //==============================================================================
     /** Returns the sample rate being used. */
     double getSampleRate() const noexcept       { return sampleRate; }

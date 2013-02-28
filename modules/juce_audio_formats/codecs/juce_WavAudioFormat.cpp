@@ -98,7 +98,7 @@ namespace WavFileHelpers
 
         static MemoryBlock createFrom (const StringPairArray& values)
         {
-            const size_t sizeNeeded = sizeof (BWAVChunk) + (size_t) values [WavAudioFormat::bwavCodingHistory].getNumBytesAsUTF8();
+            const size_t sizeNeeded = sizeof (BWAVChunk) + values [WavAudioFormat::bwavCodingHistory].getNumBytesAsUTF8();
             MemoryBlock data ((sizeNeeded + 3) & ~3);
             data.fillWith (0);
 
@@ -401,7 +401,7 @@ namespace WavFileHelpers
                                             const int chunkType, MemoryOutputStream& out)
         {
             const String label (values.getValue (prefix + "Text", prefix));
-            const int labelLength = label.getNumBytesAsUTF8() + 1;
+            const int labelLength = (int) label.getNumBytesAsUTF8() + 1;
             const int chunkLength = 4 + labelLength + (labelLength & 1);
 
             out.writeInt (chunkType);
@@ -417,7 +417,7 @@ namespace WavFileHelpers
         {
             const String text (values.getValue (prefix + "Text", prefix));
 
-            const int textLength = text.getNumBytesAsUTF8() + 1; // include null terminator
+            const int textLength = (int) text.getNumBytesAsUTF8() + 1; // include null terminator
             int chunkLength = textLength + 20 + (textLength & 1);
 
             out.writeInt (chunkName ("ltxt"));
@@ -832,7 +832,7 @@ public:
             default:    jassertfalse; break;
         }
 
-        if (! output->write (tempBlock.getData(), (int) bytes))
+        if (! output->write (tempBlock.getData(), bytes))
         {
             // failed to write to disk, so let's try writing the header.
             // If it's just run out of disk space, then if it does manage

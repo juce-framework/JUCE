@@ -25,7 +25,7 @@
 
 static ThreadLocalValue<AudioProcessor::WrapperType> wrapperTypeBeingCreated;
 
-void AudioProcessor::setTypeOfNextNewPlugin (AudioProcessor::WrapperType type)
+void JUCE_CALLTYPE AudioProcessor::setTypeOfNextNewPlugin (AudioProcessor::WrapperType type)
 {
     wrapperTypeBeingCreated = type;
 }
@@ -238,15 +238,15 @@ const uint32 magicXmlNumber = 0x21324356;
 void AudioProcessor::copyXmlToBinary (const XmlElement& xml, juce::MemoryBlock& destData)
 {
     const String xmlString (xml.createDocument (String::empty, true, false));
-    const int stringLength = xmlString.getNumBytesAsUTF8();
+    const size_t stringLength = xmlString.getNumBytesAsUTF8();
 
-    destData.setSize ((size_t) stringLength + 9);
+    destData.setSize (stringLength + 9);
 
-    char* const d = static_cast<char*> (destData.getData());
-    *(uint32*) d = ByteOrder::swapIfBigEndian ((const uint32) magicXmlNumber);
-    *(uint32*) (d + 4) = ByteOrder::swapIfBigEndian ((const uint32) stringLength);
+    uint32* const d = static_cast<uint32*> (destData.getData());
+    d[0] = ByteOrder::swapIfBigEndian ((const uint32) magicXmlNumber);
+    d[1] = ByteOrder::swapIfBigEndian ((const uint32) stringLength);
 
-    xmlString.copyToUTF8 (d + 8, stringLength + 1);
+    xmlString.copyToUTF8 ((CharPointer_UTF8::CharType*) (d + 2), stringLength + 1);
 }
 
 XmlElement* AudioProcessor::getXmlFromBinary (const void* data, const int sizeInBytes)

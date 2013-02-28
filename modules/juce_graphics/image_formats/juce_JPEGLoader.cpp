@@ -192,7 +192,7 @@ namespace JPEGHelpers
         JuceJpegDest* const dest = static_cast <JuceJpegDest*> (cinfo->dest);
 
         const size_t numToWrite = jpegBufferSize - dest->free_in_buffer;
-        dest->output->write (dest->buffer, (int) numToWrite);
+        dest->output->write (dest->buffer, numToWrite);
     }
 
     static boolean jpegWriteFlush (j_compress_ptr cinfo)
@@ -204,7 +204,7 @@ namespace JPEGHelpers
         dest->next_output_byte = reinterpret_cast <JOCTET*> (dest->buffer);
         dest->free_in_buffer = jpegBufferSize;
 
-        return (boolean) dest->output->write (dest->buffer, numToWrite);
+        return (boolean) dest->output->write (dest->buffer, (size_t) numToWrite);
     }
 }
 

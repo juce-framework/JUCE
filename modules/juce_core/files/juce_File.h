@@ -623,7 +623,7 @@ public:
         @returns false if it can't write to the file for some reason
     */
     bool appendData (const void* dataToAppend,
-                     int numberOfBytes) const;
+                     size_t numberOfBytes) const;
 
     /** Replaces this file's contents with a given block of data.
 
@@ -640,7 +640,7 @@ public:
         @see appendText
     */
     bool replaceWithData (const void* dataToWrite,
-                          int numberOfBytes) const;
+                          size_t numberOfBytes) const;
 
     /** Appends a string to the end of the file.
 

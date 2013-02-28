@@ -846,7 +846,7 @@ public:
 
         The data passed in is wrapped with header and tail bytes of 0xf0 and 0xf7.
     */
-    static MidiMessage createSysExMessage (const uint8* sysexData,
+    static MidiMessage createSysExMessage (const void* sysexData,
                                            int dataSize);
 
 

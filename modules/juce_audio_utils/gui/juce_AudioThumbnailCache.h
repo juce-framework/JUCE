@@ -72,6 +72,9 @@ public:
     */
     void storeThumb (const AudioThumbnailBase& thumb, int64 hashCode);
 
+    /** Tells the cache to forget about the thumb with the given hashcode. */
+    void removeThumb (int64 hashCode);
+
     //==============================================================================
     /** Attempts to re-load a saved cache of thumbnails from a stream.
         The cache data must have been written by the writeToStream() method.

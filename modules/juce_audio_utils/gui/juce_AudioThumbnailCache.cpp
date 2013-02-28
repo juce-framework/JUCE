@@ -140,6 +140,15 @@ void AudioThumbnailCache::clear()
     thumbs.clear();
 }
 
+void AudioThumbnailCache::removeThumb (const int64 hashCode)
+{
+    const ScopedLock sl (lock);
+
+    for (int i = thumbs.size(); --i >= 0;)
+        if (thumbs.getUnchecked(i)->hash == hashCode)
+            thumbs.remove (i);
+}
+
 static inline int getThumbnailCacheFileMagicHeader() noexcept
 {
     return (int) ByteOrder::littleEndianInt ("ThmC");

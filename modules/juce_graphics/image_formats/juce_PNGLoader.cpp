@@ -112,7 +112,7 @@ namespace PNGHelpers
 
     static void JUCE_CDECL writeDataCallback (png_structp png, png_bytep data, png_size_t length)
     {
-        static_cast<OutputStream*> (png_get_io_ptr (png))->write (data, (int) length);
+        static_cast<OutputStream*> (png_get_io_ptr (png))->write (data, length);
     }
 
    #if ! JUCE_USING_COREIMAGE_LOADER

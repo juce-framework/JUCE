@@ -35,8 +35,24 @@
 // Your project must contain an AppConfig.h file with your project-specific settings in it,
 // and your header search path must make it accessible to the module's files.
 #include "AppConfig.h"
-
 #include "juce_audio_basics.h"
+
+#ifndef JUCE_USE_SSE_INTRINSICS
+ #define JUCE_USE_SSE_INTRINSICS 1
+#endif
+
+#if ! JUCE_INTEL
+ #undef JUCE_USE_SSE_INTRINSICS
+#endif
+
+#if JUCE_USE_SSE_INTRINSICS
+ #include <emmintrin.h>
+#endif
+
+#if JUCE_MAC || JUCE_IOS
+ #define JUCE_USE_VDSP_FRAMEWORK 1
+ #include <Accelerate/Accelerate.h>
+#endif
 
 namespace juce
 {
@@ -44,6 +60,7 @@ namespace juce
 // START_AUTOINCLUDE buffers/*.cpp, effects/*.cpp, midi/*.cpp, sources/*.cpp, synthesisers/*.cpp
 #include "buffers/juce_AudioDataConverters.cpp"
 #include "buffers/juce_AudioSampleBuffer.cpp"
+#include "buffers/juce_FloatVectorOperations.cpp"
 #include "effects/juce_IIRFilter.cpp"
 #include "effects/juce_LagrangeInterpolator.cpp"
 #include "midi/juce_MidiBuffer.cpp"

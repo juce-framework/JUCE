@@ -614,7 +614,7 @@ public:
     WrapperType wrapperType;
 
     /** @internal */
-    static void setTypeOfNextNewPlugin (WrapperType);
+    static void JUCE_CALLTYPE setTypeOfNextNewPlugin (WrapperType);
 
     bool m_isInitialized;
     bool m_hasSideChain; // wrapper fills in if plugin has side-chain

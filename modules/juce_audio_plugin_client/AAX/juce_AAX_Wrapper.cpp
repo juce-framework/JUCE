@@ -423,7 +423,7 @@ struct AAXClasses
 
                 case JUCEAlgorithmIDs::preparedFlag:
                 {
-                    preparePlugin();
+                    const_cast<JuceAAX_Processor*>(this)->preparePlugin();
 
                     const size_t numObjects = dataSize / sizeof (uint32_t);
                     uint32_t* const objects = static_cast <uint32_t*> (data);
@@ -665,7 +665,7 @@ struct AAXClasses
             }
         }
 
-        void preparePlugin() const
+        void preparePlugin()
         {
             AAX_EStemFormat inputStemFormat = AAX_eStemFormat_None;
             check (Controller()->GetInputStemFormat (&inputStemFormat));
@@ -675,14 +675,14 @@ struct AAXClasses
             check (Controller()->GetOutputStemFormat (&outputStemFormat));
             const int numberOfOutputChannels = getNumChannelsForStemFormat (outputStemFormat);
 
-            int32_t bufferSize = 0;
-            check (Controller()->GetSignalLatency (&bufferSize));
+            AudioProcessor& audioProcessor = getPluginInstance();
 
             const AAX_CSampleRate sampleRate = getSampleRate();
-
-            AudioProcessor& audioProcessor = getPluginInstance();
+            const int bufferSize = 0; // how to get this?
             audioProcessor.setPlayConfigDetails (numberOfInputChannels, numberOfOutputChannels, sampleRate, bufferSize);
             audioProcessor.prepareToPlay (sampleRate, bufferSize);
+
+            check (Controller()->SetSignalLatency (audioProcessor.getLatencySamples()));
         }
 
         AAX_CSampleRate getSampleRate() const

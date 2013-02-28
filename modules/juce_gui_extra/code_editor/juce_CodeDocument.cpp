@@ -611,7 +611,7 @@ bool CodeDocument::writeToStream (OutputStream& stream)
         String temp (lines.getUnchecked(i)->line); // use a copy to avoid bloating the memory footprint of the stored string.
         const char* utf8 = temp.toUTF8();
 
-        if (! stream.write (utf8, (int) strlen (utf8)))
+        if (! stream.write (utf8, strlen (utf8)))
             return false;
     }
 
