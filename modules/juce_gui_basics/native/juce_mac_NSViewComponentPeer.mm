@@ -213,6 +213,14 @@ public:
         return true;
     }
 
+    void setRepresentedFile (const File& file)
+    {
+        if (! isSharedWindow)
+            [window setRepresentedFilename: juceStringToNS (file != File::nonexistent
+                                                                ? file.getFullPathName()
+                                                                : String::empty)];
+    }
+
     void setPosition (int x, int y)
     {
         setBounds (x, y, component.getWidth(), component.getHeight(), false);

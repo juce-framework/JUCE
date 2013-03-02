@@ -559,6 +559,10 @@ bool ComponentPeer::setDocumentEditedStatus (bool)
     return false;
 }
 
+void ComponentPeer::setRepresentedFile (const File&)
+{
+}
+
 //==============================================================================
 void ComponentPeer::clearMaskedRegion()
 {
