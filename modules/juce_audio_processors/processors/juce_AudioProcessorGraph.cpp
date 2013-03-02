@@ -1435,6 +1435,11 @@ bool AudioProcessorGraph::AudioGraphIOProcessor::silenceInProducesSilenceOut() c
     return isOutput();
 }
 
+double AudioProcessorGraph::AudioGraphIOProcessor::getTailLengthSeconds() const
+{
+    return 0;
+}
+
 bool AudioProcessorGraph::AudioGraphIOProcessor::acceptsMidi() const
 {
     return type == midiOutputNode;
