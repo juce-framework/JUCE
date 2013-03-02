@@ -75,10 +75,6 @@
  #error "You need to define the JucePlugin_EditorRequiresKeyboardFocus value!"
 #endif
 
-#ifndef JucePlugin_TailLengthSeconds
- #error "You need to define the JucePlugin_TailLengthSeconds value!"
-#endif
-
 //==============================================================================
 #if _WIN64 || (__LP64__ && (defined(__APPLE_CPP__) || defined(__APPLE_CC__)))
  #undef JucePlugin_Build_RTAS

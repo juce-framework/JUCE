@@ -892,6 +892,20 @@ public:
         return effect == nullptr || (effect->flags & effFlagsNoSoundInStop) != 0;
     }
 
+    double getTailLengthSeconds() const
+    {
+        if (effect == nullptr)
+            return 0.0;
+
+        const double sampleRate = getSampleRate();
+
+        if (sampleRate <= 0)
+            return 0.0;
+
+        VstIntPtr samples = dispatch (effGetTailSize, 0, 0, 0, 0);
+        return samples / sampleRate;
+    }
+
     bool acceptsMidi() const    { return wantsMidiMessages; }
     bool producesMidi() const   { return dispatch (effCanDo, 0, 0, (void*) "sendVstMidiEvent", 0) > 0; }
 

@@ -377,6 +377,11 @@ bool JuceDemoPluginAudioProcessor::silenceInProducesSilenceOut() const
     return false;
 }
 
+double JuceDemoPluginAudioProcessor::getTailLengthSeconds() const
+{
+    return 0.0;
+}
+
 //==============================================================================
 // This creates new instances of the plugin..
 AudioProcessor* JUCE_CALLTYPE createPluginFilter()

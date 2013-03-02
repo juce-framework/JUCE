@@ -188,7 +188,6 @@ public:
         setValueIfVoid (getPluginWantsMidiInput (project),         false);
         setValueIfVoid (getPluginProducesMidiOut (project),        false);
         setValueIfVoid (getPluginSilenceInProducesSilenceOut (project), false);
-        setValueIfVoid (getPluginTailLengthSeconds (project),      0);
         setValueIfVoid (getPluginEditorNeedsKeyFocus (project),    false);
         setValueIfVoid (getPluginAUExportPrefix (project),         sanitisedProjectName + "AU");
         setValueIfVoid (getPluginAUCocoaViewClassName (project),   sanitisedProjectName + "AU_V1");
@@ -237,9 +236,6 @@ public:
 
         props.add (new BooleanPropertyComponent (getPluginSilenceInProducesSilenceOut (project), "Silence", "Silence in produces silence out"),
                    "Enable this if your plugin has no tail - i.e. if passing a silent buffer to it will always result in a silent buffer being produced.");
-
-        props.add (new TextPropertyComponent (getPluginTailLengthSeconds (project), "Tail Length (in seconds)", 12, false),
-                   "This indicates the length, in seconds, of the plugin's tail. This information may or may not be used by the host.");
 
         props.add (new BooleanPropertyComponent (getPluginEditorNeedsKeyFocus (project), "Key Focus", "Plugin editor requires keyboard focus"),
                    "Enable this if your plugin needs keyboard input - some hosts can be a bit funny about keyboard focus..");
