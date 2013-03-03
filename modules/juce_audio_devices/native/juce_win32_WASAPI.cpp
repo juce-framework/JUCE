@@ -770,7 +770,7 @@ public:
     int getOutputLatencyInSamples()                     { return latencyOut; }
     int getInputLatencyInSamples()                      { return latencyIn; }
     BigInteger getActiveOutputChannels() const          { return outputDevice != nullptr ? outputDevice->channels : BigInteger(); }
-    BigInteger getActiveInputChannels() const           { return inputDevice != nullptr ? inputDevice->channels : BigInteger(); }
+    BigInteger getActiveInputChannels() const           { return inputDevice  != nullptr ? inputDevice->channels  : BigInteger(); }
     String getLastError()                               { return lastError; }
 
 
@@ -917,9 +917,9 @@ public:
         const int numOutputBuffers  = getActiveOutputChannels().countNumberOfSetBits();
         bool sampleRateChanged      = false;
 
-        AudioSampleBuffer ins (jmax (1, numInputBuffers), bufferSize + 32);
+        AudioSampleBuffer ins  (jmax (1, numInputBuffers),  bufferSize + 32);
         AudioSampleBuffer outs (jmax (1, numOutputBuffers), bufferSize + 32);
-        float** const inputBuffers = ins.getArrayOfChannels();
+        float** const inputBuffers  = ins.getArrayOfChannels();
         float** const outputBuffers = outs.getArrayOfChannels();
         ins.clear();
 
@@ -963,7 +963,7 @@ public:
             if (sampleRateChanged)
             {
                 triggerAsyncUpdate();
-                break; //Quit the thread... will restart it later!
+                break; // Quit the thread... will restart it later!
             }
         }
     }
@@ -1168,7 +1168,7 @@ private:
     private:
         WASAPIAudioIODeviceType& device;
 
-        HRESULT notify()   { device.systemDeviceChanged(); return S_OK; }
+        HRESULT notify()   { device.triggerAsyncDeviceChangeCallback(); return S_OK; }
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ChangeNotificationClient)
     };
@@ -1180,10 +1180,12 @@ private:
     {
         String s;
         IMMDevice* dev = nullptr;
+
         if (check (enumerator->GetDefaultAudioEndpoint (forCapture ? eCapture : eRender,
                                                         eMultimedia, &dev)))
         {
             WCHAR* deviceId = nullptr;
+
             if (check (dev->GetId (&deviceId)))
             {
                 s = deviceId;
@@ -1212,7 +1214,7 @@ private:
         }
 
         const String defaultRenderer (getDefaultEndpoint (enumerator, false));
-        const String defaultCapture (getDefaultEndpoint (enumerator, true));
+        const String defaultCapture  (getDefaultEndpoint (enumerator, true));
 
         ComSmartPtr <IMMDeviceCollection> deviceCollection;
         UINT32 numDevices = 0;

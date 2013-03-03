@@ -104,6 +104,13 @@ public:
 protected:
     virtual void systemDeviceChanged() = 0;
 
+    void triggerAsyncDeviceChangeCallback()
+    {
+        // We'll pause before sending a message, because on device removal, the OS hasn't always updated
+        // its device lists correctly at this point. This also helps avoid repeated callbacks.
+        startTimer (500);
+    }
+
 private:
     HiddenMessageWindow messageWindow;
 
@@ -115,9 +122,8 @@ private:
                   || wParam == 0x8004 /*DBT_DEVICEREMOVECOMPLETE*/
                   || wParam == 0x0007 /*DBT_DEVNODES_CHANGED*/))
         {
-            // We'll pause before sending a message, because on device removal, the OS hasn't always updated
-            // its device lists correctly at this point. This also helps avoid repeated callbacks.
-            ((DeviceChangeDetector*) GetWindowLongPtr (h, GWLP_USERDATA))->startTimer (500);
+            ((DeviceChangeDetector*) GetWindowLongPtr (h, GWLP_USERDATA))
+                ->triggerAsyncDeviceChangeCallback();
         }
 
         return DefWindowProc (h, message, wParam, lParam);

@@ -136,6 +136,12 @@ const OwnedArray <AudioIODeviceType>& AudioDeviceManager::getAvailableDeviceType
 
 void AudioDeviceManager::audioDeviceListChanged()
 {
+    if (currentAudioDevice != nullptr)
+    {
+        currentSetup.sampleRate = currentAudioDevice->getCurrentSampleRate();
+        currentSetup.bufferSize = currentAudioDevice->getCurrentBufferSizeSamples();
+    }
+
     sendChangeMessage();
 }
 
