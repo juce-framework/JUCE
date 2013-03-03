@@ -318,6 +318,11 @@ static const unsigned char temp_98c9479f[] =
 "    return false;\r\n"
 "}\r\n"
 "\r\n"
+"double FILTERCLASSNAME::getTailLengthSeconds() const\r\n"
+"{\r\n"
+"    return 0.0;\r\n"
+"}\r\n"
+"\r\n"
 "int FILTERCLASSNAME::getNumPrograms()\r\n"
 "{\r\n"
 "    return 0;\r\n"
@@ -465,6 +470,7 @@ static const unsigned char temp_62b91564[] =
 "    bool acceptsMidi() const;\r\n"
 "    bool producesMidi() const;\r\n"
 "    bool silenceInProducesSilenceOut() const;\r\n"
+"    double getTailLengthSeconds() const;\r\n"
 "\r\n"
 "    //==============================================================================\r\n"
 "    int getNumPrograms();\r\n"
@@ -1017,8 +1023,8 @@ const char* getNamedResource (const char* resourceNameUTF8, int& numBytes) throw
         case 0xe8b08520:  numBytes = 1050; return colourscheme_light_xml;
         case 0x27c5a93a:  numBytes = 1008; return jucer_AudioPluginEditorTemplate_cpp;
         case 0x4d0721bf:  numBytes = 799; return jucer_AudioPluginEditorTemplate_h;
-        case 0x51b49ac5:  numBytes = 4559; return jucer_AudioPluginFilterTemplate_cpp;
-        case 0x488afa0a:  numBytes = 2446; return jucer_AudioPluginFilterTemplate_h;
+        case 0x51b49ac5:  numBytes = 4638; return jucer_AudioPluginFilterTemplate_cpp;
+        case 0x488afa0a:  numBytes = 2488; return jucer_AudioPluginFilterTemplate_h;
         case 0x0b66646c:  numBytes = 886; return jucer_ContentCompTemplate_cpp;
         case 0x6fa10171:  numBytes = 924; return jucer_ContentCompTemplate_h;
         case 0x8905395b:  numBytes = 470; return jucer_MainConsoleAppTemplate_cpp;
