@@ -174,7 +174,7 @@ bool AudioFormatWriter::writeFromAudioSampleBuffer (const AudioSampleBuffer& sou
         return writeFromFloatArrays ((const float**) source.getArrayOfChannels(), numSourceChannels, numSamples);
 
     const float* chans [256];
-    jassert (numChannels < numElementsInArray (chans));
+    jassert ((int) numChannels < numElementsInArray (chans));
 
     for (int i = 0; i < numSourceChannels; ++i)
         chans[i] = source.getSampleData (i, startSample);

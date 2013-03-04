@@ -321,6 +321,7 @@ public:
         bool isInputChannelStereoPair (int index) const;
         bool isOutputChannelStereoPair (int index) const;
         bool silenceInProducesSilenceOut() const;
+        double getTailLengthSeconds() const;
         bool acceptsMidi() const;
         bool producesMidi() const;
 
@@ -367,6 +368,7 @@ public:
     bool isInputChannelStereoPair (int index) const;
     bool isOutputChannelStereoPair (int index) const;
     bool silenceInProducesSilenceOut() const;
+    double getTailLengthSeconds() const;
 
     bool acceptsMidi() const;
     bool producesMidi() const;

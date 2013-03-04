@@ -47,6 +47,7 @@ Graphics::Graphics (const Image& imageToDrawOnto)
       contextToDelete (&context),
       saveStatePending (false)
 {
+    jassert (imageToDrawOnto.isValid()); // Can't draw into a null image!
 }
 
 Graphics::Graphics (LowLevelGraphicsContext* const internalContext) noexcept

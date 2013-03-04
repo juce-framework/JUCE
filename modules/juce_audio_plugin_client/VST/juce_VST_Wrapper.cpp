@@ -292,7 +292,7 @@ public:
         canProcessReplacing (true);
 
         isSynth ((JucePlugin_IsSynth) != 0);
-        noTail (((JucePlugin_SilenceInProducesSilenceOut) != 0) && (JucePlugin_TailLengthSeconds <= 0));
+        noTail (filter->getTailLengthSeconds() <= 0);
         setInitialDelay (filter->getLatencySamples());
         programsAreChunks (true);
 
@@ -458,6 +458,14 @@ public:
     {
         isBypassed = b;
         return true;
+    }
+
+    VstInt32 getGetTailSize()
+    {
+        if (filter != nullptr)
+            return (VstInt32) (filter->getTailLengthSeconds() * getSampleRate());
+
+        return 0;
     }
 
     //==============================================================================

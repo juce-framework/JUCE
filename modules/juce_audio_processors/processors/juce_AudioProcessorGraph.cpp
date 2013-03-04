@@ -1328,6 +1328,7 @@ const String AudioProcessorGraph::getOutputChannelName (int channelIndex) const
 bool AudioProcessorGraph::isInputChannelStereoPair (int /*index*/) const    { return true; }
 bool AudioProcessorGraph::isOutputChannelStereoPair (int /*index*/) const   { return true; }
 bool AudioProcessorGraph::silenceInProducesSilenceOut() const               { return false; }
+double AudioProcessorGraph::getTailLengthSeconds() const                    { return 0; }
 bool AudioProcessorGraph::acceptsMidi() const   { return true; }
 bool AudioProcessorGraph::producesMidi() const  { return true; }
 void AudioProcessorGraph::getStateInformation (juce::MemoryBlock& /*destData*/)   {}
@@ -1432,6 +1433,11 @@ void AudioProcessorGraph::AudioGraphIOProcessor::processBlock (AudioSampleBuffer
 bool AudioProcessorGraph::AudioGraphIOProcessor::silenceInProducesSilenceOut() const
 {
     return isOutput();
+}
+
+double AudioProcessorGraph::AudioGraphIOProcessor::getTailLengthSeconds() const
+{
+    return 0;
 }
 
 bool AudioProcessorGraph::AudioGraphIOProcessor::acceptsMidi() const

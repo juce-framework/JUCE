@@ -45,7 +45,6 @@ namespace
     Value getPluginWantsMidiInput (Project& project)              { return project.getProjectValue ("pluginWantsMidiIn"); }
     Value getPluginProducesMidiOut (Project& project)             { return project.getProjectValue ("pluginProducesMidiOut"); }
     Value getPluginSilenceInProducesSilenceOut (Project& project) { return project.getProjectValue ("pluginSilenceInIsSilenceOut"); }
-    Value getPluginTailLengthSeconds (Project& project)           { return project.getProjectValue ("pluginTailLength"); }
     Value getPluginEditorNeedsKeyFocus (Project& project)         { return project.getProjectValue ("pluginEditorRequiresKeys"); }
     Value getPluginAUExportPrefix (Project& project)              { return project.getProjectValue ("pluginAUExportPrefix"); }
     Value getPluginAUCocoaViewClassName (Project& project)        { return project.getProjectValue ("pluginAUViewClass"); }
@@ -138,7 +137,6 @@ namespace
         flags.set ("JucePlugin_WantsMidiInput",              valueToBool (getPluginWantsMidiInput (project)));
         flags.set ("JucePlugin_ProducesMidiOutput",          valueToBool (getPluginProducesMidiOut (project)));
         flags.set ("JucePlugin_SilenceInProducesSilenceOut", valueToBool (getPluginSilenceInProducesSilenceOut (project)));
-        flags.set ("JucePlugin_TailLengthSeconds",           String (static_cast <double> (getPluginTailLengthSeconds (project).getValue())));
         flags.set ("JucePlugin_EditorRequiresKeyboardFocus", valueToBool (getPluginEditorNeedsKeyFocus (project)));
         flags.set ("JucePlugin_Version",                     project.getVersionString());
         flags.set ("JucePlugin_VersionCode",                 project.getVersionAsHex());

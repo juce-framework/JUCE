@@ -492,7 +492,7 @@ public:
     //==============================================================================
     ComponentResult Version()                   { return JucePlugin_VersionCode; }
     bool SupportsTail()                         { return true; }
-    Float64 GetTailTime()                       { return (JucePlugin_TailLengthSeconds); }
+    Float64 GetTailTime()                       { return juceFilter->getTailLengthSeconds(); }
     Float64 GetSampleRate()                     { return GetOutput(0)->GetStreamFormat().mSampleRate; }
 
     Float64 GetLatency()

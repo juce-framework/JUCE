@@ -1364,7 +1364,7 @@ public:
           clip (other.clip),
           maskArea (other.clip)
     {
-        TargetSaver ts (state.target.context);
+        OpenGLTargetSaver ts (state.target.context);
         state.currentShader.clearShader (state.shaderQuadQueue);
         state.shaderQuadQueue.flush();
         state.activeTextures.setSingleTextureMode (state.shaderQuadQueue);
@@ -1393,7 +1393,7 @@ public:
           clip (r.getBounds()),
           maskArea (clip)
     {
-        TargetSaver ts (state.target.context);
+        OpenGLTargetSaver ts (state.target.context);
         state.currentShader.clearShader (state.shaderQuadQueue);
         state.shaderQuadQueue.flush();
         state.activeTextures.clear();
@@ -1429,7 +1429,7 @@ public:
             if (excluded.getNumRectangles() == 1)
                 return excludeClipRectangle (excluded.getRectangle (0));
 
-            TargetSaver ts (state.target.context);
+            OpenGLTargetSaver ts (state.target.context);
             makeActive();
             state.blendMode.setBlendMode (state.shaderQuadQueue, true);
             state.currentShader.setShader (maskArea, state.shaderQuadQueue, state.currentShader.programs->solidColourProgram);
@@ -1445,7 +1445,7 @@ public:
         if (r.contains (clip))
             return Ptr();
 
-        TargetSaver ts (state.target.context);
+        OpenGLTargetSaver ts (state.target.context);
         makeActive();
         state.blendMode.setBlendMode (state.shaderQuadQueue, true);
         state.currentShader.setShader (maskArea, state.shaderQuadQueue, state.currentShader.programs->solidColourProgram);
@@ -1460,7 +1460,7 @@ public:
 
         if (! et.isEmpty())
         {
-            TargetSaver ts (state.target.context);
+            OpenGLTargetSaver ts (state.target.context);
             state.currentShader.clearShader (state.shaderQuadQueue);
             state.shaderQuadQueue.flush();
             state.activeTextures.clear();
@@ -1480,7 +1480,7 @@ public:
         if (clip.isEmpty())
             return Ptr();
 
-        TargetSaver ts (state.target.context);
+        OpenGLTargetSaver ts (state.target.context);
         makeActive();
 
         state.activeTextures.setSingleTextureMode (state.shaderQuadQueue);
@@ -1501,7 +1501,7 @@ public:
 
     Ptr clipToImageAlpha (const OpenGLTextureFromImage& image, const AffineTransform& transform)
     {
-        TargetSaver ts (state.target.context);
+        OpenGLTargetSaver ts (state.target.context);
         makeActive();
         state.activeTextures.setSingleTextureMode (state.shaderQuadQueue);
         state.activeTextures.bindTexture (image.textureID);
@@ -1615,28 +1615,6 @@ private:
         ScopedPointer<OpenGLTextureFromImage> image;
 
         JUCE_DECLARE_NON_COPYABLE (ShaderFillOperation)
-    };
-
-    struct TargetSaver
-    {
-        TargetSaver (const OpenGLContext& c)
-            : context (c), oldFramebuffer (OpenGLFrameBuffer::getCurrentFrameBufferTarget())
-        {
-            glGetIntegerv (GL_VIEWPORT, oldViewport);
-        }
-
-        ~TargetSaver()
-        {
-            context.extensions.glBindFramebuffer (GL_FRAMEBUFFER, oldFramebuffer);
-            glViewport (oldViewport[0], oldViewport[1], oldViewport[2], oldViewport[3]);
-        }
-
-    private:
-        const OpenGLContext& context;
-        GLuint oldFramebuffer;
-        GLint oldViewport[4];
-
-        TargetSaver& operator= (const TargetSaver&);
     };
 
     void makeActive()
@@ -2209,7 +2187,8 @@ public:
         target.makeActive();
         target.context.copyTexture (target.bounds, Rectangle<int> (texture.getWidth(),
                                                                    texture.getHeight()),
-                                    target.bounds.getWidth(), target.bounds.getHeight());
+                                    target.bounds.getWidth(), target.bounds.getHeight(),
+                                    false);
         glBindTexture (GL_TEXTURE_2D, 0);
 
        #if JUCE_WINDOWS

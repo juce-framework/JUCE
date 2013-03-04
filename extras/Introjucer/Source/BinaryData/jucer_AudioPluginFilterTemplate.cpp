@@ -93,6 +93,11 @@ bool FILTERCLASSNAME::silenceInProducesSilenceOut() const
     return false;
 }
 
+double FILTERCLASSNAME::getTailLengthSeconds() const
+{
+    return 0.0;
+}
+
 int FILTERCLASSNAME::getNumPrograms()
 {
     return 0;

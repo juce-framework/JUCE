@@ -377,6 +377,11 @@ public:
 
     bool silenceInProducesSilenceOut() const
     {
+        return getTailLengthSeconds() <= 0;
+    }
+
+    double getTailLengthSeconds() const
+    {
         Float64 tail = 0;
         UInt32 tailSize = sizeof (tail);
 
@@ -384,7 +389,7 @@ public:
             AudioUnitGetProperty (audioUnit, kAudioUnitProperty_TailTime, kAudioUnitScope_Global,
                                   0, &tail, &tailSize);
 
-        return tail <= 0;
+        return tail;
     }
 
     bool acceptsMidi() const                    { return wantsMidiMessages; }

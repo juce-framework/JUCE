@@ -496,18 +496,24 @@ void ProjectContentComponent::updateMainWindowTitle()
     if (MainWindow* mw = findParentComponentOfClass<MainWindow>())
     {
         String title;
+        File file;
         bool edited = false;
 
         if (currentDocument != nullptr)
         {
             title = currentDocument->getName();
             edited = currentDocument->needsSaving();
+            file = currentDocument->getFile();
         }
 
         if (ComponentPeer* peer = mw->getPeer())
+        {
             if (! peer->setDocumentEditedStatus (edited))
                 if (edited)
                     title << "*";
+
+            peer->setRepresentedFile (file);
+        }
 
         mw->updateTitle (title);
     }

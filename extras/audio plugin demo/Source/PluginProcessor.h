@@ -51,6 +51,7 @@ public:
     bool acceptsMidi() const;
     bool producesMidi() const;
     bool silenceInProducesSilenceOut() const;
+    double getTailLengthSeconds() const;
 
     //==============================================================================
     int getNumPrograms()                                                { return 0; }

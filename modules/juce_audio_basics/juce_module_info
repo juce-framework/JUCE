@@ -19,6 +19,6 @@
                       "sources/*",
                       "synthesisers/*" ],
 
-  "OSXFrameworks":  "vecLib",
-  "iOSFrameworks":  "vecLib"
+  "OSXFrameworks":  "Accelerate",
+  "iOSFrameworks":  "Accelerate"
 }

@@ -159,6 +159,28 @@ static void clearGLError()
     while (glGetError() != GL_NO_ERROR) {}
 }
 
+struct OpenGLTargetSaver
+{
+    OpenGLTargetSaver (const OpenGLContext& c)
+        : context (c), oldFramebuffer (OpenGLFrameBuffer::getCurrentFrameBufferTarget())
+    {
+        glGetIntegerv (GL_VIEWPORT, oldViewport);
+    }
+
+    ~OpenGLTargetSaver()
+    {
+        context.extensions.glBindFramebuffer (GL_FRAMEBUFFER, oldFramebuffer);
+        glViewport (oldViewport[0], oldViewport[1], oldViewport[2], oldViewport[3]);
+    }
+
+private:
+    const OpenGLContext& context;
+    GLuint oldFramebuffer;
+    GLint oldViewport[4];
+
+    OpenGLTargetSaver& operator= (const OpenGLTargetSaver&);
+};
+
 //==============================================================================
 #include "opengl/juce_OpenGLFrameBuffer.cpp"
 #include "opengl/juce_OpenGLGraphicsContext.cpp"
