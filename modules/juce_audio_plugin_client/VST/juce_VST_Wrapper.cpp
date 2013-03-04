@@ -460,6 +460,14 @@ public:
         return true;
     }
 
+    VstInt32 getGetTailSize()
+    {
+        if (filter != nullptr)
+            return (VstInt32) (filter->getTailLengthSeconds() * getSampleRate());
+
+        return 0;
+    }
+
     //==============================================================================
     VstInt32 processEvents (VstEvents* events)
     {
