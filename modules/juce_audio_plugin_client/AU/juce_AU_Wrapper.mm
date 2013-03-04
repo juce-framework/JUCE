@@ -1522,12 +1522,20 @@ private:
 //==============================================================================
 JUCE_COMPONENT_ENTRY (JuceAU, JucePlugin_AUExportPrefix, Entry)
 
+#ifndef AUDIOCOMPONENT_ENTRY
+ #define JUCE_DISABLE_AU_FACTORY_ENTRY 1
+#endif
+
 #if ! JUCE_DISABLE_AU_FACTORY_ENTRY  // (You might need to disable this for old Xcode 3 builds)
 JUCE_FACTORY_ENTRY   (JuceAU, JucePlugin_AUExportPrefix)
 #endif
 
 #if BUILD_AU_CARBON_UI
  JUCE_COMPONENT_ENTRY (JuceAUView, JucePlugin_AUExportPrefix, ViewEntry)
+#endif
+
+#if ! JUCE_DISABLE_AU_FACTORY_ENTRY
+ #include "AUPlugInDispatch.cpp"
 #endif
 
 #endif
