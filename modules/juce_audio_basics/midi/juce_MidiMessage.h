@@ -116,7 +116,7 @@ public:
 
         @see getRawDataSize
     */
-    uint8* getRawData() const noexcept                          { return data; }
+    const uint8* getRawData() const noexcept                    { return data; }
 
     /** Returns the number of bytes of data in the message.
 

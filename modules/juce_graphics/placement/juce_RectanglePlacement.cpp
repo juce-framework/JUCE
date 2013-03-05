@@ -87,7 +87,7 @@ void RectanglePlacement::applyTo (double& x, double& y, double& w, double& h,
     }
 }
 
-const AffineTransform RectanglePlacement::getTransformToFit (const Rectangle<float>& source, const Rectangle<float>& destination) const noexcept
+AffineTransform RectanglePlacement::getTransformToFit (const Rectangle<float>& source, const Rectangle<float>& destination) const noexcept
 {
     if (source.isEmpty())
         return AffineTransform::identity;
