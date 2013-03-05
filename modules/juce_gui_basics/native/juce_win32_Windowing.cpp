@@ -467,9 +467,9 @@ public:
     };
 
     //==============================================================================
-    HWNDComponentPeer (Component& comp, const int windowStyleFlags, HWND parentToAddTo_)
+    HWNDComponentPeer (Component& comp, const int windowStyleFlags, HWND parent, bool nonRepainting)
         : ComponentPeer (comp, windowStyleFlags),
-          dontRepaint (false),
+          dontRepaint (nonRepainting),
           currentRenderingEngine (softwareRenderingEngine),
           lastPaintTime (0),
           fullScreen (false),
@@ -479,7 +479,7 @@ public:
           constrainerIsResizing (false),
           currentWindowIcon (0),
           dropTarget (nullptr),
-          parentToAddTo (parentToAddTo_),
+          parentToAddTo (parent),
           updateLayeredWindowAlpha (255)
     {
         callFunctionIfNotLocked (&createWindowCallback, this);
@@ -903,7 +903,7 @@ public:
     class JuceDropTarget    : public ComBaseClassHelper <IDropTarget>
     {
     public:
-        JuceDropTarget (HWNDComponentPeer& owner_)   : ownerInfo (new OwnerInfo (owner_)) {}
+        JuceDropTarget (HWNDComponentPeer& p)   : ownerInfo (new OwnerInfo (p)) {}
 
         void clear()
         {
@@ -956,7 +956,7 @@ public:
     private:
         struct OwnerInfo
         {
-            OwnerInfo (HWNDComponentPeer& owner_) : owner (owner_) {}
+            OwnerInfo (HWNDComponentPeer& p) : owner (p) {}
 
             Point<int> getMousePos (const POINTL& mousePos) const
             {
@@ -1282,7 +1282,17 @@ private:
             JuceWindowIdentifier::setAsJUCEWindow (hwnd, true);
 
             if (dropTarget == nullptr)
-                dropTarget = new JuceDropTarget (*this);
+            {
+                HWNDComponentPeer* peer = nullptr;
+
+                if (dontRepaint)
+                    peer = getOwnerOfWindow (parentToAddTo);
+
+                if (peer == nullptr)
+                    peer = this;
+
+                dropTarget = new JuceDropTarget (*peer);
+            }
 
             RegisterDragDrop (hwnd, dropTarget);
 
@@ -2689,16 +2699,16 @@ ModifierKeys HWNDComponentPeer::modifiersAtLastCallback;
 
 ComponentPeer* Component::createNewPeer (int styleFlags, void* nativeWindowToAttachTo)
 {
-    return new HWNDComponentPeer (*this, styleFlags, (HWND) nativeWindowToAttachTo);
+    return new HWNDComponentPeer (*this, styleFlags,
+                                  (HWND) nativeWindowToAttachTo, false);
 }
 
 ComponentPeer* createNonRepaintingEmbeddedWindowsPeer (Component* component, void* parent)
 {
     jassert (component != nullptr);
 
-    HWNDComponentPeer* const p = new HWNDComponentPeer (*component, ComponentPeer::windowIgnoresMouseClicks, (HWND) parent);
-    p->dontRepaint = true;
-    return p;
+    return new HWNDComponentPeer (*component, ComponentPeer::windowIgnoresMouseClicks,
+                                  (HWND) parent, true);
 }
 
 
