@@ -149,7 +149,6 @@ namespace
         flags.set ("JucePlugin_AUExportPrefixQuoted",        getPluginAUExportPrefix (project).toString().quoted());
         flags.set ("JucePlugin_AUManufacturerCode",          "JucePlugin_ManufacturerCode");
         flags.set ("JucePlugin_CFBundleIdentifier",          project.getBundleIdentifier().toString());
-        flags.set ("JucePlugin_AUCocoaViewClassName",        getPluginAUCocoaViewClassName (project).toString());
         flags.set ("JucePlugin_RTASCategory",                getPluginRTASCategoryCode (project));
         flags.set ("JucePlugin_RTASManufacturerCode",        "JucePlugin_ManufacturerCode");
         flags.set ("JucePlugin_RTASProductId",               "JucePlugin_PluginCode");
@@ -476,8 +475,6 @@ namespace AUHelpers
                                                 JUCE_AU_PUBLIC "AUBase/AUBase.h",
                                                 JUCE_AU_PUBLIC "AUBase/AUDispatch.cpp",
                                                 JUCE_AU_PUBLIC "AUBase/AUDispatch.h",
-                                                JUCE_AU_PUBLIC "AUBase/AUPlugInDispatch.cpp",
-                                                JUCE_AU_PUBLIC "AUBase/AUPlugInDispatch.h",
                                                 JUCE_AU_PUBLIC "AUBase/AUInputElement.cpp",
                                                 JUCE_AU_PUBLIC "AUBase/AUInputElement.h",
                                                 JUCE_AU_PUBLIC "AUBase/AUOutputElement.cpp",
