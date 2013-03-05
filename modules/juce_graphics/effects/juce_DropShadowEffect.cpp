@@ -96,8 +96,8 @@ void DropShadow::drawForPath (Graphics& g, const Path& path) const
     jassert (radius > 0);
 
     const Rectangle<int> area ((path.getBounds().getSmallestIntegerContainer() + offset)
-                                   .getIntersection (g.getClipBounds())
-                                   .expanded (radius + 1, radius + 1));
+                                   .expanded (radius + 1)
+                                   .getIntersection (g.getClipBounds().expanded (radius + 1)));
 
     if (area.getWidth() > 2 && area.getHeight() > 2)
     {
