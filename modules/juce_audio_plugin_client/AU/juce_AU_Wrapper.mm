@@ -261,13 +261,12 @@ public:
 
                     static JuceUICreationClass cls;
 
-                    const File bundleFile (File::getSpecialLocation (File::currentApplicationFile));
-                    NSString* bundlePath = [NSString stringWithUTF8String: (const char*) bundleFile.getFullPathName().toUTF8()];
-                    NSBundle* b = [NSBundle bundleWithPath: bundlePath];
+                    // (NB: this may be the host's bundle, not necessarily the component's)
+                    NSBundle* bundle = [NSBundle bundleForClass: cls.cls];
 
                     AudioUnitCocoaViewInfo* info = static_cast <AudioUnitCocoaViewInfo*> (outData);
                     info->mCocoaAUViewClass[0] = (CFStringRef) [juceStringToNS (class_getName (cls.cls)) retain];
-                    info->mCocoaAUViewBundleLocation = (CFURLRef) [[NSURL fileURLWithPath: [b bundlePath]] retain];
+                    info->mCocoaAUViewBundleLocation = (CFURLRef) [[NSURL fileURLWithPath: [bundle bundlePath]] retain];
 
                     return noErr;
                 }
