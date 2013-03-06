@@ -62,11 +62,17 @@ public:
         @param associatedComponent   if this is non-null, it specifies the component that the
                             alert window should be associated with. Depending on the look
                             and feel, this might be used for positioning of the alert window.
+        @param callback     if this is non-null, the callback will receive a call to its
+                            modalStateFinished() when the box is dismissed. The callback object
+                            will be owned and deleted by the system, so make sure that it works
+                            safely and doesn't keep any references to objects that might be deleted
+                            before it gets called.
     */
     static void JUCE_CALLTYPE showMessageBoxAsync (AlertWindow::AlertIconType iconType,
-                                                   const String& title,
-                                                   const String& message,
-                                                   Component* associatedComponent = nullptr);
+                                                    const String& title,
+                                                    const String& message,
+                                                    Component* associatedComponent = nullptr,
+                                                    ModalComponentManager::Callback* callback = nullptr);
 
     /** Shows a dialog box with two buttons.
 

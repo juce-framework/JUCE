@@ -248,7 +248,7 @@ public:
         @param message      a longer, more descriptive message to show underneath the
                             headline
         @param buttonText   the text to show in the button - if this string is empty, the
-                            default string "ok" (or a localised version) will be used.
+                            default string "OK" (or a localised version) will be used.
         @param associatedComponent   if this is non-null, it specifies the component that the
                             alert window should be associated with. Depending on the look
                             and feel, this might be used for positioning of the alert window.
@@ -271,13 +271,12 @@ public:
         @param message      a longer, more descriptive message to show underneath the
                             headline
         @param buttonText   the text to show in the button - if this string is empty, the
-                            default string "ok" (or a localised version) will be used.
+                            default string "OK" (or a localised version) will be used.
         @param associatedComponent   if this is non-null, it specifies the component that the
                             alert window should be associated with. Depending on the look
                             and feel, this might be used for positioning of the alert window.
         @param callback     if this is non-null, the callback will receive a call to its
-                            modalStateFinished() when the box is dismissed, with its parameter
-                            being 1 if the ok button was pressed, or 0 for cancel, The callback object
+                            modalStateFinished() when the box is dismissed. The callback object
                             will be owned and deleted by the system, so make sure that it works
                             safely and doesn't keep any references to objects that might be deleted
                             before it gets called.
@@ -305,7 +304,7 @@ public:
         @param message      a longer, more descriptive message to show underneath the
                             headline
         @param button1Text  the text to show in the first button - if this string is
-                            empty, the default string "ok" (or a localised version of it)
+                            empty, the default string "OK" (or a localised version of it)
                             will be used.
         @param button2Text  the text to show in the second button - if this string is
                             empty, the default string "cancel" (or a localised version of it)
@@ -316,7 +315,7 @@ public:
         @param callback     if this is non-null, the menu will be launched asynchronously,
                             returning immediately, and the callback will receive a call to its
                             modalStateFinished() when the box is dismissed, with its parameter
-                            being 1 if the ok button was pressed, or 0 for cancel, The callback object
+                            being 1 if the ok button was pressed, or 0 for cancel. The callback object
                             will be owned and deleted by the system, so make sure that it works
                             safely and doesn't keep any references to objects that might be deleted
                             before it gets called.
@@ -368,7 +367,7 @@ public:
                             returning immediately, and the callback will receive a call to its
                             modalStateFinished() when the box is dismissed, with its parameter
                             being 1 if the "yes" button was pressed, 2 for the "no" button, or 0
-                            if it was cancelled, The callback object will be owned and deleted by the
+                            if it was cancelled. The callback object will be owned and deleted by the
                             system, so make sure that it works safely and doesn't keep any references
                             to objects that might be deleted before it gets called.
 

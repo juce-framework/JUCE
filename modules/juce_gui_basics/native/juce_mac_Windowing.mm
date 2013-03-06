@@ -32,13 +32,10 @@ void LookAndFeel::playAlertSound()
 class OSXMessageBox  : private AsyncUpdater
 {
 public:
-    OSXMessageBox (AlertWindow::AlertIconType type,
-                   const String& title_, const String& message_,
+    OSXMessageBox (AlertWindow::AlertIconType type, const String& t, const String& m,
                    const char* b1, const char* b2, const char* b3,
-                   ModalComponentManager::Callback* callback_,
-                   const bool runAsync)
-        : iconType (type), title (title_),
-          message (message_), callback (callback_),
+                   ModalComponentManager::Callback* c, const bool runAsync)
+        : iconType (type), title (t), message (m), callback (c),
           button1 (b1), button2 (b2), button3 (b3)
     {
         if (runAsync)
@@ -47,17 +44,21 @@ public:
 
     int getResult() const
     {
-        JUCE_AUTORELEASEPOOL
-        NSInteger r = getRawResult();
-        return r == NSAlertDefaultReturn ? 1 : (r == NSAlertOtherReturn ? 2 : 0);
+        switch (getRawResult())
+        {
+            case NSAlertDefaultReturn:  return 1;
+            case NSAlertOtherReturn:    return 2;
+            default:                    return 0;
+        }
     }
 
     static int show (AlertWindow::AlertIconType iconType, const String& title, const String& message,
-                     ModalComponentManager::Callback* callback, const char* b1, const char* b2, const char* b3)
+                     ModalComponentManager::Callback* callback, const char* b1, const char* b2, const char* b3,
+                     bool runAsync)
     {
         ScopedPointer<OSXMessageBox> mb (new OSXMessageBox (iconType, title, message, b1, b2, b3,
-                                                            callback, callback != nullptr));
-        if (callback == nullptr)
+                                                            callback, runAsync));
+        if (! runAsync)
             return mb->getResult();
 
         mb.release();
@@ -109,15 +110,15 @@ void JUCE_CALLTYPE NativeMessageBox::showMessageBox (AlertWindow::AlertIconType 
                                                      const String& title, const String& message,
                                                      Component* /*associatedComponent*/)
 {
-    OSXMessageBox box (iconType, title, message, "OK", nullptr, nullptr, nullptr, false);
-    (void) box.getResult();
+    OSXMessageBox::show (iconType, title, message, nullptr, "OK", nullptr, nullptr, false);
 }
 
 void JUCE_CALLTYPE NativeMessageBox::showMessageBoxAsync (AlertWindow::AlertIconType iconType,
                                                           const String& title, const String& message,
-                                                          Component* /*associatedComponent*/)
+                                                          Component* /*associatedComponent*/,
+                                                          ModalComponentManager::Callback* callback)
 {
-    new OSXMessageBox (iconType, title, message, "OK", nullptr, nullptr, nullptr, true);
+    OSXMessageBox::show (iconType, title, message, callback, "OK", nullptr, nullptr, true);
 }
 
 bool JUCE_CALLTYPE NativeMessageBox::showOkCancelBox (AlertWindow::AlertIconType iconType,
@@ -125,7 +126,8 @@ bool JUCE_CALLTYPE NativeMessageBox::showOkCancelBox (AlertWindow::AlertIconType
                                                       Component* /*associatedComponent*/,
                                                       ModalComponentManager::Callback* callback)
 {
-    return OSXMessageBox::show (iconType, title, message, callback, "OK", "Cancel", nullptr) == 1;
+    return OSXMessageBox::show (iconType, title, message, callback,
+                                "OK", "Cancel", nullptr, callback != nullptr) == 1;
 }
 
 int JUCE_CALLTYPE NativeMessageBox::showYesNoCancelBox (AlertWindow::AlertIconType iconType,
@@ -133,7 +135,8 @@ int JUCE_CALLTYPE NativeMessageBox::showYesNoCancelBox (AlertWindow::AlertIconTy
                                                         Component* /*associatedComponent*/,
                                                         ModalComponentManager::Callback* callback)
 {
-    return OSXMessageBox::show (iconType, title, message, callback, "Yes", "Cancel", "No");
+    return OSXMessageBox::show (iconType, title, message, callback,
+                                "Yes", "Cancel", "No", callback != nullptr);
 }
 
 

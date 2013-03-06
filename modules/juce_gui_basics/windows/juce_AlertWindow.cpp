@@ -631,7 +631,7 @@ void AlertWindow::showMessageBox (AlertIconType iconType,
     }
     else
     {
-        AlertWindowInfo info (title, message, associatedComponent, iconType, 1, 0, true);
+        AlertWindowInfo info (title, message, associatedComponent, iconType, 1, nullptr, true);
         info.button1 = buttonText.isEmpty() ? TRANS("ok") : buttonText;
 
         info.invoke();
@@ -648,7 +648,7 @@ void AlertWindow::showMessageBoxAsync (AlertIconType iconType,
 {
     if (LookAndFeel::getDefaultLookAndFeel().isUsingNativeAlertWindows())
     {
-        NativeMessageBox::showMessageBoxAsync (iconType, title, message, associatedComponent);
+        NativeMessageBox::showMessageBoxAsync (iconType, title, message, associatedComponent, callback);
     }
     else
     {

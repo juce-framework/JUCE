@@ -51,15 +51,13 @@ JUCE_JNI_CALLBACK (JUCE_ANDROID_ACTIVITY_CLASSNAME, launchApp, void, (JNIEnv* en
 
 JUCE_JNI_CALLBACK (JUCE_ANDROID_ACTIVITY_CLASSNAME, suspendApp, void, (JNIEnv* env, jobject activity))
 {
-    JUCEApplicationBase* const app = JUCEApplicationBase::getInstance();
-    if (app != nullptr)
+    if (JUCEApplicationBase* const app = JUCEApplicationBase::getInstance())
         app->suspended();
 }
 
 JUCE_JNI_CALLBACK (JUCE_ANDROID_ACTIVITY_CLASSNAME, resumeApp, void, (JNIEnv* env, jobject activity))
 {
-    JUCEApplicationBase* const app = JUCEApplicationBase::getInstance();
-    if (app != nullptr)
+    if (JUCEApplicationBase* const app = JUCEApplicationBase::getInstance())
         app->resumed();
 }
 
@@ -415,9 +413,7 @@ public:
             buffer = GlobalRef (env->NewIntArray (sizeNeeded));
         }
 
-        jint* dest = env->GetIntArrayElements ((jintArray) buffer.get(), 0);
-
-        if (dest != nullptr)
+        if (jint* dest = env->GetIntArrayElements ((jintArray) buffer.get(), 0))
         {
             {
                 Image temp (new PreallocatedImage (clip.getWidth(), clip.getHeight(),
@@ -646,9 +642,11 @@ void Process::makeForegroundProcess()
 //==============================================================================
 void JUCE_CALLTYPE NativeMessageBox::showMessageBoxAsync (AlertWindow::AlertIconType iconType,
                                                           const String& title, const String& message,
-                                                          Component* associatedComponent)
+                                                          Component* associatedComponent,
+                                                          ModalComponentManager::Callback* callback)
 {
-    android.activity.callVoidMethod (JuceAppActivity.showMessageBox, javaString (title).get(), javaString (message).get(), (jlong) 0);
+    android.activity.callVoidMethod (JuceAppActivity.showMessageBox, javaString (title).get(),
+                                     javaString (message).get(), (jlong) (pointer_sized_int) callback);
 }
 
 bool JUCE_CALLTYPE NativeMessageBox::showOkCancelBox (AlertWindow::AlertIconType iconType,
@@ -656,10 +654,10 @@ bool JUCE_CALLTYPE NativeMessageBox::showOkCancelBox (AlertWindow::AlertIconType
                                                       Component* associatedComponent,
                                                       ModalComponentManager::Callback* callback)
 {
-    jassert (callback != 0); // on android, all alerts must be non-modal!!
+    jassert (callback != nullptr); // on android, all alerts must be non-modal!!
 
-    android.activity.callVoidMethod (JuceAppActivity.showOkCancelBox, javaString (title).get(), javaString (message).get(),
-                                     (jlong) (pointer_sized_int) callback);
+    android.activity.callVoidMethod (JuceAppActivity.showOkCancelBox, javaString (title).get(),
+                                     javaString (message).get(), (jlong) (pointer_sized_int) callback);
     return false;
 }
 
@@ -668,19 +666,17 @@ int JUCE_CALLTYPE NativeMessageBox::showYesNoCancelBox (AlertWindow::AlertIconTy
                                                         Component* associatedComponent,
                                                         ModalComponentManager::Callback* callback)
 {
-    jassert (callback != 0); // on android, all alerts must be non-modal!!
+    jassert (callback != nullptr); // on android, all alerts must be non-modal!!
 
-    android.activity.callVoidMethod (JuceAppActivity.showYesNoCancelBox, javaString (title).get(), javaString (message).get(),
-                                     (jlong) (pointer_sized_int) callback);
+    android.activity.callVoidMethod (JuceAppActivity.showYesNoCancelBox, javaString (title).get(),
+                                     javaString (message).get(), (jlong) (pointer_sized_int) callback);
     return 0;
 }
 
 JUCE_JNI_CALLBACK (JUCE_ANDROID_ACTIVITY_CLASSNAME, alertDismissed, void, (JNIEnv* env, jobject activity,
                                                                            jlong callbackAsLong, jint result))
 {
-    ModalComponentManager::Callback* callback = (ModalComponentManager::Callback*) callbackAsLong;
-
-    if (callback != 0)
+    if (ModalComponentManager::Callback* callback = (ModalComponentManager::Callback*) callbackAsLong)
         callback->modalStateFinished (result);
 }
 

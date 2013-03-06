@@ -106,9 +106,9 @@ class iOSMessageBox
 public:
     iOSMessageBox (const String& title, const String& message,
                    NSString* button1, NSString* button2, NSString* button3,
-                   ModalComponentManager::Callback* callback_, const bool isAsync_)
+                   ModalComponentManager::Callback* cb, const bool async)
         : result (0), delegate (nil), alert (nil),
-          callback (callback_), isYesNo (button3 != nil), isAsync (isAsync_)
+          callback (cb), isYesNo (button3 != nil), isAsync (async)
     {
         delegate = [[JuceAlertBoxDelegate alloc] init];
         delegate->owner = this;
@@ -181,16 +181,16 @@ void JUCE_CALLTYPE NativeMessageBox::showMessageBox (AlertWindow::AlertIconType 
                                                      Component* associatedComponent)
 {
     JUCE_AUTORELEASEPOOL
-    iOSMessageBox mb (title, message, @"OK", nil, nil, 0, false);
+    iOSMessageBox mb (title, message, @"OK", nil, nil, nullptr, false);
     (void) mb.getResult();
 }
 
 void JUCE_CALLTYPE NativeMessageBox::showMessageBoxAsync (AlertWindow::AlertIconType iconType,
                                                           const String& title, const String& message,
-                                                          Component* associatedComponent)
+                                                          Component* associatedComponent,
+                                                          ModalComponentManager::Callback* callback)
 {
-    JUCE_AUTORELEASEPOOL
-    new iOSMessageBox (title, message, @"OK", nil, nil, 0, true);
+    new iOSMessageBox (title, message, @"OK", nil, nil, callback, true);
 }
 
 bool JUCE_CALLTYPE NativeMessageBox::showOkCancelBox (AlertWindow::AlertIconType iconType,
@@ -198,7 +198,8 @@ bool JUCE_CALLTYPE NativeMessageBox::showOkCancelBox (AlertWindow::AlertIconType
                                                       Component* associatedComponent,
                                                       ModalComponentManager::Callback* callback)
 {
-    ScopedPointer<iOSMessageBox> mb (new iOSMessageBox (title, message, @"Cancel", @"OK", nil, callback, callback != nullptr));
+    ScopedPointer<iOSMessageBox> mb (new iOSMessageBox (title, message, @"Cancel", @"OK",
+                                                        nil, callback, callback != nullptr));
 
     if (callback == nullptr)
         return mb->getResult() == 1;
