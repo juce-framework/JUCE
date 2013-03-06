@@ -328,10 +328,18 @@ void JUCE_CALLTYPE FloatVectorOperations::findMinAndMax (const float* src, int n
 
 float JUCE_CALLTYPE FloatVectorOperations::findMinimum (const float* src, int num) noexcept
 {
+   #if JUCE_USE_SSE_INTRINSICS
     return FloatVectorHelpers::findMinimumOrMaximum (src, num, true);
+   #else
+    return juce::findMinimum (src, num);
+   #endif
 }
 
 float JUCE_CALLTYPE FloatVectorOperations::findMaximum (const float* src, int num) noexcept
 {
+   #if JUCE_USE_SSE_INTRINSICS
     return FloatVectorHelpers::findMinimumOrMaximum (src, num, false);
+   #else
+    return juce::findMaximum (src, num);
+   #endif
 }
