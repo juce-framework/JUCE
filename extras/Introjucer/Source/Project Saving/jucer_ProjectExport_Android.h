@@ -439,29 +439,17 @@ private:
                 out << "  LOCAL_CPPFLAGS += " << createCPPFlags (androidConfig)
                     << (" " + replacePreprocessorTokens (androidConfig, getExtraCompilerFlagsString()).trim()).trimEnd()
                     << newLine
-                    << getDynamicLibs (androidConfig);
+                    << getLDLIBS (androidConfig);
 
                 break;
             }
         }
     }
 
-    String getDynamicLibs (const AndroidBuildConfiguration& config) const
+    String getLDLIBS (const AndroidBuildConfiguration& config) const
     {
-        String flags ("  LOCAL_LDLIBS :=");
-
-        flags << config.getGCCLibraryPathFlags();
-
-        {
-            StringArray libs;
-            libs.add ("log");
-            libs.add ("GLESv2");
-
-            for (int i = 0; i < libs.size(); ++i)
-                flags << " -l" << libs[i];
-        }
-
-        return flags + newLine;
+        return "  LOCAL_LDLIBS :=" + config.getGCCLibraryPathFlags()
+                + " -llog -lGLESv2 " + getExternalLibraryFlags (config) + newLine;
     }
 
     String createIncludePathFlags (const BuildConfiguration& config) const

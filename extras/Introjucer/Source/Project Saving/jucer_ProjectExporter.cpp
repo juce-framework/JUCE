@@ -577,3 +577,15 @@ String ProjectExporter::BuildConfiguration::getGCCLibraryPathFlags() const
 
     return s;
 }
+
+String ProjectExporter::getExternalLibraryFlags (const BuildConfiguration& config) const
+{
+    StringArray libraries;
+    libraries.addTokens (getExternalLibrariesString(), ";", "\"'");
+    libraries.removeEmptyStrings (true);
+
+    if (libraries.size() != 0)
+        return replacePreprocessorTokens (config, "-l" + libraries.joinIntoString (" -l")).trim();
+
+    return String::empty;
+}

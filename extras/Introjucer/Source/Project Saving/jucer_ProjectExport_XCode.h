@@ -618,13 +618,7 @@ private:
             getLinkerFlagsForStaticLibrary (extraLibs.getReference(i), flags, librarySearchPaths);
 
         flags.add (replacePreprocessorTokens (config, getExtraLinkerFlagsString()));
-
-        StringArray libraries;
-        libraries.addTokens (getExternalLibrariesString(), ";", "\"'");
-        libraries.removeEmptyStrings (true);
-
-        if (libraries.size() != 0)
-            flags.add (replacePreprocessorTokens (config, "-l" + libraries.joinIntoString (" -l")).trim());
+        flags.add (getExternalLibraryFlags (config));
 
         flags.removeEmptyStrings (true);
     }

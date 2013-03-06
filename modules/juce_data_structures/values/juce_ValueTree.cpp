@@ -779,9 +779,8 @@ class ValueTreePropertyValueSource  : public Value::ValueSource,
                                       private ValueTree::Listener
 {
 public:
-    ValueTreePropertyValueSource (const ValueTree& tree_, const Identifier& property_,
-                                  UndoManager* const undoManager_)
-        : tree (tree_), property (property_), undoManager (undoManager_)
+    ValueTreePropertyValueSource (const ValueTree& vt, const Identifier& prop, UndoManager* um)
+        : tree (vt), property (prop), undoManager (um)
     {
         tree.addListener (this);
     }
