@@ -1248,6 +1248,8 @@ protected:
                     link->createNewChildElement ("AdditionalLibraryDirectories")->addTextElement (replacePreprocessorTokens (config, librarySearchPaths.joinIntoString (";"))
                                                                                                     + ";%(AdditionalLibraryDirectories)");
 
+                link->createNewChildElement ("LargeAddressAware")->addTextElement ("true");
+
                 String externalLibraries (getExternalLibrariesString());
                 if (externalLibraries.isNotEmpty())
                     link->createNewChildElement ("AdditionalDependencies")->addTextElement (replacePreprocessorTokens (config, externalLibraries).trim()
