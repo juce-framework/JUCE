@@ -706,6 +706,10 @@ private:
             s.add ("DSTROOT = " + sanitisePath (binaryPath.toUnixStyle()));
             s.add ("SYMROOT = " + sanitisePath (binaryPath.toUnixStyle()));
         }
+        else
+        {
+            s.add ("CONFIGURATION_BUILD_DIR = \"$(PROJECT_DIR)/build/$(CONFIGURATION)\"");
+        }
 
         if (projectType.isLibrary())
         {
