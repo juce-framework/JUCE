@@ -187,11 +187,8 @@ namespace
 class MidiOutputDevice
 {
 public:
-    MidiOutputDevice (MidiOutput* const midiOutput_,
-                      snd_seq_t* const seqHandle_)
-        :
-          midiOutput (midiOutput_),
-          seqHandle (seqHandle_),
+    MidiOutputDevice (MidiOutput* output, snd_seq_t* handle)
+        : midiOutput (output), seqHandle (handle),
           maxEventSize (16 * 1024)
     {
         jassert (seqHandle != 0 && midiOutput != 0);
@@ -263,11 +260,9 @@ int MidiOutput::getDefaultDeviceIndex()
 MidiOutput* MidiOutput::openDevice (int deviceIndex)
 {
     MidiOutput* newDevice = nullptr;
-
     StringArray devices;
-    snd_seq_t* const handle = iterateMidiDevices (false, devices, deviceIndex);
 
-    if (handle != 0)
+    if (snd_seq_t* const handle = iterateMidiDevices (false, devices, deviceIndex))
     {
         newDevice = new MidiOutput();
         newDevice->internal = new MidiOutputDevice (newDevice, handle);
@@ -280,9 +275,7 @@ MidiOutput* MidiOutput::createNewDevice (const String& deviceName)
 {
     MidiOutput* newDevice = nullptr;
 
-    snd_seq_t* const handle = createMidiDevice (false, deviceName);
-
-    if (handle != 0)
+    if (snd_seq_t* const handle = createMidiDevice (false, deviceName))
     {
         newDevice = new MidiOutput();
         newDevice->internal = new MidiOutputDevice (newDevice, handle);
@@ -306,15 +299,11 @@ void MidiOutput::sendMessageNow (const MidiMessage& message)
 class MidiInputThread   : public Thread
 {
 public:
-    MidiInputThread (MidiInput* const midiInput_,
-                     snd_seq_t* const seqHandle_,
-                     MidiInputCallback* const callback_)
+    MidiInputThread (MidiInput* input, snd_seq_t* handle, MidiInputCallback* cb)
         : Thread ("Juce MIDI Input"),
-          midiInput (midiInput_),
-          seqHandle (seqHandle_),
-          callback (callback_)
+          midiInput (input), seqHandle (handle), callback (cb)
     {
-        jassert (seqHandle != 0 && callback != 0 && midiInput != 0);
+        jassert (seqHandle != nullptr && callback != nullptr && midiInput != nullptr);
     }
 
     ~MidiInputThread()
@@ -332,7 +321,7 @@ public:
             HeapBlock <uint8> buffer (maxEventSize);
 
             const int numPfds = snd_seq_poll_descriptors_count (seqHandle, POLLIN);
-            struct pollfd* const pfd = (struct pollfd*) alloca (numPfds * sizeof (struct pollfd));
+            HeapBlock <pollfd> pfd (numPfds);
 
             snd_seq_poll_descriptors (seqHandle, pfd, numPfds, POLLIN);
 
@@ -341,7 +330,6 @@ public:
                 if (poll (pfd, numPfds, 500) > 0)
                 {
                     snd_seq_event_t* inputEvent = nullptr;
-
                     snd_seq_nonblock (seqHandle, 1);
 
                     do
@@ -354,14 +342,9 @@ public:
                             snd_midi_event_reset_decode (midiParser);
 
                             if (numBytes > 0)
-                            {
-                                const MidiMessage message ((const uint8*) buffer,
-                                                           numBytes,
-                                                           Time::getMillisecondCounter() * 0.001);
-
-
-                                callback->handleIncomingMidiMessage (midiInput, message);
-                            }
+                                callback->handleIncomingMidiMessage (midiInput,
+                                                                     MidiMessage ((const uint8*) buffer, numBytes,
+                                                                                  Time::getMillisecondCounter() * 0.001));
 
                             snd_seq_free_event (inputEvent);
                         }
@@ -385,9 +368,8 @@ private:
 };
 
 //==============================================================================
-MidiInput::MidiInput (const String& name_)
-    : name (name_),
-      internal (0)
+MidiInput::MidiInput (const String& nm)
+    : name (nm), internal (nullptr)
 {
 }
 
@@ -397,15 +379,8 @@ MidiInput::~MidiInput()
     delete static_cast <MidiInputThread*> (internal);
 }
 
-void MidiInput::start()
-{
-    static_cast <MidiInputThread*> (internal)->startThread();
-}
-
-void MidiInput::stop()
-{
-    static_cast <MidiInputThread*> (internal)->stopThread (3000);
-}
+void MidiInput::start()  { static_cast <MidiInputThread*> (internal)->startThread(); }
+void MidiInput::stop()   { static_cast <MidiInputThread*> (internal)->stopThread (3000); }
 
 int MidiInput::getDefaultDeviceIndex()
 {
@@ -422,11 +397,9 @@ StringArray MidiInput::getDevices()
 MidiInput* MidiInput::openDevice (int deviceIndex, MidiInputCallback* callback)
 {
     MidiInput* newDevice = nullptr;
-
     StringArray devices;
-    snd_seq_t* const handle = iterateMidiDevices (true, devices, deviceIndex);
 
-    if (handle != 0)
+    if (snd_seq_t* const handle = iterateMidiDevices (true, devices, deviceIndex))
     {
         newDevice = new MidiInput (devices [deviceIndex]);
         newDevice->internal = new MidiInputThread (newDevice, handle, callback);
@@ -439,9 +412,7 @@ MidiInput* MidiInput::createNewDevice (const String& deviceName, MidiInputCallba
 {
     MidiInput* newDevice = nullptr;
 
-    snd_seq_t* const handle = createMidiDevice (true, deviceName);
-
-    if (handle != 0)
+    if (snd_seq_t* const handle = createMidiDevice (true, deviceName))
     {
         newDevice = new MidiInput (deviceName);
         newDevice->internal = new MidiInputThread (newDevice, handle, callback);
@@ -449,7 +420,6 @@ MidiInput* MidiInput::createNewDevice (const String& deviceName, MidiInputCallba
 
     return newDevice;
 }
-
 
 
 //==============================================================================
