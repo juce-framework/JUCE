@@ -821,6 +821,8 @@ public:
                 open (BigInteger (currentChansIn), BigInteger (currentChansOut),
                       currentSampleRate, currentBlockSizeSamples);
 
+                reloadChannelNames();
+
                 if (oldCallback != nullptr)
                     start (oldCallback);
             }
@@ -878,6 +880,40 @@ private:
         WCHAR wideVersion [64] = { 0 };
         MultiByteToWideChar (CP_ACP, 0, text, length, wideVersion, numElementsInArray (wideVersion));
         return wideVersion;
+    }
+
+    String getChannelName (int index, bool isInput) const
+    {
+        ASIOChannelInfo channelInfo = { 0 };
+        channelInfo.channel = index;
+        channelInfo.isInput = isInput ? 1 : 0;
+        asioObject->getChannelInfo (&channelInfo);
+
+        return convertASIOString (channelInfo.name, sizeof (channelInfo.name));
+    }
+
+    void reloadChannelNames()
+    {
+        long totalNumInputChans = 0;
+        long totalNumOutputChans = 0;
+
+        if (asioObject != nullptr
+             && asioObject->getChannels (&totalNumInputChans, &totalNumOutputChans) == ASE_OK)
+        {
+            inputChannelNames.clear();
+            outputChannelNames.clear();
+
+            for (int i = 0; i < totalNumInputChans; ++i)
+                inputChannelNames.add (getChannelName (i, true));
+
+            for (int i = 0; i < totalNumOutputChans; ++i)
+                outputChannelNames.add (getChannelName (i, false));
+
+            outputChannelNames.trim();
+            inputChannelNames.trim();
+            outputChannelNames.appendNumbersToDuplicates (false, true);
+            inputChannelNames.appendNumbersToDuplicates (false, true);
+        }
     }
 
     int resetBuffers (const BigInteger& inputChannels,
@@ -1107,8 +1143,9 @@ private:
                         numActiveOutputChans = 0;
 
                         ASIOBufferInfo* info = bufferInfos;
-                        int i, numChans = 0;
-                        for (i = 0; i < jmin (2, (int) totalNumInputChans); ++i)
+                        int numChans = 0;
+
+                        for (int i = 0; i < jmin (2, (int) totalNumInputChans); ++i)
                         {
                             info->isInput = 1;
                             info->channelNum = i;
@@ -1119,7 +1156,7 @@ private:
 
                         const int outputBufferIndex = numChans;
 
-                        for (i = 0; i < jmin (2, (int) totalNumOutputChans); ++i)
+                        for (int i = 0; i < jmin (2, (int) totalNumOutputChans); ++i)
                         {
                             info->isInput = 0;
                             info->channelNum = i;
@@ -1151,24 +1188,15 @@ private:
 
                         updateSampleRates();
 
-                        for (i = 0; i < totalNumInputChans; ++i)
-                        {
-                            ASIOChannelInfo channelInfo = { 0 };
-                            channelInfo.channel = i;
-                            channelInfo.isInput = 1;
-                            asioObject->getChannelInfo (&channelInfo);
+                        reloadChannelNames();
 
-                            inputChannelNames.add (convertASIOString (channelInfo.name, sizeof (channelInfo.name)));
-                        }
-
-                        for (i = 0; i < totalNumOutputChans; ++i)
+                        for (int i = 0; i < totalNumOutputChans; ++i)
                         {
                             ASIOChannelInfo channelInfo = { 0 };
                             channelInfo.channel = i;
                             channelInfo.isInput = 0;
                             asioObject->getChannelInfo (&channelInfo);
 
-                            outputChannelNames.add (convertASIOString (channelInfo.name, sizeof (channelInfo.name)));
                             outputFormat[i] = ASIOSampleFormat (channelInfo.type);
 
                             if (i < 2)
@@ -1178,11 +1206,6 @@ private:
                                 outputFormat[i].clear (bufferInfos [outputBufferIndex + i].buffers[1], preferredSize);
                             }
                         }
-
-                        outputChannelNames.trim();
-                        inputChannelNames.trim();
-                        outputChannelNames.appendNumbersToDuplicates (false, true);
-                        inputChannelNames.appendNumbersToDuplicates (false, true);
 
                         // start and stop because cubase does it..
                         asioObject->getLatencies (&inputLatency, &outputLatency);
