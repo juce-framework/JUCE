@@ -265,9 +265,9 @@ protected:
         bool iOS;
     };
 
-    BuildConfiguration::Ptr createBuildConfig (const ValueTree& settings) const
+    BuildConfiguration::Ptr createBuildConfig (const ValueTree& v) const
     {
-        return new XcodeBuildConfiguration (project, settings, iOS);
+        return new XcodeBuildConfiguration (project, v, iOS);
     }
 
 private:
@@ -1202,12 +1202,12 @@ private:
         misc.add (v);
     }
 
-    void addShellScriptBuildPhase (const String& name, const String& script) const
+    void addShellScriptBuildPhase (const String& phaseName, const String& script) const
     {
         if (script.trim().isNotEmpty())
         {
             ValueTree& v = addBuildPhase ("PBXShellScriptBuildPhase", StringArray());
-            v.setProperty (Ids::name, name, nullptr);
+            v.setProperty (Ids::name, phaseName, nullptr);
             v.setProperty ("shellPath", "/bin/sh", nullptr);
             v.setProperty ("shellScript", script.replace ("\\", "\\\\")
                                                 .replace ("\"", "\\\"")

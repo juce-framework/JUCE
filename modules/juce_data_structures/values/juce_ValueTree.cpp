@@ -34,7 +34,8 @@ public:
     }
 
     SharedObject (const SharedObject& other)
-        : type (other.type), properties (other.properties), parent (nullptr)
+        : ReferenceCountedObject (other),
+          type (other.type), properties (other.properties), parent (nullptr)
     {
         for (int i = 0; i < other.children.size(); ++i)
         {

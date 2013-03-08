@@ -201,9 +201,9 @@ public:
             flipRow (row);
         }
 
-        void selectedRowsChanged (int lastRowSelected)
+        void selectedRowsChanged (int row)
         {
-            owner->selectionChanged (list.modules [lastRowSelected]);
+            owner->selectionChanged (list.modules [row]);
         }
 
         void flipRow (int row)
@@ -269,13 +269,15 @@ public:
                 mappings.add (Project::configFlagEnabled);
                 mappings.add (Project::configFlagDisabled);
 
-                OwnedArray <Project::ConfigFlag> flags;
-                module->getConfigFlags (project, flags);
+                OwnedArray <Project::ConfigFlag> configFlags;
+                module->getConfigFlags (project, configFlags);
 
-                for (int i = 0; i < flags.size(); ++i)
+                for (int i = 0; i < configFlags.size(); ++i)
                 {
-                    ChoicePropertyComponent* c = new ChoicePropertyComponent (flags[i]->value, flags[i]->symbol, possibleValues, mappings);
-                    c->setTooltip (flags[i]->description);
+                    ChoicePropertyComponent* c = new ChoicePropertyComponent (configFlags[i]->value,
+                                                                              configFlags[i]->symbol,
+                                                                              possibleValues, mappings);
+                    c->setTooltip (configFlags[i]->description);
                     props.add (c);
                 }
             }

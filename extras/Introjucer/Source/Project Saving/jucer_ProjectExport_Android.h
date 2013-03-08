@@ -212,8 +212,8 @@ protected:
     class AndroidBuildConfiguration  : public BuildConfiguration
     {
     public:
-        AndroidBuildConfiguration (Project& project, const ValueTree& settings)
-            : BuildConfiguration (project, settings)
+        AndroidBuildConfiguration (Project& p, const ValueTree& settings)
+            : BuildConfiguration (p, settings)
         {
             if (getArchitectures().isEmpty())
                 getArchitecturesValue() = "armeabi armeabi-v7a";
@@ -229,9 +229,9 @@ protected:
         }
     };
 
-    BuildConfiguration::Ptr createBuildConfig (const ValueTree& settings) const
+    BuildConfiguration::Ptr createBuildConfig (const ValueTree& v) const
     {
-        return new AndroidBuildConfiguration (project, settings);
+        return new AndroidBuildConfiguration (project, v);
     }
 
 private:
@@ -629,9 +629,9 @@ private:
     void writeStringsFile (const File& file) const
     {
         XmlElement strings ("resources");
-        XmlElement* name = strings.createNewChildElement ("string");
-        name->setAttribute ("name", "app_name");
-        name->addTextElement (projectName);
+        XmlElement* resourceName = strings.createNewChildElement ("string");
+        resourceName->setAttribute ("name", "app_name");
+        resourceName->addTextElement (projectName);
 
         writeXmlOrThrow (strings, file, "utf-8", 100);
     }

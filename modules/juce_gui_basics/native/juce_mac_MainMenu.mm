@@ -324,9 +324,6 @@ private:
             [recentItem release];
         }
 
-        NSMenuItem* recentItem;
-
-    private:
         static NSMenuItem* findRecentFilesItem (NSArray* const items)
         {
             for (id object in items)
@@ -336,6 +333,8 @@ private:
                             return subObject;
             return nil;
         }
+
+        NSMenuItem* recentItem;
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (RecentFilesMenuItem)
     };

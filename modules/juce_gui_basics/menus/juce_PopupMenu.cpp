@@ -1602,9 +1602,9 @@ void PopupMenu::setLookAndFeel (LookAndFeel* const newLookAndFeel)
 }
 
 //==============================================================================
-PopupMenu::CustomComponent::CustomComponent (const bool isTriggeredAutomatically)
+PopupMenu::CustomComponent::CustomComponent (bool autoTrigger)
     : isHighlighted (false),
-      triggeredAutomatically (isTriggeredAutomatically)
+      triggeredAutomatically (autoTrigger)
 {
 }
 
