@@ -143,8 +143,6 @@ public:
         renderContext = [[[NSOpenGLContext alloc] initWithFormat: format
                                                     shareContext: (NSOpenGLContext*) contextToShare] autorelease];
 
-        setSwapInterval (1);
-
         [view setOpenGLContext: renderContext];
         [format release];
 

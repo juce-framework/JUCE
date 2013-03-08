@@ -42,9 +42,14 @@ public:
         nativeContext = new NativeContext (component, pixFormat, contextToShare);
 
         if (nativeContext->createdOk())
+        {
+            nativeContext->setSwapInterval (1);
             context.nativeContext = nativeContext;
+        }
         else
+        {
             nativeContext = nullptr;
+        }
     }
 
     ~CachedImage()
@@ -295,10 +300,8 @@ public:
 
         while (! threadShouldExit())
         {
-            const uint32 frameRenderStartTime = Time::getMillisecondCounter();
-
-            if (renderFrame())
-                waitForNextFrame (frameRenderStartTime);
+            if (! renderFrame())
+                wait (5); // failed to render, so avoid a tight fail-loop.
         }
 
         shutdownOnThread();
@@ -330,14 +333,6 @@ public:
 
         associatedObjectNames.clear();
         associatedObjects.clear();
-    }
-
-    void waitForNextFrame (const uint32 frameRenderStartTime)
-    {
-        const int defaultFPS = 60;
-
-        const int elapsed = (int) (Time::getMillisecondCounter() - frameRenderStartTime);
-        wait (jmax (1, (1000 / defaultFPS - 1) - elapsed));
     }
 
     //==============================================================================
