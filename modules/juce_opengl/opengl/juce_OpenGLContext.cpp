@@ -42,14 +42,9 @@ public:
         nativeContext = new NativeContext (component, pixFormat, contextToShare);
 
         if (nativeContext->createdOk())
-        {
-            nativeContext->setSwapInterval (1);
             context.nativeContext = nativeContext;
-        }
         else
-        {
             nativeContext = nullptr;
-        }
     }
 
     ~CachedImage()
@@ -292,6 +287,8 @@ public:
         }
 
         nativeContext->makeActive();
+        nativeContext->setSwapInterval (1);
+
         initialiseOnThread();
 
        #if JUCE_USE_OPENGL_SHADERS && ! JUCE_OPENGL_ES
