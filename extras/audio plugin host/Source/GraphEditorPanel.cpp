@@ -987,7 +987,6 @@ GraphDocumentComponent::GraphDocumentComponent (AudioPluginFormatManager& format
 
     deviceManager->addAudioCallback (&graphPlayer);
     deviceManager->addMidiInputCallback (String::empty, &graphPlayer.getMidiMessageCollector());
-    deviceManager->removeChangeListener (graphPanel);
 
     graphPanel->updateComponents();
 }
@@ -996,6 +995,7 @@ GraphDocumentComponent::~GraphDocumentComponent()
 {
     deviceManager->removeAudioCallback (&graphPlayer);
     deviceManager->removeMidiInputCallback (String::empty, &graphPlayer.getMidiMessageCollector());
+    deviceManager->removeChangeListener (graphPanel);
 
     deleteAllChildren();
 
