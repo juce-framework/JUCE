@@ -28,13 +28,13 @@ class ValueTree::SharedObject  : public ReferenceCountedObject
 public:
     typedef ReferenceCountedObjectPtr<SharedObject> Ptr;
 
-    explicit SharedObject (const Identifier& type_) noexcept
-        : type (type_), parent (nullptr)
+    explicit SharedObject (const Identifier& t) noexcept
+        : type (t), parent (nullptr)
     {
     }
 
     SharedObject (const SharedObject& other)
-        : ReferenceCountedObject (other),
+        : ReferenceCountedObject(),
           type (other.type), properties (other.properties), parent (nullptr)
     {
         for (int i = 0; i < other.children.size(); ++i)

@@ -116,6 +116,8 @@ protected:
 private:
     //==============================================================================
     Atomic <int> refCount;
+
+    JUCE_DECLARE_NON_COPYABLE (ReferenceCountedObject)
 };
 
 
@@ -175,6 +177,8 @@ protected:
 private:
     //==============================================================================
     int refCount;
+
+    JUCE_DECLARE_NON_COPYABLE (SingleThreadedReferenceCountedObject)
 };
 
 

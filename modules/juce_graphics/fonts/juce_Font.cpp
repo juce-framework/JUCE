@@ -216,7 +216,7 @@ public:
     }
 
     SharedFontInternal (const SharedFontInternal& other) noexcept
-        : ReferenceCountedObject (other),
+        : ReferenceCountedObject(),
           typefaceName (other.typefaceName),
           typefaceStyle (other.typefaceStyle),
           height (other.height),
