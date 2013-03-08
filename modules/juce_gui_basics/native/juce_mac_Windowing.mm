@@ -230,24 +230,49 @@ Desktop::DisplayOrientation Desktop::getCurrentOrientation() const
 }
 
 //==============================================================================
-#ifndef __POWER__  // Some versions of the SDK omit this function..
- extern "C"  { extern OSErr UpdateSystemActivity (UInt8); }
-#endif
-
 class ScreenSaverDefeater   : public Timer
 {
 public:
     ScreenSaverDefeater()
     {
-        startTimer (10000);
+        startTimer (5000);
         timerCallback();
     }
 
     void timerCallback()
     {
         if (Process::isForegroundProcess())
-            UpdateSystemActivity (1 /*UsrActivity*/);
+        {
+            if (assertion == nullptr)
+                assertion = new PMAssertion();
+        }
+        else
+        {
+            assertion = nullptr;
+        }
     }
+
+    struct PMAssertion
+    {
+        PMAssertion()  : assertionID (kIOPMNullAssertionID)
+        {
+            IOReturn res = IOPMAssertionCreateWithName (kIOPMAssertionTypePreventUserIdleDisplaySleep,
+                                                        kIOPMAssertionLevelOn,
+                                                        CFSTR ("JUCE Playback"),
+                                                        &assertionID);
+            jassert (res == kIOReturnSuccess); (void) res;
+        }
+
+        ~PMAssertion()
+        {
+            if (assertionID != kIOPMNullAssertionID)
+                IOPMAssertionRelease (assertionID);
+        }
+
+        IOPMAssertionID assertionID;
+    };
+
+    ScopedPointer<PMAssertion> assertion;
 };
 
 static ScopedPointer<ScreenSaverDefeater> screenSaverDefeater;
