@@ -43,7 +43,7 @@ class File;
 
     @see var
 */
-class JSON
+class JUCE_API  JSON
 {
 public:
     //==============================================================================

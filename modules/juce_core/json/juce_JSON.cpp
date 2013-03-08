@@ -329,11 +329,10 @@ public:
         }
         else if (v.isObject())
         {
-            DynamicObject* const object = v.getDynamicObject();
-
-            jassert (object != nullptr); // Only DynamicObjects can be converted to JSON!
-
-            writeObject (out, *object, indentLevel, allOnOneLine);
+            if (DynamicObject* const object = v.getDynamicObject())
+                writeObject (out, *object, indentLevel, allOnOneLine);
+            else
+                jassertfalse; // Only DynamicObjects can be converted to JSON!
         }
         else
         {
