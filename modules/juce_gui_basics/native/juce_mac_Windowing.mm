@@ -230,9 +230,18 @@ Desktop::DisplayOrientation Desktop::getCurrentOrientation() const
 }
 
 //==============================================================================
+#if defined (MAC_OS_X_VERSION_10_7) && (MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_7)
+ #define JUCE_USE_IOPM_SCREENSAVER_DEFEAT 1
+#endif
+
+#if ! (defined (JUCE_USE_IOPM_SCREENSAVER_DEFEAT) || defined (__POWER__))
+ extern "C"  { extern OSErr UpdateSystemActivity (UInt8); } // Some versions of the SDK omit this function..
+#endif
+
 class ScreenSaverDefeater   : public Timer
 {
 public:
+   #if JUCE_USE_IOPM_SCREENSAVER_DEFEAT
     ScreenSaverDefeater()
     {
         startTimer (5000);
@@ -273,6 +282,19 @@ public:
     };
 
     ScopedPointer<PMAssertion> assertion;
+   #else
+    ScreenSaverDefeater()
+    {
+        startTimer (10000);
+        timerCallback();
+    }
+
+    void timerCallback()
+    {
+        if (Process::isForegroundProcess())
+            UpdateSystemActivity (1 /*UsrActivity*/);
+    }
+   #endif
 };
 
 static ScopedPointer<ScreenSaverDefeater> screenSaverDefeater;
