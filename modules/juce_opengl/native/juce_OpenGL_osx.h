@@ -23,87 +23,6 @@
   ==============================================================================
 */
 
-struct ThreadSafeNSOpenGLViewClass  : public ObjCClass <NSOpenGLView>
-{
-    ThreadSafeNSOpenGLViewClass()  : ObjCClass <NSOpenGLView> ("JUCEGLView_")
-    {
-        addIvar <CriticalSection*> ("lock");
-        addIvar <BOOL> ("needsUpdate");
-
-        addMethod (@selector (update),               update,             "v@:");
-        addMethod (@selector (reshape),              reshape,            "v@:");
-        addMethod (@selector (_surfaceNeedsUpdate:), surfaceNeedsUpdate, "v@:@");
-        addMethod (@selector (rightMouseDown:),      rightMouseDown,     "v@:@");
-        addMethod (@selector (rightMouseUp:),        rightMouseUp,       "v@:@");
-        addMethod (@selector (acceptsFirstMouse:),   acceptsFirstMouse,  "v@:@");
-
-        registerClass();
-    }
-
-    static void init (id self)
-    {
-        object_setInstanceVariable (self, "lock", new CriticalSection());
-
-       #if defined (MAC_OS_X_VERSION_10_7) && (MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_7)
-        if ([self respondsToSelector: @selector (setWantsBestResolutionOpenGLSurface:)])
-            [self setWantsBestResolutionOpenGLSurface: YES];
-       #endif
-
-        setNeedsUpdate (self, YES);
-    }
-
-    static bool makeActive (id self)
-    {
-        const ScopedLock sl (*getLock (self));
-
-        if ([(NSOpenGLView*) self openGLContext] == nil)
-            return false;
-
-        [[(NSOpenGLView*) self openGLContext] makeCurrentContext];
-
-        if (getIvar<void*> (self, "needsUpdate"))
-        {
-            sendSuperclassMessage (self, @selector (update));
-            setNeedsUpdate (self, NO);
-        }
-
-        return true;
-    }
-
-private:
-    static CriticalSection* getLock (id self)
-    {
-        return getIvar<CriticalSection*> (self, "lock");
-    }
-
-    static void setNeedsUpdate (id self, BOOL b)
-    {
-        object_setInstanceVariable (self, "needsUpdate", (void*) b);
-    }
-
-    static void setNeedsUpdateLocked (id self, BOOL b)
-    {
-        const ScopedLock sl (*getLock (self));
-        setNeedsUpdate (self, b);
-    }
-
-    static void dealloc (id self, SEL)
-    {
-        delete getLock (self);
-        sendSuperclassMessage (self, @selector (dealloc));
-    }
-
-    static BOOL acceptsFirstMouse (id, SEL, NSEvent*)               { return YES; }
-    static void surfaceNeedsUpdate (id self, SEL, NSNotification*)  { setNeedsUpdateLocked (self, YES); }
-    static void update (id self, SEL)                               { setNeedsUpdateLocked (self, YES); }
-    static void reshape (id self, SEL)                              { setNeedsUpdateLocked (self, YES); }
-
-    static void rightMouseDown (id self, SEL, NSEvent* ev)  { [[(NSOpenGLView*) self superview] rightMouseDown: ev]; }
-    static void rightMouseUp   (id self, SEL, NSEvent* ev)  { [[(NSOpenGLView*) self superview] rightMouseUp:   ev]; }
-};
-
-
-//==============================================================================
 class OpenGLContext::NativeContext
 {
 public:
@@ -130,10 +49,14 @@ public:
 
         NSOpenGLPixelFormat* format = [[NSOpenGLPixelFormat alloc] initWithAttributes: attribs];
 
-        static ThreadSafeNSOpenGLViewClass cls;
+        static MouseForwardingNSOpenGLViewClass cls;
         view = [cls.createInstance() initWithFrame: NSMakeRect (0, 0, 100.0f, 100.0f)
                                        pixelFormat: format];
-        ThreadSafeNSOpenGLViewClass::init (view);
+
+       #if defined (MAC_OS_X_VERSION_10_7) && (MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_7)
+        if ([view respondsToSelector: @selector (setWantsBestResolutionOpenGLSurface:)])
+            [view setWantsBestResolutionOpenGLSurface: YES];
+       #endif
 
         [[NSNotificationCenter defaultCenter] addObserver: view
                                                  selector: @selector (_surfaceNeedsUpdate:)
@@ -172,8 +95,13 @@ public:
         if ([renderContext view] != view)
             [renderContext setView: view];
 
-        ThreadSafeNSOpenGLViewClass::makeActive (view);
-        return true;
+        if (NSOpenGLContext* context = [view openGLContext])
+        {
+            [context makeCurrentContext];
+            return true;
+        }
+
+        return false;
     }
 
     bool isActive() const noexcept
@@ -225,10 +153,28 @@ public:
         return numFrames;
     }
 
-private:
     NSOpenGLContext* renderContext;
     NSOpenGLView* view;
     ReferenceCountedObjectPtr<ReferenceCountedObject> viewAttachment;
+
+    //==============================================================================
+    struct MouseForwardingNSOpenGLViewClass  : public ObjCClass <NSOpenGLView>
+    {
+        MouseForwardingNSOpenGLViewClass()  : ObjCClass <NSOpenGLView> ("JUCEGLView_")
+        {
+            addMethod (@selector (rightMouseDown:),      rightMouseDown,     "v@:@");
+            addMethod (@selector (rightMouseUp:),        rightMouseUp,       "v@:@");
+            addMethod (@selector (acceptsFirstMouse:),   acceptsFirstMouse,  "v@:@");
+
+            registerClass();
+        }
+
+    private:
+        static void rightMouseDown (id self, SEL, NSEvent* ev)      { [[(NSOpenGLView*) self superview] rightMouseDown: ev]; }
+        static void rightMouseUp   (id self, SEL, NSEvent* ev)      { [[(NSOpenGLView*) self superview] rightMouseUp:   ev]; }
+        static BOOL acceptsFirstMouse (id, SEL, NSEvent*)           { return YES; }
+    };
+
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (NativeContext)
 };

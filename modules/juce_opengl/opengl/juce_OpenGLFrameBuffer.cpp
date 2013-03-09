@@ -26,16 +26,11 @@
 class OpenGLFrameBuffer::Pimpl
 {
 public:
-    Pimpl (OpenGLContext& context_, const int width_, const int height_,
+    Pimpl (OpenGLContext& c, const int w, const int h,
            const bool wantsDepthBuffer, const bool wantsStencilBuffer)
-        : context (context_),
-          width (width_),
-          height (height_),
-          textureID (0),
-          frameBufferID (0),
-          depthOrStencilBuffer (0),
-          hasDepthBuffer (false),
-          hasStencilBuffer (false)
+        : context (c), width (w), height (h),
+          textureID (0), frameBufferID (0), depthOrStencilBuffer (0),
+          hasDepthBuffer (false), hasStencilBuffer (false)
     {
         // Framebuffer objects can only be created when the current thread has an active OpenGL
         // context. You'll need to create this object in one of the OpenGLContext's callbacks.
