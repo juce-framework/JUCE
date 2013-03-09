@@ -162,7 +162,7 @@ public:
 private:
     var value;
 
-    JUCE_DECLARE_NON_COPYABLE (SimpleValueSource)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SimpleValueSource)
 };
 
 
@@ -172,10 +172,10 @@ Value::Value()
 {
 }
 
-Value::Value (ValueSource* const value_)
-    : value (value_)
+Value::Value (ValueSource* const v)
+    : value (v)
 {
-    jassert (value_ != nullptr);
+    jassert (v != nullptr);
 }
 
 Value::Value (const var& initialValue)

@@ -811,7 +811,7 @@ private:
     void valueTreeChildOrderChanged (ValueTree&) {}
     void valueTreeParentChanged (ValueTree&) {}
 
-    JUCE_DECLARE_NON_COPYABLE (ValueTreePropertyValueSource)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ValueTreePropertyValueSource)
 };
 
 Value ValueTree::getPropertyAsValue (const Identifier& name, UndoManager* const undoManager)
