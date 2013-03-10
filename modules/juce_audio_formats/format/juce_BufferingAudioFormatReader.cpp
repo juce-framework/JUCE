@@ -62,7 +62,7 @@ bool BufferingAudioReader::readSamples (int** destSamples, int numDestChannels, 
     {
         if (const BufferedBlock* const block = getBlockContaining (startSampleInFile))
         {
-            const int offset = startSampleInFile - block->range.getStart();
+            const int offset = (int) (startSampleInFile - block->range.getStart());
             const int numToDo = jmin (numSamples, (int) (block->range.getEnd() - startSampleInFile));
 
             for (int j = 0; j < numDestChannels; ++j)
@@ -71,7 +71,7 @@ bool BufferingAudioReader::readSamples (int** destSamples, int numDestChannels, 
                 {
                     dest += startOffsetInDestBuffer;
 
-                    if (j < numChannels)
+                    if (j < (int) numChannels)
                         FloatVectorOperations::copy (dest, block->buffer.getSampleData (j, offset), numToDo);
                     else
                         FloatVectorOperations::clear (dest, numToDo);
@@ -138,7 +138,7 @@ bool BufferingAudioReader::readNextBufferChunk()
         return false;
     }
 
-    for (int p = startPos; p < endPos; p += samplesPerBlock)
+    for (int64 p = startPos; p < endPos; p += samplesPerBlock)
     {
         if (getBlockContaining (p) == nullptr)
         {
