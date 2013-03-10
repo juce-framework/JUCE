@@ -162,6 +162,23 @@ public:
     */
     static int getPageSize();
 
+    //==============================================================================
+    /** Returns a backtrace of the current call-stack.
+        The usefulness of the result will depend on the level of debug symbols
+        that are available in the executable.
+    */
+    static String getStackBacktrace();
+
+    /** A void() function type, used by setApplicationCrashHandler(). */
+    typedef void (*CrashHandlerFunction)();
+
+    /** Sets up a global callback function that will be called if the application
+        executes some kind of illegal instruction.
+
+        You may want to call getStackBacktrace() in your handler function, to find out
+        where the problem happened and log it, etc.
+    */
+    static void setApplicationCrashHandler (CrashHandlerFunction);
 
 private:
     //==============================================================================
