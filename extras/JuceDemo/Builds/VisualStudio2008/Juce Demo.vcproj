@@ -784,6 +784,17 @@
             </FileConfiguration>
           </File>
           <File RelativePath="..\..\..\..\modules\juce_audio_formats\format\juce_AudioSubsectionReader.h"/>
+          <File RelativePath="..\..\..\..\modules\juce_audio_formats\format\juce_BufferingAudioFormatReader.cpp">
+            <FileConfiguration Name="Debug|Win32"
+                               ExcludedFromBuild="true">
+              <Tool Name="VCCLCompilerTool"/>
+            </FileConfiguration>
+            <FileConfiguration Name="Release|Win32"
+                               ExcludedFromBuild="true">
+              <Tool Name="VCCLCompilerTool"/>
+            </FileConfiguration>
+          </File>
+          <File RelativePath="..\..\..\..\modules\juce_audio_formats\format\juce_BufferingAudioFormatReader.h"/>
           <File RelativePath="..\..\..\..\modules\juce_audio_formats\format\juce_MemoryMappedAudioFormatReader.h"/>
         </Filter>
         <Filter Name="codecs">
