@@ -56,7 +56,8 @@
     @see OwnedArray, ReferenceCountedArray, StringArray, CriticalSection
 */
 template <typename ElementType,
-          typename TypeOfCriticalSectionToUse = DummyCriticalSection>
+          typename TypeOfCriticalSectionToUse = DummyCriticalSection,
+          int minimumAllocatedSize = 0>
 class Array
 {
 private:
@@ -1035,8 +1036,8 @@ private:
 
     void minimiseStorageAfterRemoval()
     {
-        if (data.numAllocated > numUsed * 2)
-            data.shrinkToNoMoreThan (jmax (numUsed, 64 / (int) sizeof (ElementType)));
+        if (data.numAllocated > jmax (minimumAllocatedSize, numUsed * 2))
+            data.shrinkToNoMoreThan (jmax (numUsed, jmax (minimumAllocatedSize, 64 / (int) sizeof (ElementType))));
     }
 };
 
