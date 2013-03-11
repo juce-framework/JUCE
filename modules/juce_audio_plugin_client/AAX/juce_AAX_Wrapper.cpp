@@ -457,29 +457,39 @@ struct AAXClasses
         bool getCurrentPosition (juce::AudioPlayHead::CurrentPositionInfo& info)
         {
             const AAX_ITransport& transport = *Transport();
-            check (transport.GetCurrentTempo (&info.bpm));
+            if (! check (transport.GetCurrentTempo (&info.bpm)))
+                info.bpm = 0.0;
 
-            int32_t num, denom;
+            int32_t num = 4, denom = 4;
             transport.GetCurrentMeter (&num, &denom);
             info.timeSigNumerator = num;
             info.timeSigDenominator = denom;
 
-            check (transport.GetCurrentNativeSampleLocation (&info.timeInSamples));
-            info.timeInSeconds = info.timeInSamples / getSampleRate();
+            if (check (transport.GetCurrentNativeSampleLocation (&info.timeInSamples)))
+            {
+                info.timeInSeconds = info.timeInSamples / getSampleRate();
+            }
+            else
+            {
+                info.timeInSamples = 0;
+                info.timeInSeconds = 0;
+            }
 
-            int64_t ticks;
-            check (transport.GetCurrentTickPosition (&ticks));
+            int64_t ticks = 0;
+            transport.GetCurrentTickPosition (&ticks);
             info.ppqPosition = ticks / 960000.0;
 
-            int64_t loopStartTick, loopEndTick;
+            int64_t loopStartTick = 0, loopEndTick = 0;
             check (transport.GetCurrentLoopPosition (&info.isLooping, &loopStartTick, &loopEndTick));
             info.ppqLoopStart = loopStartTick / 960000.0;
             info.ppqLoopEnd   = loopEndTick   / 960000.0;
 
             // No way to get these: (?)
+            info.isPlaying = false;
             info.isRecording = false;
             info.ppqPositionOfLastBarStart = 0;
             info.editOriginTime = 0;
+            info.frameRate = fpsUnknown;
 
             return true;
         }
