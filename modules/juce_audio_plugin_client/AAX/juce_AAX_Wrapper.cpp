@@ -457,28 +457,23 @@ struct AAXClasses
         bool getCurrentPosition (juce::AudioPlayHead::CurrentPositionInfo& info)
         {
             const AAX_ITransport& transport = *Transport();
-            if (! check (transport.GetCurrentTempo (&info.bpm)))
-                info.bpm = 0.0;
 
-            int32_t num = 4, denom = 4;
-            transport.GetCurrentMeter (&num, &denom);
-            info.timeSigNumerator = num;
-            info.timeSigDenominator = denom;
+            info.bpm = 0.0;
+            check (transport.GetCurrentTempo (&info.bpm));
 
-            if (check (transport.GetCurrentNativeSampleLocation (&info.timeInSamples)))
-            {
-                info.timeInSeconds = info.timeInSamples / getSampleRate();
-            }
-            else
-            {
-                info.timeInSamples = 0;
-                info.timeInSeconds = 0;
-            }
+            info.timeSigNumerator = 4;
+            info.timeSigDenominator = 4;
+            transport.GetCurrentMeter (&info.timeSigNumerator, &info.timeSigDenominator);
+
+            info.timeInSamples = 0;
+            check (transport.GetCurrentNativeSampleLocation (&info.timeInSamples));
+            info.timeInSeconds = info.timeInSamples / getSampleRate();
 
             int64_t ticks = 0;
-            transport.GetCurrentTickPosition (&ticks);
+            check (transport.GetCurrentTickPosition (&ticks));
             info.ppqPosition = ticks / 960000.0;
 
+            info.isLooping = false;
             int64_t loopStartTick = 0, loopEndTick = 0;
             check (transport.GetCurrentLoopPosition (&info.isLooping, &loopStartTick, &loopEndTick));
             info.ppqLoopStart = loopStartTick / 960000.0;
@@ -489,7 +484,7 @@ struct AAXClasses
             info.isRecording = false;
             info.ppqPositionOfLastBarStart = 0;
             info.editOriginTime = 0;
-            info.frameRate = fpsUnknown;
+            info.frameRate = AudioPlayHead::fpsUnknown;
 
             return true;
         }
