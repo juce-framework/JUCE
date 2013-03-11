@@ -28,13 +28,14 @@ class ValueTree::SharedObject  : public ReferenceCountedObject
 public:
     typedef ReferenceCountedObjectPtr<SharedObject> Ptr;
 
-    explicit SharedObject (const Identifier& type_) noexcept
-        : type (type_), parent (nullptr)
+    explicit SharedObject (const Identifier& t) noexcept
+        : type (t), parent (nullptr)
     {
     }
 
     SharedObject (const SharedObject& other)
-        : type (other.type), properties (other.properties), parent (nullptr)
+        : ReferenceCountedObject(),
+          type (other.type), properties (other.properties), parent (nullptr)
     {
         for (int i = 0; i < other.children.size(); ++i)
         {
@@ -779,9 +780,8 @@ class ValueTreePropertyValueSource  : public Value::ValueSource,
                                       private ValueTree::Listener
 {
 public:
-    ValueTreePropertyValueSource (const ValueTree& tree_, const Identifier& property_,
-                                  UndoManager* const undoManager_)
-        : tree (tree_), property (property_), undoManager (undoManager_)
+    ValueTreePropertyValueSource (const ValueTree& vt, const Identifier& prop, UndoManager* um)
+        : tree (vt), property (prop), undoManager (um)
     {
         tree.addListener (this);
     }
@@ -811,7 +811,7 @@ private:
     void valueTreeChildOrderChanged (ValueTree&) {}
     void valueTreeParentChanged (ValueTree&) {}
 
-    JUCE_DECLARE_NON_COPYABLE (ValueTreePropertyValueSource)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ValueTreePropertyValueSource)
 };
 
 Value ValueTree::getPropertyAsValue (const Identifier& name, UndoManager* const undoManager)

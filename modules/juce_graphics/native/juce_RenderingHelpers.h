@@ -1578,7 +1578,7 @@ namespace ClipRegions
         EdgeTableRegion (const Rectangle<float>& r) : edgeTable (r) {}
         EdgeTableRegion (const RectangleList& r)    : edgeTable (r) {}
         EdgeTableRegion (const Rectangle<int>& bounds, const Path& p, const AffineTransform& t) : edgeTable (bounds, p, t) {}
-        EdgeTableRegion (const EdgeTableRegion& other) : edgeTable (other.edgeTable) {}
+        EdgeTableRegion (const EdgeTableRegion& other) : Base(), edgeTable (other.edgeTable) {}
 
         Ptr clone() const                           { return new EdgeTableRegion (*this); }
         Ptr applyClipTo (const Ptr& target) const   { return target->clipToEdgeTable (edgeTable); }
@@ -1774,7 +1774,7 @@ namespace ClipRegions
     public:
         RectangleListRegion (const Rectangle<int>& r) : clip (r) {}
         RectangleListRegion (const RectangleList& r)  : clip (r) {}
-        RectangleListRegion (const RectangleListRegion& other) : clip (other.clip) {}
+        RectangleListRegion (const RectangleListRegion& other) : Base(), clip (other.clip) {}
 
         Ptr clone() const                           { return new RectangleListRegion (*this); }
         Ptr applyClipTo (const Ptr& target) const   { return target->clipToRectangleList (clip); }

@@ -139,7 +139,7 @@ void GZIPCompressorOutputStream::flush()
 
 bool GZIPCompressorOutputStream::write (const void* destBuffer, size_t howMany)
 {
-    jassert (destBuffer != nullptr && howMany >= 0);
+    jassert (destBuffer != nullptr && (ssize_t) howMany >= 0);
 
     return helper->write (static_cast <const uint8*> (destBuffer), howMany, *destStream);
 }

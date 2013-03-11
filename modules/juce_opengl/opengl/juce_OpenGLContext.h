@@ -188,6 +188,8 @@ public:
         fairly system-dependent, but 0 turns off syncing, 1 makes it swap on frame-boundaries,
         and greater numbers indicate that it should swap less often.
 
+        By default, this will be set to 1.
+
         Returns true if it sets the value successfully - some platforms won't support
         this setting.
     */

@@ -102,16 +102,30 @@ static RLimitInitialiser rLimitInitialiser;
 #endif
 
 //==============================================================================
+#if ! JUCE_IOS
+static String getOSXVersion()
+{
+    JUCE_AUTORELEASEPOOL
+    NSDictionary* dict = [NSDictionary dictionaryWithContentsOfFile:
+                                nsStringLiteral ("/System/Library/CoreServices/SystemVersion.plist")];
+
+    return nsStringToJuce ([dict objectForKey: nsStringLiteral ("ProductVersion")]);
+}
+#endif
+
 SystemStats::OperatingSystemType SystemStats::getOperatingSystemType()
 {
    #if JUCE_IOS
     return iOS;
    #else
-    SInt32 versionMinor = 0;
-    OSErr err = Gestalt (gestaltSystemVersionMinor, &versionMinor);
-    (void) err;
-    jassert (err == noErr);
-    return (OperatingSystemType) (versionMinor + MacOSX_10_4 - 4);
+    StringArray parts;
+    parts.addTokens (getOSXVersion(), ".", String::empty);
+
+    jassert (parts[0].getIntValue() == 10);
+    const int major = parts[1].getIntValue();
+    jassert (major > 2);
+
+    return (OperatingSystemType) (major + MacOSX_10_4 - 4);
    #endif
 }
 
@@ -120,13 +134,7 @@ String SystemStats::getOperatingSystemName()
    #if JUCE_IOS
     return "iOS " + nsStringToJuce ([[UIDevice currentDevice] systemVersion]);
    #else
-    SInt32 major, minor;
-    Gestalt (gestaltSystemVersionMajor, &major);
-    Gestalt (gestaltSystemVersionMinor, &minor);
-
-    String s ("Mac OSX ");
-    s << (int) major << '.' << (int) minor;
-    return s;
+    return "Mac OSX " + getOSXVersion();
    #endif
 }
 

@@ -265,9 +265,9 @@ protected:
         bool iOS;
     };
 
-    BuildConfiguration::Ptr createBuildConfig (const ValueTree& settings) const
+    BuildConfiguration::Ptr createBuildConfig (const ValueTree& v) const
     {
-        return new XcodeBuildConfiguration (project, settings, iOS);
+        return new XcodeBuildConfiguration (project, v, iOS);
     }
 
 private:
@@ -618,13 +618,7 @@ private:
             getLinkerFlagsForStaticLibrary (extraLibs.getReference(i), flags, librarySearchPaths);
 
         flags.add (replacePreprocessorTokens (config, getExtraLinkerFlagsString()));
-
-        StringArray libraries;
-        libraries.addTokens (getExternalLibrariesString(), ";", "\"'");
-        libraries.removeEmptyStrings (true);
-
-        if (libraries.size() != 0)
-            flags.add (replacePreprocessorTokens (config, "-l" + libraries.joinIntoString (" -l")).trim());
+        flags.add (getExternalLibraryFlags (config));
 
         flags.removeEmptyStrings (true);
     }
@@ -711,6 +705,10 @@ private:
 
             s.add ("DSTROOT = " + sanitisePath (binaryPath.toUnixStyle()));
             s.add ("SYMROOT = " + sanitisePath (binaryPath.toUnixStyle()));
+        }
+        else
+        {
+            s.add ("CONFIGURATION_BUILD_DIR = \"$(PROJECT_DIR)/build/$(CONFIGURATION)\"");
         }
 
         if (projectType.isLibrary())
@@ -1204,12 +1202,12 @@ private:
         misc.add (v);
     }
 
-    void addShellScriptBuildPhase (const String& name, const String& script) const
+    void addShellScriptBuildPhase (const String& phaseName, const String& script) const
     {
         if (script.trim().isNotEmpty())
         {
             ValueTree& v = addBuildPhase ("PBXShellScriptBuildPhase", StringArray());
-            v.setProperty (Ids::name, name, nullptr);
+            v.setProperty (Ids::name, phaseName, nullptr);
             v.setProperty ("shellPath", "/bin/sh", nullptr);
             v.setProperty ("shellScript", script.replace ("\\", "\\\\")
                                                 .replace ("\"", "\\\"")

@@ -95,9 +95,7 @@ PluginWindow* PluginWindow::getWindowFor (AudioProcessorGraph::Node* node,
 
     if (ui != nullptr)
     {
-        AudioPluginInstance* const plugin = dynamic_cast <AudioPluginInstance*> (node->getProcessor());
-
-        if (plugin != nullptr)
+        if (AudioPluginInstance* const plugin = dynamic_cast <AudioPluginInstance*> (node->getProcessor()))
             ui->setName (plugin->getName());
 
         return new PluginWindow (ui, node, useGenericView);
@@ -135,9 +133,7 @@ public:
           isInput (isInput_),
           graph (graph_)
     {
-        const AudioProcessorGraph::Node::Ptr node (graph.getNodeForId (filterID_));
-
-        if (node != nullptr)
+        if (const AudioProcessorGraph::Node::Ptr node = graph.getNodeForId (filterID_))
         {
             String tip;
 
@@ -262,13 +258,9 @@ public:
             }
             else if (r == 3 || r == 4)
             {
-                AudioProcessorGraph::Node::Ptr f (graph.getNodeForId (filterID));
-
-                if (f != nullptr)
+                if (AudioProcessorGraph::Node::Ptr f = graph.getNodeForId (filterID))
                 {
-                    PluginWindow* const w = PluginWindow::getWindowFor (f, r == 4);
-
-                    if (w != nullptr)
+                    if (PluginWindow* const w = PluginWindow::getWindowFor (f, r == 4))
                         w->toFront (true);
                 }
             }
@@ -296,15 +288,9 @@ public:
     {
         if (e.mouseWasClicked() && e.getNumberOfClicks() == 2)
         {
-            const AudioProcessorGraph::Node::Ptr f (graph.getNodeForId (filterID));
-
-            if (f != nullptr)
-            {
-                PluginWindow* const w = PluginWindow::getWindowFor (f, false);
-
-                if (w != nullptr)
+            if (const AudioProcessorGraph::Node::Ptr f = graph.getNodeForId (filterID))
+                if (PluginWindow* const w = PluginWindow::getWindowFor (f, false))
                     w->toFront (true);
-            }
         }
         else if (! e.mouseWasClicked())
         {
@@ -344,9 +330,7 @@ public:
     {
         for (int i = 0; i < getNumChildComponents(); ++i)
         {
-            PinComponent* const pc = dynamic_cast <PinComponent*> (getChildComponent(i));
-
-            if (pc != nullptr)
+            if (PinComponent* const pc = dynamic_cast <PinComponent*> (getChildComponent(i)))
             {
                 const int total = pc->isInput ? numIns : numOuts;
                 const int index = pc->index == FilterGraph::midiChannelNumber ? (total - 1) : pc->index;
@@ -362,13 +346,14 @@ public:
     {
         for (int i = 0; i < getNumChildComponents(); ++i)
         {
-            PinComponent* const pc = dynamic_cast <PinComponent*> (getChildComponent(i));
-
-            if (pc != nullptr && pc->index == index && isInput == pc->isInput)
+            if (PinComponent* const pc = dynamic_cast <PinComponent*> (getChildComponent(i)))
             {
-                x = getX() + pc->getX() + pc->getWidth() * 0.5f;
-                y = getY() + pc->getY() + pc->getHeight() * 0.5f;
-                break;
+                if (pc->index == index && isInput == pc->isInput)
+                {
+                    x = getX() + pc->getX() + pc->getWidth() * 0.5f;
+                    y = getY() + pc->getY() + pc->getHeight() * 0.5f;
+                    break;
+                }
             }
         }
     }
@@ -474,10 +459,6 @@ public:
         setAlwaysOnTop (true);
     }
 
-    ~ConnectorComponent()
-    {
-    }
-
     void setInput (const uint32 sourceFilterID_, const int sourceFilterChannel_)
     {
         if (sourceFilterID != sourceFilterID_ || sourceFilterChannel != sourceFilterChannel_)
@@ -551,18 +532,12 @@ public:
         x2 = lastOutputX;
         y2 = lastOutputY;
 
-        GraphEditorPanel* const hostPanel = getGraphPanel();
-
-        if (hostPanel != nullptr)
+        if (GraphEditorPanel* const hostPanel = getGraphPanel())
         {
-            FilterComponent* srcFilterComp = hostPanel->getComponentForFilter (sourceFilterID);
-
-            if (srcFilterComp != nullptr)
+            if (FilterComponent* srcFilterComp = hostPanel->getComponentForFilter (sourceFilterID))
                 srcFilterComp->getPinPos (sourceFilterChannel, false, x1, y1);
 
-            FilterComponent* dstFilterComp = hostPanel->getComponentForFilter (destFilterID);
-
-            if (dstFilterComp != nullptr)
+            if (FilterComponent* dstFilterComp = hostPanel->getComponentForFilter (destFilterID))
                 dstFilterComp->getPinPos (destFilterChannel, true, x2, y2);
         }
     }
@@ -728,9 +703,7 @@ void GraphEditorPanel::mouseDown (const MouseEvent& e)
     {
         PopupMenu m;
 
-        MainHostWindow* const mainWindow = findParentComponentOfClass<MainHostWindow>();
-
-        if (mainWindow != nullptr)
+        if (MainHostWindow* const mainWindow = findParentComponentOfClass<MainHostWindow>())
         {
             mainWindow->addPluginsToMenu (m);
 
@@ -750,10 +723,9 @@ FilterComponent* GraphEditorPanel::getComponentForFilter (const uint32 filterID)
 {
     for (int i = getNumChildComponents(); --i >= 0;)
     {
-        FilterComponent* const fc = dynamic_cast <FilterComponent*> (getChildComponent (i));
-
-        if (fc != nullptr && fc->filterID == filterID)
-            return fc;
+        if (FilterComponent* const fc = dynamic_cast <FilterComponent*> (getChildComponent (i)))
+            if (fc->filterID == filterID)
+                return fc;
     }
 
     return nullptr;
@@ -763,16 +735,12 @@ ConnectorComponent* GraphEditorPanel::getComponentForConnection (const AudioProc
 {
     for (int i = getNumChildComponents(); --i >= 0;)
     {
-        ConnectorComponent* const c = dynamic_cast <ConnectorComponent*> (getChildComponent (i));
-
-        if (c != nullptr
-             && c->sourceFilterID == conn.sourceNodeId
-             && c->destFilterID == conn.destNodeId
-             && c->sourceFilterChannel == conn.sourceChannelIndex
-             && c->destFilterChannel == conn.destChannelIndex)
-        {
-            return c;
-        }
+        if (ConnectorComponent* const c = dynamic_cast <ConnectorComponent*> (getChildComponent (i)))
+            if (c->sourceFilterID == conn.sourceNodeId
+                 && c->destFilterID == conn.destNodeId
+                 && c->sourceFilterChannel == conn.sourceChannelIndex
+                 && c->destFilterChannel == conn.destChannelIndex)
+                return c;
     }
 
     return nullptr;
@@ -782,15 +750,10 @@ PinComponent* GraphEditorPanel::findPinAt (const int x, const int y) const
 {
     for (int i = getNumChildComponents(); --i >= 0;)
     {
-        FilterComponent* const fc = dynamic_cast <FilterComponent*> (getChildComponent (i));
-
-        if (fc != nullptr)
+        if (FilterComponent* fc = dynamic_cast <FilterComponent*> (getChildComponent (i)))
         {
-            PinComponent* const pin
-                = dynamic_cast <PinComponent*> (fc->getComponentAt (x - fc->getX(),
-                                                                    y - fc->getY()));
-
-            if (pin != nullptr)
+            if (PinComponent* pin = dynamic_cast <PinComponent*> (fc->getComponentAt (x - fc->getX(),
+                                                                                      y - fc->getY())))
                 return pin;
         }
     }
@@ -810,16 +773,13 @@ void GraphEditorPanel::changeListenerCallback (ChangeBroadcaster*)
 
 void GraphEditorPanel::updateComponents()
 {
-    int i;
-    for (i = getNumChildComponents(); --i >= 0;)
+    for (int i = getNumChildComponents(); --i >= 0;)
     {
-        FilterComponent* const fc = dynamic_cast <FilterComponent*> (getChildComponent (i));
-
-        if (fc != nullptr)
+        if (FilterComponent* const fc = dynamic_cast <FilterComponent*> (getChildComponent (i)))
             fc->update();
     }
 
-    for (i = getNumChildComponents(); --i >= 0;)
+    for (int i = getNumChildComponents(); --i >= 0;)
     {
         ConnectorComponent* const cc = dynamic_cast <ConnectorComponent*> (getChildComponent (i));
 
@@ -837,7 +797,7 @@ void GraphEditorPanel::updateComponents()
         }
     }
 
-    for (i = graph.getNumFilters(); --i >= 0;)
+    for (int i = graph.getNumFilters(); --i >= 0;)
     {
         const AudioProcessorGraph::Node::Ptr f (graph.getNode (i));
 
@@ -849,7 +809,7 @@ void GraphEditorPanel::updateComponents()
         }
     }
 
-    for (i = graph.getNumConnections(); --i >= 0;)
+    for (int i = graph.getNumConnections(); --i >= 0;)
     {
         const AudioProcessorGraph::Connection* const c = graph.getConnection (i);
 
@@ -893,9 +853,7 @@ void GraphEditorPanel::dragConnector (const MouseEvent& e)
         int x = e2.x;
         int y = e2.y;
 
-        PinComponent* const pin = findPinAt (x, y);
-
-        if (pin != nullptr)
+        if (PinComponent* const pin = findPinAt (x, y))
         {
             uint32 srcFilter = draggingConnector->sourceFilterID;
             int srcChannel   = draggingConnector->sourceFilterChannel;
@@ -945,9 +903,7 @@ void GraphEditorPanel::endDraggingConnector (const MouseEvent& e)
 
     draggingConnector = nullptr;
 
-    PinComponent* const pin = findPinAt (e2.x, e2.y);
-
-    if (pin != nullptr)
+    if (PinComponent* const pin = findPinAt (e2.x, e2.y))
     {
         if (srcFilter == 0)
         {
@@ -1018,6 +974,8 @@ GraphDocumentComponent::GraphDocumentComponent (AudioPluginFormatManager& format
 {
     addAndMakeVisible (graphPanel = new GraphEditorPanel (graph));
 
+    deviceManager->addChangeListener (graphPanel);
+
     graphPlayer.setProcessor (&graph.getGraph());
 
     keyState.addListener (&graphPlayer.getMidiMessageCollector());
@@ -1037,6 +995,7 @@ GraphDocumentComponent::~GraphDocumentComponent()
 {
     deviceManager->removeAudioCallback (&graphPlayer);
     deviceManager->removeMidiInputCallback (String::empty, &graphPlayer.getMidiMessageCollector());
+    deviceManager->removeChangeListener (graphPanel);
 
     deleteAllChildren();
 

@@ -86,10 +86,6 @@
  #error "You need to define the JucePlugin_WinBag_path value!"
 #endif
 
-#if JucePlugin_Build_AU && ! defined (JucePlugin_AUCocoaViewClassName)
- #error "You need to define the JucePlugin_AUCocoaViewClassName value!"
-#endif
-
 #if JucePlugin_Build_LV2 && ! defined (JucePlugin_LV2URI)
  #error "You need to define the JucePlugin_LV2URI value!"
 #endif

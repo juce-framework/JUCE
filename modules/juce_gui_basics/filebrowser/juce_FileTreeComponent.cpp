@@ -116,10 +116,24 @@ public:
         {
             setOpen (true);
 
-            for (int i = 0; i < getNumSubItems(); ++i)
-                if (FileListTreeItem* f = dynamic_cast <FileListTreeItem*> (getSubItem (i)))
-                    if (f->selectFile (target))
-                        return true;
+            for (int maxRetries = 500; --maxRetries > 0;)
+            {
+                for (int i = 0; i < getNumSubItems(); ++i)
+                    if (FileListTreeItem* f = dynamic_cast <FileListTreeItem*> (getSubItem (i)))
+                        if (f->selectFile (target))
+                            return true;
+
+                // if we've just opened and the contents are still loading, wait for it..
+                if (subContentsList != nullptr && subContentsList->isStillLoading())
+                {
+                    Thread::sleep (10);
+                    rebuildItemsFromContentList();
+                }
+                else
+                {
+                    break;
+                }
+            }
         }
 
         return false;
@@ -127,17 +141,18 @@ public:
 
     void changeListenerCallback (ChangeBroadcaster*)
     {
+        rebuildItemsFromContentList();
+    }
+
+    void rebuildItemsFromContentList()
+    {
         clearSubItems();
 
         if (isOpen() && subContentsList != nullptr)
         {
             for (int i = 0; i < subContentsList->getNumFiles(); ++i)
-            {
-                FileListTreeItem* const item
-                    = new FileListTreeItem (owner, subContentsList, i, subContentsList->getFile(i), thread);
-
-                addSubItem (item);
-            }
+                addSubItem (new FileListTreeItem (owner, subContentsList, i,
+                                                  subContentsList->getFile(i), thread));
         }
     }
 

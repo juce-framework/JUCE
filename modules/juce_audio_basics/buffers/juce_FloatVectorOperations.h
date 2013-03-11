@@ -68,6 +68,12 @@ public:
 
     /** Finds the miniumum and maximum values in the given array. */
     static void JUCE_CALLTYPE findMinAndMax (const float* src, int numValues, float& minResult, float& maxResult) noexcept;
+
+    /** Finds the miniumum value in the given array. */
+    static float JUCE_CALLTYPE findMinimum (const float* src, int numValues) noexcept;
+
+    /** Finds the maximum value in the given array. */
+    static float JUCE_CALLTYPE findMaximum (const float* src, int numValues) noexcept;
 };
 
 

@@ -131,8 +131,8 @@ protected:
     class MSVCBuildConfiguration  : public BuildConfiguration
     {
     public:
-        MSVCBuildConfiguration (Project& project, const ValueTree& settings)
-            : BuildConfiguration (project, settings)
+        MSVCBuildConfiguration (Project& p, const ValueTree& settings)
+            : BuildConfiguration (p, settings)
         {
             if (getWarningLevel() == 0)
                 getWarningLevelValue() = 4;
@@ -212,9 +212,9 @@ protected:
         }
     };
 
-    BuildConfiguration::Ptr createBuildConfig (const ValueTree& settings) const
+    BuildConfiguration::Ptr createBuildConfig (const ValueTree& v) const
     {
-        return new MSVCBuildConfiguration (project, settings);
+        return new MSVCBuildConfiguration (project, v);
     }
 
     static int getWarningLevel (const BuildConfiguration& config)
@@ -989,8 +989,8 @@ protected:
     class VC2010BuildConfiguration  : public MSVCBuildConfiguration
     {
     public:
-        VC2010BuildConfiguration (Project& project, const ValueTree& settings)
-            : MSVCBuildConfiguration (project, settings)
+        VC2010BuildConfiguration (Project& p, const ValueTree& settings)
+            : MSVCBuildConfiguration (p, settings)
         {
             if (getArchitectureType().toString().isEmpty())
                 getArchitectureType() = get32BitArchName();
@@ -1018,9 +1018,9 @@ protected:
 
     virtual void addPlatformToolsetToPropertyGroup (XmlElement&) const {}
 
-    BuildConfiguration::Ptr createBuildConfig (const ValueTree& settings) const
+    BuildConfiguration::Ptr createBuildConfig (const ValueTree& v) const
     {
-        return new VC2010BuildConfiguration (project, settings);
+        return new VC2010BuildConfiguration (project, v);
     }
 
     static bool is64Bit (const BuildConfiguration& config)
@@ -1138,9 +1138,9 @@ protected:
                 }
 
                 {
-                    XmlElement* name = props->createNewChildElement ("TargetName");
-                    setConditionAttribute (*name, config);
-                    name->addTextElement (config.getOutputFilename (String::empty, true));
+                    XmlElement* targetName = props->createNewChildElement ("TargetName");
+                    setConditionAttribute (*targetName, config);
+                    targetName->addTextElement (config.getOutputFilename (String::empty, true));
                 }
 
                 {
@@ -1247,6 +1247,8 @@ protected:
                 if (librarySearchPaths.size() > 0)
                     link->createNewChildElement ("AdditionalLibraryDirectories")->addTextElement (replacePreprocessorTokens (config, librarySearchPaths.joinIntoString (";"))
                                                                                                     + ";%(AdditionalLibraryDirectories)");
+
+                link->createNewChildElement ("LargeAddressAware")->addTextElement ("true");
 
                 String externalLibraries (getExternalLibrariesString());
                 if (externalLibraries.isNotEmpty())
@@ -1521,9 +1523,9 @@ public:
     }
 
 private:
-    void addPlatformToolsetToPropertyGroup (XmlElement& project) const
+    void addPlatformToolsetToPropertyGroup (XmlElement& p) const
     {
-        forEachXmlChildElementWithTagName (project, e, "PropertyGroup")
+        forEachXmlChildElementWithTagName (p, e, "PropertyGroup")
         {
             XmlElement* platformToolset (new XmlElement ("PlatformToolset"));
             platformToolset->addTextElement (getPlatformToolset());

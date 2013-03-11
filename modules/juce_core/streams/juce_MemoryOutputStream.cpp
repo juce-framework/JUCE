@@ -70,7 +70,7 @@ void MemoryOutputStream::reset() noexcept
 
 void MemoryOutputStream::prepareToWrite (size_t numBytes)
 {
-    jassert (numBytes >= 0);
+    jassert ((ssize_t) numBytes >= 0);
     size_t storageNeeded = position + numBytes;
 
     if (storageNeeded >= data.getSize())

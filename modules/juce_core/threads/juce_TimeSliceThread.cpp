@@ -23,8 +23,8 @@
   ==============================================================================
 */
 
-TimeSliceThread::TimeSliceThread (const String& threadName)
-    : Thread (threadName),
+TimeSliceThread::TimeSliceThread (const String& name)
+    : Thread (name),
       clientBeingCalled (nullptr)
 {
 }

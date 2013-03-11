@@ -46,11 +46,15 @@
 //==============================================================================
 #if JUCE_MAC
  #import <WebKit/WebKit.h>
- #define Point CarbonDummyPointName
- #define Component CarbonDummyCompName
- #import <Carbon/Carbon.h> // still needed for SetSystemUIMode()
- #undef Point
- #undef Component
+ #import <IOKit/pwr_mgt/IOPMLib.h>
+
+ #if JUCE_SUPPORT_CARBON
+  #define Point CarbonDummyPointName
+  #define Component CarbonDummyCompName
+  #import <Carbon/Carbon.h> // still needed for SetSystemUIMode()
+  #undef Point
+  #undef Component
+ #endif
 
 //==============================================================================
 #elif JUCE_WINDOWS

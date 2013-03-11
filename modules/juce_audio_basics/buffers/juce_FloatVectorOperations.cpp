@@ -49,6 +49,61 @@ namespace FloatVectorHelpers
         _mm_empty();
        #endif
     }
+
+    static inline float findMinimumOrMaximum (const float* src, int num, const bool isMinimum) noexcept
+    {
+       #if JUCE_USE_SSE_INTRINSICS
+        const int numLongOps = num / 4;
+
+        if (numLongOps > 1 && FloatVectorHelpers::isSSE2Available())
+        {
+            __m128 val;
+
+            #define JUCE_MINIMUMMAXIMUM_SSE_LOOP(loadOp, minMaxOp) \
+                val = loadOp (src); \
+                src += 4; \
+                for (int i = 1; i < numLongOps; ++i) \
+                { \
+                    const __m128 s = loadOp (src); \
+                    val = minMaxOp (val, s); \
+                    src += 4; \
+                }
+
+            if (isMinimum)
+            {
+                if (FloatVectorHelpers::isAligned (src)) { JUCE_MINIMUMMAXIMUM_SSE_LOOP (_mm_load_ps,  _mm_min_ps) }
+                else                                     { JUCE_MINIMUMMAXIMUM_SSE_LOOP (_mm_loadu_ps, _mm_min_ps) }
+            }
+            else
+            {
+                if (FloatVectorHelpers::isAligned (src)) { JUCE_MINIMUMMAXIMUM_SSE_LOOP (_mm_load_ps, _mm_max_ps) }
+                else                                     { JUCE_MINIMUMMAXIMUM_SSE_LOOP (_mm_loadu_ps,_mm_max_ps) }
+            }
+
+            float localVal;
+
+            {
+                float vals[4];
+                _mm_storeu_ps (vals, val);
+                FloatVectorHelpers::mmEmpty();
+
+                localVal = isMinimum ? jmin (vals[0], vals[1], vals[2], vals[3])
+                                     : jmax (vals[0], vals[1], vals[2], vals[3]);
+            }
+
+            num &= 3;
+
+            for (int i = 0; i < num; ++i)
+                localVal = isMinimum ? jmin (localVal, src[i])
+                                     : jmax (localVal, src[i]);
+
+            return localVal;
+        }
+       #endif
+
+        return isMinimum ? juce::findMinimum (src, num)
+                         : juce::findMaximum (src, num);
+    }
 }
 
 #define JUCE_BEGIN_SSE_OP \
@@ -255,14 +310,11 @@ void JUCE_CALLTYPE FloatVectorOperations::findMinAndMax (const float* src, int n
 
         num &= 3;
 
-        if (num != 0)
+        for (int i = 0; i < num; ++i)
         {
-            for (int i = 0; i < num; ++i)
-            {
-                const float s = src[i];
-                localMin = jmin (localMin, s);
-                localMax = jmax (localMax, s);
-            }
+            const float s = src[i];
+            localMin = jmin (localMin, s);
+            localMax = jmax (localMax, s);
         }
 
         minResult = localMin;
@@ -272,4 +324,22 @@ void JUCE_CALLTYPE FloatVectorOperations::findMinAndMax (const float* src, int n
    #endif
 
     juce::findMinAndMax (src, num, minResult, maxResult);
+}
+
+float JUCE_CALLTYPE FloatVectorOperations::findMinimum (const float* src, int num) noexcept
+{
+   #if JUCE_USE_SSE_INTRINSICS
+    return FloatVectorHelpers::findMinimumOrMaximum (src, num, true);
+   #else
+    return juce::findMinimum (src, num);
+   #endif
+}
+
+float JUCE_CALLTYPE FloatVectorOperations::findMaximum (const float* src, int num) noexcept
+{
+   #if JUCE_USE_SSE_INTRINSICS
+    return FloatVectorHelpers::findMinimumOrMaximum (src, num, false);
+   #else
+    return juce::findMaximum (src, num);
+   #endif
 }

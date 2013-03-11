@@ -80,8 +80,8 @@ void AlertWindow::setMessage (const String& message)
 //==============================================================================
 void AlertWindow::buttonClicked (Button* button)
 {
-    if (button->getParentComponent() != nullptr)
-        button->getParentComponent()->exitModalState (button->getCommandID());
+    if (Component* parent = button->getParentComponent())
+        parent->exitModalState (button->getCommandID());
 }
 
 //==============================================================================
@@ -163,8 +163,10 @@ TextEditor* AlertWindow::getTextEditor (const String& nameOfTextEditor) const
 
 String AlertWindow::getTextEditorContents (const String& nameOfTextEditor) const
 {
-    TextEditor* const t = getTextEditor (nameOfTextEditor);
-    return t != nullptr ? t->getText() : String::empty;
+    if (TextEditor* const t = getTextEditor (nameOfTextEditor))
+        return t->getText();
+
+    return String::empty;
 }
 
 
@@ -562,12 +564,12 @@ int AlertWindow::getDesktopWindowStyleFlags() const
 class AlertWindowInfo
 {
 public:
-    AlertWindowInfo (const String& title_, const String& message_, Component* component,
-                     AlertWindow::AlertIconType iconType_, int numButtons_,
-                     ModalComponentManager::Callback* callback_, bool modal_)
-        : title (title_), message (message_), iconType (iconType_),
-          numButtons (numButtons_), returnValue (0), associatedComponent (component),
-          callback (callback_), modal (modal_)
+    AlertWindowInfo (const String& t, const String& m, Component* component,
+                     AlertWindow::AlertIconType icon, int numButts,
+                     ModalComponentManager::Callback* cb, bool runModally)
+        : title (t), message (m), iconType (icon), numButtons (numButts),
+          returnValue (0), associatedComponent (component),
+          callback (cb), modal (runModally)
     {
     }
 
@@ -629,7 +631,7 @@ void AlertWindow::showMessageBox (AlertIconType iconType,
     }
     else
     {
-        AlertWindowInfo info (title, message, associatedComponent, iconType, 1, 0, true);
+        AlertWindowInfo info (title, message, associatedComponent, iconType, 1, nullptr, true);
         info.button1 = buttonText.isEmpty() ? TRANS("ok") : buttonText;
 
         info.invoke();
@@ -641,15 +643,16 @@ void AlertWindow::showMessageBoxAsync (AlertIconType iconType,
                                        const String& title,
                                        const String& message,
                                        const String& buttonText,
-                                       Component* associatedComponent)
+                                       Component* associatedComponent,
+                                       ModalComponentManager::Callback* callback)
 {
     if (LookAndFeel::getDefaultLookAndFeel().isUsingNativeAlertWindows())
     {
-        return NativeMessageBox::showMessageBoxAsync (iconType, title, message, associatedComponent);
+        NativeMessageBox::showMessageBoxAsync (iconType, title, message, associatedComponent, callback);
     }
     else
     {
-        AlertWindowInfo info (title, message, associatedComponent, iconType, 1, 0, false);
+        AlertWindowInfo info (title, message, associatedComponent, iconType, 1, callback, false);
         info.button1 = buttonText.isEmpty() ? TRANS("ok") : buttonText;
 
         info.invoke();
@@ -665,17 +668,13 @@ bool AlertWindow::showOkCancelBox (AlertIconType iconType,
                                    ModalComponentManager::Callback* callback)
 {
     if (LookAndFeel::getDefaultLookAndFeel().isUsingNativeAlertWindows())
-    {
         return NativeMessageBox::showOkCancelBox (iconType, title, message, associatedComponent, callback);
-    }
-    else
-    {
-        AlertWindowInfo info (title, message, associatedComponent, iconType, 2, callback, callback == nullptr);
-        info.button1 = button1Text.isEmpty() ? TRANS("ok")     : button1Text;
-        info.button2 = button2Text.isEmpty() ? TRANS("cancel") : button2Text;
 
-        return info.invoke() != 0;
-    }
+    AlertWindowInfo info (title, message, associatedComponent, iconType, 2, callback, callback == nullptr);
+    info.button1 = button1Text.isEmpty() ? TRANS("ok")     : button1Text;
+    info.button2 = button2Text.isEmpty() ? TRANS("cancel") : button2Text;
+
+    return info.invoke() != 0;
 }
 
 int AlertWindow::showYesNoCancelBox (AlertIconType iconType,
@@ -688,18 +687,14 @@ int AlertWindow::showYesNoCancelBox (AlertIconType iconType,
                                      ModalComponentManager::Callback* callback)
 {
     if (LookAndFeel::getDefaultLookAndFeel().isUsingNativeAlertWindows())
-    {
         return NativeMessageBox::showYesNoCancelBox (iconType, title, message, associatedComponent, callback);
-    }
-    else
-    {
-        AlertWindowInfo info (title, message, associatedComponent, iconType, 3, callback, callback == nullptr);
-        info.button1 = button1Text.isEmpty() ? TRANS("yes")     : button1Text;
-        info.button2 = button2Text.isEmpty() ? TRANS("no")      : button2Text;
-        info.button3 = button3Text.isEmpty() ? TRANS("cancel")  : button3Text;
 
-        return info.invoke();
-    }
+    AlertWindowInfo info (title, message, associatedComponent, iconType, 3, callback, callback == nullptr);
+    info.button1 = button1Text.isEmpty() ? TRANS("yes")     : button1Text;
+    info.button2 = button2Text.isEmpty() ? TRANS("no")      : button2Text;
+    info.button3 = button3Text.isEmpty() ? TRANS("cancel")  : button3Text;
+
+    return info.invoke();
 }
 
 #if JUCE_MODAL_LOOPS_PERMITTED
@@ -708,13 +703,9 @@ bool AlertWindow::showNativeDialogBox (const String& title,
                                        bool isOkCancel)
 {
     if (isOkCancel)
-    {
         return NativeMessageBox::showOkCancelBox (AlertWindow::NoIcon, title, bodyText);
-    }
-    else
-    {
-        NativeMessageBox::showMessageBox (AlertWindow::NoIcon, title, bodyText);
-        return true;
-    }
+
+    NativeMessageBox::showMessageBox (AlertWindow::NoIcon, title, bodyText);
+    return true;
 }
 #endif

@@ -36,11 +36,11 @@
 class FileTreeTab   : public TreePanelBase
 {
 public:
-    FileTreeTab (Project& project)
-        : TreePanelBase (&project, "fileTreeState")
+    FileTreeTab (Project& p)
+        : TreePanelBase (&p, "fileTreeState")
     {
         tree.setMultiSelectEnabled (true);
-        setRoot (new GroupTreeViewItem (project.getMainGroup()));
+        setRoot (new GroupTreeViewItem (p.getMainGroup()));
     }
 };
 
@@ -48,11 +48,11 @@ public:
 class ConfigTreeTab   : public TreePanelBase
 {
 public:
-    ConfigTreeTab (Project& project)
-        : TreePanelBase (&project, "settingsTreeState")
+    ConfigTreeTab (Project& p)
+        : TreePanelBase (&p, "settingsTreeState")
     {
         tree.setMultiSelectEnabled (false);
-        setRoot (createProjectConfigTreeViewRoot (project));
+        setRoot (createProjectConfigTreeViewRoot (p));
 
         if (tree.getNumSelectedItems() == 0)
             tree.getRootItem()->setSelected (true, true);

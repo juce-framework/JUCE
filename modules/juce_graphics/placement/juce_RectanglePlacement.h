@@ -144,12 +144,12 @@ public:
                   double destinationW,
                   double destinationH) const noexcept;
 
-    /** Returns the transform that should be applied to these source co-ordinates to fit them
+    /** Returns the rectangle that should be used to fit the given source rectangle
         into the destination rectangle using the current flags.
     */
     template <typename ValueType>
-    const Rectangle<ValueType> appliedTo (const Rectangle<ValueType>& source,
-                                          const Rectangle<ValueType>& destination) const noexcept
+    Rectangle<ValueType> appliedTo (const Rectangle<ValueType>& source,
+                                    const Rectangle<ValueType>& destination) const noexcept
     {
         double x = source.getX(), y = source.getY(), w = source.getWidth(), h = source.getHeight();
         applyTo (x, y, w, h, static_cast <double> (destination.getX()), static_cast <double> (destination.getY()),
@@ -161,8 +161,8 @@ public:
     /** Returns the transform that should be applied to these source co-ordinates to fit them
         into the destination rectangle using the current flags.
     */
-    const AffineTransform getTransformToFit (const Rectangle<float>& source,
-                                             const Rectangle<float>& destination) const noexcept;
+    AffineTransform getTransformToFit (const Rectangle<float>& source,
+                                       const Rectangle<float>& destination) const noexcept;
 
 
 private:

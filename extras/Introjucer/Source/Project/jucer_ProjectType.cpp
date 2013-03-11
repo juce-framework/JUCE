@@ -190,7 +190,6 @@ public:
         setValueIfVoid (getPluginSilenceInProducesSilenceOut (project), false);
         setValueIfVoid (getPluginEditorNeedsKeyFocus (project),    false);
         setValueIfVoid (getPluginAUExportPrefix (project),         sanitisedProjectName + "AU");
-        setValueIfVoid (getPluginAUCocoaViewClassName (project),   sanitisedProjectName + "AU_V1");
         setValueIfVoid (getPluginRTASCategory (project),           String::empty);
         setValueIfVoid (project.getBundleIdentifier(),             project.getDefaultBundleIdentifier());
         setValueIfVoid (project.getAAXIdentifier(),                project.getDefaultAAXIdentifier());
@@ -242,10 +241,6 @@ public:
 
         props.add (new TextPropertyComponent (getPluginAUExportPrefix (project), "Plugin AU Export Prefix", 64, false),
                    "A prefix for the names of exported entry-point functions that the component exposes - typically this will be a version of your plugin's name that can be used as part of a C++ token.");
-
-        props.add (new TextPropertyComponent (getPluginAUCocoaViewClassName (project), "Plugin AU Cocoa View Name", 64, false),
-                   "In an AU, this is the name of Cocoa class that creates the UI. Some hosts bizarrely display the class-name, so you might want to make it reflect your plugin. But the name must be "
-                   "UNIQUE to this exact version of your plugin, to avoid objective-C linkage mix-ups that happen when different plugins containing the same class-name are loaded simultaneously.");
 
         props.add (new TextPropertyComponent (getPluginAUMainType (project), "Plugin AU Main Type", 128, false),
                    "In an AU, this is the value that is set as JucePlugin_AUMainType. Leave it blank unless you want to use a custom value.");

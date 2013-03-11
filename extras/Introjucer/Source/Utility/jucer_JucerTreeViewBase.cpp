@@ -75,7 +75,7 @@ JucerTreeViewBase::~JucerTreeViewBase()
 
 void JucerTreeViewBase::refreshSubItems()
 {
-    WholeTreeOpennessRestorer openness (*this);
+    WholeTreeOpennessRestorer wtor (*this);
     clearSubItems();
     addSubItems();
 }

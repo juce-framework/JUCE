@@ -220,6 +220,8 @@ public:
     bool hasConfigurationNamed (const String& name) const;
     String getUniqueConfigName (String name) const;
 
+    String getExternalLibraryFlags (const BuildConfiguration& config) const;
+
     //==============================================================================
     struct ConfigIterator
     {
