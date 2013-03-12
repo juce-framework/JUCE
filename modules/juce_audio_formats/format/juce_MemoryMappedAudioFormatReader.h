@@ -80,9 +80,24 @@ protected:
     int64 dataChunkStart, dataLength;
     int bytesPerFrame;
 
+    /** Converts a sample index to a byte position in the file. */
     inline int64 sampleToFilePos (int64 sample) const noexcept       { return dataChunkStart + sample * bytesPerFrame; }
+
+    /** Converts a byte position in the file to a sample index. */
     inline int64 filePosToSample (int64 filePos) const noexcept      { return (filePos - dataChunkStart) / bytesPerFrame; }
+
+    /** Converts a sample index to a pointer to the mapped file memory. */
     inline const void* sampleToPointer (int64 sample) const noexcept { return addBytesToPointer (map->getData(), sampleToFilePos (sample) - map->getRange().getStart()); }
+
+    /** Used by AudioFormatReader subclasses to scan for min/max ranges in interleaved data. */
+    template <typename SampleType, typename Endianness>
+    void scanMinAndMaxInterleaved (int channel, int64 startSampleInFile, int64 numSamples, float& mn, float& mx) const noexcept
+    {
+        typedef AudioData::Pointer <SampleType, Endianness, AudioData::Interleaved, AudioData::Const> SourceType;
+
+        SourceType (addBytesToPointer (sampleToPointer (startSampleInFile), (bitsPerSample / 8) * channel), (int) numChannels)
+           .findMinAndMax ((size_t) numSamples, mn, mx);
+    }
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MemoryMappedAudioFormatReader)
 };
