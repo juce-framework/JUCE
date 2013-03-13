@@ -23,6 +23,10 @@
   ==============================================================================
 */
 
+ResizableBorderComponent::Zone::Zone() noexcept
+    : zone (0)
+{}
+
 ResizableBorderComponent::Zone::Zone (const int zoneFlags) noexcept
     : zone (zoneFlags)
 {}
@@ -40,9 +44,9 @@ ResizableBorderComponent::Zone& ResizableBorderComponent::Zone::operator= (const
 bool ResizableBorderComponent::Zone::operator== (const ResizableBorderComponent::Zone& other) const noexcept      { return zone == other.zone; }
 bool ResizableBorderComponent::Zone::operator!= (const ResizableBorderComponent::Zone& other) const noexcept      { return zone != other.zone; }
 
-const ResizableBorderComponent::Zone ResizableBorderComponent::Zone::fromPositionOnBorder (const Rectangle<int>& totalSize,
-                                                                                           const BorderSize<int>& border,
-                                                                                           const Point<int>& position)
+ResizableBorderComponent::Zone ResizableBorderComponent::Zone::fromPositionOnBorder (const Rectangle<int>& totalSize,
+                                                                                     const BorderSize<int>& border,
+                                                                                     const Point<int>& position)
 {
     int z = 0;
 

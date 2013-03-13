@@ -76,15 +76,15 @@ private:
 class AudioThumbnail::LevelDataSource   : public TimeSliceClient
 {
 public:
-    LevelDataSource (AudioThumbnail& owner_, AudioFormatReader* newReader, int64 hash)
+    LevelDataSource (AudioThumbnail& thumb, AudioFormatReader* newReader, int64 hash)
         : lengthInSamples (0), numSamplesFinished (0), sampleRate (0), numChannels (0),
-          hashCode (hash), owner (owner_), reader (newReader)
+          hashCode (hash), owner (thumb), reader (newReader)
     {
     }
 
-    LevelDataSource (AudioThumbnail& owner_, InputSource* source_)
+    LevelDataSource (AudioThumbnail& thumb, InputSource* src)
         : lengthInSamples (0), numSamplesFinished (0), sampleRate (0), numChannels (0),
-          hashCode (source_->hashCode()), owner (owner_), source (source_)
+          hashCode (src->hashCode()), owner (thumb), source (src)
     {
     }
 
@@ -95,11 +95,11 @@ public:
 
     enum { timeBeforeDeletingReader = 3000 };
 
-    void initialise (int64 numSamplesFinished_)
+    void initialise (int64 samplesFinished)
     {
         const ScopedLock sl (readerLock);
 
-        numSamplesFinished = numSamplesFinished_;
+        numSamplesFinished = samplesFinished;
 
         createReader();
 
@@ -519,9 +519,9 @@ private:
 
 //==============================================================================
 AudioThumbnail::AudioThumbnail (const int originalSamplesPerThumbnailSample,
-                                AudioFormatManager& formatManagerToUse_,
+                                AudioFormatManager& formatManager,
                                 AudioThumbnailCache& cacheToUse)
-    : formatManagerToUse (formatManagerToUse_),
+    : formatManagerToUse (formatManager),
       cache (cacheToUse),
       window (new CachedWindow()),
       samplesPerThumbSample (originalSamplesPerThumbnailSample),

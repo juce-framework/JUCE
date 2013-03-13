@@ -87,8 +87,7 @@ bool BufferedInputStream::setPosition (int64 newPosition)
 
 bool BufferedInputStream::isExhausted()
 {
-    return (position >= lastReadPos)
-             && source->isExhausted();
+    return position >= lastReadPos && source->isExhausted();
 }
 
 void BufferedInputStream::ensureBuffered()

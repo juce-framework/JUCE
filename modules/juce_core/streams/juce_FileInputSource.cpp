@@ -23,8 +23,8 @@
   ==============================================================================
 */
 
-FileInputSource::FileInputSource (const File& file_, bool useFileTimeInHashGeneration_)
-    : file (file_), useFileTimeInHashGeneration (useFileTimeInHashGeneration_)
+FileInputSource::FileInputSource (const File& f, bool useFileTimeInHash)
+    : file (f), useFileTimeInHashGeneration (useFileTimeInHash)
 {
 }
 

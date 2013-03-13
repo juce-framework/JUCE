@@ -31,8 +31,8 @@ TemporaryFile::TemporaryFile (const String& suffix, const int optionFlags)
                     optionFlags);
 }
 
-TemporaryFile::TemporaryFile (const File& targetFile_, const int optionFlags)
-    : targetFile (targetFile_)
+TemporaryFile::TemporaryFile (const File& target, const int optionFlags)
+    : targetFile (target)
 {
     // If you use this constructor, you need to give it a valid target file!
     jassert (targetFile != File::nonexistent);
