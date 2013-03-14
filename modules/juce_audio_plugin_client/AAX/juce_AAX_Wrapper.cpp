@@ -182,8 +182,14 @@ struct AAXClasses
         float** outputChannels;
         int32_t* bufferSize;
         int32_t* bypass;
+
+       #if JucePlugin_WantsMidiInput
         AAX_IMIDINode* midiNodeIn;
+       #endif
+
+       #if JucePlugin_ProducesMidiOutput
         AAX_IMIDINode* midiNodeOut;
+       #endif
 
         PluginInstanceInfo* pluginInstance;
         int32_t* isPrepared;
@@ -197,8 +203,15 @@ struct AAXClasses
             outputChannels  = AAX_FIELD_INDEX (JUCEAlgorithmContext, outputChannels),
             bufferSize      = AAX_FIELD_INDEX (JUCEAlgorithmContext, bufferSize),
             bypass          = AAX_FIELD_INDEX (JUCEAlgorithmContext, bypass),
+
+           #if JucePlugin_WantsMidiInput
             midiNodeIn      = AAX_FIELD_INDEX (JUCEAlgorithmContext, midiNodeIn),
+           #endif
+
+           #if JucePlugin_ProducesMidiOutput
             midiNodeOut     = AAX_FIELD_INDEX (JUCEAlgorithmContext, midiNodeOut),
+           #endif
+
             pluginInstance  = AAX_FIELD_INDEX (JUCEAlgorithmContext, pluginInstance),
             preparedFlag    = AAX_FIELD_INDEX (JUCEAlgorithmContext, isPrepared)
         };
@@ -719,9 +732,21 @@ struct AAXClasses
         {
             const JUCEAlgorithmContext& i = **iter;
 
+           #if JucePlugin_WantsMidiInput
+            AAX_IMIDINode* midiNodeIn = i.midiNodeIn;
+           #else
+            AAX_IMIDINode* midiNodeIn = NULL;
+           #endif
+
+           #if JucePlugin_ProducesMidiOutput
+            AAX_IMIDINode* midiNodeOut = i.midiNodeOut;
+           #else
+            AAX_IMIDINode* midiNodeOut = NULL;
+           #endif
+
             i.pluginInstance->parameters.process (i.inputChannels, i.outputChannels,
                                                   *(i.bufferSize), *(i.bypass) != 0,
-                                                  i.midiNodeIn, i.midiNodeOut);
+                                                  midiNodeIn, midiNodeOut);
         }
     }
 
