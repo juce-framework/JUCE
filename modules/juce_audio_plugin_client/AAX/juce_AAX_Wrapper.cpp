@@ -182,8 +182,14 @@ struct AAXClasses
         float** outputChannels;
         int32_t* bufferSize;
         int32_t* bypass;
+
+       #if JucePlugin_WantsMidiInput
         AAX_IMIDINode* midiNodeIn;
+       #endif
+
+       #if JucePlugin_ProducesMidiOutput
         AAX_IMIDINode* midiNodeOut;
+       #endif
 
         PluginInstanceInfo* pluginInstance;
         int32_t* isPrepared;
@@ -197,12 +203,32 @@ struct AAXClasses
             outputChannels  = AAX_FIELD_INDEX (JUCEAlgorithmContext, outputChannels),
             bufferSize      = AAX_FIELD_INDEX (JUCEAlgorithmContext, bufferSize),
             bypass          = AAX_FIELD_INDEX (JUCEAlgorithmContext, bypass),
+
+           #if JucePlugin_WantsMidiInput
             midiNodeIn      = AAX_FIELD_INDEX (JUCEAlgorithmContext, midiNodeIn),
+           #endif
+
+           #if JucePlugin_ProducesMidiOutput
             midiNodeOut     = AAX_FIELD_INDEX (JUCEAlgorithmContext, midiNodeOut),
+           #endif
+
             pluginInstance  = AAX_FIELD_INDEX (JUCEAlgorithmContext, pluginInstance),
             preparedFlag    = AAX_FIELD_INDEX (JUCEAlgorithmContext, isPrepared)
         };
     };
+
+   #if JucePlugin_WantsMidiInput
+    static AAX_IMIDINode* getMidiNodeIn (JUCEAlgorithmContext& c) noexcept   { return c.midiNodeIn; }
+   #else
+    static AAX_IMIDINode* getMidiNodeIn (JUCEAlgorithmContext&) noexcept     { return nullptr; }
+   #endif
+
+   #if JucePlugin_ProducesMidiOutput
+    AAX_IMIDINode* midiNodeOut;
+    static AAX_IMIDINode* getMidiNodeOut (JUCEAlgorithmContext& c) noexcept  { return c.midiNodeOut; }
+   #else
+    static AAX_IMIDINode* getMidiNodeOut (JUCEAlgorithmContext&) noexcept    { return nullptr; }
+   #endif
 
     //==============================================================================
     class JuceAAX_GUI   : public AAX_CEffectGUI
@@ -721,7 +747,7 @@ struct AAXClasses
 
             i.pluginInstance->parameters.process (i.inputChannels, i.outputChannels,
                                                   *(i.bufferSize), *(i.bypass) != 0,
-                                                  i.midiNodeIn, i.midiNodeOut);
+                                                  getMidiNodeIn(i), getMidiNodeOut(i));
         }
     }
 
