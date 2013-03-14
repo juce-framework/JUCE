@@ -224,12 +224,11 @@ void AudioTransportSource::setGain (const float newGain) noexcept
     gain = newGain;
 }
 
-void AudioTransportSource::prepareToPlay (int samplesPerBlockExpected,
-                                          double sampleRate_)
+void AudioTransportSource::prepareToPlay (int samplesPerBlockExpected, double newSampleRate)
 {
     const ScopedLock sl (callbackLock);
 
-    sampleRate = sampleRate_;
+    sampleRate = newSampleRate;
     blockSize = samplesPerBlockExpected;
 
     if (masterSource != nullptr)

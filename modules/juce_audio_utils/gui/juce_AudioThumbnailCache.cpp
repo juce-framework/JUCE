@@ -56,9 +56,9 @@ private:
 };
 
 //==============================================================================
-AudioThumbnailCache::AudioThumbnailCache (const int maxNumThumbsToStore_)
+AudioThumbnailCache::AudioThumbnailCache (const int maxNumThumbs)
     : thread ("thumb cache"),
-      maxNumThumbsToStore (maxNumThumbsToStore_)
+      maxNumThumbsToStore (maxNumThumbs)
 {
     jassert (maxNumThumbsToStore > 0);
     thread.startThread (2);
