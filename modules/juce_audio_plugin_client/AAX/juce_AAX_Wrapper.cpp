@@ -507,9 +507,9 @@ struct AAXClasses
             SetParameterNormalizedValue (IndexAsParamID (parameterIndex), (double) newValue);
         }
 
-        void audioProcessorChanged (AudioProcessor* /*processor*/)
+        void audioProcessorChanged (AudioProcessor* processor)
         {
-            // TODO
+            check (Controller()->SetSignalLatency (processor->getLatencySamples()));
         }
 
         void audioProcessorParameterChangeGestureBegin (AudioProcessor* /*processor*/, int parameterIndex)
