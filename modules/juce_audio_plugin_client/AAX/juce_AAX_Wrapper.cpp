@@ -218,16 +218,16 @@ struct AAXClasses
     };
 
    #if JucePlugin_WantsMidiInput
-    static AAX_IMIDINode* getMidiNodeIn (JUCEAlgorithmContext& c) noexcept   { return c.midiNodeIn; }
+    static AAX_IMIDINode* getMidiNodeIn (const JUCEAlgorithmContext& c) noexcept   { return c.midiNodeIn; }
    #else
-    static AAX_IMIDINode* getMidiNodeIn (JUCEAlgorithmContext&) noexcept     { return nullptr; }
+    static AAX_IMIDINode* getMidiNodeIn (const JUCEAlgorithmContext&) noexcept     { return nullptr; }
    #endif
 
    #if JucePlugin_ProducesMidiOutput
     AAX_IMIDINode* midiNodeOut;
-    static AAX_IMIDINode* getMidiNodeOut (JUCEAlgorithmContext& c) noexcept  { return c.midiNodeOut; }
+    static AAX_IMIDINode* getMidiNodeOut (const JUCEAlgorithmContext& c) noexcept  { return c.midiNodeOut; }
    #else
-    static AAX_IMIDINode* getMidiNodeOut (JUCEAlgorithmContext&) noexcept    { return nullptr; }
+    static AAX_IMIDINode* getMidiNodeOut (const JUCEAlgorithmContext&) noexcept    { return nullptr; }
    #endif
 
     //==============================================================================
@@ -487,9 +487,10 @@ struct AAXClasses
             info.bpm = 0.0;
             check (transport.GetCurrentTempo (&info.bpm));
 
-            info.timeSigNumerator = 4;
-            info.timeSigDenominator = 4;
-            transport.GetCurrentMeter (&info.timeSigNumerator, &info.timeSigDenominator);
+            int32_t num = 4, den = 4;
+            transport.GetCurrentMeter (&num, &den);
+            info.timeSigNumerator   = (int) num;
+            info.timeSigDenominator = (int) den;
 
             info.timeInSamples = 0;
             check (transport.GetCurrentNativeSampleLocation (&info.timeInSamples));
