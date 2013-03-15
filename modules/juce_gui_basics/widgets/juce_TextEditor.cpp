@@ -1787,11 +1787,10 @@ void TextEditor::mouseUp (const MouseEvent& e)
 void TextEditor::mouseDoubleClick (const MouseEvent& e)
 {
     int tokenEnd = getTextIndexAt (e.x, e.y);
-    int tokenStart = tokenEnd;
+    int tokenStart = 0;
 
     if (e.getNumberOfClicks() > 3)
     {
-        tokenStart = 0;
         tokenEnd = getTotalNumChars();
     }
     else

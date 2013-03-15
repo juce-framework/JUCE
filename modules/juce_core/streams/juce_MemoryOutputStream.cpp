@@ -136,8 +136,8 @@ int MemoryOutputStream::writeFromInputStream (InputStream& source, int64 maxNumB
 
     if (availableData > 0)
     {
-        if (maxNumBytesToWrite > 0 && maxNumBytesToWrite < availableData)
-            availableData = maxNumBytesToWrite;
+        if (maxNumBytesToWrite > availableData)
+            maxNumBytesToWrite = availableData;
 
         preallocate (data.getSize() + (size_t) maxNumBytesToWrite);
     }
