@@ -117,6 +117,48 @@ void DropShadow::drawForPath (Graphics& g, const Path& path) const
     }
 }
 
+static void drawShadowSection (Graphics& g, ColourGradient& cg, const Rectangle<int>& area,
+                               bool isCorner, float centreX, float centreY, float edgeX, float edgeY)
+{
+    cg.point1 = area.getRelativePoint (centreX, centreY).toFloat();
+    cg.point2 = area.getRelativePoint (edgeX, edgeY).toFloat();
+    cg.isRadial = isCorner;
+
+    g.setGradientFill (cg);
+    g.fillRect (area);
+}
+
+void DropShadow::drawForRectangle (Graphics& g, const Rectangle<int>& targetArea) const
+{
+    ColourGradient cg (colour, 0, 0, colour.withAlpha (0.0f), 0, 0, false);
+
+    for (float i = 0.05f; i < 1.0f; i += 0.1f)
+        cg.addColour (1.0 - i, colour.withMultipliedAlpha (i * i));
+
+    const int radiusInset = (radius + 1) / 2;
+    const int expandedRadius = radius + radiusInset;
+
+    const Rectangle<int> area (targetArea.reduced (radiusInset) + offset);
+
+    Rectangle<int> r (area.expanded (expandedRadius));
+    Rectangle<int> top (r.removeFromTop (expandedRadius));
+    Rectangle<int> bottom (r.removeFromBottom (expandedRadius));
+
+    drawShadowSection (g, cg, top.removeFromLeft  (expandedRadius), true, 1.0f, 1.0f, 0, 1.0f);
+    drawShadowSection (g, cg, top.removeFromRight (expandedRadius), true, 0, 1.0f, 1.0f, 1.0f);
+    drawShadowSection (g, cg, top, false, 0, 1.0f, 0, 0);
+
+    drawShadowSection (g, cg, bottom.removeFromLeft  (expandedRadius), true, 1.0f, 0, 0, 0);
+    drawShadowSection (g, cg, bottom.removeFromRight (expandedRadius), true, 0, 0, 1.0f, 0);
+    drawShadowSection (g, cg, bottom, false, 0, 0, 0, 1.0f);
+
+    drawShadowSection (g, cg, r.removeFromLeft  (expandedRadius), false, 1.0f, 0, 0, 0);
+    drawShadowSection (g, cg, r.removeFromRight (expandedRadius), false, 0, 0, 1.0f, 0);
+
+    g.setColour (colour);
+    g.fillRect (area);
+}
+
 //==============================================================================
 DropShadowEffect::DropShadowEffect() {}
 DropShadowEffect::~DropShadowEffect() {}
