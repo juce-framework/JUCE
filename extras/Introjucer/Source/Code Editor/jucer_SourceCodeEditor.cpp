@@ -400,8 +400,11 @@ void GenericCodeEditorComponent::showFindPanel()
         resized();
     }
 
-    findPanel->editor.grabKeyboardFocus();
-    findPanel->editor.selectAll();
+    if (findPanel != nullptr)
+    {
+        findPanel->editor.grabKeyboardFocus();
+        findPanel->editor.selectAll();
+    }
 }
 
 void GenericCodeEditorComponent::hideFindPanel()

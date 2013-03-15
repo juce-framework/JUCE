@@ -333,7 +333,8 @@ int ZEXPORT deflateSetDictionary (z_streamp strm, const Bytef *dictionary, uInt 
     for (n = 0; n <= length - MIN_MATCH; n++) {
         INSERT_STRING(s, n, hash_head);
     }
-    if (hash_head) hash_head = 0;  /* to make compiler happy */
+
+    (void) hash_head;  /* to make compiler happy */
     return Z_OK;
 }
 
