@@ -71,9 +71,10 @@ public:
     */
     virtual void componentVisibilityChanged (Component& component);
 
-    /** Called when the component has children added or removed.
+    /** Called when the component has children added or removed, or their z-order
+        changes.
 
-        @param component    the component whose children were changed
+        @param component    the component whose children have changed
         @see Component::childrenChanged, Component::addChildComponent,
              Component::removeChildComponent
     */
