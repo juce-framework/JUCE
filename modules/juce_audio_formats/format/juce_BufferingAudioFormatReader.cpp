@@ -49,9 +49,15 @@ BufferingAudioReader::~BufferingAudioReader()
     thread.removeTimeSliceClient (this);
 }
 
+void BufferingAudioReader::setReadTimeout (int timeoutMilliseconds) noexcept
+{
+    timeoutMs = timeoutMilliseconds;
+}
+
 bool BufferingAudioReader::readSamples (int** destSamples, int numDestChannels, int startOffsetInDestBuffer,
                                         int64 startSampleInFile, int numSamples)
 {
+    const uint32 startTime = Time::getMillisecondCounter();
     clearSamplesBeyondAvailableLength (destSamples, numDestChannels, startOffsetInDestBuffer,
                                        startSampleInFile, numSamples, lengthInSamples);
 
@@ -84,11 +90,19 @@ bool BufferingAudioReader::readSamples (int** destSamples, int numDestChannels, 
         }
         else
         {
-            for (int j = 0; j < numDestChannels; ++j)
-                if (float* dest = (float*) destSamples[j])
-                    FloatVectorOperations::clear (dest + startOffsetInDestBuffer, numSamples);
+            if (timeoutMs >= 0 && Time::getMillisecondCounter() >= startTime + timeoutMs)
+            {
+                for (int j = 0; j < numDestChannels; ++j)
+                    if (float* dest = (float*) destSamples[j])
+                        FloatVectorOperations::clear (dest + startOffsetInDestBuffer, numSamples);
 
-            break;
+                break;
+            }
+            else
+            {
+                ScopedUnlock ul (lock);
+                Thread::yield();
+            }
         }
     }
 

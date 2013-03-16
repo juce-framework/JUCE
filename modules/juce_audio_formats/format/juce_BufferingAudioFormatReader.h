@@ -53,6 +53,13 @@ public:
 
     ~BufferingAudioReader();
 
+    /** Sets a number of milliseconds that the reader can block for in its readSamples()
+        method before giving up and returning silence.
+        A value of less that 0 means "wait forever".
+        The default timeout is 0.
+    */
+    void setReadTimeout (int timeoutMilliseconds) noexcept;
+
     bool readSamples (int** destSamples, int numDestChannels, int startOffsetInDestBuffer,
                       int64 startSampleInFile, int numSamples);
 
@@ -61,6 +68,7 @@ private:
     TimeSliceThread& thread;
     int64 nextReadPosition;
     const int numBlocks;
+    int timeoutMs;
 
     enum { samplesPerBlock = 32768 };
 
