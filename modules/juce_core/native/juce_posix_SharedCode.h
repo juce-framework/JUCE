@@ -676,30 +676,49 @@ String juce_getOutputFromCommand (const String& command)
 
 
 //==============================================================================
+#if JUCE_IOS
+class InterProcessLock::Pimpl
+{
+public:
+    Pimpl (const String&, int)
+        : handle (1), refCount (1) // On iOS just fake success..
+    {
+    }
+
+    int handle, refCount;
+};
+
+#else
+
 class InterProcessLock::Pimpl
 {
 public:
     Pimpl (const String& lockName, const int timeOutMillisecs)
         : handle (0), refCount (1)
     {
-       #if JUCE_IOS
-        handle = 1; // On iOS we can't run multiple apps, so just assume success.
+       #if JUCE_MAC
+        if (! createLockFile (File ("~/Library/Caches/com.juce.locks").getChildFile (lockName), timeOutMillisecs))
+            // Fallback if the user's home folder is on a network drive with no ability to lock..
+            createLockFile (File ("/tmp/com.juce.locks").getChildFile (lockName), timeOutMillisecs);
+
        #else
+        File tempFolder ("/var/tmp");
+        if (! tempFolder.isDirectory())
+            tempFolder = "/tmp";
 
-         // Note that we can't get the normal temp folder here, as it might be different for each app.
-        #if JUCE_MAC
-         File tempFolder ("~/Library/Caches/com.juce.locks");
-        #else
-         File tempFolder ("/var/tmp");
+        createLockFile (tempFolder.getChildFile (lockName), timeOutMillisecs);
+       #endif
+    }
 
-         if (! tempFolder.isDirectory())
-             tempFolder = "/tmp";
-        #endif
+    ~Pimpl()
+    {
+        closeFile();
+    }
 
-        const File temp (tempFolder.getChildFile (lockName));
-
-        temp.create();
-        handle = open (temp.getFullPathName().toUTF8(), O_RDWR);
+    bool createLockFile (const File& file, const int timeOutMillisecs)
+    {
+        file.create();
+        handle = open (file.getFullPathName().toUTF8(), O_RDWR);
 
         if (handle != 0)
         {
@@ -716,10 +735,15 @@ public:
                 const int result = fcntl (handle, F_SETLK, &fl);
 
                 if (result >= 0)
-                    return;
+                    return true;
 
-                if (errno != EINTR)
+                const int error = errno;
+
+                if (error != EINTR)
                 {
+                    if (error == EBADF || error == ENOTSUP)
+                        return false;
+
                     if (timeOutMillisecs == 0
                          || (timeOutMillisecs > 0 && Time::currentTimeMillis() >= endTime))
                         break;
@@ -730,17 +754,11 @@ public:
         }
 
         closeFile();
-       #endif
-    }
-
-    ~Pimpl()
-    {
-        closeFile();
+        return true; // only false if there's a file system error. Failure to lock still returns true.
     }
 
     void closeFile()
     {
-       #if ! JUCE_IOS
         if (handle != 0)
         {
             struct flock fl;
@@ -755,11 +773,11 @@ public:
             close (handle);
             handle = 0;
         }
-       #endif
     }
 
     int handle, refCount;
 };
+#endif
 
 InterProcessLock::InterProcessLock (const String& nm)  : name (nm)
 {

@@ -478,6 +478,17 @@ public:
                                  jlimit (pos.y, pos.y + h, point.y));
     }
 
+    /** Returns a point within this rectangle, specified as proportional coordinates.
+        The relative X and Y values should be between 0 and 1, where 0 is the left or
+        top of this rectangle, and 1 is the right or bottom. (Out-of-bounds values
+        will return a point outside the rectangle).
+    */
+    Point<ValueType> getRelativePoint (double relativeX, double relativeY) const noexcept
+    {
+        return Point<ValueType> (pos.x + static_cast <ValueType> (w * relativeX),
+                                 pos.y + static_cast <ValueType> (h * relativeY));
+    }
+
     /** Returns true if any part of another rectangle overlaps this one. */
     bool intersects (const Rectangle& other) const noexcept
     {

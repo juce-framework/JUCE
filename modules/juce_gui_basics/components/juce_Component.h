@@ -810,8 +810,9 @@ public:
     */
     virtual void parentHierarchyChanged();
 
-    /** Subclasses can use this callback to be told when children are added or removed.
-        @see parentHierarchyChanged
+    /** Subclasses can use this callback to be told when children are added or removed, or
+        when their z-order changes.
+        @see parentHierarchyChanged, ComponentListener::componentChildrenChanged
     */
     virtual void childrenChanged();
 

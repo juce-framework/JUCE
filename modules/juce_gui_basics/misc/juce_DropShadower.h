@@ -63,18 +63,18 @@ private:
 
     Component* owner;
     OwnedArray<Component> shadowWindows;
-    Image shadowImageSections[12];
     DropShadow shadow;
     bool reentrant;
+    WeakReference<Component> lastParentComp;
 
     void componentMovedOrResized (Component&, bool, bool);
     void componentBroughtToFront (Component&);
+    void componentChildrenChanged (Component&);
     void componentParentHierarchyChanged (Component&);
     void componentVisibilityChanged (Component&);
 
+    void updateParent();
     void updateShadows();
-    void setShadowImage (const Image&, int num, int w, int h, int sx, int sy);
-    void bringShadowWindowsToFront();
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DropShadower)
 };

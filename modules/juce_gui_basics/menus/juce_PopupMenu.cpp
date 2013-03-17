@@ -712,7 +712,7 @@ private:
             if (totalW > maxMenuW)
             {
                 numColumns = jmax (1, numColumns - 1);
-                totalW = workOutBestSize (maxMenuW); // to update col widths
+                workOutBestSize (maxMenuW); // to update col widths
                 break;
             }
             else if (totalW > maxMenuW / 2 || contentHeight < maxMenuH)

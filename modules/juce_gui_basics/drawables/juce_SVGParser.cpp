@@ -1161,8 +1161,6 @@ private:
             const double s2 = std::sqrt (s);
             rx *= s2;
             ry *= s2;
-            rx2 = rx * rx;
-            ry2 = ry * ry;
             c = 0;
         }
 

@@ -115,16 +115,16 @@ void AudioDeviceManager::createDeviceTypesIfNeeded()
 {
     if (availableDeviceTypes.size() == 0)
     {
-        createAudioDeviceTypes (availableDeviceTypes);
+        OwnedArray <AudioIODeviceType> types;
+        createAudioDeviceTypes (types);
 
-        while (lastDeviceTypeConfigs.size() < availableDeviceTypes.size())
-            lastDeviceTypeConfigs.add (new AudioDeviceSetup());
+        for (int i = 0; i < types.size(); ++i)
+            addAudioDeviceType (types.getUnchecked(i));
 
-        if (availableDeviceTypes.size() > 0)
-            currentDeviceType = availableDeviceTypes.getUnchecked(0)->getTypeName();
+        types.clear (false);
 
-        for (int i = 0; i < availableDeviceTypes.size(); ++i)
-            availableDeviceTypes.getUnchecked(i)->addListener (callbackHandler);
+        if (AudioIODeviceType* first = availableDeviceTypes.getFirst())
+            currentDeviceType = first->getTypeName();
     }
 }
 
@@ -140,6 +140,8 @@ void AudioDeviceManager::audioDeviceListChanged()
     {
         currentSetup.sampleRate = currentAudioDevice->getCurrentSampleRate();
         currentSetup.bufferSize = currentAudioDevice->getCurrentBufferSizeSamples();
+        currentSetup.inputChannels = currentAudioDevice->getActiveInputChannels();
+        currentSetup.outputChannels = currentAudioDevice->getActiveOutputChannels();
     }
 
     sendChangeMessage();
@@ -167,8 +169,14 @@ void AudioDeviceManager::createAudioDeviceTypes (OwnedArray <AudioIODeviceType>&
 
 void AudioDeviceManager::addAudioDeviceType (AudioIODeviceType* newDeviceType)
 {
-    jassert (newDeviceType != nullptr);
-    availableDeviceTypes.add (newDeviceType);
+    if (newDeviceType != nullptr)
+    {
+        jassert (lastDeviceTypeConfigs.size() == availableDeviceTypes.size());
+        availableDeviceTypes.add (newDeviceType);
+        lastDeviceTypeConfigs.add (new AudioDeviceSetup());
+
+        newDeviceType->addListener (callbackHandler);
+    }
 }
 
 //==============================================================================
