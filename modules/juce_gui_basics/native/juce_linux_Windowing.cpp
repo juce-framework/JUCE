@@ -1514,6 +1514,9 @@ public:
         handleMouseEvent (0, getMousePos (buttonRelEvent), currentModifiers, getEventTime (buttonRelEvent));
 
         clearLastMousePos();
+
+        if (parentWindow != 0)
+            updateBounds();
     }
 
     void handleMotionNotifyEvent (const XPointerMovedEvent& movedEvent)
@@ -1530,6 +1533,9 @@ public:
 
     void handleEnterNotifyEvent (const XEnterWindowEvent& enterEvent)
     {
+        if (parentWindow != 0)
+            updateBounds();
+
         clearLastMousePos();
 
         if (! currentModifiers.isAnyMouseButtonDown())
