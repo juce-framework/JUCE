@@ -718,17 +718,8 @@ public:
 
         if (isPositiveAndBelow (indexToRemove, numUsed))
         {
-            --numUsed;
-
-            ElementType* const e = data.elements + indexToRemove;
-            ElementType removed (*e);
-            e->~ElementType();
-            const int numberToShift = numUsed - indexToRemove;
-
-            if (numberToShift > 0)
-                memmove (e, e + 1, ((size_t) numberToShift) * sizeof (ElementType));
-
-            minimiseStorageAfterRemoval();
+            ElementType removed (data.elements[indexToRemove]);
+            removeInternal (indexToRemove);
             return removed;
         }
 
@@ -752,7 +743,7 @@ public:
         {
             if (valueToRemove == e[i])
             {
-                remove (i);
+                removeInternal (i);
                 break;
             }
         }
@@ -772,7 +763,7 @@ public:
 
         for (int i = numUsed; --i >= 0;)
             if (valueToRemove == data.elements[i])
-                remove (i);
+                removeInternal (i);
     }
 
     /** Removes a range of elements from the array.
@@ -850,7 +841,7 @@ public:
             {
                 for (int i = numUsed; --i >= 0;)
                     if (otherArray.contains (data.elements [i]))
-                        remove (i);
+                        removeInternal (i);
             }
         }
     }
@@ -878,7 +869,7 @@ public:
             {
                 for (int i = numUsed; --i >= 0;)
                     if (! otherArray.contains (data.elements [i]))
-                        remove (i);
+                        removeInternal (i);
             }
         }
     }
@@ -1027,6 +1018,19 @@ private:
     //==============================================================================
     ArrayAllocationBase <ElementType, TypeOfCriticalSectionToUse> data;
     int numUsed;
+
+    void removeInternal (const int indexToRemove)
+    {
+        --numUsed;
+        ElementType* const e = data.elements + indexToRemove;
+        e->~ElementType();
+        const int numberToShift = numUsed - indexToRemove;
+
+        if (numberToShift > 0)
+            memmove (e, e + 1, ((size_t) numberToShift) * sizeof (ElementType));
+
+        minimiseStorageAfterRemoval();
+    }
 
     inline void deleteAllElements() noexcept
     {

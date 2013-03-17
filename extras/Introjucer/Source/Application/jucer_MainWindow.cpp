@@ -242,9 +242,9 @@ bool MainWindow::shouldDropFilesWhenDraggedExternally (const DragAndDropTarget::
         {
             for (int i = selected.size(); --i >= 0;)
             {
-                if (JucerTreeViewBase* tv = selected.getUnchecked(i))
+                if (JucerTreeViewBase* jtvb = selected.getUnchecked(i))
                 {
-                    const File f (tv->getDraggableFile());
+                    const File f (jtvb->getDraggableFile());
 
                     if (f.existsAsFile())
                         files.add (f.getFullPathName());

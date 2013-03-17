@@ -1131,7 +1131,10 @@ Expression::Scope::~Scope() {}
 
 Expression Expression::Scope::getSymbolValue (const String& symbol) const
 {
-    throw Helpers::EvaluationError ("Unknown symbol: " + symbol);
+    if (symbol.isNotEmpty())
+        throw Helpers::EvaluationError ("Unknown symbol: " + symbol);
+
+    return Expression();
 }
 
 double Expression::Scope::evaluateFunction (const String& functionName, const double* parameters, int numParams) const
