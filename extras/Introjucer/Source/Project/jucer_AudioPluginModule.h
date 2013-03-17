@@ -517,7 +517,8 @@ namespace AUHelpers
 
                 Project& project = exporter.getProject();
 
-                addPlistDictionaryKey (dict, "name", getPluginName (project).toString());
+                addPlistDictionaryKey (dict, "name", getPluginManufacturer (project).toString()
+                                                       + ": " + getPluginName (project).toString());
                 addPlistDictionaryKey (dict, "description", getPluginDesc (project).toString());
                 addPlistDictionaryKey (dict, "factoryFunction", getPluginAUExportPrefix (project).toString() + "Factory");
                 addPlistDictionaryKey (dict, "manufacturer", getPluginManufacturerCode (project).toString().trim().substring (0, 4));
