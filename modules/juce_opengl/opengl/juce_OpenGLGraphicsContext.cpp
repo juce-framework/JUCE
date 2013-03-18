@@ -2049,29 +2049,40 @@ public:
         if (clip == nullptr || fillType.colour.isTransparent())
             return;
 
-        const Rectangle<int> clipBounds (clip->getClipBounds());
         const AffineTransform t (transform.getTransformWith (trans));
+        if (t.isSingularity())
+            return;
+
         const float alpha = fillType.colour.getFloatAlpha();
 
-        if (t.isOnlyTranslation())
+        float px0 = 0, py0 = 0;
+        float px1 = (float) image.getWidth(), py1 = 0;
+        float px2 = 0, py2 = (float) image.getHeight();
+        t.transformPoints (px0, py0, px1, py1, px2, py2);
+
+        const int ix0 = (int) (px0 * 256.0f);
+        const int iy0 = (int) (py0 * 256.0f);
+        const int ix1 = (int) (px1 * 256.0f);
+        const int iy1 = (int) (py1 * 256.0f);
+        const int ix2 = (int) (px2 * 256.0f);
+        const int iy2 = (int) (py2 * 256.0f);
+
+        if (((ix0 | iy0 | ix1 | iy1 | ix2 | iy2) & 0xf8) == 0
+              && ix0 == ix2 && iy0 == iy1)
         {
-            int tx = (int) (t.getTranslationX() * 256.0f);
-            int ty = (int) (t.getTranslationY() * 256.0f);
-
-            if (((tx | ty) & 0xf8) == 0)
-            {
-                tx = ((tx + 128) >> 8);
-                ty = ((ty + 128) >> 8);
-
-                clip->drawImage (image, t, alpha, Rectangle<int> (tx, ty, image.getWidth(), image.getHeight()), nullptr);
-                return;
-            }
+            // Non-warping transform can be done as a single rectangle.
+            clip->drawImage (image, t, alpha,
+                             Rectangle<int> (Point<int> (((ix0 + 128) >> 8),
+                                                         ((iy0 + 128) >> 8)),
+                                             Point<int> (((ix1 + 128) >> 8),
+                                                         ((iy2 + 128) >> 8))), nullptr);
         }
-
-        if (! t.isSingularity())
+        else
         {
             Path p;
             p.addRectangle (image.getBounds());
+
+            const Rectangle<int> clipBounds (clip->getClipBounds());
             EdgeTable et (clipBounds, p, t);
 
             clip->drawImage (image, t, alpha, clipBounds, &et);
