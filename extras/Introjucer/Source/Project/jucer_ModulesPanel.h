@@ -63,7 +63,7 @@ public:
     void filenameComponentChanged (FilenameComponent*)
     {
         moduleList.rescan (modulesLocation.getCurrentFile());
-        modulesLocation.setCurrentFile (moduleList.getModulesFolder(), false, false);
+        modulesLocation.setCurrentFile (moduleList.getModulesFolder(), false, dontSendNotification);
         ModuleList::setLocalModulesFolder (moduleList.getModulesFolder());
         moduleListBox.refresh();
     }
