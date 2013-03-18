@@ -23,34 +23,36 @@
   ==============================================================================
 */
 
-TemporaryFile::TemporaryFile (const String& suffix, const int optionFlags)
+static File createTempFile (const File& parentDirectory, String name,
+                            const String& suffix, const int optionFlags)
 {
-    createTempFile (File::getSpecialLocation (File::tempDirectory),
-                    "temp_" + String::toHexString (Random::getSystemRandom().nextInt()),
-                    suffix,
-                    optionFlags);
+    if ((optionFlags & TemporaryFile::useHiddenFile) != 0)
+        name = "." + name;
+
+    return parentDirectory.getNonexistentChildFile (name, suffix, (optionFlags & TemporaryFile::putNumbersInBrackets) != 0);
+}
+
+TemporaryFile::TemporaryFile (const String& suffix, const int optionFlags)
+    : temporaryFile (createTempFile (File::getSpecialLocation (File::tempDirectory),
+                                     "temp_" + String::toHexString (Random::getSystemRandom().nextInt()),
+                                     suffix, optionFlags))
+{
 }
 
 TemporaryFile::TemporaryFile (const File& target, const int optionFlags)
-    : targetFile (target)
+    : temporaryFile (createTempFile (target.getParentDirectory(),
+                                     target.getFileNameWithoutExtension()
+                                       + "_temp" + String::toHexString (Random::getSystemRandom().nextInt()),
+                                     target.getFileExtension(), optionFlags)),
+      targetFile (target)
 {
     // If you use this constructor, you need to give it a valid target file!
     jassert (targetFile != File::nonexistent);
-
-    createTempFile (targetFile.getParentDirectory(),
-                    targetFile.getFileNameWithoutExtension()
-                        + "_temp" + String::toHexString (Random::getSystemRandom().nextInt()),
-                    targetFile.getFileExtension(),
-                    optionFlags);
 }
 
-void TemporaryFile::createTempFile (const File& parentDirectory, String name,
-                                    const String& suffix, const int optionFlags)
+TemporaryFile::TemporaryFile (const File& target, const File& temporary)
+    : temporaryFile (temporary), targetFile (target)
 {
-    if ((optionFlags & useHiddenFile) != 0)
-        name = "." + name;
-
-    temporaryFile = parentDirectory.getNonexistentChildFile (name, suffix, (optionFlags & putNumbersInBrackets) != 0);
 }
 
 TemporaryFile::~TemporaryFile()
