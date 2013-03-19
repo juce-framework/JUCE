@@ -725,10 +725,8 @@ public:
    #if MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_5
     bool redirectPerformKeyEquivalent (NSEvent* ev)
     {
-        if ([ev type] == NSKeyDown)
-            return redirectKeyDown (ev);
-        else if ([ev type] == NSKeyUp)
-            return redirectKeyUp (ev);
+        if ([ev type] == NSKeyDown)   return redirectKeyDown (ev);
+        if ([ev type] == NSKeyUp)     return redirectKeyUp (ev);
 
         return false;
     }

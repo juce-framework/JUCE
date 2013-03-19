@@ -724,48 +724,33 @@ public:
 
         [nsFont retain];
 
-        ascent = std::abs ((float) [nsFont ascender]);
-        float totalSize = ascent + std::abs ((float) [nsFont descender]);
-        ascent /= totalSize;
-
-        pathTransform = AffineTransform::identity.scale (1.0f / totalSize);
-
       #if SUPPORT_ONLY_10_4_FONTS
-        ATSFontRef atsFont = ATSFontFindFromName ((CFStringRef) [nsFont fontName], kATSOptionFlagsDefault);
-
-        if (atsFont == 0)
-            atsFont = ATSFontFindFromPostScriptName ((CFStringRef) [nsFont fontName], kATSOptionFlagsDefault);
-
-        fontRef = CGFontCreateWithPlatformFont (&atsFont);
-
-        const float totalHeight = std::abs ([nsFont ascender]) + std::abs ([nsFont descender]);
-        unitsToHeightScaleFactor = 1.0f / totalHeight;
-        fontHeightToPointsFactor = referenceFontSize / totalHeight;
+        initWithATSFont();
       #else
        #if SUPPORT_10_4_FONTS
         if (NEW_CGFONT_FUNCTIONS_UNAVAILABLE)
         {
-            ATSFontRef atsFont = ATSFontFindFromName ((CFStringRef) [nsFont fontName], kATSOptionFlagsDefault);
-
-            if (atsFont == 0)
-                atsFont = ATSFontFindFromPostScriptName ((CFStringRef) [nsFont fontName], kATSOptionFlagsDefault);
-
-            fontRef = CGFontCreateWithPlatformFont (&atsFont);
-
-            const float totalHeight = std::abs ([nsFont ascender]) + std::abs ([nsFont descender]);
-            unitsToHeightScaleFactor = 1.0f / totalHeight;
-            fontHeightToPointsFactor = referenceFontSize / totalHeight;
+            initWithATSFont();
         }
         else
        #endif
         {
             fontRef = CGFontCreateWithFontName ((CFStringRef) [nsFont fontName]);
 
-            const float totalHeight = std::abs ((float) CGFontGetAscent (fontRef)) + std::abs ((float) CGFontGetDescent (fontRef));
+            const float absAscent = std::abs ((float) CGFontGetAscent (fontRef));
+            const float totalHeight = absAscent + std::abs ((float) CGFontGetDescent (fontRef));
+
+            ascent = absAscent / totalHeight;
             unitsToHeightScaleFactor = 1.0f / totalHeight;
-            fontHeightToPointsFactor = referenceFontSize / totalHeight;
-        }
+
+            const float nsFontAscent  = std::abs ([nsFont ascender]);
+            const float nsFontDescent = std::abs ([nsFont descender]);
+
+            fontHeightToPointsFactor = referenceFontSize / (nsFontAscent + nsFontDescent);
+       }
       #endif
+
+        pathTransform = AffineTransform::identity.scale (unitsToHeightScaleFactor);
     }
 
     ~OSXTypeface()
@@ -777,6 +762,27 @@ public:
         if (fontRef != 0)
             CGFontRelease (fontRef);
     }
+
+   #if SUPPORT_10_4_FONTS
+    void initWithATSFont()
+    {
+        ATSFontRef atsFont = ATSFontFindFromName ((CFStringRef) [nsFont fontName], kATSOptionFlagsDefault);
+
+        if (atsFont == 0)
+            atsFont = ATSFontFindFromPostScriptName ((CFStringRef) [nsFont fontName], kATSOptionFlagsDefault);
+
+        fontRef = CGFontCreateWithPlatformFont (&atsFont);
+
+        const float absAscent = std::abs ([nsFont ascender]);
+        const float absDescent = std::abs ([nsFont descender]);
+        const float totalHeight = absAscent + absDescent;
+
+        unitsToHeightScaleFactor = 1.0f / totalHeight;
+        fontHeightToPointsFactor = referenceFontSize / totalHeight;
+        ascent = absAscent / totalHeight;
+    }
+   #endif
+
 
     float getAscent() const                 { return ascent; }
     float getDescent() const                { return 1.0f - ascent; }
