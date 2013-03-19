@@ -861,6 +861,18 @@ public:
             window = [view window];
     }
 
+    void liveResizingStart()
+    {
+        if (constrainer != nullptr)
+            constrainer->resizeStart();
+    }
+
+    void liveResizingEnd()
+    {
+        if (constrainer != nullptr)
+            constrainer->resizeEnd();
+    }
+
     NSRect constrainRect (NSRect r)
     {
         if (constrainer != nullptr
@@ -1683,6 +1695,8 @@ struct JuceNSWindowClass   : public ObjCClass <NSWindow>
         addMethod (@selector (windowWillResize:toSize:),      windowWillResize,      @encode (NSSize), "@:@", @encode (NSSize));
         addMethod (@selector (zoom:),                         zoom,                  "v@:@");
         addMethod (@selector (windowWillMove:),               windowWillMove,        "v@:@");
+        addMethod (@selector (windowWillStartLiveResize:),    windowWillStartLiveResize, "v@:@");
+        addMethod (@selector (windowDidEndLiveResize:),       windowDidEndLiveResize, "v@:@");
 
        #if defined (MAC_OS_X_VERSION_10_6) && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_6
         addProtocol (@protocol (NSWindowDelegate));
@@ -1766,6 +1780,18 @@ private:
         if (NSViewComponentPeer* const owner = getOwner (self))
             if (owner->hasNativeTitleBar())
                 owner->sendModalInputAttemptIfBlocked();
+    }
+
+    static void windowWillStartLiveResize (id self, SEL, NSNotification*)
+    {
+        if (NSViewComponentPeer* const owner = getOwner (self))
+            owner->liveResizingStart();
+    }
+
+    static void windowDidEndLiveResize (id self, SEL, NSNotification*)
+    {
+        if (NSViewComponentPeer* const owner = getOwner (self))
+            owner->liveResizingEnd();
     }
 };
 
