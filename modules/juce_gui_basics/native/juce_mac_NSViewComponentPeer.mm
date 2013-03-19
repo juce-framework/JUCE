@@ -676,11 +676,9 @@ public:
 
                 return used;
             }
-            else
-            {
-                if (handleKeyUpOrDown (false))
-                    return true;
-            }
+
+            if (handleKeyUpOrDown (false))
+                return true;
         }
 
         return false;
@@ -688,6 +686,10 @@ public:
 
     bool redirectKeyDown (NSEvent* ev)
     {
+        // (need to retain this in case a modal loop runs in handleKeyEvent and
+        // our event object gets lost)
+        const NSObjectRetainer<NSEvent> r (ev);
+
         updateKeysDown (ev, true);
         bool used = handleKeyEvent (ev, true);
 
@@ -715,6 +717,9 @@ public:
 
     void redirectModKeyChange (NSEvent* ev)
     {
+        // (need to retain this in case a modal loop runs and our event object gets lost)
+        const NSObjectRetainer<NSEvent> r (ev);
+
         keysCurrentlyDown.clear();
         handleKeyUpOrDown (true);
 
