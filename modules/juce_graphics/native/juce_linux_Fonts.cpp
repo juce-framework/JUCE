@@ -120,7 +120,7 @@ public:
         if (iter != nullptr)
         {
             while (iter->next())
-                if (getFile().hasFileExtension ("ttf;pfb;pcf"))
+                if (getFile().hasFileExtension ("ttf;pfb;pcf;otf"))
                     return true;
         }
 
