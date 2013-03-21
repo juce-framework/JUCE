@@ -422,7 +422,13 @@ void ProjectContentComponent::closeDocument()
 void ProjectContentComponent::saveDocument()
 {
     if (currentDocument != nullptr)
-        currentDocument->save();
+    {
+        if (! currentDocument->save())
+            AlertWindow::showMessageBox (AlertWindow::WarningIcon,
+                                         TRANS("Save failed!"),
+                                         TRANS("Couldn't save the file:")
+                                           + "\n" + currentDocument->getFile().getFullPathName());
+    }
     else
         saveProject();
 
