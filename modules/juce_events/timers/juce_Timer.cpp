@@ -83,7 +83,7 @@ public:
                        when the app has a modal loop), so this is how long to wait before assuming the
                        message has been lost and trying again.
                     */
-                    const uint32 messageDeliveryTimeout = now + 2000;
+                    const uint32 messageDeliveryTimeout = now + 300;
 
                     while (callbackNeeded.get() != 0)
                     {
@@ -93,7 +93,10 @@ public:
                             return;
 
                         if (Time::getMillisecondCounter() > messageDeliveryTimeout)
+                        {
+                            messageToSend->post();
                             break;
+                        }
                     }
                 }
             }
