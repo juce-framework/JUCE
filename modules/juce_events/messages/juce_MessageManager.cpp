@@ -326,13 +326,17 @@ JUCE_API void JUCE_CALLTYPE initialiseJuce_GUI();
 JUCE_API void JUCE_CALLTYPE initialiseJuce_GUI()
 {
     JUCE_AUTORELEASEPOOL
-    MessageManager::getInstance();
+    {
+        MessageManager::getInstance();
+    }
 }
 
 JUCE_API void JUCE_CALLTYPE shutdownJuce_GUI();
 JUCE_API void JUCE_CALLTYPE shutdownJuce_GUI()
 {
     JUCE_AUTORELEASEPOOL
-    DeletedAtShutdown::deleteAll();
-    MessageManager::deleteInstance();
+    {
+        DeletedAtShutdown::deleteAll();
+        MessageManager::deleteInstance();
+    }
 }

@@ -236,7 +236,9 @@ bool AudioCDReader::isCDStillPresent() const
 void AudioCDReader::ejectDisk()
 {
     JUCE_AUTORELEASEPOOL
-    [[NSWorkspace sharedWorkspace] unmountAndEjectDeviceAtPath: juceStringToNS (volumeDir.getFullPathName())];
+    {
+        [[NSWorkspace sharedWorkspace] unmountAndEjectDeviceAtPath: juceStringToNS (volumeDir.getFullPathName())];
+    }
 }
 
 bool AudioCDReader::isTrackAudio (int trackNum) const

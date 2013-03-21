@@ -62,8 +62,8 @@
 namespace juce
 {
 
-static bool arrayContainsPlugin (const OwnedArray<PluginDescription>& list,
-                                 const PluginDescription& desc)
+static inline bool arrayContainsPlugin (const OwnedArray<PluginDescription>& list,
+                                        const PluginDescription& desc)
 {
     for (int i = list.size(); --i >= 0;)
         if (list.getUnchecked(i)->isDuplicateOf (desc))

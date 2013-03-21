@@ -199,9 +199,10 @@ public:
     void setTitle (const String& title)
     {
         JUCE_AUTORELEASEPOOL
-
-        if (! isSharedWindow)
-            [window setTitle: juceStringToNS (title)];
+        {
+            if (! isSharedWindow)
+                [window setTitle: juceStringToNS (title)];
+        }
     }
 
     bool setDocumentEditedStatus (bool edited)

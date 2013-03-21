@@ -658,20 +658,21 @@ namespace MainMenuHelpers
         if (JUCEApplication* app = JUCEApplication::getInstance())
         {
             JUCE_AUTORELEASEPOOL
+            {
+                NSMenu* mainMenu = [[NSMenu alloc] initWithTitle: nsStringLiteral ("MainMenu")];
+                NSMenuItem* item = [mainMenu addItemWithTitle: nsStringLiteral ("Apple") action: nil keyEquivalent: nsEmptyString()];
 
-            NSMenu* mainMenu = [[NSMenu alloc] initWithTitle: nsStringLiteral ("MainMenu")];
-            NSMenuItem* item = [mainMenu addItemWithTitle: nsStringLiteral ("Apple") action: nil keyEquivalent: nsEmptyString()];
+                NSMenu* appMenu = [[NSMenu alloc] initWithTitle: nsStringLiteral ("Apple")];
 
-            NSMenu* appMenu = [[NSMenu alloc] initWithTitle: nsStringLiteral ("Apple")];
+                [NSApp performSelector: @selector (setAppleMenu:) withObject: appMenu];
+                [mainMenu setSubmenu: appMenu forItem: item];
 
-            [NSApp performSelector: @selector (setAppleMenu:) withObject: appMenu];
-            [mainMenu setSubmenu: appMenu forItem: item];
+                [NSApp setMainMenu: mainMenu];
+                MainMenuHelpers::createStandardAppMenu (appMenu, app->getApplicationName(), extraItems);
 
-            [NSApp setMainMenu: mainMenu];
-            MainMenuHelpers::createStandardAppMenu (appMenu, app->getApplicationName(), extraItems);
-
-            [appMenu release];
-            [mainMenu release];
+                [appMenu release];
+                [mainMenu release];
+            }
         }
     }
 }
@@ -683,21 +684,22 @@ void MenuBarModel::setMacMainMenu (MenuBarModel* newMenuBarModel,
     if (getMacMainMenu() != newMenuBarModel)
     {
         JUCE_AUTORELEASEPOOL
-
-        if (newMenuBarModel == nullptr)
         {
-            delete JuceMainMenuHandler::instance;
-            jassert (JuceMainMenuHandler::instance == nullptr); // should be zeroed in the destructor
-            jassert (extraAppleMenuItems == nullptr); // you can't specify some extra items without also supplying a model
+            if (newMenuBarModel == nullptr)
+            {
+                delete JuceMainMenuHandler::instance;
+                jassert (JuceMainMenuHandler::instance == nullptr); // should be zeroed in the destructor
+                jassert (extraAppleMenuItems == nullptr); // you can't specify some extra items without also supplying a model
 
-            extraAppleMenuItems = nullptr;
-        }
-        else
-        {
-            if (JuceMainMenuHandler::instance == nullptr)
-                JuceMainMenuHandler::instance = new JuceMainMenuHandler();
+                extraAppleMenuItems = nullptr;
+            }
+            else
+            {
+                if (JuceMainMenuHandler::instance == nullptr)
+                    JuceMainMenuHandler::instance = new JuceMainMenuHandler();
 
-            JuceMainMenuHandler::instance->setMenu (newMenuBarModel, extraAppleMenuItems, recentItemsMenuName);
+                JuceMainMenuHandler::instance->setMenu (newMenuBarModel, extraAppleMenuItems, recentItemsMenuName);
+            }
         }
     }
 

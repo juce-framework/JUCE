@@ -304,6 +304,8 @@ namespace juce
  #if __has_feature (cxx_rvalue_references)
   #define JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS 1
  #endif
+
+ #define JUCE_COMPILER_SUPPORTS_ARC 1
 #endif
 
 #if defined (_MSC_VER) && _MSC_VER >= 1600

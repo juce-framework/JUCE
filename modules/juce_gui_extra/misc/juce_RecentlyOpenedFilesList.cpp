@@ -137,9 +137,10 @@ void RecentlyOpenedFilesList::registerRecentFileNatively (const File& file)
 {
    #if JUCE_MAC
     JUCE_AUTORELEASEPOOL
-
-    [[NSDocumentController sharedDocumentController]
-        noteNewRecentDocumentURL: [NSURL fileURLWithPath: juceStringToNS (file.getFullPathName())]];
+    {
+        [[NSDocumentController sharedDocumentController]
+            noteNewRecentDocumentURL: [NSURL fileURLWithPath: juceStringToNS (file.getFullPathName())]];
+    }
    #else
     (void) file;
    #endif
