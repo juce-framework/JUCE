@@ -51,77 +51,79 @@ void initialiseMacRTAS()
 void* attachSubWindow (void* hostWindowRef, Component* comp)
 {
     JUCE_AUTORELEASEPOOL
-
-   #if 0
-    // This was suggested as a way to improve passing keypresses to the host, but
-    // a side-effect seems to be occasional rendering artifacts.
-    HIWindowChangeClass ((WindowRef) hostWindowRef, kFloatingWindowClass);
-   #endif
-
-    NSWindow* hostWindow = [[NSWindow alloc] initWithWindowRef: hostWindowRef];
-    [hostWindow retain];
-    [hostWindow setCanHide: YES];
-    [hostWindow setReleasedWhenClosed: YES];
-    NSRect oldWindowFrame = [hostWindow frame];
-
-    NSView* content = [hostWindow contentView];
-    NSRect f = [content frame];
-    f.size.width = comp->getWidth();
-    f.size.height = comp->getHeight();
-    [content setFrame: f];
-
-    const int mainScreenHeight = [[[NSScreen screens] objectAtIndex: 0] frame].size.height;
-
-   #if WINDOWPOSITION_BODGE
     {
-        Rect winBounds;
-        GetWindowBounds ((WindowRef) hostWindowRef, kWindowContentRgn, &winBounds);
-        NSRect w = [hostWindow frame];
-        w.origin.x = winBounds.left;
-        w.origin.y = mainScreenHeight - winBounds.bottom;
-        [hostWindow setFrame: w display: NO animate: NO];
+       #if 0
+        // This was suggested as a way to improve passing keypresses to the host, but
+        // a side-effect seems to be occasional rendering artifacts.
+        HIWindowChangeClass ((WindowRef) hostWindowRef, kFloatingWindowClass);
+       #endif
+
+        NSWindow* hostWindow = [[NSWindow alloc] initWithWindowRef: hostWindowRef];
+        [hostWindow retain];
+        [hostWindow setCanHide: YES];
+        [hostWindow setReleasedWhenClosed: YES];
+        NSRect oldWindowFrame = [hostWindow frame];
+
+        NSView* content = [hostWindow contentView];
+        NSRect f = [content frame];
+        f.size.width = comp->getWidth();
+        f.size.height = comp->getHeight();
+        [content setFrame: f];
+
+        const int mainScreenHeight = [[[NSScreen screens] objectAtIndex: 0] frame].size.height;
+
+       #if WINDOWPOSITION_BODGE
+        {
+            Rect winBounds;
+            GetWindowBounds ((WindowRef) hostWindowRef, kWindowContentRgn, &winBounds);
+            NSRect w = [hostWindow frame];
+            w.origin.x = winBounds.left;
+            w.origin.y = mainScreenHeight - winBounds.bottom;
+            [hostWindow setFrame: w display: NO animate: NO];
+        }
+       #endif
+
+        NSPoint windowPos = [hostWindow convertBaseToScreen: f.origin];
+        windowPos.x = windowPos.x + jmax (0.0f, (oldWindowFrame.size.width - f.size.width) / 2.0f);
+        windowPos.y = mainScreenHeight - (windowPos.y + f.size.height);
+
+        comp->setTopLeftPosition ((int) windowPos.x, (int) windowPos.y);
+
+       #if ! JucePlugin_EditorRequiresKeyboardFocus
+        comp->addToDesktop (ComponentPeer::windowIsTemporary | ComponentPeer::windowIgnoresKeyPresses);
+       #else
+        comp->addToDesktop (ComponentPeer::windowIsTemporary);
+       #endif
+
+        comp->setVisible (true);
+
+        NSView* pluginView = (NSView*) comp->getWindowHandle();
+        NSWindow* pluginWindow = [pluginView window];
+
+        [hostWindow addChildWindow: pluginWindow
+                           ordered: NSWindowAbove];
+        [hostWindow orderFront: nil];
+        [pluginWindow orderFront: nil];
+
+        attachWindowHidingHooks (comp, (WindowRef) hostWindowRef, hostWindow);
+
+        return hostWindow;
     }
-   #endif
-
-    NSPoint windowPos = [hostWindow convertBaseToScreen: f.origin];
-    windowPos.x = windowPos.x + jmax (0.0f, (oldWindowFrame.size.width - f.size.width) / 2.0f);
-    windowPos.y = mainScreenHeight - (windowPos.y + f.size.height);
-
-    comp->setTopLeftPosition ((int) windowPos.x, (int) windowPos.y);
-
-   #if ! JucePlugin_EditorRequiresKeyboardFocus
-    comp->addToDesktop (ComponentPeer::windowIsTemporary | ComponentPeer::windowIgnoresKeyPresses);
-   #else
-    comp->addToDesktop (ComponentPeer::windowIsTemporary);
-   #endif
-
-    comp->setVisible (true);
-
-    NSView* pluginView = (NSView*) comp->getWindowHandle();
-    NSWindow* pluginWindow = [pluginView window];
-
-    [hostWindow addChildWindow: pluginWindow
-                       ordered: NSWindowAbove];
-    [hostWindow orderFront: nil];
-    [pluginWindow orderFront: nil];
-
-    attachWindowHidingHooks (comp, (WindowRef) hostWindowRef, hostWindow);
-
-    return hostWindow;
 }
 
 void removeSubWindow (void* nsWindow, Component* comp)
 {
     JUCE_AUTORELEASEPOOL
+    {
+        NSView* pluginView = (NSView*) comp->getWindowHandle();
+        NSWindow* hostWindow = (NSWindow*) nsWindow;
+        NSWindow* pluginWindow = [pluginView window];
 
-    NSView* pluginView = (NSView*) comp->getWindowHandle();
-    NSWindow* hostWindow = (NSWindow*) nsWindow;
-    NSWindow* pluginWindow = [pluginView window];
-
-    removeWindowHidingHooks (comp);
-    [hostWindow removeChildWindow: pluginWindow];
-    comp->removeFromDesktop();
-    [hostWindow release];
+        removeWindowHidingHooks (comp);
+        [hostWindow removeChildWindow: pluginWindow];
+        comp->removeFromDesktop();
+        [hostWindow release];
+    }
 }
 
 namespace

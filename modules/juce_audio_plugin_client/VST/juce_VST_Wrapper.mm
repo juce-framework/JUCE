@@ -82,90 +82,91 @@ void* attachComponentToWindowRef (Component* comp, void* windowRef);
 void* attachComponentToWindowRef (Component* comp, void* windowRef)
 {
     JUCE_AUTORELEASEPOOL
-
-  #if JUCE_64BIT
-    NSView* parentView = (NSView*) windowRef;
-
-   #if JucePlugin_EditorRequiresKeyboardFocus
-    comp->addToDesktop (0, parentView);
-   #else
-    comp->addToDesktop (ComponentPeer::windowIgnoresKeyPresses, parentView);
-   #endif
-
-    // (this workaround is because Wavelab provides a zero-size parent view..)
-    if ([parentView frame].size.height == 0)
-        [((NSView*) comp->getWindowHandle()) setFrameOrigin: NSZeroPoint];
-
-    comp->setVisible (true);
-    comp->toFront (false);
-
-    [[parentView window] setAcceptsMouseMovedEvents: YES];
-    return parentView;
-  #else
-    NSWindow* hostWindow = [[NSWindow alloc] initWithWindowRef: windowRef];
-    [hostWindow retain];
-    [hostWindow setCanHide: YES];
-    [hostWindow setReleasedWhenClosed: YES];
-
-    HIViewRef parentView = 0;
-
-    WindowAttributes attributes;
-    GetWindowAttributes ((WindowRef) windowRef, &attributes);
-    if ((attributes & kWindowCompositingAttribute) != 0)
     {
-        HIViewRef root = HIViewGetRoot ((WindowRef) windowRef);
-        HIViewFindByID (root, kHIViewWindowContentID, &parentView);
+      #if JUCE_64BIT
+        NSView* parentView = (NSView*) windowRef;
 
-        if (parentView == 0)
-            parentView = root;
+       #if JucePlugin_EditorRequiresKeyboardFocus
+        comp->addToDesktop (0, parentView);
+       #else
+        comp->addToDesktop (ComponentPeer::windowIgnoresKeyPresses, parentView);
+       #endif
+
+        // (this workaround is because Wavelab provides a zero-size parent view..)
+        if ([parentView frame].size.height == 0)
+            [((NSView*) comp->getWindowHandle()) setFrameOrigin: NSZeroPoint];
+
+        comp->setVisible (true);
+        comp->toFront (false);
+
+        [[parentView window] setAcceptsMouseMovedEvents: YES];
+        return parentView;
+      #else
+        NSWindow* hostWindow = [[NSWindow alloc] initWithWindowRef: windowRef];
+        [hostWindow retain];
+        [hostWindow setCanHide: YES];
+        [hostWindow setReleasedWhenClosed: YES];
+
+        HIViewRef parentView = 0;
+
+        WindowAttributes attributes;
+        GetWindowAttributes ((WindowRef) windowRef, &attributes);
+        if ((attributes & kWindowCompositingAttribute) != 0)
+        {
+            HIViewRef root = HIViewGetRoot ((WindowRef) windowRef);
+            HIViewFindByID (root, kHIViewWindowContentID, &parentView);
+
+            if (parentView == 0)
+                parentView = root;
+        }
+        else
+        {
+            GetRootControl ((WindowRef) windowRef, (ControlRef*) &parentView);
+
+            if (parentView == 0)
+                CreateRootControl ((WindowRef) windowRef, (ControlRef*) &parentView);
+        }
+
+        // It seems that the only way to successfully position our overlaid window is by putting a dummy
+        // HIView into the host's carbon window, and then catching events to see when it gets repositioned
+        HIViewRef dummyView = 0;
+        HIImageViewCreate (0, &dummyView);
+        HIRect r = { {0, 0}, { (float) comp->getWidth(), (float) comp->getHeight()} };
+        HIViewSetFrame (dummyView, &r);
+        HIViewAddSubview (parentView, dummyView);
+        comp->getProperties().set ("dummyViewRef", String::toHexString ((pointer_sized_int) (void*) dummyView));
+
+        EventHandlerRef ref;
+        const EventTypeSpec kControlBoundsChangedEvent = { kEventClassControl, kEventControlBoundsChanged };
+        InstallEventHandler (GetControlEventTarget (dummyView), NewEventHandlerUPP (viewBoundsChangedEvent), 1, &kControlBoundsChangedEvent, (void*) comp, &ref);
+        comp->getProperties().set ("boundsEventRef", String::toHexString ((pointer_sized_int) (void*) ref));
+
+        updateComponentPos (comp);
+
+       #if ! JucePlugin_EditorRequiresKeyboardFocus
+        comp->addToDesktop (ComponentPeer::windowIsTemporary | ComponentPeer::windowIgnoresKeyPresses);
+       #else
+        comp->addToDesktop (ComponentPeer::windowIsTemporary);
+       #endif
+
+        comp->setVisible (true);
+        comp->toFront (false);
+
+        NSView* pluginView = (NSView*) comp->getWindowHandle();
+        NSWindow* pluginWindow = [pluginView window];
+        [pluginWindow setExcludedFromWindowsMenu: YES];
+        [pluginWindow setCanHide: YES];
+
+        [hostWindow addChildWindow: pluginWindow
+                           ordered: NSWindowAbove];
+        [hostWindow orderFront: nil];
+        [pluginWindow orderFront: nil];
+
+        attachWindowHidingHooks (comp, (WindowRef) windowRef, hostWindow);
+
+        return hostWindow;
+      #endif
     }
-    else
-    {
-        GetRootControl ((WindowRef) windowRef, (ControlRef*) &parentView);
-
-        if (parentView == 0)
-            CreateRootControl ((WindowRef) windowRef, (ControlRef*) &parentView);
-    }
-
-    // It seems that the only way to successfully position our overlaid window is by putting a dummy
-    // HIView into the host's carbon window, and then catching events to see when it gets repositioned
-    HIViewRef dummyView = 0;
-    HIImageViewCreate (0, &dummyView);
-    HIRect r = { {0, 0}, { (float) comp->getWidth(), (float) comp->getHeight()} };
-    HIViewSetFrame (dummyView, &r);
-    HIViewAddSubview (parentView, dummyView);
-    comp->getProperties().set ("dummyViewRef", String::toHexString ((pointer_sized_int) (void*) dummyView));
-
-    EventHandlerRef ref;
-    const EventTypeSpec kControlBoundsChangedEvent = { kEventClassControl, kEventControlBoundsChanged };
-    InstallEventHandler (GetControlEventTarget (dummyView), NewEventHandlerUPP (viewBoundsChangedEvent), 1, &kControlBoundsChangedEvent, (void*) comp, &ref);
-    comp->getProperties().set ("boundsEventRef", String::toHexString ((pointer_sized_int) (void*) ref));
-
-    updateComponentPos (comp);
-
-   #if ! JucePlugin_EditorRequiresKeyboardFocus
-    comp->addToDesktop (ComponentPeer::windowIsTemporary | ComponentPeer::windowIgnoresKeyPresses);
-   #else
-    comp->addToDesktop (ComponentPeer::windowIsTemporary);
-   #endif
-
-    comp->setVisible (true);
-    comp->toFront (false);
-
-    NSView* pluginView = (NSView*) comp->getWindowHandle();
-    NSWindow* pluginWindow = [pluginView window];
-    [pluginWindow setExcludedFromWindowsMenu: YES];
-    [pluginWindow setCanHide: YES];
-
-    [hostWindow addChildWindow: pluginWindow
-                       ordered: NSWindowAbove];
-    [hostWindow orderFront: nil];
-    [pluginWindow orderFront: nil];
-
-    attachWindowHidingHooks (comp, (WindowRef) windowRef, hostWindow);
-
-    return hostWindow;
-  #endif
 }
 
 void detachComponentFromWindowRef (Component* comp, void* nsWindow);

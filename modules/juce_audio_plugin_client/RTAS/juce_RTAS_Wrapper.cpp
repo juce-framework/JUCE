@@ -161,28 +161,29 @@ public:
     ~JucePlugInProcess()
     {
         JUCE_AUTORELEASEPOOL
-
-        if (mLoggedIn)
-            MIDILogOut();
-
-        midiBufferNode = nullptr;
-        midiTransport = nullptr;
-
-        if (prepared)
-            juceFilter->releaseResources();
-
-        juceFilter = nullptr;
-        asyncUpdater = nullptr;
-
-        if (--numInstances == 0)
         {
-           #if JUCE_MAC
-            // Hack to allow any NSWindows to clear themselves up before returning to PT..
-            for (int i = 20; --i >= 0;)
-                MessageManager::getInstance()->runDispatchLoopUntil (1);
-           #endif
+            if (mLoggedIn)
+                MIDILogOut();
 
-            shutdownJuce_GUI();
+            midiBufferNode = nullptr;
+            midiTransport = nullptr;
+
+            if (prepared)
+                juceFilter->releaseResources();
+
+            juceFilter = nullptr;
+            asyncUpdater = nullptr;
+
+            if (--numInstances == 0)
+            {
+               #if JUCE_MAC
+                // Hack to allow any NSWindows to clear themselves up before returning to PT..
+                for (int i = 20; --i >= 0;)
+                    MessageManager::getInstance()->runDispatchLoopUntil (1);
+               #endif
+
+                shutdownJuce_GUI();
+            }
         }
     }
 
@@ -248,17 +249,19 @@ public:
             if (port != 0)
             {
                 JUCE_AUTORELEASEPOOL
-                updateSize();
+                {
+                    updateSize();
 
-               #if JUCE_WINDOWS
-                void* const hostWindow = (void*) ASI_GethWnd ((WindowPtr) port);
-               #else
-                void* const hostWindow = (void*) GetWindowFromPort (port);
-               #endif
-                wrapper = nullptr;
-                wrapper = new EditorCompWrapper (hostWindow, editorComp, this);
+                   #if JUCE_WINDOWS
+                    void* const hostWindow = (void*) ASI_GethWnd ((WindowPtr) port);
+                   #else
+                    void* const hostWindow = (void*) GetWindowFromPort (port);
+                   #endif
+                    wrapper = nullptr;
+                    wrapper = new EditorCompWrapper (hostWindow, editorComp, this);
 
-                process->touchAllParameters();
+                    process->touchAllParameters();
+                }
             }
             else
             {
@@ -291,15 +294,17 @@ public:
             if (editorComp != nullptr || wrapper != nullptr)
             {
                 JUCE_AUTORELEASEPOOL
-                PopupMenu::dismissAllActiveMenus();
+                {
+                    PopupMenu::dismissAllActiveMenus();
 
-                if (juce::Component* const modalComponent = juce::Component::getCurrentlyModalComponent())
-                    modalComponent->exitModalState (0);
+                    if (juce::Component* const modalComponent = juce::Component::getCurrentlyModalComponent())
+                        modalComponent->exitModalState (0);
 
-                filter->editorBeingDeleted (editorComp);
+                    filter->editorBeingDeleted (editorComp);
 
-                editorComp = nullptr;
-                wrapper = nullptr;
+                    editorComp = nullptr;
+                    wrapper = nullptr;
+                }
             }
         }
 

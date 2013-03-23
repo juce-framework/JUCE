@@ -258,15 +258,16 @@ public:
                #endif
                 {
                     JUCE_AUTORELEASEPOOL
+                    {
+                        static JuceUICreationClass cls;
 
-                    static JuceUICreationClass cls;
+                        // (NB: this may be the host's bundle, not necessarily the component's)
+                        NSBundle* bundle = [NSBundle bundleForClass: cls.cls];
 
-                    // (NB: this may be the host's bundle, not necessarily the component's)
-                    NSBundle* bundle = [NSBundle bundleForClass: cls.cls];
-
-                    AudioUnitCocoaViewInfo* info = static_cast <AudioUnitCocoaViewInfo*> (outData);
-                    info->mCocoaAUViewClass[0] = (CFStringRef) [juceStringToNS (class_getName (cls.cls)) retain];
-                    info->mCocoaAUViewBundleLocation = (CFURLRef) [[NSURL fileURLWithPath: [bundle bundlePath]] retain];
+                        AudioUnitCocoaViewInfo* info = static_cast <AudioUnitCocoaViewInfo*> (outData);
+                        info->mCocoaAUViewClass[0] = (CFStringRef) [juceStringToNS (class_getName (cls.cls)) retain];
+                        info->mCocoaAUViewBundleLocation = (CFURLRef) [[NSURL fileURLWithPath: [bundle bundlePath]] retain];
+                    }
 
                     return noErr;
                 }
@@ -1204,33 +1205,34 @@ public:
     ComponentResult CreateUI (Float32 /*inXOffset*/, Float32 /*inYOffset*/)
     {
         JUCE_AUTORELEASEPOOL
-
-        if (juceFilter == nullptr)
         {
-            void* pointers[2];
-            UInt32 propertySize = sizeof (pointers);
+            if (juceFilter == nullptr)
+            {
+                void* pointers[2];
+                UInt32 propertySize = sizeof (pointers);
 
-            AudioUnitGetProperty (GetEditAudioUnit(),
-                                  juceFilterObjectPropertyID,
-                                  kAudioUnitScope_Global,
-                                  0,
-                                  pointers,
-                                  &propertySize);
+                AudioUnitGetProperty (GetEditAudioUnit(),
+                                      juceFilterObjectPropertyID,
+                                      kAudioUnitScope_Global,
+                                      0,
+                                      pointers,
+                                      &propertySize);
 
-            juceFilter = (AudioProcessor*) pointers[0];
-        }
+                juceFilter = (AudioProcessor*) pointers[0];
+            }
 
-        if (juceFilter != nullptr)
-        {
-            deleteUI();
+            if (juceFilter != nullptr)
+            {
+                deleteUI();
 
-            AudioProcessorEditor* editorComp = juceFilter->createEditorIfNeeded();
-            editorComp->setOpaque (true);
-            windowComp = new ComponentInHIView (editorComp, mCarbonPane);
-        }
-        else
-        {
-            jassertfalse // can't get a pointer to our effect
+                AudioProcessorEditor* editorComp = juceFilter->createEditorIfNeeded();
+                editorComp->setOpaque (true);
+                windowComp = new ComponentInHIView (editorComp, mCarbonPane);
+            }
+            else
+            {
+                jassertfalse // can't get a pointer to our effect
+            }
         }
 
         return noErr;
@@ -1279,56 +1281,58 @@ private:
               recursive (false)
         {
             JUCE_AUTORELEASEPOOL
+            {
+                jassert (editor_ != nullptr);
+                addAndMakeVisible (&editor);
+                setOpaque (true);
+                setVisible (true);
+                setBroughtToFrontOnMouseClick (true);
 
-            jassert (editor_ != nullptr);
-            addAndMakeVisible (&editor);
-            setOpaque (true);
-            setVisible (true);
-            setBroughtToFrontOnMouseClick (true);
+                setSize (editor.getWidth(), editor.getHeight());
+                SizeControl (parentHIView, (SInt16) editor.getWidth(), (SInt16) editor.getHeight());
 
-            setSize (editor.getWidth(), editor.getHeight());
-            SizeControl (parentHIView, (SInt16) editor.getWidth(), (SInt16) editor.getHeight());
+                WindowRef windowRef = HIViewGetWindow (parentHIView);
+                hostWindow = [[NSWindow alloc] initWithWindowRef: windowRef];
 
-            WindowRef windowRef = HIViewGetWindow (parentHIView);
-            hostWindow = [[NSWindow alloc] initWithWindowRef: windowRef];
+                [hostWindow retain];
+                [hostWindow setCanHide: YES];
+                [hostWindow setReleasedWhenClosed: YES];
 
-            [hostWindow retain];
-            [hostWindow setCanHide: YES];
-            [hostWindow setReleasedWhenClosed: YES];
+                updateWindowPos();
 
-            updateWindowPos();
+               #if ! JucePlugin_EditorRequiresKeyboardFocus
+                addToDesktop (ComponentPeer::windowIsTemporary | ComponentPeer::windowIgnoresKeyPresses);
+                setWantsKeyboardFocus (false);
+               #else
+                addToDesktop (ComponentPeer::windowIsTemporary);
+                setWantsKeyboardFocus (true);
+               #endif
 
-           #if ! JucePlugin_EditorRequiresKeyboardFocus
-            addToDesktop (ComponentPeer::windowIsTemporary | ComponentPeer::windowIgnoresKeyPresses);
-            setWantsKeyboardFocus (false);
-           #else
-            addToDesktop (ComponentPeer::windowIsTemporary);
-            setWantsKeyboardFocus (true);
-           #endif
+                setVisible (true);
+                toFront (false);
 
-            setVisible (true);
-            toFront (false);
+                addSubWindow();
 
-            addSubWindow();
+                NSWindow* pluginWindow = [((NSView*) getWindowHandle()) window];
+                [pluginWindow setNextResponder: hostWindow];
 
-            NSWindow* pluginWindow = [((NSView*) getWindowHandle()) window];
-            [pluginWindow setNextResponder: hostWindow];
-
-            attachWindowHidingHooks (this, (WindowRef) windowRef, hostWindow);
+                attachWindowHidingHooks (this, (WindowRef) windowRef, hostWindow);
+            }
         }
 
         ~ComponentInHIView()
         {
             JUCE_AUTORELEASEPOOL
+            {
+                removeWindowHidingHooks (this);
 
-            removeWindowHidingHooks (this);
+                NSWindow* pluginWindow = [((NSView*) getWindowHandle()) window];
+                [hostWindow removeChildWindow: pluginWindow];
+                removeFromDesktop();
 
-            NSWindow* pluginWindow = [((NSView*) getWindowHandle()) window];
-            [hostWindow removeChildWindow: pluginWindow];
-            removeFromDesktop();
-
-            [hostWindow release];
-            hostWindow = nil;
+                [hostWindow release];
+                hostWindow = nil;
+            }
         }
 
         void updateWindowPos()
