@@ -147,6 +147,28 @@ namespace
     };
 
     struct __declspec (uuid ("BCDE0395-E52F-467C-8E3D-C4579291692E")) MMDeviceEnumerator;
+
+    struct __declspec (uuid ("5CDF2C82-841E-4546-9722-0CF74078229A")) IAudioEndpointVolume : public IUnknown
+    {
+        virtual HRESULT STDMETHODCALLTYPE RegisterControlChangeNotify (void*) = 0;
+        virtual HRESULT STDMETHODCALLTYPE UnregisterControlChangeNotify (void*) = 0;
+        virtual HRESULT STDMETHODCALLTYPE GetChannelCount (UINT*) = 0;
+        virtual HRESULT STDMETHODCALLTYPE SetMasterVolumeLevel (float, LPCGUID) = 0;
+        virtual HRESULT STDMETHODCALLTYPE SetMasterVolumeLevelScalar (float, LPCGUID) = 0;
+        virtual HRESULT STDMETHODCALLTYPE GetMasterVolumeLevel (float*) = 0;
+        virtual HRESULT STDMETHODCALLTYPE GetMasterVolumeLevelScalar (float*) = 0;
+        virtual HRESULT STDMETHODCALLTYPE SetChannelVolumeLevel (UINT, float, LPCGUID) = 0;
+        virtual HRESULT STDMETHODCALLTYPE SetChannelVolumeLevelScalar (UINT, float, LPCGUID) = 0;
+        virtual HRESULT STDMETHODCALLTYPE GetChannelVolumeLevel (UINT, float*) = 0;
+        virtual HRESULT STDMETHODCALLTYPE GetChannelVolumeLevelScalar (UINT, float*) = 0;
+        virtual HRESULT STDMETHODCALLTYPE SetMute (BOOL, LPCGUID) = 0;
+        virtual HRESULT STDMETHODCALLTYPE GetMute (BOOL*) = 0;
+        virtual HRESULT STDMETHODCALLTYPE GetVolumeStepInfo (UINT*, UINT*) = 0;
+        virtual HRESULT STDMETHODCALLTYPE VolumeStepUp (LPCGUID) = 0;
+        virtual HRESULT STDMETHODCALLTYPE VolumeStepDown (LPCGUID) = 0;
+        virtual HRESULT STDMETHODCALLTYPE QueryHardwareSupport (DWORD*) = 0;
+        virtual HRESULT STDMETHODCALLTYPE GetVolumeRange (float*, float*, float*) = 0;
+    };
 }
 
 String getDeviceID (IMMDevice* const device)
@@ -1294,6 +1316,54 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WASAPIAudioIODeviceType)
 };
 
+//==============================================================================
+struct MMDeviceMasterVolume
+{
+    MMDeviceMasterVolume()
+    {
+        ComSmartPtr<IMMDeviceEnumerator> enumerator;
+        if (check (enumerator.CoCreateInstance (__uuidof (MMDeviceEnumerator))))
+        {
+            ComSmartPtr<IMMDevice> device;
+            if (check (enumerator->GetDefaultAudioEndpoint (eRender, eConsole, device.resetAndGetPointerAddress())))
+                check (device->Activate (__uuidof (IAudioEndpointVolume), CLSCTX_INPROC_SERVER, nullptr,
+                                         (void**) endpointVolume.resetAndGetPointerAddress()));
+        }
+    }
+
+    float getGain() const
+    {
+        float vol = 0.0f;
+        if (endpointVolume != nullptr)
+            check (endpointVolume->GetMasterVolumeLevelScalar (&vol));
+
+        return vol;
+    }
+
+    bool setGain (float newGain) const
+    {
+        return endpointVolume != nullptr
+                && check (endpointVolume->SetMasterVolumeLevelScalar (jlimit (0.0f, 1.0f, newGain), nullptr));
+    }
+
+    bool isMuted() const
+    {
+        BOOL mute = 0;
+        return endpointVolume != nullptr
+                 && check (endpointVolume->GetMute (&mute)) && mute != 0;
+    }
+
+    bool setMuted (bool shouldMute) const
+    {
+        return endpointVolume != nullptr
+                && check (endpointVolume->SetMute (shouldMute, nullptr));
+    }
+
+    ComSmartPtr<IAudioEndpointVolume> endpointVolume;
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MMDeviceMasterVolume)
+};
+
 }
 
 //==============================================================================
@@ -1304,3 +1374,10 @@ AudioIODeviceType* AudioIODeviceType::createAudioIODeviceType_WASAPI()
 
     return nullptr;
 }
+
+//==============================================================================
+#define JUCE_SYSTEMAUDIOVOL_IMPLEMENTED 1
+float JUCE_CALLTYPE SystemAudioVolume::getGain()              { return WasapiClasses::MMDeviceMasterVolume().getGain(); }
+bool  JUCE_CALLTYPE SystemAudioVolume::setGain (float gain)   { return WasapiClasses::MMDeviceMasterVolume().setGain (gain); }
+bool  JUCE_CALLTYPE SystemAudioVolume::isMuted()              { return WasapiClasses::MMDeviceMasterVolume().isMuted(); }
+bool  JUCE_CALLTYPE SystemAudioVolume::setMuted (bool mute)   { return WasapiClasses::MMDeviceMasterVolume().setMuted (mute); }

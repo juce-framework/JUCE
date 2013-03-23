@@ -393,6 +393,7 @@
             </FileConfiguration>
           </File>
           <File RelativePath="..\..\..\..\modules\juce_audio_devices\audio_io\juce_AudioIODeviceType.h"/>
+          <File RelativePath="..\..\..\..\modules\juce_audio_devices\audio_io\juce_SystemAudioVolume.h"/>
         </Filter>
         <Filter Name="midi_io">
           <File RelativePath="..\..\..\..\modules\juce_audio_devices\midi_io\juce_MidiInput.h"/>
