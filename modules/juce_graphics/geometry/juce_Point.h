@@ -164,6 +164,9 @@ public:
         { return Point (transform.mat00 * x + transform.mat01 * y + transform.mat02,
                         transform.mat10 * x + transform.mat11 * y + transform.mat12); }
 
+    /** Returns the dot-product of two points (x1 * x2 + y1 * y2). */
+    FloatType getDotProduct (const Point& other) const noexcept   { return x * other.x + y * other.y; }
+
     /** Casts this point to a Point<int> object. */
     Point<int> toInt() const noexcept                             { return Point<int> (static_cast <int> (x), static_cast<int> (y)); }
 
