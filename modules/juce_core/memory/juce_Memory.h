@@ -84,7 +84,7 @@ inline Type* createCopyIfNotNull (const Type* pointer)     { return pointer != n
      Because this may use the @autoreleasepool syntax, you must follow the macro with
      a set of braces to mark the scope of the pool.
  */
-#if JUCE_COMPILER_SUPPORTS_ARC || DOXYGEN
+#if (JUCE_COMPILER_SUPPORTS_ARC && defined (__OBJC__)) || DOXYGEN
  #define JUCE_AUTORELEASEPOOL  @autoreleasepool
 #else
  #define JUCE_AUTORELEASEPOOL  const juce::ScopedAutoReleasePool JUCE_JOIN_MACRO (autoReleasePool_, __LINE__);
