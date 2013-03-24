@@ -172,12 +172,11 @@ void* attachComponentToWindowRef (Component* comp, void* windowRef)
 void detachComponentFromWindowRef (Component* comp, void* nsWindow);
 void detachComponentFromWindowRef (Component* comp, void* nsWindow)
 {
-   #if JUCE_64BIT
-    comp->removeFromDesktop();
-   #else
+    JUCE_AUTORELEASEPOOL
     {
-        JUCE_AUTORELEASEPOOL
-
+       #if JUCE_64BIT
+        comp->removeFromDesktop();
+       #else
         EventHandlerRef ref = (EventHandlerRef) (void*) (pointer_sized_int)
                                     comp->getProperties() ["boundsEventRef"].toString().getHexValue64();
         RemoveEventHandler (ref);
@@ -198,42 +197,43 @@ void detachComponentFromWindowRef (Component* comp, void* nsWindow)
         comp->removeFromDesktop();
 
         [hostWindow release];
-    }
 
-    // The event loop needs to be run between closing the window and deleting the plugin,
-    // presumably to let the cocoa objects get tidied up. Leaving out this line causes crashes
-    // in Live and Reaper when you delete the plugin with its window open.
-    // (Doing it this way rather than using a single longer timout means that we can guarantee
-    // how many messages will be dispatched, which seems to be vital in Reaper)
-    for (int i = 20; --i >= 0;)
-        MessageManager::getInstance()->runDispatchLoopUntil (1);
-   #endif
+        // The event loop needs to be run between closing the window and deleting the plugin,
+        // presumably to let the cocoa objects get tidied up. Leaving out this line causes crashes
+        // in Live and Reaper when you delete the plugin with its window open.
+        // (Doing it this way rather than using a single longer timout means that we can guarantee
+        // how many messages will be dispatched, which seems to be vital in Reaper)
+        for (int i = 20; --i >= 0;)
+            MessageManager::getInstance()->runDispatchLoopUntil (1);
+       #endif
+    }
 }
 
 void setNativeHostWindowSize (void* nsWindow, Component* component, int newWidth, int newHeight, const PluginHostType& host);
 void setNativeHostWindowSize (void* nsWindow, Component* component, int newWidth, int newHeight, const PluginHostType& host)
 {
     JUCE_AUTORELEASEPOOL
-
-   #if JUCE_64BIT
-    if (NSView* hostView = (NSView*) nsWindow)
     {
-        // xxx is this necessary, or do the hosts detect a change in the child view and do this automatically?
-        [hostView setFrameSize: NSMakeSize ([hostView frame].size.width + (newWidth - component->getWidth()),
-                                            [hostView frame].size.height + (newHeight - component->getHeight()))];
-    }
-   #else
+       #if JUCE_64BIT
+        if (NSView* hostView = (NSView*) nsWindow)
+        {
+            // xxx is this necessary, or do the hosts detect a change in the child view and do this automatically?
+            [hostView setFrameSize: NSMakeSize ([hostView frame].size.width + (newWidth - component->getWidth()),
+                                                [hostView frame].size.height + (newHeight - component->getHeight()))];
+        }
+       #else
 
-    if (HIViewRef dummyView = (HIViewRef) (void*) (pointer_sized_int)
-                                 component->getProperties() ["dummyViewRef"].toString().getHexValue64())
-    {
-        HIRect frameRect;
-        HIViewGetFrame (dummyView, &frameRect);
-        frameRect.size.width = newWidth;
-        frameRect.size.height = newHeight;
-        HIViewSetFrame (dummyView, &frameRect);
+        if (HIViewRef dummyView = (HIViewRef) (void*) (pointer_sized_int)
+                                     component->getProperties() ["dummyViewRef"].toString().getHexValue64())
+        {
+            HIRect frameRect;
+            HIViewGetFrame (dummyView, &frameRect);
+            frameRect.size.width = newWidth;
+            frameRect.size.height = newHeight;
+            HIViewSetFrame (dummyView, &frameRect);
+        }
+       #endif
     }
-   #endif
 }
 
 void checkWindowVisibility (void* nsWindow, Component* comp);
