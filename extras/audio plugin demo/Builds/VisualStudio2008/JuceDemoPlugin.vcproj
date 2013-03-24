@@ -393,6 +393,7 @@
             </FileConfiguration>
           </File>
           <File RelativePath="..\..\..\..\modules\juce_audio_devices\audio_io\juce_AudioIODeviceType.h"/>
+          <File RelativePath="..\..\..\..\modules\juce_audio_devices\audio_io\juce_SystemAudioVolume.h"/>
         </Filter>
         <Filter Name="midi_io">
           <File RelativePath="..\..\..\..\modules\juce_audio_devices\midi_io\juce_MidiInput.h"/>
@@ -963,7 +964,16 @@
         <Filter Name="format_types">
           <File RelativePath="..\..\..\..\modules\juce_audio_processors\format_types\juce_AudioUnitPluginFormat.h"/>
           <File RelativePath="..\..\..\..\modules\juce_audio_processors\format_types\juce_AudioUnitPluginFormat.mm"/>
-          <File RelativePath="..\..\..\..\modules\juce_audio_processors\format_types\juce_DirectXPluginFormat.h"/>
+          <File RelativePath="..\..\..\..\modules\juce_audio_processors\format_types\juce_LADSPAPluginFormat.cpp">
+            <FileConfiguration Name="Debug|Win32"
+                               ExcludedFromBuild="true">
+              <Tool Name="VCCLCompilerTool"/>
+            </FileConfiguration>
+            <FileConfiguration Name="Release|Win32"
+                               ExcludedFromBuild="true">
+              <Tool Name="VCCLCompilerTool"/>
+            </FileConfiguration>
+          </File>
           <File RelativePath="..\..\..\..\modules\juce_audio_processors\format_types\juce_LADSPAPluginFormat.h"/>
           <File RelativePath="..\..\..\..\modules\juce_audio_processors\format_types\juce_VSTMidiEventList.h"/>
           <File RelativePath="..\..\..\..\modules\juce_audio_processors\format_types\juce_VSTPluginFormat.cpp">

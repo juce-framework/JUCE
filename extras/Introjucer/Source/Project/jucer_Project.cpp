@@ -217,6 +217,17 @@ bool Project::isAudioPluginModuleMissing() const
             && ! isModuleEnabled ("juce_audio_plugin_client");
 }
 
+File Project::getBinaryDataCppFile (int index) const
+{
+    const File cpp (getGeneratedCodeFolder().getChildFile ("BinaryData.cpp"));
+
+    if (index > 0)
+        return cpp.getSiblingFile (cpp.getFileNameWithoutExtension() + String (index + 1))
+                    .withFileExtension (cpp.getFileExtension());
+
+    return cpp;
+}
+
 //==============================================================================
 static void registerRecentFile (const File& file)
 {

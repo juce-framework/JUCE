@@ -824,18 +824,20 @@ extern "C" void* threadEntryProc (void*);
 extern "C" void* threadEntryProc (void* userData)
 {
     JUCE_AUTORELEASEPOOL
-
-   #if JUCE_ANDROID
-    struct AndroidThreadScope
     {
-        AndroidThreadScope()   { threadLocalJNIEnvHolder.attach(); }
-        ~AndroidThreadScope()  { threadLocalJNIEnvHolder.detach(); }
-    };
+       #if JUCE_ANDROID
+        struct AndroidThreadScope
+        {
+            AndroidThreadScope()   { threadLocalJNIEnvHolder.attach(); }
+            ~AndroidThreadScope()  { threadLocalJNIEnvHolder.detach(); }
+        };
 
-    const AndroidThreadScope androidEnv;
-   #endif
+        const AndroidThreadScope androidEnv;
+       #endif
 
-    juce_threadEntryPoint (userData);
+        juce_threadEntryPoint (userData);
+    }
+
     return nullptr;
 }
 
@@ -874,7 +876,9 @@ void Thread::setCurrentThreadName (const String& name)
 {
    #if JUCE_IOS || (JUCE_MAC && defined (MAC_OS_X_VERSION_10_5) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_5)
     JUCE_AUTORELEASEPOOL
-    [[NSThread currentThread] setName: juceStringToNS (name)];
+    {
+        [[NSThread currentThread] setName: juceStringToNS (name)];
+    }
    #elif JUCE_LINUX
     prctl (PR_SET_NAME, name.toUTF8().getAddress(), 0, 0, 0);
    #endif

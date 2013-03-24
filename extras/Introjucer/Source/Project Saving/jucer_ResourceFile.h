@@ -52,7 +52,7 @@ public:
     int getNumFiles() const                 { return files.size(); }
     int64 getTotalDataSize() const;
 
-    bool write (const File& cppFile, Array<File>& filesCreated);
+    bool write (Array<File>& filesCreated);
 
     //==============================================================================
 private:

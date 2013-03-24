@@ -89,8 +89,17 @@ protected:
             setValueIfVoid (getLibrarySearchPathValue(), "/usr/X11R6/lib/");
         }
 
-        void createConfigProperties (PropertyListBuilder&)
+        Value getArchitectureType()                 { return getValue (Ids::linuxArchitecture); }
+        String getArchitectureTypeString() const    { return config [Ids::linuxArchitecture]; }
+
+        void createConfigProperties (PropertyListBuilder& props)
         {
+            const char* const archNames[] = { "(Default)", "32-bit (-m32)", "64-bit (-m64)" };
+            const var archFlags[] = { var(), "-m32", "-m64" };
+
+            props.add (new ChoicePropertyComponent (getArchitectureType(), "Architecture",
+                                                    StringArray (archNames, numElementsInArray (archNames)),
+                                                    Array<var> (archFlags, numElementsInArray (archFlags))));
         }
     };
 
@@ -157,7 +166,7 @@ private:
 
     void writeLinkerFlags (OutputStream& out, const BuildConfiguration& config) const
     {
-        out << "  LDFLAGS += -L$(BINDIR) -L$(LIBDIR)";
+        out << "  LDFLAGS += " << getArchFlags (config) << "-L$(BINDIR) -L$(LIBDIR)";
 
         if (makefileIsDLL)
             out << " -shared";
@@ -208,7 +217,8 @@ private:
 
         out << " -O" << config.getGCCOptimisationFlag() << newLine;
 
-        out << "  CXXFLAGS += $(CFLAGS) " << replacePreprocessorTokens (config, getExtraCompilerFlagsString()).trim() << newLine;
+        out << "  CXXFLAGS += $(CFLAGS) " << getArchFlags (config)
+            << replacePreprocessorTokens (config, getExtraCompilerFlagsString()).trim() << newLine;
 
         writeLinkerFlags (out, config);
 
@@ -311,6 +321,15 @@ private:
         }
 
         out << "-include $(OBJECTS:%.o=%.d)" << newLine;
+    }
+
+    String getArchFlags (const BuildConfiguration& config) const
+    {
+        if (const MakeBuildConfiguration* makeConfig = dynamic_cast<const MakeBuildConfiguration*> (&config))
+            if (makeConfig->getArchitectureTypeString().isNotEmpty())
+                return makeConfig->getArchitectureTypeString() + " ";
+
+        return String::empty;
     }
 
     String getObjectFileFor (const RelativePath& file) const

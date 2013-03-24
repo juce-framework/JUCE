@@ -47,7 +47,7 @@ FilenameComponent::FilenameComponent (const String& name,
 
     setBrowseButtonText ("...");
 
-    setCurrentFile (currentFile, true);
+    setCurrentFile (currentFile, true, dontSendNotification);
 }
 
 FilenameComponent::~FilenameComponent()
@@ -163,7 +163,7 @@ File FilenameComponent::getCurrentFile() const
 
 void FilenameComponent::setCurrentFile (File newFile,
                                         const bool addToRecentlyUsedList,
-                                        const bool sendChangeNotification)
+                                        NotificationType notification)
 {
     if (enforcedSuffix.isNotEmpty())
         newFile = newFile.withFileExtension (enforcedSuffix);
@@ -177,8 +177,13 @@ void FilenameComponent::setCurrentFile (File newFile,
 
         filenameBox.setText (lastFilename, true);
 
-        if (sendChangeNotification)
+        if (notification != dontSendNotification)
+        {
             triggerAsyncUpdate();
+
+            if (notification == sendNotificationSync)
+                handleUpdateNowIfNeeded();
+        }
     }
 }
 

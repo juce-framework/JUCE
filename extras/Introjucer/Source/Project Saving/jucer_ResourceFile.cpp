@@ -251,9 +251,9 @@ bool ResourceFile::writeCpp (MemoryOutputStream& cpp, const File& headerFile, in
     return true;
 }
 
-bool ResourceFile::write (const File& cppFile, Array<File>& filesCreated)
+bool ResourceFile::write (Array<File>& filesCreated)
 {
-    const File headerFile (cppFile.withFileExtension (".h"));
+    const File headerFile (project.getBinaryDataHeaderFile());
 
     {
         MemoryOutputStream mo;
@@ -268,11 +268,7 @@ bool ResourceFile::write (const File& cppFile, Array<File>& filesCreated)
 
     for (;;)
     {
-        File cpp (cppFile);
-
-        if (fileIndex > 0)
-            cpp = cpp.getSiblingFile (cppFile.getFileNameWithoutExtension() + String (fileIndex + 1))
-                     .withFileExtension (cppFile.getFileExtension());
+        File cpp (project.getBinaryDataCppFile (fileIndex));
 
         MemoryOutputStream mo;
         if (! (writeCpp (mo, headerFile, i) && FileHelpers::overwriteFileWithNewDataIfDifferent (cpp, mo)))

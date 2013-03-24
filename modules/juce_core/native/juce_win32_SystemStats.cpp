@@ -85,7 +85,6 @@ static void juce_getCpuVendor (char* const v)
    #if ! JUCE_MINGW
     __except (EXCEPTION_EXECUTE_HANDLER)
     {
-        *v = 0;
     }
    #endif
 

@@ -128,8 +128,10 @@ void AudioThumbnailCache::storeThumb (const AudioThumbnailBase& thumb,
             thumbs.set (findOldestThumb(), te);
     }
 
-    MemoryOutputStream out (te->data, false);
-    thumb.saveTo (out);
+    {
+        MemoryOutputStream out (te->data, false);
+        thumb.saveTo (out);
+    }
 
     saveNewlyFinishedThumbnail (thumb, hashCode);
 }

@@ -61,7 +61,7 @@ public:
         given new value, and will then reset it to its original value when this object is deleted.
     */
     ScopedValueSetter (ValueType& valueToSet,
-                       const ValueType& newValue)
+                       ValueType newValue)
         : value (valueToSet),
           originalValue (valueToSet)
     {
@@ -72,8 +72,8 @@ public:
         given new value, and will then reset it to be valueWhenDeleted when this object is deleted.
     */
     ScopedValueSetter (ValueType& valueToSet,
-                       const ValueType& newValue,
-                       const ValueType& valueWhenDeleted)
+                       ValueType newValue,
+                       ValueType valueWhenDeleted)
         : value (valueToSet),
           originalValue (valueWhenDeleted)
     {

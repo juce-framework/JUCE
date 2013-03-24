@@ -806,7 +806,7 @@ public:
         jassert (MessageManager::getInstance()->currentThreadHasLockedMessageManager());
 
         dispatchWindowMessage = windowMessageReceive;
-        repainter = new LinuxRepaintManager (this);
+        repainter = new LinuxRepaintManager (*this);
 
         createWindow (parentToAddTo);
 
@@ -1514,6 +1514,9 @@ public:
         handleMouseEvent (0, getMousePos (buttonRelEvent), currentModifiers, getEventTime (buttonRelEvent));
 
         clearLastMousePos();
+
+        if (parentWindow != 0)
+            updateBounds();
     }
 
     void handleMotionNotifyEvent (const XPointerMovedEvent& movedEvent)
@@ -1530,6 +1533,9 @@ public:
 
     void handleEnterNotifyEvent (const XEnterWindowEvent& enterEvent)
     {
+        if (parentWindow != 0)
+            updateBounds();
+
         clearLastMousePos();
 
         if (! currentModifiers.isAnyMouseButtonDown())
@@ -1606,9 +1612,7 @@ public:
         if ((styleFlags & windowHasTitleBar) != 0
               && component.isCurrentlyBlockedByAnotherModalComponent())
         {
-            Component* const currentModalComp = Component::getCurrentlyModalComponent();
-
-            if (currentModalComp != 0)
+            if (Component* const currentModalComp = Component::getCurrentlyModalComponent())
                 currentModalComp->inputAttemptWhenModal();
         }
 
@@ -1763,12 +1767,11 @@ public:
 
 private:
     //==============================================================================
-    class LinuxRepaintManager : public Timer
+    class LinuxRepaintManager   : public Timer
     {
     public:
-        LinuxRepaintManager (LinuxComponentPeer* const peer_)
-            : peer (peer_),
-              lastTimeImageUsed (0)
+        LinuxRepaintManager (LinuxComponentPeer& p)
+            : peer (p), lastTimeImageUsed (0)
         {
            #if JUCE_USE_XSHM
             shmCompletedDrawing = true;
@@ -1796,6 +1799,7 @@ private:
             if (! shmCompletedDrawing)
                 return;
            #endif
+
             if (! regionsNeedingRepaint.isEmpty())
             {
                 stopTimer();
@@ -1826,7 +1830,7 @@ private:
             }
            #endif
 
-            peer->clearMaskedRegion();
+            peer.clearMaskedRegion();
 
             RectangleList originalRepaintRegion (regionsNeedingRepaint);
             regionsNeedingRepaint.clear();
@@ -1843,9 +1847,9 @@ private:
                    #else
                     image = Image (new XBitmapImage (Image::RGB,
                    #endif
-                                                     (totalArea.getWidth() + 31) & ~31,
+                                                     (totalArea.getWidth()  + 31) & ~31,
                                                      (totalArea.getHeight() + 31) & ~31,
-                                                     false, peer->depth, peer->visual));
+                                                     false, peer.depth, peer.visual));
                 }
 
                 startTimer (repaintTimerPeriod);
@@ -1853,20 +1857,18 @@ private:
                 RectangleList adjustedList (originalRepaintRegion);
                 adjustedList.offsetAll (-totalArea.getX(), -totalArea.getY());
 
-                if (peer->depth == 32)
-                {
+                if (peer.depth == 32)
                     for (const Rectangle<int>* i = originalRepaintRegion.begin(), * const e = originalRepaintRegion.end(); i != e; ++i)
                         image.clear (*i - totalArea.getPosition());
-                }
 
                 {
-                    ScopedPointer<LowLevelGraphicsContext> context (peer->getComponent().getLookAndFeel()
+                    ScopedPointer<LowLevelGraphicsContext> context (peer.getComponent().getLookAndFeel()
                                                                       .createGraphicsContext (image, -totalArea.getPosition(), adjustedList));
-                    peer->handlePaint (*context);
+                    peer.handlePaint (*context);
                 }
 
-                if (! peer->maskedRegion.isEmpty())
-                    originalRepaintRegion.subtract (peer->maskedRegion);
+                if (! peer.maskedRegion.isEmpty())
+                    originalRepaintRegion.subtract (peer.maskedRegion);
 
                 for (const Rectangle<int>* i = originalRepaintRegion.begin(), * const e = originalRepaintRegion.end(); i != e; ++i)
                 {
@@ -1875,7 +1877,7 @@ private:
                    #endif
 
                     static_cast<XBitmapImage*> (image.getPixelData())
-                        ->blitToWindow (peer->windowH,
+                        ->blitToWindow (peer.windowH,
                                         i->getX(), i->getY(), i->getWidth(), i->getHeight(),
                                         i->getX() - totalArea.getX(), i->getY() - totalArea.getY());
                 }
@@ -1892,7 +1894,7 @@ private:
     private:
         enum { repaintTimerPeriod = 1000 / 100 };
 
-        LinuxComponentPeer* const peer;
+        LinuxComponentPeer& peer;
         Image image;
         uint32 lastTimeImageUsed;
         RectangleList regionsNeedingRepaint;

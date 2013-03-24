@@ -111,6 +111,9 @@ namespace juce
 #ifndef __JUCE_AUDIOIODEVICETYPE_JUCEHEADER__
  #include "audio_io/juce_AudioIODeviceType.h"
 #endif
+#ifndef __JUCE_SYSTEMAUDIOVOLUME_JUCEHEADER__
+ #include "audio_io/juce_SystemAudioVolume.h"
+#endif
 #ifndef __JUCE_MIDIINPUT_JUCEHEADER__
  #include "midi_io/juce_MidiInput.h"
 #endif

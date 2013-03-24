@@ -273,8 +273,10 @@ struct AAXClasses
             if (component != nullptr)
             {
                 JUCE_AUTORELEASEPOOL
-                component->removeFromDesktop();
-                component = nullptr;
+                {
+                    component->removeFromDesktop();
+                    component = nullptr;
+                }
             }
         }
 

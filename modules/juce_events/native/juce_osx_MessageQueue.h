@@ -75,12 +75,13 @@ private:
             return false;
 
         JUCE_AUTORELEASEPOOL
-
-        JUCE_TRY
         {
-            nextMessage->messageCallback();
+            JUCE_TRY
+            {
+                nextMessage->messageCallback();
+            }
+            JUCE_CATCH_EXCEPTION
         }
-        JUCE_CATCH_EXCEPTION
 
         return true;
     }

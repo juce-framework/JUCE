@@ -208,31 +208,32 @@ void MessageManager::runDispatchLoop()
     if (! quitMessagePosted) // check that the quit message wasn't already posted..
     {
         JUCE_AUTORELEASEPOOL
-
-        // must only be called by the message thread!
-        jassert (isThisTheMessageThread());
-
-      #if JUCE_PROJUCER_LIVE_BUILD
-        runDispatchLoopUntil (std::numeric_limits<int>::max());
-      #else
-       #if JUCE_CATCH_UNHANDLED_EXCEPTIONS
-        @try
         {
+            // must only be called by the message thread!
+            jassert (isThisTheMessageThread());
+
+          #if JUCE_PROJUCER_LIVE_BUILD
+            runDispatchLoopUntil (std::numeric_limits<int>::max());
+          #else
+           #if JUCE_CATCH_UNHANDLED_EXCEPTIONS
+            @try
+            {
+                [NSApp run];
+            }
+            @catch (NSException* e)
+            {
+                // An AppKit exception will kill the app, but at least this provides a chance to log it.,
+                std::runtime_error ex (std::string ("NSException: ") + [[e name] UTF8String] + ", Reason:" + [[e reason] UTF8String]);
+                JUCEApplication::sendUnhandledException (&ex, __FILE__, __LINE__);
+            }
+            @finally
+            {
+            }
+           #else
             [NSApp run];
+           #endif
+          #endif
         }
-        @catch (NSException* e)
-        {
-            // An AppKit exception will kill the app, but at least this provides a chance to log it.,
-            std::runtime_error ex (std::string ("NSException: ") + [[e name] UTF8String] + ", Reason:" + [[e reason] UTF8String]);
-            JUCEApplication::sendUnhandledException (&ex, __FILE__, __LINE__);
-        }
-        @finally
-        {
-        }
-       #else
-        [NSApp run];
-       #endif
-      #endif
     }
 }
 
@@ -257,19 +258,20 @@ bool MessageManager::runDispatchLoopUntil (int millisecondsToRunFor)
     while (! quitMessagePosted)
     {
         JUCE_AUTORELEASEPOOL
+        {
+            CFRunLoopRunInMode (kCFRunLoopDefaultMode, 0.001, true);
 
-        CFRunLoopRunInMode (kCFRunLoopDefaultMode, 0.001, true);
+            NSEvent* e = [NSApp nextEventMatchingMask: NSAnyEventMask
+                                            untilDate: [NSDate dateWithTimeIntervalSinceNow: 0.001]
+                                               inMode: NSDefaultRunLoopMode
+                                              dequeue: YES];
 
-        NSEvent* e = [NSApp nextEventMatchingMask: NSAnyEventMask
-                                        untilDate: [NSDate dateWithTimeIntervalSinceNow: 0.001]
-                                           inMode: NSDefaultRunLoopMode
-                                          dequeue: YES];
+            if (e != nil && (isEventBlockedByModalComps == nullptr || ! (*isEventBlockedByModalComps) (e)))
+                [NSApp sendEvent: e];
 
-        if (e != nil && (isEventBlockedByModalComps == nullptr || ! (*isEventBlockedByModalComps) (e)))
-            [NSApp sendEvent: e];
-
-        if (Time::getMillisecondCounter() >= endTime)
-            break;
+            if (Time::getMillisecondCounter() >= endTime)
+                break;
+        }
     }
 
     return ! quitMessagePosted;
@@ -281,7 +283,9 @@ void initialiseNSApplication();
 void initialiseNSApplication()
 {
     JUCE_AUTORELEASEPOOL
-    [NSApplication sharedApplication];
+    {
+        [NSApplication sharedApplication];
+    }
 }
 
 static AppDelegate* appDelegate = nullptr;

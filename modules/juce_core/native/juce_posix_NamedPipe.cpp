@@ -141,13 +141,13 @@ private:
         return timeoutEnd != 0 && Time::getMillisecondCounter() >= timeoutEnd;
     }
 
-    static int openPipe (const String& name, int flags, const uint32 timeoutEnd)
+    int openPipe (const String& name, int flags, const uint32 timeoutEnd)
     {
         for (;;)
         {
             const int p = ::open (name.toUTF8(), flags);
 
-            if (p != -1 || hasExpired (timeoutEnd))
+            if (p != -1 || hasExpired (timeoutEnd) || stopReadOperation)
                 return p;
 
             Thread::sleep (2);

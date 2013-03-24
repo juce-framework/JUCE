@@ -422,7 +422,13 @@ void ProjectContentComponent::closeDocument()
 void ProjectContentComponent::saveDocument()
 {
     if (currentDocument != nullptr)
-        currentDocument->save();
+    {
+        if (! currentDocument->save())
+            AlertWindow::showMessageBox (AlertWindow::WarningIcon,
+                                         TRANS("Save failed!"),
+                                         TRANS("Couldn't save the file:")
+                                           + "\n" + currentDocument->getFile().getFullPathName());
+    }
     else
         saveProject();
 
@@ -617,7 +623,7 @@ void ProjectContentComponent::getCommandInfo (const CommandID commandID, Applica
 
     case CommandIDs::openInIDE:
        #if JUCE_MAC
-        result.setInfo ("Open in XCode...",
+        result.setInfo ("Open in Xcode...",
        #elif JUCE_WINDOWS
         result.setInfo ("Open in Visual Studio...",
        #else
@@ -630,7 +636,7 @@ void ProjectContentComponent::getCommandInfo (const CommandID commandID, Applica
 
     case CommandIDs::saveAndOpenInIDE:
        #if JUCE_MAC
-        result.setInfo ("Save Project and Open in XCode...",
+        result.setInfo ("Save Project and Open in Xcode...",
        #elif JUCE_WINDOWS
         result.setInfo ("Save Project and Open in Visual Studio...",
        #else

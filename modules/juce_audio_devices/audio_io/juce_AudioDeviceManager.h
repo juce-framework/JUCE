@@ -460,7 +460,7 @@ private:
     ScopedPointer <XmlElement> lastExplicitSettings;
     mutable bool listNeedsScanning;
     bool useInputNames;
-    int inputLevelMeasurementEnabledCount;
+    Atomic<int> inputLevelMeasurementEnabledCount;
     double inputLevel;
     ScopedPointer <AudioSampleBuffer> testSound;
     int testSoundPosition;

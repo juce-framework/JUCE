@@ -39,7 +39,8 @@ public:
         : project (p),
           projectFile (file),
           generatedCodeFolder (project.getGeneratedCodeFolder()),
-          generatedFilesGroup (Project::Item::createGroup (project, getJuceCodeGroupName(), "__generatedcode__"))
+          generatedFilesGroup (Project::Item::createGroup (project, getJuceCodeGroupName(), "__generatedcode__")),
+          hasBinaryData (false)
     {
         generatedFilesGroup.setID (getGeneratedGroupID());
     }
@@ -222,8 +223,9 @@ private:
     StringArray errors;
     CriticalSection errorLock;
 
-    File appConfigFile, binaryDataCpp;
+    File appConfigFile;
     SortedSet<File> filesCreated;
+    bool hasBinaryData;
 
     // Recursively clears out any files in a folder that we didn't create, but avoids
     // any folders containing hidden files that might be used by version-control systems.
@@ -431,8 +433,8 @@ private:
         for (int i = 0; i < modules.size(); ++i)
             modules.getUnchecked(i)->writeIncludes (*this, out);
 
-        if (binaryDataCpp.exists())
-            out << CodeHelpers::createIncludeStatement (binaryDataCpp.withFileExtension (".h"), appConfigFile) << newLine;
+        if (hasBinaryData)
+            out << CodeHelpers::createIncludeStatement (project.getBinaryDataHeaderFile(), appConfigFile) << newLine;
 
         out << newLine
             << "#if ! DONT_SET_USING_JUCE_NAMESPACE" << newLine
@@ -460,8 +462,7 @@ private:
 
     void writeBinaryDataFiles()
     {
-        binaryDataCpp = project.getBinaryDataCppFile();
-        const File binaryDataH (binaryDataCpp.withFileExtension (".h"));
+        const File binaryDataH (project.getBinaryDataHeaderFile());
 
         ResourceFile resourceFile (project);
 
@@ -471,8 +472,10 @@ private:
 
             Array<File> binaryDataFiles;
 
-            if (resourceFile.write (binaryDataCpp, binaryDataFiles))
+            if (resourceFile.write (binaryDataFiles))
             {
+                hasBinaryData = true;
+
                 for (int i = 0; i < binaryDataFiles.size(); ++i)
                 {
                     const File& f = binaryDataFiles.getReference(i);
@@ -483,12 +486,15 @@ private:
             }
             else
             {
-                addError ("Can't create binary resources file: " + binaryDataCpp.getFullPathName());
+                addError ("Can't create binary resources file: "
+                            + project.getBinaryDataCppFile(0).getFullPathName());
             }
         }
         else
         {
-            binaryDataCpp.deleteFile();
+            for (int i = 20; --i >= 0;)
+                project.getBinaryDataCppFile (i).deleteFile();
+
             binaryDataH.deleteFile();
         }
     }

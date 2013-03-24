@@ -105,6 +105,12 @@ AffineTransform AffineTransform::translation (const float dx, const float dy) no
                             0, 1.0f, dy);
 }
 
+AffineTransform AffineTransform::withAbsoluteTranslation (const float tx, const float ty) const noexcept
+{
+    return AffineTransform (mat00, mat01, tx,
+                            mat10, mat11, ty);
+}
+
 AffineTransform AffineTransform::rotated (const float rad) const noexcept
 {
     const float cosRad = std::cos (rad);

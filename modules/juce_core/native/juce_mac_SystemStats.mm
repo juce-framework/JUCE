@@ -36,7 +36,11 @@ ScopedAutoReleasePool::~ScopedAutoReleasePool()
 //==============================================================================
 void Logger::outputDebugString (const String& text)
 {
-    std::cerr << text << std::endl;
+    // Would prefer to use std::cerr here, but avoiding it for
+    // the moment, due to clang JIT linkage problems.
+    fputs (text.toUTF8().getAddress(), stderr);
+    fputs ("\n", stderr);
+    fflush (stderr);
 }
 
 //==============================================================================
@@ -106,10 +110,12 @@ static RLimitInitialiser rLimitInitialiser;
 static String getOSXVersion()
 {
     JUCE_AUTORELEASEPOOL
-    NSDictionary* dict = [NSDictionary dictionaryWithContentsOfFile:
-                                nsStringLiteral ("/System/Library/CoreServices/SystemVersion.plist")];
+    {
+        NSDictionary* dict = [NSDictionary dictionaryWithContentsOfFile:
+                                    nsStringLiteral ("/System/Library/CoreServices/SystemVersion.plist")];
 
-    return nsStringToJuce ([dict objectForKey: nsStringLiteral ("ProductVersion")]);
+        return nsStringToJuce ([dict objectForKey: nsStringLiteral ("ProductVersion")]);
+    }
 }
 #endif
 

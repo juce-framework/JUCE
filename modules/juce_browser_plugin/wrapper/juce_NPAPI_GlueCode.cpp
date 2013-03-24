@@ -463,124 +463,121 @@ public:
 
     void setWindow (NPWindow* window)
     {
-        JUCE_AUTORELEASEPOOL;
-
-        log ("setWindow");
-
-        NSView* parentView = nil;
-        NP_CGContext* const cgContext = (window != nullptr) ? (NP_CGContext*) window->window : nullptr;
-        log ("NP_CGContext: " + String::toHexString ((pointer_sized_int) cgContext));
-
-       #if JUCE_USE_NPAPI_CARBON_UI
-        WindowRef windowRef = cgContext != nullptr ? (WindowRef) cgContext->window : 0;
-
-        if (windowRef != 0)
+        JUCE_AUTORELEASEPOOL
         {
-            NSWindow* win = [[[NSWindow alloc] initWithWindowRef: windowRef] autorelease];
-       #else
-        NSWindow* win = cgContext != nullptr ? (NSWindow*) cgContext->window : nil;
+            log ("setWindow");
 
-        if (win != nil)
-        {
-       #endif
-            log ("window: " + nsStringToJuce ([win description]));
+            NSView* parentView = nil;
+            NP_CGContext* const cgContext = (window != nullptr) ? (NP_CGContext*) window->window : nullptr;
+            log ("NP_CGContext: " + String::toHexString ((pointer_sized_int) cgContext));
 
-            const Rectangle<int> clip (window->clipRect.left, window->clipRect.top,
-                                       window->clipRect.right - window->clipRect.left,
-                                       window->clipRect.bottom - window->clipRect.top);
-            const Rectangle<int> target ((int) window->x, (int) window->y, (int) window->width, (int) window->height);
-            const Rectangle<int> intersection (clip.getIntersection (target));
-
-            // in firefox the clip rect is usually out of step with the target rect, but in safari it matches
-            log ("plugin window clip: " + clip.toString());
-            log ("plugin window target: " + target.toString());
-            log ("plugin window intersection: " + intersection.toString());
-
-            NSView* content = [win contentView];
-
-            if (! intersection.isEmpty())
+           #if JUCE_USE_NPAPI_CARBON_UI
+            if (WindowRef windowRef = cgContext != nullptr ? (WindowRef) cgContext->window : 0)
             {
-                log ("content: " + nsStringToJuce ([content description]));
-
-                float wx = (float) intersection.getCentreX();
-                float wy = (float) intersection.getCentreY();
-
-                NSRect v = [content convertRect: [content frame] toView: nil];
-                NSRect w = [win frame];
-
-                log ("content: " + Rectangle<int> (v.origin.x, v.origin.y, v.size.width, v.size.height).toString()
-                     + "   frame: " + Rectangle<int> (w.origin.x, w.origin.y, w.size.width, w.size.height).toString());
-
-                // adjust the requested window pos to deal with the content view's origin within the window
-                wy -= w.size.height - (v.origin.y + v.size.height);
-
-                parentView = findViewAt (content, wx, wy);
-
-                if (! isBrowserContentView (parentView))
-                    parentView = currentParentView;
-            }
-            else if (currentParentView != nil && ! target.isEmpty())
+                NSWindow* win = [[[NSWindow alloc] initWithWindowRef: windowRef] autorelease];
+           #else
+            if (NSWindow* win = cgContext != nullptr ? (NSWindow*) cgContext->window : nil)
             {
-                // Firefox can send lots of spurious resize messages when updating its pages, so this is a
-                // bodge to avoid flickering caused by repeatedly removing and re-adding the view..
+           #endif
+                log ("window: " + nsStringToJuce ([win description]));
 
-                if (content != nil && contains (content, currentParentView))
-                    parentView = currentParentView;
-            }
-            log ("parent: " + nsStringToJuce ([parentView description]));
-        }
-
-        if (parentView != currentParentView)
-        {
-            log ("new view: " + nsStringToJuce ([parentView description]));
-
-            removeFromDesktop();
-            setVisible (false);
-
-            currentParentView = parentView;
-
-            if (parentView != nil)
-            {
-                setSize (window->width, window->height);
-                addToDesktop (0, parentView);
-                setVisible (true);
-            }
-        }
-
-        if (window != nullptr)
-        {
-            if (isFirefox4)
-            {
-                // This voodoo is required to keep the plugin clipped to the correct region and
-                // to stop it overwriting the toolbars in FF4.
                 const Rectangle<int> clip (window->clipRect.left, window->clipRect.top,
                                            window->clipRect.right - window->clipRect.left,
                                            window->clipRect.bottom - window->clipRect.top);
                 const Rectangle<int> target ((int) window->x, (int) window->y, (int) window->width, (int) window->height);
+                const Rectangle<int> intersection (clip.getIntersection (target));
 
-                Point<int> clipToTargetOffset;
+                // in firefox the clip rect is usually out of step with the target rect, but in safari it matches
+                log ("plugin window clip: " + clip.toString());
+                log ("plugin window target: " + target.toString());
+                log ("plugin window intersection: " + intersection.toString());
 
+                NSView* content = [win contentView];
+
+                if (! intersection.isEmpty())
                 {
-                    NSView* contentView = [[parentView window] contentView];
-                    NSRect v = [contentView convertRect: [contentView frame] toView: nil];
-                    NSRect w = [[parentView window] frame];
+                    log ("content: " + nsStringToJuce ([content description]));
 
-                    clipToTargetOffset.setX ((int) v.origin.x);
-                    clipToTargetOffset.setY ((int) (w.size.height - (v.origin.y + v.size.height)));
+                    float wx = (float) intersection.getCentreX();
+                    float wy = (float) intersection.getCentreY();
+
+                    NSRect v = [content convertRect: [content frame] toView: nil];
+                    NSRect w = [win frame];
+
+                    log ("content: " + Rectangle<int> (v.origin.x, v.origin.y, v.size.width, v.size.height).toString()
+                         + "   frame: " + Rectangle<int> (w.origin.x, w.origin.y, w.size.width, w.size.height).toString());
+
+                    // adjust the requested window pos to deal with the content view's origin within the window
+                    wy -= w.size.height - (v.origin.y + v.size.height);
+
+                    parentView = findViewAt (content, wx, wy);
+
+                    if (! isBrowserContentView (parentView))
+                        parentView = currentParentView;
                 }
+                else if (currentParentView != nil && ! target.isEmpty())
+                {
+                    // Firefox can send lots of spurious resize messages when updating its pages, so this is a
+                    // bodge to avoid flickering caused by repeatedly removing and re-adding the view..
 
-                if (child != nullptr)
-                    child->setBounds (target - clip.getPosition() - clipToTargetOffset);
-
-                NSRect parentFrame = [parentView frame];
-
-                [(NSView*) getWindowHandle() setFrame: NSMakeRect (clip.getX() - parentFrame.origin.x,
-                                                                   clip.getY() - parentFrame.origin.y,
-                                                                   clip.getWidth(), clip.getHeight())];
+                    if (content != nil && contains (content, currentParentView))
+                        parentView = currentParentView;
+                }
+                log ("parent: " + nsStringToJuce ([parentView description]));
             }
-            else
+
+            if (parentView != currentParentView)
             {
-                setSize (window->width, window->height);
+                log ("new view: " + nsStringToJuce ([parentView description]));
+
+                removeFromDesktop();
+                setVisible (false);
+
+                currentParentView = parentView;
+
+                if (parentView != nil)
+                {
+                    setSize (window->width, window->height);
+                    addToDesktop (0, parentView);
+                    setVisible (true);
+                }
+            }
+
+            if (window != nullptr)
+            {
+                if (isFirefox4)
+                {
+                    // This voodoo is required to keep the plugin clipped to the correct region and
+                    // to stop it overwriting the toolbars in FF4.
+                    const Rectangle<int> clip (window->clipRect.left, window->clipRect.top,
+                                               window->clipRect.right - window->clipRect.left,
+                                               window->clipRect.bottom - window->clipRect.top);
+                    const Rectangle<int> target ((int) window->x, (int) window->y, (int) window->width, (int) window->height);
+
+                    Point<int> clipToTargetOffset;
+
+                    {
+                        NSView* contentView = [[parentView window] contentView];
+                        NSRect v = [contentView convertRect: [contentView frame] toView: nil];
+                        NSRect w = [[parentView window] frame];
+
+                        clipToTargetOffset.setX ((int) v.origin.x);
+                        clipToTargetOffset.setY ((int) (w.size.height - (v.origin.y + v.size.height)));
+                    }
+
+                    if (child != nullptr)
+                        child->setBounds (target - clip.getPosition() - clipToTargetOffset);
+
+                    NSRect parentFrame = [parentView frame];
+
+                    [(NSView*) getWindowHandle() setFrame: NSMakeRect (clip.getX() - parentFrame.origin.x,
+                                                                       clip.getY() - parentFrame.origin.y,
+                                                                       clip.getWidth(), clip.getHeight())];
+                }
+                else
+                {
+                    setSize (window->width, window->height);
+                }
             }
         }
     }

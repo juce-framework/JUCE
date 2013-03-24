@@ -23,41 +23,39 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_DIRECTXPLUGINFORMAT_JUCEHEADER__
-#define __JUCE_DIRECTXPLUGINFORMAT_JUCEHEADER__
-
-#include "../format/juce_AudioPluginFormat.h"
-
-#if JUCE_PLUGINHOST_DX && JUCE_WINDOWS
-
-
-//   Sorry, this file is just a placeholder at the moment!...
-
+#ifndef __JUCE_SYSTEMAUDIOVOLUME_JUCEHEADER__
+#define __JUCE_SYSTEMAUDIOVOLUME_JUCEHEADER__
 
 //==============================================================================
 /**
-    Implements a plugin format manager for DirectX plugins.
+    Contains functions to control the system's master volume.
 */
-class JUCE_API  DirectXPluginFormat   : public AudioPluginFormat
+class JUCE_API  SystemAudioVolume
 {
 public:
     //==============================================================================
-    DirectXPluginFormat();
-    ~DirectXPluginFormat();
+    /** Returns the operating system's current volume level in the range 0 to 1.0 */
+    static float JUCE_CALLTYPE getGain();
 
-    //==============================================================================
-    String getName() const                { return "DirectX"; }
-    void findAllTypesForFile (OwnedArray <PluginDescription>&, const String& fileOrIdentifier);
-    AudioPluginInstance* createInstanceFromDescription (const PluginDescription&);
-    bool fileMightContainThisPluginType (const String& fileOrIdentifier);
-    String getNameOfPluginFromIdentifier (const String& fileOrIdentifier)  { return fileOrIdentifier; }
-    FileSearchPath getDefaultLocationsToSearch();
-    bool canScanForPlugins() const        { return true; }
+    /** Attempts to set the operating system's current volume level.
+        @newGain the level, between 0 and 1.0
+        @returns true if the operation succeeds
+    */
+    static bool JUCE_CALLTYPE setGain (float newGain);
+
+    /** Returns true if the system's audio output is currently muted. */
+    static bool JUCE_CALLTYPE isMuted();
+
+    /** Attempts to mute the operating system's audio output.
+        @shouldBeMuted true if you want it to be muted
+        @returns true if the operation succeeds
+    */
+    static bool JUCE_CALLTYPE setMuted (bool shouldBeMuted);
 
 private:
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DirectXPluginFormat)
+    SystemAudioVolume(); // Don't instantiate this class, just call its static fns.
+    JUCE_DECLARE_NON_COPYABLE (SystemAudioVolume)
 };
 
-#endif
 
-#endif   // __JUCE_DIRECTXPLUGINFORMAT_JUCEHEADER__
+#endif   // __JUCE_SYSTEMAUDIOVOLUME_JUCEHEADER__

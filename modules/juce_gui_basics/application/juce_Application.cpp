@@ -283,19 +283,20 @@ String JUCEApplication::getCommandLineParameters()
 int JUCEApplication::main (int argc, const char* argv[])
 {
     JUCE_AUTORELEASEPOOL
+    {
+        juce_argc = argc;
+        juce_argv = argv;
 
-    juce_argc = argc;
-    juce_argv = argv;
+       #if JUCE_MAC
+        initialiseNSApplication();
+       #endif
 
-   #if JUCE_MAC
-    initialiseNSApplication();
-   #endif
-
-   #if JUCE_IOS
-    return juce_iOSMain (argc, argv);
-   #else
-    return JUCEApplication::main();
-   #endif
+       #if JUCE_IOS
+        return juce_iOSMain (argc, argv);
+       #else
+        return JUCEApplication::main();
+       #endif
+    }
 }
 #endif
 

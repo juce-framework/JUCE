@@ -42,14 +42,15 @@ JUCEApplicationBase::~JUCEApplicationBase()
 void JUCEApplicationBase::appWillTerminateByForce()
 {
     JUCE_AUTORELEASEPOOL
-
     {
-        const ScopedPointer<JUCEApplicationBase> app (appInstance);
+        {
+            const ScopedPointer<JUCEApplicationBase> app (appInstance);
 
-        if (app != nullptr)
-            app->shutdownApp();
+            if (app != nullptr)
+                app->shutdownApp();
+        }
+
+        DeletedAtShutdown::deleteAll();
+        MessageManager::deleteInstance();
     }
-
-    DeletedAtShutdown::deleteAll();
-    MessageManager::deleteInstance();
 }

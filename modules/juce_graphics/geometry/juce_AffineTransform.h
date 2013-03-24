@@ -133,6 +133,10 @@ public:
     static AffineTransform translation (float deltaX,
                                         float deltaY) noexcept;
 
+    /** Returns a copy of this transform with the specified translation matrix values. */
+    AffineTransform withAbsoluteTranslation (float translationX,
+                                             float translationY) const noexcept;
+
     /** Returns a transform which is the same as this one followed by a rotation.
 
         The rotation is specified by a number of radians to rotate clockwise, centred around

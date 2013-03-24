@@ -2665,18 +2665,11 @@ AudioProcessorEditor* VSTPluginInstance::createEditor()
 // entry point for all callbacks from the plugin
 static VstIntPtr VSTCALLBACK audioMaster (AEffect* effect, VstInt32 opcode, VstInt32 index, VstIntPtr value, void* ptr, float opt)
 {
-    try
-    {
-        if (effect != nullptr)
-            if (VSTPluginInstance* instance = (VSTPluginInstance*) (effect->resvd2))
-                return instance->handleCallback (opcode, index, value, ptr, opt);
+    if (effect != nullptr)
+        if (VSTPluginInstance* instance = (VSTPluginInstance*) (effect->resvd2))
+            return instance->handleCallback (opcode, index, value, ptr, opt);
 
-        return VSTPluginInstance::handleGeneralCallback (opcode, index, value, ptr, opt);
-    }
-    catch (...)
-    {
-        return 0;
-    }
+    return VSTPluginInstance::handleGeneralCallback (opcode, index, value, ptr, opt);
 }
 
 //==============================================================================
@@ -2698,60 +2691,40 @@ void VSTPluginFormat::findAllTypesForFile (OwnedArray <PluginDescription>& resul
     if (instance == nullptr)
         return;
 
-    try
+   #if JUCE_MAC
+    if (instance->module->resFileId != 0)
+        UseResFile (instance->module->resFileId);
+   #endif
+
+    instance->fillInPluginDescription (desc);
+
+    VstPlugCategory category = (VstPlugCategory) instance->dispatch (effGetPlugCategory, 0, 0, 0, 0);
+
+    if (category != kPlugCategShell)
     {
-       #if JUCE_MAC
-        if (instance->module->resFileId != 0)
-            UseResFile (instance->module->resFileId);
-       #endif
+        // Normal plugin...
+        results.add (new PluginDescription (desc));
 
-        instance->fillInPluginDescription (desc);
-
-        VstPlugCategory category = (VstPlugCategory) instance->dispatch (effGetPlugCategory, 0, 0, 0, 0);
-
-        if (category != kPlugCategShell)
-        {
-            // Normal plugin...
-            results.add (new PluginDescription (desc));
-
-            instance->dispatch (effOpen, 0, 0, 0, 0);
-        }
-        else
-        {
-            // It's a shell plugin, so iterate all the subtypes...
-            for (;;)
-            {
-                char shellEffectName [64] = { 0 };
-                const int uid = (int) instance->dispatch (effShellGetNextPlugin, 0, 0, shellEffectName, 0);
-
-                if (uid == 0)
-                    break;
-
-                desc.uid = uid;
-                desc.name = shellEffectName;
-                desc.descriptiveName = shellEffectName;
-
-                bool alreadyThere = false;
-
-                for (int i = results.size(); --i >= 0;)
-                {
-                    PluginDescription* const d = results.getUnchecked(i);
-
-                    if (d->isDuplicateOf (desc))
-                    {
-                        alreadyThere = true;
-                        break;
-                    }
-                }
-
-                if (! alreadyThere)
-                    results.add (new PluginDescription (desc));
-            }
-        }
+        instance->dispatch (effOpen, 0, 0, 0, 0);
     }
-    catch (...)
+    else
     {
-        // crashed while loading...
+        // It's a shell plugin, so iterate all the subtypes...
+        for (;;)
+        {
+            char shellEffectName [256] = { 0 };
+            const int uid = (int) instance->dispatch (effShellGetNextPlugin, 0, 0, shellEffectName, 0);
+
+            if (uid == 0)
+                break;
+
+            desc.uid = uid;
+            desc.name = shellEffectName;
+            desc.descriptiveName = shellEffectName;
+
+            if (! arrayContainsPlugin (results, desc))
+                results.add (new PluginDescription (desc));
+        }
     }
 }
 

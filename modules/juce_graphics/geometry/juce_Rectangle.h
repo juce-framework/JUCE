@@ -700,6 +700,16 @@ public:
                                  static_cast<float> (w),     static_cast<float> (h));
     }
 
+    /** Casts this rectangle to a Rectangle<double>.
+        Obviously this is mainly useful for rectangles that use integer types.
+        @see getSmallestIntegerContainer
+    */
+    Rectangle<double> toDouble() const noexcept
+    {
+        return Rectangle<double> (static_cast<double> (pos.x), static_cast<double> (pos.y),
+                                  static_cast<double> (w),     static_cast<double> (h));
+    }
+
     //==============================================================================
     /** Static utility to intersect two sets of rectangular co-ordinates.
         Returns false if the two regions didn't overlap.

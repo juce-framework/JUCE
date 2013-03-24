@@ -583,6 +583,9 @@
     <ClCompile Include="..\..\..\..\modules\juce_audio_processors\format_types\juce_AudioUnitPluginFormat.mm">
       <Filter>Juce Modules\juce_audio_processors\format_types</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_processors\format_types\juce_LADSPAPluginFormat.cpp">
+      <Filter>Juce Modules\juce_audio_processors\format_types</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_audio_processors\format_types\juce_VSTPluginFormat.cpp">
       <Filter>Juce Modules\juce_audio_processors\format_types</Filter>
     </ClCompile>
@@ -1659,6 +1662,9 @@
     <ClInclude Include="..\..\..\..\modules\juce_audio_devices\audio_io\juce_AudioIODeviceType.h">
       <Filter>Juce Modules\juce_audio_devices\audio_io</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_devices\audio_io\juce_SystemAudioVolume.h">
+      <Filter>Juce Modules\juce_audio_devices\audio_io</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_audio_devices\midi_io\juce_MidiInput.h">
       <Filter>Juce Modules\juce_audio_devices\midi_io</Filter>
     </ClInclude>
@@ -1774,9 +1780,6 @@
       <Filter>Juce Modules\juce_audio_processors\format</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_audio_processors\format_types\juce_AudioUnitPluginFormat.h">
-      <Filter>Juce Modules\juce_audio_processors\format_types</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_audio_processors\format_types\juce_DirectXPluginFormat.h">
       <Filter>Juce Modules\juce_audio_processors\format_types</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_audio_processors\format_types\juce_LADSPAPluginFormat.h">

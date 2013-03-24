@@ -52,38 +52,40 @@ public:
           swapFrames (0), useDepthBuffer (pixelFormat.depthBufferBits > 0)
     {
         JUCE_AUTORELEASEPOOL
-        ComponentPeer* const peer = component.getPeer();
-        jassert (peer != nullptr);
+        {
+            ComponentPeer* const peer = component.getPeer();
+            jassert (peer != nullptr);
 
-        const Rectangle<int> bounds (peer->getComponent().getLocalArea (&component, component.getLocalBounds()));
-        lastWidth  = bounds.getWidth();
-        lastHeight = bounds.getHeight();
+            const Rectangle<int> bounds (peer->getComponent().getLocalArea (&component, component.getLocalBounds()));
+            lastWidth  = bounds.getWidth();
+            lastHeight = bounds.getHeight();
 
-        view = [[JuceGLView alloc] initWithFrame: convertToCGRect (bounds)];
-        view.opaque = YES;
-        view.hidden = NO;
-        view.backgroundColor = [UIColor blackColor];
-        view.userInteractionEnabled = NO;
+            view = [[JuceGLView alloc] initWithFrame: convertToCGRect (bounds)];
+            view.opaque = YES;
+            view.hidden = NO;
+            view.backgroundColor = [UIColor blackColor];
+            view.userInteractionEnabled = NO;
 
-        glLayer = (CAEAGLLayer*) [view layer];
-        glLayer.contentsScale = Desktop::getInstance().getDisplays().getMainDisplay().scale;
+            glLayer = (CAEAGLLayer*) [view layer];
+            glLayer.contentsScale = Desktop::getInstance().getDisplays().getMainDisplay().scale;
 
-        [((UIView*) peer->getNativeHandle()) addSubview: view];
+            [((UIView*) peer->getNativeHandle()) addSubview: view];
 
-        context = [EAGLContext alloc];
+            context = [EAGLContext alloc];
 
-        const NSUInteger type = kEAGLRenderingAPIOpenGLES2;
+            const NSUInteger type = kEAGLRenderingAPIOpenGLES2;
 
-        if (contextToShareWith != nullptr)
-            [context initWithAPI: type  sharegroup: [(EAGLContext*) contextToShareWith sharegroup]];
-        else
-            [context initWithAPI: type];
+            if (contextToShareWith != nullptr)
+                [context initWithAPI: type  sharegroup: [(EAGLContext*) contextToShareWith sharegroup]];
+            else
+                [context initWithAPI: type];
 
-        // I'd prefer to put this stuff in the initialiseOnRenderThread() call, but doing
-        // so causes myserious timing-related failures.
-        [EAGLContext setCurrentContext: context];
-        createGLBuffers();
-        deactivateCurrentContext();
+            // I'd prefer to put this stuff in the initialiseOnRenderThread() call, but doing
+            // so causes myserious timing-related failures.
+            [EAGLContext setCurrentContext: context];
+            createGLBuffers();
+            deactivateCurrentContext();
+        }
     }
 
     ~NativeContext()

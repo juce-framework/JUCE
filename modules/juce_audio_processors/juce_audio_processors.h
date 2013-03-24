@@ -99,9 +99,6 @@ namespace juce
 #ifndef __JUCE_AUDIOUNITPLUGINFORMAT_JUCEHEADER__
  #include "format_types/juce_AudioUnitPluginFormat.h"
 #endif
-#ifndef __JUCE_DIRECTXPLUGINFORMAT_JUCEHEADER__
- #include "format_types/juce_DirectXPluginFormat.h"
-#endif
 #ifndef __JUCE_LADSPAPLUGINFORMAT_JUCEHEADER__
  #include "format_types/juce_LADSPAPluginFormat.h"
 #endif

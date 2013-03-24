@@ -216,7 +216,7 @@ void JuceUpdater::updateInstallButtonStatus()
 void JuceUpdater::filenameComponentChanged (FilenameComponent*)
 {
     moduleList.rescan (filenameComp.getCurrentFile());
-    filenameComp.setCurrentFile (moduleList.getModulesFolder(), true, false);
+    filenameComp.setCurrentFile (moduleList.getModulesFolder(), true, dontSendNotification);
 
     if (! ModuleList::isModulesFolder (moduleList.getModulesFolder()))
         currentVersionLabel.setText ("(Not a Juce folder)", false);
