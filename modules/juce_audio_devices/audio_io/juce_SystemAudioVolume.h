@@ -28,7 +28,7 @@
 
 //==============================================================================
 /**
-    Contains functions to control the system's master volume
+    Contains functions to control the system's master volume.
 */
 class JUCE_API  SystemAudioVolume
 {
@@ -53,6 +53,7 @@ public:
     static bool JUCE_CALLTYPE setMuted (bool shouldBeMuted);
 
 private:
+    SystemAudioVolume(); // Don't instantiate this class, just call its static fns.
     JUCE_DECLARE_NON_COPYABLE (SystemAudioVolume)
 };
 
