@@ -381,7 +381,9 @@ private:
     {
         if (interruptionType == kAudioSessionBeginInterruption)
         {
-            close();
+            isrunning = false;
+            AudioOutputUnitStop (audioUnit);
+            AudioSessionSetActive (false);
 
             const ScopedLock sl (callbackLock);
 
