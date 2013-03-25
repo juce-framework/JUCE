@@ -247,7 +247,7 @@ void Thread::yield()
 //==============================================================================
 static int lastProcessPriority = -1;
 
-// called by WindowDriver because Windows does wierd things to process priority
+// called by WindowDriver because Windows does weird things to process priority
 // when you swap apps, and this forces an update when the app is brought to the front.
 void juce_repeatLastProcessPriority()
 {
