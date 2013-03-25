@@ -659,10 +659,10 @@ private:
             }
             else
             {
-                gradient.point1.setXY (dx + gradientWidth * getCoordLength (fillXml->getStringAttribute ("x1", "0%"), 1.0f),
+                gradient.point1.setXY (dx + gradientWidth  * getCoordLength (fillXml->getStringAttribute ("x1", "0%"), 1.0f),
                                        dy + gradientHeight * getCoordLength (fillXml->getStringAttribute ("y1", "0%"), 1.0f));
 
-                gradient.point2.setXY (dx + gradientWidth * getCoordLength (fillXml->getStringAttribute ("x2", "100%"), 1.0f),
+                gradient.point2.setXY (dx + gradientWidth  * getCoordLength (fillXml->getStringAttribute ("x2", "100%"), 1.0f),
                                        dy + gradientHeight * getCoordLength (fillXml->getStringAttribute ("y2", "0%"), 1.0f));
             }
 
@@ -671,8 +671,34 @@ private:
         }
 
         FillType type (gradient);
-        type.transform = parseTransform (fillXml->getStringAttribute ("gradientTransform"))
-                           .followedBy (transform);
+
+        const AffineTransform gradientTransform (parseTransform (fillXml->getStringAttribute ("gradientTransform"))
+                                                    .followedBy (transform));
+
+        if (gradient.isRadial)
+        {
+            type.transform = gradientTransform;
+        }
+        else
+        {
+            // Transform the perpendicular vector into the new coordinate space for the gradient.
+            // This vector is now the slope of the linear gradient as it should appear in the new coord space
+            const Point<float> perpendicular (Point<float> (gradient.point2.y - gradient.point1.y,
+                                                            gradient.point1.x - gradient.point2.x)
+                                                  .transformedBy (gradientTransform.withAbsoluteTranslation (0, 0)));
+
+            const Point<float> newGradPoint1 (gradient.point1.transformedBy (gradientTransform));
+            const Point<float> newGradPoint2 (gradient.point2.transformedBy (gradientTransform));
+
+            // Project the transformed gradient vector onto the transformed slope of the linear
+            // gradient as it should appear in the new coordinate space
+            const float scale = perpendicular.getDotProduct (newGradPoint2 - newGradPoint1)
+                                  / perpendicular.getDotProduct (perpendicular);
+
+            type.gradient->point1 = newGradPoint1;
+            type.gradient->point2 = newGradPoint2 - perpendicular * scale;
+        }
+
         return type;
     }
 
