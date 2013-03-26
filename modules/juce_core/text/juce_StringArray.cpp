@@ -55,12 +55,17 @@ namespace StringArrayHelpers
                 dest.add (*strings++);
     }
 
-    template <typename CharType>
-    void addArray (Array<String>& dest, const CharType* const* const strings, const int numberOfStrings)
+    template <typename Type>
+    void addArray (Array<String>& dest, const Type* const strings, const int numberOfStrings)
     {
         for (int i = 0; i < numberOfStrings; ++i)
             dest.add (strings [i]);
     }
+}
+
+StringArray::StringArray (const String* initialStrings, int numberOfStrings)
+{
+    StringArrayHelpers::addArray (strings, initialStrings, numberOfStrings);
 }
 
 StringArray::StringArray (const char* const* const initialStrings)
