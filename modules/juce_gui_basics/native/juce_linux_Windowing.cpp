@@ -1500,6 +1500,9 @@ public:
     {
         updateKeyModifiers (buttonRelEvent.state);
 
+        if (parentWindow != 0)
+            updateBounds();
+
         switch (pointerMap [buttonRelEvent.button - Button1])
         {
             case Keys::LeftButton:      currentModifiers = currentModifiers.withoutFlags (ModifierKeys::leftButtonModifier); break;
@@ -1514,9 +1517,6 @@ public:
         handleMouseEvent (0, getMousePos (buttonRelEvent), currentModifiers, getEventTime (buttonRelEvent));
 
         clearLastMousePos();
-
-        if (parentWindow != 0)
-            updateBounds();
     }
 
     void handleMotionNotifyEvent (const XPointerMovedEvent& movedEvent)
