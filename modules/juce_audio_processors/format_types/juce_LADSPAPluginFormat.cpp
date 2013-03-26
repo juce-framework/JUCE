@@ -119,7 +119,7 @@ class LADSPAPluginInstance     : public AudioPluginInstance
 {
 public:
     LADSPAPluginInstance (const LADSPAModuleHandle::Ptr& m)
-        : plugin (nullptr), handle (0), initialised (false),
+        : plugin (nullptr), handle (nullptr), initialised (false),
           tempBuffer (1, 1), module (m)
     {
         ++insideLADSPACallback;
@@ -159,14 +159,12 @@ public:
 
         jassert (insideLADSPACallback == 0);
 
-        // Must delete any editors before deleting the plugin instance!
-        jassert (getActiveEditor() == nullptr);
-
-        if (plugin != nullptr && plugin->cleanup != nullptr)
+        if (handle != nullptr && plugin != nullptr && plugin->cleanup != nullptr)
             plugin->cleanup (handle);
 
         module = nullptr;
         plugin = nullptr;
+        handle = nullptr;
     }
 
     void initialise()
@@ -285,7 +283,7 @@ public:
     {
         const int numSamples = buffer.getNumSamples();
 
-        if (initialised && plugin != nullptr)
+        if (initialised && plugin != nullptr && handle != nullptr)
         {
             for (int i = 0; i < inputs.size(); ++i)
                 plugin->connect_port (handle, inputs[i],
@@ -461,6 +459,11 @@ public:
         return nullptr;
     }
 
+    bool isValid() const
+    {
+        return handle != nullptr;
+    }
+
     LADSPAModuleHandle::Ptr module;
     const LADSPA_Descriptor* plugin;
 
@@ -568,7 +571,7 @@ void LADSPAPluginFormat::findAllTypesForFile (OwnedArray <PluginDescription>& re
 
     ScopedPointer<LADSPAPluginInstance> instance (dynamic_cast <LADSPAPluginInstance*> (createInstanceFromDescription (desc)));
 
-    if (instance == nullptr)
+    if (instance == nullptr || ! instance->isValid())
         return;
 
     instance->fillInPluginDescription (desc);
@@ -612,7 +615,7 @@ AudioPluginInstance* LADSPAPluginFormat::createInstanceFromDescription (const Pl
 
             result = new LADSPAPluginInstance (module);
 
-            if (result->plugin != nullptr)
+            if (result->plugin != nullptr && result->isValid())
                 result->initialise();
             else
                 deleteAndZero (result);
@@ -672,7 +675,9 @@ void LADSPAPluginFormat::recursiveFileSearch (StringArray& results, const File& 
 
 FileSearchPath LADSPAPluginFormat::getDefaultLocationsToSearch()
 {
-    return FileSearchPath ("/usr/lib/ladspa");
+    return FileSearchPath (SystemStats::getEnvironmentVariable ("LADSPA_PATH",
+                                                                "/usr/lib/ladspa;/usr/local/lib/ladspa;~/.ladspa")
+                             .replace (":", ";"));
 }
 
 #endif
