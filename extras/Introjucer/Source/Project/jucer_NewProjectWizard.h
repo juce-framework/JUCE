@@ -27,48 +27,8 @@
 #define __JUCER_NEWPROJECTWIZARD_JUCEHEADER__
 
 #include "../jucer_Headers.h"
-#include "jucer_Project.h"
 
-
-//==============================================================================
-class NewProjectWizard
-{
-public:
-    virtual ~NewProjectWizard();
-
-    //==============================================================================
-    static StringArray getWizards();
-    static int getNumWizards();
-    static NewProjectWizard* createWizard (int index);
-
-    static Component* createComponent();
-
-    //==============================================================================
-    virtual String getName() = 0;
-    virtual String getDescription() = 0;
-
-    virtual void addSetupItems (Component& setupComp, OwnedArray<Component>& itemsCreated) = 0;
-    virtual Result processResultsFromSetupItems (Component& setupComp) = 0;
-    virtual bool initialiseProject (Project& project) = 0;
-
-protected:
-    String appTitle;
-    File targetFolder, projectFile;
-    Component* ownerWindow;
-    StringArray failedFiles;
-
-    //==============================================================================
-    NewProjectWizard();
-    Project* runWizard (Component* ownerWindow,
-                        const String& projectName,
-                        const File& targetFolder);
-
-    class WizardComp;
-    friend class WizardComp;
-
-    File getSourceFilesFolder() const         { return projectFile.getSiblingFile ("Source"); }
-    static File& getLastWizardFolder();
-};
+Component* createNewProjectWizardComponent();
 
 
 #endif   // __JUCER_NEWPROJECTWIZARD_JUCEHEADER__

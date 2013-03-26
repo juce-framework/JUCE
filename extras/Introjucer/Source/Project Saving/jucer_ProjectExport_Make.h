@@ -230,14 +230,14 @@ private:
 
         String targetName (config.getTargetBinaryNameString());
 
-        if (projectType.isLibrary())
+        if (projectType.isStaticLibrary() || projectType.isDynamicLibrary())
             targetName = getLibbedFilename (targetName);
         else
             targetName = targetName.upToLastOccurrenceOf (".", false, false) + makefileTargetSuffix;
 
         out << "  TARGET := " << escapeSpaces (targetName) << newLine;
 
-        if (projectType.isLibrary())
+        if (projectType.isStaticLibrary())
             out << "  BLDCMD = ar -rcs $(OUTDIR)/$(TARGET) $(OBJECTS) $(TARGET_ARCH)" << newLine;
         else
             out << "  BLDCMD = $(CXX) -o $(OUTDIR)/$(TARGET) $(OBJECTS) $(LDFLAGS) $(RESOURCES) $(TARGET_ARCH)" << newLine;
@@ -267,7 +267,7 @@ private:
             << "endif" << newLine
             << newLine;
 
-        if (! projectType.isLibrary())
+        if (! projectType.isStaticLibrary())
             out << "ifeq ($(TARGET_ARCH),)" << newLine
                 << "  TARGET_ARCH := -march=native" << newLine
                 << "endif"  << newLine << newLine;

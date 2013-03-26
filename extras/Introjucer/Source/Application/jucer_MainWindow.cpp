@@ -285,7 +285,7 @@ void MainWindow::updateTitle (const String& documentName)
 void MainWindow::showNewProjectWizard()
 {
     jassert (currentProject == nullptr);
-    setContentOwned (NewProjectWizard::createComponent(), true);
+    setContentOwned (createNewProjectWizardComponent(), true);
     makeVisible();
 }
 

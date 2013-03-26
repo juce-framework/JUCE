@@ -59,7 +59,6 @@ namespace Ids
     DECLARE_ID (externalLibraries);
     DECLARE_ID (extraDefs);
     DECLARE_ID (projectType);
-    DECLARE_ID (libraryType);
     DECLARE_ID (isDebug);
     DECLARE_ID (alwaysGenerateDebugSymbols);
     DECLARE_ID (targetName);
