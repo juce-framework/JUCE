@@ -793,6 +793,14 @@ static void* createDraggingHandCursor()
 }
 
 //==============================================================================
+static int numAlwaysOnTopPeers = 0;
+
+bool juce_areThereAnyAlwaysOnTopWindows()
+{
+    return numAlwaysOnTopPeers > 0;
+}
+
+//==============================================================================
 class LinuxComponentPeer  : public ComponentPeer
 {
 public:
@@ -800,13 +808,17 @@ public:
         : ComponentPeer (comp, windowStyleFlags),
           windowH (0), parentWindow (0),
           fullScreen (false), mapped (false),
-          visual (nullptr), depth (0)
+          visual (nullptr), depth (0),
+          isAlwaysOnTop (comp.isAlwaysOnTop())
     {
         // it's dangerous to create a window on a thread other than the message thread..
         jassert (MessageManager::getInstance()->currentThreadHasLockedMessageManager());
 
         dispatchWindowMessage = windowMessageReceive;
         repainter = new LinuxRepaintManager (*this);
+
+        if (isAlwaysOnTop)
+            ++numAlwaysOnTopPeers;
 
         createWindow (parentToAddTo);
 
@@ -821,6 +833,9 @@ public:
         deleteIconPixmaps();
         destroyWindow();
         windowH = 0;
+
+        if (isAlwaysOnTop)
+            --numAlwaysOnTopPeers;
     }
 
     // (this callback is hooked up in the messaging code)
@@ -1915,6 +1930,7 @@ private:
     Visual* visual;
     int depth;
     BorderSize<int> windowBorder;
+    bool isAlwaysOnTop;
     enum { KeyPressEventType = 2 };
 
     struct MotifWmHints
@@ -3137,12 +3153,6 @@ void Desktop::setScreenSaverEnabled (const bool isEnabled)
 bool Desktop::isScreenSaverEnabled()
 {
     return screenSaverAllowed;
-}
-
-//==============================================================================
-bool juce_areThereAnyAlwaysOnTopWindows()
-{
-    return false; // XXX should be implemented
 }
 
 //==============================================================================
