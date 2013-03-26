@@ -584,7 +584,7 @@ public:
                       h + windowBorder.getTopAndBottom(),
                       SWP_NOACTIVATE | SWP_NOMOVE | SWP_NOZORDER | SWP_NOOWNERZORDER);
 
-        if (isValidPeer (this)
+        if (isValidPeer (this))
         {
             updateBorderSize();
             repaintNowIfTransparent();
@@ -603,7 +603,7 @@ public:
                       h + windowBorder.getTopAndBottom(),
                       SWP_NOACTIVATE | SWP_NOZORDER | SWP_NOOWNERZORDER);
 
-        if (isValidPeer (this)
+        if (isValidPeer (this))
         {
             updateBorderSize();
             repaintNowIfTransparent();
