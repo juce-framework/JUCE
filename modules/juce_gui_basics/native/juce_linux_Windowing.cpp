@@ -1789,7 +1789,7 @@ private:
             : peer (p), lastTimeImageUsed (0)
         {
            #if JUCE_USE_XSHM
-            shmCompletedDrawing = true;
+            shmPaintsPending = 0;
 
             useARGBImagesForRendering = XSHMHelpers::isShmAvailable();
 
@@ -1811,7 +1811,7 @@ private:
         void timerCallback()
         {
            #if JUCE_USE_XSHM
-            if (! shmCompletedDrawing)
+            if (shmPaintsPending != 0)
                 return;
            #endif
 
@@ -1838,7 +1838,7 @@ private:
         void performAnyPendingRepaintsNow()
         {
            #if JUCE_USE_XSHM
-            if (! shmCompletedDrawing)
+            if (shmPaintsPending != 0)
             {
                 startTimer (repaintTimerPeriod);
                 return;
@@ -1888,7 +1888,7 @@ private:
                 for (const Rectangle<int>* i = originalRepaintRegion.begin(), * const e = originalRepaintRegion.end(); i != e; ++i)
                 {
                    #if JUCE_USE_XSHM
-                    shmCompletedDrawing = false;
+                    ++shmPaintsPending;
                    #endif
 
                     static_cast<XBitmapImage*> (image.getPixelData())
@@ -1903,7 +1903,7 @@ private:
         }
 
        #if JUCE_USE_XSHM
-        void notifyPaintCompleted()                 { shmCompletedDrawing = true; }
+        void notifyPaintCompleted() noexcept        { --shmPaintsPending; }
        #endif
 
     private:
@@ -1915,7 +1915,8 @@ private:
         RectangleList regionsNeedingRepaint;
 
        #if JUCE_USE_XSHM
-        bool useARGBImagesForRendering, shmCompletedDrawing;
+        bool useARGBImagesForRendering;
+        int shmPaintsPending;
        #endif
         JUCE_DECLARE_NON_COPYABLE (LinuxRepaintManager)
     };
