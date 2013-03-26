@@ -584,9 +584,11 @@ public:
                       h + windowBorder.getTopAndBottom(),
                       SWP_NOACTIVATE | SWP_NOMOVE | SWP_NOZORDER | SWP_NOOWNERZORDER);
 
-        updateBorderSize();
-
-        repaintNowIfTransparent();
+        if (isValidPeer (this)
+        {
+            updateBorderSize();
+            repaintNowIfTransparent();
+        }
     }
 
     void setBounds (int x, int y, int w, int h, bool isNowFullScreen)
@@ -601,9 +603,11 @@ public:
                       h + windowBorder.getTopAndBottom(),
                       SWP_NOACTIVATE | SWP_NOZORDER | SWP_NOOWNERZORDER);
 
-        updateBorderSize();
-
-        repaintNowIfTransparent();
+        if (isValidPeer (this)
+        {
+            updateBorderSize();
+            repaintNowIfTransparent();
+        }
     }
 
     Rectangle<int> getBounds() const
