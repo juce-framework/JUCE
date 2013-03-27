@@ -373,6 +373,13 @@ void AudioDeviceManager::setCurrentAudioDeviceType (const String& type,
         if (availableDeviceTypes.getUnchecked(i)->getTypeName() == type
              && currentDeviceType != type)
         {
+            if (currentAudioDevice != nullptr)
+            {
+                closeAudioDevice();
+                Thread::sleep (1500); // allow a moment for OS devices to sort themselves out, to help
+                                      // avoid things like DirectSound/ASIO clashes
+            }
+
             currentDeviceType = type;
 
             AudioDeviceSetup s (*lastDeviceTypeConfigs.getUnchecked(i));
@@ -389,8 +396,8 @@ void AudioDeviceManager::setCurrentAudioDeviceType (const String& type,
 AudioIODeviceType* AudioDeviceManager::getCurrentDeviceTypeObject() const
 {
     for (int i = 0; i < availableDeviceTypes.size(); ++i)
-        if (availableDeviceTypes[i]->getTypeName() == currentDeviceType)
-            return availableDeviceTypes[i];
+        if (availableDeviceTypes.getUnchecked(i)->getTypeName() == currentDeviceType)
+            return availableDeviceTypes.getUnchecked(i);
 
     return availableDeviceTypes[0];
 }
@@ -446,7 +453,9 @@ String AudioDeviceManager::setAudioDeviceSetup (const AudioDeviceSetup& newSetup
         currentAudioDevice = type->createDevice (newOutputDeviceName, newInputDeviceName);
 
         if (currentAudioDevice == nullptr)
-            error = "Can't open the audio device!\n\nThis may be because another application is currently using the same device - if so, you should close any other applications and try again!";
+            error = "Can't open the audio device!\n\n"
+                    "This may be because another application is currently using the same device - "
+                    "if so, you should close any other applications and try again!";
         else
             error = currentAudioDevice->getLastError();
 
