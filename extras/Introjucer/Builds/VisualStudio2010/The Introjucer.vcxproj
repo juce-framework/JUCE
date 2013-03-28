@@ -1005,6 +1005,7 @@
     <ClInclude Include="..\..\Source\Project\jucer_ProjectType.h"/>
     <ClInclude Include="..\..\Source\Project\jucer_TreeViewTypes.h"/>
     <ClInclude Include="..\..\Source\Project Saving\jucer_ProjectExport_Android.h"/>
+    <ClInclude Include="..\..\Source\Project Saving\jucer_ProjectExport_CodeBlocks.h"/>
     <ClInclude Include="..\..\Source\Project Saving\jucer_ProjectExport_Make.h"/>
     <ClInclude Include="..\..\Source\Project Saving\jucer_ProjectExport_MSVC.h"/>
     <ClInclude Include="..\..\Source\Project Saving\jucer_ProjectExport_XCode.h"/>

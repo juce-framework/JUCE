@@ -24,11 +24,13 @@
 */
 
 #include "jucer_ProjectExporter.h"
+#include "jucer_ProjectSaver.h"
+
 #include "jucer_ProjectExport_Make.h"
 #include "jucer_ProjectExport_MSVC.h"
 #include "jucer_ProjectExport_XCode.h"
 #include "jucer_ProjectExport_Android.h"
-
+#include "jucer_ProjectExport_CodeBlocks.h"
 
 //==============================================================================
 StringArray ProjectExporter::getExporterNames()
@@ -42,6 +44,7 @@ StringArray ProjectExporter::getExporterNames()
     s.add (MSVCProjectExporterVC2012::getName());
     s.add (MakefileProjectExporter::getNameLinux());
     s.add (AndroidProjectExporter::getNameAndroid());
+    s.add (CodeBlocksProjectExporter::getNameCodeBlocks());
     return s;
 }
 
@@ -72,6 +75,8 @@ ProjectExporter* ProjectExporter::createNewExporter (Project& project, const int
         case 5:     exp = new MSVCProjectExporterVC2012 (project, ValueTree (MSVCProjectExporterVC2012::getValueTreeTypeName())); break;
         case 6:     exp = new MakefileProjectExporter   (project, ValueTree (MakefileProjectExporter  ::getValueTreeTypeName())); break;
         case 7:     exp = new AndroidProjectExporter    (project, ValueTree (AndroidProjectExporter   ::getValueTreeTypeName())); break;
+        case 8:     exp = new CodeBlocksProjectExporter (project, ValueTree (CodeBlocksProjectExporter::getValueTreeTypeName())); break;
+
         default:    jassertfalse; return 0;
     }
 
@@ -102,6 +107,7 @@ ProjectExporter* ProjectExporter::createExporter (Project& project, const ValueT
     if (exp == nullptr)    exp = XCodeProjectExporter     ::createForSettings (project, settings);
     if (exp == nullptr)    exp = MakefileProjectExporter  ::createForSettings (project, settings);
     if (exp == nullptr)    exp = AndroidProjectExporter   ::createForSettings (project, settings);
+    if (exp == nullptr)    exp = CodeBlocksProjectExporter::createForSettings (project, settings);
 
     jassert (exp != nullptr);
     return exp;
@@ -161,28 +167,6 @@ ProjectExporter::~ProjectExporter()
 File ProjectExporter::getTargetFolder() const
 {
     return project.resolveFilename (getTargetLocationString());
-}
-
-String ProjectExporter::getIncludePathForFileInJuceFolder (const String& pathFromJuceFolder, const File& targetIncludeFile) const
-{
-    String juceFolderPath (getJuceFolderString());
-
-    if (juceFolderPath.startsWithChar ('<'))
-    {
-        juceFolderPath = FileHelpers::unixStylePath (File::addTrailingSeparator (juceFolderPath.substring (1).dropLastCharacters(1)));
-        if (juceFolderPath == "/")
-            juceFolderPath = String::empty;
-
-        return "<" + juceFolderPath + pathFromJuceFolder + ">";
-    }
-    else
-    {
-        const RelativePath juceFromProject (juceFolderPath, RelativePath::projectFolder);
-        const RelativePath fileFromProject (juceFromProject.getChildFile (pathFromJuceFolder));
-        const RelativePath fileFromHere (fileFromProject.rebased (project.getFile().getParentDirectory(),
-                                                                  targetIncludeFile.getParentDirectory(), RelativePath::unknown));
-        return fileFromHere.toUnixStyle().quoted();
-    }
 }
 
 RelativePath ProjectExporter::getJucePathFromProjectFolder() const
@@ -581,7 +565,7 @@ String ProjectExporter::BuildConfiguration::getGCCLibraryPathFlags() const
 String ProjectExporter::getExternalLibraryFlags (const BuildConfiguration& config) const
 {
     StringArray libraries;
-    libraries.addTokens (getExternalLibrariesString(), ";", "\"'");
+    libraries.addTokens (getExternalLibrariesString(), ";\n", "\"'");
     libraries.removeEmptyStrings (true);
 
     if (libraries.size() != 0)

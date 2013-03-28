@@ -228,8 +228,8 @@ namespace VSTHelpers
     static void fixMissingVSTValues (ProjectExporter& exporter)
     {
         if (getVSTFolder(exporter).toString().isEmpty())
-            getVSTFolder(exporter) = (exporter.isVisualStudio() ? "c:\\SDKs\\vstsdk2.4"
-                                                                : "~/SDKs/vstsdk2.4");
+            getVSTFolder(exporter) = (exporter.isWindows() ? "c:\\SDKs\\vstsdk2.4"
+                                                           : "~/SDKs/vstsdk2.4");
 
         fixMissingXcodePostBuildScript (exporter);
     }
@@ -249,7 +249,7 @@ namespace VSTHelpers
 
         addVSTFolderToPath (exporter, exporter.extraSearchPaths);
 
-        if (exporter.isVisualStudio())
+        if (exporter.isWindows())
             exporter.extraSearchPaths.add (juceWrapperFolder.toWindowsStyle());
         else if (exporter.isLinux())
             exporter.extraSearchPaths.add (juceWrapperFolder.toUnixStyle());

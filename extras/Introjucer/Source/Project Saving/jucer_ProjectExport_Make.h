@@ -23,13 +23,7 @@
   ==============================================================================
 */
 
-#ifndef __JUCER_PROJECTEXPORT_MAKE_JUCEHEADER__
-#define __JUCER_PROJECTEXPORT_MAKE_JUCEHEADER__
 
-#include "jucer_ProjectExporter.h"
-
-
-//==============================================================================
 class MakefileProjectExporter  : public ProjectExporter
 {
 public:
@@ -340,6 +334,3 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE (MakefileProjectExporter)
 };
-
-
-#endif   // __JUCER_PROJECTEXPORT_MAKE_JUCEHEADER__

@@ -147,6 +147,8 @@
     <GROUP id="{579C9644-D5C2-8469-9439-F91C81337531}" name="Project Saving">
       <FILE id="TtXohM" name="jucer_ProjectExport_Android.h" compile="0"
             resource="0" file="Source/Project Saving/jucer_ProjectExport_Android.h"/>
+      <FILE id="EkBkj1" name="jucer_ProjectExport_CodeBlocks.h" compile="0"
+            resource="0" file="Source/Project Saving/jucer_ProjectExport_CodeBlocks.h"/>
       <FILE id="mVXrLi" name="jucer_ProjectExport_Make.h" compile="0" resource="0"
             file="Source/Project Saving/jucer_ProjectExport_Make.h"/>
       <FILE id="ILeTrs" name="jucer_ProjectExport_MSVC.h" compile="0" resource="0"

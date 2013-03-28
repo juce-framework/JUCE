@@ -172,6 +172,7 @@
       </Filter>
       <Filter Name="Project Saving">
         <File RelativePath="..\..\Source\Project Saving\jucer_ProjectExport_Android.h"/>
+        <File RelativePath="..\..\Source\Project Saving\jucer_ProjectExport_CodeBlocks.h"/>
         <File RelativePath="..\..\Source\Project Saving\jucer_ProjectExport_Make.h"/>
         <File RelativePath="..\..\Source\Project Saving\jucer_ProjectExport_MSVC.h"/>
         <File RelativePath="..\..\Source\Project Saving\jucer_ProjectExport_XCode.h"/>

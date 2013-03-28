@@ -23,11 +23,6 @@
   ==============================================================================
 */
 
-#ifndef __JUCER_PROJECTEXPORT_XCODE_JUCEHEADER__
-#define __JUCER_PROJECTEXPORT_XCODE_JUCEHEADER__
-
-#include "jucer_ProjectExporter.h"
-
 namespace
 {
     const char* const osxVersionDefault         = "default";
@@ -1238,6 +1233,3 @@ private:
         return file.hasFileExtension (sourceFileExtensions);
     }
 };
-
-
-#endif   // __JUCER_PROJECTEXPORT_XCODE_JUCEHEADER__

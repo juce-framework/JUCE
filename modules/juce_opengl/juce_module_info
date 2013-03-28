@@ -18,5 +18,6 @@
 
   "OSXFrameworks":  "OpenGL",
   "iOSFrameworks":  "OpenGLES",
-  "LinuxLibs":      "GL"
+  "LinuxLibs":      "GL",
+  "mingwLibs":      "opengl32"
 }

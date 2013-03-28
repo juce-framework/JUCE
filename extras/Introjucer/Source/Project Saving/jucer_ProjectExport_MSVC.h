@@ -23,13 +23,7 @@
   ==============================================================================
 */
 
-#ifndef __JUCER_PROJECTEXPORT_MSVC_JUCEHEADER__
-#define __JUCER_PROJECTEXPORT_MSVC_JUCEHEADER__
 
-#include "jucer_ProjectExporter.h"
-#include "jucer_ProjectSaver.h"
-
-//==============================================================================
 class MSVCProjectExporterBase   : public ProjectExporter
 {
 public:
@@ -44,9 +38,10 @@ public:
     }
 
     //==============================================================================
-    bool usesMMFiles() const                    { return false; }
-    bool isVisualStudio() const                 { return true; }
-    bool canCopeWithDuplicateFiles()            { return false; }
+    bool usesMMFiles() const            { return false; }
+    bool isVisualStudio() const         { return true; }
+    bool isWindows() const              { return true; }
+    bool canCopeWithDuplicateFiles()    { return false; }
 
     bool launchProject()
     {
@@ -1523,6 +1518,3 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE (MSVCProjectExporterVC2012)
 };
-
-
-#endif   // __JUCER_PROJECTEXPORT_MSVC_JUCEHEADER__

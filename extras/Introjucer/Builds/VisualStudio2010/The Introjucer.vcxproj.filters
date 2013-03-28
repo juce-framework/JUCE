@@ -1281,6 +1281,9 @@
     <ClInclude Include="..\..\Source\Project Saving\jucer_ProjectExport_Android.h">
       <Filter>The Introjucer\Project Saving</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\Source\Project Saving\jucer_ProjectExport_CodeBlocks.h">
+      <Filter>The Introjucer\Project Saving</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\Source\Project Saving\jucer_ProjectExport_Make.h">
       <Filter>The Introjucer\Project Saving</Filter>
     </ClInclude>
