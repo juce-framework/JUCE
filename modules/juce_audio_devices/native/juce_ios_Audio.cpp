@@ -381,7 +381,7 @@ private:
     {
         if (interruptionType == kAudioSessionBeginInterruption)
         {
-            isrunning = false;
+            isRunning = false;
             AudioOutputUnitStop (audioUnit);
             AudioSessionSetActive (false);
 
