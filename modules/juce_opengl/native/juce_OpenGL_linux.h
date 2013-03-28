@@ -103,11 +103,11 @@ public:
             XFree (bestVisual);
     }
 
-    void initialiseOnRenderThread()
+    void initialiseOnRenderThread (OpenGLContext& context)
     {
         ScopedXLock xlock;
         renderContext = glXCreateContext (display, bestVisual, (GLXContext) contextToShareWith, GL_TRUE);
-        makeActive();
+        context.makeActive();
     }
 
     void shutdownOnRenderThread()

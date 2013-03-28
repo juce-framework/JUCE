@@ -63,7 +63,7 @@ public:
         glView.clear();
     }
 
-    void initialiseOnRenderThread() {}
+    void initialiseOnRenderThread (OpenGLContext&) {}
     void shutdownOnRenderThread() {}
 
     bool makeActive() const noexcept            { return isInsideGLCallback; }

@@ -81,7 +81,7 @@ public:
         renderContext = nil;
     }
 
-    void initialiseOnRenderThread() {}
+    void initialiseOnRenderThread (OpenGLContext&) {}
     void shutdownOnRenderThread()               { deactivateCurrentContext(); }
 
     bool createdOk() const noexcept             { return getRawContext() != nullptr; }

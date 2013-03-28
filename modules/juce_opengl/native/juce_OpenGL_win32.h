@@ -81,7 +81,7 @@ public:
         releaseDC();
     }
 
-    void initialiseOnRenderThread() {}
+    void initialiseOnRenderThread (OpenGLContext&) {}
     void shutdownOnRenderThread()           { deactivateCurrentContext(); }
 
     static void deactivateCurrentContext()  { wglMakeCurrent (0, 0); }
