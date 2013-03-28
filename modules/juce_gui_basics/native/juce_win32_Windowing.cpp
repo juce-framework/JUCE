@@ -470,6 +470,7 @@ public:
     HWNDComponentPeer (Component& comp, const int windowStyleFlags, HWND parent, bool nonRepainting)
         : ComponentPeer (comp, windowStyleFlags),
           dontRepaint (nonRepainting),
+          parentToAddTo (parent),
           currentRenderingEngine (softwareRenderingEngine),
           lastPaintTime (0),
           fullScreen (false),
@@ -479,7 +480,6 @@ public:
           constrainerIsResizing (false),
           currentWindowIcon (0),
           dropTarget (nullptr),
-          parentToAddTo (parent),
           updateLayeredWindowAlpha (255)
     {
         callFunctionIfNotLocked (&createWindowCallback, this);

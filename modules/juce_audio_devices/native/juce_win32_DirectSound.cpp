@@ -531,13 +531,11 @@ public:
 
     void close()
     {
-        HRESULT hr;
-
         if (pInputBuffer != nullptr)
         {
             JUCE_DS_LOG ("closing input: " + name);
-            hr = pInputBuffer->Stop();
-            JUCE_DS_LOG_ERROR (hr);
+            HRESULT hr = pInputBuffer->Stop();
+            JUCE_DS_LOG_ERROR (hr); (void) hr;
 
             pInputBuffer->Release();
             pInputBuffer = nullptr;

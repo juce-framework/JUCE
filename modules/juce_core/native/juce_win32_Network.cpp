@@ -375,7 +375,8 @@ namespace MACAddressHelpers
                         NAME_BUFFER    NameBuff [30];
                     };
 
-                    ASTAT astat = { 0 };
+                    ASTAT astat;
+                    zerostruct (astat);
                     ncb.ncb_buffer = (unsigned char*) &astat;
                     ncb.ncb_length = sizeof (ASTAT);
 

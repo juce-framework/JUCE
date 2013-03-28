@@ -57,6 +57,11 @@
 
 //==============================================================================
 #elif JUCE_WINDOWS
+ #if JUCE_MINGW && JUCE_WASAPI
+  #warning "WASAPI not currently implemented with mingw..."
+  #undef JUCE_WASAPI
+ #endif
+
  #if JUCE_WASAPI
   #pragma warning (push)
   #pragma warning (disable: 4201)

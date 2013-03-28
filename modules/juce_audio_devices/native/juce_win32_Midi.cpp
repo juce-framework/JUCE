@@ -151,6 +151,7 @@ private:
             hdr.dwBytesRecorded = 0;
             MMRESULT res = midiInPrepareHeader (deviceHandle, &hdr, sizeof (hdr));
             res = midiInAddBuffer (deviceHandle, &hdr, sizeof (hdr));
+            (void) res;
         }
 
         void writeIfFinished (HMIDIIN deviceHandle)
