@@ -62,16 +62,12 @@ public:
     //==============================================================================
     void create (const OwnedArray<LibraryModule>&) const
     {
-        Array<RelativePath> files;
-        for (int i = 0; i < getAllGroups().size(); ++i)
-            findAllFilesToCompile (getAllGroups().getReference(i), files);
-
         const File cbpFile (getTargetFolder().getChildFile (project.getProjectFilenameRoot())
                                              .withFileExtension (".cbp"));
 
         XmlElement xml ("CodeBlocks_project_file");
         addVersion (xml);
-        createProject (*xml.createNewChildElement ("Project"), files);
+        createProject (*xml.createNewChildElement ("Project"));
         writeXmlOrThrow (xml, cbpFile, "UTF-8", 10);
     }
 
@@ -96,20 +92,6 @@ private:
     }
 
     //==============================================================================
-    void findAllFilesToCompile (const Project::Item& projectItem, Array<RelativePath>& results) const
-    {
-        if (projectItem.isGroup())
-        {
-            for (int i = 0; i < projectItem.getNumChildren(); ++i)
-                findAllFilesToCompile (projectItem.getChild(i), results);
-        }
-        else
-        {
-            if (projectItem.shouldBeCompiled())
-                results.add (RelativePath (projectItem.getFile(), getTargetFolder(), RelativePath::buildTargetFolder));
-        }
-    }
-
     void addVersion (XmlElement& xml) const
     {
         XmlElement* fileVersion = xml.createNewChildElement ("FileVersion");
@@ -259,12 +241,15 @@ private:
             XmlElement* const linker = xml.createNewChildElement ("Linker");
 
             const StringArray linkerFlags (getLinkerFlags (config));
-
             for (int i = 0; i < linkerFlags.size(); ++i)
                 setAddOption (*linker, "option", linkerFlags[i]);
 
             for (int i = 0; i < mingwLibs.size(); ++i)
                 setAddOption (*linker, "library", mingwLibs[i]);
+
+            const StringArray librarySearchPaths (config.getLibrarySearchPaths());
+            for (int i = 0; i < librarySearchPaths.size(); ++i)
+                setAddOption (*linker, "directory", replacePreprocessorDefs (getAllPreprocessorDefs(), librarySearchPaths[i]));
         }
     }
 
@@ -297,23 +282,41 @@ private:
             setAddOption (*linker, "library", replacePreprocessorDefs (getAllPreprocessorDefs(), libs[i]));
     }
 
-
-    void addCompileUnits (XmlElement& xml, const Array<RelativePath>& files) const
+    void addCompileUnits (const Project::Item& projectItem, XmlElement& xml) const
     {
-        for (int i = 0; i < files.size(); ++i)
+        if (projectItem.isGroup())
         {
-            const RelativePath& file = files.getReference(i);
-            xml.createNewChildElement ("Unit")->setAttribute ("filename", file.toUnixStyle());
+            for (int i = 0; i < projectItem.getNumChildren(); ++i)
+                addCompileUnits (projectItem.getChild(i), xml);
+        }
+        else if (projectItem.shouldBeAddedToTargetProject())
+        {
+            const RelativePath file (projectItem.getFile(), getTargetFolder(), RelativePath::buildTargetFolder);
+
+            XmlElement* unit = xml.createNewChildElement ("Unit");
+            unit->setAttribute ("filename", file.toUnixStyle());
+
+            if (! projectItem.shouldBeCompiled())
+            {
+                unit->createNewChildElement("Option")->setAttribute ("compile", 0);
+                unit->createNewChildElement("Option")->setAttribute ("link", 0);
+            }
         }
     }
 
-    void createProject (XmlElement& xml, const Array<RelativePath>& files) const
+    void addCompileUnits (XmlElement& xml) const
+    {
+        for (int i = 0; i < getAllGroups().size(); ++i)
+            addCompileUnits (getAllGroups().getReference(i), xml);
+    }
+
+    void createProject (XmlElement& xml) const
     {
         addOptions (xml);
         addBuild (xml);
         addProjectCompilerOptions (xml);
         addProjectLinkerOptions (xml);
-        addCompileUnits (xml, files);
+        addCompileUnits (xml);
     }
 
     void setAddOption (XmlElement& xml, const String& name, const String& value) const
