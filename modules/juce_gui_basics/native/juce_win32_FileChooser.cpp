@@ -77,9 +77,8 @@ namespace FileChooserHelpers
             if (ofn->hdr.code == CDN_SELCHANGE)
             {
                 FileChooserCallbackInfo* info = (FileChooserCallbackInfo*) ofn->lpOFN->lCustData;
-                FilePreviewComponent* comp = dynamic_cast<FilePreviewComponent*> (info->customComponent->getChildComponent(0));
 
-                if (comp != nullptr)
+                if (FilePreviewComponent* comp = dynamic_cast<FilePreviewComponent*> (info->customComponent->getChildComponent(0)))
                 {
                     WCHAR path [MAX_PATH * 2] = { 0 };
                     CommDlg_OpenSave_GetFilePath (GetParent (hdlg), (LPARAM) &path, MAX_PATH);
@@ -110,8 +109,7 @@ namespace FileChooserHelpers
 
         void resized()
         {
-            Component* const c = getChildComponent(0);
-            if (c != nullptr)
+            if (Component* const c = getChildComponent(0))
                 c->setBounds (getLocalBounds());
         }
 
@@ -134,6 +132,8 @@ void FileChooser::showPlatformDialog (Array<File>& results, const String& title_
     using namespace FileChooserHelpers;
 
     const String title (title_);
+    String defaultExtension; // scope of these strings must extend beyond dialog's lifetime.
+
     HeapBlock<WCHAR> files;
     const size_t charsAvailableForResult = 32768;
     files.calloc (charsAvailableForResult + 1);
@@ -188,7 +188,7 @@ void FileChooser::showPlatformDialog (Array<File>& results, const String& title_
         }
 
         LPMALLOC al;
-        if (list != 0 && SUCCEEDED (SHGetMalloc (&al)))
+        if (list != nullptr && SUCCEEDED (SHGetMalloc (&al)))
             al->Free (list);
 
         if (info.returnedString.isNotEmpty())
@@ -243,9 +243,27 @@ void FileChooser::showPlatformDialog (Array<File>& results, const String& title_
         if (extraInfoComponent != nullptr)
             of.lpfnHook = &openCallback;
 
-        if (! (isSaveDialogue ? GetSaveFileName (&of)
-                              : GetOpenFileName (&of)))
-            return;
+        if (isSaveDialogue)
+        {
+            StringArray tokens;
+            tokens.addTokens (filter, ";,", "\"'");
+            tokens.trim();
+            tokens.removeEmptyStrings();
+
+            if (tokens.size() == 1 && tokens[0].removeCharacters ("*.").isNotEmpty())
+            {
+                defaultExtension = tokens[0].fromFirstOccurrenceOf (".", false, false);
+                of.lpstrDefExt = defaultExtension.toWideCharPointer();
+            }
+
+            if (! GetSaveFileName (&of))
+                return;
+        }
+        else
+        {
+            if (! GetOpenFileName (&of))
+                return;
+        }
 
         filenameOffset = of.nFileOffset;
     }
