@@ -57,20 +57,8 @@
 
 //==============================================================================
 #elif JUCE_WINDOWS
- #if JUCE_MINGW && JUCE_WASAPI
-  #warning "WASAPI not currently implemented with mingw..."
-  #undef JUCE_WASAPI
- #endif
-
  #if JUCE_WASAPI
-  #pragma warning (push)
-  #pragma warning (disable: 4201)
   #include <MMReg.h>
-  #include <Audioclient.h>
-  #include <Audiopolicy.h>
-  #include <Avrt.h>
-  #include <functiondiscoverykeys.h>
-  #pragma warning (pop)
  #endif
 
  #if JUCE_ASIO
