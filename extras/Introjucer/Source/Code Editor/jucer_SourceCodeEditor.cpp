@@ -63,27 +63,44 @@ void SourceCodeDocument::reloadInternal()
 {
     jassert (codeDoc != nullptr);
     modDetector.updateHash();
-    codeDoc->applyChanges (modDetector.getFile().loadFileAsString());
+    codeDoc->applyChanges (getFile().loadFileAsString());
     codeDoc->setSavePoint();
 }
 
-bool SourceCodeDocument::save()
+static bool writeCodeDocToFile (const File& file, CodeDocument& doc)
 {
-    TemporaryFile temp (modDetector.getFile());
+    TemporaryFile temp (file);
 
     {
         FileOutputStream fo (temp.getFile());
 
-        if (! (fo.openedOk() && getCodeDocument().writeToStream (fo)))
+        if (! (fo.openedOk() && doc.writeToStream (fo)))
             return false;
     }
 
-    if (! temp.overwriteTargetFileWithTemporary())
-        return false;
+    return temp.overwriteTargetFileWithTemporary();
+}
 
-    getCodeDocument().setSavePoint();
-    modDetector.updateHash();
-    return true;
+bool SourceCodeDocument::save()
+{
+    if (writeCodeDocToFile (getFile(), getCodeDocument()))
+    {
+        getCodeDocument().setSavePoint();
+        modDetector.updateHash();
+        return true;
+    }
+
+    return false;
+}
+
+bool SourceCodeDocument::saveAs()
+{
+    FileChooser fc (TRANS("Save As..."), getFile(), "*");
+
+    if (! fc.browseForFileToSave (true))
+        return true;
+
+    return writeCodeDocToFile (fc.getResult(), getCodeDocument());
 }
 
 void SourceCodeDocument::updateLastState (CodeEditorComponent& editor)

@@ -137,15 +137,11 @@ FileBasedDocument::SaveResult FileBasedDocument::saveAs (const File& newFile,
     if (newFile == File::nonexistent)
     {
         if (askUserForFileIfNotSpecified)
-        {
             return saveAsInteractive (true);
-        }
-        else
-        {
-            // can't save to an unspecified file
-            jassertfalse;
-            return failedToWriteToFile;
-        }
+
+        // can't save to an unspecified file
+        jassertfalse;
+        return failedToWriteToFile;
     }
 
     if (warnAboutOverwritingExistingFiles && newFile.exists())
@@ -208,16 +204,11 @@ FileBasedDocument::SaveResult FileBasedDocument::saveIfNeededAndUserAgrees()
                                                    TRANS("discard changes"),
                                                    TRANS("cancel"));
 
-    if (r == 1)
-    {
-        // save changes
+    if (r == 1)  // save changes
         return save (true, true);
-    }
-    else if (r == 2)
-    {
-        // discard changes
+
+    if (r == 2)  // discard changes
         return savedOk;
-    }
 
     return userCancelledSave;
 }

@@ -59,7 +59,8 @@ public:
             const char* extensions[] = { "h", "hpp", nullptr };
             return findCounterpart (file, extensions);
         }
-        else if (file.hasFileExtension ("h;hpp"))
+
+        if (file.hasFileExtension ("h;hpp"))
         {
             const char* extensions[] = { "cpp", "mm", "cc", "cxx", "c", "m", nullptr };
             return findCounterpart (file, extensions);
@@ -83,6 +84,7 @@ public:
 
     void reloadFromFile();
     bool save();
+    bool saveAs();
 
     Component* createEditor();
     Component* createViewer()       { return createEditor(); }
