@@ -35,7 +35,8 @@ static bool exeIsAvailable (const char* const executable)
 
 bool FileChooser::isPlatformDialogAvailable()
 {
-    return exeIsAvailable ("zenity") || exeIsAvailable ("kdialog");
+    static bool canUseNativeBox = exeIsAvailable ("zenity") || exeIsAvailable ("kdialog");
+    return canUseNativeBox;
 }
 
 void FileChooser::showPlatformDialog (Array<File>& results,

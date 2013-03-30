@@ -68,7 +68,8 @@ public:
                                              conjuction with canSelectFiles). */
         canSelectMultipleItems  = 16,   /**< specifies that the user can select multiple items. */
         useTreeView             = 32,   /**< specifies that a tree-view should be shown instead of a file list. */
-        filenameBoxIsReadOnly   = 64    /**< specifies that the user can't type directly into the filename box. */
+        filenameBoxIsReadOnly   = 64,   /**< specifies that the user can't type directly into the filename box. */
+        warnAboutOverwriting    = 128   /**< specifies that the dialog should warn about overwriting existing files (if possible). */
     };
 
     //==============================================================================
