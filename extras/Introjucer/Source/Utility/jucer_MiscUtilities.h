@@ -267,7 +267,7 @@ public:
         }
         else
         {
-            selector.setBounds (0, 0, getWidth(), getHeight());
+            selector.setBounds (getLocalBounds());
         }
     }
 

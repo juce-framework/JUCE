@@ -62,13 +62,11 @@ void ImagePreviewComponent::timerCallback()
     currentDetails = String::empty;
     repaint();
 
-    ScopedPointer <FileInputStream> in (fileToLoad.createInputStream());
+    ScopedPointer<FileInputStream> in (fileToLoad.createInputStream());
 
     if (in != nullptr)
     {
-        ImageFileFormat* const format = ImageFileFormat::findImageFormatForStream (*in);
-
-        if (format != nullptr)
+        if (ImageFileFormat* const format = ImageFileFormat::findImageFormatForStream (*in))
         {
             currentThumbnail = format->decodeImage (*in);
 

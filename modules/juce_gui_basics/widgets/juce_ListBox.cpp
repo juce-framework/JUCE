@@ -427,7 +427,7 @@ void ListBox::paintOverChildren (Graphics& g)
     if (outlineThickness > 0)
     {
         g.setColour (findColour (outlineColourId));
-        g.drawRect (0, 0, getWidth(), getHeight(), outlineThickness);
+        g.drawRect (getLocalBounds(), outlineThickness);
     }
 }
 

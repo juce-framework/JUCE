@@ -123,8 +123,8 @@ public:
 };
 
 //==============================================================================
-CodeDocument::Iterator::Iterator (const CodeDocument& document_) noexcept
-    : document (&document_),
+CodeDocument::Iterator::Iterator (const CodeDocument& doc) noexcept
+    : document (&doc),
       charPointer (nullptr),
       line (0),
       position (0)

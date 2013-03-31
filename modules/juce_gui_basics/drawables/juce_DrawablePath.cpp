@@ -78,9 +78,9 @@ void DrawablePath::applyRelativePath (const RelativePointPath& newRelativePath, 
 class DrawablePath::RelativePositioner  : public RelativeCoordinatePositionerBase
 {
 public:
-    RelativePositioner (DrawablePath& component_)
-        : RelativeCoordinatePositionerBase (component_),
-          owner (component_)
+    RelativePositioner (DrawablePath& comp)
+        : RelativeCoordinatePositionerBase (comp),
+          owner (comp)
     {
     }
 

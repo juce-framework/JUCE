@@ -46,11 +46,11 @@ DrawableShape::~DrawableShape()
 class DrawableShape::RelativePositioner  : public RelativeCoordinatePositionerBase
 {
 public:
-    RelativePositioner (DrawableShape& component_, const DrawableShape::RelativeFillType& fill_, bool isMainFill_)
-        : RelativeCoordinatePositionerBase (component_),
-          owner (component_),
-          fill (fill_),
-          isMainFill (isMainFill_)
+    RelativePositioner (DrawableShape& comp, const DrawableShape::RelativeFillType& f, bool isMain)
+        : RelativeCoordinatePositionerBase (comp),
+          owner (comp),
+          fill (f),
+          isMainFill (isMain)
     {
     }
 

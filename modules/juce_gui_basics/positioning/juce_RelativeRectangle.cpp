@@ -187,9 +187,9 @@ void RelativeRectangle::renameSymbol (const Expression::Symbol& oldSymbol, const
 class RelativeRectangleComponentPositioner  : public RelativeCoordinatePositionerBase
 {
 public:
-    RelativeRectangleComponentPositioner (Component& component_, const RelativeRectangle& rectangle_)
-        : RelativeCoordinatePositionerBase (component_),
-          rectangle (rectangle_)
+    RelativeRectangleComponentPositioner (Component& comp, const RelativeRectangle& r)
+        : RelativeCoordinatePositionerBase (comp),
+          rectangle (r)
     {
     }
 
