@@ -267,9 +267,9 @@ namespace CodeHelpers
         return result + currentLine.trimEnd() + ")";
     }
 
-    String floatLiteral (float value, int numDecPlaces)
+    String floatLiteral (double value, int numDecPlaces)
     {
-        String s ((double) value, numDecPlaces);
+        String s (value, numDecPlaces);
 
         if (s.containsChar ('.'))
             s << 'f';

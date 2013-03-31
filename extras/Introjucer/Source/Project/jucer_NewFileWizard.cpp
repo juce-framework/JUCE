@@ -25,6 +25,7 @@
 
 #include "jucer_NewFileWizard.h"
 
+NewFileWizard::Type* createGUIComponentWizard();
 
 //==============================================================================
 namespace
@@ -235,6 +236,7 @@ NewFileWizard::NewFileWizard()
     registerWizard (new NewCppAndHeaderFileWizard());
     registerWizard (new NewComponentFileWizard());
     registerWizard (new NewSingleFileComponentFileWizard());
+    registerWizard (createGUIComponentWizard());
 }
 
 NewFileWizard::~NewFileWizard()

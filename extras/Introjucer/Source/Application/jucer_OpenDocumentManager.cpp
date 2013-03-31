@@ -70,7 +70,7 @@ public:
         if (file.getFileExtension().isNotEmpty())
             return file.getFileExtension() + " file";
 
-        jassertfalse
+        jassertfalse;
         return "Unknown";
     }
 
@@ -84,10 +84,13 @@ private:
 
 
 //==============================================================================
+OpenDocumentManager::DocumentType* createGUIDocumentType();
+
 OpenDocumentManager::OpenDocumentManager()
 {
     registerType (new UnknownDocument::Type());
     registerType (new SourceCodeDocument::Type());
+    registerType (createGUIDocumentType());
 }
 
 OpenDocumentManager::~OpenDocumentManager()
@@ -195,10 +198,8 @@ bool OpenDocumentManager::closeDocument (int index, bool saveIfNeeded)
     if (Document* doc = documents [index])
     {
         if (saveIfNeeded)
-        {
             if (saveIfNeededAndUserAgrees (doc) != FileBasedDocument::savedOk)
                 return false;
-        }
 
         for (int i = listeners.size(); --i >= 0;)
             listeners.getUnchecked(i)->documentAboutToClose (doc);

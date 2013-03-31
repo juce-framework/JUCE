@@ -331,7 +331,7 @@ void ModuleList::createDependencies (const String& moduleID, OwnedArray<LibraryM
                 String version (d ["version"].toString());
 
                 //xxx to do - also need to find version conflicts
-                jassertfalse
+                jassertfalse;
             }
         }
     }

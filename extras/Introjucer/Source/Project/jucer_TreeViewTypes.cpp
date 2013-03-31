@@ -84,7 +84,7 @@ ProjectTreeViewBase* GroupTreeViewItem::createSubItem (const Project::Item& chil
     if (child.isGroup())   return new GroupTreeViewItem (child);
     if (child.isFile())    return new SourceFileTreeViewItem (child);
 
-    jassertfalse
+    jassertfalse;
     return nullptr;
 }
 
@@ -251,7 +251,7 @@ void SourceFileTreeViewItem::setName (const String& newName)
 
 ProjectTreeViewBase* SourceFileTreeViewItem::createSubItem (const Project::Item&)
 {
-    jassertfalse
+    jassertfalse;
     return nullptr;
 }
 

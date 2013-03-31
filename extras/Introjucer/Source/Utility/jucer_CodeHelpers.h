@@ -39,7 +39,7 @@ namespace CodeHelpers
     String makeBinaryDataIdentifierName (const File& file);
 
     String stringLiteral (const String& text, int maxLineLength = -1);
-    String floatLiteral (float value, int numDecPlaces);
+    String floatLiteral (double value, int numDecPlaces);
     String boolLiteral (bool value);
 
     String colourToCode (const Colour& col);
