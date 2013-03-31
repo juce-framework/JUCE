@@ -162,6 +162,7 @@ public:
         if (handle != nullptr && plugin != nullptr && plugin->cleanup != nullptr)
             plugin->cleanup (handle);
 
+        initialised = false;
         module = nullptr;
         plugin = nullptr;
         handle = nullptr;
@@ -180,7 +181,7 @@ public:
         outputs.clear();
         parameters.clear();
 
-        for (uint i = 0; i < plugin->PortCount; ++i)
+        for (unsigned int i = 0; i < plugin->PortCount; ++i)
         {
             const LADSPA_PortDescriptor portDesc = plugin->PortDescriptors[i];
 
@@ -205,6 +206,10 @@ public:
 
         setCurrentProgram (0);
         setLatencySamples (0);
+
+        // Some plugins crash if this doesn't happen:
+        if (plugin->activate   != nullptr)   plugin->activate (handle);
+        if (plugin->deactivate != nullptr)   plugin->deactivate (handle);
     }
 
     //==============================================================================
@@ -241,11 +246,11 @@ public:
         return module->file.hashCode();
     }
 
-    String getVersion() const               { return LADSPA_VERSION; }
-    String getCategory() const              { return "Effect"; }
+    String getVersion() const                 { return LADSPA_VERSION; }
+    String getCategory() const                { return "Effect"; }
 
-    bool acceptsMidi() const                { return false; }
-    bool producesMidi() const               { return false; }
+    bool acceptsMidi() const                  { return false; }
+    bool producesMidi() const                 { return false; }
 
     bool silenceInProducesSilenceOut() const  { return plugin == nullptr; } // ..any way to get a proper answer for these?
     double getTailLengthSeconds() const       { return 0.0; }
@@ -271,11 +276,17 @@ public:
                 setParameter (0, (old < 0.5f) ? 1.0f : 0.0f);
                 setParameter (0, old);
             }
+
+            if (plugin->activate != nullptr)
+                plugin->activate (handle);
         }
     }
 
     void releaseResources()
     {
+        if (handle != nullptr && plugin->deactivate != nullptr)
+            plugin->deactivate (handle);
+
         tempBuffer.setSize (1, 1);
     }
 
@@ -344,7 +355,12 @@ public:
 
     //==============================================================================
     int getNumParameters()                              { return handle != nullptr ? parameters.size() : 0; }
-    bool isParameterAutomatable (int index) const       { return true; }
+
+    bool isParameterAutomatable (int index) const
+    {
+        return plugin != nullptr
+                 && (plugin->PortDescriptors [parameters[index]] & LADSPA_PORT_INPUT) != 0;
+    }
 
     float getParameter (int index)
     {
@@ -573,6 +589,8 @@ void LADSPAPluginFormat::findAllTypesForFile (OwnedArray <PluginDescription>& re
 
     if (instance == nullptr || ! instance->isValid())
         return;
+
+    instance->initialise();
 
     instance->fillInPluginDescription (desc);
 
