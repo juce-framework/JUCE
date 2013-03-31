@@ -62,6 +62,12 @@
                        winWarningLevel="4" generateManifest="1" winArchitecture="32-bit"/>
       </CONFIGURATIONS>
     </VS2010>
+    <CODEBLOCKS targetFolder="Builds/CodeBlocks" juceFolder="../..">
+      <CONFIGURATIONS>
+        <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="The Introjucer"/>
+        <CONFIGURATION name="Release" isDebug="0" optimisation="2" targetName="The Introjucer"/>
+      </CONFIGURATIONS>
+    </CODEBLOCKS>
   </EXPORTFORMATS>
   <MAINGROUP name="The Introjucer" id="NhrJq66R">
     <GROUP id="mslFIKZ" name="Application">

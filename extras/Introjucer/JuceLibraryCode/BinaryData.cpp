@@ -564,7 +564,7 @@ static const unsigned char temp_8626361b[] =
 "\r\n"
 "%%staticMemberDefinitions%%\r\n"
 "//[EndFile] You can add extra defines here...\r\n"
-"//[/EndFile]\r\n";
+"//[/EndFile]";
 
 const char* jucer_ComponentTemplate_cpp = (const char*) temp_8626361b;
 
@@ -633,7 +633,7 @@ static const unsigned char temp_363772e0[] =
 "//[EndFile] You can add extra defines here...\r\n"
 "//[/EndFile]\r\n"
 "\r\n"
-"#endif   // %%headerGuard%%\r\n";
+"#endif   // %%headerGuard%%";
 
 const char* jucer_ComponentTemplate_h = (const char*) temp_363772e0;
 
@@ -1170,8 +1170,8 @@ const char* getNamedResource (const char* resourceNameUTF8, int& numBytes) throw
         case 0x4d0721bf:  numBytes = 799; return jucer_AudioPluginEditorTemplate_h;
         case 0x51b49ac5:  numBytes = 4638; return jucer_AudioPluginFilterTemplate_cpp;
         case 0x488afa0a:  numBytes = 2488; return jucer_AudioPluginFilterTemplate_h;
-        case 0xabad7041:  numBytes = 2085; return jucer_ComponentTemplate_cpp;
-        case 0xfc72fe86:  numBytes = 2158; return jucer_ComponentTemplate_h;
+        case 0xabad7041:  numBytes = 2083; return jucer_ComponentTemplate_cpp;
+        case 0xfc72fe86:  numBytes = 2156; return jucer_ComponentTemplate_h;
         case 0x0b66646c:  numBytes = 886; return jucer_ContentCompTemplate_cpp;
         case 0x6fa10171:  numBytes = 924; return jucer_ContentCompTemplate_h;
         case 0x8905395b:  numBytes = 470; return jucer_MainConsoleAppTemplate_cpp;
