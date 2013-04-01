@@ -626,6 +626,14 @@ public:
         handleMouseWheel (0, getMousePos (ev, view), getMouseTime (ev), wheel);
     }
 
+    void redirectMagnify (NSEvent* ev)
+    {
+        const float invScale = 1.0f - [ev magnification];
+
+        if (invScale != 0.0f)
+            handleMagnifyGesture (0, getMousePos (ev, view), getMouseTime (ev), 1.0f / invScale);
+    }
+
     void sendMouseEvent (NSEvent* ev)
     {
         updateModifiers (ev);
@@ -1347,6 +1355,7 @@ struct JuceNSViewClass   : public ObjCClass <NSView>
         addMethod (@selector (otherMouseDragged:),            mouseDragged,               "v@:@");
         addMethod (@selector (otherMouseUp:),                 mouseUp,                    "v@:@");
         addMethod (@selector (scrollWheel:),                  scrollWheel,                "v@:@");
+        addMethod (@selector (magnifyWithEvent:),             magnify,                    "v@:@");
         addMethod (@selector (acceptsFirstMouse:),            acceptsFirstMouse,          "v@:@");
         addMethod (@selector (frameChanged:),                 frameChanged,               "v@:@");
         addMethod (@selector (viewDidMoveToWindow),           viewDidMoveToWindow,        "v@:");
@@ -1425,6 +1434,7 @@ private:
     static void mouseEntered   (id self, SEL, NSEvent* ev)   { if (NSViewComponentPeer* const p = getOwner (self)) p->redirectMouseEnter (ev); }
     static void mouseExited    (id self, SEL, NSEvent* ev)   { if (NSViewComponentPeer* const p = getOwner (self)) p->redirectMouseExit  (ev); }
     static void scrollWheel    (id self, SEL, NSEvent* ev)   { if (NSViewComponentPeer* const p = getOwner (self)) p->redirectMouseWheel (ev); }
+    static void magnify        (id self, SEL, NSEvent* ev)   { if (NSViewComponentPeer* const p = getOwner (self)) p->redirectMagnify    (ev); }
 
     static BOOL acceptsFirstMouse (id, SEL, NSEvent*)        { return YES; }
 

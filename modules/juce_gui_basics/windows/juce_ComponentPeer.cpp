@@ -113,6 +113,13 @@ void ComponentPeer::handleMouseWheel (const int touchIndex, const Point<int>& po
         mouse->handleWheel (this, positionWithinPeer, time, wheel);
 }
 
+void ComponentPeer::handleMagnifyGesture (const int touchIndex, const Point<int>& positionWithinPeer,
+                                          const int64 time, const float scaleFactor)
+{
+    if (MouseInputSource* mouse = getOrCreateMouseInputSource (touchIndex))
+        mouse->handleMagnifyGesture (this, positionWithinPeer, time, scaleFactor);
+}
+
 //==============================================================================
 void ComponentPeer::handlePaint (LowLevelGraphicsContext& contextToPaintTo)
 {

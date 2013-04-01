@@ -1559,6 +1559,18 @@ public:
     virtual void mouseWheelMove (const MouseEvent& event,
                                  const MouseWheelDetails& wheel);
 
+    /** Called when a pinch-to-zoom mouse-gesture is used.
+
+        If not overridden, a component will forward this message to its parent, so
+        that parent components can collect gesture messages that are unused by child
+        components.
+
+        @param scaleFactor  a multiplier to indicate by how much the size of the target
+                            should be changed. A value of 1.0 would indicate no change,
+                            values greater than 1.0 mean it should be enlarged.
+    */
+    virtual void mouseMagnify (const MouseEvent& event, float scaleFactor);
+
     //==============================================================================
     /** Ensures that a non-stop stream of mouse-drag events will be sent during the
         current mouse-drag operation.
@@ -2281,6 +2293,7 @@ private:
     void internalMouseDrag  (MouseInputSource&, const Point<int>&, const Time&);
     void internalMouseMove  (MouseInputSource&, const Point<int>&, const Time&);
     void internalMouseWheel (MouseInputSource&, const Point<int>&, const Time&, const MouseWheelDetails&);
+    void internalMagnifyGesture (MouseInputSource&, const Point<int>&, const Time&, float);
     void internalBroughtToFront();
     void internalFocusGain (const FocusChangeType, const WeakReference<Component>&);
     void internalFocusGain (const FocusChangeType);

@@ -138,6 +138,11 @@ public:
         }
     }
 
+    void mouseMagnify (const MouseEvent&, float zoomFactor)
+    {
+        owner.sizeSlider->setValue (owner.sizeSlider->getValue() * zoomFactor);
+    }
+
 private:
     RenderingTestComponent& owner;
     double averageTime;
@@ -151,13 +156,13 @@ private:
     float speeds[8];
     Time lastSVGLoadTime;
 
-    const AffineTransform getTransform()
+    AffineTransform getTransform()
     {
         return AffineTransform::rotation ((float) owner.angleSlider->getValue() / (180.0f / float_Pi))
-                                .scaled ((float) owner.sizeSlider->getValue(),
-                                         (float) owner.sizeSlider->getValue())
-                                .translated (getWidth() / 2 + (float) owner.xSlider->getValue(),
-                                             getHeight() / 2 + (float) owner.ySlider->getValue());
+                               .scaled ((float) owner.sizeSlider->getValue(),
+                                        (float) owner.sizeSlider->getValue())
+                               .translated (getWidth() / 2 + (float) owner.xSlider->getValue(),
+                                            getHeight() / 2 + (float) owner.ySlider->getValue());
     }
 
     void clipToRectangle (Graphics& g)

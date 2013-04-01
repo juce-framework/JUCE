@@ -315,6 +315,7 @@ public:
     //==============================================================================
     void handleMouseEvent (int touchIndex, const Point<int>& positionWithinPeer, const ModifierKeys& newMods, int64 time);
     void handleMouseWheel (int touchIndex, const Point<int>& positionWithinPeer, int64 time, const MouseWheelDetails&);
+    void handleMagnifyGesture (int touchIndex, const Point<int>& positionWithinPeer, int64 time, float scaleFactor);
 
     void handleUserClosingWindow();
 

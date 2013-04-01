@@ -82,46 +82,60 @@ public:
     }
 
     //==============================================================================
+   #if JUCE_DUMP_MOUSE_EVENTS
+    #define JUCE_MOUSE_EVENT_DBG(desc)   DBG ("Mouse " desc << " #" << source.getIndex() \
+                                                << ": " << comp->getLocalPoint (nullptr, screenPos).toString() \
+                                                << " - Comp: " << String::toHexString ((int) comp));
+   #else
+    #define JUCE_MOUSE_EVENT_DBG(desc)
+   #endif
+
     void sendMouseEnter (Component* const comp, const Point<int>& screenPos, const Time& time)
     {
-        //DBG ("Mouse " + String (source.getIndex()) + " enter: " + comp->getLocalPoint (nullptr, screenPos).toString() + " - Comp: " + String::toHexString ((int) comp));
+        JUCE_MOUSE_EVENT_DBG ("enter")
         comp->internalMouseEnter (source, comp->getLocalPoint (nullptr, screenPos), time);
     }
 
     void sendMouseExit (Component* const comp, const Point<int>& screenPos, const Time& time)
     {
-        //DBG ("Mouse " + String (source.getIndex()) + " exit: " + comp->getLocalPoint (nullptr, screenPos).toString() + " - Comp: " + String::toHexString ((int) comp));
+        JUCE_MOUSE_EVENT_DBG ("exit")
         comp->internalMouseExit (source, comp->getLocalPoint (nullptr, screenPos), time);
     }
 
     void sendMouseMove (Component* const comp, const Point<int>& screenPos, const Time& time)
     {
-        //DBG ("Mouse " + String (source.getIndex()) + " move: " + comp->getLocalPoint (nullptr, screenPos).toString() + " - Comp: " + String::toHexString ((int) comp));
+        JUCE_MOUSE_EVENT_DBG ("move")
         comp->internalMouseMove (source, comp->getLocalPoint (nullptr, screenPos), time);
     }
 
     void sendMouseDown (Component* const comp, const Point<int>& screenPos, const Time& time)
     {
-        //DBG ("Mouse " + String (source.getIndex()) + " down: " + comp->getLocalPoint (nullptr, screenPos).toString() + " - Comp: " + String::toHexString ((int) comp));
+        JUCE_MOUSE_EVENT_DBG ("down")
         comp->internalMouseDown (source, comp->getLocalPoint (nullptr, screenPos), time);
     }
 
     void sendMouseDrag (Component* const comp, const Point<int>& screenPos, const Time& time)
     {
-        //DBG ("Mouse " + String (source.getIndex()) + " drag: " + comp->getLocalPoint (nullptr, screenPos).toString() + " - Comp: " + String::toHexString ((int) comp));
+        JUCE_MOUSE_EVENT_DBG ("drag")
         comp->internalMouseDrag (source, comp->getLocalPoint (nullptr, screenPos), time);
     }
 
     void sendMouseUp (Component* const comp, const Point<int>& screenPos, const Time& time, const ModifierKeys& oldMods)
     {
-        //DBG ("Mouse " + String (source.getIndex()) + " up: " + comp->getLocalPoint (nullptr, screenPos).toString() + " - Comp: " + String::toHexString ((int) comp));
+        JUCE_MOUSE_EVENT_DBG ("up")
         comp->internalMouseUp (source, comp->getLocalPoint (nullptr, screenPos), time, oldMods);
     }
 
     void sendMouseWheel (Component* const comp, const Point<int>& screenPos, const Time& time, const MouseWheelDetails& wheel)
     {
-        //DBG ("Mouse " + String (source.getIndex()) + " wheel: " + comp->getLocalPoint (nullptr, screenPos).toString() + " - Comp: " + String::toHexString ((int) comp));
+        JUCE_MOUSE_EVENT_DBG ("wheel")
         comp->internalMouseWheel (source, comp->getLocalPoint (nullptr, screenPos), time, wheel);
+    }
+
+    void sendMagnifyGesture (Component* const comp, const Point<int>& screenPos, const Time& time, const float amount)
+    {
+        JUCE_MOUSE_EVENT_DBG ("magnify")
+        comp->internalMagnifyGesture (source, comp->getLocalPoint (nullptr, screenPos), time, amount);
     }
 
     //==============================================================================
@@ -276,24 +290,37 @@ public:
         }
     }
 
-    void handleWheel (ComponentPeer* const peer, const Point<int>& positionWithinPeer,
-                      const Time& time, const MouseWheelDetails& wheel)
+    Component* getTargetForGesture (ComponentPeer* const peer, const Point<int>& positionWithinPeer,
+                                    const Time& time, Point<int>& screenPos)
     {
         jassert (peer != nullptr);
         lastTime = time;
         ++mouseEventCounter;
-        Desktop::getInstance().incrementMouseWheelCounter();
 
-        const Point<int> screenPos (peer->localToGlobal (positionWithinPeer));
+        screenPos = peer->localToGlobal (positionWithinPeer);
         setPeer (peer, screenPos, time);
         setScreenPos (screenPos, time, false);
         triggerFakeMove();
 
-        if (! isDragging())
-        {
-            if (Component* current = getComponentUnderMouse())
-                sendMouseWheel (current, screenPos, time, wheel);
-        }
+        return isDragging() ? nullptr : getComponentUnderMouse();
+    }
+
+    void handleWheel (ComponentPeer* const peer, const Point<int>& positionWithinPeer,
+                      const Time& time, const MouseWheelDetails& wheel)
+    {
+        Desktop::getInstance().incrementMouseWheelCounter();
+
+        Point<int> screenPos;
+        if (Component* current = getTargetForGesture (peer, positionWithinPeer, time, screenPos))
+            sendMouseWheel (current, screenPos, time, wheel);
+    }
+
+    void handleMagnifyGesture (ComponentPeer* const peer, const Point<int>& positionWithinPeer,
+                               const Time& time, const float scaleFactor)
+    {
+        Point<int> screenPos;
+        if (Component* current = getTargetForGesture (peer, positionWithinPeer, time, screenPos))
+            sendMagnifyGesture (current, screenPos, time, scaleFactor);
     }
 
     //==============================================================================
@@ -517,4 +544,10 @@ void MouseInputSource::handleWheel (ComponentPeer* const peer, const Point<int>&
                                     const int64 time, const MouseWheelDetails& wheel)
 {
     pimpl->handleWheel (peer, positionWithinPeer, Time (time), wheel);
+}
+
+void MouseInputSource::handleMagnifyGesture (ComponentPeer* const peer, const Point<int>& positionWithinPeer,
+                                             const int64 time, const float scaleFactor)
+{
+    pimpl->handleMagnifyGesture (peer, positionWithinPeer, Time (time), scaleFactor);
 }

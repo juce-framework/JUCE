@@ -2151,6 +2151,12 @@ void Component::mouseWheelMove (const MouseEvent& e, const MouseWheelDetails& wh
         parentComponent->mouseWheelMove (e.getEventRelativeTo (parentComponent), wheel);
 }
 
+void Component::mouseMagnify (const MouseEvent& e, float magnifyAmount)
+{
+    // the base class just passes this event up to its parent..
+    if (parentComponent != nullptr)
+        parentComponent->mouseMagnify (e.getEventRelativeTo (parentComponent), magnifyAmount);
+}
 
 //==============================================================================
 void Component::resized()                       {}
@@ -2474,6 +2480,18 @@ void Component::internalMouseWheel (MouseInputSource& source, const Point<int>& 
 
         if (! checker.shouldBailOut())
             MouseListenerList::sendWheelEvent (*this, checker, me, wheel);
+    }
+}
+
+void Component::internalMagnifyGesture (MouseInputSource& source, const Point<int>& relativePos,
+                                        const Time& time, float amount)
+{
+    if (! isCurrentlyBlockedByAnotherModalComponent())
+    {
+        const MouseEvent me (source, relativePos, source.getCurrentModifiers(),
+                             this, this, time, relativePos, time, 0, false);
+
+        mouseMagnify (me, amount);
     }
 }
 
