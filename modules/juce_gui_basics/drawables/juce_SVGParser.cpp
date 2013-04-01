@@ -38,7 +38,7 @@ public:
     //==============================================================================
     Drawable* parseSVGElement (const XmlElement& xml)
     {
-        if (! xml.hasTagName ("svg"))
+        if (! xml.hasTagNameIgnoringNamespace ("svg"))
             return nullptr;
 
         DrawableComposite* const drawable = new DrawableComposite();
@@ -105,7 +105,7 @@ public:
             if (viewBoxH == 0)  newState.viewBoxH = newState.height;
         }
 
-        newState.parseSubElements (xml, drawable);
+        newState.parseSubElements (xml, *drawable);
 
         drawable->setContentArea (RelativeRectangle (Rectangle<float> (newState.viewBoxW, newState.viewBoxH)));
         drawable->resetBoundingBoxToContentArea();
@@ -121,27 +121,30 @@ private:
     String cssStyleText;
 
     //==============================================================================
-    void parseSubElements (const XmlElement& xml, DrawableComposite* const parentDrawable)
+    void parseSubElements (const XmlElement& xml, DrawableComposite& parentDrawable)
     {
         forEachXmlChildElement (xml, e)
-        {
-            Drawable* d = nullptr;
+            parentDrawable.addAndMakeVisible (parseSubElement (*e));
+    }
 
-            if (e->hasTagName ("g"))                d = parseGroupElement (*e);
-            else if (e->hasTagName ("svg"))         d = parseSVGElement (*e);
-            else if (e->hasTagName ("path"))        d = parsePath (*e);
-            else if (e->hasTagName ("rect"))        d = parseRect (*e);
-            else if (e->hasTagName ("circle"))      d = parseCircle (*e);
-            else if (e->hasTagName ("ellipse"))     d = parseEllipse (*e);
-            else if (e->hasTagName ("line"))        d = parseLine (*e);
-            else if (e->hasTagName ("polyline"))    d = parsePolygon (*e, true);
-            else if (e->hasTagName ("polygon"))     d = parsePolygon (*e, false);
-            else if (e->hasTagName ("text"))        d = parseText (*e);
-            else if (e->hasTagName ("switch"))      d = parseSwitch (*e);
-            else if (e->hasTagName ("style"))       parseCSSStyle (*e);
+    Drawable* parseSubElement (const XmlElement& xml)
+    {
+        const String tag (xml.getTagNameWithoutNamespace());
 
-            parentDrawable->addAndMakeVisible (d);
-        }
+        if (tag == "g")           return parseGroupElement (xml);
+        if (tag == "svg")         return parseSVGElement (xml);
+        if (tag == "path")        return parsePath (xml);
+        if (tag == "rect")        return parseRect (xml);
+        if (tag == "circle")      return parseCircle (xml);
+        if (tag == "ellipse")     return parseEllipse (xml);
+        if (tag == "line")        return parseLine (xml);
+        if (tag == "polyline")    return parsePolygon (xml, true);
+        if (tag == "polygon")     return parsePolygon (xml, false);
+        if (tag == "text")        return parseText (xml);
+        if (tag == "switch")      return parseSwitch (xml);
+        if (tag == "style")       parseCSSStyle (xml);
+
+        return nullptr;
     }
 
     DrawableComposite* parseSwitch (const XmlElement& xml)
@@ -163,11 +166,11 @@ private:
             SVGState newState (*this);
             newState.addTransform (xml);
 
-            newState.parseSubElements (xml, drawable);
+            newState.parseSubElements (xml, *drawable);
         }
         else
         {
-            parseSubElements (xml, drawable);
+            parseSubElements (xml, *drawable);
         }
 
         drawable->resetContentAreaAndBoundingBoxToFitChildren();
@@ -412,26 +415,26 @@ private:
 
         if (hasRX || hasRY)
         {
-            float rx = getCoordLength (xml.getStringAttribute ("rx"), viewBoxW);
-            float ry = getCoordLength (xml.getStringAttribute ("ry"), viewBoxH);
+            float rx = getCoordLength (xml, "rx", viewBoxW);
+            float ry = getCoordLength (xml, "ry", viewBoxH);
 
             if (! hasRX)
                 rx = ry;
             else if (! hasRY)
                 ry = rx;
 
-            rect.addRoundedRectangle (getCoordLength (xml.getStringAttribute ("x"), viewBoxW),
-                                      getCoordLength (xml.getStringAttribute ("y"), viewBoxH),
-                                      getCoordLength (xml.getStringAttribute ("width"), viewBoxW),
-                                      getCoordLength (xml.getStringAttribute ("height"), viewBoxH),
+            rect.addRoundedRectangle (getCoordLength (xml, "x", viewBoxW),
+                                      getCoordLength (xml, "y", viewBoxH),
+                                      getCoordLength (xml, "width", viewBoxW),
+                                      getCoordLength (xml, "height", viewBoxH),
                                       rx, ry);
         }
         else
         {
-            rect.addRectangle (getCoordLength (xml.getStringAttribute ("x"), viewBoxW),
-                               getCoordLength (xml.getStringAttribute ("y"), viewBoxH),
-                               getCoordLength (xml.getStringAttribute ("width"), viewBoxW),
-                               getCoordLength (xml.getStringAttribute ("height"), viewBoxH));
+            rect.addRectangle (getCoordLength (xml, "x", viewBoxW),
+                               getCoordLength (xml, "y", viewBoxH),
+                               getCoordLength (xml, "width", viewBoxW),
+                               getCoordLength (xml, "height", viewBoxH));
         }
 
         return parseShape (xml, rect);
@@ -441,9 +444,9 @@ private:
     {
         Path circle;
 
-        const float cx = getCoordLength (xml.getStringAttribute ("cx"), viewBoxW);
-        const float cy = getCoordLength (xml.getStringAttribute ("cy"), viewBoxH);
-        const float radius = getCoordLength (xml.getStringAttribute ("r"), viewBoxW);
+        const float cx = getCoordLength (xml, "cx", viewBoxW);
+        const float cy = getCoordLength (xml, "cy", viewBoxH);
+        const float radius = getCoordLength (xml, "r", viewBoxW);
 
         circle.addEllipse (cx - radius, cy - radius, radius * 2.0f, radius * 2.0f);
 
@@ -454,10 +457,10 @@ private:
     {
         Path ellipse;
 
-        const float cx      = getCoordLength (xml.getStringAttribute ("cx"), viewBoxW);
-        const float cy      = getCoordLength (xml.getStringAttribute ("cy"), viewBoxH);
-        const float radiusX = getCoordLength (xml.getStringAttribute ("rx"), viewBoxW);
-        const float radiusY = getCoordLength (xml.getStringAttribute ("ry"), viewBoxH);
+        const float cx      = getCoordLength (xml, "cx", viewBoxW);
+        const float cy      = getCoordLength (xml, "cy", viewBoxH);
+        const float radiusX = getCoordLength (xml, "rx", viewBoxW);
+        const float radiusY = getCoordLength (xml, "ry", viewBoxH);
 
         ellipse.addEllipse (cx - radiusX, cy - radiusY, radiusX * 2.0f, radiusY * 2.0f);
 
@@ -468,10 +471,10 @@ private:
     {
         Path line;
 
-        const float x1 = getCoordLength (xml.getStringAttribute ("x1"), viewBoxW);
-        const float y1 = getCoordLength (xml.getStringAttribute ("y1"), viewBoxH);
-        const float x2 = getCoordLength (xml.getStringAttribute ("x2"), viewBoxW);
-        const float y2 = getCoordLength (xml.getStringAttribute ("y2"), viewBoxH);
+        const float x1 = getCoordLength (xml, "x1", viewBoxW);
+        const float y1 = getCoordLength (xml, "y1", viewBoxH);
+        const float x2 = getCoordLength (xml, "x2", viewBoxW);
+        const float y2 = getCoordLength (xml, "y2", viewBoxH);
 
         line.startNewSubPath (x1, y1);
         line.lineTo (x2, y2);
@@ -615,7 +618,7 @@ private:
 
         jassert (gradient.getNumColours() > 0);
 
-        gradient.isRadial = fillXml->hasTagName ("radialGradient");
+        gradient.isRadial = fillXml->hasTagNameIgnoringNamespace ("radialGradient");
 
         float gradientWidth = viewBoxW;
         float gradientHeight = viewBoxH;
@@ -722,7 +725,8 @@ private:
                                  .upToLastOccurrenceOf (")", false, false).trim());
 
             if (const XmlElement* const fillXml = findElementForId (topLevelXml, id))
-                if (fillXml->hasTagName ("linearGradient") || fillXml->hasTagName ("radialGradient"))
+                if (fillXml->hasTagNameIgnoringNamespace ("linearGradient")
+                     || fillXml->hasTagNameIgnoringNamespace ("radialGradient"))
                     return getGradientFillType (fillXml, path, opacity);
         }
 
@@ -788,7 +792,7 @@ private:
                 Drawable* s = parseShape (*e, path);
                 delete s;  // xxx not finished!
             }
-            else if (e->hasTagName ("tspan"))
+            else if (e->hasTagNameIgnoringNamespace ("tspan"))
             {
                 Drawable* s = parseText (*e);
                 delete s;  // xxx not finished!
@@ -855,6 +859,11 @@ private:
         }
 
         return n;
+    }
+
+    float getCoordLength (const XmlElement& xml, const char* attName, const float sizeForProportions) const
+    {
+        return getCoordLength (xml.getStringAttribute (attName), sizeForProportions);
     }
 
     void getCoordList (Array <float>& coords, const String& list,

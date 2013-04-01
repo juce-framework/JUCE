@@ -249,21 +249,28 @@ public:
 
     //==============================================================================
     /** Returns this element's tag type name.
-
-        E.g. for an element such as \<MOOSE legs="4" antlers="2">, this would return
-        "MOOSE".
-
+        E.g. for an element such as \<MOOSE legs="4" antlers="2">, this would return "MOOSE".
         @see hasTagName
     */
     inline const String& getTagName() const noexcept            { return tagName; }
 
+    /** Returns the namespace portion of the tag-name, or an empty string if none is specified. */
+    String getNamespace() const;
+
+    /** Returns the part of the tag-name that follows any namespace declaration. */
+    String getTagNameWithoutNamespace() const;
+
     /** Tests whether this element has a particular tag name.
-
         @param possibleTagName  the tag name you're comparing it with
-
         @see getTagName
     */
     bool hasTagName (const String& possibleTagName) const noexcept;
+
+    /** Tests whether this element has a particular tag name, ignoring any XML namespace prefix.
+        So a test for e.g. "xyz" will return true for "xyz" and also "foo:xyz", "bar::xyz", etc.
+        @see getTagName
+    */
+    bool hasTagNameIgnoringNamespace (const String& possibleTagName) const;
 
     //==============================================================================
     /** Returns the number of XML attributes this element contains.
