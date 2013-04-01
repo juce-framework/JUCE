@@ -35,25 +35,18 @@
 
 //==============================================================================
 class ElementFillModeProperty   : public ChoicePropertyComponent,
-                                  private ChangeListener
+                                  private ElementListenerBase <ColouredElement>
 {
 public:
     ElementFillModeProperty (ColouredElement* const owner_, const bool isForStroke_)
         : ChoicePropertyComponent ("fill mode"),
-          owner (owner_),
+          ElementListenerBase <ColouredElement> (owner_),
           isForStroke (isForStroke_)
     {
         choices.add ("Solid Colour");
         choices.add ("Linear Gradient");
         choices.add ("Radial Gradient");
         choices.add ("Image Brush");
-
-        owner->getDocument()->addChangeListener (this);
-    }
-
-    ~ElementFillModeProperty()
-    {
-        owner->getDocument()->removeChangeListener (this);
     }
 
     void setIndex (int newIndex)
@@ -91,19 +84,13 @@ public:
         return 0;
     }
 
-    void changeListenerCallback (ChangeBroadcaster*)
-    {
-        refresh();
-    }
-
 private:
-    ColouredElement* const owner;
     const bool isForStroke;
 };
 
 //==============================================================================
 class ElementFillColourProperty  : public JucerColourPropertyComponent,
-                                   private ChangeListener
+                                   private ElementListenerBase <ColouredElement>
 {
 public:
     enum ColourType
@@ -118,16 +105,10 @@ public:
                                const ColourType type_,
                                const bool isForStroke_)
         : JucerColourPropertyComponent (name, false),
-          owner (owner_),
+          ElementListenerBase <ColouredElement> (owner_),
           type (type_),
           isForStroke (isForStroke_)
     {
-        owner->getDocument()->addChangeListener (this);
-    }
-
-    ~ElementFillColourProperty()
-    {
-        owner->getDocument()->removeChangeListener (this);
     }
 
     void setColour (const Colour& newColour)
@@ -172,19 +153,14 @@ public:
         jassertfalse; // option shouldn't be visible
     }
 
-    void changeListenerCallback (ChangeBroadcaster*)
-    {
-        refresh();
-    }
-
 private:
-    ColouredElement* const owner;
     const ColourType type;
     const bool isForStroke;
 };
 
 //==============================================================================
-class ElementFillPositionProperty   : public PositionPropertyBase
+class ElementFillPositionProperty   : public PositionPropertyBase,
+                                      private ElementListenerBase <ColouredElement>
 {
 public:
     ElementFillPositionProperty (ColouredElement* const owner_,
@@ -194,16 +170,10 @@ public:
                                  const bool isForStroke_)
      : PositionPropertyBase (owner_, name, dimension_, false, false,
                              owner_->getDocument()->getComponentLayout()),
-       owner (owner_),
+       ElementListenerBase <ColouredElement> (owner_),
        isStart (isStart_),
        isForStroke (isForStroke_)
     {
-        owner->getDocument()->addChangeListener (this);
-    }
-
-    ~ElementFillPositionProperty()
-    {
-        owner->getDocument()->removeChangeListener (this);
     }
 
     void setPosition (const RelativePositionedRectangle& newPos)
@@ -232,52 +202,34 @@ public:
     }
 
 private:
-    ColouredElement* const owner;
     const bool isStart, isForStroke;
 };
 
 //==============================================================================
 class EnableStrokeProperty : public BooleanPropertyComponent,
-                             public ChangeListener
+                             private ElementListenerBase <ColouredElement>
 {
 public:
     EnableStrokeProperty (ColouredElement* const owner_)
         : BooleanPropertyComponent ("outline", "Outline enabled", "No outline"),
-          owner (owner_)
+          ElementListenerBase <ColouredElement> (owner_)
     {
-        owner->getDocument()->addChangeListener (this);
-    }
-
-    ~EnableStrokeProperty()
-    {
-        owner->getDocument()->removeChangeListener (this);
     }
 
     //==============================================================================
     void setState (bool newState)           { owner->enableStroke (newState, true); }
     bool getState() const                   { return owner->isStrokeEnabled(); }
-
-    void changeListenerCallback (ChangeBroadcaster*)     { refresh(); }
-
-private:
-    ColouredElement* const owner;
 };
 
 //==============================================================================
 class StrokeThicknessProperty   : public SliderPropertyComponent,
-                                  public ChangeListener
+                                  private ElementListenerBase <ColouredElement>
 {
 public:
     StrokeThicknessProperty (ColouredElement* const owner_)
         : SliderPropertyComponent ("outline thickness", 0.1, 200.0, 0.1, 0.3),
-          owner (owner_)
+          ElementListenerBase <ColouredElement> (owner_)
     {
-        owner->getDocument()->addChangeListener (this);
-    }
-
-    ~StrokeThicknessProperty()
-    {
-        owner->getDocument()->removeChangeListener (this);
     }
 
     void setValue (double newValue)
@@ -291,32 +243,20 @@ public:
     }
 
     double getValue() const                 { return owner->getStrokeType().stroke.getStrokeThickness(); }
-
-    void changeListenerCallback (ChangeBroadcaster*)     { refresh(); }
-
-private:
-    ColouredElement* const owner;
 };
 
 //==============================================================================
 class StrokeJointProperty : public ChoicePropertyComponent,
-                            public ChangeListener
+                            private ElementListenerBase <ColouredElement>
 {
 public:
     StrokeJointProperty (ColouredElement* const owner_)
         : ChoicePropertyComponent ("joint style"),
-          owner (owner_)
+          ElementListenerBase <ColouredElement> (owner_)
     {
         choices.add ("mitered");
         choices.add ("curved");
         choices.add ("beveled");
-
-        owner->getDocument()->addChangeListener (this);
-    }
-
-    ~StrokeJointProperty()
-    {
-        owner->getDocument()->removeChangeListener (this);
     }
 
     void setIndex (int newIndex)
@@ -345,32 +285,20 @@ public:
 
         return 0;
     }
-
-    void changeListenerCallback (ChangeBroadcaster*)     { refresh(); }
-
-private:
-    ColouredElement* const owner;
 };
 
 //==============================================================================
 class StrokeEndCapProperty   : public ChoicePropertyComponent,
-                               public ChangeListener
+                               private ElementListenerBase <ColouredElement>
 {
 public:
     StrokeEndCapProperty (ColouredElement* const owner_)
         : ChoicePropertyComponent ("end-cap style"),
-          owner (owner_)
+          ElementListenerBase <ColouredElement> (owner_)
     {
         choices.add ("butt");
         choices.add ("square");
         choices.add ("round");
-
-        owner->getDocument()->addChangeListener (this);
-    }
-
-    ~StrokeEndCapProperty()
-    {
-        owner->getDocument()->removeChangeListener (this);
     }
 
     void setIndex (int newIndex)
@@ -399,11 +327,6 @@ public:
 
         return 0;
     }
-
-    void changeListenerCallback (ChangeBroadcaster*)     { refresh(); }
-
-private:
-    ColouredElement* const owner;
 };
 
 //==============================================================================
@@ -420,24 +343,30 @@ public:
     //==============================================================================
     void setResource (const String& newName)
     {
-        if (isForStroke)
+        if (element != nullptr)
         {
-            JucerFillType type (element->getStrokeType().fill);
-            type.imageResourceName = newName;
+            if (isForStroke)
+            {
+                JucerFillType type (element->getStrokeType().fill);
+                type.imageResourceName = newName;
 
-            element->setStrokeFill (type, true);
-        }
-        else
-        {
-            JucerFillType type (element->getFillType());
-            type.imageResourceName = newName;
+                element->setStrokeFill (type, true);
+            }
+            else
+            {
+                JucerFillType type (element->getFillType());
+                type.imageResourceName = newName;
 
-            element->setFillType (type, true);
+                element->setFillType (type, true);
+            }
         }
     }
 
     String getResource() const
     {
+        if (element == nullptr)
+            return String::empty;
+
         if (isForStroke)
             return element->getStrokeType().fill.imageResourceName;
 
@@ -449,7 +378,8 @@ private:
 };
 
 //==============================================================================
-class ImageBrushPositionProperty    : public PositionPropertyBase
+class ImageBrushPositionProperty    : public PositionPropertyBase,
+                                      private ElementListenerBase <ColouredElement>
 {
 public:
     ImageBrushPositionProperty (ColouredElement* const owner_,
@@ -458,15 +388,9 @@ public:
                                 const bool isForStroke_)
         : PositionPropertyBase (owner_, name, dimension_, false, false,
                                 owner_->getDocument()->getComponentLayout()),
-          owner (owner_),
+          ElementListenerBase <ColouredElement> (owner_),
           isForStroke (isForStroke_)
     {
-        owner->getDocument()->addChangeListener (this);
-    }
-
-    ~ImageBrushPositionProperty()
-    {
-        owner->getDocument()->removeChangeListener (this);
     }
 
     void setPosition (const RelativePositionedRectangle& newPos)
@@ -494,63 +418,56 @@ public:
     }
 
 private:
-    ColouredElement* const owner;
     const bool isForStroke;
 };
 
 //==============================================================================
 class ImageBrushOpacityProperty  : public SliderPropertyComponent,
-                                   private ChangeListener
+                                   private ElementListenerBase <ColouredElement>
 {
 public:
     ImageBrushOpacityProperty (ColouredElement* const e, const bool isForStroke_)
         : SliderPropertyComponent ("opacity", 0.0, 1.0, 0.001),
-          element (e),
+          ElementListenerBase <ColouredElement> (e),
           isForStroke (isForStroke_)
     {
-        element->getDocument()->addChangeListener (this);
-    }
-
-    ~ImageBrushOpacityProperty()
-    {
-        element->getDocument()->removeChangeListener (this);
     }
 
     void setValue (double newValue)
     {
-        element->getDocument()->getUndoManager().undoCurrentTransactionOnly();
-
-        if (isForStroke)
+        if (owner != nullptr)
         {
-            JucerFillType type (element->getStrokeType().fill);
-            type.imageOpacity = newValue;
+            owner->getDocument()->getUndoManager().undoCurrentTransactionOnly();
 
-            element->setStrokeFill (type, true);
-        }
-        else
-        {
-            JucerFillType type (element->getFillType());
-            type.imageOpacity = newValue;
+            if (isForStroke)
+            {
+                JucerFillType type (owner->getStrokeType().fill);
+                type.imageOpacity = newValue;
 
-            element->setFillType (type, true);
+                owner->setStrokeFill (type, true);
+            }
+            else
+            {
+                JucerFillType type (owner->getFillType());
+                type.imageOpacity = newValue;
+
+                owner->setFillType (type, true);
+            }
         }
     }
 
     double getValue() const
     {
-        if (isForStroke)
-            return element->getStrokeType().fill.imageOpacity;
-        else
-            return element->getFillType().imageOpacity;
-    }
+        if (owner == nullptr)
+            return 0;
 
-    void changeListenerCallback (ChangeBroadcaster*)
-    {
-        refresh();
+        if (isForStroke)
+            return owner->getStrokeType().fill.imageOpacity;
+
+        return owner->getFillType().imageOpacity;
     }
 
 private:
-    ColouredElement* const element;
     bool isForStroke;
 };
 

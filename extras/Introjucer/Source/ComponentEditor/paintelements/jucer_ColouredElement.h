@@ -39,7 +39,6 @@
 class ColouredElement   : public PaintElement
 {
 public:
-    //==============================================================================
     ColouredElement (PaintRoutine* owner,
                      const String& name,
                      const bool showOutline_,

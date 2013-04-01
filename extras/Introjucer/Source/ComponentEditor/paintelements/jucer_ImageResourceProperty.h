@@ -117,7 +117,7 @@ public:
     }
 
 protected:
-    ElementType* const element;
+    mutable Component::SafePointer<ElementType> element;
     JucerDocument& document;
     const bool allowChoiceOfNoResource;
 };

@@ -133,5 +133,33 @@ private:
     ChangeBroadcaster selfChangeListenerList;
 };
 
+//==============================================================================
+template <typename ElementType>
+class ElementListenerBase   : public ChangeListener
+{
+public:
+    ElementListenerBase (ElementType* const e)
+        : owner (e), broadcaster (*owner->getDocument())
+    {
+        broadcaster.addChangeListener (this);
+    }
+
+    ~ElementListenerBase()
+    {
+        broadcaster.removeChangeListener (this);
+    }
+
+    void changeListenerCallback (ChangeBroadcaster*)
+    {
+        if (PropertyComponent* pc = dynamic_cast <PropertyComponent*> (this))
+            pc->refresh();
+    }
+
+    mutable Component::SafePointer<ElementType> owner;
+    ChangeBroadcaster& broadcaster;
+
+    JUCE_DECLARE_NON_COPYABLE (ElementListenerBase)
+};
+
 
 #endif   // __JUCER_PAINTELEMENT_JUCEHEADER__
