@@ -247,7 +247,7 @@ void Thread::yield()
 //==============================================================================
 static int lastProcessPriority = -1;
 
-// called by WindowDriver because Windows does wierd things to process priority
+// called by WindowDriver because Windows does weird things to process priority
 // when you swap apps, and this forces an update when the app is brought to the front.
 void juce_repeatLastProcessPriority()
 {
@@ -608,7 +608,7 @@ struct HighResolutionTimer::Pimpl
                 const int actualPeriod = jlimit ((int) tc.wPeriodMin, (int) tc.wPeriodMax, newPeriod);
 
                 timerID = timeSetEvent (actualPeriod, tc.wPeriodMin, callbackFunction, (DWORD_PTR) this,
-                                        TIME_PERIODIC | TIME_CALLBACK_FUNCTION | TIME_KILL_SYNCHRONOUS);
+                                        TIME_PERIODIC | TIME_CALLBACK_FUNCTION | 0x100 /*TIME_KILL_SYNCHRONOUS*/);
             }
         }
     }

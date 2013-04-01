@@ -32,6 +32,8 @@
 #include "jucer_CommandLine.h"
 #include "../Code Editor/jucer_SourceCodeEditor.h"
 
+void createGUIEditorMenu (PopupMenu&);
+void registerGUIEditorCommands();
 
 //==============================================================================
 class IntrojucerApp   : public JUCEApplication
@@ -39,7 +41,6 @@ class IntrojucerApp   : public JUCEApplication
 public:
     //==============================================================================
     IntrojucerApp() :  isRunningCommandLine (false) {}
-    ~IntrojucerApp() {}
 
     //==============================================================================
     void initialise (const String& commandLine)
@@ -71,14 +72,7 @@ public:
 
         icons = new Icons();
 
-        commandManager = new ApplicationCommandManager();
-        commandManager->registerAllCommandsForTarget (this);
-
-        {
-            CodeDocument doc;
-            CppCodeEditorComponent ed (File::nonexistent, doc);
-            commandManager->registerAllCommandsForTarget (&ed);
-        }
+        initCommandManager();
 
         menuModel = new MainMenuModel();
 
@@ -145,15 +139,8 @@ public:
     }
 
     //==============================================================================
-    const String getApplicationName()
-    {
-        return "Introjucer";
-    }
-
-    const String getApplicationVersion()
-    {
-        return ProjectInfo::versionString;
-    }
+    const String getApplicationName()       { return "Introjucer"; }
+    const String getApplicationVersion()    { return ProjectInfo::versionString; }
 
     bool moreThanOneInstanceAllowed()
     {
@@ -202,10 +189,10 @@ public:
             }
             else if (menuItemID >= activeDocumentsBaseID && menuItemID < activeDocumentsBaseID + 200)
             {
-                OpenDocumentManager::Document* doc = getApp().openDocumentManager.getOpenDocument (menuItemID - activeDocumentsBaseID);
-                jassert (doc != nullptr);
-
-                getApp().mainWindowList.openDocument (doc, true);
+                if (OpenDocumentManager::Document* doc = getApp().openDocumentManager.getOpenDocument (menuItemID - activeDocumentsBaseID))
+                    getApp().mainWindowList.openDocument (doc, true);
+                else
+                    jassertfalse;
             }
             else if (menuItemID >= colourSchemeBaseID && menuItemID < colourSchemeBaseID + 200)
             {
@@ -223,7 +210,7 @@ public:
 
     virtual StringArray getMenuNames()
     {
-        const char* const names[] = { "File", "Edit", "View", "Window", "Tools", nullptr };
+        const char* const names[] = { "File", "Edit", "View", "Window", "Jucer", "Tools", nullptr };
         return StringArray (names);
     }
 
@@ -234,6 +221,7 @@ public:
         else if (menuName == "View")    createViewMenu   (menu);
         else if (menuName == "Window")  createWindowMenu (menu);
         else if (menuName == "Tools")   createToolsMenu  (menu);
+        else if (menuName == "Jucer")   createGUIEditorMenu (menu);
         else                            jassertfalse; // names have changed?
     }
 
@@ -250,6 +238,7 @@ public:
         menu.addSeparator();
         menu.addCommandItem (commandManager, CommandIDs::closeDocument);
         menu.addCommandItem (commandManager, CommandIDs::saveDocument);
+        menu.addCommandItem (commandManager, CommandIDs::saveDocumentAs);
         menu.addSeparator();
         menu.addCommandItem (commandManager, CommandIDs::closeProject);
         menu.addCommandItem (commandManager, CommandIDs::saveProject);
@@ -567,6 +556,20 @@ private:
 
         JUCE_DECLARE_NON_COPYABLE (AsyncQuitRetrier)
     };
+
+    void initCommandManager()
+    {
+        commandManager = new ApplicationCommandManager();
+        commandManager->registerAllCommandsForTarget (this);
+
+        {
+            CodeDocument doc;
+            CppCodeEditorComponent ed (File::nonexistent, doc);
+            commandManager->registerAllCommandsForTarget (&ed);
+        }
+
+        registerGUIEditorCommands();
+    }
 };
 
 

@@ -23,13 +23,7 @@
   ==============================================================================
 */
 
-#ifndef __JUCER_PROJECTEXPORT_MSVC_JUCEHEADER__
-#define __JUCER_PROJECTEXPORT_MSVC_JUCEHEADER__
 
-#include "jucer_ProjectExporter.h"
-#include "jucer_ProjectSaver.h"
-
-//==============================================================================
 class MSVCProjectExporterBase   : public ProjectExporter
 {
 public:
@@ -39,18 +33,15 @@ public:
         if (getTargetLocationString().isEmpty())
             getTargetLocationValue() = getDefaultBuildsRootFolder() + folderName;
 
-        if ((int) getLibraryType().getValue() <= 0)
-            getLibraryType() = 1;
-
         projectGUID = createGUID (project.getProjectUID());
-
         updateOldSettings();
     }
 
     //==============================================================================
-    bool usesMMFiles() const                    { return false; }
-    bool isVisualStudio() const                 { return true; }
-    bool canCopeWithDuplicateFiles()            { return false; }
+    bool usesMMFiles() const            { return false; }
+    bool isVisualStudio() const         { return true; }
+    bool isWindows() const              { return true; }
+    bool canCopeWithDuplicateFiles()    { return false; }
 
     bool launchProject()
     {
@@ -61,16 +52,8 @@ public:
        #endif
     }
 
-    void createExporterProperties (PropertyListBuilder& props)
+    void createExporterProperties (PropertyListBuilder&)
     {
-        if (projectType.isLibrary())
-        {
-            const char* const libTypes[] = { "Static Library (.lib)", "Dynamic Library (.dll)", nullptr };
-            const int libTypeValues[] = { 1, 2 };
-            props.add (new ChoicePropertyComponent (getLibraryType(), "Library Type",
-                                                    StringArray (libTypes),
-                                                    Array<var> (libTypeValues, numElementsInArray (libTypeValues))));
-        }
     }
 
 protected:
@@ -78,11 +61,9 @@ protected:
     mutable File rcFile, iconFile;
 
     File getProjectFile (const String& extension) const   { return getTargetFolder().getChildFile (project.getProjectFilenameRoot()).withFileExtension (extension); }
-    File getSLNFile() const             { return getProjectFile (".sln"); }
+    File getSLNFile() const     { return getProjectFile (".sln"); }
 
-    Value getLibraryType()              { return getSetting (Ids::libraryType); }
-    String getLibraryString() const     { return getSettingString (Ids::libraryType); }
-    bool isLibraryDLL() const           { return msvcIsDLL || (projectType.isLibrary() && (int) settings [Ids::libraryType] == 2); }
+    bool isLibraryDLL() const   { return msvcIsDLL || projectType.isDynamicLibrary(); }
 
     static String prependIfNotAbsolute (const String& file, const char* prefix)
     {
@@ -435,7 +416,7 @@ protected:
 
     bool hasResourceFile() const
     {
-        return ! projectType.isLibrary();
+        return ! projectType.isStaticLibrary();
     }
 
     void createResourcesAndIcon() const
@@ -684,7 +665,8 @@ protected:
             const RelativePath path (projectItem.getFile(), getTargetFolder(), RelativePath::buildTargetFolder);
 
             addFile (path, parent,
-                     projectItem.shouldBeAddedToBinaryResources() || (shouldFileBeCompiledByDefault (path) && ! projectItem.shouldBeCompiled()),
+                     projectItem.shouldBeAddedToBinaryResources()
+                       || (shouldFileBeCompiledByDefault (path) && ! projectItem.shouldBeCompiled()),
                      shouldFileBeCompiledByDefault (path) && (bool) projectItem.shouldUseStdCall());
         }
     }
@@ -718,7 +700,7 @@ protected:
         if (config.getIntermediatesPath().isNotEmpty())
             xml.setAttribute ("IntermediateDirectory", FileHelpers::windowsStylePath (config.getIntermediatesPath()));
 
-        xml.setAttribute ("ConfigurationType", isLibraryDLL() ? "2" : (projectType.isLibrary() ? "4" : "1"));
+        xml.setAttribute ("ConfigurationType", isLibraryDLL() ? "2" : (projectType.isStaticLibrary() ? "4" : "1"));
         xml.setAttribute ("UseOfMFC", "0");
         xml.setAttribute ("ATLMinimizesCRunTimeLibraryUsage", "false");
         xml.setAttribute ("CharacterSet", "2");
@@ -738,7 +720,7 @@ protected:
         createToolElement (xml, "VCXMLDataGeneratorTool");
         createToolElement (xml, "VCWebServiceProxyGeneratorTool");
 
-        if (! projectType.isLibrary())
+        if (! projectType.isStaticLibrary())
         {
             XmlElement* midl = createToolElement (xml, "VCMIDLTool");
             midl->setAttribute ("PreprocessorDefinitions", isDebug ? "_DEBUG" : "NDEBUG");
@@ -757,7 +739,7 @@ protected:
             if (isDebug)
             {
                 compiler->setAttribute ("BufferSecurityCheck", "");
-                compiler->setAttribute ("DebugInformationFormat", projectType.isLibrary() ? "3" : "4");
+                compiler->setAttribute ("DebugInformationFormat", projectType.isStaticLibrary() ? "3" : "4");
             }
             else
             {
@@ -792,7 +774,7 @@ protected:
 
         createToolElement (xml, "VCPreLinkEventTool");
 
-        if (! projectType.isLibrary())
+        if (! projectType.isStaticLibrary())
         {
             XmlElement* linker = createToolElement (xml, "VCLinkerTool");
 
@@ -870,7 +852,7 @@ protected:
 
         createToolElement (xml, "VCFxCopTool");
 
-        if (! projectType.isLibrary())
+        if (! projectType.isStaticLibrary())
             createToolElement (xml, "VCAppVerifierTool");
 
         XmlElement* postBuildEvent = createToolElement (xml, "VCPostBuildEventTool");
@@ -1331,7 +1313,7 @@ protected:
     {
         if (projectType.isGUIApplication() || projectType.isCommandLineApp())   return "Application";
         if (isLibraryDLL())                                                     return "DynamicLibrary";
-        if (projectType.isLibrary())                                            return "StaticLibrary";
+        if (projectType.isStaticLibrary())                                      return "StaticLibrary";
 
         jassertfalse;
         return String::empty;
@@ -1536,6 +1518,3 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE (MSVCProjectExporterVC2012)
 };
-
-
-#endif   // __JUCER_PROJECTEXPORT_MSVC_JUCEHEADER__

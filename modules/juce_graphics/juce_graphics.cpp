@@ -44,6 +44,11 @@
  #import <QuartzCore/QuartzCore.h>
 
 #elif JUCE_WINDOWS
+ #if JUCE_MINGW && JUCE_USE_DIRECTWRITE
+  #warning "DirectWrite not currently implemented with mingw..."
+  #undef JUCE_USE_DIRECTWRITE
+ #endif
+
  #if JUCE_USE_DIRECTWRITE
   /* If you hit a compile error trying to include these files, you may need to update
      your version of the Windows SDK to the latest one. The DirectWrite and Direct2D
@@ -51,6 +56,10 @@
   */
   #include <d2d1.h>
   #include <dwrite.h>
+ #endif
+
+ #if JUCE_MINGW
+  #include <malloc.h>
  #endif
 
 #elif JUCE_IOS

@@ -26,81 +26,88 @@
 FileChooser::FileChooser (const String& chooserBoxTitle,
                           const File& currentFileOrDirectory,
                           const String& fileFilters,
-                          const bool useNativeDialogBox_)
+                          const bool useNativeBox)
     : title (chooserBoxTitle),
       filters (fileFilters),
       startingFile (currentFileOrDirectory),
-      useNativeDialogBox (useNativeDialogBox_)
+      useNativeDialogBox (useNativeBox && isPlatformDialogAvailable())
 {
-    if (useNativeDialogBox)
-    {
-        static bool canUseNativeBox = isPlatformDialogAvailable();
-        if (! canUseNativeBox)
-            useNativeDialogBox = false;
-    }
-
     if (! fileFilters.containsNonWhitespaceChars())
         filters = "*";
 }
 
-FileChooser::~FileChooser()
-{
-}
+FileChooser::~FileChooser() {}
 
 #if JUCE_MODAL_LOOPS_PERMITTED
-bool FileChooser::browseForFileToOpen (FilePreviewComponent* previewComponent)
+bool FileChooser::browseForFileToOpen (FilePreviewComponent* previewComp)
 {
-    return showDialog (false, true, false, false, false, previewComponent);
+    return showDialog (FileBrowserComponent::openMode
+                        | FileBrowserComponent::canSelectFiles,
+                       previewComp);
 }
 
-bool FileChooser::browseForMultipleFilesToOpen (FilePreviewComponent* previewComponent)
+bool FileChooser::browseForMultipleFilesToOpen (FilePreviewComponent* previewComp)
 {
-    return showDialog (false, true, false, false, true, previewComponent);
+    return showDialog (FileBrowserComponent::openMode
+                        | FileBrowserComponent::canSelectFiles
+                        | FileBrowserComponent::canSelectMultipleItems,
+                       previewComp);
 }
 
-bool FileChooser::browseForMultipleFilesOrDirectories (FilePreviewComponent* previewComponent)
+bool FileChooser::browseForMultipleFilesOrDirectories (FilePreviewComponent* previewComp)
 {
-    return showDialog (true, true, false, false, true, previewComponent);
+    return showDialog (FileBrowserComponent::openMode
+                        | FileBrowserComponent::canSelectFiles
+                        | FileBrowserComponent::canSelectDirectories
+                        | FileBrowserComponent::canSelectMultipleItems,
+                       previewComp);
 }
 
-bool FileChooser::browseForFileToSave (const bool warnAboutOverwritingExistingFiles)
+bool FileChooser::browseForFileToSave (const bool warnAboutOverwrite)
 {
-    return showDialog (false, true, true, warnAboutOverwritingExistingFiles, false, nullptr);
+    return showDialog (FileBrowserComponent::saveMode
+                        | FileBrowserComponent::canSelectFiles
+                        | (warnAboutOverwrite ? FileBrowserComponent::warnAboutOverwriting : 0),
+                       nullptr);
 }
 
 bool FileChooser::browseForDirectory()
 {
-    return showDialog (true, false, false, false, false, nullptr);
+    return showDialog (FileBrowserComponent::openMode
+                        | FileBrowserComponent::canSelectDirectories,
+                       nullptr);
 }
 
-bool FileChooser::showDialog (const bool selectsDirectories,
-                              const bool selectsFiles,
-                              const bool isSave,
-                              const bool warnAboutOverwritingExistingFiles,
-                              const bool selectMultipleFiles,
-                              FilePreviewComponent* const previewComponent)
+bool FileChooser::showDialog (const int flags, FilePreviewComponent* const previewComp)
 {
     WeakReference<Component> previouslyFocused (Component::getCurrentlyFocusedComponent());
 
     results.clear();
 
     // the preview component needs to be the right size before you pass it in here..
-    jassert (previewComponent == nullptr || (previewComponent->getWidth() > 10
-                                               && previewComponent->getHeight() > 10));
+    jassert (previewComp == nullptr || (previewComp->getWidth() > 10
+                                         && previewComp->getHeight() > 10));
+
+    const bool selectsDirectories = (flags & FileBrowserComponent::canSelectDirectories) != 0;
+    const bool selectsFiles       = (flags & FileBrowserComponent::canSelectFiles) != 0;
+    const bool isSave             = (flags & FileBrowserComponent::saveMode) != 0;
+    const bool warnAboutOverwrite = (flags & FileBrowserComponent::warnAboutOverwriting) != 0;
+    const bool selectMultiple     = (flags & FileBrowserComponent::canSelectMultipleItems) != 0;
+
+    // You've set the flags for both saveMode and openMode!
+    jassert (! (isSave && (flags & FileBrowserComponent::openMode) != 0));
 
    #if JUCE_WINDOWS
     if (useNativeDialogBox && ! (selectsFiles && selectsDirectories))
    #elif JUCE_MAC || JUCE_LINUX
-    if (useNativeDialogBox && (previewComponent == nullptr))
+    if (useNativeDialogBox && (previewComp == nullptr))
    #else
     if (false)
    #endif
     {
         showPlatformDialog (results, title, startingFile, filters,
                             selectsDirectories, selectsFiles, isSave,
-                            warnAboutOverwritingExistingFiles,
-                            selectMultipleFiles,
-                            previewComponent);
+                            warnAboutOverwrite, selectMultiple, previewComp);
     }
     else
     {
@@ -108,28 +115,10 @@ bool FileChooser::showDialog (const bool selectsDirectories,
                                      selectsDirectories ? "*" : String::empty,
                                      String::empty);
 
-        int flags = isSave ? FileBrowserComponent::saveMode
-                           : FileBrowserComponent::openMode;
-
-        if (selectsFiles)
-            flags |= FileBrowserComponent::canSelectFiles;
-
-        if (selectsDirectories)
-        {
-            flags |= FileBrowserComponent::canSelectDirectories;
-
-            if (! isSave)
-                flags |= FileBrowserComponent::filenameBoxIsReadOnly;
-        }
-
-        if (selectMultipleFiles)
-            flags |= FileBrowserComponent::canSelectMultipleItems;
-
-        FileBrowserComponent browserComponent (flags, startingFile, &wildcard, previewComponent);
+        FileBrowserComponent browserComponent (flags, startingFile, &wildcard, previewComp);
 
         FileChooserDialogBox box (title, String::empty,
-                                  browserComponent,
-                                  warnAboutOverwritingExistingFiles,
+                                  browserComponent, warnAboutOverwrite,
                                   browserComponent.findColour (AlertWindow::backgroundColourId));
 
         if (box.show())
@@ -155,16 +144,6 @@ File FileChooser::getResult() const
     return results.getFirst();
 }
 
-const Array<File>& FileChooser::getResults() const
-{
-    return results;
-}
-
 //==============================================================================
-FilePreviewComponent::FilePreviewComponent()
-{
-}
-
-FilePreviewComponent::~FilePreviewComponent()
-{
-}
+FilePreviewComponent::FilePreviewComponent() {}
+FilePreviewComponent::~FilePreviewComponent() {}

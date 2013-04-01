@@ -240,7 +240,7 @@ public:
     /** @internal */
     void resized();
     /** @internal */
-    void scrollBarMoved (ScrollBar* scrollBarThatHasMoved, double newRangeStart);
+    void scrollBarMoved (ScrollBar*, double newRangeStart);
     /** @internal */
     void mouseWheelMove (const MouseEvent&, const MouseWheelDetails&);
     /** @internal */

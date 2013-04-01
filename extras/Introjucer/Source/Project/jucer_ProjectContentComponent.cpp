@@ -419,20 +419,31 @@ void ProjectContentComponent::closeDocument()
             hideEditor();
 }
 
+static void showSaveWarning (OpenDocumentManager::Document* currentDocument)
+{
+    AlertWindow::showMessageBox (AlertWindow::WarningIcon,
+                                 TRANS("Save failed!"),
+                                 TRANS("Couldn't save the file:")
+                                   + "\n" + currentDocument->getFile().getFullPathName());
+}
+
 void ProjectContentComponent::saveDocument()
 {
     if (currentDocument != nullptr)
     {
         if (! currentDocument->save())
-            AlertWindow::showMessageBox (AlertWindow::WarningIcon,
-                                         TRANS("Save failed!"),
-                                         TRANS("Couldn't save the file:")
-                                           + "\n" + currentDocument->getFile().getFullPathName());
+            showSaveWarning (currentDocument);
     }
     else
         saveProject();
 
     updateMainWindowTitle();
+}
+
+void ProjectContentComponent::saveAs()
+{
+    if (currentDocument != nullptr && ! currentDocument->saveAs())
+        showSaveWarning (currentDocument);
 }
 
 bool ProjectContentComponent::goToPreviousFile()
@@ -544,6 +555,7 @@ ApplicationCommandTarget* ProjectContentComponent::getNextCommandTarget()
 void ProjectContentComponent::getAllCommands (Array <CommandID>& commands)
 {
     const CommandID ids[] = { CommandIDs::saveDocument,
+                              CommandIDs::saveDocumentAs,
                               CommandIDs::closeDocument,
                               CommandIDs::saveProject,
                               CommandIDs::closeProject,
@@ -593,6 +605,14 @@ void ProjectContentComponent::getCommandInfo (const CommandID commandID, Applica
                         CommandCategories::general, 0);
         result.setActive (currentDocument != nullptr || project != nullptr);
         result.defaultKeypresses.add (KeyPress ('s', ModifierKeys::commandModifier, 0));
+        break;
+
+    case CommandIDs::saveDocumentAs:
+        result.setInfo ("Save As...",
+                        "Saves the current document to a new location",
+                        CommandCategories::general, 0);
+        result.setActive (currentDocument != nullptr || project != nullptr);
+        result.defaultKeypresses.add (KeyPress ('s', ModifierKeys::commandModifier | ModifierKeys::shiftModifier, 0));
         break;
 
     case CommandIDs::closeDocument:
@@ -688,6 +708,7 @@ bool ProjectContentComponent::perform (const InvocationInfo& info)
         case CommandIDs::saveProject:
         case CommandIDs::closeProject:
         case CommandIDs::saveDocument:
+        case CommandIDs::saveDocumentAs:
         case CommandIDs::closeDocument:
         case CommandIDs::goToPreviousDoc:
         case CommandIDs::goToNextDoc:
@@ -710,6 +731,7 @@ bool ProjectContentComponent::perform (const InvocationInfo& info)
         case CommandIDs::saveProject:               saveProject(); break;
         case CommandIDs::closeProject:              closeProject(); break;
         case CommandIDs::saveDocument:              saveDocument(); break;
+        case CommandIDs::saveDocumentAs:            saveAs(); break;
 
         case CommandIDs::closeDocument:             closeDocument(); break;
         case CommandIDs::goToPreviousDoc:           goToPreviousFile(); break;

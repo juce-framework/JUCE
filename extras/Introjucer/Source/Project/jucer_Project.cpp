@@ -506,7 +506,7 @@ bool Project::Item::canContain (const Item& child) const
     if (isGroup())
         return child.isFile() || child.isGroup();
 
-    jassertfalse
+    jassertfalse;
     return false;
 }
 

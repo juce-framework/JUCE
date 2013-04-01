@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <JUCERPROJECT id="SLvvV6j" name="Juce Demo" projectType="guiapp" juceLinkage="amalg_multi"
-              jucerVersion="3.0.0" version="2.0.0" bundleIdentifier="com.rawmaterialsoftware.jucedemo"
+              jucerVersion="3.1.0" version="2.0.0" bundleIdentifier="com.rawmaterialsoftware.jucedemo"
               buildVST="1" buildRTAS="0" buildAU="1" pluginName="Juce Demo"
               pluginDesc="Juce Demo" pluginManufacturer="yourcompany" pluginManufacturerCode="abcd"
               pluginCode="Abcd" pluginChannelConfigs="{ {1, 1}, {2, 2} }" pluginIsSynth="0"
@@ -33,35 +33,6 @@
                        osxArchitecture="32BitUniversal" iosCompatibility="default"/>
       </CONFIGURATIONS>
     </XCODE_IPHONE>
-    <VS2005 targetFolder="Builds/VisualStudio2005" vstFolder="c:\SDKs\vstsdk2.4"
-            rtasFolder="c:\SDKs\PT_80_SDK" juceFolder="../../../juce" libraryType="1"
-            bigIcon="f4hwldS">
-      <CONFIGURATIONS>
-        <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="JuceDemo"
-                       defines="JUCE_UNIT_TESTS=1" winWarningLevel="4" generateManifest="1"/>
-        <CONFIGURATION name="Release" isDebug="0" optimisation="2" targetName="JuceDemo"
-                       defines="JUCE_UNIT_TESTS=1" winWarningLevel="4" generateManifest="1"/>
-      </CONFIGURATIONS>
-    </VS2005>
-    <VS2008 targetFolder="Builds/VisualStudio2008" vstFolder="c:\SDKs\vstsdk2.4"
-            rtasFolder="c:\SDKs\PT_80_SDK" juceFolder="../../../juce" libraryType="1"
-            bigIcon="f4hwldS">
-      <CONFIGURATIONS>
-        <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="JuceDemo"
-                       defines="JUCE_UNIT_TESTS=1" winWarningLevel="4" generateManifest="1"/>
-        <CONFIGURATION name="Release" isDebug="0" optimisation="2" targetName="JuceDemo"
-                       defines="JUCE_UNIT_TESTS=1" winWarningLevel="4" generateManifest="1"/>
-      </CONFIGURATIONS>
-    </VS2008>
-    <LINUX_MAKE targetFolder="Builds/Linux" vstFolder="~/SDKs/vstsdk2.4" juceFolder="../../../juce"
-                bigIcon="f4hwldS">
-      <CONFIGURATIONS>
-        <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="JuceDemo"
-                       defines="JUCE_UNIT_TESTS=1" libraryPath="/usr/X11R6/lib/"/>
-        <CONFIGURATION name="Release" isDebug="0" optimisation="2" targetName="JuceDemo"
-                       defines="JUCE_UNIT_TESTS=1" libraryPath="/usr/X11R6/lib/"/>
-      </CONFIGURATIONS>
-    </LINUX_MAKE>
     <VS2010 targetFolder="Builds/VisualStudio2010" vstFolder="c:\SDKs\vstsdk2.4"
             rtasFolder="c:\SDKs\PT_80_SDK" libraryType="1" juceFolder="../../../juce"
             bigIcon="f4hwldS">
@@ -74,6 +45,35 @@
                        generateManifest="1"/>
       </CONFIGURATIONS>
     </VS2010>
+    <VS2008 targetFolder="Builds/VisualStudio2008" vstFolder="c:\SDKs\vstsdk2.4"
+            rtasFolder="c:\SDKs\PT_80_SDK" juceFolder="../../../juce" libraryType="1"
+            bigIcon="f4hwldS">
+      <CONFIGURATIONS>
+        <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="JuceDemo"
+                       defines="JUCE_UNIT_TESTS=1" winWarningLevel="4" generateManifest="1"/>
+        <CONFIGURATION name="Release" isDebug="0" optimisation="2" targetName="JuceDemo"
+                       defines="JUCE_UNIT_TESTS=1" winWarningLevel="4" generateManifest="1"/>
+      </CONFIGURATIONS>
+    </VS2008>
+    <VS2005 targetFolder="Builds/VisualStudio2005" vstFolder="c:\SDKs\vstsdk2.4"
+            rtasFolder="c:\SDKs\PT_80_SDK" juceFolder="../../../juce" libraryType="1"
+            bigIcon="f4hwldS">
+      <CONFIGURATIONS>
+        <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="JuceDemo"
+                       defines="JUCE_UNIT_TESTS=1" winWarningLevel="4" generateManifest="1"/>
+        <CONFIGURATION name="Release" isDebug="0" optimisation="2" targetName="JuceDemo"
+                       defines="JUCE_UNIT_TESTS=1" winWarningLevel="4" generateManifest="1"/>
+      </CONFIGURATIONS>
+    </VS2005>
+    <LINUX_MAKE targetFolder="Builds/Linux" vstFolder="~/SDKs/vstsdk2.4" juceFolder="../../../juce"
+                bigIcon="f4hwldS">
+      <CONFIGURATIONS>
+        <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="JuceDemo"
+                       defines="JUCE_UNIT_TESTS=1" libraryPath="/usr/X11R6/lib/"/>
+        <CONFIGURATION name="Release" isDebug="0" optimisation="2" targetName="JuceDemo"
+                       defines="JUCE_UNIT_TESTS=1" libraryPath="/usr/X11R6/lib/"/>
+      </CONFIGURATIONS>
+    </LINUX_MAKE>
     <ANDROID targetFolder="Builds/Android" androidSDKPath="${user.home}/SDKs/android-sdk"
              androidNDKPath="${user.home}/SDKs/android-ndk" juceFolder="../../../juce"
              androidInternetNeeded="1" bigIcon="f4hwldS" androidActivityClass="com.juce.JuceDemo"
@@ -87,6 +87,12 @@
                        defines="JUCE_UNIT_TESTS=1" androidArchitectures="armeabi armeabi-v7a"/>
       </CONFIGURATIONS>
     </ANDROID>
+    <CODEBLOCKS targetFolder="Builds/CodeBlocks" juceFolder="../../modules" extraDefs="JUCE_UNIT_TESTS=1">
+      <CONFIGURATIONS>
+        <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="JuceDemo"/>
+        <CONFIGURATION name="Release" isDebug="0" optimisation="2" targetName="JuceDemo"/>
+      </CONFIGURATIONS>
+    </CODEBLOCKS>
   </EXPORTFORMATS>
   <MAINGROUP id="0bU7ypLe" name="Juce Demo">
     <FILE id="Bnqll1Mk0" name="ApplicationStartup.cpp" compile="1" resource="0"

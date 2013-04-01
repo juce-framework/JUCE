@@ -47,12 +47,7 @@ void DocumentEditorComponent::documentAboutToClose (OpenDocumentManager::Documen
         jassert (document != nullptr);
 
         if (ProjectContentComponent* pcc = findParentComponentOfClass<ProjectContentComponent>())
-        {
             pcc->hideDocument (document);
-            return;
-        }
-
-        jassertfalse
     }
 }
 

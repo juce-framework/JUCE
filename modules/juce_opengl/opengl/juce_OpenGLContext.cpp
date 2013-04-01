@@ -324,7 +324,8 @@ public:
         jassert (! cachedImageFrameBuffer.isValid());
 
         context.makeActive();
-        nativeContext->initialiseOnRenderThread();
+        nativeContext->initialiseOnRenderThread (context);
+
         glViewport (0, 0, component.getWidth(), component.getHeight());
 
         context.extensions.initialise();

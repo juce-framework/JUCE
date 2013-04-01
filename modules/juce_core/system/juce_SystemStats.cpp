@@ -70,7 +70,7 @@ String SystemStats::getStackBacktrace()
 {
     String result;
 
-   #if JUCE_ANDROID
+   #if JUCE_ANDROID || JUCE_MINGW
     jassertfalse; // sorry, not implemented yet!
 
    #elif JUCE_WINDOWS

@@ -52,10 +52,13 @@
  #include <ctime>
  #include <winsock2.h>
  #include <ws2tcpip.h>
- #include <Dbghelp.h>
 
- #if ! JUCE_DONT_AUTOLINK_TO_WIN32_LIBRARIES
-  #pragma comment (lib, "DbgHelp.lib")
+ #if ! JUCE_MINGW
+  #include <Dbghelp.h>
+
+  #if ! JUCE_DONT_AUTOLINK_TO_WIN32_LIBRARIES
+   #pragma comment (lib, "DbgHelp.lib")
+  #endif
  #endif
 
  #if JUCE_MINGW

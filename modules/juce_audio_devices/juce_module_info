@@ -23,5 +23,6 @@
 
   "OSXFrameworks":  "CoreAudio CoreMIDI DiscRecording",
   "iOSFrameworks":  "AudioToolbox CoreMIDI",
-  "LinuxLibs":      "asound"
+  "LinuxLibs":      "asound",
+  "mingwLibs":      "winmm"
 }

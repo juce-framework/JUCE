@@ -20,6 +20,24 @@
     <Filter Include="The Introjucer\Code Editor">
       <UniqueIdentifier>{D05B051C-4835-D6A6-3AF4-B61963EFC368}</UniqueIdentifier>
     </Filter>
+    <Filter Include="The Introjucer\ComponentEditor">
+      <UniqueIdentifier>{95DE2FA4-3654-5411-BB7B-2BDDDF07715E}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="The Introjucer\ComponentEditor\components">
+      <UniqueIdentifier>{073C6BA5-53F9-151C-4BB5-D5C403BF284F}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="The Introjucer\ComponentEditor\documents">
+      <UniqueIdentifier>{53C392DB-7131-B7AF-5A28-9009B03EF76E}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="The Introjucer\ComponentEditor\paintelements">
+      <UniqueIdentifier>{CFAABADC-489B-5592-206B-29BE85E556F8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="The Introjucer\ComponentEditor\properties">
+      <UniqueIdentifier>{449928FA-2DA7-18CE-61BF-50930E8C94A1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="The Introjucer\ComponentEditor\ui">
+      <UniqueIdentifier>{3CBBC95A-4009-C9C5-036C-B226EF4E113E}</UniqueIdentifier>
+    </Filter>
     <Filter Include="The Introjucer\BinaryData">
       <UniqueIdentifier>{768EDA37-3A9B-E5C5-8D35-27FEF74CCBA0}</UniqueIdentifier>
     </Filter>
@@ -304,10 +322,73 @@
     <ClCompile Include="..\..\Source\Code Editor\jucer_SourceCodeEditor.cpp">
       <Filter>The Introjucer\Code Editor</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Source\ComponentEditor\components\jucer_ComponentTypeHandler.cpp">
+      <Filter>The Introjucer\ComponentEditor\components</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\ComponentEditor\documents\jucer_ButtonDocument.cpp">
+      <Filter>The Introjucer\ComponentEditor\documents</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\ComponentEditor\documents\jucer_ComponentDocument.cpp">
+      <Filter>The Introjucer\ComponentEditor\documents</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\ComponentEditor\paintelements\jucer_ColouredElement.cpp">
+      <Filter>The Introjucer\ComponentEditor\paintelements</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\ComponentEditor\paintelements\jucer_PaintElement.cpp">
+      <Filter>The Introjucer\ComponentEditor\paintelements</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\ComponentEditor\paintelements\jucer_PaintElementPath.cpp">
+      <Filter>The Introjucer\ComponentEditor\paintelements</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\ComponentEditor\ui\jucer_ComponentLayoutEditor.cpp">
+      <Filter>The Introjucer\ComponentEditor\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\ComponentEditor\ui\jucer_ComponentOverlayComponent.cpp">
+      <Filter>The Introjucer\ComponentEditor\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\ComponentEditor\ui\jucer_EditingPanelBase.cpp">
+      <Filter>The Introjucer\ComponentEditor\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\ComponentEditor\ui\jucer_JucerDocumentEditor.cpp">
+      <Filter>The Introjucer\ComponentEditor\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\ComponentEditor\ui\jucer_PaintRoutineEditor.cpp">
+      <Filter>The Introjucer\ComponentEditor\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\ComponentEditor\ui\jucer_PaintRoutinePanel.cpp">
+      <Filter>The Introjucer\ComponentEditor\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\ComponentEditor\ui\jucer_ResourceEditorPanel.cpp">
+      <Filter>The Introjucer\ComponentEditor\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\ComponentEditor\ui\jucer_TestComponent.cpp">
+      <Filter>The Introjucer\ComponentEditor\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\ComponentEditor\jucer_BinaryResources.cpp">
+      <Filter>The Introjucer\ComponentEditor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\ComponentEditor\jucer_ComponentLayout.cpp">
+      <Filter>The Introjucer\ComponentEditor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\ComponentEditor\jucer_GeneratedCode.cpp">
+      <Filter>The Introjucer\ComponentEditor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\ComponentEditor\jucer_JucerDocument.cpp">
+      <Filter>The Introjucer\ComponentEditor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\ComponentEditor\jucer_ObjectTypes.cpp">
+      <Filter>The Introjucer\ComponentEditor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\ComponentEditor\jucer_PaintRoutine.cpp">
+      <Filter>The Introjucer\ComponentEditor</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\Source\BinaryData\jucer_AudioPluginEditorTemplate.cpp">
       <Filter>The Introjucer\BinaryData</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\BinaryData\jucer_AudioPluginFilterTemplate.cpp">
+      <Filter>The Introjucer\BinaryData</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\BinaryData\jucer_ComponentTemplate.cpp">
       <Filter>The Introjucer\BinaryData</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\BinaryData\jucer_ContentCompTemplate.cpp">
@@ -1281,6 +1362,9 @@
     <ClInclude Include="..\..\Source\Project Saving\jucer_ProjectExport_Android.h">
       <Filter>The Introjucer\Project Saving</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\Source\Project Saving\jucer_ProjectExport_CodeBlocks.h">
+      <Filter>The Introjucer\Project Saving</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\Source\Project Saving\jucer_ProjectExport_Make.h">
       <Filter>The Introjucer\Project Saving</Filter>
     </ClInclude>
@@ -1332,10 +1416,205 @@
     <ClInclude Include="..\..\Source\Code Editor\jucer_SourceCodeEditor.h">
       <Filter>The Introjucer\Code Editor</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\Source\ComponentEditor\components\jucer_ButtonHandler.h">
+      <Filter>The Introjucer\ComponentEditor\components</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\ComponentEditor\components\jucer_ComboBoxHandler.h">
+      <Filter>The Introjucer\ComponentEditor\components</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\ComponentEditor\components\jucer_ComponentNameProperty.h">
+      <Filter>The Introjucer\ComponentEditor\components</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\ComponentEditor\components\jucer_ComponentTypeHandler.h">
+      <Filter>The Introjucer\ComponentEditor\components</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\ComponentEditor\components\jucer_ComponentUndoableAction.h">
+      <Filter>The Introjucer\ComponentEditor\components</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\ComponentEditor\components\jucer_GenericComponentHandler.h">
+      <Filter>The Introjucer\ComponentEditor\components</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\ComponentEditor\components\jucer_GroupComponentHandler.h">
+      <Filter>The Introjucer\ComponentEditor\components</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\ComponentEditor\components\jucer_HyperlinkButtonHandler.h">
+      <Filter>The Introjucer\ComponentEditor\components</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\ComponentEditor\components\jucer_ImageButtonHandler.h">
+      <Filter>The Introjucer\ComponentEditor\components</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\ComponentEditor\components\jucer_JucerComponentHandler.h">
+      <Filter>The Introjucer\ComponentEditor\components</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\ComponentEditor\components\jucer_LabelHandler.h">
+      <Filter>The Introjucer\ComponentEditor\components</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\ComponentEditor\components\jucer_SliderHandler.h">
+      <Filter>The Introjucer\ComponentEditor\components</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\ComponentEditor\components\jucer_TabbedComponentHandler.h">
+      <Filter>The Introjucer\ComponentEditor\components</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\ComponentEditor\components\jucer_TextButtonHandler.h">
+      <Filter>The Introjucer\ComponentEditor\components</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\ComponentEditor\components\jucer_TextEditorHandler.h">
+      <Filter>The Introjucer\ComponentEditor\components</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\ComponentEditor\components\jucer_ToggleButtonHandler.h">
+      <Filter>The Introjucer\ComponentEditor\components</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\ComponentEditor\components\jucer_TreeViewHandler.h">
+      <Filter>The Introjucer\ComponentEditor\components</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\ComponentEditor\components\jucer_ViewportHandler.h">
+      <Filter>The Introjucer\ComponentEditor\components</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\ComponentEditor\documents\jucer_ButtonDocument.h">
+      <Filter>The Introjucer\ComponentEditor\documents</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\ComponentEditor\documents\jucer_ComponentDocument.h">
+      <Filter>The Introjucer\ComponentEditor\documents</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\ComponentEditor\paintelements\jucer_ColouredElement.h">
+      <Filter>The Introjucer\ComponentEditor\paintelements</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\ComponentEditor\paintelements\jucer_ElementSiblingComponent.h">
+      <Filter>The Introjucer\ComponentEditor\paintelements</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\ComponentEditor\paintelements\jucer_FillType.h">
+      <Filter>The Introjucer\ComponentEditor\paintelements</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\ComponentEditor\paintelements\jucer_GradientPointComponent.h">
+      <Filter>The Introjucer\ComponentEditor\paintelements</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\ComponentEditor\paintelements\jucer_ImageResourceProperty.h">
+      <Filter>The Introjucer\ComponentEditor\paintelements</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\ComponentEditor\paintelements\jucer_PaintElement.h">
+      <Filter>The Introjucer\ComponentEditor\paintelements</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\ComponentEditor\paintelements\jucer_PaintElementEllipse.h">
+      <Filter>The Introjucer\ComponentEditor\paintelements</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\ComponentEditor\paintelements\jucer_PaintElementGroup.h">
+      <Filter>The Introjucer\ComponentEditor\paintelements</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\ComponentEditor\paintelements\jucer_PaintElementImage.h">
+      <Filter>The Introjucer\ComponentEditor\paintelements</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\ComponentEditor\paintelements\jucer_PaintElementPath.h">
+      <Filter>The Introjucer\ComponentEditor\paintelements</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\ComponentEditor\paintelements\jucer_PaintElementRectangle.h">
+      <Filter>The Introjucer\ComponentEditor\paintelements</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\ComponentEditor\paintelements\jucer_PaintElementRoundedRectangle.h">
+      <Filter>The Introjucer\ComponentEditor\paintelements</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\ComponentEditor\paintelements\jucer_PaintElementText.h">
+      <Filter>The Introjucer\ComponentEditor\paintelements</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\ComponentEditor\paintelements\jucer_PaintElementUndoableAction.h">
+      <Filter>The Introjucer\ComponentEditor\paintelements</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\ComponentEditor\paintelements\jucer_PointComponent.h">
+      <Filter>The Introjucer\ComponentEditor\paintelements</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\ComponentEditor\paintelements\jucer_StrokeType.h">
+      <Filter>The Introjucer\ComponentEditor\paintelements</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\ComponentEditor\properties\jucer_ColourPropertyComponent.h">
+      <Filter>The Introjucer\ComponentEditor\properties</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\ComponentEditor\properties\jucer_ComponentBooleanProperty.h">
+      <Filter>The Introjucer\ComponentEditor\properties</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\ComponentEditor\properties\jucer_ComponentChoiceProperty.h">
+      <Filter>The Introjucer\ComponentEditor\properties</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\ComponentEditor\properties\jucer_ComponentColourProperty.h">
+      <Filter>The Introjucer\ComponentEditor\properties</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\ComponentEditor\properties\jucer_ComponentTextProperty.h">
+      <Filter>The Introjucer\ComponentEditor\properties</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\ComponentEditor\properties\jucer_FilePropertyComponent.h">
+      <Filter>The Introjucer\ComponentEditor\properties</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\ComponentEditor\properties\jucer_FontPropertyComponent.h">
+      <Filter>The Introjucer\ComponentEditor\properties</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\ComponentEditor\properties\jucer_JustificationProperty.h">
+      <Filter>The Introjucer\ComponentEditor\properties</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\ComponentEditor\properties\jucer_PositionPropertyBase.h">
+      <Filter>The Introjucer\ComponentEditor\properties</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\ComponentEditor\ui\jucer_ComponentLayoutEditor.h">
+      <Filter>The Introjucer\ComponentEditor\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\ComponentEditor\ui\jucer_ComponentLayoutPanel.h">
+      <Filter>The Introjucer\ComponentEditor\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\ComponentEditor\ui\jucer_ComponentOverlayComponent.h">
+      <Filter>The Introjucer\ComponentEditor\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\ComponentEditor\ui\jucer_EditingPanelBase.h">
+      <Filter>The Introjucer\ComponentEditor\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\ComponentEditor\ui\jucer_JucerCommandIDs.h">
+      <Filter>The Introjucer\ComponentEditor\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\ComponentEditor\ui\jucer_JucerDocumentEditor.h">
+      <Filter>The Introjucer\ComponentEditor\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\ComponentEditor\ui\jucer_PaintRoutineEditor.h">
+      <Filter>The Introjucer\ComponentEditor\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\ComponentEditor\ui\jucer_PaintRoutinePanel.h">
+      <Filter>The Introjucer\ComponentEditor\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\ComponentEditor\ui\jucer_RelativePositionedRectangle.h">
+      <Filter>The Introjucer\ComponentEditor\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\ComponentEditor\ui\jucer_ResourceEditorPanel.h">
+      <Filter>The Introjucer\ComponentEditor\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\ComponentEditor\ui\jucer_SnapGridPainter.h">
+      <Filter>The Introjucer\ComponentEditor\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\ComponentEditor\ui\jucer_TestComponent.h">
+      <Filter>The Introjucer\ComponentEditor\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\ComponentEditor\jucer_BinaryResources.h">
+      <Filter>The Introjucer\ComponentEditor</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\ComponentEditor\jucer_ComponentLayout.h">
+      <Filter>The Introjucer\ComponentEditor</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\ComponentEditor\jucer_GeneratedCode.h">
+      <Filter>The Introjucer\ComponentEditor</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\ComponentEditor\jucer_JucerDocument.h">
+      <Filter>The Introjucer\ComponentEditor</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\ComponentEditor\jucer_ObjectTypes.h">
+      <Filter>The Introjucer\ComponentEditor</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\ComponentEditor\jucer_PaintRoutine.h">
+      <Filter>The Introjucer\ComponentEditor</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\ComponentEditor\jucer_UtilityFunctions.h">
+      <Filter>The Introjucer\ComponentEditor</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\Source\BinaryData\jucer_AudioPluginEditorTemplate.h">
       <Filter>The Introjucer\BinaryData</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\BinaryData\jucer_AudioPluginFilterTemplate.h">
+      <Filter>The Introjucer\BinaryData</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\BinaryData\jucer_ComponentTemplate.h">
       <Filter>The Introjucer\BinaryData</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\BinaryData\jucer_ContentCompTemplate.h">

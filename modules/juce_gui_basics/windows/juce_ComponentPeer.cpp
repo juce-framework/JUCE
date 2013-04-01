@@ -27,9 +27,9 @@ static Array <ComponentPeer*> heavyweightPeers;
 static uint32 lastUniqueID = 1;
 
 //==============================================================================
-ComponentPeer::ComponentPeer (Component& component_, const int styleFlags_)
-    : component (component_),
-      styleFlags (styleFlags_),
+ComponentPeer::ComponentPeer (Component& comp, const int flags)
+    : component (comp),
+      styleFlags (flags),
       constrainer (nullptr),
       lastDragAndDropCompUnderMouse (nullptr),
       uniqueID (lastUniqueID += 2), // increment by 2 so that this can never hit 0

@@ -34,8 +34,10 @@
 
 #if JUCE_WINDOWS
  typedef int       juce_socklen_t;
+ typedef SOCKET    SocketHandle;
 #else
  typedef socklen_t juce_socklen_t;
+ typedef int       SocketHandle;
 #endif
 
 //==============================================================================
@@ -57,7 +59,7 @@ namespace SocketHelpers
        #endif
     }
 
-    static bool resetSocketOptions (const int handle, const bool isDatagram, const bool allowBroadcast) noexcept
+    static bool resetSocketOptions (const SocketHandle handle, const bool isDatagram, const bool allowBroadcast) noexcept
     {
         const int sndBufSize = 65536;
         const int rcvBufSize = 65536;
@@ -70,7 +72,7 @@ namespace SocketHelpers
                                : (setsockopt (handle, IPPROTO_TCP, TCP_NODELAY, (const char*) &one, sizeof (one)) == 0));
     }
 
-    static bool bindSocketToPort (const int handle, const int port) noexcept
+    static bool bindSocketToPort (const SocketHandle handle, const int port) noexcept
     {
         if (handle <= 0 || port <= 0)
             return false;
@@ -84,7 +86,7 @@ namespace SocketHelpers
         return bind (handle, (struct sockaddr*) &servTmpAddr, sizeof (struct sockaddr_in)) >= 0;
     }
 
-    static int readSocket (const int handle,
+    static int readSocket (const SocketHandle handle,
                            void* const destBuffer, const int maxBytesToRead,
                            bool volatile& connected,
                            const bool blockUntilSpecifiedAmountHasArrived) noexcept
@@ -122,7 +124,7 @@ namespace SocketHelpers
         return bytesRead;
     }
 
-    static int waitForReadiness (const int handle, const bool forReading, const int timeoutMsecs) noexcept
+    static int waitForReadiness (const SocketHandle handle, const bool forReading, const int timeoutMsecs) noexcept
     {
         struct timeval timeout;
         struct timeval* timeoutp;
@@ -175,7 +177,7 @@ namespace SocketHelpers
         return FD_ISSET (handle, forReading ? &rset : &wset) ? 1 : 0;
     }
 
-    static bool setSocketBlockingState (const int handle, const bool shouldBlock) noexcept
+    static bool setSocketBlockingState (const SocketHandle handle, const bool shouldBlock) noexcept
     {
        #if JUCE_WINDOWS
         u_long nonBlocking = shouldBlock ? 0 : (u_long) 1;

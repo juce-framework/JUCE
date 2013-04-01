@@ -165,13 +165,13 @@ Image PNGImageFormat::decodeImage (InputStream& in)
 
     pngReadStruct = png_create_read_struct (PNG_LIBPNG_VER_STRING, 0, 0, 0);
 
-    if (pngReadStruct != 0)
+    if (pngReadStruct != nullptr)
     {
         try
         {
             pngInfoStruct = png_create_info_struct (pngReadStruct);
 
-            if (pngInfoStruct == 0)
+            if (pngInfoStruct == nullptr)
             {
                 png_destroy_read_struct (&pngReadStruct, 0, 0);
                 return Image::null;
@@ -213,21 +213,20 @@ Image PNGImageFormat::decodeImage (InputStream& in)
                                   || pngInfoStruct->num_trans > 0;
 
             // Load the image into a temp buffer in the pnglib format..
-            HeapBlock <uint8> tempBuffer (height * (width << 2));
+            const size_t lineStride = width * 4;
+            HeapBlock <uint8> tempBuffer (height * lineStride);
 
+            HeapBlock <png_bytep> rows (height);
+            for (int y = (int) height; --y >= 0;)
+                rows[y] = (png_bytep) (tempBuffer + lineStride * y);
+
+            try
             {
-                HeapBlock <png_bytep> rows (height);
-                for (int y = (int) height; --y >= 0;)
-                    rows[y] = (png_bytep) (tempBuffer + (width << 2) * y);
-
-                try
-                {
-                    png_read_image (pngReadStruct, rows);
-                    png_read_end (pngReadStruct, pngInfoStruct);
-                }
-                catch (PNGHelpers::PNGErrorStruct&)
-                {}
+                png_read_image (pngReadStruct, rows);
+                png_read_end (pngReadStruct, pngInfoStruct);
             }
+            catch (PNGHelpers::PNGErrorStruct&)
+            {}
 
             png_destroy_read_struct (&pngReadStruct, &pngInfoStruct, 0);
 
@@ -239,15 +238,11 @@ Image PNGImageFormat::decodeImage (InputStream& in)
             hasAlphaChan = image.hasAlphaChannel(); // (the native image creator may not give back what we expect)
 
             const Image::BitmapData destData (image, Image::BitmapData::writeOnly);
-            uint8* srcRow = tempBuffer;
-            uint8* destRow = destData.data;
 
             for (int y = 0; y < (int) height; ++y)
             {
-                const uint8* src = srcRow;
-                srcRow += (width << 2);
-                uint8* dest = destRow;
-                destRow += destData.lineStride;
+                const uint8* src = rows[y];
+                uint8* dest = destData.getLinePointer (y);
 
                 if (hasAlphaChan)
                 {
@@ -286,14 +281,14 @@ bool PNGImageFormat::writeImageToStream (const Image& image, OutputStream& out)
 
     png_structp pngWriteStruct = png_create_write_struct (PNG_LIBPNG_VER_STRING, 0, 0, 0);
 
-    if (pngWriteStruct == 0)
+    if (pngWriteStruct == nullptr)
         return false;
 
     png_infop pngInfoStruct = png_create_info_struct (pngWriteStruct);
 
-    if (pngInfoStruct == 0)
+    if (pngInfoStruct == nullptr)
     {
-        png_destroy_write_struct (&pngWriteStruct, (png_infopp) 0);
+        png_destroy_write_struct (&pngWriteStruct, (png_infopp) nullptr);
         return false;
     }
 

@@ -51,8 +51,8 @@ public:
                   && tc->getEditingMode() == ToolbarItemComponent::editableOnToolbar)
             {
                 g.setColour (findColour (Toolbar::editingModeOutlineColourId, true));
-                g.drawRect (0, 0, getWidth(), getHeight(),
-                            jmin (2, (getWidth() - 1) / 2, (getHeight() - 1) / 2));
+                g.drawRect (getLocalBounds(), jmin (2, (getWidth() - 1) / 2,
+                                                       (getHeight() - 1) / 2));
             }
         }
     }

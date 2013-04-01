@@ -190,6 +190,13 @@ namespace
         return exporter.getVisualStudioVersion() < 10 ? CodeHelpers::addEscapeChars (text.quoted())
                                                       : CodeHelpers::addEscapeChars (text).quoted();
     }
+
+    String createRebasedPath (ProjectExporter& exporter, const RelativePath& path)
+    {
+        return createEscapedStringForVersion (exporter,
+                                              exporter.rebaseFromProjectFolderToBuildTarget (path)
+                                                      .toWindowsStyle());
+    }
 }
 
 //==============================================================================
@@ -221,8 +228,8 @@ namespace VSTHelpers
     static void fixMissingVSTValues (ProjectExporter& exporter)
     {
         if (getVSTFolder(exporter).toString().isEmpty())
-            getVSTFolder(exporter) = (exporter.isVisualStudio() ? "c:\\SDKs\\vstsdk2.4"
-                                                                : "~/SDKs/vstsdk2.4");
+            getVSTFolder(exporter) = (exporter.isWindows() ? "c:\\SDKs\\vstsdk2.4"
+                                                           : "~/SDKs/vstsdk2.4");
 
         fixMissingXcodePostBuildScript (exporter);
     }
@@ -242,7 +249,7 @@ namespace VSTHelpers
 
         addVSTFolderToPath (exporter, exporter.extraSearchPaths);
 
-        if (exporter.isVisualStudio())
+        if (exporter.isWindows())
             exporter.extraSearchPaths.add (juceWrapperFolder.toWindowsStyle());
         else if (exporter.isLinux())
             exporter.extraSearchPaths.add (juceWrapperFolder.toUnixStyle());
@@ -263,11 +270,6 @@ namespace RTASHelpers
                                                                                               RelativePath::projectFolder); }
 
     static bool isExporterSupported (ProjectExporter& exporter)   { return exporter.isVisualStudio() || exporter.isXcode(); }
-
-    static RelativePath getRTASFolderRelativePath (ProjectExporter& exporter)
-    {
-        return exporter.rebaseFromProjectFolderToBuildTarget (getRTASFolderPath (exporter));
-    }
 
     static void fixMissingRTASValues (ProjectExporter& exporter)
     {
@@ -306,6 +308,7 @@ namespace RTASHelpers
                                 "AlturaPorts/TDMPlugins/PluginLibrary/Interfaces",
                                 "AlturaPorts/TDMPlugins/common",
                                 "AlturaPorts/TDMPlugins/common/Platform",
+                                "AlturaPorts/TDMPlugins/common/Macros",
                                 "AlturaPorts/TDMPlugins/SignalProcessing/Public",
                                 "AlturaPorts/TDMPlugIns/DSPManager/Interfaces",
                                 "AlturaPorts/SADriver/Interfaces",
@@ -368,12 +371,15 @@ namespace RTASHelpers
         {
             fixMissingRTASValues (exporter);
 
+            const RelativePath rtasFolder (getRTASFolderPath (exporter));
+
             if (exporter.isVisualStudio())
             {
                 exporter.msvcTargetSuffix = ".dpm";
 
-                String winbag (getRTASFolderRelativePath (exporter).getChildFile ("WinBag").toWindowsStyle());
-                exporter.msvcExtraPreprocessorDefs.set ("JucePlugin_WinBag_path", createEscapedStringForVersion (exporter, winbag));
+                exporter.msvcExtraPreprocessorDefs.set ("JucePlugin_WinBag_path",
+                                                        createRebasedPath (exporter,
+                                                                           rtasFolder.getChildFile ("WinBag")));
 
                 RelativePath juceFolder (exporter.getJucePathFromTargetFolder());
                 if (juceFolder.getFileName() != "modules")
@@ -404,7 +410,6 @@ namespace RTASHelpers
             {
                 exporter.xcodeCanUseDwarf = false;
 
-                RelativePath rtasFolder (getRTASFolderPath (exporter));
                 exporter.xcodeExtraLibrariesDebug.add   (rtasFolder.getChildFile ("MacBag/Libs/Debug/libPluginLibrary.a"));
                 exporter.xcodeExtraLibrariesRelease.add (rtasFolder.getChildFile ("MacBag/Libs/Release/libPluginLibrary.a"));
             }
@@ -580,9 +585,8 @@ namespace AAXHelpers
                     if (config->getValue (Ids::useRuntimeLibDLL).getValue().isVoid())
                         config->getValue (Ids::useRuntimeLibDLL) = true;
 
-                exporter.msvcExtraPreprocessorDefs
-                    .set ("JucePlugin_AAXLibs_path",
-                          createEscapedStringForVersion (exporter, aaxLibsFolder.toWindowsStyle()));
+                exporter.msvcExtraPreprocessorDefs.set ("JucePlugin_AAXLibs_path",
+                                                        createRebasedPath (exporter, aaxLibsFolder));
             }
             else
             {

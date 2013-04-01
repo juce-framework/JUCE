@@ -23,13 +23,7 @@
   ==============================================================================
 */
 
-#ifndef __JUCER_PROJECTEXPORT_MAKE_JUCEHEADER__
-#define __JUCER_PROJECTEXPORT_MAKE_JUCEHEADER__
 
-#include "jucer_ProjectExporter.h"
-
-
-//==============================================================================
 class MakefileProjectExporter  : public ProjectExporter
 {
 public:
@@ -230,14 +224,14 @@ private:
 
         String targetName (config.getTargetBinaryNameString());
 
-        if (projectType.isLibrary())
+        if (projectType.isStaticLibrary() || projectType.isDynamicLibrary())
             targetName = getLibbedFilename (targetName);
         else
             targetName = targetName.upToLastOccurrenceOf (".", false, false) + makefileTargetSuffix;
 
         out << "  TARGET := " << escapeSpaces (targetName) << newLine;
 
-        if (projectType.isLibrary())
+        if (projectType.isStaticLibrary())
             out << "  BLDCMD = ar -rcs $(OUTDIR)/$(TARGET) $(OBJECTS) $(TARGET_ARCH)" << newLine;
         else
             out << "  BLDCMD = $(CXX) -o $(OUTDIR)/$(TARGET) $(OBJECTS) $(LDFLAGS) $(RESOURCES) $(TARGET_ARCH)" << newLine;
@@ -267,7 +261,7 @@ private:
             << "endif" << newLine
             << newLine;
 
-        if (! projectType.isLibrary())
+        if (! projectType.isStaticLibrary())
             out << "ifeq ($(TARGET_ARCH),)" << newLine
                 << "  TARGET_ARCH := -march=native" << newLine
                 << "endif"  << newLine << newLine;
@@ -340,6 +334,3 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE (MakefileProjectExporter)
 };
-
-
-#endif   // __JUCER_PROJECTEXPORT_MAKE_JUCEHEADER__

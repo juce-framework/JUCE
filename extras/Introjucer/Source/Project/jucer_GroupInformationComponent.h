@@ -77,23 +77,21 @@ public:
 
     Component* refreshComponentForRow (int rowNumber, bool /*isRowSelected*/, Component* existingComponentToUpdate)
     {
+        ScopedPointer<Component> existing (existingComponentToUpdate);
+
         if (rowNumber < getNumRows())
         {
             Project::Item child (item.getChild (rowNumber));
 
             if (existingComponentToUpdate == nullptr
-                 || dynamic_cast <FileOptionComponent*> (existingComponentToUpdate)->item != child)
+                 || dynamic_cast <FileOptionComponent*> (existing.get())->item != child)
             {
-                delete existingComponentToUpdate;
-                existingComponentToUpdate = new FileOptionComponent (child);
+                existing = nullptr;
+                existing = new FileOptionComponent (child);
             }
         }
-        else
-        {
-            deleteAndZero (existingComponentToUpdate);
-        }
 
-        return existingComponentToUpdate;
+        return existing.release();
     }
 
     //==============================================================================

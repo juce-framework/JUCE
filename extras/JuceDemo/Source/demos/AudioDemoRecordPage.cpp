@@ -1,20 +1,18 @@
 /*
   ==============================================================================
 
-  This is an automatically generated file created by the Jucer!
-
-  Creation date:  21 Sep 2012 12:10:11pm
+  This is an automatically generated GUI class created by the Introjucer!
 
   Be careful when adding custom code to these files, as only the code within
   the "//[xyz]" and "//[/xyz]" sections will be retained when the file is loaded
   and re-saved.
 
-  Jucer version: 1.12
+  Created with Introjucer version: 3.1.0
 
   ------------------------------------------------------------------------------
 
-  The Jucer is part of the JUCE library - "Jules' Utility Class Extensions"
-  Copyright 2004-6 by Raw Material Software ltd.
+  The Introjucer is part of the JUCE library - "Jules' Utility Class Extensions"
+  Copyright 2004-13 by Raw Material Software Ltd.
 
   ==============================================================================
 */
@@ -147,11 +145,11 @@ AudioDemoRecordPage::AudioDemoRecordPage (AudioDeviceManager& deviceManager_)
 
     addAndMakeVisible (explanationLabel = new Label (String::empty,
                                                      "This page demonstrates how to record a wave file from the live audio input..\n\nPressing record will start recording a file in your \"Documents\" folder."));
-    explanationLabel->setFont (Font (15.0000f, Font::plain));
+    explanationLabel->setFont (Font (15.00f, Font::plain));
     explanationLabel->setJustificationType (Justification::topLeft);
     explanationLabel->setEditable (false, false, false);
     explanationLabel->setColour (TextEditor::textColourId, Colours::black);
-    explanationLabel->setColour (TextEditor::backgroundColourId, Colour (0x0));
+    explanationLabel->setColour (TextEditor::backgroundColourId, Colour (0x00000000));
 
     addAndMakeVisible (recordButton = new TextButton (String::empty));
     recordButton->setButtonText ("Record");
@@ -259,9 +257,10 @@ void AudioDemoRecordPage::visibilityChanged()
 
 //==============================================================================
 #if 0
-/*  -- Jucer information section --
+/*  -- Introjucer information section --
 
-    This is where the Jucer puts all of its metadata, so don't change anything in here!
+    This is where the Introjucer stores the metadata that describe this GUI layout, so
+    make changes in here at your peril!
 
 BEGIN_JUCER_METADATA
 
@@ -291,3 +290,7 @@ BEGIN_JUCER_METADATA
 END_JUCER_METADATA
 */
 #endif
+
+
+//[EndFile] You can add extra defines here...
+//[/EndFile]

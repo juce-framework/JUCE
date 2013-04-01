@@ -57,10 +57,12 @@ public:
 
     virtual bool isXcode() const                { return false; }
     virtual bool isVisualStudio() const         { return false; }
+    virtual bool isWindows() const              { return false; }
     virtual int getVisualStudioVersion() const  { return 0; }
     virtual bool isLinux() const                { return false; }
     virtual bool isOSX() const                  { return false; }
     virtual bool isAndroid() const              { return false; }
+    virtual bool isCodeBlocks() const           { return false; }
 
     //==============================================================================
     String getName() const                      { return name; }
@@ -88,9 +90,6 @@ public:
     String getExternalLibrariesString() const   { return getSettingString (Ids::externalLibraries).replaceCharacters ("\r\n", " ;"); }
 
     Value getUserNotes()                        { return getSetting (Ids::userNotes); }
-
-    // This adds the quotes, and may return angle-brackets, eg: <foo/bar.h> or normal quotes.
-    String getIncludePathForFileInJuceFolder (const String& pathFromJuceFolder, const File& targetIncludeFile) const;
 
     RelativePath rebaseFromProjectFolderToBuildTarget (const RelativePath& path) const;
     void addToExtraSearchPaths (const RelativePath& pathFromProjectFolder);
@@ -151,6 +150,7 @@ public:
     StringPairArray msvcExtraPreprocessorDefs;
     bool msvcIsDLL, msvcIsWindowsSubsystem;
     String msvcDelayLoadedDLLs;
+    StringArray mingwLibs;
 
     //==============================================================================
     StringArray extraSearchPaths;

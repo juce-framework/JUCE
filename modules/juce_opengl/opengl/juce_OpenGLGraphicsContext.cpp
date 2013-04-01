@@ -1118,21 +1118,6 @@ public:
         target.makeActive();
         blendMode.resync();
         JUCE_CHECK_OPENGL_ERROR
-
-       #ifdef GL_COLOR_ARRAY
-        glDisableClientState (GL_COLOR_ARRAY);
-        glDisableClientState (GL_NORMAL_ARRAY);
-        glDisableClientState (GL_VERTEX_ARRAY);
-        glDisableClientState (GL_INDEX_ARRAY);
-
-        for (int i = 3; --i >= 0;)
-        {
-            activeTextures.setActiveTexture (i);
-            glDisableClientState (GL_TEXTURE_COORD_ARRAY);
-        }
-       #endif
-
-        JUCE_CHECK_OPENGL_ERROR
         activeTextures.clear();
         shaderQuadQueue.initialise();
         JUCE_CHECK_OPENGL_ERROR
@@ -1142,11 +1127,6 @@ public:
     {
         flush();
         target.context.extensions.glBindFramebuffer (GL_FRAMEBUFFER, previousFrameBufferTarget);
-
-       #if defined (GL_INDEX_ARRAY)
-        glDisableClientState (GL_INDEX_ARRAY);
-       #endif
-
         target.context.extensions.glBindBuffer (GL_ARRAY_BUFFER, 0);
         target.context.extensions.glBindBuffer (GL_ELEMENT_ARRAY_BUFFER, 0);
     }

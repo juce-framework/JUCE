@@ -331,7 +331,7 @@ void ModuleList::createDependencies (const String& moduleID, OwnedArray<LibraryM
                 String version (d ["version"].toString());
 
                 //xxx to do - also need to find version conflicts
-                jassertfalse
+                jassertfalse;
             }
         }
     }
@@ -518,6 +518,14 @@ void LibraryModule::prepareExporter (ProjectExporter& exporter, ProjectSaver& pr
         exporter.linuxLibs.sort (false);
         exporter.linuxLibs.removeDuplicates (false);
     }
+    else if (exporter.isCodeBlocks())
+    {
+        const String libs (moduleInfo ["mingwLibs"].toString());
+        exporter.mingwLibs.addTokens (libs, ", ", String::empty);
+        exporter.mingwLibs.trim();
+        exporter.mingwLibs.sort (false);
+        exporter.mingwLibs.removeDuplicates (false);
+    }
 
     if (isPluginClient())
     {
@@ -605,9 +613,10 @@ static bool exporterTargetMatches (const String& test, String target)
 bool LibraryModule::fileTargetMatches (ProjectExporter& exporter, const String& target)
 {
     if (exporter.isXcode())         return exporterTargetMatches ("xcode", target);
-    if (exporter.isVisualStudio())  return exporterTargetMatches ("msvc", target);
+    if (exporter.isWindows())       return exporterTargetMatches ("msvc", target);
     if (exporter.isLinux())         return exporterTargetMatches ("linux", target);
     if (exporter.isAndroid())       return exporterTargetMatches ("android", target);
+    if (exporter.isCodeBlocks())    return exporterTargetMatches ("mingw", target);
     return target.isEmpty();
 }
 

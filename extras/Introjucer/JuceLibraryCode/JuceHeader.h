@@ -32,8 +32,8 @@
 namespace ProjectInfo
 {
     const char* const  projectName    = "The Introjucer";
-    const char* const  versionString  = "3.0.0";
-    const int          versionNumber  = 0x30000;
+    const char* const  versionString  = "3.1.0";
+    const int          versionNumber  = 0x30100;
 }
 
 #endif   // __APPHEADERFILE_M70QFTRRK__

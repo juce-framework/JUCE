@@ -60,7 +60,7 @@ void FilenameComponent::paintOverChildren (Graphics& g)
     if (isFileDragOver)
     {
         g.setColour (Colours::red.withAlpha (0.2f));
-        g.drawRect (0, 0, getWidth(), getHeight(), 3);
+        g.drawRect (getLocalBounds(), 3);
     }
 }
 

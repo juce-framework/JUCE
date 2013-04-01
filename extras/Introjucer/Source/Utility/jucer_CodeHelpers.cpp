@@ -267,6 +267,23 @@ namespace CodeHelpers
         return result + currentLine.trimEnd() + ")";
     }
 
+    String floatLiteral (double value, int numDecPlaces)
+    {
+        String s (value, numDecPlaces);
+
+        if (s.containsChar ('.'))
+            s << 'f';
+        else
+            s << ".0f";
+
+        return s;
+    }
+
+    String boolLiteral (bool value)
+    {
+        return value ? "true" : "false";
+    }
+
     String colourToCode (const Colour& col)
     {
         const Colour colours[] =
@@ -290,6 +307,33 @@ namespace CodeHelpers
                 return "Colours::" + String (colourNames[i]);
 
         return "Colour (0x" + hexString8Digits ((int) col.getARGB()) + ')';
+    }
+
+    String justificationToCode (const Justification& justification)
+    {
+        switch (justification.getFlags())
+        {
+            case Justification::centred:                return "Justification::centred";
+            case Justification::centredLeft:            return "Justification::centredLeft";
+            case Justification::centredRight:           return "Justification::centredRight";
+            case Justification::centredTop:             return "Justification::centredTop";
+            case Justification::centredBottom:          return "Justification::centredBottom";
+            case Justification::topLeft:                return "Justification::topLeft";
+            case Justification::topRight:               return "Justification::topRight";
+            case Justification::bottomLeft:             return "Justification::bottomLeft";
+            case Justification::bottomRight:            return "Justification::bottomRight";
+            case Justification::left:                   return "Justification::left";
+            case Justification::right:                  return "Justification::right";
+            case Justification::horizontallyCentred:    return "Justification::horizontallyCentred";
+            case Justification::top:                    return "Justification::top";
+            case Justification::bottom:                 return "Justification::bottom";
+            case Justification::verticallyCentred:      return "Justification::verticallyCentred";
+            case Justification::horizontallyJustified:  return "Justification::horizontallyJustified";
+            default:                                    break;
+        }
+
+        jassertfalse;
+        return "Justification (" + String (justification.getFlags()) + ")";
     }
 
     void writeDataAsCppLiteral (const MemoryBlock& mb, OutputStream& out,

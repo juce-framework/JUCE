@@ -1,26 +1,24 @@
 /*
   ==============================================================================
 
-  This is an automatically generated file created by the Jucer!
-
-  Creation date:  21 Sep 2012 12:10:20pm
+  This is an automatically generated GUI class created by the Introjucer!
 
   Be careful when adding custom code to these files, as only the code within
   the "//[xyz]" and "//[/xyz]" sections will be retained when the file is loaded
   and re-saved.
 
-  Jucer version: 1.12
+  Created with Introjucer version: 3.1.0
 
   ------------------------------------------------------------------------------
 
-  The Jucer is part of the JUCE library - "Jules' Utility Class Extensions"
-  Copyright 2004-6 by Raw Material Software ltd.
+  The Introjucer is part of the JUCE library - "Jules' Utility Class Extensions"
+  Copyright 2004-13 by Raw Material Software Ltd.
 
   ==============================================================================
 */
 
-#ifndef __JUCER_HEADER_AUDIODEMOSYNTHPAGE_AUDIODEMOSYNTHPAGE_D17DA22__
-#define __JUCER_HEADER_AUDIODEMOSYNTHPAGE_AUDIODEMOSYNTHPAGE_D17DA22__
+#ifndef __JUCER_HEADER_AUDIODEMOSYNTHPAGE_AUDIODEMOSYNTHPAGE_1A41C21B__
+#define __JUCER_HEADER_AUDIODEMOSYNTHPAGE_AUDIODEMOSYNTHPAGE_1A41C21B__
 
 //[Headers]     -- You can add your own extra header files here --
 #include "../jucedemo_headers.h"
@@ -75,5 +73,7 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioDemoSynthPage)
 };
 
+//[EndFile] You can add extra defines here...
+//[/EndFile]
 
-#endif   // __JUCER_HEADER_AUDIODEMOSYNTHPAGE_AUDIODEMOSYNTHPAGE_D17DA22__
+#endif   // __JUCER_HEADER_AUDIODEMOSYNTHPAGE_AUDIODEMOSYNTHPAGE_1A41C21B__

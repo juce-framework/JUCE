@@ -34,6 +34,10 @@ extras/JuceDemo/Builds/Android/libs
 extras/JuceDemo/Builds/Android/gen
 extras/JuceDemo/Builds/Android/obj
 extras/JuceDemo/Builds/iOS/build
+extras/JuceDemo/Builds/CodeBlocks/bin
+extras/JuceDemo/Builds/CodeBlocks/obj
+extras/JuceDemo/Builds/CodeBlocks/*.depend
+extras/JuceDemo/Builds/CodeBlocks/*.layout
 extras/audio plugin demo/Builds/MacOSX/build
 extras/audio plugin demo/Builds/Linux/build
 extras/audio plugin demo/Builds/VisualStudio2005/Debug
@@ -54,6 +58,10 @@ extras/Introjucer/Builds/VisualStudio2008/Debug
 extras/Introjucer/Builds/VisualStudio2008/Release
 extras/Introjucer/Builds/VisualStudio2010/Debug
 extras/Introjucer/Builds/VisualStudio2010/Release
+extras/Introjucer/Builds/CodeBlocks/bin
+extras/Introjucer/Builds/CodeBlocks/obj
+extras/Introjucer/Builds/CodeBlocks/*.depend
+extras/Introjucer/Builds/CodeBlocks/*.layout
 extras/the jucer/Builds/MacOSX/build
 extras/audio plugin host/build/mac/build
 extras/audio plugin demo/Builds/VisualStudio2008

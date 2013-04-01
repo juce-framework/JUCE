@@ -45,7 +45,8 @@ public:
     static const ProjectType* findType (const String& typeCode);
 
     //==============================================================================
-    virtual bool isLibrary() const              { return false; }
+    virtual bool isStaticLibrary() const        { return false; }
+    virtual bool isDynamicLibrary() const       { return false; }
     virtual bool isGUIApplication() const       { return false; }
     virtual bool isCommandLineApp() const       { return false; }
     virtual bool isAudioPlugin() const          { return false; }
@@ -53,6 +54,8 @@ public:
 
     static const char* getGUIAppTypeName();
     static const char* getConsoleAppTypeName();
+    static const char* getStaticLibTypeName();
+    static const char* getDynamicLibTypeName();
     static const char* getAudioPluginTypeName();
 
     virtual void setMissingProjectProperties (Project&) const = 0;

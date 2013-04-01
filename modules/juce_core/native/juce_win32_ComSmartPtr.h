@@ -26,6 +26,17 @@
 #ifndef __JUCE_WIN32_COMSMARTPTR_JUCEHEADER__
 #define __JUCE_WIN32_COMSMARTPTR_JUCEHEADER__
 
+#ifndef _MSC_VER
+template<typename Type> struct UUIDGetter { static CLSID get() { jassertfalse; return CLSID(); } };
+#define __uuidof(x)  UUIDGetter<x>::get()
+#endif
+
+inline CLSID uuidFromString (const char* s) noexcept
+{
+    CLSID c;
+    UuidFromStringA ((unsigned char*) s, &c);
+    return c;
+}
 
 //==============================================================================
 /** A simple COM smart pointer.

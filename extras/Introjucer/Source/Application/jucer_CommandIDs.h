@@ -34,6 +34,7 @@ namespace CommandIDs
         open                   = 0x200020,
         closeDocument          = 0x200030,
         saveDocument           = 0x200040,
+        saveDocumentAs         = 0x200041,
 
         closeProject           = 0x200051,
         saveProject            = 0x200060,

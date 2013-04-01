@@ -23,13 +23,7 @@
   ==============================================================================
 */
 
-#ifndef __JUCER_PROJECTEXPORT_ANDROID_JUCEHEADER__
-#define __JUCER_PROJECTEXPORT_ANDROID_JUCEHEADER__
 
-#include "jucer_ProjectExporter.h"
-
-
-//==============================================================================
 class AndroidProjectExporter  : public ProjectExporter
 {
 public:
@@ -639,6 +633,3 @@ private:
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE (AndroidProjectExporter)
 };
-
-
-#endif   // __JUCER_PROJECTEXPORT_ANDROID_JUCEHEADER__

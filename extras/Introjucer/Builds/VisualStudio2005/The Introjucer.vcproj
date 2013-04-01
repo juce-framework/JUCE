@@ -172,6 +172,7 @@
       </Filter>
       <Filter Name="Project Saving">
         <File RelativePath="..\..\Source\Project Saving\jucer_ProjectExport_Android.h"/>
+        <File RelativePath="..\..\Source\Project Saving\jucer_ProjectExport_CodeBlocks.h"/>
         <File RelativePath="..\..\Source\Project Saving\jucer_ProjectExport_Make.h"/>
         <File RelativePath="..\..\Source\Project Saving\jucer_ProjectExport_MSVC.h"/>
         <File RelativePath="..\..\Source\Project Saving\jucer_ProjectExport_XCode.h"/>
@@ -202,6 +203,102 @@
       <Filter Name="Code Editor">
         <File RelativePath="..\..\Source\Code Editor\jucer_SourceCodeEditor.cpp"/>
         <File RelativePath="..\..\Source\Code Editor\jucer_SourceCodeEditor.h"/>
+      </Filter>
+      <Filter Name="ComponentEditor">
+        <Filter Name="components">
+          <File RelativePath="..\..\Source\ComponentEditor\components\jucer_ButtonHandler.h"/>
+          <File RelativePath="..\..\Source\ComponentEditor\components\jucer_ComboBoxHandler.h"/>
+          <File RelativePath="..\..\Source\ComponentEditor\components\jucer_ComponentNameProperty.h"/>
+          <File RelativePath="..\..\Source\ComponentEditor\components\jucer_ComponentTypeHandler.cpp"/>
+          <File RelativePath="..\..\Source\ComponentEditor\components\jucer_ComponentTypeHandler.h"/>
+          <File RelativePath="..\..\Source\ComponentEditor\components\jucer_ComponentUndoableAction.h"/>
+          <File RelativePath="..\..\Source\ComponentEditor\components\jucer_GenericComponentHandler.h"/>
+          <File RelativePath="..\..\Source\ComponentEditor\components\jucer_GroupComponentHandler.h"/>
+          <File RelativePath="..\..\Source\ComponentEditor\components\jucer_HyperlinkButtonHandler.h"/>
+          <File RelativePath="..\..\Source\ComponentEditor\components\jucer_ImageButtonHandler.h"/>
+          <File RelativePath="..\..\Source\ComponentEditor\components\jucer_JucerComponentHandler.h"/>
+          <File RelativePath="..\..\Source\ComponentEditor\components\jucer_LabelHandler.h"/>
+          <File RelativePath="..\..\Source\ComponentEditor\components\jucer_SliderHandler.h"/>
+          <File RelativePath="..\..\Source\ComponentEditor\components\jucer_TabbedComponentHandler.h"/>
+          <File RelativePath="..\..\Source\ComponentEditor\components\jucer_TextButtonHandler.h"/>
+          <File RelativePath="..\..\Source\ComponentEditor\components\jucer_TextEditorHandler.h"/>
+          <File RelativePath="..\..\Source\ComponentEditor\components\jucer_ToggleButtonHandler.h"/>
+          <File RelativePath="..\..\Source\ComponentEditor\components\jucer_TreeViewHandler.h"/>
+          <File RelativePath="..\..\Source\ComponentEditor\components\jucer_ViewportHandler.h"/>
+        </Filter>
+        <Filter Name="documents">
+          <File RelativePath="..\..\Source\ComponentEditor\documents\jucer_ButtonDocument.cpp"/>
+          <File RelativePath="..\..\Source\ComponentEditor\documents\jucer_ButtonDocument.h"/>
+          <File RelativePath="..\..\Source\ComponentEditor\documents\jucer_ComponentDocument.cpp"/>
+          <File RelativePath="..\..\Source\ComponentEditor\documents\jucer_ComponentDocument.h"/>
+        </Filter>
+        <Filter Name="paintelements">
+          <File RelativePath="..\..\Source\ComponentEditor\paintelements\jucer_ColouredElement.cpp"/>
+          <File RelativePath="..\..\Source\ComponentEditor\paintelements\jucer_ColouredElement.h"/>
+          <File RelativePath="..\..\Source\ComponentEditor\paintelements\jucer_ElementSiblingComponent.h"/>
+          <File RelativePath="..\..\Source\ComponentEditor\paintelements\jucer_FillType.h"/>
+          <File RelativePath="..\..\Source\ComponentEditor\paintelements\jucer_GradientPointComponent.h"/>
+          <File RelativePath="..\..\Source\ComponentEditor\paintelements\jucer_ImageResourceProperty.h"/>
+          <File RelativePath="..\..\Source\ComponentEditor\paintelements\jucer_PaintElement.cpp"/>
+          <File RelativePath="..\..\Source\ComponentEditor\paintelements\jucer_PaintElement.h"/>
+          <File RelativePath="..\..\Source\ComponentEditor\paintelements\jucer_PaintElementEllipse.h"/>
+          <File RelativePath="..\..\Source\ComponentEditor\paintelements\jucer_PaintElementGroup.h"/>
+          <File RelativePath="..\..\Source\ComponentEditor\paintelements\jucer_PaintElementImage.h"/>
+          <File RelativePath="..\..\Source\ComponentEditor\paintelements\jucer_PaintElementPath.cpp"/>
+          <File RelativePath="..\..\Source\ComponentEditor\paintelements\jucer_PaintElementPath.h"/>
+          <File RelativePath="..\..\Source\ComponentEditor\paintelements\jucer_PaintElementRectangle.h"/>
+          <File RelativePath="..\..\Source\ComponentEditor\paintelements\jucer_PaintElementRoundedRectangle.h"/>
+          <File RelativePath="..\..\Source\ComponentEditor\paintelements\jucer_PaintElementText.h"/>
+          <File RelativePath="..\..\Source\ComponentEditor\paintelements\jucer_PaintElementUndoableAction.h"/>
+          <File RelativePath="..\..\Source\ComponentEditor\paintelements\jucer_PointComponent.h"/>
+          <File RelativePath="..\..\Source\ComponentEditor\paintelements\jucer_StrokeType.h"/>
+        </Filter>
+        <Filter Name="properties">
+          <File RelativePath="..\..\Source\ComponentEditor\properties\jucer_ColourPropertyComponent.h"/>
+          <File RelativePath="..\..\Source\ComponentEditor\properties\jucer_ComponentBooleanProperty.h"/>
+          <File RelativePath="..\..\Source\ComponentEditor\properties\jucer_ComponentChoiceProperty.h"/>
+          <File RelativePath="..\..\Source\ComponentEditor\properties\jucer_ComponentColourProperty.h"/>
+          <File RelativePath="..\..\Source\ComponentEditor\properties\jucer_ComponentTextProperty.h"/>
+          <File RelativePath="..\..\Source\ComponentEditor\properties\jucer_FilePropertyComponent.h"/>
+          <File RelativePath="..\..\Source\ComponentEditor\properties\jucer_FontPropertyComponent.h"/>
+          <File RelativePath="..\..\Source\ComponentEditor\properties\jucer_JustificationProperty.h"/>
+          <File RelativePath="..\..\Source\ComponentEditor\properties\jucer_PositionPropertyBase.h"/>
+        </Filter>
+        <Filter Name="ui">
+          <File RelativePath="..\..\Source\ComponentEditor\ui\jucer_ComponentLayoutEditor.cpp"/>
+          <File RelativePath="..\..\Source\ComponentEditor\ui\jucer_ComponentLayoutEditor.h"/>
+          <File RelativePath="..\..\Source\ComponentEditor\ui\jucer_ComponentLayoutPanel.h"/>
+          <File RelativePath="..\..\Source\ComponentEditor\ui\jucer_ComponentOverlayComponent.cpp"/>
+          <File RelativePath="..\..\Source\ComponentEditor\ui\jucer_ComponentOverlayComponent.h"/>
+          <File RelativePath="..\..\Source\ComponentEditor\ui\jucer_EditingPanelBase.cpp"/>
+          <File RelativePath="..\..\Source\ComponentEditor\ui\jucer_EditingPanelBase.h"/>
+          <File RelativePath="..\..\Source\ComponentEditor\ui\jucer_JucerCommandIDs.h"/>
+          <File RelativePath="..\..\Source\ComponentEditor\ui\jucer_JucerDocumentEditor.cpp"/>
+          <File RelativePath="..\..\Source\ComponentEditor\ui\jucer_JucerDocumentEditor.h"/>
+          <File RelativePath="..\..\Source\ComponentEditor\ui\jucer_PaintRoutineEditor.cpp"/>
+          <File RelativePath="..\..\Source\ComponentEditor\ui\jucer_PaintRoutineEditor.h"/>
+          <File RelativePath="..\..\Source\ComponentEditor\ui\jucer_PaintRoutinePanel.cpp"/>
+          <File RelativePath="..\..\Source\ComponentEditor\ui\jucer_PaintRoutinePanel.h"/>
+          <File RelativePath="..\..\Source\ComponentEditor\ui\jucer_RelativePositionedRectangle.h"/>
+          <File RelativePath="..\..\Source\ComponentEditor\ui\jucer_ResourceEditorPanel.cpp"/>
+          <File RelativePath="..\..\Source\ComponentEditor\ui\jucer_ResourceEditorPanel.h"/>
+          <File RelativePath="..\..\Source\ComponentEditor\ui\jucer_SnapGridPainter.h"/>
+          <File RelativePath="..\..\Source\ComponentEditor\ui\jucer_TestComponent.cpp"/>
+          <File RelativePath="..\..\Source\ComponentEditor\ui\jucer_TestComponent.h"/>
+        </Filter>
+        <File RelativePath="..\..\Source\ComponentEditor\jucer_BinaryResources.cpp"/>
+        <File RelativePath="..\..\Source\ComponentEditor\jucer_BinaryResources.h"/>
+        <File RelativePath="..\..\Source\ComponentEditor\jucer_ComponentLayout.cpp"/>
+        <File RelativePath="..\..\Source\ComponentEditor\jucer_ComponentLayout.h"/>
+        <File RelativePath="..\..\Source\ComponentEditor\jucer_GeneratedCode.cpp"/>
+        <File RelativePath="..\..\Source\ComponentEditor\jucer_GeneratedCode.h"/>
+        <File RelativePath="..\..\Source\ComponentEditor\jucer_JucerDocument.cpp"/>
+        <File RelativePath="..\..\Source\ComponentEditor\jucer_JucerDocument.h"/>
+        <File RelativePath="..\..\Source\ComponentEditor\jucer_ObjectTypes.cpp"/>
+        <File RelativePath="..\..\Source\ComponentEditor\jucer_ObjectTypes.h"/>
+        <File RelativePath="..\..\Source\ComponentEditor\jucer_PaintRoutine.cpp"/>
+        <File RelativePath="..\..\Source\ComponentEditor\jucer_PaintRoutine.h"/>
+        <File RelativePath="..\..\Source\ComponentEditor\jucer_UtilityFunctions.h"/>
       </Filter>
       <Filter Name="BinaryData">
         <File RelativePath="..\..\Source\BinaryData\AudioPluginXCodeScript.txt">
@@ -276,6 +373,26 @@
           </FileConfiguration>
         </File>
         <File RelativePath="..\..\Source\BinaryData\jucer_AudioPluginFilterTemplate.h">
+          <FileConfiguration Name="Debug|Win32"
+                             ExcludedFromBuild="true">
+            <Tool Name="VCCLCompilerTool"/>
+          </FileConfiguration>
+          <FileConfiguration Name="Release|Win32"
+                             ExcludedFromBuild="true">
+            <Tool Name="VCCLCompilerTool"/>
+          </FileConfiguration>
+        </File>
+        <File RelativePath="..\..\Source\BinaryData\jucer_ComponentTemplate.cpp">
+          <FileConfiguration Name="Debug|Win32"
+                             ExcludedFromBuild="true">
+            <Tool Name="VCCLCompilerTool"/>
+          </FileConfiguration>
+          <FileConfiguration Name="Release|Win32"
+                             ExcludedFromBuild="true">
+            <Tool Name="VCCLCompilerTool"/>
+          </FileConfiguration>
+        </File>
+        <File RelativePath="..\..\Source\BinaryData\jucer_ComponentTemplate.h">
           <FileConfiguration Name="Debug|Win32"
                              ExcludedFromBuild="true">
             <Tool Name="VCCLCompilerTool"/>

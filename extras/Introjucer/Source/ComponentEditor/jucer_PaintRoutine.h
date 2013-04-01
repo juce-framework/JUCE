@@ -1,0 +1,120 @@
+/*
+  ==============================================================================
+
+   This file is part of the JUCE library - "Jules' Utility Class Extensions"
+   Copyright 2004-11 by Raw Material Software Ltd.
+
+  ------------------------------------------------------------------------------
+
+   JUCE can be redistributed and/or modified under the terms of the GNU General
+   Public License (Version 2), as published by the Free Software Foundation.
+   A copy of the license is included in the JUCE distribution, or can be found
+   online at www.gnu.org/licenses.
+
+   JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+   A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+
+  ------------------------------------------------------------------------------
+
+   To release a closed-source product which uses JUCE, commercial licenses are
+   available: visit www.rawmaterialsoftware.com/juce for more information.
+
+  ==============================================================================
+*/
+
+#ifndef __JUCER_PAINTROUTINE_JUCEHEADER__
+#define __JUCER_PAINTROUTINE_JUCEHEADER__
+
+#include "paintelements/jucer_PaintElement.h"
+class JucerDocument;
+class PathPoint;
+
+
+//==============================================================================
+/**
+    Contains a set of PaintElements that constitute some kind of paint() method.
+
+*/
+class PaintRoutine
+{
+public:
+    //==============================================================================
+    PaintRoutine();
+    ~PaintRoutine();
+
+    //==============================================================================
+    void changed();
+    bool perform (UndoableAction* action, const String& actionName);
+
+    //==============================================================================
+    int getNumElements() const noexcept                                     { return elements.size(); }
+    PaintElement* getElement (const int index) const noexcept               { return elements [index]; }
+    int indexOfElement (PaintElement* e) const noexcept                     { return elements.indexOf (e); }
+    bool containsElement (PaintElement* e) const noexcept                   { return elements.contains (e); }
+
+    //==============================================================================
+    void clear();
+    PaintElement* addElementFromXml (const XmlElement& xml, const int index, const bool undoable);
+    PaintElement* addNewElement (PaintElement* elementToCopy, const int index, const bool undoable);
+    void removeElement (PaintElement* element, const bool undoable);
+
+    void elementToFront (PaintElement* element, const bool undoable);
+    void elementToBack (PaintElement* element, const bool undoable);
+
+    const Colour getBackgroundColour() const noexcept                       { return backgroundColour; }
+    void setBackgroundColour (const Colour& newColour) noexcept;
+
+    void fillWithBackground (Graphics& g, const bool drawOpaqueBackground);
+    void drawElements (Graphics& g, const Rectangle<int>& relativeTo);
+
+    void dropImageAt (const File& f, int x, int y);
+
+    //==============================================================================
+    SelectedItemSet <PaintElement*>& getSelectedElements() noexcept         { return selectedElements; }
+    SelectedItemSet <PathPoint*>& getSelectedPoints() noexcept              { return selectedPoints; }
+
+    static const char* const clipboardXmlTag;
+    void copySelectedToClipboard();
+    void paste();
+    void deleteSelected();
+    void selectAll();
+
+    void selectedToFront();
+    void selectedToBack();
+
+    void groupSelected();
+    void ungroupSelected();
+
+    void startDragging (const Rectangle<int>& parentArea);
+    void dragSelectedComps (int dxFromDragStart, int dyFromDragStart, const Rectangle<int>& parentArea);
+    void endDragging();
+
+    void bringLostItemsBackOnScreen (const Rectangle<int>& parentArea);
+
+    //==============================================================================
+    void setDocument (JucerDocument* const doc)                       { document = doc; }
+    JucerDocument* getDocument() const noexcept                       { return document; }
+
+    //==============================================================================
+    static const char* xmlTagName;
+    XmlElement* createXml() const;
+    bool loadFromXml (const XmlElement& xml);
+
+    void fillInGeneratedCode (GeneratedCode& code, String& paintMethodCode) const;
+
+    //==============================================================================
+private:
+    OwnedArray <PaintElement> elements;
+    SelectedItemSet <PaintElement*> selectedElements;
+    SelectedItemSet <PathPoint*> selectedPoints;
+    JucerDocument* document;
+
+    Colour backgroundColour;
+
+    friend class DeleteElementAction;
+    friend class FrontOrBackElementAction;
+    void moveElementZOrder (int oldIndex, int newIndex);
+};
+
+#endif   // __JUCER_PAINTROUTINE_JUCEHEADER__

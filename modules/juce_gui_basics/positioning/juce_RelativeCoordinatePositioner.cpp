@@ -26,7 +26,7 @@
 class MarkerListScope  : public Expression::Scope
 {
 public:
-    MarkerListScope (Component& component_) : component (component_) {}
+    MarkerListScope (Component& comp) : component (comp) {}
 
     Expression getSymbolValue (const String& symbol) const
     {
@@ -90,8 +90,8 @@ private:
 };
 
 //==============================================================================
-RelativeCoordinatePositionerBase::ComponentScope::ComponentScope (Component& component_)
-    : component (component_)
+RelativeCoordinatePositionerBase::ComponentScope::ComponentScope (Component& comp)
+    : component (comp)
 {
 }
 
@@ -151,8 +151,8 @@ Component* RelativeCoordinatePositionerBase::ComponentScope::findSiblingComponen
 class RelativeCoordinatePositionerBase::DependencyFinderScope  : public ComponentScope
 {
 public:
-    DependencyFinderScope (Component& component_, RelativeCoordinatePositionerBase& positioner_, bool& ok_)
-        : ComponentScope (component_), positioner (positioner_), ok (ok_)
+    DependencyFinderScope (Component& comp, RelativeCoordinatePositionerBase& positioner_, bool& ok_)
+        : ComponentScope (comp), positioner (positioner_), ok (ok_)
     {
     }
 
@@ -221,8 +221,8 @@ private:
 };
 
 //==============================================================================
-RelativeCoordinatePositionerBase::RelativeCoordinatePositionerBase (Component& component_)
-    : Component::Positioner (component_), registeredOk (false)
+RelativeCoordinatePositionerBase::RelativeCoordinatePositionerBase (Component& comp)
+    : Component::Positioner (comp), registeredOk (false)
 {
 }
 

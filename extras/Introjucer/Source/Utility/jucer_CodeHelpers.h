@@ -39,8 +39,12 @@ namespace CodeHelpers
     String makeBinaryDataIdentifierName (const File& file);
 
     String stringLiteral (const String& text, int maxLineLength = -1);
+    String floatLiteral (double value, int numDecPlaces);
+    String boolLiteral (bool value);
 
     String colourToCode (const Colour& col);
+    String justificationToCode (const Justification&);
+
     String alignFunctionCallParams (const String& call, const StringArray& parameters, int maxLineLength);
 
     void writeDataAsCppLiteral (const MemoryBlock& data, OutputStream& out,

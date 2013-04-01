@@ -218,21 +218,21 @@ void autoScrollForMouseEvent (const MouseEvent& e, bool scrollX, bool scrollY)
 }
 
 //==============================================================================
-int indexOfLineStartingWith (const StringArray& lines, const String& text, int startIndex)
+int indexOfLineStartingWith (const StringArray& lines, const String& text, int index)
 {
-    startIndex = jmax (0, startIndex);
+    const int len = text.length();
 
-    while (startIndex < lines.size())
+    for (const String* i = lines.begin() + index, * const e = lines.end(); i < e; ++i)
     {
-        if (lines[startIndex].trimStart().startsWithIgnoreCase (text))
-            return startIndex;
+        if (CharacterFunctions::compareUpTo (i->getCharPointer().findEndOfWhitespace(),
+                                             text.getCharPointer(), len) == 0)
+            return index;
 
-        ++startIndex;
+        ++index;
     }
 
     return -1;
 }
-
 
 //==============================================================================
 RolloverHelpComp::RolloverHelpComp()

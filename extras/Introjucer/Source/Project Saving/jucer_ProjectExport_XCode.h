@@ -23,11 +23,6 @@
   ==============================================================================
 */
 
-#ifndef __JUCER_PROJECTEXPORT_XCODE_JUCEHEADER__
-#define __JUCER_PROJECTEXPORT_XCODE_JUCEHEADER__
-
-#include "jucer_ProjectExporter.h"
-
 namespace
 {
     const char* const osxVersionDefault         = "default";
@@ -124,14 +119,6 @@ public:
                    "A comma-separated list of extra frameworks that should be added to the build. "
                    "(Don't include the .framework extension in the name)");
 
-        if (projectType.isLibrary())
-        {
-            const char* const libTypes[] = { "Static Library (.a)", "Dynamic Library (.dylib)", 0 };
-            const int libTypeValues[] = { 1, 2, 0 };
-            props.add (new ChoicePropertyComponent (getLibraryType(), "Library Type",
-                                                    StringArray (libTypes), Array<var> (libTypeValues)));
-        }
-
         props.add (new TextPropertyComponent (getPreBuildScriptValue(), "Pre-build shell script", 32768, true),
                    "Some shell-script that will be run before a build starts.");
 
@@ -173,10 +160,6 @@ public:
     }
 
 protected:
-    Value getLibraryType()          { return getSetting (Ids::libraryType); }
-    bool isStaticLibrary() const    { return projectType.isLibrary() && (int) settings [Ids::libraryType] == 1; }
-
-
     //==============================================================================
     class XcodeBuildConfiguration  : public BuildConfiguration
     {
@@ -366,7 +349,7 @@ private:
 
         addShellScriptBuildPhase ("Pre-build script", getPreBuildScript());
 
-        if (! isStaticLibrary())
+        if (! projectType.isStaticLibrary())
             addBuildPhase ("PBXResourcesBuildPhase", resourceIDs);
 
         if (rezFileIDs.size() > 0)
@@ -374,7 +357,7 @@ private:
 
         addBuildPhase ("PBXSourcesBuildPhase", sourceIDs);
 
-        if (! isStaticLibrary())
+        if (! projectType.isStaticLibrary())
             addBuildPhase ("PBXFrameworksBuildPhase", frameworkIDs);
 
         addShellScriptBuildPhase ("Post-build script", getPostBuildScript());
@@ -637,7 +620,7 @@ private:
         s.add ("WARNING_CFLAGS = -Wreorder");
         s.add ("GCC_MODEL_TUNING = G5");
 
-        if (projectType.isLibrary())
+        if (projectType.isStaticLibrary())
         {
             s.add ("GCC_INLINES_ARE_PRIVATE_EXTERN = NO");
             s.add ("GCC_SYMBOLS_PRIVATE_EXTERN = NO");
@@ -709,12 +692,6 @@ private:
         else
         {
             s.add ("CONFIGURATION_BUILD_DIR = \"$(PROJECT_DIR)/build/$(CONFIGURATION)\"");
-        }
-
-        if (projectType.isLibrary())
-        {
-            s.add ("CONFIGURATION_BUILD_DIR = \"$(BUILD_DIR)\"");
-            s.add ("DEPLOYMENT_LOCATION = YES");
         }
 
         String gccVersion ("com.apple.compilers.llvm.clang.1_0");
@@ -823,7 +800,7 @@ private:
 
     void addFrameworks() const
     {
-        if (! isStaticLibrary())
+        if (! projectType.isStaticLibrary())
         {
             StringArray s (xcodeFrameworks);
             s.addTokens (getExtraFrameworksString(), ",;", "\"'");
@@ -1256,6 +1233,3 @@ private:
         return file.hasFileExtension (sourceFileExtensions);
     }
 };
-
-
-#endif   // __JUCER_PROJECTEXPORT_XCODE_JUCEHEADER__

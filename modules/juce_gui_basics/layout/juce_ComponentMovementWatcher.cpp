@@ -23,11 +23,11 @@
   ==============================================================================
 */
 
-ComponentMovementWatcher::ComponentMovementWatcher (Component* const component_)
-    : component (component_),
+ComponentMovementWatcher::ComponentMovementWatcher (Component* const comp)
+    : component (comp),
       lastPeerID (0),
       reentrant (false),
-      wasShowing (component_->isShowing())
+      wasShowing (comp->isShowing())
 {
     jassert (component != nullptr); // can't use this with a null pointer..
 

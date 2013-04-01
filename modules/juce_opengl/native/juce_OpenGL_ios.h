@@ -97,7 +97,7 @@ public:
         [view release];
     }
 
-    void initialiseOnRenderThread() {}
+    void initialiseOnRenderThread (OpenGLContext&) {}
 
     void shutdownOnRenderThread()
     {

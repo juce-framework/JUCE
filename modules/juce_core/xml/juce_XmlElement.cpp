@@ -29,9 +29,8 @@ XmlElement::XmlAttributeNode::XmlAttributeNode (const XmlAttributeNode& other) n
 {
 }
 
-XmlElement::XmlAttributeNode::XmlAttributeNode (const String& name_, const String& value_) noexcept
-    : name (name_),
-      value (value_)
+XmlElement::XmlAttributeNode::XmlAttributeNode (const String& n, const String& v) noexcept
+    : name (n), value (v)
 {
    #if JUCE_DEBUG
     // this checks whether the attribute name string contains any illegal characters..
@@ -46,14 +45,14 @@ inline bool XmlElement::XmlAttributeNode::hasName (const String& nameToMatch) co
 }
 
 //==============================================================================
-XmlElement::XmlElement (const String& tagName_) noexcept
-    : tagName (tagName_)
+XmlElement::XmlElement (const String& tag) noexcept
+    : tagName (tag)
 {
     // the tag name mustn't be empty, or it'll look like a text element!
-    jassert (tagName_.containsNonWhitespaceChars())
+    jassert (tag.containsNonWhitespaceChars())
 
     // The tag can't contain spaces or other characters that would create invalid XML!
-    jassert (! tagName_.containsAnyOf (" <>/&"));
+    jassert (! tag.containsAnyOf (" <>/&"));
 }
 
 XmlElement::XmlElement (int /*dummy*/) noexcept
@@ -362,24 +361,30 @@ bool XmlElement::writeToFile (const File& file,
 }
 
 //==============================================================================
-bool XmlElement::hasTagName (const String& tagNameWanted) const noexcept
+bool XmlElement::hasTagName (const String& possibleTagName) const noexcept
 {
-   #if JUCE_DEBUG
-    // if debugging, check that the case is actually the same, because
-    // valid xml is case-sensitive, and although this lets it pass, it's
-    // better not to..
-    if (tagName.equalsIgnoreCase (tagNameWanted))
-    {
-        jassert (tagName == tagNameWanted);
-        return true;
-    }
-    else
-    {
-        return false;
-    }
-   #else
-    return tagName.equalsIgnoreCase (tagNameWanted);
-   #endif
+    const bool matches = tagName.equalsIgnoreCase (possibleTagName);
+
+    // XML tags should be case-sensitive, so although this method allows a
+    // case-insensitive match to pass, you should try to avoid this.
+    jassert ((! matches) || tagName == possibleTagName);
+
+    return matches;
+}
+
+String XmlElement::getNamespace() const
+{
+    return tagName.upToFirstOccurrenceOf (":", false, false);
+}
+
+String XmlElement::getTagNameWithoutNamespace() const
+{
+    return tagName.fromLastOccurrenceOf (":", false, false);
+}
+
+bool XmlElement::hasTagNameIgnoringNamespace (const String& possibleTagName) const
+{
+    return hasTagName (possibleTagName) || getTagNameWithoutNamespace() == possibleTagName;
 }
 
 XmlElement* XmlElement::getNextElementWithTagName (const String& requiredTagName) const

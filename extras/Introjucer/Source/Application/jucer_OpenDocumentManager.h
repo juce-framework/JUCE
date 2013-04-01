@@ -55,6 +55,7 @@ public:
         virtual File getFile() const = 0;
         virtual bool needsSaving() const = 0;
         virtual bool save() = 0;
+        virtual bool saveAs() = 0;
         virtual bool hasFileBeenModifiedExternally() = 0;
         virtual void reloadFromFile() = 0;
         virtual Component* createEditor() = 0;

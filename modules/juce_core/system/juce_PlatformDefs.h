@@ -305,7 +305,9 @@ namespace juce
   #define JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS 1
  #endif
 
- #define JUCE_COMPILER_SUPPORTS_ARC 1
+ #ifndef JUCE_COMPILER_SUPPORTS_ARC
+  #define JUCE_COMPILER_SUPPORTS_ARC 1
+ #endif
 #endif
 
 #if defined (_MSC_VER) && _MSC_VER >= 1600

@@ -91,6 +91,9 @@ public:
     /** True if the socket is connected to this machine rather than over the network. */
     bool isLocal() const noexcept;
 
+    /** Returns the OS's socket handle that's currently open. */
+    int getRawSocketHandle() const noexcept                     { return handle; }
+
     //==============================================================================
     /** Waits until the socket is ready for reading or writing.
 
@@ -154,7 +157,6 @@ public:
         @see createListener
     */
     StreamingSocket* waitForNextConnection() const;
-
 
 private:
     //==============================================================================
@@ -237,6 +239,9 @@ public:
     /** True if the socket is connected to this machine rather than over the network. */
     bool isLocal() const noexcept;
 
+    /** Returns the OS's socket handle that's currently open. */
+    int getRawSocketHandle() const noexcept                     { return handle; }
+
     //==============================================================================
     /** Waits until the socket is ready for reading or writing.
 
@@ -282,7 +287,6 @@ public:
         sending, but can be used to read the data.
     */
     DatagramSocket* waitForNextConnection() const;
-
 
 private:
     //==============================================================================

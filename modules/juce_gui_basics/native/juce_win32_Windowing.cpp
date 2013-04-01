@@ -470,6 +470,7 @@ public:
     HWNDComponentPeer (Component& comp, const int windowStyleFlags, HWND parent, bool nonRepainting)
         : ComponentPeer (comp, windowStyleFlags),
           dontRepaint (nonRepainting),
+          parentToAddTo (parent),
           currentRenderingEngine (softwareRenderingEngine),
           lastPaintTime (0),
           fullScreen (false),
@@ -479,7 +480,6 @@ public:
           constrainerIsResizing (false),
           currentWindowIcon (0),
           dropTarget (nullptr),
-          parentToAddTo (parent),
           updateLayeredWindowAlpha (255)
     {
         callFunctionIfNotLocked (&createWindowCallback, this);
@@ -584,9 +584,11 @@ public:
                       h + windowBorder.getTopAndBottom(),
                       SWP_NOACTIVATE | SWP_NOMOVE | SWP_NOZORDER | SWP_NOOWNERZORDER);
 
-        updateBorderSize();
-
-        repaintNowIfTransparent();
+        if (isValidPeer (this))
+        {
+            updateBorderSize();
+            repaintNowIfTransparent();
+        }
     }
 
     void setBounds (int x, int y, int w, int h, bool isNowFullScreen)
@@ -601,9 +603,11 @@ public:
                       h + windowBorder.getTopAndBottom(),
                       SWP_NOACTIVATE | SWP_NOZORDER | SWP_NOOWNERZORDER);
 
-        updateBorderSize();
-
-        repaintNowIfTransparent();
+        if (isValidPeer (this))
+        {
+            updateBorderSize();
+            repaintNowIfTransparent();
+        }
     }
 
     Rectangle<int> getBounds() const

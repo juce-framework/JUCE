@@ -793,6 +793,14 @@ static void* createDraggingHandCursor()
 }
 
 //==============================================================================
+static int numAlwaysOnTopPeers = 0;
+
+bool juce_areThereAnyAlwaysOnTopWindows()
+{
+    return numAlwaysOnTopPeers > 0;
+}
+
+//==============================================================================
 class LinuxComponentPeer  : public ComponentPeer
 {
 public:
@@ -800,13 +808,17 @@ public:
         : ComponentPeer (comp, windowStyleFlags),
           windowH (0), parentWindow (0),
           fullScreen (false), mapped (false),
-          visual (nullptr), depth (0)
+          visual (nullptr), depth (0),
+          isAlwaysOnTop (comp.isAlwaysOnTop())
     {
         // it's dangerous to create a window on a thread other than the message thread..
         jassert (MessageManager::getInstance()->currentThreadHasLockedMessageManager());
 
         dispatchWindowMessage = windowMessageReceive;
         repainter = new LinuxRepaintManager (*this);
+
+        if (isAlwaysOnTop)
+            ++numAlwaysOnTopPeers;
 
         createWindow (parentToAddTo);
 
@@ -821,6 +833,9 @@ public:
         deleteIconPixmaps();
         destroyWindow();
         windowH = 0;
+
+        if (isAlwaysOnTop)
+            --numAlwaysOnTopPeers;
     }
 
     // (this callback is hooked up in the messaging code)
@@ -1500,6 +1515,9 @@ public:
     {
         updateKeyModifiers (buttonRelEvent.state);
 
+        if (parentWindow != 0)
+            updateBounds();
+
         switch (pointerMap [buttonRelEvent.button - Button1])
         {
             case Keys::LeftButton:      currentModifiers = currentModifiers.withoutFlags (ModifierKeys::leftButtonModifier); break;
@@ -1514,9 +1532,6 @@ public:
         handleMouseEvent (0, getMousePos (buttonRelEvent), currentModifiers, getEventTime (buttonRelEvent));
 
         clearLastMousePos();
-
-        if (parentWindow != 0)
-            updateBounds();
     }
 
     void handleMotionNotifyEvent (const XPointerMovedEvent& movedEvent)
@@ -1774,7 +1789,7 @@ private:
             : peer (p), lastTimeImageUsed (0)
         {
            #if JUCE_USE_XSHM
-            shmCompletedDrawing = true;
+            shmPaintsPending = 0;
 
             useARGBImagesForRendering = XSHMHelpers::isShmAvailable();
 
@@ -1796,7 +1811,7 @@ private:
         void timerCallback()
         {
            #if JUCE_USE_XSHM
-            if (! shmCompletedDrawing)
+            if (shmPaintsPending != 0)
                 return;
            #endif
 
@@ -1823,7 +1838,7 @@ private:
         void performAnyPendingRepaintsNow()
         {
            #if JUCE_USE_XSHM
-            if (! shmCompletedDrawing)
+            if (shmPaintsPending != 0)
             {
                 startTimer (repaintTimerPeriod);
                 return;
@@ -1873,7 +1888,7 @@ private:
                 for (const Rectangle<int>* i = originalRepaintRegion.begin(), * const e = originalRepaintRegion.end(); i != e; ++i)
                 {
                    #if JUCE_USE_XSHM
-                    shmCompletedDrawing = false;
+                    ++shmPaintsPending;
                    #endif
 
                     static_cast<XBitmapImage*> (image.getPixelData())
@@ -1888,7 +1903,7 @@ private:
         }
 
        #if JUCE_USE_XSHM
-        void notifyPaintCompleted()                 { shmCompletedDrawing = true; }
+        void notifyPaintCompleted() noexcept        { --shmPaintsPending; }
        #endif
 
     private:
@@ -1900,7 +1915,8 @@ private:
         RectangleList regionsNeedingRepaint;
 
        #if JUCE_USE_XSHM
-        bool useARGBImagesForRendering, shmCompletedDrawing;
+        bool useARGBImagesForRendering;
+        int shmPaintsPending;
        #endif
         JUCE_DECLARE_NON_COPYABLE (LinuxRepaintManager)
     };
@@ -1915,6 +1931,7 @@ private:
     Visual* visual;
     int depth;
     BorderSize<int> windowBorder;
+    bool isAlwaysOnTop;
     enum { KeyPressEventType = 2 };
 
     struct MotifWmHints
@@ -3137,12 +3154,6 @@ void Desktop::setScreenSaverEnabled (const bool isEnabled)
 bool Desktop::isScreenSaverEnabled()
 {
     return screenSaverAllowed;
-}
-
-//==============================================================================
-bool juce_areThereAnyAlwaysOnTopWindows()
-{
-    return false; // XXX should be implemented
 }
 
 //==============================================================================

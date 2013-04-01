@@ -53,6 +53,12 @@ public:
     /** Creates an array containing a single string. */
     explicit StringArray (const String& firstValue);
 
+    /** Creates an array from a raw array of strings.
+        @param strings          an array of strings to add
+        @param numberOfStrings  how many items there are in the array
+    */
+    StringArray (const String* strings, int numberOfStrings);
+
     /** Creates a copy of an array of string literals.
         @param strings          an array of strings to add. Null pointers in the array will be
                                 treated as empty strings

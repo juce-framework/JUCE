@@ -58,6 +58,7 @@ public:
     OpenDocumentManager::Document* getCurrentDocument() const   { return currentDocument; }
     void closeDocument();
     void saveDocument();
+    void saveAs();
 
     void hideEditor();
     bool setEditorComponent (Component* editor, OpenDocumentManager::Document* doc);

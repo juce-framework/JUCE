@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <JUCERPROJECT id="Uy86Nk" name="Jucer" projectType="guiapp" version="1.0.0"
-              bundleIdentifier="com.yourcompany.Jucer" jucerVersion="3.0.0">
+              bundleIdentifier="com.yourcompany.Jucer" jucerVersion="3.1.0">
   <EXPORTFORMATS>
     <XCODE_MAC targetFolder="Builds/MacOSX" objCExtraSuffix="wQBvzo" juceFolder="../.."
                bigIcon="HFdB13">

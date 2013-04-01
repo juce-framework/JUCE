@@ -435,10 +435,10 @@ bool DragAndDropContainer::shouldDropFilesWhenDraggedExternally (const DragAndDr
 }
 
 //==============================================================================
-DragAndDropTarget::SourceDetails::SourceDetails (const var& description_, Component* sourceComponent_, const Point<int>& localPosition_) noexcept
-    : description (description_),
-      sourceComponent (sourceComponent_),
-      localPosition (localPosition_)
+DragAndDropTarget::SourceDetails::SourceDetails (const var& desc, Component* comp, const Point<int>& pos) noexcept
+    : description (desc),
+      sourceComponent (comp),
+      localPosition (pos)
 {
 }
 
