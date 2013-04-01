@@ -118,7 +118,8 @@ public:
             bounce (bouncingNumber[i], bouncingNumberDelta[i], 1.0f);
 
         owner.speedLabel->setText (String (getWidth()) + "x" + String (getHeight())
-                                    + " - Render time: " + String (averageTime, 2) + "ms", false);
+                                    + " - Render time: " + String (averageTime, 2) + "ms",
+                                   dontSendNotification);
 
         if (owner.animatePositionToggle->getToggleState())
         {

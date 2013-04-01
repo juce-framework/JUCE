@@ -310,7 +310,7 @@ String FileBrowserComponent::getActionVerb() const
 
 void FileBrowserComponent::setFilenameBoxLabel (const String& name)
 {
-    fileLabel.setText (name, false);
+    fileLabel.setText (name, dontSendNotification);
 }
 
 FilePreviewComponent* FileBrowserComponent::getPreviewComponent() const noexcept

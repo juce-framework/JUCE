@@ -1113,6 +1113,7 @@ void TextEditor::lookAndFeelChanged()
     {
         setCaretVisible (false);
         setCaretVisible (true);
+        updateCaretPosition();
     }
 }
 

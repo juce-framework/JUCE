@@ -280,7 +280,7 @@ void ComboBox::setSelectedId (const int newItemId, const bool dontSendChangeMess
         if (! dontSendChangeMessage)
             triggerAsyncUpdate();
 
-        label->setText (newItemText, false);
+        label->setText (newItemText, dontSendNotification);
         lastCurrentId = newItemId;
         currentId = newItemId;
 
@@ -333,7 +333,7 @@ void ComboBox::setText (const String& newText, const bool dontSendChangeMessage)
 
     if (label->getText() != newText)
     {
-        label->setText (newText, false);
+        label->setText (newText, dontSendNotification);
 
         if (! dontSendChangeMessage)
             triggerAsyncUpdate();
@@ -417,7 +417,7 @@ void ComboBox::lookAndFeelChanged()
             newLabel->setEditable (label->isEditable());
             newLabel->setJustificationType (label->getJustificationType());
             newLabel->setTooltip (label->getTooltip());
-            newLabel->setText (label->getText(), false);
+            newLabel->setText (label->getText(), dontSendNotification);
         }
 
         label = newLabel;

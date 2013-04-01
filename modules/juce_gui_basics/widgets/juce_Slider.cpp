@@ -401,7 +401,7 @@ public:
     void updateText()
     {
         if (valueBox != nullptr)
-            valueBox->setText (owner.getTextFromValue (currentValue.getValue()), false);
+            valueBox->setText (owner.getTextFromValue (currentValue.getValue()), dontSendNotification);
     }
 
     double constrainedValue (double value) const
@@ -564,7 +564,7 @@ public:
             owner.addAndMakeVisible (valueBox = lf.createSliderTextBox (owner));
 
             valueBox->setWantsKeyboardFocus (false);
-            valueBox->setText (previousTextBoxContent, false);
+            valueBox->setText (previousTextBoxContent, dontSendNotification);
 
             if (valueBox->isEditable() != editableText) // (avoid overriding the single/double click flags unless we have to)
                 valueBox->setEditable (editableText && owner.isEnabled());

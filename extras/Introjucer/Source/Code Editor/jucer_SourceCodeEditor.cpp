@@ -308,7 +308,7 @@ public:
         editor.setColour (CaretComponent::caretColourId, Colours::black);
 
         addAndMakeVisible (&editor);
-        label.setText ("Find:", false);
+        label.setText ("Find:", dontSendNotification);
         label.setColour (Label::textColourId, Colours::white);
         label.attachToComponent (&editor, false);
 

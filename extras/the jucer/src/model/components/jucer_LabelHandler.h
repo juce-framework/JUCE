@@ -95,7 +95,7 @@ public:
 
         l->setJustificationType (Justification (xml.getIntAttribute ("justification", Justification::centred)));
 
-        l->setText (xml.getStringAttribute ("labelText", "Label Text"), false);
+        l->setText (xml.getStringAttribute ("labelText", "Label Text"), dontSendNotification);
 
         l->setEditable (xml.getBoolAttribute ("editableSingleClick", defaultLabel.isEditableOnSingleClick()),
                         xml.getBoolAttribute ("editableDoubleClick", defaultLabel.isEditableOnDoubleClick()),
@@ -232,7 +232,7 @@ private:
             bool perform()
             {
                 showCorrectTab();
-                getComponent()->setText (newState, false);
+                getComponent()->setText (newState, dontSendNotification);
                 changed();
                 return true;
             }
@@ -240,7 +240,7 @@ private:
             bool undo()
             {
                 showCorrectTab();
-                getComponent()->setText (oldState, false);
+                getComponent()->setText (oldState, dontSendNotification);
                 changed();
                 return true;
             }

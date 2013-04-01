@@ -56,7 +56,7 @@ Label::~Label()
 
 //==============================================================================
 void Label::setText (const String& newText,
-                     const bool broadcastChangeMessage)
+                     const NotificationType notification)
 {
     hideEditor (true);
 
@@ -71,7 +71,7 @@ void Label::setText (const String& newText,
         if (ownerComponent != nullptr)
             componentMovedOrResized (*ownerComponent, true, true);
 
-        if (broadcastChangeMessage)
+        if (notification != dontSendNotification)
             callChangeListeners();
     }
 }
@@ -86,7 +86,7 @@ String Label::getText (const bool returnActiveEditorContents) const
 void Label::valueChanged (Value&)
 {
     if (lastTextValue != textValue.toString())
-        setText (textValue.toString(), true);
+        setText (textValue.toString(), sendNotification);
 }
 
 //==============================================================================
@@ -359,16 +359,13 @@ class LabelKeyboardFocusTraverser   : public KeyboardFocusTraverser
 public:
     LabelKeyboardFocusTraverser() {}
 
-    Component* getNextComponent (Component* current)
-    {
-        return KeyboardFocusTraverser::getNextComponent (dynamic_cast <TextEditor*> (current) != nullptr
-                                                            ? current->getParentComponent() : current);
-    }
+    Component* getNextComponent (Component* c)     { return KeyboardFocusTraverser::getNextComponent (getComp (c)); }
+    Component* getPreviousComponent (Component* c) { return KeyboardFocusTraverser::getPreviousComponent (getComp (c)); }
 
-    Component* getPreviousComponent (Component* current)
+    static Component* getComp (Component* current)
     {
-        return KeyboardFocusTraverser::getPreviousComponent (dynamic_cast <TextEditor*> (current) != nullptr
-                                                                ? current->getParentComponent() : current);
+        return dynamic_cast <TextEditor*> (current) != nullptr
+                 ? current->getParentComponent() : current;
     }
 };
 
