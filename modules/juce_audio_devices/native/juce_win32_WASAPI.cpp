@@ -44,36 +44,38 @@ void logFailure (HRESULT hr)
 
         switch (hr)
         {
-            case E_POINTER:                                 m = "E_POINTER"; break;
-            case E_INVALIDARG:                              m = "E_INVALIDARG"; break;
-            case AUDCLNT_E_NOT_INITIALIZED:                 m = "AUDCLNT_E_NOT_INITIALIZED"; break;
-            case AUDCLNT_E_ALREADY_INITIALIZED:             m = "AUDCLNT_E_ALREADY_INITIALIZED"; break;
-            case AUDCLNT_E_WRONG_ENDPOINT_TYPE:             m = "AUDCLNT_E_WRONG_ENDPOINT_TYPE"; break;
-            case AUDCLNT_E_DEVICE_INVALIDATED:              m = "AUDCLNT_E_DEVICE_INVALIDATED"; break;
-            case AUDCLNT_E_NOT_STOPPED:                     m = "AUDCLNT_E_NOT_STOPPED"; break;
-            case AUDCLNT_E_BUFFER_TOO_LARGE:                m = "AUDCLNT_E_BUFFER_TOO_LARGE"; break;
-            case AUDCLNT_E_OUT_OF_ORDER:                    m = "AUDCLNT_E_OUT_OF_ORDER"; break;
-            case AUDCLNT_E_UNSUPPORTED_FORMAT:              m = "AUDCLNT_E_UNSUPPORTED_FORMAT"; break;
-            case AUDCLNT_E_INVALID_SIZE:                    m = "AUDCLNT_E_INVALID_SIZE"; break;
-            case AUDCLNT_E_DEVICE_IN_USE:                   m = "AUDCLNT_E_DEVICE_IN_USE"; break;
-            case AUDCLNT_E_BUFFER_OPERATION_PENDING:        m = "AUDCLNT_E_BUFFER_OPERATION_PENDING"; break;
-            case AUDCLNT_E_THREAD_NOT_REGISTERED:           m = "AUDCLNT_E_THREAD_NOT_REGISTERED"; break;
-            case AUDCLNT_E_EXCLUSIVE_MODE_NOT_ALLOWED:      m = "AUDCLNT_E_EXCLUSIVE_MODE_NOT_ALLOWED"; break;
-            case AUDCLNT_E_ENDPOINT_CREATE_FAILED:          m = "AUDCLNT_E_ENDPOINT_CREATE_FAILED"; break;
-            case AUDCLNT_E_SERVICE_NOT_RUNNING:             m = "AUDCLNT_E_SERVICE_NOT_RUNNING"; break;
-            case AUDCLNT_E_EVENTHANDLE_NOT_EXPECTED:        m = "AUDCLNT_E_EVENTHANDLE_NOT_EXPECTED"; break;
-            case AUDCLNT_E_EXCLUSIVE_MODE_ONLY:             m = "AUDCLNT_E_EXCLUSIVE_MODE_ONLY"; break;
-            case AUDCLNT_E_BUFDURATION_PERIOD_NOT_EQUAL:    m = "AUDCLNT_E_BUFDURATION_PERIOD_NOT_EQUAL"; break;
-            case AUDCLNT_E_EVENTHANDLE_NOT_SET:             m = "AUDCLNT_E_EVENTHANDLE_NOT_SET"; break;
-            case AUDCLNT_E_INCORRECT_BUFFER_SIZE:           m = "AUDCLNT_E_INCORRECT_BUFFER_SIZE"; break;
-            case AUDCLNT_E_BUFFER_SIZE_ERROR:               m = "AUDCLNT_E_BUFFER_SIZE_ERROR"; break;
-            case AUDCLNT_E_CPUUSAGE_EXCEEDED:               m = "AUDCLNT_E_CPUUSAGE_EXCEEDED"; break;
-            case AUDCLNT_E_BUFFER_ERROR:                    m = "AUDCLNT_E_BUFFER_ERROR"; break;
-            case AUDCLNT_E_BUFFER_SIZE_NOT_ALIGNED:         m = "AUDCLNT_E_BUFFER_SIZE_NOT_ALIGNED"; break;
-            case AUDCLNT_E_INVALID_DEVICE_PERIOD:           m = "AUDCLNT_E_INVALID_DEVICE_PERIOD"; break;
-            case AUDCLNT_S_BUFFER_EMPTY:                    m = "AUDCLNT_S_BUFFER_EMPTY"; break;
-            case AUDCLNT_S_THREAD_ALREADY_REGISTERED:       m = "AUDCLNT_S_THREAD_ALREADY_REGISTERED"; break;
-            default:                                        break;
+            case E_POINTER:     m = "E_POINTER"; break;
+            case E_INVALIDARG:  m = "E_INVALIDARG"; break;
+
+            #define JUCE_WASAPI_ERR(desc, n) \
+                case MAKE_HRESULT(1, 0x889, n): m = #desc; break;
+
+            JUCE_WASAPI_ERR (AUDCLNT_E_NOT_INITIALIZED, 0x001)
+            JUCE_WASAPI_ERR (AUDCLNT_E_ALREADY_INITIALIZED, 0x002)
+            JUCE_WASAPI_ERR (AUDCLNT_E_WRONG_ENDPOINT_TYPE, 0x003)
+            JUCE_WASAPI_ERR (AUDCLNT_E_DEVICE_INVALIDATED, 0x004)
+            JUCE_WASAPI_ERR (AUDCLNT_E_NOT_STOPPED, 0x005)
+            JUCE_WASAPI_ERR (AUDCLNT_E_BUFFER_TOO_LARGE, 0x006)
+            JUCE_WASAPI_ERR (AUDCLNT_E_OUT_OF_ORDER, 0x007)
+            JUCE_WASAPI_ERR (AUDCLNT_E_UNSUPPORTED_FORMAT, 0x008)
+            JUCE_WASAPI_ERR (AUDCLNT_E_INVALID_SIZE, 0x009)
+            JUCE_WASAPI_ERR (AUDCLNT_E_DEVICE_IN_USE, 0x00a)
+            JUCE_WASAPI_ERR (AUDCLNT_E_BUFFER_OPERATION_PENDING, 0x00b)
+            JUCE_WASAPI_ERR (AUDCLNT_E_THREAD_NOT_REGISTERED, 0x00c)
+            JUCE_WASAPI_ERR (AUDCLNT_E_EXCLUSIVE_MODE_NOT_ALLOWED, 0x00e)
+            JUCE_WASAPI_ERR (AUDCLNT_E_ENDPOINT_CREATE_FAILED, 0x00f)
+            JUCE_WASAPI_ERR (AUDCLNT_E_SERVICE_NOT_RUNNING, 0x010)
+            JUCE_WASAPI_ERR (AUDCLNT_E_EVENTHANDLE_NOT_EXPECTED, 0x011)
+            JUCE_WASAPI_ERR (AUDCLNT_E_EXCLUSIVE_MODE_ONLY, 0x012)
+            JUCE_WASAPI_ERR (AUDCLNT_E_BUFDURATION_PERIOD_NOT_EQUAL, 0x013)
+            JUCE_WASAPI_ERR (AUDCLNT_E_EVENTHANDLE_NOT_SET, 0x014)
+            JUCE_WASAPI_ERR (AUDCLNT_E_INCORRECT_BUFFER_SIZE, 0x015)
+            JUCE_WASAPI_ERR (AUDCLNT_E_BUFFER_SIZE_ERROR, 0x016)
+            JUCE_WASAPI_ERR (AUDCLNT_E_CPUUSAGE_EXCEEDED, 0x017)
+            JUCE_WASAPI_ERR (AUDCLNT_E_BUFFER_ERROR, 0x018)
+            JUCE_WASAPI_ERR (AUDCLNT_E_BUFFER_SIZE_NOT_ALIGNED, 0x019)
+            JUCE_WASAPI_ERR (AUDCLNT_E_INVALID_DEVICE_PERIOD, 0x020)
+            default: break;
         }
 
         Logger::writeToLog ("WASAPI error: " + (m != nullptr ? String (m)
