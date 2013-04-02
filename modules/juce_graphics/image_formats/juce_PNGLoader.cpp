@@ -160,16 +160,11 @@ Image PNGImageFormat::decodeImage (InputStream& in)
     using namespace pnglibNamespace;
     Image image;
 
-    png_structp pngReadStruct;
-    png_infop pngInfoStruct;
-
-    pngReadStruct = png_create_read_struct (PNG_LIBPNG_VER_STRING, 0, 0, 0);
-
-    if (pngReadStruct != nullptr)
+    if (png_structp pngReadStruct = png_create_read_struct (PNG_LIBPNG_VER_STRING, 0, 0, 0))
     {
         try
         {
-            pngInfoStruct = png_create_info_struct (pngReadStruct);
+            png_infop pngInfoStruct = png_create_info_struct (pngReadStruct);
 
             if (pngInfoStruct == nullptr)
             {
@@ -177,7 +172,7 @@ Image PNGImageFormat::decodeImage (InputStream& in)
                 return Image::null;
             }
 
-            png_set_error_fn (pngReadStruct, 0, PNGHelpers::errorCallback, PNGHelpers::errorCallback );
+            png_set_error_fn (pngReadStruct, 0, PNGHelpers::errorCallback, PNGHelpers::errorCallback);
 
             // read the header..
             png_set_read_fn (pngReadStruct, &in, PNGHelpers::readCallback);

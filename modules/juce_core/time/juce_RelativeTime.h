@@ -61,32 +61,32 @@ public:
     /** Creates a new RelativeTime object representing a number of milliseconds.
         @see minutes, hours, days, weeks
     */
-    static const RelativeTime milliseconds (int milliseconds) noexcept;
+    static RelativeTime milliseconds (int milliseconds) noexcept;
 
     /** Creates a new RelativeTime object representing a number of milliseconds.
         @see minutes, hours, days, weeks
     */
-    static const RelativeTime milliseconds (int64 milliseconds) noexcept;
+    static RelativeTime milliseconds (int64 milliseconds) noexcept;
 
     /** Creates a new RelativeTime object representing a number of minutes.
         @see milliseconds, hours, days, weeks
     */
-    static const RelativeTime minutes (double numberOfMinutes) noexcept;
+    static RelativeTime minutes (double numberOfMinutes) noexcept;
 
     /** Creates a new RelativeTime object representing a number of hours.
         @see milliseconds, minutes, days, weeks
     */
-    static const RelativeTime hours (double numberOfHours) noexcept;
+    static RelativeTime hours (double numberOfHours) noexcept;
 
     /** Creates a new RelativeTime object representing a number of days.
         @see milliseconds, minutes, hours, weeks
     */
-    static const RelativeTime days (double numberOfDays) noexcept;
+    static RelativeTime days (double numberOfDays) noexcept;
 
     /** Creates a new RelativeTime object representing a number of weeks.
         @see milliseconds, minutes, hours, days
     */
-    static const RelativeTime weeks (double numberOfWeeks) noexcept;
+    static RelativeTime weeks (double numberOfWeeks) noexcept;
 
     //==============================================================================
     /** Returns the number of milliseconds this time represents.
