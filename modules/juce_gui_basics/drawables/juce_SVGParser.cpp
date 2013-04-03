@@ -180,12 +180,18 @@ private:
     //==============================================================================
     Drawable* parsePath (const XmlElement& xml) const
     {
-        const String dAttribute (xml.getStringAttribute ("d").trimStart());
-        String::CharPointerType d (dAttribute.getCharPointer());
         Path path;
+        parsePathString (path, xml.getStringAttribute ("d"));
 
         if (getStyleAttribute (&xml, "fill-rule").trim().equalsIgnoreCase ("evenodd"))
             path.setUsingNonZeroWinding (false);
+
+        return parseShape (xml, path);
+    }
+
+    void parsePathString (Path& path, const String& pathString) const
+    {
+        String::CharPointerType d (pathString.getCharPointer().findEndOfWhitespace());
 
         Point<float> subpathStart, last, last2, p1, p2, p3;
         juce_wchar lastCommandChar = 0;
@@ -402,8 +408,6 @@ private:
             if (! carryOn)
                 break;
         }
-
-        return parseShape (xml, path);
     }
 
     Drawable* parseRect (const XmlElement& xml) const

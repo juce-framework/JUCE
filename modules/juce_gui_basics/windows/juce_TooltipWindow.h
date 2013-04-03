@@ -35,7 +35,8 @@
     A window that displays a pop-up tooltip when the mouse hovers over another component.
 
     To enable tooltips in your app, just create a single instance of a TooltipWindow
-    object.
+    object. Note that if you instantiate more than one instance of this class, you'll
+    end up with multiple tooltips being shown!
 
     The TooltipWindow object will then stay invisible, waiting until the mouse
     hovers for the specified length of time - it will then see if it's currently
