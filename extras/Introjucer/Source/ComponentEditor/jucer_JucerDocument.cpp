@@ -526,6 +526,22 @@ bool JucerDocument::findTemplateFiles (String& headerContent, String& cppContent
     return true;
 }
 
+static String fixLineEndings (const String& s)
+{
+    StringArray lines;
+    lines.addLines (s);
+
+    for (int i = 0; i < lines.size(); ++i)
+        lines.set (i, lines[i].trimEnd());
+
+    while (lines.size() > 0 && lines [lines.size() - 1].trim().isEmpty())
+        lines.remove (lines.size() - 1);
+
+    lines.add (String::empty);
+
+    return lines.joinIntoString ("\r\n");
+}
+
 bool JucerDocument::flushChangesToDocuments()
 {
     String headerTemplate, cppTemplate;
@@ -547,6 +563,9 @@ bool JucerDocument::flushChangesToDocuments()
 
         generated.applyToCode (headerTemplate, headerFile.getFileNameWithoutExtension(), false, existingHeader);
         generated.applyToCode (cppTemplate,    headerFile.getFileNameWithoutExtension(), false, existingCpp);
+
+        headerTemplate = fixLineEndings (headerTemplate);
+        cppTemplate    = fixLineEndings (cppTemplate);
 
         if (header->getCodeDocument().getAllContent() != headerTemplate)
             header->getCodeDocument().replaceAllContent (headerTemplate);

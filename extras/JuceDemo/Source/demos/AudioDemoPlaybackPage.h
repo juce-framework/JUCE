@@ -17,8 +17,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCER_HEADER_AUDIODEMOPLAYBACKPAGE_AUDIODEMOPLAYBACKPAGE_1B87E5D0__
-#define __JUCER_HEADER_AUDIODEMOPLAYBACKPAGE_AUDIODEMOPLAYBACKPAGE_1B87E5D0__
+#ifndef __JUCE_HEADER_AFB2CF84BB553F2A__
+#define __JUCE_HEADER_AFB2CF84BB553F2A__
 
 //[Headers]     -- You can add your own extra header files here --
 #include "../jucedemo_headers.h"
@@ -93,4 +93,4 @@ private:
 //[EndFile] You can add extra defines here...
 //[/EndFile]
 
-#endif   // __JUCER_HEADER_AUDIODEMOPLAYBACKPAGE_AUDIODEMOPLAYBACKPAGE_1B87E5D0__
+#endif   // __JUCE_HEADER_AFB2CF84BB553F2A__
