@@ -628,10 +628,13 @@ public:
 
     void redirectMagnify (NSEvent* ev)
     {
+       #if defined (MAC_OS_X_VERSION_10_6) && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_6
         const float invScale = 1.0f - [ev magnification];
 
         if (invScale != 0.0f)
             handleMagnifyGesture (0, getMousePos (ev, view), getMouseTime (ev), 1.0f / invScale);
+       #endif
+        (void) ev;
     }
 
     void sendMouseEvent (NSEvent* ev)
