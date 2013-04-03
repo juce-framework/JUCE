@@ -318,6 +318,8 @@ namespace PNGHelpers
     {
         throw PNGErrorStruct();
     }
+
+    static void JUCE_CDECL warningCallback (png_structp, png_const_charp) {}
    #endif
 }
 
@@ -363,7 +365,7 @@ Image PNGImageFormat::decodeImage (InputStream& in)
                 return Image::null;
             }
 
-            png_set_error_fn (pngReadStruct, 0, PNGHelpers::errorCallback, PNGHelpers::errorCallback);
+            png_set_error_fn (pngReadStruct, 0, PNGHelpers::errorCallback, PNGHelpers::warningCallback);
 
             // read the header..
             png_set_read_fn (pngReadStruct, &in, PNGHelpers::readCallback);
