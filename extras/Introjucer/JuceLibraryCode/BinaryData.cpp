@@ -31,6 +31,14 @@ static const unsigned char temp_43731c40[] =
 "  cp -r \"$original\" \"$AU\"\r\n"
 "  sed -i \"\" -e 's/TDMwPTul/BNDLPTul/g' \"$AU/Contents/PkgInfo\"\r\n"
 "  sed -i \"\" -e 's/TDMw/BNDL/g' \"$AU/Contents/$INFOPLIST_FILE\"\r\n"
+"\r\n"
+"  # Fix info.plist for AUs built with Xcode 3\r\n"
+"  if [ -f \"$DEVELOPER_DIR/Library/Developer/CoreAudio/AudioUnits/AUPublic/AUBase/AUPlugInDispatch.cpp\" ]; then\r\n"
+"    # (nothing)\r\n"
+"  else\r\n"
+"    echo \"Removing AudioComponents entry from Info.plist because this is not a new-format AU\"\r\n"
+"    /usr/libexec/PlistBuddy -c \"Delete AudioComponents\" \"$original/Contents/Info.plist\"\r\n"
+"  fi\r\n"
 "fi\r\n"
 "\r\n"
 "if [ $copyVST -gt 0 ]; then\r\n"
@@ -1162,7 +1170,7 @@ const char* getNamedResource (const char* resourceNameUTF8, int& numBytes) throw
 
     switch (hash)
     {
-        case 0x44be9398:  numBytes = 2101; return AudioPluginXCodeScript_txt;
+        case 0x44be9398:  numBytes = 2477; return AudioPluginXCodeScript_txt;
         case 0x4a0cfd09:  numBytes = 151; return background_tile_png;
         case 0x763d39dc:  numBytes = 1050; return colourscheme_dark_xml;
         case 0xe8b08520:  numBytes = 1050; return colourscheme_light_xml;
