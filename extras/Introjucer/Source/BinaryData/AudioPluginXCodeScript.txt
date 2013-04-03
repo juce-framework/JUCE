@@ -23,7 +23,7 @@ if [ $copyAU -gt 0 ]; then
 
   # Fix info.plist for AUs built with Xcode 3
   if [ -f "$DEVELOPER_DIR/Library/Developer/CoreAudio/AudioUnits/AUPublic/AUBase/AUPlugInDispatch.cpp" ]; then
-    # (nothing)
+    echo
   else
     echo "Removing AudioComponents entry from Info.plist because this is not a new-format AU"
     /usr/libexec/PlistBuddy -c "Delete AudioComponents" "$original/Contents/Info.plist"
