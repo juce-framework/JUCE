@@ -37,7 +37,7 @@ static const unsigned char temp_43731c40[] =
 "    echo\r\n"
 "  else\r\n"
 "    echo \"Removing AudioComponents entry from Info.plist because this is not a new-format AU\"\r\n"
-"    /usr/libexec/PlistBuddy -c \"Delete AudioComponents\" \"$original/Contents/Info.plist\"\r\n"
+"    /usr/libexec/PlistBuddy -c \"Delete AudioComponents\" \"$AU/Contents/Info.plist\"\r\n"
 "  fi\r\n"
 "fi\r\n"
 "\r\n"
@@ -1170,7 +1170,7 @@ const char* getNamedResource (const char* resourceNameUTF8, int& numBytes) throw
 
     switch (hash)
     {
-        case 0x44be9398:  numBytes = 2470; return AudioPluginXCodeScript_txt;
+        case 0x44be9398:  numBytes = 2464; return AudioPluginXCodeScript_txt;
         case 0x4a0cfd09:  numBytes = 151; return background_tile_png;
         case 0x763d39dc:  numBytes = 1050; return colourscheme_dark_xml;
         case 0xe8b08520:  numBytes = 1050; return colourscheme_light_xml;

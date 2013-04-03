@@ -26,7 +26,7 @@ if [ $copyAU -gt 0 ]; then
     echo
   else
     echo "Removing AudioComponents entry from Info.plist because this is not a new-format AU"
-    /usr/libexec/PlistBuddy -c "Delete AudioComponents" "$original/Contents/Info.plist"
+    /usr/libexec/PlistBuddy -c "Delete AudioComponents" "$AU/Contents/Info.plist"
   fi
 fi
 
