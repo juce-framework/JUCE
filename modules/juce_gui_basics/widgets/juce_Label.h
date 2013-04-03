@@ -67,11 +67,11 @@ public:
     //==============================================================================
     /** Changes the label text.
 
-        If broadcastChangeMessage is true and the new text is different to the current
-        text, then the class will broadcast a change message to any Label::Listener objects
-        that are registered.
+        The NotificationType parameter indicates whether to send a change message to
+        any Label::Listener objects if the new text is different.
     */
-    void setText (const String& newText, bool broadcastChangeMessage);
+    void setText (const String& newText,
+                  NotificationType notification);
 
     /** Returns the label's current text.
 
@@ -196,8 +196,7 @@ public:
         /** Destructor. */
         virtual ~Listener() {}
 
-        /** Called when a Label's text has changed.
-        */
+        /** Called when a Label's text has changed. */
         virtual void labelTextChanged (Label* labelThatHasChanged) = 0;
     };
 
@@ -280,10 +279,10 @@ protected:
     virtual void textWasChanged();
 
     /** Called when the text editor has just appeared, due to a user click or other focus change. */
-    virtual void editorShown (TextEditor* editorComponent);
+    virtual void editorShown (TextEditor*);
 
     /** Called when the text editor is going to be deleted, after editing has finished. */
-    virtual void editorAboutToBeHidden (TextEditor* editorComponent);
+    virtual void editorAboutToBeHidden (TextEditor*);
 
     //==============================================================================
     /** @internal */
@@ -320,6 +319,8 @@ protected:
     void colourChanged();
     /** @internal */
     void valueChanged (Value&);
+    /** @internal */
+    void callChangeListeners();
 
 private:
     //==============================================================================
@@ -344,7 +345,6 @@ private:
     bool leftOfOwnerComp : 1;
 
     bool updateFromTextEditorContents (TextEditor&);
-    void callChangeListeners();
 
 #if JUCE_LABEL_EDITOR_IN_NEW_WINDOW
     static bool hostNeedsEditorInNewWindow();

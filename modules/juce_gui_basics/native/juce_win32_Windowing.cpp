@@ -77,8 +77,9 @@ bool Desktop::canUseSemiTransparentWindows() noexcept
  #define TOUCHEVENTF_DOWN   0x0002
  #define TOUCHEVENTF_UP     0x0004
  DECLARE_HANDLE (HTOUCHINPUT);
+ DECLARE_HANDLE (HGESTUREINFO);
 
- typedef struct tagTOUCHINPUT
+ struct TOUCHINPUT
  {
     LONG x;
     LONG y;
@@ -90,16 +91,32 @@ bool Desktop::canUseSemiTransparentWindows() noexcept
     ULONG_PTR dwExtraInfo;
     DWORD cxContact;
     DWORD cyContact;
- } TOUCHINPUT, *PTOUCHINPUT;
+ };
+
+ struct GESTUREINFO
+ {
+    UINT cbSize;
+    DWORD dwFlags;
+    DWORD dwID;
+    HWND hwndTarget;
+    POINTS ptsLocation;
+    DWORD dwInstanceID;
+    DWORD dwSequenceID;
+    ULONGLONG ullArguments;
+    UINT cbExtraArgs;
+ };
+
 #endif
 
 typedef BOOL (WINAPI* RegisterTouchWindowFunc) (HWND, ULONG);
-typedef BOOL (WINAPI* GetTouchInputInfoFunc) (HTOUCHINPUT, UINT, PTOUCHINPUT, int);
+typedef BOOL (WINAPI* GetTouchInputInfoFunc) (HTOUCHINPUT, UINT, TOUCHINPUT*, int);
 typedef BOOL (WINAPI* CloseTouchInputHandleFunc) (HTOUCHINPUT);
+typedef BOOL (WINAPI* GetGestureInfoFunc) (HGESTUREINFO, GESTUREINFO*);
 
 static RegisterTouchWindowFunc   registerTouchWindow = nullptr;
 static GetTouchInputInfoFunc     getTouchInputInfo = nullptr;
 static CloseTouchInputHandleFunc closeTouchInputHandle = nullptr;
+static GetGestureInfoFunc        getGestureInfo = nullptr;
 
 static bool hasCheckedForMultiTouch = false;
 
@@ -112,6 +129,7 @@ static bool canUseMultiTouch()
         registerTouchWindow   = (RegisterTouchWindowFunc)   getUser32Function ("RegisterTouchWindow");
         getTouchInputInfo     = (GetTouchInputInfoFunc)     getUser32Function ("GetTouchInputInfo");
         closeTouchInputHandle = (CloseTouchInputHandleFunc) getUser32Function ("CloseTouchInputHandle");
+        getGestureInfo        = (GetGestureInfoFunc)        getUser32Function ("GetGestureInfo");
     }
 
     return registerTouchWindow != nullptr;
@@ -473,6 +491,7 @@ public:
           parentToAddTo (parent),
           currentRenderingEngine (softwareRenderingEngine),
           lastPaintTime (0),
+          lastMagnifySize (0),
           fullScreen (false),
           isDragging (false),
           isMouseOver (false),
@@ -1070,6 +1089,7 @@ private:
     ScopedPointer<Direct2DLowLevelGraphicsContext> direct2DContext;
    #endif
     uint32 lastPaintTime;
+    ULONGLONG lastMagnifySize;
     bool fullScreen, isDragging, isMouseOver, hasCreatedCaret, constrainerIsResizing;
     BorderSize<int> windowBorder;
     HICON currentWindowIcon;
@@ -1690,10 +1710,9 @@ private:
         doMouseEvent (getCurrentMousePos());
     }
 
-    void doMouseWheel (const Point<int>& globalPos, const WPARAM wParam, const bool isVertical)
+    ComponentPeer* findPeerUnderMouse (Point<int>& localPos)
     {
-        updateKeyModifiers();
-        const float amount = jlimit (-1000.0f, 1000.0f, 0.5f * (short) HIWORD (wParam));
+        const Point<int> globalPos (getCurrentMousePosGlobal());
 
         // Because Windows stupidly sends all wheel events to the window with the keyboard
         // focus, we have to redirect them here according to the mouse pos..
@@ -1703,13 +1722,60 @@ private:
         if (peer == nullptr)
             peer = this;
 
+        localPos = peer->globalToLocal (globalPos);
+        return peer;
+    }
+
+    void doMouseWheel (const WPARAM wParam, const bool isVertical)
+    {
+        updateKeyModifiers();
+        const float amount = jlimit (-1000.0f, 1000.0f, 0.5f * (short) HIWORD (wParam));
+
         MouseWheelDetails wheel;
         wheel.deltaX = isVertical ? 0.0f : amount / -256.0f;
         wheel.deltaY = isVertical ? amount / 256.0f : 0.0f;
         wheel.isReversed = false;
         wheel.isSmooth = false;
 
-        peer->handleMouseWheel (0, peer->globalToLocal (globalPos), getMouseEventTime(), wheel);
+        Point<int> localPos;
+        if (ComponentPeer* const peer = findPeerUnderMouse (localPos))
+            peer->handleMouseWheel (0, localPos, getMouseEventTime(), wheel);
+    }
+
+    bool doGestureEvent (LPARAM lParam)
+    {
+        GESTUREINFO gi;
+        zerostruct (gi);
+        gi.cbSize = sizeof (gi);
+
+        if (getGestureInfo != nullptr && getGestureInfo ((HGESTUREINFO) lParam, &gi))
+        {
+            updateKeyModifiers();
+            Point<int> localPos;
+
+            if (ComponentPeer* const peer = findPeerUnderMouse (localPos))
+            {
+                switch (gi.dwID)
+                {
+                    case 3: /*GID_ZOOM*/
+                        if (gi.dwFlags != 1 /*GF_BEGIN*/ && lastMagnifySize > 0)
+                            peer->handleMagnifyGesture (0, localPos, getMouseEventTime(),
+                                                        (float) (gi.ullArguments / (double) lastMagnifySize));
+
+                        lastMagnifySize = gi.ullArguments;
+                        return true;
+
+                    case 4: /*GID_PAN*/
+                    case 5: /*GID_ROTATE*/
+                    case 6: /*GID_TWOFINGERTAP*/
+                    case 7: /*GID_PRESSANDTAP*/
+                    default:
+                        break;
+                }
+            }
+        }
+
+        return false;
     }
 
     void doTouchEvent (const int numInputs, HTOUCHINPUT eventHandle)
@@ -2226,7 +2292,7 @@ private:
 
             case 0x020A: /* WM_MOUSEWHEEL */
             case 0x020E: /* WM_MOUSEHWHEEL */
-                doMouseWheel (getCurrentMousePosGlobal(), wParam, message == 0x020A);
+                doMouseWheel (wParam, message == 0x020A);
                 return 0;
 
             case WM_TOUCH:
@@ -2235,6 +2301,12 @@ private:
 
                 doTouchEvent ((int) wParam, (HTOUCHINPUT) lParam);
                 return 0;
+
+            case 0x119: /* WM_GESTURE */
+                if (doGestureEvent (lParam))
+                    return 0;
+
+                break;
 
             //==============================================================================
             case WM_SIZING:                return handleSizeConstraining (*(RECT*) lParam, wParam);

@@ -82,10 +82,6 @@ struct TextDiffHelpers
 
         if (len >= minLengthToMatch)
         {
-            jassert (indexA >= 0 && indexA <= a.length);
-            jassert (indexB >= 0 && indexB <= b.length);
-            jassert (String (a.text + indexA, (size_t) len) == String (b.text + indexB, (size_t) len));
-
             if (indexA > 0 && indexB > 0)
                 diffSkippingCommonStart (td, StringRegion (a.text, a.start, indexA),
                                              StringRegion (b.text, b.start, indexB));

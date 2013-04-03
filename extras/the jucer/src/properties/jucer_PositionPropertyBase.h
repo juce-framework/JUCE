@@ -394,7 +394,7 @@ public:
 
     void refresh()
     {
-        textEditor->setText (getText(), false);
+        textEditor->setText (getText(), dontSendNotification);
     }
 
     void buttonClicked (Button*)

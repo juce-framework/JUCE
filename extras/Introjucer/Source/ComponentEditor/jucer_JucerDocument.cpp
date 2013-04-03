@@ -548,8 +548,11 @@ bool JucerDocument::flushChangesToDocuments()
         generated.applyToCode (headerTemplate, headerFile.getFileNameWithoutExtension(), false, existingHeader);
         generated.applyToCode (cppTemplate,    headerFile.getFileNameWithoutExtension(), false, existingCpp);
 
-        header->getCodeDocument().applyChanges (headerTemplate);
-        cpp->getCodeDocument().applyChanges (cppTemplate);
+        if (header->getCodeDocument().getAllContent() != headerTemplate)
+            header->getCodeDocument().replaceAllContent (headerTemplate);
+
+        if (cpp->getCodeDocument().getAllContent() != cppTemplate)
+            cpp->getCodeDocument().replaceAllContent (cppTemplate);
     }
 
     return true;
@@ -557,7 +560,9 @@ bool JucerDocument::flushChangesToDocuments()
 
 bool JucerDocument::reloadFromDocument()
 {
-    ScopedPointer<XmlElement> newXML (pullMetaDataFromCppFile (cpp->getCodeDocument().getAllContent()));
+    const String cppContent (cpp->getCodeDocument().getAllContent());
+
+    ScopedPointer<XmlElement> newXML (pullMetaDataFromCppFile (cppContent));
 
     if (newXML == nullptr || ! newXML->hasTagName (jucerCompXmlTag))
         return false;
@@ -567,7 +572,11 @@ bool JucerDocument::reloadFromDocument()
 
     currentXML = newXML;
     stopTimer();
-    return loadFromXml (*currentXML);
+    if (! loadFromXml (*currentXML))
+        return false;
+
+    resources.loadFromCpp (getCppFile(), cppContent);
+    return true;
 }
 
 XmlElement* JucerDocument::pullMetaDataFromCppFile (const String& cpp)

@@ -62,6 +62,14 @@
                        winWarningLevel="4" generateManifest="1" winArchitecture="32-bit"/>
       </CONFIGURATIONS>
     </VS2010>
+    <VS2012 targetFolder="Builds/VisualStudio2012" juceFolder="../..">
+      <CONFIGURATIONS>
+        <CONFIGURATION name="Debug" winWarningLevel="4" generateManifest="1" winArchitecture="32-bit"
+                       isDebug="1" optimisation="1" targetName="The Introjucer"/>
+        <CONFIGURATION name="Release" winWarningLevel="4" generateManifest="1" winArchitecture="32-bit"
+                       isDebug="0" optimisation="2" targetName="The Introjucer"/>
+      </CONFIGURATIONS>
+    </VS2012>
     <CODEBLOCKS targetFolder="Builds/CodeBlocks" juceFolder="../..">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="The Introjucer"/>

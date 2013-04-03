@@ -599,8 +599,6 @@ void CodeDocument::applyChanges (const String& newContent)
         else
             insert (c.insertedText, c.start, true);
     }
-
-    jassert (getAllContent() == corrected);
 }
 
 void CodeDocument::replaceAllContent (const String& newContent)

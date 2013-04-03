@@ -67,7 +67,10 @@ PaintElement::~PaintElement()
     siblingComponents.clear();
 
     if (owner != nullptr)
+    {
+        owner->getSelectedElements().deselect (this);
         owner->getSelectedElements().removeChangeListener (this);
+    }
 }
 
 
@@ -170,35 +173,27 @@ void PaintElement::updateBounds (const Rectangle<int>& parentArea)
 }
 
 //==============================================================================
-class ElementPositionProperty   : public PositionPropertyBase
+class ElementPositionProperty   : public PositionPropertyBase,
+                                  private ElementListenerBase<PaintElement>
 {
 public:
     ElementPositionProperty (PaintElement* e, const String& name,
                              ComponentPositionDimension dimension_)
        : PositionPropertyBase (e, name, dimension_, true, false,
                                e->getDocument()->getComponentLayout()),
-         element (e)
+         ElementListenerBase<PaintElement> (e)
     {
-        e->getDocument()->addChangeListener (this);
-    }
-
-    ~ElementPositionProperty()
-    {
-        element->getDocument()->removeChangeListener (this);
     }
 
     void setPosition (const RelativePositionedRectangle& newPos)
     {
-        element->setPosition (newPos, true);
+        owner->setPosition (newPos, true);
     }
 
     RelativePositionedRectangle getPosition() const
     {
-        return element->getPosition();
+        return owner->getPosition();
     }
-
-private:
-    PaintElement* const element;
 };
 
 //==============================================================================

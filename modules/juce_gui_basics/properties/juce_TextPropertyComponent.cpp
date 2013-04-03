@@ -47,7 +47,7 @@ public:
 
     void filesDropped (const StringArray& files, int, int)
     {
-        setText (getText() + files.joinIntoString (isMultiline ? "\n" : ", "), true);
+        setText (getText() + files.joinIntoString (isMultiline ? "\n" : ", "), sendNotificationSync);
         showEditor();
     }
 
@@ -102,7 +102,7 @@ TextPropertyComponent::~TextPropertyComponent()
 
 void TextPropertyComponent::setText (const String& newText)
 {
-    textEditor->setText (newText, true);
+    textEditor->setText (newText, sendNotificationSync);
 }
 
 String TextPropertyComponent::getText() const
@@ -123,7 +123,7 @@ void TextPropertyComponent::createEditor (const int maxNumChars, const bool isMu
 
 void TextPropertyComponent::refresh()
 {
-    textEditor->setText (getText(), false);
+    textEditor->setText (getText(), dontSendNotification);
 }
 
 void TextPropertyComponent::textWasEdited()

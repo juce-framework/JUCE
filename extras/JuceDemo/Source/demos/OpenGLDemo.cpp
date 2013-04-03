@@ -38,7 +38,7 @@ public:
           textScrollPos (200)
     {
         infoLabel.setText ("These sliders demonstrate how components and 2D graphics can be rendered "
-                           "using OpenGL by using the OpenGLContext class.", false);
+                           "using OpenGL by using the OpenGLContext class.", dontSendNotification);
         infoLabel.setInterceptsMouseClicks (false, false);
         addAndMakeVisible (&infoLabel);
         infoLabel.setBounds ("parent.width * 0.05, bottom - 150, parent.width * 0.4, parent.height - 60");

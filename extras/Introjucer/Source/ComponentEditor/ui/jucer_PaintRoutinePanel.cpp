@@ -128,10 +128,13 @@ public:
         {
             if (PaintElement* const pe = paintRoutine.getSelectedElements().getSelectedItem (0))
             {
-                Array <PropertyComponent*> props;
-                pe->getEditableProperties (props);
+                if (paintRoutine.containsElement (pe))
+                {
+                    Array <PropertyComponent*> props;
+                    pe->getEditableProperties (props);
 
-                propsPanel->addSection (pe->getTypeName(), props);
+                    propsPanel->addSection (pe->getTypeName(), props);
+                }
             }
         }
 

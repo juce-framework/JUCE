@@ -229,15 +229,10 @@ bool JPEGImageFormat::canUnderstand (InputStream& in)
     const int bytesNeeded = 10;
     uint8 header [bytesNeeded];
 
-    if (in.read (header, bytesNeeded) == bytesNeeded)
-    {
-        return header[0] == 0xff
+    return in.read (header, bytesNeeded) == bytesNeeded
+            && header[0] == 0xff
             && header[1] == 0xd8
-            && header[2] == 0xff
-            && (header[3] == 0xe0 || header[3] == 0xe1);
-    }
-
-    return false;
+            && header[2] == 0xff;
 }
 
 #if JUCE_USING_COREIMAGE_LOADER

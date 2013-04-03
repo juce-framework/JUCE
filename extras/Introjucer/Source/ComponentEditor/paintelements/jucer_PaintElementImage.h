@@ -36,7 +36,6 @@
 class PaintElementImage   : public PaintElement
 {
 public:
-    //==============================================================================
     PaintElementImage (PaintRoutine* owner)
         : PaintElement (owner, "Image"),
           opacity (1.0),
@@ -400,90 +399,64 @@ private:
 
         void setResource (const String& newName)
         {
-            element->setResource (newName, true);
+            if (element != nullptr)
+                element->setResource (newName, true);
         }
 
         String getResource() const
         {
-            return element->getResource();
+            if (element != nullptr)
+                return element->getResource();
+
+            return String::empty;
         }
     };
 
     //==============================================================================
     class OpacityProperty  : public SliderPropertyComponent,
-                             private ChangeListener
+                             private ElementListenerBase <PaintElementImage>
     {
     public:
         OpacityProperty (PaintElementImage* const e)
             : SliderPropertyComponent ("opacity", 0.0, 1.0, 0.001),
-              element (e)
+              ElementListenerBase <PaintElementImage> (e)
         {
-            element->getDocument()->addChangeListener (this);
-        }
-
-        ~OpacityProperty()
-        {
-            element->getDocument()->removeChangeListener (this);
         }
 
         void setValue (double newValue)
         {
-            element->getDocument()->getUndoManager().undoCurrentTransactionOnly();
-
-            element->setOpacity (newValue, true);
+            owner->getDocument()->getUndoManager().undoCurrentTransactionOnly();
+            owner->setOpacity (newValue, true);
         }
 
         double getValue() const
         {
-            return element->getOpacity();
+            return owner->getOpacity();
         }
-
-        void changeListenerCallback (ChangeBroadcaster*)
-        {
-            refresh();
-        }
-
-    private:
-        PaintElementImage* const element;
     };
 
     class StretchModeProperty  : public ChoicePropertyComponent,
-                                 private ChangeListener
+                                 private ElementListenerBase <PaintElementImage>
     {
     public:
         StretchModeProperty (PaintElementImage* const e)
             : ChoicePropertyComponent ("stretch mode"),
-              element (e)
+              ElementListenerBase <PaintElementImage> (e)
         {
             choices.add ("Stretched to fit");
             choices.add ("Maintain aspect ratio");
             choices.add ("Maintain aspect ratio, only reduce in size");
-
-            element->getDocument()->addChangeListener (this);
-        }
-
-        ~StretchModeProperty()
-        {
-            element->getDocument()->removeChangeListener (this);
         }
 
         void setIndex (int newIndex)
         {
-            element->setStretchMode ((StretchMode) newIndex, true);
+            owner->setStretchMode ((StretchMode) newIndex, true);
         }
 
         int getIndex() const
         {
-            return (int) element->getStretchMode();
+            return (int) owner->getStretchMode();
         }
-
-        void changeListenerCallback (ChangeBroadcaster*)
-        {
-            refresh();
-        }
-
-    private:
-        PaintElementImage* const element;
     };
 
     class ResetSizeProperty   : public ButtonPropertyComponent

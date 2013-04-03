@@ -55,7 +55,7 @@ JuceUpdater::JuceUpdater (ModuleList& moduleList_, const String& message)
 
     currentVersionLabel.setFont (Font (14.0f, Font::italic));
     label.setFont (Font (12.0f));
-    label.setText ("Local modules folder:", false);
+    label.setText ("Local modules folder:", dontSendNotification);
 
     addAndMakeVisible (&availableVersionsList);
     availableVersionsList.setModel (this);
@@ -219,9 +219,9 @@ void JuceUpdater::filenameComponentChanged (FilenameComponent*)
     filenameComp.setCurrentFile (moduleList.getModulesFolder(), true, dontSendNotification);
 
     if (! ModuleList::isModulesFolder (moduleList.getModulesFolder()))
-        currentVersionLabel.setText ("(Not a Juce folder)", false);
+        currentVersionLabel.setText ("(Not a Juce folder)", dontSendNotification);
     else
-        currentVersionLabel.setText (String::empty, false);
+        currentVersionLabel.setText (String::empty, dontSendNotification);
 
     refresh();
 }
