@@ -27,7 +27,7 @@ class SVGState
 {
 public:
     //==============================================================================
-    SVGState (const XmlElement* const topLevel)
+    explicit SVGState (const XmlElement* const topLevel)
         : topLevelXml (topLevel),
           elementX (0), elementY (0),
           width (512), height (512),
@@ -113,82 +113,7 @@ public:
         return drawable;
     }
 
-private:
     //==============================================================================
-    const XmlElement* const topLevelXml;
-    float elementX, elementY, width, height, viewBoxW, viewBoxH;
-    AffineTransform transform;
-    String cssStyleText;
-
-    //==============================================================================
-    void parseSubElements (const XmlElement& xml, DrawableComposite& parentDrawable)
-    {
-        forEachXmlChildElement (xml, e)
-            parentDrawable.addAndMakeVisible (parseSubElement (*e));
-    }
-
-    Drawable* parseSubElement (const XmlElement& xml)
-    {
-        const String tag (xml.getTagNameWithoutNamespace());
-
-        if (tag == "g")           return parseGroupElement (xml);
-        if (tag == "svg")         return parseSVGElement (xml);
-        if (tag == "path")        return parsePath (xml);
-        if (tag == "rect")        return parseRect (xml);
-        if (tag == "circle")      return parseCircle (xml);
-        if (tag == "ellipse")     return parseEllipse (xml);
-        if (tag == "line")        return parseLine (xml);
-        if (tag == "polyline")    return parsePolygon (xml, true);
-        if (tag == "polygon")     return parsePolygon (xml, false);
-        if (tag == "text")        return parseText (xml);
-        if (tag == "switch")      return parseSwitch (xml);
-        if (tag == "style")       parseCSSStyle (xml);
-
-        return nullptr;
-    }
-
-    DrawableComposite* parseSwitch (const XmlElement& xml)
-    {
-        if (const XmlElement* const group = xml.getChildByName ("g"))
-            return parseGroupElement (*group);
-
-        return nullptr;
-    }
-
-    DrawableComposite* parseGroupElement (const XmlElement& xml)
-    {
-        DrawableComposite* const drawable = new DrawableComposite();
-
-        drawable->setName (xml.getStringAttribute ("id"));
-
-        if (xml.hasAttribute ("transform"))
-        {
-            SVGState newState (*this);
-            newState.addTransform (xml);
-
-            newState.parseSubElements (xml, *drawable);
-        }
-        else
-        {
-            parseSubElements (xml, *drawable);
-        }
-
-        drawable->resetContentAreaAndBoundingBoxToFitChildren();
-        return drawable;
-    }
-
-    //==============================================================================
-    Drawable* parsePath (const XmlElement& xml) const
-    {
-        Path path;
-        parsePathString (path, xml.getStringAttribute ("d"));
-
-        if (getStyleAttribute (&xml, "fill-rule").trim().equalsIgnoreCase ("evenodd"))
-            path.setUsingNonZeroWinding (false);
-
-        return parseShape (xml, path);
-    }
-
     void parsePathString (Path& path, const String& pathString) const
     {
         String::CharPointerType d (pathString.getCharPointer().findEndOfWhitespace());
@@ -408,6 +333,82 @@ private:
             if (! carryOn)
                 break;
         }
+    }
+
+private:
+    //==============================================================================
+    const XmlElement* const topLevelXml;
+    float elementX, elementY, width, height, viewBoxW, viewBoxH;
+    AffineTransform transform;
+    String cssStyleText;
+
+    //==============================================================================
+    void parseSubElements (const XmlElement& xml, DrawableComposite& parentDrawable)
+    {
+        forEachXmlChildElement (xml, e)
+            parentDrawable.addAndMakeVisible (parseSubElement (*e));
+    }
+
+    Drawable* parseSubElement (const XmlElement& xml)
+    {
+        const String tag (xml.getTagNameWithoutNamespace());
+
+        if (tag == "g")           return parseGroupElement (xml);
+        if (tag == "svg")         return parseSVGElement (xml);
+        if (tag == "path")        return parsePath (xml);
+        if (tag == "rect")        return parseRect (xml);
+        if (tag == "circle")      return parseCircle (xml);
+        if (tag == "ellipse")     return parseEllipse (xml);
+        if (tag == "line")        return parseLine (xml);
+        if (tag == "polyline")    return parsePolygon (xml, true);
+        if (tag == "polygon")     return parsePolygon (xml, false);
+        if (tag == "text")        return parseText (xml);
+        if (tag == "switch")      return parseSwitch (xml);
+        if (tag == "style")       parseCSSStyle (xml);
+
+        return nullptr;
+    }
+
+    DrawableComposite* parseSwitch (const XmlElement& xml)
+    {
+        if (const XmlElement* const group = xml.getChildByName ("g"))
+            return parseGroupElement (*group);
+
+        return nullptr;
+    }
+
+    DrawableComposite* parseGroupElement (const XmlElement& xml)
+    {
+        DrawableComposite* const drawable = new DrawableComposite();
+
+        drawable->setName (xml.getStringAttribute ("id"));
+
+        if (xml.hasAttribute ("transform"))
+        {
+            SVGState newState (*this);
+            newState.addTransform (xml);
+
+            newState.parseSubElements (xml, *drawable);
+        }
+        else
+        {
+            parseSubElements (xml, *drawable);
+        }
+
+        drawable->resetContentAreaAndBoundingBoxToFitChildren();
+        return drawable;
+    }
+
+    //==============================================================================
+    Drawable* parsePath (const XmlElement& xml) const
+    {
+        Path path;
+        parsePathString (path, xml.getStringAttribute ("d"));
+
+        if (getStyleAttribute (&xml, "fill-rule").trim().equalsIgnoreCase ("evenodd"))
+            path.setUsingNonZeroWinding (false);
+
+        return parseShape (xml, path);
     }
 
     Drawable* parseRect (const XmlElement& xml) const
@@ -1266,4 +1267,12 @@ Drawable* Drawable::createFromSVG (const XmlElement& svgDocument)
 {
     SVGState state (&svgDocument);
     return state.parseSVGElement (svgDocument);
+}
+
+Path Drawable::parseSVGPath (const String& svgPath)
+{
+    SVGState state (nullptr);
+    Path p;
+    state.parsePathString (p, svgPath);
+    return p;
 }
