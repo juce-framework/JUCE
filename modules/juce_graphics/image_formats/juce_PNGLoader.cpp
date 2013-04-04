@@ -370,8 +370,8 @@ Image PNGImageFormat::decodeImage (InputStream& in)
             // read the header..
             png_set_read_fn (pngReadStruct, &in, PNGHelpers::readCallback);
 
-            png_uint_32 width, height;
-            int bitDepth, colorType, interlaceType;
+            png_uint_32 width = 0, height = 0;
+            int bitDepth = 0, colorType = 0, interlaceType;
 
             png_read_info (pngReadStruct, pngInfoStruct);
 

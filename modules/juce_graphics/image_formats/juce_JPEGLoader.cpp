@@ -346,7 +346,8 @@ bool JPEGImageFormat::writeImageToStream (const Image& image, OutputStream& out)
     using namespace jpeglibNamespace;
     using namespace JPEGHelpers;
 
-    struct jpeg_compress_struct jpegCompStruct;
+    jpeg_compress_struct jpegCompStruct;
+    zerostruct (jpegCompStruct);
     jpeg_create_compress (&jpegCompStruct);
 
     struct jpeg_error_mgr jerr;
