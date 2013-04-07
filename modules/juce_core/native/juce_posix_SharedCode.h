@@ -543,7 +543,7 @@ void MemoryMappedFile::openInternal (const File& file, AccessMode mode)
 MemoryMappedFile::~MemoryMappedFile()
 {
     if (address != nullptr)
-        munmap (address, range.getLength());
+        munmap (address, (size_t) range.getLength());
 
     if (fileHandle != 0)
         close (fileHandle);
