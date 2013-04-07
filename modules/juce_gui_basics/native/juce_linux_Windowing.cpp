@@ -2961,7 +2961,7 @@ ModifierKeys ModifierKeys::getCurrentModifiersRealtime() noexcept
 void Desktop::setKioskComponent (Component* kioskModeComponent, bool enableOrDisable, bool /* allowMenusAndBars */)
 {
     if (enableOrDisable)
-        kioskModeComponent->setBounds (Desktop::getInstance().getDisplays().getMainDisplay().totalArea);
+        kioskModeComponent->setBounds (getDisplays().getMainDisplay().totalArea);
 }
 
 //==============================================================================

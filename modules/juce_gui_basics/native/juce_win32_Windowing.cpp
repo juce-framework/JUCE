@@ -635,8 +635,7 @@ public:
         GetWindowRect (hwnd, &r);
         Rectangle<int> bounds (rectangleFromRECT (r));
 
-        HWND parentH = GetParent (hwnd);
-        if (parentH != 0)
+        if (HWND parentH = GetParent (hwnd))
         {
             GetWindowRect (parentH, &r);
             bounds.translate (-r.left, -r.top);

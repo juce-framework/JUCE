@@ -17,8 +17,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCER_HEADER_AUDIODEMOTABCOMPONENT_AUDIODEMOTABCOMPONENT_85D9915C__
-#define __JUCER_HEADER_AUDIODEMOTABCOMPONENT_AUDIODEMOTABCOMPONENT_85D9915C__
+#ifndef __JUCE_HEADER_6B066C3EF65F4A5E__
+#define __JUCE_HEADER_6B066C3EF65F4A5E__
 
 //[Headers]     -- You can add your own extra header files here --
 #include "../jucedemo_headers.h"
@@ -96,4 +96,4 @@ private:
 //[EndFile] You can add extra defines here...
 //[/EndFile]
 
-#endif   // __JUCER_HEADER_AUDIODEMOTABCOMPONENT_AUDIODEMOTABCOMPONENT_85D9915C__
+#endif   // __JUCE_HEADER_6B066C3EF65F4A5E__

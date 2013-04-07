@@ -95,9 +95,7 @@ void DropShadower::setOwner (Component* componentToFollow)
         jassert (componentToFollow != nullptr);
 
         owner = componentToFollow;
-
         jassert (owner != nullptr);
-        jassert (owner->isOpaque()); // doesn't work properly for semi-transparent comps!
 
         updateParent();
         owner->addComponentListener (this);

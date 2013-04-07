@@ -17,8 +17,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCER_HEADER_AUDIODEMOSETUPPAGE_AUDIODEMOSETUPPAGE_D771B0A5__
-#define __JUCER_HEADER_AUDIODEMOSETUPPAGE_AUDIODEMOSETUPPAGE_D771B0A5__
+#ifndef __JUCE_HEADER_EF8CB39C6E013E02__
+#define __JUCE_HEADER_EF8CB39C6E013E02__
 
 //[Headers]     -- You can add your own extra header files here --
 #include "../jucedemo_headers.h"
@@ -66,4 +66,4 @@ private:
 //[EndFile] You can add extra defines here...
 //[/EndFile]
 
-#endif   // __JUCER_HEADER_AUDIODEMOSETUPPAGE_AUDIODEMOSETUPPAGE_D771B0A5__
+#endif   // __JUCE_HEADER_EF8CB39C6E013E02__

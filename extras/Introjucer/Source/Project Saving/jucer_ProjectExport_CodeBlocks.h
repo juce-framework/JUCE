@@ -265,6 +265,8 @@ private:
     {
         XmlElement* const compiler = xml.createNewChildElement ("Compiler");
         setAddOption (*compiler, "option", "-Wall");
+        setAddOption (*compiler, "option", "-Wno-strict-aliasing");
+        setAddOption (*compiler, "option", "-Wno-strict-overflow");
     }
 
     void addProjectLinkerOptions (XmlElement& xml) const

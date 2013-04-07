@@ -111,6 +111,7 @@ void StoredSettings::updateGlobalProps()
 void StoredSettings::flush()
 {
     updateGlobalProps();
+    saveSwatchColours();
 
     for (int i = propertyFiles.size(); --i >= 0;)
         propertyFiles.getUnchecked(i)->saveIfNeeded();
@@ -177,6 +178,14 @@ void StoredSettings::loadSwatchColours()
     for (int i = 0; i < numSwatchColours; ++i)
         swatchColours.add (Colour::fromString (props.getValue ("swatchColour" + String (i),
                                                                colours [2 + i].toString())));
+}
+
+void StoredSettings::saveSwatchColours()
+{
+    PropertiesFile& props = getGlobalProperties();
+
+    for (int i = 0; i < swatchColours.size(); ++i)
+        props.setValue ("swatchColour" + String (i), swatchColours.getReference(i).toString());
 }
 
 int StoredSettings::ColourSelectorWithSwatches::getNumSwatches() const

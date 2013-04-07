@@ -17,8 +17,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCER_HEADER_AUDIODEMOLATENCYPAGE_AUDIODEMOLATENCYPAGE_DCAF1C2C__
-#define __JUCER_HEADER_AUDIODEMOLATENCYPAGE_AUDIODEMOLATENCYPAGE_DCAF1C2C__
+#ifndef __JUCE_HEADER_B6583AF122163F8__
+#define __JUCE_HEADER_B6583AF122163F8__
 
 //[Headers]     -- You can add your own extra header files here --
 #include "../jucedemo_headers.h"
@@ -73,4 +73,4 @@ private:
 //[EndFile] You can add extra defines here...
 //[/EndFile]
 
-#endif   // __JUCER_HEADER_AUDIODEMOLATENCYPAGE_AUDIODEMOLATENCYPAGE_DCAF1C2C__
+#endif   // __JUCE_HEADER_B6583AF122163F8__

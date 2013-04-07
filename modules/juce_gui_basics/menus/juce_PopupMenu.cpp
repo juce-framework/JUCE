@@ -738,12 +738,12 @@ private:
 
         for (int col = 0; col < numColumns; ++col)
         {
-            int i, colW = options.standardHeight, colH = 0;
+            int colW = options.standardHeight, colH = 0;
 
             const int numChildren = jmin (items.size() - childNum,
                                           (items.size() + numColumns - 1) / numColumns);
 
-            for (i = numChildren; --i >= 0;)
+            for (int i = numChildren; --i >= 0;)
             {
                 colW = jmax (colW, items.getUnchecked (childNum + i)->getWidth());
                 colH += items.getUnchecked (childNum + i)->getHeight();

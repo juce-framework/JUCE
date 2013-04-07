@@ -17,8 +17,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCER_HEADER_AUDIODEMORECORDPAGE_AUDIODEMORECORDPAGE_6C08990__
-#define __JUCER_HEADER_AUDIODEMORECORDPAGE_AUDIODEMORECORDPAGE_6C08990__
+#ifndef __JUCE_HEADER_F15E29646987960A__
+#define __JUCE_HEADER_F15E29646987960A__
 
 //[Headers]     -- You can add your own extra header files here --
 #include "../jucedemo_headers.h"
@@ -74,4 +74,4 @@ private:
 //[EndFile] You can add extra defines here...
 //[/EndFile]
 
-#endif   // __JUCER_HEADER_AUDIODEMORECORDPAGE_AUDIODEMORECORDPAGE_6C08990__
+#endif   // __JUCE_HEADER_F15E29646987960A__

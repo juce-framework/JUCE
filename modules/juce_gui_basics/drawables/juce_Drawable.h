@@ -156,6 +156,9 @@ public:
     */
     static Drawable* createFromSVG (const XmlElement& svgDocument);
 
+    /** Parses an SVG path string and returns it. */
+    static Path parseSVGPath (const String& svgPath);
+
     //==============================================================================
     /** Tries to create a Drawable from a previously-saved ValueTree.
         The ValueTree must have been created by the createValueTree() method.

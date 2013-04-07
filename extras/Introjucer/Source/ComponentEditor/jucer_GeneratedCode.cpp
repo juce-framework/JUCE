@@ -338,11 +338,8 @@ void GeneratedCode::applyToCode (String& code,
                                  const String& oldFileWithUserData) const
 {
     // header guard..
-    String headerGuard ("__JUCER_HEADER_");
-    headerGuard << className.toUpperCase().retainCharacters ("ABCDEFGHIJKLMNOPQRSTUVWXYZ")
-                << "_" << fileNameRoot.toUpperCase().retainCharacters ("ABCDEFGHIJKLMNOPQRSTUVWXYZ")
-                << "_" << String::toHexString (Random::getSystemRandom().nextInt()).toUpperCase()
-                << "__";
+    String headerGuard ("__JUCE_HEADER_");
+    headerGuard << String::toHexString ((className + "xx" + fileNameRoot).hashCode64()).toUpperCase() << "__";
     replaceTemplate (code, "headerGuard", headerGuard);
 
     replaceTemplate (code, "version", JUCEApplication::getInstance()->getApplicationVersion());

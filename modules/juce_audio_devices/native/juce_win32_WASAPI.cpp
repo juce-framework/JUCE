@@ -101,9 +101,6 @@ bool check (HRESULT hr)
     template<> struct UUIDGetter<name>   { static CLSID get() { return uuidFromString (guid); } }; \
     struct name
 
- #define KSDATAFORMAT_SUBTYPE_PCM         uuidFromString ("00000001-0000-0010-8000-00aa00389b71")
- #define KSDATAFORMAT_SUBTYPE_IEEE_FLOAT  uuidFromString ("00000003-0000-0010-8000-00aa00389b71")
-
  struct PROPERTYKEY
  {
     GUID fmtid;
@@ -113,6 +110,11 @@ bool check (HRESULT hr)
  WINOLEAPI PropVariantClear (PROPVARIANT*);
 #else
  #define JUCE_COMCLASS(name, guid)       struct __declspec (uuid (guid)) name
+#endif
+
+#ifndef KSDATAFORMAT_SUBTYPE_PCM
+ #define KSDATAFORMAT_SUBTYPE_PCM         uuidFromString ("00000001-0000-0010-8000-00aa00389b71")
+ #define KSDATAFORMAT_SUBTYPE_IEEE_FLOAT  uuidFromString ("00000003-0000-0010-8000-00aa00389b71")
 #endif
 
 #define JUCE_IUNKNOWNCLASS(name, guid)   JUCE_COMCLASS(name, guid) : public IUnknown

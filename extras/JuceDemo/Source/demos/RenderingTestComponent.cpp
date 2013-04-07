@@ -1,20 +1,18 @@
 /*
   ==============================================================================
 
-  This is an automatically generated file created by the Jucer!
-
-  Creation date:  21 Sep 2012 12:12:19pm
+  This is an automatically generated GUI class created by the Introjucer!
 
   Be careful when adding custom code to these files, as only the code within
   the "//[xyz]" and "//[/xyz]" sections will be retained when the file is loaded
   and re-saved.
 
-  Jucer version: 1.12
+  Created with Introjucer version: 3.1.0
 
   ------------------------------------------------------------------------------
 
-  The Jucer is part of the JUCE library - "Jules' Utility Class Extensions"
-  Copyright 2004-6 by Raw Material Software ltd.
+  The Introjucer is part of the JUCE library - "Jules' Utility Class Extensions"
+  Copyright 2004-13 by Raw Material Software Ltd.
 
   ==============================================================================
 */
@@ -422,19 +420,19 @@ RenderingTestComponent::RenderingTestComponent ()
 
     addAndMakeVisible (testTypeLabel = new Label (String::empty,
                                                   "Test type:"));
-    testTypeLabel->setFont (Font (15.0000f, Font::plain));
+    testTypeLabel->setFont (Font (15.00f, Font::plain));
     testTypeLabel->setJustificationType (Justification::centredRight);
     testTypeLabel->setEditable (false, false, false);
     testTypeLabel->setColour (TextEditor::textColourId, Colours::black);
-    testTypeLabel->setColour (TextEditor::backgroundColourId, Colour (0x0));
+    testTypeLabel->setColour (TextEditor::backgroundColourId, Colour (0x00000000));
 
     addAndMakeVisible (speedLabel = new Label (String::empty,
                                                "speed"));
-    speedLabel->setFont (Font (15.0000f, Font::plain));
+    speedLabel->setFont (Font (15.00f, Font::plain));
     speedLabel->setJustificationType (Justification::centredLeft);
     speedLabel->setEditable (false, false, false);
     speedLabel->setColour (TextEditor::textColourId, Colours::black);
-    speedLabel->setColour (TextEditor::backgroundColourId, Colour (0x0));
+    speedLabel->setColour (TextEditor::backgroundColourId, Colour (0x00000000));
 
     addAndMakeVisible (testCanvas = new RenderingTestCanvas (*this));
 
@@ -461,11 +459,11 @@ RenderingTestComponent::RenderingTestComponent ()
 
     addAndMakeVisible (opacityLabel = new Label (String::empty,
                                                  "Opacity:"));
-    opacityLabel->setFont (Font (15.0000f, Font::plain));
+    opacityLabel->setFont (Font (15.00f, Font::plain));
     opacityLabel->setJustificationType (Justification::centredRight);
     opacityLabel->setEditable (false, false, false);
     opacityLabel->setColour (TextEditor::textColourId, Colours::black);
-    opacityLabel->setColour (TextEditor::backgroundColourId, Colour (0x0));
+    opacityLabel->setColour (TextEditor::backgroundColourId, Colour (0x00000000));
 
     addAndMakeVisible (xSlider = new Slider (String::empty));
     xSlider->setRange (-100, 100, 0.1);
@@ -494,35 +492,35 @@ RenderingTestComponent::RenderingTestComponent ()
 
     addAndMakeVisible (xSliderLabel = new Label (String::empty,
                                                  "X offset:"));
-    xSliderLabel->setFont (Font (15.0000f, Font::plain));
+    xSliderLabel->setFont (Font (15.00f, Font::plain));
     xSliderLabel->setJustificationType (Justification::centredRight);
     xSliderLabel->setEditable (false, false, false);
     xSliderLabel->setColour (TextEditor::textColourId, Colours::black);
-    xSliderLabel->setColour (TextEditor::backgroundColourId, Colour (0x0));
+    xSliderLabel->setColour (TextEditor::backgroundColourId, Colour (0x00000000));
 
     addAndMakeVisible (ySliderLabel = new Label (String::empty,
                                                  "Y offset:"));
-    ySliderLabel->setFont (Font (15.0000f, Font::plain));
+    ySliderLabel->setFont (Font (15.00f, Font::plain));
     ySliderLabel->setJustificationType (Justification::centredRight);
     ySliderLabel->setEditable (false, false, false);
     ySliderLabel->setColour (TextEditor::textColourId, Colours::black);
-    ySliderLabel->setColour (TextEditor::backgroundColourId, Colour (0x0));
+    ySliderLabel->setColour (TextEditor::backgroundColourId, Colour (0x00000000));
 
     addAndMakeVisible (sizeSliderLabel = new Label (String::empty,
                                                     "Size:"));
-    sizeSliderLabel->setFont (Font (15.0000f, Font::plain));
+    sizeSliderLabel->setFont (Font (15.00f, Font::plain));
     sizeSliderLabel->setJustificationType (Justification::centredRight);
     sizeSliderLabel->setEditable (false, false, false);
     sizeSliderLabel->setColour (TextEditor::textColourId, Colours::black);
-    sizeSliderLabel->setColour (TextEditor::backgroundColourId, Colour (0x0));
+    sizeSliderLabel->setColour (TextEditor::backgroundColourId, Colour (0x00000000));
 
     addAndMakeVisible (angleSliderLabel = new Label (String::empty,
                                                      "Angle:"));
-    angleSliderLabel->setFont (Font (15.0000f, Font::plain));
+    angleSliderLabel->setFont (Font (15.00f, Font::plain));
     angleSliderLabel->setJustificationType (Justification::centredRight);
     angleSliderLabel->setEditable (false, false, false);
     angleSliderLabel->setColour (TextEditor::textColourId, Colours::black);
-    angleSliderLabel->setColour (TextEditor::backgroundColourId, Colour (0x0));
+    angleSliderLabel->setColour (TextEditor::backgroundColourId, Colour (0x00000000));
 
     addAndMakeVisible (clipToRectangleToggle = new ToggleButton (String::empty));
     clipToRectangleToggle->setButtonText ("Clip to rectangle");
@@ -595,28 +593,28 @@ void RenderingTestComponent::paint (Graphics& g)
 
 void RenderingTestComponent::resized()
 {
-    testTypeComboBox->setBounds (proportionOfWidth (0.1658f), 16, proportionOfWidth (0.3436f), 24);
-    testTypeLabel->setBounds (proportionOfWidth (0.0273f), 16, proportionOfWidth (0.1299f), 24);
-    speedLabel->setBounds (proportionOfWidth (0.5368f), 16, proportionOfWidth (0.4308f), 24);
+    testTypeComboBox->setBounds (proportionOfWidth (0.1646f), 16, proportionOfWidth (0.3436f), 24);
+    testTypeLabel->setBounds (proportionOfWidth (0.0288f), 16, proportionOfWidth (0.1296f), 24);
+    speedLabel->setBounds (proportionOfWidth (0.5350f), 16, proportionOfWidth (0.4321f), 24);
     testCanvas->setBounds (20, 56, getWidth() - 40, getHeight() - 215);
-    opacitySlider->setBounds (proportionOfWidth (0.6000f), getHeight() - 141, proportionOfWidth (0.3795f), 24);
-    highQualityToggle->setBounds (proportionOfWidth (0.0222f), getHeight() - 141, proportionOfWidth (0.4444f), 24);
-    animateSizeToggle->setBounds (proportionOfWidth (0.7573f), getHeight() - 85, proportionOfWidth (0.2239f), 24);
-    animateRotationToggle->setBounds (proportionOfWidth (0.7573f), getHeight() - 61, proportionOfWidth (0.2239f), 24);
-    animatePositionToggle->setBounds (proportionOfWidth (0.7573f), getHeight() - 109, proportionOfWidth (0.2239f), 24);
-    animateFillToggle->setBounds (proportionOfWidth (0.7573f), getHeight() - 37, proportionOfWidth (0.2359f), 24);
-    opacityLabel->setBounds ((proportionOfWidth (0.6000f)) + -66, getHeight() - 141, 64, 24);
-    xSlider->setBounds (proportionOfWidth (0.3607f), getHeight() - 109, proportionOfWidth (0.3795f), 24);
-    ySlider->setBounds (proportionOfWidth (0.3607f), getHeight() - 85, proportionOfWidth (0.3795f), 24);
-    sizeSlider->setBounds (proportionOfWidth (0.3607f), getHeight() - 61, proportionOfWidth (0.3795f), 24);
-    angleSlider->setBounds (proportionOfWidth (0.3607f), getHeight() - 37, proportionOfWidth (0.3795f), 24);
-    xSliderLabel->setBounds (proportionOfWidth (0.2496f), getHeight() - 109, proportionOfWidth (0.1060f), 24);
-    ySliderLabel->setBounds (proportionOfWidth (0.2496f), getHeight() - 85, proportionOfWidth (0.1060f), 24);
-    sizeSliderLabel->setBounds (proportionOfWidth (0.2496f), getHeight() - 61, proportionOfWidth (0.1060f), 24);
-    angleSliderLabel->setBounds (proportionOfWidth (0.2496f), getHeight() - 37, proportionOfWidth (0.1060f), 24);
-    clipToRectangleToggle->setBounds (proportionOfWidth (0.0222f), getHeight() - 109, 144, 24);
-    clipToPathToggle->setBounds (proportionOfWidth (0.0222f), getHeight() - 85, 144, 24);
-    clipToImageToggle->setBounds (proportionOfWidth (0.0222f), getHeight() - 61, 144, 24);
+    opacitySlider->setBounds (proportionOfWidth (0.6008f), getHeight() - 141, proportionOfWidth (0.3786f), 24);
+    highQualityToggle->setBounds (proportionOfWidth (0.0226f), getHeight() - 141, proportionOfWidth (0.4444f), 24);
+    animateSizeToggle->setBounds (proportionOfWidth (0.7572f), getHeight() - 85, proportionOfWidth (0.2243f), 24);
+    animateRotationToggle->setBounds (proportionOfWidth (0.7572f), getHeight() - 61, proportionOfWidth (0.2243f), 24);
+    animatePositionToggle->setBounds (proportionOfWidth (0.7572f), getHeight() - 109, proportionOfWidth (0.2243f), 24);
+    animateFillToggle->setBounds (proportionOfWidth (0.7572f), getHeight() - 37, proportionOfWidth (0.2366f), 24);
+    opacityLabel->setBounds ((proportionOfWidth (0.6008f)) + -66, getHeight() - 141, 64, 24);
+    xSlider->setBounds (proportionOfWidth (0.3601f), getHeight() - 109, proportionOfWidth (0.3786f), 24);
+    ySlider->setBounds (proportionOfWidth (0.3601f), getHeight() - 85, proportionOfWidth (0.3786f), 24);
+    sizeSlider->setBounds (proportionOfWidth (0.3601f), getHeight() - 61, proportionOfWidth (0.3786f), 24);
+    angleSlider->setBounds (proportionOfWidth (0.3601f), getHeight() - 37, proportionOfWidth (0.3786f), 24);
+    xSliderLabel->setBounds (proportionOfWidth (0.2490f), getHeight() - 109, proportionOfWidth (0.1070f), 24);
+    ySliderLabel->setBounds (proportionOfWidth (0.2490f), getHeight() - 85, proportionOfWidth (0.1070f), 24);
+    sizeSliderLabel->setBounds (proportionOfWidth (0.2490f), getHeight() - 61, proportionOfWidth (0.1070f), 24);
+    angleSliderLabel->setBounds (proportionOfWidth (0.2490f), getHeight() - 37, proportionOfWidth (0.1070f), 24);
+    clipToRectangleToggle->setBounds (proportionOfWidth (0.0226f), getHeight() - 109, 144, 24);
+    clipToPathToggle->setBounds (proportionOfWidth (0.0226f), getHeight() - 85, 144, 24);
+    clipToImageToggle->setBounds (proportionOfWidth (0.0226f), getHeight() - 61, 144, 24);
     //[UserResized] Add your own custom resize handling here..
     //[/UserResized]
 }
@@ -679,9 +677,10 @@ void RenderingTestComponent::sliderValueChanged (Slider* sliderThatWasMoved)
 
 //==============================================================================
 #if 0
-/*  -- Jucer information section --
+/*  -- Introjucer information section --
 
-    This is where the Jucer puts all of its metadata, so don't change anything in here!
+    This is where the Introjucer stores the metadata that describe this GUI layout, so
+    make changes in here at your peril!
 
 BEGIN_JUCER_METADATA
 
@@ -691,16 +690,16 @@ BEGIN_JUCER_METADATA
                  fixedSize="0" initialWidth="600" initialHeight="400">
   <BACKGROUND backgroundColour="ffffffff"/>
   <COMBOBOX name="" id="216a392b47348589" memberName="testTypeComboBox" virtualName=""
-            explicitFocusOrder="0" pos="16.581% 16 34.359% 24" editable="0"
+            explicitFocusOrder="0" pos="16.461% 16 34.362% 24" editable="0"
             layout="33" items="Paths - Solid&#10;Paths - Linear gradient&#10;Paths - Radial gradient&#10;Paths - Stroked&#10;Images - RGB&#10;Images - ARGB&#10;Tiled Images - RGB&#10;Tiled Images - ARGB&#10;Glyphs&#10;SVG&#10;Lines"
             textWhenNonSelected="" textWhenNoItems="(no choices)"/>
   <LABEL name="" id="193cb8e961baa02a" memberName="testTypeLabel" virtualName=""
-         explicitFocusOrder="0" pos="2.735% 16 12.991% 24" edTextCol="ff000000"
+         explicitFocusOrder="0" pos="2.881% 16 12.963% 24" edTextCol="ff000000"
          edBkgCol="0" labelText="Test type:" editableSingleClick="0" editableDoubleClick="0"
          focusDiscardsChanges="0" fontname="Default font" fontsize="15"
          bold="0" italic="0" justification="34"/>
   <LABEL name="" id="c4977cdfea8776fb" memberName="speedLabel" virtualName=""
-         explicitFocusOrder="0" pos="53.675% 16 43.077% 24" edTextCol="ff000000"
+         explicitFocusOrder="0" pos="53.498% 16 43.21% 24" edTextCol="ff000000"
          edBkgCol="0" labelText="speed" editableSingleClick="0" editableDoubleClick="0"
          focusDiscardsChanges="0" fontname="Default font" fontsize="15"
          bold="0" italic="0" justification="33"/>
@@ -708,27 +707,27 @@ BEGIN_JUCER_METADATA
                     explicitFocusOrder="0" pos="20 56 40M 215M" class="RenderingTestCanvas"
                     params="*this"/>
   <SLIDER name="" id="e970a33ca991909e" memberName="opacitySlider" virtualName=""
-          explicitFocusOrder="0" pos="60% 141R 37.949% 24" min="0" max="1"
+          explicitFocusOrder="0" pos="60.082% 141R 37.86% 24" min="0" max="1"
           int="0.001" style="LinearHorizontal" textBoxPos="TextBoxLeft"
           textBoxEditable="1" textBoxWidth="70" textBoxHeight="20" skewFactor="1"/>
   <TOGGLEBUTTON name="" id="2d368b2ffc99beef" memberName="highQualityToggle"
-                virtualName="" explicitFocusOrder="0" pos="2.222% 141R 44.444% 24"
+                virtualName="" explicitFocusOrder="0" pos="2.263% 141R 44.444% 24"
                 buttonText="Higher quality image interpolation" connectedEdges="0"
                 needsCallback="0" radioGroupId="0" state="0"/>
   <TOGGLEBUTTON name="" id="3b7c06ef24935a72" memberName="animateSizeToggle"
-                virtualName="" explicitFocusOrder="0" pos="75.726% 85R 22.393% 24"
+                virtualName="" explicitFocusOrder="0" pos="75.72% 85R 22.428% 24"
                 buttonText="Animate size" connectedEdges="0" needsCallback="0"
                 radioGroupId="0" state="0"/>
   <TOGGLEBUTTON name="" id="acf40ac0130d68eb" memberName="animateRotationToggle"
-                virtualName="" explicitFocusOrder="0" pos="75.726% 61R 22.393% 24"
+                virtualName="" explicitFocusOrder="0" pos="75.72% 61R 22.428% 24"
                 buttonText="Animate rotation" connectedEdges="0" needsCallback="0"
                 radioGroupId="0" state="0"/>
   <TOGGLEBUTTON name="" id="afe7d31210a544cb" memberName="animatePositionToggle"
-                virtualName="" explicitFocusOrder="0" pos="75.726% 109R 22.393% 24"
+                virtualName="" explicitFocusOrder="0" pos="75.72% 109R 22.428% 24"
                 buttonText="Animate position" connectedEdges="0" needsCallback="0"
                 radioGroupId="0" state="0"/>
   <TOGGLEBUTTON name="" id="20466306ead4c6c2" memberName="animateFillToggle"
-                virtualName="" explicitFocusOrder="0" pos="75.726% 37R 23.59% 24"
+                virtualName="" explicitFocusOrder="0" pos="75.72% 37R 23.663% 24"
                 buttonText="Animate gradient" connectedEdges="0" needsCallback="0"
                 radioGroupId="0" state="0"/>
   <LABEL name="" id="ff3fb4acd2101aa5" memberName="opacityLabel" virtualName=""
@@ -737,50 +736,50 @@ BEGIN_JUCER_METADATA
          editableDoubleClick="0" focusDiscardsChanges="0" fontname="Default font"
          fontsize="15" bold="0" italic="0" justification="34"/>
   <SLIDER name="" id="549cfd1459f09c12" memberName="xSlider" virtualName=""
-          explicitFocusOrder="0" pos="36.068% 109R 37.949% 24" min="-100"
+          explicitFocusOrder="0" pos="36.008% 109R 37.86% 24" min="-100"
           max="100" int="0.1" style="LinearHorizontal" textBoxPos="TextBoxLeft"
           textBoxEditable="1" textBoxWidth="80" textBoxHeight="20" skewFactor="1"/>
   <SLIDER name="" id="49b53bab0eca9967" memberName="ySlider" virtualName=""
-          explicitFocusOrder="0" pos="36.068% 85R 37.949% 24" min="-100"
+          explicitFocusOrder="0" pos="36.008% 85R 37.86% 24" min="-100"
           max="100" int="0.1" style="LinearHorizontal" textBoxPos="TextBoxLeft"
           textBoxEditable="1" textBoxWidth="80" textBoxHeight="20" skewFactor="1"/>
   <SLIDER name="" id="d89d3e0269c1aef4" memberName="sizeSlider" virtualName=""
-          explicitFocusOrder="0" pos="36.068% 61R 37.949% 24" min="0.01"
+          explicitFocusOrder="0" pos="36.008% 61R 37.86% 24" min="0.01"
           max="10" int="0.01" style="LinearHorizontal" textBoxPos="TextBoxLeft"
           textBoxEditable="1" textBoxWidth="80" textBoxHeight="20" skewFactor="0.4"/>
   <SLIDER name="" id="a68c75ae0f41c437" memberName="angleSlider" virtualName=""
-          explicitFocusOrder="0" pos="36.068% 37R 37.949% 24" min="-180"
+          explicitFocusOrder="0" pos="36.008% 37R 37.86% 24" min="-180"
           max="180" int="0.1" style="LinearHorizontal" textBoxPos="TextBoxLeft"
           textBoxEditable="1" textBoxWidth="80" textBoxHeight="20" skewFactor="1"/>
   <LABEL name="" id="61972b44db6093d7" memberName="xSliderLabel" virtualName=""
-         explicitFocusOrder="0" pos="24.957% 109R 10.598% 24" edTextCol="ff000000"
+         explicitFocusOrder="0" pos="24.897% 109R 10.7% 24" edTextCol="ff000000"
          edBkgCol="0" labelText="X offset:" editableSingleClick="0" editableDoubleClick="0"
          focusDiscardsChanges="0" fontname="Default font" fontsize="15"
          bold="0" italic="0" justification="34"/>
   <LABEL name="" id="fd87229f56908c79" memberName="ySliderLabel" virtualName=""
-         explicitFocusOrder="0" pos="24.957% 85R 10.598% 24" edTextCol="ff000000"
+         explicitFocusOrder="0" pos="24.897% 85R 10.7% 24" edTextCol="ff000000"
          edBkgCol="0" labelText="Y offset:" editableSingleClick="0" editableDoubleClick="0"
          focusDiscardsChanges="0" fontname="Default font" fontsize="15"
          bold="0" italic="0" justification="34"/>
   <LABEL name="" id="889901f3d351ac41" memberName="sizeSliderLabel" virtualName=""
-         explicitFocusOrder="0" pos="24.957% 61R 10.598% 24" edTextCol="ff000000"
+         explicitFocusOrder="0" pos="24.897% 61R 10.7% 24" edTextCol="ff000000"
          edBkgCol="0" labelText="Size:" editableSingleClick="0" editableDoubleClick="0"
          focusDiscardsChanges="0" fontname="Default font" fontsize="15"
          bold="0" italic="0" justification="34"/>
   <LABEL name="" id="98c096221f161097" memberName="angleSliderLabel" virtualName=""
-         explicitFocusOrder="0" pos="24.957% 37R 10.598% 24" edTextCol="ff000000"
+         explicitFocusOrder="0" pos="24.897% 37R 10.7% 24" edTextCol="ff000000"
          edBkgCol="0" labelText="Angle:" editableSingleClick="0" editableDoubleClick="0"
          focusDiscardsChanges="0" fontname="Default font" fontsize="15"
          bold="0" italic="0" justification="34"/>
   <TOGGLEBUTTON name="" id="dc21f241b7188003" memberName="clipToRectangleToggle"
-                virtualName="" explicitFocusOrder="0" pos="2.222% 109R 144 24"
+                virtualName="" explicitFocusOrder="0" pos="2.263% 109R 144 24"
                 buttonText="Clip to rectangle" connectedEdges="0" needsCallback="0"
                 radioGroupId="0" state="0"/>
   <TOGGLEBUTTON name="" id="e242a0decedf4fbd" memberName="clipToPathToggle" virtualName=""
-                explicitFocusOrder="0" pos="2.222% 85R 144 24" buttonText="Clip to path"
+                explicitFocusOrder="0" pos="2.263% 85R 144 24" buttonText="Clip to path"
                 connectedEdges="0" needsCallback="0" radioGroupId="0" state="0"/>
   <TOGGLEBUTTON name="" id="2c40de62d77841ae" memberName="clipToImageToggle"
-                virtualName="" explicitFocusOrder="0" pos="2.222% 61R 144 24"
+                virtualName="" explicitFocusOrder="0" pos="2.263% 61R 144 24"
                 buttonText="Clip to image" connectedEdges="0" needsCallback="0"
                 radioGroupId="0" state="0"/>
 </JUCER_COMPONENT>
@@ -792,7 +791,7 @@ END_JUCER_METADATA
 //==============================================================================
 // Binary resources - be careful not to edit any of these sections!
 
-// JUCER_RESOURCE: demoJpeg_jpg, 111719, "../../../../../../../../Users/jules/Desktop/DemoJPEG.jpg"
+// JUCER_RESOURCE: demoJpeg_jpg, 111719, "../../../../../../Users/jules/Desktop/DemoJPEG.jpg"
 static const unsigned char resource_RenderingTestComponent_demoJpeg_jpg[] = { 255,216,255,224,0,16,74,70,73,70,0,1,1,1,0,180,0,180,0,0,255,226,5,88,73,67,67,95,80,82,79,70,73,76,69,0,1,1,0,0,5,72,97,112,
 112,108,2,32,0,0,115,99,110,114,82,71,66,32,88,89,90,32,7,211,0,7,0,1,0,0,0,0,0,0,97,99,115,112,65,80,80,76,0,0,0,0,97,112,112,108,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,246,214,0,1,0,0,0,0,211,45,97,112,
 112,108,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,11,114,88,89,90,0,0,1,8,0,0,0,20,103,88,89,90,0,0,1,28,0,0,0,20,98,88,89,90,0,0,1,48,0,0,0,20,119,
@@ -2775,7 +2774,7 @@ static const unsigned char resource_RenderingTestComponent_demoJpeg_jpg[] = { 25
 const char* RenderingTestComponent::demoJpeg_jpg = (const char*) resource_RenderingTestComponent_demoJpeg_jpg;
 const int RenderingTestComponent::demoJpeg_jpgSize = 111719;
 
-// JUCER_RESOURCE: demoPng_png, 15290, "../../../../../../../../Users/jules/Desktop/DemoPNG.png"
+// JUCER_RESOURCE: demoPng_png, 15290, "../../../../../../Users/jules/Desktop/DemoPNG.png"
 static const unsigned char resource_RenderingTestComponent_demoPng_png[] = { 137,80,78,71,13,10,26,10,0,0,0,13,73,72,68,82,0,0,0,140,0,0,0,86,8,6,0,0,0,29,101,126,119,0,0,0,9,112,72,89,115,0,0,11,19,0,
 0,11,19,1,0,154,156,24,0,0,0,4,103,65,77,65,0,0,177,142,124,251,81,147,0,0,0,32,99,72,82,77,0,0,122,37,0,0,128,131,0,0,249,255,0,0,128,233,0,0,117,48,0,0,234,96,0,0,58,152,0,0,23,111,146,95,197,70,0,0,
 59,48,73,68,65,84,120,218,98,100,160,30,96,68,195,76,72,24,89,140,17,77,223,63,32,254,143,70,255,67,226,195,212,12,58,160,163,163,192,112,252,248,20,6,38,38,102,134,55,111,62,50,240,240,112,50,176,178,
@@ -3046,3 +3045,7 @@ static const unsigned char resource_RenderingTestComponent_demoPng_png[] = { 137
 
 const char* RenderingTestComponent::demoPng_png = (const char*) resource_RenderingTestComponent_demoPng_png;
 const int RenderingTestComponent::demoPng_pngSize = 15290;
+
+
+//[EndFile] You can add extra defines here...
+//[/EndFile]

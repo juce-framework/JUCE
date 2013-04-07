@@ -156,7 +156,7 @@
 namespace juce
 {
     extern JUCE_API bool JUCE_CALLTYPE juce_isRunningUnderDebugger();
-    extern JUCE_API void logAssertion (const char* file, int line) noexcept;
+    extern JUCE_API void JUCE_CALLTYPE logAssertion (const char* file, int line) noexcept;
 
     #include "../memory/juce_Memory.h"
     #include "../maths/juce_MathsFunctions.h"

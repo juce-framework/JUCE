@@ -150,7 +150,7 @@ namespace SocketHelpers
         fd_set* const pwset = forReading ? nullptr : &wset;
 
        #if JUCE_WINDOWS
-        if (select (handle + 1, prset, pwset, 0, timeoutp) < 0)
+        if (select ((int) handle + 1, prset, pwset, 0, timeoutp) < 0)
             return -1;
        #else
         {
