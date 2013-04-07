@@ -62,7 +62,7 @@
                        winWarningLevel="4" generateManifest="1" winArchitecture="32-bit"/>
       </CONFIGURATIONS>
     </VS2010>
-    <VS2012 targetFolder="Builds/VisualStudio2012" juceFolder="../..">
+    <VS2012 targetFolder="Builds/VisualStudio2012" juceFolder="../.." bigIcon="rVgowdy">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" winWarningLevel="4" generateManifest="1" winArchitecture="32-bit"
                        isDebug="1" optimisation="1" targetName="The Introjucer"/>

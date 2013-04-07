@@ -33,6 +33,15 @@
                        osxArchitecture="32BitUniversal" iosCompatibility="default"/>
       </CONFIGURATIONS>
     </XCODE_IPHONE>
+    <VS2012 targetFolder="Builds/VisualStudio2012" juceFolder="../../../juce"
+            bigIcon="f4hwldS">
+      <CONFIGURATIONS>
+        <CONFIGURATION name="Debug" winWarningLevel="4" generateManifest="1" winArchitecture="32-bit"
+                       isDebug="1" optimisation="1" targetName="Juce Demo"/>
+        <CONFIGURATION name="Release" winWarningLevel="4" generateManifest="1" winArchitecture="32-bit"
+                       isDebug="0" optimisation="2" targetName="Juce Demo"/>
+      </CONFIGURATIONS>
+    </VS2012>
     <VS2010 targetFolder="Builds/VisualStudio2010" vstFolder="c:\SDKs\vstsdk2.4"
             rtasFolder="c:\SDKs\PT_80_SDK" libraryType="1" juceFolder="../../../juce"
             bigIcon="f4hwldS">
