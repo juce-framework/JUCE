@@ -112,11 +112,13 @@ typedef BOOL (WINAPI* RegisterTouchWindowFunc) (HWND, ULONG);
 typedef BOOL (WINAPI* GetTouchInputInfoFunc) (HTOUCHINPUT, UINT, TOUCHINPUT*, int);
 typedef BOOL (WINAPI* CloseTouchInputHandleFunc) (HTOUCHINPUT);
 typedef BOOL (WINAPI* GetGestureInfoFunc) (HGESTUREINFO, GESTUREINFO*);
+typedef BOOL (WINAPI* SetProcessDPIAwareFunc)();
 
 static RegisterTouchWindowFunc   registerTouchWindow = nullptr;
 static GetTouchInputInfoFunc     getTouchInputInfo = nullptr;
 static CloseTouchInputHandleFunc closeTouchInputHandle = nullptr;
 static GetGestureInfoFunc        getGestureInfo = nullptr;
+static SetProcessDPIAwareFunc    setProcessDPIAware = nullptr;
 
 static bool hasCheckedForMultiTouch = false;
 
@@ -138,6 +140,27 @@ static bool canUseMultiTouch()
 static inline Rectangle<int> rectangleFromRECT (const RECT& r) noexcept
 {
     return Rectangle<int>::leftTopRightBottom ((int) r.left, (int) r.top, (int) r.right, (int) r.bottom);
+}
+
+static void setDPIAwareness()
+{
+    if (JUCEApplication::isStandaloneApp())
+    {
+        if (setProcessDPIAware == nullptr)
+            setProcessDPIAware = (SetProcessDPIAwareFunc) getUser32Function ("SetProcessDPIAware");
+
+        if (setProcessDPIAware != nullptr)
+            setProcessDPIAware();
+    }
+}
+
+inline float getDisplayScale()
+{
+    HDC dc = GetDC (0);
+    const float scale = (GetDeviceCaps (dc, LOGPIXELSX)
+                         + GetDeviceCaps (dc, LOGPIXELSY)) / (2.0f * 96.0f);
+    ReleaseDC (0, dc);
+    return scale;
 }
 
 //==============================================================================
@@ -1322,6 +1345,7 @@ private:
             if (canUseMultiTouch())
                 registerTouchWindow (hwnd, 0);
 
+            setDPIAwareness();
             updateBorderSize();
 
             // Calling this function here is (for some reason) necessary to make Windows
@@ -1777,8 +1801,13 @@ private:
         return false;
     }
 
-    void doTouchEvent (const int numInputs, HTOUCHINPUT eventHandle)
+    LRESULT doTouchEvent (const int numInputs, HTOUCHINPUT eventHandle)
     {
+        if ((styleFlags & windowIgnoresMouseClicks) != 0)
+            if (HWNDComponentPeer* const parent = getOwnerOfWindow (GetParent (hwnd)))
+                if (parent != this)
+                    return parent->doTouchEvent (numInputs, eventHandle);
+
         HeapBlock<TOUCHINPUT> inputInfo (numInputs);
 
         if (getTouchInputInfo (eventHandle, numInputs, inputInfo, sizeof (TOUCHINPUT)))
@@ -1791,12 +1820,13 @@ private:
                 {
                     if (! handleTouchInput (inputInfo[i], (flags & TOUCHEVENTF_DOWN) != 0,
                                                           (flags & TOUCHEVENTF_UP) != 0))
-                        return;  // abandon method if this window was deleted by the callback
+                        return 0;  // abandon method if this window was deleted by the callback
                 }
             }
         }
 
         closeTouchInputHandle (eventHandle);
+        return 0;
     }
 
     bool handleTouchInput (const TOUCHINPUT& touch, const bool isDown, const bool isUp)
@@ -2243,7 +2273,8 @@ private:
             case WM_NCHITTEST:
                 if ((styleFlags & windowIgnoresMouseClicks) != 0)
                     return HTTRANSPARENT;
-                else if (! hasTitleBar())
+
+                if (! hasTitleBar())
                     return HTCLIENT;
 
                 break;
@@ -2295,11 +2326,10 @@ private:
                 return 0;
 
             case WM_TOUCH:
-                if (getTouchInputInfo == nullptr)
-                    break;
+                if (getTouchInputInfo != nullptr)
+                    return doTouchEvent ((int) wParam, (HTOUCHINPUT) lParam);
 
-                doTouchEvent ((int) wParam, (HTOUCHINPUT) lParam);
-                return 0;
+                break;
 
             case 0x119: /* WM_GESTURE */
                 if (doGestureEvent (lParam))
@@ -3158,6 +3188,8 @@ static BOOL CALLBACK enumMonitorsProc (HMONITOR, HDC, LPRECT r, LPARAM userInfo)
 
 void Desktop::Displays::findDisplays()
 {
+    setDPIAwareness();
+
     Array <Rectangle<int> > monitors;
     EnumDisplayMonitors (0, 0, &enumMonitorsProc, (LPARAM) &monitors);
 

@@ -42,7 +42,7 @@ public:
 
     Component* getComponentUnderMouse() const
     {
-        return static_cast <Component*> (componentUnderMouse);
+        return componentUnderMouse.get();
     }
 
     ModifierKeys getCurrentModifiers() const
