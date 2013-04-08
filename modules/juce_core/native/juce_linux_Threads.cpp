@@ -77,22 +77,11 @@ JUCE_API bool JUCE_CALLTYPE Process::isRunningUnderDebugger()
     return juce_isRunningUnderDebugger();
 }
 
-void Process::raisePrivilege()
+static void swapUserAndEffectiveUser()
 {
-    // If running suid root, change effective user to root
-    if (geteuid() != 0 && getuid() == 0)
-    {
-        setreuid (geteuid(), getuid());
-        setregid (getegid(), getgid());
-    }
+    (void) setreuid (geteuid(), getuid());
+    (void) setregid (getegid(), getgid());
 }
 
-void Process::lowerPrivilege()
-{
-    // If runing suid root, change effective user back to real user
-    if (geteuid() == 0 && getuid() != 0)
-    {
-        setreuid (geteuid(), getuid());
-        setregid (getegid(), getgid());
-    }
-}
+void Process::raisePrivilege()  { if (geteuid() != 0 && getuid() == 0) swapUserAndEffectiveUser(); }
+void Process::lowerPrivilege()  { if (geteuid() == 0 && getuid() != 0) swapUserAndEffectiveUser(); }
