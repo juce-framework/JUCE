@@ -578,7 +578,7 @@ public:
                             DetachResource (resHandle);
                             HLock (resHandle);
 
-                            Ptr ptr;
+                            ::Ptr ptr;
                             Str255 errorText;
 
                             OSErr err = GetMemFragment (*resHandle, GetHandleSize (resHandle),
