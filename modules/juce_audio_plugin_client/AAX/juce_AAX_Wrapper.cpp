@@ -508,8 +508,10 @@ struct AAXClasses
             info.ppqLoopStart = loopStartTick / 960000.0;
             info.ppqLoopEnd   = loopEndTick   / 960000.0;
 
+            if (transport.IsTransportPlaying (&info.isPlaying) != AAX_SUCCESS)
+                info.isPlaying = false;
+
             // No way to get these: (?)
-            info.isPlaying = false;
             info.isRecording = false;
             info.ppqPositionOfLastBarStart = 0;
             info.editOriginTime = 0;
