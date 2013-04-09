@@ -194,7 +194,8 @@ private:
 
                     if (nextChar == ',')
                         continue;
-                    else if (nextChar == '}')
+
+                    if (nextChar == '}')
                         break;
                 }
             }
@@ -237,7 +238,8 @@ private:
 
             if (nextChar == ',')
                 continue;
-            else if (nextChar == ']')
+
+            if (nextChar == ']')
                 break;
 
             return createFail ("Expected object array item, but found", &oldT);
@@ -248,8 +250,7 @@ private:
 
     static Result parseString (String::CharPointerType& t, var& result)
     {
-        Array<juce_wchar> buffer;
-        buffer.ensureStorageAllocated (256);
+        MemoryOutputStream buffer (256);
 
         for (;;)
         {
@@ -295,11 +296,10 @@ private:
             if (c == 0)
                 return createFail ("Unexpected end-of-input in string constant");
 
-            buffer.add (c);
+            buffer.appendUTF8Char (c);
         }
 
-        buffer.add (0);
-        result = String (CharPointer_UTF32 (buffer.getRawDataPointer()));
+        result = buffer.toString();
         return Result::ok();
     }
 };
@@ -336,7 +336,8 @@ public:
         }
         else
         {
-            jassert (! v.isMethod()); // Can't convert an object with methods to JSON!
+            // Can't convert these other types of object to JSON!
+            jassert (! (v.isMethod() || v.isBinaryData()));
 
             out << v.toString();
         }

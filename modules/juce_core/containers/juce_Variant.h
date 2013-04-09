@@ -77,6 +77,8 @@ public:
     var (const Array<var>& value);
     var (ReferenceCountedObject* object);
     var (MethodFunction method) noexcept;
+    var (const void* binaryData, size_t dataSize);
+    var (const MemoryBlock& binaryData);
 
     var& operator= (const var& valueToCopy);
     var& operator= (int value);
@@ -93,6 +95,7 @@ public:
    #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
     var (var&& other) noexcept;
     var (String&& value);
+    var (MemoryBlock&& binaryData);
     var& operator= (var&& other) noexcept;
     var& operator= (String&& value);
    #endif
@@ -107,6 +110,7 @@ public:
     operator String() const;
     String toString() const;
     Array<var>* getArray() const noexcept;
+    MemoryBlock* getBinaryData() const noexcept;
     ReferenceCountedObject* getObject() const noexcept;
     DynamicObject* getDynamicObject() const noexcept;
 
@@ -118,6 +122,7 @@ public:
     bool isString() const noexcept;
     bool isObject() const noexcept;
     bool isArray() const noexcept;
+    bool isBinaryData() const noexcept;
     bool isMethod() const noexcept;
 
     /** Returns true if this var has the same value as the one supplied.
@@ -245,6 +250,7 @@ private:
     class VariantType_String;  friend class VariantType_String;
     class VariantType_Object;  friend class VariantType_Object;
     class VariantType_Array;   friend class VariantType_Array;
+    class VariantType_Binary;  friend class VariantType_Binary;
     class VariantType_Method;  friend class VariantType_Method;
 
     union ValueUnion
@@ -256,6 +262,7 @@ private:
         char stringValue [sizeof (String)];
         ReferenceCountedObject* objectValue;
         Array<var>* arrayValue;
+        MemoryBlock* binaryValue;
         MethodFunction methodValue;
     };
 

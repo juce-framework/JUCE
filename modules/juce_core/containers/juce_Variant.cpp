@@ -31,7 +31,8 @@ enum VariantStreamMarkers
     varMarker_Double    = 4,
     varMarker_String    = 5,
     varMarker_Int64     = 6,
-    varMarker_Array     = 7
+    varMarker_Array     = 7,
+    varMarker_Binary    = 8
 };
 
 //==============================================================================
@@ -47,7 +48,8 @@ public:
     virtual String toString (const ValueUnion&) const                           { return String::empty; }
     virtual bool toBool (const ValueUnion&) const noexcept                      { return false; }
     virtual ReferenceCountedObject* toObject (const ValueUnion&) const noexcept { return nullptr; }
-    virtual Array<var>* toArray (const ValueUnion&) const noexcept              { return 0; }
+    virtual Array<var>* toArray (const ValueUnion&) const noexcept              { return nullptr; }
+    virtual MemoryBlock* toBinary (const ValueUnion&) const noexcept            { return nullptr; }
 
     virtual bool isVoid() const noexcept      { return false; }
     virtual bool isInt() const noexcept       { return false; }
@@ -57,6 +59,7 @@ public:
     virtual bool isString() const noexcept    { return false; }
     virtual bool isObject() const noexcept    { return false; }
     virtual bool isArray() const noexcept     { return false; }
+    virtual bool isBinary() const noexcept    { return false; }
     virtual bool isMethod() const noexcept    { return false; }
 
     virtual void cleanUp (ValueUnion&) const noexcept {}
@@ -293,6 +296,35 @@ public:
 };
 
 //==============================================================================
+class var::VariantType_Binary   : public var::VariantType
+{
+public:
+    VariantType_Binary() noexcept {}
+
+    static const VariantType_Binary instance;
+
+    void cleanUp (ValueUnion& data) const noexcept                      { delete data.binaryValue; }
+    void createCopy (ValueUnion& dest, const ValueUnion& source) const  { dest.binaryValue = new MemoryBlock (*source.binaryValue); }
+
+    String toString (const ValueUnion& data) const                      { return data.binaryValue->toBase64Encoding(); }
+    bool isBinary() const noexcept                                      { return true; }
+    MemoryBlock* toBinary (const ValueUnion& data) const noexcept       { return data.binaryValue; }
+
+    bool equals (const ValueUnion& data, const ValueUnion& otherData, const VariantType& otherType) const noexcept
+    {
+        const MemoryBlock* const otherBlock = otherType.toBinary (otherData);
+        return otherBlock != nullptr && *otherBlock == *data.binaryValue;
+    }
+
+    void writeToStream (const ValueUnion& data, OutputStream& output) const
+    {
+        output.writeCompressedInt (1 + data.binaryValue->getSize());
+        output.writeByte (varMarker_Binary);
+        output << *data.binaryValue;
+    }
+};
+
+//==============================================================================
 class var::VariantType_Method   : public var::VariantType
 {
 public:
@@ -300,7 +332,7 @@ public:
     static const VariantType_Method instance;
 
     String toString (const ValueUnion&) const               { return "Method"; }
-    bool toBool (const ValueUnion& data) const noexcept     { return data.methodValue != 0; }
+    bool toBool (const ValueUnion& data) const noexcept     { return data.methodValue != nullptr; }
     bool isMethod() const noexcept                          { return true; }
 
     bool equals (const ValueUnion& data, const ValueUnion& otherData, const VariantType& otherType) const noexcept
@@ -324,6 +356,7 @@ const var::VariantType_Double  var::VariantType_Double::instance;
 const var::VariantType_String  var::VariantType_String::instance;
 const var::VariantType_Object  var::VariantType_Object::instance;
 const var::VariantType_Array   var::VariantType_Array::instance;
+const var::VariantType_Binary  var::VariantType_Binary::instance;
 const var::VariantType_Method  var::VariantType_Method::instance;
 
 
@@ -354,6 +387,8 @@ var::var (const Array<var>& v)        : type (&VariantType_Array::instance)  { v
 var::var (const String& v)            : type (&VariantType_String::instance) { new (value.stringValue) String (v); }
 var::var (const char* const v)        : type (&VariantType_String::instance) { new (value.stringValue) String (v); }
 var::var (const wchar_t* const v)     : type (&VariantType_String::instance) { new (value.stringValue) String (v); }
+var::var (const void* v, size_t sz)   : type (&VariantType_Binary::instance) { value.binaryValue = new MemoryBlock (v, sz); }
+var::var (const MemoryBlock& v)       : type (&VariantType_Binary::instance) { value.binaryValue = new MemoryBlock (v); }
 
 var::var (ReferenceCountedObject* const object)  : type (&VariantType_Object::instance)
 {
@@ -363,16 +398,18 @@ var::var (ReferenceCountedObject* const object)  : type (&VariantType_Object::in
         object->incReferenceCount();
 }
 
+
 //==============================================================================
-bool var::isVoid() const noexcept     { return type->isVoid(); }
-bool var::isInt() const noexcept      { return type->isInt(); }
-bool var::isInt64() const noexcept    { return type->isInt64(); }
-bool var::isBool() const noexcept     { return type->isBool(); }
-bool var::isDouble() const noexcept   { return type->isDouble(); }
-bool var::isString() const noexcept   { return type->isString(); }
-bool var::isObject() const noexcept   { return type->isObject(); }
-bool var::isArray() const noexcept    { return type->isArray(); }
-bool var::isMethod() const noexcept   { return type->isMethod(); }
+bool var::isVoid() const noexcept       { return type->isVoid(); }
+bool var::isInt() const noexcept        { return type->isInt(); }
+bool var::isInt64() const noexcept      { return type->isInt64(); }
+bool var::isBool() const noexcept       { return type->isBool(); }
+bool var::isDouble() const noexcept     { return type->isDouble(); }
+bool var::isString() const noexcept     { return type->isString(); }
+bool var::isObject() const noexcept     { return type->isObject(); }
+bool var::isArray() const noexcept      { return type->isArray(); }
+bool var::isBinaryData() const noexcept { return type->isBinary(); }
+bool var::isMethod() const noexcept     { return type->isMethod(); }
 
 var::operator int() const noexcept                      { return type->toInt (value); }
 var::operator int64() const noexcept                    { return type->toInt64 (value); }
@@ -383,6 +420,7 @@ String var::toString() const                            { return type->toString 
 var::operator String() const                            { return type->toString (value); }
 ReferenceCountedObject* var::getObject() const noexcept { return type->toObject (value); }
 Array<var>* var::getArray() const noexcept              { return type->toArray (value); }
+MemoryBlock* var::getBinaryData() const noexcept        { return type->toBinary (value); }
 DynamicObject* var::getDynamicObject() const noexcept   { return dynamic_cast <DynamicObject*> (getObject()); }
 
 //==============================================================================
@@ -421,6 +459,11 @@ var& var::operator= (var&& other) noexcept
 var::var (String&& v)  : type (&VariantType_String::instance)
 {
     new (value.stringValue) String (static_cast<String&&> (v));
+}
+
+var::var (MemoryBlock&& v)  : type (&VariantType_Binary::instance)
+{
+    value.binaryValue = new MemoryBlock (static_cast<MemoryBlock&&> (v));
 }
 
 var& var::operator= (String&& v)
@@ -628,6 +671,14 @@ var var::readFromStream (InputStream& input)
                 MemoryOutputStream mo;
                 mo.writeFromInputStream (input, numBytes - 1);
                 return var (mo.toUTF8());
+            }
+
+            case varMarker_Binary:
+            {
+                MemoryBlock mb (numBytes - 1);
+                const int numRead = input.read (mb.getData(), numBytes - 1);
+                mb.setSize (numRead);
+                return var (mb);
             }
 
             case varMarker_Array:
