@@ -27,8 +27,8 @@ NamedValueSet::NamedValue::NamedValue() noexcept
 {
 }
 
-inline NamedValueSet::NamedValue::NamedValue (const Identifier& name_, const var& value_)
-    : name (name_), value (value_)
+inline NamedValueSet::NamedValue::NamedValue (const Identifier& n, const var& v)
+    : name (n), value (v)
 {
 }
 
@@ -52,8 +52,8 @@ NamedValueSet::NamedValue::NamedValue (NamedValue&& other) noexcept
 {
 }
 
-inline NamedValueSet::NamedValue::NamedValue (const Identifier& name_, var&& value_)
-    : name (name_), value (static_cast <var&&> (value_))
+inline NamedValueSet::NamedValue::NamedValue (const Identifier& n, var&& v)
+    : name (n), value (static_cast <var&&> (v))
 {
 }
 
@@ -264,16 +264,43 @@ void NamedValueSet::setFromXmlAttributes (const XmlElement& xml)
     const int numAtts = xml.getNumAttributes(); // xxx inefficient - should write an att iterator..
 
     for (int i = 0; i < numAtts; ++i)
-        appender.append (new NamedValue (xml.getAttributeName (i), var (xml.getAttributeValue (i))));
+    {
+        const String& name = xml.getAttributeName (i);
+        const String& value = xml.getAttributeValue (i);
+
+        if (name.startsWith ("base64:"))
+        {
+            MemoryBlock mb;
+
+            if (mb.fromBase64Encoding (value))
+            {
+                appender.append (new NamedValue (name.substring (7), var (mb)));
+                continue;
+            }
+        }
+
+        appender.append (new NamedValue (name, var (value)));
+    }
 }
 
 void NamedValueSet::copyToXmlAttributes (XmlElement& xml) const
 {
     for (NamedValue* i = values; i != nullptr; i = i->nextListItem)
     {
-        jassert (! i->value.isObject()); // DynamicObjects can't be stored as XML!
+        if (const MemoryBlock* mb = i->value.getBinaryData())
+        {
+            xml.setAttribute ("base64:" + i->name.toString(),
+                              mb->toBase64Encoding());
+        }
+        else
+        {
+            // These types can't be stored as XML!
+            jassert (! i->value.isObject());
+            jassert (! i->value.isMethod());
+            jassert (! i->value.isArray());
 
-        xml.setAttribute (i->name.toString(),
-                          i->value.toString());
+            xml.setAttribute (i->name.toString(),
+                              i->value.toString());
+        }
     }
 }
