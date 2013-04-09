@@ -42,7 +42,7 @@ class JUCE_API  MemoryOutputStream  : public OutputStream
 {
 public:
     //==============================================================================
-    /** Creates an empty memory stream ready for writing into.
+    /** Creates an empty memory stream, ready to be written into.
 
         @param initialSize  the intial amount of capacity to allocate for writing into
     */
@@ -70,13 +70,11 @@ public:
 
     //==============================================================================
     /** Returns a pointer to the data that has been written to the stream.
-
         @see getDataSize
     */
     const void* getData() const noexcept;
 
     /** Returns the number of bytes of data that have been written to the stream.
-
         @see getData
     */
     size_t getDataSize() const noexcept                 { return size; }
@@ -88,6 +86,9 @@ public:
         amount of data without needing to be resized.
     */
     void preallocate (size_t bytesToPreallocate);
+
+    /** Appends the utf-8 bytes for a unicode character */
+    void appendUTF8Char (juce_wchar character);
 
     /** Returns a String created from the (UTF8) data that has been written to the stream. */
     String toUTF8() const;
@@ -120,7 +121,7 @@ private:
     size_t position, size;
 
     void trimExternalBlockSize();
-    void prepareToWrite (size_t);
+    char* prepareToWrite (size_t);
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MemoryOutputStream)
 };
