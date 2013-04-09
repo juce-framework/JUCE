@@ -107,7 +107,7 @@ MainWindow::MainWindow()
     // don't want the window to take focus when the title-bar is clicked..
     setWantsKeyboardFocus (false);
 
-   #ifndef JUCE_DEBUG
+   #if ! JUCE_DEBUG
     // scan for fonts before the app gets started rather than glitching later
     FontPropertyComponent::preloadAllFonts();
    #endif

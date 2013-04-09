@@ -373,12 +373,10 @@ public:
         {
             const int c1 = (int) s1.getAndAdvance();
             const int c2 = (int) s2.getAndAdvance();
-
             const int diff = c1 - c2;
-            if (diff != 0)
-                return diff < 0 ? -1 : 1;
-            else if (c1 == 0)
-                break;
+
+            if (diff != 0)  return diff < 0 ? -1 : 1;
+            if (c1 == 0)    break;
         }
 
         return 0;
@@ -392,12 +390,10 @@ public:
         {
             const int c1 = (int) s1.getAndAdvance();
             const int c2 = (int) s2.getAndAdvance();
-
             const int diff = c1 - c2;
-            if (diff != 0)
-                return diff < 0 ? -1 : 1;
-            else if (c1 == 0)
-                break;
+
+            if (diff != 0)  return diff < 0 ? -1 : 1;
+            if (c1 == 0)    break;
         }
 
         return 0;
@@ -409,16 +405,12 @@ public:
     {
         for (;;)
         {
-            int c1 = (int) s1.toUpperCase();
-            int c2 = (int) s2.toUpperCase();
-            ++s1;
-            ++s2;
-
+            const int c1 = (int) s1.toUpperCase(); ++s1;
+            const int c2 = (int) s2.toUpperCase(); ++s2;
             const int diff = c1 - c2;
-            if (diff != 0)
-                return diff < 0 ? -1 : 1;
-            else if (c1 == 0)
-                break;
+
+            if (diff != 0)  return diff < 0 ? -1 : 1;
+            if (c1 == 0)    break;
         }
 
         return 0;
@@ -430,16 +422,12 @@ public:
     {
         while (--maxChars >= 0)
         {
-            int c1 = s1.toUpperCase();
-            int c2 = s2.toUpperCase();
-            ++s1;
-            ++s2;
-
+            const int c1 = (int) s1.toUpperCase(); ++s1;
+            const int c2 = (int) s2.toUpperCase(); ++s2;
             const int diff = c1 - c2;
-            if (diff != 0)
-                return diff < 0 ? -1 : 1;
-            else if (c1 == 0)
-                break;
+
+            if (diff != 0)  return diff < 0 ? -1 : 1;
+            if (c1 == 0)    break;
         }
 
         return 0;

@@ -959,7 +959,7 @@ AudioProcessorGraph::Node* AudioProcessorGraph::getNodeForId (const uint32 nodeI
 
 AudioProcessorGraph::Node* AudioProcessorGraph::addNode (AudioProcessor* const newProcessor, uint32 nodeId)
 {
-    if (newProcessor == nullptr)
+    if (newProcessor == nullptr || newProcessor == this)
     {
         jassertfalse;
         return nullptr;

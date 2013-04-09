@@ -318,7 +318,7 @@ public:
 
     void writeToStream (const ValueUnion& data, OutputStream& output) const
     {
-        output.writeCompressedInt (1 + data.binaryValue->getSize());
+        output.writeCompressedInt (1 + (int) data.binaryValue->getSize());
         output.writeByte (varMarker_Binary);
         output << *data.binaryValue;
     }

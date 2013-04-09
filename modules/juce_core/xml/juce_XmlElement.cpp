@@ -511,7 +511,8 @@ void XmlElement::setAttribute (const String& attributeName, const String& value)
                 att->value = value;
                 break;
             }
-            else if (att->nextListItem == nullptr)
+
+            if (att->nextListItem == nullptr)
             {
                 att->nextListItem = new XmlAttributeNode (attributeName, value);
                 break;
