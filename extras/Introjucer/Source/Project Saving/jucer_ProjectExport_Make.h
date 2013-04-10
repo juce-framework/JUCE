@@ -88,8 +88,8 @@ protected:
 
         void createConfigProperties (PropertyListBuilder& props)
         {
-            const char* const archNames[] = { "(Default)", "32-bit (-m32)", "64-bit (-m64)" };
-            const var archFlags[] = { var(), "-m32", "-m64" };
+            const char* const archNames[] = { "(Default)", "32-bit (-m32)", "64-bit (-m64)", "ARM v6", "ARM v7" };
+            const var archFlags[] = { var(), "-m32", "-m64", "-march=armv6", "-march=armv7" };
 
             props.add (new ChoicePropertyComponent (getArchitectureType(), "Architecture",
                                                     StringArray (archNames, numElementsInArray (archNames)),
