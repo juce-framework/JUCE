@@ -94,6 +94,12 @@ public:
             stopTimer();
     }
 
+    void clear()
+    {
+        const ScopedLock sl (lock);
+        images.clear();
+    }
+
     struct Item
     {
         Image image;
@@ -161,4 +167,9 @@ void ImageCache::setCacheTimeout (const int millisecs)
 {
     jassert (millisecs >= 0);
     Pimpl::getInstance()->cacheTimeout = (unsigned int) millisecs;
+}
+
+void ImageCache::clear()
+{
+    Pimpl::getInstance()->clear();
 }

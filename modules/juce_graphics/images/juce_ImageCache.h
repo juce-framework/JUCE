@@ -109,6 +109,8 @@ public:
     */
     static void setCacheTimeout (int millisecs);
 
+    /** Clears the cache immediately. */
+    static void clear();
 
 private:
     //==============================================================================
