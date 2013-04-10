@@ -430,12 +430,15 @@ private:
             {
                 const AndroidBuildConfiguration& androidConfig = dynamic_cast <const AndroidBuildConfiguration&> (*config);
 
-                out << "  LOCAL_CPPFLAGS += " << createCPPFlags (androidConfig)
-                    << (" " + replacePreprocessorTokens (androidConfig, getExtraCompilerFlagsString()).trim()).trimEnd()
-                    << newLine
-                    << getLDLIBS (androidConfig).trimEnd()
-                    << newLine;
+                String cppFlags;
+                cppFlags << createCPPFlags (androidConfig)
+                         << (" " + replacePreprocessorTokens (androidConfig, getExtraCompilerFlagsString()).trim()).trimEnd()
+                         << newLine
+                         << getLDLIBS (androidConfig).trimEnd()
+                         << newLine;
 
+                out << "  LOCAL_CPPFLAGS += " << cppFlags;
+                out << "  LOCAL_CFLAGS += " << cppFlags;
                 break;
             }
         }
