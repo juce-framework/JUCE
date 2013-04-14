@@ -487,7 +487,7 @@ protected:
                                                                    nodeName,
                                                                    midiBuffer);
 
-                midiBufferNode->Initialize (1, true);
+                midiBufferNode->Initialize (0xffff, true);
             }
            #endif
         }
