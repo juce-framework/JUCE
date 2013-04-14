@@ -263,6 +263,27 @@ public:
             (iter.getListener()->*callbackFunction) (param1, param2, param3, param4, param5);
     }
 
+    //==============================================================================
+    /** Calls a member function on each listener in the list, with 5 parameters. */
+    template <LL_TEMPLATE(1), LL_TEMPLATE(2), LL_TEMPLATE(3), LL_TEMPLATE(4), LL_TEMPLATE(5), LL_TEMPLATE(6)>
+    void call (void (ListenerClass::*callbackFunction) (P1, P2, P3, P4, P5, P6),
+               LL_PARAM(1), LL_PARAM(2), LL_PARAM(3), LL_PARAM(4), LL_PARAM(5), LL_PARAM(6))
+    {
+        for (Iterator<DummyBailOutChecker, ThisType> iter (*this); iter.next();)
+            (iter.getListener()->*callbackFunction) (param1, param2, param3, param4, param5, param6);
+    }
+
+    /** Calls a member function on each listener in the list, with 5 parameters and a bail-out-checker.
+        See the class description for info about writing a bail-out checker. */
+    template <class BailOutCheckerType, LL_TEMPLATE(1), LL_TEMPLATE(2), LL_TEMPLATE(3), LL_TEMPLATE(4), LL_TEMPLATE(5), LL_TEMPLATE(6)>
+    void callChecked (const BailOutCheckerType& bailOutChecker,
+                      void (ListenerClass::*callbackFunction) (P1, P2, P3, P4, P5, P6),
+                      LL_PARAM(1), LL_PARAM(2), LL_PARAM(3), LL_PARAM(4), LL_PARAM(5), LL_PARAM(6))
+    {
+        for (Iterator<BailOutCheckerType, ThisType> iter (*this); iter.next (bailOutChecker);)
+            (iter.getListener()->*callbackFunction) (param1, param2, param3, param4, param5, param6);
+    }
+
 
     //==============================================================================
     /** A dummy bail-out checker that always returns false.

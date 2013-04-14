@@ -201,7 +201,9 @@ Colour::Colour (const uint8 red, const uint8 green, const uint8 blue, const floa
 
 Colour Colour::fromFloatRGBA (const float red, const float green, const float blue, const float alpha) noexcept
 {
-    return Colour (ColourHelpers::floatToUInt8 (red), ColourHelpers::floatToUInt8 (green), ColourHelpers::floatToUInt8 (blue), alpha);
+    return Colour (ColourHelpers::floatToUInt8 (red),
+                   ColourHelpers::floatToUInt8 (green),
+                   ColourHelpers::floatToUInt8 (blue), alpha);
 }
 
 Colour::Colour (const float hue, const float saturation, const float brightness, const float alpha) noexcept

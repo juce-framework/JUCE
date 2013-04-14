@@ -676,8 +676,13 @@ var var::readFromStream (InputStream& input)
             case varMarker_Binary:
             {
                 MemoryBlock mb (numBytes - 1);
-                const int numRead = input.read (mb.getData(), numBytes - 1);
-                mb.setSize (numRead);
+
+                if (numBytes > 1)
+                {
+                    const int numRead = input.read (mb.getData(), numBytes - 1);
+                    mb.setSize (numRead);
+                }
+
                 return var (mb);
             }
 
