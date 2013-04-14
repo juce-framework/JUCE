@@ -334,7 +334,6 @@ public:
          deviceIsOpen (false),
          isStarted (false),
          buffersCreated (false),
-         isASIOOpen (false),
          calledback (false),
          littleEndian (false),
          postOutput (true),
@@ -348,6 +347,8 @@ public:
 
         jassert (currentASIODev [slotNumber] == nullptr);
         currentASIODev [slotNumber] = this;
+
+        openDevice();
     }
 
     ~ASIOAudioIODevice()
@@ -413,16 +414,19 @@ public:
                  const BigInteger& outputChannels,
                  double sr, int bufferSizeSamples)
     {
-        close();
+        if (isOpen())
+            close();
+
         jassert (currentCallback == nullptr);
 
         if (bufferSizeSamples < 8 || bufferSizeSamples > 16384)
             shouldUsePreferredSize = true;
 
+        if (asioObject == nullptr)
         {
             const String openingError (openDevice());
 
-            if (asioObject == nullptr || ! isASIOOpen)
+            if (asioObject == nullptr)
                 return openingError;
         }
 
@@ -716,7 +720,7 @@ public:
         stopTimer();
         stop();
 
-        if (isASIOOpen && deviceIsOpen)
+        if (asioObject != nullptr && deviceIsOpen)
         {
             const ScopedLock sl (callbackLock);
 
@@ -739,7 +743,7 @@ public:
     }
 
     bool isOpen()                       { return deviceIsOpen || insideControlPanelModalLoop; }
-    bool isPlaying()                    { return isASIOOpen && (currentCallback != nullptr); }
+    bool isPlaying()                    { return asioObject != nullptr && currentCallback != nullptr; }
 
     int getCurrentBufferSizeSamples()   { return currentBlockSizeSamples; }
     double getCurrentSampleRate()       { return currentSampleRate; }
@@ -879,7 +883,6 @@ private:
     int volatile bufferIndex, numActiveInputChans, numActiveOutputChans;
 
     bool deviceIsOpen, isStarted, buffersCreated;
-    bool volatile isASIOOpen;
     bool volatile calledback;
     bool volatile littleEndian, postOutput, needToReset;
     bool volatile insideControlPanelModalLoop;
@@ -1073,7 +1076,6 @@ private:
         inputChannelNames.clear();
         bufferSizes.clear();
         sampleRates.clear();
-        isASIOOpen = false;
         deviceIsOpen = false;
         totalNumInputChans = 0;
         totalNumOutputChans = 0;
@@ -1240,11 +1242,9 @@ private:
             JUCE_ASIO_LOG_ERROR (error, err);
             disposeBuffers();
             removeCurrentDriver();
-            isASIOOpen = false;
         }
         else
         {
-            isASIOOpen = true;
             JUCE_ASIO_LOG ("device open");
         }
 
