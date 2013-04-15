@@ -49,8 +49,7 @@ public:
     void setScaleFactor (double newScale)
     {
         scaleFactor = newScale;
-        content->setTransform (AffineTransform::scale ((float) scaleFactor,
-                                                       (float) scaleFactor));
+        content->setTransform (AffineTransform::scale ((float) scaleFactor));
     }
 
 private:
@@ -70,14 +69,14 @@ public:
     void mouseWheelMove (const MouseEvent& e, const MouseWheelDetails& wheel)
     {
         if (e.mods.isCtrlDown() || e.mods.isAltDown() || e.mods.isCommandDown())
-        {
-            const double factor = 1.0f / (1.0f - wheel.deltaY);
-            panel->setZoom (panel->getZoom() * factor, e.x, e.y);
-        }
+            mouseMagnify (e, 1.0f / (1.0f - wheel.deltaY));
         else
-        {
             Viewport::mouseWheelMove (e, wheel);
-        }
+    }
+
+    void mouseMagnify (const MouseEvent& e, float factor)
+    {
+        panel->setZoom (panel->getZoom() * factor, e.x, e.y);
     }
 
     void dragKeyHeldDown (const bool isKeyDown)

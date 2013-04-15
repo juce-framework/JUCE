@@ -46,50 +46,36 @@ public:
         {
             snapGridSize = design.getSnappingGridSize();
             snapShown = design.isSnapShown() && design.isSnapActive (false);
-
-            backgroundFill = Image();
             return true;
         }
 
         return false;
     }
 
-    void updateColour()
-    {
-        backgroundFill = Image();
-    }
-
     void draw (Graphics& g, PaintRoutine* backgroundGraphics)
     {
-        if (backgroundFill.isNull() && snapShown)
+        if (snapShown && snapGridSize > 2)
         {
-            backgroundFill = Image (Image::ARGB, snapGridSize, snapGridSize, true);
-
-            Graphics g2 (backgroundFill);
-
             Colour col (Colours::black);
 
             if (backgroundGraphics != nullptr)
                 col = backgroundGraphics->getBackgroundColour().contrasting();
 
-            if (snapGridSize > 2)
-            {
-                g2.setColour (col.withAlpha (0.1f));
-                g2.drawRect (0, 0, snapGridSize + 1, snapGridSize + 1);
-            }
-        }
+            g.setColour (col.withAlpha (0.1f));
 
-        if (backgroundFill.isValid())
-        {
-            g.setTiledImageFill (backgroundFill, 0, 0, 1.0f);
-            g.fillAll();
+            const Rectangle<int> clip (g.getClipBounds());
+
+            for (int y = clip.getY() - (clip.getY() % snapGridSize); y < clip.getBottom(); y += snapGridSize)
+                g.drawHorizontalLine (y, 0.0f, (float) clip.getRight());
+
+            for (int x = clip.getX() - (clip.getX() % snapGridSize); x < clip.getRight(); x += snapGridSize)
+                g.drawVerticalLine (x, 0.0f, (float) clip.getBottom());
         }
     }
 
 private:
     int snapGridSize;
     bool snapShown;
-    Image backgroundFill;
 };
 
 

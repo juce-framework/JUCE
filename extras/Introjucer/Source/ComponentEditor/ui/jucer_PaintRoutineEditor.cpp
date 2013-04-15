@@ -181,7 +181,6 @@ void PaintRoutineEditor::refreshAllElements()
     if (currentBackgroundColour != graphics.getBackgroundColour())
     {
         currentBackgroundColour = graphics.getBackgroundColour();
-        grid.updateColour();
         repaint();
     }
 
@@ -241,7 +240,7 @@ void PaintRoutineEditor::findLassoItemsInArea (Array <PaintElement*>& results, c
 {
     for (int i = 0; i < getNumChildComponents(); ++i)
         if (PaintElement* const e = dynamic_cast <PaintElement*> (getChildComponent (i)))
-            if (e->getBounds().expanded (-e->borderThickness, -e->borderThickness).intersects (lasso))
+            if (e->getBounds().expanded (-e->borderThickness).intersects (lasso))
                 results.add (e);
 }
 

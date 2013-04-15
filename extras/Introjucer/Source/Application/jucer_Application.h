@@ -520,7 +520,23 @@ public:
 
     virtual void doExtraInitialisation() {}
     virtual void addExtraConfigItems (Project&, TreeViewItem&) {}
+
     virtual String getLogFolderName() const    { return "com.juce.introjucer"; }
+
+    virtual PropertiesFile::Options getPropertyFileOptionsFor (const String& filename)
+    {
+        PropertiesFile::Options options;
+        options.applicationName     = filename;
+        options.filenameSuffix      = "settings";
+        options.osxLibrarySubFolder = "Application Support";
+       #if JUCE_LINUX
+        options.folderName          = ".introjucer";
+       #else
+        options.folderName          = "Introjucer";
+       #endif
+
+        return options;
+    }
 
     virtual Component* createProjectContentComponent() const
     {

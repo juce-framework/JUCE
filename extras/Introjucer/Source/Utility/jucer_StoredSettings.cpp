@@ -57,17 +57,8 @@ PropertiesFile& StoredSettings::getGlobalProperties()
 
 static PropertiesFile* createPropsFile (const String& filename)
 {
-    PropertiesFile::Options options;
-    options.applicationName     = filename;
-    options.filenameSuffix      = "settings";
-    options.osxLibrarySubFolder = "Application Support";
-   #if JUCE_LINUX
-    options.folderName          = ".introjucer";
-   #else
-    options.folderName          = "Introjucer";
-   #endif
-
-    return new PropertiesFile (options);
+    return new PropertiesFile (IntrojucerApp::getApp()
+                                .getPropertyFileOptionsFor (filename));
 }
 
 PropertiesFile& StoredSettings::getProjectProperties (const String& projectUID)
