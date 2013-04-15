@@ -472,7 +472,11 @@ private:
 
             Array<File> binaryDataFiles;
 
-            if (resourceFile.write (binaryDataFiles))
+            int maxSize = project.getMaxBinaryFileSize().getValue();
+            if (maxSize <= 0)
+                maxSize = 10 * 1024 * 1024;
+
+            if (resourceFile.write (binaryDataFiles, maxSize))
             {
                 hasBinaryData = true;
 

@@ -52,7 +52,7 @@ public:
     int getNumFiles() const                 { return files.size(); }
     int64 getTotalDataSize() const;
 
-    bool write (Array<File>& filesCreated);
+    bool write (Array<File>& filesCreated, int maxFileSize);
 
     //==============================================================================
 private:
@@ -62,7 +62,7 @@ private:
     String className;
 
     bool writeHeader (MemoryOutputStream&);
-    bool writeCpp (MemoryOutputStream&, const File& headerFile, int& index);
+    bool writeCpp (MemoryOutputStream&, const File& headerFile, int& index, int maxFileSize);
     void addResourcesFromProjectItem (const Project::Item& node);
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ResourceFile)

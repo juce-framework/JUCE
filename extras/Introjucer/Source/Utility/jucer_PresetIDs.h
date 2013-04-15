@@ -134,6 +134,7 @@ namespace Ids
     DECLARE_ID (font);
     DECLARE_ID (colour);
     DECLARE_ID (userNotes);
+    DECLARE_ID (maxBinaryFileSize);
     const Identifier ID ("id");
     const Identifier class_ ("class");
 

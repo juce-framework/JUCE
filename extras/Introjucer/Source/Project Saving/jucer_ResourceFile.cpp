@@ -166,9 +166,8 @@ bool ResourceFile::writeHeader (MemoryOutputStream& header)
     return true;
 }
 
-bool ResourceFile::writeCpp (MemoryOutputStream& cpp, const File& headerFile, int& i)
+bool ResourceFile::writeCpp (MemoryOutputStream& cpp, const File& headerFile, int& i, const int maxFileSize)
 {
-    const int maxFileSize = 10 * 1024 * 1024;
     const bool isFirstFile = (i == 0);
 
     cpp << "/* ==================================== " << resourceFileIdentifierString << " ===================================="
@@ -251,7 +250,7 @@ bool ResourceFile::writeCpp (MemoryOutputStream& cpp, const File& headerFile, in
     return true;
 }
 
-bool ResourceFile::write (Array<File>& filesCreated)
+bool ResourceFile::write (Array<File>& filesCreated, const int maxFileSize)
 {
     const File headerFile (project.getBinaryDataHeaderFile());
 
@@ -271,7 +270,7 @@ bool ResourceFile::write (Array<File>& filesCreated)
         File cpp (project.getBinaryDataCppFile (fileIndex));
 
         MemoryOutputStream mo;
-        if (! (writeCpp (mo, headerFile, i) && FileHelpers::overwriteFileWithNewDataIfDifferent (cpp, mo)))
+        if (! (writeCpp (mo, headerFile, i, maxFileSize) && FileHelpers::overwriteFileWithNewDataIfDifferent (cpp, mo)))
             return false;
 
         filesCreated.add (cpp);
