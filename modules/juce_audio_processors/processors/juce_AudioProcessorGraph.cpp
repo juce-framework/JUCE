@@ -965,6 +965,15 @@ AudioProcessorGraph::Node* AudioProcessorGraph::addNode (AudioProcessor* const n
         return nullptr;
     }
 
+    for (int i = nodes.size(); --i >= 0;)
+    {
+        if (nodes.getUnchecked(i)->getProcessor() == newProcessor)
+        {
+            jassertfalse; // Cannot add the same object to the graph twice!
+            return nullptr;
+        }
+    }
+
     if (nodeId == 0)
     {
         nodeId = ++lastNodeId;
