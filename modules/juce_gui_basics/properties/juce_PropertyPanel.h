@@ -53,8 +53,7 @@ public:
     ~PropertyPanel();
 
     //==============================================================================
-    /** Deletes all property components from the panel.
-    */
+    /** Deletes all property components from the panel. */
     void clear();
 
     /** Adds a set of properties to the panel.
@@ -87,27 +86,28 @@ public:
     /** Returns true if there no properties have been added. */
     bool isEmpty() const;
 
+    /** Returns the height that the panel needs in order to display all of its content
+        without scrolling.
+    */
+    int getTotalContentHeight() const;
+
     //==============================================================================
     /** Returns a list of all the names of sections in the panel.
-
         These are the sections that have been added with addSection().
     */
     StringArray getSectionNames() const;
 
     /** Returns true if the section at this index is currently open.
-
         The index is from 0 up to the number of items returned by getSectionNames().
     */
     bool isSectionOpen (int sectionIndex) const;
 
     /** Opens or closes one of the sections.
-
         The index is from 0 up to the number of items returned by getSectionNames().
     */
     void setSectionOpen (int sectionIndex, bool shouldBeOpen);
 
     /** Enables or disables one of the sections.
-
         The index is from 0 up to the number of items returned by getSectionNames().
     */
     void setSectionEnabled (int sectionIndex, bool shouldBeEnabled);
@@ -116,7 +116,6 @@ public:
     /** Saves the current state of open/closed sections so it can be restored later.
 
         The caller is responsible for deleting the object that is returned.
-
         To restore this state, use restoreOpennessState().
 
         @see restoreOpennessState
@@ -135,7 +134,6 @@ public:
 
     //==============================================================================
     /** Sets a message to be displayed when there are no properties in the panel.
-
         The default message is "nothing selected".
     */
     void setMessageWhenEmpty (const String& newMessage);
@@ -147,7 +145,7 @@ public:
 
     //==============================================================================
     /** @internal */
-    void paint (Graphics& g);
+    void paint (Graphics&);
     /** @internal */
     void resized();
 

@@ -109,8 +109,10 @@ public:
     */
     static void setCacheTimeout (int millisecs);
 
-    /** Clears the cache immediately. */
-    static void clear();
+    /** Releases any images in the cache that aren't being referenced by active
+        Image objects.
+    */
+    static void releaseUnusedImages();
 
 private:
     //==============================================================================

@@ -181,9 +181,8 @@ private:
 
 //==============================================================================
 PropertyPanel::PropertyPanel()
+    : messageWhenEmpty (TRANS("(nothing selected)"))
 {
-    messageWhenEmpty = TRANS("(nothing selected)");
-
     addAndMakeVisible (&viewport);
     viewport.setViewedComponent (propertyHolderComponent = new PropertyHolderComponent());
     viewport.setFocusContainer (true);
@@ -225,6 +224,11 @@ void PropertyPanel::clear()
 bool PropertyPanel::isEmpty() const
 {
     return propertyHolderComponent->getNumSections() == 0;
+}
+
+int PropertyPanel::getTotalContentHeight() const
+{
+    return propertyHolderComponent->getHeight();
 }
 
 void PropertyPanel::addProperties (const Array <PropertyComponent*>& newProperties)

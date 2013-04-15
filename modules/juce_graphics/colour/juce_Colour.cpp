@@ -398,12 +398,12 @@ Colour Colour::contrasting (const Colour& target, float minContrast) const noexc
     const ColourHelpers::YIQ bg (*this);
     ColourHelpers::YIQ fg (target);
 
-    if (fabs (bg.y - fg.y) >= minContrast)
+    if (std::abs (bg.y - fg.y) >= minContrast)
         return target;
 
     const float y1 = jmax (0.0f, bg.y - minContrast);
     const float y2 = jmin (1.0f, bg.y + minContrast);
-    fg.y = (fabs (y1 - bg.y) > fabs (y2 - bg.y)) ? y1 : y2;
+    fg.y = (std::abs (y1 - bg.y) > std::abs (y2 - bg.y)) ? y1 : y2;
 
     return fg.toColour();
 }
