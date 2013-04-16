@@ -23,6 +23,67 @@
   ==============================================================================
 */
 
+struct DefaultFontNames
+{
+    DefaultFontNames()
+        : defaultSans  ("sans"),
+          defaultSerif ("serif"),
+          defaultFixed ("monospace"),
+          defaultFallback ("sans")
+    {
+    }
+
+    String getRealFontName (const String& faceName) const
+    {
+        if (faceName == Font::getDefaultSansSerifFontName())    return defaultSans;
+        if (faceName == Font::getDefaultSerifFontName())        return defaultSerif;
+        if (faceName == Font::getDefaultMonospacedFontName())   return defaultFixed;
+
+        return faceName;
+    }
+
+    String defaultSans, defaultSerif, defaultFixed, defaultFallback;
+};
+
+Typeface::Ptr Font::getDefaultTypefaceForFont (const Font& font)
+{
+    static DefaultFontNames defaultNames;
+
+    Font f (font);
+    f.setTypefaceName (defaultNames.getRealFontName (font.getTypefaceName()));
+    return Typeface::createSystemTypefaceFor (f);
+}
+
+//==============================================================================
+#if JUCE_USE_FREETYPE
+
+void FontFileIterator::findFontDirectories()
+{
+    fontDirs.add ("/system/fonts");
+}
+
+Typeface::Ptr Typeface::createSystemTypefaceFor (const Font& font)
+{
+    return new FreeTypeTypeface (font);
+}
+
+StringArray Font::findAllTypefaceNames()
+{
+    return FTTypefaceList::getInstance()->findAllFamilyNames();
+}
+
+StringArray Font::findAllTypefaceStyles (const String& family)
+{
+    return FTTypefaceList::getInstance()->findAllTypefaceStyles (family);
+}
+
+bool TextLayout::createNativeLayout (const AttributedString&)
+{
+    return false;
+}
+
+#else
+
 //==============================================================================
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
  STATICMETHOD (create,          "create",           "(Ljava/lang/String;I)Landroid/graphics/Typeface;") \
@@ -30,7 +91,6 @@
 
 DECLARE_JNI_CLASS (TypefaceClass, "android/graphics/Typeface");
 #undef JNI_CLASS_MEMBERS
-
 
 //==============================================================================
 StringArray Font::findAllTypefaceNames()
@@ -59,34 +119,6 @@ StringArray Font::findAllTypefaceStyles (const String& family)
                                         .fromLastOccurrenceOf ("-", false, false));
 
     return results;
-}
-
-struct DefaultFontNames
-{
-    DefaultFontNames()
-        : defaultSans  ("sans"),
-          defaultSerif ("serif"),
-          defaultFixed ("monospace"),
-          defaultFallback ("sans")
-    {
-    }
-
-    String defaultSans, defaultSerif, defaultFixed, defaultFallback;
-};
-
-Typeface::Ptr Font::getDefaultTypefaceForFont (const Font& font)
-{
-    static DefaultFontNames defaultNames;
-
-    String faceName (font.getTypefaceName());
-
-    if (faceName == Font::getDefaultSansSerifFontName())       faceName = defaultNames.defaultSans;
-    else if (faceName == Font::getDefaultSerifFontName())      faceName = defaultNames.defaultSerif;
-    else if (faceName == Font::getDefaultMonospacedFontName()) faceName = defaultNames.defaultFixed;
-
-    Font f (font);
-    f.setTypefaceName (faceName);
-    return Typeface::createSystemTypefaceFor (f);
 }
 
 const float referenceFontSize = 256.0f;
@@ -283,3 +315,5 @@ bool TextLayout::createNativeLayout (const AttributedString&)
 {
     return false;
 }
+
+#endif

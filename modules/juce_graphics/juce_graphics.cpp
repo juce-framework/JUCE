@@ -71,10 +71,21 @@
  #endif
 
 #elif JUCE_LINUX
- #include <ft2build.h>
- #include FT_FREETYPE_H
- #undef SIZEOF
+ #ifndef JUCE_USE_FREETYPE
+  #define JUCE_USE_FREETYPE 1
+ #endif
+
+ #if ! JUCE_USE_FREETYPE_AMALGAMATED
+  #include <ft2build.h>
+  #include FT_FREETYPE_H
+ #endif
 #endif
+
+#if JUCE_USE_FREETYPE && JUCE_USE_FREETYPE_AMALGAMATED
+ #include "native/freetype/FreeTypeAmalgam.h"
+#endif
+
+#undef SIZEOF
 
 #if (JUCE_MAC || JUCE_IOS) && USE_COREGRAPHICS_RENDERING && JUCE_USE_COREIMAGE_LOADER
  #define JUCE_USING_COREIMAGE_LOADER 1
@@ -117,6 +128,10 @@ namespace juce
 #include "effects/juce_DropShadowEffect.cpp"
 #include "effects/juce_GlowEffect.cpp"
 
+#if JUCE_USE_FREETYPE
+ #include "native/juce_freetype_Fonts.cpp"
+#endif
+
 //==============================================================================
 #if JUCE_MAC || JUCE_IOS
  #include "../juce_core/native/juce_osx_ObjCHelpers.h"
@@ -142,5 +157,18 @@ namespace juce
  #include "native/juce_android_Fonts.cpp"
 
 #endif
-
 }
+
+//==============================================================================
+#if JUCE_USE_FREETYPE && JUCE_USE_FREETYPE_AMALGAMATED
+ #undef PIXEL_MASK
+ #undef ZLIB_VERSION
+ #undef Z_ASCII
+ #undef ZEXTERN
+ #undef ZEXPORT
+
+ extern "C"
+ {
+   #include "native/freetype/FreeTypeAmalgam.c"
+ }
+#endif
