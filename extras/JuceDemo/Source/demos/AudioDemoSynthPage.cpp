@@ -246,11 +246,7 @@ public:
 
 //==============================================================================
 AudioDemoSynthPage::AudioDemoSynthPage (AudioDeviceManager& deviceManager_)
-    : deviceManager (deviceManager_),
-      keyboardComponent (0),
-      sineButton (0),
-      sampledButton (0),
-      liveAudioDisplayComp (0)
+    : deviceManager (deviceManager_)
 {
     addAndMakeVisible (keyboardComponent = new MidiKeyboardComponent (keyboardState, MidiKeyboardComponent::horizontalKeyboard));
 
@@ -294,10 +290,10 @@ AudioDemoSynthPage::~AudioDemoSynthPage()
     deviceManager.removeAudioCallback (liveAudioDisplayComp);
     //[/Destructor_pre]
 
-    deleteAndZero (keyboardComponent);
-    deleteAndZero (sineButton);
-    deleteAndZero (sampledButton);
-    deleteAndZero (liveAudioDisplayComp);
+    keyboardComponent = nullptr;
+    sineButton = nullptr;
+    sampledButton = nullptr;
+    liveAudioDisplayComp = nullptr;
 
 
     //[Destructor]. You can add your own custom destruction code here..

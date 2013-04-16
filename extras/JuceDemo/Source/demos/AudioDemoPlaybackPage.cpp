@@ -173,13 +173,7 @@ private:
 AudioDemoPlaybackPage::AudioDemoPlaybackPage (AudioDeviceManager& deviceManager_)
     : deviceManager (deviceManager_),
       thread ("audio file preview"),
-      directoryList (0, thread),
-      zoomLabel (0),
-      explanation (0),
-      zoomSlider (0),
-      thumbnail (0),
-      startStopButton (0),
-      fileTreeComp (0)
+      directoryList (nullptr, thread)
 {
     addAndMakeVisible (zoomLabel = new Label (String::empty,
                                               "zoom:"));
@@ -244,12 +238,12 @@ AudioDemoPlaybackPage::~AudioDemoPlaybackPage()
     fileTreeComp->removeListener (this);
     //[/Destructor_pre]
 
-    deleteAndZero (zoomLabel);
-    deleteAndZero (explanation);
-    deleteAndZero (zoomSlider);
-    deleteAndZero (thumbnail);
-    deleteAndZero (startStopButton);
-    deleteAndZero (fileTreeComp);
+    zoomLabel = nullptr;
+    explanation = nullptr;
+    zoomSlider = nullptr;
+    thumbnail = nullptr;
+    startStopButton = nullptr;
+    fileTreeComp = nullptr;
 
 
     //[Destructor]. You can add your own custom destruction code here..
@@ -379,7 +373,7 @@ BEGIN_JUCER_METADATA
 
 <JUCER_COMPONENT documentType="Component" className="AudioDemoPlaybackPage" componentName=""
                  parentClasses="public Component, public FileBrowserListener"
-                 constructorParams="AudioDeviceManager&amp; deviceManager_" variableInitialisers="deviceManager (deviceManager_),&#10;thread (&quot;audio file preview&quot;),&#10;directoryList (0, thread)"
+                 constructorParams="AudioDeviceManager&amp; deviceManager_" variableInitialisers="deviceManager (deviceManager_),&#10;thread (&quot;audio file preview&quot;),&#10;directoryList (nullptr, thread)"
                  snapPixels="8" snapActive="1" snapShown="1" overlayOpacity="0.330000013"
                  fixedSize="0" initialWidth="600" initialHeight="400">
   <BACKGROUND backgroundColour="ffd3d3d3"/>

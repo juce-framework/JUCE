@@ -144,14 +144,14 @@ public:
                     const String imageVariable ("drawable" + String (code.getUniqueSuffix()));
 
                     code.privateMemberDeclarations
-                        << "Drawable* " << imageVariable << ";\n";
+                        << "ScopedPointer<Drawable> " << imageVariable << ";\n";
 
                     code.constructorCode
                         << imageVariable << " = Drawable::createFromImageData ("
                         << resourceName << ", " << resourceName << "Size);\n";
 
                     code.destructorCode
-                        << "deleteAndZero (" << imageVariable << ");\n";
+                        << imageVariable << " = nullptr;\n";
 
                     if (opacity >= 254.0 / 255.0)
                         r << "g.setColour (Colours::black);\n";
@@ -291,18 +291,19 @@ public:
 
     void resetToImageSize()
     {
-        const Drawable* const image = getDrawable();
-
-        if (image != nullptr && getParentComponent() != nullptr)
+        if (const Drawable* const image = getDrawable())
         {
-            const Rectangle<int> parentArea (((PaintRoutineEditor*) getParentComponent())->getComponentArea());
+            if (PaintRoutineEditor* ed = dynamic_cast <PaintRoutineEditor*> (getParentComponent()))
+            {
+                const Rectangle<int> parentArea (ed->getComponentArea());
 
-            Rectangle<int> r (getCurrentBounds (parentArea));
-            Rectangle<float> bounds (image->getDrawableBounds());
+                Rectangle<int> r (getCurrentBounds (parentArea));
+                Rectangle<float> bounds (image->getDrawableBounds());
 
-            r.setSize ((int) (bounds.getWidth() + 0.999f), (int) (bounds.getHeight() + 0.999f));
+                r.setSize ((int) (bounds.getWidth() + 0.999f), (int) (bounds.getHeight() + 0.999f));
 
-            setCurrentBounds (r, parentArea, true);
+                setCurrentBounds (r, parentArea, true);
+            }
         }
     }
 

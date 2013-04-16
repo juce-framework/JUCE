@@ -110,7 +110,6 @@ void LiveAudioInputDisplayComp::audioDeviceIOCallback (const float** inputChanne
 
 //==============================================================================
 AudioDemoTabComponent::AudioDemoTabComponent ()
-    : tabbedComponent (0)
 {
     addAndMakeVisible (tabbedComponent = new TabbedComponent (TabbedButtonBar::TabsAtTop));
     tabbedComponent->setTabBarDepth (30);
@@ -138,7 +137,7 @@ AudioDemoTabComponent::~AudioDemoTabComponent()
     //[Destructor_pre]. You can add your own custom destruction code here..
     //[/Destructor_pre]
 
-    deleteAndZero (tabbedComponent);
+    tabbedComponent = nullptr;
 
 
     //[Destructor]. You can add your own custom destruction code here..

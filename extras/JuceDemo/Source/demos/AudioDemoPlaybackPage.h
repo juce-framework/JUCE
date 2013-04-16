@@ -78,12 +78,12 @@ private:
     //[/UserVariables]
 
     //==============================================================================
-    Label* zoomLabel;
-    Label* explanation;
-    Slider* zoomSlider;
-    DemoThumbnailComp* thumbnail;
-    TextButton* startStopButton;
-    FileTreeComponent* fileTreeComp;
+    ScopedPointer<Label> zoomLabel;
+    ScopedPointer<Label> explanation;
+    ScopedPointer<Slider> zoomSlider;
+    ScopedPointer<DemoThumbnailComp> thumbnail;
+    ScopedPointer<TextButton> startStopButton;
+    ScopedPointer<FileTreeComponent> fileTreeComp;
 
 
     //==============================================================================

@@ -136,10 +136,7 @@ private:
 
 //==============================================================================
 AudioDemoRecordPage::AudioDemoRecordPage (AudioDeviceManager& deviceManager_)
-    : deviceManager (deviceManager_),
-      liveAudioDisplayComp (0),
-      explanationLabel (0),
-      recordButton (0)
+    : deviceManager (deviceManager_)
 {
     addAndMakeVisible (liveAudioDisplayComp = new LiveAudioInputDisplayComp());
 
@@ -179,9 +176,9 @@ AudioDemoRecordPage::~AudioDemoRecordPage()
     recorder = 0;
     //[/Destructor_pre]
 
-    deleteAndZero (liveAudioDisplayComp);
-    deleteAndZero (explanationLabel);
-    deleteAndZero (recordButton);
+    liveAudioDisplayComp = nullptr;
+    explanationLabel = nullptr;
+    recordButton = nullptr;
 
 
     //[Destructor]. You can add your own custom destruction code here..

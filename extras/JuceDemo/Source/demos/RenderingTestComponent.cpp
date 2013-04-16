@@ -377,28 +377,6 @@ Component* createRenderingDemo()
 
 //==============================================================================
 RenderingTestComponent::RenderingTestComponent ()
-    : testTypeComboBox (0),
-      testTypeLabel (0),
-      speedLabel (0),
-      testCanvas (0),
-      opacitySlider (0),
-      highQualityToggle (0),
-      animateSizeToggle (0),
-      animateRotationToggle (0),
-      animatePositionToggle (0),
-      animateFillToggle (0),
-      opacityLabel (0),
-      xSlider (0),
-      ySlider (0),
-      sizeSlider (0),
-      angleSlider (0),
-      xSliderLabel (0),
-      ySliderLabel (0),
-      sizeSliderLabel (0),
-      angleSliderLabel (0),
-      clipToRectangleToggle (0),
-      clipToPathToggle (0),
-      clipToImageToggle (0)
 {
     addAndMakeVisible (testTypeComboBox = new ComboBox (String::empty));
     testTypeComboBox->setEditableText (false);
@@ -551,28 +529,28 @@ RenderingTestComponent::~RenderingTestComponent()
     //[Destructor_pre]. You can add your own custom destruction code here..
     //[/Destructor_pre]
 
-    deleteAndZero (testTypeComboBox);
-    deleteAndZero (testTypeLabel);
-    deleteAndZero (speedLabel);
-    deleteAndZero (testCanvas);
-    deleteAndZero (opacitySlider);
-    deleteAndZero (highQualityToggle);
-    deleteAndZero (animateSizeToggle);
-    deleteAndZero (animateRotationToggle);
-    deleteAndZero (animatePositionToggle);
-    deleteAndZero (animateFillToggle);
-    deleteAndZero (opacityLabel);
-    deleteAndZero (xSlider);
-    deleteAndZero (ySlider);
-    deleteAndZero (sizeSlider);
-    deleteAndZero (angleSlider);
-    deleteAndZero (xSliderLabel);
-    deleteAndZero (ySliderLabel);
-    deleteAndZero (sizeSliderLabel);
-    deleteAndZero (angleSliderLabel);
-    deleteAndZero (clipToRectangleToggle);
-    deleteAndZero (clipToPathToggle);
-    deleteAndZero (clipToImageToggle);
+    testTypeComboBox = nullptr;
+    testTypeLabel = nullptr;
+    speedLabel = nullptr;
+    testCanvas = nullptr;
+    opacitySlider = nullptr;
+    highQualityToggle = nullptr;
+    animateSizeToggle = nullptr;
+    animateRotationToggle = nullptr;
+    animatePositionToggle = nullptr;
+    animateFillToggle = nullptr;
+    opacityLabel = nullptr;
+    xSlider = nullptr;
+    ySlider = nullptr;
+    sizeSlider = nullptr;
+    angleSlider = nullptr;
+    xSliderLabel = nullptr;
+    ySliderLabel = nullptr;
+    sizeSliderLabel = nullptr;
+    angleSliderLabel = nullptr;
+    clipToRectangleToggle = nullptr;
+    clipToPathToggle = nullptr;
+    clipToImageToggle = nullptr;
 
 
     //[Destructor]. You can add your own custom destruction code here..

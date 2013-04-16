@@ -90,22 +90,12 @@ void GeneratedCode::removeCallback (const String& returnType, const String& prot
 
 void GeneratedCode::addImageResourceLoader (const String& imageMemberName, const String& resourceName)
 {
-    const String initialiser (imageMemberName + " (0)");
+    privateMemberDeclarations
+        << "Image " << imageMemberName << ";\n";
 
-    if (! initialisers.contains (initialiser, false))
-    {
-        initialisers.add (initialiser);
-
-        privateMemberDeclarations
-            << "Image " << imageMemberName << ";\n";
-
-        if (resourceName.isNotEmpty())
-        {
-            constructorCode
-                << imageMemberName << " = ImageCache::getFromMemory ("
-                << resourceName << ", " << resourceName << "Size);\n";
-        }
-    }
+    if (resourceName.isNotEmpty())
+        constructorCode << imageMemberName << " = ImageCache::getFromMemory ("
+                        << resourceName << ", " << resourceName << "Size);\n";
 }
 
 StringArray GeneratedCode::getExtraParentClasses() const

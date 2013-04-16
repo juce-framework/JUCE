@@ -61,9 +61,9 @@ private:
     //[/UserVariables]
 
     //==============================================================================
-    LiveAudioInputDisplayComp* liveAudioDisplayComp;
-    TextButton* startTestButton;
-    TextEditor* testResultsBox;
+    ScopedPointer<LiveAudioInputDisplayComp> liveAudioDisplayComp;
+    ScopedPointer<TextButton> startTestButton;
+    ScopedPointer<TextEditor> testResultsBox;
 
 
     //==============================================================================

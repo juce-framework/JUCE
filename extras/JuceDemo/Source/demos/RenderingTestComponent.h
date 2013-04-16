@@ -66,28 +66,28 @@ private:
     //[/UserVariables]
 
     //==============================================================================
-    ComboBox* testTypeComboBox;
-    Label* testTypeLabel;
-    Label* speedLabel;
-    RenderingTestCanvas* testCanvas;
-    Slider* opacitySlider;
-    ToggleButton* highQualityToggle;
-    ToggleButton* animateSizeToggle;
-    ToggleButton* animateRotationToggle;
-    ToggleButton* animatePositionToggle;
-    ToggleButton* animateFillToggle;
-    Label* opacityLabel;
-    Slider* xSlider;
-    Slider* ySlider;
-    Slider* sizeSlider;
-    Slider* angleSlider;
-    Label* xSliderLabel;
-    Label* ySliderLabel;
-    Label* sizeSliderLabel;
-    Label* angleSliderLabel;
-    ToggleButton* clipToRectangleToggle;
-    ToggleButton* clipToPathToggle;
-    ToggleButton* clipToImageToggle;
+    ScopedPointer<ComboBox> testTypeComboBox;
+    ScopedPointer<Label> testTypeLabel;
+    ScopedPointer<Label> speedLabel;
+    ScopedPointer<RenderingTestCanvas> testCanvas;
+    ScopedPointer<Slider> opacitySlider;
+    ScopedPointer<ToggleButton> highQualityToggle;
+    ScopedPointer<ToggleButton> animateSizeToggle;
+    ScopedPointer<ToggleButton> animateRotationToggle;
+    ScopedPointer<ToggleButton> animatePositionToggle;
+    ScopedPointer<ToggleButton> animateFillToggle;
+    ScopedPointer<Label> opacityLabel;
+    ScopedPointer<Slider> xSlider;
+    ScopedPointer<Slider> ySlider;
+    ScopedPointer<Slider> sizeSlider;
+    ScopedPointer<Slider> angleSlider;
+    ScopedPointer<Label> xSliderLabel;
+    ScopedPointer<Label> ySliderLabel;
+    ScopedPointer<Label> sizeSliderLabel;
+    ScopedPointer<Label> angleSliderLabel;
+    ScopedPointer<ToggleButton> clipToRectangleToggle;
+    ScopedPointer<ToggleButton> clipToPathToggle;
+    ScopedPointer<ToggleButton> clipToImageToggle;
 
 
     //==============================================================================

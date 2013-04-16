@@ -56,7 +56,7 @@ private:
     //[/UserVariables]
 
     //==============================================================================
-    AudioDeviceSelectorComponent* deviceSelector;
+    ScopedPointer<AudioDeviceSelectorComponent> deviceSelector;
 
 
     //==============================================================================

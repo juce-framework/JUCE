@@ -279,10 +279,7 @@ private:
 
 //==============================================================================
 AudioDemoLatencyPage::AudioDemoLatencyPage (AudioDeviceManager& deviceManager_)
-    : deviceManager (deviceManager_),
-      liveAudioDisplayComp (0),
-      startTestButton (0),
-      testResultsBox (0)
+    : deviceManager (deviceManager_)
 {
     addAndMakeVisible (liveAudioDisplayComp = new LiveAudioInputDisplayComp());
 
@@ -325,9 +322,9 @@ AudioDemoLatencyPage::~AudioDemoLatencyPage()
     deviceManager.removeAudioCallback (latencyTester);
     //[/Destructor_pre]
 
-    deleteAndZero (liveAudioDisplayComp);
-    deleteAndZero (startTestButton);
-    deleteAndZero (testResultsBox);
+    liveAudioDisplayComp = nullptr;
+    startTestButton = nullptr;
+    testResultsBox = nullptr;
 
 
     //[Destructor]. You can add your own custom destruction code here..

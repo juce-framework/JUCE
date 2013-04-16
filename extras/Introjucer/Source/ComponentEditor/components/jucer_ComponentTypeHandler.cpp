@@ -496,19 +496,15 @@ void ComponentTypeHandler::fillInGeneratedCode (Component* component, GeneratedC
 
 void ComponentTypeHandler::fillInMemberVariableDeclarations (GeneratedCode& code, Component* component, const String& memberVariableName)
 {
-    const String virtualName (component->getProperties() ["virtualName"].toString());
+    String clsName (component->getProperties() ["virtualName"].toString());
 
-    if (virtualName.isNotEmpty())
-        code.privateMemberDeclarations
-            << CodeHelpers::makeValidIdentifier (virtualName, false, false, true);
+    if (clsName.isNotEmpty())
+        clsName = CodeHelpers::makeValidIdentifier (clsName, false, false, true);
     else
-        code.privateMemberDeclarations
-            << getClassName (component);
+        clsName = getClassName (component);
 
     code.privateMemberDeclarations
-        << "* " << memberVariableName << ";\n";
-
-    code.initialisers.add (memberVariableName + " (0)");
+        << "ScopedPointer<" << clsName << "> " << memberVariableName << ";\n";
 }
 
 void ComponentTypeHandler::fillInResizeCode (GeneratedCode& code, Component* component, const String& memberVariableName)
@@ -579,5 +575,5 @@ void ComponentTypeHandler::fillInDeletionCode (GeneratedCode& code, Component*,
                                                const String& memberVariableName)
 {
     code.destructorCode
-        << "deleteAndZero (" << memberVariableName << ");\n";
+        << memberVariableName << " = nullptr;\n";
 }
