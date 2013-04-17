@@ -739,6 +739,7 @@
 		F04BF3F08D2E6AD3A96EC9A1 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "jucer_PaintRoutineEditor.cpp"; path = "../../src/ui/jucer_PaintRoutineEditor.cpp"; sourceTree = "SOURCE_ROOT"; };
 		F063C41ED7B74514A30D4516 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_events.h"; path = "../../../../modules/juce_events/juce_events.h"; sourceTree = "SOURCE_ROOT"; };
 		F066D126F1E16F0D4C0EF330 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_SplashScreen.cpp"; path = "../../../../modules/juce_gui_extra/misc/juce_SplashScreen.cpp"; sourceTree = "SOURCE_ROOT"; };
+		F0E4CBBCE745CDAB2BCE9BA7 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_freetype_Fonts.cpp"; path = "../../../../modules/juce_graphics/native/juce_freetype_Fonts.cpp"; sourceTree = "SOURCE_ROOT"; };
 		F19C572BE537ECEE32243D53 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_ColourSelector.h"; path = "../../../../modules/juce_gui_extra/misc/juce_ColourSelector.h"; sourceTree = "SOURCE_ROOT"; };
 		F1C2BA6947DEEC7A2FF1D9EA = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_NotificationType.h"; path = "../../../../modules/juce_events/messages/juce_NotificationType.h"; sourceTree = "SOURCE_ROOT"; };
 		F233BDCE6D542E561B263413 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_XmlElement.h"; path = "../../../../modules/juce_core/xml/juce_XmlElement.h"; sourceTree = "SOURCE_ROOT"; };
@@ -1267,6 +1268,7 @@
 		52A53F1777A820F2AB42DD91 = { isa = PBXGroup; children = (
 				50EFF428020185E2AE66AA54,
 				02314F5CE4D8509DE87CF93E,
+				F0E4CBBCE745CDAB2BCE9BA7,
 				814FFDA698E109CEE727F845,
 				66ED948A8EBAED562101EE36,
 				FCB2AD7C12426703410DA46C,

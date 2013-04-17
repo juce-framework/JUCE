@@ -1877,6 +1877,10 @@
       <Option compile="0"/>
       <Option link="0"/>
     </Unit>
+    <Unit filename="../../../../modules/juce_graphics/native/juce_freetype_Fonts.cpp">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
     <Unit filename="../../../../modules/juce_graphics/native/juce_linux_Fonts.cpp">
       <Option compile="0"/>
       <Option link="0"/>

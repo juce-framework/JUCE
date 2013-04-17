@@ -209,6 +209,7 @@
 		2C712E1519F7D4410288D35D = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_AiffAudioFormat.h"; path = "../../../../modules/juce_audio_formats/codecs/juce_AiffAudioFormat.h"; sourceTree = "SOURCE_ROOT"; };
 		2C80ACF1A94F47BA05FA687C = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_OutputStream.h"; path = "../../../../modules/juce_core/streams/juce_OutputStream.h"; sourceTree = "SOURCE_ROOT"; };
 		2CD9DB6EFEAE8354A089CAC9 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_IIRFilter.cpp"; path = "../../../../modules/juce_audio_basics/effects/juce_IIRFilter.cpp"; sourceTree = "SOURCE_ROOT"; };
+		2CE241BF8BF73AED94C89DA6 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_freetype_Fonts.cpp"; path = "../../../../modules/juce_graphics/native/juce_freetype_Fonts.cpp"; sourceTree = "SOURCE_ROOT"; };
 		2CE3420FBFD3136621EAFB1D = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = MainDemoWindow.cpp; path = ../../Source/MainDemoWindow.cpp; sourceTree = "SOURCE_ROOT"; };
 		2CED94801F5481AE15648BF9 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_ColourSelector.cpp"; path = "../../../../modules/juce_gui_extra/misc/juce_ColourSelector.cpp"; sourceTree = "SOURCE_ROOT"; };
 		2D529158434D415C56A07479 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_TemporaryFile.cpp"; path = "../../../../modules/juce_core/files/juce_TemporaryFile.cpp"; sourceTree = "SOURCE_ROOT"; };
@@ -1565,6 +1566,7 @@
 		AE4D88D94AF6F0F06DE97BB6 = { isa = PBXGroup; children = (
 				4F2F636FB9416BFBB1FF2473,
 				373EBC4E488B3EF8A0A72CAF,
+				2CE241BF8BF73AED94C89DA6,
 				6C608B44E265F761D09C91CB,
 				61D55BA26F1410A26A007514,
 				8EB9B4853F225BDB97D6626E,
