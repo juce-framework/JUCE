@@ -516,6 +516,14 @@ double JucerDocumentEditor::getZoom() const
     return 1.0;
 }
 
+static double snapToIntegerZoom (double zoom)
+{
+    if (zoom >= 1.0)
+        return (double) (int) (zoom + 0.5);
+
+    return 1.0 / (int) (1.0 / zoom + 0.5);
+}
+
 void JucerDocumentEditor::addElement (const int index)
 {
     if (PaintRoutinePanel* const panel = dynamic_cast <PaintRoutinePanel*> (tabbedComponent.getCurrentContentComponent()))
@@ -919,17 +927,9 @@ bool JucerDocumentEditor::perform (const InvocationInfo& info)
             showGraphics (0);
             break;
 
-        case JucerCommandIDs::zoomIn:
-            setZoom (getZoom() * 2.0);
-            break;
-
-        case JucerCommandIDs::zoomOut:
-            setZoom (getZoom() / 2.0);
-            break;
-
-        case JucerCommandIDs::zoomNormal:
-            setZoom (1.0);
-            break;
+        case JucerCommandIDs::zoomIn:      setZoom (snapToIntegerZoom (getZoom() * 2.0)); break;
+        case JucerCommandIDs::zoomOut:     setZoom (snapToIntegerZoom (getZoom() / 2.0)); break;
+        case JucerCommandIDs::zoomNormal:  setZoom (1.0); break;
 
         case JucerCommandIDs::spaceBarDrag:
             if (EditingPanelBase* panel = dynamic_cast <EditingPanelBase*> (tabbedComponent.getCurrentContentComponent()))
