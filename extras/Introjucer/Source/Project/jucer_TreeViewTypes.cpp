@@ -32,8 +32,8 @@
 #include "jucer_ProjectContentComponent.h"
 
 //==============================================================================
-GroupTreeViewItem::GroupTreeViewItem (const Project::Item& item_)
-    : ProjectTreeViewBase (item_)
+GroupTreeViewItem::GroupTreeViewItem (const Project::Item& i)
+    : ProjectTreeViewBase (i)
 {
 }
 
@@ -94,33 +94,6 @@ void GroupTreeViewItem::showDocument()
         pcc->setEditorComponent (new GroupInformationComponent (item), nullptr);
 }
 
-void GroupTreeViewItem::showPopupMenu()
-{
-    PopupMenu m;
-    addCreateFileMenuItems (m);
-
-    m.addSeparator();
-
-    if (isOpen())
-        m.addItem (4, "Collapse all Sub-groups");
-    else
-        m.addItem (5, "Expand all Sub-groups");
-
-    m.addSeparator();
-    m.addItem (6, "Enable compiling of all enclosed files");
-    m.addItem (7, "Disable compiling of all enclosed files");
-
-    m.addSeparator();
-    m.addItem (3, "Sort Contents Alphabetically");
-    m.addSeparator();
-    m.addItem (1, "Rename...");
-
-    if (! isRoot())
-        m.addItem (2, "Delete");
-
-    launchPopupMenu (m);
-}
-
 static void openOrCloseAllSubGroups (TreeViewItem& item, bool shouldOpen)
 {
     item.setOpen (shouldOpen);
@@ -139,17 +112,46 @@ static void setFilesToCompile (Project::Item item, const bool shouldCompile)
         setFilesToCompile (item.getChild (i), shouldCompile);
 }
 
+void GroupTreeViewItem::showPopupMenu()
+{
+    PopupMenu m;
+    addCreateFileMenuItems (m);
+
+    m.addSeparator();
+
+    if (isOpen())
+        m.addItem (1, "Collapse all Sub-groups");
+    else
+        m.addItem (2, "Expand all Sub-groups");
+
+    m.addSeparator();
+    m.addItem (3, "Enable compiling of all enclosed files");
+    m.addItem (4, "Disable compiling of all enclosed files");
+
+    m.addSeparator();
+    m.addItem (5, "Sort Items Alphabetically");
+    m.addItem (6, "Sort Items Alphabetically (Groups first)");
+    m.addSeparator();
+    m.addItem (7, "Rename...");
+
+    if (! isRoot())
+        m.addItem (8, "Delete");
+
+    launchPopupMenu (m);
+}
+
 void GroupTreeViewItem::handlePopupMenuResult (int resultCode)
 {
     switch (resultCode)
     {
-        case 1:     triggerAsyncRename (item); break;
-        case 2:     deleteAllSelectedItems(); break;
-        case 3:     item.sortAlphabetically (false); break;
-        case 4:     openOrCloseAllSubGroups (*this, false); break;
-        case 5:     openOrCloseAllSubGroups (*this, true); break;
-        case 6:     setFilesToCompile (item, true); break;
-        case 7:     setFilesToCompile (item, false); break;
+        case 1:     openOrCloseAllSubGroups (*this, false); break;
+        case 2:     openOrCloseAllSubGroups (*this, true); break;
+        case 3:     setFilesToCompile (item, true); break;
+        case 4:     setFilesToCompile (item, false); break;
+        case 5:     item.sortAlphabetically (false); break;
+        case 6:     item.sortAlphabetically (true); break;
+        case 7:     triggerAsyncRename (item); break;
+        case 8:     deleteAllSelectedItems(); break;
         default:    processCreateFileMenuItem (resultCode); break;
     }
 }

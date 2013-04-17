@@ -33,6 +33,7 @@
 #include "../Code Editor/jucer_SourceCodeEditor.h"
 
 void createGUIEditorMenu (PopupMenu&);
+void handleGUIEditorMenuCommand (int);
 void registerGUIEditorCommands();
 
 //==============================================================================
@@ -325,6 +326,10 @@ public:
         else if (menuItemID >= colourSchemeBaseID && menuItemID < colourSchemeBaseID + 200)
         {
             settings->appearance.selectPresetScheme (menuItemID - colourSchemeBaseID);
+        }
+        else
+        {
+            handleGUIEditorMenuCommand (menuItemID);
         }
     }
 
