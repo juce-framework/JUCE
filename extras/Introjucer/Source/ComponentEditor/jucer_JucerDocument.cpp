@@ -574,6 +574,7 @@ bool JucerDocument::flushChangesToDocuments()
             cpp->getCodeDocument().replaceAllContent (cppTemplate);
     }
 
+    userDocChangeTimer = nullptr;
     return true;
 }
 
