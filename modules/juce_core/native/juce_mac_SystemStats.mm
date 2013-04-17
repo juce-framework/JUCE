@@ -38,7 +38,7 @@ void Logger::outputDebugString (const String& text)
 {
     // Would prefer to use std::cerr here, but avoiding it for
     // the moment, due to clang JIT linkage problems.
-    fputs (text.toUTF8().getAddress(), stderr);
+    fputs (text.toRawUTF8(), stderr);
     fputs ("\n", stderr);
     fflush (stderr);
 }

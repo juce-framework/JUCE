@@ -883,7 +883,7 @@ public:
     void setTitle (const String& title)
     {
         XTextProperty nameProperty;
-        char* strings[] = { const_cast <char*> (title.toUTF8().getAddress()) };
+        char* strings[] = { const_cast <char*> (title.toRawUTF8()) };
         ScopedXLock xlock;
 
         if (XStringListToTextProperty (strings, 1, &nameProperty))
@@ -2527,7 +2527,7 @@ private:
             xchangeProperty (evt.xselectionrequest.requestor,
                              evt.xselectionrequest.property,
                              targetType, 8,
-                             dragState.textOrFiles.toUTF8().getAddress(),
+                             dragState.textOrFiles.toRawUTF8(),
                              dragState.textOrFiles.getNumBytesAsUTF8());
         }
 

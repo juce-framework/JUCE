@@ -688,7 +688,7 @@ struct AAXClasses
                 {
                     AAX_IParameter* parameter
                         = new AAX_CParameter<float> (IndexAsParamID (parameterIndex),
-                                                     audioProcessor.getParameterName (parameterIndex).toUTF8().getAddress(),
+                                                     audioProcessor.getParameterName (parameterIndex).toRawUTF8(),
                                                      audioProcessor.getParameter (parameterIndex),
                                                      AAX_CLinearTaperDelegate<float, 0>(),
                                                      AAX_CNumberDisplayDelegate<float, 3>(),

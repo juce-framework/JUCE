@@ -418,7 +418,7 @@ private:
         const String s (metadata [name]);
 
         if (s.isNotEmpty())
-            vorbis_comment_add_tag (&vc, vorbisName, const_cast <char*> (s.toUTF8().getAddress()));
+            vorbis_comment_add_tag (&vc, vorbisName, const_cast <char*> (s.toRawUTF8()));
     }
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OggWriter)

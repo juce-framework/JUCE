@@ -180,7 +180,7 @@ namespace CodeHelpers
     String addEscapeChars (const String& s)
     {
         MemoryOutputStream out;
-        writeEscapeChars (out, s.toUTF8().getAddress(), -1, -1, false, true, true);
+        writeEscapeChars (out, s.toRawUTF8(), -1, -1, false, true, true);
         return out.toUTF8();
     }
 

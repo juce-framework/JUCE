@@ -300,13 +300,11 @@ inline int64 abs64 (const int64 n) noexcept
 
 //==============================================================================
 /** A predefined value for Pi, at double-precision.
-
     @see float_Pi
 */
 const double  double_Pi  = 3.1415926535897932384626433832795;
 
-/** A predefined value for Pi, at sngle-precision.
-
+/** A predefined value for Pi, at single-precision.
     @see double_Pi
 */
 const float   float_Pi   = 3.14159265358979323846f;

@@ -408,15 +408,15 @@ bool Process::openEmailWithAttachments (const String& targetEmailAddress,
         return false;
 
     MapiMessage message = { 0 };
-    message.lpszSubject = (LPSTR) emailSubject.toUTF8().getAddress();
-    message.lpszNoteText = (LPSTR) bodyText.toUTF8().getAddress();
+    message.lpszSubject = (LPSTR) emailSubject.toRawUTF8();
+    message.lpszNoteText = (LPSTR) bodyText.toRawUTF8();
 
     MapiRecipDesc recip = { 0 };
     recip.ulRecipClass = MAPI_TO;
     String targetEmailAddress_ (targetEmailAddress);
     if (targetEmailAddress_.isEmpty())
         targetEmailAddress_ = " "; // (Windows Mail can't deal with a blank address)
-    recip.lpszName = (LPSTR) targetEmailAddress_.toUTF8().getAddress();
+    recip.lpszName = (LPSTR) targetEmailAddress_.toRawUTF8();
     message.nRecipCount = 1;
     message.lpRecips = &recip;
 
@@ -429,7 +429,7 @@ bool Process::openEmailWithAttachments (const String& targetEmailAddress,
     for (int i = 0; i < filesToAttach.size(); ++i)
     {
         files[i].nPosition = (ULONG) -1;
-        files[i].lpszPathName = (LPSTR) filesToAttach[i].toUTF8().getAddress();
+        files[i].lpszPathName = (LPSTR) filesToAttach[i].toRawUTF8();
     }
 
     return mapiSendMail (0, 0, &message, MAPI_DIALOG | MAPI_LOGON_UI, 0) == SUCCESS_SUCCESS;

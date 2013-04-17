@@ -346,6 +346,8 @@ String::String (const CharPointer_UTF8&  start, const CharPointer_UTF8&  end) : 
 String::String (const CharPointer_UTF16& start, const CharPointer_UTF16& end) : text (StringHolder::createFromCharPointer (start, end)) {}
 String::String (const CharPointer_UTF32& start, const CharPointer_UTF32& end) : text (StringHolder::createFromCharPointer (start, end)) {}
 
+String::String (const std::string& s) : text (StringHolder::createFromFixedLength (s.data(), s.size())) {}
+
 String String::charToString (const juce_wchar character)
 {
     String result (PreallocationBytes (CharPointerType::getBytesRequiredFor (character)));
@@ -2011,9 +2013,19 @@ CharPointer_UTF8  String::toUTF8()  const { return StringEncodingConverter <Char
 CharPointer_UTF16 String::toUTF16() const { return StringEncodingConverter <CharPointerType, CharPointer_UTF16>::convert (*this); }
 CharPointer_UTF32 String::toUTF32() const { return StringEncodingConverter <CharPointerType, CharPointer_UTF32>::convert (*this); }
 
+const char* String::toRawUTF8() const
+{
+    return toUTF8().getAddress();
+}
+
 const wchar_t* String::toWideCharPointer() const
 {
     return StringEncodingConverter <CharPointerType, CharPointer_wchar_t>::convert (*this).getAddress();
+}
+
+std::string String::toStdString() const
+{
+    return std::string (toRawUTF8());
 }
 
 //==============================================================================
@@ -2251,6 +2263,7 @@ public:
             expect (s3.indexOf (L"HIJK") == -1);
             expect (s3.indexOfIgnoreCase ("hij") == 7);
             expect (s3.indexOfIgnoreCase (L"hijk") == -1);
+            expect (s3.toStdString() == s3.toRawUTF8());
 
             String s4 (s3);
             s4.append (String ("xyz123"), 3);

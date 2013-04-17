@@ -880,7 +880,7 @@ void Thread::setCurrentThreadName (const String& name)
         [[NSThread currentThread] setName: juceStringToNS (name)];
     }
    #elif JUCE_LINUX
-    prctl (PR_SET_NAME, name.toUTF8().getAddress(), 0, 0, 0);
+    prctl (PR_SET_NAME, name.toRawUTF8(), 0, 0, 0);
    #endif
 }
 
