@@ -61,6 +61,7 @@
 #include "AAX_ITransport.h"
 #include "AAX_IMIDINode.h"
 #include "AAX_UtilsNative.h"
+#include "AAX_Enums.h"
 
 #ifdef __clang__
  #pragma clang diagnostic pop
@@ -511,11 +512,35 @@ struct AAXClasses
             if (transport.IsTransportPlaying (&info.isPlaying) != AAX_SUCCESS)
                 info.isPlaying = false;
 
+            info.editOriginTime = 0;
+            info.frameRate = AudioPlayHead::fpsUnknown;
+
+            AAX_EFrameRate frameRate;
+            int32_t offset;
+
+            if (transport.GetTimeCodeInfo (&frameRate, &offset) == AAX_SUCCESS)
+            {
+                double framesPerSec = 24.0;
+
+                switch (frameRate)
+                {
+                    case AAX_eFrameRate_Undeclared:    break;
+                    case AAX_eFrameRate_24Frame:       info.frameRate = AudioPlayHead::fps24;       break;
+                    case AAX_eFrameRate_25Frame:       info.frameRate = AudioPlayHead::fps25;       framesPerSec = 25.0; break;
+                    case AAX_eFrameRate_2997NonDrop:   info.frameRate = AudioPlayHead::fps2997;     framesPerSec = 29.97002997; break;
+                    case AAX_eFrameRate_2997DropFrame: info.frameRate = AudioPlayHead::fps2997drop; framesPerSec = 29.97002997; break;
+                    case AAX_eFrameRate_30NonDrop:     info.frameRate = AudioPlayHead::fps30;       framesPerSec = 30.0; break;
+                    case AAX_eFrameRate_30DropFrame:   info.frameRate = AudioPlayHead::fps30drop;   framesPerSec = 30.0; break;
+                    case AAX_eFrameRate_23976:         info.frameRate = AudioPlayHead::fps24;       framesPerSec = 23.976; break;
+                    default:                           break;
+                }
+
+                info.editOriginTime = offset / framesPerSec;
+            }
+
             // No way to get these: (?)
             info.isRecording = false;
             info.ppqPositionOfLastBarStart = 0;
-            info.editOriginTime = 0;
-            info.frameRate = AudioPlayHead::fpsUnknown;
 
             return true;
         }
