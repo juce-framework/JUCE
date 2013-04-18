@@ -496,7 +496,15 @@ struct AAXClasses
             info.timeSigDenominator = (int) den;
 
             info.timeInSamples = 0;
-            check (transport.GetCurrentNativeSampleLocation (&info.timeInSamples));
+
+            if (transport.IsTransportPlaying (&info.isPlaying) != AAX_SUCCESS)
+                info.isPlaying = false;
+
+            if (! info.isPlaying)
+                check (transport.GetTimelineSelectionStartPosition (&info.timeInSamples));
+            else
+                check (transport.GetCurrentNativeSampleLocation (&info.timeInSamples));
+
             info.timeInSeconds = info.timeInSamples / getSampleRate();
 
             int64_t ticks = 0;
@@ -508,9 +516,6 @@ struct AAXClasses
             check (transport.GetCurrentLoopPosition (&info.isLooping, &loopStartTick, &loopEndTick));
             info.ppqLoopStart = loopStartTick / 960000.0;
             info.ppqLoopEnd   = loopEndTick   / 960000.0;
-
-            if (transport.IsTransportPlaying (&info.isPlaying) != AAX_SUCCESS)
-                info.isPlaying = false;
 
             info.editOriginTime = 0;
             info.frameRate = AudioPlayHead::fpsUnknown;
