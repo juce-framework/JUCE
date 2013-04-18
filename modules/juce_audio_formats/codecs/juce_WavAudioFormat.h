@@ -111,6 +111,28 @@ public:
                                                const String& codingHistory);
 
     //==============================================================================
+    /** Metadata property name used when reading a WAV file with an acid chunk. */
+    static const char* const acidOneShot;
+    /** Metadata property name used when reading a WAV file with an acid chunk. */
+    static const char* const acidRootSet;
+    /** Metadata property name used when reading a WAV file with an acid chunk. */
+    static const char* const acidStretch;
+    /** Metadata property name used when reading a WAV file with an acid chunk. */
+    static const char* const acidDiskBased;
+    /** Metadata property name used when reading a WAV file with an acid chunk. */
+    static const char* const acidizerFlag;
+    /** Metadata property name used when reading a WAV file with an acid chunk. */
+    static const char* const acidRootNote;
+    /** Metadata property name used when reading a WAV file with an acid chunk. */
+    static const char* const acidBeats;
+    /** Metadata property name used when reading a WAV file with an acid chunk. */
+    static const char* const acidDenominator;
+    /** Metadata property name used when reading a WAV file with an acid chunk. */
+    static const char* const acidNumerator;
+    /** Metadata property name used when reading a WAV file with an acid chunk. */
+    static const char* const acidTempo;
+
+    //==============================================================================
     Array<int> getPossibleSampleRates();
     Array<int> getPossibleBitDepths();
     bool canDoStereo();
