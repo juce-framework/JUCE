@@ -166,6 +166,9 @@ public:
                 buttonState = newButtonState; // must change this before calling sendMouseUp, in case it runs a modal loop
 
                 sendMouseUp (current, screenPos + unboundedMouseOffset, time, oldMods);
+
+                if (lastCounter != mouseEventCounter)
+                    return true; // if a modal loop happened, then newButtonState is no longer valid.
             }
 
             enableUnboundedMouseMovement (false, false);
