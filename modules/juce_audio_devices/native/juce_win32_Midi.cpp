@@ -81,7 +81,10 @@ public:
             activeMidiCollectors.addIfNotAlreadyThere (this);
 
             for (int i = 0; i < (int) numHeaders; ++i)
+            {
+                headers[i].prepare (deviceHandle);
                 headers[i].write (deviceHandle);
+            }
 
             startTime = Time::getMillisecondCounterHiRes();
             MMRESULT res = midiInStart (deviceHandle);
@@ -139,29 +142,15 @@ private:
     class MidiHeader
     {
     public:
-        MidiHeader()
+        MidiHeader() {}
+
+        void prepare (HMIDIIN deviceHandle)
         {
             zerostruct (hdr);
             hdr.lpData = data;
             hdr.dwBufferLength = (DWORD) numElementsInArray (data);
-        }
 
-        void write (HMIDIIN deviceHandle)
-        {
-            hdr.dwBytesRecorded = 0;
-            MMRESULT res = midiInPrepareHeader (deviceHandle, &hdr, sizeof (hdr));
-            res = midiInAddBuffer (deviceHandle, &hdr, sizeof (hdr));
-            (void) res;
-        }
-
-        void writeIfFinished (HMIDIIN deviceHandle)
-        {
-            if ((hdr.dwFlags & WHDR_DONE) != 0)
-            {
-                MMRESULT res = midiInUnprepareHeader (deviceHandle, &hdr, sizeof (hdr));
-                (void) res;
-                write (deviceHandle);
-            }
+            midiInPrepareHeader (deviceHandle, &hdr, sizeof (hdr));
         }
 
         void unprepare (HMIDIIN deviceHandle)
@@ -174,6 +163,18 @@ private:
 
                 jassert (c >= 0);
             }
+        }
+
+        void write (HMIDIIN deviceHandle)
+        {
+            hdr.dwBytesRecorded = 0;
+            midiInAddBuffer (deviceHandle, &hdr, sizeof (hdr));
+        }
+
+        void writeIfFinished (HMIDIIN deviceHandle)
+        {
+            if ((hdr.dwFlags & WHDR_DONE) != 0)
+                write (deviceHandle);
         }
 
     private:
