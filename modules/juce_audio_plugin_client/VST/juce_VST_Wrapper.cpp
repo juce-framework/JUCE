@@ -1419,10 +1419,12 @@ private:
 
     //==============================================================================
    #if JUCE_WINDOWS
-    // Workarounds for Wavelab's happy-go-lucky use of threads.
+    // Workarounds for hosts which attempt to open editor windows on a non-GUI thread.. (Grrrr...)
     static void checkWhetherMessageThreadIsCorrect()
     {
-        if (getHostType().isWavelab() || getHostType().isCubaseBridged())
+        const PluginHostType host (getHostType());
+
+        if (host.isWavelab() || host.isCubaseBridged() || host.isPremiere())
         {
             if (! messageThreadIsDefinitelyCorrect)
             {
