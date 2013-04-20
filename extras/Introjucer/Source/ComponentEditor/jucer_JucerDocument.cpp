@@ -310,12 +310,12 @@ void JucerDocument::getOptionalMethods (StringArray& baseClasses,
     addMethod ("Component", "void", "inputAttemptWhenModal()", "", baseClasses, returnValues, methods, initialContents);
 }
 
-void JucerDocument::setOptionalMethodEnabled (const String& methodSigniture, const bool enable)
+void JucerDocument::setOptionalMethodEnabled (const String& methodSignature, const bool enable)
 {
     if (enable)
-        activeExtraMethods.addIfNotAlreadyThere (methodSigniture);
+        activeExtraMethods.addIfNotAlreadyThere (methodSignature);
     else
-        activeExtraMethods.removeString (methodSigniture);
+        activeExtraMethods.removeString (methodSignature);
 
     changed();
 }

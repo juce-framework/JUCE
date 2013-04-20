@@ -104,8 +104,8 @@ public:
                                      StringArray& methods,
                                      StringArray& initialContents) const;
 
-    void setOptionalMethodEnabled (const String& methodSigniture, const bool enable);
-    bool isOptionalMethodEnabled (const String& methodSigniture) const throw();
+    void setOptionalMethodEnabled (const String& methodSignature, const bool enable);
+    bool isOptionalMethodEnabled (const String& methodSignature) const throw();
 
     //==============================================================================
     BinaryResources& getResources() throw()                                 { return resources; }

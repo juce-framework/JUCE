@@ -106,8 +106,8 @@ public:
                                      StringArray& methods,
                                      StringArray& initialContents) const;
 
-    void setOptionalMethodEnabled (const String& methodSigniture, const bool enable);
-    bool isOptionalMethodEnabled (const String& methodSigniture) const noexcept;
+    void setOptionalMethodEnabled (const String& methodSignature, const bool enable);
+    bool isOptionalMethodEnabled (const String& methodSignature) const noexcept;
 
     //==============================================================================
     BinaryResources& getResources() noexcept                                { return resources; }
