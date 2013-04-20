@@ -28,6 +28,16 @@ static const char* const aiffFormatName = "AIFF file";
 static const char* const aiffExtensions[] = { ".aiff", ".aif", 0 };
 
 //==============================================================================
+const char* const AiffAudioFormat::appleOneShot         = "apple one shot";
+const char* const AiffAudioFormat::appleRootSet         = "apple root set";
+const char* const AiffAudioFormat::appleRootNote        = "apple root note";
+const char* const AiffAudioFormat::appleBeats           = "apple beats";
+const char* const AiffAudioFormat::appleDenominator     = "apple denominator";
+const char* const AiffAudioFormat::appleNumerator       = "apple numerator";
+const char* const AiffAudioFormat::appleTag             = "apple tag";
+const char* const AiffAudioFormat::appleKey             = "apple key";
+
+//==============================================================================
 namespace AiffFileHelpers
 {
     inline int chunkName (const char* const name)   { return (int) ByteOrder::littleEndianInt (name); }
@@ -111,6 +121,74 @@ namespace AiffFileHelpers
             }
         }
 
+    } JUCE_PACKED;
+
+    //==============================================================================
+    struct BASCChunk
+    {
+        enum Key
+        {
+            minor = 1,
+            major = 2,
+            neither = 3,
+            both = 4
+        };
+
+        BASCChunk (InputStream& input)
+        {
+            zerostruct (*this);
+
+            flags       = input.readIntBigEndian();
+            numBeats    = input.readIntBigEndian();
+            rootNote    = input.readShortBigEndian();
+            key         = input.readShortBigEndian();
+            timeSigNum  = input.readShortBigEndian();
+            timeSigDen  = input.readShortBigEndian();
+            oneShot     = input.readShortBigEndian();
+            input.read (unknown, sizeof (unknown));
+        }
+
+        void addToMetadata (StringPairArray& metadata) const
+        {
+            const bool rootNoteSet = rootNote != 0;
+
+            setBoolFlag (metadata, AiffAudioFormat::appleOneShot, oneShot == 2);
+            setBoolFlag (metadata, AiffAudioFormat::appleRootSet, rootNoteSet);
+
+            if (rootNoteSet)
+                metadata.set (AiffAudioFormat::appleRootNote,   String (rootNote));
+
+            metadata.set (AiffAudioFormat::appleBeats,          String (numBeats));
+            metadata.set (AiffAudioFormat::appleDenominator,    String (timeSigDen));
+            metadata.set (AiffAudioFormat::appleNumerator,      String (timeSigNum));
+
+            const char* keyString = nullptr;
+
+            switch (key)
+            {
+                case minor:     keyString = "major";        break;
+                case major:     keyString = "major";        break;
+                case neither:   keyString = "neither";      break;
+                case both:      keyString = "both";         break;
+            }
+
+            if (keyString != nullptr)
+                metadata.set (AiffAudioFormat::appleKey, keyString);
+        }
+
+        void setBoolFlag (StringPairArray& values, const char* name, bool shouldBeSet) const
+        {
+            values.set (name, shouldBeSet ? "1" : "0");
+        }
+
+        uint32 flags;
+        uint32 numBeats;
+        uint16 rootNote;
+        uint16 key;
+        uint16 timeSigNum;
+        uint16 timeSigDen;
+        uint16 oneShot;
+        uint8 unknown[66];
     } JUCE_PACKED;
 
    #if JUCE_MSVC
@@ -391,6 +469,10 @@ public:
                         inst.calloc (jmax ((size_t) length + 1, sizeof (InstChunk)), 1);
                         input->read (inst, (int) length);
                         inst->copyTo (metadataValues);
+                    }
+                    else if (type == chunkName ("basc"))
+                    {
+                        AiffFileHelpers::BASCChunk (*input).addToMetadata (metadataValues);
                     }
                     else if ((hasGotVer && hasGotData && hasGotType)
                               || chunkEnd < input->getPosition()

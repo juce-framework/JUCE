@@ -45,16 +45,24 @@ public:
     ~CoreAudioFormat();
 
     //==============================================================================
+    /** Metadata property name used when reading a caf file with a MIDI chunk. */
+    static const char* const midiDataBase64;
+    /** Metadata property name used when reading a caf file with tempo information. */
+    static const char* const tempo;
+    /** Metadata property name used when reading a caf file time signature information. */
+    static const char* const timeSig;
+
+    //==============================================================================
     Array<int> getPossibleSampleRates();
     Array<int> getPossibleBitDepths();
     bool canDoStereo();
     bool canDoMono();
 
     //==============================================================================
-    AudioFormatReader* createReaderFor (InputStream* sourceStream,
+    AudioFormatReader* createReaderFor (InputStream*,
                                         bool deleteStreamIfOpeningFails);
 
-    AudioFormatWriter* createWriterFor (OutputStream* streamToWriteTo,
+    AudioFormatWriter* createWriterFor (OutputStream*,
                                         double sampleRateToUse,
                                         unsigned int numberOfChannels,
                                         int bitsPerSample,

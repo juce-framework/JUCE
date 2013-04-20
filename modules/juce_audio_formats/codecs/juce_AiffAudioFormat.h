@@ -40,6 +40,24 @@ public:
     ~AiffAudioFormat();
 
     //==============================================================================
+    /** Metadata property name used when reading a aiff file with a basc chunk. */
+    static const char* const appleOneShot;
+    /** Metadata property name used when reading a aiff file with a basc chunk. */
+    static const char* const appleRootSet;
+    /** Metadata property name used when reading a aiff file with a basc chunk. */
+    static const char* const appleRootNote;
+    /** Metadata property name used when reading a aiff file with a basc chunk. */
+    static const char* const appleBeats;
+    /** Metadata property name used when reading a aiff file with a basc chunk. */
+    static const char* const appleDenominator;
+    /** Metadata property name used when reading a aiff file with a basc chunk. */
+    static const char* const appleNumerator;
+    /** Metadata property name used when reading a aiff file with a basc chunk. */
+    static const char* const appleTag;
+    /** Metadata property name used when reading a aiff file with a basc chunk. */
+    static const char* const appleKey;
+
+    //==============================================================================
     Array<int> getPossibleSampleRates();
     Array<int> getPossibleBitDepths();
     bool canDoStereo();

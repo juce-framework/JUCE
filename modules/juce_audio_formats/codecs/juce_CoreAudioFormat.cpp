@@ -51,6 +51,243 @@ namespace
 }
 
 //==============================================================================
+const char* const CoreAudioFormat::midiDataBase64   = "midiDataBase64";
+const char* const CoreAudioFormat::tempo            = "tempo";
+const char* const CoreAudioFormat::timeSig          = "time signature";
+
+//==============================================================================
+struct CoreAudioFormatMetatdata
+{
+    static uint32 chunkName (const char* const name) noexcept   { return ByteOrder::bigEndianInt (name); }
+
+    //==============================================================================
+    struct FileHeader
+    {
+        FileHeader (InputStream& input)
+        {
+            fileType    = input.readIntBigEndian();
+            fileVersion = input.readShortBigEndian();
+            fileFlags   = input.readShortBigEndian();
+        }
+
+        uint32 fileType;
+        uint16 fileVersion;
+        uint16 fileFlags;
+    };
+
+    //==============================================================================
+    struct ChunkHeader
+    {
+        ChunkHeader (InputStream& input)
+        {
+            chunkType = input.readIntBigEndian();
+            chunkSize = input.readInt64BigEndian();
+        }
+
+        uint32 chunkType;
+        int64 chunkSize;
+    };
+
+    //==============================================================================
+    struct AudioDescriptionChunk
+    {
+        AudioDescriptionChunk (InputStream& input)
+        {
+            sampleRate          = input.readDoubleBigEndian();
+            formatID            = input.readIntBigEndian();
+            formatFlags         = input.readIntBigEndian();
+            bytesPerPacket      = input.readIntBigEndian();
+            framesPerPacket     = input.readIntBigEndian();
+            channelsPerFrame    = input.readIntBigEndian();
+            bitsPerChannel      = input.readIntBigEndian();
+        }
+
+        double sampleRate;
+        uint32 formatID;
+        uint32 formatFlags;
+        uint32 bytesPerPacket;
+        uint32 framesPerPacket;
+        uint32 channelsPerFrame;
+        uint32 bitsPerChannel;
+    };
+
+    //==============================================================================
+    struct UserDefinedChunk
+    {
+        UserDefinedChunk (InputStream& input, int64 size)
+        {
+            // a user defined chunk contains 16 bytes of a UUID first
+            uuid[1] = input.readInt64BigEndian();
+            uuid[0] = input.readInt64BigEndian();
+
+            input.skipNextBytes (size - 16);
+        }
+
+        int64 uuid[2];
+    };
+
+    //==============================================================================
+    static StringPairArray parseMidiChunk (InputStream& input, int64 size)
+    {
+        const int64 originalPosition = input.getPosition();
+
+        MemoryBlock midiBlock;
+        input.readIntoMemoryBlock (midiBlock, size);
+        MemoryInputStream midiInputStream (midiBlock, false);
+
+        StringPairArray midiMetadata;
+        MidiFile midiFile;
+
+        if (midiFile.readFrom (midiInputStream))
+        {
+            midiMetadata.set (CoreAudioFormat::midiDataBase64, midiBlock.toBase64Encoding());
+
+            findTempoEvents (midiFile, midiMetadata);
+            findTimeSigEvents (midiFile, midiMetadata);
+        }
+
+        input.setPosition (originalPosition + size);
+        return midiMetadata;
+    }
+
+    static void findTempoEvents (MidiFile& midiFile, StringPairArray& midiMetadata)
+    {
+        MidiMessageSequence tempoEvents;
+        midiFile.findAllTempoEvents (tempoEvents);
+
+        const int numTempoEvents = tempoEvents.getNumEvents();
+        MemoryOutputStream tempoSequence;
+
+        for (int i = 0; i < numTempoEvents; ++i)
+        {
+            const double tempo = getTempoFromTempoMetaEvent (tempoEvents.getEventPointer (i));
+
+            if (tempo > 0.0)
+            {
+                if (i == 0)
+                    midiMetadata.set (CoreAudioFormat::tempo, String (tempo));
+
+                if (numTempoEvents > 1)
+                    tempoSequence << String (tempo) << ',' << tempoEvents.getEventTime (i) << ';';
+            }
+        }
+
+        if (tempoSequence.getDataSize() > 0)
+            midiMetadata.set ("tempo sequence", tempoSequence.toString());
+    }
+
+    static double getTempoFromTempoMetaEvent (MidiMessageSequence::MidiEventHolder* holder)
+    {
+        if (holder != nullptr)
+        {
+            const MidiMessage& midiMessage = holder->message;
+
+            if (midiMessage.isTempoMetaEvent())
+            {
+                const double tempoSecondsPerQuarterNote = midiMessage.getTempoSecondsPerQuarterNote();
+
+                if (tempoSecondsPerQuarterNote > 0.0)
+                    return 60.0 / tempoSecondsPerQuarterNote;
+            }
+        }
+
+        return 0.0;
+    }
+
+    static void findTimeSigEvents (MidiFile& midiFile, StringPairArray& midiMetadata)
+    {
+        MidiMessageSequence timeSigEvents;
+        midiFile.findAllTimeSigEvents (timeSigEvents);
+        const int numTimeSigEvents = timeSigEvents.getNumEvents();
+
+        MemoryOutputStream timeSigSequence;
+
+        for (int i = 0; i < numTimeSigEvents; ++i)
+        {
+            int numerator, denominator;
+            timeSigEvents.getEventPointer(i)->message.getTimeSignatureInfo (numerator, denominator);
+
+            String timeSigString;
+            timeSigString << numerator << '/' << denominator;
+
+            if (i == 0)
+                midiMetadata.set (CoreAudioFormat::timeSig, timeSigString);
+
+            if (numTimeSigEvents > 1)
+                timeSigSequence << timeSigString << ',' << timeSigEvents.getEventTime (i) << ';';
+        }
+
+        if (timeSigSequence.getDataSize() > 0)
+            midiMetadata.set ("time signature sequence", timeSigSequence.toString());
+    }
+
+    //==============================================================================
+    static StringPairArray parseInformationChunk (InputStream& input)
+    {
+        StringPairArray infoStrings;
+        const uint32 numEntries = (uint32) input.readIntBigEndian();
+
+        for (uint32 i = 0; i < numEntries; ++i)
+            infoStrings.set (input.readString(), input.readString());
+
+        return infoStrings;
+    }
+
+    //==============================================================================
+    static bool read (InputStream& input, StringPairArray& metadataValues)
+    {
+        const int64 originalPos = input.getPosition();
+
+        const FileHeader cafFileHeader (input);
+        const bool isCafFile = cafFileHeader.fileType == chunkName ("caff");
+
+        if (isCafFile)
+        {
+            while (! input.isExhausted())
+            {
+                const ChunkHeader chunkHeader (input);
+
+                if (chunkHeader.chunkType == chunkName ("desc"))
+                {
+                    AudioDescriptionChunk audioDescriptionChunk (input);
+                }
+                else if (chunkHeader.chunkType == chunkName ("uuid"))
+                {
+                    UserDefinedChunk userDefinedChunk (input, chunkHeader.chunkSize);
+                }
+                else if (chunkHeader.chunkType == chunkName ("data"))
+                {
+                    // -1 signifies an unknown data size so the data has to be at the
+                    // end of the file so we must have finished the header
+
+                    if (chunkHeader.chunkSize == -1)
+                        break;
+
+                    input.skipNextBytes (chunkHeader.chunkSize);
+                }
+                else if (chunkHeader.chunkType == chunkName ("midi"))
+                {
+                    metadataValues.addArray (parseMidiChunk (input, chunkHeader.chunkSize));
+                }
+                else if (chunkHeader.chunkType == chunkName ("info"))
+                {
+                    metadataValues.addArray (parseInformationChunk (input));
+                }
+                else
+                {
+                    // we aren't decoding this chunk yet so just skip over it
+                    input.skipNextBytes (chunkHeader.chunkSize);
+                }
+            }
+        }
+
+        input.setPosition (originalPos);
+
+        return isCafFile;
+    }
+};
+
+//==============================================================================
 class CoreAudioReader : public AudioFormatReader
 {
 public:
@@ -60,6 +297,9 @@ public:
     {
         usesFloatingPointData = true;
         bitsPerSample = 32;
+
+        if (input != nullptr)
+            CoreAudioFormatMetatdata::read (*input, metadataValues);
 
         OSStatus status = AudioFileOpenWithCallbacks (this,
                                                       &readCallback,
