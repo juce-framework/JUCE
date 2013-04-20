@@ -88,13 +88,24 @@ public:
         else
             mainWindowList.reopenLastProjects();
 
-        makeSureUserHasSelectedModuleFolder();
-
         mainWindowList.createWindowIfNoneAreOpen();
 
        #if JUCE_MAC
         MenuBarModel::setMacMainMenu (menuModel, nullptr, "Open Recent");
        #endif
+
+        struct ModuleFolderChecker  : public CallbackMessage
+        {
+            ModuleFolderChecker() {}
+
+            void messageCallback()
+            {
+                if (IntrojucerApp* const app = dynamic_cast<IntrojucerApp*> (JUCEApplication::getInstance()))
+                    app->makeSureUserHasSelectedModuleFolder();
+            }
+        };
+
+        (new ModuleFolderChecker())->post();
     }
 
     void shutdown()

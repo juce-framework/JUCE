@@ -66,8 +66,6 @@ JuceUpdater::JuceUpdater (ModuleList& moduleList_, const String& message)
     versionsToDownload.addListener (this);
 
     setSize (600, 500);
-
-    checkNow();
 }
 
 JuceUpdater::~JuceUpdater()
