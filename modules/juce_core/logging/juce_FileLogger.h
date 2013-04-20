@@ -33,7 +33,7 @@
 
 //==============================================================================
 /**
-    A simple implemenation of a Logger that writes to a file.
+    A simple implementation of a Logger that writes to a file.
 
     @see Logger
 */
