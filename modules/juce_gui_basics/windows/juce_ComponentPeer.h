@@ -135,20 +135,6 @@ public:
     virtual void setRepresentedFile (const File&);
 
     //==============================================================================
-    /** Moves the window without changing its size.
-
-        If the native window is contained in another window, then the co-ordinates are
-        relative to the parent window's origin, not the screen origin.
-
-        This should result in a callback to handleMovedOrResized().
-    */
-    virtual void setPosition (int x, int y) = 0;
-
-    /** Resizes the window without changing its position.
-        This should result in a callback to handleMovedOrResized().
-    */
-    virtual void setSize (int w, int h) = 0;
-
     /** Moves and resizes the window.
 
         If the native window is contained in another window, then the co-ordinates are
@@ -156,7 +142,7 @@ public:
 
         This should result in a callback to handleMovedOrResized().
     */
-    virtual void setBounds (int x, int y, int w, int h, bool isNowFullScreen) = 0;
+    virtual void setBounds (const Rectangle<int>& newBounds, bool isNowFullScreen) = 0;
 
     /** Returns the current position and size of the window.
 
@@ -164,9 +150,6 @@ public:
         relative to the parent window's origin, not the screen origin.
     */
     virtual Rectangle<int> getBounds() const = 0;
-
-    /** Returns the x-position of this window, relative to the screen's origin. */
-    virtual Point<int> getScreenPosition() const = 0;
 
     /** Converts a position relative to the top-left of this component to screen co-ordinates. */
     virtual Point<int> localToGlobal (const Point<int>& relativePosition) = 0;

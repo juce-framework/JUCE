@@ -55,7 +55,7 @@ namespace
     }
 }
 
-extern CGImageRef juce_createCoreGraphicsImage (const Image&, const bool forAlpha, CGColorSpaceRef, const bool mustOutliveSource);
+extern CGImageRef juce_createCoreGraphicsImage (const Image&, CGColorSpaceRef, bool mustOutliveSource);
 extern CGContextRef juce_getImageContext (const Image&);
 
 #endif   // __JUCE_MAC_COREGRAPHICSHELPERS_JUCEHEADER__

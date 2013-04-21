@@ -183,50 +183,33 @@ public:
         view.callVoidMethod (ComponentPeerView.setViewName, javaString (title).get());
     }
 
-    void setPosition (int x, int y)
-    {
-        const Rectangle<int> pos (getBounds());
-        setBounds (x, y, pos.getWidth(), pos.getHeight(), false);
-    }
-
-    void setSize (int w, int h)
-    {
-        const Rectangle<int> pos (getBounds());
-        setBounds (pos.getX(), pos.getY(), w, h, false);
-    }
-
-    void setBounds (int x, int y, int w, int h, bool isNowFullScreen)
+    void setBounds (const Rectangle<int>& r, bool isNowFullScreen)
     {
         if (MessageManager::getInstance()->isThisTheMessageThread())
         {
             fullScreen = isNowFullScreen;
-            w = jmax (0, w);
-            h = jmax (0, h);
-
-            view.callVoidMethod (ComponentPeerView.layout, x, y, x + w, y + h);
+            view.callVoidMethod (ComponentPeerView.layout,
+                                 r.getX(), r.getY(), r.getRight(), r.getBottom());
         }
         else
         {
             class ViewMover  : public CallbackMessage
             {
             public:
-                ViewMover (const GlobalRef& view_, int x_, int y_, int w_, int h_)
-                    : view (view_), x (x_), y (y_), w (w_), h (h_)
-                {
-                    post();
-                }
+                ViewMover (const GlobalRef& v, const Rectangle<int>& r)  : view (v), bounds (r) {}
 
                 void messageCallback()
                 {
-                    view.callVoidMethod (ComponentPeerView.layout, x, y, x + w, y + h);
+                    view.callVoidMethod (ComponentPeerView.layout,
+                                         bounds.getX(), bounds.getY(), bounds.getRight(), bounds.getBottom());
                 }
 
             private:
                 GlobalRef view;
-                int x, y, w, h;
+                Rectangle<int> bounds;
             };
 
-            new ViewMover (view, x, y, w, h);
+            (new ViewMover (view, r))->post();
         }
     }
 
@@ -282,7 +265,7 @@ public:
 
         // (can't call the component's setBounds method because that'll reset our fullscreen flag)
         if (! r.isEmpty())
-            setBounds (r.getX(), r.getY(), r.getWidth(), r.getHeight(), shouldBeFullScreen);
+            setBounds (r, shouldBeFullScreen);
 
         component.repaint();
     }

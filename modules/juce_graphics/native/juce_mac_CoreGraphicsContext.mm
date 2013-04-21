@@ -74,8 +74,8 @@ public:
     ImageType* createType() const    { return new NativeImageType(); }
 
     //==============================================================================
-    static CGImageRef createImage (const Image& juceImage, const bool /*forAlpha*/,
-                                   CGColorSpaceRef colourSpace, const bool mustOutliveSource)
+    static CGImageRef createImage (const Image& juceImage, CGColorSpaceRef colourSpace,
+                                   const bool mustOutliveSource)
     {
         const Image::BitmapData srcData (juceImage, Image::BitmapData::readOnly);
         CGDataProviderRef provider;
@@ -245,7 +245,7 @@ void CoreGraphicsContext::clipToImageAlpha (const Image& sourceImage, const Affi
         if (sourceImage.getFormat() != Image::SingleChannel)
             singleChannelImage = sourceImage.convertedToFormat (Image::SingleChannel);
 
-        CGImageRef image = CoreGraphicsImage::createImage (singleChannelImage, true, greyColourSpace, true);
+        CGImageRef image = CoreGraphicsImage::createImage (singleChannelImage, greyColourSpace, true);
 
         flip();
         AffineTransform t (AffineTransform::verticalFlip (sourceImage.getHeight()).followedBy (transform));
@@ -439,7 +439,7 @@ void CoreGraphicsContext::drawImage (const Image& sourceImage, const AffineTrans
 {
     const int iw = sourceImage.getWidth();
     const int ih = sourceImage.getHeight();
-    CGImageRef image = CoreGraphicsImage::createImage (sourceImage, false, rgbColourSpace, false);
+    CGImageRef image = CoreGraphicsImage::createImage (sourceImage, rgbColourSpace, false);
 
     CGContextSaveGState (context);
     CGContextSetAlpha (context, state->fillType.getOpacity());
@@ -856,10 +856,10 @@ Image juce_createImageFromCIImage (CIImage* im, int w, int h)
     return Image (cgImage);
 }
 
-CGImageRef juce_createCoreGraphicsImage (const Image& juceImage, const bool forAlpha,
-                                         CGColorSpaceRef colourSpace, const bool mustOutliveSource)
+CGImageRef juce_createCoreGraphicsImage (const Image& juceImage, CGColorSpaceRef colourSpace,
+                                         const bool mustOutliveSource)
 {
-    return CoreGraphicsImage::createImage (juceImage, forAlpha, colourSpace, mustOutliveSource);
+    return CoreGraphicsImage::createImage (juceImage, colourSpace, mustOutliveSource);
 }
 
 CGContextRef juce_getImageContext (const Image& image)

@@ -133,13 +133,10 @@ public:
     void* getNativeHandle() const;
     void setVisible (bool shouldBeVisible);
     void setTitle (const String& title);
-    void setPosition (int x, int y);
-    void setSize (int w, int h);
-    void setBounds (int x, int y, int w, int h, bool isNowFullScreen);
+    void setBounds (const Rectangle<int>&, bool isNowFullScreen);
 
     Rectangle<int> getBounds() const;
     Rectangle<int> getBounds (const bool global) const;
-    Point<int> getScreenPosition() const;
     Point<int> localToGlobal (const Point<int>& relativePosition);
     Point<int> globalToLocal (const Point<int>& screenPosition);
     void setAlpha (float newAlpha);
@@ -530,37 +527,23 @@ void UIViewComponentPeer::setTitle (const String& title)
     // xxx is this possible?
 }
 
-void UIViewComponentPeer::setPosition (int x, int y)
-{
-    setBounds (x, y, component.getWidth(), component.getHeight(), false);
-}
-
-void UIViewComponentPeer::setSize (int w, int h)
-{
-    setBounds (component.getX(), component.getY(), w, h, false);
-}
-
-void UIViewComponentPeer::setBounds (int x, int y, int w, int h, const bool isNowFullScreen)
+void UIViewComponentPeer::setBounds (const Rectangle<int>& newBounds, const bool isNowFullScreen)
 {
     fullScreen = isNowFullScreen;
-    w = jmax (0, w);
-    h = jmax (0, h);
 
     if (isSharedWindow)
     {
-        CGRect r = CGRectMake ((CGFloat) x, (CGFloat) y, (CGFloat) w, (CGFloat) h);
+        CGRect r = convertToCGRect (newBounds);
 
-        if (view.frame.size.width != r.size.width
-             || view.frame.size.height != r.size.height)
+        if (view.frame.size.width != r.size.width || view.frame.size.height != r.size.height)
             [view setNeedsDisplay];
 
         view.frame = r;
     }
     else
     {
-        const Rectangle<int> bounds (rotatedScreenPosToReal (Rectangle<int> (x, y, w, h)));
-        window.frame = convertToCGRect (bounds);
-        view.frame = CGRectMake (0, 0, (CGFloat) w, (CGFloat) h);
+        window.frame = convertToCGRect (rotatedScreenPosToReal (newBounds));
+        view.frame = CGRectMake (0, 0, (CGFloat) newBounds.getWidth(), (CGFloat) newBounds.getHeight());
 
         handleMovedOrResized();
     }
@@ -586,19 +569,14 @@ Rectangle<int> UIViewComponentPeer::getBounds() const
     return getBounds (! isSharedWindow);
 }
 
-Point<int> UIViewComponentPeer::getScreenPosition() const
-{
-    return getBounds (true).getPosition();
-}
-
 Point<int> UIViewComponentPeer::localToGlobal (const Point<int>& relativePosition)
 {
-    return relativePosition + getScreenPosition();
+    return relativePosition + getBounds (true).getPosition();
 }
 
 Point<int> UIViewComponentPeer::globalToLocal (const Point<int>& screenPosition)
 {
-    return screenPosition - getScreenPosition();
+    return screenPosition - getBounds (true).getPosition();
 }
 
 CGRect UIViewComponentPeer::constrainRect (CGRect r)
@@ -657,7 +635,7 @@ void UIViewComponentPeer::setFullScreen (bool shouldBeFullScreen)
 
         // (can't call the component's setBounds method because that'll reset our fullscreen flag)
         if (! r.isEmpty())
-            setBounds (r.getX(), r.getY(), r.getWidth(), r.getHeight(), shouldBeFullScreen);
+            setBounds (r, shouldBeFullScreen);
 
         component.repaint();
     }
@@ -695,7 +673,7 @@ void UIViewComponentPeer::updateTransformAndScreenBounds()
         const int x = ((int) (newDesktop.getWidth()  * centreRelX)) - (oldArea.getWidth()  / 2);
         const int y = ((int) (newDesktop.getHeight() * centreRelY)) - (oldArea.getHeight() / 2);
 
-        setBounds (x, y, oldArea.getWidth(), oldArea.getHeight(), false);
+        setBounds (oldArea.withPosition (x, y), false);
     }
 
     [view setNeedsDisplay];
@@ -774,7 +752,7 @@ void UIViewComponentPeer::handleTouches (UIEvent* event, const bool isDown, cons
 
         CGPoint p = [touch locationInView: view];
         const Point<int> pos ((int) p.x, (int) p.y);
-        juce_lastMousePos = pos + getScreenPosition();
+        juce_lastMousePos = pos + getBounds (true).getPosition();
 
         const int64 time = getMouseTime (event);
         const int touchIndex = currentTouches.getIndexOfTouch (touch);

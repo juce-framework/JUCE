@@ -222,21 +222,12 @@ public:
                                                                 : String::empty)];
     }
 
-    void setPosition (int x, int y)
-    {
-        setBounds (x, y, component.getWidth(), component.getHeight(), false);
-    }
-
-    void setSize (int w, int h)
-    {
-        setBounds (component.getX(), component.getY(), w, h, false);
-    }
-
-    void setBounds (int x, int y, int w, int h, bool isNowFullScreen)
+    void setBounds (const Rectangle<int>& newBounds, bool isNowFullScreen)
     {
         fullScreen = isNowFullScreen;
 
-        NSRect r = NSMakeRect ((CGFloat) x, (CGFloat) y, (CGFloat) jmax (0, w), (CGFloat) jmax (0, h));
+        NSRect r = NSMakeRect ((CGFloat) newBounds.getX(), (CGFloat) newBounds.getY(),
+                               (CGFloat) jmax (0, newBounds.getWidth()), (CGFloat) jmax (0, newBounds.getHeight()));
 
         if (isSharedWindow)
         {
@@ -289,19 +280,14 @@ public:
         return getBounds (! isSharedWindow);
     }
 
-    Point<int> getScreenPosition() const
-    {
-        return getBounds (true).getPosition();
-    }
-
     Point<int> localToGlobal (const Point<int>& relativePosition)
     {
-        return relativePosition + getScreenPosition();
+        return relativePosition + getBounds (true).getPosition();
     }
 
     Point<int> globalToLocal (const Point<int>& screenPosition)
     {
-        return screenPosition - getScreenPosition();
+        return screenPosition - getBounds (true).getPosition();
     }
 
     void setAlpha (float newAlpha)
@@ -368,7 +354,7 @@ public:
 
                     // (can't call the component's setBounds method because that'll reset our fullscreen flag)
                     if (r != component.getBounds() && ! r.isEmpty())
-                        setBounds (r.getX(), r.getY(), r.getWidth(), r.getHeight(), shouldBeFullScreen);
+                        setBounds (r, shouldBeFullScreen);
                 }
             }
         }
@@ -817,7 +803,7 @@ public:
                 }
 
                 CGColorSpaceRef colourSpace = CGColorSpaceCreateDeviceRGB();
-                CGImageRef image = juce_createCoreGraphicsImage (temp, false, colourSpace, false);
+                CGImageRef image = juce_createCoreGraphicsImage (temp, colourSpace, false);
                 CGColorSpaceRelease (colourSpace);
                 CGContextDrawImage (cg, CGRectMake (r.origin.x, r.origin.y, clipW, clipH), image);
                 CGImageRelease (image);

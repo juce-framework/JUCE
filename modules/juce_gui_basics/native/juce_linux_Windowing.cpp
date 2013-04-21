@@ -895,7 +895,7 @@ public:
         }
     }
 
-    void setBounds (int x, int y, int w, int h, bool isNowFullScreen)
+    void setBounds (const Rectangle<int>& newBounds, bool isNowFullScreen)
     {
         if (fullScreen && ! isNowFullScreen)
         {
@@ -929,7 +929,8 @@ public:
 
         if (windowH != 0)
         {
-            bounds.setBounds (x, y, jmax (1, w), jmax (1, h));
+            bounds = newBounds.withSize (jmax (1, newBounds.getWidth()),
+                                         jmax (1, newBounds.getHeight()));
 
             WeakReference<Component> deletionChecker (&component);
             ScopedXLock xlock;
@@ -965,19 +966,16 @@ public:
         }
     }
 
-    void setPosition (int x, int y)           { setBounds (x, y, bounds.getWidth(), bounds.getHeight(), false); }
-    void setSize (int w, int h)               { setBounds (bounds.getX(), bounds.getY(), w, h, false); }
     Rectangle<int> getBounds() const          { return bounds; }
-    Point<int> getScreenPosition() const      { return bounds.getPosition(); }
 
     Point<int> localToGlobal (const Point<int>& relativePosition)
     {
-        return relativePosition + getScreenPosition();
+        return relativePosition + bounds.getPosition();
     }
 
     Point<int> globalToLocal (const Point<int>& screenPosition)
     {
-        return screenPosition - getScreenPosition();
+        return screenPosition - bounds.getPosition();
     }
 
     void setAlpha (float /* newAlpha */)
@@ -1033,7 +1031,7 @@ public:
                 r = Desktop::getInstance().getDisplays().getMainDisplay().userArea;
 
             if (! r.isEmpty())
-                setBounds (r.getX(), r.getY(), r.getWidth(), r.getHeight(), shouldBeFullScreen);
+                setBounds (r, shouldBeFullScreen);
 
             component.repaint();
         }
@@ -2621,7 +2619,7 @@ private:
 
         Point<int> dropPos ((int) clientMsg.data.l[2] >> 16,
                             (int) clientMsg.data.l[2] & 0xffff);
-        dropPos -= getScreenPosition();
+        dropPos -= bounds.getPosition();
 
         const Atoms& atoms = Atoms::get();
         Atom targetAction = atoms.XdndActionCopy;
