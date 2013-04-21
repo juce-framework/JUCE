@@ -1134,6 +1134,11 @@ Typeface::Ptr Typeface::createSystemTypefaceFor (const Font& font)
     return new OSXTypeface (font);
 }
 
+void Typeface::scanFolderForFonts (const File&)
+{
+    jassertfalse; // not implemented on this platform
+}
+
 struct DefaultFontNames
 {
     DefaultFontNames()

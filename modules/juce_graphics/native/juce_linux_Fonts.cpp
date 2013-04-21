@@ -23,8 +23,10 @@
   ==============================================================================
 */
 
-void FontFileIterator::findFontDirectories()
+StringArray FTTypefaceList::getDefaultFontDirectories()
 {
+    StringArray fontDirs;
+
     fontDirs.addTokens (CharPointer_UTF8 (getenv ("JUCE_FONT_PATH")), ";,", String::empty);
     fontDirs.removeEmptyStrings (true);
 
@@ -60,11 +62,17 @@ void FontFileIterator::findFontDirectories()
         fontDirs.add ("/usr/X11R6/lib/X11/fonts");
 
     fontDirs.removeDuplicates (false);
+    return fontDirs;
 }
 
 Typeface::Ptr Typeface::createSystemTypefaceFor (const Font& font)
 {
     return new FreeTypeTypeface (font);
+}
+
+void Typeface::scanFolderForFonts (const File& folder)
+{
+    FTTypefaceList::getInstance()->scanFontPaths (StringArray (folder.getFullPathName()));
 }
 
 StringArray Font::findAllTypefaceNames()

@@ -499,3 +499,8 @@ Typeface::Ptr Typeface::createSystemTypefaceFor (const Font& font)
 
     return new WindowsTypeface (font);
 }
+
+void Typeface::scanFolderForFonts (const File&)
+{
+    jassertfalse; // not implemented on this platform
+}

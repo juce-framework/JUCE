@@ -57,14 +57,19 @@ Typeface::Ptr Font::getDefaultTypefaceForFont (const Font& font)
 //==============================================================================
 #if JUCE_USE_FREETYPE
 
-void FontFileIterator::findFontDirectories()
+StringArray FTTypefaceList::getDefaultFontDirectories()
 {
-    fontDirs.add ("/system/fonts");
+    return StringArray ("/system/fonts");
 }
 
 Typeface::Ptr Typeface::createSystemTypefaceFor (const Font& font)
 {
     return new FreeTypeTypeface (font);
+}
+
+void Typeface::scanFolderForFonts (const File& folder)
+{
+    FTTypefaceList::getInstance()->scanFontPaths (StringArray (folder.getFullPathName()));
 }
 
 StringArray Font::findAllTypefaceNames()
@@ -309,6 +314,11 @@ private:
 Typeface::Ptr Typeface::createSystemTypefaceFor (const Font& font)
 {
     return new AndroidTypeface (font);
+}
+
+void Typeface::scanFolderForFonts (const File&)
+{
+    jassertfalse; // not available unless using FreeType
 }
 
 bool TextLayout::createNativeLayout (const AttributedString&)

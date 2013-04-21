@@ -72,74 +72,12 @@ struct FTFaceWrapper     : public ReferenceCountedObject
 };
 
 //==============================================================================
-class FontFileIterator
-{
-public:
-    FontFileIterator()  : index (0)
-    {
-        findFontDirectories();
-    }
-
-    bool next()
-    {
-        if (iter != nullptr)
-        {
-            while (iter->next())
-                if (getFile().hasFileExtension ("ttf;pfb;pcf;otf"))
-                    return true;
-        }
-
-        if (index >= fontDirs.size())
-            return false;
-
-        iter = new DirectoryIterator (File::getCurrentWorkingDirectory()
-                                         .getChildFile (fontDirs [index++]), true);
-        return next();
-    }
-
-    File getFile() const    { jassert (iter != nullptr); return iter->getFile(); }
-
-private:
-    StringArray fontDirs;
-    int index;
-    ScopedPointer<DirectoryIterator> iter;
-
-    void findFontDirectories();
-
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FontFileIterator)
-};
-
-//==============================================================================
 class FTTypefaceList  : private DeletedAtShutdown
 {
 public:
-    FTTypefaceList()
-        : library (new FTLibWrapper())
+    FTTypefaceList()  : library (new FTLibWrapper())
     {
-        FontFileIterator fontFileIterator;
-
-        while (fontFileIterator.next())
-        {
-            int faceIndex = 0;
-            int numFaces = 0;
-
-            do
-            {
-                FTFaceWrapper face (library, fontFileIterator.getFile(), faceIndex);
-
-                if (face.face != 0)
-                {
-                    if (faceIndex == 0)
-                        numFaces = face.face->num_faces;
-
-                    if ((face.face->face_flags & FT_FACE_FLAG_SCALABLE) != 0)
-                        faces.add (new KnownTypeface (fontFileIterator.getFile(), faceIndex, face));
-                }
-
-                ++faceIndex;
-            }
-            while (faceIndex < numFaces);
-        }
+        scanFontPaths (getDefaultFontDirectories());
     }
 
     ~FTTypefaceList()
@@ -217,6 +155,19 @@ public:
         return s;
     }
 
+    void scanFontPaths (const StringArray& paths)
+    {
+        for (int i = 0; i < paths.size(); ++i)
+        {
+            DirectoryIterator iter (File::getCurrentWorkingDirectory()
+                                       .getChildFile (paths[i]), true);
+
+            while (iter.next())
+                if (iter.getFile().hasFileExtension ("ttf;pfb;pcf;otf"))
+                    scanFont (iter.getFile());
+        }
+    }
+
     void getMonospacedNames (StringArray& monoSpaced) const
     {
         for (int i = 0; i < faces.size(); i++)
@@ -243,6 +194,31 @@ public:
 private:
     FTLibWrapper::Ptr library;
     OwnedArray<KnownTypeface> faces;
+
+    static StringArray getDefaultFontDirectories();
+
+    void scanFont (const File& file)
+    {
+        int faceIndex = 0;
+        int numFaces = 0;
+
+        do
+        {
+            FTFaceWrapper face (library, file, faceIndex);
+
+            if (face.face != 0)
+            {
+                if (faceIndex == 0)
+                    numFaces = face.face->num_faces;
+
+                if ((face.face->face_flags & FT_FACE_FLAG_SCALABLE) != 0)
+                    faces.add (new KnownTypeface (file, faceIndex, face));
+            }
+
+            ++faceIndex;
+        }
+        while (faceIndex < numFaces);
+    }
 
     const KnownTypeface* matchTypeface (const String& familyName, const String& style) const noexcept
     {

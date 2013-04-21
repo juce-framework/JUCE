@@ -129,6 +129,11 @@ public:
     /** Clears any fonts that are currently cached in memory. */
     static void clearTypefaceCache();
 
+    /** On some platforms, this allows a specific path to be scanned.
+        Currently only available when using FreeType.
+    */
+    static void scanFolderForFonts (const File& folder);
+
 protected:
     //==============================================================================
     String name, style;
