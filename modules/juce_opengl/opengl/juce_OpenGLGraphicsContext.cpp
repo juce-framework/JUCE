@@ -922,6 +922,8 @@ struct StateHelpers
         ~ShaderQuadQueue() noexcept
         {
             static_jassert (sizeof (VertexInfo) == 8);
+            context.extensions.glBindBuffer (GL_ARRAY_BUFFER, 0);
+            context.extensions.glBindBuffer (GL_ELEMENT_ARRAY_BUFFER, 0);
             context.extensions.glDeleteBuffers (2, buffers);
         }
 
@@ -940,7 +942,7 @@ struct StateHelpers
             context.extensions.glBindBuffer (GL_ELEMENT_ARRAY_BUFFER, buffers[0]);
             context.extensions.glBufferData (GL_ELEMENT_ARRAY_BUFFER, sizeof (indexData), indexData, GL_STATIC_DRAW);
             context.extensions.glBindBuffer (GL_ARRAY_BUFFER, buffers[1]);
-            context.extensions.glBufferData (GL_ARRAY_BUFFER, sizeof (vertexData), vertexData, GL_DYNAMIC_DRAW);
+            context.extensions.glBufferData (GL_ARRAY_BUFFER, sizeof (vertexData), vertexData, GL_STREAM_DRAW);
             JUCE_CHECK_OPENGL_ERROR
         }
 
@@ -1028,6 +1030,8 @@ struct StateHelpers
         void draw() noexcept
         {
             context.extensions.glBufferSubData (GL_ARRAY_BUFFER, 0, numVertices * sizeof (VertexInfo), vertexData);
+            // NB: If you get a random crash in here and are running in a Parallels VM, it seems to be a bug in
+            // their driver.. Can't find a workaround unfortunately.
             glDrawElements (GL_TRIANGLES, (numVertices * 3) / 2, GL_UNSIGNED_SHORT, 0);
             JUCE_CHECK_OPENGL_ERROR
             numVertices = 0;
@@ -1040,8 +1044,7 @@ struct StateHelpers
     struct CurrentShader
     {
         CurrentShader (OpenGLContext& c) noexcept
-            : context (c),
-              activeShader (nullptr)
+            : context (c), activeShader (nullptr)
         {
             const char programValueID[] = "GraphicsContextPrograms";
             programs = static_cast <ShaderPrograms*> (context.getAssociatedObject (programValueID));
@@ -1128,8 +1131,6 @@ public:
     {
         flush();
         target.context.extensions.glBindFramebuffer (GL_FRAMEBUFFER, previousFrameBufferTarget);
-        target.context.extensions.glBindBuffer (GL_ARRAY_BUFFER, 0);
-        target.context.extensions.glBindBuffer (GL_ELEMENT_ARRAY_BUFFER, 0);
     }
 
     void flush()
@@ -1263,13 +1264,13 @@ public:
             {
                 setShader (programs->imageMasked);
                 imageParams = &programs->imageMasked.imageParams;
-                maskParams = &programs->imageMasked.maskParams;
+                maskParams  = &programs->imageMasked.maskParams;
             }
             else
             {
                 setShader (programs->tiledImageMasked);
                 imageParams = &programs->tiledImageMasked.imageParams;
-                maskParams = &programs->tiledImageMasked.maskParams;
+                maskParams  = &programs->tiledImageMasked.maskParams;
             }
         }
         else

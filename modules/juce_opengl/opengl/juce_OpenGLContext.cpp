@@ -471,7 +471,18 @@ private:
 
     static bool canBeAttached (const Component& comp) noexcept
     {
-        return comp.getWidth() > 0 && comp.getHeight() > 0 && comp.isShowing();
+        return comp.getWidth() > 0 && comp.getHeight() > 0 && isShowingOrMinimised (comp);
+    }
+
+    static bool isShowingOrMinimised (const Component& c)
+    {
+        if (! c.isVisible())
+            return false;
+
+        if (Component* p = c.getParentComponent())
+            return isShowingOrMinimised (*p);
+
+        return c.getPeer() != nullptr;
     }
 
     static bool isAttached (const Component& comp) noexcept
