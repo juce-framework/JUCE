@@ -111,6 +111,7 @@ public:
 
     /** Changes the current filename.
 
+        @param newFile                the new filename to use
         @param addToRecentlyUsedList  if true, the filename will also be added to the
                                       drop-down list of recent files.
         @param notification           whether to send a notification of the change to listeners

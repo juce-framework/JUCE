@@ -38,7 +38,7 @@ public:
     static float JUCE_CALLTYPE getGain();
 
     /** Attempts to set the operating system's current volume level.
-        @newGain the level, between 0 and 1.0
+        @param newGain  the level, between 0 and 1.0
         @returns true if the operation succeeds
     */
     static bool JUCE_CALLTYPE setGain (float newGain);
@@ -47,7 +47,7 @@ public:
     static bool JUCE_CALLTYPE isMuted();
 
     /** Attempts to mute the operating system's audio output.
-        @shouldBeMuted true if you want it to be muted
+        @param shouldBeMuted    true if you want it to be muted
         @returns true if the operation succeeds
     */
     static bool JUCE_CALLTYPE setMuted (bool shouldBeMuted);

@@ -1565,6 +1565,7 @@ public:
         that parent components can collect gesture messages that are unused by child
         components.
 
+        @param event   details about the mouse event
         @param scaleFactor  a multiplier to indicate by how much the size of the target
                             should be changed. A value of 1.0 would indicate no change,
                             values greater than 1.0 mean it should be enlarged.
