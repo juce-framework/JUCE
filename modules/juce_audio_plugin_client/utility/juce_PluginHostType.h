@@ -28,9 +28,9 @@ class PluginHostType
 {
 public:
     //==============================================================================
-    PluginHostType()  : type (getHostType())
-    {
-    }
+    PluginHostType()  : type (getHostType()) {}
+    PluginHostType (const PluginHostType& other)  : type (other.type) {}
+    PluginHostType& operator= (const PluginHostType& other)  { type = other.type; return *this; }
 
     //==============================================================================
     enum HostType
@@ -67,7 +67,7 @@ public:
         StudioOne
     };
 
-    const HostType type;
+    HostType type;
 
     //==============================================================================
     bool isAbletonLive() const noexcept      { return type == AbletonLive6 || type == AbletonLive7 || type == AbletonLive8 || type == AbletonLiveGeneric; }
@@ -155,6 +155,4 @@ private:
        #endif
         return UnknownHost;
     }
-
-    JUCE_DECLARE_NON_COPYABLE (PluginHostType)
 };
