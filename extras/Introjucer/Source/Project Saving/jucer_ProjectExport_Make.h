@@ -160,7 +160,7 @@ private:
 
     void writeLinkerFlags (OutputStream& out, const BuildConfiguration& config) const
     {
-        out << "  LDFLAGS += " << getArchFlags (config) << "-L$(BINDIR) -L$(LIBDIR)";
+        out << "  LDFLAGS += $(TARGET_ARCH) -L$(BINDIR) -L$(LIBDIR)";
 
         if (makefileIsDLL)
             out << " -shared";
@@ -197,7 +197,12 @@ private:
         out << "  BINDIR := " << escapeSpaces (buildDirName) << newLine
             << "  LIBDIR := " << escapeSpaces (buildDirName) << newLine
             << "  OBJDIR := " << escapeSpaces (intermediatesDirName) << newLine
-            << "  OUTDIR := " << escapeSpaces (outputDir) << newLine;
+            << "  OUTDIR := " << escapeSpaces (outputDir) << newLine
+            << newLine
+            << "  ifeq ($(TARGET_ARCH),)" << newLine
+            << "    TARGET_ARCH := " << getArchFlags (config) << newLine
+            << "  endif"  << newLine
+            << newLine;
 
         writeCppFlags (out, config);
 
@@ -211,7 +216,7 @@ private:
 
         out << " -O" << config.getGCCOptimisationFlag() << newLine;
 
-        out << "  CXXFLAGS += $(CFLAGS) " << getArchFlags (config)
+        out << "  CXXFLAGS += $(CFLAGS) "
             << replacePreprocessorTokens (config, getExtraCompilerFlagsString()).trim() << newLine;
 
         writeLinkerFlags (out, config);
@@ -261,17 +266,12 @@ private:
             << "endif" << newLine
             << newLine;
 
-        if (! projectType.isStaticLibrary())
-            out << "ifeq ($(TARGET_ARCH),)" << newLine
-                << "  TARGET_ARCH := -march=native" << newLine
-                << "endif"  << newLine << newLine;
+        for (ConstConfigIterator config (*this); config.next();)
+            writeConfig (out, *config);
 
         out << "# (this disables dependency generation if multiple architectures are set)" << newLine
             << "DEPFLAGS := $(if $(word 2, $(TARGET_ARCH)), , -MMD)" << newLine
             << newLine;
-
-        for (ConstConfigIterator config (*this); config.next();)
-            writeConfig (out, *config);
 
         writeObjects (out, files);
 
@@ -321,9 +321,9 @@ private:
     {
         if (const MakeBuildConfiguration* makeConfig = dynamic_cast<const MakeBuildConfiguration*> (&config))
             if (makeConfig->getArchitectureTypeString().isNotEmpty())
-                return makeConfig->getArchitectureTypeString() + " ";
+                return makeConfig->getArchitectureTypeString();
 
-        return String::empty;
+        return "-march=native";
     }
 
     String getObjectFileFor (const RelativePath& file) const
