@@ -61,7 +61,9 @@ public:
 
         JUCE_TRY
         {
-            filter = createPluginFilterOfType (AudioProcessor::wrapperType_Standalone);
+            AudioProcessor::setTypeOfNextNewPlugin (AudioProcessor::wrapperType_Standalone);
+            filter = createPluginFilter();
+            AudioProcessor::setTypeOfNextNewPlugin (AudioProcessor::wrapperType_Undefined);
         }
         JUCE_CATCH_ALL
 
