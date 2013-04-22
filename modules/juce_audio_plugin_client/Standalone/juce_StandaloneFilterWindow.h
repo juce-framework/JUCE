@@ -26,8 +26,6 @@
 #ifndef __JUCE_STANDALONEFILTERWINDOW_JUCEHEADER__
 #define __JUCE_STANDALONEFILTERWINDOW_JUCEHEADER__
 
-extern AudioProcessor* JUCE_CALLTYPE createPluginFilterOfType (AudioProcessor::WrapperType);
-
 //==============================================================================
 /**
     A class that can be used to run a simple standalone application containing your filter.
@@ -59,13 +57,7 @@ public:
         optionsButton.addListener (this);
         optionsButton.setTriggeredOnMouseDown (true);
 
-        JUCE_TRY
-        {
-            AudioProcessor::setTypeOfNextNewPlugin (AudioProcessor::wrapperType_Standalone);
-            filter = createPluginFilter();
-            AudioProcessor::setTypeOfNextNewPlugin (AudioProcessor::wrapperType_Undefined);
-        }
-        JUCE_CATCH_ALL
+        createFilter();
 
         if (filter == nullptr)
         {
@@ -155,12 +147,18 @@ public:
     AudioProcessor* getAudioProcessor() const noexcept      { return filter; }
     AudioDeviceManager* getDeviceManager() const noexcept   { return deviceManager; }
 
+    void createFilter()
+    {
+        AudioProcessor::setTypeOfNextNewPlugin (AudioProcessor::wrapperType_Standalone);
+        filter = createPluginFilter();
+        AudioProcessor::setTypeOfNextNewPlugin (AudioProcessor::wrapperType_Undefined);
+    }
+
     /** Deletes and re-creates the filter and its UI. */
     void resetFilter()
     {
         deleteFilter();
-
-        filter = createPluginFilterOfType (AudioProcessor::wrapperType_Standalone);
+        createFilter();
 
         if (filter != nullptr)
         {
