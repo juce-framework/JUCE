@@ -2619,7 +2619,7 @@ private:
         {
             if (ComponentPeer* const peer = getPeer())
             {
-                const Point<int> pos (getScreenPosition() - peer->getScreenPosition());
+                const Point<int> pos (peer->globalToLocal (getScreenPosition()));
                 ERect r;
                 r.left   = (VstInt16) pos.getX();
                 r.top    = (VstInt16) pos.getY();
