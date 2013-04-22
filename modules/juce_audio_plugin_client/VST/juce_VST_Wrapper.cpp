@@ -41,6 +41,14 @@
  #undef STRICT
  #define STRICT 1
  #include <windows.h>
+
+ #ifdef __MINGW32__
+  struct MOUSEHOOKSTRUCTEX
+  {
+     MOUSEHOOKSTRUCT _unnamed;
+     DWORD mouseData;
+  };
+ #endif
 #elif defined (LINUX)
  #include <X11/Xlib.h>
  #include <X11/Xutil.h>
