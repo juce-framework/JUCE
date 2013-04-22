@@ -555,10 +555,10 @@ public:
 
     //==============================================================================
     /** Adds a listener that will be called when an aspect of this processor changes. */
-    void addListener (AudioProcessorListener* newListener);
+    virtual void addListener (AudioProcessorListener* newListener);
 
     /** Removes a previously added listener. */
-    void removeListener (AudioProcessorListener* listenerToRemove);
+    virtual void removeListener (AudioProcessorListener* listenerToRemove);
 
     //==============================================================================
     /** Tells the processor to use this playhead object.
