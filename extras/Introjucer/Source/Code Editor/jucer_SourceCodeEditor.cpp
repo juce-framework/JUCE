@@ -341,7 +341,7 @@ public:
         findNext.setCommandToTrigger (cm, CommandIDs::findNext, true);
     }
 
-    void paint (Graphics& g)
+    void paint (Graphics& g) override
     {
         Path outline;
         outline.addRoundedRectangle (1.0f, 1.0f, getWidth() - 2.0f, getHeight() - 2.0f, 8.0f);
@@ -352,7 +352,7 @@ public:
         g.strokePath (outline, PathStrokeType (1.0f));
     }
 
-    void resized()
+    void resized() override
     {
         int y = 30;
         editor.setBounds (10, y, getWidth() - 20, 24);
@@ -362,12 +362,12 @@ public:
         findPrev.setBounds (getWidth() - 70, y, 30, 22);
     }
 
-    void buttonClicked (Button*)
+    void buttonClicked (Button*) override
     {
         setCaseSensitiveSearch (caseButton.getToggleState());
     }
 
-    void textEditorTextChanged (TextEditor&)
+    void textEditorTextChanged (TextEditor&) override
     {
         setSearchString (editor.getText());
 
@@ -375,14 +375,14 @@ public:
             ed->findNext (true, false);
     }
 
-    void textEditorFocusLost (TextEditor&) {}
+    void textEditorFocusLost (TextEditor&) override {}
 
-    void textEditorReturnKeyPressed (TextEditor&)
+    void textEditorReturnKeyPressed (TextEditor&) override
     {
         commandManager->invokeDirectly (CommandIDs::findNext, true);
     }
 
-    void textEditorEscapeKeyPressed (TextEditor&)
+    void textEditorEscapeKeyPressed (TextEditor&) override
     {
         if (GenericCodeEditorComponent* ed = getOwner())
             ed->hideFindPanel();

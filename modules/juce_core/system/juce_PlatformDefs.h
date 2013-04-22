@@ -305,6 +305,10 @@ namespace juce
   #define JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS 1
  #endif
 
+ #ifndef JUCE_COMPILER_SUPPORTS_OVERRIDE_AND_FINAL
+  #define JUCE_COMPILER_SUPPORTS_OVERRIDE_AND_FINAL 1
+ #endif
+
  #ifndef JUCE_COMPILER_SUPPORTS_ARC
   #define JUCE_COMPILER_SUPPORTS_ARC 1
  #endif
@@ -313,6 +317,14 @@ namespace juce
 #if defined (_MSC_VER) && _MSC_VER >= 1600
  #define JUCE_COMPILER_SUPPORTS_NULLPTR 1
  #define JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS 1
+#endif
+
+#if defined (_MSC_VER) && _MSC_VER >= 1700
+ #define JUCE_COMPILER_SUPPORTS_OVERRIDE_AND_FINAL 1
+#endif
+
+#if (! JUCE_CLANG) && defined (__GNUC__) && (__GNUC__ * 100 + __GNUC_MINOR__) >= 40700
+ #define JUCE_COMPILER_SUPPORTS_OVERRIDE_AND_FINAL 1
 #endif
 
 //==============================================================================
@@ -332,6 +344,13 @@ namespace juce
   #undef nullptr
  #endif
  #define nullptr (0)
+#endif
+
+#if ! (DOXYGEN || JUCE_COMPILER_SUPPORTS_OVERRIDE_AND_FINAL)
+ #undef  override
+ #define override
+ #undef  final
+ #define final
 #endif
 
 #endif   // __JUCE_PLATFORMDEFS_JUCEHEADER__
