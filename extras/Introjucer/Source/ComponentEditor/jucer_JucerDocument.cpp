@@ -674,6 +674,21 @@ public:
     {
     }
 
+    bool save()
+    {
+        return SourceCodeDocument::save() && saveHeader();
+    }
+
+    bool saveHeader()
+    {
+        OpenDocumentManager& odm = IntrojucerApp::getApp().openDocumentManager;
+
+        if (OpenDocumentManager::Document* header = odm.openFile (nullptr, getFile().withFileExtension (".h")))
+            return header->save();
+
+        return false;
+    }
+
     Component* createEditor()
     {
         ScopedPointer<JucerDocument> jucerDoc (JucerDocument::createForCppFile (getProject(), getFile()));
