@@ -213,10 +213,15 @@ public:
     CppCodeEditorComponent (const File& file, CodeDocument& codeDocument);
     ~CppCodeEditorComponent();
 
+    void addPopupMenuItems (PopupMenu&, const MouseEvent*);
+    void performPopupMenuAction (int menuItemID);
+
     void handleReturnKey();
     void insertTextAtCaret (const String& newText);
 
 private:
+    void insertComponentClass();
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CppCodeEditorComponent)
 };
 

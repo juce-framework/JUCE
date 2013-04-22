@@ -1623,6 +1623,9 @@
     <ClInclude Include="..\..\Source\BinaryData\jucer_ContentCompTemplate.h">
       <Filter>The Introjucer\BinaryData</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\Source\BinaryData\jucer_InlineComponentTemplate.h">
+      <Filter>The Introjucer\BinaryData</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\Source\BinaryData\jucer_NewComponentTemplate.h">
       <Filter>The Introjucer\BinaryData</Filter>
     </ClInclude>

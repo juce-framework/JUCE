@@ -211,7 +211,11 @@ GenericCodeEditorComponent::GenericCodeEditorComponent (const File& f, CodeDocum
 
 GenericCodeEditorComponent::~GenericCodeEditorComponent() {}
 
-enum { showInFinderID = 0x2fe821e3 };
+enum
+{
+    showInFinderID = 0x2fe821e3,
+    insertComponentID = 0x2fe821e4
+};
 
 void GenericCodeEditorComponent::addPopupMenuItems (PopupMenu& menu, const MouseEvent* e)
 {
@@ -568,4 +572,47 @@ void CppCodeEditorComponent::insertTextAtCaret (const String& newText)
     }
 
     GenericCodeEditorComponent::insertTextAtCaret (newText);
+}
+
+void CppCodeEditorComponent::addPopupMenuItems (PopupMenu& menu, const MouseEvent* e)
+{
+    GenericCodeEditorComponent::addPopupMenuItems (menu, e);
+
+    menu.addSeparator();
+    menu.addItem (insertComponentID, TRANS("Insert code for a new Component class..."));
+}
+
+void CppCodeEditorComponent::performPopupMenuAction (int menuItemID)
+{
+    if (menuItemID == insertComponentID)
+        insertComponentClass();
+
+    GenericCodeEditorComponent::performPopupMenuAction (menuItemID);
+}
+
+void CppCodeEditorComponent::insertComponentClass()
+{
+    AlertWindow aw (TRANS ("Insert a new Component class"),
+                    TRANS ("Please enter a name for the new class"),
+                    AlertWindow::NoIcon, nullptr);
+
+    const char* classNameField = "Class Name";
+
+    aw.addTextEditor (classNameField, String::empty, String::empty, false);
+    aw.addButton (TRANS ("Insert Code"),  1, KeyPress (KeyPress::returnKey));
+    aw.addButton (TRANS ("Cancel"),       0, KeyPress (KeyPress::escapeKey));
+
+    while (aw.runModalLoop() != 0)
+    {
+        const String className (aw.getTextEditorContents (classNameField).trim());
+
+        if (className == CodeHelpers::makeValidIdentifier (className, false, true, false))
+        {
+            String code (BinaryData::jucer_InlineComponentTemplate_h);
+            code = code.replace ("COMPONENTCLASS", className);
+
+            insertTextAtCaret (code);
+            break;
+        }
+    }
 }

@@ -177,17 +177,12 @@ FileBasedDocument::SaveResult OpenDocumentManager::saveIfNeededAndUserAgrees (Op
                                                    TRANS("discard changes"),
                                                    TRANS("cancel"));
 
-    if (r == 1)
-    {
-        // save changes
+    if (r == 1)  // save changes
         return doc->save() ? FileBasedDocument::savedOk
                            : FileBasedDocument::failedToWriteToFile;
-    }
-    else if (r == 2)
-    {
-        // discard changes
+
+    if (r == 2)  // discard changes
         return FileBasedDocument::savedOk;
-    }
 
     return FileBasedDocument::userCancelledSave;
 }

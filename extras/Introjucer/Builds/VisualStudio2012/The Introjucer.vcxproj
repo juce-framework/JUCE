@@ -1123,6 +1123,7 @@
     <ClInclude Include="..\..\Source\BinaryData\jucer_AudioPluginFilterTemplate.h"/>
     <ClInclude Include="..\..\Source\BinaryData\jucer_ComponentTemplate.h"/>
     <ClInclude Include="..\..\Source\BinaryData\jucer_ContentCompTemplate.h"/>
+    <ClInclude Include="..\..\Source\BinaryData\jucer_InlineComponentTemplate.h"/>
     <ClInclude Include="..\..\Source\BinaryData\jucer_NewComponentTemplate.h"/>
     <ClInclude Include="..\..\Source\BinaryData\jucer_NewCppFileTemplate.h"/>
     <ClInclude Include="..\..\Source\BinaryData\jucer_NewInlineComponentTemplate.h"/>

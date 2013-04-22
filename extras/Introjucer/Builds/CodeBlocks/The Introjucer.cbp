@@ -605,6 +605,10 @@
       <Option compile="0"/>
       <Option link="0"/>
     </Unit>
+    <Unit filename="../../Source/BinaryData/jucer_InlineComponentTemplate.h">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
     <Unit filename="../../Source/BinaryData/jucer_MainConsoleAppTemplate.cpp">
       <Option compile="0"/>
       <Option link="0"/>

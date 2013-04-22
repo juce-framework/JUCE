@@ -424,6 +424,8 @@
             resource="1" file="Source/BinaryData/jucer_ContentCompTemplate.cpp"/>
       <FILE id="gFj8Jl" name="jucer_ContentCompTemplate.h" compile="0" resource="1"
             file="Source/BinaryData/jucer_ContentCompTemplate.h"/>
+      <FILE id="BnCgp2" name="jucer_InlineComponentTemplate.h" compile="0"
+            resource="1" file="Source/BinaryData/jucer_InlineComponentTemplate.h"/>
       <FILE id="pizYtv9" name="jucer_MainConsoleAppTemplate.cpp" compile="0"
             resource="1" file="Source/BinaryData/jucer_MainConsoleAppTemplate.cpp"/>
       <FILE id="tZCXSl" name="jucer_MainTemplate_NoWindow.cpp" compile="0"
