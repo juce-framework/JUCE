@@ -2046,7 +2046,7 @@ public:
         {
             if (ComponentPeer* const peer = getPeer())
             {
-                peer->addMaskedRegion (getScreenBounds() - peer->getScreenPosition());
+                peer->addMaskedRegion (peer->globalToLocal (getScreenBounds()));
 
                #if JUCE_LINUX
                 if (pluginWindow != 0)

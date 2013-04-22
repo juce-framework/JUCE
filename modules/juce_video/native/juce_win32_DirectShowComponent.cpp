@@ -802,7 +802,7 @@ void DirectShowComponent::paint (Graphics& g)
         context->handleUpdateNowIfNeeded();
 
         if (ComponentPeer* const peer = getPeer())
-            peer->addMaskedRegion (getScreenBounds() - peer->getScreenPosition());
+            peer->addMaskedRegion (peer->globalToLocal (getScreenBounds()));
     }
     else
     {
