@@ -43,9 +43,8 @@
  #include <windows.h>
 
  #ifdef __MINGW32__
-  struct MOUSEHOOKSTRUCTEX
+  struct MOUSEHOOKSTRUCTEX  : public MOUSEHOOKSTRUCT
   {
-     MOUSEHOOKSTRUCT _unnamed;
      DWORD mouseData;
   };
  #endif
