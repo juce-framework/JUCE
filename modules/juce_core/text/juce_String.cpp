@@ -243,8 +243,7 @@ void String::preallocateBytes (const size_t numBytesNeeded)
 }
 
 //==============================================================================
-String::String() noexcept
-    : text (StringHolder::getEmpty())
+String::String() noexcept  : text (StringHolder::getEmpty())
 {
 }
 
@@ -473,7 +472,7 @@ namespace NumberToStringConverters
     }
 
     template <typename IntegerType>
-    String::CharPointerType createFromInteger (const IntegerType number)
+    static String::CharPointerType createFromInteger (const IntegerType number)
     {
         char buffer [32];
         char* const end = buffer + numElementsInArray (buffer);
@@ -1897,15 +1896,8 @@ String String::toHexString (const void* const d, const int size, const int group
     return s;
 }
 
-int String::getHexValue32() const noexcept
-{
-    return HexConverter<int>::stringToHex (text);
-}
-
-int64 String::getHexValue64() const noexcept
-{
-    return HexConverter<int64>::stringToHex (text);
-}
+int   String::getHexValue32() const noexcept    { return HexConverter<int>  ::stringToHex (text); }
+int64 String::getHexValue64() const noexcept    { return HexConverter<int64>::stringToHex (text); }
 
 //==============================================================================
 String String::createStringFromData (const void* const data_, const int size)

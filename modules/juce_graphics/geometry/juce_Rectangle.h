@@ -496,7 +496,8 @@ public:
             && pos.y + h > other.pos.y
             && pos.x < other.pos.x + other.w
             && pos.y < other.pos.y + other.h
-            && w > ValueType() && h > ValueType();
+            && w > ValueType() && h > ValueType()
+            && other.w > ValueType() && other.h > ValueType();
     }
 
     /** Returns the region that is the overlap between this and another rectangle.
