@@ -136,6 +136,9 @@ private:
         flags.add ("-march=pentium4");
         flags.add ("-mstackrealign");
 
+        if (config.isDebug())
+            flags.add ("-g");
+
         flags.addTokens (replacePreprocessorTokens (config, getExtraCompilerFlagsString()).trim(),
                          " \n", "\"'");
 
@@ -186,6 +189,7 @@ private:
         if (type.isCommandLineApp()) return 1;
         if (type.isStaticLibrary())  return 2;
         if (type.isDynamicLibrary()) return 3;
+        if (type.isAudioPlugin())    return 3;
         return 0;
     }
 
