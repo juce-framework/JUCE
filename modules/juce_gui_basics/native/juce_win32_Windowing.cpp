@@ -625,13 +625,10 @@ public:
             }
         }
 
-        RECT r;
-        GetWindowRect (hwnd, &r);
-        const Rectangle<int> oldBounds (rectangleFromRECT (r));
-
-        const bool hasMoved = (oldBounds.getPosition() != newBounds.getPosition());
-        const bool hasResized = (oldBounds.getWidth() != newBounds.getWidth()
-                                  || oldBounds.getHeight() != newBounds.getHeight());
+        const Rectangle<int> oldBounds (getBounds());
+        const bool hasMoved = (oldBounds.getPosition() != bounds.getPosition());
+        const bool hasResized = (oldBounds.getWidth() != bounds.getWidth()
+                                  || oldBounds.getHeight() != bounds.getHeight());
 
         DWORD flags = SWP_NOACTIVATE | SWP_NOZORDER | SWP_NOOWNERZORDER;
         if (! hasMoved)    flags |= SWP_NOMOVE;
