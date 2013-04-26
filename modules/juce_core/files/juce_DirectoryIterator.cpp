@@ -23,22 +23,39 @@
   ==============================================================================
 */
 
-DirectoryIterator::DirectoryIterator (const File& directory,
-                                      bool isRecursive_,
-                                      const String& wildCard_,
-                                      const int whatToLookFor_)
-  : fileFinder (directory, isRecursive_ ? "*" : wildCard_),
-    wildCard (wildCard_),
+static StringArray parseWildcards (const String& pattern)
+{
+    StringArray s;
+    s.addTokens (pattern, ";,", "\"'");
+    s.trim();
+    s.removeEmptyStrings();
+    return s;
+}
+
+static bool fileMatches (const StringArray& wildCards, const String& filename)
+{
+    for (int i = 0; i < wildCards.size(); ++i)
+        if (filename.matchesWildcard (wildCards[i], ! File::areFileNamesCaseSensitive()))
+            return true;
+
+    return false;
+}
+
+DirectoryIterator::DirectoryIterator (const File& directory, bool recursive,
+                                      const String& pattern, const int type)
+  : wildCards (parseWildcards (pattern)),
+    fileFinder (directory, (recursive || wildCards.size() > 1) ? "*" : pattern),
+    wildCard (pattern),
     path (File::addTrailingSeparator (directory.getFullPathName())),
     index (-1),
     totalNumFiles (-1),
-    whatToLookFor (whatToLookFor_),
-    isRecursive (isRecursive_),
+    whatToLookFor (type),
+    isRecursive (recursive),
     hasBeenAdvanced (false)
 {
     // you have to specify the type of files you're looking for!
-    jassert ((whatToLookFor_ & (File::findFiles | File::findDirectories)) != 0);
-    jassert (whatToLookFor_ > 0 && whatToLookFor_ <= 7);
+    jassert ((type & (File::findFiles | File::findDirectories)) != 0);
+    jassert (type > 0 && type <= 7);
 }
 
 DirectoryIterator::~DirectoryIterator()
@@ -91,7 +108,7 @@ bool DirectoryIterator::next (bool* const isDirResult, bool* const isHiddenResul
 
             // if recursive, we're not relying on the OS iterator to do the wildcard match, so do it now..
             if (matches && isRecursive)
-                matches = filename.matchesWildcard (wildCard, ! File::areFileNamesCaseSensitive());
+                matches = fileMatches (wildCards, filename);
 
             if (matches && (whatToLookFor & File::ignoreHiddenFiles) != 0)
                 matches = ! isHidden;

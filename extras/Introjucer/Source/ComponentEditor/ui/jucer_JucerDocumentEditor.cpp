@@ -338,7 +338,7 @@ JucerDocumentEditor::JucerDocumentEditor (JucerDocument* const doc)
 
         updateTabs();
 
-        tabbedComponent.setCurrentTabIndex (0);
+        tabbedComponent.setCurrentTabIndex (1);
 
         document->addChangeListener (this);
 

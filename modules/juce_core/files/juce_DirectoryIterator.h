@@ -64,7 +64,8 @@ public:
 
         @param directory    the directory to search in
         @param isRecursive  whether all the subdirectories should also be searched
-        @param wildCard     the file pattern to match
+        @param wildCard     the file pattern to match. This may contain multiple patterns
+                            separated by a semi-colon or comma, e.g. "*.jpg;*.png"
         @param whatToLookFor    a value from the File::TypesOfFileToFind enum, specifying
                                 whether to look for files, directories, or both.
     */
@@ -138,6 +139,7 @@ private:
     };
 
     friend class ScopedPointer<NativeIterator::Pimpl>;
+    StringArray wildCards;
     NativeIterator fileFinder;
     String wildCard, path;
     int index;
