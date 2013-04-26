@@ -180,8 +180,9 @@ void MainWindow::restoreWindowPosition()
 
 bool MainWindow::canOpenFile (const File& file) const
 {
-    return file.hasFileExtension (Project::projectFileExtension)
-             || IntrojucerApp::getApp().openDocumentManager.canOpenFile (file);
+    return (! file.isDirectory())
+             && (file.hasFileExtension (Project::projectFileExtension)
+                  || IntrojucerApp::getApp().openDocumentManager.canOpenFile (file));
 }
 
 bool MainWindow::openFile (const File& file)
