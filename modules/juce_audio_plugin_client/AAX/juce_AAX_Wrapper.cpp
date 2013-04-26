@@ -570,6 +570,14 @@ struct AAXClasses
             ReleaseParameter (IndexAsParamID (parameterIndex));
         }
 
+        AAX_Result NotificationReceived (AAX_CTypeID type, const void* data, uint32_t size)
+        {
+            if (type == AAX_eNotificationEvent_EnteringOfflineMode)  pluginInstance->setNonRealtime (true);
+            if (type == AAX_eNotificationEvent_ExitingOfflineMode)   pluginInstance->setNonRealtime (false);
+
+            return AAX_CEffectParameters::NotificationReceived (type, data, size);
+        }
+
         void process (const float* const* inputs, float* const* outputs, const int bufferSize,
                       const bool bypass, AAX_IMIDINode* midiNodeIn, AAX_IMIDINode* midiNodeOut)
         {
