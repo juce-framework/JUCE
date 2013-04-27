@@ -98,10 +98,7 @@ static void findIPAddresses (int sock, Array<IPAddress>& result)
 {
     ifconf cfg;
     HeapBlock<char> buffer;
-    size_t bufferSize = 4096;
-
-    const size_t ifreq_size_in  = IFNAMSIZ + sizeof (struct sockaddr_in);
-    const size_t ifreq_size_in6 = IFNAMSIZ + sizeof (struct sockaddr_in6);
+    size_t bufferSize = 1024;
 
     do
     {
@@ -114,10 +111,10 @@ static void findIPAddresses (int sock, Array<IPAddress>& result)
         if (ioctl (sock, SIOCGIFCONF, &cfg) < 0 && errno != EINVAL)
             return;
 
-    } while (bufferSize < cfg.ifc_len + 2 * ifreq_size_in6);
+    } while (bufferSize < cfg.ifc_len + 2 * (IFNAMSIZ + sizeof (struct sockaddr_in6)));
 
    #if JUCE_MAC || JUCE_IOS
-    while (cfg.ifc_len >= (int) ifreq_size_in)
+    while (cfg.ifc_len >= (int) (IFNAMSIZ + sizeof (struct sockaddr_in)))
     {
         if (cfg.ifc_req->ifr_addr.sa_family == AF_INET) // Skip non-internet addresses
             addAddress ((const sockaddr_in*) &cfg.ifc_req->ifr_addr, result);
