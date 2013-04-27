@@ -121,32 +121,33 @@ private:
         if (hostPath.containsIgnoreCase     ("Studio One"))        return StudioOne;
 
       #elif JUCE_WINDOWS
-        if (hostFilename.containsIgnoreCase ("Live 6."))        return AbletonLive6;
-        if (hostFilename.containsIgnoreCase ("Live 7."))        return AbletonLive7;
-        if (hostFilename.containsIgnoreCase ("Live 8."))        return AbletonLive8;
-        if (hostFilename.containsIgnoreCase ("Live "))          return AbletonLiveGeneric;
-        if (hostFilename.containsIgnoreCase ("Adobe Premiere")) return AdobePremierePro;
-        if (hostFilename.containsIgnoreCase ("ProTools"))       return DigidesignProTools;
-        if (hostPath.containsIgnoreCase     ("SONAR 8"))        return CakewalkSonar8;
-        if (hostFilename.containsIgnoreCase ("SONAR"))          return CakewalkSonarGeneric;
-        if (hostFilename.containsIgnoreCase ("Logic"))          return EmagicLogic;
-        if (hostPath.containsIgnoreCase     ("Tracktion 3"))    return MackieTracktion3;
-        if (hostFilename.containsIgnoreCase ("Tracktion"))      return MackieTracktionGeneric;
-        if (hostFilename.containsIgnoreCase ("reaper"))         return Reaper;
-        if (hostFilename.containsIgnoreCase ("Cubase4"))        return SteinbergCubase4;
-        if (hostFilename.containsIgnoreCase ("Cubase5"))        return SteinbergCubase5;
-        if (hostFilename.containsIgnoreCase ("Cubase6"))        return SteinbergCubase6;
-        if (hostFilename.containsIgnoreCase ("Cubase7"))        return SteinbergCubase7;
-        if (hostFilename.containsIgnoreCase ("Cubase"))         return SteinbergCubaseGeneric;
-        if (hostFilename.containsIgnoreCase ("VSTBridgeApp"))   return SteinbergCubase5Bridged;
-        if (hostPath.containsIgnoreCase     ("Wavelab 5"))      return SteinbergWavelab5;
-        if (hostPath.containsIgnoreCase     ("Wavelab 6"))      return SteinbergWavelab6;
-        if (hostPath.containsIgnoreCase     ("Wavelab 7"))      return SteinbergWavelab7;
-        if (hostFilename.containsIgnoreCase ("Wavelab"))        return SteinbergWavelabGeneric;
-        if (hostFilename.containsIgnoreCase ("rm-host"))        return MuseReceptorGeneric;
-        if (hostFilename.startsWithIgnoreCase ("Sam"))          return MagixSamplitude;
-        if (hostFilename.startsWith         ("FL"))             return FruityLoops;
-        if (hostPath.containsIgnoreCase     ("Studio One"))     return StudioOne;
+        if (hostFilename.containsIgnoreCase ("Live 6."))           return AbletonLive6;
+        if (hostFilename.containsIgnoreCase ("Live 7."))           return AbletonLive7;
+        if (hostFilename.containsIgnoreCase ("Live 8."))           return AbletonLive8;
+        if (hostFilename.containsIgnoreCase ("Live "))             return AbletonLiveGeneric;
+        if (hostFilename.containsIgnoreCase ("Adobe Premiere"))    return AdobePremierePro;
+        if (hostFilename.containsIgnoreCase ("ProTools"))          return DigidesignProTools;
+        if (hostPath.containsIgnoreCase     ("SONAR 8"))           return CakewalkSonar8;
+        if (hostFilename.containsIgnoreCase ("SONAR"))             return CakewalkSonarGeneric;
+        if (hostFilename.containsIgnoreCase ("Logic"))             return EmagicLogic;
+        if (hostPath.containsIgnoreCase     ("Tracktion 3"))       return MackieTracktion3;
+        if (hostFilename.containsIgnoreCase ("Tracktion"))         return MackieTracktionGeneric;
+        if (hostFilename.containsIgnoreCase ("reaper"))            return Reaper;
+        if (hostFilename.containsIgnoreCase ("Cubase4"))           return SteinbergCubase4;
+        if (hostFilename.containsIgnoreCase ("Cubase5"))           return SteinbergCubase5;
+        if (hostFilename.containsIgnoreCase ("Cubase6"))           return SteinbergCubase6;
+        if (hostFilename.containsIgnoreCase ("Cubase7"))           return SteinbergCubase7;
+        if (hostFilename.containsIgnoreCase ("Cubase"))            return SteinbergCubaseGeneric;
+        if (hostFilename.containsIgnoreCase ("VSTBridgeApp"))      return SteinbergCubase5Bridged;
+        if (hostPath.containsIgnoreCase     ("Wavelab 5"))         return SteinbergWavelab5;
+        if (hostPath.containsIgnoreCase     ("Wavelab 6"))         return SteinbergWavelab6;
+        if (hostPath.containsIgnoreCase     ("Wavelab 7"))         return SteinbergWavelab7;
+        if (hostFilename.containsIgnoreCase ("Wavelab"))           return SteinbergWavelabGeneric;
+        if (hostFilename.containsIgnoreCase ("rm-host"))           return MuseReceptorGeneric;
+        if (hostFilename.startsWithIgnoreCase ("Sam"))             return MagixSamplitude;
+        if (hostFilename.startsWith         ("FL"))                return FruityLoops;
+        if (hostPath.containsIgnoreCase     ("Studio One"))        return StudioOne;
+        if (hostPath.containsIgnoreCase     ("Digital Performer")) return DigitalPerformer;
 
        #elif JUCE_LINUX
         jassertfalse   // not yet done!
