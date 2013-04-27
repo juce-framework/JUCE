@@ -126,6 +126,7 @@ private:
           << "CPU has 3DNOW: "  << (SystemStats::has3DNow() ? "yes" : "no") << newLine
 
           << "Found network card MAC addresses: " << getMacAddressList() << newLine
+          << "Found IP addresses: " << getIPAddressList() << newLine
 
           << "Current working directory: "         << File::getCurrentWorkingDirectory().getFullPathName() << newLine
           << "Current executable file: "           << File::getSpecialLocation (File::currentExecutableFile).getFullPathName() << newLine
@@ -148,6 +149,18 @@ private:
         StringArray addressStrings;
         for (int i = 0; i < macAddresses.size(); ++i)
             addressStrings.add (macAddresses[i].toString());
+
+        return addressStrings.joinIntoString (", ");
+    }
+
+    static String getIPAddressList()
+    {
+        Array <IPAddress> addresses;
+        IPAddress::findAllAddresses (addresses);
+
+        StringArray addressStrings;
+        for (int i = 0; i < addresses.size(); ++i)
+            addressStrings.add (addresses[i].toString());
 
         return addressStrings.joinIntoString (", ");
     }

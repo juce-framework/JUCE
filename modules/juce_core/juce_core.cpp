@@ -84,6 +84,8 @@
  #include <arpa/inet.h>
  #include <netinet/tcp.h>
  #include <sys/time.h>
+ #include <net/if.h>
+ #include <sys/ioctl.h>
 
  #if ! JUCE_ANDROID
   #include <execinfo.h>
@@ -128,6 +130,7 @@ namespace juce
 #include "network/juce_NamedPipe.cpp"
 #include "network/juce_Socket.cpp"
 #include "network/juce_URL.cpp"
+#include "network/juce_IPAddress.cpp"
 #include "streams/juce_BufferedInputStream.cpp"
 #include "streams/juce_FileInputSource.cpp"
 #include "streams/juce_InputStream.cpp"
