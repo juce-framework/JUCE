@@ -27,7 +27,7 @@ namespace
 {
 
 #ifndef JUCE_ALSA_LOGGING
- #define JUCE_ALSA_LOGGING 1
+ #define JUCE_ALSA_LOGGING 0
 #endif
 
 #if JUCE_ALSA_LOGGING
@@ -898,14 +898,14 @@ public:
           hasScanned (false),
           listOnlySoundcards (onlySoundcards)
     {
-       #if JUCE_ALSA_LOGGING
+       #if ! JUCE_ALSA_LOGGING
         snd_lib_error_set_handler (&silentErrorHandler);
        #endif
     }
 
     ~ALSAAudioIODeviceType()
     {
-       #if JUCE_ALSA_LOGGING
+       #if ! JUCE_ALSA_LOGGING
         snd_lib_error_set_handler (nullptr);
        #endif
 
