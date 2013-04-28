@@ -239,6 +239,8 @@ void MessageManager::runDispatchLoop()
 
 void MessageManager::stopDispatchLoop()
 {
+    jassert (isThisTheMessageThread()); // must only be called by the message thread
+
     quitMessagePosted = true;
    #if ! JUCE_PROJUCER_LIVE_BUILD
     [NSApp stop: nil];
