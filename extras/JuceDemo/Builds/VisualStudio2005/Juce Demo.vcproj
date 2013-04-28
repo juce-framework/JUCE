@@ -1562,6 +1562,17 @@
           <File RelativePath="..\..\..\..\modules\juce_core\files\juce_TemporaryFile.h"/>
         </Filter>
         <Filter Name="network">
+          <File RelativePath="..\..\..\..\modules\juce_core\network\juce_IPAddress.cpp">
+            <FileConfiguration Name="Debug|Win32"
+                               ExcludedFromBuild="true">
+              <Tool Name="VCCLCompilerTool"/>
+            </FileConfiguration>
+            <FileConfiguration Name="Release|Win32"
+                               ExcludedFromBuild="true">
+              <Tool Name="VCCLCompilerTool"/>
+            </FileConfiguration>
+          </File>
+          <File RelativePath="..\..\..\..\modules\juce_core\network\juce_IPAddress.h"/>
           <File RelativePath="..\..\..\..\modules\juce_core\network\juce_MACAddress.cpp">
             <FileConfiguration Name="Debug|Win32"
                                ExcludedFromBuild="true">
