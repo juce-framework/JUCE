@@ -165,6 +165,9 @@ private:
         if (makefileIsDLL)
             out << " -shared";
 
+        if (! config.isDebug())
+            out << " -fvisibility=hidden";
+
         out << config.getGCCLibraryPathFlags();
 
         for (int i = 0; i < linuxLibs.size(); ++i)
