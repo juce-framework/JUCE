@@ -417,6 +417,7 @@ public:
     ~MidiOutputDevice()
     {
         snd_midi_event_free (midiParser);
+        port.deletePort();
     }
 
     void sendMessageNow (const MidiMessage& message)
