@@ -23,7 +23,7 @@
   ==============================================================================
 */
 
-//==============================================================================
+
 class WebBrowserComponent::Pimpl   : public ActiveXControlComponent
 {
 public:
@@ -48,12 +48,10 @@ public:
         createControl (&CLSID_WebBrowser);
         browser = (IWebBrowser2*) queryInterface (&IID_IWebBrowser2);
 
-        IConnectionPointContainer* connectionPointContainer = (IConnectionPointContainer*) queryInterface (&IID_IConnectionPointContainer);
-
-        if (connectionPointContainer != nullptr)
+        if (IConnectionPointContainer* connectionPointContainer
+                = (IConnectionPointContainer*) queryInterface (&IID_IConnectionPointContainer))
         {
-            connectionPointContainer->FindConnectionPoint (DIID_DWebBrowserEvents2,
-                                                           &connectionPoint);
+            connectionPointContainer->FindConnectionPoint (DIID_DWebBrowserEvents2, &connectionPoint);
 
             if (connectionPoint != nullptr)
             {
@@ -89,9 +87,9 @@ public:
 
             if (postData != nullptr && postData->getSize() > 0)
             {
-                LPSAFEARRAY sa = SafeArrayCreateVector (VT_UI1, 0, (ULONG) postData->getSize());
+                sa = SafeArrayCreateVector (VT_UI1, 0, (ULONG) postData->getSize());
 
-                if (sa != 0)
+                if (sa != nullptr)
                 {
                     void* data = nullptr;
                     SafeArrayAccessData (sa, &data);
@@ -113,10 +111,9 @@ public:
             }
 
             browser->Navigate ((BSTR) (const OLECHAR*) url.toWideCharPointer(),
-                               &flags, &frame,
-                               &postDataVar, &headersVar);
+                               &flags, &frame, &postDataVar, &headersVar);
 
-            if (sa != 0)
+            if (sa != nullptr)
                 SafeArrayDestroy (sa);
 
             VariantClear (&flags);
