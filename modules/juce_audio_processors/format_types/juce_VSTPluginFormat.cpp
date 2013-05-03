@@ -1971,7 +1971,7 @@ public:
     {
         if (isShowing())
             openPluginWindow();
-        else
+        else if (! shouldAvoidDeletingWindow())
             closePluginWindow();
 
         componentMovedOrResized (true, true);
@@ -2049,16 +2049,16 @@ public:
     //==============================================================================
     void timerCallback()
     {
-       #if JUCE_WINDOWS
-        if (--sizeCheckCount <= 0)
+        if (isShowing())
         {
-            sizeCheckCount = 10;
-            checkPluginWindowSize();
-        }
-       #endif
+           #if JUCE_WINDOWS
+            if (--sizeCheckCount <= 0)
+            {
+                sizeCheckCount = 10;
+                checkPluginWindowSize();
+            }
+           #endif
 
-        try
-        {
             static bool reentrant = false;
 
             if (! reentrant)
@@ -2068,8 +2068,6 @@ public:
                 reentrant = false;
             }
         }
-        catch (...)
-        {}
     }
 
     //==============================================================================
@@ -2127,6 +2125,16 @@ private:
     Window pluginWindow;
     EventProcPtr pluginProc;
    #endif
+
+    // This is a workaround for old Mackie plugins that crash if their
+    // window is deleted more than once.
+    bool shouldAvoidDeletingWindow() const
+    {
+        PluginDescription desc;
+        plugin.fillInPluginDescription (desc);
+
+        return desc.manufacturerName.containsIgnoreCase ("Loud Technologies");
+    }
 
     //==============================================================================
 #if JUCE_MAC
@@ -2537,6 +2545,7 @@ private:
         InnerWrapperComponent (VSTPluginWindow& w)
             : owner (w), alreadyInside (false)
         {
+            keepPluginWindowWhenHidden = w.shouldAvoidDeletingWindow();
         }
 
         ~InnerWrapperComponent()

@@ -41,6 +41,7 @@ class CarbonViewWrapperComponent  : public Component,
 public:
     CarbonViewWrapperComponent()
         : ComponentMovementWatcher (this),
+          keepPluginWindowWhenHidden (false),
           wrapperWindow (0),
           carbonWindow (0),
           embeddedView (0),
@@ -48,7 +49,7 @@ public:
     {
     }
 
-    virtual ~CarbonViewWrapperComponent()
+    ~CarbonViewWrapperComponent()
     {
         jassert (embeddedView == 0); // must call deleteWindow() in the subclass's destructor!
     }
@@ -233,7 +234,7 @@ public:
     {
         if (isShowing())
             createWindow();
-        else
+        else if (! keepPluginWindowWhenHidden)
             deleteWindow();
 
         setEmbeddedWindowToOurSize();
@@ -253,12 +254,15 @@ public:
 
     void timerCallback()
     {
-        setOurSizeToEmbeddedViewSize();
+        if (isShowing())
+        {
+            setOurSizeToEmbeddedViewSize();
 
-        // To avoid strange overpainting problems when the UI is first opened, we'll
-        // repaint it a few times during the first second that it's on-screen..
-        if ((Time::getCurrentTime() - creationTime).inMilliseconds() < 1000)
-            recursiveHIViewRepaint (HIViewGetRoot (wrapperWindow));
+            // To avoid strange overpainting problems when the UI is first opened, we'll
+            // repaint it a few times during the first second that it's on-screen..
+            if ((Time::getCurrentTime() - creationTime).inMilliseconds() < 1000)
+                recursiveHIViewRepaint (HIViewGetRoot (wrapperWindow));
+        }
     }
 
     OSStatus carbonEventHandler (EventHandlerCallRef /*nextHandlerRef*/, EventRef event)
@@ -293,6 +297,8 @@ public:
     {
         return ((CarbonViewWrapperComponent*) userData)->carbonEventHandler (nextHandlerRef, event);
     }
+
+    bool keepPluginWindowWhenHidden;
 
 protected:
     WindowRef wrapperWindow;
