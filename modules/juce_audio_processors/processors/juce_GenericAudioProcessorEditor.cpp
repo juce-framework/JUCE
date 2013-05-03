@@ -28,16 +28,16 @@ class ProcessorParameterPropertyComp   : public PropertyComponent,
                                          private Timer
 {
 public:
-    ProcessorParameterPropertyComp (const String& name, AudioProcessor& owner_, const int index_)
+    ProcessorParameterPropertyComp (const String& name, AudioProcessor& p, const int index_)
         : PropertyComponent (name),
-          owner (owner_),
+          owner (p),
           index (index_),
           paramHasChanged (false),
-          slider (owner_, index_)
+          slider (p, index_)
     {
         startTimer (100);
         addAndMakeVisible (&slider);
-        owner_.addListener (this);
+        owner.addListener (this);
     }
 
     ~ProcessorParameterPropertyComp()
@@ -77,8 +77,8 @@ private:
     class ParamSlider  : public Slider
     {
     public:
-        ParamSlider (AudioProcessor& owner_, const int index_)
-            : owner (owner_),
+        ParamSlider (AudioProcessor& p, const int index_)
+            : owner (p),
               index (index_)
         {
             setRange (0.0, 1.0, 0.0);
@@ -118,26 +118,26 @@ private:
 
 
 //==============================================================================
-GenericAudioProcessorEditor::GenericAudioProcessorEditor (AudioProcessor* const owner_)
-    : AudioProcessorEditor (owner_)
+GenericAudioProcessorEditor::GenericAudioProcessorEditor (AudioProcessor* const p)
+    : AudioProcessorEditor (p)
 {
-    jassert (owner_ != nullptr);
+    jassert (p != nullptr);
     setOpaque (true);
 
     addAndMakeVisible (&panel);
 
     Array <PropertyComponent*> params;
 
-    const int numParams = owner_->getNumParameters();
+    const int numParams = p->getNumParameters();
     int totalHeight = 0;
 
     for (int i = 0; i < numParams; ++i)
     {
-        String name (owner_->getParameterName (i));
+        String name (p->getParameterName (i));
         if (name.trim().isEmpty())
             name = "Unnamed";
 
-        ProcessorParameterPropertyComp* const pc = new ProcessorParameterPropertyComp (name, *owner_, i);
+        ProcessorParameterPropertyComp* const pc = new ProcessorParameterPropertyComp (name, *p, i);
         params.add (pc);
         totalHeight += pc->getPreferredHeight();
     }

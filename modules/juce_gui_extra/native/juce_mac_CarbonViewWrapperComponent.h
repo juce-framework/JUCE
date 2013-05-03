@@ -98,9 +98,7 @@ public:
 
             // Check for the plugin creating its own floating window, and if there is one,
             // we need to reparent it to make it visible..
-            NSWindow* floatingChildWindow = [[carbonWindow childWindows] objectAtIndex: 0];
-
-            if (floatingChildWindow != nil)
+            if (NSWindow* floatingChildWindow = [[carbonWindow childWindows] objectAtIndex: 0])
                 [getOwnerWindow() addChildWindow: floatingChildWindow
                                          ordered: NSWindowAbove];
 
@@ -112,7 +110,7 @@ public:
                 { kEventClassMouse,  kEventMouseDown },
                 { kEventClassMouse,  kEventMouseMoved },
                 { kEventClassMouse,  kEventMouseDragged },
-                { kEventClassMouse,  kEventMouseUp},
+                { kEventClassMouse,  kEventMouseUp },
                 { kEventClassWindow, kEventWindowDrawContent },
                 { kEventClassWindow, kEventWindowShown },
                 { kEventClassWindow, kEventWindowHidden }
@@ -201,6 +199,18 @@ public:
                 wr.bottom = (short) (wr.top + getHeight());
 
                 SetWindowBounds (wrapperWindow, kWindowContentRgn, &wr);
+
+                // This group stuff is mainly a workaround for Mackie plugins like FinalMix..
+                WindowGroupRef group = GetWindowGroup (wrapperWindow);
+                WindowRef attachedWindow;
+
+                if (GetIndexedWindow (group, 2, kWindowGroupContentsReturnWindows, &attachedWindow) == noErr)
+                {
+                    SelectWindow (attachedWindow);
+                    ActivateWindow (attachedWindow, TRUE);
+                    HideWindow (wrapperWindow);
+                }
+
                 ShowWindow (wrapperWindow);
             }
 
@@ -269,7 +279,9 @@ public:
                 SetEventParameter (event, kEventParamClickActivation, typeClickActivationResult,
                                    sizeof (ClickActivationResult), &howToHandleClick);
 
-                HIViewSetNeedsDisplay (embeddedView, true);
+                if (embeddedView != 0)
+                    HIViewSetNeedsDisplay (embeddedView, true);
+
                 return noErr;
             }
         }

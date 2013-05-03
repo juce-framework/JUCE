@@ -644,7 +644,8 @@ ComponentPeer* Component::getPeer() const
 {
     if (flags.hasHeavyweightPeerFlag)
         return ComponentPeer::getPeerFor (this);
-    else if (parentComponent == nullptr)
+
+    if (parentComponent == nullptr)
         return nullptr;
 
     return parentComponent->getPeer();

@@ -1147,8 +1147,8 @@ public:
             class AsyncRepaintMessage  : public CallbackMessage
             {
             public:
-                AsyncRepaintMessage (NSViewComponentPeer* const peer_, const Rectangle<int>& rect_)
-                    : peer (peer_), rect (rect_)
+                AsyncRepaintMessage (NSViewComponentPeer* const p, const Rectangle<int>& r)
+                    : peer (p), rect (r)
                 {}
 
                 void messageCallback()
