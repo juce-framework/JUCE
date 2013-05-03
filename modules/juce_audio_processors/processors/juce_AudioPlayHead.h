@@ -80,16 +80,13 @@ public:
         /** For timecode, the position of the start of the edit, in seconds from 00:00:00:00. */
         double editOriginTime;
 
-        /** The current play position in pulses-per-quarter-note.
-
-            This is the number of quarter notes since the edit start.
-        */
+        /** The current play position, in pulses-per-quarter-note. */
         double ppqPosition;
 
         /** The position of the start of the last bar, in pulses-per-quarter-note.
 
-            This is the number of quarter notes from the start of the edit to the
-            start of the current bar.
+            This is the time from the start of the edit to the start of the current
+            bar, in ppq units.
 
             Note - this value may be unavailable on some hosts, e.g. Pro-Tools. If
             it's not available, the value will be 0.
