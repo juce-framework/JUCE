@@ -126,6 +126,8 @@ bool KnownPluginList::scanAndAddFile (const String& fileOrIdentifier,
                                       OwnedArray <PluginDescription>& typesFound,
                                       AudioPluginFormat& format)
 {
+    const ScopedLock sl (scanLock);
+
     if (dontRescanIfAlreadyInList
          && getTypeForFile (fileOrIdentifier) != nullptr)
     {
@@ -153,14 +155,17 @@ bool KnownPluginList::scanAndAddFile (const String& fileOrIdentifier,
 
     OwnedArray <PluginDescription> found;
 
-    if (scanner != nullptr)
     {
-        if (! scanner->findPluginTypesFor (format, found, fileOrIdentifier))
-            addToBlacklist (fileOrIdentifier);
-    }
-    else
-    {
-        format.findAllTypesForFile (found, fileOrIdentifier);
+        const ScopedUnlock sl (scanLock);
+        if (scanner != nullptr)
+        {
+            if (! scanner->findPluginTypesFor (format, found, fileOrIdentifier))
+                addToBlacklist (fileOrIdentifier);
+        }
+        else
+        {
+            format.findAllTypesForFile (found, fileOrIdentifier);
+        }
     }
 
     for (int i = 0; i < found.size(); ++i)
