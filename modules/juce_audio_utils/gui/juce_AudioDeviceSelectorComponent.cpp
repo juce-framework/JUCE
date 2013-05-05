@@ -192,7 +192,7 @@ struct AudioDeviceSetupDetails
     bool useStereoPairs;
 };
 
-static String getNoDeviceString()   { return "<< " + TRANS("none") + " >>"); }
+static String getNoDeviceString()   { return "<< " + TRANS("none") + " >>"; }
 
 //==============================================================================
 class AudioDeviceSettingsPanel : public Component,
