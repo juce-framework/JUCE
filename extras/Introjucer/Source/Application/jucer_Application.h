@@ -537,7 +537,14 @@ public:
     virtual void doExtraInitialisation() {}
     virtual void addExtraConfigItems (Project&, TreeViewItem&) {}
 
-    virtual String getLogFolderName() const    { return "com.juce.introjucer"; }
+    virtual String getLogFolderName() const
+    {
+       #if JUCE_LINUX
+        return ".config/juce/introjucer";
+       #else
+        return "com.juce.introjucer";
+       #endif
+    }
 
     virtual PropertiesFile::Options getPropertyFileOptionsFor (const String& filename)
     {
