@@ -632,7 +632,7 @@ void AlertWindow::showMessageBox (AlertIconType iconType,
     else
     {
         AlertWindowInfo info (title, message, associatedComponent, iconType, 1, nullptr, true);
-        info.button1 = buttonText.isEmpty() ? TRANS("ok") : buttonText;
+        info.button1 = buttonText.isEmpty() ? TRANS("OK") : buttonText;
 
         info.invoke();
     }
@@ -653,7 +653,7 @@ void AlertWindow::showMessageBoxAsync (AlertIconType iconType,
     else
     {
         AlertWindowInfo info (title, message, associatedComponent, iconType, 1, callback, false);
-        info.button1 = buttonText.isEmpty() ? TRANS("ok") : buttonText;
+        info.button1 = buttonText.isEmpty() ? TRANS("OK") : buttonText;
 
         info.invoke();
     }
@@ -671,8 +671,8 @@ bool AlertWindow::showOkCancelBox (AlertIconType iconType,
         return NativeMessageBox::showOkCancelBox (iconType, title, message, associatedComponent, callback);
 
     AlertWindowInfo info (title, message, associatedComponent, iconType, 2, callback, callback == nullptr);
-    info.button1 = button1Text.isEmpty() ? TRANS("ok")     : button1Text;
-    info.button2 = button2Text.isEmpty() ? TRANS("cancel") : button2Text;
+    info.button1 = button1Text.isEmpty() ? TRANS("OK")     : button1Text;
+    info.button2 = button2Text.isEmpty() ? TRANS("Cancel") : button2Text;
 
     return info.invoke() != 0;
 }
@@ -690,9 +690,9 @@ int AlertWindow::showYesNoCancelBox (AlertIconType iconType,
         return NativeMessageBox::showYesNoCancelBox (iconType, title, message, associatedComponent, callback);
 
     AlertWindowInfo info (title, message, associatedComponent, iconType, 3, callback, callback == nullptr);
-    info.button1 = button1Text.isEmpty() ? TRANS("yes")     : button1Text;
-    info.button2 = button2Text.isEmpty() ? TRANS("no")      : button2Text;
-    info.button3 = button3Text.isEmpty() ? TRANS("cancel")  : button3Text;
+    info.button1 = button1Text.isEmpty() ? TRANS("Yes")     : button1Text;
+    info.button2 = button2Text.isEmpty() ? TRANS("No")      : button2Text;
+    info.button3 = button3Text.isEmpty() ? TRANS("Cancel")  : button3Text;
 
     return info.invoke();
 }

@@ -714,16 +714,19 @@ static void addFileWithGroups (Project::Item& group, const RelativePath& file, c
     }
 }
 
+void LibraryModule::findBrowseableFiles (const File& localModuleFolder, Array<File>& filesFound) const
+{
+    const var filesArray (moduleInfo ["browse"]);
+    const Array<var>* const files = filesArray.getArray();
+
+    for (int i = 0; i < files->size(); ++i)
+        findWildcardMatches (localModuleFolder, files->getReference(i), filesFound);
+}
+
 void LibraryModule::addBrowsableCode (ProjectExporter& exporter, const Array<File>& compiled, const File& localModuleFolder) const
 {
     if (sourceFiles.size() == 0)
-    {
-        const var filesArray (moduleInfo ["browse"]);
-        const Array<var>* const files = filesArray.getArray();
-
-        for (int i = 0; i < files->size(); ++i)
-            findWildcardMatches (localModuleFolder, files->getReference(i), sourceFiles);
-    }
+        findBrowseableFiles (localModuleFolder, sourceFiles);
 
     Project::Item sourceGroup (Project::Item::createGroup (exporter.getProject(), getID(), "__mainsourcegroup" + getID()));
 

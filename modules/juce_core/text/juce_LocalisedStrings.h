@@ -109,7 +109,7 @@ public:
     /** Returns the currently selected set of mappings.
 
         This is the object that was last passed to setCurrentMappings(). It may
-        be 0 if none has been created.
+        be nullptr if none has been created.
     */
     static LocalisedStrings* getCurrentMappings();
 
@@ -194,6 +194,15 @@ private:
  */
  #define TRANS(stringLiteral) juce::translate (stringLiteral)
 #endif
+
+/** A dummy version of the TRANS macro, used to indicate a string literal that should be
+    added to the translation file by source-code scanner tools.
+
+    Wrapping a string literal in this macro has no effect, but by using it around strings
+    that your app needs to translate at a later stage, it lets automatic code-scanning tools
+    find this string and add it to the list of strings that need translation.
+*/
+#define NEEDS_TRANS(stringLiteral) (stringLiteral)
 
 /** Uses the LocalisedStrings class to translate the given string literal.
     @see LocalisedStrings

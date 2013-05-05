@@ -173,9 +173,9 @@ FileBasedDocument::SaveResult OpenDocumentManager::saveIfNeededAndUserAgrees (Op
                                                    TRANS("Closing document..."),
                                                    TRANS("Do you want to save the changes to \"")
                                                        + doc->getName() + "\"?",
-                                                   TRANS("save"),
-                                                   TRANS("discard changes"),
-                                                   TRANS("cancel"));
+                                                   TRANS("Save"),
+                                                   TRANS("Discard changes"),
+                                                   TRANS("Cancel"));
 
     if (r == 1)  // save changes
         return doc->save() ? FileBasedDocument::savedOk

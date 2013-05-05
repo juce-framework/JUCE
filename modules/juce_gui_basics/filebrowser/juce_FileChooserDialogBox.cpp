@@ -209,12 +209,13 @@ void FileChooserDialogBox::okButtonPressed()
          && content->chooserComponent.getSelectedFile(0).exists())
     {
         AlertWindow::showOkCancelBox (AlertWindow::WarningIcon,
-                                         TRANS("File already exists"),
-                                         TRANS("There's already a file called:")
-                                           + "\n\n" + content->chooserComponent.getSelectedFile(0).getFullPathName()
-                                           + "\n\n" + TRANS("Are you sure you want to overwrite it?"),
-                                         TRANS("overwrite"),
-                                         TRANS("cancel"),
+                                      TRANS("File already exists"),
+                                      TRANS("There's already a file called: FLMN")
+                                         .replace ("FLNM", content->chooserComponent.getSelectedFile(0).getFullPathName())
+                                        + "\n\n"
+                                        + TRANS("Are you sure you want to overwrite it?"),
+                                      TRANS("Overwrite"),
+                                      TRANS("Cancel"),
                                       this,
                                       ModalCallbackFunction::forComponent (okToOverwriteFileCallback, this));
     }

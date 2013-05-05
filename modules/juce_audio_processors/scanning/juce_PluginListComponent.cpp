@@ -355,7 +355,7 @@ private:
 
     bool doNextScan()
     {
-        progressMessage = TRANS("Testing:\n\n") + scanner->getNextPluginFileThatWillBeScanned();
+        progressMessage = TRANS("Testing") + ":\n\n" + scanner->getNextPluginFileThatWillBeScanned();
 
         if (scanner->scanNextFile (true))
         {
@@ -419,6 +419,7 @@ void PluginListComponent::scanFinished (const StringArray& failedFiles)
     if (shortNames.size() > 0)
         AlertWindow::showMessageBoxAsync (AlertWindow::InfoIcon,
                                           TRANS("Scan complete"),
-                                          TRANS("Note that the following files appeared to be plugin files, but failed to load correctly:\n\n")
+                                          TRANS("Note that the following files appeared to be plugin files, but failed to load correctly")
+                                            + ":\n\n"
                                             + shortNames.joinIntoString (", "));
 }

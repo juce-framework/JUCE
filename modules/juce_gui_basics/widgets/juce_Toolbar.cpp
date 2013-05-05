@@ -708,8 +708,9 @@ private:
           : factory (factory_),
             toolbar (toolbar_),
             palette (factory_, toolbar_),
-            instructions (String::empty, TRANS ("You can drag the items above and drop them onto a toolbar to add them.\n\n"
-                                                "Items on the toolbar can also be dragged around to change their order, or dragged off the edge to delete them.")),
+            instructions (String::empty, TRANS ("You can drag the items above and drop them onto a toolbar to add them.")
+                                          + "\n\n"
+                                          + TRANS ("Items on the toolbar can also be dragged around to change their order, or dragged off the edge to delete them.")),
             defaultButton (TRANS ("Restore to default set of items"))
         {
             addAndMakeVisible (&palette);

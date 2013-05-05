@@ -51,6 +51,7 @@ public:
     void createPropertyEditors (ProjectExporter&, PropertyListBuilder&) const;
     void getConfigFlags (Project&, OwnedArray<Project::ConfigFlag>& flags) const;
     void getLocalCompiledFiles (const File& localModuleFolder, Array<File>& files) const;
+    void findBrowseableFiles (const File& localModuleFolder, Array<File>& files) const;
     File getLocalFolderFor (Project&) const;
 
     static String getInfoFileName()     { return "juce_module_info"; }

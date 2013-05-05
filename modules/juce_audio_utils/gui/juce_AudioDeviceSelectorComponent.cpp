@@ -70,7 +70,6 @@ class AudioDeviceSelectorComponent::MidiInputSelectorComponentListBox  : public 
                                                                          private ListBoxModel
 {
 public:
-    //==============================================================================
     MidiInputSelectorComponentListBox (AudioDeviceManager& deviceManager_,
                                        const String& noItemsMessage_,
                                        const int minNumber_,
@@ -193,6 +192,7 @@ struct AudioDeviceSetupDetails
     bool useStereoPairs;
 };
 
+static String getNoDeviceString()   { return "<< " + TRANS("none") + " >>"); }
 
 //==============================================================================
 class AudioDeviceSettingsPanel : public Component,
@@ -515,7 +515,7 @@ private:
         for (int i = 0; i < devs.size(); ++i)
             combo.addItem (devs[i], i + 1);
 
-        combo.addItem (TRANS("<< none >>"), -1);
+        combo.addItem (getNoDeviceString(), -1);
         combo.setSelectedId (-1, true);
     }
 
@@ -959,7 +959,7 @@ AudioDeviceSelectorComponent::AudioDeviceSelectorComponent (AudioDeviceManager& 
     {
         addAndMakeVisible (midiInputsList
                             = new MidiInputSelectorComponentListBox (deviceManager,
-                                                                     TRANS("(No MIDI inputs available)"),
+                                                                     "(" + TRANS("No MIDI inputs available") + ")",
                                                                      0, 0));
 
         midiInputsLabel = new Label (String::empty, TRANS ("Active MIDI inputs:"));
@@ -1102,7 +1102,7 @@ void AudioDeviceSelectorComponent::updateAllControls()
 
         const StringArray midiOuts (MidiOutput::getDevices());
 
-        midiOutputSelector->addItem (TRANS("<< none >>"), -1);
+        midiOutputSelector->addItem (getNoDeviceString(), -1);
         midiOutputSelector->addSeparator();
 
         for (int i = 0; i < midiOuts.size(); ++i)

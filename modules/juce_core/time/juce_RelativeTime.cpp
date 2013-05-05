@@ -61,6 +61,13 @@ bool operator>= (const RelativeTime& t1, const RelativeTime& t2) noexcept       
 bool operator<= (const RelativeTime& t1, const RelativeTime& t2) noexcept       { return t1.inSeconds() <= t2.inSeconds(); }
 
 //==============================================================================
+static void translateTimeField (String& result, int n, const char* singular, const char* plural)
+{
+    result << TRANS (n == 1 ? singular : plural)
+                .replace (n == 1 ? "1" : "2", String (n))
+           << ' ';
+}
+
 String RelativeTime::getDescription (const String& returnValueForZeroTime) const
 {
     if (seconds < 0.001 && seconds > -0.001)
@@ -76,16 +83,14 @@ String RelativeTime::getDescription (const String& returnValueForZeroTime) const
     int n = std::abs ((int) inWeeks());
     if (n > 0)
     {
-        result << n << TRANS (n == 1 ? " week "
-                                     : " weeks ");
+        translateTimeField (result, n, NEEDS_TRANS("1 week"), NEEDS_TRANS("2 weeks"));
         ++fieldsShown;
     }
 
     n = std::abs ((int) inDays()) % 7;
     if (n > 0)
     {
-        result << n << TRANS (n == 1 ? " day "
-                                     : " days ");
+        translateTimeField (result, n, NEEDS_TRANS("1 day"), NEEDS_TRANS("2 days"));
         ++fieldsShown;
     }
 
@@ -94,8 +99,7 @@ String RelativeTime::getDescription (const String& returnValueForZeroTime) const
         n = std::abs ((int) inHours()) % 24;
         if (n > 0)
         {
-            result << n << TRANS (n == 1 ? " hr "
-                                         : " hrs ");
+            translateTimeField (result, n, NEEDS_TRANS("1 hr"), NEEDS_TRANS("2 hrs"));
             ++fieldsShown;
         }
 
@@ -104,8 +108,7 @@ String RelativeTime::getDescription (const String& returnValueForZeroTime) const
             n = std::abs ((int) inMinutes()) % 60;
             if (n > 0)
             {
-                result << n << TRANS (n == 1 ? " min "
-                                             : " mins ");
+                translateTimeField (result, n, NEEDS_TRANS("1 min"), NEEDS_TRANS("2 mins"));
                 ++fieldsShown;
             }
 
@@ -114,8 +117,7 @@ String RelativeTime::getDescription (const String& returnValueForZeroTime) const
                 n = std::abs ((int) inSeconds()) % 60;
                 if (n > 0)
                 {
-                    result << n << TRANS (n == 1 ? " sec "
-                                                 : " secs ");
+                    translateTimeField (result, n, NEEDS_TRANS("1 sec"), NEEDS_TRANS("2 secs"));
                     ++fieldsShown;
                 }
 
@@ -123,7 +125,7 @@ String RelativeTime::getDescription (const String& returnValueForZeroTime) const
                 {
                     n = std::abs ((int) inMilliseconds()) % 1000;
                     if (n > 0)
-                        result << n << TRANS (" ms");
+                        result << n << ' ' << TRANS ("ms");
                 }
             }
         }

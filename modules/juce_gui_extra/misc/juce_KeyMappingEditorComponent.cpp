@@ -96,7 +96,7 @@ public:
                            AlertWindow::NoIcon),
               owner (kec)
         {
-            addButton (TRANS("Ok"), 1);
+            addButton (TRANS("OK"), 1);
             addButton (TRANS("Cancel"), 0);
 
             // (avoid return + escape keys getting processed by the buttons..)
@@ -110,13 +110,15 @@ public:
         bool keyPressed (const KeyPress& key)
         {
             lastPress = key;
-            String message (TRANS("Key: ") + owner.getDescriptionForKeyPress (key));
+            String message (TRANS("Key") + ": " + owner.getDescriptionForKeyPress (key));
 
             const CommandID previousCommand = owner.getMappings().findCommandForKeyPress (key);
 
             if (previousCommand != 0)
-                message << "\n\n" << TRANS("(Currently assigned to \"")
-                        << owner.getCommandManager().getNameOfCommand (previousCommand) << "\")";
+                message << "\n\n("
+                        << TRANS("Currently assigned to \"CMDN\"")
+                            .replace ("CMDN", owner.getCommandManager().getNameOfCommand (previousCommand))
+                        << ')';
 
             setMessage (message);
             return true;
@@ -160,9 +162,10 @@ public:
             {
                 AlertWindow::showOkCancelBox (AlertWindow::WarningIcon,
                                               TRANS("Change key-mapping"),
-                                              TRANS("This key is already assigned to the command \"")
-                                                + owner.getCommandManager().getNameOfCommand (previousCommand)
-                                                + TRANS("\"\n\nDo you want to re-assign it to this new command instead?"),
+                                              TRANS("This key is already assigned to the command \"CMDN\"")
+                                                  .replace ("CMDN", owner.getCommandManager().getNameOfCommand (previousCommand))
+                                                + "\n\n"
+                                                + TRANS("Do you want to re-assign it to this new command instead?"),
                                               TRANS("Re-assign"),
                                               TRANS("Cancel"),
                                               this,
