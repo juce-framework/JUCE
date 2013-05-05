@@ -82,9 +82,9 @@ File PropertiesFile::Options::getDefaultFile() const
         dir = dir.getChildFile (folderName);
 
    #elif JUCE_LINUX || JUCE_ANDROID
-    const File dir ((commonToAllUsers ? "/var/" : "~/")
-                        + (folderName.isNotEmpty() ? folderName
-                                                   : ("." + applicationName)));
+    const File dir (File (commonToAllUsers ? "/var" : "~")
+                     .getChildFile (folderName.isNotEmpty() ? folderName
+                                                            : ("." + applicationName)));
 
    #elif JUCE_WINDOWS
     File dir (File::getSpecialLocation (commonToAllUsers ? File::commonApplicationDataDirectory

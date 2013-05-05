@@ -537,7 +537,11 @@ public:
     virtual void doExtraInitialisation() {}
     virtual void addExtraConfigItems (Project&, TreeViewItem&) {}
 
+   #if JUCE_LINUX
+    virtual String getLogFolderName() const    { return "~/.config/Introjucer/Logs"; }
+   #else
     virtual String getLogFolderName() const    { return "com.juce.introjucer"; }
+   #endif
 
     virtual PropertiesFile::Options getPropertyFileOptionsFor (const String& filename)
     {
@@ -546,7 +550,7 @@ public:
         options.filenameSuffix      = "settings";
         options.osxLibrarySubFolder = "Application Support";
        #if JUCE_LINUX
-        options.folderName          = ".introjucer";
+        options.folderName          = "~/.config/Introjucer";
        #else
         options.folderName          = "Introjucer";
        #endif
