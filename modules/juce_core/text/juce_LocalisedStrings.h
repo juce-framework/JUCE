@@ -81,14 +81,16 @@ public:
         When you create one of these, you can call setCurrentMappings() to make it
         the set of mappings that the system's using.
     */
-    LocalisedStrings (const String& fileContents);
+    LocalisedStrings (const String& fileContents,
+                      bool ignoreCaseOfKeys);
 
     /** Creates a set of translations from a file.
 
         When you create one of these, you can call setCurrentMappings() to make it
         the set of mappings that the system's using.
     */
-    LocalisedStrings (const File& fileToLoad);
+    LocalisedStrings (const File& fileToLoad,
+                      bool ignoreCaseOfKeys);
 
     /** Destructor. */
     ~LocalisedStrings();
@@ -167,19 +169,13 @@ public:
     const StringArray& getCountryCodes() const            { return countryCodes; }
 
 
-    //==============================================================================
-    /** Indicates whether to use a case-insensitive search when looking up a string.
-        This defaults to true.
-    */
-    void setIgnoresCase (bool shouldIgnoreCase);
-
 private:
     //==============================================================================
     String languageName;
     StringArray countryCodes;
     StringPairArray translations;
 
-    void loadFromText (const String& fileContents);
+    void loadFromText (const String&, bool ignoreCase);
 
     JUCE_LEAK_DETECTOR (LocalisedStrings)
 };
