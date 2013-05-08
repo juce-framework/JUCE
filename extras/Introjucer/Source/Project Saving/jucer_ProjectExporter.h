@@ -81,7 +81,7 @@ public:
     String getTargetLocationString() const      { return getSettingString (Ids::targetFolder); }
 
     Value getExtraCompilerFlags()               { return getSetting (Ids::extraCompilerFlags); }
-    String getExtraCompilerFlagsString() const  { return getSettingString (Ids::extraCompilerFlags); }
+    String getExtraCompilerFlagsString() const  { return getSettingString (Ids::extraCompilerFlags).replaceCharacters ("\r\n", "  "); }
 
     Value getExtraLinkerFlags()                 { return getSetting (Ids::extraLinkerFlags); }
     String getExtraLinkerFlagsString() const    { return getSettingString (Ids::extraLinkerFlags).replaceCharacters ("\r\n", "  "); }
