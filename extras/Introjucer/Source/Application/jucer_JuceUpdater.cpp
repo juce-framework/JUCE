@@ -250,75 +250,75 @@ void JuceUpdater::paintListBoxItem (int /*rowNumber*/, Graphics& g, int /*width*
         g.fillAll (findColour (TextEditor::highlightColourId));
 }
 
-Component* JuceUpdater::refreshComponentForRow (int rowNumber, bool /*isRowSelected*/, Component* existingComponentToUpdate)
+class UpdateListComponent  : public Component
 {
-    class UpdateListComponent  : public Component
+public:
+    UpdateListComponent()
     {
-    public:
-        UpdateListComponent()
-        {
-            addChildComponent (&toggle);
-            toggle.setWantsKeyboardFocus (false);
-            setInterceptsMouseClicks (false, true);
-        }
+        addChildComponent (&toggle);
+        toggle.setWantsKeyboardFocus (false);
+        setInterceptsMouseClicks (false, true);
+    }
 
-        void setModule (const ModuleList::Module* newModule,
-                        const ModuleList::Module* existingModule,
-                        const Value& value)
+    void setModule (const ModuleList::Module* newModule,
+                    const ModuleList::Module* existingModule,
+                    const Value& value)
+    {
+        if (newModule != nullptr)
         {
-            if (newModule != nullptr)
+            toggle.getToggleStateValue().referTo (value);
+            toggle.setVisible (true);
+            toggle.setEnabled (true);
+
+            name = newModule->uid;
+            status = String::empty;
+
+            if (existingModule == nullptr)
             {
-                toggle.getToggleStateValue().referTo (value);
-                toggle.setVisible (true);
-                toggle.setEnabled (true);
-
-                name = newModule->uid;
-                status = String::empty;
-
-                if (existingModule == nullptr)
-                {
-                    status << " (not currently installed)";
-                }
-                else if (existingModule->version != newModule->version)
-                {
-                    status << " installed: " << existingModule->version
-                           << ", available: " << newModule->version;
-                }
-                else
-                {
-                    status << " (latest version already installed: " << existingModule->version << ")";
-                    toggle.setEnabled (false);
-                }
+                status << " (not currently installed)";
+            }
+            else if (existingModule->version != newModule->version)
+            {
+                status << " installed: " << existingModule->version
+                       << ", available: " << newModule->version;
             }
             else
             {
-                name = status = String::empty;
-                toggle.setVisible (false);
+                status << " (latest version already installed: " << existingModule->version << ")";
+                toggle.setEnabled (false);
             }
         }
-
-        void paint (Graphics& g)
+        else
         {
-            g.setColour (Colours::black);
-            g.setFont (getHeight() * 0.7f);
-
-            g.drawText (name, toggle.getRight() + 4, 0, getWidth() / 2 - toggle.getRight() - 4, getHeight(),
-                        Justification::centredLeft, true);
-
-            g.drawText (status, getWidth() / 2, 0, getWidth() / 2, getHeight(),
-                        Justification::centredLeft, true);
+            name = status = String::empty;
+            toggle.setVisible (false);
         }
+    }
 
-        void resized()
-        {
-            toggle.setBounds (2, 2, getHeight() - 4, getHeight() - 4);
-        }
+    void paint (Graphics& g)
+    {
+        g.setColour (Colours::black);
+        g.setFont (getHeight() * 0.7f);
 
-    private:
-        ToggleButton toggle;
-        String name, status;
-    };
+        g.drawText (name, toggle.getRight() + 4, 0, getWidth() / 2 - toggle.getRight() - 4, getHeight(),
+                    Justification::centredLeft, true);
 
+        g.drawText (status, getWidth() / 2, 0, getWidth() / 2, getHeight(),
+                    Justification::centredLeft, true);
+    }
+
+    void resized()
+    {
+        toggle.setBounds (2, 2, getHeight() - 4, getHeight() - 4);
+    }
+
+private:
+    ToggleButton toggle;
+    String name, status;
+};
+
+Component* JuceUpdater::refreshComponentForRow (int rowNumber, bool /*isRowSelected*/, Component* existingComponentToUpdate)
+{
     UpdateListComponent* c = dynamic_cast <UpdateListComponent*> (existingComponentToUpdate);
     if (c == nullptr)
         c = new UpdateListComponent();

@@ -47,6 +47,7 @@ namespace CommandIDs
         showAppearanceSettings = 0x200077,
         showConfigPanel        = 0x200074,
         showFilePanel          = 0x200078,
+        showTranslationTool    = 0x200079,
 
         closeWindow            = 0x201001,
         closeAllDocuments      = 0x201000,

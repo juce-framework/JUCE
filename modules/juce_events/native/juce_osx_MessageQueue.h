@@ -63,7 +63,6 @@ public:
 
 private:
     ReferenceCountedArray <MessageManager::MessageBase, CriticalSection> messages;
-    CriticalSection lock;
     CFRunLoopRef runLoop;
     CFRunLoopSourceRef runLoopSource;
 

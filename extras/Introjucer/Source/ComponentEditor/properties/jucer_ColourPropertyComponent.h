@@ -49,7 +49,6 @@ public:
         ((ColourPropEditorComponent*) getChildComponent (0))->refresh();
     }
 
-private:
     class ColourEditorComponent    : public Component,
                                      public ChangeListener
     {
@@ -106,10 +105,6 @@ private:
             if (cs->getCurrentColour() != getColour())
                 setColour (cs->getCurrentColour());
         }
-
-    private:
-        Colour colour;
-        bool canResetToDefault;
 
         class ColourSelectorComp   : public Component,
                                      public ButtonListener
@@ -181,6 +176,10 @@ private:
             ColourSelectorWithSwatches selector;
             TextButton defaultButton;
         };
+
+    private:
+        Colour colour;
+        bool canResetToDefault;
     };
 
     class ColourPropEditorComponent     : public ColourEditorComponent
