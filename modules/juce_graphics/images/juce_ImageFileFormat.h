@@ -62,6 +62,9 @@ public:
         The format class should only read the first few bytes of the stream and sniff
         for header bytes that it understands.
 
+        Note that this will advance the stream and leave it in a new position, so if you're
+        planning on re-using it, you may want to rewind it after calling this method.
+
         @see decodeImage
     */
     virtual bool canUnderstand (InputStream& input) = 0;
@@ -151,11 +154,11 @@ public:
     ~PNGImageFormat();
 
     //==============================================================================
-    String getFormatName();
-    bool usesFileExtension (const File& possibleFile);
-    bool canUnderstand (InputStream& input);
-    Image decodeImage (InputStream& input);
-    bool writeImageToStream (const Image& sourceImage, OutputStream& destStream);
+    String getFormatName() override;
+    bool usesFileExtension (const File&) override;
+    bool canUnderstand (InputStream&) override;
+    Image decodeImage (InputStream&) override;
+    bool writeImageToStream (const Image&, OutputStream&) override;
 };
 
 
@@ -181,11 +184,11 @@ public:
     void setQuality (float newQuality);
 
     //==============================================================================
-    String getFormatName();
-    bool usesFileExtension (const File& possibleFile);
-    bool canUnderstand (InputStream& input);
-    Image decodeImage (InputStream& input);
-    bool writeImageToStream (const Image& sourceImage, OutputStream& destStream);
+    String getFormatName() override;
+    bool usesFileExtension (const File&) override;
+    bool canUnderstand (InputStream&) override;
+    Image decodeImage (InputStream&) override;
+    bool writeImageToStream (const Image&, OutputStream&) override;
 
 private:
     float quality;
@@ -205,11 +208,11 @@ public:
     ~GIFImageFormat();
 
     //==============================================================================
-    String getFormatName();
-    bool usesFileExtension (const File& possibleFile);
-    bool canUnderstand (InputStream& input);
-    Image decodeImage (InputStream& input);
-    bool writeImageToStream (const Image& sourceImage, OutputStream& destStream);
+    String getFormatName() override;
+    bool usesFileExtension (const File&) override;
+    bool canUnderstand (InputStream&) override;
+    Image decodeImage (InputStream&) override;
+    bool writeImageToStream (const Image&, OutputStream&) override;
 };
 
 
