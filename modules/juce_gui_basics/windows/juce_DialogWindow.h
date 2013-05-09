@@ -119,7 +119,7 @@ public:
             will be automatically deleted when the modal state is terminated.
 
             When the dialog's close button is clicked, it'll automatically terminate its
-            modal state, but you can also do this programatically by calling
+            modal state, but you can also do this programmatically by calling
             exitModalState (returnValue) on the DialogWindow.
 
             If your content component needs to find the dialog window that it is
@@ -162,7 +162,7 @@ public:
         you want to block and run a modal loop until the dialog is dismissed, use showModalDialog()
         instead.
 
-        To close the dialog programatically, you should call exitModalState (returnValue) on
+        To close the dialog programmatically, you should call exitModalState (returnValue) on
         the DialogWindow that is created. To find a pointer to this window from your
         contentComponent, you can do something like this:
         @code
@@ -210,7 +210,7 @@ public:
 
         It returns the value that was returned by the dialog box's runModalLoop() call.
 
-        To close the dialog programatically, you should call exitModalState (returnValue) on
+        To close the dialog programmatically, you should call exitModalState (returnValue) on
         the DialogWindow that is created. To find a pointer to this window from your
         contentComponent, you can do something like this:
         @code
