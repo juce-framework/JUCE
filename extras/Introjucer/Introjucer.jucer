@@ -209,6 +209,8 @@
             file="Source/Utility/jucer_StoredSettings.cpp"/>
       <FILE id="BkswLvF" name="jucer_StoredSettings.h" compile="0" resource="0"
             file="Source/Utility/jucer_StoredSettings.h"/>
+      <FILE id="l75UWh" name="jucer_TranslationTool.h" compile="0" resource="0"
+            file="Source/Utility/jucer_TranslationTool.h"/>
       <FILE id="lZ9s99o" name="jucer_ValueSourceHelpers.h" compile="0" resource="0"
             file="Source/Utility/jucer_ValueSourceHelpers.h"/>
     </GROUP>

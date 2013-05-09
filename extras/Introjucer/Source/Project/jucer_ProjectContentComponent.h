@@ -102,6 +102,7 @@ protected:
     OpenDocumentManager::Document* currentDocument;
     RecentDocumentList recentDocumentList;
     ScopedPointer<Component> logo;
+    ScopedPointer<Component> translationTool;
 
     TabbedComponent treeViewTabs;
     ScopedPointer<ResizableEdgeComponent> resizerBar;
@@ -114,6 +115,7 @@ protected:
     void changeListenerCallback (ChangeBroadcaster*);
     TreeView* getFilesTreeView() const;
     ProjectTreeViewBase* getFilesTreeRoot() const;
+    void showTranslationTool();
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ProjectContentComponent)
 };

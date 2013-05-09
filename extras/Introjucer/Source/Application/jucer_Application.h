@@ -207,19 +207,19 @@ public:
 
     virtual StringArray getMenuNames()
     {
-        const char* const names[] = { "File", "Edit", "View", "Window", "Jucer", "Tools", nullptr };
+        const char* const names[] = { "File", "Edit", "View", "Window", "GUI Editor", "Tools", nullptr };
         return StringArray (names);
     }
 
     virtual void createMenu (PopupMenu& menu, const String& menuName)
     {
-        if (menuName == "File")         createFileMenu   (menu);
-        else if (menuName == "Edit")    createEditMenu   (menu);
-        else if (menuName == "View")    createViewMenu   (menu);
-        else if (menuName == "Window")  createWindowMenu (menu);
-        else if (menuName == "Tools")   createToolsMenu  (menu);
-        else if (menuName == "Jucer")   createGUIEditorMenu (menu);
-        else                            jassertfalse; // names have changed?
+        if (menuName == "File")             createFileMenu   (menu);
+        else if (menuName == "Edit")        createEditMenu   (menu);
+        else if (menuName == "View")        createViewMenu   (menu);
+        else if (menuName == "Window")      createWindowMenu (menu);
+        else if (menuName == "Tools")       createToolsMenu  (menu);
+        else if (menuName == "GUI Editor")  createGUIEditorMenu (menu);
+        else                                jassertfalse; // names have changed?
     }
 
     virtual void createFileMenu (PopupMenu& menu)
@@ -318,6 +318,7 @@ public:
     {
         menu.addCommandItem (commandManager, CommandIDs::updateModules);
         menu.addCommandItem (commandManager, CommandIDs::showUTF8Tool);
+        menu.addCommandItem (commandManager, CommandIDs::showTranslationTool);
     }
 
     virtual void handleMainMenuCommand (int menuItemID)

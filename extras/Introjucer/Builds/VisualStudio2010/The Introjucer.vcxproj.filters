@@ -1416,6 +1416,9 @@
     <ClInclude Include="..\..\Source\Utility\jucer_StoredSettings.h">
       <Filter>The Introjucer\Utility</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\Source\Utility\jucer_TranslationTool.h">
+      <Filter>The Introjucer\Utility</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\Source\Utility\jucer_ValueSourceHelpers.h">
       <Filter>The Introjucer\Utility</Filter>
     </ClInclude>

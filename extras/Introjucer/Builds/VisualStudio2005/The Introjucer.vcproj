@@ -198,6 +198,7 @@
         <File RelativePath="..\..\Source\Utility\jucer_RelativePath.h"/>
         <File RelativePath="..\..\Source\Utility\jucer_StoredSettings.cpp"/>
         <File RelativePath="..\..\Source\Utility\jucer_StoredSettings.h"/>
+        <File RelativePath="..\..\Source\Utility\jucer_TranslationTool.h"/>
         <File RelativePath="..\..\Source\Utility\jucer_ValueSourceHelpers.h"/>
       </Filter>
       <Filter Name="Code Editor">

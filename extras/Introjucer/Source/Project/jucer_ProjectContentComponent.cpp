@@ -30,7 +30,7 @@
 #include "jucer_ConfigPage.h"
 #include "jucer_TreeViewTypes.h"
 #include "../Project Saving/jucer_ProjectExporter.h"
-
+#include "../Utility/jucer_TranslationTool.h"
 
 //==============================================================================
 class FileTreeTab   : public TreePanelBase
@@ -547,6 +547,26 @@ void ProjectContentComponent::showBubbleMessage (const Rectangle<int>& pos, cons
 }
 
 //==============================================================================
+void ProjectContentComponent::showTranslationTool()
+{
+    if (translationTool != nullptr)
+    {
+        translationTool->toFront (true);
+    }
+    else if (project != nullptr)
+    {
+        TranslationToolComponent* ttc = new TranslationToolComponent();
+        ttc->initialiseForProject (*project);
+
+        new FloatingToolWindow ("Translation File Builder",
+                                "transToolWindowPos_" + project->getProjectUID(),
+                                ttc, translationTool,
+                                600, 700,
+                                500, 400, 10000, 10000);
+    }
+}
+
+//==============================================================================
 ApplicationCommandTarget* ProjectContentComponent::getNextCommandTarget()
 {
     return findFirstTargetParentComponent();
@@ -566,7 +586,8 @@ void ProjectContentComponent::getAllCommands (Array <CommandID>& commands)
                               CommandIDs::goToPreviousDoc,
                               CommandIDs::goToNextDoc,
                               CommandIDs::goToCounterpart,
-                              CommandIDs::deleteSelectedItem };
+                              CommandIDs::deleteSelectedItem,
+                              CommandIDs::showTranslationTool };
 
     commands.addArray (ids, numElementsInArray (ids));
 }
@@ -691,6 +712,10 @@ void ProjectContentComponent::getCommandInfo (const CommandID commandID, Applica
         result.setActive (dynamic_cast<TreePanelBase*> (treeViewTabs.getCurrentContentComponent()) != nullptr);
         break;
 
+    case CommandIDs::showTranslationTool:
+        result.setInfo ("Translation File Builder", "Shows the translation file helper tool", CommandCategories::general, 0);
+        break;
+
     default:
         break;
     }
@@ -750,6 +775,8 @@ bool ProjectContentComponent::perform (const InvocationInfo& info)
                 openInIDE();
 
             break;
+
+        case CommandIDs::showTranslationTool:       showTranslationTool(); break;
 
         default:
             return false;

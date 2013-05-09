@@ -1050,6 +1050,7 @@
     <ClInclude Include="..\..\Source\Utility\jucer_PresetIDs.h"/>
     <ClInclude Include="..\..\Source\Utility\jucer_RelativePath.h"/>
     <ClInclude Include="..\..\Source\Utility\jucer_StoredSettings.h"/>
+    <ClInclude Include="..\..\Source\Utility\jucer_TranslationTool.h"/>
     <ClInclude Include="..\..\Source\Utility\jucer_ValueSourceHelpers.h"/>
     <ClInclude Include="..\..\Source\Code Editor\jucer_SourceCodeEditor.h"/>
     <ClInclude Include="..\..\Source\ComponentEditor\components\jucer_ButtonHandler.h"/>
