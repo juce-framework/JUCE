@@ -32,22 +32,22 @@ class FileListTreeItem   : public TreeViewItem,
                            private ChangeListener
 {
 public:
-    FileListTreeItem (FileTreeComponent& owner_,
-                      DirectoryContentsList* const parentContentsList_,
-                      const int indexInContentsList_,
-                      const File& file_,
-                      TimeSliceThread& thread_)
-        : file (file_),
-          owner (owner_),
-          parentContentsList (parentContentsList_),
-          indexInContentsList (indexInContentsList_),
+    FileListTreeItem (FileTreeComponent& treeComp,
+                      DirectoryContentsList* const parentContents,
+                      const int indexInContents,
+                      const File& f,
+                      TimeSliceThread& t)
+        : file (f),
+          owner (treeComp),
+          parentContentsList (parentContents),
+          indexInContentsList (indexInContents),
           subContentsList (nullptr, false),
-          thread (thread_)
+          thread (t)
     {
         DirectoryContentsList::FileInfo fileInfo;
 
-        if (parentContentsList_ != nullptr
-             && parentContentsList_->getFileInfo (indexInContentsList_, fileInfo))
+        if (parentContents != nullptr
+             && parentContents->getFileInfo (indexInContents, fileInfo))
         {
             fileSize = File::descriptionOfSizeInBytes (fileInfo.fileSize);
             modTime = fileInfo.modificationTime.formatted ("%d %b '%y %H:%M");
@@ -63,6 +63,7 @@ public:
     {
         thread.removeTimeSliceClient (this);
         clearSubItems();
+        removeSubContentsList();
     }
 
     //==============================================================================
@@ -97,8 +98,19 @@ public:
         }
     }
 
+    void removeSubContentsList()
+    {
+        if (subContentsList != nullptr)
+        {
+            subContentsList->removeChangeListener (this);
+            subContentsList.clear();
+        }
+    }
+
     void setSubContentsList (DirectoryContentsList* newList, const bool canDeleteList)
     {
+        removeSubContentsList();
+
         OptionalScopedPointer<DirectoryContentsList> newPointer (newList, canDeleteList);
         subContentsList = newPointer;
         newList->addChangeListener (this);
