@@ -58,6 +58,8 @@ public:
         SteinbergWavelab5,
         SteinbergWavelab6,
         SteinbergWavelab7,
+        SteinbergWavelab8,
+        SteinbergNuendo,
         SteinbergWavelabGeneric,
         MuseReceptorGeneric,
         MagixSamplitude,
@@ -73,9 +75,10 @@ public:
     bool isAbletonLive() const noexcept      { return type == AbletonLive6 || type == AbletonLive7 || type == AbletonLive8 || type == AbletonLiveGeneric; }
     bool isCubase() const noexcept           { return type == SteinbergCubase4 || type == SteinbergCubase5 || type == SteinbergCubase5Bridged || type == SteinbergCubase6 || type == SteinbergCubase7 || type == SteinbergCubaseGeneric; }
     bool isCubaseBridged() const noexcept    { return type == SteinbergCubase5Bridged; }
+    bool isNuendo() const noexcept           { return type == SteinbergNuendo; }
     bool isTracktion() const noexcept        { return type == MackieTracktion3 || type == MackieTracktionGeneric; }
     bool isSonar() const noexcept            { return type == CakewalkSonar8 || type == CakewalkSonarGeneric; }
-    bool isWavelab() const noexcept          { return isWavelabLegacy() || type == SteinbergWavelab7 || type == SteinbergWavelabGeneric; }
+    bool isWavelab() const noexcept          { return isWavelabLegacy() || type == SteinbergWavelab7 || type == SteinbergWavelab8 || type == SteinbergWavelabGeneric; }
     bool isWavelabLegacy() const noexcept    { return type == SteinbergWavelab5 || type == SteinbergWavelab6; }
     bool isPremiere() const noexcept         { return type == AdobePremierePro; }
     bool isLogic() const noexcept            { return type == AppleLogic || type == EmagicLogic; }
@@ -114,6 +117,8 @@ private:
         if (hostFilename.containsIgnoreCase ("Cubase 7"))          return SteinbergCubase7;
         if (hostFilename.containsIgnoreCase ("Cubase"))            return SteinbergCubaseGeneric;
         if (hostPath.containsIgnoreCase     ("Wavelab 7"))         return SteinbergWavelab7;
+        if (hostPath.containsIgnoreCase     ("Wavelab 8"))         return SteinbergWavelab8;
+        if (hostPath.containsIgnoreCase     ("Nuendo"))            return SteinbergNuendo;
         if (hostFilename.containsIgnoreCase ("Wavelab"))           return SteinbergWavelabGeneric;
         if (hostFilename.containsIgnoreCase ("WaveBurner"))        return WaveBurner;
         if (hostFilename.contains           ("Digital Performer")) return DigitalPerformer;
@@ -142,6 +147,8 @@ private:
         if (hostPath.containsIgnoreCase     ("Wavelab 5"))         return SteinbergWavelab5;
         if (hostPath.containsIgnoreCase     ("Wavelab 6"))         return SteinbergWavelab6;
         if (hostPath.containsIgnoreCase     ("Wavelab 7"))         return SteinbergWavelab7;
+        if (hostPath.containsIgnoreCase     ("Wavelab 8"))         return SteinbergWavelab8;
+        if (hostPath.containsIgnoreCase     ("Nuendo"))            return SteinbergNuendo;
         if (hostFilename.containsIgnoreCase ("Wavelab"))           return SteinbergWavelabGeneric;
         if (hostFilename.containsIgnoreCase ("rm-host"))           return MuseReceptorGeneric;
         if (hostFilename.startsWithIgnoreCase ("Sam"))             return MagixSamplitude;
