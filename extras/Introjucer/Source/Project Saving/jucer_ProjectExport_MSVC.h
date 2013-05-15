@@ -144,6 +144,18 @@ protected:
         String getIntermediatesPath() const         { return config [Ids::intermediatesPath].toString(); }
         Value getIntermediatesPathValue()           { return getValue (Ids::intermediatesPath); }
 
+        String getCharacterSet() const
+        {
+            String charSet (config [Ids::characterSet].toString());
+
+            if (charSet.isEmpty())
+                charSet = "MultiByte";
+
+            return charSet;
+        }
+
+        Value getCharacterSetValue()                { return getValue (Ids::characterSet); }
+
         String getOutputFilename (const String& suffix, bool forceSuffix) const
         {
             const String target (File::createLegalFileName (getTargetBinaryNameString().trim()));
@@ -190,6 +202,14 @@ protected:
             props.add (new TextPropertyComponent (getPrebuildCommand(),  "Pre-build Command",  2048, false));
             props.add (new TextPropertyComponent (getPostbuildCommand(), "Post-build Command", 2048, false));
             props.add (new BooleanPropertyComponent (shouldGenerateManifestValue(), "Manifest", "Generate Manifest"));
+
+            {
+                const char* const characterSetNames[] = { "Default", "MultiByte", "Unicode", nullptr };
+                const var charSets[]                  = { var::null, "MultiByte", "Unicode", };
+
+                props.add (new ChoicePropertyComponent (getCharacterSetValue(), "Character Set",
+                                                        StringArray (characterSetNames), Array<var> (charSets, numElementsInArray (charSets))));
+            }
         }
     };
 
@@ -1065,7 +1085,7 @@ protected:
             e->setAttribute ("Label", "Configuration");
             e->createNewChildElement ("ConfigurationType")->addTextElement (getProjectType());
             e->createNewChildElement ("UseOfMfc")->addTextElement ("false");
-            e->createNewChildElement ("CharacterSet")->addTextElement ("MultiByte");
+            e->createNewChildElement ("CharacterSet")->addTextElement (config.getCharacterSet());
 
             if (! (config.isDebug() || config.shouldDisableWholeProgramOpt()))
                 e->createNewChildElement ("WholeProgramOptimization")->addTextElement ("true");
