@@ -120,15 +120,14 @@ namespace AudioUnitFormatHelpers
             DBG ("AU name: " + name);
         }
 
-        if (name.isNotEmpty())
+        if (name.containsChar (':'))
         {
             manufacturer = name.upToFirstOccurrenceOf (":", false, false).trim();
             name         = name.fromFirstOccurrenceOf (":", false, false).trim();
         }
-        else
-        {
+
+        if (name.isEmpty())
             name = "<Unknown>";
-        }
     }
 
     bool getComponentDescFromIdentifier (const String& fileOrIdentifier, AudioComponentDescription& desc,
@@ -153,6 +152,22 @@ namespace AudioUnitFormatHelpers
                 if (AudioComponent comp = AudioComponentFindNext (0, &desc))
                 {
                     getNameAndManufacturer (comp, name, manufacturer);
+
+                    if (manufacturer.isEmpty())
+                        manufacturer = tokens[2];
+
+                    if (version.isEmpty())
+                    {
+                        UInt32 versionNum;
+
+                        if (AudioComponentGetVersion (comp, &versionNum) == noErr)
+                        {
+                            version << (int) (versionNum >> 16) << "."
+                                    << (int) ((versionNum >> 8) & 0xff) << "."
+                                    << (int) (versionNum & 0xff);
+                        }
+                    }
+
                     return true;
                 }
             }
