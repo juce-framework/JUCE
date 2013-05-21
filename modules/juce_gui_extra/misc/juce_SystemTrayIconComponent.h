@@ -26,7 +26,7 @@
 #ifndef __JUCE_SYSTEMTRAYICONCOMPONENT_JUCEHEADER__
 #define __JUCE_SYSTEMTRAYICONCOMPONENT_JUCEHEADER__
 
-#if JUCE_WINDOWS || JUCE_LINUX || DOXYGEN
+#if JUCE_WINDOWS || JUCE_LINUX || JUCE_MAC || DOXYGEN
 
 
 //==============================================================================

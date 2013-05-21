@@ -23,7 +23,7 @@
   ==============================================================================
 */
 
-#if JUCE_WINDOWS || JUCE_LINUX
+#if JUCE_WINDOWS || JUCE_LINUX || JUCE_MAC
 
 SystemTrayIconComponent::SystemTrayIconComponent()
 {

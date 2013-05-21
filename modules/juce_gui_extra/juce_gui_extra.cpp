@@ -111,6 +111,7 @@ namespace juce
  #if JUCE_MAC
   #include "native/juce_mac_NSViewComponent.mm"
   #include "native/juce_mac_AppleRemote.mm"
+  #include "native/juce_mac_SystemTrayIcon.cpp"
  #endif
 
  #if JUCE_IOS
