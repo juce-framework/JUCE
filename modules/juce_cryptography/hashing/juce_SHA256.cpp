@@ -206,7 +206,7 @@ SHA256::SHA256 (const File& file)
     }
 }
 
-SHA256::SHA256 (const CharPointer_UTF8& utf8) noexcept
+SHA256::SHA256 (CharPointer_UTF8 utf8) noexcept
 {
     jassert (utf8.getAddress() != nullptr);
     process (utf8.getAddress(), utf8.sizeInBytes() - 1);

@@ -146,8 +146,8 @@ public:
     void createEditor (CodeDocument& codeDocument);
     void setEditor (CodeEditorComponent*);
 
-    void scrollToKeepRangeOnScreen (const Range<int>& range);
-    void highlight (const Range<int>& range, bool cursorAtStart);
+    void scrollToKeepRangeOnScreen (Range<int> range);
+    void highlight (Range<int> range, bool cursorAtStart);
 
     ScopedPointer<CodeEditorComponent> editor;
 

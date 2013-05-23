@@ -102,7 +102,7 @@ public:
     static GLuint getCurrentFrameBufferTarget();
 
     /** Clears the framebuffer with the specified colour. */
-    void clear (const Colour& colour);
+    void clear (Colour colour);
 
     /** Selects the framebuffer as the current target, and clears it to transparent. */
     void makeCurrentAndClear();
@@ -113,14 +113,14 @@ public:
                  float x2, float y2,
                  float x3, float y3,
                  float x4, float y4,
-                 const Colour& colour) const;
+                 Colour colour) const;
 
     /** Draws this framebuffer onto the current context, with the specified corner positions. */
     void draw3D (float x1, float y1, float z1,
                  float x2, float y2, float z2,
                  float x3, float y3, float z3,
                  float x4, float y4, float z4,
-                 const Colour& colour) const;
+                 Colour colour) const;
 
     /** Draws the framebuffer at a given position. */
     void drawAt (float x1, float y1) const;

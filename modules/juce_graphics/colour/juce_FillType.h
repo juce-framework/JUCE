@@ -49,7 +49,7 @@ public:
     /** Creates a fill type of a solid colour.
         @see setColour
     */
-    FillType (const Colour& colour) noexcept;
+    FillType (Colour colour) noexcept;
 
     /** Creates a gradient fill type.
         @see setGradient
@@ -88,7 +88,7 @@ public:
 
     /** Turns this object into a solid colour fill.
         If the object was an image or gradient, those fields will no longer be valid. */
-    void setColour (const Colour& newColour) noexcept;
+    void setColour (Colour newColour) noexcept;
 
     /** Turns this object into a gradient fill. */
     void setGradient (const ColourGradient& newGradient);

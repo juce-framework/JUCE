@@ -108,7 +108,7 @@ public:
         on where there's the most space, honouring any restrictions that were set
         with setAllowedPlacement().
     */
-    void setPosition (const Point<int>& arrowTipPosition);
+    void setPosition (Point<int> arrowTipPosition);
 
     /** Moves and resizes the bubble to point at a given rectangle.
 

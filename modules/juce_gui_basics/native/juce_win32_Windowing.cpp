@@ -1555,7 +1555,7 @@ private:
     }
 
     //==============================================================================
-    void doMouseEvent (const Point<int>& position)
+    void doMouseEvent (Point<int> position)
     {
         handleMouseEvent (0, position, currentModifiers, getMouseEventTime());
     }
@@ -1613,7 +1613,7 @@ private:
                 && (flags & 0x80) != 0; // (bit 7 = 0 for pen events, 1 for touch)
     }
 
-    void doMouseMove (const Point<int>& position)
+    void doMouseMove (Point<int> position)
     {
         if (! isCurrentEventFromTouchScreen())
         {
@@ -1652,7 +1652,7 @@ private:
         }
     }
 
-    void doMouseDown (const Point<int>& position, const WPARAM wParam)
+    void doMouseDown (Point<int> position, const WPARAM wParam)
     {
         if (! isCurrentEventFromTouchScreen())
         {
@@ -1668,7 +1668,7 @@ private:
         }
     }
 
-    void doMouseUp (const Point<int>& position, const WPARAM wParam)
+    void doMouseUp (Point<int> position, const WPARAM wParam)
     {
         if (! isCurrentEventFromTouchScreen())
         {
@@ -3025,7 +3025,7 @@ Point<int> MouseInputSource::getCurrentMousePosition()
     return Point<int> (mousePos.x, mousePos.y);
 }
 
-void Desktop::setMousePosition (const Point<int>& newPosition)
+void Desktop::setMousePosition (Point<int> newPosition)
 {
     SetCursorPos (newPosition.x, newPosition.y);
 }

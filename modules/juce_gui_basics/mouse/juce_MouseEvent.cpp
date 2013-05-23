@@ -24,13 +24,13 @@
 */
 
 MouseEvent::MouseEvent (MouseInputSource& inputSource,
-                        const Point<int>& position,
-                        const ModifierKeys& modKeys,
+                        Point<int> position,
+                        ModifierKeys modKeys,
                         Component* const eventComp,
                         Component* const originator,
-                        const Time& time,
-                        const Point<int>& downPos,
-                        const Time& downTime,
+                        Time time,
+                        Point<int> downPos,
+                        Time downTime,
                         const int numClicks,
                         const bool mouseWasDragged) noexcept
     : x (position.x),
@@ -62,7 +62,7 @@ MouseEvent MouseEvent::getEventRelativeTo (Component* const otherComponent) cons
                        mouseDownTime, numberOfClicks, wasMovedSinceMouseDown != 0);
 }
 
-MouseEvent MouseEvent::withNewPosition (const Point<int>& newPosition) const noexcept
+MouseEvent MouseEvent::withNewPosition (Point<int> newPosition) const noexcept
 {
     return MouseEvent (source, newPosition, mods, eventComponent, originalComponent,
                        eventTime, mouseDownPos, mouseDownTime,

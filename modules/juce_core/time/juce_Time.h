@@ -252,9 +252,9 @@ public:
 
     //==============================================================================
     /** Adds a RelativeTime to this time. */
-    Time& operator+= (const RelativeTime& delta);
+    Time& operator+= (RelativeTime delta);
     /** Subtracts a RelativeTime from this time. */
-    Time& operator-= (const RelativeTime& delta);
+    Time& operator-= (RelativeTime delta);
 
     //==============================================================================
     /** Tries to set the computer's clock.
@@ -377,27 +377,27 @@ private:
 
 //==============================================================================
 /** Adds a RelativeTime to a Time. */
-JUCE_API Time operator+ (const Time& time, const RelativeTime& delta);
+JUCE_API Time operator+ (Time time, RelativeTime delta);
 /** Adds a RelativeTime to a Time. */
-JUCE_API Time operator+ (const RelativeTime& delta, const Time& time);
+JUCE_API Time operator+ (RelativeTime delta, Time time);
 
 /** Subtracts a RelativeTime from a Time. */
-JUCE_API Time operator- (const Time& time, const RelativeTime& delta);
+JUCE_API Time operator- (Time time, RelativeTime delta);
 /** Returns the relative time difference between two times. */
-JUCE_API const RelativeTime operator- (const Time& time1, const Time& time2);
+JUCE_API const RelativeTime operator- (Time time1, Time time2);
 
 /** Compares two Time objects. */
-JUCE_API bool operator== (const Time& time1, const Time& time2);
+JUCE_API bool operator== (Time time1, Time time2);
 /** Compares two Time objects. */
-JUCE_API bool operator!= (const Time& time1, const Time& time2);
+JUCE_API bool operator!= (Time time1, Time time2);
 /** Compares two Time objects. */
-JUCE_API bool operator<  (const Time& time1, const Time& time2);
+JUCE_API bool operator<  (Time time1, Time time2);
 /** Compares two Time objects. */
-JUCE_API bool operator<= (const Time& time1, const Time& time2);
+JUCE_API bool operator<= (Time time1, Time time2);
 /** Compares two Time objects. */
-JUCE_API bool operator>  (const Time& time1, const Time& time2);
+JUCE_API bool operator>  (Time time1, Time time2);
 /** Compares two Time objects. */
-JUCE_API bool operator>= (const Time& time1, const Time& time2);
+JUCE_API bool operator>= (Time time1, Time time2);
 
 
 #endif   // __JUCE_TIME_JUCEHEADER__

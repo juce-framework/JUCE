@@ -424,8 +424,8 @@ KeyMappingEditorComponent::~KeyMappingEditorComponent()
 }
 
 //==============================================================================
-void KeyMappingEditorComponent::setColours (const Colour& mainBackground,
-                                            const Colour& textColour)
+void KeyMappingEditorComponent::setColours (Colour mainBackground,
+                                            Colour textColour)
 {
     setColour (backgroundColourId, mainBackground);
     setColour (textColourId, textColour);

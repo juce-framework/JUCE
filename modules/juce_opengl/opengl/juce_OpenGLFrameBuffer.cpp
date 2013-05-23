@@ -293,7 +293,7 @@ void OpenGLFrameBuffer::releaseAsRenderingTarget()
         pimpl->context.extensions.glBindFramebuffer (GL_FRAMEBUFFER, 0);
 }
 
-void OpenGLFrameBuffer::clear (const Colour& colour)
+void OpenGLFrameBuffer::clear (Colour colour)
 {
     if (makeCurrentRenderingTarget())
     {
@@ -367,7 +367,7 @@ void OpenGLFrameBuffer::draw2D (float x1, float y1,
                                 float x2, float y2,
                                 float x3, float y3,
                                 float x4, float y4,
-                                const Colour& colour) const
+                                Colour colour) const
 {
     if (pimpl != nullptr)
     {
@@ -381,7 +381,7 @@ void OpenGLFrameBuffer::draw3D (float x1, float y1, float z1,
                                 float x2, float y2, float z2,
                                 float x3, float y3, float z3,
                                 float x4, float y4, float z4,
-                                const Colour& colour) const
+                                Colour colour) const
 {
     if (pimpl != nullptr)
     {

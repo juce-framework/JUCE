@@ -62,13 +62,13 @@ public:
         @param mouseWasDragged  whether the mouse has been dragged significantly since the previous mouse-down
     */
     MouseEvent (MouseInputSource& source,
-                const Point<int>& position,
-                const ModifierKeys& modifiers,
+                Point<int> position,
+                ModifierKeys modifiers,
                 Component* eventComponent,
                 Component* originator,
-                const Time& eventTime,
-                const Point<int>& mouseDownPos,
-                const Time& mouseDownTime,
+                Time eventTime,
+                Point<int> mouseDownPos,
+                Time mouseDownTime,
                 int numberOfClicks,
                 bool mouseWasDragged) noexcept;
 
@@ -290,7 +290,7 @@ public:
         All other members of the event object are the same, but the x and y are
         replaced with these new values.
     */
-    MouseEvent withNewPosition (const Point<int>& newPosition) const noexcept;
+    MouseEvent withNewPosition (Point<int> newPosition) const noexcept;
 
     //==============================================================================
     /** Changes the application-wide setting for the double-click time limit.

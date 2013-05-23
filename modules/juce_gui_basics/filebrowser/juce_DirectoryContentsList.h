@@ -206,8 +206,8 @@ private:
     void changed();
     bool checkNextFile (bool& hasChanged);
     bool addFile (const File& file, bool isDir,
-                  const int64 fileSize, const Time& modTime,
-                  const Time& creationTime, bool isReadOnly);
+                  const int64 fileSize, const Time modTime,
+                  const Time creationTime, bool isReadOnly);
     void setTypeFlags (int newFlags);
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DirectoryContentsList)

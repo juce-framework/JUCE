@@ -56,7 +56,7 @@ void ApplicationCommandInfo::setTicked (const bool b) noexcept
         flags &= ~isTicked;
 }
 
-void ApplicationCommandInfo::addDefaultKeypress (const int keyCode, const ModifierKeys& modifiers) noexcept
+void ApplicationCommandInfo::addDefaultKeypress (const int keyCode, ModifierKeys modifiers) noexcept
 {
     defaultKeypresses.add (KeyPress (keyCode, modifiers, 0));
 }

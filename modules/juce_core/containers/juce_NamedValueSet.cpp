@@ -27,7 +27,7 @@ NamedValueSet::NamedValue::NamedValue() noexcept
 {
 }
 
-inline NamedValueSet::NamedValue::NamedValue (const Identifier& n, const var& v)
+inline NamedValueSet::NamedValue::NamedValue (const Identifier n, const var& v)
     : name (n), value (v)
 {
 }
@@ -52,7 +52,7 @@ NamedValueSet::NamedValue::NamedValue (NamedValue&& other) noexcept
 {
 }
 
-inline NamedValueSet::NamedValue::NamedValue (const Identifier& n, var&& v)
+inline NamedValueSet::NamedValue::NamedValue (const Identifier n, var&& v)
     : name (n), value (static_cast <var&&> (v))
 {
 }
@@ -138,7 +138,7 @@ int NamedValueSet::size() const noexcept
     return values.size();
 }
 
-const var& NamedValueSet::operator[] (const Identifier& name) const
+const var& NamedValueSet::operator[] (const Identifier name) const
 {
     for (NamedValue* i = values; i != nullptr; i = i->nextListItem)
         if (i->name == name)
@@ -147,7 +147,7 @@ const var& NamedValueSet::operator[] (const Identifier& name) const
     return var::null;
 }
 
-var NamedValueSet::getWithDefault (const Identifier& name, const var& defaultReturnValue) const
+var NamedValueSet::getWithDefault (const Identifier name, const var& defaultReturnValue) const
 {
     if (const var* const v = getVarPointer (name))
         return *v;
@@ -155,7 +155,7 @@ var NamedValueSet::getWithDefault (const Identifier& name, const var& defaultRet
     return defaultReturnValue;
 }
 
-var* NamedValueSet::getVarPointer (const Identifier& name) const noexcept
+var* NamedValueSet::getVarPointer (const Identifier name) const noexcept
 {
     for (NamedValue* i = values; i != nullptr; i = i->nextListItem)
         if (i->name == name)
@@ -165,7 +165,7 @@ var* NamedValueSet::getVarPointer (const Identifier& name) const noexcept
 }
 
 #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
-bool NamedValueSet::set (const Identifier& name, var&& newValue)
+bool NamedValueSet::set (const Identifier name, var&& newValue)
 {
     LinkedListPointer<NamedValue>* i = &values;
 
@@ -190,7 +190,7 @@ bool NamedValueSet::set (const Identifier& name, var&& newValue)
 }
 #endif
 
-bool NamedValueSet::set (const Identifier& name, const var& newValue)
+bool NamedValueSet::set (const Identifier name, const var& newValue)
 {
     LinkedListPointer<NamedValue>* i = &values;
 
@@ -214,12 +214,12 @@ bool NamedValueSet::set (const Identifier& name, const var& newValue)
     return true;
 }
 
-bool NamedValueSet::contains (const Identifier& name) const
+bool NamedValueSet::contains (const Identifier name) const
 {
     return getVarPointer (name) != nullptr;
 }
 
-bool NamedValueSet::remove (const Identifier& name)
+bool NamedValueSet::remove (const Identifier name)
 {
     LinkedListPointer<NamedValue>* i = &values;
 

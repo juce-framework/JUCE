@@ -220,27 +220,27 @@ public:
 
     //==============================================================================
     /** If this variant is an object, this returns one of its properties. */
-    var operator[] (const Identifier& propertyName) const;
+    var operator[] (const Identifier propertyName) const;
     /** If this variant is an object, this returns one of its properties. */
     var operator[] (const char* propertyName) const;
     /** If this variant is an object, this returns one of its properties, or a default
         fallback value if the property is not set. */
-    var getProperty (const Identifier& propertyName, const var& defaultReturnValue) const;
+    var getProperty (const Identifier propertyName, const var& defaultReturnValue) const;
 
     /** If this variant is an object, this invokes one of its methods with no arguments. */
-    var call (const Identifier& method) const;
+    var call (const Identifier method) const;
     /** If this variant is an object, this invokes one of its methods with one argument. */
-    var call (const Identifier& method, const var& arg1) const;
+    var call (const Identifier method, const var& arg1) const;
     /** If this variant is an object, this invokes one of its methods with 2 arguments. */
-    var call (const Identifier& method, const var& arg1, const var& arg2) const;
+    var call (const Identifier method, const var& arg1, const var& arg2) const;
     /** If this variant is an object, this invokes one of its methods with 3 arguments. */
-    var call (const Identifier& method, const var& arg1, const var& arg2, const var& arg3);
+    var call (const Identifier method, const var& arg1, const var& arg2, const var& arg3);
     /** If this variant is an object, this invokes one of its methods with 4 arguments. */
-    var call (const Identifier& method, const var& arg1, const var& arg2, const var& arg3, const var& arg4) const;
+    var call (const Identifier method, const var& arg1, const var& arg2, const var& arg3, const var& arg4) const;
     /** If this variant is an object, this invokes one of its methods with 5 arguments. */
-    var call (const Identifier& method, const var& arg1, const var& arg2, const var& arg3, const var& arg4, const var& arg5) const;
+    var call (const Identifier method, const var& arg1, const var& arg2, const var& arg3, const var& arg4, const var& arg5) const;
     /** If this variant is an object, this invokes one of its methods with a list of arguments. */
-    var invoke (const Identifier& method, const var* arguments, int numArguments) const;
+    var invoke (const Identifier method, const var* arguments, int numArguments) const;
 
     //==============================================================================
     /** Writes a binary representation of this value to a stream.

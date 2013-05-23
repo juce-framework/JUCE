@@ -120,37 +120,37 @@ public:
 
     //==============================================================================
     /** Creates a string from a UTF-8 character string */
-    String (const CharPointer_UTF8& text);
+    String (const CharPointer_UTF8 text);
 
     /** Creates a string from a UTF-8 character string */
-    String (const CharPointer_UTF8& text, size_t maxChars);
+    String (const CharPointer_UTF8 text, size_t maxChars);
 
     /** Creates a string from a UTF-8 character string */
-    String (const CharPointer_UTF8& start, const CharPointer_UTF8& end);
+    String (const CharPointer_UTF8 start, const CharPointer_UTF8 end);
 
     //==============================================================================
     /** Creates a string from a UTF-16 character string */
-    String (const CharPointer_UTF16& text);
+    String (const CharPointer_UTF16 text);
 
     /** Creates a string from a UTF-16 character string */
-    String (const CharPointer_UTF16& text, size_t maxChars);
+    String (const CharPointer_UTF16 text, size_t maxChars);
 
     /** Creates a string from a UTF-16 character string */
-    String (const CharPointer_UTF16& start, const CharPointer_UTF16& end);
+    String (const CharPointer_UTF16 start, const CharPointer_UTF16 end);
 
     //==============================================================================
     /** Creates a string from a UTF-32 character string */
-    String (const CharPointer_UTF32& text);
+    String (const CharPointer_UTF32 text);
 
     /** Creates a string from a UTF-32 character string */
-    String (const CharPointer_UTF32& text, size_t maxChars);
+    String (const CharPointer_UTF32 text, size_t maxChars);
 
     /** Creates a string from a UTF-32 character string */
-    String (const CharPointer_UTF32& start, const CharPointer_UTF32& end);
+    String (const CharPointer_UTF32 start, const CharPointer_UTF32 end);
 
     //==============================================================================
     /** Creates a string from an ASCII character string */
-    String (const CharPointer_ASCII& text);
+    String (const CharPointer_ASCII text);
 
     /** Creates a string from a UTF-8 encoded std::string. */
     String (const std::string&);
@@ -242,7 +242,7 @@ public:
         @param maxCharsToTake   the maximum number of characters to take from the string passed in
     */
     template <class CharPointer>
-    void appendCharPointer (const CharPointer& textToAppend, size_t maxCharsToTake)
+    void appendCharPointer (const CharPointer textToAppend, size_t maxCharsToTake)
     {
         if (textToAppend.getAddress() != nullptr)
         {
@@ -267,7 +267,7 @@ public:
 
     /** Appends a string to the end of this one. */
     template <class CharPointer>
-    void appendCharPointer (const CharPointer& textToAppend)
+    void appendCharPointer (const CharPointer textToAppend)
     {
         if (textToAppend.getAddress() != nullptr)
         {
@@ -1037,7 +1037,7 @@ public:
         that is returned must not be stored anywhere, as it can be deleted whenever the
         string changes.
     */
-    inline const CharPointerType& getCharPointer() const noexcept    { return text; }
+    inline CharPointerType getCharPointer() const noexcept      { return text; }
 
     /** Returns a pointer to a UTF-8 version of this string.
 
@@ -1296,11 +1296,11 @@ JUCE_API bool JUCE_CALLTYPE operator== (const String& string1, const char* strin
 /** Case-sensitive comparison of two strings. */
 JUCE_API bool JUCE_CALLTYPE operator== (const String& string1, const wchar_t* string2) noexcept;
 /** Case-sensitive comparison of two strings. */
-JUCE_API bool JUCE_CALLTYPE operator== (const String& string1, const CharPointer_UTF8& string2) noexcept;
+JUCE_API bool JUCE_CALLTYPE operator== (const String& string1, const CharPointer_UTF8 string2) noexcept;
 /** Case-sensitive comparison of two strings. */
-JUCE_API bool JUCE_CALLTYPE operator== (const String& string1, const CharPointer_UTF16& string2) noexcept;
+JUCE_API bool JUCE_CALLTYPE operator== (const String& string1, const CharPointer_UTF16 string2) noexcept;
 /** Case-sensitive comparison of two strings. */
-JUCE_API bool JUCE_CALLTYPE operator== (const String& string1, const CharPointer_UTF32& string2) noexcept;
+JUCE_API bool JUCE_CALLTYPE operator== (const String& string1, const CharPointer_UTF32 string2) noexcept;
 /** Case-sensitive comparison of two strings. */
 JUCE_API bool JUCE_CALLTYPE operator!= (const String& string1, const String& string2) noexcept;
 /** Case-sensitive comparison of two strings. */
@@ -1308,11 +1308,11 @@ JUCE_API bool JUCE_CALLTYPE operator!= (const String& string1, const char* strin
 /** Case-sensitive comparison of two strings. */
 JUCE_API bool JUCE_CALLTYPE operator!= (const String& string1, const wchar_t* string2) noexcept;
 /** Case-sensitive comparison of two strings. */
-JUCE_API bool JUCE_CALLTYPE operator!= (const String& string1, const CharPointer_UTF8& string2) noexcept;
+JUCE_API bool JUCE_CALLTYPE operator!= (const String& string1, const CharPointer_UTF8 string2) noexcept;
 /** Case-sensitive comparison of two strings. */
-JUCE_API bool JUCE_CALLTYPE operator!= (const String& string1, const CharPointer_UTF16& string2) noexcept;
+JUCE_API bool JUCE_CALLTYPE operator!= (const String& string1, const CharPointer_UTF16 string2) noexcept;
 /** Case-sensitive comparison of two strings. */
-JUCE_API bool JUCE_CALLTYPE operator!= (const String& string1, const CharPointer_UTF32& string2) noexcept;
+JUCE_API bool JUCE_CALLTYPE operator!= (const String& string1, const CharPointer_UTF32 string2) noexcept;
 /** Case-sensitive comparison of two strings. */
 JUCE_API bool JUCE_CALLTYPE operator>  (const String& string1, const String& string2) noexcept;
 /** Case-sensitive comparison of two strings. */

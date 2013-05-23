@@ -42,7 +42,7 @@ class JUCE_API  LowLevelGraphicsSoftwareRenderer    : public LowLevelGraphicsCon
 public:
     //==============================================================================
     LowLevelGraphicsSoftwareRenderer (const Image& imageToRenderOnto);
-    LowLevelGraphicsSoftwareRenderer (const Image& imageToRenderOnto, const Point<int>& origin,
+    LowLevelGraphicsSoftwareRenderer (const Image& imageToRenderOnto, Point<int> origin,
                                       const RectangleList& initialClip);
     ~LowLevelGraphicsSoftwareRenderer();
 

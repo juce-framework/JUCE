@@ -106,7 +106,7 @@ public:
     static StringPairArray createBWAVMetadata (const String& description,
                                                const String& originator,
                                                const String& originatorRef,
-                                               const Time& dateAndTime,
+                                               const Time dateAndTime,
                                                const int64 timeReferenceSamples,
                                                const String& codingHistory);
 

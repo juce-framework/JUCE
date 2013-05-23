@@ -61,16 +61,16 @@ public:
     Identifier (const Identifier& other) noexcept;
 
     /** Creates a copy of another identifier. */
-    Identifier& operator= (const Identifier& other) noexcept;
+    Identifier& operator= (const Identifier other) noexcept;
 
     /** Destructor */
     ~Identifier();
 
     /** Compares two identifiers. This is a very fast operation. */
-    inline bool operator== (const Identifier& other) const noexcept     { return name == other.name; }
+    inline bool operator== (const Identifier other) const noexcept      { return name == other.name; }
 
     /** Compares two identifiers. This is a very fast operation. */
-    inline bool operator!= (const Identifier& other) const noexcept     { return name != other.name; }
+    inline bool operator!= (const Identifier other) const noexcept      { return name != other.name; }
 
     /** Returns this identifier as a string. */
     String toString() const                                             { return name; }

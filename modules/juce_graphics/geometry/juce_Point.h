@@ -59,8 +59,8 @@ public:
     /** Copies this point from another one. */
     Point& operator= (const Point& other) noexcept                      { x = other.x; y = other.y; return *this; }
 
-    inline bool operator== (const Point& other) const noexcept          { return x == other.x && y == other.y; }
-    inline bool operator!= (const Point& other) const noexcept          { return x != other.x || y != other.y; }
+    inline bool operator== (Point other) const noexcept                 { return x == other.x && y == other.y; }
+    inline bool operator!= (Point other) const noexcept                 { return x != other.x || y != other.y; }
 
     /** Returns true if the point is (0, 0). */
     bool isOrigin() const noexcept                                      { return x == ValueType() && y == ValueType(); }
@@ -93,16 +93,16 @@ public:
     Point translated (const ValueType xDelta, const ValueType yDelta) const noexcept  { return Point (x + xDelta, y + yDelta); }
 
     /** Adds two points together. */
-    Point operator+ (const Point& other) const noexcept                 { return Point (x + other.x, y + other.y); }
+    Point operator+ (Point other) const noexcept                        { return Point (x + other.x, y + other.y); }
 
     /** Adds another point's co-ordinates to this one. */
-    Point& operator+= (const Point& other) noexcept                     { x += other.x; y += other.y; return *this; }
+    Point& operator+= (Point other) noexcept                            { x += other.x; y += other.y; return *this; }
 
     /** Subtracts one points from another. */
-    Point operator- (const Point& other) const noexcept                 { return Point (x - other.x, y - other.y); }
+    Point operator- (Point other) const noexcept                        { return Point (x - other.x, y - other.y); }
 
     /** Subtracts another point's co-ordinates to this one. */
-    Point& operator-= (const Point& other) noexcept                     { x -= other.x; y -= other.y; return *this; }
+    Point& operator-= (Point other) noexcept                            { x -= other.x; y -= other.y; return *this; }
 
     /** Returns a point whose coordinates are multiplied by a given value. */
     Point operator* (const ValueType multiplier) const noexcept         { return Point (x * multiplier, y * multiplier); }
@@ -123,7 +123,7 @@ public:
     ValueType getDistanceFromOrigin() const noexcept                    { return juce_hypot (x, y); }
 
     /** Returns the straight-line distance between this point and another one. */
-    ValueType getDistanceFrom (const Point& other) const noexcept       { return juce_hypot (x - other.x, y - other.y); }
+    ValueType getDistanceFrom (Point other) const noexcept              { return juce_hypot (x - other.x, y - other.y); }
 
     /** This type will be double if the Point's type is double, otherwise it will be float. */
     typedef typename TypeHelpers::SmallestFloatType<ValueType>::type FloatType;
@@ -133,7 +133,7 @@ public:
         The return value is the number of radians clockwise from the 12 o'clock direction,
         where this point is the centre and the other point is on the circumference.
     */
-    FloatType getAngleToPoint (const Point& other) const noexcept
+    FloatType getAngleToPoint (Point other) const noexcept
         { return static_cast<FloatType> (std::atan2 (other.x - x, y - other.y)); }
 
     /** Taking this point to be the centre of a circle, this returns a point on its circumference.
@@ -165,7 +165,7 @@ public:
                         transform.mat10 * x + transform.mat11 * y + transform.mat12); }
 
     /** Returns the dot-product of two points (x1 * x2 + y1 * y2). */
-    FloatType getDotProduct (const Point& other) const noexcept   { return x * other.x + y * other.y; }
+    FloatType getDotProduct (Point other) const noexcept          { return x * other.x + y * other.y; }
 
     /** Casts this point to a Point<int> object. */
     Point<int> toInt() const noexcept                             { return Point<int> (static_cast <int> (x), static_cast<int> (y)); }

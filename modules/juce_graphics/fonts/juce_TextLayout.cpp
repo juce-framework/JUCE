@@ -23,7 +23,7 @@
   ==============================================================================
 */
 
-TextLayout::Glyph::Glyph (const int glyphCode_, const Point<float>& anchor_, float width_) noexcept
+TextLayout::Glyph::Glyph (const int glyphCode_, Point<float> anchor_, float width_) noexcept
     : glyphCode (glyphCode_), anchor (anchor_), width (width_)
 {
 }
@@ -49,7 +49,7 @@ TextLayout::Run::Run() noexcept
 {
 }
 
-TextLayout::Run::Run (const Range<int>& range, const int numGlyphsToPreallocate)
+TextLayout::Run::Run (Range<int> range, const int numGlyphsToPreallocate)
     : colour (0xff000000), stringRange (range)
 {
     glyphs.ensureStorageAllocated (numGlyphsToPreallocate);
@@ -71,7 +71,7 @@ TextLayout::Line::Line() noexcept
 {
 }
 
-TextLayout::Line::Line (const Range<int>& stringRange_, const Point<float>& lineOrigin_,
+TextLayout::Line::Line (Range<int> stringRange_, Point<float> lineOrigin_,
                         const float ascent_, const float descent_, const float leading_,
                         const int numRunsToPreallocate)
     : stringRange (stringRange_), lineOrigin (lineOrigin_),
@@ -251,7 +251,7 @@ namespace TextLayoutHelpers
 
     struct RunAttribute
     {
-        RunAttribute (const FontAndColour& fc, const Range<int>& r) noexcept
+        RunAttribute (const FontAndColour& fc, const Range<int> r) noexcept
             : fontAndColour (fc), range (r)
         {}
 
@@ -415,7 +415,7 @@ namespace TextLayoutHelpers
             return CharacterFunctions::isWhitespace (c) ? 2 : 1;
         }
 
-        void appendText (const AttributedString& text, const Range<int>& stringRange,
+        void appendText (const AttributedString& text, const Range<int> stringRange,
                          const Font& font, const Colour& colour)
         {
             const String stringText (text.getText().substring (stringRange.getStart(), stringRange.getEnd()));

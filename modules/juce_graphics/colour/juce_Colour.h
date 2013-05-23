@@ -231,14 +231,14 @@ public:
         If the foreground colour is semi-transparent, it is blended onto this colour
         accordingly.
     */
-    Colour overlaidWith (const Colour& foregroundColour) const noexcept;
+    Colour overlaidWith (Colour foregroundColour) const noexcept;
 
     /** Returns a colour that lies somewhere between this one and another.
 
         If amountOfOther is zero, the result is 100% this colour, if amountOfOther
         is 1.0, the result is 100% of the other colour.
     */
-    Colour interpolatedWith (const Colour& other, float proportionOfOther) const noexcept;
+    Colour interpolatedWith (Colour other, float proportionOfOther) const noexcept;
 
     //==============================================================================
     /** Returns the colour's hue component.
@@ -331,14 +331,14 @@ public:
         nudged up or down so that it differs from the luminosity of this colour
         by at least the amount specified by minLuminosityDiff.
     */
-    Colour contrasting (const Colour& targetColour, float minLuminosityDiff) const noexcept;
+    Colour contrasting (Colour targetColour, float minLuminosityDiff) const noexcept;
 
     /** Returns a colour that contrasts against two colours.
         Looks for a colour that contrasts with both of the colours passed-in.
         Handy for things like choosing a highlight colour in text editors, etc.
     */
-    static Colour contrasting (const Colour& colour1,
-                               const Colour& colour2) noexcept;
+    static Colour contrasting (Colour colour1,
+                               Colour colour2) noexcept;
 
     //==============================================================================
     /** Returns an opaque shade of grey.

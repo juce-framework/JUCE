@@ -188,7 +188,7 @@ public:
         This won't do any alpha-blending - it just sets all pixels in the image to
         the given colour (which may be non-opaque if the image has an alpha channel).
     */
-    void clear (const Rectangle<int>& area, const Colour& colourToClearTo = Colour (0x00000000));
+    void clear (const Rectangle<int>& area, Colour colourToClearTo = Colour (0x00000000));
 
     /** Returns a rescaled version of this image.
 
@@ -262,7 +262,7 @@ public:
 
         @see getPixelAt, Image::BitmapData::setPixelColour
     */
-    void setPixelAt (int x, int y, const Colour& colour);
+    void setPixelAt (int x, int y, Colour colour);
 
     /** Changes the opacity of a pixel.
 
@@ -344,7 +344,7 @@ public:
             For performance reasons, this won't do any bounds-checking on the coordinates, so it's the caller's
             repsonsibility to make sure they're within the image's size.
         */
-        void setPixelColour (int x, int y, const Colour& colour) const noexcept;
+        void setPixelColour (int x, int y, Colour colour) const noexcept;
 
         /** Returns the size of the bitmap. */
         Rectangle<int> getBounds() const noexcept                           { return Rectangle<int> (width, height); }

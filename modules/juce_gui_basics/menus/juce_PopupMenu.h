@@ -146,7 +146,7 @@ public:
     */
     void addColouredItem (int itemResultID,
                           const String& itemText,
-                          const Colour& itemTextColour,
+                          Colour itemTextColour,
                           bool isEnabled = true,
                           bool isTicked = false,
                           const Image& iconToUse = Image::null);

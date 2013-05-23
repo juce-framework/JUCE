@@ -216,7 +216,7 @@ MD5::MD5 (const void* data, const size_t numBytes) noexcept
     processData (data, numBytes);
 }
 
-MD5::MD5 (const CharPointer_UTF8& utf8) noexcept
+MD5::MD5 (CharPointer_UTF8 utf8) noexcept
 {
     jassert (utf8.getAddress() != nullptr);
     processData (utf8.getAddress(), utf8.sizeInBytes() - 1);

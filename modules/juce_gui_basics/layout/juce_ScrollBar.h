@@ -99,7 +99,7 @@ public:
 
         @see setCurrentRange
     */
-    void setRangeLimits (const Range<double>& newRangeLimit,
+    void setRangeLimits (Range<double> newRangeLimit,
                          NotificationType notification = sendNotificationAsync);
 
     /** Sets the minimum and maximum values that the bar will move between.
@@ -145,7 +145,7 @@ public:
         @returns true if the range was changed, or false if nothing was changed.
         @see getCurrentRange. setCurrentRangeStart
     */
-    bool setCurrentRange (const Range<double>& newRange,
+    bool setCurrentRange (Range<double> newRange,
                           NotificationType notification = sendNotificationAsync);
 
     /** Changes the position of the scrollbar's 'thumb'.

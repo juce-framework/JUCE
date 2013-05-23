@@ -81,7 +81,7 @@ public:
 
         @see setOpacity
     */
-    void setColour (const Colour& newColour);
+    void setColour (Colour newColour);
 
     /** Changes the opacity to use with the current colour.
 
@@ -251,7 +251,7 @@ public:
     //==============================================================================
     /** Fills the context's entire clip region with the current colour or brush.
 
-        (See also the fillAll (const Colour&) method which is a quick way of filling
+        (See also the fillAll (Colour) method which is a quick way of filling
         it with a given colour).
     */
     void fillAll() const;
@@ -261,7 +261,7 @@ public:
         This leaves the context's current colour and brush unchanged, it just
         uses the specified colour temporarily.
     */
-    void fillAll (const Colour& colourToUse) const;
+    void fillAll (Colour colourToUse) const;
 
     //==============================================================================
     /** Fills a rectangle with the current colour or brush.
@@ -301,7 +301,7 @@ public:
     */
     void fillCheckerBoard (const Rectangle<int>& area,
                            int checkWidth, int checkHeight,
-                           const Colour& colour1, const Colour& colour2) const;
+                           Colour colour1, Colour colour2) const;
 
     /** Draws four lines to form a rectangular outline, using the current colour or brush.
 

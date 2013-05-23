@@ -29,7 +29,7 @@ struct CustomMouseCursorInfo
         : image (im), hotspot (hsX, hsY), scaleFactor (1.0f)
     {}
 
-    CustomMouseCursorInfo (const Image& im, const Point<int>& hs, float scale) noexcept
+    CustomMouseCursorInfo (const Image& im, Point<int> hs, float scale) noexcept
         : image (im), hotspot (hs), scaleFactor (scale)
     {}
 
@@ -54,7 +54,7 @@ public:
     {
     }
 
-    SharedCursorHandle (const Image& image, const Point<int>& hotSpot, const float scaleFactor)
+    SharedCursorHandle (const Image& image, Point<int> hotSpot, const float scaleFactor)
         : handle (CustomMouseCursorInfo (image, hotSpot, scaleFactor).create()),
           refCount (1),
           standardType (MouseCursor::NormalCursor),

@@ -48,7 +48,7 @@ public:
     */
     ArrowButton (const String& buttonName,
                  float arrowDirection,
-                 const Colour& arrowColour);
+                 Colour arrowColour);
 
     /** Destructor. */
     ~ArrowButton();

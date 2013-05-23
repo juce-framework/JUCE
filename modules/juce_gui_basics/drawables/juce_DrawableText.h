@@ -55,10 +55,10 @@ public:
     const String& getText() const noexcept                              { return text;}
 
     /** Sets the colour of the text. */
-    void setColour (const Colour& newColour);
+    void setColour (Colour newColour);
 
     /** Returns the current text colour. */
-    const Colour& getColour() const noexcept                            { return colour; }
+    Colour getColour() const noexcept                                   { return colour; }
 
     /** Sets the font to use.
         Note that the font height and horizontal scale are set as RelativeCoordinates using
@@ -115,7 +115,7 @@ public:
         Value getTextValue (UndoManager* undoManager);
 
         Colour getColour() const;
-        void setColour (const Colour& newColour, UndoManager* undoManager);
+        void setColour (Colour newColour, UndoManager* undoManager);
 
         Justification getJustification() const;
         void setJustification (const Justification& newJustification, UndoManager* undoManager);

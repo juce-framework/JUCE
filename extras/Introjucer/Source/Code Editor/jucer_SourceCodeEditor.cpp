@@ -155,7 +155,7 @@ void SourceCodeEditor::setEditor (CodeEditorComponent* newEditor)
     editor->getDocument().addListener (this);
 }
 
-void SourceCodeEditor::scrollToKeepRangeOnScreen (const Range<int>& range)
+void SourceCodeEditor::scrollToKeepRangeOnScreen (Range<int> range)
 {
     const int space = jmin (10, editor->getNumLinesOnScreen() / 3);
     const CodeDocument::Position start (editor->getDocument(), range.getStart());
@@ -164,7 +164,7 @@ void SourceCodeEditor::scrollToKeepRangeOnScreen (const Range<int>& range)
     editor->scrollToKeepLinesOnScreen (Range<int> (start.getLineNumber() - space, end.getLineNumber() + space));
 }
 
-void SourceCodeEditor::highlight (const Range<int>& range, bool cursorAtStart)
+void SourceCodeEditor::highlight (Range<int> range, bool cursorAtStart)
 {
     scrollToKeepRangeOnScreen (range);
 

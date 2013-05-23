@@ -48,25 +48,25 @@ public:
     {
     }
 
-    inline CharPointer_UTF32& operator= (const CharPointer_UTF32& other) noexcept
+    inline CharPointer_UTF32 operator= (CharPointer_UTF32 other) noexcept
     {
         data = other.data;
         return *this;
     }
 
-    inline CharPointer_UTF32& operator= (const CharType* text) noexcept
+    inline CharPointer_UTF32 operator= (const CharType* text) noexcept
     {
         data = const_cast <CharType*> (text);
         return *this;
     }
 
     /** This is a pointer comparison, it doesn't compare the actual text. */
-    inline bool operator== (const CharPointer_UTF32& other) const noexcept { return data == other.data; }
-    inline bool operator!= (const CharPointer_UTF32& other) const noexcept { return data != other.data; }
-    inline bool operator<= (const CharPointer_UTF32& other) const noexcept { return data <= other.data; }
-    inline bool operator<  (const CharPointer_UTF32& other) const noexcept { return data <  other.data; }
-    inline bool operator>= (const CharPointer_UTF32& other) const noexcept { return data >= other.data; }
-    inline bool operator>  (const CharPointer_UTF32& other) const noexcept { return data >  other.data; }
+    inline bool operator== (CharPointer_UTF32 other) const noexcept     { return data == other.data; }
+    inline bool operator!= (CharPointer_UTF32 other) const noexcept     { return data != other.data; }
+    inline bool operator<= (CharPointer_UTF32 other) const noexcept     { return data <= other.data; }
+    inline bool operator<  (CharPointer_UTF32 other) const noexcept     { return data <  other.data; }
+    inline bool operator>= (CharPointer_UTF32 other) const noexcept     { return data >= other.data; }
+    inline bool operator>  (CharPointer_UTF32 other) const noexcept     { return data >  other.data; }
 
     /** Returns the address that this pointer is pointing to. */
     inline CharType* getAddress() const noexcept        { return data; }
@@ -81,14 +81,14 @@ public:
     inline juce_wchar operator*() const noexcept        { return *data; }
 
     /** Moves this pointer along to the next character in the string. */
-    inline CharPointer_UTF32& operator++() noexcept
+    inline CharPointer_UTF32 operator++() noexcept
     {
         ++data;
         return *this;
     }
 
     /** Moves this pointer to the previous character in the string. */
-    inline CharPointer_UTF32& operator--() noexcept
+    inline CharPointer_UTF32 operator--() noexcept
     {
         --data;
         return *this;
@@ -172,7 +172,7 @@ public:
     }
 
     /** Returns the number of characters in this string, or up to the given end pointer, whichever is lower. */
-    size_t lengthUpTo (const CharPointer_UTF32& end) const noexcept
+    size_t lengthUpTo (const CharPointer_UTF32 end) const noexcept
     {
         return CharacterFunctions::lengthUpTo (*this, end);
     }
@@ -198,7 +198,7 @@ public:
         The value returned does NOT include the terminating null character.
     */
     template <class CharPointer>
-    static size_t getBytesRequiredFor (const CharPointer& text) noexcept
+    static size_t getBytesRequiredFor (const CharPointer text) noexcept
     {
         return sizeof (CharType) * text.length();
     }
@@ -211,13 +211,13 @@ public:
 
     /** Copies a source string to this pointer, advancing this pointer as it goes. */
     template <typename CharPointer>
-    void writeAll (const CharPointer& src) noexcept
+    void writeAll (const CharPointer src) noexcept
     {
         CharacterFunctions::copyAll (*this, src);
     }
 
     /** Copies a source string to this pointer, advancing this pointer as it goes. */
-    void writeAll (const CharPointer_UTF32& src) noexcept
+    void writeAll (const CharPointer_UTF32 src) noexcept
     {
         const CharType* s = src.data;
 
@@ -233,7 +233,7 @@ public:
         to the destination buffer before stopping.
     */
     template <typename CharPointer>
-    size_t writeWithDestByteLimit (const CharPointer& src, const size_t maxDestBytes) noexcept
+    size_t writeWithDestByteLimit (const CharPointer src, const size_t maxDestBytes) noexcept
     {
         return CharacterFunctions::copyWithDestByteLimit (*this, src, maxDestBytes);
     }
@@ -243,21 +243,21 @@ public:
         written to the destination buffer before stopping (including the terminating null).
     */
     template <typename CharPointer>
-    void writeWithCharLimit (const CharPointer& src, const int maxChars) noexcept
+    void writeWithCharLimit (const CharPointer src, const int maxChars) noexcept
     {
         CharacterFunctions::copyWithCharLimit (*this, src, maxChars);
     }
 
     /** Compares this string with another one. */
     template <typename CharPointer>
-    int compare (const CharPointer& other) const noexcept
+    int compare (const CharPointer other) const noexcept
     {
         return CharacterFunctions::compare (*this, other);
     }
 
    #if JUCE_NATIVE_WCHAR_IS_UTF32 && ! JUCE_ANDROID
     /** Compares this string with another one. */
-    int compare (const CharPointer_UTF32& other) const noexcept
+    int compare (const CharPointer_UTF32 other) const noexcept
     {
         return wcscmp (data, other.data);
     }
@@ -265,28 +265,28 @@ public:
 
     /** Compares this string with another one, up to a specified number of characters. */
     template <typename CharPointer>
-    int compareUpTo (const CharPointer& other, const int maxChars) const noexcept
+    int compareUpTo (const CharPointer other, const int maxChars) const noexcept
     {
         return CharacterFunctions::compareUpTo (*this, other, maxChars);
     }
 
     /** Compares this string with another one. */
     template <typename CharPointer>
-    int compareIgnoreCase (const CharPointer& other) const
+    int compareIgnoreCase (const CharPointer other) const
     {
         return CharacterFunctions::compareIgnoreCase (*this, other);
     }
 
     /** Compares this string with another one, up to a specified number of characters. */
     template <typename CharPointer>
-    int compareIgnoreCaseUpTo (const CharPointer& other, const int maxChars) const noexcept
+    int compareIgnoreCaseUpTo (const CharPointer other, const int maxChars) const noexcept
     {
         return CharacterFunctions::compareIgnoreCaseUpTo (*this, other, maxChars);
     }
 
     /** Returns the character index of a substring, or -1 if it isn't found. */
     template <typename CharPointer>
-    int indexOf (const CharPointer& stringToFind) const noexcept
+    int indexOf (const CharPointer stringToFind) const noexcept
     {
         return CharacterFunctions::indexOf (*this, stringToFind);
     }
@@ -362,7 +362,7 @@ public:
     }
 
     /** Atomically swaps this pointer for a new value, returning the previous value. */
-    CharPointer_UTF32 atomicSwap (const CharPointer_UTF32& newValue)
+    CharPointer_UTF32 atomicSwap (const CharPointer_UTF32 newValue)
     {
         return CharPointer_UTF32 (reinterpret_cast <Atomic<CharType*>&> (data).exchange (newValue.data));
     }

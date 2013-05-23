@@ -294,7 +294,7 @@ Point<int> MouseInputSource::getCurrentMousePosition()
     return juce_lastMousePos;
 }
 
-void Desktop::setMousePosition (const Point<int>&)
+void Desktop::setMousePosition (Point<int>)
 {
 }
 

@@ -581,7 +581,7 @@ namespace EdgeTableFillers
     class SolidColour
     {
     public:
-        SolidColour (const Image::BitmapData& image, const PixelARGB& colour)
+        SolidColour (const Image::BitmapData& image, const PixelARGB colour)
             : destData (image), sourceColour (colour)
         {
             if (sizeof (PixelType) == 3 && destData.pixelStride == sizeof (PixelType))
@@ -651,12 +651,12 @@ namespace EdgeTableFillers
             return addBytesToPointer (linePixels, x * destData.pixelStride);
         }
 
-        inline void blendLine (PixelType* dest, const PixelARGB& colour, int width) const noexcept
+        inline void blendLine (PixelType* dest, const PixelARGB colour, int width) const noexcept
         {
             JUCE_PERFORM_PIXEL_OP_LOOP (blend (colour))
         }
 
-        forcedinline void replaceLine (PixelRGB* dest, const PixelARGB& colour, int width) const noexcept
+        forcedinline void replaceLine (PixelRGB* dest, const PixelARGB colour, int width) const noexcept
         {
             if (destData.pixelStride == sizeof (*dest))
             {
@@ -701,7 +701,7 @@ namespace EdgeTableFillers
             }
         }
 
-        forcedinline void replaceLine (PixelAlpha* dest, const PixelARGB& colour, int width) const noexcept
+        forcedinline void replaceLine (PixelAlpha* dest, const PixelARGB colour, int width) const noexcept
         {
             if (destData.pixelStride == sizeof (*dest))
                 memset (dest, colour.getAlpha(), (size_t) width);
@@ -709,7 +709,7 @@ namespace EdgeTableFillers
                 JUCE_PERFORM_PIXEL_OP_LOOP (setAlpha (colour.getAlpha()))
         }
 
-        forcedinline void replaceLine (PixelARGB* dest, const PixelARGB& colour, int width) const noexcept
+        forcedinline void replaceLine (PixelARGB* dest, const PixelARGB colour, int width) const noexcept
         {
             JUCE_PERFORM_PIXEL_OP_LOOP (set (colour))
         }
@@ -1497,7 +1497,7 @@ namespace EdgeTableFillers
     }
 
     template <class Iterator, class DestPixelType>
-    void renderSolidFill (Iterator& iter, const Image::BitmapData& destData, const PixelARGB& fillColour, const bool replaceContents, DestPixelType*)
+    void renderSolidFill (Iterator& iter, const Image::BitmapData& destData, const PixelARGB fillColour, const bool replaceContents, DestPixelType*)
     {
         if (replaceContents)
         {
@@ -1556,14 +1556,14 @@ namespace ClipRegions
         virtual Ptr clipToPath (const Path&, const AffineTransform&) = 0;
         virtual Ptr clipToEdgeTable (const EdgeTable& et) = 0;
         virtual Ptr clipToImageAlpha (const Image&, const AffineTransform&, const bool betterQuality) = 0;
-        virtual void translate (const Point<int>& delta) = 0;
+        virtual void translate (Point<int> delta) = 0;
 
         virtual bool clipRegionIntersects (const Rectangle<int>&) const = 0;
         virtual Rectangle<int> getClipBounds() const = 0;
 
-        virtual void fillRectWithColour (Image::BitmapData& destData, const Rectangle<int>&, const PixelARGB& colour, bool replaceContents) const = 0;
-        virtual void fillRectWithColour (Image::BitmapData& destData, const Rectangle<float>&, const PixelARGB& colour) const = 0;
-        virtual void fillAllWithColour (Image::BitmapData& destData, const PixelARGB& colour, bool replaceContents) const = 0;
+        virtual void fillRectWithColour (Image::BitmapData& destData, const Rectangle<int>&, const PixelARGB colour, bool replaceContents) const = 0;
+        virtual void fillRectWithColour (Image::BitmapData& destData, const Rectangle<float>&, const PixelARGB colour) const = 0;
+        virtual void fillAllWithColour (Image::BitmapData& destData, const PixelARGB colour, bool replaceContents) const = 0;
         virtual void fillAllWithGradient (Image::BitmapData& destData, ColourGradient&, const AffineTransform&, bool isIdentity) const = 0;
         virtual void renderImageTransformed (const Image::BitmapData& destData, const Image::BitmapData& srcData, const int alpha, const AffineTransform&, bool betterQuality, bool tiledFill) const = 0;
         virtual void renderImageUntransformed (const Image::BitmapData& destData, const Image::BitmapData& srcData, const int alpha, int x, int y, bool tiledFill) const = 0;
@@ -1664,7 +1664,7 @@ namespace ClipRegions
             return edgeTable.isEmpty() ? nullptr : this;
         }
 
-        void translate (const Point<int>& delta)
+        void translate (Point<int> delta)
         {
             edgeTable.translate ((float) delta.x, delta.y);
         }
@@ -1679,7 +1679,7 @@ namespace ClipRegions
             return edgeTable.getMaximumBounds();
         }
 
-        void fillRectWithColour (Image::BitmapData& destData, const Rectangle<int>& area, const PixelARGB& colour, bool replaceContents) const
+        void fillRectWithColour (Image::BitmapData& destData, const Rectangle<int>& area, const PixelARGB colour, bool replaceContents) const
         {
             const Rectangle<int> totalClip (edgeTable.getMaximumBounds());
             const Rectangle<int> clipped (totalClip.getIntersection (area));
@@ -1692,7 +1692,7 @@ namespace ClipRegions
             }
         }
 
-        void fillRectWithColour (Image::BitmapData& destData, const Rectangle<float>& area, const PixelARGB& colour) const
+        void fillRectWithColour (Image::BitmapData& destData, const Rectangle<float>& area, const PixelARGB colour) const
         {
             const Rectangle<float> totalClip (edgeTable.getMaximumBounds().toFloat());
             const Rectangle<float> clipped (totalClip.getIntersection (area));
@@ -1705,7 +1705,7 @@ namespace ClipRegions
             }
         }
 
-        void fillAllWithColour (Image::BitmapData& destData, const PixelARGB& colour, bool replaceContents) const
+        void fillAllWithColour (Image::BitmapData& destData, const PixelARGB colour, bool replaceContents) const
         {
             switch (destData.pixelFormat)
             {
@@ -1805,7 +1805,7 @@ namespace ClipRegions
             return toEdgeTable()->clipToImageAlpha (image, transform, betterQuality);
         }
 
-        void translate (const Point<int>& delta)
+        void translate (Point<int> delta)
         {
             clip.offsetAll (delta.x, delta.y);
         }
@@ -1813,7 +1813,7 @@ namespace ClipRegions
         bool clipRegionIntersects (const Rectangle<int>& r) const   { return clip.intersects (r); }
         Rectangle<int> getClipBounds() const                        { return clip.getBounds(); }
 
-        void fillRectWithColour (Image::BitmapData& destData, const Rectangle<int>& area, const PixelARGB& colour, bool replaceContents) const
+        void fillRectWithColour (Image::BitmapData& destData, const Rectangle<int>& area, const PixelARGB colour, bool replaceContents) const
         {
             SubRectangleIterator iter (clip, area);
 
@@ -1825,7 +1825,7 @@ namespace ClipRegions
             }
         }
 
-        void fillRectWithColour (Image::BitmapData& destData, const Rectangle<float>& area, const PixelARGB& colour) const
+        void fillRectWithColour (Image::BitmapData& destData, const Rectangle<float>& area, const PixelARGB colour) const
         {
             SubRectangleIteratorFloat iter (clip, area);
 
@@ -1837,7 +1837,7 @@ namespace ClipRegions
             }
         }
 
-        void fillAllWithColour (Image::BitmapData& destData, const PixelARGB& colour, bool replaceContents) const
+        void fillAllWithColour (Image::BitmapData& destData, const PixelARGB colour, bool replaceContents) const
         {
             switch (destData.pixelFormat)
             {

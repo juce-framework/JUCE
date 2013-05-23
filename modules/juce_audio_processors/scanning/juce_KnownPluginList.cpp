@@ -89,7 +89,7 @@ namespace
         return Time();
     }
 
-    bool timesAreDifferent (const Time& t1, const Time& t2) noexcept
+    bool timesAreDifferent (const Time t1, const Time t2) noexcept
     {
         return t1 != t2 || t1 == Time();
     }

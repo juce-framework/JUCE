@@ -56,9 +56,9 @@ public:
     bool operator== (const RelativeParallelogram& other) const noexcept;
     bool operator!= (const RelativeParallelogram& other) const noexcept;
 
-    static const Point<float> getInternalCoordForPoint (const Point<float>* parallelogramCorners, Point<float> point) noexcept;
-    static const Point<float> getPointForInternalCoord (const Point<float>* parallelogramCorners, const Point<float>& internalPoint) noexcept;
-    static const Rectangle<float> getBoundingBox (const Point<float>* parallelogramCorners) noexcept;
+    static Point<float> getInternalCoordForPoint (const Point<float>* parallelogramCorners, Point<float> point) noexcept;
+    static Point<float> getPointForInternalCoord (const Point<float>* parallelogramCorners, Point<float> internalPoint) noexcept;
+    static Rectangle<float> getBoundingBox (const Point<float>* parallelogramCorners) noexcept;
 
     //==============================================================================
     RelativePoint topLeft, topRight, bottomLeft;

@@ -392,7 +392,7 @@ public:
         @returns true if it manages to change the file's time.
         @see getLastModificationTime, setLastAccessTime, setCreationTime
     */
-    bool setLastModificationTime (const Time& newTime) const;
+    bool setLastModificationTime (Time newTime) const;
 
     /** Changes the last-access time for this file.
 
@@ -400,7 +400,7 @@ public:
         @returns true if it manages to change the file's time.
         @see getLastAccessTime, setLastModificationTime, setCreationTime
     */
-    bool setLastAccessTime (const Time& newTime) const;
+    bool setLastAccessTime (Time newTime) const;
 
     /** Changes the creation date for this file.
 
@@ -408,7 +408,7 @@ public:
         @returns true if it manages to change the file's time.
         @see getCreationTime, setLastModificationTime, setLastAccessTime
     */
-    bool setCreationTime (const Time& newTime) const;
+    bool setCreationTime (Time newTime) const;
 
     /** If possible, this will try to create a version string for the given file.
 

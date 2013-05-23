@@ -64,7 +64,7 @@ Component* Desktop::getComponent (const int index) const noexcept
     return desktopComponents [index];
 }
 
-Component* Desktop::findComponentAt (const Point<int>& screenPosition) const
+Component* Desktop::findComponentAt (Point<int> screenPosition) const
 {
     for (int i = desktopComponents.size(); --i >= 0;)
     {
@@ -328,7 +328,7 @@ const Desktop::Displays::Display& Desktop::Displays::getMainDisplay() const noex
     return displays.getReference(0);
 }
 
-const Desktop::Displays::Display& Desktop::Displays::getDisplayContaining (const Point<int>& position) const noexcept
+const Desktop::Displays::Display& Desktop::Displays::getDisplayContaining (Point<int> position) const noexcept
 {
     const Display* best = &displays.getReference(0);
     double bestDistance = 1.0e10;

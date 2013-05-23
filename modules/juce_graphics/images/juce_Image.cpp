@@ -392,7 +392,7 @@ Colour Image::BitmapData::getPixelColour (const int x, const int y) const noexce
     return Colour();
 }
 
-void Image::BitmapData::setPixelColour (const int x, const int y, const Colour& colour) const noexcept
+void Image::BitmapData::setPixelColour (const int x, const int y, Colour colour) const noexcept
 {
     jassert (isPositiveAndBelow (x, width) && isPositiveAndBelow (y, height));
 
@@ -409,7 +409,7 @@ void Image::BitmapData::setPixelColour (const int x, const int y, const Colour& 
 }
 
 //==============================================================================
-void Image::clear (const Rectangle<int>& area, const Colour& colourToClearTo)
+void Image::clear (const Rectangle<int>& area, Colour colourToClearTo)
 {
     const ScopedPointer<LowLevelGraphicsContext> g (image->createLowLevelContext());
     g->setFill (colourToClearTo);
@@ -428,7 +428,7 @@ Colour Image::getPixelAt (const int x, const int y) const
     return Colour();
 }
 
-void Image::setPixelAt (const int x, const int y, const Colour& colour)
+void Image::setPixelAt (const int x, const int y, Colour colour)
 {
     if (isPositiveAndBelow (x, getWidth()) && isPositiveAndBelow (y, getHeight()))
     {

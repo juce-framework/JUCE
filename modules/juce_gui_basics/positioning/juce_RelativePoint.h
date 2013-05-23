@@ -42,7 +42,7 @@ public:
     RelativePoint();
 
     /** Creates an absolute point, relative to the origin. */
-    RelativePoint (const Point<float>& absolutePoint);
+    RelativePoint (Point<float> absolutePoint);
 
     /** Creates an absolute point, relative to the origin. */
     RelativePoint (float absoluteX, float absoluteY);
@@ -65,7 +65,7 @@ public:
         You'll need to provide a suitable Expression::Scope for looking up any coordinates that may
         be needed to calculate the result.
     */
-    const Point<float> resolve (const Expression::Scope* evaluationContext) const;
+    Point<float> resolve (const Expression::Scope* evaluationContext) const;
 
     /** Changes the values of this point's coordinates to make it resolve to the specified position.
 
@@ -73,7 +73,7 @@ public:
         or relative positions to whatever values are necessary to make the resultant position
         match the position that is provided.
     */
-    void moveToAbsolute (const Point<float>& newPos, const Expression::Scope* evaluationContext);
+    void moveToAbsolute (Point<float> newPos, const Expression::Scope* evaluationContext);
 
     /** Returns a string which represents this point.
         This returns a comma-separated pair of coordinates. For details of the string syntax used by the

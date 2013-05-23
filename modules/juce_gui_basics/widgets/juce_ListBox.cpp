@@ -590,7 +590,7 @@ void ListBox::deselectAllRows()
 }
 
 void ListBox::selectRowsBasedOnModifierKeys (const int row,
-                                             const ModifierKeys& mods,
+                                             ModifierKeys mods,
                                              const bool isMouseUpEvent)
 {
     if (multipleSelection && mods.isCommandDown())

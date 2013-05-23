@@ -23,12 +23,12 @@
   ==============================================================================
 */
 
-AttributedString::Attribute::Attribute (const Range<int>& range_, const Colour& colour_)
+AttributedString::Attribute::Attribute (Range<int> range_, Colour colour_)
     : range (range_), colour (new Colour (colour_))
 {
 }
 
-AttributedString::Attribute::Attribute (const Range<int>& range_, const Font& font_)
+AttributedString::Attribute::Attribute (Range<int> range_, const Font& font_)
     : range (range_), font (new Font (font_))
 {
 }
@@ -137,7 +137,7 @@ void AttributedString::append (const String& textToAppend, const Font& font)
     setFont (Range<int> (oldLength, oldLength + newLength), font);
 }
 
-void AttributedString::append (const String& textToAppend, const Colour& colour)
+void AttributedString::append (const String& textToAppend, Colour colour)
 {
     const int oldLength = text.length();
     const int newLength = textToAppend.length();
@@ -146,7 +146,7 @@ void AttributedString::append (const String& textToAppend, const Colour& colour)
     setColour (Range<int> (oldLength, oldLength + newLength), colour);
 }
 
-void AttributedString::append (const String& textToAppend, const Font& font, const Colour& colour)
+void AttributedString::append (const String& textToAppend, const Font& font, Colour colour)
 {
     const int oldLength = text.length();
     const int newLength = textToAppend.length();
@@ -191,12 +191,12 @@ void AttributedString::setLineSpacing (const float newLineSpacing) noexcept
     lineSpacing = newLineSpacing;
 }
 
-void AttributedString::setColour (const Range<int>& range, const Colour& colour)
+void AttributedString::setColour (Range<int> range, Colour colour)
 {
     attributes.add (new Attribute (range, colour));
 }
 
-void AttributedString::setColour (const Colour& colour)
+void AttributedString::setColour (Colour colour)
 {
     for (int i = attributes.size(); --i >= 0;)
         if (attributes.getUnchecked(i)->getColour() != nullptr)
@@ -205,7 +205,7 @@ void AttributedString::setColour (const Colour& colour)
     setColour (Range<int> (0, text.length()), colour);
 }
 
-void AttributedString::setFont (const Range<int>& range, const Font& font)
+void AttributedString::setFont (Range<int> range, const Font& font)
 {
     attributes.add (new Attribute (range, font));
 }

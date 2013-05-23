@@ -166,7 +166,7 @@ const Colour Colours::yellowgreen (0xff9acd32);
 
 //==============================================================================
 Colour Colours::findColourForName (const String& colourName,
-                                   const Colour& defaultColour)
+                                   Colour defaultColour)
 {
     static const uint32 presets[] =
     {

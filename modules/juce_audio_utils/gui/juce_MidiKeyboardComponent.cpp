@@ -266,7 +266,7 @@ int MidiKeyboardComponent::getKeyStartPosition (const int midiNoteNumber) const
 const uint8 MidiKeyboardComponent::whiteNotes[] = { 0, 2, 4, 5, 7, 9, 11 };
 const uint8 MidiKeyboardComponent::blackNotes[] = { 1, 3, 6, 8, 10 };
 
-int MidiKeyboardComponent::xyToNote (const Point<int>& pos, float& mousePositionVelocity)
+int MidiKeyboardComponent::xyToNote (Point<int> pos, float& mousePositionVelocity)
 {
     if (! reallyContains (pos, false))
         return -1;
@@ -286,7 +286,7 @@ int MidiKeyboardComponent::xyToNote (const Point<int>& pos, float& mousePosition
     return remappedXYToNote (p + Point<int> (xOffset, 0), mousePositionVelocity);
 }
 
-int MidiKeyboardComponent::remappedXYToNote (const Point<int>& pos, float& mousePositionVelocity) const
+int MidiKeyboardComponent::remappedXYToNote (Point<int> pos, float& mousePositionVelocity) const
 {
     if (pos.getY() < blackNoteLength)
     {
@@ -692,7 +692,7 @@ void MidiKeyboardComponent::updateNoteUnderMouse (const MouseEvent& e, bool isDo
     updateNoteUnderMouse (e.getPosition(), isDown, e.source.getIndex());
 }
 
-void MidiKeyboardComponent::updateNoteUnderMouse (const Point<int>& pos, bool isDown, int fingerNum)
+void MidiKeyboardComponent::updateNoteUnderMouse (Point<int> pos, bool isDown, int fingerNum)
 {
     float mousePositionVelocity = 0.0f;
     const int newNote = xyToNote (pos, mousePositionVelocity);

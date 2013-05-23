@@ -148,7 +148,7 @@ public:
         @see selectOnly, addToSelection, addToSelectionOnMouseDown, addToSelectionOnMouseUp
     */
     void addToSelectionBasedOnModifiers (ParameterType item,
-                                         const ModifierKeys& modifiers)
+                                         ModifierKeys modifiers)
     {
         if (modifiers.isShiftDown())
         {
@@ -185,7 +185,7 @@ public:
         @see addToSelectionOnMouseUp, addToSelectionBasedOnModifiers
     */
     bool addToSelectionOnMouseDown (ParameterType item,
-                                    const ModifierKeys& modifiers)
+                                    ModifierKeys modifiers)
     {
         if (isSelected (item))
             return ! modifiers.isPopupMenu();
@@ -209,7 +209,7 @@ public:
                                 should have made during the matching mouseDown event
     */
     void addToSelectionOnMouseUp (ParameterType item,
-                                  const ModifierKeys& modifiers,
+                                  ModifierKeys modifiers,
                                   const bool wasItemDragged,
                                   const bool resultOfMouseDownSelectMethod)
     {

@@ -231,7 +231,7 @@ void PaintElementPath::rescalePoint (RelativePositionedRectangle& pos, int dx, i
 }
 
 //==============================================================================
-static void drawArrow (Graphics& g, const Point<float>& p1, const Point<float>& p2)
+static void drawArrow (Graphics& g, const Point<float> p1, const Point<float> p2)
 {
     g.drawArrow (Line<float> (p1.x, p1.y, (p1.x + p2.x) * 0.5f, (p1.y + p2.y) * 0.5f), 1.0f, 8.0f, 10.0f);
     g.drawLine (p1.x + (p2.x - p1.x) * 0.49f, p1.y + (p2.y - p1.y) * 0.49f, p2.x, p2.y);

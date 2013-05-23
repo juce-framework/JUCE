@@ -32,7 +32,7 @@ namespace ColourHelpers
 
     // This is an adjusted brightness value, based on the way the human
     // eye responds to different colour channels..
-    static float getPerceivedBrightness (const Colour& c) noexcept
+    static float getPerceivedBrightness (Colour c) noexcept
     {
         const float r = c.getFloatRed();
         const float g = c.getFloatGreen();
@@ -46,7 +46,7 @@ namespace ColourHelpers
     //==============================================================================
     struct HSB
     {
-        HSB (const Colour& col) noexcept
+        HSB (Colour col) noexcept
         {
             const int r = col.getRed();
             const int g = col.getGreen();
@@ -92,7 +92,7 @@ namespace ColourHelpers
             brightness = hi / 255.0f;
         }
 
-        Colour toColour (const Colour& original) const noexcept
+        Colour toColour (Colour original) const noexcept
         {
             return Colour (hue, saturation, brightness, original.getAlpha());
         }
@@ -124,7 +124,7 @@ namespace ColourHelpers
     //==============================================================================
     struct YIQ
     {
-        YIQ (const Colour& c) noexcept
+        YIQ (Colour c) noexcept
         {
             const float r = c.getFloatRed();
             const float g = c.getFloatGreen();
@@ -275,7 +275,7 @@ Colour Colour::withMultipliedAlpha (const float alphaMultiplier) const noexcept
 }
 
 //==============================================================================
-Colour Colour::overlaidWith (const Colour& src) const noexcept
+Colour Colour::overlaidWith (Colour src) const noexcept
 {
     const int destAlpha = getAlpha();
 
@@ -296,7 +296,7 @@ Colour Colour::overlaidWith (const Colour& src) const noexcept
                    (uint8) resA);
 }
 
-Colour Colour::interpolatedWith (const Colour& other, float proportionOfOther) const noexcept
+Colour Colour::interpolatedWith (Colour other, float proportionOfOther) const noexcept
 {
     if (proportionOfOther <= 0)
         return *this;
@@ -393,7 +393,7 @@ Colour Colour::contrasting (const float amount) const noexcept
                             : Colours::white).withAlpha (amount));
 }
 
-Colour Colour::contrasting (const Colour& target, float minContrast) const noexcept
+Colour Colour::contrasting (Colour target, float minContrast) const noexcept
 {
     const ColourHelpers::YIQ bg (*this);
     ColourHelpers::YIQ fg (target);
@@ -408,8 +408,8 @@ Colour Colour::contrasting (const Colour& target, float minContrast) const noexc
     return fg.toColour();
 }
 
-Colour Colour::contrasting (const Colour& colour1,
-                            const Colour& colour2) noexcept
+Colour Colour::contrasting (Colour colour1,
+                            Colour colour2) noexcept
 {
     const float b1 = ColourHelpers::getPerceivedBrightness (colour1);
     const float b2 = ColourHelpers::getPerceivedBrightness (colour2);

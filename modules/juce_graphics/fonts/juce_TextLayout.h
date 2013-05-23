@@ -82,7 +82,7 @@ public:
     class JUCE_API  Glyph
     {
     public:
-        Glyph (int glyphCode, const Point<float>& anchor, float width) noexcept;
+        Glyph (int glyphCode, Point<float> anchor, float width) noexcept;
         Glyph (const Glyph&) noexcept;
         Glyph& operator= (const Glyph&) noexcept;
         ~Glyph() noexcept;
@@ -108,7 +108,7 @@ public:
     public:
         Run() noexcept;
         Run (const Run&);
-        Run (const Range<int>& stringRange, int numGlyphsToPreallocate);
+        Run (Range<int> stringRange, int numGlyphsToPreallocate);
         ~Run() noexcept;
 
         Font font;              /**< The run's font. */
@@ -128,7 +128,7 @@ public:
     public:
         Line() noexcept;
         Line (const Line&);
-        Line (const Range<int>& stringRange, const Point<float>& lineOrigin,
+        Line (Range<int> stringRange, Point<float> lineOrigin,
               float ascent, float descent, float leading, int numRunsToPreallocate);
         ~Line() noexcept;
 

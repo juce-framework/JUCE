@@ -58,7 +58,7 @@ public:
     }
 
     /** Copies another range object. */
-    Range& operator= (const Range& other) noexcept
+    Range& operator= (Range other) noexcept
     {
         start = other.start;
         end = other.end;
@@ -167,7 +167,7 @@ public:
 
     //==============================================================================
     /** Adds an amount to the start and end of the range. */
-    inline const Range& operator+= (const ValueType amountToAdd) noexcept
+    inline Range operator+= (const ValueType amountToAdd) noexcept
     {
         start += amountToAdd;
         end += amountToAdd;
@@ -175,7 +175,7 @@ public:
     }
 
     /** Subtracts an amount from the start and end of the range. */
-    inline const Range& operator-= (const ValueType amountToSubtract) noexcept
+    inline Range operator-= (const ValueType amountToSubtract) noexcept
     {
         start -= amountToSubtract;
         end -= amountToSubtract;
@@ -197,8 +197,8 @@ public:
         return Range (start - amountToSubtract, end - amountToSubtract);
     }
 
-    bool operator== (const Range& other) const noexcept     { return start == other.start && end == other.end; }
-    bool operator!= (const Range& other) const noexcept     { return start != other.start || end != other.end; }
+    bool operator== (Range other) const noexcept     { return start == other.start && end == other.end; }
+    bool operator!= (Range other) const noexcept     { return start != other.start || end != other.end; }
 
     //==============================================================================
     /** Returns true if the given position lies inside this range. */
@@ -214,27 +214,27 @@ public:
     }
 
     /** Returns true if the given range lies entirely inside this range. */
-    bool contains (const Range& other) const noexcept
+    bool contains (Range other) const noexcept
     {
         return start <= other.start && end >= other.end;
     }
 
     /** Returns true if the given range intersects this one. */
-    bool intersects (const Range& other) const noexcept
+    bool intersects (Range other) const noexcept
     {
         return other.start < end && start < other.end;
     }
 
     /** Returns the range that is the intersection of the two ranges, or an empty range
         with an undefined start position if they don't overlap. */
-    Range getIntersectionWith (const Range& other) const noexcept
+    Range getIntersectionWith (Range other) const noexcept
     {
         return Range (jmax (start, other.start),
                       jmin (end, other.end));
     }
 
     /** Returns the smallest range that contains both this one and the other one. */
-    Range getUnionWith (const Range& other) const noexcept
+    Range getUnionWith (Range other) const noexcept
     {
         return Range (jmin (start, other.start),
                       jmax (end, other.end));
@@ -250,7 +250,7 @@ public:
         will be the new range, shifted forwards or backwards so that it doesn't extend
         beyond this one, but keeping its original length.
     */
-    Range constrainRange (const Range& rangeToConstrain) const noexcept
+    Range constrainRange (Range rangeToConstrain) const noexcept
     {
         const ValueType otherLen = rangeToConstrain.getLength();
         return getLength() <= otherLen

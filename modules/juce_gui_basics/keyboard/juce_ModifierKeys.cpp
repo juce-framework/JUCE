@@ -38,7 +38,7 @@ ModifierKeys::ModifierKeys (const ModifierKeys& other) noexcept
 {
 }
 
-ModifierKeys& ModifierKeys::operator= (const ModifierKeys& other) noexcept
+ModifierKeys& ModifierKeys::operator= (const ModifierKeys other) noexcept
 {
     flags = other.flags;
     return *this;

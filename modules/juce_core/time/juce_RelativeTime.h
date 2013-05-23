@@ -139,14 +139,14 @@ public:
 
     //==============================================================================
     /** Adds another RelativeTime to this one. */
-    const RelativeTime& operator+= (const RelativeTime& timeToAdd) noexcept;
+    RelativeTime operator+= (RelativeTime timeToAdd) noexcept;
     /** Subtracts another RelativeTime from this one. */
-    const RelativeTime& operator-= (const RelativeTime& timeToSubtract) noexcept;
+    RelativeTime operator-= (RelativeTime timeToSubtract) noexcept;
 
     /** Adds a number of seconds to this time. */
-    const RelativeTime& operator+= (double secondsToAdd) noexcept;
+    RelativeTime operator+= (double secondsToAdd) noexcept;
     /** Subtracts a number of seconds from this time. */
-    const RelativeTime& operator-= (double secondsToSubtract) noexcept;
+    RelativeTime operator-= (double secondsToSubtract) noexcept;
 
 private:
     //==============================================================================
@@ -155,23 +155,23 @@ private:
 
 //==============================================================================
 /** Compares two RelativeTimes. */
-bool operator== (const RelativeTime& t1, const RelativeTime& t2) noexcept;
+bool operator== (RelativeTime t1, RelativeTime t2) noexcept;
 /** Compares two RelativeTimes. */
-bool operator!= (const RelativeTime& t1, const RelativeTime& t2) noexcept;
+bool operator!= (RelativeTime t1, RelativeTime t2) noexcept;
 /** Compares two RelativeTimes. */
-bool operator>  (const RelativeTime& t1, const RelativeTime& t2) noexcept;
+bool operator>  (RelativeTime t1, RelativeTime t2) noexcept;
 /** Compares two RelativeTimes. */
-bool operator<  (const RelativeTime& t1, const RelativeTime& t2) noexcept;
+bool operator<  (RelativeTime t1, RelativeTime t2) noexcept;
 /** Compares two RelativeTimes. */
-bool operator>= (const RelativeTime& t1, const RelativeTime& t2) noexcept;
+bool operator>= (RelativeTime t1, RelativeTime t2) noexcept;
 /** Compares two RelativeTimes. */
-bool operator<= (const RelativeTime& t1, const RelativeTime& t2) noexcept;
+bool operator<= (RelativeTime t1, RelativeTime t2) noexcept;
 
 //==============================================================================
 /** Adds two RelativeTimes together. */
-RelativeTime  operator+  (const RelativeTime&  t1, const RelativeTime& t2) noexcept;
+RelativeTime  operator+  (RelativeTime t1, RelativeTime t2) noexcept;
 /** Subtracts two RelativeTimes. */
-RelativeTime  operator-  (const RelativeTime&  t1, const RelativeTime& t2) noexcept;
+RelativeTime  operator-  (RelativeTime t1, RelativeTime t2) noexcept;
 
 
 

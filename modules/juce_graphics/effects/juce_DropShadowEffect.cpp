@@ -69,7 +69,7 @@ DropShadow::DropShadow() noexcept
 {
 }
 
-DropShadow::DropShadow (const Colour& shadowColour, const int r, const Point<int>& o) noexcept
+DropShadow::DropShadow (Colour shadowColour, const int r, Point<int> o) noexcept
     : colour (shadowColour), radius (r), offset (o)
 {
     jassert (radius > 0);

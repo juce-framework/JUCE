@@ -82,7 +82,7 @@ public:
 
     /** Changes the colour that is currently being shown.
     */
-    void setCurrentColour (const Colour& newColour);
+    void setCurrentColour (Colour newColour);
 
     //==============================================================================
     /** Tells the selector how many preset colour swatches you want to have on the component.

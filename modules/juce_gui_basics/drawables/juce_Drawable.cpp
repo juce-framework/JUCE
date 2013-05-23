@@ -109,7 +109,7 @@ void Drawable::setBoundsToEnclose (const Rectangle<float>& area)
 }
 
 //==============================================================================
-void Drawable::setOriginWithOriginalSize (const Point<float>& originWithinParent)
+void Drawable::setOriginWithOriginalSize (Point<float> originWithinParent)
 {
     setTransform (AffineTransform::translation (originWithinParent.x, originWithinParent.y));
 }

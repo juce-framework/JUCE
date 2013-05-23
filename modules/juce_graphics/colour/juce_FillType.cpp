@@ -28,8 +28,8 @@ FillType::FillType() noexcept
 {
 }
 
-FillType::FillType (const Colour& colour_) noexcept
-    : colour (colour_)
+FillType::FillType (Colour c) noexcept
+    : colour (c)
 {
 }
 
@@ -102,7 +102,7 @@ bool FillType::operator!= (const FillType& other) const
     return ! operator== (other);
 }
 
-void FillType::setColour (const Colour& newColour) noexcept
+void FillType::setColour (Colour newColour) noexcept
 {
     gradient = nullptr;
     image = Image::null;

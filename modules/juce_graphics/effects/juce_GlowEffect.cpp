@@ -34,7 +34,7 @@ GlowEffect::~GlowEffect()
 }
 
 void GlowEffect::setGlowProperties (const float newRadius,
-                                    const Colour& newColour)
+                                    Colour newColour)
 {
     radius = newRadius;
     colour = newColour;

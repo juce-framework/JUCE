@@ -79,7 +79,7 @@ ScrollBar::~ScrollBar()
 }
 
 //==============================================================================
-void ScrollBar::setRangeLimits (const Range<double>& newRangeLimit, NotificationType notification)
+void ScrollBar::setRangeLimits (Range<double> newRangeLimit, NotificationType notification)
 {
     if (totalRange != newRangeLimit)
     {
@@ -95,7 +95,7 @@ void ScrollBar::setRangeLimits (const double newMinimum, const double newMaximum
     setRangeLimits (Range<double> (newMinimum, newMaximum), notification);
 }
 
-bool ScrollBar::setCurrentRange (const Range<double>& newRange,
+bool ScrollBar::setCurrentRange (Range<double> newRange,
                                  const NotificationType notification)
 {
     const Range<double> constrainedRange (totalRange.constrainRange (newRange));

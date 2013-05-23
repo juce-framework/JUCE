@@ -33,8 +33,8 @@ ColourGradient::ColourGradient() noexcept
    #endif
 }
 
-ColourGradient::ColourGradient (const Colour& colour1, const float x1_, const float y1_,
-                                const Colour& colour2, const float x2_, const float y2_,
+ColourGradient::ColourGradient (Colour colour1, const float x1_, const float y1_,
+                                Colour colour2, const float x2_, const float y2_,
                                 const bool isRadial_)
     : point1 (x1_, y1_),
       point2 (x2_, y2_),
@@ -66,7 +66,7 @@ void ColourGradient::clearColours()
     colours.clear();
 }
 
-int ColourGradient::addColour (const double proportionAlongGradient, const Colour& colour)
+int ColourGradient::addColour (const double proportionAlongGradient, Colour colour)
 {
     // must be within the two end-points
     jassert (proportionAlongGradient >= 0 && proportionAlongGradient <= 1.0);
@@ -119,7 +119,7 @@ Colour ColourGradient::getColour (const int index) const noexcept
     return Colour();
 }
 
-void ColourGradient::setColour (int index, const Colour& newColour) noexcept
+void ColourGradient::setColour (int index, Colour newColour) noexcept
 {
     if (isPositiveAndBelow (index, colours.size()))
         colours.getReference (index).colour = newColour;

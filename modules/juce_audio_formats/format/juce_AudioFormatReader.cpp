@@ -395,7 +395,7 @@ bool MemoryMappedAudioFormatReader::mapEntireFile()
     return mapSectionOfFile (Range<int64> (0, lengthInSamples));
 }
 
-bool MemoryMappedAudioFormatReader::mapSectionOfFile (const Range<int64>& samplesToMap)
+bool MemoryMappedAudioFormatReader::mapSectionOfFile (Range<int64> samplesToMap)
 {
     if (map == nullptr || samplesToMap != mappedSection)
     {

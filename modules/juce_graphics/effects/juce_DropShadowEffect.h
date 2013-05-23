@@ -39,7 +39,7 @@ struct JUCE_API  DropShadow
     DropShadow() noexcept;
 
     /** Creates a drop-shadow object with the given parameters. */
-    DropShadow (const Colour& shadowColour, int radius, const Point<int>& offset) noexcept;
+    DropShadow (Colour shadowColour, int radius, Point<int> offset) noexcept;
 
     /** Renders a drop-shadow based on the alpha-channel of the given image. */
     void drawForImage (Graphics& g, const Image& srcImage) const;

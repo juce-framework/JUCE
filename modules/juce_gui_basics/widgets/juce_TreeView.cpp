@@ -279,7 +279,7 @@ private:
     TreeViewItem* buttonUnderMouse;
     bool isDragging, needSelectionOnMouseUp;
 
-    void selectBasedOnModifiers (TreeViewItem* const item, const ModifierKeys& modifiers)
+    void selectBasedOnModifiers (TreeViewItem* const item, const ModifierKeys modifiers)
     {
         TreeViewItem* firstSelected = nullptr;
 

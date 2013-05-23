@@ -59,7 +59,7 @@ void DrawableText::setText (const String& newText)
     }
 }
 
-void DrawableText::setColour (const Colour& newColour)
+void DrawableText::setColour (Colour newColour)
 {
     if (colour != newColour)
     {
@@ -233,7 +233,7 @@ Colour DrawableText::ValueTreeWrapper::getColour() const
     return Colour::fromString (state [colour].toString());
 }
 
-void DrawableText::ValueTreeWrapper::setColour (const Colour& newColour, UndoManager* undoManager)
+void DrawableText::ValueTreeWrapper::setColour (Colour newColour, UndoManager* undoManager)
 {
     state.setProperty (colour, newColour.toString(), undoManager);
 }

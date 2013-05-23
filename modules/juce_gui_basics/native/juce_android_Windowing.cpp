@@ -590,7 +590,7 @@ Point<int> MouseInputSource::getCurrentMousePosition()
     return AndroidComponentPeer::lastMousePos;
 }
 
-void Desktop::setMousePosition (const Point<int>& newPosition)
+void Desktop::setMousePosition (Point<int> newPosition)
 {
     // not needed
 }

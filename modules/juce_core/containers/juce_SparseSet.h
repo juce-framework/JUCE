@@ -162,7 +162,7 @@ public:
     /** Adds a range of contiguous values to the set.
         e.g. addRange (Range \<int\> (10, 14)) will add (10, 11, 12, 13) to the set.
     */
-    void addRange (const Range<Type>& range)
+    void addRange (const Range<Type> range)
     {
         jassert (range.getLength() >= 0);
         if (range.getLength() > 0)
@@ -179,7 +179,7 @@ public:
     /** Removes a range of values from the set.
         e.g. removeRange (Range\<int\> (10, 14)) will remove (10, 11, 12, 13) from the set.
     */
-    void removeRange (const Range<Type>& rangeToRemove)
+    void removeRange (const Range<Type> rangeToRemove)
     {
         jassert (rangeToRemove.getLength() >= 0);
 
@@ -216,7 +216,7 @@ public:
     }
 
     /** Does an XOR of the values in a given range. */
-    void invertRange (const Range<Type>& range)
+    void invertRange (const Range<Type> range)
     {
         SparseSet newItems;
         newItems.addRange (range);
@@ -231,7 +231,7 @@ public:
     }
 
     /** Checks whether any part of a given range overlaps any part of this set. */
-    bool overlapsRange (const Range<Type>& range)
+    bool overlapsRange (const Range<Type> range)
     {
         if (range.getLength() > 0)
         {
@@ -249,7 +249,7 @@ public:
     }
 
     /** Checks whether the whole of a given range is contained within this one. */
-    bool containsRange (const Range<Type>& range)
+    bool containsRange (const Range<Type> range)
     {
         if (range.getLength() > 0)
         {

@@ -232,8 +232,8 @@ int DirectoryContentsList::compareElements (const DirectoryContentsList::FileInf
 bool DirectoryContentsList::addFile (const File& file,
                                      const bool isDir,
                                      const int64 fileSize,
-                                     const Time& modTime,
-                                     const Time& creationTime,
+                                     const Time modTime,
+                                     const Time creationTime,
                                      const bool isReadOnly)
 {
     if (fileFilter == nullptr

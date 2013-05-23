@@ -333,7 +333,7 @@ public:
         @see selectRow
     */
     void selectRowsBasedOnModifierKeys (int rowThatWasClickedOn,
-                                        const ModifierKeys& modifiers,
+                                        ModifierKeys modifiers,
                                         bool isMouseUpEvent);
 
     //==============================================================================

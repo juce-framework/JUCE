@@ -110,7 +110,7 @@ void MenuBarComponent::resized()
     }
 }
 
-int MenuBarComponent::getItemAt (const Point<int>& p)
+int MenuBarComponent::getItemAt (Point<int> p)
 {
     for (int i = 0; i < xPositions.size(); ++i)
         if (p.x >= xPositions[i] && p.x < xPositions[i + 1])
@@ -157,7 +157,7 @@ void MenuBarComponent::setOpenItem (int index)
     }
 }
 
-void MenuBarComponent::updateItemUnderMouse (const Point<int>& p)
+void MenuBarComponent::updateItemUnderMouse (Point<int> p)
 {
     setItemUnderMouse (getItemAt (p));
 }

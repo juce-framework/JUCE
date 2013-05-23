@@ -714,7 +714,7 @@ private:
                               const String& fill,
                               const String& fillOpacity,
                               const String& overallOpacity,
-                              const Colour& defaultColour) const
+                              const Colour defaultColour) const
     {
         float opacity = 1.0f;
 
@@ -1045,7 +1045,7 @@ private:
     }
 
     //==============================================================================
-    static Colour parseColour (const String& s, int& index, const Colour& defaultColour)
+    static Colour parseColour (const String& s, int& index, const Colour defaultColour)
     {
         if (s [index] == '#')
         {
@@ -1071,9 +1071,10 @@ private:
                            (uint8) ((hex [2] << 4) + hex [3]),
                            (uint8) ((hex [4] << 4) + hex [5]));
         }
-        else if (s [index] == 'r'
-                  && s [index + 1] == 'g'
-                  && s [index + 2] == 'b')
+
+        if (s [index] == 'r'
+              && s [index + 1] == 'g'
+              && s [index + 2] == 'b')
         {
             const int openBracket = s.indexOfChar (index, '(');
             const int closeBracket = s.indexOfChar (openBracket, ')');

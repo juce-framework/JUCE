@@ -39,7 +39,7 @@ Identifier::Identifier (const Identifier& other) noexcept
 {
 }
 
-Identifier& Identifier::operator= (const Identifier& other) noexcept
+Identifier& Identifier::operator= (const Identifier other) noexcept
 {
     name = other.name;
     return *this;

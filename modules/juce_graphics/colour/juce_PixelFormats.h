@@ -112,7 +112,7 @@ public:
         This takes into account the opacity of the pixel being overlaid, and blends
         it accordingly.
     */
-    forcedinline void blend (const PixelRGB& src) noexcept;
+    forcedinline void blend (const PixelRGB src) noexcept;
 
 
     /** Blends another pixel onto this one, applying an extra multiplier to its opacity.
@@ -358,7 +358,7 @@ public:
         b = (uint8) sargb;
     }
 
-    forcedinline void blend (const PixelRGB& src) noexcept
+    forcedinline void blend (const PixelRGB src) noexcept
     {
         set (src);
     }
@@ -467,7 +467,7 @@ private:
 #endif
 ;
 
-forcedinline void PixelARGB::blend (const PixelRGB& src) noexcept
+forcedinline void PixelARGB::blend (const PixelRGB src) noexcept
 {
     set (src);
 }

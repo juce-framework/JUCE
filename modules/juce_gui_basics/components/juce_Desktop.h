@@ -80,7 +80,7 @@ public:
     /** Makes the mouse pointer jump to a given location.
         The co-ordinates are relative to the top-left of the main monitor.
     */
-    static void setMousePosition (const Point<int>& newPosition);
+    static void setMousePosition (Point<int> newPosition);
 
     /** Returns the last position at which a mouse button was pressed.
 
@@ -203,7 +203,7 @@ public:
 
         Returns nullptr if the co-ordinates are inside a non-Juce window.
     */
-    Component* findComponentAt (const Point<int>& screenPosition) const;
+    Component* findComponentAt (Point<int> screenPosition) const;
 
     /** The Desktop object has a ComponentAnimator instance which can be used for performing
         your animations.
@@ -343,7 +343,7 @@ public:
         /** Returns the display which contains a particular point.
             If the point lies outside all the displays, the nearest one will be returned.
         */
-        const Display& getDisplayContaining (const Point<int>& position) const noexcept;
+        const Display& getDisplayContaining (Point<int> position) const noexcept;
 
         /** Returns a RectangleList made up of all the displays. */
         RectangleList getRectangleList (bool userAreasOnly) const;

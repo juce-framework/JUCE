@@ -58,7 +58,7 @@ public:
         opacity).
     */
     void setGlowProperties (float newRadius,
-                            const Colour& newColour);
+                            Colour newColour);
 
 
     //==============================================================================

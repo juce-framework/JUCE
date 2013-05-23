@@ -108,10 +108,10 @@ private:
     Point<int> lastMousePos;
     int itemUnderMouse, currentPopupIndex, topLevelIndexClicked;
 
-    int getItemAt (const Point<int>&);
+    int getItemAt (Point<int>);
     void setItemUnderMouse (int index);
     void setOpenItem (int index);
-    void updateItemUnderMouse (const Point<int>&);
+    void updateItemUnderMouse (Point<int>);
     void timerCallback();
     void repaintMenuItem (int index);
     void menuDismissed (int topLevelIndex, int itemId);

@@ -39,7 +39,7 @@ RelativePoint::RelativePoint()
 {
 }
 
-RelativePoint::RelativePoint (const Point<float>& absolutePoint)
+RelativePoint::RelativePoint (Point<float> absolutePoint)
     : x (absolutePoint.x), y (absolutePoint.y)
 {
 }
@@ -72,13 +72,13 @@ bool RelativePoint::operator!= (const RelativePoint& other) const noexcept
     return ! operator== (other);
 }
 
-const Point<float> RelativePoint::resolve (const Expression::Scope* scope) const
+Point<float> RelativePoint::resolve (const Expression::Scope* scope) const
 {
     return Point<float> ((float) x.resolve (scope),
                          (float) y.resolve (scope));
 }
 
-void RelativePoint::moveToAbsolute (const Point<float>& newPos, const Expression::Scope* scope)
+void RelativePoint::moveToAbsolute (Point<float> newPos, const Expression::Scope* scope)
 {
     x.moveToAbsolute (newPos.x, scope);
     y.moveToAbsolute (newPos.y, scope);

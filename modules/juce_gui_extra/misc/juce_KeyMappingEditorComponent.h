@@ -57,8 +57,8 @@ public:
         @param mainBackground       colour to use for most of the background
         @param textColour           colour to use for the text
     */
-    void setColours (const Colour& mainBackground,
-                     const Colour& textColour);
+    void setColours (Colour mainBackground,
+                     Colour textColour);
 
     /** Returns the KeyPressMappingSet that this component is acting upon. */
     KeyPressMappingSet& getMappings() const noexcept                { return mappings; }

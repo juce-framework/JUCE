@@ -113,7 +113,7 @@ public:
     /** Resets any transformations on this drawable, and positions its origin within
         its parent component.
     */
-    void setOriginWithOriginalSize (const Point<float>& originWithinParent);
+    void setOriginWithOriginalSize (Point<float> originWithinParent);
 
     /** Sets a transform for this drawable that will position it within the specified
         area of its parent component.

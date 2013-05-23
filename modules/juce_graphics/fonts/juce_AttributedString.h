@@ -71,9 +71,9 @@ public:
     /** Appends some text, with a specified font, and the default colour (black). */
     void append (const String& textToAppend, const Font& font);
     /** Appends some text, with a specified colour, and the default font. */
-    void append (const String& textToAppend, const Colour& colour);
+    void append (const String& textToAppend, Colour colour);
     /** Appends some text, with a specified font and colour. */
-    void append (const String& textToAppend, const Font& font, const Colour& colour);
+    void append (const String& textToAppend, const Font& font, Colour colour);
 
     /** Appends another AttributedString to this one.
         Note that this will only append the text, fonts, and colours - it won't copy any
@@ -154,12 +154,12 @@ public:
         /** Creates an attribute that changes the colour for a range of characters.
             @see AttributedString::setColour()
         */
-        Attribute (const Range<int>& range, const Colour& colour);
+        Attribute (Range<int> range, Colour colour);
 
         /** Creates an attribute that changes the font for a range of characters.
             @see AttributedString::setFont()
         */
-        Attribute (const Range<int>& range, const Font& font);
+        Attribute (Range<int> range, const Font& font);
 
         Attribute (const Attribute&);
         ~Attribute();
@@ -194,13 +194,13 @@ public:
 
     //==============================================================================
     /** Adds a colour attribute for the specified range. */
-    void setColour (const Range<int>& range, const Colour& colour);
+    void setColour (Range<int> range, Colour colour);
 
     /** Removes all existing colour attributes, and applies this colour to the whole string. */
-    void setColour (const Colour& colour);
+    void setColour (Colour colour);
 
     /** Adds a font attribute for the specified range. */
-    void setFont (const Range<int>& range, const Font& font);
+    void setFont (Range<int> range, const Font& font);
 
     /** Removes all existing font attributes, and applies this font to the whole string. */
     void setFont (const Font& font);

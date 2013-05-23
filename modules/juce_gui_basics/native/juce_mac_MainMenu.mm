@@ -423,7 +423,7 @@ private:
         [menu release];
     }
 
-    static unsigned int juceModsToNSMods (const ModifierKeys& mods)
+    static unsigned int juceModsToNSMods (const ModifierKeys mods)
     {
         unsigned int m = 0;
         if (mods.isShiftDown())    m |= NSShiftKeyMask;

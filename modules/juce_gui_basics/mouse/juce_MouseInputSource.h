@@ -166,11 +166,11 @@ public:
 
     //==============================================================================
     /** @internal */
-    void handleEvent (ComponentPeer*, const Point<int>&, int64 time, const ModifierKeys&);
+    void handleEvent (ComponentPeer*, Point<int>, int64 time, const ModifierKeys);
     /** @internal */
-    void handleWheel (ComponentPeer*, const Point<int>&, int64 time, const MouseWheelDetails&);
+    void handleWheel (ComponentPeer*, Point<int>, int64 time, const MouseWheelDetails&);
     /** @internal */
-    void handleMagnifyGesture (ComponentPeer*, const Point<int>&, int64 time, float scaleFactor);
+    void handleMagnifyGesture (ComponentPeer*, Point<int>, int64 time, float scaleFactor);
 
 private:
     //==============================================================================

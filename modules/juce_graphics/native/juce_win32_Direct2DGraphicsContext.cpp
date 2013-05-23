@@ -629,8 +629,8 @@ public:
                     {
                         radialGradient = 0;
 
-                        const Point<float>& p1 = fillType.gradient->point1;
-                        const Point<float>& p2 = fillType.gradient->point2;
+                        const Point<float> p1 = fillType.gradient->point1;
+                        const Point<float> p2 = fillType.gradient->point2;
                         float r = p1.getDistanceFrom (p2);
 
                         D2D1_RADIAL_GRADIENT_BRUSH_PROPERTIES props =
@@ -645,8 +645,8 @@ public:
                     {
                         linearGradient = 0;
 
-                        const Point<float>& p1 = fillType.gradient->point1;
-                        const Point<float>& p2 = fillType.gradient->point2;
+                        const Point<float> p1 = fillType.gradient->point1;
+                        const Point<float> p2 = fillType.gradient->point2;
 
                         D2D1_LINEAR_GRADIENT_BRUSH_PROPERTIES props =
                             D2D1::LinearGradientBrushProperties (D2D1::Point2F (p1.x, p1.y),

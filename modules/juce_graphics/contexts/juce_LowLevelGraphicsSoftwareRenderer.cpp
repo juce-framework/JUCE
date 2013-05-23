@@ -28,7 +28,7 @@ LowLevelGraphicsSoftwareRenderer::LowLevelGraphicsSoftwareRenderer (const Image&
 {
 }
 
-LowLevelGraphicsSoftwareRenderer::LowLevelGraphicsSoftwareRenderer (const Image& image, const Point<int>& origin,
+LowLevelGraphicsSoftwareRenderer::LowLevelGraphicsSoftwareRenderer (const Image& image, Point<int> origin,
                                                                     const RectangleList& initialClip)
     : savedState (new RenderingHelpers::SoftwareRendererSavedState (image, initialClip, origin.x, origin.y))
 {

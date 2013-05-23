@@ -59,7 +59,7 @@ public:
         /** Creates a SourceDetails object from its various settings. */
         SourceDetails (const var& description,
                        Component* sourceComponent,
-                       const Point<int>& localPosition) noexcept;
+                       Point<int> localPosition) noexcept;
 
         /** A descriptor for the drag - this is set DragAndDropContainer::startDragging(). */
         var description;

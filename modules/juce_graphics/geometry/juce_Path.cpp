@@ -271,7 +271,7 @@ void Path::startNewSubPath (const float x, const float y)
     data.elements [numElements++] = y;
 }
 
-void Path::startNewSubPath (const Point<float>& start)
+void Path::startNewSubPath (const Point<float> start)
 {
     startNewSubPath (start.x, start.y);
 }
@@ -292,7 +292,7 @@ void Path::lineTo (const float x, const float y)
     bounds.extend (x, y);
 }
 
-void Path::lineTo (const Point<float>& end)
+void Path::lineTo (const Point<float> end)
 {
     lineTo (end.x, end.y);
 }
@@ -317,8 +317,8 @@ void Path::quadraticTo (const float x1, const float y1,
     bounds.extend (x1, y1, x2, y2);
 }
 
-void Path::quadraticTo (const Point<float>& controlPoint,
-                        const Point<float>& endPoint)
+void Path::quadraticTo (const Point<float> controlPoint,
+                        const Point<float> endPoint)
 {
     quadraticTo (controlPoint.x, controlPoint.y,
                  endPoint.x, endPoint.y);
@@ -349,9 +349,9 @@ void Path::cubicTo (const float x1, const float y1,
     bounds.extend (x3, y3);
 }
 
-void Path::cubicTo (const Point<float>& controlPoint1,
-                    const Point<float>& controlPoint2,
-                    const Point<float>& endPoint)
+void Path::cubicTo (const Point<float> controlPoint1,
+                    const Point<float> controlPoint2,
+                    const Point<float> endPoint)
 {
     cubicTo (controlPoint1.x, controlPoint1.y,
              controlPoint2.x, controlPoint2.y,
@@ -676,7 +676,7 @@ void Path::addArrow (const Line<float>& line, float lineThickness,
     closeSubPath();
 }
 
-void Path::addPolygon (const Point<float>& centre, const int numberOfSides,
+void Path::addPolygon (const Point<float> centre, const int numberOfSides,
                        const float radius, const float startAngle)
 {
     jassert (numberOfSides > 1); // this would be silly.
@@ -700,7 +700,7 @@ void Path::addPolygon (const Point<float>& centre, const int numberOfSides,
     }
 }
 
-void Path::addStar (const Point<float>& centre, const int numberOfPoints,
+void Path::addStar (const Point<float> centre, const int numberOfPoints,
                     const float innerRadius, const float outerRadius, const float startAngle)
 {
     jassert (numberOfPoints > 1); // this would be silly.
@@ -728,7 +728,7 @@ void Path::addStar (const Point<float>& centre, const int numberOfPoints,
 
 void Path::addBubble (const Rectangle<float>& bodyArea,
                       const Rectangle<float>& maximumArea,
-                      const Point<float>& arrowTip,
+                      const Point<float> arrowTip,
                       const float cornerSize,
                       const float arrowBaseWidth)
 {
@@ -1023,7 +1023,7 @@ bool Path::contains (const float x, const float y, const float tolerance) const
                              : ((negativeCrossings + positiveCrossings) & 1) != 0;
 }
 
-bool Path::contains (const Point<float>& point, const float tolerance) const
+bool Path::contains (const Point<float> point, const float tolerance) const
 {
     return contains (point.x, point.y, tolerance);
 }
@@ -1100,7 +1100,7 @@ Point<float> Path::getPointAlongPath (float distanceFromStart, const AffineTrans
     return Point<float> (i.x2, i.y2);
 }
 
-float Path::getNearestPoint (const Point<float>& targetPoint, Point<float>& pointOnPath,
+float Path::getNearestPoint (const Point<float> targetPoint, Point<float>& pointOnPath,
                              const AffineTransform& transform) const
 {
     PathFlatteningIterator i (*this, transform);

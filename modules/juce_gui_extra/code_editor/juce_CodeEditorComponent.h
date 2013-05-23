@@ -143,7 +143,7 @@ public:
     void scrollBy (int deltaLines);
     void scrollToColumn (int newFirstColumnOnScreen);
     void scrollToKeepCaretOnScreen();
-    void scrollToKeepLinesOnScreen (const Range<int>& linesToShow);
+    void scrollToKeepLinesOnScreen (Range<int> linesToShow);
 
     void insertTextAtCaret (const String& textToInsert);
     void insertTabAtCaret();
@@ -152,10 +152,10 @@ public:
     void unindentSelection();
 
     //==============================================================================
-    Range<int> getHighlightedRegion() const;
+    Range<int> getHighlightedRegion() const override;
     bool isHighlightActive() const noexcept;
-    void setHighlightedRegion (const Range<int>& newRange);
-    String getTextInRange (const Range<int>& range) const;
+    void setHighlightedRegion (const Range<int>& newRange) override;
+    String getTextInRange (const Range<int>& range) const override;
 
     //==============================================================================
     /** Can be used to save and restore the editor's caret position, selection state, etc. */
@@ -216,7 +216,7 @@ public:
 
         Array<TokenType> types;
 
-        void set (const String& name, const Colour& colour);
+        void set (const String& name, const Colour colour);
     };
 
     /** Changes the syntax highlighting scheme.

@@ -134,7 +134,7 @@ public:
 
         @see closeSubPath, setUsingNonZeroWinding
     */
-    bool contains (const Point<float>& point,
+    bool contains (const Point<float> point,
                    float tolerance = 1.0f) const;
 
     /** Checks whether a line crosses the path.
@@ -181,7 +181,7 @@ public:
         This sets pointOnPath to the nearest point, and returns the distance of this point from the start
         of the path.
     */
-    float getNearestPoint (const Point<float>& targetPoint,
+    float getNearestPoint (const Point<float> targetPoint,
                            Point<float>& pointOnPath,
                            const AffineTransform& transform = AffineTransform::identity) const;
 
@@ -213,7 +213,7 @@ public:
 
         @see lineTo, quadraticTo, cubicTo, closeSubPath
     */
-    void startNewSubPath (const Point<float>& start);
+    void startNewSubPath (const Point<float> start);
 
     /** Closes a the current sub-path with a line back to its start-point.
 
@@ -249,7 +249,7 @@ public:
 
         @see startNewSubPath, quadraticTo, cubicTo, closeSubPath
     */
-    void lineTo (const Point<float>& end);
+    void lineTo (const Point<float> end);
 
     /** Adds a quadratic bezier curve from the shape's last position to a new position.
 
@@ -274,8 +274,8 @@ public:
 
         @see startNewSubPath, lineTo, cubicTo, closeSubPath
     */
-    void quadraticTo (const Point<float>& controlPoint,
-                      const Point<float>& endPoint);
+    void quadraticTo (const Point<float> controlPoint,
+                      const Point<float> endPoint);
 
     /** Adds a cubic bezier curve from the shape's last position to a new position.
 
@@ -302,9 +302,9 @@ public:
 
         @see startNewSubPath, lineTo, quadraticTo, closeSubPath
     */
-    void cubicTo (const Point<float>& controlPoint1,
-                  const Point<float>& controlPoint2,
-                  const Point<float>& endPoint);
+    void cubicTo (const Point<float> controlPoint1,
+                  const Point<float> controlPoint2,
+                  const Point<float> endPoint);
 
     /** Returns the last point that was added to the path by one of the drawing methods.
     */
@@ -512,7 +512,7 @@ public:
     /** Adds a polygon shape to the path.
         @see addStar
     */
-    void addPolygon (const Point<float>& centre,
+    void addPolygon (const Point<float> centre,
                      int numberOfSides,
                      float radius,
                      float startAngle = 0.0f);
@@ -520,7 +520,7 @@ public:
     /** Adds a star shape to the path.
         @see addPolygon
     */
-    void addStar (const Point<float>& centre,
+    void addStar (const Point<float> centre,
                   int numberOfPoints,
                   float innerRadius,
                   float outerRadius,
@@ -538,7 +538,7 @@ public:
     */
     void addBubble (const Rectangle<float>& bodyArea,
                     const Rectangle<float>& maximumArea,
-                    const Point<float>& arrowTipPosition,
+                    const Point<float> arrowTipPosition,
                     const float cornerSize,
                     const float arrowBaseWidth);
 

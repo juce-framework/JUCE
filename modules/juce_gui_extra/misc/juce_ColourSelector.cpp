@@ -351,7 +351,7 @@ Colour ColourSelector::getCurrentColour() const
     return ((flags & showAlphaChannel) != 0) ? colour : colour.withAlpha ((uint8) 0xff);
 }
 
-void ColourSelector::setCurrentColour (const Colour& c)
+void ColourSelector::setCurrentColour (Colour c)
 {
     if (c != colour)
     {

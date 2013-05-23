@@ -32,7 +32,7 @@ struct Target
         : context (c), frameBufferID (frameBufferID_), bounds (width, height)
     {}
 
-    Target (OpenGLContext& c, OpenGLFrameBuffer& fb, const Point<int>& origin) noexcept
+    Target (OpenGLContext& c, OpenGLFrameBuffer& fb, Point<int> origin) noexcept
         : context (c), frameBufferID (fb.getFrameBufferID()),
           bounds (origin.x, origin.y, fb.getWidth(), fb.getHeight())
     {
@@ -298,7 +298,7 @@ public:
               matrix (program, "matrix")
         {}
 
-        void setMatrix (const Point<float>& p1, const Point<float>& p2, const Point<float>& p3)
+        void setMatrix (const Point<float> p1, const Point<float> p2, const Point<float> p3)
         {
             const AffineTransform t (AffineTransform::fromTargetPoints (p1.x, p1.y,  0.0f, 0.0f,
                                                                         p2.x, p2.y,  1.0f, 0.0f,
@@ -665,8 +665,8 @@ struct StateHelpers
     template <class QuadQueueType>
     struct EdgeTableRenderer
     {
-        EdgeTableRenderer (QuadQueueType& quadQueue_, const PixelARGB& colour_) noexcept
-            : quadQueue (quadQueue_), colour (colour_)
+        EdgeTableRenderer (QuadQueueType& q, const PixelARGB c) noexcept
+            : quadQueue (q), colour (c)
         {}
 
         void setEdgeTableYPos (const int y) noexcept
@@ -709,8 +709,8 @@ struct StateHelpers
     template <class QuadQueueType>
     struct FloatRectangleRenderer
     {
-        FloatRectangleRenderer (QuadQueueType& quadQueue_, const PixelARGB& colour_) noexcept
-            : quadQueue (quadQueue_), colour (colour_)
+        FloatRectangleRenderer (QuadQueueType& q, const PixelARGB c) noexcept
+            : quadQueue (q), colour (c)
         {}
 
         void operator() (const int x, const int y, const int w, const int h, const int alpha) noexcept
@@ -946,7 +946,7 @@ struct StateHelpers
             JUCE_CHECK_OPENGL_ERROR
         }
 
-        void add (const int x, const int y, const int w, const int h, const PixelARGB& colour) noexcept
+        void add (const int x, const int y, const int w, const int h, const PixelARGB colour) noexcept
         {
             jassert (w > 0 && h > 0);
 
@@ -968,24 +968,24 @@ struct StateHelpers
                 draw();
         }
 
-        void add (const Rectangle<int>& r, const PixelARGB& colour) noexcept
+        void add (const Rectangle<int>& r, const PixelARGB colour) noexcept
         {
             add (r.getX(), r.getY(), r.getWidth(), r.getHeight(), colour);
         }
 
-        void add (const Rectangle<float>& r, const PixelARGB& colour) noexcept
+        void add (const Rectangle<float>& r, const PixelARGB colour) noexcept
         {
             FloatRectangleRenderer<ShaderQuadQueue> frr (*this, colour);
             RenderingHelpers::FloatRectangleRasterisingInfo (r).iterate (frr);
         }
 
-        void add (const RectangleList& list, const PixelARGB& colour) noexcept
+        void add (const RectangleList& list, const PixelARGB colour) noexcept
         {
             for (const Rectangle<int>* i = list.begin(), * const e = list.end(); i != e; ++i)
                 add (*i, colour);
         }
 
-        void add (const RectangleList& list, const Rectangle<int>& clip, const PixelARGB& colour) noexcept
+        void add (const RectangleList& list, const Rectangle<int>& clip, const PixelARGB colour) noexcept
         {
             for (const Rectangle<int>* i = list.begin(), * const e = list.end(); i != e; ++i)
             {
@@ -996,7 +996,7 @@ struct StateHelpers
             }
         }
 
-        void add (const EdgeTable& et, const PixelARGB& colour)
+        void add (const EdgeTable& et, const PixelARGB colour)
         {
             EdgeTableRenderer<ShaderQuadQueue> etr (*this, colour);
             et.iterate (etr);

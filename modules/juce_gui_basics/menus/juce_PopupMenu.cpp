@@ -47,7 +47,7 @@ public:
           const bool active,
           const bool ticked,
           const Image& im,
-          const Colour& colour,
+          const Colour colour,
           const bool useColour,
           CustomComponent* const custom,
           const PopupMenu* const sub,
@@ -564,7 +564,7 @@ private:
                 && (isOver || (activeSubMenu != nullptr && activeSubMenu->isOverChildren()));
     }
 
-    void updateMouseOverStatus (const Point<int>& globalMousePos)
+    void updateMouseOverStatus (Point<int> globalMousePos)
     {
         isOver = reallyContains (getLocalPoint (nullptr, globalMousePos), true);
 
@@ -930,7 +930,7 @@ private:
         return false;
     }
 
-    void highlightItemUnderMouse (const Point<int>& globalMousePos, const Point<int>& localMousePos, const uint32 timeNow)
+    void highlightItemUnderMouse (Point<int> globalMousePos, Point<int> localMousePos, const uint32 timeNow)
     {
         if (globalMousePos != lastMousePos || timeNow > lastMouseMoveTime + 350)
         {
@@ -1006,7 +1006,7 @@ private:
         }
     }
 
-    void checkButtonState (const Point<int>& localMousePos, const uint32 timeNow,
+    void checkButtonState (Point<int> localMousePos, const uint32 timeNow,
                            const bool wasDown, const bool overScrollArea, const bool isOverAny)
     {
         isDown = hasBeenOver
@@ -1088,7 +1088,7 @@ private:
     bool isTopScrollZoneActive() const noexcept     { return canScroll() && childYOffset > 0; }
     bool isBottomScrollZoneActive() const noexcept  { return canScroll() && childYOffset < contentHeight - windowPos.getHeight(); }
 
-    bool scrollIfNecessary (const Point<int>& localMousePos, const uint32 timeNow)
+    bool scrollIfNecessary (Point<int> localMousePos, const uint32 timeNow)
     {
         if (canScroll()
              && (isOver || (isDown && isPositiveAndBelow (localMousePos.x, getWidth()))))
@@ -1214,7 +1214,7 @@ void PopupMenu::addCommandItem (ApplicationCommandManager* commandManager,
 
 void PopupMenu::addColouredItem (const int itemResultID,
                                  const String& itemText,
-                                 const Colour& itemTextColour,
+                                 Colour itemTextColour,
                                  const bool isActive,
                                  const bool isTicked,
                                  const Image& iconToUse)

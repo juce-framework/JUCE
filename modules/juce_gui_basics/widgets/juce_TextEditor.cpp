@@ -61,7 +61,7 @@ struct TextAtom
 class TextEditor::UniformTextSection
 {
 public:
-    UniformTextSection (const String& text, const Font& f, const Colour& col, const juce_wchar passwordChar)
+    UniformTextSection (const String& text, const Font& f, const Colour col, const juce_wchar passwordChar)
         : font (f), colour (col)
     {
         initialiseAtoms (text, passwordChar);
@@ -175,7 +175,7 @@ public:
             mo << atoms.getUnchecked(i)->atomText;
     }
 
-    void appendSubstring (MemoryOutputStream& mo, const Range<int>& range) const
+    void appendSubstring (MemoryOutputStream& mo, const Range<int> range) const
     {
         int index = 0;
         for (int i = 0; i < atoms.size(); ++i)
@@ -557,7 +557,7 @@ public:
         }
     }
 
-    void drawSelection (Graphics& g, const Range<int>& selected) const
+    void drawSelection (Graphics& g, const Range<int> selected) const
     {
         const int startX = roundToInt (indexToX (selected.getStart()));
         const int endX   = roundToInt (indexToX (selected.getEnd()));
@@ -568,7 +568,7 @@ public:
         g.fillRect (startX, y, endX - startX, nextY - y);
     }
 
-    void drawUnderline (Graphics& g, const Range<int>& underline, const Colour& colour) const
+    void drawUnderline (Graphics& g, const Range<int> underline, const Colour colour) const
     {
         const int startX    = roundToInt (indexToX (underline.getStart()));
         const int endX      = roundToInt (indexToX (underline.getEnd()));
@@ -580,8 +580,8 @@ public:
     }
 
     void drawSelectedText (Graphics& g,
-                           const Range<int>& selected,
-                           const Colour& selectedTextColour) const
+                           const Range<int> selected,
+                           const Colour selectedTextColour) const
     {
         if (passwordCharacter != 0 || ! atom->isWhitespace())
         {
@@ -728,7 +728,7 @@ public:
                   const String& newText,
                   const int insertPos,
                   const Font& newFont,
-                  const Colour& newColour,
+                  const Colour newColour,
                   const int oldCaret,
                   const int newCaret)
         : owner (ed),
@@ -1282,7 +1282,7 @@ void TextEditor::timerCallbackInt()
         newTransaction();
 }
 
-void TextEditor::repaintText (const Range<int>& range)
+void TextEditor::repaintText (const Range<int> range)
 {
     if (! range.isEmpty())
     {
@@ -1654,7 +1654,7 @@ void TextEditor::drawContent (Graphics& g)
 
         for (int j = underlinedSections.size(); --j >= 0;)
         {
-            const Range<int>& underlinedSection = underlinedSections.getReference (j);
+            const Range<int> underlinedSection = underlinedSections.getReference (j);
 
             Iterator i2 (sections, wordWrapWidth, passwordCharacter);
 
@@ -2183,7 +2183,7 @@ void TextEditor::clearInternal (UndoManager* const um)
 void TextEditor::insert (const String& text,
                          const int insertIndex,
                          const Font& font,
-                         const Colour& colour,
+                         const Colour colour,
                          UndoManager* const um,
                          const int caretPositionToMoveTo)
 {
@@ -2280,7 +2280,7 @@ void TextEditor::reinsert (const int insertIndex,
     valueTextNeedsUpdating = true;
 }
 
-void TextEditor::remove (const Range<int>& range,
+void TextEditor::remove (Range<int> range,
                          UndoManager* const um,
                          const int caretPositionToMoveTo)
 {

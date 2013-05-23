@@ -116,7 +116,7 @@ private:
     QuaternionType quaternion;
     Point<float> lastMouse;
 
-    Point<float> mousePosToProportion (const Point<float>& mousePos) const noexcept
+    Point<float> mousePosToProportion (const Point<float> mousePos) const noexcept
     {
         const int scale = (jmin (area.getWidth(), area.getHeight()) / 2);
 
@@ -128,7 +128,7 @@ private:
                              (area.getCentreY() - mousePos.y) / scale);
     }
 
-    VectorType projectOnSphere (const Point<float>& pos) const noexcept
+    VectorType projectOnSphere (const Point<float> pos) const noexcept
     {
         const GLfloat radiusSquared = radius * radius;
         const GLfloat xySquared = pos.x * pos.x + pos.y * pos.y;

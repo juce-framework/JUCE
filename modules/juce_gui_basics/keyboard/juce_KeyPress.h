@@ -67,7 +67,7 @@ public:
         @see getKeyCode, isKeyCode, getModifiers
     */
     KeyPress (int keyCode,
-              const ModifierKeys& modifiers,
+              ModifierKeys modifiers,
               juce_wchar textCharacter) noexcept;
 
     /** Creates a keypress with a keyCode but no modifiers or text character. */

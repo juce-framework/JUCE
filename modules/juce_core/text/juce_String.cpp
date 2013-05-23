@@ -70,7 +70,7 @@ public:
     }
 
     template <class CharPointer>
-    static CharPointerType createFromCharPointer (const CharPointer& text)
+    static CharPointerType createFromCharPointer (const CharPointer text)
     {
         if (text.getAddress() == nullptr || text.isEmpty())
             return getEmpty();
@@ -87,7 +87,7 @@ public:
     }
 
     template <class CharPointer>
-    static CharPointerType createFromCharPointer (const CharPointer& text, size_t maxChars)
+    static CharPointerType createFromCharPointer (const CharPointer text, size_t maxChars)
     {
         if (text.getAddress() == nullptr || text.isEmpty() || maxChars == 0)
             return getEmpty();
@@ -108,7 +108,7 @@ public:
     }
 
     template <class CharPointer>
-    static CharPointerType createFromCharPointer (const CharPointer& start, const CharPointer& end)
+    static CharPointerType createFromCharPointer (const CharPointer start, const CharPointer end)
     {
         if (start.getAddress() == nullptr || start.isEmpty())
             return getEmpty();
@@ -128,7 +128,7 @@ public:
         return dest;
     }
 
-    static CharPointerType createFromCharPointer (const CharPointerType& start, const CharPointerType& end)
+    static CharPointerType createFromCharPointer (const CharPointerType start, const CharPointerType end)
     {
         if (start.getAddress() == nullptr || start.isEmpty())
             return getEmpty();
@@ -153,7 +153,7 @@ public:
     }
 
     //==============================================================================
-    static void retain (const CharPointerType& text) noexcept
+    static void retain (const CharPointerType text) noexcept
     {
         ++(bufferFromText (text)->refCount);
     }
@@ -164,13 +164,13 @@ public:
             delete[] reinterpret_cast <char*> (b);
     }
 
-    static void release (const CharPointerType& text) noexcept
+    static void release (const CharPointerType text) noexcept
     {
         release (bufferFromText (text));
     }
 
     //==============================================================================
-    static CharPointerType makeUnique (const CharPointerType& text)
+    static CharPointerType makeUnique (const CharPointerType text)
     {
         StringHolder* const b = bufferFromText (text);
 
@@ -184,7 +184,7 @@ public:
         return newText;
     }
 
-    static CharPointerType makeUniqueWithByteSize (const CharPointerType& text, size_t numBytes)
+    static CharPointerType makeUniqueWithByteSize (const CharPointerType text, size_t numBytes)
     {
         StringHolder* const b = bufferFromText (text);
 
@@ -198,7 +198,7 @@ public:
         return newText;
     }
 
-    static size_t getAllocatedNumBytes (const CharPointerType& text) noexcept
+    static size_t getAllocatedNumBytes (const CharPointerType text) noexcept
     {
         return bufferFromText (text)->allocatedNumBytes;
     }
@@ -211,7 +211,7 @@ public:
     static StringHolder empty;
 
 private:
-    static inline StringHolder* bufferFromText (const CharPointerType& text) noexcept
+    static inline StringHolder* bufferFromText (const CharPointerType text) noexcept
     {
         // (Can't use offsetof() here because of warnings about this not being a POD)
         return reinterpret_cast <StringHolder*> (reinterpret_cast <char*> (text.getAddress())
@@ -331,19 +331,19 @@ String::String (const char* const t, const size_t maxChars)
 }
 
 String::String (const wchar_t* const t)      : text (StringHolder::createFromCharPointer (castToCharPointer_wchar_t (t))) {}
-String::String (const CharPointer_UTF8&  t)  : text (StringHolder::createFromCharPointer (t)) {}
-String::String (const CharPointer_UTF16& t)  : text (StringHolder::createFromCharPointer (t)) {}
-String::String (const CharPointer_UTF32& t)  : text (StringHolder::createFromCharPointer (t)) {}
-String::String (const CharPointer_ASCII& t)  : text (StringHolder::createFromCharPointer (t)) {}
+String::String (const CharPointer_UTF8  t)   : text (StringHolder::createFromCharPointer (t)) {}
+String::String (const CharPointer_UTF16 t)   : text (StringHolder::createFromCharPointer (t)) {}
+String::String (const CharPointer_UTF32 t)   : text (StringHolder::createFromCharPointer (t)) {}
+String::String (const CharPointer_ASCII t)   : text (StringHolder::createFromCharPointer (t)) {}
 
-String::String (const CharPointer_UTF8&  t, const size_t maxChars)  : text (StringHolder::createFromCharPointer (t, maxChars)) {}
-String::String (const CharPointer_UTF16& t, const size_t maxChars)  : text (StringHolder::createFromCharPointer (t, maxChars)) {}
-String::String (const CharPointer_UTF32& t, const size_t maxChars)  : text (StringHolder::createFromCharPointer (t, maxChars)) {}
+String::String (const CharPointer_UTF8  t, const size_t maxChars)   : text (StringHolder::createFromCharPointer (t, maxChars)) {}
+String::String (const CharPointer_UTF16 t, const size_t maxChars)   : text (StringHolder::createFromCharPointer (t, maxChars)) {}
+String::String (const CharPointer_UTF32 t, const size_t maxChars)   : text (StringHolder::createFromCharPointer (t, maxChars)) {}
 String::String (const wchar_t* const t, size_t maxChars)            : text (StringHolder::createFromCharPointer (castToCharPointer_wchar_t (t), maxChars)) {}
 
-String::String (const CharPointer_UTF8&  start, const CharPointer_UTF8&  end) : text (StringHolder::createFromCharPointer (start, end)) {}
-String::String (const CharPointer_UTF16& start, const CharPointer_UTF16& end) : text (StringHolder::createFromCharPointer (start, end)) {}
-String::String (const CharPointer_UTF32& start, const CharPointer_UTF32& end) : text (StringHolder::createFromCharPointer (start, end)) {}
+String::String (const CharPointer_UTF8  start, const CharPointer_UTF8  end)  : text (StringHolder::createFromCharPointer (start, end)) {}
+String::String (const CharPointer_UTF16 start, const CharPointer_UTF16 end)  : text (StringHolder::createFromCharPointer (start, end)) {}
+String::String (const CharPointer_UTF32 start, const CharPointer_UTF32 end)  : text (StringHolder::createFromCharPointer (start, end)) {}
 
 String::String (const std::string& s) : text (StringHolder::createFromFixedLength (s.data(), s.size())) {}
 
@@ -546,15 +546,15 @@ int64 String::hashCode64() const noexcept
 JUCE_API bool JUCE_CALLTYPE operator== (const String& s1, const String& s2) noexcept            { return s1.compare (s2) == 0; }
 JUCE_API bool JUCE_CALLTYPE operator== (const String& s1, const char* const s2) noexcept        { return s1.compare (s2) == 0; }
 JUCE_API bool JUCE_CALLTYPE operator== (const String& s1, const wchar_t* const s2) noexcept     { return s1.compare (s2) == 0; }
-JUCE_API bool JUCE_CALLTYPE operator== (const String& s1, const CharPointer_UTF8& s2) noexcept  { return s1.getCharPointer().compare (s2) == 0; }
-JUCE_API bool JUCE_CALLTYPE operator== (const String& s1, const CharPointer_UTF16& s2) noexcept { return s1.getCharPointer().compare (s2) == 0; }
-JUCE_API bool JUCE_CALLTYPE operator== (const String& s1, const CharPointer_UTF32& s2) noexcept { return s1.getCharPointer().compare (s2) == 0; }
+JUCE_API bool JUCE_CALLTYPE operator== (const String& s1, const CharPointer_UTF8 s2) noexcept   { return s1.getCharPointer().compare (s2) == 0; }
+JUCE_API bool JUCE_CALLTYPE operator== (const String& s1, const CharPointer_UTF16 s2) noexcept  { return s1.getCharPointer().compare (s2) == 0; }
+JUCE_API bool JUCE_CALLTYPE operator== (const String& s1, const CharPointer_UTF32 s2) noexcept  { return s1.getCharPointer().compare (s2) == 0; }
 JUCE_API bool JUCE_CALLTYPE operator!= (const String& s1, const String& s2) noexcept            { return s1.compare (s2) != 0; }
 JUCE_API bool JUCE_CALLTYPE operator!= (const String& s1, const char* const s2) noexcept        { return s1.compare (s2) != 0; }
 JUCE_API bool JUCE_CALLTYPE operator!= (const String& s1, const wchar_t* const s2) noexcept     { return s1.compare (s2) != 0; }
-JUCE_API bool JUCE_CALLTYPE operator!= (const String& s1, const CharPointer_UTF8& s2) noexcept  { return s1.getCharPointer().compare (s2) != 0; }
-JUCE_API bool JUCE_CALLTYPE operator!= (const String& s1, const CharPointer_UTF16& s2) noexcept { return s1.getCharPointer().compare (s2) != 0; }
-JUCE_API bool JUCE_CALLTYPE operator!= (const String& s1, const CharPointer_UTF32& s2) noexcept { return s1.getCharPointer().compare (s2) != 0; }
+JUCE_API bool JUCE_CALLTYPE operator!= (const String& s1, const CharPointer_UTF8 s2) noexcept   { return s1.getCharPointer().compare (s2) != 0; }
+JUCE_API bool JUCE_CALLTYPE operator!= (const String& s1, const CharPointer_UTF16 s2) noexcept  { return s1.getCharPointer().compare (s2) != 0; }
+JUCE_API bool JUCE_CALLTYPE operator!= (const String& s1, const CharPointer_UTF32 s2) noexcept  { return s1.getCharPointer().compare (s2) != 0; }
 JUCE_API bool JUCE_CALLTYPE operator>  (const String& s1, const String& s2) noexcept            { return s1.compare (s2) > 0; }
 JUCE_API bool JUCE_CALLTYPE operator<  (const String& s1, const String& s2) noexcept            { return s1.compare (s2) < 0; }
 JUCE_API bool JUCE_CALLTYPE operator>= (const String& s1, const String& s2) noexcept            { return s1.compare (s2) >= 0; }
@@ -1020,7 +1020,7 @@ struct WildCardMatcher
                 || (ignoreCase && CharacterFunctions::toLowerCase (wc) == CharacterFunctions::toLowerCase (tc));
     }
 
-    static bool matchesAnywhere (const CharPointer& wildcard, CharPointer test, const bool ignoreCase) noexcept
+    static bool matchesAnywhere (const CharPointer wildcard, CharPointer test, const bool ignoreCase) noexcept
     {
         for (; ! test.isEmpty(); ++test)
             if (matches (wildcard, test, ignoreCase))
@@ -2024,7 +2024,7 @@ std::string String::toStdString() const
 template <class CharPointerType_Src, class CharPointerType_Dest>
 struct StringCopier
 {
-    static size_t copyToBuffer (const CharPointerType_Src& source, typename CharPointerType_Dest::CharType* const buffer, const size_t maxBufferSizeBytes)
+    static size_t copyToBuffer (const CharPointerType_Src source, typename CharPointerType_Dest::CharType* const buffer, const size_t maxBufferSizeBytes)
     {
         jassert (((ssize_t) maxBufferSizeBytes) >= 0); // keep this value positive!
 

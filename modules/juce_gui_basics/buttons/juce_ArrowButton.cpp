@@ -23,7 +23,7 @@
   ==============================================================================
 */
 
-ArrowButton::ArrowButton (const String& name, float arrowDirectionInRadians, const Colour& arrowColour)
+ArrowButton::ArrowButton (const String& name, float arrowDirectionInRadians, Colour arrowColour)
    : Button (name), colour (arrowColour)
 {
     path.addTriangle (0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.5f);

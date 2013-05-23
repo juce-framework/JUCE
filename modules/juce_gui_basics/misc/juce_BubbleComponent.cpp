@@ -60,7 +60,7 @@ void BubbleComponent::setPosition (Component* componentToPointTo)
         setPosition (componentToPointTo->getScreenBounds());
 }
 
-void BubbleComponent::setPosition (const Point<int>& pos)
+void BubbleComponent::setPosition (Point<int> pos)
 {
     setPosition (Rectangle<int> (pos.x, pos.y, 1, 1));
 }

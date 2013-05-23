@@ -121,7 +121,7 @@ public:
         */
         static Zone fromPositionOnBorder (const Rectangle<int>& totalSize,
                                           const BorderSize<int>& border,
-                                          const Point<int>& position);
+                                          Point<int> position);
 
         /** Returns an appropriate mouse-cursor for this resize zone. */
         MouseCursor getMouseCursor() const noexcept;

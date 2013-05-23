@@ -398,10 +398,10 @@ private:
     static const uint8 blackNotes[];
 
     void getKeyPos (int midiNoteNumber, int& x, int& w) const;
-    int xyToNote (const Point<int>&, float& mousePositionVelocity);
-    int remappedXYToNote (const Point<int>&, float& mousePositionVelocity) const;
+    int xyToNote (Point<int>, float& mousePositionVelocity);
+    int remappedXYToNote (Point<int>, float& mousePositionVelocity) const;
     void resetAnyKeysInUse();
-    void updateNoteUnderMouse (const Point<int>&, bool isDown, int fingerNum);
+    void updateNoteUnderMouse (Point<int>, bool isDown, int fingerNum);
     void updateNoteUnderMouse (const MouseEvent&, bool isDown);
     void repaintNote (const int midiNoteNumber);
     void setLowestVisibleKeyFloat (float noteNumber);

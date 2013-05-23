@@ -72,7 +72,7 @@ public:
         @code MD5 checksum (myString.toUTF8());
         @endcode
     */
-    explicit MD5 (const CharPointer_UTF8& utf8Text) noexcept;
+    explicit MD5 (CharPointer_UTF8 utf8Text) noexcept;
 
     /** Destructor. */
     ~MD5() noexcept;

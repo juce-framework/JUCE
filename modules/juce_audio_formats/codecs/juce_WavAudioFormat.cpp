@@ -38,7 +38,7 @@ const char* const WavAudioFormat::bwavCodingHistory    = "bwav coding history";
 StringPairArray WavAudioFormat::createBWAVMetadata (const String& description,
                                                     const String& originator,
                                                     const String& originatorRef,
-                                                    const Time& date,
+                                                    const Time date,
                                                     const int64 timeReferenceSamples,
                                                     const String& codingHistory)
 {

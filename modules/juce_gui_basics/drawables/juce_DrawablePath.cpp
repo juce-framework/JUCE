@@ -403,7 +403,7 @@ namespace DrawablePathHelpers
     }
 }
 
-float DrawablePath::ValueTreeWrapper::Element::findProportionAlongLine (const Point<float>& targetPoint, Expression::Scope* scope) const
+float DrawablePath::ValueTreeWrapper::Element::findProportionAlongLine (Point<float> targetPoint, Expression::Scope* scope) const
 {
     using namespace DrawablePathHelpers;
     const Identifier pointType (state.getType());
@@ -460,7 +460,7 @@ float DrawablePath::ValueTreeWrapper::Element::findProportionAlongLine (const Po
     return bestProp;
 }
 
-ValueTree DrawablePath::ValueTreeWrapper::Element::insertPoint (const Point<float>& targetPoint, Expression::Scope* scope, UndoManager* undoManager)
+ValueTree DrawablePath::ValueTreeWrapper::Element::insertPoint (Point<float> targetPoint, Expression::Scope* scope, UndoManager* undoManager)
 {
     ValueTree newTree;
     const Identifier pointType (state.getType());

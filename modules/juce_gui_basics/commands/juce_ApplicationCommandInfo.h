@@ -82,7 +82,7 @@ struct JUCE_API  ApplicationCommandInfo
         @endcode
     */
     void addDefaultKeypress (int keyCode,
-                             const ModifierKeys& modifiers) noexcept;
+                             ModifierKeys modifiers) noexcept;
 
     //==============================================================================
     /** The command's unique ID number.

@@ -255,7 +255,7 @@ public:
     //==============================================================================
     /** Parses a character string, to read an integer value. */
     template <typename IntType, typename CharPointerType>
-    static IntType getIntValue (const CharPointerType& text) noexcept
+    static IntType getIntValue (const CharPointerType text) noexcept
     {
         IntType v = 0;
         CharPointerType s (text.findEndOfWhitespace());
@@ -294,7 +294,7 @@ public:
     /** Counts the number of characters in a given string, stopping if the count exceeds
         a specified end-pointer. */
     template <typename CharPointerType>
-    static size_t lengthUpTo (CharPointerType start, const CharPointerType& end) noexcept
+    static size_t lengthUpTo (CharPointerType start, const CharPointerType end) noexcept
     {
         size_t len = 0;
 
@@ -437,7 +437,7 @@ public:
         Returns -1 if the substring is not found.
     */
     template <typename CharPointerType1, typename CharPointerType2>
-    static int indexOf (CharPointerType1 textToSearch, const CharPointerType2& substringToLookFor) noexcept
+    static int indexOf (CharPointerType1 textToSearch, const CharPointerType2 substringToLookFor) noexcept
     {
         int index = 0;
         const int substringLength = (int) substringToLookFor.length();
@@ -459,7 +459,7 @@ public:
         null terminator.
     */
     template <typename CharPointerType1, typename CharPointerType2>
-    static CharPointerType1 find (CharPointerType1 textToSearch, const CharPointerType2& substringToLookFor) noexcept
+    static CharPointerType1 find (CharPointerType1 textToSearch, const CharPointerType2 substringToLookFor) noexcept
     {
         const int substringLength = (int) substringToLookFor.length();
 
@@ -475,7 +475,7 @@ public:
         Returns -1 if the substring is not found.
     */
     template <typename CharPointerType1, typename CharPointerType2>
-    static int indexOfIgnoreCase (CharPointerType1 haystack, const CharPointerType2& needle) noexcept
+    static int indexOfIgnoreCase (CharPointerType1 haystack, const CharPointerType2 needle) noexcept
     {
         int index = 0;
         const int needleLength = (int) needle.length();

@@ -106,7 +106,7 @@ public:
 
         @see getViewPositionX, getViewPositionY, setViewPositionProportionately
     */
-    void setViewPosition (const Point<int>& newPosition);
+    void setViewPosition (Point<int> newPosition);
 
     /** Changes the view position as a proportion of the distance it can move.
 
@@ -136,7 +136,7 @@ public:
 
     /** Returns the position within the child component of the top-left of its visible area.
     */
-    const Point<int>& getViewPosition() const noexcept      { return lastVisibleArea.getPosition(); }
+    Point<int> getViewPosition() const noexcept             { return lastVisibleArea.getPosition(); }
 
     /** Returns the position within the child component of the top-left of its visible area.
         @see getViewWidth, setViewPosition
@@ -260,7 +260,7 @@ private:
     Component contentHolder;
     ScrollBar verticalScrollBar;
     ScrollBar horizontalScrollBar;
-    Point<int> viewportPosToCompPos (const Point<int>&) const;
+    Point<int> viewportPosToCompPos (Point<int>) const;
 
     void updateVisibleArea();
     void deleteContentComp();

@@ -55,7 +55,7 @@ public:
     ModifierKeys (const ModifierKeys& other) noexcept;
 
     /** Copies this object from another one. */
-    ModifierKeys& operator= (const ModifierKeys& other) noexcept;
+    ModifierKeys& operator= (const ModifierKeys other) noexcept;
 
     //==============================================================================
     /** Checks whether the 'command' key flag is set (or 'ctrl' on Windows/Linux).
@@ -167,8 +167,8 @@ public:
     /** Returns a copy of only the non-mouse flags */
     ModifierKeys withoutMouseButtons() const noexcept                   { return ModifierKeys (flags & ~allMouseButtonModifiers); }
 
-    bool operator== (const ModifierKeys& other) const noexcept          { return flags == other.flags; }
-    bool operator!= (const ModifierKeys& other) const noexcept          { return flags != other.flags; }
+    bool operator== (const ModifierKeys other) const noexcept           { return flags == other.flags; }
+    bool operator!= (const ModifierKeys other) const noexcept           { return flags != other.flags; }
 
     //==============================================================================
     /** Returns the raw flags for direct testing. */

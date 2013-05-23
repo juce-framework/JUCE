@@ -40,13 +40,13 @@ void ImageButton::setImages (const bool resizeButtonNowToFitThisImage,
                              const bool preserveImageProportions,
                              const Image& normalImage_,
                              const float imageOpacityWhenNormal,
-                             const Colour& overlayColourWhenNormal,
+                             Colour overlayColourWhenNormal,
                              const Image& overImage_,
                              const float imageOpacityWhenOver,
-                             const Colour& overlayColourWhenOver,
+                             Colour overlayColourWhenOver,
                              const Image& downImage_,
                              const float imageOpacityWhenDown,
-                             const Colour& overlayColourWhenDown,
+                             Colour overlayColourWhenDown,
                              const float hitTestAlphaThreshold)
 {
     normalImage = normalImage_;

@@ -64,7 +64,7 @@ bool OpenGLHelpers::isExtensionSupported (const char* const extensionName)
     return false;
 }
 
-void OpenGLHelpers::clear (const Colour& colour)
+void OpenGLHelpers::clear (Colour colour)
 {
     glClearColor (colour.getFloatRed(), colour.getFloatGreen(),
                   colour.getFloatBlue(), colour.getFloatAlpha());
@@ -73,7 +73,7 @@ void OpenGLHelpers::clear (const Colour& colour)
 }
 
 #if JUCE_USE_OPENGL_FIXED_FUNCTION
-void OpenGLHelpers::setColour (const Colour& colour)
+void OpenGLHelpers::setColour (Colour colour)
 {
     glColor4f (colour.getFloatRed(), colour.getFloatGreen(),
                colour.getFloatBlue(), colour.getFloatAlpha());
@@ -143,7 +143,7 @@ void OpenGLHelpers::drawQuad2D (float x1, float y1,
                                 float x2, float y2,
                                 float x3, float y3,
                                 float x4, float y4,
-                                const Colour& colour)
+                                Colour colour)
 {
     const GLfloat vertices[]      = { x1, y1, x2, y2, x4, y4, x3, y3 };
     const GLfloat textureCoords[] = { 0, 0, 1.0f, 0, 0, 1.0f, 1.0f, 1.0f };
@@ -166,7 +166,7 @@ void OpenGLHelpers::drawQuad3D (float x1, float y1, float z1,
                                 float x2, float y2, float z2,
                                 float x3, float y3, float z3,
                                 float x4, float y4, float z4,
-                                const Colour& colour)
+                                Colour colour)
 {
     const GLfloat vertices[]      = { x1, y1, z1, x2, y2, z2, x4, y4, z4, x3, y3, z3 };
     const GLfloat textureCoords[] = { 0, 0, 1.0f, 0, 0, 1.0f, 1.0f, 1.0f };
@@ -233,7 +233,7 @@ void OpenGLHelpers::fillRectWithTexture (const Rectangle<int>& rect, GLuint text
     drawTextureQuad (textureID, rect);
 }
 
-void OpenGLHelpers::fillRectWithColour (const Rectangle<int>& rect, const Colour& colour)
+void OpenGLHelpers::fillRectWithColour (const Rectangle<int>& rect, Colour colour)
 {
     glEnableClientState (GL_VERTEX_ARRAY);
     glDisableClientState (GL_TEXTURE_COORD_ARRAY);

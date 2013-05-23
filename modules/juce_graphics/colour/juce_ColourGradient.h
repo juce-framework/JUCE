@@ -57,8 +57,8 @@ public:
 
         @see ColourGradient
     */
-    ColourGradient (const Colour& colour1, float x1, float y1,
-                    const Colour& colour2, float x2, float y2,
+    ColourGradient (Colour colour1, float x1, float y1,
+                    Colour colour2, float x2, float y2,
                     bool isRadial);
 
     /** Creates an uninitialised gradient.
@@ -91,7 +91,7 @@ public:
         @returns the index at which the new point was added
     */
     int addColour (double proportionAlongGradient,
-                   const Colour& colour);
+                   Colour colour);
 
     /** Removes one of the colours from the gradient. */
     void removeColour (int index);
@@ -117,7 +117,7 @@ public:
     /** Changes the colour at a given index.
         The index is from 0 to getNumColours() - 1.
     */
-    void setColour (int index, const Colour& newColour) noexcept;
+    void setColour (int index, Colour newColour) noexcept;
 
     /** Returns the an interpolated colour at any position along the gradient.
         @param position     the position along the gradient, between 0 and 1
@@ -165,7 +165,7 @@ private:
     {
         ColourPoint() noexcept {}
 
-        ColourPoint (const double pos, const Colour& col) noexcept
+        ColourPoint (const double pos, Colour col) noexcept
             : position (pos), colour (col)
         {}
 

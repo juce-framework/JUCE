@@ -3115,7 +3115,7 @@ Point<int> MouseInputSource::getCurrentMousePosition()
     return Point<int> (x, y);
 }
 
-void Desktop::setMousePosition (const Point<int>& newPosition)
+void Desktop::setMousePosition (Point<int> newPosition)
 {
     ScopedXLock xlock;
     Window root = RootWindow (display, DefaultScreen (display));

@@ -495,7 +495,7 @@ bool operator!= (const var& v1, const char* const v2)       { return v1.toString
 
 
 //==============================================================================
-var var::operator[] (const Identifier& propertyName) const
+var var::operator[] (const Identifier propertyName) const
 {
     if (DynamicObject* const o = getDynamicObject())
         return o->getProperty (propertyName);
@@ -508,7 +508,7 @@ var var::operator[] (const char* const propertyName) const
     return operator[] (Identifier (propertyName));
 }
 
-var var::getProperty (const Identifier& propertyName, const var& defaultReturnValue) const
+var var::getProperty (const Identifier propertyName, const var& defaultReturnValue) const
 {
     if (DynamicObject* const o = getDynamicObject())
         return o->getProperties().getWithDefault (propertyName, defaultReturnValue);
@@ -516,7 +516,7 @@ var var::getProperty (const Identifier& propertyName, const var& defaultReturnVa
     return defaultReturnValue;
 }
 
-var var::invoke (const Identifier& method, const var* arguments, int numArguments) const
+var var::invoke (const Identifier method, const var* arguments, int numArguments) const
 {
     if (DynamicObject* const o = getDynamicObject())
         return o->invokeMethod (method, arguments, numArguments);
@@ -534,35 +534,35 @@ var var::invokeMethod (DynamicObject* const target, const var* const arguments, 
     return var::null;
 }
 
-var var::call (const Identifier& method) const
+var var::call (const Identifier method) const
 {
     return invoke (method, nullptr, 0);
 }
 
-var var::call (const Identifier& method, const var& arg1) const
+var var::call (const Identifier method, const var& arg1) const
 {
     return invoke (method, &arg1, 1);
 }
 
-var var::call (const Identifier& method, const var& arg1, const var& arg2) const
+var var::call (const Identifier method, const var& arg1, const var& arg2) const
 {
     var args[] = { arg1, arg2 };
     return invoke (method, args, 2);
 }
 
-var var::call (const Identifier& method, const var& arg1, const var& arg2, const var& arg3)
+var var::call (const Identifier method, const var& arg1, const var& arg2, const var& arg3)
 {
     var args[] = { arg1, arg2, arg3 };
     return invoke (method, args, 3);
 }
 
-var var::call (const Identifier& method, const var& arg1, const var& arg2, const var& arg3, const var& arg4) const
+var var::call (const Identifier method, const var& arg1, const var& arg2, const var& arg3, const var& arg4) const
 {
     var args[] = { arg1, arg2, arg3, arg4 };
     return invoke (method, args, 4);
 }
 
-var var::call (const Identifier& method, const var& arg1, const var& arg2, const var& arg3, const var& arg4, const var& arg5) const
+var var::call (const Identifier method, const var& arg1, const var& arg2, const var& arg3, const var& arg4, const var& arg5) const
 {
     var args[] = { arg1, arg2, arg3, arg4, arg5 };
     return invoke (method, args, 5);

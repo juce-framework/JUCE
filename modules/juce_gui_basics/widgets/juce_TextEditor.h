@@ -406,16 +406,16 @@ public:
         The rectangle returned is relative to the component's top-left corner.
         @see scrollEditorToPositionCaret
     */
-    Rectangle<int> getCaretRectangle();
+    Rectangle<int> getCaretRectangle() override;
 
     /** Selects a section of the text. */
-    void setHighlightedRegion (const Range<int>& newSelection);
+    void setHighlightedRegion (const Range<int>& newSelection) override;
 
     /** Returns the range of characters that are selected.
         If nothing is selected, this will return an empty range.
         @see setHighlightedRegion
     */
-    Range<int> getHighlightedRegion() const                   { return selection; }
+    Range<int> getHighlightedRegion() const override            { return selection; }
 
     /** Returns the section of text that is currently selected. */
     String getHighlightedText() const;
@@ -699,9 +699,9 @@ private:
     void coalesceSimilarSections();
     void splitSection (int sectionIndex, int charToSplitAt);
     void clearInternal (UndoManager*);
-    void insert (const String&, int insertIndex, const Font&, const Colour&, UndoManager*, int newCaretPos);
+    void insert (const String&, int insertIndex, const Font&, const Colour, UndoManager*, int newCaretPos);
     void reinsert (int insertIndex, const Array <UniformTextSection*>&);
-    void remove (const Range<int>& range, UndoManager*, int caretPositionToMoveTo);
+    void remove (Range<int> range, UndoManager*, int caretPositionToMoveTo);
     void getCharPosition (int index, float& x, float& y, float& lineHeight) const;
     void updateCaretPosition();
     void updateValueFromText();
@@ -716,7 +716,7 @@ private:
     void updateTextHolderSize();
     float getWordWrapWidth() const;
     void timerCallbackInt();
-    void repaintText (const Range<int>&);
+    void repaintText (Range<int>);
     void scrollByLines (int deltaLines);
     bool undoOrRedo (bool shouldUndo);
     UndoManager* getUndoManager() noexcept;

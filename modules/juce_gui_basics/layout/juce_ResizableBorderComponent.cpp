@@ -46,7 +46,7 @@ bool ResizableBorderComponent::Zone::operator!= (const ResizableBorderComponent:
 
 ResizableBorderComponent::Zone ResizableBorderComponent::Zone::fromPositionOnBorder (const Rectangle<int>& totalSize,
                                                                                      const BorderSize<int>& border,
-                                                                                     const Point<int>& position)
+                                                                                     Point<int> position)
 {
     int z = 0;
 

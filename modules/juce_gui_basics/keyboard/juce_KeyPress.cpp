@@ -30,7 +30,7 @@ KeyPress::KeyPress() noexcept
 }
 
 KeyPress::KeyPress (const int keyCode_,
-                    const ModifierKeys& mods_,
+                    ModifierKeys mods_,
                     const juce_wchar textCharacter_) noexcept
     : keyCode (keyCode_),
       mods (mods_),

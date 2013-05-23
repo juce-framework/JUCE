@@ -174,7 +174,7 @@ void Graphics::endTransparencyLayer()
 }
 
 //==============================================================================
-void Graphics::setColour (const Colour& newColour)
+void Graphics::setColour (Colour newColour)
 {
     saveStateIfPending();
     context.setFill (newColour);
@@ -369,7 +369,7 @@ void Graphics::fillAll() const
     fillRect (context.getClipBounds());
 }
 
-void Graphics::fillAll (const Colour& colourToUse) const
+void Graphics::fillAll (Colour colourToUse) const
 {
     if (! colourToUse.isTransparent())
     {
@@ -503,7 +503,7 @@ void Graphics::drawArrow (const Line<float>& line, const float lineThickness, co
 
 void Graphics::fillCheckerBoard (const Rectangle<int>& area,
                                  const int checkWidth, const int checkHeight,
-                                 const Colour& colour1, const Colour& colour2) const
+                                 Colour colour1, Colour colour2) const
 {
     jassert (checkWidth > 0 && checkHeight > 0); // can't be zero or less!
 

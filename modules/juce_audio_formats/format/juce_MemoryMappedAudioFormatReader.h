@@ -62,16 +62,16 @@ public:
     bool mapEntireFile();
 
     /** Attempts to map a section of the file into memory. */
-    bool mapSectionOfFile (const Range<int64>& samplesToMap);
+    bool mapSectionOfFile (Range<int64> samplesToMap);
 
     /** Returns the sample range that's currently memory-mapped and available for reading. */
-    const Range<int64>& getMappedSection() const noexcept   { return mappedSection; }
+    Range<int64> getMappedSection() const noexcept          { return mappedSection; }
 
     /** Touches the memory for the given sample, to force it to be loaded into active memory. */
     void touchSample (int64 sample) const noexcept;
 
     /** Returns the number of bytes currently being mapped */
-    size_t getNumBytesUsed() const           { return map != nullptr ? map->getSize() : 0; }
+    size_t getNumBytesUsed() const                          { return map != nullptr ? map->getSize() : 0; }
 
 protected:
     File file;

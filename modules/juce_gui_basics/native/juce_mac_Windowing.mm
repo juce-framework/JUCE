@@ -218,7 +218,7 @@ Point<int> MouseInputSource::getCurrentMousePosition()
     }
 }
 
-void Desktop::setMousePosition (const Point<int>& newPosition)
+void Desktop::setMousePosition (Point<int> newPosition)
 {
     // this rubbish needs to be done around the warp call, to avoid causing a
     // bizarre glitch..
