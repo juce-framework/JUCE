@@ -46,8 +46,8 @@ const char* const drawableItemDragType  = "Drawable Items";
 const char* const componentItemDragType = "Components";
 
 const char* const sourceFileExtensions          = "cpp;mm;m;c;cc;cxx";
-const char* const headerFileExtensions          = "h;hpp;hxx";
-const char* const sourceOrHeaderFileExtensions  = "cpp;mm;m;c;cc;cxx;h;hpp;hxx";
+const char* const headerFileExtensions          = "h;hpp;hxx;inl";
+const char* const sourceOrHeaderFileExtensions  = "cpp;mm;m;c;cc;cxx;h;hpp;hxx;inl";
 
 enum ColourIds
 {
