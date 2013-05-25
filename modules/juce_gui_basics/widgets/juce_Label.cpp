@@ -209,6 +209,10 @@ void Label::showEditor()
         editor->setText (getText(), false);
         editor->addListener (this);
         editor->grabKeyboardFocus();
+
+        if (editor == nullptr) // may be deleted by a callback
+            return;
+
         editor->setHighlightedRegion (Range<int> (0, textValue.toString().length()));
 
         resized();

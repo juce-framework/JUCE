@@ -118,7 +118,7 @@ bool MessageManager::runDispatchLoopUntil (int millisecondsToRunFor)
         }
         JUCE_CATCH_EXCEPTION
 
-        if (millisecondsToRunFor >= 0 && Time::currentTimeMillis() >= currentTime)
+        if (millisecondsToRunFor >= 0 && Time::currentTimeMillis() >= endTime)
             break;
     }
 
