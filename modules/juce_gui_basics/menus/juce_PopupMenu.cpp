@@ -1054,26 +1054,22 @@ private:
     void selectNextItem (const int delta)
     {
         disableTimerUntilMouseMoves();
-        PopupMenu::ItemComponent* mic = nullptr;
-        bool wasLastOne = (currentChild == nullptr);
-        const int numItems = items.size();
 
-        for (int i = 0; i < numItems + 1; ++i)
+        int start = jmax (0, items.indexOf (currentChild));
+
+        for (int i = items.size(); --i >= 0;)
         {
-            int index = (delta > 0) ? i : (numItems - 1 - i);
-            index = (index + numItems) % numItems;
+            start += delta;
 
-            mic = items.getUnchecked (index);
-
-            if (mic != nullptr && (mic->itemInfo.canBeTriggered() || mic->itemInfo.hasActiveSubMenu())
-                 && wasLastOne)
-                break;
-
-            if (mic == currentChild)
-                wasLastOne = true;
+            if (PopupMenu::ItemComponent* mic = items.getUnchecked (jlimit (0, items.size() - 1, start)))
+            {
+                if (mic->itemInfo.canBeTriggered() || mic->itemInfo.hasActiveSubMenu())
+                {
+                    setCurrentlyHighlightedChild (mic);
+                    break;
+                }
+            }
         }
-
-        setCurrentlyHighlightedChild (mic);
     }
 
     void disableTimerUntilMouseMoves()
