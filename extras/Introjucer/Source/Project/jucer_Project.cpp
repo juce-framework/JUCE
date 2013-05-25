@@ -406,6 +406,10 @@ void Project::createPropertyEditors (PropertyListBuilder& props)
                    "(Note that individual resource files which are larger than this size cannot be split across multiple cpp files).");
     }
 
+    props.add (new TextPropertyComponent (getProjectPreprocessorDefs(), "Preprocessor definitions", 32768, true),
+               "Global preprocessor definitions. Use the form \"NAME1=value NAME2=value\", using whitespace, commas, or "
+               "new-lines to separate the items - to include a space or comma in a definition, precede it with a backslash.");
+
     props.add (new TextPropertyComponent (getProjectUserNotes(), "Notes", 32768, true),
                "Extra comments: This field is not used for code or project generation, it's just a space where you can express your thoughts.");
 }
