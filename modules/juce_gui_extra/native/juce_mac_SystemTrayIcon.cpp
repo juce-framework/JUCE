@@ -33,27 +33,25 @@ class SystemTrayIconComponent::Pimpl
 public:
     Pimpl (SystemTrayIconComponent& iconComp, const Image& im)
         : owner (iconComp), statusItem (nil),
-          statusIcon (MouseCursorHelpers::createNSImage (im))
+          statusIcon (MouseCursorHelpers::createNSImage (im)),
+          isHighlighted (false)
     {
-        static SystemTrayCallbackClass cls;
-        callback = [cls.createInstance() init];
-        SystemTrayCallbackClass::setOwner (callback, this);
-
-        statusItem = [[[NSStatusBar systemStatusBar] statusItemWithLength: NSSquareStatusItemLength] retain];
-
-        [statusItem setHighlightMode: YES];
+        static SystemTrayViewClass cls;
+        view = [cls.createInstance() init];
+        SystemTrayViewClass::setOwner (view, this);
+        SystemTrayViewClass::setImage (view, statusIcon);
 
         setIconSize();
-        [statusItem setImage: statusIcon];
-        [statusItem setTarget: callback];
-        [statusItem setAction: @selector (statusItemAction:)];
+
+        statusItem = [[[NSStatusBar systemStatusBar] statusItemWithLength: NSSquareStatusItemLength] retain];
+        [statusItem setView: view];
     }
 
     ~Pimpl()
     {
         [statusItem release];
+        [view release];
         [statusIcon release];
-        [callback release];
     }
 
     void updateIcon (const Image& newImage)
@@ -61,6 +59,13 @@ public:
         [statusIcon release];
         statusIcon = MouseCursorHelpers::createNSImage (newImage);
         setIconSize();
+        SystemTrayViewClass::setImage (view, statusIcon);
+    }
+
+    void setHighlighted (bool shouldHighlight)
+    {
+        isHighlighted = shouldHighlight;
+        [view setNeedsDisplay: true];
     }
 
     void handleStatusItemAction (NSEvent* e)
@@ -117,33 +122,62 @@ private:
     SystemTrayIconComponent& owner;
     NSStatusItem* statusItem;
     NSImage* statusIcon;
-    NSObject* callback;
+    NSControl* view;
+    bool isHighlighted;
 
     void setIconSize()
     {
         [statusIcon setSize: NSMakeSize (20.0f, 20.0f)];
     }
 
-    struct SystemTrayCallbackClass   : public ObjCClass <NSObject>
+    struct SystemTrayViewClass : public ObjCClass <NSControl>
     {
-        SystemTrayCallbackClass()  : ObjCClass <NSObject> ("JUCESystemTray_")
+        SystemTrayViewClass()  : ObjCClass <NSControl> ("JUCESystemTrayView_")
         {
-            addIvar<SystemTrayIconComponent::Pimpl*> ("owner");
-            addMethod (@selector (statusItemAction:), statusItemAction, "v@:@");
+            addIvar<Pimpl*> ("owner");
+            addIvar<NSImage*> ("image");
+
+            addMethod (@selector (mouseDown:),      handleEventDown, "v@:@");
+            addMethod (@selector (rightMouseDown:), handleEventDown, "v@:@");
+            addMethod (@selector (drawRect:),       drawRect,        "v@:@");
 
             registerClass();
         }
 
-        static void setOwner (id self, SystemTrayIconComponent::Pimpl* owner)
-        {
-            object_setInstanceVariable (self, "owner", owner);
-        }
+        static Pimpl* getOwner (id self)                { return getIvar<Pimpl*> (self, "owner"); }
+        static NSImage* getImage (id self)              { return getIvar<NSImage*> (self, "image"); }
+        static void setOwner (id self, Pimpl* owner)    { object_setInstanceVariable (self, "owner", owner); }
+        static void setImage (id self, NSImage* image)  { object_setInstanceVariable (self, "image", image); }
 
     private:
-        static void statusItemAction (id self, SEL, id /*sender*/)
+        static void handleEventDown (id self, SEL, NSEvent* e)
         {
-            if (SystemTrayIconComponent::Pimpl* const owner = getIvar<SystemTrayIconComponent::Pimpl*> (self, "owner"))
-                owner->handleStatusItemAction ([NSApp currentEvent]);
+            if (Pimpl* const owner = getOwner (self))
+            {
+                owner->setHighlighted (! owner->isHighlighted);
+                owner->handleStatusItemAction (e);
+            }
+        }
+
+        static void drawRect (id self, SEL, NSRect)
+        {
+            NSRect bounds = [self bounds];
+
+            if (Pimpl* const owner = getOwner (self))
+                [owner->statusItem drawStatusBarBackgroundInRect: bounds
+                                                   withHighlight: owner->isHighlighted];
+
+            if (NSImage* const im = getImage (self))
+            {
+                NSSize imageSize = [im size];
+
+                [im drawInRect: NSMakeRect (bounds.origin.x + ((bounds.size.width  - imageSize.width)  / 2.0f),
+                                            bounds.origin.y + ((bounds.size.height - imageSize.height) / 2.0f),
+                                            imageSize.width, imageSize.height)
+                      fromRect: NSZeroRect
+                     operation: NSCompositeSourceOver
+                      fraction: 1.0f];
+            }
         }
     };
 
