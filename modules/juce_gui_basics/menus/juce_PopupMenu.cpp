@@ -1061,7 +1061,7 @@ private:
         {
             start += delta;
 
-            if (PopupMenu::ItemComponent* mic = items.getUnchecked (jlimit (0, items.size() - 1, start)))
+            if (PopupMenu::ItemComponent* mic = items.getUnchecked ((start + items.size()) % items.size()))
             {
                 if (mic->itemInfo.canBeTriggered() || mic->itemInfo.hasActiveSubMenu())
                 {
