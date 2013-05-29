@@ -26,6 +26,8 @@
 #ifndef __JUCE_STANDALONEFILTERWINDOW_JUCEHEADER__
 #define __JUCE_STANDALONEFILTERWINDOW_JUCEHEADER__
 
+extern AudioProcessor* JUCE_CALLTYPE createPluginFilter();
+
 //==============================================================================
 /**
     A class that can be used to run a simple standalone application containing your filter.
