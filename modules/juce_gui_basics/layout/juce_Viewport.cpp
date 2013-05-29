@@ -350,7 +350,7 @@ void Viewport::mouseWheelMove (const MouseEvent& e, const MouseWheelDetails& whe
 
 bool Viewport::useMouseWheelMoveIfNeeded (const MouseEvent& e, const MouseWheelDetails& wheel)
 {
-    if (! (e.mods.isAltDown() || e.mods.isCtrlDown()))
+    if (! (e.mods.isAltDown() || e.mods.isCtrlDown() || e.mods.isCommandDown()))
     {
         const bool hasVertBar = verticalScrollBar.isVisible();
         const bool hasHorzBar = horizontalScrollBar.isVisible();
