@@ -49,6 +49,7 @@ public:
 
     ~Pimpl()
     {
+        [[NSStatusBar systemStatusBar] removeStatusItem: statusItem];
         [statusItem release];
         [view release];
         [statusIcon release];
@@ -201,7 +202,7 @@ void SystemTrayIconComponent::setIconImage (const Image& newImage)
     }
 }
 
-void SystemTrayIconComponent::setIconTooltip (const String& /* tooltip */)
+void SystemTrayIconComponent::setIconTooltip (const String&)
 {
     // xxx not yet implemented!
 }
