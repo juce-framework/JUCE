@@ -153,7 +153,7 @@ void TimeSliceThread::run()
                     const ScopedLock sl2 (listLock);
 
                     if (msUntilNextCall >= 0)
-                        clientBeingCalled->nextCallTime += RelativeTime::milliseconds (msUntilNextCall);
+                        clientBeingCalled->nextCallTime = now + RelativeTime::milliseconds (msUntilNextCall);
                     else
                         clients.removeFirstMatchingValue (clientBeingCalled);
 
