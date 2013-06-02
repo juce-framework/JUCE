@@ -166,9 +166,12 @@ public:
         This will attempt to open either a default audio device, or one that was
         previously saved as XML.
 
-        @param numInputChannelsNeeded       a minimum number of input channels needed
-                                            by your app.
-        @param numOutputChannelsNeeded      a minimum number of output channels to open
+        @param numInputChannelsNeeded       the maximum number of input channels your app would like to
+                                            use (the actual number of channels opened may be less than
+                                            the number requested)
+        @param numOutputChannelsNeeded      the maximum number of output channels your app would like to
+                                            use (the actual number of channels opened may be less than
+                                            the number requested)
         @param savedState                   either a previously-saved state that was produced
                                             by createStateXml(), or nullptr if you want the manager
                                             to choose the best device to open.

@@ -326,7 +326,7 @@ EDataFlow getDataFlow (const ComSmartPtr<IMMDevice>& device)
 
 int refTimeToSamples (const REFERENCE_TIME& t, const double sampleRate) noexcept
 {
-    return roundDoubleToInt (sampleRate * ((double) t) * 0.0000001);
+    return roundToInt (sampleRate * ((double) t) * 0.0000001);
 }
 
 void copyWavFormat (WAVEFORMATEXTENSIBLE& dest, const WAVEFORMATEX* const src) noexcept
@@ -553,12 +553,12 @@ private:
             format.Format.cbSize = sizeof (WAVEFORMATEXTENSIBLE) - sizeof (WAVEFORMATEX);
         }
 
-        format.Format.nSamplesPerSec = (DWORD) roundDoubleToInt (sampleRate);
-        format.Format.nChannels = (WORD) numChannels;
-        format.Format.wBitsPerSample = (WORD) (8 * bytesPerSampleToTry);
-        format.Format.nAvgBytesPerSec = (DWORD) (format.Format.nSamplesPerSec * numChannels * bytesPerSampleToTry);
-        format.Format.nBlockAlign = (WORD) (numChannels * bytesPerSampleToTry);
-        format.SubFormat = useFloat ? KSDATAFORMAT_SUBTYPE_IEEE_FLOAT : KSDATAFORMAT_SUBTYPE_PCM;
+        format.Format.nSamplesPerSec       = (DWORD) sampleRate;
+        format.Format.nChannels            = (WORD) numChannels;
+        format.Format.wBitsPerSample       = (WORD) (8 * bytesPerSampleToTry);
+        format.Format.nAvgBytesPerSec      = (DWORD) (format.Format.nSamplesPerSec * numChannels * bytesPerSampleToTry);
+        format.Format.nBlockAlign          = (WORD) (numChannels * bytesPerSampleToTry);
+        format.SubFormat                   = useFloat ? KSDATAFORMAT_SUBTYPE_IEEE_FLOAT : KSDATAFORMAT_SUBTYPE_PCM;
         format.Samples.wValidBitsPerSample = format.Format.wBitsPerSample;
 
         switch (numChannels)
@@ -573,8 +573,10 @@ private:
 
         WAVEFORMATEXTENSIBLE* nearestFormat = nullptr;
 
-        HRESULT hr = client->IsFormatSupported (useExclusiveMode ? AUDCLNT_SHAREMODE_EXCLUSIVE : AUDCLNT_SHAREMODE_SHARED,
-                                                (WAVEFORMATEX*) &format, useExclusiveMode ? nullptr : (WAVEFORMATEX**) &nearestFormat);
+        HRESULT hr = client->IsFormatSupported (useExclusiveMode ? AUDCLNT_SHAREMODE_EXCLUSIVE
+                                                                 : AUDCLNT_SHAREMODE_SHARED,
+                                                (WAVEFORMATEX*) &format,
+                                                useExclusiveMode ? nullptr : (WAVEFORMATEX**) &nearestFormat);
         logFailure (hr);
 
         if (hr == S_FALSE && format.Format.nSamplesPerSec == nearestFormat->Format.nSamplesPerSec)
