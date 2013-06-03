@@ -472,6 +472,15 @@ public:
             }
         }
 
+        if (ModuleList().isLibraryNewerThanIntrojucer())
+        {
+            AlertWindow::showMessageBox (AlertWindow::WarningIcon,
+                                         "Introjucer",
+                                         "This version of the introjucer is out-of-date!"
+                                         "\n\n"
+                                         "Always make sure that you're running the very latest version, preferably compiled directly from the juce tree that you're working with!");
+        }
+
         return true;
     }
 

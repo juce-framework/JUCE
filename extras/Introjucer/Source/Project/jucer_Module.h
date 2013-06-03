@@ -129,6 +129,7 @@ public:
 
     static File getDefaultModulesFolder (Project*);
     static bool isLocalModulesFolderValid();
+    static bool isLibraryNewerThanIntrojucer();
 
     static File getLocalModulesFolder (Project*);
     static void setLocalModulesFolder (const File& newFile);

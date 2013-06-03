@@ -73,6 +73,45 @@ bool ModuleList::isLocalModulesFolderValid()
     return isModulesFolder (getModulesFolderForJuceOrModulesFolder (getLocalModulesFolder (nullptr)));
 }
 
+static int getVersionElement (const String& v, int index)
+{
+    StringArray parts;
+    parts.addTokens (v, "., ", String::empty);
+
+    return parts [parts.size() - index - 1].getIntValue();
+}
+
+static int getJuceVersion (const String& v)
+{
+    return getVersionElement (v, 2) * 100000
+         + getVersionElement (v, 1) * 1000
+         + getVersionElement (v, 0);
+}
+
+static int getBuiltJuceVersion()
+{
+    return JUCE_MAJOR_VERSION * 100000
+         + JUCE_MINOR_VERSION * 1000
+         + JUCE_BUILDNUMBER;
+}
+
+bool ModuleList::isLibraryNewerThanIntrojucer()
+{
+    ModuleList list;
+    list.rescan (getModulesFolderForJuceOrModulesFolder (getLocalModulesFolder (nullptr)));
+
+    for (int i = list.modules.size(); --i >= 0;)
+    {
+        const Module* m = list.modules.getUnchecked(i);
+
+        if (m->uid.startsWith ("juce_")
+             && getJuceVersion (m->version) > getBuiltJuceVersion())
+            return true;
+    }
+
+    return false;
+}
+
 bool ModuleList::isJuceFolder (const File& folder)
 {
     return folder.getFileName().containsIgnoreCase ("juce")
