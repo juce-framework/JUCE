@@ -137,9 +137,9 @@ void AudioDeviceManager::audioDeviceListChanged()
 {
     if (currentAudioDevice != nullptr)
     {
-        currentSetup.sampleRate = currentAudioDevice->getCurrentSampleRate();
-        currentSetup.bufferSize = currentAudioDevice->getCurrentBufferSizeSamples();
-        currentSetup.inputChannels = currentAudioDevice->getActiveInputChannels();
+        currentSetup.sampleRate     = currentAudioDevice->getCurrentSampleRate();
+        currentSetup.bufferSize     = currentAudioDevice->getCurrentBufferSizeSamples();
+        currentSetup.inputChannels  = currentAudioDevice->getActiveInputChannels();
         currentSetup.outputChannels = currentAudioDevice->getActiveOutputChannels();
     }
 

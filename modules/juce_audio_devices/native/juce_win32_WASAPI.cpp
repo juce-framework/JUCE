@@ -373,6 +373,7 @@ public:
         defaultSampleRate = format.Format.nSamplesPerSec;
         minBufferSize = refTimeToSamples (minPeriod, defaultSampleRate);
         defaultBufferSize = refTimeToSamples (defaultPeriod, defaultSampleRate);
+        mixFormatChannelMask = format.dwChannelMask;
 
         rates.addUsingDefaultSort (defaultSampleRate);
 
@@ -458,6 +459,7 @@ public:
     double sampleRate, defaultSampleRate;
     int numChannels, actualNumChannels;
     int minBufferSize, defaultBufferSize, latencySamples;
+    DWORD mixFormatChannelMask;
     const bool useExclusiveMode;
     Array <double> rates;
     HANDLE clientEvent;
@@ -560,16 +562,7 @@ private:
         format.Format.nBlockAlign          = (WORD) (numChannels * bytesPerSampleToTry);
         format.SubFormat                   = useFloat ? KSDATAFORMAT_SUBTYPE_IEEE_FLOAT : KSDATAFORMAT_SUBTYPE_PCM;
         format.Samples.wValidBitsPerSample = format.Format.wBitsPerSample;
-
-        switch (numChannels)
-        {
-            case 1:     format.dwChannelMask = SPEAKER_FRONT_CENTER; break;
-            case 2:     format.dwChannelMask = SPEAKER_FRONT_LEFT | SPEAKER_FRONT_RIGHT; break;
-            case 4:     format.dwChannelMask = SPEAKER_FRONT_LEFT | SPEAKER_FRONT_RIGHT | SPEAKER_BACK_LEFT | SPEAKER_BACK_RIGHT; break;
-            case 6:     format.dwChannelMask = SPEAKER_FRONT_LEFT | SPEAKER_FRONT_RIGHT | SPEAKER_FRONT_CENTER | SPEAKER_LOW_FREQUENCY | SPEAKER_BACK_LEFT | SPEAKER_BACK_RIGHT; break;
-            case 8:     format.dwChannelMask = SPEAKER_FRONT_LEFT | SPEAKER_FRONT_RIGHT | SPEAKER_FRONT_CENTER | SPEAKER_LOW_FREQUENCY | SPEAKER_BACK_LEFT | SPEAKER_BACK_RIGHT | SPEAKER_FRONT_LEFT_OF_CENTER | SPEAKER_FRONT_RIGHT_OF_CENTER; break;
-            default:    break;
-        }
+        format.dwChannelMask               = mixFormatChannelMask;
 
         WAVEFORMATEXTENSIBLE* nearestFormat = nullptr;
 
