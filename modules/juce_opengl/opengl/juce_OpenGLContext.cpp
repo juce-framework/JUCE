@@ -316,8 +316,10 @@ public:
 
     void initialiseOnThread()
     {
-        jassert (associatedObjectNames.size() == 0);
-        jassert (! cachedImageFrameBuffer.isValid());
+        // On android, this can get called twice, so drop any previous state..
+        associatedObjectNames.clear();
+        associatedObjects.clear();
+        cachedImageFrameBuffer.release();
 
         context.makeActive();
         nativeContext->initialiseOnRenderThread (context);
