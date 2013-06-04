@@ -359,15 +359,22 @@ public:
         listeners.callChecked (checker, &SliderListener::sliderDragEnded, slider);
     }
 
+    struct DragInProgress
+    {
+        DragInProgress (Pimpl& p)  : owner (p)      { owner.sendDragStart(); }
+        ~DragInProgress()                           { owner.sendDragEnd(); }
+
+        Pimpl& owner;
+    };
+
     void buttonClicked (Button* button)
     {
         if (style == IncDecButtons)
         {
             const double delta = (button == incButton) ? interval : -interval;
 
-            sendDragStart();
+            DragInProgress drag (*this);
             setValue (owner.snapValue (getValue() + delta, false), sendNotificationSync);
-            sendDragEnd();
         }
     }
 
@@ -390,9 +397,8 @@ public:
 
         if (newValue != (double) currentValue.getValue())
         {
-            sendDragStart();
+            DragInProgress drag (*this);
             setValue (newValue, sendNotificationSync);
-            sendDragEnd();
         }
 
         updateText(); // force a clean-up of the text, needed in case setValue() hasn't done this.
@@ -821,6 +827,7 @@ public:
         incDecDragged = false;
         useDragEvents = false;
         mouseDragStartPos = mousePosWhenLastDragged = e.getPosition();
+        currentDrag = nullptr;
 
         if (owner.isEnabled())
         {
@@ -864,7 +871,7 @@ public:
                     popup->setVisible (true);
                 }
 
-                sendDragStart();
+                currentDrag = new DragInProgress (*this);
                 mouseDrag (e);
             }
         }
@@ -944,7 +951,7 @@ public:
             if (sendChangeOnlyOnRelease && valueOnMouseDown != (double) currentValue.getValue())
                 triggerChangeMessage (sendNotificationAsync);
 
-            sendDragEnd();
+            currentDrag = nullptr;
             popupDisplay = nullptr;
 
             if (style == IncDecButtons)
@@ -957,6 +964,8 @@ public:
         {
             popupDisplay->startTimer (2000);
         }
+
+        currentDrag = nullptr;
     }
 
     bool canDoubleClickToValue() const
@@ -971,9 +980,8 @@ public:
     {
         if (canDoubleClickToValue())
         {
-            sendDragStart();
+            DragInProgress drag (*this);
             setValue (doubleClickReturnValue, sendNotificationSync);
-            sendDragEnd();
         }
     }
 
@@ -998,9 +1006,8 @@ public:
                 if (value > newValue)
                     delta = -delta;
 
-                sendDragStart();
+                DragInProgress drag (*this);
                 setValue (owner.snapValue (value + delta, false), sendNotificationSync);
-                sendDragEnd();
             }
 
             return true;
@@ -1217,6 +1224,7 @@ public:
     int sliderBeingDragged;
     int pixelsForFullDragExtent;
     Rectangle<int> sliderRect;
+    ScopedPointer<DragInProgress> currentDrag;
 
     TextEntryBoxPosition textBoxPos;
     String textSuffix;
