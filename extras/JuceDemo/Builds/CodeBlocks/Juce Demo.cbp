@@ -3273,6 +3273,10 @@
       <Option compile="0"/>
       <Option link="0"/>
     </Unit>
+    <Unit filename="../../../../modules/juce_gui_extra/native/juce_mac_SystemTrayIcon.cpp">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
     <Unit filename="../../../../modules/juce_gui_extra/native/juce_mac_WebBrowserComponent.mm">
       <Option compile="0"/>
       <Option link="0"/>

@@ -393,6 +393,7 @@
 		72A33ACFFB64FE8A52B4ED7E = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_MessageManager.h"; path = "../../../../modules/juce_events/messages/juce_MessageManager.h"; sourceTree = "SOURCE_ROOT"; };
 		73580140646A8832FDEEDD4A = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_MouseCursor.h"; path = "../../../../modules/juce_gui_basics/mouse/juce_MouseCursor.h"; sourceTree = "SOURCE_ROOT"; };
 		73B018D531FC6AB2E3A73FA3 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "jucer_ComboBoxHandler.h"; path = "../../src/model/components/jucer_ComboBoxHandler.h"; sourceTree = "SOURCE_ROOT"; };
+		74727E609CB7E1E9B3A01D5F = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_mac_SystemTrayIcon.cpp"; path = "../../../../modules/juce_gui_extra/native/juce_mac_SystemTrayIcon.cpp"; sourceTree = "SOURCE_ROOT"; };
 		74DFA045C650CBB4FF3A5A95 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_Singleton.h"; path = "../../../../modules/juce_core/memory/juce_Singleton.h"; sourceTree = "SOURCE_ROOT"; };
 		74E58518172E6234F9B887E1 = { isa = PBXFileReference; lastKnownFileType = file; name = "juce_module_info"; path = "../../../../modules/juce_events/juce_module_info"; sourceTree = "SOURCE_ROOT"; };
 		7599121AB5A8187B361B7744 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_ComponentBoundsConstrainer.h"; path = "../../../../modules/juce_gui_basics/layout/juce_ComponentBoundsConstrainer.h"; sourceTree = "SOURCE_ROOT"; };
@@ -1623,6 +1624,7 @@
 				5AD700319E9D8F4F3A6843AA,
 				2462071E3029E9CDFEEA15A5,
 				04CC081487193A4CF6848E4A,
+				74727E609CB7E1E9B3A01D5F,
 				F8EF61F18821D1F9ED3CCF15,
 				ECF89AE44B18B0FD4FB2D728,
 				A657AAA8B0ACAFCCD6010FC4,

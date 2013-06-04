@@ -3400,6 +3400,16 @@
           <File RelativePath="..\..\..\..\modules\juce_gui_extra\native\juce_mac_AppleRemote.mm"/>
           <File RelativePath="..\..\..\..\modules\juce_gui_extra\native\juce_mac_CarbonViewWrapperComponent.h"/>
           <File RelativePath="..\..\..\..\modules\juce_gui_extra\native\juce_mac_NSViewComponent.mm"/>
+          <File RelativePath="..\..\..\..\modules\juce_gui_extra\native\juce_mac_SystemTrayIcon.cpp">
+            <FileConfiguration Name="Debug|Win32"
+                               ExcludedFromBuild="true">
+              <Tool Name="VCCLCompilerTool"/>
+            </FileConfiguration>
+            <FileConfiguration Name="Release|Win32"
+                               ExcludedFromBuild="true">
+              <Tool Name="VCCLCompilerTool"/>
+            </FileConfiguration>
+          </File>
           <File RelativePath="..\..\..\..\modules\juce_gui_extra\native\juce_mac_WebBrowserComponent.mm"/>
           <File RelativePath="..\..\..\..\modules\juce_gui_extra\native\juce_win32_ActiveXComponent.cpp">
             <FileConfiguration Name="Debug|Win32"
