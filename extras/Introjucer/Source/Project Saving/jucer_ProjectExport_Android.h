@@ -447,7 +447,8 @@ private:
     String getLDLIBS (const AndroidBuildConfiguration& config) const
     {
         return "  LOCAL_LDLIBS :=" + config.getGCCLibraryPathFlags()
-                + " -llog -lGLESv2 " + getExternalLibraryFlags (config);
+                + " -llog -lGLESv2 " + getExternalLibraryFlags (config)
+                + " " + replacePreprocessorTokens (config, getExtraLinkerFlagsString());
     }
 
     String createIncludePathFlags (const BuildConfiguration& config) const
