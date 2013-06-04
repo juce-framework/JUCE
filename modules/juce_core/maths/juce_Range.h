@@ -40,8 +40,7 @@ class Range
 public:
     //==============================================================================
     /** Constructs an empty range. */
-    Range() noexcept
-        : start (ValueType()), end (ValueType())
+    Range() noexcept  : start(), end()
     {
     }
 
@@ -65,16 +64,11 @@ public:
         return *this;
     }
 
-    /** Destructor. */
-    ~Range() noexcept
-    {
-    }
-
     /** Returns the range that lies between two positions (in either order). */
     static Range between (const ValueType position1, const ValueType position2) noexcept
     {
-        return (position1 < position2) ? Range (position1, position2)
-                                       : Range (position2, position1);
+        return position1 < position2 ? Range (position1, position2)
+                                     : Range (position2, position1);
     }
 
     /** Returns a range with the specified start position and a length of zero. */

@@ -223,21 +223,17 @@ Result ModuleList::rescan (const File& newModulesFolder)
             {
                 LibraryModule m (moduleDef);
 
-                if (m.isValid())
-                {
-                    Module* info = new Module();
-                    modules.add (info);
-
-                    info->uid = m.getID();
-                    info->version = m.getVersion();
-                    info->name = m.moduleInfo ["name"];
-                    info->description = m.moduleInfo ["description"];
-                    info->file = moduleDef;
-                }
-                else
-                {
+                if (! m.isValid())
                     return Result::fail ("Failed to load module manifest: " + moduleDef.getFullPathName());
-                }
+
+                Module* info = new Module();
+                modules.add (info);
+
+                info->uid = m.getID();
+                info->version = m.getVersion();
+                info->name = m.moduleInfo ["name"];
+                info->description = m.moduleInfo ["description"];
+                info->file = moduleDef;
             }
         }
     }
@@ -756,10 +752,10 @@ static void addFileWithGroups (Project::Item& group, const RelativePath& file, c
 void LibraryModule::findBrowseableFiles (const File& localModuleFolder, Array<File>& filesFound) const
 {
     const var filesArray (moduleInfo ["browse"]);
-    const Array<var>* const files = filesArray.getArray();
 
-    for (int i = 0; i < files->size(); ++i)
-        findWildcardMatches (localModuleFolder, files->getReference(i), filesFound);
+    if (const Array<var>* const files = filesArray.getArray())
+        for (int i = 0; i < files->size(); ++i)
+            findWildcardMatches (localModuleFolder, files->getReference(i), filesFound);
 }
 
 void LibraryModule::addBrowsableCode (ProjectExporter& exporter, const Array<File>& compiled, const File& localModuleFolder) const

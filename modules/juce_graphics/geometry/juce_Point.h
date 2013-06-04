@@ -52,9 +52,6 @@ public:
     /** Creates a point from an (x, y) position. */
     Point (const ValueType initialX, const ValueType initialY) noexcept : x (initialX), y (initialY) {}
 
-    /** Destructor. */
-    ~Point() noexcept {}
-
     //==============================================================================
     /** Copies this point from another one. */
     Point& operator= (const Point& other) noexcept                      { x = other.x; y = other.y; return *this; }

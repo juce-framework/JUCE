@@ -169,8 +169,7 @@ bool Colour::operator== (const Colour& other) const noexcept    { return argb.ge
 bool Colour::operator!= (const Colour& other) const noexcept    { return argb.getARGB() != other.argb.getARGB(); }
 
 //==============================================================================
-Colour::Colour (const uint32 argb_) noexcept
-    : argb (argb_)
+Colour::Colour (const uint32 col) noexcept  : argb (col)
 {
 }
 

@@ -29,17 +29,16 @@ KeyPress::KeyPress() noexcept
 {
 }
 
-KeyPress::KeyPress (const int keyCode_,
-                    ModifierKeys mods_,
-                    const juce_wchar textCharacter_) noexcept
-    : keyCode (keyCode_),
-      mods (mods_),
-      textCharacter (textCharacter_)
+KeyPress::KeyPress (const int code, ModifierKeys m,
+                    const juce_wchar textChar) noexcept
+    : keyCode (code),
+      mods (m),
+      textCharacter (textChar)
 {
 }
 
-KeyPress::KeyPress (const int keyCode_) noexcept
-    : keyCode (keyCode_),
+KeyPress::KeyPress (const int code) noexcept
+    : keyCode (code),
       textCharacter (0)
 {
 }
