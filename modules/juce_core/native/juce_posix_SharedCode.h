@@ -957,8 +957,8 @@ void Thread::setCurrentThreadAffinityMask (const uint32 affinityMask)
 bool DynamicLibrary::open (const String& name)
 {
     close();
-    handle = dlopen (name.toUTF8(), RTLD_LOCAL | RTLD_NOW);
-    return handle != 0;
+    handle = dlopen (name.isEmpty() ? nullptr : name.toUTF8(), RTLD_LOCAL | RTLD_NOW);
+    return handle != nullptr;
 }
 
 void DynamicLibrary::close()

@@ -70,7 +70,7 @@ public:
     }
 
     /** Creates a Rectangle from the positions of two opposite corners. */
-    Rectangle (const Point<ValueType>& corner1, const Point<ValueType>& corner2) noexcept
+    Rectangle (const Point<ValueType> corner1, const Point<ValueType> corner2) noexcept
       : pos (jmin (corner1.x, corner2.x),
              jmin (corner1.y, corner2.y)),
         w (corner1.x - corner2.x),
@@ -139,16 +139,16 @@ public:
 
     //==============================================================================
     /** Returns the rectangle's top-left position as a Point. */
-    inline const Point<ValueType>& getPosition() const noexcept                                     { return pos; }
+    inline Point<ValueType> getPosition() const noexcept                                            { return pos; }
 
     /** Changes the position of the rectangle's top-left corner (leaving its size unchanged). */
-    inline void setPosition (const Point<ValueType>& newPos) noexcept                               { pos = newPos; }
+    inline void setPosition (const Point<ValueType> newPos) noexcept                                { pos = newPos; }
 
     /** Changes the position of the rectangle's top-left corner (leaving its size unchanged). */
     inline void setPosition (const ValueType newX, const ValueType newY) noexcept                   { pos.setXY (newX, newY); }
 
     /** Returns the rectangle's top-left position as a Point. */
-    const Point<ValueType>& getTopLeft() const noexcept                                             { return pos; }
+    Point<ValueType> getTopLeft() const noexcept                                                    { return pos; }
 
     /** Returns the rectangle's top-right position as a Point. */
     Point<ValueType> getTopRight() const noexcept                                                   { return Point<ValueType> (pos.x + w, pos.y); }
@@ -188,7 +188,7 @@ public:
     Rectangle withPosition (const ValueType newX, const ValueType newY) const noexcept   { return Rectangle (newX, newY, w, h); }
 
     /** Returns a rectangle with the same size as this one, but a new position. */
-    Rectangle withPosition (const Point<ValueType>& newPos) const noexcept  { return Rectangle (newPos.x, newPos.y, w, h); }
+    Rectangle withPosition (const Point<ValueType> newPos) const noexcept   { return Rectangle (newPos.x, newPos.y, w, h); }
 
     /** Returns a rectangle whose size is the same as this one, but whose top-left position is (0, 0). */
     Rectangle withZeroOrigin() const noexcept                               { return Rectangle (w, h); }
@@ -267,26 +267,26 @@ public:
     }
 
     /** Returns a rectangle which is the same as this one moved by a given amount. */
-    Rectangle operator+ (const Point<ValueType>& deltaPosition) const noexcept
+    Rectangle operator+ (const Point<ValueType> deltaPosition) const noexcept
     {
         return Rectangle (pos.x + deltaPosition.x, pos.y + deltaPosition.y, w, h);
     }
 
     /** Moves this rectangle by a given amount. */
-    Rectangle& operator+= (const Point<ValueType>& deltaPosition) noexcept
+    Rectangle& operator+= (const Point<ValueType> deltaPosition) noexcept
     {
         pos += deltaPosition;
         return *this;
     }
 
     /** Returns a rectangle which is the same as this one moved by a given amount. */
-    Rectangle operator- (const Point<ValueType>& deltaPosition) const noexcept
+    Rectangle operator- (const Point<ValueType> deltaPosition) const noexcept
     {
         return Rectangle (pos.x - deltaPosition.x, pos.y - deltaPosition.y, w, h);
     }
 
     /** Moves this rectangle by a given amount. */
-    Rectangle& operator-= (const Point<ValueType>& deltaPosition) noexcept
+    Rectangle& operator-= (const Point<ValueType> deltaPosition) noexcept
     {
         pos -= deltaPosition;
         return *this;
@@ -459,7 +459,7 @@ public:
     }
 
     /** Returns true if this co-ordinate is inside the rectangle. */
-    bool contains (const Point<ValueType>& point) const noexcept
+    bool contains (const Point<ValueType> point) const noexcept
     {
         return point.x >= pos.x && point.y >= pos.y && point.x < pos.x + w && point.y < pos.y + h;
     }
@@ -472,7 +472,7 @@ public:
     }
 
     /** Returns the nearest point to the specified point that lies within this rectangle. */
-    Point<ValueType> getConstrainedPoint (const Point<ValueType>& point) const noexcept
+    Point<ValueType> getConstrainedPoint (const Point<ValueType> point) const noexcept
     {
         return Point<ValueType> (jlimit (pos.x, pos.x + w, point.x),
                                  jlimit (pos.y, pos.y + h, point.y));
