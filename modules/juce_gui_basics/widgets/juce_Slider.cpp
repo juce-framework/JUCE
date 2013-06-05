@@ -365,6 +365,8 @@ public:
         ~DragInProgress()                           { owner.sendDragEnd(); }
 
         Pimpl& owner;
+
+        JUCE_DECLARE_NON_COPYABLE (DragInProgress)
     };
 
     void buttonClicked (Button* button)

@@ -153,13 +153,11 @@ public:
 
     /** Appends a custom menu item that can't be used to trigger a result.
 
-        This will add a user-defined component to use as a menu item. Unlike the
-        addCustomItem() method that takes a PopupMenu::CustomComponent, this version
-        can't trigger a result from it, so doesn't take a menu ID. It also doesn't
-        delete the component when it's finished, so it's the caller's responsibility
-        to manage the component that is passed-in.
+        This will add a user-defined component to use as a menu item.
+        It's the caller's responsibility to delete the component that is passed-in
+        when it's no longer needed after the menu has been hidden.
 
-        if triggerMenuItemAutomaticallyWhenClicked is true, the menu itself will handle
+        If triggerMenuItemAutomaticallyWhenClicked is true, the menu itself will handle
         detection of a mouse-click on your component, and use that to trigger the
         menu ID specified in itemResultID. If this is false, the menu item can't
         be triggered, so itemResultID is not used.
