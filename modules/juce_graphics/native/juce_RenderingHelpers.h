@@ -916,14 +916,14 @@ namespace EdgeTableFillers
     {
     public:
         TransformedImageFill (const Image::BitmapData& dest, const Image::BitmapData& src,
-                              const AffineTransform& transform, const int alpha, const bool higherQuality)
+                              const AffineTransform& transform, const int alpha, const Graphics::ResamplingQuality q)
             : interpolator (transform,
-                            higherQuality ? 0.5f : 0.0f,
-                            higherQuality ? -128 : 0),
+                            q != Graphics::lowResamplingQuality ? 0.5f : 0.0f,
+                            q != Graphics::lowResamplingQuality ? -128 : 0),
               destData (dest),
               srcData (src),
               extraAlpha (alpha + 1),
-              betterQuality (higherQuality),
+              quality (q),
               maxX (src.width  - 1),
               maxY (src.height - 1),
               scratchSize (2048)
@@ -1021,7 +1021,7 @@ namespace EdgeTableFillers
                     loResY = negativeAwareModulo (loResY, srcData.height);
                 }
 
-                if (betterQuality)
+                if (quality != Graphics::lowResamplingQuality)
                 {
                     if (isPositiveAndBelow (loResX, maxX))
                     {
@@ -1361,7 +1361,7 @@ namespace EdgeTableFillers
         const Image::BitmapData& destData;
         const Image::BitmapData& srcData;
         const int extraAlpha;
-        const bool betterQuality;
+        const Graphics::ResamplingQuality quality;
         const int maxX, maxY;
         int y;
         DestPixelType* linePixels;
@@ -1375,7 +1375,7 @@ namespace EdgeTableFillers
     //==============================================================================
     template <class Iterator>
     void renderImageTransformed (Iterator& iter, const Image::BitmapData& destData, const Image::BitmapData& srcData,
-                                 const int alpha, const AffineTransform& transform, bool betterQuality, bool tiledFill)
+                                 const int alpha, const AffineTransform& transform, Graphics::ResamplingQuality quality, bool tiledFill)
     {
         switch (destData.pixelFormat)
         {
@@ -1383,16 +1383,16 @@ namespace EdgeTableFillers
             switch (srcData.pixelFormat)
             {
             case Image::ARGB:
-                if (tiledFill)  { TransformedImageFill <PixelARGB, PixelARGB, true>  r (destData, srcData, transform, alpha, betterQuality); iter.iterate (r); }
-                else            { TransformedImageFill <PixelARGB, PixelARGB, false> r (destData, srcData, transform, alpha, betterQuality); iter.iterate (r); }
+                if (tiledFill)  { TransformedImageFill <PixelARGB, PixelARGB, true>  r (destData, srcData, transform, alpha, quality); iter.iterate (r); }
+                else            { TransformedImageFill <PixelARGB, PixelARGB, false> r (destData, srcData, transform, alpha, quality); iter.iterate (r); }
                 break;
             case Image::RGB:
-                if (tiledFill)  { TransformedImageFill <PixelARGB, PixelRGB, true>  r (destData, srcData, transform, alpha, betterQuality); iter.iterate (r); }
-                else            { TransformedImageFill <PixelARGB, PixelRGB, false> r (destData, srcData, transform, alpha, betterQuality); iter.iterate (r); }
+                if (tiledFill)  { TransformedImageFill <PixelARGB, PixelRGB, true>  r (destData, srcData, transform, alpha, quality); iter.iterate (r); }
+                else            { TransformedImageFill <PixelARGB, PixelRGB, false> r (destData, srcData, transform, alpha, quality); iter.iterate (r); }
                 break;
             default:
-                if (tiledFill)  { TransformedImageFill <PixelARGB, PixelAlpha, true>  r (destData, srcData, transform, alpha, betterQuality); iter.iterate (r); }
-                else            { TransformedImageFill <PixelARGB, PixelAlpha, false> r (destData, srcData, transform, alpha, betterQuality); iter.iterate (r); }
+                if (tiledFill)  { TransformedImageFill <PixelARGB, PixelAlpha, true>  r (destData, srcData, transform, alpha, quality); iter.iterate (r); }
+                else            { TransformedImageFill <PixelARGB, PixelAlpha, false> r (destData, srcData, transform, alpha, quality); iter.iterate (r); }
                 break;
             }
             break;
@@ -1401,16 +1401,16 @@ namespace EdgeTableFillers
             switch (srcData.pixelFormat)
             {
             case Image::ARGB:
-                if (tiledFill)  { TransformedImageFill <PixelRGB, PixelARGB, true>  r (destData, srcData, transform, alpha, betterQuality); iter.iterate (r); }
-                else            { TransformedImageFill <PixelRGB, PixelARGB, false> r (destData, srcData, transform, alpha, betterQuality); iter.iterate (r); }
+                if (tiledFill)  { TransformedImageFill <PixelRGB, PixelARGB, true>  r (destData, srcData, transform, alpha, quality); iter.iterate (r); }
+                else            { TransformedImageFill <PixelRGB, PixelARGB, false> r (destData, srcData, transform, alpha, quality); iter.iterate (r); }
                 break;
             case Image::RGB:
-                if (tiledFill)  { TransformedImageFill <PixelRGB, PixelRGB, true>  r (destData, srcData, transform, alpha, betterQuality); iter.iterate (r); }
-                else            { TransformedImageFill <PixelRGB, PixelRGB, false> r (destData, srcData, transform, alpha, betterQuality); iter.iterate (r); }
+                if (tiledFill)  { TransformedImageFill <PixelRGB, PixelRGB, true>  r (destData, srcData, transform, alpha, quality); iter.iterate (r); }
+                else            { TransformedImageFill <PixelRGB, PixelRGB, false> r (destData, srcData, transform, alpha, quality); iter.iterate (r); }
                 break;
             default:
-                if (tiledFill)  { TransformedImageFill <PixelRGB, PixelAlpha, true>  r (destData, srcData, transform, alpha, betterQuality); iter.iterate (r); }
-                else            { TransformedImageFill <PixelRGB, PixelAlpha, false> r (destData, srcData, transform, alpha, betterQuality); iter.iterate (r); }
+                if (tiledFill)  { TransformedImageFill <PixelRGB, PixelAlpha, true>  r (destData, srcData, transform, alpha, quality); iter.iterate (r); }
+                else            { TransformedImageFill <PixelRGB, PixelAlpha, false> r (destData, srcData, transform, alpha, quality); iter.iterate (r); }
                 break;
             }
             break;
@@ -1419,16 +1419,16 @@ namespace EdgeTableFillers
             switch (srcData.pixelFormat)
             {
             case Image::ARGB:
-                if (tiledFill)  { TransformedImageFill <PixelAlpha, PixelARGB, true>  r (destData, srcData, transform, alpha, betterQuality); iter.iterate (r); }
-                else            { TransformedImageFill <PixelAlpha, PixelARGB, false> r (destData, srcData, transform, alpha, betterQuality); iter.iterate (r); }
+                if (tiledFill)  { TransformedImageFill <PixelAlpha, PixelARGB, true>  r (destData, srcData, transform, alpha, quality); iter.iterate (r); }
+                else            { TransformedImageFill <PixelAlpha, PixelARGB, false> r (destData, srcData, transform, alpha, quality); iter.iterate (r); }
                 break;
             case Image::RGB:
-                if (tiledFill)  { TransformedImageFill <PixelAlpha, PixelRGB, true>  r (destData, srcData, transform, alpha, betterQuality); iter.iterate (r); }
-                else            { TransformedImageFill <PixelAlpha, PixelRGB, false> r (destData, srcData, transform, alpha, betterQuality); iter.iterate (r); }
+                if (tiledFill)  { TransformedImageFill <PixelAlpha, PixelRGB, true>  r (destData, srcData, transform, alpha, quality); iter.iterate (r); }
+                else            { TransformedImageFill <PixelAlpha, PixelRGB, false> r (destData, srcData, transform, alpha, quality); iter.iterate (r); }
                 break;
             default:
-                if (tiledFill)  { TransformedImageFill <PixelAlpha, PixelAlpha, true>  r (destData, srcData, transform, alpha, betterQuality); iter.iterate (r); }
-                else            { TransformedImageFill <PixelAlpha, PixelAlpha, false> r (destData, srcData, transform, alpha, betterQuality); iter.iterate (r); }
+                if (tiledFill)  { TransformedImageFill <PixelAlpha, PixelAlpha, true>  r (destData, srcData, transform, alpha, quality); iter.iterate (r); }
+                else            { TransformedImageFill <PixelAlpha, PixelAlpha, false> r (destData, srcData, transform, alpha, quality); iter.iterate (r); }
                 break;
             }
             break;
@@ -1555,7 +1555,7 @@ namespace ClipRegions
         virtual Ptr excludeClipRectangle (const Rectangle<int>&) = 0;
         virtual Ptr clipToPath (const Path&, const AffineTransform&) = 0;
         virtual Ptr clipToEdgeTable (const EdgeTable& et) = 0;
-        virtual Ptr clipToImageAlpha (const Image&, const AffineTransform&, const bool betterQuality) = 0;
+        virtual Ptr clipToImageAlpha (const Image&, const AffineTransform&, const Graphics::ResamplingQuality quality) = 0;
         virtual void translate (Point<int> delta) = 0;
 
         virtual bool clipRegionIntersects (const Rectangle<int>&) const = 0;
@@ -1565,7 +1565,7 @@ namespace ClipRegions
         virtual void fillRectWithColour (Image::BitmapData& destData, const Rectangle<float>&, const PixelARGB colour) const = 0;
         virtual void fillAllWithColour (Image::BitmapData& destData, const PixelARGB colour, bool replaceContents) const = 0;
         virtual void fillAllWithGradient (Image::BitmapData& destData, ColourGradient&, const AffineTransform&, bool isIdentity) const = 0;
-        virtual void renderImageTransformed (const Image::BitmapData& destData, const Image::BitmapData& srcData, const int alpha, const AffineTransform&, bool betterQuality, bool tiledFill) const = 0;
+        virtual void renderImageTransformed (const Image::BitmapData& destData, const Image::BitmapData& srcData, const int alpha, const AffineTransform&, Graphics::ResamplingQuality, bool tiledFill) const = 0;
         virtual void renderImageUntransformed (const Image::BitmapData& destData, const Image::BitmapData& srcData, const int alpha, int x, int y, bool tiledFill) const = 0;
     };
 
@@ -1619,7 +1619,7 @@ namespace ClipRegions
             return edgeTable.isEmpty() ? nullptr : this;
         }
 
-        Ptr clipToImageAlpha (const Image& image, const AffineTransform& transform, const bool betterQuality)
+        Ptr clipToImageAlpha (const Image& image, const AffineTransform& transform, const Graphics::ResamplingQuality quality)
         {
             const Image::BitmapData srcData (image, Image::BitmapData::readOnly);
 
@@ -1629,7 +1629,7 @@ namespace ClipRegions
                 const int tx = (int) (transform.getTranslationX() * 256.0f);
                 const int ty = (int) (transform.getTranslationY() * 256.0f);
 
-                if ((! betterQuality) || ((tx | ty) & 224) == 0)
+                if (quality == Graphics::lowResamplingQuality || ((tx | ty) & 224) == 0)
                 {
                     const int imageX = ((tx + 128) >> 8);
                     const int imageY = ((ty + 128) >> 8);
@@ -1656,9 +1656,9 @@ namespace ClipRegions
             if (! edgeTable.isEmpty())
             {
                 if (image.getFormat() == Image::ARGB)
-                    transformedClipImage (srcData, transform, betterQuality, (PixelARGB*) 0);
+                    transformedClipImage (srcData, transform, quality, (PixelARGB*) 0);
                 else
-                    transformedClipImage (srcData, transform, betterQuality, (PixelAlpha*) 0);
+                    transformedClipImage (srcData, transform, quality, (PixelAlpha*) 0);
             }
 
             return edgeTable.isEmpty() ? nullptr : this;
@@ -1729,9 +1729,9 @@ namespace ClipRegions
             }
         }
 
-        void renderImageTransformed (const Image::BitmapData& destData, const Image::BitmapData& srcData, const int alpha, const AffineTransform& transform, bool betterQuality, bool tiledFill) const
+        void renderImageTransformed (const Image::BitmapData& destData, const Image::BitmapData& srcData, const int alpha, const AffineTransform& transform, Graphics::ResamplingQuality quality, bool tiledFill) const
         {
-            EdgeTableFillers::renderImageTransformed (edgeTable, destData, srcData, alpha, transform, betterQuality, tiledFill);
+            EdgeTableFillers::renderImageTransformed (edgeTable, destData, srcData, alpha, transform, quality, tiledFill);
         }
 
         void renderImageUntransformed (const Image::BitmapData& destData, const Image::BitmapData& srcData, const int alpha, int x, int y, bool tiledFill) const
@@ -1744,9 +1744,9 @@ namespace ClipRegions
     private:
         //==============================================================================
         template <class SrcPixelType>
-        void transformedClipImage (const Image::BitmapData& srcData, const AffineTransform& transform, const bool betterQuality, const SrcPixelType*)
+        void transformedClipImage (const Image::BitmapData& srcData, const AffineTransform& transform, const Graphics::ResamplingQuality quality, const SrcPixelType*)
         {
-            EdgeTableFillers::TransformedImageFill <SrcPixelType, SrcPixelType, false> renderer (srcData, srcData, transform, 255, betterQuality);
+            EdgeTableFillers::TransformedImageFill <SrcPixelType, SrcPixelType, false> renderer (srcData, srcData, transform, 255, quality);
 
             for (int y = 0; y < edgeTable.getMaximumBounds().getHeight(); ++y)
                 renderer.clipEdgeTableLine (edgeTable, edgeTable.getMaximumBounds().getX(), y + edgeTable.getMaximumBounds().getY(),
@@ -1800,9 +1800,9 @@ namespace ClipRegions
         Ptr clipToPath (const Path& p, const AffineTransform& transform)  { return toEdgeTable()->clipToPath (p, transform); }
         Ptr clipToEdgeTable (const EdgeTable& et)                         { return toEdgeTable()->clipToEdgeTable (et); }
 
-        Ptr clipToImageAlpha (const Image& image, const AffineTransform& transform, const bool betterQuality)
+        Ptr clipToImageAlpha (const Image& image, const AffineTransform& transform, const Graphics::ResamplingQuality quality)
         {
-            return toEdgeTable()->clipToImageAlpha (image, transform, betterQuality);
+            return toEdgeTable()->clipToImageAlpha (image, transform, quality);
         }
 
         void translate (Point<int> delta)
@@ -1861,9 +1861,9 @@ namespace ClipRegions
             }
         }
 
-        void renderImageTransformed (const Image::BitmapData& destData, const Image::BitmapData& srcData, const int alpha, const AffineTransform& transform, bool betterQuality, bool tiledFill) const
+        void renderImageTransformed (const Image::BitmapData& destData, const Image::BitmapData& srcData, const int alpha, const AffineTransform& transform, Graphics::ResamplingQuality quality, bool tiledFill) const
         {
-            EdgeTableFillers::renderImageTransformed (*this, destData, srcData, alpha, transform, betterQuality, tiledFill);
+            EdgeTableFillers::renderImageTransformed (*this, destData, srcData, alpha, transform, quality, tiledFill);
         }
 
         void renderImageUntransformed (const Image::BitmapData& destData, const Image::BitmapData& srcData, const int alpha, int x, int y, bool tiledFill) const
@@ -2153,8 +2153,7 @@ public:
             if (sourceImage.hasAlphaChannel())
             {
                 cloneClipIfMultiplyReferenced();
-                clip = clip->clipToImageAlpha (sourceImage, transform.getTransformWith (t),
-                                               interpolationQuality != Graphics::lowResamplingQuality);
+                clip = clip->clipToImageAlpha (sourceImage, transform.getTransformWith (t), interpolationQuality);
             }
             else
             {
@@ -2363,7 +2362,6 @@ public:
         const Image::BitmapData destData (image, Image::BitmapData::readWrite);
         const Image::BitmapData srcData (sourceImage, Image::BitmapData::readOnly);
         const int alpha = fillType.colour.getAlpha();
-        const bool betterQuality = (interpolationQuality != Graphics::lowResamplingQuality);
 
         if (t.isOnlyTranslation())
         {
@@ -2371,7 +2369,7 @@ public:
             int tx = (int) (t.getTranslationX() * 256.0f);
             int ty = (int) (t.getTranslationY() * 256.0f);
 
-            if ((! betterQuality) || ((tx | ty) & 224) == 0)
+            if (interpolationQuality == Graphics::lowResamplingQuality || ((tx | ty) & 224) == 0)
             {
                 tx = ((tx + 128) >> 8);
                 ty = ((ty + 128) >> 8);
@@ -2402,7 +2400,7 @@ public:
         {
             if (tiledFillClipRegion != nullptr)
             {
-                tiledFillClipRegion->renderImageTransformed (destData, srcData, alpha, t, betterQuality, true);
+                tiledFillClipRegion->renderImageTransformed (destData, srcData, alpha, t, interpolationQuality, true);
             }
             else
             {
@@ -2413,7 +2411,7 @@ public:
                 c = c->clipToPath (p, t);
 
                 if (c != nullptr)
-                    c->renderImageTransformed (destData, srcData, alpha, t, betterQuality, false);
+                    c->renderImageTransformed (destData, srcData, alpha, t, interpolationQuality, false);
             }
         }
     }
