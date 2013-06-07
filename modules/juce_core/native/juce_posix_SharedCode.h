@@ -23,14 +23,6 @@
   ==============================================================================
 */
 
-/*
-    This file contains posix routines that are common to both the Linux and Mac builds.
-
-    It gets included directly in the cpp files for these platforms.
-*/
-
-
-//==============================================================================
 CriticalSection::CriticalSection() noexcept
 {
     pthread_mutexattr_t atts;

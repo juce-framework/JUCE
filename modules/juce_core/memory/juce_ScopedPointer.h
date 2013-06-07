@@ -214,7 +214,7 @@ private:
 
           ScopedPointer<MyClass> m (new MyClass());  // Compiles OK
 
-       It's probably best to use the latter form when writing your object declarations anyway, as 
+       It's probably best to use the latter form when writing your object declarations anyway, as
        this is a better representation of the code that you actually want the compiler to produce.
     */
     JUCE_DECLARE_NON_COPYABLE (ScopedPointer)
