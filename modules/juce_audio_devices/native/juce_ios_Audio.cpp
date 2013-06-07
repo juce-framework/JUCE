@@ -345,7 +345,7 @@ private:
 
             Float32 bufferDuration = preferredBufferSize / sampleRate;
             UInt32 bufferDurationSize = sizeof (bufferDuration);
-            AudioSessionGetProperty (kAudioSessionProperty_CurrentHardwareIOBufferDuration, &bufferDurationSize, &bufferDurationSize);
+            AudioSessionGetProperty (kAudioSessionProperty_CurrentHardwareIOBufferDuration, &bufferDurationSize, &bufferDuration);
             actualBufferSize = (int) (sampleRate * bufferDuration + 0.5);
 
             AudioOutputUnitStart (audioUnit);
