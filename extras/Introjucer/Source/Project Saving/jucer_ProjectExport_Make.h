@@ -217,10 +217,11 @@ private:
         if (makefileIsDLL)
             out << " -fPIC";
 
-        out << " -O" << config.getGCCOptimisationFlag() << newLine;
+        out << " -O" << config.getGCCOptimisationFlag()
+            << (" "  + replacePreprocessorTokens (config, getExtraCompilerFlagsString())).trim()
+            << newLine;
 
-        out << "  CXXFLAGS += $(CFLAGS) "
-            << replacePreprocessorTokens (config, getExtraCompilerFlagsString()).trim() << newLine;
+        out << "  CXXFLAGS += $(CFLAGS)" << newLine;
 
         writeLinkerFlags (out, config);
 
