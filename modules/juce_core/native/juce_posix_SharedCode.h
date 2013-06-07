@@ -1077,9 +1077,7 @@ private:
 
 bool ChildProcess::start (const String& command)
 {
-    StringArray tokens;
-    tokens.addTokens (command, true);
-    return start (tokens);
+    return start (StringArray::fromTokens (command, true));
 }
 
 bool ChildProcess::start (const StringArray& args)

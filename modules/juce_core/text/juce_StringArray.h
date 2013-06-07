@@ -211,8 +211,8 @@ public:
 
         This will tokenise the given string using whitespace characters as the
         token delimiters, and will add these tokens to the end of the array.
-
         @returns    the number of tokens added
+        @see fromTokens
     */
     int addTokens (const String& stringToTokenise,
                    bool preserveQuotedStrings);
@@ -229,6 +229,7 @@ public:
                                     which are treated as quotes. Any text occurring
                                     between quotes is not broken up into tokens.
         @returns    the number of tokens added
+        @see fromTokens
     */
     int addTokens (const String& stringToTokenise,
                    const String& breakCharacters,
@@ -241,6 +242,40 @@ public:
         the array.
     */
     int addLines (const String& stringToBreakUp);
+
+    /** Returns an array containing the tokens in a given string.
+
+        This will tokenise the given string using whitespace characters as the
+        token delimiters, and return these tokens as an array.
+        @see addTokens
+    */
+    static StringArray fromTokens (const String& stringToTokenise,
+                                   bool preserveQuotedStrings);
+
+    /** Returns an array containing the tokens in a given string.
+
+        This will tokenise the given string using whitespace characters as the
+        token delimiters, and return these tokens as an array.
+
+        @param stringToTokenise     the string to tokenise
+        @param breakCharacters      a string of characters, any of which will be considered
+                                    to be a token delimiter.
+        @param quoteCharacters      if this string isn't empty, it defines a set of characters
+                                    which are treated as quotes. Any text occurring
+                                    between quotes is not broken up into tokens.
+        @see addTokens
+    */
+    static StringArray fromTokens (const String& stringToTokenise,
+                                   const String& breakCharacters,
+                                   const String& quoteCharacters);
+
+    /** Returns an array containing the lines in a given string.
+
+        This breaks a string down into lines separated by \\n or \\r\\n, and returns an
+        array containing these lines. Line-break characters are omitted from the strings that
+        are added to the array.
+    */
+    static StringArray fromLines (const String& stringToBreakUp);
 
     //==============================================================================
     /** Removes all elements from the array. */

@@ -258,8 +258,7 @@ private:
 
         if (responseHeader.isNotEmpty())
         {
-            headerLines.clear();
-            headerLines.addLines (responseHeader);
+            headerLines = StringArray::fromLines (responseHeader);
 
             const int statusCode = responseHeader.fromFirstOccurrenceOf (" ", false, false)
                                                  .substring (0, 3).getIntValue();

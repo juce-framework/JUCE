@@ -418,6 +418,30 @@ int StringArray::addLines (const String& sourceText)
     return numLines;
 }
 
+StringArray StringArray::fromTokens (const String& stringToTokenise,
+                                     bool preserveQuotedStrings)
+{
+    StringArray s;
+    s.addTokens (stringToTokenise, preserveQuotedStrings);
+    return s;
+}
+
+StringArray StringArray::fromTokens (const String& stringToTokenise,
+                                     const String& breakCharacters,
+                                     const String& quoteCharacters)
+{
+    StringArray s;
+    s.addTokens (stringToTokenise, breakCharacters, quoteCharacters);
+    return s;
+}
+
+StringArray StringArray::fromLines (const String& stringToBreakUp)
+{
+    StringArray s;
+    s.addLines (stringToBreakUp);
+    return s;
+}
+
 //==============================================================================
 void StringArray::removeDuplicates (const bool ignoreCase)
 {

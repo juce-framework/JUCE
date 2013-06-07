@@ -584,9 +584,8 @@ void CodeDocument::replaceSection (const int start, const int end, const String&
 
 void CodeDocument::applyChanges (const String& newContent)
 {
-    StringArray correctedLines;
-    correctedLines.addLines (newContent);
-    const String corrected (correctedLines.joinIntoString (newLineChars));
+    const String corrected (StringArray::fromLines (newContent)
+                                .joinIntoString (newLineChars));
 
     TextDiff diff (getAllContent(), corrected);
 
