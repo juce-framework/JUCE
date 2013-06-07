@@ -141,6 +141,21 @@ public:
         return *this;
     }
 
+   #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
+    ScopedPointer (ScopedPointer&& other) noexcept
+        : object (other.object)
+    {
+        other.object = nullptr;
+    }
+
+    ScopedPointer& operator= (ScopedPointer&& other) noexcept
+    {
+        object = other.object;
+        other.object = nullptr;
+        return *this;
+    }
+   #endif
+
     //==============================================================================
     /** Returns the object that this ScopedPointer refers to. */
     inline operator ObjectType*() const noexcept                                    { return object; }
@@ -185,12 +200,12 @@ private:
     // (Required as an alternative to the overloaded & operator).
     const ScopedPointer* getAddress() const noexcept                                { return this; }
 
-  #if ! JUCE_MSVC  // (MSVC can't deal with multiple copy constructors)
-    /* These are private to stop people accidentally copying a const ScopedPointer (the compiler
-       would let you do so by implicitly casting the source to its raw object pointer).
+  #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS || ! JUCE_MSVC  // (MSVC can't deal with multiple copy constructors)
+    /* The copy constructors are private to stop people accidentally copying a const ScopedPointer
+       (the compiler would let you do so by implicitly casting the source to its raw object pointer).
 
-       A side effect of this is that you may hit a puzzling compiler error when you write something
-       like this:
+       A side effect of this is that in a compiler that doesn't support C++11, you may hit an
+       error when you write something like this:
 
           ScopedPointer<MyClass> m = new MyClass();  // Compile error: copy constructor is private.
 
@@ -199,12 +214,10 @@ private:
 
           ScopedPointer<MyClass> m (new MyClass());  // Compiles OK
 
-       It's good practice to always use the latter form when writing your object declarations anyway,
-       rather than writing them as assignments and assuming (or hoping) that the compiler will be
-       smart enough to replace your construction + assignment with a single constructor.
+       It's probably best to use the latter form when writing your object declarations anyway, as 
+       this is a better representation of the code that you actually want the compiler to produce.
     */
-    ScopedPointer (const ScopedPointer&);
-    ScopedPointer& operator= (const ScopedPointer&);
+    JUCE_DECLARE_NON_COPYABLE (ScopedPointer)
   #endif
 };
 
