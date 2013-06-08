@@ -66,6 +66,13 @@ public:
     */
     void setNumberOfThreadsForScanning (int numThreads);
 
+    /** Returns the last search path stored in a given properties file for the specified format. */
+    static FileSearchPath getLastSearchPath (PropertiesFile& properties, AudioPluginFormat& format);
+
+    /** Stores a search path in a properties file for the given format. */
+    static void setLastSearchPath (PropertiesFile& properties, AudioPluginFormat& format,
+                                   const FileSearchPath& newPath);
+
     //==============================================================================
     /** @internal */
     void resized();
