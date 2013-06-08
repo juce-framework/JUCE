@@ -218,7 +218,7 @@ private:
             out << " -fPIC";
 
         out << " -O" << config.getGCCOptimisationFlag()
-            << (" "  + replacePreprocessorTokens (config, getExtraCompilerFlagsString())).trim()
+            << (" "  + replacePreprocessorTokens (config, getExtraCompilerFlagsString())).trimEnd()
             << newLine;
 
         out << "  CXXFLAGS += $(CFLAGS)" << newLine;
