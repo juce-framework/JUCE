@@ -656,6 +656,11 @@ String LADSPAPluginFormat::getNameOfPluginFromIdentifier (const String& fileOrId
     return fileOrIdentifier;
 }
 
+bool LADSPAPluginFormat::pluginNeedsRescanning (const PluginDescription& desc)
+{
+    return File (desc.fileOrIdentifier).getLastModificationTime() != desc.lastFileModTime;
+}
+
 bool LADSPAPluginFormat::doesPluginStillExist (const PluginDescription& desc)
 {
     return File::createFileWithoutCheckingPath (desc.fileOrIdentifier).exists();

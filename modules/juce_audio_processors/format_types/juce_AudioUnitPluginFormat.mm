@@ -1662,6 +1662,16 @@ String AudioUnitPluginFormat::getNameOfPluginFromIdentifier (const String& fileO
     return name;
 }
 
+bool AudioUnitPluginFormat::pluginNeedsRescanning (const PluginDescription& desc)
+{
+    AudioComponentDescription newDesc;
+    String name, version, manufacturer;
+
+    return ! (AudioUnitFormatHelpers::getComponentDescFromIdentifier (desc.fileOrIdentifier, newDesc,
+                                                                      name, version, manufacturer)
+               && version == desc.version);
+}
+
 bool AudioUnitPluginFormat::doesPluginStillExist (const PluginDescription& desc)
 {
     if (desc.fileOrIdentifier.startsWithIgnoreCase (AudioUnitFormatHelpers::auIdentifierPrefix))

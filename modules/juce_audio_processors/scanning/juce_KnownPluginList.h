@@ -104,7 +104,8 @@ public:
     /** Returns true if the specified file is already known about and if it
         hasn't been modified since our entry was created.
     */
-    bool isListingUpToDate (const String& possiblePluginFileOrIdentifier) const;
+    bool isListingUpToDate (const String& possiblePluginFileOrIdentifier,
+                            AudioPluginFormat& formatToUse) const;
 
     /** Scans and adds a bunch of files that might have been dragged-and-dropped.
         If any types are found in the files, their descriptions are returned in the array.

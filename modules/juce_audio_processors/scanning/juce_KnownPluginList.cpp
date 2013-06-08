@@ -79,25 +79,8 @@ void KnownPluginList::removeType (const int index)
     sendChangeMessage();
 }
 
-namespace
-{
-    Time getPluginFileModTime (const String& fileOrIdentifier)
-    {
-        if (fileOrIdentifier.startsWithChar ('/') || fileOrIdentifier[1] == ':')
-            return File (fileOrIdentifier).getLastModificationTime();
-
-        return Time();
-    }
-
-    bool timesAreDifferent (const Time t1, const Time t2) noexcept
-    {
-        return t1 != t2 || t1 == Time();
-    }
-
-    enum { menuIdBase = 0x324503f4 };
-}
-
-bool KnownPluginList::isListingUpToDate (const String& fileOrIdentifier) const
+bool KnownPluginList::isListingUpToDate (const String& fileOrIdentifier,
+                                         AudioPluginFormat& formatToUse) const
 {
     if (getTypeForFile (fileOrIdentifier) == nullptr)
         return false;
@@ -107,10 +90,8 @@ bool KnownPluginList::isListingUpToDate (const String& fileOrIdentifier) const
         const PluginDescription* const d = types.getUnchecked(i);
 
         if (d->fileOrIdentifier == fileOrIdentifier
-             && timesAreDifferent (d->lastFileModTime, getPluginFileModTime (fileOrIdentifier)))
-        {
+             && formatToUse.pluginNeedsRescanning (*d))
             return false;
-        }
     }
 
     return true;
@@ -139,7 +120,7 @@ bool KnownPluginList::scanAndAddFile (const String& fileOrIdentifier,
 
             if (d->fileOrIdentifier == fileOrIdentifier && d->pluginFormatName == format.getName())
             {
-                if (timesAreDifferent (d->lastFileModTime, getPluginFileModTime (fileOrIdentifier)))
+                if (format.pluginNeedsRescanning (*d))
                     needsRescanning = true;
                 else
                     typesFound.add (new PluginDescription (*d));
@@ -337,6 +318,8 @@ void KnownPluginList::recreateFromXml (const XmlElement& xml)
 //==============================================================================
 struct PluginTreeUtils
 {
+    enum { menuIdBase = 0x324503f4 };
+
     static void buildTreeByFolder (KnownPluginList::PluginTree& tree, const Array <PluginDescription*>& allPlugins)
     {
         for (int i = 0; i < allPlugins.size(); ++i)
@@ -511,7 +494,7 @@ void KnownPluginList::addToMenu (PopupMenu& menu, const SortMethod sortMethod) c
 
 int KnownPluginList::getIndexChosenByMenu (const int menuResultCode) const
 {
-    const int i = menuResultCode - menuIdBase;
+    const int i = menuResultCode - PluginTreeUtils::menuIdBase;
     return isPositiveAndBelow (i, types.size()) ? i : -1;
 }
 

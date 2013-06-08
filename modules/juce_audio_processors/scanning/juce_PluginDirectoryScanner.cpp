@@ -85,7 +85,7 @@ bool PluginDirectoryScanner::scanNextFile (const bool dontRescanIfAlreadyInList)
     {
         String file (filesOrIdentifiersToScan [index]);
 
-        if (file.isNotEmpty() && ! list.isListingUpToDate (file))
+        if (file.isNotEmpty() && ! list.isListingUpToDate (file, format))
         {
             OwnedArray <PluginDescription> typesFound;
 

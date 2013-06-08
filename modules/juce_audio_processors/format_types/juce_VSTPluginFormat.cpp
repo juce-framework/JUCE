@@ -2780,6 +2780,11 @@ String VSTPluginFormat::getNameOfPluginFromIdentifier (const String& fileOrIdent
     return fileOrIdentifier;
 }
 
+bool VSTPluginFormat::pluginNeedsRescanning (const PluginDescription& desc)
+{
+    return File (desc.fileOrIdentifier).getLastModificationTime() != desc.lastFileModTime;
+}
+
 bool VSTPluginFormat::doesPluginStillExist (const PluginDescription& desc)
 {
     return File (desc.fileOrIdentifier).exists();

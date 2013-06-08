@@ -77,6 +77,9 @@ public:
     /** Returns a readable version of the name of the plugin that this identifier refers to. */
     virtual String getNameOfPluginFromIdentifier (const String& fileOrIdentifier) = 0;
 
+    /** Returns true if this plugin's version or date has changed and it should be re-checked. */
+    virtual bool pluginNeedsRescanning (const PluginDescription&) = 0;
+
     /** Checks whether this plugin could possibly be loaded.
         It doesn't actually need to load it, just to check whether the file or component
         still exists.
