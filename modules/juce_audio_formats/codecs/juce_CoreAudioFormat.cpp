@@ -132,7 +132,7 @@ struct CoreAudioFormatMetatdata
         const int64 originalPosition = input.getPosition();
 
         MemoryBlock midiBlock;
-        input.readIntoMemoryBlock (midiBlock, size);
+        input.readIntoMemoryBlock (midiBlock, (ssize_t) size);
         MemoryInputStream midiInputStream (midiBlock, false);
 
         StringPairArray midiMetadata;
