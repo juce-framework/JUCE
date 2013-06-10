@@ -73,6 +73,9 @@ public:
     static void setLastSearchPath (PropertiesFile& properties, AudioPluginFormat& format,
                                    const FileSearchPath& newPath);
 
+    /** Triggers a scan for the given format. */
+    void scanFor (AudioPluginFormat& format);
+
     //==============================================================================
     /** @internal */
     void resized();
@@ -102,7 +105,6 @@ private:
     friend class ScopedPointer<Scanner>;
     ScopedPointer<Scanner> currentScanner;
 
-    void scanFor (AudioPluginFormat*);
     void scanFinished (const StringArray&);
 
     static void optionsMenuStaticCallback (int, PluginListComponent*);

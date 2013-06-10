@@ -200,7 +200,11 @@ void PluginListComponent::optionsMenuCallback (int result)
         case 6:   showSelectedFolder(); break;
         case 7:   removeMissingPlugins(); break;
 
-        default:  scanFor (formatManager.getFormat (result - 10)); break;
+        default:
+            if (AudioPluginFormat* format = formatManager.getFormat (result - 10))
+                scanFor (*format);
+
+            break;
     }
 }
 
@@ -413,10 +417,9 @@ private:
 
 };
 
-void PluginListComponent::scanFor (AudioPluginFormat* format)
+void PluginListComponent::scanFor (AudioPluginFormat& format)
 {
-    if (format != nullptr)
-        currentScanner = new Scanner (*this, *format, propertiesToUse, numThreads);
+    currentScanner = new Scanner (*this, format, propertiesToUse, numThreads);
 }
 
 void PluginListComponent::scanFinished (const StringArray& failedFiles)
