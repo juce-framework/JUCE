@@ -1,7 +1,7 @@
 {
   "id":             "juce_core",
   "name":           "JUCE core classes",
-  "version":        "2.0.40",
+  "version":        "2.0.41",
   "description":    "The essential set of basic JUCE classes, as required by all the other JUCE modules. Includes text, container, memory, threading and i/o functionality.",
   "website":        "http://www.juce.com/juce",
   "license":        "GPL/Commercial",

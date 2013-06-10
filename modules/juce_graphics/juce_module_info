@@ -1,7 +1,7 @@
 {
   "id":             "juce_graphics",
   "name":           "JUCE graphics classes",
-  "version":        "2.0.40",
+  "version":        "2.0.41",
   "description":    "Classes for 2D vector graphics, image loading/saving, font handling, etc.",
   "website":        "http://www.juce.com/juce",
   "license":        "GPL/Commercial",

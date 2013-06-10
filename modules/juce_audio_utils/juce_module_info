@@ -1,7 +1,7 @@
 {
   "id":             "juce_audio_utils",
   "name":           "JUCE extra audio utility classes",
-  "version":        "2.0.40",
+  "version":        "2.0.41",
   "description":    "Classes for audio-related GUI and miscellaneous tasks.",
   "website":        "http://www.juce.com/juce",
   "license":        "GPL/Commercial",
