@@ -62,6 +62,7 @@ public:
     void findAllTypesForFile (OwnedArray <PluginDescription>&, const String&)     {}
     bool doesPluginStillExist (const PluginDescription&)        { return true; }
     String getNameOfPluginFromIdentifier (const String& fileOrIdentifier)   { return fileOrIdentifier; }
+    bool pluginNeedsRescanning (const PluginDescription&)       { return false; }
     StringArray searchPathsForPlugins (const FileSearchPath&, bool)         { return StringArray(); }
     AudioPluginInstance* createInstanceFromDescription (const PluginDescription& desc);
 
