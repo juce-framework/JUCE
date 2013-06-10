@@ -35,6 +35,16 @@
 class PixelRGB;
 class PixelAlpha;
 
+inline uint32 maskPixelComponents (uint32 x) noexcept
+{
+    return (x >> 8) & 0x00ff00ff;
+}
+
+inline uint32 clampPixelComponents (uint32 x) noexcept
+{
+    return (x & 0x00ff00ff) | (maskPixelComponents (x) * 0xff);
+}
+
 //==============================================================================
 /**
     Represents a 32-bit ARGB pixel with premultiplied alpha, and can perform compositing
@@ -98,13 +108,10 @@ public:
     template <class Pixel>
     forcedinline void blend (const Pixel& src) noexcept
     {
-        uint32 sargb = src.getARGB();
-        const uint32 alpha = 0x100 - (sargb >> 24);
-
-        sargb += 0x00ff00ff & ((getRB() * alpha) >> 8);
-        sargb += 0xff00ff00 & (getAG() * alpha);
-
-        argb = sargb;
+        const uint32 alpha = 0x100 - src.getAlpha();
+        uint32 rb = src.getRB() + maskPixelComponents (getRB() * alpha);
+        uint32 ag = src.getAG() + maskPixelComponents (getAG() * alpha);
+        argb = clampPixelComponents (rb) + (clampPixelComponents (ag) << 8);
     }
 
     /** Blends another pixel onto this one.
@@ -123,17 +130,14 @@ public:
     template <class Pixel>
     forcedinline void blend (const Pixel& src, uint32 extraAlpha) noexcept
     {
-        ++extraAlpha;
+        uint32 ag = maskPixelComponents (extraAlpha * src.getAG());
+        const uint32 alpha = 0x100 - (ag >> 16);
+        ag += maskPixelComponents (getAG() * alpha);
 
-        uint32 sargb = ((extraAlpha * src.getAG()) & 0xff00ff00)
-                         | (((extraAlpha * src.getRB()) >> 8) & 0x00ff00ff);
+        uint32 rb = maskPixelComponents (extraAlpha * src.getRB())
+                     + maskPixelComponents (getRB() * alpha);
 
-        const uint32 alpha = 0x100 - (sargb >> 24);
-
-        sargb += 0x00ff00ff & ((getRB() * alpha) >> 8);
-        sargb += 0xff00ff00 & (getAG() * alpha);
-
-        argb = sargb;
+        argb = clampPixelComponents(rb) + (clampPixelComponents (ag) << 8);
     }
 
     /** Blends another pixel with this one, creating a colour that is somewhere
@@ -347,15 +351,14 @@ public:
     template <class Pixel>
     forcedinline void blend (const Pixel& src) noexcept
     {
-        uint32 sargb = src.getARGB();
-        const uint32 alpha = 0x100 - (sargb >> 24);
+        const uint32 alpha = 0x100 - src.getAlpha();
 
-        sargb += 0x00ff00ff & ((getRB() * alpha) >> 8);
-        sargb += 0x0000ff00 & (g * alpha);
+        uint32 rb = clampPixelComponents (src.getRB() + maskPixelComponents (getRB() * alpha));
+        uint32 ag = src.getAG() + (g * alpha >> 8);
 
-        r = (uint8) (sargb >> 16);
-        g = (uint8) (sargb >> 8);
-        b = (uint8) sargb;
+        r = (uint8) (rb >> 16);
+        g = (uint8) clampPixelComponents (ag);
+        b = (uint8) rb;
     }
 
     forcedinline void blend (const PixelRGB src) noexcept
@@ -371,19 +374,16 @@ public:
     template <class Pixel>
     forcedinline void blend (const Pixel& src, uint32 extraAlpha) noexcept
     {
-        ++extraAlpha;
-        const uint32 srb = (extraAlpha * src.getRB()) >> 8;
-        const uint32 sag = extraAlpha * src.getAG();
-        uint32 sargb = (sag & 0xff00ff00) | (srb & 0x00ff00ff);
+        uint32 ag = maskPixelComponents (extraAlpha * src.getAG());
+        const uint32 alpha = 0x100 - (ag >> 16);
+        ag += g * alpha >> 8;
 
-        const uint32 alpha = 0x100 - (sargb >> 24);
+        uint32 rb = clampPixelComponents (maskPixelComponents (extraAlpha * src.getRB())
+                                           + maskPixelComponents (getRB() * alpha));
 
-        sargb += 0x00ff00ff & ((getRB() * alpha) >> 8);
-        sargb += 0x0000ff00 & (g * alpha);
-
-        b = (uint8) sargb;
-        g = (uint8) (sargb >> 8);
-        r = (uint8) (sargb >> 16);
+        b = (uint8) rb;
+        g = (uint8) clampPixelComponents (ag);
+        r = (uint8) (rb >> 16);
     }
 
     /** Blends another pixel with this one, creating a colour that is somewhere
