@@ -42,7 +42,7 @@ inline uint32 maskPixelComponents (uint32 x) noexcept
 
 inline uint32 clampPixelComponents (uint32 x) noexcept
 {
-    return (x & 0x00ff00ff) | (maskPixelComponents (x) * 0xff);
+    return (x | (0x01000100 - maskPixelComponents (x))) & 0x00ff00ff;
 }
 
 //==============================================================================
