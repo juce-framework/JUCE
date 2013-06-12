@@ -156,7 +156,9 @@ private:
         {
             DataReleaser* r = new DataReleaser (frameBuffer, x, y, bitmapData.width, bitmapData.height);
             bitmapData.dataReleaser = r;
-            bitmapData.data = (uint8*) (r->data + (x + y * bitmapData.width));
+
+            bitmapData.data = (uint8*) r->data.getData();
+            bitmapData.lineStride = (bitmapData.width * bitmapData.pixelStride + 3) & ~3;
 
             ReaderType::read (frameBuffer, bitmapData, x, y);
         }
