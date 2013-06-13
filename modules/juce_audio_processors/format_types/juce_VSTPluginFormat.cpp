@@ -2653,6 +2653,23 @@ static VstIntPtr VSTCALLBACK audioMaster (AEffect* effect, VstInt32 opcode, VstI
 VSTPluginFormat::VSTPluginFormat() {}
 VSTPluginFormat::~VSTPluginFormat() {}
 
+static VSTPluginInstance* createAndUpdateDesc (VSTPluginFormat& format, PluginDescription& desc)
+{
+    if (VSTPluginInstance* instance = dynamic_cast <VSTPluginInstance*> (format.createInstanceFromDescription (desc)))
+    {
+       #if JUCE_MAC
+        if (instance->module->resFileId != 0)
+            UseResFile (instance->module->resFileId);
+       #endif
+
+        instance->fillInPluginDescription (desc);
+
+        return instance;
+    }
+
+    return nullptr;
+}
+
 void VSTPluginFormat::findAllTypesForFile (OwnedArray <PluginDescription>& results,
                                            const String& fileOrIdentifier)
 {
@@ -2663,17 +2680,10 @@ void VSTPluginFormat::findAllTypesForFile (OwnedArray <PluginDescription>& resul
     desc.fileOrIdentifier = fileOrIdentifier;
     desc.uid = 0;
 
-    ScopedPointer <VSTPluginInstance> instance (dynamic_cast <VSTPluginInstance*> (createInstanceFromDescription (desc)));
+    ScopedPointer<VSTPluginInstance> instance (createAndUpdateDesc (*this, desc));
 
     if (instance == nullptr)
         return;
-
-   #if JUCE_MAC
-    if (instance->module->resFileId != 0)
-        UseResFile (instance->module->resFileId);
-   #endif
-
-    instance->fillInPluginDescription (desc);
 
     VstPlugCategory category = (VstPlugCategory) instance->dispatch (effGetPlugCategory, 0, 0, 0, 0);
 
@@ -2696,11 +2706,17 @@ void VSTPluginFormat::findAllTypesForFile (OwnedArray <PluginDescription>& resul
                 break;
 
             desc.uid = uid;
-            desc.name = shellEffectName;
-            desc.descriptiveName = shellEffectName;
 
-            if (! arrayContainsPlugin (results, desc))
-                results.add (new PluginDescription (desc));
+            ScopedPointer<VSTPluginInstance> shellInstance (createAndUpdateDesc (*this, desc));
+
+            if (shellInstance != nullptr)
+            {
+                jassert (desc.uid == uid);
+                desc.name = shellEffectName;
+
+                if (! arrayContainsPlugin (results, desc))
+                    results.add (new PluginDescription (desc));
+            }
         }
     }
 }
