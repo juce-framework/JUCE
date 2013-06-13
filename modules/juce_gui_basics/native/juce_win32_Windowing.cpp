@@ -2356,7 +2356,8 @@ private:
                 if (doAppCommand (lParam))
                     return TRUE;
 
-                break;
+            case WM_MENUCHAR: // triggered when alt+something is pressed
+                return MNC_CLOSE << 16; // (avoids making the default system beep)
 
             //==============================================================================
             case WM_SETFOCUS:
