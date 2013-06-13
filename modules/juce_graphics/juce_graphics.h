@@ -22,7 +22,7 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_GRAPHICS_MODULE_JUCEHEADER__ // %%
+#ifndef __JUCE_GRAPHICS_MODULE_JUCEHEADER__
 #define __JUCE_GRAPHICS_MODULE_JUCEHEADER__
 
 #include "../juce_core/juce_core.h"

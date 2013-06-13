@@ -29,14 +29,6 @@
 #ifndef __JUCE_CORE_JUCEHEADER__
 #define __JUCE_CORE_JUCEHEADER__
 
-/* This line is here as a sanity-check to catch syntax errors caused by mistakes in 3rd-party
-   header files that have been included prior to this one. If you hit an error at this line,
-   there's probably some kind of syntax problem in whatever code immediately precedes this header.
-
-   It also causes an error if you attempt to build using a C or obj-C compiler rather than a C++ one.
-*/
-namespace DummyNamespaceStatementToCatchSyntaxErrors {}
-
 #ifndef JUCE_MODULE_AVAILABLE_juce_core
  /* If you fail to make sure that all your compile units are building JUCE with the same set of
     option flags, then there's a risk that different compile units will treat the classes as having
