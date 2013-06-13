@@ -361,7 +361,7 @@ struct AAXClasses
                                 public AudioProcessorListener
     {
     public:
-        JuceAAX_Processor()
+        JuceAAX_Processor()  : sampleRate (0), lastBufferSize (1024)
         {
             pluginInstance = createPluginFilterOfType (AudioProcessor::wrapperType_AAX);
             pluginInstance->setPlayHead (this);
@@ -374,9 +374,11 @@ struct AAXClasses
 
         AAX_Result EffectInit()
         {
+            check (Controller()->GetSampleRate (&sampleRate));
+
+            preparePlugin();
             addBypassParameter();
             addAudioProcessorParameters();
-            preparePlugin();
 
             return AAX_SUCCESS;
         }
@@ -499,12 +501,11 @@ struct AAXClasses
             if (transport.IsTransportPlaying (&info.isPlaying) != AAX_SUCCESS)
                 info.isPlaying = false;
 
-            if (! info.isPlaying)
-                check (transport.GetTimelineSelectionStartPosition (&info.timeInSamples));
-            else
+            if (info.isPlaying
+                 || transport.GetTimelineSelectionStartPosition (&info.timeInSamples) != AAX_SUCCESS)
                 check (transport.GetCurrentNativeSampleLocation (&info.timeInSamples));
 
-            info.timeInSeconds = info.timeInSamples / getSampleRate();
+            info.timeInSeconds = info.timeInSamples / sampleRate;
 
             int64_t ticks = 0;
             check (transport.GetCurrentTickPosition (&ticks));
@@ -666,6 +667,12 @@ struct AAXClasses
            #endif
 
             {
+                if (lastBufferSize != bufferSize)
+                {
+                    lastBufferSize = bufferSize;
+                    pluginInstance->prepareToPlay (sampleRate, bufferSize);
+                }
+
                 const ScopedLock sl (pluginInstance->getCallbackLock());
 
                 if (bypass)
@@ -750,19 +757,10 @@ struct AAXClasses
 
             AudioProcessor& audioProcessor = getPluginInstance();
 
-            const AAX_CSampleRate sampleRate = getSampleRate();
-            const int bufferSize = 0; // how to get this?
-            audioProcessor.setPlayConfigDetails (numberOfInputChannels, numberOfOutputChannels, sampleRate, bufferSize);
-            audioProcessor.prepareToPlay (sampleRate, bufferSize);
+            audioProcessor.setPlayConfigDetails (numberOfInputChannels, numberOfOutputChannels, sampleRate, lastBufferSize);
+            audioProcessor.prepareToPlay (sampleRate, lastBufferSize);
 
             check (Controller()->SetSignalLatency (audioProcessor.getLatencySamples()));
-        }
-
-        AAX_CSampleRate getSampleRate() const
-        {
-            AAX_CSampleRate sampleRate;
-            check (Controller()->GetSampleRate (&sampleRate));
-            return sampleRate;
         }
 
         JUCELibraryRefCount juceCount;
@@ -771,6 +769,8 @@ struct AAXClasses
         MidiBuffer midiBuffer;
         Array<float*> channelList;
         int32_t juceChunkIndex;
+        AAX_CSampleRate sampleRate;
+        int lastBufferSize;
 
         // tempFilterData is initialized in GetChunkSize.
         // To avoid generating it again in GetChunk, we keep it as a member.
@@ -857,11 +857,14 @@ struct AAXClasses
         {
             if (AAX_IComponentDescriptor* const desc = descriptor.NewComponentDescriptor())
             {
-                createDescriptor (*desc, i,
-                                  channelConfigs [i][0],
-                                  channelConfigs [i][1]);
+                const int numIns  = channelConfigs [i][0];
+                const int numOuts = channelConfigs [i][1];
 
-                check (descriptor.AddComponent (desc));
+                if (numIns <= 8 && numOuts <= 8) // AAX doesn't seem to handle more than 8 chans
+                {
+                    createDescriptor (*desc, i, numIns, numOuts);
+                    check (descriptor.AddComponent (desc));
+                }
             }
         }
     }
