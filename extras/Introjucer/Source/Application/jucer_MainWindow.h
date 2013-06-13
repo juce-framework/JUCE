@@ -102,6 +102,8 @@ public:
     MainWindow* getOrCreateFrontmostWindow();
     MainWindow* getOrCreateEmptyWindow();
 
+    Project* getFrontmostProject();
+
     void reopenLastProjects();
     void saveCurrentlyOpenProjectList();
 

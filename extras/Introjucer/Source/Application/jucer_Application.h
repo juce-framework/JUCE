@@ -486,7 +486,7 @@ public:
     bool runModuleUpdate (const String& message)
     {
         ModuleList list;
-        list.rescan (ModuleList::getDefaultModulesFolder (nullptr));
+        list.rescan (ModuleList::getDefaultModulesFolder (mainWindowList.getFrontmostProject()));
         JuceUpdater::show (list, mainWindowList.windows[0], message);
 
         ModuleList::setLocalModulesFolder (list.getModulesFolder());
