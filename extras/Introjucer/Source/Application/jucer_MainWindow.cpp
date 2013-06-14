@@ -533,7 +533,7 @@ Project* MainWindowList::getFrontmostProject()
 {
     Desktop& desktop = Desktop::getInstance();
 
-    for (int i = 0; i < desktop.getNumComponents(); ++i)
+    for (int i = desktop.getNumComponents(); --i >= 0;)
         if (MainWindow* const mw = dynamic_cast <MainWindow*> (desktop.getComponent(i)))
             if (Project* p = mw->getProject())
                 return p;
