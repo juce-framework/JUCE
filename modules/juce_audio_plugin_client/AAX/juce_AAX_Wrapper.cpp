@@ -728,20 +728,17 @@ struct AAXClasses
 
             for (int parameterIndex = 0; parameterIndex < numParameters; ++parameterIndex)
             {
-                if (audioProcessor.isParameterAutomatable (parameterIndex))
-                {
-                    AAX_IParameter* parameter
-                        = new AAX_CParameter<float> (IndexAsParamID (parameterIndex),
-                                                     audioProcessor.getParameterName (parameterIndex).toRawUTF8(),
-                                                     audioProcessor.getParameter (parameterIndex),
-                                                     AAX_CLinearTaperDelegate<float, 0>(),
-                                                     AAX_CNumberDisplayDelegate<float, 3>(),
-                                                     true);
+                AAX_IParameter* parameter
+                    = new AAX_CParameter<float> (IndexAsParamID (parameterIndex),
+                                                 audioProcessor.getParameterName (parameterIndex).toRawUTF8(),
+                                                 audioProcessor.getParameter (parameterIndex),
+                                                 AAX_CLinearTaperDelegate<float, 0>(),
+                                                 AAX_CNumberDisplayDelegate<float, 3>(),
+                                                 audioProcessor.isParameterAutomatable (parameterIndex));
 
-                    parameter->SetNumberOfSteps (0x7fffffff);
-                    parameter->SetType (AAX_eParameterType_Continuous);
-                    mParameterManager.AddParameter (parameter);
-                }
+                parameter->SetNumberOfSteps (0x7fffffff);
+                parameter->SetType (AAX_eParameterType_Continuous);
+                mParameterManager.AddParameter (parameter);
             }
         }
 
