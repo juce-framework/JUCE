@@ -262,8 +262,8 @@ struct TranslationHelpers
     {
         StringArray lines;
 
-        lines.add ("language: [enter 2-letter country code here!]");
-        lines.add ("countries: [enter list of valid locales here!]");
+        lines.add ("language: [enter full name of the language here!]");
+        lines.add ("countries: [enter list of 2-character country codes here!]");
         lines.add (String::empty);
 
         for (int i = 0; i < preStrings.size(); ++i)
