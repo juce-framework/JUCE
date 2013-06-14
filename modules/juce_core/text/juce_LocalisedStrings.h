@@ -171,6 +171,8 @@ public:
     */
     const StringArray& getCountryCodes() const            { return countryCodes; }
 
+    /** Provides access to the actual list of mappings. */
+    const StringPairArray& getMappings() const            { return translations; }
 
 private:
     //==============================================================================

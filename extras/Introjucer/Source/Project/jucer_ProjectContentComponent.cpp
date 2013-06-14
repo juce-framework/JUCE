@@ -554,14 +554,12 @@ void ProjectContentComponent::showTranslationTool()
     }
     else if (project != nullptr)
     {
-        TranslationToolComponent* ttc = new TranslationToolComponent();
-        ttc->initialiseForProject (*project);
-
         new FloatingToolWindow ("Translation File Builder",
-                                "transToolWindowPos_" + project->getProjectUID(),
-                                ttc, translationTool,
+                                "transToolWindowPos",
+                                new TranslationToolComponent(),
+                                translationTool,
                                 600, 700,
-                                500, 400, 10000, 10000);
+                                600, 400, 10000, 10000);
     }
 }
 
