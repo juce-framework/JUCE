@@ -135,7 +135,7 @@ public:
     */
     bool isVisible() const noexcept                         { return flags.visibleFlag; }
 
-    /** Called when this component's visiblility changes.
+    /** Called when this component's visibility changes.
         @see setVisible, isVisible
     */
     virtual void visibilityChanged();
