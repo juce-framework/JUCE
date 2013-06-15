@@ -43,6 +43,7 @@ public:
     String getVersion() const           { return moduleInfo ["version"].toString(); }
     String getName() const              { return moduleInfo ["name"].toString(); }
     String getDescription() const       { return moduleInfo ["description"].toString(); }
+    String getLicense() const           { return moduleInfo ["license"].toString(); }
     const File& getFolder() const       { return moduleFolder; }
 
     void writeIncludes (ProjectSaver&, OutputStream&);
@@ -109,7 +110,7 @@ public:
     {
         LibraryModule* create() const;
 
-        String uid, version, name, description;
+        String uid, version, name, description, license;
         File file;
         URL url;
 

@@ -2178,12 +2178,6 @@ void LookAndFeel::drawTabButtonText (TabBarButton& button, Graphics& g, bool isM
     Font font (depth * 0.6f);
     font.setUnderline (button.hasKeyboardFocus (false));
 
-    GlyphArrangement textLayout;
-    textLayout.addFittedText (font, button.getButtonText().trim(),
-                              0.0f, 0.0f, (float) length, (float) depth,
-                              Justification::centred,
-                              jmax (1, ((int) depth) / 12));
-
     AffineTransform t;
 
     switch (button.getTabbedButtonBar().getOrientation())
@@ -2209,7 +2203,13 @@ void LookAndFeel::drawTabButtonText (TabBarButton& button, Graphics& g, bool isM
     const float alpha = button.isEnabled() ? ((isMouseOver || isMouseDown) ? 1.0f : 0.8f) : 0.3f;
 
     g.setColour (col.withMultipliedAlpha (alpha));
-    textLayout.draw (g, t);
+    g.setFont (font);
+    g.addTransform (t);
+
+    g.drawFittedText (button.getButtonText().trim(),
+                      0.0f, 0.0f, (float) length, (float) depth,
+                      Justification::centred,
+                      jmax (1, ((int) depth) / 12));
 }
 
 void LookAndFeel::drawTabButton (TabBarButton& button, Graphics& g, bool isMouseOver, bool isMouseDown)

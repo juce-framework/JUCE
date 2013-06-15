@@ -89,8 +89,6 @@ public:
     int getTabButtonOverlap (int tabDepth);
     int getTabButtonSpaceAroundImage();
     int getTabButtonBestWidth (TabBarButton& button, int tabDepth);
-    static Colour getTabBackgroundColour (TabBarButton& button);
-    void createTabTextLayout (const TabBarButton& button, const Rectangle<int>& textArea, GlyphArrangement& textLayout);
     void drawTabButton (TabBarButton& button, Graphics& g, bool isMouseOver, bool isMouseDown);
 
     Rectangle<int> getTabButtonExtraComponentBounds (const TabBarButton& button, Rectangle<int>& textArea, Component& comp);

@@ -232,6 +232,7 @@ Result ModuleList::rescan (const File& newModulesFolder)
                 info->version = m.getVersion();
                 info->name = m.moduleInfo ["name"];
                 info->description = m.moduleInfo ["description"];
+                info->license = m.moduleInfo ["license"];
                 info->file = moduleDef;
             }
         }
@@ -273,6 +274,7 @@ bool ModuleList::loadFromWebsite()
                     info->version = lm.getVersion();
                     info->name = lm.getName();
                     info->description = lm.getDescription();
+                    info->license = lm.getLicense();
                     info->url = baseURL.getChildURL (file);
                 }
             }
@@ -294,6 +296,7 @@ bool ModuleList::Module::operator== (const Module& other) const
              && version == other.version
              && name == other.name
              && description == other.description
+             && license == other.license
              && file == other.file
              && url == other.url;
 }

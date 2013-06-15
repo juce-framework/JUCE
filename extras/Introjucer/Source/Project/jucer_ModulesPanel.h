@@ -307,14 +307,17 @@ public:
 
                 if (const ModuleList::Module* module = moduleList.findModuleInfo (moduleID))
                 {
-                    String text;
-                    text << module->name << newLine << "Version: " << module->version << newLine << newLine
-                         << module->description;
+                    AttributedString s;
+                    s.setJustification (Justification::topLeft);
 
-                    GlyphArrangement ga;
-                    ga.addJustifiedText (Font (13.0f), text, 4.0f, 16.0f, getWidth() - 8.0f, Justification::topLeft);
-                    g.setColour (Colours::black);
-                    ga.draw (g);
+                    Font f (13.0f);
+
+                    s.append (module->name + "\n", f.boldened());
+                    s.append ("Version: "  + module->version
+                                + "     License: " + module->license + "\n", f.italicised());
+                    s.append ("\n" + module->description, f);
+
+                    s.draw (g, getLocalBounds().reduced (4, 2).toFloat());
                 }
             }
 
@@ -355,10 +358,10 @@ public:
                 String text ("This module requires the following dependencies:\n");
                 text << missingDependencies.joinIntoString (", ");
 
-                GlyphArrangement ga;
-                ga.addJustifiedText (Font (13.0f), text, 4.0f, 16.0f, getWidth() - 8.0f, Justification::topLeft);
-                g.setColour (Colours::red);
-                ga.draw (g);
+                AttributedString s;
+                s.setJustification (Justification::topLeft);
+                s.append (text, Font (13.0f), Colours::red);
+                s.draw (g, getLocalBounds().reduced (4, 16).toFloat());
             }
 
             void buttonClicked (Button*)

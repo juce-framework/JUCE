@@ -142,24 +142,6 @@ private:
 };
 
 //==============================================================================
-class FloatingLabelComponent    : public Component
-{
-public:
-    FloatingLabelComponent();
-
-    void remove();
-    void update (Component* parent, const String& text, const Colour& textColour,
-                 int x, int y, bool toRight, bool below);
-
-    void paint (Graphics& g);
-
-private:
-    Font font;
-    Colour colour;
-    GlyphArrangement glyphs;
-};
-
-//==============================================================================
 // A ValueSource which takes an input source, and forwards any changes in it.
 // This class is a handy way to create sources which re-map a value.
 class ValueSourceFilter   : public Value::ValueSource,

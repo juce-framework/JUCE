@@ -554,22 +554,25 @@ int IntrojucerLookAndFeel::getTabButtonOverlap (int /*tabDepth*/)               
 int IntrojucerLookAndFeel::getTabButtonSpaceAroundImage()                              { return 1; }
 int IntrojucerLookAndFeel::getTabButtonBestWidth (TabBarButton&, int /*tabDepth*/)     { return 120; }
 
-void IntrojucerLookAndFeel::createTabTextLayout (const TabBarButton& button, const Rectangle<int>& textArea, GlyphArrangement& textLayout)
+static void createTabTextLayout (const TabBarButton& button, const Rectangle<int>& textArea,
+                                 const Colour colour, TextLayout& textLayout)
 {
     Font font (textArea.getHeight() * 0.5f);
     font.setUnderline (button.hasKeyboardFocus (false));
 
-    textLayout.addFittedText (font, button.getButtonText().trim(),
-                              (float) textArea.getX(), (float) textArea.getY(), (float) textArea.getWidth(), (float) textArea.getHeight(),
-                              Justification::centred, 1);
+    AttributedString s;
+    s.setJustification (Justification::centred);
+    s.append (button.getButtonText().trim(), font, colour);
+
+    textLayout.createLayout (s, (float) textArea.getWidth());
 }
 
-Colour IntrojucerLookAndFeel::getTabBackgroundColour (TabBarButton& button)
+static Colour getTabBackgroundColour (TabBarButton& button)
 {
-    const Colour normalBkg (button.findColour (mainBackgroundColourId));
-    Colour bkg (normalBkg.contrasting (0.15f));
+    const Colour bkg (button.findColour (mainBackgroundColourId).contrasting (0.15f));
+
     if (button.isFrontTab())
-        bkg = bkg.overlaidWith (Colours::yellow.withAlpha (0.5f));
+        return bkg.overlaidWith (Colours::yellow.withAlpha (0.5f));
 
     return bkg;
 }
@@ -577,7 +580,6 @@ Colour IntrojucerLookAndFeel::getTabBackgroundColour (TabBarButton& button)
 void IntrojucerLookAndFeel::drawTabButton (TabBarButton& button, Graphics& g, bool isMouseOver, bool isMouseDown)
 {
     const Rectangle<int> activeArea (button.getActiveArea());
-
     const Colour bkg (getTabBackgroundColour (button));
 
     g.setGradientFill (ColourGradient (bkg.brighter (0.1f), 0, (float) activeArea.getY(),
@@ -587,19 +589,20 @@ void IntrojucerLookAndFeel::drawTabButton (TabBarButton& button, Graphics& g, bo
     g.setColour (button.findColour (mainBackgroundColourId).darker (0.3f));
     g.drawRect (activeArea);
 
-    GlyphArrangement textLayout;
-    createTabTextLayout (button, button.getTextArea(), textLayout);
-
     const float alpha = button.isEnabled() ? ((isMouseOver || isMouseDown) ? 1.0f : 0.8f) : 0.3f;
-    g.setColour (bkg.contrasting().withMultipliedAlpha (alpha));
-    textLayout.draw (g);
+    const Colour col (bkg.contrasting().withMultipliedAlpha (alpha));
+
+    TextLayout textLayout;
+    createTabTextLayout (button, button.getTextArea(), col, textLayout);
+
+    textLayout.draw (g, button.getTextArea().toFloat());
 }
 
 Rectangle<int> IntrojucerLookAndFeel::getTabButtonExtraComponentBounds (const TabBarButton& button, Rectangle<int>& textArea, Component& comp)
 {
-    GlyphArrangement textLayout;
-    createTabTextLayout (button, textArea, textLayout);
-    const int textWidth = (int) textLayout.getBoundingBox (0, -1, false).getWidth();
+    TextLayout textLayout;
+    createTabTextLayout (button, textArea, Colours::black, textLayout);
+    const int textWidth = (int) textLayout.getWidth();
     const int extraSpace = jmax (0, textArea.getWidth() - (textWidth + comp.getWidth())) / 2;
 
     textArea.removeFromRight (extraSpace);
