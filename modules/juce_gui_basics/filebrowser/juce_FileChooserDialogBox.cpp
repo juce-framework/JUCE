@@ -25,7 +25,6 @@
 class FileChooserDialogBox::ContentComponent  : public Component
 {
 public:
-    //==============================================================================
     ContentComponent (const String& name, const String& desc, FileBrowserComponent& chooser)
         : Component (name),
           chooserComponent (chooser),
@@ -49,8 +48,8 @@ public:
 
     void paint (Graphics& g)
     {
-        g.setColour (getLookAndFeel().findColour (FileChooserDialogBox::titleTextColourId));
-        text.draw (g);
+        text.draw (g, getLocalBounds().reduced (6)
+                        .removeFromTop (text.getHeight()).toFloat());
     }
 
     void resized()
@@ -59,9 +58,10 @@ public:
 
         Rectangle<int> area (getLocalBounds());
 
-        getLookAndFeel().createFileChooserHeaderText (getName(), instructions, text, getWidth());
-        const Rectangle<float> bb (text.getBoundingBox (0, text.getNumGlyphs(), false));
-        area.removeFromTop (roundToInt (bb.getBottom()) + 10);
+        text.createLayout (getLookAndFeel().createFileChooserHeaderText (getName(), instructions),
+                           getWidth() - 12.0f);
+
+        area.removeFromTop (roundToInt (text.getHeight()) + 10);
 
         chooserComponent.setBounds (area.removeFromTop (area.getHeight() - buttonHeight - 20));
         Rectangle<int> buttonArea (area.reduced (16, 10));
@@ -83,7 +83,7 @@ public:
 
 private:
     String instructions;
-    GlyphArrangement text;
+    TextLayout text;
 };
 
 //==============================================================================

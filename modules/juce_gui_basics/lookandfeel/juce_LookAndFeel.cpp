@@ -2490,20 +2490,17 @@ void LookAndFeel::drawCallOutBoxBackground (CallOutBox& box, Graphics& g,
 
 
 //==============================================================================
-void LookAndFeel::createFileChooserHeaderText (const String& title,
-                                               const String& instructions,
-                                               GlyphArrangement& text,
-                                               int width)
+AttributedString LookAndFeel::createFileChooserHeaderText (const String& title,
+                                                           const String& instructions)
 {
-    text.clear();
+    AttributedString s;
+    s.setJustification (Justification::centred);
 
-    text.addJustifiedText (Font (17.0f, Font::bold), title,
-                           8.0f, 22.0f, width - 16.0f,
-                           Justification::centred);
+    const Colour colour (findColour (FileChooserDialogBox::titleTextColourId));
+    s.append (title + "\n\n", Font (17.0f, Font::bold), colour);
+    s.append (instructions, Font (14.0f), colour);
 
-    text.addJustifiedText (Font (14.0f), instructions,
-                           8.0f, 24.0f + 16.0f, width - 16.0f,
-                           Justification::centred);
+    return s;
 }
 
 void LookAndFeel::drawFileBrowserRow (Graphics& g, int width, int height,

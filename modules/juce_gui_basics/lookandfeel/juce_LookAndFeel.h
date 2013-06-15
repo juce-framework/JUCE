@@ -311,10 +311,8 @@ public:
     virtual const Drawable* getDefaultFolderImage();
     virtual const Drawable* getDefaultDocumentFileImage();
 
-    virtual void createFileChooserHeaderText (const String& title,
-                                              const String& instructions,
-                                              GlyphArrangement& destArrangement,
-                                              int width);
+    virtual AttributedString createFileChooserHeaderText (const String& title,
+                                                          const String& instructions);
 
     virtual void drawFileBrowserRow (Graphics& g, int width, int height,
                                      const String& filename, Image* icon,
@@ -673,6 +671,7 @@ private:
     virtual int getTabButtonBestWidth (int, const String&, int, Button&) { return 0; }
     virtual int drawBubble (Graphics&, float, float, float, float, float, float) { return 0; }
     virtual int getFontForTextButton (TextButton&) { return 0; }
+    virtual int createFileChooserHeaderText (const String&, const String&, GlyphArrangement&, int) { return 0; }
    #endif
 
     class GlassWindowButton;
