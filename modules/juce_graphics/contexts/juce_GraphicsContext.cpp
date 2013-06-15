@@ -251,16 +251,6 @@ void Graphics::drawSingleLineText (const String& text, const int startX, const i
     }
 }
 
-void Graphics::drawTextAsPath (const String& text, const AffineTransform& transform) const
-{
-    if (text.isNotEmpty())
-    {
-        GlyphArrangement arr;
-        arr.addLineOfText (context.getFont(), text, 0.0f, 0.0f);
-        arr.draw (*this, transform);
-    }
-}
-
 void Graphics::drawMultiLineText (const String& text, const int startX,
                                   const int baselineY, const int maximumLineWidth) const
 {
