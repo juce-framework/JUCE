@@ -49,7 +49,7 @@ public:
     void paint (Graphics& g)
     {
         text.draw (g, getLocalBounds().reduced (6)
-                        .removeFromTop (text.getHeight()).toFloat());
+                        .removeFromTop ((int) text.getHeight()).toFloat());
     }
 
     void resized()

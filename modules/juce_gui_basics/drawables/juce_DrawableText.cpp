@@ -172,7 +172,7 @@ void DrawableText::paint (Graphics& g)
     g.setFont (scaledFont);
     g.setColour (colour);
 
-    g.drawFittedText (text, Rectangle<int> (w, h), justification, 0x100000);
+    g.drawFittedText (text, Rectangle<float> (w, h).getSmallestIntegerContainer(), justification, 0x100000);
 }
 
 Rectangle<float> DrawableText::getDrawableBounds() const

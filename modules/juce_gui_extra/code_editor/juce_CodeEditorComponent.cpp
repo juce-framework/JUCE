@@ -110,7 +110,7 @@ public:
             column += token.length;
         }
 
-        as.draw (g, Rectangle<float> (x, y, 10000.0f, (float) lineH));
+        as.draw (g, Rectangle<float> (x, (float) y, 10000.0f, (float) lineH));
     }
 
 private:

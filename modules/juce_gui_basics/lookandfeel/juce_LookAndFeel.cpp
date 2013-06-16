@@ -2207,7 +2207,7 @@ void LookAndFeel::drawTabButtonText (TabBarButton& button, Graphics& g, bool isM
     g.addTransform (t);
 
     g.drawFittedText (button.getButtonText().trim(),
-                      0.0f, 0.0f, (float) length, (float) depth,
+                      0, 0, (int) length, (int) depth,
                       Justification::centred,
                       jmax (1, ((int) depth) / 12));
 }
