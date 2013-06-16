@@ -26,24 +26,6 @@
   ==============================================================================
 */
 
-static StringArray parseWildcards (const String& pattern)
-{
-    StringArray s;
-    s.addTokens (pattern, ";,", "\"'");
-    s.trim();
-    s.removeEmptyStrings();
-    return s;
-}
-
-static bool fileMatches (const StringArray& wildCards, const String& filename)
-{
-    for (int i = 0; i < wildCards.size(); ++i)
-        if (filename.matchesWildcard (wildCards[i], ! File::areFileNamesCaseSensitive()))
-            return true;
-
-    return false;
-}
-
 DirectoryIterator::DirectoryIterator (const File& directory, bool recursive,
                                       const String& pattern, const int type)
   : wildCards (parseWildcards (pattern)),
@@ -63,6 +45,24 @@ DirectoryIterator::DirectoryIterator (const File& directory, bool recursive,
 
 DirectoryIterator::~DirectoryIterator()
 {
+}
+
+StringArray DirectoryIterator::parseWildcards (const String& pattern)
+{
+    StringArray s;
+    s.addTokens (pattern, ";,", "\"'");
+    s.trim();
+    s.removeEmptyStrings();
+    return s;
+}
+
+bool DirectoryIterator::fileMatches (const StringArray& wildCards, const String& filename)
+{
+    for (int i = 0; i < wildCards.size(); ++i)
+        if (filename.matchesWildcard (wildCards[i], ! File::areFileNamesCaseSensitive()))
+            return true;
+
+    return false;
 }
 
 bool DirectoryIterator::next()
