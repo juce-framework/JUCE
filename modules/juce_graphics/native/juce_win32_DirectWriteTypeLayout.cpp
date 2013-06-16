@@ -221,9 +221,11 @@ namespace DirectWriteTypeLayout
 
         if (const Font* const font = attr.getFont())
         {
+            const String familyName (FontStyleHelpers::getConcreteFamilyName (*font));
+
             BOOL fontFound = false;
             uint32 fontIndex;
-            fontCollection->FindFamilyName (FontStyleHelpers::getConcreteFamilyName (*font).toWideCharPointer(),
+            fontCollection->FindFamilyName (familyName.toWideCharPointer(),
                                             &fontIndex, &fontFound);
 
             if (! fontFound)
@@ -244,7 +246,7 @@ namespace DirectWriteTypeLayout
                     break;
             }
 
-            textLayout->SetFontFamilyName (attr.getFont()->getTypefaceName().toWideCharPointer(), range);
+            textLayout->SetFontFamilyName (familyName.toWideCharPointer(), range);
             textLayout->SetFontWeight (dwFont->GetWeight(), range);
             textLayout->SetFontStretch (dwFont->GetStretch(), range);
             textLayout->SetFontStyle (dwFont->GetStyle(), range);
