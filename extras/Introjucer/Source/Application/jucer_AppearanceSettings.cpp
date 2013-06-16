@@ -567,7 +567,7 @@ static void createTabTextLayout (const TabBarButton& button, const Rectangle<int
     textLayout.createLayout (s, (float) textArea.getWidth());
 }
 
-static Colour getTabBackgroundColour (TabBarButton& button)
+Colour IntrojucerLookAndFeel::getTabBackgroundColour (TabBarButton& button)
 {
     const Colour bkg (button.findColour (mainBackgroundColourId).contrasting (0.15f));
 
@@ -580,6 +580,7 @@ static Colour getTabBackgroundColour (TabBarButton& button)
 void IntrojucerLookAndFeel::drawTabButton (TabBarButton& button, Graphics& g, bool isMouseOver, bool isMouseDown)
 {
     const Rectangle<int> activeArea (button.getActiveArea());
+
     const Colour bkg (getTabBackgroundColour (button));
 
     g.setGradientFill (ColourGradient (bkg.brighter (0.1f), 0, (float) activeArea.getY(),

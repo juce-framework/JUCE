@@ -141,11 +141,9 @@ class SourceCodeEditor  : public DocumentEditorComponent,
                           private CodeDocument::Listener
 {
 public:
-    SourceCodeEditor (OpenDocumentManager::Document* document);
+    SourceCodeEditor (OpenDocumentManager::Document* document, CodeDocument&);
+    SourceCodeEditor (OpenDocumentManager::Document* document, CodeEditorComponent*);
     ~SourceCodeEditor();
-
-    void createEditor (CodeDocument& codeDocument);
-    void setEditor (CodeEditorComponent*);
 
     void scrollToKeepRangeOnScreen (Range<int> range);
     void highlight (Range<int> range, bool cursorAtStart);
@@ -165,6 +163,7 @@ private:
     void codeDocumentTextInserted (const String&, int);
     void codeDocumentTextDeleted (int, int);
 
+    void setEditor (CodeEditorComponent*);
     void updateColourScheme();
     void checkSaveState();
 

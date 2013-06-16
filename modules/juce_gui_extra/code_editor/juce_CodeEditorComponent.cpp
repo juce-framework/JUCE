@@ -81,8 +81,7 @@ public:
     }
 
     void draw (CodeEditorComponent& owner, Graphics& g, const Font& fontToUse,
-               const float leftClip, const float rightClip,
-               const float x, const int y, const int baselineOffset,
+               const float rightClip, const float x, const int y,
                const int lineH, const float characterWidth,
                const Colour highlightColour) const
     {
@@ -93,9 +92,11 @@ public:
                         roundToInt ((highlightColumnEnd - highlightColumnStart) * characterWidth), lineH);
         }
 
-        const float baselineY = (float) (y + baselineOffset);
         Colour lastColour (0x00000001);
-        GlyphArrangement ga;
+
+        AttributedString as;
+        as.setJustification (Justification::centredLeft);
+
         int column = 0;
 
         for (int i = 0; i < tokens.size(); ++i)
@@ -104,26 +105,12 @@ public:
             if (tokenX > rightClip)
                 break;
 
-            SyntaxToken& token = tokens.getReference(i);
-
-            const Colour newColour (owner.getColourForTokenType (token.tokenType));
-            if (lastColour != newColour)
-            {
-                ga.draw (g);
-                ga.clear();
-
-                lastColour = newColour;
-                g.setColour (newColour);
-            }
-
+            const SyntaxToken& token = tokens.getReference(i);
+            as.append (token.text, fontToUse, owner.getColourForTokenType (token.tokenType));
             column += token.length;
-
-            if (x + column * characterWidth >= leftClip)
-                ga.addCurtailedLineOfText (fontToUse, token.text, tokenX, baselineY,
-                                           (rightClip - tokenX) + characterWidth, false);
         }
 
-        ga.draw (g);
+        as.draw (g, Rectangle<int> (x, y, 10000, lineH).toFloat());
     }
 
 private:
@@ -484,20 +471,18 @@ void CodeEditorComponent::paint (Graphics& g)
     g.reduceClipRegion (gutterSize, 0, verticalScrollBar.getX() - gutterSize, horizontalScrollBar.getY());
 
     g.setFont (font);
-    const int baselineOffset = (int) font.getAscent();
     const Colour highlightColour (findColour (CodeEditorComponent::highlightColourId));
 
     const Rectangle<int> clip (g.getClipBounds());
     const int firstLineToDraw = jmax (0, clip.getY() / lineHeight);
     const int lastLineToDraw = jmin (lines.size(), clip.getBottom() / lineHeight + 1);
     const float x = (float) (gutterSize - xOffset * charWidth);
-    const float leftClip  = (float) clip.getX();
     const float rightClip = (float) clip.getRight();
 
     for (int i = firstLineToDraw; i < lastLineToDraw; ++i)
-        lines.getUnchecked(i)->draw (*this, g, font, leftClip, rightClip,
-                                     x, lineHeight * i, baselineOffset,
-                                     lineHeight, charWidth, highlightColour);
+        lines.getUnchecked(i)->draw (*this, g, font, rightClip,
+                                     x, lineHeight * i, lineHeight,
+                                     charWidth, highlightColour);
 }
 
 void CodeEditorComponent::setScrollbarThickness (const int thickness)

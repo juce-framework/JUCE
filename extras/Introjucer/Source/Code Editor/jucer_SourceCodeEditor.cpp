@@ -46,8 +46,7 @@ CodeDocument& SourceCodeDocument::getCodeDocument()
 
 Component* SourceCodeDocument::createEditor()
 {
-    SourceCodeEditor* e = new SourceCodeEditor (this);
-    e->createEditor (getCodeDocument());
+    SourceCodeEditor* e = new SourceCodeEditor (this, getCodeDocument());
     applyLastState (*(e->editor));
     return e;
 }
@@ -114,9 +113,21 @@ void SourceCodeDocument::applyLastState (CodeEditorComponent& editor) const
 }
 
 //==============================================================================
-SourceCodeEditor::SourceCodeEditor (OpenDocumentManager::Document* doc)
+SourceCodeEditor::SourceCodeEditor (OpenDocumentManager::Document* doc, CodeDocument& codeDocument)
     : DocumentEditorComponent (doc)
 {
+    setOpaque (true);
+
+    if (document->getFile().hasFileExtension (sourceOrHeaderFileExtensions))
+        setEditor (new CppCodeEditorComponent (document->getFile(), codeDocument));
+    else
+        setEditor (new GenericCodeEditorComponent (document->getFile(), codeDocument, nullptr));
+}
+
+SourceCodeEditor::SourceCodeEditor (OpenDocumentManager::Document* doc, CodeEditorComponent* ed)
+    : DocumentEditorComponent (doc)
+{
+    setEditor (ed);
 }
 
 SourceCodeEditor::~SourceCodeEditor()
@@ -128,14 +139,6 @@ SourceCodeEditor::~SourceCodeEditor()
 
     if (SourceCodeDocument* doc = dynamic_cast <SourceCodeDocument*> (getDocument()))
         doc->updateLastState (*editor);
-}
-
-void SourceCodeEditor::createEditor (CodeDocument& codeDocument)
-{
-    if (document->getFile().hasFileExtension (sourceOrHeaderFileExtensions))
-        setEditor (new CppCodeEditorComponent (document->getFile(), codeDocument));
-    else
-        setEditor (new GenericCodeEditorComponent (document->getFile(), codeDocument, nullptr));
 }
 
 void SourceCodeEditor::setEditor (CodeEditorComponent* newEditor)

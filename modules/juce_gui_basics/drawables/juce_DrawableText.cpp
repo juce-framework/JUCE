@@ -158,28 +158,21 @@ void DrawableText::recalculateCoordinates (Expression::Scope* scope)
     repaint();
 }
 
-const AffineTransform DrawableText::getArrangementAndTransform (GlyphArrangement& glyphs) const
-{
-    const float w = Line<float> (resolvedPoints[0], resolvedPoints[1]).getLength();
-    const float h = Line<float> (resolvedPoints[0], resolvedPoints[2]).getLength();
-
-    glyphs.addFittedText (scaledFont, text, 0, 0, w, h, justification, 0x100000);
-
-    return AffineTransform::fromTargetPoints (0, 0, resolvedPoints[0].x, resolvedPoints[0].y,
-                                              w, 0, resolvedPoints[1].x, resolvedPoints[1].y,
-                                              0, h, resolvedPoints[2].x, resolvedPoints[2].y);
-}
-
 //==============================================================================
 void DrawableText::paint (Graphics& g)
 {
     transformContextToCorrectOrigin (g);
 
+    const float w = Line<float> (resolvedPoints[0], resolvedPoints[1]).getLength();
+    const float h = Line<float> (resolvedPoints[0], resolvedPoints[2]).getLength();
+
+    g.addTransform (AffineTransform::fromTargetPoints (0, 0, resolvedPoints[0].x, resolvedPoints[0].y,
+                                                       w, 0, resolvedPoints[1].x, resolvedPoints[1].y,
+                                                       0, h, resolvedPoints[2].x, resolvedPoints[2].y));
+    g.setFont (scaledFont);
     g.setColour (colour);
 
-    GlyphArrangement ga;
-    const AffineTransform transform (getArrangementAndTransform (ga));
-    ga.draw (g, transform);
+    g.drawFittedText (text, Rectangle<int> (w, h), justification, 0x100000);
 }
 
 Rectangle<float> DrawableText::getDrawableBounds() const

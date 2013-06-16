@@ -149,7 +149,6 @@ private:
     bool registerCoordinates (RelativeCoordinatePositionerBase&);
     void recalculateCoordinates (Expression::Scope*);
     void refreshBounds();
-    const AffineTransform getArrangementAndTransform (GlyphArrangement& glyphs) const;
 
     DrawableText& operator= (const DrawableText&);
     JUCE_LEAK_DETECTOR (DrawableText)

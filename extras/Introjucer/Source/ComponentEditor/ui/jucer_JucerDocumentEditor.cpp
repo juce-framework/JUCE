@@ -329,9 +329,9 @@ JucerDocumentEditor::JucerDocumentEditor (JucerDocument* const doc)
 
         tabbedComponent.addTab ("Resources", tabColour, new ResourceEditorPanel (*document), true);
 
-        SourceCodeEditor* codeEditor = new SourceCodeEditor (&document->getCppDocument());
-        codeEditor->setEditor (new CppCodeEditorComponent (document->getCppFile(),
-                                                           document->getCppDocument().getCodeDocument()));
+        SourceCodeEditor* codeEditor = new SourceCodeEditor (&document->getCppDocument(),
+                                                             new CppCodeEditorComponent (document->getCppFile(),
+                                                                                         document->getCppDocument().getCodeDocument()));
 
         tabbedComponent.addTab ("Code", tabColour, codeEditor, true);
 

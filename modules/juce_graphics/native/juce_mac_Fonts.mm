@@ -39,6 +39,8 @@ extern "C"
 }
 #endif
 
+static CTFontRef getCTFontFromTypeface (const Font& f);
+
 namespace CoreTextTypeLayout
 {
     static String findBestAvailableStyle (const Font& font, CGAffineTransform& requiredTransform)
@@ -187,6 +189,18 @@ namespace CoreTextTypeLayout
         HeapBlock<CGPoint> local;
     };
 
+    static CTFontRef getOrCreateFont (const Font& f)
+    {
+        if (CTFontRef ctf = getCTFontFromTypeface (f))
+        {
+            CFRetain (ctf);
+            return ctf;
+        }
+
+        CGAffineTransform transform;
+        return createCTFont (f, referenceFontSize, transform);
+    }
+
     //==============================================================================
     static CFAttributedStringRef createCFAttributedString (const AttributedString& text)
     {
@@ -213,13 +227,14 @@ namespace CoreTextTypeLayout
 
             if (const Font* const f = attr->getFont())
             {
-                CGAffineTransform transform;
-                CTFontRef ctFontRef = createCTFont (*f, referenceFontSize, transform);
-                ctFontRef = getFontWithPointSize (ctFontRef, f->getHeight() * getHeightToPointsFactor (ctFontRef));
+                if (CTFontRef ctFontRef = getOrCreateFont (*f))
+                {
+                    ctFontRef = getFontWithPointSize (ctFontRef, f->getHeight() * getHeightToPointsFactor (ctFontRef));
 
-                CFAttributedStringSetAttribute (attribString, CFRangeMake (range.getStart(), range.getLength()),
-                                                kCTFontAttributeName, ctFontRef);
-                CFRelease (ctFontRef);
+                    CFAttributedStringSetAttribute (attribString, CFRangeMake (range.getStart(), range.getLength()),
+                                                    kCTFontAttributeName, ctFontRef);
+                    CFRelease (ctFontRef);
+                }
             }
 
             if (const Colour* const col = attr->getColour())
@@ -416,11 +431,11 @@ class OSXTypeface  : public Typeface
 public:
     OSXTypeface (const Font& font)
         : Typeface (font.getTypefaceName(),
-          font.getTypefaceStyle()),
+                    font.getTypefaceStyle()),
           fontRef (nullptr),
+          ctFontRef (nullptr),
           fontHeightToPointsFactor (1.0f),
           renderingTransform (CGAffineTransformIdentity),
-          ctFontRef (nullptr),
           attributedStringAtts (nullptr),
           ascent (0.0f),
           unitsToHeightScaleFactor (0.0f)
@@ -566,12 +581,12 @@ public:
 
     //==============================================================================
     CGFontRef fontRef;
+    CTFontRef ctFontRef;
 
     float fontHeightToPointsFactor;
     CGAffineTransform renderingTransform;
 
 private:
-    CTFontRef ctFontRef;
     CFDictionaryRef attributedStringAtts;
     float ascent, unitsToHeightScaleFactor;
     AffineTransform pathTransform;
@@ -597,6 +612,15 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OSXTypeface)
 };
+
+CTFontRef getCTFontFromTypeface (const Font& f)
+{
+    if (OSXTypeface* tf = dynamic_cast <OSXTypeface*> (f.getTypeface()))
+        return tf->ctFontRef;
+
+    return 0;
+}
+
 
 StringArray Font::findAllTypefaceNames()
 {
