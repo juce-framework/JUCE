@@ -178,7 +178,7 @@ private:
     struct ObjectHolder
     {
         ObjectHolder (const Thread::ThreadID& tid)
-            : threadId (tid), object()
+            : threadId (tid), next (nullptr), object()
         {}
 
         Thread::ThreadID threadId;

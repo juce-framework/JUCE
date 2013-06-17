@@ -23,6 +23,7 @@
 */
 
 SplashScreen::SplashScreen()
+    : originalClickCounter (0)
 {
     setOpaque (true);
 }

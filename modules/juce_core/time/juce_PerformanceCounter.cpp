@@ -33,6 +33,7 @@ PerformanceCounter::PerformanceCounter (const String& name_,
       numRuns (0),
       runsPerPrint (runsPerPrintout),
       totalTime (0),
+      started (0),
       outputFile (loggingFile)
 {
     if (outputFile != File::nonexistent)

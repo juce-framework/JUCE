@@ -246,9 +246,8 @@ public:
 
     void changeListenerCallback (ChangeBroadcaster* source)
     {
-        ColourSelector* cs = dynamic_cast <ColourSelector*> (source);
-
-        setColour (TextButton::buttonColourId, cs->getCurrentColour());
+        if (ColourSelector* cs = dynamic_cast <ColourSelector*> (source))
+            setColour (TextButton::buttonColourId, cs->getCurrentColour());
     }
 };
 

@@ -924,7 +924,9 @@ void AudioProcessorGraph::Node::setParentGraph (AudioProcessorGraph* const graph
 AudioProcessorGraph::AudioProcessorGraph()
     : lastNodeId (0),
       renderingBuffers (1, 1),
-      currentAudioOutputBuffer (1, 1)
+      currentAudioInputBuffer (nullptr),
+      currentAudioOutputBuffer (1, 1),
+      currentMidiInputBuffer (nullptr)
 {
 }
 

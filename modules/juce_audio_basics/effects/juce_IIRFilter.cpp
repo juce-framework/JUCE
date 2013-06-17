@@ -32,6 +32,7 @@
 IIRFilter::IIRFilter()
     : active (false), v1 (0), v2 (0)
 {
+    zeromem (coefficients, sizeof (coefficients));
 }
 
 IIRFilter::IIRFilter (const IIRFilter& other)

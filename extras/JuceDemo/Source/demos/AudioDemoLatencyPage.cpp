@@ -38,10 +38,8 @@ public:
           sampleRate (0),
           isRunning (false),
           resultsBox (resultsBox_)
-    {
-    }
-
-    ~LatencyTester()
+          deviceInputLatency (0),
+          deviceOutputLatency (0)
     {
     }
 

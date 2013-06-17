@@ -47,8 +47,7 @@ class SineWaveVoice  : public SynthesiserVoice
 {
 public:
     SineWaveVoice()
-        : angleDelta (0.0),
-          tailOff (0.0)
+       : currentAngle (0), angleDelta (0), level (0), tailOff (0)
     {
     }
 

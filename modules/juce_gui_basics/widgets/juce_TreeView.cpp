@@ -30,7 +30,8 @@ public:
     ContentComponent (TreeView& tree)
         : owner (tree),
           buttonUnderMouse (nullptr),
-          isDragging (false)
+          isDragging (false),
+          needSelectionOnMouseUp (false)
     {
     }
 
@@ -924,7 +925,7 @@ class TreeView::InsertPointHighlight   : public Component
 {
 public:
     InsertPointHighlight()
-        : lastItem (nullptr)
+        : lastItem (nullptr), lastIndex (0)
     {
         setSize (100, 12);
         setAlwaysOnTop (true);
@@ -1122,6 +1123,8 @@ TreeViewItem::TreeViewItem()
       y (0),
       itemHeight (0),
       totalHeight (0),
+      itemWidth (0),
+      totalWidth (0),
       selected (false),
       redrawNeeded (true),
       drawLinesInside (true),
@@ -1370,7 +1373,7 @@ Rectangle<int> TreeViewItem::getItemPosition (const bool relativeToTreeViewTopLe
 
     Rectangle<int> r (indentX, y, jmax (0, width), totalHeight);
 
-    if (relativeToTreeViewTopLeft)
+    if (relativeToTreeViewTopLeft && ownerView != nullptr)
         r -= ownerView->viewport->getViewPosition();
 
     return r;

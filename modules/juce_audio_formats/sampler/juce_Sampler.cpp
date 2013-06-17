@@ -73,10 +73,9 @@ bool SamplerSound::appliesToChannel (const int /*midiChannel*/)
 SamplerVoice::SamplerVoice()
     : pitchRatio (0.0),
       sourceSamplePosition (0.0),
-      lgain (0.0f),
-      rgain (0.0f),
-      isInAttack (false),
-      isInRelease (false)
+      lgain (0.0f), rgain (0.0f),
+      attackReleaseLevel (0), attackDelta (0), releaseDelta (0),
+      isInAttack (false), isInRelease (false)
 {
 }
 

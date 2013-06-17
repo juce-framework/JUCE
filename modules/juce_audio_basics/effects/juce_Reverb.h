@@ -220,7 +220,10 @@ private:
     class CombFilter
     {
     public:
-        CombFilter() noexcept  : bufferSize (0), bufferIndex (0) {}
+        CombFilter() noexcept
+            : bufferSize (0), bufferIndex (0),
+              feedback (0), last (0), damp1 (0), damp2 (0)
+        {}
 
         void setSize (const int size)
         {

@@ -450,7 +450,8 @@ public:
           storedPathname (storedPath.isEmpty() ? f.getFileName() : storedPath),
           compressionLevel (compression),
           compressedSize (0),
-          headerStart (0)
+          headerStart (0),
+          checksum (0)
     {
     }
 
