@@ -37,7 +37,7 @@ public:
           recordedSampleNum (-1),
           sampleRate (0),
           isRunning (false),
-          resultsBox (resultsBox_)
+          resultsBox (resultsBox_),
           deviceInputLatency (0),
           deviceOutputLatency (0)
     {
