@@ -550,6 +550,8 @@ private:
     void restoreToDefaultOpenness();
     bool isFullyOpen() const noexcept;
     XmlElement* getOpennessState (bool canReturnNull) const;
+    bool removeSubItemFromList (int index, bool deleteItem);
+    void removeAllSubItemsFromList();
 
    #if JUCE_CATCH_DEPRECATED_CODE_MISUSE
     // The parameters for these methods have changed - please update your code!

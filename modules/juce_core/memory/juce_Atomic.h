@@ -48,7 +48,7 @@ public:
     }
 
     /** Creates a new value, with a given initial value. */
-    inline Atomic (const Type initialValue) noexcept
+    inline explicit Atomic (const Type initialValue) noexcept
         : value (initialValue)
     {
     }
