@@ -28,9 +28,9 @@ class Slider::Pimpl   : public AsyncUpdater,
                         public ValueListener
 {
 public:
-    Pimpl (Slider& owner_, SliderStyle style_, TextEntryBoxPosition textBoxPosition)
-      : owner (owner_),
-        style (style_),
+    Pimpl (Slider& s, SliderStyle sliderStyle, TextEntryBoxPosition textBoxPosition)
+      : owner (s),
+        style (sliderStyle),
         lastCurrentValue (0), lastValueMin (0), lastValueMax (0),
         minimum (0), maximum (10), interval (0), doubleClickReturnValue (0),
         skewFactor (1.0), velocityModeSensitivity (1.0),
@@ -1256,11 +1256,12 @@ public:
                                    public Timer
     {
     public:
-        PopupDisplayComponent (Slider& owner_)
-            : owner (owner_),
-              font (15.0f, Font::bold)
+        PopupDisplayComponent (Slider& s)
+            : owner (s),
+              font (s.getLookAndFeel().getSliderPopupFont())
         {
             setAlwaysOnTop (true);
+            setAllowedPlacement (owner.getLookAndFeel().getSliderPopupPlacement());
         }
 
         void paintContent (Graphics& g, int w, int h)
@@ -1470,9 +1471,9 @@ void Slider::setDoubleClickReturnValue (bool isDoubleClickEnabled,  double value
     pimpl->doubleClickReturnValue = valueToSetOnDoubleClick;
 }
 
-double Slider::getDoubleClickReturnValue (bool& isEnabled_) const
+double Slider::getDoubleClickReturnValue (bool& isEnabledResult) const
 {
-    isEnabled_ = pimpl->doubleClickToValue;
+    isEnabledResult = pimpl->doubleClickToValue;
     return pimpl->doubleClickReturnValue;
 }
 
@@ -1546,7 +1547,7 @@ void Slider::stoppedDragging() {}
 void Slider::valueChanged() {}
 
 //==============================================================================
-void Slider::setPopupMenuEnabled (const bool menuEnabled_)  { pimpl->menuEnabled = menuEnabled_; }
+void Slider::setPopupMenuEnabled (const bool menuEnabled)   { pimpl->menuEnabled = menuEnabled; }
 void Slider::setScrollWheelEnabled (const bool enabled)     { pimpl->scrollWheelEnabled = enabled; }
 
 bool Slider::isHorizontal() const noexcept   { return pimpl->isHorizontal(); }

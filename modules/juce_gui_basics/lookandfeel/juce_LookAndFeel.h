@@ -450,6 +450,9 @@ public:
 
     virtual ImageEffectFilter* getSliderEffect();
 
+    virtual Font getSliderPopupFont();
+    virtual int getSliderPopupPlacement();
+
     //==============================================================================
     virtual void getTooltipSize (const String& tipText, int& width, int& height);
 
