@@ -51,7 +51,7 @@ public:
 
     //==============================================================================
     /** Changes the filter to use the same parameters as the one being passed in. */
-    void setFilterParameters (const IIRFilter& newSettings);
+    void setCoefficients (const IIRCoefficients& newCoefficients);
 
     //==============================================================================
     void prepareToPlay (int samplesPerBlockExpected, double sampleRate);
