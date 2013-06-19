@@ -104,7 +104,7 @@ Range<float> TextLayout::Line::getLineBoundsX() const noexcept
             float minX = run.glyphs.getReference(0).anchor.x;
             float maxX = minX;
 
-            for (int j = run.glyphs.size(); --j > 0;)
+            for (int j = run.glyphs.size(); --j >= 0;)
             {
                 const Glyph& glyph = run.glyphs.getReference (j);
                 const float x = glyph.anchor.x;
