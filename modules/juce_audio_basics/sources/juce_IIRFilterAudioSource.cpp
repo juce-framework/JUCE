@@ -41,6 +41,12 @@ void IIRFilterAudioSource::setCoefficients (const IIRCoefficients& newCoefficien
         iirFilters.getUnchecked(i)->setCoefficients (newCoefficients);
 }
 
+void IIRFilterAudioSource::makeInactive()
+{
+    for (int i = iirFilters.size(); --i >= 0;)
+        iirFilters.getUnchecked(i)->makeInactive();
+}
+
 //==============================================================================
 void IIRFilterAudioSource::prepareToPlay (int samplesPerBlockExpected, double sampleRate)
 {

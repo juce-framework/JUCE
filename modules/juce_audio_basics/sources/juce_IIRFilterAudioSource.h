@@ -53,6 +53,9 @@ public:
     /** Changes the filter to use the same parameters as the one being passed in. */
     void setCoefficients (const IIRCoefficients& newCoefficients);
 
+    /** Calls IIRFilter::makeInactive() on all the filters being used internally. */
+    void makeInactive();
+
     //==============================================================================
     void prepareToPlay (int samplesPerBlockExpected, double sampleRate);
     void releaseResources();
