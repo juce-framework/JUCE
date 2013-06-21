@@ -575,7 +575,8 @@ void LibraryModule::prepareExporter (ProjectExporter& exporter, ProjectSaver& pr
 
 void LibraryModule::createPropertyEditors (ProjectExporter& exporter, PropertyListBuilder& props) const
 {
-    if (isVSTPluginHost (exporter.getProject()))
+    if (isVSTPluginHost (exporter.getProject())
+         && ! (isPluginClient() && shouldBuildVST  (exporter.getProject()).getValue()))
         VSTHelpers::createVSTPathEditor (exporter, props);
 
     if (isPluginClient())
