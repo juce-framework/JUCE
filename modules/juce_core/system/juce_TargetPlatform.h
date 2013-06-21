@@ -119,6 +119,8 @@
 
   #if defined (__ppc__) || defined (__ppc64__)
     #define JUCE_PPC 1
+  #elif defined (__arm__)
+    #define JUCE_ARM 1
   #else
     #define JUCE_INTEL 1
   #endif
@@ -161,7 +163,9 @@
     #define JUCE_32BIT 1
   #endif
 
-  #if __MMX__ || __SSE__ || __amd64__
+  #ifdef __arm__
+    #define JUCE_ARM 1
+  #elif __MMX__ || __SSE__ || __amd64__
     #define JUCE_INTEL 1
   #endif
 #endif
