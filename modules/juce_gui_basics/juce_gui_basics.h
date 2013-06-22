@@ -111,6 +111,9 @@ namespace juce
 #ifndef __JUCE_MOUSEEVENT_JUCEHEADER__
  #include "mouse/juce_MouseEvent.h"
 #endif
+#ifndef __JUCE_MOUSEINACTIVITYDETECTOR_JUCEHEADER__
+ #include "mouse/juce_MouseInactivityDetector.h"
+#endif
 #ifndef __JUCE_MOUSEINPUTSOURCE_JUCEHEADER__
  #include "mouse/juce_MouseInputSource.h"
 #endif
@@ -239,6 +242,12 @@ namespace juce
 #endif
 #ifndef __JUCE_WILDCARDFILEFILTER_JUCEHEADER__
  #include "filebrowser/juce_WildcardFileFilter.h"
+#endif
+#ifndef __JUCE_ANIMATEDPOSITION_JUCEHEADER__
+ #include "layout/juce_AnimatedPosition.h"
+#endif
+#ifndef __JUCE_ANIMATEDPOSITIONBEHAVIOURS_JUCEHEADER__
+ #include "layout/juce_AnimatedPositionBehaviours.h"
 #endif
 #ifndef __JUCE_COMPONENTANIMATOR_JUCEHEADER__
  #include "layout/juce_ComponentAnimator.h"

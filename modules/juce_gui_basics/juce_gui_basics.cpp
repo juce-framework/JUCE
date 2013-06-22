@@ -147,6 +147,7 @@ namespace juce
 #include "mouse/juce_DragAndDropContainer.cpp"
 #include "mouse/juce_MouseCursor.cpp"
 #include "mouse/juce_MouseEvent.cpp"
+#include "mouse/juce_MouseInactivityDetector.cpp"
 #include "mouse/juce_MouseInputSource.cpp"
 #include "mouse/juce_MouseListener.cpp"
 #include "keyboard/juce_CaretComponent.cpp"
