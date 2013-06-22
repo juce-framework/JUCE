@@ -210,15 +210,18 @@ private:
 
     void prepareFloatBuffers()
     {
-        floatData.setSize (numInputChannels + numOutputChannels, actualBufferSize);
-        zeromem (inputChannels, sizeof (inputChannels));
-        zeromem (outputChannels, sizeof (outputChannels));
+        if (numInputChannels + numOutputChannels > 0)
+        {
+            floatData.setSize (numInputChannels + numOutputChannels, actualBufferSize);
+            zeromem (inputChannels, sizeof (inputChannels));
+            zeromem (outputChannels, sizeof (outputChannels));
 
-        for (int i = 0; i < numInputChannels; ++i)
-            inputChannels[i] = floatData.getSampleData (i);
+            for (int i = 0; i < numInputChannels; ++i)
+                inputChannels[i] = floatData.getSampleData (i);
 
-        for (int i = 0; i < numOutputChannels; ++i)
-            outputChannels[i] = floatData.getSampleData (i + numInputChannels);
+            for (int i = 0; i < numOutputChannels; ++i)
+                outputChannels[i] = floatData.getSampleData (i + numInputChannels);
+        }
     }
 
     //==================================================================================================
