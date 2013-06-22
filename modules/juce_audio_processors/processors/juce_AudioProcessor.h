@@ -567,11 +567,12 @@ public:
     void setPlayHead (AudioPlayHead* newPlayHead) noexcept;
 
     //==============================================================================
+    /** This is called by the processor to specify its details before being played. */
+    void setPlayConfigDetails (int numIns, int numOuts, double sampleRate, int blockSize) noexcept;
+
+    //==============================================================================
     /** Not for public use - this is called before deleting an editor component. */
     void editorBeingDeleted (AudioProcessorEditor*) noexcept;
-
-    /** Not for public use - this is called to initialise the processor before playing. */
-    void setPlayConfigDetails (int numIns, int numOuts, double sampleRate, int blockSize) noexcept;
 
     /** Not for public use - this is called to initialise the processor before playing. */
     void setSpeakerArrangement (const String& inputs, const String& outputs);
