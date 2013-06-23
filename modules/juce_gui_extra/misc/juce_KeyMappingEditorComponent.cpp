@@ -229,7 +229,7 @@ public:
         addChildComponent (b);
     }
 
-    void paint (Graphics& g)
+    void paint (Graphics& g) override
     {
         g.setFont (getHeight() * 0.7f);
         g.setColour (findColour (KeyMappingEditorComponent::textColourId));
@@ -239,7 +239,7 @@ public:
                           Justification::centredLeft, true);
     }
 
-    void resized()
+    void resized() override
     {
         int x = getWidth() - 4;
 
@@ -296,7 +296,7 @@ public:
     bool mightContainSubItems()                 { return true; }
     int getItemHeight() const                   { return 28; }
 
-    void paintItem (Graphics& g, int width, int height)
+    void paintItem (Graphics& g, int width, int height) override
     {
         g.setFont (Font (height * 0.6f, Font::bold));
         g.setColour (owner.findColour (KeyMappingEditorComponent::textColourId));
@@ -306,7 +306,7 @@ public:
                     Justification::centredLeft, true);
     }
 
-    void itemOpennessChanged (bool isNowOpen)
+    void itemOpennessChanged (bool isNowOpen) override
     {
         if (isNowOpen)
         {
@@ -353,7 +353,7 @@ public:
     bool mightContainSubItems()             { return true; }
     String getUniqueName() const            { return "keys"; }
 
-    void changeListenerCallback (ChangeBroadcaster*)
+    void changeListenerCallback (ChangeBroadcaster*) override
     {
         const OpennessRestorer opennessRestorer (*this);
         clearSubItems();
@@ -380,7 +380,7 @@ public:
             owner->getMappings().resetToDefaultMappings();
     }
 
-    void buttonClicked (Button*)
+    void buttonClicked (Button*) override
     {
         AlertWindow::showOkCancelBox (AlertWindow::QuestionIcon,
                                       TRANS("Reset to defaults"),

@@ -1805,7 +1805,7 @@ private:
            #endif
         }
 
-        void timerCallback()
+        void timerCallback() override
         {
            #if JUCE_USE_XSHM
             if (shmPaintsPending != 0)

@@ -362,7 +362,7 @@ public:
         triggerAsyncUpdate();
     }
 
-    void handleAsyncUpdate()
+    void handleAsyncUpdate() override
     {
         setScreenPos (lastScreenPos, jmax (lastTime, Time::getCurrentTime()), true);
     }

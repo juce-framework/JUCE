@@ -230,7 +230,7 @@ private:
     typedef const ScopedPointer<InterProcessLock::ScopedLockType> ProcessScopedLock;
     InterProcessLock::ScopedLockType* createProcessLock() const;
 
-    void timerCallback();
+    void timerCallback() override;
     bool saveAsXml();
     bool saveAsBinary();
     bool loadAsXml();

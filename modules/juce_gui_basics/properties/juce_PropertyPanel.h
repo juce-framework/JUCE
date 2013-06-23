@@ -144,9 +144,9 @@ public:
 
     //==============================================================================
     /** @internal */
-    void paint (Graphics&);
+    void paint (Graphics&) override;
     /** @internal */
-    void resized();
+    void resized() override;
 
 private:
     class SectionComponent;

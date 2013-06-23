@@ -156,8 +156,8 @@ private:
     void updateHSV();
     void update();
     void sliderValueChanged (Slider*);
-    void paint (Graphics& g);
-    void resized();
+    void paint (Graphics&) override;
+    void resized() override;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ColourSelector)
 

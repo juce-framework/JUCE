@@ -194,7 +194,7 @@ private:
     void connectionLostInt();
     void deliverDataInt (const MemoryBlock&);
     bool readNextMessageInt();
-    void run();
+    void run() override;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (InterprocessConnection)
 };

@@ -789,35 +789,35 @@ public:
 
     //==============================================================================
     /** @internal */
-    void paint (Graphics& g);
+    void paint (Graphics&) override;
     /** @internal */
-    void resized();
+    void resized() override;
     /** @internal */
-    bool keyPressed (const KeyPress& key);
+    bool keyPressed (const KeyPress&) override;
     /** @internal */
-    void colourChanged();
+    void colourChanged() override;
     /** @internal */
-    void enablementChanged();
+    void enablementChanged() override;
     /** @internal */
-    bool isInterestedInFileDrag (const StringArray& files);
+    bool isInterestedInFileDrag (const StringArray& files) override;
     /** @internal */
-    void fileDragEnter (const StringArray& files, int x, int y);
+    void fileDragEnter (const StringArray& files, int x, int y) override;
     /** @internal */
-    void fileDragMove (const StringArray& files, int x, int y);
+    void fileDragMove (const StringArray& files, int x, int y) override;
     /** @internal */
-    void fileDragExit (const StringArray& files);
+    void fileDragExit (const StringArray& files) override;
     /** @internal */
-    void filesDropped (const StringArray& files, int x, int y);
+    void filesDropped (const StringArray& files, int x, int y) override;
     /** @internal */
-    bool isInterestedInDragSource (const SourceDetails&);
+    bool isInterestedInDragSource (const SourceDetails&) override;
     /** @internal */
-    void itemDragEnter (const SourceDetails&);
+    void itemDragEnter (const SourceDetails&) override;
     /** @internal */
-    void itemDragMove (const SourceDetails&);
+    void itemDragMove (const SourceDetails&) override;
     /** @internal */
-    void itemDragExit (const SourceDetails&);
+    void itemDragExit (const SourceDetails&) override;
     /** @internal */
-    void itemDropped (const SourceDetails&);
+    void itemDropped (const SourceDetails&) override;
 
 private:
     class ContentComponent;

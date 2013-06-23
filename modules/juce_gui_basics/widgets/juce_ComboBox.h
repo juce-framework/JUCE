@@ -339,37 +339,37 @@ public:
 
     //==============================================================================
     /** @internal */
-    void labelTextChanged (Label*);
+    void labelTextChanged (Label*) override;
     /** @internal */
-    void enablementChanged();
+    void enablementChanged() override;
     /** @internal */
-    void colourChanged();
+    void colourChanged() override;
     /** @internal */
-    void focusGained (Component::FocusChangeType cause);
+    void focusGained (Component::FocusChangeType) override;
     /** @internal */
-    void focusLost (Component::FocusChangeType cause);
+    void focusLost (Component::FocusChangeType) override;
     /** @internal */
-    void handleAsyncUpdate();
+    void handleAsyncUpdate() override;
     /** @internal */
-    String getTooltip()                                       { return label->getTooltip(); }
+    String getTooltip() override                        { return label->getTooltip(); }
     /** @internal */
-    void mouseDown (const MouseEvent&);
+    void mouseDown (const MouseEvent&) override;
     /** @internal */
-    void mouseDrag (const MouseEvent&);
+    void mouseDrag (const MouseEvent&) override;
     /** @internal */
-    void mouseUp (const MouseEvent&);
+    void mouseUp (const MouseEvent&) override;
     /** @internal */
-    void lookAndFeelChanged();
+    void lookAndFeelChanged() override;
     /** @internal */
-    void paint (Graphics&);
+    void paint (Graphics&) override;
     /** @internal */
-    void resized();
+    void resized() override;
     /** @internal */
-    bool keyStateChanged (bool isKeyDown);
+    bool keyStateChanged (bool) override;
     /** @internal */
-    bool keyPressed (const KeyPress&);
+    bool keyPressed (const KeyPress&) override;
     /** @internal */
-    void valueChanged (Value&);
+    void valueChanged (Value&) override;
 
 private:
     //==============================================================================

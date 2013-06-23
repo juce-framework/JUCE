@@ -160,15 +160,15 @@ public:
 
     //==============================================================================
     /** @internal */
-    void paintButton (Graphics&, bool isMouseOverButton, bool isButtonDown);
+    void paintButton (Graphics&, bool isMouseOverButton, bool isButtonDown) override;
     /** @internal */
-    void buttonStateChanged();
+    void buttonStateChanged() override;
     /** @internal */
-    void resized();
+    void resized() override;
     /** @internal */
-    void enablementChanged();
+    void enablementChanged() override;
     /** @internal */
-    void colourChanged();
+    void colourChanged() override;
 
 private:
     //==============================================================================

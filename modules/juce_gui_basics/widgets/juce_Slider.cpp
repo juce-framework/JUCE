@@ -329,7 +329,7 @@ public:
         }
     }
 
-    void handleAsyncUpdate()
+    void handleAsyncUpdate() override
     {
         cancelPendingUpdate();
 
@@ -1284,7 +1284,7 @@ public:
             repaint();
         }
 
-        void timerCallback()
+        void timerCallback() override
         {
             owner.pimpl->popupDisplay = nullptr;
         }

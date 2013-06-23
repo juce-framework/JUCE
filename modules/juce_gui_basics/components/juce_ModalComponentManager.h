@@ -127,7 +127,7 @@ protected:
     ~ModalComponentManager();
 
     /** @internal */
-    void handleAsyncUpdate();
+    void handleAsyncUpdate() override;
 
 private:
     //==============================================================================

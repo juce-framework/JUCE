@@ -60,14 +60,14 @@ public:
                                         are shown, with an "advanced" button that shows the rest of them
     */
     AudioDeviceSelectorComponent (AudioDeviceManager& deviceManager,
-                                  const int minAudioInputChannels,
-                                  const int maxAudioInputChannels,
-                                  const int minAudioOutputChannels,
-                                  const int maxAudioOutputChannels,
-                                  const bool showMidiInputOptions,
-                                  const bool showMidiOutputSelector,
-                                  const bool showChannelsAsStereoPairs,
-                                  const bool hideAdvancedOptionsWithButton);
+                                  int minAudioInputChannels,
+                                  int maxAudioInputChannels,
+                                  int minAudioOutputChannels,
+                                  int maxAudioOutputChannels,
+                                  bool showMidiInputOptions,
+                                  bool showMidiOutputSelector,
+                                  bool showChannelsAsStereoPairs,
+                                  bool hideAdvancedOptionsWithButton);
 
     /** Destructor */
     ~AudioDeviceSelectorComponent();
@@ -77,9 +77,9 @@ public:
 
     //==============================================================================
     /** @internal */
-    void resized();
+    void resized() override;
     /** @internal */
-    void childBoundsChanged (Component*);
+    void childBoundsChanged (Component*) override;
 
 private:
     //==============================================================================

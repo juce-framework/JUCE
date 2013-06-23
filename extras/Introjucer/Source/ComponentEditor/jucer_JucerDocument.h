@@ -163,7 +163,7 @@ private:
     ScopedPointer<XmlElement> currentXML;
     ScopedPointer<Timer> userDocChangeTimer;
 
-    void timerCallback();
+    void timerCallback() override;
     void codeDocumentTextInserted (const String& newText, int insertIndex);
     void codeDocumentTextDeleted (int startIndex, int endIndex);
     void userEditedCpp();

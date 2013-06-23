@@ -86,7 +86,7 @@ private:
     //==============================================================================
     ScopedPointer <StreamingSocket> socket;
 
-    void run();
+    void run() override;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (InterprocessConnectionServer)
 };

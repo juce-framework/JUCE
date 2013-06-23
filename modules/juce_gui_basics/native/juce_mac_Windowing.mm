@@ -72,7 +72,7 @@ private:
     const char* button2;
     const char* button3;
 
-    void handleAsyncUpdate()
+    void handleAsyncUpdate() override
     {
         const int result = getResult();
 
@@ -250,7 +250,7 @@ public:
         timerCallback();
     }
 
-    void timerCallback()
+    void timerCallback() override
     {
         if (Process::isForegroundProcess())
         {
@@ -291,7 +291,7 @@ public:
         timerCallback();
     }
 
-    void timerCallback()
+    void timerCallback() override
     {
         if (Process::isForegroundProcess())
             UpdateSystemActivity (1 /*UsrActivity*/);

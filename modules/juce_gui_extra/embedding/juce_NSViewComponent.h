@@ -71,8 +71,7 @@ public:
 
     //==============================================================================
     /** @internal */
-    void paint (Graphics& g);
-
+    void paint (Graphics&) override;
     /** @internal */
     static ReferenceCountedObject* attachViewToComponent (Component&, void*);
 

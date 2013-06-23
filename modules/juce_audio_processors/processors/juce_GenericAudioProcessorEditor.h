@@ -46,8 +46,8 @@ public:
     ~GenericAudioProcessorEditor();
 
     //==============================================================================
-    void paint (Graphics& g);
-    void resized();
+    void paint (Graphics&) override;
+    void resized() override;
 
 private:
     //==============================================================================

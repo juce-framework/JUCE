@@ -104,12 +104,12 @@ private:
     bool changedCompsSinceShown;
     String tipShowing, lastTipUnderMouse;
 
-    void paint (Graphics& g);
-    void mouseEnter (const MouseEvent& e);
-    void timerCallback();
+    void paint (Graphics&) override;
+    void mouseEnter (const MouseEvent&) override;
+    void timerCallback() override;
 
-    static String getTipFor (Component* c);
-    void showFor (const String& tip);
+    static String getTipFor (Component*);
+    void showFor (const String&);
     void hide();
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TooltipWindow)

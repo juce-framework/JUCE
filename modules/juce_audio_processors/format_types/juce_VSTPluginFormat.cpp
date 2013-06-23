@@ -1232,13 +1232,13 @@ public:
     void setCurrentProgramStateInformation (const void* data, int size) { loadFromFXBFile (data, size); }
 
     //==============================================================================
-    void timerCallback()
+    void timerCallback() override
     {
         if (dispatch (effIdle, 0, 0, 0, 0) == 0)
             stopTimer();
     }
 
-    void handleAsyncUpdate()
+    void handleAsyncUpdate() override
     {
         // indicates that something about the plugin has changed..
         updateHostDisplay();
@@ -2006,12 +2006,12 @@ public:
 
     //==============================================================================
    #if JUCE_MAC
-    void paint (Graphics& g)
+    void paint (Graphics& g) override
     {
         g.fillAll (Colours::black);
     }
    #else
-    void paint (Graphics& g)
+    void paint (Graphics& g) override
     {
         if (isOpen)
         {
@@ -2046,7 +2046,7 @@ public:
    #endif
 
     //==============================================================================
-    void timerCallback()
+    void timerCallback() override
     {
         if (isShowing())
         {

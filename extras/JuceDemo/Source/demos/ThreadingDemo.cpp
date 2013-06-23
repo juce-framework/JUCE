@@ -135,7 +135,7 @@ public:
         stopThread (2000);
     }
 
-    void run()
+    void run() override
     {
         // this is the code that runs this thread - we'll loop continuously,
         // updating the co-ordinates of our blob.

@@ -95,13 +95,13 @@ public:
 protected:
     //==============================================================================
     /** @internal */
-    void paint (Graphics& g);
+    void paint (Graphics&) override;
     /** @internal */
-    void lookAndFeelChanged();
+    void lookAndFeelChanged() override;
     /** @internal */
-    void visibilityChanged();
+    void visibilityChanged() override;
     /** @internal */
-    void colourChanged();
+    void colourChanged() override;
 
 private:
     double& progress;
@@ -110,7 +110,7 @@ private:
     String displayedMessage, currentMessage;
     uint32 lastCallbackTime;
 
-    void timerCallback();
+    void timerCallback() override;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ProgressBar)
 };

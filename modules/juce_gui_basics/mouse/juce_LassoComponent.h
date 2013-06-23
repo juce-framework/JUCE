@@ -207,7 +207,7 @@ public:
 
     //==============================================================================
     /** @internal */
-    void paint (Graphics& g)
+    void paint (Graphics& g) override
     {
         getLookAndFeel().drawLasso (g, *this);
 
@@ -218,7 +218,7 @@ public:
     }
 
     /** @internal */
-    bool hitTest (int, int)             { return false; }
+    bool hitTest (int, int) override        { return false; }
 
 private:
     //==============================================================================

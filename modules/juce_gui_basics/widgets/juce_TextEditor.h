@@ -588,39 +588,39 @@ public:
 
     //==============================================================================
     /** @internal */
-    void paint (Graphics&);
+    void paint (Graphics&) override;
     /** @internal */
-    void paintOverChildren (Graphics&);
+    void paintOverChildren (Graphics&) override;
     /** @internal */
-    void mouseDown (const MouseEvent&);
+    void mouseDown (const MouseEvent&) override;
     /** @internal */
-    void mouseUp (const MouseEvent&);
+    void mouseUp (const MouseEvent&) override;
     /** @internal */
-    void mouseDrag (const MouseEvent&);
+    void mouseDrag (const MouseEvent&) override;
     /** @internal */
-    void mouseDoubleClick (const MouseEvent&);
+    void mouseDoubleClick (const MouseEvent&) override;
     /** @internal */
-    void mouseWheelMove (const MouseEvent&, const MouseWheelDetails&);
+    void mouseWheelMove (const MouseEvent&, const MouseWheelDetails&) override;
     /** @internal */
-    bool keyPressed (const KeyPress&);
+    bool keyPressed (const KeyPress&) override;
     /** @internal */
-    bool keyStateChanged (bool isKeyDown);
+    bool keyStateChanged (bool) override;
     /** @internal */
-    void focusGained (FocusChangeType);
+    void focusGained (FocusChangeType) override;
     /** @internal */
-    void focusLost (FocusChangeType);
+    void focusLost (FocusChangeType) override;
     /** @internal */
-    void resized();
+    void resized() override;
     /** @internal */
-    void enablementChanged();
+    void enablementChanged() override;
     /** @internal */
-    void colourChanged();
+    void colourChanged() override;
     /** @internal */
-    void lookAndFeelChanged();
+    void lookAndFeelChanged() override;
     /** @internal */
-    bool isTextInputActive() const;
+    bool isTextInputActive() const override;
     /** @internal */
-    void setTemporaryUnderlining (const Array <Range<int> >&);
+    void setTemporaryUnderlining (const Array <Range<int> >&) override;
 
 protected:
     //==============================================================================

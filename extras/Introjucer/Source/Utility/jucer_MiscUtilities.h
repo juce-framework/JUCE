@@ -96,8 +96,8 @@ class RolloverHelpComp   : public Component,
 public:
     RolloverHelpComp();
 
-    void paint (Graphics& g);
-    void timerCallback();
+    void paint (Graphics&) override;
+    void timerCallback() override;
 
 private:
     Component* lastComp;

@@ -37,7 +37,7 @@ public:
         startTimer (1000 / 30);
     }
 
-    void timerCallback()
+    void timerCallback() override
     {
         // workaround for carbon windows not getting mouse-moves..
         const Point<int> screenPos (Desktop::getInstance().getMainMouseSource().getScreenPosition());

@@ -277,11 +277,11 @@ public:
 
     //==============================================================================
     /** @internal */
-    void paint (Graphics& g);
+    void paint (Graphics&) override;
     /** @internal */
-    void resized();
+    void resized() override;
     /** @internal */
-    void componentNameChanged (Component&);
+    void componentNameChanged (Component&) override;
 
 private:
     //==============================================================================

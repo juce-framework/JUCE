@@ -46,13 +46,13 @@ public:
         propertyComps.clear();
     }
 
-    void paint (Graphics& g)
+    void paint (Graphics& g) override
     {
         if (titleHeight > 0)
             getLookAndFeel().drawPropertyPanelSectionHeader (g, getName(), isOpen(), getWidth(), titleHeight);
     }
 
-    void resized()
+    void resized() override
     {
         int y = titleHeight;
 
@@ -102,7 +102,7 @@ public:
             propertyComps.getUnchecked (i)->refresh();
     }
 
-    void mouseUp (const MouseEvent& e)
+    void mouseUp (const MouseEvent& e) override
     {
         if (e.getMouseDownX() < titleHeight
              && e.x < titleHeight
@@ -113,7 +113,7 @@ public:
         }
     }
 
-    void mouseDoubleClick (const MouseEvent& e)
+    void mouseDoubleClick (const MouseEvent& e) override
     {
         if (e.y < titleHeight)
             setOpen (! isOpen());
@@ -133,7 +133,7 @@ class PropertyPanel::PropertyHolderComponent  : public Component
 public:
     PropertyHolderComponent() {}
 
-    void paint (Graphics&) {}
+    void paint (Graphics&) override {}
 
     void updateLayout (int width)
     {

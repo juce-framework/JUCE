@@ -83,17 +83,17 @@ public:
 
     //==============================================================================
     /** @internal */
-    void paint (Graphics& g);
+    void paint (Graphics&) override;
     /** @internal */
-    bool hitTest (int x, int y);
+    bool hitTest (int x, int y) override;
     /** @internal */
-    Drawable* createCopy() const;
+    Drawable* createCopy() const override;
     /** @internal */
-    Rectangle<float> getDrawableBounds() const;
+    Rectangle<float> getDrawableBounds() const override;
     /** @internal */
     void refreshFromValueTree (const ValueTree& tree, ComponentBuilder& builder);
     /** @internal */
-    ValueTree createValueTree (ComponentBuilder::ImageProvider* imageProvider) const;
+    ValueTree createValueTree (ComponentBuilder::ImageProvider* imageProvider) const override;
     /** @internal */
     static const Identifier valueTreeType;
 

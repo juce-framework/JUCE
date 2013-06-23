@@ -264,35 +264,35 @@ public:
 
     //==============================================================================
     /** @internal */
-    void paint (Graphics&);
+    void paint (Graphics&) override;
     /** @internal */
-    void resized();
+    void resized() override;
     /** @internal */
-    void mouseMove (const MouseEvent&);
+    void mouseMove (const MouseEvent&) override;
     /** @internal */
-    void mouseDrag (const MouseEvent&);
+    void mouseDrag (const MouseEvent&) override;
     /** @internal */
-    void mouseDown (const MouseEvent&);
+    void mouseDown (const MouseEvent&) override;
     /** @internal */
-    void mouseUp (const MouseEvent&);
+    void mouseUp (const MouseEvent&) override;
     /** @internal */
-    void mouseEnter (const MouseEvent&);
+    void mouseEnter (const MouseEvent&) override;
     /** @internal */
-    void mouseExit (const MouseEvent&);
+    void mouseExit (const MouseEvent&) override;
     /** @internal */
-    void mouseWheelMove (const MouseEvent&, const MouseWheelDetails&);
+    void mouseWheelMove (const MouseEvent&, const MouseWheelDetails&) override;
     /** @internal */
-    void timerCallback();
+    void timerCallback() override;
     /** @internal */
-    bool keyStateChanged (bool isKeyDown);
+    bool keyStateChanged (bool isKeyDown) override;
     /** @internal */
-    void focusLost (FocusChangeType);
+    void focusLost (FocusChangeType) override;
     /** @internal */
-    void handleNoteOn (MidiKeyboardState*, int midiChannel, int midiNoteNumber, float velocity);
+    void handleNoteOn (MidiKeyboardState*, int midiChannel, int midiNoteNumber, float velocity) override;
     /** @internal */
-    void handleNoteOff (MidiKeyboardState*, int midiChannel, int midiNoteNumber);
+    void handleNoteOff (MidiKeyboardState*, int midiChannel, int midiNoteNumber) override;
     /** @internal */
-    void colourChanged();
+    void colourChanged() override;
 
 protected:
     //==============================================================================

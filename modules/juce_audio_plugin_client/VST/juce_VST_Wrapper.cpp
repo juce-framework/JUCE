@@ -280,7 +280,7 @@ public:
         clearSingletonInstance();
     }
 
-    void run()
+    void run() override
     {
         initialiseJuce_GUI();
         initialised = true;
@@ -1038,7 +1038,7 @@ public:
         return 0;
     }
 
-    void timerCallback()
+    void timerCallback() override
     {
         if (shouldDeleteEditor)
         {
@@ -1353,9 +1353,9 @@ public:
                                  // have been transferred to another parent which takes over ownership.
         }
 
-        void paint (Graphics&) {}
+        void paint (Graphics&) override {}
 
-        void paintOverChildren (Graphics&)
+        void paintOverChildren (Graphics&) override
         {
             // this causes an async call to masterIdle() to help
             // creaky old DAWs like Nuendo repaint themselves while we're
@@ -1365,7 +1365,7 @@ public:
         }
 
        #if JUCE_MAC
-        bool keyPressed (const KeyPress&)
+        bool keyPressed (const KeyPress&) override
         {
             // If we have an unused keypress, move the key-focus to a host window
             // and re-inject the event..
@@ -1378,13 +1378,13 @@ public:
             return dynamic_cast <AudioProcessorEditor*> (getChildComponent (0));
         }
 
-        void resized()
+        void resized() override
         {
             if (Component* const editor = getChildComponent(0))
                 editor->setBounds (getLocalBounds());
         }
 
-        void childBoundsChanged (Component* child)
+        void childBoundsChanged (Component* child) override
         {
             child->setTopLeftPosition (0, 0);
 
@@ -1408,18 +1408,18 @@ public:
            #endif
         }
 
-        void handleAsyncUpdate()
+        void handleAsyncUpdate() override
         {
             wrapper.tryMasterIdle();
         }
 
        #if JUCE_WINDOWS
-        void mouseDown (const MouseEvent&)
+        void mouseDown (const MouseEvent&) override
         {
             broughtToFront();
         }
 
-        void broughtToFront()
+        void broughtToFront() override
         {
             // for hosts like nuendo, need to also pop the MDI container to the
             // front when our comp is clicked on.

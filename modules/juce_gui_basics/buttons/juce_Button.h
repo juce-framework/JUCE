@@ -404,43 +404,43 @@ protected:
     /** @internal */
     virtual void internalClickCallback (const ModifierKeys&);
     /** @internal */
-    void handleCommandMessage (int commandId);
+    void handleCommandMessage (int commandId) override;
     /** @internal */
-    void mouseEnter (const MouseEvent&);
+    void mouseEnter (const MouseEvent&) override;
     /** @internal */
-    void mouseExit (const MouseEvent&);
+    void mouseExit (const MouseEvent&) override;
     /** @internal */
-    void mouseDown (const MouseEvent&);
+    void mouseDown (const MouseEvent&) override;
     /** @internal */
-    void mouseDrag (const MouseEvent&);
+    void mouseDrag (const MouseEvent&) override;
     /** @internal */
-    void mouseUp (const MouseEvent&);
+    void mouseUp (const MouseEvent&) override;
     /** @internal */
-    bool keyPressed (const KeyPress&);
+    bool keyPressed (const KeyPress&) override;
     /** @internal */
-    bool keyPressed (const KeyPress&, Component*);
+    bool keyPressed (const KeyPress&, Component*) override;
     /** @internal */
-    bool keyStateChanged (bool isKeyDown, Component*);
+    bool keyStateChanged (bool isKeyDown, Component*) override;
     /** @internal */
     using Component::keyStateChanged;
     /** @internal */
-    void paint (Graphics&);
+    void paint (Graphics&) override;
     /** @internal */
-    void parentHierarchyChanged();
+    void parentHierarchyChanged() override;
     /** @internal */
-    void visibilityChanged();
+    void visibilityChanged() override;
     /** @internal */
-    void focusGained (FocusChangeType);
+    void focusGained (FocusChangeType) override;
     /** @internal */
-    void focusLost (FocusChangeType);
+    void focusLost (FocusChangeType) override;
     /** @internal */
-    void enablementChanged();
+    void enablementChanged() override;
     /** @internal */
-    void applicationCommandInvoked (const ApplicationCommandTarget::InvocationInfo&);
+    void applicationCommandInvoked (const ApplicationCommandTarget::InvocationInfo&) override;
     /** @internal */
-    void applicationCommandListChanged();
+    void applicationCommandListChanged() override;
     /** @internal */
-    void valueChanged (Value&);
+    void valueChanged (Value&) override;
 
 private:
     //==============================================================================

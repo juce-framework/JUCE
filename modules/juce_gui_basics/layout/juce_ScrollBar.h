@@ -296,21 +296,21 @@ public:
 
     //==============================================================================
     /** @internal */
-    bool keyPressed (const KeyPress&);
+    bool keyPressed (const KeyPress&) override;
     /** @internal */
-    void mouseWheelMove (const MouseEvent&, const MouseWheelDetails&);
+    void mouseWheelMove (const MouseEvent&, const MouseWheelDetails&) override;
     /** @internal */
-    void lookAndFeelChanged();
+    void lookAndFeelChanged() override;
     /** @internal */
-    void mouseDown (const MouseEvent&);
+    void mouseDown (const MouseEvent&) override;
     /** @internal */
-    void mouseDrag (const MouseEvent&);
+    void mouseDrag (const MouseEvent&) override;
     /** @internal */
-    void mouseUp   (const MouseEvent&);
+    void mouseUp   (const MouseEvent&) override;
     /** @internal */
-    void paint (Graphics&);
+    void paint (Graphics&) override;
     /** @internal */
-    void resized();
+    void resized() override;
 
 private:
     //==============================================================================
@@ -325,9 +325,9 @@ private:
     ScopedPointer<ScrollbarButton> upButton, downButton;
     ListenerList <Listener> listeners;
 
-    void handleAsyncUpdate();
+    void handleAsyncUpdate() override;
     void updateThumbPosition();
-    void timerCallback();
+    void timerCallback() override;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ScrollBar)
 };

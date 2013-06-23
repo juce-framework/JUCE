@@ -1453,7 +1453,7 @@ public:
                      the source component in which it occurred
         @see mouseEnter, mouseExit, mouseDrag, contains
     */
-    virtual void mouseMove (const MouseEvent& event);
+    virtual void mouseMove (const MouseEvent& event) override;
 
     /** Called when the mouse first enters a component.
 
@@ -1469,7 +1469,7 @@ public:
                      the source component in which it occurred
         @see mouseExit, mouseDrag, mouseMove, contains
     */
-    virtual void mouseEnter (const MouseEvent& event);
+    virtual void mouseEnter (const MouseEvent& event) override;
 
     /** Called when the mouse moves out of a component.
 
@@ -1484,7 +1484,7 @@ public:
                       the source component in which it occurred
         @see mouseEnter, mouseDrag, mouseMove, contains
     */
-    virtual void mouseExit (const MouseEvent& event);
+    virtual void mouseExit (const MouseEvent& event) override;
 
     /** Called when a mouse button is pressed.
 
@@ -1499,7 +1499,7 @@ public:
                       the source component in which it occurred
         @see mouseUp, mouseDrag, mouseDoubleClick, contains
     */
-    virtual void mouseDown (const MouseEvent& event);
+    virtual void mouseDown (const MouseEvent& event) override;
 
     /** Called when the mouse is moved while a button is held down.
 
@@ -1511,7 +1511,7 @@ public:
                       the source component in which it occurred
         @see mouseDown, mouseUp, mouseMove, contains, setDragRepeatInterval
     */
-    virtual void mouseDrag (const MouseEvent& event);
+    virtual void mouseDrag (const MouseEvent& event) override;
 
     /** Called when a mouse button is released.
 
@@ -1526,7 +1526,7 @@ public:
                       the source component in which it occurred
         @see mouseDown, mouseDrag, mouseDoubleClick, contains
     */
-    virtual void mouseUp (const MouseEvent& event);
+    virtual void mouseUp (const MouseEvent& event) override;
 
     /** Called when a mouse button has been double-clicked on a component.
 
@@ -1538,7 +1538,7 @@ public:
                       the source component in which it occurred
         @see mouseDown, mouseUp
     */
-    virtual void mouseDoubleClick (const MouseEvent& event);
+    virtual void mouseDoubleClick (const MouseEvent& event) override;
 
     /** Called when the mouse-wheel is moved.
 
@@ -1556,7 +1556,7 @@ public:
         @param wheel   details about the mouse wheel movement
     */
     virtual void mouseWheelMove (const MouseEvent& event,
-                                 const MouseWheelDetails& wheel);
+                                 const MouseWheelDetails& wheel) override;
 
     /** Called when a pinch-to-zoom mouse-gesture is used.
 

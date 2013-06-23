@@ -235,7 +235,7 @@ public:
             }
         }
 
-        void timerCallback()
+        void timerCallback() override
         {
             if (! juce::Component::isMouseButtonDownAnywhere())
             {
@@ -499,7 +499,7 @@ protected:
         midiEvents.ensureSize (2048);
     }
 
-    void handleAsyncUpdate()
+    void handleAsyncUpdate() override
     {
         if (! prepared)
         {

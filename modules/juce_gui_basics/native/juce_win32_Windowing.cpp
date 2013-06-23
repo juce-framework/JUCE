@@ -1123,7 +1123,7 @@ private:
             return image;
         }
 
-        void timerCallback()
+        void timerCallback() override
         {
             stopTimer();
             image = Image::null;
@@ -2923,7 +2923,7 @@ public:
         return (r == IDYES || r == IDOK) ? 1 : (r == IDNO ? 2 : 0);
     }
 
-    void handleAsyncUpdate()
+    void handleAsyncUpdate() override
     {
         const int result = getResult();
 
@@ -3040,7 +3040,7 @@ public:
         timerCallback();
     }
 
-    void timerCallback()
+    void timerCallback() override
     {
         if (Process::isForegroundProcess())
         {

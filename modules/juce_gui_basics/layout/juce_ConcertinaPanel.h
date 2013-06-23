@@ -93,7 +93,7 @@ public:
     void setPanelHeaderSize (Component* panelComponent, int headerSize);
 
 private:
-    void resized();
+    void resized() override;
 
     class PanelHolder;
     struct PanelSizes;

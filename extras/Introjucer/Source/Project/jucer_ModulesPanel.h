@@ -490,7 +490,7 @@ public:
             refresh();
         }
 
-        void timerCallback()
+        void timerCallback() override
         {
             refresh();
         }

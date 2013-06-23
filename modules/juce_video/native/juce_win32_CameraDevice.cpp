@@ -449,7 +449,7 @@ public:
             owner = nullptr;
         }
 
-        void paint (Graphics& g)
+        void paint (Graphics& g) override
         {
             g.setColour (Colours::black);
             g.setImageResamplingQuality (Graphics::lowResamplingQuality);
@@ -460,7 +460,7 @@ public:
                 g.fillAll (Colours::black);
         }
 
-        void changeListenerCallback (ChangeBroadcaster*)
+        void changeListenerCallback (ChangeBroadcaster*) override
         {
             const int64 now = Time::currentTimeMillis();
 

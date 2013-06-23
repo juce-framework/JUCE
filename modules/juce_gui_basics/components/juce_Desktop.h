@@ -411,7 +411,7 @@ private:
 
     ComponentAnimator animator;
 
-    void timerCallback();
+    void timerCallback() override;
     void resetTimer();
     ListenerList <MouseListener>& getMouseListeners();
 
@@ -422,7 +422,7 @@ private:
     void setKioskComponent (Component*, bool enableOrDisable, bool allowMenusAndBars);
 
     void triggerFocusCallback();
-    void handleAsyncUpdate();
+    void handleAsyncUpdate() override;
 
     Desktop();
     ~Desktop();

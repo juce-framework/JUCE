@@ -179,33 +179,33 @@ public:
 
     //==============================================================================
     /** @internal */
-    void resized();
+    void resized() override;
     /** @internal */
-    void buttonClicked (Button*);
+    void buttonClicked (Button*) override;
     /** @internal */
-    void comboBoxChanged (ComboBox*);
+    void comboBoxChanged (ComboBox*) override;
     /** @internal */
-    void textEditorTextChanged (TextEditor&);
+    void textEditorTextChanged (TextEditor&) override;
     /** @internal */
-    void textEditorReturnKeyPressed (TextEditor&);
+    void textEditorReturnKeyPressed (TextEditor&) override;
     /** @internal */
-    void textEditorEscapeKeyPressed (TextEditor&);
+    void textEditorEscapeKeyPressed (TextEditor&) override;
     /** @internal */
-    void textEditorFocusLost (TextEditor&);
+    void textEditorFocusLost (TextEditor&) override;
     /** @internal */
-    bool keyPressed (const KeyPress&);
+    bool keyPressed (const KeyPress&) override;
     /** @internal */
-    void selectionChanged();
+    void selectionChanged() override;
     /** @internal */
-    void fileClicked (const File&, const MouseEvent&);
+    void fileClicked (const File&, const MouseEvent&) override;
     /** @internal */
-    void fileDoubleClicked (const File&);
+    void fileDoubleClicked (const File&) override;
     /** @internal */
-    void browserRootChanged (const File&);
+    void browserRootChanged (const File&) override;
     /** @internal */
-    bool isFileSuitable (const File&) const;
+    bool isFileSuitable (const File&) const override;
     /** @internal */
-    bool isDirectorySuitable (const File&) const;
+    bool isDirectorySuitable (const File&) const override;
 
     /** @internal */
     FilePreviewComponent* getPreviewComponent() const noexcept;

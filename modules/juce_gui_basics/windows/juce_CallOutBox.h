@@ -116,21 +116,21 @@ public:
 
     //==============================================================================
     /** @internal */
-    void paint (Graphics& g);
+    void paint (Graphics&) override;
     /** @internal */
-    void resized();
+    void resized() override;
     /** @internal */
-    void moved();
+    void moved() override;
     /** @internal */
-    void childBoundsChanged (Component*);
+    void childBoundsChanged (Component*) override;
     /** @internal */
-    bool hitTest (int x, int y);
+    bool hitTest (int x, int y) override;
     /** @internal */
-    void inputAttemptWhenModal();
+    void inputAttemptWhenModal() override;
     /** @internal */
-    bool keyPressed (const KeyPress& key);
+    bool keyPressed (const KeyPress&) override;
     /** @internal */
-    void handleCommandMessage (int commandId);
+    void handleCommandMessage (int commandId) override;
 
 private:
     //==============================================================================

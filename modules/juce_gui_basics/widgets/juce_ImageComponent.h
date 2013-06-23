@@ -64,11 +64,11 @@ public:
     void setImagePlacement (const RectanglePlacement& newPlacement);
 
     /** Returns the current image placement. */
-    const RectanglePlacement getImagePlacement() const;
+    RectanglePlacement getImagePlacement() const;
 
     //==============================================================================
     /** @internal */
-    void paint (Graphics& g);
+    void paint (Graphics&) override;
 
 private:
     Image image;

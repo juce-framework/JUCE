@@ -400,7 +400,7 @@ public:
         startTimer (500);
     }
 
-    void timerCallback()
+    void timerCallback() override
     {
         stopTimer();
         commandManager->invoke (info, true);

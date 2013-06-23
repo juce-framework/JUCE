@@ -321,27 +321,27 @@ public:
 protected:
     //==============================================================================
     /** @internal */
-    void paint (Graphics& g);
+    void paint (Graphics&) override;
     /** (if overriding this, make sure you call ResizableWindow::moved() in your subclass) */
-    void moved();
+    void moved() override;
     /** (if overriding this, make sure you call ResizableWindow::resized() in your subclass) */
-    void resized();
+    void resized() override;
     /** @internal */
-    void mouseDown (const MouseEvent& e);
+    void mouseDown (const MouseEvent&) override;
     /** @internal */
-    void mouseDrag (const MouseEvent& e);
+    void mouseDrag (const MouseEvent&) override;
     /** @internal */
-    void lookAndFeelChanged();
+    void lookAndFeelChanged() override;
     /** @internal */
-    void childBoundsChanged (Component* child);
+    void childBoundsChanged (Component*) override;
     /** @internal */
-    void parentSizeChanged();
+    void parentSizeChanged() override;
     /** @internal */
-    void visibilityChanged();
+    void visibilityChanged() override;
     /** @internal */
-    void activeWindowStatusChanged();
+    void activeWindowStatusChanged() override;
     /** @internal */
-    int getDesktopWindowStyleFlags() const;
+    int getDesktopWindowStyleFlags() const override;
 
    #if JUCE_DEBUG
     /** Overridden to warn people about adding components directly to this component

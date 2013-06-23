@@ -30,7 +30,7 @@ public:
     {
     }
 
-    void paint (Graphics& g)
+    void paint (Graphics& g) override
     {
         if (TableListBoxModel* const tableModel = owner.getModel())
         {
@@ -105,7 +105,7 @@ public:
         }
     }
 
-    void resized()
+    void resized() override
     {
         for (int i = columnComponents.size(); --i >= 0;)
             resizeCustomComp (i);
@@ -118,7 +118,7 @@ public:
                             .withY (0).withHeight (getHeight()));
     }
 
-    void mouseDown (const MouseEvent& e)
+    void mouseDown (const MouseEvent& e) override
     {
         isDragging = false;
         selectRowOnMouseUp = false;
@@ -142,7 +142,7 @@ public:
         }
     }
 
-    void mouseDrag (const MouseEvent& e)
+    void mouseDrag (const MouseEvent& e) override
     {
         if (isEnabled() && owner.getModel() != nullptr && ! (e.mouseWasClicked() || isDragging))
         {
@@ -161,7 +161,7 @@ public:
         }
     }
 
-    void mouseUp (const MouseEvent& e)
+    void mouseUp (const MouseEvent& e) override
     {
         if (selectRowOnMouseUp && e.mouseWasClicked() && isEnabled())
         {
@@ -175,7 +175,7 @@ public:
         }
     }
 
-    void mouseDoubleClick (const MouseEvent& e)
+    void mouseDoubleClick (const MouseEvent& e) override
     {
         const int columnId = owner.getHeader().getColumnIdAtX (e.x);
 
@@ -184,7 +184,7 @@ public:
                 m->cellDoubleClicked (row, columnId, e);
     }
 
-    String getTooltip()
+    String getTooltip() override
     {
         const int columnId = owner.getHeader().getColumnIdAtX (getMouseXYRelative().getX());
 

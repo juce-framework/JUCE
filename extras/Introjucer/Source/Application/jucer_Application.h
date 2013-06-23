@@ -595,7 +595,7 @@ private:
     public:
         AsyncQuitRetrier()   { startTimer (500); }
 
-        void timerCallback()
+        void timerCallback() override
         {
             stopTimer();
             delete this;

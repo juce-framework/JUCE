@@ -230,25 +230,25 @@ public:
     //==============================================================================
    #ifndef DOXYGEN
     /** @internal */
-    void paint (Graphics&);
+    void paint (Graphics&) override;
     /** @internal */
-    void resized();
+    void resized() override;
     /** @internal */
-    void lookAndFeelChanged();
+    void lookAndFeelChanged() override;
     /** @internal */
-    BorderSize<int> getBorderThickness();
+    BorderSize<int> getBorderThickness() override;
     /** @internal */
-    BorderSize<int> getContentComponentBorder();
+    BorderSize<int> getContentComponentBorder() override;
     /** @internal */
-    void mouseDoubleClick (const MouseEvent&);
+    void mouseDoubleClick (const MouseEvent&) override;
     /** @internal */
-    void userTriedToCloseWindow();
+    void userTriedToCloseWindow() override;
     /** @internal */
-    void activeWindowStatusChanged();
+    void activeWindowStatusChanged() override;
     /** @internal */
-    int getDesktopWindowStyleFlags() const;
+    int getDesktopWindowStyleFlags() const override;
     /** @internal */
-    void parentHierarchyChanged();
+    void parentHierarchyChanged() override;
     /** @internal */
     Rectangle<int> getTitleBarArea();
    #endif

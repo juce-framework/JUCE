@@ -307,7 +307,7 @@ struct AppearanceEditor
             getLookAndFeel().drawSpinningWaitAnimation (g, Colours::white, (getWidth() - size) / 2, getHeight() / 2 - 50, size, size);
         }
 
-        void timerCallback()
+        void timerCallback() override
         {
             repaint();
 

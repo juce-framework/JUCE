@@ -48,11 +48,11 @@ public:
 
     //==============================================================================
     /** @internal */
-    void selectedFileChanged (const File& newSelectedFile);
+    void selectedFileChanged (const File& newSelectedFile) override;
     /** @internal */
-    void paint (Graphics& g);
+    void paint (Graphics&) override;
     /** @internal */
-    void timerCallback();
+    void timerCallback() override;
 
 private:
     File fileToLoad;

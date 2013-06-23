@@ -250,9 +250,9 @@ public:
 protected:
     //==============================================================================
     /** @internal */
-    void resized();
+    void resized() override;
     /** @internal */
-    bool keyPressed (const KeyPress&);
+    bool keyPressed (const KeyPress&) override;
 
 private:
     bool escapeKeyTriggersCloseButton;

@@ -127,11 +127,11 @@ public:
 
     //==============================================================================
     /** @internal */
-    void resized();
+    void resized() override;
     /** @internal */
-    void paint (Graphics& g);
+    void paint (Graphics&) override;
     /** @internal */
-    void buttonClicked (Button* button);
+    void buttonClicked (Button*) override;
 
 private:
     //==============================================================================

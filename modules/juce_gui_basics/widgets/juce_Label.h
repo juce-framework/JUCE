@@ -274,39 +274,39 @@ protected:
 
     //==============================================================================
     /** @internal */
-    void paint (Graphics&);
+    void paint (Graphics&) override;
     /** @internal */
-    void resized();
+    void resized() override;
     /** @internal */
-    void mouseUp (const MouseEvent&);
+    void mouseUp (const MouseEvent&) override;
     /** @internal */
-    void mouseDoubleClick (const MouseEvent&);
+    void mouseDoubleClick (const MouseEvent&) override;
     /** @internal */
-    void componentMovedOrResized (Component&, bool wasMoved, bool wasResized);
+    void componentMovedOrResized (Component&, bool wasMoved, bool wasResized) override;
     /** @internal */
-    void componentParentHierarchyChanged (Component&);
+    void componentParentHierarchyChanged (Component&) override;
     /** @internal */
-    void componentVisibilityChanged (Component&);
+    void componentVisibilityChanged (Component&) override;
     /** @internal */
-    void inputAttemptWhenModal();
+    void inputAttemptWhenModal() override;
     /** @internal */
-    void focusGained (FocusChangeType);
+    void focusGained (FocusChangeType) override;
     /** @internal */
-    void enablementChanged();
+    void enablementChanged() override;
     /** @internal */
-    KeyboardFocusTraverser* createFocusTraverser();
+    KeyboardFocusTraverser* createFocusTraverser() override;
     /** @internal */
-    void textEditorTextChanged (TextEditor&);
+    void textEditorTextChanged (TextEditor&) override;
     /** @internal */
-    void textEditorReturnKeyPressed (TextEditor&);
+    void textEditorReturnKeyPressed (TextEditor&) override;
     /** @internal */
-    void textEditorEscapeKeyPressed (TextEditor&);
+    void textEditorEscapeKeyPressed (TextEditor&) override;
     /** @internal */
-    void textEditorFocusLost (TextEditor&);
+    void textEditorFocusLost (TextEditor&) override;
     /** @internal */
-    void colourChanged();
+    void colourChanged() override;
     /** @internal */
-    void valueChanged (Value&);
+    void valueChanged (Value&) override;
     /** @internal */
     void callChangeListeners();
 

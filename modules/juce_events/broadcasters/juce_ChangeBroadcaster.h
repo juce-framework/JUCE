@@ -91,7 +91,7 @@ private:
     {
     public:
         ChangeBroadcasterCallback();
-        void handleAsyncUpdate();
+        void handleAsyncUpdate() override;
 
         ChangeBroadcaster* owner;
     };

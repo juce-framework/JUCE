@@ -157,17 +157,17 @@ public:
         setInterceptsMouseClicks (false, false);
     }
 
-    void paint (Graphics& g)
+    void paint (Graphics& g) override
     {
         getLookAndFeel().drawTabAreaBehindFrontButton (owner, g, getWidth(), getHeight());
     }
 
-    void enablementChanged()
+    void enablementChanged() override
     {
         repaint();
     }
 
-    void buttonClicked (Button*)
+    void buttonClicked (Button*) override
     {
         owner.showExtraItemsMenu();
     }

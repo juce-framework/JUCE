@@ -1286,23 +1286,23 @@ public:
 
     bool isValid() const        { return wrapper.getView() != nil; }
 
-    void paint (Graphics& g)
+    void paint (Graphics& g) override
     {
         g.fillAll (Colours::white);
     }
 
-    void resized()
+    void resized() override
     {
         wrapper.setSize (getWidth(), getHeight());
     }
 
-    void timerCallback()
+    void timerCallback() override
     {
         wrapper.resizeToFitView();
         startTimer (jmin (713, getTimerInterval() + 51));
     }
 
-    void childBoundsChanged (Component* child)
+    void childBoundsChanged (Component* child) override
     {
         setSize (wrapper.getWidth(), wrapper.getHeight());
         startTimer (70);
@@ -1424,20 +1424,20 @@ public:
     bool isValid() const noexcept           { return audioComponent != nullptr; }
 
     //==============================================================================
-    void paint (Graphics& g)
+    void paint (Graphics& g) override
     {
         g.fillAll (Colours::black);
     }
 
-    void resized()
+    void resized() override
     {
         if (innerWrapper != nullptr)
             innerWrapper->setSize (getWidth(), getHeight());
     }
 
     //==============================================================================
-    bool keyStateChanged (bool)         { return false; }
-    bool keyPressed (const KeyPress&)   { return false; }
+    bool keyStateChanged (bool) override         { return false; }
+    bool keyPressed (const KeyPress&) override   { return false; }
 
     //==============================================================================
     AudioUnit getAudioUnit() const      { return plugin.audioUnit; }

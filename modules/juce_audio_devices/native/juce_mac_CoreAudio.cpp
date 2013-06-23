@@ -759,7 +759,7 @@ public:
             startTimer (100);
     }
 
-    void timerCallback()
+    void timerCallback() override
     {
         stopTimer();
         JUCE_COREAUDIOLOG ("CoreAudio device changed callback");

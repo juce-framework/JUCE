@@ -145,11 +145,11 @@ public:
     };
 
     /** @internal */
-    Rectangle<float> getDrawableBounds() const;
+    Rectangle<float> getDrawableBounds() const override;
     /** @internal */
-    void paint (Graphics& g);
+    void paint (Graphics&) override;
     /** @internal */
-    bool hitTest (int x, int y);
+    bool hitTest (int x, int y) override;
 
 protected:
     //==============================================================================

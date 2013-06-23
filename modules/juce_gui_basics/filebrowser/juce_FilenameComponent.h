@@ -180,19 +180,19 @@ public:
 
     //==============================================================================
     /** @internal */
-    void paintOverChildren (Graphics& g);
+    void paintOverChildren (Graphics&) override;
     /** @internal */
-    void resized();
+    void resized() override;
     /** @internal */
-    void lookAndFeelChanged();
+    void lookAndFeelChanged() override;
     /** @internal */
-    bool isInterestedInFileDrag (const StringArray& files);
+    bool isInterestedInFileDrag (const StringArray&) override;
     /** @internal */
-    void filesDropped (const StringArray& files, int, int);
+    void filesDropped (const StringArray&, int, int) override;
     /** @internal */
-    void fileDragEnter (const StringArray& files, int, int);
+    void fileDragEnter (const StringArray&, int, int) override;
     /** @internal */
-    void fileDragExit (const StringArray& files);
+    void fileDragExit (const StringArray&) override;
 
 private:
     //==============================================================================
@@ -205,9 +205,9 @@ private:
     ListenerList <FilenameComponentListener> listeners;
     File defaultBrowseFile;
 
-    void comboBoxChanged (ComboBox*);
-    void buttonClicked (Button* button);
-    void handleAsyncUpdate();
+    void comboBoxChanged (ComboBox*) override;
+    void buttonClicked (Button* button) override;
+    void handleAsyncUpdate() override;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FilenameComponent)
 };

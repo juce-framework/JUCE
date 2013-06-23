@@ -79,11 +79,11 @@ public:
 
     //==============================================================================
     /** @internal */
-    void paint (Graphics& g);
+    void paint (Graphics&) override;
     /** @internal */
-    void refresh();
+    void refresh() override;
     /** @internal */
-    void buttonClicked (Button*);
+    void buttonClicked (Button*) override;
 
 private:
     ToggleButton button;

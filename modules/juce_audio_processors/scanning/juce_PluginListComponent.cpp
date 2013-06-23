@@ -351,7 +351,7 @@ private:
                                                : StringArray());
     }
 
-    void timerCallback()
+    void timerCallback() override
     {
         if (pool == nullptr)
         {

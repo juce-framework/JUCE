@@ -80,28 +80,27 @@ public:
 
     //==============================================================================
     /** @internal */
-    int getNumRows();
+    int getNumRows() override;
     /** @internal */
-    void paintListBoxItem (int rowNumber, Graphics& g, int width, int height, bool rowIsSelected);
+    void paintListBoxItem (int rowNumber, Graphics& g, int width, int height, bool rowIsSelected) override;
     /** @internal */
-    void deleteKeyPressed (int lastRowSelected);
+    void deleteKeyPressed (int lastRowSelected) override;
     /** @internal */
-    void returnKeyPressed (int lastRowSelected);
+    void returnKeyPressed (int lastRowSelected) override;
     /** @internal */
-    void listBoxItemDoubleClicked (int row, const MouseEvent&);
+    void listBoxItemDoubleClicked (int row, const MouseEvent&) override;
     /** @internal */
-    void selectedRowsChanged (int lastRowSelected);
+    void selectedRowsChanged (int lastRowSelected) override;
     /** @internal */
-    void resized();
+    void resized() override;
     /** @internal */
-    void paint (Graphics& g);
+    void paint (Graphics&) override;
     /** @internal */
-    bool isInterestedInFileDrag (const StringArray& files);
+    bool isInterestedInFileDrag (const StringArray&) override;
     /** @internal */
-    void filesDropped (const StringArray& files, int, int);
+    void filesDropped (const StringArray& files, int, int) override;
     /** @internal */
-    void buttonClicked (Button* button);
-
+    void buttonClicked (Button*) override;
 
 private:
     //==============================================================================

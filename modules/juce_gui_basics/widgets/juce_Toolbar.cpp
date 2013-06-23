@@ -57,11 +57,11 @@ public:
         return true;
     }
 
-    void paintButtonArea (Graphics&, int, int, bool, bool)
+    void paintButtonArea (Graphics&, int, int, bool, bool) override
     {
     }
 
-    void contentAreaChanged (const Rectangle<int>&)
+    void contentAreaChanged (const Rectangle<int>&) override
     {
     }
 
@@ -70,7 +70,7 @@ public:
         return fixedSize <= 0 ? 0 : 1;
     }
 
-    void paint (Graphics& g)
+    void paint (Graphics& g) override
     {
         const int w = getWidth();
         const int h = getHeight();
@@ -652,7 +652,7 @@ public:
         toolbar->setEditingActive (false);
     }
 
-    void closeButtonPressed()
+    void closeButtonPressed() override
     {
         setVisible (false);
     }
@@ -750,7 +750,7 @@ private:
             setSize (500, 300);
         }
 
-        void comboBoxChanged (ComboBox*)
+        void comboBoxChanged (ComboBox*) override
         {
             switch (styleBox.getSelectedId())
             {
@@ -762,12 +762,12 @@ private:
             palette.resized(); // to make it update the styles
         }
 
-        void buttonClicked (Button*)
+        void buttonClicked (Button*) override
         {
             toolbar->addDefaultItems (factory);
         }
 
-        void paint (Graphics& g)
+        void paint (Graphics& g) override
         {
             Colour background;
 
@@ -778,7 +778,7 @@ private:
             g.fillRect (palette.getX(), palette.getBottom() - 1, palette.getWidth(), 1);
         }
 
-        void resized()
+        void resized() override
         {
             palette.setBounds (0, 0, getWidth(), getHeight() - 120);
             styleBox.setBounds (10, getHeight() - 110, 200, 22);

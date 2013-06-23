@@ -192,7 +192,7 @@ class MouseDragAutoRepeater  : public Timer
 public:
     MouseDragAutoRepeater() {}
 
-    void timerCallback()
+    void timerCallback() override
     {
         Desktop& desktop = Desktop::getInstance();
         int numMiceDown = 0;

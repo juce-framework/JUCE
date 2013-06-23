@@ -167,19 +167,19 @@ public:
 
 protected:
     /** @internal */
-    void paint (Graphics&);
+    void paint (Graphics&) override;
     /** @internal */
-    void mouseEnter (const MouseEvent&);
+    void mouseEnter (const MouseEvent&) override;
     /** @internal */
-    void mouseMove (const MouseEvent&);
+    void mouseMove (const MouseEvent&) override;
     /** @internal */
-    void mouseDown (const MouseEvent&);
+    void mouseDown (const MouseEvent&) override;
     /** @internal */
-    void mouseDrag (const MouseEvent&);
+    void mouseDrag (const MouseEvent&) override;
     /** @internal */
-    void mouseUp (const MouseEvent&);
+    void mouseUp (const MouseEvent&) override;
     /** @internal */
-    bool hitTest (int x, int y);
+    bool hitTest (int x, int y) override;
 
 private:
     WeakReference<Component> component;

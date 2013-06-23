@@ -226,7 +226,7 @@ public:
         signalThreadShouldExit();
     }
 
-    void run()
+    void run() override
     {
         connection = [[NSURLConnection alloc] initWithRequest: request
                                                      delegate: delegate];

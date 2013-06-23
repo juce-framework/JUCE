@@ -31,7 +31,7 @@ public:
     {
     }
 
-    void timerCallback()
+    void timerCallback() override
     {
         owner.timerCallback (timerId);
     }

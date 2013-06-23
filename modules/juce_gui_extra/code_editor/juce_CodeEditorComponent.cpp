@@ -293,7 +293,7 @@ class CodeEditorComponent::GutterComponent  : public Component
 public:
     GutterComponent() : lastNumLines (0) {}
 
-    void paint (Graphics& g)
+    void paint (Graphics& g) override
     {
         jassert (dynamic_cast <CodeEditorComponent*> (getParentComponent()) != nullptr);
         const CodeEditorComponent& editor = *static_cast <CodeEditorComponent*> (getParentComponent());

@@ -65,7 +65,7 @@ const Image& ImageComponent::getImage() const
     return image;
 }
 
-const RectanglePlacement ImageComponent::getImagePlacement() const
+RectanglePlacement ImageComponent::getImagePlacement() const
 {
     return placement;
 }

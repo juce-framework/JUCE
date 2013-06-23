@@ -963,7 +963,7 @@ public:
         setStatusMessage ("Getting ready...");
     }
 
-    void run()
+    void run() override
     {
         setProgress (-1.0); // setting a value beyond the range 0 -> 1 will show a spinning bar..
         setStatusMessage ("Preparing to do some stuff...");

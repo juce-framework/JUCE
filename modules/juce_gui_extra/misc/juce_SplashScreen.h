@@ -128,7 +128,7 @@ public:
 
     //==============================================================================
     /** @internal */
-    void paint (Graphics&);
+    void paint (Graphics&) override;
 
 private:
     //==============================================================================
@@ -136,7 +136,7 @@ private:
     Time earliestTimeToDelete;
     int originalClickCounter;
 
-    void timerCallback();
+    void timerCallback() override;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SplashScreen)
 };

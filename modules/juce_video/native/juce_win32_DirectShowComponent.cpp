@@ -252,7 +252,7 @@ public:
             videoRenderer->setVideoWindow (hwnd);
     }
 
-    void handleAsyncUpdate()
+    void handleAsyncUpdate() override
     {
         if (hwnd  != 0)
         {

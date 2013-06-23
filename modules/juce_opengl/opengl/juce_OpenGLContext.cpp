@@ -69,7 +69,7 @@ public:
     }
 
     //==============================================================================
-    void paint (Graphics&)
+    void paint (Graphics&) override
     {
         if (ComponentPeer* const peer = component.getPeer())
             peer->addMaskedRegion (peer->getComponent().getLocalArea (&component, component.getLocalBounds()));
@@ -291,7 +291,7 @@ public:
     }
 
     //==============================================================================
-    void run()
+    void run() override
     {
         {
             // Allow the message thread to finish setting-up the context before using it..

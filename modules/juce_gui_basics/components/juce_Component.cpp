@@ -690,7 +690,7 @@ class StandardCachedComponentImage  : public CachedComponentImage
 public:
     StandardCachedComponentImage (Component& c) noexcept : owner (c) {}
 
-    void paint (Graphics& g)
+    void paint (Graphics& g) override
     {
         const Rectangle<int> bounds (owner.getLocalBounds());
 

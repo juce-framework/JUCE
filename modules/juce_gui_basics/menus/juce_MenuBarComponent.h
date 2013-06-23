@@ -73,30 +73,29 @@ public:
 
     //==============================================================================
     /** @internal */
-    void paint (Graphics& g);
+    void paint (Graphics&) override;
     /** @internal */
-    void resized();
+    void resized() override;
     /** @internal */
-    void mouseEnter (const MouseEvent& e);
+    void mouseEnter (const MouseEvent&) override;
     /** @internal */
-    void mouseExit (const MouseEvent& e);
+    void mouseExit (const MouseEvent&) override;
     /** @internal */
-    void mouseDown (const MouseEvent& e);
+    void mouseDown (const MouseEvent&) override;
     /** @internal */
-    void mouseDrag (const MouseEvent& e);
+    void mouseDrag (const MouseEvent&) override;
     /** @internal */
-    void mouseUp (const MouseEvent& e);
+    void mouseUp (const MouseEvent&) override;
     /** @internal */
-    void mouseMove (const MouseEvent& e);
+    void mouseMove (const MouseEvent&) override;
     /** @internal */
-    void handleCommandMessage (int commandId);
+    void handleCommandMessage (int commandId) override;
     /** @internal */
-    bool keyPressed (const KeyPress& key);
+    bool keyPressed (const KeyPress&) override;
     /** @internal */
-    void menuBarItemsChanged (MenuBarModel* menuBarModel);
+    void menuBarItemsChanged (MenuBarModel*) override;
     /** @internal */
-    void menuCommandInvoked (MenuBarModel* menuBarModel,
-                             const ApplicationCommandTarget::InvocationInfo& info);
+    void menuCommandInvoked (MenuBarModel*, const ApplicationCommandTarget::InvocationInfo&) override;
 
 private:
     //==============================================================================
@@ -111,7 +110,7 @@ private:
     void setItemUnderMouse (int index);
     void setOpenItem (int index);
     void updateItemUnderMouse (Point<int>);
-    void timerCallback();
+    void timerCallback() override;
     void repaintMenuItem (int index);
     void menuDismissed (int topLevelIndex, int itemId);
     static void menuBarMenuDismissedCallback (int, MenuBarComponent*, int);

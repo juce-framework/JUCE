@@ -109,9 +109,9 @@ public:
 
     //==============================================================================
     /** @internal */
-    void parentHierarchyChanged();
+    void parentHierarchyChanged() override;
     /** @internal */
-    void resized();
+    void resized() override;
 
 private:
     //==============================================================================

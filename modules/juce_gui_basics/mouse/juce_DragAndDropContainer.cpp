@@ -72,7 +72,7 @@ public:
         }
     }
 
-    void paint (Graphics& g)
+    void paint (Graphics& g) override
     {
         if (isOpaque())
             g.fillAll (Colours::white);
@@ -81,7 +81,7 @@ public:
         g.drawImageAt (image, 0, 0);
     }
 
-    void mouseUp (const MouseEvent& e)
+    void mouseUp (const MouseEvent& e) override
     {
         if (e.originalComponent != this)
         {
@@ -114,7 +114,7 @@ public:
         }
     }
 
-    void mouseDrag (const MouseEvent& e)
+    void mouseDrag (const MouseEvent& e) override
     {
         if (e.originalComponent != this)
             updateLocation (true, e.getScreenPosition());
@@ -157,7 +157,7 @@ public:
         }
     }
 
-    void timerCallback()
+    void timerCallback() override
     {
         if (sourceDetails.sourceComponent == nullptr)
         {

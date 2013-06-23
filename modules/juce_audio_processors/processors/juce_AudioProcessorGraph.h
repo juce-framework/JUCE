@@ -405,7 +405,7 @@ private:
     MidiBuffer* currentMidiInputBuffer;
     MidiBuffer currentMidiOutputBuffer;
 
-    void handleAsyncUpdate();
+    void handleAsyncUpdate() override;
     void clearRenderingSequence();
     void buildRenderingSequence();
     bool isAnInputTo (uint32 possibleInputId, uint32 possibleDestinationId, int recursionCheck) const;

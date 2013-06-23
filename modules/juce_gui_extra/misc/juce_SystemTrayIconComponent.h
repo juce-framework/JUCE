@@ -64,7 +64,7 @@ public:
 
    #if JUCE_LINUX
     /** @internal */
-    void paint (Graphics& g);
+    void paint (Graphics&) override;
    #endif
 
 private:

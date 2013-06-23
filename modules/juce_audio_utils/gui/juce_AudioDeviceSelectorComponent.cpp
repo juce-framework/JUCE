@@ -39,7 +39,7 @@ public:
         manager->enableInputLevelMeasurement (false);
     }
 
-    void timerCallback()
+    void timerCallback() override
     {
         const float newLevel = (float) manager->getCurrentInputLevel();
 
@@ -50,7 +50,7 @@ public:
         }
     }
 
-    void paint (Graphics& g)
+    void paint (Graphics& g) override
     {
         getLookAndFeel().drawLevelMeter (g, getWidth(), getHeight(),
                                          (float) exp (log (level) / 3.0)); // (add a bit of a skew to make the level more obvious)
@@ -134,7 +134,7 @@ public:
         flipEnablement (row);
     }
 
-    void paint (Graphics& g)
+    void paint (Graphics& g) override
     {
         ListBox::paint (g);
 
@@ -778,7 +778,7 @@ public:
             flipEnablement (row);
         }
 
-        void paint (Graphics& g)
+        void paint (Graphics& g) override
         {
             ListBox::paint (g);
 

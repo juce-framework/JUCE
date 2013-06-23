@@ -291,7 +291,7 @@ public:
         stopTimer();
     }
 
-    void timerCallback()
+    void timerCallback() override
     {
         const DiskState state = getDiskState();
 

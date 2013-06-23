@@ -67,13 +67,13 @@ public:
 
     //==============================================================================
     /** @internal */
-    void paint (Graphics& g);
+    void paint (Graphics&) override;
 
 private:
     Component* owner;
 
     bool shouldBeShown() const;
-    void timerCallback();
+    void timerCallback() override;
 
     JUCE_DECLARE_NON_COPYABLE (CaretComponent)
 };

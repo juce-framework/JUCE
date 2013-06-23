@@ -821,7 +821,7 @@ public:
         startTimer (500);
     }
 
-    void timerCallback()
+    void timerCallback() override
     {
         if (! insideControlPanelModalLoop)
         {

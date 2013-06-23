@@ -42,7 +42,7 @@ public:
         setMouseCursor (MouseCursor::DraggingHandCursor);
     }
 
-    void paint (Graphics& g)
+    void paint (Graphics& g) override
     {
         if (ToolbarItemComponent* const tc = getToolbarItemComponent())
         {
@@ -56,7 +56,7 @@ public:
         }
     }
 
-    void mouseDown (const MouseEvent& e)
+    void mouseDown (const MouseEvent& e) override
     {
         isDragging = false;
 
@@ -67,7 +67,7 @@ public:
         }
     }
 
-    void mouseDrag (const MouseEvent& e)
+    void mouseDrag (const MouseEvent& e) override
     {
         if (! (isDragging || e.mouseWasClicked()))
         {
@@ -88,7 +88,7 @@ public:
         }
     }
 
-    void mouseUp (const MouseEvent&)
+    void mouseUp (const MouseEvent&) override
     {
         isDragging = false;
 
@@ -103,7 +103,7 @@ public:
         }
     }
 
-    void parentSizeChanged()
+    void parentSizeChanged() override
     {
         setBounds (0, 0, getParentWidth(), getParentHeight());
     }

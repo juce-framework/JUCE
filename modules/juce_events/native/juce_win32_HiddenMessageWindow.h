@@ -128,7 +128,7 @@ private:
         return DefWindowProc (h, message, wParam, lParam);
     }
 
-    void timerCallback()
+    void timerCallback() override
     {
         stopTimer();
         systemDeviceChanged();

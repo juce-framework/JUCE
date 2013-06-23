@@ -166,11 +166,11 @@ public:
 
     //==============================================================================
     /** @internal */
-    void applicationCommandInvoked (const ApplicationCommandTarget::InvocationInfo& info);
+    void applicationCommandInvoked (const ApplicationCommandTarget::InvocationInfo& info) override;
     /** @internal */
-    void applicationCommandListChanged();
+    void applicationCommandListChanged() override;
     /** @internal */
-    void handleAsyncUpdate();
+    void handleAsyncUpdate() override;
 
 private:
     ApplicationCommandManager* manager;

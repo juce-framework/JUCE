@@ -324,12 +324,12 @@ struct AAXClasses
                 }
             }
 
-            void paint (Graphics& g)
+            void paint (Graphics& g) override
             {
                 g.fillAll (Colours::black);
             }
 
-            void childBoundsChanged (Component*)
+            void childBoundsChanged (Component*) override
             {
                 if (pluginEditor != nullptr)
                 {

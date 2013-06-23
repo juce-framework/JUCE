@@ -270,19 +270,19 @@ public:
 
     //==============================================================================
     /** @internal */
-    void paint (Graphics& g);
+    void paint (Graphics&) override;
     /** @internal */
-    void resized();
+    void resized() override;
     /** @internal */
-    void mouseDown (const MouseEvent&);
+    void mouseDown (const MouseEvent&) override;
     /** @internal */
-    bool isInterestedInDragSource (const SourceDetails&);
+    bool isInterestedInDragSource (const SourceDetails&) override;
     /** @internal */
-    void itemDragMove (const SourceDetails&);
+    void itemDragMove (const SourceDetails&) override;
     /** @internal */
-    void itemDragExit (const SourceDetails&);
+    void itemDragExit (const SourceDetails&) override;
     /** @internal */
-    void itemDropped (const SourceDetails&);
+    void itemDropped (const SourceDetails&) override;
     /** @internal */
     void updateAllItemPositions (bool animate);
     /** @internal */
@@ -301,7 +301,7 @@ private:
     class Spacer;
     class CustomisationDialog;
 
-    void buttonClicked (Button*);
+    void buttonClicked (Button*) override;
     void addItemInternal (ToolbarItemFactory& factory, int itemId, int insertIndex);
 
     ToolbarItemComponent* getNextActiveComponent (int index, int delta) const;
