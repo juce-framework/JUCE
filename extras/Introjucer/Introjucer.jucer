@@ -62,7 +62,7 @@
                        winWarningLevel="4" generateManifest="1" winArchitecture="32-bit"/>
       </CONFIGURATIONS>
     </VS2010>
-    <VS2012 targetFolder="Builds/VisualStudio2012" juceFolder="../..">
+    <VS2012 targetFolder="Builds/VisualStudio2012" juceFolder="../.." bigIcon="rVgowdy">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" winWarningLevel="4" generateManifest="1" winArchitecture="32-bit"
                        isDebug="1" optimisation="1" targetName="The Introjucer"/>
@@ -209,6 +209,8 @@
             file="Source/Utility/jucer_StoredSettings.cpp"/>
       <FILE id="BkswLvF" name="jucer_StoredSettings.h" compile="0" resource="0"
             file="Source/Utility/jucer_StoredSettings.h"/>
+      <FILE id="l75UWh" name="jucer_TranslationTool.h" compile="0" resource="0"
+            file="Source/Utility/jucer_TranslationTool.h"/>
       <FILE id="lZ9s99o" name="jucer_ValueSourceHelpers.h" compile="0" resource="0"
             file="Source/Utility/jucer_ValueSourceHelpers.h"/>
     </GROUP>
@@ -424,6 +426,8 @@
             resource="1" file="Source/BinaryData/jucer_ContentCompTemplate.cpp"/>
       <FILE id="gFj8Jl" name="jucer_ContentCompTemplate.h" compile="0" resource="1"
             file="Source/BinaryData/jucer_ContentCompTemplate.h"/>
+      <FILE id="BnCgp2" name="jucer_InlineComponentTemplate.h" compile="0"
+            resource="1" file="Source/BinaryData/jucer_InlineComponentTemplate.h"/>
       <FILE id="pizYtv9" name="jucer_MainConsoleAppTemplate.cpp" compile="0"
             resource="1" file="Source/BinaryData/jucer_MainConsoleAppTemplate.cpp"/>
       <FILE id="tZCXSl" name="jucer_MainTemplate_NoWindow.cpp" compile="0"
@@ -461,4 +465,7 @@
     <MODULE id="juce_gui_basics" showAllCode="1"/>
     <MODULE id="juce_gui_extra" showAllCode="1"/>
   </MODULES>
+  <LIVE_SETTINGS>
+    <OSX enableCxx11="1" systemHeaderPath="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/4.2/include"/>
+  </LIVE_SETTINGS>
 </JUCERPROJECT>

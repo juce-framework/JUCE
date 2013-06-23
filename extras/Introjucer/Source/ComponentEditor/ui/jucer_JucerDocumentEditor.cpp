@@ -1,24 +1,23 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-11 by Raw Material Software Ltd.
+   This file is part of the JUCE library.
+   Copyright (c) 2013 - Raw Material Software Ltd.
 
-  ------------------------------------------------------------------------------
+   Permission is granted to use this software under the terms of either:
+   a) the GPL v2 (or any later version)
+   b) the Affero GPL v3
 
-   JUCE can be redistributed and/or modified under the terms of the GNU General
-   Public License (Version 2), as published by the Free Software Foundation.
-   A copy of the license is included in the JUCE distribution, or can be found
-   online at www.gnu.org/licenses.
+   Details of these licenses can be found at: www.gnu.org/licenses
 
    JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
    A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
-  ------------------------------------------------------------------------------
+   ------------------------------------------------------------------------------
 
    To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.rawmaterialsoftware.com/juce for more information.
+   available: visit www.juce.com for more information.
 
   ==============================================================================
 */
@@ -330,15 +329,15 @@ JucerDocumentEditor::JucerDocumentEditor (JucerDocument* const doc)
 
         tabbedComponent.addTab ("Resources", tabColour, new ResourceEditorPanel (*document), true);
 
-        SourceCodeEditor* codeEditor = new SourceCodeEditor (&document->getCppDocument());
-        codeEditor->setEditor (new CppCodeEditorComponent (document->getCppFile(),
-                                                           document->getCppDocument().getCodeDocument()));
+        SourceCodeEditor* codeEditor = new SourceCodeEditor (&document->getCppDocument(),
+                                                             new CppCodeEditorComponent (document->getCppFile(),
+                                                                                         document->getCppDocument().getCodeDocument()));
 
         tabbedComponent.addTab ("Code", tabColour, codeEditor, true);
 
         updateTabs();
 
-        tabbedComponent.setCurrentTabIndex (0);
+        tabbedComponent.setCurrentTabIndex (1);
 
         document->addChangeListener (this);
 
@@ -514,6 +513,14 @@ double JucerDocumentEditor::getZoom() const
         return panel->getZoom();
 
     return 1.0;
+}
+
+static double snapToIntegerZoom (double zoom)
+{
+    if (zoom >= 1.0)
+        return (double) (int) (zoom + 0.5);
+
+    return 1.0 / (int) (1.0 / zoom + 0.5);
 }
 
 void JucerDocumentEditor::addElement (const int index)
@@ -919,17 +926,9 @@ bool JucerDocumentEditor::perform (const InvocationInfo& info)
             showGraphics (0);
             break;
 
-        case JucerCommandIDs::zoomIn:
-            setZoom (getZoom() * 2.0);
-            break;
-
-        case JucerCommandIDs::zoomOut:
-            setZoom (getZoom() / 2.0);
-            break;
-
-        case JucerCommandIDs::zoomNormal:
-            setZoom (1.0);
-            break;
+        case JucerCommandIDs::zoomIn:      setZoom (snapToIntegerZoom (getZoom() * 2.0)); break;
+        case JucerCommandIDs::zoomOut:     setZoom (snapToIntegerZoom (getZoom() / 2.0)); break;
+        case JucerCommandIDs::zoomNormal:  setZoom (1.0); break;
 
         case JucerCommandIDs::spaceBarDrag:
             if (EditingPanelBase* panel = dynamic_cast <EditingPanelBase*> (tabbedComponent.getCurrentContentComponent()))
@@ -1099,6 +1098,9 @@ Image JucerDocumentEditor::createComponentLayerSnapshot() const
     return Image();
 }
 
+const int gridSnapMenuItemBase = 0x8723620;
+const int snapSizes[] = { 2, 3, 4, 5, 6, 8, 10, 12, 16, 20, 24, 32 };
+
 void createGUIEditorMenu (PopupMenu& menu)
 {
     menu.addCommandItem (commandManager, JucerCommandIDs::editCompLayout);
@@ -1140,12 +1142,12 @@ void createGUIEditorMenu (PopupMenu& menu)
     JucerDocumentEditor* holder = JucerDocumentEditor::getActiveDocumentHolder();
 
     {
-        const int snapSizes[] = { 2, 3, 4, 5, 6, 8, 10, 12, 16, 20, 24, 32 };
         const int currentSnapSize = holder != nullptr ? holder->getDocument()->getSnappingGridSize() : -1;
 
         PopupMenu m;
         for (int i = 0; i < numElementsInArray (snapSizes); ++i)
-            m.addItem (300 + i, String (snapSizes[i]) + " pixels", true, snapSizes[i] == currentSnapSize);
+            m.addItem (gridSnapMenuItemBase + i, String (snapSizes[i]) + " pixels",
+                       true, snapSizes[i] == currentSnapSize);
 
         menu.addSubMenu ("Grid size", m, currentSnapSize >= 0);
     }
@@ -1165,6 +1167,23 @@ void createGUIEditorMenu (PopupMenu& menu)
         overlays.addCommandItem (commandManager, JucerCommandIDs::compOverlay100);
 
         menu.addSubMenu ("Component Overlay", overlays, holder != nullptr);
+    }
+}
+
+void handleGUIEditorMenuCommand (int menuItemID)
+{
+    if (JucerDocumentEditor* ed = JucerDocumentEditor::getActiveDocumentHolder())
+    {
+        int gridIndex = menuItemID - gridSnapMenuItemBase;
+
+        if (isPositiveAndBelow (gridIndex, numElementsInArray (snapSizes)))
+        {
+            JucerDocument& doc = *ed->getDocument();
+
+            doc.setSnappingGrid (snapSizes [gridIndex],
+                                 doc.isSnapActive (false),
+                                 doc.isSnapShown());
+        }
     }
 }
 

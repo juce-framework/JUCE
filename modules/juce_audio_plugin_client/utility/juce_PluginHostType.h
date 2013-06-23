@@ -1,24 +1,23 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-11 by Raw Material Software Ltd.
+   This file is part of the JUCE library.
+   Copyright (c) 2013 - Raw Material Software Ltd.
 
-  ------------------------------------------------------------------------------
+   Permission is granted to use this software under the terms of either:
+   a) the GPL v2 (or any later version)
+   b) the Affero GPL v3
 
-   JUCE can be redistributed and/or modified under the terms of the GNU General
-   Public License (Version 2), as published by the Free Software Foundation.
-   A copy of the license is included in the JUCE distribution, or can be found
-   online at www.gnu.org/licenses.
+   Details of these licenses can be found at: www.gnu.org/licenses
 
    JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
    A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
-  ------------------------------------------------------------------------------
+   ------------------------------------------------------------------------------
 
    To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.rawmaterialsoftware.com/juce for more information.
+   available: visit www.juce.com for more information.
 
   ==============================================================================
 */
@@ -28,9 +27,9 @@ class PluginHostType
 {
 public:
     //==============================================================================
-    PluginHostType()  : type (getHostType())
-    {
-    }
+    PluginHostType()  : type (getHostType()) {}
+    PluginHostType (const PluginHostType& other)  : type (other.type) {}
+    PluginHostType& operator= (const PluginHostType& other)  { type = other.type; return *this; }
 
     //==============================================================================
     enum HostType
@@ -55,10 +54,11 @@ public:
         SteinbergCubaseGeneric,
         SteinbergCubase6,
         SteinbergCubase7,
-        SteinbergNuendo,
         SteinbergWavelab5,
         SteinbergWavelab6,
         SteinbergWavelab7,
+        SteinbergWavelab8,
+        SteinbergNuendo,
         SteinbergWavelabGeneric,
         MuseReceptorGeneric,
         MagixSamplitude,
@@ -68,15 +68,16 @@ public:
         StudioOne
     };
 
-    const HostType type;
+    HostType type;
 
     //==============================================================================
     bool isAbletonLive() const noexcept      { return type == AbletonLive6 || type == AbletonLive7 || type == AbletonLive8 || type == AbletonLiveGeneric; }
     bool isCubase() const noexcept           { return type == SteinbergCubase4 || type == SteinbergCubase5 || type == SteinbergCubase5Bridged || type == SteinbergCubase6 || type == SteinbergCubase7 || type == SteinbergCubaseGeneric; }
     bool isCubaseBridged() const noexcept    { return type == SteinbergCubase5Bridged; }
+    bool isNuendo() const noexcept           { return type == SteinbergNuendo; }
     bool isTracktion() const noexcept        { return type == MackieTracktion3 || type == MackieTracktionGeneric; }
     bool isSonar() const noexcept            { return type == CakewalkSonar8 || type == CakewalkSonarGeneric; }
-    bool isWavelab() const noexcept          { return isWavelabLegacy() || type == SteinbergWavelab7 || type == SteinbergWavelabGeneric; }
+    bool isWavelab() const noexcept          { return isWavelabLegacy() || type == SteinbergWavelab7 || type == SteinbergWavelab8 || type == SteinbergWavelabGeneric; }
     bool isWavelabLegacy() const noexcept    { return type == SteinbergWavelab5 || type == SteinbergWavelab6; }
     bool isPremiere() const noexcept         { return type == AdobePremierePro; }
     bool isLogic() const noexcept            { return type == AppleLogic || type == EmagicLogic; }
@@ -115,8 +116,9 @@ private:
         if (hostFilename.containsIgnoreCase ("Cubase 6"))          return SteinbergCubase6;
         if (hostFilename.containsIgnoreCase ("Cubase 7"))          return SteinbergCubase7;
         if (hostFilename.containsIgnoreCase ("Cubase"))            return SteinbergCubaseGeneric;
-        if (hostFilename.containsIgnoreCase ("Nuendo"))            return SteinbergNuendo;
         if (hostPath.containsIgnoreCase     ("Wavelab 7"))         return SteinbergWavelab7;
+        if (hostPath.containsIgnoreCase     ("Wavelab 8"))         return SteinbergWavelab8;
+        if (hostPath.containsIgnoreCase     ("Nuendo"))            return SteinbergNuendo;
         if (hostFilename.containsIgnoreCase ("Wavelab"))           return SteinbergWavelabGeneric;
         if (hostFilename.containsIgnoreCase ("WaveBurner"))        return WaveBurner;
         if (hostFilename.contains           ("Digital Performer")) return DigitalPerformer;
@@ -124,33 +126,35 @@ private:
         if (hostPath.containsIgnoreCase     ("Studio One"))        return StudioOne;
 
       #elif JUCE_WINDOWS
-        if (hostFilename.containsIgnoreCase ("Live 6."))        return AbletonLive6;
-        if (hostFilename.containsIgnoreCase ("Live 7."))        return AbletonLive7;
-        if (hostFilename.containsIgnoreCase ("Live 8."))        return AbletonLive8;
-        if (hostFilename.containsIgnoreCase ("Live "))          return AbletonLiveGeneric;
-        if (hostFilename.containsIgnoreCase ("Adobe Premiere")) return AdobePremierePro;
-        if (hostFilename.containsIgnoreCase ("ProTools"))       return DigidesignProTools;
-        if (hostPath.containsIgnoreCase     ("SONAR 8"))        return CakewalkSonar8;
-        if (hostFilename.containsIgnoreCase ("SONAR"))          return CakewalkSonarGeneric;
-        if (hostFilename.containsIgnoreCase ("Logic"))          return EmagicLogic;
-        if (hostPath.containsIgnoreCase     ("Tracktion 3"))    return MackieTracktion3;
-        if (hostFilename.containsIgnoreCase ("Tracktion"))      return MackieTracktionGeneric;
-        if (hostFilename.containsIgnoreCase ("reaper"))         return Reaper;
-        if (hostFilename.containsIgnoreCase ("Cubase4"))        return SteinbergCubase4;
-        if (hostFilename.containsIgnoreCase ("Cubase5"))        return SteinbergCubase5;
-        if (hostFilename.containsIgnoreCase ("Cubase6"))        return SteinbergCubase6;
-        if (hostFilename.containsIgnoreCase ("Cubase7"))        return SteinbergCubase7;
-        if (hostFilename.containsIgnoreCase ("Cubase"))         return SteinbergCubaseGeneric;
-        if (hostFilename.containsIgnoreCase ("Nuendo"))         return SteinbergNuendo;
-        if (hostFilename.containsIgnoreCase ("VSTBridgeApp"))   return SteinbergCubase5Bridged;
-        if (hostPath.containsIgnoreCase     ("Wavelab 5"))      return SteinbergWavelab5;
-        if (hostPath.containsIgnoreCase     ("Wavelab 6"))      return SteinbergWavelab6;
-        if (hostPath.containsIgnoreCase     ("Wavelab 7"))      return SteinbergWavelab7;
-        if (hostFilename.containsIgnoreCase ("Wavelab"))        return SteinbergWavelabGeneric;
-        if (hostFilename.containsIgnoreCase ("rm-host"))        return MuseReceptorGeneric;
-        if (hostFilename.startsWithIgnoreCase ("Sam"))          return MagixSamplitude;
-        if (hostFilename.startsWith         ("FL"))             return FruityLoops;
-        if (hostPath.containsIgnoreCase     ("Studio One"))     return StudioOne;
+        if (hostFilename.containsIgnoreCase ("Live 6."))           return AbletonLive6;
+        if (hostFilename.containsIgnoreCase ("Live 7."))           return AbletonLive7;
+        if (hostFilename.containsIgnoreCase ("Live 8."))           return AbletonLive8;
+        if (hostFilename.containsIgnoreCase ("Live "))             return AbletonLiveGeneric;
+        if (hostFilename.containsIgnoreCase ("Adobe Premiere"))    return AdobePremierePro;
+        if (hostFilename.containsIgnoreCase ("ProTools"))          return DigidesignProTools;
+        if (hostPath.containsIgnoreCase     ("SONAR 8"))           return CakewalkSonar8;
+        if (hostFilename.containsIgnoreCase ("SONAR"))             return CakewalkSonarGeneric;
+        if (hostFilename.containsIgnoreCase ("Logic"))             return EmagicLogic;
+        if (hostPath.containsIgnoreCase     ("Tracktion 3"))       return MackieTracktion3;
+        if (hostFilename.containsIgnoreCase ("Tracktion"))         return MackieTracktionGeneric;
+        if (hostFilename.containsIgnoreCase ("reaper"))            return Reaper;
+        if (hostFilename.containsIgnoreCase ("Cubase4"))           return SteinbergCubase4;
+        if (hostFilename.containsIgnoreCase ("Cubase5"))           return SteinbergCubase5;
+        if (hostFilename.containsIgnoreCase ("Cubase6"))           return SteinbergCubase6;
+        if (hostFilename.containsIgnoreCase ("Cubase7"))           return SteinbergCubase7;
+        if (hostFilename.containsIgnoreCase ("Cubase"))            return SteinbergCubaseGeneric;
+        if (hostFilename.containsIgnoreCase ("VSTBridgeApp"))      return SteinbergCubase5Bridged;
+        if (hostPath.containsIgnoreCase     ("Wavelab 5"))         return SteinbergWavelab5;
+        if (hostPath.containsIgnoreCase     ("Wavelab 6"))         return SteinbergWavelab6;
+        if (hostPath.containsIgnoreCase     ("Wavelab 7"))         return SteinbergWavelab7;
+        if (hostPath.containsIgnoreCase     ("Wavelab 8"))         return SteinbergWavelab8;
+        if (hostPath.containsIgnoreCase     ("Nuendo"))            return SteinbergNuendo;
+        if (hostFilename.containsIgnoreCase ("Wavelab"))           return SteinbergWavelabGeneric;
+        if (hostFilename.containsIgnoreCase ("rm-host"))           return MuseReceptorGeneric;
+        if (hostFilename.startsWithIgnoreCase ("Sam"))             return MagixSamplitude;
+        if (hostFilename.startsWith         ("FL"))                return FruityLoops;
+        if (hostPath.containsIgnoreCase     ("Studio One"))        return StudioOne;
+        if (hostPath.containsIgnoreCase     ("Digital Performer")) return DigitalPerformer;
 
        #elif JUCE_LINUX
         jassertfalse   // not yet done!
@@ -159,6 +163,4 @@ private:
        #endif
         return UnknownHost;
     }
-
-    JUCE_DECLARE_NON_COPYABLE (PluginHostType)
 };

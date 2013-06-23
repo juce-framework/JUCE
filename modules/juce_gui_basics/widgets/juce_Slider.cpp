@@ -1,24 +1,23 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-11 by Raw Material Software Ltd.
+   This file is part of the JUCE library.
+   Copyright (c) 2013 - Raw Material Software Ltd.
 
-  ------------------------------------------------------------------------------
+   Permission is granted to use this software under the terms of either:
+   a) the GPL v2 (or any later version)
+   b) the Affero GPL v3
 
-   JUCE can be redistributed and/or modified under the terms of the GNU General
-   Public License (Version 2), as published by the Free Software Foundation.
-   A copy of the license is included in the JUCE distribution, or can be found
-   online at www.gnu.org/licenses.
+   Details of these licenses can be found at: www.gnu.org/licenses
 
    JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
    A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
-  ------------------------------------------------------------------------------
+   ------------------------------------------------------------------------------
 
    To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.rawmaterialsoftware.com/juce for more information.
+   available: visit www.juce.com for more information.
 
   ==============================================================================
 */
@@ -29,9 +28,9 @@ class Slider::Pimpl   : public AsyncUpdater,
                         public ValueListener
 {
 public:
-    Pimpl (Slider& owner_, SliderStyle style_, TextEntryBoxPosition textBoxPosition)
-      : owner (owner_),
-        style (style_),
+    Pimpl (Slider& s, SliderStyle sliderStyle, TextEntryBoxPosition textBoxPosition)
+      : owner (s),
+        style (sliderStyle),
         lastCurrentValue (0), lastValueMin (0), lastValueMax (0),
         minimum (0), maximum (10), interval (0), doubleClickReturnValue (0),
         skewFactor (1.0), velocityModeSensitivity (1.0),
@@ -359,15 +358,24 @@ public:
         listeners.callChecked (checker, &SliderListener::sliderDragEnded, slider);
     }
 
+    struct DragInProgress
+    {
+        DragInProgress (Pimpl& p)  : owner (p)      { owner.sendDragStart(); }
+        ~DragInProgress()                           { owner.sendDragEnd(); }
+
+        Pimpl& owner;
+
+        JUCE_DECLARE_NON_COPYABLE (DragInProgress)
+    };
+
     void buttonClicked (Button* button)
     {
         if (style == IncDecButtons)
         {
             const double delta = (button == incButton) ? interval : -interval;
 
-            sendDragStart();
+            DragInProgress drag (*this);
             setValue (owner.snapValue (getValue() + delta, false), sendNotificationSync);
-            sendDragEnd();
         }
     }
 
@@ -390,9 +398,8 @@ public:
 
         if (newValue != (double) currentValue.getValue())
         {
-            sendDragStart();
+            DragInProgress drag (*this);
             setValue (newValue, sendNotificationSync);
-            sendDragEnd();
         }
 
         updateText(); // force a clean-up of the text, needed in case setValue() hasn't done this.
@@ -821,6 +828,7 @@ public:
         incDecDragged = false;
         useDragEvents = false;
         mouseDragStartPos = mousePosWhenLastDragged = e.getPosition();
+        currentDrag = nullptr;
 
         if (owner.isEnabled())
         {
@@ -864,7 +872,7 @@ public:
                     popup->setVisible (true);
                 }
 
-                sendDragStart();
+                currentDrag = new DragInProgress (*this);
                 mouseDrag (e);
             }
         }
@@ -944,7 +952,7 @@ public:
             if (sendChangeOnlyOnRelease && valueOnMouseDown != (double) currentValue.getValue())
                 triggerChangeMessage (sendNotificationAsync);
 
-            sendDragEnd();
+            currentDrag = nullptr;
             popupDisplay = nullptr;
 
             if (style == IncDecButtons)
@@ -957,6 +965,8 @@ public:
         {
             popupDisplay->startTimer (2000);
         }
+
+        currentDrag = nullptr;
     }
 
     bool canDoubleClickToValue() const
@@ -971,9 +981,8 @@ public:
     {
         if (canDoubleClickToValue())
         {
-            sendDragStart();
+            DragInProgress drag (*this);
             setValue (doubleClickReturnValue, sendNotificationSync);
-            sendDragEnd();
         }
     }
 
@@ -998,9 +1007,8 @@ public:
                 if (value > newValue)
                     delta = -delta;
 
-                sendDragStart();
+                DragInProgress drag (*this);
                 setValue (owner.snapValue (value + delta, false), sendNotificationSync);
-                sendDragEnd();
             }
 
             return true;
@@ -1217,6 +1225,7 @@ public:
     int sliderBeingDragged;
     int pixelsForFullDragExtent;
     Rectangle<int> sliderRect;
+    ScopedPointer<DragInProgress> currentDrag;
 
     TextEntryBoxPosition textBoxPos;
     String textSuffix;
@@ -1247,11 +1256,12 @@ public:
                                    public Timer
     {
     public:
-        PopupDisplayComponent (Slider& owner_)
-            : owner (owner_),
-              font (15.0f, Font::bold)
+        PopupDisplayComponent (Slider& s)
+            : owner (s),
+              font (s.getLookAndFeel().getSliderPopupFont())
         {
             setAlwaysOnTop (true);
+            setAllowedPlacement (owner.getLookAndFeel().getSliderPopupPlacement());
         }
 
         void paintContent (Graphics& g, int w, int h)
@@ -1461,9 +1471,9 @@ void Slider::setDoubleClickReturnValue (bool isDoubleClickEnabled,  double value
     pimpl->doubleClickReturnValue = valueToSetOnDoubleClick;
 }
 
-double Slider::getDoubleClickReturnValue (bool& isEnabled_) const
+double Slider::getDoubleClickReturnValue (bool& isEnabledResult) const
 {
-    isEnabled_ = pimpl->doubleClickToValue;
+    isEnabledResult = pimpl->doubleClickToValue;
     return pimpl->doubleClickReturnValue;
 }
 
@@ -1537,7 +1547,7 @@ void Slider::stoppedDragging() {}
 void Slider::valueChanged() {}
 
 //==============================================================================
-void Slider::setPopupMenuEnabled (const bool menuEnabled_)  { pimpl->menuEnabled = menuEnabled_; }
+void Slider::setPopupMenuEnabled (const bool menuEnabled)   { pimpl->menuEnabled = menuEnabled; }
 void Slider::setScrollWheelEnabled (const bool enabled)     { pimpl->scrollWheelEnabled = enabled; }
 
 bool Slider::isHorizontal() const noexcept   { return pimpl->isHorizontal(); }

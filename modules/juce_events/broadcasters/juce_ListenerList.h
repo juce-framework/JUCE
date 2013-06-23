@@ -1,24 +1,23 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-11 by Raw Material Software Ltd.
+   This file is part of the JUCE library.
+   Copyright (c) 2013 - Raw Material Software Ltd.
 
-  ------------------------------------------------------------------------------
+   Permission is granted to use this software under the terms of either:
+   a) the GPL v2 (or any later version)
+   b) the Affero GPL v3
 
-   JUCE can be redistributed and/or modified under the terms of the GNU General
-   Public License (Version 2), as published by the Free Software Foundation.
-   A copy of the license is included in the JUCE distribution, or can be found
-   online at www.gnu.org/licenses.
+   Details of these licenses can be found at: www.gnu.org/licenses
 
    JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
    A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
-  ------------------------------------------------------------------------------
+   ------------------------------------------------------------------------------
 
    To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.rawmaterialsoftware.com/juce for more information.
+   available: visit www.juce.com for more information.
 
   ==============================================================================
 */
@@ -261,6 +260,27 @@ public:
     {
         for (Iterator<BailOutCheckerType, ThisType> iter (*this); iter.next (bailOutChecker);)
             (iter.getListener()->*callbackFunction) (param1, param2, param3, param4, param5);
+    }
+
+    //==============================================================================
+    /** Calls a member function on each listener in the list, with 5 parameters. */
+    template <LL_TEMPLATE(1), LL_TEMPLATE(2), LL_TEMPLATE(3), LL_TEMPLATE(4), LL_TEMPLATE(5), LL_TEMPLATE(6)>
+    void call (void (ListenerClass::*callbackFunction) (P1, P2, P3, P4, P5, P6),
+               LL_PARAM(1), LL_PARAM(2), LL_PARAM(3), LL_PARAM(4), LL_PARAM(5), LL_PARAM(6))
+    {
+        for (Iterator<DummyBailOutChecker, ThisType> iter (*this); iter.next();)
+            (iter.getListener()->*callbackFunction) (param1, param2, param3, param4, param5, param6);
+    }
+
+    /** Calls a member function on each listener in the list, with 5 parameters and a bail-out-checker.
+        See the class description for info about writing a bail-out checker. */
+    template <class BailOutCheckerType, LL_TEMPLATE(1), LL_TEMPLATE(2), LL_TEMPLATE(3), LL_TEMPLATE(4), LL_TEMPLATE(5), LL_TEMPLATE(6)>
+    void callChecked (const BailOutCheckerType& bailOutChecker,
+                      void (ListenerClass::*callbackFunction) (P1, P2, P3, P4, P5, P6),
+                      LL_PARAM(1), LL_PARAM(2), LL_PARAM(3), LL_PARAM(4), LL_PARAM(5), LL_PARAM(6))
+    {
+        for (Iterator<BailOutCheckerType, ThisType> iter (*this); iter.next (bailOutChecker);)
+            (iter.getListener()->*callbackFunction) (param1, param2, param3, param4, param5, param6);
     }
 
 

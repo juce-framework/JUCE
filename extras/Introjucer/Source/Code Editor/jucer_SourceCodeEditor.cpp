@@ -1,24 +1,23 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-11 by Raw Material Software Ltd.
+   This file is part of the JUCE library.
+   Copyright (c) 2013 - Raw Material Software Ltd.
 
-  ------------------------------------------------------------------------------
+   Permission is granted to use this software under the terms of either:
+   a) the GPL v2 (or any later version)
+   b) the Affero GPL v3
 
-   JUCE can be redistributed and/or modified under the terms of the GNU General
-   Public License (Version 2), as published by the Free Software Foundation.
-   A copy of the license is included in the JUCE distribution, or can be found
-   online at www.gnu.org/licenses.
+   Details of these licenses can be found at: www.gnu.org/licenses
 
    JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
    A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
-  ------------------------------------------------------------------------------
+   ------------------------------------------------------------------------------
 
    To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.rawmaterialsoftware.com/juce for more information.
+   available: visit www.juce.com for more information.
 
   ==============================================================================
 */
@@ -47,8 +46,7 @@ CodeDocument& SourceCodeDocument::getCodeDocument()
 
 Component* SourceCodeDocument::createEditor()
 {
-    SourceCodeEditor* e = new SourceCodeEditor (this);
-    e->createEditor (getCodeDocument());
+    SourceCodeEditor* e = new SourceCodeEditor (this, getCodeDocument());
     applyLastState (*(e->editor));
     return e;
 }
@@ -115,9 +113,21 @@ void SourceCodeDocument::applyLastState (CodeEditorComponent& editor) const
 }
 
 //==============================================================================
-SourceCodeEditor::SourceCodeEditor (OpenDocumentManager::Document* doc)
+SourceCodeEditor::SourceCodeEditor (OpenDocumentManager::Document* doc, CodeDocument& codeDocument)
     : DocumentEditorComponent (doc)
 {
+    setOpaque (true);
+
+    if (document->getFile().hasFileExtension (sourceOrHeaderFileExtensions))
+        setEditor (new CppCodeEditorComponent (document->getFile(), codeDocument));
+    else
+        setEditor (new GenericCodeEditorComponent (document->getFile(), codeDocument, nullptr));
+}
+
+SourceCodeEditor::SourceCodeEditor (OpenDocumentManager::Document* doc, CodeEditorComponent* ed)
+    : DocumentEditorComponent (doc)
+{
+    setEditor (ed);
 }
 
 SourceCodeEditor::~SourceCodeEditor()
@@ -129,14 +139,6 @@ SourceCodeEditor::~SourceCodeEditor()
 
     if (SourceCodeDocument* doc = dynamic_cast <SourceCodeDocument*> (getDocument()))
         doc->updateLastState (*editor);
-}
-
-void SourceCodeEditor::createEditor (CodeDocument& codeDocument)
-{
-    if (document->getFile().hasFileExtension (sourceOrHeaderFileExtensions))
-        setEditor (new CppCodeEditorComponent (document->getFile(), codeDocument));
-    else
-        setEditor (new GenericCodeEditorComponent (document->getFile(), codeDocument, nullptr));
 }
 
 void SourceCodeEditor::setEditor (CodeEditorComponent* newEditor)
@@ -155,7 +157,7 @@ void SourceCodeEditor::setEditor (CodeEditorComponent* newEditor)
     editor->getDocument().addListener (this);
 }
 
-void SourceCodeEditor::scrollToKeepRangeOnScreen (const Range<int>& range)
+void SourceCodeEditor::scrollToKeepRangeOnScreen (Range<int> range)
 {
     const int space = jmin (10, editor->getNumLinesOnScreen() / 3);
     const CodeDocument::Position start (editor->getDocument(), range.getStart());
@@ -164,7 +166,7 @@ void SourceCodeEditor::scrollToKeepRangeOnScreen (const Range<int>& range)
     editor->scrollToKeepLinesOnScreen (Range<int> (start.getLineNumber() - space, end.getLineNumber() + space));
 }
 
-void SourceCodeEditor::highlight (const Range<int>& range, bool cursorAtStart)
+void SourceCodeEditor::highlight (Range<int> range, bool cursorAtStart)
 {
     scrollToKeepRangeOnScreen (range);
 
@@ -211,7 +213,11 @@ GenericCodeEditorComponent::GenericCodeEditorComponent (const File& f, CodeDocum
 
 GenericCodeEditorComponent::~GenericCodeEditorComponent() {}
 
-enum { showInFinderID = 0x2fe821e3 };
+enum
+{
+    showInFinderID = 0x2fe821e3,
+    insertComponentID = 0x2fe821e4
+};
 
 void GenericCodeEditorComponent::addPopupMenuItems (PopupMenu& menu, const MouseEvent* e)
 {
@@ -337,7 +343,7 @@ public:
         findNext.setCommandToTrigger (cm, CommandIDs::findNext, true);
     }
 
-    void paint (Graphics& g)
+    void paint (Graphics& g) override
     {
         Path outline;
         outline.addRoundedRectangle (1.0f, 1.0f, getWidth() - 2.0f, getHeight() - 2.0f, 8.0f);
@@ -348,7 +354,7 @@ public:
         g.strokePath (outline, PathStrokeType (1.0f));
     }
 
-    void resized()
+    void resized() override
     {
         int y = 30;
         editor.setBounds (10, y, getWidth() - 20, 24);
@@ -358,12 +364,12 @@ public:
         findPrev.setBounds (getWidth() - 70, y, 30, 22);
     }
 
-    void buttonClicked (Button*)
+    void buttonClicked (Button*) override
     {
         setCaseSensitiveSearch (caseButton.getToggleState());
     }
 
-    void textEditorTextChanged (TextEditor&)
+    void textEditorTextChanged (TextEditor&) override
     {
         setSearchString (editor.getText());
 
@@ -371,14 +377,14 @@ public:
             ed->findNext (true, false);
     }
 
-    void textEditorFocusLost (TextEditor&) {}
+    void textEditorFocusLost (TextEditor&) override {}
 
-    void textEditorReturnKeyPressed (TextEditor&)
+    void textEditorReturnKeyPressed (TextEditor&) override
     {
         commandManager->invokeDirectly (CommandIDs::findNext, true);
     }
 
-    void textEditorEscapeKeyPressed (TextEditor&)
+    void textEditorEscapeKeyPressed (TextEditor&) override
     {
         if (GenericCodeEditorComponent* ed = getOwner())
             ed->hideFindPanel();
@@ -568,4 +574,47 @@ void CppCodeEditorComponent::insertTextAtCaret (const String& newText)
     }
 
     GenericCodeEditorComponent::insertTextAtCaret (newText);
+}
+
+void CppCodeEditorComponent::addPopupMenuItems (PopupMenu& menu, const MouseEvent* e)
+{
+    GenericCodeEditorComponent::addPopupMenuItems (menu, e);
+
+    menu.addSeparator();
+    menu.addItem (insertComponentID, TRANS("Insert code for a new Component class..."));
+}
+
+void CppCodeEditorComponent::performPopupMenuAction (int menuItemID)
+{
+    if (menuItemID == insertComponentID)
+        insertComponentClass();
+
+    GenericCodeEditorComponent::performPopupMenuAction (menuItemID);
+}
+
+void CppCodeEditorComponent::insertComponentClass()
+{
+    AlertWindow aw (TRANS ("Insert a new Component class"),
+                    TRANS ("Please enter a name for the new class"),
+                    AlertWindow::NoIcon, nullptr);
+
+    const char* classNameField = "Class Name";
+
+    aw.addTextEditor (classNameField, String::empty, String::empty, false);
+    aw.addButton (TRANS ("Insert Code"),  1, KeyPress (KeyPress::returnKey));
+    aw.addButton (TRANS ("Cancel"),       0, KeyPress (KeyPress::escapeKey));
+
+    while (aw.runModalLoop() != 0)
+    {
+        const String className (aw.getTextEditorContents (classNameField).trim());
+
+        if (className == CodeHelpers::makeValidIdentifier (className, false, true, false))
+        {
+            String code (BinaryData::jucer_InlineComponentTemplate_h);
+            code = code.replace ("COMPONENTCLASS", className);
+
+            insertTextAtCaret (code);
+            break;
+        }
+    }
 }

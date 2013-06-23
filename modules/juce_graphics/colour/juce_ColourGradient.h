@@ -1,24 +1,23 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-11 by Raw Material Software Ltd.
+   This file is part of the JUCE library.
+   Copyright (c) 2013 - Raw Material Software Ltd.
 
-  ------------------------------------------------------------------------------
+   Permission is granted to use this software under the terms of either:
+   a) the GPL v2 (or any later version)
+   b) the Affero GPL v3
 
-   JUCE can be redistributed and/or modified under the terms of the GNU General
-   Public License (Version 2), as published by the Free Software Foundation.
-   A copy of the license is included in the JUCE distribution, or can be found
-   online at www.gnu.org/licenses.
+   Details of these licenses can be found at: www.gnu.org/licenses
 
    JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
    A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
-  ------------------------------------------------------------------------------
+   ------------------------------------------------------------------------------
 
    To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.rawmaterialsoftware.com/juce for more information.
+   available: visit www.juce.com for more information.
 
   ==============================================================================
 */
@@ -57,8 +56,8 @@ public:
 
         @see ColourGradient
     */
-    ColourGradient (const Colour& colour1, float x1, float y1,
-                    const Colour& colour2, float x2, float y2,
+    ColourGradient (Colour colour1, float x1, float y1,
+                    Colour colour2, float x2, float y2,
                     bool isRadial);
 
     /** Creates an uninitialised gradient.
@@ -91,7 +90,7 @@ public:
         @returns the index at which the new point was added
     */
     int addColour (double proportionAlongGradient,
-                   const Colour& colour);
+                   Colour colour);
 
     /** Removes one of the colours from the gradient. */
     void removeColour (int index);
@@ -117,7 +116,7 @@ public:
     /** Changes the colour at a given index.
         The index is from 0 to getNumColours() - 1.
     */
-    void setColour (int index, const Colour& newColour) noexcept;
+    void setColour (int index, Colour newColour) noexcept;
 
     /** Returns the an interpolated colour at any position along the gradient.
         @param position     the position along the gradient, between 0 and 1
@@ -165,7 +164,7 @@ private:
     {
         ColourPoint() noexcept {}
 
-        ColourPoint (const double pos, const Colour& col) noexcept
+        ColourPoint (const double pos, Colour col) noexcept
             : position (pos), colour (col)
         {}
 

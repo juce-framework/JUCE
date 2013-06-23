@@ -1,24 +1,23 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-11 by Raw Material Software Ltd.
+   This file is part of the JUCE library.
+   Copyright (c) 2013 - Raw Material Software Ltd.
 
-  ------------------------------------------------------------------------------
+   Permission is granted to use this software under the terms of either:
+   a) the GPL v2 (or any later version)
+   b) the Affero GPL v3
 
-   JUCE can be redistributed and/or modified under the terms of the GNU General
-   Public License (Version 2), as published by the Free Software Foundation.
-   A copy of the license is included in the JUCE distribution, or can be found
-   online at www.gnu.org/licenses.
+   Details of these licenses can be found at: www.gnu.org/licenses
 
    JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
    A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
-  ------------------------------------------------------------------------------
+   ------------------------------------------------------------------------------
 
    To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.rawmaterialsoftware.com/juce for more information.
+   available: visit www.juce.com for more information.
 
   ==============================================================================
 */
@@ -26,6 +25,16 @@
 //==============================================================================
 static const char* const aiffFormatName = "AIFF file";
 static const char* const aiffExtensions[] = { ".aiff", ".aif", 0 };
+
+//==============================================================================
+const char* const AiffAudioFormat::appleOneShot         = "apple one shot";
+const char* const AiffAudioFormat::appleRootSet         = "apple root set";
+const char* const AiffAudioFormat::appleRootNote        = "apple root note";
+const char* const AiffAudioFormat::appleBeats           = "apple beats";
+const char* const AiffAudioFormat::appleDenominator     = "apple denominator";
+const char* const AiffAudioFormat::appleNumerator       = "apple numerator";
+const char* const AiffAudioFormat::appleTag             = "apple tag";
+const char* const AiffAudioFormat::appleKey             = "apple key";
 
 //==============================================================================
 namespace AiffFileHelpers
@@ -113,9 +122,121 @@ namespace AiffFileHelpers
 
     } JUCE_PACKED;
 
+    //==============================================================================
+    struct BASCChunk
+    {
+        enum Key
+        {
+            minor = 1,
+            major = 2,
+            neither = 3,
+            both = 4
+        };
+
+        BASCChunk (InputStream& input)
+        {
+            zerostruct (*this);
+
+            flags       = input.readIntBigEndian();
+            numBeats    = input.readIntBigEndian();
+            rootNote    = input.readShortBigEndian();
+            key         = input.readShortBigEndian();
+            timeSigNum  = input.readShortBigEndian();
+            timeSigDen  = input.readShortBigEndian();
+            oneShot     = input.readShortBigEndian();
+            input.read (unknown, sizeof (unknown));
+        }
+
+        void addToMetadata (StringPairArray& metadata) const
+        {
+            const bool rootNoteSet = rootNote != 0;
+
+            setBoolFlag (metadata, AiffAudioFormat::appleOneShot, oneShot == 2);
+            setBoolFlag (metadata, AiffAudioFormat::appleRootSet, rootNoteSet);
+
+            if (rootNoteSet)
+                metadata.set (AiffAudioFormat::appleRootNote,   String (rootNote));
+
+            metadata.set (AiffAudioFormat::appleBeats,          String (numBeats));
+            metadata.set (AiffAudioFormat::appleDenominator,    String (timeSigDen));
+            metadata.set (AiffAudioFormat::appleNumerator,      String (timeSigNum));
+
+            const char* keyString = nullptr;
+
+            switch (key)
+            {
+                case minor:     keyString = "major";        break;
+                case major:     keyString = "major";        break;
+                case neither:   keyString = "neither";      break;
+                case both:      keyString = "both";         break;
+            }
+
+            if (keyString != nullptr)
+                metadata.set (AiffAudioFormat::appleKey, keyString);
+        }
+
+        void setBoolFlag (StringPairArray& values, const char* name, bool shouldBeSet) const
+        {
+            values.set (name, shouldBeSet ? "1" : "0");
+        }
+
+        uint32 flags;
+        uint32 numBeats;
+        uint16 rootNote;
+        uint16 key;
+        uint16 timeSigNum;
+        uint16 timeSigDen;
+        uint16 oneShot;
+        uint8 unknown[66];
+    } JUCE_PACKED;
+
    #if JUCE_MSVC
     #pragma pack (pop)
    #endif
+
+    //==============================================================================
+    static String readCATEChunk (InputStream& input, const uint32 length)
+    {
+        MemoryBlock mb;
+        input.skipNextBytes (4);
+        input.readIntoMemoryBlock (mb, length - 4);
+
+        static const char* appleGenres[] =
+        {
+            "Rock/Blues",
+            "Electronic/Dance",
+            "Jazz",
+            "Urban",
+            "World/Ethnic",
+            "Cinematic/New Age",
+            "Orchestral",
+            "Country/Folk",
+            "Experimental",
+            "Other Genre",
+            nullptr
+        };
+
+        const StringArray genres (appleGenres);
+        StringArray tagsArray;
+
+        int bytesLeft = (int) mb.getSize();
+        const char* data = static_cast <const char*> (mb.getData());
+
+        while (bytesLeft > 0)
+        {
+            const String tag (CharPointer_UTF8 (data),
+                              CharPointer_UTF8 (data + bytesLeft));
+
+            if (tag.isNotEmpty())
+                tagsArray.add (data);
+
+            const int numBytesInTag = genres.contains (tag) ? 118 : 50;
+            data += numBytesInTag;
+            bytesLeft -= numBytesInTag;
+        }
+
+        return tagsArray.joinIntoString (";");
+    }
 
     //==============================================================================
     namespace MarkChunk
@@ -391,6 +512,15 @@ public:
                         inst.calloc (jmax ((size_t) length + 1, sizeof (InstChunk)), 1);
                         input->read (inst, (int) length);
                         inst->copyTo (metadataValues);
+                    }
+                    else if (type == chunkName ("basc"))
+                    {
+                        AiffFileHelpers::BASCChunk (*input).addToMetadata (metadataValues);
+                    }
+                    else if (type == chunkName ("cate"))
+                    {
+                        metadataValues.set (AiffAudioFormat::appleTag,
+                                            AiffFileHelpers::readCATEChunk (*input, length));;
                     }
                     else if ((hasGotVer && hasGotData && hasGotType)
                               || chunkEnd < input->getPosition()

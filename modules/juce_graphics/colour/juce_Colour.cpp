@@ -1,24 +1,23 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-11 by Raw Material Software Ltd.
+   This file is part of the JUCE library.
+   Copyright (c) 2013 - Raw Material Software Ltd.
 
-  ------------------------------------------------------------------------------
+   Permission is granted to use this software under the terms of either:
+   a) the GPL v2 (or any later version)
+   b) the Affero GPL v3
 
-   JUCE can be redistributed and/or modified under the terms of the GNU General
-   Public License (Version 2), as published by the Free Software Foundation.
-   A copy of the license is included in the JUCE distribution, or can be found
-   online at www.gnu.org/licenses.
+   Details of these licenses can be found at: www.gnu.org/licenses
 
    JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
    A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
-  ------------------------------------------------------------------------------
+   ------------------------------------------------------------------------------
 
    To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.rawmaterialsoftware.com/juce for more information.
+   available: visit www.juce.com for more information.
 
   ==============================================================================
 */
@@ -32,7 +31,7 @@ namespace ColourHelpers
 
     // This is an adjusted brightness value, based on the way the human
     // eye responds to different colour channels..
-    static float getPerceivedBrightness (const Colour& c) noexcept
+    static float getPerceivedBrightness (Colour c) noexcept
     {
         const float r = c.getFloatRed();
         const float g = c.getFloatGreen();
@@ -46,7 +45,7 @@ namespace ColourHelpers
     //==============================================================================
     struct HSB
     {
-        HSB (const Colour& col) noexcept
+        HSB (Colour col) noexcept
         {
             const int r = col.getRed();
             const int g = col.getGreen();
@@ -92,7 +91,7 @@ namespace ColourHelpers
             brightness = hi / 255.0f;
         }
 
-        Colour toColour (const Colour& original) const noexcept
+        Colour toColour (Colour original) const noexcept
         {
             return Colour (hue, saturation, brightness, original.getAlpha());
         }
@@ -124,7 +123,7 @@ namespace ColourHelpers
     //==============================================================================
     struct YIQ
     {
-        YIQ (const Colour& c) noexcept
+        YIQ (Colour c) noexcept
         {
             const float r = c.getFloatRed();
             const float g = c.getFloatGreen();
@@ -169,8 +168,7 @@ bool Colour::operator== (const Colour& other) const noexcept    { return argb.ge
 bool Colour::operator!= (const Colour& other) const noexcept    { return argb.getARGB() != other.argb.getARGB(); }
 
 //==============================================================================
-Colour::Colour (const uint32 argb_) noexcept
-    : argb (argb_)
+Colour::Colour (const uint32 col) noexcept  : argb (col)
 {
 }
 
@@ -201,7 +199,9 @@ Colour::Colour (const uint8 red, const uint8 green, const uint8 blue, const floa
 
 Colour Colour::fromFloatRGBA (const float red, const float green, const float blue, const float alpha) noexcept
 {
-    return Colour (ColourHelpers::floatToUInt8 (red), ColourHelpers::floatToUInt8 (green), ColourHelpers::floatToUInt8 (blue), alpha);
+    return Colour (ColourHelpers::floatToUInt8 (red),
+                   ColourHelpers::floatToUInt8 (green),
+                   ColourHelpers::floatToUInt8 (blue), alpha);
 }
 
 Colour::Colour (const float hue, const float saturation, const float brightness, const float alpha) noexcept
@@ -273,7 +273,7 @@ Colour Colour::withMultipliedAlpha (const float alphaMultiplier) const noexcept
 }
 
 //==============================================================================
-Colour Colour::overlaidWith (const Colour& src) const noexcept
+Colour Colour::overlaidWith (Colour src) const noexcept
 {
     const int destAlpha = getAlpha();
 
@@ -294,7 +294,7 @@ Colour Colour::overlaidWith (const Colour& src) const noexcept
                    (uint8) resA);
 }
 
-Colour Colour::interpolatedWith (const Colour& other, float proportionOfOther) const noexcept
+Colour Colour::interpolatedWith (Colour other, float proportionOfOther) const noexcept
 {
     if (proportionOfOther <= 0)
         return *this;
@@ -391,23 +391,23 @@ Colour Colour::contrasting (const float amount) const noexcept
                             : Colours::white).withAlpha (amount));
 }
 
-Colour Colour::contrasting (const Colour& target, float minContrast) const noexcept
+Colour Colour::contrasting (Colour target, float minContrast) const noexcept
 {
     const ColourHelpers::YIQ bg (*this);
     ColourHelpers::YIQ fg (target);
 
-    if (fabs (bg.y - fg.y) >= minContrast)
+    if (std::abs (bg.y - fg.y) >= minContrast)
         return target;
 
     const float y1 = jmax (0.0f, bg.y - minContrast);
     const float y2 = jmin (1.0f, bg.y + minContrast);
-    fg.y = (fabs (y1 - bg.y) > fabs (y2 - bg.y)) ? y1 : y2;
+    fg.y = (std::abs (y1 - bg.y) > std::abs (y2 - bg.y)) ? y1 : y2;
 
     return fg.toColour();
 }
 
-Colour Colour::contrasting (const Colour& colour1,
-                            const Colour& colour2) noexcept
+Colour Colour::contrasting (Colour colour1,
+                            Colour colour2) noexcept
 {
     const float b1 = ColourHelpers::getPerceivedBrightness (colour1);
     const float b2 = ColourHelpers::getPerceivedBrightness (colour2);

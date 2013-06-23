@@ -1,30 +1,29 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-11 by Raw Material Software Ltd.
+   This file is part of the JUCE library.
+   Copyright (c) 2013 - Raw Material Software Ltd.
 
-  ------------------------------------------------------------------------------
+   Permission is granted to use this software under the terms of either:
+   a) the GPL v2 (or any later version)
+   b) the Affero GPL v3
 
-   JUCE can be redistributed and/or modified under the terms of the GNU General
-   Public License (Version 2), as published by the Free Software Foundation.
-   A copy of the license is included in the JUCE distribution, or can be found
-   online at www.gnu.org/licenses.
+   Details of these licenses can be found at: www.gnu.org/licenses
 
    JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
    A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
-  ------------------------------------------------------------------------------
+   ------------------------------------------------------------------------------
 
    To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.rawmaterialsoftware.com/juce for more information.
+   available: visit www.juce.com for more information.
 
   ==============================================================================
 */
 
-#ifndef __JUCER_MODULESPANEL_H_D0C12034__
-#define __JUCER_MODULESPANEL_H_D0C12034__
+#ifndef __JUCER_MODULESPANEL_JUCEHEADER__
+#define __JUCER_MODULESPANEL_JUCEHEADER__
 
 
 class ModulesPanel  : public PropertyComponent,
@@ -308,14 +307,17 @@ public:
 
                 if (const ModuleList::Module* module = moduleList.findModuleInfo (moduleID))
                 {
-                    String text;
-                    text << module->name << newLine << "Version: " << module->version << newLine << newLine
-                         << module->description;
+                    AttributedString s;
+                    s.setJustification (Justification::topLeft);
 
-                    GlyphArrangement ga;
-                    ga.addJustifiedText (Font (13.0f), text, 4.0f, 16.0f, getWidth() - 8.0f, Justification::topLeft);
-                    g.setColour (Colours::black);
-                    ga.draw (g);
+                    Font f (13.0f);
+
+                    s.append (module->name + "\n", f.boldened());
+                    s.append ("Version: "  + module->version
+                                + "     License: " + module->license + "\n", f.italicised());
+                    s.append ("\n" + module->description, f);
+
+                    s.draw (g, getLocalBounds().reduced (4, 2).toFloat());
                 }
             }
 
@@ -356,10 +358,10 @@ public:
                 String text ("This module requires the following dependencies:\n");
                 text << missingDependencies.joinIntoString (", ");
 
-                GlyphArrangement ga;
-                ga.addJustifiedText (Font (13.0f), text, 4.0f, 16.0f, getWidth() - 8.0f, Justification::topLeft);
-                g.setColour (Colours::red);
-                ga.draw (g);
+                AttributedString s;
+                s.setJustification (Justification::topLeft);
+                s.append (text, Font (13.0f), Colours::red);
+                s.draw (g, getLocalBounds().reduced (4, 16).toFloat());
             }
 
             void buttonClicked (Button*)
@@ -510,4 +512,4 @@ private:
     ScopedPointer<ModuleSettingsPanel> settings;
 };
 
-#endif
+#endif   // __JUCER_MODULESPANEL_JUCEHEADER__

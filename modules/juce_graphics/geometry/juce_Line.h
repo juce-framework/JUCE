@@ -1,24 +1,23 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-11 by Raw Material Software Ltd.
+   This file is part of the JUCE library.
+   Copyright (c) 2013 - Raw Material Software Ltd.
 
-  ------------------------------------------------------------------------------
+   Permission is granted to use this software under the terms of either:
+   a) the GPL v2 (or any later version)
+   b) the Affero GPL v3
 
-   JUCE can be redistributed and/or modified under the terms of the GNU General
-   Public License (Version 2), as published by the Free Software Foundation.
-   A copy of the license is included in the JUCE distribution, or can be found
-   online at www.gnu.org/licenses.
+   Details of these licenses can be found at: www.gnu.org/licenses
 
    JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
    A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
-  ------------------------------------------------------------------------------
+   ------------------------------------------------------------------------------
 
    To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.rawmaterialsoftware.com/juce for more information.
+   available: visit www.juce.com for more information.
 
   ==============================================================================
 */
@@ -66,8 +65,8 @@ public:
     }
 
     /** Creates a line from its start and end points. */
-    Line (const Point<ValueType>& startPoint,
-          const Point<ValueType>& endPoint) noexcept
+    Line (const Point<ValueType> startPoint,
+          const Point<ValueType> endPoint) noexcept
         : start (startPoint),
           end (endPoint)
     {
@@ -98,10 +97,10 @@ public:
     inline ValueType getEndY() const noexcept                               { return end.y; }
 
     /** Returns the line's start point. */
-    inline const Point<ValueType>& getStart() const noexcept                { return start; }
+    inline Point<ValueType> getStart() const noexcept                       { return start; }
 
     /** Returns the line's end point. */
-    inline const Point<ValueType>& getEnd() const noexcept                  { return end; }
+    inline Point<ValueType> getEnd() const noexcept                         { return end; }
 
     /** Changes this line's start point */
     void setStart (ValueType newStartX, ValueType newStartY) noexcept       { start.setXY (newStartX, newStartY); }
@@ -110,10 +109,10 @@ public:
     void setEnd (ValueType newEndX, ValueType newEndY) noexcept             { end.setXY (newEndX, newEndY); }
 
     /** Changes this line's start point */
-    void setStart (const Point<ValueType>& newStart) noexcept               { start = newStart; }
+    void setStart (const Point<ValueType> newStart) noexcept                { start = newStart; }
 
     /** Changes this line's end point */
-    void setEnd (const Point<ValueType>& newEnd) noexcept                   { end = newEnd; }
+    void setEnd (const Point<ValueType> newEnd) noexcept                    { end = newEnd; }
 
     /** Returns a line that is the same as this one, but with the start and end reversed, */
     const Line reversed() const noexcept                                    { return Line (end, start); }
@@ -250,7 +249,7 @@ public:
         @returns the point's distance from the line
         @see getPositionAlongLineOfNearestPoint
     */
-    ValueType getDistanceFromPoint (const Point<ValueType>& targetPoint,
+    ValueType getDistanceFromPoint (const Point<ValueType> targetPoint,
                                     Point<ValueType>& pointOnLine) const noexcept
     {
         const Point<ValueType> delta (end - start);
@@ -291,7 +290,7 @@ public:
                     turn this number into a position, use getPointAlongLineProportionally().
         @see getDistanceFromPoint, getPointAlongLineProportionally
     */
-    ValueType findNearestProportionalPositionTo (const Point<ValueType>& point) const noexcept
+    ValueType findNearestProportionalPositionTo (const Point<ValueType> point) const noexcept
     {
         const Point<ValueType> delta (end - start);
         const double length = delta.x * delta.x + delta.y * delta.y;
@@ -305,7 +304,7 @@ public:
     /** Finds the point on this line which is nearest to a given point.
         @see getDistanceFromPoint, findNearestProportionalPositionTo
     */
-    Point<ValueType> findNearestPointTo (const Point<ValueType>& point) const noexcept
+    Point<ValueType> findNearestPointTo (const Point<ValueType> point) const noexcept
     {
         return getPointAlongLineProportionally (findNearestProportionalPositionTo (point));
     }
@@ -316,7 +315,7 @@ public:
         coordinate of this line at the given x (assuming the line extends infinitely
         in both directions).
     */
-    bool isPointAbove (const Point<ValueType>& point) const noexcept
+    bool isPointAbove (const Point<ValueType> point) const noexcept
     {
         return start.x != end.x
                 && point.y < ((end.y - start.y)
@@ -349,8 +348,8 @@ private:
     //==============================================================================
     Point<ValueType> start, end;
 
-    static bool findIntersection (const Point<ValueType>& p1, const Point<ValueType>& p2,
-                                  const Point<ValueType>& p3, const Point<ValueType>& p4,
+    static bool findIntersection (const Point<ValueType> p1, const Point<ValueType> p2,
+                                  const Point<ValueType> p3, const Point<ValueType> p4,
                                   Point<ValueType>& intersection) noexcept
     {
         if (p2 == p3)

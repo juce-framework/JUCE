@@ -1,24 +1,27 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-11 by Raw Material Software Ltd.
+   This file is part of the juce_core module of the JUCE library.
+   Copyright (c) 2013 - Raw Material Software Ltd.
 
-  ------------------------------------------------------------------------------
+   Permission to use, copy, modify, and/or distribute this software for any purpose with
+   or without fee is hereby granted, provided that the above copyright notice and this
+   permission notice appear in all copies.
 
-   JUCE can be redistributed and/or modified under the terms of the GNU General
-   Public License (Version 2), as published by the Free Software Foundation.
-   A copy of the license is included in the JUCE distribution, or can be found
-   online at www.gnu.org/licenses.
+   THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH REGARD
+   TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS. IN
+   NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL
+   DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER
+   IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
+   CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
-   JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-   A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+   ------------------------------------------------------------------------------
 
-  ------------------------------------------------------------------------------
+   NOTE! This permissive ISC license applies ONLY to files within the juce_core module!
+   All other JUCE modules are covered by a dual GPL/commercial license, so if you are
+   using any other modules, be sure to check that you also comply with their license.
 
-   To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.rawmaterialsoftware.com/juce for more information.
+   For more details, visit www.juce.com
 
   ==============================================================================
 */
@@ -52,25 +55,25 @@ public:
     {
     }
 
-    inline CharPointer_UTF16& operator= (const CharPointer_UTF16& other) noexcept
+    inline CharPointer_UTF16 operator= (CharPointer_UTF16 other) noexcept
     {
         data = other.data;
         return *this;
     }
 
-    inline CharPointer_UTF16& operator= (const CharType* text) noexcept
+    inline CharPointer_UTF16 operator= (const CharType* text) noexcept
     {
         data = const_cast <CharType*> (text);
         return *this;
     }
 
     /** This is a pointer comparison, it doesn't compare the actual text. */
-    inline bool operator== (const CharPointer_UTF16& other) const noexcept { return data == other.data; }
-    inline bool operator!= (const CharPointer_UTF16& other) const noexcept { return data != other.data; }
-    inline bool operator<= (const CharPointer_UTF16& other) const noexcept { return data <= other.data; }
-    inline bool operator<  (const CharPointer_UTF16& other) const noexcept { return data <  other.data; }
-    inline bool operator>= (const CharPointer_UTF16& other) const noexcept { return data >= other.data; }
-    inline bool operator>  (const CharPointer_UTF16& other) const noexcept { return data >  other.data; }
+    inline bool operator== (CharPointer_UTF16 other) const noexcept     { return data == other.data; }
+    inline bool operator!= (CharPointer_UTF16 other) const noexcept     { return data != other.data; }
+    inline bool operator<= (CharPointer_UTF16 other) const noexcept     { return data <= other.data; }
+    inline bool operator<  (CharPointer_UTF16 other) const noexcept     { return data <  other.data; }
+    inline bool operator>= (CharPointer_UTF16 other) const noexcept     { return data >= other.data; }
+    inline bool operator>  (CharPointer_UTF16 other) const noexcept     { return data >  other.data; }
 
     /** Returns the address that this pointer is pointing to. */
     inline CharType* getAddress() const noexcept        { return data; }
@@ -93,7 +96,7 @@ public:
     }
 
     /** Moves this pointer along to the next character in the string. */
-    CharPointer_UTF16& operator++() noexcept
+    CharPointer_UTF16 operator++() noexcept
     {
         const juce_wchar n = *data++;
 
@@ -104,7 +107,7 @@ public:
     }
 
     /** Moves this pointer back to the previous character in the string. */
-    CharPointer_UTF16& operator--() noexcept
+    CharPointer_UTF16 operator--() noexcept
     {
         const juce_wchar n = *--data;
 
@@ -231,7 +234,7 @@ public:
     }
 
     /** Returns the number of characters in this string, or up to the given end pointer, whichever is lower. */
-    size_t lengthUpTo (const CharPointer_UTF16& end) const noexcept
+    size_t lengthUpTo (const CharPointer_UTF16 end) const noexcept
     {
         return CharacterFunctions::lengthUpTo (*this, end);
     }
@@ -281,13 +284,13 @@ public:
 
     /** Copies a source string to this pointer, advancing this pointer as it goes. */
     template <typename CharPointer>
-    void writeAll (const CharPointer& src) noexcept
+    void writeAll (const CharPointer src) noexcept
     {
         CharacterFunctions::copyAll (*this, src);
     }
 
     /** Copies a source string to this pointer, advancing this pointer as it goes. */
-    void writeAll (const CharPointer_UTF16& src) noexcept
+    void writeAll (const CharPointer_UTF16 src) noexcept
     {
         const CharType* s = src.data;
 
@@ -303,7 +306,7 @@ public:
         to the destination buffer before stopping.
     */
     template <typename CharPointer>
-    size_t writeWithDestByteLimit (const CharPointer& src, const size_t maxDestBytes) noexcept
+    size_t writeWithDestByteLimit (const CharPointer src, const size_t maxDestBytes) noexcept
     {
         return CharacterFunctions::copyWithDestByteLimit (*this, src, maxDestBytes);
     }
@@ -313,51 +316,51 @@ public:
         written to the destination buffer before stopping (including the terminating null).
     */
     template <typename CharPointer>
-    void writeWithCharLimit (const CharPointer& src, const int maxChars) noexcept
+    void writeWithCharLimit (const CharPointer src, const int maxChars) noexcept
     {
         CharacterFunctions::copyWithCharLimit (*this, src, maxChars);
     }
 
     /** Compares this string with another one. */
     template <typename CharPointer>
-    int compare (const CharPointer& other) const noexcept
+    int compare (const CharPointer other) const noexcept
     {
         return CharacterFunctions::compare (*this, other);
     }
 
     /** Compares this string with another one, up to a specified number of characters. */
     template <typename CharPointer>
-    int compareUpTo (const CharPointer& other, const int maxChars) const noexcept
+    int compareUpTo (const CharPointer other, const int maxChars) const noexcept
     {
         return CharacterFunctions::compareUpTo (*this, other, maxChars);
     }
 
     /** Compares this string with another one. */
     template <typename CharPointer>
-    int compareIgnoreCase (const CharPointer& other) const noexcept
+    int compareIgnoreCase (const CharPointer other) const noexcept
     {
         return CharacterFunctions::compareIgnoreCase (*this, other);
     }
 
     /** Compares this string with another one, up to a specified number of characters. */
     template <typename CharPointer>
-    int compareIgnoreCaseUpTo (const CharPointer& other, const int maxChars) const noexcept
+    int compareIgnoreCaseUpTo (const CharPointer other, const int maxChars) const noexcept
     {
         return CharacterFunctions::compareIgnoreCaseUpTo (*this, other, maxChars);
     }
 
    #if JUCE_WINDOWS && ! DOXYGEN
-    int compareIgnoreCase (const CharPointer_UTF16& other) const noexcept
+    int compareIgnoreCase (const CharPointer_UTF16 other) const noexcept
     {
         return _wcsicmp (data, other.data);
     }
 
-    int compareIgnoreCaseUpTo (const CharPointer_UTF16& other, int maxChars) const noexcept
+    int compareIgnoreCaseUpTo (const CharPointer_UTF16 other, int maxChars) const noexcept
     {
         return _wcsnicmp (data, other.data, (size_t) maxChars);
     }
 
-    int indexOf (const CharPointer_UTF16& stringToFind) const noexcept
+    int indexOf (const CharPointer_UTF16 stringToFind) const noexcept
     {
         const CharType* const t = wcsstr (data, stringToFind.getAddress());
         return t == nullptr ? -1 : (int) (t - data);
@@ -366,7 +369,7 @@ public:
 
     /** Returns the character index of a substring, or -1 if it isn't found. */
     template <typename CharPointer>
-    int indexOf (const CharPointer& stringToFind) const noexcept
+    int indexOf (const CharPointer stringToFind) const noexcept
     {
         return CharacterFunctions::indexOf (*this, stringToFind);
     }
@@ -466,7 +469,7 @@ public:
     }
 
     /** Atomically swaps this pointer for a new value, returning the previous value. */
-    CharPointer_UTF16 atomicSwap (const CharPointer_UTF16& newValue)
+    CharPointer_UTF16 atomicSwap (const CharPointer_UTF16 newValue)
     {
         return CharPointer_UTF16 (reinterpret_cast <Atomic<CharType*>&> (data).exchange (newValue.data));
     }

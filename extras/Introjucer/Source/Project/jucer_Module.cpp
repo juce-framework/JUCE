@@ -1,24 +1,23 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-11 by Raw Material Software Ltd.
+   This file is part of the JUCE library.
+   Copyright (c) 2013 - Raw Material Software Ltd.
 
-  ------------------------------------------------------------------------------
+   Permission is granted to use this software under the terms of either:
+   a) the GPL v2 (or any later version)
+   b) the Affero GPL v3
 
-   JUCE can be redistributed and/or modified under the terms of the GNU General
-   Public License (Version 2), as published by the Free Software Foundation.
-   A copy of the license is included in the JUCE distribution, or can be found
-   online at www.gnu.org/licenses.
+   Details of these licenses can be found at: www.gnu.org/licenses
 
    JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
    A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
-  ------------------------------------------------------------------------------
+   ------------------------------------------------------------------------------
 
    To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.rawmaterialsoftware.com/juce for more information.
+   available: visit www.juce.com for more information.
 
   ==============================================================================
 */
@@ -71,6 +70,45 @@ bool ModuleList::operator== (const ModuleList& other) const
 bool ModuleList::isLocalModulesFolderValid()
 {
     return isModulesFolder (getModulesFolderForJuceOrModulesFolder (getLocalModulesFolder (nullptr)));
+}
+
+static int getVersionElement (const String& v, int index)
+{
+    StringArray parts;
+    parts.addTokens (v, "., ", String::empty);
+
+    return parts [parts.size() - index - 1].getIntValue();
+}
+
+static int getJuceVersion (const String& v)
+{
+    return getVersionElement (v, 2) * 100000
+         + getVersionElement (v, 1) * 1000
+         + getVersionElement (v, 0);
+}
+
+static int getBuiltJuceVersion()
+{
+    return JUCE_MAJOR_VERSION * 100000
+         + JUCE_MINOR_VERSION * 1000
+         + JUCE_BUILDNUMBER;
+}
+
+bool ModuleList::isLibraryNewerThanIntrojucer()
+{
+    ModuleList list;
+    list.rescan (getModulesFolderForJuceOrModulesFolder (getLocalModulesFolder (nullptr)));
+
+    for (int i = list.modules.size(); --i >= 0;)
+    {
+        const Module* m = list.modules.getUnchecked(i);
+
+        if (m->uid.startsWith ("juce_")
+             && getJuceVersion (m->version) > getBuiltJuceVersion())
+            return true;
+    }
+
+    return false;
 }
 
 bool ModuleList::isJuceFolder (const File& folder)
@@ -184,21 +222,18 @@ Result ModuleList::rescan (const File& newModulesFolder)
             {
                 LibraryModule m (moduleDef);
 
-                if (m.isValid())
-                {
-                    Module* info = new Module();
-                    modules.add (info);
-
-                    info->uid = m.getID();
-                    info->version = m.getVersion();
-                    info->name = m.moduleInfo ["name"];
-                    info->description = m.moduleInfo ["description"];
-                    info->file = moduleDef;
-                }
-                else
-                {
+                if (! m.isValid())
                     return Result::fail ("Failed to load module manifest: " + moduleDef.getFullPathName());
-                }
+
+                Module* info = new Module();
+                modules.add (info);
+
+                info->uid = m.getID();
+                info->version = m.getVersion();
+                info->name = m.moduleInfo ["name"];
+                info->description = m.moduleInfo ["description"];
+                info->license = m.moduleInfo ["license"];
+                info->file = moduleDef;
             }
         }
     }
@@ -211,7 +246,7 @@ bool ModuleList::loadFromWebsite()
 {
     modules.clear();
 
-    URL baseURL ("http://www.rawmaterialsoftware.com/juce/modules");
+    URL baseURL ("http://www.juce.com/juce/modules");
     URL url (baseURL.getChildURL ("modulelist.php"));
 
     var infoList (JSON::parse (url.readEntireTextStream (false)));
@@ -239,6 +274,7 @@ bool ModuleList::loadFromWebsite()
                     info->version = lm.getVersion();
                     info->name = lm.getName();
                     info->description = lm.getDescription();
+                    info->license = lm.getLicense();
                     info->url = baseURL.getChildURL (file);
                 }
             }
@@ -260,6 +296,7 @@ bool ModuleList::Module::operator== (const Module& other) const
              && version == other.version
              && name == other.name
              && description == other.description
+             && license == other.license
              && file == other.file
              && url == other.url;
 }
@@ -538,7 +575,8 @@ void LibraryModule::prepareExporter (ProjectExporter& exporter, ProjectSaver& pr
 
 void LibraryModule::createPropertyEditors (ProjectExporter& exporter, PropertyListBuilder& props) const
 {
-    if (isVSTPluginHost (exporter.getProject()))
+    if (isVSTPluginHost (exporter.getProject())
+         && ! (isPluginClient() && shouldBuildVST  (exporter.getProject()).getValue()))
         VSTHelpers::createVSTPathEditor (exporter, props);
 
     if (isPluginClient())
@@ -714,16 +752,19 @@ static void addFileWithGroups (Project::Item& group, const RelativePath& file, c
     }
 }
 
+void LibraryModule::findBrowseableFiles (const File& localModuleFolder, Array<File>& filesFound) const
+{
+    const var filesArray (moduleInfo ["browse"]);
+
+    if (const Array<var>* const files = filesArray.getArray())
+        for (int i = 0; i < files->size(); ++i)
+            findWildcardMatches (localModuleFolder, files->getReference(i), filesFound);
+}
+
 void LibraryModule::addBrowsableCode (ProjectExporter& exporter, const Array<File>& compiled, const File& localModuleFolder) const
 {
     if (sourceFiles.size() == 0)
-    {
-        const var filesArray (moduleInfo ["browse"]);
-        const Array<var>* const files = filesArray.getArray();
-
-        for (int i = 0; i < files->size(); ++i)
-            findWildcardMatches (localModuleFolder, files->getReference(i), sourceFiles);
-    }
+        findBrowseableFiles (localModuleFolder, sourceFiles);
 
     Project::Item sourceGroup (Project::Item::createGroup (exporter.getProject(), getID(), "__mainsourcegroup" + getID()));
 

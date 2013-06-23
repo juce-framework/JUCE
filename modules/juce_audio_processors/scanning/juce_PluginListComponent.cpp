@@ -1,24 +1,23 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-11 by Raw Material Software Ltd.
+   This file is part of the JUCE library.
+   Copyright (c) 2013 - Raw Material Software Ltd.
 
-  ------------------------------------------------------------------------------
+   Permission is granted to use this software under the terms of either:
+   a) the GPL v2 (or any later version)
+   b) the Affero GPL v3
 
-   JUCE can be redistributed and/or modified under the terms of the GNU General
-   Public License (Version 2), as published by the Free Software Foundation.
-   A copy of the license is included in the JUCE distribution, or can be found
-   online at www.gnu.org/licenses.
+   Details of these licenses can be found at: www.gnu.org/licenses
 
    JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
    A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
-  ------------------------------------------------------------------------------
+   ------------------------------------------------------------------------------
 
    To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.rawmaterialsoftware.com/juce for more information.
+   available: visit www.juce.com for more information.
 
   ==============================================================================
 */
@@ -32,7 +31,7 @@ PluginListComponent::PluginListComponent (AudioPluginFormatManager& manager,
       deadMansPedalFile (deadMansPedal),
       optionsButton ("Options..."),
       propertiesToUse (properties),
-      scanOnBackgroundThread (false)
+      numThreads (0)
 {
     listBox.setModel (this);
     addAndMakeVisible (&listBox);
@@ -60,9 +59,9 @@ void PluginListComponent::setOptionsButtonText (const String& newText)
     resized();
 }
 
-void PluginListComponent::setScansOnMessageThread (bool useMessageThread) noexcept
+void PluginListComponent::setNumberOfThreadsForScanning (int num)
 {
-    scanOnBackgroundThread = ! useMessageThread;
+    numThreads = num;
 }
 
 void PluginListComponent::resized()
@@ -200,7 +199,11 @@ void PluginListComponent::optionsMenuCallback (int result)
         case 6:   showSelectedFolder(); break;
         case 7:   removeMissingPlugins(); break;
 
-        default:  scanFor (formatManager.getFormat (result - 10)); break;
+        default:
+            if (AudioPluginFormat* format = formatManager.getFormat (result - 10))
+                scanFor (*format);
+
+            break;
     }
 }
 
@@ -243,28 +246,38 @@ void PluginListComponent::filesDropped (const StringArray& files, int, int)
     list.scanAndAddDragAndDroppedFiles (formatManager, files, typesFound);
 }
 
+FileSearchPath PluginListComponent::getLastSearchPath (PropertiesFile& properties, AudioPluginFormat& format)
+{
+    return properties.getValue ("lastPluginScanPath_" + format.getName(),
+                                format.getDefaultLocationsToSearch().toString());
+}
+
+void PluginListComponent::setLastSearchPath (PropertiesFile& properties, AudioPluginFormat& format,
+                                             const FileSearchPath& newPath)
+{
+    properties.setValue ("lastPluginScanPath_" + format.getName(), newPath.toString());
+}
+
 //==============================================================================
-class PluginListComponent::Scanner    : private Timer,
-                                        private Thread
+class PluginListComponent::Scanner    : private Timer
 {
 public:
     Scanner (PluginListComponent& plc,
              AudioPluginFormat& format,
              PropertiesFile* properties,
-             bool useThread)
-        : Thread ("plugin_scan"),
-          owner (plc), formatToScan (format), propertiesToUse (properties),
+             int threads)
+        : owner (plc), formatToScan (format), propertiesToUse (properties),
           pathChooserWindow (TRANS("Select folders to scan..."), String::empty, AlertWindow::NoIcon),
           progressWindow (TRANS("Scanning for plug-ins..."),
                           TRANS("Searching for all possible plug-in files..."), AlertWindow::NoIcon),
-          progress (0.0), shouldUseThread (useThread), finished (false)
+          progress (0.0), numThreads (threads), finished (false)
     {
         FileSearchPath path (formatToScan.getDefaultLocationsToSearch());
 
         if (path.getNumPaths() > 0) // if the path is empty, then paths aren't used for this format.
         {
             if (propertiesToUse != nullptr)
-                path = propertiesToUse->getValue ("lastPluginScanPath_" + formatToScan.getName(), path.toString());
+                path = getLastSearchPath (*propertiesToUse, formatToScan);
 
             pathList.setSize (500, 300);
             pathList.setPath (path);
@@ -285,7 +298,11 @@ public:
 
     ~Scanner()
     {
-        stopThread (10000);
+        if (pool != nullptr)
+        {
+            pool->removeAllJobs (true, 60000);
+            pool = nullptr;
+        }
     }
 
 private:
@@ -309,7 +326,7 @@ private:
 
         if (propertiesToUse != nullptr)
         {
-            propertiesToUse->setValue ("lastPluginScanPath_" + formatToScan.getName(), pathList.getPath().toString());
+            setLastSearchPath (*propertiesToUse, formatToScan, pathList.getPath());
             propertiesToUse->saveIfNeeded();
         }
 
@@ -317,8 +334,13 @@ private:
         progressWindow.addProgressBarComponent (progress);
         progressWindow.enterModalState();
 
-        if (shouldUseThread)
-            startThread();
+        if (numThreads > 0)
+        {
+            pool = new ThreadPool (numThreads);
+
+            for (int i = numThreads; --i >= 0;)
+                pool->addJob (new ScanJob (*this), true);
+        }
 
         startTimer (20);
     }
@@ -331,7 +353,7 @@ private:
 
     void timerCallback()
     {
-        if (! isThreadRunning())
+        if (pool == nullptr)
         {
             if (doNextScan())
                 startTimer (20);
@@ -346,15 +368,9 @@ private:
             progressWindow.setMessage (progressMessage);
     }
 
-    void run()
-    {
-        while (doNextScan() && ! threadShouldExit())
-        {}
-    }
-
     bool doNextScan()
     {
-        progressMessage = TRANS("Testing:\n\n") + scanner->getNextPluginFileThatWillBeScanned();
+        progressMessage = TRANS("Testing") + ":\n\n" + scanner->getNextPluginFileThatWillBeScanned();
 
         if (scanner->scanNextFile (true))
         {
@@ -374,15 +390,35 @@ private:
     FileSearchPathListComponent pathList;
     String progressMessage;
     double progress;
-    bool shouldUseThread, finished;
+    int numThreads;
+    bool finished;
+
+    ScopedPointer<ThreadPool> pool;
+
+    struct ScanJob  : public ThreadPoolJob
+    {
+        ScanJob (Scanner& s)  : ThreadPoolJob ("pluginscan"), scanner (s) {}
+
+        JobStatus runJob()
+        {
+            while (scanner.doNextScan() && ! shouldExit())
+            {}
+
+            return jobHasFinished;
+        }
+
+        Scanner& scanner;
+
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ScanJob)
+    };
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Scanner)
+
 };
 
-void PluginListComponent::scanFor (AudioPluginFormat* format)
+void PluginListComponent::scanFor (AudioPluginFormat& format)
 {
-    if (format != nullptr)
-        currentScanner = new Scanner (*this, *format, propertiesToUse, scanOnBackgroundThread);
+    currentScanner = new Scanner (*this, format, propertiesToUse, numThreads);
 }
 
 void PluginListComponent::scanFinished (const StringArray& failedFiles)
@@ -397,6 +433,7 @@ void PluginListComponent::scanFinished (const StringArray& failedFiles)
     if (shortNames.size() > 0)
         AlertWindow::showMessageBoxAsync (AlertWindow::InfoIcon,
                                           TRANS("Scan complete"),
-                                          TRANS("Note that the following files appeared to be plugin files, but failed to load correctly:\n\n")
+                                          TRANS("Note that the following files appeared to be plugin files, but failed to load correctly")
+                                            + ":\n\n"
                                             + shortNames.joinIntoString (", "));
 }

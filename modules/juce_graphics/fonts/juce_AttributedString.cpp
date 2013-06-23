@@ -1,34 +1,33 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-11 by Raw Material Software Ltd.
+   This file is part of the JUCE library.
+   Copyright (c) 2013 - Raw Material Software Ltd.
 
-  ------------------------------------------------------------------------------
+   Permission is granted to use this software under the terms of either:
+   a) the GPL v2 (or any later version)
+   b) the Affero GPL v3
 
-   JUCE can be redistributed and/or modified under the terms of the GNU General
-   Public License (Version 2), as published by the Free Software Foundation.
-   A copy of the license is included in the JUCE distribution, or can be found
-   online at www.gnu.org/licenses.
+   Details of these licenses can be found at: www.gnu.org/licenses
 
    JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
    A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
-  ------------------------------------------------------------------------------
+   ------------------------------------------------------------------------------
 
    To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.rawmaterialsoftware.com/juce for more information.
+   available: visit www.juce.com for more information.
 
   ==============================================================================
 */
 
-AttributedString::Attribute::Attribute (const Range<int>& range_, const Colour& colour_)
+AttributedString::Attribute::Attribute (Range<int> range_, Colour colour_)
     : range (range_), colour (new Colour (colour_))
 {
 }
 
-AttributedString::Attribute::Attribute (const Range<int>& range_, const Font& font_)
+AttributedString::Attribute::Attribute (Range<int> range_, const Font& font_)
     : range (range_), font (new Font (font_))
 {
 }
@@ -137,7 +136,7 @@ void AttributedString::append (const String& textToAppend, const Font& font)
     setFont (Range<int> (oldLength, oldLength + newLength), font);
 }
 
-void AttributedString::append (const String& textToAppend, const Colour& colour)
+void AttributedString::append (const String& textToAppend, Colour colour)
 {
     const int oldLength = text.length();
     const int newLength = textToAppend.length();
@@ -146,7 +145,7 @@ void AttributedString::append (const String& textToAppend, const Colour& colour)
     setColour (Range<int> (oldLength, oldLength + newLength), colour);
 }
 
-void AttributedString::append (const String& textToAppend, const Font& font, const Colour& colour)
+void AttributedString::append (const String& textToAppend, const Font& font, Colour colour)
 {
     const int oldLength = text.length();
     const int newLength = textToAppend.length();
@@ -191,12 +190,12 @@ void AttributedString::setLineSpacing (const float newLineSpacing) noexcept
     lineSpacing = newLineSpacing;
 }
 
-void AttributedString::setColour (const Range<int>& range, const Colour& colour)
+void AttributedString::setColour (Range<int> range, Colour colour)
 {
     attributes.add (new Attribute (range, colour));
 }
 
-void AttributedString::setColour (const Colour& colour)
+void AttributedString::setColour (Colour colour)
 {
     for (int i = attributes.size(); --i >= 0;)
         if (attributes.getUnchecked(i)->getColour() != nullptr)
@@ -205,7 +204,7 @@ void AttributedString::setColour (const Colour& colour)
     setColour (Range<int> (0, text.length()), colour);
 }
 
-void AttributedString::setFont (const Range<int>& range, const Font& font)
+void AttributedString::setFont (Range<int> range, const Font& font)
 {
     attributes.add (new Attribute (range, font));
 }

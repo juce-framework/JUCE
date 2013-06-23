@@ -28,8 +28,7 @@
 
 //==============================================================================
 AudioDemoSetupPage::AudioDemoSetupPage (AudioDeviceManager& deviceManager_)
-    : deviceManager (deviceManager_),
-      deviceSelector (0)
+    : deviceManager (deviceManager_)
 {
     addAndMakeVisible (deviceSelector = new AudioDeviceSelectorComponent (deviceManager, 0, 2, 0, 2, true, true, true, false));
 
@@ -49,7 +48,7 @@ AudioDemoSetupPage::~AudioDemoSetupPage()
     //[Destructor_pre]. You can add your own custom destruction code here..
     //[/Destructor_pre]
 
-    deleteAndZero (deviceSelector);
+    deviceSelector = nullptr;
 
 
     //[Destructor]. You can add your own custom destruction code here..

@@ -1,24 +1,23 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-11 by Raw Material Software Ltd.
+   This file is part of the JUCE library.
+   Copyright (c) 2013 - Raw Material Software Ltd.
 
-  ------------------------------------------------------------------------------
+   Permission is granted to use this software under the terms of either:
+   a) the GPL v2 (or any later version)
+   b) the Affero GPL v3
 
-   JUCE can be redistributed and/or modified under the terms of the GNU General
-   Public License (Version 2), as published by the Free Software Foundation.
-   A copy of the license is included in the JUCE distribution, or can be found
-   online at www.gnu.org/licenses.
+   Details of these licenses can be found at: www.gnu.org/licenses
 
    JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
    A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
-  ------------------------------------------------------------------------------
+   ------------------------------------------------------------------------------
 
    To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.rawmaterialsoftware.com/juce for more information.
+   available: visit www.juce.com for more information.
 
   ==============================================================================
 */
@@ -98,7 +97,7 @@ void Viewport::setViewedComponent (Component* const newViewedComponent, const bo
 int Viewport::getMaximumVisibleWidth() const    { return contentHolder.getWidth(); }
 int Viewport::getMaximumVisibleHeight() const   { return contentHolder.getHeight(); }
 
-Point<int> Viewport::viewportPosToCompPos (const Point<int>& pos) const
+Point<int> Viewport::viewportPosToCompPos (Point<int> pos) const
 {
     jassert (contentComp != nullptr);
     return Point<int> (jmax (jmin (0, contentHolder.getWidth()  - contentComp->getWidth()),  jmin (0, -(pos.x))),
@@ -110,7 +109,7 @@ void Viewport::setViewPosition (const int xPixelsOffset, const int yPixelsOffset
     setViewPosition (Point<int> (xPixelsOffset, yPixelsOffset));
 }
 
-void Viewport::setViewPosition (const Point<int>& newPosition)
+void Viewport::setViewPosition (Point<int> newPosition)
 {
     if (contentComp != nullptr)
         contentComp->setTopLeftPosition (viewportPosToCompPos (newPosition));
@@ -350,7 +349,7 @@ void Viewport::mouseWheelMove (const MouseEvent& e, const MouseWheelDetails& whe
 
 bool Viewport::useMouseWheelMoveIfNeeded (const MouseEvent& e, const MouseWheelDetails& wheel)
 {
-    if (! (e.mods.isAltDown() || e.mods.isCtrlDown()))
+    if (! (e.mods.isAltDown() || e.mods.isCtrlDown() || e.mods.isCommandDown()))
     {
         const bool hasVertBar = verticalScrollBar.isVisible();
         const bool hasHorzBar = horizontalScrollBar.isVisible();

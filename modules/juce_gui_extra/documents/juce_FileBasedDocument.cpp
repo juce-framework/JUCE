@@ -1,24 +1,23 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-11 by Raw Material Software Ltd.
+   This file is part of the JUCE library.
+   Copyright (c) 2013 - Raw Material Software Ltd.
 
-  ------------------------------------------------------------------------------
+   Permission is granted to use this software under the terms of either:
+   a) the GPL v2 (or any later version)
+   b) the Affero GPL v3
 
-   JUCE can be redistributed and/or modified under the terms of the GNU General
-   Public License (Version 2), as published by the Free Software Foundation.
-   A copy of the license is included in the JUCE distribution, or can be found
-   online at www.gnu.org/licenses.
+   Details of these licenses can be found at: www.gnu.org/licenses
 
    JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
    A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
-  ------------------------------------------------------------------------------
+   ------------------------------------------------------------------------------
 
    To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.rawmaterialsoftware.com/juce for more information.
+   available: visit www.juce.com for more information.
 
   ==============================================================================
 */
@@ -98,8 +97,8 @@ bool FileBasedDocument::loadFrom (const File& newFile,
     {
         AlertWindow::showMessageBox (AlertWindow::WarningIcon,
                                      TRANS("Failed to open file..."),
-                                     TRANS("There was an error while trying to load the file:\n\n")
-                                       + newFile.getFullPathName()
+                                     TRANS("There was an error while trying to load the file: FLNM")
+                                        .replace ("FLNM", "\n" + newFile.getFullPathName())
                                        + "\n\n"
                                        + result.getErrorMessage());
     }
@@ -117,6 +116,18 @@ bool FileBasedDocument::loadFromUserSpecifiedFile (const bool showMessageOnFailu
         return loadFrom (fc.getResult(), showMessageOnFailure);
 
     return false;
+}
+
+static bool askToOverwriteFile (const File& newFile)
+{
+    return AlertWindow::showOkCancelBox (AlertWindow::WarningIcon,
+                                            TRANS("File already exists"),
+                                            TRANS("There's already a file called: FLMN")
+                                                .replace ("FLNM", newFile.getFullPathName())
+                                             + "\n\n"
+                                             + TRANS("Are you sure you want to overwrite it?"),
+                                            TRANS("Overwrite"),
+                                            TRANS("Cancel"));
 }
 
 //==============================================================================
@@ -144,19 +155,10 @@ FileBasedDocument::SaveResult FileBasedDocument::saveAs (const File& newFile,
         return failedToWriteToFile;
     }
 
-    if (warnAboutOverwritingExistingFiles && newFile.exists())
-    {
-        if (! AlertWindow::showOkCancelBox (AlertWindow::WarningIcon,
-                                            TRANS("File already exists"),
-                                            TRANS("There's already a file called:\n\n")
-                                              + newFile.getFullPathName()
-                                              + TRANS("\n\nAre you sure you want to overwrite it?"),
-                                            TRANS("overwrite"),
-                                            TRANS("cancel")))
-        {
-            return userCancelledSave;
-        }
-    }
+    if (warnAboutOverwritingExistingFiles
+          && newFile.exists()
+          && ! askToOverwriteFile (newFile))
+        return userCancelledSave;
 
     MouseCursor::showWaitCursor();
 
@@ -180,10 +182,9 @@ FileBasedDocument::SaveResult FileBasedDocument::saveAs (const File& newFile,
     {
         AlertWindow::showMessageBox (AlertWindow::WarningIcon,
                                      TRANS("Error writing to file..."),
-                                     TRANS("An error occurred while trying to save \"")
-                                        + getDocumentTitle()
-                                        + TRANS("\" to the file:\n\n")
-                                        + newFile.getFullPathName()
+                                     TRANS("An error occurred while trying to save \"DCNM\" to the file: FLNM")
+                                         .replace ("DCNM", getDocumentTitle())
+                                         .replace ("FLNM", "\n" + newFile.getFullPathName())
                                         + "\n\n"
                                         + result.getErrorMessage());
     }
@@ -198,11 +199,11 @@ FileBasedDocument::SaveResult FileBasedDocument::saveIfNeededAndUserAgrees()
 
     const int r = AlertWindow::showYesNoCancelBox (AlertWindow::QuestionIcon,
                                                    TRANS("Closing document..."),
-                                                   TRANS("Do you want to save the changes to \"")
-                                                       + getDocumentTitle() + "\"?",
-                                                   TRANS("save"),
-                                                   TRANS("discard changes"),
-                                                   TRANS("cancel"));
+                                                   TRANS("Do you want to save the changes to \"DCNM\"?")
+                                                    .replace ("DCNM", getDocumentTitle()),
+                                                   TRANS("Save"),
+                                                   TRANS("Discard changes"),
+                                                   TRANS("Cancel"));
 
     if (r == 1)  // save changes
         return save (true, true);
@@ -248,19 +249,8 @@ FileBasedDocument::SaveResult FileBasedDocument::saveAsInteractive (const bool w
         {
             chosen = chosen.withFileExtension (fileExtension);
 
-            if (chosen.exists())
-            {
-                if (! AlertWindow::showOkCancelBox (AlertWindow::WarningIcon,
-                                                    TRANS("File already exists"),
-                                                    TRANS("There's already a file called:")
-                                                      + "\n\n" + chosen.getFullPathName()
-                                                      + "\n\n" + TRANS("Are you sure you want to overwrite it?"),
-                                                    TRANS("overwrite"),
-                                                    TRANS("cancel")))
-                {
-                    return userCancelledSave;
-                }
-            }
+            if (chosen.exists() && ! askToOverwriteFile (chosen))
+                return userCancelledSave;
         }
 
         setLastDocumentOpened (chosen);

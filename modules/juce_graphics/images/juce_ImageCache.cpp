@@ -1,24 +1,23 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-11 by Raw Material Software Ltd.
+   This file is part of the JUCE library.
+   Copyright (c) 2013 - Raw Material Software Ltd.
 
-  ------------------------------------------------------------------------------
+   Permission is granted to use this software under the terms of either:
+   a) the GPL v2 (or any later version)
+   b) the Affero GPL v3
 
-   JUCE can be redistributed and/or modified under the terms of the GNU General
-   Public License (Version 2), as published by the Free Software Foundation.
-   A copy of the license is included in the JUCE distribution, or can be found
-   online at www.gnu.org/licenses.
+   Details of these licenses can be found at: www.gnu.org/licenses
 
    JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
    A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
-  ------------------------------------------------------------------------------
+   ------------------------------------------------------------------------------
 
    To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.rawmaterialsoftware.com/juce for more information.
+   available: visit www.juce.com for more information.
 
   ==============================================================================
 */
@@ -27,8 +26,7 @@ class ImageCache::Pimpl     : private Timer,
                               private DeletedAtShutdown
 {
 public:
-    Pimpl()
-        : cacheTimeout (5000)
+    Pimpl()  : cacheTimeout (5000)
     {
     }
 
@@ -43,7 +41,7 @@ public:
 
         for (int i = images.size(); --i >= 0;)
         {
-            Item* const item = images.getUnchecked(i);
+            const Item* const item = images.getUnchecked(i);
 
             if (item->hashCode == hashCode)
                 return item->image;
@@ -92,6 +90,15 @@ public:
 
         if (images.size() == 0)
             stopTimer();
+    }
+
+    void releaseUnusedImages()
+    {
+        const ScopedLock sl (lock);
+
+        for (int i = images.size(); --i >= 0;)
+            if (images.getUnchecked(i)->image.getReferenceCount() <= 1)
+                images.remove (i);
     }
 
     struct Item
@@ -161,4 +168,9 @@ void ImageCache::setCacheTimeout (const int millisecs)
 {
     jassert (millisecs >= 0);
     Pimpl::getInstance()->cacheTimeout = (unsigned int) millisecs;
+}
+
+void ImageCache::releaseUnusedImages()
+{
+    Pimpl::getInstance()->releaseUnusedImages();
 }

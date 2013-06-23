@@ -86,7 +86,7 @@ private:
     //[/UserVariables]
 
     //==============================================================================
-    TabbedComponent* tabbedComponent;
+    ScopedPointer<TabbedComponent> tabbedComponent;
 
 
     //==============================================================================

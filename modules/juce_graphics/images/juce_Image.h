@@ -1,24 +1,23 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-11 by Raw Material Software Ltd.
+   This file is part of the JUCE library.
+   Copyright (c) 2013 - Raw Material Software Ltd.
 
-  ------------------------------------------------------------------------------
+   Permission is granted to use this software under the terms of either:
+   a) the GPL v2 (or any later version)
+   b) the Affero GPL v3
 
-   JUCE can be redistributed and/or modified under the terms of the GNU General
-   Public License (Version 2), as published by the Free Software Foundation.
-   A copy of the license is included in the JUCE distribution, or can be found
-   online at www.gnu.org/licenses.
+   Details of these licenses can be found at: www.gnu.org/licenses
 
    JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
    A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
-  ------------------------------------------------------------------------------
+   ------------------------------------------------------------------------------
 
    To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.rawmaterialsoftware.com/juce for more information.
+   available: visit www.juce.com for more information.
 
   ==============================================================================
 */
@@ -188,7 +187,7 @@ public:
         This won't do any alpha-blending - it just sets all pixels in the image to
         the given colour (which may be non-opaque if the image has an alpha channel).
     */
-    void clear (const Rectangle<int>& area, const Colour& colourToClearTo = Colour (0x00000000));
+    void clear (const Rectangle<int>& area, Colour colourToClearTo = Colour (0x00000000));
 
     /** Returns a rescaled version of this image.
 
@@ -262,7 +261,7 @@ public:
 
         @see getPixelAt, Image::BitmapData::setPixelColour
     */
-    void setPixelAt (int x, int y, const Colour& colour);
+    void setPixelAt (int x, int y, Colour colour);
 
     /** Changes the opacity of a pixel.
 
@@ -344,7 +343,7 @@ public:
             For performance reasons, this won't do any bounds-checking on the coordinates, so it's the caller's
             repsonsibility to make sure they're within the image's size.
         */
-        void setPixelColour (int x, int y, const Colour& colour) const noexcept;
+        void setPixelColour (int x, int y, Colour colour) const noexcept;
 
         /** Returns the size of the bitmap. */
         Rectangle<int> getBounds() const noexcept                           { return Rectangle<int> (width, height); }

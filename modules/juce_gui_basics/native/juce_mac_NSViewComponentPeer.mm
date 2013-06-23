@@ -1,24 +1,23 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-11 by Raw Material Software Ltd.
+   This file is part of the JUCE library.
+   Copyright (c) 2013 - Raw Material Software Ltd.
 
-  ------------------------------------------------------------------------------
+   Permission is granted to use this software under the terms of either:
+   a) the GPL v2 (or any later version)
+   b) the Affero GPL v3
 
-   JUCE can be redistributed and/or modified under the terms of the GNU General
-   Public License (Version 2), as published by the Free Software Foundation.
-   A copy of the license is included in the JUCE distribution, or can be found
-   online at www.gnu.org/licenses.
+   Details of these licenses can be found at: www.gnu.org/licenses
 
    JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
    A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
-  ------------------------------------------------------------------------------
+   ------------------------------------------------------------------------------
 
    To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.rawmaterialsoftware.com/juce for more information.
+   available: visit www.juce.com for more information.
 
   ==============================================================================
 */
@@ -222,21 +221,12 @@ public:
                                                                 : String::empty)];
     }
 
-    void setPosition (int x, int y)
-    {
-        setBounds (x, y, component.getWidth(), component.getHeight(), false);
-    }
-
-    void setSize (int w, int h)
-    {
-        setBounds (component.getX(), component.getY(), w, h, false);
-    }
-
-    void setBounds (int x, int y, int w, int h, bool isNowFullScreen)
+    void setBounds (const Rectangle<int>& newBounds, bool isNowFullScreen)
     {
         fullScreen = isNowFullScreen;
 
-        NSRect r = NSMakeRect ((CGFloat) x, (CGFloat) y, (CGFloat) jmax (0, w), (CGFloat) jmax (0, h));
+        NSRect r = NSMakeRect ((CGFloat) newBounds.getX(), (CGFloat) newBounds.getY(),
+                               (CGFloat) jmax (0, newBounds.getWidth()), (CGFloat) jmax (0, newBounds.getHeight()));
 
         if (isSharedWindow)
         {
@@ -289,19 +279,14 @@ public:
         return getBounds (! isSharedWindow);
     }
 
-    Point<int> getScreenPosition() const
-    {
-        return getBounds (true).getPosition();
-    }
-
     Point<int> localToGlobal (const Point<int>& relativePosition)
     {
-        return relativePosition + getScreenPosition();
+        return relativePosition + getBounds (true).getPosition();
     }
 
     Point<int> globalToLocal (const Point<int>& screenPosition)
     {
-        return screenPosition - getScreenPosition();
+        return screenPosition - getBounds (true).getPosition();
     }
 
     void setAlpha (float newAlpha)
@@ -368,7 +353,7 @@ public:
 
                     // (can't call the component's setBounds method because that'll reset our fullscreen flag)
                     if (r != component.getBounds() && ! r.isEmpty())
-                        setBounds (r.getX(), r.getY(), r.getWidth(), r.getHeight(), shouldBeFullScreen);
+                        setBounds (r, shouldBeFullScreen);
                 }
             }
         }
@@ -819,7 +804,7 @@ public:
                 }
 
                 CGColorSpaceRef colourSpace = CGColorSpaceCreateDeviceRGB();
-                CGImageRef image = juce_createCoreGraphicsImage (temp, false, colourSpace, false);
+                CGImageRef image = juce_createCoreGraphicsImage (temp, colourSpace, false);
                 CGColorSpaceRelease (colourSpace);
                 CGContextDrawImage (cg, CGRectMake (r.origin.x, r.origin.y, clipW, clipH), image);
                 CGImageRelease (image);
@@ -1163,8 +1148,8 @@ public:
             class AsyncRepaintMessage  : public CallbackMessage
             {
             public:
-                AsyncRepaintMessage (NSViewComponentPeer* const peer_, const Rectangle<int>& rect_)
-                    : peer (peer_), rect (rect_)
+                AsyncRepaintMessage (NSViewComponentPeer* const p, const Rectangle<int>& r)
+                    : peer (p), rect (r)
                 {}
 
                 void messageCallback()

@@ -1,28 +1,26 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-11 by Raw Material Software Ltd.
+   This file is part of the JUCE library.
+   Copyright (c) 2013 - Raw Material Software Ltd.
 
-  ------------------------------------------------------------------------------
+   Permission is granted to use this software under the terms of either:
+   a) the GPL v2 (or any later version)
+   b) the Affero GPL v3
 
-   JUCE can be redistributed and/or modified under the terms of the GNU General
-   Public License (Version 2), as published by the Free Software Foundation.
-   A copy of the license is included in the JUCE distribution, or can be found
-   online at www.gnu.org/licenses.
+   Details of these licenses can be found at: www.gnu.org/licenses
 
    JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
    A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
-  ------------------------------------------------------------------------------
+   ------------------------------------------------------------------------------
 
    To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.rawmaterialsoftware.com/juce for more information.
+   available: visit www.juce.com for more information.
 
   ==============================================================================
 */
-
 
 class MSVCProjectExporterBase   : public ProjectExporter
 {
@@ -144,6 +142,18 @@ protected:
         String getIntermediatesPath() const         { return config [Ids::intermediatesPath].toString(); }
         Value getIntermediatesPathValue()           { return getValue (Ids::intermediatesPath); }
 
+        String getCharacterSet() const
+        {
+            String charSet (config [Ids::characterSet].toString());
+
+            if (charSet.isEmpty())
+                charSet = "MultiByte";
+
+            return charSet;
+        }
+
+        Value getCharacterSetValue()                { return getValue (Ids::characterSet); }
+
         String getOutputFilename (const String& suffix, bool forceSuffix) const
         {
             const String target (File::createLegalFileName (getTargetBinaryNameString().trim()));
@@ -190,6 +200,14 @@ protected:
             props.add (new TextPropertyComponent (getPrebuildCommand(),  "Pre-build Command",  2048, false));
             props.add (new TextPropertyComponent (getPostbuildCommand(), "Post-build Command", 2048, false));
             props.add (new BooleanPropertyComponent (shouldGenerateManifestValue(), "Manifest", "Generate Manifest"));
+
+            {
+                const char* const characterSetNames[] = { "Default", "MultiByte", "Unicode", nullptr };
+                const var charSets[]                  = { var::null, "MultiByte", "Unicode", };
+
+                props.add (new ChoicePropertyComponent (getCharacterSetValue(), "Character Set",
+                                                        StringArray (characterSetNames), Array<var> (charSets, numElementsInArray (charSets))));
+            }
         }
     };
 
@@ -1065,7 +1083,7 @@ protected:
             e->setAttribute ("Label", "Configuration");
             e->createNewChildElement ("ConfigurationType")->addTextElement (getProjectType());
             e->createNewChildElement ("UseOfMfc")->addTextElement ("false");
-            e->createNewChildElement ("CharacterSet")->addTextElement ("MultiByte");
+            e->createNewChildElement ("CharacterSet")->addTextElement (config.getCharacterSet());
 
             if (! (config.isDebug() || config.shouldDisableWholeProgramOpt()))
                 e->createNewChildElement ("WholeProgramOptimization")->addTextElement ("true");

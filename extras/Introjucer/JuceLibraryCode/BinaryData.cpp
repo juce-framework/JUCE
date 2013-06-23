@@ -727,6 +727,51 @@ static const unsigned char temp_4a30078b[] =
 
 const char* jucer_ContentCompTemplate_h = (const char*) temp_4a30078b;
 
+//================== jucer_InlineComponentTemplate.h ==================
+static const unsigned char temp_cd7c7047[] =
+"//==============================================================================\r\n"
+"class COMPONENTCLASS    : public Component\r\n"
+"{\r\n"
+"public:\r\n"
+"    COMPONENTCLASS()\r\n"
+"    {\r\n"
+"        // In your constructor, you should add any child components, and\r\n"
+"        // initialise any special settings that your component needs.\r\n"
+"\r\n"
+"    }\r\n"
+"\r\n"
+"    ~COMPONENTCLASS()\r\n"
+"    {\r\n"
+"    }\r\n"
+"\r\n"
+"    void paint (Graphics& g)\r\n"
+"    {\r\n"
+"        // You should replace everything in this method with your own drawing code..\r\n"
+"\r\n"
+"        g.fillAll (Colours::white);   // clear the background\r\n"
+"\r\n"
+"        g.setColour (Colours::grey);\r\n"
+"        g.drawRect (getLocalBounds(), 1);   // draw an outline around the component\r\n"
+"\r\n"
+"        g.setColour (Colours::lightblue);\r\n"
+"        g.setFont (14.0f);\r\n"
+"        g.drawText (\"COMPONENTCLASS\", getLocalBounds(),\r\n"
+"                    Justification::centred, true);   // draw some placeholder text\r\n"
+"    }\r\n"
+"\r\n"
+"    void resized()\r\n"
+"    {\r\n"
+"        // This method is where you should set the bounds of any child\r\n"
+"        // components that your component contains..\r\n"
+"\r\n"
+"    }\r\n"
+"\r\n"
+"private:\r\n"
+"    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (COMPONENTCLASS)\r\n"
+"};\r\n";
+
+const char* jucer_InlineComponentTemplate_h = (const char*) temp_cd7c7047;
+
 //================== jucer_MainConsoleAppTemplate.cpp ==================
 static const unsigned char temp_794304c3[] =
 "/*\r\n"
@@ -1182,6 +1227,7 @@ const char* getNamedResource (const char* resourceNameUTF8, int& numBytes) throw
         case 0xfc72fe86:  numBytes = 2156; return jucer_ComponentTemplate_h;
         case 0x0b66646c:  numBytes = 886; return jucer_ContentCompTemplate_cpp;
         case 0x6fa10171:  numBytes = 924; return jucer_ContentCompTemplate_h;
+        case 0x28d496ad:  numBytes = 1143; return jucer_InlineComponentTemplate_h;
         case 0x8905395b:  numBytes = 470; return jucer_MainConsoleAppTemplate_cpp;
         case 0x5e5ea047:  numBytes = 1947; return jucer_MainTemplate_NoWindow_cpp;
         case 0x400bc026:  numBytes = 3613; return jucer_MainTemplate_Window_cpp;

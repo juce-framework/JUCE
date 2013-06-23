@@ -1,24 +1,23 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-11 by Raw Material Software Ltd.
+   This file is part of the JUCE library.
+   Copyright (c) 2013 - Raw Material Software Ltd.
 
-  ------------------------------------------------------------------------------
+   Permission is granted to use this software under the terms of either:
+   a) the GPL v2 (or any later version)
+   b) the Affero GPL v3
 
-   JUCE can be redistributed and/or modified under the terms of the GNU General
-   Public License (Version 2), as published by the Free Software Foundation.
-   A copy of the license is included in the JUCE distribution, or can be found
-   online at www.gnu.org/licenses.
+   Details of these licenses can be found at: www.gnu.org/licenses
 
    JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
    A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
-  ------------------------------------------------------------------------------
+   ------------------------------------------------------------------------------
 
    To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.rawmaterialsoftware.com/juce for more information.
+   available: visit www.juce.com for more information.
 
   ==============================================================================
 */
@@ -82,10 +81,9 @@ public:
     }
 
     void draw (CodeEditorComponent& owner, Graphics& g, const Font& fontToUse,
-               const float leftClip, const float rightClip,
-               const float x, const int y, const int baselineOffset,
+               const float rightClip, const float x, const int y,
                const int lineH, const float characterWidth,
-               const Colour& highlightColour) const
+               const Colour highlightColour) const
     {
         if (highlightColumnStart < highlightColumnEnd)
         {
@@ -94,9 +92,11 @@ public:
                         roundToInt ((highlightColumnEnd - highlightColumnStart) * characterWidth), lineH);
         }
 
-        const float baselineY = (float) (y + baselineOffset);
         Colour lastColour (0x00000001);
-        GlyphArrangement ga;
+
+        AttributedString as;
+        as.setJustification (Justification::centredLeft);
+
         int column = 0;
 
         for (int i = 0; i < tokens.size(); ++i)
@@ -105,26 +105,12 @@ public:
             if (tokenX > rightClip)
                 break;
 
-            SyntaxToken& token = tokens.getReference(i);
-
-            const Colour newColour (owner.getColourForTokenType (token.tokenType));
-            if (lastColour != newColour)
-            {
-                ga.draw (g);
-                ga.clear();
-
-                lastColour = newColour;
-                g.setColour (newColour);
-            }
-
+            const SyntaxToken& token = tokens.getReference(i);
+            as.append (token.text, fontToUse, owner.getColourForTokenType (token.tokenType));
             column += token.length;
-
-            if (x + column * characterWidth >= leftClip)
-                ga.addCurtailedLineOfText (fontToUse, token.text, tokenX, baselineY,
-                                           (rightClip - tokenX) + characterWidth, false);
         }
 
-        ga.draw (g);
+        as.draw (g, Rectangle<float> (x, (float) y, 10000.0f, (float) lineH));
     }
 
 private:
@@ -485,20 +471,18 @@ void CodeEditorComponent::paint (Graphics& g)
     g.reduceClipRegion (gutterSize, 0, verticalScrollBar.getX() - gutterSize, horizontalScrollBar.getY());
 
     g.setFont (font);
-    const int baselineOffset = (int) font.getAscent();
     const Colour highlightColour (findColour (CodeEditorComponent::highlightColourId));
 
     const Rectangle<int> clip (g.getClipBounds());
     const int firstLineToDraw = jmax (0, clip.getY() / lineHeight);
     const int lastLineToDraw = jmin (lines.size(), clip.getBottom() / lineHeight + 1);
     const float x = (float) (gutterSize - xOffset * charWidth);
-    const float leftClip  = (float) clip.getX();
     const float rightClip = (float) clip.getRight();
 
     for (int i = firstLineToDraw; i < lastLineToDraw; ++i)
-        lines.getUnchecked(i)->draw (*this, g, font, leftClip, rightClip,
-                                     x, lineHeight * i, baselineOffset,
-                                     lineHeight, charWidth, highlightColour);
+        lines.getUnchecked(i)->draw (*this, g, font, rightClip,
+                                     x, lineHeight * i, lineHeight,
+                                     charWidth, highlightColour);
 }
 
 void CodeEditorComponent::setScrollbarThickness (const int thickness)
@@ -677,6 +661,7 @@ void CodeEditorComponent::scrollToLineInternal (int newFirstLineOnScreen)
 
         updateCachedIterators (firstLineOnScreen);
         rebuildLineTokensAsync();
+        pimpl->handleUpdateNowIfNeeded();
     }
 }
 
@@ -709,7 +694,7 @@ void CodeEditorComponent::scrollBy (int deltaLines)
     scrollToLine (firstLineOnScreen + deltaLines);
 }
 
-void CodeEditorComponent::scrollToKeepLinesOnScreen (const Range<int>& rangeToShow)
+void CodeEditorComponent::scrollToKeepLinesOnScreen (Range<int> rangeToShow)
 {
     if (rangeToShow.getStart() < firstLineOnScreen)
         scrollBy (rangeToShow.getStart() - firstLineOnScreen);
@@ -1039,14 +1024,16 @@ bool CodeEditorComponent::moveCaretToStartOfLine (const bool selecting)
 bool CodeEditorComponent::moveCaretToEnd (const bool selecting)
 {
     newTransaction();
-    moveCaretTo (CodeDocument::Position (document, std::numeric_limits<int>::max(), std::numeric_limits<int>::max()), selecting);
+    moveCaretTo (CodeDocument::Position (document, std::numeric_limits<int>::max(),
+                                         std::numeric_limits<int>::max()), selecting);
     return true;
 }
 
 bool CodeEditorComponent::moveCaretToEndOfLine (const bool selecting)
 {
     newTransaction();
-    moveCaretTo (CodeDocument::Position (document, caretPos.getLineNumber(), std::numeric_limits<int>::max()), selecting);
+    moveCaretTo (CodeDocument::Position (document, caretPos.getLineNumber(),
+                                         std::numeric_limits<int>::max()), selecting);
     return true;
 }
 
@@ -1057,13 +1044,9 @@ bool CodeEditorComponent::deleteBackwards (const bool moveInWholeWordSteps)
         cut(); // in case something is already highlighted
         moveCaretTo (document.findWordBreakBefore (caretPos), true);
     }
-    else
+    else if (selectionStart == selectionEnd && ! skipBackwardsToPreviousTab())
     {
-        if (selectionStart == selectionEnd)
-        {
-            if (! skipBackwardsToPreviousTab())
-                selectionStart.moveBy (-1);
-        }
+        selectionStart.moveBy (-1);
     }
 
     cut();
@@ -1114,7 +1097,8 @@ bool CodeEditorComponent::deleteForwards (const bool moveInWholeWordSteps)
 bool CodeEditorComponent::selectAll()
 {
     newTransaction();
-    selectRegion (CodeDocument::Position (document, std::numeric_limits<int>::max(), std::numeric_limits<int>::max()),
+    selectRegion (CodeDocument::Position (document, std::numeric_limits<int>::max(),
+                                          std::numeric_limits<int>::max()),
                   CodeDocument::Position (document, 0, 0));
     return true;
 }
@@ -1484,7 +1468,7 @@ void CodeEditorComponent::setFont (const Font& newFont)
     resized();
 }
 
-void CodeEditorComponent::ColourScheme::set (const String& name, const Colour& colour)
+void CodeEditorComponent::ColourScheme::set (const String& name, const Colour colour)
 {
     for (int i = 0; i < types.size(); ++i)
     {

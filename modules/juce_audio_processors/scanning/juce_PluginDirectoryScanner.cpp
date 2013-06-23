@@ -1,24 +1,23 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-11 by Raw Material Software Ltd.
+   This file is part of the JUCE library.
+   Copyright (c) 2013 - Raw Material Software Ltd.
 
-  ------------------------------------------------------------------------------
+   Permission is granted to use this software under the terms of either:
+   a) the GPL v2 (or any later version)
+   b) the Affero GPL v3
 
-   JUCE can be redistributed and/or modified under the terms of the GNU General
-   Public License (Version 2), as published by the Free Software Foundation.
-   A copy of the license is included in the JUCE distribution, or can be found
-   online at www.gnu.org/licenses.
+   Details of these licenses can be found at: www.gnu.org/licenses
 
    JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
    A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
-  ------------------------------------------------------------------------------
+   ------------------------------------------------------------------------------
 
    To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.rawmaterialsoftware.com/juce for more information.
+   available: visit www.juce.com for more information.
 
   ==============================================================================
 */
@@ -39,7 +38,6 @@ PluginDirectoryScanner::PluginDirectoryScanner (KnownPluginList& listToAddTo,
     : list (listToAddTo),
       format (formatToLookFor),
       deadMansPedalFile (deadMansPedal),
-      nextIndex (0),
       progress (0)
 {
     directoriesToSearch.removeRedundantPaths();
@@ -60,6 +58,7 @@ PluginDirectoryScanner::PluginDirectoryScanner (KnownPluginList& listToAddTo,
     }
 
     applyBlacklistingsFromDeadMansPedal (listToAddTo, deadMansPedalFile);
+    nextIndex.set (filesOrIdentifiersToScan.size());
 }
 
 PluginDirectoryScanner::~PluginDirectoryScanner()
@@ -69,43 +68,51 @@ PluginDirectoryScanner::~PluginDirectoryScanner()
 //==============================================================================
 String PluginDirectoryScanner::getNextPluginFileThatWillBeScanned() const
 {
-    return format.getNameOfPluginFromIdentifier (filesOrIdentifiersToScan [nextIndex]);
+    return format.getNameOfPluginFromIdentifier (filesOrIdentifiersToScan [nextIndex.get() - 1]);
+}
+
+void PluginDirectoryScanner::updateProgress()
+{
+    progress = (1.0f - nextIndex.get() / (float) filesOrIdentifiersToScan.size());
 }
 
 bool PluginDirectoryScanner::scanNextFile (const bool dontRescanIfAlreadyInList)
 {
-    String file (filesOrIdentifiersToScan [nextIndex]);
+    const int index = --nextIndex;
 
-    if (file.isNotEmpty() && ! list.isListingUpToDate (file))
+    if (index >= 0)
     {
-        OwnedArray <PluginDescription> typesFound;
+        String file (filesOrIdentifiersToScan [index]);
 
-        // Add this plugin to the end of the dead-man's pedal list in case it crashes...
-        StringArray crashedPlugins (readDeadMansPedalFile (deadMansPedalFile));
-        crashedPlugins.removeString (file);
-        crashedPlugins.add (file);
-        setDeadMansPedalFile (crashedPlugins);
+        if (file.isNotEmpty() && ! list.isListingUpToDate (file, format))
+        {
+            OwnedArray <PluginDescription> typesFound;
 
-        list.scanAndAddFile (file, dontRescanIfAlreadyInList, typesFound, format);
+            // Add this plugin to the end of the dead-man's pedal list in case it crashes...
+            StringArray crashedPlugins (readDeadMansPedalFile (deadMansPedalFile));
+            crashedPlugins.removeString (file);
+            crashedPlugins.add (file);
+            setDeadMansPedalFile (crashedPlugins);
 
-        // Managed to load without crashing, so remove it from the dead-man's-pedal..
-        crashedPlugins.removeString (file);
-        setDeadMansPedalFile (crashedPlugins);
+            list.scanAndAddFile (file, dontRescanIfAlreadyInList, typesFound, format);
 
-        if (typesFound.size() == 0 && ! list.getBlacklistedFiles().contains (file))
-            failedFiles.add (file);
+            // Managed to load without crashing, so remove it from the dead-man's-pedal..
+            crashedPlugins.removeString (file);
+            setDeadMansPedalFile (crashedPlugins);
+
+            if (typesFound.size() == 0 && ! list.getBlacklistedFiles().contains (file))
+                failedFiles.add (file);
+        }
     }
 
-    return skipNextFile();
+    updateProgress();
+    return index > 0;
 }
 
 bool PluginDirectoryScanner::skipNextFile()
 {
-    if (nextIndex >= filesOrIdentifiersToScan.size())
-        return false;
-
-    progress = ++nextIndex / (float) filesOrIdentifiersToScan.size();
-    return nextIndex < filesOrIdentifiersToScan.size();
+    updateProgress();
+    return --nextIndex > 0;
 }
 
 void PluginDirectoryScanner::setDeadMansPedalFile (const StringArray& newContents)

@@ -1,24 +1,23 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-11 by Raw Material Software Ltd.
+   This file is part of the JUCE library.
+   Copyright (c) 2013 - Raw Material Software Ltd.
 
-  ------------------------------------------------------------------------------
+   Permission is granted to use this software under the terms of either:
+   a) the GPL v2 (or any later version)
+   b) the Affero GPL v3
 
-   JUCE can be redistributed and/or modified under the terms of the GNU General
-   Public License (Version 2), as published by the Free Software Foundation.
-   A copy of the license is included in the JUCE distribution, or can be found
-   online at www.gnu.org/licenses.
+   Details of these licenses can be found at: www.gnu.org/licenses
 
    JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
    A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
-  ------------------------------------------------------------------------------
+   ------------------------------------------------------------------------------
 
    To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.rawmaterialsoftware.com/juce for more information.
+   available: visit www.juce.com for more information.
 
   ==============================================================================
 */
@@ -39,6 +38,8 @@ extern "C"
     const CGSize* CTRunGetAdvancesPtr (CTRunRef);
 }
 #endif
+
+static CTFontRef getCTFontFromTypeface (const Font& f);
 
 namespace CoreTextTypeLayout
 {
@@ -188,6 +189,18 @@ namespace CoreTextTypeLayout
         HeapBlock<CGPoint> local;
     };
 
+    static CTFontRef getOrCreateFont (const Font& f)
+    {
+        if (CTFontRef ctf = getCTFontFromTypeface (f))
+        {
+            CFRetain (ctf);
+            return ctf;
+        }
+
+        CGAffineTransform transform;
+        return createCTFont (f, referenceFontSize, transform);
+    }
+
     //==============================================================================
     static CFAttributedStringRef createCFAttributedString (const AttributedString& text)
     {
@@ -214,13 +227,14 @@ namespace CoreTextTypeLayout
 
             if (const Font* const f = attr->getFont())
             {
-                CGAffineTransform transform;
-                CTFontRef ctFontRef = createCTFont (*f, referenceFontSize, transform);
-                ctFontRef = getFontWithPointSize (ctFontRef, f->getHeight() * getHeightToPointsFactor (ctFontRef));
+                if (CTFontRef ctFontRef = getOrCreateFont (*f))
+                {
+                    ctFontRef = getFontWithPointSize (ctFontRef, f->getHeight() * getHeightToPointsFactor (ctFontRef));
 
-                CFAttributedStringSetAttribute (attribString, CFRangeMake (range.getStart(), range.getLength()),
-                                                kCTFontAttributeName, ctFontRef);
-                CFRelease (ctFontRef);
+                    CFAttributedStringSetAttribute (attribString, CFRangeMake (range.getStart(), range.getLength()),
+                                                    kCTFontAttributeName, ctFontRef);
+                    CFRelease (ctFontRef);
+                }
             }
 
             if (const Colour* const col = attr->getColour())
@@ -417,11 +431,11 @@ class OSXTypeface  : public Typeface
 public:
     OSXTypeface (const Font& font)
         : Typeface (font.getTypefaceName(),
-          font.getTypefaceStyle()),
+                    font.getTypefaceStyle()),
           fontRef (nullptr),
+          ctFontRef (nullptr),
           fontHeightToPointsFactor (1.0f),
           renderingTransform (CGAffineTransformIdentity),
-          ctFontRef (nullptr),
           attributedStringAtts (nullptr),
           ascent (0.0f),
           unitsToHeightScaleFactor (0.0f)
@@ -567,12 +581,12 @@ public:
 
     //==============================================================================
     CGFontRef fontRef;
+    CTFontRef ctFontRef;
 
     float fontHeightToPointsFactor;
     CGAffineTransform renderingTransform;
 
 private:
-    CTFontRef ctFontRef;
     CFDictionaryRef attributedStringAtts;
     float ascent, unitsToHeightScaleFactor;
     AffineTransform pathTransform;
@@ -598,6 +612,15 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OSXTypeface)
 };
+
+CTFontRef getCTFontFromTypeface (const Font& f)
+{
+    if (OSXTypeface* tf = dynamic_cast <OSXTypeface*> (f.getTypeface()))
+        return tf->ctFontRef;
+
+    return 0;
+}
+
 
 StringArray Font::findAllTypefaceNames()
 {
@@ -1132,6 +1155,11 @@ StringArray Font::findAllTypefaceStyles (const String& family)
 Typeface::Ptr Typeface::createSystemTypefaceFor (const Font& font)
 {
     return new OSXTypeface (font);
+}
+
+void Typeface::scanFolderForFonts (const File&)
+{
+    jassertfalse; // not implemented on this platform
 }
 
 struct DefaultFontNames

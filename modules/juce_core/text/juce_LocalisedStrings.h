@@ -1,24 +1,27 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-11 by Raw Material Software Ltd.
+   This file is part of the juce_core module of the JUCE library.
+   Copyright (c) 2013 - Raw Material Software Ltd.
 
-  ------------------------------------------------------------------------------
+   Permission to use, copy, modify, and/or distribute this software for any purpose with
+   or without fee is hereby granted, provided that the above copyright notice and this
+   permission notice appear in all copies.
 
-   JUCE can be redistributed and/or modified under the terms of the GNU General
-   Public License (Version 2), as published by the Free Software Foundation.
-   A copy of the license is included in the JUCE distribution, or can be found
-   online at www.gnu.org/licenses.
+   THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH REGARD
+   TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS. IN
+   NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL
+   DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER
+   IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
+   CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
-   JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-   A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+   ------------------------------------------------------------------------------
 
-  ------------------------------------------------------------------------------
+   NOTE! This permissive ISC license applies ONLY to files within the juce_core module!
+   All other JUCE modules are covered by a dual GPL/commercial license, so if you are
+   using any other modules, be sure to check that you also comply with their license.
 
-   To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.rawmaterialsoftware.com/juce for more information.
+   For more details, visit www.juce.com
 
   ==============================================================================
 */
@@ -81,14 +84,16 @@ public:
         When you create one of these, you can call setCurrentMappings() to make it
         the set of mappings that the system's using.
     */
-    LocalisedStrings (const String& fileContents);
+    LocalisedStrings (const String& fileContents,
+                      bool ignoreCaseOfKeys);
 
     /** Creates a set of translations from a file.
 
         When you create one of these, you can call setCurrentMappings() to make it
         the set of mappings that the system's using.
     */
-    LocalisedStrings (const File& fileToLoad);
+    LocalisedStrings (const File& fileToLoad,
+                      bool ignoreCaseOfKeys);
 
     /** Destructor. */
     ~LocalisedStrings();
@@ -109,7 +114,7 @@ public:
     /** Returns the currently selected set of mappings.
 
         This is the object that was last passed to setCurrentMappings(). It may
-        be 0 if none has been created.
+        be nullptr if none has been created.
     */
     static LocalisedStrings* getCurrentMappings();
 
@@ -166,12 +171,8 @@ public:
     */
     const StringArray& getCountryCodes() const            { return countryCodes; }
 
-
-    //==============================================================================
-    /** Indicates whether to use a case-insensitive search when looking up a string.
-        This defaults to true.
-    */
-    void setIgnoresCase (bool shouldIgnoreCase);
+    /** Provides access to the actual list of mappings. */
+    const StringPairArray& getMappings() const            { return translations; }
 
 private:
     //==============================================================================
@@ -179,7 +180,7 @@ private:
     StringArray countryCodes;
     StringPairArray translations;
 
-    void loadFromText (const String& fileContents);
+    void loadFromText (const String&, bool ignoreCase);
 
     JUCE_LEAK_DETECTOR (LocalisedStrings)
 };
@@ -194,6 +195,15 @@ private:
  */
  #define TRANS(stringLiteral) juce::translate (stringLiteral)
 #endif
+
+/** A dummy version of the TRANS macro, used to indicate a string literal that should be
+    added to the translation file by source-code scanner tools.
+
+    Wrapping a string literal in this macro has no effect, but by using it around strings
+    that your app needs to translate at a later stage, it lets automatic code-scanning tools
+    find this string and add it to the list of strings that need translation.
+*/
+#define NEEDS_TRANS(stringLiteral) (stringLiteral)
 
 /** Uses the LocalisedStrings class to translate the given string literal.
     @see LocalisedStrings

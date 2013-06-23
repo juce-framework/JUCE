@@ -1,24 +1,23 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-11 by Raw Material Software Ltd.
+   This file is part of the JUCE library.
+   Copyright (c) 2013 - Raw Material Software Ltd.
 
-  ------------------------------------------------------------------------------
+   Permission is granted to use this software under the terms of either:
+   a) the GPL v2 (or any later version)
+   b) the Affero GPL v3
 
-   JUCE can be redistributed and/or modified under the terms of the GNU General
-   Public License (Version 2), as published by the Free Software Foundation.
-   A copy of the license is included in the JUCE distribution, or can be found
-   online at www.gnu.org/licenses.
+   Details of these licenses can be found at: www.gnu.org/licenses
 
    JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
    A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
-  ------------------------------------------------------------------------------
+   ------------------------------------------------------------------------------
 
    To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.rawmaterialsoftware.com/juce for more information.
+   available: visit www.juce.com for more information.
 
   ==============================================================================
 */
@@ -52,15 +51,12 @@ public:
     /** Creates a point from an (x, y) position. */
     Point (const ValueType initialX, const ValueType initialY) noexcept : x (initialX), y (initialY) {}
 
-    /** Destructor. */
-    ~Point() noexcept {}
-
     //==============================================================================
     /** Copies this point from another one. */
     Point& operator= (const Point& other) noexcept                      { x = other.x; y = other.y; return *this; }
 
-    inline bool operator== (const Point& other) const noexcept          { return x == other.x && y == other.y; }
-    inline bool operator!= (const Point& other) const noexcept          { return x != other.x || y != other.y; }
+    inline bool operator== (Point other) const noexcept                 { return x == other.x && y == other.y; }
+    inline bool operator!= (Point other) const noexcept                 { return x != other.x || y != other.y; }
 
     /** Returns true if the point is (0, 0). */
     bool isOrigin() const noexcept                                      { return x == ValueType() && y == ValueType(); }
@@ -93,16 +89,16 @@ public:
     Point translated (const ValueType xDelta, const ValueType yDelta) const noexcept  { return Point (x + xDelta, y + yDelta); }
 
     /** Adds two points together. */
-    Point operator+ (const Point& other) const noexcept                 { return Point (x + other.x, y + other.y); }
+    Point operator+ (Point other) const noexcept                        { return Point (x + other.x, y + other.y); }
 
     /** Adds another point's co-ordinates to this one. */
-    Point& operator+= (const Point& other) noexcept                     { x += other.x; y += other.y; return *this; }
+    Point& operator+= (Point other) noexcept                            { x += other.x; y += other.y; return *this; }
 
     /** Subtracts one points from another. */
-    Point operator- (const Point& other) const noexcept                 { return Point (x - other.x, y - other.y); }
+    Point operator- (Point other) const noexcept                        { return Point (x - other.x, y - other.y); }
 
     /** Subtracts another point's co-ordinates to this one. */
-    Point& operator-= (const Point& other) noexcept                     { x -= other.x; y -= other.y; return *this; }
+    Point& operator-= (Point other) noexcept                            { x -= other.x; y -= other.y; return *this; }
 
     /** Returns a point whose coordinates are multiplied by a given value. */
     Point operator* (const ValueType multiplier) const noexcept         { return Point (x * multiplier, y * multiplier); }
@@ -123,7 +119,7 @@ public:
     ValueType getDistanceFromOrigin() const noexcept                    { return juce_hypot (x, y); }
 
     /** Returns the straight-line distance between this point and another one. */
-    ValueType getDistanceFrom (const Point& other) const noexcept       { return juce_hypot (x - other.x, y - other.y); }
+    ValueType getDistanceFrom (Point other) const noexcept              { return juce_hypot (x - other.x, y - other.y); }
 
     /** This type will be double if the Point's type is double, otherwise it will be float. */
     typedef typename TypeHelpers::SmallestFloatType<ValueType>::type FloatType;
@@ -133,7 +129,7 @@ public:
         The return value is the number of radians clockwise from the 12 o'clock direction,
         where this point is the centre and the other point is on the circumference.
     */
-    FloatType getAngleToPoint (const Point& other) const noexcept
+    FloatType getAngleToPoint (Point other) const noexcept
         { return static_cast<FloatType> (std::atan2 (other.x - x, y - other.y)); }
 
     /** Taking this point to be the centre of a circle, this returns a point on its circumference.
@@ -165,7 +161,7 @@ public:
                         transform.mat10 * x + transform.mat11 * y + transform.mat12); }
 
     /** Returns the dot-product of two points (x1 * x2 + y1 * y2). */
-    FloatType getDotProduct (const Point& other) const noexcept   { return x * other.x + y * other.y; }
+    FloatType getDotProduct (Point other) const noexcept          { return x * other.x + y * other.y; }
 
     /** Casts this point to a Point<int> object. */
     Point<int> toInt() const noexcept                             { return Point<int> (static_cast <int> (x), static_cast<int> (y)); }

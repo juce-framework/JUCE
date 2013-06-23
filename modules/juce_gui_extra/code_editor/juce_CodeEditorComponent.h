@@ -1,24 +1,23 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-11 by Raw Material Software Ltd.
+   This file is part of the JUCE library.
+   Copyright (c) 2013 - Raw Material Software Ltd.
 
-  ------------------------------------------------------------------------------
+   Permission is granted to use this software under the terms of either:
+   a) the GPL v2 (or any later version)
+   b) the Affero GPL v3
 
-   JUCE can be redistributed and/or modified under the terms of the GNU General
-   Public License (Version 2), as published by the Free Software Foundation.
-   A copy of the license is included in the JUCE distribution, or can be found
-   online at www.gnu.org/licenses.
+   Details of these licenses can be found at: www.gnu.org/licenses
 
    JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
    A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
-  ------------------------------------------------------------------------------
+   ------------------------------------------------------------------------------
 
    To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.rawmaterialsoftware.com/juce for more information.
+   available: visit www.juce.com for more information.
 
   ==============================================================================
 */
@@ -143,7 +142,7 @@ public:
     void scrollBy (int deltaLines);
     void scrollToColumn (int newFirstColumnOnScreen);
     void scrollToKeepCaretOnScreen();
-    void scrollToKeepLinesOnScreen (const Range<int>& linesToShow);
+    void scrollToKeepLinesOnScreen (Range<int> linesToShow);
 
     void insertTextAtCaret (const String& textToInsert);
     void insertTabAtCaret();
@@ -152,10 +151,10 @@ public:
     void unindentSelection();
 
     //==============================================================================
-    Range<int> getHighlightedRegion() const;
+    Range<int> getHighlightedRegion() const override;
     bool isHighlightActive() const noexcept;
-    void setHighlightedRegion (const Range<int>& newRange);
-    String getTextInRange (const Range<int>& range) const;
+    void setHighlightedRegion (const Range<int>& newRange) override;
+    String getTextInRange (const Range<int>& range) const override;
 
     //==============================================================================
     /** Can be used to save and restore the editor's caret position, selection state, etc. */
@@ -216,7 +215,7 @@ public:
 
         Array<TokenType> types;
 
-        void set (const String& name, const Colour& colour);
+        void set (const String& name, const Colour colour);
     };
 
     /** Changes the syntax highlighting scheme.

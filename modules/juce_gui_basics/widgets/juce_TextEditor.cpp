@@ -1,24 +1,23 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-11 by Raw Material Software Ltd.
+   This file is part of the JUCE library.
+   Copyright (c) 2013 - Raw Material Software Ltd.
 
-  ------------------------------------------------------------------------------
+   Permission is granted to use this software under the terms of either:
+   a) the GPL v2 (or any later version)
+   b) the Affero GPL v3
 
-   JUCE can be redistributed and/or modified under the terms of the GNU General
-   Public License (Version 2), as published by the Free Software Foundation.
-   A copy of the license is included in the JUCE distribution, or can be found
-   online at www.gnu.org/licenses.
+   Details of these licenses can be found at: www.gnu.org/licenses
 
    JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
    A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
-  ------------------------------------------------------------------------------
+   ------------------------------------------------------------------------------
 
    To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.rawmaterialsoftware.com/juce for more information.
+   available: visit www.juce.com for more information.
 
   ==============================================================================
 */
@@ -61,7 +60,7 @@ struct TextAtom
 class TextEditor::UniformTextSection
 {
 public:
-    UniformTextSection (const String& text, const Font& f, const Colour& col, const juce_wchar passwordChar)
+    UniformTextSection (const String& text, const Font& f, const Colour col, const juce_wchar passwordChar)
         : font (f), colour (col)
     {
         initialiseAtoms (text, passwordChar);
@@ -175,7 +174,7 @@ public:
             mo << atoms.getUnchecked(i)->atomText;
     }
 
-    void appendSubstring (MemoryOutputStream& mo, const Range<int>& range) const
+    void appendSubstring (MemoryOutputStream& mo, const Range<int> range) const
     {
         int index = 0;
         for (int i = 0; i < atoms.size(); ++i)
@@ -557,7 +556,7 @@ public:
         }
     }
 
-    void drawSelection (Graphics& g, const Range<int>& selected) const
+    void drawSelection (Graphics& g, const Range<int> selected) const
     {
         const int startX = roundToInt (indexToX (selected.getStart()));
         const int endX   = roundToInt (indexToX (selected.getEnd()));
@@ -568,7 +567,7 @@ public:
         g.fillRect (startX, y, endX - startX, nextY - y);
     }
 
-    void drawUnderline (Graphics& g, const Range<int>& underline, const Colour& colour) const
+    void drawUnderline (Graphics& g, const Range<int> underline, const Colour colour) const
     {
         const int startX    = roundToInt (indexToX (underline.getStart()));
         const int endX      = roundToInt (indexToX (underline.getEnd()));
@@ -580,8 +579,8 @@ public:
     }
 
     void drawSelectedText (Graphics& g,
-                           const Range<int>& selected,
-                           const Colour& selectedTextColour) const
+                           const Range<int> selected,
+                           const Colour selectedTextColour) const
     {
         if (passwordCharacter != 0 || ! atom->isWhitespace())
         {
@@ -728,7 +727,7 @@ public:
                   const String& newText,
                   const int insertPos,
                   const Font& newFont,
-                  const Colour& newColour,
+                  const Colour newColour,
                   const int oldCaret,
                   const int newCaret)
         : owner (ed),
@@ -1282,7 +1281,7 @@ void TextEditor::timerCallbackInt()
         newTransaction();
 }
 
-void TextEditor::repaintText (const Range<int>& range)
+void TextEditor::repaintText (const Range<int> range)
 {
     if (! range.isEmpty())
     {
@@ -1654,7 +1653,7 @@ void TextEditor::drawContent (Graphics& g)
 
         for (int j = underlinedSections.size(); --j >= 0;)
         {
-            const Range<int>& underlinedSection = underlinedSections.getReference (j);
+            const Range<int> underlinedSection = underlinedSections.getReference (j);
 
             Iterator i2 (sections, wordWrapWidth, passwordCharacter);
 
@@ -2094,7 +2093,7 @@ void TextEditor::focusGained (FocusChangeType)
 
     if (ComponentPeer* const peer = getPeer())
         if (! isReadOnly())
-            peer->textInputRequired (getScreenPosition() - peer->getScreenPosition());
+            peer->textInputRequired (peer->globalToLocal (getScreenPosition()));
 }
 
 void TextEditor::focusLost (FocusChangeType)
@@ -2183,7 +2182,7 @@ void TextEditor::clearInternal (UndoManager* const um)
 void TextEditor::insert (const String& text,
                          const int insertIndex,
                          const Font& font,
-                         const Colour& colour,
+                         const Colour colour,
                          UndoManager* const um,
                          const int caretPositionToMoveTo)
 {
@@ -2280,7 +2279,7 @@ void TextEditor::reinsert (const int insertIndex,
     valueTextNeedsUpdating = true;
 }
 
-void TextEditor::remove (const Range<int>& range,
+void TextEditor::remove (Range<int> range,
                          UndoManager* const um,
                          const int caretPositionToMoveTo)
 {

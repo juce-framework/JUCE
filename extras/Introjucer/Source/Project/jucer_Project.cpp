@@ -1,24 +1,23 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-11 by Raw Material Software Ltd.
+   This file is part of the JUCE library.
+   Copyright (c) 2013 - Raw Material Software Ltd.
 
-  ------------------------------------------------------------------------------
+   Permission is granted to use this software under the terms of either:
+   a) the GPL v2 (or any later version)
+   b) the Affero GPL v3
 
-   JUCE can be redistributed and/or modified under the terms of the GNU General
-   Public License (Version 2), as published by the Free Software Foundation.
-   A copy of the license is included in the JUCE distribution, or can be found
-   online at www.gnu.org/licenses.
+   Details of these licenses can be found at: www.gnu.org/licenses
 
    JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
    A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
-  ------------------------------------------------------------------------------
+   ------------------------------------------------------------------------------
 
    To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.rawmaterialsoftware.com/juce for more information.
+   available: visit www.juce.com for more information.
 
   ==============================================================================
 */
@@ -382,8 +381,33 @@ void Project::createPropertyEditors (PropertyListBuilder& props)
 
     getProjectType().createPropertyEditors (*this, props);
 
-    props.add (new TextPropertyComponent (getProjectPreprocessorDefs(), "Preprocessor definitions", 32768, false),
-               "Extra preprocessor definitions. Use the form \"NAME1=value NAME2=value\", using whitespace or commas to separate the items - to include a space or comma in a definition, precede it with a backslash.");
+    {
+        const int maxSizes[] = { 20480, 10240, 6144, 2048, 1024, 512, 256, 128, 64 };
+
+        StringArray maxSizeNames;
+        Array<var> maxSizeCodes;
+
+        maxSizeNames.add (TRANS("Default"));
+        maxSizeCodes.add (var::null);
+
+        maxSizeNames.add (String::empty);
+        maxSizeCodes.add (var::null);
+
+        for (int i = 0; i < numElementsInArray (maxSizes); ++i)
+        {
+            const int sizeInBytes = maxSizes[i] * 1024;
+            maxSizeNames.add (File::descriptionOfSizeInBytes (sizeInBytes));
+            maxSizeCodes.add (sizeInBytes);
+        }
+
+        props.add (new ChoicePropertyComponent (getMaxBinaryFileSize(), "BinaryData.cpp size limit", maxSizeNames, maxSizeCodes),
+                   "When splitting binary data into multiple cpp files, the Introjucer attempts to keep the file sizes below this threshold. "
+                   "(Note that individual resource files which are larger than this size cannot be split across multiple cpp files).");
+    }
+
+    props.add (new TextPropertyComponent (getProjectPreprocessorDefs(), "Preprocessor definitions", 32768, true),
+               "Global preprocessor definitions. Use the form \"NAME1=value NAME2=value\", using whitespace, commas, or "
+               "new-lines to separate the items - to include a space or comma in a definition, precede it with a backslash.");
 
     props.add (new TextPropertyComponent (getProjectUserNotes(), "Notes", 32768, true),
                "Extra comments: This field is not used for code or project generation, it's just a space where you can express your thoughts.");
@@ -402,7 +426,9 @@ int Project::getVersionAsHexInteger() const
 {
     const StringArray configs (getConfigs (*this));
 
-    int value = (configs[0].getIntValue() << 16) + (configs[1].getIntValue() << 8) + configs[2].getIntValue();
+    int value = (configs[0].getIntValue() << 16)
+                 + (configs[1].getIntValue() << 8)
+                  + configs[2].getIntValue();
 
     if (configs.size() >= 4)
         value = (value << 8) + configs[3].getIntValue();

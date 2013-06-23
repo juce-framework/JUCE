@@ -1,24 +1,23 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-11 by Raw Material Software Ltd.
+   This file is part of the JUCE library.
+   Copyright (c) 2013 - Raw Material Software Ltd.
 
-  ------------------------------------------------------------------------------
+   Permission is granted to use this software under the terms of either:
+   a) the GPL v2 (or any later version)
+   b) the Affero GPL v3
 
-   JUCE can be redistributed and/or modified under the terms of the GNU General
-   Public License (Version 2), as published by the Free Software Foundation.
-   A copy of the license is included in the JUCE distribution, or can be found
-   online at www.gnu.org/licenses.
+   Details of these licenses can be found at: www.gnu.org/licenses
 
    JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
    A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
-  ------------------------------------------------------------------------------
+   ------------------------------------------------------------------------------
 
    To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.rawmaterialsoftware.com/juce for more information.
+   available: visit www.juce.com for more information.
 
   ==============================================================================
 */
@@ -326,7 +325,7 @@ EDataFlow getDataFlow (const ComSmartPtr<IMMDevice>& device)
 
 int refTimeToSamples (const REFERENCE_TIME& t, const double sampleRate) noexcept
 {
-    return roundDoubleToInt (sampleRate * ((double) t) * 0.0000001);
+    return roundToInt (sampleRate * ((double) t) * 0.0000001);
 }
 
 void copyWavFormat (WAVEFORMATEXTENSIBLE& dest, const WAVEFORMATEX* const src) noexcept
@@ -373,6 +372,7 @@ public:
         defaultSampleRate = format.Format.nSamplesPerSec;
         minBufferSize = refTimeToSamples (minPeriod, defaultSampleRate);
         defaultBufferSize = refTimeToSamples (defaultPeriod, defaultSampleRate);
+        mixFormatChannelMask = format.dwChannelMask;
 
         rates.addUsingDefaultSort (defaultSampleRate);
 
@@ -458,6 +458,7 @@ public:
     double sampleRate, defaultSampleRate;
     int numChannels, actualNumChannels;
     int minBufferSize, defaultBufferSize, latencySamples;
+    DWORD mixFormatChannelMask;
     const bool useExclusiveMode;
     Array <double> rates;
     HANDLE clientEvent;
@@ -553,28 +554,21 @@ private:
             format.Format.cbSize = sizeof (WAVEFORMATEXTENSIBLE) - sizeof (WAVEFORMATEX);
         }
 
-        format.Format.nSamplesPerSec = (DWORD) roundDoubleToInt (sampleRate);
-        format.Format.nChannels = (WORD) numChannels;
-        format.Format.wBitsPerSample = (WORD) (8 * bytesPerSampleToTry);
-        format.Format.nAvgBytesPerSec = (DWORD) (format.Format.nSamplesPerSec * numChannels * bytesPerSampleToTry);
-        format.Format.nBlockAlign = (WORD) (numChannels * bytesPerSampleToTry);
-        format.SubFormat = useFloat ? KSDATAFORMAT_SUBTYPE_IEEE_FLOAT : KSDATAFORMAT_SUBTYPE_PCM;
+        format.Format.nSamplesPerSec       = (DWORD) sampleRate;
+        format.Format.nChannels            = (WORD) numChannels;
+        format.Format.wBitsPerSample       = (WORD) (8 * bytesPerSampleToTry);
+        format.Format.nAvgBytesPerSec      = (DWORD) (format.Format.nSamplesPerSec * numChannels * bytesPerSampleToTry);
+        format.Format.nBlockAlign          = (WORD) (numChannels * bytesPerSampleToTry);
+        format.SubFormat                   = useFloat ? KSDATAFORMAT_SUBTYPE_IEEE_FLOAT : KSDATAFORMAT_SUBTYPE_PCM;
         format.Samples.wValidBitsPerSample = format.Format.wBitsPerSample;
-
-        switch (numChannels)
-        {
-            case 1:     format.dwChannelMask = SPEAKER_FRONT_CENTER; break;
-            case 2:     format.dwChannelMask = SPEAKER_FRONT_LEFT | SPEAKER_FRONT_RIGHT; break;
-            case 4:     format.dwChannelMask = SPEAKER_FRONT_LEFT | SPEAKER_FRONT_RIGHT | SPEAKER_BACK_LEFT | SPEAKER_BACK_RIGHT; break;
-            case 6:     format.dwChannelMask = SPEAKER_FRONT_LEFT | SPEAKER_FRONT_RIGHT | SPEAKER_FRONT_CENTER | SPEAKER_LOW_FREQUENCY | SPEAKER_BACK_LEFT | SPEAKER_BACK_RIGHT; break;
-            case 8:     format.dwChannelMask = SPEAKER_FRONT_LEFT | SPEAKER_FRONT_RIGHT | SPEAKER_FRONT_CENTER | SPEAKER_LOW_FREQUENCY | SPEAKER_BACK_LEFT | SPEAKER_BACK_RIGHT | SPEAKER_FRONT_LEFT_OF_CENTER | SPEAKER_FRONT_RIGHT_OF_CENTER; break;
-            default:    break;
-        }
+        format.dwChannelMask               = mixFormatChannelMask;
 
         WAVEFORMATEXTENSIBLE* nearestFormat = nullptr;
 
-        HRESULT hr = client->IsFormatSupported (useExclusiveMode ? AUDCLNT_SHAREMODE_EXCLUSIVE : AUDCLNT_SHAREMODE_SHARED,
-                                                (WAVEFORMATEX*) &format, useExclusiveMode ? nullptr : (WAVEFORMATEX**) &nearestFormat);
+        HRESULT hr = client->IsFormatSupported (useExclusiveMode ? AUDCLNT_SHAREMODE_EXCLUSIVE
+                                                                 : AUDCLNT_SHAREMODE_SHARED,
+                                                (WAVEFORMATEX*) &format,
+                                                useExclusiveMode ? nullptr : (WAVEFORMATEX**) &nearestFormat);
         logFailure (hr);
 
         if (hr == S_FALSE && format.Format.nSamplesPerSec == nearestFormat->Format.nSamplesPerSec)

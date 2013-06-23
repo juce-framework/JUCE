@@ -1,24 +1,23 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-11 by Raw Material Software Ltd.
+   This file is part of the JUCE library.
+   Copyright (c) 2013 - Raw Material Software Ltd.
 
-  ------------------------------------------------------------------------------
+   Permission is granted to use this software under the terms of either:
+   a) the GPL v2 (or any later version)
+   b) the Affero GPL v3
 
-   JUCE can be redistributed and/or modified under the terms of the GNU General
-   Public License (Version 2), as published by the Free Software Foundation.
-   A copy of the license is included in the JUCE distribution, or can be found
-   online at www.gnu.org/licenses.
+   Details of these licenses can be found at: www.gnu.org/licenses
 
    JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
    A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
-  ------------------------------------------------------------------------------
+   ------------------------------------------------------------------------------
 
    To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.rawmaterialsoftware.com/juce for more information.
+   available: visit www.juce.com for more information.
 
   ==============================================================================
 */
@@ -883,7 +882,7 @@ public:
     void setTitle (const String& title)
     {
         XTextProperty nameProperty;
-        char* strings[] = { const_cast <char*> (title.toUTF8().getAddress()) };
+        char* strings[] = { const_cast <char*> (title.toRawUTF8()) };
         ScopedXLock xlock;
 
         if (XStringListToTextProperty (strings, 1, &nameProperty))
@@ -895,7 +894,7 @@ public:
         }
     }
 
-    void setBounds (int x, int y, int w, int h, bool isNowFullScreen)
+    void setBounds (const Rectangle<int>& newBounds, bool isNowFullScreen)
     {
         if (fullScreen && ! isNowFullScreen)
         {
@@ -929,7 +928,8 @@ public:
 
         if (windowH != 0)
         {
-            bounds.setBounds (x, y, jmax (1, w), jmax (1, h));
+            bounds = newBounds.withSize (jmax (1, newBounds.getWidth()),
+                                         jmax (1, newBounds.getHeight()));
 
             WeakReference<Component> deletionChecker (&component);
             ScopedXLock xlock;
@@ -965,19 +965,16 @@ public:
         }
     }
 
-    void setPosition (int x, int y)           { setBounds (x, y, bounds.getWidth(), bounds.getHeight(), false); }
-    void setSize (int w, int h)               { setBounds (bounds.getX(), bounds.getY(), w, h, false); }
     Rectangle<int> getBounds() const          { return bounds; }
-    Point<int> getScreenPosition() const      { return bounds.getPosition(); }
 
     Point<int> localToGlobal (const Point<int>& relativePosition)
     {
-        return relativePosition + getScreenPosition();
+        return relativePosition + bounds.getPosition();
     }
 
     Point<int> globalToLocal (const Point<int>& screenPosition)
     {
-        return screenPosition - getScreenPosition();
+        return screenPosition - bounds.getPosition();
     }
 
     void setAlpha (float /* newAlpha */)
@@ -1033,7 +1030,7 @@ public:
                 r = Desktop::getInstance().getDisplays().getMainDisplay().userArea;
 
             if (! r.isEmpty())
-                setBounds (r.getX(), r.getY(), r.getWidth(), r.getHeight(), shouldBeFullScreen);
+                setBounds (r, shouldBeFullScreen);
 
             component.repaint();
         }
@@ -2527,7 +2524,7 @@ private:
             xchangeProperty (evt.xselectionrequest.requestor,
                              evt.xselectionrequest.property,
                              targetType, 8,
-                             dragState.textOrFiles.toUTF8().getAddress(),
+                             dragState.textOrFiles.toRawUTF8(),
                              dragState.textOrFiles.getNumBytesAsUTF8());
         }
 
@@ -2621,7 +2618,7 @@ private:
 
         Point<int> dropPos ((int) clientMsg.data.l[2] >> 16,
                             (int) clientMsg.data.l[2] & 0xffff);
-        dropPos -= getScreenPosition();
+        dropPos -= bounds.getPosition();
 
         const Atoms& atoms = Atoms::get();
         Atom targetAction = atoms.XdndActionCopy;
@@ -3117,7 +3114,7 @@ Point<int> MouseInputSource::getCurrentMousePosition()
     return Point<int> (x, y);
 }
 
-void Desktop::setMousePosition (const Point<int>& newPosition)
+void Desktop::setMousePosition (Point<int> newPosition)
 {
     ScopedXLock xlock;
     Window root = RootWindow (display, DefaultScreen (display));

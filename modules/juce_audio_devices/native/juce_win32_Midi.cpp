@@ -1,24 +1,23 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-11 by Raw Material Software Ltd.
+   This file is part of the JUCE library.
+   Copyright (c) 2013 - Raw Material Software Ltd.
 
-  ------------------------------------------------------------------------------
+   Permission is granted to use this software under the terms of either:
+   a) the GPL v2 (or any later version)
+   b) the Affero GPL v3
 
-   JUCE can be redistributed and/or modified under the terms of the GNU General
-   Public License (Version 2), as published by the Free Software Foundation.
-   A copy of the license is included in the JUCE distribution, or can be found
-   online at www.gnu.org/licenses.
+   Details of these licenses can be found at: www.gnu.org/licenses
 
    JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
    A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
-  ------------------------------------------------------------------------------
+   ------------------------------------------------------------------------------
 
    To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.rawmaterialsoftware.com/juce for more information.
+   available: visit www.juce.com for more information.
 
   ==============================================================================
 */
@@ -81,7 +80,10 @@ public:
             activeMidiCollectors.addIfNotAlreadyThere (this);
 
             for (int i = 0; i < (int) numHeaders; ++i)
+            {
+                headers[i].prepare (deviceHandle);
                 headers[i].write (deviceHandle);
+            }
 
             startTime = Time::getMillisecondCounterHiRes();
             MMRESULT res = midiInStart (deviceHandle);
@@ -139,29 +141,15 @@ private:
     class MidiHeader
     {
     public:
-        MidiHeader()
+        MidiHeader() {}
+
+        void prepare (HMIDIIN deviceHandle)
         {
             zerostruct (hdr);
             hdr.lpData = data;
             hdr.dwBufferLength = (DWORD) numElementsInArray (data);
-        }
 
-        void write (HMIDIIN deviceHandle)
-        {
-            hdr.dwBytesRecorded = 0;
-            MMRESULT res = midiInPrepareHeader (deviceHandle, &hdr, sizeof (hdr));
-            res = midiInAddBuffer (deviceHandle, &hdr, sizeof (hdr));
-            (void) res;
-        }
-
-        void writeIfFinished (HMIDIIN deviceHandle)
-        {
-            if ((hdr.dwFlags & WHDR_DONE) != 0)
-            {
-                MMRESULT res = midiInUnprepareHeader (deviceHandle, &hdr, sizeof (hdr));
-                (void) res;
-                write (deviceHandle);
-            }
+            midiInPrepareHeader (deviceHandle, &hdr, sizeof (hdr));
         }
 
         void unprepare (HMIDIIN deviceHandle)
@@ -174,6 +162,18 @@ private:
 
                 jassert (c >= 0);
             }
+        }
+
+        void write (HMIDIIN deviceHandle)
+        {
+            hdr.dwBytesRecorded = 0;
+            midiInAddBuffer (deviceHandle, &hdr, sizeof (hdr));
+        }
+
+        void writeIfFinished (HMIDIIN deviceHandle)
+        {
+            if ((hdr.dwFlags & WHDR_DONE) != 0)
+                write (deviceHandle);
         }
 
     private:

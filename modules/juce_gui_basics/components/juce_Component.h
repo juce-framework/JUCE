@@ -1,24 +1,23 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-11 by Raw Material Software Ltd.
+   This file is part of the JUCE library.
+   Copyright (c) 2013 - Raw Material Software Ltd.
 
-  ------------------------------------------------------------------------------
+   Permission is granted to use this software under the terms of either:
+   a) the GPL v2 (or any later version)
+   b) the Affero GPL v3
 
-   JUCE can be redistributed and/or modified under the terms of the GNU General
-   Public License (Version 2), as published by the Free Software Foundation.
-   A copy of the license is included in the JUCE distribution, or can be found
-   online at www.gnu.org/licenses.
+   Details of these licenses can be found at: www.gnu.org/licenses
 
    JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
    A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
-  ------------------------------------------------------------------------------
+   ------------------------------------------------------------------------------
 
    To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.rawmaterialsoftware.com/juce for more information.
+   available: visit www.juce.com for more information.
 
   ==============================================================================
 */
@@ -136,7 +135,7 @@ public:
     */
     bool isVisible() const noexcept                         { return flags.visibleFlag; }
 
-    /** Called when this component's visiblility changes.
+    /** Called when this component's visibility changes.
         @see setVisible, isVisible
     */
     virtual void visibilityChanged();
@@ -288,7 +287,7 @@ public:
     int getRight() const noexcept                           { return bounds.getRight(); }
 
     /** Returns the component's top-left position as a Point. */
-    const Point<int>& getPosition() const noexcept          { return bounds.getPosition(); }
+    Point<int> getPosition() const noexcept                 { return bounds.getPosition(); }
 
     /** Returns the y coordinate of the bottom edge of this component.
         This is a distance in pixels from the top edge of the component's parent.
@@ -361,7 +360,7 @@ public:
         screen coordinate.
     */
     Point<int> getLocalPoint (const Component* sourceComponent,
-                              const Point<int>& pointRelativeToSourceComponent) const;
+                              Point<int> pointRelativeToSourceComponent) const;
 
     /** Converts a rectangle to be relative to this component's coordinate space.
 
@@ -379,7 +378,7 @@ public:
     /** Converts a point relative to this component's top-left into a screen coordinate.
         @see getLocalPoint, localAreaToGlobal
     */
-    Point<int> localPointToGlobal (const Point<int>& localPoint) const;
+    Point<int> localPointToGlobal (Point<int> localPoint) const;
 
     /** Converts a rectangle from this component's coordinate space to a screen coordinate.
 
@@ -419,7 +418,7 @@ public:
 
         @see setBounds, ComponentListener::componentMovedOrResized
     */
-    void setTopLeftPosition (const Point<int>& newTopLeftPosition);
+    void setTopLeftPosition (Point<int> newTopLeftPosition);
 
     /** Moves the component to a new position.
 
@@ -897,7 +896,7 @@ public:
                     which might be in the way - for that, see reallyContains()
         @see hitTest, reallyContains, getComponentAt
     */
-    bool contains (const Point<int>& localPoint);
+    bool contains (Point<int> localPoint);
 
     /** Returns true if a given point lies in this component, taking any overlapping
         siblings into account.
@@ -907,7 +906,7 @@ public:
                                             this determines whether that is counted as a hit.
         @see contains, getComponentAt
     */
-    bool reallyContains (const Point<int>& localPoint, bool returnTrueIfWithinAChild);
+    bool reallyContains (Point<int> localPoint, bool returnTrueIfWithinAChild);
 
     /** Returns the component at a certain point within this one.
 
@@ -930,7 +929,7 @@ public:
                     instead call getComponentAt on the top-level parent of this component.
         @see hitTest, contains, reallyContains
     */
-    Component* getComponentAt (const Point<int>& position);
+    Component* getComponentAt (Point<int> position);
 
     //==============================================================================
     /** Marks the whole component as needing to be redrawn.
@@ -1565,6 +1564,7 @@ public:
         that parent components can collect gesture messages that are unused by child
         components.
 
+        @param event   details about the mouse event
         @param scaleFactor  a multiplier to indicate by how much the size of the target
                             should be changed. A value of 1.0 would indicate no change,
                             values greater than 1.0 mean it should be enlarged.
@@ -2042,7 +2042,7 @@ public:
 
         @see findColour, isColourSpecified, colourChanged, LookAndFeel::findColour, LookAndFeel::setColour
     */
-    void setColour (int colourId, const Colour& colour);
+    void setColour (int colourId, Colour newColour);
 
     /** If a colour has been set with setColour(), this will remove it.
         This allows you to make a colour revert to its default state.
@@ -2216,9 +2216,9 @@ public:
     //==============================================================================
    #ifndef DOXYGEN
     // These methods are deprecated - use localPointToGlobal, getLocalPoint, getLocalPoint, etc instead.
-    JUCE_DEPRECATED (Point<int> relativePositionToGlobal (const Point<int>&) const);
-    JUCE_DEPRECATED (Point<int> globalPositionToRelative (const Point<int>&) const);
-    JUCE_DEPRECATED (Point<int> relativePositionToOtherComponent (const Component*, const Point<int>&) const);
+    JUCE_DEPRECATED (Point<int> relativePositionToGlobal (Point<int>) const);
+    JUCE_DEPRECATED (Point<int> globalPositionToRelative (Point<int>) const);
+    JUCE_DEPRECATED (Point<int> relativePositionToOtherComponent (const Component*, Point<int>) const);
    #endif
 
 private:
@@ -2286,14 +2286,14 @@ private:
     uint8 componentTransparency;
 
     //==============================================================================
-    void internalMouseEnter (MouseInputSource&, const Point<int>&, const Time&);
-    void internalMouseExit  (MouseInputSource&, const Point<int>&, const Time&);
-    void internalMouseDown  (MouseInputSource&, const Point<int>&, const Time&);
-    void internalMouseUp    (MouseInputSource&, const Point<int>&, const Time&, const ModifierKeys& oldModifiers);
-    void internalMouseDrag  (MouseInputSource&, const Point<int>&, const Time&);
-    void internalMouseMove  (MouseInputSource&, const Point<int>&, const Time&);
-    void internalMouseWheel (MouseInputSource&, const Point<int>&, const Time&, const MouseWheelDetails&);
-    void internalMagnifyGesture (MouseInputSource&, const Point<int>&, const Time&, float);
+    void internalMouseEnter (MouseInputSource&, Point<int>, Time);
+    void internalMouseExit  (MouseInputSource&, Point<int>, Time);
+    void internalMouseDown  (MouseInputSource&, Point<int>, Time);
+    void internalMouseUp    (MouseInputSource&, Point<int>, Time, const ModifierKeys oldModifiers);
+    void internalMouseDrag  (MouseInputSource&, Point<int>, Time);
+    void internalMouseMove  (MouseInputSource&, Point<int>, Time);
+    void internalMouseWheel (MouseInputSource&, Point<int>, Time, const MouseWheelDetails&);
+    void internalMagnifyGesture (MouseInputSource&, Point<int>, Time, float);
     void internalBroughtToFront();
     void internalFocusGain (const FocusChangeType, const WeakReference<Component>&);
     void internalFocusGain (const FocusChangeType);
@@ -2335,7 +2335,7 @@ private:
     virtual void filesDropped (const StringArray&, int, int) {}
 
     // This is included here to cause an error if you use or overload it - it has been deprecated in
-    // favour of contains (const Point<int>&)
+    // favour of contains (Point<int>)
     void contains (int, int);
    #endif
 

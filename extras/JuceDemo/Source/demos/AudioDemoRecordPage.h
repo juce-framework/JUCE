@@ -62,9 +62,9 @@ private:
     //[/UserVariables]
 
     //==============================================================================
-    LiveAudioInputDisplayComp* liveAudioDisplayComp;
-    Label* explanationLabel;
-    TextButton* recordButton;
+    ScopedPointer<LiveAudioInputDisplayComp> liveAudioDisplayComp;
+    ScopedPointer<Label> explanationLabel;
+    ScopedPointer<TextButton> recordButton;
 
 
     //==============================================================================

@@ -1,24 +1,23 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-11 by Raw Material Software Ltd.
+   This file is part of the JUCE library.
+   Copyright (c) 2013 - Raw Material Software Ltd.
 
-  ------------------------------------------------------------------------------
+   Permission is granted to use this software under the terms of either:
+   a) the GPL v2 (or any later version)
+   b) the Affero GPL v3
 
-   JUCE can be redistributed and/or modified under the terms of the GNU General
-   Public License (Version 2), as published by the Free Software Foundation.
-   A copy of the license is included in the JUCE distribution, or can be found
-   online at www.gnu.org/licenses.
+   Details of these licenses can be found at: www.gnu.org/licenses
 
    JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
    A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
-  ------------------------------------------------------------------------------
+   ------------------------------------------------------------------------------
 
    To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.rawmaterialsoftware.com/juce for more information.
+   available: visit www.juce.com for more information.
 
   ==============================================================================
 */
@@ -296,57 +295,6 @@ String RolloverHelpComp::findTip (Component* c)
 
     return String::empty;
 }
-
-//==============================================================================
-FloatingLabelComponent::FloatingLabelComponent()
-    : font (10.0f)
-{
-    setInterceptsMouseClicks (false, false);
-}
-
-void FloatingLabelComponent::remove()
-{
-    if (Component* p = getParentComponent())
-        p->removeChildComponent (this);
-}
-
-void FloatingLabelComponent::update (Component* parent, const String& text, const Colour& textColour,
-                                     int x, int y, bool toRight, bool below)
-{
-    colour = textColour;
-
-    Rectangle<int> r;
-
-    if (text != getName())
-    {
-        setName (text);
-        glyphs.clear();
-        glyphs.addJustifiedText (font, text, 0, 0, 200.0f, Justification::left);
-        glyphs.justifyGlyphs (0, std::numeric_limits<int>::max(), 0, 0, 1000, 1000, Justification::topLeft);
-
-        r = glyphs.getBoundingBox (0, std::numeric_limits<int>::max(), false)
-                  .getSmallestIntegerContainer().expanded (1, 1);
-    }
-    else
-    {
-        r = getLocalBounds();
-    }
-
-    r.setPosition (x + (toRight ? 3 : -(r.getWidth() + 3)), y + (below ? 2 : -(r.getHeight() + 2)));
-    setBounds (r);
-    parent->addAndMakeVisible (this);
-}
-
-void FloatingLabelComponent::paint (Graphics& g)
-{
-    g.setFont (font);
-    g.setColour (Colours::white.withAlpha (0.5f));
-    g.fillRoundedRectangle (0, 0, (float) getWidth(), (float) getHeight(), 3);
-
-    g.setColour (colour);
-    glyphs.draw (g, AffineTransform::translation (1.0f, 1.0f));
-}
-
 
 //==============================================================================
 class UTF8Component  : public Component,

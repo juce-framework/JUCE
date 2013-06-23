@@ -1,24 +1,23 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-11 by Raw Material Software Ltd.
+   This file is part of the JUCE library.
+   Copyright (c) 2013 - Raw Material Software Ltd.
 
-  ------------------------------------------------------------------------------
+   Permission is granted to use this software under the terms of either:
+   a) the GPL v2 (or any later version)
+   b) the Affero GPL v3
 
-   JUCE can be redistributed and/or modified under the terms of the GNU General
-   Public License (Version 2), as published by the Free Software Foundation.
-   A copy of the license is included in the JUCE distribution, or can be found
-   online at www.gnu.org/licenses.
+   Details of these licenses can be found at: www.gnu.org/licenses
 
    JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
    A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
-  ------------------------------------------------------------------------------
+   ------------------------------------------------------------------------------
 
    To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.rawmaterialsoftware.com/juce for more information.
+   available: visit www.juce.com for more information.
 
   ==============================================================================
 */
@@ -59,7 +58,7 @@ void DrawableText::setText (const String& newText)
     }
 }
 
-void DrawableText::setColour (const Colour& newColour)
+void DrawableText::setColour (Colour newColour)
 {
     if (colour != newColour)
     {
@@ -159,28 +158,21 @@ void DrawableText::recalculateCoordinates (Expression::Scope* scope)
     repaint();
 }
 
-const AffineTransform DrawableText::getArrangementAndTransform (GlyphArrangement& glyphs) const
-{
-    const float w = Line<float> (resolvedPoints[0], resolvedPoints[1]).getLength();
-    const float h = Line<float> (resolvedPoints[0], resolvedPoints[2]).getLength();
-
-    glyphs.addFittedText (scaledFont, text, 0, 0, w, h, justification, 0x100000);
-
-    return AffineTransform::fromTargetPoints (0, 0, resolvedPoints[0].x, resolvedPoints[0].y,
-                                              w, 0, resolvedPoints[1].x, resolvedPoints[1].y,
-                                              0, h, resolvedPoints[2].x, resolvedPoints[2].y);
-}
-
 //==============================================================================
 void DrawableText::paint (Graphics& g)
 {
     transformContextToCorrectOrigin (g);
 
+    const float w = Line<float> (resolvedPoints[0], resolvedPoints[1]).getLength();
+    const float h = Line<float> (resolvedPoints[0], resolvedPoints[2]).getLength();
+
+    g.addTransform (AffineTransform::fromTargetPoints (0, 0, resolvedPoints[0].x, resolvedPoints[0].y,
+                                                       w, 0, resolvedPoints[1].x, resolvedPoints[1].y,
+                                                       0, h, resolvedPoints[2].x, resolvedPoints[2].y));
+    g.setFont (scaledFont);
     g.setColour (colour);
 
-    GlyphArrangement ga;
-    const AffineTransform transform (getArrangementAndTransform (ga));
-    ga.draw (g, transform);
+    g.drawFittedText (text, Rectangle<float> (w, h).getSmallestIntegerContainer(), justification, 0x100000);
 }
 
 Rectangle<float> DrawableText::getDrawableBounds() const
@@ -233,7 +225,7 @@ Colour DrawableText::ValueTreeWrapper::getColour() const
     return Colour::fromString (state [colour].toString());
 }
 
-void DrawableText::ValueTreeWrapper::setColour (const Colour& newColour, UndoManager* undoManager)
+void DrawableText::ValueTreeWrapper::setColour (Colour newColour, UndoManager* undoManager)
 {
     state.setProperty (colour, newColour.toString(), undoManager);
 }

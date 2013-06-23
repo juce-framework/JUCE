@@ -1,24 +1,23 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-11 by Raw Material Software Ltd.
+   This file is part of the JUCE library.
+   Copyright (c) 2013 - Raw Material Software Ltd.
 
-  ------------------------------------------------------------------------------
+   Permission is granted to use this software under the terms of either:
+   a) the GPL v2 (or any later version)
+   b) the Affero GPL v3
 
-   JUCE can be redistributed and/or modified under the terms of the GNU General
-   Public License (Version 2), as published by the Free Software Foundation.
-   A copy of the license is included in the JUCE distribution, or can be found
-   online at www.gnu.org/licenses.
+   Details of these licenses can be found at: www.gnu.org/licenses
 
    JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
    A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
-  ------------------------------------------------------------------------------
+   ------------------------------------------------------------------------------
 
    To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.rawmaterialsoftware.com/juce for more information.
+   available: visit www.juce.com for more information.
 
   ==============================================================================
 */
@@ -406,16 +405,16 @@ public:
         The rectangle returned is relative to the component's top-left corner.
         @see scrollEditorToPositionCaret
     */
-    Rectangle<int> getCaretRectangle();
+    Rectangle<int> getCaretRectangle() override;
 
     /** Selects a section of the text. */
-    void setHighlightedRegion (const Range<int>& newSelection);
+    void setHighlightedRegion (const Range<int>& newSelection) override;
 
     /** Returns the range of characters that are selected.
         If nothing is selected, this will return an empty range.
         @see setHighlightedRegion
     */
-    Range<int> getHighlightedRegion() const                   { return selection; }
+    Range<int> getHighlightedRegion() const override            { return selection; }
 
     /** Returns the section of text that is currently selected. */
     String getHighlightedText() const;
@@ -699,9 +698,9 @@ private:
     void coalesceSimilarSections();
     void splitSection (int sectionIndex, int charToSplitAt);
     void clearInternal (UndoManager*);
-    void insert (const String&, int insertIndex, const Font&, const Colour&, UndoManager*, int newCaretPos);
+    void insert (const String&, int insertIndex, const Font&, const Colour, UndoManager*, int newCaretPos);
     void reinsert (int insertIndex, const Array <UniformTextSection*>&);
-    void remove (const Range<int>& range, UndoManager*, int caretPositionToMoveTo);
+    void remove (Range<int> range, UndoManager*, int caretPositionToMoveTo);
     void getCharPosition (int index, float& x, float& y, float& lineHeight) const;
     void updateCaretPosition();
     void updateValueFromText();
@@ -716,7 +715,7 @@ private:
     void updateTextHolderSize();
     float getWordWrapWidth() const;
     void timerCallbackInt();
-    void repaintText (const Range<int>&);
+    void repaintText (Range<int>);
     void scrollByLines (int deltaLines);
     bool undoOrRedo (bool shouldUndo);
     UndoManager* getUndoManager() noexcept;

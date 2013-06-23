@@ -69,6 +69,8 @@ public final class JuceAppActivity   extends Activity
 
         viewHolder = new ViewHolder (this);
         setContentView (viewHolder);
+
+        setVolumeControlStream (AudioManager.STREAM_MUSIC);
     }
 
     @Override

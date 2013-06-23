@@ -1,24 +1,23 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-11 by Raw Material Software Ltd.
+   This file is part of the JUCE library.
+   Copyright (c) 2013 - Raw Material Software Ltd.
 
-  ------------------------------------------------------------------------------
+   Permission is granted to use this software under the terms of either:
+   a) the GPL v2 (or any later version)
+   b) the Affero GPL v3
 
-   JUCE can be redistributed and/or modified under the terms of the GNU General
-   Public License (Version 2), as published by the Free Software Foundation.
-   A copy of the license is included in the JUCE distribution, or can be found
-   online at www.gnu.org/licenses.
+   Details of these licenses can be found at: www.gnu.org/licenses
 
    JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
    A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
-  ------------------------------------------------------------------------------
+   ------------------------------------------------------------------------------
 
    To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.rawmaterialsoftware.com/juce for more information.
+   available: visit www.juce.com for more information.
 
   ==============================================================================
 */
@@ -33,6 +32,7 @@
 #include "../Code Editor/jucer_SourceCodeEditor.h"
 
 void createGUIEditorMenu (PopupMenu&);
+void handleGUIEditorMenuCommand (int);
 void registerGUIEditorCommands();
 
 //==============================================================================
@@ -87,13 +87,24 @@ public:
         else
             mainWindowList.reopenLastProjects();
 
-        makeSureUserHasSelectedModuleFolder();
-
         mainWindowList.createWindowIfNoneAreOpen();
 
        #if JUCE_MAC
         MenuBarModel::setMacMainMenu (menuModel, nullptr, "Open Recent");
        #endif
+
+        struct ModuleFolderChecker  : public CallbackMessage
+        {
+            ModuleFolderChecker() {}
+
+            void messageCallback()
+            {
+                if (IntrojucerApp* const app = dynamic_cast<IntrojucerApp*> (JUCEApplication::getInstance()))
+                    app->makeSureUserHasSelectedModuleFolder();
+            }
+        };
+
+        (new ModuleFolderChecker())->post();
     }
 
     void shutdown()
@@ -182,22 +193,7 @@ public:
 
         void menuItemSelected (int menuItemID, int /*topLevelMenuIndex*/)
         {
-            if (menuItemID >= recentProjectsBaseID && menuItemID < recentProjectsBaseID + 100)
-            {
-                // open a file from the "recent files" menu
-                getApp().openFile (getAppSettings().recentFiles.getFile (menuItemID - recentProjectsBaseID));
-            }
-            else if (menuItemID >= activeDocumentsBaseID && menuItemID < activeDocumentsBaseID + 200)
-            {
-                if (OpenDocumentManager::Document* doc = getApp().openDocumentManager.getOpenDocument (menuItemID - activeDocumentsBaseID))
-                    getApp().mainWindowList.openDocument (doc, true);
-                else
-                    jassertfalse;
-            }
-            else if (menuItemID >= colourSchemeBaseID && menuItemID < colourSchemeBaseID + 200)
-            {
-                getAppSettings().appearance.selectPresetScheme (menuItemID - colourSchemeBaseID);
-            }
+            getApp().handleMainMenuCommand (menuItemID);
         }
     };
 
@@ -210,19 +206,19 @@ public:
 
     virtual StringArray getMenuNames()
     {
-        const char* const names[] = { "File", "Edit", "View", "Window", "Jucer", "Tools", nullptr };
+        const char* const names[] = { "File", "Edit", "View", "Window", "GUI Editor", "Tools", nullptr };
         return StringArray (names);
     }
 
     virtual void createMenu (PopupMenu& menu, const String& menuName)
     {
-        if (menuName == "File")         createFileMenu   (menu);
-        else if (menuName == "Edit")    createEditMenu   (menu);
-        else if (menuName == "View")    createViewMenu   (menu);
-        else if (menuName == "Window")  createWindowMenu (menu);
-        else if (menuName == "Tools")   createToolsMenu  (menu);
-        else if (menuName == "Jucer")   createGUIEditorMenu (menu);
-        else                            jassertfalse; // names have changed?
+        if (menuName == "File")             createFileMenu   (menu);
+        else if (menuName == "Edit")        createEditMenu   (menu);
+        else if (menuName == "View")        createViewMenu   (menu);
+        else if (menuName == "Window")      createWindowMenu (menu);
+        else if (menuName == "Tools")       createToolsMenu  (menu);
+        else if (menuName == "GUI Editor")  createGUIEditorMenu (menu);
+        else                                jassertfalse; // names have changed?
     }
 
     virtual void createFileMenu (PopupMenu& menu)
@@ -232,7 +228,7 @@ public:
         menu.addCommandItem (commandManager, CommandIDs::open);
 
         PopupMenu recentFiles;
-        getAppSettings().recentFiles.createPopupMenuItems (recentFiles, recentProjectsBaseID, true, true);
+        settings->recentFiles.createPopupMenuItems (recentFiles, recentProjectsBaseID, true, true);
         menu.addSubMenu ("Open Recent", recentFiles);
 
         menu.addSeparator();
@@ -305,11 +301,11 @@ public:
         menu.addCommandItem (commandManager, CommandIDs::goToCounterpart);
         menu.addSeparator();
 
-        const int numDocs = jmin (50, getApp().openDocumentManager.getNumOpenDocuments());
+        const int numDocs = jmin (50, openDocumentManager.getNumOpenDocuments());
 
         for (int i = 0; i < numDocs; ++i)
         {
-            OpenDocumentManager::Document* doc = getApp().openDocumentManager.getOpenDocument(i);
+            OpenDocumentManager::Document* doc = openDocumentManager.getOpenDocument(i);
             menu.addItem (activeDocumentsBaseID + i, doc->getName());
         }
 
@@ -321,6 +317,31 @@ public:
     {
         menu.addCommandItem (commandManager, CommandIDs::updateModules);
         menu.addCommandItem (commandManager, CommandIDs::showUTF8Tool);
+        menu.addCommandItem (commandManager, CommandIDs::showTranslationTool);
+    }
+
+    virtual void handleMainMenuCommand (int menuItemID)
+    {
+        if (menuItemID >= recentProjectsBaseID && menuItemID < recentProjectsBaseID + 100)
+        {
+            // open a file from the "recent files" menu
+            openFile (settings->recentFiles.getFile (menuItemID - recentProjectsBaseID));
+        }
+        else if (menuItemID >= activeDocumentsBaseID && menuItemID < activeDocumentsBaseID + 200)
+        {
+            if (OpenDocumentManager::Document* doc = openDocumentManager.getOpenDocument (menuItemID - activeDocumentsBaseID))
+                mainWindowList.openDocument (doc, true);
+            else
+                jassertfalse;
+        }
+        else if (menuItemID >= colourSchemeBaseID && menuItemID < colourSchemeBaseID + 200)
+        {
+            settings->appearance.selectPresetScheme (menuItemID - colourSchemeBaseID);
+        }
+        else
+        {
+            handleGUIEditorMenuCommand (menuItemID);
+        }
     }
 
     //==============================================================================
@@ -450,13 +471,22 @@ public:
             }
         }
 
+        if (ModuleList().isLibraryNewerThanIntrojucer())
+        {
+            AlertWindow::showMessageBox (AlertWindow::WarningIcon,
+                                         "Introjucer",
+                                         "This version of the introjucer is out-of-date!"
+                                         "\n\n"
+                                         "Always make sure that you're running the very latest version, preferably compiled directly from the juce tree that you're working with!");
+        }
+
         return true;
     }
 
     bool runModuleUpdate (const String& message)
     {
         ModuleList list;
-        list.rescan (ModuleList::getDefaultModulesFolder (nullptr));
+        list.rescan (ModuleList::getDefaultModulesFolder (mainWindowList.getFrontmostProject()));
         JuceUpdater::show (list, mainWindowList.windows[0], message);
 
         ModuleList::setLocalModulesFolder (list.getModulesFolder());
@@ -515,7 +545,27 @@ public:
 
     virtual void doExtraInitialisation() {}
     virtual void addExtraConfigItems (Project&, TreeViewItem&) {}
+
+   #if JUCE_LINUX
+    virtual String getLogFolderName() const    { return "~/.config/Introjucer/Logs"; }
+   #else
     virtual String getLogFolderName() const    { return "com.juce.introjucer"; }
+   #endif
+
+    virtual PropertiesFile::Options getPropertyFileOptionsFor (const String& filename)
+    {
+        PropertiesFile::Options options;
+        options.applicationName     = filename;
+        options.filenameSuffix      = "settings";
+        options.osxLibrarySubFolder = "Application Support";
+       #if JUCE_LINUX
+        options.folderName          = "~/.config/Introjucer";
+       #else
+        options.folderName          = "Introjucer";
+       #endif
+
+        return options;
+    }
 
     virtual Component* createProjectContentComponent() const
     {
@@ -551,7 +601,7 @@ private:
             delete this;
 
             if (JUCEApplication::getInstance() != nullptr)
-                IntrojucerApp::getApp().closeModalCompsAndQuit();
+                getApp().closeModalCompsAndQuit();
         }
 
         JUCE_DECLARE_NON_COPYABLE (AsyncQuitRetrier)

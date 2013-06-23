@@ -1,24 +1,23 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-11 by Raw Material Software Ltd.
+   This file is part of the JUCE library.
+   Copyright (c) 2013 - Raw Material Software Ltd.
 
-  ------------------------------------------------------------------------------
+   Permission is granted to use this software under the terms of either:
+   a) the GPL v2 (or any later version)
+   b) the Affero GPL v3
 
-   JUCE can be redistributed and/or modified under the terms of the GNU General
-   Public License (Version 2), as published by the Free Software Foundation.
-   A copy of the license is included in the JUCE distribution, or can be found
-   online at www.gnu.org/licenses.
+   Details of these licenses can be found at: www.gnu.org/licenses
 
    JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
    A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
-  ------------------------------------------------------------------------------
+   ------------------------------------------------------------------------------
 
    To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.rawmaterialsoftware.com/juce for more information.
+   available: visit www.juce.com for more information.
 
   ==============================================================================
 */
@@ -32,8 +31,8 @@
 #include "jucer_ProjectContentComponent.h"
 
 //==============================================================================
-GroupTreeViewItem::GroupTreeViewItem (const Project::Item& item_)
-    : ProjectTreeViewBase (item_)
+GroupTreeViewItem::GroupTreeViewItem (const Project::Item& i)
+    : ProjectTreeViewBase (i)
 {
 }
 
@@ -94,33 +93,6 @@ void GroupTreeViewItem::showDocument()
         pcc->setEditorComponent (new GroupInformationComponent (item), nullptr);
 }
 
-void GroupTreeViewItem::showPopupMenu()
-{
-    PopupMenu m;
-    addCreateFileMenuItems (m);
-
-    m.addSeparator();
-
-    if (isOpen())
-        m.addItem (4, "Collapse all Sub-groups");
-    else
-        m.addItem (5, "Expand all Sub-groups");
-
-    m.addSeparator();
-    m.addItem (6, "Enable compiling of all enclosed files");
-    m.addItem (7, "Disable compiling of all enclosed files");
-
-    m.addSeparator();
-    m.addItem (3, "Sort Contents Alphabetically");
-    m.addSeparator();
-    m.addItem (1, "Rename...");
-
-    if (! isRoot())
-        m.addItem (2, "Delete");
-
-    launchPopupMenu (m);
-}
-
 static void openOrCloseAllSubGroups (TreeViewItem& item, bool shouldOpen)
 {
     item.setOpen (shouldOpen);
@@ -139,17 +111,46 @@ static void setFilesToCompile (Project::Item item, const bool shouldCompile)
         setFilesToCompile (item.getChild (i), shouldCompile);
 }
 
+void GroupTreeViewItem::showPopupMenu()
+{
+    PopupMenu m;
+    addCreateFileMenuItems (m);
+
+    m.addSeparator();
+
+    if (isOpen())
+        m.addItem (1, "Collapse all Sub-groups");
+    else
+        m.addItem (2, "Expand all Sub-groups");
+
+    m.addSeparator();
+    m.addItem (3, "Enable compiling of all enclosed files");
+    m.addItem (4, "Disable compiling of all enclosed files");
+
+    m.addSeparator();
+    m.addItem (5, "Sort Items Alphabetically");
+    m.addItem (6, "Sort Items Alphabetically (Groups first)");
+    m.addSeparator();
+    m.addItem (7, "Rename...");
+
+    if (! isRoot())
+        m.addItem (8, "Delete");
+
+    launchPopupMenu (m);
+}
+
 void GroupTreeViewItem::handlePopupMenuResult (int resultCode)
 {
     switch (resultCode)
     {
-        case 1:     triggerAsyncRename (item); break;
-        case 2:     deleteAllSelectedItems(); break;
-        case 3:     item.sortAlphabetically (false); break;
-        case 4:     openOrCloseAllSubGroups (*this, false); break;
-        case 5:     openOrCloseAllSubGroups (*this, true); break;
-        case 6:     setFilesToCompile (item, true); break;
-        case 7:     setFilesToCompile (item, false); break;
+        case 1:     openOrCloseAllSubGroups (*this, false); break;
+        case 2:     openOrCloseAllSubGroups (*this, true); break;
+        case 3:     setFilesToCompile (item, true); break;
+        case 4:     setFilesToCompile (item, false); break;
+        case 5:     item.sortAlphabetically (false); break;
+        case 6:     item.sortAlphabetically (true); break;
+        case 7:     triggerAsyncRename (item); break;
+        case 8:     deleteAllSelectedItems(); break;
         default:    processCreateFileMenuItem (resultCode); break;
     }
 }

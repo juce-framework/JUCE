@@ -1,24 +1,23 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-11 by Raw Material Software Ltd.
+   This file is part of the JUCE library.
+   Copyright (c) 2013 - Raw Material Software Ltd.
 
-  ------------------------------------------------------------------------------
+   Permission is granted to use this software under the terms of either:
+   a) the GPL v2 (or any later version)
+   b) the Affero GPL v3
 
-   JUCE can be redistributed and/or modified under the terms of the GNU General
-   Public License (Version 2), as published by the Free Software Foundation.
-   A copy of the license is included in the JUCE distribution, or can be found
-   online at www.gnu.org/licenses.
+   Details of these licenses can be found at: www.gnu.org/licenses
 
    JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
    A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
-  ------------------------------------------------------------------------------
+   ------------------------------------------------------------------------------
 
    To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.rawmaterialsoftware.com/juce for more information.
+   available: visit www.juce.com for more information.
 
   ==============================================================================
 */
@@ -36,6 +35,7 @@ BufferingAudioSource::BufferingAudioSource (PositionableAudioSource* source_,
       bufferValidStart (0),
       bufferValidEnd (0),
       nextPlayPos (0),
+      sampleRate (0),
       wasSourceLooping (false),
       isPrepared (false)
 {
@@ -209,42 +209,40 @@ bool BufferingAudioSource::readNextBufferChunk()
         }
     }
 
-    if (sectionToReadStart != sectionToReadEnd)
+    if (sectionToReadStart == sectionToReadEnd)
+        return false;
+
+    jassert (buffer.getNumSamples() > 0);
+    const int bufferIndexStart = (int) (sectionToReadStart % buffer.getNumSamples());
+    const int bufferIndexEnd   = (int) (sectionToReadEnd   % buffer.getNumSamples());
+
+    if (bufferIndexStart < bufferIndexEnd)
     {
-        jassert (buffer.getNumSamples() > 0);
-        const int bufferIndexStart = (int) (sectionToReadStart % buffer.getNumSamples());
-        const int bufferIndexEnd   = (int) (sectionToReadEnd   % buffer.getNumSamples());
+        readBufferSection (sectionToReadStart,
+                           (int) (sectionToReadEnd - sectionToReadStart),
+                           bufferIndexStart);
+    }
+    else
+    {
+        const int initialSize = buffer.getNumSamples() - bufferIndexStart;
 
-        if (bufferIndexStart < bufferIndexEnd)
-        {
-            readBufferSection (sectionToReadStart,
-                               (int) (sectionToReadEnd - sectionToReadStart),
-                               bufferIndexStart);
-        }
-        else
-        {
-            const int initialSize = buffer.getNumSamples() - bufferIndexStart;
+        readBufferSection (sectionToReadStart,
+                           initialSize,
+                           bufferIndexStart);
 
-            readBufferSection (sectionToReadStart,
-                               initialSize,
-                               bufferIndexStart);
+        readBufferSection (sectionToReadStart + initialSize,
+                           (int) (sectionToReadEnd - sectionToReadStart) - initialSize,
+                           0);
+    }
 
-            readBufferSection (sectionToReadStart + initialSize,
-                               (int) (sectionToReadEnd - sectionToReadStart) - initialSize,
-                               0);
-        }
-
+    {
         const ScopedLock sl2 (bufferStartPosLock);
 
         bufferValidStart = newBVS;
         bufferValidEnd = newBVE;
+    }
 
-        return true;
-    }
-    else
-    {
-        return false;
-    }
+    return true;
 }
 
 void BufferingAudioSource::readBufferSection (const int64 start, const int length, const int bufferOffset)

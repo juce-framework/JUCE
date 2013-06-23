@@ -18,6 +18,8 @@
           <Add option="-O0"/>
           <Add option="-std=gnu++0x"/>
           <Add option="-march=pentium4"/>
+          <Add option="-mstackrealign"/>
+          <Add option="-g"/>
           <Add option="-D__MINGW__=1"/>
           <Add option="-D__MINGW_EXTENSION="/>
           <Add option="-DJUCE_UNIT_TESTS=1"/>
@@ -52,6 +54,7 @@
           <Add option="-Os"/>
           <Add option="-std=gnu++0x"/>
           <Add option="-march=pentium4"/>
+          <Add option="-mstackrealign"/>
           <Add option="-D__MINGW__=1"/>
           <Add option="-D__MINGW_EXTENSION="/>
           <Add option="-DJUCE_UNIT_TESTS=1"/>
@@ -79,6 +82,8 @@
     </Build>
     <Compiler>
       <Add option="-Wall"/>
+      <Add option="-Wno-strict-aliasing"/>
+      <Add option="-Wno-strict-overflow"/>
     </Compiler>
     <Linker>
       <Add library="gdi32"/>
@@ -1232,6 +1237,14 @@
       <Option compile="0"/>
       <Option link="0"/>
     </Unit>
+    <Unit filename="../../../../modules/juce_core/network/juce_IPAddress.cpp">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../../../modules/juce_core/network/juce_IPAddress.h">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
     <Unit filename="../../../../modules/juce_core/network/juce_MACAddress.cpp">
       <Option compile="0"/>
       <Option link="0"/>
@@ -2057,6 +2070,10 @@
       <Option link="0"/>
     </Unit>
     <Unit filename="../../../../modules/juce_graphics/native/juce_android_GraphicsContext.cpp">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../../../modules/juce_graphics/native/juce_freetype_Fonts.cpp">
       <Option compile="0"/>
       <Option link="0"/>
     </Unit>
@@ -3253,6 +3270,10 @@
       <Option link="0"/>
     </Unit>
     <Unit filename="../../../../modules/juce_gui_extra/native/juce_mac_NSViewComponent.mm">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../../../modules/juce_gui_extra/native/juce_mac_SystemTrayIcon.cpp">
       <Option compile="0"/>
       <Option link="0"/>
     </Unit>

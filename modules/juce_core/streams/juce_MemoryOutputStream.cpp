@@ -1,24 +1,27 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-11 by Raw Material Software Ltd.
+   This file is part of the juce_core module of the JUCE library.
+   Copyright (c) 2013 - Raw Material Software Ltd.
 
-  ------------------------------------------------------------------------------
+   Permission to use, copy, modify, and/or distribute this software for any purpose with
+   or without fee is hereby granted, provided that the above copyright notice and this
+   permission notice appear in all copies.
 
-   JUCE can be redistributed and/or modified under the terms of the GNU General
-   Public License (Version 2), as published by the Free Software Foundation.
-   A copy of the license is included in the JUCE distribution, or can be found
-   online at www.gnu.org/licenses.
+   THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH REGARD
+   TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS. IN
+   NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL
+   DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER
+   IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
+   CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
-   JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-   A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+   ------------------------------------------------------------------------------
 
-  ------------------------------------------------------------------------------
+   NOTE! This permissive ISC license applies ONLY to files within the juce_core module!
+   All other JUCE modules are covered by a dual GPL/commercial license, so if you are
+   using any other modules, be sure to check that you also comply with their license.
 
-   To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.rawmaterialsoftware.com/juce for more information.
+   For more details, visit www.juce.com
 
   ==============================================================================
 */
@@ -68,13 +71,18 @@ void MemoryOutputStream::reset() noexcept
     size = 0;
 }
 
-void MemoryOutputStream::prepareToWrite (size_t numBytes)
+char* MemoryOutputStream::prepareToWrite (size_t numBytes)
 {
     jassert ((ssize_t) numBytes >= 0);
     size_t storageNeeded = position + numBytes;
 
     if (storageNeeded >= data.getSize())
         data.ensureSize ((storageNeeded + jmin (storageNeeded / 2, (size_t) (1024 * 1024)) + 32) & ~31u);
+
+    char* const writePointer = static_cast <char*> (data.getData()) + position;
+    position += numBytes;
+    size = jmax (size, position);
+    return writePointer;
 }
 
 bool MemoryOutputStream::write (const void* const buffer, size_t howMany)
@@ -82,12 +90,7 @@ bool MemoryOutputStream::write (const void* const buffer, size_t howMany)
     jassert (buffer != nullptr && ((ssize_t) howMany) >= 0);
 
     if (howMany > 0)
-    {
-        prepareToWrite (howMany);
-        memcpy (static_cast<char*> (data.getData()) + position, buffer, howMany);
-        position += howMany;
-        size = jmax (size, position);
-    }
+        memcpy (prepareToWrite (howMany), buffer, howMany);
 
     return true;
 }
@@ -95,12 +98,12 @@ bool MemoryOutputStream::write (const void* const buffer, size_t howMany)
 void MemoryOutputStream::writeRepeatedByte (uint8 byte, size_t howMany)
 {
     if (howMany > 0)
-    {
-        prepareToWrite (howMany);
-        memset (static_cast<char*> (data.getData()) + position, byte, howMany);
-        position += howMany;
-        size = jmax (size, position);
-    }
+        memset (prepareToWrite (howMany), byte, howMany);
+}
+
+void MemoryOutputStream::appendUTF8Char (juce_wchar c)
+{
+    CharPointer_UTF8 (prepareToWrite (CharPointer_UTF8::getBytesRequiredFor (c))).write (c);
 }
 
 MemoryBlock MemoryOutputStream::getMemoryBlock() const

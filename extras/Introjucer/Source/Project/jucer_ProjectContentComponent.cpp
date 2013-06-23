@@ -1,24 +1,23 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-11 by Raw Material Software Ltd.
+   This file is part of the JUCE library.
+   Copyright (c) 2013 - Raw Material Software Ltd.
 
-  ------------------------------------------------------------------------------
+   Permission is granted to use this software under the terms of either:
+   a) the GPL v2 (or any later version)
+   b) the Affero GPL v3
 
-   JUCE can be redistributed and/or modified under the terms of the GNU General
-   Public License (Version 2), as published by the Free Software Foundation.
-   A copy of the license is included in the JUCE distribution, or can be found
-   online at www.gnu.org/licenses.
+   Details of these licenses can be found at: www.gnu.org/licenses
 
    JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
    A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
-  ------------------------------------------------------------------------------
+   ------------------------------------------------------------------------------
 
    To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.rawmaterialsoftware.com/juce for more information.
+   available: visit www.juce.com for more information.
 
   ==============================================================================
 */
@@ -30,7 +29,7 @@
 #include "jucer_ConfigPage.h"
 #include "jucer_TreeViewTypes.h"
 #include "../Project Saving/jucer_ProjectExporter.h"
-
+#include "../Utility/jucer_TranslationTool.h"
 
 //==============================================================================
 class FileTreeTab   : public TreePanelBase
@@ -547,6 +546,24 @@ void ProjectContentComponent::showBubbleMessage (const Rectangle<int>& pos, cons
 }
 
 //==============================================================================
+void ProjectContentComponent::showTranslationTool()
+{
+    if (translationTool != nullptr)
+    {
+        translationTool->toFront (true);
+    }
+    else if (project != nullptr)
+    {
+        new FloatingToolWindow ("Translation File Builder",
+                                "transToolWindowPos",
+                                new TranslationToolComponent(),
+                                translationTool,
+                                600, 700,
+                                600, 400, 10000, 10000);
+    }
+}
+
+//==============================================================================
 ApplicationCommandTarget* ProjectContentComponent::getNextCommandTarget()
 {
     return findFirstTargetParentComponent();
@@ -566,7 +583,8 @@ void ProjectContentComponent::getAllCommands (Array <CommandID>& commands)
                               CommandIDs::goToPreviousDoc,
                               CommandIDs::goToNextDoc,
                               CommandIDs::goToCounterpart,
-                              CommandIDs::deleteSelectedItem };
+                              CommandIDs::deleteSelectedItem,
+                              CommandIDs::showTranslationTool };
 
     commands.addArray (ids, numElementsInArray (ids));
 }
@@ -691,6 +709,10 @@ void ProjectContentComponent::getCommandInfo (const CommandID commandID, Applica
         result.setActive (dynamic_cast<TreePanelBase*> (treeViewTabs.getCurrentContentComponent()) != nullptr);
         break;
 
+    case CommandIDs::showTranslationTool:
+        result.setInfo ("Translation File Builder", "Shows the translation file helper tool", CommandCategories::general, 0);
+        break;
+
     default:
         break;
     }
@@ -750,6 +772,8 @@ bool ProjectContentComponent::perform (const InvocationInfo& info)
                 openInIDE();
 
             break;
+
+        case CommandIDs::showTranslationTool:       showTranslationTool(); break;
 
         default:
             return false;

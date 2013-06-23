@@ -1,24 +1,23 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-11 by Raw Material Software Ltd.
+   This file is part of the JUCE library.
+   Copyright (c) 2013 - Raw Material Software Ltd.
 
-  ------------------------------------------------------------------------------
+   Permission is granted to use this software under the terms of either:
+   a) the GPL v2 (or any later version)
+   b) the Affero GPL v3
 
-   JUCE can be redistributed and/or modified under the terms of the GNU General
-   Public License (Version 2), as published by the Free Software Foundation.
-   A copy of the license is included in the JUCE distribution, or can be found
-   online at www.gnu.org/licenses.
+   Details of these licenses can be found at: www.gnu.org/licenses
 
    JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
    A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
-  ------------------------------------------------------------------------------
+   ------------------------------------------------------------------------------
 
    To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.rawmaterialsoftware.com/juce for more information.
+   available: visit www.juce.com for more information.
 
   ==============================================================================
 */
@@ -46,50 +45,36 @@ public:
         {
             snapGridSize = design.getSnappingGridSize();
             snapShown = design.isSnapShown() && design.isSnapActive (false);
-
-            backgroundFill = Image();
             return true;
         }
 
         return false;
     }
 
-    void updateColour()
-    {
-        backgroundFill = Image();
-    }
-
     void draw (Graphics& g, PaintRoutine* backgroundGraphics)
     {
-        if (backgroundFill.isNull() && snapShown)
+        if (snapShown && snapGridSize > 2)
         {
-            backgroundFill = Image (Image::ARGB, snapGridSize, snapGridSize, true);
-
-            Graphics g2 (backgroundFill);
-
             Colour col (Colours::black);
 
             if (backgroundGraphics != nullptr)
                 col = backgroundGraphics->getBackgroundColour().contrasting();
 
-            if (snapGridSize > 2)
-            {
-                g2.setColour (col.withAlpha (0.1f));
-                g2.drawRect (0, 0, snapGridSize + 1, snapGridSize + 1);
-            }
-        }
+            g.setColour (col.withAlpha (0.1f));
 
-        if (backgroundFill.isValid())
-        {
-            g.setTiledImageFill (backgroundFill, 0, 0, 1.0f);
-            g.fillAll();
+            const Rectangle<int> clip (g.getClipBounds());
+
+            for (int y = clip.getY() - (clip.getY() % snapGridSize); y < clip.getBottom(); y += snapGridSize)
+                g.drawHorizontalLine (y, 0.0f, (float) clip.getRight());
+
+            for (int x = clip.getX() - (clip.getX() % snapGridSize); x < clip.getRight(); x += snapGridSize)
+                g.drawVerticalLine (x, 0.0f, (float) clip.getBottom());
         }
     }
 
 private:
     int snapGridSize;
     bool snapShown;
-    Image backgroundFill;
 };
 
 

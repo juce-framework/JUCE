@@ -1,24 +1,23 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-11 by Raw Material Software Ltd.
+   This file is part of the JUCE library.
+   Copyright (c) 2013 - Raw Material Software Ltd.
 
-  ------------------------------------------------------------------------------
+   Permission is granted to use this software under the terms of either:
+   a) the GPL v2 (or any later version)
+   b) the Affero GPL v3
 
-   JUCE can be redistributed and/or modified under the terms of the GNU General
-   Public License (Version 2), as published by the Free Software Foundation.
-   A copy of the license is included in the JUCE distribution, or can be found
-   online at www.gnu.org/licenses.
+   Details of these licenses can be found at: www.gnu.org/licenses
 
    JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
    A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
-  ------------------------------------------------------------------------------
+   ------------------------------------------------------------------------------
 
    To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.rawmaterialsoftware.com/juce for more information.
+   available: visit www.juce.com for more information.
 
   ==============================================================================
 */
@@ -194,14 +193,14 @@ struct Component::ComponentHelpers
     }
 
     //==============================================================================
-    static inline bool hitTest (Component& comp, const Point<int>& localPoint)
+    static inline bool hitTest (Component& comp, Point<int> localPoint)
     {
         return isPositiveAndBelow (localPoint.x, comp.getWidth())
                  && isPositiveAndBelow (localPoint.y, comp.getHeight())
                  && comp.hitTest (localPoint.x, localPoint.y);
     }
 
-    static Point<int> convertFromParentSpace (const Component& comp, const Point<int>& pointInParentSpace)
+    static Point<int> convertFromParentSpace (const Component& comp, Point<int> pointInParentSpace)
     {
         if (comp.affineTransform == nullptr)
             return pointInParentSpace - comp.getPosition();
@@ -217,7 +216,7 @@ struct Component::ComponentHelpers
         return areaInParentSpace.toFloat().transformed (comp.affineTransform->inverted()).getSmallestIntegerContainer() - comp.getPosition();
     }
 
-    static Point<int> convertToParentSpace (const Component& comp, const Point<int>& pointInLocalSpace)
+    static Point<int> convertToParentSpace (const Component& comp, Point<int> pointInLocalSpace)
     {
         if (comp.affineTransform == nullptr)
             return pointInLocalSpace + comp.getPosition();
@@ -295,7 +294,7 @@ struct Component::ComponentHelpers
         return r;
     }
 
-    static bool clipObscuredRegions (const Component& comp, Graphics& g, const Rectangle<int>& clipRect, const Point<int>& delta)
+    static bool clipObscuredRegions (const Component& comp, Graphics& g, const Rectangle<int>& clipRect, Point<int> delta)
     {
         bool nothingChanged = true;
 
@@ -328,7 +327,7 @@ struct Component::ComponentHelpers
     }
 
     static void subtractObscuredRegions (const Component& comp, RectangleList& result,
-                                         const Point<int>& delta, const Rectangle<int>& clipRect,
+                                         Point<int> delta, const Rectangle<int>& clipRect,
                                          const Component* const compToAvoid)
     {
         for (int i = comp.childComponentList.size(); --i >= 0;)
@@ -584,7 +583,7 @@ void Component::addToDesktop (int styleWanted, void* nativeWindowToAttachTo)
             Desktop::getInstance().addDesktopComponent (this);
 
             bounds.setPosition (topLeft);
-            peer->setBounds (topLeft.x, topLeft.y, getWidth(), getHeight(), false);
+            peer->setBounds (bounds, false);
 
             if (oldRenderingEngine >= 0)
                 peer->setCurrentRenderingEngine (oldRenderingEngine);
@@ -644,7 +643,8 @@ ComponentPeer* Component::getPeer() const
 {
     if (flags.hasHeavyweightPeerFlag)
         return ComponentPeer::getPeerFor (this);
-    else if (parentComponent == nullptr)
+
+    if (parentComponent == nullptr)
         return nullptr;
 
     return parentComponent->getPeer();
@@ -965,7 +965,7 @@ Rectangle<int> Component::getParentMonitorArea() const
     return Desktop::getInstance().getDisplays().getDisplayContaining (getScreenBounds().getCentre()).userArea;
 }
 
-Point<int> Component::getLocalPoint (const Component* source, const Point<int>& point) const
+Point<int> Component::getLocalPoint (const Component* source, Point<int> point) const
 {
     return ComponentHelpers::convertCoordinate (this, source, point);
 }
@@ -975,7 +975,7 @@ Rectangle<int> Component::getLocalArea (const Component* source, const Rectangle
     return ComponentHelpers::convertCoordinate (this, source, area);
 }
 
-Point<int> Component::localPointToGlobal (const Point<int>& point) const
+Point<int> Component::localPointToGlobal (Point<int> point) const
 {
     return ComponentHelpers::convertCoordinate (nullptr, this, point);
 }
@@ -986,17 +986,17 @@ Rectangle<int> Component::localAreaToGlobal (const Rectangle<int>& area) const
 }
 
 // Deprecated methods...
-Point<int> Component::relativePositionToGlobal (const Point<int>& relativePosition) const
+Point<int> Component::relativePositionToGlobal (Point<int> relativePosition) const
 {
     return localPointToGlobal (relativePosition);
 }
 
-Point<int> Component::globalPositionToRelative (const Point<int>& screenPosition) const
+Point<int> Component::globalPositionToRelative (Point<int> screenPosition) const
 {
     return getLocalPoint (nullptr, screenPosition);
 }
 
-Point<int> Component::relativePositionToOtherComponent (const Component* const targetComponent, const Point<int>& positionRelativeToThis) const
+Point<int> Component::relativePositionToOtherComponent (const Component* const targetComponent, Point<int> positionRelativeToThis) const
 {
     return targetComponent == nullptr ? localPointToGlobal (positionRelativeToThis)
                                       : targetComponent->getLocalPoint (this, positionRelativeToThis);
@@ -1048,17 +1048,8 @@ void Component::setBounds (const int x, const int y, int w, int h)
         }
 
         if (flags.hasHeavyweightPeerFlag)
-        {
             if (ComponentPeer* const peer = getPeer())
-            {
-                if (wasMoved && wasResized)
-                    peer->setBounds (getX(), getY(), getWidth(), getHeight(), false);
-                else if (wasMoved)
-                    peer->setPosition (getX(), getY());
-                else if (wasResized)
-                    peer->setSize (getWidth(), getHeight());
-            }
-        }
+                peer->setBounds (getBounds(), false);
 
         sendMovedResizedMessages (wasMoved, wasResized);
     }
@@ -1112,7 +1103,7 @@ void Component::setTopLeftPosition (const int x, const int y)
     setBounds (x, y, getWidth(), getHeight());
 }
 
-void Component::setTopLeftPosition (const Point<int>& pos)
+void Component::setTopLeftPosition (Point<int> pos)
 {
     setBounds (pos.x, pos.y, getWidth(), getHeight());
 }
@@ -1295,7 +1286,7 @@ void Component::getInterceptsMouseClicks (bool& allowsClicksOnThisComponent,
     allowsClicksOnChildComponents = flags.allowChildMouseClicksFlag;
 }
 
-bool Component::contains (const Point<int>& point)
+bool Component::contains (Point<int> point)
 {
     if (ComponentHelpers::hitTest (*this, point))
     {
@@ -1310,7 +1301,7 @@ bool Component::contains (const Point<int>& point)
     return false;
 }
 
-bool Component::reallyContains (const Point<int>& point, const bool returnTrueIfWithinAChild)
+bool Component::reallyContains (Point<int> point, const bool returnTrueIfWithinAChild)
 {
     if (! contains (point))
         return false;
@@ -1321,7 +1312,7 @@ bool Component::reallyContains (const Point<int>& point, const bool returnTrueIf
     return (compAtPosition == this) || (returnTrueIfWithinAChild && isParentOf (compAtPosition));
 }
 
-Component* Component::getComponentAt (const Point<int>& position)
+Component* Component::getComponentAt (Point<int> position)
 {
     if (flags.visibleFlag && ComponentHelpers::hitTest (*this, position))
     {
@@ -2054,7 +2045,7 @@ void Component::removeColour (const int colourId)
         colourChanged();
 }
 
-void Component::setColour (const int colourId, const Colour& colour)
+void Component::setColour (const int colourId, Colour colour)
 {
     if (properties.set (ComponentHelpers::getColourPropertyId (colourId), (int) colour.getARGB()))
         colourChanged();
@@ -2253,7 +2244,7 @@ void Component::removeMouseListener (MouseListener* const listenerToRemove)
 }
 
 //==============================================================================
-void Component::internalMouseEnter (MouseInputSource& source, const Point<int>& relativePos, const Time& time)
+void Component::internalMouseEnter (MouseInputSource& source, Point<int> relativePos, Time time)
 {
     if (isCurrentlyBlockedByAnotherModalComponent())
     {
@@ -2279,7 +2270,7 @@ void Component::internalMouseEnter (MouseInputSource& source, const Point<int>& 
     MouseListenerList::sendMouseEvent (*this, checker, &MouseListener::mouseEnter, me);
 }
 
-void Component::internalMouseExit (MouseInputSource& source, const Point<int>& relativePos, const Time& time)
+void Component::internalMouseExit (MouseInputSource& source, Point<int> relativePos, Time time)
 {
     if (flags.repaintOnMouseActivityFlag)
         repaint();
@@ -2299,7 +2290,7 @@ void Component::internalMouseExit (MouseInputSource& source, const Point<int>& r
     MouseListenerList::sendMouseEvent (*this, checker, &MouseListener::mouseExit, me);
 }
 
-void Component::internalMouseDown (MouseInputSource& source, const Point<int>& relativePos, const Time& time)
+void Component::internalMouseDown (MouseInputSource& source, Point<int> relativePos, Time time)
 {
     Desktop& desktop = Desktop::getInstance();
     BailOutChecker checker (this);
@@ -2363,8 +2354,8 @@ void Component::internalMouseDown (MouseInputSource& source, const Point<int>& r
     MouseListenerList::sendMouseEvent (*this, checker, &MouseListener::mouseDown, me);
 }
 
-void Component::internalMouseUp (MouseInputSource& source, const Point<int>& relativePos,
-                                 const Time& time, const ModifierKeys& oldModifiers)
+void Component::internalMouseUp (MouseInputSource& source, Point<int> relativePos,
+                                 Time time, const ModifierKeys oldModifiers)
 {
     if (flags.mouseDownWasBlocked && isCurrentlyBlockedByAnotherModalComponent())
         return;
@@ -2406,7 +2397,7 @@ void Component::internalMouseUp (MouseInputSource& source, const Point<int>& rel
     }
 }
 
-void Component::internalMouseDrag (MouseInputSource& source, const Point<int>& relativePos, const Time& time)
+void Component::internalMouseDrag (MouseInputSource& source, Point<int> relativePos, Time time)
 {
     if (! isCurrentlyBlockedByAnotherModalComponent())
     {
@@ -2429,7 +2420,7 @@ void Component::internalMouseDrag (MouseInputSource& source, const Point<int>& r
     }
 }
 
-void Component::internalMouseMove (MouseInputSource& source, const Point<int>& relativePos, const Time& time)
+void Component::internalMouseMove (MouseInputSource& source, Point<int> relativePos, Time time)
 {
     Desktop& desktop = Desktop::getInstance();
 
@@ -2455,8 +2446,8 @@ void Component::internalMouseMove (MouseInputSource& source, const Point<int>& r
     }
 }
 
-void Component::internalMouseWheel (MouseInputSource& source, const Point<int>& relativePos,
-                                    const Time& time, const MouseWheelDetails& wheel)
+void Component::internalMouseWheel (MouseInputSource& source, Point<int> relativePos,
+                                    Time time, const MouseWheelDetails& wheel)
 {
     Desktop& desktop = Desktop::getInstance();
     BailOutChecker checker (this);
@@ -2483,8 +2474,8 @@ void Component::internalMouseWheel (MouseInputSource& source, const Point<int>& 
     }
 }
 
-void Component::internalMagnifyGesture (MouseInputSource& source, const Point<int>& relativePos,
-                                        const Time& time, float amount)
+void Component::internalMagnifyGesture (MouseInputSource& source, Point<int> relativePos,
+                                        Time time, float amount)
 {
     if (! isCurrentlyBlockedByAnotherModalComponent())
     {

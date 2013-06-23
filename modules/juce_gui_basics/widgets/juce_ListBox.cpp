@@ -1,24 +1,23 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-11 by Raw Material Software Ltd.
+   This file is part of the JUCE library.
+   Copyright (c) 2013 - Raw Material Software Ltd.
 
-  ------------------------------------------------------------------------------
+   Permission is granted to use this software under the terms of either:
+   a) the GPL v2 (or any later version)
+   b) the Affero GPL v3
 
-   JUCE can be redistributed and/or modified under the terms of the GNU General
-   Public License (Version 2), as published by the Free Software Foundation.
-   A copy of the license is included in the JUCE distribution, or can be found
-   online at www.gnu.org/licenses.
+   Details of these licenses can be found at: www.gnu.org/licenses
 
    JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
    A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
-  ------------------------------------------------------------------------------
+   ------------------------------------------------------------------------------
 
    To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.rawmaterialsoftware.com/juce for more information.
+   available: visit www.juce.com for more information.
 
   ==============================================================================
 */
@@ -33,7 +32,7 @@ public:
     {
     }
 
-    void paint (Graphics& g)
+    void paint (Graphics& g) override
     {
         if (ListBoxModel* m = owner.getModel())
             m->paintListBoxItem (row, g, getWidth(), getHeight(), selected);
@@ -60,7 +59,7 @@ public:
         }
     }
 
-    void mouseDown (const MouseEvent& e)
+    void mouseDown (const MouseEvent& e) override
     {
         isDragging = false;
         selectRowOnMouseUp = false;
@@ -81,7 +80,7 @@ public:
         }
     }
 
-    void mouseUp (const MouseEvent& e)
+    void mouseUp (const MouseEvent& e) override
     {
         if (isEnabled() && selectRowOnMouseUp && ! isDragging)
         {
@@ -92,14 +91,14 @@ public:
         }
     }
 
-    void mouseDoubleClick (const MouseEvent& e)
+    void mouseDoubleClick (const MouseEvent& e) override
     {
         if (ListBoxModel* m = owner.getModel())
             if (isEnabled())
                 m->listBoxItemDoubleClicked (row, e);
     }
 
-    void mouseDrag (const MouseEvent& e)
+    void mouseDrag (const MouseEvent& e) override
     {
         if (ListBoxModel* m = owner.getModel())
         {
@@ -121,13 +120,13 @@ public:
         }
     }
 
-    void resized()
+    void resized() override
     {
         if (customComponent != nullptr)
             customComponent->setBounds (getLocalBounds());
     }
 
-    String getTooltip()
+    String getTooltip() override
     {
         if (ListBoxModel* m = owner.getModel())
             return m->getTooltipForRow (row);
@@ -183,7 +182,7 @@ public:
         return -1;
     }
 
-    void visibleAreaChanged (const Rectangle<int>&)
+    void visibleAreaChanged (const Rectangle<int>&) override
     {
         updateVisibleArea (true);
 
@@ -297,13 +296,13 @@ public:
         }
     }
 
-    void paint (Graphics& g)
+    void paint (Graphics& g) override
     {
         if (isOpaque())
             g.fillAll (owner.findColour (ListBox::backgroundColourId));
     }
 
-    bool keyPressed (const KeyPress& key)
+    bool keyPressed (const KeyPress& key) override
     {
         if (key.isKeyCode (KeyPress::upKey)
             || key.isKeyCode (KeyPress::downKey)
@@ -343,13 +342,13 @@ public:
         owner.addMouseListener (this, true);
     }
 
-    void mouseMove (const MouseEvent& e)
+    void mouseMove (const MouseEvent& e) override
     {
         const MouseEvent e2 (e.getEventRelativeTo (&owner));
         owner.selectRow (owner.getRowContainingPosition (e2.x, e2.y), true);
     }
 
-    void mouseExit (const MouseEvent& e)
+    void mouseExit (const MouseEvent& e) override
     {
         mouseMove (e);
     }
@@ -590,7 +589,7 @@ void ListBox::deselectAllRows()
 }
 
 void ListBox::selectRowsBasedOnModifierKeys (const int row,
-                                             const ModifierKeys& mods,
+                                             ModifierKeys mods,
                                              const bool isMouseUpEvent)
 {
     if (multipleSelection && mods.isCommandDown())

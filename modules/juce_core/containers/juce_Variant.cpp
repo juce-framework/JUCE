@@ -1,24 +1,27 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-11 by Raw Material Software Ltd.
+   This file is part of the juce_core module of the JUCE library.
+   Copyright (c) 2013 - Raw Material Software Ltd.
 
-  ------------------------------------------------------------------------------
+   Permission to use, copy, modify, and/or distribute this software for any purpose with
+   or without fee is hereby granted, provided that the above copyright notice and this
+   permission notice appear in all copies.
 
-   JUCE can be redistributed and/or modified under the terms of the GNU General
-   Public License (Version 2), as published by the Free Software Foundation.
-   A copy of the license is included in the JUCE distribution, or can be found
-   online at www.gnu.org/licenses.
+   THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH REGARD
+   TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS. IN
+   NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL
+   DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER
+   IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
+   CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
-   JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-   A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+   ------------------------------------------------------------------------------
 
-  ------------------------------------------------------------------------------
+   NOTE! This permissive ISC license applies ONLY to files within the juce_core module!
+   All other JUCE modules are covered by a dual GPL/commercial license, so if you are
+   using any other modules, be sure to check that you also comply with their license.
 
-   To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.rawmaterialsoftware.com/juce for more information.
+   For more details, visit www.juce.com
 
   ==============================================================================
 */
@@ -31,7 +34,8 @@ enum VariantStreamMarkers
     varMarker_Double    = 4,
     varMarker_String    = 5,
     varMarker_Int64     = 6,
-    varMarker_Array     = 7
+    varMarker_Array     = 7,
+    varMarker_Binary    = 8
 };
 
 //==============================================================================
@@ -47,7 +51,8 @@ public:
     virtual String toString (const ValueUnion&) const                           { return String::empty; }
     virtual bool toBool (const ValueUnion&) const noexcept                      { return false; }
     virtual ReferenceCountedObject* toObject (const ValueUnion&) const noexcept { return nullptr; }
-    virtual Array<var>* toArray (const ValueUnion&) const noexcept              { return 0; }
+    virtual Array<var>* toArray (const ValueUnion&) const noexcept              { return nullptr; }
+    virtual MemoryBlock* toBinary (const ValueUnion&) const noexcept            { return nullptr; }
 
     virtual bool isVoid() const noexcept      { return false; }
     virtual bool isInt() const noexcept       { return false; }
@@ -57,6 +62,7 @@ public:
     virtual bool isString() const noexcept    { return false; }
     virtual bool isObject() const noexcept    { return false; }
     virtual bool isArray() const noexcept     { return false; }
+    virtual bool isBinary() const noexcept    { return false; }
     virtual bool isMethod() const noexcept    { return false; }
 
     virtual void cleanUp (ValueUnion&) const noexcept {}
@@ -293,6 +299,35 @@ public:
 };
 
 //==============================================================================
+class var::VariantType_Binary   : public var::VariantType
+{
+public:
+    VariantType_Binary() noexcept {}
+
+    static const VariantType_Binary instance;
+
+    void cleanUp (ValueUnion& data) const noexcept                      { delete data.binaryValue; }
+    void createCopy (ValueUnion& dest, const ValueUnion& source) const  { dest.binaryValue = new MemoryBlock (*source.binaryValue); }
+
+    String toString (const ValueUnion& data) const                      { return data.binaryValue->toBase64Encoding(); }
+    bool isBinary() const noexcept                                      { return true; }
+    MemoryBlock* toBinary (const ValueUnion& data) const noexcept       { return data.binaryValue; }
+
+    bool equals (const ValueUnion& data, const ValueUnion& otherData, const VariantType& otherType) const noexcept
+    {
+        const MemoryBlock* const otherBlock = otherType.toBinary (otherData);
+        return otherBlock != nullptr && *otherBlock == *data.binaryValue;
+    }
+
+    void writeToStream (const ValueUnion& data, OutputStream& output) const
+    {
+        output.writeCompressedInt (1 + (int) data.binaryValue->getSize());
+        output.writeByte (varMarker_Binary);
+        output << *data.binaryValue;
+    }
+};
+
+//==============================================================================
 class var::VariantType_Method   : public var::VariantType
 {
 public:
@@ -300,7 +335,7 @@ public:
     static const VariantType_Method instance;
 
     String toString (const ValueUnion&) const               { return "Method"; }
-    bool toBool (const ValueUnion& data) const noexcept     { return data.methodValue != 0; }
+    bool toBool (const ValueUnion& data) const noexcept     { return data.methodValue != nullptr; }
     bool isMethod() const noexcept                          { return true; }
 
     bool equals (const ValueUnion& data, const ValueUnion& otherData, const VariantType& otherType) const noexcept
@@ -324,6 +359,7 @@ const var::VariantType_Double  var::VariantType_Double::instance;
 const var::VariantType_String  var::VariantType_String::instance;
 const var::VariantType_Object  var::VariantType_Object::instance;
 const var::VariantType_Array   var::VariantType_Array::instance;
+const var::VariantType_Binary  var::VariantType_Binary::instance;
 const var::VariantType_Method  var::VariantType_Method::instance;
 
 
@@ -354,6 +390,8 @@ var::var (const Array<var>& v)        : type (&VariantType_Array::instance)  { v
 var::var (const String& v)            : type (&VariantType_String::instance) { new (value.stringValue) String (v); }
 var::var (const char* const v)        : type (&VariantType_String::instance) { new (value.stringValue) String (v); }
 var::var (const wchar_t* const v)     : type (&VariantType_String::instance) { new (value.stringValue) String (v); }
+var::var (const void* v, size_t sz)   : type (&VariantType_Binary::instance) { value.binaryValue = new MemoryBlock (v, sz); }
+var::var (const MemoryBlock& v)       : type (&VariantType_Binary::instance) { value.binaryValue = new MemoryBlock (v); }
 
 var::var (ReferenceCountedObject* const object)  : type (&VariantType_Object::instance)
 {
@@ -363,16 +401,18 @@ var::var (ReferenceCountedObject* const object)  : type (&VariantType_Object::in
         object->incReferenceCount();
 }
 
+
 //==============================================================================
-bool var::isVoid() const noexcept     { return type->isVoid(); }
-bool var::isInt() const noexcept      { return type->isInt(); }
-bool var::isInt64() const noexcept    { return type->isInt64(); }
-bool var::isBool() const noexcept     { return type->isBool(); }
-bool var::isDouble() const noexcept   { return type->isDouble(); }
-bool var::isString() const noexcept   { return type->isString(); }
-bool var::isObject() const noexcept   { return type->isObject(); }
-bool var::isArray() const noexcept    { return type->isArray(); }
-bool var::isMethod() const noexcept   { return type->isMethod(); }
+bool var::isVoid() const noexcept       { return type->isVoid(); }
+bool var::isInt() const noexcept        { return type->isInt(); }
+bool var::isInt64() const noexcept      { return type->isInt64(); }
+bool var::isBool() const noexcept       { return type->isBool(); }
+bool var::isDouble() const noexcept     { return type->isDouble(); }
+bool var::isString() const noexcept     { return type->isString(); }
+bool var::isObject() const noexcept     { return type->isObject(); }
+bool var::isArray() const noexcept      { return type->isArray(); }
+bool var::isBinaryData() const noexcept { return type->isBinary(); }
+bool var::isMethod() const noexcept     { return type->isMethod(); }
 
 var::operator int() const noexcept                      { return type->toInt (value); }
 var::operator int64() const noexcept                    { return type->toInt64 (value); }
@@ -383,6 +423,7 @@ String var::toString() const                            { return type->toString 
 var::operator String() const                            { return type->toString (value); }
 ReferenceCountedObject* var::getObject() const noexcept { return type->toObject (value); }
 Array<var>* var::getArray() const noexcept              { return type->toArray (value); }
+MemoryBlock* var::getBinaryData() const noexcept        { return type->toBinary (value); }
 DynamicObject* var::getDynamicObject() const noexcept   { return dynamic_cast <DynamicObject*> (getObject()); }
 
 //==============================================================================
@@ -423,6 +464,11 @@ var::var (String&& v)  : type (&VariantType_String::instance)
     new (value.stringValue) String (static_cast<String&&> (v));
 }
 
+var::var (MemoryBlock&& v)  : type (&VariantType_Binary::instance)
+{
+    value.binaryValue = new MemoryBlock (static_cast<MemoryBlock&&> (v));
+}
+
 var& var::operator= (String&& v)
 {
     type->cleanUp (value);
@@ -452,7 +498,7 @@ bool operator!= (const var& v1, const char* const v2)       { return v1.toString
 
 
 //==============================================================================
-var var::operator[] (const Identifier& propertyName) const
+var var::operator[] (const Identifier propertyName) const
 {
     if (DynamicObject* const o = getDynamicObject())
         return o->getProperty (propertyName);
@@ -465,7 +511,7 @@ var var::operator[] (const char* const propertyName) const
     return operator[] (Identifier (propertyName));
 }
 
-var var::getProperty (const Identifier& propertyName, const var& defaultReturnValue) const
+var var::getProperty (const Identifier propertyName, const var& defaultReturnValue) const
 {
     if (DynamicObject* const o = getDynamicObject())
         return o->getProperties().getWithDefault (propertyName, defaultReturnValue);
@@ -473,7 +519,7 @@ var var::getProperty (const Identifier& propertyName, const var& defaultReturnVa
     return defaultReturnValue;
 }
 
-var var::invoke (const Identifier& method, const var* arguments, int numArguments) const
+var var::invoke (const Identifier method, const var* arguments, int numArguments) const
 {
     if (DynamicObject* const o = getDynamicObject())
         return o->invokeMethod (method, arguments, numArguments);
@@ -491,35 +537,35 @@ var var::invokeMethod (DynamicObject* const target, const var* const arguments, 
     return var::null;
 }
 
-var var::call (const Identifier& method) const
+var var::call (const Identifier method) const
 {
     return invoke (method, nullptr, 0);
 }
 
-var var::call (const Identifier& method, const var& arg1) const
+var var::call (const Identifier method, const var& arg1) const
 {
     return invoke (method, &arg1, 1);
 }
 
-var var::call (const Identifier& method, const var& arg1, const var& arg2) const
+var var::call (const Identifier method, const var& arg1, const var& arg2) const
 {
     var args[] = { arg1, arg2 };
     return invoke (method, args, 2);
 }
 
-var var::call (const Identifier& method, const var& arg1, const var& arg2, const var& arg3)
+var var::call (const Identifier method, const var& arg1, const var& arg2, const var& arg3)
 {
     var args[] = { arg1, arg2, arg3 };
     return invoke (method, args, 3);
 }
 
-var var::call (const Identifier& method, const var& arg1, const var& arg2, const var& arg3, const var& arg4) const
+var var::call (const Identifier method, const var& arg1, const var& arg2, const var& arg3, const var& arg4) const
 {
     var args[] = { arg1, arg2, arg3, arg4 };
     return invoke (method, args, 4);
 }
 
-var var::call (const Identifier& method, const var& arg1, const var& arg2, const var& arg3, const var& arg4, const var& arg5) const
+var var::call (const Identifier method, const var& arg1, const var& arg2, const var& arg3, const var& arg4, const var& arg5) const
 {
     var args[] = { arg1, arg2, arg3, arg4, arg5 };
     return invoke (method, args, 5);
@@ -628,6 +674,19 @@ var var::readFromStream (InputStream& input)
                 MemoryOutputStream mo;
                 mo.writeFromInputStream (input, numBytes - 1);
                 return var (mo.toUTF8());
+            }
+
+            case varMarker_Binary:
+            {
+                MemoryBlock mb (numBytes - 1);
+
+                if (numBytes > 1)
+                {
+                    const int numRead = input.read (mb.getData(), numBytes - 1);
+                    mb.setSize (numRead);
+                }
+
+                return var (mb);
             }
 
             case varMarker_Array:

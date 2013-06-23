@@ -1,27 +1,38 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-11 by Raw Material Software Ltd.
+   This file is part of the JUCE library.
+   Copyright (c) 2013 - Raw Material Software Ltd.
 
-  ------------------------------------------------------------------------------
+   Permission is granted to use this software under the terms of either:
+   a) the GPL v2 (or any later version)
+   b) the Affero GPL v3
 
-   JUCE can be redistributed and/or modified under the terms of the GNU General
-   Public License (Version 2), as published by the Free Software Foundation.
-   A copy of the license is included in the JUCE distribution, or can be found
-   online at www.gnu.org/licenses.
+   Details of these licenses can be found at: www.gnu.org/licenses
 
    JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
    A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
-  ------------------------------------------------------------------------------
+   ------------------------------------------------------------------------------
 
    To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.rawmaterialsoftware.com/juce for more information.
+   available: visit www.juce.com for more information.
 
   ==============================================================================
 */
+
+//==============================================================================
+namespace PopupMenuSettings
+{
+    const int scrollZone = 24;
+    const int borderSize = 2;
+    const int timerInterval = 50;
+    const int dismissCommandId = 0x6287345f;
+    const int sectionHeaderID  = 0x4734a34f;
+
+    static bool menuWasHiddenBecauseOfAppChange = false;
+}
 
 class PopupMenu::Item
 {
@@ -35,7 +46,7 @@ public:
           const bool active,
           const bool ticked,
           const Image& im,
-          const Colour& colour,
+          const Colour colour,
           const bool useColour,
           CustomComponent* const custom,
           const PopupMenu* const sub,
@@ -87,7 +98,7 @@ public:
           commandManager (other.commandManager)
     {}
 
-    bool canBeTriggered() const noexcept    { return isActive && itemID != 0; }
+    bool canBeTriggered() const noexcept    { return isActive && itemID != 0 && itemID != PopupMenuSettings::sectionHeaderID; }
     bool hasActiveSubMenu() const noexcept  { return isActive && subMenu != nullptr && subMenu->items.size() > 0; }
 
     //==============================================================================
@@ -198,17 +209,6 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ItemComponent)
 };
 
-
-//==============================================================================
-namespace PopupMenuSettings
-{
-    const int scrollZone = 24;
-    const int borderSize = 2;
-    const int timerInterval = 50;
-    const int dismissCommandId = 0x6287345f;
-
-    static bool menuWasHiddenBecauseOfAppChange = false;
-}
 
 //==============================================================================
 class PopupMenu::Window  : public Component,
@@ -563,7 +563,7 @@ private:
                 && (isOver || (activeSubMenu != nullptr && activeSubMenu->isOverChildren()));
     }
 
-    void updateMouseOverStatus (const Point<int>& globalMousePos)
+    void updateMouseOverStatus (Point<int> globalMousePos)
     {
         isOver = reallyContains (getLocalPoint (nullptr, globalMousePos), true);
 
@@ -929,7 +929,7 @@ private:
         return false;
     }
 
-    void highlightItemUnderMouse (const Point<int>& globalMousePos, const Point<int>& localMousePos, const uint32 timeNow)
+    void highlightItemUnderMouse (Point<int> globalMousePos, Point<int> localMousePos, const uint32 timeNow)
     {
         if (globalMousePos != lastMousePos || timeNow > lastMouseMoveTime + 350)
         {
@@ -1005,7 +1005,7 @@ private:
         }
     }
 
-    void checkButtonState (const Point<int>& localMousePos, const uint32 timeNow,
+    void checkButtonState (Point<int> localMousePos, const uint32 timeNow,
                            const bool wasDown, const bool overScrollArea, const bool isOverAny)
     {
         isDown = hasBeenOver
@@ -1053,26 +1053,22 @@ private:
     void selectNextItem (const int delta)
     {
         disableTimerUntilMouseMoves();
-        PopupMenu::ItemComponent* mic = nullptr;
-        bool wasLastOne = (currentChild == nullptr);
-        const int numItems = items.size();
 
-        for (int i = 0; i < numItems + 1; ++i)
+        int start = jmax (0, items.indexOf (currentChild));
+
+        for (int i = items.size(); --i >= 0;)
         {
-            int index = (delta > 0) ? i : (numItems - 1 - i);
-            index = (index + numItems) % numItems;
+            start += delta;
 
-            mic = items.getUnchecked (index);
-
-            if (mic != nullptr && (mic->itemInfo.canBeTriggered() || mic->itemInfo.hasActiveSubMenu())
-                 && wasLastOne)
-                break;
-
-            if (mic == currentChild)
-                wasLastOne = true;
+            if (PopupMenu::ItemComponent* mic = items.getUnchecked ((start + items.size()) % items.size()))
+            {
+                if (mic->itemInfo.canBeTriggered() || mic->itemInfo.hasActiveSubMenu())
+                {
+                    setCurrentlyHighlightedChild (mic);
+                    break;
+                }
+            }
         }
-
-        setCurrentlyHighlightedChild (mic);
     }
 
     void disableTimerUntilMouseMoves()
@@ -1087,7 +1083,7 @@ private:
     bool isTopScrollZoneActive() const noexcept     { return canScroll() && childYOffset > 0; }
     bool isBottomScrollZoneActive() const noexcept  { return canScroll() && childYOffset < contentHeight - windowPos.getHeight(); }
 
-    bool scrollIfNecessary (const Point<int>& localMousePos, const uint32 timeNow)
+    bool scrollIfNecessary (Point<int> localMousePos, const uint32 timeNow)
     {
         if (canScroll()
              && (isOver || (isDown && isPositiveAndBelow (localMousePos.x, getWidth()))))
@@ -1213,7 +1209,7 @@ void PopupMenu::addCommandItem (ApplicationCommandManager* commandManager,
 
 void PopupMenu::addColouredItem (const int itemResultID,
                                  const String& itemText,
-                                 const Colour& itemTextColour,
+                                 Colour itemTextColour,
                                  const bool isActive,
                                  const bool isTicked,
                                  const Image& iconToUse)
@@ -1330,7 +1326,7 @@ private:
 
 void PopupMenu::addSectionHeader (const String& title)
 {
-    addCustomItem (0X4734a34f, new HeaderItemComponent (title));
+    addCustomItem (PopupMenuSettings::sectionHeaderID, new HeaderItemComponent (title));
 }
 
 //==============================================================================

@@ -1,24 +1,23 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-11 by Raw Material Software Ltd.
+   This file is part of the JUCE library.
+   Copyright (c) 2013 - Raw Material Software Ltd.
 
-  ------------------------------------------------------------------------------
+   Permission is granted to use this software under the terms of either:
+   a) the GPL v2 (or any later version)
+   b) the Affero GPL v3
 
-   JUCE can be redistributed and/or modified under the terms of the GNU General
-   Public License (Version 2), as published by the Free Software Foundation.
-   A copy of the license is included in the JUCE distribution, or can be found
-   online at www.gnu.org/licenses.
+   Details of these licenses can be found at: www.gnu.org/licenses
 
    JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
    A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
-  ------------------------------------------------------------------------------
+   ------------------------------------------------------------------------------
 
    To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.rawmaterialsoftware.com/juce for more information.
+   available: visit www.juce.com for more information.
 
   ==============================================================================
 */
@@ -61,6 +60,7 @@
 #include "AAX_ITransport.h"
 #include "AAX_IMIDINode.h"
 #include "AAX_UtilsNative.h"
+#include "AAX_Enums.h"
 
 #ifdef __clang__
  #pragma clang diagnostic pop
@@ -361,7 +361,7 @@ struct AAXClasses
                                 public AudioProcessorListener
     {
     public:
-        JuceAAX_Processor()
+        JuceAAX_Processor()  : sampleRate (0), lastBufferSize (1024)
         {
             pluginInstance = createPluginFilterOfType (AudioProcessor::wrapperType_AAX);
             pluginInstance->setPlayHead (this);
@@ -374,9 +374,11 @@ struct AAXClasses
 
         AAX_Result EffectInit()
         {
+            check (Controller()->GetSampleRate (&sampleRate));
+
+            preparePlugin();
             addBypassParameter();
             addAudioProcessorParameters();
-            preparePlugin();
 
             return AAX_SUCCESS;
         }
@@ -495,8 +497,15 @@ struct AAXClasses
             info.timeSigDenominator = (int) den;
 
             info.timeInSamples = 0;
-            check (transport.GetCurrentNativeSampleLocation (&info.timeInSamples));
-            info.timeInSeconds = info.timeInSamples / getSampleRate();
+
+            if (transport.IsTransportPlaying (&info.isPlaying) != AAX_SUCCESS)
+                info.isPlaying = false;
+
+            if (info.isPlaying
+                 || transport.GetTimelineSelectionStartPosition (&info.timeInSamples) != AAX_SUCCESS)
+                check (transport.GetCurrentNativeSampleLocation (&info.timeInSamples));
+
+            info.timeInSeconds = info.timeInSamples / sampleRate;
 
             int64_t ticks = 0;
             check (transport.GetCurrentTickPosition (&ticks));
@@ -508,12 +517,35 @@ struct AAXClasses
             info.ppqLoopStart = loopStartTick / 960000.0;
             info.ppqLoopEnd   = loopEndTick   / 960000.0;
 
-            // No way to get these: (?)
-            info.isPlaying = false;
-            info.isRecording = false;
-            info.ppqPositionOfLastBarStart = 0;
             info.editOriginTime = 0;
             info.frameRate = AudioPlayHead::fpsUnknown;
+
+            AAX_EFrameRate frameRate;
+            int32_t offset;
+
+            if (transport.GetTimeCodeInfo (&frameRate, &offset) == AAX_SUCCESS)
+            {
+                double framesPerSec = 24.0;
+
+                switch (frameRate)
+                {
+                    case AAX_eFrameRate_Undeclared:    break;
+                    case AAX_eFrameRate_24Frame:       info.frameRate = AudioPlayHead::fps24;       break;
+                    case AAX_eFrameRate_25Frame:       info.frameRate = AudioPlayHead::fps25;       framesPerSec = 25.0; break;
+                    case AAX_eFrameRate_2997NonDrop:   info.frameRate = AudioPlayHead::fps2997;     framesPerSec = 29.97002997; break;
+                    case AAX_eFrameRate_2997DropFrame: info.frameRate = AudioPlayHead::fps2997drop; framesPerSec = 29.97002997; break;
+                    case AAX_eFrameRate_30NonDrop:     info.frameRate = AudioPlayHead::fps30;       framesPerSec = 30.0; break;
+                    case AAX_eFrameRate_30DropFrame:   info.frameRate = AudioPlayHead::fps30drop;   framesPerSec = 30.0; break;
+                    case AAX_eFrameRate_23976:         info.frameRate = AudioPlayHead::fps24;       framesPerSec = 23.976; break;
+                    default:                           break;
+                }
+
+                info.editOriginTime = offset / framesPerSec;
+            }
+
+            // No way to get these: (?)
+            info.isRecording = false;
+            info.ppqPositionOfLastBarStart = 0;
 
             return true;
         }
@@ -536,6 +568,14 @@ struct AAXClasses
         void audioProcessorParameterChangeGestureEnd (AudioProcessor* /*processor*/, int parameterIndex)
         {
             ReleaseParameter (IndexAsParamID (parameterIndex));
+        }
+
+        AAX_Result NotificationReceived (AAX_CTypeID type, const void* data, uint32_t size)
+        {
+            if (type == AAX_eNotificationEvent_EnteringOfflineMode)  pluginInstance->setNonRealtime (true);
+            if (type == AAX_eNotificationEvent_ExitingOfflineMode)   pluginInstance->setNonRealtime (false);
+
+            return AAX_CEffectParameters::NotificationReceived (type, data, size);
         }
 
         void process (const float* const* inputs, float* const* outputs, const int bufferSize,
@@ -627,6 +667,12 @@ struct AAXClasses
            #endif
 
             {
+                if (lastBufferSize != bufferSize)
+                {
+                    lastBufferSize = bufferSize;
+                    pluginInstance->prepareToPlay (sampleRate, bufferSize);
+                }
+
                 const ScopedLock sl (pluginInstance->getCallbackLock());
 
                 if (bypass)
@@ -682,20 +728,17 @@ struct AAXClasses
 
             for (int parameterIndex = 0; parameterIndex < numParameters; ++parameterIndex)
             {
-                if (audioProcessor.isParameterAutomatable (parameterIndex))
-                {
-                    AAX_IParameter* parameter
-                        = new AAX_CParameter<float> (IndexAsParamID (parameterIndex),
-                                                     audioProcessor.getParameterName (parameterIndex).toUTF8().getAddress(),
-                                                     audioProcessor.getParameter (parameterIndex),
-                                                     AAX_CLinearTaperDelegate<float, 0>(),
-                                                     AAX_CNumberDisplayDelegate<float, 3>(),
-                                                     true);
+                AAX_IParameter* parameter
+                    = new AAX_CParameter<float> (IndexAsParamID (parameterIndex),
+                                                 audioProcessor.getParameterName (parameterIndex).toRawUTF8(),
+                                                 audioProcessor.getParameter (parameterIndex),
+                                                 AAX_CLinearTaperDelegate<float, 0>(),
+                                                 AAX_CNumberDisplayDelegate<float, 3>(),
+                                                 audioProcessor.isParameterAutomatable (parameterIndex));
 
-                    parameter->SetNumberOfSteps (0x7fffffff);
-                    parameter->SetType (AAX_eParameterType_Continuous);
-                    mParameterManager.AddParameter (parameter);
-                }
+                parameter->SetNumberOfSteps (0x7fffffff);
+                parameter->SetType (AAX_eParameterType_Continuous);
+                mParameterManager.AddParameter (parameter);
             }
         }
 
@@ -711,19 +754,10 @@ struct AAXClasses
 
             AudioProcessor& audioProcessor = getPluginInstance();
 
-            const AAX_CSampleRate sampleRate = getSampleRate();
-            const int bufferSize = 0; // how to get this?
-            audioProcessor.setPlayConfigDetails (numberOfInputChannels, numberOfOutputChannels, sampleRate, bufferSize);
-            audioProcessor.prepareToPlay (sampleRate, bufferSize);
+            audioProcessor.setPlayConfigDetails (numberOfInputChannels, numberOfOutputChannels, sampleRate, lastBufferSize);
+            audioProcessor.prepareToPlay (sampleRate, lastBufferSize);
 
             check (Controller()->SetSignalLatency (audioProcessor.getLatencySamples()));
-        }
-
-        AAX_CSampleRate getSampleRate() const
-        {
-            AAX_CSampleRate sampleRate;
-            check (Controller()->GetSampleRate (&sampleRate));
-            return sampleRate;
         }
 
         JUCELibraryRefCount juceCount;
@@ -732,6 +766,8 @@ struct AAXClasses
         MidiBuffer midiBuffer;
         Array<float*> channelList;
         int32_t juceChunkIndex;
+        AAX_CSampleRate sampleRate;
+        int lastBufferSize;
 
         // tempFilterData is initialized in GetChunkSize.
         // To avoid generating it again in GetChunk, we keep it as a member.
@@ -818,11 +854,14 @@ struct AAXClasses
         {
             if (AAX_IComponentDescriptor* const desc = descriptor.NewComponentDescriptor())
             {
-                createDescriptor (*desc, i,
-                                  channelConfigs [i][0],
-                                  channelConfigs [i][1]);
+                const int numIns  = channelConfigs [i][0];
+                const int numOuts = channelConfigs [i][1];
 
-                check (descriptor.AddComponent (desc));
+                if (numIns <= 8 && numOuts <= 8) // AAX doesn't seem to handle more than 8 chans
+                {
+                    createDescriptor (*desc, i, numIns, numOuts);
+                    check (descriptor.AddComponent (desc));
+                }
             }
         }
     }

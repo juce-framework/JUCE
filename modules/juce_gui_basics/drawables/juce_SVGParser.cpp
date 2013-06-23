@@ -1,24 +1,23 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-11 by Raw Material Software Ltd.
+   This file is part of the JUCE library.
+   Copyright (c) 2013 - Raw Material Software Ltd.
 
-  ------------------------------------------------------------------------------
+   Permission is granted to use this software under the terms of either:
+   a) the GPL v2 (or any later version)
+   b) the Affero GPL v3
 
-   JUCE can be redistributed and/or modified under the terms of the GNU General
-   Public License (Version 2), as published by the Free Software Foundation.
-   A copy of the license is included in the JUCE distribution, or can be found
-   online at www.gnu.org/licenses.
+   Details of these licenses can be found at: www.gnu.org/licenses
 
    JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
    A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
-  ------------------------------------------------------------------------------
+   ------------------------------------------------------------------------------
 
    To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.rawmaterialsoftware.com/juce for more information.
+   available: visit www.juce.com for more information.
 
   ==============================================================================
 */
@@ -714,7 +713,7 @@ private:
                               const String& fill,
                               const String& fillOpacity,
                               const String& overallOpacity,
-                              const Colour& defaultColour) const
+                              const Colour defaultColour) const
     {
         float opacity = 1.0f;
 
@@ -1045,7 +1044,7 @@ private:
     }
 
     //==============================================================================
-    static Colour parseColour (const String& s, int& index, const Colour& defaultColour)
+    static Colour parseColour (const String& s, int& index, const Colour defaultColour)
     {
         if (s [index] == '#')
         {
@@ -1071,9 +1070,10 @@ private:
                            (uint8) ((hex [2] << 4) + hex [3]),
                            (uint8) ((hex [4] << 4) + hex [5]));
         }
-        else if (s [index] == 'r'
-                  && s [index + 1] == 'g'
-                  && s [index + 2] == 'b')
+
+        if (s [index] == 'r'
+              && s [index + 1] == 'g'
+              && s [index + 2] == 'b')
         {
             const int openBracket = s.indexOfChar (index, '(');
             const int closeBracket = s.indexOfChar (openBracket, ')');

@@ -1,24 +1,23 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-9 by Raw Material Software Ltd.
+   This file is part of the JUCE library.
+   Copyright (c) 2013 - Raw Material Software Ltd.
 
-  ------------------------------------------------------------------------------
+   Permission is granted to use this software under the terms of either:
+   a) the GPL v2 (or any later version)
+   b) the Affero GPL v3
 
-   JUCE can be redistributed and/or modified under the terms of the GNU General
-   Public License (Version 2), as published by the Free Software Foundation.
-   A copy of the license is included in the JUCE distribution, or can be found
-   online at www.gnu.org/licenses.
+   Details of these licenses can be found at: www.gnu.org/licenses
 
    JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
    A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
-  ------------------------------------------------------------------------------
+   ------------------------------------------------------------------------------
 
    To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.rawmaterialsoftware.com/juce for more information.
+   available: visit www.juce.com for more information.
 
   ==============================================================================
 */
@@ -126,6 +125,7 @@ private:
           << "CPU has 3DNOW: "  << (SystemStats::has3DNow() ? "yes" : "no") << newLine
 
           << "Found network card MAC addresses: " << getMacAddressList() << newLine
+          << "Found IP addresses: " << getIPAddressList() << newLine
 
           << "Current working directory: "         << File::getCurrentWorkingDirectory().getFullPathName() << newLine
           << "Current executable file: "           << File::getSpecialLocation (File::currentExecutableFile).getFullPathName() << newLine
@@ -148,6 +148,18 @@ private:
         StringArray addressStrings;
         for (int i = 0; i < macAddresses.size(); ++i)
             addressStrings.add (macAddresses[i].toString());
+
+        return addressStrings.joinIntoString (", ");
+    }
+
+    static String getIPAddressList()
+    {
+        Array <IPAddress> addresses;
+        IPAddress::findAllAddresses (addresses);
+
+        StringArray addressStrings;
+        for (int i = 0; i < addresses.size(); ++i)
+            addressStrings.add (addresses[i].toString());
 
         return addressStrings.joinIntoString (", ");
     }

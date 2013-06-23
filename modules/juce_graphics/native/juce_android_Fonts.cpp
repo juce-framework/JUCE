@@ -1,27 +1,92 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-11 by Raw Material Software Ltd.
+   This file is part of the JUCE library.
+   Copyright (c) 2013 - Raw Material Software Ltd.
 
-  ------------------------------------------------------------------------------
+   Permission is granted to use this software under the terms of either:
+   a) the GPL v2 (or any later version)
+   b) the Affero GPL v3
 
-   JUCE can be redistributed and/or modified under the terms of the GNU General
-   Public License (Version 2), as published by the Free Software Foundation.
-   A copy of the license is included in the JUCE distribution, or can be found
-   online at www.gnu.org/licenses.
+   Details of these licenses can be found at: www.gnu.org/licenses
 
    JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
    A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
-  ------------------------------------------------------------------------------
+   ------------------------------------------------------------------------------
 
    To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.rawmaterialsoftware.com/juce for more information.
+   available: visit www.juce.com for more information.
 
   ==============================================================================
 */
+
+struct DefaultFontNames
+{
+    DefaultFontNames()
+        : defaultSans  ("sans"),
+          defaultSerif ("serif"),
+          defaultFixed ("monospace"),
+          defaultFallback ("sans")
+    {
+    }
+
+    String getRealFontName (const String& faceName) const
+    {
+        if (faceName == Font::getDefaultSansSerifFontName())    return defaultSans;
+        if (faceName == Font::getDefaultSerifFontName())        return defaultSerif;
+        if (faceName == Font::getDefaultMonospacedFontName())   return defaultFixed;
+
+        return faceName;
+    }
+
+    String defaultSans, defaultSerif, defaultFixed, defaultFallback;
+};
+
+Typeface::Ptr Font::getDefaultTypefaceForFont (const Font& font)
+{
+    static DefaultFontNames defaultNames;
+
+    Font f (font);
+    f.setTypefaceName (defaultNames.getRealFontName (font.getTypefaceName()));
+    return Typeface::createSystemTypefaceFor (f);
+}
+
+//==============================================================================
+#if JUCE_USE_FREETYPE
+
+StringArray FTTypefaceList::getDefaultFontDirectories()
+{
+    return StringArray ("/system/fonts");
+}
+
+Typeface::Ptr Typeface::createSystemTypefaceFor (const Font& font)
+{
+    return new FreeTypeTypeface (font);
+}
+
+void Typeface::scanFolderForFonts (const File& folder)
+{
+    FTTypefaceList::getInstance()->scanFontPaths (StringArray (folder.getFullPathName()));
+}
+
+StringArray Font::findAllTypefaceNames()
+{
+    return FTTypefaceList::getInstance()->findAllFamilyNames();
+}
+
+StringArray Font::findAllTypefaceStyles (const String& family)
+{
+    return FTTypefaceList::getInstance()->findAllTypefaceStyles (family);
+}
+
+bool TextLayout::createNativeLayout (const AttributedString&)
+{
+    return false;
+}
+
+#else
 
 //==============================================================================
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
@@ -30,7 +95,6 @@
 
 DECLARE_JNI_CLASS (TypefaceClass, "android/graphics/Typeface");
 #undef JNI_CLASS_MEMBERS
-
 
 //==============================================================================
 StringArray Font::findAllTypefaceNames()
@@ -59,34 +123,6 @@ StringArray Font::findAllTypefaceStyles (const String& family)
                                         .fromLastOccurrenceOf ("-", false, false));
 
     return results;
-}
-
-struct DefaultFontNames
-{
-    DefaultFontNames()
-        : defaultSans  ("sans"),
-          defaultSerif ("serif"),
-          defaultFixed ("monospace"),
-          defaultFallback ("sans")
-    {
-    }
-
-    String defaultSans, defaultSerif, defaultFixed, defaultFallback;
-};
-
-Typeface::Ptr Font::getDefaultTypefaceForFont (const Font& font)
-{
-    static DefaultFontNames defaultNames;
-
-    String faceName (font.getTypefaceName());
-
-    if (faceName == Font::getDefaultSansSerifFontName())       faceName = defaultNames.defaultSans;
-    else if (faceName == Font::getDefaultSerifFontName())      faceName = defaultNames.defaultSerif;
-    else if (faceName == Font::getDefaultMonospacedFontName()) faceName = defaultNames.defaultFixed;
-
-    Font f (font);
-    f.setTypefaceName (faceName);
-    return Typeface::createSystemTypefaceFor (f);
 }
 
 const float referenceFontSize = 256.0f;
@@ -279,7 +315,14 @@ Typeface::Ptr Typeface::createSystemTypefaceFor (const Font& font)
     return new AndroidTypeface (font);
 }
 
+void Typeface::scanFolderForFonts (const File&)
+{
+    jassertfalse; // not available unless using FreeType
+}
+
 bool TextLayout::createNativeLayout (const AttributedString&)
 {
     return false;
 }
+
+#endif

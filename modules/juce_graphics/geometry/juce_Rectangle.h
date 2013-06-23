@@ -1,24 +1,23 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-11 by Raw Material Software Ltd.
+   This file is part of the JUCE library.
+   Copyright (c) 2013 - Raw Material Software Ltd.
 
-  ------------------------------------------------------------------------------
+   Permission is granted to use this software under the terms of either:
+   a) the GPL v2 (or any later version)
+   b) the Affero GPL v3
 
-   JUCE can be redistributed and/or modified under the terms of the GNU General
-   Public License (Version 2), as published by the Free Software Foundation.
-   A copy of the license is included in the JUCE distribution, or can be found
-   online at www.gnu.org/licenses.
+   Details of these licenses can be found at: www.gnu.org/licenses
 
    JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
    A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
-  ------------------------------------------------------------------------------
+   ------------------------------------------------------------------------------
 
    To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.rawmaterialsoftware.com/juce for more information.
+   available: visit www.juce.com for more information.
 
   ==============================================================================
 */
@@ -70,7 +69,7 @@ public:
     }
 
     /** Creates a Rectangle from the positions of two opposite corners. */
-    Rectangle (const Point<ValueType>& corner1, const Point<ValueType>& corner2) noexcept
+    Rectangle (const Point<ValueType> corner1, const Point<ValueType> corner2) noexcept
       : pos (jmin (corner1.x, corner2.x),
              jmin (corner1.y, corner2.y)),
         w (corner1.x - corner2.x),
@@ -139,16 +138,16 @@ public:
 
     //==============================================================================
     /** Returns the rectangle's top-left position as a Point. */
-    inline const Point<ValueType>& getPosition() const noexcept                                     { return pos; }
+    inline Point<ValueType> getPosition() const noexcept                                            { return pos; }
 
     /** Changes the position of the rectangle's top-left corner (leaving its size unchanged). */
-    inline void setPosition (const Point<ValueType>& newPos) noexcept                               { pos = newPos; }
+    inline void setPosition (const Point<ValueType> newPos) noexcept                                { pos = newPos; }
 
     /** Changes the position of the rectangle's top-left corner (leaving its size unchanged). */
     inline void setPosition (const ValueType newX, const ValueType newY) noexcept                   { pos.setXY (newX, newY); }
 
     /** Returns the rectangle's top-left position as a Point. */
-    const Point<ValueType>& getTopLeft() const noexcept                                             { return pos; }
+    Point<ValueType> getTopLeft() const noexcept                                                    { return pos; }
 
     /** Returns the rectangle's top-right position as a Point. */
     Point<ValueType> getTopRight() const noexcept                                                   { return Point<ValueType> (pos.x + w, pos.y); }
@@ -188,7 +187,7 @@ public:
     Rectangle withPosition (const ValueType newX, const ValueType newY) const noexcept   { return Rectangle (newX, newY, w, h); }
 
     /** Returns a rectangle with the same size as this one, but a new position. */
-    Rectangle withPosition (const Point<ValueType>& newPos) const noexcept  { return Rectangle (newPos.x, newPos.y, w, h); }
+    Rectangle withPosition (const Point<ValueType> newPos) const noexcept   { return Rectangle (newPos.x, newPos.y, w, h); }
 
     /** Returns a rectangle whose size is the same as this one, but whose top-left position is (0, 0). */
     Rectangle withZeroOrigin() const noexcept                               { return Rectangle (w, h); }
@@ -267,26 +266,26 @@ public:
     }
 
     /** Returns a rectangle which is the same as this one moved by a given amount. */
-    Rectangle operator+ (const Point<ValueType>& deltaPosition) const noexcept
+    Rectangle operator+ (const Point<ValueType> deltaPosition) const noexcept
     {
         return Rectangle (pos.x + deltaPosition.x, pos.y + deltaPosition.y, w, h);
     }
 
     /** Moves this rectangle by a given amount. */
-    Rectangle& operator+= (const Point<ValueType>& deltaPosition) noexcept
+    Rectangle& operator+= (const Point<ValueType> deltaPosition) noexcept
     {
         pos += deltaPosition;
         return *this;
     }
 
     /** Returns a rectangle which is the same as this one moved by a given amount. */
-    Rectangle operator- (const Point<ValueType>& deltaPosition) const noexcept
+    Rectangle operator- (const Point<ValueType> deltaPosition) const noexcept
     {
         return Rectangle (pos.x - deltaPosition.x, pos.y - deltaPosition.y, w, h);
     }
 
     /** Moves this rectangle by a given amount. */
-    Rectangle& operator-= (const Point<ValueType>& deltaPosition) noexcept
+    Rectangle& operator-= (const Point<ValueType> deltaPosition) noexcept
     {
         pos -= deltaPosition;
         return *this;
@@ -459,7 +458,7 @@ public:
     }
 
     /** Returns true if this co-ordinate is inside the rectangle. */
-    bool contains (const Point<ValueType>& point) const noexcept
+    bool contains (const Point<ValueType> point) const noexcept
     {
         return point.x >= pos.x && point.y >= pos.y && point.x < pos.x + w && point.y < pos.y + h;
     }
@@ -472,7 +471,7 @@ public:
     }
 
     /** Returns the nearest point to the specified point that lies within this rectangle. */
-    Point<ValueType> getConstrainedPoint (const Point<ValueType>& point) const noexcept
+    Point<ValueType> getConstrainedPoint (const Point<ValueType> point) const noexcept
     {
         return Point<ValueType> (jlimit (pos.x, pos.x + w, point.x),
                                  jlimit (pos.y, pos.y + h, point.y));
@@ -496,7 +495,8 @@ public:
             && pos.y + h > other.pos.y
             && pos.x < other.pos.x + other.w
             && pos.y < other.pos.y + other.h
-            && w > ValueType() && h > ValueType();
+            && w > ValueType() && h > ValueType()
+            && other.w > ValueType() && other.h > ValueType();
     }
 
     /** Returns the region that is the overlap between this and another rectangle.

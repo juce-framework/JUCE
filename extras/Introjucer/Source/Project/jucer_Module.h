@@ -1,24 +1,23 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-11 by Raw Material Software Ltd.
+   This file is part of the JUCE library.
+   Copyright (c) 2013 - Raw Material Software Ltd.
 
-  ------------------------------------------------------------------------------
+   Permission is granted to use this software under the terms of either:
+   a) the GPL v2 (or any later version)
+   b) the Affero GPL v3
 
-   JUCE can be redistributed and/or modified under the terms of the GNU General
-   Public License (Version 2), as published by the Free Software Foundation.
-   A copy of the license is included in the JUCE distribution, or can be found
-   online at www.gnu.org/licenses.
+   Details of these licenses can be found at: www.gnu.org/licenses
 
    JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
    A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
-  ------------------------------------------------------------------------------
+   ------------------------------------------------------------------------------
 
    To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.rawmaterialsoftware.com/juce for more information.
+   available: visit www.juce.com for more information.
 
   ==============================================================================
 */
@@ -44,6 +43,7 @@ public:
     String getVersion() const           { return moduleInfo ["version"].toString(); }
     String getName() const              { return moduleInfo ["name"].toString(); }
     String getDescription() const       { return moduleInfo ["description"].toString(); }
+    String getLicense() const           { return moduleInfo ["license"].toString(); }
     const File& getFolder() const       { return moduleFolder; }
 
     void writeIncludes (ProjectSaver&, OutputStream&);
@@ -51,6 +51,7 @@ public:
     void createPropertyEditors (ProjectExporter&, PropertyListBuilder&) const;
     void getConfigFlags (Project&, OwnedArray<Project::ConfigFlag>& flags) const;
     void getLocalCompiledFiles (const File& localModuleFolder, Array<File>& files) const;
+    void findBrowseableFiles (const File& localModuleFolder, Array<File>& files) const;
     File getLocalFolderFor (Project&) const;
 
     static String getInfoFileName()     { return "juce_module_info"; }
@@ -109,7 +110,7 @@ public:
     {
         LibraryModule* create() const;
 
-        String uid, version, name, description;
+        String uid, version, name, description, license;
         File file;
         URL url;
 
@@ -128,6 +129,7 @@ public:
 
     static File getDefaultModulesFolder (Project*);
     static bool isLocalModulesFolderValid();
+    static bool isLibraryNewerThanIntrojucer();
 
     static File getLocalModulesFolder (Project*);
     static void setLocalModulesFolder (const File& newFile);

@@ -1,24 +1,23 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-11 by Raw Material Software Ltd.
+   This file is part of the JUCE library.
+   Copyright (c) 2013 - Raw Material Software Ltd.
 
-  ------------------------------------------------------------------------------
+   Permission is granted to use this software under the terms of either:
+   a) the GPL v2 (or any later version)
+   b) the Affero GPL v3
 
-   JUCE can be redistributed and/or modified under the terms of the GNU General
-   Public License (Version 2), as published by the Free Software Foundation.
-   A copy of the license is included in the JUCE distribution, or can be found
-   online at www.gnu.org/licenses.
+   Details of these licenses can be found at: www.gnu.org/licenses
 
    JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
    A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
-  ------------------------------------------------------------------------------
+   ------------------------------------------------------------------------------
 
    To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.rawmaterialsoftware.com/juce for more information.
+   available: visit www.juce.com for more information.
 
   ==============================================================================
 */
@@ -55,10 +54,9 @@ public:
         // In order to receive the "TaskbarCreated" message, we need to request that it's not filtered out.
         // (Need to load dynamically, as ChangeWindowMessageFilter is only available in Vista and later)
         typedef BOOL (WINAPI* ChangeWindowMessageFilterType) (UINT, DWORD);
-        ChangeWindowMessageFilterType changeWindowMessageFilter
-            = (ChangeWindowMessageFilterType) getUser32Function ("ChangeWindowMessageFilter");
 
-        if (changeWindowMessageFilter != nullptr)
+        if (ChangeWindowMessageFilterType changeWindowMessageFilter
+                = (ChangeWindowMessageFilterType) getUser32Function ("ChangeWindowMessageFilter"))
             changeWindowMessageFilter (taskbarCreatedMessage, 1 /* MSGFLT_ADD */);
     }
 
@@ -96,9 +94,7 @@ public:
             if (lParam == WM_LBUTTONDOWN || lParam == WM_RBUTTONDOWN
                  || lParam == WM_LBUTTONDBLCLK || lParam == WM_LBUTTONDBLCLK)
             {
-                Component* const current = Component::getCurrentlyModalComponent();
-
-                if (current != nullptr)
+                if (Component* const current = Component::getCurrentlyModalComponent())
                     current->inputAttemptWhenModal();
             }
         }
@@ -113,9 +109,11 @@ public:
             else if (lParam == WM_LBUTTONUP || lParam == WM_RBUTTONUP)
                 eventMods = eventMods.withoutMouseButtons();
 
+            const Time eventTime (getMouseEventTime());
+
             const MouseEvent e (Desktop::getInstance().getMainMouseSource(),
-                                Point<int>(), eventMods, &owner, &owner, Time (getMouseEventTime()),
-                                Point<int>(), Time (getMouseEventTime()), 1, false);
+                                Point<int>(), eventMods, &owner, &owner, eventTime,
+                                Point<int>(), eventTime, 1, false);
 
             if (lParam == WM_LBUTTONDOWN || lParam == WM_RBUTTONDOWN)
             {
@@ -141,17 +139,9 @@ public:
     static Pimpl* getPimpl (HWND hwnd)
     {
         if (JuceWindowIdentifier::isJUCEWindow (hwnd))
-        {
-            ComponentPeer* peer = (ComponentPeer*) GetWindowLongPtr (hwnd, 8);
-
-            if (peer != nullptr)
-            {
-                SystemTrayIconComponent* const iconComp = dynamic_cast<SystemTrayIconComponent*> (&(peer->getComponent()));
-
-                if (iconComp != nullptr)
+            if (ComponentPeer* peer = (ComponentPeer*) GetWindowLongPtr (hwnd, 8))
+                if (SystemTrayIconComponent* const iconComp = dynamic_cast<SystemTrayIconComponent*> (&(peer->getComponent())))
                     return iconComp->pimpl;
-            }
-        }
 
         return nullptr;
     }

@@ -1,24 +1,23 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-11 by Raw Material Software Ltd.
+   This file is part of the JUCE library.
+   Copyright (c) 2013 - Raw Material Software Ltd.
 
-  ------------------------------------------------------------------------------
+   Permission is granted to use this software under the terms of either:
+   a) the GPL v2 (or any later version)
+   b) the Affero GPL v3
 
-   JUCE can be redistributed and/or modified under the terms of the GNU General
-   Public License (Version 2), as published by the Free Software Foundation.
-   A copy of the license is included in the JUCE distribution, or can be found
-   online at www.gnu.org/licenses.
+   Details of these licenses can be found at: www.gnu.org/licenses
 
    JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
    A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
-  ------------------------------------------------------------------------------
+   ------------------------------------------------------------------------------
 
    To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.rawmaterialsoftware.com/juce for more information.
+   available: visit www.juce.com for more information.
 
   ==============================================================================
 */
@@ -38,7 +37,7 @@ const char* const WavAudioFormat::bwavCodingHistory    = "bwav coding history";
 StringPairArray WavAudioFormat::createBWAVMetadata (const String& description,
                                                     const String& originator,
                                                     const String& originatorRef,
-                                                    const Time& date,
+                                                    const Time date,
                                                     const int64 timeReferenceSamples,
                                                     const String& codingHistory)
 {
@@ -54,6 +53,17 @@ StringPairArray WavAudioFormat::createBWAVMetadata (const String& description,
 
     return m;
 }
+
+const char* const WavAudioFormat::acidOneShot          = "acid one shot";
+const char* const WavAudioFormat::acidRootSet          = "acid root set";
+const char* const WavAudioFormat::acidStretch          = "acid stretch";
+const char* const WavAudioFormat::acidDiskBased        = "acid disk based";
+const char* const WavAudioFormat::acidizerFlag         = "acidizer flag";
+const char* const WavAudioFormat::acidRootNote         = "acid root note";
+const char* const WavAudioFormat::acidBeats            = "acid beats";
+const char* const WavAudioFormat::acidDenominator      = "acid denominator";
+const char* const WavAudioFormat::acidNumerator        = "acid numerator";
+const char* const WavAudioFormat::acidTempo            = "acid tempo";
 
 
 //==============================================================================
@@ -458,6 +468,49 @@ namespace WavFileHelpers
     }
 
     //==============================================================================
+    struct AcidChunk
+    {
+        /** Reads an acid RIFF chunk from a stream positioned just after the size byte. */
+        AcidChunk (InputStream& input, int length)
+        {
+            zerostruct (*this);
+            input.read (this, jmin ((int) sizeof (*this), length));
+        }
+
+        void addToMetadata (StringPairArray& values) const
+        {
+            setBoolFlag (values, WavAudioFormat::acidOneShot,   0x01);
+            setBoolFlag (values, WavAudioFormat::acidRootSet,   0x02);
+            setBoolFlag (values, WavAudioFormat::acidStretch,   0x04);
+            setBoolFlag (values, WavAudioFormat::acidDiskBased, 0x08);
+            setBoolFlag (values, WavAudioFormat::acidizerFlag,  0x10);
+
+            if (flags & 0x02) // root note set
+                values.set (WavAudioFormat::acidRootNote, String (rootNote));
+
+            values.set (WavAudioFormat::acidBeats,       String (numBeats));
+            values.set (WavAudioFormat::acidDenominator, String (meterDenominator));
+            values.set (WavAudioFormat::acidNumerator,   String (meterNumerator));
+            values.set (WavAudioFormat::acidTempo,       String (tempo));
+        }
+
+        void setBoolFlag (StringPairArray& values, const char* name, int32 mask) const
+        {
+            values.set (name, (flags & mask) ? "1" : "0");
+        }
+
+        int32 flags;
+        int16 rootNote;
+        int16 reserved1;
+        float reserved2;
+        int32 numBeats;
+        int16 meterDenominator;
+        int16 meterNumerator;
+        float tempo;
+
+    } JUCE_PACKED;
+
+    //==============================================================================
     struct ExtensibleWavSubFormat
     {
         uint32 data1;
@@ -692,6 +745,10 @@ public:
                             input->setPosition (adtlChunkEnd);
                         }
                     }
+                }
+                else if (chunkType == chunkName ("acid"))
+                {
+                    AcidChunk (*input, length).addToMetadata (metadataValues);
                 }
                 else if (chunkEnd <= input->getPosition())
                 {

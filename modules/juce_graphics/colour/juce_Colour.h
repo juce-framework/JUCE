@@ -1,24 +1,23 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-11 by Raw Material Software Ltd.
+   This file is part of the JUCE library.
+   Copyright (c) 2013 - Raw Material Software Ltd.
 
-  ------------------------------------------------------------------------------
+   Permission is granted to use this software under the terms of either:
+   a) the GPL v2 (or any later version)
+   b) the Affero GPL v3
 
-   JUCE can be redistributed and/or modified under the terms of the GNU General
-   Public License (Version 2), as published by the Free Software Foundation.
-   A copy of the license is included in the JUCE distribution, or can be found
-   online at www.gnu.org/licenses.
+   Details of these licenses can be found at: www.gnu.org/licenses
 
    JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
    A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
-  ------------------------------------------------------------------------------
+   ------------------------------------------------------------------------------
 
    To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.rawmaterialsoftware.com/juce for more information.
+   available: visit www.juce.com for more information.
 
   ==============================================================================
 */
@@ -231,14 +230,14 @@ public:
         If the foreground colour is semi-transparent, it is blended onto this colour
         accordingly.
     */
-    Colour overlaidWith (const Colour& foregroundColour) const noexcept;
+    Colour overlaidWith (Colour foregroundColour) const noexcept;
 
     /** Returns a colour that lies somewhere between this one and another.
 
         If amountOfOther is zero, the result is 100% this colour, if amountOfOther
         is 1.0, the result is 100% of the other colour.
     */
-    Colour interpolatedWith (const Colour& other, float proportionOfOther) const noexcept;
+    Colour interpolatedWith (Colour other, float proportionOfOther) const noexcept;
 
     //==============================================================================
     /** Returns the colour's hue component.
@@ -331,14 +330,14 @@ public:
         nudged up or down so that it differs from the luminosity of this colour
         by at least the amount specified by minLuminosityDiff.
     */
-    Colour contrasting (const Colour& targetColour, float minLuminosityDiff) const noexcept;
+    Colour contrasting (Colour targetColour, float minLuminosityDiff) const noexcept;
 
     /** Returns a colour that contrasts against two colours.
         Looks for a colour that contrasts with both of the colours passed-in.
         Handy for things like choosing a highlight colour in text editors, etc.
     */
-    static Colour contrasting (const Colour& colour1,
-                               const Colour& colour2) noexcept;
+    static Colour contrasting (Colour colour1,
+                               Colour colour2) noexcept;
 
     //==============================================================================
     /** Returns an opaque shade of grey.

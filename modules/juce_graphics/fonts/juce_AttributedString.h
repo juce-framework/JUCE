@@ -1,24 +1,23 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-11 by Raw Material Software Ltd.
+   This file is part of the JUCE library.
+   Copyright (c) 2013 - Raw Material Software Ltd.
 
-  ------------------------------------------------------------------------------
+   Permission is granted to use this software under the terms of either:
+   a) the GPL v2 (or any later version)
+   b) the Affero GPL v3
 
-   JUCE can be redistributed and/or modified under the terms of the GNU General
-   Public License (Version 2), as published by the Free Software Foundation.
-   A copy of the license is included in the JUCE distribution, or can be found
-   online at www.gnu.org/licenses.
+   Details of these licenses can be found at: www.gnu.org/licenses
 
    JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
    A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
-  ------------------------------------------------------------------------------
+   ------------------------------------------------------------------------------
 
    To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.rawmaterialsoftware.com/juce for more information.
+   available: visit www.juce.com for more information.
 
   ==============================================================================
 */
@@ -71,9 +70,9 @@ public:
     /** Appends some text, with a specified font, and the default colour (black). */
     void append (const String& textToAppend, const Font& font);
     /** Appends some text, with a specified colour, and the default font. */
-    void append (const String& textToAppend, const Colour& colour);
+    void append (const String& textToAppend, Colour colour);
     /** Appends some text, with a specified font and colour. */
-    void append (const String& textToAppend, const Font& font, const Colour& colour);
+    void append (const String& textToAppend, const Font& font, Colour colour);
 
     /** Appends another AttributedString to this one.
         Note that this will only append the text, fonts, and colours - it won't copy any
@@ -154,12 +153,12 @@ public:
         /** Creates an attribute that changes the colour for a range of characters.
             @see AttributedString::setColour()
         */
-        Attribute (const Range<int>& range, const Colour& colour);
+        Attribute (Range<int> range, Colour colour);
 
         /** Creates an attribute that changes the font for a range of characters.
             @see AttributedString::setFont()
         */
-        Attribute (const Range<int>& range, const Font& font);
+        Attribute (Range<int> range, const Font& font);
 
         Attribute (const Attribute&);
         ~Attribute();
@@ -194,13 +193,13 @@ public:
 
     //==============================================================================
     /** Adds a colour attribute for the specified range. */
-    void setColour (const Range<int>& range, const Colour& colour);
+    void setColour (Range<int> range, Colour colour);
 
     /** Removes all existing colour attributes, and applies this colour to the whole string. */
-    void setColour (const Colour& colour);
+    void setColour (Colour colour);
 
     /** Adds a font attribute for the specified range. */
-    void setFont (const Range<int>& range, const Font& font);
+    void setFont (Range<int> range, const Font& font);
 
     /** Removes all existing font attributes, and applies this font to the whole string. */
     void setFont (const Font& font);

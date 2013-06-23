@@ -8,4 +8,4 @@ most applications, and is particularly well-suited for building
 highly-customised GUIs, and for handling graphics and sound.
 
 For more information, visit the website:
-http://www.rawmaterialsoftware.com
+http://www.juce.com

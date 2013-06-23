@@ -1,24 +1,23 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-11 by Raw Material Software Ltd.
+   This file is part of the JUCE library.
+   Copyright (c) 2013 - Raw Material Software Ltd.
 
-  ------------------------------------------------------------------------------
+   Permission is granted to use this software under the terms of either:
+   a) the GPL v2 (or any later version)
+   b) the Affero GPL v3
 
-   JUCE can be redistributed and/or modified under the terms of the GNU General
-   Public License (Version 2), as published by the Free Software Foundation.
-   A copy of the license is included in the JUCE distribution, or can be found
-   online at www.gnu.org/licenses.
+   Details of these licenses can be found at: www.gnu.org/licenses
 
    JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
    A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
-  ------------------------------------------------------------------------------
+   ------------------------------------------------------------------------------
 
    To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.rawmaterialsoftware.com/juce for more information.
+   available: visit www.juce.com for more information.
 
   ==============================================================================
 */
@@ -61,8 +60,20 @@ public:
     /** Changes the text in the panel's button. */
     void setOptionsButtonText (const String& newText);
 
-    /** Chooses whether to use the message thread or a background thread for scanning. */
-    void setScansOnMessageThread (bool useMessageThread) noexcept;
+    /** Sets how many threads to simultaneously scan for plugins.
+        If this is 0, then all scanning happens on the message thread (this is the default)
+    */
+    void setNumberOfThreadsForScanning (int numThreads);
+
+    /** Returns the last search path stored in a given properties file for the specified format. */
+    static FileSearchPath getLastSearchPath (PropertiesFile& properties, AudioPluginFormat& format);
+
+    /** Stores a search path in a properties file for the given format. */
+    static void setLastSearchPath (PropertiesFile& properties, AudioPluginFormat& format,
+                                   const FileSearchPath& newPath);
+
+    /** Triggers a scan for the given format. */
+    void scanFor (AudioPluginFormat& format);
 
     //==============================================================================
     /** @internal */
@@ -86,14 +97,13 @@ private:
     ListBox listBox;
     TextButton optionsButton;
     PropertiesFile* propertiesToUse;
-    bool scanOnBackgroundThread;
+    int numThreads;
 
     class Scanner;
     friend class Scanner;
     friend class ScopedPointer<Scanner>;
     ScopedPointer<Scanner> currentScanner;
 
-    void scanFor (AudioPluginFormat*);
     void scanFinished (const StringArray&);
 
     static void optionsMenuStaticCallback (int, PluginListComponent*);

@@ -63,10 +63,10 @@ private:
     //[/UserVariables]
 
     //==============================================================================
-    MidiKeyboardComponent* keyboardComponent;
-    ToggleButton* sineButton;
-    ToggleButton* sampledButton;
-    LiveAudioInputDisplayComp* liveAudioDisplayComp;
+    ScopedPointer<MidiKeyboardComponent> keyboardComponent;
+    ScopedPointer<ToggleButton> sineButton;
+    ScopedPointer<ToggleButton> sampledButton;
+    ScopedPointer<LiveAudioInputDisplayComp> liveAudioDisplayComp;
 
 
     //==============================================================================

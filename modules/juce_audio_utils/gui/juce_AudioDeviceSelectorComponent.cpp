@@ -1,24 +1,23 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-11 by Raw Material Software Ltd.
+   This file is part of the JUCE library.
+   Copyright (c) 2013 - Raw Material Software Ltd.
 
-  ------------------------------------------------------------------------------
+   Permission is granted to use this software under the terms of either:
+   a) the GPL v2 (or any later version)
+   b) the Affero GPL v3
 
-   JUCE can be redistributed and/or modified under the terms of the GNU General
-   Public License (Version 2), as published by the Free Software Foundation.
-   A copy of the license is included in the JUCE distribution, or can be found
-   online at www.gnu.org/licenses.
+   Details of these licenses can be found at: www.gnu.org/licenses
 
    JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
    A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
-  ------------------------------------------------------------------------------
+   ------------------------------------------------------------------------------
 
    To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.rawmaterialsoftware.com/juce for more information.
+   available: visit www.juce.com for more information.
 
   ==============================================================================
 */
@@ -70,7 +69,6 @@ class AudioDeviceSelectorComponent::MidiInputSelectorComponentListBox  : public 
                                                                          private ListBoxModel
 {
 public:
-    //==============================================================================
     MidiInputSelectorComponentListBox (AudioDeviceManager& deviceManager_,
                                        const String& noItemsMessage_,
                                        const int minNumber_,
@@ -193,6 +191,7 @@ struct AudioDeviceSetupDetails
     bool useStereoPairs;
 };
 
+static String getNoDeviceString()   { return "<< " + TRANS("none") + " >>"; }
 
 //==============================================================================
 class AudioDeviceSettingsPanel : public Component,
@@ -515,7 +514,7 @@ private:
         for (int i = 0; i < devs.size(); ++i)
             combo.addItem (devs[i], i + 1);
 
-        combo.addItem (TRANS("<< none >>"), -1);
+        combo.addItem (getNoDeviceString(), -1);
         combo.setSelectedId (-1, true);
     }
 
@@ -959,7 +958,7 @@ AudioDeviceSelectorComponent::AudioDeviceSelectorComponent (AudioDeviceManager& 
     {
         addAndMakeVisible (midiInputsList
                             = new MidiInputSelectorComponentListBox (deviceManager,
-                                                                     TRANS("(No MIDI inputs available)"),
+                                                                     "(" + TRANS("No MIDI inputs available") + ")",
                                                                      0, 0));
 
         midiInputsLabel = new Label (String::empty, TRANS ("Active MIDI inputs:"));
@@ -1102,7 +1101,7 @@ void AudioDeviceSelectorComponent::updateAllControls()
 
         const StringArray midiOuts (MidiOutput::getDevices());
 
-        midiOutputSelector->addItem (TRANS("<< none >>"), -1);
+        midiOutputSelector->addItem (getNoDeviceString(), -1);
         midiOutputSelector->addSeparator();
 
         for (int i = 0; i < midiOuts.size(); ++i)

@@ -1,24 +1,23 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-11 by Raw Material Software Ltd.
+   This file is part of the JUCE library.
+   Copyright (c) 2013 - Raw Material Software Ltd.
 
-  ------------------------------------------------------------------------------
+   Permission is granted to use this software under the terms of either:
+   a) the GPL v2 (or any later version)
+   b) the Affero GPL v3
 
-   JUCE can be redistributed and/or modified under the terms of the GNU General
-   Public License (Version 2), as published by the Free Software Foundation.
-   A copy of the license is included in the JUCE distribution, or can be found
-   online at www.gnu.org/licenses.
+   Details of these licenses can be found at: www.gnu.org/licenses
 
    JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
    A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
-  ------------------------------------------------------------------------------
+   ------------------------------------------------------------------------------
 
    To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.rawmaterialsoftware.com/juce for more information.
+   available: visit www.juce.com for more information.
 
   ==============================================================================
 */
@@ -66,8 +65,6 @@ JuceUpdater::JuceUpdater (ModuleList& moduleList_, const String& message)
     versionsToDownload.addListener (this);
 
     setSize (600, 500);
-
-    checkNow();
 }
 
 JuceUpdater::~JuceUpdater()
@@ -252,75 +249,75 @@ void JuceUpdater::paintListBoxItem (int /*rowNumber*/, Graphics& g, int /*width*
         g.fillAll (findColour (TextEditor::highlightColourId));
 }
 
-Component* JuceUpdater::refreshComponentForRow (int rowNumber, bool /*isRowSelected*/, Component* existingComponentToUpdate)
+class UpdateListComponent  : public Component
 {
-    class UpdateListComponent  : public Component
+public:
+    UpdateListComponent()
     {
-    public:
-        UpdateListComponent()
-        {
-            addChildComponent (&toggle);
-            toggle.setWantsKeyboardFocus (false);
-            setInterceptsMouseClicks (false, true);
-        }
+        addChildComponent (&toggle);
+        toggle.setWantsKeyboardFocus (false);
+        setInterceptsMouseClicks (false, true);
+    }
 
-        void setModule (const ModuleList::Module* newModule,
-                        const ModuleList::Module* existingModule,
-                        const Value& value)
+    void setModule (const ModuleList::Module* newModule,
+                    const ModuleList::Module* existingModule,
+                    const Value& value)
+    {
+        if (newModule != nullptr)
         {
-            if (newModule != nullptr)
+            toggle.getToggleStateValue().referTo (value);
+            toggle.setVisible (true);
+            toggle.setEnabled (true);
+
+            name = newModule->uid;
+            status = String::empty;
+
+            if (existingModule == nullptr)
             {
-                toggle.getToggleStateValue().referTo (value);
-                toggle.setVisible (true);
-                toggle.setEnabled (true);
-
-                name = newModule->uid;
-                status = String::empty;
-
-                if (existingModule == nullptr)
-                {
-                    status << " (not currently installed)";
-                }
-                else if (existingModule->version != newModule->version)
-                {
-                    status << " installed: " << existingModule->version
-                           << ", available: " << newModule->version;
-                }
-                else
-                {
-                    status << " (latest version already installed: " << existingModule->version << ")";
-                    toggle.setEnabled (false);
-                }
+                status << " (not currently installed)";
+            }
+            else if (existingModule->version != newModule->version)
+            {
+                status << " installed: " << existingModule->version
+                       << ", available: " << newModule->version;
             }
             else
             {
-                name = status = String::empty;
-                toggle.setVisible (false);
+                status << " (latest version already installed: " << existingModule->version << ")";
+                toggle.setEnabled (false);
             }
         }
-
-        void paint (Graphics& g)
+        else
         {
-            g.setColour (Colours::black);
-            g.setFont (getHeight() * 0.7f);
-
-            g.drawText (name, toggle.getRight() + 4, 0, getWidth() / 2 - toggle.getRight() - 4, getHeight(),
-                        Justification::centredLeft, true);
-
-            g.drawText (status, getWidth() / 2, 0, getWidth() / 2, getHeight(),
-                        Justification::centredLeft, true);
+            name = status = String::empty;
+            toggle.setVisible (false);
         }
+    }
 
-        void resized()
-        {
-            toggle.setBounds (2, 2, getHeight() - 4, getHeight() - 4);
-        }
+    void paint (Graphics& g)
+    {
+        g.setColour (Colours::black);
+        g.setFont (getHeight() * 0.7f);
 
-    private:
-        ToggleButton toggle;
-        String name, status;
-    };
+        g.drawText (name, toggle.getRight() + 4, 0, getWidth() / 2 - toggle.getRight() - 4, getHeight(),
+                    Justification::centredLeft, true);
 
+        g.drawText (status, getWidth() / 2, 0, getWidth() / 2, getHeight(),
+                    Justification::centredLeft, true);
+    }
+
+    void resized()
+    {
+        toggle.setBounds (2, 2, getHeight() - 4, getHeight() - 4);
+    }
+
+private:
+    ToggleButton toggle;
+    String name, status;
+};
+
+Component* JuceUpdater::refreshComponentForRow (int rowNumber, bool /*isRowSelected*/, Component* existingComponentToUpdate)
+{
     UpdateListComponent* c = dynamic_cast <UpdateListComponent*> (existingComponentToUpdate);
     if (c == nullptr)
         c = new UpdateListComponent();
