@@ -40,8 +40,8 @@ namespace CommandIDs
     static const int aboutBox               = 0x30300;
 }
 
-extern ApplicationCommandManager* commandManager;
-extern ApplicationProperties* appProperties;
+ApplicationCommandManager& getCommandManager();
+ApplicationProperties& getAppProperties();
 
 //==============================================================================
 /**
