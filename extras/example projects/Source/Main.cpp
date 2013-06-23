@@ -58,13 +58,7 @@ class JUCEHelloWorldApplication : public JUCEApplication
 {
 public:
     //==============================================================================
-    JUCEHelloWorldApplication()
-    {
-    }
-
-    ~JUCEHelloWorldApplication()
-    {
-    }
+    JUCEHelloWorldApplication() {}
 
     //==============================================================================
     void initialise (const String& commandLine)
@@ -87,7 +81,7 @@ public:
 
         // The helloWorldWindow variable is a ScopedPointer, so setting it to a null
         // pointer will delete the window.
-        helloWorldWindow = 0;
+        helloWorldWindow = nullptr;
     }
 
     //==============================================================================

@@ -25,9 +25,9 @@
                   juceFolder="../.." objCExtraSuffix="JtTAKTK1s">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="HelloWorld"
-                       osxSDK="1" osxCompatibility="1" osxArchitecture="default"/>
+                       osxSDK="1" osxCompatibility="1" osxArchitecture="default" iosCompatibility="default"/>
         <CONFIGURATION name="Release" isDebug="0" optimisation="2" targetName="HelloWorld"
-                       osxSDK="1" osxCompatibility="1" osxArchitecture="default"/>
+                       osxSDK="1" osxCompatibility="1" osxArchitecture="default" iosCompatibility="default"/>
       </CONFIGURATIONS>
     </XCODE_IPHONE>
     <VS2005 targetFolder="Builds/VisualStudio2005" vstFolder="c:\SDKs\vstsdk2.4"

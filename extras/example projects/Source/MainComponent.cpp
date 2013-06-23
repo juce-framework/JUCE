@@ -1,20 +1,18 @@
 /*
   ==============================================================================
 
-  This is an automatically generated file created by the Jucer!
-
-  Creation date:  21 Sep 2012 12:11:41pm
+  This is an automatically generated GUI class created by the Introjucer!
 
   Be careful when adding custom code to these files, as only the code within
   the "//[xyz]" and "//[/xyz]" sections will be retained when the file is loaded
   and re-saved.
 
-  Jucer version: 1.12
+  Created with Introjucer version: 3.1.0
 
   ------------------------------------------------------------------------------
 
-  The Jucer is part of the JUCE library - "Jules' Utility Class Extensions"
-  Copyright 2004-6 by Raw Material Software ltd.
+  The Introjucer is part of the JUCE library - "Jules' Utility Class Extensions"
+  Copyright 2004-13 by Raw Material Software Ltd.
 
   ==============================================================================
 */
@@ -30,17 +28,15 @@
 
 //==============================================================================
 MainComponent::MainComponent ()
-    : helloWorldLabel (0),
-      quitButton (0)
 {
     addAndMakeVisible (helloWorldLabel = new Label (String::empty,
                                                     "Hello World!"));
-    helloWorldLabel->setFont (Font (40.0000f, Font::bold));
+    helloWorldLabel->setFont (Font (40.00f, Font::bold));
     helloWorldLabel->setJustificationType (Justification::centred);
     helloWorldLabel->setEditable (false, false, false);
     helloWorldLabel->setColour (Label::textColourId, Colours::black);
     helloWorldLabel->setColour (TextEditor::textColourId, Colours::black);
-    helloWorldLabel->setColour (TextEditor::backgroundColourId, Colour (0x0));
+    helloWorldLabel->setColour (TextEditor::backgroundColourId, Colour (0x00000000));
 
     addAndMakeVisible (quitButton = new TextButton (String::empty));
     quitButton->setButtonText ("Quit");
@@ -62,8 +58,8 @@ MainComponent::~MainComponent()
     //[Destructor_pre]. You can add your own custom destruction code here..
     //[/Destructor_pre]
 
-    deleteAndZero (helloWorldLabel);
-    deleteAndZero (quitButton);
+    helloWorldLabel = nullptr;
+    quitButton = nullptr;
 
 
     //[Destructor]. You can add your own custom destruction code here..
@@ -81,7 +77,7 @@ void MainComponent::paint (Graphics& g)
     g.setColour (Colours::white);
     g.fillPath (internalPath1);
     g.setColour (Colour (0xff6f6f6f));
-    g.strokePath (internalPath1, PathStrokeType (5.2000f));
+    g.strokePath (internalPath1, PathStrokeType (5.200f));
 
     //[UserPaint] Add your own custom painting code here..
     //[/UserPaint]
@@ -131,9 +127,10 @@ void MainComponent::buttonClicked (Button* buttonThatWasClicked)
 
 //==============================================================================
 #if 0
-/*  -- Jucer information section --
+/*  -- Introjucer information section --
 
-    This is where the Jucer puts all of its metadata, so don't change anything in here!
+    This is where the Introjucer stores the metadata that describe this GUI layout, so
+    make changes in here at your peril!
 
 BEGIN_JUCER_METADATA
 
@@ -158,3 +155,7 @@ BEGIN_JUCER_METADATA
 END_JUCER_METADATA
 */
 #endif
+
+
+//[EndFile] You can add extra defines here...
+//[/EndFile]
