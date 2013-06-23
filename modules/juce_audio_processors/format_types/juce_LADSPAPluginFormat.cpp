@@ -615,7 +615,7 @@ void LADSPAPluginFormat::findAllTypesForFile (OwnedArray <PluginDescription>& re
 
 AudioPluginInstance* LADSPAPluginFormat::createInstanceFromDescription (const PluginDescription& desc)
 {
-    LADSPAPluginInstance* result = nullptr;
+    ScopedPointer<LADSPAPluginInstance> result;
 
     if (fileMightContainThisPluginType (desc.fileOrIdentifier))
     {
@@ -635,13 +635,13 @@ AudioPluginInstance* LADSPAPluginFormat::createInstanceFromDescription (const Pl
             if (result->plugin != nullptr && result->isValid())
                 result->initialise();
             else
-                deleteAndZero (result);
+                result = nullptr;
         }
 
         previousWorkingDirectory.setAsCurrentWorkingDirectory();
     }
 
-    return result;
+    return result.release();
 }
 
 bool LADSPAPluginFormat::fileMightContainThisPluginType (const String& fileOrIdentifier)

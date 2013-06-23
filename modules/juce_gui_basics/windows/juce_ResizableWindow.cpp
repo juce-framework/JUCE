@@ -358,14 +358,14 @@ void ResizableWindow::setBoundsConstrained (const Rectangle<int>& newBounds)
 //==============================================================================
 void ResizableWindow::paint (Graphics& g)
 {
-    getLookAndFeel().fillResizableWindowBackground (g, getWidth(), getHeight(),
-                                                    getBorderThickness(), *this);
+    LookAndFeel& lf = getLookAndFeel();
+
+    lf.fillResizableWindowBackground (g, getWidth(), getHeight(),
+                                      getBorderThickness(), *this);
 
     if (! isFullScreen())
-    {
-        getLookAndFeel().drawResizableWindowBorder (g, getWidth(), getHeight(),
-                                                    getBorderThickness(), *this);
-    }
+        lf.drawResizableWindowBorder (g, getWidth(), getHeight(),
+                                      getBorderThickness(), *this);
 
    #if JUCE_DEBUG
     /* If this fails, then you've probably written a subclass with a resized()
@@ -464,9 +464,10 @@ void ResizableWindow::setFullScreen (const bool shouldBeFullScreen)
 
 bool ResizableWindow::isMinimised() const
 {
-    ComponentPeer* const peer = getPeer();
+    if (ComponentPeer* const peer = getPeer())
+        return peer->isMinimised();
 
-    return (peer != nullptr) && peer->isMinimised();
+    return false;
 }
 
 void ResizableWindow::setMinimised (const bool shouldMinimise)
