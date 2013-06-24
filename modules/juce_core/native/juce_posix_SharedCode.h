@@ -874,8 +874,12 @@ void Thread::setCurrentThreadName (const String& name)
     {
         [[NSThread currentThread] setName: juceStringToNS (name)];
     }
-   #elif JUCE_LINUX && (__GLIBC__ * 1000 + __GLIBC_MINOR__) >= 2012
-    pthread_setname_np (pthread_self(), name.toRawUTF8());
+   #elif JUCE_LINUX
+    #if (__GLIBC__ * 1000 + __GLIBC_MINOR__) >= 2012
+     pthread_setname_np (pthread_self(), name.toRawUTF8());
+    #else
+     prctl (PR_SET_NAME, name.toRawUTF8(), 0, 0, 0);
+    #endif
    #endif
 }
 
