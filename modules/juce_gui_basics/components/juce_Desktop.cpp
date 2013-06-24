@@ -141,6 +141,18 @@ void Desktop::componentBroughtToFront (Component* const c)
 }
 
 //==============================================================================
+void Desktop::addPeer (ComponentPeer* peer)
+{
+    peers.add (peer);
+}
+
+void Desktop::removePeer (ComponentPeer* peer)
+{
+    peers.removeFirstMatchingValue (peer);
+    triggerFocusCallback();
+}
+
+//==============================================================================
 Point<int> Desktop::getMousePosition()
 {
     return getInstance().getMainMouseSource().getScreenPosition();
@@ -184,6 +196,23 @@ MouseInputSource* Desktop::getDraggingMouseSource (int index) const noexcept
     }
 
     return nullptr;
+}
+
+MouseInputSource* Desktop::getOrCreateMouseInputSource (int touchIndex)
+{
+    jassert (touchIndex >= 0 && touchIndex < 100); // sanity-check on number of fingers
+
+    for (;;)
+    {
+        if (MouseInputSource* mouse = getMouseSource (touchIndex))
+            return mouse;
+
+        if (! addMouseInputSource())
+        {
+            jassertfalse; // not enough mouse sources!
+            return nullptr;
+        }
+    }
 }
 
 //==============================================================================

@@ -1534,7 +1534,7 @@ private:
                 // if the component's not opaque, this won't draw properly unless the platform can support this
                 jassert (Desktop::canUseSemiTransparentWindows() || component.isOpaque());
 
-                updateCurrentModifiers();
+                ModifierKeys::updateCurrentModifiers();
 
                 {
                     ScopedPointer<LowLevelGraphicsContext> context (component.getLookAndFeel()

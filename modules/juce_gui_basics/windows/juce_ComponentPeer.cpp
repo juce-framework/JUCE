@@ -22,7 +22,6 @@
   ==============================================================================
 */
 
-static Array <ComponentPeer*> heavyweightPeers;
 static uint32 lastUniqueID = 1;
 
 //==============================================================================
@@ -35,31 +34,32 @@ ComponentPeer::ComponentPeer (Component& comp, const int flags)
       fakeMouseMessageSent (false),
       isWindowMinimised (false)
 {
-    heavyweightPeers.add (this);
+    Desktop::getInstance().addPeer (this);
 }
 
 ComponentPeer::~ComponentPeer()
 {
-    heavyweightPeers.removeFirstMatchingValue (this);
-    Desktop::getInstance().triggerFocusCallback();
+    Desktop::getInstance().removePeer (this);
 }
 
 //==============================================================================
 int ComponentPeer::getNumPeers() noexcept
 {
-    return heavyweightPeers.size();
+    return Desktop::getInstance().peers.size();
 }
 
 ComponentPeer* ComponentPeer::getPeer (const int index) noexcept
 {
-    return heavyweightPeers [index];
+    return Desktop::getInstance().peers [index];
 }
 
 ComponentPeer* ComponentPeer::getPeerFor (const Component* const component) noexcept
 {
-    for (int i = heavyweightPeers.size(); --i >= 0;)
+    const Array<ComponentPeer*>& peers = Desktop::getInstance().peers;
+
+    for (int i = peers.size(); --i >= 0;)
     {
-        ComponentPeer* const peer = heavyweightPeers.getUnchecked(i);
+        ComponentPeer* const peer = peers.getUnchecked(i);
 
         if (&(peer->getComponent()) == component)
             return peer;
@@ -70,52 +70,28 @@ ComponentPeer* ComponentPeer::getPeerFor (const Component* const component) noex
 
 bool ComponentPeer::isValidPeer (const ComponentPeer* const peer) noexcept
 {
-    return heavyweightPeers.contains (const_cast <ComponentPeer*> (peer));
-}
-
-void ComponentPeer::updateCurrentModifiers() noexcept
-{
-    ModifierKeys::updateCurrentModifiers();
+    return Desktop::getInstance().peers.contains (const_cast <ComponentPeer*> (peer));
 }
 
 //==============================================================================
-MouseInputSource* ComponentPeer::getOrCreateMouseInputSource (int touchIndex)
-{
-    jassert (touchIndex >= 0 && touchIndex < 100); // sanity-check on number of fingers
-
-    Desktop& desktop = Desktop::getInstance();
-
-    for (;;)
-    {
-        if (MouseInputSource* mouse = desktop.getMouseSource (touchIndex))
-            return mouse;
-
-        if (! desktop.addMouseInputSource())
-        {
-            jassertfalse; // not enough mouse sources!
-            return nullptr;
-        }
-    }
-}
-
 void ComponentPeer::handleMouseEvent (const int touchIndex, const Point<int> positionWithinPeer,
                                       const ModifierKeys newMods, const int64 time)
 {
-    if (MouseInputSource* mouse = getOrCreateMouseInputSource (touchIndex))
+    if (MouseInputSource* mouse = Desktop::getInstance().getOrCreateMouseInputSource (touchIndex))
         mouse->handleEvent (this, positionWithinPeer, time, newMods);
 }
 
 void ComponentPeer::handleMouseWheel (const int touchIndex, const Point<int> positionWithinPeer,
                                       const int64 time, const MouseWheelDetails& wheel)
 {
-    if (MouseInputSource* mouse = getOrCreateMouseInputSource (touchIndex))
+    if (MouseInputSource* mouse = Desktop::getInstance().getOrCreateMouseInputSource (touchIndex))
         mouse->handleWheel (this, positionWithinPeer, time, wheel);
 }
 
 void ComponentPeer::handleMagnifyGesture (const int touchIndex, const Point<int> positionWithinPeer,
                                           const int64 time, const float scaleFactor)
 {
-    if (MouseInputSource* mouse = getOrCreateMouseInputSource (touchIndex))
+    if (MouseInputSource* mouse = Desktop::getInstance().getOrCreateMouseInputSource (touchIndex))
         mouse->handleMagnifyGesture (this, positionWithinPeer, time, scaleFactor);
 }
 
@@ -170,7 +146,7 @@ Component* ComponentPeer::getTargetForKeyPress()
 
 bool ComponentPeer::handleKeyPress (const int keyCode, const juce_wchar textCharacter)
 {
-    updateCurrentModifiers();
+    ModifierKeys::updateCurrentModifiers();
     bool keyWasUsed = false;
 
     const KeyPress keyInfo (keyCode,
@@ -220,7 +196,7 @@ bool ComponentPeer::handleKeyPress (const int keyCode, const juce_wchar textChar
 
 bool ComponentPeer::handleKeyUpOrDown (const bool isKeyDown)
 {
-    updateCurrentModifiers();
+    ModifierKeys::updateCurrentModifiers();
     bool keyWasUsed = false;
 
     for (Component* target = getTargetForKeyPress(); target != nullptr; target = target->getParentComponent())
@@ -251,7 +227,7 @@ bool ComponentPeer::handleKeyUpOrDown (const bool isKeyDown)
 
 void ComponentPeer::handleModifierKeysChange()
 {
-    updateCurrentModifiers();
+    ModifierKeys::updateCurrentModifiers();
 
     Component* target = Desktop::getInstance().getMainMouseSource().getComponentUnderMouse();
 
@@ -282,7 +258,7 @@ void ComponentPeer::dismissPendingTextInput() {}
 //==============================================================================
 void ComponentPeer::handleBroughtToFront()
 {
-    updateCurrentModifiers();
+    ModifierKeys::updateCurrentModifiers();
     component.internalBroughtToFront();
 }
 
@@ -293,7 +269,7 @@ void ComponentPeer::setConstrainer (ComponentBoundsConstrainer* const newConstra
 
 void ComponentPeer::handleMovedOrResized()
 {
-    updateCurrentModifiers();
+    ModifierKeys::updateCurrentModifiers();
 
     const bool nowMinimised = isMinimised();
 
@@ -332,7 +308,7 @@ void ComponentPeer::handleMovedOrResized()
 
 void ComponentPeer::handleFocusGain()
 {
-    updateCurrentModifiers();
+    ModifierKeys::updateCurrentModifiers();
 
     if (component.isParentOf (lastFocusedComponent))
     {
@@ -351,7 +327,7 @@ void ComponentPeer::handleFocusGain()
 
 void ComponentPeer::handleFocusLoss()
 {
-    updateCurrentModifiers();
+    ModifierKeys::updateCurrentModifiers();
 
     if (component.hasKeyboardFocus (true))
     {
@@ -375,7 +351,7 @@ Component* ComponentPeer::getLastFocusedSubcomponent() const noexcept
 
 void ComponentPeer::handleScreenSizeChange()
 {
-    updateCurrentModifiers();
+    ModifierKeys::updateCurrentModifiers();
 
     component.parentSizeChanged();
     handleMovedOrResized();
@@ -458,7 +434,7 @@ namespace DragHelpers
 
 bool ComponentPeer::handleDragMove (const ComponentPeer::DragInfo& info)
 {
-    updateCurrentModifiers();
+    ModifierKeys::updateCurrentModifiers();
 
     Component* const compUnderMouse = component.getComponentAt (info.position);
 
@@ -556,7 +532,7 @@ bool ComponentPeer::handleDragDrop (const ComponentPeer::DragInfo& info)
 //==============================================================================
 void ComponentPeer::handleUserClosingWindow()
 {
-    updateCurrentModifiers();
+    ModifierKeys::updateCurrentModifiers();
     component.userTriedToCloseWindow();
 }
 

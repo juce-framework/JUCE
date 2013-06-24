@@ -365,8 +365,6 @@ protected:
     Rectangle<int> lastNonFullscreenBounds;
     ComponentBoundsConstrainer* constrainer;
 
-    static void updateCurrentModifiers() noexcept;
-
 private:
     //==============================================================================
     WeakReference<Component> lastFocusedComponent, dragAndDropTargetComponent;
@@ -374,7 +372,6 @@ private:
     const uint32 uniqueID;
     bool fakeMouseMessageSent, isWindowMinimised;
     Component* getTargetForKeyPress();
-    static MouseInputSource* getOrCreateMouseInputSource (int);
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ComponentPeer)
 };

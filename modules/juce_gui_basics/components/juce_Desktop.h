@@ -397,6 +397,10 @@ private:
     ListenerList <FocusChangeListener> focusListeners;
 
     Array <Component*> desktopComponents;
+    Array <ComponentPeer*> peers;
+
+    void addPeer (ComponentPeer*);
+    void removePeer (ComponentPeer*);
 
     Displays displays;
 
@@ -422,6 +426,7 @@ private:
     void timerCallback() override;
     void resetTimer();
     ListenerList <MouseListener>& getMouseListeners();
+    MouseInputSource* getOrCreateMouseInputSource (int touchIndex);
 
     void addDesktopComponent (Component*);
     void removeDesktopComponent (Component*);
