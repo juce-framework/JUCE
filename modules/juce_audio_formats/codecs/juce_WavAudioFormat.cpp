@@ -942,7 +942,7 @@ private:
         const size_t bytesPerFrame = numChannels * bitsPerSample / 8;
         uint64 audioDataSize = bytesPerFrame * lengthInSamples;
 
-        const bool isRF64 = (bytesWritten >= literal64bit (0x100000000));
+        const bool isRF64 = (bytesWritten >= 0x100000000LL);
         const bool isWaveFmtEx = isRF64 || (numChannels > 2);
 
         int64 riffChunkSize = (int64) (4 /* 'RIFF' */ + 8 + 40 /* WAVEFORMATEX */
