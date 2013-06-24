@@ -246,7 +246,7 @@
  #define JucePlugin_AUManufacturerCode     JucePlugin_ManufacturerCode
 #endif
 #ifndef  JucePlugin_CFBundleIdentifier
- #define JucePlugin_CFBundleIdentifier     com.rawmaterialsoftware.JuceDemoPlugin
+ #define JucePlugin_CFBundleIdentifier     com.juce.JuceDemoPlugin
 #endif
 #ifndef  JucePlugin_RTASCategory
  #define JucePlugin_RTASCategory           ePlugInCategory_None

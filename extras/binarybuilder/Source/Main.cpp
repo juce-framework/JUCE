@@ -71,7 +71,7 @@ static bool isHiddenFile (const File& f, const File& root)
 //==============================================================================
 int main (int argc, char* argv[])
 {
-    std::cout << "\n BinaryBuilder! Copyright 2007 by Julian Storer - www.rawmaterialsoftware.com\n\n";
+    std::cout << "\n BinaryBuilder! Copyright 2007 by Julian Storer - www.juce.com\n\n";
 
     if (argc < 4 || argc > 5)
     {

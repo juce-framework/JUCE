@@ -74,7 +74,7 @@ public:
 
         // Create an address box..
         addAndMakeVisible (&addressTextBox);
-        addressTextBox.setTextToShowWhenEmpty ("Enter a web address, e.g. http://www.rawmaterialsoftware.com", Colours::grey);
+        addressTextBox.setTextToShowWhenEmpty ("Enter a web address, e.g. http://www.juce.com", Colours::grey);
         addressTextBox.addListener (this);
 
         // create the actual browser component

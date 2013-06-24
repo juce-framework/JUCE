@@ -520,7 +520,7 @@ public:
         //==============================================================================
         HyperlinkButton* hyperlink
             = new HyperlinkButton ("this is a HyperlinkButton",
-                                    URL ("http://www.rawmaterialsoftware.com/juce"));
+                                    URL ("http://www.juce.com"));
 
         hyperlink->setBounds (10, 130, 200, 24);
         addAndMakeVisible (hyperlink);

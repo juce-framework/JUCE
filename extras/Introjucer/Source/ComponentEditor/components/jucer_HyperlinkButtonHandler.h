@@ -33,7 +33,7 @@ public:
 
     Component* createNewComponent (JucerDocument*)
     {
-        HyperlinkButton* hb = new HyperlinkButton ("new hyperlink", URL ("http://www.rawmaterialsoftware.com/juce"));
+        HyperlinkButton* hb = new HyperlinkButton ("new hyperlink", URL ("http://www.juce.com"));
 
         setNeedsButtonListener (hb, false);
         return hb;
