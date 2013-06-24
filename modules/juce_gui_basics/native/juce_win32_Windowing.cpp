@@ -153,13 +153,18 @@ static void setDPIAwareness()
     }
 }
 
-inline float getDisplayScale()
+inline double getDPI()
 {
     HDC dc = GetDC (0);
-    const float scale = (GetDeviceCaps (dc, LOGPIXELSX)
-                         + GetDeviceCaps (dc, LOGPIXELSY)) / (2.0f * 96.0f);
+    const double dpi = (GetDeviceCaps (dc, LOGPIXELSX)
+                       + GetDeviceCaps (dc, LOGPIXELSY)) / 2.0;
     ReleaseDC (0, dc);
-    return scale;
+    return dpi;
+}
+
+inline double getDisplayScale()
+{
+    return getDPI() / 96.0;
 }
 
 //==============================================================================
@@ -3182,12 +3187,15 @@ void Desktop::Displays::findDisplays()
     RECT workArea;
     SystemParametersInfo (SPI_GETWORKAREA, 0, &workArea, 0);
 
+    const double dpi = getDPI(); // (this has only one value for all monitors)
+
     for (int i = 0; i < monitors.size(); ++i)
     {
         Display d;
         d.userArea = d.totalArea = monitors.getReference(i);
         d.isMain = (i == 0);
         d.scale = 1.0;
+        d.dpi = dpi;
 
         if (i == 0)
             d.userArea = d.userArea.getIntersection (rectangleFromRECT (workArea));

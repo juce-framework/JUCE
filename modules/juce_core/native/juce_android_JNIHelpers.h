@@ -242,7 +242,7 @@ public:
     //==============================================================================
     GlobalRef activity;
     String appFile, appDataDir;
-    int screenWidth, screenHeight;
+    int screenWidth, screenHeight, dpi;
 };
 
 extern AndroidSystem android;

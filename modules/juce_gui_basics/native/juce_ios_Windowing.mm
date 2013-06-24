@@ -318,6 +318,8 @@ void Desktop::Displays::findDisplays()
         else
             d.scale = 1.0;
 
+        d.dpi = 160 * d.scale;
+
         displays.add (d);
     }
 }

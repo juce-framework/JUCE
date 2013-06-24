@@ -2968,6 +2968,13 @@ ComponentPeer* Component::createNewPeer (int styleFlags, void* nativeWindowToAtt
 }
 
 //==============================================================================
+static double getDisplayDPI (int index)
+{
+    double dpiX = (DisplayWidth  (display, index) * 25.4) / DisplayWidthMM  (display, index);
+    double dpiY = (DisplayHeight (display, index) * 25.4) / DisplayHeightMM (display, index);
+    return (dpiX + dpiY) / 2.0;
+}
+
 void Desktop::Displays::findDisplays()
 {
     if (display == 0)
@@ -3021,6 +3028,7 @@ void Desktop::Displays::findDisplays()
                                                                        screens[j].height);
                             d.isMain = (index == 0);
                             d.scale = 1.0;
+                            d.dpi = getDisplayDPI (index);
 
                             displays.add (d);
                         }
@@ -3054,6 +3062,7 @@ void Desktop::Displays::findDisplays()
                                                                position[2], position[3]);
                     d.isMain = (displays.size() == 0);
                     d.scale = 1.0;
+                    d.dpi = getDisplayDPI (i);
 
                     displays.add (d);
                 }
@@ -3063,10 +3072,11 @@ void Desktop::Displays::findDisplays()
         if (displays.size() == 0)
         {
             Display d;
-            d.userArea = d.totalArea = Rectangle<int> (DisplayWidth (display, DefaultScreen (display)),
+            d.userArea = d.totalArea = Rectangle<int> (DisplayWidth  (display, DefaultScreen (display)),
                                                        DisplayHeight (display, DefaultScreen (display)));
             d.isMain = true;
             d.scale = 1.0;
+            d.dpi = getDisplayDPI (0);
 
             displays.add (d);
         }

@@ -328,9 +328,17 @@ public:
             Rectangle<int> totalArea;
 
             /** This is the scale-factor of this display.
-                For higher-resolution displays, this may be a value greater than 1.0
+                If you create a component with size 1x1, this scale factor indicates the actual
+                size of the component in terms of physical pixels.
+                For higher-resolution displays, it may be a value greater than 1.0
             */
             double scale;
+
+            /** The DPI of the display.
+                This is the number of physical pixels per inch. To get the number of logical
+                pixels per inch, divide this by the Display::scale value.
+            */
+            double dpi;
 
             /** This will be true if this is the user's main screen. */
             bool isMain;

@@ -125,7 +125,7 @@ extern "C" jint JNI_OnLoad (JavaVM*, void*)
 }
 
 //==============================================================================
-AndroidSystem::AndroidSystem() : screenWidth (0), screenHeight (0)
+AndroidSystem::AndroidSystem() : screenWidth (0), screenHeight (0), dpi (160)
 {
 }
 
@@ -133,6 +133,7 @@ void AndroidSystem::initialise (JNIEnv* env, jobject activity_,
                                 jstring appFile_, jstring appDataDir_)
 {
     screenWidth = screenHeight = 0;
+    dpi = 160;
     JNIClassBase::initialiseAllClasses (env);
 
     threadLocalJNIEnvHolder.initialise (env);

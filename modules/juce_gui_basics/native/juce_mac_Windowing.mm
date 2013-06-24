@@ -373,6 +373,9 @@ void Desktop::Displays::findDisplays()
            #endif
                 d.scale = 1.0;
 
+            NSSize dpi = [[[s deviceDescription] objectForKey: NSDeviceResolution] sizeValue];
+            d.dpi = (dpi.width + dpi.height) / 2.0;
+
             displays.add (d);
         }
     }

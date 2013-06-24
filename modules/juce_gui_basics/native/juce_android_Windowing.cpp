@@ -697,11 +697,13 @@ void Desktop::Displays::findDisplays()
 }
 
 JUCE_JNI_CALLBACK (JUCE_ANDROID_ACTIVITY_CLASSNAME, setScreenSize, void, (JNIEnv* env, jobject activity,
-                                                                          jint screenWidth, jint screenHeight))
+                                                                          jint screenWidth, jint screenHeight,
+                                                                          jint dpi))
 {
     const bool isSystemInitialised = android.screenWidth != 0;
     android.screenWidth = screenWidth;
     android.screenHeight = screenHeight;
+    android.dpi = dpi;
 
     const_cast <Desktop::Displays&> (Desktop::getInstance().getDisplays()).refresh();
 }
