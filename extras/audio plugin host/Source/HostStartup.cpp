@@ -83,7 +83,7 @@ public:
     bool moreThanOneInstanceAllowed()       { return true; }
 
     ApplicationCommandManager commandManager;
-    ScopedPointer<ApplicationProperties> appProperties = nullptr;
+    ScopedPointer<ApplicationProperties> appProperties;
 
 private:
     ScopedPointer<MainHostWindow> mainWindow;
