@@ -471,7 +471,7 @@ static int fit_line(lsfit_acc *a,int fits,int *y0,int *y1,
     xb+=   x0;
     yb+=  *y0;
     x2b+=  x0 *  x0;
-    y2b+= *y0 * *y0;
+    //y2b+= *y0 * *y0;
     xyb+= *y0 *  x0;
     bn++;
   }
@@ -480,7 +480,7 @@ static int fit_line(lsfit_acc *a,int fits,int *y0,int *y1,
     xb+=   x1;
     yb+=  *y1;
     x2b+=  x1 *  x1;
-    y2b+= *y1 * *y1;
+    //y2b+= *y1 * *y1;
     xyb+= *y1 *  x1;
     bn++;
   }

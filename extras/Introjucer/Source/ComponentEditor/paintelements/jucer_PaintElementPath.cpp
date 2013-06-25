@@ -977,7 +977,10 @@ bool PaintElementPath::getPoint (int index, int pointNumber, double& x, double& 
     const PathPoint* const p = points [index];
 
     if (p == nullptr)
+    {
+        x = y = 0;
         return false;
+    }
 
     jassert (pointNumber < 3 || p->type == Path::Iterator::cubicTo);
     jassert (pointNumber < 2 || p->type == Path::Iterator::cubicTo || p->type == Path::Iterator::quadraticTo);

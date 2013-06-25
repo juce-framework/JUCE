@@ -161,6 +161,7 @@ int ResourceEditorPanel::getColumnAutoSizeWidth (int columnId)
     for (int i = document.getResources().size(); --i >= 0;)
     {
         const BinaryResources::BinaryResource* const r = document.getResources() [i];
+        jassert (r != nullptr);
         String text;
 
         if (columnId == 1)

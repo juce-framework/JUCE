@@ -218,6 +218,8 @@ void EditingPanelBase::setZoom (double newScale, int anchorX, int anchorY)
     magnifier->setScaleFactor (newScale);
 
     resized();
+
+    jassert (viewport != nullptr);
     anchor = viewport->getLocalPoint (editor, anchor);
 
     viewport->setViewPosition (jlimit (0, jmax (0, viewport->getViewedComponent()->getWidth() - viewport->getViewWidth()),

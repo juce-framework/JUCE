@@ -235,8 +235,14 @@ public:
     ElementType operator[] (const int index) const
     {
         const ScopedLockType lock (getLock());
-        return isPositiveAndBelow (index, numUsed) ? data.elements [index]
-                                                   : ElementType();
+
+        if (isPositiveAndBelow (index, numUsed))
+        {
+            jassert (data.elements != nullptr);
+            return data.elements [index];
+        }
+
+        return ElementType();
     }
 
     /** Returns one of the elements in the array, without checking the index passed in.
@@ -251,7 +257,7 @@ public:
     inline ElementType getUnchecked (const int index) const
     {
         const ScopedLockType lock (getLock());
-        jassert (isPositiveAndBelow (index, numUsed));
+        jassert (isPositiveAndBelow (index, numUsed) && data.elements != nullptr);
         return data.elements [index];
     }
 
@@ -267,7 +273,7 @@ public:
     inline ElementType& getReference (const int index) const noexcept
     {
         const ScopedLockType lock (getLock());
-        jassert (isPositiveAndBelow (index, numUsed));
+        jassert (isPositiveAndBelow (index, numUsed) && data.elements != nullptr);
         return data.elements [index];
     }
 
@@ -388,6 +394,7 @@ public:
     {
         const ScopedLockType lock (getLock());
         data.ensureAllocatedSize (numUsed + 1);
+        jassert (data.elements != nullptr);
 
         if (isPositiveAndBelow (indexToInsertAt, numUsed))
         {

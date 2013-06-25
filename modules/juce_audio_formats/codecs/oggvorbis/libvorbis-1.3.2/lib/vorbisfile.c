@@ -853,7 +853,7 @@ static int _fetch_and_process_packet(OggVorbis_File *vf,
           if(ret)return(ret);
           vf->current_serialno=vf->os.serialno;
           vf->current_link++;
-          link=0;
+          //link=0;
         }
       }
     }
@@ -1561,6 +1561,7 @@ int ov_pcm_seek_page(OggVorbis_File *vf,ogg_int64_t pos){
           break;
         }else
           result=ogg_stream_packetout(&vf->os,NULL);
+          (void) result;
       }
     }
   }
@@ -2158,6 +2159,8 @@ static void _ov_getlap(OggVorbis_File *vf,vorbis_info *vi,vorbis_dsp_state *vd,
         memcpy(lappcm[i]+lapcount,pcm[i],sizeof(**pcm)*samples);
       lapcount+=samples;
     }
+
+    (void) lapcount;
   }
 }
 

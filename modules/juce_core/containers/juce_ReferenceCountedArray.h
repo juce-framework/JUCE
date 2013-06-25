@@ -297,6 +297,7 @@ public:
     {
         const ScopedLockType lock (getLock());
         data.ensureAllocatedSize (numUsed + 1);
+        jassert (data.elements != nullptr);
         data.elements [numUsed++] = newObject;
 
         if (newObject != nullptr)
@@ -327,6 +328,7 @@ public:
                 indexToInsertAt = numUsed;
 
             data.ensureAllocatedSize (numUsed + 1);
+            jassert (data.elements != nullptr);
 
             ObjectClass** const e = data.elements + indexToInsertAt;
             const int numToMove = numUsed - indexToInsertAt;
@@ -393,6 +395,7 @@ public:
             else
             {
                 data.ensureAllocatedSize (numUsed + 1);
+                jassert (data.elements != nullptr);
                 data.elements [numUsed++] = newObject;
             }
         }
