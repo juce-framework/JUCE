@@ -98,6 +98,8 @@ void ComponentPeer::handleMagnifyGesture (const int touchIndex, const Point<int>
 //==============================================================================
 void ComponentPeer::handlePaint (LowLevelGraphicsContext& contextToPaintTo)
 {
+    ModifierKeys::updateCurrentModifiers();
+
     Graphics g (&contextToPaintTo);
 
    #if JUCE_ENABLE_REPAINT_DEBUGGING
