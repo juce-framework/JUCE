@@ -347,7 +347,7 @@ void Desktop::sendMouseMove()
 
 
 //==============================================================================
-Desktop::Displays::Displays()   { refresh(); }
+Desktop::Displays::Displays()   { init(); }
 Desktop::Displays::~Displays()  {}
 
 const Desktop::Displays::Display& Desktop::Displays::getMainDisplay() const noexcept
@@ -416,13 +416,18 @@ bool operator!= (const Desktop::Displays::Display& d1, const Desktop::Displays::
     return ! (d1 == d2);
 }
 
+void Desktop::Displays::init()
+{
+    findDisplays();
+    jassert (displays.size() > 0);
+}
+
 void Desktop::Displays::refresh()
 {
     Array<Display> oldDisplays;
     oldDisplays.swapWithArray (displays);
 
-    findDisplays();
-    jassert (displays.size() > 0);
+    init();
 
     if (oldDisplays != displays)
     {

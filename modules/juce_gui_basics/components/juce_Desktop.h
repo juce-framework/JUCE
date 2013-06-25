@@ -370,6 +370,8 @@ public:
         friend class Desktop;
         Displays();
         ~Displays();
+
+        void init();
         void findDisplays();
     };
 
