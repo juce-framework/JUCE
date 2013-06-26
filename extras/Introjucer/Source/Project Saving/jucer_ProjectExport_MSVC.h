@@ -197,8 +197,8 @@ protected:
             if (! isDebug())
                 props.add (new BooleanPropertyComponent (shouldGenerateDebugSymbolsValue(), "Debug Symbols", "Force generation of debug symbols"));
 
-            props.add (new TextPropertyComponent (getPrebuildCommand(),  "Pre-build Command",  2048, false));
-            props.add (new TextPropertyComponent (getPostbuildCommand(), "Post-build Command", 2048, false));
+            props.add (new TextPropertyComponent (getPrebuildCommand(),  "Pre-build Command",  2048, true));
+            props.add (new TextPropertyComponent (getPostbuildCommand(), "Post-build Command", 2048, true));
             props.add (new BooleanPropertyComponent (shouldGenerateManifestValue(), "Manifest", "Generate Manifest"));
 
             {
