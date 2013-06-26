@@ -77,10 +77,13 @@ public:
         re-tested if it's not already in the list, or if the file's modification
         time has changed since the list was created. If dontRescanIfAlreadyInList is
         false, the file will always be reloaded and tested.
+        The nameOfPluginBeingScanned will be updated to the name of the plugin being
+        scanned before the scan starts.
 
         Returns false when there are no more files to try.
     */
-    bool scanNextFile (bool dontRescanIfAlreadyInList);
+    bool scanNextFile (bool dontRescanIfAlreadyInList,
+                       String& nameOfPluginBeingScanned);
 
     /** Skips over the next file without scanning it.
         Returns false when there are no more files to try.

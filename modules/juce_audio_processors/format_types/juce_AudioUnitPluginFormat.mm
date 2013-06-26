@@ -115,8 +115,6 @@ namespace AudioUnitFormatHelpers
         {
             name = String::fromCFString (cfName);
             CFRelease (cfName);
-
-            DBG ("AU name: " + name);
         }
 
         if (name.containsChar (':'))
