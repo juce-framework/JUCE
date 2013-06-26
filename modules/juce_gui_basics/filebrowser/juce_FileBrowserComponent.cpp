@@ -497,7 +497,7 @@ void FileBrowserComponent::comboBoxChanged (ComboBox*)
     }
 }
 
-void FileBrowserComponent::getRoots (StringArray& rootNames, StringArray& rootPaths)
+void FileBrowserComponent::getDefaultRoots (StringArray& rootNames, StringArray& rootPaths)
 {
    #if JUCE_WINDOWS
     Array<File> roots;
@@ -570,4 +570,9 @@ void FileBrowserComponent::getRoots (StringArray& rootNames, StringArray& rootPa
     rootPaths.add (File::getSpecialLocation (File::userDesktopDirectory).getFullPathName());
     rootNames.add ("Desktop");
    #endif
+}
+
+void FileBrowserComponent::getRoots (StringArray& rootNames, StringArray& rootPaths)
+{
+    getDefaultRoots (rootNames, rootPaths);
 }

@@ -176,6 +176,12 @@ public:
     */
     void removeListener (FileBrowserListener* listener);
 
+    /** Returns a platform-specific list of names and paths for some suggested places the user
+        might want to use as root folders.
+        The list returned contains empty strings to indicate section breaks.
+        @see getRoots()
+    */
+    static void getDefaultRoots (StringArray& rootNames, StringArray& rootPaths);
 
     //==============================================================================
     /** @internal */
@@ -215,7 +221,9 @@ public:
 
 protected:
     /** Returns a list of names and paths for the default places the user might want to look.
-        Use an empty string to indicate a section break.
+
+        By default this just calls getDefaultRoots(), but you may want to override it to
+        return a custom list.
     */
     virtual void getRoots (StringArray& rootNames, StringArray& rootPaths);
 
