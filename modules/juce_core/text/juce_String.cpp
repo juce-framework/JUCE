@@ -136,7 +136,8 @@ public:
         if (start.getAddress() == nullptr || start.isEmpty())
             return getEmpty();
 
-        const size_t numBytes = (size_t) (end.getAddress() - start.getAddress());
+        const size_t numBytes = (size_t) (reinterpret_cast<const char*> (end.getAddress())
+                                           - reinterpret_cast<const char*> (start.getAddress()));
         const CharPointerType dest (createUninitialisedBytes (numBytes + sizeof (CharType)));
         memcpy (dest.getAddress(), start, numBytes);
         dest.getAddress()[numBytes / sizeof (CharType)] = 0;
