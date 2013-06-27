@@ -137,9 +137,9 @@ public:
             return getEmpty();
 
         const size_t numBytes = (size_t) (end.getAddress() - start.getAddress());
-        const CharPointerType dest (createUninitialisedBytes (numBytes + 1));
+        const CharPointerType dest (createUninitialisedBytes (numBytes + sizeof (CharType)));
         memcpy (dest.getAddress(), start, numBytes);
-        dest.getAddress()[numBytes] = 0;
+        dest.getAddress()[numBytes / sizeof (CharType)] = 0;
         return dest;
     }
 
