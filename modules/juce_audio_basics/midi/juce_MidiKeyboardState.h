@@ -180,13 +180,11 @@ public:
 
     //==============================================================================
     /** Registers a listener for callbacks when keys go up or down.
-
         @see removeListener
     */
     void addListener (MidiKeyboardStateListener* listener);
 
     /** Deregisters a listener.
-
         @see addListener
     */
     void removeListener (MidiKeyboardStateListener* listener);
