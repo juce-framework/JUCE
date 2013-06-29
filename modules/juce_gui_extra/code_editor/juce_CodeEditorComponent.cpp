@@ -106,7 +106,7 @@ public:
                 break;
 
             const SyntaxToken& token = tokens.getReference(i);
-            as.append (token.text, fontToUse, owner.getColourForTokenType (token.tokenType));
+            as.append (token.text.removeCharacters ("\r\n"), fontToUse, owner.getColourForTokenType (token.tokenType));
             column += token.length;
         }
 

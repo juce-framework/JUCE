@@ -69,7 +69,6 @@ MainWindow::MainWindow()
     // don't want the window to take focus when the title-bar is clicked..
     setWantsKeyboardFocus (false);
 
-    //getPeer()->setCurrentRenderingEngine (0);
     getLookAndFeel().setColour (ColourSelector::backgroundColourId, Colours::transparentBlack);
 
     setResizeLimits (600, 500, 32000, 32000);
