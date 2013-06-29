@@ -506,7 +506,7 @@ namespace TextLayoutHelpers
             {
                 const int stringLength = text.getText().length();
                 int rangeStart = 0;
-                FontAndColour lastFontAndColour (nullptr);
+                FontAndColour lastFontAndColour (&defaultFont);
 
                 // Iterate through every character in the string
                 for (int i = 0; i < stringLength; ++i)
