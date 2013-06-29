@@ -307,7 +307,7 @@ namespace TextLayoutHelpers
 
                 Array <int> newGlyphs;
                 Array <float> xOffsets;
-                t.font.getGlyphPositions (t.text.trimEnd(), newGlyphs, xOffsets);
+                t.font.getGlyphPositions (getTrimmedEndIfNotAllWhitespace (t.text), newGlyphs, xOffsets);
 
                 if (currentRun == nullptr)  currentRun  = new TextLayout::Run();
                 if (currentLine == nullptr) currentLine = new TextLayout::Line();
@@ -541,6 +541,15 @@ namespace TextLayoutHelpers
                 const RunAttribute& r = runAttributes.getReference(i);
                 appendText (text, r.range, *(r.fontAndColour.font), r.fontAndColour.colour);
             }
+        }
+
+        static String getTrimmedEndIfNotAllWhitespace (const String& s)
+        {
+            String trimmed (s.trimEnd());
+            if (trimmed.isEmpty() && ! s.isEmpty())
+                trimmed = s;
+
+            return trimmed;
         }
 
         OwnedArray<Token> tokens;

@@ -619,6 +619,7 @@ bool CoreGraphicsContext::drawTextLayout (const AttributedString& text, const Re
     CoreTextTypeLayout::drawToCGContext (text, area, context, flipHeight);
     return true;
    #else
+    (void) text; (void) area;
     return false;
    #endif
 }
