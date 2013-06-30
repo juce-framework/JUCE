@@ -50,7 +50,7 @@ public:
                             method is called. If manualReset is true, then once the event is signalled,
                             the only way to reset it will be by calling the reset() method.
     */
-    WaitableEvent (bool manualReset = false) noexcept;
+    explicit WaitableEvent (bool manualReset = false) noexcept;
 
     /** Destructor.
 

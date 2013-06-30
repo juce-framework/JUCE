@@ -436,10 +436,7 @@ struct VBRTagData
         vbrScale = -1;
 
         if (flags & 8)
-        {
             vbrScale = ByteOrder::bigEndianInt (data);
-            data += 4;
-        }
 
         headersize = ((type + 1) * 72000 * bitrate) / sampleRate;
         return true;

@@ -952,8 +952,6 @@ private:
     bool setFileTimesInternal (int64 m, int64 a, int64 c) const;
     void getFileTimesInternal (int64& m, int64& a, int64& c) const;
     bool setFileReadOnlyInternal (bool) const;
-
-    JUCE_LEAK_DETECTOR (File)
 };
 
 #endif   // __JUCE_FILE_JUCEHEADER__

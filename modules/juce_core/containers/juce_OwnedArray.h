@@ -249,12 +249,13 @@ public:
         @param newObject       the new object to add to the array
         @see set, insert, addIfNotAlreadyThere, addSorted
     */
-    void add (const ObjectClass* const newObject) noexcept
+    ObjectClass* add (ObjectClass* const newObject) noexcept
     {
         const ScopedLockType lock (getLock());
         data.ensureAllocatedSize (numUsed + 1);
         jassert (data.elements != nullptr);
         data.elements [numUsed++] = const_cast <ObjectClass*> (newObject);
+        return const_cast <ObjectClass*> (newObject);
     }
 
     /** Inserts a new object into the array at the given index.
@@ -275,7 +276,7 @@ public:
         @see add, addSorted, addIfNotAlreadyThere, set
     */
     void insert (int indexToInsertAt,
-                 const ObjectClass* const newObject) noexcept
+                 ObjectClass* const newObject) noexcept
     {
         if (indexToInsertAt >= 0)
         {

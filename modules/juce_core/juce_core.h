@@ -101,7 +101,7 @@
  #define JUCE_DONT_AUTOLINK_TO_WIN32_LIBRARIES 0
 #endif
 
-/*  Config: JUCE_INCLUDE_ZLIB_CODE
+/** Config: JUCE_INCLUDE_ZLIB_CODE
     This can be used to disable Juce's embedded 3rd-party zlib code.
     You might need to tweak this if you're linking to an external zlib library in your app,
     but for normal apps, this option should be left alone.
