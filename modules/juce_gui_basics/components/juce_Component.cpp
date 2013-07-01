@@ -1167,7 +1167,7 @@ void Component::setBoundsInset (const BorderSize<int>& borders)
 }
 
 void Component::setBoundsToFit (int x, int y, int width, int height,
-                                const Justification& justification,
+                                Justification justification,
                                 const bool onlyReduceInSize)
 {
     // it's no good calling this method unless both the component and

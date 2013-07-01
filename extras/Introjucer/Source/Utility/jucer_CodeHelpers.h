@@ -42,7 +42,7 @@ namespace CodeHelpers
     String boolLiteral (bool value);
 
     String colourToCode (Colour col);
-    String justificationToCode (const Justification&);
+    String justificationToCode (Justification);
 
     String alignFunctionCallParams (const String& call, const StringArray& parameters, int maxLineLength);
 

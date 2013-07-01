@@ -144,7 +144,7 @@ public:
     */
     void drawSingleLineText (const String& text,
                              int startX, int baselineY,
-                             const Justification& justification = Justification::left) const;
+                             Justification justification = Justification::left) const;
 
     /** Draws text across multiple lines.
 
@@ -169,7 +169,7 @@ public:
     */
     void drawText (const String& text,
                    int x, int y, int width, int height,
-                   const Justification& justificationType,
+                   Justification justificationType,
                    bool useEllipsesIfTooBig) const;
 
     /** Draws a line of text within a specified rectangle.
@@ -183,7 +183,7 @@ public:
     */
     void drawText (const String& text,
                    const Rectangle<int>& area,
-                   const Justification& justificationType,
+                   Justification justificationType,
                    bool useEllipsesIfTooBig) const;
 
     /** Tries to draw a text string inside a given space.
@@ -207,7 +207,7 @@ public:
     */
     void drawFittedText (const String& text,
                          int x, int y, int width, int height,
-                         const Justification& justificationFlags,
+                         Justification justificationFlags,
                          int maximumNumberOfLines,
                          float minimumHorizontalScale = 0.7f) const;
 
@@ -232,7 +232,7 @@ public:
     */
     void drawFittedText (const String& text,
                          const Rectangle<int>& area,
-                         const Justification& justificationFlags,
+                         Justification justificationFlags,
                          int maximumNumberOfLines,
                          float minimumHorizontalScale = 0.7f) const;
 

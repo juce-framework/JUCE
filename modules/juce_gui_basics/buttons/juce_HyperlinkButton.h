@@ -63,7 +63,7 @@ public:
     */
     void setFont (const Font& newFont,
                   bool resizeToMatchComponentHeight,
-                  const Justification& justificationType = Justification::horizontallyCentred);
+                  Justification justificationType = Justification::horizontallyCentred);
 
     //==============================================================================
     /** A set of colour IDs to use to change the colour of various aspects of the link.

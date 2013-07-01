@@ -77,7 +77,7 @@ bool ComboBox::isTextEditable() const noexcept
     return label->isEditable();
 }
 
-void ComboBox::setJustificationType (const Justification& justification)
+void ComboBox::setJustificationType (Justification justification)
 {
     label->setJustificationType (justification);
 }

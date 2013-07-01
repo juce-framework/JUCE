@@ -71,10 +71,10 @@ public:
     const Font& getFont() const noexcept                                { return font; }
 
     /** Changes the justification of the text within the bounding box. */
-    void setJustification (const Justification& newJustification);
+    void setJustification (Justification newJustification);
 
     /** Returns the current justification. */
-    const Justification& getJustification() const noexcept              { return justification; }
+    Justification getJustification() const noexcept                     { return justification; }
 
     /** Returns the parallelogram that defines the text bounding box. */
     const RelativeParallelogram& getBoundingBox() const noexcept        { return bounds; }
@@ -117,7 +117,7 @@ public:
         void setColour (Colour newColour, UndoManager* undoManager);
 
         Justification getJustification() const;
-        void setJustification (const Justification& newJustification, UndoManager* undoManager);
+        void setJustification (Justification newJustification, UndoManager* undoManager);
 
         Font getFont() const;
         void setFont (const Font& newFont, UndoManager* undoManager);

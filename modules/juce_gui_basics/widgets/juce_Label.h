@@ -114,7 +114,7 @@ public:
 
         (The default is Justification::centredLeft)
     */
-    void setJustificationType (const Justification& justification);
+    void setJustificationType (Justification justification);
 
     /** Returns the type of justification, as set in setJustificationType(). */
     Justification getJustificationType() const noexcept                         { return justification; }

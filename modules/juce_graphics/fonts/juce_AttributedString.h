@@ -102,7 +102,7 @@ public:
     /** Sets the justification that should be used for laying-out the text.
         This may include both vertical and horizontal flags.
     */
-    void setJustification (const Justification& newJustification) noexcept;
+    void setJustification (Justification newJustification) noexcept;
 
     //==============================================================================
     /** Types of word-wrap behaviour.

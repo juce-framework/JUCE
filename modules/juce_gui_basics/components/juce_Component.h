@@ -565,7 +565,7 @@ public:
         @see setBounds
     */
     void setBoundsToFit (int x, int y, int width, int height,
-                         const Justification& justification,
+                         Justification justification,
                          bool onlyReduceInSize);
 
     /** Changes the position of the component's centre.

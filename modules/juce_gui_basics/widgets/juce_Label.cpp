@@ -115,7 +115,7 @@ void Label::setEditable (const bool editOnSingleClick,
     setFocusContainer (editOnSingleClick || editOnDoubleClick);
 }
 
-void Label::setJustificationType (const Justification& newJustification)
+void Label::setJustificationType (Justification newJustification)
 {
     if (justification != newJustification)
     {

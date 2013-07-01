@@ -308,7 +308,7 @@ namespace CodeHelpers
         return "Colour (0x" + hexString8Digits ((int) col.getARGB()) + ')';
     }
 
-    String justificationToCode (const Justification& justification)
+    String justificationToCode (Justification justification)
     {
         switch (justification.getFlags())
         {

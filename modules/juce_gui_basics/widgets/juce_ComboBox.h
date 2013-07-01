@@ -82,7 +82,7 @@ public:
         The default is Justification::centredLeft. The text is displayed using a
         Label component inside the ComboBox.
     */
-    void setJustificationType (const Justification& justification);
+    void setJustificationType (Justification justification);
 
     /** Returns the current justification for the text box.
         @see setJustificationType
