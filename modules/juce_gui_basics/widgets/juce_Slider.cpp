@@ -1146,7 +1146,7 @@ public:
 
         const int indent = lf.getSliderThumbRadius (owner);
 
-        if (style == LinearBar || style == LinearBarVertical)
+        if (style == LinearBar)
         {
             const int barIndent = 1;
             sliderRegionStart = barIndent;
@@ -1154,6 +1154,15 @@ public:
 
             sliderRect.setBounds (sliderRegionStart, barIndent,
                                   sliderRegionSize, localBounds.getHeight() - barIndent * 2);
+        }
+        else if (style == LinearBarVertical)
+        {
+            const int barIndent = 1;
+            sliderRegionStart = barIndent;
+            sliderRegionSize = localBounds.getHeight() - barIndent * 2;
+
+            sliderRect.setBounds (barIndent, sliderRegionStart,
+                                  localBounds.getWidth() - barIndent * 2, sliderRegionSize);
         }
         else if (isHorizontal())
         {

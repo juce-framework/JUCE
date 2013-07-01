@@ -1466,7 +1466,13 @@ void LookAndFeel::drawLinearSlider (Graphics& g,
                                                                  isMouseOver || slider.isMouseButtonDown()));
 
         drawShinyButtonShape (g,
-                              (float) x, (float) y, sliderPos - (float) x, (float) height, 0.0f,
+                              (float) x,
+                              style == Slider::LinearBarVertical ? sliderPos
+                                                                 : (float) y,
+                              style == Slider::LinearBarVertical ? (float) width
+                                                                 : (sliderPos - x),
+                              style == Slider::LinearBarVertical ? (height - sliderPos)
+                                                                 : (float) height, 0.0f,
                               baseColour,
                               slider.isEnabled() ? 0.9f : 0.3f,
                               true, true, true, true);
