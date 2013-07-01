@@ -76,6 +76,8 @@ void ShapeButton::setShape (const Path& newShape,
         setSize (1 + (int) (newBounds.getWidth() + outlineWidth),
                  1 + (int) (newBounds.getHeight() + outlineWidth));
     }
+
+    repaint();
 }
 
 void ShapeButton::paintButton (Graphics& g, bool isMouseOverButton, bool isButtonDown)
