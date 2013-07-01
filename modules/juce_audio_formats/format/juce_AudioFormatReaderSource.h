@@ -93,12 +93,8 @@ private:
     int64 volatile nextPlayPos;
     bool volatile looping;
 
-    void readBufferSection (int start, int length, AudioSampleBuffer& buffer, int startSample);
-
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioFormatReaderSource)
 };
-
-
 
 
 #endif   // __JUCE_AUDIOFORMATREADERSOURCE_JUCEHEADER__
