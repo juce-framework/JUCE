@@ -776,12 +776,13 @@ public:
 
         if (oldBufferSize != bufferSize || oldSampleRate != sampleRate)
         {
+            AudioIODeviceCallback* const oldCallback = callback;
             callbacksAllowed = false;
             stop (false);
             updateDetailsFromDevice();
             callbacksAllowed = true;
 
-            owner.restart();
+            owner.restart (oldCallback);
         }
     }
 
@@ -1013,9 +1014,8 @@ public:
         internal->stop (false);
     }
 
-    void restart()
+    void restart (AudioIODeviceCallback* const oldCallback)
     {
-        AudioIODeviceCallback* oldCallback = internal->callback;
         stop();
 
         if (oldCallback != nullptr)
