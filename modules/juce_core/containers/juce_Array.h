@@ -728,6 +728,7 @@ public:
 
         if (isPositiveAndBelow (indexToRemove, numUsed))
         {
+            jassert (data.elements != nullptr);
             ElementType removed (data.elements[indexToRemove]);
             removeInternal (indexToRemove);
             return removed;
