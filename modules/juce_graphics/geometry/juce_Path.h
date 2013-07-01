@@ -612,7 +612,25 @@ public:
     */
     AffineTransform getTransformToScaleToFit (float x, float y, float width, float height,
                                               bool preserveProportions,
-                                              const Justification& justificationType = Justification::centred) const;
+                                              Justification justificationType = Justification::centred) const;
+
+    /** Returns a transform that can be used to rescale the path to fit into a given space.
+
+        @param area                 the rectangle to fit the path inside
+        @param preserveProportions  if true, it will fit the path into the space without altering its
+                                    horizontal/vertical scale ratio; if false, it will distort the
+                                    path to fill the specified ratio both horizontally and vertically
+        @param justificationType    if the proportions are preseved, the resultant path may be smaller
+                                    than the available rectangle, so this describes how it should be
+                                    positioned within the space.
+        @returns                    an appropriate transformation
+
+        @see applyTransform, scaleToFit
+
+    */
+    AffineTransform getTransformToScaleToFit (const Rectangle<float>& area,
+                                              bool preserveProportions,
+                                              Justification justificationType = Justification::centred) const;
 
     /** Creates a version of this path where all sharp corners have been replaced by curves.
 

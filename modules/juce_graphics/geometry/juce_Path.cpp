@@ -938,10 +938,17 @@ void Path::applyTransform (const AffineTransform& transform) noexcept
 
 
 //==============================================================================
+AffineTransform Path::getTransformToScaleToFit (const Rectangle<float>& area,
+                                                bool preserveProportions, Justification justification) const
+{
+    return getTransformToScaleToFit (area.getX(), area.getY(), area.getWidth(), area.getHeight(),
+                                     preserveProportions, justification);
+}
+
 AffineTransform Path::getTransformToScaleToFit (const float x, const float y,
                                                 const float w, const float h,
                                                 const bool preserveProportions,
-                                                const Justification& justification) const
+                                                Justification justification) const
 {
     Rectangle<float> boundsRect (getBounds());
 
