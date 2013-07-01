@@ -107,7 +107,7 @@ public:
         @see TabbedButtonBar::addTab
     */
     void addTab (const String& tabName,
-                 const Colour& tabBackgroundColour,
+                 Colour tabBackgroundColour,
                  Component* contentComponent,
                  bool deleteComponentWhenNotNeeded,
                  int insertIndex = -1);
@@ -134,7 +134,7 @@ public:
     Colour getTabBackgroundColour (int tabIndex) const noexcept;
 
     /** Changes the background colour of one of the tabs. */
-    void setTabBackgroundColour (int tabIndex, const Colour& newColour);
+    void setTabBackgroundColour (int tabIndex, Colour newColour);
 
     //==============================================================================
     /** Changes the currently-selected tab.

@@ -46,20 +46,20 @@ public:
     //==============================================================================
     /**
     */
-    MultiDocumentPanelWindow (const Colour& backgroundColour);
+    MultiDocumentPanelWindow (Colour backgroundColour);
 
     /** Destructor. */
     ~MultiDocumentPanelWindow();
 
     //==============================================================================
     /** @internal */
-    void maximiseButtonPressed();
+    void maximiseButtonPressed() override;
     /** @internal */
-    void closeButtonPressed();
+    void closeButtonPressed() override;
     /** @internal */
-    void activeWindowStatusChanged();
+    void activeWindowStatusChanged() override;
     /** @internal */
-    void broughtToFront();
+    void broughtToFront() override;
 
 private:
     //==============================================================================
@@ -136,7 +136,7 @@ public:
                                     the caller must handle the component's deletion
     */
     bool addDocument (Component* component,
-                      const Colour& backgroundColour,
+                      Colour backgroundColour,
                       bool deleteWhenRemoved);
 
     /** Closes one of the documents.
@@ -233,13 +233,13 @@ public:
         Each document has its own background colour, but this is the one used to fill the areas
         behind them.
     */
-    void setBackgroundColour (const Colour& newBackgroundColour);
+    void setBackgroundColour (Colour newBackgroundColour);
 
     /** Returns the current background colour.
 
         @see setBackgroundColour
     */
-    const Colour& getBackgroundColour() const noexcept                  { return backgroundColour; }
+    Colour getBackgroundColour() const noexcept                         { return backgroundColour; }
 
     /** If the panel is being used in tabbed mode, this returns the TabbedComponent that's involved. */
     TabbedComponent* getCurrentTabbedComponent() const noexcept         { return tabComponent; }

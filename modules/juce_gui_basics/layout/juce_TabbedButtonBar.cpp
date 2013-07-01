@@ -227,7 +227,7 @@ void TabbedButtonBar::clearTabs()
 }
 
 void TabbedButtonBar::addTab (const String& tabName,
-                              const Colour& tabBackgroundColour,
+                              Colour tabBackgroundColour,
                               int insertIndex)
 {
     jassert (tabName.isNotEmpty()); // you have to give them all a name..
@@ -482,7 +482,7 @@ Colour TabbedButtonBar::getTabBackgroundColour (const int tabIndex)
     return tab == nullptr ? Colours::white : tab->colour;
 }
 
-void TabbedButtonBar::setTabBackgroundColour (const int tabIndex, const Colour& newColour)
+void TabbedButtonBar::setTabBackgroundColour (const int tabIndex, Colour newColour)
 {
     if (TabInfo* const tab = tabs [tabIndex])
     {

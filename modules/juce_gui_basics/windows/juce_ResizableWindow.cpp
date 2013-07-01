@@ -37,7 +37,7 @@ ResizableWindow::ResizableWindow (const String& name,
 }
 
 ResizableWindow::ResizableWindow (const String& name,
-                                  const Colour& backgroundColour_,
+                                  Colour backgroundColour_,
                                   const bool addToDesktop_)
     : TopLevelWindow (name, addToDesktop_),
       ownsContentComponent (false),
@@ -401,7 +401,7 @@ Colour ResizableWindow::getBackgroundColour() const noexcept
     return findColour (backgroundColourId, false);
 }
 
-void ResizableWindow::setBackgroundColour (const Colour& newColour)
+void ResizableWindow::setBackgroundColour (Colour newColour)
 {
     Colour backgroundColour (newColour);
 

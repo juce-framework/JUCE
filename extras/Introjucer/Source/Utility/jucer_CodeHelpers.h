@@ -41,7 +41,7 @@ namespace CodeHelpers
     String floatLiteral (double value, int numDecPlaces);
     String boolLiteral (bool value);
 
-    String colourToCode (const Colour& col);
+    String colourToCode (Colour col);
     String justificationToCode (const Justification&);
 
     String alignFunctionCallParams (const String& call, const StringArray& parameters, int maxLineLength);

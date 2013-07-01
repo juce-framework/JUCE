@@ -91,7 +91,7 @@ FileChooserDialogBox::FileChooserDialogBox (const String& name,
                                             const String& instructions,
                                             FileBrowserComponent& chooserComponent,
                                             const bool warnAboutOverwritingExistingFiles_,
-                                            const Colour& backgroundColour)
+                                            Colour backgroundColour)
     : ResizableWindow (name, backgroundColour, true),
       warnAboutOverwritingExistingFiles (warnAboutOverwritingExistingFiles_)
 {

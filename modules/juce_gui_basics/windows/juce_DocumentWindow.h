@@ -89,7 +89,7 @@ public:
         @see TitleBarButtons
     */
     DocumentWindow (const String& name,
-                    const Colour& backgroundColour,
+                    Colour backgroundColour,
                     int requiredButtons,
                     bool addToDesktop = true);
 

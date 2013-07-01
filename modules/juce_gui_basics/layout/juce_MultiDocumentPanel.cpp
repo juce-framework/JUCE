@@ -22,7 +22,7 @@
   ==============================================================================
 */
 
-MultiDocumentPanelWindow::MultiDocumentPanelWindow (const Colour& backgroundColour)
+MultiDocumentPanelWindow::MultiDocumentPanelWindow (Colour backgroundColour)
     : DocumentWindow (String::empty, backgroundColour,
                       DocumentWindow::maximiseButton | DocumentWindow::closeButton, false)
 {
@@ -156,7 +156,7 @@ void MultiDocumentPanel::addWindow (Component* component)
 }
 
 bool MultiDocumentPanel::addDocument (Component* const component,
-                                      const Colour& docColour,
+                                      Colour docColour,
                                       const bool deleteWhenRemoved)
 {
     // If you try passing a full DocumentWindow or ResizableWindow in here, you'll end up
@@ -415,7 +415,7 @@ void MultiDocumentPanel::setLayoutMode (const LayoutMode newLayoutMode)
     }
 }
 
-void MultiDocumentPanel::setBackgroundColour (const Colour& newBackgroundColour)
+void MultiDocumentPanel::setBackgroundColour (Colour newBackgroundColour)
 {
     if (backgroundColour != newBackgroundColour)
     {

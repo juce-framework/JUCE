@@ -1163,7 +1163,7 @@ void TextEditor::setInputRestrictions (const int maxLen,
     setInputFilter (new LengthAndCharacterRestriction (maxLen, chars), true);
 }
 
-void TextEditor::setTextToShowWhenEmpty (const String& text, const Colour& colourToUse)
+void TextEditor::setTextToShowWhenEmpty (const String& text, Colour colourToUse)
 {
     textToShowWhenEmpty = text;
     colourForTextWhenEmpty = colourToUse;

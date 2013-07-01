@@ -91,7 +91,7 @@ public:
                           const String& instructions,
                           FileBrowserComponent& browserComponent,
                           bool warnAboutOverwritingExistingFiles,
-                          const Colour& backgroundColour);
+                          Colour backgroundColour);
 
     /** Destructor. */
     ~FileChooserDialogBox();

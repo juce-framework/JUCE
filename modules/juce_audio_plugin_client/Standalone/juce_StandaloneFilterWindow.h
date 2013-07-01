@@ -46,7 +46,7 @@ public:
         class and deleted automatically when no longer needed. (It can also be null)
     */
     StandaloneFilterWindow (const String& title,
-                            const Colour& backgroundColour,
+                            Colour backgroundColour,
                             PropertySet* settingsToUse)
         : DocumentWindow (title, backgroundColour, DocumentWindow::minimiseButton | DocumentWindow::closeButton),
           settings (settingsToUse),

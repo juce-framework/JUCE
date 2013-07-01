@@ -42,9 +42,9 @@ private:
 
 //==============================================================================
 DocumentWindow::DocumentWindow (const String& title,
-                                const Colour& backgroundColour,
-                                const int requiredButtons_,
-                                const bool addToDesktop_)
+                                Colour backgroundColour,
+                                int requiredButtons_,
+                                bool addToDesktop_)
     : ResizableWindow (title, backgroundColour, addToDesktop_),
       titleBarHeight (26),
       menuBarHeight (24),

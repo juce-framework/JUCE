@@ -102,7 +102,7 @@ public:
     void showInDialogBox (const String& dialogTitle,
                           int dialogWidth,
                           int dialogHeight,
-                          const Colour& backgroundColour = Colours::white);
+                          Colour backgroundColour = Colours::white);
 
     //==============================================================================
     /** Subclasses must override this to return a component for each preferences page.

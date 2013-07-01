@@ -110,7 +110,7 @@ public:
     void drawButtonBackground (Graphics& g, Button& button, const Colour& backgroundColour,
                                bool isMouseOverButton, bool isButtonDown);
 
-    static Colour getScrollbarColourForBackground (const Colour& background);
+    static Colour getScrollbarColourForBackground (Colour background);
 
 private:
     Image backgroundTexture;

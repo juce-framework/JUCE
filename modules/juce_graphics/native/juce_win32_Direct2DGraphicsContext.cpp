@@ -722,7 +722,7 @@ private:
         return D2D1::RectF ((float) r.getX(), (float) r.getY(), (float) r.getRight(), (float) r.getBottom());
     }
 
-    static D2D1_COLOR_F colourToD2D (const Colour& c)
+    static D2D1_COLOR_F colourToD2D (Colour c)
     {
         return D2D1::ColorF::ColorF (c.getFloatRed(), c.getFloatGreen(), c.getFloatBlue(), c.getFloatAlpha());
     }

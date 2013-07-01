@@ -267,7 +267,7 @@ public:
         string is only displayed, it's not taken to actually be the contents of
         the editor.
     */
-    void setTextToShowWhenEmpty (const String& text, const Colour& colourToUse);
+    void setTextToShowWhenEmpty (const String& text, Colour colourToUse);
 
     //==============================================================================
     /** Changes the size of the scrollbars that are used.

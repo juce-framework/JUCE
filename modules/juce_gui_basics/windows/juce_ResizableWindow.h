@@ -75,7 +75,7 @@ public:
                                     desktop; if false, you can use it as a child component
     */
     ResizableWindow (const String& name,
-                     const Colour& backgroundColour,
+                     Colour backgroundColour,
                      bool addToDesktop);
 
     /** Destructor.
@@ -110,7 +110,7 @@ public:
 
         @see getBackgroundColour
     */
-    void setBackgroundColour (const Colour& newColour);
+    void setBackgroundColour (Colour newColour);
 
     //==============================================================================
     /** Make the window resizable or fixed.

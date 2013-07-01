@@ -206,7 +206,7 @@ public:
         If this is the first tab added, it'll also be automatically selected.
     */
     void addTab (const String& tabName,
-                 const Colour& tabBackgroundColour,
+                 Colour tabBackgroundColour,
                  int insertIndex);
 
     /** Changes the name of one of the tabs. */
@@ -273,7 +273,7 @@ public:
     /** Changes the background colour of a tab.
         @see addTab, getTabBackgroundColour
     */
-    void setTabBackgroundColour (int tabIndex, const Colour& newColour);
+    void setTabBackgroundColour (int tabIndex, Colour newColour);
 
     //==============================================================================
     /** A set of colour IDs to use to change the colour of various aspects of the component.

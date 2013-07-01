@@ -283,7 +283,7 @@ namespace CodeHelpers
         return value ? "true" : "false";
     }
 
-    String colourToCode (const Colour& col)
+    String colourToCode (Colour col)
     {
         const Colour colours[] =
         {

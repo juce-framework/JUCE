@@ -260,7 +260,7 @@ namespace TextLayoutHelpers
 
     struct Token
     {
-        Token (const String& t, const Font& f, const Colour& c, const bool whitespace)
+        Token (const String& t, const Font& f, Colour c, const bool whitespace)
             : text (t), font (f), colour (c),
               area (font.getStringWidthFloat (t), f.getHeight()),
               isWhitespace (whitespace),
@@ -415,7 +415,7 @@ namespace TextLayoutHelpers
         }
 
         void appendText (const AttributedString& text, const Range<int> stringRange,
-                         const Font& font, const Colour& colour)
+                         const Font& font, Colour colour)
         {
             const String stringText (text.getText().substring (stringRange.getStart(), stringRange.getEnd()));
             String::CharPointerType t (stringText.getCharPointer());

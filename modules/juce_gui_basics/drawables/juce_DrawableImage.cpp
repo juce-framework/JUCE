@@ -62,7 +62,7 @@ void DrawableImage::setOpacity (const float newOpacity)
     opacity = newOpacity;
 }
 
-void DrawableImage::setOverlayColour (const Colour& newOverlayColour)
+void DrawableImage::setOverlayColour (Colour newOverlayColour)
 {
     overlayColour = newOverlayColour;
 }
@@ -205,7 +205,7 @@ Colour DrawableImage::ValueTreeWrapper::getOverlayColour() const
     return Colour::fromString (state [overlay].toString());
 }
 
-void DrawableImage::ValueTreeWrapper::setOverlayColour (const Colour& newColour, UndoManager* undoManager)
+void DrawableImage::ValueTreeWrapper::setOverlayColour (Colour newColour, UndoManager* undoManager)
 {
     if (newColour.isTransparent())
         state.removeProperty (overlay, undoManager);

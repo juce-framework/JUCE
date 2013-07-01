@@ -537,7 +537,7 @@ IntrojucerLookAndFeel::IntrojucerLookAndFeel()
                getScrollbarColourForBackground (findColour (mainBackgroundColourId)));
 }
 
-Colour IntrojucerLookAndFeel::getScrollbarColourForBackground (const Colour& background)
+Colour IntrojucerLookAndFeel::getScrollbarColourForBackground (Colour background)
 {
     return background.contrasting().withAlpha (0.13f);
 }

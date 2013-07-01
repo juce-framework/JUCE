@@ -22,14 +22,11 @@
   ==============================================================================
 */
 
-ShapeButton::ShapeButton (const String& text_,
-                          const Colour& normalColour_,
-                          const Colour& overColour_,
-                          const Colour& downColour_)
-  : Button (text_),
-    normalColour (normalColour_),
-    overColour (overColour_),
-    downColour (downColour_),
+ShapeButton::ShapeButton (const String& t, Colour n, Colour o, Colour d)
+  : Button (t),
+    normalColour (n),
+    overColour (o),
+    downColour (d),
     maintainShapeProportions (false),
     outlineWidth (0.0f)
 {
@@ -39,16 +36,16 @@ ShapeButton::~ShapeButton()
 {
 }
 
-void ShapeButton::setColours (const Colour& newNormalColour,
-                              const Colour& newOverColour,
-                              const Colour& newDownColour)
+void ShapeButton::setColours (Colour newNormalColour,
+                              Colour newOverColour,
+                              Colour newDownColour)
 {
     normalColour = newNormalColour;
     overColour = newOverColour;
     downColour = newDownColour;
 }
 
-void ShapeButton::setOutline (const Colour& newOutlineColour,
+void ShapeButton::setOutline (Colour newOutlineColour,
                               const float newOutlineWidth)
 {
     outlineColour = newOutlineColour;
