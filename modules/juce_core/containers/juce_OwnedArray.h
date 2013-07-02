@@ -350,7 +350,7 @@ public:
 
         @param newObject   the new object to add to the array
     */
-    void addIfNotAlreadyThere (const ObjectClass* const newObject) noexcept
+    void addIfNotAlreadyThere (ObjectClass* const newObject) noexcept
     {
         const ScopedLockType lock (getLock());
 
