@@ -35,14 +35,14 @@ struct TextDiffHelpers
         StringRegion (const String& s) noexcept
             : text (s.getCharPointer()), start (0), length (s.length()) {}
 
-        StringRegion (const String::CharPointerType& t, int s, int len)  noexcept
+        StringRegion (const String::CharPointerType t, int s, int len)  noexcept
             : text (t), start (s), length (len) {}
 
         String::CharPointerType text;
         int start, length;
     };
 
-    static void addInsertion (TextDiff& td, const String::CharPointerType& text, int index, int length)
+    static void addInsertion (TextDiff& td, const String::CharPointerType text, int index, int length)
     {
         TextDiff::Change c;
         c.insertedText = String (text, (size_t) length);
@@ -104,7 +104,7 @@ struct TextDiffHelpers
     }
 
     static int findLongestCommonSubstring (String::CharPointerType a, const int lenA,
-                                           const String::CharPointerType& b, const int lenB,
+                                           const String::CharPointerType b, const int lenB,
                                            int& indexInA, int& indexInB)
     {
         if (lenA == 0 || lenB == 0)

@@ -1205,8 +1205,8 @@ public:
         dest = result.getCharPointer();
     }
 
-    StringCreationHelper (const String::CharPointerType& source_)
-        : source (source_), dest (nullptr), allocatedBytes (StringHolder::getAllocatedNumBytes (source)), bytesWritten (0)
+    StringCreationHelper (const String::CharPointerType s)
+        : source (s), dest (nullptr), allocatedBytes (StringHolder::getAllocatedNumBytes (s)), bytesWritten (0)
     {
         result.preallocateBytes (allocatedBytes);
         dest = result.getCharPointer();
@@ -1536,7 +1536,8 @@ String String::quoted (const juce_wchar quoteCharacter) const
 }
 
 //==============================================================================
-static String::CharPointerType findTrimmedEnd (const String::CharPointerType& start, String::CharPointerType end)
+static String::CharPointerType findTrimmedEnd (const String::CharPointerType start,
+                                               String::CharPointerType end)
 {
     while (end > start)
     {

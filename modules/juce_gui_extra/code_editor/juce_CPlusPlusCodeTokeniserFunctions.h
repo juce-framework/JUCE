@@ -541,8 +541,8 @@ struct CppTokeniserFunctions
     */
     struct StringIterator
     {
-        StringIterator (const String& s) noexcept                  : t (s.getCharPointer()), numChars (0) {}
-        StringIterator (const String::CharPointerType& s) noexcept : t (s), numChars (0) {}
+        StringIterator (const String& s) noexcept            : t (s.getCharPointer()), numChars (0) {}
+        StringIterator (String::CharPointerType s) noexcept  : t (s), numChars (0) {}
 
         juce_wchar nextChar() noexcept      { if (isEOF()) return 0; ++numChars; return t.getAndAdvance(); }
         juce_wchar peekNextChar()noexcept   { return *t; }

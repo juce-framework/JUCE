@@ -25,7 +25,7 @@
 class CodeDocumentLine
 {
 public:
-    CodeDocumentLine (const String::CharPointerType& l,
+    CodeDocumentLine (const String::CharPointerType l,
                       const int lineLen,
                       const int numNewLineChars,
                       const int startInFile)

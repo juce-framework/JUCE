@@ -117,7 +117,7 @@ namespace juce
   extern void initialiseMac();
   extern void* attachComponentToWindowRef (Component* component, void* windowRef);
   extern void detachComponentFromWindowRef (Component* component, void* nsWindow);
-  extern void setNativeHostWindowSize (void* nsWindow, Component* editorComp, int newWidth, int newHeight, const PluginHostType& host);
+  extern void setNativeHostWindowSize (void* nsWindow, Component* editorComp, int newWidth, int newHeight);
   extern void checkWindowVisibility (void* nsWindow, Component* component);
   extern bool forwardCurrentKeyEventToHost (Component* component);
  #endif
@@ -1252,7 +1252,7 @@ public:
             {
                 // some hosts don't support the sizeWindow call, so do it manually..
                #if JUCE_MAC
-                setNativeHostWindowSize (hostWindow, editorComp, newWidth, newHeight, getHostType());
+                setNativeHostWindowSize (hostWindow, editorComp, newWidth, newHeight);
 
                #elif JUCE_LINUX
                 // (Currently, all linux hosts support sizeWindow, so this should never need to happen)

@@ -147,7 +147,7 @@ public:
 private:
     StringPool identifierPool;
 
-    static DISPID getHashFromString (const String::CharPointerType& s) noexcept
+    static DISPID getHashFromString (const String::CharPointerType s) noexcept
     {
         return (DISPID) (pointer_sized_int) s.getAddress();
     }
