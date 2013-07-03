@@ -659,6 +659,7 @@ public:
             else
                 JUCE_ASIO_LOG ("latencies: " + String ((int) outputLatency) + ", " + String ((int) inputLatency));
 
+            asioObject->getBufferSize (&minSize, &maxSize, &preferredSize, &granularity);
             deviceIsOpen = true;
 
             JUCE_ASIO_LOG ("starting");
