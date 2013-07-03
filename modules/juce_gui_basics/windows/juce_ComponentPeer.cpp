@@ -78,21 +78,21 @@ void ComponentPeer::handleMouseEvent (const int touchIndex, const Point<int> pos
                                       const ModifierKeys newMods, const int64 time)
 {
     if (MouseInputSource* mouse = Desktop::getInstance().getOrCreateMouseInputSource (touchIndex))
-        mouse->handleEvent (this, positionWithinPeer, time, newMods);
+        mouse->handleEvent (*this, positionWithinPeer, time, newMods);
 }
 
 void ComponentPeer::handleMouseWheel (const int touchIndex, const Point<int> positionWithinPeer,
                                       const int64 time, const MouseWheelDetails& wheel)
 {
     if (MouseInputSource* mouse = Desktop::getInstance().getOrCreateMouseInputSource (touchIndex))
-        mouse->handleWheel (this, positionWithinPeer, time, wheel);
+        mouse->handleWheel (*this, positionWithinPeer, time, wheel);
 }
 
 void ComponentPeer::handleMagnifyGesture (const int touchIndex, const Point<int> positionWithinPeer,
                                           const int64 time, const float scaleFactor)
 {
     if (MouseInputSource* mouse = Desktop::getInstance().getOrCreateMouseInputSource (touchIndex))
-        mouse->handleMagnifyGesture (this, positionWithinPeer, time, scaleFactor);
+        mouse->handleMagnifyGesture (*this, positionWithinPeer, time, scaleFactor);
 }
 
 //==============================================================================

@@ -61,8 +61,7 @@ class JUCE_API  Desktop  : private DeletedAtShutdown,
 {
 public:
     //==============================================================================
-    /** There's only one dektop object, and this method will return it.
-    */
+    /** There's only one desktop object, and this method will return it. */
     static Desktop& JUCE_CALLTYPE getInstance();
 
     //==============================================================================
@@ -424,6 +423,8 @@ private:
     int allowedOrientations;
 
     ComponentAnimator animator;
+
+    AffineTransform masterTransform;
 
     void timerCallback() override;
     void resetTimer();

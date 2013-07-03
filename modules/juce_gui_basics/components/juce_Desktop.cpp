@@ -158,6 +158,11 @@ Point<int> Desktop::getMousePosition()
     return getInstance().getMainMouseSource().getScreenPosition();
 }
 
+void Desktop::setMousePosition (Point<int> newPosition)
+{
+    getInstance().getMainMouseSource().setScreenPosition (newPosition);
+}
+
 Point<int> Desktop::getLastMouseDownPosition()
 {
     return getInstance().getMainMouseSource().getLastMouseDownPosition();
