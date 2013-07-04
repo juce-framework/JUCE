@@ -101,16 +101,20 @@ public:
     Point& operator-= (Point other) noexcept                            { x -= other.x; y -= other.y; return *this; }
 
     /** Returns a point whose coordinates are multiplied by a given value. */
-    Point operator* (const ValueType multiplier) const noexcept         { return Point (x * multiplier, y * multiplier); }
-
-    /** Multiplies the point's co-ordinates by a value. */
-    Point& operator*= (const ValueType multiplier) noexcept             { x *= multiplier; y *= multiplier; return *this; }
+    template <typename FloatType>
+    Point operator* (const FloatType multiplier) const noexcept         { return Point ((ValueType) (x * multiplier), (ValueType) (y * multiplier)); }
 
     /** Returns a point whose coordinates are divided by a given value. */
-    Point operator/ (const ValueType divisor) const noexcept            { return Point (x / divisor, y / divisor); }
+    template <typename FloatType>
+    Point operator/ (const FloatType divisor) const noexcept            { return Point ((ValueType) (x / divisor), (ValueType) (y / divisor)); }
+
+    /** Multiplies the point's co-ordinates by a value. */
+    template <typename FloatType>
+    Point& operator*= (const FloatType multiplier) noexcept             { x = (ValueType) (x * multiplier); y = (ValueType) (y * multiplier); return *this; }
 
     /** Divides the point's co-ordinates by a value. */
-    Point& operator/= (const ValueType divisor) noexcept                { x /= divisor; y /= divisor; return *this; }
+    template <typename FloatType>
+    Point& operator/= (const FloatType divisor) noexcept                { x = (ValueType) (x / divisor); y = (ValueType) (y / divisor); return *this; }
 
     /** Returns the inverse of this point. */
     Point operator-() const noexcept                                    { return Point (-x, -y); }

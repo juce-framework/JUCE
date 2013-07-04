@@ -305,8 +305,8 @@ public:
     Rectangle operator*= (FloatType scaleFactor) noexcept
     {
         pos *= scaleFactor;
-        w *= scaleFactor;
-        h *= scaleFactor;
+        w = (ValueType) (w * scaleFactor);
+        h = (ValueType) (h * scaleFactor);
         return *this;
     }
 
