@@ -310,6 +310,20 @@ public:
         return *this;
     }
 
+    /** Scales this rectangle by the given amount, centred around the origin. */
+    template <typename FloatType>
+    Rectangle operator/ (FloatType scaleFactor) const noexcept
+    {
+        return operator* (((FloatType) 1) / scaleFactor);
+    }
+
+    /** Scales this rectangle by the given amount, centred around the origin. */
+    template <typename FloatType>
+    Rectangle operator/= (FloatType scaleFactor) noexcept
+    {
+        return operator*= (((FloatType) 1) / scaleFactor);
+    }
+
     /** Expands the rectangle by a given amount.
 
         Effectively, its new size is (x - deltaX, y - deltaY, w + deltaX * 2, h + deltaY * 2).
