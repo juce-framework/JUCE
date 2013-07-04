@@ -175,15 +175,15 @@ namespace DirectShowHelpers
 class DirectShowComponent::DirectShowContext    : public AsyncUpdater
 {
 public:
-    DirectShowContext (DirectShowComponent& component_, VideoRendererType type_)
-        : component (component_),
+    DirectShowContext (DirectShowComponent& c, VideoRendererType renderType)
+        : component (c),
           hwnd (0),
           hdc (0),
           state (uninitializedState),
           hasVideo (false),
           videoWidth (0),
           videoHeight (0),
-          type (type_),
+          type (renderType),
           needToUpdateViewport (true),
           needToRecreateNativeWindow (false)
     {
@@ -319,7 +319,17 @@ public:
 
         // build filter graph
         if (SUCCEEDED (hr))
+        {
             hr = graphBuilder->RenderFile (fileOrURLPath.toWideCharPointer(), nullptr);
+
+            if (FAILED (hr))
+            {
+                // Annoyingly, if we don't run the msg loop between failing and deleting the window, the
+                // whole OS message-dispatch system gets itself into a state, and refuses to deliver any
+                // more messages for the whole app. (That's what happens in Win7, anyway)
+                MessageManager::getInstance()->runDispatchLoopUntil (200);
+            }
+        }
 
         // remove video renderer if not connected (no video)
         if (SUCCEEDED (hr))
