@@ -686,12 +686,13 @@ bool juce_areThereAnyAlwaysOnTopWindows()
 }
 
 //==============================================================================
-void Desktop::Displays::findDisplays()
+void Desktop::Displays::findDisplays (float masterScale)
 {
     Display d;
-    d.userArea = d.totalArea = Rectangle<int> (android.screenWidth, android.screenHeight);
+    d.userArea = d.totalArea = Rectangle<int> (android.screenWidth,
+                                               android.screenHeight) / masterScale;
     d.isMain = true;
-    d.scale = 1.0;
+    d.scale = masterScale;
 
     displays.add (d);
 }

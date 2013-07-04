@@ -1338,6 +1338,7 @@ private:
                 registerTouchWindow (hwnd, 0);
 
             setDPIAwareness();
+            setMessageFilter();
             updateBorderSize();
 
             // Calling this function here is (for some reason) necessary to make Windows
@@ -1405,6 +1406,19 @@ private:
                 DestroyIcon (currentWindowIcon);
 
             currentWindowIcon = hicon;
+        }
+    }
+
+    void setMessageFilter()
+    {
+        typedef BOOL (WINAPI* ChangeWindowMessageFilterExFunc) (HWND, UINT, DWORD, PVOID);
+
+        if (ChangeWindowMessageFilterExFunc changeMessageFilter
+                = (ChangeWindowMessageFilterExFunc) getUser32Function ("ChangeWindowMessageFilterEx"))
+        {
+            changeMessageFilter (hwnd, WM_DROPFILES, 1 /*MSGFLT_ALLOW*/, nullptr);
+            changeMessageFilter (hwnd, WM_COPYDATA, 1 /*MSGFLT_ALLOW*/, nullptr);
+            changeMessageFilter (hwnd, 0x49, 1 /*MSGFLT_ALLOW*/, nullptr);
         }
     }
 
@@ -3163,7 +3177,7 @@ static BOOL CALLBACK enumMonitorsProc (HMONITOR, HDC, LPRECT r, LPARAM userInfo)
     return TRUE;
 }
 
-void Desktop::Displays::findDisplays()
+void Desktop::Displays::findDisplays (float masterScale)
 {
     setDPIAwareness();
 
@@ -3190,9 +3204,9 @@ void Desktop::Displays::findDisplays()
     for (int i = 0; i < monitors.size(); ++i)
     {
         Display d;
-        d.userArea = d.totalArea = monitors.getReference(i);
+        d.userArea = d.totalArea = monitors.getReference(i) / masterScale;
         d.isMain = (i == 0);
-        d.scale = 1.0;
+        d.scale = masterScale;
         d.dpi = dpi;
 
         if (i == 0)

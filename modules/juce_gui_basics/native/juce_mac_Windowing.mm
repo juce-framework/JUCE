@@ -348,7 +348,7 @@ static Rectangle<int> convertDisplayRect (NSRect r, CGFloat mainScreenBottom)
     return convertToRectInt (r);
 }
 
-void Desktop::Displays::findDisplays()
+void Desktop::Displays::findDisplays (const float masterScale)
 {
     JUCE_AUTORELEASEPOOL
     {
@@ -362,16 +362,15 @@ void Desktop::Displays::findDisplays()
             NSScreen* s = (NSScreen*) [screens objectAtIndex: i];
 
             Display d;
-            d.userArea  = convertDisplayRect ([s visibleFrame], mainScreenBottom);
-            d.totalArea = convertDisplayRect ([s frame], mainScreenBottom);
+            d.userArea  = convertDisplayRect ([s visibleFrame], mainScreenBottom) / masterScale;
+            d.totalArea = convertDisplayRect ([s frame], mainScreenBottom) / masterScale;
             d.isMain = (i == 0);
+            d.scale = masterScale;
 
            #if defined (MAC_OS_X_VERSION_10_7) && (MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_7)
             if ([s respondsToSelector: @selector (backingScaleFactor)])
-                d.scale = s.backingScaleFactor;
-            else
+                d.scale *= s.backingScaleFactor;
            #endif
-                d.scale = 1.0;
 
             NSSize dpi = [[[s deviceDescription] objectForKey: NSDeviceResolution] sizeValue];
             d.dpi = (dpi.width + dpi.height) / 2.0;

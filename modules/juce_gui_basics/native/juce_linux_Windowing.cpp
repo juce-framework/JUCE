@@ -2975,7 +2975,7 @@ static double getDisplayDPI (int index)
     return (dpiX + dpiY) / 2.0;
 }
 
-void Desktop::Displays::findDisplays()
+void Desktop::Displays::findDisplays (float masterScale)
 {
     if (display == 0)
         return;
@@ -3025,9 +3025,9 @@ void Desktop::Displays::findDisplays()
                             d.userArea = d.totalArea = Rectangle<int> (screens[j].x_org,
                                                                        screens[j].y_org,
                                                                        screens[j].width,
-                                                                       screens[j].height);
+                                                                       screens[j].height) * masterScale;
                             d.isMain = (index == 0);
-                            d.scale = 1.0;
+                            d.scale = masterScale;
                             d.dpi = getDisplayDPI (index);
 
                             displays.add (d);
@@ -3059,9 +3059,9 @@ void Desktop::Displays::findDisplays()
 
                     Display d;
                     d.userArea = d.totalArea = Rectangle<int> (position[0], position[1],
-                                                               position[2], position[3]);
+                                                               position[2], position[3]) / masterScale;
                     d.isMain = (displays.size() == 0);
-                    d.scale = 1.0;
+                    d.scale = masterScale;
                     d.dpi = getDisplayDPI (i);
 
                     displays.add (d);
@@ -3073,9 +3073,9 @@ void Desktop::Displays::findDisplays()
         {
             Display d;
             d.userArea = d.totalArea = Rectangle<int> (DisplayWidth  (display, DefaultScreen (display)),
-                                                       DisplayHeight (display, DefaultScreen (display)));
+                                                       DisplayHeight (display, DefaultScreen (display))) * masterScale;
             d.isMain = true;
-            d.scale = 1.0;
+            d.scale = masterScale;
             d.dpi = getDisplayDPI (0);
 
             displays.add (d);

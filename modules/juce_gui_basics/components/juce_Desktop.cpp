@@ -25,8 +25,10 @@
 Desktop::Desktop()
     : mouseClickCounter (0), mouseWheelCounter (0),
       kioskModeComponent (nullptr),
-      allowedOrientations (allOrientations)
+      allowedOrientations (allOrientations),
+      masterScaleFactor (1.0f)
 {
+    displays = new Displays (*this);
     addMouseInputSource();
 }
 
@@ -352,7 +354,7 @@ void Desktop::sendMouseMove()
 
 
 //==============================================================================
-Desktop::Displays::Displays()   { init(); }
+Desktop::Displays::Displays (Desktop& desktop)   { init (desktop); }
 Desktop::Displays::~Displays()  {}
 
 const Desktop::Displays::Display& Desktop::Displays::getMainDisplay() const noexcept
@@ -421,9 +423,9 @@ bool operator!= (const Desktop::Displays::Display& d1, const Desktop::Displays::
     return ! (d1 == d2);
 }
 
-void Desktop::Displays::init()
+void Desktop::Displays::init (Desktop& desktop)
 {
-    findDisplays();
+    findDisplays (desktop.masterScaleFactor);
     jassert (displays.size() > 0);
 }
 
@@ -432,7 +434,7 @@ void Desktop::Displays::refresh()
     Array<Display> oldDisplays;
     oldDisplays.swapWithArray (displays);
 
-    init();
+    init (Desktop::getInstance());
 
     if (oldDisplays != displays)
     {

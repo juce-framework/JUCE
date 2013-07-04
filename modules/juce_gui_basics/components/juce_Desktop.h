@@ -367,14 +367,15 @@ public:
 
     private:
         friend class Desktop;
-        Displays();
+        friend class ScopedPointer<Displays>;
+        Displays (Desktop&);
         ~Displays();
 
-        void init();
-        void findDisplays();
+        void init (Desktop&);
+        void findDisplays (float masterScale);
     };
 
-    const Displays& getDisplays() const noexcept       { return displays; }
+    const Displays& getDisplays() const noexcept       { return *displays; }
 
     //==============================================================================
     /** True if the OS supports semitransparent windows */
@@ -403,7 +404,7 @@ private:
     void addPeer (ComponentPeer*);
     void removePeer (ComponentPeer*);
 
-    Displays displays;
+    ScopedPointer<Displays> displays;
 
     Point<int> lastFakeMouseMove;
     void sendMouseMove();
@@ -421,10 +422,9 @@ private:
     Rectangle<int> kioskComponentOriginalBounds;
 
     int allowedOrientations;
+    float masterScaleFactor;
 
     ComponentAnimator animator;
-
-    AffineTransform masterTransform;
 
     void timerCallback() override;
     void resetTimer();
