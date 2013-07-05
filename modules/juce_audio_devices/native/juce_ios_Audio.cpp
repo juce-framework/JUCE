@@ -98,18 +98,19 @@ public:
 
         AudioSessionSetActive (true);
 
-        UInt32 audioCategory = kAudioSessionCategory_MediaPlayback;
+        UInt32 audioCategory = (numInputChannels > 0 && audioInputIsAvailable) ? kAudioSessionCategory_PlayAndRecord
+                                                                               : kAudioSessionCategory_MediaPlayback;
 
-        if (numInputChannels > 0 && audioInputIsAvailable)
+        AudioSessionSetProperty (kAudioSessionProperty_AudioCategory, sizeof (audioCategory), &audioCategory);
+
+        if (audioCategory == kAudioSessionCategory_PlayAndRecord;
         {
-            audioCategory = kAudioSessionCategory_PlayAndRecord;
-
+            // (note: mustn't set this until after the audio category property has been set)
             UInt32 allowBluetoothInput = 1;
             AudioSessionSetProperty (kAudioSessionProperty_OverrideCategoryEnableBluetoothInput,
                                      sizeof (allowBluetoothInput), &allowBluetoothInput);
         }
 
-        AudioSessionSetProperty (kAudioSessionProperty_AudioCategory, sizeof (audioCategory), &audioCategory);
         AudioSessionAddPropertyListener (kAudioSessionProperty_AudioRouteChange, routingChangedStatic, this);
 
         fixAudioRouteIfSetToReceiver();
