@@ -203,14 +203,6 @@ public:
     static Typeface::Ptr getDefaultTypefaceForFont (const Font& font);
 
     //==============================================================================
-    /** Returns the total height of this font.
-        This is the maximum height, from the top of the ascent to the bottom of the
-        descenders.
-
-        @see withHeight, setHeightWithoutChangingWidth, getAscent
-    */
-    float getHeight() const noexcept;
-
     /** Returns a copy of this font with a new height. */
     Font withHeight (float height) const;
 
@@ -227,17 +219,45 @@ public:
     */
     void setHeightWithoutChangingWidth (float newHeight);
 
-    /** Returns the height of the font above its baseline.
+    /** Returns the total height of this font, in pixels.
+        This is the maximum height, from the top of the ascent to the bottom of the
+        descenders.
+
+        @see withHeight, setHeightWithoutChangingWidth, getAscent
+    */
+    float getHeight() const noexcept;
+
+    /** Returns the total height of this font, in points.
+        This is the maximum height, from the top of the ascent to the bottom of the
+        descenders.
+
+        @see withPointHeight, getHeight
+    */
+    float getHeightInPoints() const;
+
+    /** Returns the height of the font above its baseline, in pixels.
         This is the maximum height from the baseline to the top.
         @see getHeight, getDescent
     */
     float getAscent() const;
 
-    /** Returns the amount that the font descends below its baseline.
+    /** Returns the height of the font above its baseline, in points.
+        This is the maximum height from the baseline to the top.
+        @see getHeight, getDescent
+    */
+    float getAscentInPoints() const;
+
+    /** Returns the amount that the font descends below its baseline, in pixels.
         This is calculated as (getHeight() - getAscent()).
         @see getAscent, getHeight
     */
     float getDescent() const;
+
+    /** Returns the amount that the font descends below its baseline, in points.
+        This is calculated as (getHeight() - getAscent()).
+        @see getAscent, getHeight
+    */
+    float getDescentInPoints() const;
 
     //==============================================================================
     /** Returns the font's style flags.
@@ -435,6 +455,7 @@ private:
     ReferenceCountedObjectPtr <SharedFontInternal> font;
     void dupeInternalIfShared();
     void checkTypefaceSuitability();
+    float getHeightToPointsFactor() const;
 
     JUCE_LEAK_DETECTOR (Font)
 };

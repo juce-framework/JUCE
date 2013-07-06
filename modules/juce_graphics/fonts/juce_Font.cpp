@@ -350,10 +350,8 @@ const String& Font::getDefaultStyle()
     return style;
 }
 
-const String& Font::getTypefaceName() const noexcept
-{
-    return font->typefaceName;
-}
+const String& Font::getTypefaceName() const noexcept    { return font->typefaceName; }
+const String& Font::getTypefaceStyle() const noexcept   { return font->typefaceStyle; }
 
 void Font::setTypefaceName (const String& faceName)
 {
@@ -366,11 +364,6 @@ void Font::setTypefaceName (const String& faceName)
         font->typeface = nullptr;
         font->ascent = 0;
     }
-}
-
-const String& Font::getTypefaceStyle() const noexcept
-{
-    return font->typefaceStyle;
 }
 
 void Font::setTypefaceStyle (const String& typefaceStyle)
@@ -399,7 +392,10 @@ StringArray Font::getAvailableStyles() const
 Typeface* Font::getTypeface() const
 {
     if (font->typeface == nullptr)
+    {
         font->typeface = TypefaceCache::getInstance()->findTypefaceFor (*this);
+        jassert (font->typeface != nullptr);
+    }
 
     return font->typeface;
 }
@@ -434,11 +430,6 @@ void Font::setFallbackFontStyle (const String& style)
 }
 
 //==============================================================================
-float Font::getHeight() const noexcept
-{
-    return font->height;
-}
-
 Font Font::withHeight (const float newHeight) const
 {
     Font f (*this);
@@ -446,10 +437,15 @@ Font Font::withHeight (const float newHeight) const
     return f;
 }
 
+float Font::getHeightToPointsFactor() const
+{
+    return getTypeface()->getHeightToPointsFactor();
+}
+
 Font Font::withPointHeight (float heightInPoints) const
 {
     Font f (*this);
-    f.setHeight (heightInPoints / getTypeface()->getHeightToPointsFactor());
+    f.setHeight (heightInPoints / getHeightToPointsFactor());
     return f;
 }
 
@@ -549,11 +545,6 @@ void Font::setSizeAndStyle (float newHeight,
     setTypefaceStyle (newStyle);
 }
 
-float Font::getHorizontalScale() const noexcept
-{
-    return font->horizontalScale;
-}
-
 Font Font::withHorizontalScale (const float newHorizontalScale) const
 {
     Font f (*this);
@@ -566,6 +557,11 @@ void Font::setHorizontalScale (const float scaleFactor)
     dupeInternalIfShared();
     font->horizontalScale = scaleFactor;
     checkTypefaceSuitability();
+}
+
+float Font::getHorizontalScale() const noexcept
+{
+    return font->horizontalScale;
 }
 
 float Font::getExtraKerningFactor() const noexcept
@@ -587,11 +583,12 @@ void Font::setExtraKerningFactor (const float extraKerning)
     checkTypefaceSuitability();
 }
 
-Font Font::boldened() const             { return withStyle (getStyleFlags() | bold); }
-Font Font::italicised() const           { return withStyle (getStyleFlags() | italic); }
+Font Font::boldened() const                 { return withStyle (getStyleFlags() | bold); }
+Font Font::italicised() const               { return withStyle (getStyleFlags() | italic); }
 
-bool Font::isBold() const noexcept      { return FontStyleHelpers::isBold   (font->typefaceStyle); }
-bool Font::isItalic() const noexcept    { return FontStyleHelpers::isItalic (font->typefaceStyle); }
+bool Font::isBold() const noexcept          { return FontStyleHelpers::isBold   (font->typefaceStyle); }
+bool Font::isItalic() const noexcept        { return FontStyleHelpers::isItalic (font->typefaceStyle); }
+bool Font::isUnderlined() const noexcept    { return font->underline; }
 
 void Font::setBold (const bool shouldBeBold)
 {
@@ -614,11 +611,6 @@ void Font::setUnderline (const bool shouldBeUnderlined)
     checkTypefaceSuitability();
 }
 
-bool Font::isUnderlined() const noexcept
-{
-    return font->underline;
-}
-
 float Font::getAscent() const
 {
     if (font->ascent == 0)
@@ -627,10 +619,12 @@ float Font::getAscent() const
     return font->height * font->ascent;
 }
 
-float Font::getDescent() const
-{
-    return font->height - getAscent();
-}
+float Font::getHeight() const noexcept      { return font->height; }
+float Font::getDescent() const              { return font->height - getAscent(); }
+
+float Font::getHeightInPoints() const       { return getHeight()  * getHeightToPointsFactor(); }
+float Font::getAscentInPoints() const       { return getAscent()  * getHeightToPointsFactor(); }
+float Font::getDescentInPoints() const      { return getDescent() * getHeightToPointsFactor(); }
 
 int Font::getStringWidth (const String& text) const
 {
