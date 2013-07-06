@@ -285,7 +285,7 @@ public:
           numInputBusses (0),
           numOutputBusses (0),
           audioUnit (nullptr),
-          parameterListenerRef (0),
+          eventListenerRef (0),
           midiConcatenator (2048)
     {
         using namespace AudioUnitFormatHelpers;
@@ -315,10 +315,10 @@ public:
 
         jassert (AudioUnitFormatHelpers::insideCallback == 0);
 
-        if (parameterListenerRef != 0)
+        if (eventListenerRef != 0)
         {
-            AUListenerDispose (parameterListenerRef);
-            parameterListenerRef = 0;
+            AUListenerDispose (eventListenerRef);
+            eventListenerRef = 0;
         }
 
         if (audioUnit != nullptr)
@@ -883,7 +883,7 @@ private:
     int numInputBusChannels, numOutputBusChannels, numInputBusses, numOutputBusses;
 
     AudioUnit audioUnit;
-    AUParameterListenerRef parameterListenerRef;
+    AUEventListenerRef eventListenerRef;
 
     struct ParamInfo
     {
@@ -940,7 +940,13 @@ private:
                                       kAudioUnitScope_Global, 0, &info, sizeof (info));
             }
 
-            AUListenerCreate (parameterListenerCallback, this, nullptr, nullptr, 0, &parameterListenerRef);
+            AUEventListenerCreate (eventListenerCallback, this,
+                                  #if MAC_OS_X_VERSION_MIN_REQUIRED > MAC_OS_X_VERSION_10_4
+                                   CFRunLoopGetMain(),
+                                  #else
+                                   nullptr,
+                                  #endif
+                                   kCFRunLoopDefaultMode, 0, 0, &eventListenerRef);
 
             for (int i = 0; i < parameters.size(); ++i)
             {
@@ -952,28 +958,57 @@ private:
                 paramToAdd.mScope = kAudioUnitScope_Global;
                 paramToAdd.mElement = 0;
 
-                AUListenerAddParameter (parameterListenerRef, nullptr, &paramToAdd);
+                AudioUnitEvent event;
+                event.mArgument.mParameter = paramToAdd;
+
+                event.mEventType = kAudioUnitEvent_ParameterValueChange;
+                AUEventListenerAddEventType (eventListenerRef, nullptr, &event);
+
+                event.mEventType = kAudioUnitEvent_BeginParameterChangeGesture;
+                AUEventListenerAddEventType (eventListenerRef, nullptr, &event);
+
+                event.mEventType = kAudioUnitEvent_EndParameterChangeGesture;
+                AUEventListenerAddEventType (eventListenerRef, nullptr, &event);
             }
         }
     }
 
-    void parameterChanged (const AudioUnitParameter* param, AudioUnitParameterValue newValue)
+    void eventCallback (const AudioUnitEvent& event, AudioUnitParameterValue newValue)
     {
-        for (int i = 0; i < parameters.size(); ++i)
+        switch (event.mEventType)
         {
-            const ParamInfo& p = *parameters.getUnchecked(i);
+            case kAudioUnitEvent_ParameterValueChange:
+                for (int i = 0; i < parameters.size(); ++i)
+                {
+                    const ParamInfo& p = *parameters.getUnchecked(i);
 
-            if (p.paramID == param->mParameterID)
-            {
-                sendParamChangeMessageToListeners (i, (newValue - p.minValue) / (p.maxValue - p.minValue));
+                    if (p.paramID == event.mArgument.mParameter.mParameterID)
+                    {
+                        sendParamChangeMessageToListeners (i, (newValue - p.minValue) / (p.maxValue - p.minValue));
+                        break;
+                    }
+                }
+
                 break;
-            }
+
+            case kAudioUnitEvent_BeginParameterChangeGesture:
+                beginParameterChangeGesture (event.mArgument.mParameter.mParameterID);
+                break;
+
+            case kAudioUnitEvent_EndParameterChangeGesture:
+                endParameterChangeGesture (event.mArgument.mParameter.mParameterID);
+                break;
+
+            default:
+                break;
         }
     }
 
-    static void parameterListenerCallback (void* userData, void*, const AudioUnitParameter* param, AudioUnitParameterValue newValue)
+    static void eventListenerCallback (void* userData, void*, const AudioUnitEvent* event,
+                                       UInt64, AudioUnitParameterValue value)
     {
-        ((AudioUnitPluginInstance*) userData)->parameterChanged (param, newValue);
+        jassert (event != nullptr);
+        static_cast <AudioUnitPluginInstance*> (userData)->eventCallback (*event, value);
     }
 
     //==============================================================================
@@ -985,7 +1020,8 @@ private:
     {
         if (currentBuffer != nullptr)
         {
-            jassert (inNumberFrames == (UInt32) currentBuffer->getNumSamples()); // if this ever happens, might need to add extra handling
+            // if this ever happens, might need to add extra handling
+            jassert (inNumberFrames == (UInt32) currentBuffer->getNumSamples());
 
             for (UInt32 i = 0; i < ioData->mNumberBuffers; ++i)
             {
@@ -1017,12 +1053,20 @@ private:
 
             for (UInt32 i = 0; i < pktlist->numPackets; ++i)
             {
-                midiConcatenator.pushMidiData (packet->data, (int) packet->length, time, (void*) nullptr, *this);
+                midiConcatenator.pushMidiData (packet->data, (int) packet->length,
+                                               time, (void*) nullptr, *this);
+
                 packet = MIDIPacketNext (packet);
             }
         }
 
         return noErr;
+    }
+
+    template <typename Type1, typename Type2>
+    static void setIfNotNull (Type1* p, Type2 value) noexcept
+    {
+        if (p != nullptr) *p = value;
     }
 
     OSStatus getBeatAndTempo (Float64* outCurrentBeat, Float64* outCurrentTempo) const
@@ -1032,13 +1076,13 @@ private:
 
         if (ph != nullptr && ph->getCurrentPosition (result))
         {
-            if (outCurrentBeat  != nullptr)    *outCurrentBeat  = result.ppqPosition;
-            if (outCurrentTempo != nullptr)    *outCurrentTempo = result.bpm;
+            setIfNotNull (outCurrentBeat, result.ppqPosition);
+            setIfNotNull (outCurrentTempo, result.bpm);
         }
         else
         {
-            if (outCurrentBeat  != nullptr)    *outCurrentBeat  = 0;
-            if (outCurrentTempo != nullptr)    *outCurrentTempo = 120.0;
+            setIfNotNull (outCurrentBeat, 0);
+            setIfNotNull (outCurrentTempo, 120.0);
         }
 
         return noErr;
@@ -1052,17 +1096,17 @@ private:
 
         if (ph != nullptr && ph->getCurrentPosition (result))
         {
-            if (outTimeSig_Numerator != nullptr)            *outTimeSig_Numerator   = result.timeSigNumerator;
-            if (outTimeSig_Denominator != nullptr)          *outTimeSig_Denominator = result.timeSigDenominator;
-            if (outDeltaSampleOffsetToNextBeat != nullptr)  *outDeltaSampleOffsetToNextBeat = 0; //xxx
-            if (outCurrentMeasureDownBeat != nullptr)       *outCurrentMeasureDownBeat = result.ppqPositionOfLastBarStart; //xxx wrong
+            setIfNotNull (outTimeSig_Numerator, result.timeSigNumerator);
+            setIfNotNull (outTimeSig_Denominator, result.timeSigDenominator);
+            setIfNotNull (outDeltaSampleOffsetToNextBeat, 0); //xxx
+            setIfNotNull (outCurrentMeasureDownBeat, result.ppqPositionOfLastBarStart); //xxx wrong
         }
         else
         {
-            if (outDeltaSampleOffsetToNextBeat != nullptr)  *outDeltaSampleOffsetToNextBeat = 0;
-            if (outTimeSig_Numerator != nullptr)            *outTimeSig_Numerator = 4;
-            if (outTimeSig_Denominator != nullptr)          *outTimeSig_Denominator = 4;
-            if (outCurrentMeasureDownBeat != nullptr)       *outCurrentMeasureDownBeat = 0;
+            setIfNotNull (outDeltaSampleOffsetToNextBeat, 0);
+            setIfNotNull (outTimeSig_Numerator, 4);
+            setIfNotNull (outTimeSig_Denominator, 4);
+            setIfNotNull (outCurrentMeasureDownBeat, 0);
         }
 
         return noErr;
@@ -1077,8 +1121,7 @@ private:
 
         if (ph != nullptr && ph->getCurrentPosition (result))
         {
-            if (outIsPlaying != nullptr)
-                *outIsPlaying = result.isPlaying;
+            setIfNotNull (outIsPlaying, result.isPlaying);
 
             if (outTransportStateChanged != nullptr)
             {
@@ -1086,21 +1129,19 @@ private:
                 wasPlaying = result.isPlaying;
             }
 
-            if (outCurrentSampleInTimeLine != nullptr)
-                *outCurrentSampleInTimeLine = (Float64) result.timeInSamples;
-
-            if (outIsCycling != nullptr)        *outIsCycling = false;
-            if (outCycleStartBeat != nullptr)   *outCycleStartBeat = 0;
-            if (outCycleEndBeat != nullptr)     *outCycleEndBeat = 0;
+            setIfNotNull (outCurrentSampleInTimeLine, result.timeInSamples);
+            setIfNotNull (outIsCycling, false);
+            setIfNotNull (outCycleStartBeat, 0);
+            setIfNotNull (outCycleEndBeat, 0);
         }
         else
         {
-            if (outIsPlaying != nullptr)                *outIsPlaying = false;
-            if (outTransportStateChanged != nullptr)    *outTransportStateChanged = false;
-            if (outCurrentSampleInTimeLine != nullptr)  *outCurrentSampleInTimeLine = 0;
-            if (outIsCycling != nullptr)                *outIsCycling = false;
-            if (outCycleStartBeat != nullptr)           *outCycleStartBeat = 0;
-            if (outCycleEndBeat != nullptr)             *outCycleEndBeat = 0;
+            setIfNotNull (outIsPlaying, false);
+            setIfNotNull (outTransportStateChanged, false);
+            setIfNotNull (outCurrentSampleInTimeLine, 0);
+            setIfNotNull (outIsCycling, false);
+            setIfNotNull (outCycleStartBeat, 0);
+            setIfNotNull (outCycleEndBeat, 0);
         }
 
         return noErr;
