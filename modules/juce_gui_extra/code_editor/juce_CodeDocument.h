@@ -347,9 +347,9 @@ public:
     /** Iterates the text in a CodeDocument.
 
         This class lets you read characters from a CodeDocument. It's designed to be used
-        by a SyntaxAnalyser object.
+        by a CodeTokeniser object.
 
-        @see CodeDocument, SyntaxAnalyser
+        @see CodeDocument
     */
     class JUCE_API  Iterator
     {
