@@ -39,6 +39,15 @@ public:
     //==============================================================================
     /** Creates a null set of coefficients (which will produce silence). */
     IIRCoefficients() noexcept;
+
+    /** Directly constructs an object from the raw coefficients.
+        Most people will want to use the static methods instead of this, but
+        the constructor is public to allow tinkerers to create their own custom
+        filters!
+    */
+    IIRCoefficients (double c1, double c2, double c3,
+                     double c4, double c5, double c6) noexcept;
+
     /** Creates a copy of another filter. */
     IIRCoefficients (const IIRCoefficients&) noexcept;
     /** Creates a copy of another filter. */
@@ -91,8 +100,6 @@ public:
 
 private:
     friend class IIRFilter;
-    IIRCoefficients (double, double, double, double, double, double) noexcept;
-
     float c[5];
 };
 
@@ -113,13 +120,13 @@ public:
         you process with it. Use the setCoefficients() method to turn it into the
         type of filter needed.
     */
-    IIRFilter();
+    IIRFilter() noexcept;
 
     /** Creates a copy of another filter. */
-    IIRFilter (const IIRFilter& other);
+    IIRFilter (const IIRFilter&) noexcept;
 
     /** Destructor. */
-    ~IIRFilter();
+    ~IIRFilter() noexcept;
 
     //==============================================================================
     /** Clears the filter so that any incoming data passes through unchanged. */
@@ -129,7 +136,7 @@ public:
     void setCoefficients (const IIRCoefficients& newCoefficients) noexcept;
 
     /** Returns the coefficients that this filter is using. */
-    IIRCoefficients getCoefficients() const         { return coefficients; }
+    IIRCoefficients getCoefficients() const noexcept    { return coefficients; }
 
     //==============================================================================
     /** Resets the filter's processing pipeline, ready to start a new stream of data.
@@ -153,9 +160,9 @@ public:
 protected:
     //==============================================================================
     SpinLock processLock;
-    bool active;
     IIRCoefficients coefficients;
     float v1, v2;
+    bool active;
 
     IIRFilter& operator= (const IIRFilter&);
     JUCE_LEAK_DETECTOR (IIRFilter)
