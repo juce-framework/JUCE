@@ -547,7 +547,7 @@ namespace TextLayoutHelpers
         {
             String trimmed (s.trimEnd());
             if (trimmed.isEmpty() && ! s.isEmpty())
-                trimmed = s;
+                trimmed = s.replaceCharacters ("\r\n\t", "   ");
 
             return trimmed;
         }
