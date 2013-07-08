@@ -53,7 +53,7 @@ public:
     ~ArrowButton();
 
     /** @internal */
-    void paintButton (Graphics&, bool isMouseOverButton, bool isButtonDown);
+    void paintButton (Graphics&, bool isMouseOverButton, bool isButtonDown) override;
 
 private:
     Colour colour;

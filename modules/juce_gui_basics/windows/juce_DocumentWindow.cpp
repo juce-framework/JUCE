@@ -25,9 +25,9 @@
 class DocumentWindow::ButtonListenerProxy  : public ButtonListener // (can't use Button::Listener due to idiotic VC2005 bug)
 {
 public:
-    ButtonListenerProxy (DocumentWindow& owner_) : owner (owner_) {}
+    ButtonListenerProxy (DocumentWindow& w) : owner (w) {}
 
-    void buttonClicked (Button* button)
+    void buttonClicked (Button* button) override
     {
         if      (button == owner.getMinimiseButton())  owner.minimiseButtonPressed();
         else if (button == owner.getMaximiseButton())  owner.maximiseButtonPressed();

@@ -437,7 +437,7 @@ private:
     public:
         AsyncMenuUpdater() {}
 
-        void messageCallback()
+        void messageCallback() override
         {
             if (instance != nullptr)
                 instance->menuBarItemsChanged (nullptr);
@@ -454,7 +454,7 @@ private:
             : commandId (commandId_), topLevelIndex (topLevelIndex_)
         {}
 
-        void messageCallback()
+        void messageCallback() override
         {
             if (instance != nullptr)
                 instance->invokeDirectly (commandId, topLevelIndex);

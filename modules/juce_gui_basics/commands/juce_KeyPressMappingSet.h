@@ -214,11 +214,11 @@ public:
 
     //==============================================================================
     /** @internal */
-    bool keyPressed (const KeyPress&, Component* originatingComponent);
+    bool keyPressed (const KeyPress&, Component*) override;
     /** @internal */
-    bool keyStateChanged (bool isKeyDown, Component* originatingComponent);
+    bool keyStateChanged (bool isKeyDown, Component*) override;
     /** @internal */
-    void globalFocusChanged (Component*);
+    void globalFocusChanged (Component*) override;
 
 private:
     //==============================================================================
@@ -241,7 +241,6 @@ private:
 
     OwnedArray <KeyPressTime> keysDown;
 
-    void handleMessage (const Message&);
     void invokeCommand (const CommandID, const KeyPress&, const bool isKeyDown,
                         const int millisecsSinceKeyPressed, Component* originator) const;
 

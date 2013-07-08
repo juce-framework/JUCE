@@ -250,7 +250,7 @@ protected:
   #endif
 
 private:
-    void nonConstDraw (Graphics& g, float opacity, const AffineTransform& transform);
+    void nonConstDraw (Graphics&, float opacity, const AffineTransform&);
 
     Drawable& operator= (const Drawable&);
     JUCE_LEAK_DETECTOR (Drawable)

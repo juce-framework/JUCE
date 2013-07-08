@@ -30,7 +30,7 @@ public:
     {
     }
 
-    void messageCallback()
+    void messageCallback() override
     {
         if (ApplicationCommandTarget* const target = owner)
             target->tryToInvoke (info, false);

@@ -1638,7 +1638,7 @@ void Component::exitModalState (const int returnValue)
                 ExitModalStateMessage (Component* const c, const int res)
                     : target (c), result (res)   {}
 
-                void messageCallback()
+                void messageCallback() override
                 {
                     if (target.get() != nullptr) // (get() required for VS2003 bug)
                         target->exitModalState (result);
@@ -2196,7 +2196,7 @@ void Component::postCommandMessage (const int commandId)
         CustomCommandMessage (Component* const c, const int command)
             : target (c), commandId (command) {}
 
-        void messageCallback()
+        void messageCallback() override
         {
             if (target.get() != nullptr)  // (get() required for VS2003 bug)
                 target->handleCommandMessage (commandId);

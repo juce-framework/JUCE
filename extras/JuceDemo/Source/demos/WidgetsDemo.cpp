@@ -232,7 +232,7 @@ public:
         changeWidthToFitText();
     }
 
-    void clicked()
+    void clicked() override
     {
         ColourSelector* colourSelector = new ColourSelector();
         colourSelector->setName ("background");

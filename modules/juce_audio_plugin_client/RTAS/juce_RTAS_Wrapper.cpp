@@ -363,9 +363,9 @@ public:
                #endif
             }
 
-            void paint (Graphics&) {}
+            void paint (Graphics&) override {}
 
-            void resized()
+            void resized() override
             {
                 if (juce::Component* const ed = getEditor())
                     ed->setBounds (getLocalBounds());
@@ -374,7 +374,7 @@ public:
             }
 
            #if JUCE_WINDOWS
-            void globalFocusChanged (juce::Component*)
+            void globalFocusChanged (juce::Component*) override
             {
                #if ! JucePlugin_EditorRequiresKeyboardFocus
                 if (hasKeyboardFocus (true))
@@ -383,7 +383,7 @@ public:
             }
            #endif
 
-            void childBoundsChanged (juce::Component* child)
+            void childBoundsChanged (juce::Component* child) override
             {
                 setSize (child->getWidth(), child->getHeight());
                 child->setTopLeftPosition (0, 0);
@@ -394,10 +394,10 @@ public:
                 owner->updateSize();
             }
 
-            void userTriedToCloseWindow() {}
+            void userTriedToCloseWindow() override {}
 
            #if JUCE_MAC && JucePlugin_EditorRequiresKeyboardFocus
-            bool keyPressed (const KeyPress& kp)
+            bool keyPressed (const KeyPress& kp) override
             {
                 owner->updateSize();
                 forwardCurrentKeyEventToHostWindow();

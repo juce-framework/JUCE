@@ -368,7 +368,7 @@ public:
         JUCE_DECLARE_NON_COPYABLE (DragInProgress)
     };
 
-    void buttonClicked (Button* button)
+    void buttonClicked (Button* button) override
     {
         if (style == IncDecButtons)
         {
@@ -379,7 +379,7 @@ public:
         }
     }
 
-    void valueChanged (Value& value)
+    void valueChanged (Value& value) override
     {
         if (value.refersToSameSourceAs (currentValue))
         {
@@ -392,7 +392,7 @@ public:
             setMaxValue (valueMax.getValue(), dontSendNotification, true);
     }
 
-    void labelTextChanged (Label* label)
+    void labelTextChanged (Label* label) override
     {
         const double newValue = owner.snapValue (owner.getValueFromText (label->getText()), false);
 

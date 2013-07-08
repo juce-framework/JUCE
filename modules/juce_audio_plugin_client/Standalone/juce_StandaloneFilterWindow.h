@@ -241,13 +241,13 @@ public:
 
     //==============================================================================
     /** @internal */
-    void closeButtonPressed()
+    void closeButtonPressed() override
     {
         JUCEApplication::quit();
     }
 
     /** @internal */
-    void buttonClicked (Button*)
+    void buttonClicked (Button*) override
     {
         if (filter != nullptr)
         {
@@ -271,7 +271,7 @@ public:
     }
 
     /** @internal */
-    void resized()
+    void resized() override
     {
         DocumentWindow::resized();
         optionsButton.setBounds (8, 6, 60, getTitleBarHeight() - 8);

@@ -65,18 +65,18 @@ public:
         of (0, 0).
     */
     virtual void setOrigin (int x, int y) = 0;
-    virtual void addTransform (const AffineTransform& transform) = 0;
+    virtual void addTransform (const AffineTransform&) = 0;
     virtual float getScaleFactor() = 0;
 
     virtual float getTargetDeviceScaleFactor()    { return 1.0f; }
 
-    virtual bool clipToRectangle (const Rectangle<int>& r) = 0;
-    virtual bool clipToRectangleList (const RectangleList& clipRegion) = 0;
-    virtual void excludeClipRectangle (const Rectangle<int>& r) = 0;
-    virtual void clipToPath (const Path& path, const AffineTransform& transform) = 0;
-    virtual void clipToImageAlpha (const Image& sourceImage, const AffineTransform& transform) = 0;
+    virtual bool clipToRectangle (const Rectangle<int>&) = 0;
+    virtual bool clipToRectangleList (const RectangleList&) = 0;
+    virtual void excludeClipRectangle (const Rectangle<int>&) = 0;
+    virtual void clipToPath (const Path&, const AffineTransform&) = 0;
+    virtual void clipToImageAlpha (const Image&, const AffineTransform&) = 0;
 
-    virtual bool clipRegionIntersects (const Rectangle<int>& r) = 0;
+    virtual bool clipRegionIntersects (const Rectangle<int>&) = 0;
     virtual Rectangle<int> getClipBounds() const = 0;
     virtual bool isClipEmpty() const = 0;
 
@@ -87,23 +87,23 @@ public:
     virtual void endTransparencyLayer() = 0;
 
     //==============================================================================
-    virtual void setFill (const FillType& fillType) = 0;
+    virtual void setFill (const FillType&) = 0;
     virtual void setOpacity (float newOpacity) = 0;
-    virtual void setInterpolationQuality (Graphics::ResamplingQuality quality) = 0;
+    virtual void setInterpolationQuality (Graphics::ResamplingQuality) = 0;
 
     //==============================================================================
-    virtual void fillRect (const Rectangle<int>& r, bool replaceExistingContents) = 0;
-    virtual void fillPath (const Path& path, const AffineTransform& transform) = 0;
+    virtual void fillRect (const Rectangle<int>&, bool replaceExistingContents) = 0;
+    virtual void fillPath (const Path&, const AffineTransform&) = 0;
 
-    virtual void drawImage (const Image& sourceImage, const AffineTransform& transform) = 0;
+    virtual void drawImage (const Image&, const AffineTransform&) = 0;
 
-    virtual void drawLine (const Line <float>& line) = 0;
+    virtual void drawLine (const Line <float>&) = 0;
     virtual void drawVerticalLine (int x, float top, float bottom) = 0;
     virtual void drawHorizontalLine (int y, float left, float right) = 0;
 
-    virtual void setFont (const Font& newFont) = 0;
+    virtual void setFont (const Font&) = 0;
     virtual const Font& getFont() = 0;
-    virtual void drawGlyph (int glyphNumber, const AffineTransform& transform) = 0;
+    virtual void drawGlyph (int glyphNumber, const AffineTransform&) = 0;
     virtual bool drawTextLayout (const AttributedString&, const Rectangle<float>&)  { return false; }
 };
 

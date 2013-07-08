@@ -33,7 +33,7 @@ public:
         setOpaque (true);
     }
 
-    void clicked()
+    void clicked() override
     {
         int note = owner.getLowestVisibleKey();
 
@@ -45,7 +45,7 @@ public:
         owner.setLowestVisibleKey (note * 12);
     }
 
-    void paintButton (Graphics& g, bool isMouseOverButton, bool isButtonDown)
+    void paintButton (Graphics& g, bool isMouseOverButton, bool isButtonDown) override
     {
         owner.drawUpDownButton (g, getWidth(), getHeight(),
                                 isMouseOverButton, isButtonDown,

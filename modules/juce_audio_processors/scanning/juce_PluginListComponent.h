@@ -77,17 +77,17 @@ public:
 
     //==============================================================================
     /** @internal */
-    void resized();
+    void resized() override;
     /** @internal */
-    bool isInterestedInFileDrag (const StringArray&);
+    bool isInterestedInFileDrag (const StringArray&) override;
     /** @internal */
-    void filesDropped (const StringArray&, int, int);
+    void filesDropped (const StringArray&, int, int) override;
     /** @internal */
-    int getNumRows();
+    int getNumRows() override;
     /** @internal */
-    void paintListBoxItem (int row, Graphics&, int width, int height, bool rowIsSelected);
+    void paintListBoxItem (int row, Graphics&, int width, int height, bool rowIsSelected) override;
     /** @internal */
-    void deleteKeyPressed (int lastRowSelected);
+    void deleteKeyPressed (int lastRowSelected) override;
 
 private:
     //==============================================================================
@@ -114,8 +114,8 @@ private:
     bool canShowSelectedFolder() const;
     void removeMissingPlugins();
 
-    void buttonClicked (Button*);
-    void changeListenerCallback (ChangeBroadcaster*);
+    void buttonClicked (Button*) override;
+    void changeListenerCallback (ChangeBroadcaster*) override;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PluginListComponent)
 };

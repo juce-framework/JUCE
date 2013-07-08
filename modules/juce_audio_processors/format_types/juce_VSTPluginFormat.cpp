@@ -2401,7 +2401,7 @@ private:
         }
     }
 
-    void mouseEnter (const MouseEvent& e)
+    void mouseEnter (const MouseEvent& e) override
     {
         if (pluginWindow != 0)
         {
@@ -2424,7 +2424,7 @@ private:
         }
     }
 
-    void mouseExit (const MouseEvent& e)
+    void mouseExit (const MouseEvent& e) override
     {
         if (pluginWindow != 0)
         {
@@ -2448,7 +2448,7 @@ private:
         }
     }
 
-    void mouseMove (const MouseEvent& e)
+    void mouseMove (const MouseEvent& e) override
     {
         if (pluginWindow != 0)
         {
@@ -2468,7 +2468,7 @@ private:
         }
     }
 
-    void mouseDrag (const MouseEvent& e)
+    void mouseDrag (const MouseEvent& e) override
     {
         if (pluginWindow != 0)
         {
@@ -2489,7 +2489,7 @@ private:
         }
     }
 
-    void mouseUp (const MouseEvent& e)
+    void mouseUp (const MouseEvent& e) override
     {
         if (pluginWindow != 0)
         {
@@ -2509,7 +2509,7 @@ private:
         }
     }
 
-    void mouseWheelMove (const MouseEvent& e, const MouseWheelDetails& wheel)
+    void mouseWheelMove (const MouseEvent& e, const MouseWheelDetails& wheel) override
     {
         if (pluginWindow != 0)
         {
@@ -2621,7 +2621,7 @@ private:
     ScopedPointer <NSViewComponent> innerWrapper;
    #endif
 
-    void resized()
+    void resized() override
     {
         if (innerWrapper != nullptr)
             innerWrapper->setSize (getWidth(), getHeight());

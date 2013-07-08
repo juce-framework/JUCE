@@ -97,7 +97,7 @@ public:
         {
             ModuleFolderChecker() {}
 
-            void messageCallback()
+            void messageCallback() override
             {
                 if (IntrojucerApp* const app = dynamic_cast<IntrojucerApp*> (JUCEApplication::getInstance()))
                     app->makeSureUserHasSelectedModuleFolder();

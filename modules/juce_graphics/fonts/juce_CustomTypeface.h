@@ -117,13 +117,13 @@ public:
 
     //==============================================================================
     // The following methods implement the basic Typeface behaviour.
-    float getAscent() const;
-    float getDescent() const;
-    float getHeightToPointsFactor() const;
-    float getStringWidth (const String& text);
-    void getGlyphPositions (const String& text, Array <int>& glyphs, Array<float>& xOffsets);
-    bool getOutlineForGlyph (int glyphNumber, Path& path);
-    EdgeTable* getEdgeTableForGlyph (int glyphNumber, const AffineTransform& transform);
+    float getAscent() const override;
+    float getDescent() const override;
+    float getHeightToPointsFactor() const override;
+    float getStringWidth (const String&) override;
+    void getGlyphPositions (const String&, Array <int>& glyphs, Array<float>& xOffsets) override;
+    bool getOutlineForGlyph (int glyphNumber, Path&) override;
+    EdgeTable* getEdgeTableForGlyph (int glyphNumber, const AffineTransform&) override;
 
 protected:
     //==============================================================================

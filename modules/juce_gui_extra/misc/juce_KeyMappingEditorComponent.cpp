@@ -39,7 +39,7 @@ public:
                                  : TRANS("click to change this key-mapping"));
     }
 
-    void paintButton (Graphics& g, bool /*isOver*/, bool /*isDown*/)
+    void paintButton (Graphics& g, bool /*isOver*/, bool /*isDown*/) override
     {
         getLookAndFeel().drawKeymapChangeButton (g, getWidth(), getHeight(), *this,
                                                  keyNum >= 0 ? getName() : String::empty);
@@ -58,7 +58,7 @@ public:
         }
     }
 
-    void clicked()
+    void clicked() override
     {
         if (keyNum >= 0)
         {
@@ -106,7 +106,7 @@ public:
             grabKeyboardFocus();
         }
 
-        bool keyPressed (const KeyPress& key)
+        bool keyPressed (const KeyPress& key) override
         {
             lastPress = key;
             String message (TRANS("Key") + ": " + owner.getDescriptionForKeyPress (key));
@@ -123,7 +123,7 @@ public:
             return true;
         }
 
-        bool keyStateChanged (bool)
+        bool keyStateChanged (bool) override
         {
             return true;
         }

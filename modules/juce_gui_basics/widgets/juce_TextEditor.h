@@ -315,7 +315,7 @@ public:
     String getText() const;
 
     /** Returns a section of the contents of the editor. */
-    String getTextInRange (const Range<int>& textRange) const;
+    String getTextInRange (const Range<int>& textRange) const override;
 
     /** Returns true if there are no characters in the editor.
         This is far more efficient than calling getText().isEmpty().
@@ -355,7 +355,7 @@ public:
 
         @see setCaretPosition, getCaretPosition, setHighlightedRegion
     */
-    void insertTextAtCaret (const String& textToInsert);
+    void insertTextAtCaret (const String& textToInsert) override;
 
     /** Deletes all the text from the editor. */
     void clear();
@@ -562,7 +562,7 @@ public:
         String allowedCharacters;
         int maxLength;
 
-        String filterNewText (TextEditor&, const String&);
+        String filterNewText (TextEditor&, const String&) override;
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LengthAndCharacterRestriction)
     };

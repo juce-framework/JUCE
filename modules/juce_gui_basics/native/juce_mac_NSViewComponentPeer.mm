@@ -1150,7 +1150,7 @@ public:
                     : peer (p), rect (r)
                 {}
 
-                void messageCallback()
+                void messageCallback() override
                 {
                     if (ComponentPeer::isValidPeer (peer))
                         peer->repaint (rect);

@@ -85,14 +85,14 @@ private:
 
     class ItemComponent;
 
-    void changeListenerCallback (ChangeBroadcaster*);
+    void changeListenerCallback (ChangeBroadcaster*) override;
 
-    int getNumRows();
-    void paintListBoxItem (int, Graphics&, int, int, bool);
-    Component* refreshComponentForRow (int rowNumber, bool isRowSelected, Component* existingComponentToUpdate);
-    void selectedRowsChanged (int lastRowSelected);
-    void deleteKeyPressed (int currentSelectedRow);
-    void returnKeyPressed (int currentSelectedRow);
+    int getNumRows() override;
+    void paintListBoxItem (int, Graphics&, int, int, bool) override;
+    Component* refreshComponentForRow (int rowNumber, bool isRowSelected, Component* existingComponentToUpdate) override;
+    void selectedRowsChanged (int lastRowSelected) override;
+    void deleteKeyPressed (int currentSelectedRow) override;
+    void returnKeyPressed (int currentSelectedRow) override;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FileListComponent)
 };

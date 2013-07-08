@@ -1234,13 +1234,13 @@ public:
         addAndMakeVisible (comp);
     }
 
-    void getIdealSize (int& idealWidth, int& idealHeight)
+    void getIdealSize (int& idealWidth, int& idealHeight) override
     {
         idealWidth = width;
         idealHeight = height;
     }
 
-    void resized()
+    void resized() override
     {
         if (Component* const child = getChildComponent(0))
             child->setBounds (getLocalBounds());

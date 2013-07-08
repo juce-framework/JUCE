@@ -1491,7 +1491,7 @@ private:
                 public:
                     MessageThreadCallback (bool& tr) : triggered (tr) {}
 
-                    void messageCallback()
+                    void messageCallback() override
                     {
                         triggered = true;
                     }

@@ -415,7 +415,7 @@ namespace DragHelpers
     public:
         AsyncDropMessage (Component* c, const ComponentPeer::DragInfo& d)  : target (c), info (d) {}
 
-        void messageCallback()
+        void messageCallback() override
         {
             if (Component* const c = target.get())
             {

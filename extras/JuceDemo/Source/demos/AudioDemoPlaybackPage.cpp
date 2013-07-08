@@ -70,7 +70,7 @@ public:
         }
     }
 
-    void mouseWheelMove (const MouseEvent&, const MouseWheelDetails& wheel)
+    void mouseWheelMove (const MouseEvent&, const MouseWheelDetails& wheel) override
     {
         if (thumbnail.getTotalLength() > 0)
         {
@@ -86,7 +86,7 @@ public:
         }
     }
 
-    void paint (Graphics& g)
+    void paint (Graphics& g) override
     {
         g.fillAll (Colours::white);
         g.setColour (Colours::lightblue);
@@ -103,18 +103,18 @@ public:
         }
     }
 
-    void changeListenerCallback (ChangeBroadcaster*)
+    void changeListenerCallback (ChangeBroadcaster*) override
     {
         // this method is called by the thumbnail when it has changed, so we should repaint it..
         repaint();
     }
 
-    bool isInterestedInFileDrag (const StringArray& /*files*/)
+    bool isInterestedInFileDrag (const StringArray& /*files*/) override
     {
         return true;
     }
 
-    void filesDropped (const StringArray& files, int /*x*/, int /*y*/)
+    void filesDropped (const StringArray& files, int /*x*/, int /*y*/) override
     {
         AudioDemoPlaybackPage* demoPage = findParentComponentOfClass<AudioDemoPlaybackPage>();
 
@@ -122,22 +122,22 @@ public:
             demoPage->showFile (File (files[0]));
     }
 
-    void mouseDown (const MouseEvent& e)
+    void mouseDown (const MouseEvent& e) override
     {
         mouseDrag (e);
     }
 
-    void mouseDrag (const MouseEvent& e)
+    void mouseDrag (const MouseEvent& e) override
     {
         transportSource.setPosition (jmax (0.0, xToTime ((float) e.x)));
     }
 
-    void mouseUp (const MouseEvent&)
+    void mouseUp (const MouseEvent&) override
     {
         transportSource.start();
     }
 
-    void timerCallback()
+    void timerCallback() override
     {
         currentPositionMarker.setVisible (transportSource.isPlaying() || isMouseButtonDown());
 

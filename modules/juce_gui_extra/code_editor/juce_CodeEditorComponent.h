@@ -90,7 +90,7 @@ public:
     CodeDocument::Position getCaretPos() const                  { return caretPos; }
 
     /** Returns the position of the caret, relative to the editor's origin. */
-    Rectangle<int> getCaretRectangle();
+    Rectangle<int> getCaretRectangle() override;
 
     /** Moves the caret.
         If selecting is true, the section of the document between the current
@@ -144,7 +144,7 @@ public:
     void scrollToKeepCaretOnScreen();
     void scrollToKeepLinesOnScreen (Range<int> linesToShow);
 
-    void insertTextAtCaret (const String& textToInsert);
+    void insertTextAtCaret (const String& textToInsert) override;
     void insertTabAtCaret();
 
     void indentSelection();

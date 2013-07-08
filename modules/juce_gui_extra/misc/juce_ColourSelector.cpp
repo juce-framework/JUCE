@@ -129,7 +129,7 @@ public:
         updateMarker();
     }
 
-    void resized()
+    void resized() override
     {
         colours = Image::null;
         updateMarker();

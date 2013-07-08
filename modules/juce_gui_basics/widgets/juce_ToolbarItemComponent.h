@@ -187,9 +187,9 @@ public:
 
     //==============================================================================
     /** @internal */
-    void paintButton (Graphics& g, bool isMouseOver, bool isMouseDown);
+    void paintButton (Graphics&, bool isMouseOver, bool isMouseDown) override;
     /** @internal */
-    void resized();
+    void resized() override;
 
 private:
     friend class Toolbar;

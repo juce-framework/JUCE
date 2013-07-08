@@ -242,7 +242,7 @@ private:
             : files (f), canMoveFiles (canMove)
         {}
 
-        void messageCallback()
+        void messageCallback() override
         {
             DragAndDropContainer::performExternalDragDropOfFiles (files, canMoveFiles);
         }

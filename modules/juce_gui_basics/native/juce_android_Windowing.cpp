@@ -129,7 +129,7 @@ public:
             {
                 ViewDeleter (const GlobalRef& view_) : view (view_) {}
 
-                void messageCallback()
+                void messageCallback() override
                 {
                     android.activity.callVoidMethod (JuceAppActivity.deleteView, view.get());
                 }
@@ -163,7 +163,7 @@ public:
                     : view (view_), shouldBeVisible (shouldBeVisible_)
                 {}
 
-                void messageCallback()
+                void messageCallback() override
                 {
                     view.callVoidMethod (ComponentPeerView.setVisible, shouldBeVisible);
                 }
@@ -197,7 +197,7 @@ public:
             public:
                 ViewMover (const GlobalRef& v, const Rectangle<int>& r)  : view (v), bounds (r) {}
 
-                void messageCallback()
+                void messageCallback() override
                 {
                     view.callVoidMethod (ComponentPeerView.layout,
                                          bounds.getX(), bounds.getY(), bounds.getRight(), bounds.getBottom());
@@ -429,7 +429,7 @@ public:
                 ViewRepainter (const GlobalRef& view_, const Rectangle<int>& area_)
                     : view (view_), area (area_) {}
 
-                void messageCallback()
+                void messageCallback() override
                 {
                     view.callVoidMethod (ComponentPeerView.invalidate, area.getX(), area.getY(),
                                          area.getRight(), area.getBottom());

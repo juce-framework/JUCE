@@ -85,9 +85,8 @@ public:
     void setOutline (Colour outlineColour,
                      float outlineStrokeWidth);
 
-
     /** @internal */
-    void paintButton (Graphics&, bool isMouseOverButton, bool isButtonDown);
+    void paintButton (Graphics&, bool isMouseOverButton, bool isButtonDown) override;
 
 private:
     //==============================================================================

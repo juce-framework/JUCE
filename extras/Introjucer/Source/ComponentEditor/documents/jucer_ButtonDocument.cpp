@@ -282,7 +282,7 @@ public:
         setClickingTogglesState (true);
     }
 
-    void paintButton (Graphics& g, bool isMouseOverButton, bool isButtonDown)
+    void paintButton (Graphics& g, bool isMouseOverButton, bool isButtonDown) override
     {
         if (document->paintStatesEnabled [background])
         {

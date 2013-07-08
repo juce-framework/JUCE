@@ -114,7 +114,7 @@ void ProjectTreeViewBase::triggerAsyncRename (const Project::Item& itemToRename)
         RenameMessage (TreeView* const t, const Project::Item& i)
             : tree (t), itemToRename (i)  {}
 
-        void messageCallback()
+        void messageCallback() override
         {
             if (tree != nullptr)
                 if (ProjectTreeViewBase* root = dynamic_cast <ProjectTreeViewBase*> (tree->getRootItem()))

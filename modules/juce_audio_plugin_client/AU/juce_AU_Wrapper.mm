@@ -1354,15 +1354,15 @@ private:
             [pluginWindow orderFront: nil];
         }
 
-        void resized()
+        void resized() override
         {
             if (Component* const child = getChildComponent (0))
                 child->setBounds (getLocalBounds());
         }
 
-        void paint (Graphics&) {}
+        void paint (Graphics&) override {}
 
-        void childBoundsChanged (Component*)
+        void childBoundsChanged (Component*) override
         {
             if (! recursive)
             {
@@ -1385,7 +1385,7 @@ private:
             }
         }
 
-        bool keyPressed (const KeyPress& kp)
+        bool keyPressed (const KeyPress& kp) override
         {
             if (! kp.getModifiers().isCommandDown())
             {

@@ -223,7 +223,7 @@ public:
         setup.manager->removeChangeListener (this);
     }
 
-    void resized()
+    void resized() override
     {
         const int lx = proportionOfWidth (0.35f);
         const int w = proportionOfWidth (0.4f);
@@ -305,7 +305,7 @@ public:
         }
     }
 
-    void comboBoxChanged (ComboBox* comboBoxThatHasChanged)
+    void comboBoxChanged (ComboBox* comboBoxThatHasChanged) override
     {
         if (comboBoxThatHasChanged == nullptr)
             return;
@@ -381,7 +381,7 @@ public:
         return device->showControlPanel();
     }
 
-    void buttonClicked (Button* button)
+    void buttonClicked (Button* button) override
     {
         if (button == showAdvancedSettingsButton)
         {
@@ -475,7 +475,7 @@ public:
         setSize (getWidth(), getLowestY() + 4);
     }
 
-    void changeListenerCallback (ChangeBroadcaster*)
+    void changeListenerCallback (ChangeBroadcaster*) override
     {
         updateAllControls();
     }
@@ -714,12 +714,12 @@ public:
             repaint();
         }
 
-        int getNumRows()
+        int getNumRows() override
         {
             return items.size();
         }
 
-        void paintListBoxItem (int row, Graphics& g, int width, int height, bool rowIsSelected)
+        void paintListBoxItem (int row, Graphics& g, int width, int height, bool rowIsSelected) override
         {
             if (isPositiveAndBelow (row, items.size()))
             {
@@ -760,7 +760,7 @@ public:
             }
         }
 
-        void listBoxItemClicked (int row, const MouseEvent& e)
+        void listBoxItemClicked (int row, const MouseEvent& e) override
         {
             selectRow (row);
 
@@ -768,12 +768,12 @@ public:
                 flipEnablement (row);
         }
 
-        void listBoxItemDoubleClicked (int row, const MouseEvent&)
+        void listBoxItemDoubleClicked (int row, const MouseEvent&) override
         {
             flipEnablement (row);
         }
 
-        void returnKeyPressed (int row)
+        void returnKeyPressed (int row) override
         {
             flipEnablement (row);
         }
