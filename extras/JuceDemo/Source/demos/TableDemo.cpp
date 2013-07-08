@@ -242,7 +242,7 @@ private:
         {
             row = newRow;
             columnId = newColumn;
-            comboBox.setSelectedId (owner.getRating (row), true);
+            comboBox.setSelectedId (owner.getRating (row), dontSendNotification);
         }
 
         void comboBoxChanged (ComboBox* /*comboBoxThatHasChanged*/)

@@ -232,7 +232,7 @@ void DocumentWindow::resized()
     ResizableWindow::resized();
 
     if (Button* const b = getMaximiseButton())
-        b->setToggleState (isFullScreen(), false);
+        b->setToggleState (isFullScreen(), dontSendNotification);
 
     const Rectangle<int> titleBarArea (getTitleBarArea());
 

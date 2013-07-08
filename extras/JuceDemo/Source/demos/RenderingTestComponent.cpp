@@ -520,7 +520,7 @@ RenderingTestComponent::RenderingTestComponent ()
     testTypeComboBox->setSelectedId (2);
     sizeSlider->setValue (1.0, dontSendNotification);
     opacitySlider->setValue (1.0, dontSendNotification);
-    highQualityToggle->setToggleState (true, false);
+    highQualityToggle->setToggleState (true, dontSendNotification);
     //[/Constructor]
 }
 

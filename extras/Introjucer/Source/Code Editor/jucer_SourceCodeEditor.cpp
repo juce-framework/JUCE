@@ -320,7 +320,7 @@ public:
 
         addAndMakeVisible (&caseButton);
         caseButton.setColour (ToggleButton::textColourId, Colours::white);
-        caseButton.setToggleState (isCaseSensitiveSearch(), false);
+        caseButton.setToggleState (isCaseSensitiveSearch(), dontSendNotification);
         caseButton.addListener (this);
 
         findPrev.setConnectedEdges (Button::ConnectedOnRight);

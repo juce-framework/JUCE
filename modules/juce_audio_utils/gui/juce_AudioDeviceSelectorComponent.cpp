@@ -465,10 +465,10 @@ public:
             bufferSizeDropDown = nullptr;
 
             if (outputDeviceDropDown != nullptr)
-                outputDeviceDropDown->setSelectedId (-1, true);
+                outputDeviceDropDown->setSelectedId (-1, dontSendNotification);
 
             if (inputDeviceDropDown != nullptr)
-                inputDeviceDropDown->setSelectedId (-1, true);
+                inputDeviceDropDown->setSelectedId (-1, dontSendNotification);
         }
 
         resized();
@@ -498,7 +498,7 @@ private:
 
             const int index = type->getIndexOfDevice (currentDevice, isInput);
 
-            box->setSelectedId (index + 1, true);
+            box->setSelectedId (index + 1, dontSendNotification);
 
             if (testButton != nullptr && ! isInput)
                 testButton->setEnabled (index >= 0);
@@ -509,13 +509,13 @@ private:
     {
         const StringArray devs (type->getDeviceNames (isInputs));
 
-        combo.clear (true);
+        combo.clear (dontSendNotification);
 
         for (int i = 0; i < devs.size(); ++i)
             combo.addItem (devs[i], i + 1);
 
         combo.addItem (getNoDeviceString(), -1);
-        combo.setSelectedId (-1, true);
+        combo.setSelectedId (-1, dontSendNotification);
     }
 
     int getLowestY() const
@@ -617,7 +617,7 @@ private:
             sampleRateDropDown->addItem (String (rate) + " Hz", rate);
         }
 
-        sampleRateDropDown->setSelectedId (roundToInt (currentDevice->getCurrentSampleRate()), true);
+        sampleRateDropDown->setSelectedId (roundToInt (currentDevice->getCurrentSampleRate()), dontSendNotification);
         sampleRateDropDown->addListener (this);
     }
 
@@ -651,7 +651,7 @@ private:
                                          bs);
         }
 
-        bufferSizeDropDown->setSelectedId (currentDevice->getCurrentBufferSizeSamples(), true);
+        bufferSizeDropDown->setSelectedId (currentDevice->getCurrentBufferSizeSamples(), dontSendNotification);
         bufferSizeDropDown->addListener (this);
     }
 
@@ -1059,7 +1059,7 @@ void AudioDeviceSelectorComponent::changeListenerCallback (ChangeBroadcaster*)
 void AudioDeviceSelectorComponent::updateAllControls()
 {
     if (deviceTypeDropDown != nullptr)
-        deviceTypeDropDown->setText (deviceManager.getCurrentAudioDeviceType(), false);
+        deviceTypeDropDown->setText (deviceManager.getCurrentAudioDeviceType(), dontSendNotification);
 
     if (audioDeviceSettingsComp == nullptr
          || audioDeviceSettingsCompType != deviceManager.getCurrentAudioDeviceType())
@@ -1112,7 +1112,7 @@ void AudioDeviceSelectorComponent::updateAllControls()
         if (deviceManager.getDefaultMidiOutput() != nullptr)
             current = 1 + midiOuts.indexOf (deviceManager.getDefaultMidiOutputName());
 
-        midiOutputSelector->setSelectedId (current, true);
+        midiOutputSelector->setSelectedId (current, dontSendNotification);
     }
 
     resized();

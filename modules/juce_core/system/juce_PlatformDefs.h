@@ -271,10 +271,12 @@ namespace juce
 
 //==============================================================================
 // Cross-compiler deprecation macros..
-#if DOXYGEN || (JUCE_MSVC && ! JUCE_NO_DEPRECATION_WARNINGS)
- /** This can be used to wrap a function which has been deprecated. */
+#ifdef DOXYGEN
+ /** This macro can be used to wrap a function which has been deprecated. */
+ #define JUCE_DEPRECATED(functionDef)
+#elif JUCE_MSVC && ! JUCE_NO_DEPRECATION_WARNINGS
  #define JUCE_DEPRECATED(functionDef)     __declspec(deprecated) functionDef
-#elif JUCE_GCC  && ! JUCE_NO_DEPRECATION_WARNINGS
+#elif JUCE_GCC && ! JUCE_NO_DEPRECATION_WARNINGS
  #define JUCE_DEPRECATED(functionDef)     functionDef __attribute__ ((deprecated))
 #else
  #define JUCE_DEPRECATED(functionDef)     functionDef

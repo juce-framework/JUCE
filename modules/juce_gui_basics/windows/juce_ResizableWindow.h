@@ -312,7 +312,7 @@ public:
     };
 
     //==============================================================================
-    /** @deprecated - use setContentOwned() and setContentNonOwned() instead. */
+    // Deprecated: use setContentOwned() and setContentNonOwned() instead.
     JUCE_DEPRECATED (void setContentComponent (Component* newContentComponent,
                                                bool deleteOldOne = true,
                                                bool resizeToFit = false));

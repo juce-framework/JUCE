@@ -1224,7 +1224,7 @@ private:
     explicit String (const PreallocationBytes&); // This constructor preallocates a certain amount of memory
     void appendFixedLength (const char* text, int numExtraChars);
     size_t getByteOffsetOfEnd() const noexcept;
-    JUCE_DEPRECATED (String (const String& stringToCopy, size_t charsToAllocate));
+    JUCE_DEPRECATED (String (const String&, size_t));
 
     // This private cast operator should prevent strings being accidentally cast
     // to bools (this is possible because the compiler can add an implicit cast

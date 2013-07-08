@@ -2214,12 +2214,10 @@ public:
     CachedComponentImage* getCachedComponentImage() const noexcept  { return cachedImage; }
 
     //==============================================================================
-   #ifndef DOXYGEN
     // These methods are deprecated - use localPointToGlobal, getLocalPoint, getLocalPoint, etc instead.
     JUCE_DEPRECATED (Point<int> relativePositionToGlobal (Point<int>) const);
     JUCE_DEPRECATED (Point<int> globalPositionToRelative (Point<int>) const);
     JUCE_DEPRECATED (Point<int> relativePositionToOtherComponent (const Component*, Point<int>) const);
-   #endif
 
 private:
     //==============================================================================

@@ -141,12 +141,12 @@ public:
 
     /** Removes all the items from the drop-down list.
 
-        If this call causes the content to be cleared, then a change-message
-        will be broadcast unless dontSendChangeMessage is true.
+        If this call causes the content to be cleared, and a change-message
+        will be broadcast according to the notification parameter.
 
         @see addItem, removeItem, getNumItems
     */
-    void clear (bool dontSendChangeMessage = false);
+    void clear (NotificationType notification = sendNotificationAsync);
 
     /** Returns the number of items that have been added to the list.
 
@@ -196,12 +196,13 @@ public:
         This will set the ComboBox's text to that of the item that matches
         this ID.
 
-        @param newItemId                the new item to select
-        @param dontSendChangeMessage    if set to true, this method won't trigger a
-                                        change notification
+        @param newItemId        the new item to select
+        @param notification     determines the type of change notification that will
+                                be sent to listeners if the value changes
         @see getSelectedId, setSelectedItemIndex, setText
     */
-    void setSelectedId (int newItemId, bool dontSendChangeMessage = false);
+    void setSelectedId (int newItemId,
+                        NotificationType notification = sendNotificationAsync);
 
     //==============================================================================
     /** Returns the index of the item that's currently shown in the box.
@@ -219,12 +220,13 @@ public:
         This will set the ComboBox's text to that of the item at the given
         index in the list.
 
-        @param newItemIndex             the new item to select
-        @param dontSendChangeMessage    if set to true, this method won't trigger a
-                                        change notification
+        @param newItemIndex     the new item to select
+        @param notification     determines the type of change notification that will
+                                be sent to listeners if the value changes
         @see getSelectedItemIndex, setSelectedId, setText
     */
-    void setSelectedItemIndex (int newItemIndex, bool dontSendChangeMessage = false);
+    void setSelectedItemIndex (int newItemIndex,
+                               NotificationType notification = sendNotificationAsync);
 
     //==============================================================================
     /** Returns the text that is currently shown in the combo-box's text field.
@@ -244,12 +246,13 @@ public:
         items, then getSelectedId() will return -1, otherwise it wil return
         the approriate ID.
 
-        @param newText                  the text to select
-        @param dontSendChangeMessage    if set to true, this method won't trigger a
-                                        change notification
+        @param newText          the text to select
+        @param notification     determines the type of change notification that will
+                                be sent to listeners if the text changes
         @see getText
     */
-    void setText (const String& newText, bool dontSendChangeMessage = false);
+    void setText (const String& newText,
+                  NotificationType notification = sendNotificationAsync);
 
     /** Programmatically opens the text editor to allow the user to edit the current item.
 
@@ -371,6 +374,12 @@ public:
     /** @internal */
     void valueChanged (Value&) override;
 
+    // These methods' bool parameters have changed: see their new method signatures.
+    JUCE_DEPRECATED (void clear (bool));
+    JUCE_DEPRECATED (void setSelectedId (int, bool));
+    JUCE_DEPRECATED (void setSelectedItemIndex (int, bool));
+    JUCE_DEPRECATED (void setText (const String&, bool));
+
 private:
     //==============================================================================
     struct ItemInfo
@@ -395,6 +404,7 @@ private:
     ItemInfo* getItemForId (int itemId) const noexcept;
     ItemInfo* getItemForIndex (int index) const noexcept;
     bool selectIfEnabled (int index);
+    void sendChange (NotificationType);
     static void popupMenuFinishedCallback (int, ComboBox*);
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ComboBox)

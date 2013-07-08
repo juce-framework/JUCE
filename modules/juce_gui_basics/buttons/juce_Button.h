@@ -90,17 +90,17 @@ public:
         an action you won't change this. Toggle buttons, however will want to
         change their state when turned on or off.
 
-        @param shouldBeOn               whether to set the button's toggle state to be on or
-                                        off. If it's a member of a button group, this will
-                                        always try to turn it on, and to turn off any other
-                                        buttons in the group
-        @param sendChangeNotification   if true, a callback will be made to clicked(); if false
-                                        the button will be repainted but no notification will
-                                        be sent
+        @param shouldBeOn       whether to set the button's toggle state to be on or
+                                off. If it's a member of a button group, this will
+                                always try to turn it on, and to turn off any other
+                                buttons in the group
+        @param notification     determines the behaviour if the value changes - this
+                                can invoke a synchronous call to clicked(), but
+                                sendNotificationAsync is not supported
         @see getToggleState, setRadioGroupId
     */
     void setToggleState (bool shouldBeOn,
-                         bool sendChangeNotification);
+                         NotificationType notification);
 
     /** Returns true if the button is 'on'.
 
@@ -353,6 +353,8 @@ public:
     */
     void setState (const ButtonState newState);
 
+    // This method's parameters have changed - see the new version.
+    JUCE_DEPRECATED (void setToggleState (bool, bool));
 
 protected:
     //==============================================================================
@@ -474,15 +476,11 @@ private:
     ButtonState updateState();
     ButtonState updateState (bool isOver, bool isDown);
     bool isShortcutPressed() const;
-    void turnOffOtherButtonsInGroup (bool sendChangeNotification);
+    void turnOffOtherButtonsInGroup (NotificationType);
 
     void flashButtonState();
     void sendClickMessage (const ModifierKeys&);
     void sendStateMessage();
-
-    // These are deprecated - please use addListener() and removeListener() instead!
-    JUCE_DEPRECATED (void addButtonListener (Listener*));
-    JUCE_DEPRECATED (void removeButtonListener (Listener*));
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Button)
 };

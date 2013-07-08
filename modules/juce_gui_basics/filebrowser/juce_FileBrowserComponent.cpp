@@ -244,7 +244,7 @@ void FileBrowserComponent::setRoot (const File& newRootDirectory)
     if (currentRootName.isEmpty())
         currentRootName = File::separatorString;
 
-    currentPathBox.setText (currentRootName, true);
+    currentPathBox.setText (currentRootName, dontSendNotification);
 
     goUpButton->setEnabled (currentRoot.getParentDirectory().isDirectory()
                              && currentRoot.getParentDirectory() != currentRoot);

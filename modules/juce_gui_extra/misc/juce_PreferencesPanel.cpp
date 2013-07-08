@@ -130,7 +130,7 @@ void PreferencesPanel::setCurrentPage (const String& pageName)
         {
             if (buttons.getUnchecked(i)->getName() == pageName)
             {
-                buttons.getUnchecked(i)->setToggleState (true, false);
+                buttons.getUnchecked(i)->setToggleState (true, dontSendNotification);
                 break;
             }
         }

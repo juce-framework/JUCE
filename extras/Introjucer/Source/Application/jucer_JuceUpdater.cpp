@@ -207,7 +207,7 @@ void JuceUpdater::updateInstallButtonStatus()
 {
     const int numChecked = getNumCheckedModules();
     installButton.setEnabled (numChecked > 0);
-    selectAllButton.setToggleState (numChecked > latestList.modules.size() / 2, false);
+    selectAllButton.setToggleState (numChecked > latestList.modules.size() / 2, dontSendNotification);
 }
 
 void JuceUpdater::filenameComponentChanged (FilenameComponent*)

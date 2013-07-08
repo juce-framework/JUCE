@@ -62,7 +62,7 @@ public:
         if (! ButtonHandler::restoreFromXml (xml, comp, layout))
             return false;
 
-        tb->setToggleState (xml.getBoolAttribute ("state", false), false);
+        tb->setToggleState (xml.getBoolAttribute ("state", false), dontSendNotification);
         return true;
     }
 
@@ -75,7 +75,7 @@ public:
         String s;
 
         if (tb->getToggleState())
-            s << memberVariableName << "->setToggleState (true, false);\n";
+            s << memberVariableName << "->setToggleState (true, dontSendNotification);\n";
 
         s << getColourIntialisationCode (component, memberVariableName)
           << '\n';
@@ -117,7 +117,7 @@ private:
             bool perform()
             {
                 showCorrectTab();
-                getComponent()->setToggleState (newState, false);
+                getComponent()->setToggleState (newState, dontSendNotification);
                 changed();
                 return true;
             }
@@ -125,7 +125,7 @@ private:
             bool undo()
             {
                 showCorrectTab();
-                getComponent()->setToggleState (oldState, false);
+                getComponent()->setToggleState (oldState, dontSendNotification);
                 changed();
                 return true;
             }

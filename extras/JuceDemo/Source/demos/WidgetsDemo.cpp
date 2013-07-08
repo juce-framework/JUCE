@@ -399,7 +399,7 @@ static Component* createRadioButtonPage()
         tb->setTooltip ("a set of mutually-exclusive radio buttons");
 
         if (i == 0)
-            tb->setToggleState (true, false);
+            tb->setToggleState (true, dontSendNotification);
     }
 
     for (int i = 0; i < 4; ++i)
@@ -429,7 +429,7 @@ static Component* createRadioButtonPage()
         db->setBounds (25 + i * buttonSize, 180, buttonSize, buttonSize);
 
         if (i == 0)
-            db->setToggleState (true, false);
+            db->setToggleState (true, dontSendNotification);
     }
 
     for (int i = 0; i < 4; ++i)
@@ -447,7 +447,7 @@ static Component* createRadioButtonPage()
                                 | ((i != 3) ? Button::ConnectedOnRight : 0));
 
         if (i == 0)
-            tb->setToggleState (true, false);
+            tb->setToggleState (true, dontSendNotification);
     }
 
     return page;
@@ -1074,7 +1074,7 @@ public:
         addAndMakeVisible (&enableButton);
         enableButton.setBounds (230, 10, 180, 24);
         enableButton.setTooltip ("Enables/disables all the components");
-        enableButton.setToggleState (true, false);
+        enableButton.setToggleState (true, dontSendNotification);
         enableButton.addListener (this);
 
         addAndMakeVisible (&transformSlider);

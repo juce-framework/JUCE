@@ -321,7 +321,7 @@ void TabbedButtonBar::setCurrentTabIndex (int newIndex, const bool sendChangeMes
         for (int i = 0; i < tabs.size(); ++i)
         {
             TabBarButton* tb = tabs.getUnchecked(i)->button;
-            tb->setToggleState (i == newIndex, false);
+            tb->setToggleState (i == newIndex, dontSendNotification);
         }
 
         resized();
