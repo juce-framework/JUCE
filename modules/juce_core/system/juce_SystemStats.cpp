@@ -84,7 +84,7 @@ String SystemStats::getStackBacktrace()
     int frames = (int) CaptureStackBackTrace (0, numElementsInArray (stack), stack, nullptr);
 
     HeapBlock<SYMBOL_INFO> symbol;
-    symbol.calloc (sizeof(SYMBOL_INFO) + 256, 1);
+    symbol.calloc (sizeof (SYMBOL_INFO) + 256, 1);
     symbol->MaxNameLen = 255;
     symbol->SizeOfStruct = sizeof (SYMBOL_INFO);
 
@@ -136,6 +136,8 @@ static void handleCrash (int)
     globalCrashHandler();
     kill (getpid(), SIGKILL);
 }
+
+int juce_siginterrupt (int sig, int flag);
 #endif
 
 void SystemStats::setApplicationCrashHandler (CrashHandlerFunction handler)
@@ -151,7 +153,7 @@ void SystemStats::setApplicationCrashHandler (CrashHandlerFunction handler)
     for (int i = 0; i < numElementsInArray (signals); ++i)
     {
         ::signal (signals[i], handleCrash);
-        ::siginterrupt (signals[i], 1);
+        juce_siginterrupt (signals[i], 1);
     }
    #endif
 }

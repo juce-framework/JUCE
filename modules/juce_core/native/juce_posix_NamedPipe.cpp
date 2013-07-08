@@ -37,7 +37,7 @@ public:
          stopReadOperation (false)
     {
         signal (SIGPIPE, signalHandler);
-        siginterrupt (SIGPIPE, 1);
+        juce_siginterrupt (SIGPIPE, 1);
     }
 
     ~Pimpl()
