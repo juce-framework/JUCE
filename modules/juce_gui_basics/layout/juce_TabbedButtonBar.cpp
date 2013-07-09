@@ -271,12 +271,13 @@ void TabbedButtonBar::setTabName (const int tabIndex, const String& newName)
 
 void TabbedButtonBar::removeTab (const int tabIndex)
 {
+    const int oldIndex = currentTabIndex;
     if (tabIndex == currentTabIndex)
         setCurrentTabIndex (-1);
 
-    TabInfo* const currentTab = tabs [currentTabIndex];
     tabs.remove (tabIndex);
-    currentTabIndex = tabs.indexOf (currentTab);
+
+    setCurrentTabIndex (oldIndex);
     resized();
 }
 
