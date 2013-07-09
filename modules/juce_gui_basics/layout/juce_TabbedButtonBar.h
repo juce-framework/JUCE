@@ -296,9 +296,9 @@ public:
 
     //==============================================================================
     /** @internal */
-    void resized();
+    void resized() override;
     /** @internal */
-    void lookAndFeelChanged();
+    void lookAndFeelChanged() override;
 
 protected:
     //==============================================================================

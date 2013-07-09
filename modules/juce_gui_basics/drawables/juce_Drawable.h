@@ -211,7 +211,7 @@ protected:
     /** @internal */
     void transformContextToCorrectOrigin (Graphics&);
     /** @internal */
-    void parentHierarchyChanged();
+    void parentHierarchyChanged() override;
     /** @internal */
     void setBoundsToEnclose (const Rectangle<float>&);
 

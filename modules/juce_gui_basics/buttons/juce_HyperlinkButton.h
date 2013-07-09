@@ -95,13 +95,11 @@ public:
 protected:
     //==============================================================================
     /** @internal */
-    void clicked();
+    void clicked() override;
     /** @internal */
-    void colourChanged();
+    void colourChanged() override;
     /** @internal */
-    void paintButton (Graphics& g,
-                      bool isMouseOverButton,
-                      bool isButtonDown);
+    void paintButton (Graphics&, bool isMouseOver, bool isButtonDown) override;
 
 private:
     //==============================================================================

@@ -53,7 +53,7 @@ public:
         return true;
     }
 
-    void actionListenerCallback (const String& message)
+    void actionListenerCallback (const String& message) override
     {
         if (JUCEApplication* const app = JUCEApplication::getInstance())
         {

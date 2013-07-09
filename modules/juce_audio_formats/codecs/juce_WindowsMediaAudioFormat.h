@@ -36,17 +36,17 @@ public:
     ~WindowsMediaAudioFormat();
 
     //==============================================================================
-    Array<int> getPossibleSampleRates();
-    Array<int> getPossibleBitDepths();
-    bool canDoStereo();
-    bool canDoMono();
+    Array<int> getPossibleSampleRates() override;
+    Array<int> getPossibleBitDepths() override;
+    bool canDoStereo() override;
+    bool canDoMono() override;
 
     //==============================================================================
-    AudioFormatReader* createReaderFor (InputStream*, bool deleteStreamIfOpeningFails);
+    AudioFormatReader* createReaderFor (InputStream*, bool deleteStreamIfOpeningFails) override;
 
     AudioFormatWriter* createWriterFor (OutputStream*, double sampleRateToUse,
                                         unsigned int numberOfChannels, int bitsPerSample,
-                                        const StringPairArray& metadataValues, int qualityOptionIndex);
+                                        const StringPairArray& metadataValues, int qualityOptionIndex) override;
 };
 
 #endif

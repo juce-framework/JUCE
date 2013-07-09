@@ -205,8 +205,8 @@ private:
     bool movieLoaded, controllerVisible, looping;
 
 #if JUCE_WINDOWS
-    void parentHierarchyChanged();
-    void visibilityChanged();
+    void parentHierarchyChanged() override;
+    void visibilityChanged() override;
 
     void createControlIfNeeded();
     bool isControlCreated() const;

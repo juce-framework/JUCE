@@ -161,7 +161,7 @@ public:
     }
 
     bool readSamples (int** destSamples, int numDestChannels, int startOffsetInDestBuffer,
-                      int64 startSampleInFile, int numSamples)
+                      int64 startSampleInFile, int numSamples) override
     {
         if (sampleRate <= 0)
             return false;

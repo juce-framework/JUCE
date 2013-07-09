@@ -57,28 +57,27 @@ public:
     static const char* const appleKey;
 
     //==============================================================================
-    Array<int> getPossibleSampleRates();
-    Array<int> getPossibleBitDepths();
-    bool canDoStereo();
-    bool canDoMono();
+    Array<int> getPossibleSampleRates() override;
+    Array<int> getPossibleBitDepths() override;
+    bool canDoStereo() override;
+    bool canDoMono() override;
 
    #if JUCE_MAC
-    bool canHandleFile (const File& fileToTest);
+    bool canHandleFile (const File& fileToTest) override;
    #endif
 
     //==============================================================================
     AudioFormatReader* createReaderFor (InputStream* sourceStream,
-                                        bool deleteStreamIfOpeningFails);
+                                        bool deleteStreamIfOpeningFails) override;
 
-    MemoryMappedAudioFormatReader* createMemoryMappedReader (const File&);
+    MemoryMappedAudioFormatReader* createMemoryMappedReader (const File&) override;
 
     AudioFormatWriter* createWriterFor (OutputStream* streamToWriteTo,
                                         double sampleRateToUse,
                                         unsigned int numberOfChannels,
                                         int bitsPerSample,
                                         const StringPairArray& metadataValues,
-                                        int qualityOptionIndex);
-
+                                        int qualityOptionIndex) override;
 
 private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(AiffAudioFormat)

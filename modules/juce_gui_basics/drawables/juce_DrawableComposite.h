@@ -107,11 +107,11 @@ public:
     /** @internal */
     Rectangle<float> getDrawableBounds() const;
     /** @internal */
-    void childBoundsChanged (Component*);
+    void childBoundsChanged (Component*) override;
     /** @internal */
-    void childrenChanged();
+    void childrenChanged() override;
     /** @internal */
-    void parentHierarchyChanged();
+    void parentHierarchyChanged() override;
     /** @internal */
     MarkerList* getMarkers (bool xAxis);
 

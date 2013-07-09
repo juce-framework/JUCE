@@ -140,15 +140,15 @@ protected:
 
     //==============================================================================
     /** @internal */
-    void focusOfChildComponentChanged (FocusChangeType cause);
+    void focusOfChildComponentChanged (FocusChangeType) override;
     /** @internal */
-    void parentHierarchyChanged();
+    void parentHierarchyChanged() override;
     /** @internal */
     virtual int getDesktopWindowStyleFlags() const;
     /** @internal */
     void recreateDesktopWindow();
     /** @internal */
-    void visibilityChanged();
+    void visibilityChanged() override;
 
 private:
     friend class TopLevelWindowManager;
