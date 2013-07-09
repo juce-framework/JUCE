@@ -796,7 +796,7 @@ public:
         effect = nullptr;
     }
 
-    void fillInPluginDescription (PluginDescription& desc) const
+    void fillInPluginDescription (PluginDescription& desc) const override
     {
         desc.name = name;
 
@@ -872,8 +872,8 @@ public:
         setLatencySamples (effect->initialDelay);
     }
 
-    void* getPlatformSpecificData()  { return effect; }
-    const String getName() const     { return name; }
+    void* getPlatformSpecificData() override  { return effect; }
+    const String getName() const override     { return name; }
 
     int getUID() const
     {
@@ -885,12 +885,12 @@ public:
         return uid;
     }
 
-    bool silenceInProducesSilenceOut() const
+    bool silenceInProducesSilenceOut() const override
     {
         return effect == nullptr || (effect->flags & effFlagsNoSoundInStop) != 0;
     }
 
-    double getTailLengthSeconds() const
+    double getTailLengthSeconds() const override
     {
         if (effect == nullptr)
             return 0.0;
@@ -904,11 +904,11 @@ public:
         return samples / sampleRate;
     }
 
-    bool acceptsMidi() const    { return wantsMidiMessages; }
-    bool producesMidi() const   { return dispatch (effCanDo, 0, 0, (void*) "sendVstMidiEvent", 0) > 0; }
+    bool acceptsMidi() const override    { return wantsMidiMessages; }
+    bool producesMidi() const override   { return dispatch (effCanDo, 0, 0, (void*) "sendVstMidiEvent", 0) > 0; }
 
     //==============================================================================
-    void prepareToPlay (double rate, int samplesPerBlockExpected)
+    void prepareToPlay (double rate, int samplesPerBlockExpected) override
     {
         setPlayConfigDetails (effect->numInputs, effect->numOutputs, rate, samplesPerBlockExpected);
 
@@ -955,7 +955,7 @@ public:
         }
     }
 
-    void releaseResources()
+    void releaseResources() override
     {
         if (initialised)
         {
@@ -969,7 +969,7 @@ public:
         midiEventsToSend.freeEvents();
     }
 
-    void reset()
+    void reset() override
     {
         if (isPowerOn)
         {
@@ -978,7 +978,7 @@ public:
         }
     }
 
-    void processBlock (AudioSampleBuffer& buffer, MidiBuffer& midiMessages)
+    void processBlock (AudioSampleBuffer& buffer, MidiBuffer& midiMessages) override
     {
         const int numSamples = buffer.getNumSamples();
 
@@ -1083,11 +1083,11 @@ public:
     }
 
     //==============================================================================
-    bool hasEditor() const                  { return effect != nullptr && (effect->flags & effFlagsHasEditor) != 0; }
-    AudioProcessorEditor* createEditor();
+    bool hasEditor() const override                  { return effect != nullptr && (effect->flags & effFlagsHasEditor) != 0; }
+    AudioProcessorEditor* createEditor() override;
 
     //==============================================================================
-    const String getInputChannelName (int index) const
+    const String getInputChannelName (int index) const override
     {
         if (index >= 0 && index < getNumInputChannels())
         {
@@ -1099,7 +1099,7 @@ public:
         return String::empty;
     }
 
-    bool isInputChannelStereoPair (int index) const
+    bool isInputChannelStereoPair (int index) const override
     {
         if (index < 0 || index >= getNumInputChannels())
             return false;
@@ -1111,7 +1111,7 @@ public:
         return true;
     }
 
-    const String getOutputChannelName (int index) const
+    const String getOutputChannelName (int index) const override
     {
         if (index >= 0 && index < getNumOutputChannels())
         {
@@ -1123,7 +1123,7 @@ public:
         return String::empty;
     }
 
-    bool isOutputChannelStereoPair (int index) const
+    bool isOutputChannelStereoPair (int index) const override
     {
         if (index < 0 || index >= getNumOutputChannels())
             return false;
@@ -1144,7 +1144,7 @@ public:
     //==============================================================================
     int getNumParameters()      { return effect != nullptr ? effect->numParams : 0; }
 
-    float getParameter (int index)
+    float getParameter (int index) override
     {
         if (effect != nullptr && isPositiveAndBelow (index, (int) effect->numParams))
         {
@@ -1155,7 +1155,7 @@ public:
         return 0.0f;
     }
 
-    void setParameter (int index, float newValue)
+    void setParameter (int index, float newValue) override
     {
         if (effect != nullptr && isPositiveAndBelow (index, (int) effect->numParams))
         {
@@ -1166,11 +1166,11 @@ public:
         }
     }
 
-    const String getParameterName (int index)       { return getTextForOpcode (index, effGetParamName); }
-    const String getParameterText (int index)       { return getTextForOpcode (index, effGetParamDisplay); }
-    String getParameterLabel (int index) const      { return getTextForOpcode (index, effGetParamLabel); }
+    const String getParameterName (int index) override       { return getTextForOpcode (index, effGetParamName); }
+    const String getParameterText (int index) override       { return getTextForOpcode (index, effGetParamDisplay); }
+    String getParameterLabel (int index) const override      { return getTextForOpcode (index, effGetParamLabel); }
 
-    bool isParameterAutomatable (int index) const
+    bool isParameterAutomatable (int index) const override
     {
         if (effect != nullptr)
         {
@@ -1182,16 +1182,16 @@ public:
     }
 
     //==============================================================================
-    int getNumPrograms()          { return effect != nullptr ? effect->numPrograms : 0; }
-    int getCurrentProgram()       { return (int) dispatch (effGetProgram, 0, 0, 0, 0); }
+    int getNumPrograms() override          { return effect != nullptr ? effect->numPrograms : 0; }
+    int getCurrentProgram() override       { return (int) dispatch (effGetProgram, 0, 0, 0, 0); }
 
-    void setCurrentProgram (int newIndex)
+    void setCurrentProgram (int newIndex) override
     {
         if (getNumPrograms() > 0 && newIndex != getCurrentProgram())
             dispatch (effSetProgram, 0, jlimit (0, getNumPrograms() - 1, newIndex), 0, 0);
     }
 
-    const String getProgramName (int index)
+    const String getProgramName (int index) override
     {
         if (index == getCurrentProgram())
             return getCurrentProgramName();
@@ -1211,7 +1211,7 @@ public:
         return programNames [index];
     }
 
-    void changeProgramName (int index, const String& newName)
+    void changeProgramName (int index, const String& newName) override
     {
         if (index == getCurrentProgram())
         {
@@ -1225,11 +1225,11 @@ public:
     }
 
     //==============================================================================
-    void getStateInformation (MemoryBlock& mb)                  { saveToFXBFile (mb, true); }
-    void getCurrentProgramStateInformation (MemoryBlock& mb)    { saveToFXBFile (mb, false); }
+    void getStateInformation (MemoryBlock& mb) override                  { saveToFXBFile (mb, true); }
+    void getCurrentProgramStateInformation (MemoryBlock& mb) override    { saveToFXBFile (mb, false); }
 
-    void setStateInformation (const void* data, int size)               { loadFromFXBFile (data, size); }
-    void setCurrentProgramStateInformation (const void* data, int size) { loadFromFXBFile (data, size); }
+    void setStateInformation (const void* data, int size) override               { loadFromFXBFile (data, size); }
+    void setCurrentProgramStateInformation (const void* data, int size) override { loadFromFXBFile (data, size); }
 
     //==============================================================================
     void timerCallback() override
@@ -1937,7 +1937,7 @@ public:
 
     //==============================================================================
    #if ! JUCE_MAC
-    void componentMovedOrResized (bool /*wasMoved*/, bool /*wasResized*/)
+    void componentMovedOrResized (bool /*wasMoved*/, bool /*wasResized*/) override
     {
         if (recursiveResize)
             return;
@@ -1966,7 +1966,7 @@ public:
         }
     }
 
-    void componentVisibilityChanged()
+    void componentVisibilityChanged() override
     {
         if (isShowing())
             openPluginWindow();
@@ -1976,7 +1976,7 @@ public:
         componentMovedOrResized (true, true);
     }
 
-    void componentPeerChanged()
+    void componentPeerChanged() override
     {
         closePluginWindow();
         openPluginWindow();
@@ -1984,7 +1984,7 @@ public:
    #endif
 
    #if JUCE_MAC && ! JUCE_SUPPORT_CARBON
-    void visibilityChanged()
+    void visibilityChanged() override
     {
         if (isVisible())
             openPluginWindow();
@@ -1992,7 +1992,7 @@ public:
             closePluginWindow();
     }
 
-    void childBoundsChanged (Component*)
+    void childBoundsChanged (Component*) override
     {
         if (innerWrapper != nullptr)
             setSize (innerWrapper->getWidth(),
@@ -2001,8 +2001,8 @@ public:
    #endif
 
     //==============================================================================
-    bool keyStateChanged (bool)                 { return pluginWantsKeys; }
-    bool keyPressed (const juce::KeyPress&)     { return pluginWantsKeys; }
+    bool keyStateChanged (bool) override                 { return pluginWantsKeys; }
+    bool keyPressed (const juce::KeyPress&) override     { return pluginWantsKeys; }
 
     //==============================================================================
    #if JUCE_MAC
@@ -2070,7 +2070,7 @@ public:
     }
 
     //==============================================================================
-    void mouseDown (const MouseEvent& e)
+    void mouseDown (const MouseEvent& e) override
     {
         (void) e;
 
@@ -2100,7 +2100,7 @@ public:
        #endif
     }
 
-    void broughtToFront()
+    void broughtToFront() override
     {
         activeVSTWindows.removeFirstMatchingValue (this);
         activeVSTWindows.add (this);
@@ -2133,6 +2133,13 @@ private:
         plugin.fillInPluginDescription (desc);
 
         return desc.manufacturerName.containsIgnoreCase ("Loud Technologies");
+    }
+
+    // This is an old workaround for some plugins that need a repaint when their
+    // windows are first created, but it breaks some Izotope plugins..
+    bool shouldRepaintCarbonWindowWhenCreated()
+    {
+        return ! plugin.getName().containsIgnoreCase ("izotope");
     }
 
     //==============================================================================
@@ -2545,6 +2552,7 @@ private:
             : owner (w), alreadyInside (false)
         {
             keepPluginWindowWhenHidden = w.shouldAvoidDeletingWindow();
+            setRepaintsChildHIViewWhenCreated (w.shouldRepaintCarbonWindowWhenCreated());
         }
 
         ~InnerWrapperComponent()
@@ -2552,13 +2560,13 @@ private:
             deleteWindow();
         }
 
-        HIViewRef attachView (WindowRef windowRef, HIViewRef rootView)
+        HIViewRef attachView (WindowRef windowRef, HIViewRef rootView) override
         {
             owner.openPluginWindow (windowRef);
             return 0;
         }
 
-        void removeView (HIViewRef)
+        void removeView (HIViewRef) override
         {
             if (owner.isOpen)
             {
@@ -2568,7 +2576,7 @@ private:
             }
         }
 
-        bool getEmbeddedViewSize (int& w, int& h)
+        bool getEmbeddedViewSize (int& w, int& h) override
         {
             ERect* rect = nullptr;
             owner.dispatch (effEditGetRect, 0, 0, &rect, 0);
@@ -2577,7 +2585,7 @@ private:
             return true;
         }
 
-        void handleMouseDown (int x, int y)
+        void handleMouseDown (int x, int y) override
         {
             if (! alreadyInside)
             {
@@ -2592,7 +2600,7 @@ private:
             }
         }
 
-        void handlePaint()
+        void handlePaint() override
         {
             if (ComponentPeer* const peer = getPeer())
             {

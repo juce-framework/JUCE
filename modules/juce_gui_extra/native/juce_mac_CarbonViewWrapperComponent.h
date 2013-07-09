@@ -44,7 +44,8 @@ public:
           wrapperWindow (0),
           carbonWindow (0),
           embeddedView (0),
-          recursiveResize (false)
+          recursiveResize (false),
+          repaintChildOnCreation (true)
     {
     }
 
@@ -259,9 +260,14 @@ public:
 
             // To avoid strange overpainting problems when the UI is first opened, we'll
             // repaint it a few times during the first second that it's on-screen..
-            if ((Time::getCurrentTime() - creationTime).inMilliseconds() < 1000)
+            if (repaintChildOnCreation && (Time::getCurrentTime() - creationTime).inMilliseconds() < 1000)
                 recursiveHIViewRepaint (HIViewGetRoot (wrapperWindow));
         }
+    }
+
+    void setRepaintsChildHIViewWhenCreated (bool b) noexcept
+    {
+        repaintChildOnCreation = b;
     }
 
     OSStatus carbonEventHandler (EventHandlerCallRef /*nextHandlerRef*/, EventRef event)
@@ -303,7 +309,7 @@ protected:
     WindowRef wrapperWindow;
     NSWindow* carbonWindow;
     HIViewRef embeddedView;
-    bool recursiveResize;
+    bool recursiveResize, repaintChildOnCreation;
     Time creationTime;
 
     EventHandlerRef eventHandlerRef;
