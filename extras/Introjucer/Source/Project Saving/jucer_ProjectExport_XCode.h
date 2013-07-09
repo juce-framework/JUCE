@@ -78,21 +78,12 @@ public:
     Value  getPreBuildScriptValue()         { return getSetting (Ids::prebuildCommand); }
     String getPreBuildScript() const        { return settings   [Ids::prebuildCommand]; }
 
-    bool isAvailableOnCurrentOS()
-    {
-       #if JUCE_MAC
-        return true;
-       #else
-        return false;
-       #endif
-    }
+    bool usesMMFiles() const override                { return true; }
+    bool isXcode() const override                    { return true; }
+    bool isOSX() const override                      { return ! iOS; }
+    bool canCopeWithDuplicateFiles() override        { return true; }
 
-    bool usesMMFiles() const                { return true; }
-    bool isXcode() const                    { return true; }
-    bool isOSX() const                      { return ! iOS; }
-    bool canCopeWithDuplicateFiles()        { return true; }
-
-    void createExporterProperties (PropertyListBuilder& props)
+    void createExporterProperties (PropertyListBuilder& props) override
     {
         if (projectType.isGUIApplication() && ! iOS)
         {
@@ -125,7 +116,7 @@ public:
                    "Some shell-script that will be run after a build completes.");
     }
 
-    bool launchProject()
+    bool launchProject() override
     {
        #if JUCE_MAC
         return getProjectBundle().startAsProcess();
@@ -135,7 +126,7 @@ public:
     }
 
     //==============================================================================
-    void create (const OwnedArray<LibraryModule>&) const
+    void create (const OwnedArray<LibraryModule>&) const override
     {
         infoPlistFile = getTargetFolder().getChildFile ("Info.plist");
         menuNibFile = getTargetFolder().getChildFile ("RecentFilesMenuTemplate.nib");
@@ -247,7 +238,7 @@ protected:
         bool iOS;
     };
 
-    BuildConfiguration::Ptr createBuildConfig (const ValueTree& v) const
+    BuildConfiguration::Ptr createBuildConfig (const ValueTree& v) const override
     {
         return new XcodeBuildConfiguration (project, v, iOS);
     }
