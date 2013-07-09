@@ -89,8 +89,10 @@ public:
 
         mainWindowList.createWindowIfNoneAreOpen();
 
-       #if JUCE_MAC
-        MenuBarModel::setMacMainMenu (menuModel, nullptr, "Open Recent");
+       #if JUCE_MAC 
+        // NB: the native recent menus doesn't work at the moment - must reenable this when fixed
+        //MenuBarModel::setMacMainMenu (menuModel, nullptr, "Open Recent");
+        MenuBarModel::setMacMainMenu (menuModel, nullptr);
        #endif
 
         struct ModuleFolderChecker  : public CallbackMessage
