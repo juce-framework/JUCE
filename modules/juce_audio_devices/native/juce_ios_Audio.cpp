@@ -103,7 +103,7 @@ public:
 
         AudioSessionSetProperty (kAudioSessionProperty_AudioCategory, sizeof (audioCategory), &audioCategory);
 
-        if (audioCategory == kAudioSessionCategory_PlayAndRecord;
+        if (audioCategory == kAudioSessionCategory_PlayAndRecord)
         {
             // (note: mustn't set this until after the audio category property has been set)
             UInt32 allowBluetoothInput = 1;
