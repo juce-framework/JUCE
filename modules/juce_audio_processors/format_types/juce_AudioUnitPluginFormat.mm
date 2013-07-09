@@ -345,7 +345,7 @@ public:
     //==============================================================================
     // AudioPluginInstance methods:
 
-    void fillInPluginDescription (PluginDescription& desc) const
+    void fillInPluginDescription (PluginDescription& desc) const override
     {
         desc.name = pluginName;
         desc.descriptiveName = pluginName;
@@ -363,15 +363,15 @@ public:
         desc.isInstrument = (componentDesc.componentType == kAudioUnitType_MusicDevice);
     }
 
-    void* getPlatformSpecificData()             { return audioUnit; }
-    const String getName() const                { return pluginName; }
+    void* getPlatformSpecificData() override             { return audioUnit; }
+    const String getName() const override                { return pluginName; }
 
-    bool silenceInProducesSilenceOut() const
+    bool silenceInProducesSilenceOut() const override
     {
         return getTailLengthSeconds() <= 0;
     }
 
-    double getTailLengthSeconds() const
+    double getTailLengthSeconds() const override
     {
         Float64 tail = 0;
         UInt32 tailSize = sizeof (tail);
@@ -383,13 +383,13 @@ public:
         return tail;
     }
 
-    bool acceptsMidi() const                    { return wantsMidiMessages; }
-    bool producesMidi() const                   { return producesMidiMessages; }
+    bool acceptsMidi() const override                    { return wantsMidiMessages; }
+    bool producesMidi() const override                   { return producesMidiMessages; }
 
     //==============================================================================
     // AudioProcessor methods:
 
-    void prepareToPlay (double newSampleRate, int estimatedSamplesPerBlock)
+    void prepareToPlay (double newSampleRate, int estimatedSamplesPerBlock) override
     {
         if (audioUnit != nullptr)
         {
@@ -472,7 +472,7 @@ public:
         }
     }
 
-    void releaseResources()
+    void releaseResources() override
     {
         if (prepared)
         {
@@ -494,7 +494,7 @@ public:
         for (int i = 0; i < numOutputBusses; ++i)  AudioUnitReset (audioUnit, kAudioUnitScope_Output, i);
     }
 
-    void processBlock (AudioSampleBuffer& buffer, MidiBuffer& midiMessages)
+    void processBlock (AudioSampleBuffer& buffer, MidiBuffer& midiMessages) override
     {
         const int numSamples = buffer.getNumSamples();
 
@@ -560,11 +560,11 @@ public:
     }
 
     //==============================================================================
-    bool hasEditor() const                  { return true; }
-    AudioProcessorEditor* createEditor();
+    bool hasEditor() const override                  { return true; }
+    AudioProcessorEditor* createEditor() override;
 
     //==============================================================================
-    const String getInputChannelName (int index) const
+    const String getInputChannelName (int index) const override
     {
         if (isPositiveAndBelow (index, getNumInputChannels()))
             return "Input " + String (index + 1);
@@ -572,7 +572,7 @@ public:
         return String::empty;
     }
 
-    const String getOutputChannelName (int index) const
+    const String getOutputChannelName (int index) const override
     {
         if (isPositiveAndBelow (index, getNumOutputChannels()))
             return "Output " + String (index + 1);
@@ -580,13 +580,13 @@ public:
         return String::empty;
     }
 
-    bool isInputChannelStereoPair (int index) const    { return isPositiveAndBelow (index, getNumInputChannels()); }
-    bool isOutputChannelStereoPair (int index) const   { return isPositiveAndBelow (index, getNumOutputChannels()); }
+    bool isInputChannelStereoPair (int index) const override    { return isPositiveAndBelow (index, getNumInputChannels()); }
+    bool isOutputChannelStereoPair (int index) const override   { return isPositiveAndBelow (index, getNumOutputChannels()); }
 
     //==============================================================================
-    int getNumParameters()              { return parameters.size(); }
+    int getNumParameters() override              { return parameters.size(); }
 
-    float getParameter (int index)
+    float getParameter (int index) override
     {
         const ScopedLock sl (lock);
 
@@ -608,7 +608,7 @@ public:
         return value;
     }
 
-    void setParameter (int index, float newValue)
+    void setParameter (int index, float newValue) override
     {
         const ScopedLock sl (lock);
 
@@ -646,7 +646,7 @@ public:
             sendParameterChangeEvent (i);
     }
 
-    const String getParameterName (int index)
+    const String getParameterName (int index) override
     {
         if (const ParamInfo* p = parameters[index])
             return p->name;
@@ -654,9 +654,9 @@ public:
         return String::empty;
     }
 
-    const String getParameterText (int index)   { return String (getParameter (index)); }
+    const String getParameterText (int index) override   { return String (getParameter (index)); }
 
-    bool isParameterAutomatable (int index) const
+    bool isParameterAutomatable (int index) const override
     {
         if (const ParamInfo* p = parameters[index])
             return p->automatable;
@@ -665,7 +665,7 @@ public:
     }
 
     //==============================================================================
-    int getNumPrograms()
+    int getNumPrograms() override
     {
         CFArrayRef presets;
         UInt32 sz = sizeof (CFArrayRef);
@@ -681,7 +681,7 @@ public:
         return num;
     }
 
-    int getCurrentProgram()
+    int getCurrentProgram() override
     {
         AUPreset current;
         current.presetNumber = 0;
@@ -693,7 +693,7 @@ public:
         return current.presetNumber;
     }
 
-    void setCurrentProgram (int newIndex)
+    void setCurrentProgram (int newIndex) override
     {
         AUPreset current;
         current.presetNumber = newIndex;
@@ -705,7 +705,7 @@ public:
         sendAllParametersChangedEvents();
     }
 
-    const String getProgramName (int index)
+    const String getProgramName (int index) override
     {
         String s;
         CFArrayRef presets;
@@ -732,18 +732,18 @@ public:
         return s;
     }
 
-    void changeProgramName (int index, const String& newName)
+    void changeProgramName (int index, const String& newName) override
     {
         jassertfalse; // xxx not implemented!
     }
 
     //==============================================================================
-    void getStateInformation (MemoryBlock& destData)
+    void getStateInformation (MemoryBlock& destData) override
     {
         getCurrentProgramStateInformation (destData);
     }
 
-    void getCurrentProgramStateInformation (MemoryBlock& destData)
+    void getCurrentProgramStateInformation (MemoryBlock& destData) override
     {
         CFPropertyListRef propertyList = 0;
         UInt32 sz = sizeof (CFPropertyListRef);
@@ -770,12 +770,12 @@ public:
         }
     }
 
-    void setStateInformation (const void* data, int sizeInBytes)
+    void setStateInformation (const void* data, int sizeInBytes) override
     {
         setCurrentProgramStateInformation (data, sizeInBytes);
     }
 
-    void setCurrentProgramStateInformation (const void* data, int sizeInBytes)
+    void setCurrentProgramStateInformation (const void* data, int sizeInBytes) override
     {
         CFReadStreamRef stream = CFReadStreamCreateWithBytesNoCopy (kCFAllocatorDefault,
                                                                     (const UInt8*) data,
@@ -803,7 +803,7 @@ public:
         }
     }
 
-    void refreshParameterList()
+    void refreshParameterList() override
     {
         parameters.clear();
 
@@ -1425,9 +1425,9 @@ private:
 class AudioUnitPluginWindowCarbon   : public AudioProcessorEditor
 {
 public:
-    AudioUnitPluginWindowCarbon (AudioUnitPluginInstance& plugin_)
-        : AudioProcessorEditor (&plugin_),
-          plugin (plugin_),
+    AudioUnitPluginWindowCarbon (AudioUnitPluginInstance& p)
+        : AudioProcessorEditor (&p),
+          plugin (p),
           audioComponent (nullptr),
           viewComponent (nullptr)
     {

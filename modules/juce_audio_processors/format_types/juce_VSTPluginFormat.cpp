@@ -248,13 +248,13 @@ namespace
 {
     static bool xErrorTriggered = false;
 
-    int temporaryErrorHandler (Display*, XErrorEvent*)
+    static int temporaryErrorHandler (Display*, XErrorEvent*)
     {
         xErrorTriggered = true;
         return 0;
     }
 
-    EventProcPtr getPropertyFromXWindow (Window handle, Atom atom)
+    static EventProcPtr getPropertyFromXWindow (Window handle, Atom atom)
     {
         XErrorHandler oldErrorHandler = XSetErrorHandler (temporaryErrorHandler);
         xErrorTriggered = false;
@@ -292,7 +292,7 @@ namespace
         return 0;
     }
 
-    void translateJuceToXButtonModifiers (const MouseEvent& e, XEvent& ev) noexcept
+    static void translateJuceToXButtonModifiers (const MouseEvent& e, XEvent& ev) noexcept
     {
         if (e.mods.isLeftButtonDown())
         {
@@ -311,21 +311,21 @@ namespace
         }
     }
 
-    void translateJuceToXMotionModifiers (const MouseEvent& e, XEvent& ev) noexcept
+    static void translateJuceToXMotionModifiers (const MouseEvent& e, XEvent& ev) noexcept
     {
         if (e.mods.isLeftButtonDown())          ev.xmotion.state |= Button1Mask;
         else if (e.mods.isRightButtonDown())    ev.xmotion.state |= Button3Mask;
         else if (e.mods.isMiddleButtonDown())   ev.xmotion.state |= Button2Mask;
     }
 
-    void translateJuceToXCrossingModifiers (const MouseEvent& e, XEvent& ev) noexcept
+    static void translateJuceToXCrossingModifiers (const MouseEvent& e, XEvent& ev) noexcept
     {
         if (e.mods.isLeftButtonDown())          ev.xcrossing.state |= Button1Mask;
         else if (e.mods.isRightButtonDown())    ev.xcrossing.state |= Button3Mask;
         else if (e.mods.isMiddleButtonDown())   ev.xcrossing.state |= Button2Mask;
     }
 
-    void translateJuceToXMouseWheelModifiers (const MouseEvent& e, const float increment, XEvent& ev) noexcept
+    static void translateJuceToXMouseWheelModifiers (const MouseEvent& e, const float increment, XEvent& ev) noexcept
     {
         if (increment < 0)
         {
@@ -2033,7 +2033,7 @@ public:
                     ev.xexpose.width = clip.getWidth();
                     ev.xexpose.height = clip.getHeight();
 
-                    sendEventToChild (&ev);
+                    sendEventToChild (ev);
                 }
                #endif
             }
@@ -2080,20 +2080,11 @@ public:
 
         toFront (true);
 
-        XEvent ev = { 0 };
-        ev.xbutton.display = display;
+        XEvent ev;
+        prepareXEvent (ev, e);
         ev.xbutton.type = ButtonPress;
-        ev.xbutton.window = pluginWindow;
-        ev.xbutton.root = RootWindow (display, DefaultScreen (display));
-        ev.xbutton.time = CurrentTime;
-        ev.xbutton.x = e.x;
-        ev.xbutton.y = e.y;
-        ev.xbutton.x_root = e.getScreenX();
-        ev.xbutton.y_root = e.getScreenY();
-
         translateJuceToXButtonModifiers (e, ev);
-
-        sendEventToChild (&ev);
+        sendEventToChild (ev);
 
        #elif JUCE_WINDOWS
         toFront (true);
@@ -2392,42 +2383,46 @@ private:
 #if JUCE_LINUX
     //==============================================================================
     // overload mouse/keyboard events to forward them to the plugin's inner window..
-    void sendEventToChild (XEvent* event)
+    void sendEventToChild (XEvent& event)
     {
         if (pluginProc != 0)
         {
             // if the plugin publishes an event procedure, pass the event directly..
-            pluginProc (event);
+            pluginProc (&event);
         }
         else if (pluginWindow != 0)
         {
             // if the plugin has a window, then send the event to the window so that
             // its message thread will pick it up..
-            XSendEvent (display, pluginWindow, False, 0L, event);
+            XSendEvent (display, pluginWindow, False, NoEventMask, &event);
             XFlush (display);
         }
+    }
+
+    void prepareXEvent (XEvent& ev, const MouseEvent& e) const noexcept
+    {
+        zerostruct (ev);
+        ev.xcrossing.display = display;
+        ev.xcrossing.window = pluginWindow;
+        ev.xcrossing.root = RootWindow (display, DefaultScreen (display));
+        ev.xcrossing.time = CurrentTime;
+        ev.xcrossing.x = e.x;
+        ev.xcrossing.y = e.y;
+        ev.xcrossing.x_root = e.getScreenX();
+        ev.xcrossing.y_root = e.getScreenY();
     }
 
     void mouseEnter (const MouseEvent& e) override
     {
         if (pluginWindow != 0)
         {
-            XEvent ev = { 0 };
-            ev.xcrossing.display = display;
+            XEvent ev;
+            prepareXEvent (ev, e);
             ev.xcrossing.type = EnterNotify;
-            ev.xcrossing.window = pluginWindow;
-            ev.xcrossing.root = RootWindow (display, DefaultScreen (display));
-            ev.xcrossing.time = CurrentTime;
-            ev.xcrossing.x = e.x;
-            ev.xcrossing.y = e.y;
-            ev.xcrossing.x_root = e.getScreenX();
-            ev.xcrossing.y_root = e.getScreenY();
-            ev.xcrossing.mode = NotifyNormal; // NotifyGrab, NotifyUngrab
-            ev.xcrossing.detail = NotifyAncestor; // NotifyVirtual, NotifyInferior, NotifyNonlinear,NotifyNonlinearVirtual
-
+            ev.xcrossing.mode = NotifyNormal;
+            ev.xcrossing.detail = NotifyAncestor;
             translateJuceToXCrossingModifiers (e, ev);
-
-            sendEventToChild (&ev);
+            sendEventToChild (ev);
         }
     }
 
@@ -2435,23 +2430,14 @@ private:
     {
         if (pluginWindow != 0)
         {
-            XEvent ev = { 0 };
-            ev.xcrossing.display = display;
+            XEvent ev;
+            prepareXEvent (ev, e);
             ev.xcrossing.type = LeaveNotify;
-            ev.xcrossing.window = pluginWindow;
-            ev.xcrossing.root = RootWindow (display, DefaultScreen (display));
-            ev.xcrossing.time = CurrentTime;
-            ev.xcrossing.x = e.x;
-            ev.xcrossing.y = e.y;
-            ev.xcrossing.x_root = e.getScreenX();
-            ev.xcrossing.y_root = e.getScreenY();
-            ev.xcrossing.mode = NotifyNormal; // NotifyGrab, NotifyUngrab
-            ev.xcrossing.detail = NotifyAncestor; // NotifyVirtual, NotifyInferior, NotifyNonlinear,NotifyNonlinearVirtual
-            ev.xcrossing.focus = hasKeyboardFocus (true); // TODO - yes ?
-
+            ev.xcrossing.mode = NotifyNormal;
+            ev.xcrossing.detail = NotifyAncestor;
+            ev.xcrossing.focus = hasKeyboardFocus (true);
             translateJuceToXCrossingModifiers (e, ev);
-
-            sendEventToChild (&ev);
+            sendEventToChild (ev);
         }
     }
 
@@ -2459,19 +2445,11 @@ private:
     {
         if (pluginWindow != 0)
         {
-            XEvent ev = { 0 };
-            ev.xmotion.display = display;
+            XEvent ev;
+            prepareXEvent (ev, e);
             ev.xmotion.type = MotionNotify;
-            ev.xmotion.window = pluginWindow;
-            ev.xmotion.root = RootWindow (display, DefaultScreen (display));
-            ev.xmotion.time = CurrentTime;
             ev.xmotion.is_hint = NotifyNormal;
-            ev.xmotion.x = e.x;
-            ev.xmotion.y = e.y;
-            ev.xmotion.x_root = e.getScreenX();
-            ev.xmotion.y_root = e.getScreenY();
-
-            sendEventToChild (&ev);
+            sendEventToChild (ev);
         }
     }
 
@@ -2479,20 +2457,12 @@ private:
     {
         if (pluginWindow != 0)
         {
-            XEvent ev = { 0 };
-            ev.xmotion.display = display;
+            XEvent ev;
+            prepareXEvent (ev, e);
             ev.xmotion.type = MotionNotify;
-            ev.xmotion.window = pluginWindow;
-            ev.xmotion.root = RootWindow (display, DefaultScreen (display));
-            ev.xmotion.time = CurrentTime;
-            ev.xmotion.x = e.x ;
-            ev.xmotion.y = e.y;
-            ev.xmotion.x_root = e.getScreenX();
-            ev.xmotion.y_root = e.getScreenY();
             ev.xmotion.is_hint = NotifyNormal;
-
             translateJuceToXMotionModifiers (e, ev);
-            sendEventToChild (&ev);
+            sendEventToChild (ev);
         }
     }
 
@@ -2500,19 +2470,11 @@ private:
     {
         if (pluginWindow != 0)
         {
-            XEvent ev = { 0 };
-            ev.xbutton.display = display;
+            XEvent ev;
+            prepareXEvent (ev, e);
             ev.xbutton.type = ButtonRelease;
-            ev.xbutton.window = pluginWindow;
-            ev.xbutton.root = RootWindow (display, DefaultScreen (display));
-            ev.xbutton.time = CurrentTime;
-            ev.xbutton.x = e.x;
-            ev.xbutton.y = e.y;
-            ev.xbutton.x_root = e.getScreenX();
-            ev.xbutton.y_root = e.getScreenY();
-
             translateJuceToXButtonModifiers (e, ev);
-            sendEventToChild (&ev);
+            sendEventToChild (ev);
         }
     }
 
@@ -2520,24 +2482,14 @@ private:
     {
         if (pluginWindow != 0)
         {
-            XEvent ev = { 0 };
-            ev.xbutton.display = display;
+            XEvent ev;
+            prepareXEvent (ev, e);
             ev.xbutton.type = ButtonPress;
-            ev.xbutton.window = pluginWindow;
-            ev.xbutton.root = RootWindow (display, DefaultScreen (display));
-            ev.xbutton.time = CurrentTime;
-            ev.xbutton.x = e.x;
-            ev.xbutton.y = e.y;
-            ev.xbutton.x_root = e.getScreenX();
-            ev.xbutton.y_root = e.getScreenY();
-
             translateJuceToXMouseWheelModifiers (e, wheel.deltaY, ev);
-            sendEventToChild (&ev);
-
-            // TODO - put a usleep here ?
+            sendEventToChild (ev);
 
             ev.xbutton.type = ButtonRelease;
-            sendEventToChild (&ev);
+            sendEventToChild (ev);
         }
     }
 #endif
