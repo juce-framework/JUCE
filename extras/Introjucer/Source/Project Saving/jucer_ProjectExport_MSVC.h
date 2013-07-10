@@ -1048,7 +1048,7 @@ protected:
     void fillInProjectXml (XmlElement& projectXml) const
     {
         projectXml.setAttribute ("DefaultTargets", "Build");
-        projectXml.setAttribute ("ToolsVersion", "4.0");
+        projectXml.setAttribute ("ToolsVersion", getToolsVersion());
         projectXml.setAttribute ("xmlns", "http://schemas.microsoft.com/developer/msbuild/2003");
 
         {
@@ -1442,7 +1442,7 @@ protected:
 
     void fillInFiltersXml (XmlElement& filterXml) const
     {
-        filterXml.setAttribute ("ToolsVersion", "4.0");
+        filterXml.setAttribute ("ToolsVersion", getToolsVersion());
         filterXml.setAttribute ("xmlns", "http://schemas.microsoft.com/developer/msbuild/2003");
 
         XmlElement* groupsXml  = filterXml.createNewChildElement ("ItemGroup");
