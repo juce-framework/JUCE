@@ -419,6 +419,11 @@ void PluginListComponent::scanFor (AudioPluginFormat& format)
     currentScanner = new Scanner (*this, format, propertiesToUse, numThreads);
 }
 
+bool PluginListComponent::isScanning() const noexcept
+{
+    return currentScanner != nullptr;
+}
+
 void PluginListComponent::scanFinished (const StringArray& failedFiles)
 {
     StringArray shortNames;

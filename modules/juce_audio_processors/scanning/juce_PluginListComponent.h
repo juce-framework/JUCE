@@ -46,7 +46,6 @@ public:
         Creates the list component.
 
         For info about the deadMansPedalFile, see the PluginDirectoryScanner constructor.
-
         The properties file, if supplied, is used to store the user's last search paths.
     */
     PluginListComponent (AudioPluginFormatManager& formatManager,
@@ -72,8 +71,11 @@ public:
     static void setLastSearchPath (PropertiesFile& properties, AudioPluginFormat& format,
                                    const FileSearchPath& newPath);
 
-    /** Triggers a scan for the given format. */
+    /** Triggers an asynchronous scan for the given format. */
     void scanFor (AudioPluginFormat& format);
+
+    /** Returns true if there's currently a scan in progress. */
+    bool isScanning() const noexcept;
 
     //==============================================================================
     /** @internal */
@@ -105,7 +107,6 @@ private:
     ScopedPointer<Scanner> currentScanner;
 
     void scanFinished (const StringArray&);
-
     static void optionsMenuStaticCallback (int, PluginListComponent*);
     void optionsMenuCallback (int);
     void updateList();
