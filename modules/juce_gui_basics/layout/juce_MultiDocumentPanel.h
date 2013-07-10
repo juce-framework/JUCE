@@ -295,10 +295,9 @@ private:
     friend class MultiDocumentPanelWindow;
     friend class TabbedComponentInternal;
 
-    Component* getContainerComp (Component* c) const;
+    Component* getContainerComp (Component*) const;
     void updateOrder();
-
-    void addWindow (Component* component);
+    void addWindow (Component*);
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MultiDocumentPanel)
 };

@@ -295,6 +295,11 @@ bool MultiDocumentPanel::closeDocument (Component* component,
         }
 
         resized();
+
+        // This ensures that the active tab is painted properly when a tab is closed!
+        if (Component* activeComponent = getActiveDocument())
+            setActiveDocument (activeComponent);
+
         activeDocumentChanged();
     }
     else
@@ -330,6 +335,8 @@ Component* MultiDocumentPanel::getActiveDocument() const noexcept
 
 void MultiDocumentPanel::setActiveDocument (Component* component)
 {
+    jassert (component != nullptr);
+
     if (mode == FloatingWindows)
     {
         component = getContainerComp (component);
