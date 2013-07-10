@@ -74,12 +74,12 @@ public:
 
 
     //==============================================================================
-    int64 getTotalLength();
-    int64 getPosition();
-    bool setPosition (int64 newPosition);
-    int read (void* destBuffer, int maxBytesToRead);
-    String readString();
-    bool isExhausted();
+    int64 getTotalLength() override;
+    int64 getPosition() override;
+    bool setPosition (int64 newPosition) override;
+    int read (void* destBuffer, int maxBytesToRead) override;
+    String readString() override;
+    bool isExhausted() override;
 
 
 private:

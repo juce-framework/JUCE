@@ -599,7 +599,7 @@ private:
     {
     public:
         SilentDummyModalComp() {}
-        void inputAttemptWhenModal() {}
+        void inputAttemptWhenModal() override {}
     };
 
     SilentDummyModalComp dummyModalComponent;

@@ -219,18 +219,18 @@ public:
         }
     }
 
-    void componentMovedOrResized (bool /*wasMoved*/, bool /*wasResized*/)
+    void componentMovedOrResized (bool /*wasMoved*/, bool /*wasResized*/) override
     {
         setEmbeddedWindowToOurSize();
     }
 
-    void componentPeerChanged()
+    void componentPeerChanged() override
     {
         deleteWindow();
         createWindow();
     }
 
-    void componentVisibilityChanged()
+    void componentVisibilityChanged() override
     {
         if (isShowing())
             createWindow();

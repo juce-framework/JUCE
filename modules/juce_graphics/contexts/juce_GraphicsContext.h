@@ -559,7 +559,7 @@ public:
     */
     void drawImageWithin (const Image& imageToDraw,
                           int destX, int destY, int destWidth, int destHeight,
-                          const RectanglePlacement& placementWithinTarget,
+                          RectanglePlacement placementWithinTarget,
                           bool fillAlphaChannelWithCurrentBrush = false) const;
 
 

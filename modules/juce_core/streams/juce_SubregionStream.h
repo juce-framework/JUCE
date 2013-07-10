@@ -74,15 +74,14 @@ public:
 
 
     //==============================================================================
-    int64 getTotalLength();
-    int64 getPosition();
-    bool setPosition (int64 newPosition);
-    int read (void* destBuffer, int maxBytesToRead);
-    bool isExhausted();
+    int64 getTotalLength() override;
+    int64 getPosition() override;
+    bool setPosition (int64 newPosition) override;
+    int read (void* destBuffer, int maxBytesToRead) override;
+    bool isExhausted() override;
 
-
-    //==============================================================================
 private:
+    //==============================================================================
     OptionalScopedPointer<InputStream> source;
     const int64 startPositionInSourceStream, lengthOfSourceStream;
 

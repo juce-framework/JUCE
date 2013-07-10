@@ -80,11 +80,11 @@ public:
     size_t getDataSize() const noexcept         { return dataSize; }
 
     //==============================================================================
-    int64 getPosition();
-    bool setPosition (int64 pos);
-    int64 getTotalLength();
-    bool isExhausted();
-    int read (void* destBuffer, int maxBytesToRead);
+    int64 getPosition() override;
+    bool setPosition (int64 pos) override;
+    int64 getTotalLength() override;
+    bool isExhausted() override;
+    int read (void* destBuffer, int maxBytesToRead) override;
 
 private:
     //==============================================================================

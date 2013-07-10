@@ -627,7 +627,7 @@ void Graphics::drawImageAt (const Image& imageToDraw,
 void Graphics::drawImageWithin (const Image& imageToDraw,
                                 const int destX, const int destY,
                                 const int destW, const int destH,
-                                const RectanglePlacement& placementWithinTarget,
+                                RectanglePlacement placementWithinTarget,
                                 const bool fillAlphaChannelWithCurrentBrush) const
 {
     // passing in a silly number can cause maths problems in rendering!

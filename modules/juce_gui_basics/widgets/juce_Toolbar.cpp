@@ -657,7 +657,7 @@ public:
         setVisible (false);
     }
 
-    bool canModalEventBeSentToComponent (const Component* comp)
+    bool canModalEventBeSentToComponent (const Component* comp) override
     {
         return toolbar->isParentOf (comp);
     }

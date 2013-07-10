@@ -75,11 +75,11 @@ public:
 
 
     //==============================================================================
-    int64 getTotalLength();
-    int read (void* destBuffer, int maxBytesToRead);
-    bool isExhausted();
-    int64 getPosition();
-    bool setPosition (int64 pos);
+    int64 getTotalLength() override;
+    int read (void* destBuffer, int maxBytesToRead) override;
+    bool isExhausted() override;
+    int64 getPosition() override;
+    bool setPosition (int64 pos) override;
 
 private:
     //==============================================================================

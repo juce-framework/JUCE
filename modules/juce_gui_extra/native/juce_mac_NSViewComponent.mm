@@ -44,7 +44,7 @@ public:
         [view release];
     }
 
-    void componentMovedOrResized (Component& comp, bool wasMoved, bool wasResized)
+    void componentMovedOrResized (Component& comp, bool wasMoved, bool wasResized) override
     {
         ComponentMovementWatcher::componentMovedOrResized (comp, wasMoved, wasResized);
 
@@ -56,7 +56,7 @@ public:
             componentMovedOrResized (wasMoved, wasResized);
     }
 
-    void componentMovedOrResized (bool /*wasMoved*/, bool /*wasResized*/)
+    void componentMovedOrResized (bool /*wasMoved*/, bool /*wasResized*/) override
     {
         Component* const topComp = owner.getTopLevelComponent();
 
@@ -70,7 +70,7 @@ public:
         }
     }
 
-    void componentPeerChanged()
+    void componentPeerChanged() override
     {
         ComponentPeer* const peer = owner.getPeer();
 
@@ -90,7 +90,7 @@ public:
         [view setHidden: ! owner.isShowing()];
     }
 
-    void componentVisibilityChanged()
+    void componentVisibilityChanged() override
     {
         componentPeerChanged();
     }

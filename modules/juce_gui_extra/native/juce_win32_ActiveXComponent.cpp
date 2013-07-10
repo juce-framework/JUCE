@@ -238,7 +238,7 @@ public:
     }
 
     //==============================================================================
-    void componentMovedOrResized (bool /*wasMoved*/, bool /*wasResized*/)
+    void componentMovedOrResized (bool /*wasMoved*/, bool /*wasResized*/) override
     {
         Component* const topComp = owner.getTopLevelComponent();
 
@@ -246,12 +246,12 @@ public:
             setControlBounds (topComp->getLocalArea (&owner, owner.getLocalBounds()));
     }
 
-    void componentPeerChanged()
+    void componentPeerChanged() override
     {
         componentMovedOrResized (true, true);
     }
 
-    void componentVisibilityChanged()
+    void componentVisibilityChanged() override
     {
         setControlVisible (owner.isShowing());
         componentPeerChanged();

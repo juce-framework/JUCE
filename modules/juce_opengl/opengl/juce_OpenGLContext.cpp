@@ -75,19 +75,19 @@ public:
             peer->addMaskedRegion (peer->getComponent().getLocalArea (&component, component.getLocalBounds()));
     }
 
-    void invalidateAll()
+    void invalidateAll() override
     {
         validArea.clear();
         triggerRepaint();
     }
 
-    void invalidate (const Rectangle<int>& area)
+    void invalidate (const Rectangle<int>& area) override
     {
         validArea.subtract (area);
         triggerRepaint();
     }
 
-    void releaseResources() {}
+    void releaseResources() override {}
 
     void triggerRepaint()
     {
@@ -416,7 +416,7 @@ public:
         detach();
     }
 
-    void componentMovedOrResized (bool /*wasMoved*/, bool /*wasResized*/)
+    void componentMovedOrResized (bool /*wasMoved*/, bool /*wasResized*/) override
     {
         Component& comp = *getComponent();
 
@@ -434,13 +434,13 @@ public:
         }
     }
 
-    void componentPeerChanged()
+    void componentPeerChanged() override
     {
         detach();
         componentVisibilityChanged();
     }
 
-    void componentVisibilityChanged()
+    void componentVisibilityChanged() override
     {
         Component& comp = *getComponent();
 
@@ -456,7 +456,7 @@ public:
     }
 
    #if JUCE_DEBUG || JUCE_LOG_ASSERTIONS
-    void componentBeingDeleted (Component& component)
+    void componentBeingDeleted (Component& component) override
     {
         /* You must call detach() or delete your OpenGLContext to remove it
            from a component BEFORE deleting the component that it is using!

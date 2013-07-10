@@ -728,9 +728,9 @@ public:
         g.drawImageAt (image, 0, 0);
     }
 
-    void invalidateAll()                            { validArea.clear(); }
-    void invalidate (const Rectangle<int>& area)    { validArea.subtract (area); }
-    void releaseResources()                         { image = Image::null; }
+    void invalidateAll() override                            { validArea.clear(); }
+    void invalidate (const Rectangle<int>& area) override    { validArea.subtract (area); }
+    void releaseResources() override                         { image = Image::null; }
 
 private:
     Image image;

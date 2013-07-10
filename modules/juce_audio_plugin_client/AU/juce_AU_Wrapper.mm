@@ -984,7 +984,7 @@ public:
             return view;
         }
 
-        void childBoundsChanged (Component*)
+        void childBoundsChanged (Component*) override
         {
             if (Component* editor = getChildComponent(0))
             {
@@ -1004,7 +1004,7 @@ public:
             }
         }
 
-        bool keyPressed (const KeyPress&)
+        bool keyPressed (const KeyPress&) override
         {
             if (PluginHostType().isAbletonLive())
             {

@@ -33,21 +33,21 @@ public:
         jassert (comp != nullptr);
     }
 
-    void componentMovedOrResized (bool, bool) {}
+    void componentMovedOrResized (bool, bool) override {}
 
-    void componentPeerChanged()
+    void componentPeerChanged() override
     {
         if (! component->isShowing())
             cancel();
     }
 
-    void componentVisibilityChanged()
+    void componentVisibilityChanged() override
     {
         if (! component->isShowing())
             cancel();
     }
 
-    void componentBeingDeleted (Component& comp)
+    void componentBeingDeleted (Component& comp) override
     {
         ComponentMovementWatcher::componentBeingDeleted (comp);
 

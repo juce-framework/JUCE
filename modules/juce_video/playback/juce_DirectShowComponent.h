@@ -135,7 +135,7 @@ public:
         @note Not implemented
     */
     void setBoundsWithCorrectAspectRatio (const Rectangle<int>& spaceToFitWithin,
-                                          const RectanglePlacement& placement);
+                                          RectanglePlacement placement);
 
     /** Starts the video playing. */
     void play();

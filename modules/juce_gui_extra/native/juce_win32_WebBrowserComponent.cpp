@@ -162,9 +162,9 @@ private:
             return E_NOTIMPL;
         }
 
-        void componentMovedOrResized (bool, bool )  {}
-        void componentPeerChanged()                 {}
-        void componentVisibilityChanged()           { owner.visibilityChanged(); }
+        void componentMovedOrResized (bool, bool) override   {}
+        void componentPeerChanged() override                 {}
+        void componentVisibilityChanged() override           { owner.visibilityChanged(); }
 
     private:
         WebBrowserComponent& owner;

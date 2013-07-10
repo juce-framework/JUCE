@@ -113,7 +113,7 @@ public:
     /** @internal */
     void parentHierarchyChanged() override;
     /** @internal */
-    MarkerList* getMarkers (bool xAxis);
+    MarkerList* getMarkers (bool xAxis) override;
 
     //==============================================================================
     /** Internally-used class for wrapping a DrawableComposite's state into a ValueTree. */

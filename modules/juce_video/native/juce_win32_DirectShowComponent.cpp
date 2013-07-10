@@ -734,19 +734,19 @@ public:
     {
     }
 
-    void componentMovedOrResized (bool /*wasMoved*/, bool /*wasResized*/)
+    void componentMovedOrResized (bool /*wasMoved*/, bool /*wasResized*/) override
     {
         if (owner->videoLoaded)
             owner->updateContextPosition();
     }
 
-    void componentPeerChanged()
+    void componentPeerChanged() override
     {
         if (owner->videoLoaded)
             owner->recreateNativeWindowAsync();
     }
 
-    void componentVisibilityChanged()
+    void componentVisibilityChanged() override
     {
         if (owner->videoLoaded)
             owner->showContext (owner->isShowing());
@@ -869,7 +869,7 @@ void DirectShowComponent::getMovieNormalSize (int &width, int &height) const
 
 //======================================================================
 void DirectShowComponent::setBoundsWithCorrectAspectRatio (const Rectangle<int>& spaceToFitWithin,
-                                                           const RectanglePlacement& placement)
+                                                           RectanglePlacement placement)
 {
     int normalWidth, normalHeight;
     getMovieNormalSize (normalWidth, normalHeight);

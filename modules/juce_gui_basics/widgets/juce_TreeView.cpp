@@ -409,7 +409,7 @@ public:
         repaint();
     }
 
-    void visibleAreaChanged (const Rectangle<int>& newVisibleArea)
+    void visibleAreaChanged (const Rectangle<int>& newVisibleArea) override
     {
         const bool hasScrolledSideways = (newVisibleArea.getX() != lastX);
         lastX = newVisibleArea.getX();
