@@ -718,11 +718,6 @@ void ProjectContentComponent::getCommandInfo (const CommandID commandID, Applica
     }
 }
 
-bool ProjectContentComponent::isCommandActive (const CommandID)
-{
-    return project != nullptr;
-}
-
 bool ProjectContentComponent::perform (const InvocationInfo& info)
 {
     switch (info.commandID)

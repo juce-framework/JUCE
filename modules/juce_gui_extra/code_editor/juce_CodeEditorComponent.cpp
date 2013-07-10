@@ -261,7 +261,7 @@ private:
     void timerCallback()        { owner.newTransaction(); }
     void handleAsyncUpdate()    { owner.rebuildLineTokens(); }
 
-    void scrollBarMoved (ScrollBar* scrollBarThatHasMoved, double newRangeStart)
+    void scrollBarMoved (ScrollBar* scrollBarThatHasMoved, double newRangeStart) override
     {
         if (scrollBarThatHasMoved->isVertical())
             owner.scrollToLineInternal ((int) newRangeStart);
@@ -269,12 +269,12 @@ private:
             owner.scrollToColumnInternal (newRangeStart);
     }
 
-    void codeDocumentTextInserted (const String& newText, int pos)
+    void codeDocumentTextInserted (const String& newText, int pos) override
     {
         codeDocumentChanged (pos, pos + newText.length());
     }
 
-    void codeDocumentTextDeleted (int start, int end)
+    void codeDocumentTextDeleted (int start, int end) override
     {
         codeDocumentChanged (start, end);
     }

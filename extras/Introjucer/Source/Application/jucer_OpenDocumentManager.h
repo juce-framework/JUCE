@@ -93,8 +93,8 @@ public:
         virtual void documentAboutToClose (Document* document) = 0;
     };
 
-    void addListener (DocumentCloseListener* listener);
-    void removeListener (DocumentCloseListener* listener);
+    void addListener (DocumentCloseListener*);
+    void removeListener (DocumentCloseListener*);
 
     //==============================================================================
     class DocumentType

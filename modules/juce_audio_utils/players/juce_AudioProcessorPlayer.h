@@ -74,13 +74,13 @@ public:
                                 int totalNumInputChannels,
                                 float** outputChannelData,
                                 int totalNumOutputChannels,
-                                int numSamples);
+                                int numSamples) override;
     /** @internal */
-    void audioDeviceAboutToStart (AudioIODevice*);
+    void audioDeviceAboutToStart (AudioIODevice*) override;
     /** @internal */
-    void audioDeviceStopped();
+    void audioDeviceStopped() override;
     /** @internal */
-    void handleIncomingMidiMessage (MidiInput*, const MidiMessage&);
+    void handleIncomingMidiMessage (MidiInput*, const MidiMessage&) override;
 
 private:
     //==============================================================================

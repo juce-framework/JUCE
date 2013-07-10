@@ -86,13 +86,13 @@ public:
                                 int totalNumInputChannels,
                                 float** outputChannelData,
                                 int totalNumOutputChannels,
-                                int numSamples);
+                                int numSamples) override;
 
     /** Implementation of the AudioIODeviceCallback method. */
-    void audioDeviceAboutToStart (AudioIODevice* device);
+    void audioDeviceAboutToStart (AudioIODevice* device) override;
 
     /** Implementation of the AudioIODeviceCallback method. */
-    void audioDeviceStopped();
+    void audioDeviceStopped() override;
 
     /** An alternative method for initialising the source without an AudioIODevice. */
     void prepareToPlay (double sampleRate, int blockSize);

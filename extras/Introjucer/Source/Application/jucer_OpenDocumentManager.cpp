@@ -41,30 +41,30 @@ public:
     //==============================================================================
     struct Type  : public OpenDocumentManager::DocumentType
     {
-        bool canOpenFile (const File&)                     { return true; }
-        Document* openFile (Project* p, const File& f)     { return new UnknownDocument (p, f); }
+        bool canOpenFile (const File&) override                     { return true; }
+        Document* openFile (Project* p, const File& f) override     { return new UnknownDocument (p, f); }
     };
 
     //==============================================================================
-    bool loadedOk() const                           { return true; }
-    bool isForFile (const File& f) const            { return file == f; }
-    bool isForNode (const ValueTree&) const         { return false; }
-    bool refersToProject (Project& p) const         { return project == &p; }
-    Project* getProject() const                     { return project; }
-    bool needsSaving() const                        { return false; }
-    bool save()                                     { return true; }
-    bool saveAs()                                   { return false; }
-    bool hasFileBeenModifiedExternally()            { return fileModificationTime != file.getLastModificationTime(); }
-    void reloadFromFile()                           { fileModificationTime = file.getLastModificationTime(); }
-    String getName() const                          { return file.getFileName(); }
-    File getFile() const                            { return file; }
-    Component* createEditor()                       { return new ItemPreviewComponent (file); }
-    Component* createViewer()                       { return createEditor(); }
-    void fileHasBeenRenamed (const File& newFile)   { file = newFile; }
-    String getState() const                         { return String::empty; }
-    void restoreState (const String&)               {}
+    bool loadedOk() const override                           { return true; }
+    bool isForFile (const File& f) const override            { return file == f; }
+    bool isForNode (const ValueTree&) const override         { return false; }
+    bool refersToProject (Project& p) const override         { return project == &p; }
+    Project* getProject() const override                     { return project; }
+    bool needsSaving() const override                        { return false; }
+    bool save() override                                     { return true; }
+    bool saveAs() override                                   { return false; }
+    bool hasFileBeenModifiedExternally() override            { return fileModificationTime != file.getLastModificationTime(); }
+    void reloadFromFile() override                           { fileModificationTime = file.getLastModificationTime(); }
+    String getName() const override                          { return file.getFileName(); }
+    File getFile() const override                            { return file; }
+    Component* createEditor() override                       { return new ItemPreviewComponent (file); }
+    Component* createViewer() override                       { return createEditor(); }
+    void fileHasBeenRenamed (const File& newFile) override   { file = newFile; }
+    String getState() const override                         { return String::empty; }
+    void restoreState (const String&) override               {}
 
-    String getType() const
+    String getType() const override
     {
         if (file.getFileExtension().isNotEmpty())
             return file.getFileExtension() + " file";

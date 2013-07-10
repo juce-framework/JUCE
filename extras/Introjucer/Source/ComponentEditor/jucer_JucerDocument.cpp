@@ -673,7 +673,7 @@ public:
     {
     }
 
-    bool save()
+    bool save() override
     {
         return SourceCodeDocument::save() && saveHeader();
     }
@@ -688,7 +688,7 @@ public:
         return false;
     }
 
-    Component* createEditor()
+    Component* createEditor() override
     {
         ScopedPointer<JucerDocument> jucerDoc (JucerDocument::createForCppFile (getProject(), getFile()));
 
@@ -703,8 +703,8 @@ public:
     public:
         Type() {}
 
-        bool canOpenFile (const File& f)                { return JucerDocument::isValidJucerCppFile (f); }
-        Document* openFile (Project* p, const File& f)  { return new JucerComponentDocument (p, f); }
+        bool canOpenFile (const File& f) override                { return JucerDocument::isValidJucerCppFile (f); }
+        Document* openFile (Project* p, const File& f) override  { return new JucerComponentDocument (p, f); }
     };
 };
 

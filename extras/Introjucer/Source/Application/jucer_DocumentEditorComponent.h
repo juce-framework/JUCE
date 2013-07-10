@@ -40,7 +40,8 @@ public:
     ~DocumentEditorComponent();
 
     OpenDocumentManager::Document* getDocument() const              { return document; }
-    void documentAboutToClose (OpenDocumentManager::Document* document);
+
+    void documentAboutToClose (OpenDocumentManager::Document*) override;
 
 protected:
     OpenDocumentManager::Document* document;

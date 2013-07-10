@@ -84,17 +84,16 @@ public:
     void showBubbleMessage (const Rectangle<int>& pos, const String& text);
 
     //==============================================================================
-    ApplicationCommandTarget* getNextCommandTarget();
-    void getAllCommands (Array <CommandID>& commands);
-    void getCommandInfo (CommandID commandID, ApplicationCommandInfo& result);
-    bool isCommandActive (const CommandID commandID);
-    bool perform (const InvocationInfo& info);
+    ApplicationCommandTarget* getNextCommandTarget() override;
+    void getAllCommands (Array <CommandID>& commands) override;
+    void getCommandInfo (CommandID commandID, ApplicationCommandInfo& result) override;
+    bool perform (const InvocationInfo& info) override;
 
-    void paint (Graphics&);
-    void paintOverChildren (Graphics&);
-    void resized();
-    void childBoundsChanged (Component* child);
-    void lookAndFeelChanged();
+    void paint (Graphics&) override;
+    void paintOverChildren (Graphics&) override;
+    void resized() override;
+    void childBoundsChanged (Component*) override;
+    void lookAndFeelChanged() override;
 
 protected:
     Project* project;
@@ -110,8 +109,8 @@ protected:
     ComponentBoundsConstrainer treeSizeConstrainer;
     BubbleMessageComponent bubbleMessage;
 
-    void documentAboutToClose (OpenDocumentManager::Document*);
-    void changeListenerCallback (ChangeBroadcaster*);
+    void documentAboutToClose (OpenDocumentManager::Document*) override;
+    void changeListenerCallback (ChangeBroadcaster*) override;
     TreeView* getFilesTreeView() const;
     ProjectTreeViewBase* getFilesTreeRoot() const;
     void showTranslationTool();

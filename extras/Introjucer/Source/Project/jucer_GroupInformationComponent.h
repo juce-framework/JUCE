@@ -53,28 +53,28 @@ public:
     }
 
     //==============================================================================
-    void paint (Graphics& g)
+    void paint (Graphics& g) override
     {
         IntrojucerLookAndFeel::fillWithBackgroundTexture (*this, g);
     }
 
-    void resized()
+    void resized() override
     {
         list.setBounds (getLocalBounds().reduced (5, 4));
     }
 
-    int getNumRows()
+    int getNumRows() override
     {
         return item.getNumChildren();
     }
 
-    void paintListBoxItem (int /*rowNumber*/, Graphics& g, int width, int height, bool /*rowIsSelected*/)
+    void paintListBoxItem (int /*rowNumber*/, Graphics& g, int width, int height, bool /*rowIsSelected*/) override
     {
         g.setColour (Colours::white.withAlpha (0.4f));
         g.fillRect (0, 0, width, height - 1);
     }
 
-    Component* refreshComponentForRow (int rowNumber, bool /*isRowSelected*/, Component* existingComponentToUpdate)
+    Component* refreshComponentForRow (int rowNumber, bool /*isRowSelected*/, Component* existingComponentToUpdate) override
     {
         ScopedPointer<Component> existing (existingComponentToUpdate);
 
@@ -94,11 +94,11 @@ public:
     }
 
     //==============================================================================
-    void valueTreePropertyChanged (ValueTree&, const Identifier&)    { itemChanged(); }
-    void valueTreeChildAdded (ValueTree&, ValueTree&)                { itemChanged(); }
-    void valueTreeChildRemoved (ValueTree&, ValueTree&)              { itemChanged(); }
-    void valueTreeChildOrderChanged (ValueTree&)                     { itemChanged(); }
-    void valueTreeParentChanged (ValueTree&)                         { itemChanged(); }
+    void valueTreePropertyChanged (ValueTree&, const Identifier&) override    { itemChanged(); }
+    void valueTreeChildAdded (ValueTree&, ValueTree&) override                { itemChanged(); }
+    void valueTreeChildRemoved (ValueTree&, ValueTree&) override              { itemChanged(); }
+    void valueTreeChildOrderChanged (ValueTree&) override                     { itemChanged(); }
+    void valueTreeParentChanged (ValueTree&) override                         { itemChanged(); }
 
 private:
     Project::Item item;
@@ -129,7 +129,7 @@ private:
             }
         }
 
-        void paint (Graphics& g)
+        void paint (Graphics& g) override
         {
             int x = getHeight() + 6;
 
@@ -146,7 +146,7 @@ private:
             g.drawText (item.getName(), x, 0, x2 - x, getHeight(), Justification::centredLeft, true);
         }
 
-        void resized()
+        void resized() override
         {
             int w = 180;
             resourceButton.setBounds (getWidth() - w, 1, w, getHeight() - 2);

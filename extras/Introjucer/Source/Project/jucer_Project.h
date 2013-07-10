@@ -42,13 +42,13 @@ public:
 
     //==============================================================================
     // FileBasedDocument stuff..
-    String getDocumentTitle();
-    Result loadDocument (const File& file);
-    Result saveDocument (const File& file);
+    String getDocumentTitle() override;
+    Result loadDocument (const File& file) override;
+    Result saveDocument (const File& file) override;
     Result saveProject (const File& file, bool isCommandLineApp);
     Result saveResourcesOnly (const File& file);
-    File getLastDocumentOpened();
-    void setLastDocumentOpened (const File& file);
+    File getLastDocumentOpened() override;
+    void setLastDocumentOpened (const File& file) override;
 
     void setTitle (const String& newTitle);
 
@@ -262,11 +262,11 @@ public:
     PropertiesFile& getStoredProperties() const;
 
     //==============================================================================
-    void valueTreePropertyChanged (ValueTree& tree, const Identifier& property);
-    void valueTreeChildAdded (ValueTree& parentTree, ValueTree& childWhichHasBeenAdded);
-    void valueTreeChildRemoved (ValueTree& parentTree, ValueTree& childWhichHasBeenRemoved);
-    void valueTreeChildOrderChanged (ValueTree& parentTree);
-    void valueTreeParentChanged (ValueTree& tree);
+    void valueTreePropertyChanged (ValueTree&, const Identifier&) override;
+    void valueTreeChildAdded (ValueTree&, ValueTree&) override;
+    void valueTreeChildRemoved (ValueTree&, ValueTree&) override;
+    void valueTreeChildOrderChanged (ValueTree&) override;
+    void valueTreeParentChanged (ValueTree&) override;
 
     //==============================================================================
     UndoManager* getUndoManagerFor (const ValueTree&) const             { return nullptr; }

@@ -86,11 +86,11 @@ public:
 
     //==============================================================================
     /** @internal */
-    void handleNoteOn (MidiKeyboardState* source, int midiChannel, int midiNoteNumber, float velocity);
+    void handleNoteOn (MidiKeyboardState*, int midiChannel, int midiNoteNumber, float velocity) override;
     /** @internal */
-    void handleNoteOff (MidiKeyboardState* source, int midiChannel, int midiNoteNumber);
+    void handleNoteOff (MidiKeyboardState*, int midiChannel, int midiNoteNumber) override;
     /** @internal */
-    void handleIncomingMidiMessage (MidiInput* source, const MidiMessage& message);
+    void handleIncomingMidiMessage (MidiInput*, const MidiMessage&) override;
 
 private:
     //==============================================================================
