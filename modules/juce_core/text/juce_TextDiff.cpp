@@ -116,6 +116,7 @@ struct TextDiffHelpers
         int* l0 = lines;
         int* l1 = l0 + lenB + 1;
 
+        int loopsWithoutImprovement = 0;
         int bestLength = 0;
         indexInA = indexInB = 0;
 
@@ -137,12 +138,16 @@ struct TextDiffHelpers
 
                     if (len > bestLength)
                     {
+                        loopsWithoutImprovement = 0;
                         bestLength = len;
                         indexInA = i;
                         indexInB = j;
                     }
                 }
             }
+
+            if (++loopsWithoutImprovement > 100)
+                break;
 
             std::swap (l0, l1);
         }
