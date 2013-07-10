@@ -225,7 +225,10 @@ public:
 
                 if (recent->recentItem != nil)
                 {
-                    [menuToAddTo addItem: [recent->recentItem copyWithZone: nil]];
+                    if (NSMenu* parent = [recent->recentItem menu])
+                        [parent removeItem: recent->recentItem];
+
+                    [menuToAddTo addItem: recent->recentItem];
                     return;
                 }
             }
