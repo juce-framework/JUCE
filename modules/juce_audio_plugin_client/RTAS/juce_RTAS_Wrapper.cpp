@@ -499,7 +499,7 @@ protected:
         midiEvents.ensureSize (2048);
     }
 
-    void handleAsyncUpdate() override
+    void handleAsyncUpdate()
     {
         if (! prepared)
         {
