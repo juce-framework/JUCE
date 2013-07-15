@@ -391,6 +391,14 @@ public:
     void sort (bool ignoreCase);
 
     //==============================================================================
+    /** Increases the array's internal storage to hold a minimum number of elements.
+
+        Calling this before adding a large known number of elements means that
+        the array won't have to keep dynamically resizing itself as the elements
+        are added, and it'll therefore be more efficient.
+    */
+    void ensureStorageAllocated (int minNumElements);
+
     /** Reduces the amount of storage being used by the array.
 
         Arrays typically allocate slightly more storage than they need, and after
