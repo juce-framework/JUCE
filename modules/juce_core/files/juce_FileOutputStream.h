@@ -90,11 +90,11 @@ public:
     Result truncate();
 
     //==============================================================================
-    void flush();
-    int64 getPosition();
-    bool setPosition (int64 pos);
-    bool write (const void* data, size_t numBytes);
-    void writeRepeatedByte (uint8 byte, size_t numTimesToRepeat);
+    void flush() override;
+    int64 getPosition() override;
+    bool setPosition (int64) override;
+    bool write (const void*, size_t) override;
+    bool writeRepeatedByte (uint8 byte, size_t numTimesToRepeat) override;
 
 
 private:

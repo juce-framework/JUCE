@@ -78,9 +78,9 @@ public:
     */
     void flush();
 
-    int64 getPosition();
-    bool setPosition (int64 newPosition);
-    bool write (const void* destBuffer, size_t howMany);
+    int64 getPosition() override;
+    bool setPosition (int64) override;
+    bool write (const void*, size_t) override;
 
     /** These are preset values that can be used for the constructor's windowBits paramter.
         For more info about this, see the zlib documentation for its windowBits parameter.

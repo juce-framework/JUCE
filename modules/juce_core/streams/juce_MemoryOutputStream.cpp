@@ -95,10 +95,12 @@ bool MemoryOutputStream::write (const void* const buffer, size_t howMany)
     return true;
 }
 
-void MemoryOutputStream::writeRepeatedByte (uint8 byte, size_t howMany)
+bool MemoryOutputStream::writeRepeatedByte (uint8 byte, size_t howMany)
 {
     if (howMany > 0)
         memset (prepareToWrite (howMany), byte, howMany);
+
+    return true;
 }
 
 void MemoryOutputStream::appendUTF8Char (juce_wchar c)

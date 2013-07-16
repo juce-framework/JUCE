@@ -111,11 +111,11 @@ public:
     */
     void flush();
 
-    bool write (const void* buffer, size_t howMany);
-    int64 getPosition()                                 { return position; }
-    bool setPosition (int64 newPosition);
-    int writeFromInputStream (InputStream& source, int64 maxNumBytesToWrite);
-    void writeRepeatedByte (uint8 byte, size_t numTimesToRepeat);
+    bool write (const void*, size_t) override;
+    int64 getPosition() override                                 { return position; }
+    bool setPosition (int64) override;
+    int writeFromInputStream (InputStream&, int64 maxNumBytesToWrite) override;
+    bool writeRepeatedByte (uint8 byte, size_t numTimesToRepeat) override;
 
 private:
     //==============================================================================
