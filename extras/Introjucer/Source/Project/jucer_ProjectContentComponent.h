@@ -71,6 +71,7 @@ public:
     bool saveProject();
     void closeProject();
     void openInIDE();
+    void openInIDE (const String& exporterName);
 
     void deleteSelectedTreeItems();
 
@@ -82,6 +83,8 @@ public:
     void rebuildProjectTabs();
 
     void showBubbleMessage (const Rectangle<int>& pos, const String& text);
+
+    StringArray getExportersWhichCanLaunch() const;
 
     //==============================================================================
     ApplicationCommandTarget* getNextCommandTarget() override;

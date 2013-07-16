@@ -125,6 +125,15 @@ public:
        #endif
     }
 
+    bool canLaunchProject() override
+    {
+       #if JUCE_MAC
+        return true;
+       #else
+        return false;
+       #endif
+    }
+
     //==============================================================================
     void create (const OwnedArray<LibraryModule>&) const override
     {

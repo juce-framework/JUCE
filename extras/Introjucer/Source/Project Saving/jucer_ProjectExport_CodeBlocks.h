@@ -47,6 +47,7 @@ public:
     }
 
     //==============================================================================
+    bool canLaunchProject() override                 { return false; }
     bool launchProject() override                    { return false; }
     bool isCodeBlocks() const override               { return true; }
     bool isWindows() const override                  { return true; }

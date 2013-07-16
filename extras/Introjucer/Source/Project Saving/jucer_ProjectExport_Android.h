@@ -64,6 +64,7 @@ public:
     }
 
     //==============================================================================
+    bool canLaunchProject() override                     { return false; }
     bool launchProject() override                        { return false; }
     bool isAndroid() const override                      { return true; }
     bool usesMMFiles() const override                    { return false; }

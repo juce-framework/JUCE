@@ -49,6 +49,7 @@ public:
     //=============================================================================
     virtual bool usesMMFiles() const = 0;
     virtual void createExporterProperties (PropertyListBuilder&) = 0;
+    virtual bool canLaunchProject() = 0;
     virtual bool launchProject() = 0;
     virtual void create (const OwnedArray<LibraryModule>&) const = 0; // may throw a SaveError
     virtual bool shouldFileBeCompiledByDefault (const RelativePath& path) const;

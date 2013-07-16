@@ -50,6 +50,15 @@ public:
        #endif
     }
 
+    bool canLaunchProject() override
+    {
+       #if JUCE_WINDOWS
+        return true;
+       #else
+        return false;
+       #endif
+    }
+
     void createExporterProperties (PropertyListBuilder&) override
     {
     }
