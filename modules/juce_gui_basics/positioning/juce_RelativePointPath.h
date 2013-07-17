@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_RELATIVEPOINTPATH_JUCEHEADER__
-#define __JUCE_RELATIVEPOINTPATH_JUCEHEADER__
+#ifndef JUCE_RELATIVEPOINTPATH_H_INCLUDED
+#define JUCE_RELATIVEPOINTPATH_H_INCLUDED
 
 #include "juce_RelativePoint.h"
 class DrawablePath;
@@ -190,4 +190,4 @@ private:
 };
 
 
-#endif   // __JUCE_RELATIVEPOINTPATH_JUCEHEADER__
+#endif   // JUCE_RELATIVEPOINTPATH_H_INCLUDED

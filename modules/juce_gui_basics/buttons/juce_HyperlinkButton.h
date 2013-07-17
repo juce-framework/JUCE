@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_HYPERLINKBUTTON_JUCEHEADER__
-#define __JUCE_HYPERLINKBUTTON_JUCEHEADER__
+#ifndef JUCE_HYPERLINKBUTTON_H_INCLUDED
+#define JUCE_HYPERLINKBUTTON_H_INCLUDED
 
 #include "juce_Button.h"
 
@@ -113,4 +113,4 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (HyperlinkButton)
 };
 
-#endif   // __JUCE_HYPERLINKBUTTON_JUCEHEADER__
+#endif   // JUCE_HYPERLINKBUTTON_H_INCLUDED

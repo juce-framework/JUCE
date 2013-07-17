@@ -26,8 +26,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_INPUTSTREAM_JUCEHEADER__
-#define __JUCE_INPUTSTREAM_JUCEHEADER__
+#ifndef JUCE_INPUTSTREAM_H_INCLUDED
+#define JUCE_INPUTSTREAM_H_INCLUDED
 
 #include "../text/juce_String.h"
 class MemoryBlock;
@@ -295,4 +295,4 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (InputStream)
 };
 
-#endif   // __JUCE_INPUTSTREAM_JUCEHEADER__
+#endif   // JUCE_INPUTSTREAM_H_INCLUDED

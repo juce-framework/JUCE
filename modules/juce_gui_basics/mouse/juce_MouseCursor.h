@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_MOUSECURSOR_JUCEHEADER__
-#define __JUCE_MOUSECURSOR_JUCEHEADER__
+#ifndef JUCE_MOUSECURSOR_H_INCLUDED
+#define JUCE_MOUSECURSOR_H_INCLUDED
 
 class Image;
 class ComponentPeer;
@@ -183,4 +183,4 @@ private:
     JUCE_LEAK_DETECTOR (MouseCursor)
 };
 
-#endif   // __JUCE_MOUSECURSOR_JUCEHEADER__
+#endif   // JUCE_MOUSECURSOR_H_INCLUDED

@@ -26,8 +26,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_MEMORYMAPPEDFILE_JUCEHEADER__
-#define __JUCE_MEMORYMAPPEDFILE_JUCEHEADER__
+#ifndef JUCE_MEMORYMAPPEDFILE_H_INCLUDED
+#define JUCE_MEMORYMAPPEDFILE_H_INCLUDED
 
 #include "juce_File.h"
 
@@ -113,4 +113,4 @@ private:
 };
 
 
-#endif   // __JUCE_MEMORYMAPPEDFILE_JUCEHEADER__
+#endif   // JUCE_MEMORYMAPPEDFILE_H_INCLUDED

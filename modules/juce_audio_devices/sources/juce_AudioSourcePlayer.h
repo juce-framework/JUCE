@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_AUDIOSOURCEPLAYER_JUCEHEADER__
-#define __JUCE_AUDIOSOURCEPLAYER_JUCEHEADER__
+#ifndef JUCE_AUDIOSOURCEPLAYER_H_INCLUDED
+#define JUCE_AUDIOSOURCEPLAYER_H_INCLUDED
 
 
 //==============================================================================
@@ -113,4 +113,4 @@ private:
 };
 
 
-#endif   // __JUCE_AUDIOSOURCEPLAYER_JUCEHEADER__
+#endif   // JUCE_AUDIOSOURCEPLAYER_H_INCLUDED

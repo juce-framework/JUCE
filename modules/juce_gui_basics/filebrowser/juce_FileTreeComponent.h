@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_FILETREECOMPONENT_JUCEHEADER__
-#define __JUCE_FILETREECOMPONENT_JUCEHEADER__
+#ifndef JUCE_FILETREECOMPONENT_H_INCLUDED
+#define JUCE_FILETREECOMPONENT_H_INCLUDED
 
 #include "juce_DirectoryContentsDisplayComponent.h"
 #include "../widgets/juce_TreeView.h"
@@ -97,4 +97,4 @@ private:
 };
 
 
-#endif   // __JUCE_FILETREECOMPONENT_JUCEHEADER__
+#endif   // JUCE_FILETREECOMPONENT_H_INCLUDED

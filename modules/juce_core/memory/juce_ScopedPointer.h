@@ -26,8 +26,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_SCOPEDPOINTER_JUCEHEADER__
-#define __JUCE_SCOPEDPOINTER_JUCEHEADER__
+#ifndef JUCE_SCOPEDPOINTER_H_INCLUDED
+#define JUCE_SCOPEDPOINTER_H_INCLUDED
 
 //==============================================================================
 /**
@@ -250,4 +250,4 @@ template <typename Type>
 void deleteAndZero (ScopedPointer<Type>&)  { static_jassert (sizeof (Type) == 12345); }
 #endif
 
-#endif   // __JUCE_SCOPEDPOINTER_JUCEHEADER__
+#endif   // JUCE_SCOPEDPOINTER_H_INCLUDED

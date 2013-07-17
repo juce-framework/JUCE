@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_POINT_JUCEHEADER__
-#define __JUCE_POINT_JUCEHEADER__
+#ifndef JUCE_POINT_H_INCLUDED
+#define JUCE_POINT_H_INCLUDED
 
 #include "juce_AffineTransform.h"
 
@@ -185,4 +185,4 @@ public:
 };
 
 
-#endif   // __JUCE_POINT_JUCEHEADER__
+#endif   // JUCE_POINT_H_INCLUDED

@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_EDGETABLE_JUCEHEADER__
-#define __JUCE_EDGETABLE_JUCEHEADER__
+#ifndef JUCE_EDGETABLE_H_INCLUDED
+#define JUCE_EDGETABLE_H_INCLUDED
 
 #include "../geometry/juce_AffineTransform.h"
 #include "../geometry/juce_Rectangle.h"
@@ -207,4 +207,4 @@ private:
 };
 
 
-#endif   // __JUCE_EDGETABLE_JUCEHEADER__
+#endif   // JUCE_EDGETABLE_H_INCLUDED

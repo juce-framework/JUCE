@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_TEXTPROPERTYCOMPONENT_JUCEHEADER__
-#define __JUCE_TEXTPROPERTYCOMPONENT_JUCEHEADER__
+#ifndef JUCE_TEXTPROPERTYCOMPONENT_H_INCLUDED
+#define JUCE_TEXTPROPERTYCOMPONENT_H_INCLUDED
 
 #include "juce_PropertyComponent.h"
 #include "../widgets/juce_Label.h"
@@ -109,4 +109,4 @@ private:
 };
 
 
-#endif   // __JUCE_TEXTPROPERTYCOMPONENT_JUCEHEADER__
+#endif   // JUCE_TEXTPROPERTYCOMPONENT_H_INCLUDED

@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_SPLASHSCREEN_JUCEHEADER__
-#define __JUCE_SPLASHSCREEN_JUCEHEADER__
+#ifndef JUCE_SPLASHSCREEN_H_INCLUDED
+#define JUCE_SPLASHSCREEN_H_INCLUDED
 
 
 //==============================================================================
@@ -142,4 +142,4 @@ private:
 };
 
 
-#endif   // __JUCE_SPLASHSCREEN_JUCEHEADER__
+#endif   // JUCE_SPLASHSCREEN_H_INCLUDED

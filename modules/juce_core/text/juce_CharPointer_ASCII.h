@@ -26,8 +26,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_CHARPOINTER_ASCII_JUCEHEADER__
-#define __JUCE_CHARPOINTER_ASCII_JUCEHEADER__
+#ifndef JUCE_CHARPOINTER_ASCII_H_INCLUDED
+#define JUCE_CHARPOINTER_ASCII_H_INCLUDED
 
 
 //==============================================================================
@@ -384,4 +384,4 @@ private:
 };
 
 
-#endif   // __JUCE_CHARPOINTER_ASCII_JUCEHEADER__
+#endif   // JUCE_CHARPOINTER_ASCII_H_INCLUDED

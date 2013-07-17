@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_GENERICAUDIOPROCESSOREDITOR_JUCEHEADER__
-#define __JUCE_GENERICAUDIOPROCESSOREDITOR_JUCEHEADER__
+#ifndef JUCE_GENERICAUDIOPROCESSOREDITOR_H_INCLUDED
+#define JUCE_GENERICAUDIOPROCESSOREDITOR_H_INCLUDED
 
 #include "juce_AudioProcessorEditor.h"
 
@@ -57,4 +57,4 @@ private:
 };
 
 
-#endif   // __JUCE_GENERICAUDIOPROCESSOREDITOR_JUCEHEADER__
+#endif   // JUCE_GENERICAUDIOPROCESSOREDITOR_H_INCLUDED

@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_AUDIOTRANSPORTSOURCE_JUCEHEADER__
-#define __JUCE_AUDIOTRANSPORTSOURCE_JUCEHEADER__
+#ifndef JUCE_AUDIOTRANSPORTSOURCE_H_INCLUDED
+#define JUCE_AUDIOTRANSPORTSOURCE_H_INCLUDED
 
 
 //==============================================================================
@@ -183,4 +183,4 @@ private:
 };
 
 
-#endif   // __JUCE_AUDIOTRANSPORTSOURCE_JUCEHEADER__
+#endif   // JUCE_AUDIOTRANSPORTSOURCE_H_INCLUDED

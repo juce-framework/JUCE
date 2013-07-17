@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_DIALOGWINDOW_JUCEHEADER__
-#define __JUCE_DIALOGWINDOW_JUCEHEADER__
+#ifndef JUCE_DIALOGWINDOW_H_INCLUDED
+#define JUCE_DIALOGWINDOW_H_INCLUDED
 
 #include "juce_DocumentWindow.h"
 
@@ -260,4 +260,4 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DialogWindow)
 };
 
-#endif   // __JUCE_DIALOGWINDOW_JUCEHEADER__
+#endif   // JUCE_DIALOGWINDOW_H_INCLUDED

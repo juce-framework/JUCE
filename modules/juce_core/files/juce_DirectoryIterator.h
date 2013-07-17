@@ -26,8 +26,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_DIRECTORYITERATOR_JUCEHEADER__
-#define __JUCE_DIRECTORYITERATOR_JUCEHEADER__
+#ifndef JUCE_DIRECTORYITERATOR_H_INCLUDED
+#define JUCE_DIRECTORYITERATOR_H_INCLUDED
 
 #include "juce_File.h"
 #include "../memory/juce_ScopedPointer.h"
@@ -159,4 +159,4 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DirectoryIterator)
 };
 
-#endif   // __JUCE_DIRECTORYITERATOR_JUCEHEADER__
+#endif   // JUCE_DIRECTORYITERATOR_H_INCLUDED

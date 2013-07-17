@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_OPENGLIMAGE_JUCEHEADER__
-#define __JUCE_OPENGLIMAGE_JUCEHEADER__
+#ifndef JUCE_OPENGLIMAGE_H_INCLUDED
+#define JUCE_OPENGLIMAGE_H_INCLUDED
 
 
 //==============================================================================
@@ -49,4 +49,4 @@ public:
     static OpenGLFrameBuffer* getFrameBufferFrom (const Image&);
 };
 
-#endif   // __JUCE_OPENGLIMAGE_JUCEHEADER__
+#endif   // JUCE_OPENGLIMAGE_H_INCLUDED

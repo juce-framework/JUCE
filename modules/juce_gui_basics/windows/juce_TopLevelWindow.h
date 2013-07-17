@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_TOPLEVELWINDOW_JUCEHEADER__
-#define __JUCE_TOPLEVELWINDOW_JUCEHEADER__
+#ifndef JUCE_TOPLEVELWINDOW_H_INCLUDED
+#define JUCE_TOPLEVELWINDOW_H_INCLUDED
 
 #include "../components/juce_Component.h"
 #include "../misc/juce_DropShadower.h"
@@ -161,4 +161,4 @@ private:
 };
 
 
-#endif   // __JUCE_TOPLEVELWINDOW_JUCEHEADER__
+#endif   // JUCE_TOPLEVELWINDOW_H_INCLUDED

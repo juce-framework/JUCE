@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_MOUSEEVENT_JUCEHEADER__
-#define __JUCE_MOUSEEVENT_JUCEHEADER__
+#ifndef JUCE_MOUSEEVENT_H_INCLUDED
+#define JUCE_MOUSEEVENT_H_INCLUDED
 
 class Component;
 class MouseInputSource;
@@ -357,4 +357,4 @@ struct MouseWheelDetails
 };
 
 
-#endif   // __JUCE_MOUSEEVENT_JUCEHEADER__
+#endif   // JUCE_MOUSEEVENT_H_INCLUDED

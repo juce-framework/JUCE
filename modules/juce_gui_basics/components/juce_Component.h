@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_COMPONENT_JUCEHEADER__
-#define __JUCE_COMPONENT_JUCEHEADER__
+#ifndef JUCE_COMPONENT_H_INCLUDED
+#define JUCE_COMPONENT_H_INCLUDED
 
 #include "../mouse/juce_MouseCursor.h"
 #include "../mouse/juce_MouseListener.h"
@@ -2345,4 +2345,4 @@ protected:
 };
 
 
-#endif   // __JUCE_COMPONENT_JUCEHEADER__
+#endif   // JUCE_COMPONENT_H_INCLUDED

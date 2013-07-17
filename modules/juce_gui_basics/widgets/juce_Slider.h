@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_SLIDER_JUCEHEADER__
-#define __JUCE_SLIDER_JUCEHEADER__
+#ifndef JUCE_SLIDER_H_INCLUDED
+#define JUCE_SLIDER_H_INCLUDED
 
 #include "juce_Label.h"
 #include "../buttons/juce_Button.h"
@@ -830,4 +830,4 @@ private:
 /** This typedef is just for compatibility with old code - newer code should use the Slider::Listener class directly. */
 typedef Slider::Listener SliderListener;
 
-#endif   // __JUCE_SLIDER_JUCEHEADER__
+#endif   // JUCE_SLIDER_H_INCLUDED

@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_OSX_MESSAGEQUEUE_JUCEHEADER__
-#define __JUCE_OSX_MESSAGEQUEUE_JUCEHEADER__
+#ifndef JUCE_OSX_MESSAGEQUEUE_H_INCLUDED
+#define JUCE_OSX_MESSAGEQUEUE_H_INCLUDED
 
 //==============================================================================
 /* An internal message pump class used in OSX and iOS. */
@@ -100,4 +100,4 @@ private:
     }
 };
 
-#endif   // __JUCE_OSX_MESSAGEQUEUE_JUCEHEADER__
+#endif   // JUCE_OSX_MESSAGEQUEUE_H_INCLUDED

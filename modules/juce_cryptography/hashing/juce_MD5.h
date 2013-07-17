@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_MD5_JUCEHEADER__
-#define __JUCE_MD5_JUCEHEADER__
+#ifndef JUCE_MD5_H_INCLUDED
+#define JUCE_MD5_H_INCLUDED
 
 //==============================================================================
 /**
@@ -111,4 +111,4 @@ private:
 };
 
 
-#endif   // __JUCE_MD5_JUCEHEADER__
+#endif   // JUCE_MD5_H_INCLUDED

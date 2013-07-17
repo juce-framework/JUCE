@@ -26,8 +26,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_REFERENCECOUNTEDOBJECT_JUCEHEADER__
-#define __JUCE_REFERENCECOUNTEDOBJECT_JUCEHEADER__
+#ifndef JUCE_REFERENCECOUNTEDOBJECT_H_INCLUDED
+#define JUCE_REFERENCECOUNTEDOBJECT_H_INCLUDED
 
 #include "juce_Atomic.h"
 
@@ -397,4 +397,4 @@ bool operator!= (ReferenceCountedObjectClass* object1, ReferenceCountedObjectPtr
 }
 
 
-#endif   // __JUCE_REFERENCECOUNTEDOBJECT_JUCEHEADER__
+#endif   // JUCE_REFERENCECOUNTEDOBJECT_H_INCLUDED

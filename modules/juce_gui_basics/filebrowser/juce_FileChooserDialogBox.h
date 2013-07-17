@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_FILECHOOSERDIALOGBOX_JUCEHEADER__
-#define __JUCE_FILECHOOSERDIALOGBOX_JUCEHEADER__
+#ifndef JUCE_FILECHOOSERDIALOGBOX_H_INCLUDED
+#define JUCE_FILECHOOSERDIALOGBOX_H_INCLUDED
 
 #include "juce_FileBrowserComponent.h"
 #include "../windows/juce_ResizableWindow.h"
@@ -158,4 +158,4 @@ private:
 };
 
 
-#endif   // __JUCE_FILECHOOSERDIALOGBOX_JUCEHEADER__
+#endif   // JUCE_FILECHOOSERDIALOGBOX_H_INCLUDED

@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_DOCUMENTWINDOW_JUCEHEADER__
-#define __JUCE_DOCUMENTWINDOW_JUCEHEADER__
+#ifndef JUCE_DOCUMENTWINDOW_H_INCLUDED
+#define JUCE_DOCUMENTWINDOW_H_INCLUDED
 
 #include "juce_ResizableWindow.h"
 #include "../buttons/juce_Button.h"
@@ -272,4 +272,4 @@ private:
 };
 
 
-#endif   // __JUCE_DOCUMENTWINDOW_JUCEHEADER__
+#endif   // JUCE_DOCUMENTWINDOW_H_INCLUDED

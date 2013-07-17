@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_BUFFERINGAUDIOSOURCE_JUCEHEADER__
-#define __JUCE_BUFFERINGAUDIOSOURCE_JUCEHEADER__
+#ifndef JUCE_BUFFERINGAUDIOSOURCE_H_INCLUDED
+#define JUCE_BUFFERINGAUDIOSOURCE_H_INCLUDED
 
 #include "juce_PositionableAudioSource.h"
 
@@ -110,4 +110,4 @@ private:
 };
 
 
-#endif   // __JUCE_BUFFERINGAUDIOSOURCE_JUCEHEADER__
+#endif   // JUCE_BUFFERINGAUDIOSOURCE_H_INCLUDED

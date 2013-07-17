@@ -26,8 +26,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_FILE_JUCEHEADER__
-#define __JUCE_FILE_JUCEHEADER__
+#ifndef JUCE_FILE_H_INCLUDED
+#define JUCE_FILE_H_INCLUDED
 
 #include "../containers/juce_Array.h"
 #include "../time/juce_Time.h"
@@ -956,4 +956,4 @@ private:
     bool setFileReadOnlyInternal (bool) const;
 };
 
-#endif   // __JUCE_FILE_JUCEHEADER__
+#endif   // JUCE_FILE_H_INCLUDED

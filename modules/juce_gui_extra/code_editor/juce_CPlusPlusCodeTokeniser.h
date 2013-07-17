@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_CPLUSPLUSCODETOKENISER_JUCEHEADER__
-#define __JUCE_CPLUSPLUSCODETOKENISER_JUCEHEADER__
+#ifndef JUCE_CPLUSPLUSCODETOKENISER_H_INCLUDED
+#define JUCE_CPLUSPLUSCODETOKENISER_H_INCLUDED
 
 #include "juce_CodeTokeniser.h"
 
@@ -70,4 +70,4 @@ private:
 };
 
 
-#endif   // __JUCE_CPLUSPLUSCODETOKENISER_JUCEHEADER__
+#endif   // JUCE_CPLUSPLUSCODETOKENISER_H_INCLUDED

@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_POPUPMENU_JUCEHEADER__
-#define __JUCE_POPUPMENU_JUCEHEADER__
+#ifndef JUCE_POPUPMENU_H_INCLUDED
+#define JUCE_POPUPMENU_H_INCLUDED
 
 
 //==============================================================================
@@ -505,4 +505,4 @@ private:
     JUCE_LEAK_DETECTOR (PopupMenu)
 };
 
-#endif   // __JUCE_POPUPMENU_JUCEHEADER__
+#endif   // JUCE_POPUPMENU_H_INCLUDED

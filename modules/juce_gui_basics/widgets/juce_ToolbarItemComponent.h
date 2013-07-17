@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_TOOLBARITEMCOMPONENT_JUCEHEADER__
-#define __JUCE_TOOLBARITEMCOMPONENT_JUCEHEADER__
+#ifndef JUCE_TOOLBARITEMCOMPONENT_H_INCLUDED
+#define JUCE_TOOLBARITEMCOMPONENT_H_INCLUDED
 
 #include "../buttons/juce_Button.h"
 #include "../drawables/juce_Drawable.h"
@@ -207,4 +207,4 @@ private:
 };
 
 
-#endif   // __JUCE_TOOLBARITEMCOMPONENT_JUCEHEADER__
+#endif   // JUCE_TOOLBARITEMCOMPONENT_H_INCLUDED

@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_RECTANGLE_JUCEHEADER__
-#define __JUCE_RECTANGLE_JUCEHEADER__
+#ifndef JUCE_RECTANGLE_H_INCLUDED
+#define JUCE_RECTANGLE_H_INCLUDED
 
 #include "juce_Point.h"
 class RectangleList;
@@ -799,4 +799,4 @@ private:
 };
 
 
-#endif   // __JUCE_RECTANGLE_JUCEHEADER__
+#endif   // JUCE_RECTANGLE_H_INCLUDED

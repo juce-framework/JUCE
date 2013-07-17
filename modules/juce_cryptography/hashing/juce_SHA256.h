@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_SHA256_JUCEHEADER__
-#define __JUCE_SHA256_JUCEHEADER__
+#ifndef JUCE_SHA256_H_INCLUDED
+#define JUCE_SHA256_H_INCLUDED
 
 
 //==============================================================================
@@ -104,4 +104,4 @@ private:
 };
 
 
-#endif   // __JUCE_SHA256_JUCEHEADER__
+#endif   // JUCE_SHA256_H_INCLUDED

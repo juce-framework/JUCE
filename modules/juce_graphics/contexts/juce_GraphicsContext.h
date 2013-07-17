@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_GRAPHICSCONTEXT_JUCEHEADER__
-#define __JUCE_GRAPHICSCONTEXT_JUCEHEADER__
+#ifndef JUCE_GRAPHICSCONTEXT_H_INCLUDED
+#define JUCE_GRAPHICSCONTEXT_H_INCLUDED
 
 #include "../fonts/juce_Font.h"
 #include "../geometry/juce_Rectangle.h"
@@ -721,4 +721,4 @@ private:
 };
 
 
-#endif   // __JUCE_GRAPHICSCONTEXT_JUCEHEADER__
+#endif   // JUCE_GRAPHICSCONTEXT_H_INCLUDED

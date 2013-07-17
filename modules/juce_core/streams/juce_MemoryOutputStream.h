@@ -26,8 +26,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_MEMORYOUTPUTSTREAM_JUCEHEADER__
-#define __JUCE_MEMORYOUTPUTSTREAM_JUCEHEADER__
+#ifndef JUCE_MEMORYOUTPUTSTREAM_H_INCLUDED
+#define JUCE_MEMORYOUTPUTSTREAM_H_INCLUDED
 
 #include "juce_OutputStream.h"
 #include "../memory/juce_MemoryBlock.h"
@@ -133,4 +133,4 @@ private:
 OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, const MemoryOutputStream& streamToRead);
 
 
-#endif   // __JUCE_MEMORYOUTPUTSTREAM_JUCEHEADER__
+#endif   // JUCE_MEMORYOUTPUTSTREAM_H_INCLUDED

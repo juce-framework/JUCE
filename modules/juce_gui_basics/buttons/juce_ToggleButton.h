@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_TOGGLEBUTTON_JUCEHEADER__
-#define __JUCE_TOGGLEBUTTON_JUCEHEADER__
+#ifndef JUCE_TOGGLEBUTTON_H_INCLUDED
+#define JUCE_TOGGLEBUTTON_H_INCLUDED
 
 #include "juce_Button.h"
 
@@ -86,4 +86,4 @@ private:
 };
 
 
-#endif   // __JUCE_TOGGLEBUTTON_JUCEHEADER__
+#endif   // JUCE_TOGGLEBUTTON_H_INCLUDED

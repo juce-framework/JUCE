@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_AUDIOFORMAT_JUCEHEADER__
-#define __JUCE_AUDIOFORMAT_JUCEHEADER__
+#ifndef JUCE_AUDIOFORMAT_H_INCLUDED
+#define JUCE_AUDIOFORMAT_H_INCLUDED
 
 #include "juce_AudioFormatReader.h"
 #include "juce_AudioFormatWriter.h"
@@ -175,4 +175,4 @@ private:
 };
 
 
-#endif   // __JUCE_AUDIOFORMAT_JUCEHEADER__
+#endif   // JUCE_AUDIOFORMAT_H_INCLUDED

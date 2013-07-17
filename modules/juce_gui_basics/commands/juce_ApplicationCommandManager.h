@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_APPLICATIONCOMMANDMANAGER_JUCEHEADER__
-#define __JUCE_APPLICATIONCOMMANDMANAGER_JUCEHEADER__
+#ifndef JUCE_APPLICATIONCOMMANDMANAGER_H_INCLUDED
+#define JUCE_APPLICATIONCOMMANDMANAGER_H_INCLUDED
 
 #include "juce_ApplicationCommandTarget.h"
 class KeyPressMappingSet;
@@ -354,4 +354,4 @@ public:
 
 
 
-#endif   // __JUCE_APPLICATIONCOMMANDMANAGER_JUCEHEADER__
+#endif   // JUCE_APPLICATIONCOMMANDMANAGER_H_INCLUDED

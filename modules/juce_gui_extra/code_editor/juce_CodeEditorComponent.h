@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_CODEEDITORCOMPONENT_JUCEHEADER__
-#define __JUCE_CODEEDITORCOMPONENT_JUCEHEADER__
+#ifndef JUCE_CODEEDITORCOMPONENT_H_INCLUDED
+#define JUCE_CODEEDITORCOMPONENT_H_INCLUDED
 
 #include "juce_CodeDocument.h"
 class CodeTokeniser;
@@ -417,4 +417,4 @@ private:
 };
 
 
-#endif   // __JUCE_CODEEDITORCOMPONENT_JUCEHEADER__
+#endif   // JUCE_CODEEDITORCOMPONENT_H_INCLUDED

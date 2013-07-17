@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_GLYPHARRANGEMENT_JUCEHEADER__
-#define __JUCE_GLYPHARRANGEMENT_JUCEHEADER__
+#ifndef JUCE_GLYPHARRANGEMENT_H_INCLUDED
+#define JUCE_GLYPHARRANGEMENT_H_INCLUDED
 
 #include "juce_Font.h"
 #include "../contexts/juce_GraphicsContext.h"
@@ -313,4 +313,4 @@ private:
 };
 
 
-#endif   // __JUCE_GLYPHARRANGEMENT_JUCEHEADER__
+#endif   // JUCE_GLYPHARRANGEMENT_H_INCLUDED

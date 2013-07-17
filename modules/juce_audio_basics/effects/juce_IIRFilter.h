@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_IIRFILTER_JUCEHEADER__
-#define __JUCE_IIRFILTER_JUCEHEADER__
+#ifndef JUCE_IIRFILTER_H_INCLUDED
+#define JUCE_IIRFILTER_H_INCLUDED
 
 class IIRFilter;
 
@@ -169,4 +169,4 @@ protected:
 };
 
 
-#endif   // __JUCE_IIRFILTER_JUCEHEADER__
+#endif   // JUCE_IIRFILTER_H_INCLUDED

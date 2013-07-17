@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_LADSPAPLUGINFORMAT_JUCEHEADER__
-#define __JUCE_LADSPAPLUGINFORMAT_JUCEHEADER__
+#ifndef JUCE_LADSPAPLUGINFORMAT_H_INCLUDED
+#define JUCE_LADSPAPLUGINFORMAT_H_INCLUDED
 
 #include "../format/juce_AudioPluginFormat.h"
 
@@ -61,4 +61,4 @@ private:
 
 #endif
 
-#endif   // __JUCE_LADSPAPLUGINFORMAT_JUCEHEADER__
+#endif   // JUCE_LADSPAPLUGINFORMAT_H_INCLUDED

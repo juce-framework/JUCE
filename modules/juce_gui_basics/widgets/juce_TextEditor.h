@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_TEXTEDITOR_JUCEHEADER__
-#define __JUCE_TEXTEDITOR_JUCEHEADER__
+#ifndef JUCE_TEXTEDITOR_H_INCLUDED
+#define JUCE_TEXTEDITOR_H_INCLUDED
 
 #include "../components/juce_Component.h"
 #include "../layout/juce_Viewport.h"
@@ -727,4 +727,4 @@ private:
 typedef TextEditor::Listener TextEditorListener;
 
 
-#endif   // __JUCE_TEXTEDITOR_JUCEHEADER__
+#endif   // JUCE_TEXTEDITOR_H_INCLUDED

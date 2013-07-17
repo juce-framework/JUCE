@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_FONT_JUCEHEADER__
-#define __JUCE_FONT_JUCEHEADER__
+#ifndef JUCE_FONT_H_INCLUDED
+#define JUCE_FONT_H_INCLUDED
 
 #include "juce_Typeface.h"
 class LowLevelGraphicsContext;
@@ -460,4 +460,4 @@ private:
     JUCE_LEAK_DETECTOR (Font)
 };
 
-#endif   // __JUCE_FONT_JUCEHEADER__
+#endif   // JUCE_FONT_H_INCLUDED

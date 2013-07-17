@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_KEYPRESS_JUCEHEADER__
-#define __JUCE_KEYPRESS_JUCEHEADER__
+#ifndef JUCE_KEYPRESS_H_INCLUDED
+#define JUCE_KEYPRESS_H_INCLUDED
 
 #include "juce_ModifierKeys.h"
 
@@ -253,4 +253,4 @@ private:
 };
 
 
-#endif   // __JUCE_KEYPRESS_JUCEHEADER__
+#endif   // JUCE_KEYPRESS_H_INCLUDED

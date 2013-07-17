@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_COLOURS_JUCEHEADER__
-#define __JUCE_COLOURS_JUCEHEADER__
+#ifndef JUCE_COLOURS_H_INCLUDED
+#define JUCE_COLOURS_H_INCLUDED
 
 #include "juce_Colour.h"
 
@@ -106,4 +106,4 @@ private:
     JUCE_DECLARE_NON_COPYABLE (Colours)
 };
 
-#endif   // __JUCE_COLOURS_JUCEHEADER__
+#endif   // JUCE_COLOURS_H_INCLUDED

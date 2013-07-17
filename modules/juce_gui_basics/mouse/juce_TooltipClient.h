@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_TOOLTIPCLIENT_JUCEHEADER__
-#define __JUCE_TOOLTIPCLIENT_JUCEHEADER__
+#ifndef JUCE_TOOLTIPCLIENT_H_INCLUDED
+#define JUCE_TOOLTIPCLIENT_H_INCLUDED
 
 
 //==============================================================================
@@ -82,4 +82,4 @@ private:
 };
 
 
-#endif   // __JUCE_TOOLTIPCLIENT_JUCEHEADER__
+#endif   // JUCE_TOOLTIPCLIENT_H_INCLUDED

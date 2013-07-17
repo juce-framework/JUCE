@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_CODEDOCUMENT_JUCEHEADER__
-#define __JUCE_CODEDOCUMENT_JUCEHEADER__
+#ifndef JUCE_CODEDOCUMENT_H_INCLUDED
+#define JUCE_CODEDOCUMENT_H_INCLUDED
 
 class CodeDocumentLine;
 
@@ -414,4 +414,4 @@ private:
 };
 
 
-#endif   // __JUCE_CODEDOCUMENT_JUCEHEADER__
+#endif   // JUCE_CODEDOCUMENT_H_INCLUDED

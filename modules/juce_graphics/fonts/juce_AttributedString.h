@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_ATTRIBUTEDSTRING_JUCEHEADER__
-#define __JUCE_ATTRIBUTEDSTRING_JUCEHEADER__
+#ifndef JUCE_ATTRIBUTEDSTRING_H_INCLUDED
+#define JUCE_ATTRIBUTEDSTRING_H_INCLUDED
 
 
 //==============================================================================
@@ -215,4 +215,4 @@ private:
     JUCE_LEAK_DETECTOR (AttributedString)
 };
 
-#endif   // __JUCE_ATTRIBUTEDSTRING_JUCEHEADER__
+#endif   // JUCE_ATTRIBUTEDSTRING_H_INCLUDED

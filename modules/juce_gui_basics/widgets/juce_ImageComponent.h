@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_IMAGECOMPONENT_JUCEHEADER__
-#define __JUCE_IMAGECOMPONENT_JUCEHEADER__
+#ifndef JUCE_IMAGECOMPONENT_H_INCLUDED
+#define JUCE_IMAGECOMPONENT_H_INCLUDED
 
 #include "../components/juce_Component.h"
 #include "../mouse/juce_TooltipClient.h"
@@ -78,4 +78,4 @@ private:
 };
 
 
-#endif   // __JUCE_IMAGECOMPONENT_JUCEHEADER__
+#endif   // JUCE_IMAGECOMPONENT_H_INCLUDED

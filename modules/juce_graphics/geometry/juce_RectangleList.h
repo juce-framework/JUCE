@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_RECTANGLELIST_JUCEHEADER__
-#define __JUCE_RECTANGLELIST_JUCEHEADER__
+#ifndef JUCE_RECTANGLELIST_H_INCLUDED
+#define JUCE_RECTANGLELIST_H_INCLUDED
 
 #include "juce_Rectangle.h"
 #include "juce_Path.h"
@@ -268,4 +268,4 @@ private:
 };
 
 
-#endif   // __JUCE_RECTANGLELIST_JUCEHEADER__
+#endif   // JUCE_RECTANGLELIST_H_INCLUDED

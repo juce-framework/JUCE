@@ -26,8 +26,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_DYNAMICLIBRARY_JUCEHEADER__
-#define __JUCE_DYNAMICLIBRARY_JUCEHEADER__
+#ifndef JUCE_DYNAMICLIBRARY_H_INCLUDED
+#define JUCE_DYNAMICLIBRARY_H_INCLUDED
 
 /**
     Handles the opening and closing of DLLs.
@@ -82,4 +82,4 @@ private:
 };
 
 
-#endif   // __JUCE_DYNAMICLIBRARY_JUCEHEADER__
+#endif   // JUCE_DYNAMICLIBRARY_H_INCLUDED

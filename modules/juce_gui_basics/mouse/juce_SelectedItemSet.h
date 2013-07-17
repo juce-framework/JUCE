@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_SELECTEDITEMSET_JUCEHEADER__
-#define __JUCE_SELECTEDITEMSET_JUCEHEADER__
+#ifndef JUCE_SELECTEDITEMSET_H_INCLUDED
+#define JUCE_SELECTEDITEMSET_H_INCLUDED
 
 
 //==============================================================================
@@ -304,4 +304,4 @@ private:
 };
 
 
-#endif   // __JUCE_SELECTEDITEMSET_JUCEHEADER__
+#endif   // JUCE_SELECTEDITEMSET_H_INCLUDED

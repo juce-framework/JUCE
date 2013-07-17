@@ -26,8 +26,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_PLATFORMDEFS_JUCEHEADER__
-#define __JUCE_PLATFORMDEFS_JUCEHEADER__
+#ifndef JUCE_PLATFORMDEFS_H_INCLUDED
+#define JUCE_PLATFORMDEFS_H_INCLUDED
 
 //==============================================================================
 /*  This file defines miscellaneous macros for debugging, assertions, etc.
@@ -366,4 +366,4 @@ namespace juce
  #define override
 #endif
 
-#endif   // __JUCE_PLATFORMDEFS_JUCEHEADER__
+#endif   // JUCE_PLATFORMDEFS_H_INCLUDED

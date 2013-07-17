@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_FILELISTCOMPONENT_JUCEHEADER__
-#define __JUCE_FILELISTCOMPONENT_JUCEHEADER__
+#ifndef JUCE_FILELISTCOMPONENT_H_INCLUDED
+#define JUCE_FILELISTCOMPONENT_H_INCLUDED
 
 #include "juce_DirectoryContentsDisplayComponent.h"
 #include "juce_FileBrowserListener.h"
@@ -98,4 +98,4 @@ private:
 };
 
 
-#endif   // __JUCE_FILELISTCOMPONENT_JUCEHEADER__
+#endif   // JUCE_FILELISTCOMPONENT_H_INCLUDED

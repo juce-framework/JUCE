@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_MOUSEINPUTSOURCE_JUCEHEADER__
-#define __JUCE_MOUSEINPUTSOURCE_JUCEHEADER__
+#ifndef JUCE_MOUSEINPUTSOURCE_H_INCLUDED
+#define JUCE_MOUSEINPUTSOURCE_H_INCLUDED
 
 #include "../keyboard/juce_ModifierKeys.h"
 #include "../components/juce_Desktop.h"
@@ -183,4 +183,4 @@ private:
 };
 
 
-#endif   // __JUCE_MOUSEINPUTSOURCE_JUCEHEADER__
+#endif   // JUCE_MOUSEINPUTSOURCE_H_INCLUDED

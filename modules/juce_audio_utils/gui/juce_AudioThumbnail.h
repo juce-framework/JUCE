@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_AUDIOTHUMBNAIL_JUCEHEADER__
-#define __JUCE_AUDIOTHUMBNAIL_JUCEHEADER__
+#ifndef JUCE_AUDIOTHUMBNAIL_H_INCLUDED
+#define JUCE_AUDIOTHUMBNAIL_H_INCLUDED
 
 class AudioThumbnailCache;
 
@@ -226,4 +226,4 @@ private:
 };
 
 
-#endif   // __JUCE_AUDIOTHUMBNAIL_JUCEHEADER__
+#endif   // JUCE_AUDIOTHUMBNAIL_H_INCLUDED

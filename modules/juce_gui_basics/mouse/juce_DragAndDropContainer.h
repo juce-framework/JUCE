@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_DRAGANDDROPCONTAINER_JUCEHEADER__
-#define __JUCE_DRAGANDDROPCONTAINER_JUCEHEADER__
+#ifndef JUCE_DRAGANDDROPCONTAINER_H_INCLUDED
+#define JUCE_DRAGANDDROPCONTAINER_H_INCLUDED
 
 #include "juce_DragAndDropTarget.h"
 
@@ -180,4 +180,4 @@ private:
 };
 
 
-#endif   // __JUCE_DRAGANDDROPCONTAINER_JUCEHEADER__
+#endif   // JUCE_DRAGANDDROPCONTAINER_H_INCLUDED

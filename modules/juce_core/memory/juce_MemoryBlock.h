@@ -26,8 +26,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_MEMORYBLOCK_JUCEHEADER__
-#define __JUCE_MEMORYBLOCK_JUCEHEADER__
+#ifndef JUCE_MEMORYBLOCK_H_INCLUDED
+#define JUCE_MEMORYBLOCK_H_INCLUDED
 
 #include "../text/juce_String.h"
 #include "../memory/juce_HeapBlock.h"
@@ -257,4 +257,4 @@ private:
 };
 
 
-#endif   // __JUCE_MEMORYBLOCK_JUCEHEADER__
+#endif   // JUCE_MEMORYBLOCK_H_INCLUDED

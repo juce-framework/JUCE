@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_LISTBOX_JUCEHEADER__
-#define __JUCE_LISTBOX_JUCEHEADER__
+#ifndef JUCE_LISTBOX_H_INCLUDED
+#define JUCE_LISTBOX_H_INCLUDED
 
 #include "../layout/juce_Viewport.h"
 
@@ -574,4 +574,4 @@ private:
 };
 
 
-#endif   // __JUCE_LISTBOX_JUCEHEADER__
+#endif   // JUCE_LISTBOX_H_INCLUDED

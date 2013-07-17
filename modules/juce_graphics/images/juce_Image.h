@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_IMAGE_JUCEHEADER__
-#define __JUCE_IMAGE_JUCEHEADER__
+#ifndef JUCE_IMAGE_H_INCLUDED
+#define JUCE_IMAGE_H_INCLUDED
 
 #include "../colour/juce_Colour.h"
 #include "../contexts/juce_GraphicsContext.h"
@@ -520,4 +520,4 @@ public:
 };
 
 
-#endif   // __JUCE_IMAGE_JUCEHEADER__
+#endif   // JUCE_IMAGE_H_INCLUDED

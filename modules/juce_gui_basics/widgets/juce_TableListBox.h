@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_TABLELISTBOX_JUCEHEADER__
-#define __JUCE_TABLELISTBOX_JUCEHEADER__
+#ifndef JUCE_TABLELISTBOX_H_INCLUDED
+#define JUCE_TABLELISTBOX_H_INCLUDED
 
 #include "juce_TableHeaderComponent.h"
 #include "juce_ListBox.h"
@@ -337,4 +337,4 @@ private:
 };
 
 
-#endif   // __JUCE_TABLELISTBOX_JUCEHEADER__
+#endif   // JUCE_TABLELISTBOX_H_INCLUDED

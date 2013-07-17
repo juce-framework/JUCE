@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_BOX2D_JUCEHEADER__
-#define __JUCE_BOX2D_JUCEHEADER__
+#ifndef JUCE_BOX2D_H_INCLUDED
+#define JUCE_BOX2D_H_INCLUDED
 
 //=============================================================================
 #include "../juce_graphics/juce_graphics.h"
@@ -35,4 +35,4 @@ namespace juce
   #include "utils/juce_Box2DRenderer.h"
 }
 
-#endif   // __JUCE_BOX2D_JUCEHEADER__
+#endif   // JUCE_BOX2D_H_INCLUDED

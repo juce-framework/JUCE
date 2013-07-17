@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_AUDIOPROCESSOR_JUCEHEADER__
-#define __JUCE_AUDIOPROCESSOR_JUCEHEADER__
+#ifndef JUCE_AUDIOPROCESSOR_H_INCLUDED
+#define JUCE_AUDIOPROCESSOR_H_INCLUDED
 
 #include "juce_AudioProcessorEditor.h"
 #include "juce_AudioProcessorListener.h"
@@ -641,4 +641,4 @@ private:
 };
 
 
-#endif   // __JUCE_AUDIOPROCESSOR_JUCEHEADER__
+#endif   // JUCE_AUDIOPROCESSOR_H_INCLUDED

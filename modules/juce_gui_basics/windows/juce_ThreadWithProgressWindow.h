@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_THREADWITHPROGRESSWINDOW_JUCEHEADER__
-#define __JUCE_THREADWITHPROGRESSWINDOW_JUCEHEADER__
+#ifndef JUCE_THREADWITHPROGRESSWINDOW_H_INCLUDED
+#define JUCE_THREADWITHPROGRESSWINDOW_H_INCLUDED
 
 #include "../windows/juce_AlertWindow.h"
 
@@ -152,4 +152,4 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ThreadWithProgressWindow)
 };
 
-#endif   // __JUCE_THREADWITHPROGRESSWINDOW_JUCEHEADER__
+#endif   // JUCE_THREADWITHPROGRESSWINDOW_H_INCLUDED

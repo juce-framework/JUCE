@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_RECTANGLEPLACEMENT_JUCEHEADER__
-#define __JUCE_RECTANGLEPLACEMENT_JUCEHEADER__
+#ifndef JUCE_RECTANGLEPLACEMENT_H_INCLUDED
+#define JUCE_RECTANGLEPLACEMENT_H_INCLUDED
 
 #include "../geometry/juce_AffineTransform.h"
 #include "../geometry/juce_Rectangle.h"
@@ -169,4 +169,4 @@ private:
     int flags;
 };
 
-#endif   // __JUCE_RECTANGLEPLACEMENT_JUCEHEADER__
+#endif   // JUCE_RECTANGLEPLACEMENT_H_INCLUDED

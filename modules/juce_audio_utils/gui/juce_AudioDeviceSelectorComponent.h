@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_AUDIODEVICESELECTORCOMPONENT_JUCEHEADER__
-#define __JUCE_AUDIODEVICESELECTORCOMPONENT_JUCEHEADER__
+#ifndef JUCE_AUDIODEVICESELECTORCOMPONENT_H_INCLUDED
+#define JUCE_AUDIODEVICESELECTORCOMPONENT_H_INCLUDED
 
 
 //==============================================================================
@@ -105,4 +105,4 @@ private:
 };
 
 
-#endif   // __JUCE_AUDIODEVICESELECTORCOMPONENT_JUCEHEADER__
+#endif   // JUCE_AUDIODEVICESELECTORCOMPONENT_H_INCLUDED

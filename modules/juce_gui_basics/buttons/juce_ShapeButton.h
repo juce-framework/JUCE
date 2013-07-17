@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_SHAPEBUTTON_JUCEHEADER__
-#define __JUCE_SHAPEBUTTON_JUCEHEADER__
+#ifndef JUCE_SHAPEBUTTON_H_INCLUDED
+#define JUCE_SHAPEBUTTON_H_INCLUDED
 
 #include "juce_Button.h"
 
@@ -100,4 +100,4 @@ private:
 };
 
 
-#endif   // __JUCE_SHAPEBUTTON_JUCEHEADER__
+#endif   // JUCE_SHAPEBUTTON_H_INCLUDED

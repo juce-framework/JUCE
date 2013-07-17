@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_DRAWABLERECTANGLE_JUCEHEADER__
-#define __JUCE_DRAWABLERECTANGLE_JUCEHEADER__
+#ifndef JUCE_DRAWABLERECTANGLE_H_INCLUDED
+#define JUCE_DRAWABLERECTANGLE_H_INCLUDED
 
 #include "juce_DrawableShape.h"
 #include "../positioning/juce_RelativeParallelogram.h"
@@ -103,4 +103,4 @@ private:
 };
 
 
-#endif   // __JUCE_DRAWABLERECTANGLE_JUCEHEADER__
+#endif   // JUCE_DRAWABLERECTANGLE_H_INCLUDED

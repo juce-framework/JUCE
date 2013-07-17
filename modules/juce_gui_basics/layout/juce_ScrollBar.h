@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_SCROLLBAR_JUCEHEADER__
-#define __JUCE_SCROLLBAR_JUCEHEADER__
+#ifndef JUCE_SCROLLBAR_H_INCLUDED
+#define JUCE_SCROLLBAR_H_INCLUDED
 
 #include "../buttons/juce_Button.h"
 class Viewport;
@@ -336,4 +336,4 @@ private:
 typedef ScrollBar::Listener ScrollBarListener;
 
 
-#endif   // __JUCE_SCROLLBAR_JUCEHEADER__
+#endif   // JUCE_SCROLLBAR_H_INCLUDED

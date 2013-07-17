@@ -26,8 +26,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_RANDOM_JUCEHEADER__
-#define __JUCE_RANDOM_JUCEHEADER__
+#ifndef JUCE_RANDOM_H_INCLUDED
+#define JUCE_RANDOM_H_INCLUDED
 
 #include "juce_BigInteger.h"
 
@@ -137,4 +137,4 @@ private:
 };
 
 
-#endif   // __JUCE_RANDOM_JUCEHEADER__
+#endif   // JUCE_RANDOM_H_INCLUDED

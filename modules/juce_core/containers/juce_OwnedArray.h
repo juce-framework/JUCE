@@ -26,8 +26,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_OWNEDARRAY_JUCEHEADER__
-#define __JUCE_OWNEDARRAY_JUCEHEADER__
+#ifndef JUCE_OWNEDARRAY_H_INCLUDED
+#define JUCE_OWNEDARRAY_H_INCLUDED
 
 #include "juce_ArrayAllocationBase.h"
 #include "juce_ElementComparator.h"
@@ -877,4 +877,4 @@ private:
 };
 
 
-#endif   // __JUCE_OWNEDARRAY_JUCEHEADER__
+#endif   // JUCE_OWNEDARRAY_H_INCLUDED

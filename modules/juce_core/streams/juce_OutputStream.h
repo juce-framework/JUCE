@@ -26,8 +26,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_OUTPUTSTREAM_JUCEHEADER__
-#define __JUCE_OUTPUTSTREAM_JUCEHEADER__
+#ifndef JUCE_OUTPUTSTREAM_H_INCLUDED
+#define JUCE_OUTPUTSTREAM_H_INCLUDED
 
 #include "../text/juce_String.h"
 #include "../text/juce_NewLine.h"
@@ -281,4 +281,4 @@ JUCE_API OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, InputStre
 JUCE_API OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, const NewLine&);
 
 
-#endif   // __JUCE_OUTPUTSTREAM_JUCEHEADER__
+#endif   // JUCE_OUTPUTSTREAM_H_INCLUDED

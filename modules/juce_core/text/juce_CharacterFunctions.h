@@ -26,8 +26,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_CHARACTERFUNCTIONS_JUCEHEADER__
-#define __JUCE_CHARACTERFUNCTIONS_JUCEHEADER__
+#ifndef JUCE_CHARACTERFUNCTIONS_H_INCLUDED
+#define JUCE_CHARACTERFUNCTIONS_H_INCLUDED
 
 
 //==============================================================================
@@ -584,4 +584,4 @@ private:
 };
 
 
-#endif   // __JUCE_CHARACTERFUNCTIONS_JUCEHEADER__
+#endif   // JUCE_CHARACTERFUNCTIONS_H_INCLUDED

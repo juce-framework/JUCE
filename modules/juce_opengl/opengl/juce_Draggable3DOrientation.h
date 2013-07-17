@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_DRAGGABLE3DORIENTATION_JUCEHEADER__
-#define __JUCE_DRAGGABLE3DORIENTATION_JUCEHEADER__
+#ifndef JUCE_DRAGGABLE3DORIENTATION_H_INCLUDED
+#define JUCE_DRAGGABLE3DORIENTATION_H_INCLUDED
 
 #include "juce_Quaternion.h"
 
@@ -150,4 +150,4 @@ private:
     }
 };
 
-#endif   // __JUCE_DRAGGABLE3DORIENTATION_JUCEHEADER__
+#endif   // JUCE_DRAGGABLE3DORIENTATION_H_INCLUDED

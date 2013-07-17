@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_COLOURSELECTOR_JUCEHEADER__
-#define __JUCE_COLOURSELECTOR_JUCEHEADER__
+#ifndef JUCE_COLOURSELECTOR_H_INCLUDED
+#define JUCE_COLOURSELECTOR_H_INCLUDED
 
 
 //==============================================================================
@@ -169,4 +169,4 @@ private:
 };
 
 
-#endif   // __JUCE_COLOURSELECTOR_JUCEHEADER__
+#endif   // JUCE_COLOURSELECTOR_H_INCLUDED

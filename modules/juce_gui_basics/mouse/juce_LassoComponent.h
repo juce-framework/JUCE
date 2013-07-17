@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_LASSOCOMPONENT_JUCEHEADER__
-#define __JUCE_LASSOCOMPONENT_JUCEHEADER__
+#ifndef JUCE_LASSOCOMPONENT_H_INCLUDED
+#define JUCE_LASSOCOMPONENT_H_INCLUDED
 
 #include "../components/juce_Component.h"
 #include "juce_SelectedItemSet.h"
@@ -230,4 +230,4 @@ private:
 };
 
 
-#endif   // __JUCE_LASSOCOMPONENT_JUCEHEADER__
+#endif   // JUCE_LASSOCOMPONENT_H_INCLUDED

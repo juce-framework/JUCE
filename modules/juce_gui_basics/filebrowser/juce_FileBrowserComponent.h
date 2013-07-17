@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_FILEBROWSERCOMPONENT_JUCEHEADER__
-#define __JUCE_FILEBROWSERCOMPONENT_JUCEHEADER__
+#ifndef JUCE_FILEBROWSERCOMPONENT_H_INCLUDED
+#define JUCE_FILEBROWSERCOMPONENT_H_INCLUDED
 
 #include "juce_DirectoryContentsDisplayComponent.h"
 #include "juce_FilePreviewComponent.h"
@@ -257,4 +257,4 @@ private:
 
 
 
-#endif   // __JUCE_FILEBROWSERCOMPONENT_JUCEHEADER__
+#endif   // JUCE_FILEBROWSERCOMPONENT_H_INCLUDED

@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_MESSAGE_JUCEHEADER__
-#define __JUCE_MESSAGE_JUCEHEADER__
+#ifndef JUCE_MESSAGE_H_INCLUDED
+#define JUCE_MESSAGE_H_INCLUDED
 
 class MessageListener;
 
@@ -62,4 +62,4 @@ private:
 };
 
 
-#endif   // __JUCE_MESSAGE_JUCEHEADER__
+#endif   // JUCE_MESSAGE_H_INCLUDED

@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_QUICKTIMEMOVIECOMPONENT_JUCEHEADER__
-#define __JUCE_QUICKTIMEMOVIECOMPONENT_JUCEHEADER__
+#ifndef JUCE_QUICKTIMEMOVIECOMPONENT_H_INCLUDED
+#define JUCE_QUICKTIMEMOVIECOMPONENT_H_INCLUDED
 
 // (NB: This stuff mustn't go inside the "#if QUICKTIME" block, or it'll break the
 // amalgamated build)
@@ -217,4 +217,4 @@ private:
 };
 
 #endif
-#endif   // __JUCE_QUICKTIMEMOVIECOMPONENT_JUCEHEADER__
+#endif   // JUCE_QUICKTIMEMOVIECOMPONENT_H_INCLUDED

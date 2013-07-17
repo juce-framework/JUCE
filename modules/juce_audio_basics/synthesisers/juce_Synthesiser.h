@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_SYNTHESISER_JUCEHEADER__
-#define __JUCE_SYNTHESISER_JUCEHEADER__
+#ifndef JUCE_SYNTHESISER_H_INCLUDED
+#define JUCE_SYNTHESISER_H_INCLUDED
 
 #include "../buffers/juce_AudioSampleBuffer.h"
 #include "../midi/juce_MidiBuffer.h"
@@ -490,4 +490,4 @@ private:
 };
 
 
-#endif   // __JUCE_SYNTHESISER_JUCEHEADER__
+#endif   // JUCE_SYNTHESISER_H_INCLUDED

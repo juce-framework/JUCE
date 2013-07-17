@@ -26,8 +26,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_WEAKREFERENCE_JUCEHEADER__
-#define __JUCE_WEAKREFERENCE_JUCEHEADER__
+#ifndef JUCE_WEAKREFERENCE_H_INCLUDED
+#define JUCE_WEAKREFERENCE_H_INCLUDED
 
 #include "juce_ReferenceCountedObject.h"
 
@@ -211,4 +211,4 @@ private:
 };
 
 
-#endif   // __JUCE_WEAKREFERENCE_JUCEHEADER__
+#endif   // JUCE_WEAKREFERENCE_H_INCLUDED

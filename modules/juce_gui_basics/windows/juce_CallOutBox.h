@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_CALLOUTBOX_JUCEHEADER__
-#define __JUCE_CALLOUTBOX_JUCEHEADER__
+#ifndef JUCE_CALLOUTBOX_H_INCLUDED
+#define JUCE_CALLOUTBOX_H_INCLUDED
 
 #include "../components/juce_Component.h"
 
@@ -154,4 +154,4 @@ private:
 };
 
 
-#endif   // __JUCE_CALLOUTBOX_JUCEHEADER__
+#endif   // JUCE_CALLOUTBOX_H_INCLUDED

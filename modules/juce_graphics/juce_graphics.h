@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_GRAPHICS_MODULE_JUCEHEADER__ // %%
-#define __JUCE_GRAPHICS_MODULE_JUCEHEADER__
+#ifndef JUCE_GRAPHICS_H_INCLUDED // %%
+#define JUCE_GRAPHICS_H_INCLUDED
 
 #include "../juce_core/juce_core.h"
 #include "../juce_events/juce_events.h"
@@ -66,110 +66,42 @@ namespace juce
 
 // START_AUTOINCLUDE colour, geometry, placement, contexts, images,
 // image_formats, fonts, effects
-#ifndef __JUCE_COLOUR_JUCEHEADER__
- #include "colour/juce_Colour.h"
-#endif
-#ifndef __JUCE_COLOURGRADIENT_JUCEHEADER__
- #include "colour/juce_ColourGradient.h"
-#endif
-#ifndef __JUCE_COLOURS_JUCEHEADER__
- #include "colour/juce_Colours.h"
-#endif
-#ifndef __JUCE_FILLTYPE_JUCEHEADER__
- #include "colour/juce_FillType.h"
-#endif
-#ifndef __JUCE_PIXELFORMATS_JUCEHEADER__
- #include "colour/juce_PixelFormats.h"
-#endif
-#ifndef __JUCE_AFFINETRANSFORM_JUCEHEADER__
- #include "geometry/juce_AffineTransform.h"
-#endif
-#ifndef __JUCE_BORDERSIZE_JUCEHEADER__
- #include "geometry/juce_BorderSize.h"
-#endif
-#ifndef __JUCE_EDGETABLE_JUCEHEADER__
- #include "geometry/juce_EdgeTable.h"
-#endif
-#ifndef __JUCE_LINE_JUCEHEADER__
- #include "geometry/juce_Line.h"
-#endif
-#ifndef __JUCE_PATH_JUCEHEADER__
- #include "geometry/juce_Path.h"
-#endif
-#ifndef __JUCE_PATHITERATOR_JUCEHEADER__
- #include "geometry/juce_PathIterator.h"
-#endif
-#ifndef __JUCE_PATHSTROKETYPE_JUCEHEADER__
- #include "geometry/juce_PathStrokeType.h"
-#endif
-#ifndef __JUCE_POINT_JUCEHEADER__
- #include "geometry/juce_Point.h"
-#endif
-#ifndef __JUCE_RECTANGLE_JUCEHEADER__
- #include "geometry/juce_Rectangle.h"
-#endif
-#ifndef __JUCE_RECTANGLELIST_JUCEHEADER__
- #include "geometry/juce_RectangleList.h"
-#endif
-#ifndef __JUCE_JUSTIFICATION_JUCEHEADER__
- #include "placement/juce_Justification.h"
-#endif
-#ifndef __JUCE_RECTANGLEPLACEMENT_JUCEHEADER__
- #include "placement/juce_RectanglePlacement.h"
-#endif
-#ifndef __JUCE_GRAPHICSCONTEXT_JUCEHEADER__
- #include "contexts/juce_GraphicsContext.h"
-#endif
-#ifndef __JUCE_LOWLEVELGRAPHICSCONTEXT_JUCEHEADER__
- #include "contexts/juce_LowLevelGraphicsContext.h"
-#endif
-#ifndef __JUCE_LOWLEVELGRAPHICSPOSTSCRIPTRENDERER_JUCEHEADER__
- #include "contexts/juce_LowLevelGraphicsPostScriptRenderer.h"
-#endif
-#ifndef __JUCE_LOWLEVELGRAPHICSSOFTWARERENDERER_JUCEHEADER__
- #include "contexts/juce_LowLevelGraphicsSoftwareRenderer.h"
-#endif
-#ifndef __JUCE_IMAGE_JUCEHEADER__
- #include "images/juce_Image.h"
-#endif
-#ifndef __JUCE_IMAGECACHE_JUCEHEADER__
- #include "images/juce_ImageCache.h"
-#endif
-#ifndef __JUCE_IMAGECONVOLUTIONKERNEL_JUCEHEADER__
- #include "images/juce_ImageConvolutionKernel.h"
-#endif
-#ifndef __JUCE_IMAGEFILEFORMAT_JUCEHEADER__
- #include "images/juce_ImageFileFormat.h"
-#endif
-#ifndef __JUCE_ATTRIBUTEDSTRING_JUCEHEADER__
- #include "fonts/juce_AttributedString.h"
-#endif
-#ifndef __JUCE_CUSTOMTYPEFACE_JUCEHEADER__
- #include "fonts/juce_CustomTypeface.h"
-#endif
-#ifndef __JUCE_FONT_JUCEHEADER__
- #include "fonts/juce_Font.h"
-#endif
-#ifndef __JUCE_GLYPHARRANGEMENT_JUCEHEADER__
- #include "fonts/juce_GlyphArrangement.h"
-#endif
-#ifndef __JUCE_TEXTLAYOUT_JUCEHEADER__
- #include "fonts/juce_TextLayout.h"
-#endif
-#ifndef __JUCE_TYPEFACE_JUCEHEADER__
- #include "fonts/juce_Typeface.h"
-#endif
-#ifndef __JUCE_DROPSHADOWEFFECT_JUCEHEADER__
- #include "effects/juce_DropShadowEffect.h"
-#endif
-#ifndef __JUCE_GLOWEFFECT_JUCEHEADER__
- #include "effects/juce_GlowEffect.h"
-#endif
-#ifndef __JUCE_IMAGEEFFECTFILTER_JUCEHEADER__
- #include "effects/juce_ImageEffectFilter.h"
-#endif
+#include "colour/juce_Colour.h"
+#include "colour/juce_ColourGradient.h"
+#include "colour/juce_Colours.h"
+#include "colour/juce_FillType.h"
+#include "colour/juce_PixelFormats.h"
+#include "geometry/juce_AffineTransform.h"
+#include "geometry/juce_BorderSize.h"
+#include "geometry/juce_EdgeTable.h"
+#include "geometry/juce_Line.h"
+#include "geometry/juce_Path.h"
+#include "geometry/juce_PathIterator.h"
+#include "geometry/juce_PathStrokeType.h"
+#include "geometry/juce_Point.h"
+#include "geometry/juce_Rectangle.h"
+#include "geometry/juce_RectangleList.h"
+#include "placement/juce_Justification.h"
+#include "placement/juce_RectanglePlacement.h"
+#include "contexts/juce_GraphicsContext.h"
+#include "contexts/juce_LowLevelGraphicsContext.h"
+#include "contexts/juce_LowLevelGraphicsPostScriptRenderer.h"
+#include "contexts/juce_LowLevelGraphicsSoftwareRenderer.h"
+#include "images/juce_Image.h"
+#include "images/juce_ImageCache.h"
+#include "images/juce_ImageConvolutionKernel.h"
+#include "images/juce_ImageFileFormat.h"
+#include "fonts/juce_AttributedString.h"
+#include "fonts/juce_CustomTypeface.h"
+#include "fonts/juce_Font.h"
+#include "fonts/juce_GlyphArrangement.h"
+#include "fonts/juce_TextLayout.h"
+#include "fonts/juce_Typeface.h"
+#include "effects/juce_DropShadowEffect.h"
+#include "effects/juce_GlowEffect.h"
+#include "effects/juce_ImageEffectFilter.h"
 // END_AUTOINCLUDE
 
 }
 
-#endif   // __JUCE_GRAPHICS_MODULE_JUCEHEADER__
+#endif   // JUCE_GRAPHICS_H_INCLUDED

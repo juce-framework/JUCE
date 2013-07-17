@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_DRAWABLEBUTTON_JUCEHEADER__
-#define __JUCE_DRAWABLEBUTTON_JUCEHEADER__
+#ifndef JUCE_DRAWABLEBUTTON_H_INCLUDED
+#define JUCE_DRAWABLEBUTTON_H_INCLUDED
 
 #include "juce_Button.h"
 #include "../drawables/juce_Drawable.h"
@@ -182,4 +182,4 @@ private:
 };
 
 
-#endif   // __JUCE_DRAWABLEBUTTON_JUCEHEADER__
+#endif   // JUCE_DRAWABLEBUTTON_H_INCLUDED

@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_AUDIODATACONVERTERS_JUCEHEADER__
-#define __JUCE_AUDIODATACONVERTERS_JUCEHEADER__
+#ifndef JUCE_AUDIODATACONVERTERS_H_INCLUDED
+#define JUCE_AUDIODATACONVERTERS_H_INCLUDED
 
 
 //==============================================================================
@@ -688,4 +688,4 @@ private:
 };
 
 
-#endif   // __JUCE_AUDIODATACONVERTERS_JUCEHEADER__
+#endif   // JUCE_AUDIODATACONVERTERS_H_INCLUDED

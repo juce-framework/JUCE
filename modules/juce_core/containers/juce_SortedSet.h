@@ -26,8 +26,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_SORTEDSET_JUCEHEADER__
-#define __JUCE_SORTEDSET_JUCEHEADER__
+#ifndef JUCE_SORTEDSET_H_INCLUDED
+#define JUCE_SORTEDSET_H_INCLUDED
 
 #include "juce_ArrayAllocationBase.h"
 #include "../threads/juce_CriticalSection.h"
@@ -496,4 +496,4 @@ private:
   #pragma warning (pop)
 #endif
 
-#endif   // __JUCE_SORTEDSET_JUCEHEADER__
+#endif   // JUCE_SORTEDSET_H_INCLUDED

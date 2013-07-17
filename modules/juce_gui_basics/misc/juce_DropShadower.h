@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_DROPSHADOWER_JUCEHEADER__
-#define __JUCE_DROPSHADOWER_JUCEHEADER__
+#ifndef JUCE_DROPSHADOWER_H_INCLUDED
+#define JUCE_DROPSHADOWER_H_INCLUDED
 
 #include "../components/juce_Component.h"
 
@@ -79,4 +79,4 @@ private:
 };
 
 
-#endif   // __JUCE_DROPSHADOWER_JUCEHEADER__
+#endif   // JUCE_DROPSHADOWER_H_INCLUDED

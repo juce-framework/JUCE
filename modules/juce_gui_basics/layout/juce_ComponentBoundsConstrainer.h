@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_COMPONENTBOUNDSCONSTRAINER_JUCEHEADER__
-#define __JUCE_COMPONENTBOUNDSCONSTRAINER_JUCEHEADER__
+#ifndef JUCE_COMPONENTBOUNDSCONSTRAINER_H_INCLUDED
+#define JUCE_COMPONENTBOUNDSCONSTRAINER_H_INCLUDED
 
 #include "../components/juce_Component.h"
 
@@ -196,4 +196,4 @@ private:
 };
 
 
-#endif   // __JUCE_COMPONENTBOUNDSCONSTRAINER_JUCEHEADER__
+#endif   // JUCE_COMPONENTBOUNDSCONSTRAINER_H_INCLUDED

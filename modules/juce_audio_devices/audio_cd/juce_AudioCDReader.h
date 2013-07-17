@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_AUDIOCDREADER_JUCEHEADER__
-#define __JUCE_AUDIOCDREADER_JUCEHEADER__
+#ifndef JUCE_AUDIOCDREADER_H_INCLUDED
+#define JUCE_AUDIOCDREADER_H_INCLUDED
 
 #if JUCE_USE_CDREADER || DOXYGEN
 
@@ -171,4 +171,4 @@ private:
 };
 
 #endif
-#endif   // __JUCE_AUDIOCDREADER_JUCEHEADER__
+#endif   // JUCE_AUDIOCDREADER_H_INCLUDED

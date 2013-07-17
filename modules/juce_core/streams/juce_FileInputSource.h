@@ -26,8 +26,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_FILEINPUTSOURCE_JUCEHEADER__
-#define __JUCE_FILEINPUTSOURCE_JUCEHEADER__
+#ifndef JUCE_FILEINPUTSOURCE_H_INCLUDED
+#define JUCE_FILEINPUTSOURCE_H_INCLUDED
 
 #include "juce_InputSource.h"
 #include "../files/juce_File.h"
@@ -66,4 +66,4 @@ private:
 };
 
 
-#endif   // __JUCE_FILEINPUTSOURCE_JUCEHEADER__
+#endif   // JUCE_FILEINPUTSOURCE_H_INCLUDED

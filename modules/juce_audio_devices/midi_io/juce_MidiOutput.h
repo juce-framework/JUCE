@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_MIDIOUTPUT_JUCEHEADER__
-#define __JUCE_MIDIOUTPUT_JUCEHEADER__
+#ifndef JUCE_MIDIOUTPUT_H_INCLUDED
+#define JUCE_MIDIOUTPUT_H_INCLUDED
 
 
 //==============================================================================
@@ -144,4 +144,4 @@ private:
 };
 
 
-#endif   // __JUCE_MIDIOUTPUT_JUCEHEADER__
+#endif   // JUCE_MIDIOUTPUT_H_INCLUDED

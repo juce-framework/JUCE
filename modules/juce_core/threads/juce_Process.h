@@ -26,8 +26,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_PROCESS_JUCEHEADER__
-#define __JUCE_PROCESS_JUCEHEADER__
+#ifndef JUCE_PROCESS_H_INCLUDED
+#define JUCE_PROCESS_H_INCLUDED
 
 #include "../text/juce_String.h"
 
@@ -149,4 +149,4 @@ private:
 };
 
 
-#endif   // __JUCE_PROCESS_JUCEHEADER__
+#endif   // JUCE_PROCESS_H_INCLUDED

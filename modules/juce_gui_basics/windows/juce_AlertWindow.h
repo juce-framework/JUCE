@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_ALERTWINDOW_JUCEHEADER__
-#define __JUCE_ALERTWINDOW_JUCEHEADER__
+#ifndef JUCE_ALERTWINDOW_H_INCLUDED
+#define JUCE_ALERTWINDOW_H_INCLUDED
 
 #include "juce_TopLevelWindow.h"
 #include "../buttons/juce_TextButton.h"
@@ -467,4 +467,4 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AlertWindow)
 };
 
-#endif   // __JUCE_ALERTWINDOW_JUCEHEADER__
+#endif   // JUCE_ALERTWINDOW_H_INCLUDED

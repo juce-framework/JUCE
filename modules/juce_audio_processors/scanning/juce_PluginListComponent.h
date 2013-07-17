@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_PLUGINLISTCOMPONENT_JUCEHEADER__
-#define __JUCE_PLUGINLISTCOMPONENT_JUCEHEADER__
+#ifndef JUCE_PLUGINLISTCOMPONENT_H_INCLUDED
+#define JUCE_PLUGINLISTCOMPONENT_H_INCLUDED
 
 #include "juce_KnownPluginList.h"
 #include "../format/juce_AudioPluginFormat.h"
@@ -122,4 +122,4 @@ private:
 };
 
 
-#endif   // __JUCE_PLUGINLISTCOMPONENT_JUCEHEADER__
+#endif   // JUCE_PLUGINLISTCOMPONENT_H_INCLUDED

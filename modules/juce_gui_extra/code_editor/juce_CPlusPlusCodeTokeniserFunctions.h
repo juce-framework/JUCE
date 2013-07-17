@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_CPLUSPLUSCODETOKENISERFUNCTIONS_JUCEHEADER__
-#define __JUCE_CPLUSPLUSCODETOKENISERFUNCTIONS_JUCEHEADER__
+#ifndef JUCE_CPLUSPLUSCODETOKENISERFUNCTIONS_H_INCLUDED
+#define JUCE_CPLUSPLUSCODETOKENISERFUNCTIONS_H_INCLUDED
 
 
 //==============================================================================
@@ -557,4 +557,4 @@ struct CppTokeniserFunctions
 };
 
 
-#endif   // __JUCE_CPLUSPLUSCODETOKENISERFUNCTIONS_JUCEHEADER__
+#endif   // JUCE_CPLUSPLUSCODETOKENISERFUNCTIONS_H_INCLUDED

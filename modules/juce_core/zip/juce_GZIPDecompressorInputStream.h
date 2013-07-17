@@ -26,8 +26,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_GZIPDECOMPRESSORINPUTSTREAM_JUCEHEADER__
-#define __JUCE_GZIPDECOMPRESSORINPUTSTREAM_JUCEHEADER__
+#ifndef JUCE_GZIPDECOMPRESSORINPUTSTREAM_H_INCLUDED
+#define JUCE_GZIPDECOMPRESSORINPUTSTREAM_H_INCLUDED
 
 #include "../streams/juce_InputStream.h"
 #include "../memory/juce_OptionalScopedPointer.h"
@@ -98,4 +98,4 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (GZIPDecompressorInputStream)
 };
 
-#endif   // __JUCE_GZIPDECOMPRESSORINPUTSTREAM_JUCEHEADER__
+#endif   // JUCE_GZIPDECOMPRESSORINPUTSTREAM_H_INCLUDED

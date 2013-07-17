@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_MAC_CARBONVIEWWRAPPERCOMPONENT_JUCEHEADER__
-#define __JUCE_MAC_CARBONVIEWWRAPPERCOMPONENT_JUCEHEADER__
+#ifndef JUCE_MAC_CARBONVIEWWRAPPERCOMPONENT_H_INCLUDED
+#define JUCE_MAC_CARBONVIEWWRAPPERCOMPONENT_H_INCLUDED
 
 
 //==============================================================================
@@ -317,4 +317,4 @@ protected:
     NSWindow* getOwnerWindow() const    { return [((NSView*) getWindowHandle()) window]; }
 };
 
-#endif   // __JUCE_MAC_CARBONVIEWWRAPPERCOMPONENT_JUCEHEADER__
+#endif   // JUCE_MAC_CARBONVIEWWRAPPERCOMPONENT_H_INCLUDED

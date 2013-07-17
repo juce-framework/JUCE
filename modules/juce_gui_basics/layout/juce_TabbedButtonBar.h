@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_TABBEDBUTTONBAR_JUCEHEADER__
-#define __JUCE_TABBEDBUTTONBAR_JUCEHEADER__
+#ifndef JUCE_TABBEDBUTTONBAR_H_INCLUDED
+#define JUCE_TABBEDBUTTONBAR_H_INCLUDED
 
 #include "../buttons/juce_Button.h"
 class TabbedButtonBar;
@@ -337,4 +337,4 @@ private:
 };
 
 
-#endif   // __JUCE_TABBEDBUTTONBAR_JUCEHEADER__
+#endif   // JUCE_TABBEDBUTTONBAR_H_INCLUDED

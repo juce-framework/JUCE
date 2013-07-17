@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_BUBBLEMESSAGECOMPONENT_JUCEHEADER__
-#define __JUCE_BUBBLEMESSAGECOMPONENT_JUCEHEADER__
+#ifndef JUCE_BUBBLEMESSAGECOMPONENT_H_INCLUDED
+#define JUCE_BUBBLEMESSAGECOMPONENT_H_INCLUDED
 
 
 //==============================================================================
@@ -129,4 +129,4 @@ private:
 };
 
 
-#endif   // __JUCE_BUBBLEMESSAGECOMPONENT_JUCEHEADER__
+#endif   // JUCE_BUBBLEMESSAGECOMPONENT_H_INCLUDED

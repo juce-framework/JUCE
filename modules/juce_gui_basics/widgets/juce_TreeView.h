@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_TREEVIEW_JUCEHEADER__
-#define __JUCE_TREEVIEW_JUCEHEADER__
+#ifndef JUCE_TREEVIEW_H_INCLUDED
+#define JUCE_TREEVIEW_H_INCLUDED
 
 #include "../layout/juce_Viewport.h"
 #include "../mouse/juce_FileDragAndDropTarget.h"
@@ -858,4 +858,4 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TreeView)
 };
 
-#endif   // __JUCE_TREEVIEW_JUCEHEADER__
+#endif   // JUCE_TREEVIEW_H_INCLUDED

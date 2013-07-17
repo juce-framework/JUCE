@@ -26,8 +26,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_INTERPROCESSLOCK_JUCEHEADER__
-#define __JUCE_INTERPROCESSLOCK_JUCEHEADER__
+#ifndef JUCE_INTERPROCESSLOCK_H_INCLUDED
+#define JUCE_INTERPROCESSLOCK_H_INCLUDED
 
 #include "../text/juce_String.h"
 #include "../memory/juce_ScopedPointer.h"
@@ -128,4 +128,4 @@ private:
 };
 
 
-#endif   // __JUCE_INTERPROCESSLOCK_JUCEHEADER__
+#endif   // JUCE_INTERPROCESSLOCK_H_INCLUDED

@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_COMBOBOX_JUCEHEADER__
-#define __JUCE_COMBOBOX_JUCEHEADER__
+#ifndef JUCE_COMBOBOX_H_INCLUDED
+#define JUCE_COMBOBOX_H_INCLUDED
 
 #include "juce_Label.h"
 
@@ -413,4 +413,4 @@ private:
 /** This typedef is just for compatibility with old code - newer code should use the ComboBox::Listener class directly. */
 typedef ComboBox::Listener ComboBoxListener;
 
-#endif   // __JUCE_COMBOBOX_JUCEHEADER__
+#endif   // JUCE_COMBOBOX_H_INCLUDED

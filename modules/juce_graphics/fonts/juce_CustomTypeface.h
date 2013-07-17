@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_CUSTOMTYPEFACE_JUCEHEADER__
-#define __JUCE_CUSTOMTYPEFACE_JUCEHEADER__
+#ifndef JUCE_CUSTOMTYPEFACE_H_INCLUDED
+#define JUCE_CUSTOMTYPEFACE_H_INCLUDED
 
 #include "juce_Typeface.h"
 class InputStream;
@@ -151,4 +151,4 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CustomTypeface)
 };
 
-#endif   // __JUCE_CUSTOMTYPEFACE_JUCEHEADER__
+#endif   // JUCE_CUSTOMTYPEFACE_H_INCLUDED

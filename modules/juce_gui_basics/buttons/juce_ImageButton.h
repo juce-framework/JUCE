@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_IMAGEBUTTON_JUCEHEADER__
-#define __JUCE_IMAGEBUTTON_JUCEHEADER__
+#ifndef JUCE_IMAGEBUTTON_H_INCLUDED
+#define JUCE_IMAGEBUTTON_H_INCLUDED
 
 #include "juce_Button.h"
 
@@ -148,4 +148,4 @@ private:
 };
 
 
-#endif   // __JUCE_IMAGEBUTTON_JUCEHEADER__
+#endif   // JUCE_IMAGEBUTTON_H_INCLUDED

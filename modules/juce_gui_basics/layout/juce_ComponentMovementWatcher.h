@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_COMPONENTMOVEMENTWATCHER_JUCEHEADER__
-#define __JUCE_COMPONENTMOVEMENTWATCHER_JUCEHEADER__
+#ifndef JUCE_COMPONENTMOVEMENTWATCHER_H_INCLUDED
+#define JUCE_COMPONENTMOVEMENTWATCHER_H_INCLUDED
 
 #include "../components/juce_Component.h"
 
@@ -94,4 +94,4 @@ private:
 };
 
 
-#endif   // __JUCE_COMPONENTMOVEMENTWATCHER_JUCEHEADER__
+#endif   // JUCE_COMPONENTMOVEMENTWATCHER_H_INCLUDED

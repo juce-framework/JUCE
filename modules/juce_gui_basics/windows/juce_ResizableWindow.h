@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_RESIZABLEWINDOW_JUCEHEADER__
-#define __JUCE_RESIZABLEWINDOW_JUCEHEADER__
+#ifndef JUCE_RESIZABLEWINDOW_H_INCLUDED
+#define JUCE_RESIZABLEWINDOW_H_INCLUDED
 
 #include "juce_TopLevelWindow.h"
 #include "../mouse/juce_ComponentDragger.h"
@@ -389,4 +389,4 @@ private:
 };
 
 
-#endif   // __JUCE_RESIZABLEWINDOW_JUCEHEADER__
+#endif   // JUCE_RESIZABLEWINDOW_H_INCLUDED

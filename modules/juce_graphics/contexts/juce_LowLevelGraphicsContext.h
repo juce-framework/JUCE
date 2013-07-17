@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_LOWLEVELGRAPHICSCONTEXT_JUCEHEADER__
-#define __JUCE_LOWLEVELGRAPHICSCONTEXT_JUCEHEADER__
+#ifndef JUCE_LOWLEVELGRAPHICSCONTEXT_H_INCLUDED
+#define JUCE_LOWLEVELGRAPHICSCONTEXT_H_INCLUDED
 
 #include "../images/juce_Image.h"
 #include "../geometry/juce_Path.h"
@@ -108,4 +108,4 @@ public:
 };
 
 
-#endif   // __JUCE_LOWLEVELGRAPHICSCONTEXT_JUCEHEADER__
+#endif   // JUCE_LOWLEVELGRAPHICSCONTEXT_H_INCLUDED

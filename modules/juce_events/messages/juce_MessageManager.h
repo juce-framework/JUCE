@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_MESSAGEMANAGER_JUCEHEADER__
-#define __JUCE_MESSAGEMANAGER_JUCEHEADER__
+#ifndef JUCE_MESSAGEMANAGER_H_INCLUDED
+#define JUCE_MESSAGEMANAGER_H_INCLUDED
 
 class MessageManagerLock;
 class ThreadPoolJob;
@@ -325,4 +325,4 @@ private:
 };
 
 
-#endif   // __JUCE_MESSAGEMANAGER_JUCEHEADER__
+#endif   // JUCE_MESSAGEMANAGER_H_INCLUDED

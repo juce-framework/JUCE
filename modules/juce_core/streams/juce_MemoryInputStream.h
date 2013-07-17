@@ -26,8 +26,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_MEMORYINPUTSTREAM_JUCEHEADER__
-#define __JUCE_MEMORYINPUTSTREAM_JUCEHEADER__
+#ifndef JUCE_MEMORYINPUTSTREAM_H_INCLUDED
+#define JUCE_MEMORYINPUTSTREAM_H_INCLUDED
 
 #include "juce_InputStream.h"
 #include "../memory/juce_HeapBlock.h"
@@ -97,4 +97,4 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MemoryInputStream)
 };
 
-#endif   // __JUCE_MEMORYINPUTSTREAM_JUCEHEADER__
+#endif   // JUCE_MEMORYINPUTSTREAM_H_INCLUDED

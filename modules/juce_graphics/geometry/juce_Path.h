@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_PATH_JUCEHEADER__
-#define __JUCE_PATH_JUCEHEADER__
+#ifndef JUCE_PATH_H_INCLUDED
+#define JUCE_PATH_H_INCLUDED
 
 #include "juce_AffineTransform.h"
 #include "juce_Line.h"
@@ -782,4 +782,4 @@ private:
     JUCE_LEAK_DETECTOR (Path)
 };
 
-#endif   // __JUCE_PATH_JUCEHEADER__
+#endif   // JUCE_PATH_H_INCLUDED

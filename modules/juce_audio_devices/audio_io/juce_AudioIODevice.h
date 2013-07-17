@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_AUDIOIODEVICE_JUCEHEADER__
-#define __JUCE_AUDIOIODEVICE_JUCEHEADER__
+#ifndef JUCE_AUDIOIODEVICE_H_INCLUDED
+#define JUCE_AUDIOIODEVICE_H_INCLUDED
 
 class AudioIODevice;
 
@@ -329,4 +329,4 @@ protected:
 };
 
 
-#endif   // __JUCE_AUDIOIODEVICE_JUCEHEADER__
+#endif   // JUCE_AUDIOIODEVICE_H_INCLUDED

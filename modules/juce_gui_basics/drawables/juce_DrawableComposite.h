@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_DRAWABLECOMPOSITE_JUCEHEADER__
-#define __JUCE_DRAWABLECOMPOSITE_JUCEHEADER__
+#ifndef JUCE_DRAWABLECOMPOSITE_H_INCLUDED
+#define JUCE_DRAWABLECOMPOSITE_H_INCLUDED
 
 #include "juce_Drawable.h"
 #include "../positioning/juce_MarkerList.h"
@@ -158,4 +158,4 @@ private:
 };
 
 
-#endif   // __JUCE_DRAWABLECOMPOSITE_JUCEHEADER__
+#endif   // JUCE_DRAWABLECOMPOSITE_H_INCLUDED

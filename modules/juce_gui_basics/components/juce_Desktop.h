@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_DESKTOP_JUCEHEADER__
-#define __JUCE_DESKTOP_JUCEHEADER__
+#ifndef JUCE_DESKTOP_H_INCLUDED
+#define JUCE_DESKTOP_H_INCLUDED
 
 #include "juce_Component.h"
 #include "../layout/juce_ComponentAnimator.h"
@@ -447,4 +447,4 @@ private:
 };
 
 
-#endif   // __JUCE_DESKTOP_JUCEHEADER__
+#endif   // JUCE_DESKTOP_H_INCLUDED

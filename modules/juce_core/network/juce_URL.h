@@ -26,8 +26,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_URL_JUCEHEADER__
-#define __JUCE_URL_JUCEHEADER__
+#ifndef JUCE_URL_H_INCLUDED
+#define JUCE_URL_H_INCLUDED
 
 #include "../text/juce_StringPairArray.h"
 #include "../files/juce_File.h"
@@ -347,4 +347,4 @@ private:
 };
 
 
-#endif   // __JUCE_URL_JUCEHEADER__
+#endif   // JUCE_URL_H_INCLUDED

@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_TOOLTIPWINDOW_JUCEHEADER__
-#define __JUCE_TOOLTIPWINDOW_JUCEHEADER__
+#ifndef JUCE_TOOLTIPWINDOW_H_INCLUDED
+#define JUCE_TOOLTIPWINDOW_H_INCLUDED
 
 #include "../components/juce_Component.h"
 #include "../mouse/juce_TooltipClient.h"
@@ -116,4 +116,4 @@ private:
 };
 
 
-#endif   // __JUCE_TOOLTIPWINDOW_JUCEHEADER__
+#endif   // JUCE_TOOLTIPWINDOW_H_INCLUDED

@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_MIDIKEYBOARDCOMPONENT_JUCEHEADER__
-#define __JUCE_MIDIKEYBOARDCOMPONENT_JUCEHEADER__
+#ifndef JUCE_MIDIKEYBOARDCOMPONENT_H_INCLUDED
+#define JUCE_MIDIKEYBOARDCOMPONENT_H_INCLUDED
 
 
 //==============================================================================
@@ -408,4 +408,4 @@ private:
 };
 
 
-#endif   // __JUCE_MIDIKEYBOARDCOMPONENT_JUCEHEADER__
+#endif   // JUCE_MIDIKEYBOARDCOMPONENT_H_INCLUDED

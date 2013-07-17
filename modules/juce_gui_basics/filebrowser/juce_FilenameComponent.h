@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_FILENAMECOMPONENT_JUCEHEADER__
-#define __JUCE_FILENAMECOMPONENT_JUCEHEADER__
+#ifndef JUCE_FILENAMECOMPONENT_H_INCLUDED
+#define JUCE_FILENAMECOMPONENT_H_INCLUDED
 
 #include "../widgets/juce_ComboBox.h"
 #include "../buttons/juce_TextButton.h"
@@ -214,4 +214,4 @@ private:
 
 
 
-#endif   // __JUCE_FILENAMECOMPONENT_JUCEHEADER__
+#endif   // JUCE_FILENAMECOMPONENT_H_INCLUDED

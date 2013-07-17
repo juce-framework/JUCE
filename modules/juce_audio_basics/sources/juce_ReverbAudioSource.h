@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_REVERBAUDIOSOURCE_JUCEHEADER__
-#define __JUCE_REVERBAUDIOSOURCE_JUCEHEADER__
+#ifndef JUCE_REVERBAUDIOSOURCE_H_INCLUDED
+#define JUCE_REVERBAUDIOSOURCE_H_INCLUDED
 
 #include "juce_AudioSource.h"
 #include "../effects/juce_Reverb.h"
@@ -76,4 +76,4 @@ private:
 };
 
 
-#endif   // __JUCE_REVERBAUDIOSOURCE_JUCEHEADER__
+#endif   // JUCE_REVERBAUDIOSOURCE_H_INCLUDED

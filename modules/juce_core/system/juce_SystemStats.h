@@ -26,8 +26,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_SYSTEMSTATS_JUCEHEADER__
-#define __JUCE_SYSTEMSTATS_JUCEHEADER__
+#ifndef JUCE_SYSTEMSTATS_H_INCLUDED
+#define JUCE_SYSTEMSTATS_H_INCLUDED
 
 #include "../text/juce_StringArray.h"
 
@@ -203,4 +203,4 @@ private:
 };
 
 
-#endif   // __JUCE_SYSTEMSTATS_JUCEHEADER__
+#endif   // JUCE_SYSTEMSTATS_H_INCLUDED

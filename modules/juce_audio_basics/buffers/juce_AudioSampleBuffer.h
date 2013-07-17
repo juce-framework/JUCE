@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_AUDIOSAMPLEBUFFER_JUCEHEADER__
-#define __JUCE_AUDIOSAMPLEBUFFER_JUCEHEADER__
+#ifndef JUCE_AUDIOSAMPLEBUFFER_H_INCLUDED
+#define JUCE_AUDIOSAMPLEBUFFER_H_INCLUDED
 
 
 //==============================================================================
@@ -443,4 +443,4 @@ private:
 };
 
 
-#endif   // __JUCE_AUDIOSAMPLEBUFFER_JUCEHEADER__
+#endif   // JUCE_AUDIOSAMPLEBUFFER_H_INCLUDED

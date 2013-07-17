@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_LOWLEVELGRAPHICSSOFTWARERENDERER_JUCEHEADER__
-#define __JUCE_LOWLEVELGRAPHICSSOFTWARERENDERER_JUCEHEADER__
+#ifndef JUCE_LOWLEVELGRAPHICSSOFTWARERENDERER_H_INCLUDED
+#define JUCE_LOWLEVELGRAPHICSSOFTWARERENDERER_H_INCLUDED
 
 #include "juce_LowLevelGraphicsContext.h"
 #include "../native/juce_RenderingHelpers.h"
@@ -91,4 +91,4 @@ protected:
 };
 
 
-#endif   // __JUCE_LOWLEVELGRAPHICSSOFTWARERENDERER_JUCEHEADER__
+#endif   // JUCE_LOWLEVELGRAPHICSSOFTWARERENDERER_H_INCLUDED

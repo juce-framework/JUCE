@@ -26,8 +26,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_STRING_JUCEHEADER__
-#define __JUCE_STRING_JUCEHEADER__
+#ifndef JUCE_STRING_H_INCLUDED
+#define JUCE_STRING_H_INCLUDED
 
 #include "juce_CharacterFunctions.h"
 
@@ -1348,4 +1348,4 @@ std::basic_ostream <wchar_t, traits>& JUCE_CALLTYPE operator<< (std::basic_ostre
 JUCE_API OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, const String& stringToWrite);
 
 
-#endif   // __JUCE_STRING_JUCEHEADER__
+#endif   // JUCE_STRING_H_INCLUDED

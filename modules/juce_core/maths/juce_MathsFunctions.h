@@ -26,8 +26,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_MATHSFUNCTIONS_JUCEHEADER__
-#define __JUCE_MATHSFUNCTIONS_JUCEHEADER__
+#ifndef JUCE_MATHSFUNCTIONS_H_INCLUDED
+#define JUCE_MATHSFUNCTIONS_H_INCLUDED
 
 //==============================================================================
 /*
@@ -511,4 +511,4 @@ namespace TypeHelpers
 
 //==============================================================================
 
-#endif   // __JUCE_MATHSFUNCTIONS_JUCEHEADER__
+#endif   // JUCE_MATHSFUNCTIONS_H_INCLUDED

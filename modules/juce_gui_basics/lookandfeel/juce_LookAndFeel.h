@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_LOOKANDFEEL_JUCEHEADER__
-#define __JUCE_LOOKANDFEEL_JUCEHEADER__
+#ifndef JUCE_LOOKANDFEEL_H_INCLUDED
+#define JUCE_LOOKANDFEEL_H_INCLUDED
 
 #include "../widgets/juce_Slider.h"
 #include "../layout/juce_TabbedComponent.h"
@@ -684,4 +684,4 @@ private:
 };
 
 
-#endif   // __JUCE_LOOKANDFEEL_JUCEHEADER__
+#endif   // JUCE_LOOKANDFEEL_H_INCLUDED

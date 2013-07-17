@@ -26,8 +26,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_FILEINPUTSTREAM_JUCEHEADER__
-#define __JUCE_FILEINPUTSTREAM_JUCEHEADER__
+#ifndef JUCE_FILEINPUTSTREAM_H_INCLUDED
+#define JUCE_FILEINPUTSTREAM_H_INCLUDED
 
 #include "juce_File.h"
 #include "../streams/juce_InputStream.h"
@@ -96,4 +96,4 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FileInputStream)
 };
 
-#endif   // __JUCE_FILEINPUTSTREAM_JUCEHEADER__
+#endif   // JUCE_FILEINPUTSTREAM_H_INCLUDED

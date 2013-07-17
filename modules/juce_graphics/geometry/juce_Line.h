@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_LINE_JUCEHEADER__
-#define __JUCE_LINE_JUCEHEADER__
+#ifndef JUCE_LINE_H_INCLUDED
+#define JUCE_LINE_H_INCLUDED
 
 #include "juce_Point.h"
 
@@ -408,4 +408,4 @@ private:
 };
 
 
-#endif   // __JUCE_LINE_JUCEHEADER__
+#endif   // JUCE_LINE_H_INCLUDED

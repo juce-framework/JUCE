@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_MIDIKEYBOARDSTATE_JUCEHEADER__
-#define __JUCE_MIDIKEYBOARDSTATE_JUCEHEADER__
+#ifndef JUCE_MIDIKEYBOARDSTATE_H_INCLUDED
+#define JUCE_MIDIKEYBOARDSTATE_H_INCLUDED
 
 #include "juce_MidiBuffer.h"
 class MidiKeyboardState;
@@ -203,4 +203,4 @@ private:
 };
 
 
-#endif   // __JUCE_MIDIKEYBOARDSTATE_JUCEHEADER__
+#endif   // JUCE_MIDIKEYBOARDSTATE_H_INCLUDED

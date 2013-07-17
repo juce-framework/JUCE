@@ -26,8 +26,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_HASHMAP_JUCEHEADER__
-#define __JUCE_HASHMAP_JUCEHEADER__
+#ifndef JUCE_HASHMAP_H_INCLUDED
+#define JUCE_HASHMAP_H_INCLUDED
 
 #include "juce_OwnedArray.h"
 #include "juce_LinkedListPointer.h"
@@ -449,4 +449,4 @@ private:
 };
 
 
-#endif   // __JUCE_HASHMAP_JUCEHEADER__
+#endif   // JUCE_HASHMAP_H_INCLUDED

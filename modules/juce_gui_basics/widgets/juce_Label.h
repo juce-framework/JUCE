@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_LABEL_JUCEHEADER__
-#define __JUCE_LABEL_JUCEHEADER__
+#ifndef JUCE_LABEL_H_INCLUDED
+#define JUCE_LABEL_H_INCLUDED
 
 #include "juce_TextEditor.h"
 
@@ -334,4 +334,4 @@ private:
 /** This typedef is just for compatibility with old code - newer code should use the Label::Listener class directly. */
 typedef Label::Listener LabelListener;
 
-#endif   // __JUCE_LABEL_JUCEHEADER__
+#endif   // JUCE_LABEL_H_INCLUDED

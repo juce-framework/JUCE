@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_JUSTIFICATION_JUCEHEADER__
-#define __JUCE_JUSTIFICATION_JUCEHEADER__
+#ifndef JUCE_JUSTIFICATION_H_INCLUDED
+#define JUCE_JUSTIFICATION_H_INCLUDED
 
 #include "../geometry/juce_Rectangle.h"
 
@@ -185,4 +185,4 @@ private:
     int flags;
 };
 
-#endif   // __JUCE_JUSTIFICATION_JUCEHEADER__
+#endif   // JUCE_JUSTIFICATION_H_INCLUDED

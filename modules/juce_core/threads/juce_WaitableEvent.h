@@ -26,8 +26,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_WAITABLEEVENT_JUCEHEADER__
-#define __JUCE_WAITABLEEVENT_JUCEHEADER__
+#ifndef JUCE_WAITABLEEVENT_H_INCLUDED
+#define JUCE_WAITABLEEVENT_H_INCLUDED
 
 #include "../text/juce_String.h"
 
@@ -116,4 +116,4 @@ private:
 };
 
 
-#endif   // __JUCE_WAITABLEEVENT_JUCEHEADER__
+#endif   // JUCE_WAITABLEEVENT_H_INCLUDED

@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_OPENGL_JUCEHEADER__
-#define __JUCE_OPENGL_JUCEHEADER__
+#ifndef JUCE_OPENGL_H_INCLUDED
+#define JUCE_OPENGL_H_INCLUDED
 
 #include "../juce_gui_extra/juce_gui_extra.h"
 
@@ -80,47 +80,21 @@ namespace juce
 #include "opengl/juce_OpenGLHelpers.h"
 
 // START_AUTOINCLUDE opengl
-#ifndef __JUCE_DRAGGABLE3DORIENTATION_JUCEHEADER__
- #include "opengl/juce_Draggable3DOrientation.h"
-#endif
-#ifndef __JUCE_MATRIX3D_JUCEHEADER__
- #include "opengl/juce_Matrix3D.h"
-#endif
-#ifndef __JUCE_OPENGLCONTEXT_JUCEHEADER__
- #include "opengl/juce_OpenGLContext.h"
-#endif
-#ifndef __JUCE_OPENGLFRAMEBUFFER_JUCEHEADER__
- #include "opengl/juce_OpenGLFrameBuffer.h"
-#endif
-#ifndef __JUCE_OPENGLGRAPHICSCONTEXT_JUCEHEADER__
- #include "opengl/juce_OpenGLGraphicsContext.h"
-#endif
-#ifndef __JUCE_OPENGLHELPERS_JUCEHEADER__
- #include "opengl/juce_OpenGLHelpers.h"
-#endif
-#ifndef __JUCE_OPENGLIMAGE_JUCEHEADER__
- #include "opengl/juce_OpenGLImage.h"
-#endif
-#ifndef __JUCE_OPENGLPIXELFORMAT_JUCEHEADER__
- #include "opengl/juce_OpenGLPixelFormat.h"
-#endif
-#ifndef __JUCE_OPENGLRENDERER_JUCEHEADER__
- #include "opengl/juce_OpenGLRenderer.h"
-#endif
-#ifndef __JUCE_OPENGLSHADERPROGRAM_JUCEHEADER__
- #include "opengl/juce_OpenGLShaderProgram.h"
-#endif
-#ifndef __JUCE_OPENGLTEXTURE_JUCEHEADER__
- #include "opengl/juce_OpenGLTexture.h"
-#endif
-#ifndef __JUCE_QUATERNION_JUCEHEADER__
- #include "opengl/juce_Quaternion.h"
-#endif
-#ifndef __JUCE_VECTOR3D_JUCEHEADER__
- #include "opengl/juce_Vector3D.h"
-#endif
+#include "opengl/juce_Draggable3DOrientation.h"
+#include "opengl/juce_Matrix3D.h"
+#include "opengl/juce_OpenGLContext.h"
+#include "opengl/juce_OpenGLFrameBuffer.h"
+#include "opengl/juce_OpenGLGraphicsContext.h"
+#include "opengl/juce_OpenGLHelpers.h"
+#include "opengl/juce_OpenGLImage.h"
+#include "opengl/juce_OpenGLPixelFormat.h"
+#include "opengl/juce_OpenGLRenderer.h"
+#include "opengl/juce_OpenGLShaderProgram.h"
+#include "opengl/juce_OpenGLTexture.h"
+#include "opengl/juce_Quaternion.h"
+#include "opengl/juce_Vector3D.h"
 // END_AUTOINCLUDE
 
 }
 
-#endif   // __JUCE_OPENGL_JUCEHEADER__
+#endif   // JUCE_OPENGL_H_INCLUDED

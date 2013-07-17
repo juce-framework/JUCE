@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_TABLEHEADERCOMPONENT_JUCEHEADER__
-#define __JUCE_TABLEHEADERCOMPONENT_JUCEHEADER__
+#ifndef JUCE_TABLEHEADERCOMPONENT_H_INCLUDED
+#define JUCE_TABLEHEADERCOMPONENT_H_INCLUDED
 
 #include "../menus/juce_PopupMenu.h"
 
@@ -430,4 +430,4 @@ private:
 typedef TableHeaderComponent::Listener TableHeaderListener;
 
 
-#endif   // __JUCE_TABLEHEADERCOMPONENT_JUCEHEADER__
+#endif   // JUCE_TABLEHEADERCOMPONENT_H_INCLUDED

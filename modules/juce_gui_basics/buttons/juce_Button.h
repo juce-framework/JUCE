@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_BUTTON_JUCEHEADER__
-#define __JUCE_BUTTON_JUCEHEADER__
+#ifndef JUCE_BUTTON_H_INCLUDED
+#define JUCE_BUTTON_H_INCLUDED
 
 #include "../components/juce_Component.h"
 #include "../keyboard/juce_KeyListener.h"
@@ -490,4 +490,4 @@ private:
  typedef Button::Listener ButtonListener;
 #endif
 
-#endif   // __JUCE_BUTTON_JUCEHEADER__
+#endif   // JUCE_BUTTON_H_INCLUDED

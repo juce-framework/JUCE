@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_OPENGLCONTEXT_JUCEHEADER__
-#define __JUCE_OPENGLCONTEXT_JUCEHEADER__
+#ifndef JUCE_OPENGLCONTEXT_H_INCLUDED
+#define JUCE_OPENGLCONTEXT_H_INCLUDED
 
 #include "juce_OpenGLPixelFormat.h"
 #include "../native/juce_OpenGLExtensions.h"
@@ -250,4 +250,4 @@ private:
 };
 
 
-#endif   // __JUCE_OPENGLCONTEXT_JUCEHEADER__
+#endif   // JUCE_OPENGLCONTEXT_H_INCLUDED

@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_MAC_COREGRAPHICSCONTEXT_JUCEHEADER__
-#define __JUCE_MAC_COREGRAPHICSCONTEXT_JUCEHEADER__
+#ifndef JUCE_MAC_COREGRAPHICSCONTEXT_H_INCLUDED
+#define JUCE_MAC_COREGRAPHICSCONTEXT_H_INCLUDED
 
 //==============================================================================
 class CoreGraphicsContext   : public LowLevelGraphicsContext
@@ -119,4 +119,4 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CoreGraphicsContext)
 };
 
-#endif   // __JUCE_MAC_COREGRAPHICSCONTEXT_JUCEHEADER__
+#endif   // JUCE_MAC_COREGRAPHICSCONTEXT_H_INCLUDED

@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_KEYPRESSMAPPINGSET_JUCEHEADER__
-#define __JUCE_KEYPRESSMAPPINGSET_JUCEHEADER__
+#ifndef JUCE_KEYPRESSMAPPINGSET_H_INCLUDED
+#define JUCE_KEYPRESSMAPPINGSET_H_INCLUDED
 
 #include "../keyboard/juce_KeyListener.h"
 #include "../commands/juce_ApplicationCommandManager.h"
@@ -249,4 +249,4 @@ private:
 };
 
 
-#endif   // __JUCE_KEYPRESSMAPPINGSET_JUCEHEADER__
+#endif   // JUCE_KEYPRESSMAPPINGSET_H_INCLUDED

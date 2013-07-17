@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_BUBBLECOMPONENT_JUCEHEADER__
-#define __JUCE_BUBBLECOMPONENT_JUCEHEADER__
+#ifndef JUCE_BUBBLECOMPONENT_H_INCLUDED
+#define JUCE_BUBBLECOMPONENT_H_INCLUDED
 
 
 //==============================================================================
@@ -164,4 +164,4 @@ private:
 };
 
 
-#endif   // __JUCE_BUBBLECOMPONENT_JUCEHEADER__
+#endif   // JUCE_BUBBLECOMPONENT_H_INCLUDED

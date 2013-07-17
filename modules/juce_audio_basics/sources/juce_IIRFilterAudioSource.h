@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_IIRFILTERAUDIOSOURCE_JUCEHEADER__
-#define __JUCE_IIRFILTERAUDIOSOURCE_JUCEHEADER__
+#ifndef JUCE_IIRFILTERAUDIOSOURCE_H_INCLUDED
+#define JUCE_IIRFILTERAUDIOSOURCE_H_INCLUDED
 
 #include "juce_AudioSource.h"
 #include "../effects/juce_IIRFilter.h"
@@ -70,4 +70,4 @@ private:
 };
 
 
-#endif   // __JUCE_IIRFILTERAUDIOSOURCE_JUCEHEADER__
+#endif   // JUCE_IIRFILTERAUDIOSOURCE_H_INCLUDED

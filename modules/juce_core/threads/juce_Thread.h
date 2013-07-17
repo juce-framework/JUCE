@@ -26,8 +26,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_THREAD_JUCEHEADER__
-#define __JUCE_THREAD_JUCEHEADER__
+#ifndef JUCE_THREAD_H_INCLUDED
+#define JUCE_THREAD_H_INCLUDED
 
 #include "juce_WaitableEvent.h"
 #include "juce_CriticalSection.h"
@@ -289,4 +289,4 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Thread)
 };
 
-#endif   // __JUCE_THREAD_JUCEHEADER__
+#endif   // JUCE_THREAD_H_INCLUDED

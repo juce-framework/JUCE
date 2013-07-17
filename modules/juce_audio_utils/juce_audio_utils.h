@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_AUDIO_UTILS_JUCEHEADER__
-#define __JUCE_AUDIO_UTILS_JUCEHEADER__
+#ifndef JUCE_AUDIO_UTILS_H_INCLUDED
+#define JUCE_AUDIO_UTILS_H_INCLUDED
 
 #include "../juce_gui_basics/juce_gui_basics.h"
 #include "../juce_audio_devices/juce_audio_devices.h"
@@ -33,26 +33,12 @@
 //=============================================================================
 namespace juce
 {
-
-#ifndef __JUCE_AUDIODEVICESELECTORCOMPONENT_JUCEHEADER__
  #include "gui/juce_AudioDeviceSelectorComponent.h"
-#endif
-#ifndef __JUCE_AUDIOTHUMBNAILBASE_JUCEHEADER__
  #include "gui/juce_AudioThumbnailBase.h"
-#endif
-#ifndef __JUCE_AUDIOTHUMBNAIL_JUCEHEADER__
  #include "gui/juce_AudioThumbnail.h"
-#endif
-#ifndef __JUCE_AUDIOTHUMBNAILCACHE_JUCEHEADER__
  #include "gui/juce_AudioThumbnailCache.h"
-#endif
-#ifndef __JUCE_MIDIKEYBOARDCOMPONENT_JUCEHEADER__
  #include "gui/juce_MidiKeyboardComponent.h"
-#endif
-#ifndef __JUCE_AUDIOPROCESSORPLAYER_JUCEHEADER__
  #include "players/juce_AudioProcessorPlayer.h"
-#endif
-
 }
 
-#endif   // __JUCE_AUDIO_UTILS_JUCEHEADER__
+#endif   // JUCE_AUDIO_UTILS_H_INCLUDED

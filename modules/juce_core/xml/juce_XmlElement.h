@@ -26,8 +26,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_XMLELEMENT_JUCEHEADER__
-#define __JUCE_XMLELEMENT_JUCEHEADER__
+#ifndef JUCE_XMLELEMENT_H_INCLUDED
+#define JUCE_XMLELEMENT_H_INCLUDED
 
 #include "../text/juce_String.h"
 #include "../streams/juce_OutputStream.h"
@@ -736,4 +736,4 @@ private:
 };
 
 
-#endif   // __JUCE_XMLELEMENT_JUCEHEADER__
+#endif   // JUCE_XMLELEMENT_H_INCLUDED

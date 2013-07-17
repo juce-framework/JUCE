@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_GROUPCOMPONENT_JUCEHEADER__
-#define __JUCE_GROUPCOMPONENT_JUCEHEADER__
+#ifndef JUCE_GROUPCOMPONENT_H_INCLUDED
+#define JUCE_GROUPCOMPONENT_H_INCLUDED
 
 #include "../components/juce_Component.h"
 
@@ -100,4 +100,4 @@ private:
 };
 
 
-#endif   // __JUCE_GROUPCOMPONENT_JUCEHEADER__
+#endif   // JUCE_GROUPCOMPONENT_H_INCLUDED

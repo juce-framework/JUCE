@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_WIN32_HIDDENMESSAGEWINDOW_JUCEHEADER__
-#define __JUCE_WIN32_HIDDENMESSAGEWINDOW_JUCEHEADER__
+#ifndef JUCE_WIN32_HIDDENMESSAGEWINDOW_H_INCLUDED
+#define JUCE_WIN32_HIDDENMESSAGEWINDOW_H_INCLUDED
 
 //==============================================================================
 class HiddenMessageWindow
@@ -135,4 +135,4 @@ private:
     }
 };
 
-#endif   // __JUCE_WIN32_HIDDENMESSAGEWINDOW_JUCEHEADER__
+#endif   // JUCE_WIN32_HIDDENMESSAGEWINDOW_H_INCLUDED

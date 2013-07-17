@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_SYSTEMAUDIOVOLUME_JUCEHEADER__
-#define __JUCE_SYSTEMAUDIOVOLUME_JUCEHEADER__
+#ifndef JUCE_SYSTEMAUDIOVOLUME_H_INCLUDED
+#define JUCE_SYSTEMAUDIOVOLUME_H_INCLUDED
 
 //==============================================================================
 /**
@@ -57,4 +57,4 @@ private:
 };
 
 
-#endif   // __JUCE_SYSTEMAUDIOVOLUME_JUCEHEADER__
+#endif   // JUCE_SYSTEMAUDIOVOLUME_H_INCLUDED

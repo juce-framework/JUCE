@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_VIEWPORT_JUCEHEADER__
-#define __JUCE_VIEWPORT_JUCEHEADER__
+#ifndef JUCE_VIEWPORT_H_INCLUDED
+#define JUCE_VIEWPORT_H_INCLUDED
 
 #include "juce_ScrollBar.h"
 
@@ -273,4 +273,4 @@ private:
 };
 
 
-#endif   // __JUCE_VIEWPORT_JUCEHEADER__
+#endif   // JUCE_VIEWPORT_H_INCLUDED

@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_TOOLBAR_JUCEHEADER__
-#define __JUCE_TOOLBAR_JUCEHEADER__
+#ifndef JUCE_TOOLBAR_H_INCLUDED
+#define JUCE_TOOLBAR_H_INCLUDED
 
 #include "../mouse/juce_DragAndDropContainer.h"
 #include "../layout/juce_ComponentAnimator.h"
@@ -310,4 +310,4 @@ private:
 };
 
 
-#endif   // __JUCE_TOOLBAR_JUCEHEADER__
+#endif   // JUCE_TOOLBAR_H_INCLUDED

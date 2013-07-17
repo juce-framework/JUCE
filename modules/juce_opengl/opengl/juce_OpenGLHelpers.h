@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_OPENGLHELPERS_JUCEHEADER__
-#define __JUCE_OPENGLHELPERS_JUCEHEADER__
+#ifndef JUCE_OPENGLHELPERS_H_INCLUDED
+#define JUCE_OPENGLHELPERS_H_INCLUDED
 
 class OpenGLTexture;
 class OpenGLFrameBuffer;
@@ -125,4 +125,4 @@ private:
 };
 
 
-#endif   // __JUCE_OPENGLHELPERS_JUCEHEADER__
+#endif   // JUCE_OPENGLHELPERS_H_INCLUDED

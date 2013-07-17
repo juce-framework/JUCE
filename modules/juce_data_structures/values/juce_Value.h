@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_VALUE_JUCEHEADER__
-#define __JUCE_VALUE_JUCEHEADER__
+#ifndef JUCE_VALUE_H_INCLUDED
+#define JUCE_VALUE_H_INCLUDED
 
 
 //==============================================================================
@@ -227,4 +227,4 @@ OutputStream& JUCE_CALLTYPE operator<< (OutputStream&, const Value&);
 /** This typedef is just for compatibility with old code - newer code should use the Value::Listener class directly. */
 typedef Value::Listener ValueListener;
 
-#endif   // __JUCE_VALUE_JUCEHEADER__
+#endif   // JUCE_VALUE_H_INCLUDED

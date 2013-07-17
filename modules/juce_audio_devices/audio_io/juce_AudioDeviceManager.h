@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_AUDIODEVICEMANAGER_JUCEHEADER__
-#define __JUCE_AUDIODEVICEMANAGER_JUCEHEADER__
+#ifndef JUCE_AUDIODEVICEMANAGER_H_INCLUDED
+#define JUCE_AUDIODEVICEMANAGER_H_INCLUDED
 
 #include "juce_AudioIODeviceType.h"
 #include "../midi_io/juce_MidiInput.h"
@@ -511,4 +511,4 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioDeviceManager)
 };
 
-#endif   // __JUCE_AUDIODEVICEMANAGER_JUCEHEADER__
+#endif   // JUCE_AUDIODEVICEMANAGER_H_INCLUDED

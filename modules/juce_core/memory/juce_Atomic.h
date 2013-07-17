@@ -26,8 +26,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_ATOMIC_JUCEHEADER__
-#define __JUCE_ATOMIC_JUCEHEADER__
+#ifndef JUCE_ATOMIC_H_INCLUDED
+#define JUCE_ATOMIC_H_INCLUDED
 
 
 //==============================================================================
@@ -393,4 +393,4 @@ inline void Atomic<Type>::memoryBarrier() noexcept
   #pragma warning (pop)
 #endif
 
-#endif   // __JUCE_ATOMIC_JUCEHEADER__
+#endif   // JUCE_ATOMIC_H_INCLUDED

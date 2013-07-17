@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_BLOWFISH_JUCEHEADER__
-#define __JUCE_BLOWFISH_JUCEHEADER__
+#ifndef JUCE_BLOWFISH_H_INCLUDED
+#define JUCE_BLOWFISH_H_INCLUDED
 
 
 //==============================================================================
@@ -69,4 +69,4 @@ private:
 };
 
 
-#endif   // __JUCE_BLOWFISH_JUCEHEADER__
+#endif   // JUCE_BLOWFISH_H_INCLUDED

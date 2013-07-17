@@ -26,8 +26,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_REFERENCECOUNTEDARRAY_JUCEHEADER__
-#define __JUCE_REFERENCECOUNTEDARRAY_JUCEHEADER__
+#ifndef JUCE_REFERENCECOUNTEDARRAY_H_INCLUDED
+#define JUCE_REFERENCECOUNTEDARRAY_H_INCLUDED
 
 #include "../memory/juce_ReferenceCountedObject.h"
 #include "juce_ArrayAllocationBase.h"
@@ -864,4 +864,4 @@ private:
 };
 
 
-#endif   // __JUCE_REFERENCECOUNTEDARRAY_JUCEHEADER__
+#endif   // JUCE_REFERENCECOUNTEDARRAY_H_INCLUDED

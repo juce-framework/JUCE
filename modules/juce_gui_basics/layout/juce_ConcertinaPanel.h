@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_CONCERTINAPANEL_JUCEHEADER__
-#define __JUCE_CONCERTINAPANEL_JUCEHEADER__
+#ifndef JUCE_CONCERTINAPANEL_H_INCLUDED
+#define JUCE_CONCERTINAPANEL_H_INCLUDED
 
 //==============================================================================
 /**
@@ -117,4 +117,4 @@ private:
 };
 
 
-#endif   // __JUCE_CONCERTINAPANEL_JUCEHEADER__
+#endif   // JUCE_CONCERTINAPANEL_H_INCLUDED

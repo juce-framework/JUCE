@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_PLUGINDIRECTORYSCANNER_JUCEHEADER__
-#define __JUCE_PLUGINDIRECTORYSCANNER_JUCEHEADER__
+#ifndef JUCE_PLUGINDIRECTORYSCANNER_H_INCLUDED
+#define JUCE_PLUGINDIRECTORYSCANNER_H_INCLUDED
 
 #include "juce_KnownPluginList.h"
 #include "../format/juce_AudioPluginFormatManager.h"
@@ -127,4 +127,4 @@ private:
 };
 
 
-#endif   // __JUCE_PLUGINDIRECTORYSCANNER_JUCEHEADER__
+#endif   // JUCE_PLUGINDIRECTORYSCANNER_H_INCLUDED

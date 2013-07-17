@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_PROPERTYCOMPONENT_JUCEHEADER__
-#define __JUCE_PROPERTYCOMPONENT_JUCEHEADER__
+#ifndef JUCE_PROPERTYCOMPONENT_H_INCLUDED
+#define JUCE_PROPERTYCOMPONENT_H_INCLUDED
 
 class EditableProperty;
 
@@ -118,4 +118,4 @@ private:
 };
 
 
-#endif   // __JUCE_PROPERTYCOMPONENT_JUCEHEADER__
+#endif   // JUCE_PROPERTYCOMPONENT_H_INCLUDED

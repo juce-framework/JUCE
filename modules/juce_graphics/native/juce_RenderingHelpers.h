@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_RENDERINGHELPERS_JUCEHEADER__
-#define __JUCE_RENDERINGHELPERS_JUCEHEADER__
+#ifndef JUCE_RENDERINGHELPERS_H_INCLUDED
+#define JUCE_RENDERINGHELPERS_H_INCLUDED
 
 #if JUCE_MSVC
  #pragma warning (push)
@@ -2491,4 +2491,4 @@ private:
  #pragma warning (pop)
 #endif
 
-#endif   // __JUCE_RENDERINGHELPERS_JUCEHEADER__
+#endif   // JUCE_RENDERINGHELPERS_H_INCLUDED

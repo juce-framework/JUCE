@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_STANDALONEFILTERWINDOW_JUCEHEADER__
-#define __JUCE_STANDALONEFILTERWINDOW_JUCEHEADER__
+#ifndef JUCE_STANDALONEFILTERWINDOW_H_INCLUDED
+#define JUCE_STANDALONEFILTERWINDOW_H_INCLUDED
 
 extern AudioProcessor* JUCE_CALLTYPE createPluginFilter();
 
@@ -301,4 +301,4 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (StandaloneFilterWindow)
 };
 
-#endif   // __JUCE_STANDALONEFILTERWINDOW_JUCEHEADER__
+#endif   // JUCE_STANDALONEFILTERWINDOW_H_INCLUDED

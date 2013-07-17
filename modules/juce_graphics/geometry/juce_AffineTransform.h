@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_AFFINETRANSFORM_JUCEHEADER__
-#define __JUCE_AFFINETRANSFORM_JUCEHEADER__
+#ifndef JUCE_AFFINETRANSFORM_H_INCLUDED
+#define JUCE_AFFINETRANSFORM_H_INCLUDED
 
 
 //==============================================================================
@@ -265,4 +265,4 @@ private:
     JUCE_LEAK_DETECTOR (AffineTransform)
 };
 
-#endif   // __JUCE_AFFINETRANSFORM_JUCEHEADER__
+#endif   // JUCE_AFFINETRANSFORM_H_INCLUDED

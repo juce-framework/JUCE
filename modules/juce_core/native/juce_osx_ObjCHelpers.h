@@ -26,8 +26,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_OSX_OBJCHELPERS_JUCEHEADER__
-#define __JUCE_OSX_OBJCHELPERS_JUCEHEADER__
+#ifndef JUCE_OSX_OBJCHELPERS_H_INCLUDED
+#define JUCE_OSX_OBJCHELPERS_H_INCLUDED
 
 
 /* This file contains a few helper functions that are used internally but which
@@ -155,4 +155,4 @@ private:
 };
 
 
-#endif   // __JUCE_OSX_OBJCHELPERS_JUCEHEADER__
+#endif   // JUCE_OSX_OBJCHELPERS_H_INCLUDED

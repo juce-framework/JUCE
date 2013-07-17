@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_TOOLBARITEMPALETTE_JUCEHEADER__
-#define __JUCE_TOOLBARITEMPALETTE_JUCEHEADER__
+#ifndef JUCE_TOOLBARITEMPALETTE_H_INCLUDED
+#define JUCE_TOOLBARITEMPALETTE_H_INCLUDED
 
 #include "juce_Toolbar.h"
 #include "../layout/juce_Viewport.h"
@@ -76,4 +76,4 @@ private:
 };
 
 
-#endif   // __JUCE_TOOLBARITEMPALETTE_JUCEHEADER__
+#endif   // JUCE_TOOLBARITEMPALETTE_H_INCLUDED

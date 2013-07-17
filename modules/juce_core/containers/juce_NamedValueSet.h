@@ -26,8 +26,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_NAMEDVALUESET_JUCEHEADER__
-#define __JUCE_NAMEDVALUESET_JUCEHEADER__
+#ifndef JUCE_NAMEDVALUESET_H_INCLUDED
+#define JUCE_NAMEDVALUESET_H_INCLUDED
 
 #include "juce_Variant.h"
 #include "../containers/juce_LinkedListPointer.h"
@@ -166,4 +166,4 @@ private:
 };
 
 
-#endif   // __JUCE_NAMEDVALUESET_JUCEHEADER__
+#endif   // JUCE_NAMEDVALUESET_H_INCLUDED
