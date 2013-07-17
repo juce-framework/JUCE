@@ -403,6 +403,7 @@ private:
             << newLine
             << "include $(CLEAR_VARS)" << newLine
             << newLine
+            << "LOCAL_ARM_MODE := arm" << newLine
             << "LOCAL_MODULE := juce_jni" << newLine
             << "LOCAL_SRC_FILES := \\" << newLine;
 
