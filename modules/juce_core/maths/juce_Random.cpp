@@ -116,6 +116,20 @@ BigInteger Random::nextLargeNumber (const BigInteger& maximumValue)
     return n;
 }
 
+void Random::fillBitsRandomly (void* const buffer, size_t bytes)
+{
+    int* d = static_cast<int*> (buffer);
+
+    for (; bytes >= sizeof (int); bytes -= sizeof (int))
+        *d++ = nextInt();
+
+    if (bytes > 0)
+    {
+        const int lastBytes = nextInt();
+        memcpy (d, &lastBytes, bytes);
+    }
+}
+
 void Random::fillBitsRandomly (BigInteger& arrayToChange, int startBit, int numBits)
 {
     arrayToChange.setBit (startBit + numBits - 1, true);  // to force the array to pre-allocate space
