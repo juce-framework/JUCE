@@ -100,7 +100,7 @@
 #ifdef _MSC_VER
  #pragma pack (pop)
 
- #if JUCE_DEBUGxxx // (the debug lib in the 8.0 SDK fails to link, so we'll stick to the release one...)
+ #if JUCE_RTAS_LINK_TO_DEBUG_LIB // (the debug lib in the 8.0 SDK fails to link, so we'll stick to the release one...)
   #define PT_LIB_PATH  JucePlugin_WinBag_path "\\Debug\\lib\\"
  #else
   #define PT_LIB_PATH  JucePlugin_WinBag_path "\\Release\\lib\\"
