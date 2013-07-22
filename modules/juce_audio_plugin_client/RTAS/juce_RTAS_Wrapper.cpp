@@ -988,11 +988,12 @@ private:
             case 4:   return ePlugIn_StemFormat_Quad;
             case 5:   return ePlugIn_StemFormat_5dot0;
             case 6:   return ePlugIn_StemFormat_5dot1;
-            case 7:   return ePlugIn_StemFormat_6dot1;
 
            #if PT_VERS_MAJOR >= 9
+            case 7:   return ePlugIn_StemFormat_7dot0DTS;
             case 8:   return ePlugIn_StemFormat_7dot1DTS;
            #else
+            case 7:   return ePlugIn_StemFormat_7dot0;
             case 8:   return ePlugIn_StemFormat_7dot1;
            #endif
 

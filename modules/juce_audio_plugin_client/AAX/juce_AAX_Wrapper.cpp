@@ -111,7 +111,7 @@ struct AAXClasses
             case 4:   return AAX_eStemFormat_Quad;
             case 5:   return AAX_eStemFormat_5_0;
             case 6:   return AAX_eStemFormat_5_1;
-            case 7:   return AAX_eStemFormat_6_1;
+            case 7:   return AAX_eStemFormat_7_0_DTS;
             case 8:   return AAX_eStemFormat_7_1_DTS;
 
             default:  jassertfalse; break; // hmm - not a valid number of chans..
@@ -131,7 +131,7 @@ struct AAXClasses
             case AAX_eStemFormat_Quad:      return 4;
             case AAX_eStemFormat_5_0:       return 5;
             case AAX_eStemFormat_5_1:       return 6;
-            case AAX_eStemFormat_6_1:       return 7;
+            case AAX_eStemFormat_7_0_DTS:   return 7;
             case AAX_eStemFormat_7_1_DTS:   return 8;
             default:  jassertfalse; break; // hmm - not a valid number of chans..
         }
