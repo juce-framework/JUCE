@@ -100,7 +100,7 @@ public:
     ~Rectangle() noexcept {}
 
     //==============================================================================
-    /** Returns true if the rectangle's width and height are both zero or less */
+    /** Returns true if the rectangle's width or height are zero or less */
     bool isEmpty() const noexcept                                   { return w <= ValueType() || h <= ValueType(); }
 
     /** Returns the x coordinate of the rectangle's left-hand-side. */
