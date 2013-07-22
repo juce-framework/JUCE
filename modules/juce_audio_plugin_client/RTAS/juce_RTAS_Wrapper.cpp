@@ -100,7 +100,14 @@
 #ifdef _MSC_VER
  #pragma pack (pop)
 
- #if JUCE_RTAS_LINK_TO_DEBUG_LIB // (the debug lib in the 8.0 SDK fails to link, so we'll stick to the release one...)
+ // This JUCE_RTAS_LINK_TO_DEBUG_LIB setting can be used to force linkage
+ // against only the release build of the RTAS lib, since in older SDKs there
+ // can be problems with the debug build.
+ #if JUCE_DEBUG && ! defined (JUCE_RTAS_LINK_TO_DEBUG_LIB)
+  #define JUCE_RTAS_LINK_TO_DEBUG_LIB 1
+ #endif
+
+ #if JUCE_RTAS_LINK_TO_DEBUG_LIB
   #define PT_LIB_PATH  JucePlugin_WinBag_path "\\Debug\\lib\\"
  #else
   #define PT_LIB_PATH  JucePlugin_WinBag_path "\\Release\\lib\\"
