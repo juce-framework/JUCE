@@ -87,11 +87,18 @@ public:
 
     /** Returns the last value that was set by setDragAndDropDescription().
     */
-    const String& getDragAndDropDescription() const noexcept     { return dragAndDropDescription; }
+    const String& getDragAndDropDescription() const noexcept    { return dragAndDropDescription; }
+
+    /** Changes the height of the treeview items. */
+    void setItemHeight (int newHeight);
+
+    /** Returns the height of the treeview items. */
+    int getItemHeight() const noexcept                          { return itemHeight; }
 
 private:
     //==============================================================================
     String dragAndDropDescription;
+    int itemHeight;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FileTreeComponent)
 };

@@ -836,11 +836,8 @@ private:
     ScopedPointer<InsertPointHighlight> dragInsertPointHighlight;
     ScopedPointer<TargetGroupHighlight> dragTargetGroupHighlight;
     int indentSize;
-    bool defaultOpenness : 1;
-    bool needsRecalculating : 1;
-    bool rootItemVisible : 1;
-    bool multiSelectEnabled : 1;
-    bool openCloseButtonsVisible : 1;
+    bool defaultOpenness, needsRecalculating, rootItemVisible;
+    bool multiSelectEnabled, openCloseButtonsVisible;
 
     void itemsChanged() noexcept;
     void recalculateIfNeeded();

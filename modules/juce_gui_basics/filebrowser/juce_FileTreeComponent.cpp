@@ -22,7 +22,7 @@
   ==============================================================================
 */
 
-Image juce_createIconForFile (const File& file);
+Image juce_createIconForFile (const File&);
 
 //==============================================================================
 class FileListTreeItem   : public TreeViewItem,
@@ -68,7 +68,7 @@ public:
     //==============================================================================
     bool mightContainSubItems() override                 { return isDirectory; }
     String getUniqueName() const override                { return file.getFullPathName(); }
-    int getItemHeight() const override                   { return 22; }
+    int getItemHeight() const override                   { return owner.getItemHeight(); }
 
     var getDragSourceDescription() override              { return owner.getDragAndDropDescription(); }
 
@@ -252,7 +252,8 @@ private:
 
 //==============================================================================
 FileTreeComponent::FileTreeComponent (DirectoryContentsList& listToShow)
-    : DirectoryContentsDisplayComponent (listToShow)
+    : DirectoryContentsDisplayComponent (listToShow),
+      itemHeight (22)
 {
     setRootItemVisible (false);
     refresh();
@@ -304,4 +305,15 @@ void FileTreeComponent::setSelectedFile (const File& target)
     if (FileListTreeItem* t = dynamic_cast <FileListTreeItem*> (getRootItem()))
         if (! t->selectFile (target))
             clearSelectedItems();
+}
+
+void FileTreeComponent::setItemHeight (int newHeight)
+{
+    if (itemHeight != newHeight)
+    {
+        itemHeight = newHeight;
+
+        if (TreeViewItem* root = getRootItem())
+            root->treeHasChanged();
+    }
 }
