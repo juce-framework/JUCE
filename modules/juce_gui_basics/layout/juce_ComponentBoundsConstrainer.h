@@ -139,7 +139,7 @@ public:
 
 
     //==============================================================================
-    /** This callback changes the given co-ordinates to impose whatever the current
+    /** This callback changes the given coordinates to impose whatever the current
         constraints are set to be.
 
         @param bounds               the target position that should be examined and adjusted

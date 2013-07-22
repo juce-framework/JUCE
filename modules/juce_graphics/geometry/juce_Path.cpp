@@ -22,7 +22,7 @@
   ==============================================================================
 */
 
-// tests that some co-ords aren't NaNs
+// tests that some coordinates aren't NaNs
 #define JUCE_CHECK_COORDS_ARE_VALID(x, y) \
     jassert (x == x && y == y);
 

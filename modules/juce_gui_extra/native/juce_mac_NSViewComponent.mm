@@ -50,7 +50,7 @@ public:
 
         // The ComponentMovementWatcher version of this method avoids calling
         // us when the top-level comp is resized, but for an NSView we need to know this
-        // because with inverted co-ords, we need to update the position even if the
+        // because with inverted coordinates, we need to update the position even if the
         // top-left pos hasn't changed
         if (comp.isOnDesktop() && wasResized)
             componentMovedOrResized (wasMoved, wasResized);

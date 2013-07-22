@@ -29,11 +29,11 @@ class ComponentLayout;
 
 //==============================================================================
 /**
-    A rectangle whose co-ordinates can be defined in terms of absolute or
+    A rectangle whose coordinates can be defined in terms of absolute or
     proportional distances.
 
     Designed mainly for storing component positions, this gives you a lot of
-    control over how each co-ordinate is stored, either as an absolute position,
+    control over how each coordinate is stored, either as an absolute position,
     or as a proportion of the size of a parent rectangle.
 
     It also allows you to define the anchor points by which the rectangle is
@@ -68,7 +68,7 @@ class PositionedRectangle
 {
 public:
     //==============================================================================
-    /** Creates an empty rectangle with all co-ordinates set to zero.
+    /** Creates an empty rectangle with all coordinates set to zero.
 
         The default anchor point is top-left; the default
     */
@@ -122,20 +122,20 @@ public:
     /** Returns a string version of this position, from which it can later be
         re-generated.
 
-        The format is four co-ordinates, "x y w h".
+        The format is four coordinates, "x y w h".
 
-        - If a co-ordinate is absolute, it is stored as an integer, e.g. "100".
-        - If a co-ordinate is proportional to its parent's width or height, it is stored
+        - If a coordinate is absolute, it is stored as an integer, e.g. "100".
+        - If a coordinate is proportional to its parent's width or height, it is stored
           as a percentage, e.g. "80%".
-        - If the X or Y co-ordinate is relative to the parent's right or bottom edge, the
+        - If the X or Y coordinate is relative to the parent's right or bottom edge, the
           number has "R" appended to it, e.g. "100R" means a distance of 100 pixels from
           the parent's right-hand edge.
-        - If the X or Y co-ordinate is relative to the parent's centre, the number has "C"
+        - If the X or Y coordinate is relative to the parent's centre, the number has "C"
           appended to it, e.g. "-50C" would be 50 pixels left of the parent's centre.
-        - If the X or Y co-ordinate should be anchored at the component's right or bottom
+        - If the X or Y coordinate should be anchored at the component's right or bottom
           edge, then it has "r" appended to it. So "-50Rr" would mean that this component's
           right-hand edge should be 50 pixels left of the parent's right-hand edge.
-        - If the X or Y co-ordinate should be anchored at the component's centre, then it
+        - If the X or Y coordinate should be anchored at the component's centre, then it
           has "c" appended to it. So "-50Rc" would mean that this component's
           centre should be 50 pixels left of the parent's right-hand edge. "40%c" means that
           this component's centre should be placed 40% across the parent's width.
@@ -198,17 +198,17 @@ public:
     }
 
     //==============================================================================
-    /** Updates this object's co-ordinates to match the given rectangle.
+    /** Updates this object's coordinates to match the given rectangle.
 
-        This will set all co-ordinates based on the given rectangle, re-calculating
+        This will set all coordinates based on the given rectangle, re-calculating
         any proportional distances, and using the current anchor points.
 
-        So for example if the x co-ordinate mode is currently proportional, this will
+        So for example if the x coordinate mode is currently proportional, this will
         re-calculate x based on the rectangle's relative position within the target
         rectangle's width.
 
         If the target rectangle's width or height are zero then it may not be possible
-        to re-calculate some proportional co-ordinates. In this case, those co-ordinates
+        to re-calculate some proportional coordinates. In this case, those coordinates
         will not be changed.
     */
     void updateFrom (const Rectangle<int>& newPosition,
@@ -228,12 +228,12 @@ public:
         updatePosAndSize (y, h, newY, newH, yMode, hMode, target.getY(), target.getHeight());
     }
 
-    /** Updates this object's co-ordinates to match the bounds of this component.
+    /** Updates this object's coordinates to match the bounds of this component.
 
         This is equivalent to calling updateFrom() with the component's bounds and
         it parent size.
 
-        If the component doesn't currently have a parent, then proportional co-ordinates
+        If the component doesn't currently have a parent, then proportional coordinates
         might not be updated because it would need to know the parent's size to do the
         maths for this.
     */
@@ -249,18 +249,18 @@ public:
     /** Specifies the point within the rectangle, relative to which it should be positioned. */
     enum AnchorPoint
     {
-        anchorAtLeftOrTop              = 1 << 0,    /**< The x or y co-ordinate specifies where the left or top edge of the rectangle should be. */
-        anchorAtRightOrBottom          = 1 << 1,    /**< The x or y co-ordinate specifies where the right or bottom edge of the rectangle should be. */
-        anchorAtCentre                 = 1 << 2     /**< The x or y co-ordinate specifies where the centre of the rectangle should be. */
+        anchorAtLeftOrTop              = 1 << 0,    /**< The x or y coordinate specifies where the left or top edge of the rectangle should be. */
+        anchorAtRightOrBottom          = 1 << 1,    /**< The x or y coordinate specifies where the right or bottom edge of the rectangle should be. */
+        anchorAtCentre                 = 1 << 2     /**< The x or y coordinate specifies where the centre of the rectangle should be. */
     };
 
-    /** Specifies how an x or y co-ordinate should be interpreted. */
+    /** Specifies how an x or y coordinate should be interpreted. */
     enum PositionMode
     {
-        absoluteFromParentTopLeft       = 1 << 3,   /**< The x or y co-ordinate specifies an absolute distance from the parent's top or left edge. */
-        absoluteFromParentBottomRight   = 1 << 4,   /**< The x or y co-ordinate specifies an absolute distance from the parent's bottom or right edge. */
-        absoluteFromParentCentre        = 1 << 5,   /**< The x or y co-ordinate specifies an absolute distance from the parent's centre. */
-        proportionOfParentSize          = 1 << 6    /**< The x or y co-ordinate specifies a proportion of the parent's width or height, measured from the parent's top or left. */
+        absoluteFromParentTopLeft       = 1 << 3,   /**< The x or y coordinate specifies an absolute distance from the parent's top or left edge. */
+        absoluteFromParentBottomRight   = 1 << 4,   /**< The x or y coordinate specifies an absolute distance from the parent's bottom or right edge. */
+        absoluteFromParentCentre        = 1 << 5,   /**< The x or y coordinate specifies an absolute distance from the parent's centre. */
+        proportionOfParentSize          = 1 << 6    /**< The x or y coordinate specifies a proportion of the parent's width or height, measured from the parent's top or left. */
     };
 
     /** Specifies how the width or height should be interpreted. */
@@ -272,11 +272,11 @@ public:
     };
 
     //==============================================================================
-    /** Sets all options for all co-ordinates.
+    /** Sets all options for all coordinates.
 
         This requires a reference rectangle to be specified, because if you're changing any
         of the modes from proportional to absolute or vice-versa, then it'll need to convert
-        the co-ordinates, and will need to know the parent size so it can calculate this.
+        the coordinates, and will need to know the parent size so it can calculate this.
     */
     void setModes (const AnchorPoint xAnchor, const PositionMode xMode_,
                    const AnchorPoint yAnchor, const PositionMode yMode_,
@@ -306,7 +306,7 @@ public:
         }
     }
 
-    /** Returns the anchoring mode for the x co-ordinate.
+    /** Returns the anchoring mode for the x coordinate.
         To change any of the modes, use setModes().
     */
     AnchorPoint getAnchorPointX() const noexcept
@@ -314,7 +314,7 @@ public:
         return (AnchorPoint) (xMode & (anchorAtLeftOrTop | anchorAtRightOrBottom | anchorAtCentre));
     }
 
-    /** Returns the positioning mode for the x co-ordinate.
+    /** Returns the positioning mode for the x coordinate.
         To change any of the modes, use setModes().
     */
     PositionMode getPositionModeX() const noexcept
@@ -323,7 +323,7 @@ public:
                                          | absoluteFromParentCentre | proportionOfParentSize));
     }
 
-    /** Returns the raw x co-ordinate.
+    /** Returns the raw x coordinate.
 
         If the x position mode is absolute, then this will be the absolute value. If it's
         proportional, then this will be a fractional proportion, where 1.0 means the full
@@ -331,13 +331,12 @@ public:
     */
     double getX() const noexcept                    { return x; }
 
-    /** Sets the raw value of the x co-ordinate.
-
+    /** Sets the raw value of the x coordinate.
         See getX() for the meaning of this value.
     */
     void setX (const double newX) noexcept          { x = newX; }
 
-    /** Returns the anchoring mode for the y co-ordinate.
+    /** Returns the anchoring mode for the y coordinate.
         To change any of the modes, use setModes().
     */
     AnchorPoint getAnchorPointY() const noexcept
@@ -345,7 +344,7 @@ public:
         return (AnchorPoint) (yMode & (anchorAtLeftOrTop | anchorAtRightOrBottom | anchorAtCentre));
     }
 
-    /** Returns the positioning mode for the y co-ordinate.
+    /** Returns the positioning mode for the y coordinate.
         To change any of the modes, use setModes().
     */
     PositionMode getPositionModeY() const noexcept
@@ -354,7 +353,7 @@ public:
                                          | absoluteFromParentCentre | proportionOfParentSize));
     }
 
-    /** Returns the raw y co-ordinate.
+    /** Returns the raw y coordinate.
 
         If the y position mode is absolute, then this will be the absolute value. If it's
         proportional, then this will be a fractional proportion, where 1.0 means the full
@@ -362,8 +361,7 @@ public:
     */
     double getY() const noexcept                    { return y; }
 
-    /** Sets the raw value of the y co-ordinate.
-
+    /** Sets the raw value of the y coordinate.
         See getY() for the meaning of this value.
     */
     void setY (const double newY) noexcept          { y = newY; }

@@ -67,7 +67,7 @@ public:
     //==============================================================================
     /** Returns the mouse position.
 
-        The co-ordinates are relative to the top-left of the main monitor.
+        The coordinates are relative to the top-left of the main monitor.
 
         Note that this is just a shortcut for calling getMainMouseSource().getScreenPosition(), and
         you should only resort to grabbing the global mouse position if there's really no
@@ -76,7 +76,7 @@ public:
     static Point<int> getMousePosition();
 
     /** Makes the mouse pointer jump to a given location.
-        The co-ordinates are relative to the top-left of the main monitor.
+        The coordinates are relative to the top-left of the main monitor.
     */
     static void setMousePosition (Point<int> newPosition);
 
@@ -199,7 +199,7 @@ public:
         This will drill down into top-level windows to find the child component at
         the given position.
 
-        Returns nullptr if the co-ordinates are inside a non-Juce window.
+        Returns nullptr if the coordinates are inside a non-Juce window.
     */
     Component* findComponentAt (Point<int> screenPosition) const;
 

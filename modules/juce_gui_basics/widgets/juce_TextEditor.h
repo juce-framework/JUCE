@@ -420,7 +420,7 @@ public:
     String getHighlightedText() const;
 
     /** Finds the index of the character at a given position.
-        The co-ordinates are relative to the component's top-left.
+        The coordinates are relative to the component's top-left.
     */
     int getTextIndexAt (int x, int y);
 

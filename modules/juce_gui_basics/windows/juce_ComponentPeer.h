@@ -136,7 +136,7 @@ public:
     //==============================================================================
     /** Moves and resizes the window.
 
-        If the native window is contained in another window, then the co-ordinates are
+        If the native window is contained in another window, then the coordinates are
         relative to the parent window's origin, not the screen origin.
 
         This should result in a callback to handleMovedOrResized().
@@ -145,18 +145,18 @@ public:
 
     /** Returns the current position and size of the window.
 
-        If the native window is contained in another window, then the co-ordinates are
+        If the native window is contained in another window, then the coordinates are
         relative to the parent window's origin, not the screen origin.
     */
     virtual Rectangle<int> getBounds() const = 0;
 
-    /** Converts a position relative to the top-left of this component to screen co-ordinates. */
+    /** Converts a position relative to the top-left of this component to screen coordinates. */
     virtual Point<int> localToGlobal (const Point<int>& relativePosition) = 0;
 
-    /** Converts a rectangle relative to the top-left of this component to screen co-ordinates. */
+    /** Converts a rectangle relative to the top-left of this component to screen coordinates. */
     virtual Rectangle<int> localToGlobal (const Rectangle<int>& relativePosition);
 
-    /** Converts a screen co-ordinate to a position relative to the top-left of this component. */
+    /** Converts a screen coordinate to a position relative to the top-left of this component. */
     virtual Point<int> globalToLocal (const Point<int>& screenPosition) = 0;
 
     /** Converts a screen area to a position relative to the top-left of this component. */

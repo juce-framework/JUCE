@@ -59,7 +59,7 @@ public:
     /** Shows a message bubble at a particular position.
 
         This shows the bubble with its stem pointing to the given location
-        (co-ordinates being relative to its parent component).
+        (coordinates being relative to its parent component).
 
         For details about exactly how it decides where to position itself, see
         BubbleComponent::updatePosition().

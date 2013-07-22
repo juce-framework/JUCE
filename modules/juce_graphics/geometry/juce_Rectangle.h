@@ -41,7 +41,7 @@ class Rectangle
 public:
     //==============================================================================
     /** Creates a rectangle of zero size.
-        The default co-ordinates will be (0, 0, 0, 0).
+        The default coordinates will be (0, 0, 0, 0).
     */
     Rectangle() noexcept
       : w(), h()
@@ -103,10 +103,10 @@ public:
     /** Returns true if the rectangle's width and height are both zero or less */
     bool isEmpty() const noexcept                                   { return w <= ValueType() || h <= ValueType(); }
 
-    /** Returns the x co-ordinate of the rectangle's left-hand-side. */
+    /** Returns the x coordinate of the rectangle's left-hand-side. */
     inline ValueType getX() const noexcept                          { return pos.x; }
 
-    /** Returns the y co-ordinate of the rectangle's top edge. */
+    /** Returns the y coordinate of the rectangle's top edge. */
     inline ValueType getY() const noexcept                          { return pos.y; }
 
     /** Returns the width of the rectangle. */
@@ -115,16 +115,16 @@ public:
     /** Returns the height of the rectangle. */
     inline ValueType getHeight() const noexcept                     { return h; }
 
-    /** Returns the x co-ordinate of the rectangle's right-hand-side. */
+    /** Returns the x coordinate of the rectangle's right-hand-side. */
     inline ValueType getRight() const noexcept                      { return pos.x + w; }
 
-    /** Returns the y co-ordinate of the rectangle's bottom edge. */
+    /** Returns the y coordinate of the rectangle's bottom edge. */
     inline ValueType getBottom() const noexcept                     { return pos.y + h; }
 
-    /** Returns the x co-ordinate of the rectangle's centre. */
+    /** Returns the x coordinate of the rectangle's centre. */
     ValueType getCentreX() const noexcept                           { return pos.x + w / (ValueType) 2; }
 
-    /** Returns the y co-ordinate of the rectangle's centre. */
+    /** Returns the y coordinate of the rectangle's centre. */
     ValueType getCentreY() const noexcept                           { return pos.y + h / (ValueType) 2; }
 
     /** Returns the centre point of the rectangle. */
@@ -161,7 +161,7 @@ public:
     /** Changes the rectangle's size, leaving the position of its top-left corner unchanged. */
     void setSize (const ValueType newWidth, const ValueType newHeight) noexcept                     { w = newWidth; h = newHeight; }
 
-    /** Changes all the rectangle's co-ordinates. */
+    /** Changes all the rectangle's coordinates. */
     void setBounds (const ValueType newX, const ValueType newY,
                     const ValueType newWidth, const ValueType newHeight) noexcept                   { pos.x = newX; pos.y = newY; w = newWidth; h = newHeight; }
 
@@ -250,7 +250,7 @@ public:
     Rectangle withBottom (const ValueType newBottom) const noexcept   { return Rectangle (pos.x, jmin (pos.y, newBottom), w, jmax (ValueType(), newBottom - pos.y)); }
 
     //==============================================================================
-    /** Moves the rectangle's position by adding amount to its x and y co-ordinates. */
+    /** Moves the rectangle's position by adding amount to its x and y coordinates. */
     void translate (const ValueType deltaX,
                     const ValueType deltaY) noexcept
     {
@@ -465,13 +465,13 @@ public:
     /** Returns true if the two rectangles are not identical. */
     bool operator!= (const Rectangle& other) const noexcept     { return pos != other.pos || w != other.w || h != other.h; }
 
-    /** Returns true if this co-ordinate is inside the rectangle. */
+    /** Returns true if this coordinate is inside the rectangle. */
     bool contains (const ValueType xCoord, const ValueType yCoord) const noexcept
     {
         return xCoord >= pos.x && yCoord >= pos.y && xCoord < pos.x + w && yCoord < pos.y + h;
     }
 
-    /** Returns true if this co-ordinate is inside the rectangle. */
+    /** Returns true if this coordinate is inside the rectangle. */
     bool contains (const Point<ValueType> point) const noexcept
     {
         return point.x >= pos.x && point.y >= pos.y && point.x < pos.x + w && point.y < pos.y + h;
@@ -725,7 +725,7 @@ public:
     }
 
     //==============================================================================
-    /** Static utility to intersect two sets of rectangular co-ordinates.
+    /** Static utility to intersect two sets of rectangular coordinates.
         Returns false if the two regions didn't overlap.
         @see intersectRectangle
     */

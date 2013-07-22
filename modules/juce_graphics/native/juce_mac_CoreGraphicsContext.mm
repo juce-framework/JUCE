@@ -520,8 +520,8 @@ void CoreGraphicsContext::drawVerticalLine (const int x, float top, float bottom
        #if MAC_OS_X_VERSION_MIN_REQUIRED > MAC_OS_X_VERSION_10_5
         CGContextFillRect (context, CGRectMake (x, flipHeight - bottom, 1.0f, bottom - top));
        #else
-        // On Leopard, unless both co-ordinates are non-integer, it disables anti-aliasing, so nudge
-        // the x co-ord slightly to trick it..
+        // On Leopard, unless both coordinates are non-integer, it disables anti-aliasing, so nudge
+        // the x coordinate slightly to trick it..
         CGContextFillRect (context, CGRectMake (x + 1.0f / 256.0f, flipHeight - bottom, 1.0f + 1.0f / 256.0f, bottom - top));
        #endif
     }
@@ -538,8 +538,8 @@ void CoreGraphicsContext::drawHorizontalLine (const int y, float left, float rig
        #if MAC_OS_X_VERSION_MIN_REQUIRED > MAC_OS_X_VERSION_10_5
         CGContextFillRect (context, CGRectMake (left, flipHeight - (y + 1.0f), right - left, 1.0f));
        #else
-        // On Leopard, unless both co-ordinates are non-integer, it disables anti-aliasing, so nudge
-        // the x co-ord slightly to trick it..
+        // On Leopard, unless both coordinates are non-integer, it disables anti-aliasing, so nudge
+        // the x coordinate slightly to trick it..
         CGContextFillRect (context, CGRectMake (left, flipHeight - (y + (1.0f + 1.0f / 256.0f)), right - left, 1.0f + 1.0f / 256.0f));
        #endif
     }

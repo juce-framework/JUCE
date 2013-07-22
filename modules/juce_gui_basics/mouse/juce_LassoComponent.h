@@ -50,7 +50,7 @@ public:
         Your implementation of this method must find all the relevent items that lie
         within the given rectangle. and add them to the itemsFound array.
 
-        The co-ordinates are relative to the top-left of the lasso component's parent
+        The coordinates are relative to the top-left of the lasso component's parent
         component. (i.e. they are the same as the size and position of the lasso
         component itself).
     */

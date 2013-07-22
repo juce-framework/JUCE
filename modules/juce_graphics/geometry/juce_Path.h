@@ -190,7 +190,7 @@ public:
 
     /** Begins a new subpath with a given starting position.
 
-        This will move the path's current position to the co-ordinates passed in and
+        This will move the path's current position to the coordinates passed in and
         make it ready to draw lines or curves starting from this position.
 
         After adding whatever lines and curves are needed, you can either
@@ -203,7 +203,7 @@ public:
 
     /** Begins a new subpath with a given starting position.
 
-        This will move the path's current position to the co-ordinates passed in and
+        This will move the path's current position to the coordinates passed in and
         make it ready to draw lines or curves starting from this position.
 
         After adding whatever lines and curves are needed, you can either

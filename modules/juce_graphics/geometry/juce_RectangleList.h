@@ -208,10 +208,10 @@ public:
     */
     void consolidate();
 
-    /** Adds an x and y value to all the co-ordinates. */
+    /** Adds an x and y value to all the coordinates. */
     void offsetAll (int dx, int dy) noexcept;
 
-    /** Scales all the co-ordinates. */
+    /** Scales all the coordinates. */
     template <typename ScaleType>
     void scaleAll (ScaleType scaleFactor) noexcept
     {

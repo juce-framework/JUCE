@@ -267,7 +267,7 @@ public:
     /** Fills a rectangle with the current colour or brush.
 
         This uses sub-pixel positioning so is slower than the fillRect method which
-        takes integer co-ordinates.
+        takes integer coordinates.
     */
     void fillRect (float x, float y, float width, float height) const;
 
@@ -474,7 +474,7 @@ public:
     /** Draws an image.
 
         This will draw the whole of an image, positioning its top-left corner at the
-        given co-ordinates, and keeping its size the same. This is the simplest image
+        given coordinates, and keeping its size the same. This is the simplest image
         drawing method - the others give more control over the scaling and clipping
         of the images.
 

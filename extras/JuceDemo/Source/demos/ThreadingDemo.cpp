@@ -138,7 +138,7 @@ public:
     void run() override
     {
         // this is the code that runs this thread - we'll loop continuously,
-        // updating the co-ordinates of our blob.
+        // updating the coordinates of our blob.
 
         // threadShouldExit() returns true when the stopThread() method has been
         // called, so we should check it often, and exit as soon as it gets flagged.

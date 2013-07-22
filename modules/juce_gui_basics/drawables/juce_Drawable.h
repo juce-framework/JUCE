@@ -73,7 +73,7 @@ public:
 
     /** Renders the Drawable at a given offset within the Graphics context.
 
-        The co-ordinates passed-in are used to translate the object relative to its own
+        The coordinates passed-in are used to translate the object relative to its own
         origin before drawing it - this is basically a quick way of saying:
 
         @code

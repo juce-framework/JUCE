@@ -79,7 +79,7 @@ public:
     static const AffineTransform identity;
 
     //==============================================================================
-    /** Transforms a 2D co-ordinate using this matrix. */
+    /** Transforms a 2D coordinate using this matrix. */
     template <typename ValueType>
     void transformPoint (ValueType& x, ValueType& y) const noexcept
     {
@@ -88,7 +88,7 @@ public:
         y = static_cast <ValueType> (mat10 * oldX + mat11 * y + mat12);
     }
 
-    /** Transforms two 2D co-ordinates using this matrix.
+    /** Transforms two 2D coordinates using this matrix.
         This is just a shortcut for calling transformPoint() on each of these pairs of
         coordinates in turn. (And putting all the calculations into one function hopefully
         also gives the compiler a bit more scope for pipelining it).
@@ -104,7 +104,7 @@ public:
         y2 = static_cast <ValueType> (mat10 * oldX2 + mat11 * y2 + mat12);
     }
 
-    /** Transforms three 2D co-ordinates using this matrix.
+    /** Transforms three 2D coordinates using this matrix.
         This is just a shortcut for calling transformPoint() on each of these pairs of
         coordinates in turn. (And putting all the calculations into one function hopefully
         also gives the compiler a bit more scope for pipelining it).
@@ -146,7 +146,7 @@ public:
     /** Returns a transform which is the same as this one followed by a rotation about a given point.
 
         The rotation is specified by a number of radians to rotate clockwise, centred around
-        the co-ordinates passed in.
+        the coordinates passed in.
     */
     AffineTransform rotated (float angleInRadians,
                              float pivotX,
@@ -191,7 +191,7 @@ public:
     /** Returns a shear transform, centred around the origin (0, 0). */
     static AffineTransform shear (float shearX, float shearY) noexcept;
 
-    /** Returns a transform that will flip co-ordinates vertically within a window of the given height.
+    /** Returns a transform that will flip coordinates vertically within a window of the given height.
         This is handy for converting between upside-down coordinate systems such as OpenGL or CoreGraphics.
     */
     static AffineTransform verticalFlip (float height) noexcept;

@@ -105,7 +105,7 @@ public:
     Rectangle<int> getCharacterBounds (const CodeDocument::Position& pos) const;
 
     /** Finds the character at a given on-screen position.
-        The co-ordinates are relative to this component's top-left origin.
+        The coordinates are relative to this component's top-left origin.
     */
     CodeDocument::Position getPositionAt (int x, int y);
 

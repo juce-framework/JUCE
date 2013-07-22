@@ -181,7 +181,7 @@ public:
         the lines can be left- or right-justified, or centred horizontally in the space
         between x and (x + maxLineWidth).
 
-        The y co-ordinate is the position of the baseline of the first line of text - subsequent
+        The y coordinate is the position of the baseline of the first line of text - subsequent
         lines will be placed below it, separated by a distance of font.getHeight().
     */
     void addJustifiedText (const Font& font,
@@ -239,7 +239,7 @@ public:
     */
     void createPath (Path& path) const;
 
-    /** Looks for a glyph that contains the given co-ordinate.
+    /** Looks for a glyph that contains the given coordinate.
 
         @returns the index of the glyph, or -1 if none were found.
     */

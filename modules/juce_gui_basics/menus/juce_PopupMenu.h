@@ -287,7 +287,7 @@ public:
     /** Displays the menu at a specific location.
 
         This is the same as show(), but uses a specific location (in global screen
-        co-ordinates) rather than the current mouse position.
+        coordinates) rather than the current mouse position.
 
         The screenAreaToAttachTo parameter indicates a screen area to which the menu
         will be adjacent. Depending on where this is, the menu will decide which edge to
