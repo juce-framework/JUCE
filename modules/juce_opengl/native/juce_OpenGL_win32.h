@@ -30,7 +30,8 @@ class OpenGLContext::NativeContext
 public:
     NativeContext (Component& component,
                    const OpenGLPixelFormat& pixelFormat,
-                   void* contextToShareWith)
+                   void* contextToShareWith,
+                   bool /*useMultisampling*/)
     {
         createNativeWindow (component);
 

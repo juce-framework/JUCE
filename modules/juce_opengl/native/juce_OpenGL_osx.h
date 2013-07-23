@@ -27,7 +27,8 @@ class OpenGLContext::NativeContext
 public:
     NativeContext (Component& component,
                    const OpenGLPixelFormat& pixFormat,
-                   void* contextToShare)
+                   void* contextToShare,
+                   bool /*useMultisampling*/)
         : lastSwapTime (0), minSwapTimeMs (0), underrunCounter (0)
     {
         NSOpenGLPixelFormatAttribute attribs[] =

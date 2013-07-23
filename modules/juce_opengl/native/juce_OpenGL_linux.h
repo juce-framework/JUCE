@@ -31,7 +31,8 @@ class OpenGLContext::NativeContext
 public:
     NativeContext (Component& component,
                    const OpenGLPixelFormat& pixelFormat,
-                   void* shareContext)
+                   void* shareContext,
+                   bool /*useMultisampling*/)
         : renderContext (0), embeddedWindow (0), swapFrames (0), bestVisual (0),
           contextToShareWith (shareContext)
     {

@@ -39,7 +39,7 @@ public:
           hasInitialised (false),
           needsUpdate (1)
     {
-        nativeContext = new NativeContext (component, pixFormat, contextToShare);
+        nativeContext = new NativeContext (component, pixFormat, contextToShare, c.useMultisampling);
 
         if (nativeContext->createdOk())
             context.nativeContext = nativeContext;
@@ -521,7 +521,7 @@ private:
 //==============================================================================
 OpenGLContext::OpenGLContext()
     : nativeContext (nullptr), renderer (nullptr), contextToShareWith (nullptr),
-      renderComponents (true)
+      renderComponents (true), useMultisampling (false)
 {
 }
 
@@ -564,6 +564,15 @@ void OpenGLContext::setNativeSharedContext (void* nativeContextToShareWith) noex
     jassert (nativeContext == nullptr);
 
     contextToShareWith = nativeContextToShareWith;
+}
+
+void OpenGLContext::setMultisamplingEnabled (bool b) noexcept
+{
+    // This method must not be called when the context has already been attached!
+    // Call it before attaching your context, or use detach() first, before calling this!
+    jassert (nativeContext == nullptr);
+
+    useMultisampling = b;
 }
 
 void OpenGLContext::attachTo (Component& component)

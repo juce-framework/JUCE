@@ -92,6 +92,11 @@ public:
     */
     void setNativeSharedContext (void* nativeContextToShareWith) noexcept;
 
+    /** Enables multisampling on platforms where this is implemented.
+        If enabling this, you must call this method before attachTo().
+    */
+    void setMultisamplingEnabled (bool) noexcept;
+
     //==============================================================================
     /** Attaches the context to a target component.
 
@@ -242,7 +247,7 @@ private:
     ScopedPointer<Attachment> attachment;
     OpenGLPixelFormat pixelFormat;
     void* contextToShareWith;
-    bool renderComponents;
+    bool renderComponents, useMultisampling;
 
     CachedImage* getCachedImage() const noexcept;
 
