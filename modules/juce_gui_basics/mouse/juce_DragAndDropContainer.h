@@ -97,12 +97,12 @@ public:
 
     /** Returns the description of the thing that's currently being dragged.
 
-        If nothing's being dragged, this will return an empty string, otherwise it's the
-        string that was passed into startDragging().
+        If nothing's being dragged, this will return a null var, otherwise it'll return
+        the var that was passed into startDragging().
 
         @see startDragging
     */
-    String getCurrentDragDescription() const;
+    var getCurrentDragDescription() const;
 
     /** Utility to find the DragAndDropContainer for a given Component.
 
@@ -172,7 +172,7 @@ private:
     class DragImageComponent;
     friend class DragImageComponent;
     ScopedPointer <Component> dragImageComponent;
-    String currentDragDesc;
+    var currentDragDesc;
 
     JUCE_DEPRECATED (virtual bool shouldDropFilesWhenDraggedExternally (const String&, Component*, StringArray&, bool&)) { return false; }
 
