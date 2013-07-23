@@ -224,6 +224,15 @@ public:
         setEmbeddedWindowToOurSize();
     }
 
+    // (overridden to intercept movements of the top-level window)
+    void componentMovedOrResized (Component& component, bool wasMoved, bool wasResized) override
+    {
+        ComponentMovementWatcher::componentMovedOrResized (component, wasMoved, wasResized);
+
+        if (&component == getTopLevelComponent())
+            setEmbeddedWindowToOurSize();
+    }
+
     void componentPeerChanged() override
     {
         deleteWindow();

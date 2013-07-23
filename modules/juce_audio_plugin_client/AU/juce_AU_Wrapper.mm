@@ -924,7 +924,7 @@ public:
         return noErr;
     }
 
-    void componentMovedOrResized (Component& component, bool /*wasMoved*/, bool /*wasResized*/)
+    void componentMovedOrResized (Component& component, bool /*wasMoved*/, bool /*wasResized*/) override
     {
         NSView* view = (NSView*) component.getWindowHandle();
         NSRect r = [[view superview] frame];
