@@ -229,7 +229,7 @@ struct Component::ComponentHelpers
         if (comp.affineTransform == nullptr)
             return areaInLocalSpace + comp.getPosition();
 
-        return (areaInLocalSpace + comp.getPosition()).toFloat().transformed (*comp.affineTransform).getSmallestIntegerContainer();
+        return (areaInLocalSpace + comp.getPosition()).transformed (*comp.affineTransform);
     }
 
     template <typename Type>
@@ -583,7 +583,7 @@ void Component::addToDesktop (int styleWanted, void* nativeWindowToAttachTo)
             Desktop::getInstance().addDesktopComponent (this);
 
             bounds.setPosition (topLeft);
-            peer->setBounds (bounds, false);
+            peer->updateBounds();
 
             if (oldRenderingEngine >= 0)
                 peer->setCurrentRenderingEngine (oldRenderingEngine);
@@ -1049,7 +1049,7 @@ void Component::setBounds (const int x, const int y, int w, int h)
 
         if (flags.hasHeavyweightPeerFlag)
             if (ComponentPeer* const peer = getPeer())
-                peer->setBounds (getBounds(), false);
+                peer->updateBounds();
 
         sendMovedResizedMessages (wasMoved, wasResized);
     }
@@ -1792,7 +1792,8 @@ void Component::internalRepaintUnchecked (const Rectangle<int>& area, const bool
             CHECK_MESSAGE_MANAGER_IS_LOCKED
 
             if (ComponentPeer* const peer = getPeer())
-                peer->repaint (area);
+                peer->repaint (affineTransform != nullptr ? area.transformed (*affineTransform)
+                                                          : area);
         }
         else
         {
@@ -2101,7 +2102,7 @@ Rectangle<int> Component::getLocalBounds() const noexcept
 Rectangle<int> Component::getBoundsInParent() const noexcept
 {
     return affineTransform == nullptr ? bounds
-                                      : bounds.toFloat().transformed (*affineTransform).getSmallestIntegerContainer();
+                                      : bounds.transformed (*affineTransform);
 }
 
 void Component::getVisibleArea (RectangleList& result, const bool includeSiblings) const

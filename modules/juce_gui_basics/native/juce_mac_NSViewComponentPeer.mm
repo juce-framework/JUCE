@@ -173,9 +173,9 @@ public:
     }
 
     //==============================================================================
-    void* getNativeHandle() const    { return view; }
+    void* getNativeHandle() const override    { return view; }
 
-    void setVisible (bool shouldBeVisible)
+    void setVisible (bool shouldBeVisible) override
     {
         if (isSharedWindow)
         {
@@ -195,7 +195,7 @@ public:
         }
     }
 
-    void setTitle (const String& title)
+    void setTitle (const String& title) override
     {
         JUCE_AUTORELEASEPOOL
         {
@@ -204,7 +204,7 @@ public:
         }
     }
 
-    bool setDocumentEditedStatus (bool edited)
+    bool setDocumentEditedStatus (bool edited) override
     {
         if (! hasNativeTitleBar())
             return false;
@@ -213,7 +213,7 @@ public:
         return true;
     }
 
-    void setRepresentedFile (const File& file)
+    void setRepresentedFile (const File& file) override
     {
         if (! isSharedWindow)
             [window setRepresentedFilename: juceStringToNS (file != File::nonexistent
@@ -221,7 +221,7 @@ public:
                                                                 : String::empty)];
     }
 
-    void setBounds (const Rectangle<int>& newBounds, bool isNowFullScreen)
+    void setBounds (const Rectangle<int>& newBounds, bool isNowFullScreen) override
     {
         fullScreen = isNowFullScreen;
 
@@ -274,22 +274,22 @@ public:
         return Rectangle<int> (convertToRectInt (r));
     }
 
-    Rectangle<int> getBounds() const
+    Rectangle<int> getBounds() const override
     {
         return getBounds (! isSharedWindow);
     }
 
-    Point<int> localToGlobal (const Point<int>& relativePosition)
+    Point<int> localToGlobal (const Point<int>& relativePosition) override
     {
         return relativePosition + getBounds (true).getPosition();
     }
 
-    Point<int> globalToLocal (const Point<int>& screenPosition)
+    Point<int> globalToLocal (const Point<int>& screenPosition) override
     {
         return screenPosition - getBounds (true).getPosition();
     }
 
-    void setAlpha (float newAlpha)
+    void setAlpha (float newAlpha) override
     {
         if (! isSharedWindow)
         {
@@ -314,7 +314,7 @@ public:
         }
     }
 
-    void setMinimised (bool shouldBeMinimised)
+    void setMinimised (bool shouldBeMinimised) override
     {
         if (! isSharedWindow)
         {
@@ -325,12 +325,12 @@ public:
         }
     }
 
-    bool isMinimised() const
+    bool isMinimised() const override
     {
         return [window isMiniaturized];
     }
 
-    void setFullScreen (bool shouldBeFullScreen)
+    void setFullScreen (bool shouldBeFullScreen) override
     {
         if (! isSharedWindow)
         {
@@ -359,12 +359,12 @@ public:
         }
     }
 
-    bool isFullScreen() const
+    bool isFullScreen() const override
     {
         return fullScreen;
     }
 
-    bool contains (const Point<int>& position, bool trueIfInAChildWindow) const
+    bool contains (const Point<int>& position, bool trueIfInAChildWindow) const override
     {
         if (! (isPositiveAndBelow (position.getX(), component.getWidth())
                 && isPositiveAndBelow (position.getY(), component.getHeight())))
@@ -379,7 +379,7 @@ public:
                                     : (v == view);
     }
 
-    BorderSize<int> getFrameSize() const
+    BorderSize<int> getFrameSize() const override
     {
         BorderSize<int> b;
 
@@ -412,7 +412,7 @@ public:
         return (getStyleFlags() & windowHasTitleBar) != 0;
     }
 
-    bool setAlwaysOnTop (bool alwaysOnTop)
+    bool setAlwaysOnTop (bool alwaysOnTop) override
     {
         if (! isSharedWindow)
             [window setLevel: alwaysOnTop ? NSFloatingWindowLevel
@@ -420,7 +420,7 @@ public:
         return true;
     }
 
-    void toFront (bool makeActiveWindow)
+    void toFront (bool makeActiveWindow) override
     {
         if (isSharedWindow)
             [[view superview] addSubview: view
@@ -446,7 +446,7 @@ public:
         }
     }
 
-    void toBehind (ComponentPeer* other)
+    void toBehind (ComponentPeer* other) override
     {
         NSViewComponentPeer* const otherPeer = dynamic_cast <NSViewComponentPeer*> (other);
         jassert (otherPeer != nullptr); // wrong type of window?
@@ -467,12 +467,12 @@ public:
         }
     }
 
-    void setIcon (const Image&)
+    void setIcon (const Image&) override
     {
         // to do..
     }
 
-    StringArray getAvailableRenderingEngines()
+    StringArray getAvailableRenderingEngines() override
     {
         StringArray s (ComponentPeer::getAvailableRenderingEngines());
 
@@ -483,12 +483,12 @@ public:
         return s;
     }
 
-    int getCurrentRenderingEngine() const
+    int getCurrentRenderingEngine() const override
     {
         return usingCoreGraphics ? 1 : 0;
     }
 
-    void setCurrentRenderingEngine (int index)
+    void setCurrentRenderingEngine (int index) override
     {
        #if USE_COREGRAPHICS_RENDERING
         if (usingCoreGraphics != (index > 0))
@@ -733,11 +733,6 @@ public:
         return false;
     }
    #endif
-
-    bool isOpaque()
-    {
-        return component.isOpaque();
-    }
 
     void drawRect (NSRect r)
     {
@@ -1119,13 +1114,13 @@ public:
         }
     }
 
-    bool isFocused() const
+    bool isFocused() const override
     {
         return isSharedWindow ? this == currentlyFocusedPeer
                               : [window isKeyWindow];
     }
 
-    void grabFocus()
+    void grabFocus() override
     {
         if (window != nil)
         {
@@ -1136,10 +1131,10 @@ public:
         }
     }
 
-    void textInputRequired (const Point<int>&) {}
+    void textInputRequired (const Point<int>&) override {}
 
     //==============================================================================
-    void repaint (const Rectangle<int>& area)
+    void repaint (const Rectangle<int>& area) override
     {
         if (insideDrawRect)
         {
@@ -1170,7 +1165,7 @@ public:
         }
     }
 
-    void performAnyPendingRepaintsNow()
+    void performAnyPendingRepaintsNow() override
     {
         [view displayIfNeeded];
     }
@@ -1433,7 +1428,7 @@ private:
     static BOOL isOpaque (id self, SEL)
     {
         NSViewComponentPeer* const owner = getOwner (self);
-        return owner == nullptr || owner->isOpaque();
+        return owner == nullptr || owner->getComponent().isOpaque();
     }
 
     //==============================================================================

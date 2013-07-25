@@ -144,12 +144,12 @@ public:
         view.clear();
     }
 
-    void* getNativeHandle() const
+    void* getNativeHandle() const override
     {
         return (void*) view.get();
     }
 
-    void setVisible (bool shouldBeVisible)
+    void setVisible (bool shouldBeVisible) override
     {
         if (MessageManager::getInstance()->isThisTheMessageThread())
         {
@@ -177,12 +177,12 @@ public:
         }
     }
 
-    void setTitle (const String& title)
+    void setTitle (const String& title) override
     {
         view.callVoidMethod (ComponentPeerView.setViewName, javaString (title).get());
     }
 
-    void setBounds (const Rectangle<int>& r, bool isNowFullScreen)
+    void setBounds (const Rectangle<int>& r, bool isNowFullScreen) override
     {
         if (MessageManager::getInstance()->isThisTheMessageThread())
         {
@@ -212,7 +212,7 @@ public:
         }
     }
 
-    Rectangle<int> getBounds() const
+    Rectangle<int> getBounds() const override
     {
         return Rectangle<int> (view.callIntMethod (ComponentPeerView.getLeft),
                                view.callIntMethod (ComponentPeerView.getTop),
@@ -234,27 +234,27 @@ public:
                            view.callIntMethod (ComponentPeerView.getTop));
     }
 
-    Point<int> localToGlobal (const Point<int>& relativePosition)
+    Point<int> localToGlobal (const Point<int>& relativePosition) override
     {
         return relativePosition + getScreenPosition();
     }
 
-    Point<int> globalToLocal (const Point<int>& screenPosition)
+    Point<int> globalToLocal (const Point<int>& screenPosition) override
     {
         return screenPosition - getScreenPosition();
     }
 
-    void setMinimised (bool shouldBeMinimised)
+    void setMinimised (bool shouldBeMinimised) override
     {
         // n/a
     }
 
-    bool isMinimised() const
+    bool isMinimised() const override
     {
         return false;
     }
 
-    void setFullScreen (bool shouldBeFullScreen)
+    void setFullScreen (bool shouldBeFullScreen) override
     {
         Rectangle<int> r (shouldBeFullScreen ? Desktop::getInstance().getDisplays().getMainDisplay().userArea
                                              : lastNonFullscreenBounds);
@@ -269,17 +269,17 @@ public:
         component.repaint();
     }
 
-    bool isFullScreen() const
+    bool isFullScreen() const override
     {
         return fullScreen;
     }
 
-    void setIcon (const Image& newIcon)
+    void setIcon (const Image& newIcon) override
     {
         // n/a
     }
 
-    bool contains (const Point<int>& position, bool trueIfInAChildWindow) const
+    bool contains (const Point<int>& position, bool trueIfInAChildWindow) const override
     {
         return isPositiveAndBelow (position.x, component.getWidth())
             && isPositiveAndBelow (position.y, component.getHeight())
@@ -287,19 +287,19 @@ public:
                                                                     position.x, position.y));
     }
 
-    BorderSize<int> getFrameSize() const
+    BorderSize<int> getFrameSize() const override
     {
         // TODO
         return BorderSize<int>();
     }
 
-    bool setAlwaysOnTop (bool alwaysOnTop)
+    bool setAlwaysOnTop (bool alwaysOnTop) override
     {
         // TODO
         return false;
     }
 
-    void toFront (bool makeActive)
+    void toFront (bool makeActive) override
     {
         view.callVoidMethod (ComponentPeerView.bringToFront);
 
@@ -309,7 +309,7 @@ public:
         handleBroughtToFront();
     }
 
-    void toBehind (ComponentPeer* other)
+    void toBehind (ComponentPeer* other) override
     {
         // TODO
     }
@@ -347,12 +347,12 @@ public:
     }
 
     //==============================================================================
-    bool isFocused() const
+    bool isFocused() const override
     {
         return view.callBooleanMethod (ComponentPeerView.hasFocus);
     }
 
-    void grabFocus()
+    void grabFocus() override
     {
         view.callBooleanMethod (ComponentPeerView.requestFocus);
     }
@@ -365,12 +365,12 @@ public:
             handleFocusLoss();
     }
 
-    void textInputRequired (const Point<int>&)
+    void textInputRequired (const Point<int>&) override
     {
         view.callVoidMethod (ComponentPeerView.showKeyboard, true);
     }
 
-    void dismissPendingTextInput()
+    void dismissPendingTextInput() override
     {
         view.callVoidMethod (ComponentPeerView.showKeyboard, false);
      }
@@ -416,7 +416,7 @@ public:
         }
     }
 
-    void repaint (const Rectangle<int>& area)
+    void repaint (const Rectangle<int>& area) override
     {
         if (MessageManager::getInstance()->isThisTheMessageThread())
         {
@@ -444,12 +444,12 @@ public:
         }
     }
 
-    void performAnyPendingRepaintsNow()
+    void performAnyPendingRepaintsNow() override
     {
         // TODO
     }
 
-    void setAlpha (float newAlpha)
+    void setAlpha (float newAlpha) override
     {
         // TODO
     }
@@ -503,8 +503,8 @@ private:
             }
         }
 
-        ImageType* createType() const                       { return new SoftwareImageType(); }
-        LowLevelGraphicsContext* createLowLevelContext()    { return new LowLevelGraphicsSoftwareRenderer (Image (this)); }
+        ImageType* createType() const override                      { return new SoftwareImageType(); }
+        LowLevelGraphicsContext* createLowLevelContext() override   { return new LowLevelGraphicsSoftwareRenderer (Image (this)); }
 
         void initialiseBitmapData (Image::BitmapData& bm, int x, int y, Image::BitmapData::ReadWriteMode mode)
         {

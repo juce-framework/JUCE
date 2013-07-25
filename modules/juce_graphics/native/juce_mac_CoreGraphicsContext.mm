@@ -50,12 +50,12 @@ public:
         CGContextRelease (context);
     }
 
-    LowLevelGraphicsContext* createLowLevelContext()
+    LowLevelGraphicsContext* createLowLevelContext() override
     {
         return new CoreGraphicsContext (context, height, 1.0f);
     }
 
-    void initialiseBitmapData (Image::BitmapData& bitmap, int x, int y, Image::BitmapData::ReadWriteMode)
+    void initialiseBitmapData (Image::BitmapData& bitmap, int x, int y, Image::BitmapData::ReadWriteMode) override
     {
         bitmap.data = imageData + x * pixelStride + y * lineStride;
         bitmap.pixelFormat = pixelFormat;
@@ -63,14 +63,14 @@ public:
         bitmap.pixelStride = pixelStride;
     }
 
-    ImagePixelData* clone()
+    ImagePixelData* clone() override
     {
         CoreGraphicsImage* im = new CoreGraphicsImage (pixelFormat, width, height, false);
         memcpy (im->imageData, imageData, lineStride * height);
         return im;
     }
 
-    ImageType* createType() const    { return new NativeImageType(); }
+    ImageType* createType() const override    { return new NativeImageType(); }
 
     //==============================================================================
     static CGImageRef createImage (const Image& juceImage, CGColorSpaceRef colourSpace,

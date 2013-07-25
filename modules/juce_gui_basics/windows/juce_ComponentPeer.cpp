@@ -31,7 +31,6 @@ ComponentPeer::ComponentPeer (Component& comp, const int flags)
       constrainer (nullptr),
       lastDragAndDropCompUnderMouse (nullptr),
       uniqueID (lastUniqueID += 2), // increment by 2 so that this can never hit 0
-      fakeMouseMessageSent (false),
       isWindowMinimised (false)
 {
     Desktop::getInstance().addPeer (this);
@@ -73,26 +72,39 @@ bool ComponentPeer::isValidPeer (const ComponentPeer* const peer) noexcept
     return Desktop::getInstance().peers.contains (const_cast <ComponentPeer*> (peer));
 }
 
+void ComponentPeer::updateBounds()
+{
+    setBounds (component.getBoundsInParent(), false);
+}
+
 //==============================================================================
+static Point<int> peerPositionToComp (ComponentPeer& peer, Point<int> pos)
+{
+    if (peer.getComponent().isTransformed())
+        return pos.transformedBy (peer.getComponent().getTransform().inverted());
+
+    return pos;
+}
+
 void ComponentPeer::handleMouseEvent (const int touchIndex, const Point<int> positionWithinPeer,
                                       const ModifierKeys newMods, const int64 time)
 {
     if (MouseInputSource* mouse = Desktop::getInstance().getOrCreateMouseInputSource (touchIndex))
-        mouse->handleEvent (*this, positionWithinPeer, time, newMods);
+        mouse->handleEvent (*this, peerPositionToComp (*this, positionWithinPeer), time, newMods);
 }
 
 void ComponentPeer::handleMouseWheel (const int touchIndex, const Point<int> positionWithinPeer,
                                       const int64 time, const MouseWheelDetails& wheel)
 {
     if (MouseInputSource* mouse = Desktop::getInstance().getOrCreateMouseInputSource (touchIndex))
-        mouse->handleWheel (*this, positionWithinPeer, time, wheel);
+        mouse->handleWheel (*this, peerPositionToComp (*this, positionWithinPeer), time, wheel);
 }
 
 void ComponentPeer::handleMagnifyGesture (const int touchIndex, const Point<int> positionWithinPeer,
                                           const int64 time, const float scaleFactor)
 {
     if (MouseInputSource* mouse = Desktop::getInstance().getOrCreateMouseInputSource (touchIndex))
-        mouse->handleMagnifyGesture (*this, positionWithinPeer, time, scaleFactor);
+        mouse->handleMagnifyGesture (*this, peerPositionToComp (*this, positionWithinPeer), time, scaleFactor);
 }
 
 //==============================================================================
@@ -101,6 +113,7 @@ void ComponentPeer::handlePaint (LowLevelGraphicsContext& contextToPaintTo)
     ModifierKeys::updateCurrentModifiers();
 
     Graphics g (&contextToPaintTo);
+    g.addTransform (component.getTransform());
 
    #if JUCE_ENABLE_REPAINT_DEBUGGING
     g.saveState();
@@ -279,7 +292,7 @@ void ComponentPeer::handleMovedOrResized()
     {
         const WeakReference<Component> deletionChecker (&component);
 
-        const Rectangle<int> newBounds (getBounds());
+        const Rectangle<int> newBounds (getBounds().transformed (component.getTransform().inverted()));
         const bool wasMoved   = (component.getPosition() != newBounds.getPosition());
         const bool wasResized = (component.getWidth() != newBounds.getWidth() || component.getHeight() != newBounds.getHeight());
 

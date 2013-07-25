@@ -143,6 +143,9 @@ public:
     */
     virtual void setBounds (const Rectangle<int>& newBounds, bool isNowFullScreen) = 0;
 
+    /** Updates the peer's bounds to match its component. */
+    void updateBounds();
+
     /** Returns the current position and size of the window.
 
         If the native window is contained in another window, then the coordinates are
@@ -370,7 +373,7 @@ private:
     WeakReference<Component> lastFocusedComponent, dragAndDropTargetComponent;
     Component* lastDragAndDropCompUnderMouse;
     const uint32 uniqueID;
-    bool fakeMouseMessageSent, isWindowMinimised;
+    bool isWindowMinimised;
     Component* getTargetForKeyPress();
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ComponentPeer)

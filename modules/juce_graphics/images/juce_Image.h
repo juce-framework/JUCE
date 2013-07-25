@@ -499,8 +499,8 @@ public:
     SoftwareImageType();
     ~SoftwareImageType();
 
-    ImagePixelData::Ptr create (Image::PixelFormat, int width, int height, bool clearImage) const;
-    int getTypeID() const;
+    ImagePixelData::Ptr create (Image::PixelFormat, int width, int height, bool clearImage) const override;
+    int getTypeID() const override;
 };
 
 //==============================================================================
@@ -515,8 +515,8 @@ public:
     NativeImageType();
     ~NativeImageType();
 
-    ImagePixelData::Ptr create (Image::PixelFormat, int width, int height, bool clearImage) const;
-    int getTypeID() const;
+    ImagePixelData::Ptr create (Image::PixelFormat, int width, int height, bool clearImage) const override;
+    int getTypeID() const override;
 };
 
 
