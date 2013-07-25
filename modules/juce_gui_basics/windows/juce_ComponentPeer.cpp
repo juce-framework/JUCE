@@ -78,33 +78,25 @@ void ComponentPeer::updateBounds()
 }
 
 //==============================================================================
-static Point<int> peerPositionToComp (ComponentPeer& peer, Point<int> pos)
-{
-    if (peer.getComponent().isTransformed())
-        return pos.transformedBy (peer.getComponent().getTransform().inverted());
-
-    return pos;
-}
-
 void ComponentPeer::handleMouseEvent (const int touchIndex, const Point<int> positionWithinPeer,
                                       const ModifierKeys newMods, const int64 time)
 {
     if (MouseInputSource* mouse = Desktop::getInstance().getOrCreateMouseInputSource (touchIndex))
-        mouse->handleEvent (*this, peerPositionToComp (*this, positionWithinPeer), time, newMods);
+        mouse->handleEvent (*this, positionWithinPeer, time, newMods);
 }
 
 void ComponentPeer::handleMouseWheel (const int touchIndex, const Point<int> positionWithinPeer,
                                       const int64 time, const MouseWheelDetails& wheel)
 {
     if (MouseInputSource* mouse = Desktop::getInstance().getOrCreateMouseInputSource (touchIndex))
-        mouse->handleWheel (*this, peerPositionToComp (*this, positionWithinPeer), time, wheel);
+        mouse->handleWheel (*this, positionWithinPeer, time, wheel);
 }
 
 void ComponentPeer::handleMagnifyGesture (const int touchIndex, const Point<int> positionWithinPeer,
                                           const int64 time, const float scaleFactor)
 {
     if (MouseInputSource* mouse = Desktop::getInstance().getOrCreateMouseInputSource (touchIndex))
-        mouse->handleMagnifyGesture (*this, peerPositionToComp (*this, positionWithinPeer), time, scaleFactor);
+        mouse->handleMagnifyGesture (*this, positionWithinPeer, time, scaleFactor);
 }
 
 //==============================================================================
@@ -292,7 +284,7 @@ void ComponentPeer::handleMovedOrResized()
     {
         const WeakReference<Component> deletionChecker (&component);
 
-        const Rectangle<int> newBounds (getBounds().transformed (component.getTransform().inverted()));
+        const Rectangle<int> newBounds (getBounds().transformedBy (component.getTransform().inverted()));
         const bool wasMoved   = (component.getPosition() != newBounds.getPosition());
         const bool wasResized = (component.getWidth() != newBounds.getWidth() || component.getHeight() != newBounds.getHeight());
 

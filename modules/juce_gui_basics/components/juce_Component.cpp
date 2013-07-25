@@ -213,7 +213,7 @@ struct Component::ComponentHelpers
         if (comp.affineTransform == nullptr)
             return areaInParentSpace - comp.getPosition();
 
-        return areaInParentSpace.toFloat().transformed (comp.affineTransform->inverted()).getSmallestIntegerContainer() - comp.getPosition();
+        return areaInParentSpace.toFloat().transformedBy (comp.affineTransform->inverted()).getSmallestIntegerContainer() - comp.getPosition();
     }
 
     static Point<int> convertToParentSpace (const Component& comp, Point<int> pointInLocalSpace)
@@ -229,7 +229,7 @@ struct Component::ComponentHelpers
         if (comp.affineTransform == nullptr)
             return areaInLocalSpace + comp.getPosition();
 
-        return (areaInLocalSpace + comp.getPosition()).transformed (*comp.affineTransform);
+        return (areaInLocalSpace + comp.getPosition()).transformedBy (*comp.affineTransform);
     }
 
     template <typename Type>
@@ -257,6 +257,9 @@ struct Component::ComponentHelpers
 
             if (source->isOnDesktop())
             {
+                if (source->isTransformed())
+                    p = p.transformedBy (source->getTransform());
+
                 p = source->getPeer()->localToGlobal (p);
                 source = nullptr;
             }
@@ -274,9 +277,16 @@ struct Component::ComponentHelpers
         const Component* const topLevelComp = target->getTopLevelComponent();
 
         if (topLevelComp->isOnDesktop())
+        {
             p = topLevelComp->getPeer()->globalToLocal (p);
+
+            if (topLevelComp->isTransformed())
+                p = p.transformedBy (topLevelComp->getTransform().inverted());
+        }
         else
+        {
             p = convertFromParentSpace (*topLevelComp, p);
+        }
 
         if (topLevelComp == target)
             return p;
@@ -1792,7 +1802,7 @@ void Component::internalRepaintUnchecked (const Rectangle<int>& area, const bool
             CHECK_MESSAGE_MANAGER_IS_LOCKED
 
             if (ComponentPeer* const peer = getPeer())
-                peer->repaint (affineTransform != nullptr ? area.transformed (*affineTransform)
+                peer->repaint (affineTransform != nullptr ? area.transformedBy (*affineTransform)
                                                           : area);
         }
         else
@@ -2102,7 +2112,7 @@ Rectangle<int> Component::getLocalBounds() const noexcept
 Rectangle<int> Component::getBoundsInParent() const noexcept
 {
     return affineTransform == nullptr ? bounds
-                                      : bounds.transformed (*affineTransform);
+                                      : bounds.transformedBy (*affineTransform);
 }
 
 void Component::getVisibleArea (RectangleList& result, const bool includeSiblings) const

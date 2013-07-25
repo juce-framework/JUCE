@@ -250,7 +250,7 @@ Rectangle<float> Path::getBounds() const noexcept
 
 Rectangle<float> Path::getBoundsTransformed (const AffineTransform& transform) const noexcept
 {
-    return getBounds().transformed (transform);
+    return getBounds().transformedBy (transform);
 }
 
 //==============================================================================

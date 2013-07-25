@@ -274,12 +274,16 @@ namespace juce
 #ifdef DOXYGEN
  /** This macro can be used to wrap a function which has been deprecated. */
  #define JUCE_DEPRECATED(functionDef)
+ #define JUCE_DEPRECATED_WITH_BODY(functionDef, body)
 #elif JUCE_MSVC && ! JUCE_NO_DEPRECATION_WARNINGS
- #define JUCE_DEPRECATED(functionDef)     __declspec(deprecated) functionDef
+ #define JUCE_DEPRECATED(functionDef)                   __declspec(deprecated) functionDef
+ #define JUCE_DEPRECATED_WITH_BODY(functionDef, body)   __declspec(deprecated) functionDef body
 #elif JUCE_GCC && ! JUCE_NO_DEPRECATION_WARNINGS
- #define JUCE_DEPRECATED(functionDef)     functionDef __attribute__ ((deprecated))
+ #define JUCE_DEPRECATED(functionDef)                   functionDef __attribute__ ((deprecated))
+ #define JUCE_DEPRECATED_WITH_BODY(functionDef, body)   functionDef __attribute__ ((deprecated)) body
 #else
- #define JUCE_DEPRECATED(functionDef)     functionDef
+ #define JUCE_DEPRECATED(functionDef)                   functionDef
+ #define JUCE_DEPRECATED_WITH_BODY(functionDef, body)   functionDef body
 #endif
 
 //==============================================================================

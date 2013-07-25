@@ -123,13 +123,13 @@ public:
     template <typename Type>
     Rectangle<Type> transformed (const Rectangle<Type>& r) const noexcept
     {
-        return r.transformed (complexTransform);
+        return r.transformedBy (complexTransform);
     }
 
     Rectangle<int> deviceSpaceToUserSpace (const Rectangle<int>& r) const noexcept
     {
         return isOnlyTranslated ? r.translated (-xOffset, -yOffset)
-                                : r.transformed (complexTransform.inverted());
+                                : r.transformedBy (complexTransform.inverted());
     }
 
     AffineTransform complexTransform;

@@ -73,7 +73,6 @@ public:
         e.g. @code
         AffineTransform myTransform = AffineTransform::identity.rotated (.5f)
                                                                .scaled (2.0f);
-
         @endcode
     */
     static const AffineTransform identity;

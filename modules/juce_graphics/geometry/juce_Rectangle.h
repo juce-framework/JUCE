@@ -651,7 +651,7 @@ public:
 
         This should only be used on floating point rectangles.
     */
-    Rectangle transformed (const AffineTransform& transform) const noexcept
+    Rectangle transformedBy (const AffineTransform& transform) const noexcept
     {
         typedef typename TypeHelpers::SmallestFloatType<ValueType>::type FloatType;
 
@@ -804,7 +804,8 @@ public:
                           parseIntAfterSpace (toks[3]));
     }
 
-    typedef ValueType Type;
+    // This has been renamed by transformedBy, in order to match the method names used in the Point class.
+    JUCE_DEPRECATED_WITH_BODY (Rectangle transformed (const AffineTransform& t) const noexcept, { return transformedBy (t); })
 
 private:
     friend class RectangleList;
