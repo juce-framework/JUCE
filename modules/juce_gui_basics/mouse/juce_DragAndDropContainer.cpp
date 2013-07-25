@@ -310,15 +310,13 @@ DragAndDropContainer::~DragAndDropContainer()
 
 void DragAndDropContainer::startDragging (const var& sourceDescription,
                                           Component* sourceComponent,
-                                          const Image& dragImage_,
+                                          Image dragImage,
                                           const bool allowDraggingToExternalWindows,
                                           const Point<int>* imageOffsetFromMouse)
 {
-    Image dragImage (dragImage_);
-
     if (dragImageComponent == nullptr)
     {
-        MouseInputSource* draggingSource = Desktop::getInstance().getDraggingMouseSource (0);
+        MouseInputSource* const draggingSource = Desktop::getInstance().getDraggingMouseSource (0);
 
         if (draggingSource == nullptr || ! draggingSource->isDragging())
         {
@@ -326,7 +324,7 @@ void DragAndDropContainer::startDragging (const var& sourceDescription,
             return;
         }
 
-        const Point<int> lastMouseDown (Desktop::getLastMouseDownPosition());
+        const Point<int> lastMouseDown (draggingSource->getLastMouseDownPosition());
         Point<int> imageOffset;
 
         if (dragImage.isNull())
@@ -389,15 +387,15 @@ void DragAndDropContainer::startDragging (const var& sourceDescription,
         }
         else
         {
-            Component* const thisComp = dynamic_cast <Component*> (this);
-
-            if (thisComp == nullptr)
+            if (Component* const thisComp = dynamic_cast <Component*> (this))
+            {
+                thisComp->addChildComponent (dragImageComponent);
+            }
+            else
             {
                 jassertfalse;   // Your DragAndDropContainer needs to be a Component!
                 return;
             }
-
-            thisComp->addChildComponent (dragImageComponent);
         }
 
         static_cast <DragImageComponent*> (dragImageComponent.get())->updateLocation (false, lastMouseDown);

@@ -28,7 +28,6 @@
 #include "../buttons/juce_Button.h"
 #include "../drawables/juce_Drawable.h"
 #include "juce_Toolbar.h"
-class ItemDragAndDropOverlayComponent;
 
 
 //==============================================================================

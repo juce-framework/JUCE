@@ -80,7 +80,7 @@ public:
         setResizable (options.resizable, options.useBottomRightCornerResizer);
     }
 
-    void closeButtonPressed()
+    void closeButtonPressed() override
     {
         setVisible (false);
     }
