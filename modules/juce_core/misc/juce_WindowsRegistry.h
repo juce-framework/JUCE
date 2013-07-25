@@ -86,6 +86,12 @@ public:
     /** Returns true if the given value exists in the registry. */
     static bool valueExistsWow64 (const String& regValuePath);
 
+    /** Returns true if the given key exists in the registry. */
+    static bool keyExists (const String& regValuePath);
+
+    /** Returns true if the given key exists in the registry. */
+    static bool keyExistsWow64 (const String& regValuePath);
+
     /** Deletes a registry value. */
     static void deleteValue (const String& regValuePath);
 

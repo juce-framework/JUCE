@@ -1014,22 +1014,20 @@ private:
 
             return addGroup (projectItem, childIDs);
         }
-        else
+
+        if (projectItem.shouldBeAddedToTargetProject())
         {
-            if (projectItem.shouldBeAddedToTargetProject())
-            {
-                const String itemPath (projectItem.getFilePath());
-                RelativePath path;
+            const String itemPath (projectItem.getFilePath());
+            RelativePath path;
 
-                if (itemPath.startsWith ("${"))
-                    path = RelativePath (itemPath, RelativePath::unknown);
-                else
-                    path = RelativePath (projectItem.getFile(), getTargetFolder(), RelativePath::buildTargetFolder);
+            if (itemPath.startsWith ("${"))
+                path = RelativePath (itemPath, RelativePath::unknown);
+            else
+                path = RelativePath (projectItem.getFile(), getTargetFolder(), RelativePath::buildTargetFolder);
 
-                return addFile (path, projectItem.shouldBeCompiled(),
-                                projectItem.shouldBeAddedToBinaryResources(),
-                                projectItem.shouldInhibitWarnings());
-            }
+            return addFile (path, projectItem.shouldBeCompiled(),
+                            projectItem.shouldBeAddedToBinaryResources(),
+                            projectItem.shouldInhibitWarnings());
         }
 
         return String::empty;
