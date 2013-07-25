@@ -121,15 +121,15 @@ public:
     }
 
     template <typename Type>
-    Rectangle<float> transformed (const Rectangle<Type>& r) const noexcept
+    Rectangle<Type> transformed (const Rectangle<Type>& r) const noexcept
     {
-        return r.toFloat().transformed (complexTransform);
+        return r.transformed (complexTransform);
     }
 
     Rectangle<int> deviceSpaceToUserSpace (const Rectangle<int>& r) const noexcept
     {
         return isOnlyTranslated ? r.translated (-xOffset, -yOffset)
-                                : r.toFloat().transformed (complexTransform.inverted()).getSmallestIntegerContainer();
+                                : r.transformed (complexTransform.inverted());
     }
 
     AffineTransform complexTransform;
@@ -2065,7 +2065,7 @@ public:
             else if (transform.isIntegerScaling)
             {
                 cloneClipIfMultiplyReferenced();
-                clip = clip->clipToRectangle (transform.transformed (r).getSmallestIntegerContainer());
+                clip = clip->clipToRectangle (transform.transformed (r));
             }
             else
             {
@@ -2095,7 +2095,7 @@ public:
                 RectangleList scaledList;
 
                 for (const Rectangle<int>* i = r.begin(), * const e = r.end(); i != e; ++i)
-                    scaledList.add (transform.transformed (*i).getSmallestIntegerContainer());
+                    scaledList.add (transform.transformed (*i));
 
                 clip = clip->clipToRectangleList (scaledList);
             }
@@ -2120,7 +2120,7 @@ public:
             }
             else if (transform.isIntegerScaling)
             {
-                clip = clip->excludeClipRectangle (transform.transformed (r).getSmallestIntegerContainer());
+                clip = clip->excludeClipRectangle (transform.transformed (r));
             }
             else
             {
@@ -2262,7 +2262,7 @@ public:
             if (transform.isOnlyTranslated)
                 fillTargetRect (transform.translated (r), replaceContents);
             else if (transform.isIntegerScaling)
-                fillTargetRect (transform.transformed (r).getSmallestIntegerContainer(), replaceContents);
+                fillTargetRect (transform.transformed (r), replaceContents);
             else
                 fillRectAsPath (r);
         }

@@ -196,8 +196,8 @@ public:
     /** Returns the position of this point, if it is transformed by a given AffineTransform. */
     Point transformedBy (const AffineTransform& transform) const noexcept
     {
-        return Point (transform.mat00 * x + transform.mat01 * y + transform.mat02,
-                      transform.mat10 * x + transform.mat11 * y + transform.mat12);
+        return Point (static_cast<ValueType> (transform.mat00 * x + transform.mat01 * y + transform.mat02),
+                      static_cast<ValueType> (transform.mat10 * x + transform.mat11 * y + transform.mat12));
     }
 
     //==============================================================================

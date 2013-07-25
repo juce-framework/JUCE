@@ -587,8 +587,9 @@ public:
             pos.y = newY;
             return true;
         }
-        else if (pos.y == other.pos.y && getBottom() == other.getBottom()
-                  && (other.getRight() >= pos.x && other.pos.x <= getRight()))
+
+        if (pos.y == other.pos.y && getBottom() == other.getBottom()
+             && (other.getRight() >= pos.x && other.pos.x <= getRight()))
         {
             const ValueType newX = jmin (pos.x, other.pos.x);
             w = jmax (getRight(), other.getRight()) - newX;
@@ -652,20 +653,24 @@ public:
     */
     Rectangle transformed (const AffineTransform& transform) const noexcept
     {
-        float x1 = pos.x,     y1 = pos.y;
-        float x2 = pos.x + w, y2 = pos.y;
-        float x3 = pos.x,     y3 = pos.y + h;
-        float x4 = x2,        y4 = y3;
+        typedef typename TypeHelpers::SmallestFloatType<ValueType>::type FloatType;
+
+        FloatType x1 = static_cast<FloatType> (pos.x),     y1 = static_cast<FloatType> (pos.y);
+        FloatType x2 = static_cast<FloatType> (pos.x + w), y2 = static_cast<FloatType> (pos.y);
+        FloatType x3 = static_cast<FloatType> (pos.x),     y3 = static_cast<FloatType> (pos.y + h);
+        FloatType x4 = static_cast<FloatType> (x2),        y4 = static_cast<FloatType> (y3);
 
         transform.transformPoints (x1, y1, x2, y2);
         transform.transformPoints (x3, y3, x4, y4);
 
-        const float rx = jmin (x1, x2, x3, x4);
-        const float ry = jmin (y1, y2, y3, y4);
+        const FloatType rx1 = jmin (x1, x2, x3, x4);
+        const FloatType rx2 = jmax (x1, x2, x3, x4);
+        const FloatType ry1 = jmin (y1, y2, y3, y4);
+        const FloatType ry2 = jmax (y1, y2, y3, y4);
 
-        return Rectangle (rx, ry,
-                          jmax (x1, x2, x3, x4) - rx,
-                          jmax (y1, y2, y3, y4) - ry);
+        Rectangle r;
+        Rectangle<FloatType> (rx1, ry1, rx2 - rx1, ry2 - ry1).copyWithRounding (r);
+        return r;
     }
 
     /** Returns the smallest integer-aligned rectangle that completely contains this one.
@@ -674,12 +679,42 @@ public:
     */
     Rectangle<int> getSmallestIntegerContainer() const noexcept
     {
-        const int x1 = static_cast <int> (std::floor (static_cast<float> (pos.x)));
-        const int y1 = static_cast <int> (std::floor (static_cast<float> (pos.y)));
-        const int x2 = static_cast <int> (std::ceil  (static_cast<float> (pos.x + w)));
-        const int y2 = static_cast <int> (std::ceil  (static_cast<float> (pos.y + h)));
+        return getSmallestIntegerContainerWithType<int>();
+    }
 
-        return Rectangle<int> (x1, y1, x2 - x1, y2 - y1);
+    /** Returns the smallest integer-aligned rectangle that completely contains this one.
+        This is only relevent for floating-point rectangles, of course.
+        @see toFloat()
+    */
+    template <typename IntType>
+    Rectangle<IntType> getSmallestIntegerContainerWithType() const noexcept
+    {
+        const IntType x1 = static_cast <IntType> (std::floor (static_cast<float> (pos.x)));
+        const IntType y1 = static_cast <IntType> (std::floor (static_cast<float> (pos.y)));
+        const IntType x2 = static_cast <IntType> (std::ceil  (static_cast<float> (pos.x + w)));
+        const IntType y2 = static_cast <IntType> (std::ceil  (static_cast<float> (pos.y + h)));
+
+        return Rectangle<IntType> (x1, y1, x2 - x1, y2 - y1);
+    }
+
+    /** Casts this rectangle to a Rectangle<float>.
+        Obviously this is mainly useful for rectangles that use integer types.
+        @see getSmallestIntegerContainer
+    */
+    Rectangle<float> toFloat() const noexcept
+    {
+        return Rectangle<float> (static_cast<float> (pos.x), static_cast<float> (pos.y),
+                                 static_cast<float> (w),     static_cast<float> (h));
+    }
+
+    /** Casts this rectangle to a Rectangle<double>.
+        Obviously this is mainly useful for rectangles that use integer types.
+        @see getSmallestIntegerContainer
+    */
+    Rectangle<double> toDouble() const noexcept
+    {
+        return Rectangle<double> (static_cast<double> (pos.x), static_cast<double> (pos.y),
+                                  static_cast<double> (w),     static_cast<double> (h));
     }
 
     /** Returns the smallest Rectangle that can contain a set of points. */
@@ -702,26 +737,6 @@ public:
         }
 
         return Rectangle (minX, minY, maxX - minX, maxY - minY);
-    }
-
-    /** Casts this rectangle to a Rectangle<float>.
-        Obviously this is mainly useful for rectangles that use integer types.
-        @see getSmallestIntegerContainer
-    */
-    Rectangle<float> toFloat() const noexcept
-    {
-        return Rectangle<float> (static_cast<float> (pos.x), static_cast<float> (pos.y),
-                                 static_cast<float> (w),     static_cast<float> (h));
-    }
-
-    /** Casts this rectangle to a Rectangle<double>.
-        Obviously this is mainly useful for rectangles that use integer types.
-        @see getSmallestIntegerContainer
-    */
-    Rectangle<double> toDouble() const noexcept
-    {
-        return Rectangle<double> (static_cast<double> (pos.x), static_cast<double> (pos.y),
-                                  static_cast<double> (w),     static_cast<double> (h));
     }
 
     //==============================================================================
@@ -789,6 +804,8 @@ public:
                           parseIntAfterSpace (toks[3]));
     }
 
+    typedef ValueType Type;
+
 private:
     friend class RectangleList;
     Point<ValueType> pos;
@@ -796,6 +813,12 @@ private:
 
     static int parseIntAfterSpace (const String& s) noexcept
         { return s.getCharPointer().findEndOfWhitespace().getIntValue32(); }
+
+    template <typename OtherType> friend class Rectangle;
+
+    void copyWithRounding (Rectangle<int>& result) const noexcept    { result = getSmallestIntegerContainer(); }
+    void copyWithRounding (Rectangle<float>& result) const noexcept  { result = toFloat(); }
+    void copyWithRounding (Rectangle<double>& result) const noexcept { result = toDouble(); }
 };
 
 
