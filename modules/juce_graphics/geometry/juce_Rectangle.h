@@ -304,9 +304,10 @@ public:
     template <typename FloatType>
     Rectangle operator*= (FloatType scaleFactor) noexcept
     {
-        pos *= scaleFactor;
-        w = (ValueType) (w * scaleFactor);
-        h = (ValueType) (h * scaleFactor);
+        Rectangle<FloatType> (pos.x * scaleFactor,
+                              pos.y * scaleFactor,
+                              w * scaleFactor,
+                              h * scaleFactor).copyWithRounding (*this);
         return *this;
     }
 

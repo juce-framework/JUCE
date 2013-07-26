@@ -166,6 +166,11 @@ public:
                             float factorY) const noexcept;
 
     /** Returns a transform which is the same as this one followed by a re-scaling.
+        The scaling is centred around the origin (0, 0).
+    */
+    AffineTransform scaled (float factor) const noexcept;
+
+    /** Returns a transform which is the same as this one followed by a re-scaling.
         The scaling is centred around the origin provided.
     */
     AffineTransform scaled (float factorX, float factorY,
