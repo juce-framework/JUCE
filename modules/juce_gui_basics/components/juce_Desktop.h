@@ -375,7 +375,18 @@ public:
         void findDisplays (float masterScale);
     };
 
-    const Displays& getDisplays() const noexcept       { return *displays; }
+    const Displays& getDisplays() const noexcept        { return *displays; }
+
+    //==============================================================================
+    /** Sets a global scale factor to be used for all desktop windows.
+        Setting this will also scale the monitor sizes that are returned by getDisplays().
+    */
+    void setGlobalScaleFactor (float newScaleFactor) noexcept;
+
+    /** Returns the current global scale factor, as set by setGlobalScaleFactor().
+        @see setGlobalScaleFactor
+    */
+    float getGlobalScaleFactor() const noexcept         { return masterScaleFactor; }
 
     //==============================================================================
     /** True if the OS supports semitransparent windows */
@@ -400,9 +411,6 @@ private:
 
     Array <Component*> desktopComponents;
     Array <ComponentPeer*> peers;
-
-    void addPeer (ComponentPeer*);
-    void removePeer (ComponentPeer*);
 
     ScopedPointer<Displays> displays;
 

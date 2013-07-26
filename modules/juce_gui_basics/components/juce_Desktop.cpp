@@ -143,18 +143,6 @@ void Desktop::componentBroughtToFront (Component* const c)
 }
 
 //==============================================================================
-void Desktop::addPeer (ComponentPeer* peer)
-{
-    peers.add (peer);
-}
-
-void Desktop::removePeer (ComponentPeer* peer)
-{
-    peers.removeFirstMatchingValue (peer);
-    triggerFocusCallback();
-}
-
-//==============================================================================
 Point<int> Desktop::getMousePosition()
 {
     return getInstance().getMainMouseSource().getScreenPosition();
@@ -488,4 +476,14 @@ bool Desktop::isOrientationEnabled (const DisplayOrientation orientation) const 
     jassert (orientation == upright || orientation == upsideDown || orientation == rotatedClockwise || orientation ==  rotatedAntiClockwise);
 
     return (allowedOrientations & orientation) != 0;
+}
+
+void Desktop::setGlobalScaleFactor (float newScaleFactor) noexcept
+{
+    if (masterScaleFactor != newScaleFactor)
+    {
+        masterScaleFactor = newScaleFactor;
+
+        displays->refresh();
+    }
 }

@@ -146,6 +146,7 @@ private:
     void fileClicked (const File&, const MouseEvent&) override;
     void fileDoubleClicked (const File&) override;
     void browserRootChanged (const File&) override;
+    int getDefaultWidth() const;
 
     void okButtonPressed();
     void createNewFolder();

@@ -196,44 +196,64 @@ struct Component::ComponentHelpers
     static inline bool hitTest (Component& comp, Point<int> localPoint)
     {
         return isPositiveAndBelow (localPoint.x, comp.getWidth())
-                 && isPositiveAndBelow (localPoint.y, comp.getHeight())
-                 && comp.hitTest (localPoint.x, localPoint.y);
+            && isPositiveAndBelow (localPoint.y, comp.getHeight())
+            && comp.hitTest (localPoint.x, localPoint.y);
     }
 
-    static Point<int> convertFromParentSpace (const Component& comp, Point<int> pointInParentSpace)
+    template <typename PointOrRect>
+    static PointOrRect unscaledScreenPosToScaled (PointOrRect pos) noexcept
+    {
+        const float scale = Desktop::getInstance().masterScaleFactor;
+        return scale != 1.0f ? pos / scale : pos;
+    }
+
+    template <typename PointOrRect>
+    static PointOrRect scaledScreenPosToUnscaled (PointOrRect pos) noexcept
+    {
+        const float scale = Desktop::getInstance().masterScaleFactor;
+        return scale != 1.0f ? pos * scale : pos;
+    }
+
+    // converts an unscaled position within a peer to the local position within that peer's component
+    template <typename PointOrRect>
+    static PointOrRect rawPeerPositionToLocal (const Component& comp, PointOrRect pos) noexcept
+    {
+        if (comp.isTransformed())
+            pos = pos.transformedBy (comp.getTransform().inverted());
+
+        return unscaledScreenPosToScaled (pos);
+    }
+
+    // converts a position within a peer's component to the unscaled position within the peer
+    template <typename PointOrRect>
+    static PointOrRect localPositionToRawPeerPos (const Component& comp, PointOrRect pos) noexcept
+    {
+        if (comp.isTransformed())
+            pos = pos.transformedBy (comp.getTransform());
+
+        return scaledScreenPosToUnscaled (pos);
+    }
+
+    template <typename PointOrRect>
+    static PointOrRect convertFromParentSpace (const Component& comp, PointOrRect pointInParentSpace)
     {
         if (comp.affineTransform == nullptr)
             return pointInParentSpace - comp.getPosition();
 
-        return pointInParentSpace.toFloat().transformedBy (comp.affineTransform->inverted()).toInt() - comp.getPosition();
+        return pointInParentSpace.transformedBy (comp.affineTransform->inverted()) - comp.getPosition();
     }
 
-    static Rectangle<int> convertFromParentSpace (const Component& comp, const Rectangle<int>& areaInParentSpace)
-    {
-        if (comp.affineTransform == nullptr)
-            return areaInParentSpace - comp.getPosition();
-
-        return areaInParentSpace.toFloat().transformedBy (comp.affineTransform->inverted()).getSmallestIntegerContainer() - comp.getPosition();
-    }
-
-    static Point<int> convertToParentSpace (const Component& comp, Point<int> pointInLocalSpace)
+    template <typename PointOrRect>
+    static PointOrRect convertToParentSpace (const Component& comp, PointOrRect pointInLocalSpace)
     {
         if (comp.affineTransform == nullptr)
             return pointInLocalSpace + comp.getPosition();
 
-        return (pointInLocalSpace + comp.getPosition()).toFloat().transformedBy (*comp.affineTransform).toInt();
+        return (pointInLocalSpace + comp.getPosition()).transformedBy (*comp.affineTransform);
     }
 
-    static Rectangle<int> convertToParentSpace (const Component& comp, const Rectangle<int>& areaInLocalSpace)
-    {
-        if (comp.affineTransform == nullptr)
-            return areaInLocalSpace + comp.getPosition();
-
-        return (areaInLocalSpace + comp.getPosition()).transformedBy (*comp.affineTransform);
-    }
-
-    template <typename Type>
-    static Type convertFromDistantParentSpace (const Component* parent, const Component& target, const Type& coordInParent)
+    template <typename PointOrRect>
+    static PointOrRect convertFromDistantParentSpace (const Component* parent, const Component& target, const PointOrRect& coordInParent)
     {
         const Component* const directParent = target.getParentComponent();
         jassert (directParent != nullptr);
@@ -244,8 +264,8 @@ struct Component::ComponentHelpers
         return convertFromParentSpace (target, convertFromDistantParentSpace (parent, *directParent, coordInParent));
     }
 
-    template <typename Type>
-    static Type convertCoordinate (const Component* target, const Component* source, Type p)
+    template <typename PointOrRect>
+    static PointOrRect convertCoordinate (const Component* target, const Component* source, PointOrRect p)
     {
         while (source != nullptr)
         {
@@ -255,19 +275,8 @@ struct Component::ComponentHelpers
             if (source->isParentOf (target))
                 return convertFromDistantParentSpace (source, *target, p);
 
-            if (source->isOnDesktop())
-            {
-                if (source->isTransformed())
-                    p = p.transformedBy (source->getTransform());
-
-                p = source->getPeer()->localToGlobal (p);
-                source = nullptr;
-            }
-            else
-            {
-                p = convertToParentSpace (*source, p);
-                source = source->getParentComponent();
-            }
+            p = convertToParentSpace (*source, p);
+            source = source->getParentComponent();
         }
 
         jassert (source == nullptr);
@@ -276,17 +285,7 @@ struct Component::ComponentHelpers
 
         const Component* const topLevelComp = target->getTopLevelComponent();
 
-        if (topLevelComp->isOnDesktop())
-        {
-            p = topLevelComp->getPeer()->globalToLocal (p);
-
-            if (topLevelComp->isTransformed())
-                p = p.transformedBy (topLevelComp->getTransform().inverted());
-        }
-        else
-        {
-            p = convertFromParentSpace (*topLevelComp, p);
-        }
+        p = convertFromParentSpace (*topLevelComp, p);
 
         if (topLevelComp == target)
             return p;
@@ -1218,11 +1217,6 @@ void Component::setBoundsToFit (int x, int y, int width, int height,
 }
 
 //==============================================================================
-bool Component::isTransformed() const noexcept
-{
-    return affineTransform != nullptr;
-}
-
 void Component::setTransform (const AffineTransform& newTransform)
 {
     // If you pass in a transform with no inverse, the component will have no dimensions,
@@ -1254,6 +1248,11 @@ void Component::setTransform (const AffineTransform& newTransform)
         repaint();
         sendMovedResizedMessages (false, false);
     }
+}
+
+bool Component::isTransformed() const noexcept
+{
+    return affineTransform != nullptr;
 }
 
 AffineTransform Component::getTransform() const
@@ -1802,8 +1801,8 @@ void Component::internalRepaintUnchecked (const Rectangle<int>& area, const bool
             CHECK_MESSAGE_MANAGER_IS_LOCKED
 
             if (ComponentPeer* const peer = getPeer())
-                peer->repaint (affineTransform != nullptr ? area.transformedBy (*affineTransform)
-                                                          : area);
+                peer->repaint (ComponentHelpers::scaledScreenPosToUnscaled (affineTransform != nullptr ? area.transformedBy (*affineTransform)
+                                                                                                       : area));
         }
         else
         {

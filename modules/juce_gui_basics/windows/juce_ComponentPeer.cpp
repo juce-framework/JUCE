@@ -33,12 +33,14 @@ ComponentPeer::ComponentPeer (Component& comp, const int flags)
       uniqueID (lastUniqueID += 2), // increment by 2 so that this can never hit 0
       isWindowMinimised (false)
 {
-    Desktop::getInstance().addPeer (this);
+    Desktop::getInstance().peers.add (this);
 }
 
 ComponentPeer::~ComponentPeer()
 {
-    Desktop::getInstance().removePeer (this);
+    Desktop& desktop = Desktop::getInstance();
+    desktop.peers.removeFirstMatchingValue (this);
+    desktop.triggerFocusCallback();
 }
 
 //==============================================================================
@@ -74,7 +76,7 @@ bool ComponentPeer::isValidPeer (const ComponentPeer* const peer) noexcept
 
 void ComponentPeer::updateBounds()
 {
-    setBounds (component.getBoundsInParent(), false);
+    setBounds (Component::ComponentHelpers::scaledScreenPosToUnscaled (component.getBoundsInParent()), false);
 }
 
 //==============================================================================
@@ -105,7 +107,14 @@ void ComponentPeer::handlePaint (LowLevelGraphicsContext& contextToPaintTo)
     ModifierKeys::updateCurrentModifiers();
 
     Graphics g (&contextToPaintTo);
-    g.addTransform (component.getTransform());
+
+    if (component.isTransformed())
+        g.addTransform (component.getTransform());
+
+    float masterScale = Desktop::getInstance().masterScaleFactor;
+
+    if (masterScale != 1.0f)
+        g.addTransform (AffineTransform::scale (masterScale));
 
    #if JUCE_ENABLE_REPAINT_DEBUGGING
     g.saveState();
@@ -284,12 +293,18 @@ void ComponentPeer::handleMovedOrResized()
     {
         const WeakReference<Component> deletionChecker (&component);
 
-        const Rectangle<int> newBounds (getBounds().transformedBy (component.getTransform().inverted()));
-        const bool wasMoved   = (component.getPosition() != newBounds.getPosition());
-        const bool wasResized = (component.getWidth() != newBounds.getWidth() || component.getHeight() != newBounds.getHeight());
+        Rectangle<int> newBounds (getBounds());
+        Rectangle<int> oldBounds (component.getBounds());
+
+        oldBounds = Component::ComponentHelpers::localPositionToRawPeerPos (component, oldBounds);
+
+        const bool wasMoved   = (oldBounds.getPosition() != newBounds.getPosition());
+        const bool wasResized = (oldBounds.getWidth() != newBounds.getWidth() || oldBounds.getHeight() != newBounds.getHeight());
 
         if (wasMoved || wasResized)
         {
+            newBounds = Component::ComponentHelpers::rawPeerPositionToLocal (component, newBounds);
+
             component.bounds = newBounds;
 
             if (wasResized)
