@@ -98,7 +98,7 @@ public:
 
     //==============================================================================
     /** Clears the array, optionally deleting the objects inside it first. */
-    void clear (const bool deleteObjects = true)
+    void clear (bool deleteObjects = true)
     {
         const ScopedLockType lock (getLock());
 
@@ -106,6 +106,18 @@ public:
             deleteAllObjects();
 
         data.setAllocatedSize (0);
+        numUsed = 0;
+    }
+
+    //==============================================================================
+    /** Clears the array, optionally deleting the objects inside it first. */
+    void clearQuick (bool deleteObjects)
+    {
+        const ScopedLockType lock (getLock());
+
+        if (deleteObjects)
+            deleteAllObjects();
+
         numUsed = 0;
     }
 
