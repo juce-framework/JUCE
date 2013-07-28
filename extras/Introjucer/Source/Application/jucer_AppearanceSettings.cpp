@@ -111,7 +111,7 @@ void AppearanceSettings::refreshPresetSchemeList()
 
     if (newSchemes != presetSchemeFiles)
     {
-        presetSchemeFiles.swapWithArray (newSchemes);
+        presetSchemeFiles.swapWith (newSchemes);
         commandManager->commandStatusChanged();
     }
 }

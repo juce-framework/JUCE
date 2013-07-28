@@ -96,7 +96,7 @@ public:
     ReferenceCountedArray& operator= (const ReferenceCountedArray& other) noexcept
     {
         ReferenceCountedArray otherCopy (other);
-        swapWithArray (otherCopy);
+        swapWith (otherCopy);
         return *this;
     }
 
@@ -107,7 +107,7 @@ public:
     ReferenceCountedArray<ObjectClass, TypeOfCriticalSectionToUse>& operator= (const ReferenceCountedArray<OtherObjectClass, TypeOfCriticalSectionToUse>& other) noexcept
     {
         ReferenceCountedArray<ObjectClass, TypeOfCriticalSectionToUse> otherCopy (other);
-        swapWithArray (otherCopy);
+        swapWith (otherCopy);
         return *this;
     }
 
@@ -745,11 +745,11 @@ public:
         If you need to exchange two arrays, this is vastly quicker than using copy-by-value
         because it just swaps their internal pointers.
     */
-    void swapWithArray (ReferenceCountedArray& otherArray) noexcept
+    template <class OtherArrayType>
+    void swapWith (OtherArrayType& otherArray) noexcept
     {
         const ScopedLockType lock1 (getLock());
-        const ScopedLockType lock2 (otherArray.getLock());
-
+        const typename OtherArrayType::ScopedLockType lock2 (otherArray.getLock());
         data.swapWith (otherArray.data);
         std::swap (numUsed, otherArray.numUsed);
     }
@@ -856,6 +856,11 @@ public:
     /** Returns the type of scoped lock to use for locking this array */
     typedef typename TypeOfCriticalSectionToUse::ScopedLockType ScopedLockType;
 
+
+    //==============================================================================
+    // Note that the swapWithArray method has been replaced by a more flexible templated version,
+    // and renamed "swapWith" to be more consistent with the names used in other classes.
+    JUCE_DEPRECATED_WITH_BODY (void swapWithArray (ReferenceCountedArray& other) noexcept, { swapWith (other); })
 
 private:
     //==============================================================================

@@ -127,7 +127,7 @@ bool StringArray::operator!= (const StringArray& other) const noexcept
 
 void StringArray::swapWith (StringArray& other) noexcept
 {
-    strings.swapWithArray (other.strings);
+    strings.swapWith (other.strings);
 }
 
 void StringArray::clear()

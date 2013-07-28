@@ -317,12 +317,13 @@ public:
 
     //==============================================================================
     /** Efficiently swaps the contents of two hash-maps. */
-    void swapWith (HashMap& otherHashMap) noexcept
+    template <class OtherHashMapType>
+    void swapWith (OtherHashMapType& otherHashMap) noexcept
     {
         const ScopedLockType lock1 (getLock());
-        const ScopedLockType lock2 (otherHashMap.getLock());
+        const typename OtherHashMapType::ScopedLockType lock2 (otherHashMap.getLock());
 
-        slots.swapWithArray (otherHashMap.slots);
+        slots.swapWith (otherHashMap.slots);
         std::swap (totalNumItems, otherHashMap.totalNumItems);
     }
 

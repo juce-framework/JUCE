@@ -22,7 +22,7 @@
   ==============================================================================
 */
 
-static uint32 lastUniqueID = 1;
+static uint32 lastUniquePeerID = 1;
 
 //==============================================================================
 ComponentPeer::ComponentPeer (Component& comp, const int flags)
@@ -30,7 +30,7 @@ ComponentPeer::ComponentPeer (Component& comp, const int flags)
       styleFlags (flags),
       constrainer (nullptr),
       lastDragAndDropCompUnderMouse (nullptr),
-      uniqueID (lastUniqueID += 2), // increment by 2 so that this can never hit 0
+      uniqueID (lastUniquePeerID += 2), // increment by 2 so that this can never hit 0
       isWindowMinimised (false)
 {
     Desktop::getInstance().peers.add (this);

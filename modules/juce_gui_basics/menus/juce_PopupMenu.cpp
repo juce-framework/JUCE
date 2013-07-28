@@ -1150,14 +1150,14 @@ PopupMenu& PopupMenu::operator= (const PopupMenu& other)
 PopupMenu::PopupMenu (PopupMenu&& other) noexcept
     : lookAndFeel (other.lookAndFeel)
 {
-    items.swapWithArray (other.items);
+    items.swapWith (other.items);
 }
 
 PopupMenu& PopupMenu::operator= (PopupMenu&& other) noexcept
 {
     jassert (this != &other); // hopefully the compiler should make this situation impossible!
 
-    items.swapWithArray (other.items);
+    items.swapWith (other.items);
     lookAndFeel = other.lookAndFeel;
     return *this;
 }

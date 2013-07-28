@@ -332,7 +332,7 @@ bool RectangleList::getIntersectionWith (const Rectangle<int>& rect, RectangleLi
 
 void RectangleList::swapWith (RectangleList& otherList) noexcept
 {
-    rects.swapWithArray (otherList.rects);
+    rects.swapWith (otherList.rects);
 }
 
 

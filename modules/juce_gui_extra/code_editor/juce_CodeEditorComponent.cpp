@@ -76,7 +76,7 @@ public:
             return false;
         }
 
-        tokens.swapWithArray (newTokens);
+        tokens.swapWith (newTokens);
         return true;
     }
 

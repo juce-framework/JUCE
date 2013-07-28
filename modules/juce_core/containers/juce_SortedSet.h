@@ -450,7 +450,7 @@ public:
     */
     void swapWith (SortedSet& otherSet) noexcept
     {
-        data.swapWithArray (otherSet.data);
+        data.swapWith (otherSet.data);
     }
 
     //==============================================================================

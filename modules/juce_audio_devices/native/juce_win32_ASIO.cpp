@@ -387,7 +387,7 @@ public:
 
         if (sampleRates != newRates)
         {
-            sampleRates.swapWithArray (newRates);
+            sampleRates.swapWith (newRates);
 
            #if JUCE_ASIO_DEBUGGING
             StringArray s;

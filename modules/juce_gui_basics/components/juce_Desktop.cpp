@@ -420,7 +420,7 @@ void Desktop::Displays::init (Desktop& desktop)
 void Desktop::Displays::refresh()
 {
     Array<Display> oldDisplays;
-    oldDisplays.swapWithArray (displays);
+    oldDisplays.swapWith (displays);
 
     init (Desktop::getInstance());
 
