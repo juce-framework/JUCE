@@ -330,7 +330,7 @@ public:
         If includeSiblings is true, it will also take into account any siblings
         that may be overlapping the component.
     */
-    void getVisibleArea (RectangleList& result, bool includeSiblings) const;
+    void getVisibleArea (RectangleList<int>& result, bool includeSiblings) const;
 
     //==============================================================================
     /** Returns this component's x coordinate relative the the screen's top-left origin.

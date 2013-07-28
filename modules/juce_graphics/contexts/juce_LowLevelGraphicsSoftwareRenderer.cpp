@@ -28,7 +28,7 @@ LowLevelGraphicsSoftwareRenderer::LowLevelGraphicsSoftwareRenderer (const Image&
 }
 
 LowLevelGraphicsSoftwareRenderer::LowLevelGraphicsSoftwareRenderer (const Image& image, Point<int> origin,
-                                                                    const RectangleList& initialClip)
+                                                                    const RectangleList<int>& initialClip)
     : savedState (new RenderingHelpers::SoftwareRendererSavedState (image, initialClip, origin.x, origin.y))
 {
 }
@@ -45,9 +45,9 @@ float LowLevelGraphicsSoftwareRenderer::getScaleFactor()                        
 Rectangle<int> LowLevelGraphicsSoftwareRenderer::getClipBounds() const                { return savedState->getClipBounds(); }
 bool LowLevelGraphicsSoftwareRenderer::isClipEmpty() const                            { return savedState->clip == nullptr; }
 
-bool LowLevelGraphicsSoftwareRenderer::clipToRectangle (const Rectangle<int>& r)      { return savedState->clipToRectangle (r); }
-bool LowLevelGraphicsSoftwareRenderer::clipToRectangleList (const RectangleList& r)   { return savedState->clipToRectangleList (r); }
-void LowLevelGraphicsSoftwareRenderer::excludeClipRectangle (const Rectangle<int>& r) { savedState->excludeClipRectangle (r); }
+bool LowLevelGraphicsSoftwareRenderer::clipToRectangle (const Rectangle<int>& r)            { return savedState->clipToRectangle (r); }
+bool LowLevelGraphicsSoftwareRenderer::clipToRectangleList (const RectangleList<int>& r)    { return savedState->clipToRectangleList (r); }
+void LowLevelGraphicsSoftwareRenderer::excludeClipRectangle (const Rectangle<int>& r)       { savedState->excludeClipRectangle (r); }
 
 void LowLevelGraphicsSoftwareRenderer::clipToPath (const Path& path, const AffineTransform& transform)
 {

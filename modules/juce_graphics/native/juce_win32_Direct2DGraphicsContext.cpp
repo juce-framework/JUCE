@@ -103,7 +103,7 @@ public:
         return ! isClipEmpty();
     }
 
-    bool clipToRectangleList (const RectangleList& clipRegion)
+    bool clipToRectangleList (const RectangleList<int>& clipRegion)
     {
         currentState->clipToRectList (rectListToPathGeometry (clipRegion));
         return ! isClipEmpty();
@@ -742,7 +742,7 @@ private:
         sink->EndFigure (D2D1_FIGURE_END_CLOSED);
     }
 
-    static ID2D1PathGeometry* rectListToPathGeometry (const RectangleList& clipRegion)
+    static ID2D1PathGeometry* rectListToPathGeometry (const RectangleList<int>& clipRegion)
     {
         ID2D1PathGeometry* p = nullptr;
         Direct2DFactories::getInstance().d2dFactory->CreatePathGeometry (&p);

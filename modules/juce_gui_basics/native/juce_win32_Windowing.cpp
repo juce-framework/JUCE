@@ -333,7 +333,7 @@ public:
 
     void blitToWindow (HWND hwnd, HDC dc, const bool transparent,
                        const int x, const int y,
-                       const RectangleList& maskedRegion,
+                       const RectangleList<int>& maskedRegion,
                        const uint8 updateLayeredWindowAlpha) noexcept
     {
         SetMapMode (dc, MM_TEXT);
@@ -1487,7 +1487,7 @@ private:
 
                 Image& offscreenImage = offscreenImageGenerator.getImage (transparent, w, h);
 
-                RectangleList contextClip;
+                RectangleList<int> contextClip;
                 const Rectangle<int> clipBounds (w, h);
 
                 bool needToPaintAll = true;

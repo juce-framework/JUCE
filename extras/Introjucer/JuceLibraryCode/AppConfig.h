@@ -49,6 +49,10 @@
  //#define JUCE_DONT_AUTOLINK_TO_WIN32_LIBRARIES
 #endif
 
+#ifndef    JUCE_INCLUDE_ZLIB_CODE
+ //#define JUCE_INCLUDE_ZLIB_CODE
+#endif
+
 //==============================================================================
 // juce_graphics flags:
 

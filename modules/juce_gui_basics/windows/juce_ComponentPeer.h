@@ -165,6 +165,11 @@ public:
     /** Converts a screen area to a position relative to the top-left of this component. */
     virtual Rectangle<int> globalToLocal (const Rectangle<int>& screenPosition);
 
+    /** Returns the area in peer coordinates that is covered by the given sub-comp (which
+        may be at any depth)
+    */
+    Rectangle<int> getAreaCoveredBy (Component& subComponent) const;
+
     /** Minimises the window. */
     virtual void setMinimised (bool shouldBeMinimised) = 0;
 
@@ -364,7 +369,7 @@ protected:
     //==============================================================================
     Component& component;
     const int styleFlags;
-    RectangleList maskedRegion;
+    RectangleList<int> maskedRegion;
     Rectangle<int> lastNonFullscreenBounds;
     ComponentBoundsConstrainer* constrainer;
 

@@ -42,7 +42,7 @@ public:
     //==============================================================================
     LowLevelGraphicsSoftwareRenderer (const Image& imageToRenderOnto);
     LowLevelGraphicsSoftwareRenderer (const Image& imageToRenderOnto, Point<int> origin,
-                                      const RectangleList& initialClip);
+                                      const RectangleList<int>& initialClip);
     ~LowLevelGraphicsSoftwareRenderer();
 
     bool isVectorDevice() const override;
@@ -50,7 +50,7 @@ public:
     void addTransform (const AffineTransform&) override;
     float getScaleFactor() override;
     bool clipToRectangle (const Rectangle<int>&) override;
-    bool clipToRectangleList (const RectangleList&) override;
+    bool clipToRectangleList (const RectangleList<int>&) override;
     void excludeClipRectangle (const Rectangle<int>&) override;
     void clipToPath (const Path&, const AffineTransform&) override;
     void clipToImageAlpha (const Image&, const AffineTransform&) override;

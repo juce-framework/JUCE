@@ -383,7 +383,7 @@ public:
         @param alphaThreshold   for a semi-transparent image, any pixels whose alpha is
                                 above this level will be considered opaque
     */
-    void createSolidAreaMask (RectangleList& result, float alphaThreshold) const;
+    void createSolidAreaMask (RectangleList<int>& result, float alphaThreshold) const;
 
     //==============================================================================
     /** Returns a NamedValueSet that is attached to the image and which can be used for

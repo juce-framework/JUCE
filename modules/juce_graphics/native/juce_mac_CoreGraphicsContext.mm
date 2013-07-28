@@ -192,7 +192,7 @@ bool CoreGraphicsContext::clipToRectangle (const Rectangle<int>& r)
     return ! isClipEmpty();
 }
 
-bool CoreGraphicsContext::clipToRectangleListWithoutTest (const RectangleList& clipRegion)
+bool CoreGraphicsContext::clipToRectangleListWithoutTest (const RectangleList<int>& clipRegion)
 {
     if (clipRegion.isEmpty())
     {
@@ -216,14 +216,14 @@ bool CoreGraphicsContext::clipToRectangleListWithoutTest (const RectangleList& c
     }
 }
 
-bool CoreGraphicsContext::clipToRectangleList (const RectangleList& clipRegion)
+bool CoreGraphicsContext::clipToRectangleList (const RectangleList<int>& clipRegion)
 {
     return clipToRectangleListWithoutTest (clipRegion) && ! isClipEmpty();
 }
 
 void CoreGraphicsContext::excludeClipRectangle (const Rectangle<int>& r)
 {
-    RectangleList remaining (getClipBounds());
+    RectangleList<int> remaining (getClipBounds());
     remaining.subtract (r);
     clipToRectangleListWithoutTest (remaining);
 }

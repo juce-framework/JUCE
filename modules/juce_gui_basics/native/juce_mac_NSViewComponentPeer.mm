@@ -64,7 +64,7 @@ public:
         appFocusChangeCallback = appFocusChanged;
         isEventBlockedByModalComps = checkEventBlockedByModalComps;
 
-        NSRect r = NSMakeRect (0, 0, (CGFloat) component.getWidth(), (CGFloat) component.getHeight());
+        NSRect r = makeNSRect (component.getLocalBounds());
 
         view = [createViewInstance() initWithFrame: r];
         setOwner (view, this);
@@ -225,8 +225,7 @@ public:
     {
         fullScreen = isNowFullScreen;
 
-        NSRect r = NSMakeRect ((CGFloat) newBounds.getX(), (CGFloat) newBounds.getY(),
-                               (CGFloat) jmax (0, newBounds.getWidth()), (CGFloat) jmax (0, newBounds.getHeight()));
+        NSRect r = makeNSRect (newBounds);
 
         if (isSharedWindow)
         {
@@ -770,7 +769,7 @@ public:
             const int clipW = (int) (r.size.width  + 0.5f);
             const int clipH = (int) (r.size.height + 0.5f);
 
-            RectangleList clip;
+            RectangleList<int> clip;
             getClipRects (clip, offset, clipW, clipH);
 
             if (! clip.isEmpty())
@@ -1192,7 +1191,7 @@ private:
         object_setInstanceVariable (viewOrWindow, "owner", newOwner);
     }
 
-    void getClipRects (RectangleList& clip, const Point<int> offset, const int clipW, const int clipH)
+    void getClipRects (RectangleList<int>& clip, const Point<int> offset, const int clipW, const int clipH)
     {
         const NSRect* rects = nullptr;
         NSInteger numRects = 0;

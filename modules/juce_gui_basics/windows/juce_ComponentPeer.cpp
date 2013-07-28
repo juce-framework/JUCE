@@ -399,6 +399,14 @@ Rectangle<int> ComponentPeer::globalToLocal (const Rectangle<int>& screenPositio
     return screenPosition.withPosition (globalToLocal (screenPosition.getPosition()));
 }
 
+Rectangle<int> ComponentPeer::getAreaCoveredBy (Component& subComponent) const
+{
+    jassert (component.isParentOf (&subComponent)); // this can only be used for child components.
+
+    return Component::ComponentHelpers::scaledScreenPosToUnscaled
+            (component.getLocalArea (&subComponent, subComponent.getLocalBounds()));
+}
+
 //==============================================================================
 namespace DragHelpers
 {

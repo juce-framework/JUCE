@@ -522,7 +522,7 @@ void Image::desaturate()
     }
 }
 
-void Image::createSolidAreaMask (RectangleList& result, const float alphaThreshold) const
+void Image::createSolidAreaMask (RectangleList<int>& result, const float alphaThreshold) const
 {
     if (hasAlphaChannel())
     {

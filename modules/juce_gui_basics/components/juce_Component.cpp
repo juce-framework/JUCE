@@ -335,7 +335,7 @@ struct Component::ComponentHelpers
         return nothingChanged;
     }
 
-    static void subtractObscuredRegions (const Component& comp, RectangleList& result,
+    static void subtractObscuredRegions (const Component& comp, RectangleList<int>& result,
                                          Point<int> delta, const Rectangle<int>& clipRect,
                                          const Component* const compToAvoid)
     {
@@ -743,7 +743,7 @@ public:
 
 private:
     Image image;
-    RectangleList validArea;
+    RectangleList<int> validArea;
     Component& owner;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (StandardCachedComponentImage)
@@ -2114,7 +2114,7 @@ Rectangle<int> Component::getBoundsInParent() const noexcept
                                       : bounds.transformedBy (*affineTransform);
 }
 
-void Component::getVisibleArea (RectangleList& result, const bool includeSiblings) const
+void Component::getVisibleArea (RectangleList<int>& result, const bool includeSiblings) const
 {
     result.clear();
     const Rectangle<int> unclipped (ComponentHelpers::getUnclippedArea (*this));

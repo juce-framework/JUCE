@@ -85,7 +85,7 @@ bool Graphics::reduceClipRegion (const int x, const int y, const int w, const in
     return reduceClipRegion (Rectangle<int> (x, y, w, h));
 }
 
-bool Graphics::reduceClipRegion (const RectangleList& clipRegion)
+bool Graphics::reduceClipRegion (const RectangleList<int>& clipRegion)
 {
     saveStateIfPending();
     return context.clipToRectangleList (clipRegion);

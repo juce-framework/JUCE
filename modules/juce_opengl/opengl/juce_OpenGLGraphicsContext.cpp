@@ -978,13 +978,13 @@ struct StateHelpers
             RenderingHelpers::FloatRectangleRasterisingInfo (r).iterate (frr);
         }
 
-        void add (const RectangleList& list, const PixelARGB colour) noexcept
+        void add (const RectangleList<int>& list, const PixelARGB colour) noexcept
         {
             for (const Rectangle<int>* i = list.begin(), * const e = list.end(); i != e; ++i)
                 add (*i, colour);
         }
 
-        void add (const RectangleList& list, const Rectangle<int>& clip, const PixelARGB colour) noexcept
+        void add (const RectangleList<int>& list, const Rectangle<int>& clip, const PixelARGB colour) noexcept
         {
             for (const Rectangle<int>* i = list.begin(), * const e = list.end(); i != e; ++i)
             {
@@ -1318,7 +1318,7 @@ public:
 
     virtual Ptr clone() const = 0;
     virtual Ptr clipToRectangle (const Rectangle<int>&) = 0;
-    virtual Ptr clipToRectangleList (const RectangleList&) = 0;
+    virtual Ptr clipToRectangleList (const RectangleList<int>&) = 0;
     virtual Ptr excludeClipRectangle (const Rectangle<int>&) = 0;
     virtual Ptr clipToPath (const Path& p, const AffineTransform&) = 0;
     virtual Ptr clipToImageAlpha (const OpenGLTextureFromImage&, const AffineTransform&) = 0;
@@ -1369,7 +1369,7 @@ public:
         state.shaderQuadQueue.flush();
     }
 
-    ClipRegion_Mask (GLState& state_, const RectangleList& r)
+    ClipRegion_Mask (GLState& state_, const RectangleList<int>& r)
         : ClipRegionBase (state_),
           clip (r.getBounds()),
           maskArea (clip)
@@ -1397,13 +1397,13 @@ public:
         return clip.isEmpty() ? nullptr : this;
     }
 
-    Ptr clipToRectangleList (const RectangleList& r)
+    Ptr clipToRectangleList (const RectangleList<int>& r)
     {
         clip = clip.getIntersection (r.getBounds());
         if (clip.isEmpty())
             return Ptr();
 
-        RectangleList excluded (clip);
+        RectangleList<int> excluded (clip);
 
         if (excluded.subtract (r))
         {
@@ -1640,7 +1640,7 @@ public:
         : ClipRegionBase (state_), clip (r)
     {}
 
-    ClipRegion_RectangleList (GLState& state_, const RectangleList& r) noexcept
+    ClipRegion_RectangleList (GLState& state_, const RectangleList<int>& r) noexcept
         : ClipRegionBase (state_), clip (r)
     {}
 
@@ -1704,13 +1704,13 @@ public:
         }
     }
 
-    Rectangle<int> getClipBounds() const                { return clip.getBounds(); }
-    Ptr clipToRectangle (const Rectangle<int>& r)       { return clip.clipTo (r) ? this : nullptr; }
-    Ptr clipToRectangleList (const RectangleList& r)    { return clip.clipTo (r) ? this : nullptr; }
-    Ptr excludeClipRectangle (const Rectangle<int>& r)  { clip.subtract (r); return clip.isEmpty() ? nullptr : this; }
+    Rectangle<int> getClipBounds() const                    { return clip.getBounds(); }
+    Ptr clipToRectangle (const Rectangle<int>& r)           { return clip.clipTo (r) ? this : nullptr; }
+    Ptr clipToRectangleList (const RectangleList<int>& r)   { return clip.clipTo (r) ? this : nullptr; }
+    Ptr excludeClipRectangle (const Rectangle<int>& r)      { clip.subtract (r); return clip.isEmpty() ? nullptr : this; }
 
 private:
-    RectangleList clip;
+    RectangleList<int> clip;
 
     Ptr toMask() const    { return new ClipRegion_Mask (state, clip); }
 
@@ -1796,21 +1796,21 @@ public:
         return clip != nullptr;
     }
 
-    bool clipToRectangleList (const RectangleList& r)
+    bool clipToRectangleList (const RectangleList<int>& r)
     {
         if (clip != nullptr)
         {
             if (transform.isOnlyTranslated)
             {
                 cloneClipIfMultiplyReferenced();
-                RectangleList offsetList (r);
+                RectangleList<int> offsetList (r);
                 offsetList.offsetAll (transform.xOffset, transform.yOffset);
                 clip = clip->clipToRectangleList (offsetList);
             }
             else if (transform.isIntegerScaling)
             {
                 cloneClipIfMultiplyReferenced();
-                RectangleList scaledList;
+                RectangleList<int> scaledList;
 
                 for (const Rectangle<int>* i = r.begin(), * const e = r.end(); i != e; ++i)
                     scaledList.add (transform.transformed (*i).getSmallestIntegerContainer());
@@ -2124,7 +2124,7 @@ public:
     bool isClipEmpty() const                                            { return stack->clip == nullptr; }
     bool clipRegionIntersects (const Rectangle<int>& r)                 { return stack->clipRegionIntersects (r); }
     bool clipToRectangle (const Rectangle<int>& r)                      { return stack->clipToRectangle (r); }
-    bool clipToRectangleList (const RectangleList& r)                   { return stack->clipToRectangleList (r); }
+    bool clipToRectangleList (const RectangleList<int>& r)              { return stack->clipToRectangleList (r); }
     void excludeClipRectangle (const Rectangle<int>& r)                 { stack->excludeClipRectangle (r); }
     void clipToPath (const Path& path, const AffineTransform& t)        { stack->clipToPath (path, t); }
     void clipToImageAlpha (const Image& im, const AffineTransform& t)   { stack->clipToImageAlpha (im, t); }

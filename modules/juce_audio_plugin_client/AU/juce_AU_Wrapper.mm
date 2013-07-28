@@ -932,7 +932,7 @@ public:
         r.size.width = component.getWidth();
         r.size.height = component.getHeight();
         [[view superview] setFrame: r];
-        [view setFrame: NSMakeRect (0, 0, component.getWidth(), component.getHeight())];
+        [view setFrame: makeNSRect (component.getLocalBounds())];
         [view setNeedsDisplay: YES];
     }
 
@@ -961,7 +961,7 @@ public:
         static NSView* createViewFor (AudioProcessor* filter, JuceAU* au, AudioProcessorEditor* const editor)
         {
             EditorCompHolder* editorCompHolder = new EditorCompHolder (editor);
-            NSRect r = NSMakeRect (0, 0, editorCompHolder->getWidth(), editorCompHolder->getHeight());
+            NSRect r = makeNSRect (editorCompHolder->getLocalBounds());
 
             static JuceUIViewClass cls;
             NSView* view = [[cls.createInstance() initWithFrame: r] autorelease];
@@ -999,7 +999,7 @@ public:
                 r.size.width = editor->getWidth();
                 r.size.height = editor->getHeight();
                 [[view superview] setFrame: r];
-                [view setFrame: NSMakeRect (0, 0, editor->getWidth(), editor->getHeight())];
+                [view setFrame: makeNSRect (editor->getLocalBounds())];
                 [view setNeedsDisplay: YES];
             }
         }

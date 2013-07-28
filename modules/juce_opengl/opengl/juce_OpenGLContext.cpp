@@ -119,7 +119,7 @@ public:
         return true;
     }
 
-    void clearRegionInFrameBuffer (const RectangleList& list, const float scaleFactor)
+    void clearRegionInFrameBuffer (const RectangleList<int>& list, const float scaleFactor)
     {
         glClearColor (0, 0, 0, 0);
         glEnable (GL_SCISSOR_TEST);
@@ -211,7 +211,7 @@ public:
         if (! ensureFrameBufferSize())
             return;
 
-        RectangleList invalid (viewportArea);
+        RectangleList<int> invalid (viewportArea);
         invalid.subtract (validArea);
         validArea = viewportArea;
 
@@ -361,7 +361,7 @@ public:
     Component& component;
 
     OpenGLFrameBuffer cachedImageFrameBuffer;
-    RectangleList validArea;
+    RectangleList<int> validArea;
     Rectangle<int> viewportArea;
     double scale;
 
@@ -429,8 +429,8 @@ public:
             if (CachedImage* const c = CachedImage::get (comp))
                 c->handleResize();
 
-            context.nativeContext->updateWindowPosition (comp.getTopLevelComponent()
-                                                            ->getLocalArea (&comp, comp.getLocalBounds()));
+            if (ComponentPeer* peer = comp.getTopLevelComponent()->getPeer())
+                context.nativeContext->updateWindowPosition (peer->getAreaCoveredBy (comp));
         }
     }
 

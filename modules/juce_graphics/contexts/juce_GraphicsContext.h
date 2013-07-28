@@ -26,7 +26,7 @@
 #define JUCE_GRAPHICSCONTEXT_H_INCLUDED
 
 #include "../fonts/juce_Font.h"
-#include "../geometry/juce_Rectangle.h"
+#include "../geometry/juce_RectangleList.h"
 #include "../geometry/juce_PathStrokeType.h"
 #include "../geometry/juce_Line.h"
 #include "../colour/juce_Colours.h"
@@ -35,7 +35,6 @@
 class LowLevelGraphicsContext;
 class Image;
 class FillType;
-class RectangleList;
 
 
 //==============================================================================
@@ -597,7 +596,7 @@ public:
         @returns true if the resulting clipping region is non-zero in size
         @see setOrigin, clipRegionIntersects
     */
-    bool reduceClipRegion (const RectangleList& clipRegion);
+    bool reduceClipRegion (const RectangleList<int>& clipRegion);
 
     /** Intersects the current clipping region with a path.
 

@@ -378,9 +378,9 @@ const Desktop::Displays::Display& Desktop::Displays::getDisplayContaining (Point
     return *best;
 }
 
-RectangleList Desktop::Displays::getRectangleList (bool userAreasOnly) const
+RectangleList<int> Desktop::Displays::getRectangleList (bool userAreasOnly) const
 {
-    RectangleList rl;
+    RectangleList<int> rl;
 
     for (int i = 0; i < displays.size(); ++i)
     {

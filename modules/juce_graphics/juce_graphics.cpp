@@ -105,7 +105,6 @@ namespace juce
 #include "geometry/juce_Path.cpp"
 #include "geometry/juce_PathIterator.cpp"
 #include "geometry/juce_PathStrokeType.cpp"
-#include "geometry/juce_RectangleList.cpp"
 #include "placement/juce_Justification.cpp"
 #include "placement/juce_RectanglePlacement.cpp"
 #include "contexts/juce_GraphicsContext.cpp"

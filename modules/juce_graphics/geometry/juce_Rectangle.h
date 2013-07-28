@@ -26,7 +26,6 @@
 #define JUCE_RECTANGLE_H_INCLUDED
 
 #include "juce_Point.h"
-class RectangleList;
 
 
 //==============================================================================
@@ -809,14 +808,14 @@ public:
     JUCE_DEPRECATED_WITH_BODY (Rectangle transformed (const AffineTransform& t) const noexcept, { return transformedBy (t); })
 
 private:
-    friend class RectangleList;
+    template <typename OtherType> friend class Rectangle;
+    template <typename OtherType> friend class RectangleList;
+
     Point<ValueType> pos;
     ValueType w, h;
 
     static int parseIntAfterSpace (const String& s) noexcept
         { return s.getCharPointer().findEndOfWhitespace().getIntValue32(); }
-
-    template <typename OtherType> friend class Rectangle;
 
     void copyWithRounding (Rectangle<int>& result) const noexcept    { result = getSmallestIntegerContainer(); }
     void copyWithRounding (Rectangle<float>& result) const noexcept  { result = toFloat(); }

@@ -352,7 +352,7 @@ public:
         const Display& getDisplayContaining (Point<int> position) const noexcept;
 
         /** Returns a RectangleList made up of all the displays. */
-        RectangleList getRectangleList (bool userAreasOnly) const;
+        RectangleList<int> getRectangleList (bool userAreasOnly) const;
 
         /** Returns the smallest bounding box which contains all the displays. */
         Rectangle<int> getTotalBounds (bool userAreasOnly) const;

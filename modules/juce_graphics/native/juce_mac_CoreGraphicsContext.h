@@ -40,7 +40,7 @@ public:
     float getScaleFactor() override;
     float getTargetDeviceScaleFactor() override  { return targetScale; }
     bool clipToRectangle (const Rectangle<int>&) override;
-    bool clipToRectangleList (const RectangleList&) override;
+    bool clipToRectangleList (const RectangleList<int>&) override;
     void excludeClipRectangle (const Rectangle<int>&) override;
     void clipToPath (const Path&, const AffineTransform&) override;
     void clipToImageAlpha (const Image&, const AffineTransform&) override;
@@ -113,7 +113,7 @@ private:
     void flip() const;
     void applyTransform (const AffineTransform&) const;
     void drawImage (const Image&, const AffineTransform&, bool fillEntireClipAsTiles);
-    bool clipToRectangleListWithoutTest (const RectangleList&);
+    bool clipToRectangleListWithoutTest (const RectangleList<int>&);
     void fillCGRect (const CGRect&, bool replaceExistingContents);
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CoreGraphicsContext)

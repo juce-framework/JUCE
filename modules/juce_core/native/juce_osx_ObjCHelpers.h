@@ -55,6 +55,15 @@ namespace
     {
         return [NSString string];
     }
+
+    template <typename RectangleType>
+    static NSRect makeNSRect (const RectangleType& r) noexcept
+    {
+        return NSMakeRect (static_cast <CGFloat> (r.getX()),
+                           static_cast <CGFloat> (r.getY()),
+                           static_cast <CGFloat> (r.getWidth()),
+                           static_cast <CGFloat> (r.getHeight()));
+    }
 }
 
 //==============================================================================

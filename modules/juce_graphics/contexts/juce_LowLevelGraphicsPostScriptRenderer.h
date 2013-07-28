@@ -52,7 +52,7 @@ public:
     float getScaleFactor() override;
 
     bool clipToRectangle (const Rectangle<int>&) override;
-    bool clipToRectangleList (const RectangleList&) override;
+    bool clipToRectangleList (const RectangleList<int>&) override;
     void excludeClipRectangle (const Rectangle<int>&) override;
     void clipToPath (const Path&, const AffineTransform&) override;
     void clipToImageAlpha (const Image&, const AffineTransform&) override;
@@ -100,7 +100,7 @@ protected:
         SavedState();
         ~SavedState();
 
-        RectangleList clip;
+        RectangleList<int> clip;
         int xOffset, yOffset;
         FillType fillType;
         Font font;

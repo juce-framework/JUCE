@@ -244,7 +244,7 @@ void TabbedComponent::paint (Graphics& g)
 
     if (outlineThickness > 0)
     {
-        RectangleList rl (content);
+        RectangleList<int> rl (content);
         rl.subtract (outline.subtractedFrom (content));
 
         g.reduceClipRegion (rl);
