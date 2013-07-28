@@ -284,14 +284,17 @@ public:
     /** Removes all elements from the array. */
     void clear();
 
-    /** Removes a string from the array.
+    /** Removes all elements from the array without freeing the array's allocated storage.
+        @see clear
+    */
+    void clearQuick();
 
+    /** Removes a string from the array.
         If the index is out-of-range, no action will be taken.
     */
     void remove (int index);
 
     /** Finds a string in the array and removes it.
-
         This will remove the first occurrence of the given string from the array. The
         comparison may be case-insensitive depending on the ignoreCase parameter.
     */

@@ -135,6 +135,11 @@ void StringArray::clear()
     strings.clear();
 }
 
+void StringArray::clearQuick()
+{
+    strings.clearQuick();
+}
+
 const String& StringArray::operator[] (const int index) const noexcept
 {
     if (isPositiveAndBelow (index, strings.size()))
