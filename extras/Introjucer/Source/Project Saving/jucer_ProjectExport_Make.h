@@ -264,6 +264,10 @@ private:
             << "# Don't edit this file! Your changes will be overwritten when you re-save the Introjucer project!" << newLine
             << newLine;
 
+        out << "# (this disables dependency generation if multiple architectures are set)" << newLine
+            << "DEPFLAGS := $(if $(word 2, $(TARGET_ARCH)), , -MMD)" << newLine
+            << newLine;
+
         out << "ifndef CONFIG" << newLine
             << "  CONFIG=" << escapeSpaces (getConfiguration(0)->getName()) << newLine
             << "endif" << newLine
@@ -271,10 +275,6 @@ private:
 
         for (ConstConfigIterator config (*this); config.next();)
             writeConfig (out, *config);
-
-        out << "# (this disables dependency generation if multiple architectures are set)" << newLine
-            << "DEPFLAGS := $(if $(word 2, $(TARGET_ARCH)), , -MMD)" << newLine
-            << newLine;
 
         writeObjects (out, files);
 
