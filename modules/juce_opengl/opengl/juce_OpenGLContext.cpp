@@ -793,15 +793,15 @@ void OpenGLContext::copyTexture (const Rectangle<int>& targetClipArea,
                       vOffsetAndScale (prog, "vOffsetAndScale")
                 {}
 
-                void set (const float targetWidth, const float targetHeight, const Rectangle<float>& bounds, bool flippedVertically) const
+                void set (const float targetWidth, const float targetHeight, const Rectangle<float>& bounds, bool flipVertically) const
                 {
                     const GLfloat m[] = { bounds.getX(), bounds.getY(), bounds.getWidth(), bounds.getHeight() };
                     textureBounds.set (m, 4);
                     imageTexture.set (0);
                     screenSize.set (targetWidth, targetHeight);
 
-                    vOffsetAndScale.set (flippedVertically ? 0.0f : 1.0f,
-                                         flippedVertically ? 1.0f : -1.0f);
+                    vOffsetAndScale.set (flipVertically ? 0.0f : 1.0f,
+                                         flipVertically ? 1.0f : -1.0f);
                 }
 
                 OpenGLShaderProgram::Attribute positionAttribute;

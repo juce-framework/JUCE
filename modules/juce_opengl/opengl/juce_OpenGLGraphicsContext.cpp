@@ -1311,7 +1311,7 @@ private:
 class ClipRegionBase  : public SingleThreadedReferenceCountedObject
 {
 public:
-    ClipRegionBase (GLState& state_) noexcept : state (state_) {}
+    ClipRegionBase (GLState& s) noexcept : state (s) {}
     virtual ~ClipRegionBase() {}
 
     typedef ReferenceCountedObjectPtr<ClipRegionBase> Ptr;
@@ -1369,8 +1369,8 @@ public:
         state.shaderQuadQueue.flush();
     }
 
-    ClipRegion_Mask (GLState& state_, const RectangleList<int>& r)
-        : ClipRegionBase (state_),
+    ClipRegion_Mask (GLState& s, const RectangleList<int>& r)
+        : ClipRegionBase (s),
           clip (r.getBounds()),
           maskArea (clip)
     {
@@ -1636,12 +1636,12 @@ private:
 class ClipRegion_RectangleList  : public ClipRegionBase
 {
 public:
-    ClipRegion_RectangleList (GLState& state_, const Rectangle<int>& r) noexcept
-        : ClipRegionBase (state_), clip (r)
+    ClipRegion_RectangleList (GLState& s, const Rectangle<int>& r) noexcept
+        : ClipRegionBase (s), clip (r)
     {}
 
-    ClipRegion_RectangleList (GLState& state_, const RectangleList<int>& r) noexcept
-        : ClipRegionBase (state_), clip (r)
+    ClipRegion_RectangleList (GLState& s, const RectangleList<int>& r) noexcept
+        : ClipRegionBase (s), clip (r)
     {}
 
     Ptr clone() const       { return new ClipRegion_RectangleList (state, clip); }
@@ -1758,10 +1758,10 @@ private:
 class SavedState
 {
 public:
-    SavedState (GLState* const state_)
-        : clip (new ClipRegion_RectangleList (*state_, state_->target.bounds)),
+    SavedState (GLState* const s)
+        : clip (new ClipRegion_RectangleList (*s, s->target.bounds)),
           transform (0, 0), interpolationQuality (Graphics::mediumResamplingQuality),
-          state (state_), transparencyLayerAlpha (1.0f)
+          state (s), transparencyLayerAlpha (1.0f)
     {}
 
     SavedState (const SavedState& other)
