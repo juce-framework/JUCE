@@ -381,7 +381,7 @@ namespace NumberToStringConverters
     // pass in a pointer to the END of a buffer..
     static char* numberToString (char* t, const int64 n) noexcept
     {
-        if (n > 0)
+        if (n >= 0)
             return printDigits (t, static_cast<uint64> (n));
 
         // NB: this needs to be careful not to call -std::numeric_limits<int64>::min(),
@@ -398,7 +398,7 @@ namespace NumberToStringConverters
 
     static char* numberToString (char* t, const int n) noexcept
     {
-        if (n > 0)
+        if (n >= 0)
             return printDigits (t, static_cast<unsigned int> (n));
 
         // NB: this needs to be careful not to call -std::numeric_limits<int>::min(),
