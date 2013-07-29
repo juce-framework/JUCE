@@ -22,25 +22,33 @@
   ==============================================================================
 */
 
-AudioSampleBuffer::AudioSampleBuffer (const int numChannels_,
+AudioSampleBuffer::AudioSampleBuffer (const int numChans,
                                       const int numSamples) noexcept
-  : numChannels (numChannels_),
+  : numChannels (numChans),
     size (numSamples)
 {
     jassert (numSamples >= 0);
-    jassert (numChannels_ > 0);
+    jassert (numChans > 0);
 
     allocateData();
 }
 
 AudioSampleBuffer::AudioSampleBuffer (const AudioSampleBuffer& other) noexcept
   : numChannels (other.numChannels),
-    size (other.size)
+    size (other.size),
+    allocatedBytes (other.allocatedBytes)
 {
-    allocateData();
+    if (allocatedBytes == 0)
+    {
+        allocateChannels (other.channels, 0);
+    }
+    else
+    {
+        allocateData();
 
-    for (int i = 0; i < numChannels; ++i)
-        FloatVectorOperations::copy (channels[i], other.channels[i], size);
+        for (int i = 0; i < numChannels; ++i)
+            FloatVectorOperations::copy (channels[i], other.channels[i], size);
+    }
 }
 
 void AudioSampleBuffer::allocateData()
@@ -61,25 +69,25 @@ void AudioSampleBuffer::allocateData()
 }
 
 AudioSampleBuffer::AudioSampleBuffer (float* const* dataToReferTo,
-                                      const int numChannels_,
+                                      const int numChans,
                                       const int numSamples) noexcept
-    : numChannels (numChannels_),
+    : numChannels (numChans),
       size (numSamples),
       allocatedBytes (0)
 {
-    jassert (numChannels_ > 0);
+    jassert (numChans > 0);
     allocateChannels (dataToReferTo, 0);
 }
 
 AudioSampleBuffer::AudioSampleBuffer (float* const* dataToReferTo,
-                                      const int numChannels_,
+                                      const int numChans,
                                       const int startSample,
                                       const int numSamples) noexcept
-    : numChannels (numChannels_),
+    : numChannels (numChans),
       size (numSamples),
       allocatedBytes (0)
 {
-    jassert (numChannels_ > 0);
+    jassert (numChans > 0);
     allocateChannels (dataToReferTo, startSample);
 }
 

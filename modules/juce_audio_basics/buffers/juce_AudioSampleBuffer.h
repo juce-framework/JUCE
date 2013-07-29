@@ -96,16 +96,14 @@ public:
     AudioSampleBuffer (const AudioSampleBuffer& other) noexcept;
 
     /** Copies another buffer onto this one.
-
         This buffer's size will be changed to that of the other buffer.
     */
     AudioSampleBuffer& operator= (const AudioSampleBuffer& other) noexcept;
 
     /** Destructor.
-
         This will free any memory allocated by the buffer.
     */
-    virtual ~AudioSampleBuffer() noexcept;
+    ~AudioSampleBuffer() noexcept;
 
     //==============================================================================
     /** Returns the number of channels of audio data that this buffer contains.
