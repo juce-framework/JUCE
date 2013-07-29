@@ -364,7 +364,7 @@ String String::charToString (const juce_wchar character)
 namespace NumberToStringConverters
 {
     template <typename Type>
-    static inline char* printDigits (char* t, Type v) noexcept
+    static char* printDigits (char* t, Type v) noexcept
     {
         *--t = 0;
 
@@ -507,10 +507,9 @@ juce_wchar String::operator[] (int index) const noexcept
 
 int String::hashCode() const noexcept
 {
-    CharPointerType t (text);
     int result = 0;
 
-    while (! t.isEmpty())
+    for (CharPointerType t (text); ! t.isEmpty();)
         result = 31 * result + (int) t.getAndAdvance();
 
     return result;
@@ -518,10 +517,9 @@ int String::hashCode() const noexcept
 
 int64 String::hashCode64() const noexcept
 {
-    CharPointerType t (text);
     int64 result = 0;
 
-    while (! t.isEmpty())
+    for (CharPointerType t (text); ! t.isEmpty();)
         result = 101 * result + t.getAndAdvance();
 
     return result;

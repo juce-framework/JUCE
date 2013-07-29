@@ -59,6 +59,12 @@ public:
 
     static Point<int> screenPosToLocalPos (Component& comp, Point<int> pos)
     {
+        if (ComponentPeer* const peer = comp.getPeer())
+        {
+            pos = peer->globalToLocal (pos);
+            return comp.getLocalPoint (&peer->getComponent(), Component::ComponentHelpers::unscaledScreenPosToScaled (pos));
+        }
+
         return comp.getLocalPoint (nullptr, Component::ComponentHelpers::unscaledScreenPosToScaled (pos));
     }
 
@@ -66,9 +72,8 @@ public:
     {
         if (ComponentPeer* const peer = getPeer())
         {
+            Point<int> relativePos (Component::ComponentHelpers::unscaledScreenPosToScaled (peer->globalToLocal (screenPos)));
             Component& comp = peer->getComponent();
-            Point<int> relativePos (Component::ComponentHelpers::convertFromParentSpace (comp,
-                                            Component::ComponentHelpers::unscaledScreenPosToScaled (screenPos)));
 
             // (the contains() call is needed to test for overlapping desktop windows)
             if (comp.contains (relativePos))
