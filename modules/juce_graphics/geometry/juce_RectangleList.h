@@ -208,19 +208,19 @@ public:
 
         if (originalNumRects > 0)
         {
-            const ValueType x1 = rect.pos.x;
-            const ValueType y1 = rect.pos.y;
-            const ValueType x2 = x1 + rect.w;
-            const ValueType y2 = y1 + rect.h;
+            const ValueType x1 = rect.getX();
+            const ValueType y1 = rect.getY();
+            const ValueType x2 = x1 + rect.getWidth();
+            const ValueType y2 = y1 + rect.getHeight();
 
             for (int i = getNumRectangles(); --i >= 0;)
             {
                 RectangleType& r = rects.getReference (i);
 
-                const ValueType rx1 = r.pos.x;
-                const ValueType ry1 = r.pos.y;
-                const ValueType rx2 = rx1 + r.w;
-                const ValueType ry2 = ry1 + r.h;
+                const ValueType rx1 = r.getX();
+                const ValueType ry1 = r.getY();
+                const ValueType rx2 = rx1 + r.getWidth();
+                const ValueType ry2 = ry1 + r.getHeight();
 
                 if (! (x2 <= rx1 || x1 >= rx2 || y2 <= ry1 || y1 >= ry2))
                 {
@@ -228,12 +228,12 @@ public:
                     {
                         if (y1 <= ry1 && y2 >= ry2 && x2 >= rx2)
                         {
-                            r.w = x1 - rx1;
+                            r.setWidth (x1 - rx1);
                         }
                         else
                         {
-                            r.pos.x = x1;
-                            r.w = rx2 - x1;
+                            r.setX (x1);
+                            r.setWidth (rx2 - x1);
 
                             rects.insert (++i, RectangleType (rx1, ry1, x1 - rx1,  ry2 - ry1));
                             ++i;
@@ -241,8 +241,8 @@ public:
                     }
                     else if (x2 > rx1 && x2 < rx2)
                     {
-                        r.pos.x = x2;
-                        r.w = rx2 - x2;
+                        r.setX (x2);
+                        r.setWidth (rx2 - x2);
 
                         if (y1 > ry1 || y2 < ry2 || x1 > rx1)
                         {
@@ -254,12 +254,12 @@ public:
                     {
                         if (x1 <= rx1 && x2 >= rx2 && y2 >= ry2)
                         {
-                            r.h = y1 - ry1;
+                            r.setHeight (y1 - ry1);
                         }
                         else
                         {
-                            r.pos.y = y1;
-                            r.h = ry2 - y1;
+                            r.setY (y1);
+                            r.setHeight (ry2 - y1);
 
                             rects.insert (++i, RectangleType (rx1, ry1, rx2 - rx1, y1 - ry1));
                             ++i;
@@ -267,8 +267,8 @@ public:
                     }
                     else if (y2 > ry1 && y2 < ry2)
                     {
-                        r.pos.y = y2;
-                        r.h = ry2 - y2;
+                        r.setY (y2);
+                        r.setHeight (ry2 - y2);
 
                         if (x1 > rx1 || x2 < rx2 || y1 > ry1)
                         {
@@ -324,7 +324,7 @@ public:
             {
                 RectangleType& r = rects.getReference (i);
 
-                if (! rect.intersectRectangle (r.pos.x, r.pos.y, r.w, r.h))
+                if (! rect.intersectRectangle (r))
                     rects.remove (i);
                 else
                     notEmpty = true;
@@ -358,7 +358,7 @@ public:
             {
                 RectangleType r (other.rects.getReference (i));
 
-                if (rect.intersectRectangle (r.pos.x, r.pos.y, r.w, r.h))
+                if (rect.intersectRectangle (r))
                     result.rects.add (r);
             }
         }
@@ -387,7 +387,7 @@ public:
             {
                 RectangleType r (rects.getReference (i));
 
-                if (rect.intersectRectangle (r.pos.x, r.pos.y, r.w, r.h))
+                if (rect.intersectRectangle (r))
                     destRegion.rects.add (r);
             }
         }
@@ -496,17 +496,17 @@ public:
 
         const RectangleType& r = rects.getReference (0);
 
-        ValueType minX = r.pos.x;
-        ValueType minY = r.pos.y;
-        ValueType maxX = minX + r.w;
-        ValueType maxY = minY + r.h;
+        ValueType minX = r.getX();
+        ValueType minY = r.getY();
+        ValueType maxX = minX + r.getWidth();
+        ValueType maxY = minY + r.getHeight();
 
         for (int i = rects.size(); --i > 0;)
         {
             const RectangleType& r2 = rects.getReference (i);
 
-            minX = jmin (minX, r2.pos.x);
-            minY = jmin (minY, r2.pos.y);
+            minX = jmin (minX, r2.getX());
+            minY = jmin (minY, r2.getY());
             maxX = jmax (maxX, r2.getRight());
             maxY = jmax (maxY, r2.getBottom());
         }
@@ -525,18 +525,18 @@ public:
         for (int i = 0; i < getNumRectangles() - 1; ++i)
         {
             RectangleType& r = rects.getReference (i);
-            const ValueType rx1 = r.pos.x;
-            const ValueType ry1 = r.pos.y;
-            const ValueType rx2 = rx1 + r.w;
-            const ValueType ry2 = ry1 + r.h;
+            const ValueType rx1 = r.getX();
+            const ValueType ry1 = r.getY();
+            const ValueType rx2 = rx1 + r.getWidth();
+            const ValueType ry2 = ry1 + r.getHeight();
 
             for (int j = rects.size(); --j > i;)
             {
                 RectangleType& r2 = rects.getReference (j);
-                const ValueType jrx1 = r2.pos.x;
-                const ValueType jry1 = r2.pos.y;
-                const ValueType jrx2 = jrx1 + r2.w;
-                const ValueType jry2 = jry1 + r2.h;
+                const ValueType jrx1 = r2.getX();
+                const ValueType jry1 = r2.getY();
+                const ValueType jrx2 = jrx1 + r2.getWidth();
+                const ValueType jry2 = jry1 + r2.getHeight();
 
                 // if the vertical edges of any blocks are touching and their horizontals don't
                 // line up, split them horizontally..
@@ -544,7 +544,7 @@ public:
                 {
                     if (jry1 > ry1 && jry1 < ry2)
                     {
-                        r.h = jry1 - ry1;
+                        r.setHeight (jry1 - ry1);
                         rects.add (RectangleType (rx1, jry1, rx2 - rx1, ry2 - jry1));
                         i = -1;
                         break;
@@ -552,21 +552,21 @@ public:
 
                     if (jry2 > ry1 && jry2 < ry2)
                     {
-                        r.h = jry2 - ry1;
+                        r.setHeight (jry2 - ry1);
                         rects.add (RectangleType (rx1, jry2, rx2 - rx1, ry2 - jry2));
                         i = -1;
                         break;
                     }
                     else if (ry1 > jry1 && ry1 < jry2)
                     {
-                        r2.h = ry1 - jry1;
+                        r2.setHeight (ry1 - jry1);
                         rects.add (RectangleType (jrx1, ry1, jrx2 - jrx1, jry2 - ry1));
                         i = -1;
                         break;
                     }
                     else if (ry2 > jry1 && ry2 < jry2)
                     {
-                        r2.h = ry2 - jry1;
+                        r2.setHeight (ry2 - jry1);
                         rects.add (RectangleType (jrx1, ry2, jrx2 - jrx1, jry2 - ry2));
                         i = -1;
                         break;
@@ -592,13 +592,16 @@ public:
     }
 
     /** Adds an x and y value to all the coordinates. */
-    void offsetAll (ValueType dx, ValueType dy) noexcept
+    void offsetAll (Point<ValueType> offset) noexcept
     {
         for (RectangleType* r = rects.begin(), * const e = rects.end(); r != e; ++r)
-        {
-            r->pos.x += dx;
-            r->pos.y += dy;
-        }
+            *r += offset;
+    }
+
+    /** Adds an x and y value to all the coordinates. */
+    void offsetAll (ValueType dx, ValueType dy) noexcept
+    {
+        offsetAll (Point<ValueType> (dx, dy));
     }
 
     /** Scales all the coordinates. */

@@ -126,7 +126,8 @@ public:
         return r.transformedBy (complexTransform);
     }
 
-    Rectangle<int> deviceSpaceToUserSpace (const Rectangle<int>& r) const noexcept
+    template <typename Type>
+    Rectangle<Type> deviceSpaceToUserSpace (const Rectangle<Type>& r) const noexcept
     {
         return isOnlyTranslated ? r.translated (-xOffset, -yOffset)
                                 : r.transformedBy (complexTransform.inverted());

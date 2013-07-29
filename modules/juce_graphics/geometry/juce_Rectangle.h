@@ -529,9 +529,9 @@ public:
         return Rectangle();
     }
 
-    /** Clips a rectangle so that it lies only within this one.
+    /** Clips a set of rectangle coordinates so that they lie only within this one.
         This is a non-static version of intersectRectangles().
-        Returns false if the two regions didn't overlap.
+        Returns false if the two rectangles didn't overlap.
     */
     bool intersectRectangle (ValueType& otherX, ValueType& otherY, ValueType& otherW, ValueType& otherH) const noexcept
     {
@@ -551,6 +551,15 @@ public:
         }
 
         return false;
+    }
+
+    /** Clips a rectangle so that it lies only within this one.
+        Returns false if the two rectangles didn't overlap.
+    */
+    bool intersectRectangle (Rectangle<ValueType>& rectangleToClip) const noexcept
+    {
+        return intersectRectangle (rectangleToClip.pos.x, rectangleToClip.pos.y,
+                                   rectangleToClip.w, rectangleToClip.h);
     }
 
     /** Returns the smallest rectangle that contains both this one and the one passed-in.
@@ -809,7 +818,6 @@ public:
 
 private:
     template <typename OtherType> friend class Rectangle;
-    template <typename OtherType> friend class RectangleList;
 
     Point<ValueType> pos;
     ValueType w, h;
