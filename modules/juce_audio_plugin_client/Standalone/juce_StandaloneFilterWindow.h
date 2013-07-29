@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_STANDALONEFILTERWINDOW_JUCEHEADER__
-#define __JUCE_STANDALONEFILTERWINDOW_JUCEHEADER__
+#ifndef JUCE_STANDALONEFILTERWINDOW_H_INCLUDED
+#define JUCE_STANDALONEFILTERWINDOW_H_INCLUDED
 
 extern AudioProcessor* JUCE_CALLTYPE createPluginFilter();
 
@@ -46,7 +46,7 @@ public:
         class and deleted automatically when no longer needed. (It can also be null)
     */
     StandaloneFilterWindow (const String& title,
-                            const Colour& backgroundColour,
+                            Colour backgroundColour,
                             PropertySet* settingsToUse)
         : DocumentWindow (title, backgroundColour, DocumentWindow::minimiseButton | DocumentWindow::closeButton),
           settings (settingsToUse),
@@ -241,13 +241,13 @@ public:
 
     //==============================================================================
     /** @internal */
-    void closeButtonPressed()
+    void closeButtonPressed() override
     {
         JUCEApplication::quit();
     }
 
     /** @internal */
-    void buttonClicked (Button*)
+    void buttonClicked (Button*) override
     {
         if (filter != nullptr)
         {
@@ -271,7 +271,7 @@ public:
     }
 
     /** @internal */
-    void resized()
+    void resized() override
     {
         DocumentWindow::resized();
         optionsButton.setBounds (8, 6, 60, getTitleBarHeight() - 8);
@@ -301,4 +301,4 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (StandaloneFilterWindow)
 };
 
-#endif   // __JUCE_STANDALONEFILTERWINDOW_JUCEHEADER__
+#endif   // JUCE_STANDALONEFILTERWINDOW_H_INCLUDED

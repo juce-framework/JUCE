@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_DRAWABLEIMAGE_JUCEHEADER__
-#define __JUCE_DRAWABLEIMAGE_JUCEHEADER__
+#ifndef JUCE_DRAWABLEIMAGE_H_INCLUDED
+#define JUCE_DRAWABLEIMAGE_H_INCLUDED
 
 #include "juce_Drawable.h"
 #include "../positioning/juce_RelativeParallelogram.h"
@@ -67,10 +67,10 @@ public:
         This is handy for doing things like darkening or lightening an image by overlaying
         it with semi-transparent black or white.
     */
-    void setOverlayColour (const Colour& newOverlayColour);
+    void setOverlayColour (Colour newOverlayColour);
 
     /** Returns the overlay colour. */
-    const Colour& getOverlayColour() const noexcept             { return overlayColour; }
+    Colour getOverlayColour() const noexcept                    { return overlayColour; }
 
     /** Sets the bounding box within which the image should be displayed. */
     void setBoundingBox (const RelativeParallelogram& newBounds);
@@ -83,17 +83,17 @@ public:
 
     //==============================================================================
     /** @internal */
-    void paint (Graphics& g);
+    void paint (Graphics&) override;
     /** @internal */
-    bool hitTest (int x, int y);
+    bool hitTest (int x, int y) override;
     /** @internal */
-    Drawable* createCopy() const;
+    Drawable* createCopy() const override;
     /** @internal */
-    Rectangle<float> getDrawableBounds() const;
+    Rectangle<float> getDrawableBounds() const override;
     /** @internal */
-    void refreshFromValueTree (const ValueTree& tree, ComponentBuilder& builder);
+    void refreshFromValueTree (const ValueTree& tree, ComponentBuilder&);
     /** @internal */
-    ValueTree createValueTree (ComponentBuilder::ImageProvider* imageProvider) const;
+    ValueTree createValueTree (ComponentBuilder::ImageProvider*) const override;
     /** @internal */
     static const Identifier valueTreeType;
 
@@ -105,19 +105,19 @@ public:
         ValueTreeWrapper (const ValueTree& state);
 
         var getImageIdentifier() const;
-        void setImageIdentifier (const var& newIdentifier, UndoManager* undoManager);
-        Value getImageIdentifierValue (UndoManager* undoManager);
+        void setImageIdentifier (const var&, UndoManager*);
+        Value getImageIdentifierValue (UndoManager*);
 
         float getOpacity() const;
-        void setOpacity (float newOpacity, UndoManager* undoManager);
-        Value getOpacityValue (UndoManager* undoManager);
+        void setOpacity (float newOpacity, UndoManager*);
+        Value getOpacityValue (UndoManager*);
 
         Colour getOverlayColour() const;
-        void setOverlayColour (const Colour& newColour, UndoManager* undoManager);
-        Value getOverlayColourValue (UndoManager* undoManager);
+        void setOverlayColour (Colour newColour, UndoManager*);
+        Value getOverlayColourValue (UndoManager*);
 
         RelativeParallelogram getBoundingBox() const;
-        void setBoundingBox (const RelativeParallelogram& newBounds, UndoManager* undoManager);
+        void setBoundingBox (const RelativeParallelogram&, UndoManager*);
 
         static const Identifier opacity, overlay, image, topLeft, topRight, bottomLeft;
     };
@@ -138,4 +138,4 @@ private:
 };
 
 
-#endif   // __JUCE_DRAWABLEIMAGE_JUCEHEADER__
+#endif   // JUCE_DRAWABLEIMAGE_H_INCLUDED

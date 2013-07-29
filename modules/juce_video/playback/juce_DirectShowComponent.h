@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_DIRECTSHOWCOMPONENT_JUCEHEADER__
-#define __JUCE_DIRECTSHOWCOMPONENT_JUCEHEADER__
+#ifndef JUCE_DIRECTSHOWCOMPONENT_H_INCLUDED
+#define JUCE_DIRECTSHOWCOMPONENT_H_INCLUDED
 
 #if JUCE_DIRECTSHOW || DOXYGEN
 
@@ -135,7 +135,7 @@ public:
         @note Not implemented
     */
     void setBoundsWithCorrectAspectRatio (const Rectangle<int>& spaceToFitWithin,
-                                          const RectanglePlacement& placement);
+                                          RectanglePlacement placement);
 
     /** Starts the video playing. */
     void play();
@@ -186,7 +186,7 @@ public:
 
     //==============================================================================
     /** @internal */
-    void paint (Graphics& g);
+    void paint (Graphics&) override;
 
 private:
     //==============================================================================
@@ -213,4 +213,4 @@ private:
 };
 
 #endif
-#endif   // __JUCE_DIRECTSHOWCOMPONENT_JUCEHEADER__
+#endif   // JUCE_DIRECTSHOWCOMPONENT_H_INCLUDED

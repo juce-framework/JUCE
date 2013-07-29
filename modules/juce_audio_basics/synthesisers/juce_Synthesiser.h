@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_SYNTHESISER_JUCEHEADER__
-#define __JUCE_SYNTHESISER_JUCEHEADER__
+#ifndef JUCE_SYNTHESISER_H_INCLUDED
+#define JUCE_SYNTHESISER_H_INCLUDED
 
 #include "../buffers/juce_AudioSampleBuffer.h"
 #include "../midi/juce_MidiBuffer.h"
@@ -471,6 +471,9 @@ protected:
                      int midiNoteNumber,
                      float velocity);
 
+    /** Can be overridden to do custom handling of incoming midi events. */
+    virtual void handleMidiEvent (const MidiMessage&);
+
 private:
     //==============================================================================
     double sampleRate;
@@ -478,8 +481,7 @@ private:
     bool shouldStealNotes;
     BigInteger sustainPedalsDown;
 
-    void handleMidiEvent (const MidiMessage& m);
-    void stopVoice (SynthesiserVoice* voice, bool allowTailOff);
+    void stopVoice (SynthesiserVoice*, bool allowTailOff);
 
    #if JUCE_CATCH_DEPRECATED_CODE_MISUSE
     // Note the new parameters for this method.
@@ -490,4 +492,4 @@ private:
 };
 
 
-#endif   // __JUCE_SYNTHESISER_JUCEHEADER__
+#endif   // JUCE_SYNTHESISER_H_INCLUDED

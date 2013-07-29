@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_RELATIVEPOINT_JUCEHEADER__
-#define __JUCE_RELATIVEPOINT_JUCEHEADER__
+#ifndef JUCE_RELATIVEPOINT_H_INCLUDED
+#define JUCE_RELATIVEPOINT_H_INCLUDED
 
 #include "juce_RelativeCoordinate.h"
 
@@ -89,4 +89,4 @@ public:
 };
 
 
-#endif   // __JUCE_RELATIVEPOINT_JUCEHEADER__
+#endif   // JUCE_RELATIVEPOINT_H_INCLUDED

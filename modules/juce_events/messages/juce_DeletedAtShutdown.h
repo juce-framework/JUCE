@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_DELETEDATSHUTDOWN_JUCEHEADER__
-#define __JUCE_DELETEDATSHUTDOWN_JUCEHEADER__
+#ifndef JUCE_DELETEDATSHUTDOWN_H_INCLUDED
+#define JUCE_DELETEDATSHUTDOWN_H_INCLUDED
 
 
 //==============================================================================
@@ -65,4 +65,4 @@ private:
     JUCE_DECLARE_NON_COPYABLE (DeletedAtShutdown)
 };
 
-#endif   // __JUCE_DELETEDATSHUTDOWN_JUCEHEADER__
+#endif   // JUCE_DELETEDATSHUTDOWN_H_INCLUDED

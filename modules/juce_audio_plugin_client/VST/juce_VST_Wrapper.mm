@@ -208,8 +208,8 @@ void detachComponentFromWindowRef (Component* comp, void* nsWindow)
     }
 }
 
-void setNativeHostWindowSize (void* nsWindow, Component* component, int newWidth, int newHeight, const PluginHostType& host);
-void setNativeHostWindowSize (void* nsWindow, Component* component, int newWidth, int newHeight, const PluginHostType& host)
+void setNativeHostWindowSize (void* nsWindow, Component* component, int newWidth, int newHeight);
+void setNativeHostWindowSize (void* nsWindow, Component* component, int newWidth, int newHeight)
 {
     JUCE_AUTORELEASEPOOL
     {

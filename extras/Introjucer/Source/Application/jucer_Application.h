@@ -43,7 +43,7 @@ public:
     IntrojucerApp() :  isRunningCommandLine (false) {}
 
     //==============================================================================
-    void initialise (const String& commandLine)
+    void initialise (const String& commandLine) override
     {
         LookAndFeel::setDefaultLookAndFeel (&lookAndFeel);
         settings = new StoredSettings();
@@ -97,7 +97,7 @@ public:
         {
             ModuleFolderChecker() {}
 
-            void messageCallback()
+            void messageCallback() override
             {
                 if (IntrojucerApp* const app = dynamic_cast<IntrojucerApp*> (JUCEApplication::getInstance()))
                     app->makeSureUserHasSelectedModuleFolder();
@@ -107,7 +107,7 @@ public:
         (new ModuleFolderChecker())->post();
     }
 
-    void shutdown()
+    void shutdown() override
     {
         appearanceEditorWindow = nullptr;
         utf8Window = nullptr;
@@ -131,7 +131,7 @@ public:
     }
 
     //==============================================================================
-    void systemRequestedQuit()
+    void systemRequestedQuit() override
     {
         closeModalCompsAndQuit();
     }
@@ -150,15 +150,15 @@ public:
     }
 
     //==============================================================================
-    const String getApplicationName()       { return "Introjucer"; }
-    const String getApplicationVersion()    { return ProjectInfo::versionString; }
+    const String getApplicationName() override       { return "Introjucer"; }
+    const String getApplicationVersion() override    { return ProjectInfo::versionString; }
 
-    bool moreThanOneInstanceAllowed()
+    bool moreThanOneInstanceAllowed() override
     {
         return true; // this is handled manually in initialise()
     }
 
-    void anotherInstanceStarted (const String& commandLine)
+    void anotherInstanceStarted (const String& commandLine) override
     {
         openFile (commandLine.unquoted());
     }
@@ -345,7 +345,7 @@ public:
     }
 
     //==============================================================================
-    void getAllCommands (Array <CommandID>& commands)
+    void getAllCommands (Array <CommandID>& commands) override
     {
         JUCEApplication::getAllCommands (commands);
 
@@ -360,7 +360,7 @@ public:
         commands.addArray (ids, numElementsInArray (ids));
     }
 
-    void getCommandInfo (CommandID commandID, ApplicationCommandInfo& result)
+    void getCommandInfo (CommandID commandID, ApplicationCommandInfo& result) override
     {
         switch (commandID)
         {
@@ -402,7 +402,7 @@ public:
         }
     }
 
-    bool perform (const InvocationInfo& info)
+    bool perform (const InvocationInfo& info) override
     {
         switch (info.commandID)
         {
@@ -595,7 +595,7 @@ private:
     public:
         AsyncQuitRetrier()   { startTimer (500); }
 
-        void timerCallback()
+        void timerCallback() override
         {
             stopTimer();
             delete this;

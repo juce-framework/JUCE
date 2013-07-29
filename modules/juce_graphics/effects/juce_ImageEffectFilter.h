@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_IMAGEEFFECTFILTER_JUCEHEADER__
-#define __JUCE_IMAGEEFFECTFILTER_JUCEHEADER__
+#ifndef JUCE_IMAGEEFFECTFILTER_H_INCLUDED
+#define JUCE_IMAGEEFFECTFILTER_H_INCLUDED
 
 #include "../contexts/juce_GraphicsContext.h"
 
@@ -68,4 +68,4 @@ public:
 
 };
 
-#endif   // __JUCE_IMAGEEFFECTFILTER_JUCEHEADER__
+#endif   // JUCE_IMAGEEFFECTFILTER_H_INCLUDED

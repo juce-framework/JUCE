@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_AUDIODEVICESELECTORCOMPONENT_JUCEHEADER__
-#define __JUCE_AUDIODEVICESELECTORCOMPONENT_JUCEHEADER__
+#ifndef JUCE_AUDIODEVICESELECTORCOMPONENT_H_INCLUDED
+#define JUCE_AUDIODEVICESELECTORCOMPONENT_H_INCLUDED
 
 
 //==============================================================================
@@ -60,14 +60,14 @@ public:
                                         are shown, with an "advanced" button that shows the rest of them
     */
     AudioDeviceSelectorComponent (AudioDeviceManager& deviceManager,
-                                  const int minAudioInputChannels,
-                                  const int maxAudioInputChannels,
-                                  const int minAudioOutputChannels,
-                                  const int maxAudioOutputChannels,
-                                  const bool showMidiInputOptions,
-                                  const bool showMidiOutputSelector,
-                                  const bool showChannelsAsStereoPairs,
-                                  const bool hideAdvancedOptionsWithButton);
+                                  int minAudioInputChannels,
+                                  int maxAudioInputChannels,
+                                  int minAudioOutputChannels,
+                                  int maxAudioOutputChannels,
+                                  bool showMidiInputOptions,
+                                  bool showMidiOutputSelector,
+                                  bool showChannelsAsStereoPairs,
+                                  bool hideAdvancedOptionsWithButton);
 
     /** Destructor */
     ~AudioDeviceSelectorComponent();
@@ -77,9 +77,9 @@ public:
 
     //==============================================================================
     /** @internal */
-    void resized();
+    void resized() override;
     /** @internal */
-    void childBoundsChanged (Component*);
+    void childBoundsChanged (Component*) override;
 
 private:
     //==============================================================================
@@ -97,12 +97,12 @@ private:
     ScopedPointer<ComboBox> midiOutputSelector;
     ScopedPointer<Label> midiInputsLabel, midiOutputLabel;
 
-    void comboBoxChanged (ComboBox*);
-    void changeListenerCallback (ChangeBroadcaster*);
+    void comboBoxChanged (ComboBox*) override;
+    void changeListenerCallback (ChangeBroadcaster*) override;
     void updateAllControls();
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioDeviceSelectorComponent)
 };
 
 
-#endif   // __JUCE_AUDIODEVICESELECTORCOMPONENT_JUCEHEADER__
+#endif   // JUCE_AUDIODEVICESELECTORCOMPONENT_H_INCLUDED

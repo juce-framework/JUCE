@@ -26,8 +26,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_ZIPFILE_JUCEHEADER__
-#define __JUCE_ZIPFILE_JUCEHEADER__
+#ifndef JUCE_ZIPFILE_H_INCLUDED
+#define JUCE_ZIPFILE_H_INCLUDED
 
 #include "../files/juce_File.h"
 #include "../streams/juce_InputSource.h"
@@ -246,4 +246,4 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ZipFile)
 };
 
-#endif   // __JUCE_ZIPFILE_JUCEHEADER__
+#endif   // JUCE_ZIPFILE_H_INCLUDED

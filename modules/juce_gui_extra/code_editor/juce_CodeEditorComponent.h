@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_CODEEDITORCOMPONENT_JUCEHEADER__
-#define __JUCE_CODEEDITORCOMPONENT_JUCEHEADER__
+#ifndef JUCE_CODEEDITORCOMPONENT_H_INCLUDED
+#define JUCE_CODEEDITORCOMPONENT_H_INCLUDED
 
 #include "juce_CodeDocument.h"
 class CodeTokeniser;
@@ -90,7 +90,7 @@ public:
     CodeDocument::Position getCaretPos() const                  { return caretPos; }
 
     /** Returns the position of the caret, relative to the editor's origin. */
-    Rectangle<int> getCaretRectangle();
+    Rectangle<int> getCaretRectangle() override;
 
     /** Moves the caret.
         If selecting is true, the section of the document between the current
@@ -105,7 +105,7 @@ public:
     Rectangle<int> getCharacterBounds (const CodeDocument::Position& pos) const;
 
     /** Finds the character at a given on-screen position.
-        The co-ordinates are relative to this component's top-left origin.
+        The coordinates are relative to this component's top-left origin.
     */
     CodeDocument::Position getPositionAt (int x, int y);
 
@@ -144,7 +144,7 @@ public:
     void scrollToKeepCaretOnScreen();
     void scrollToKeepLinesOnScreen (Range<int> linesToShow);
 
-    void insertTextAtCaret (const String& textToInsert);
+    void insertTextAtCaret (const String& textToInsert) override;
     void insertTabAtCaret();
 
     void indentSelection();
@@ -232,7 +232,7 @@ public:
         The token type values are dependent on the tokeniser being used.
         @see setColourScheme
     */
-    Colour getColourForTokenType (const int tokenType) const;
+    Colour getColourForTokenType (int tokenType) const;
 
     //==============================================================================
     /** A set of colour IDs to use to change the colour of various aspects of the editor.
@@ -311,37 +311,37 @@ public:
 
     //==============================================================================
     /** @internal */
-    void paint (Graphics&);
+    void paint (Graphics&) override;
     /** @internal */
-    void resized();
+    void resized() override;
     /** @internal */
-    bool keyPressed (const KeyPress&);
+    bool keyPressed (const KeyPress&) override;
     /** @internal */
-    void mouseDown (const MouseEvent&);
+    void mouseDown (const MouseEvent&) override;
     /** @internal */
-    void mouseDrag (const MouseEvent&);
+    void mouseDrag (const MouseEvent&) override;
     /** @internal */
-    void mouseUp (const MouseEvent&);
+    void mouseUp (const MouseEvent&) override;
     /** @internal */
-    void mouseDoubleClick (const MouseEvent&);
+    void mouseDoubleClick (const MouseEvent&) override;
     /** @internal */
-    void mouseWheelMove (const MouseEvent&, const MouseWheelDetails&);
+    void mouseWheelMove (const MouseEvent&, const MouseWheelDetails&) override;
     /** @internal */
-    void focusGained (FocusChangeType);
+    void focusGained (FocusChangeType) override;
     /** @internal */
-    void focusLost (FocusChangeType);
+    void focusLost (FocusChangeType) override;
     /** @internal */
-    bool isTextInputActive() const;
+    bool isTextInputActive() const override;
     /** @internal */
-    void setTemporaryUnderlining (const Array <Range<int> >&);
+    void setTemporaryUnderlining (const Array <Range<int> >&) override;
     /** @internal */
-    ApplicationCommandTarget* getNextCommandTarget();
+    ApplicationCommandTarget* getNextCommandTarget() override;
     /** @internal */
-    void getAllCommands (Array<CommandID>&);
+    void getAllCommands (Array<CommandID>&) override;
     /** @internal */
-    void getCommandInfo (CommandID, ApplicationCommandInfo&);
+    void getCommandInfo (CommandID, ApplicationCommandInfo&) override;
     /** @internal */
-    bool perform (const InvocationInfo&);
+    bool perform (const InvocationInfo&) override;
 
 private:
     //==============================================================================
@@ -417,4 +417,4 @@ private:
 };
 
 
-#endif   // __JUCE_CODEEDITORCOMPONENT_JUCEHEADER__
+#endif   // JUCE_CODEEDITORCOMPONENT_H_INCLUDED

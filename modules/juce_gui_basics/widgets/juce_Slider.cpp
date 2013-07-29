@@ -329,7 +329,7 @@ public:
         }
     }
 
-    void handleAsyncUpdate()
+    void handleAsyncUpdate() override
     {
         cancelPendingUpdate();
 
@@ -368,7 +368,7 @@ public:
         JUCE_DECLARE_NON_COPYABLE (DragInProgress)
     };
 
-    void buttonClicked (Button* button)
+    void buttonClicked (Button* button) override
     {
         if (style == IncDecButtons)
         {
@@ -379,7 +379,7 @@ public:
         }
     }
 
-    void valueChanged (Value& value)
+    void valueChanged (Value& value) override
     {
         if (value.refersToSameSourceAs (currentValue))
         {
@@ -392,7 +392,7 @@ public:
             setMaxValue (valueMax.getValue(), dontSendNotification, true);
     }
 
-    void labelTextChanged (Label* label)
+    void labelTextChanged (Label* label) override
     {
         const double newValue = owner.snapValue (owner.getValueFromText (label->getText()), false);
 
@@ -1146,7 +1146,7 @@ public:
 
         const int indent = lf.getSliderThumbRadius (owner);
 
-        if (style == LinearBar || style == LinearBarVertical)
+        if (style == LinearBar)
         {
             const int barIndent = 1;
             sliderRegionStart = barIndent;
@@ -1154,6 +1154,15 @@ public:
 
             sliderRect.setBounds (sliderRegionStart, barIndent,
                                   sliderRegionSize, localBounds.getHeight() - barIndent * 2);
+        }
+        else if (style == LinearBarVertical)
+        {
+            const int barIndent = 1;
+            sliderRegionStart = barIndent;
+            sliderRegionSize = localBounds.getHeight() - barIndent * 2;
+
+            sliderRect.setBounds (barIndent, sliderRegionStart,
+                                  localBounds.getWidth() - barIndent * 2, sliderRegionSize);
         }
         else if (isHorizontal())
         {
@@ -1284,7 +1293,7 @@ public:
             repaint();
         }
 
-        void timerCallback()
+        void timerCallback() override
         {
             owner.pimpl->popupDisplay = nullptr;
         }

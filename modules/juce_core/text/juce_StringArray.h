@@ -26,8 +26,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_STRINGARRAY_JUCEHEADER__
-#define __JUCE_STRINGARRAY_JUCEHEADER__
+#ifndef JUCE_STRINGARRAY_H_INCLUDED
+#define JUCE_STRINGARRAY_H_INCLUDED
 
 #include "juce_String.h"
 #include "../containers/juce_Array.h"
@@ -284,14 +284,17 @@ public:
     /** Removes all elements from the array. */
     void clear();
 
-    /** Removes a string from the array.
+    /** Removes all elements from the array without freeing the array's allocated storage.
+        @see clear
+    */
+    void clearQuick();
 
+    /** Removes a string from the array.
         If the index is out-of-range, no action will be taken.
     */
     void remove (int index);
 
     /** Finds a string in the array and removes it.
-
         This will remove the first occurrence of the given string from the array. The
         comparison may be case-insensitive depending on the ignoreCase parameter.
     */
@@ -391,6 +394,14 @@ public:
     void sort (bool ignoreCase);
 
     //==============================================================================
+    /** Increases the array's internal storage to hold a minimum number of elements.
+
+        Calling this before adding a large known number of elements means that
+        the array won't have to keep dynamically resizing itself as the elements
+        are added, and it'll therefore be more efficient.
+    */
+    void ensureStorageAllocated (int minNumElements);
+
     /** Reduces the amount of storage being used by the array.
 
         Arrays typically allocate slightly more storage than they need, and after
@@ -408,4 +419,4 @@ private:
 };
 
 
-#endif   // __JUCE_STRINGARRAY_JUCEHEADER__
+#endif   // JUCE_STRINGARRAY_H_INCLUDED

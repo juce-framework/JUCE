@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_TYPEFACE_JUCEHEADER__
-#define __JUCE_TYPEFACE_JUCEHEADER__
+#ifndef JUCE_TYPEFACE_H_INCLUDED
+#define JUCE_TYPEFACE_H_INCLUDED
 
 class Path;
 class Font;
@@ -146,4 +146,4 @@ private:
 };
 
 
-#endif   // __JUCE_TYPEFACE_JUCEHEADER__
+#endif   // JUCE_TYPEFACE_H_INCLUDED

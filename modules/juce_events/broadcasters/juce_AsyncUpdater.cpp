@@ -27,7 +27,7 @@ class AsyncUpdater::AsyncUpdaterMessage  : public CallbackMessage
 public:
     AsyncUpdaterMessage (AsyncUpdater& au)  : owner (au) {}
 
-    void messageCallback()
+    void messageCallback() override
     {
         if (shouldDeliver.compareAndSetBool (0, 1))
             owner.handleAsyncUpdate();

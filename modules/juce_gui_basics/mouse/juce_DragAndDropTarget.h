@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_DRAGANDDROPTARGET_JUCEHEADER__
-#define __JUCE_DRAGANDDROPTARGET_JUCEHEADER__
+#ifndef JUCE_DRAGANDDROPTARGET_H_INCLUDED
+#define JUCE_DRAGANDDROPTARGET_H_INCLUDED
 
 #include "../components/juce_Component.h"
 
@@ -151,4 +151,4 @@ private:
    #endif
 };
 
-#endif   // __JUCE_DRAGANDDROPTARGET_JUCEHEADER__
+#endif   // JUCE_DRAGANDDROPTARGET_H_INCLUDED

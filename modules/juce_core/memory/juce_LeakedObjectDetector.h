@@ -26,8 +26,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_LEAKEDOBJECTDETECTOR_JUCEHEADER__
-#define __JUCE_LEAKEDOBJECTDETECTOR_JUCEHEADER__
+#ifndef JUCE_LEAKEDOBJECTDETECTOR_H_INCLUDED
+#define JUCE_LEAKEDOBJECTDETECTOR_H_INCLUDED
 
 #include "../text/juce_String.h"
 #include "juce_Atomic.h"
@@ -146,4 +146,4 @@ private:
 #endif
 
 
-#endif   // __JUCE_LEAKEDOBJECTDETECTOR_JUCEHEADER__
+#endif   // JUCE_LEAKEDOBJECTDETECTOR_H_INCLUDED

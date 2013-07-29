@@ -48,17 +48,18 @@ public:
     }
 
     //==============================================================================
-    bool launchProject()                        { return false; }
-    bool usesMMFiles() const                    { return false; }
-    bool isLinux() const                        { return true; }
-    bool canCopeWithDuplicateFiles()            { return false; }
+    bool canLaunchProject() override                    { return false; }
+    bool launchProject() override                       { return false; }
+    bool usesMMFiles() const override                   { return false; }
+    bool isLinux() const override                       { return true; }
+    bool canCopeWithDuplicateFiles() override           { return false; }
 
-    void createExporterProperties (PropertyListBuilder&)
+    void createExporterProperties (PropertyListBuilder&) override
     {
     }
 
     //==============================================================================
-    void create (const OwnedArray<LibraryModule>&) const
+    void create (const OwnedArray<LibraryModule>&) const override
     {
         Array<RelativePath> files;
         for (int i = 0; i < getAllGroups().size(); ++i)
@@ -84,7 +85,7 @@ protected:
         Value getArchitectureType()                 { return getValue (Ids::linuxArchitecture); }
         String getArchitectureTypeString() const    { return config [Ids::linuxArchitecture]; }
 
-        void createConfigProperties (PropertyListBuilder& props)
+        void createConfigProperties (PropertyListBuilder& props) override
         {
             const char* const archNames[] = { "(Default)", "32-bit (-m32)", "64-bit (-m64)", "ARM v6", "ARM v7" };
             const var archFlags[] = { var(), "-m32", "-m64", "-march=armv6", "-march=armv7" };
@@ -95,7 +96,7 @@ protected:
         }
     };
 
-    BuildConfiguration::Ptr createBuildConfig (const ValueTree& tree) const
+    BuildConfiguration::Ptr createBuildConfig (const ValueTree& tree) const override
     {
         return new MakeBuildConfiguration (project, tree);
     }
@@ -263,6 +264,10 @@ private:
             << "# Don't edit this file! Your changes will be overwritten when you re-save the Introjucer project!" << newLine
             << newLine;
 
+        out << "# (this disables dependency generation if multiple architectures are set)" << newLine
+            << "DEPFLAGS := $(if $(word 2, $(TARGET_ARCH)), , -MMD)" << newLine
+            << newLine;
+
         out << "ifndef CONFIG" << newLine
             << "  CONFIG=" << escapeSpaces (getConfiguration(0)->getName()) << newLine
             << "endif" << newLine
@@ -270,10 +275,6 @@ private:
 
         for (ConstConfigIterator config (*this); config.next();)
             writeConfig (out, *config);
-
-        out << "# (this disables dependency generation if multiple architectures are set)" << newLine
-            << "DEPFLAGS := $(if $(word 2, $(TARGET_ARCH)), , -MMD)" << newLine
-            << newLine;
 
         writeObjects (out, files);
 

@@ -22,12 +22,12 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_AUDIO_PLUGIN_CLIENT_JUCEHEADER__
-#define __JUCE_AUDIO_PLUGIN_CLIENT_JUCEHEADER__
+#ifndef JUCE_AUDIO_PLUGIN_CLIENT_H_INCLUDED
+#define JUCE_AUDIO_PLUGIN_CLIENT_H_INCLUDED
 
 #include "../juce_gui_basics/juce_gui_basics.h"
 #include "../juce_audio_basics/juce_audio_basics.h"
 #include "../juce_audio_processors/juce_audio_processors.h"
 #include "utility/juce_CheckSettingMacros.h"
 
-#endif   // __JUCE_AUDIO_PLUGIN_CLIENT_JUCEHEADER__
+#endif   // JUCE_AUDIO_PLUGIN_CLIENT_H_INCLUDED

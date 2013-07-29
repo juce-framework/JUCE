@@ -615,12 +615,12 @@ public:
         }
     }
 
-    LowLevelGraphicsContext* createLowLevelContext()
+    LowLevelGraphicsContext* createLowLevelContext() override
     {
         return new LowLevelGraphicsSoftwareRenderer (Image (this));
     }
 
-    void initialiseBitmapData (Image::BitmapData& bitmap, int x, int y, Image::BitmapData::ReadWriteMode)
+    void initialiseBitmapData (Image::BitmapData& bitmap, int x, int y, Image::BitmapData::ReadWriteMode) override
     {
         bitmap.data = imageData + x * pixelStride + y * lineStride;
         bitmap.pixelFormat = pixelFormat;
@@ -628,13 +628,13 @@ public:
         bitmap.pixelStride = pixelStride;
     }
 
-    ImagePixelData* clone()
+    ImagePixelData* clone() override
     {
         jassertfalse;
         return nullptr;
     }
 
-    ImageType* createType() const     { return new NativeImageType(); }
+    ImageType* createType() const override     { return new NativeImageType(); }
 
     void blitToWindow (Window window, int dx, int dy, int dw, int dh, int sx, int sy)
     {
@@ -853,7 +853,7 @@ public:
     }
 
     //==============================================================================
-    void* getNativeHandle() const
+    void* getNativeHandle() const override
     {
         return (void*) windowH;
     }
@@ -870,7 +870,7 @@ public:
         return reinterpret_cast <LinuxComponentPeer*> (peer);
     }
 
-    void setVisible (bool shouldBeVisible)
+    void setVisible (bool shouldBeVisible) override
     {
         ScopedXLock xlock;
         if (shouldBeVisible)
@@ -879,7 +879,7 @@ public:
             XUnmapWindow (display, windowH);
     }
 
-    void setTitle (const String& title)
+    void setTitle (const String& title) override
     {
         XTextProperty nameProperty;
         char* strings[] = { const_cast <char*> (title.toRawUTF8()) };
@@ -894,7 +894,7 @@ public:
         }
     }
 
-    void setBounds (const Rectangle<int>& newBounds, bool isNowFullScreen)
+    void setBounds (const Rectangle<int>& newBounds, bool isNowFullScreen) override
     {
         if (fullScreen && ! isNowFullScreen)
         {
@@ -965,24 +965,24 @@ public:
         }
     }
 
-    Rectangle<int> getBounds() const          { return bounds; }
+    Rectangle<int> getBounds() const override          { return bounds; }
 
-    Point<int> localToGlobal (const Point<int>& relativePosition)
+    Point<int> localToGlobal (const Point<int>& relativePosition) override
     {
         return relativePosition + bounds.getPosition();
     }
 
-    Point<int> globalToLocal (const Point<int>& screenPosition)
+    Point<int> globalToLocal (const Point<int>& screenPosition) override
     {
         return screenPosition - bounds.getPosition();
     }
 
-    void setAlpha (float /* newAlpha */)
+    void setAlpha (float /* newAlpha */) override
     {
         //xxx todo!
     }
 
-    void setMinimised (bool shouldBeMinimised)
+    void setMinimised (bool shouldBeMinimised) override
     {
         if (shouldBeMinimised)
         {
@@ -1005,7 +1005,7 @@ public:
         }
     }
 
-    bool isMinimised() const
+    bool isMinimised() const override
     {
         ScopedXLock xlock;
         const Atoms& atoms = Atoms::get();
@@ -1018,7 +1018,7 @@ public:
                 && ((unsigned long*) prop.data)[0] == IconicState;
     }
 
-    void setFullScreen (const bool shouldBeFullScreen)
+    void setFullScreen (const bool shouldBeFullScreen) override
     {
         Rectangle<int> r (lastNonFullscreenBounds); // (get a copy of this before de-minimising)
 
@@ -1036,7 +1036,7 @@ public:
         }
     }
 
-    bool isFullScreen() const
+    bool isFullScreen() const override
     {
         return fullScreen;
     }
@@ -1088,7 +1088,7 @@ public:
         return result;
     }
 
-    bool contains (const Point<int>& position, bool trueIfInAChildWindow) const
+    bool contains (const Point<int>& position, bool trueIfInAChildWindow) const override
     {
         if (! bounds.withZeroOrigin().contains (position))
             return false;
@@ -1118,17 +1118,17 @@ public:
                 && child == None;
     }
 
-    BorderSize<int> getFrameSize() const
+    BorderSize<int> getFrameSize() const override
     {
         return BorderSize<int>();
     }
 
-    bool setAlwaysOnTop (bool /* alwaysOnTop */)
+    bool setAlwaysOnTop (bool /* alwaysOnTop */) override
     {
         return false;
     }
 
-    void toFront (bool makeActive)
+    void toFront (bool makeActive) override
     {
         if (makeActive)
         {
@@ -1166,7 +1166,7 @@ public:
         handleBroughtToFront();
     }
 
-    void toBehind (ComponentPeer* other)
+    void toBehind (ComponentPeer* other) override
     {
         LinuxComponentPeer* const otherPeer = dynamic_cast <LinuxComponentPeer*> (other);
         jassert (otherPeer != nullptr); // wrong type of window?
@@ -1182,7 +1182,7 @@ public:
         }
     }
 
-    bool isFocused() const
+    bool isFocused() const override
     {
         int revert = 0;
         Window focusedWindow = 0;
@@ -1192,7 +1192,7 @@ public:
         return focusedWindow == windowH;
     }
 
-    void grabFocus()
+    void grabFocus() override
     {
         XWindowAttributes atts;
         ScopedXLock xlock;
@@ -1207,21 +1207,19 @@ public:
         }
     }
 
-    void textInputRequired (const Point<int>&)
-    {
-    }
+    void textInputRequired (const Point<int>&) override {}
 
-    void repaint (const Rectangle<int>& area)
+    void repaint (const Rectangle<int>& area) override
     {
         repainter->repaint (area.getIntersection (component.getLocalBounds()));
     }
 
-    void performAnyPendingRepaintsNow()
+    void performAnyPendingRepaintsNow() override
     {
         repainter->performAnyPendingRepaintsNow();
     }
 
-    void setIcon (const Image& newIcon)
+    void setIcon (const Image& newIcon) override
     {
         const int dataSize = newIcon.getWidth() * newIcon.getHeight() + 2;
         HeapBlock <unsigned long> data (dataSize);
@@ -1513,7 +1511,7 @@ public:
         updateKeyModifiers (buttonRelEvent.state);
 
         if (parentWindow != 0)
-            updateBounds();
+            updateWindowBounds();
 
         switch (pointerMap [buttonRelEvent.button - Button1])
         {
@@ -1546,7 +1544,7 @@ public:
     void handleEnterNotifyEvent (const XEnterWindowEvent& enterEvent)
     {
         if (parentWindow != 0)
-            updateBounds();
+            updateWindowBounds();
 
         clearLastMousePos();
 
@@ -1616,7 +1614,7 @@ public:
 
     void handleConfigureNotifyEvent (XConfigureEvent& confEvent)
     {
-        updateBounds();
+        updateWindowBounds();
         updateBorderSize();
         handleMovedOrResized();
 
@@ -1656,7 +1654,7 @@ public:
 
     void handleGravityNotify()
     {
-        updateBounds();
+        updateWindowBounds();
         updateBorderSize();
         handleMovedOrResized();
     }
@@ -1805,7 +1803,7 @@ private:
            #endif
         }
 
-        void timerCallback()
+        void timerCallback() override
         {
            #if JUCE_USE_XSHM
             if (shmPaintsPending != 0)
@@ -1844,7 +1842,7 @@ private:
 
             peer.clearMaskedRegion();
 
-            RectangleList originalRepaintRegion (regionsNeedingRepaint);
+            RectangleList<int>  originalRepaintRegion (regionsNeedingRepaint);
             regionsNeedingRepaint.clear();
             const Rectangle<int> totalArea (originalRepaintRegion.getBounds());
 
@@ -1866,7 +1864,7 @@ private:
 
                 startTimer (repaintTimerPeriod);
 
-                RectangleList adjustedList (originalRepaintRegion);
+                RectangleList<int> adjustedList (originalRepaintRegion);
                 adjustedList.offsetAll (-totalArea.getX(), -totalArea.getY());
 
                 if (peer.depth == 32)
@@ -1909,7 +1907,7 @@ private:
         LinuxComponentPeer& peer;
         Image image;
         uint32 lastTimeImageUsed;
-        RectangleList regionsNeedingRepaint;
+        RectangleList<int> regionsNeedingRepaint;
 
        #if JUCE_USE_XSHM
         bool useARGBImagesForRendering;
@@ -2327,7 +2325,7 @@ private:
         }
     }
 
-    void updateBounds()
+    void updateWindowBounds()
     {
         jassert (windowH != 0);
         if (windowH != 0)
@@ -2968,7 +2966,14 @@ ComponentPeer* Component::createNewPeer (int styleFlags, void* nativeWindowToAtt
 }
 
 //==============================================================================
-void Desktop::Displays::findDisplays()
+static double getDisplayDPI (int index)
+{
+    double dpiX = (DisplayWidth  (display, index) * 25.4) / DisplayWidthMM  (display, index);
+    double dpiY = (DisplayHeight (display, index) * 25.4) / DisplayHeightMM (display, index);
+    return (dpiX + dpiY) / 2.0;
+}
+
+void Desktop::Displays::findDisplays (float masterScale)
 {
     if (display == 0)
         return;
@@ -3018,9 +3023,10 @@ void Desktop::Displays::findDisplays()
                             d.userArea = d.totalArea = Rectangle<int> (screens[j].x_org,
                                                                        screens[j].y_org,
                                                                        screens[j].width,
-                                                                       screens[j].height);
+                                                                       screens[j].height) * masterScale;
                             d.isMain = (index == 0);
-                            d.scale = 1.0;
+                            d.scale = masterScale;
+                            d.dpi = getDisplayDPI (index);
 
                             displays.add (d);
                         }
@@ -3051,9 +3057,10 @@ void Desktop::Displays::findDisplays()
 
                     Display d;
                     d.userArea = d.totalArea = Rectangle<int> (position[0], position[1],
-                                                               position[2], position[3]);
+                                                               position[2], position[3]) / masterScale;
                     d.isMain = (displays.size() == 0);
-                    d.scale = 1.0;
+                    d.scale = masterScale;
+                    d.dpi = getDisplayDPI (i);
 
                     displays.add (d);
                 }
@@ -3063,10 +3070,11 @@ void Desktop::Displays::findDisplays()
         if (displays.size() == 0)
         {
             Display d;
-            d.userArea = d.totalArea = Rectangle<int> (DisplayWidth (display, DefaultScreen (display)),
-                                                       DisplayHeight (display, DefaultScreen (display)));
+            d.userArea = d.totalArea = Rectangle<int> (DisplayWidth  (display, DefaultScreen (display)),
+                                                       DisplayHeight (display, DefaultScreen (display))) * masterScale;
             d.isMain = true;
-            d.scale = 1.0;
+            d.scale = masterScale;
+            d.dpi = getDisplayDPI (0);
 
             displays.add (d);
         }
@@ -3094,7 +3102,7 @@ bool Desktop::canUseSemiTransparentWindows() noexcept
              && (matchedDepth == desiredDepth);
 }
 
-Point<int> MouseInputSource::getCurrentMousePosition()
+Point<int> MouseInputSource::getCurrentRawMousePosition()
 {
     Window root, child;
     int x, y, winx, winy;
@@ -3114,7 +3122,7 @@ Point<int> MouseInputSource::getCurrentMousePosition()
     return Point<int> (x, y);
 }
 
-void Desktop::setMousePosition (Point<int> newPosition)
+void MouseInputSource::setRawMousePosition (Point<int> newPosition)
 {
     ScopedXLock xlock;
     Window root = RootWindow (display, DefaultScreen (display));

@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_MULTITIMER_JUCEHEADER__
-#define __JUCE_MULTITIMER_JUCEHEADER__
+#ifndef JUCE_MULTITIMER_H_INCLUDED
+#define JUCE_MULTITIMER_H_INCLUDED
 
 #include "juce_Timer.h"
 
@@ -126,4 +126,4 @@ private:
     MultiTimer& operator= (const MultiTimer&);
 };
 
-#endif   // __JUCE_MULTITIMER_JUCEHEADER__
+#endif   // JUCE_MULTITIMER_H_INCLUDED

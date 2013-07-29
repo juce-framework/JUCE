@@ -26,8 +26,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_CHILDPROCESS_JUCEHEADER__
-#define __JUCE_CHILDPROCESS_JUCEHEADER__
+#ifndef JUCE_CHILDPROCESS_H_INCLUDED
+#define JUCE_CHILDPROCESS_H_INCLUDED
 
 
 //==============================================================================
@@ -102,4 +102,4 @@ private:
 };
 
 
-#endif   // __JUCE_CHILDPROCESS_JUCEHEADER__
+#endif   // JUCE_CHILDPROCESS_H_INCLUDED

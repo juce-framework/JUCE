@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_RENDERINGHELPERS_JUCEHEADER__
-#define __JUCE_RENDERINGHELPERS_JUCEHEADER__
+#ifndef JUCE_RENDERINGHELPERS_H_INCLUDED
+#define JUCE_RENDERINGHELPERS_H_INCLUDED
 
 #if JUCE_MSVC
  #pragma warning (push)
@@ -121,15 +121,16 @@ public:
     }
 
     template <typename Type>
-    Rectangle<float> transformed (const Rectangle<Type>& r) const noexcept
+    Rectangle<Type> transformed (const Rectangle<Type>& r) const noexcept
     {
-        return r.toFloat().transformed (complexTransform);
+        return r.transformedBy (complexTransform);
     }
 
-    Rectangle<int> deviceSpaceToUserSpace (const Rectangle<int>& r) const noexcept
+    template <typename Type>
+    Rectangle<Type> deviceSpaceToUserSpace (const Rectangle<Type>& r) const noexcept
     {
         return isOnlyTranslated ? r.translated (-xOffset, -yOffset)
-                                : r.toFloat().transformed (complexTransform.inverted()).getSmallestIntegerContainer();
+                                : r.transformedBy (complexTransform.inverted());
     }
 
     AffineTransform complexTransform;
@@ -1550,7 +1551,7 @@ namespace ClipRegions
         virtual Ptr applyClipTo (const Ptr& target) const = 0;
 
         virtual Ptr clipToRectangle (const Rectangle<int>&) = 0;
-        virtual Ptr clipToRectangleList (const RectangleList&) = 0;
+        virtual Ptr clipToRectangleList (const RectangleList<int>&) = 0;
         virtual Ptr excludeClipRectangle (const Rectangle<int>&) = 0;
         virtual Ptr clipToPath (const Path&, const AffineTransform&) = 0;
         virtual Ptr clipToEdgeTable (const EdgeTable& et) = 0;
@@ -1572,12 +1573,12 @@ namespace ClipRegions
     class EdgeTableRegion  : public Base
     {
     public:
-        EdgeTableRegion (const EdgeTable& e)        : edgeTable (e) {}
-        EdgeTableRegion (const Rectangle<int>& r)   : edgeTable (r) {}
-        EdgeTableRegion (const Rectangle<float>& r) : edgeTable (r) {}
-        EdgeTableRegion (const RectangleList& r)    : edgeTable (r) {}
+        EdgeTableRegion (const EdgeTable& e)            : edgeTable (e) {}
+        EdgeTableRegion (const Rectangle<int>& r)       : edgeTable (r) {}
+        EdgeTableRegion (const Rectangle<float>& r)     : edgeTable (r) {}
+        EdgeTableRegion (const RectangleList<int>& r)   : edgeTable (r) {}
         EdgeTableRegion (const Rectangle<int>& bounds, const Path& p, const AffineTransform& t) : edgeTable (bounds, p, t) {}
-        EdgeTableRegion (const EdgeTableRegion& other) : Base(), edgeTable (other.edgeTable) {}
+        EdgeTableRegion (const EdgeTableRegion& other)  : Base(), edgeTable (other.edgeTable) {}
 
         Ptr clone() const                           { return new EdgeTableRegion (*this); }
         Ptr applyClipTo (const Ptr& target) const   { return target->clipToEdgeTable (edgeTable); }
@@ -1588,9 +1589,9 @@ namespace ClipRegions
             return edgeTable.isEmpty() ? nullptr : this;
         }
 
-        Ptr clipToRectangleList (const RectangleList& r)
+        Ptr clipToRectangleList (const RectangleList<int>& r)
         {
-            RectangleList inverse (edgeTable.getMaximumBounds());
+            RectangleList<int> inverse (edgeTable.getMaximumBounds());
 
             if (inverse.subtract (r))
                 for (const Rectangle<int>* i = inverse.begin(), * const e = inverse.end(); i != e; ++i)
@@ -1772,7 +1773,7 @@ namespace ClipRegions
     {
     public:
         RectangleListRegion (const Rectangle<int>& r) : clip (r) {}
-        RectangleListRegion (const RectangleList& r)  : clip (r) {}
+        RectangleListRegion (const RectangleList<int>& r)  : clip (r) {}
         RectangleListRegion (const RectangleListRegion& other) : Base(), clip (other.clip) {}
 
         Ptr clone() const                           { return new RectangleListRegion (*this); }
@@ -1784,7 +1785,7 @@ namespace ClipRegions
             return clip.isEmpty() ? nullptr : this;
         }
 
-        Ptr clipToRectangleList (const RectangleList& r)
+        Ptr clipToRectangleList (const RectangleList<int>& r)
         {
             clip.clipTo (r);
             return clip.isEmpty() ? nullptr : this;
@@ -1870,7 +1871,7 @@ namespace ClipRegions
             EdgeTableFillers::renderImageUntransformed (*this, destData, srcData, alpha, x, y, tiledFill);
         }
 
-        RectangleList clip;
+        RectangleList<int> clip;
 
         //==============================================================================
         template <class Renderer>
@@ -1896,7 +1897,7 @@ namespace ClipRegions
         class SubRectangleIterator
         {
         public:
-            SubRectangleIterator (const RectangleList& clipList, const Rectangle<int>& clipBounds)
+            SubRectangleIterator (const RectangleList<int>& clipList, const Rectangle<int>& clipBounds)
                 : clip (clipList), area (clipBounds)
             {}
 
@@ -1923,7 +1924,7 @@ namespace ClipRegions
             }
 
         private:
-            const RectangleList& clip;
+            const RectangleList<int>& clip;
             const Rectangle<int> area;
 
             JUCE_DECLARE_NON_COPYABLE (SubRectangleIterator)
@@ -1933,7 +1934,7 @@ namespace ClipRegions
         class SubRectangleIteratorFloat
         {
         public:
-            SubRectangleIteratorFloat (const RectangleList& clipList, const Rectangle<float>& clipBounds) noexcept
+            SubRectangleIteratorFloat (const RectangleList<int>& clipList, const Rectangle<float>& clipBounds) noexcept
                 : clip (clipList), area (clipBounds)
             {
             }
@@ -2013,7 +2014,7 @@ namespace ClipRegions
             }
 
         private:
-            const RectangleList& clip;
+            const RectangleList<int>& clip;
             const Rectangle<float>& area;
 
             JUCE_DECLARE_NON_COPYABLE (SubRectangleIteratorFloat)
@@ -2037,7 +2038,7 @@ public:
     {
     }
 
-    SoftwareRendererSavedState (const Image& im, const RectangleList& clipList, const int x, const int y)
+    SoftwareRendererSavedState (const Image& im, const RectangleList<int>& clipList, const int x, const int y)
         : image (im), clip (new ClipRegions::RectangleListRegion (clipList)),
           transform (x, y),
           interpolationQuality (Graphics::mediumResamplingQuality),
@@ -2065,7 +2066,7 @@ public:
             else if (transform.isIntegerScaling)
             {
                 cloneClipIfMultiplyReferenced();
-                clip = clip->clipToRectangle (transform.transformed (r).getSmallestIntegerContainer());
+                clip = clip->clipToRectangle (transform.transformed (r));
             }
             else
             {
@@ -2078,24 +2079,24 @@ public:
         return clip != nullptr;
     }
 
-    bool clipToRectangleList (const RectangleList& r)
+    bool clipToRectangleList (const RectangleList<int>& r)
     {
         if (clip != nullptr)
         {
             if (transform.isOnlyTranslated)
             {
                 cloneClipIfMultiplyReferenced();
-                RectangleList offsetList (r);
+                RectangleList<int> offsetList (r);
                 offsetList.offsetAll (transform.xOffset, transform.yOffset);
                 clip = clip->clipToRectangleList (offsetList);
             }
             else if (transform.isIntegerScaling)
             {
                 cloneClipIfMultiplyReferenced();
-                RectangleList scaledList;
+                RectangleList<int> scaledList;
 
                 for (const Rectangle<int>* i = r.begin(), * const e = r.end(); i != e; ++i)
-                    scaledList.add (transform.transformed (*i).getSmallestIntegerContainer());
+                    scaledList.add (transform.transformed (*i));
 
                 clip = clip->clipToRectangleList (scaledList);
             }
@@ -2120,7 +2121,7 @@ public:
             }
             else if (transform.isIntegerScaling)
             {
-                clip = clip->excludeClipRectangle (transform.transformed (r).getSmallestIntegerContainer());
+                clip = clip->excludeClipRectangle (transform.transformed (r));
             }
             else
             {
@@ -2262,7 +2263,7 @@ public:
             if (transform.isOnlyTranslated)
                 fillTargetRect (transform.translated (r), replaceContents);
             else if (transform.isIntegerScaling)
-                fillTargetRect (transform.transformed (r).getSmallestIntegerContainer(), replaceContents);
+                fillTargetRect (transform.transformed (r), replaceContents);
             else
                 fillRectAsPath (r);
         }
@@ -2491,4 +2492,4 @@ private:
  #pragma warning (pop)
 #endif
 
-#endif   // __JUCE_RENDERINGHELPERS_JUCEHEADER__
+#endif   // JUCE_RENDERINGHELPERS_H_INCLUDED

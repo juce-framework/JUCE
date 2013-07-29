@@ -215,6 +215,8 @@ void ComponentLayoutEditor::refreshAllComponents()
     for (int i = layout.getNumComponents(); --i >= 0;)
     {
         Component* const c = layout.getComponent (i);
+        jassert (c != nullptr);
+
         ComponentOverlayComponent* overlay = getOverlayCompFor (c);
 
         bool isNewOverlay = false;

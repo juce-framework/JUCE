@@ -131,18 +131,24 @@ bool  JUCE_CALLTYPE SystemAudioVolume::isMuted()              { return SystemVol
 bool  JUCE_CALLTYPE SystemAudioVolume::setMuted (bool mute)   { return SystemVol (kAudioDevicePropertyMute).setMuted (mute); }
 
 //==============================================================================
+struct CoreAudioClasses
+{
+
+class CoreAudioIODevice;
+
+//==============================================================================
 class CoreAudioInternal  : private Timer
 {
 public:
-    //==============================================================================
-    CoreAudioInternal (AudioDeviceID id)
-       : inputLatency (0),
+    CoreAudioInternal (CoreAudioIODevice& d, AudioDeviceID id, bool isSlave)
+       : owner (d),
+         inputLatency (0),
          outputLatency (0),
          callback (nullptr),
         #if MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_5
          audioProcID (0),
         #endif
-         isSlaveDevice (false),
+         isSlaveDevice (isSlave),
          deviceID (id),
          started (false),
          sampleRate (0),
@@ -185,11 +191,11 @@ public:
         tempInputBuffers.calloc ((size_t) numInputChans + 2);
         tempOutputBuffers.calloc ((size_t) numOutputChans + 2);
 
-        int i, count = 0;
-        for (i = 0; i < numInputChans; ++i)
+        int count = 0;
+        for (int i = 0; i < numInputChans; ++i)
             tempInputBuffers[i] = audioBuffer + count++ * tempBufSize;
 
-        for (i = 0; i < numOutputChans; ++i)
+        for (int i = 0; i < numOutputChans; ++i)
             tempOutputBuffers[i] = audioBuffer + count++ * tempBufSize;
     }
 
@@ -759,7 +765,7 @@ public:
             startTimer (100);
     }
 
-    void timerCallback()
+    void timerCallback() override
     {
         stopTimer();
         JUCE_COREAUDIOLOG ("CoreAudio device changed callback");
@@ -769,57 +775,11 @@ public:
         updateDetailsFromDevice();
 
         if (oldBufferSize != bufferSize || oldSampleRate != sampleRate)
-        {
-            callbacksAllowed = false;
-            stop (false);
-            updateDetailsFromDevice();
-            callbacksAllowed = true;
-        }
-    }
-
-    CoreAudioInternal* getRelatedDevice() const
-    {
-        UInt32 size = 0;
-        ScopedPointer <CoreAudioInternal> result;
-
-        AudioObjectPropertyAddress pa;
-        pa.mSelector = kAudioDevicePropertyRelatedDevices;
-        pa.mScope = kAudioObjectPropertyScopeWildcard;
-        pa.mElement = kAudioObjectPropertyElementMaster;
-
-        if (deviceID != 0
-             && AudioObjectGetPropertyDataSize (deviceID, &pa, 0, 0, &size) == noErr
-             && size > 0)
-        {
-            HeapBlock <AudioDeviceID> devs;
-            devs.calloc (size, 1);
-
-            if (OK (AudioObjectGetPropertyData (deviceID, &pa, 0, 0, &size, devs)))
-            {
-                for (unsigned int i = 0; i < size / sizeof (AudioDeviceID); ++i)
-                {
-                    if (devs[i] != deviceID && devs[i] != 0)
-                    {
-                        result = new CoreAudioInternal (devs[i]);
-
-                        const bool thisIsInput = inChanNames.size() > 0 && outChanNames.size() == 0;
-                        const bool otherIsInput = result->inChanNames.size() > 0 && result->outChanNames.size() == 0;
-
-                        if (thisIsInput != otherIsInput
-                             || (inChanNames.size() + outChanNames.size() == 0)
-                             || (result->inChanNames.size() + result->outChanNames.size()) == 0)
-                            break;
-
-                        result = 0;
-                    }
-                }
-            }
-        }
-
-        return result.release();
+            owner.restart();
     }
 
     //==============================================================================
+    CoreAudioIODevice& owner;
     int inputLatency, outputLatency;
     BigInteger activeInputChans, activeOutputChans;
     StringArray inChanNames, outChanNames;
@@ -954,19 +914,14 @@ public:
         {
             jassert (inputDeviceId != 0);
 
-            device = new CoreAudioInternal (inputDeviceId);
+            device = new CoreAudioInternal (*this, inputDeviceId, false);
         }
         else
         {
-            device = new CoreAudioInternal (outputDeviceId);
+            device = new CoreAudioInternal (*this, outputDeviceId, false);
 
             if (inputDeviceId != 0)
-            {
-                CoreAudioInternal* secondDevice = new CoreAudioInternal (inputDeviceId);
-
-                device->inputDevice = secondDevice;
-                secondDevice->isSlaveDevice = true;
-            }
+                device->inputDevice = new CoreAudioInternal (*this, inputDeviceId, true);
         }
 
         internal = device;
@@ -1005,7 +960,7 @@ public:
         return internal->inChanNames;
     }
 
-    bool isOpen()    { return isOpen_; }
+    bool isOpen()                        { return isOpen_; }
 
     int getNumSampleRates()              { return internal->sampleRates.size(); }
     double getSampleRate (int index)     { return internal->sampleRates [index]; }
@@ -1049,6 +1004,15 @@ public:
     {
         isOpen_ = false;
         internal->stop (false);
+    }
+
+    void restart()
+    {
+        AudioIODeviceCallback* oldCallback = internal->callback;
+        stop();
+
+        if (oldCallback != nullptr)
+            start (oldCallback);
     }
 
     BigInteger getActiveOutputChannels() const
@@ -1361,10 +1325,12 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CoreAudioIODeviceType)
 };
 
+};
+
 //==============================================================================
 AudioIODeviceType* AudioIODeviceType::createAudioIODeviceType_CoreAudio()
 {
-    return new CoreAudioIODeviceType();
+    return new CoreAudioClasses::CoreAudioIODeviceType();
 }
 
 #undef JUCE_COREAUDIOLOG

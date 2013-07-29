@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_MIDIMESSAGECOLLECTOR_JUCEHEADER__
-#define __JUCE_MIDIMESSAGECOLLECTOR_JUCEHEADER__
+#ifndef JUCE_MIDIMESSAGECOLLECTOR_H_INCLUDED
+#define JUCE_MIDIMESSAGECOLLECTOR_H_INCLUDED
 
 #include "juce_MidiInput.h"
 
@@ -86,11 +86,11 @@ public:
 
     //==============================================================================
     /** @internal */
-    void handleNoteOn (MidiKeyboardState* source, int midiChannel, int midiNoteNumber, float velocity);
+    void handleNoteOn (MidiKeyboardState*, int midiChannel, int midiNoteNumber, float velocity) override;
     /** @internal */
-    void handleNoteOff (MidiKeyboardState* source, int midiChannel, int midiNoteNumber);
+    void handleNoteOff (MidiKeyboardState*, int midiChannel, int midiNoteNumber) override;
     /** @internal */
-    void handleIncomingMidiMessage (MidiInput* source, const MidiMessage& message);
+    void handleIncomingMidiMessage (MidiInput*, const MidiMessage&) override;
 
 private:
     //==============================================================================
@@ -103,4 +103,4 @@ private:
 };
 
 
-#endif   // __JUCE_MIDIMESSAGECOLLECTOR_JUCEHEADER__
+#endif   // JUCE_MIDIMESSAGECOLLECTOR_H_INCLUDED

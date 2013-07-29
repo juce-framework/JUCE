@@ -39,7 +39,7 @@ public:
           hasInitialised (false),
           needsUpdate (1)
     {
-        nativeContext = new NativeContext (component, pixFormat, contextToShare);
+        nativeContext = new NativeContext (component, pixFormat, contextToShare, c.useMultisampling);
 
         if (nativeContext->createdOk())
             context.nativeContext = nativeContext;
@@ -69,25 +69,25 @@ public:
     }
 
     //==============================================================================
-    void paint (Graphics&)
+    void paint (Graphics&) override
     {
         if (ComponentPeer* const peer = component.getPeer())
             peer->addMaskedRegion (peer->getComponent().getLocalArea (&component, component.getLocalBounds()));
     }
 
-    void invalidateAll()
+    void invalidateAll() override
     {
         validArea.clear();
         triggerRepaint();
     }
 
-    void invalidate (const Rectangle<int>& area)
+    void invalidate (const Rectangle<int>& area) override
     {
         validArea.subtract (area);
         triggerRepaint();
     }
 
-    void releaseResources() {}
+    void releaseResources() override {}
 
     void triggerRepaint()
     {
@@ -119,7 +119,7 @@ public:
         return true;
     }
 
-    void clearRegionInFrameBuffer (const RectangleList& list, const float scaleFactor)
+    void clearRegionInFrameBuffer (const RectangleList<int>& list, const float scaleFactor)
     {
         glClearColor (0, 0, 0, 0);
         glEnable (GL_SCISSOR_TEST);
@@ -211,7 +211,7 @@ public:
         if (! ensureFrameBufferSize())
             return;
 
-        RectangleList invalid (viewportArea);
+        RectangleList<int> invalid (viewportArea);
         invalid.subtract (validArea);
         validArea = viewportArea;
 
@@ -291,7 +291,7 @@ public:
     }
 
     //==============================================================================
-    void run()
+    void run() override
     {
         {
             // Allow the message thread to finish setting-up the context before using it..
@@ -361,7 +361,7 @@ public:
     Component& component;
 
     OpenGLFrameBuffer cachedImageFrameBuffer;
-    RectangleList validArea;
+    RectangleList<int> validArea;
     Rectangle<int> viewportArea;
     double scale;
 
@@ -416,7 +416,7 @@ public:
         detach();
     }
 
-    void componentMovedOrResized (bool /*wasMoved*/, bool /*wasResized*/)
+    void componentMovedOrResized (bool /*wasMoved*/, bool /*wasResized*/) override
     {
         Component& comp = *getComponent();
 
@@ -429,18 +429,18 @@ public:
             if (CachedImage* const c = CachedImage::get (comp))
                 c->handleResize();
 
-            context.nativeContext->updateWindowPosition (comp.getTopLevelComponent()
-                                                            ->getLocalArea (&comp, comp.getLocalBounds()));
+            if (ComponentPeer* peer = comp.getTopLevelComponent()->getPeer())
+                context.nativeContext->updateWindowPosition (peer->getAreaCoveredBy (comp));
         }
     }
 
-    void componentPeerChanged()
+    void componentPeerChanged() override
     {
         detach();
         componentVisibilityChanged();
     }
 
-    void componentVisibilityChanged()
+    void componentVisibilityChanged() override
     {
         Component& comp = *getComponent();
 
@@ -456,7 +456,7 @@ public:
     }
 
    #if JUCE_DEBUG || JUCE_LOG_ASSERTIONS
-    void componentBeingDeleted (Component& component)
+    void componentBeingDeleted (Component& component) override
     {
         /* You must call detach() or delete your OpenGLContext to remove it
            from a component BEFORE deleting the component that it is using!
@@ -521,7 +521,7 @@ private:
 //==============================================================================
 OpenGLContext::OpenGLContext()
     : nativeContext (nullptr), renderer (nullptr), contextToShareWith (nullptr),
-      renderComponents (true)
+      renderComponents (true), useMultisampling (false)
 {
 }
 
@@ -564,6 +564,15 @@ void OpenGLContext::setNativeSharedContext (void* nativeContextToShareWith) noex
     jassert (nativeContext == nullptr);
 
     contextToShareWith = nativeContextToShareWith;
+}
+
+void OpenGLContext::setMultisamplingEnabled (bool b) noexcept
+{
+    // This method must not be called when the context has already been attached!
+    // Call it before attaching your context, or use detach() first, before calling this!
+    jassert (nativeContext == nullptr);
+
+    useMultisampling = b;
 }
 
 void OpenGLContext::attachTo (Component& component)
@@ -784,15 +793,15 @@ void OpenGLContext::copyTexture (const Rectangle<int>& targetClipArea,
                       vOffsetAndScale (prog, "vOffsetAndScale")
                 {}
 
-                void set (const float targetWidth, const float targetHeight, const Rectangle<float>& bounds, bool flippedVertically) const
+                void set (const float targetWidth, const float targetHeight, const Rectangle<float>& bounds, bool flipVertically) const
                 {
                     const GLfloat m[] = { bounds.getX(), bounds.getY(), bounds.getWidth(), bounds.getHeight() };
                     textureBounds.set (m, 4);
                     imageTexture.set (0);
                     screenSize.set (targetWidth, targetHeight);
 
-                    vOffsetAndScale.set (flippedVertically ? 0.0f : 1.0f,
-                                         flippedVertically ? 1.0f : -1.0f);
+                    vOffsetAndScale.set (flipVertically ? 0.0f : 1.0f,
+                                         flipVertically ? 1.0f : -1.0f);
                 }
 
                 OpenGLShaderProgram::Attribute positionAttribute;

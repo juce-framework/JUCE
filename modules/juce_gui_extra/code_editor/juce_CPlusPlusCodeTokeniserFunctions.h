@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_CPLUSPLUSCODETOKENISERFUNCTIONS_JUCEHEADER__
-#define __JUCE_CPLUSPLUSCODETOKENISERFUNCTIONS_JUCEHEADER__
+#ifndef JUCE_CPLUSPLUSCODETOKENISERFUNCTIONS_H_INCLUDED
+#define JUCE_CPLUSPLUSCODETOKENISERFUNCTIONS_H_INCLUDED
 
 
 //==============================================================================
@@ -541,8 +541,8 @@ struct CppTokeniserFunctions
     */
     struct StringIterator
     {
-        StringIterator (const String& s) noexcept                  : t (s.getCharPointer()), numChars (0) {}
-        StringIterator (const String::CharPointerType& s) noexcept : t (s), numChars (0) {}
+        StringIterator (const String& s) noexcept            : t (s.getCharPointer()), numChars (0) {}
+        StringIterator (String::CharPointerType s) noexcept  : t (s), numChars (0) {}
 
         juce_wchar nextChar() noexcept      { if (isEOF()) return 0; ++numChars; return t.getAndAdvance(); }
         juce_wchar peekNextChar()noexcept   { return *t; }
@@ -557,4 +557,4 @@ struct CppTokeniserFunctions
 };
 
 
-#endif   // __JUCE_CPLUSPLUSCODETOKENISERFUNCTIONS_JUCEHEADER__
+#endif   // JUCE_CPLUSPLUSCODETOKENISERFUNCTIONS_H_INCLUDED

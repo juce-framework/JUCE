@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_MENUBARMODEL_JUCEHEADER__
-#define __JUCE_MENUBARMODEL_JUCEHEADER__
+#ifndef JUCE_MENUBARMODEL_H_INCLUDED
+#define JUCE_MENUBARMODEL_H_INCLUDED
 
 #include "juce_PopupMenu.h"
 
@@ -166,11 +166,11 @@ public:
 
     //==============================================================================
     /** @internal */
-    void applicationCommandInvoked (const ApplicationCommandTarget::InvocationInfo& info);
+    void applicationCommandInvoked (const ApplicationCommandTarget::InvocationInfo& info) override;
     /** @internal */
-    void applicationCommandListChanged();
+    void applicationCommandListChanged() override;
     /** @internal */
-    void handleAsyncUpdate();
+    void handleAsyncUpdate() override;
 
 private:
     ApplicationCommandManager* manager;
@@ -183,4 +183,4 @@ private:
 typedef MenuBarModel::Listener MenuBarModelListener;
 
 
-#endif   // __JUCE_MENUBARMODEL_JUCEHEADER__
+#endif   // JUCE_MENUBARMODEL_H_INCLUDED

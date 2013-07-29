@@ -26,8 +26,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_MATHSFUNCTIONS_JUCEHEADER__
-#define __JUCE_MATHSFUNCTIONS_JUCEHEADER__
+#ifndef JUCE_MATHSFUNCTIONS_H_INCLUDED
+#define JUCE_MATHSFUNCTIONS_H_INCLUDED
 
 //==============================================================================
 /*
@@ -55,27 +55,21 @@ typedef unsigned int                uint32;
   typedef __int64                   int64;
   /** A platform-independent 64-bit unsigned integer type. */
   typedef unsigned __int64          uint64;
-  /** A platform-independent macro for writing 64-bit literals, needed because
-      different compilers have different syntaxes for this.
-
-      E.g. writing literal64bit (0x1000000000) will translate to 0x1000000000LL for
-      GCC, or 0x1000000000 for MSVC.
-  */
-  #define literal64bit(longLiteral)     ((__int64) longLiteral)
 #else
   /** A platform-independent 64-bit integer type. */
   typedef long long                 int64;
   /** A platform-independent 64-bit unsigned integer type. */
   typedef unsigned long long        uint64;
-  /** A platform-independent macro for writing 64-bit literals, needed because
-      different compilers have different syntaxes for this.
-
-      E.g. writing literal64bit (0x1000000000) will translate to 0x1000000000LL for
-      GCC, or 0x1000000000 for MSVC.
-  */
-  #define literal64bit(longLiteral)     (longLiteral##LL)
 #endif
 
+#ifndef DOXYGEN
+ /** A macro for creating 64-bit literals.
+     Historically, this was needed to support portability with MSVC6, and is kept here
+     so that old code will still compile, but nowadays every compiler will support the
+     LL and ULL suffixes, so you should use those in preference to this macro.
+ */
+ #define literal64bit(longLiteral)     (longLiteral##LL)
+#endif
 
 #if JUCE_64BIT
   /** A signed integer type that's guaranteed to be large enough to hold a pointer without truncating it. */
@@ -517,4 +511,4 @@ namespace TypeHelpers
 
 //==============================================================================
 
-#endif   // __JUCE_MATHSFUNCTIONS_JUCEHEADER__
+#endif   // JUCE_MATHSFUNCTIONS_H_INCLUDED

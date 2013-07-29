@@ -157,17 +157,17 @@ public:
         setInterceptsMouseClicks (false, false);
     }
 
-    void paint (Graphics& g)
+    void paint (Graphics& g) override
     {
         getLookAndFeel().drawTabAreaBehindFrontButton (owner, g, getWidth(), getHeight());
     }
 
-    void enablementChanged()
+    void enablementChanged() override
     {
         repaint();
     }
 
-    void buttonClicked (Button*)
+    void buttonClicked (Button*) override
     {
         owner.showExtraItemsMenu();
     }
@@ -227,7 +227,7 @@ void TabbedButtonBar::clearTabs()
 }
 
 void TabbedButtonBar::addTab (const String& tabName,
-                              const Colour& tabBackgroundColour,
+                              Colour tabBackgroundColour,
                               int insertIndex)
 {
     jassert (tabName.isNotEmpty()); // you have to give them all a name..
@@ -271,12 +271,13 @@ void TabbedButtonBar::setTabName (const int tabIndex, const String& newName)
 
 void TabbedButtonBar::removeTab (const int tabIndex)
 {
+    const int oldIndex = currentTabIndex;
     if (tabIndex == currentTabIndex)
         setCurrentTabIndex (-1);
 
-    TabInfo* const currentTab = tabs [currentTabIndex];
     tabs.remove (tabIndex);
-    currentTabIndex = tabs.indexOf (currentTab);
+
+    setCurrentTabIndex (oldIndex);
     resized();
 }
 
@@ -321,7 +322,7 @@ void TabbedButtonBar::setCurrentTabIndex (int newIndex, const bool sendChangeMes
         for (int i = 0; i < tabs.size(); ++i)
         {
             TabBarButton* tb = tabs.getUnchecked(i)->button;
-            tb->setToggleState (i == newIndex, false);
+            tb->setToggleState (i == newIndex, dontSendNotification);
         }
 
         resized();
@@ -482,7 +483,7 @@ Colour TabbedButtonBar::getTabBackgroundColour (const int tabIndex)
     return tab == nullptr ? Colours::white : tab->colour;
 }
 
-void TabbedButtonBar::setTabBackgroundColour (const int tabIndex, const Colour& newColour)
+void TabbedButtonBar::setTabBackgroundColour (const int tabIndex, Colour newColour)
 {
     if (TabInfo* const tab = tabs [tabIndex])
     {

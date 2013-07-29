@@ -170,7 +170,7 @@ void AttributedString::clear()
     attributes.clear();
 }
 
-void AttributedString::setJustification (const Justification& newJustification) noexcept
+void AttributedString::setJustification (Justification newJustification) noexcept
 {
     justification = newJustification;
 }

@@ -115,6 +115,11 @@ struct RegistryKeyWrapper
         return defaultValue;
     }
 
+    static bool keyExists (const String& regValuePath, const DWORD wow64Flags)
+    {
+        return RegistryKeyWrapper (regValuePath, false, wow64Flags).key != 0;
+    }
+
     static bool valueExists (const String& regValuePath, const DWORD wow64Flags)
     {
         const RegistryKeyWrapper key (regValuePath, false, wow64Flags);
@@ -159,6 +164,11 @@ bool WindowsRegistry::valueExistsWow64 (const String& regValuePath)
     return RegistryKeyWrapper::valueExists (regValuePath, 0x100 /*KEY_WOW64_64KEY*/);
 }
 
+bool WindowsRegistry::keyExistsWow64 (const String& regValuePath)
+{
+    return RegistryKeyWrapper::keyExists (regValuePath, 0x100 /*KEY_WOW64_64KEY*/);
+}
+
 bool WindowsRegistry::setValue (const String& regValuePath, const String& value)
 {
     return RegistryKeyWrapper::setValue (regValuePath, REG_SZ, value.toWideCharPointer(),
@@ -183,6 +193,11 @@ bool WindowsRegistry::setValue (const String& regValuePath, const MemoryBlock& v
 bool WindowsRegistry::valueExists (const String& regValuePath)
 {
     return RegistryKeyWrapper::valueExists (regValuePath, 0);
+}
+
+bool WindowsRegistry::keyExists (const String& regValuePath)
+{
+    return RegistryKeyWrapper::keyExists (regValuePath, 0);
 }
 
 void WindowsRegistry::deleteValue (const String& regValuePath)

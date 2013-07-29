@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_BUTTON_JUCEHEADER__
-#define __JUCE_BUTTON_JUCEHEADER__
+#ifndef JUCE_BUTTON_H_INCLUDED
+#define JUCE_BUTTON_H_INCLUDED
 
 #include "../components/juce_Component.h"
 #include "../keyboard/juce_KeyListener.h"
@@ -90,17 +90,17 @@ public:
         an action you won't change this. Toggle buttons, however will want to
         change their state when turned on or off.
 
-        @param shouldBeOn               whether to set the button's toggle state to be on or
-                                        off. If it's a member of a button group, this will
-                                        always try to turn it on, and to turn off any other
-                                        buttons in the group
-        @param sendChangeNotification   if true, a callback will be made to clicked(); if false
-                                        the button will be repainted but no notification will
-                                        be sent
+        @param shouldBeOn       whether to set the button's toggle state to be on or
+                                off. If it's a member of a button group, this will
+                                always try to turn it on, and to turn off any other
+                                buttons in the group
+        @param notification     determines the behaviour if the value changes - this
+                                can invoke a synchronous call to clicked(), but
+                                sendNotificationAsync is not supported
         @see getToggleState, setRadioGroupId
     */
     void setToggleState (bool shouldBeOn,
-                         bool sendChangeNotification);
+                         NotificationType notification);
 
     /** Returns true if the button is 'on'.
 
@@ -353,6 +353,8 @@ public:
     */
     void setState (const ButtonState newState);
 
+    // This method's parameters have changed - see the new version.
+    JUCE_DEPRECATED (void setToggleState (bool, bool));
 
 protected:
     //==============================================================================
@@ -404,43 +406,43 @@ protected:
     /** @internal */
     virtual void internalClickCallback (const ModifierKeys&);
     /** @internal */
-    void handleCommandMessage (int commandId);
+    void handleCommandMessage (int commandId) override;
     /** @internal */
-    void mouseEnter (const MouseEvent&);
+    void mouseEnter (const MouseEvent&) override;
     /** @internal */
-    void mouseExit (const MouseEvent&);
+    void mouseExit (const MouseEvent&) override;
     /** @internal */
-    void mouseDown (const MouseEvent&);
+    void mouseDown (const MouseEvent&) override;
     /** @internal */
-    void mouseDrag (const MouseEvent&);
+    void mouseDrag (const MouseEvent&) override;
     /** @internal */
-    void mouseUp (const MouseEvent&);
+    void mouseUp (const MouseEvent&) override;
     /** @internal */
-    bool keyPressed (const KeyPress&);
+    bool keyPressed (const KeyPress&) override;
     /** @internal */
-    bool keyPressed (const KeyPress&, Component*);
+    bool keyPressed (const KeyPress&, Component*) override;
     /** @internal */
-    bool keyStateChanged (bool isKeyDown, Component*);
+    bool keyStateChanged (bool isKeyDown, Component*) override;
     /** @internal */
     using Component::keyStateChanged;
     /** @internal */
-    void paint (Graphics&);
+    void paint (Graphics&) override;
     /** @internal */
-    void parentHierarchyChanged();
+    void parentHierarchyChanged() override;
     /** @internal */
-    void visibilityChanged();
+    void visibilityChanged() override;
     /** @internal */
-    void focusGained (FocusChangeType);
+    void focusGained (FocusChangeType) override;
     /** @internal */
-    void focusLost (FocusChangeType);
+    void focusLost (FocusChangeType) override;
     /** @internal */
-    void enablementChanged();
+    void enablementChanged() override;
     /** @internal */
-    void applicationCommandInvoked (const ApplicationCommandTarget::InvocationInfo&);
+    void applicationCommandInvoked (const ApplicationCommandTarget::InvocationInfo&) override;
     /** @internal */
-    void applicationCommandListChanged();
+    void applicationCommandListChanged() override;
     /** @internal */
-    void valueChanged (Value&);
+    void valueChanged (Value&) override;
 
 private:
     //==============================================================================
@@ -474,15 +476,11 @@ private:
     ButtonState updateState();
     ButtonState updateState (bool isOver, bool isDown);
     bool isShortcutPressed() const;
-    void turnOffOtherButtonsInGroup (bool sendChangeNotification);
+    void turnOffOtherButtonsInGroup (NotificationType);
 
     void flashButtonState();
     void sendClickMessage (const ModifierKeys&);
     void sendStateMessage();
-
-    // These are deprecated - please use addListener() and removeListener() instead!
-    JUCE_DEPRECATED (void addButtonListener (Listener*));
-    JUCE_DEPRECATED (void removeButtonListener (Listener*));
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Button)
 };
@@ -492,4 +490,4 @@ private:
  typedef Button::Listener ButtonListener;
 #endif
 
-#endif   // __JUCE_BUTTON_JUCEHEADER__
+#endif   // JUCE_BUTTON_H_INCLUDED

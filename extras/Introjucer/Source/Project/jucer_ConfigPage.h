@@ -63,7 +63,7 @@ public:
         return height;
     }
 
-    void paint (Graphics& g)
+    void paint (Graphics& g) override
     {
         const Colour bkg (findColour (mainBackgroundColourId));
 
@@ -92,12 +92,12 @@ public:
         viewport.setViewedComponent (content, true);
     }
 
-    void paint (Graphics& g)
+    void paint (Graphics& g) override
     {
         IntrojucerLookAndFeel::fillWithBackgroundTexture (*this, g);
     }
 
-    void resized()
+    void resized() override
     {
         Rectangle<int> r (getLocalBounds());
         rolloverHelp.setBounds (r.removeFromBottom (70).reduced (10, 0));
@@ -121,7 +121,7 @@ public:
     void showSettingsPage (Component* content);
     void closeSettingsPage();
 
-    void deleteAllSelectedItems()
+    void deleteAllSelectedItems() override
     {
         TreeView* const tree = getOwnerView();
         jassert (tree->getNumSelectedItems() <= 1); // multi-select should be disabled
@@ -130,17 +130,17 @@ public:
             s->deleteItem();
     }
 
-    void itemOpennessChanged (bool isNowOpen)
+    void itemOpennessChanged (bool isNowOpen) override
     {
         if (isNowOpen)
            refreshSubItems();
     }
 
-    void valueTreePropertyChanged (ValueTree&, const Identifier&) {}
-    void valueTreeChildAdded (ValueTree&, ValueTree&) {}
-    void valueTreeChildRemoved (ValueTree&, ValueTree&) {}
-    void valueTreeChildOrderChanged (ValueTree&) {}
-    void valueTreeParentChanged (ValueTree&) {}
+    void valueTreePropertyChanged (ValueTree&, const Identifier&) override {}
+    void valueTreeChildAdded (ValueTree&, ValueTree&) override {}
+    void valueTreeChildRemoved (ValueTree&, ValueTree&) override {}
+    void valueTreeChildOrderChanged (ValueTree&) override {}
+    void valueTreeParentChanged (ValueTree&) override {}
 
     static void updateSize (Component& comp, PropertyGroup& group)
     {

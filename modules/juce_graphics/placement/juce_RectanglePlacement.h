@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_RECTANGLEPLACEMENT_JUCEHEADER__
-#define __JUCE_RECTANGLEPLACEMENT_JUCEHEADER__
+#ifndef JUCE_RECTANGLEPLACEMENT_H_INCLUDED
+#define JUCE_RECTANGLEPLACEMENT_H_INCLUDED
 
 #include "../geometry/juce_AffineTransform.h"
 #include "../geometry/juce_Rectangle.h"
@@ -131,7 +131,7 @@ public:
     //==============================================================================
     /** Adjusts the position and size of a rectangle to fit it into a space.
 
-        The source rectangle co-ordinates will be adjusted so that they fit into
+        The source rectangle coordinates will be adjusted so that they fit into
         the destination rectangle based on this object's flags.
     */
     void applyTo (double& sourceX,
@@ -157,7 +157,7 @@ public:
                                      static_cast <ValueType> (w), static_cast <ValueType> (h));
     }
 
-    /** Returns the transform that should be applied to these source co-ordinates to fit them
+    /** Returns the transform that should be applied to these source coordinates to fit them
         into the destination rectangle using the current flags.
     */
     AffineTransform getTransformToFit (const Rectangle<float>& source,
@@ -169,4 +169,4 @@ private:
     int flags;
 };
 
-#endif   // __JUCE_RECTANGLEPLACEMENT_JUCEHEADER__
+#endif   // JUCE_RECTANGLEPLACEMENT_H_INCLUDED

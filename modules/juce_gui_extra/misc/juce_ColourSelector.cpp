@@ -54,7 +54,7 @@ public:
         setInterceptsMouseClicks (false, false);
     }
 
-    void paint (Graphics& g)
+    void paint (Graphics& g) override
     {
         g.setColour (Colour::greyLevel (0.1f));
         g.drawEllipse (1.0f, 1.0f, getWidth() - 2.0f, getHeight() - 2.0f, 1.0f);
@@ -77,7 +77,7 @@ public:
         setMouseCursor (MouseCursor::CrosshairCursor);
     }
 
-    void paint (Graphics& g)
+    void paint (Graphics& g) override
     {
         if (colours.isNull())
         {
@@ -104,12 +104,12 @@ public:
                      0, 0, colours.getWidth(), colours.getHeight());
     }
 
-    void mouseDown (const MouseEvent& e)
+    void mouseDown (const MouseEvent& e) override
     {
         mouseDrag (e);
     }
 
-    void mouseDrag (const MouseEvent& e)
+    void mouseDrag (const MouseEvent& e) override
     {
         const float sat = (e.x - edge) / (float) (getWidth() - edge * 2);
         const float val = 1.0f - (e.y - edge) / (float) (getHeight() - edge * 2);
@@ -129,7 +129,7 @@ public:
         updateMarker();
     }
 
-    void resized()
+    void resized() override
     {
         colours = Image::null;
         updateMarker();
@@ -164,7 +164,7 @@ public:
         setInterceptsMouseClicks (false, false);
     }
 
-    void paint (Graphics& g)
+    void paint (Graphics& g) override
     {
         const float cw = (float) getWidth();
         const float ch = (float) getHeight();
@@ -199,7 +199,7 @@ public:
         addAndMakeVisible (&marker);
     }
 
-    void paint (Graphics& g)
+    void paint (Graphics& g) override
     {
         ColourGradient cg;
         cg.isRadial = false;
@@ -213,17 +213,17 @@ public:
         g.fillRect (getLocalBounds().reduced (edge));
     }
 
-    void resized()
+    void resized() override
     {
         marker.setBounds (0, roundToInt ((getHeight() - edge * 2) * h), getWidth(), edge * 2);
     }
 
-    void mouseDown (const MouseEvent& e)
+    void mouseDown (const MouseEvent& e) override
     {
         mouseDrag (e);
     }
 
-    void mouseDrag (const MouseEvent& e)
+    void mouseDrag (const MouseEvent& e) override
     {
         owner.setHue ((e.y - edge) / (float) (getHeight() - edge * 2));
     }
@@ -253,7 +253,7 @@ public:
     {
     }
 
-    void paint (Graphics& g)
+    void paint (Graphics& g) override
     {
         const Colour c (owner.getSwatchColour (index));
 
@@ -262,7 +262,7 @@ public:
                             Colour (0xffffffff).overlaidWith (c));
     }
 
-    void mouseDown (const MouseEvent&)
+    void mouseDown (const MouseEvent&) override
     {
         PopupMenu m;
         m.addItem (1, TRANS("Use this swatch as the current colour"));

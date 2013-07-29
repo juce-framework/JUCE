@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_RESIZABLEWINDOW_JUCEHEADER__
-#define __JUCE_RESIZABLEWINDOW_JUCEHEADER__
+#ifndef JUCE_RESIZABLEWINDOW_H_INCLUDED
+#define JUCE_RESIZABLEWINDOW_H_INCLUDED
 
 #include "juce_TopLevelWindow.h"
 #include "../mouse/juce_ComponentDragger.h"
@@ -75,7 +75,7 @@ public:
                                     desktop; if false, you can use it as a child component
     */
     ResizableWindow (const String& name,
-                     const Colour& backgroundColour,
+                     Colour backgroundColour,
                      bool addToDesktop);
 
     /** Destructor.
@@ -110,7 +110,7 @@ public:
 
         @see getBackgroundColour
     */
-    void setBackgroundColour (const Colour& newColour);
+    void setBackgroundColour (Colour newColour);
 
     //==============================================================================
     /** Make the window resizable or fixed.
@@ -312,7 +312,7 @@ public:
     };
 
     //==============================================================================
-    /** @deprecated - use setContentOwned() and setContentNonOwned() instead. */
+    // Deprecated: use setContentOwned() and setContentNonOwned() instead.
     JUCE_DEPRECATED (void setContentComponent (Component* newContentComponent,
                                                bool deleteOldOne = true,
                                                bool resizeToFit = false));
@@ -321,27 +321,27 @@ public:
 protected:
     //==============================================================================
     /** @internal */
-    void paint (Graphics& g);
+    void paint (Graphics&) override;
     /** (if overriding this, make sure you call ResizableWindow::moved() in your subclass) */
-    void moved();
+    void moved() override;
     /** (if overriding this, make sure you call ResizableWindow::resized() in your subclass) */
-    void resized();
+    void resized() override;
     /** @internal */
-    void mouseDown (const MouseEvent& e);
+    void mouseDown (const MouseEvent&) override;
     /** @internal */
-    void mouseDrag (const MouseEvent& e);
+    void mouseDrag (const MouseEvent&) override;
     /** @internal */
-    void lookAndFeelChanged();
+    void lookAndFeelChanged() override;
     /** @internal */
-    void childBoundsChanged (Component* child);
+    void childBoundsChanged (Component*) override;
     /** @internal */
-    void parentSizeChanged();
+    void parentSizeChanged() override;
     /** @internal */
-    void visibilityChanged();
+    void visibilityChanged() override;
     /** @internal */
-    void activeWindowStatusChanged();
+    void activeWindowStatusChanged() override;
     /** @internal */
-    int getDesktopWindowStyleFlags() const;
+    int getDesktopWindowStyleFlags() const override;
 
    #if JUCE_DEBUG
     /** Overridden to warn people about adding components directly to this component
@@ -389,4 +389,4 @@ private:
 };
 
 
-#endif   // __JUCE_RESIZABLEWINDOW_JUCEHEADER__
+#endif   // JUCE_RESIZABLEWINDOW_H_INCLUDED

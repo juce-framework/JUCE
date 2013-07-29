@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_AUDIOPROCESSORGRAPH_JUCEHEADER__
-#define __JUCE_AUDIOPROCESSORGRAPH_JUCEHEADER__
+#ifndef JUCE_AUDIOPROCESSORGRAPH_H_INCLUDED
+#define JUCE_AUDIOPROCESSORGRAPH_H_INCLUDED
 
 #include "juce_AudioProcessor.h"
 #include "../format/juce_AudioPluginFormatManager.h"
@@ -405,7 +405,7 @@ private:
     MidiBuffer* currentMidiInputBuffer;
     MidiBuffer currentMidiOutputBuffer;
 
-    void handleAsyncUpdate();
+    void handleAsyncUpdate() override;
     void clearRenderingSequence();
     void buildRenderingSequence();
     bool isAnInputTo (uint32 possibleInputId, uint32 possibleDestinationId, int recursionCheck) const;
@@ -414,4 +414,4 @@ private:
 };
 
 
-#endif   // __JUCE_AUDIOPROCESSORGRAPH_JUCEHEADER__
+#endif   // JUCE_AUDIOPROCESSORGRAPH_H_INCLUDED

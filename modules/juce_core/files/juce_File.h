@@ -26,8 +26,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_FILE_JUCEHEADER__
-#define __JUCE_FILE_JUCEHEADER__
+#ifndef JUCE_FILE_H_INCLUDED
+#define JUCE_FILE_H_INCLUDED
 
 #include "../containers/juce_Array.h"
 #include "../time/juce_Time.h"
@@ -75,10 +75,10 @@ public:
         On the Mac/Linux, the path can include "~" notation for referring to
         user home directories.
     */
-    File (const String& path);
+    File (const String& absolutePath);
 
     /** Creates a copy of another file object. */
-    File (const File& other);
+    File (const File&);
 
     /** Destructor. */
     ~File() noexcept  {}
@@ -93,14 +93,14 @@ public:
         On the Mac/Linux, the path can include "~" notation for referring to
         user home directories.
     */
-    File& operator= (const String& newFilePath);
+    File& operator= (const String& newAbsolutePath);
 
     /** Copies from another file object. */
     File& operator= (const File& otherFile);
 
    #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
-    File (File&& otherFile) noexcept;
-    File& operator= (File&& otherFile) noexcept;
+    File (File&&) noexcept;
+    File& operator= (File&&) noexcept;
    #endif
 
     //==============================================================================
@@ -205,8 +205,7 @@ public:
 
         @param extensionToTest  the extension to look for - it doesn't matter whether or
                                 not this string has a dot at the start, so ".wav" and "wav"
-                                will have the same effect. The comparison used is
-                                case-insensitve. To compare with multiple extensions, this
+                                will have the same effect. To compare with multiple extensions, this
                                 parameter can contain multiple strings, separated by semi-colons -
                                 so, for example: hasFileExtension (".jpeg;png;gif") would return
                                 true if the file has any of those three extensions.
@@ -251,12 +250,13 @@ public:
     int64 hashCode64() const;
 
     //==============================================================================
-    /** Returns a file based on a relative path.
+    /** Returns a file that represents a relative (or absolute) sub-path of the current one.
 
         This will find a child file or directory of the current object.
 
         e.g.
             File ("/moose/fish").getChildFile ("foo.txt") will produce "/moose/fish/foo.txt".
+            File ("/moose/fish").getChildFile ("haddock/foo.txt") will produce "/moose/fish/haddock/foo.txt".
             File ("/moose/fish").getChildFile ("../foo.txt") will produce "/moose/foo.txt".
 
         If the string is actually an absolute path, it will be treated as such, e.g.
@@ -264,7 +264,7 @@ public:
 
         @see getSiblingFile, getParentDirectory, getRelativePathFrom, isAChildOf
     */
-    File getChildFile (String relativePath) const;
+    File getChildFile (String relativeOrAbsolutePath) const;
 
     /** Returns a file which is in the same directory as this one.
 
@@ -327,13 +327,13 @@ public:
 
     //==============================================================================
     /** Compares the pathnames for two files. */
-    bool operator== (const File& otherFile) const;
+    bool operator== (const File&) const;
     /** Compares the pathnames for two files. */
-    bool operator!= (const File& otherFile) const;
+    bool operator!= (const File&) const;
     /** Compares the pathnames for two files. */
-    bool operator< (const File& otherFile) const;
+    bool operator< (const File&) const;
     /** Compares the pathnames for two files. */
-    bool operator> (const File& otherFile) const;
+    bool operator> (const File&) const;
 
     //==============================================================================
     /** Checks whether a file can be created or written to.
@@ -884,19 +884,20 @@ public:
     static const String separatorString;
 
     //==============================================================================
-    /** Removes illegal characters from a filename.
+    /** Returns a version of a filename with any illegal characters removed.
 
         This will return a copy of the given string after removing characters
         that are not allowed in a legal filename, and possibly shortening the
         string if it's too long.
 
-        Because this will remove slashes, don't use it on an absolute pathname.
+        Because this will remove slashes, don't use it on an absolute pathname - use
+        createLegalPathName() for that.
 
         @see createLegalPathName
     */
     static String createLegalFileName (const String& fileNameToFix);
 
-    /** Removes illegal characters from a pathname.
+    /** Returns a version of a path with any illegal characters removed.
 
         Similar to createLegalFileName(), but this won't remove slashes, so can
         be used on a complete pathname.
@@ -916,7 +917,7 @@ public:
 
         Best to avoid this unless you really know what you're doing.
     */
-    static File createFileWithoutCheckingPath (const String& path) noexcept;
+    static File createFileWithoutCheckingPath (const String& absolutePath) noexcept;
 
     /** Adds a separator character to the end of a path if it doesn't already have one. */
     static String addTrailingSeparator (const String& path);
@@ -953,8 +954,6 @@ private:
     bool setFileTimesInternal (int64 m, int64 a, int64 c) const;
     void getFileTimesInternal (int64& m, int64& a, int64& c) const;
     bool setFileReadOnlyInternal (bool) const;
-
-    JUCE_LEAK_DETECTOR (File)
 };
 
-#endif   // __JUCE_FILE_JUCEHEADER__
+#endif   // JUCE_FILE_H_INCLUDED

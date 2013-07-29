@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_FILECHOOSER_JUCEHEADER__
-#define __JUCE_FILECHOOSER_JUCEHEADER__
+#ifndef JUCE_FILECHOOSER_H_INCLUDED
+#define JUCE_FILECHOOSER_H_INCLUDED
 
 #include "juce_FilePreviewComponent.h"
 
@@ -196,4 +196,4 @@ private:
 };
 
 
-#endif   // __JUCE_FILECHOOSER_JUCEHEADER__
+#endif   // JUCE_FILECHOOSER_H_INCLUDED

@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_FILELISTCOMPONENT_JUCEHEADER__
-#define __JUCE_FILELISTCOMPONENT_JUCEHEADER__
+#ifndef JUCE_FILELISTCOMPONENT_H_INCLUDED
+#define JUCE_FILELISTCOMPONENT_H_INCLUDED
 
 #include "juce_DirectoryContentsDisplayComponent.h"
 #include "juce_FileBrowserListener.h"
@@ -85,17 +85,17 @@ private:
 
     class ItemComponent;
 
-    void changeListenerCallback (ChangeBroadcaster*);
+    void changeListenerCallback (ChangeBroadcaster*) override;
 
-    int getNumRows();
-    void paintListBoxItem (int, Graphics&, int, int, bool);
-    Component* refreshComponentForRow (int rowNumber, bool isRowSelected, Component* existingComponentToUpdate);
-    void selectedRowsChanged (int lastRowSelected);
-    void deleteKeyPressed (int currentSelectedRow);
-    void returnKeyPressed (int currentSelectedRow);
+    int getNumRows() override;
+    void paintListBoxItem (int, Graphics&, int, int, bool) override;
+    Component* refreshComponentForRow (int rowNumber, bool isRowSelected, Component* existingComponentToUpdate) override;
+    void selectedRowsChanged (int lastRowSelected) override;
+    void deleteKeyPressed (int currentSelectedRow) override;
+    void returnKeyPressed (int currentSelectedRow) override;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FileListComponent)
 };
 
 
-#endif   // __JUCE_FILELISTCOMPONENT_JUCEHEADER__
+#endif   // JUCE_FILELISTCOMPONENT_H_INCLUDED

@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_TOOLTIPWINDOW_JUCEHEADER__
-#define __JUCE_TOOLTIPWINDOW_JUCEHEADER__
+#ifndef JUCE_TOOLTIPWINDOW_H_INCLUDED
+#define JUCE_TOOLTIPWINDOW_H_INCLUDED
 
 #include "../components/juce_Component.h"
 #include "../mouse/juce_TooltipClient.h"
@@ -104,16 +104,16 @@ private:
     bool changedCompsSinceShown;
     String tipShowing, lastTipUnderMouse;
 
-    void paint (Graphics& g);
-    void mouseEnter (const MouseEvent& e);
-    void timerCallback();
+    void paint (Graphics&) override;
+    void mouseEnter (const MouseEvent&) override;
+    void timerCallback() override;
 
-    static String getTipFor (Component* c);
-    void showFor (const String& tip);
+    static String getTipFor (Component*);
+    void showFor (const String&);
     void hide();
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TooltipWindow)
 };
 
 
-#endif   // __JUCE_TOOLTIPWINDOW_JUCEHEADER__
+#endif   // JUCE_TOOLTIPWINDOW_H_INCLUDED

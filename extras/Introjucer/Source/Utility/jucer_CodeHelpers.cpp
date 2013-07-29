@@ -283,7 +283,7 @@ namespace CodeHelpers
         return value ? "true" : "false";
     }
 
-    String colourToCode (const Colour& col)
+    String colourToCode (Colour col)
     {
         const Colour colours[] =
         {
@@ -308,7 +308,7 @@ namespace CodeHelpers
         return "Colour (0x" + hexString8Digits ((int) col.getARGB()) + ')';
     }
 
-    String justificationToCode (const Justification& justification)
+    String justificationToCode (Justification justification)
     {
         switch (justification.getFlags())
         {

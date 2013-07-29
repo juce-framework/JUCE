@@ -72,7 +72,7 @@ Random& Random::getSystemRandom() noexcept
 //==============================================================================
 int Random::nextInt() noexcept
 {
-    seed = (seed * literal64bit (0x5deece66d) + 11) & literal64bit (0xffffffffffff);
+    seed = (seed * 0x5deece66dLL + 11) & 0xffffffffffffLL;
 
     return (int) (seed >> 16);
 }
@@ -114,6 +114,20 @@ BigInteger Random::nextLargeNumber (const BigInteger& maximumValue)
     while (n >= maximumValue);
 
     return n;
+}
+
+void Random::fillBitsRandomly (void* const buffer, size_t bytes)
+{
+    int* d = static_cast<int*> (buffer);
+
+    for (; bytes >= sizeof (int); bytes -= sizeof (int))
+        *d++ = nextInt();
+
+    if (bytes > 0)
+    {
+        const int lastBytes = nextInt();
+        memcpy (d, &lastBytes, bytes);
+    }
 }
 
 void Random::fillBitsRandomly (BigInteger& arrayToChange, int startBit, int numBits)

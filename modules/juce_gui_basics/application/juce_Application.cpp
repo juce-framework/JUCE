@@ -53,7 +53,7 @@ public:
         return true;
     }
 
-    void actionListenerCallback (const String& message)
+    void actionListenerCallback (const String& message) override
     {
         if (JUCEApplication* const app = JUCEApplication::getInstance())
         {
@@ -254,7 +254,7 @@ int JUCEApplication::main()
  extern void initialiseNSApplication();
 #endif
 
-extern const char** juce_argv;  // declared in juce_core
+extern const char* const* juce_argv;  // declared in juce_core
 extern int juce_argc;
 
 StringArray JUCEApplication::getCommandLineParameterArray()

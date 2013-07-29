@@ -25,8 +25,10 @@
 Desktop::Desktop()
     : mouseClickCounter (0), mouseWheelCounter (0),
       kioskModeComponent (nullptr),
-      allowedOrientations (allOrientations)
+      allowedOrientations (allOrientations),
+      masterScaleFactor (1.0f)
 {
+    displays = new Displays (*this);
     addMouseInputSource();
 }
 
@@ -146,6 +148,11 @@ Point<int> Desktop::getMousePosition()
     return getInstance().getMainMouseSource().getScreenPosition();
 }
 
+void Desktop::setMousePosition (Point<int> newPosition)
+{
+    getInstance().getMainMouseSource().setScreenPosition (newPosition);
+}
+
 Point<int> Desktop::getLastMouseDownPosition()
 {
     return getInstance().getMainMouseSource().getLastMouseDownPosition();
@@ -186,13 +193,30 @@ MouseInputSource* Desktop::getDraggingMouseSource (int index) const noexcept
     return nullptr;
 }
 
+MouseInputSource* Desktop::getOrCreateMouseInputSource (int touchIndex)
+{
+    jassert (touchIndex >= 0 && touchIndex < 100); // sanity-check on number of fingers
+
+    for (;;)
+    {
+        if (MouseInputSource* mouse = getMouseSource (touchIndex))
+            return mouse;
+
+        if (! addMouseInputSource())
+        {
+            jassertfalse; // not enough mouse sources!
+            return nullptr;
+        }
+    }
+}
+
 //==============================================================================
 class MouseDragAutoRepeater  : public Timer
 {
 public:
     MouseDragAutoRepeater() {}
 
-    void timerCallback()
+    void timerCallback() override
     {
         Desktop& desktop = Desktop::getInstance();
         int numMiceDown = 0;
@@ -318,7 +342,7 @@ void Desktop::sendMouseMove()
 
 
 //==============================================================================
-Desktop::Displays::Displays()   { refresh(); }
+Desktop::Displays::Displays (Desktop& desktop)   { init (desktop); }
 Desktop::Displays::~Displays()  {}
 
 const Desktop::Displays::Display& Desktop::Displays::getMainDisplay() const noexcept
@@ -354,9 +378,9 @@ const Desktop::Displays::Display& Desktop::Displays::getDisplayContaining (Point
     return *best;
 }
 
-RectangleList Desktop::Displays::getRectangleList (bool userAreasOnly) const
+RectangleList<int> Desktop::Displays::getRectangleList (bool userAreasOnly) const
 {
-    RectangleList rl;
+    RectangleList<int> rl;
 
     for (int i = 0; i < displays.size(); ++i)
     {
@@ -387,13 +411,18 @@ bool operator!= (const Desktop::Displays::Display& d1, const Desktop::Displays::
     return ! (d1 == d2);
 }
 
+void Desktop::Displays::init (Desktop& desktop)
+{
+    findDisplays (desktop.masterScaleFactor);
+    jassert (displays.size() > 0);
+}
+
 void Desktop::Displays::refresh()
 {
     Array<Display> oldDisplays;
-    oldDisplays.swapWithArray (displays);
+    oldDisplays.swapWith (displays);
 
-    findDisplays();
-    jassert (displays.size() > 0);
+    init (Desktop::getInstance());
 
     if (oldDisplays != displays)
     {
@@ -447,4 +476,14 @@ bool Desktop::isOrientationEnabled (const DisplayOrientation orientation) const 
     jassert (orientation == upright || orientation == upsideDown || orientation == rotatedClockwise || orientation ==  rotatedAntiClockwise);
 
     return (allowedOrientations & orientation) != 0;
+}
+
+void Desktop::setGlobalScaleFactor (float newScaleFactor) noexcept
+{
+    if (masterScaleFactor != newScaleFactor)
+    {
+        masterScaleFactor = newScaleFactor;
+
+        displays->refresh();
+    }
 }

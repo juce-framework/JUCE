@@ -38,14 +38,14 @@ public:
         return frameBuffer.initialise (context, width, height);
     }
 
-    LowLevelGraphicsContext* createLowLevelContext()
+    LowLevelGraphicsContext* createLowLevelContext() override
     {
         return createOpenGLGraphicsContext (context, frameBuffer);
     }
 
-    ImageType* createType() const     { return new OpenGLImageType(); }
+    ImageType* createType() const override     { return new OpenGLImageType(); }
 
-    ImagePixelData* clone()
+    ImagePixelData* clone() override
     {
         OpenGLFrameBufferImage* im = new OpenGLFrameBufferImage (context, width, height);
         im->incReferenceCount();
@@ -60,7 +60,7 @@ public:
         return im;
     }
 
-    void initialiseBitmapData (Image::BitmapData& bitmapData, int x, int y, Image::BitmapData::ReadWriteMode mode)
+    void initialiseBitmapData (Image::BitmapData& bitmapData, int x, int y, Image::BitmapData::ReadWriteMode mode) override
     {
         bitmapData.pixelFormat = pixelFormat;
         bitmapData.lineStride  = lineStride;

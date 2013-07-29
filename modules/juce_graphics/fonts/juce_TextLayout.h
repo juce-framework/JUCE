@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_TEXTLAYOUT_JUCEHEADER__
-#define __JUCE_TEXTLAYOUT_JUCEHEADER__
+#ifndef JUCE_TEXTLAYOUT_H_INCLUDED
+#define JUCE_TEXTLAYOUT_H_INCLUDED
 
 #include "juce_Font.h"
 #include "../placement/juce_Justification.h"
@@ -177,4 +177,4 @@ private:
     JUCE_LEAK_DETECTOR (TextLayout)
 };
 
-#endif   // __JUCE_TEXTLAYOUT_JUCEHEADER__
+#endif   // JUCE_TEXTLAYOUT_H_INCLUDED

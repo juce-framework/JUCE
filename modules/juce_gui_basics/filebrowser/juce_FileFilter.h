@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_FILEFILTER_JUCEHEADER__
-#define __JUCE_FILEFILTER_JUCEHEADER__
+#ifndef JUCE_FILEFILTER_H_INCLUDED
+#define JUCE_FILEFILTER_H_INCLUDED
 
 
 //==============================================================================
@@ -70,4 +70,4 @@ protected:
 };
 
 
-#endif   // __JUCE_FILEFILTER_JUCEHEADER__
+#endif   // JUCE_FILEFILTER_H_INCLUDED

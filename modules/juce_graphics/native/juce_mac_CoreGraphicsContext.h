@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_MAC_COREGRAPHICSCONTEXT_JUCEHEADER__
-#define __JUCE_MAC_COREGRAPHICSCONTEXT_JUCEHEADER__
+#ifndef JUCE_MAC_COREGRAPHICSCONTEXT_H_INCLUDED
+#define JUCE_MAC_COREGRAPHICSCONTEXT_H_INCLUDED
 
 //==============================================================================
 class CoreGraphicsContext   : public LowLevelGraphicsContext
@@ -33,46 +33,45 @@ public:
     ~CoreGraphicsContext();
 
     //==============================================================================
-    bool isVectorDevice() const         { return false; }
+    bool isVectorDevice() const override         { return false; }
 
-    void setOrigin (int x, int y);
-    void addTransform (const AffineTransform& transform);
-    float getScaleFactor();
-    float getTargetDeviceScaleFactor()  { return targetScale; }
-    bool clipToRectangle (const Rectangle<int>& r);
-    bool clipToRectangleList (const RectangleList& clipRegion);
-    void excludeClipRectangle (const Rectangle<int>& r);
-    void clipToPath (const Path& path, const AffineTransform& transform);
-    void clipToImageAlpha (const Image& sourceImage, const AffineTransform& transform);
-    bool clipRegionIntersects (const Rectangle<int>& r);
-    Rectangle<int> getClipBounds() const;
-    bool isClipEmpty() const;
-
-    //==============================================================================
-    void saveState();
-    void restoreState();
-    void beginTransparencyLayer (float opacity);
-    void endTransparencyLayer();
+    void setOrigin (int x, int y) override;
+    void addTransform (const AffineTransform&) override;
+    float getScaleFactor() override;
+    float getTargetDeviceScaleFactor() override  { return targetScale; }
+    bool clipToRectangle (const Rectangle<int>&) override;
+    bool clipToRectangleList (const RectangleList<int>&) override;
+    void excludeClipRectangle (const Rectangle<int>&) override;
+    void clipToPath (const Path&, const AffineTransform&) override;
+    void clipToImageAlpha (const Image&, const AffineTransform&) override;
+    bool clipRegionIntersects (const Rectangle<int>&) override;
+    Rectangle<int> getClipBounds() const override;
+    bool isClipEmpty() const override;
 
     //==============================================================================
-    void setFill (const FillType& fillType);
-    void setOpacity (float newOpacity);
-    void setInterpolationQuality (Graphics::ResamplingQuality quality);
+    void saveState() override;
+    void restoreState() override;
+    void beginTransparencyLayer (float opacity) override;
+    void endTransparencyLayer() override;
 
     //==============================================================================
-    void fillRect (const Rectangle<int>& r, const bool replaceExistingContents);
-    void fillCGRect (const CGRect& cgRect, const bool replaceExistingContents);
-    void fillPath (const Path& path, const AffineTransform& transform);
-    void drawImage (const Image& sourceImage, const AffineTransform& transform);
+    void setFill (const FillType&) override;
+    void setOpacity (float) override;
+    void setInterpolationQuality (Graphics::ResamplingQuality) override;
 
     //==============================================================================
-    void drawLine (const Line<float>& line);
-    void drawVerticalLine (const int x, float top, float bottom);
-    void drawHorizontalLine (const int y, float left, float right);
-    void setFont (const Font& newFont);
-    const Font& getFont();
-    void drawGlyph (int glyphNumber, const AffineTransform& transform);
-    bool drawTextLayout (const AttributedString& text, const Rectangle<float>&);
+    void fillRect (const Rectangle<int>&, bool replaceExistingContents) override;
+    void fillPath (const Path&, const AffineTransform&) override;
+    void drawImage (const Image& sourceImage, const AffineTransform&) override;
+
+    //==============================================================================
+    void drawLine (const Line<float>&) override;
+    void drawVerticalLine (const int x, float top, float bottom) override;
+    void drawHorizontalLine (const int y, float left, float right) override;
+    void setFont (const Font&) override;
+    const Font& getFont() override;
+    void drawGlyph (int glyphNumber, const AffineTransform&) override;
+    bool drawTextLayout (const AttributedString&, const Rectangle<float>&) override;
 
 private:
     CGContextRef context;
@@ -109,14 +108,15 @@ private:
     OwnedArray <SavedState> stateStack;
 
     void drawGradient();
-    void createPath (const Path& path) const;
-    void createPath (const Path& path, const AffineTransform& transform) const;
+    void createPath (const Path&) const;
+    void createPath (const Path&, const AffineTransform&) const;
     void flip() const;
-    void applyTransform (const AffineTransform& transform) const;
-    void drawImage (const Image& sourceImage, const AffineTransform& transform, bool fillEntireClipAsTiles);
-    bool clipToRectangleListWithoutTest (const RectangleList&);
+    void applyTransform (const AffineTransform&) const;
+    void drawImage (const Image&, const AffineTransform&, bool fillEntireClipAsTiles);
+    bool clipToRectangleListWithoutTest (const RectangleList<int>&);
+    void fillCGRect (const CGRect&, bool replaceExistingContents);
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CoreGraphicsContext)
 };
 
-#endif   // __JUCE_MAC_COREGRAPHICSCONTEXT_JUCEHEADER__
+#endif   // JUCE_MAC_COREGRAPHICSCONTEXT_H_INCLUDED

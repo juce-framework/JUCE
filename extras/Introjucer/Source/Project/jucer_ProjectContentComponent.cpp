@@ -491,13 +491,51 @@ void ProjectContentComponent::closeProject()
         mw->closeCurrentProject();
 }
 
+StringArray ProjectContentComponent::getExportersWhichCanLaunch() const
+{
+    StringArray s;
+
+    for (Project::ExporterIterator exporter (*project); exporter.next();)
+        if (exporter->canLaunchProject())
+            s.add (exporter->getName());
+
+    return s;
+}
+
+void ProjectContentComponent::openInIDE (const String& exporterName)
+{
+    if (project != nullptr)
+        for (Project::ExporterIterator exporter (*project); exporter.next();)
+            if (exporter->getName() == exporterName && exporter->launchProject())
+                break;
+}
+
+static void openIDEMenuCallback (int result, ProjectContentComponent* comp)
+{
+    if (comp != nullptr && result > 0)
+        comp->openInIDE (comp->getExportersWhichCanLaunch() [result - 1]);
+}
+
 void ProjectContentComponent::openInIDE()
 {
     if (project != nullptr)
     {
-        for (Project::ExporterIterator exporter (*project); exporter.next();)
-            if (exporter->launchProject())
-                break;
+        StringArray possibleExporters = getExportersWhichCanLaunch();
+
+        if (possibleExporters.size() > 1)
+        {
+            PopupMenu menu;
+
+            for (int i = 0; i < possibleExporters.size(); ++i)
+                menu.addItem (i + 1, possibleExporters[i]);
+
+            menu.showMenuAsync (PopupMenu::Options(),
+                                ModalCallbackFunction::forComponent (openIDEMenuCallback, this));
+        }
+        else
+        {
+            openInIDE (possibleExporters[0]);
+        }
     }
 }
 
@@ -716,11 +754,6 @@ void ProjectContentComponent::getCommandInfo (const CommandID commandID, Applica
     default:
         break;
     }
-}
-
-bool ProjectContentComponent::isCommandActive (const CommandID)
-{
-    return project != nullptr;
 }
 
 bool ProjectContentComponent::perform (const InvocationInfo& info)

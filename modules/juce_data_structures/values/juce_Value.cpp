@@ -52,7 +52,7 @@ private:
     SourceSet sourcesNeedingAnUpdate;
     SourceSet* sourcesBeingIterated;
 
-    void handleAsyncUpdate()
+    void handleAsyncUpdate() override
     {
         const ReferenceCountedObjectPtr<SharedValueSourceUpdater> localRef (this);
 

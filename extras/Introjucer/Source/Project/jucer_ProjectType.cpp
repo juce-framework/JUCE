@@ -270,7 +270,10 @@ public:
                    "ePlugInCategory_Dither, ePlugInCategory_SoundField");
 
         props.add (new TextPropertyComponent (getPluginAAXCategory (project), "Plugin AAX Category", 64, false),
-                   "This is one of the RTAS categories from the AAX_EPlugInCategory enum");
+                   "This is one of the categories from the AAX_EPlugInCategory enum");
+
+        props.add (new TextPropertyComponent (project.getAAXIdentifier(), "Plugin AAX Identifier", 256, false),
+                   "The value to use for the JucePlugin_AAXIdentifier setting");
     }
 
     void prepareExporter (ProjectExporter& exporter) const

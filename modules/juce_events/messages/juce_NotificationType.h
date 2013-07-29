@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_NOTIFICATIONTYPE_JUCEHEADER__
-#define __JUCE_NOTIFICATIONTYPE_JUCEHEADER__
+#ifndef JUCE_NOTIFICATIONTYPE_H_INCLUDED
+#define JUCE_NOTIFICATIONTYPE_H_INCLUDED
 
 //==============================================================================
 /**
@@ -39,4 +39,4 @@ enum NotificationType
 };
 
 
-#endif   // __JUCE_NOTIFICATIONTYPE_JUCEHEADER__
+#endif   // JUCE_NOTIFICATIONTYPE_H_INCLUDED

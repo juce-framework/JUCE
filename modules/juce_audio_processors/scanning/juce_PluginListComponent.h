@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_PLUGINLISTCOMPONENT_JUCEHEADER__
-#define __JUCE_PLUGINLISTCOMPONENT_JUCEHEADER__
+#ifndef JUCE_PLUGINLISTCOMPONENT_H_INCLUDED
+#define JUCE_PLUGINLISTCOMPONENT_H_INCLUDED
 
 #include "juce_KnownPluginList.h"
 #include "../format/juce_AudioPluginFormat.h"
@@ -46,7 +46,6 @@ public:
         Creates the list component.
 
         For info about the deadMansPedalFile, see the PluginDirectoryScanner constructor.
-
         The properties file, if supplied, is used to store the user's last search paths.
     */
     PluginListComponent (AudioPluginFormatManager& formatManager,
@@ -72,22 +71,25 @@ public:
     static void setLastSearchPath (PropertiesFile& properties, AudioPluginFormat& format,
                                    const FileSearchPath& newPath);
 
-    /** Triggers a scan for the given format. */
+    /** Triggers an asynchronous scan for the given format. */
     void scanFor (AudioPluginFormat& format);
+
+    /** Returns true if there's currently a scan in progress. */
+    bool isScanning() const noexcept;
 
     //==============================================================================
     /** @internal */
-    void resized();
+    void resized() override;
     /** @internal */
-    bool isInterestedInFileDrag (const StringArray&);
+    bool isInterestedInFileDrag (const StringArray&) override;
     /** @internal */
-    void filesDropped (const StringArray&, int, int);
+    void filesDropped (const StringArray&, int, int) override;
     /** @internal */
-    int getNumRows();
+    int getNumRows() override;
     /** @internal */
-    void paintListBoxItem (int row, Graphics&, int width, int height, bool rowIsSelected);
+    void paintListBoxItem (int row, Graphics&, int width, int height, bool rowIsSelected) override;
     /** @internal */
-    void deleteKeyPressed (int lastRowSelected);
+    void deleteKeyPressed (int lastRowSelected) override;
 
 private:
     //==============================================================================
@@ -105,7 +107,6 @@ private:
     ScopedPointer<Scanner> currentScanner;
 
     void scanFinished (const StringArray&);
-
     static void optionsMenuStaticCallback (int, PluginListComponent*);
     void optionsMenuCallback (int);
     void updateList();
@@ -114,11 +115,11 @@ private:
     bool canShowSelectedFolder() const;
     void removeMissingPlugins();
 
-    void buttonClicked (Button*);
-    void changeListenerCallback (ChangeBroadcaster*);
+    void buttonClicked (Button*) override;
+    void changeListenerCallback (ChangeBroadcaster*) override;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PluginListComponent)
 };
 
 
-#endif   // __JUCE_PLUGINLISTCOMPONENT_JUCEHEADER__
+#endif   // JUCE_PLUGINLISTCOMPONENT_H_INCLUDED

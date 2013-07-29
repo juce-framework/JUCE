@@ -96,6 +96,7 @@ public:
         }
         else if (mode == imageBrush)
         {
+            jassert (document != nullptr);
             loadImage (document);
 
             Rectangle<int> r (imageAnchor.getRectangle (parentArea, document->getComponentLayout()));

@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_COMPONENTBOUNDSCONSTRAINER_JUCEHEADER__
-#define __JUCE_COMPONENTBOUNDSCONSTRAINER_JUCEHEADER__
+#ifndef JUCE_COMPONENTBOUNDSCONSTRAINER_H_INCLUDED
+#define JUCE_COMPONENTBOUNDSCONSTRAINER_H_INCLUDED
 
 #include "../components/juce_Component.h"
 
@@ -139,7 +139,7 @@ public:
 
 
     //==============================================================================
-    /** This callback changes the given co-ordinates to impose whatever the current
+    /** This callback changes the given coordinates to impose whatever the current
         constraints are set to be.
 
         @param bounds               the target position that should be examined and adjusted
@@ -196,4 +196,4 @@ private:
 };
 
 
-#endif   // __JUCE_COMPONENTBOUNDSCONSTRAINER_JUCEHEADER__
+#endif   // JUCE_COMPONENTBOUNDSCONSTRAINER_H_INCLUDED

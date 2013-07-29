@@ -83,7 +83,7 @@ void DrawableText::setFont (const Font& newFont, bool applySizeAndScale)
     }
 }
 
-void DrawableText::setJustification (const Justification& newJustification)
+void DrawableText::setJustification (Justification newJustification)
 {
     justification = newJustification;
     repaint();
@@ -235,7 +235,7 @@ Justification DrawableText::ValueTreeWrapper::getJustification() const
     return Justification ((int) state [justification]);
 }
 
-void DrawableText::ValueTreeWrapper::setJustification (const Justification& newJustification, UndoManager* undoManager)
+void DrawableText::ValueTreeWrapper::setJustification (Justification newJustification, UndoManager* undoManager)
 {
     state.setProperty (justification, newJustification.getFlags(), undoManager);
 }

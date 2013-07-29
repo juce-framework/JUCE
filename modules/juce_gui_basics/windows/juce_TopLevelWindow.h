@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_TOPLEVELWINDOW_JUCEHEADER__
-#define __JUCE_TOPLEVELWINDOW_JUCEHEADER__
+#ifndef JUCE_TOPLEVELWINDOW_H_INCLUDED
+#define JUCE_TOPLEVELWINDOW_H_INCLUDED
 
 #include "../components/juce_Component.h"
 #include "../misc/juce_DropShadower.h"
@@ -128,7 +128,7 @@ public:
 
     //==============================================================================
     /** @internal */
-    virtual void addToDesktop (int windowStyleFlags, void* nativeWindowToAttachTo = nullptr);
+    virtual void addToDesktop (int windowStyleFlags, void* nativeWindowToAttachTo = nullptr) override;
 
 protected:
     //==============================================================================
@@ -140,15 +140,15 @@ protected:
 
     //==============================================================================
     /** @internal */
-    void focusOfChildComponentChanged (FocusChangeType cause);
+    void focusOfChildComponentChanged (FocusChangeType) override;
     /** @internal */
-    void parentHierarchyChanged();
+    void parentHierarchyChanged() override;
     /** @internal */
     virtual int getDesktopWindowStyleFlags() const;
     /** @internal */
     void recreateDesktopWindow();
     /** @internal */
-    void visibilityChanged();
+    void visibilityChanged() override;
 
 private:
     friend class TopLevelWindowManager;
@@ -161,4 +161,4 @@ private:
 };
 
 
-#endif   // __JUCE_TOPLEVELWINDOW_JUCEHEADER__
+#endif   // JUCE_TOPLEVELWINDOW_H_INCLUDED

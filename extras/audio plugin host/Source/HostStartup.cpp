@@ -31,18 +31,11 @@
 #endif
 
 
-ApplicationCommandManager* commandManager = nullptr;
-ApplicationProperties* appProperties = nullptr;
-
-
 //==============================================================================
 class PluginHostApp  : public JUCEApplication
 {
 public:
-    //==============================================================================
-    PluginHostApp()
-    {
-    }
+    PluginHostApp() {}
 
     void initialise (const String& commandLine)
     {
@@ -56,38 +49,30 @@ public:
         appProperties = new ApplicationProperties();
         appProperties->setStorageParameters (options);
 
-        commandManager = new ApplicationCommandManager();
-
         mainWindow = new MainHostWindow();
-        //mainWindow->setUsingNativeTitleBar (true);
+        mainWindow->setUsingNativeTitleBar (true);
 
-        commandManager->registerAllCommandsForTarget (this);
-        commandManager->registerAllCommandsForTarget (mainWindow);
+        commandManager.registerAllCommandsForTarget (this);
+        commandManager.registerAllCommandsForTarget (mainWindow);
 
         mainWindow->menuItemsChanged();
 
-        if (commandLine.isNotEmpty() && mainWindow->getGraphEditor() != 0)
-        {
-           #if JUCE_MAC
-            if (! commandLine.trimStart().startsWith ("-"))
-           #endif
-                mainWindow->getGraphEditor()->graph.loadFrom (File::getCurrentWorkingDirectory()
-                                                                .getChildFile (commandLine), true);
-        }
+        if (commandLine.isNotEmpty()
+             && ! commandLine.trimStart().startsWith ("-")
+             && mainWindow->getGraphEditor() != nullptr)
+            mainWindow->getGraphEditor()->graph.loadFrom (File::getCurrentWorkingDirectory()
+                                                            .getChildFile (commandLine), true);
     }
 
     void shutdown()
     {
-        mainWindow = 0;
-        appProperties->closeFiles();
-
-        deleteAndZero (commandManager);
-        deleteAndZero (appProperties);
+        mainWindow = nullptr;
+        appProperties = nullptr;
     }
 
     void systemRequestedQuit()
     {
-        if (mainWindow != 0)
+        if (mainWindow != nullptr)
             mainWindow->tryToQuitApplication();
         else
             JUCEApplication::quit();
@@ -97,9 +82,16 @@ public:
     const String getApplicationVersion()    { return ProjectInfo::versionString; }
     bool moreThanOneInstanceAllowed()       { return true; }
 
+    ApplicationCommandManager commandManager;
+    ScopedPointer<ApplicationProperties> appProperties;
+
 private:
-    ScopedPointer <MainHostWindow> mainWindow;
+    ScopedPointer<MainHostWindow> mainWindow;
 };
+
+static PluginHostApp& getApp()                      { return *dynamic_cast<PluginHostApp*>(JUCEApplication::getInstance()); }
+ApplicationCommandManager& getCommandManager()      { return getApp().commandManager; }
+ApplicationProperties& getAppProperties()           { return *getApp().appProperties; }
 
 
 // This kicks the whole thing off..

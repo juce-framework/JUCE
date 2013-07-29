@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_MEMORYMAPPEDAUDIOFORMATREADER_JUCEHEADER__
-#define __JUCE_MEMORYMAPPEDAUDIOFORMATREADER_JUCEHEADER__
+#ifndef JUCE_MEMORYMAPPEDAUDIOFORMATREADER_H_INCLUDED
+#define JUCE_MEMORYMAPPEDAUDIOFORMATREADER_H_INCLUDED
 
 //==============================================================================
 /**
@@ -102,4 +102,4 @@ protected:
 };
 
 
-#endif   // __JUCE_MEMORYMAPPEDAUDIOFORMATREADER_JUCEHEADER__
+#endif   // JUCE_MEMORYMAPPEDAUDIOFORMATREADER_H_INCLUDED

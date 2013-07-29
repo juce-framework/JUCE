@@ -26,8 +26,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_TIMESLICETHREAD_JUCEHEADER__
-#define __JUCE_TIMESLICETHREAD_JUCEHEADER__
+#ifndef JUCE_TIMESLICETHREAD_H_INCLUDED
+#define JUCE_TIMESLICETHREAD_H_INCLUDED
 
 #include "juce_Thread.h"
 #include "../containers/juce_Array.h"
@@ -134,7 +134,7 @@ public:
 
     //==============================================================================
    #ifndef DOXYGEN
-    void run();
+    void run() override;
    #endif
 
     //==============================================================================
@@ -149,4 +149,4 @@ private:
 };
 
 
-#endif   // __JUCE_TIMESLICETHREAD_JUCEHEADER__
+#endif   // JUCE_TIMESLICETHREAD_H_INCLUDED

@@ -24,8 +24,8 @@
 
 #ifdef __aeffect__
 
-#ifndef __JUCE_VSTMIDIEVENTLIST_JUCEHEADER__
-#define __JUCE_VSTMIDIEVENTLIST_JUCEHEADER__
+#ifndef JUCE_VSTMIDIEVENTLIST_H_INCLUDED
+#define JUCE_VSTMIDIEVENTLIST_H_INCLUDED
 
 
 //==============================================================================
@@ -185,5 +185,5 @@ private:
 };
 
 
-#endif   // __JUCE_VSTMIDIEVENTLIST_JUCEHEADER__
-#endif   // __JUCE_VSTMIDIEVENTLIST_JUCEHEADER__
+#endif   // JUCE_VSTMIDIEVENTLIST_H_INCLUDED
+#endif

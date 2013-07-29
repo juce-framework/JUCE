@@ -35,7 +35,7 @@ public:
     {
     }
 
-    void mouseDown (const MouseEvent& e)
+    void mouseDown (const MouseEvent& e) override
     {
         updateButtonUnderMouse (e);
 
@@ -73,7 +73,7 @@ public:
         }
     }
 
-    void mouseUp (const MouseEvent& e)
+    void mouseUp (const MouseEvent& e) override
     {
         updateButtonUnderMouse (e);
 
@@ -85,7 +85,7 @@ public:
         }
     }
 
-    void mouseDoubleClick (const MouseEvent& e)
+    void mouseDoubleClick (const MouseEvent& e) override
     {
         if (e.getNumberOfClicks() != 3 && isEnabled())  // ignore triple clicks
         {
@@ -96,7 +96,7 @@ public:
         }
     }
 
-    void mouseDrag (const MouseEvent& e)
+    void mouseDrag (const MouseEvent& e) override
     {
         if (isEnabled()
              && ! (isDragging || e.mouseWasClicked()
@@ -134,10 +134,10 @@ public:
         }
     }
 
-    void mouseMove (const MouseEvent& e)    { updateButtonUnderMouse (e); }
-    void mouseExit (const MouseEvent& e)    { updateButtonUnderMouse (e); }
+    void mouseMove (const MouseEvent& e) override    { updateButtonUnderMouse (e); }
+    void mouseExit (const MouseEvent& e) override    { updateButtonUnderMouse (e); }
 
-    void paint (Graphics& g)
+    void paint (Graphics& g) override
     {
         if (owner.rootItem != nullptr)
         {
@@ -238,12 +238,12 @@ public:
         return item == buttonUnderMouse;
     }
 
-    void resized()
+    void resized() override
     {
         owner.itemsChanged();
     }
 
-    String getTooltip()
+    String getTooltip() override
     {
         Rectangle<int> pos;
         if (TreeViewItem* const item = findItemAt (getMouseXYRelative().y, pos))
@@ -382,7 +382,7 @@ private:
         return false;
     }
 
-    void handleAsyncUpdate()
+    void handleAsyncUpdate() override
     {
         owner.recalculateIfNeeded();
     }
@@ -409,7 +409,7 @@ public:
         repaint();
     }
 
-    void visibleAreaChanged (const Rectangle<int>& newVisibleArea)
+    void visibleAreaChanged (const Rectangle<int>& newVisibleArea) override
     {
         const bool hasScrolledSideways = (newVisibleArea.getX() != lastX);
         lastX = newVisibleArea.getX();
@@ -421,7 +421,7 @@ public:
         return static_cast <ContentComponent*> (getViewedComponent());
     }
 
-    bool keyPressed (const KeyPress& key)
+    bool keyPressed (const KeyPress& key) override
     {
         Component* const tree = getParentComponent();
 
@@ -941,7 +941,7 @@ public:
                    width - (insertPos.pos.x - offset), getHeight());
     }
 
-    void paint (Graphics& g)
+    void paint (Graphics& g) override
     {
         Path p;
         const float h = (float) getHeight();
@@ -977,7 +977,7 @@ public:
         setBounds (r);
     }
 
-    void paint (Graphics& g)
+    void paint (Graphics& g) override
     {
         g.setColour (findColour (TreeView::dragAndDropIndicatorColourId, true));
         g.drawRoundedRectangle (1.0f, 1.0f, getWidth() - 2.0f, getHeight() - 2.0f, 3.0f, 2.0f);

@@ -26,8 +26,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_SINGLETON_JUCEHEADER__
-#define __JUCE_SINGLETON_JUCEHEADER__
+#ifndef JUCE_SINGLETON_H_INCLUDED
+#define JUCE_SINGLETON_H_INCLUDED
 
 
 //==============================================================================
@@ -289,4 +289,4 @@
 
 
 
-#endif   // __JUCE_SINGLETON_JUCEHEADER__
+#endif   // JUCE_SINGLETON_H_INCLUDED

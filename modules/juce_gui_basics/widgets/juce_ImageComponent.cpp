@@ -41,7 +41,7 @@ void ImageComponent::setImage (const Image& newImage)
     }
 }
 
-void ImageComponent::setImage (const Image& newImage, const RectanglePlacement& placementToUse)
+void ImageComponent::setImage (const Image& newImage, RectanglePlacement placementToUse)
 {
     if (image != newImage || placement != placementToUse)
     {
@@ -51,7 +51,7 @@ void ImageComponent::setImage (const Image& newImage, const RectanglePlacement& 
     }
 }
 
-void ImageComponent::setImagePlacement (const RectanglePlacement& newPlacement)
+void ImageComponent::setImagePlacement (RectanglePlacement newPlacement)
 {
     if (placement != newPlacement)
     {
@@ -65,7 +65,7 @@ const Image& ImageComponent::getImage() const
     return image;
 }
 
-const RectanglePlacement ImageComponent::getImagePlacement() const
+RectanglePlacement ImageComponent::getImagePlacement() const
 {
     return placement;
 }

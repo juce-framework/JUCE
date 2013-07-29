@@ -26,8 +26,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_INPUTSTREAM_JUCEHEADER__
-#define __JUCE_INPUTSTREAM_JUCEHEADER__
+#ifndef JUCE_INPUTSTREAM_H_INCLUDED
+#define JUCE_INPUTSTREAM_H_INCLUDED
 
 #include "../text/juce_String.h"
 class MemoryBlock;
@@ -86,41 +86,28 @@ public:
     virtual int read (void* destBuffer, int maxBytesToRead) = 0;
 
     /** Reads a byte from the stream.
-
         If the stream is exhausted, this will return zero.
-
         @see OutputStream::writeByte
     */
     virtual char readByte();
 
     /** Reads a boolean from the stream.
-
-        The bool is encoded as a single byte - 1 for true, 0 for false.
-
+        The bool is encoded as a single byte - non-zero for true, 0 for false.
         If the stream is exhausted, this will return false.
-
         @see OutputStream::writeBool
     */
     virtual bool readBool();
 
     /** Reads two bytes from the stream as a little-endian 16-bit value.
-
-        If the next two bytes read are byte1 and byte2, this returns
-        (byte1 | (byte2 << 8)).
-
+        If the next two bytes read are byte1 and byte2, this returns (byte1 | (byte2 << 8)).
         If the stream is exhausted partway through reading the bytes, this will return zero.
-
         @see OutputStream::writeShort, readShortBigEndian
     */
     virtual short readShort();
 
     /** Reads two bytes from the stream as a little-endian 16-bit value.
-
-        If the next two bytes read are byte1 and byte2, this returns
-        (byte2 | (byte1 << 8)).
-
+        If the next two bytes read are byte1 and byte2, this returns (byte2 | (byte1 << 8)).
         If the stream is exhausted partway through reading the bytes, this will return zero.
-
         @see OutputStream::writeShortBigEndian, readShort
     */
     virtual short readShortBigEndian();
@@ -170,51 +157,36 @@ public:
     virtual int64 readInt64BigEndian();
 
     /** Reads four bytes as a 32-bit floating point value.
-
         The raw 32-bit encoding of the float is read from the stream as a little-endian int.
-
         If the stream is exhausted partway through reading the bytes, this will return zero.
-
         @see OutputStream::writeFloat, readDouble
     */
     virtual float readFloat();
 
     /** Reads four bytes as a 32-bit floating point value.
-
         The raw 32-bit encoding of the float is read from the stream as a big-endian int.
-
         If the stream is exhausted partway through reading the bytes, this will return zero.
-
         @see OutputStream::writeFloatBigEndian, readDoubleBigEndian
     */
     virtual float readFloatBigEndian();
 
     /** Reads eight bytes as a 64-bit floating point value.
-
         The raw 64-bit encoding of the double is read from the stream as a little-endian int64.
-
         If the stream is exhausted partway through reading the bytes, this will return zero.
-
         @see OutputStream::writeDouble, readFloat
     */
     virtual double readDouble();
 
     /** Reads eight bytes as a 64-bit floating point value.
-
         The raw 64-bit encoding of the double is read from the stream as a big-endian int64.
-
         If the stream is exhausted partway through reading the bytes, this will return zero.
-
         @see OutputStream::writeDoubleBigEndian, readFloatBigEndian
     */
     virtual double readDoubleBigEndian();
 
     /** Reads an encoded 32-bit number from the stream using a space-saving compressed format.
-
         For small values, this is more space-efficient than using readInt() and OutputStream::writeInt()
-
         The format used is: number of significant bytes + up to 4 bytes in little-endian order.
-
         @see OutputStream::writeCompressedInt()
     */
     virtual int readCompressedInt();
@@ -259,7 +231,6 @@ public:
 
     //==============================================================================
     /** Returns the offset of the next byte that will be read from the stream.
-
         @see setPosition
     */
     virtual int64 getPosition() = 0;
@@ -295,4 +266,4 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (InputStream)
 };
 
-#endif   // __JUCE_INPUTSTREAM_JUCEHEADER__
+#endif   // JUCE_INPUTSTREAM_H_INCLUDED

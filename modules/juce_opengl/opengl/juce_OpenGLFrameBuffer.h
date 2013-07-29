@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_OPENGLFRAMEBUFFER_JUCEHEADER__
-#define __JUCE_OPENGLFRAMEBUFFER_JUCEHEADER__
+#ifndef JUCE_OPENGLFRAMEBUFFER_H_INCLUDED
+#define JUCE_OPENGLFRAMEBUFFER_H_INCLUDED
 
 
 //==============================================================================
@@ -150,4 +150,4 @@ private:
 };
 
 
-#endif   // __JUCE_OPENGLFRAMEBUFFER_JUCEHEADER__
+#endif   // JUCE_OPENGLFRAMEBUFFER_H_INCLUDED

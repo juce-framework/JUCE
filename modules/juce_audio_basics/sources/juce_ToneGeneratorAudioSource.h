@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_TONEGENERATORAUDIOSOURCE_JUCEHEADER__
-#define __JUCE_TONEGENERATORAUDIOSOURCE_JUCEHEADER__
+#ifndef JUCE_TONEGENERATORAUDIOSOURCE_H_INCLUDED
+#define JUCE_TONEGENERATORAUDIOSOURCE_H_INCLUDED
 
 #include "juce_AudioSource.h"
 
@@ -72,4 +72,4 @@ private:
 };
 
 
-#endif   // __JUCE_TONEGENERATORAUDIOSOURCE_JUCEHEADER__
+#endif   // JUCE_TONEGENERATORAUDIOSOURCE_H_INCLUDED

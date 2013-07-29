@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_AUDIOFORMATWRITER_JUCEHEADER__
-#define __JUCE_AUDIOFORMATWRITER_JUCEHEADER__
+#ifndef JUCE_AUDIOFORMATWRITER_H_INCLUDED
+#define JUCE_AUDIOFORMATWRITER_H_INCLUDED
 
 #include "juce_AudioFormatReader.h"
 
@@ -258,4 +258,4 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioFormatWriter)
 };
 
-#endif   // __JUCE_AUDIOFORMATWRITER_JUCEHEADER__
+#endif   // JUCE_AUDIOFORMATWRITER_H_INCLUDED

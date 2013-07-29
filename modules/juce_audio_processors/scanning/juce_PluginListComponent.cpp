@@ -351,7 +351,7 @@ private:
                                                : StringArray());
     }
 
-    void timerCallback()
+    void timerCallback() override
     {
         if (pool == nullptr)
         {
@@ -365,14 +365,12 @@ private:
         if (finished)
             finishedScan();
         else
-            progressWindow.setMessage (progressMessage);
+            progressWindow.setMessage (TRANS("Testing") + ":\n\n" + pluginBeingScanned);
     }
 
     bool doNextScan()
     {
-        progressMessage = TRANS("Testing") + ":\n\n" + scanner->getNextPluginFileThatWillBeScanned();
-
-        if (scanner->scanNextFile (true))
+        if (scanner->scanNextFile (true, pluginBeingScanned))
         {
             progress = scanner->getProgress();
             return true;
@@ -388,7 +386,7 @@ private:
     ScopedPointer<PluginDirectoryScanner> scanner;
     AlertWindow pathChooserWindow, progressWindow;
     FileSearchPathListComponent pathList;
-    String progressMessage;
+    String pluginBeingScanned;
     double progress;
     int numThreads;
     bool finished;
@@ -419,6 +417,11 @@ private:
 void PluginListComponent::scanFor (AudioPluginFormat& format)
 {
     currentScanner = new Scanner (*this, format, propertiesToUse, numThreads);
+}
+
+bool PluginListComponent::isScanning() const noexcept
+{
+    return currentScanner != nullptr;
 }
 
 void PluginListComponent::scanFinished (const StringArray& failedFiles)

@@ -118,7 +118,7 @@ namespace ProjectSettingsTreeClasses
             return getParentItem()->getUniqueName() + "||" + config->getName();
         }
 
-        void valueTreePropertyChanged (ValueTree&, const Identifier&)  { repaintItem(); }
+        void valueTreePropertyChanged (ValueTree&, const Identifier&) override  { repaintItem(); }
 
     private:
         ProjectExporter::BuildConfiguration::Ptr config;

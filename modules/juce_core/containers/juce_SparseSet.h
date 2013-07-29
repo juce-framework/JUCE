@@ -26,8 +26,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_SPARSESET_JUCEHEADER__
-#define __JUCE_SPARSESET_JUCEHEADER__
+#ifndef JUCE_SPARSESET_H_INCLUDED
+#define JUCE_SPARSESET_H_INCLUDED
 
 #include "../maths/juce_Range.h"
 #include "../threads/juce_CriticalSection.h"
@@ -298,4 +298,4 @@ private:
 
 
 
-#endif   // __JUCE_SPARSESET_JUCEHEADER__
+#endif   // JUCE_SPARSESET_H_INCLUDED

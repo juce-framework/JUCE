@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_FILETREECOMPONENT_JUCEHEADER__
-#define __JUCE_FILETREECOMPONENT_JUCEHEADER__
+#ifndef JUCE_FILETREECOMPONENT_H_INCLUDED
+#define JUCE_FILETREECOMPONENT_H_INCLUDED
 
 #include "juce_DirectoryContentsDisplayComponent.h"
 #include "../widgets/juce_TreeView.h"
@@ -87,14 +87,21 @@ public:
 
     /** Returns the last value that was set by setDragAndDropDescription().
     */
-    const String& getDragAndDropDescription() const noexcept     { return dragAndDropDescription; }
+    const String& getDragAndDropDescription() const noexcept    { return dragAndDropDescription; }
+
+    /** Changes the height of the treeview items. */
+    void setItemHeight (int newHeight);
+
+    /** Returns the height of the treeview items. */
+    int getItemHeight() const noexcept                          { return itemHeight; }
 
 private:
     //==============================================================================
     String dragAndDropDescription;
+    int itemHeight;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FileTreeComponent)
 };
 
 
-#endif   // __JUCE_FILETREECOMPONENT_JUCEHEADER__
+#endif   // JUCE_FILETREECOMPONENT_H_INCLUDED

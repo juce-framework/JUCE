@@ -146,7 +146,7 @@ public:
         stopThread (10000);
     }
 
-    void run()
+    void run() override
     {
         if (downloaded.loadFromWebsite())
             triggerAsyncUpdate();
@@ -156,7 +156,7 @@ public:
                                          "Couldn't connect to the JUCE webserver!");
     }
 
-    void handleAsyncUpdate()
+    void handleAsyncUpdate() override
     {
         owner.backgroundUpdateComplete (downloaded);
     }
@@ -207,7 +207,7 @@ void JuceUpdater::updateInstallButtonStatus()
 {
     const int numChecked = getNumCheckedModules();
     installButton.setEnabled (numChecked > 0);
-    selectAllButton.setToggleState (numChecked > latestList.modules.size() / 2, false);
+    selectAllButton.setToggleState (numChecked > latestList.modules.size() / 2, dontSendNotification);
 }
 
 void JuceUpdater::filenameComponentChanged (FilenameComponent*)
@@ -346,7 +346,7 @@ public:
     {
     }
 
-    void run()
+    void run() override
     {
         for (int i = 0; i < itemsToInstall.size(); ++i)
         {

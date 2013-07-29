@@ -35,21 +35,21 @@ class SourceCodeDocument  : public OpenDocumentManager::Document
 public:
     SourceCodeDocument (Project*, const File&);
 
-    bool loadedOk() const                           { return true; }
-    bool isForFile (const File& file) const         { return getFile() == file; }
-    bool isForNode (const ValueTree&) const         { return false; }
-    bool refersToProject (Project& p) const         { return project == &p; }
-    Project* getProject() const                     { return project; }
-    String getName() const                          { return getFile().getFileName(); }
-    String getType() const                          { return getFile().getFileExtension() + " file"; }
-    File getFile() const                            { return modDetector.getFile(); }
-    bool needsSaving() const                        { return codeDoc != nullptr && codeDoc->hasChangedSinceSavePoint(); }
-    bool hasFileBeenModifiedExternally()            { return modDetector.hasBeenModified(); }
-    void fileHasBeenRenamed (const File& newFile)   { modDetector.fileHasBeenRenamed (newFile); }
-    String getState() const                         { return lastState != nullptr ? lastState->toString() : String::empty; }
-    void restoreState (const String& state)         { lastState = new CodeEditorComponent::State (state); }
+    bool loadedOk() const override                           { return true; }
+    bool isForFile (const File& file) const override         { return getFile() == file; }
+    bool isForNode (const ValueTree&) const override         { return false; }
+    bool refersToProject (Project& p) const override         { return project == &p; }
+    Project* getProject() const override                     { return project; }
+    String getName() const override                          { return getFile().getFileName(); }
+    String getType() const override                          { return getFile().getFileExtension() + " file"; }
+    File getFile() const override                            { return modDetector.getFile(); }
+    bool needsSaving() const override                        { return codeDoc != nullptr && codeDoc->hasChangedSinceSavePoint(); }
+    bool hasFileBeenModifiedExternally() override            { return modDetector.hasBeenModified(); }
+    void fileHasBeenRenamed (const File& newFile) override   { modDetector.fileHasBeenRenamed (newFile); }
+    String getState() const override                         { return lastState != nullptr ? lastState->toString() : String::empty; }
+    void restoreState (const String& state) override         { lastState = new CodeEditorComponent::State (state); }
 
-    File getCounterpartFile() const
+    File getCounterpartFile() const override
     {
         const File file (getFile());
 
@@ -81,22 +81,22 @@ public:
         return File::nonexistent;
     }
 
-    void reloadFromFile();
-    bool save();
-    bool saveAs();
+    void reloadFromFile() override;
+    bool save() override;
+    bool saveAs() override;
 
-    Component* createEditor();
-    Component* createViewer()       { return createEditor(); }
+    Component* createEditor() override;
+    Component* createViewer() override       { return createEditor(); }
 
-    void updateLastState (CodeEditorComponent& editor);
-    void applyLastState (CodeEditorComponent& editor) const;
+    void updateLastState (CodeEditorComponent&);
+    void applyLastState (CodeEditorComponent&) const;
 
     CodeDocument& getCodeDocument();
 
     //==============================================================================
     struct Type  : public OpenDocumentManager::DocumentType
     {
-        bool canOpenFile (const File& file)
+        bool canOpenFile (const File& file) override
         {
             if (file.hasFileExtension ("cpp;h;hpp;mm;m;c;cc;cxx;txt;inc;tcc;xml;plist;rtf;html;htm;php;py;rb;cs"))
                 return true;
@@ -122,7 +122,7 @@ public:
             return true;
         }
 
-        Document* openFile (Project* p, const File& file)   { return new SourceCodeDocument (p, file); }
+        Document* openFile (Project* p, const File& file) override   { return new SourceCodeDocument (p, file); }
     };
 
 protected:
@@ -141,8 +141,8 @@ class SourceCodeEditor  : public DocumentEditorComponent,
                           private CodeDocument::Listener
 {
 public:
-    SourceCodeEditor (OpenDocumentManager::Document* document, CodeDocument&);
-    SourceCodeEditor (OpenDocumentManager::Document* document, CodeEditorComponent*);
+    SourceCodeEditor (OpenDocumentManager::Document*, CodeDocument&);
+    SourceCodeEditor (OpenDocumentManager::Document*, CodeEditorComponent*);
     ~SourceCodeEditor();
 
     void scrollToKeepRangeOnScreen (Range<int> range);
@@ -151,17 +151,17 @@ public:
     ScopedPointer<CodeEditorComponent> editor;
 
 private:
-    void resized();
+    void resized() override;
 
-    void valueTreePropertyChanged (ValueTree&, const Identifier&);
-    void valueTreeChildAdded (ValueTree&, ValueTree&);
-    void valueTreeChildRemoved (ValueTree&, ValueTree&);
-    void valueTreeChildOrderChanged (ValueTree&);
-    void valueTreeParentChanged (ValueTree&);
-    void valueTreeRedirected (ValueTree&);
+    void valueTreePropertyChanged (ValueTree&, const Identifier&) override;
+    void valueTreeChildAdded (ValueTree&, ValueTree&) override;
+    void valueTreeChildRemoved (ValueTree&, ValueTree&) override;
+    void valueTreeChildOrderChanged (ValueTree&) override;
+    void valueTreeParentChanged (ValueTree&) override;
+    void valueTreeRedirected (ValueTree&) override;
 
-    void codeDocumentTextInserted (const String&, int);
-    void codeDocumentTextDeleted (int, int);
+    void codeDocumentTextInserted (const String&, int) override;
+    void codeDocumentTextDeleted (int, int) override;
 
     void setEditor (CodeEditorComponent*);
     void updateColourScheme();
@@ -178,20 +178,20 @@ public:
     GenericCodeEditorComponent (const File&, CodeDocument&, CodeTokeniser*);
     ~GenericCodeEditorComponent();
 
-    void addPopupMenuItems (PopupMenu&, const MouseEvent*);
-    void performPopupMenuAction (int menuItemID);
+    void addPopupMenuItems (PopupMenu&, const MouseEvent*) override;
+    void performPopupMenuAction (int menuItemID) override;
 
-    void getAllCommands (Array<CommandID>&);
-    void getCommandInfo (CommandID, ApplicationCommandInfo&);
-    bool perform (const InvocationInfo&);
+    void getAllCommands (Array<CommandID>&) override;
+    void getCommandInfo (CommandID, ApplicationCommandInfo&) override;
+    bool perform (const InvocationInfo&) override;
 
     void showFindPanel();
     void hideFindPanel();
     void findSelection();
     void findNext (bool forwards, bool skipCurrentSelection);
-    void handleEscapeKey();
+    void handleEscapeKey() override;
 
-    void resized();
+    void resized() override;
 
     static String getSearchString()                 { return getAppSettings().getGlobalProperties().getValue ("searchString"); }
     static void setSearchString (const String& s)   { getAppSettings().getGlobalProperties().setValue ("searchString", s); }
@@ -210,14 +210,14 @@ private:
 class CppCodeEditorComponent  : public GenericCodeEditorComponent
 {
 public:
-    CppCodeEditorComponent (const File& file, CodeDocument& codeDocument);
+    CppCodeEditorComponent (const File& file, CodeDocument&);
     ~CppCodeEditorComponent();
 
-    void addPopupMenuItems (PopupMenu&, const MouseEvent*);
-    void performPopupMenuAction (int menuItemID);
+    void addPopupMenuItems (PopupMenu&, const MouseEvent*) override;
+    void performPopupMenuAction (int menuItemID) override;
 
-    void handleReturnKey();
-    void insertTextAtCaret (const String& newText);
+    void handleReturnKey() override;
+    void insertTextAtCaret (const String& newText) override;
 
 private:
     void insertComponentClass();

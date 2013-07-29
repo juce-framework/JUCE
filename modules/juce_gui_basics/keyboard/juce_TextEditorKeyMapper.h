@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_TEXTEDITORKEYMAPPER_JUCEHEADER__
-#define __JUCE_TEXTEDITORKEYMAPPER_JUCEHEADER__
+#ifndef JUCE_TEXTEDITORKEYMAPPER_H_INCLUDED
+#define JUCE_TEXTEDITORKEYMAPPER_H_INCLUDED
 
 #include "juce_KeyPress.h"
 
@@ -120,4 +120,4 @@ struct TextEditorKeyMapper
 };
 
 
-#endif   // __JUCE_TEXTEDITORKEYMAPPER_JUCEHEADER__
+#endif   // JUCE_TEXTEDITORKEYMAPPER_H_INCLUDED

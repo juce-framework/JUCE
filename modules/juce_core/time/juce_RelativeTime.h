@@ -26,8 +26,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_RELATIVETIME_JUCEHEADER__
-#define __JUCE_RELATIVETIME_JUCEHEADER__
+#ifndef JUCE_RELATIVETIME_H_INCLUDED
+#define JUCE_RELATIVETIME_H_INCLUDED
 
 #include "../text/juce_String.h"
 
@@ -178,4 +178,4 @@ RelativeTime  operator-  (RelativeTime t1, RelativeTime t2) noexcept;
 
 
 
-#endif   // __JUCE_RELATIVETIME_JUCEHEADER__
+#endif   // JUCE_RELATIVETIME_H_INCLUDED

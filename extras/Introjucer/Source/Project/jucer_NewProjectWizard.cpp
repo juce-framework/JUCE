@@ -42,7 +42,7 @@ struct NewProjectWizardClasses
         setupComp.addChildAndSetID (c, "filesToCreate");
 
         c->addItemList (fileOptions, 1);
-        c->setSelectedId (1, false);
+        c->setSelectedId (1, dontSendNotification);
 
         Label* l = new Label (String::empty, TRANS("Files to Auto-Generate") + ":");
         l->attachToComponent (c, true);
@@ -482,7 +482,7 @@ struct NewProjectWizardClasses
 
             addChildAndSetID (&projectType, "projectType");
             projectType.addItemList (getWizardNames(), 1);
-            projectType.setSelectedId (1, true);
+            projectType.setSelectedId (1, dontSendNotification);
             projectType.setBounds ("100, projectName.bottom + 4, projectName.right, top + 22");
             typeLabel.attachToComponent (&projectType, true);
             projectType.addListener (this);

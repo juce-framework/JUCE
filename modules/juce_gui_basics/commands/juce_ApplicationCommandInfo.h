@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_APPLICATIONCOMMANDINFO_JUCEHEADER__
-#define __JUCE_APPLICATIONCOMMANDINFO_JUCEHEADER__
+#ifndef JUCE_APPLICATIONCOMMANDINFO_H_INCLUDED
+#define JUCE_APPLICATIONCOMMANDINFO_H_INCLUDED
 
 #include "../keyboard/juce_KeyPress.h"
 #include "juce_ApplicationCommandID.h"
@@ -190,4 +190,4 @@ struct JUCE_API  ApplicationCommandInfo
 };
 
 
-#endif   // __JUCE_APPLICATIONCOMMANDINFO_JUCEHEADER__
+#endif   // JUCE_APPLICATIONCOMMANDINFO_H_INCLUDED

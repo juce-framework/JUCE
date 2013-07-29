@@ -26,8 +26,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_RESULT_JUCEHEADER__
-#define __JUCE_RESULT_JUCEHEADER__
+#ifndef JUCE_RESULT_H_INCLUDED
+#define JUCE_RESULT_H_INCLUDED
 
 #include "../text/juce_String.h"
 
@@ -65,7 +65,7 @@ class JUCE_API  Result
 public:
     //==============================================================================
     /** Creates and returns a 'successful' result. */
-    static Result ok() noexcept;
+    static Result ok() noexcept                         { return Result(); }
 
     /** Creates a 'failure' result.
         If you pass a blank error message in here, a default "Unknown Error" message
@@ -99,12 +99,12 @@ public:
     const String& getErrorMessage() const noexcept;
 
     //==============================================================================
-    Result (const Result& other);
-    Result& operator= (const Result& other);
+    Result (const Result&);
+    Result& operator= (const Result&);
 
    #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
-    Result (Result&& other) noexcept;
-    Result& operator= (Result&& other) noexcept;
+    Result (Result&&) noexcept;
+    Result& operator= (Result&&) noexcept;
    #endif
 
     bool operator== (const Result& other) const noexcept;
@@ -113,6 +113,9 @@ public:
 private:
     String errorMessage;
 
+    // The default constructor is not for public use!
+    // Instead, use Result::ok() or Result::fail()
+    Result() noexcept;
     explicit Result (const String&) noexcept;
 
     // These casts are private to prevent people trying to use the Result object in numeric contexts
@@ -121,4 +124,4 @@ private:
 };
 
 
-#endif   // __JUCE_RESULT_JUCEHEADER__
+#endif   // JUCE_RESULT_H_INCLUDED

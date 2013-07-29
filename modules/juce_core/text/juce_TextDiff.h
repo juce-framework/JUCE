@@ -26,8 +26,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_TEXTDIFF_JUCEHEADER__
-#define __JUCE_TEXTDIFF_JUCEHEADER__
+#ifndef JUCE_TEXTDIFF_H_INCLUDED
+#define JUCE_TEXTDIFF_H_INCLUDED
 
 
 /**
@@ -77,4 +77,4 @@ public:
 };
 
 
-#endif   // __JUCE_TEXTDIFF_JUCEHEADER__
+#endif   // JUCE_TEXTDIFF_H_INCLUDED

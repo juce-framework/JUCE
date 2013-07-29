@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_AUDIOSUBSECTIONREADER_JUCEHEADER__
-#define __JUCE_AUDIOSUBSECTIONREADER_JUCEHEADER__
+#ifndef JUCE_AUDIOSUBSECTIONREADER_H_INCLUDED
+#define JUCE_AUDIOSUBSECTIONREADER_H_INCLUDED
 
 #include "juce_AudioFormatReader.h"
 
@@ -67,14 +67,14 @@ public:
 
     //==============================================================================
     bool readSamples (int** destSamples, int numDestChannels, int startOffsetInDestBuffer,
-                      int64 startSampleInFile, int numSamples);
+                      int64 startSampleInFile, int numSamples) override;
 
     void readMaxLevels (int64 startSample,
                         int64 numSamples,
                         float& lowestLeft,
                         float& highestLeft,
                         float& lowestRight,
-                        float& highestRight);
+                        float& highestRight) override;
 
 
 private:
@@ -86,4 +86,4 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioSubsectionReader)
 };
 
-#endif   // __JUCE_AUDIOSUBSECTIONREADER_JUCEHEADER__
+#endif   // JUCE_AUDIOSUBSECTIONREADER_H_INCLUDED

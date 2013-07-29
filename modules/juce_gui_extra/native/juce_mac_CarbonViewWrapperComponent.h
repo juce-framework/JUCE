@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_MAC_CARBONVIEWWRAPPERCOMPONENT_JUCEHEADER__
-#define __JUCE_MAC_CARBONVIEWWRAPPERCOMPONENT_JUCEHEADER__
+#ifndef JUCE_MAC_CARBONVIEWWRAPPERCOMPONENT_H_INCLUDED
+#define JUCE_MAC_CARBONVIEWWRAPPERCOMPONENT_H_INCLUDED
 
 
 //==============================================================================
@@ -44,7 +44,8 @@ public:
           wrapperWindow (0),
           carbonWindow (0),
           embeddedView (0),
-          recursiveResize (false)
+          recursiveResize (false),
+          repaintChildOnCreation (true)
     {
     }
 
@@ -218,18 +219,27 @@ public:
         }
     }
 
-    void componentMovedOrResized (bool /*wasMoved*/, bool /*wasResized*/)
+    void componentMovedOrResized (bool /*wasMoved*/, bool /*wasResized*/) override
     {
         setEmbeddedWindowToOurSize();
     }
 
-    void componentPeerChanged()
+    // (overridden to intercept movements of the top-level window)
+    void componentMovedOrResized (Component& component, bool wasMoved, bool wasResized) override
+    {
+        ComponentMovementWatcher::componentMovedOrResized (component, wasMoved, wasResized);
+
+        if (&component == getTopLevelComponent())
+            setEmbeddedWindowToOurSize();
+    }
+
+    void componentPeerChanged() override
     {
         deleteWindow();
         createWindow();
     }
 
-    void componentVisibilityChanged()
+    void componentVisibilityChanged() override
     {
         if (isShowing())
             createWindow();
@@ -251,7 +261,7 @@ public:
         }
     }
 
-    void timerCallback()
+    void timerCallback() override
     {
         if (isShowing())
         {
@@ -259,9 +269,14 @@ public:
 
             // To avoid strange overpainting problems when the UI is first opened, we'll
             // repaint it a few times during the first second that it's on-screen..
-            if ((Time::getCurrentTime() - creationTime).inMilliseconds() < 1000)
+            if (repaintChildOnCreation && (Time::getCurrentTime() - creationTime).inMilliseconds() < 1000)
                 recursiveHIViewRepaint (HIViewGetRoot (wrapperWindow));
         }
+    }
+
+    void setRepaintsChildHIViewWhenCreated (bool b) noexcept
+    {
+        repaintChildOnCreation = b;
     }
 
     OSStatus carbonEventHandler (EventHandlerCallRef /*nextHandlerRef*/, EventRef event)
@@ -303,7 +318,7 @@ protected:
     WindowRef wrapperWindow;
     NSWindow* carbonWindow;
     HIViewRef embeddedView;
-    bool recursiveResize;
+    bool recursiveResize, repaintChildOnCreation;
     Time creationTime;
 
     EventHandlerRef eventHandlerRef;
@@ -311,4 +326,4 @@ protected:
     NSWindow* getOwnerWindow() const    { return [((NSView*) getWindowHandle()) window]; }
 };
 
-#endif   // __JUCE_MAC_CARBONVIEWWRAPPERCOMPONENT_JUCEHEADER__
+#endif   // JUCE_MAC_CARBONVIEWWRAPPERCOMPONENT_H_INCLUDED

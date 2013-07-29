@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_AUDIOFORMATREADER_JUCEHEADER__
-#define __JUCE_AUDIOFORMATREADER_JUCEHEADER__
+#ifndef JUCE_AUDIOFORMATREADER_H_INCLUDED
+#define JUCE_AUDIOFORMATREADER_H_INCLUDED
 
 class AudioFormat;
 
@@ -283,4 +283,4 @@ private:
 };
 
 
-#endif   // __JUCE_AUDIOFORMATREADER_JUCEHEADER__
+#endif   // JUCE_AUDIOFORMATREADER_H_INCLUDED

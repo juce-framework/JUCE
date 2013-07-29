@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_ATTRIBUTEDSTRING_JUCEHEADER__
-#define __JUCE_ATTRIBUTEDSTRING_JUCEHEADER__
+#ifndef JUCE_ATTRIBUTEDSTRING_H_INCLUDED
+#define JUCE_ATTRIBUTEDSTRING_H_INCLUDED
 
 
 //==============================================================================
@@ -102,7 +102,7 @@ public:
     /** Sets the justification that should be used for laying-out the text.
         This may include both vertical and horizontal flags.
     */
-    void setJustification (const Justification& newJustification) noexcept;
+    void setJustification (Justification newJustification) noexcept;
 
     //==============================================================================
     /** Types of word-wrap behaviour.
@@ -215,4 +215,4 @@ private:
     JUCE_LEAK_DETECTOR (AttributedString)
 };
 
-#endif   // __JUCE_ATTRIBUTEDSTRING_JUCEHEADER__
+#endif   // JUCE_ATTRIBUTEDSTRING_H_INCLUDED

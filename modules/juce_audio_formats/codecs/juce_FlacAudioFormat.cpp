@@ -145,7 +145,7 @@ public:
 
     // returns the number of samples read
     bool readSamples (int** destSamples, int numDestChannels, int startOffsetInDestBuffer,
-                      int64 startSampleInFile, int numSamples)
+                      int64 startSampleInFile, int numSamples) override
     {
         using namespace FlacNamespace;
 
@@ -355,7 +355,7 @@ public:
     }
 
     //==============================================================================
-    bool write (const int** samplesToWrite, int numSamples)
+    bool write (const int** samplesToWrite, int numSamples) override
     {
         using namespace FlacNamespace;
         if (! ok)

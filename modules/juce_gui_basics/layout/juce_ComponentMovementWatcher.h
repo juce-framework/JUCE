@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_COMPONENTMOVEMENTWATCHER_JUCEHEADER__
-#define __JUCE_COMPONENTMOVEMENTWATCHER_JUCEHEADER__
+#ifndef JUCE_COMPONENTMOVEMENTWATCHER_H_INCLUDED
+#define JUCE_COMPONENTMOVEMENTWATCHER_H_INCLUDED
 
 #include "../components/juce_Component.h"
 
@@ -71,13 +71,13 @@ public:
 
     //==============================================================================
     /** @internal */
-    void componentParentHierarchyChanged (Component& component);
+    void componentParentHierarchyChanged (Component&) override;
     /** @internal */
-    void componentMovedOrResized (Component& component, bool wasMoved, bool wasResized);
+    void componentMovedOrResized (Component&, bool wasMoved, bool wasResized) override;
     /** @internal */
-    void componentBeingDeleted (Component& component);
+    void componentBeingDeleted (Component&) override;
     /** @internal */
-    void componentVisibilityChanged (Component& component);
+    void componentVisibilityChanged (Component&) override;
 
 private:
     //==============================================================================
@@ -94,4 +94,4 @@ private:
 };
 
 
-#endif   // __JUCE_COMPONENTMOVEMENTWATCHER_JUCEHEADER__
+#endif   // JUCE_COMPONENTMOVEMENTWATCHER_H_INCLUDED

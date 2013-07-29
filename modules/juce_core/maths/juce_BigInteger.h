@@ -26,8 +26,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_BIGINTEGER_JUCEHEADER__
-#define __JUCE_BIGINTEGER_JUCEHEADER__
+#ifndef JUCE_BIGINTEGER_H_INCLUDED
+#define JUCE_BIGINTEGER_H_INCLUDED
 
 #include "../text/juce_String.h"
 #include "../memory/juce_HeapBlock.h"
@@ -331,4 +331,4 @@ OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, const BigInteger& 
 #endif
 
 
-#endif   // __JUCE_BIGINTEGER_JUCEHEADER__
+#endif   // JUCE_BIGINTEGER_H_INCLUDED

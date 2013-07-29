@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_BORDERSIZE_JUCEHEADER__
-#define __JUCE_BORDERSIZE_JUCEHEADER__
+#ifndef JUCE_BORDERSIZE_H_INCLUDED
+#define JUCE_BORDERSIZE_H_INCLUDED
 
 #include "juce_Rectangle.h"
 
@@ -152,4 +152,4 @@ private:
 };
 
 
-#endif   // __JUCE_BORDERSIZE_JUCEHEADER__
+#endif   // JUCE_BORDERSIZE_H_INCLUDED

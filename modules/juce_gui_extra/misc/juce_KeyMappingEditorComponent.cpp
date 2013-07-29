@@ -39,7 +39,7 @@ public:
                                  : TRANS("click to change this key-mapping"));
     }
 
-    void paintButton (Graphics& g, bool /*isOver*/, bool /*isDown*/)
+    void paintButton (Graphics& g, bool /*isOver*/, bool /*isDown*/) override
     {
         getLookAndFeel().drawKeymapChangeButton (g, getWidth(), getHeight(), *this,
                                                  keyNum >= 0 ? getName() : String::empty);
@@ -58,7 +58,7 @@ public:
         }
     }
 
-    void clicked()
+    void clicked() override
     {
         if (keyNum >= 0)
         {
@@ -106,7 +106,7 @@ public:
             grabKeyboardFocus();
         }
 
-        bool keyPressed (const KeyPress& key)
+        bool keyPressed (const KeyPress& key) override
         {
             lastPress = key;
             String message (TRANS("Key") + ": " + owner.getDescriptionForKeyPress (key));
@@ -123,7 +123,7 @@ public:
             return true;
         }
 
-        bool keyStateChanged (bool)
+        bool keyStateChanged (bool) override
         {
             return true;
         }
@@ -229,17 +229,17 @@ public:
         addChildComponent (b);
     }
 
-    void paint (Graphics& g)
+    void paint (Graphics& g) override
     {
         g.setFont (getHeight() * 0.7f);
         g.setColour (findColour (KeyMappingEditorComponent::textColourId));
 
-        g.drawFittedText (owner.getCommandManager().getNameOfCommand (commandID),
+        g.drawFittedText (TRANS (owner.getCommandManager().getNameOfCommand (commandID)),
                           4, 0, jmax (40, getChildComponent (0)->getX() - 5), getHeight(),
                           Justification::centredLeft, true);
     }
 
-    void resized()
+    void resized() override
     {
         int x = getWidth() - 4;
 
@@ -296,7 +296,7 @@ public:
     bool mightContainSubItems()                 { return true; }
     int getItemHeight() const                   { return 28; }
 
-    void paintItem (Graphics& g, int width, int height)
+    void paintItem (Graphics& g, int width, int height) override
     {
         g.setFont (Font (height * 0.6f, Font::bold));
         g.setColour (owner.findColour (KeyMappingEditorComponent::textColourId));
@@ -306,7 +306,7 @@ public:
                     Justification::centredLeft, true);
     }
 
-    void itemOpennessChanged (bool isNowOpen)
+    void itemOpennessChanged (bool isNowOpen) override
     {
         if (isNowOpen)
         {
@@ -353,7 +353,7 @@ public:
     bool mightContainSubItems()             { return true; }
     String getUniqueName() const            { return "keys"; }
 
-    void changeListenerCallback (ChangeBroadcaster*)
+    void changeListenerCallback (ChangeBroadcaster*) override
     {
         const OpennessRestorer opennessRestorer (*this);
         clearSubItems();
@@ -380,7 +380,7 @@ public:
             owner->getMappings().resetToDefaultMappings();
     }
 
-    void buttonClicked (Button*)
+    void buttonClicked (Button*) override
     {
         AlertWindow::showOkCancelBox (AlertWindow::QuestionIcon,
                                       TRANS("Reset to defaults"),

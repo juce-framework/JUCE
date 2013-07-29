@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_UNDOABLEACTION_JUCEHEADER__
-#define __JUCE_UNDOABLEACTION_JUCEHEADER__
+#ifndef JUCE_UNDOABLEACTION_H_INCLUDED
+#define JUCE_UNDOABLEACTION_H_INCLUDED
 
 
 //==============================================================================
@@ -96,4 +96,4 @@ public:
 };
 
 
-#endif   // __JUCE_UNDOABLEACTION_JUCEHEADER__
+#endif   // JUCE_UNDOABLEACTION_H_INCLUDED

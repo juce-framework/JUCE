@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_RECENTLYOPENEDFILESLIST_JUCEHEADER__
-#define __JUCE_RECENTLYOPENEDFILESLIST_JUCEHEADER__
+#ifndef JUCE_RECENTLYOPENEDFILESLIST_H_INCLUDED
+#define JUCE_RECENTLYOPENEDFILESLIST_H_INCLUDED
 
 
 //==============================================================================
@@ -161,4 +161,4 @@ private:
 };
 
 
-#endif   // __JUCE_RECENTLYOPENEDFILESLIST_JUCEHEADER__
+#endif   // JUCE_RECENTLYOPENEDFILESLIST_H_INCLUDED

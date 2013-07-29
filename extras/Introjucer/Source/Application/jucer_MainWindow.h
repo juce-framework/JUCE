@@ -43,7 +43,7 @@ public:
     ~MainWindow();
 
     //==============================================================================
-    void closeButtonPressed();
+    void closeButtonPressed() override;
 
     //==============================================================================
     bool canOpenFile (const File& file) const;
@@ -58,23 +58,23 @@ public:
 
     void showNewProjectWizard();
 
-    bool isInterestedInFileDrag (const StringArray& files);
-    void filesDropped (const StringArray& filenames, int mouseX, int mouseY);
+    bool isInterestedInFileDrag (const StringArray& files) override;
+    void filesDropped (const StringArray& filenames, int mouseX, int mouseY) override;
 
-    void activeWindowStatusChanged();
+    void activeWindowStatusChanged() override;
 
     void updateTitle (const String& documentName);
 
     ProjectContentComponent* getProjectContentComponent() const;
 
     //==============================================================================
-    ApplicationCommandTarget* getNextCommandTarget();
-    void getAllCommands (Array <CommandID>& commands);
-    void getCommandInfo (CommandID commandID, ApplicationCommandInfo& result);
-    bool perform (const InvocationInfo& info);
+    ApplicationCommandTarget* getNextCommandTarget() override;
+    void getAllCommands (Array <CommandID>& commands) override;
+    void getCommandInfo (CommandID commandID, ApplicationCommandInfo& result) override;
+    bool perform (const InvocationInfo& info) override;
 
     bool shouldDropFilesWhenDraggedExternally (const DragAndDropTarget::SourceDetails& sourceDetails,
-                                               StringArray& files, bool& canMoveFiles);
+                                               StringArray& files, bool& canMoveFiles) override;
 private:
     ScopedPointer <Project> currentProject;
 

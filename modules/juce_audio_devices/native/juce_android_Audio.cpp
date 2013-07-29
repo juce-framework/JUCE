@@ -277,7 +277,7 @@ public:
         }
     }
 
-    void run()
+    void run() override
     {
         JNIEnv* env = getEnv();
         jshortArray audioBuffer = env->NewShortArray (actualBufferSize * jmax (numDeviceOutputChannels, numDeviceInputChannels));

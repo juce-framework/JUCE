@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_FILLTYPE_JUCEHEADER__
-#define __JUCE_FILLTYPE_JUCEHEADER__
+#ifndef JUCE_FILLTYPE_H_INCLUDED
+#define JUCE_FILLTYPE_H_INCLUDED
 
 #include "../colour/juce_ColourGradient.h"
 #include "../images/juce_Image.h"
@@ -149,4 +149,4 @@ private:
 };
 
 
-#endif   // __JUCE_FILLTYPE_JUCEHEADER__
+#endif   // JUCE_FILLTYPE_H_INCLUDED

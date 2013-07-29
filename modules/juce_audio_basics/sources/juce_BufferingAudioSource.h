@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_BUFFERINGAUDIOSOURCE_JUCEHEADER__
-#define __JUCE_BUFFERINGAUDIOSOURCE_JUCEHEADER__
+#ifndef JUCE_BUFFERINGAUDIOSOURCE_H_INCLUDED
+#define JUCE_BUFFERINGAUDIOSOURCE_H_INCLUDED
 
 #include "juce_PositionableAudioSource.h"
 
@@ -70,26 +70,26 @@ public:
 
     //==============================================================================
     /** Implementation of the AudioSource method. */
-    void prepareToPlay (int samplesPerBlockExpected, double sampleRate);
+    void prepareToPlay (int samplesPerBlockExpected, double sampleRate) override;
 
     /** Implementation of the AudioSource method. */
-    void releaseResources();
+    void releaseResources() override;
 
     /** Implementation of the AudioSource method. */
-    void getNextAudioBlock (const AudioSourceChannelInfo& bufferToFill);
+    void getNextAudioBlock (const AudioSourceChannelInfo& bufferToFill) override;
 
     //==============================================================================
     /** Implements the PositionableAudioSource method. */
-    void setNextReadPosition (int64 newPosition);
+    void setNextReadPosition (int64 newPosition) override;
 
     /** Implements the PositionableAudioSource method. */
-    int64 getNextReadPosition() const;
+    int64 getNextReadPosition() const override;
 
     /** Implements the PositionableAudioSource method. */
-    int64 getTotalLength() const                { return source->getTotalLength(); }
+    int64 getTotalLength() const override       { return source->getTotalLength(); }
 
     /** Implements the PositionableAudioSource method. */
-    bool isLooping() const                      { return source->isLooping(); }
+    bool isLooping() const override             { return source->isLooping(); }
 
 private:
     //==============================================================================
@@ -110,4 +110,4 @@ private:
 };
 
 
-#endif   // __JUCE_BUFFERINGAUDIOSOURCE_JUCEHEADER__
+#endif   // JUCE_BUFFERINGAUDIOSOURCE_H_INCLUDED

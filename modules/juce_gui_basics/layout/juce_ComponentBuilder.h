@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_COMPONENTBUILDER_JUCEHEADER__
-#define __JUCE_COMPONENTBUILDER_JUCEHEADER__
+#ifndef JUCE_COMPONENTBUILDER_H_INCLUDED
+#define JUCE_COMPONENTBUILDER_H_INCLUDED
 
 #include "../components/juce_Component.h"
 
@@ -235,13 +235,13 @@ private:
     WeakReference<Component> componentRef;
    #endif
 
-    void valueTreePropertyChanged (ValueTree&, const Identifier&);
-    void valueTreeChildAdded (ValueTree&, ValueTree&);
-    void valueTreeChildRemoved (ValueTree&, ValueTree&);
-    void valueTreeChildOrderChanged (ValueTree&);
-    void valueTreeParentChanged (ValueTree&);
+    void valueTreePropertyChanged (ValueTree&, const Identifier&) override;
+    void valueTreeChildAdded (ValueTree&, ValueTree&) override;
+    void valueTreeChildRemoved (ValueTree&, ValueTree&) override;
+    void valueTreeChildOrderChanged (ValueTree&) override;
+    void valueTreeParentChanged (ValueTree&) override;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ComponentBuilder)
 };
 
-#endif   // __JUCE_COMPONENTBUILDER_JUCEHEADER__
+#endif   // JUCE_COMPONENTBUILDER_H_INCLUDED

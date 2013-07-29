@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_MIXERAUDIOSOURCE_JUCEHEADER__
-#define __JUCE_MIXERAUDIOSOURCE_JUCEHEADER__
+#ifndef JUCE_MIXERAUDIOSOURCE_H_INCLUDED
+#define JUCE_MIXERAUDIOSOURCE_H_INCLUDED
 
 #include "juce_AudioSource.h"
 
@@ -100,4 +100,4 @@ private:
 };
 
 
-#endif   // __JUCE_MIXERAUDIOSOURCE_JUCEHEADER__
+#endif   // JUCE_MIXERAUDIOSOURCE_H_INCLUDED

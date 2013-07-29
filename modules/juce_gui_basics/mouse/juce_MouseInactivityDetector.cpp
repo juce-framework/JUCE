@@ -54,8 +54,11 @@ void MouseInactivityDetector::wakeUp (const MouseEvent& e, bool alwaysWake)
     if ((! isActive) && (alwaysWake || e.source.isTouch() || newPos.getDistanceFrom (lastMousePos) > 15))
         setActive (true);
 
-    lastMousePos = newPos;
-    startTimer (delayMs);
+    if (lastMousePos != newPos)
+    {
+        lastMousePos = newPos;
+        startTimer (delayMs);
+    }
 }
 
 void MouseInactivityDetector::setActive (bool b)

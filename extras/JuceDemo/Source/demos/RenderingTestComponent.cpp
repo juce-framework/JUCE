@@ -191,7 +191,7 @@ private:
         g.reduceClipRegion (argbImage, transform);
     }
 
-    void drawPaths (Graphics& g, bool /*solid*/, bool linearGradient, bool radialGradient)
+    void drawPaths (Graphics& g, bool /*solid*/, bool useLinearGradient, bool useRadialGradient)
     {
         Path p;
         p.addRectangle (-50, 0, 100, 100);
@@ -199,7 +199,7 @@ private:
         p.addStar (Point<float> (-100.0f, 0.0f), 6, 40.0f, 70.0f, 0.1f);
         p.addEllipse (-60.0f, -100.0f, 120.0f, 90.0f);
 
-        if (linearGradient || radialGradient)
+        if (useLinearGradient || useRadialGradient)
         {
             Colour c1 (bouncingNumber[0], bouncingNumber[1], bouncingNumber[2], 1.0f);
             Colour c2 (bouncingNumber[4], bouncingNumber[5], bouncingNumber[6], 1.0f);
@@ -222,7 +222,7 @@ private:
 
             ColourGradient gradient (c1, x1, y1,
                                      c2, x2, y2,
-                                     radialGradient);
+                                     useRadialGradient);
 
             gradient.addColour (intermediatePos, c3);
 
@@ -520,7 +520,7 @@ RenderingTestComponent::RenderingTestComponent ()
     testTypeComboBox->setSelectedId (2);
     sizeSlider->setValue (1.0, dontSendNotification);
     opacitySlider->setValue (1.0, dontSendNotification);
-    highQualityToggle->setToggleState (true, false);
+    highQualityToggle->setToggleState (true, dontSendNotification);
     //[/Constructor]
 }
 

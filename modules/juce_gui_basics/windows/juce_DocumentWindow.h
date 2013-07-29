@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_DOCUMENTWINDOW_JUCEHEADER__
-#define __JUCE_DOCUMENTWINDOW_JUCEHEADER__
+#ifndef JUCE_DOCUMENTWINDOW_H_INCLUDED
+#define JUCE_DOCUMENTWINDOW_H_INCLUDED
 
 #include "juce_ResizableWindow.h"
 #include "../buttons/juce_Button.h"
@@ -89,7 +89,7 @@ public:
         @see TitleBarButtons
     */
     DocumentWindow (const String& name,
-                    const Colour& backgroundColour,
+                    Colour backgroundColour,
                     int requiredButtons,
                     bool addToDesktop = true);
 
@@ -230,25 +230,25 @@ public:
     //==============================================================================
    #ifndef DOXYGEN
     /** @internal */
-    void paint (Graphics&);
+    void paint (Graphics&) override;
     /** @internal */
-    void resized();
+    void resized() override;
     /** @internal */
-    void lookAndFeelChanged();
+    void lookAndFeelChanged() override;
     /** @internal */
-    BorderSize<int> getBorderThickness();
+    BorderSize<int> getBorderThickness() override;
     /** @internal */
-    BorderSize<int> getContentComponentBorder();
+    BorderSize<int> getContentComponentBorder() override;
     /** @internal */
-    void mouseDoubleClick (const MouseEvent&);
+    void mouseDoubleClick (const MouseEvent&) override;
     /** @internal */
-    void userTriedToCloseWindow();
+    void userTriedToCloseWindow() override;
     /** @internal */
-    void activeWindowStatusChanged();
+    void activeWindowStatusChanged() override;
     /** @internal */
-    int getDesktopWindowStyleFlags() const;
+    int getDesktopWindowStyleFlags() const override;
     /** @internal */
-    void parentHierarchyChanged();
+    void parentHierarchyChanged() override;
     /** @internal */
     Rectangle<int> getTitleBarArea();
    #endif
@@ -272,4 +272,4 @@ private:
 };
 
 
-#endif   // __JUCE_DOCUMENTWINDOW_JUCEHEADER__
+#endif   // JUCE_DOCUMENTWINDOW_H_INCLUDED

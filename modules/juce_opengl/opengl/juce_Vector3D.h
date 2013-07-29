@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_VECTOR3D_JUCEHEADER__
-#define __JUCE_VECTOR3D_JUCEHEADER__
+#ifndef JUCE_VECTOR3D_H_INCLUDED
+#define JUCE_VECTOR3D_H_INCLUDED
 
 //==============================================================================
 /**
@@ -78,4 +78,4 @@ public:
 };
 
 
-#endif   // __JUCE_VECTOR3D_JUCEHEADER__
+#endif   // JUCE_VECTOR3D_H_INCLUDED

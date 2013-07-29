@@ -387,7 +387,7 @@ public:
 
         if (sampleRates != newRates)
         {
-            sampleRates.swapWithArray (newRates);
+            sampleRates.swapWith (newRates);
 
            #if JUCE_ASIO_DEBUGGING
             StringArray s;
@@ -659,6 +659,7 @@ public:
             else
                 JUCE_ASIO_LOG ("latencies: " + String ((int) outputLatency) + ", " + String ((int) inputLatency));
 
+            asioObject->getBufferSize (&minSize, &maxSize, &preferredSize, &granularity);
             deviceIsOpen = true;
 
             JUCE_ASIO_LOG ("starting");
@@ -821,7 +822,7 @@ public:
         startTimer (500);
     }
 
-    void timerCallback()
+    void timerCallback() override
     {
         if (! insideControlPanelModalLoop)
         {

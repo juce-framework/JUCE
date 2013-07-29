@@ -95,7 +95,7 @@ inline void drawResizableBorder (Graphics& g, int w, int h,
 
 inline void drawMouseOverCorners (Graphics& g, int w, int h)
 {
-    RectangleList r (Rectangle<int> (0, 0, w, h));
+    RectangleList<int> r (Rectangle<int> (0, 0, w, h));
     r.subtract (Rectangle<int> (1, 1, w - 2, h - 2));
 
     const int size = jmin (w / 3, h / 3, 12);

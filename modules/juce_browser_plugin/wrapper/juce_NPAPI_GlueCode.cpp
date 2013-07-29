@@ -286,13 +286,13 @@ public:
     }
 
     //==============================================================================
-    void paint (Graphics& g)
+    void paint (Graphics& g) override
     {
         if (child == nullptr || ! child->isOpaque())
             g.fillAll (Colours::white);
     }
 
-    void resized()
+    void resized() override
     {
         if (child != nullptr && ! isFirefox4)
             child->setBounds (getLocalBounds());

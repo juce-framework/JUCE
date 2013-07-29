@@ -172,7 +172,7 @@ public:
             oldCallback->audioDeviceStopped();
     }
 
-    void run()
+    void run() override
     {
         if (recorder != nullptr)    recorder->start();
         if (player != nullptr)      player->start();

@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_AUDIO_DEVICES_JUCEHEADER__
-#define __JUCE_AUDIO_DEVICES_JUCEHEADER__
+#ifndef JUCE_AUDIO_DEVICES_H_INCLUDED
+#define JUCE_AUDIO_DEVICES_H_INCLUDED
 
 #include "../juce_events/juce_events.h"
 #include "../juce_audio_basics/juce_audio_basics.h"
@@ -101,41 +101,19 @@ namespace juce
 {
 
 // START_AUTOINCLUDE audio_io, midi_io, sources, audio_cd
-#ifndef __JUCE_AUDIODEVICEMANAGER_JUCEHEADER__
- #include "audio_io/juce_AudioDeviceManager.h"
-#endif
-#ifndef __JUCE_AUDIOIODEVICE_JUCEHEADER__
- #include "audio_io/juce_AudioIODevice.h"
-#endif
-#ifndef __JUCE_AUDIOIODEVICETYPE_JUCEHEADER__
- #include "audio_io/juce_AudioIODeviceType.h"
-#endif
-#ifndef __JUCE_SYSTEMAUDIOVOLUME_JUCEHEADER__
- #include "audio_io/juce_SystemAudioVolume.h"
-#endif
-#ifndef __JUCE_MIDIINPUT_JUCEHEADER__
- #include "midi_io/juce_MidiInput.h"
-#endif
-#ifndef __JUCE_MIDIMESSAGECOLLECTOR_JUCEHEADER__
- #include "midi_io/juce_MidiMessageCollector.h"
-#endif
-#ifndef __JUCE_MIDIOUTPUT_JUCEHEADER__
- #include "midi_io/juce_MidiOutput.h"
-#endif
-#ifndef __JUCE_AUDIOSOURCEPLAYER_JUCEHEADER__
- #include "sources/juce_AudioSourcePlayer.h"
-#endif
-#ifndef __JUCE_AUDIOTRANSPORTSOURCE_JUCEHEADER__
- #include "sources/juce_AudioTransportSource.h"
-#endif
-#ifndef __JUCE_AUDIOCDBURNER_JUCEHEADER__
- #include "audio_cd/juce_AudioCDBurner.h"
-#endif
-#ifndef __JUCE_AUDIOCDREADER_JUCEHEADER__
- #include "audio_cd/juce_AudioCDReader.h"
-#endif
+#include "audio_io/juce_AudioDeviceManager.h"
+#include "audio_io/juce_AudioIODevice.h"
+#include "audio_io/juce_AudioIODeviceType.h"
+#include "audio_io/juce_SystemAudioVolume.h"
+#include "midi_io/juce_MidiInput.h"
+#include "midi_io/juce_MidiMessageCollector.h"
+#include "midi_io/juce_MidiOutput.h"
+#include "sources/juce_AudioSourcePlayer.h"
+#include "sources/juce_AudioTransportSource.h"
+#include "audio_cd/juce_AudioCDBurner.h"
+#include "audio_cd/juce_AudioCDReader.h"
 // END_AUTOINCLUDE
 
 }
 
-#endif   // __JUCE_AUDIO_DEVICES_JUCEHEADER__
+#endif   // JUCE_AUDIO_DEVICES_H_INCLUDED

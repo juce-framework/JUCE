@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_TEXTBUTTON_JUCEHEADER__
-#define __JUCE_TEXTBUTTON_JUCEHEADER__
+#ifndef JUCE_TEXTBUTTON_H_INCLUDED
+#define JUCE_TEXTBUTTON_H_INCLUDED
 
 #include "juce_Button.h"
 
@@ -90,13 +90,13 @@ public:
 
 protected:
     /** @internal */
-    void paintButton (Graphics& g, bool isMouseOverButton, bool isButtonDown);
+    void paintButton (Graphics&, bool isMouseOverButton, bool isButtonDown) override;
     /** @internal */
-    void colourChanged();
+    void colourChanged() override;
 
 private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TextButton)
 };
 
 
-#endif   // __JUCE_TEXTBUTTON_JUCEHEADER__
+#endif   // JUCE_TEXTBUTTON_H_INCLUDED

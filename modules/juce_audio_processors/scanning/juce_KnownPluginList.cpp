@@ -136,7 +136,8 @@ bool KnownPluginList::scanAndAddFile (const String& fileOrIdentifier,
     OwnedArray <PluginDescription> found;
 
     {
-        const ScopedUnlock sl (scanLock);
+        const ScopedUnlock sl2 (scanLock);
+
         if (scanner != nullptr)
         {
             if (! scanner->findPluginTypesFor (format, found, fileOrIdentifier))

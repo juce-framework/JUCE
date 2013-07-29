@@ -147,7 +147,7 @@ public:
 private:
     StringPool identifierPool;
 
-    static DISPID getHashFromString (const String::CharPointerType& s) noexcept
+    static DISPID getHashFromString (const String::CharPointerType s) noexcept
     {
         return (DISPID) (pointer_sized_int) s.getAddress();
     }
@@ -447,13 +447,13 @@ public:
     }
 
     //==============================================================================
-    void paint (Graphics& g)
+    void paint (Graphics& g) override
     {
         if (child == nullptr || ! child->isOpaque())
             g.fillAll (Colours::white);
     }
 
-    void resized()
+    void resized() override
     {
         if (child != nullptr)
             child->setBounds (getLocalBounds());

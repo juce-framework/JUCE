@@ -124,7 +124,7 @@ void Button::setConnectedEdges (const int connectedEdgeFlags_)
 
 //==============================================================================
 void Button::setToggleState (const bool shouldBeOn,
-                             const bool sendChangeNotification)
+                             const NotificationType notification)
 {
     if (shouldBeOn != lastToggleState)
     {
@@ -136,8 +136,11 @@ void Button::setToggleState (const bool shouldBeOn,
 
         WeakReference<Component> deletionWatcher (this);
 
-        if (sendChangeNotification)
+        if (notification != dontSendNotification)
         {
+            // async callbacks aren't possible here
+            jassert (notification != sendNotificationAsync);
+
             sendClickMessage (ModifierKeys());
 
             if (deletionWatcher == nullptr)
@@ -146,7 +149,7 @@ void Button::setToggleState (const bool shouldBeOn,
 
         if (lastToggleState)
         {
-            turnOffOtherButtonsInGroup (sendChangeNotification);
+            turnOffOtherButtonsInGroup (notification);
 
             if (deletionWatcher == nullptr)
                 return;
@@ -154,6 +157,11 @@ void Button::setToggleState (const bool shouldBeOn,
 
         sendStateMessage();
     }
+}
+
+void Button::setToggleState (const bool shouldBeOn, bool sendChange)
+{
+    setToggleState (shouldBeOn, sendChange ? sendNotification : dontSendNotification);
 }
 
 void Button::setClickingTogglesState (const bool shouldToggle) noexcept
@@ -175,7 +183,7 @@ bool Button::getClickingTogglesState() const noexcept
 void Button::valueChanged (Value& value)
 {
     if (value.refersToSameSourceAs (isOn))
-        setToggleState (isOn.getValue(), true);
+        setToggleState (isOn.getValue(), sendNotification);
 }
 
 void Button::setRadioGroupId (const int newGroupId)
@@ -185,11 +193,11 @@ void Button::setRadioGroupId (const int newGroupId)
         radioGroupId = newGroupId;
 
         if (lastToggleState)
-            turnOffOtherButtonsInGroup (true);
+            turnOffOtherButtonsInGroup (sendNotification);
     }
 }
 
-void Button::turnOffOtherButtonsInGroup (const bool sendChangeNotification)
+void Button::turnOffOtherButtonsInGroup (const NotificationType notification)
 {
     if (Component* const p = getParentComponent())
     {
@@ -207,7 +215,7 @@ void Button::turnOffOtherButtonsInGroup (const bool sendChangeNotification)
                     {
                         if (b->getRadioGroupId() == radioGroupId)
                         {
-                            b->setToggleState (false, sendChangeNotification);
+                            b->setToggleState (false, notification);
 
                             if (deletionWatcher == nullptr)
                                 return;
@@ -309,7 +317,7 @@ void Button::triggerClick()
 void Button::internalClickCallback (const ModifierKeys& modifiers)
 {
     if (clickTogglesState)
-        setToggleState ((radioGroupId != 0) || ! lastToggleState, false);
+        setToggleState ((radioGroupId != 0) || ! lastToggleState, dontSendNotification);
 
     sendClickMessage (modifiers);
 }
@@ -350,9 +358,6 @@ void Button::removeListener (ButtonListener* const listener)
 {
     buttonListeners.remove (listener);
 }
-
-void Button::addButtonListener (ButtonListener* l)      { addListener (l); }
-void Button::removeButtonListener (ButtonListener* l)   { removeListener (l); }
 
 void Button::sendClickMessage (const ModifierKeys& modifiers)
 {
@@ -523,7 +528,7 @@ void Button::applicationCommandListChanged()
         setEnabled (target != nullptr && (info.flags & ApplicationCommandInfo::isDisabled) == 0);
 
         if (target != nullptr)
-            setToggleState ((info.flags & ApplicationCommandInfo::isTicked) != 0, false);
+            setToggleState ((info.flags & ApplicationCommandInfo::isTicked) != 0, dontSendNotification);
     }
 }
 

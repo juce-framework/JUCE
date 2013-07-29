@@ -27,7 +27,7 @@ class MessageManager::QuitMessage   : public MessageManager::MessageBase
 public:
     QuitMessage() {}
 
-    void messageCallback()
+    void messageCallback() override
     {
         if (MessageManager* const mm = MessageManager::instance)
             mm->quitMessageReceived = true;
@@ -134,7 +134,7 @@ public:
         : result (nullptr), func (f), parameter (param)
     {}
 
-    void messageCallback()
+    void messageCallback() override
     {
         result = (*func) (parameter);
         finished.signal();
@@ -227,7 +227,7 @@ class MessageManagerLock::BlockingMessage   : public MessageManager::MessageBase
 public:
     BlockingMessage() noexcept {}
 
-    void messageCallback()
+    void messageCallback() override
     {
         lockedEvent.signal();
         releaseEvent.wait();

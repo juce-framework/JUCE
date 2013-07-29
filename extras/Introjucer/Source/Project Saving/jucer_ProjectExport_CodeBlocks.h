@@ -47,18 +47,19 @@ public:
     }
 
     //==============================================================================
-    bool launchProject()                    { return false; }
-    bool isCodeBlocks() const               { return true; }
-    bool isWindows() const                  { return true; }
-    bool usesMMFiles() const                { return false; }
-    bool canCopeWithDuplicateFiles()        { return false; }
+    bool canLaunchProject() override                 { return false; }
+    bool launchProject() override                    { return false; }
+    bool isCodeBlocks() const override               { return true; }
+    bool isWindows() const override                  { return true; }
+    bool usesMMFiles() const override                { return false; }
+    bool canCopeWithDuplicateFiles() override        { return false; }
 
-    void createExporterProperties (PropertyListBuilder&)
+    void createExporterProperties (PropertyListBuilder&) override
     {
     }
 
     //==============================================================================
-    void create (const OwnedArray<LibraryModule>&) const
+    void create (const OwnedArray<LibraryModule>&) const override
     {
         const File cbpFile (getTargetFolder().getChildFile (project.getProjectFilenameRoot())
                                              .withFileExtension (".cbp"));
@@ -84,7 +85,7 @@ private:
         }
     };
 
-    BuildConfiguration::Ptr createBuildConfig (const ValueTree& tree) const
+    BuildConfiguration::Ptr createBuildConfig (const ValueTree& tree) const override
     {
         return new CodeBlocksBuildConfiguration (project, tree);
     }

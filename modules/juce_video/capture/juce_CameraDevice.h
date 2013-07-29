@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_CAMERADEVICE_JUCEHEADER__
-#define __JUCE_CAMERADEVICE_JUCEHEADER__
+#ifndef JUCE_CAMERADEVICE_H_INCLUDED
+#define JUCE_CAMERADEVICE_H_INCLUDED
 
 #if JUCE_USE_CAMERA || DOXYGEN
 
@@ -156,4 +156,4 @@ typedef CameraDevice::Listener CameraImageListener;
 
 
 #endif
-#endif   // __JUCE_CAMERADEVICE_JUCEHEADER__
+#endif   // JUCE_CAMERADEVICE_H_INCLUDED

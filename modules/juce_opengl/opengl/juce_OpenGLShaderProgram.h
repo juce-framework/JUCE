@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_OPENGLSHADERPROGRAM_JUCEHEADER__
-#define __JUCE_OPENGLSHADERPROGRAM_JUCEHEADER__
+#ifndef JUCE_OPENGLSHADERPROGRAM_H_INCLUDED
+#define JUCE_OPENGLSHADERPROGRAM_H_INCLUDED
 
 //==============================================================================
 /**
@@ -150,4 +150,4 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OpenGLShaderProgram)
 };
 
-#endif   // __JUCE_OPENGLSHADERPROGRAM_JUCEHEADER__
+#endif   // JUCE_OPENGLSHADERPROGRAM_H_INCLUDED

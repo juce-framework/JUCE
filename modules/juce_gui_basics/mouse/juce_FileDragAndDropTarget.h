@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_FILEDRAGANDDROPTARGET_JUCEHEADER__
-#define __JUCE_FILEDRAGANDDROPTARGET_JUCEHEADER__
+#ifndef JUCE_FILEDRAGANDDROPTARGET_H_INCLUDED
+#define JUCE_FILEDRAGANDDROPTARGET_H_INCLUDED
 
 /**
     Components derived from this class can have files dropped onto them by an external application.
@@ -101,4 +101,4 @@ public:
 };
 
 
-#endif   // __JUCE_FILEDRAGANDDROPTARGET_JUCEHEADER__
+#endif   // JUCE_FILEDRAGANDDROPTARGET_H_INCLUDED

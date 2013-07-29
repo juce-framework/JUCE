@@ -26,8 +26,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_READWRITELOCK_JUCEHEADER__
-#define __JUCE_READWRITELOCK_JUCEHEADER__
+#ifndef JUCE_READWRITELOCK_H_INCLUDED
+#define JUCE_READWRITELOCK_H_INCLUDED
 
 #include "juce_CriticalSection.h"
 #include "juce_SpinLock.h"
@@ -156,4 +156,4 @@ private:
 };
 
 
-#endif   // __JUCE_READWRITELOCK_JUCEHEADER__
+#endif   // JUCE_READWRITELOCK_H_INCLUDED

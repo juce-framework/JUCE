@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_SPLASHSCREEN_JUCEHEADER__
-#define __JUCE_SPLASHSCREEN_JUCEHEADER__
+#ifndef JUCE_SPLASHSCREEN_H_INCLUDED
+#define JUCE_SPLASHSCREEN_H_INCLUDED
 
 
 //==============================================================================
@@ -128,7 +128,7 @@ public:
 
     //==============================================================================
     /** @internal */
-    void paint (Graphics&);
+    void paint (Graphics&) override;
 
 private:
     //==============================================================================
@@ -136,10 +136,10 @@ private:
     Time earliestTimeToDelete;
     int originalClickCounter;
 
-    void timerCallback();
+    void timerCallback() override;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SplashScreen)
 };
 
 
-#endif   // __JUCE_SPLASHSCREEN_JUCEHEADER__
+#endif   // JUCE_SPLASHSCREEN_H_INCLUDED

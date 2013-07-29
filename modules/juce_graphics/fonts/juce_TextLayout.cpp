@@ -260,7 +260,7 @@ namespace TextLayoutHelpers
 
     struct Token
     {
-        Token (const String& t, const Font& f, const Colour& c, const bool whitespace)
+        Token (const String& t, const Font& f, Colour c, const bool whitespace)
             : text (t), font (f), colour (c),
               area (font.getStringWidthFloat (t), f.getHeight()),
               isWhitespace (whitespace),
@@ -307,7 +307,7 @@ namespace TextLayoutHelpers
 
                 Array <int> newGlyphs;
                 Array <float> xOffsets;
-                t.font.getGlyphPositions (t.text.trimEnd(), newGlyphs, xOffsets);
+                t.font.getGlyphPositions (getTrimmedEndIfNotAllWhitespace (t.text), newGlyphs, xOffsets);
 
                 if (currentRun == nullptr)  currentRun  = new TextLayout::Run();
                 if (currentLine == nullptr) currentLine = new TextLayout::Line();
@@ -415,7 +415,7 @@ namespace TextLayoutHelpers
         }
 
         void appendText (const AttributedString& text, const Range<int> stringRange,
-                         const Font& font, const Colour& colour)
+                         const Font& font, Colour colour)
         {
             const String stringText (text.getText().substring (stringRange.getStart(), stringRange.getEnd()));
             String::CharPointerType t (stringText.getCharPointer());
@@ -506,7 +506,7 @@ namespace TextLayoutHelpers
             {
                 const int stringLength = text.getText().length();
                 int rangeStart = 0;
-                FontAndColour lastFontAndColour (nullptr);
+                FontAndColour lastFontAndColour (&defaultFont);
 
                 // Iterate through every character in the string
                 for (int i = 0; i < stringLength; ++i)
@@ -541,6 +541,15 @@ namespace TextLayoutHelpers
                 const RunAttribute& r = runAttributes.getReference(i);
                 appendText (text, r.range, *(r.fontAndColour.font), r.fontAndColour.colour);
             }
+        }
+
+        static String getTrimmedEndIfNotAllWhitespace (const String& s)
+        {
+            String trimmed (s.trimEnd());
+            if (trimmed.isEmpty() && ! s.isEmpty())
+                trimmed = s.replaceCharacters ("\r\n\t", "   ");
+
+            return trimmed;
         }
 
         OwnedArray<Token> tokens;

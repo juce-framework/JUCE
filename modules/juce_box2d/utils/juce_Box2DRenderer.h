@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_BOX2DRENDERER_JUCEHEADER__
-#define __JUCE_BOX2DRENDERER_JUCEHEADER__
+#ifndef JUCE_BOX2DRENDERER_H_INCLUDED
+#define JUCE_BOX2DRENDERER_H_INCLUDED
 
 //=============================================================================
 /** A simple implementation of the b2Draw class, used to draw a Box2D world.
@@ -74,4 +74,4 @@ protected:
 };
 
 
-#endif   // __JUCE_BOX2DRENDERER_JUCEHEADER__
+#endif   // JUCE_BOX2DRENDERER_H_INCLUDED

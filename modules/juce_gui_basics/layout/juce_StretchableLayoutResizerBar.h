@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_STRETCHABLELAYOUTRESIZERBAR_JUCEHEADER__
-#define __JUCE_STRETCHABLELAYOUTRESIZERBAR_JUCEHEADER__
+#ifndef JUCE_STRETCHABLELAYOUTRESIZERBAR_H_INCLUDED
+#define JUCE_STRETCHABLELAYOUTRESIZERBAR_H_INCLUDED
 
 #include "../components/juce_Component.h"
 #include "juce_StretchableLayoutManager.h"
@@ -77,11 +77,11 @@ public:
 
     //==============================================================================
     /** @internal */
-    void paint (Graphics& g);
+    void paint (Graphics&) override;
     /** @internal */
-    void mouseDown (const MouseEvent& e);
+    void mouseDown (const MouseEvent&) override;
     /** @internal */
-    void mouseDrag (const MouseEvent& e);
+    void mouseDrag (const MouseEvent&) override;
 
 
 private:
@@ -94,4 +94,4 @@ private:
 };
 
 
-#endif   // __JUCE_STRETCHABLELAYOUTRESIZERBAR_JUCEHEADER__
+#endif   // JUCE_STRETCHABLELAYOUTRESIZERBAR_H_INCLUDED

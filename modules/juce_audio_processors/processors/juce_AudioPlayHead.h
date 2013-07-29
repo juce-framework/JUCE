@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_AUDIOPLAYHEAD_JUCEHEADER__
-#define __JUCE_AUDIOPLAYHEAD_JUCEHEADER__
+#ifndef JUCE_AUDIOPLAYHEAD_H_INCLUDED
+#define JUCE_AUDIOPLAYHEAD_H_INCLUDED
 
 
 //==============================================================================
@@ -137,4 +137,4 @@ public:
 };
 
 
-#endif   // __JUCE_AUDIOPLAYHEAD_JUCEHEADER__
+#endif   // JUCE_AUDIOPLAYHEAD_H_INCLUDED

@@ -163,19 +163,19 @@ IIRCoefficients IIRCoefficients::makePeakFilter (const double sampleRate,
 }
 
 //==============================================================================
-IIRFilter::IIRFilter()
-    : active (false), v1 (0), v2 (0)
+IIRFilter::IIRFilter() noexcept
+    : v1 (0), v2 (0), active (false)
 {
 }
 
-IIRFilter::IIRFilter (const IIRFilter& other)
-    : active (other.active), v1 (0), v2 (0)
+IIRFilter::IIRFilter (const IIRFilter& other) noexcept
+    : v1 (0), v2 (0), active (other.active)
 {
     const SpinLock::ScopedLockType sl (other.processLock);
     coefficients = other.coefficients;
 }
 
-IIRFilter::~IIRFilter()
+IIRFilter::~IIRFilter() noexcept
 {
 }
 

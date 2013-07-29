@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_ANIMATEDPOSITION_JUCEHEADER__
-#define __JUCE_ANIMATEDPOSITION_JUCEHEADER__
+#ifndef JUCE_ANIMATEDPOSITION_H_INCLUDED
+#define JUCE_ANIMATEDPOSITION_H_INCLUDED
 
 //==============================================================================
 /**
@@ -205,4 +205,4 @@ private:
 };
 
 
-#endif   // __JUCE_ANIMATEDPOSITION_JUCEHEADER__
+#endif   // JUCE_ANIMATEDPOSITION_H_INCLUDED

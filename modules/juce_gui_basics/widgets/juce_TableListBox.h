@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_TABLELISTBOX_JUCEHEADER__
-#define __JUCE_TABLELISTBOX_JUCEHEADER__
+#ifndef JUCE_TABLELISTBOX_H_INCLUDED
+#define JUCE_TABLELISTBOX_H_INCLUDED
 
 #include "juce_TableHeaderComponent.h"
 #include "juce_ListBox.h"
@@ -269,11 +269,11 @@ public:
 
     /** Returns the position of one of the cells in the table.
 
-        If relativeToComponentTopLeft is true, the co-ordinates are relative to
+        If relativeToComponentTopLeft is true, the coordinates are relative to
         the table component's top-left. The row number isn't checked to see if it's
         in-range, but the column ID must exist or this will return an empty rectangle.
 
-        If relativeToComponentTopLeft is false, the co-ords are relative to the
+        If relativeToComponentTopLeft is false, the coordinates are relative to the
         top-left of the table's top-left cell.
     */
     Rectangle<int> getCellPosition (int columnId, int rowNumber,
@@ -337,4 +337,4 @@ private:
 };
 
 
-#endif   // __JUCE_TABLELISTBOX_JUCEHEADER__
+#endif   // JUCE_TABLELISTBOX_H_INCLUDED

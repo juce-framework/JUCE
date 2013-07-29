@@ -1973,10 +1973,6 @@
       <Option compile="0"/>
       <Option link="0"/>
     </Unit>
-    <Unit filename="../../../../modules/juce_graphics/geometry/juce_RectangleList.cpp">
-      <Option compile="0"/>
-      <Option link="0"/>
-    </Unit>
     <Unit filename="../../../../modules/juce_graphics/geometry/juce_RectangleList.h">
       <Option compile="0"/>
       <Option link="0"/>
@@ -2202,6 +2198,14 @@
       <Option link="0"/>
     </Unit>
     <Unit filename="../../../../modules/juce_gui_basics/mouse/juce_MouseEvent.h">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../../../modules/juce_gui_basics/mouse/juce_MouseInactivityDetector.cpp">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../../../modules/juce_gui_basics/mouse/juce_MouseInactivityDetector.h">
       <Option compile="0"/>
       <Option link="0"/>
     </Unit>
@@ -2490,6 +2494,14 @@
       <Option link="0"/>
     </Unit>
     <Unit filename="../../../../modules/juce_gui_basics/menus/juce_PopupMenu.h">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../../../modules/juce_gui_basics/layout/juce_AnimatedPosition.h">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../../../modules/juce_gui_basics/layout/juce_AnimatedPositionBehaviours.h">
       <Option compile="0"/>
       <Option link="0"/>
     </Unit>

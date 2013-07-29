@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_TOOLBARITEMPALETTE_JUCEHEADER__
-#define __JUCE_TOOLBARITEMPALETTE_JUCEHEADER__
+#ifndef JUCE_TOOLBARITEMPALETTE_H_INCLUDED
+#define JUCE_TOOLBARITEMPALETTE_H_INCLUDED
 
 #include "juce_Toolbar.h"
 #include "../layout/juce_Viewport.h"
@@ -53,27 +53,27 @@ public:
         The toolbar and factory must not be deleted while this object exists.
     */
     ToolbarItemPalette (ToolbarItemFactory& factory,
-                        Toolbar* toolbar);
+                        Toolbar& toolbar);
 
     /** Destructor. */
     ~ToolbarItemPalette();
 
     //==============================================================================
     /** @internal */
-    void resized();
+    void resized() override;
 
 private:
     ToolbarItemFactory& factory;
-    Toolbar* toolbar;
+    Toolbar& toolbar;
     Viewport viewport;
     OwnedArray <ToolbarItemComponent> items;
 
     friend class Toolbar;
-    void replaceComponent (ToolbarItemComponent* comp);
+    void replaceComponent (ToolbarItemComponent&);
     void addComponent (int itemId, int index);
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ToolbarItemPalette)
 };
 
 
-#endif   // __JUCE_TOOLBARITEMPALETTE_JUCEHEADER__
+#endif   // JUCE_TOOLBARITEMPALETTE_H_INCLUDED

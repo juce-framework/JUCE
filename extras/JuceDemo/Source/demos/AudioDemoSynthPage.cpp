@@ -253,7 +253,7 @@ AudioDemoSynthPage::AudioDemoSynthPage (AudioDeviceManager& deviceManager_)
     sineButton->setButtonText ("Use sine wave");
     sineButton->setRadioGroupId (321);
     sineButton->addListener (this);
-    sineButton->setToggleState (true, false);
+    sineButton->setToggleState (true, dontSendNotification);
 
     addAndMakeVisible (sampledButton = new ToggleButton (String::empty));
     sampledButton->setButtonText ("Use sampled sound");

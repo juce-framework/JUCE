@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_NSVIEWCOMPONENT_JUCEHEADER__
-#define __JUCE_NSVIEWCOMPONENT_JUCEHEADER__
+#ifndef JUCE_NSVIEWCOMPONENT_H_INCLUDED
+#define JUCE_NSVIEWCOMPONENT_H_INCLUDED
 
 #if JUCE_MAC || DOXYGEN
 
@@ -71,8 +71,7 @@ public:
 
     //==============================================================================
     /** @internal */
-    void paint (Graphics& g);
-
+    void paint (Graphics&) override;
     /** @internal */
     static ReferenceCountedObject* attachViewToComponent (Component&, void*);
 
@@ -83,4 +82,4 @@ private:
 };
 
 #endif
-#endif   // __JUCE_NSVIEWCOMPONENT_JUCEHEADER__
+#endif   // JUCE_NSVIEWCOMPONENT_H_INCLUDED

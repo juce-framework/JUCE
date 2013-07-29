@@ -30,7 +30,8 @@ class OpenGLContext::NativeContext
 public:
     NativeContext (Component& component,
                    const OpenGLPixelFormat& pixelFormat,
-                   void* contextToShareWith)
+                   void* contextToShareWith,
+                   bool /*useMultisampling*/)
     {
         createNativeWindow (component);
 
@@ -141,7 +142,10 @@ private:
     {
         Component* topComp = component.getTopLevelComponent();
         nativeWindow = createNonRepaintingEmbeddedWindowsPeer (&dummyComponent, topComp->getWindowHandle());
-        updateWindowPosition (topComp->getLocalArea (&component, component.getLocalBounds()));
+
+        if (ComponentPeer* peer = topComp->getPeer())
+            updateWindowPosition (peer->getAreaCoveredBy (component));
+
         nativeWindow->setVisible (true);
         dc = GetDC ((HWND) nativeWindow->getNativeHandle());
     }

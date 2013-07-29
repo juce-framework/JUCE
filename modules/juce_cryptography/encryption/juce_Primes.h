@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_PRIMES_JUCEHEADER__
-#define __JUCE_PRIMES_JUCEHEADER__
+#ifndef JUCE_PRIMES_H_INCLUDED
+#define JUCE_PRIMES_H_INCLUDED
 
 
 //==============================================================================
@@ -70,4 +70,4 @@ private:
 };
 
 
-#endif   // __JUCE_PRIMES_JUCEHEADER__
+#endif   // JUCE_PRIMES_H_INCLUDED

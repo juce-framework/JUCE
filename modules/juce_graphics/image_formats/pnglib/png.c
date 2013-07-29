@@ -200,7 +200,7 @@ png_user_version_check(png_structrp png_ptr, png_const_charp user_png_ver)
              "Application built with libpng-");
          pos = png_safecat(m, (sizeof m), pos, user_png_ver);
          pos = png_safecat(m, (sizeof m), pos, " but running with ");
-         pos = png_safecat(m, (sizeof m), pos, png_libpng_ver);
+         png_safecat(m, (sizeof m), pos, png_libpng_ver);
 
          png_warning(png_ptr, m);
 #endif
@@ -1720,7 +1720,7 @@ png_icc_profile_error(png_const_structrp png_ptr, png_colorspacerp colorspace,
       }
 #  endif
    /* The 'reason' is an arbitrary message, allow +79 maximum 195 */
-   pos = png_safecat(message, (sizeof message), pos, reason);
+   png_safecat(message, (sizeof message), pos, reason);
 
    /* This is recoverable, but make it unconditionally an app_error on write to
     * avoid writing invalid ICC profiles into PNG files.  (I.e.  we handle them

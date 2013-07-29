@@ -124,7 +124,7 @@ private:
             jassert (client.input && client.get() != nullptr);
         }
 
-        void run()
+        void run() override
         {
             const int maxEventSize = 16 * 1024;
             snd_midi_event_t* midiParser;

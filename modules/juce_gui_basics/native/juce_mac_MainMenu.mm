@@ -134,7 +134,8 @@ public:
         if (currentModel != nullptr)
             menuNames = currentModel->getMenuBarNames();
 
-        NSMenu* menuBar = [NSApp mainMenu];
+        NSMenu* menuBar = [[NSApp mainMenu] retain];
+
         while ([menuBar numberOfItems] > 1 + menuNames.size())
             [menuBar removeItemAtIndex: [menuBar numberOfItems] - 1];
 
@@ -149,6 +150,8 @@ public:
             else
                 updateTopLevelMenu ([menuBar itemAtIndex: 1 + i], menu, menuNames[i], menuId, i);
         }
+
+        [menuBar release];
     }
 
     void menuCommandInvoked (MenuBarModel*, const ApplicationCommandTarget::InvocationInfo& info)
@@ -222,7 +225,10 @@ public:
 
                 if (recent->recentItem != nil)
                 {
-                    [menuToAddTo addItem: [recent->recentItem copyWithZone: nil]];
+                    if (NSMenu* parent = [recent->recentItem menu])
+                        [parent removeItem: recent->recentItem];
+
+                    [menuToAddTo addItem: recent->recentItem];
                     return;
                 }
             }
@@ -437,7 +443,7 @@ private:
     public:
         AsyncMenuUpdater() {}
 
-        void messageCallback()
+        void messageCallback() override
         {
             if (instance != nullptr)
                 instance->menuBarItemsChanged (nullptr);
@@ -454,7 +460,7 @@ private:
             : commandId (commandId_), topLevelIndex (topLevelIndex_)
         {}
 
-        void messageCallback()
+        void messageCallback() override
         {
             if (instance != nullptr)
                 instance->invokeDirectly (commandId, topLevelIndex);
@@ -544,6 +550,9 @@ public:
         if (const PopupMenu* appleMenu = MenuBarModel::getMacExtraAppleItemsMenu())
             oldAppleMenu = new PopupMenu (*appleMenu);
 
+        if (JuceMainMenuHandler::instance != nullptr)
+            oldRecentItems = JuceMainMenuHandler::instance->recentItemsMenuName;
+
         MenuBarModel::setMacMainMenu (nullptr);
 
         NSMenu* menu = [[NSMenu alloc] initWithTitle: nsStringLiteral ("Edit")];
@@ -575,12 +584,13 @@ public:
 
     ~TemporaryMainMenuWithStandardCommands()
     {
-        MenuBarModel::setMacMainMenu (oldMenu, oldAppleMenu);
+        MenuBarModel::setMacMainMenu (oldMenu, oldAppleMenu, oldRecentItems);
     }
 
 private:
     MenuBarModel* oldMenu;
     ScopedPointer<PopupMenu> oldAppleMenu;
+    String oldRecentItems;
 
     // The OS view already plays an alert when clicking outside
     // the modal comp, so this override avoids adding extra
@@ -592,7 +602,7 @@ private:
     {
     public:
         SilentDummyModalComp() {}
-        void inputAttemptWhenModal() {}
+        void inputAttemptWhenModal() override {}
     };
 
     SilentDummyModalComp dummyModalComponent;
@@ -737,8 +747,4 @@ void juce_initialiseMacMainMenu()
 
     if (JuceMainMenuHandler::instance == nullptr)
         MainMenuHelpers::rebuildMainMenu (nullptr);
-
-    // Forcing a rebuild of the menus like this seems necessary to kick the native
-    // recent-files list into action.. (not sure precisely why though)
-    TemporaryMainMenuWithStandardCommands dummy; (void) dummy;
 }

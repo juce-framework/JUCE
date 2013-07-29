@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_QUICKTIMEMOVIECOMPONENT_JUCEHEADER__
-#define __JUCE_QUICKTIMEMOVIECOMPONENT_JUCEHEADER__
+#ifndef JUCE_QUICKTIMEMOVIECOMPONENT_H_INCLUDED
+#define JUCE_QUICKTIMEMOVIECOMPONENT_H_INCLUDED
 
 // (NB: This stuff mustn't go inside the "#if QUICKTIME" block, or it'll break the
 // amalgamated build)
@@ -139,7 +139,7 @@ public:
         the top or sides.
     */
     void setBoundsWithCorrectAspectRatio (const Rectangle<int>& spaceToFitWithin,
-                                          const RectanglePlacement& placement);
+                                          RectanglePlacement placement);
 
     /** Starts the movie playing. */
     void play();
@@ -167,13 +167,11 @@ public:
     void setSpeed (float newSpeed);
 
     /** Changes the movie's playback volume.
-
         @param newVolume    the volume in the range 0 (silent) to 1.0 (full)
     */
     void setMovieVolume (float newVolume);
 
     /** Returns the movie's playback volume.
-
         @returns the volume in the range 0 (silent) to 1.0 (full)
     */
     float getMovieVolume() const;
@@ -182,13 +180,11 @@ public:
     void setLooping (bool shouldLoop);
 
     /** Returns true if the movie is currently looping.
-
         @see setLooping
     */
     bool isLooping() const;
 
     /** True if the native QuickTime controller bar is shown in the window.
-
         @see loadMovie
     */
     bool isControllerVisible() const;
@@ -196,7 +192,7 @@ public:
 
     //==============================================================================
     /** @internal */
-    void paint (Graphics& g);
+    void paint (Graphics&) override;
 
 
 private:
@@ -204,22 +200,21 @@ private:
     File movieFile;
     bool movieLoaded, controllerVisible, looping;
 
-#if JUCE_WINDOWS
-    void parentHierarchyChanged();
-    void visibilityChanged();
-
+   #if JUCE_WINDOWS
+    void parentHierarchyChanged() override;
+    void visibilityChanged() override;
     void createControlIfNeeded();
     bool isControlCreated() const;
 
     class Pimpl;
     friend class ScopedPointer <Pimpl>;
     ScopedPointer <Pimpl> pimpl;
-#else
+   #else
     void* movie;
-#endif
+   #endif
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (QuickTimeMovieComponent)
 };
 
 #endif
-#endif   // __JUCE_QUICKTIMEMOVIECOMPONENT_JUCEHEADER__
+#endif   // JUCE_QUICKTIMEMOVIECOMPONENT_H_INCLUDED

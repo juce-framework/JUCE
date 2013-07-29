@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_ANIMATEDPOSITIONBEHAVIOURS_JUCEHEADER__
-#define __JUCE_ANIMATEDPOSITIONBEHAVIOURS_JUCEHEADER__
+#ifndef JUCE_ANIMATEDPOSITIONBEHAVIOURS_H_INCLUDED
+#define JUCE_ANIMATEDPOSITIONBEHAVIOURS_H_INCLUDED
 
 
 //==============================================================================
@@ -146,4 +146,4 @@ namespace AnimatedPositionBehaviours
 };
 
 
-#endif   // __JUCE_ANIMATEDPOSITIONBEHAVIOURS_JUCEHEADER__
+#endif   // JUCE_ANIMATEDPOSITIONBEHAVIOURS_H_INCLUDED

@@ -47,13 +47,10 @@ public:
     //==============================================================================
     struct BinaryResource
     {
-        BinaryResource();
-        ~BinaryResource();
-
         String name;
         String originalFilename;
         MemoryBlock data;
-        Drawable* drawable;
+        ScopedPointer<Drawable> drawable;
     };
 
     void clear();

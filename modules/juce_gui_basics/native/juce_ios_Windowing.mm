@@ -288,12 +288,12 @@ bool Desktop::canUseSemiTransparentWindows() noexcept
     return true;
 }
 
-Point<int> MouseInputSource::getCurrentMousePosition()
+Point<int> MouseInputSource::getCurrentRawMousePosition()
 {
     return juce_lastMousePos;
 }
 
-void Desktop::setMousePosition (Point<int>)
+void MouseInputSource::setRawMousePosition (Point<int>)
 {
 }
 
@@ -302,21 +302,22 @@ Desktop::DisplayOrientation Desktop::getCurrentOrientation() const
     return Orientations::convertToJuce ([[UIApplication sharedApplication] statusBarOrientation]);
 }
 
-void Desktop::Displays::findDisplays()
+void Desktop::Displays::findDisplays (float masterScale)
 {
     JUCE_AUTORELEASEPOOL
     {
         UIScreen* s = [UIScreen mainScreen];
 
         Display d;
-        d.userArea  = UIViewComponentPeer::realScreenPosToRotated (convertToRectInt ([s applicationFrame]));
-        d.totalArea = UIViewComponentPeer::realScreenPosToRotated (convertToRectInt ([s bounds]));
+        d.userArea  = UIViewComponentPeer::realScreenPosToRotated (convertToRectInt ([s applicationFrame])) / masterScale;
+        d.totalArea = UIViewComponentPeer::realScreenPosToRotated (convertToRectInt ([s bounds])) / masterScale;
         d.isMain = true;
+        d.scale = masterScale;
 
         if ([s respondsToSelector: @selector (scale)])
-            d.scale = s.scale;
-        else
-            d.scale = 1.0;
+            d.scale *= s.scale;
+
+        d.dpi = 160 * d.scale;
 
         displays.add (d);
     }

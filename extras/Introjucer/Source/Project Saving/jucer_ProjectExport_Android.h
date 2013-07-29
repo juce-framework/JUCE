@@ -64,12 +64,13 @@ public:
     }
 
     //==============================================================================
-    bool launchProject()                        { return false; }
-    bool isAndroid() const                      { return true; }
-    bool usesMMFiles() const                    { return false; }
-    bool canCopeWithDuplicateFiles()            { return false; }
+    bool canLaunchProject() override                     { return false; }
+    bool launchProject() override                        { return false; }
+    bool isAndroid() const override                      { return true; }
+    bool usesMMFiles() const override                    { return false; }
+    bool canCopeWithDuplicateFiles() override            { return false; }
 
-    void createExporterProperties (PropertyListBuilder& props)
+    void createExporterProperties (PropertyListBuilder& props) override
     {
         props.add (new TextPropertyComponent (getActivityClassPathValue(), "Android Activity class name", 256, false),
                    "The full java class name to use for the app's Activity class.");
@@ -154,7 +155,7 @@ public:
     }
 
     //==============================================================================
-    void create (const OwnedArray<LibraryModule>& modules) const
+    void create (const OwnedArray<LibraryModule>& modules) const override
     {
         const File target (getTargetFolder());
         const File jniFolder (target.getChildFile ("jni"));
@@ -402,6 +403,7 @@ private:
             << newLine
             << "include $(CLEAR_VARS)" << newLine
             << newLine
+            << "LOCAL_ARM_MODE := arm" << newLine
             << "LOCAL_MODULE := juce_jni" << newLine
             << "LOCAL_SRC_FILES := \\" << newLine;
 

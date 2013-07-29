@@ -1008,11 +1008,11 @@ private:
     class CharToGlyphMapper
     {
     public:
-        CharToGlyphMapper (CGFontRef fontRef)
+        CharToGlyphMapper (CGFontRef cgFontRef)
             : segCount (0), endCode (0), startCode (0), idDelta (0),
               idRangeOffset (0), glyphIndexes (0)
         {
-            CFDataRef cmapTable = CGFontCopyTableForTag (fontRef, 'cmap');
+            CFDataRef cmapTable = CGFontCopyTableForTag (cgFontRef, 'cmap');
 
             if (cmapTable != 0)
             {

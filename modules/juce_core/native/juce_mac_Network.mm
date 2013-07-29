@@ -226,7 +226,7 @@ public:
         signalThreadShouldExit();
     }
 
-    void run()
+    void run() override
     {
         connection = [[NSURLConnection alloc] initWithRequest: request
                                                      delegate: delegate];
@@ -327,12 +327,12 @@ public:
     }
 
     //==============================================================================
-    bool isError() const        { return connection == nullptr; }
-    int64 getTotalLength()      { return connection == nullptr ? -1 : connection->contentLength; }
-    bool isExhausted()          { return finished; }
-    int64 getPosition()         { return position; }
+    bool isError() const                { return connection == nullptr; }
+    int64 getTotalLength() override     { return connection == nullptr ? -1 : connection->contentLength; }
+    bool isExhausted() override         { return finished; }
+    int64 getPosition() override        { return position; }
 
-    int read (void* buffer, int bytesToRead)
+    int read (void* buffer, int bytesToRead) override
     {
         jassert (buffer != nullptr && bytesToRead >= 0);
 
@@ -351,7 +351,7 @@ public:
         }
     }
 
-    bool setPosition (int64 wantedPos)
+    bool setPosition (int64 wantedPos) override
     {
         if (wantedPos != position)
         {

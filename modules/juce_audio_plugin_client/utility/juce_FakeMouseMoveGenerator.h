@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_FAKEMOUSEMOVEGENERATOR_JUCEHEADER__
-#define __JUCE_FAKEMOUSEMOVEGENERATOR_JUCEHEADER__
+#ifndef JUCE_FAKEMOUSEMOVEGENERATOR_H_INCLUDED
+#define JUCE_FAKEMOUSEMOVEGENERATOR_H_INCLUDED
 
 #if JUCE_MAC && JUCE_SUPPORT_CARBON
 
@@ -37,7 +37,7 @@ public:
         startTimer (1000 / 30);
     }
 
-    void timerCallback()
+    void timerCallback() override
     {
         // workaround for carbon windows not getting mouse-moves..
         const Point<int> screenPos (Desktop::getInstance().getMainMouseSource().getScreenPosition());
@@ -63,4 +63,4 @@ private:
 struct FakeMouseMoveGenerator {};
 #endif
 
-#endif   // __JUCE_FAKEMOUSEMOVEGENERATOR_JUCEHEADER__
+#endif   // JUCE_FAKEMOUSEMOVEGENERATOR_H_INCLUDED

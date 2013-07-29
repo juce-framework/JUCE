@@ -85,7 +85,7 @@ bool Graphics::reduceClipRegion (const int x, const int y, const int w, const in
     return reduceClipRegion (Rectangle<int> (x, y, w, h));
 }
 
-bool Graphics::reduceClipRegion (const RectangleList& clipRegion)
+bool Graphics::reduceClipRegion (const RectangleList<int>& clipRegion)
 {
     saveStateIfPending();
     return context.clipToRectangleList (clipRegion);
@@ -222,7 +222,7 @@ Font Graphics::getCurrentFont() const
 
 //==============================================================================
 void Graphics::drawSingleLineText (const String& text, const int startX, const int baselineY,
-                                   const Justification& justification) const
+                                   Justification justification) const
 {
     if (text.isNotEmpty()
          && startX < context.getClipBounds().getRight())
@@ -266,7 +266,7 @@ void Graphics::drawMultiLineText (const String& text, const int startX,
 }
 
 void Graphics::drawText (const String& text, const Rectangle<int>& area,
-                         const Justification& justificationType,
+                         Justification justificationType,
                          const bool useEllipsesIfTooBig) const
 {
     if (text.isNotEmpty() && context.clipRegionIntersects (area))
@@ -285,14 +285,14 @@ void Graphics::drawText (const String& text, const Rectangle<int>& area,
 }
 
 void Graphics::drawText (const String& text, const int x, const int y, const int width, const int height,
-                         const Justification& justificationType,
+                         Justification justificationType,
                          const bool useEllipsesIfTooBig) const
 {
     drawText (text, Rectangle<int> (x, y, width, height), justificationType, useEllipsesIfTooBig);
 }
 
 void Graphics::drawFittedText (const String& text, const Rectangle<int>& area,
-                               const Justification& justification,
+                               Justification justification,
                                const int maximumNumberOfLines,
                                const float minimumHorizontalScale) const
 {
@@ -311,7 +311,7 @@ void Graphics::drawFittedText (const String& text, const Rectangle<int>& area,
 }
 
 void Graphics::drawFittedText (const String& text, const int x, const int y, const int width, const int height,
-                               const Justification& justification,
+                               Justification justification,
                                const int maximumNumberOfLines,
                                const float minimumHorizontalScale) const
 {
@@ -627,7 +627,7 @@ void Graphics::drawImageAt (const Image& imageToDraw,
 void Graphics::drawImageWithin (const Image& imageToDraw,
                                 const int destX, const int destY,
                                 const int destW, const int destH,
-                                const RectanglePlacement& placementWithinTarget,
+                                RectanglePlacement placementWithinTarget,
                                 const bool fillAlphaChannelWithCurrentBrush) const
 {
     // passing in a silly number can cause maths problems in rendering!

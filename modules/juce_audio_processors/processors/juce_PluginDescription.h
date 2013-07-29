@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_PLUGINDESCRIPTION_JUCEHEADER__
-#define __JUCE_PLUGINDESCRIPTION_JUCEHEADER__
+#ifndef JUCE_PLUGINDESCRIPTION_H_INCLUDED
+#define JUCE_PLUGINDESCRIPTION_H_INCLUDED
 
 
 //==============================================================================
@@ -139,4 +139,4 @@ private:
 };
 
 
-#endif   // __JUCE_PLUGINDESCRIPTION_JUCEHEADER__
+#endif   // JUCE_PLUGINDESCRIPTION_H_INCLUDED

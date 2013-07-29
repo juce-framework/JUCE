@@ -68,7 +68,7 @@ void MessageManager::stopDispatchLoop()
     {
         QuitCallback() {}
 
-        void messageCallback()
+        void messageCallback() override
         {
             android.activity.callVoidMethod (JuceAppActivity.finish);
         }

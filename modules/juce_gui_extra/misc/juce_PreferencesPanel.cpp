@@ -79,7 +79,7 @@ void PreferencesPanel::addSettingsPage (const String& title, const void* imageDa
 }
 
 //==============================================================================
-void PreferencesPanel::showInDialogBox (const String& dialogTitle, int dialogWidth, int dialogHeight, const Colour& backgroundColour)
+void PreferencesPanel::showInDialogBox (const String& dialogTitle, int dialogWidth, int dialogHeight, Colour backgroundColour)
 {
     setSize (dialogWidth, dialogHeight);
 
@@ -130,7 +130,7 @@ void PreferencesPanel::setCurrentPage (const String& pageName)
         {
             if (buttons.getUnchecked(i)->getName() == pageName)
             {
-                buttons.getUnchecked(i)->setToggleState (true, false);
+                buttons.getUnchecked(i)->setToggleState (true, dontSendNotification);
                 break;
             }
         }

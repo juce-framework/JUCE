@@ -46,7 +46,7 @@ public:
             instance = nullptr;
     }
 
-    void run()
+    void run() override
     {
         uint32 lastTime = Time::getMillisecondCounter();
         MessageManager::MessageBase::Ptr messageToSend (new CallTimersMessage());
@@ -192,7 +192,7 @@ private:
     {
         CallTimersMessage() {}
 
-        void messageCallback()
+        void messageCallback() override
         {
             if (instance != nullptr)
                 instance->callTimers();
@@ -272,7 +272,7 @@ private:
         return firstTimer != nullptr ? firstTimer->countdownMs : 1000;
     }
 
-    void handleAsyncUpdate()
+    void handleAsyncUpdate() override
     {
         startThread (7);
     }

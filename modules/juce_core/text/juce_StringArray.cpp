@@ -127,12 +127,17 @@ bool StringArray::operator!= (const StringArray& other) const noexcept
 
 void StringArray::swapWith (StringArray& other) noexcept
 {
-    strings.swapWithArray (other.strings);
+    strings.swapWith (other.strings);
 }
 
 void StringArray::clear()
 {
     strings.clear();
+}
+
+void StringArray::clearQuick()
+{
+    strings.clearQuick();
 }
 
 const String& StringArray::operator[] (const int index) const noexcept
@@ -502,6 +507,11 @@ void StringArray::appendNumbersToDuplicates (const bool ignoreCase,
             }
         }
     }
+}
+
+void StringArray::ensureStorageAllocated (int minNumElements)
+{
+    strings.ensureStorageAllocated (minNumElements);
 }
 
 void StringArray::minimiseStorageOverheads()

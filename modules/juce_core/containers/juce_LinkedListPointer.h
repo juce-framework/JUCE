@@ -26,8 +26,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_LINKEDLISTPOINTER_JUCEHEADER__
-#define __JUCE_LINKEDLISTPOINTER_JUCEHEADER__
+#ifndef JUCE_LINKEDLISTPOINTER_H_INCLUDED
+#define JUCE_LINKEDLISTPOINTER_H_INCLUDED
 
 
 //==============================================================================
@@ -368,4 +368,4 @@ private:
 };
 
 
-#endif   // __JUCE_LINKEDLISTPOINTER_JUCEHEADER__
+#endif   // JUCE_LINKEDLISTPOINTER_H_INCLUDED

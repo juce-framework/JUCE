@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_MIDIOUTPUT_JUCEHEADER__
-#define __JUCE_MIDIOUTPUT_JUCEHEADER__
+#ifndef JUCE_MIDIOUTPUT_H_INCLUDED
+#define JUCE_MIDIOUTPUT_H_INCLUDED
 
 
 //==============================================================================
@@ -137,11 +137,11 @@ protected:
     PendingMessage* firstMessage;
 
     MidiOutput();
-    void run();
+    void run() override;
 
 private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MidiOutput)
 };
 
 
-#endif   // __JUCE_MIDIOUTPUT_JUCEHEADER__
+#endif   // JUCE_MIDIOUTPUT_H_INCLUDED

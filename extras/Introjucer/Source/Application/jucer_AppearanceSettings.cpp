@@ -111,7 +111,7 @@ void AppearanceSettings::refreshPresetSchemeList()
 
     if (newSchemes != presetSchemeFiles)
     {
-        presetSchemeFiles.swapWithArray (newSchemes);
+        presetSchemeFiles.swapWith (newSchemes);
         commandManager->commandStatusChanged();
     }
 }
@@ -295,7 +295,7 @@ struct AppearanceEditor
             startTimer (1);
         }
 
-        void paint (Graphics& g)
+        void paint (Graphics& g) override
         {
             g.fillAll (Colours::darkgrey);
 
@@ -307,7 +307,7 @@ struct AppearanceEditor
             getLookAndFeel().drawSpinningWaitAnimation (g, Colours::white, (getWidth() - size) / 2, getHeight() / 2 - 50, size, size);
         }
 
-        void timerCallback()
+        void timerCallback() override
         {
             repaint();
 
@@ -388,7 +388,7 @@ struct AppearanceEditor
             panel.addProperties (props);
         }
 
-        void resized()
+        void resized() override
         {
             Rectangle<int> r (getLocalBounds());
             panel.setBounds (r.removeFromTop (getHeight() - 28).reduced (4, 2));
@@ -400,7 +400,7 @@ struct AppearanceEditor
         PropertyPanel panel;
         TextButton loadButton, saveButton;
 
-        void buttonClicked (Button* b)
+        void buttonClicked (Button* b) override
         {
             if (b == &loadButton)
                 loadScheme();
@@ -485,12 +485,12 @@ struct AppearanceEditor
     public:
         FontSizeValueSource (const Value& source)  : ValueSourceFilter (source) {}
 
-        var getValue() const
+        var getValue() const override
         {
             return Font::fromString (sourceValue.toString()).getHeight();
         }
 
-        void setValue (const var& newValue)
+        void setValue (const var& newValue) override
         {
             sourceValue = Font::fromString (sourceValue.toString()).withHeight (newValue).toString();
         }
@@ -537,7 +537,7 @@ IntrojucerLookAndFeel::IntrojucerLookAndFeel()
                getScrollbarColourForBackground (findColour (mainBackgroundColourId)));
 }
 
-Colour IntrojucerLookAndFeel::getScrollbarColourForBackground (const Colour& background)
+Colour IntrojucerLookAndFeel::getScrollbarColourForBackground (Colour background)
 {
     return background.contrasting().withAlpha (0.13f);
 }

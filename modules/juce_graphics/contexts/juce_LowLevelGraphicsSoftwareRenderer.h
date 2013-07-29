@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_LOWLEVELGRAPHICSSOFTWARERENDERER_JUCEHEADER__
-#define __JUCE_LOWLEVELGRAPHICSSOFTWARERENDERER_JUCEHEADER__
+#ifndef JUCE_LOWLEVELGRAPHICSSOFTWARERENDERER_H_INCLUDED
+#define JUCE_LOWLEVELGRAPHICSSOFTWARERENDERER_H_INCLUDED
 
 #include "juce_LowLevelGraphicsContext.h"
 #include "../native/juce_RenderingHelpers.h"
@@ -42,45 +42,44 @@ public:
     //==============================================================================
     LowLevelGraphicsSoftwareRenderer (const Image& imageToRenderOnto);
     LowLevelGraphicsSoftwareRenderer (const Image& imageToRenderOnto, Point<int> origin,
-                                      const RectangleList& initialClip);
+                                      const RectangleList<int>& initialClip);
     ~LowLevelGraphicsSoftwareRenderer();
 
-    bool isVectorDevice() const;
-    void setOrigin (int x, int y);
-    void addTransform (const AffineTransform&);
-    float getScaleFactor();
-    bool clipToRectangle (const Rectangle<int>&);
-    bool clipToRectangleList (const RectangleList&);
-    void excludeClipRectangle (const Rectangle<int>&);
-    void clipToPath (const Path&, const AffineTransform&);
-    void clipToImageAlpha (const Image&, const AffineTransform&);
-    bool clipRegionIntersects (const Rectangle<int>&);
-    Rectangle<int> getClipBounds() const;
-    bool isClipEmpty() const;
+    bool isVectorDevice() const override;
+    void setOrigin (int x, int y) override;
+    void addTransform (const AffineTransform&) override;
+    float getScaleFactor() override;
+    bool clipToRectangle (const Rectangle<int>&) override;
+    bool clipToRectangleList (const RectangleList<int>&) override;
+    void excludeClipRectangle (const Rectangle<int>&) override;
+    void clipToPath (const Path&, const AffineTransform&) override;
+    void clipToImageAlpha (const Image&, const AffineTransform&) override;
+    bool clipRegionIntersects (const Rectangle<int>&) override;
+    Rectangle<int> getClipBounds() const override;
+    bool isClipEmpty() const override;
 
-    void saveState();
-    void restoreState();
+    void saveState() override;
+    void restoreState() override;
 
-    void beginTransparencyLayer (float opacity);
-    void endTransparencyLayer();
+    void beginTransparencyLayer (float opacity) override;
+    void endTransparencyLayer() override;
 
-    void setFill (const FillType&);
-    void setOpacity (float opacity);
-    void setInterpolationQuality (Graphics::ResamplingQuality);
+    void setFill (const FillType&) override;
+    void setOpacity (float opacity) override;
+    void setInterpolationQuality (Graphics::ResamplingQuality) override;
 
-    void fillRect (const Rectangle<int>&, bool replaceExistingContents);
-    void fillPath (const Path&, const AffineTransform&);
+    void fillRect (const Rectangle<int>&, bool replaceExistingContents) override;
+    void fillPath (const Path&, const AffineTransform&) override;
 
-    void drawImage (const Image&, const AffineTransform&);
+    void drawImage (const Image&, const AffineTransform&) override;
 
-    void drawLine (const Line <float>&);
-    void drawVerticalLine (int x, float top, float bottom);
-    void drawHorizontalLine (int x, float top, float bottom);
+    void drawLine (const Line <float>&) override;
+    void drawVerticalLine (int x, float top, float bottom) override;
+    void drawHorizontalLine (int x, float top, float bottom) override;
 
-    void setFont (const Font&);
-    const Font& getFont();
-    void drawGlyph (int glyphNumber, float x, float y);
-    void drawGlyph (int glyphNumber, const AffineTransform&);
+    void setFont (const Font&) override;
+    const Font& getFont() override;
+    void drawGlyph (int glyphNumber, const AffineTransform&) override;
 
     const Image& getImage() const noexcept                                          { return savedState->image; }
     const RenderingHelpers::TranslationOrTransform& getTransform() const noexcept   { return savedState->transform; }
@@ -92,4 +91,4 @@ protected:
 };
 
 
-#endif   // __JUCE_LOWLEVELGRAPHICSSOFTWARERENDERER_JUCEHEADER__
+#endif   // JUCE_LOWLEVELGRAPHICSSOFTWARERENDERER_H_INCLUDED

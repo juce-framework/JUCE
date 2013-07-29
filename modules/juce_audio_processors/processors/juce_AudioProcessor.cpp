@@ -116,6 +116,8 @@ void AudioProcessor::setLatencySamples (const int newLatency)
 void AudioProcessor::setParameterNotifyingHost (const int parameterIndex,
                                                 const float newValue)
 {
+    jassert (MessageManager::getInstance()->isThisTheMessageThread());
+
     setParameter (parameterIndex, newValue);
     sendParamChangeMessageToListeners (parameterIndex, newValue);
 }

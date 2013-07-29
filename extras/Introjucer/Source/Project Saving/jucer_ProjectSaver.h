@@ -54,7 +54,7 @@ public:
               saver (ps), result (Result::ok())
         {}
 
-        void run()
+        void run() override
         {
             setProgress (-1);
             result = saver.save (false);

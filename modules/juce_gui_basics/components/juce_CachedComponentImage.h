@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_CACHEDCOMPONENTIMAGE_JUCEHEADER__
-#define __JUCE_CACHEDCOMPONENTIMAGE_JUCEHEADER__
+#ifndef JUCE_CACHEDCOMPONENTIMAGE_H_INCLUDED
+#define JUCE_CACHEDCOMPONENTIMAGE_H_INCLUDED
 
 class Component;
 
@@ -63,4 +63,4 @@ public:
     virtual void releaseResources() = 0;
 };
 
-#endif   // __JUCE_CACHEDCOMPONENTIMAGE_JUCEHEADER__
+#endif   // JUCE_CACHEDCOMPONENTIMAGE_H_INCLUDED

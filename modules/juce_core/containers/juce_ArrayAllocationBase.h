@@ -26,8 +26,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_ARRAYALLOCATIONBASE_JUCEHEADER__
-#define __JUCE_ARRAYALLOCATIONBASE_JUCEHEADER__
+#ifndef JUCE_ARRAYALLOCATIONBASE_H_INCLUDED
+#define JUCE_ARRAYALLOCATIONBASE_H_INCLUDED
 
 #include "../memory/juce_HeapBlock.h"
 
@@ -108,6 +108,8 @@ public:
     {
         if (minNumElements > numAllocated)
             setAllocatedSize ((minNumElements + minNumElements / 2 + 8) & ~7);
+
+        jassert (numAllocated <= 0 || elements != nullptr);
     }
 
     /** Minimises the amount of storage allocated so that it's no more than
@@ -135,4 +137,4 @@ private:
 };
 
 
-#endif   // __JUCE_ARRAYALLOCATIONBASE_JUCEHEADER__
+#endif   // JUCE_ARRAYALLOCATIONBASE_H_INCLUDED

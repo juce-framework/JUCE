@@ -26,8 +26,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_XMLDOCUMENT_JUCEHEADER__
-#define __JUCE_XMLDOCUMENT_JUCEHEADER__
+#ifndef JUCE_XMLDOCUMENT_H_INCLUDED
+#define JUCE_XMLDOCUMENT_H_INCLUDED
 
 #include "juce_XmlElement.h"
 #include "../text/juce_StringArray.h"
@@ -183,4 +183,4 @@ private:
 };
 
 
-#endif   // __JUCE_XMLDOCUMENT_JUCEHEADER__
+#endif   // JUCE_XMLDOCUMENT_H_INCLUDED

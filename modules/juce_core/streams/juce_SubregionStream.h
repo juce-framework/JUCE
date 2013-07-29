@@ -26,8 +26,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_SUBREGIONSTREAM_JUCEHEADER__
-#define __JUCE_SUBREGIONSTREAM_JUCEHEADER__
+#ifndef JUCE_SUBREGIONSTREAM_H_INCLUDED
+#define JUCE_SUBREGIONSTREAM_H_INCLUDED
 
 #include "juce_InputStream.h"
 #include "../memory/juce_OptionalScopedPointer.h"
@@ -74,19 +74,18 @@ public:
 
 
     //==============================================================================
-    int64 getTotalLength();
-    int64 getPosition();
-    bool setPosition (int64 newPosition);
-    int read (void* destBuffer, int maxBytesToRead);
-    bool isExhausted();
+    int64 getTotalLength() override;
+    int64 getPosition() override;
+    bool setPosition (int64 newPosition) override;
+    int read (void* destBuffer, int maxBytesToRead) override;
+    bool isExhausted() override;
 
-
-    //==============================================================================
 private:
+    //==============================================================================
     OptionalScopedPointer<InputStream> source;
     const int64 startPositionInSourceStream, lengthOfSourceStream;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SubregionStream)
 };
 
-#endif   // __JUCE_SUBREGIONSTREAM_JUCEHEADER__
+#endif   // JUCE_SUBREGIONSTREAM_H_INCLUDED

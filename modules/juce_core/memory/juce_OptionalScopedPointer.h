@@ -26,8 +26,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_OPTIONALSCOPEDPOINTER_JUCEHEADER__
-#define __JUCE_OPTIONALSCOPEDPOINTER_JUCEHEADER__
+#ifndef JUCE_OPTIONALSCOPEDPOINTER_H_INCLUDED
+#define JUCE_OPTIONALSCOPEDPOINTER_H_INCLUDED
 
 #include "juce_ScopedPointer.h"
 
@@ -185,4 +185,4 @@ private:
 };
 
 
-#endif   // __JUCE_OPTIONALSCOPEDPOINTER_JUCEHEADER__
+#endif   // JUCE_OPTIONALSCOPEDPOINTER_H_INCLUDED

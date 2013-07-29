@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_PROPERTIESFILE_JUCEHEADER__
-#define __JUCE_PROPERTIESFILE_JUCEHEADER__
+#ifndef JUCE_PROPERTIESFILE_H_INCLUDED
+#define JUCE_PROPERTIESFILE_H_INCLUDED
 
 
 //==============================================================================
@@ -230,7 +230,7 @@ private:
     typedef const ScopedPointer<InterProcessLock::ScopedLockType> ProcessScopedLock;
     InterProcessLock::ScopedLockType* createProcessLock() const;
 
-    void timerCallback();
+    void timerCallback() override;
     bool saveAsXml();
     bool saveAsBinary();
     bool loadAsXml();
@@ -240,4 +240,4 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PropertiesFile)
 };
 
-#endif   // __JUCE_PROPERTIESFILE_JUCEHEADER__
+#endif   // JUCE_PROPERTIESFILE_H_INCLUDED

@@ -26,8 +26,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_WAITABLEEVENT_JUCEHEADER__
-#define __JUCE_WAITABLEEVENT_JUCEHEADER__
+#ifndef JUCE_WAITABLEEVENT_H_INCLUDED
+#define JUCE_WAITABLEEVENT_H_INCLUDED
 
 #include "../text/juce_String.h"
 
@@ -50,7 +50,7 @@ public:
                             method is called. If manualReset is true, then once the event is signalled,
                             the only way to reset it will be by calling the reset() method.
     */
-    WaitableEvent (bool manualReset = false) noexcept;
+    explicit WaitableEvent (bool manualReset = false) noexcept;
 
     /** Destructor.
 
@@ -116,4 +116,4 @@ private:
 };
 
 
-#endif   // __JUCE_WAITABLEEVENT_JUCEHEADER__
+#endif   // JUCE_WAITABLEEVENT_H_INCLUDED

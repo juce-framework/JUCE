@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_KEYMAPPINGEDITORCOMPONENT_JUCEHEADER__
-#define __JUCE_KEYMAPPINGEDITORCOMPONENT_JUCEHEADER__
+#ifndef JUCE_KEYMAPPINGEDITORCOMPONENT_H_INCLUDED
+#define JUCE_KEYMAPPINGEDITORCOMPONENT_H_INCLUDED
 
 
 //==============================================================================
@@ -109,9 +109,9 @@ public:
 
     //==============================================================================
     /** @internal */
-    void parentHierarchyChanged();
+    void parentHierarchyChanged() override;
     /** @internal */
-    void resized();
+    void resized() override;
 
 private:
     //==============================================================================
@@ -133,4 +133,4 @@ private:
 };
 
 
-#endif   // __JUCE_KEYMAPPINGEDITORCOMPONENT_JUCEHEADER__
+#endif   // JUCE_KEYMAPPINGEDITORCOMPONENT_H_INCLUDED

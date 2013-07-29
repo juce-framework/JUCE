@@ -67,7 +67,7 @@ public:
         }
     }
 
-    void timerCallback()
+    void timerCallback() override
     {
         const uint32 now = Time::getApproximateMillisecondCounter();
 

@@ -22,7 +22,7 @@
   ==============================================================================
 */
 
-#if defined (__JUCE_GRAPHICS_MODULE_JUCEHEADER__) && ! JUCE_AMALGAMATED_INCLUDE
+#if defined (JUCE_GRAPHICS_H_INCLUDED) && ! JUCE_AMALGAMATED_INCLUDE
  /* When you add this cpp file to your project, you mustn't include it in a file where you've
     already included any other headers - just put it inside a file on its own, possibly with your config
     flags preceding it, but don't include anything else. That also includes avoiding any automatic prefix
@@ -105,7 +105,6 @@ namespace juce
 #include "geometry/juce_Path.cpp"
 #include "geometry/juce_PathIterator.cpp"
 #include "geometry/juce_PathStrokeType.cpp"
-#include "geometry/juce_RectangleList.cpp"
 #include "placement/juce_Justification.cpp"
 #include "placement/juce_RectanglePlacement.cpp"
 #include "contexts/juce_GraphicsContext.cpp"

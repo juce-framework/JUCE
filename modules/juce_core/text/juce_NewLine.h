@@ -26,8 +26,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_NEWLINE_JUCEHEADER__
-#define __JUCE_NEWLINE_JUCEHEADER__
+#ifndef JUCE_NEWLINE_H_INCLUDED
+#define JUCE_NEWLINE_H_INCLUDED
 
 
 //==============================================================================
@@ -75,4 +75,4 @@ extern NewLine newLine;
 JUCE_API String& JUCE_CALLTYPE operator<< (String& string1, const NewLine&);
 
 
-#endif   // __JUCE_NEWLINE_JUCEHEADER__
+#endif   // JUCE_NEWLINE_H_INCLUDED

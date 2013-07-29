@@ -184,11 +184,11 @@ void InterprocessConnection::initialiseWithPipe (NamedPipe* const pipe_)
 //==============================================================================
 struct ConnectionStateMessage  : public MessageManager::MessageBase
 {
-    ConnectionStateMessage (InterprocessConnection* owner_, bool connectionMade_) noexcept
-        : owner (owner_), connectionMade (connectionMade_)
+    ConnectionStateMessage (InterprocessConnection* ipc, bool connected) noexcept
+        : owner (ipc), connectionMade (connected)
     {}
 
-    void messageCallback()
+    void messageCallback() override
     {
         if (InterprocessConnection* const ipc = owner)
         {
@@ -237,7 +237,7 @@ struct DataDeliveryMessage  : public Message
         : owner (ipc), data (d)
     {}
 
-    void messageCallback()
+    void messageCallback() override
     {
         if (InterprocessConnection* const ipc = owner)
             ipc->messageReceived (data);

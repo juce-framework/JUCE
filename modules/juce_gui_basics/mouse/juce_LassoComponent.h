@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_LASSOCOMPONENT_JUCEHEADER__
-#define __JUCE_LASSOCOMPONENT_JUCEHEADER__
+#ifndef JUCE_LASSOCOMPONENT_H_INCLUDED
+#define JUCE_LASSOCOMPONENT_H_INCLUDED
 
 #include "../components/juce_Component.h"
 #include "juce_SelectedItemSet.h"
@@ -50,7 +50,7 @@ public:
         Your implementation of this method must find all the relevent items that lie
         within the given rectangle. and add them to the itemsFound array.
 
-        The co-ordinates are relative to the top-left of the lasso component's parent
+        The coordinates are relative to the top-left of the lasso component's parent
         component. (i.e. they are the same as the size and position of the lasso
         component itself).
     */
@@ -207,7 +207,7 @@ public:
 
     //==============================================================================
     /** @internal */
-    void paint (Graphics& g)
+    void paint (Graphics& g) override
     {
         getLookAndFeel().drawLasso (g, *this);
 
@@ -218,7 +218,7 @@ public:
     }
 
     /** @internal */
-    bool hitTest (int, int)             { return false; }
+    bool hitTest (int, int) override        { return false; }
 
 private:
     //==============================================================================
@@ -230,4 +230,4 @@ private:
 };
 
 
-#endif   // __JUCE_LASSOCOMPONENT_JUCEHEADER__
+#endif   // JUCE_LASSOCOMPONENT_H_INCLUDED

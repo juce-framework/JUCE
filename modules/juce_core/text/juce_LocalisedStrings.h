@@ -26,8 +26,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_LOCALISEDSTRINGS_JUCEHEADER__
-#define __JUCE_LOCALISEDSTRINGS_JUCEHEADER__
+#ifndef JUCE_LOCALISEDSTRINGS_H_INCLUDED
+#define JUCE_LOCALISEDSTRINGS_H_INCLUDED
 
 #include "juce_StringPairArray.h"
 #include "../files/juce_File.h"
@@ -221,4 +221,4 @@ String translate (const char* stringLiteral);
 String translate (const String& stringLiteral, const String& resultIfNotFound);
 
 
-#endif   // __JUCE_LOCALISEDSTRINGS_JUCEHEADER__
+#endif   // JUCE_LOCALISEDSTRINGS_H_INCLUDED

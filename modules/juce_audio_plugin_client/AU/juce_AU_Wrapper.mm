@@ -988,7 +988,7 @@ public:
         return noErr;
     }
 
-    void componentMovedOrResized (Component& component, bool /*wasMoved*/, bool /*wasResized*/)
+    void componentMovedOrResized (Component& component, bool /*wasMoved*/, bool /*wasResized*/) override
     {
         NSView* view = (NSView*) component.getWindowHandle();
         NSRect r = [[view superview] frame];
@@ -996,7 +996,7 @@ public:
         r.size.width = component.getWidth();
         r.size.height = component.getHeight();
         [[view superview] setFrame: r];
-        [view setFrame: NSMakeRect (0, 0, component.getWidth(), component.getHeight())];
+        [view setFrame: makeNSRect (component.getLocalBounds())];
         [view setNeedsDisplay: YES];
     }
 
@@ -1025,7 +1025,7 @@ public:
         static NSView* createViewFor (AudioProcessor* filter, JuceAU* au, AudioProcessorEditor* const editor)
         {
             EditorCompHolder* editorCompHolder = new EditorCompHolder (editor);
-            NSRect r = NSMakeRect (0, 0, editorCompHolder->getWidth(), editorCompHolder->getHeight());
+            NSRect r = makeNSRect (editorCompHolder->getLocalBounds());
 
             static JuceUIViewClass cls;
             NSView* view = [[cls.createInstance() initWithFrame: r] autorelease];
@@ -1048,7 +1048,7 @@ public:
             return view;
         }
 
-        void childBoundsChanged (Component*)
+        void childBoundsChanged (Component*) override
         {
             if (Component* editor = getChildComponent(0))
             {
@@ -1063,12 +1063,12 @@ public:
                 r.size.width = editor->getWidth();
                 r.size.height = editor->getHeight();
                 [[view superview] setFrame: r];
-                [view setFrame: NSMakeRect (0, 0, editor->getWidth(), editor->getHeight())];
+                [view setFrame: makeNSRect (editor->getLocalBounds())];
                 [view setNeedsDisplay: YES];
             }
         }
 
-        bool keyPressed (const KeyPress&)
+        bool keyPressed (const KeyPress&) override
         {
             if (PluginHostType().isAbletonLive())
             {
@@ -1418,15 +1418,15 @@ private:
             [pluginWindow orderFront: nil];
         }
 
-        void resized()
+        void resized() override
         {
             if (Component* const child = getChildComponent (0))
                 child->setBounds (getLocalBounds());
         }
 
-        void paint (Graphics&) {}
+        void paint (Graphics&) override {}
 
-        void childBoundsChanged (Component*)
+        void childBoundsChanged (Component*) override
         {
             if (! recursive)
             {
@@ -1449,7 +1449,7 @@ private:
             }
         }
 
-        bool keyPressed (const KeyPress& kp)
+        bool keyPressed (const KeyPress& kp) override
         {
             if (! kp.getModifiers().isCommandDown())
             {

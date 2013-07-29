@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_COMPONENTDRAGGER_JUCEHEADER__
-#define __JUCE_COMPONENTDRAGGER_JUCEHEADER__
+#ifndef JUCE_COMPONENTDRAGGER_H_INCLUDED
+#define JUCE_COMPONENTDRAGGER_H_INCLUDED
 
 #include "juce_MouseEvent.h"
 #include "../layout/juce_ComponentBoundsConstrainer.h"
@@ -101,4 +101,4 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ComponentDragger)
 };
 
-#endif   // __JUCE_COMPONENTDRAGGER_JUCEHEADER__
+#endif   // JUCE_COMPONENTDRAGGER_H_INCLUDED

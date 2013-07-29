@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_REVERB_JUCEHEADER__
-#define __JUCE_REVERB_JUCEHEADER__
+#ifndef JUCE_REVERB_H_INCLUDED
+#define JUCE_REVERB_H_INCLUDED
 
 
 //==============================================================================
@@ -320,4 +320,4 @@ private:
 };
 
 
-#endif   // __JUCE_REVERB_JUCEHEADER__
+#endif   // JUCE_REVERB_H_INCLUDED

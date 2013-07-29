@@ -67,12 +67,12 @@ private:
 
     void applyToLookAndFeel (LookAndFeel&) const;
 
-    void valueTreePropertyChanged (ValueTree&, const Identifier&)   { updateColourScheme(); }
-    void valueTreeChildAdded (ValueTree&, ValueTree&)               { updateColourScheme(); }
-    void valueTreeChildRemoved (ValueTree&, ValueTree&)             { updateColourScheme(); }
-    void valueTreeChildOrderChanged (ValueTree&)                    { updateColourScheme(); }
-    void valueTreeParentChanged (ValueTree&)                        { updateColourScheme(); }
-    void valueTreeRedirected (ValueTree&)                           { updateColourScheme(); }
+    void valueTreePropertyChanged (ValueTree&, const Identifier&) override   { updateColourScheme(); }
+    void valueTreeChildAdded (ValueTree&, ValueTree&) override               { updateColourScheme(); }
+    void valueTreeChildRemoved (ValueTree&, ValueTree&) override             { updateColourScheme(); }
+    void valueTreeChildOrderChanged (ValueTree&) override                    { updateColourScheme(); }
+    void valueTreeParentChanged (ValueTree&) override                        { updateColourScheme(); }
+    void valueTreeRedirected (ValueTree&) override                           { updateColourScheme(); }
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AppearanceSettings)
 };
@@ -110,7 +110,7 @@ public:
     void drawButtonBackground (Graphics& g, Button& button, const Colour& backgroundColour,
                                bool isMouseOverButton, bool isButtonDown);
 
-    static Colour getScrollbarColourForBackground (const Colour& background);
+    static Colour getScrollbarColourForBackground (Colour background);
 
 private:
     Image backgroundTexture;

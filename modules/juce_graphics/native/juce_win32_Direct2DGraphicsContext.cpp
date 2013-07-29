@@ -103,7 +103,7 @@ public:
         return ! isClipEmpty();
     }
 
-    bool clipToRectangleList (const RectangleList& clipRegion)
+    bool clipToRectangleList (const RectangleList<int>& clipRegion)
     {
         currentState->clipToRectList (rectListToPathGeometry (clipRegion));
         return ! isClipEmpty();
@@ -722,7 +722,7 @@ private:
         return D2D1::RectF ((float) r.getX(), (float) r.getY(), (float) r.getRight(), (float) r.getBottom());
     }
 
-    static D2D1_COLOR_F colourToD2D (const Colour& c)
+    static D2D1_COLOR_F colourToD2D (Colour c)
     {
         return D2D1::ColorF::ColorF (c.getFloatRed(), c.getFloatGreen(), c.getFloatBlue(), c.getFloatAlpha());
     }
@@ -742,7 +742,7 @@ private:
         sink->EndFigure (D2D1_FIGURE_END_CLOSED);
     }
 
-    static ID2D1PathGeometry* rectListToPathGeometry (const RectangleList& clipRegion)
+    static ID2D1PathGeometry* rectListToPathGeometry (const RectangleList<int>& clipRegion)
     {
         ID2D1PathGeometry* p = nullptr;
         Direct2DFactories::getInstance().d2dFactory->CreatePathGeometry (&p);

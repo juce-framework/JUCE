@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_OPENGLIMAGE_JUCEHEADER__
-#define __JUCE_OPENGLIMAGE_JUCEHEADER__
+#ifndef JUCE_OPENGLIMAGE_H_INCLUDED
+#define JUCE_OPENGLIMAGE_H_INCLUDED
 
 
 //==============================================================================
@@ -43,10 +43,10 @@ public:
     OpenGLImageType();
     ~OpenGLImageType();
 
-    ImagePixelData::Ptr create (Image::PixelFormat, int width, int height, bool shouldClearImage) const;
-    int getTypeID() const;
+    ImagePixelData::Ptr create (Image::PixelFormat, int width, int height, bool shouldClearImage) const override;
+    int getTypeID() const override;
 
     static OpenGLFrameBuffer* getFrameBufferFrom (const Image&);
 };
 
-#endif   // __JUCE_OPENGLIMAGE_JUCEHEADER__
+#endif   // JUCE_OPENGLIMAGE_H_INCLUDED

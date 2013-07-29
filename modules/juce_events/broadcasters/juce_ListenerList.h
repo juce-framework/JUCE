@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_LISTENERLIST_JUCEHEADER__
-#define __JUCE_LISTENERLIST_JUCEHEADER__
+#ifndef JUCE_LISTENERLIST_H_INCLUDED
+#define JUCE_LISTENERLIST_H_INCLUDED
 
 
 //==============================================================================
@@ -356,4 +356,4 @@ private:
 };
 
 
-#endif   // __JUCE_LISTENERLIST_JUCEHEADER__
+#endif   // JUCE_LISTENERLIST_H_INCLUDED

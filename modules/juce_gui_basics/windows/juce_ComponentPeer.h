@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_COMPONENTPEER_JUCEHEADER__
-#define __JUCE_COMPONENTPEER_JUCEHEADER__
+#ifndef JUCE_COMPONENTPEER_H_INCLUDED
+#define JUCE_COMPONENTPEER_H_INCLUDED
 
 #include "../components/juce_Component.h"
 #include "../mouse/juce_MouseCursor.h"
@@ -136,31 +136,39 @@ public:
     //==============================================================================
     /** Moves and resizes the window.
 
-        If the native window is contained in another window, then the co-ordinates are
+        If the native window is contained in another window, then the coordinates are
         relative to the parent window's origin, not the screen origin.
 
         This should result in a callback to handleMovedOrResized().
     */
     virtual void setBounds (const Rectangle<int>& newBounds, bool isNowFullScreen) = 0;
 
+    /** Updates the peer's bounds to match its component. */
+    void updateBounds();
+
     /** Returns the current position and size of the window.
 
-        If the native window is contained in another window, then the co-ordinates are
+        If the native window is contained in another window, then the coordinates are
         relative to the parent window's origin, not the screen origin.
     */
     virtual Rectangle<int> getBounds() const = 0;
 
-    /** Converts a position relative to the top-left of this component to screen co-ordinates. */
+    /** Converts a position relative to the top-left of this component to screen coordinates. */
     virtual Point<int> localToGlobal (const Point<int>& relativePosition) = 0;
 
-    /** Converts a rectangle relative to the top-left of this component to screen co-ordinates. */
+    /** Converts a rectangle relative to the top-left of this component to screen coordinates. */
     virtual Rectangle<int> localToGlobal (const Rectangle<int>& relativePosition);
 
-    /** Converts a screen co-ordinate to a position relative to the top-left of this component. */
+    /** Converts a screen coordinate to a position relative to the top-left of this component. */
     virtual Point<int> globalToLocal (const Point<int>& screenPosition) = 0;
 
     /** Converts a screen area to a position relative to the top-left of this component. */
     virtual Rectangle<int> globalToLocal (const Rectangle<int>& screenPosition);
+
+    /** Returns the area in peer coordinates that is covered by the given sub-comp (which
+        may be at any depth)
+    */
+    Rectangle<int> getAreaCoveredBy (Component& subComponent) const;
 
     /** Minimises the window. */
     virtual void setMinimised (bool shouldBeMinimised) = 0;
@@ -361,23 +369,20 @@ protected:
     //==============================================================================
     Component& component;
     const int styleFlags;
-    RectangleList maskedRegion;
+    RectangleList<int> maskedRegion;
     Rectangle<int> lastNonFullscreenBounds;
     ComponentBoundsConstrainer* constrainer;
-
-    static void updateCurrentModifiers() noexcept;
 
 private:
     //==============================================================================
     WeakReference<Component> lastFocusedComponent, dragAndDropTargetComponent;
     Component* lastDragAndDropCompUnderMouse;
     const uint32 uniqueID;
-    bool fakeMouseMessageSent, isWindowMinimised;
+    bool isWindowMinimised;
     Component* getTargetForKeyPress();
-    static MouseInputSource* getOrCreateMouseInputSource (int);
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ComponentPeer)
 };
 
 
-#endif   // __JUCE_COMPONENTPEER_JUCEHEADER__
+#endif   // JUCE_COMPONENTPEER_H_INCLUDED

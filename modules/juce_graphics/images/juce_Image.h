@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_IMAGE_JUCEHEADER__
-#define __JUCE_IMAGE_JUCEHEADER__
+#ifndef JUCE_IMAGE_H_INCLUDED
+#define JUCE_IMAGE_H_INCLUDED
 
 #include "../colour/juce_Colour.h"
 #include "../contexts/juce_GraphicsContext.h"
@@ -244,7 +244,7 @@ public:
     //==============================================================================
     /** Returns the colour of one of the pixels in the image.
 
-        If the co-ordinates given are beyond the image's boundaries, this will
+        If the coordinates given are beyond the image's boundaries, this will
         return Colours::transparentBlack.
 
         @see setPixelAt, Image::BitmapData::getPixelColour
@@ -253,7 +253,7 @@ public:
 
     /** Sets the colour of one of the image's pixels.
 
-        If the co-ordinates are beyond the image's boundaries, then nothing will happen.
+        If the coordinates are beyond the image's boundaries, then nothing will happen.
 
         Note that this won't do any alpha-blending, it'll just replace the existing pixel
         with the given one. The colour's opacity will be ignored if this image doesn't have
@@ -266,10 +266,10 @@ public:
     /** Changes the opacity of a pixel.
 
         This only has an effect if the image has an alpha channel and if the
-        given co-ordinates are inside the image's boundary.
+        given coordinates are inside the image's boundary.
 
         The multiplier must be in the range 0 to 1.0, and the current alpha
-        at the given co-ordinates will be multiplied by this value.
+        at the given coordinates will be multiplied by this value.
 
         @see setPixelAt
     */
@@ -322,13 +322,13 @@ public:
         ~BitmapData();
 
         /** Returns a pointer to the start of a line in the image.
-            The co-ordinate you provide here isn't checked, so it's the caller's responsibility to make
+            The coordinate you provide here isn't checked, so it's the caller's responsibility to make
             sure it's not out-of-range.
         */
         inline uint8* getLinePointer (int y) const noexcept                 { return data + y * lineStride; }
 
         /** Returns a pointer to a pixel in the image.
-            The co-ordinates you give here are not checked, so it's the caller's responsibility to make sure they're
+            The coordinates you give here are not checked, so it's the caller's responsibility to make sure they're
             not out-of-range.
         */
         inline uint8* getPixelPointer (int x, int y) const noexcept         { return data + y * lineStride + x * pixelStride; }
@@ -383,7 +383,7 @@ public:
         @param alphaThreshold   for a semi-transparent image, any pixels whose alpha is
                                 above this level will be considered opaque
     */
-    void createSolidAreaMask (RectangleList& result, float alphaThreshold) const;
+    void createSolidAreaMask (RectangleList<int>& result, float alphaThreshold) const;
 
     //==============================================================================
     /** Returns a NamedValueSet that is attached to the image and which can be used for
@@ -499,8 +499,8 @@ public:
     SoftwareImageType();
     ~SoftwareImageType();
 
-    ImagePixelData::Ptr create (Image::PixelFormat, int width, int height, bool clearImage) const;
-    int getTypeID() const;
+    ImagePixelData::Ptr create (Image::PixelFormat, int width, int height, bool clearImage) const override;
+    int getTypeID() const override;
 };
 
 //==============================================================================
@@ -515,9 +515,9 @@ public:
     NativeImageType();
     ~NativeImageType();
 
-    ImagePixelData::Ptr create (Image::PixelFormat, int width, int height, bool clearImage) const;
-    int getTypeID() const;
+    ImagePixelData::Ptr create (Image::PixelFormat, int width, int height, bool clearImage) const override;
+    int getTypeID() const override;
 };
 
 
-#endif   // __JUCE_IMAGE_JUCEHEADER__
+#endif   // JUCE_IMAGE_H_INCLUDED

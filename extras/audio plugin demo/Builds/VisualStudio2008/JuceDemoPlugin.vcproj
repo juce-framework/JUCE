@@ -2456,16 +2456,6 @@
           <File RelativePath="..\..\..\..\modules\juce_graphics\geometry\juce_PathStrokeType.h"/>
           <File RelativePath="..\..\..\..\modules\juce_graphics\geometry\juce_Point.h"/>
           <File RelativePath="..\..\..\..\modules\juce_graphics\geometry\juce_Rectangle.h"/>
-          <File RelativePath="..\..\..\..\modules\juce_graphics\geometry\juce_RectangleList.cpp">
-            <FileConfiguration Name="Debug|Win32"
-                               ExcludedFromBuild="true">
-              <Tool Name="VCCLCompilerTool"/>
-            </FileConfiguration>
-            <FileConfiguration Name="Release|Win32"
-                               ExcludedFromBuild="true">
-              <Tool Name="VCCLCompilerTool"/>
-            </FileConfiguration>
-          </File>
           <File RelativePath="..\..\..\..\modules\juce_graphics\geometry\juce_RectangleList.h"/>
         </Filter>
         <Filter Name="placement">
@@ -2780,6 +2770,17 @@
             </FileConfiguration>
           </File>
           <File RelativePath="..\..\..\..\modules\juce_gui_basics\mouse\juce_MouseEvent.h"/>
+          <File RelativePath="..\..\..\..\modules\juce_gui_basics\mouse\juce_MouseInactivityDetector.cpp">
+            <FileConfiguration Name="Debug|Win32"
+                               ExcludedFromBuild="true">
+              <Tool Name="VCCLCompilerTool"/>
+            </FileConfiguration>
+            <FileConfiguration Name="Release|Win32"
+                               ExcludedFromBuild="true">
+              <Tool Name="VCCLCompilerTool"/>
+            </FileConfiguration>
+          </File>
+          <File RelativePath="..\..\..\..\modules\juce_gui_basics\mouse\juce_MouseInactivityDetector.h"/>
           <File RelativePath="..\..\..\..\modules\juce_gui_basics\mouse\juce_MouseInputSource.cpp">
             <FileConfiguration Name="Debug|Win32"
                                ExcludedFromBuild="true">
@@ -3150,6 +3151,8 @@
           <File RelativePath="..\..\..\..\modules\juce_gui_basics\menus\juce_PopupMenu.h"/>
         </Filter>
         <Filter Name="layout">
+          <File RelativePath="..\..\..\..\modules\juce_gui_basics\layout\juce_AnimatedPosition.h"/>
+          <File RelativePath="..\..\..\..\modules\juce_gui_basics\layout\juce_AnimatedPositionBehaviours.h"/>
           <File RelativePath="..\..\..\..\modules\juce_gui_basics\layout\juce_ComponentAnimator.cpp">
             <FileConfiguration Name="Debug|Win32"
                                ExcludedFromBuild="true">

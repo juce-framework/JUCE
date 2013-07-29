@@ -26,8 +26,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_CORE_JUCEHEADER__
-#define __JUCE_CORE_JUCEHEADER__
+#ifndef JUCE_CORE_H_INCLUDED
+#define JUCE_CORE_H_INCLUDED
 
 #ifndef JUCE_MODULE_AVAILABLE_juce_core
  /* If you fail to make sure that all your compile units are building JUCE with the same set of
@@ -101,7 +101,7 @@
  #define JUCE_DONT_AUTOLINK_TO_WIN32_LIBRARIES 0
 #endif
 
-/*  Config: JUCE_INCLUDE_ZLIB_CODE
+/** Config: JUCE_INCLUDE_ZLIB_CODE
     This can be used to disable Juce's embedded 3rd-party zlib code.
     You might need to tweak this if you're linking to an external zlib library in your app,
     but for normal apps, this option should be left alone.
@@ -143,303 +143,105 @@ namespace juce
 
 // START_AUTOINCLUDE containers, files, json, logging, maths, memory, misc, network,
 // streams, system, text, threads, time, unit_tests, xml, zip
-#ifndef __JUCE_ABSTRACTFIFO_JUCEHEADER__
- #include "containers/juce_AbstractFifo.h"
-#endif
-#ifndef __JUCE_ARRAY_JUCEHEADER__
- #include "containers/juce_Array.h"
-#endif
-#ifndef __JUCE_ARRAYALLOCATIONBASE_JUCEHEADER__
- #include "containers/juce_ArrayAllocationBase.h"
-#endif
-#ifndef __JUCE_DYNAMICOBJECT_JUCEHEADER__
- #include "containers/juce_DynamicObject.h"
-#endif
-#ifndef __JUCE_ELEMENTCOMPARATOR_JUCEHEADER__
- #include "containers/juce_ElementComparator.h"
-#endif
-#ifndef __JUCE_HASHMAP_JUCEHEADER__
- #include "containers/juce_HashMap.h"
-#endif
-#ifndef __JUCE_LINKEDLISTPOINTER_JUCEHEADER__
- #include "containers/juce_LinkedListPointer.h"
-#endif
-#ifndef __JUCE_NAMEDVALUESET_JUCEHEADER__
- #include "containers/juce_NamedValueSet.h"
-#endif
-#ifndef __JUCE_OWNEDARRAY_JUCEHEADER__
- #include "containers/juce_OwnedArray.h"
-#endif
-#ifndef __JUCE_PROPERTYSET_JUCEHEADER__
- #include "containers/juce_PropertySet.h"
-#endif
-#ifndef __JUCE_REFERENCECOUNTEDARRAY_JUCEHEADER__
- #include "containers/juce_ReferenceCountedArray.h"
-#endif
-#ifndef __JUCE_SCOPEDVALUESETTER_JUCEHEADER__
- #include "containers/juce_ScopedValueSetter.h"
-#endif
-#ifndef __JUCE_SORTEDSET_JUCEHEADER__
- #include "containers/juce_SortedSet.h"
-#endif
-#ifndef __JUCE_SPARSESET_JUCEHEADER__
- #include "containers/juce_SparseSet.h"
-#endif
-#ifndef __JUCE_VARIANT_JUCEHEADER__
- #include "containers/juce_Variant.h"
-#endif
-#ifndef __JUCE_DIRECTORYITERATOR_JUCEHEADER__
- #include "files/juce_DirectoryIterator.h"
-#endif
-#ifndef __JUCE_FILE_JUCEHEADER__
- #include "files/juce_File.h"
-#endif
-#ifndef __JUCE_FILEINPUTSTREAM_JUCEHEADER__
- #include "files/juce_FileInputStream.h"
-#endif
-#ifndef __JUCE_FILEOUTPUTSTREAM_JUCEHEADER__
- #include "files/juce_FileOutputStream.h"
-#endif
-#ifndef __JUCE_FILESEARCHPATH_JUCEHEADER__
- #include "files/juce_FileSearchPath.h"
-#endif
-#ifndef __JUCE_MEMORYMAPPEDFILE_JUCEHEADER__
- #include "files/juce_MemoryMappedFile.h"
-#endif
-#ifndef __JUCE_TEMPORARYFILE_JUCEHEADER__
- #include "files/juce_TemporaryFile.h"
-#endif
-#ifndef __JUCE_JSON_JUCEHEADER__
- #include "json/juce_JSON.h"
-#endif
-#ifndef __JUCE_FILELOGGER_JUCEHEADER__
- #include "logging/juce_FileLogger.h"
-#endif
-#ifndef __JUCE_LOGGER_JUCEHEADER__
- #include "logging/juce_Logger.h"
-#endif
-#ifndef __JUCE_BIGINTEGER_JUCEHEADER__
- #include "maths/juce_BigInteger.h"
-#endif
-#ifndef __JUCE_EXPRESSION_JUCEHEADER__
- #include "maths/juce_Expression.h"
-#endif
-#ifndef __JUCE_MATHSFUNCTIONS_JUCEHEADER__
- #include "maths/juce_MathsFunctions.h"
-#endif
-#ifndef __JUCE_RANDOM_JUCEHEADER__
- #include "maths/juce_Random.h"
-#endif
-#ifndef __JUCE_RANGE_JUCEHEADER__
- #include "maths/juce_Range.h"
-#endif
-#ifndef __JUCE_ATOMIC_JUCEHEADER__
- #include "memory/juce_Atomic.h"
-#endif
-#ifndef __JUCE_BYTEORDER_JUCEHEADER__
- #include "memory/juce_ByteOrder.h"
-#endif
-#ifndef __JUCE_HEAPBLOCK_JUCEHEADER__
- #include "memory/juce_HeapBlock.h"
-#endif
-#ifndef __JUCE_LEAKEDOBJECTDETECTOR_JUCEHEADER__
- #include "memory/juce_LeakedObjectDetector.h"
-#endif
-#ifndef __JUCE_MEMORY_JUCEHEADER__
- #include "memory/juce_Memory.h"
-#endif
-#ifndef __JUCE_MEMORYBLOCK_JUCEHEADER__
- #include "memory/juce_MemoryBlock.h"
-#endif
-#ifndef __JUCE_OPTIONALSCOPEDPOINTER_JUCEHEADER__
- #include "memory/juce_OptionalScopedPointer.h"
-#endif
-#ifndef __JUCE_REFERENCECOUNTEDOBJECT_JUCEHEADER__
- #include "memory/juce_ReferenceCountedObject.h"
-#endif
-#ifndef __JUCE_SCOPEDPOINTER_JUCEHEADER__
- #include "memory/juce_ScopedPointer.h"
-#endif
-#ifndef __JUCE_SINGLETON_JUCEHEADER__
- #include "memory/juce_Singleton.h"
-#endif
-#ifndef __JUCE_WEAKREFERENCE_JUCEHEADER__
- #include "memory/juce_WeakReference.h"
-#endif
-#ifndef __JUCE_RESULT_JUCEHEADER__
- #include "misc/juce_Result.h"
-#endif
-#ifndef __JUCE_UUID_JUCEHEADER__
- #include "misc/juce_Uuid.h"
-#endif
-#ifndef __JUCE_WINDOWSREGISTRY_JUCEHEADER__
- #include "misc/juce_WindowsRegistry.h"
-#endif
-#ifndef __JUCE_IPADDRESS_JUCEHEADER__
- #include "network/juce_IPAddress.h"
-#endif
-#ifndef __JUCE_MACADDRESS_JUCEHEADER__
- #include "network/juce_MACAddress.h"
-#endif
-#ifndef __JUCE_NAMEDPIPE_JUCEHEADER__
- #include "network/juce_NamedPipe.h"
-#endif
-#ifndef __JUCE_SOCKET_JUCEHEADER__
- #include "network/juce_Socket.h"
-#endif
-#ifndef __JUCE_URL_JUCEHEADER__
- #include "network/juce_URL.h"
-#endif
-#ifndef __JUCE_BUFFEREDINPUTSTREAM_JUCEHEADER__
- #include "streams/juce_BufferedInputStream.h"
-#endif
-#ifndef __JUCE_FILEINPUTSOURCE_JUCEHEADER__
- #include "streams/juce_FileInputSource.h"
-#endif
-#ifndef __JUCE_INPUTSOURCE_JUCEHEADER__
- #include "streams/juce_InputSource.h"
-#endif
-#ifndef __JUCE_INPUTSTREAM_JUCEHEADER__
- #include "streams/juce_InputStream.h"
-#endif
-#ifndef __JUCE_MEMORYINPUTSTREAM_JUCEHEADER__
- #include "streams/juce_MemoryInputStream.h"
-#endif
-#ifndef __JUCE_MEMORYOUTPUTSTREAM_JUCEHEADER__
- #include "streams/juce_MemoryOutputStream.h"
-#endif
-#ifndef __JUCE_OUTPUTSTREAM_JUCEHEADER__
- #include "streams/juce_OutputStream.h"
-#endif
-#ifndef __JUCE_SUBREGIONSTREAM_JUCEHEADER__
- #include "streams/juce_SubregionStream.h"
-#endif
-#ifndef __JUCE_PLATFORMDEFS_JUCEHEADER__
- #include "system/juce_PlatformDefs.h"
-#endif
-#ifndef __JUCE_STANDARDHEADER_JUCEHEADER__
- #include "system/juce_StandardHeader.h"
-#endif
-#ifndef __JUCE_SYSTEMSTATS_JUCEHEADER__
- #include "system/juce_SystemStats.h"
-#endif
-#ifndef __JUCE_TARGETPLATFORM_JUCEHEADER__
- #include "system/juce_TargetPlatform.h"
-#endif
-#ifndef __JUCE_CHARACTERFUNCTIONS_JUCEHEADER__
- #include "text/juce_CharacterFunctions.h"
-#endif
-#ifndef __JUCE_CHARPOINTER_ASCII_JUCEHEADER__
- #include "text/juce_CharPointer_ASCII.h"
-#endif
-#ifndef __JUCE_CHARPOINTER_UTF16_JUCEHEADER__
- #include "text/juce_CharPointer_UTF16.h"
-#endif
-#ifndef __JUCE_CHARPOINTER_UTF32_JUCEHEADER__
- #include "text/juce_CharPointer_UTF32.h"
-#endif
-#ifndef __JUCE_CHARPOINTER_UTF8_JUCEHEADER__
- #include "text/juce_CharPointer_UTF8.h"
-#endif
-#ifndef __JUCE_IDENTIFIER_JUCEHEADER__
- #include "text/juce_Identifier.h"
-#endif
-#ifndef __JUCE_LOCALISEDSTRINGS_JUCEHEADER__
- #include "text/juce_LocalisedStrings.h"
-#endif
-#ifndef __JUCE_NEWLINE_JUCEHEADER__
- #include "text/juce_NewLine.h"
-#endif
-#ifndef __JUCE_STRING_JUCEHEADER__
- #include "text/juce_String.h"
-#endif
-#ifndef __JUCE_STRINGARRAY_JUCEHEADER__
- #include "text/juce_StringArray.h"
-#endif
-#ifndef __JUCE_STRINGPAIRARRAY_JUCEHEADER__
- #include "text/juce_StringPairArray.h"
-#endif
-#ifndef __JUCE_STRINGPOOL_JUCEHEADER__
- #include "text/juce_StringPool.h"
-#endif
-#ifndef __JUCE_TEXTDIFF_JUCEHEADER__
- #include "text/juce_TextDiff.h"
-#endif
-#ifndef __JUCE_CHILDPROCESS_JUCEHEADER__
- #include "threads/juce_ChildProcess.h"
-#endif
-#ifndef __JUCE_CRITICALSECTION_JUCEHEADER__
- #include "threads/juce_CriticalSection.h"
-#endif
-#ifndef __JUCE_DYNAMICLIBRARY_JUCEHEADER__
- #include "threads/juce_DynamicLibrary.h"
-#endif
-#ifndef __JUCE_HIGHRESOLUTIONTIMER_JUCEHEADER__
- #include "threads/juce_HighResolutionTimer.h"
-#endif
-#ifndef __JUCE_INTERPROCESSLOCK_JUCEHEADER__
- #include "threads/juce_InterProcessLock.h"
-#endif
-#ifndef __JUCE_PROCESS_JUCEHEADER__
- #include "threads/juce_Process.h"
-#endif
-#ifndef __JUCE_READWRITELOCK_JUCEHEADER__
- #include "threads/juce_ReadWriteLock.h"
-#endif
-#ifndef __JUCE_SCOPEDLOCK_JUCEHEADER__
- #include "threads/juce_ScopedLock.h"
-#endif
-#ifndef __JUCE_SCOPEDREADLOCK_JUCEHEADER__
- #include "threads/juce_ScopedReadLock.h"
-#endif
-#ifndef __JUCE_SCOPEDWRITELOCK_JUCEHEADER__
- #include "threads/juce_ScopedWriteLock.h"
-#endif
-#ifndef __JUCE_SPINLOCK_JUCEHEADER__
- #include "threads/juce_SpinLock.h"
-#endif
-#ifndef __JUCE_THREAD_JUCEHEADER__
- #include "threads/juce_Thread.h"
-#endif
-#ifndef __JUCE_THREADLOCALVALUE_JUCEHEADER__
- #include "threads/juce_ThreadLocalValue.h"
-#endif
-#ifndef __JUCE_THREADPOOL_JUCEHEADER__
- #include "threads/juce_ThreadPool.h"
-#endif
-#ifndef __JUCE_TIMESLICETHREAD_JUCEHEADER__
- #include "threads/juce_TimeSliceThread.h"
-#endif
-#ifndef __JUCE_WAITABLEEVENT_JUCEHEADER__
- #include "threads/juce_WaitableEvent.h"
-#endif
-#ifndef __JUCE_PERFORMANCECOUNTER_JUCEHEADER__
- #include "time/juce_PerformanceCounter.h"
-#endif
-#ifndef __JUCE_RELATIVETIME_JUCEHEADER__
- #include "time/juce_RelativeTime.h"
-#endif
-#ifndef __JUCE_TIME_JUCEHEADER__
- #include "time/juce_Time.h"
-#endif
-#ifndef __JUCE_UNITTEST_JUCEHEADER__
- #include "unit_tests/juce_UnitTest.h"
-#endif
-#ifndef __JUCE_XMLDOCUMENT_JUCEHEADER__
- #include "xml/juce_XmlDocument.h"
-#endif
-#ifndef __JUCE_XMLELEMENT_JUCEHEADER__
- #include "xml/juce_XmlElement.h"
-#endif
-#ifndef __JUCE_GZIPCOMPRESSOROUTPUTSTREAM_JUCEHEADER__
- #include "zip/juce_GZIPCompressorOutputStream.h"
-#endif
-#ifndef __JUCE_GZIPDECOMPRESSORINPUTSTREAM_JUCEHEADER__
- #include "zip/juce_GZIPDecompressorInputStream.h"
-#endif
-#ifndef __JUCE_ZIPFILE_JUCEHEADER__
- #include "zip/juce_ZipFile.h"
-#endif
+#include "containers/juce_AbstractFifo.h"
+#include "containers/juce_Array.h"
+#include "containers/juce_ArrayAllocationBase.h"
+#include "containers/juce_DynamicObject.h"
+#include "containers/juce_ElementComparator.h"
+#include "containers/juce_HashMap.h"
+#include "containers/juce_LinkedListPointer.h"
+#include "containers/juce_NamedValueSet.h"
+#include "containers/juce_OwnedArray.h"
+#include "containers/juce_PropertySet.h"
+#include "containers/juce_ReferenceCountedArray.h"
+#include "containers/juce_ScopedValueSetter.h"
+#include "containers/juce_SortedSet.h"
+#include "containers/juce_SparseSet.h"
+#include "containers/juce_Variant.h"
+#include "files/juce_DirectoryIterator.h"
+#include "files/juce_File.h"
+#include "files/juce_FileInputStream.h"
+#include "files/juce_FileOutputStream.h"
+#include "files/juce_FileSearchPath.h"
+#include "files/juce_MemoryMappedFile.h"
+#include "files/juce_TemporaryFile.h"
+#include "json/juce_JSON.h"
+#include "logging/juce_FileLogger.h"
+#include "logging/juce_Logger.h"
+#include "maths/juce_BigInteger.h"
+#include "maths/juce_Expression.h"
+#include "maths/juce_MathsFunctions.h"
+#include "maths/juce_Random.h"
+#include "maths/juce_Range.h"
+#include "memory/juce_Atomic.h"
+#include "memory/juce_ByteOrder.h"
+#include "memory/juce_HeapBlock.h"
+#include "memory/juce_LeakedObjectDetector.h"
+#include "memory/juce_Memory.h"
+#include "memory/juce_MemoryBlock.h"
+#include "memory/juce_OptionalScopedPointer.h"
+#include "memory/juce_ReferenceCountedObject.h"
+#include "memory/juce_ScopedPointer.h"
+#include "memory/juce_Singleton.h"
+#include "memory/juce_WeakReference.h"
+#include "misc/juce_Result.h"
+#include "misc/juce_Uuid.h"
+#include "misc/juce_WindowsRegistry.h"
+#include "network/juce_IPAddress.h"
+#include "network/juce_MACAddress.h"
+#include "network/juce_NamedPipe.h"
+#include "network/juce_Socket.h"
+#include "network/juce_URL.h"
+#include "streams/juce_BufferedInputStream.h"
+#include "streams/juce_FileInputSource.h"
+#include "streams/juce_InputSource.h"
+#include "streams/juce_InputStream.h"
+#include "streams/juce_MemoryInputStream.h"
+#include "streams/juce_MemoryOutputStream.h"
+#include "streams/juce_OutputStream.h"
+#include "streams/juce_SubregionStream.h"
+#include "system/juce_PlatformDefs.h"
+#include "system/juce_StandardHeader.h"
+#include "system/juce_SystemStats.h"
+#include "system/juce_TargetPlatform.h"
+#include "text/juce_CharacterFunctions.h"
+#include "text/juce_CharPointer_ASCII.h"
+#include "text/juce_CharPointer_UTF16.h"
+#include "text/juce_CharPointer_UTF32.h"
+#include "text/juce_CharPointer_UTF8.h"
+#include "text/juce_Identifier.h"
+#include "text/juce_LocalisedStrings.h"
+#include "text/juce_NewLine.h"
+#include "text/juce_String.h"
+#include "text/juce_StringArray.h"
+#include "text/juce_StringPairArray.h"
+#include "text/juce_StringPool.h"
+#include "text/juce_TextDiff.h"
+#include "threads/juce_ChildProcess.h"
+#include "threads/juce_CriticalSection.h"
+#include "threads/juce_DynamicLibrary.h"
+#include "threads/juce_HighResolutionTimer.h"
+#include "threads/juce_InterProcessLock.h"
+#include "threads/juce_Process.h"
+#include "threads/juce_ReadWriteLock.h"
+#include "threads/juce_ScopedLock.h"
+#include "threads/juce_ScopedReadLock.h"
+#include "threads/juce_ScopedWriteLock.h"
+#include "threads/juce_SpinLock.h"
+#include "threads/juce_Thread.h"
+#include "threads/juce_ThreadLocalValue.h"
+#include "threads/juce_ThreadPool.h"
+#include "threads/juce_TimeSliceThread.h"
+#include "threads/juce_WaitableEvent.h"
+#include "time/juce_PerformanceCounter.h"
+#include "time/juce_RelativeTime.h"
+#include "time/juce_Time.h"
+#include "unit_tests/juce_UnitTest.h"
+#include "xml/juce_XmlDocument.h"
+#include "xml/juce_XmlElement.h"
+#include "zip/juce_GZIPCompressorOutputStream.h"
+#include "zip/juce_GZIPDecompressorInputStream.h"
+#include "zip/juce_ZipFile.h"
 // END_AUTOINCLUDE
 
 }
@@ -448,4 +250,4 @@ namespace juce
  #pragma warning (pop)
 #endif
 
-#endif   // __JUCE_CORE_JUCEHEADER__
+#endif   // JUCE_CORE_H_INCLUDED

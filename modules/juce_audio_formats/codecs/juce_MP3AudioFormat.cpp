@@ -436,10 +436,7 @@ struct VBRTagData
         vbrScale = -1;
 
         if (flags & 8)
-        {
             vbrScale = ByteOrder::bigEndianInt (data);
-            data += 4;
-        }
 
         headersize = ((type + 1) * 72000 * bitrate) / sampleRate;
         return true;
@@ -2957,7 +2954,7 @@ public:
 
     //==============================================================================
     bool readSamples (int** destSamples, int numDestChannels, int startOffsetInDestBuffer,
-                      int64 startSampleInFile, int numSamples)
+                      int64 startSampleInFile, int numSamples) override
     {
         jassert (destSamples != nullptr);
 

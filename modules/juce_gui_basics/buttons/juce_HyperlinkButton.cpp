@@ -50,7 +50,7 @@ HyperlinkButton::~HyperlinkButton()
 //==============================================================================
 void HyperlinkButton::setFont (const Font& newFont,
                                const bool resizeToMatchComponentHeight,
-                               const Justification& justificationType)
+                               Justification justificationType)
 {
     font = newFont;
     resizeFont = resizeToMatchComponentHeight;

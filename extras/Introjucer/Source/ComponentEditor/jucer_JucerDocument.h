@@ -163,9 +163,9 @@ private:
     ScopedPointer<XmlElement> currentXML;
     ScopedPointer<Timer> userDocChangeTimer;
 
-    void timerCallback();
-    void codeDocumentTextInserted (const String& newText, int insertIndex);
-    void codeDocumentTextDeleted (int startIndex, int endIndex);
+    void timerCallback() override;
+    void codeDocumentTextInserted (const String& newText, int insertIndex) override;
+    void codeDocumentTextDeleted (int startIndex, int endIndex) override;
     void userEditedCpp();
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (JucerDocument);

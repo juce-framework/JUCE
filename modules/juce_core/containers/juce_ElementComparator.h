@@ -26,8 +26,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_ELEMENTCOMPARATOR_JUCEHEADER__
-#define __JUCE_ELEMENTCOMPARATOR_JUCEHEADER__
+#ifndef JUCE_ELEMENTCOMPARATOR_H_INCLUDED
+#define JUCE_ELEMENTCOMPARATOR_H_INCLUDED
 
 
 //==============================================================================
@@ -276,4 +276,4 @@ public:
 };
 
 
-#endif   // __JUCE_ELEMENTCOMPARATOR_JUCEHEADER__
+#endif   // JUCE_ELEMENTCOMPARATOR_H_INCLUDED

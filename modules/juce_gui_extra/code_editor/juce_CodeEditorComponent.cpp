@@ -76,7 +76,7 @@ public:
             return false;
         }
 
-        tokens.swapWithArray (newTokens);
+        tokens.swapWith (newTokens);
         return true;
     }
 
@@ -106,7 +106,7 @@ public:
                 break;
 
             const SyntaxToken& token = tokens.getReference(i);
-            as.append (token.text, fontToUse, owner.getColourForTokenType (token.tokenType));
+            as.append (token.text.removeCharacters ("\r\n"), fontToUse, owner.getColourForTokenType (token.tokenType));
             column += token.length;
         }
 
@@ -261,7 +261,7 @@ private:
     void timerCallback()        { owner.newTransaction(); }
     void handleAsyncUpdate()    { owner.rebuildLineTokens(); }
 
-    void scrollBarMoved (ScrollBar* scrollBarThatHasMoved, double newRangeStart)
+    void scrollBarMoved (ScrollBar* scrollBarThatHasMoved, double newRangeStart) override
     {
         if (scrollBarThatHasMoved->isVertical())
             owner.scrollToLineInternal ((int) newRangeStart);
@@ -269,12 +269,12 @@ private:
             owner.scrollToColumnInternal (newRangeStart);
     }
 
-    void codeDocumentTextInserted (const String& newText, int pos)
+    void codeDocumentTextInserted (const String& newText, int pos) override
     {
         codeDocumentChanged (pos, pos + newText.length());
     }
 
-    void codeDocumentTextDeleted (int start, int end)
+    void codeDocumentTextDeleted (int start, int end) override
     {
         codeDocumentChanged (start, end);
     }
@@ -293,7 +293,7 @@ class CodeEditorComponent::GutterComponent  : public Component
 public:
     GutterComponent() : lastNumLines (0) {}
 
-    void paint (Graphics& g)
+    void paint (Graphics& g) override
     {
         jassert (dynamic_cast <CodeEditorComponent*> (getParentComponent()) != nullptr);
         const CodeEditorComponent& editor = *static_cast <CodeEditorComponent*> (getParentComponent());

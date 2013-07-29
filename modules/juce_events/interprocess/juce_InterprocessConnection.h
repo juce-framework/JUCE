@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_INTERPROCESSCONNECTION_JUCEHEADER__
-#define __JUCE_INTERPROCESSCONNECTION_JUCEHEADER__
+#ifndef JUCE_INTERPROCESSCONNECTION_H_INCLUDED
+#define JUCE_INTERPROCESSCONNECTION_H_INCLUDED
 
 class InterprocessConnectionServer;
 class MemoryBlock;
@@ -194,9 +194,9 @@ private:
     void connectionLostInt();
     void deliverDataInt (const MemoryBlock&);
     bool readNextMessageInt();
-    void run();
+    void run() override;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (InterprocessConnection)
 };
 
-#endif   // __JUCE_INTERPROCESSCONNECTION_JUCEHEADER__
+#endif   // JUCE_INTERPROCESSCONNECTION_H_INCLUDED

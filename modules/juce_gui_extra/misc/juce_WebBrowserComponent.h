@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_WEBBROWSERCOMPONENT_JUCEHEADER__
-#define __JUCE_WEBBROWSERCOMPONENT_JUCEHEADER__
+#ifndef JUCE_WEBBROWSERCOMPONENT_H_INCLUDED
+#define JUCE_WEBBROWSERCOMPONENT_H_INCLUDED
 
 #if JUCE_WEB_BROWSER || DOXYGEN
 
@@ -99,13 +99,13 @@ public:
 
     //==============================================================================
     /** @internal */
-    void paint (Graphics& g);
+    void paint (Graphics&) override;
     /** @internal */
-    void resized();
+    void resized() override;
     /** @internal */
-    void parentHierarchyChanged();
+    void parentHierarchyChanged() override;
     /** @internal */
-    void visibilityChanged();
+    void visibilityChanged() override;
 
 private:
     //==============================================================================
@@ -124,4 +124,4 @@ private:
 
 
 #endif
-#endif   // __JUCE_WEBBROWSERCOMPONENT_JUCEHEADER__
+#endif   // JUCE_WEBBROWSERCOMPONENT_H_INCLUDED

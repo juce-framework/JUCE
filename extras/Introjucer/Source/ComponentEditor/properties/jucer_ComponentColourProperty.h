@@ -80,10 +80,6 @@ public:
     {
     }
 
-    ~ComponentColourIdProperty()
-    {
-    }
-
     //==============================================================================
     Colour getColour() const
     {

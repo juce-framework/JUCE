@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_AUDIOSOURCEPLAYER_JUCEHEADER__
-#define __JUCE_AUDIOSOURCEPLAYER_JUCEHEADER__
+#ifndef JUCE_AUDIOSOURCEPLAYER_H_INCLUDED
+#define JUCE_AUDIOSOURCEPLAYER_H_INCLUDED
 
 
 //==============================================================================
@@ -86,13 +86,13 @@ public:
                                 int totalNumInputChannels,
                                 float** outputChannelData,
                                 int totalNumOutputChannels,
-                                int numSamples);
+                                int numSamples) override;
 
     /** Implementation of the AudioIODeviceCallback method. */
-    void audioDeviceAboutToStart (AudioIODevice* device);
+    void audioDeviceAboutToStart (AudioIODevice* device) override;
 
     /** Implementation of the AudioIODeviceCallback method. */
-    void audioDeviceStopped();
+    void audioDeviceStopped() override;
 
     /** An alternative method for initialising the source without an AudioIODevice. */
     void prepareToPlay (double sampleRate, int blockSize);
@@ -113,4 +113,4 @@ private:
 };
 
 
-#endif   // __JUCE_AUDIOSOURCEPLAYER_JUCEHEADER__
+#endif   // JUCE_AUDIOSOURCEPLAYER_H_INCLUDED

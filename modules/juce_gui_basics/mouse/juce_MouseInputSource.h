@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_MOUSEINPUTSOURCE_JUCEHEADER__
-#define __JUCE_MOUSEINPUTSOURCE_JUCEHEADER__
+#ifndef JUCE_MOUSEINPUTSOURCE_H_INCLUDED
+#define JUCE_MOUSEINPUTSOURCE_H_INCLUDED
 
 #include "../keyboard/juce_ModifierKeys.h"
 #include "../components/juce_Desktop.h"
@@ -149,7 +149,7 @@ public:
         Calling this method when the mouse button is currently pressed will remove the cursor
         from the screen and allow the mouse to (seem to) move beyond the edges of the screen.
 
-        This means that the co-ordinates returned to mouseDrag() will be unbounded, and this
+        This means that the coordinates returned to mouseDrag() will be unbounded, and this
         can be used for things like custom slider controls or dragging objects around, where
         movement would be otherwise be limited by the mouse hitting the edges of the screen.
 
@@ -163,25 +163,24 @@ public:
     */
     void enableUnboundedMouseMovement (bool isEnabled, bool keepCursorVisibleUntilOffscreen = false);
 
-    //==============================================================================
-    /** @internal */
-    void handleEvent (ComponentPeer*, Point<int>, int64 time, const ModifierKeys);
-    /** @internal */
-    void handleWheel (ComponentPeer*, Point<int>, int64 time, const MouseWheelDetails&);
-    /** @internal */
-    void handleMagnifyGesture (ComponentPeer*, Point<int>, int64 time, float scaleFactor);
+    /** Attempts to set this mouse pointer's screen position. */
+    void setScreenPosition (Point<int> newPosition);
 
 private:
     //==============================================================================
-    friend class Desktop;
     friend class ComponentPeer;
     friend class MouseInputSourceInternal;
     ScopedPointer<MouseInputSourceInternal> pimpl;
 
-    static Point<int> getCurrentMousePosition();
+    void handleEvent (ComponentPeer&, Point<int>, int64 time, const ModifierKeys);
+    void handleWheel (ComponentPeer&, Point<int>, int64 time, const MouseWheelDetails&);
+    void handleMagnifyGesture (ComponentPeer&, Point<int>, int64 time, float scaleFactor);
+
+    static Point<int> getCurrentRawMousePosition();
+    static void setRawMousePosition (Point<int>);
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MouseInputSource)
 };
 
 
-#endif   // __JUCE_MOUSEINPUTSOURCE_JUCEHEADER__
+#endif   // JUCE_MOUSEINPUTSOURCE_H_INCLUDED

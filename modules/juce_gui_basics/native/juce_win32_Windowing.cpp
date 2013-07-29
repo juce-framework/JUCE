@@ -153,13 +153,18 @@ static void setDPIAwareness()
     }
 }
 
-inline float getDisplayScale()
+inline double getDPI()
 {
     HDC dc = GetDC (0);
-    const float scale = (GetDeviceCaps (dc, LOGPIXELSX)
-                         + GetDeviceCaps (dc, LOGPIXELSY)) / (2.0f * 96.0f);
+    const double dpi = (GetDeviceCaps (dc, LOGPIXELSX)
+                       + GetDeviceCaps (dc, LOGPIXELSY)) / 2.0;
     ReleaseDC (0, dc);
-    return scale;
+    return dpi;
+}
+
+inline double getDisplayScale()
+{
+    return getDPI() / 96.0;
 }
 
 //==============================================================================
@@ -301,14 +306,14 @@ public:
         DeleteObject (hBitmap);
     }
 
-    ImageType* createType() const                       { return new NativeImageType(); }
+    ImageType* createType() const override                       { return new NativeImageType(); }
 
-    LowLevelGraphicsContext* createLowLevelContext()
+    LowLevelGraphicsContext* createLowLevelContext() override
     {
         return new LowLevelGraphicsSoftwareRenderer (Image (this));
     }
 
-    void initialiseBitmapData (Image::BitmapData& bitmap, int x, int y, Image::BitmapData::ReadWriteMode)
+    void initialiseBitmapData (Image::BitmapData& bitmap, int x, int y, Image::BitmapData::ReadWriteMode) override
     {
         bitmap.data = imageData + x * pixelStride + y * lineStride;
         bitmap.pixelFormat = pixelFormat;
@@ -316,7 +321,7 @@ public:
         bitmap.pixelStride = pixelStride;
     }
 
-    ImagePixelData* clone()
+    ImagePixelData* clone() override
     {
         WindowsBitmapImage* im = new WindowsBitmapImage (pixelFormat, width, height, false);
 
@@ -328,7 +333,7 @@ public:
 
     void blitToWindow (HWND hwnd, HDC dc, const bool transparent,
                        const int x, const int y,
-                       const RectangleList& maskedRegion,
+                       const RectangleList<int>& maskedRegion,
                        const uint8 updateLayeredWindowAlpha) noexcept
     {
         SetMapMode (dc, MM_TEXT);
@@ -563,9 +568,9 @@ public:
     }
 
     //==============================================================================
-    void* getNativeHandle() const    { return hwnd; }
+    void* getNativeHandle() const override    { return hwnd; }
 
-    void setVisible (bool shouldBeVisible)
+    void setVisible (bool shouldBeVisible) override
     {
         ShowWindow (hwnd, shouldBeVisible ? SW_SHOWNA : SW_HIDE);
 
@@ -575,7 +580,7 @@ public:
             lastPaintTime = 0;
     }
 
-    void setTitle (const String& title)
+    void setTitle (const String& title) override
     {
         // Unfortunately some ancient bits of win32 mean you can only perform this operation from the message thread.
         jassert (MessageManager::getInstance()->isThisTheMessageThread());
@@ -608,7 +613,7 @@ public:
        #endif
     }
 
-    void setBounds (const Rectangle<int>& bounds, bool isNowFullScreen)
+    void setBounds (const Rectangle<int>& bounds, bool isNowFullScreen) override
     {
         fullScreen = isNowFullScreen;
 
@@ -645,7 +650,7 @@ public:
         }
     }
 
-    Rectangle<int> getBounds() const
+    Rectangle<int> getBounds() const override
     {
         RECT r;
         GetWindowRect (hwnd, &r);
@@ -668,17 +673,17 @@ public:
                            r.top + windowBorder.getTop());
     }
 
-    Point<int> localToGlobal (const Point<int>& relativePosition)
+    Point<int> localToGlobal (const Point<int>& relativePosition) override
     {
         return relativePosition + getScreenPosition();
     }
 
-    Point<int> globalToLocal (const Point<int>& screenPosition)
+    Point<int> globalToLocal (const Point<int>& screenPosition) override
     {
         return screenPosition - getScreenPosition();
     }
 
-    void setAlpha (float newAlpha)
+    void setAlpha (float newAlpha) override
     {
         const uint8 intAlpha = (uint8) jlimit (0, 255, (int) (newAlpha * 255.0f));
 
@@ -702,13 +707,13 @@ public:
         }
     }
 
-    void setMinimised (bool shouldBeMinimised)
+    void setMinimised (bool shouldBeMinimised) override
     {
         if (shouldBeMinimised != isMinimised())
             ShowWindow (hwnd, shouldBeMinimised ? SW_MINIMIZE : SW_SHOWNORMAL);
     }
 
-    bool isMinimised() const
+    bool isMinimised() const override
     {
         WINDOWPLACEMENT wp;
         wp.length = sizeof (WINDOWPLACEMENT);
@@ -717,7 +722,7 @@ public:
         return wp.showCmd == SW_SHOWMINIMIZED;
     }
 
-    void setFullScreen (bool shouldBeFullScreen)
+    void setFullScreen (bool shouldBeFullScreen) override
     {
         setMinimised (false);
 
@@ -749,7 +754,7 @@ public:
         }
     }
 
-    bool isFullScreen() const
+    bool isFullScreen() const override
     {
         if (! hasTitleBar())
             return fullScreen;
@@ -773,19 +778,19 @@ public:
         return w == hwnd || (trueIfInAChildWindow && (IsChild (hwnd, w) != 0));
     }
 
-    bool contains (const Point<int>& position, bool trueIfInAChildWindow) const
+    bool contains (const Point<int>& position, bool trueIfInAChildWindow) const override
     {
         return isPositiveAndBelow (position.x, component.getWidth())
             && isPositiveAndBelow (position.y, component.getHeight())
             && isWindowAtPoint (position, trueIfInAChildWindow);
     }
 
-    BorderSize<int> getFrameSize() const
+    BorderSize<int> getFrameSize() const override
     {
         return windowBorder;
     }
 
-    bool setAlwaysOnTop (bool alwaysOnTop)
+    bool setAlwaysOnTop (bool alwaysOnTop) override
     {
         const bool oldDeactivate = shouldDeactivateTitleBar;
         shouldDeactivateTitleBar = ((styleFlags & windowIsTemporary) == 0);
@@ -802,7 +807,7 @@ public:
         return true;
     }
 
-    void toFront (bool makeActive)
+    void toFront (bool makeActive) override
     {
         setMinimised (false);
 
@@ -820,7 +825,7 @@ public:
         }
     }
 
-    void toBehind (ComponentPeer* other)
+    void toBehind (ComponentPeer* other) override
     {
         if (HWNDComponentPeer* const otherPeer = dynamic_cast <HWNDComponentPeer*> (other))
         {
@@ -839,12 +844,12 @@ public:
         }
     }
 
-    bool isFocused() const
+    bool isFocused() const override
     {
         return callFunctionIfNotLocked (&getFocusCallback, 0) == (void*) hwnd;
     }
 
-    void grabFocus()
+    void grabFocus() override
     {
         const bool oldDeactivate = shouldDeactivateTitleBar;
         shouldDeactivateTitleBar = ((styleFlags & windowIsTemporary) == 0);
@@ -854,7 +859,7 @@ public:
         shouldDeactivateTitleBar = oldDeactivate;
     }
 
-    void textInputRequired (const Point<int>&)
+    void textInputRequired (const Point<int>&) override
     {
         if (! hasCreatedCaret)
         {
@@ -866,18 +871,18 @@ public:
         SetCaretPos (0, 0);
     }
 
-    void dismissPendingTextInput()
+    void dismissPendingTextInput() override
     {
         imeHandler.handleSetContext (hwnd, false);
     }
 
-    void repaint (const Rectangle<int>& area)
+    void repaint (const Rectangle<int>& area) override
     {
         const RECT r = { area.getX(), area.getY(), area.getRight(), area.getBottom() };
         InvalidateRect (hwnd, &r, FALSE);
     }
 
-    void performAnyPendingRepaintsNow()
+    void performAnyPendingRepaintsNow() override
     {
         MSG m;
         if (component.isVisible()
@@ -1123,7 +1128,7 @@ private:
             return image;
         }
 
-        void timerCallback()
+        void timerCallback() override
         {
             stopTimer();
             image = Image::null;
@@ -1333,6 +1338,7 @@ private:
                 registerTouchWindow (hwnd, 0);
 
             setDPIAwareness();
+            setMessageFilter();
             updateBorderSize();
 
             // Calling this function here is (for some reason) necessary to make Windows
@@ -1403,6 +1409,19 @@ private:
         }
     }
 
+    void setMessageFilter()
+    {
+        typedef BOOL (WINAPI* ChangeWindowMessageFilterExFunc) (HWND, UINT, DWORD, PVOID);
+
+        if (ChangeWindowMessageFilterExFunc changeMessageFilter
+                = (ChangeWindowMessageFilterExFunc) getUser32Function ("ChangeWindowMessageFilterEx"))
+        {
+            changeMessageFilter (hwnd, WM_DROPFILES, 1 /*MSGFLT_ALLOW*/, nullptr);
+            changeMessageFilter (hwnd, WM_COPYDATA, 1 /*MSGFLT_ALLOW*/, nullptr);
+            changeMessageFilter (hwnd, 0x49, 1 /*MSGFLT_ALLOW*/, nullptr);
+        }
+    }
+
     //==============================================================================
     void handlePaintMessage()
     {
@@ -1468,7 +1487,7 @@ private:
 
                 Image& offscreenImage = offscreenImageGenerator.getImage (transparent, w, h);
 
-                RectangleList contextClip;
+                RectangleList<int> contextClip;
                 const Rectangle<int> clipBounds (w, h);
 
                 bool needToPaintAll = true;
@@ -1529,8 +1548,6 @@ private:
                 // if the component's not opaque, this won't draw properly unless the platform can support this
                 jassert (Desktop::canUseSemiTransparentWindows() || component.isOpaque());
 
-                updateCurrentModifiers();
-
                 {
                     ScopedPointer<LowLevelGraphicsContext> context (component.getLookAndFeel()
                                                                         .createGraphicsContext (offscreenImage, Point<int> (-x, -y), contextClip));
@@ -1559,7 +1576,7 @@ private:
         handleMouseEvent (0, position, currentModifiers, getMouseEventTime());
     }
 
-    StringArray getAvailableRenderingEngines()
+    StringArray getAvailableRenderingEngines() override
     {
         StringArray s (ComponentPeer::getAvailableRenderingEngines());
 
@@ -1571,7 +1588,7 @@ private:
         return s;
     }
 
-    int getCurrentRenderingEngine() const    { return currentRenderingEngine; }
+    int getCurrentRenderingEngine() const override    { return currentRenderingEngine; }
 
    #if JUCE_DIRECT2D
     void updateDirect2DContext()
@@ -1583,7 +1600,7 @@ private:
     }
    #endif
 
-    void setCurrentRenderingEngine (int index)
+    void setCurrentRenderingEngine (int index) override
     {
         (void) index;
 
@@ -2923,7 +2940,7 @@ public:
         return (r == IDYES || r == IDOK) ? 1 : (r == IDNO ? 2 : 0);
     }
 
-    void handleAsyncUpdate()
+    void handleAsyncUpdate() override
     {
         const int result = getResult();
 
@@ -3018,14 +3035,14 @@ bool Desktop::addMouseInputSource()
     return false;
 }
 
-Point<int> MouseInputSource::getCurrentMousePosition()
+Point<int> MouseInputSource::getCurrentRawMousePosition()
 {
     POINT mousePos;
     GetCursorPos (&mousePos);
     return Point<int> (mousePos.x, mousePos.y);
 }
 
-void Desktop::setMousePosition (Point<int> newPosition)
+void MouseInputSource::setRawMousePosition (Point<int> newPosition)
 {
     SetCursorPos (newPosition.x, newPosition.y);
 }
@@ -3040,7 +3057,7 @@ public:
         timerCallback();
     }
 
-    void timerCallback()
+    void timerCallback() override
     {
         if (Process::isForegroundProcess())
         {
@@ -3160,7 +3177,7 @@ static BOOL CALLBACK enumMonitorsProc (HMONITOR, HDC, LPRECT r, LPARAM userInfo)
     return TRUE;
 }
 
-void Desktop::Displays::findDisplays()
+void Desktop::Displays::findDisplays (float masterScale)
 {
     setDPIAwareness();
 
@@ -3182,12 +3199,15 @@ void Desktop::Displays::findDisplays()
     RECT workArea;
     SystemParametersInfo (SPI_GETWORKAREA, 0, &workArea, 0);
 
+    const double dpi = getDPI(); // (this has only one value for all monitors)
+
     for (int i = 0; i < monitors.size(); ++i)
     {
         Display d;
-        d.userArea = d.totalArea = monitors.getReference(i);
+        d.userArea = d.totalArea = monitors.getReference(i) / masterScale;
         d.isMain = (i == 0);
-        d.scale = 1.0;
+        d.scale = masterScale;
+        d.dpi = dpi;
 
         if (i == 0)
             d.userArea = d.userArea.getIntersection (rectangleFromRECT (workArea));

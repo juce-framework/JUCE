@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_EDGETABLE_JUCEHEADER__
-#define __JUCE_EDGETABLE_JUCEHEADER__
+#ifndef JUCE_EDGETABLE_H_INCLUDED
+#define JUCE_EDGETABLE_H_INCLUDED
 
 #include "../geometry/juce_AffineTransform.h"
 #include "../geometry/juce_Rectangle.h"
@@ -59,7 +59,7 @@ public:
     explicit EdgeTable (const Rectangle<int>& rectangleToAdd);
 
     /** Creates an edge table containing a rectangle list. */
-    explicit EdgeTable (const RectangleList& rectanglesToAdd);
+    explicit EdgeTable (const RectangleList<int>& rectanglesToAdd);
 
     /** Creates an edge table containing a rectangle. */
     explicit EdgeTable (const Rectangle<float>& rectangleToAdd);
@@ -207,4 +207,4 @@ private:
 };
 
 
-#endif   // __JUCE_EDGETABLE_JUCEHEADER__
+#endif   // JUCE_EDGETABLE_H_INCLUDED

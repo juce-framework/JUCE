@@ -47,10 +47,8 @@
 #include <string.h> /* for memcpy() */
 #include <sys/types.h> /* for off_t */
 #if defined _MSC_VER || defined __BORLANDC__ || defined __MINGW32__
-#if _MSC_VER <= 1700 || defined __BORLANDC__ /* @@@ [2G limit] */
 #define fseeko fseek
 #define ftello ftell
-#endif
 #endif
 #include "../assert.h"
 #include "../alloc.h"
@@ -2660,7 +2658,7 @@ void update_metadata_(const FLAC__StreamEncoder *encoder)
 			b[3] = (FLAC__byte)xx; xx >>= 8;
 			b[2] = (FLAC__byte)xx; xx >>= 8;
 			b[1] = (FLAC__byte)xx; xx >>= 8;
-			b[0] = (FLAC__byte)xx; xx >>= 8;
+			b[0] = (FLAC__byte)xx; //xx >>= 8;
 			xx = encoder->private_->seek_table->points[i].stream_offset;
 			b[15] = (FLAC__byte)xx; xx >>= 8;
 			b[14] = (FLAC__byte)xx; xx >>= 8;
@@ -2669,10 +2667,10 @@ void update_metadata_(const FLAC__StreamEncoder *encoder)
 			b[11] = (FLAC__byte)xx; xx >>= 8;
 			b[10] = (FLAC__byte)xx; xx >>= 8;
 			b[9] = (FLAC__byte)xx; xx >>= 8;
-			b[8] = (FLAC__byte)xx; xx >>= 8;
+			b[8] = (FLAC__byte)xx; //xx >>= 8;
 			x = encoder->private_->seek_table->points[i].frame_samples;
 			b[17] = (FLAC__byte)x; x >>= 8;
-			b[16] = (FLAC__byte)x; x >>= 8;
+			b[16] = (FLAC__byte)x; //x >>= 8;
 			if(encoder->private_->write_callback(encoder, b, 18, 0, 0, encoder->private_->client_data) != FLAC__STREAM_ENCODER_WRITE_STATUS_OK) {
 				encoder->protected_->state = FLAC__STREAM_ENCODER_CLIENT_ERROR;
 				return;

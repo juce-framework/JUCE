@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_MIDIKEYBOARDCOMPONENT_JUCEHEADER__
-#define __JUCE_MIDIKEYBOARDCOMPONENT_JUCEHEADER__
+#ifndef JUCE_MIDIKEYBOARDCOMPONENT_H_INCLUDED
+#define JUCE_MIDIKEYBOARDCOMPONENT_H_INCLUDED
 
 
 //==============================================================================
@@ -146,13 +146,11 @@ public:
                             int highestNote);
 
     /** Returns the first note in the available range.
-
         @see setAvailableRange
     */
     int getRangeStart() const noexcept                              { return rangeStart; }
 
     /** Returns the last note in the available range.
-
         @see setAvailableRange
     */
     int getRangeEnd() const noexcept                                { return rangeEnd; }
@@ -166,7 +164,6 @@ public:
     void setLowestVisibleKey (int noteNumber);
 
     /** Returns the number of the first key shown in the component.
-
         @see setLowestVisibleKey
     */
     int getLowestVisibleKey() const noexcept                        { return (int) firstKey; }
@@ -211,7 +208,6 @@ public:
 
     //==============================================================================
     /** Deletes all key-mappings.
-
         @see setKeyPressForNote
     */
     void clearKeyMappings();
@@ -228,7 +224,6 @@ public:
                              int midiNoteOffsetFromC);
 
     /** Removes any key-mappings for a given note.
-
         For a description of what the note number means, see setKeyPressForNote().
     */
     void removeKeyPressForNote (int midiNoteOffsetFromC);
@@ -264,35 +259,35 @@ public:
 
     //==============================================================================
     /** @internal */
-    void paint (Graphics&);
+    void paint (Graphics&) override;
     /** @internal */
-    void resized();
+    void resized() override;
     /** @internal */
-    void mouseMove (const MouseEvent&);
+    void mouseMove (const MouseEvent&) override;
     /** @internal */
-    void mouseDrag (const MouseEvent&);
+    void mouseDrag (const MouseEvent&) override;
     /** @internal */
-    void mouseDown (const MouseEvent&);
+    void mouseDown (const MouseEvent&) override;
     /** @internal */
-    void mouseUp (const MouseEvent&);
+    void mouseUp (const MouseEvent&) override;
     /** @internal */
-    void mouseEnter (const MouseEvent&);
+    void mouseEnter (const MouseEvent&) override;
     /** @internal */
-    void mouseExit (const MouseEvent&);
+    void mouseExit (const MouseEvent&) override;
     /** @internal */
-    void mouseWheelMove (const MouseEvent&, const MouseWheelDetails&);
+    void mouseWheelMove (const MouseEvent&, const MouseWheelDetails&) override;
     /** @internal */
-    void timerCallback();
+    void timerCallback() override;
     /** @internal */
-    bool keyStateChanged (bool isKeyDown);
+    bool keyStateChanged (bool isKeyDown) override;
     /** @internal */
-    void focusLost (FocusChangeType);
+    void focusLost (FocusChangeType) override;
     /** @internal */
-    void handleNoteOn (MidiKeyboardState*, int midiChannel, int midiNoteNumber, float velocity);
+    void handleNoteOn (MidiKeyboardState*, int midiChannel, int midiNoteNumber, float velocity) override;
     /** @internal */
-    void handleNoteOff (MidiKeyboardState*, int midiChannel, int midiNoteNumber);
+    void handleNoteOff (MidiKeyboardState*, int midiChannel, int midiNoteNumber) override;
     /** @internal */
-    void colourChanged();
+    void colourChanged() override;
 
 protected:
     //==============================================================================
@@ -349,10 +344,14 @@ protected:
     virtual bool mouseDownOnKey (int midiNoteNumber, const MouseEvent& e);
 
     /** Callback when the mouse is dragged from one key onto another.
-
         @see mouseDownOnKey
     */
     virtual void mouseDraggedToKey (int midiNoteNumber, const MouseEvent& e);
+
+    /** Callback when the mouse is released from a key.
+        @see mouseDownOnKey
+    */
+    virtual void mouseUpOnKey (int midiNoteNumber, const MouseEvent& e);
 
     /** Calculates the positon of a given midi-note.
 
@@ -390,8 +389,7 @@ private:
 
     Array <KeyPress> keyPresses;
     Array <int> keyPressNotes;
-    int keyMappingOctave;
-    int octaveNumForMiddleC;
+    int keyMappingOctave, octaveNumForMiddleC;
 
     static const uint8 whiteNotes[];
     static const uint8 blackNotes[];
@@ -410,4 +408,4 @@ private:
 };
 
 
-#endif   // __JUCE_MIDIKEYBOARDCOMPONENT_JUCEHEADER__
+#endif   // JUCE_MIDIKEYBOARDCOMPONENT_H_INCLUDED

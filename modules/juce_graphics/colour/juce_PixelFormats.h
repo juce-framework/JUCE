@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_PIXELFORMATS_JUCEHEADER__
-#define __JUCE_PIXELFORMATS_JUCEHEADER__
+#ifndef JUCE_PIXELFORMATS_H_INCLUDED
+#define JUCE_PIXELFORMATS_H_INCLUDED
 
 
 //==============================================================================
@@ -601,4 +601,4 @@ private:
  #pragma pack (pop)
 #endif
 
-#endif   // __JUCE_PIXELFORMATS_JUCEHEADER__
+#endif   // JUCE_PIXELFORMATS_H_INCLUDED

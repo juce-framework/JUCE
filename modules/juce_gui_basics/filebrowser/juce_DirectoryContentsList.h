@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_DIRECTORYCONTENTSLIST_JUCEHEADER__
-#define __JUCE_DIRECTORYCONTENTSLIST_JUCEHEADER__
+#ifndef JUCE_DIRECTORYCONTENTSLIST_H_INCLUDED
+#define JUCE_DIRECTORYCONTENTSLIST_H_INCLUDED
 
 #include "juce_FileFilter.h"
 
@@ -213,4 +213,4 @@ private:
 };
 
 
-#endif   // __JUCE_DIRECTORYCONTENTSLIST_JUCEHEADER__
+#endif   // JUCE_DIRECTORYCONTENTSLIST_H_INCLUDED

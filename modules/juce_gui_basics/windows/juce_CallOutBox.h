@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_CALLOUTBOX_JUCEHEADER__
-#define __JUCE_CALLOUTBOX_JUCEHEADER__
+#ifndef JUCE_CALLOUTBOX_H_INCLUDED
+#define JUCE_CALLOUTBOX_H_INCLUDED
 
 #include "../components/juce_Component.h"
 
@@ -37,16 +37,19 @@
     other component - but it looks fancier, and has an arrow that can indicate the
     object that it applies to.
 
-    Normally, you'd create one of these on the stack and run it modally, e.g.
+    The class works best when shown modally, but obviously running modal loops is
+    evil and must never be done, so the launchAsynchronously method is provided as
+    a handy way of launching an instance of a CallOutBox and automatically managing
+    its lifetime, e.g.
 
     @code
-    void mouseUp (const MouseEvent& e)
+    void mouseUp (const MouseEvent&)
     {
-        MyContentComponent content;
-        content.setSize (300, 300);
+        FoobarContentComp* content = new FoobarContentComp();
+        content->setSize (300, 300);
 
-        CallOutBox callOut (content, *this, nullptr);
-        callOut.runModalLoop();
+        CallOutBox& myBox
+            = CallOutBox::launchAsynchronously (content, getScreenBounds(), nullptr);
     }
     @endcode
 
@@ -97,7 +100,10 @@ public:
 
         This method will create and display a callout, returning immediately, after which
         the box will continue to run modally until the user clicks on some other component, at
-        which point it will be dismissed automatically.
+        which point it will be dismissed and deleted automatically.
+
+        It returns a reference to the newly-created box so that you can customise it, but don't
+        keep a pointer to it, as it'll be deleted at some point when it gets closed.
 
         @param contentComponent     the component to display inside the call-out. This should
                                     already have a size set (although the call-out will also
@@ -116,21 +122,21 @@ public:
 
     //==============================================================================
     /** @internal */
-    void paint (Graphics& g);
+    void paint (Graphics&) override;
     /** @internal */
-    void resized();
+    void resized() override;
     /** @internal */
-    void moved();
+    void moved() override;
     /** @internal */
-    void childBoundsChanged (Component*);
+    void childBoundsChanged (Component*) override;
     /** @internal */
-    bool hitTest (int x, int y);
+    bool hitTest (int x, int y) override;
     /** @internal */
-    void inputAttemptWhenModal();
+    void inputAttemptWhenModal() override;
     /** @internal */
-    bool keyPressed (const KeyPress& key);
+    bool keyPressed (const KeyPress&) override;
     /** @internal */
-    void handleCommandMessage (int commandId);
+    void handleCommandMessage (int) override;
 
 private:
     //==============================================================================
@@ -148,4 +154,4 @@ private:
 };
 
 
-#endif   // __JUCE_CALLOUTBOX_JUCEHEADER__
+#endif   // JUCE_CALLOUTBOX_H_INCLUDED

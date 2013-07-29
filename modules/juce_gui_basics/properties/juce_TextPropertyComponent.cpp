@@ -39,18 +39,18 @@ public:
         setColour (textColourId,       owner.findColour (TextPropertyComponent::textColourId));
     }
 
-    bool isInterestedInFileDrag (const StringArray&)
+    bool isInterestedInFileDrag (const StringArray&) override
     {
         return true;
     }
 
-    void filesDropped (const StringArray& files, int, int)
+    void filesDropped (const StringArray& files, int, int) override
     {
         setText (getText() + files.joinIntoString (isMultiline ? "\n" : ", "), sendNotificationSync);
         showEditor();
     }
 
-    TextEditor* createEditorComponent()
+    TextEditor* createEditorComponent() override
     {
         TextEditor* const ed = Label::createEditorComponent();
         ed->setInputRestrictions (maxChars);
@@ -64,7 +64,7 @@ public:
         return ed;
     }
 
-    void textWasEdited()
+    void textWasEdited() override
     {
         owner.textWasEdited();
     }

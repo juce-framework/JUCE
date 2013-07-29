@@ -26,8 +26,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_OUTPUTSTREAM_JUCEHEADER__
-#define __JUCE_OUTPUTSTREAM_JUCEHEADER__
+#ifndef JUCE_OUTPUTSTREAM_H_INCLUDED
+#define JUCE_OUTPUTSTREAM_H_INCLUDED
 
 #include "../text/juce_String.h"
 #include "../text/juce_NewLine.h"
@@ -95,75 +95,88 @@ public:
 
     //==============================================================================
     /** Writes a single byte to the stream.
-
+        @returns false if the write operation fails for some reason
         @see InputStream::readByte
     */
-    virtual void writeByte (char byte);
+    virtual bool writeByte (char byte);
 
     /** Writes a boolean to the stream as a single byte.
         This is encoded as a binary byte (not as text) with a value of 1 or 0.
+        @returns false if the write operation fails for some reason
         @see InputStream::readBool
     */
-    virtual void writeBool (bool boolValue);
+    virtual bool writeBool (bool boolValue);
 
     /** Writes a 16-bit integer to the stream in a little-endian byte order.
         This will write two bytes to the stream: (value & 0xff), then (value >> 8).
+        @returns false if the write operation fails for some reason
         @see InputStream::readShort
     */
-    virtual void writeShort (short value);
+    virtual bool writeShort (short value);
 
     /** Writes a 16-bit integer to the stream in a big-endian byte order.
         This will write two bytes to the stream: (value >> 8), then (value & 0xff).
+        @returns false if the write operation fails for some reason
         @see InputStream::readShortBigEndian
     */
-    virtual void writeShortBigEndian (short value);
+    virtual bool writeShortBigEndian (short value);
 
     /** Writes a 32-bit integer to the stream in a little-endian byte order.
+        @returns false if the write operation fails for some reason
         @see InputStream::readInt
     */
-    virtual void writeInt (int value);
+    virtual bool writeInt (int value);
 
     /** Writes a 32-bit integer to the stream in a big-endian byte order.
+        @returns false if the write operation fails for some reason
         @see InputStream::readIntBigEndian
     */
-    virtual void writeIntBigEndian (int value);
+    virtual bool writeIntBigEndian (int value);
 
     /** Writes a 64-bit integer to the stream in a little-endian byte order.
+        @returns false if the write operation fails for some reason
         @see InputStream::readInt64
     */
-    virtual void writeInt64 (int64 value);
+    virtual bool writeInt64 (int64 value);
 
     /** Writes a 64-bit integer to the stream in a big-endian byte order.
+        @returns false if the write operation fails for some reason
         @see InputStream::readInt64BigEndian
     */
-    virtual void writeInt64BigEndian (int64 value);
+    virtual bool writeInt64BigEndian (int64 value);
 
     /** Writes a 32-bit floating point value to the stream in a binary format.
         The binary 32-bit encoding of the float is written as a little-endian int.
+        @returns false if the write operation fails for some reason
         @see InputStream::readFloat
     */
-    virtual void writeFloat (float value);
+    virtual bool writeFloat (float value);
 
     /** Writes a 32-bit floating point value to the stream in a binary format.
         The binary 32-bit encoding of the float is written as a big-endian int.
+        @returns false if the write operation fails for some reason
         @see InputStream::readFloatBigEndian
     */
-    virtual void writeFloatBigEndian (float value);
+    virtual bool writeFloatBigEndian (float value);
 
     /** Writes a 64-bit floating point value to the stream in a binary format.
         The eight raw bytes of the double value are written out as a little-endian 64-bit int.
+        @returns false if the write operation fails for some reason
         @see InputStream::readDouble
     */
-    virtual void writeDouble (double value);
+    virtual bool writeDouble (double value);
 
     /** Writes a 64-bit floating point value to the stream in a binary format.
         The eight raw bytes of the double value are written out as a big-endian 64-bit int.
         @see InputStream::readDoubleBigEndian
+        @returns false if the write operation fails for some reason
     */
-    virtual void writeDoubleBigEndian (double value);
+    virtual bool writeDoubleBigEndian (double value);
 
-    /** Writes a byte to the output stream a given number of times. */
-    virtual void writeRepeatedByte (uint8 byte, size_t numTimesToRepeat);
+    /** Writes a byte to the output stream a given number of times.
+        @returns false if the write operation fails for some reason
+    */
+    virtual bool writeRepeatedByte (uint8 byte, size_t numTimesToRepeat);
 
     /** Writes a condensed binary encoding of a 32-bit integer.
 
@@ -173,9 +186,10 @@ public:
 
         The format used is: number of significant bytes + up to 4 bytes in little-endian order.
 
+        @returns false if the write operation fails for some reason
         @see InputStream::readCompressedInt
     */
-    virtual void writeCompressedInt (int value);
+    virtual bool writeCompressedInt (int value);
 
     /** Stores a string in the stream in a binary format.
 
@@ -187,9 +201,10 @@ public:
 
         For appending text to a file, instead use writeText, or operator<<
 
+        @returns false if the write operation fails for some reason
         @see InputStream::readString, writeText, operator<<
     */
-    virtual void writeString (const String& text);
+    virtual bool writeString (const String& text);
 
     /** Writes a string of text to the stream.
 
@@ -198,8 +213,9 @@ public:
         of a file).
 
         The method also replaces '\\n' characters in the text with '\\r\\n'.
+        @returns false if the write operation fails for some reason
     */
-    virtual void writeText (const String& text,
+    virtual bool writeText (const String& text,
                             bool asUTF16,
                             bool writeUTF16ByteOrderMark);
 
@@ -209,6 +225,7 @@ public:
         @param maxNumBytesToWrite   the number of bytes to read from the stream (if this is
                                     less than zero, it will keep reading until the input
                                     is exhausted)
+        @returns the number of bytes written
     */
     virtual int writeFromInputStream (InputStream& source, int64 maxNumBytesToWrite);
 
@@ -264,4 +281,4 @@ JUCE_API OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, InputStre
 JUCE_API OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, const NewLine&);
 
 
-#endif   // __JUCE_OUTPUTSTREAM_JUCEHEADER__
+#endif   // JUCE_OUTPUTSTREAM_H_INCLUDED

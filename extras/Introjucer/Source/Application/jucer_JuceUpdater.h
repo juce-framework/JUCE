@@ -74,11 +74,11 @@ private:
     int getNumCheckedModules() const;
     bool isLatestVersion (const String& moduleID) const;
 
-    void valueTreePropertyChanged (ValueTree&, const Identifier&);
-    void valueTreeChildAdded (ValueTree&, ValueTree&);
-    void valueTreeChildRemoved (ValueTree&, ValueTree&);
-    void valueTreeChildOrderChanged (ValueTree&);
-    void valueTreeParentChanged (ValueTree&);
+    void valueTreePropertyChanged (ValueTree&, const Identifier&) override;
+    void valueTreeChildAdded (ValueTree&, ValueTree&) override;
+    void valueTreeChildRemoved (ValueTree&, ValueTree&) override;
+    void valueTreeChildOrderChanged (ValueTree&) override;
+    void valueTreeParentChanged (ValueTree&) override;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (JuceUpdater)
 };

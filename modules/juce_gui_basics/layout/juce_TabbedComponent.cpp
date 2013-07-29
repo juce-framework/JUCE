@@ -145,7 +145,7 @@ void TabbedComponent::clearTabs()
 }
 
 void TabbedComponent::addTab (const String& tabName,
-                              const Colour& tabBackgroundColour,
+                              Colour tabBackgroundColour,
                               Component* const contentComponent,
                               const bool deleteComponentWhenNotNeeded,
                               const int insertIndex)
@@ -194,7 +194,7 @@ Colour TabbedComponent::getTabBackgroundColour (const int tabIndex) const noexce
     return tabs->getTabBackgroundColour (tabIndex);
 }
 
-void TabbedComponent::setTabBackgroundColour (const int tabIndex, const Colour& newColour)
+void TabbedComponent::setTabBackgroundColour (const int tabIndex, Colour newColour)
 {
     tabs->setTabBackgroundColour (tabIndex, newColour);
 
@@ -244,7 +244,7 @@ void TabbedComponent::paint (Graphics& g)
 
     if (outlineThickness > 0)
     {
-        RectangleList rl (content);
+        RectangleList<int> rl (content);
         rl.subtract (outline.subtractedFrom (content));
 
         g.reduceClipRegion (rl);

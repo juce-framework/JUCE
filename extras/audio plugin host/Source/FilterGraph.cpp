@@ -244,7 +244,7 @@ Result FilterGraph::saveDocument (const File& file)
 File FilterGraph::getLastDocumentOpened()
 {
     RecentlyOpenedFilesList recentFiles;
-    recentFiles.restoreFromString (appProperties->getUserSettings()
+    recentFiles.restoreFromString (getAppProperties().getUserSettings()
                                         ->getValue ("recentFilterGraphFiles"));
 
     return recentFiles.getFile (0);
@@ -253,12 +253,12 @@ File FilterGraph::getLastDocumentOpened()
 void FilterGraph::setLastDocumentOpened (const File& file)
 {
     RecentlyOpenedFilesList recentFiles;
-    recentFiles.restoreFromString (appProperties->getUserSettings()
+    recentFiles.restoreFromString (getAppProperties().getUserSettings()
                                         ->getValue ("recentFilterGraphFiles"));
 
     recentFiles.addFile (file);
 
-    appProperties->getUserSettings()
+    getAppProperties().getUserSettings()
         ->setValue ("recentFilterGraphFiles", recentFiles.toString());
 }
 

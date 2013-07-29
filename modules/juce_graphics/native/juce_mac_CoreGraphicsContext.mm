@@ -50,12 +50,12 @@ public:
         CGContextRelease (context);
     }
 
-    LowLevelGraphicsContext* createLowLevelContext()
+    LowLevelGraphicsContext* createLowLevelContext() override
     {
         return new CoreGraphicsContext (context, height, 1.0f);
     }
 
-    void initialiseBitmapData (Image::BitmapData& bitmap, int x, int y, Image::BitmapData::ReadWriteMode)
+    void initialiseBitmapData (Image::BitmapData& bitmap, int x, int y, Image::BitmapData::ReadWriteMode) override
     {
         bitmap.data = imageData + x * pixelStride + y * lineStride;
         bitmap.pixelFormat = pixelFormat;
@@ -63,14 +63,14 @@ public:
         bitmap.pixelStride = pixelStride;
     }
 
-    ImagePixelData* clone()
+    ImagePixelData* clone() override
     {
         CoreGraphicsImage* im = new CoreGraphicsImage (pixelFormat, width, height, false);
         memcpy (im->imageData, imageData, lineStride * height);
         return im;
     }
 
-    ImageType* createType() const    { return new NativeImageType(); }
+    ImageType* createType() const override    { return new NativeImageType(); }
 
     //==============================================================================
     static CGImageRef createImage (const Image& juceImage, CGColorSpaceRef colourSpace,
@@ -192,7 +192,7 @@ bool CoreGraphicsContext::clipToRectangle (const Rectangle<int>& r)
     return ! isClipEmpty();
 }
 
-bool CoreGraphicsContext::clipToRectangleListWithoutTest (const RectangleList& clipRegion)
+bool CoreGraphicsContext::clipToRectangleListWithoutTest (const RectangleList<int>& clipRegion)
 {
     if (clipRegion.isEmpty())
     {
@@ -216,14 +216,14 @@ bool CoreGraphicsContext::clipToRectangleListWithoutTest (const RectangleList& c
     }
 }
 
-bool CoreGraphicsContext::clipToRectangleList (const RectangleList& clipRegion)
+bool CoreGraphicsContext::clipToRectangleList (const RectangleList<int>& clipRegion)
 {
     return clipToRectangleListWithoutTest (clipRegion) && ! isClipEmpty();
 }
 
 void CoreGraphicsContext::excludeClipRectangle (const Rectangle<int>& r)
 {
-    RectangleList remaining (getClipBounds());
+    RectangleList<int> remaining (getClipBounds());
     remaining.subtract (r);
     clipToRectangleListWithoutTest (remaining);
 }
@@ -520,8 +520,8 @@ void CoreGraphicsContext::drawVerticalLine (const int x, float top, float bottom
        #if MAC_OS_X_VERSION_MIN_REQUIRED > MAC_OS_X_VERSION_10_5
         CGContextFillRect (context, CGRectMake (x, flipHeight - bottom, 1.0f, bottom - top));
        #else
-        // On Leopard, unless both co-ordinates are non-integer, it disables anti-aliasing, so nudge
-        // the x co-ord slightly to trick it..
+        // On Leopard, unless both coordinates are non-integer, it disables anti-aliasing, so nudge
+        // the x coordinate slightly to trick it..
         CGContextFillRect (context, CGRectMake (x + 1.0f / 256.0f, flipHeight - bottom, 1.0f + 1.0f / 256.0f, bottom - top));
        #endif
     }
@@ -538,8 +538,8 @@ void CoreGraphicsContext::drawHorizontalLine (const int y, float left, float rig
        #if MAC_OS_X_VERSION_MIN_REQUIRED > MAC_OS_X_VERSION_10_5
         CGContextFillRect (context, CGRectMake (left, flipHeight - (y + 1.0f), right - left, 1.0f));
        #else
-        // On Leopard, unless both co-ordinates are non-integer, it disables anti-aliasing, so nudge
-        // the x co-ord slightly to trick it..
+        // On Leopard, unless both coordinates are non-integer, it disables anti-aliasing, so nudge
+        // the x coordinate slightly to trick it..
         CGContextFillRect (context, CGRectMake (left, flipHeight - (y + (1.0f + 1.0f / 256.0f)), right - left, 1.0f + 1.0f / 256.0f));
        #endif
     }
@@ -619,6 +619,7 @@ bool CoreGraphicsContext::drawTextLayout (const AttributedString& text, const Re
     CoreTextTypeLayout::drawToCGContext (text, area, context, flipHeight);
     return true;
    #else
+    (void) text; (void) area;
     return false;
    #endif
 }

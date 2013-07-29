@@ -22,14 +22,11 @@
   ==============================================================================
 */
 
-ShapeButton::ShapeButton (const String& text_,
-                          const Colour& normalColour_,
-                          const Colour& overColour_,
-                          const Colour& downColour_)
-  : Button (text_),
-    normalColour (normalColour_),
-    overColour (overColour_),
-    downColour (downColour_),
+ShapeButton::ShapeButton (const String& t, Colour n, Colour o, Colour d)
+  : Button (t),
+    normalColour (n),
+    overColour (o),
+    downColour (d),
     maintainShapeProportions (false),
     outlineWidth (0.0f)
 {
@@ -39,16 +36,16 @@ ShapeButton::~ShapeButton()
 {
 }
 
-void ShapeButton::setColours (const Colour& newNormalColour,
-                              const Colour& newOverColour,
-                              const Colour& newDownColour)
+void ShapeButton::setColours (Colour newNormalColour,
+                              Colour newOverColour,
+                              Colour newDownColour)
 {
     normalColour = newNormalColour;
     overColour = newOverColour;
     downColour = newDownColour;
 }
 
-void ShapeButton::setOutline (const Colour& newOutlineColour,
+void ShapeButton::setOutline (Colour newOutlineColour,
                               const float newOutlineWidth)
 {
     outlineColour = newOutlineColour;
@@ -71,13 +68,16 @@ void ShapeButton::setShape (const Path& newShape,
         Rectangle<float> newBounds (shape.getBounds());
 
         if (hasShadow)
-            newBounds.expand (4.0f, 4.0f);
+            newBounds = newBounds.expanded (4.0f);
 
-        shape.applyTransform (AffineTransform::translation (-newBounds.getX(), -newBounds.getY()));
+        shape.applyTransform (AffineTransform::translation (-newBounds.getX(),
+                                                            -newBounds.getY()));
 
         setSize (1 + (int) (newBounds.getWidth() + outlineWidth),
                  1 + (int) (newBounds.getHeight() + outlineWidth));
     }
+
+    repaint();
 }
 
 void ShapeButton::paintButton (Graphics& g, bool isMouseOverButton, bool isButtonDown)
@@ -88,25 +88,24 @@ void ShapeButton::paintButton (Graphics& g, bool isMouseOverButton, bool isButto
         isButtonDown = false;
     }
 
+    Rectangle<float> r (getLocalBounds().toFloat().reduced (outlineWidth * 0.5f));
+
+    if (getComponentEffect() != nullptr)
+        r = r.reduced (2.0f);
+
+    if (isButtonDown)
+    {
+        const float sizeReductionWhenPressed = 0.04f;
+
+        r = r.reduced (sizeReductionWhenPressed * r.getWidth(),
+                       sizeReductionWhenPressed * r.getHeight());
+    }
+
+    const AffineTransform trans (shape.getTransformToScaleToFit (r, maintainShapeProportions));
+
     g.setColour (isButtonDown ? downColour
                               : isMouseOverButton ? overColour
                                                   : normalColour);
-
-    int w = getWidth();
-    int h = getHeight();
-
-    if (getComponentEffect() != nullptr)
-    {
-        w -= 4;
-        h -= 4;
-    }
-
-    const float offset = (outlineWidth * 0.5f) + (isButtonDown ? 1.5f : 0.0f);
-
-    const AffineTransform trans (shape.getTransformToScaleToFit (offset, offset,
-                                                                 w - offset - outlineWidth,
-                                                                 h - offset - outlineWidth,
-                                                                 maintainShapeProportions));
     g.fillPath (shape, trans);
 
     if (outlineWidth > 0.0f)

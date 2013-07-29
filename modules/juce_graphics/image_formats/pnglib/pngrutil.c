@@ -456,7 +456,7 @@ png_inflate(png_structrp png_ptr, png_uint_32 owner, int finish,
       do
       {
          uInt avail;
-         Byte local_buffer[PNG_INFLATE_BUF_SIZE];
+         unsigned char local_buffer[PNG_INFLATE_BUF_SIZE];
 
          /* zlib INPUT BUFFER */
          /* The setting of 'avail_in' used to be outside the loop; by setting it
@@ -1360,8 +1360,8 @@ png_handle_iCCP(png_structrp png_ptr, png_inforp info_ptr, png_uint_32 length)
             if (png_inflate_claim(png_ptr, png_iCCP,
                png_ptr->flags & PNG_FLAG_BENIGN_ERRORS_WARN ? 15 : 0) == Z_OK)
             {
-               Byte profile_header[132];
-               Byte local_buffer[PNG_INFLATE_BUF_SIZE];
+               unsigned char profile_header[132];
+               unsigned char local_buffer[PNG_INFLATE_BUF_SIZE];
                png_alloc_size_t size = (sizeof profile_header);
 
                png_ptr->zstream.next_in = (Bytef*)keyword + (keyword_length+2);
@@ -3862,7 +3862,7 @@ png_read_filter_row_paeth_multibyte_pixel(png_row_infop row_info, png_bytep row,
       if (pb < pa) pa = pb, a = b;
       if (pc < pa) a = c;
 
-      c = b;
+      //c = b;
       a += *row;
       *row++ = (png_byte)a;
    }

@@ -628,7 +628,7 @@ public:
         callback = newCallback;
     }
 
-    void run()
+    void run() override
     {
         while (! threadShouldExit())
         {

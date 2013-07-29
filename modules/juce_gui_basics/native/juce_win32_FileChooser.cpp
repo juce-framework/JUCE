@@ -101,12 +101,12 @@ namespace FileChooserHelpers
             setSize (jlimit (20, 800, customComp->getWidth()), customComp->getHeight());
         }
 
-        void paint (Graphics& g)
+        void paint (Graphics& g) override
         {
             g.fillAll (Colours::lightgrey);
         }
 
-        void resized()
+        void resized() override
         {
             if (Component* const c = getChildComponent(0))
                 c->setBounds (getLocalBounds());

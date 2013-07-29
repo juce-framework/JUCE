@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_ASYNCUPDATER_JUCEHEADER__
-#define __JUCE_ASYNCUPDATER_JUCEHEADER__
+#ifndef JUCE_ASYNCUPDATER_H_INCLUDED
+#define JUCE_ASYNCUPDATER_H_INCLUDED
 
 
 //==============================================================================
@@ -106,4 +106,4 @@ private:
 };
 
 
-#endif   // __JUCE_ASYNCUPDATER_JUCEHEADER__
+#endif   // JUCE_ASYNCUPDATER_H_INCLUDED

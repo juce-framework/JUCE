@@ -1180,7 +1180,7 @@ void AudioProcessorGraph::clearRenderingSequence()
 
     {
         const ScopedLock sl (getCallbackLock());
-        renderingOps.swapWithArray (oldOps);
+        renderingOps.swapWith (oldOps);
     }
 
     deleteRenderOpArray (oldOps);
@@ -1254,7 +1254,7 @@ void AudioProcessorGraph::buildRenderingSequence()
         while (midiBuffers.size() < numMidiBuffersNeeded)
             midiBuffers.add (new MidiBuffer());
 
-        renderingOps.swapWithArray (newRenderingOps);
+        renderingOps.swapWith (newRenderingOps);
     }
 
     // delete the old ones..

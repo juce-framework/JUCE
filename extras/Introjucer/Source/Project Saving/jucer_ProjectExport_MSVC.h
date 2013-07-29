@@ -36,12 +36,12 @@ public:
     }
 
     //==============================================================================
-    bool usesMMFiles() const            { return false; }
-    bool isVisualStudio() const         { return true; }
-    bool isWindows() const              { return true; }
-    bool canCopeWithDuplicateFiles()    { return false; }
+    bool usesMMFiles() const override            { return false; }
+    bool isVisualStudio() const override         { return true; }
+    bool isWindows() const override              { return true; }
+    bool canCopeWithDuplicateFiles() override    { return false; }
 
-    bool launchProject()
+    bool launchProject() override
     {
        #if JUCE_WINDOWS
         return getSLNFile().startAsProcess();
@@ -50,7 +50,16 @@ public:
        #endif
     }
 
-    void createExporterProperties (PropertyListBuilder&)
+    bool canLaunchProject() override
+    {
+       #if JUCE_WINDOWS
+        return true;
+       #else
+        return false;
+       #endif
+    }
+
+    void createExporterProperties (PropertyListBuilder&) override
     {
     }
 
@@ -164,7 +173,7 @@ protected:
             return target;
         }
 
-        void createConfigProperties (PropertyListBuilder& props)
+        void createConfigProperties (PropertyListBuilder& props) override
         {
             props.add (new TextPropertyComponent (getIntermediatesPathValue(), "Intermediates path", 2048, false),
                        "An optional path to a folder to use for the intermediate build files. Note that Visual Studio allows "
@@ -197,8 +206,8 @@ protected:
             if (! isDebug())
                 props.add (new BooleanPropertyComponent (shouldGenerateDebugSymbolsValue(), "Debug Symbols", "Force generation of debug symbols"));
 
-            props.add (new TextPropertyComponent (getPrebuildCommand(),  "Pre-build Command",  2048, false));
-            props.add (new TextPropertyComponent (getPostbuildCommand(), "Post-build Command", 2048, false));
+            props.add (new TextPropertyComponent (getPrebuildCommand(),  "Pre-build Command",  2048, true));
+            props.add (new TextPropertyComponent (getPostbuildCommand(), "Post-build Command", 2048, true));
             props.add (new BooleanPropertyComponent (shouldGenerateManifestValue(), "Manifest", "Generate Manifest"));
 
             {
@@ -211,7 +220,7 @@ protected:
         }
     };
 
-    BuildConfiguration::Ptr createBuildConfig (const ValueTree& v) const
+    BuildConfiguration::Ptr createBuildConfig (const ValueTree& v) const override
     {
         return new MSVCBuildConfiguration (project, v);
     }
@@ -557,7 +566,7 @@ public:
 
     static const char* getName()                    { return "Visual Studio 2008"; }
     static const char* getValueTreeTypeName()       { return "VS2008"; }
-    int getVisualStudioVersion() const              { return 9; }
+    int getVisualStudioVersion() const override     { return 9; }
 
     static MSVCProjectExporterVC2008* createForSettings (Project& project, const ValueTree& settings)
     {
@@ -916,7 +925,7 @@ public:
 
     static const char* getName()                    { return "Visual Studio 2005"; }
     static const char* getValueTreeTypeName()       { return "VS2005"; }
-    int getVisualStudioVersion() const              { return 8; }
+    int getVisualStudioVersion() const override     { return 8; }
 
     static MSVCProjectExporterVC2005* createForSettings (Project& project, const ValueTree& settings)
     {
@@ -945,9 +954,10 @@ public:
 
     static const char* getName()                { return "Visual Studio 2010"; }
     static const char* getValueTreeTypeName()   { return "VS2010"; }
-    int getVisualStudioVersion() const          { return 10; }
+    int getVisualStudioVersion() const override { return 10; }
     virtual String getPlatformToolset() const   { return "Windows7.1SDK"; }
     virtual String getSolutionComment() const   { return "# Visual Studio 2010"; }
+    virtual String getToolsVersion() const      { return "4.0"; }
 
     static MSVCProjectExporterVC2010* createForSettings (Project& project, const ValueTree& settings)
     {
@@ -1004,7 +1014,7 @@ protected:
         bool is64Bit() const                    { return config [Ids::winArchitecture].toString() == get64BitArchName(); }
 
         //==============================================================================
-        void createConfigProperties (PropertyListBuilder& props)
+        void createConfigProperties (PropertyListBuilder& props) override
         {
             MSVCBuildConfiguration::createConfigProperties (props);
 
@@ -1047,7 +1057,7 @@ protected:
     void fillInProjectXml (XmlElement& projectXml) const
     {
         projectXml.setAttribute ("DefaultTargets", "Build");
-        projectXml.setAttribute ("ToolsVersion", "4.0");
+        projectXml.setAttribute ("ToolsVersion", getToolsVersion());
         projectXml.setAttribute ("xmlns", "http://schemas.microsoft.com/developer/msbuild/2003");
 
         {
@@ -1441,7 +1451,7 @@ protected:
 
     void fillInFiltersXml (XmlElement& filterXml) const
     {
-        filterXml.setAttribute ("ToolsVersion", "4.0");
+        filterXml.setAttribute ("ToolsVersion", getToolsVersion());
         filterXml.setAttribute ("xmlns", "http://schemas.microsoft.com/developer/msbuild/2003");
 
         XmlElement* groupsXml  = filterXml.createNewChildElement ("ItemGroup");
@@ -1483,21 +1493,23 @@ protected:
 class MSVCProjectExporterVC2012 : public MSVCProjectExporterVC2010
 {
 public:
-    MSVCProjectExporterVC2012 (Project& p, const ValueTree& t)
-        : MSVCProjectExporterVC2010 (p, t, "VisualStudio2012")
+    MSVCProjectExporterVC2012 (Project& p, const ValueTree& t,
+                               const char* folderName = "VisualStudio2012")
+        : MSVCProjectExporterVC2010 (p, t, folderName)
     {
         name = getName();
     }
 
     static const char* getName()                { return "Visual Studio 2012"; }
     static const char* getValueTreeTypeName()   { return "VS2012"; }
-    int getVisualStudioVersion() const          { return 11; }
-    String getSolutionComment() const           { return "# Visual Studio 2012"; }
+    int getVisualStudioVersion() const override { return 11; }
+    String getSolutionComment() const override  { return "# Visual Studio 2012"; }
+    virtual String getDefaultToolset() const    { return "v110"; }
 
     String getPlatformToolset() const
     {
         const String s (settings [Ids::toolset].toString());
-        return s.isNotEmpty() ? s : "v110";
+        return s.isNotEmpty() ? s : getDefaultToolset();
     }
 
     Value getPlatformToolsetValue()             { return getSetting (Ids::toolset); }
@@ -1510,7 +1522,7 @@ public:
         return nullptr;
     }
 
-    void createExporterProperties (PropertyListBuilder& props)
+    void createExporterProperties (PropertyListBuilder& props) override
     {
         MSVCProjectExporterVC2010::createExporterProperties (props);
 
@@ -1523,7 +1535,7 @@ public:
     }
 
 private:
-    void addPlatformToolsetToPropertyGroup (XmlElement& p) const
+    void addPlatformToolsetToPropertyGroup (XmlElement& p) const override
     {
         forEachXmlChildElementWithTagName (p, e, "PropertyGroup")
         {
@@ -1535,4 +1547,45 @@ private:
     }
 
     JUCE_DECLARE_NON_COPYABLE (MSVCProjectExporterVC2012)
+};
+
+//==============================================================================
+class MSVCProjectExporterVC2013 : public MSVCProjectExporterVC2012
+{
+public:
+    MSVCProjectExporterVC2013 (Project& p, const ValueTree& t)
+        : MSVCProjectExporterVC2012 (p, t, "VisualStudio2013")
+    {
+        name = getName();
+    }
+
+    static const char* getName()                { return "Visual Studio 2013"; }
+    static const char* getValueTreeTypeName()   { return "VS2013"; }
+    int getVisualStudioVersion() const override { return 12; }
+    String getSolutionComment() const override  { return "# Visual Studio 2013"; }
+    String getToolsVersion() const override     { return "12.0"; }
+    String getDefaultToolset() const override   { return "v120"; }
+
+    static MSVCProjectExporterVC2013* createForSettings (Project& project, const ValueTree& settings)
+    {
+        if (settings.hasType (getValueTreeTypeName()))
+            return new MSVCProjectExporterVC2013 (project, settings);
+
+        return nullptr;
+    }
+
+    void createExporterProperties (PropertyListBuilder& props) override
+    {
+        MSVCProjectExporterVC2010::createExporterProperties (props);
+
+        const char* const toolsetNames[] = { "(default)", "v120", "v120_xp", nullptr };
+        const var toolsets[]             = { var(),       "v120", "v120_xp" };
+
+        props.add (new ChoicePropertyComponent (getPlatformToolsetValue(), "Platform Toolset",
+                                                StringArray (toolsetNames),
+                                                Array<var> (toolsets, numElementsInArray (toolsets))));
+    }
+
+private:
+    JUCE_DECLARE_NON_COPYABLE (MSVCProjectExporterVC2013)
 };

@@ -153,7 +153,7 @@ public:
                                                         idealWidth, idealHeight);
     }
 
-    void paint (Graphics& g)
+    void paint (Graphics& g) override
     {
         if (itemInfo.customComp == nullptr)
         {
@@ -180,7 +180,7 @@ public:
         }
     }
 
-    void resized()
+    void resized() override
     {
         if (Component* const child = getChildComponent (0))
             child->setBounds (getLocalBounds().reduced (2, 0));
@@ -290,7 +290,7 @@ public:
     }
 
     //==============================================================================
-    void paint (Graphics& g)
+    void paint (Graphics& g) override
     {
         if (isOpaque())
             g.fillAll (Colours::white);
@@ -298,7 +298,7 @@ public:
         getLookAndFeel().drawPopupMenuBackground (g, getWidth(), getHeight());
     }
 
-    void paintOverChildren (Graphics& g)
+    void paintOverChildren (Graphics& g) override
     {
         if (canScroll())
         {
@@ -362,18 +362,18 @@ public:
     }
 
     //==============================================================================
-    void mouseMove (const MouseEvent&)    { timerCallback(); }
-    void mouseDown (const MouseEvent&)    { timerCallback(); }
-    void mouseDrag (const MouseEvent&)    { timerCallback(); }
-    void mouseUp   (const MouseEvent&)    { timerCallback(); }
+    void mouseMove (const MouseEvent&) override    { timerCallback(); }
+    void mouseDown (const MouseEvent&) override    { timerCallback(); }
+    void mouseDrag (const MouseEvent&) override    { timerCallback(); }
+    void mouseUp   (const MouseEvent&) override    { timerCallback(); }
 
-    void mouseWheelMove (const MouseEvent&, const MouseWheelDetails& wheel)
+    void mouseWheelMove (const MouseEvent&, const MouseWheelDetails& wheel) override
     {
         alterChildYPos (roundToInt (-10.0f * wheel.deltaY * PopupMenuSettings::scrollZone));
         lastMousePos = Point<int> (-1, -1);
     }
 
-    bool keyPressed (const KeyPress& key)
+    bool keyPressed (const KeyPress& key) override
     {
         if (key.isKeyCode (KeyPress::downKey))
         {
@@ -432,7 +432,7 @@ public:
         return true;
     }
 
-    void inputAttemptWhenModal()
+    void inputAttemptWhenModal() override
     {
         WeakReference<Component> deletionChecker (this);
 
@@ -461,7 +461,7 @@ public:
         }
     }
 
-    void handleCommandMessage (int commandId)
+    void handleCommandMessage (int commandId) override
     {
         Component::handleCommandMessage (commandId);
 
@@ -470,7 +470,7 @@ public:
     }
 
     //==============================================================================
-    void timerCallback()
+    void timerCallback() override
     {
         if (! isVisible())
             return;
@@ -1150,14 +1150,14 @@ PopupMenu& PopupMenu::operator= (const PopupMenu& other)
 PopupMenu::PopupMenu (PopupMenu&& other) noexcept
     : lookAndFeel (other.lookAndFeel)
 {
-    items.swapWithArray (other.items);
+    items.swapWith (other.items);
 }
 
 PopupMenu& PopupMenu::operator= (PopupMenu&& other) noexcept
 {
     jassert (this != &other); // hopefully the compiler should make this situation impossible!
 
-    items.swapWithArray (other.items);
+    items.swapWith (other.items);
     lookAndFeel = other.lookAndFeel;
     return *this;
 }
@@ -1234,13 +1234,13 @@ public:
         addAndMakeVisible (comp);
     }
 
-    void getIdealSize (int& idealWidth, int& idealHeight)
+    void getIdealSize (int& idealWidth, int& idealHeight) override
     {
         idealWidth = width;
         idealHeight = height;
     }
 
-    void resized()
+    void resized() override
     {
         if (Component* const child = getChildComponent(0))
             child->setBounds (getLocalBounds());
@@ -1303,7 +1303,7 @@ public:
         setName (name);
     }
 
-    void paint (Graphics& g)
+    void paint (Graphics& g) override
     {
         g.setFont (getLookAndFeel().getPopupMenuFont().boldened());
         g.setColour (findColour (PopupMenu::headerTextColourId));

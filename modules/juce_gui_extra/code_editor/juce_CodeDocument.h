@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_CODEDOCUMENT_JUCEHEADER__
-#define __JUCE_CODEDOCUMENT_JUCEHEADER__
+#ifndef JUCE_CODEDOCUMENT_H_INCLUDED
+#define JUCE_CODEDOCUMENT_H_INCLUDED
 
 class CodeDocumentLine;
 
@@ -347,9 +347,9 @@ public:
     /** Iterates the text in a CodeDocument.
 
         This class lets you read characters from a CodeDocument. It's designed to be used
-        by a SyntaxAnalyser object.
+        by a CodeTokeniser object.
 
-        @see CodeDocument, SyntaxAnalyser
+        @see CodeDocument
     */
     class JUCE_API  Iterator
     {
@@ -414,4 +414,4 @@ private:
 };
 
 
-#endif   // __JUCE_CODEDOCUMENT_JUCEHEADER__
+#endif   // JUCE_CODEDOCUMENT_H_INCLUDED

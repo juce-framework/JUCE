@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_AUDIOFORMATREADERSOURCE_JUCEHEADER__
-#define __JUCE_AUDIOFORMATREADERSOURCE_JUCEHEADER__
+#ifndef JUCE_AUDIOFORMATREADERSOURCE_H_INCLUDED
+#define JUCE_AUDIOFORMATREADERSOURCE_H_INCLUDED
 
 
 //==============================================================================
@@ -68,23 +68,23 @@ public:
 
     //==============================================================================
     /** Implementation of the AudioSource method. */
-    void prepareToPlay (int samplesPerBlockExpected, double sampleRate);
+    void prepareToPlay (int samplesPerBlockExpected, double sampleRate) override;
 
     /** Implementation of the AudioSource method. */
-    void releaseResources();
+    void releaseResources() override;
 
     /** Implementation of the AudioSource method. */
-    void getNextAudioBlock (const AudioSourceChannelInfo& bufferToFill);
+    void getNextAudioBlock (const AudioSourceChannelInfo& bufferToFill) override;
 
     //==============================================================================
     /** Implements the PositionableAudioSource method. */
-    void setNextReadPosition (int64 newPosition);
+    void setNextReadPosition (int64 newPosition) override;
 
     /** Implements the PositionableAudioSource method. */
-    int64 getNextReadPosition() const;
+    int64 getNextReadPosition() const override;
 
     /** Implements the PositionableAudioSource method. */
-    int64 getTotalLength() const;
+    int64 getTotalLength() const override;
 
 private:
     //==============================================================================
@@ -93,12 +93,8 @@ private:
     int64 volatile nextPlayPos;
     bool volatile looping;
 
-    void readBufferSection (int start, int length, AudioSampleBuffer& buffer, int startSample);
-
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioFormatReaderSource)
 };
 
 
-
-
-#endif   // __JUCE_AUDIOFORMATREADERSOURCE_JUCEHEADER__
+#endif   // JUCE_AUDIOFORMATREADERSOURCE_H_INCLUDED

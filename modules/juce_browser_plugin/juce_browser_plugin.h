@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_BROWSER_PLUGIN_JUCEHEADER__
-#define __JUCE_BROWSER_PLUGIN_JUCEHEADER__
+#ifndef JUCE_BROWSER_PLUGIN_H_INCLUDED
+#define JUCE_BROWSER_PLUGIN_H_INCLUDED
 
 #include "../juce_gui_basics/juce_gui_basics.h"
 
@@ -143,4 +143,4 @@ namespace juce
 juce::BrowserPluginComponent* JUCE_CALLTYPE createBrowserPlugin();
 
 
-#endif   // __JUCE_BROWSER_PLUGIN_JUCEHEADER__
+#endif   // JUCE_BROWSER_PLUGIN_H_INCLUDED

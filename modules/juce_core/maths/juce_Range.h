@@ -26,8 +26,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_RANGE_JUCEHEADER__
-#define __JUCE_RANGE_JUCEHEADER__
+#ifndef JUCE_RANGE_H_INCLUDED
+#define JUCE_RANGE_H_INCLUDED
 
 
 //==============================================================================
@@ -261,4 +261,4 @@ private:
 };
 
 
-#endif   // __JUCE_RANGE_JUCEHEADER__
+#endif   // JUCE_RANGE_H_INCLUDED

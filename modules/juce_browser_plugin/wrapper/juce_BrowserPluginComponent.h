@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_BROWSERPLUGINCOMPONENT_JUCEHEADER__
-#define __JUCE_BROWSERPLUGINCOMPONENT_JUCEHEADER__
+#ifndef JUCE_BROWSERPLUGINCOMPONENT_H_INCLUDED
+#define JUCE_BROWSERPLUGINCOMPONENT_H_INCLUDED
 
 //==============================================================================
 /**
@@ -69,4 +69,4 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (BrowserPluginComponent)
 };
 
-#endif   // __JUCE_BROWSERPLUGINCOMPONENT_JUCEHEADER__
+#endif   // JUCE_BROWSERPLUGINCOMPONENT_H_INCLUDED

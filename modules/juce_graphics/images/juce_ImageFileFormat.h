@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_IMAGEFILEFORMAT_JUCEHEADER__
-#define __JUCE_IMAGEFILEFORMAT_JUCEHEADER__
+#ifndef JUCE_IMAGEFILEFORMAT_H_INCLUDED
+#define JUCE_IMAGEFILEFORMAT_H_INCLUDED
 
 #include "juce_Image.h"
 
@@ -215,4 +215,4 @@ public:
 };
 
 
-#endif   // __JUCE_IMAGEFILEFORMAT_JUCEHEADER__
+#endif   // JUCE_IMAGEFILEFORMAT_H_INCLUDED

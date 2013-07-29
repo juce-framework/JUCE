@@ -728,6 +728,7 @@ String ComponentLayout::getComponentMemberVariableName (Component* comp) const
 
 void ComponentLayout::setComponentMemberVariableName (Component* comp, const String& newName)
 {
+    jassert (comp != nullptr);
     const String oldName (getComponentMemberVariableName (comp));
 
     comp->getProperties().set ("memberName", String::empty);
@@ -782,6 +783,7 @@ String ComponentLayout::getComponentVirtualClassName (Component* comp) const
 
 void ComponentLayout::setComponentVirtualClassName (Component* comp, const String& newName)
 {
+    jassert (comp != nullptr);
     const String name (CodeHelpers::makeValidIdentifier (newName, false, false, true));
 
     if (name != getComponentVirtualClassName (comp))

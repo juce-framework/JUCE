@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_BUBBLECOMPONENT_JUCEHEADER__
-#define __JUCE_BUBBLECOMPONENT_JUCEHEADER__
+#ifndef JUCE_BUBBLECOMPONENT_H_INCLUDED
+#define JUCE_BUBBLECOMPONENT_H_INCLUDED
 
 
 //==============================================================================
@@ -57,7 +57,7 @@ public:
     ~BubbleComponent();
 
     //==============================================================================
-    /** A list of permitted placements for the bubble, relative to the co-ordinates
+    /** A list of permitted placements for the bubble, relative to the coordinates
         at which it should be pointing.
 
         @see setAllowedPlacement
@@ -99,9 +99,9 @@ public:
     /** Moves and resizes the bubble to point at a given point.
 
         This will resize the bubble to fit its content, then position it
-        so that the tip of the bubble points to the given co-ordinate. The co-ordinates
+        so that the tip of the bubble points to the given coordinate. The coordinates
         are relative to either the bubble component's parent component if it has one, or
-        they are screen co-ordinates if not.
+        they are screen coordinates if not.
 
         It'll put itself either above, below, or to the side of this point, depending
         on where there's the most space, honouring any restrictions that were set
@@ -113,8 +113,8 @@ public:
 
         This will resize the bubble to fit its content, then find a position for it
         so that it's next to, but doesn't overlap the given rectangle. The rectangle's
-        co-ordinates are relative to either the bubble component's parent component
-        if it has one, or they are screen co-ordinates if not.
+        coordinates are relative to either the bubble component's parent component
+        if it has one, or they are screen coordinates if not.
 
         It'll put itself either above, below, or to the side of the component depending
         on where there's the most space, honouring any restrictions that were set
@@ -152,7 +152,7 @@ protected:
 
 public:
     /** @internal */
-    void paint (Graphics& g);
+    void paint (Graphics&) override;
 
 private:
     Rectangle<int> content;
@@ -164,4 +164,4 @@ private:
 };
 
 
-#endif   // __JUCE_BUBBLECOMPONENT_JUCEHEADER__
+#endif   // JUCE_BUBBLECOMPONENT_H_INCLUDED

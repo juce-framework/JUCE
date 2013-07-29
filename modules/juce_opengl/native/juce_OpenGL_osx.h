@@ -27,7 +27,9 @@ class OpenGLContext::NativeContext
 public:
     NativeContext (Component& component,
                    const OpenGLPixelFormat& pixFormat,
-                   void* contextToShare)
+                   void* contextToShare,
+                   bool /*useMultisampling*/)
+        : lastSwapTime (0), minSwapTimeMs (0), underrunCounter (0)
     {
         NSOpenGLPixelFormatAttribute attribs[] =
         {
@@ -132,12 +134,16 @@ public:
     void swapBuffers()
     {
         [renderContext flushBuffer];
+
+        sleepIfRenderingTooFast();
     }
 
     void updateWindowPosition (const Rectangle<int>&) {}
 
     bool setSwapInterval (int numFramesPerSwap)
     {
+        minSwapTimeMs = (numFramesPerSwap * 1000) / 60;
+
         [renderContext setValues: (const GLint*) &numFramesPerSwap
                     forParameter: NSOpenGLCPSwapInterval];
         return true;
@@ -152,9 +158,38 @@ public:
         return numFrames;
     }
 
+    void sleepIfRenderingTooFast()
+    {
+        // When our window is entirely occluded by other windows, the system
+        // fails to correctly implement the swap interval time, so the render
+        // loop spins at full speed, burning CPU. This hack detects when things
+        // are going too fast and slows things down if necessary.
+
+        if (minSwapTimeMs > 0)
+        {
+            const double now = Time::getMillisecondCounterHiRes();
+            const int elapsed = (int) (now - lastSwapTime);
+            lastSwapTime = now;
+
+            if (isPositiveAndBelow (elapsed, minSwapTimeMs - 3))
+            {
+                if (underrunCounter > 3)
+                    Thread::sleep (minSwapTimeMs - elapsed);
+                else
+                    ++underrunCounter;
+            }
+            else
+            {
+                underrunCounter = 0;
+            }
+        }
+    }
+
     NSOpenGLContext* renderContext;
     NSOpenGLView* view;
     ReferenceCountedObjectPtr<ReferenceCountedObject> viewAttachment;
+    double lastSwapTime;
+    int minSwapTimeMs, underrunCounter;
 
     //==============================================================================
     struct MouseForwardingNSOpenGLViewClass  : public ObjCClass <NSOpenGLView>

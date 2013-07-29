@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_LINE_JUCEHEADER__
-#define __JUCE_LINE_JUCEHEADER__
+#ifndef JUCE_LINE_H_INCLUDED
+#define JUCE_LINE_H_INCLUDED
 
 #include "juce_Point.h"
 
@@ -57,7 +57,7 @@ public:
     {
     }
 
-    /** Creates a line based on the co-ordinates of its start and end points. */
+    /** Creates a line based on the coordinates of its start and end points. */
     Line (ValueType startX, ValueType startY, ValueType endX, ValueType endY) noexcept
         : start (startX, startY),
           end (endX, endY)
@@ -84,16 +84,16 @@ public:
     ~Line() noexcept {}
 
     //==============================================================================
-    /** Returns the x co-ordinate of the line's start point. */
+    /** Returns the x coordinate of the line's start point. */
     inline ValueType getStartX() const noexcept                             { return start.x; }
 
-    /** Returns the y co-ordinate of the line's start point. */
+    /** Returns the y coordinate of the line's start point. */
     inline ValueType getStartY() const noexcept                             { return start.y; }
 
-    /** Returns the x co-ordinate of the line's end point. */
+    /** Returns the x coordinate of the line's end point. */
     inline ValueType getEndX() const noexcept                               { return end.x; }
 
-    /** Returns the y co-ordinate of the line's end point. */
+    /** Returns the y coordinate of the line's end point. */
     inline ValueType getEndY() const noexcept                               { return end.y; }
 
     /** Returns the line's start point. */
@@ -128,10 +128,10 @@ public:
     /** Returns the length of the line. */
     ValueType getLength() const noexcept                                    { return start.getDistanceFrom (end); }
 
-    /** Returns true if the line's start and end x co-ordinates are the same. */
+    /** Returns true if the line's start and end x coordinates are the same. */
     bool isVertical() const noexcept                                        { return start.x == end.x; }
 
-    /** Returns true if the line's start and end y co-ordinates are the same. */
+    /** Returns true if the line's start and end y coordinates are the same. */
     bool isHorizontal() const noexcept                                      { return start.y == end.y; }
 
     /** Returns the line's angle.
@@ -164,7 +164,7 @@ public:
                                 are parallel, this will just be set to the position
                                 of one of the line's endpoints.
         @returns    true if the line segments intersect; false if they dont. Even if they
-                    don't intersect, the intersection co-ordinates returned will still
+                    don't intersect, the intersection coordinates returned will still
                     be valid
     */
     bool intersects (const Line& line, Point<ValueType>& intersection) const noexcept
@@ -408,4 +408,4 @@ private:
 };
 
 
-#endif   // __JUCE_LINE_JUCEHEADER__
+#endif   // JUCE_LINE_H_INCLUDED
