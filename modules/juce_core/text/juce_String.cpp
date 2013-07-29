@@ -363,72 +363,54 @@ String String::charToString (const juce_wchar character)
 //==============================================================================
 namespace NumberToStringConverters
 {
-    // pass in a pointer to the END of a buffer..
-    static char* numberToString (char* t, const int64 n) noexcept
+    template <typename Type>
+    static inline char* printDigits (char* t, Type v) noexcept
     {
         *--t = 0;
-        int64 v = (n >= 0) ? n : -n;
 
         do
         {
-            *--t = (char) ('0' + (int) (v % 10));
+            *--t = '0' + (char) (v % 10);
             v /= 10;
 
         } while (v > 0);
 
-        if (n < 0)
-            *--t = '-';
+        return t;
+    }
 
+    // pass in a pointer to the END of a buffer..
+    static char* numberToString (char* t, const int64 n) noexcept
+    {
+        if (n > 0)
+            return printDigits (t, static_cast<uint64> (n));
+
+        // NB: this needs to be careful not to call -std::numeric_limits<int64>::min(),
+        // which has undefined behaviour
+        t = printDigits (t, static_cast<uint64> (-(n + 1)) + 1);
+        *--t = '-';
         return t;
     }
 
     static char* numberToString (char* t, uint64 v) noexcept
     {
-        *--t = 0;
-
-        do
-        {
-            *--t = (char) ('0' + (int) (v % 10));
-            v /= 10;
-
-        } while (v > 0);
-
-        return t;
+        return printDigits (t, v);
     }
 
     static char* numberToString (char* t, const int n) noexcept
     {
-        if (n == (int) 0x80000000) // (would cause an overflow)
-            return numberToString (t, (int64) n);
+        if (n > 0)
+            return printDigits (t, static_cast<unsigned int> (n));
 
-        *--t = 0;
-        int v = abs (n);
-
-        do
-        {
-            *--t = (char) ('0' + (v % 10));
-            v /= 10;
-
-        } while (v > 0);
-
-        if (n < 0)
-            *--t = '-';
-
+        // NB: this needs to be careful not to call -std::numeric_limits<int>::min(),
+        // which has undefined behaviour
+        t = printDigits (t, static_cast<unsigned int> (-(n + 1)) + 1);
+        *--t = '-';
         return t;
     }
 
     static char* numberToString (char* t, unsigned int v) noexcept
     {
-        *--t = 0;
-
-        do
-        {
-            *--t = (char) ('0' + (v % 10));
-            v /= 10;
-
-        } while (v > 0);
-
-        return t;
+        return printDigits (t, v);
     }
 
     static char* doubleToString (char* buffer, const int numChars, double n, int numDecPlaces, size_t& len) noexcept
@@ -481,7 +463,6 @@ namespace NumberToStringConverters
         char buffer [32];
         char* const end = buffer + numElementsInArray (buffer);
         char* const start = numberToString (end, number);
-
         return StringHolder::createFromFixedLength (start, (size_t) (end - start - 1));
     }
 
@@ -2226,6 +2207,10 @@ public:
             expect (String ((int64) -1234).getLargeIntValue() == -1234);
             expect (String (-1234.56).getDoubleValue() == -1234.56);
             expect (String (-1234.56f).getFloatValue() == -1234.56f);
+            expect (String (std::numeric_limits<int>::max()).getIntValue() == std::numeric_limits<int>::max());
+            expect (String (std::numeric_limits<int>::min()).getIntValue() == std::numeric_limits<int>::min());
+            expect (String (std::numeric_limits<int64>::max()).getLargeIntValue() == std::numeric_limits<int64>::max());
+            expect (String (std::numeric_limits<int64>::min()).getLargeIntValue() == std::numeric_limits<int64>::min());
             expect (("xyz" + s).getTrailingIntValue() == s.getIntValue());
             expect (s.getHexValue32() == 0x12345678);
             expect (s.getHexValue64() == (int64) 0x12345678);
