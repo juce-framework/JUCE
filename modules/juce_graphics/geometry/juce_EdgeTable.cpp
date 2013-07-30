@@ -495,7 +495,7 @@ void EdgeTable::intersectWithEdgeTableLine (const int y, const int* otherLine)
                 if (destTotal >= maxEdgesPerLine)
                 {
                     dest[0] = destTotal;
-                    remapTableForNumEdges (maxEdgesPerLine + juce_edgeTableDefaultEdgesPerLine);
+                    remapTableForNumEdges (jmax (256, destTotal * 2));
                     dest = table + lineStrideElements * y;
                 }
 
@@ -512,7 +512,7 @@ void EdgeTable::intersectWithEdgeTableLine (const int y, const int* otherLine)
         if (destTotal >= maxEdgesPerLine)
         {
             dest[0] = destTotal;
-            remapTableForNumEdges (maxEdgesPerLine + juce_edgeTableDefaultEdgesPerLine);
+            remapTableForNumEdges (jmax (256, destTotal * 2));
             dest = table + lineStrideElements * y;
         }
 
