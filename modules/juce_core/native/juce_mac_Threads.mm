@@ -60,7 +60,7 @@ void Process::lowerPrivilege()
 
 void Process::terminate()
 {
-    exit (0);
+    std::exit (EXIT_FAILURE);
 }
 
 void Process::setPriority (ProcessPriority)
