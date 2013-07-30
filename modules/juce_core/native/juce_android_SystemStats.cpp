@@ -112,7 +112,7 @@ JNIEnv* getEnv() noexcept
     {
         DBG ("*** Call to getEnv() when system not initialised");
         jassertfalse;
-        exit (0);
+        std::exit (EXIT_FAILURE);
     }
    #endif
 
