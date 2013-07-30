@@ -1583,16 +1583,16 @@ struct ClipRegions
 
         typedef typename Base::Ptr Ptr;
 
-        Ptr clone() const override                           { return new EdgeTableRegion (*this); }
-        Ptr applyClipTo (const Ptr& target) const override   { return target->clipToEdgeTable (edgeTable); }
+        Ptr clone() const                           { return new EdgeTableRegion (*this); }
+        Ptr applyClipTo (const Ptr& target) const   { return target->clipToEdgeTable (edgeTable); }
 
-        Ptr clipToRectangle (const Rectangle<int>& r) override
+        Ptr clipToRectangle (const Rectangle<int>& r)
         {
             edgeTable.clipToRectangle (r);
             return edgeTable.isEmpty() ? nullptr : this;
         }
 
-        Ptr clipToRectangleList (const RectangleList<int>& r) override
+        Ptr clipToRectangleList (const RectangleList<int>& r)
         {
             RectangleList<int> inverse (edgeTable.getMaximumBounds());
 
@@ -1603,26 +1603,26 @@ struct ClipRegions
             return edgeTable.isEmpty() ? nullptr : this;
         }
 
-        Ptr excludeClipRectangle (const Rectangle<int>& r) override
+        Ptr excludeClipRectangle (const Rectangle<int>& r)
         {
             edgeTable.excludeRectangle (r);
             return edgeTable.isEmpty() ? nullptr : this;
         }
 
-        Ptr clipToPath (const Path& p, const AffineTransform& transform) override
+        Ptr clipToPath (const Path& p, const AffineTransform& transform)
         {
             EdgeTable et (edgeTable.getMaximumBounds(), p, transform);
             edgeTable.clipToEdgeTable (et);
             return edgeTable.isEmpty() ? nullptr : this;
         }
 
-        Ptr clipToEdgeTable (const EdgeTable& et) override
+        Ptr clipToEdgeTable (const EdgeTable& et)
         {
             edgeTable.clipToEdgeTable (et);
             return edgeTable.isEmpty() ? nullptr : this;
         }
 
-        Ptr clipToImageAlpha (const Image& image, const AffineTransform& transform, const Graphics::ResamplingQuality quality) override
+        Ptr clipToImageAlpha (const Image& image, const AffineTransform& transform, const Graphics::ResamplingQuality quality)
         {
             const Image::BitmapData srcData (image, Image::BitmapData::readOnly);
 
@@ -1682,7 +1682,7 @@ struct ClipRegions
             return edgeTable.getMaximumBounds();
         }
 
-        void fillRectWithColour (SavedStateType& state, const Rectangle<int>& area, const PixelARGB colour, bool replaceContents) const override
+        void fillRectWithColour (SavedStateType& state, const Rectangle<int>& area, const PixelARGB colour, bool replaceContents) const
         {
             const Rectangle<int> totalClip (edgeTable.getMaximumBounds());
             const Rectangle<int> clipped (totalClip.getIntersection (area));
@@ -1695,7 +1695,7 @@ struct ClipRegions
             }
         }
 
-        void fillRectWithColour (SavedStateType& state, const Rectangle<float>& area, const PixelARGB colour) const override
+        void fillRectWithColour (SavedStateType& state, const Rectangle<float>& area, const PixelARGB colour) const
         {
             const Rectangle<float> totalClip (edgeTable.getMaximumBounds().toFloat());
             const Rectangle<float> clipped (totalClip.getIntersection (area));
@@ -1708,22 +1708,22 @@ struct ClipRegions
             }
         }
 
-        void fillAllWithColour (SavedStateType& state, const PixelARGB colour, bool replaceContents) const override
+        void fillAllWithColour (SavedStateType& state, const PixelARGB colour, bool replaceContents) const
         {
             state.fillWithSolidColour (edgeTable, colour, replaceContents);
         }
 
-        void fillAllWithGradient (SavedStateType& state, ColourGradient& gradient, const AffineTransform& transform, bool isIdentity) const override
+        void fillAllWithGradient (SavedStateType& state, ColourGradient& gradient, const AffineTransform& transform, bool isIdentity) const
         {
             state.fillWithGradient (edgeTable, gradient, transform, isIdentity);
         }
 
-        void renderImageTransformed (SavedStateType& state, const Image& src, const int alpha, const AffineTransform& transform, Graphics::ResamplingQuality quality, bool tiledFill) const override
+        void renderImageTransformed (SavedStateType& state, const Image& src, const int alpha, const AffineTransform& transform, Graphics::ResamplingQuality quality, bool tiledFill) const
         {
             state.renderImageTransformed (edgeTable, src, alpha, transform, quality, tiledFill);
         }
 
-        void renderImageUntransformed (SavedStateType& state, const Image& src, const int alpha, int x, int y, bool tiledFill) const override
+        void renderImageUntransformed (SavedStateType& state, const Image& src, const int alpha, int x, int y, bool tiledFill) const
         {
             state.renderImageUntransformed (edgeTable, src, alpha, x, y, tiledFill);
         }
@@ -1766,31 +1766,31 @@ struct ClipRegions
 
         typedef typename Base::Ptr Ptr;
 
-        Ptr clone() const override                           { return new RectangleListRegion (*this); }
-        Ptr applyClipTo (const Ptr& target) const override   { return target->clipToRectangleList (clip); }
+        Ptr clone() const                           { return new RectangleListRegion (*this); }
+        Ptr applyClipTo (const Ptr& target) const   { return target->clipToRectangleList (clip); }
 
-        Ptr clipToRectangle (const Rectangle<int>& r) override
+        Ptr clipToRectangle (const Rectangle<int>& r)
         {
             clip.clipTo (r);
             return clip.isEmpty() ? nullptr : this;
         }
 
-        Ptr clipToRectangleList (const RectangleList<int>& r) override
+        Ptr clipToRectangleList (const RectangleList<int>& r)
         {
             clip.clipTo (r);
             return clip.isEmpty() ? nullptr : this;
         }
 
-        Ptr excludeClipRectangle (const Rectangle<int>& r) override
+        Ptr excludeClipRectangle (const Rectangle<int>& r)
         {
             clip.subtract (r);
             return clip.isEmpty() ? nullptr : this;
         }
 
-        Ptr clipToPath (const Path& p, const AffineTransform& transform) override  { return toEdgeTable()->clipToPath (p, transform); }
-        Ptr clipToEdgeTable (const EdgeTable& et) override                         { return toEdgeTable()->clipToEdgeTable (et); }
+        Ptr clipToPath (const Path& p, const AffineTransform& transform)  { return toEdgeTable()->clipToPath (p, transform); }
+        Ptr clipToEdgeTable (const EdgeTable& et)                         { return toEdgeTable()->clipToEdgeTable (et); }
 
-        Ptr clipToImageAlpha (const Image& image, const AffineTransform& transform, const Graphics::ResamplingQuality quality) override
+        Ptr clipToImageAlpha (const Image& image, const AffineTransform& transform, const Graphics::ResamplingQuality quality)
         {
             return toEdgeTable()->clipToImageAlpha (image, transform, quality);
         }
@@ -1803,34 +1803,34 @@ struct ClipRegions
         bool clipRegionIntersects (const Rectangle<int>& r) const   { return clip.intersects (r); }
         Rectangle<int> getClipBounds() const                        { return clip.getBounds(); }
 
-        void fillRectWithColour (SavedStateType& state, const Rectangle<int>& area, const PixelARGB colour, bool replaceContents) const override
+        void fillRectWithColour (SavedStateType& state, const Rectangle<int>& area, const PixelARGB colour, bool replaceContents) const
         {
             SubRectangleIterator iter (clip, area);
             state.fillWithSolidColour (iter, colour, replaceContents);
         }
 
-        void fillRectWithColour (SavedStateType& state, const Rectangle<float>& area, const PixelARGB colour) const override
+        void fillRectWithColour (SavedStateType& state, const Rectangle<float>& area, const PixelARGB colour) const
         {
             SubRectangleIteratorFloat iter (clip, area);
             state.fillWithSolidColour (iter, colour, false);
         }
 
-        void fillAllWithColour (SavedStateType& state, const PixelARGB colour, bool replaceContents) const override
+        void fillAllWithColour (SavedStateType& state, const PixelARGB colour, bool replaceContents) const
         {
             state.fillWithSolidColour (*this, colour, replaceContents);
         }
 
-        void fillAllWithGradient (SavedStateType& state, ColourGradient& gradient, const AffineTransform& transform, bool isIdentity) const override
+        void fillAllWithGradient (SavedStateType& state, ColourGradient& gradient, const AffineTransform& transform, bool isIdentity) const
         {
             state.fillWithGradient (*this, gradient, transform, isIdentity);
         }
 
-        void renderImageTransformed (SavedStateType& state, const Image& src, const int alpha, const AffineTransform& transform, Graphics::ResamplingQuality quality, bool tiledFill) const override
+        void renderImageTransformed (SavedStateType& state, const Image& src, const int alpha, const AffineTransform& transform, Graphics::ResamplingQuality quality, bool tiledFill) const
         {
             state.renderImageTransformed (*this, src, alpha, transform, quality, tiledFill);
         }
 
-        void renderImageUntransformed (SavedStateType& state, const Image& src, const int alpha, int x, int y, bool tiledFill) const override
+        void renderImageUntransformed (SavedStateType& state, const Image& src, const int alpha, int x, int y, bool tiledFill) const
         {
             state.renderImageUntransformed (*this, src, alpha, x, y, tiledFill);
         }

@@ -1402,7 +1402,7 @@ public:
     //==============================================================================
     template <typename IteratorType>
     void renderImageTransformed (IteratorType& iter, const Image& src, const int alpha,
-                                 const AffineTransform& trans, Graphics::ResamplingQuality quality, bool tiledFill) const
+                                 const AffineTransform& trans, Graphics::ResamplingQuality, bool tiledFill) const
     {
         state->shaderQuadQueue.flush();
         OpenGLTextureFromImage image (src);
@@ -1431,7 +1431,7 @@ public:
     }
 
     template <typename IteratorType>
-    void fillWithGradient (IteratorType& iter, ColourGradient& gradient, const AffineTransform& trans, bool isIdentity) const
+    void fillWithGradient (IteratorType& iter, ColourGradient& gradient, const AffineTransform& trans, bool /*isIdentity*/) const
     {
         state->setShaderForGradientFill (gradient, trans, 0, nullptr);
         state->shaderQuadQueue.add (iter, fillType.colour.getPixelARGB());
