@@ -25,9 +25,9 @@
 const int juce_edgeTableDefaultEdgesPerLine = 32;
 
 //==============================================================================
-EdgeTable::EdgeTable (const Rectangle<int>& bounds_,
+EdgeTable::EdgeTable (const Rectangle<int>& area,
                       const Path& path, const AffineTransform& transform)
-   : bounds (bounds_),
+   : bounds (area),
      maxEdgesPerLine (juce_edgeTableDefaultEdgesPerLine),
      lineStrideElements ((juce_edgeTableDefaultEdgesPerLine << 1) + 1),
      needToCheckEmptinesss (true)

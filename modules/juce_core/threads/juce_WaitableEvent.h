@@ -46,6 +46,8 @@ public:
     //==============================================================================
     /** Creates a WaitableEvent object.
 
+        The object is initially in an unsignalled state.
+
         @param manualReset  If this is false, the event will be reset automatically when the wait()
                             method is called. If manualReset is true, then once the event is signalled,
                             the only way to reset it will be by calling the reset() method.

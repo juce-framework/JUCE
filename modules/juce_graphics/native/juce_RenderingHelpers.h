@@ -2216,6 +2216,11 @@ public:
     }
 
     //==============================================================================
+    void setFillType (const FillType& newFill)
+    {
+        fillType = newFill;
+    }
+
     void fillTargetRect (const Rectangle<int>& r, const bool replaceContents)
     {
         if (fillType.isColour())
@@ -2301,6 +2306,24 @@ public:
         }
     }
 
+    void drawGlyph (int glyphNumber, const AffineTransform& trans)
+    {
+        if (trans.isOnlyTranslation() && transform.isOnlyTranslated)
+        {
+            GlyphCache <CachedGlyphEdgeTable <SoftwareRendererSavedState>, SoftwareRendererSavedState>::getInstance()
+                .drawGlyph (*this, font, glyphNumber,
+                            trans.getTranslationX(),
+                            trans.getTranslationY());
+        }
+        else
+        {
+            const float fontHeight = font.getHeight();
+            drawGlyph (font, glyphNumber,
+                       AffineTransform::scale (fontHeight * font.getHorizontalScale(), fontHeight)
+                                       .followedBy (trans));
+        }
+    }
+
     void drawGlyph (const Font& f, int glyphNumber, const AffineTransform& t)
     {
         if (clip != nullptr)
@@ -2353,7 +2376,19 @@ public:
         }
     }
 
+    void drawLine (const Line <float>& line)
+    {
+        Path p;
+        p.addLineSegment (line, 1.0f);
+        fillPath (p, AffineTransform::identity);
+    }
+
     //==============================================================================
+    void drawImage (const Image& sourceImage, const AffineTransform& trans)
+    {
+        renderImage (sourceImage, trans, nullptr);
+    }
+
     void renderImage (const Image& sourceImage, const AffineTransform& trans,
                       const ClipRegions::Base* const tiledFillClipRegion)
     {
@@ -2445,6 +2480,13 @@ public:
         : currentState (initialState)
     {}
 
+    SavedStateStack() noexcept {}
+
+    void initialise (StateObjectType* state)
+    {
+        currentState = state;
+    }
+
     inline StateObjectType* operator->() const noexcept     { return currentState; }
     inline StateObjectType& operator*()  const noexcept     { return *currentState; }
 
@@ -2484,6 +2526,47 @@ private:
     OwnedArray<StateObjectType> stack;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SavedStateStack)
+};
+
+//==============================================================================
+template <class SavedStateType>
+class StackBasedLowLevelGraphicsContext  : public LowLevelGraphicsContext
+{
+public:
+    bool isVectorDevice() const override                                         { return false; }
+    void setOrigin (int x, int y) override                                       { stack->transform.setOrigin (x, y); }
+    void addTransform (const AffineTransform& t) override                        { stack->transform.addTransform (t); }
+    float getScaleFactor() override                                              { return stack->transform.getScaleFactor(); }
+    Rectangle<int> getClipBounds() const override                                { return stack->getClipBounds(); }
+    bool isClipEmpty() const override                                            { return stack->clip == nullptr; }
+    bool clipRegionIntersects (const Rectangle<int>& r) override                 { return stack->clipRegionIntersects (r); }
+    bool clipToRectangle (const Rectangle<int>& r) override                      { return stack->clipToRectangle (r); }
+    bool clipToRectangleList (const RectangleList<int>& r) override              { return stack->clipToRectangleList (r); }
+    void excludeClipRectangle (const Rectangle<int>& r) override                 { stack->excludeClipRectangle (r); }
+    void clipToPath (const Path& path, const AffineTransform& t) override        { stack->clipToPath (path, t); }
+    void clipToImageAlpha (const Image& im, const AffineTransform& t) override   { stack->clipToImageAlpha (im, t); }
+    void saveState() override                                                    { stack.save(); }
+    void restoreState() override                                                 { stack.restore(); }
+    void beginTransparencyLayer (float opacity) override                         { stack.beginTransparencyLayer (opacity); }
+    void endTransparencyLayer() override                                         { stack.endTransparencyLayer(); }
+    void setFill (const FillType& fillType) override                             { stack->setFillType (fillType); }
+    void setOpacity (float newOpacity) override                                  { stack->fillType.setOpacity (newOpacity); }
+    void setInterpolationQuality (Graphics::ResamplingQuality quality) override  { stack->interpolationQuality = quality; }
+    void fillRect (const Rectangle<int>& r, bool replace) override               { stack->fillRect (r, replace); }
+    void fillPath (const Path& path, const AffineTransform& t) override          { stack->fillPath (path, t); }
+    void drawImage (const Image& im, const AffineTransform& t) override          { stack->drawImage (im, t); }
+    void drawVerticalLine (int x, float top, float bottom) override              { if (top < bottom) stack->fillRect (Rectangle<float> ((float) x, top, 1.0f, bottom - top)); }
+    void drawHorizontalLine (int y, float left, float right) override            { if (left < right) stack->fillRect (Rectangle<float> (left, (float) y, right - left, 1.0f)); }
+    void drawGlyph (int glyphNumber, const AffineTransform& t) override          { stack->drawGlyph (glyphNumber, t); }
+    void drawLine (const Line <float>& line) override                            { stack->drawLine (line); }
+    void setFont (const Font& newFont) override                                  { stack->font = newFont; }
+    const Font& getFont() override                                               { return stack->font; }
+
+protected:
+    StackBasedLowLevelGraphicsContext (SavedStateType* initialState) : stack (initialState) {}
+    StackBasedLowLevelGraphicsContext() {}
+
+    RenderingHelpers::SavedStateStack<SavedStateType> stack;
 };
 
 }

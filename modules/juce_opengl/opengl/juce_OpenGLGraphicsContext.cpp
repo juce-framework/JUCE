@@ -2109,45 +2109,16 @@ private:
 };
 
 //==============================================================================
-class ShaderContext   : public LowLevelGraphicsContext
+class ShaderContext   : public RenderingHelpers::StackBasedLowLevelGraphicsContext <SavedState>
 {
 public:
-    ShaderContext (const Target& target)
-       : glState (target), stack (new SavedState (&glState))
-    {}
-
-    bool isVectorDevice() const                                         { return false; }
-    void setOrigin (int x, int y)                                       { stack->transform.setOrigin (x, y); }
-    void addTransform (const AffineTransform& t)                        { stack->transform.addTransform (t); }
-    float getScaleFactor()                                              { return stack->transform.getScaleFactor(); }
-    Rectangle<int> getClipBounds() const                                { return stack->getClipBounds(); }
-    bool isClipEmpty() const                                            { return stack->clip == nullptr; }
-    bool clipRegionIntersects (const Rectangle<int>& r)                 { return stack->clipRegionIntersects (r); }
-    bool clipToRectangle (const Rectangle<int>& r)                      { return stack->clipToRectangle (r); }
-    bool clipToRectangleList (const RectangleList<int>& r)              { return stack->clipToRectangleList (r); }
-    void excludeClipRectangle (const Rectangle<int>& r)                 { stack->excludeClipRectangle (r); }
-    void clipToPath (const Path& path, const AffineTransform& t)        { stack->clipToPath (path, t); }
-    void clipToImageAlpha (const Image& im, const AffineTransform& t)   { stack->clipToImageAlpha (im, t); }
-    void saveState()                                                    { stack.save(); }
-    void restoreState()                                                 { stack.restore(); }
-    void beginTransparencyLayer (float opacity)                         { stack.beginTransparencyLayer (opacity); }
-    void endTransparencyLayer()                                         { stack.endTransparencyLayer(); }
-    void setFill (const FillType& fillType)                             { stack->setFillType (fillType); }
-    void setOpacity (float newOpacity)                                  { stack->fillType.setOpacity (newOpacity); }
-    void setInterpolationQuality (Graphics::ResamplingQuality quality)  { stack->interpolationQuality = quality; }
-    void fillRect (const Rectangle<int>& r, bool replace)               { stack->fillRect (r, replace); }
-    void fillPath (const Path& path, const AffineTransform& t)          { stack->fillPath (path, t); }
-    void drawImage (const Image& im, const AffineTransform& t)          { stack->drawImage (im, t); }
-    void drawVerticalLine (int x, float top, float bottom)              { if (top < bottom) stack->fillRect (Rectangle<float> ((float) x, top, 1.0f, bottom - top)); }
-    void drawHorizontalLine (int y, float left, float right)            { if (left < right) stack->fillRect (Rectangle<float> (left, (float) y, right - left, 1.0f)); }
-    void drawGlyph (int glyphNumber, const AffineTransform& t)          { stack->drawGlyph (glyphNumber, t); }
-    void drawLine (const Line <float>& line)                            { stack->drawLine (line); }
-    void setFont (const Font& newFont)                                  { stack->font = newFont; }
-    const Font& getFont()                                               { return stack->font; }
+    ShaderContext (const Target& target)  : glState (target)
+    {
+        stack.initialise (new SavedState (&glState));
+    }
 
 private:
     GLState glState;
-    RenderingHelpers::SavedStateStack<SavedState> stack;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ShaderContext)
 };
@@ -2157,8 +2128,8 @@ private:
 class NonShaderContext   : public LowLevelGraphicsSoftwareRenderer
 {
 public:
-    NonShaderContext (const Target& target_, const Image& image_)
-        : LowLevelGraphicsSoftwareRenderer (image_), target (target_), image (image_)
+    NonShaderContext (const Target& t, const Image& im)
+        : LowLevelGraphicsSoftwareRenderer (im), target (t), image (im)
     {}
 
     ~NonShaderContext()
