@@ -2880,10 +2880,9 @@ bool Process::isForegroundProcess()
     return false;
 }
 
-void Process::makeForegroundProcess()
-{
-    // is this possible in Windows?
-}
+// N/A on Windows as far as I know.
+void Process::makeForegroundProcess() {}
+void Process::hide() {}
 
 //==============================================================================
 static BOOL CALLBACK enumAlwaysOnTopWindows (HWND hwnd, LPARAM lParam)

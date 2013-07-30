@@ -80,6 +80,9 @@ public:
     */
     static void makeForegroundProcess();
 
+    /** Hides the application (on an OS that supports this, e.g. OSX) */
+    static void hide();
+
     //==============================================================================
     /** Raises the current process's privilege level.
 

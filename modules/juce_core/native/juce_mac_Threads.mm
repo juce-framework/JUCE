@@ -48,6 +48,13 @@ void Process::makeForegroundProcess()
    #endif
 }
 
+void Process::hide()
+{
+   #if JUCE_MAC
+    [NSApp hide: nil];
+   #endif
+}
+
 void Process::raisePrivilege()
 {
     jassertfalse;

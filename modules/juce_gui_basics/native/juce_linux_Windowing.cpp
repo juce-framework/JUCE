@@ -2920,9 +2920,9 @@ bool Process::isForegroundProcess()
     return LinuxComponentPeer::isActiveApplication;
 }
 
-void Process::makeForegroundProcess()
-{
-}
+// N/A on Linux as far as I know.
+void Process::makeForegroundProcess() {}
+void Process::hide() {}
 
 //==============================================================================
 void ModifierKeys::updateCurrentModifiers() noexcept
