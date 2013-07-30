@@ -698,10 +698,10 @@ public:
     template <typename IntType>
     Rectangle<IntType> getSmallestIntegerContainerWithType() const noexcept
     {
-        const IntType x1 = static_cast <IntType> (std::floor (static_cast<float> (pos.x)));
-        const IntType y1 = static_cast <IntType> (std::floor (static_cast<float> (pos.y)));
-        const IntType x2 = static_cast <IntType> (std::ceil  (static_cast<float> (pos.x + w)));
-        const IntType y2 = static_cast <IntType> (std::ceil  (static_cast<float> (pos.y + h)));
+        const IntType x1 = static_cast<IntType> (std::floor (pos.x));
+        const IntType y1 = static_cast<IntType> (std::floor (pos.y));
+        const IntType x2 = static_cast<IntType> (std::ceil  (pos.x + w));
+        const IntType y2 = static_cast<IntType> (std::ceil  (pos.y + h));
 
         return Rectangle<IntType> (x1, y1, x2 - x1, y2 - y1);
     }
