@@ -125,7 +125,7 @@ public:
             {
                 owner.mouseUp (e);
             }
-            else if (lParam == WM_LBUTTONDBLCLK || lParam == WM_LBUTTONDBLCLK)
+            else if (lParam == WM_LBUTTONDBLCLK || lParam == WM_RBUTTONDBLCLK)
             {
                 owner.mouseDoubleClick (e);
             }
