@@ -350,8 +350,8 @@ public:
         /** Creates a pointer from some raw data in the appropriate format with the specified number of interleaved channels.
             For non-interleaved data, use the other constructor.
         */
-        Pointer (typename Constness::VoidType* sourceData, int numInterleavedChannels) noexcept
-            : InterleavingType (numInterleavedChannels), data (Constness::toVoidPtr (sourceData))
+        Pointer (typename Constness::VoidType* sourceData, int numInterleaved) noexcept
+            : InterleavingType (numInterleaved), data (Constness::toVoidPtr (sourceData))
         {
         }
 

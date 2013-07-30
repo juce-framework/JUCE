@@ -460,14 +460,14 @@ public:
     }
 
    #if JUCE_DEBUG || JUCE_LOG_ASSERTIONS
-    void componentBeingDeleted (Component& component) override
+    void componentBeingDeleted (Component& c) override
     {
         /* You must call detach() or delete your OpenGLContext to remove it
            from a component BEFORE deleting the component that it is using!
         */
         jassertfalse;
 
-        ComponentMovementWatcher::componentBeingDeleted (component);
+        ComponentMovementWatcher::componentBeingDeleted (c);
     }
    #endif
 

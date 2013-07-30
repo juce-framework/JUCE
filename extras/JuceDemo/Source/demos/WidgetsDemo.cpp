@@ -839,10 +839,10 @@ private:
                 comboBox.setEditableText (true);
             }
 
-            bool getToolbarItemSizes (int /*toolbarDepth*/, bool isToolbarVertical,
+            bool getToolbarItemSizes (int /*toolbarDepth*/, bool isVertical,
                                       int& preferredSize, int& minSize, int& maxSize)
             {
-                if (isToolbarVertical)
+                if (isVertical)
                     return false;
 
                 preferredSize = 250;
@@ -855,12 +855,12 @@ private:
             {
             }
 
-            void contentAreaChanged (const Rectangle<int>& contentArea)
+            void contentAreaChanged (const Rectangle<int>& newArea)
             {
-                comboBox.setSize (contentArea.getWidth() - 2,
-                                  jmin (contentArea.getHeight() - 2, 22));
+                comboBox.setSize (newArea.getWidth() - 2,
+                                  jmin (newArea.getHeight() - 2, 22));
 
-                comboBox.setCentrePosition (contentArea.getCentreX(), contentArea.getCentreY());
+                comboBox.setCentrePosition (newArea.getCentreX(), newArea.getCentreY());
             }
 
         private:

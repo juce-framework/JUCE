@@ -25,12 +25,12 @@
 PluginListComponent::PluginListComponent (AudioPluginFormatManager& manager,
                                           KnownPluginList& listToEdit,
                                           const File& deadMansPedal,
-                                          PropertiesFile* const properties)
+                                          PropertiesFile* const props)
     : formatManager (manager),
       list (listToEdit),
       deadMansPedalFile (deadMansPedal),
       optionsButton ("Options..."),
-      propertiesToUse (properties),
+      propertiesToUse (props),
       numThreads (0)
 {
     listBox.setModel (this);

@@ -188,9 +188,9 @@ class AudioFormatWriter::ThreadedWriter::Buffer   : public AbstractFifo,
                                                     private TimeSliceClient
 {
 public:
-    Buffer (TimeSliceThread& tst, AudioFormatWriter* w, int channels, int bufferSize)
-        : AbstractFifo (bufferSize),
-          buffer (channels, bufferSize),
+    Buffer (TimeSliceThread& tst, AudioFormatWriter* w, int channels, int numSamples)
+        : AbstractFifo (numSamples),
+          buffer (channels, numSamples),
           timeSliceThread (tst),
           writer (w),
           receiver (nullptr),
