@@ -297,3 +297,40 @@ String MD5::toHexString() const
 //==============================================================================
 bool MD5::operator== (const MD5& other) const noexcept   { return memcmp (result, other.result, sizeof (result)) == 0; }
 bool MD5::operator!= (const MD5& other) const noexcept   { return ! operator== (other); }
+
+
+//==============================================================================
+#if JUCE_UNIT_TESTS
+
+class MD5Tests  : public UnitTest
+{
+public:
+    MD5Tests() : UnitTest ("MD5") {}
+
+    void test (const char* input, const char* expected)
+    {
+        {
+            MD5 hash (input, strlen (input));
+            expectEquals (hash.toHexString(), String (expected));
+        }
+
+        {
+            MemoryInputStream m (input, strlen (input), false);
+            MD5 hash (m);
+            expectEquals (hash.toHexString(), String (expected));
+        }
+    }
+
+    void runTest()
+    {
+        beginTest ("MD5");
+
+        test ("", "d41d8cd98f00b204e9800998ecf8427e");
+        test ("The quick brown fox jumps over the lazy dog",  "9e107d9d372bb6826bd81d3542a419d6");
+        test ("The quick brown fox jumps over the lazy dog.", "e4d909c290d0fb1ca068ffaddf22cbd0");
+    }
+};
+
+static MD5Tests MD5UnitTests;
+
+#endif
