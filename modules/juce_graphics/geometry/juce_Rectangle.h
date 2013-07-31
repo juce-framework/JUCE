@@ -290,7 +290,11 @@ public:
         return *this;
     }
 
-    /** Scales this rectangle by the given amount, centred around the origin. */
+    /** Returns a rectangle that has been scaled by the given amount, centred around the origin.
+        Note that if the rectangle has int coordinates and it's scaled by a
+        floating-point amount, then the result will be converted back to integer
+        coordinates using getSmallestIntegerContainer().
+    */
     template <typename FloatType>
     Rectangle operator* (FloatType scaleFactor) const noexcept
     {
@@ -299,7 +303,11 @@ public:
         return r;
     }
 
-    /** Scales this rectangle by the given amount, centred around the origin. */
+    /** Scales this rectangle by the given amount, centred around the origin.
+        Note that if the rectangle has int coordinates and it's scaled by a
+        floating-point amount, then the result will be converted back to integer
+        coordinates using getSmallestIntegerContainer().
+    */
     template <typename FloatType>
     Rectangle operator*= (FloatType scaleFactor) noexcept
     {
