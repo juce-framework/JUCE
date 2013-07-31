@@ -322,14 +322,20 @@ public:
     template <typename FloatType>
     Rectangle operator/ (FloatType scaleFactor) const noexcept
     {
-        return operator* (((FloatType) 1) / scaleFactor);
+        Rectangle r (*this);
+        r /= scaleFactor;
+        return r;
     }
 
     /** Scales this rectangle by the given amount, centred around the origin. */
     template <typename FloatType>
     Rectangle operator/= (FloatType scaleFactor) noexcept
     {
-        return operator*= (((FloatType) 1) / scaleFactor);
+        Rectangle<FloatType> (pos.x / scaleFactor,
+                              pos.y / scaleFactor,
+                              w / scaleFactor,
+                              h / scaleFactor).copyWithRounding (*this);
+        return *this;
     }
 
     /** Expands the rectangle by a given amount.
