@@ -1840,8 +1840,6 @@ private:
             }
            #endif
 
-            peer.clearMaskedRegion();
-
             RectangleList<int>  originalRepaintRegion (regionsNeedingRepaint);
             regionsNeedingRepaint.clear();
             const Rectangle<int> totalArea (originalRepaintRegion.getBounds());
@@ -1876,9 +1874,6 @@ private:
                                                                       .createGraphicsContext (image, -totalArea.getPosition(), adjustedList));
                     peer.handlePaint (*context);
                 }
-
-                if (! peer.maskedRegion.isEmpty())
-                    originalRepaintRegion.subtract (peer.maskedRegion);
 
                 for (const Rectangle<int>* i = originalRepaintRegion.begin(), * const e = originalRepaintRegion.end(); i != e; ++i)
                 {

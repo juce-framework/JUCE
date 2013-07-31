@@ -69,11 +69,7 @@ public:
     }
 
     //==============================================================================
-    void paint (Graphics&) override
-    {
-        if (ComponentPeer* const peer = component.getPeer())
-            peer->addMaskedRegion (peer->getComponent().getLocalArea (&component, component.getLocalBounds()));
-    }
+    void paint (Graphics&) override {}
 
     void invalidateAll() override
     {

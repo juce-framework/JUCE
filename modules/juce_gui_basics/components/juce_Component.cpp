@@ -1839,9 +1839,9 @@ void Component::internalRepaintUnchecked (const Rectangle<int>& area, const bool
 //==============================================================================
 void Component::paint (Graphics&)
 {
-    // all painting is done in the subclasses
-
-    jassert (! isOpaque()); // if your component's opaque, you've gotta paint it!
+    // if your component is marked as opaque, you must implement a paint
+    // method and ensure that its entire area is completely painted.
+    jassert (getBounds().isEmpty() || ! isOpaque());
 }
 
 void Component::paintOverChildren (Graphics&)

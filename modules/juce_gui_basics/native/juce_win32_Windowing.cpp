@@ -333,19 +333,12 @@ public:
 
     void blitToWindow (HWND hwnd, HDC dc, const bool transparent,
                        const int x, const int y,
-                       const RectangleList<int>& maskedRegion,
                        const uint8 updateLayeredWindowAlpha) noexcept
     {
         SetMapMode (dc, MM_TEXT);
 
         if (transparent)
         {
-            if (! maskedRegion.isEmpty())
-            {
-                for (const Rectangle<int>* i = maskedRegion.begin(), * const e = maskedRegion.end(); i != e; ++i)
-                    ExcludeClipRect (hdc, i->getX(), i->getY(), i->getRight(), i->getBottom());
-            }
-
             RECT windowBounds;
             GetWindowRect (hwnd, &windowBounds);
 
@@ -364,24 +357,11 @@ public:
         }
         else
         {
-            int savedDC = 0;
-
-            if (! maskedRegion.isEmpty())
-            {
-                savedDC = SaveDC (dc);
-
-                for (const Rectangle<int>* i = maskedRegion.begin(), * const e = maskedRegion.end(); i != e; ++i)
-                    ExcludeClipRect (dc, i->getX(), i->getY(), i->getRight(), i->getBottom());
-            }
-
             StretchDIBits (dc,
                            x, y, width, height,
                            0, 0, width, height,
                            bitmapData, (const BITMAPINFO*) &bitmapInfo,
                            DIB_RGB_COLORS, SRCCOPY);
-
-            if (! maskedRegion.isEmpty())
-                RestoreDC (dc, savedDC);
         }
     }
 
@@ -1422,6 +1402,19 @@ private:
         }
     }
 
+    static BOOL CALLBACK clipChildWindowCallback (HWND hwnd, LPARAM context)
+    {
+        RECT childPos, parentPos;
+        GetWindowRect (hwnd, &childPos);
+        GetWindowRect (GetParent (hwnd), &parentPos);
+
+        ((RectangleList<int>*) context)->subtract (Rectangle<int> (childPos.left   - parentPos.left,
+                                                                   childPos.top    - parentPos.top,
+                                                                   childPos.right  - childPos.left,
+                                                                   childPos.bottom - childPos.top));
+        return TRUE;
+    }
+
     //==============================================================================
     void handlePaintMessage()
     {
@@ -1483,8 +1476,6 @@ private:
 
             if (w > 0 && h > 0)
             {
-                clearMaskedRegion();
-
                 Image& offscreenImage = offscreenImageGenerator.getImage (transparent, w, h);
 
                 RectangleList<int> contextClip;
@@ -1539,24 +1530,27 @@ private:
                     contextClip.addWithoutMerging (Rectangle<int> (w, h));
                 }
 
-                if (transparent)
+                EnumChildWindows (hwnd, clipChildWindowCallback, (LPARAM) &contextClip);
+
+                if (! contextClip.isEmpty())
                 {
-                    for (const Rectangle<int>* i = contextClip.begin(), * const e = contextClip.end(); i != e; ++i)
-                        offscreenImage.clear (*i);
+                    if (transparent)
+                        for (const Rectangle<int>* i = contextClip.begin(), * const e = contextClip.end(); i != e; ++i)
+                            offscreenImage.clear (*i);
+
+                    // if the component's not opaque, this won't draw properly unless the platform can support this
+                    jassert (Desktop::canUseSemiTransparentWindows() || component.isOpaque());
+
+                    {
+                        ScopedPointer<LowLevelGraphicsContext> context (component.getLookAndFeel()
+                                                                            .createGraphicsContext (offscreenImage, Point<int> (-x, -y), contextClip));
+                        handlePaint (*context);
+                    }
+
+                    if (! dontRepaint)
+                        static_cast <WindowsBitmapImage*> (offscreenImage.getPixelData())
+                            ->blitToWindow (hwnd, dc, transparent, x, y, updateLayeredWindowAlpha);
                 }
-
-                // if the component's not opaque, this won't draw properly unless the platform can support this
-                jassert (Desktop::canUseSemiTransparentWindows() || component.isOpaque());
-
-                {
-                    ScopedPointer<LowLevelGraphicsContext> context (component.getLookAndFeel()
-                                                                        .createGraphicsContext (offscreenImage, Point<int> (-x, -y), contextClip));
-                    handlePaint (*context);
-                }
-
-                if (! dontRepaint)
-                    static_cast <WindowsBitmapImage*> (offscreenImage.getPixelData())
-                        ->blitToWindow (hwnd, dc, transparent, x, y, maskedRegion, updateLayeredWindowAlpha);
             }
 
             DeleteObject (rgn);
