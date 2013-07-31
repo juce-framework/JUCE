@@ -26,12 +26,6 @@
   ==============================================================================
 */
 
-const SystemStats::CPUFlags& SystemStats::getCPUFlags()
-{
-    static CPUFlags cpuFlags;
-    return cpuFlags;
-}
-
 String SystemStats::getJUCEVersion()
 {
     // Some basic tests, to keep an eye on things and make sure these types work ok
@@ -66,6 +60,36 @@ String SystemStats::getJUCEVersion()
 
  static JuceVersionPrinter juceVersionPrinter;
 #endif
+
+
+//==============================================================================
+struct CPUInformation
+{
+    CPUInformation() noexcept
+        : numCpus (0), hasMMX (false), hasSSE (false),
+          hasSSE2 (false), hasSSE3 (false), has3DNow (false)
+    {
+        initialise();
+    }
+
+    void initialise() noexcept;
+
+    int numCpus;
+    bool hasMMX, hasSSE, hasSSE2, hasSSE3, has3DNow;
+};
+
+static const CPUInformation& getCPUInformation() noexcept
+{
+    static CPUInformation info;
+    return info;
+}
+
+int SystemStats::getNumCpus() noexcept        { return getCPUInformation().numCpus; }
+bool SystemStats::hasMMX() noexcept           { return getCPUInformation().hasMMX; }
+bool SystemStats::hasSSE() noexcept           { return getCPUInformation().hasSSE; }
+bool SystemStats::hasSSE2() noexcept          { return getCPUInformation().hasSSE2; }
+bool SystemStats::hasSSE3() noexcept          { return getCPUInformation().hasSSE3; }
+bool SystemStats::has3DNow() noexcept         { return getCPUInformation().has3DNow; }
 
 
 //==============================================================================
