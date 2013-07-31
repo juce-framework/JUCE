@@ -697,7 +697,6 @@ JUCE_JNI_CALLBACK (JUCE_ANDROID_ACTIVITY_CLASSNAME, setScreenSize, void, (JNIEnv
                                                                           jint screenWidth, jint screenHeight,
                                                                           jint dpi))
 {
-    const bool isSystemInitialised = android.screenWidth != 0;
     android.screenWidth = screenWidth;
     android.screenHeight = screenHeight;
     android.dpi = dpi;
