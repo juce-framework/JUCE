@@ -33,6 +33,8 @@ public:
     {
         setOpaque (true);
         averageTime = 0;
+        averageFPS = 0;
+        lastPaintTime = 0;
 
         rgbImage = ImageFileFormat::loadFrom (RenderingTestComponent::demoJpeg_jpg, RenderingTestComponent::demoJpeg_jpgSize);
         argbImage = ImageFileFormat::loadFrom (RenderingTestComponent::demoPng_png, RenderingTestComponent::demoPng_pngSize);
@@ -97,9 +99,13 @@ public:
             case 11: drawLines (g); break;
         }
 
-        double endTime = Time::getMillisecondCounterHiRes();
-        double timeTaken = endTime - startTime;
+        double now = Time::getMillisecondCounterHiRes();
+        double timeTaken = now - startTime;
         averageTime += (timeTaken - averageTime) * 0.1;
+
+        double fps = 1000.0 / (now - lastPaintTime);
+        averageFPS += (fps - averageFPS) * 0.1;
+        lastPaintTime = now;
     }
 
     void timerCallback()
@@ -116,7 +122,8 @@ public:
             bounce (bouncingNumber[i], bouncingNumberDelta[i], 1.0f);
 
         owner.speedLabel->setText (String (getWidth()) + "x" + String (getHeight())
-                                    + " - Render time: " + String (averageTime, 2) + "ms",
+                                    + " - Render time: " + String (averageTime, 2) + "ms,  "
+                                    + String (averageFPS, 1) + "fps",
                                    dontSendNotification);
 
         if (owner.animatePositionToggle->getToggleState())
@@ -143,7 +150,7 @@ public:
 
 private:
     RenderingTestComponent& owner;
-    double averageTime;
+    double averageTime, averageFPS, lastPaintTime;
 
     Image rgbImage, argbImage;
     ScopedPointer<DrawableComposite> svgDrawable;
