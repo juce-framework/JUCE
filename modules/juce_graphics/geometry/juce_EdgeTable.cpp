@@ -417,7 +417,7 @@ void EdgeTable::intersectWithEdgeTableLine (const int y, const int* otherLine)
     if (dest[0] == 0)
         return;
 
-    int otherNumPoints = *otherLine;
+    const int otherNumPoints = *otherLine;
     if (otherNumPoints == 0)
     {
         *dest = 0;
@@ -522,17 +522,6 @@ void EdgeTable::intersectWithEdgeTableLine (const int y, const int* otherLine)
     }
 
     dest[0] = destTotal;
-
-#if JUCE_DEBUG
-    int last = std::numeric_limits<int>::min();
-    for (int i = 0; i < dest[0]; ++i)
-    {
-        jassert (dest[i * 2 + 1] > last);
-        last = dest[i * 2 + 1];
-    }
-
-    jassert (dest [dest[0] * 2] == 0);
-#endif
 }
 
 void EdgeTable::clipEdgeTableLineToRange (int* dest, const int x1, const int x2) noexcept
@@ -656,13 +645,12 @@ void EdgeTable::clipToEdgeTable (const EdgeTable& other)
         if (clipped.getRight() < bounds.getRight())
             bounds.setRight (clipped.getRight());
 
-        int i = 0;
-        for (i = top; --i >= 0;)
+        for (int i = 0; i < top; ++i)
             table [lineStrideElements * i] = 0;
 
         const int* otherLine = other.table + other.lineStrideElements * (clipped.getY() - other.bounds.getY());
 
-        for (i = top; i < bottom; ++i)
+        for (int i = top; i < bottom; ++i)
         {
             intersectWithEdgeTableLine (i, otherLine);
             otherLine += other.lineStrideElements;

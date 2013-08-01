@@ -237,7 +237,7 @@ public:
 
             if (module != nullptr)
             {
-                props.add (new ModuleInfoComponent (project, moduleList, moduleID));
+                props.add (new ModuleInfoComponent (moduleList, moduleID));
 
                 if (project.isModuleEnabled (moduleID))
                 {
@@ -293,8 +293,8 @@ public:
         class ModuleInfoComponent  : public PropertyComponent
         {
         public:
-            ModuleInfoComponent (Project& p, ModuleList& list, const String& modID)
-                : PropertyComponent ("Module", 100), project (p), moduleList (list), moduleID (modID)
+            ModuleInfoComponent (ModuleList& list, const String& modID)
+                : PropertyComponent ("Module", 100), moduleList (list), moduleID (modID)
             {
             }
 
@@ -322,7 +322,6 @@ public:
             }
 
         private:
-            Project& project;
             ModuleList& moduleList;
             String moduleID;
 
