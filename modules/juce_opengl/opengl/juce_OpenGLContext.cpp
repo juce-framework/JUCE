@@ -185,18 +185,21 @@ public:
 
     void updateViewportSize (bool canTriggerUpdate)
     {
-        const double newScale = Desktop::getInstance().getDisplays()
-                                    .getDisplayContaining (component.getScreenBounds().getCentre()).scale;
-
-        Rectangle<int> newArea (component.getLocalBounds() * newScale);
-
-        if (scale != newScale || viewportArea != newArea)
+        if (ComponentPeer* peer = component.getPeer())
         {
-            scale = newScale;
-            viewportArea = newArea;
+            Rectangle<int> newArea (peer->getAreaCoveredBy (component).withPosition (0, 0));
 
-            if (canTriggerUpdate)
-                invalidateAll();
+            const double newScale = Desktop::getInstance().getDisplays()
+                                        .getDisplayContaining (component.getScreenBounds().getCentre()).scale;
+
+            if (scale != newScale || viewportArea != newArea)
+            {
+                scale = newScale;
+                viewportArea = newArea;
+
+                if (canTriggerUpdate)
+                    invalidateAll();
+            }
         }
     }
 

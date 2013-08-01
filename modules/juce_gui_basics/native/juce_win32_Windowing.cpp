@@ -1404,12 +1404,13 @@ private:
 
     static BOOL CALLBACK clipChildWindowCallback (HWND hwnd, LPARAM context)
     {
-        RECT childPos, parentPos;
+        RECT childPos;
         GetWindowRect (hwnd, &childPos);
-        GetWindowRect (GetParent (hwnd), &parentPos);
+        POINT pos = { childPos.left, childPos.top };
+        ScreenToClient (GetParent (hwnd), &pos);
 
-        ((RectangleList<int>*) context)->subtract (Rectangle<int> (childPos.left   - parentPos.left,
-                                                                   childPos.top    - parentPos.top,
+        ((RectangleList<int>*) context)->subtract (Rectangle<int> (pos.x,
+                                                                   pos.y,
                                                                    childPos.right  - childPos.left,
                                                                    childPos.bottom - childPos.top));
         return TRUE;
