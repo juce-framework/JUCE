@@ -56,6 +56,7 @@ namespace
         return [NSString string];
     }
 
+   #if JUCE_MAC
     template <typename RectangleType>
     static NSRect makeNSRect (const RectangleType& r) noexcept
     {
@@ -64,6 +65,7 @@ namespace
                            static_cast <CGFloat> (r.getWidth()),
                            static_cast <CGFloat> (r.getHeight()));
     }
+   #endif
 }
 
 //==============================================================================
