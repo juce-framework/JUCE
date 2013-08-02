@@ -100,6 +100,16 @@ struct AAXClasses
         jassert (result == AAX_SUCCESS); (void) result;
     }
 
+    static int getParamIndexFromID (AAX_CParamID paramID) noexcept
+    {
+        return atoi (paramID);
+    }
+
+    static bool isBypassParam (AAX_CParamID paramID) noexcept
+    {
+        return AAX::IsParameterIDEqual (paramID, cDefaultMasterBypassID);
+    }
+
     static AAX_EStemFormat getFormatForChans (const int numChans) noexcept
     {
         switch (numChans)
@@ -235,11 +245,11 @@ struct AAXClasses
     {
     public:
         JuceAAX_GUI() {}
-        virtual ~JuceAAX_GUI()  { DeleteViewContainer(); }
+        ~JuceAAX_GUI()  { DeleteViewContainer(); }
 
         static AAX_IEffectGUI* AAX_CALLBACK Create()   { return new JuceAAX_GUI(); }
 
-        void CreateViewContents()
+        void CreateViewContents() override
         {
             if (component == nullptr)
             {
@@ -250,7 +260,7 @@ struct AAXClasses
             }
         }
 
-        void CreateViewContainer()
+        void CreateViewContainer() override
         {
             CreateViewContents();
 
@@ -268,7 +278,7 @@ struct AAXClasses
             }
         }
 
-        void DeleteViewContainer()
+        void DeleteViewContainer() override
         {
             if (component != nullptr)
             {
@@ -280,7 +290,7 @@ struct AAXClasses
             }
         }
 
-        virtual AAX_Result GetViewSize (AAX_Point* viewSize) const
+        virtual AAX_Result GetViewSize (AAX_Point* viewSize) const override
         {
             if (component != nullptr)
             {
@@ -292,12 +302,12 @@ struct AAXClasses
             return AAX_ERROR_NULL_OBJECT;
         }
 
-        AAX_Result ParameterUpdated (AAX_CParamID /*paramID*/)
+        AAX_Result ParameterUpdated (AAX_CParamID /*paramID*/) override
         {
             return AAX_SUCCESS;
         }
 
-        AAX_Result SetControlHighlightInfo (AAX_CParamID /*paramID*/, AAX_CBoolean /*isHighlighted*/, AAX_EHighlightColor)
+        AAX_Result SetControlHighlightInfo (AAX_CParamID /*paramID*/, AAX_CBoolean /*isHighlighted*/, AAX_EHighlightColor) override
         {
             return AAX_SUCCESS;
         }
@@ -372,7 +382,7 @@ struct AAXClasses
 
         static AAX_CEffectParameters* AAX_CALLBACK Create()   { return new JuceAAX_Processor(); }
 
-        AAX_Result EffectInit()
+        AAX_Result EffectInit() override
         {
             check (Controller()->GetSampleRate (&sampleRate));
 
@@ -383,14 +393,14 @@ struct AAXClasses
             return AAX_SUCCESS;
         }
 
-        AAX_Result GetNumberOfChunks (int32_t* numChunks) const
+        AAX_Result GetNumberOfChunks (int32_t* numChunks) const override
         {
             // The juceChunk is the last chunk.
             *numChunks = juceChunkIndex + 1;
             return AAX_SUCCESS;
         }
 
-        AAX_Result GetChunkIDFromIndex (int32_t index, AAX_CTypeID* chunkID) const
+        AAX_Result GetChunkIDFromIndex (int32_t index, AAX_CTypeID* chunkID) const override
         {
             if (index != juceChunkIndex)
                 return AAX_CEffectParameters::GetChunkIDFromIndex (index, chunkID);
@@ -399,7 +409,7 @@ struct AAXClasses
             return AAX_SUCCESS;
         }
 
-        AAX_Result GetChunkSize (AAX_CTypeID chunkID, uint32_t* oSize) const
+        AAX_Result GetChunkSize (AAX_CTypeID chunkID, uint32_t* oSize) const override
         {
             if (chunkID != juceChunkType)
                 return AAX_CEffectParameters::GetChunkSize (chunkID, oSize);
@@ -410,7 +420,7 @@ struct AAXClasses
             return AAX_SUCCESS;
         }
 
-        AAX_Result GetChunk (AAX_CTypeID chunkID, AAX_SPlugInChunk* oChunk) const
+        AAX_Result GetChunk (AAX_CTypeID chunkID, AAX_SPlugInChunk* oChunk) const override
         {
             if (chunkID != juceChunkType)
                 return AAX_CEffectParameters::GetChunk (chunkID, oChunk);
@@ -425,7 +435,7 @@ struct AAXClasses
             return AAX_SUCCESS;
         }
 
-        AAX_Result SetChunk (AAX_CTypeID chunkID, const AAX_SPlugInChunk* chunk)
+        AAX_Result SetChunk (AAX_CTypeID chunkID, const AAX_SPlugInChunk* chunk) override
         {
             if (chunkID != juceChunkType)
                 return AAX_CEffectParameters::SetChunk (chunkID, chunk);
@@ -434,7 +444,7 @@ struct AAXClasses
             return AAX_SUCCESS;
         }
 
-        AAX_Result ResetFieldData (AAX_CFieldIndex fieldIndex, void* data, uint32_t dataSize) const
+        AAX_Result ResetFieldData (AAX_CFieldIndex fieldIndex, void* data, uint32_t dataSize) const override
         {
             switch (fieldIndex)
             {
@@ -466,25 +476,109 @@ struct AAXClasses
             }
 
             return AAX_SUCCESS;
-            //return AAX_ERROR_INVALID_FIELD_INDEX;
         }
 
-        AAX_Result UpdateParameterNormalizedValue (AAX_CParamID paramID, double value, AAX_EUpdateSource source)
+        AAX_Result UpdateParameterNormalizedValue (AAX_CParamID paramID, double value, AAX_EUpdateSource source) override
         {
             AAX_Result result = AAX_CEffectParameters::UpdateParameterNormalizedValue (paramID, value, source);
 
-            if (AAX::IsParameterIDEqual (paramID, cDefaultMasterBypassID) == false)
-            {
-                const int parameterIndex = atoi (paramID);
-                pluginInstance->setParameter (parameterIndex, (float) value);
-            }
+            if (! isBypassParam (paramID))
+                pluginInstance->setParameter (getParamIndexFromID (paramID), (float) value);
 
             return result;
         }
 
+        AAX_Result GetParameterStringFromValue (AAX_CParamID paramID, double value, AAX_IString* result, int32_t maxLen) const override
+        {
+            if (isBypassParam (paramID))
+                result->Set (value == 0 ? "Off"
+                                        : (maxLen >= 8 ? "Bypassed" : "Byp"));
+            else
+                result->Set (pluginInstance->getParameterText (getParamIndexFromID (paramID), maxLen).toRawUTF8());
+
+            return AAX_SUCCESS;
+        }
+
+        AAX_Result GetParameterNumberofSteps (AAX_CParamID paramID, int32_t* result) const
+        {
+            if (isBypassParam (paramID))
+                *result = 2;
+            else
+                *result = pluginInstance->getParameterNumSteps (getParamIndexFromID (paramID));
+
+            return AAX_SUCCESS;
+        }
+
+        AAX_Result GetParameterNormalizedValue (AAX_CParamID paramID, double* result) const override
+        {
+            if (isBypassParam (paramID))
+                return AAX_CEffectParameters::GetParameterNormalizedValue (paramID, result);
+
+            *result = pluginInstance->getParameter (getParamIndexFromID (paramID));
+            return AAX_SUCCESS;
+        }
+
+        AAX_Result SetParameterNormalizedValue (AAX_CParamID paramID, double newValue) const
+        {
+            if (! isBypassParam (paramID))
+            {
+                if (AAX_IParameter* p = const_cast<AAX_IParameter*> (mParameterManager.GetParameterByID (paramID)))
+                    p->SetValueWithFloat (newValue);
+
+                pluginInstance->setParameter (getParamIndexFromID (paramID), (float) newValue);
+            }
+
+            return AAX_SUCCESS;
+        }
+
+        AAX_Result SetParameterNormalizedRelative (AAX_CParamID paramID, double newValue) const
+        {
+            if (! isBypassParam (paramID))
+            {
+                const int paramIndex = getParamIndexFromID (paramID);
+                const float oldValue = pluginInstance->getParameter (paramIndex);
+                pluginInstance->setParameter (paramIndex, jlimit (0.0f, 1.0f, (float) (oldValue + newValue)));
+
+                if (AAX_IParameter* p = const_cast<AAX_IParameter*> (mParameterManager.GetParameterByID (paramID)))
+                    p->SetValueWithFloat (newValue);
+            }
+
+            return AAX_SUCCESS;
+        }
+
+        AAX_Result GetParameterNameOfLength (AAX_CParamID paramID, AAX_IString* result, int32_t maxLen) const override
+        {
+            if (isBypassParam (paramID))
+                result->Set (maxLen >= 13 ? "Master Bypass"
+                                          : (maxLen >= 8 ? "Mast Byp"
+                                                         : (maxLen >= 6 ? "MstByp" : "MByp")));
+            else
+                result->Set (pluginInstance->getParameterName (getParamIndexFromID (paramID), maxLen).toRawUTF8());
+
+            return AAX_SUCCESS;
+        }
+
+        AAX_Result GetParameterName (AAX_CParamID paramID, AAX_IString* result) const override
+        {
+            if (isBypassParam (paramID))
+                result->Set ("Master Bypass");
+            else
+                result->Set (pluginInstance->getParameterName (getParamIndexFromID (paramID), 31).toRawUTF8());
+
+            return AAX_SUCCESS;
+        }
+
+        AAX_Result GetParameterDefaultNormalizedValue (AAX_CParamID paramID, double* result) const override
+        {
+            if (! isBypassParam (paramID))
+                *result = (double) pluginInstance->getParameterDefaultValue (getParamIndexFromID (paramID));
+
+            return AAX_SUCCESS;
+        }
+
         AudioProcessor& getPluginInstance() const noexcept   { return *pluginInstance; }
 
-        bool getCurrentPosition (juce::AudioPlayHead::CurrentPositionInfo& info)
+        bool getCurrentPosition (juce::AudioPlayHead::CurrentPositionInfo& info) override
         {
             const AAX_ITransport& transport = *Transport();
 
@@ -550,27 +644,27 @@ struct AAXClasses
             return true;
         }
 
-        void audioProcessorParameterChanged (AudioProcessor* /*processor*/, int parameterIndex, float newValue)
+        void audioProcessorParameterChanged (AudioProcessor* /*processor*/, int parameterIndex, float newValue) override
         {
             SetParameterNormalizedValue (IndexAsParamID (parameterIndex), (double) newValue);
         }
 
-        void audioProcessorChanged (AudioProcessor* processor)
+        void audioProcessorChanged (AudioProcessor* processor) override
         {
             check (Controller()->SetSignalLatency (processor->getLatencySamples()));
         }
 
-        void audioProcessorParameterChangeGestureBegin (AudioProcessor* /*processor*/, int parameterIndex)
+        void audioProcessorParameterChangeGestureBegin (AudioProcessor* /*processor*/, int parameterIndex) override
         {
             TouchParameter (IndexAsParamID (parameterIndex));
         }
 
-        void audioProcessorParameterChangeGestureEnd (AudioProcessor* /*processor*/, int parameterIndex)
+        void audioProcessorParameterChangeGestureEnd (AudioProcessor* /*processor*/, int parameterIndex) override
         {
             ReleaseParameter (IndexAsParamID (parameterIndex));
         }
 
-        AAX_Result NotificationReceived (AAX_CTypeID type, const void* data, uint32_t size)
+        AAX_Result NotificationReceived (AAX_CTypeID type, const void* data, uint32_t size) override
         {
             if (type == AAX_eNotificationEvent_EnteringOfflineMode)  pluginInstance->setNonRealtime (true);
             if (type == AAX_eNotificationEvent_ExitingOfflineMode)   pluginInstance->setNonRealtime (false);
@@ -730,13 +824,14 @@ struct AAXClasses
             {
                 AAX_IParameter* parameter
                     = new AAX_CParameter<float> (IndexAsParamID (parameterIndex),
-                                                 audioProcessor.getParameterName (parameterIndex).toRawUTF8(),
+                                                 audioProcessor.getParameterName (parameterIndex, 31).toRawUTF8(),
                                                  audioProcessor.getParameter (parameterIndex),
                                                  AAX_CLinearTaperDelegate<float, 0>(),
                                                  AAX_CNumberDisplayDelegate<float, 3>(),
                                                  audioProcessor.isParameterAutomatable (parameterIndex));
 
-                parameter->SetNumberOfSteps (0x7fffffff);
+                parameter->AddShortenedName (audioProcessor.getParameterName (parameterIndex, 4).toRawUTF8());
+                parameter->SetNumberOfSteps (audioProcessor.getParameterNumSteps (parameterIndex));
                 parameter->SetType (AAX_eParameterType_Continuous);
                 mParameterManager.AddParameter (parameter);
             }
@@ -839,6 +934,12 @@ struct AAXClasses
         descriptor.AddName (JucePlugin_Desc);
         descriptor.AddName (JucePlugin_Name);
         descriptor.AddCategory (JucePlugin_AAXCategory);
+
+       #ifdef JucePlugin_AAXPageTableFile
+        // optional page table setting - define this macro in your AppConfig.h if you
+        // want to set this value - see Avid documentation for details about its format.
+        descriptor.AddResourceInfo (AAX_eResourceType_PageTable, JucePlugin_AAXPageTableFile);
+       #endif
 
         check (descriptor.AddProcPtr ((void*) JuceAAX_GUI::Create,        kAAX_ProcPtrID_Create_EffectGUI));
         check (descriptor.AddProcPtr ((void*) JuceAAX_Processor::Create,  kAAX_ProcPtrID_Create_EffectParameters));

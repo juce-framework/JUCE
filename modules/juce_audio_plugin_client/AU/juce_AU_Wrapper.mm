@@ -406,7 +406,7 @@ public:
 
             outParameterInfo.minValue = 0.0f;
             outParameterInfo.maxValue = 1.0f;
-            outParameterInfo.defaultValue = 0.0f;
+            outParameterInfo.defaultValue = juceFilter->getParameterDefaultValue (index);
             outParameterInfo.unit = kAudioUnitParameterUnit_Generic;
 
             return noErr;

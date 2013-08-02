@@ -114,11 +114,22 @@ void AudioProcessor::setLatencySamples (const int newLatency)
 void AudioProcessor::setParameterNotifyingHost (const int parameterIndex,
                                                 const float newValue)
 {
-    jassert (MessageManager::getInstance()->isThisTheMessageThread());
-
     setParameter (parameterIndex, newValue);
     sendParamChangeMessageToListeners (parameterIndex, newValue);
 }
+
+String AudioProcessor::getParameterName (int parameterIndex, int maximumStringLength)
+{
+    return getParameterName (parameterIndex).substring (0, maximumStringLength);
+}
+
+String AudioProcessor::getParameterText (int parameterIndex, int maximumStringLength)
+{
+    return getParameterText (parameterIndex).substring (0, maximumStringLength);
+}
+
+int AudioProcessor::getParameterNumSteps (int /*parameterIndex*/)        { return 0x7fffffff; }
+float AudioProcessor::getParameterDefaultValue (int /*parameterIndex*/)  { return 0.0f; }
 
 AudioProcessorListener* AudioProcessor::getListenerLocked (const int index) const noexcept
 {
