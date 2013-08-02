@@ -2015,28 +2015,23 @@ public:
     {
         if (isOpen)
         {
-            if (ComponentPeer* const peer = getPeer())
+           #if JUCE_LINUX
+            if (pluginWindow != 0)
             {
-                peer->addMaskedRegion (peer->globalToLocal (getScreenBounds()));
+                const Rectangle<int> clip (g.getClipBounds());
 
-               #if JUCE_LINUX
-                if (pluginWindow != 0)
-                {
-                    const Rectangle<int> clip (g.getClipBounds());
+                XEvent ev = { 0 };
+                ev.xexpose.type = Expose;
+                ev.xexpose.display = display;
+                ev.xexpose.window = pluginWindow;
+                ev.xexpose.x = clip.getX();
+                ev.xexpose.y = clip.getY();
+                ev.xexpose.width = clip.getWidth();
+                ev.xexpose.height = clip.getHeight();
 
-                    XEvent ev = { 0 };
-                    ev.xexpose.type = Expose;
-                    ev.xexpose.display = display;
-                    ev.xexpose.window = pluginWindow;
-                    ev.xexpose.x = clip.getX();
-                    ev.xexpose.y = clip.getY();
-                    ev.xexpose.width = clip.getWidth();
-                    ev.xexpose.height = clip.getHeight();
-
-                    sendEventToChild (ev);
-                }
-               #endif
+                sendEventToChild (ev);
             }
+           #endif
         }
         else
         {

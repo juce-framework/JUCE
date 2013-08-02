@@ -290,7 +290,11 @@ public:
         return *this;
     }
 
-    /** Scales this rectangle by the given amount, centred around the origin. */
+    /** Returns a rectangle that has been scaled by the given amount, centred around the origin.
+        Note that if the rectangle has int coordinates and it's scaled by a
+        floating-point amount, then the result will be converted back to integer
+        coordinates using getSmallestIntegerContainer().
+    */
     template <typename FloatType>
     Rectangle operator* (FloatType scaleFactor) const noexcept
     {
@@ -299,7 +303,11 @@ public:
         return r;
     }
 
-    /** Scales this rectangle by the given amount, centred around the origin. */
+    /** Scales this rectangle by the given amount, centred around the origin.
+        Note that if the rectangle has int coordinates and it's scaled by a
+        floating-point amount, then the result will be converted back to integer
+        coordinates using getSmallestIntegerContainer().
+    */
     template <typename FloatType>
     Rectangle operator*= (FloatType scaleFactor) noexcept
     {
@@ -314,14 +322,20 @@ public:
     template <typename FloatType>
     Rectangle operator/ (FloatType scaleFactor) const noexcept
     {
-        return operator* (((FloatType) 1) / scaleFactor);
+        Rectangle r (*this);
+        r /= scaleFactor;
+        return r;
     }
 
     /** Scales this rectangle by the given amount, centred around the origin. */
     template <typename FloatType>
     Rectangle operator/= (FloatType scaleFactor) noexcept
     {
-        return operator*= (((FloatType) 1) / scaleFactor);
+        Rectangle<FloatType> (pos.x / scaleFactor,
+                              pos.y / scaleFactor,
+                              w / scaleFactor,
+                              h / scaleFactor).copyWithRounding (*this);
+        return *this;
     }
 
     /** Expands the rectangle by a given amount.
@@ -688,22 +702,12 @@ public:
     */
     Rectangle<int> getSmallestIntegerContainer() const noexcept
     {
-        return getSmallestIntegerContainerWithType<int>();
-    }
+        const int x1 = floorAsInt (pos.x);
+        const int y1 = floorAsInt (pos.y);
+        const int x2 = ceilAsInt  (pos.x + w);
+        const int y2 = ceilAsInt  (pos.y + h);
 
-    /** Returns the smallest integer-aligned rectangle that completely contains this one.
-        This is only relevent for floating-point rectangles, of course.
-        @see toFloat()
-    */
-    template <typename IntType>
-    Rectangle<IntType> getSmallestIntegerContainerWithType() const noexcept
-    {
-        const IntType x1 = static_cast <IntType> (std::floor (static_cast<float> (pos.x)));
-        const IntType y1 = static_cast <IntType> (std::floor (static_cast<float> (pos.y)));
-        const IntType x2 = static_cast <IntType> (std::ceil  (static_cast<float> (pos.x + w)));
-        const IntType y2 = static_cast <IntType> (std::ceil  (static_cast<float> (pos.y + h)));
-
-        return Rectangle<IntType> (x1, y1, x2 - x1, y2 - y1);
+        return Rectangle<int> (x1, y1, x2 - x1, y2 - y1);
     }
 
     /** Casts this rectangle to a Rectangle<float>.
@@ -828,6 +832,13 @@ private:
     void copyWithRounding (Rectangle<int>& result) const noexcept    { result = getSmallestIntegerContainer(); }
     void copyWithRounding (Rectangle<float>& result) const noexcept  { result = toFloat(); }
     void copyWithRounding (Rectangle<double>& result) const noexcept { result = toDouble(); }
+
+    static int floorAsInt (int n) noexcept     { return n; }
+    static int floorAsInt (float n) noexcept   { return (int) std::floor (n); }
+    static int floorAsInt (double n) noexcept  { return (int) std::floor (n); }
+    static int ceilAsInt (int n) noexcept      { return n; }
+    static int ceilAsInt (float n) noexcept    { return (int) std::ceil (n); }
+    static int ceilAsInt (double n) noexcept   { return (int) std::ceil (n); }
 };
 
 

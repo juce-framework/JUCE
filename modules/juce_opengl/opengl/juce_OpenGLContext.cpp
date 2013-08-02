@@ -37,7 +37,7 @@ public:
           shadersAvailable (false),
          #endif
           hasInitialised (false),
-          needsUpdate (1)
+          needsUpdate (1), lastMMLockReleaseTime (0)
     {
         nativeContext = new NativeContext (component, pixFormat, contextToShare, c.useMultisampling);
 
@@ -69,11 +69,7 @@ public:
     }
 
     //==============================================================================
-    void paint (Graphics&) override
-    {
-        if (ComponentPeer* const peer = component.getPeer())
-            peer->addMaskedRegion (peer->getComponent().getLocalArea (&component, component.getLocalBounds()));
-    }
+    void paint (Graphics&) override {}
 
     void invalidateAll() override
     {
@@ -83,7 +79,7 @@ public:
 
     void invalidate (const Rectangle<int>& area) override
     {
-        validArea.subtract (area);
+        validArea.subtract (area * scale);
         triggerRepaint();
     }
 
@@ -119,7 +115,7 @@ public:
         return true;
     }
 
-    void clearRegionInFrameBuffer (const RectangleList<int>& list, const float scaleFactor)
+    void clearRegionInFrameBuffer (const RectangleList<int>& list)
     {
         glClearColor (0, 0, 0, 0);
         glEnable (GL_SCISSOR_TEST);
@@ -130,8 +126,7 @@ public:
 
         for (const Rectangle<int>* i = list.begin(), * const e = list.end(); i != e; ++i)
         {
-            const Rectangle<int> r ((i->toFloat() * scaleFactor).getSmallestIntegerContainer());
-            glScissor (r.getX(), imageH - r.getBottom(), r.getWidth(), r.getHeight());
+            glScissor (i->getX(), imageH - i->getBottom(), i->getWidth(), i->getHeight());
             glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
         }
 
@@ -148,6 +143,10 @@ public:
 
         if (context.renderComponents && isUpdating)
         {
+            // This avoids hogging the message thread when doing intensive rendering.
+            if (lastMMLockReleaseTime + 1 >= Time::getMillisecondCounter())
+                Thread::sleep (2);
+
             mmLock = new MessageManagerLock (this);  // need to acquire this before locking the context.
             if (! mmLock->lockWasGained())
                 return false;
@@ -173,6 +172,7 @@ public:
             {
                 paintComponent();
                 mmLock = nullptr;
+                lastMMLockReleaseTime = Time::getMillisecondCounter();
             }
 
             glViewport (0, 0, viewportArea.getWidth(), viewportArea.getHeight());
@@ -185,19 +185,21 @@ public:
 
     void updateViewportSize (bool canTriggerUpdate)
     {
-        const double newScale = Desktop::getInstance().getDisplays()
-                                    .getDisplayContaining (component.getScreenBounds().getCentre()).scale;
-
-        Rectangle<int> newArea (roundToInt (component.getWidth() * newScale),
-                                roundToInt (component.getHeight() * newScale));
-
-        if (scale != newScale || viewportArea != newArea)
+        if (ComponentPeer* peer = component.getPeer())
         {
-            scale = newScale;
-            viewportArea = newArea;
+            Rectangle<int> newArea (peer->getAreaCoveredBy (component).withPosition (0, 0));
 
-            if (canTriggerUpdate)
-                invalidateAll();
+            const double newScale = Desktop::getInstance().getDisplays()
+                                        .getDisplayContaining (component.getScreenBounds().getCentre()).scale;
+
+            if (scale != newScale || viewportArea != newArea)
+            {
+                scale = newScale;
+                viewportArea = newArea;
+
+                if (canTriggerUpdate)
+                    invalidateAll();
+            }
         }
     }
 
@@ -217,12 +219,12 @@ public:
 
         if (! invalid.isEmpty())
         {
-            clearRegionInFrameBuffer (invalid, (float) scale);
+            clearRegionInFrameBuffer (invalid);
 
             {
                 ScopedPointer<LowLevelGraphicsContext> g (createOpenGLGraphicsContext (context, cachedImageFrameBuffer));
-                g->addTransform (AffineTransform::scale ((float) scale));
                 g->clipToRectangleList (invalid);
+                g->addTransform (AffineTransform::scale ((float) scale));
 
                 paintOwner (*g);
                 JUCE_CHECK_OPENGL_ERROR
@@ -371,6 +373,7 @@ public:
     WaitableEvent canPaintNowFlag, finishedPaintingFlag;
     bool shadersAvailable, hasInitialised;
     Atomic<int> needsUpdate;
+    uint32 lastMMLockReleaseTime;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CachedImage)
 };
@@ -456,14 +459,14 @@ public:
     }
 
    #if JUCE_DEBUG || JUCE_LOG_ASSERTIONS
-    void componentBeingDeleted (Component& component) override
+    void componentBeingDeleted (Component& c) override
     {
         /* You must call detach() or delete your OpenGLContext to remove it
            from a component BEFORE deleting the component that it is using!
         */
         jassertfalse;
 
-        ComponentMovementWatcher::componentBeingDeleted (component);
+        ComponentMovementWatcher::componentBeingDeleted (c);
     }
    #endif
 

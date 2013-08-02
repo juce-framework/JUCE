@@ -175,8 +175,8 @@ namespace juce
     };@endcode
 */
 #define JUCE_DECLARE_NON_COPYABLE(className) \
-    className (const className&);\
-    className& operator= (const className&);
+    className (const className&) JUCE_DELETED_FUNCTION;\
+    className& operator= (const className&) JUCE_DELETED_FUNCTION;
 
 /** This is a shorthand way of writing both a JUCE_DECLARE_NON_COPYABLE and
     JUCE_LEAK_DETECTOR macro for a class.
@@ -190,8 +190,8 @@ namespace juce
 */
 #define JUCE_PREVENT_HEAP_ALLOCATION \
    private: \
-    static void* operator new (size_t); \
-    static void operator delete (void*);
+    static void* operator new (size_t) JUCE_DELETED_FUNCTION; \
+    static void operator delete (void*) JUCE_DELETED_FUNCTION;
 
 
 //==============================================================================
@@ -313,6 +313,10 @@ namespace juce
  #if (__GNUC__ * 100 + __GNUC_MINOR__) >= 407 && ! defined (JUCE_COMPILER_SUPPORTS_OVERRIDE_AND_FINAL)
   #define JUCE_COMPILER_SUPPORTS_OVERRIDE_AND_FINAL 1
  #endif
+
+ #if (__GNUC__ * 100 + __GNUC_MINOR__) >= 407 && ! defined (JUCE_DELETED_FUNCTION)
+  #define JUCE_DELETED_FUNCTION = delete
+ #endif
 #endif
 
 #if JUCE_CLANG && defined (__has_feature)
@@ -326,6 +330,10 @@ namespace juce
 
  #if __has_feature (cxx_rvalue_references)
   #define JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS 1
+ #endif
+
+ #if __has_feature (cxx_deleted_functions)
+  #define JUCE_DELETED_FUNCTION = delete
  #endif
 
  #ifndef JUCE_COMPILER_SUPPORTS_OVERRIDE_AND_FINAL
@@ -344,6 +352,10 @@ namespace juce
 
 #if defined (_MSC_VER) && _MSC_VER >= 1700
  #define JUCE_COMPILER_SUPPORTS_OVERRIDE_AND_FINAL 1
+#endif
+
+#ifndef JUCE_DELETED_FUNCTION
+ #define JUCE_DELETED_FUNCTION
 #endif
 
 //==============================================================================

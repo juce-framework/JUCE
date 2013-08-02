@@ -270,7 +270,7 @@ public:
             r.origin.y = [[view superview] frame].size.height - r.origin.y - r.size.height;
         }
 
-        return Rectangle<int> (convertToRectInt (r));
+        return convertToRectInt (r);
     }
 
     Rectangle<int> getBounds() const override

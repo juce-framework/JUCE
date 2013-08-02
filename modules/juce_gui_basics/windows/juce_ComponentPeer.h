@@ -324,24 +324,6 @@ public:
     bool handleDragDrop (const DragInfo&);
 
     //==============================================================================
-    /** Resets the masking region.
-        The subclass should call this every time it's about to call the handlePaint method.
-        @see addMaskedRegion
-    */
-    void clearMaskedRegion();
-
-    /** Adds a rectangle to the set of areas not to paint over.
-
-        A component can call this on its peer during its paint() method, to signal
-        that the painting code should ignore a given region. The reason
-        for this is to stop embedded windows (such as OpenGL) getting painted over.
-
-        The masked region is cleared each time before a paint happens, so a component
-        will have to make sure it calls this every time it's painted.
-    */
-    void addMaskedRegion (const Rectangle<int>& area);
-
-    //==============================================================================
     /** Returns the number of currently-active peers.
         @see getPeer
     */
@@ -369,7 +351,6 @@ protected:
     //==============================================================================
     Component& component;
     const int styleFlags;
-    RectangleList<int> maskedRegion;
     Rectangle<int> lastNonFullscreenBounds;
     ComponentBoundsConstrainer* constrainer;
 

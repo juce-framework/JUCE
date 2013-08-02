@@ -612,14 +612,10 @@ ModifierKeys ModifierKeys::getCurrentModifiersRealtime() noexcept
 }
 
 //==============================================================================
-bool Process::isForegroundProcess()
-{
-    return true;      // TODO
-}
-
-void Process::makeForegroundProcess()
-{
-}
+// TODO
+bool Process::isForegroundProcess() { return true; }
+void Process::makeForegroundProcess() {}
+void Process::hide() {}
 
 //==============================================================================
 void JUCE_CALLTYPE NativeMessageBox::showMessageBoxAsync (AlertWindow::AlertIconType iconType,
@@ -701,7 +697,6 @@ JUCE_JNI_CALLBACK (JUCE_ANDROID_ACTIVITY_CLASSNAME, setScreenSize, void, (JNIEnv
                                                                           jint screenWidth, jint screenHeight,
                                                                           jint dpi))
 {
-    const bool isSystemInitialised = android.screenWidth != 0;
     android.screenWidth = screenWidth;
     android.screenHeight = screenHeight;
     android.dpi = dpi;

@@ -36,57 +36,21 @@
     User code is not supposed to create instances of this class directly - do all your
     rendering via the Graphics class instead.
 */
-class JUCE_API  LowLevelGraphicsSoftwareRenderer    : public LowLevelGraphicsContext
+class JUCE_API  LowLevelGraphicsSoftwareRenderer    : public RenderingHelpers::StackBasedLowLevelGraphicsContext<RenderingHelpers::SoftwareRendererSavedState>
 {
 public:
     //==============================================================================
+    /** Creates a context to render into an image. */
     LowLevelGraphicsSoftwareRenderer (const Image& imageToRenderOnto);
+
+    /** Creates a context to render into a clipped subsection of an image. */
     LowLevelGraphicsSoftwareRenderer (const Image& imageToRenderOnto, Point<int> origin,
                                       const RectangleList<int>& initialClip);
+
+    /** Destructor. */
     ~LowLevelGraphicsSoftwareRenderer();
 
-    bool isVectorDevice() const override;
-    void setOrigin (int x, int y) override;
-    void addTransform (const AffineTransform&) override;
-    float getScaleFactor() override;
-    bool clipToRectangle (const Rectangle<int>&) override;
-    bool clipToRectangleList (const RectangleList<int>&) override;
-    void excludeClipRectangle (const Rectangle<int>&) override;
-    void clipToPath (const Path&, const AffineTransform&) override;
-    void clipToImageAlpha (const Image&, const AffineTransform&) override;
-    bool clipRegionIntersects (const Rectangle<int>&) override;
-    Rectangle<int> getClipBounds() const override;
-    bool isClipEmpty() const override;
-
-    void saveState() override;
-    void restoreState() override;
-
-    void beginTransparencyLayer (float opacity) override;
-    void endTransparencyLayer() override;
-
-    void setFill (const FillType&) override;
-    void setOpacity (float opacity) override;
-    void setInterpolationQuality (Graphics::ResamplingQuality) override;
-
-    void fillRect (const Rectangle<int>&, bool replaceExistingContents) override;
-    void fillPath (const Path&, const AffineTransform&) override;
-
-    void drawImage (const Image&, const AffineTransform&) override;
-
-    void drawLine (const Line <float>&) override;
-    void drawVerticalLine (int x, float top, float bottom) override;
-    void drawHorizontalLine (int x, float top, float bottom) override;
-
-    void setFont (const Font&) override;
-    const Font& getFont() override;
-    void drawGlyph (int glyphNumber, const AffineTransform&) override;
-
-    const Image& getImage() const noexcept                                          { return savedState->image; }
-    const RenderingHelpers::TranslationOrTransform& getTransform() const noexcept   { return savedState->transform; }
-
-protected:
-    RenderingHelpers::SavedStateStack <RenderingHelpers::SoftwareRendererSavedState> savedState;
-
+private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LowLevelGraphicsSoftwareRenderer)
 };
 

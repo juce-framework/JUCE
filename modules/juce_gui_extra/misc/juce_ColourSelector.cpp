@@ -193,8 +193,8 @@ private:
 class ColourSelector::HueSelectorComp  : public Component
 {
 public:
-    HueSelectorComp (ColourSelector& cs, float& hue, float& sat, float& val, const int edgeSize)
-        : owner (cs), h (hue), s (sat), v (val), edge (edgeSize)
+    HueSelectorComp (ColourSelector& cs, float& hue, const int edgeSize)
+        : owner (cs), h (hue), edge (edgeSize)
     {
         addAndMakeVisible (&marker);
     }
@@ -236,8 +236,6 @@ public:
 private:
     ColourSelector& owner;
     float& h;
-    float& s;
-    float& v;
     HueSelectorMarker marker;
     const int edge;
 
@@ -332,7 +330,7 @@ ColourSelector::ColourSelector (const int sectionsToShow, const int edge, const 
     if ((flags & showColourspace) != 0)
     {
         addAndMakeVisible (colourSpace = new ColourSpaceView (*this, h, s, v, gapAroundColourSpaceComponent));
-        addAndMakeVisible (hueSelector = new HueSelectorComp (*this, h, s, v, gapAroundColourSpaceComponent));
+        addAndMakeVisible (hueSelector = new HueSelectorComp (*this, h,  gapAroundColourSpaceComponent));
     }
 
     update();

@@ -128,7 +128,7 @@ public:
 
 
     //==============================================================================
-    virtual const Typeface::Ptr getTypefaceForFont (const Font& font);
+    virtual Typeface::Ptr getTypefaceForFont (const Font& font);
 
     /** Allows you to change the default sans-serif font.
 

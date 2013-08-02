@@ -105,7 +105,7 @@ public:
     }
 
 private:
-    float x, y, size, dx, dy, w, h, parentWidth, parentHeight;
+    float x, y, size, dx, dy, parentWidth, parentHeight;
     float innerX, innerY;
     Colour colour;
     Thread::ThreadID threadId;

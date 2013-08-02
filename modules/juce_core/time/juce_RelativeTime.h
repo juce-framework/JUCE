@@ -62,14 +62,19 @@ public:
 
     //==============================================================================
     /** Creates a new RelativeTime object representing a number of milliseconds.
-        @see minutes, hours, days, weeks
+        @see seconds, minutes, hours, days, weeks
     */
     static RelativeTime milliseconds (int milliseconds) noexcept;
 
     /** Creates a new RelativeTime object representing a number of milliseconds.
-        @see minutes, hours, days, weeks
+        @see seconds, minutes, hours, days, weeks
     */
     static RelativeTime milliseconds (int64 milliseconds) noexcept;
+
+    /** Creates a new RelativeTime object representing a number of seconds.
+        @see milliseconds, minutes, hours, days, weeks
+    */
+    static RelativeTime seconds (double seconds) noexcept;
 
     /** Creates a new RelativeTime object representing a number of minutes.
         @see milliseconds, hours, days, weeks
@@ -100,7 +105,7 @@ public:
     /** Returns the number of seconds this time represents.
         @see inMilliseconds, inMinutes, inHours, inDays, inWeeks
     */
-    double inSeconds() const noexcept       { return seconds; }
+    double inSeconds() const noexcept       { return numSeconds; }
 
     /** Returns the number of minutes this time represents.
         @see inMilliseconds, inSeconds, inHours, inDays, inWeeks
@@ -153,7 +158,7 @@ public:
 
 private:
     //==============================================================================
-    double seconds;
+    double numSeconds;
 };
 
 //==============================================================================

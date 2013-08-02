@@ -77,8 +77,8 @@ public:
           numClientInputChannels (0), numDeviceInputChannels (0), numDeviceInputChannelsAvailable (2),
           numClientOutputChannels (0), numDeviceOutputChannels (0),
           actualBufferSize (0), isRunning (false),
-          outputChannelBuffer (1, 1),
-          inputChannelBuffer (1, 1)
+          inputChannelBuffer (1, 1),
+          outputChannelBuffer (1, 1)
     {
         JNIEnv* env = getEnv();
         sampleRate = env->CallStaticIntMethod (AudioTrack, AudioTrack.getNativeOutputSampleRate, MODE_STREAM);

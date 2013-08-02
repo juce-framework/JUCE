@@ -254,7 +254,7 @@ public:
 
     void handleAsyncUpdate() override
     {
-        if (hwnd  != 0)
+        if (hwnd != 0)
         {
             if (needToRecreateNativeWindow)
             {
@@ -791,12 +791,8 @@ void DirectShowComponent::updateContextPosition()
     context->updateContextPosition();
 
     if (getWidth() > 0 && getHeight() > 0)
-    {
-        Component* const topComp = getTopLevelComponent();
-
-        if (topComp->getPeer() != nullptr)
-            context->updateWindowPosition (topComp->getLocalArea (this, getLocalBounds()));
-    }
+        if (ComponentPeer* peer = getTopLevelComponent()->getPeer())
+            context->updateWindowPosition (peer->getAreaCoveredBy (*this));
 }
 
 void DirectShowComponent::showContext (const bool shouldBeVisible)
@@ -807,16 +803,9 @@ void DirectShowComponent::showContext (const bool shouldBeVisible)
 void DirectShowComponent::paint (Graphics& g)
 {
     if (videoLoaded)
-    {
         context->handleUpdateNowIfNeeded();
-
-        if (ComponentPeer* const peer = getPeer())
-            peer->addMaskedRegion (peer->globalToLocal (getScreenBounds()));
-    }
     else
-    {
         g.fillAll (Colours::grey);
-    }
 }
 
 //======================================================================

@@ -28,5 +28,5 @@
 
 void Logger::outputDebugString (const String& text)
 {
-    __android_log_print (ANDROID_LOG_INFO, "JUCE", text.toUTF8());
+    __android_log_print (ANDROID_LOG_INFO, "JUCE", "%s", text.toUTF8().getAddress());
 }

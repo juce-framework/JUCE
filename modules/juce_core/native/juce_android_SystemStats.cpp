@@ -112,7 +112,7 @@ JNIEnv* getEnv() noexcept
     {
         DBG ("*** Call to getEnv() when system not initialised");
         jassertfalse;
-        exit (0);
+        std::exit (EXIT_FAILURE);
     }
    #endif
 
@@ -268,14 +268,8 @@ String SystemStats::getUserRegion()      { return AndroidStatsHelpers::getLocale
 String SystemStats::getDisplayLanguage() { return getUserLanguage(); }
 
 //==============================================================================
-SystemStats::CPUFlags::CPUFlags()
+void CPUInformation::initialise() noexcept
 {
-    // TODO
-    hasMMX = false;
-    hasSSE = false;
-    hasSSE2 = false;
-    has3DNow = false;
-
     numCpus = jmax (1, sysconf (_SC_NPROCESSORS_ONLN));
 }
 

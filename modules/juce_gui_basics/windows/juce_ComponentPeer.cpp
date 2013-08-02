@@ -574,17 +574,6 @@ void ComponentPeer::setRepresentedFile (const File&)
 }
 
 //==============================================================================
-void ComponentPeer::clearMaskedRegion()
-{
-    maskedRegion.clear();
-}
-
-void ComponentPeer::addMaskedRegion (const Rectangle<int>& area)
-{
-    maskedRegion.add (area);
-}
-
-//==============================================================================
 StringArray ComponentPeer::getAvailableRenderingEngines()       { return StringArray ("Software Renderer"); }
 int ComponentPeer::getCurrentRenderingEngine() const            { return 0; }
 void ComponentPeer::setCurrentRenderingEngine (int index)       { jassert (index == 0); (void) index; }

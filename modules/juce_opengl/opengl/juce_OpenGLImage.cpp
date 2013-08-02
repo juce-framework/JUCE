@@ -25,8 +25,8 @@
 class OpenGLFrameBufferImage   : public ImagePixelData
 {
 public:
-    OpenGLFrameBufferImage (OpenGLContext& context_, int width, int height)
-        : ImagePixelData (Image::ARGB, width, height),
+    OpenGLFrameBufferImage (OpenGLContext& context_, int w, int h)
+        : ImagePixelData (Image::ARGB, w, h),
           context (context_),
           pixelStride (4),
           lineStride (width * pixelStride)

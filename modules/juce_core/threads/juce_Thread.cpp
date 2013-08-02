@@ -65,10 +65,15 @@ struct CurrentThreadHolder   : public ReferenceCountedObject
 
 static char currentThreadHolderLock [sizeof (SpinLock)]; // (statically initialised to zeros).
 
+static SpinLock* castToSpinLockWithoutAliasingWarning (void* s)
+{
+    return static_cast<SpinLock*> (s);
+}
+
 static CurrentThreadHolder::Ptr getCurrentThreadHolder()
 {
     static CurrentThreadHolder::Ptr currentThreadHolder;
-    SpinLock::ScopedLockType lock (*reinterpret_cast <SpinLock*> (currentThreadHolderLock));
+    SpinLock::ScopedLockType lock (*castToSpinLockWithoutAliasingWarning (currentThreadHolderLock));
 
     if (currentThreadHolder == nullptr)
         currentThreadHolder = new CurrentThreadHolder();

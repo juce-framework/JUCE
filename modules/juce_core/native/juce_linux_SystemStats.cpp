@@ -132,12 +132,13 @@ String SystemStats::getUserRegion()      { return getLocaleValue (_NL_IDENTIFICA
 String SystemStats::getDisplayLanguage() { return getUserLanguage(); }
 
 //==============================================================================
-SystemStats::CPUFlags::CPUFlags()
+void CPUInformation::initialise() noexcept
 {
     const String flags (LinuxStatsHelpers::getCpuInfo ("flags"));
     hasMMX   = flags.contains ("mmx");
     hasSSE   = flags.contains ("sse");
     hasSSE2  = flags.contains ("sse2");
+    hasSSE3  = flags.contains ("sse3");
     has3DNow = flags.contains ("3dnow");
 
     numCpus = LinuxStatsHelpers::getCpuInfo ("processor").getIntValue() + 1;

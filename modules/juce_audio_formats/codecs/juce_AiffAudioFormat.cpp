@@ -792,8 +792,8 @@ private:
 class MemoryMappedAiffReader   : public MemoryMappedAudioFormatReader
 {
 public:
-    MemoryMappedAiffReader (const File& file, const AiffAudioFormatReader& reader)
-        : MemoryMappedAudioFormatReader (file, reader, reader.dataChunkStart,
+    MemoryMappedAiffReader (const File& f, const AiffAudioFormatReader& reader)
+        : MemoryMappedAudioFormatReader (f, reader, reader.dataChunkStart,
                                          reader.bytesPerFrame * reader.lengthInSamples, reader.bytesPerFrame),
           littleEndian (reader.littleEndian)
     {

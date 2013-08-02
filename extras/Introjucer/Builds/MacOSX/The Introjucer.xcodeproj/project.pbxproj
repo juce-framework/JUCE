@@ -1873,7 +1873,7 @@
 				HEADER_SEARCH_PATHS = "../../JuceLibraryCode $(inherited)";
 				GCC_OPTIMIZATION_LEVEL = 0;
 				INFOPLIST_FILE = Info.plist;
-				OTHER_CPLUSPLUSFLAGS = "-W -Wall -Wshadow -Wno-missing-field-initializers -Wint-conversion -Wshadow -Wconstant-conversion -Wshorten-64-to-32 -Wstrict-aliasing";
+				OTHER_CPLUSPLUSFLAGS = "-Wall -Wshadow -Wno-missing-field-initializers -Wshadow -Wshorten-64-to-32 -Wstrict-aliasing";
 				INSTALL_PATH = "$(HOME)/Applications";
 				CONFIGURATION_BUILD_DIR = "$(PROJECT_DIR)/build/$(CONFIGURATION)";
 				MACOSX_DEPLOYMENT_TARGET_ppc = 10.4;
@@ -1894,7 +1894,7 @@
 				HEADER_SEARCH_PATHS = "../../JuceLibraryCode $(inherited)";
 				GCC_OPTIMIZATION_LEVEL = 3;
 				INFOPLIST_FILE = Info.plist;
-				OTHER_CPLUSPLUSFLAGS = "-W -Wall -Wshadow -Wno-missing-field-initializers -Wint-conversion -Wshadow -Wconstant-conversion -Wshorten-64-to-32 -Wstrict-aliasing";
+				OTHER_CPLUSPLUSFLAGS = "-Wall -Wshadow -Wno-missing-field-initializers -Wshadow -Wshorten-64-to-32 -Wstrict-aliasing";
 				INSTALL_PATH = "$(HOME)/Applications";
 				CONFIGURATION_BUILD_DIR = "$(PROJECT_DIR)/build/$(CONFIGURATION)";
 				MACOSX_DEPLOYMENT_TARGET = 10.5;
