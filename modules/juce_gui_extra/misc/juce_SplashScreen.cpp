@@ -22,71 +22,50 @@
   ==============================================================================
 */
 
-SplashScreen::SplashScreen()
-    : originalClickCounter (0)
+SplashScreen::SplashScreen (const String& title, const Image& image, bool useDropShadow)
+    : Component (title),
+      backgroundImage (image),
+      clickCountToDelete (0)
 {
-    setOpaque (true);
+    // You must supply a valid image here!
+    jassert (backgroundImage.isValid());
+
+    setOpaque (! backgroundImage.hasAlphaChannel());
+    makeVisible (image.getWidth(), image.getHeight(), useDropShadow);
 }
 
-SplashScreen::~SplashScreen()
+SplashScreen::SplashScreen (const String& title, int width, int height, bool useDropShadow)
+    : Component (title),
+      clickCountToDelete (0)
 {
+    makeVisible (width, height, useDropShadow);
 }
 
-//==============================================================================
-void SplashScreen::show (const String& title,
-                         const Image& backgroundImage_,
-                         const int minimumTimeToDisplayFor,
-                         const bool useDropShadow,
-                         const bool removeOnMouseClick)
+void SplashScreen::makeVisible (int w, int h, bool useDropShadow)
 {
-    backgroundImage = backgroundImage_;
+    clickCountToDelete = Desktop::getInstance().getMouseButtonClickCounter();
+    creationTime = Time::getCurrentTime();
 
-    jassert (backgroundImage_.isValid());
-
-    if (backgroundImage_.isValid())
-    {
-        setOpaque (! backgroundImage_.hasAlphaChannel());
-
-        show (title,
-              backgroundImage_.getWidth(),
-              backgroundImage_.getHeight(),
-              minimumTimeToDisplayFor,
-              useDropShadow,
-              removeOnMouseClick);
-    }
-}
-
-void SplashScreen::show (const String& title,
-                         const int width,
-                         const int height,
-                         const int minimumTimeToDisplayFor,
-                         const bool useDropShadow,
-                         const bool removeOnMouseClick)
-{
-    setName (title);
     setAlwaysOnTop (true);
     setVisible (true);
-    centreWithSize (width, height);
-
+    centreWithSize (w, h);
     addToDesktop (useDropShadow ? ComponentPeer::windowHasDropShadow : 0);
     toFront (false);
+}
 
-   #if JUCE_MODAL_LOOPS_PERMITTED
-    MessageManager::getInstance()->runDispatchLoopUntil (300);
-   #endif
+SplashScreen::~SplashScreen() {}
 
-    repaint();
+void SplashScreen::deleteAfterDelay (RelativeTime timeout, bool removeOnMouseClick)
+{
+    // Note that this method must be safe to call from non-GUI threads
+    if (! removeOnMouseClick)
+        clickCountToDelete = std::numeric_limits<int>::max();
 
-    originalClickCounter = removeOnMouseClick
-                                ? Desktop::getInstance().getMouseButtonClickCounter()
-                                : std::numeric_limits<int>::max();
-
-    earliestTimeToDelete = Time::getCurrentTime() + RelativeTime::milliseconds (minimumTimeToDisplayFor);
+    minimumVisibleTime = timeout;
 
     startTimer (50);
 }
 
-//==============================================================================
 void SplashScreen::paint (Graphics& g)
 {
     g.setOpacity (1.0f);
@@ -98,9 +77,7 @@ void SplashScreen::paint (Graphics& g)
 
 void SplashScreen::timerCallback()
 {
-    if (Time::getCurrentTime() > earliestTimeToDelete
-         || Desktop::getInstance().getMouseButtonClickCounter() != originalClickCounter)
-    {
+    if (Time::getCurrentTime() > creationTime + minimumVisibleTime
+         || Desktop::getInstance().getMouseButtonClickCounter() > clickCountToDelete)
         delete this;
-    }
 }
