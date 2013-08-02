@@ -264,7 +264,7 @@ void LookAndFeel::setDefaultLookAndFeel (LookAndFeel* newDefaultLookAndFeel) noe
 }
 
 //==============================================================================
-const Typeface::Ptr LookAndFeel::getTypefaceForFont (const Font& font)
+Typeface::Ptr LookAndFeel::getTypefaceForFont (const Font& font)
 {
     if (defaultSans.isNotEmpty() && font.getTypefaceName() == Font::getDefaultSansSerifFontName())
     {
