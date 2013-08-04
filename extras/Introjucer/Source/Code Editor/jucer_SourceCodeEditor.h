@@ -53,13 +53,13 @@ public:
     {
         const File file (getFile());
 
-        if (file.hasFileExtension ("cpp;c;mm;m"))
+        if (file.hasFileExtension (sourceFileExtensions))
         {
-            const char* extensions[] = { "h", "hpp", nullptr };
+            const char* extensions[] = { "h", "hpp", "hxx", "hh", nullptr };
             return findCounterpart (file, extensions);
         }
 
-        if (file.hasFileExtension ("h;hpp"))
+        if (file.hasFileExtension (headerFileExtensions))
         {
             const char* extensions[] = { "cpp", "mm", "cc", "cxx", "c", "m", nullptr };
             return findCounterpart (file, extensions);
@@ -98,7 +98,8 @@ public:
     {
         bool canOpenFile (const File& file) override
         {
-            if (file.hasFileExtension ("cpp;h;hpp;mm;m;c;cc;cxx;txt;inc;tcc;xml;plist;rtf;html;htm;php;py;rb;cs"))
+            if (file.hasFileExtension (sourceOrHeaderFileExtensions)
+                 || file.hasFileExtension ("txt;inc;tcc;xml;plist;rtf;html;htm;php;py;rb;cs"))
                 return true;
 
             MemoryBlock mb;
