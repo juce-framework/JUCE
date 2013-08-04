@@ -222,7 +222,7 @@ protected:
                            "The minimum version of OSX that the target binary will be compatible with.");
 
                 const char* osxArch[] = { "Use Default", "Native architecture of build machine",
-                                          "Universal Binary (32-bit)", "Universal Binary (64-bit)", "64-bit Intel", 0 };
+                                          "Universal Binary (32-bit)", "Universal Binary (32/64-bit)", "64-bit Intel", 0 };
                 const char* osxArchValues[] = { osxArch_Default, osxArch_Native, osxArch_32BitUniversal,
                                                 osxArch_64BitUniversal, osxArch_64Bit, 0 };
 
@@ -601,6 +601,12 @@ private:
 
         flags.add (replacePreprocessorTokens (config, getExtraLinkerFlagsString()));
         flags.add (getExternalLibraryFlags (config));
+
+        if (! config.isDebug())
+        {
+            flags.add ("-gfull");
+            flags.add ("-dead_strip");
+        }
 
         flags.removeEmptyStrings (true);
     }
