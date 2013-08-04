@@ -602,12 +602,6 @@ private:
         flags.add (replacePreprocessorTokens (config, getExtraLinkerFlagsString()));
         flags.add (getExternalLibraryFlags (config));
 
-        if (! config.isDebug())
-        {
-            flags.add ("-gfull");
-            flags.add ("-dead_strip");
-        }
-
         flags.removeEmptyStrings (true);
     }
 
@@ -775,6 +769,7 @@ private:
             defines.set ("NDEBUG", "1");
             s.add ("GCC_GENERATE_DEBUGGING_SYMBOLS = NO");
             s.add ("GCC_SYMBOLS_PRIVATE_EXTERN = YES");
+            s.add ("DEAD_CODE_STRIPPING = YES");
         }
 
         {
