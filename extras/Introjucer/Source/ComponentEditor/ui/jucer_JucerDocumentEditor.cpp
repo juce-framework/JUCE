@@ -1075,7 +1075,7 @@ bool JucerDocumentEditor::keyPressed (const KeyPress& key)
 {
     if (key.isKeyCode (KeyPress::deleteKey) || key.isKeyCode (KeyPress::backspaceKey))
     {
-        commandManager->invokeDirectly (StandardApplicationCommandIDs::del, true);
+        IntrojucerApp::getCommandManager().invokeDirectly (StandardApplicationCommandIDs::del, true);
         return true;
     }
 
@@ -1085,7 +1085,7 @@ bool JucerDocumentEditor::keyPressed (const KeyPress& key)
 JucerDocumentEditor* JucerDocumentEditor::getActiveDocumentHolder()
 {
     ApplicationCommandInfo info (0);
-    ApplicationCommandTarget* target = commandManager->getTargetForCommand (JucerCommandIDs::editCompLayout, info);
+    ApplicationCommandTarget* target = IntrojucerApp::getCommandManager().getTargetForCommand (JucerCommandIDs::editCompLayout, info);
 
     return dynamic_cast <JucerDocumentEditor*> (target);
 }
@@ -1103,6 +1103,8 @@ const int snapSizes[] = { 2, 3, 4, 5, 6, 8, 10, 12, 16, 20, 24, 32 };
 
 void createGUIEditorMenu (PopupMenu& menu)
 {
+    ApplicationCommandManager* commandManager = &IntrojucerApp::getCommandManager();
+
     menu.addCommandItem (commandManager, JucerCommandIDs::editCompLayout);
     menu.addCommandItem (commandManager, JucerCommandIDs::editCompGraphics);
     menu.addSeparator();
@@ -1190,5 +1192,5 @@ void handleGUIEditorMenuCommand (int menuItemID)
 void registerGUIEditorCommands()
 {
     JucerDocumentEditor dh (nullptr);
-    commandManager->registerAllCommandsForTarget (&dh);
+    IntrojucerApp::getCommandManager().registerAllCommandsForTarget (&dh);
 }

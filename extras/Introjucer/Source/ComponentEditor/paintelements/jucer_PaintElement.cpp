@@ -23,6 +23,7 @@
 */
 
 #include "../../jucer_Headers.h"
+#include "../../Application/jucer_Application.h"
 #include "../jucer_PaintRoutine.h"
 #include "../jucer_UtilityFunctions.h"
 #include "../ui/jucer_JucerCommandIDs.h"
@@ -462,6 +463,8 @@ void PaintElement::updateSiblingComps()
 
 void PaintElement::showPopupMenu()
 {
+    ApplicationCommandManager* commandManager = &IntrojucerApp::getCommandManager();
+
     PopupMenu m;
 
     m.addCommandItem (commandManager, JucerCommandIDs::toFront);

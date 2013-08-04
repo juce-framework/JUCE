@@ -23,6 +23,7 @@
 */
 
 #include "../../jucer_Headers.h"
+#include "../../Application/jucer_Application.h"
 #include "../ui/jucer_JucerCommandIDs.h"
 #include "jucer_PaintRoutineEditor.h"
 #include "../jucer_ObjectTypes.h"
@@ -200,6 +201,8 @@ void PaintRoutineEditor::mouseDown (const MouseEvent& e)
 {
     if (e.mods.isPopupMenu())
     {
+        ApplicationCommandManager* commandManager = &IntrojucerApp::getCommandManager();
+
         PopupMenu m;
 
         m.addCommandItem (commandManager, JucerCommandIDs::editCompLayout);

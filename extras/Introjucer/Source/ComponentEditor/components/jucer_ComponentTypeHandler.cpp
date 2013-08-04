@@ -78,6 +78,8 @@ void ComponentTypeHandler::showPopupMenu (Component*, ComponentLayout&)
 {
     PopupMenu m;
 
+    ApplicationCommandManager* commandManager = &IntrojucerApp::getCommandManager();
+
     m.addCommandItem (commandManager, JucerCommandIDs::toFront);
     m.addCommandItem (commandManager, JucerCommandIDs::toBack);
     m.addSeparator();

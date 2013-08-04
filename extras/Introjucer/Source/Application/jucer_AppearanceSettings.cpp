@@ -112,7 +112,7 @@ void AppearanceSettings::refreshPresetSchemeList()
     if (newSchemes != presetSchemeFiles)
     {
         presetSchemeFiles.swapWith (newSchemes);
-        commandManager->commandStatusChanged();
+        IntrojucerApp::getCommandManager().commandStatusChanged();
     }
 }
 

@@ -30,8 +30,6 @@
 #include "../Project/jucer_NewProjectWizard.h"
 #include "../Utility/jucer_JucerTreeViewBase.h"
 
-ScopedPointer<ApplicationCommandManager> commandManager;
-
 
 //==============================================================================
 MainWindow::MainWindow()
@@ -50,20 +48,22 @@ MainWindow::MainWindow()
     setResizable (true, false);
     centreWithSize (800, 600);
 
+    ApplicationCommandManager& commandManager = IntrojucerApp::getCommandManager();
+
     // Register all the app commands..
-    commandManager->registerAllCommandsForTarget (this);
-    commandManager->registerAllCommandsForTarget (getProjectContentComponent());
+    commandManager.registerAllCommandsForTarget (this);
+    commandManager.registerAllCommandsForTarget (getProjectContentComponent());
 
     // update key mappings..
     {
-        commandManager->getKeyMappings()->resetToDefaultMappings();
+        commandManager.getKeyMappings()->resetToDefaultMappings();
 
         ScopedPointer <XmlElement> keys (getGlobalProperties().getXmlValue ("keyMappings"));
 
         if (keys != nullptr)
-            commandManager->getKeyMappings()->restoreFromXml (*keys);
+            commandManager.getKeyMappings()->restoreFromXml (*keys);
 
-        addKeyListener (commandManager->getKeyMappings());
+        addKeyListener (commandManager.getKeyMappings());
     }
 
     // don't want the window to take focus when the title-bar is clicked..
@@ -80,7 +80,7 @@ MainWindow::~MainWindow()
     setMenuBar (nullptr);
    #endif
 
-    removeKeyListener (commandManager->getKeyMappings());
+    removeKeyListener (IntrojucerApp::getCommandManager().getKeyMappings());
 
     // save the current size and position to our settings file..
     getGlobalProperties().setValue ("lastMainWindowPos", getWindowStateAsString());
@@ -160,7 +160,7 @@ void MainWindow::setProject (Project* newProject)
     getProjectContentComponent()->setProject (newProject);
     currentProject = newProject;
     getProjectContentComponent()->updateMainWindowTitle();
-    commandManager->commandStatusChanged();
+    IntrojucerApp::getCommandManager().commandStatusChanged();
 }
 
 void MainWindow::restoreWindowPosition()

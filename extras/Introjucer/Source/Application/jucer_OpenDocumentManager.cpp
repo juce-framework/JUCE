@@ -149,7 +149,7 @@ OpenDocumentManager::Document* OpenDocumentManager::openFile (Project* project, 
     jassert (d != nullptr);  // should always at least have been picked up by UnknownDocument
 
     documents.add (d);
-    commandManager->commandStatusChanged();
+    IntrojucerApp::getCommandManager().commandStatusChanged();
     return d;
 }
 
@@ -199,7 +199,7 @@ bool OpenDocumentManager::closeDocument (int index, bool saveIfNeeded)
             listeners.getUnchecked(i)->documentAboutToClose (doc);
 
         documents.remove (index);
-        commandManager->commandStatusChanged();
+        IntrojucerApp::getCommandManager().commandStatusChanged();
     }
 
     return true;

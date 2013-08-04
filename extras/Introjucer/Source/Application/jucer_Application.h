@@ -170,13 +170,20 @@ public:
         return *app;
     }
 
+    static ApplicationCommandManager& getCommandManager()
+    {
+        ApplicationCommandManager* cm = IntrojucerApp::getApp().commandManager;
+        jassert (cm != nullptr);
+        return *cm;
+    }
+
     //==============================================================================
     class MainMenuModel  : public MenuBarModel
     {
     public:
         MainMenuModel()
         {
-            setApplicationCommandManagerToWatch (commandManager);
+            setApplicationCommandManagerToWatch (&getCommandManager());
         }
 
         StringArray getMenuBarNames()
@@ -582,6 +589,7 @@ public:
 
     MainWindowList mainWindowList;
     OpenDocumentManager openDocumentManager;
+    ScopedPointer<ApplicationCommandManager> commandManager;
 
     ScopedPointer<Component> appearanceEditorWindow, utf8Window;
 

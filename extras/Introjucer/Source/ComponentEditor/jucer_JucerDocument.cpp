@@ -52,21 +52,21 @@ JucerDocument::JucerDocument (SourceCodeDocument* c)
     jassert (cpp != nullptr);
     resources.setDocument (this);
 
-    commandManager->commandStatusChanged();
+    IntrojucerApp::getCommandManager().commandStatusChanged();
     cpp->getCodeDocument().addListener (this);
 }
 
 JucerDocument::~JucerDocument()
 {
     cpp->getCodeDocument().removeListener (this);
-    commandManager->commandStatusChanged();
+    IntrojucerApp::getCommandManager().commandStatusChanged();
 }
 
 //==============================================================================
 void JucerDocument::changed()
 {
     sendChangeMessage();
-    commandManager->commandStatusChanged();
+    IntrojucerApp::getCommandManager().commandStatusChanged();
     startTimer (800);
 }
 

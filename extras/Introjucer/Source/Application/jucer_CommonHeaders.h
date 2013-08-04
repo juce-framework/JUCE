@@ -37,9 +37,6 @@
 #include "jucer_CommandIDs.h"
 
 //==============================================================================
-extern ScopedPointer<ApplicationCommandManager> commandManager;
-
-//==============================================================================
 const char* const projectItemDragType   = "Project Items";
 const char* const drawableItemDragType  = "Drawable Items";
 const char* const componentItemDragType = "Components";
