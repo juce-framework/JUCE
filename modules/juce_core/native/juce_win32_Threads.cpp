@@ -150,7 +150,7 @@ void Thread::killThread()
     }
 }
 
-void Thread::setCurrentThreadName (const String& name)
+void JUCE_CALLTYPE Thread::setCurrentThreadName (const String& name)
 {
    #if JUCE_DEBUG && JUCE_MSVC
     struct
@@ -177,7 +177,7 @@ void Thread::setCurrentThreadName (const String& name)
    #endif
 }
 
-Thread::ThreadID Thread::getCurrentThreadId()
+Thread::ThreadID JUCE_CALLTYPE Thread::getCurrentThreadId()
 {
     return (ThreadID) (pointer_sized_int) GetCurrentThreadId();
 }
@@ -199,7 +199,7 @@ bool Thread::setThreadPriority (void* handle, int priority)
     return SetThreadPriority (handle, pri) != FALSE;
 }
 
-void Thread::setCurrentThreadAffinityMask (const uint32 affinityMask)
+void JUCE_CALLTYPE Thread::setCurrentThreadAffinityMask (const uint32 affinityMask)
 {
     SetThreadAffinityMask (GetCurrentThread(), affinityMask);
 }
