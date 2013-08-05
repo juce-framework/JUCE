@@ -471,8 +471,8 @@ void Project::findAllImageItems (OwnedArray<Project::Item>& items)
 }
 
 //==============================================================================
-Project::Item::Item (Project& project_, const ValueTree& state_)
-    : project (project_), state (state_)
+Project::Item::Item (Project& p, const ValueTree& s)
+    : project (p), state (s)
 {
 }
 
@@ -748,7 +748,7 @@ Project::Item Project::Item::addNewSubGroup (const String& name, int insertIndex
     String newID (createGUID (getID() + name + String (getNumChildren())));
 
     int n = 0;
-    while (findItemWithID (newID).isValid())
+    while (project.getMainGroup().findItemWithID (newID).isValid())
         newID = createGUID (newID + String (++n));
 
     Item group (createGroup (project, name, newID));
@@ -767,12 +767,9 @@ bool Project::Item::addFile (const File& file, int insertIndex, const bool shoul
     {
         Item group (addNewSubGroup (file.getFileNameWithoutExtension(), insertIndex));
 
-        DirectoryIterator iter (file, false, "*", File::findFilesAndDirectories);
-        while (iter.next())
-        {
+        for (DirectoryIterator iter (file, false, "*", File::findFilesAndDirectories); iter.next();)
             if (! project.getMainGroup().findItemForFile (iter.getFile()).isValid())
                 group.addFile (iter.getFile(), -1, shouldCompile);
-        }
 
         group.sortAlphabetically (false);
     }
@@ -1005,7 +1002,7 @@ String Project::getFileTemplate (const String& templateName)
 }
 
 //==============================================================================
-Project::ExporterIterator::ExporterIterator (Project& project_) : index (-1), project (project_) {}
+Project::ExporterIterator::ExporterIterator (Project& p) : index (-1), project (p) {}
 Project::ExporterIterator::~ExporterIterator() {}
 
 bool Project::ExporterIterator::next()

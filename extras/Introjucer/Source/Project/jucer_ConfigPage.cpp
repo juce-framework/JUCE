@@ -55,8 +55,8 @@ namespace ProjectSettingsTreeClasses
     class ConfigItem   : public SettingsTreeViewItemBase
     {
     public:
-        ConfigItem (const ProjectExporter::BuildConfiguration::Ptr& config_, const String& exporterName_)
-            : config (config_), exporterName (exporterName_), configTree (config->config)
+        ConfigItem (const ProjectExporter::BuildConfiguration::Ptr& conf, const String& expName)
+            : config (conf), exporterName (expName), configTree (config->config)
         {
             jassert (config != nullptr);
             configTree.addListener (this);
@@ -155,9 +155,9 @@ namespace ProjectSettingsTreeClasses
     class ExporterItem   : public SettingsTreeViewItemBase
     {
     public:
-        ExporterItem (Project& project_, ProjectExporter* exporter_, int exporterIndex_)
-            : project (project_), exporter (exporter_), configListTree (exporter->getConfigurations()),
-              exporterIndex (exporterIndex_)
+        ExporterItem (Project& p, ProjectExporter* e, int index)
+            : project (p), exporter (e), configListTree (exporter->getConfigurations()),
+              exporterIndex (index)
         {
             configListTree.addListener (this);
             jassert (exporter != nullptr);
@@ -283,7 +283,7 @@ namespace ProjectSettingsTreeClasses
     class ModulesItem   : public SettingsTreeViewItemBase
     {
     public:
-        ModulesItem (Project& project_)  : project (project_) {}
+        ModulesItem (Project& p)  : project (p) {}
 
         bool canBeSelected() const              { return true; }
         bool mightContainSubItems()             { return false; }
@@ -302,7 +302,7 @@ namespace ProjectSettingsTreeClasses
         class SettingsComp  : public Component
         {
         public:
-            SettingsComp (Project& project_)   : project (project_)
+            SettingsComp (Project& p)   : project (p)
             {
                 addAndMakeVisible (&group);
 
@@ -334,8 +334,8 @@ namespace ProjectSettingsTreeClasses
     class RootItem   : public SettingsTreeViewItemBase
     {
     public:
-        RootItem (Project& project_)
-            : project (project_), exportersTree (project_.getExporters())
+        RootItem (Project& p)
+            : project (p), exportersTree (p.getExporters())
         {
             exportersTree.addListener (this);
         }
@@ -414,8 +414,7 @@ namespace ProjectSettingsTreeClasses
                               private ChangeListener
         {
         public:
-            SettingsComp (Project& project_)
-                : project (project_)
+            SettingsComp (Project& p)  : project (p)
             {
                 addAndMakeVisible (&group);
 

@@ -147,7 +147,7 @@ bool ProjectExporter::canProjectBeLaunched (Project* project)
 }
 
 //==============================================================================
-ProjectExporter::ProjectExporter (Project& project_, const ValueTree& settings_)
+ProjectExporter::ProjectExporter (Project& p, const ValueTree& settings_)
     : xcodeIsBundle (false),
       xcodeCreatePList (false),
       xcodeCanUseDwarf (true),
@@ -155,10 +155,10 @@ ProjectExporter::ProjectExporter (Project& project_, const ValueTree& settings_)
       msvcIsDLL (false),
       msvcIsWindowsSubsystem (true),
       settings (settings_),
-      project (project_),
-      projectType (project_.getProjectType()),
-      projectName (project_.getTitle()),
-      projectFolder (project_.getFile().getParentDirectory()),
+      project (p),
+      projectType (p.getProjectType()),
+      projectName (p.getTitle()),
+      projectFolder (p.getFile().getParentDirectory()),
       modulesGroup (nullptr)
 {
 }
@@ -484,8 +484,8 @@ bool ProjectExporter::ConstConfigIterator::next()
 }
 
 //==============================================================================
-ProjectExporter::BuildConfiguration::BuildConfiguration (Project& project_, const ValueTree& configNode)
-   : config (configNode), project (project_)
+ProjectExporter::BuildConfiguration::BuildConfiguration (Project& p, const ValueTree& configNode)
+   : config (configNode), project (p)
 {
 }
 

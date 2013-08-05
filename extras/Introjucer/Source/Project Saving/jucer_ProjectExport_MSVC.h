@@ -557,9 +557,9 @@ class MSVCProjectExporterVC2008   : public MSVCProjectExporterBase
 {
 public:
     //==============================================================================
-    MSVCProjectExporterVC2008 (Project& project_, const ValueTree& settings_,
+    MSVCProjectExporterVC2008 (Project& p, const ValueTree& s,
                                const char* folderName = "VisualStudio2008")
-        : MSVCProjectExporterBase (project_, settings_, folderName)
+        : MSVCProjectExporterBase (p, s, folderName)
     {
         name = getName();
     }

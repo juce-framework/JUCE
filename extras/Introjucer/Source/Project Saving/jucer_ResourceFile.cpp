@@ -30,8 +30,8 @@ static const char* resourceFileIdentifierString = "JUCER_BINARY_RESOURCE";
 
 
 //==============================================================================
-ResourceFile::ResourceFile (Project& project_)
-    : project (project_),
+ResourceFile::ResourceFile (Project& p)
+    : project (p),
       className ("BinaryData")
 {
     addResourcesFromProjectItem (project.getMainGroup());
