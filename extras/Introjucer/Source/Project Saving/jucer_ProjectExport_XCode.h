@@ -222,7 +222,7 @@ protected:
                            "The minimum version of OSX that the target binary will be compatible with.");
 
                 const char* osxArch[] = { "Use Default", "Native architecture of build machine",
-                                          "Universal Binary (32-bit)", "Universal Binary (64-bit)", "64-bit Intel", 0 };
+                                          "Universal Binary (32-bit)", "Universal Binary (32/64-bit)", "64-bit Intel", 0 };
                 const char* osxArchValues[] = { osxArch_Default, osxArch_Native, osxArch_32BitUniversal,
                                                 osxArch_64BitUniversal, osxArch_64Bit, 0 };
 
@@ -769,6 +769,7 @@ private:
             defines.set ("NDEBUG", "1");
             s.add ("GCC_GENERATE_DEBUGGING_SYMBOLS = NO");
             s.add ("GCC_SYMBOLS_PRIVATE_EXTERN = YES");
+            s.add ("DEAD_CODE_STRIPPING = YES");
         }
 
         {

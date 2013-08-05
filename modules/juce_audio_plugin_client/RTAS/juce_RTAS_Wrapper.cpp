@@ -847,9 +847,9 @@ private:
 
         //==============================================================================
         OSType GetID() const            { return index + 1; }
-        long GetDefaultValue() const    { return floatToLong (0); }
+        long GetDefaultValue() const    { return floatToLong (juceFilter->getParameterDefaultValue (index)); }
         void SetDefaultValue (long)     {}
-        long GetNumSteps() const        { return 0xffffffff; }
+        long GetNumSteps() const        { return juceFilter->getParameterNumSteps (index); }
 
         long ConvertStringToValue (const char* valueString) const
         {
@@ -863,7 +863,7 @@ private:
             // Pro-tools expects all your parameters to have valid names!
             jassert (juceFilter->getParameterName (index).isNotEmpty());
 
-            juceFilter->getParameterName (index).copyToUTF8 (name, (size_t) maxLength);
+            juceFilter->getParameterName (index, maxLength).copyToUTF8 (name, (size_t) maxLength + 1);
         }
 
         long GetPriority() const        { return kFicCooperativeTaskPriority; }
@@ -878,7 +878,7 @@ private:
 
         void GetValueString (char* valueString, int maxLength, long value) const
         {
-            juceFilter->getParameterText (index).copyToUTF8 (valueString, (size_t) maxLength);
+            juceFilter->getParameterText (index, maxLength).copyToUTF8 (valueString, (size_t) maxLength + 1);
         }
 
         Cmn_Bool IsAutomatable() const
