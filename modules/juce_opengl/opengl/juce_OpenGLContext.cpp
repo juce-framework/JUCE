@@ -71,16 +71,18 @@ public:
     //==============================================================================
     void paint (Graphics&) override {}
 
-    void invalidateAll() override
+    bool invalidateAll() override
     {
         validArea.clear();
         triggerRepaint();
+        return false;
     }
 
-    void invalidate (const Rectangle<int>& area) override
+    bool invalidate (const Rectangle<int>& area) override
     {
         validArea.subtract (area * scale);
         triggerRepaint();
+        return false;
     }
 
     void releaseResources() override {}
@@ -145,7 +147,7 @@ public:
         {
             // This avoids hogging the message thread when doing intensive rendering.
             if (lastMMLockReleaseTime + 1 >= Time::getMillisecondCounter())
-                Thread::sleep (2);
+                wait (2);
 
             mmLock = new MessageManagerLock (this);  // need to acquire this before locking the context.
             if (! mmLock->lockWasGained())

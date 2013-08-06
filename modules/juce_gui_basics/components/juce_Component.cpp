@@ -761,8 +761,8 @@ public:
         g.drawImageAt (image, 0, 0);
     }
 
-    void invalidateAll() override                            { validArea.clear(); }
-    void invalidate (const Rectangle<int>& area) override    { validArea.subtract (area); }
+    bool invalidateAll() override                            { validArea.clear(); return true; }
+    bool invalidate (const Rectangle<int>& area) override    { validArea.subtract (area); return true; }
     void releaseResources() override                         { image = Image::null; }
 
 private:
@@ -1811,12 +1811,9 @@ void Component::internalRepaintUnchecked (const Rectangle<int>& area, const bool
     if (flags.visibleFlag)
     {
         if (cachedImage != nullptr)
-        {
-            if (isEntireComponent)
-                cachedImage->invalidateAll();
-            else
-                cachedImage->invalidate (area);
-        }
+            if (! (isEntireComponent ? cachedImage->invalidateAll()
+                                     : cachedImage->invalidate (area)))
+                return;
 
         if (flags.hasHeavyweightPeerFlag)
         {

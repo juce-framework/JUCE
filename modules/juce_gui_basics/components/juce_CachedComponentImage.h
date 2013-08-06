@@ -51,11 +51,17 @@ public:
     */
     virtual void paint (Graphics&) = 0;
 
-    /** Invalidates all cached image data. */
-    virtual void invalidateAll() = 0;
+    /** Invalidates all cached image data.
+        @returns true if the peer should also be repainted, or false if this object
+                 handles all repaint work internally.
+    */
+    virtual bool invalidateAll() = 0;
 
-    /** Invalidates a section of the cached image data. */
-    virtual void invalidate (const Rectangle<int>& area) = 0;
+    /** Invalidates a section of the cached image data.
+        @returns true if the peer should also be repainted, or false if this object
+                 handles all repaint work internally.
+    */
+    virtual bool invalidate (const Rectangle<int>& area) = 0;
 
     /** Called to indicate that the component is no longer active, so
         any cached data should be released if possible.

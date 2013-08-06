@@ -1435,134 +1435,131 @@ private:
         else
        #endif
 
+        HRGN rgn = CreateRectRgn (0, 0, 0, 0);
+        const int regionType = GetUpdateRgn (hwnd, rgn, false);
+
+        PAINTSTRUCT paintStruct;
+        HDC dc = BeginPaint (hwnd, &paintStruct); // Note this can immediately generate a WM_NCPAINT
+                                                  // message and become re-entrant, but that's OK
+
+        // if something in a paint handler calls, e.g. a message box, this can become reentrant and
+        // corrupt the image it's using to paint into, so do a check here.
+        static bool reentrant = false;
+        if (! (reentrant || dontRepaint))
         {
-            HRGN rgn = CreateRectRgn (0, 0, 0, 0);
-            const int regionType = GetUpdateRgn (hwnd, rgn, false);
-
-            PAINTSTRUCT paintStruct;
-            HDC dc = BeginPaint (hwnd, &paintStruct); // Note this can immediately generate a WM_NCPAINT
-                                                      // message and become re-entrant, but that's OK
-
-            // if something in a paint handler calls, e.g. a message box, this can become reentrant and
-            // corrupt the image it's using to paint into, so do a check here.
-            static bool reentrant = false;
-            if (reentrant)
-            {
-                DeleteObject (rgn);
-                EndPaint (hwnd, &paintStruct);
-                return;
-            }
-
             const ScopedValueSetter<bool> setter (reentrant, true, false);
-
-            // this is the rectangle to update..
-            int x = paintStruct.rcPaint.left;
-            int y = paintStruct.rcPaint.top;
-            int w = paintStruct.rcPaint.right - x;
-            int h = paintStruct.rcPaint.bottom - y;
-
-            const bool transparent = isUsingUpdateLayeredWindow();
-
-            if (transparent)
-            {
-                // it's not possible to have a transparent window with a title bar at the moment!
-                jassert (! hasTitleBar());
-
-                RECT r;
-                GetWindowRect (hwnd, &r);
-                x = y = 0;
-                w = r.right - r.left;
-                h = r.bottom - r.top;
-            }
-
-            if (w > 0 && h > 0)
-            {
-                Image& offscreenImage = offscreenImageGenerator.getImage (transparent, w, h);
-
-                RectangleList<int> contextClip;
-                const Rectangle<int> clipBounds (w, h);
-
-                bool needToPaintAll = true;
-
-                if (regionType == COMPLEXREGION && ! transparent)
-                {
-                    HRGN clipRgn = CreateRectRgnIndirect (&paintStruct.rcPaint);
-                    CombineRgn (rgn, rgn, clipRgn, RGN_AND);
-                    DeleteObject (clipRgn);
-
-                    char rgnData [8192];
-                    const DWORD res = GetRegionData (rgn, sizeof (rgnData), (RGNDATA*) rgnData);
-
-                    if (res > 0 && res <= sizeof (rgnData))
-                    {
-                        const RGNDATAHEADER* const hdr = &(((const RGNDATA*) rgnData)->rdh);
-
-                        if (hdr->iType == RDH_RECTANGLES
-                             && hdr->rcBound.right - hdr->rcBound.left >= w
-                             && hdr->rcBound.bottom - hdr->rcBound.top >= h)
-                        {
-                            needToPaintAll = false;
-
-                            const RECT* rects = (const RECT*) (rgnData + sizeof (RGNDATAHEADER));
-
-                            for (int i = (int) ((RGNDATA*) rgnData)->rdh.nCount; --i >= 0;)
-                            {
-                                if (rects->right <= x + w && rects->bottom <= y + h)
-                                {
-                                    const int cx = jmax (x, (int) rects->left);
-                                    contextClip.addWithoutMerging (Rectangle<int> (cx - x, rects->top - y, rects->right - cx, rects->bottom - rects->top)
-                                                                       .getIntersection (clipBounds));
-                                }
-                                else
-                                {
-                                    needToPaintAll = true;
-                                    break;
-                                }
-
-                                ++rects;
-                            }
-                        }
-                    }
-                }
-
-                if (needToPaintAll)
-                {
-                    contextClip.clear();
-                    contextClip.addWithoutMerging (Rectangle<int> (w, h));
-                }
-
-                EnumChildWindows (hwnd, clipChildWindowCallback, (LPARAM) &contextClip);
-
-                if (! contextClip.isEmpty())
-                {
-                    if (transparent)
-                        for (const Rectangle<int>* i = contextClip.begin(), * const e = contextClip.end(); i != e; ++i)
-                            offscreenImage.clear (*i);
-
-                    // if the component's not opaque, this won't draw properly unless the platform can support this
-                    jassert (Desktop::canUseSemiTransparentWindows() || component.isOpaque());
-
-                    {
-                        ScopedPointer<LowLevelGraphicsContext> context (component.getLookAndFeel()
-                                                                            .createGraphicsContext (offscreenImage, Point<int> (-x, -y), contextClip));
-                        handlePaint (*context);
-                    }
-
-                    if (! dontRepaint)
-                        static_cast <WindowsBitmapImage*> (offscreenImage.getPixelData())
-                            ->blitToWindow (hwnd, dc, transparent, x, y, updateLayeredWindowAlpha);
-                }
-            }
-
-            DeleteObject (rgn);
-            EndPaint (hwnd, &paintStruct);
+            performPaint (dc, rgn, regionType, paintStruct);
         }
+
+        DeleteObject (rgn);
+        EndPaint (hwnd, &paintStruct);
 
        #ifndef JUCE_GCC
         _fpreset(); // because some graphics cards can unmask FP exceptions
        #endif
 
         lastPaintTime = Time::getMillisecondCounter();
+    }
+
+    void performPaint (HDC dc, HRGN rgn, int regionType, PAINTSTRUCT& paintStruct)
+    {
+        int x = paintStruct.rcPaint.left;
+        int y = paintStruct.rcPaint.top;
+        int w = paintStruct.rcPaint.right - x;
+        int h = paintStruct.rcPaint.bottom - y;
+
+        const bool transparent = isUsingUpdateLayeredWindow();
+
+        if (transparent)
+        {
+            // it's not possible to have a transparent window with a title bar at the moment!
+            jassert (! hasTitleBar());
+
+            RECT r;
+            GetWindowRect (hwnd, &r);
+            x = y = 0;
+            w = r.right - r.left;
+            h = r.bottom - r.top;
+        }
+
+        if (w > 0 && h > 0)
+        {
+            Image& offscreenImage = offscreenImageGenerator.getImage (transparent, w, h);
+
+            RectangleList<int> contextClip;
+            const Rectangle<int> clipBounds (w, h);
+
+            bool needToPaintAll = true;
+
+            if (regionType == COMPLEXREGION && ! transparent)
+            {
+                HRGN clipRgn = CreateRectRgnIndirect (&paintStruct.rcPaint);
+                CombineRgn (rgn, rgn, clipRgn, RGN_AND);
+                DeleteObject (clipRgn);
+
+                char rgnData [8192];
+                const DWORD res = GetRegionData (rgn, sizeof (rgnData), (RGNDATA*) rgnData);
+
+                if (res > 0 && res <= sizeof (rgnData))
+                {
+                    const RGNDATAHEADER* const hdr = &(((const RGNDATA*) rgnData)->rdh);
+
+                    if (hdr->iType == RDH_RECTANGLES
+                         && hdr->rcBound.right - hdr->rcBound.left >= w
+                         && hdr->rcBound.bottom - hdr->rcBound.top >= h)
+                    {
+                        needToPaintAll = false;
+
+                        const RECT* rects = (const RECT*) (rgnData + sizeof (RGNDATAHEADER));
+
+                        for (int i = (int) ((RGNDATA*) rgnData)->rdh.nCount; --i >= 0;)
+                        {
+                            if (rects->right <= x + w && rects->bottom <= y + h)
+                            {
+                                const int cx = jmax (x, (int) rects->left);
+                                contextClip.addWithoutMerging (Rectangle<int> (cx - x, rects->top - y,
+                                                                               rects->right - cx, rects->bottom - rects->top)
+                                                                   .getIntersection (clipBounds));
+                            }
+                            else
+                            {
+                                needToPaintAll = true;
+                                break;
+                            }
+
+                            ++rects;
+                        }
+                    }
+                }
+            }
+
+            if (needToPaintAll)
+            {
+                contextClip.clear();
+                contextClip.addWithoutMerging (Rectangle<int> (w, h));
+            }
+
+            EnumChildWindows (hwnd, clipChildWindowCallback, (LPARAM) &contextClip);
+
+            if (! contextClip.isEmpty())
+            {
+                if (transparent)
+                    for (const Rectangle<int>* i = contextClip.begin(), * const e = contextClip.end(); i != e; ++i)
+                        offscreenImage.clear (*i);
+
+                // if the component's not opaque, this won't draw properly unless the platform can support this
+                jassert (Desktop::canUseSemiTransparentWindows() || component.isOpaque());
+
+                {
+                    ScopedPointer<LowLevelGraphicsContext> context (component.getLookAndFeel()
+                                                                        .createGraphicsContext (offscreenImage, Point<int> (-x, -y), contextClip));
+                    handlePaint (*context);
+                }
+
+                static_cast <WindowsBitmapImage*> (offscreenImage.getPixelData())
+                    ->blitToWindow (hwnd, dc, transparent, x, y, updateLayeredWindowAlpha);
+            }
+        }
     }
 
     //==============================================================================
