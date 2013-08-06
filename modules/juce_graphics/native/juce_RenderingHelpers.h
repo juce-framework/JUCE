@@ -40,14 +40,14 @@ class TranslationOrTransform
 {
 public:
     TranslationOrTransform (int x, int y) noexcept
-        : xOffset (x), yOffset (y), isOnlyTranslated (true), isIntegerScaling (true)
+        : xOffset (x), yOffset (y), isOnlyTranslated (true), isRotated (false)
     {
     }
 
     TranslationOrTransform (const TranslationOrTransform& other) noexcept
         : complexTransform (other.complexTransform),
           xOffset (other.xOffset), yOffset (other.yOffset),
-          isOnlyTranslated (other.isOnlyTranslated), isIntegerScaling (other.isIntegerScaling)
+          isOnlyTranslated (other.isOnlyTranslated), isRotated (other.isRotated)
     {
     }
 
@@ -79,9 +79,7 @@ public:
 
     void addTransform (const AffineTransform& t) noexcept
     {
-        if (isOnlyTranslated
-             && t.isOnlyTranslation()
-             && isIntegerTranslation (t))
+        if (isOnlyTranslated && t.isOnlyTranslation())
         {
             xOffset += (int) t.getTranslationX();
             yOffset += (int) t.getTranslationY();
@@ -90,7 +88,7 @@ public:
         {
             complexTransform = getTransformWith (t);
             isOnlyTranslated = false;
-            isIntegerScaling = isIntegerScale (complexTransform);
+            isRotated = (complexTransform.mat01 != 0 || complexTransform.mat10 != 0);
         }
     }
 
@@ -135,28 +133,7 @@ public:
 
     AffineTransform complexTransform;
     int xOffset, yOffset;
-    bool isOnlyTranslated, isIntegerScaling;
-
-private:
-    static inline bool isIntegerTranslation (const AffineTransform& t) noexcept
-    {
-        const int tx = (int) (t.getTranslationX() * 256.0f);
-        const int ty = (int) (t.getTranslationY() * 256.0f);
-        return ((tx | ty) & 0xf8) == 0;
-    }
-
-    static inline bool isIntegerScale (const AffineTransform& t) noexcept
-    {
-        if (t.mat01 != 0 || t.mat10 != 0)
-            return false;
-
-        const int tx = (int) (t.getTranslationX() * 256.0f);
-        const int ty = (int) (t.getTranslationY() * 256.0f);
-        const int txs = (int) (t.mat00 * 256.0f);
-        const int tys = (int) (t.mat11 * 256.0f);
-
-        return ((tx | ty | txs | tys) & 0xf8) == 0;
-    }
+    bool isOnlyTranslated, isRotated;
 };
 
 //==============================================================================
@@ -2029,7 +2006,7 @@ public:
                 cloneClipIfMultiplyReferenced();
                 clip = clip->clipToRectangle (transform.translated (r));
             }
-            else if (transform.isIntegerScaling)
+            else if (! transform.isRotated)
             {
                 cloneClipIfMultiplyReferenced();
                 clip = clip->clipToRectangle (transform.transformed (r));
@@ -2056,7 +2033,7 @@ public:
                 offsetList.offsetAll (transform.xOffset, transform.yOffset);
                 clip = clip->clipToRectangleList (offsetList);
             }
-            else if (transform.isIntegerScaling)
+            else if (! transform.isRotated)
             {
                 cloneClipIfMultiplyReferenced();
                 RectangleList<int> scaledList;
@@ -2085,7 +2062,7 @@ public:
             {
                 clip = clip->excludeClipRectangle (transform.translated (r));
             }
-            else if (transform.isIntegerScaling)
+            else if (! transform.isRotated)
             {
                 clip = clip->excludeClipRectangle (transform.transformed (r));
             }
@@ -2198,10 +2175,15 @@ public:
         {
             if (transform.isOnlyTranslated)
                 fillTargetRect (transform.translated (r), replaceContents);
-            else if (transform.isIntegerScaling)
-                fillTargetRect (transform.transformed (r), replaceContents);
             else
-                fillRectAsPath (r);
+            {
+                jassert (! replaceContents); // not implemented..
+
+                if (! transform.isRotated)
+                    fillTargetRect (transform.transformed (r.toFloat()));
+                else
+                    fillRectAsPath (r);
+            }
         }
     }
 
@@ -2211,7 +2193,7 @@ public:
         {
             if (transform.isOnlyTranslated)
                 fillTargetRect (transform.translated (r));
-            else if (transform.isIntegerScaling)
+            else if (! transform.isRotated)
                 fillTargetRect (transform.transformed (r));
             else
                 fillRectAsPath (r);
