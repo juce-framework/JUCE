@@ -711,7 +711,6 @@ public:
     }
 
     /** Casts this rectangle to a Rectangle<float>.
-        Obviously this is mainly useful for rectangles that use integer types.
         @see getSmallestIntegerContainer
     */
     Rectangle<float> toFloat() const noexcept
@@ -721,13 +720,24 @@ public:
     }
 
     /** Casts this rectangle to a Rectangle<double>.
-        Obviously this is mainly useful for rectangles that use integer types.
         @see getSmallestIntegerContainer
     */
     Rectangle<double> toDouble() const noexcept
     {
         return Rectangle<double> (static_cast<double> (pos.x), static_cast<double> (pos.y),
                                   static_cast<double> (w),     static_cast<double> (h));
+    }
+
+    /** Casts this rectangle to a Rectangle with the given type.
+        If the target type is a conversion from float to int, then the conversion
+        will be done using getSmallestIntegerContainer().
+    */
+    template <typename TargetType>
+    Rectangle<TargetType> toType() const noexcept
+    {
+        Rectangle<TargetType> r;
+        copyWithRounding (r);
+        return r;
     }
 
     /** Returns the smallest Rectangle that can contain a set of points. */

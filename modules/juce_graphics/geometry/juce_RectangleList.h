@@ -343,7 +343,8 @@ public:
 
         @see getIntersectionWith
     */
-    bool clipTo (const RectangleList& other)
+    template <typename OtherValueType>
+    bool clipTo (const RectangleList<OtherValueType>& other)
     {
         if (rects.size() == 0)
             return false;
@@ -354,12 +355,12 @@ public:
         {
             const RectangleType& rect = rects.getReference (j);
 
-            for (int i = other.rects.size(); --i >= 0;)
+            for (const Rectangle<OtherValueType>* r = other.begin(), * const e = other.end(); r != e; ++r)
             {
-                RectangleType r (other.rects.getReference (i));
+                RectangleType clipped (r->template toType<ValueType>());
 
-                if (rect.intersectRectangle (r))
-                    result.rects.add (r);
+                if (rect.intersectRectangle (clipped))
+                    result.rects.add (clipped);
             }
         }
 
