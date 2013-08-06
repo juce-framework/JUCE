@@ -26,7 +26,7 @@ Desktop::Desktop()
     : mouseClickCounter (0), mouseWheelCounter (0),
       kioskModeComponent (nullptr),
       allowedOrientations (allOrientations),
-      masterScaleFactor (1.0f)
+      masterScaleFactor ((float) getDefaultMasterScale())
 {
     displays = new Displays (*this);
     addMouseInputSource();

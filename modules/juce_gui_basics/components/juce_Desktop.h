@@ -448,6 +448,8 @@ private:
     void triggerFocusCallback();
     void handleAsyncUpdate() override;
 
+    static double getDefaultMasterScale();
+
     Desktop();
     ~Desktop();
 

@@ -572,6 +572,11 @@ bool Desktop::canUseSemiTransparentWindows() noexcept
     return true;
 }
 
+double Desktop::getDefaultMasterScale()
+{
+    return 1.0;
+}
+
 Desktop::DisplayOrientation Desktop::getCurrentOrientation() const
 {
     // TODO

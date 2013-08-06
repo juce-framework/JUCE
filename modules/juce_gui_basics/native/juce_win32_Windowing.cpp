@@ -141,6 +141,7 @@ static inline Rectangle<int> rectangleFromRECT (const RECT& r) noexcept
     return Rectangle<int>::leftTopRightBottom ((int) r.left, (int) r.top, (int) r.right, (int) r.bottom);
 }
 
+//==============================================================================
 static void setDPIAwareness()
 {
     if (JUCEApplication::isStandaloneApp())
@@ -162,7 +163,7 @@ inline double getDPI()
     return dpi;
 }
 
-inline double getDisplayScale()
+double Desktop::getDefaultMasterScale()
 {
     return getDPI() / 96.0;
 }

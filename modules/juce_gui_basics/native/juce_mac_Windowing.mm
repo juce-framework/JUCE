@@ -226,6 +226,11 @@ void MouseInputSource::setRawMousePosition (Point<int> newPosition)
     CGAssociateMouseAndMouseCursorPosition (true);
 }
 
+double Desktop::getDefaultMasterScale()
+{
+    return 1.0;
+}
+
 Desktop::DisplayOrientation Desktop::getCurrentOrientation() const
 {
     return upright;

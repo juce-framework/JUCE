@@ -297,6 +297,11 @@ void MouseInputSource::setRawMousePosition (Point<int>)
 {
 }
 
+double Desktop::getDefaultMasterScale()
+{
+    return 1.0;
+}
+
 Desktop::DisplayOrientation Desktop::getCurrentOrientation() const
 {
     return Orientations::convertToJuce ([[UIApplication sharedApplication] statusBarOrientation]);

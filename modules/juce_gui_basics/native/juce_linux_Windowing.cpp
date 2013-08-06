@@ -3124,6 +3124,11 @@ void MouseInputSource::setRawMousePosition (Point<int> newPosition)
     XWarpPointer (display, None, root, 0, 0, 0, 0, newPosition.getX(), newPosition.getY());
 }
 
+double Desktop::getDefaultMasterScale()
+{
+    return 1.0;
+}
+
 Desktop::DisplayOrientation Desktop::getCurrentOrientation() const
 {
     return upright;
