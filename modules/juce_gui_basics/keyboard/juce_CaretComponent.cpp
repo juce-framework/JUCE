@@ -25,6 +25,7 @@
 CaretComponent::CaretComponent (Component* const keyFocusOwner)
     : owner (keyFocusOwner)
 {
+    setPaintingIsUnclipped (true);
     setInterceptsMouseClicks (false, false);
 }
 
@@ -34,7 +35,8 @@ CaretComponent::~CaretComponent()
 
 void CaretComponent::paint (Graphics& g)
 {
-    g.fillAll (findColour (caretColourId, true));
+    g.setColour (findColour (caretColourId, true));
+    g.fillRect (getLocalBounds());
 }
 
 void CaretComponent::timerCallback()
