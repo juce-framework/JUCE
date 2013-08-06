@@ -98,9 +98,11 @@ public:
                                            double Q,
                                            float gainFactor) noexcept;
 
-private:
-    friend class IIRFilter;
-    float c[5];
+    //==============================================================================
+    /** The raw coefficients.
+        You should leave these numbers alone unless you really know what you're doing.
+    */
+    float coefficients[5];
 };
 
 //==============================================================================
