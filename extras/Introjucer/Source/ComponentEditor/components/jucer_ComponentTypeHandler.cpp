@@ -74,6 +74,8 @@ ComponentOverlayComponent* ComponentTypeHandler::createOverlayComponent (Compone
     return new ComponentOverlayComponent (child, layout);
 }
 
+static void dummyMenuCallback (int, int) {}
+
 void ComponentTypeHandler::showPopupMenu (Component*, ComponentLayout&)
 {
     PopupMenu m;
@@ -88,7 +90,8 @@ void ComponentTypeHandler::showPopupMenu (Component*, ComponentLayout&)
     m.addCommandItem (commandManager, StandardApplicationCommandIDs::paste);
     m.addCommandItem (commandManager, StandardApplicationCommandIDs::del);
 
-    m.show();
+    m.showMenuAsync (PopupMenu::Options(),
+                     ModalCallbackFunction::create (dummyMenuCallback, 0));
 }
 
 JucerDocument* ComponentTypeHandler::findParentDocument (Component* component)

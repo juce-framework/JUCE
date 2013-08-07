@@ -2968,6 +2968,7 @@ private:
     }
 };
 
+#if JUCE_MODAL_LOOPS_PERMITTED
 void JUCE_CALLTYPE NativeMessageBox::showMessageBox (AlertWindow::AlertIconType iconType,
                                                      const String& title, const String& message,
                                                      Component* associatedComponent)
@@ -2975,6 +2976,7 @@ void JUCE_CALLTYPE NativeMessageBox::showMessageBox (AlertWindow::AlertIconType 
     WindowsMessageBox box (iconType, title, message, associatedComponent, MB_OK, 0, false);
     (void) box.getResult();
 }
+#endif
 
 void JUCE_CALLTYPE NativeMessageBox::showMessageBoxAsync (AlertWindow::AlertIconType iconType,
                                                           const String& title, const String& message,

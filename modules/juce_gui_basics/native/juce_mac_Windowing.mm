@@ -104,13 +104,14 @@ private:
     }
 };
 
-
+#if JUCE_MODAL_LOOPS_PERMITTED
 void JUCE_CALLTYPE NativeMessageBox::showMessageBox (AlertWindow::AlertIconType iconType,
                                                      const String& title, const String& message,
                                                      Component* /*associatedComponent*/)
 {
     OSXMessageBox::show (iconType, title, message, nullptr, "OK", nullptr, nullptr, false);
 }
+#endif
 
 void JUCE_CALLTYPE NativeMessageBox::showMessageBoxAsync (AlertWindow::AlertIconType iconType,
                                                           const String& title, const String& message,
