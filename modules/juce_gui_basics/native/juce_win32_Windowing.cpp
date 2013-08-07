@@ -141,6 +141,16 @@ static inline Rectangle<int> rectangleFromRECT (const RECT& r) noexcept
     return Rectangle<int>::leftTopRightBottom ((int) r.left, (int) r.top, (int) r.right, (int) r.bottom);
 }
 
+static void setWindowPos (HWND hwnd, Rectangle<int> bounds, UINT flags)
+{
+    SetWindowPos (hwnd, 0, bounds.getX(), bounds.getY(), bounds.getWidth(), bounds.getHeight(), flags);
+}
+
+static void setWindowZOrder (HWND hwnd, HWND insertAfter)
+{
+    SetWindowPos (hwnd, insertAfter, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE | SWP_NOSENDCHANGING);
+}
+
 //==============================================================================
 static void setDPIAwareness()
 {
@@ -619,10 +629,7 @@ public:
         if (! hasMoved)    flags |= SWP_NOMOVE;
         if (! hasResized)  flags |= SWP_NOSIZE;
 
-        SetWindowPos (hwnd, 0,
-                      newBounds.getX(), newBounds.getY(),
-                      newBounds.getWidth(), newBounds.getHeight(),
-                      flags);
+        setWindowPos (hwnd, newBounds, flags);
 
         if (hasResized && isValidPeer (this))
         {
@@ -776,9 +783,7 @@ public:
         const bool oldDeactivate = shouldDeactivateTitleBar;
         shouldDeactivateTitleBar = ((styleFlags & windowIsTemporary) == 0);
 
-        SetWindowPos (hwnd, alwaysOnTop ? HWND_TOPMOST : HWND_NOTOPMOST,
-                      0, 0, 0, 0,
-                      SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE | SWP_NOSENDCHANGING);
+        setWindowZOrder (hwnd, alwaysOnTop ? HWND_TOPMOST : HWND_NOTOPMOST);
 
         shouldDeactivateTitleBar = oldDeactivate;
 
@@ -815,9 +820,9 @@ public:
             // Must be careful not to try to put a topmost window behind a normal one, or Windows
             // promotes the normal one to be topmost!
             if (component.isAlwaysOnTop() == otherPeer->getComponent().isAlwaysOnTop())
-                SetWindowPos (hwnd, otherPeer->hwnd, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE | SWP_NOSENDCHANGING);
+                setWindowZOrder (hwnd, otherPeer->hwnd);
             else if (otherPeer->getComponent().isAlwaysOnTop())
-                SetWindowPos (hwnd, HWND_TOP,        0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE | SWP_NOSENDCHANGING);
+                setWindowZOrder (hwnd, HWND_TOP);
         }
         else
         {
@@ -1351,7 +1356,7 @@ private:
 
     static void* toFrontCallback2 (void* h)
     {
-        SetWindowPos ((HWND) h, HWND_TOP, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE | SWP_NOSENDCHANGING);
+        setWindowZOrder ((HWND) h, HWND_TOP);
         return nullptr;
     }
 
@@ -2203,8 +2208,8 @@ private:
         {
             if (isFullScreen())
             {
-                EnableMenuItem (menu, SC_RESTORE, MF_BYCOMMAND | MF_ENABLED);
-                EnableMenuItem (menu, SC_MOVE, MF_BYCOMMAND | MF_GRAYED);
+                EnableMenuItem (menu, SC_RESTORE,  MF_BYCOMMAND | MF_ENABLED);
+                EnableMenuItem (menu, SC_MOVE,     MF_BYCOMMAND | MF_GRAYED);
             }
             else if (! isMinimised())
             {
@@ -2215,13 +2220,16 @@ private:
 
     void doSettingChange()
     {
-        const_cast <Desktop::Displays&> (Desktop::getInstance().getDisplays()).refresh();
+        Desktop& desktop = Desktop::getInstance();
+
+        const_cast <Desktop::Displays&> (desktop.getDisplays()).refresh();
 
         if (fullScreen && ! isMinimised())
         {
-            const Rectangle<int> r (component.getParentMonitorArea());
+            const Desktop::Displays::Display& display
+                    = desktop.getDisplays().getDisplayContaining (component.getScreenBounds().getCentre());
 
-            SetWindowPos (hwnd, 0, r.getX(), r.getY(), r.getWidth(), r.getHeight(),
+            setWindowPos (hwnd, display.userArea * display.scale,
                           SWP_NOACTIVATE | SWP_NOOWNERZORDER | SWP_NOZORDER | SWP_NOSENDCHANGING);
         }
     }
@@ -2310,17 +2318,15 @@ private:
             case WM_MBUTTONUP:
             case WM_RBUTTONUP:          doMouseUp (getPointFromLParam (lParam), wParam); return 0;
 
+            case 0x020A: /* WM_MOUSEWHEEL */   doMouseWheel (wParam, true);  return 0;
+            case 0x020E: /* WM_MOUSEHWHEEL */  doMouseWheel (wParam, false); return 0;
+
             case WM_CAPTURECHANGED:     doCaptureChanged(); return 0;
 
             case WM_NCMOUSEMOVE:
                 if (hasTitleBar())
                     break;
 
-                return 0;
-
-            case 0x020A: /* WM_MOUSEWHEEL */
-            case 0x020E: /* WM_MOUSEHWHEEL */
-                doMouseWheel (wParam, message == 0x020A);
                 return 0;
 
             case WM_TOUCH:
@@ -2380,6 +2386,8 @@ private:
             case WM_APPCOMMAND:
                 if (doAppCommand (lParam))
                     return TRUE;
+
+                break;
 
             case WM_MENUCHAR: // triggered when alt+something is pressed
                 return MNC_CLOSE << 16; // (avoids making the default system beep)
