@@ -1403,16 +1403,31 @@ private:
         }
     }
 
+    struct EnumWindowsInfo
+    {
+        HWNDComponentPeer* peer;
+        RectangleList<int>* clip;
+    };
+
     static BOOL CALLBACK clipChildWindowCallback (HWND hwnd, LPARAM context)
     {
-        RECT r;
-        GetWindowRect (hwnd, &r);
-        POINT pos = { r.left, r.top };
-        ScreenToClient (GetParent (hwnd), &pos);
+        if (IsWindowVisible (hwnd))
+        {
+            HWND parent = GetParent (hwnd);
 
-        ((RectangleList<int>*) context)->subtract (Rectangle<int> (pos.x, pos.y,
-                                                                   r.right  - r.left,
-                                                                   r.bottom - r.top));
+            if (parent == ((EnumWindowsInfo*) context)->peer->hwnd)
+            {
+                RECT r;
+                GetWindowRect (hwnd, &r);
+                POINT pos = { r.left, r.top };
+                ScreenToClient (GetParent (hwnd), &pos);
+
+                ((EnumWindowsInfo*) context)->clip->subtract (Rectangle<int> (pos.x, pos.y,
+                                                                              r.right  - r.left,
+                                                                              r.bottom - r.top));
+            }
+        }
+
         return TRUE;
     }
 
@@ -1539,7 +1554,8 @@ private:
                 contextClip.addWithoutMerging (Rectangle<int> (w, h));
             }
 
-            EnumChildWindows (hwnd, clipChildWindowCallback, (LPARAM) &contextClip);
+            EnumWindowsInfo enumInfo = { this, &contextClip };
+            EnumChildWindows (hwnd, clipChildWindowCallback, (LPARAM) &enumInfo);
 
             if (! contextClip.isEmpty())
             {
