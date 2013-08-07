@@ -1328,7 +1328,7 @@ bool Component::contains (Point<int> point)
 
         if (flags.hasHeavyweightPeerFlag)
             if (const ComponentPeer* const peer = getPeer())
-                return peer->contains (point, true);
+                return peer->contains (ComponentHelpers::localPositionToRawPeerPos (*this, point), true);
     }
 
     return false;

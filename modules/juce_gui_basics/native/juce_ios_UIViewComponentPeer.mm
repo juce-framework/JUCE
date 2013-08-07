@@ -137,14 +137,14 @@ public:
 
     Rectangle<int> getBounds() const override;
     Rectangle<int> getBounds (bool global) const;
-    Point<int> localToGlobal (const Point<int>& relativePosition) override;
-    Point<int> globalToLocal (const Point<int>& screenPosition) override;
+    Point<int> localToGlobal (Point<int> relativePosition) override;
+    Point<int> globalToLocal (Point<int> screenPosition) override;
     void setAlpha (float newAlpha) override;
     void setMinimised (bool shouldBeMinimised) override;
     bool isMinimised() const override;
     void setFullScreen (bool shouldBeFullScreen) override;
     bool isFullScreen() const override;
-    bool contains (const Point<int>& position, bool trueIfInAChildWindow) const override;
+    bool contains (Point<int> localPos, bool trueIfInAChildWindow) const override;
     BorderSize<int> getFrameSize() const override;
     bool setAlwaysOnTop (bool alwaysOnTop) override;
     void toFront (bool makeActiveWindow) override;
@@ -569,12 +569,12 @@ Rectangle<int> UIViewComponentPeer::getBounds() const
     return getBounds (! isSharedWindow);
 }
 
-Point<int> UIViewComponentPeer::localToGlobal (const Point<int>& relativePosition)
+Point<int> UIViewComponentPeer::localToGlobal (Point<int> relativePosition)
 {
     return relativePosition + getBounds (true).getPosition();
 }
 
-Point<int> UIViewComponentPeer::globalToLocal (const Point<int>& screenPosition)
+Point<int> UIViewComponentPeer::globalToLocal (Point<int> screenPosition)
 {
     return screenPosition - getBounds (true).getPosition();
 }
@@ -679,12 +679,12 @@ void UIViewComponentPeer::updateTransformAndScreenBounds()
     [view setNeedsDisplay];
 }
 
-bool UIViewComponentPeer::contains (const Point<int>& position, bool trueIfInAChildWindow) const
+bool UIViewComponentPeer::contains (Point<int> localPos, bool trueIfInAChildWindow) const
 {
-    if (! component.getLocalBounds().contains (position))
+    if (! component.getLocalBounds().contains (localPos))
         return false;
 
-    UIView* v = [view hitTest: convertToCGPoint (position)
+    UIView* v = [view hitTest: convertToCGPoint (localPos)
                     withEvent: nil];
 
     if (trueIfInAChildWindow)

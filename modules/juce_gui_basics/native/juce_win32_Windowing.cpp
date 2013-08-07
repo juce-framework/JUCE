@@ -146,6 +146,13 @@ static void setWindowPos (HWND hwnd, Rectangle<int> bounds, UINT flags)
     SetWindowPos (hwnd, 0, bounds.getX(), bounds.getY(), bounds.getWidth(), bounds.getHeight(), flags);
 }
 
+static RECT getWindowRect (HWND hwnd)
+{
+    RECT r;
+    GetWindowRect (hwnd, &r);
+    return r;
+}
+
 static void setWindowZOrder (HWND hwnd, HWND insertAfter)
 {
     SetWindowPos (hwnd, insertAfter, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE | SWP_NOSENDCHANGING);
@@ -350,8 +357,7 @@ public:
 
         if (transparent)
         {
-            RECT windowBounds;
-            GetWindowRect (hwnd, &windowBounds);
+            RECT windowBounds = getWindowRect (hwnd);
 
             POINT p = { -x, -y };
             POINT pos = { windowBounds.left, windowBounds.top };
@@ -591,12 +597,10 @@ public:
         info.cbSize = sizeof (info);
 
         if (GetWindowInfo (hwnd, &info))
-        {
             windowBorder = BorderSize<int> (info.rcClient.top - info.rcWindow.top,
                                             info.rcClient.left - info.rcWindow.left,
                                             info.rcWindow.bottom - info.rcClient.bottom,
                                             info.rcWindow.right - info.rcClient.right);
-        }
 
        #if JUCE_DIRECT2D
         if (direct2DContext != nullptr)
@@ -614,8 +618,7 @@ public:
         {
             if (HWND parentHwnd = GetParent (hwnd))
             {
-                RECT parentRect;
-                GetWindowRect (parentHwnd, &parentRect);
+                RECT parentRect = getWindowRect (parentHwnd);
                 newBounds.translate (parentRect.left, parentRect.top);
             }
         }
@@ -640,13 +643,11 @@ public:
 
     Rectangle<int> getBounds() const override
     {
-        RECT r;
-        GetWindowRect (hwnd, &r);
-        Rectangle<int> bounds (rectangleFromRECT (r));
+        Rectangle<int> bounds (rectangleFromRECT (getWindowRect (hwnd)));
 
         if (HWND parentH = GetParent (hwnd))
         {
-            GetWindowRect (parentH, &r);
+            RECT r = getWindowRect (parentH);
             bounds.translate (-r.left, -r.top);
         }
 
@@ -655,21 +656,14 @@ public:
 
     Point<int> getScreenPosition() const
     {
-        RECT r;
-        GetWindowRect (hwnd, &r);
+        RECT r = getWindowRect (hwnd);
+
         return Point<int> (r.left + windowBorder.getLeft(),
-                           r.top + windowBorder.getTop());
+                           r.top  + windowBorder.getTop());
     }
 
-    Point<int> localToGlobal (const Point<int>& relativePosition) override
-    {
-        return relativePosition + getScreenPosition();
-    }
-
-    Point<int> globalToLocal (const Point<int>& screenPosition) override
-    {
-        return screenPosition - getScreenPosition();
-    }
+    Point<int> localToGlobal (Point<int> relativePosition) override  { return relativePosition + getScreenPosition(); }
+    Point<int> globalToLocal (Point<int> screenPosition) override    { return screenPosition   - getScreenPosition(); }
 
     void setAlpha (float newAlpha) override
     {
@@ -754,23 +748,19 @@ public:
         return wp.showCmd == SW_SHOWMAXIMIZED;
     }
 
-    bool isWindowAtPoint (const Point<int>& localPos, bool trueIfInAChildWindow) const
+    bool contains (Point<int> localPos, bool trueIfInAChildWindow) const override
     {
-        RECT r;
-        GetWindowRect (hwnd, &r);
+        RECT r = getWindowRect (hwnd);
+
+        if (! (isPositiveAndBelow (localPos.x, (int) (r.right - r.left))
+                && isPositiveAndBelow (localPos.y, (int) (r.bottom - r.top))))
+            return false;
 
         POINT p = { localPos.x + r.left + windowBorder.getLeft(),
                     localPos.y + r.top  + windowBorder.getTop() };
 
         HWND w = WindowFromPoint (p);
         return w == hwnd || (trueIfInAChildWindow && (IsChild (hwnd, w) != 0));
-    }
-
-    bool contains (const Point<int>& position, bool trueIfInAChildWindow) const override
-    {
-        return isPositiveAndBelow (position.x, component.getWidth())
-            && isPositiveAndBelow (position.y, component.getHeight())
-            && isWindowAtPoint (position, trueIfInAChildWindow);
     }
 
     BorderSize<int> getFrameSize() const override
@@ -1422,8 +1412,7 @@ private:
 
             if (parent == ((EnumWindowsInfo*) context)->peer->hwnd)
             {
-                RECT r;
-                GetWindowRect (hwnd, &r);
+                RECT r = getWindowRect (hwnd);
                 POINT pos = { r.left, r.top };
                 ScreenToClient (GetParent (hwnd), &pos);
 
@@ -1495,8 +1484,7 @@ private:
             // it's not possible to have a transparent window with a title bar at the moment!
             jassert (! hasTitleBar());
 
-            RECT r;
-            GetWindowRect (hwnd, &r);
+            RECT r = getWindowRect (hwnd);
             x = y = 0;
             w = r.right - r.left;
             h = r.bottom - r.top;
@@ -2348,7 +2336,7 @@ private:
             case WM_WINDOWPOSCHANGED:
                 {
                     const Point<int> pos (getCurrentMousePos());
-                    if (isWindowAtPoint (pos, false))
+                    if (contains (pos, false))
                         doMouseEvent (pos);
                 }
 
@@ -3207,11 +3195,7 @@ void Desktop::Displays::findDisplays (float masterScale)
             monitors.swap (i, 0);
 
     if (monitors.size() == 0)
-    {
-        RECT r;
-        GetWindowRect (GetDesktopWindow(), &r);
-        monitors.add (rectangleFromRECT (r));
-    }
+        monitors.add (rectangleFromRECT (getWindowRect (GetDesktopWindow())));
 
     RECT workArea;
     SystemParametersInfo (SPI_GETWORKAREA, 0, &workArea, 0);

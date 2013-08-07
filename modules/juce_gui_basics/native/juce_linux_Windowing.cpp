@@ -967,12 +967,12 @@ public:
 
     Rectangle<int> getBounds() const override          { return bounds; }
 
-    Point<int> localToGlobal (const Point<int>& relativePosition) override
+    Point<int> localToGlobal (Point<int> relativePosition) override
     {
         return relativePosition + bounds.getPosition();
     }
 
-    Point<int> globalToLocal (const Point<int>& screenPosition) override
+    Point<int> globalToLocal (Point<int> screenPosition) override
     {
         return screenPosition - bounds.getPosition();
     }
@@ -1088,9 +1088,9 @@ public:
         return result;
     }
 
-    bool contains (const Point<int>& position, bool trueIfInAChildWindow) const override
+    bool contains (Point<int> localPos, bool trueIfInAChildWindow) const override
     {
-        if (! bounds.withZeroOrigin().contains (position))
+        if (! bounds.withZeroOrigin().contains (localPos))
             return false;
 
         for (int i = Desktop::getInstance().getNumComponents(); --i >= 0;)
@@ -1100,7 +1100,8 @@ public:
             if (c == &component)
                 break;
 
-            if (c->contains (position + bounds.getPosition() - c->getScreenPosition()))
+            // TODO: needs scaling correctly
+            if (c->contains (localPos + bounds.getPosition() - c->getScreenPosition()))
                 return false;
         }
 
@@ -1114,7 +1115,7 @@ public:
         ScopedXLock xlock;
 
         return XGetGeometry (display, (::Drawable) windowH, &root, &wx, &wy, &ww, &wh, &bw, &depth)
-                && XTranslateCoordinates (display, windowH, windowH, position.getX(), position.getY(), &wx, &wy, &child)
+                && XTranslateCoordinates (display, windowH, windowH, localPos.getX(), localPos.getY(), &wx, &wy, &child)
                 && child == None;
     }
 
