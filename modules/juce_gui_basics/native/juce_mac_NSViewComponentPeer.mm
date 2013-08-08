@@ -365,11 +365,11 @@ public:
 
     bool contains (Point<int> localPos, bool trueIfInAChildWindow) const override
     {
-        if (! (isPositiveAndBelow (localPos.getX(), component.getWidth())
-                && isPositiveAndBelow (localPos.getY(), component.getHeight())))
-            return false;
-
         NSRect frameRect = [view frame];
+
+        if (! (isPositiveAndBelow (localPos.getX(), (int) frameRect.size.width)
+             && isPositiveAndBelow (localPos.getY(), (int) frameRect.size.height)))
+            return false;
 
         NSView* v = [view hitTest: NSMakePoint (frameRect.origin.x + localPos.getX(),
                                                 frameRect.origin.y + frameRect.size.height - localPos.getY())];

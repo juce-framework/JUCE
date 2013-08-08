@@ -94,7 +94,10 @@ public:
 
     float getScaleFactor() const noexcept
     {
-        return isOnlyTranslated ? 1.0f : complexTransform.getScaleFactor();
+        return isOnlyTranslated ? 1.0f
+                                : (isRotated ? complexTransform.getScaleFactor()
+                                             : jmax (complexTransform.mat00,
+                                                     complexTransform.mat11));
     }
 
     void moveOriginInDeviceSpace (const int dx, const int dy) noexcept
@@ -1892,7 +1895,8 @@ struct ClipRegions
                     const int clipTop    = i->getY();
                     const int clipBottom = i->getBottom();
 
-                    if (f.totalBottom > clipTop && f.totalTop < clipBottom && f.totalRight > clipLeft && f.totalLeft < clipRight)
+                    if (f.totalBottom > clipTop && f.totalTop < clipBottom
+                         && f.totalRight > clipLeft && f.totalLeft < clipRight)
                     {
                         if (f.isOnePixelWide())
                         {
@@ -2052,6 +2056,16 @@ public:
         return clip != nullptr;
     }
 
+    static Rectangle<int> getLargestIntegerWithin (Rectangle<float> r)
+    {
+        const int x1 = (int) std::ceil (r.getX());
+        const int y1 = (int) std::ceil (r.getY());
+        const int x2 = (int) std::floor (r.getRight());
+        const int y2 = (int) std::floor (r.getBottom());
+
+        return Rectangle<int> (x1, y1, x2 - x1, y2 - y1);
+    }
+
     bool excludeClipRectangle (const Rectangle<int>& r)
     {
         if (clip != nullptr)
@@ -2060,11 +2074,11 @@ public:
 
             if (transform.isOnlyTranslated)
             {
-                clip = clip->excludeClipRectangle (transform.translated (r));
+                clip = clip->excludeClipRectangle (getLargestIntegerWithin (transform.translated (r.toFloat())));
             }
             else if (! transform.isRotated)
             {
-                clip = clip->excludeClipRectangle (transform.transformed (r));
+                clip = clip->excludeClipRectangle (getLargestIntegerWithin (transform.transformed (r.toFloat())));
             }
             else
             {
@@ -2543,6 +2557,7 @@ public:
     void setOrigin (int x, int y) override                                       { stack->transform.setOrigin (x, y); }
     void addTransform (const AffineTransform& t) override                        { stack->transform.addTransform (t); }
     float getScaleFactor() override                                              { return stack->transform.getScaleFactor(); }
+    float getTargetDeviceScaleFactor() override                                  { return stack->transform.getScaleFactor(); }
     Rectangle<int> getClipBounds() const override                                { return stack->getClipBounds(); }
     bool isClipEmpty() const override                                            { return stack->clip == nullptr; }
     bool clipRegionIntersects (const Rectangle<int>& r) override                 { return stack->clipRegionIntersects (r); }

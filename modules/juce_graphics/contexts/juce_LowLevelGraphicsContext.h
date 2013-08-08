@@ -67,8 +67,7 @@ public:
     virtual void setOrigin (int x, int y) = 0;
     virtual void addTransform (const AffineTransform&) = 0;
     virtual float getScaleFactor() = 0;
-
-    virtual float getTargetDeviceScaleFactor()    { return 1.0f; }
+    virtual float getTargetDeviceScaleFactor() = 0;
 
     virtual bool clipToRectangle (const Rectangle<int>&) = 0;
     virtual bool clipToRectangleList (const RectangleList<int>&) = 0;
