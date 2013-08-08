@@ -1402,23 +1402,26 @@ private:
     {
         HWNDComponentPeer* peer;
         RectangleList<int>* clip;
+        Point<int> origin;
     };
 
     static BOOL CALLBACK clipChildWindowCallback (HWND hwnd, LPARAM context)
     {
         if (IsWindowVisible (hwnd))
         {
+            const EnumWindowsInfo& info = *(EnumWindowsInfo*) context;
+
             HWND parent = GetParent (hwnd);
 
-            if (parent == ((EnumWindowsInfo*) context)->peer->hwnd)
+            if (parent == info.peer->hwnd)
             {
                 RECT r = getWindowRect (hwnd);
                 POINT pos = { r.left, r.top };
                 ScreenToClient (GetParent (hwnd), &pos);
 
-                ((EnumWindowsInfo*) context)->clip->subtract (Rectangle<int> (pos.x, pos.y,
-                                                                              r.right  - r.left,
-                                                                              r.bottom - r.top));
+                info.clip->subtract (Rectangle<int> (pos.x, pos.y,
+                                                     r.right  - r.left,
+                                                     r.bottom - r.top) - info.origin);
             }
         }
 
@@ -1547,8 +1550,10 @@ private:
                 contextClip.addWithoutMerging (Rectangle<int> (w, h));
             }
 
-            EnumWindowsInfo enumInfo = { this, &contextClip };
-            EnumChildWindows (hwnd, clipChildWindowCallback, (LPARAM) &enumInfo);
+            {
+                EnumWindowsInfo enumInfo = { this, &contextClip, Point<int> (x, y) };
+                EnumChildWindows (hwnd, clipChildWindowCallback, (LPARAM) &enumInfo);
+            }
 
             if (! contextClip.isEmpty())
             {
