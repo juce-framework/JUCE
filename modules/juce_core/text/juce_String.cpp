@@ -363,6 +363,12 @@ String String::charToString (const juce_wchar character)
 //==============================================================================
 namespace NumberToStringConverters
 {
+    enum
+    {
+        charsNeededForInt = 32,
+        charsNeededForDouble = 48
+    };
+
     template <typename Type>
     static char* printDigits (char* t, Type v) noexcept
     {
@@ -413,6 +419,26 @@ namespace NumberToStringConverters
         return printDigits (t, v);
     }
 
+    struct StackArrayStream  : public std::basic_streambuf<char, std::char_traits<char> >
+    {
+        explicit StackArrayStream (char* d)
+        {
+            imbue (std::locale::classic());
+            setp (d, d + charsNeededForDouble);
+        }
+
+        size_t writeDouble (double n, int numDecPlaces)
+        {
+            {
+                std::ostream o (this);
+                o.precision ((std::streamsize) numDecPlaces);
+                o << n;
+            }
+
+            return (size_t) (pptr() - pbase());
+        }
+    };
+
     static char* doubleToString (char* buffer, const int numChars, double n, int numDecPlaces, size_t& len) noexcept
     {
         if (numDecPlaces > 0 && numDecPlaces < 7 && n > -1.0e20 && n < 1.0e20)
@@ -440,27 +466,16 @@ namespace NumberToStringConverters
             return t;
         }
 
-       // Use a locale-free sprintf where possible (not available on linux AFAICT)
-       #if JUCE_MSVC
-        static _locale_t cLocale = _create_locale (LC_NUMERIC, "C");
-
-        len = (size_t) (numDecPlaces > 0 ? _sprintf_l (buffer, "%.*f", cLocale, numDecPlaces, n)
-                                         : _sprintf_l (buffer, "%.9g", cLocale, n));
-       #elif JUCE_MAC || JUCE_IOS
-        len = (size_t) (numDecPlaces > 0 ? sprintf_l (buffer, nullptr, "%.*f", numDecPlaces, n)
-                                         : sprintf_l (buffer, nullptr, "%.9g", n));
-       #else
-        len = (size_t) (numDecPlaces > 0 ? sprintf (buffer, "%.*f", numDecPlaces, n)
-                                         : sprintf (buffer, "%.9g", n));
-       #endif
-
+        StackArrayStream strm (buffer);
+        len = strm.writeDouble (n, numDecPlaces <= 0 ? 20 : numDecPlaces);
+        jassert (len <= charsNeededForDouble);
         return buffer;
     }
 
     template <typename IntegerType>
     static String::CharPointerType createFromInteger (const IntegerType number)
     {
-        char buffer [32];
+        char buffer [charsNeededForInt];
         char* const end = buffer + numElementsInArray (buffer);
         char* const start = numberToString (end, number);
         return StringHolder::createFromFixedLength (start, (size_t) (end - start - 1));
@@ -468,7 +483,7 @@ namespace NumberToStringConverters
 
     static String::CharPointerType createFromDouble (const double number, const int numberOfDecimalPlaces)
     {
-        char buffer [48];
+        char buffer [charsNeededForDouble];
         size_t len;
         char* const start = doubleToString (buffer, numElementsInArray (buffer), (double) number, numberOfDecimalPlaces, len);
         return StringHolder::createFromFixedLength (start, len);
