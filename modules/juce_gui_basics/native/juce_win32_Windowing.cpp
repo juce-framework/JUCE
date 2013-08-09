@@ -1398,18 +1398,20 @@ private:
         }
     }
 
-    struct EnumWindowsInfo
+    struct ChildWindowClippingInfo
     {
+        HDC dc;
         HWNDComponentPeer* peer;
         RectangleList<int>* clip;
         Point<int> origin;
+        int savedDC;
     };
 
     static BOOL CALLBACK clipChildWindowCallback (HWND hwnd, LPARAM context)
     {
         if (IsWindowVisible (hwnd))
         {
-            const EnumWindowsInfo& info = *(EnumWindowsInfo*) context;
+            ChildWindowClippingInfo& info = *(ChildWindowClippingInfo*) context;
 
             HWND parent = GetParent (hwnd);
 
@@ -1419,9 +1421,16 @@ private:
                 POINT pos = { r.left, r.top };
                 ScreenToClient (GetParent (hwnd), &pos);
 
-                info.clip->subtract (Rectangle<int> (pos.x, pos.y,
+                Rectangle<int> clip (Rectangle<int> (pos.x, pos.y,
                                                      r.right  - r.left,
-                                                     r.bottom - r.top) - info.origin);
+                                                     r.bottom - r.top));
+
+                info.clip->subtract (clip - info.origin);
+
+                if (info.savedDC == 0)
+                    info.savedDC = SaveDC (info.dc);
+
+                ExcludeClipRect (info.dc, clip.getX(), clip.getY(), clip.getRight(), clip.getBottom());
             }
         }
 
@@ -1550,10 +1559,8 @@ private:
                 contextClip.addWithoutMerging (Rectangle<int> (w, h));
             }
 
-            {
-                EnumWindowsInfo enumInfo = { this, &contextClip, Point<int> (x, y) };
-                EnumChildWindows (hwnd, clipChildWindowCallback, (LPARAM) &enumInfo);
-            }
+            ChildWindowClippingInfo childClipInfo = { dc, this, &contextClip, Point<int> (x, y), 0 };
+            EnumChildWindows (hwnd, clipChildWindowCallback, (LPARAM) &childClipInfo);
 
             if (! contextClip.isEmpty())
             {
@@ -1573,6 +1580,9 @@ private:
                 static_cast <WindowsBitmapImage*> (offscreenImage.getPixelData())
                     ->blitToWindow (hwnd, dc, transparent, x, y, updateLayeredWindowAlpha);
             }
+
+            if (childClipInfo.savedDC != 0)
+                RestoreDC (dc, childClipInfo.savedDC);
         }
     }
 
