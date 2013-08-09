@@ -962,6 +962,11 @@ private:
 
         if (! isRF64)
         {
+            /* NB: This junk chunk is added for padding, so that the header is a fixed size
+               regardless of whether it's RF64 or not. That way, we can begin recording a file,
+               and when it's finished, can go back and write either a RIFF or RF64 header,
+               depending on whether more than 2^32 samples were written.
+            */
             output->writeInt (chunkName ("JUNK"));
             output->writeInt (28 + (isWaveFmtEx? 0 : 24));
             output->writeRepeatedByte (0, 28 /* ds64 */ + (isWaveFmtEx? 0 : 24));
