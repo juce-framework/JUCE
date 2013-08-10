@@ -431,7 +431,10 @@ namespace NumberToStringConverters
         {
             {
                 std::ostream o (this);
-                o.precision ((std::streamsize) numDecPlaces);
+
+                if (numDecPlaces > 0)
+                    o.precision ((std::streamsize) numDecPlaces);
+
                 o << n;
             }
 
@@ -467,7 +470,7 @@ namespace NumberToStringConverters
         }
 
         StackArrayStream strm (buffer);
-        len = strm.writeDouble (n, numDecPlaces <= 0 ? 20 : numDecPlaces);
+        len = strm.writeDouble (n, numDecPlaces);
         jassert (len <= charsNeededForDouble);
         return buffer;
     }
