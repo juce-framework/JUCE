@@ -107,7 +107,7 @@ struct AAXClasses
 
     static bool isBypassParam (AAX_CParamID paramID) noexcept
     {
-        return AAX::IsParameterIDEqual (paramID, cDefaultMasterBypassID);
+        return AAX::IsParameterIDEqual (paramID, cDefaultMasterBypassID) != 0;
     }
 
     static AAX_EStemFormat getFormatForChans (const int numChans) noexcept
@@ -523,7 +523,7 @@ struct AAXClasses
             if (! isBypassParam (paramID))
             {
                 if (AAX_IParameter* p = const_cast<AAX_IParameter*> (mParameterManager.GetParameterByID (paramID)))
-                    p->SetValueWithFloat (newValue);
+                    p->SetValueWithFloat ((float) newValue);
 
                 pluginInstance->setParameter (getParamIndexFromID (paramID), (float) newValue);
             }
@@ -540,7 +540,7 @@ struct AAXClasses
                 pluginInstance->setParameter (paramIndex, jlimit (0.0f, 1.0f, (float) (oldValue + newValue)));
 
                 if (AAX_IParameter* p = const_cast<AAX_IParameter*> (mParameterManager.GetParameterByID (paramID)))
-                    p->SetValueWithFloat (newValue);
+                    p->SetValueWithFloat ((float) newValue);
             }
 
             return AAX_SUCCESS;
@@ -798,6 +798,8 @@ struct AAXClasses
                     }
                 }
             }
+           #else
+            (void) midiNodeOut;
            #endif
         }
 

@@ -35,8 +35,8 @@
 namespace ASIODebugging
 {
    #if JUCE_ASIO_DEBUGGING
-    #define JUCE_ASIO_LOG(a)            ASIODebugging::logMessage (a)
-    #define JUCE_ASIO_LOG_ERROR(a, b)   ASIODebugging::logError ((a), (b))
+    #define JUCE_ASIO_LOG(msg)               ASIODebugging::logMessage (msg)
+    #define JUCE_ASIO_LOG_ERROR(msg, errNum) ASIODebugging::logError ((msg), (errNum))
 
     static void logMessage (String message)
     {
@@ -66,8 +66,8 @@ namespace ASIODebugging
     }
    #else
     static void dummyLog() {}
-    #define JUCE_ASIO_LOG(a)            ASIODebugging::dummyLog()
-    #define JUCE_ASIO_LOG_ERROR(a, b)   ASIODebugging::dummyLog()
+    #define JUCE_ASIO_LOG(msg)               ASIODebugging::dummyLog()
+    #define JUCE_ASIO_LOG_ERROR(msg, errNum) (void) errNum; ASIODebugging::dummyLog()
    #endif
 }
 
