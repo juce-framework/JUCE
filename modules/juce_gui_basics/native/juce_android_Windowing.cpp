@@ -454,6 +454,11 @@ public:
         // TODO
     }
 
+    StringArray getAvailableRenderingEngines() override
+    {
+        return StringArray ("Software Renderer");
+    }
+
     //==============================================================================
     static AndroidComponentPeer* findPeerForJavaView (JNIEnv* env, jobject viewToFind)
     {

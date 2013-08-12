@@ -574,6 +574,5 @@ void ComponentPeer::setRepresentedFile (const File&)
 }
 
 //==============================================================================
-StringArray ComponentPeer::getAvailableRenderingEngines()       { return StringArray ("Software Renderer"); }
 int ComponentPeer::getCurrentRenderingEngine() const            { return 0; }
 void ComponentPeer::setCurrentRenderingEngine (int index)       { jassert (index == 0); (void) index; }

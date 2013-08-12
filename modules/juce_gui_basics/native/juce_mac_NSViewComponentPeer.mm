@@ -473,7 +473,7 @@ public:
 
     StringArray getAvailableRenderingEngines() override
     {
-        StringArray s (ComponentPeer::getAvailableRenderingEngines());
+        StringArray s ("Software Renderer");
 
        #if USE_COREGRAPHICS_RENDERING
         s.add ("CoreGraphics Renderer");

@@ -1594,7 +1594,7 @@ private:
 
     StringArray getAvailableRenderingEngines() override
     {
-        StringArray s (ComponentPeer::getAvailableRenderingEngines());
+        StringArray s ("Software Renderer");
 
        #if JUCE_DIRECT2D
         if (SystemStats::getOperatingSystemType() >= SystemStats::Windows7)

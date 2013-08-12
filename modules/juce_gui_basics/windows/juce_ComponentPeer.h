@@ -343,7 +343,7 @@ public:
     static bool isValidPeer (const ComponentPeer* peer) noexcept;
 
     //==============================================================================
-    virtual StringArray getAvailableRenderingEngines();
+    virtual StringArray getAvailableRenderingEngines() = 0;
     virtual int getCurrentRenderingEngine() const;
     virtual void setCurrentRenderingEngine (int index);
 

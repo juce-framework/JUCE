@@ -130,43 +130,39 @@ public:
     ~UIViewComponentPeer();
 
     //==============================================================================
-    void* getNativeHandle() const override;
+    void* getNativeHandle() const override                  { return view; }
     void setVisible (bool shouldBeVisible) override;
     void setTitle (const String& title) override;
     void setBounds (const Rectangle<int>&, bool isNowFullScreen) override;
 
-    Rectangle<int> getBounds() const override;
+    Rectangle<int> getBounds() const override               { return getBounds (! isSharedWindow); }
     Rectangle<int> getBounds (bool global) const;
     Point<int> localToGlobal (Point<int> relativePosition) override;
     Point<int> globalToLocal (Point<int> screenPosition) override;
     void setAlpha (float newAlpha) override;
-    void setMinimised (bool shouldBeMinimised) override;
-    bool isMinimised() const override;
+    void setMinimised (bool) override                       {}
+    bool isMinimised() const override                       { return false; }
     void setFullScreen (bool shouldBeFullScreen) override;
-    bool isFullScreen() const override;
+    bool isFullScreen() const override                      { return fullScreen; }
     bool contains (Point<int> localPos, bool trueIfInAChildWindow) const override;
-    BorderSize<int> getFrameSize() const override;
+    BorderSize<int> getFrameSize() const override           { return BorderSize<int>(); }
     bool setAlwaysOnTop (bool alwaysOnTop) override;
     void toFront (bool makeActiveWindow) override;
     void toBehind (ComponentPeer* other) override;
     void setIcon (const Image& newIcon) override;
+    StringArray getAvailableRenderingEngines() override     { return StringArray ("CoreGraphics Renderer"); }
 
-    virtual void drawRect (CGRect);
-
-    virtual bool canBecomeKeyWindow();
-    virtual bool windowShouldClose();
-
-    virtual void redirectMovedOrResized();
-    virtual CGRect constrainRect (CGRect r);
+    void drawRect (CGRect);
+    bool canBecomeKeyWindow();
 
     //==============================================================================
-    virtual void viewFocusGain();
-    virtual void viewFocusLoss();
+    void viewFocusGain();
+    void viewFocusLoss();
     bool isFocused() const override;
     void grabFocus() override;
-    void textInputRequired (const Point<int>& position) override;
+    void textInputRequired (const Point<int>&) override;
 
-    virtual BOOL textViewReplaceCharacters (const Range<int>& range, const String& text);
+    BOOL textViewReplaceCharacters (Range<int>, const String&);
     void updateHiddenTextContent (TextInputTarget*);
     void globalFocusChanged (Component*) override;
 
@@ -249,6 +245,24 @@ public:
 
 private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (UIViewComponentPeer)
+
+    class AsyncRepaintMessage  : public CallbackMessage
+    {
+    public:
+        UIViewComponentPeer* const peer;
+        const Rectangle<int> rect;
+
+        AsyncRepaintMessage (UIViewComponentPeer* const p, const Rectangle<int>& r)
+            : peer (p), rect (r)
+        {
+        }
+
+        void messageCallback() override
+        {
+            if (ComponentPeer::isValidPeer (peer))
+                peer->repaint (rect);
+        }
+    };
 };
 
 } // (juce namespace)
@@ -509,11 +523,6 @@ UIViewComponentPeer::~UIViewComponentPeer()
 }
 
 //==============================================================================
-void* UIViewComponentPeer::getNativeHandle() const
-{
-    return view;
-}
-
 void UIViewComponentPeer::setVisible (bool shouldBeVisible)
 {
     view.hidden = ! shouldBeVisible;
@@ -564,11 +573,6 @@ Rectangle<int> UIViewComponentPeer::getBounds (const bool global) const
     return convertToRectInt (r);
 }
 
-Rectangle<int> UIViewComponentPeer::getBounds() const
-{
-    return getBounds (! isSharedWindow);
-}
-
 Point<int> UIViewComponentPeer::localToGlobal (Point<int> relativePosition)
 {
     return relativePosition + getBounds (true).getPosition();
@@ -579,48 +583,9 @@ Point<int> UIViewComponentPeer::globalToLocal (Point<int> screenPosition)
     return screenPosition - getBounds (true).getPosition();
 }
 
-CGRect UIViewComponentPeer::constrainRect (CGRect r)
-{
-    if (constrainer != nullptr)
-    {
-        CGRect mainScreen = [UIScreen mainScreen].bounds;
-
-        CGRect current = window.frame;
-        current.origin.y = mainScreen.size.height - current.origin.y - current.size.height;
-
-        r.origin.y = mainScreen.size.height - r.origin.y - r.size.height;
-
-        Rectangle<int> pos (convertToRectInt (r));
-        Rectangle<int> original (convertToRectInt (current));
-
-        constrainer->checkBounds (pos, original,
-                                  Desktop::getInstance().getDisplays().getTotalBounds (true),
-                                  pos.getY() != original.getY() && pos.getBottom() == original.getBottom(),
-                                  pos.getX() != original.getX() && pos.getRight()  == original.getRight(),
-                                  pos.getY() == original.getY() && pos.getBottom() != original.getBottom(),
-                                  pos.getX() == original.getX() && pos.getRight()  != original.getRight());
-
-        r.origin.x = pos.getX();
-        r.origin.y = mainScreen.size.height - r.size.height - pos.getY();
-        r.size.width = pos.getWidth();
-        r.size.height = pos.getHeight();
-    }
-
-    return r;
-}
-
 void UIViewComponentPeer::setAlpha (float newAlpha)
 {
     [view.window setAlpha: (CGFloat) newAlpha];
-}
-
-void UIViewComponentPeer::setMinimised (bool shouldBeMinimised)
-{
-}
-
-bool UIViewComponentPeer::isMinimised() const
-{
-    return false;
 }
 
 void UIViewComponentPeer::setFullScreen (bool shouldBeFullScreen)
@@ -639,11 +604,6 @@ void UIViewComponentPeer::setFullScreen (bool shouldBeFullScreen)
 
         component.repaint();
     }
-}
-
-bool UIViewComponentPeer::isFullScreen() const
-{
-    return fullScreen;
 }
 
 void UIViewComponentPeer::updateTransformAndScreenBounds()
@@ -691,11 +651,6 @@ bool UIViewComponentPeer::contains (Point<int> localPos, bool trueIfInAChildWind
         return v != nil;
 
     return v == view;
-}
-
-BorderSize<int> UIViewComponentPeer::getFrameSize() const
-{
-    return BorderSize<int>();
 }
 
 bool UIViewComponentPeer::setAlwaysOnTop (bool alwaysOnTop)
@@ -853,7 +808,7 @@ void UIViewComponentPeer::updateHiddenTextContent (TextInputTarget* target)
     view->hiddenTextView.selectedRange = NSMakeRange (target->getHighlightedRegion().getStart(), 0);
 }
 
-BOOL UIViewComponentPeer::textViewReplaceCharacters (const Range<int>& range, const String& text)
+BOOL UIViewComponentPeer::textViewReplaceCharacters (Range<int> range, const String& text)
 {
     if (TextInputTarget* const target = findCurrentTextInputTarget())
     {
@@ -917,20 +872,6 @@ bool UIViewComponentPeer::canBecomeKeyWindow()
     return (getStyleFlags() & juce::ComponentPeer::windowIgnoresKeyPresses) == 0;
 }
 
-bool UIViewComponentPeer::windowShouldClose()
-{
-    if (! isValidPeer (this))
-        return YES;
-
-    handleUserClosingWindow();
-    return NO;
-}
-
-void UIViewComponentPeer::redirectMovedOrResized()
-{
-    handleMovedOrResized();
-}
-
 //==============================================================================
 void Desktop::setKioskComponent (Component* kioskModeComponent, bool enableOrDisable, bool allowMenusAndBars)
 {
@@ -944,34 +885,12 @@ void Desktop::setKioskComponent (Component* kioskModeComponent, bool enableOrDis
 }
 
 //==============================================================================
-class AsyncRepaintMessage  : public CallbackMessage
-{
-public:
-    UIViewComponentPeer* const peer;
-    const Rectangle<int> rect;
-
-    AsyncRepaintMessage (UIViewComponentPeer* const p, const Rectangle<int>& r)
-        : peer (p), rect (r)
-    {
-    }
-
-    void messageCallback() override
-    {
-        if (ComponentPeer::isValidPeer (peer))
-            peer->repaint (rect);
-    }
-};
-
 void UIViewComponentPeer::repaint (const Rectangle<int>& area)
 {
     if (insideDrawRect || ! MessageManager::getInstance()->isThisTheMessageThread())
-    {
         (new AsyncRepaintMessage (this, area))->post();
-    }
     else
-    {
         [view setNeedsDisplayInRect: convertToCGRect (area)];
-    }
 }
 
 void UIViewComponentPeer::performAnyPendingRepaintsNow()
