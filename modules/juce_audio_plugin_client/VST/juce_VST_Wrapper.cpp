@@ -205,52 +205,6 @@ namespace
         }
     }
 
-    //==============================================================================
-    static HHOOK keyboardHook = 0;
-    static int keyboardHookUsers = 0;
-
-    LRESULT CALLBACK keyboardHookCallback (int nCode, WPARAM wParam, LPARAM lParam)
-    {
-        if (nCode == 0)
-        {
-            const MSG& msg = *(const MSG*) lParam;
-
-            if (msg.message == WM_CHAR)
-            {
-                Desktop& desktop = Desktop::getInstance();
-                HWND focused = GetFocus();
-
-                for (int i = desktop.getNumComponents(); --i >= 0;)
-                {
-                    if ((HWND) desktop.getComponent (i)->getWindowHandle() == focused)
-                    {
-                        SendMessage (focused, msg.message, msg.wParam, msg.lParam);
-                        break;
-                    }
-                }
-            }
-        }
-
-        return CallNextHookEx (mouseWheelHook, nCode, wParam, lParam);
-    }
-
-    void registerKeyboardHook()
-    {
-        if (keyboardHookUsers++ == 0)
-            keyboardHook = SetWindowsHookEx (WH_GETMESSAGE, keyboardHookCallback,
-                                             (HINSTANCE) Process::getCurrentModuleInstanceHandle(),
-                                             GetCurrentThreadId());
-    }
-
-    void unregisterKeyboardHook()
-    {
-        if (--keyboardHookUsers == 0 && keyboardHook != 0)
-        {
-            UnhookWindowsHookEx (keyboardHook);
-            keyboardHook = 0;
-        }
-    }
-
    #if JUCE_WINDOWS
     static bool messageThreadIsDefinitelyCorrect = false;
    #endif
@@ -1336,9 +1290,6 @@ public:
                 addMouseListener (this, true);
 
             registerMouseWheelHook();
-
-            if (PluginHostType().isAbletonLive())
-                registerKeyboardHook();
            #endif
         }
 
@@ -1346,7 +1297,6 @@ public:
         {
            #if JUCE_WINDOWS
             unregisterMouseWheelHook();
-            unregisterKeyboardHook();
            #endif
 
             deleteAllChildren(); // note that we can't use a ScopedPointer because the editor may
@@ -1423,9 +1373,7 @@ public:
         {
             // for hosts like nuendo, need to also pop the MDI container to the
             // front when our comp is clicked on.
-            HWND parent = findMDIParentOf ((HWND) getWindowHandle());
-
-            if (parent != 0)
+            if (HWND parent = findMDIParentOf ((HWND) getWindowHandle()))
                 SetWindowPos (parent, HWND_TOP, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
         }
        #endif
