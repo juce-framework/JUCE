@@ -23,28 +23,22 @@
 */
 
 KeyPress::KeyPress() noexcept
-    : keyCode (0),
-      textCharacter (0)
+    : keyCode (0), textCharacter (0)
 {
 }
 
-KeyPress::KeyPress (const int code, ModifierKeys m,
-                    const juce_wchar textChar) noexcept
-    : keyCode (code),
-      mods (m),
-      textCharacter (textChar)
+KeyPress::KeyPress (int code, ModifierKeys m, juce_wchar textChar) noexcept
+    : keyCode (code), mods (m), textCharacter (textChar)
 {
 }
 
 KeyPress::KeyPress (const int code) noexcept
-    : keyCode (code),
-      textCharacter (0)
+    : keyCode (code), textCharacter (0)
 {
 }
 
 KeyPress::KeyPress (const KeyPress& other) noexcept
-    : keyCode (other.keyCode),
-      mods (other.mods),
+    : keyCode (other.keyCode), mods (other.mods),
       textCharacter (other.textCharacter)
 {
 }
@@ -188,13 +182,14 @@ namespace KeyPressHelpers
         { "command + ",   0x2318 },
         { "option + ",    0x2325 },
         { "ctrl + ",      0x2303 },
-        { "return",       0x23ce },
+        { "return",       0x21b5 },
         { "cursor left",  0x2190 },
         { "cursor right", 0x2192 },
         { "cursor up",    0x2191 },
         { "cursor down",  0x2193 },
         { "backspace",    0x232b },
-        { "delete",       0x2326 }
+        { "delete",       0x2326 },
+        { "spacebar",     0x2423 }
     };
    #endif
 }
@@ -258,23 +253,14 @@ String KeyPress::getTextDescription() const
         if (textCharacter == '/')
             return "/";
 
-        if (mods.isCtrlDown())
-            desc << "ctrl + ";
-
-        if (mods.isShiftDown())
-            desc << "shift + ";
+        if (mods.isCtrlDown())      desc << "ctrl + ";
+        if (mods.isShiftDown())     desc << "shift + ";
 
        #if JUCE_MAC
-        if (mods.isAltDown())
-            desc << "option + ";
-
-        // only do this on the mac, because on Windows ctrl and command are the same,
-        // and this would get confusing
-        if (mods.isCommandDown())
-            desc << "command + ";
+        if (mods.isAltDown())       desc << "option + ";
+        if (mods.isCommandDown())   desc << "command + ";
        #else
-        if (mods.isAltDown())
-            desc << "alt + ";
+        if (mods.isAltDown())       desc << "alt + ";
        #endif
 
         for (int i = 0; i < numElementsInArray (KeyPressHelpers::translations); ++i)

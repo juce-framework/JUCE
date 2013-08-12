@@ -22,20 +22,9 @@
   ==============================================================================
 */
 
-ModifierKeys::ModifierKeys() noexcept
-    : flags (0)
-{
-}
-
-ModifierKeys::ModifierKeys (const int flags_) noexcept
-    : flags (flags_)
-{
-}
-
-ModifierKeys::ModifierKeys (const ModifierKeys& other) noexcept
-    : flags (other.flags)
-{
-}
+ModifierKeys::ModifierKeys() noexcept  : flags (0) {}
+ModifierKeys::ModifierKeys (int rawFlags) noexcept  : flags (rawFlags) {}
+ModifierKeys::ModifierKeys (const ModifierKeys& other) noexcept  : flags (other.flags) {}
 
 ModifierKeys& ModifierKeys::operator= (const ModifierKeys other) noexcept
 {
