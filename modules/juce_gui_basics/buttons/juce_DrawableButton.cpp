@@ -175,37 +175,15 @@ void DrawableButton::paintButton (Graphics& g,
                                   const bool isMouseOverButton,
                                   const bool isButtonDown)
 {
+    LookAndFeel& lf = getLookAndFeel();
+
     if (style == ImageOnButtonBackground)
-    {
-        getLookAndFeel().drawButtonBackground (g, *this,
-                                               findColour (getToggleState() ? TextButton::buttonOnColourId
-                                                                            : TextButton::buttonColourId),
-                                               isMouseOverButton,
-                                               isButtonDown);
-    }
+        lf.drawButtonBackground (g, *this,
+                                 findColour (getToggleState() ? TextButton::buttonOnColourId
+                                                              : TextButton::buttonColourId),
+                                 isMouseOverButton, isButtonDown);
     else
-    {
-        g.fillAll (findColour (getToggleState() ? backgroundOnColourId
-                                                : backgroundColourId));
-
-        const int textH = (style == ImageAboveTextLabel)
-                            ? jmin (16, proportionOfHeight (0.25f))
-                            : 0;
-
-        if (textH > 0)
-        {
-            g.setFont ((float) textH);
-
-            g.setColour (findColour (getToggleState() ? DrawableButton::textColourOnId
-                                                      : DrawableButton::textColourId)
-                            .withMultipliedAlpha (isEnabled() ? 1.0f : 0.4f));
-
-            g.drawFittedText (getButtonText(),
-                              2, getHeight() - textH - 1,
-                              getWidth() - 4, textH,
-                              Justification::centred, 1);
-        }
-    }
+        lf.drawDrawableButton (g, *this, isMouseOverButton, isButtonDown);
 }
 
 //==============================================================================

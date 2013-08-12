@@ -115,6 +115,9 @@ public:
     */
     void setButtonStyle (ButtonStyle newStyle);
 
+    /** Returns the current style. */
+    ButtonStyle getStyle() const noexcept       { return style; }
+
     //==============================================================================
     /** Gives the button an optional amount of space around the edge of the drawable.
         By default there's a gap of about 3 pixels.

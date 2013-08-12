@@ -447,6 +447,33 @@ void LookAndFeel::changeToggleButtonWidthToFitText (ToggleButton& button)
                     button.getHeight());
 }
 
+void LookAndFeel::drawDrawableButton (Graphics& g, DrawableButton& button,
+                                      bool /*isMouseOverButton*/, bool /*isButtonDown*/)
+{
+    bool toggleState = button.getToggleState();
+
+    g.fillAll (button.findColour (toggleState ? DrawableButton::backgroundOnColourId
+                                              : DrawableButton::backgroundColourId));
+
+    const int textH = (button.getStyle() == DrawableButton::ImageAboveTextLabel)
+                        ? jmin (16, button.proportionOfHeight (0.25f))
+                        : 0;
+
+    if (textH > 0)
+    {
+        g.setFont ((float) textH);
+
+        g.setColour (button.findColour (toggleState ? DrawableButton::textColourOnId
+                                                    : DrawableButton::textColourId)
+                        .withMultipliedAlpha (button.isEnabled() ? 1.0f : 0.4f));
+
+        g.drawFittedText (button.getButtonText(),
+                          2, button.getHeight() - textH - 1,
+                          button.getWidth() - 4, textH,
+                          Justification::centred, 1);
+    }
+}
+
 //==============================================================================
 AlertWindow* LookAndFeel::createAlertWindow (const String& title,
                                              const String& message,

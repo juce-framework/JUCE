@@ -182,6 +182,11 @@ public:
                               bool isMouseOverButton,
                               bool isButtonDown);
 
+    virtual void drawDrawableButton (Graphics& g,
+                                     DrawableButton& button,
+                                     bool isMouseOverButton,
+                                     bool isButtonDown);
+
     //==============================================================================
     // AlertWindow handling..
 
