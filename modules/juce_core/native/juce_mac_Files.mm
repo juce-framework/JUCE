@@ -393,43 +393,46 @@ bool DirectoryIterator::NativeIterator::next (String& filenameFound,
 //==============================================================================
 bool Process::openDocument (const String& fileName, const String& parameters)
 {
-  #if JUCE_IOS
-    return [[UIApplication sharedApplication] openURL: [NSURL URLWithString: juceStringToNS (fileName)]];
-  #else
     JUCE_AUTORELEASEPOOL
     {
-        if (parameters.isEmpty())
-        {
-            return [[NSWorkspace sharedWorkspace] openFile: juceStringToNS (fileName)]
-                || [[NSWorkspace sharedWorkspace] openURL: [NSURL URLWithString: juceStringToNS (fileName)]];
-        }
+        NSURL* filenameAsURL = [NSURL URLWithString: juceStringToNS (fileName)];
 
-        bool ok = false;
+      #if JUCE_IOS
+        return [[UIApplication sharedApplication] openURL: filenameAsURL];
+      #else
+        NSWorkspace* workspace = [NSWorkspace sharedWorkspace];
+
+        if (parameters.isEmpty())
+            return [workspace openFile: juceStringToNS (fileName)]
+                || [workspace openURL: filenameAsURL];
+
         const File file (fileName);
 
         if (file.isBundle())
         {
-            NSMutableArray* urls = [NSMutableArray array];
+            StringArray params;
+            params.addTokens (parameters, true);
 
-            StringArray docs;
-            docs.addTokens (parameters, true);
-            for (int i = 0; i < docs.size(); ++i)
-                [urls addObject: juceStringToNS (docs[i])];
+            NSMutableArray* paramArray = [[[NSMutableArray alloc] init] autorelease];
+            for (int i = 0; i < params.size(); ++i)
+                [paramArray addObject: juceStringToNS (params[i])];
 
-            ok = [[NSWorkspace sharedWorkspace] openURLs: urls
-                                 withAppBundleIdentifier: [[NSBundle bundleWithPath: juceStringToNS (fileName)] bundleIdentifier]
-                                                 options: 0
-                          additionalEventParamDescriptor: nil
-                                       launchIdentifiers: nil];
+            NSMutableDictionary* dict = [[[NSMutableDictionary alloc] init] autorelease];
+            [dict setObject: paramArray
+                     forKey: NSWorkspaceLaunchConfigurationArguments];
+
+            return [workspace launchApplicationAtURL: filenameAsURL
+                                             options: NSWorkspaceLaunchDefault | NSWorkspaceLaunchNewInstance
+                                       configuration: dict
+                                               error: nil];
         }
-        else if (file.exists())
-        {
-            ok = FileHelpers::launchExecutable ("\"" + fileName + "\" " + parameters);
-        }
 
-        return ok;
+        if (file.exists())
+            return FileHelpers::launchExecutable ("\"" + fileName + "\" " + parameters);
+
+        return false;
+      #endif
     }
-  #endif
 }
 
 void File::revealToUser() const
