@@ -189,10 +189,12 @@ public:
     {
         if (ComponentPeer* peer = component.getPeer())
         {
-            Rectangle<int> newArea (peer->getAreaCoveredBy (component).withPosition (0, 0));
-
             const double newScale = Desktop::getInstance().getDisplays()
                                         .getDisplayContaining (component.getScreenBounds().getCentre()).scale;
+
+            Rectangle<int> newArea (peer->getComponent().getLocalArea (&component, component.getLocalBounds())
+                                                        .withPosition (0, 0)
+                                     * newScale);
 
             if (scale != newScale || viewportArea != newArea)
             {
