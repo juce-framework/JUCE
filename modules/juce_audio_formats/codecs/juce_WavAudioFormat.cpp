@@ -962,18 +962,29 @@ private:
 
         if (! isRF64)
         {
+           #if ! JUCE_WAV_DO_NOT_PAD_HEADER_SIZE
             /* NB: This junk chunk is added for padding, so that the header is a fixed size
                regardless of whether it's RF64 or not. That way, we can begin recording a file,
                and when it's finished, can go back and write either a RIFF or RF64 header,
                depending on whether more than 2^32 samples were written.
+
+               The JUCE_WAV_DO_NOT_PAD_HEADER_SIZE macro allows you to disable this feature in case
+               you need to create files for crappy WAV players with bugs that stop them skipping chunks
+               which they don't recognise. But DO NOT USE THIS option unless you really have no choice,
+               because it means that if you write more than 2^32 samples to the file, you'll corrupt it.
             */
             output->writeInt (chunkName ("JUNK"));
             output->writeInt (28 + (isWaveFmtEx? 0 : 24));
             output->writeRepeatedByte (0, 28 /* ds64 */ + (isWaveFmtEx? 0 : 24));
+           #endif
         }
         else
         {
-            // write ds64 chunk
+           #if ! JUCE_WAV_DO_NOT_PAD_HEADER_SIZE
+            // If you disable padding, then you MUST NOT write more than 2^32 samples to a file.
+            jassertfalse;
+           #endif
+
             output->writeInt (chunkName ("ds64"));
             output->writeInt (28);  // chunk size for uncompressed data (no table)
             output->writeInt64 (riffChunkSize);
