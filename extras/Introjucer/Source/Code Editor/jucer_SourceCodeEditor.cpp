@@ -117,8 +117,6 @@ void SourceCodeDocument::applyLastState (CodeEditorComponent& editor) const
 SourceCodeEditor::SourceCodeEditor (OpenDocumentManager::Document* doc, CodeDocument& codeDocument)
     : DocumentEditorComponent (doc)
 {
-    setOpaque (true);
-
     if (document->getFile().hasFileExtension (sourceOrHeaderFileExtensions))
         setEditor (new CppCodeEditorComponent (document->getFile(), codeDocument));
     else
