@@ -152,7 +152,11 @@ void JUCE_CALLTYPE Thread::sleep (int millisecs)
 
 void Process::terminate()
 {
-    std::terminate();
+   #if JUCE_ANDROID
+    _exit (EXIT_FAILURE);
+   #else
+    std::_Exit (EXIT_FAILURE);
+   #endif
 }
 
 //==============================================================================
