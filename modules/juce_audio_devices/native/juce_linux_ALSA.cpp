@@ -47,7 +47,7 @@ namespace
 
 #define JUCE_ALSA_FAILED(x)  failed (x)
 
-void getDeviceSampleRates (snd_pcm_t* handle, Array <int>& rates)
+static void getDeviceSampleRates (snd_pcm_t* handle, Array <int>& rates)
 {
     const int ratesToTry[] = { 22050, 32000, 44100, 48000, 88200, 96000, 176400, 192000, 0 };
 
@@ -64,7 +64,7 @@ void getDeviceSampleRates (snd_pcm_t* handle, Array <int>& rates)
     }
 }
 
-void getDeviceNumChannels (snd_pcm_t* handle, unsigned int* minChans, unsigned int* maxChans)
+static void getDeviceNumChannels (snd_pcm_t* handle, unsigned int* minChans, unsigned int* maxChans)
 {
     snd_pcm_hw_params_t *params;
     snd_pcm_hw_params_alloca (&params);
@@ -86,14 +86,14 @@ void getDeviceNumChannels (snd_pcm_t* handle, unsigned int* minChans, unsigned i
     }
 }
 
-void getDeviceProperties (const String& deviceID,
-                          unsigned int& minChansOut,
-                          unsigned int& maxChansOut,
-                          unsigned int& minChansIn,
-                          unsigned int& maxChansIn,
-                          Array <int>& rates,
-                          bool testOutput = true,
-                          bool testInput = true)
+static void getDeviceProperties (const String& deviceID,
+                                 unsigned int& minChansOut,
+                                 unsigned int& maxChansOut,
+                                 unsigned int& minChansIn,
+                                 unsigned int& maxChansIn,
+                                 Array <int>& rates,
+                                 bool testOutput,
+                                 bool testInput)
 {
     minChansOut = maxChansOut = minChansIn = maxChansIn = 0;
 
@@ -132,6 +132,14 @@ void getDeviceProperties (const String& deviceID,
             snd_pcm_close (pcmHandle);
         }
     }
+}
+
+static void ensureMinimumNumBitsSet (BigInteger& chans, int minNumChans)
+{
+    int i = 0;
+
+    while (chans.countNumberOfSetBits() < minNumChans)
+        chans.setBit (i++);
 }
 
 static void silentErrorHandler (const char*, int, const char*, int, const char*,...) {}
@@ -445,16 +453,15 @@ private:
 class ALSAThread  : public Thread
 {
 public:
-    ALSAThread (const String& inputId_,
-                const String& outputId_)
+    ALSAThread (const String& inputDeviceID, const String& outputDeviceID)
         : Thread ("Juce ALSA"),
           sampleRate (0),
           bufferSize (0),
           outputLatency (0),
           inputLatency (0),
           callback (0),
-          inputId (inputId_),
-          outputId (outputId_),
+          inputId (inputDeviceID),
+          outputId (outputDeviceID),
           numCallbacks (0),
           audioIoInProgress (false),
           inputChannelBuffer (1, 1),
@@ -470,14 +477,14 @@ public:
 
     void open (BigInteger inputChannels,
                BigInteger outputChannels,
-               const double sampleRate_,
-               const int bufferSize_)
+               const double newSampleRate,
+               const int newBufferSize)
     {
         close();
 
         error = String::empty;
-        sampleRate = sampleRate_;
-        bufferSize = bufferSize_;
+        sampleRate = newSampleRate;
+        bufferSize = newBufferSize;
 
         inputChannelBuffer.setSize (jmax ((int) minChansIn, inputChannels.getHighestBit()) + 1, bufferSize);
         inputChannelBuffer.clear();
@@ -495,6 +502,8 @@ public:
                 }
             }
         }
+
+        ensureMinimumNumBitsSet (outputChannels, minChansOut);
 
         outputChannelBuffer.setSize (jmax ((int) minChansOut, outputChannels.getHighestBit()) + 1, bufferSize);
         outputChannelBuffer.clear();
@@ -524,10 +533,9 @@ public:
                 return;
             }
 
-            currentOutputChans.setRange (0, minChansOut, true);
-
             if (! outputDevice->setParameters ((unsigned int) sampleRate,
-                                               jlimit ((int) minChansOut, (int) maxChansOut, currentOutputChans.getHighestBit() + 1),
+                                               jlimit ((int) minChansOut, (int) maxChansOut,
+                                                       currentOutputChans.getHighestBit() + 1),
                                                bufferSize))
             {
                 error = outputDevice->error;
@@ -549,7 +557,7 @@ public:
                 return;
             }
 
-            currentInputChans.setRange (0, minChansIn, true);
+            ensureMinimumNumBitsSet (currentInputChans, minChansIn);
 
             if (! inputDevice->setParameters ((unsigned int) sampleRate,
                                               jlimit ((int) minChansIn, (int) maxChansIn, currentInputChans.getHighestBit() + 1),
@@ -774,14 +782,14 @@ class ALSAAudioIODevice   : public AudioIODevice
 public:
     ALSAAudioIODevice (const String& deviceName,
                        const String& typeName,
-                       const String& inputId_,
-                       const String& outputId_)
+                       const String& inputDeviceID,
+                       const String& outputDeviceID)
         : AudioIODevice (deviceName, typeName),
-          inputId (inputId_),
-          outputId (outputId_),
+          inputId (inputDeviceID),
+          outputId (outputDeviceID),
           isOpen_ (false),
           isStarted (false),
-          internal (inputId_, outputId_)
+          internal (inputDeviceID, outputDeviceID)
     {
     }
 
