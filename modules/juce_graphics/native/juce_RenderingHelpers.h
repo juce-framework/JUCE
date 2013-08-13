@@ -39,50 +39,44 @@ namespace RenderingHelpers
 class TranslationOrTransform
 {
 public:
-    TranslationOrTransform (int x, int y) noexcept
-        : xOffset (x), yOffset (y), isOnlyTranslated (true), isRotated (false)
+    TranslationOrTransform (Point<int> origin) noexcept
+        : offset (origin), isOnlyTranslated (true), isRotated (false)
     {
     }
 
     TranslationOrTransform (const TranslationOrTransform& other) noexcept
-        : complexTransform (other.complexTransform),
-          xOffset (other.xOffset), yOffset (other.yOffset),
+        : complexTransform (other.complexTransform), offset (other.offset),
           isOnlyTranslated (other.isOnlyTranslated), isRotated (other.isRotated)
     {
     }
 
     AffineTransform getTransform() const noexcept
     {
-        return isOnlyTranslated ? AffineTransform::translation ((float) xOffset, (float) yOffset)
+        return isOnlyTranslated ? AffineTransform::translation ((float) offset.x, (float) offset.y)
                                 : complexTransform;
     }
 
     AffineTransform getTransformWith (const AffineTransform& userTransform) const noexcept
     {
-        return isOnlyTranslated ? userTransform.translated ((float) xOffset, (float) yOffset)
+        return isOnlyTranslated ? userTransform.translated ((float) offset.x, (float) offset.y)
                                 : userTransform.followedBy (complexTransform);
     }
 
-    void setOrigin (const int x, const int y) noexcept
+    void setOrigin (Point<int> delta) noexcept
     {
         if (isOnlyTranslated)
-        {
-            xOffset += x;
-            yOffset += y;
-        }
+            offset += delta;
         else
-        {
-            complexTransform = AffineTransform::translation ((float) x, (float) y)
+            complexTransform = AffineTransform::translation ((float) delta.x, (float) delta.y)
                                                .followedBy (complexTransform);
-        }
     }
 
     void addTransform (const AffineTransform& t) noexcept
     {
         if (isOnlyTranslated && t.isOnlyTranslation())
         {
-            xOffset += (int) t.getTranslationX();
-            yOffset += (int) t.getTranslationY();
+            offset += Point<int> ((int) t.getTranslationX(),
+                                  (int) t.getTranslationY());
         }
         else
         {
@@ -100,42 +94,42 @@ public:
                                                      complexTransform.mat11));
     }
 
-    void moveOriginInDeviceSpace (const int dx, const int dy) noexcept
+    void moveOriginInDeviceSpace (Point<int> delta) noexcept
     {
         if (isOnlyTranslated)
-        {
-            xOffset += dx;
-            yOffset += dy;
-        }
+            offset += delta;
         else
-        {
-            complexTransform = complexTransform.translated ((float) dx, (float) dy);
-        }
+            complexTransform = complexTransform.translated ((float) delta.x, (float) delta.y);
     }
 
-    template <typename Type>
-    Rectangle<Type> translated (const Rectangle<Type>& r) const noexcept
+    Rectangle<int> translated (const Rectangle<int>& r) const noexcept
     {
         jassert (isOnlyTranslated);
-        return r.translated (static_cast <Type> (xOffset),
-                             static_cast <Type> (yOffset));
+        return r + offset;
     }
 
-    template <typename Type>
-    Rectangle<Type> transformed (const Rectangle<Type>& r) const noexcept
+    Rectangle<float> translated (const Rectangle<float>& r) const noexcept
     {
+        jassert (isOnlyTranslated);
+        return r + offset.toFloat();
+    }
+
+    template <typename RectangleOrPoint>
+    RectangleOrPoint transformed (const RectangleOrPoint& r) const noexcept
+    {
+        jassert (! isOnlyTranslated);
         return r.transformedBy (complexTransform);
     }
 
     template <typename Type>
     Rectangle<Type> deviceSpaceToUserSpace (const Rectangle<Type>& r) const noexcept
     {
-        return isOnlyTranslated ? r.translated (-xOffset, -yOffset)
+        return isOnlyTranslated ? r - offset
                                 : r.transformedBy (complexTransform.inverted());
     }
 
     AffineTransform complexTransform;
-    int xOffset, yOffset;
+    Point<int> offset;
     bool isOnlyTranslated, isRotated;
 };
 
@@ -166,7 +160,7 @@ public:
     }
 
     //==============================================================================
-    void drawGlyph (RenderTargetType& target, const Font& font, const int glyphNumber, float x, float y)
+    void drawGlyph (RenderTargetType& target, const Font& font, const int glyphNumber, Point<float> pos)
     {
         ++accessCounter;
         CachedGlyphType* glyph = nullptr;
@@ -209,7 +203,7 @@ public:
         }
 
         glyph->lastAccessCount = accessCounter.value;
-        glyph->draw (target, x, y);
+        glyph->draw (target, pos);
     }
 
 private:
@@ -260,13 +254,13 @@ class CachedGlyphEdgeTable
 public:
     CachedGlyphEdgeTable() : glyph (0), lastAccessCount (0) {}
 
-    void draw (RendererType& state, float x, const float y) const
+    void draw (RendererType& state, Point<float> pos) const
     {
         if (snapToIntegerCoordinate)
-            x = std::floor (x + 0.5f);
+            pos.x = std::floor (pos.x + 0.5f);
 
         if (edgeTable != nullptr)
-            state.fillEdgeTable (*edgeTable, x, roundToInt (y));
+            state.fillEdgeTable (*edgeTable, pos.x, roundToInt (pos.y));
     }
 
     void generate (const Font& newFont, const int glyphNumber)
@@ -1981,13 +1975,13 @@ public:
     typedef typename ClipRegions<SavedStateType>::RectangleListRegion    RectangleListRegionType;
 
     SavedStateBase (const Rectangle<int>& initialClip)
-        : clip (new RectangleListRegionType (initialClip)), transform (0, 0),
+        : clip (new RectangleListRegionType (initialClip)), transform (Point<int>()),
           interpolationQuality (Graphics::mediumResamplingQuality), transparencyLayerAlpha (1.0f)
     {
     }
 
-    SavedStateBase (const RectangleList<int>& clipList, int x, int y)
-        : clip (new RectangleListRegionType (clipList)), transform (x, y),
+    SavedStateBase (const RectangleList<int>& clipList, Point<int> origin)
+        : clip (new RectangleListRegionType (clipList)), transform (origin),
           interpolationQuality (Graphics::mediumResamplingQuality), transparencyLayerAlpha (1.0f)
     {
     }
@@ -2034,7 +2028,7 @@ public:
             {
                 cloneClipIfMultiplyReferenced();
                 RectangleList<int> offsetList (r);
-                offsetList.offsetAll (transform.xOffset, transform.yOffset);
+                offsetList.offsetAll (transform.offset.x, transform.offset.y);
                 clip = clip->clipToRectangleList (offsetList);
             }
             else if (! transform.isRotated)
@@ -2222,13 +2216,10 @@ public:
 
     void fillEdgeTable (const EdgeTable& edgeTable, const float x, const int y)
     {
-        jassert (transform.isOnlyTranslated);
-
         if (clip != nullptr)
         {
             EdgeTableRegionType* edgeTableClip = new EdgeTableRegionType (edgeTable);
-            edgeTableClip->edgeTable.translate (x + transform.xOffset,
-                                                y + transform.yOffset);
+            edgeTableClip->edgeTable.translate (x, y);
             fillShape (edgeTableClip, false);
         }
     }
@@ -2365,8 +2356,8 @@ public:
     {
     }
 
-    SoftwareRendererSavedState (const Image& im, const RectangleList<int>& clipList, int x, int y)
-        : BaseClass (clipList, x, y), image (im)
+    SoftwareRendererSavedState (const Image& im, const RectangleList<int>& clipList, Point<int> origin)
+        : BaseClass (clipList, origin), image (im)
     {
     }
 
@@ -2385,7 +2376,7 @@ public:
 
             s->image = Image (Image::ARGB, layerBounds.getWidth(), layerBounds.getHeight(), true);
             s->transparencyLayerAlpha = opacity;
-            s->transform.moveOriginInDeviceSpace (-layerBounds.getX(), -layerBounds.getY());
+            s->transform.moveOriginInDeviceSpace (-layerBounds.getPosition());
 
             s->cloneClipIfMultiplyReferenced();
             s->clip->translate (-layerBounds.getPosition());
@@ -2412,12 +2403,31 @@ public:
     {
         if (clip != nullptr)
         {
-            if (trans.isOnlyTranslation() && transform.isOnlyTranslated)
+            if (trans.isOnlyTranslation() && ! transform.isRotated)
             {
-                GlyphCache <CachedGlyphEdgeTable <SoftwareRendererSavedState>, SoftwareRendererSavedState>::getInstance()
-                    .drawGlyph (*this, font, glyphNumber,
-                                trans.getTranslationX(),
-                                trans.getTranslationY());
+                typedef GlyphCache <CachedGlyphEdgeTable <SoftwareRendererSavedState>, SoftwareRendererSavedState> GlyphCacheType;
+
+                GlyphCacheType& cache = GlyphCacheType::getInstance();
+
+                Point<float> pos (trans.getTranslationX(), trans.getTranslationY());
+
+                if (transform.isOnlyTranslated)
+                {
+                    cache.drawGlyph (*this, font, glyphNumber, pos + transform.offset.toFloat());
+                }
+                else
+                {
+                    pos = transform.transformed (pos);
+
+                    Font f (font);
+                    f.setHeight (font.getHeight() * transform.complexTransform.mat11);
+
+                    const float xScale = transform.complexTransform.mat00 / transform.complexTransform.mat11;
+                    if (std::abs (xScale - 1.0f) > 0.01f)
+                        f.setHorizontalScale (xScale);
+
+                    cache.drawGlyph (*this, f, glyphNumber, pos);
+                }
             }
             else
             {
@@ -2554,7 +2564,7 @@ class StackBasedLowLevelGraphicsContext  : public LowLevelGraphicsContext
 {
 public:
     bool isVectorDevice() const override                                         { return false; }
-    void setOrigin (int x, int y) override                                       { stack->transform.setOrigin (x, y); }
+    void setOrigin (int x, int y) override                                       { stack->transform.setOrigin (Point<int> (x, y)); }
     void addTransform (const AffineTransform& t) override                        { stack->transform.addTransform (t); }
     float getScaleFactor() override                                              { return stack->transform.getScaleFactor(); }
     float getTargetDeviceScaleFactor() override                                  { return stack->transform.getScaleFactor(); }

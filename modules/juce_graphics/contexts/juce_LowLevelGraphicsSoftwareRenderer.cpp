@@ -31,7 +31,7 @@ LowLevelGraphicsSoftwareRenderer::LowLevelGraphicsSoftwareRenderer (const Image&
 LowLevelGraphicsSoftwareRenderer::LowLevelGraphicsSoftwareRenderer (const Image& image, Point<int> origin,
                                                                     const RectangleList<int>& initialClip)
     : RenderingHelpers::StackBasedLowLevelGraphicsContext<RenderingHelpers::SoftwareRendererSavedState>
-        (new RenderingHelpers::SoftwareRendererSavedState (image, initialClip, origin.x, origin.y))
+        (new RenderingHelpers::SoftwareRendererSavedState (image, initialClip, origin))
 {
 }
 
