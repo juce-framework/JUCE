@@ -52,11 +52,6 @@ void Process::setPriority (const ProcessPriority prior)
     pthread_setschedparam (pthread_self(), policy, &param);
 }
 
-void Process::terminate()
-{
-    std::exit (EXIT_FAILURE);
-}
-
 JUCE_API bool JUCE_CALLTYPE juce_isRunningUnderDebugger()
 {
    #if JUCE_BSD

@@ -65,11 +65,6 @@ void Process::lowerPrivilege()
     jassertfalse;
 }
 
-void Process::terminate()
-{
-    std::exit (EXIT_FAILURE);
-}
-
 void Process::setPriority (ProcessPriority)
 {
     // xxx

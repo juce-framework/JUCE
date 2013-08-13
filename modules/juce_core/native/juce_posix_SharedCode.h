@@ -150,6 +150,10 @@ void JUCE_CALLTYPE Thread::sleep (int millisecs)
     nanosleep (&time, nullptr);
 }
 
+void Process::terminate()
+{
+    std::terminate();
+}
 
 //==============================================================================
 const juce_wchar File::separator = '/';
