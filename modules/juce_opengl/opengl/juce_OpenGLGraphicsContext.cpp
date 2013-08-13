@@ -1369,12 +1369,31 @@ public:
     {
         if (clip != nullptr)
         {
-            if (trans.isOnlyTranslation() && transform.isOnlyTranslated)
+            if (trans.isOnlyTranslation() && ! transform.isRotated)
             {
-                RenderingHelpers::GlyphCache <RenderingHelpers::CachedGlyphEdgeTable <SavedState>, SavedState>::getInstance()
-                    .drawGlyph (*this, font, glyphNumber,
-                                trans.getTranslationX(),
-                                trans.getTranslationY());
+                typedef RenderingHelpers::GlyphCache <RenderingHelpers::CachedGlyphEdgeTable <SavedState>, SavedState> GlyphCacheType;
+
+                GlyphCacheType& cache = GlyphCacheType::getInstance();
+
+                Point<float> pos (trans.getTranslationX(), trans.getTranslationY());
+
+                if (transform.isOnlyTranslated)
+                {
+                    cache.drawGlyph (*this, font, glyphNumber, pos + transform.offset.toFloat());
+                }
+                else
+                {
+                    pos = transform.transformed (pos);
+
+                    Font f (font);
+                    f.setHeight (font.getHeight() * transform.complexTransform.mat11);
+
+                    const float xScale = transform.complexTransform.mat00 / transform.complexTransform.mat11;
+                    if (std::abs (xScale - 1.0f) > 0.01f)
+                        f.setHorizontalScale (xScale);
+
+                    cache.drawGlyph (*this, f, glyphNumber, pos);
+                }
             }
             else
             {
