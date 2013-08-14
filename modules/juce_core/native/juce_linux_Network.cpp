@@ -55,13 +55,12 @@ void MACAddress::findAllAddresses (Array<MACAddress>& result)
 }
 
 
-bool Process::openEmailWithAttachments (const String& /* targetEmailAddress */,
-                                        const String& /* emailSubject */,
-                                        const String& /* bodyText */,
-                                        const StringArray& /* filesToAttach */)
+bool JUCE_CALLTYPE Process::openEmailWithAttachments (const String& /* targetEmailAddress */,
+                                                      const String& /* emailSubject */,
+                                                      const String& /* bodyText */,
+                                                      const StringArray& /* filesToAttach */)
 {
     jassertfalse;    // xxx todo
-
     return false;
 }
 

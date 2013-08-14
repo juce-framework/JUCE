@@ -271,7 +271,7 @@ void juce_repeatLastProcessPriority()
     }
 }
 
-void Process::setPriority (ProcessPriority prior)
+void JUCE_CALLTYPE Process::setPriority (ProcessPriority prior)
 {
     if (lastProcessPriority != (int) prior)
     {
@@ -292,7 +292,7 @@ bool JUCE_CALLTYPE Process::isRunningUnderDebugger()
 
 static void* currentModuleHandle = nullptr;
 
-void* Process::getCurrentModuleInstanceHandle() noexcept
+void* JUCE_CALLTYPE Process::getCurrentModuleInstanceHandle() noexcept
 {
     if (currentModuleHandle == nullptr)
         currentModuleHandle = GetModuleHandleA (nullptr);
@@ -300,22 +300,22 @@ void* Process::getCurrentModuleInstanceHandle() noexcept
     return currentModuleHandle;
 }
 
-void Process::setCurrentModuleInstanceHandle (void* const newHandle) noexcept
+void JUCE_CALLTYPE Process::setCurrentModuleInstanceHandle (void* const newHandle) noexcept
 {
     currentModuleHandle = newHandle;
 }
 
-void Process::raisePrivilege()
+void JUCE_CALLTYPE Process::raisePrivilege()
 {
     jassertfalse; // xxx not implemented
 }
 
-void Process::lowerPrivilege()
+void JUCE_CALLTYPE Process::lowerPrivilege()
 {
     jassertfalse; // xxx not implemented
 }
 
-void Process::terminate()
+void JUCE_CALLTYPE Process::terminate()
 {
    #if JUCE_MSVC && JUCE_CHECK_MEMORY_LEAKS
     _CrtDumpMemoryLeaks();

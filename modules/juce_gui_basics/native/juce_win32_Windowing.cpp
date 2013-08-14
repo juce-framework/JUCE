@@ -2887,7 +2887,7 @@ bool KeyPress::isKeyCurrentlyDown (const int keyCode)
 }
 
 //==============================================================================
-bool Process::isForegroundProcess()
+bool JUCE_CALLTYPE Process::isForegroundProcess()
 {
     HWND fg = GetForegroundWindow();
 
@@ -2908,8 +2908,8 @@ bool Process::isForegroundProcess()
 }
 
 // N/A on Windows as far as I know.
-void Process::makeForegroundProcess() {}
-void Process::hide() {}
+void JUCE_CALLTYPE Process::makeForegroundProcess() {}
+void JUCE_CALLTYPE Process::hide() {}
 
 //==============================================================================
 static BOOL CALLBACK enumAlwaysOnTopWindows (HWND hwnd, LPARAM lParam)

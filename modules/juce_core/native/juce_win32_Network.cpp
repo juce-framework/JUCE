@@ -428,10 +428,10 @@ void IPAddress::findAllAddresses (Array<IPAddress>& result)
 }
 
 //==============================================================================
-bool Process::openEmailWithAttachments (const String& targetEmailAddress,
-                                        const String& emailSubject,
-                                        const String& bodyText,
-                                        const StringArray& filesToAttach)
+bool JUCE_CALLTYPE Process::openEmailWithAttachments (const String& targetEmailAddress,
+                                                      const String& emailSubject,
+                                                      const String& bodyText,
+                                                      const StringArray& filesToAttach)
 {
     DynamicLibrary dll ("MAPI32.dll");
     JUCE_LOAD_WINAPI_FUNCTION (dll, MAPISendMail, mapiSendMail,

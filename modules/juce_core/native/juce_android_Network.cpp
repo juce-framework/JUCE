@@ -54,10 +54,10 @@ void MACAddress::findAllAddresses (Array<MACAddress>& result)
 }
 
 
-bool Process::openEmailWithAttachments (const String& targetEmailAddress,
-                                        const String& emailSubject,
-                                        const String& bodyText,
-                                        const StringArray& filesToAttach)
+JUCE_API bool JUCE_CALLTYPE Process::openEmailWithAttachments (const String& targetEmailAddress,
+                                                               const String& emailSubject,
+                                                               const String& bodyText,
+                                                               const StringArray& filesToAttach)
 {
     // TODO
     return false;

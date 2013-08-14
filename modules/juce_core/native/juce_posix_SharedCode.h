@@ -150,7 +150,7 @@ void JUCE_CALLTYPE Thread::sleep (int millisecs)
     nanosleep (&time, nullptr);
 }
 
-void Process::terminate()
+void JUCE_CALLTYPE Process::terminate()
 {
    #if JUCE_ANDROID
     _exit (EXIT_FAILURE);

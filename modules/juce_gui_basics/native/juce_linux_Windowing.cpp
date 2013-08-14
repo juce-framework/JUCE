@@ -2928,14 +2928,14 @@ bool LinuxComponentPeer::isActiveApplication = false;
 Point<int> LinuxComponentPeer::lastMousePos;
 
 //==============================================================================
-bool Process::isForegroundProcess()
+JUCE_API bool JUCE_CALLTYPE Process::isForegroundProcess()
 {
     return LinuxComponentPeer::isActiveApplication;
 }
 
 // N/A on Linux as far as I know.
-void Process::makeForegroundProcess() {}
-void Process::hide() {}
+JUCE_API void JUCE_CALLTYPE Process::makeForegroundProcess() {}
+JUCE_API void JUCE_CALLTYPE Process::hide() {}
 
 //==============================================================================
 void ModifierKeys::updateCurrentModifiers() noexcept

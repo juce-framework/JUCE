@@ -623,9 +623,9 @@ ModifierKeys ModifierKeys::getCurrentModifiersRealtime() noexcept
 
 //==============================================================================
 // TODO
-bool Process::isForegroundProcess() { return true; }
-void Process::makeForegroundProcess() {}
-void Process::hide() {}
+JUCE_API bool JUCE_CALLTYPE Process::isForegroundProcess() { return true; }
+JUCE_API void JUCE_CALLTYPE Process::makeForegroundProcess() {}
+JUCE_API void JUCE_CALLTYPE Process::hide() {}
 
 //==============================================================================
 void JUCE_CALLTYPE NativeMessageBox::showMessageBoxAsync (AlertWindow::AlertIconType iconType,
