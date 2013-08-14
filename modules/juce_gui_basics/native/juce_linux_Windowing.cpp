@@ -1333,42 +1333,6 @@ public:
         }
     }
 
-    static int getKeyCodeFromKeySym (KeySym sym)
-    {
-        switch (sym)
-        {
-            case XK_KP_Divide:      return XK_slash; break;
-            case XK_KP_Multiply:    return XK_asterisk; break;
-            case XK_KP_Subtract:    return XK_hyphen; break;
-            case XK_KP_Add:         return XK_plus; break;
-            case XK_KP_Enter:       return XK_Return; break;
-
-            case XK_KP_0:           return XK_0; break;
-            case XK_KP_1:           return XK_1; break;
-            case XK_KP_2:           return XK_2; break;
-            case XK_KP_3:           return XK_3; break;
-            case XK_KP_4:           return XK_4; break;
-            case XK_KP_5:           return XK_5; break;
-            case XK_KP_6:           return XK_6; break;
-            case XK_KP_7:           return XK_7; break;
-            case XK_KP_8:           return XK_8; break;
-            case XK_KP_9:           return XK_9; break;
-
-            case XK_KP_Insert:      return XK_Insert; break;
-            case XK_KP_Delete:      return XK_Delete; break;
-            case XK_KP_End:         return XK_End; break;
-            case XK_KP_Down:        return XK_Down; break;
-            case XK_KP_Page_Down:   return XK_Page_Down; break;
-            case XK_KP_Left:        return XK_Left; break;
-            case XK_KP_Right:       return XK_Right; break;
-            case XK_KP_Home:        return XK_Home; break;
-            case XK_KP_Up:          return XK_Up; break;
-            case XK_KP_Page_Up:     return XK_Page_Up; break;
-
-            default:                break;
-        }
-    }
-
     void handleKeyPressEvent (XKeyEvent& keyEvent)
     {
         char utf8 [64] = { 0 };
@@ -1408,6 +1372,7 @@ public:
                 case XK_KP_Multiply:    keyCode = XK_asterisk; break;
                 case XK_KP_Enter:       keyCode = XK_Return; break;
                 case XK_KP_Insert:      keyCode = XK_Insert; break;
+                case XK_Delete:
                 case XK_KP_Delete:      keyCode = XK_Delete; break;
                 case XK_KP_Left:        keyCode = XK_Left; break;
                 case XK_KP_Right:       keyCode = XK_Right; break;
