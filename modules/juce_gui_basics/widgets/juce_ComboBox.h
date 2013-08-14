@@ -362,6 +362,8 @@ public:
     /** @internal */
     void mouseUp (const MouseEvent&) override;
     /** @internal */
+    void mouseWheelMove (const MouseEvent&, const MouseWheelDetails&) override;
+    /** @internal */
     void lookAndFeelChanged() override;
     /** @internal */
     void paint (Graphics&) override;
@@ -404,6 +406,7 @@ private:
     ItemInfo* getItemForId (int itemId) const noexcept;
     ItemInfo* getItemForIndex (int index) const noexcept;
     bool selectIfEnabled (int index);
+    bool nudgeSelectedItem (int delta);
     void sendChange (NotificationType);
     static void popupMenuFinishedCallback (int, ComboBox*);
 

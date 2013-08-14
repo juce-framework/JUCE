@@ -300,6 +300,15 @@ bool ComboBox::selectIfEnabled (const int index)
     return false;
 }
 
+bool ComboBox::nudgeSelectedItem (int delta)
+{
+    for (int i = getSelectedItemIndex() + delta; isPositiveAndBelow (i, getNumItems()); i += delta)
+        if (selectIfEnabled (i))
+            return true;
+
+    return false;
+}
+
 void ComboBox::valueChanged (Value&)
 {
     if (lastCurrentId != (int) currentId.getValue())
@@ -445,23 +454,17 @@ bool ComboBox::keyPressed (const KeyPress& key)
 {
     if (key == KeyPress::upKey || key == KeyPress::leftKey)
     {
-        int index = getSelectedItemIndex() - 1;
-
-        while (index >= 0 && ! selectIfEnabled (index))
-            --index;
-
+        nudgeSelectedItem (-1);
         return true;
     }
-    else if (key == KeyPress::downKey || key == KeyPress::rightKey)
+
+    if (key == KeyPress::downKey || key == KeyPress::rightKey)
     {
-        int index = getSelectedItemIndex() + 1;
-
-        while (index < getNumItems() && ! selectIfEnabled (index))
-            ++index;
-
+        nudgeSelectedItem (1);
         return true;
     }
-    else if (key == KeyPress::returnKey)
+
+    if (key == KeyPress::returnKey)
     {
         showPopup();
         return true;
@@ -574,16 +577,21 @@ void ComboBox::mouseUp (const MouseEvent& e2)
     }
 }
 
-//==============================================================================
-void ComboBox::addListener (ComboBoxListener* const listener)
+void ComboBox::mouseWheelMove (const MouseEvent& e, const MouseWheelDetails& wheel)
 {
-    listeners.add (listener);
+   #if 0
+    // NB: this is far too irritating if enabled, because on scrollable pages containing
+    // comboboxes (e.g. introjucer settings pages), you can easily nudge them when trying to scroll
+    if (menuActive && wheel.deltaY != 0)
+        nudgeSelectedItem (wheel.deltaY > 0 ? -1 : 1);
+    else
+   #endif
+        Component::mouseWheelMove (e, wheel);
 }
 
-void ComboBox::removeListener (ComboBoxListener* const listener)
-{
-    listeners.remove (listener);
-}
+//==============================================================================
+void ComboBox::addListener (ComboBoxListener* listener)       { listeners.add (listener); }
+void ComboBox::removeListener (ComboBoxListener* listener)    { listeners.remove (listener); }
 
 void ComboBox::handleAsyncUpdate()
 {
