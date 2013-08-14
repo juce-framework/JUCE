@@ -258,5 +258,5 @@ bool AffineTransform::isOnlyTranslation() const noexcept
 
 float AffineTransform::getScaleFactor() const noexcept
 {
-    return juce_hypot (mat00 + mat01, mat10 + mat11);
+    return (mat00 + mat11) / 2.0f;
 }
