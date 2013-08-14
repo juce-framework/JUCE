@@ -419,7 +419,7 @@ bool Process::openDocument (const String& fileName, const String& parameters)
 
             NSMutableDictionary* dict = [[[NSMutableDictionary alloc] init] autorelease];
             [dict setObject: paramArray
-                     forKey: NSWorkspaceLaunchConfigurationArguments];
+                     forKey: nsStringLiteral ("NSWorkspaceLaunchConfigurationArguments")];
 
             return [workspace launchApplicationAtURL: filenameAsURL
                                              options: NSWorkspaceLaunchDefault | NSWorkspaceLaunchNewInstance
