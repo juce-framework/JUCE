@@ -287,8 +287,9 @@ public:
             pathChooserWindow.addButton (TRANS("Cancel"), 0, KeyPress (KeyPress::escapeKey));
 
             pathChooserWindow.enterModalState (true,
-                ModalCallbackFunction::forComponent (startScanCallback, &pathChooserWindow, this),
-                false);
+                                               ModalCallbackFunction::forComponent (startScanCallback,
+                                                                                    &pathChooserWindow, this),
+                                               false);
         }
         else
         {
@@ -306,15 +307,92 @@ public:
     }
 
 private:
+    PluginListComponent& owner;
+    AudioPluginFormat& formatToScan;
+    PropertiesFile* propertiesToUse;
+    ScopedPointer<PluginDirectoryScanner> scanner;
+    AlertWindow pathChooserWindow, progressWindow;
+    FileSearchPathListComponent pathList;
+    String pluginBeingScanned;
+    double progress;
+    int numThreads;
+    bool finished;
+    ScopedPointer<ThreadPool> pool;
+
     static void startScanCallback (int result, AlertWindow* alert, Scanner* scanner)
     {
         if (alert != nullptr && scanner != nullptr)
         {
             if (result != 0)
-                scanner->startScan();
+                scanner->warnUserAboutStupidPaths();
             else
                 scanner->finishedScan();
         }
+    }
+
+    // Try to dissuade people from to scanning their entire C: drive, or other system folders.
+    void warnUserAboutStupidPaths()
+    {
+        for (int i = 0; i < pathList.getPath().getNumPaths(); ++i)
+        {
+            const File f (pathList.getPath()[i]);
+
+            if (isStupidPath (f))
+            {
+                AlertWindow::showOkCancelBox (AlertWindow::WarningIcon,
+                                              TRANS("Plugin Scanning"),
+                                              TRANS("If you choose to scan folders that contain non-plugin files, "
+                                                    "then scanning may take a long time, and can cause crashes when "
+                                                    "attempting to load unsuitable files.")
+                                                + newLine
+                                                + TRANS ("Are you sure you want to scan the folder \"XYZ\"?")
+                                                   .replace ("XYZ", f.getFullPathName()),
+                                              TRANS ("Scan"),
+                                              String::empty,
+                                              nullptr,
+                                              ModalCallbackFunction::create (warnAboutStupidPathsCallback, this));
+                return;
+            }
+        }
+
+        startScan();
+    }
+
+    static bool isStupidPath (const File& f)
+    {
+        Array<File> roots;
+        File::findFileSystemRoots (roots);
+
+        if (roots.contains (f))
+            return true;
+
+        File::SpecialLocationType pathsThatWouldBeStupidToScan[]
+            = { File::globalApplicationsDirectory,
+                File::userHomeDirectory,
+                File::userDocumentsDirectory,
+                File::userDesktopDirectory,
+                File::tempDirectory,
+                File::userMusicDirectory,
+                File::userMoviesDirectory,
+                File::userPicturesDirectory };
+
+        for (int i = 0; i < numElementsInArray (pathsThatWouldBeStupidToScan); ++i)
+        {
+            const File sillyFolder (File::getSpecialLocation (pathsThatWouldBeStupidToScan[i]));
+
+            if (f == sillyFolder || sillyFolder.isAChildOf (f))
+                return true;
+        }
+
+        return false;
+    }
+
+    static void warnAboutStupidPathsCallback (int result, Scanner* scanner)
+    {
+        if (result != 0)
+            scanner->startScan();
+        else
+            scanner->finishedScan();
     }
 
     void startScan()
@@ -380,19 +458,6 @@ private:
         return false;
     }
 
-    PluginListComponent& owner;
-    AudioPluginFormat& formatToScan;
-    PropertiesFile* propertiesToUse;
-    ScopedPointer<PluginDirectoryScanner> scanner;
-    AlertWindow pathChooserWindow, progressWindow;
-    FileSearchPathListComponent pathList;
-    String pluginBeingScanned;
-    double progress;
-    int numThreads;
-    bool finished;
-
-    ScopedPointer<ThreadPool> pool;
-
     struct ScanJob  : public ThreadPoolJob
     {
         ScanJob (Scanner& s)  : ThreadPoolJob ("pluginscan"), scanner (s) {}
@@ -411,7 +476,6 @@ private:
     };
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Scanner)
-
 };
 
 void PluginListComponent::scanFor (AudioPluginFormat& format)
