@@ -2274,6 +2274,8 @@ void LookAndFeel::drawTabButton (TabBarButton& button, Graphics& g, bool isMouse
     drawTabButtonText (button, g, isMouseOver, isMouseDown);
 }
 
+void LookAndFeel::drawTabbedButtonBarBackground (TabbedButtonBar&, Graphics&) {}
+
 void LookAndFeel::drawTabAreaBehindFrontButton (TabbedButtonBar& bar, Graphics& g, const int w, const int h)
 {
     const float shadowSize = 0.2f;

@@ -152,7 +152,7 @@ public:
 
     //==============================================================================
     /** Draws the lozenge-shaped background for a standard button. */
-    virtual void drawButtonBackground (Graphics& g,
+    virtual void drawButtonBackground (Graphics&,
                                        Button& button,
                                        const Colour& backgroundColour,
                                        bool isMouseOverButton,
@@ -161,20 +161,20 @@ public:
     virtual Font getTextButtonFont (TextButton& button);
 
     /** Draws the text for a TextButton. */
-    virtual void drawButtonText (Graphics& g,
+    virtual void drawButtonText (Graphics&,
                                  TextButton& button,
                                  bool isMouseOverButton,
                                  bool isButtonDown);
 
     /** Draws the contents of a standard ToggleButton. */
-    virtual void drawToggleButton (Graphics& g,
+    virtual void drawToggleButton (Graphics&,
                                    ToggleButton& button,
                                    bool isMouseOverButton,
                                    bool isButtonDown);
 
     virtual void changeToggleButtonWidthToFitText (ToggleButton& button);
 
-    virtual void drawTickBox (Graphics& g,
+    virtual void drawTickBox (Graphics&,
                               Component& component,
                               float x, float y, float w, float h,
                               bool ticked,
@@ -182,7 +182,7 @@ public:
                               bool isMouseOverButton,
                               bool isButtonDown);
 
-    virtual void drawDrawableButton (Graphics& g,
+    virtual void drawDrawableButton (Graphics&,
                                      DrawableButton& button,
                                      bool isMouseOverButton,
                                      bool isButtonDown);
@@ -199,7 +199,7 @@ public:
                                             int numButtons,
                                             Component* associatedComponent);
 
-    virtual void drawAlertBox (Graphics& g,
+    virtual void drawAlertBox (Graphics&,
                                AlertWindow& alert,
                                const Rectangle<int>& textArea,
                                TextLayout& textLayout);
@@ -222,7 +222,7 @@ public:
 
         (Used by progress bars in AlertWindow).
     */
-    virtual void drawProgressBar (Graphics& g, ProgressBar& progressBar,
+    virtual void drawProgressBar (Graphics&, ProgressBar& progressBar,
                                   int width, int height,
                                   double progress, const String& textToShow);
 
@@ -230,7 +230,7 @@ public:
     // Draws a small image that spins to indicate that something's happening..
     // This method should use the current time to animate itself, so just keep
     // repainting it every so often.
-    virtual void drawSpinningWaitAnimation (Graphics& g, const Colour& colour,
+    virtual void drawSpinningWaitAnimation (Graphics&, const Colour& colour,
                                             int x, int y, int w, int h);
 
     //==============================================================================
@@ -247,7 +247,7 @@ public:
         @param isMouseOverButton    whether the mouse is currently over the button (also true if it's held down)
         @param isButtonDown         whether the mouse button's held down
     */
-    virtual void drawScrollbarButton (Graphics& g,
+    virtual void drawScrollbarButton (Graphics&,
                                       ScrollBar& scrollbar,
                                       int width, int height,
                                       int buttonDirection,
@@ -272,7 +272,7 @@ public:
                                     currently dragging the thumb
         @param isMouseDown          whether the mouse is currently dragging the scrollbar
     */
-    virtual void drawScrollbar (Graphics& g,
+    virtual void drawScrollbar (Graphics&,
                                 ScrollBar& scrollbar,
                                 int x, int y,
                                 int width, int height,
@@ -302,11 +302,11 @@ public:
 
     //==============================================================================
     /** Draws the + or - box in a treeview. */
-    virtual void drawTreeviewPlusMinusBox (Graphics& g, int x, int y, int w, int h, bool isPlus, bool isMouseOver);
+    virtual void drawTreeviewPlusMinusBox (Graphics&, int x, int y, int w, int h, bool isPlus, bool isMouseOver);
 
     //==============================================================================
-    virtual void fillTextEditorBackground (Graphics& g, int width, int height, TextEditor& textEditor);
-    virtual void drawTextEditorOutline (Graphics& g, int width, int height, TextEditor& textEditor);
+    virtual void fillTextEditorBackground (Graphics&, int width, int height, TextEditor& textEditor);
+    virtual void drawTextEditorOutline (Graphics&, int width, int height, TextEditor& textEditor);
 
     virtual CaretComponent* createCaretComponent (Component* keyFocusOwner);
 
@@ -319,7 +319,7 @@ public:
     virtual AttributedString createFileChooserHeaderText (const String& title,
                                                           const String& instructions);
 
-    virtual void drawFileBrowserRow (Graphics& g, int width, int height,
+    virtual void drawFileBrowserRow (Graphics&, int width, int height,
                                      const String& filename, Image* icon,
                                      const String& fileSizeDescription,
                                      const String& fileTimeDescription,
@@ -338,18 +338,18 @@ public:
                                              Button* goUpButton);
 
     //==============================================================================
-    virtual void drawBubble (Graphics& g, BubbleComponent&,
+    virtual void drawBubble (Graphics&, BubbleComponent&,
                              const Point<float>& tip, const Rectangle<float>& body);
 
     //==============================================================================
-    virtual void drawLasso (Graphics& g, Component& lassoComp);
+    virtual void drawLasso (Graphics&, Component& lassoComp);
 
     //==============================================================================
     /** Fills the background of a popup menu component. */
-    virtual void drawPopupMenuBackground (Graphics& g, int width, int height);
+    virtual void drawPopupMenuBackground (Graphics&, int width, int height);
 
     /** Draws one of the items in a popup menu. */
-    virtual void drawPopupMenuItem (Graphics& g,
+    virtual void drawPopupMenuItem (Graphics&,
                                     int width, int height,
                                     bool isSeparator,
                                     bool isActive,
@@ -364,7 +364,7 @@ public:
     /** Returns the size and style of font to use in popup menus. */
     virtual Font getPopupMenuFont();
 
-    virtual void drawPopupMenuUpDownArrow (Graphics& g,
+    virtual void drawPopupMenuUpDownArrow (Graphics&,
                                            int width, int height,
                                            bool isScrollUpArrow);
 
@@ -377,7 +377,7 @@ public:
 
     virtual int getMenuWindowFlags();
 
-    virtual void drawMenuBarBackground (Graphics& g, int width, int height,
+    virtual void drawMenuBarBackground (Graphics&, int width, int height,
                                         bool isMouseOverBar,
                                         MenuBarComponent& menuBar);
 
@@ -385,7 +385,7 @@ public:
 
     virtual Font getMenuBarFont (MenuBarComponent& menuBar, int itemIndex, const String& itemText);
 
-    virtual void drawMenuBarItem (Graphics& g,
+    virtual void drawMenuBarItem (Graphics&,
                                   int width, int height,
                                   int itemIndex,
                                   const String& itemText,
@@ -395,7 +395,7 @@ public:
                                   MenuBarComponent& menuBar);
 
     //==============================================================================
-    virtual void drawComboBox (Graphics& g, int width, int height,
+    virtual void drawComboBox (Graphics&, int width, int height,
                                bool isButtonDown,
                                int buttonX, int buttonY,
                                int buttonW, int buttonH,
@@ -413,7 +413,7 @@ public:
     virtual Font getLabelFont (Label&);
 
     //==============================================================================
-    virtual void drawLinearSlider (Graphics& g,
+    virtual void drawLinearSlider (Graphics&,
                                    int x, int y,
                                    int width, int height,
                                    float sliderPos,
@@ -422,7 +422,7 @@ public:
                                    const Slider::SliderStyle style,
                                    Slider& slider);
 
-    virtual void drawLinearSliderBackground (Graphics& g,
+    virtual void drawLinearSliderBackground (Graphics&,
                                              int x, int y,
                                              int width, int height,
                                              float sliderPos,
@@ -431,7 +431,7 @@ public:
                                              const Slider::SliderStyle style,
                                              Slider& slider);
 
-    virtual void drawLinearSliderThumb (Graphics& g,
+    virtual void drawLinearSliderThumb (Graphics&,
                                         int x, int y,
                                         int width, int height,
                                         float sliderPos,
@@ -442,7 +442,7 @@ public:
 
     virtual int getSliderThumbRadius (Slider& slider);
 
-    virtual void drawRotarySlider (Graphics& g,
+    virtual void drawRotarySlider (Graphics&,
                                    int x, int y,
                                    int width, int height,
                                    float sliderPosProportional,
@@ -461,7 +461,7 @@ public:
     //==============================================================================
     virtual void getTooltipSize (const String& tipText, int& width, int& height);
 
-    virtual void drawTooltip (Graphics& g, const String& text, int width, int height);
+    virtual void drawTooltip (Graphics&, const String& text, int width, int height);
 
     //==============================================================================
     virtual Button* createFilenameComponentBrowseButton (const String& text);
@@ -470,33 +470,33 @@ public:
                                           ComboBox* filenameBox, Button* browseButton);
 
     //==============================================================================
-    virtual void drawConcertinaPanelHeader (Graphics& g, const Rectangle<int>& area,
+    virtual void drawConcertinaPanelHeader (Graphics&, const Rectangle<int>& area,
                                             bool isMouseOver, bool isMouseDown,
-                                            ConcertinaPanel& concertina, Component& panel);
+                                            ConcertinaPanel&, Component& panel);
 
     //==============================================================================
-    virtual void drawCornerResizer (Graphics& g,
+    virtual void drawCornerResizer (Graphics&,
                                     int w, int h,
                                     bool isMouseOver,
                                     bool isMouseDragging);
 
-    virtual void drawResizableFrame (Graphics& g,
+    virtual void drawResizableFrame (Graphics&,
                                     int w, int h,
-                                    const BorderSize<int>& borders);
+                                    const BorderSize<int>&);
 
     //==============================================================================
-    virtual void fillResizableWindowBackground (Graphics& g, int w, int h,
-                                                const BorderSize<int>& border,
+    virtual void fillResizableWindowBackground (Graphics&, int w, int h,
+                                                const BorderSize<int>&,
                                                 ResizableWindow& window);
 
-    virtual void drawResizableWindowBorder (Graphics& g,
+    virtual void drawResizableWindowBorder (Graphics&,
                                             int w, int h,
                                             const BorderSize<int>& border,
                                             ResizableWindow& window);
 
     //==============================================================================
     virtual void drawDocumentWindowTitleBar (DocumentWindow& window,
-                                             Graphics& g, int w, int h,
+                                             Graphics&, int w, int h,
                                              int titleSpaceX, int titleSpaceW,
                                              const Image* icon,
                                              bool drawTitleTextOnLeft);
@@ -517,14 +517,14 @@ public:
     virtual DropShadower* createDropShadowerForComponent (Component* component);
 
     //==============================================================================
-    virtual void drawStretchableLayoutResizerBar (Graphics& g,
+    virtual void drawStretchableLayoutResizerBar (Graphics&,
                                                   int w, int h,
                                                   bool isVerticalBar,
                                                   bool isMouseOver,
                                                   bool isMouseDragging);
 
     //==============================================================================
-    virtual void drawGroupComponentOutline (Graphics& g, int w, int h,
+    virtual void drawGroupComponentOutline (Graphics&, int w, int h,
                                             const String& text,
                                             const Justification& position,
                                             GroupComponent& group);
@@ -535,61 +535,62 @@ public:
     virtual int getTabButtonBestWidth (TabBarButton&, int tabDepth);
     virtual Rectangle<int> getTabButtonExtraComponentBounds (const TabBarButton&, Rectangle<int>& textArea, Component& extraComp);
 
-    virtual void drawTabButton (TabBarButton&, Graphics& g, bool isMouseOver, bool isMouseDown);
-    virtual void drawTabButtonText (TabBarButton&, Graphics& g, bool isMouseOver, bool isMouseDown);
-    virtual void drawTabAreaBehindFrontButton (TabbedButtonBar&, Graphics& g, int w, int h);
+    virtual void drawTabButton (TabBarButton&, Graphics&, bool isMouseOver, bool isMouseDown);
+    virtual void drawTabButtonText (TabBarButton&, Graphics&, bool isMouseOver, bool isMouseDown);
+    virtual void drawTabbedButtonBarBackground (TabbedButtonBar&, Graphics&);
+    virtual void drawTabAreaBehindFrontButton (TabbedButtonBar&, Graphics&, int w, int h);
 
     virtual void createTabButtonShape (TabBarButton&, Path& path,  bool isMouseOver, bool isMouseDown);
-    virtual void fillTabButtonShape (TabBarButton&, Graphics& g, const Path& path, bool isMouseOver, bool isMouseDown);
+    virtual void fillTabButtonShape (TabBarButton&, Graphics&, const Path& path, bool isMouseOver, bool isMouseDown);
 
     virtual Button* createTabBarExtrasButton();
 
     //==============================================================================
-    virtual void drawImageButton (Graphics& g, Image* image,
+    virtual void drawImageButton (Graphics&, Image* image,
                                   int imageX, int imageY, int imageW, int imageH,
                                   const Colour& overlayColour,
                                   float imageOpacity,
                                   ImageButton& button);
 
     //==============================================================================
-    virtual void drawTableHeaderBackground (Graphics& g, TableHeaderComponent& header);
+    virtual void drawTableHeaderBackground (Graphics&, TableHeaderComponent&);
 
-    virtual void drawTableHeaderColumn (Graphics& g, const String& columnName, int columnId,
+    virtual void drawTableHeaderColumn (Graphics&, const String& columnName, int columnId,
                                         int width, int height,
                                         bool isMouseOver, bool isMouseDown,
                                         int columnFlags);
 
     //==============================================================================
-    virtual void paintToolbarBackground (Graphics& g, int width, int height, Toolbar& toolbar);
+    virtual void paintToolbarBackground (Graphics&, int width, int height, Toolbar& toolbar);
 
     virtual Button* createToolbarMissingItemsButton (Toolbar& toolbar);
 
-    virtual void paintToolbarButtonBackground (Graphics& g, int width, int height,
+    virtual void paintToolbarButtonBackground (Graphics&, int width, int height,
                                                bool isMouseOver, bool isMouseDown,
                                                ToolbarItemComponent& component);
 
-    virtual void paintToolbarButtonLabel (Graphics& g, int x, int y, int width, int height,
+    virtual void paintToolbarButtonLabel (Graphics&, int x, int y, int width, int height,
                                           const String& text, ToolbarItemComponent& component);
 
     //==============================================================================
-    virtual void drawPropertyPanelSectionHeader (Graphics& g, const String& name,
+    virtual void drawPropertyPanelSectionHeader (Graphics&, const String& name,
                                                  bool isOpen, int width, int height);
 
-    virtual void drawPropertyComponentBackground (Graphics& g, int width, int height,
+    virtual void drawPropertyComponentBackground (Graphics&, int width, int height,
                                                   PropertyComponent& component);
 
-    virtual void drawPropertyComponentLabel (Graphics& g, int width, int height,
+    virtual void drawPropertyComponentLabel (Graphics&, int width, int height,
                                              PropertyComponent& component);
 
     virtual Rectangle<int> getPropertyComponentContentPosition (PropertyComponent& component);
 
     //==============================================================================
-    virtual void drawCallOutBoxBackground (CallOutBox& box, Graphics& g, const Path& path, Image& cachedImage);
+    virtual void drawCallOutBoxBackground (CallOutBox& box, Graphics&, const Path& path, Image& cachedImage);
 
     //==============================================================================
-    virtual void drawLevelMeter (Graphics& g, int width, int height, float level);
+    virtual void drawLevelMeter (Graphics&, int width, int height, float level);
 
-    virtual void drawKeymapChangeButton (Graphics& g, int width, int height, Button& button, const String& keyDescription);
+    virtual void drawKeymapChangeButton (Graphics&, int width, int height, Button& button, const String& keyDescription);
 
     //==============================================================================
     /** Plays the system's default 'beep' noise, to alert the user about something very important.
@@ -611,7 +612,7 @@ public:
         sharp, and it fades towards the centre; if sharpEdgeOnOutside is false, then
         the centre edges are sharp and it fades towards the outside.
     */
-    static void drawBevel (Graphics& g,
+    static void drawBevel (Graphics&,
                             int x, int y, int width, int height,
                             int bevelThickness,
                             const Colour& topLeftColour = Colours::white,
@@ -620,20 +621,20 @@ public:
                             bool sharpEdgeOnOutside = true);
 
     /** Utility function to draw a shiny, glassy circle (for round LED-type buttons). */
-    static void drawGlassSphere (Graphics& g,
+    static void drawGlassSphere (Graphics&,
                                  float x, float y,
                                  float diameter,
                                  const Colour& colour,
                                  float outlineThickness) noexcept;
 
-    static void drawGlassPointer (Graphics& g,
+    static void drawGlassPointer (Graphics&,
                                   float x, float y,
                                   float diameter,
                                   const Colour& colour, float outlineThickness,
                                   int direction) noexcept;
 
     /** Utility function to draw a shiny, glassy oblong (for text buttons). */
-    static void drawGlassLozenge (Graphics& g,
+    static void drawGlassLozenge (Graphics&,
                                   float x, float y,
                                   float width, float height,
                                   const Colour& colour,
@@ -659,7 +660,7 @@ private:
 
     bool useNativeAlertWindows;
 
-    void drawShinyButtonShape (Graphics& g,
+    void drawShinyButtonShape (Graphics&,
                                float x, float y, float w, float h, float maxCornerSize,
                                const Colour& baseColour,
                                float strokeWidth,

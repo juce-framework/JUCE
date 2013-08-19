@@ -296,6 +296,8 @@ public:
 
     //==============================================================================
     /** @internal */
+    void paint (Graphics&) override;
+    /** @internal */
     void resized() override;
     /** @internal */
     void lookAndFeelChanged() override;

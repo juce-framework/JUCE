@@ -151,8 +151,7 @@ class TabbedButtonBar::BehindFrontTabComp  : public Component,
                                              public ButtonListener // (can't use Button::Listener due to idiotic VC2005 bug)
 {
 public:
-    BehindFrontTabComp (TabbedButtonBar& owner_)
-        : owner (owner_)
+    BehindFrontTabComp (TabbedButtonBar& tb)  : owner (tb)
     {
         setInterceptsMouseClicks (false, false);
     }
@@ -353,6 +352,11 @@ void TabbedButtonBar::lookAndFeelChanged()
 {
     extraTabsButton = nullptr;
     resized();
+}
+
+void TabbedButtonBar::paint (Graphics& g)
+{
+    getLookAndFeel().drawTabbedButtonBarBackground (*this, g);
 }
 
 void TabbedButtonBar::resized()
