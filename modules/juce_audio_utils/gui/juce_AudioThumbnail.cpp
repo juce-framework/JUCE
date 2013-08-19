@@ -148,7 +148,7 @@ public:
         reader = nullptr;
     }
 
-    int useTimeSlice()
+    int useTimeSlice() override
     {
         if (isFullyLoaded())
         {

@@ -233,7 +233,7 @@ public:
         return true;
     }
 
-    int useTimeSlice()
+    int useTimeSlice() override
     {
         return writePendingData();
     }

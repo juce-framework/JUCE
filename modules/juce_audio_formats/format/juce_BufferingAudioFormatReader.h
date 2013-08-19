@@ -83,7 +83,7 @@ private:
     OwnedArray<BufferedBlock> blocks;
 
     BufferedBlock* getBlockContaining (int64 pos) const noexcept;
-    int useTimeSlice();
+    int useTimeSlice() override;
     bool readNextBufferChunk();
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (BufferingAudioReader)
