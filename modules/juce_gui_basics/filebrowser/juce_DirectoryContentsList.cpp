@@ -22,10 +22,8 @@
   ==============================================================================
 */
 
-DirectoryContentsList::DirectoryContentsList (const FileFilter* const fileFilter_,
-                                              TimeSliceThread& thread_)
-   : fileFilter (fileFilter_),
-     thread (thread_),
+DirectoryContentsList::DirectoryContentsList (const FileFilter* f, TimeSliceThread& t)
+   : fileFilter (f), thread (t),
      fileTypeFlags (File::ignoreHiddenFiles | File::findFiles),
      shouldStop (true)
 {
@@ -48,11 +46,6 @@ bool DirectoryContentsList::ignoresHiddenFiles() const
 }
 
 //==============================================================================
-const File& DirectoryContentsList::getDirectory() const
-{
-    return root;
-}
-
 void DirectoryContentsList::setDirectory (const File& directory,
                                           const bool includeDirectories,
                                           const bool includeFiles)
@@ -115,11 +108,6 @@ void DirectoryContentsList::refresh()
 }
 
 //==============================================================================
-int DirectoryContentsList::getNumFiles() const
-{
-    return files.size();
-}
-
 bool DirectoryContentsList::getFileInfo (const int index,
                                          FileInfo& result) const
 {
@@ -217,29 +205,30 @@ bool DirectoryContentsList::checkNextFile (bool& hasChanged)
     return false;
 }
 
-int DirectoryContentsList::compareElements (const DirectoryContentsList::FileInfo* const first,
-                                            const DirectoryContentsList::FileInfo* const second)
+struct FileInfoComparator
 {
-   #if JUCE_WINDOWS
-    if (first->isDirectory != second->isDirectory)
-        return first->isDirectory ? -1 : 1;
-   #endif
+    static int compareElements (const DirectoryContentsList::FileInfo* const first,
+                                const DirectoryContentsList::FileInfo* const second)
+    {
+       #if JUCE_WINDOWS
+        if (first->isDirectory != second->isDirectory)
+            return first->isDirectory ? -1 : 1;
+       #endif
 
-    return first->filename.compareIgnoreCase (second->filename);
-}
+        return first->filename.compareIgnoreCase (second->filename);
+    }
+};
 
-bool DirectoryContentsList::addFile (const File& file,
-                                     const bool isDir,
+bool DirectoryContentsList::addFile (const File& file, const bool isDir,
                                      const int64 fileSize,
-                                     const Time modTime,
-                                     const Time creationTime,
+                                     Time modTime, Time creationTime,
                                      const bool isReadOnly)
 {
     if (fileFilter == nullptr
          || ((! isDir) && fileFilter->isFileSuitable (file))
          || (isDir && fileFilter->isDirectorySuitable (file)))
     {
-        ScopedPointer <FileInfo> info (new FileInfo());
+        ScopedPointer<FileInfo> info (new FileInfo());
 
         info->filename = file.getFileName();
         info->fileSize = fileSize;
@@ -254,7 +243,8 @@ bool DirectoryContentsList::addFile (const File& file,
             if (files.getUnchecked(i)->filename == info->filename)
                 return false;
 
-        files.addSorted (*this, info.release());
+        FileInfoComparator comp;
+        files.addSorted (comp, info.release());
         return true;
     }
 

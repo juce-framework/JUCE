@@ -53,10 +53,9 @@ public:
         listeners and update them when the list changes.
 
         @param fileFilter       an optional filter to select which files are
-                                included in the list. If this is 0, then all files
-                                and directories are included. Make sure that the
-                                filter doesn't get deleted during the lifetime of this
-                                object
+                                included in the list. If this is nullptr, then all files
+                                and directories are included. Make sure that the filter
+                                doesn't get deleted during the lifetime of this object
         @param threadToUse      a thread object that this list can use
                                 to scan for files as a background task. Make sure
                                 that the thread you give it has been started, or you
@@ -70,6 +69,9 @@ public:
 
 
     //==============================================================================
+    /** Returns the directory that's currently being used. */
+    const File& getDirectory() const noexcept               { return root; }
+
     /** Sets the directory to look in for files.
 
         If the directory that's passed in is different to the current one, this will
@@ -79,8 +81,15 @@ public:
                        bool includeDirectories,
                        bool includeFiles);
 
-    /** Returns the directory that's currently being used. */
-    const File& getDirectory() const;
+    /** Returns true if this list contains directories.
+        @see setDirectory
+    */
+    bool isFindingDirectories() const noexcept              { return (fileTypeFlags & File::findDirectories) != 0; }
+
+    /** Returns true if this list contains files.
+        @see setDirectory
+    */
+    bool isFindingFiles() const noexcept                    { return (fileTypeFlags & File::findFiles) != 0; }
 
     /** Clears the list, and stops the thread scanning for files. */
     void clear();
@@ -92,7 +101,6 @@ public:
     bool isStillLoading() const;
 
     /** Tells the list whether or not to ignore hidden files.
-
         By default these are ignored.
     */
     void setIgnoresHiddenFiles (bool shouldIgnoreHiddenFiles);
@@ -121,13 +129,11 @@ public:
         int64 fileSize;
 
         /** File modification time.
-
             As supplied by File::getLastModificationTime().
         */
         Time modificationTime;
 
         /** File creation time.
-
             As supplied by File::getCreationTime().
         */
         Time creationTime;
@@ -142,15 +148,14 @@ public:
     //==============================================================================
     /** Returns the number of files currently available in the list.
 
-        The info about one of these files can be retrieved with getFileInfo() or
-        getFile().
+        The info about one of these files can be retrieved with getFileInfo() or getFile().
 
         Obviously as the background thread runs and scans the directory for files, this
         number will change.
 
         @see getFileInfo, getFile
     */
-    int getNumFiles() const;
+    int getNumFiles() const noexcept                        { return files.size(); }
 
     /** Returns the cached information about one of the files in the list.
 
@@ -173,20 +178,16 @@ public:
     File getFile (int index) const;
 
     /** Returns the file filter being used.
-
         The filter is specified in the constructor.
     */
-    const FileFilter* getFilter() const                     { return fileFilter; }
+    const FileFilter* getFilter() const noexcept            { return fileFilter; }
 
     /** Returns true if the list contains the specified file. */
     bool contains (const File&) const;
 
     //==============================================================================
     /** @internal */
-    TimeSliceThread& getTimeSliceThread()                   { return thread; }
-    /** @internal */
-    static int compareElements (const DirectoryContentsList::FileInfo* first,
-                                const DirectoryContentsList::FileInfo* second);
+    TimeSliceThread& getTimeSliceThread() const noexcept    { return thread; }
 
 private:
     File root;
@@ -195,19 +196,18 @@ private:
     int fileTypeFlags;
 
     CriticalSection fileListLock;
-    OwnedArray <FileInfo> files;
+    OwnedArray<FileInfo> files;
 
-    ScopedPointer <DirectoryIterator> fileFindHandle;
+    ScopedPointer<DirectoryIterator> fileFindHandle;
     bool volatile shouldStop;
 
-    int useTimeSlice();
+    int useTimeSlice() override;
     void stopSearching();
     void changed();
     bool checkNextFile (bool& hasChanged);
-    bool addFile (const File& file, bool isDir,
-                  const int64 fileSize, const Time modTime,
-                  const Time creationTime, bool isReadOnly);
-    void setTypeFlags (int newFlags);
+    bool addFile (const File&, bool isDir, int64 fileSize, Time modTime,
+                  Time creationTime, bool isReadOnly);
+    void setTypeFlags (int);
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DirectoryContentsList)
 };
