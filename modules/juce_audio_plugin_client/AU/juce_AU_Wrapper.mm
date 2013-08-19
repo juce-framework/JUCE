@@ -100,8 +100,15 @@ class JuceAUBaseClass   : public AUMIDIEffectBase
 public:
     JuceAUBaseClass (AudioComponentInstance comp)  : AUMIDIEffectBase (comp, false) {}
 
-    using AUMIDIBase::MIDIEvent;
-    using AUMIDIBase::SysEx;
+    OSStatus MIDIEvent (UInt32 inStatus, UInt32 inData1, UInt32 inData2, UInt32 inOffsetSampleFrame) override
+    {
+        return AUMIDIBase::MIDIEvent (inStatus, inData1, inData2, inOffsetSampleFrame);
+    }
+
+    OSStatus SysEx (const UInt8* inData, UInt32 inLength) override
+    {
+        return AUMIDIBase::SysEx (inData, inLength);
+    }
 };
 
 
