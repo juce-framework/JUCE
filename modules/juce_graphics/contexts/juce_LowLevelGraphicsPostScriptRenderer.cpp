@@ -105,8 +105,7 @@ void LowLevelGraphicsPostScriptRenderer::addTransform (const AffineTransform& /*
     jassertfalse;
 }
 
-float LowLevelGraphicsPostScriptRenderer::getScaleFactor()                 { return 1.0f; }
-float LowLevelGraphicsPostScriptRenderer::getTargetDeviceScaleFactor()     { return 1.0f; }
+float LowLevelGraphicsPostScriptRenderer::getPhysicalPixelScaleFactor()    { return 1.0f; }
 
 bool LowLevelGraphicsPostScriptRenderer::clipToRectangle (const Rectangle<int>& r)
 {

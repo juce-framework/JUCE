@@ -721,16 +721,21 @@ bool Component::isOpaque() const noexcept
 class StandardCachedComponentImage  : public CachedComponentImage
 {
 public:
-    StandardCachedComponentImage (Component& c) noexcept : owner (c) {}
+    StandardCachedComponentImage (Component& c) noexcept : owner (c), scale (1.0f) {}
 
     void paint (Graphics& g) override
     {
-        const Rectangle<int> bounds (owner.getLocalBounds());
+        scale = g.getInternalContext().getPhysicalPixelScaleFactor();
+        const Rectangle<int> compBounds (owner.getLocalBounds());
+        const Rectangle<int> imageBounds (compBounds * scale);
 
-        if (image.isNull() || image.getBounds() != bounds)
+        if (image.isNull() || image.getBounds() != imageBounds)
         {
-            image = Image (owner.isOpaque() ? Image::RGB : Image::ARGB,
-                           jmax (1, bounds.getWidth()), jmax (1, bounds.getHeight()), ! owner.isOpaque());
+            image = Image (owner.isOpaque() ? Image::RGB
+                                            : Image::ARGB,
+                           jmax (1, imageBounds.getWidth()),
+                           jmax (1, imageBounds.getHeight()),
+                           ! owner.isOpaque());
 
             validArea.clear();
         }
@@ -747,28 +752,31 @@ public:
                 if (! owner.isOpaque())
                 {
                     lg.setFill (Colours::transparentBlack);
-                    lg.fillRect (bounds, true);
+                    lg.fillRect (imageBounds, true);
                     lg.setFill (Colours::black);
                 }
 
+                lg.addTransform (AffineTransform::scale (scale));
                 owner.paintEntireComponent (imG, true);
             }
         }
 
-        validArea = bounds;
+        validArea = imageBounds;
 
         g.setColour (Colours::black.withAlpha (owner.getAlpha()));
-        g.drawImageAt (image, 0, 0);
+        g.drawImage (image, 0, 0, compBounds.getWidth(), compBounds.getHeight(),
+                     0, 0, imageBounds.getWidth(), imageBounds.getHeight(), false);
     }
 
     bool invalidateAll() override                            { validArea.clear(); return true; }
-    bool invalidate (const Rectangle<int>& area) override    { validArea.subtract (area); return true; }
+    bool invalidate (const Rectangle<int>& area) override    { validArea.subtract (area * scale); return true; }
     void releaseResources() override                         { image = Image::null; }
 
 private:
     Image image;
     RectangleList<int> validArea;
     Component& owner;
+    float scale;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (StandardCachedComponentImage)
 };
@@ -1936,10 +1944,12 @@ void Component::paintEntireComponent (Graphics& g, const bool ignoreAlphaLevel)
 
     if (effect != nullptr)
     {
-        const float scale = g.getInternalContext().getTargetDeviceScaleFactor();
+        const float scale = g.getInternalContext().getPhysicalPixelScaleFactor();
+
+        const Rectangle<int> bounds (getLocalBounds() * scale);
 
         Image effectImage (flags.opaqueFlag ? Image::RGB : Image::ARGB,
-                           (int) (scale * getWidth()), (int) (scale * getHeight()), ! flags.opaqueFlag);
+                           bounds.getWidth(), bounds.getHeight(), ! flags.opaqueFlag);
         {
             Graphics g2 (effectImage);
             g2.addTransform (AffineTransform::scale (scale));

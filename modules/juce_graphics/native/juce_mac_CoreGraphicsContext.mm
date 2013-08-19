@@ -123,10 +123,10 @@ ImagePixelData::Ptr NativeImageType::create (Image::PixelFormat format, int widt
 }
 
 //==============================================================================
-CoreGraphicsContext::CoreGraphicsContext (CGContextRef context_, const float flipHeight_, const float targetScale_)
-    : context (context_),
-      flipHeight (flipHeight_),
-      targetScale (targetScale_),
+CoreGraphicsContext::CoreGraphicsContext (CGContextRef c, const float h, const float scale)
+    : context (c),
+      flipHeight (h),
+      targetScale (scale),
       lastClipRectIsValid (false),
       state (new SavedState())
 {
@@ -167,12 +167,18 @@ void CoreGraphicsContext::addTransform (const AffineTransform& transform)
                                     .translated (0, -flipHeight)
                                     .scaled (1.0f, -1.0f));
     lastClipRectIsValid = false;
+
+    jassert (getPhysicalPixelScaleFactor() > 0.0f);
+    jassert (getPhysicalPixelScaleFactor() > 0.0f);
 }
 
-float CoreGraphicsContext::getScaleFactor()
+float CoreGraphicsContext::getPhysicalPixelScaleFactor()
 {
-    CGAffineTransform t = CGContextGetCTM (context);
-    return (float) juce_hypot (t.a + t.c, t.b + t.d);
+    const CGAffineTransform t = CGContextGetCTM (context);
+
+    return targetScale * (float) (juce_hypot (t.a, t.c) + juce_hypot (t.b, t.d)) / 2.0f;
+
+//    return targetScale * (float) (t.a + t.d) / 2.0f;
 }
 
 bool CoreGraphicsContext::clipToRectangle (const Rectangle<int>& r)

@@ -384,7 +384,7 @@ void Graphics::strokePath (const Path& path,
                            const AffineTransform& transform) const
 {
     Path stroke;
-    strokeType.createStrokedPath (stroke, path, transform, context.getScaleFactor());
+    strokeType.createStrokedPath (stroke, path, transform, context.getPhysicalPixelScaleFactor());
     fillPath (stroke);
 }
 

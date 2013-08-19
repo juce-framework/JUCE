@@ -37,8 +37,7 @@ public:
 
     void setOrigin (int x, int y) override;
     void addTransform (const AffineTransform&) override;
-    float getScaleFactor() override;
-    float getTargetDeviceScaleFactor() override  { return targetScale; }
+    float getPhysicalPixelScaleFactor() override;
     bool clipToRectangle (const Rectangle<int>&) override;
     bool clipToRectangleList (const RectangleList<int>&) override;
     void excludeClipRectangle (const Rectangle<int>&) override;

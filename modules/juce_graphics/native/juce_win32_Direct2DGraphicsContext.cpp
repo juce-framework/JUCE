@@ -92,7 +92,7 @@ public:
         currentState->transform = transform.followedBy (currentState->transform);
     }
 
-    float getScaleFactor()
+    float getPhysicalPixelScaleFactor()
     {
         return currentState->transform.getScaleFactor();
     }

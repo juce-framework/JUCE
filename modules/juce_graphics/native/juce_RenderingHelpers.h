@@ -86,12 +86,9 @@ public:
         }
     }
 
-    float getScaleFactor() const noexcept
+    float getPhysicalPixelScaleFactor() const noexcept
     {
-        return isOnlyTranslated ? 1.0f
-                                : (isRotated ? complexTransform.getScaleFactor()
-                                             : jmax (complexTransform.mat00,
-                                                     complexTransform.mat11));
+        return isOnlyTranslated ? 1.0f : complexTransform.getScaleFactor();
     }
 
     void moveOriginInDeviceSpace (Point<int> delta) noexcept
@@ -2182,15 +2179,17 @@ public:
         if (clip != nullptr)
         {
             if (transform.isOnlyTranslated)
+            {
                 fillTargetRect (transform.translated (r), replaceContents);
+            }
+            else if (! transform.isRotated)
+            {
+                fillTargetRect (transform.transformed (r), replaceContents);
+            }
             else
             {
                 jassert (! replaceContents); // not implemented..
-
-                if (! transform.isRotated)
-                    fillTargetRect (transform.transformed (r.toFloat()));
-                else
-                    fillRectAsPath (r);
+                fillRectAsPath (r);
             }
         }
     }
@@ -2566,8 +2565,7 @@ public:
     bool isVectorDevice() const override                                         { return false; }
     void setOrigin (int x, int y) override                                       { stack->transform.setOrigin (Point<int> (x, y)); }
     void addTransform (const AffineTransform& t) override                        { stack->transform.addTransform (t); }
-    float getScaleFactor() override                                              { return stack->transform.getScaleFactor(); }
-    float getTargetDeviceScaleFactor() override                                  { return stack->transform.getScaleFactor(); }
+    float getPhysicalPixelScaleFactor() override                                 { return stack->transform.getPhysicalPixelScaleFactor(); }
     Rectangle<int> getClipBounds() const override                                { return stack->getClipBounds(); }
     bool isClipEmpty() const override                                            { return stack->clip == nullptr; }
     bool clipRegionIntersects (const Rectangle<int>& r) override                 { return stack->clipRegionIntersects (r); }
