@@ -517,6 +517,10 @@ namespace WavFileHelpers
         uint16 data2;
         uint16 data3;
         uint8  data4[8];
+
+        bool operator== (const ExtensibleWavSubFormat& other) const noexcept   { return memcmp (this, &other, sizeof (*this)) == 0; }
+        bool operator!= (const ExtensibleWavSubFormat& other) const noexcept   { return ! operator== (other); }
+
     } JUCE_PACKED;
 
     static const ExtensibleWavSubFormat pcmFormat       = { 0x00000001, 0x0000, 0x0010, { 0x80, 0x00, 0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71 } };
@@ -639,9 +643,9 @@ public:
                             subFormat.data3 = (uint16) input->readShort();
                             input->read (subFormat.data4, sizeof (subFormat.data4));
 
-                            if (memcmp (&subFormat, &pcmFormat, sizeof (subFormat)) != 0
-                                 && memcmp (&subFormat, &IEEEFloatFormat, sizeof (subFormat)) != 0
-                                 && memcmp (&subFormat, &ambisonicFormat, sizeof (subFormat)) != 0)
+                            if (subFormat == IEEEFloatFormat)
+                                usesFloatingPointData = true;
+                            else if (subFormat != pcmFormat && subFormat != ambisonicFormat)
                                 bytesPerFrame = 0;
                         }
                     }
