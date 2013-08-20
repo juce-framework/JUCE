@@ -171,7 +171,7 @@ public:
         virtual ~Listener()  {}
 
         /** Called when the button is clicked. */
-        virtual void buttonClicked (Button* button) = 0;
+        virtual void buttonClicked (Button*) = 0;
 
         /** Called when the button's state changes. */
         virtual void buttonStateChanged (Button*)  {}
@@ -281,10 +281,10 @@ public:
 
         @see TooltipClient, TooltipWindow
     */
-    void setTooltip (const String& newTooltip);
+    void setTooltip (const String& newTooltip) override;
 
     // (implementation of the TooltipClient method)
-    String getTooltip();
+    String getTooltip() override;
 
 
     //==============================================================================

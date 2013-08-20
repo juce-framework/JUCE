@@ -161,9 +161,7 @@ public:
     String getItemText (int index) const;
 
     /** Returns the ID for one of the items in the list.
-
         Note that this doesn't include headers or separators.
-
         @param index    the item's index from 0 to (getNumItems() - 1)
     */
     int getItemId (int index) const noexcept;
@@ -318,7 +316,7 @@ public:
 
     //==============================================================================
     /** Gives the ComboBox a tooltip. */
-    void setTooltip (const String& newTooltip);
+    void setTooltip (const String& newTooltip) override;
 
 
     //==============================================================================

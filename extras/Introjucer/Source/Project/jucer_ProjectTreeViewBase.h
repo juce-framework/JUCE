@@ -65,32 +65,32 @@ public:
     virtual ProjectTreeViewBase* findTreeViewItem (const Project::Item& itemToFind);
 
     //==============================================================================
-    void valueTreePropertyChanged (ValueTree& tree, const Identifier& property);
-    void valueTreeChildAdded (ValueTree& parentTree, ValueTree& childWhichHasBeenAdded);
-    void valueTreeChildRemoved (ValueTree& parentTree, ValueTree& childWhichHasBeenRemoved);
-    void valueTreeChildOrderChanged (ValueTree& parentTree);
-    void valueTreeParentChanged (ValueTree& tree);
+    void valueTreePropertyChanged (ValueTree& tree, const Identifier& property) override;
+    void valueTreeChildAdded (ValueTree& parentTree, ValueTree& childWhichHasBeenAdded) override;
+    void valueTreeChildRemoved (ValueTree& parentTree, ValueTree& childWhichHasBeenRemoved) override;
+    void valueTreeChildOrderChanged (ValueTree& parentTree) override;
+    void valueTreeParentChanged (ValueTree& tree) override;
 
     //==============================================================================
-    bool mightContainSubItems();
-    String getUniqueName() const;
-    void itemOpennessChanged (bool isNowOpen);
-    bool canBeSelected() const                  { return true; }
-    String getTooltip();
-    var getDragSourceDescription();
-    void addSubItems();
+    bool mightContainSubItems() override;
+    String getUniqueName() const override;
+    void itemOpennessChanged (bool isNowOpen) override;
+    bool canBeSelected() const override                  { return true; }
+    String getTooltip() override;
+    var getDragSourceDescription() override;
+    void addSubItems() override;
 
     //==============================================================================
     // Drag-and-drop stuff..
-    bool isInterestedInFileDrag (const StringArray& files);
-    void filesDropped (const StringArray& files, int insertIndex);
-    bool isInterestedInDragSource (const DragAndDropTarget::SourceDetails& dragSourceDetails);
-    void itemDropped (const DragAndDropTarget::SourceDetails& dragSourceDetails, int insertIndex);
-    int getMillisecsAllowedForDragGesture();
+    bool isInterestedInFileDrag (const StringArray& files) override;
+    void filesDropped (const StringArray& files, int insertIndex) override;
+    bool isInterestedInDragSource (const DragAndDropTarget::SourceDetails& dragSourceDetails) override;
+    void itemDropped (const DragAndDropTarget::SourceDetails& dragSourceDetails, int insertIndex) override;
+    int getMillisecsAllowedForDragGesture() override;
 
     static void getAllSelectedNodesInTree (Component* componentInTree, OwnedArray <Project::Item>& selectedNodes);
 
-    File getDraggableFile() const      { return getFile(); }
+    File getDraggableFile() const override      { return getFile(); }
 
     //==============================================================================
     Project::Item item;
@@ -102,8 +102,8 @@ protected:
     void treeChildrenChanged (const ValueTree& parentTree);
     virtual ProjectTreeViewBase* createSubItem (const Project::Item& node) = 0;
 
-    Icon getIcon() const           { return item.getIcon().withContrastingColourTo (getBackgroundColour()); }
-    bool isIconCrossedOut() const  { return item.isIconCrossedOut(); }
+    Icon getIcon() const override           { return item.getIcon().withContrastingColourTo (getBackgroundColour()); }
+    bool isIconCrossedOut() const override  { return item.isIconCrossedOut(); }
 
     //==============================================================================
     void triggerAsyncRename (const Project::Item& itemToRename);

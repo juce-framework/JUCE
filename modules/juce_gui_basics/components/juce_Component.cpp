@@ -1946,10 +1946,10 @@ void Component::paintEntireComponent (Graphics& g, const bool ignoreAlphaLevel)
     {
         const float scale = g.getInternalContext().getPhysicalPixelScaleFactor();
 
-        const Rectangle<int> bounds (getLocalBounds() * scale);
+        const Rectangle<int> scaledBounds (getLocalBounds() * scale);
 
         Image effectImage (flags.opaqueFlag ? Image::RGB : Image::ARGB,
-                           bounds.getWidth(), bounds.getHeight(), ! flags.opaqueFlag);
+                           scaledBounds.getWidth(), scaledBounds.getHeight(), ! flags.opaqueFlag);
         {
             Graphics g2 (effectImage);
             g2.addTransform (AffineTransform::scale (scale));
