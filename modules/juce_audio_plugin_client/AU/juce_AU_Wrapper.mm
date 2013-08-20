@@ -94,7 +94,13 @@ static const AudioUnitPropertyID juceFilterObjectPropertyID = 0x1a45ffe9;
 static const short channelConfigs[][2] = { JucePlugin_PreferredChannelConfigurations };
 static const int numChannelConfigs = sizeof (channelConfigs) / sizeof (*channelConfigs);
 
-// Avoids some multiple inheritance complications in the Apple base class code.
+#if JucePlugin_IsSynth
+class JuceAUBaseClass   : public MusicDeviceBase
+{
+public:
+    JuceAUBaseClass (AudioComponentInstance comp)  : MusicDeviceBase (comp, 0, 1) {}
+};
+#else
 class JuceAUBaseClass   : public AUMIDIEffectBase
 {
 public:
@@ -110,6 +116,7 @@ public:
         return AUMIDIBase::SysEx (inData, inLength);
     }
 };
+#endif
 
 
 // This macro can be set if you need to override this internal name for some reason..
