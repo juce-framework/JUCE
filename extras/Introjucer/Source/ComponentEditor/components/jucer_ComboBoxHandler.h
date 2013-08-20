@@ -231,13 +231,13 @@ private:
         {
         }
 
-        void setJustification (const Justification& newJustification)
+        void setJustification (Justification newJustification)
         {
             document.perform (new ComboJustifyChangeAction (component, *document.getComponentLayout(), newJustification),
                               "Change combo box justification");
         }
 
-        const Justification getJustification() const        { return component->getJustificationType(); }
+        Justification getJustification() const        { return component->getJustificationType(); }
 
     private:
         ComboBox* const component;
@@ -246,7 +246,7 @@ private:
         class ComboJustifyChangeAction  : public ComponentUndoableAction <ComboBox>
         {
         public:
-            ComboJustifyChangeAction (ComboBox* const comp, ComponentLayout& layout, const Justification& newState_)
+            ComboJustifyChangeAction (ComboBox* const comp, ComponentLayout& layout, Justification newState_)
                 : ComponentUndoableAction <ComboBox> (comp, layout),
                   newState (newState_),
                   oldState (comp->getJustificationType())

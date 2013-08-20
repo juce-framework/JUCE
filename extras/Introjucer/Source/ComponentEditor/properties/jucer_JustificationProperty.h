@@ -53,9 +53,8 @@ public:
     }
 
     //==============================================================================
-    virtual void setJustification (const Justification& newJustification) = 0;
-    virtual const Justification getJustification() const = 0;
-
+    virtual void setJustification (Justification newJustification) = 0;
+    virtual Justification getJustification() const = 0;
 
     //==============================================================================
     void setIndex (int newIndex)

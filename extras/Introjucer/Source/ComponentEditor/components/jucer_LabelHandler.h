@@ -370,13 +370,13 @@ private:
             document.removeChangeListener (this);
         }
 
-        void setJustification (const Justification& newJustification)
+        void setJustification (Justification newJustification)
         {
             document.perform (new LabelJustifyChangeAction (label, *document.getComponentLayout(), newJustification),
                               "Change Label justification");
         }
 
-        const Justification getJustification() const
+        Justification getJustification() const
         {
             return label->getJustificationType();
         }
@@ -390,7 +390,7 @@ private:
         class LabelJustifyChangeAction  : public ComponentUndoableAction <Label>
         {
         public:
-            LabelJustifyChangeAction (Label* const comp, ComponentLayout& layout, const Justification& newState_)
+            LabelJustifyChangeAction (Label* const comp, ComponentLayout& layout, Justification newState_)
                 : ComponentUndoableAction <Label> (comp, layout),
                   newState (newState_),
                   oldState (comp->getJustificationType())

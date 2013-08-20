@@ -120,12 +120,12 @@ public:
     GlyphArrangement();
 
     /** Takes a copy of another arrangement. */
-    GlyphArrangement (const GlyphArrangement& other);
+    GlyphArrangement (const GlyphArrangement&);
 
     /** Copies another arrangement onto this one.
         To add another arrangement without clearing this one, use addGlyphArrangement().
     */
-    GlyphArrangement& operator= (const GlyphArrangement& other);
+    GlyphArrangement& operator= (const GlyphArrangement&);
 
     /** Destructor. */
     ~GlyphArrangement();
@@ -143,8 +143,7 @@ public:
     PositionedGlyph& getGlyph (int index) const noexcept;
 
     //==============================================================================
-    /** Clears all text from the arrangement and resets it.
-    */
+    /** Clears all text from the arrangement and resets it. */
     void clear();
 
     /** Appends a line of text to the arrangement.
@@ -188,7 +187,7 @@ public:
                            const String& text,
                            float x, float y,
                            float maxLineWidth,
-                           const Justification& horizontalLayout);
+                           Justification horizontalLayout);
 
     /** Tries to fit some text withing a given space.
 
@@ -208,7 +207,7 @@ public:
     void addFittedText (const Font& font,
                         const String& text,
                         float x, float y, float width, float height,
-                        const Justification& layout,
+                        Justification layout,
                         int maximumLinesToUse,
                         float minimumHorizontalScale = 0.7f);
 
@@ -224,23 +223,21 @@ public:
         This uses cached bitmaps so is much faster than the draw (Graphics&, const AffineTransform&)
         method, which renders the glyphs as filled vectors.
     */
-    void draw (const Graphics& g) const;
+    void draw (const Graphics&) const;
 
     /** Draws this glyph arrangement to a graphics context.
 
         This renders the paths as filled vectors, so is far slower than the draw (Graphics&)
         method for non-transformed arrangements.
     */
-    void draw (const Graphics& g, const AffineTransform& transform) const;
+    void draw (const Graphics&, const AffineTransform&) const;
 
     /** Converts the set of glyphs into a path.
-
         @param path     the glyphs' outlines will be appended to this path
     */
     void createPath (Path& path) const;
 
     /** Looks for a glyph that contains the given coordinate.
-
         @returns the index of the glyph, or -1 if none were found.
     */
     int findGlyphIndexAt (float x, float y) const;
@@ -296,7 +293,7 @@ public:
     */
     void justifyGlyphs (int startIndex, int numGlyphs,
                         float x, float y, float width, float height,
-                        const Justification& justification);
+                        Justification justification);
 
 
 private:
@@ -305,7 +302,7 @@ private:
 
     int insertEllipsis (const Font&, float maxXPos, int startIndex, int endIndex);
     int fitLineIntoSpace (int start, int numGlyphs, float x, float y, float w, float h, const Font&,
-                          const Justification&, float minimumHorizontalScale);
+                          Justification, float minimumHorizontalScale);
     void spreadOutLine (int start, int numGlyphs, float targetWidth);
     void drawGlyphUnderline (const Graphics&, const PositionedGlyph&, int, const AffineTransform&) const;
 

@@ -1448,25 +1448,26 @@ int PopupMenu::showWithOptionalCallback (const Options& options, ModalComponentM
     ScopedPointer<ModalComponentManager::Callback> userCallbackDeleter (userCallback);
     ScopedPointer<PopupMenuCompletionCallback> callback (new PopupMenuCompletionCallback());
 
-    Component* window = createWindow (options, &(callback->managerOfChosenCommand));
-    if (window == nullptr)
-        return 0;
+    if (Component* window = createWindow (options, &(callback->managerOfChosenCommand)))
+    {
+        callback->component = window;
 
-    callback->component = window;
+        window->setVisible (true); // (must be called before enterModalState on Windows to avoid DropShadower confusion)
+        window->enterModalState (false, userCallbackDeleter.release());
+        ModalComponentManager::getInstance()->attachCallback (window, callback.release());
 
-    window->setVisible (true); // (must be called before enterModalState on Windows to avoid DropShadower confusion)
-    window->enterModalState (false, userCallbackDeleter.release());
-    ModalComponentManager::getInstance()->attachCallback (window, callback.release());
+        window->toFront (false);  // need to do this after making it modal, or it could
+                                  // be stuck behind other comps that are already modal..
 
-    window->toFront (false);  // need to do this after making it modal, or it could
-                              // be stuck behind other comps that are already modal..
+       #if JUCE_MODAL_LOOPS_PERMITTED
+        if (userCallback == nullptr && canBeModal)
+            return window->runModalLoop();
+       #else
+        jassert (! (userCallback == nullptr && canBeModal));
+       #endif
+    }
 
-   #if JUCE_MODAL_LOOPS_PERMITTED
-    return (userCallback == nullptr && canBeModal) ? window->runModalLoop() : 0;
-   #else
-    jassert (! (userCallback == nullptr && canBeModal));
     return 0;
-   #endif
 }
 
 //==============================================================================

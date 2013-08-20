@@ -176,13 +176,13 @@ private:
             document.removeChangeListener (this);
         }
 
-        void setJustification (const Justification& newJustification)
+        void setJustification (Justification newJustification)
         {
             document.perform (new GroupJustifyChangeAction (group, *document.getComponentLayout(), newJustification),
                               "Change text label position");
         }
 
-        const Justification getJustification() const
+        Justification getJustification() const
         {
             return group->getTextLabelPosition();
         }
@@ -196,7 +196,7 @@ private:
         class GroupJustifyChangeAction  : public ComponentUndoableAction <GroupComponent>
         {
         public:
-            GroupJustifyChangeAction (GroupComponent* const comp, ComponentLayout& layout, const Justification& newState_)
+            GroupJustifyChangeAction (GroupComponent* const comp, ComponentLayout& layout, Justification newState_)
                 : ComponentUndoableAction <GroupComponent> (comp, layout),
                   newState (newState_),
                   oldState (comp->getTextLabelPosition())

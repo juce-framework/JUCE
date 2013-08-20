@@ -279,15 +279,15 @@ public:
         }
     }
 
-    String getTypefaceName() const noexcept                          { return typefaceName; }
+    String getTypefaceName() const noexcept                         { return typefaceName; }
 
     //==============================================================================
-    const Justification& getJustification() const noexcept           { return justification; }
+    Justification getJustification() const noexcept                 { return justification; }
 
     class SetJustifyAction   : public PaintElementUndoableAction <PaintElementText>
     {
     public:
-        SetJustifyAction (PaintElementText* const element, const Justification& newValue_)
+        SetJustifyAction (PaintElementText* const element, Justification newValue_)
             : PaintElementUndoableAction <PaintElementText> (element),
               newValue (newValue_),
               oldValue (element->getJustification())
@@ -312,7 +312,7 @@ public:
         Justification newValue, oldValue;
     };
 
-    void setJustification (const Justification& j, const bool undoable)
+    void setJustification (Justification j, const bool undoable)
     {
         if (justification.getFlags() != j.getFlags())
         {
@@ -516,12 +516,12 @@ private:
             element->getDocument()->removeChangeListener (this);
         }
 
-        void setJustification (const Justification& newJustification)
+        void setJustification (Justification newJustification)
         {
             element->setJustification (newJustification, true);
         }
 
-        const Justification getJustification() const
+        Justification getJustification() const
         {
             return element->getJustification();
         }
