@@ -129,6 +129,13 @@ public:
     */
     void setDefaultBrowseTarget (const File& newDefaultDirectory);
 
+    /** This can be overridden to return a custom location that you want the dialog box
+        to show when the browse button is pushed.
+        The default implementation of this method will return either the current file
+        (if one has been chosen) or the location that was set by setDefaultBrowseTarget().
+    */
+    virtual File getLocationToBrowse();
+
     /** Returns all the entries on the recent files list.
 
         This can be used in conjunction with setRecentlyUsedFilenames() for saving the
@@ -176,7 +183,7 @@ public:
     void removeListener (FilenameComponentListener* listener);
 
     /** Gives the component a tooltip. */
-    void setTooltip (const String& newTooltip);
+    void setTooltip (const String& newTooltip) override;
 
     //==============================================================================
     /** @internal */
@@ -206,7 +213,7 @@ private:
     File defaultBrowseFile;
 
     void comboBoxChanged (ComboBox*) override;
-    void buttonClicked (Button* button) override;
+    void buttonClicked (Button*) override;
     void handleAsyncUpdate() override;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FilenameComponent)

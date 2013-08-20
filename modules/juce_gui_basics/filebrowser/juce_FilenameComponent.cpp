@@ -28,7 +28,7 @@ FilenameComponent::FilenameComponent (const String& name,
                                       const bool isDirectory,
                                       const bool isForSaving,
                                       const String& fileBrowserWildcard,
-                                      const String& enforcedSuffix_,
+                                      const String& suffix,
                                       const String& textWhenNothingSelected)
     : Component (name),
       maxRecentFiles (30),
@@ -36,7 +36,7 @@ FilenameComponent::FilenameComponent (const String& name,
       isSaving (isForSaving),
       isFileDragOver (false),
       wildcard (fileBrowserWildcard),
-      enforcedSuffix (enforcedSuffix_)
+      enforcedSuffix (suffix)
 {
     addAndMakeVisible (&filenameBox);
     filenameBox.setEditableText (canEditFilename);
@@ -96,13 +96,18 @@ void FilenameComponent::setDefaultBrowseTarget (const File& newDefaultDirectory)
     defaultBrowseFile = newDefaultDirectory;
 }
 
+File FilenameComponent::getLocationToBrowse()
+{
+    return getCurrentFile() == File::nonexistent ? defaultBrowseFile
+                                                 : getCurrentFile();
+}
+
 void FilenameComponent::buttonClicked (Button*)
 {
    #if JUCE_MODAL_LOOPS_PERMITTED
     FileChooser fc (isDir ? TRANS ("Choose a new directory")
                           : TRANS ("Choose a new file"),
-                    getCurrentFile() == File::nonexistent ? defaultBrowseFile
-                                                          : getCurrentFile(),
+                    getLocationToBrowse(),
                     wildcard);
 
     if (isDir ? fc.browseForDirectory()
