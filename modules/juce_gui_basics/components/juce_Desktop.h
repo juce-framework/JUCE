@@ -403,14 +403,14 @@ private:
     friend class DeletedAtShutdown;
     friend class TopLevelWindowManager;
 
-    OwnedArray <MouseInputSource> mouseSources;
+    OwnedArray<MouseInputSource> mouseSources;
     bool addMouseInputSource();
 
-    ListenerList <MouseListener> mouseListeners;
-    ListenerList <FocusChangeListener> focusListeners;
+    ListenerList<MouseListener> mouseListeners;
+    ListenerList<FocusChangeListener> focusListeners;
 
-    Array <Component*> desktopComponents;
-    Array <ComponentPeer*> peers;
+    Array<Component*> desktopComponents;
+    Array<ComponentPeer*> peers;
 
     ScopedPointer<Displays> displays;
 
@@ -436,7 +436,7 @@ private:
 
     void timerCallback() override;
     void resetTimer();
-    ListenerList <MouseListener>& getMouseListeners();
+    ListenerList<MouseListener>& getMouseListeners();
     MouseInputSource* getOrCreateMouseInputSource (int touchIndex);
 
     void addDesktopComponent (Component*);

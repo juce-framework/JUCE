@@ -413,7 +413,7 @@ bool operator!= (const Desktop::Displays::Display& d1, const Desktop::Displays::
 
 void Desktop::Displays::init (Desktop& desktop)
 {
-    findDisplays (desktop.masterScaleFactor);
+    findDisplays (desktop.getGlobalScaleFactor());
     jassert (displays.size() > 0);
 }
 
@@ -483,7 +483,6 @@ void Desktop::setGlobalScaleFactor (float newScaleFactor) noexcept
     if (masterScaleFactor != newScaleFactor)
     {
         masterScaleFactor = newScaleFactor;
-
         displays->refresh();
     }
 }

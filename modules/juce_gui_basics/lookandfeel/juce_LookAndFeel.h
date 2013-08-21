@@ -247,7 +247,7 @@ public:
         @param isMouseOverButton    whether the mouse is currently over the button (also true if it's held down)
         @param isButtonDown         whether the mouse button's held down
     */
-    virtual void drawScrollbarButton (Graphics&,
+    virtual void drawScrollbarButton (Graphics& g,
                                       ScrollBar& scrollbar,
                                       int width, int height,
                                       int buttonDirection,
@@ -272,7 +272,7 @@ public:
                                     currently dragging the thumb
         @param isMouseDown          whether the mouse is currently dragging the scrollbar
     */
-    virtual void drawScrollbar (Graphics&,
+    virtual void drawScrollbar (Graphics& g,
                                 ScrollBar& scrollbar,
                                 int x, int y,
                                 int width, int height,

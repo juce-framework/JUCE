@@ -109,11 +109,10 @@ public:
     //==============================================================================
     /** Creates an empty hash-map.
 
-        The numberOfSlots parameter specifies the number of hash entries the map will
-        use. This will be the "upperLimit" parameter that is passed to your generateHash()
-        function. The number of hash slots will grow automatically if necessary, or
-        it can be remapped manually using remapTable().
-
+        @param numberOfSlots Specifies the number of hash entries the map will use. This will be
+                            the "upperLimit" parameter that is passed to your generateHash()
+                            function. The number of hash slots will grow automatically if necessary,
+                            or it can be remapped manually using remapTable().
         @param hashFunction An instance of HashFunctionType, which will be copied and
                             stored to use with the HashMap. This parameter can be omitted
                             if HashFunctionType has a default constructor.

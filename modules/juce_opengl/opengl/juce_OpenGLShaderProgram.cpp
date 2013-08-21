@@ -41,7 +41,9 @@ OpenGLShaderProgram::~OpenGLShaderProgram() noexcept
 double OpenGLShaderProgram::getLanguageVersion()
 {
    #if JUCE_OPENGL_ES
-    jassertfalse; // doesn't work in ES
+    // GLES doesn't support this version number, but that shouldn't matter since
+    // on GLES you probably won't need to check it.
+    jassertfalse;
     return 0;
    #else
     return String ((const char*) glGetString (GL_SHADING_LANGUAGE_VERSION))
@@ -66,6 +68,8 @@ bool OpenGLShaderProgram::addShader (const char* const code, GLenum type)
         errorLog = String (infoLog, (size_t) infoLogLength);
 
        #if JUCE_DEBUG
+        // Your GLSL code contained compile errors!
+        // Hopefully this compile log should help to explain what went wrong.
         DBG (errorLog);
         jassertfalse;
        #endif
@@ -94,6 +98,8 @@ bool OpenGLShaderProgram::link() noexcept
         errorLog = String (infoLog, (size_t) infoLogLength);
 
        #if JUCE_DEBUG
+        // Your GLSL code contained link errors!
+        // Hopefully this compile log should help to explain what went wrong.
         DBG (errorLog);
         jassertfalse;
        #endif

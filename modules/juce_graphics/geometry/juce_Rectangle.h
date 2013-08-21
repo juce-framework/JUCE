@@ -827,8 +827,10 @@ public:
                           parseIntAfterSpace (toks[3]));
     }
 
+   #ifndef DOXYGEN
     // This has been renamed by transformedBy, in order to match the method names used in the Point class.
     JUCE_DEPRECATED_WITH_BODY (Rectangle transformed (const AffineTransform& t) const noexcept, { return transformedBy (t); })
+   #endif
 
 private:
     template <typename OtherType> friend class Rectangle;

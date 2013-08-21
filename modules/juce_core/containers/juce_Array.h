@@ -1025,9 +1025,11 @@ public:
 
 
     //==============================================================================
+   #ifndef DOXYGEN
     // Note that the swapWithArray method has been replaced by a more flexible templated version,
     // and renamed "swapWith" to be more consistent with the names used in other classes.
     JUCE_DEPRECATED_WITH_BODY (void swapWithArray (Array& other) noexcept, { swapWith (other); })
+   #endif
 
 private:
     //==============================================================================
