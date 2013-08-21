@@ -25,9 +25,9 @@
 class OpenGLFrameBufferImage   : public ImagePixelData
 {
 public:
-    OpenGLFrameBufferImage (OpenGLContext& context_, int w, int h)
+    OpenGLFrameBufferImage (OpenGLContext& c, int w, int h)
         : ImagePixelData (Image::ARGB, w, h),
-          context (context_),
+          context (c),
           pixelStride (4),
           lineStride (width * pixelStride)
     {
@@ -116,8 +116,8 @@ private:
 
     struct Writer
     {
-        Writer (OpenGLFrameBuffer& frameBuffer_, int x, int y, int w, int h) noexcept
-            : frameBuffer (frameBuffer_), area (x, y, w, h)
+        Writer (OpenGLFrameBuffer& fb, int x, int y, int w, int h) noexcept
+            : frameBuffer (fb), area (x, y, w, h)
         {}
 
         void write (const PixelARGB* const data) const noexcept
@@ -195,7 +195,8 @@ ImagePixelData::Ptr OpenGLImageType::create (Image::PixelFormat, int width, int 
 
 OpenGLFrameBuffer* OpenGLImageType::getFrameBufferFrom (const Image& image)
 {
-    OpenGLFrameBufferImage* const glImage = dynamic_cast<OpenGLFrameBufferImage*> (image.getPixelData());
+    if (OpenGLFrameBufferImage* const glImage = dynamic_cast<OpenGLFrameBufferImage*> (image.getPixelData()))
+        return &(glImage->frameBuffer);
 
-    return glImage != nullptr ? &(glImage->frameBuffer) : nullptr;
+    return nullptr;
 }

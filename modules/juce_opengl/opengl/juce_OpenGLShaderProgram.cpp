@@ -24,8 +24,8 @@
 
 #if JUCE_USE_OPENGL_SHADERS
 
-OpenGLShaderProgram::OpenGLShaderProgram (const OpenGLContext& context_) noexcept
-    : context (context_)
+OpenGLShaderProgram::OpenGLShaderProgram (const OpenGLContext& c) noexcept
+    : context (c)
 {
     // This object can only be created and used when the current thread has an active OpenGL context.
     jassert (OpenGLHelpers::isContextActive());

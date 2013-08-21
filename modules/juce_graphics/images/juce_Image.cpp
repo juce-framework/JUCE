@@ -256,7 +256,10 @@ void Image::duplicateIfShared()
 
 Image Image::createCopy() const
 {
-    return Image (image != nullptr ? image->clone() : nullptr);
+    if (image != nullptr)
+        return Image (image->clone());
+
+    return Image();
 }
 
 Image Image::rescaled (const int newWidth, const int newHeight, const Graphics::ResamplingQuality quality) const
