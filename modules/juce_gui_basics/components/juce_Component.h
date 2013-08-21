@@ -1250,6 +1250,7 @@ public:
     */
     static Component* JUCE_CALLTYPE getCurrentlyFocusedComponent() noexcept;
 
+    /** If any component has keyboard focus, this will defocus it. */
     static void JUCE_CALLTYPE unfocusAllComponents();
 
     //==============================================================================
