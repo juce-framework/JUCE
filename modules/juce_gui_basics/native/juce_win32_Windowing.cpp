@@ -2097,18 +2097,18 @@ private:
     {
         if (isConstrainedNativeWindow())
         {
-            Desktop& desktop = Desktop::getInstance();
-            Rectangle<int> pos (rectangleFromRECT (r) / desktop.getGlobalScaleFactor());
+            const float scale = getComponent().getDesktopScaleFactor();
+            Rectangle<int> pos (rectangleFromRECT (r) / scale);
             const Rectangle<int> current (windowBorder.addedTo (component.getBounds()));
 
             constrainer->checkBounds (pos, windowBorder.addedTo (component.getBounds()),
-                                      desktop.getDisplays().getTotalBounds (true),
+                                      Desktop::getInstance().getDisplays().getTotalBounds (true),
                                       wParam == WMSZ_TOP    || wParam == WMSZ_TOPLEFT    || wParam == WMSZ_TOPRIGHT,
                                       wParam == WMSZ_LEFT   || wParam == WMSZ_TOPLEFT    || wParam == WMSZ_BOTTOMLEFT,
                                       wParam == WMSZ_BOTTOM || wParam == WMSZ_BOTTOMLEFT || wParam == WMSZ_BOTTOMRIGHT,
                                       wParam == WMSZ_RIGHT  || wParam == WMSZ_TOPRIGHT   || wParam == WMSZ_BOTTOMRIGHT);
 
-            pos *= desktop.getGlobalScaleFactor();
+            pos *= scale;
             r.left   = pos.getX();
             r.top    = pos.getY();
             r.right  = pos.getRight();
@@ -2125,19 +2125,19 @@ private:
             if ((wp.flags & (SWP_NOMOVE | SWP_NOSIZE)) != (SWP_NOMOVE | SWP_NOSIZE)
                  && ! Component::isMouseButtonDownAnywhere())
             {
-                Desktop& desktop = Desktop::getInstance();
+                const float scale = getComponent().getDesktopScaleFactor();
                 Rectangle<int> pos (wp.x, wp.y, wp.cx, wp.cy);
-                pos /= desktop.getGlobalScaleFactor();
+                pos /= scale;
                 const Rectangle<int> current (windowBorder.addedTo (component.getBounds()));
 
                 constrainer->checkBounds (pos, current,
-                                          desktop.getDisplays().getTotalBounds (true),
+                                          Desktop::getInstance().getDisplays().getTotalBounds (true),
                                           pos.getY() != current.getY() && pos.getBottom() == current.getBottom(),
                                           pos.getX() != current.getX() && pos.getRight()  == current.getRight(),
                                           pos.getY() == current.getY() && pos.getBottom() != current.getBottom(),
                                           pos.getX() == current.getX() && pos.getRight()  != current.getRight());
 
-                pos *= desktop.getGlobalScaleFactor();
+                pos *= scale;
                 wp.x = pos.getX();
                 wp.y = pos.getY();
                 wp.cx = pos.getWidth();

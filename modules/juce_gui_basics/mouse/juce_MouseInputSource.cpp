@@ -62,17 +62,19 @@ public:
         if (ComponentPeer* const peer = comp.getPeer())
         {
             pos = peer->globalToLocal (pos);
-            return comp.getLocalPoint (&peer->getComponent(), Component::ComponentHelpers::unscaledScreenPosToScaled (pos));
+            Component& peerComp = peer->getComponent();
+            return comp.getLocalPoint (&peerComp, Component::ComponentHelpers::unscaledScreenPosToScaled (peerComp, pos));
         }
 
-        return comp.getLocalPoint (nullptr, Component::ComponentHelpers::unscaledScreenPosToScaled (pos));
+        return comp.getLocalPoint (nullptr, Component::ComponentHelpers::unscaledScreenPosToScaled (comp, pos));
     }
 
     Component* findComponentAt (Point<int> screenPos)
     {
         if (ComponentPeer* const peer = getPeer())
         {
-            Point<int> relativePos (Component::ComponentHelpers::unscaledScreenPosToScaled (peer->globalToLocal (screenPos)));
+            Point<int> relativePos (Component::ComponentHelpers::unscaledScreenPosToScaled (peer->getComponent(),
+                                                                                            peer->globalToLocal (screenPos)));
             Component& comp = peer->getComponent();
 
             // (the contains() call is needed to test for overlapping desktop windows)

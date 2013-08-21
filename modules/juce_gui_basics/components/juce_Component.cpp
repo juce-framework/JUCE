@@ -201,17 +201,39 @@ struct Component::ComponentHelpers
     }
 
     template <typename PointOrRect>
+    static PointOrRect unscaledScreenPosToScaled (float scale, PointOrRect pos) noexcept
+    {
+        return scale != 1.0f ? pos / scale : pos;
+    }
+
+    template <typename PointOrRect>
+    static PointOrRect scaledScreenPosToUnscaled (float scale, PointOrRect pos) noexcept
+    {
+        return scale != 1.0f ? pos * scale : pos;
+    }
+
+    template <typename PointOrRect>
     static PointOrRect unscaledScreenPosToScaled (PointOrRect pos) noexcept
     {
-        const float scale = Desktop::getInstance().masterScaleFactor;
-        return scale != 1.0f ? pos / scale : pos;
+        return unscaledScreenPosToScaled (Desktop::getInstance().getGlobalScaleFactor(), pos);
     }
 
     template <typename PointOrRect>
     static PointOrRect scaledScreenPosToUnscaled (PointOrRect pos) noexcept
     {
-        const float scale = Desktop::getInstance().masterScaleFactor;
-        return scale != 1.0f ? pos * scale : pos;
+        return scaledScreenPosToUnscaled (Desktop::getInstance().getGlobalScaleFactor(), pos);
+    }
+
+    template <typename PointOrRect>
+    static PointOrRect unscaledScreenPosToScaled (const Component& comp, PointOrRect pos) noexcept
+    {
+        return unscaledScreenPosToScaled (comp.getDesktopScaleFactor(), pos);
+    }
+
+    template <typename PointOrRect>
+    static PointOrRect scaledScreenPosToUnscaled (const Component& comp, PointOrRect pos) noexcept
+    {
+        return scaledScreenPosToUnscaled (comp.getDesktopScaleFactor(), pos);
     }
 
     // converts an unscaled position within a peer to the local position within that peer's component
@@ -221,7 +243,7 @@ struct Component::ComponentHelpers
         if (comp.isTransformed())
             pos = pos.transformedBy (comp.getTransform().inverted());
 
-        return unscaledScreenPosToScaled (pos);
+        return unscaledScreenPosToScaled (comp, pos);
     }
 
     // converts a position within a peer's component to the unscaled position within the peer
@@ -231,7 +253,7 @@ struct Component::ComponentHelpers
         if (comp.isTransformed())
             pos = pos.transformedBy (comp.getTransform());
 
-        return scaledScreenPosToUnscaled (pos);
+        return scaledScreenPosToUnscaled (comp, pos);
     }
 
     template <typename PointOrRect>
@@ -243,7 +265,7 @@ struct Component::ComponentHelpers
         if (comp.isOnDesktop())
         {
             if (ComponentPeer* peer = comp.getPeer())
-                pointInParentSpace = unscaledScreenPosToScaled (peer->globalToLocal (scaledScreenPosToUnscaled (pointInParentSpace)));
+                pointInParentSpace = unscaledScreenPosToScaled (comp, peer->globalToLocal (scaledScreenPosToUnscaled (pointInParentSpace)));
             else
                 jassertfalse;
         }
@@ -261,7 +283,7 @@ struct Component::ComponentHelpers
         if (comp.isOnDesktop())
         {
             if (ComponentPeer* peer = comp.getPeer())
-                pointInLocalSpace = unscaledScreenPosToScaled (peer->localToGlobal (scaledScreenPosToUnscaled (pointInLocalSpace)));
+                pointInLocalSpace = unscaledScreenPosToScaled (peer->localToGlobal (scaledScreenPosToUnscaled (comp, pointInLocalSpace)));
             else
                 jassertfalse;
         }
@@ -696,6 +718,8 @@ void Component::userTriedToCloseWindow()
 }
 
 void Component::minimisationStateChanged (bool) {}
+
+float Component::getDesktopScaleFactor() const  { return Desktop::getInstance().getGlobalScaleFactor(); }
 
 //==============================================================================
 void Component::setOpaque (const bool shouldBeOpaque)
@@ -1830,7 +1854,8 @@ void Component::internalRepaintUnchecked (const Rectangle<int>& area, const bool
             CHECK_MESSAGE_MANAGER_IS_LOCKED
 
             if (ComponentPeer* const peer = getPeer())
-                peer->repaint (ComponentHelpers::scaledScreenPosToUnscaled (affineTransform != nullptr ? area.transformedBy (*affineTransform)
+                peer->repaint (ComponentHelpers::scaledScreenPosToUnscaled (*this,
+                                                                            affineTransform != nullptr ? area.transformedBy (*affineTransform)
                                                                                                        : area));
         }
         else

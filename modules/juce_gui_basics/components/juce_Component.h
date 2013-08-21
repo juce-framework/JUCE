@@ -215,6 +215,15 @@ public:
     */
     virtual void minimisationStateChanged (bool isNowMinimised);
 
+    /** Returns the default scale factor to use for this component when it is placed
+        on the desktop.
+        The default implementation of this method just returns the value from
+        Desktop::getGlobalScaleFactor(), but it can be overridden if a particular component
+        has different requirements. The method only used if this component is added
+        to the desktop - it has no effect for child components.
+    */
+    virtual float getDesktopScaleFactor() const;
+
     //==============================================================================
     /** Brings the component to the front of its siblings.
 
@@ -1240,6 +1249,8 @@ public:
         @returns the focused component, or null if nothing is focused.
     */
     static Component* JUCE_CALLTYPE getCurrentlyFocusedComponent() noexcept;
+
+    static void JUCE_CALLTYPE unfocusAllComponents();
 
     //==============================================================================
     /** Tries to move the keyboard focus to one of this component's siblings.
@@ -2334,7 +2345,7 @@ private:
 
     // This is included here to cause an error if you use or overload it - it has been deprecated in
     // favour of contains (Point<int>)
-    void contains (int, int);
+    void contains (int, int) JUCE_DELETED_FUNCTION;
    #endif
 
 protected:

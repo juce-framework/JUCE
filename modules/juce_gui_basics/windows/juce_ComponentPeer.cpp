@@ -76,7 +76,7 @@ bool ComponentPeer::isValidPeer (const ComponentPeer* const peer) noexcept
 
 void ComponentPeer::updateBounds()
 {
-    setBounds (Component::ComponentHelpers::scaledScreenPosToUnscaled (component.getBoundsInParent()), false);
+    setBounds (Component::ComponentHelpers::scaledScreenPosToUnscaled (component, component.getBoundsInParent()), false);
 }
 
 //==============================================================================
@@ -111,7 +111,7 @@ void ComponentPeer::handlePaint (LowLevelGraphicsContext& contextToPaintTo)
     if (component.isTransformed())
         g.addTransform (component.getTransform());
 
-    float masterScale = Desktop::getInstance().masterScaleFactor;
+    const float masterScale = component.getDesktopScaleFactor();
 
     if (masterScale != 1.0f)
         g.addTransform (AffineTransform::scale (masterScale));
@@ -402,7 +402,7 @@ Rectangle<int> ComponentPeer::globalToLocal (const Rectangle<int>& screenPositio
 Rectangle<int> ComponentPeer::getAreaCoveredBy (Component& subComponent) const
 {
     return Component::ComponentHelpers::scaledScreenPosToUnscaled
-            (component.getLocalArea (&subComponent, subComponent.getLocalBounds()));
+            (component, component.getLocalArea (&subComponent, subComponent.getLocalBounds()));
 }
 
 //==============================================================================
