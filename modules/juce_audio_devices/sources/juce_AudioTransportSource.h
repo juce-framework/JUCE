@@ -147,7 +147,7 @@ public:
     void releaseResources() override;
 
     /** Implementation of the AudioSource method. */
-    void getNextAudioBlock (const AudioSourceChannelInfo& bufferToFill) override;
+    void getNextAudioBlock (const AudioSourceChannelInfo&) override;
 
     //==============================================================================
     /** Implements the PositionableAudioSource method. */

@@ -53,13 +53,13 @@ public:
 
     //==============================================================================
     /** Implementation of the AudioSource method. */
-    void prepareToPlay (int samplesPerBlockExpected, double sampleRate);
+    void prepareToPlay (int samplesPerBlockExpected, double sampleRate) override;
 
     /** Implementation of the AudioSource method. */
-    void releaseResources();
+    void releaseResources() override;
 
     /** Implementation of the AudioSource method. */
-    void getNextAudioBlock (const AudioSourceChannelInfo& bufferToFill);
+    void getNextAudioBlock (const AudioSourceChannelInfo&) override;
 
 
 private:

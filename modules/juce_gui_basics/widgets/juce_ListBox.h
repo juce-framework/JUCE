@@ -43,13 +43,11 @@ public:
 
     //==============================================================================
     /** This has to return the number of items in the list.
-
         @see ListBox::getNumRows()
     */
     virtual int getNumRows() = 0;
 
-    /** This method must be implemented to draw a row of the list.
-    */
+    /** This method must be implemented to draw a row of the list. */
     virtual void paintListBoxItem (int rowNumber,
                                    Graphics& g,
                                    int width, int height,
@@ -86,20 +84,17 @@ public:
                                                Component* existingComponentToUpdate);
 
     /** This can be overridden to react to the user clicking on a row.
-
         @see listBoxItemDoubleClicked
     */
     virtual void listBoxItemClicked (int row, const MouseEvent& e);
 
     /** This can be overridden to react to the user double-clicking on a row.
-
         @see listBoxItemClicked
     */
     virtual void listBoxItemDoubleClicked (int row, const MouseEvent& e);
 
-    /** This can be overridden to react to the user double-clicking on a part of the list where
+    /** This can be overridden to react to the user clicking on a part of the list where
         there are no rows.
-
         @see listBoxItemClicked
     */
     virtual void backgroundClicked();
@@ -253,21 +248,17 @@ public:
                             int lastRow);
 
     /** Deselects a row.
-
         If it's not currently selected, this will do nothing.
-
         @see selectRow, deselectAllRows
     */
     void deselectRow (int rowNumber);
 
     /** Deselects any currently selected rows.
-
         @see deselectRow
     */
     void deselectAllRows();
 
     /** Selects or deselects a row.
-
         If the row's currently selected, this deselects it, and vice-versa.
     */
     void flipRowSelection (int rowNumber);
@@ -292,7 +283,6 @@ public:
     bool isRowSelected (int rowNumber) const;
 
     /** Returns the number of rows that are currently selected.
-
         @see getSelectedRow, isRowSelected, getLastRowSelected
     */
     int getNumSelectedRows() const;
@@ -357,8 +347,7 @@ public:
     */
     double getVerticalPosition() const;
 
-    /** Scrolls if necessary to make sure that a particular row is visible.
-    */
+    /** Scrolls if necessary to make sure that a particular row is visible. */
     void scrollToEnsureRowIsOnscreen (int row);
 
     /** Returns a pointer to the vertical scrollbar. */
@@ -560,7 +549,7 @@ private:
     int outlineThickness;
     int lastRowSelected;
     bool multipleSelection, hasDoneInitialUpdate;
-    SparseSet <int> selected;
+    SparseSet<int> selected;
 
     void selectRowInternal (int rowNumber, bool dontScrollToShowThisRow,
                             bool deselectOthersFirst, bool isMouseClick);
