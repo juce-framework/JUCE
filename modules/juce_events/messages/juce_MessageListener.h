@@ -25,8 +25,6 @@
 #ifndef JUCE_MESSAGELISTENER_H_INCLUDED
 #define JUCE_MESSAGELISTENER_H_INCLUDED
 
-#include "juce_MessageManager.h"
-
 
 //==============================================================================
 /**

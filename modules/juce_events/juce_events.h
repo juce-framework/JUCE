@@ -31,27 +31,24 @@
 namespace juce
 {
 
-// START_AUTOINCLUDE messages, broadcasters, timers,
-// interprocess, native/juce_ScopedXLock*
-#include "messages/juce_ApplicationBase.h"
-#include "messages/juce_CallbackMessage.h"
-#include "messages/juce_DeletedAtShutdown.h"
+#include "messages/juce_MessageManager.h"
 #include "messages/juce_Message.h"
 #include "messages/juce_MessageListener.h"
-#include "messages/juce_MessageManager.h"
+#include "messages/juce_CallbackMessage.h"
+#include "messages/juce_DeletedAtShutdown.h"
 #include "messages/juce_NotificationType.h"
+#include "messages/juce_ApplicationBase.h"
+#include "broadcasters/juce_ListenerList.h"
 #include "broadcasters/juce_ActionBroadcaster.h"
 #include "broadcasters/juce_ActionListener.h"
 #include "broadcasters/juce_AsyncUpdater.h"
-#include "broadcasters/juce_ChangeBroadcaster.h"
 #include "broadcasters/juce_ChangeListener.h"
-#include "broadcasters/juce_ListenerList.h"
-#include "timers/juce_MultiTimer.h"
+#include "broadcasters/juce_ChangeBroadcaster.h"
 #include "timers/juce_Timer.h"
+#include "timers/juce_MultiTimer.h"
 #include "interprocess/juce_InterprocessConnection.h"
 #include "interprocess/juce_InterprocessConnectionServer.h"
 #include "native/juce_ScopedXLock.h"
-// END_AUTOINCLUDE
 
 }
 

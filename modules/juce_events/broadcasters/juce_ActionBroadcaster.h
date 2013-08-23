@@ -25,8 +25,6 @@
 #ifndef JUCE_ACTIONBROADCASTER_H_INCLUDED
 #define JUCE_ACTIONBROADCASTER_H_INCLUDED
 
-#include "juce_ActionListener.h"
-
 
 //==============================================================================
 /** Manages a list of ActionListeners, and can send them messages.

@@ -25,8 +25,6 @@
 #ifndef JUCE_UNDOMANAGER_H_INCLUDED
 #define JUCE_UNDOMANAGER_H_INCLUDED
 
-#include "juce_UndoableAction.h"
-
 
 //==============================================================================
 /**

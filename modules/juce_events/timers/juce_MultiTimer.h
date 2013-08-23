@@ -25,7 +25,6 @@
 #ifndef JUCE_MULTITIMER_H_INCLUDED
 #define JUCE_MULTITIMER_H_INCLUDED
 
-#include "juce_Timer.h"
 
 //==============================================================================
 /**

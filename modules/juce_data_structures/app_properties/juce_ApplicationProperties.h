@@ -25,7 +25,6 @@
 #ifndef JUCE_APPLICATIONPROPERTIES_H_INCLUDED
 #define JUCE_APPLICATIONPROPERTIES_H_INCLUDED
 
-#include "juce_PropertiesFile.h"
 
 //==============================================================================
 /**

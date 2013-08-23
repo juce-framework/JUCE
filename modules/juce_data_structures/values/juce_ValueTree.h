@@ -25,9 +25,6 @@
 #ifndef JUCE_VALUETREE_H_INCLUDED
 #define JUCE_VALUETREE_H_INCLUDED
 
-#include "juce_Value.h"
-#include "../undomanager/juce_UndoManager.h"
-
 
 //==============================================================================
 /**
