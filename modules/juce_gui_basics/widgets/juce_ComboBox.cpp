@@ -582,7 +582,7 @@ void ComboBox::mouseWheelMove (const MouseEvent& e, const MouseWheelDetails& whe
    #if 0
     // NB: this is far too irritating if enabled, because on scrollable pages containing
     // comboboxes (e.g. introjucer settings pages), you can easily nudge them when trying to scroll
-    if (menuActive && wheel.deltaY != 0)
+    if (! menuActive && wheel.deltaY != 0)
         nudgeSelectedItem (wheel.deltaY > 0 ? -1 : 1);
     else
    #endif
@@ -609,7 +609,7 @@ void ComboBox::sendChange (const NotificationType notification)
 }
 
 // Old deprecated methods - remove eventually...
-void ComboBox::clear (const bool dontSendChange)    { clear (dontSendChange ? dontSendNotification : sendNotification); }
+void ComboBox::clear (const bool dontSendChange)                                 { clear (dontSendChange ? dontSendNotification : sendNotification); }
 void ComboBox::setSelectedItemIndex (const int index, const bool dontSendChange) { setSelectedItemIndex (index, dontSendChange ? dontSendNotification : sendNotification); }
 void ComboBox::setSelectedId (const int newItemId, const bool dontSendChange)    { setSelectedId (newItemId, dontSendChange ? dontSendNotification : sendNotification); }
 void ComboBox::setText (const String& newText, const bool dontSendChange)        { setText (newText, dontSendChange ? dontSendNotification : sendNotification); }
