@@ -29,8 +29,6 @@
 #ifndef JUCE_PERFORMANCECOUNTER_H_INCLUDED
 #define JUCE_PERFORMANCECOUNTER_H_INCLUDED
 
-#include "../files/juce_File.h"
-
 
 //==============================================================================
 /** A timer for measuring performance of code and dumping the results to a file.

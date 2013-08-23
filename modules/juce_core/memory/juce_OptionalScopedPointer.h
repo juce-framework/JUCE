@@ -29,8 +29,6 @@
 #ifndef JUCE_OPTIONALSCOPEDPOINTER_H_INCLUDED
 #define JUCE_OPTIONALSCOPEDPOINTER_H_INCLUDED
 
-#include "juce_ScopedPointer.h"
-
 
 //==============================================================================
 /**

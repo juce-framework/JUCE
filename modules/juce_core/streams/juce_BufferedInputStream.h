@@ -29,10 +29,6 @@
 #ifndef JUCE_BUFFEREDINPUTSTREAM_H_INCLUDED
 #define JUCE_BUFFEREDINPUTSTREAM_H_INCLUDED
 
-#include "juce_InputStream.h"
-#include "../memory/juce_OptionalScopedPointer.h"
-#include "../memory/juce_HeapBlock.h"
-
 
 //==============================================================================
 /** Wraps another input stream, and reads from it using an intermediate buffer

@@ -29,11 +29,6 @@
 #ifndef JUCE_XMLELEMENT_H_INCLUDED
 #define JUCE_XMLELEMENT_H_INCLUDED
 
-#include "../text/juce_String.h"
-#include "../streams/juce_OutputStream.h"
-#include "../files/juce_File.h"
-#include "../containers/juce_LinkedListPointer.h"
-
 
 //==============================================================================
 /** A handy macro to make it easy to iterate all the child elements in an XmlElement.

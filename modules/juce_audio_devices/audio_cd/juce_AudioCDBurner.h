@@ -158,7 +158,7 @@ private:
     AudioCDBurner (const int deviceIndex);
 
     class Pimpl;
-    friend class ScopedPointer<Pimpl>;
+    friend struct ContainerDeletePolicy<Pimpl>;
     ScopedPointer<Pimpl> pimpl;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioCDBurner)

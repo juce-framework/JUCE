@@ -29,8 +29,6 @@
 #ifndef JUCE_PROCESS_H_INCLUDED
 #define JUCE_PROCESS_H_INCLUDED
 
-#include "../text/juce_String.h"
-
 
 //==============================================================================
 /** Represents the current executable's process.

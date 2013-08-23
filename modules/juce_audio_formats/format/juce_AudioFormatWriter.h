@@ -203,7 +203,7 @@ public:
 
     private:
         class Buffer;
-        friend class ScopedPointer<Buffer>;
+        friend struct ContainerDeletePolicy<Buffer>;
         ScopedPointer<Buffer> buffer;
     };
 

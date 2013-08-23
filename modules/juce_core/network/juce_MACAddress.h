@@ -29,8 +29,6 @@
 #ifndef JUCE_MACADDRESS_H_INCLUDED
 #define JUCE_MACADDRESS_H_INCLUDED
 
-#include "../containers/juce_Array.h"
-
 
 //==============================================================================
 /**

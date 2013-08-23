@@ -29,8 +29,6 @@
 #ifndef JUCE_ARRAYALLOCATIONBASE_H_INCLUDED
 #define JUCE_ARRAYALLOCATIONBASE_H_INCLUDED
 
-#include "../memory/juce_HeapBlock.h"
-
 
 //==============================================================================
 /**

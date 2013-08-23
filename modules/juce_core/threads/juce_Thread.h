@@ -29,9 +29,6 @@
 #ifndef JUCE_THREAD_H_INCLUDED
 #define JUCE_THREAD_H_INCLUDED
 
-#include "juce_WaitableEvent.h"
-#include "juce_CriticalSection.h"
-
 
 //==============================================================================
 /**

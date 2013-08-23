@@ -29,8 +29,6 @@
 #ifndef JUCE_SYSTEMSTATS_H_INCLUDED
 #define JUCE_SYSTEMSTATS_H_INCLUDED
 
-#include "../text/juce_StringArray.h"
-
 
 //==============================================================================
 /**

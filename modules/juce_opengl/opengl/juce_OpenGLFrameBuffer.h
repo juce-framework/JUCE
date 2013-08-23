@@ -139,11 +139,11 @@ public:
 
 private:
     class Pimpl;
-    friend class ScopedPointer<Pimpl>;
+    friend struct ContainerDeletePolicy<Pimpl>;
     ScopedPointer<Pimpl> pimpl;
 
     class SavedState;
-    friend class ScopedPointer<SavedState>;
+    friend struct ContainerDeletePolicy<SavedState>;
     ScopedPointer<SavedState> savedState;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OpenGLFrameBuffer)

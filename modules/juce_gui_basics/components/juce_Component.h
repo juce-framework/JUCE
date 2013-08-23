@@ -2254,7 +2254,7 @@ private:
 
     class MouseListenerList;
     friend class MouseListenerList;
-    friend class ScopedPointer <MouseListenerList>;
+    friend struct ContainerDeletePolicy<MouseListenerList>;
     ScopedPointer <MouseListenerList> mouseListeners;
     ScopedPointer <Array <KeyListener*> > keyListeners;
     ListenerList <ComponentListener> componentListeners;

@@ -29,10 +29,6 @@
 #ifndef JUCE_PROPERTYSET_H_INCLUDED
 #define JUCE_PROPERTYSET_H_INCLUDED
 
-#include "../text/juce_StringPairArray.h"
-#include "../xml/juce_XmlElement.h"
-#include "../containers/juce_Variant.h"
-
 
 //==============================================================================
 /**

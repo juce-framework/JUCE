@@ -164,6 +164,7 @@ namespace juce
     #include "../memory/juce_Memory.h"
     #include "../maths/juce_MathsFunctions.h"
     #include "../memory/juce_ByteOrder.h"
+    #include "../text/juce_String.h"
     #include "../logging/juce_Logger.h"
     #include "../memory/juce_LeakedObjectDetector.h"
 }

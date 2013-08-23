@@ -29,9 +29,6 @@
 #ifndef JUCE_STRINGARRAY_H_INCLUDED
 #define JUCE_STRINGARRAY_H_INCLUDED
 
-#include "juce_String.h"
-#include "../containers/juce_Array.h"
-
 
 //==============================================================================
 /**

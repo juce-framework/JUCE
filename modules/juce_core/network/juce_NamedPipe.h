@@ -29,7 +29,6 @@
 #ifndef JUCE_NAMEDPIPE_H_INCLUDED
 #define JUCE_NAMEDPIPE_H_INCLUDED
 
-#include "../threads/juce_ReadWriteLock.h"
 
 //==============================================================================
 /**

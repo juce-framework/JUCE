@@ -29,8 +29,6 @@
 #ifndef JUCE_RANDOM_H_INCLUDED
 #define JUCE_RANDOM_H_INCLUDED
 
-#include "juce_BigInteger.h"
-
 
 //==============================================================================
 /**

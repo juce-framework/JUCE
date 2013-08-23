@@ -826,9 +826,9 @@ private:
     class TargetGroupHighlight;
     friend class TreeViewItem;
     friend class ContentComponent;
-    friend class ScopedPointer<TreeViewport>;
-    friend class ScopedPointer<InsertPointHighlight>;
-    friend class ScopedPointer<TargetGroupHighlight>;
+    friend struct ContainerDeletePolicy<TreeViewport>;
+    friend struct ContainerDeletePolicy<InsertPointHighlight>;
+    friend struct ContainerDeletePolicy<TargetGroupHighlight>;
 
     ScopedPointer<TreeViewport> viewport;
     CriticalSection nodeAlterationLock;

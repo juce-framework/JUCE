@@ -363,12 +363,12 @@ private:
 
     class Pimpl;
     friend class Pimpl;
-    friend class ScopedPointer<Pimpl>;
+    friend struct ContainerDeletePolicy<Pimpl>;
     ScopedPointer<Pimpl> pimpl;
 
     class GutterComponent;
     friend class GutterComponent;
-    friend class ScopedPointer<GutterComponent>;
+    friend struct ContainerDeletePolicy<GutterComponent>;
     ScopedPointer<GutterComponent> gutter;
 
     enum DragType

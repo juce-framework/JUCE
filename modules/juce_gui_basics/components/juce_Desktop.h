@@ -367,7 +367,7 @@ public:
 
     private:
         friend class Desktop;
-        friend class ScopedPointer<Displays>;
+        friend struct ContainerDeletePolicy<Displays>;
         Displays (Desktop&);
         ~Displays();
 

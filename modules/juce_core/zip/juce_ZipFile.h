@@ -29,11 +29,6 @@
 #ifndef JUCE_ZIPFILE_H_INCLUDED
 #define JUCE_ZIPFILE_H_INCLUDED
 
-#include "../files/juce_File.h"
-#include "../streams/juce_InputSource.h"
-#include "../threads/juce_CriticalSection.h"
-#include "../containers/juce_OwnedArray.h"
-
 
 //==============================================================================
 /**
@@ -210,7 +205,7 @@ public:
         //==============================================================================
     private:
         class Item;
-        friend class OwnedArray<Item>;
+        friend struct ContainerDeletePolicy<Item>;
         OwnedArray<Item> items;
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Builder)

@@ -29,11 +29,6 @@
 #ifndef JUCE_URL_H_INCLUDED
 #define JUCE_URL_H_INCLUDED
 
-#include "../text/juce_StringPairArray.h"
-#include "../files/juce_File.h"
-class InputStream;
-class XmlElement;
-
 
 //==============================================================================
 /**

@@ -103,7 +103,7 @@ private:
 
     class Scanner;
     friend class Scanner;
-    friend class ScopedPointer<Scanner>;
+    friend struct ContainerDeletePolicy<Scanner>;
     ScopedPointer<Scanner> currentScanner;
 
     void scanFinished (const StringArray&);

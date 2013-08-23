@@ -29,8 +29,6 @@
 #ifndef JUCE_SPINLOCK_H_INCLUDED
 #define JUCE_SPINLOCK_H_INCLUDED
 
-#include "juce_ScopedLock.h"
-
 
 //==============================================================================
 /**

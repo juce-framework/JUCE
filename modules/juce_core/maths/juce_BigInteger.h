@@ -29,10 +29,6 @@
 #ifndef JUCE_BIGINTEGER_H_INCLUDED
 #define JUCE_BIGINTEGER_H_INCLUDED
 
-#include "../text/juce_String.h"
-#include "../memory/juce_HeapBlock.h"
-class MemoryBlock;
-
 
 //==============================================================================
 /**

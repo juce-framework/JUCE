@@ -29,14 +29,10 @@
 #ifndef JUCE_SORTEDSET_H_INCLUDED
 #define JUCE_SORTEDSET_H_INCLUDED
 
-#include "juce_ArrayAllocationBase.h"
-#include "../threads/juce_CriticalSection.h"
-
 #if JUCE_MSVC
-  #pragma warning (push)
-  #pragma warning (disable: 4512)
+ #pragma warning (push)
+ #pragma warning (disable: 4512)
 #endif
-
 
 //==============================================================================
 /**
@@ -491,7 +487,7 @@ private:
 };
 
 #if JUCE_MSVC
-  #pragma warning (pop)
+ #pragma warning (pop)
 #endif
 
 #endif   // JUCE_SORTEDSET_H_INCLUDED

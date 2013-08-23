@@ -29,13 +29,6 @@
 #ifndef JUCE_NAMEDVALUESET_H_INCLUDED
 #define JUCE_NAMEDVALUESET_H_INCLUDED
 
-#include "juce_Variant.h"
-#include "../containers/juce_LinkedListPointer.h"
-class XmlElement;
-#ifndef DOXYGEN
- class JSONFormatter;
-#endif
-
 
 //==============================================================================
 /** Holds a set of named var objects.

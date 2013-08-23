@@ -29,9 +29,6 @@
 #ifndef JUCE_DIRECTORYITERATOR_H_INCLUDED
 #define JUCE_DIRECTORYITERATOR_H_INCLUDED
 
-#include "juce_File.h"
-#include "../memory/juce_ScopedPointer.h"
-
 
 //==============================================================================
 /**
@@ -135,13 +132,13 @@ private:
 
     private:
         friend class DirectoryIterator;
-        friend class ScopedPointer<Pimpl>;
+        friend struct ContainerDeletePolicy<Pimpl>;
         ScopedPointer<Pimpl> pimpl;
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (NativeIterator)
     };
 
-    friend class ScopedPointer<NativeIterator::Pimpl>;
+    friend struct ContainerDeletePolicy<NativeIterator::Pimpl>;
     StringArray wildCards;
     NativeIterator fileFinder;
     String wildCard, path;
@@ -150,7 +147,7 @@ private:
     const int whatToLookFor;
     const bool isRecursive;
     bool hasBeenAdvanced;
-    ScopedPointer <DirectoryIterator> subIterator;
+    ScopedPointer<DirectoryIterator> subIterator;
     File currentFile;
 
     static StringArray parseWildcards (const String& pattern);

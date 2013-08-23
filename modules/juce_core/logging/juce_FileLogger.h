@@ -29,10 +29,6 @@
 #ifndef JUCE_FILELOGGER_H_INCLUDED
 #define JUCE_FILELOGGER_H_INCLUDED
 
-#include "juce_Logger.h"
-#include "../files/juce_File.h"
-#include "../memory/juce_ScopedPointer.h"
-
 
 //==============================================================================
 /**

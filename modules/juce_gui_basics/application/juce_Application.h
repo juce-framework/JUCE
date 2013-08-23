@@ -254,7 +254,7 @@ private:
     //==============================================================================
     struct MultipleInstanceHandler;
     friend struct MultipleInstanceHandler;
-    friend class ScopedPointer<MultipleInstanceHandler>;
+    friend struct ContainerDeletePolicy<MultipleInstanceHandler>;
     ScopedPointer<MultipleInstanceHandler> multipleInstanceHandler;
 
     int appReturnValue;

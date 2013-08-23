@@ -29,9 +29,6 @@
 #ifndef JUCE_MEMORYINPUTSTREAM_H_INCLUDED
 #define JUCE_MEMORYINPUTSTREAM_H_INCLUDED
 
-#include "juce_InputStream.h"
-#include "../memory/juce_HeapBlock.h"
-
 
 //==============================================================================
 /**

@@ -248,8 +248,8 @@ void PluginListComponent::filesDropped (const StringArray& files, int, int)
 
 FileSearchPath PluginListComponent::getLastSearchPath (PropertiesFile& properties, AudioPluginFormat& format)
 {
-    return properties.getValue ("lastPluginScanPath_" + format.getName(),
-                                format.getDefaultLocationsToSearch().toString());
+    return FileSearchPath (properties.getValue ("lastPluginScanPath_" + format.getName(),
+                                                format.getDefaultLocationsToSearch().toString()));
 }
 
 void PluginListComponent::setLastSearchPath (PropertiesFile& properties, AudioPluginFormat& format,

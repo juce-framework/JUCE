@@ -29,8 +29,6 @@
 #ifndef JUCE_STRINGPAIRARRAY_H_INCLUDED
 #define JUCE_STRINGPAIRARRAY_H_INCLUDED
 
-#include "juce_StringArray.h"
-
 
 //==============================================================================
 /**

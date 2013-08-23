@@ -29,15 +29,6 @@
 #ifndef JUCE_FILE_H_INCLUDED
 #define JUCE_FILE_H_INCLUDED
 
-#include "../containers/juce_Array.h"
-#include "../time/juce_Time.h"
-#include "../text/juce_StringArray.h"
-#include "../memory/juce_MemoryBlock.h"
-#include "../memory/juce_ScopedPointer.h"
-#include "../misc/juce_Result.h"
-class FileInputStream;
-class FileOutputStream;
-
 
 //==============================================================================
 /**

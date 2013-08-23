@@ -26,41 +26,28 @@
   ==============================================================================
 */
 
-#ifndef JUCE_FILEINPUTSOURCE_H_INCLUDED
-#define JUCE_FILEINPUTSOURCE_H_INCLUDED
-
+#ifndef JUCE_CONTAINERDELETEPOLICY_H_INCLUDED
+#define JUCE_CONTAINERDELETEPOLICY_H_INCLUDED
 
 //==============================================================================
 /**
-    A type of InputSource that represents a normal file.
+    Used by container classes as an indirect way to delete an object of a
+    particular type.
 
-    @see InputSource
+    The generic implementation of this class simply calls 'delete', but you can
+    create a specialised version of it for a particular class if you need to
+    delete that type of object in a more appropriate way.
+
+    @see ScopedPointer, OwnedArray
 */
-class JUCE_API  FileInputSource     : public InputSource
+template <typename ObjectType>
+struct ContainerDeletePolicy
 {
-public:
-    //==============================================================================
-    /** Creates a FileInputSource for a file.
-        If the useFileTimeInHashGeneration parameter is true, then this object's
-        hashCode() method will incorporate the file time into its hash code; if
-        false, only the file name will be used for the hash.
-    */
-    FileInputSource (const File& file, bool useFileTimeInHashGeneration = false);
-
-    /** Destructor. */
-    ~FileInputSource();
-
-    InputStream* createInputStream();
-    InputStream* createInputStreamFor (const String& relatedItemPath);
-    int64 hashCode() const;
-
-private:
-    //==============================================================================
-    const File file;
-    bool useFileTimeInHashGeneration;
-
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FileInputSource)
+    static void destroy (ObjectType* object)
+    {
+        delete object;
+    }
 };
 
 
-#endif   // JUCE_FILEINPUTSOURCE_H_INCLUDED
+#endif   // JUCE_CONTAINERDELETEPOLICY_H_INCLUDED

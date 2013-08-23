@@ -105,7 +105,7 @@ private:
     TimeSliceThread thread;
 
     class ThumbnailCacheEntry;
-    friend class OwnedArray<ThumbnailCacheEntry>;
+    friend struct ContainerDeletePolicy<ThumbnailCacheEntry>;
     OwnedArray<ThumbnailCacheEntry> thumbs;
     CriticalSection lock;
     int maxNumThumbsToStore;

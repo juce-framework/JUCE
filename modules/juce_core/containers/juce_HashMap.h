@@ -29,10 +29,6 @@
 #ifndef JUCE_HASHMAP_H_INCLUDED
 #define JUCE_HASHMAP_H_INCLUDED
 
-#include "juce_OwnedArray.h"
-#include "juce_LinkedListPointer.h"
-#include "../memory/juce_ScopedPointer.h"
-
 
 //==============================================================================
 /**

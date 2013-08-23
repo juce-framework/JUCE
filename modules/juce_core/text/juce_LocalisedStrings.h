@@ -29,8 +29,6 @@
 #ifndef JUCE_LOCALISEDSTRINGS_H_INCLUDED
 #define JUCE_LOCALISEDSTRINGS_H_INCLUDED
 
-#include "juce_StringPairArray.h"
-#include "../files/juce_File.h"
 
 //==============================================================================
 /**

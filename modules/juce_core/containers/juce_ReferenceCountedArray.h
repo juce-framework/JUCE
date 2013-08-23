@@ -29,11 +29,6 @@
 #ifndef JUCE_REFERENCECOUNTEDARRAY_H_INCLUDED
 #define JUCE_REFERENCECOUNTEDARRAY_H_INCLUDED
 
-#include "../memory/juce_ReferenceCountedObject.h"
-#include "juce_ArrayAllocationBase.h"
-#include "juce_ElementComparator.h"
-#include "../threads/juce_CriticalSection.h"
-
 
 //==============================================================================
 /**

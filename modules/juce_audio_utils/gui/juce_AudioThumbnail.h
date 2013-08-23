@@ -201,11 +201,11 @@ private:
     class CachedWindow;
 
     friend class LevelDataSource;
-    friend class ScopedPointer<LevelDataSource>;
     friend class ThumbData;
-    friend class OwnedArray<ThumbData>;
     friend class CachedWindow;
-    friend class ScopedPointer<CachedWindow>;
+    friend struct ContainerDeletePolicy<LevelDataSource>;
+    friend struct ContainerDeletePolicy<ThumbData>;
+    friend struct ContainerDeletePolicy<CachedWindow>;
 
     ScopedPointer<LevelDataSource> source;
     ScopedPointer<CachedWindow> window;

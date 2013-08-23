@@ -97,7 +97,7 @@ public:
     /** Destructor.
         This will delete the object that this ScopedPointer currently refers to.
     */
-    inline ~ScopedPointer()                                                         { delete object; }
+    inline ~ScopedPointer()                 { ContainerDeletePolicy<ObjectType>::destroy (object); }
 
     /** Changes this ScopedPointer to point to a new object.
 
@@ -119,7 +119,7 @@ public:
             ObjectType* const oldObject = object;
             object = objectToTransferFrom.object;
             objectToTransferFrom.object = nullptr;
-            delete oldObject;
+            ContainerDeletePolicy<ObjectType>::destroy (oldObject);
         }
 
         return *this;
@@ -138,7 +138,7 @@ public:
         {
             ObjectType* const oldObject = object;
             object = newObjectToTakePossessionOf;
-            delete oldObject;
+            ContainerDeletePolicy<ObjectType>::destroy (oldObject);
         }
 
         return *this;

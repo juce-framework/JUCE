@@ -321,9 +321,9 @@ private:
     int initialDelayInMillisecs, repeatDelayInMillisecs, minimumDelayInMillisecs;
     bool vertical, isDraggingThumb, autohides;
     class ScrollbarButton;
-    friend class ScopedPointer<ScrollbarButton>;
+    friend struct ContainerDeletePolicy<ScrollbarButton>;
     ScopedPointer<ScrollbarButton> upButton, downButton;
-    ListenerList <Listener> listeners;
+    ListenerList<Listener> listeners;
 
     void handleAsyncUpdate() override;
     void updateThumbPosition();

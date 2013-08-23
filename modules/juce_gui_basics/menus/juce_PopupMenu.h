@@ -492,11 +492,11 @@ private:
     friend class Window;
     friend class CustomComponent;
     friend class MenuBarComponent;
-    friend class OwnedArray <Item>;
-    friend class OwnedArray <ItemComponent>;
-    friend class ScopedPointer <Window>;
+    friend struct ContainerDeletePolicy<Item>;
+    friend struct ContainerDeletePolicy<ItemComponent>;
+    friend struct ContainerDeletePolicy<Window>;
 
-    OwnedArray <Item> items;
+    OwnedArray<Item> items;
     LookAndFeel* lookAndFeel;
 
     Component* createWindow (const Options&, ApplicationCommandManager**) const;

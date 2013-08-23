@@ -29,12 +29,6 @@
 #ifndef JUCE_READWRITELOCK_H_INCLUDED
 #define JUCE_READWRITELOCK_H_INCLUDED
 
-#include "juce_CriticalSection.h"
-#include "juce_SpinLock.h"
-#include "juce_WaitableEvent.h"
-#include "juce_Thread.h"
-#include "../containers/juce_Array.h"
-
 
 //==============================================================================
 /**

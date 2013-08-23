@@ -1215,6 +1215,7 @@
         <Filter Name="memory">
           <File RelativePath="..\..\..\..\modules\juce_core\memory\juce_Atomic.h"/>
           <File RelativePath="..\..\..\..\modules\juce_core\memory\juce_ByteOrder.h"/>
+          <File RelativePath="..\..\..\..\modules\juce_core\memory\juce_ContainerDeletePolicy.h"/>
           <File RelativePath="..\..\..\..\modules\juce_core\memory\juce_HeapBlock.h"/>
           <File RelativePath="..\..\..\..\modules\juce_core\memory\juce_LeakedObjectDetector.h"/>
           <File RelativePath="..\..\..\..\modules\juce_core\memory\juce_Memory.h"/>
@@ -2502,16 +2503,6 @@
           <File RelativePath="..\..\..\..\modules\juce_graphics\geometry\juce_RectangleList.h"/>
         </Filter>
         <Filter Name="placement">
-          <File RelativePath="..\..\..\..\modules\juce_graphics\placement\juce_Justification.cpp">
-            <FileConfiguration Name="Debug|Win32"
-                               ExcludedFromBuild="true">
-              <Tool Name="VCCLCompilerTool"/>
-            </FileConfiguration>
-            <FileConfiguration Name="Release|Win32"
-                               ExcludedFromBuild="true">
-              <Tool Name="VCCLCompilerTool"/>
-            </FileConfiguration>
-          </File>
           <File RelativePath="..\..\..\..\modules\juce_graphics\placement\juce_Justification.h"/>
           <File RelativePath="..\..\..\..\modules\juce_graphics\placement\juce_RectanglePlacement.cpp">
             <FileConfiguration Name="Debug|Win32"

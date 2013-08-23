@@ -29,10 +29,6 @@
 #ifndef JUCE_OWNEDARRAY_H_INCLUDED
 #define JUCE_OWNEDARRAY_H_INCLUDED
 
-#include "juce_ArrayAllocationBase.h"
-#include "juce_ElementComparator.h"
-#include "../threads/juce_CriticalSection.h"
-
 
 //==============================================================================
 /** An array designed for holding objects.
@@ -389,7 +385,7 @@ public:
     {
         if (indexToChange >= 0)
         {
-            ObjectClass* toDelete = nullptr;
+            ScopedPointer<ObjectClass> toDelete;
 
             {
                 const ScopedLockType lock (getLock());
@@ -401,7 +397,7 @@ public:
                         toDelete = data.elements [indexToChange];
 
                         if (toDelete == newObject)
-                            toDelete = nullptr;
+                            toDelete.release();
                     }
 
                     data.elements [indexToChange] = const_cast <ObjectClass*> (newObject);
@@ -412,10 +408,6 @@ public:
                     data.elements [numUsed++] = const_cast <ObjectClass*> (newObject);
                 }
             }
-
-            delete toDelete; // don't want to use a ScopedPointer here because if the
-                             // object has a private destructor, both OwnedArray and
-                             // ScopedPointer would need to be friend classes..
         }
         else
         {
@@ -575,7 +567,7 @@ public:
     void remove (const int indexToRemove,
                  const bool deleteObject = true)
     {
-        ObjectClass* toDelete = nullptr;
+        ScopedPointer<ObjectClass> toDelete;
 
         {
             const ScopedLockType lock (getLock());
@@ -594,10 +586,6 @@ public:
                     memmove (e, e + 1, sizeof (ObjectClass*) * (size_t) numToShift);
             }
         }
-
-        delete toDelete; // don't want to use a ScopedPointer here because if the
-                         // object has a private destructor, both OwnedArray and
-                         // ScopedPointer would need to be friend classes..
 
         if ((numUsed << 1) < data.numAllocated)
             minimiseStorageOverheads();
@@ -686,7 +674,7 @@ public:
             {
                 for (int i = startIndex; i < endIndex; ++i)
                 {
-                    delete data.elements [i];
+                    ContainerDeletePolicy<ObjectClass>::destroy (data.elements [i]);
                     data.elements [i] = nullptr; // (in case one of the destructors accesses this array and hits a dangling pointer)
                 }
             }
@@ -889,7 +877,7 @@ private:
     void deleteAllObjects()
     {
         while (numUsed > 0)
-            delete data.elements [--numUsed];
+            ContainerDeletePolicy<ObjectClass>::destroy (data.elements [--numUsed]);
     }
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OwnedArray)

@@ -481,7 +481,7 @@ private:
     //==============================================================================
     class CallbackHandler;
     friend class CallbackHandler;
-    friend class ScopedPointer<CallbackHandler>;
+    friend struct ContainerDeletePolicy<CallbackHandler>;
     ScopedPointer<CallbackHandler> callbackHandler;
 
     void audioDeviceIOCallbackInt (const float** inputChannelData, int totalNumInputChannels,

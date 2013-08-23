@@ -29,15 +29,6 @@
 #ifndef JUCE_VARIANT_H_INCLUDED
 #define JUCE_VARIANT_H_INCLUDED
 
-#include "../text/juce_Identifier.h"
-#include "../streams/juce_OutputStream.h"
-#include "../streams/juce_InputStream.h"
-#include "../containers/juce_Array.h"
-
-#ifndef DOXYGEN
- class ReferenceCountedObject;
- class DynamicObject;
-#endif
 
 //==============================================================================
 /**

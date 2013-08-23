@@ -137,9 +137,9 @@ private:
     class ColourSpaceMarker;
     class HueSelectorMarker;
     friend class ColourSpaceView;
-    friend class ScopedPointer<ColourSpaceView>;
+    friend struct ContainerDeletePolicy<ColourSpaceView>;
     friend class HueSelectorComp;
-    friend class ScopedPointer<HueSelectorComp>;
+    friend struct ContainerDeletePolicy<HueSelectorComp>;
 
     Colour colour;
     float h, s, v;

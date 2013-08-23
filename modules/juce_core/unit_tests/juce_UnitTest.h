@@ -29,8 +29,6 @@
 #ifndef JUCE_UNITTEST_H_INCLUDED
 #define JUCE_UNITTEST_H_INCLUDED
 
-#include "../text/juce_StringArray.h"
-#include "../containers/juce_OwnedArray.h"
 class UnitTestRunner;
 
 

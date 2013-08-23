@@ -29,10 +29,6 @@
 #ifndef JUCE_GZIPCOMPRESSOROUTPUTSTREAM_H_INCLUDED
 #define JUCE_GZIPCOMPRESSOROUTPUTSTREAM_H_INCLUDED
 
-#include "../streams/juce_OutputStream.h"
-#include "../memory/juce_OptionalScopedPointer.h"
-#include "../memory/juce_HeapBlock.h"
-
 
 //==============================================================================
 /**
@@ -96,8 +92,8 @@ private:
     OptionalScopedPointer<OutputStream> destStream;
 
     class GZIPCompressorHelper;
-    friend class ScopedPointer <GZIPCompressorHelper>;
-    ScopedPointer <GZIPCompressorHelper> helper;
+    friend struct ContainerDeletePolicy<GZIPCompressorHelper>;
+    ScopedPointer<GZIPCompressorHelper> helper;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (GZIPCompressorOutputStream)
 };

@@ -30,8 +30,6 @@
 #include "juce_Rectangle.h"
 #include "../placement/juce_Justification.h"
 class Image;
-class InputStream;
-class OutputStream;
 
 
 //==============================================================================

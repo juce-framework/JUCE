@@ -29,8 +29,6 @@
 #ifndef JUCE_IDENTIFIER_H_INCLUDED
 #define JUCE_IDENTIFIER_H_INCLUDED
 
-class StringPool;
-
 
 //==============================================================================
 /**

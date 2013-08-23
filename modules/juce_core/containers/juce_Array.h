@@ -29,10 +29,6 @@
 #ifndef JUCE_ARRAY_H_INCLUDED
 #define JUCE_ARRAY_H_INCLUDED
 
-#include "juce_ArrayAllocationBase.h"
-#include "juce_ElementComparator.h"
-#include "../threads/juce_CriticalSection.h"
-
 
 //==============================================================================
 /**

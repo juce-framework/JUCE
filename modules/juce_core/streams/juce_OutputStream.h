@@ -29,12 +29,6 @@
 #ifndef JUCE_OUTPUTSTREAM_H_INCLUDED
 #define JUCE_OUTPUTSTREAM_H_INCLUDED
 
-#include "../text/juce_String.h"
-#include "../text/juce_NewLine.h"
-class InputStream;
-class MemoryBlock;
-class File;
-
 
 //==============================================================================
 /**

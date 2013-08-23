@@ -268,6 +268,7 @@
         <Filter Name="memory">
           <File RelativePath="..\..\..\..\modules\juce_core\memory\juce_Atomic.h"/>
           <File RelativePath="..\..\..\..\modules\juce_core\memory\juce_ByteOrder.h"/>
+          <File RelativePath="..\..\..\..\modules\juce_core\memory\juce_ContainerDeletePolicy.h"/>
           <File RelativePath="..\..\..\..\modules\juce_core\memory\juce_HeapBlock.h"/>
           <File RelativePath="..\..\..\..\modules\juce_core\memory\juce_LeakedObjectDetector.h"/>
           <File RelativePath="..\..\..\..\modules\juce_core\memory\juce_Memory.h"/>

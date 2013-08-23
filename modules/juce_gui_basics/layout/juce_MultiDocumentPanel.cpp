@@ -397,11 +397,12 @@ void MultiDocumentPanel::setLayoutMode (const LayoutMode newLayoutMode)
         {
             for (int i = getNumChildComponents(); --i >= 0;)
             {
-                if (MultiDocumentPanelWindow* const dw = dynamic_cast <MultiDocumentPanelWindow*> (getChildComponent (i)))
+                ScopedPointer<MultiDocumentPanelWindow> dw (dynamic_cast <MultiDocumentPanelWindow*> (getChildComponent (i)));
+
+                if (dw != nullptr)
                 {
                     dw->getContentComponent()->getProperties().set ("mdiDocumentPos_", dw->getWindowStateAsString());
                     dw->clearContentComponent();
-                    delete dw;
                 }
             }
         }

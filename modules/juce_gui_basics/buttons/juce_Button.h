@@ -453,8 +453,8 @@ private:
 
     class RepeatTimer;
     friend class RepeatTimer;
-    friend class ScopedPointer <RepeatTimer>;
-    ScopedPointer <RepeatTimer> repeatTimer;
+    friend struct ContainerDeletePolicy<RepeatTimer>;
+    ScopedPointer<RepeatTimer> repeatTimer;
     uint32 buttonPressTime, lastRepeatTime;
     ApplicationCommandManager* commandManagerToUse;
     int autoRepeatDelay, autoRepeatSpeed, autoRepeatMinimumDelay;

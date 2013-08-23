@@ -29,12 +29,6 @@
 #ifndef JUCE_XMLDOCUMENT_H_INCLUDED
 #define JUCE_XMLDOCUMENT_H_INCLUDED
 
-#include "juce_XmlElement.h"
-#include "../text/juce_StringArray.h"
-#include "../files/juce_File.h"
-#include "../memory/juce_ScopedPointer.h"
-class InputSource;
-
 
 //==============================================================================
 /**

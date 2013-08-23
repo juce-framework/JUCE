@@ -204,8 +204,8 @@ public:
     }
 
 private:
-    friend class OwnedArray <CachedGlyphType>;
-    OwnedArray <CachedGlyphType> glyphs;
+    friend struct ContainerDeletePolicy<CachedGlyphType>;
+    OwnedArray<CachedGlyphType> glyphs;
     Atomic<int> accessCounter, hits, misses;
     ReadWriteLock lock;
 

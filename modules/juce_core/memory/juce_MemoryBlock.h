@@ -29,9 +29,6 @@
 #ifndef JUCE_MEMORYBLOCK_H_INCLUDED
 #define JUCE_MEMORYBLOCK_H_INCLUDED
 
-#include "../text/juce_String.h"
-#include "../memory/juce_HeapBlock.h"
-
 
 //==============================================================================
 /**

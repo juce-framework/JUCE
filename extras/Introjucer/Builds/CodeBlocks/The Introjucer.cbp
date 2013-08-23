@@ -776,6 +776,10 @@
       <Option compile="0"/>
       <Option link="0"/>
     </Unit>
+    <Unit filename="../../../../modules/juce_core/memory/juce_ContainerDeletePolicy.h">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
     <Unit filename="../../../../modules/juce_core/memory/juce_HeapBlock.h">
       <Option compile="0"/>
       <Option link="0"/>
@@ -1797,10 +1801,6 @@
       <Option link="0"/>
     </Unit>
     <Unit filename="../../../../modules/juce_graphics/geometry/juce_RectangleList.h">
-      <Option compile="0"/>
-      <Option link="0"/>
-    </Unit>
-    <Unit filename="../../../../modules/juce_graphics/placement/juce_Justification.cpp">
       <Option compile="0"/>
       <Option link="0"/>
     </Unit>

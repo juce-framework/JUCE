@@ -328,7 +328,7 @@ private:
 
     class BehindFrontTabComp;
     friend class BehindFrontTabComp;
-    friend class ScopedPointer<BehindFrontTabComp>;
+    friend struct ContainerDeletePolicy<BehindFrontTabComp>;
     ScopedPointer<BehindFrontTabComp> behindFrontTab;
     ScopedPointer<Button> extraTabsButton;
 

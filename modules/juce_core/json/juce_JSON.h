@@ -29,12 +29,6 @@
 #ifndef JUCE_JSON_H_INCLUDED
 #define JUCE_JSON_H_INCLUDED
 
-#include "../misc/juce_Result.h"
-#include "../containers/juce_Variant.h"
-class InputStream;
-class OutputStream;
-class File;
-
 
 //==============================================================================
 /**

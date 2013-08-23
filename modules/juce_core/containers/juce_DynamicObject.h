@@ -29,9 +29,6 @@
 #ifndef JUCE_DYNAMICOBJECT_H_INCLUDED
 #define JUCE_DYNAMICOBJECT_H_INCLUDED
 
-#include "juce_NamedValueSet.h"
-#include "../memory/juce_ReferenceCountedObject.h"
-
 
 //==============================================================================
 /**
