@@ -25,8 +25,6 @@
 #ifndef JUCE_MIDIMESSAGESEQUENCE_H_INCLUDED
 #define JUCE_MIDIMESSAGESEQUENCE_H_INCLUDED
 
-#include "juce_MidiMessage.h"
-
 
 //==============================================================================
 /**

@@ -25,9 +25,6 @@
 #ifndef JUCE_IIRFILTERAUDIOSOURCE_H_INCLUDED
 #define JUCE_IIRFILTERAUDIOSOURCE_H_INCLUDED
 
-#include "juce_AudioSource.h"
-#include "../effects/juce_IIRFilter.h"
-
 
 //==============================================================================
 /**

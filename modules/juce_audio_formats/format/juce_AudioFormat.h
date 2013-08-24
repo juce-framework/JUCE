@@ -112,9 +112,7 @@ public:
     virtual AudioFormatReader* createReaderFor (InputStream* sourceStream,
                                                 bool deleteStreamIfOpeningFails) = 0;
 
-    /** Attempts to create a MemoryMappedAudioFormatReader, if possible for this
-        format.
-
+    /** Attempts to create a MemoryMappedAudioFormatReader, if possible for this format.
         If the format does not support this, the method will return nullptr;
     */
     virtual MemoryMappedAudioFormatReader* createMemoryMappedReader (const File& file);

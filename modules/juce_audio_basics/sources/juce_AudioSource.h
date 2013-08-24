@@ -25,8 +25,6 @@
 #ifndef JUCE_AUDIOSOURCE_H_INCLUDED
 #define JUCE_AUDIOSOURCE_H_INCLUDED
 
-#include "../buffers/juce_AudioSampleBuffer.h"
-
 
 //==============================================================================
 /**

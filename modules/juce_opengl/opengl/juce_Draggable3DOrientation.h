@@ -25,8 +25,6 @@
 #ifndef JUCE_DRAGGABLE3DORIENTATION_H_INCLUDED
 #define JUCE_DRAGGABLE3DORIENTATION_H_INCLUDED
 
-#include "juce_Quaternion.h"
-
 
 //==============================================================================
 /**

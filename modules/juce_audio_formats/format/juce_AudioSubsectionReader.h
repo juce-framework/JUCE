@@ -25,8 +25,6 @@
 #ifndef JUCE_AUDIOSUBSECTIONREADER_H_INCLUDED
 #define JUCE_AUDIOSUBSECTIONREADER_H_INCLUDED
 
-#include "juce_AudioFormatReader.h"
-
 
 //==============================================================================
 /**

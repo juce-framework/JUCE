@@ -41,7 +41,6 @@
 namespace juce
 {
 
-// START_AUTOINCLUDE documents, code_editor, embedding, lookandfeel, misc
 #include "documents/juce_FileBasedDocument.h"
 #include "code_editor/juce_CodeDocument.h"
 #include "code_editor/juce_CodeEditorComponent.h"
@@ -61,7 +60,6 @@ namespace juce
 #include "misc/juce_SplashScreen.h"
 #include "misc/juce_SystemTrayIconComponent.h"
 #include "misc/juce_WebBrowserComponent.h"
-// END_AUTOINCLUDE
 
 }
 

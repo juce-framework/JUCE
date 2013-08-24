@@ -25,6 +25,7 @@
 #ifndef JUCE_DECIBELS_H_INCLUDED
 #define JUCE_DECIBELS_H_INCLUDED
 
+
 //==============================================================================
 /**
     This class contains some helpful static methods for dealing with decibel values.

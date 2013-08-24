@@ -25,9 +25,6 @@
 #ifndef JUCE_SYNTHESISER_H_INCLUDED
 #define JUCE_SYNTHESISER_H_INCLUDED
 
-#include "../buffers/juce_AudioSampleBuffer.h"
-#include "../midi/juce_MidiBuffer.h"
-
 
 //==============================================================================
 /**

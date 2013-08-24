@@ -25,8 +25,6 @@
 #ifndef JUCE_TONEGENERATORAUDIOSOURCE_H_INCLUDED
 #define JUCE_TONEGENERATORAUDIOSOURCE_H_INCLUDED
 
-#include "juce_AudioSource.h"
-
 
 //==============================================================================
 /**

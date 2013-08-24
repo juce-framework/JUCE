@@ -25,8 +25,6 @@
 #ifndef JUCE_BUFFERINGAUDIOSOURCE_H_INCLUDED
 #define JUCE_BUFFERINGAUDIOSOURCE_H_INCLUDED
 
-#include "juce_PositionableAudioSource.h"
-
 
 //==============================================================================
 /**

@@ -25,9 +25,6 @@
 #ifndef JUCE_REVERBAUDIOSOURCE_H_INCLUDED
 #define JUCE_REVERBAUDIOSOURCE_H_INCLUDED
 
-#include "juce_AudioSource.h"
-#include "../effects/juce_Reverb.h"
-
 
 //==============================================================================
 /**

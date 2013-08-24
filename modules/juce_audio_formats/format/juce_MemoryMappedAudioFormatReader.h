@@ -25,6 +25,7 @@
 #ifndef JUCE_MEMORYMAPPEDAUDIOFORMATREADER_H_INCLUDED
 #define JUCE_MEMORYMAPPEDAUDIOFORMATREADER_H_INCLUDED
 
+
 //==============================================================================
 /**
     A specialised type of AudioFormatReader that uses a MemoryMappedFile to read

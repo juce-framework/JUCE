@@ -25,6 +25,7 @@
 #ifndef JUCE_OPENGLRENDERER_H_INCLUDED
 #define JUCE_OPENGLRENDERER_H_INCLUDED
 
+
 //==============================================================================
 /**
     A base class that should be implemented by classes which want to render openGL

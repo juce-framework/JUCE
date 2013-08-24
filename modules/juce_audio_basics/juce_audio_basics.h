@@ -31,7 +31,6 @@
 namespace juce
 {
 
-// START_AUTOINCLUDE buffers, effects, midi, sources, synthesisers
 #include "buffers/juce_AudioDataConverters.h"
 #include "buffers/juce_AudioSampleBuffer.h"
 #include "buffers/juce_FloatVectorOperations.h"
@@ -39,22 +38,21 @@ namespace juce
 #include "effects/juce_IIRFilter.h"
 #include "effects/juce_LagrangeInterpolator.h"
 #include "effects/juce_Reverb.h"
+#include "midi/juce_MidiMessage.h"
 #include "midi/juce_MidiBuffer.h"
+#include "midi/juce_MidiMessageSequence.h"
 #include "midi/juce_MidiFile.h"
 #include "midi/juce_MidiKeyboardState.h"
-#include "midi/juce_MidiMessage.h"
-#include "midi/juce_MidiMessageSequence.h"
 #include "sources/juce_AudioSource.h"
+#include "sources/juce_PositionableAudioSource.h"
 #include "sources/juce_BufferingAudioSource.h"
 #include "sources/juce_ChannelRemappingAudioSource.h"
 #include "sources/juce_IIRFilterAudioSource.h"
 #include "sources/juce_MixerAudioSource.h"
-#include "sources/juce_PositionableAudioSource.h"
 #include "sources/juce_ResamplingAudioSource.h"
 #include "sources/juce_ReverbAudioSource.h"
 #include "sources/juce_ToneGeneratorAudioSource.h"
 #include "synthesisers/juce_Synthesiser.h"
-// END_AUTOINCLUDE
 
 }
 

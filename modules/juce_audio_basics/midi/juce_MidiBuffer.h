@@ -25,8 +25,6 @@
 #ifndef JUCE_MIDIBUFFER_H_INCLUDED
 #define JUCE_MIDIBUFFER_H_INCLUDED
 
-#include "juce_MidiMessage.h"
-
 
 //==============================================================================
 /**

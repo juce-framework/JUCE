@@ -77,23 +77,25 @@
 namespace juce
 {
 
-#include "opengl/juce_OpenGLHelpers.h"
+class OpenGLTexture;
+class OpenGLFrameBuffer;
 
-// START_AUTOINCLUDE opengl
-#include "opengl/juce_Draggable3DOrientation.h"
+#include "opengl/juce_OpenGLHelpers.h"
+#include "opengl/juce_Quaternion.h"
 #include "opengl/juce_Matrix3D.h"
+#include "opengl/juce_Draggable3DOrientation.h"
+#include "opengl/juce_OpenGLPixelFormat.h"
+#include "native/juce_OpenGLExtensions.h"
+#include "opengl/juce_OpenGLRenderer.h"
 #include "opengl/juce_OpenGLContext.h"
 #include "opengl/juce_OpenGLFrameBuffer.h"
 #include "opengl/juce_OpenGLGraphicsContext.h"
 #include "opengl/juce_OpenGLHelpers.h"
 #include "opengl/juce_OpenGLImage.h"
-#include "opengl/juce_OpenGLPixelFormat.h"
 #include "opengl/juce_OpenGLRenderer.h"
 #include "opengl/juce_OpenGLShaderProgram.h"
 #include "opengl/juce_OpenGLTexture.h"
-#include "opengl/juce_Quaternion.h"
 #include "opengl/juce_Vector3D.h"
-// END_AUTOINCLUDE
 
 }
 

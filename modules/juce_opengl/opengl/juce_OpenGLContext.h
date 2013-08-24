@@ -25,10 +25,6 @@
 #ifndef JUCE_OPENGLCONTEXT_H_INCLUDED
 #define JUCE_OPENGLCONTEXT_H_INCLUDED
 
-#include "juce_OpenGLPixelFormat.h"
-#include "../native/juce_OpenGLExtensions.h"
-#include "juce_OpenGLRenderer.h"
-
 
 //==============================================================================
 /**
