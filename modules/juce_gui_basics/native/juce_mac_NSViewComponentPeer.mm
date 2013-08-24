@@ -632,9 +632,11 @@ public:
         const String unicode (nsStringToJuce ([ev characters]));
         const int keyCode = getKeyCodeFromEvent (ev);
 
-        //DBG ("unicode: " + unicode + " " + String::toHexString ((int) unicode[0]));
-        //String unmodified (nsStringToJuce ([ev charactersIgnoringModifiers]));
-        //DBG ("unmodified: " + unmodified + " " + String::toHexString ((int) unmodified[0]));
+       #if JUCE_DEBUG_KEYCODES
+        DBG ("unicode: " + unicode + " " + String::toHexString ((int) unicode[0]));
+        String unmodified (nsStringToJuce ([ev charactersIgnoringModifiers]));
+        DBG ("unmodified: " + unmodified + " " + String::toHexString ((int) unmodified[0]));
+       #endif
 
         if (keyCode != 0 || unicode.isNotEmpty())
         {
@@ -661,7 +663,8 @@ public:
                             break; // (these all seem to generate unwanted garbage unicode strings)
 
                         default:
-                            if (([ev modifierFlags] & NSCommandKeyMask) != 0)
+                            if (([ev modifierFlags] & NSCommandKeyMask) != 0
+                                 || (keyCode >= NSF1FunctionKey && keyCode <= NSF35FunctionKey))
                                 textCharacter = 0;
                             break;
                     }
