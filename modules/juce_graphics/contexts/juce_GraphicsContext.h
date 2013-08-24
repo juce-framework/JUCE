@@ -25,17 +25,6 @@
 #ifndef JUCE_GRAPHICSCONTEXT_H_INCLUDED
 #define JUCE_GRAPHICSCONTEXT_H_INCLUDED
 
-#include "../fonts/juce_Font.h"
-#include "../geometry/juce_RectangleList.h"
-#include "../geometry/juce_PathStrokeType.h"
-#include "../geometry/juce_Line.h"
-#include "../colour/juce_Colours.h"
-#include "../colour/juce_ColourGradient.h"
-#include "../placement/juce_RectanglePlacement.h"
-class LowLevelGraphicsContext;
-class Image;
-class FillType;
-
 
 //==============================================================================
 /**

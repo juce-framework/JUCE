@@ -25,8 +25,6 @@
 #ifndef JUCE_POINT_H_INCLUDED
 #define JUCE_POINT_H_INCLUDED
 
-#include "juce_AffineTransform.h"
-
 
 //==============================================================================
 /**

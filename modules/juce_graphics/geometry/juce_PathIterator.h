@@ -25,8 +25,6 @@
 #ifndef JUCE_PATHITERATOR_H_INCLUDED
 #define JUCE_PATHITERATOR_H_INCLUDED
 
-#include "juce_Path.h"
-
 
 //==============================================================================
 /**

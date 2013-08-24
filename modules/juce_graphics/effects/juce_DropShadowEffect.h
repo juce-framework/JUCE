@@ -25,8 +25,6 @@
 #ifndef JUCE_DROPSHADOWEFFECT_H_INCLUDED
 #define JUCE_DROPSHADOWEFFECT_H_INCLUDED
 
-#include "juce_ImageEffectFilter.h"
-
 
 //==============================================================================
 /**

@@ -64,43 +64,49 @@
 namespace juce
 {
 
-// START_AUTOINCLUDE colour, geometry, placement, contexts, images,
-// image_formats, fonts, effects
+class Image;
+class AffineTransform;
+class Path;
+class Font;
+class Graphics;
+class FillType;
+class LowLevelGraphicsContext;
+
+#include "geometry/juce_AffineTransform.h"
+#include "geometry/juce_Point.h"
+#include "geometry/juce_Line.h"
+#include "geometry/juce_Rectangle.h"
+#include "placement/juce_Justification.h"
+#include "geometry/juce_Path.h"
+#include "geometry/juce_RectangleList.h"
+#include "colour/juce_PixelFormats.h"
 #include "colour/juce_Colour.h"
 #include "colour/juce_ColourGradient.h"
 #include "colour/juce_Colours.h"
-#include "colour/juce_FillType.h"
-#include "colour/juce_PixelFormats.h"
-#include "geometry/juce_AffineTransform.h"
 #include "geometry/juce_BorderSize.h"
 #include "geometry/juce_EdgeTable.h"
-#include "geometry/juce_Line.h"
-#include "geometry/juce_Path.h"
 #include "geometry/juce_PathIterator.h"
 #include "geometry/juce_PathStrokeType.h"
-#include "geometry/juce_Point.h"
-#include "geometry/juce_Rectangle.h"
-#include "geometry/juce_RectangleList.h"
-#include "placement/juce_Justification.h"
 #include "placement/juce_RectanglePlacement.h"
-#include "contexts/juce_GraphicsContext.h"
-#include "contexts/juce_LowLevelGraphicsContext.h"
-#include "contexts/juce_LowLevelGraphicsPostScriptRenderer.h"
-#include "contexts/juce_LowLevelGraphicsSoftwareRenderer.h"
-#include "images/juce_Image.h"
 #include "images/juce_ImageCache.h"
 #include "images/juce_ImageConvolutionKernel.h"
 #include "images/juce_ImageFileFormat.h"
 #include "fonts/juce_AttributedString.h"
-#include "fonts/juce_CustomTypeface.h"
+#include "fonts/juce_Typeface.h"
 #include "fonts/juce_Font.h"
 #include "fonts/juce_GlyphArrangement.h"
 #include "fonts/juce_TextLayout.h"
-#include "fonts/juce_Typeface.h"
+#include "fonts/juce_CustomTypeface.h"
+#include "contexts/juce_GraphicsContext.h"
+#include "contexts/juce_LowLevelGraphicsContext.h"
+#include "images/juce_Image.h"
+#include "colour/juce_FillType.h"
+#include "native/juce_RenderingHelpers.h"
+#include "contexts/juce_LowLevelGraphicsSoftwareRenderer.h"
+#include "contexts/juce_LowLevelGraphicsPostScriptRenderer.h"
+#include "effects/juce_ImageEffectFilter.h"
 #include "effects/juce_DropShadowEffect.h"
 #include "effects/juce_GlowEffect.h"
-#include "effects/juce_ImageEffectFilter.h"
-// END_AUTOINCLUDE
 
 }
 

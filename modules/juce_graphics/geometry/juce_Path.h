@@ -25,12 +25,6 @@
 #ifndef JUCE_PATH_H_INCLUDED
 #define JUCE_PATH_H_INCLUDED
 
-#include "juce_AffineTransform.h"
-#include "juce_Line.h"
-#include "juce_Rectangle.h"
-#include "../placement/juce_Justification.h"
-class Image;
-
 
 //==============================================================================
 /**

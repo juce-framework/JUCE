@@ -25,8 +25,6 @@
 #ifndef JUCE_JUSTIFICATION_H_INCLUDED
 #define JUCE_JUSTIFICATION_H_INCLUDED
 
-#include "../geometry/juce_Rectangle.h"
-
 
 //==============================================================================
 /**

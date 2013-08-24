@@ -25,8 +25,6 @@
 #ifndef JUCE_PATHSTROKETYPE_H_INCLUDED
 #define JUCE_PATHSTROKETYPE_H_INCLUDED
 
-#include "juce_Path.h"
-
 
 //==============================================================================
 /**

@@ -25,9 +25,6 @@
 #ifndef JUCE_RECTANGLELIST_H_INCLUDED
 #define JUCE_RECTANGLELIST_H_INCLUDED
 
-#include "juce_Rectangle.h"
-#include "juce_Path.h"
-
 
 //==============================================================================
 /**

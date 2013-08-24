@@ -25,8 +25,6 @@
 #ifndef JUCE_IMAGECONVOLUTIONKERNEL_H_INCLUDED
 #define JUCE_IMAGECONVOLUTIONKERNEL_H_INCLUDED
 
-#include "juce_Image.h"
-
 
 //==============================================================================
 /**

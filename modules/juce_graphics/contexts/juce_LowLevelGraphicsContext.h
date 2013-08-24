@@ -25,12 +25,6 @@
 #ifndef JUCE_LOWLEVELGRAPHICSCONTEXT_H_INCLUDED
 #define JUCE_LOWLEVELGRAPHICSCONTEXT_H_INCLUDED
 
-#include "../images/juce_Image.h"
-#include "../geometry/juce_Path.h"
-#include "../geometry/juce_RectangleList.h"
-#include "../colour/juce_ColourGradient.h"
-#include "../colour/juce_FillType.h"
-class AttributedString;
 
 //==============================================================================
 /**

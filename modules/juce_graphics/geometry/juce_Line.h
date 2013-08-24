@@ -25,8 +25,6 @@
 #ifndef JUCE_LINE_H_INCLUDED
 #define JUCE_LINE_H_INCLUDED
 
-#include "juce_Point.h"
-
 
 //==============================================================================
 /**

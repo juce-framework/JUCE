@@ -25,8 +25,6 @@
 #ifndef JUCE_BORDERSIZE_H_INCLUDED
 #define JUCE_BORDERSIZE_H_INCLUDED
 
-#include "juce_Rectangle.h"
-
 
 //==============================================================================
 /**

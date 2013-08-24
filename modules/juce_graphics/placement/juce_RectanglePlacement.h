@@ -25,9 +25,6 @@
 #ifndef JUCE_RECTANGLEPLACEMENT_H_INCLUDED
 #define JUCE_RECTANGLEPLACEMENT_H_INCLUDED
 
-#include "../geometry/juce_AffineTransform.h"
-#include "../geometry/juce_Rectangle.h"
-
 
 //==============================================================================
 /**

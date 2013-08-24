@@ -25,9 +25,6 @@
 #ifndef JUCE_GLYPHARRANGEMENT_H_INCLUDED
 #define JUCE_GLYPHARRANGEMENT_H_INCLUDED
 
-#include "juce_Font.h"
-#include "../contexts/juce_GraphicsContext.h"
-
 
 //==============================================================================
 /**

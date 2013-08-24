@@ -25,12 +25,6 @@
 #ifndef JUCE_EDGETABLE_H_INCLUDED
 #define JUCE_EDGETABLE_H_INCLUDED
 
-#include "../geometry/juce_AffineTransform.h"
-#include "../geometry/juce_Rectangle.h"
-#include "../geometry/juce_RectangleList.h"
-class Path;
-class Image;
-
 
 //==============================================================================
 /**

@@ -25,8 +25,6 @@
 #ifndef JUCE_COLOURS_H_INCLUDED
 #define JUCE_COLOURS_H_INCLUDED
 
-#include "juce_Colour.h"
-
 
 //==============================================================================
 /**

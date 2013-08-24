@@ -25,8 +25,6 @@
 #ifndef JUCE_LOWLEVELGRAPHICSPOSTSCRIPTRENDERER_H_INCLUDED
 #define JUCE_LOWLEVELGRAPHICSPOSTSCRIPTRENDERER_H_INCLUDED
 
-#include "juce_LowLevelGraphicsContext.h"
-
 
 //==============================================================================
 /**

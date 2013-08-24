@@ -25,8 +25,6 @@
 #ifndef JUCE_GLOWEFFECT_H_INCLUDED
 #define JUCE_GLOWEFFECT_H_INCLUDED
 
-#include "juce_ImageEffectFilter.h"
-
 
 //==============================================================================
 /**

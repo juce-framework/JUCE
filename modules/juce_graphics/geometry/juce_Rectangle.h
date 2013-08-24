@@ -25,8 +25,6 @@
 #ifndef JUCE_RECTANGLE_H_INCLUDED
 #define JUCE_RECTANGLE_H_INCLUDED
 
-#include "juce_Point.h"
-
 
 //==============================================================================
 /**

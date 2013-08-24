@@ -25,8 +25,6 @@
 #ifndef JUCE_IMAGEFILEFORMAT_H_INCLUDED
 #define JUCE_IMAGEFILEFORMAT_H_INCLUDED
 
-#include "juce_Image.h"
-
 
 //==============================================================================
 /**

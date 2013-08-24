@@ -25,9 +25,6 @@
 #ifndef JUCE_IMAGE_H_INCLUDED
 #define JUCE_IMAGE_H_INCLUDED
 
-#include "../colour/juce_Colour.h"
-#include "../contexts/juce_GraphicsContext.h"
-
 class ImageType;
 class ImagePixelData;
 

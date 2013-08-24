@@ -25,9 +25,6 @@
 #ifndef JUCE_FONT_H_INCLUDED
 #define JUCE_FONT_H_INCLUDED
 
-#include "juce_Typeface.h"
-class LowLevelGraphicsContext;
-
 
 //==============================================================================
 /**

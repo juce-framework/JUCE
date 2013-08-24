@@ -25,8 +25,6 @@
 #ifndef JUCE_LOWLEVELGRAPHICSSOFTWARERENDERER_H_INCLUDED
 #define JUCE_LOWLEVELGRAPHICSSOFTWARERENDERER_H_INCLUDED
 
-#include "juce_LowLevelGraphicsContext.h"
-#include "../native/juce_RenderingHelpers.h"
 
 //==============================================================================
 /**
