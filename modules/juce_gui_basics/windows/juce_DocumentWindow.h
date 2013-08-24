@@ -25,10 +25,6 @@
 #ifndef JUCE_DOCUMENTWINDOW_H_INCLUDED
 #define JUCE_DOCUMENTWINDOW_H_INCLUDED
 
-#include "juce_ResizableWindow.h"
-#include "../buttons/juce_Button.h"
-#include "../menus/juce_MenuBarModel.h"
-
 
 //==============================================================================
 /**

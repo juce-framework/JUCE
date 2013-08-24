@@ -25,11 +25,6 @@
 #ifndef JUCE_FILESEARCHPATHLISTCOMPONENT_H_INCLUDED
 #define JUCE_FILESEARCHPATHLISTCOMPONENT_H_INCLUDED
 
-#include "../widgets/juce_ListBox.h"
-#include "../buttons/juce_DrawableButton.h"
-#include "../buttons/juce_TextButton.h"
-#include "../mouse/juce_FileDragAndDropTarget.h"
-
 
 //==============================================================================
 /**

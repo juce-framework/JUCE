@@ -25,8 +25,6 @@
 #ifndef JUCE_RELATIVEPARALLELOGRAM_H_INCLUDED
 #define JUCE_RELATIVEPARALLELOGRAM_H_INCLUDED
 
-#include "juce_RelativePoint.h"
-
 
 //==============================================================================
 /**

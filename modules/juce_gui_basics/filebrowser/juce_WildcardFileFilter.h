@@ -25,8 +25,6 @@
 #ifndef JUCE_WILDCARDFILEFILTER_H_INCLUDED
 #define JUCE_WILDCARDFILEFILTER_H_INCLUDED
 
-#include "juce_FileFilter.h"
-
 
 //==============================================================================
 /**

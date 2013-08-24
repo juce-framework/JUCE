@@ -25,6 +25,7 @@
 #ifndef JUCE_ANIMATEDPOSITION_H_INCLUDED
 #define JUCE_ANIMATEDPOSITION_H_INCLUDED
 
+
 //==============================================================================
 /**
     Models a 1-dimensional position that can be dragged around by the user, and which

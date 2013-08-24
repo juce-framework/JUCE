@@ -25,9 +25,6 @@
 #ifndef JUCE_TOOLBAR_H_INCLUDED
 #define JUCE_TOOLBAR_H_INCLUDED
 
-#include "../mouse/juce_DragAndDropContainer.h"
-#include "../layout/juce_ComponentAnimator.h"
-#include "../buttons/juce_Button.h"
 class ToolbarItemComponent;
 class ToolbarItemFactory;
 

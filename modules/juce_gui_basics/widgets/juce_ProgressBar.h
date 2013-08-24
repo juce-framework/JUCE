@@ -25,8 +25,6 @@
 #ifndef JUCE_PROGRESSBAR_H_INCLUDED
 #define JUCE_PROGRESSBAR_H_INCLUDED
 
-#include "../components/juce_Component.h"
-#include "../mouse/juce_TooltipClient.h"
 
 //==============================================================================
 /**

@@ -25,9 +25,6 @@
 #ifndef JUCE_APPLICATIONCOMMANDTARGET_H_INCLUDED
 #define JUCE_APPLICATIONCOMMANDTARGET_H_INCLUDED
 
-#include "juce_ApplicationCommandInfo.h"
-class Component;
-
 
 //==============================================================================
 /**

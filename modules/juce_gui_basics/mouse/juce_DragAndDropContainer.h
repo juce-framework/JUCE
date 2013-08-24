@@ -25,8 +25,6 @@
 #ifndef JUCE_DRAGANDDROPCONTAINER_H_INCLUDED
 #define JUCE_DRAGANDDROPCONTAINER_H_INCLUDED
 
-#include "juce_DragAndDropTarget.h"
-
 
 //==============================================================================
 /**

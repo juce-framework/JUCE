@@ -25,12 +25,6 @@
 #ifndef JUCE_FILEBROWSERCOMPONENT_H_INCLUDED
 #define JUCE_FILEBROWSERCOMPONENT_H_INCLUDED
 
-#include "juce_DirectoryContentsDisplayComponent.h"
-#include "juce_FilePreviewComponent.h"
-#include "../widgets/juce_TextEditor.h"
-#include "../widgets/juce_ComboBox.h"
-#include "../buttons/juce_DrawableButton.h"
-
 
 //==============================================================================
 /**

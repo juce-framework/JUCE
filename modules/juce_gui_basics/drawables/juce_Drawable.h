@@ -25,12 +25,6 @@
 #ifndef JUCE_DRAWABLE_H_INCLUDED
 #define JUCE_DRAWABLE_H_INCLUDED
 
-#include "../components/juce_Component.h"
-#include "../positioning/juce_RelativeCoordinate.h"
-#include "../positioning/juce_RelativeCoordinatePositioner.h"
-#include "../layout/juce_ComponentBuilder.h"
-class DrawableComposite;
-
 
 //==============================================================================
 /**

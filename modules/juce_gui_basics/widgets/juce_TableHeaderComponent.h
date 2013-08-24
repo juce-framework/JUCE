@@ -25,8 +25,6 @@
 #ifndef JUCE_TABLEHEADERCOMPONENT_H_INCLUDED
 #define JUCE_TABLEHEADERCOMPONENT_H_INCLUDED
 
-#include "../menus/juce_PopupMenu.h"
-
 
 //==============================================================================
 /**

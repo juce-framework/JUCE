@@ -25,8 +25,6 @@
 #ifndef JUCE_KEYBOARDFOCUSTRAVERSER_H_INCLUDED
 #define JUCE_KEYBOARDFOCUSTRAVERSER_H_INCLUDED
 
-class Component;
-
 
 //==============================================================================
 /**

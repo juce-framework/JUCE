@@ -25,8 +25,6 @@
 #ifndef JUCE_RESIZABLECORNERCOMPONENT_H_INCLUDED
 #define JUCE_RESIZABLECORNERCOMPONENT_H_INCLUDED
 
-#include "juce_ComponentBoundsConstrainer.h"
-
 
 //==============================================================================
 /** A component that resizes a parent component when dragged.

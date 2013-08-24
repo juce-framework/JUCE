@@ -25,8 +25,6 @@
 #ifndef JUCE_MULTIDOCUMENTPANEL_H_INCLUDED
 #define JUCE_MULTIDOCUMENTPANEL_H_INCLUDED
 
-#include "juce_TabbedComponent.h"
-#include "../windows/juce_DocumentWindow.h"
 class MultiDocumentPanel;
 
 

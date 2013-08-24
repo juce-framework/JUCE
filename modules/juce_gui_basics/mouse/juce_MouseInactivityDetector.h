@@ -25,6 +25,7 @@
 #ifndef JUCE_MOUSEINACTIVITYDETECTOR_H_INCLUDED
 #define JUCE_MOUSEINACTIVITYDETECTOR_H_INCLUDED
 
+
 //==============================================================================
 /**
     This object watches for mouse-events happening within a component, and if

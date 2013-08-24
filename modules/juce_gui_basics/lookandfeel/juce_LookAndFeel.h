@@ -25,38 +25,6 @@
 #ifndef JUCE_LOOKANDFEEL_H_INCLUDED
 #define JUCE_LOOKANDFEEL_H_INCLUDED
 
-#include "../widgets/juce_Slider.h"
-#include "../layout/juce_TabbedComponent.h"
-#include "../windows/juce_AlertWindow.h"
-
-class ToggleButton;
-class TextButton;
-class AlertWindow;
-class TextLayout;
-class ScrollBar;
-class ComboBox;
-class Button;
-class FilenameComponent;
-class DocumentWindow;
-class ResizableWindow;
-class GroupComponent;
-class MenuBarComponent;
-class DropShadower;
-class GlyphArrangement;
-class PropertyComponent;
-class TableHeaderComponent;
-class Toolbar;
-class ToolbarItemComponent;
-class PopupMenu;
-class ProgressBar;
-class FileBrowserComponent;
-class DirectoryContentsDisplayComponent;
-class FilePreviewComponent;
-class ImageButton;
-class CallOutBox;
-class Drawable;
-class CaretComponent;
-class BubbleComponent;
 
 //==============================================================================
 /**

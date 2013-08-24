@@ -25,8 +25,6 @@
 #ifndef JUCE_LISTBOX_H_INCLUDED
 #define JUCE_LISTBOX_H_INCLUDED
 
-#include "../layout/juce_Viewport.h"
-
 
 //==============================================================================
 /**

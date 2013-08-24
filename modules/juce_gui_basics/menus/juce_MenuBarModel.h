@@ -25,8 +25,6 @@
 #ifndef JUCE_MENUBARMODEL_H_INCLUDED
 #define JUCE_MENUBARMODEL_H_INCLUDED
 
-#include "juce_PopupMenu.h"
-
 
 //==============================================================================
 /**

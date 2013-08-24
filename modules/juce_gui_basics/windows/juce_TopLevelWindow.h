@@ -25,9 +25,6 @@
 #ifndef JUCE_TOPLEVELWINDOW_H_INCLUDED
 #define JUCE_TOPLEVELWINDOW_H_INCLUDED
 
-#include "../components/juce_Component.h"
-#include "../misc/juce_DropShadower.h"
-
 
 //==============================================================================
 /**
@@ -153,7 +150,7 @@ protected:
 private:
     friend class TopLevelWindowManager;
     bool useDropShadow, useNativeTitleBar, isCurrentlyActive;
-    ScopedPointer <DropShadower> shadower;
+    ScopedPointer<DropShadower> shadower;
 
     void setWindowActive (bool isNowActive);
 

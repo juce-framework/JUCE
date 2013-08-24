@@ -25,8 +25,6 @@
 #ifndef JUCE_TEXTEDITORKEYMAPPER_H_INCLUDED
 #define JUCE_TEXTEDITORKEYMAPPER_H_INCLUDED
 
-#include "juce_KeyPress.h"
-
 
 //==============================================================================
 /** This class is used to invoke a range of text-editor navigation methods on

@@ -25,11 +25,6 @@
 #ifndef JUCE_APPLICATIONCOMMANDMANAGER_H_INCLUDED
 #define JUCE_APPLICATIONCOMMANDMANAGER_H_INCLUDED
 
-#include "juce_ApplicationCommandTarget.h"
-class KeyPressMappingSet;
-class ApplicationCommandManagerListener;
-class Desktop;
-
 
 //==============================================================================
 /**

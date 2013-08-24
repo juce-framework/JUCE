@@ -25,8 +25,6 @@
 #ifndef JUCE_DIALOGWINDOW_H_INCLUDED
 #define JUCE_DIALOGWINDOW_H_INCLUDED
 
-#include "juce_DocumentWindow.h"
-
 
 //==============================================================================
 /**

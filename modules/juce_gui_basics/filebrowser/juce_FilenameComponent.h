@@ -25,11 +25,6 @@
 #ifndef JUCE_FILENAMECOMPONENT_H_INCLUDED
 #define JUCE_FILENAMECOMPONENT_H_INCLUDED
 
-#include "../widgets/juce_ComboBox.h"
-#include "../buttons/juce_TextButton.h"
-#include "../mouse/juce_FileDragAndDropTarget.h"
-class FilenameComponent;
-
 
 //==============================================================================
 /**

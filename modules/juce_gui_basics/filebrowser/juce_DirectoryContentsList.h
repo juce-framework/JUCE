@@ -25,8 +25,6 @@
 #ifndef JUCE_DIRECTORYCONTENTSLIST_H_INCLUDED
 #define JUCE_DIRECTORYCONTENTSLIST_H_INCLUDED
 
-#include "juce_FileFilter.h"
-
 
 //==============================================================================
 /**

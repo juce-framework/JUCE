@@ -25,9 +25,6 @@
 #ifndef JUCE_TABLELISTBOX_H_INCLUDED
 #define JUCE_TABLELISTBOX_H_INCLUDED
 
-#include "juce_TableHeaderComponent.h"
-#include "juce_ListBox.h"
-
 
 //==============================================================================
 /**

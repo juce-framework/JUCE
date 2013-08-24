@@ -25,11 +25,6 @@
 #ifndef JUCE_FILELISTCOMPONENT_H_INCLUDED
 #define JUCE_FILELISTCOMPONENT_H_INCLUDED
 
-#include "juce_DirectoryContentsDisplayComponent.h"
-#include "juce_FileBrowserListener.h"
-#include "../widgets/juce_ListBox.h"
-#include "../widgets/juce_TreeView.h"
-
 
 //==============================================================================
 /**

@@ -25,6 +25,7 @@
 #ifndef JUCE_CONCERTINAPANEL_H_INCLUDED
 #define JUCE_CONCERTINAPANEL_H_INCLUDED
 
+
 //==============================================================================
 /**
     A panel which holds a vertical stack of components which can be expanded

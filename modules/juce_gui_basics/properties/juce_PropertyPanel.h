@@ -25,9 +25,6 @@
 #ifndef JUCE_PROPERTYPANEL_H_INCLUDED
 #define JUCE_PROPERTYPANEL_H_INCLUDED
 
-#include "juce_PropertyComponent.h"
-#include "../layout/juce_Viewport.h"
-
 
 //==============================================================================
 /**

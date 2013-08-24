@@ -25,12 +25,6 @@
 #ifndef JUCE_COMPONENTPEER_H_INCLUDED
 #define JUCE_COMPONENTPEER_H_INCLUDED
 
-#include "../components/juce_Component.h"
-#include "../mouse/juce_MouseCursor.h"
-#include "../keyboard/juce_TextInputTarget.h"
-
-class ComponentBoundsConstrainer;
-
 
 //==============================================================================
 /**

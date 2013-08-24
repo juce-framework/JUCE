@@ -25,9 +25,6 @@
 #ifndef JUCE_STRETCHABLELAYOUTRESIZERBAR_H_INCLUDED
 #define JUCE_STRETCHABLELAYOUTRESIZERBAR_H_INCLUDED
 
-#include "../components/juce_Component.h"
-#include "juce_StretchableLayoutManager.h"
-
 
 //==============================================================================
 /**

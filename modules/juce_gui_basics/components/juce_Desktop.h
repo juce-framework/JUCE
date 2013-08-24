@@ -25,12 +25,6 @@
 #ifndef JUCE_DESKTOP_H_INCLUDED
 #define JUCE_DESKTOP_H_INCLUDED
 
-#include "juce_Component.h"
-#include "../layout/juce_ComponentAnimator.h"
-class MouseInputSource;
-class MouseInputSourceInternal;
-class MouseListener;
-
 
 //==============================================================================
 /**

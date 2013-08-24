@@ -117,6 +117,7 @@ public:
                                     for all users (you might not have permission to do this
                                     unless running in an installer). If true, it will register the
                                     association in HKEY_CURRENT_USER.
+        @param mode                 the WoW64 mode to use for choosing the database
     */
     static bool registerFileAssociation (const String& fileExtension,
                                          const String& symbolicDescription,

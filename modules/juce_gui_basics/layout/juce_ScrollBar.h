@@ -25,8 +25,6 @@
 #ifndef JUCE_SCROLLBAR_H_INCLUDED
 #define JUCE_SCROLLBAR_H_INCLUDED
 
-#include "../buttons/juce_Button.h"
-class Viewport;
 
 //==============================================================================
 /**

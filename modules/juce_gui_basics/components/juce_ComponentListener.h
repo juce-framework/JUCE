@@ -25,8 +25,6 @@
 #ifndef JUCE_COMPONENTLISTENER_H_INCLUDED
 #define JUCE_COMPONENTLISTENER_H_INCLUDED
 
-class Component;
-
 
 //==============================================================================
 /**

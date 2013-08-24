@@ -25,9 +25,6 @@
 #ifndef JUCE_IMAGECOMPONENT_H_INCLUDED
 #define JUCE_IMAGECOMPONENT_H_INCLUDED
 
-#include "../components/juce_Component.h"
-#include "../mouse/juce_TooltipClient.h"
-
 
 //==============================================================================
 /**

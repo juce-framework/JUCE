@@ -25,8 +25,6 @@
 #ifndef JUCE_COMBOBOX_H_INCLUDED
 #define JUCE_COMBOBOX_H_INCLUDED
 
-#include "juce_Label.h"
-
 
 //==============================================================================
 /**

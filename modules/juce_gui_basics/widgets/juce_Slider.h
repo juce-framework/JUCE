@@ -25,8 +25,6 @@
 #ifndef JUCE_SLIDER_H_INCLUDED
 #define JUCE_SLIDER_H_INCLUDED
 
-#include "juce_Label.h"
-#include "../buttons/juce_Button.h"
 
 //==============================================================================
 /**

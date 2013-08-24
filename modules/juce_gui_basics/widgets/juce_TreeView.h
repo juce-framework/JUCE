@@ -25,9 +25,6 @@
 #ifndef JUCE_TREEVIEW_H_INCLUDED
 #define JUCE_TREEVIEW_H_INCLUDED
 
-#include "../layout/juce_Viewport.h"
-#include "../mouse/juce_FileDragAndDropTarget.h"
-#include "../mouse/juce_DragAndDropTarget.h"
 class TreeView;
 
 

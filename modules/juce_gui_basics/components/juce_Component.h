@@ -25,22 +25,6 @@
 #ifndef JUCE_COMPONENT_H_INCLUDED
 #define JUCE_COMPONENT_H_INCLUDED
 
-#include "../mouse/juce_MouseCursor.h"
-#include "../mouse/juce_MouseListener.h"
-#include "../mouse/juce_MouseEvent.h"
-#include "juce_ComponentListener.h"
-#include "../keyboard/juce_KeyListener.h"
-#include "../keyboard/juce_KeyboardFocusTraverser.h"
-#include "juce_ModalComponentManager.h"
-
-class LookAndFeel;
-class MouseInputSource;
-class MouseInputSourceInternal;
-class ComponentPeer;
-class MarkerList;
-class RelativeRectangle;
-class CachedComponentImage;
-
 
 //==============================================================================
 /**

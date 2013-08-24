@@ -25,8 +25,6 @@
 #ifndef JUCE_TABBEDCOMPONENT_H_INCLUDED
 #define JUCE_TABBEDCOMPONENT_H_INCLUDED
 
-#include "juce_TabbedButtonBar.h"
-
 
 //==============================================================================
 /**

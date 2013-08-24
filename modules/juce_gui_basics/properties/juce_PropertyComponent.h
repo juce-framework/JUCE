@@ -25,10 +25,6 @@
 #ifndef JUCE_PROPERTYCOMPONENT_H_INCLUDED
 #define JUCE_PROPERTYCOMPONENT_H_INCLUDED
 
-class EditableProperty;
-
-#include "../components/juce_Component.h"
-#include "../mouse/juce_TooltipClient.h"
 
 //==============================================================================
 /**

@@ -25,13 +25,6 @@
 #ifndef JUCE_ALERTWINDOW_H_INCLUDED
 #define JUCE_ALERTWINDOW_H_INCLUDED
 
-#include "juce_TopLevelWindow.h"
-#include "../buttons/juce_TextButton.h"
-#include "../widgets/juce_ComboBox.h"
-#include "../widgets/juce_TextEditor.h"
-#include "../widgets/juce_ProgressBar.h"
-#include "../mouse/juce_ComponentDragger.h"
-
 
 //==============================================================================
 /** A window that displays a message and has buttons for the user to react to it.

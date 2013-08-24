@@ -25,9 +25,6 @@
 #ifndef JUCE_APPLICATIONCOMMANDINFO_H_INCLUDED
 #define JUCE_APPLICATIONCOMMANDINFO_H_INCLUDED
 
-#include "../keyboard/juce_KeyPress.h"
-#include "juce_ApplicationCommandID.h"
-
 
 //==============================================================================
 /**

@@ -25,11 +25,6 @@
 #ifndef JUCE_RESIZABLEWINDOW_H_INCLUDED
 #define JUCE_RESIZABLEWINDOW_H_INCLUDED
 
-#include "juce_TopLevelWindow.h"
-#include "../mouse/juce_ComponentDragger.h"
-#include "../layout/juce_ResizableBorderComponent.h"
-#include "../layout/juce_ResizableCornerComponent.h"
-
 
 //==============================================================================
 /**

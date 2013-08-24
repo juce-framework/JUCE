@@ -25,8 +25,6 @@
 #ifndef JUCE_RELATIVEPOINTPATH_H_INCLUDED
 #define JUCE_RELATIVEPOINTPATH_H_INCLUDED
 
-#include "juce_RelativePoint.h"
-class DrawablePath;
 
 //==============================================================================
 /**

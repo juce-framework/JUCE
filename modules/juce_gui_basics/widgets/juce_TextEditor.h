@@ -25,12 +25,6 @@
 #ifndef JUCE_TEXTEDITOR_H_INCLUDED
 #define JUCE_TEXTEDITOR_H_INCLUDED
 
-#include "../components/juce_Component.h"
-#include "../layout/juce_Viewport.h"
-#include "../menus/juce_PopupMenu.h"
-#include "../keyboard/juce_TextInputTarget.h"
-#include "../keyboard/juce_CaretComponent.h"
-
 
 //==============================================================================
 /**

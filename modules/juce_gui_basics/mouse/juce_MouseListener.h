@@ -25,8 +25,6 @@
 #ifndef JUCE_MOUSELISTENER_H_INCLUDED
 #define JUCE_MOUSELISTENER_H_INCLUDED
 
-class MouseEvent;
-struct MouseWheelDetails;
 
 //==============================================================================
 /**

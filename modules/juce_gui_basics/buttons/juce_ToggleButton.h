@@ -25,8 +25,6 @@
 #ifndef JUCE_TOGGLEBUTTON_H_INCLUDED
 #define JUCE_TOGGLEBUTTON_H_INCLUDED
 
-#include "juce_Button.h"
-
 
 //==============================================================================
 /**

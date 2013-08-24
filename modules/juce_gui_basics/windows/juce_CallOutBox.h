@@ -25,8 +25,6 @@
 #ifndef JUCE_CALLOUTBOX_H_INCLUDED
 #define JUCE_CALLOUTBOX_H_INCLUDED
 
-#include "../components/juce_Component.h"
-
 
 //==============================================================================
 /**

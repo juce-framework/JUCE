@@ -25,9 +25,6 @@
 #ifndef JUCE_KEYPRESSMAPPINGSET_H_INCLUDED
 #define JUCE_KEYPRESSMAPPINGSET_H_INCLUDED
 
-#include "../keyboard/juce_KeyListener.h"
-#include "../commands/juce_ApplicationCommandManager.h"
-
 
 //==============================================================================
 /**

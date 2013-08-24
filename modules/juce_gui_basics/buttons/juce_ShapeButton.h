@@ -25,8 +25,6 @@
 #ifndef JUCE_SHAPEBUTTON_H_INCLUDED
 #define JUCE_SHAPEBUTTON_H_INCLUDED
 
-#include "juce_Button.h"
-
 
 //==============================================================================
 /**

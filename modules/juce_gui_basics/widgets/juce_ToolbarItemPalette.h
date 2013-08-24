@@ -25,9 +25,6 @@
 #ifndef JUCE_TOOLBARITEMPALETTE_H_INCLUDED
 #define JUCE_TOOLBARITEMPALETTE_H_INCLUDED
 
-#include "juce_Toolbar.h"
-#include "../layout/juce_Viewport.h"
-
 
 //==============================================================================
 /**

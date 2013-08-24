@@ -25,8 +25,6 @@
 #ifndef JUCE_CACHEDCOMPONENTIMAGE_H_INCLUDED
 #define JUCE_CACHEDCOMPONENTIMAGE_H_INCLUDED
 
-class Component;
-
 
 //==============================================================================
 /**

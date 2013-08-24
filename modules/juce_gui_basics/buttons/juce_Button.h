@@ -25,10 +25,6 @@
 #ifndef JUCE_BUTTON_H_INCLUDED
 #define JUCE_BUTTON_H_INCLUDED
 
-#include "../components/juce_Component.h"
-#include "../keyboard/juce_KeyListener.h"
-#include "../commands/juce_ApplicationCommandManager.h"
-
 
 //==============================================================================
 /**

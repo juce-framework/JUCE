@@ -25,8 +25,6 @@
 #ifndef JUCE_THREADWITHPROGRESSWINDOW_H_INCLUDED
 #define JUCE_THREADWITHPROGRESSWINDOW_H_INCLUDED
 
-#include "../windows/juce_AlertWindow.h"
-
 
 //==============================================================================
 /**

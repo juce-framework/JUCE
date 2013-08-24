@@ -25,10 +25,6 @@
 #ifndef JUCE_MOUSEINPUTSOURCE_H_INCLUDED
 #define JUCE_MOUSEINPUTSOURCE_H_INCLUDED
 
-#include "../keyboard/juce_ModifierKeys.h"
-#include "../components/juce_Desktop.h"
-class MouseInputSourceInternal;
-
 
 //==============================================================================
 /**

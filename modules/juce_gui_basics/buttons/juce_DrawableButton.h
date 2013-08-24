@@ -25,9 +25,6 @@
 #ifndef JUCE_DRAWABLEBUTTON_H_INCLUDED
 #define JUCE_DRAWABLEBUTTON_H_INCLUDED
 
-#include "juce_Button.h"
-#include "../drawables/juce_Drawable.h"
-
 
 //==============================================================================
 /**

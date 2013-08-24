@@ -25,8 +25,6 @@
 #ifndef JUCE_LABEL_H_INCLUDED
 #define JUCE_LABEL_H_INCLUDED
 
-#include "juce_TextEditor.h"
-
 
 //==============================================================================
 /**

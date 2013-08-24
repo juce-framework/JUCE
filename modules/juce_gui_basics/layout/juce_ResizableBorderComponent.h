@@ -25,8 +25,6 @@
 #ifndef JUCE_RESIZABLEBORDERCOMPONENT_H_INCLUDED
 #define JUCE_RESIZABLEBORDERCOMPONENT_H_INCLUDED
 
-#include "juce_ComponentBoundsConstrainer.h"
-
 
 //==============================================================================
 /**
