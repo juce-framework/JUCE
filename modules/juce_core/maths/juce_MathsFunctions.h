@@ -443,6 +443,13 @@ IntegerType negativeAwareModulo (IntegerType dividend, const IntegerType divisor
     return (dividend < 0) ? (dividend + divisor) : dividend;
 }
 
+/** Returns the square of its argument. */
+template <typename NumericType>
+NumericType square (NumericType n) noexcept
+{
+    return n * n;
+}
+
 //==============================================================================
 #if (JUCE_INTEL && JUCE_32BIT) || defined (DOXYGEN)
  /** This macro can be applied to a float variable to check whether it contains a denormalised
