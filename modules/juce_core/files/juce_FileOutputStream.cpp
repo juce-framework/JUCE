@@ -29,14 +29,14 @@
 int64 juce_fileSetPosition (void* handle, int64 pos);
 
 //==============================================================================
-FileOutputStream::FileOutputStream (const File& f, const int bufferSize_)
+FileOutputStream::FileOutputStream (const File& f, const size_t bufferSizeToUse)
     : file (f),
       fileHandle (nullptr),
       status (Result::ok()),
       currentPosition (0),
-      bufferSize (bufferSize_),
+      bufferSize (bufferSizeToUse),
       bytesInBuffer (0),
-      buffer ((size_t) jmax (bufferSize_, 16))
+      buffer (jmax (bufferSizeToUse, (size_t) 16))
 {
     openHandle();
 }

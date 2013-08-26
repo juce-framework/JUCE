@@ -1151,7 +1151,7 @@ struct HighResolutionTimer::Pimpl
             shouldStop = false;
 
             if (pthread_create (&thread, nullptr, timerThread, this) == 0)
-                setThreadToRealtime (thread, newPeriod);
+                setThreadToRealtime (thread, (uint64) newPeriod);
             else
                 jassertfalse;
         }

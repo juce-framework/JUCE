@@ -27,6 +27,7 @@
 //==============================================================================
 namespace MouseCursorHelpers
 {
+    NSImage* createNSImage (const Image&);
     NSImage* createNSImage (const Image& image)
     {
         JUCE_AUTORELEASEPOOL

@@ -137,13 +137,13 @@ namespace AiffFileHelpers
         {
             zerostruct (*this);
 
-            flags       = input.readIntBigEndian();
-            numBeats    = input.readIntBigEndian();
-            rootNote    = input.readShortBigEndian();
-            key         = input.readShortBigEndian();
-            timeSigNum  = input.readShortBigEndian();
-            timeSigDen  = input.readShortBigEndian();
-            oneShot     = input.readShortBigEndian();
+            flags       = (uint32) input.readIntBigEndian();
+            numBeats    = (uint32) input.readIntBigEndian();
+            rootNote    = (uint16) input.readShortBigEndian();
+            key         = (uint16) input.readShortBigEndian();
+            timeSigNum  = (uint16) input.readShortBigEndian();
+            timeSigDen  = (uint16) input.readShortBigEndian();
+            oneShot     = (uint16) input.readShortBigEndian();
             input.read (unknown, sizeof (unknown));
         }
 
@@ -199,7 +199,7 @@ namespace AiffFileHelpers
     {
         MemoryBlock mb;
         input.skipNextBytes (4);
-        input.readIntoMemoryBlock (mb, length - 4);
+        input.readIntoMemoryBlock (mb, (ssize_t) length - 4);
 
         static const char* appleGenres[] =
         {
@@ -910,8 +910,10 @@ bool AiffAudioFormat::canHandleFile (const File& f)
         return true;
 
     const OSType type = f.getMacOSType();
-    return type == 'AIFF' || type == 'AIFC'
-        || type == 'aiff' || type == 'aifc';
+
+    // (NB: written as hex to avoid four-char-constant warnings)
+    return type == 0x41494646 /* AIFF */ || type == 0x41494643 /* AIFC */
+        || type == 0x61696666 /* aiff */ || type == 0x61696663 /* aifc */;
 }
 #endif
 

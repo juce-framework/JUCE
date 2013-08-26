@@ -95,7 +95,7 @@ protected:
     {
         typedef AudioData::Pointer <SampleType, Endianness, AudioData::Interleaved, AudioData::Const> SourceType;
 
-        SourceType (addBytesToPointer (sampleToPointer (startSampleInFile), (bitsPerSample / 8) * channel), (int) numChannels)
+        SourceType (addBytesToPointer (sampleToPointer (startSampleInFile), ((int) bitsPerSample / 8) * channel), (int) numChannels)
            .findMinAndMax ((size_t) numSamples, mn, mx);
     }
 

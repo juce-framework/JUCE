@@ -162,7 +162,7 @@ namespace FloatVectorHelpers
 void JUCE_CALLTYPE FloatVectorOperations::clear (float* dest, int num) noexcept
 {
    #if JUCE_USE_VDSP_FRAMEWORK
-    vDSP_vclr (dest, 1, num);
+    vDSP_vclr (dest, 1, (size_t) num);
    #else
     zeromem (dest, num * sizeof (float));
    #endif
@@ -171,7 +171,7 @@ void JUCE_CALLTYPE FloatVectorOperations::clear (float* dest, int num) noexcept
 void JUCE_CALLTYPE FloatVectorOperations::fill (float* dest, float valueToFill, int num) noexcept
 {
    #if JUCE_USE_VDSP_FRAMEWORK
-    vDSP_vfill (&valueToFill, dest, 1, num);
+    vDSP_vfill (&valueToFill, dest, 1, (size_t) num);
    #else
     #if JUCE_USE_SSE_INTRINSICS
      const __m128 val = _mm_load1_ps (&valueToFill);
@@ -183,7 +183,7 @@ void JUCE_CALLTYPE FloatVectorOperations::fill (float* dest, float valueToFill, 
 
 void JUCE_CALLTYPE FloatVectorOperations::copy (float* dest, const float* src, int num) noexcept
 {
-    memcpy (dest, src, num * sizeof (float));
+    memcpy (dest, src, (size_t) num * sizeof (float));
 }
 
 void JUCE_CALLTYPE FloatVectorOperations::copyWithMultiply (float* dest, const float* src, float multiplier, int num) noexcept

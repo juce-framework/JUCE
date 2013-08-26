@@ -293,7 +293,7 @@ namespace CoreTextTypeLayout
            #endif
         };
 
-        CTParagraphStyleRef ctParagraphStyleRef = CTParagraphStyleCreate (settings, numElementsInArray (settings));
+        CTParagraphStyleRef ctParagraphStyleRef = CTParagraphStyleCreate (settings, (size_t) numElementsInArray (settings));
         CFAttributedStringSetAttribute (attribString, CFRangeMake (0, CFAttributedStringGetLength (attribString)),
                                         kCTParagraphStyleAttributeName, ctParagraphStyleRef);
         CFRelease (ctParagraphStyleRef);

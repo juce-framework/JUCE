@@ -56,7 +56,7 @@ public:
             g.fillAll (Colours::blue.withAlpha (0.3f));
 
         // use a "colour" attribute in the xml tag for this node to set the text colour..
-        g.setColour (Colour (xml.getStringAttribute ("colour", "ff000000").getHexValue32()));
+        g.setColour (Colour ((uint32) xml.getStringAttribute ("colour", "ff000000").getHexValue32()));
 
         g.setFont (height * 0.7f);
 

@@ -36,8 +36,8 @@ public:
         averageFPS = 0;
         lastPaintTime = 0;
 
-        rgbImage = ImageFileFormat::loadFrom (RenderingTestComponent::demoJpeg_jpg, RenderingTestComponent::demoJpeg_jpgSize);
-        argbImage = ImageFileFormat::loadFrom (RenderingTestComponent::demoPng_png, RenderingTestComponent::demoPng_pngSize);
+        rgbImage = ImageFileFormat::loadFrom (RenderingTestComponent::demoJpeg_jpg, (size_t) RenderingTestComponent::demoJpeg_jpgSize);
+        argbImage = ImageFileFormat::loadFrom (RenderingTestComponent::demoPng_png, (size_t) RenderingTestComponent::demoPng_pngSize);
         createSVGDrawable();
 
         glyphs.addFittedText (Font (20.0f), "The Quick Brown Fox Jumped Over The Lazy Dog",

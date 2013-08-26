@@ -665,7 +665,7 @@ FileInputStream* File::createInputStream() const
     return nullptr;
 }
 
-FileOutputStream* File::createOutputStream (const int bufferSize) const
+FileOutputStream* File::createOutputStream (const size_t bufferSize) const
 {
     ScopedPointer<FileOutputStream> out (new FileOutputStream (*this, bufferSize));
 

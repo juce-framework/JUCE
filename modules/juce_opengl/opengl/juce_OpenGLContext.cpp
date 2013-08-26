@@ -829,14 +829,15 @@ void OpenGLContext::copyTexture (const Rectangle<int>& targetClipArea,
         const OverlayShaderProgram& program = OverlayShaderProgram::select (*this);
         program.params.set ((float) contextWidth, (float) contextHeight, anchorPosAndTextureSize.toFloat(), flippedVertically);
 
-        extensions.glVertexAttribPointer (program.params.positionAttribute.attributeID, 2, GL_SHORT, GL_FALSE, 4, vertices);
-        extensions.glEnableVertexAttribArray (program.params.positionAttribute.attributeID);
+        const GLuint index = (GLuint) program.params.positionAttribute.attributeID;
+        extensions.glVertexAttribPointer (index, 2, GL_SHORT, GL_FALSE, 4, vertices);
+        extensions.glEnableVertexAttribArray (index);
         JUCE_CHECK_OPENGL_ERROR
 
         glDrawArrays (GL_TRIANGLE_STRIP, 0, 4);
 
         extensions.glUseProgram (0);
-        extensions.glDisableVertexAttribArray (program.params.positionAttribute.attributeID);
+        extensions.glDisableVertexAttribArray (index);
     }
     #if JUCE_USE_OPENGL_FIXED_FUNCTION
     else

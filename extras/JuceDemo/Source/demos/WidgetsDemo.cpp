@@ -43,7 +43,7 @@ public:
         direction.x = random.nextFloat() * 8.0f - 4.0f;
         direction.y = random.nextFloat() * 8.0f - 4.0f;
 
-        colour = Colour (random.nextInt())
+        colour = Colour ((uint32) random.nextInt())
                     .withAlpha (0.5f)
                     .withBrightness (0.7f);
 

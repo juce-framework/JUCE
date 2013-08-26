@@ -49,7 +49,7 @@ public:
 
         size = Random::getSystemRandom().nextFloat() * 30.0f + 30.0f;
 
-        colour = Colour (Random::getSystemRandom().nextInt())
+        colour = Colour ((uint32) Random::getSystemRandom().nextInt())
                     .withAlpha (0.5f)
                     .withBrightness (0.7f);
     }

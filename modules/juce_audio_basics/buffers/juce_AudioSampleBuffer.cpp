@@ -158,8 +158,8 @@ void AudioSampleBuffer::setSize (const int newNumChannels,
 
     if (newNumSamples != size || newNumChannels != numChannels)
     {
-        const size_t allocatedSamplesPerChannel = (newNumSamples + 3) & ~3;
-        const size_t channelListSize = ((sizeof (float*) * (size_t) (newNumChannels + 1)) + 15) & ~15;
+        const size_t allocatedSamplesPerChannel = ((size_t) newNumSamples + 3) & ~3u;
+        const size_t channelListSize = ((sizeof (float*) * (size_t) (newNumChannels + 1)) + 15) & ~15u;
         const size_t newTotalBytes = ((size_t) newNumChannels * (size_t) allocatedSamplesPerChannel * sizeof (float))
                                         + channelListSize + 32;
 
@@ -168,7 +168,7 @@ void AudioSampleBuffer::setSize (const int newNumChannels,
             HeapBlock <char, true> newData;
             newData.allocate (newTotalBytes, clearExtraSpace);
 
-            const size_t numSamplesToCopy = jmin (newNumSamples, size);
+            const size_t numSamplesToCopy = (size_t) jmin (newNumSamples, size);
 
             float** const newChannels = reinterpret_cast <float**> (newData.getData());
             float* newChan = reinterpret_cast <float*> (newData + channelListSize);

@@ -229,12 +229,12 @@ void MemoryBlock::copyFrom (const void* const src, int offset, size_t num) noexc
     if (offset < 0)
     {
         d -= offset;
-        num -= offset;
+        num += (size_t) -offset;
         offset = 0;
     }
 
-    if (offset + num > size)
-        num = size - offset;
+    if ((size_t) offset + num > size)
+        num = size - (size_t) offset;
 
     if (num > 0)
         memcpy (data + offset, d, num);
@@ -248,14 +248,13 @@ void MemoryBlock::copyTo (void* const dst, int offset, size_t num) const noexcep
     {
         zeromem (d, (size_t) -offset);
         d -= offset;
-
-        num += offset;
+        num -= (size_t) -offset;
         offset = 0;
     }
 
-    if (offset + num > size)
+    if ((size_t) offset + num > size)
     {
-        const size_t newNum = size - offset;
+        const size_t newNum = size - (size_t) offset;
         zeromem (d + newNum, num - newNum);
         num = newNum;
     }
@@ -275,12 +274,12 @@ int MemoryBlock::getBitRange (const size_t bitRangeStart, size_t numBits) const 
     int res = 0;
 
     size_t byte = bitRangeStart >> 3;
-    int offsetInByte = (int) bitRangeStart & 7;
+    size_t offsetInByte = bitRangeStart & 7;
     size_t bitsSoFar = 0;
 
     while (numBits > 0 && (size_t) byte < size)
     {
-        const int bitsThisTime = jmin ((int) numBits, 8 - offsetInByte);
+        const size_t bitsThisTime = jmin (numBits, 8 - offsetInByte);
         const int mask = (0xff >> (8 - bitsThisTime)) << offsetInByte;
 
         res |= (((data[byte] & mask) >> offsetInByte) << bitsSoFar);
@@ -297,17 +296,17 @@ int MemoryBlock::getBitRange (const size_t bitRangeStart, size_t numBits) const 
 void MemoryBlock::setBitRange (const size_t bitRangeStart, size_t numBits, int bitsToSet) noexcept
 {
     size_t byte = bitRangeStart >> 3;
-    int offsetInByte = (int) bitRangeStart & 7;
-    unsigned int mask = ~((((unsigned int) 0xffffffff) << (32 - numBits)) >> (32 - numBits));
+    size_t offsetInByte = bitRangeStart & 7;
+    uint32 mask = ~((((uint32) 0xffffffff) << (32 - numBits)) >> (32 - numBits));
 
     while (numBits > 0 && (size_t) byte < size)
     {
-        const int bitsThisTime = jmin ((int) numBits, 8 - offsetInByte);
+        const size_t bitsThisTime = jmin (numBits, 8 - offsetInByte);
 
-        const unsigned int tempMask = (mask << offsetInByte) | ~((((unsigned int) 0xffffffff) >> offsetInByte) << offsetInByte);
-        const unsigned int tempBits = (unsigned int) bitsToSet << offsetInByte;
+        const uint32 tempMask = (mask << offsetInByte) | ~((((uint32) 0xffffffff) >> offsetInByte) << offsetInByte);
+        const uint32 tempBits = (uint32) bitsToSet << offsetInByte;
 
-        data[byte] = (char) ((data[byte] & tempMask) | tempBits);
+        data[byte] = (char) (((uint32) data[byte] & tempMask) | tempBits);
 
         ++byte;
         numBits -= bitsThisTime;
@@ -336,22 +335,11 @@ void MemoryBlock::loadFromHexString (const String& hex)
             {
                 const juce_wchar c = t.getAndAdvance();
 
-                if (c >= '0' && c <= '9')
-                {
-                    byte |= c - '0';
-                    break;
-                }
-                else if (c >= 'a' && c <= 'z')
-                {
-                    byte |= c - ('a' - 10);
-                    break;
-                }
-                else if (c >= 'A' && c <= 'Z')
-                {
-                    byte |= c - ('A' - 10);
-                    break;
-                }
-                else if (c == 0)
+                if (c >= '0' && c <= '9')    { byte |= c - '0';        break; }
+                if (c >= 'a' && c <= 'z')    { byte |= c - ('a' - 10); break; }
+                if (c >= 'A' && c <= 'Z')    { byte |= c - ('A' - 10); break; }
+
+                if (c == 0)
                 {
                     setSize (static_cast <size_t> (dest - data));
                     return;
@@ -372,7 +360,7 @@ String MemoryBlock::toBase64Encoding() const
 
     String destString ((unsigned int) size); // store the length, followed by a '.', and then the data.
     const int initialLen = destString.length();
-    destString.preallocateBytes (sizeof (String::CharPointerType::CharType) * (size_t) (initialLen + 2 + numChars));
+    destString.preallocateBytes (sizeof (String::CharPointerType::CharType) * (size_t) initialLen + 2 + numChars);
 
     String::CharPointerType d (destString.getCharPointer());
     d += initialLen;

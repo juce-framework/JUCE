@@ -83,7 +83,7 @@ int LagrangeInterpolator::process (const double actualRatio, const float* in,
 {
     if (actualRatio == 1.0)
     {
-        memcpy (out, in, numOut * sizeof (float));
+        memcpy (out, in, (size_t) numOut * sizeof (float));
 
         if (numOut >= 4)
         {

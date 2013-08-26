@@ -129,7 +129,7 @@ bool OutputStream::writeCompressedInt (int value)
     if (value < 0)
         data[0] |= 0x80;
 
-    return write (data, num + 1);
+    return write (data, (size_t) num + 1);
 }
 
 bool OutputStream::writeInt64 (int64 value)
@@ -219,7 +219,7 @@ bool OutputStream::writeText (const String& text, const bool asUTF16,
             if (*t == '\n')
             {
                 if (t > src)
-                    if (! write (src, (int) (t - src)))
+                    if (! write (src, (size_t) (t - src)))
                         return false;
 
                 if (! write ("\r\n", 2))
@@ -235,7 +235,7 @@ bool OutputStream::writeText (const String& text, const bool asUTF16,
             else if (*t == 0)
             {
                 if (t > src)
-                    if (! write (src, (int) (t - src)))
+                    if (! write (src, (size_t) (t - src)))
                         return false;
 
                 break;
@@ -263,7 +263,7 @@ int OutputStream::writeFromInputStream (InputStream& source, int64 numBytesToWri
         if (num <= 0)
             break;
 
-        write (buffer, num);
+        write (buffer, (size_t) num);
 
         numBytesToWrite -= num;
         numWritten += num;

@@ -70,6 +70,7 @@ const char* const WavAudioFormat::acidTempo            = "acid tempo";
 namespace WavFileHelpers
 {
     inline int chunkName (const char* const name) noexcept   { return (int) ByteOrder::littleEndianInt (name); }
+    inline size_t roundUpSize (size_t sz) noexcept           { return (sz + 3) & ~3u; }
 
     #if JUCE_MSVC
      #pragma pack (push, 1)
@@ -108,8 +109,7 @@ namespace WavFileHelpers
 
         static MemoryBlock createFrom (const StringPairArray& values)
         {
-            const size_t sizeNeeded = sizeof (BWAVChunk) + values [WavAudioFormat::bwavCodingHistory].getNumBytesAsUTF8();
-            MemoryBlock data ((sizeNeeded + 3) & ~3);
+            MemoryBlock data (roundUpSize (sizeof (BWAVChunk) + values [WavAudioFormat::bwavCodingHistory].getNumBytesAsUTF8()));
             data.fillWith (0);
 
             BWAVChunk* b = (BWAVChunk*) data.getData();
@@ -223,8 +223,7 @@ namespace WavFileHelpers
 
             if (numLoops > 0)
             {
-                const size_t sizeNeeded = sizeof (SMPLChunk) + (size_t) (numLoops - 1) * sizeof (SampleLoop);
-                data.setSize ((sizeNeeded + 3) & ~3, true);
+                data.setSize (roundUpSize (sizeof (SMPLChunk) + (size_t) (numLoops - 1) * sizeof (SampleLoop)), true);
 
                 SMPLChunk* const s = static_cast <SMPLChunk*> (data.getData());
 
@@ -353,8 +352,7 @@ namespace WavFileHelpers
 
             if (numCues > 0)
             {
-                const size_t sizeNeeded = sizeof (CueChunk) + (size_t) (numCues - 1) * sizeof (Cue);
-                data.setSize ((sizeNeeded + 3) & ~3, true);
+                data.setSize (roundUpSize (sizeof (CueChunk) + (size_t) (numCues - 1) * sizeof (Cue)), true);
 
                 CueChunk* const c = static_cast <CueChunk*> (data.getData());
 
@@ -417,7 +415,7 @@ namespace WavFileHelpers
             out.writeInt (chunkType);
             out.writeInt (chunkLength);
             out.writeInt (getValue (values, prefix, "Identifier"));
-            out.write (label.toUTF8(), labelLength);
+            out.write (label.toUTF8(), (size_t) labelLength);
 
             if ((out.getDataSize() & 1) != 0)
                 out.writeByte (0);
@@ -439,7 +437,7 @@ namespace WavFileHelpers
             out.writeShort ((short) getValue (values, prefix, "Language"));
             out.writeShort ((short) getValue (values, prefix, "Dialect"));
             out.writeShort ((short) getValue (values, prefix, "CodePage"));
-            out.write (text.toUTF8(), textLength);
+            out.write (text.toUTF8(), (size_t) textLength);
 
             if ((out.getDataSize() & 1) != 0)
                 out.writeByte (0);
@@ -471,10 +469,10 @@ namespace WavFileHelpers
     struct AcidChunk
     {
         /** Reads an acid RIFF chunk from a stream positioned just after the size byte. */
-        AcidChunk (InputStream& input, int length)
+        AcidChunk (InputStream& input, size_t length)
         {
             zerostruct (*this);
-            input.read (this, jmin ((int) sizeof (*this), length));
+            input.read (this, (int) jmin (sizeof (*this), length));
         }
 
         void addToMetadata (StringPairArray& values) const
@@ -876,6 +874,7 @@ public:
     //==============================================================================
     bool write (const int** data, int numSamples) override
     {
+        jassert (numSamples >= 0);
         jassert (data != nullptr && *data != nullptr); // the input must contain at least one channel!
 
         if (writeFailed)
@@ -905,7 +904,7 @@ public:
         else
         {
             bytesWritten += bytes;
-            lengthInSamples += numSamples;
+            lengthInSamples += (uint64) numSamples;
 
             return true;
         }

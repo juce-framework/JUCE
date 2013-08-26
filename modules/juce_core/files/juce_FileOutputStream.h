@@ -54,7 +54,7 @@ public:
         @see TemporaryFile
     */
     FileOutputStream (const File& fileToWriteTo,
-                      int bufferSizeToUse = 16384);
+                      size_t bufferSizeToUse = 16384);
 
     /** Destructor. */
     ~FileOutputStream();

@@ -108,7 +108,7 @@ private:
             : area (et.getMaximumBounds().withSize (nextPowerOfTwo (et.getMaximumBounds().getWidth()),
                                                     nextPowerOfTwo (et.getMaximumBounds().getHeight())))
         {
-            data.calloc (area.getWidth() * area.getHeight());
+            data.calloc ((size_t) (area.getWidth() * area.getHeight()));
             et.iterate (*this);
         }
 
@@ -129,12 +129,12 @@ private:
 
         inline void handleEdgeTableLine (int x, int width, const int alphaLevel) const noexcept
         {
-            memset (currentLine + x, (uint8) alphaLevel, width);
+            memset (currentLine + x, (uint8) alphaLevel, (size_t) width);
         }
 
         inline void handleEdgeTableLineFull (int x, int width) const noexcept
         {
-            memset (currentLine + x, 255, width);
+            memset (currentLine + x, 255, (size_t) width);
         }
 
         HeapBlock<uint8> data;
@@ -215,16 +215,16 @@ public:
 
         void bindAttributes (OpenGLContext& context)
         {
-            context.extensions.glVertexAttribPointer (positionAttribute.attributeID, 2, GL_SHORT, GL_FALSE, 8, (void*) 0);
-            context.extensions.glVertexAttribPointer (colourAttribute.attributeID, 4, GL_UNSIGNED_BYTE, GL_TRUE, 8, (void*) 4);
-            context.extensions.glEnableVertexAttribArray (positionAttribute.attributeID);
-            context.extensions.glEnableVertexAttribArray (colourAttribute.attributeID);
+            context.extensions.glVertexAttribPointer ((GLuint) positionAttribute.attributeID, 2, GL_SHORT, GL_FALSE, 8, (void*) 0);
+            context.extensions.glVertexAttribPointer ((GLuint) colourAttribute.attributeID, 4, GL_UNSIGNED_BYTE, GL_TRUE, 8, (void*) 4);
+            context.extensions.glEnableVertexAttribArray ((GLuint) positionAttribute.attributeID);
+            context.extensions.glEnableVertexAttribArray ((GLuint) colourAttribute.attributeID);
         }
 
         void unbindAttributes (OpenGLContext& context)
         {
-            context.extensions.glDisableVertexAttribArray (positionAttribute.attributeID);
-            context.extensions.glDisableVertexAttribArray (colourAttribute.attributeID);
+            context.extensions.glDisableVertexAttribArray ((GLuint) positionAttribute.attributeID);
+            context.extensions.glDisableVertexAttribArray ((GLuint) colourAttribute.attributeID);
         }
 
         OpenGLShaderProgram::Attribute positionAttribute, colourAttribute;
@@ -813,7 +813,7 @@ struct StateHelpers
             if (currentActiveTexture != index)
             {
                 currentActiveTexture = index;
-                context.extensions.glActiveTexture (GL_TEXTURE0 + index);
+                context.extensions.glActiveTexture ((GLenum) (GL_TEXTURE0 + index));
                 JUCE_CHECK_OPENGL_ERROR
             }
         }
@@ -1029,7 +1029,7 @@ struct StateHelpers
 
         void draw() noexcept
         {
-            context.extensions.glBufferSubData (GL_ARRAY_BUFFER, 0, numVertices * sizeof (VertexInfo), vertexData);
+            context.extensions.glBufferSubData (GL_ARRAY_BUFFER, 0, (GLsizeiptr) ((size_t) numVertices * sizeof (VertexInfo)), vertexData);
             // NB: If you get a random crash in here and are running in a Parallels VM, it seems to be a bug in
             // their driver.. Can't find a workaround unfortunately.
             glDrawElements (GL_TRIANGLES, (numVertices * 3) / 2, GL_UNSIGNED_SHORT, 0);
@@ -1158,7 +1158,7 @@ public:
         {
             activeTextures.setTexturesEnabled (shaderQuadQueue, 3);
             activeTextures.setActiveTexture (1);
-            activeTextures.bindTexture (maskTextureID);
+            activeTextures.bindTexture ((GLuint) maskTextureID);
             activeTextures.setActiveTexture (0);
             textureCache.bindTextureForGradient (activeTextures, g);
         }
@@ -1259,7 +1259,7 @@ public:
 
         if (maskArea != nullptr)
         {
-            activeTextures.setTwoTextureMode (shaderQuadQueue, image.textureID, maskTextureID);
+            activeTextures.setTwoTextureMode (shaderQuadQueue, image.textureID, (GLuint) maskTextureID);
 
             if (clampTiledImages)
             {

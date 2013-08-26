@@ -48,9 +48,14 @@
  #include <emmintrin.h>
 #endif
 
-#if JUCE_MAC || JUCE_IOS
+#ifndef JUCE_USE_VDSP_FRAMEWORK
  #define JUCE_USE_VDSP_FRAMEWORK 1
+#endif
+
+#if (JUCE_MAC || JUCE_IOS) && JUCE_USE_VDSP_FRAMEWORK
  #include <Accelerate/Accelerate.h>
+#else
+ #undef JUCE_USE_VDSP_FRAMEWORK
 #endif
 
 namespace juce
