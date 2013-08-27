@@ -143,6 +143,14 @@ void LocalisedStrings::loadFromText (const String& fileContents, bool ignoreCase
     }
 }
 
+void LocalisedStrings::addStrings (const LocalisedStrings& other)
+{
+    jassert (languageName == other.languageName);
+    jassert (countryCodes == other.countryCodes);
+
+    translations.addArray (other.translations);
+}
+
 //==============================================================================
 void LocalisedStrings::setCurrentMappings (LocalisedStrings* newTranslations)
 {
