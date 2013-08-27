@@ -198,10 +198,10 @@ namespace CodeHelpers
 
     String makeHeaderGuardName (const File& file)
     {
-        return "__" + file.getFileName().toUpperCase()
-                                        .replaceCharacters (" .", "__")
-                                        .retainCharacters ("_ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
-                + "_" + String::toHexString (file.hashCode()).toUpperCase() + "__";
+        return file.getFileName().toUpperCase()
+                                 .replaceCharacters (" .", "__")
+                                 .retainCharacters ("_ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
+                + "_INCLUDED";
     }
 
     String makeBinaryDataIdentifierName (const File& file)
