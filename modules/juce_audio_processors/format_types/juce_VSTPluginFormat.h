@@ -80,6 +80,16 @@ public:
     static void setExtraFunctions (AudioPluginInstance* plugin, ExtraFunctions* functions);
 
     //==============================================================================
+   #if JUCE_64BIT
+    typedef int64 VstIntPtr;
+   #else
+    typedef int32 VstIntPtr;
+   #endif
+
+    /** This simply calls directly to the VST's AEffect::dispatcher() function. */
+    static VstIntPtr JUCE_CALLTYPE dispatcher (AudioPluginInstance*, int32, int32, VstIntPtr, void*, float);
+
+    //==============================================================================
     String getName() const override                { return "VST"; }
     void findAllTypesForFile (OwnedArray <PluginDescription>&, const String& fileOrIdentifier) override;
     AudioPluginInstance* createInstanceFromDescription (const PluginDescription&) override;
