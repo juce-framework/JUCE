@@ -164,6 +164,7 @@ public:
         if (context.renderer != nullptr)
         {
             glViewport (0, 0, viewportArea.getWidth(), viewportArea.getHeight());
+            context.currentRenderScale = scale;
             context.renderer->renderOpenGL();
             clearGLError();
         }
@@ -527,8 +528,8 @@ private:
 
 //==============================================================================
 OpenGLContext::OpenGLContext()
-    : nativeContext (nullptr), renderer (nullptr), contextToShareWith (nullptr),
-      renderComponents (true), useMultisampling (false)
+    : nativeContext (nullptr), renderer (nullptr), currentRenderScale (1.0),
+      contextToShareWith (nullptr), renderComponents (true), useMultisampling (false)
 {
 }
 

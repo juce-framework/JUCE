@@ -201,6 +201,16 @@ public:
     int getSwapInterval() const;
 
     //==============================================================================
+    /** Returns the scale factor used by the display that is being rendered.
+
+        The scale is that of the display - see Desktop::Displays::Display::scale
+
+        Note that this should only be called during an OpenGLRenderer::renderOpenGL()
+        callback - at other times the value it returns is undefined.
+    */
+    double getRenderingScale() const noexcept   { return currentRenderScale; }
+
+    //==============================================================================
     /** Returns an OS-dependent handle to some kind of underlting OS-provided GL context.
 
         The exact type of the value returned will depend on the OS and may change
@@ -208,7 +218,6 @@ public:
         native code is probably the best way to find out what it is.
     */
     void* getRawContext() const noexcept;
-
 
     //==============================================================================
     /** Draws the currently selected texture into this context at its original size.
@@ -240,6 +249,7 @@ private:
     class Attachment;
     NativeContext* nativeContext;
     OpenGLRenderer* renderer;
+    double currentRenderScale;
     ScopedPointer<Attachment> attachment;
     OpenGLPixelFormat pixelFormat;
     void* contextToShareWith;

@@ -109,7 +109,9 @@ public:
         OpenGLHelpers::clear (Colours::darkgrey.withAlpha (1.0f));
 
         updateTextureImage();  // this will update our dynamically-changing texture image.
-        drawBackground2DStuff(); // draws some 2D content to demonstrate the OpenGLGraphicsContext class
+
+        const float scale = (float) openGLContext.getRenderingScale();
+        drawBackground2DStuff (scale); // draws some 2D content to demonstrate the OpenGLGraphicsContext class
 
         // Having used the juce 2D renderer, it will have messed-up a whole load of GL state, so
         // we'll put back any important settings before doing our normal GL 3D drawing..
@@ -120,8 +122,9 @@ public:
         glEnable (GL_TEXTURE_2D);
 
        #if JUCE_USE_OPENGL_FIXED_FUNCTION
-        OpenGLHelpers::prepareFor2D (getContextWidth(), getContextHeight());
-        OpenGLHelpers::setPerspective (45.0, getContextWidth() / (double) getContextHeight(), 0.1, 100.0);
+        OpenGLHelpers::prepareFor2D (roundToInt (scale * getWidth()),
+                                     roundToInt (scale * getHeight()));
+        OpenGLHelpers::setPerspective (45.0, getWidth() / (double) getHeight(), 0.1, 100.0);
 
         glTranslatef (0.0f, 0.0f, -5.0f);
         draggableOrientation.applyToOpenGLMatrix();
@@ -163,23 +166,23 @@ public:
         }
     }
 
-    void drawBackground2DStuff()
+    void drawBackground2DStuff (float scale)
     {
         // Create an OpenGLGraphicsContext that will draw into this GL window..
         ScopedPointer<LowLevelGraphicsContext> glRenderer (createOpenGLGraphicsContext (openGLContext,
-                                                                                        getContextWidth(),
-                                                                                        getContextHeight()));
+                                                                                        roundToInt (scale * getWidth()),
+                                                                                        roundToInt (scale * getHeight())));
 
         if (glRenderer != nullptr)
         {
             Graphics g (glRenderer);
-            g.addTransform (AffineTransform::scale ((float) getScale()));
+            g.addTransform (AffineTransform::scale (scale));
 
             // This stuff just creates a spinning star shape and fills it..
             Path p;
-            const float scale = getHeight() * 0.4f;
             p.addStar (Point<float> (getWidth() * 0.7f, getHeight() * 0.4f), 7,
-                       scale * (float) sizeSlider.getValue(), scale,
+                       getHeight() * 0.4f * (float) sizeSlider.getValue(),
+                       getHeight() * 0.4f,
                        rotation / 50.0f);
 
             g.setGradientFill (ColourGradient (Colours::green.withRotatedHue (fabsf (::sinf (rotation / 300.0f))),
@@ -189,10 +192,6 @@ public:
             g.fillPath (p);
         }
     }
-
-    double getScale() const         { return Desktop::getInstance().getDisplays().getDisplayContaining (getScreenBounds().getCentre()).scale; }
-    int getContextWidth() const     { return roundToInt (getScale() * getWidth()); }
-    int getContextHeight() const    { return roundToInt (getScale() * getHeight()); }
 
     void timerCallback()
     {
