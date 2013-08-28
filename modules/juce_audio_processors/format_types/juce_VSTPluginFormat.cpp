@@ -1395,7 +1395,7 @@ public:
     }
 
     //==============================================================================
-    VstIntPtr dispatch (const int opcode, const int index, const int value, void* const ptr, float opt) const
+    VstIntPtr dispatch (const int opcode, const int index, const VstIntPtr value, void* const ptr, float opt) const
     {
         VstIntPtr result = 0;
 
