@@ -22,11 +22,6 @@
   ==============================================================================
 */
 
-#ifndef JUCE_LADSPAPLUGINFORMAT_H_INCLUDED
-#define JUCE_LADSPAPLUGINFORMAT_H_INCLUDED
-
-#include "../format/juce_AudioPluginFormat.h"
-
 #if (JUCE_PLUGINHOST_LADSPA && JUCE_LINUX) || DOXYGEN
 
 //==============================================================================
@@ -60,5 +55,3 @@ private:
 
 
 #endif
-
-#endif   // JUCE_LADSPAPLUGINFORMAT_H_INCLUDED

@@ -25,9 +25,6 @@
 #ifndef JUCE_PLUGINLISTCOMPONENT_H_INCLUDED
 #define JUCE_PLUGINLISTCOMPONENT_H_INCLUDED
 
-#include "juce_KnownPluginList.h"
-#include "../format/juce_AudioPluginFormat.h"
-
 
 //==============================================================================
 /**

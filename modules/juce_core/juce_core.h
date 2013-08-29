@@ -125,6 +125,10 @@
  //#define JUCE_CATCH_UNHANDLED_EXCEPTIONS 1
 #endif
 
+#ifndef JUCE_STRING_UTF_TYPE
+ #define JUCE_STRING_UTF_TYPE 8
+#endif
+
 //=============================================================================
 //=============================================================================
 #if JUCE_MSVC
@@ -144,25 +148,50 @@ namespace juce
 class MemoryBlock;
 class File;
 class InputStream;
+class OutputStream;
 class DynamicObject;
 class FileInputStream;
 class FileOutputStream;
 class XmlElement;
 class JSONFormatter;
 
-#include "memory/juce_Atomic.h"
+extern JUCE_API bool JUCE_CALLTYPE juce_isRunningUnderDebugger();
+extern JUCE_API void JUCE_CALLTYPE logAssertion (const char* file, int line) noexcept;
+
+#include "memory/juce_Memory.h"
+#include "maths/juce_MathsFunctions.h"
 #include "memory/juce_ByteOrder.h"
+#include "memory/juce_Atomic.h"
+#include "text/juce_CharacterFunctions.h"
+
+#if JUCE_MSVC
+ #pragma warning (push)
+ #pragma warning (disable: 4514 4996)
+#endif
+
+#include "text/juce_CharPointer_UTF8.h"
+#include "text/juce_CharPointer_UTF16.h"
+#include "text/juce_CharPointer_UTF32.h"
+#include "text/juce_CharPointer_ASCII.h"
+
+#if JUCE_MSVC
+ #pragma warning (pop)
+#endif
+
+#include "text/juce_String.h"
+#include "logging/juce_Logger.h"
+#include "memory/juce_LeakedObjectDetector.h"
 #include "memory/juce_ContainerDeletePolicy.h"
 #include "memory/juce_HeapBlock.h"
-#include "memory/juce_LeakedObjectDetector.h"
-#include "memory/juce_Memory.h"
 #include "memory/juce_MemoryBlock.h"
 #include "memory/juce_ReferenceCountedObject.h"
 #include "memory/juce_ScopedPointer.h"
 #include "memory/juce_OptionalScopedPointer.h"
 #include "memory/juce_Singleton.h"
 #include "memory/juce_WeakReference.h"
+#include "threads/juce_ScopedLock.h"
 #include "threads/juce_CriticalSection.h"
+#include "maths/juce_Range.h"
 #include "containers/juce_ElementComparator.h"
 #include "containers/juce_ArrayAllocationBase.h"
 #include "containers/juce_Array.h"
@@ -202,26 +231,20 @@ class JSONFormatter;
 #include "files/juce_MemoryMappedFile.h"
 #include "files/juce_TemporaryFile.h"
 #include "streams/juce_FileInputSource.h"
-#include "logging/juce_Logger.h"
 #include "logging/juce_FileLogger.h"
 #include "json/juce_JSON.h"
 #include "maths/juce_BigInteger.h"
 #include "maths/juce_Expression.h"
-#include "maths/juce_MathsFunctions.h"
 #include "maths/juce_Random.h"
-#include "maths/juce_Range.h"
 #include "misc/juce_Uuid.h"
 #include "misc/juce_WindowsRegistry.h"
 #include "system/juce_PlatformDefs.h"
-#include "system/juce_StandardHeader.h"
 #include "system/juce_SystemStats.h"
-#include "system/juce_TargetPlatform.h"
 #include "threads/juce_ChildProcess.h"
 #include "threads/juce_DynamicLibrary.h"
 #include "threads/juce_HighResolutionTimer.h"
 #include "threads/juce_InterProcessLock.h"
 #include "threads/juce_Process.h"
-#include "threads/juce_ScopedLock.h"
 #include "threads/juce_SpinLock.h"
 #include "threads/juce_WaitableEvent.h"
 #include "threads/juce_Thread.h"

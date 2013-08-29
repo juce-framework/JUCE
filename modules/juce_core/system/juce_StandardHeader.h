@@ -50,7 +50,6 @@
 
 
 //==============================================================================
-#include "juce_TargetPlatform.h"  // (sets up the various JUCE_WINDOWS, JUCE_MAC, etc flags)
 #include "juce_PlatformDefs.h"
 
 //==============================================================================
@@ -153,20 +152,5 @@
 #ifndef DOXYGEN
  #define JUCE_NAMESPACE juce  // This old macro is deprecated: you should just use the juce namespace directly.
 #endif
-
-//==============================================================================
-// Now include some common headers...
-namespace juce
-{
-    extern JUCE_API bool JUCE_CALLTYPE juce_isRunningUnderDebugger();
-    extern JUCE_API void JUCE_CALLTYPE logAssertion (const char* file, int line) noexcept;
-
-    #include "../memory/juce_Memory.h"
-    #include "../maths/juce_MathsFunctions.h"
-    #include "../memory/juce_ByteOrder.h"
-    #include "../text/juce_String.h"
-    #include "../logging/juce_Logger.h"
-    #include "../memory/juce_LeakedObjectDetector.h"
-}
 
 #endif   // JUCE_STANDARDHEADER_H_INCLUDED

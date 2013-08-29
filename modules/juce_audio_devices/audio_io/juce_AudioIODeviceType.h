@@ -25,9 +25,6 @@
 #ifndef JUCE_AUDIOIODEVICETYPE_H_INCLUDED
 #define JUCE_AUDIOIODEVICETYPE_H_INCLUDED
 
-#include "juce_AudioIODevice.h"
-class AudioDeviceManager;
-
 
 //==============================================================================
 /**

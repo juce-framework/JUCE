@@ -25,9 +25,6 @@
 #ifndef JUCE_AUDIOPLUGININSTANCE_H_INCLUDED
 #define JUCE_AUDIOPLUGININSTANCE_H_INCLUDED
 
-#include "../processors/juce_AudioProcessor.h"
-#include "juce_PluginDescription.h"
-
 
 //==============================================================================
 /**

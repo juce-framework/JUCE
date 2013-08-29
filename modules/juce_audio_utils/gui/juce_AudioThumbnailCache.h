@@ -25,8 +25,6 @@
 #ifndef JUCE_AUDIOTHUMBNAILCACHE_H_INCLUDED
 #define JUCE_AUDIOTHUMBNAILCACHE_H_INCLUDED
 
-#include "juce_AudioThumbnailBase.h"
-
 
 //==============================================================================
 /**

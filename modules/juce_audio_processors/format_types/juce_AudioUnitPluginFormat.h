@@ -22,11 +22,6 @@
   ==============================================================================
 */
 
-#ifndef JUCE_AUDIOUNITPLUGINFORMAT_H_INCLUDED
-#define JUCE_AUDIOUNITPLUGINFORMAT_H_INCLUDED
-
-#include "../format/juce_AudioPluginFormat.h"
-
 #if (JUCE_PLUGINHOST_AU && JUCE_MAC) || DOXYGEN
 
 //==============================================================================
@@ -58,5 +53,3 @@ private:
 };
 
 #endif
-
-#endif   // JUCE_AUDIOUNITPLUGINFORMAT_H_INCLUDED

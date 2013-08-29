@@ -85,15 +85,15 @@
 namespace juce
 {
 
-// START_AUTOINCLUDE format, codecs, sampler
+class AudioFormat;
+#include "format/juce_AudioFormatReader.h"
+#include "format/juce_AudioFormatWriter.h"
+#include "format/juce_MemoryMappedAudioFormatReader.h"
 #include "format/juce_AudioFormat.h"
 #include "format/juce_AudioFormatManager.h"
-#include "format/juce_AudioFormatReader.h"
 #include "format/juce_AudioFormatReaderSource.h"
-#include "format/juce_AudioFormatWriter.h"
 #include "format/juce_AudioSubsectionReader.h"
 #include "format/juce_BufferingAudioFormatReader.h"
-#include "format/juce_MemoryMappedAudioFormatReader.h"
 #include "codecs/juce_AiffAudioFormat.h"
 #include "codecs/juce_CoreAudioFormat.h"
 #include "codecs/juce_FlacAudioFormat.h"
@@ -104,7 +104,6 @@ namespace juce
 #include "codecs/juce_WavAudioFormat.h"
 #include "codecs/juce_WindowsMediaAudioFormat.h"
 #include "sampler/juce_Sampler.h"
-// END_AUTOINCLUDE
 
 }
 

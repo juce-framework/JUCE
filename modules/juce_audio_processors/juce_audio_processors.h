@@ -59,30 +59,27 @@
 
 //=============================================================================
 //=============================================================================
-#include "../juce_core/system/juce_StandardHeader.h"
-
 namespace juce
 {
 
-// START_AUTOINCLUDE processors, format, format_types, scanning
+class AudioProcessor;
 #include "processors/juce_AudioPlayHead.h"
-#include "processors/juce_AudioPluginInstance.h"
-#include "processors/juce_AudioProcessor.h"
 #include "processors/juce_AudioProcessorEditor.h"
-#include "processors/juce_AudioProcessorGraph.h"
 #include "processors/juce_AudioProcessorListener.h"
-#include "processors/juce_GenericAudioProcessorEditor.h"
+#include "processors/juce_AudioProcessor.h"
 #include "processors/juce_PluginDescription.h"
+#include "processors/juce_AudioPluginInstance.h"
+#include "processors/juce_AudioProcessorGraph.h"
+#include "processors/juce_GenericAudioProcessorEditor.h"
 #include "format/juce_AudioPluginFormat.h"
 #include "format/juce_AudioPluginFormatManager.h"
+#include "scanning/juce_KnownPluginList.h"
 #include "format_types/juce_AudioUnitPluginFormat.h"
 #include "format_types/juce_LADSPAPluginFormat.h"
 #include "format_types/juce_VSTMidiEventList.h"
 #include "format_types/juce_VSTPluginFormat.h"
-#include "scanning/juce_KnownPluginList.h"
 #include "scanning/juce_PluginDirectoryScanner.h"
 #include "scanning/juce_PluginListComponent.h"
-// END_AUTOINCLUDE
 
 }
 

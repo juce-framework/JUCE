@@ -25,8 +25,6 @@
 #ifndef JUCE_AUDIOFORMATREADER_H_INCLUDED
 #define JUCE_AUDIOFORMATREADER_H_INCLUDED
 
-class AudioFormat;
-
 
 //==============================================================================
 /**

@@ -25,10 +25,6 @@
 #ifndef JUCE_AUDIODEVICEMANAGER_H_INCLUDED
 #define JUCE_AUDIODEVICEMANAGER_H_INCLUDED
 
-#include "juce_AudioIODeviceType.h"
-#include "../midi_io/juce_MidiInput.h"
-#include "../midi_io/juce_MidiOutput.h"
-
 
 //==============================================================================
 /**

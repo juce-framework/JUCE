@@ -22,11 +22,6 @@
   ==============================================================================
 */
 
-#ifndef JUCE_VSTPLUGINFORMAT_H_INCLUDED
-#define JUCE_VSTPLUGINFORMAT_H_INCLUDED
-
-#include "../format/juce_AudioPluginFormat.h"
-
 #if JUCE_PLUGINHOST_VST || DOXYGEN
 
 //==============================================================================
@@ -109,4 +104,3 @@ private:
 
 
 #endif
-#endif   // JUCE_VSTPLUGINFORMAT_H_INCLUDED

@@ -29,8 +29,6 @@
 #ifndef JUCE_CRITICALSECTION_H_INCLUDED
 #define JUCE_CRITICALSECTION_H_INCLUDED
 
-#include "juce_ScopedLock.h"
-
 
 //==============================================================================
 /**

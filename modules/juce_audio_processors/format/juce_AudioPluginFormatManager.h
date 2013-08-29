@@ -25,8 +25,6 @@
 #ifndef JUCE_AUDIOPLUGINFORMATMANAGER_H_INCLUDED
 #define JUCE_AUDIOPLUGINFORMATMANAGER_H_INCLUDED
 
-#include "juce_AudioPluginFormat.h"
-
 
 //==============================================================================
 /**

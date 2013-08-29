@@ -25,9 +25,6 @@
 #ifndef JUCE_AUDIOFORMAT_H_INCLUDED
 #define JUCE_AUDIOFORMAT_H_INCLUDED
 
-#include "juce_AudioFormatReader.h"
-#include "juce_AudioFormatWriter.h"
-#include "juce_MemoryMappedAudioFormatReader.h"
 
 //==============================================================================
 /**

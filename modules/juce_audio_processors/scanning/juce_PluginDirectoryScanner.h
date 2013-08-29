@@ -25,9 +25,6 @@
 #ifndef JUCE_PLUGINDIRECTORYSCANNER_H_INCLUDED
 #define JUCE_PLUGINDIRECTORYSCANNER_H_INCLUDED
 
-#include "juce_KnownPluginList.h"
-#include "../format/juce_AudioPluginFormatManager.h"
-
 
 //==============================================================================
 /**

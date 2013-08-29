@@ -29,9 +29,6 @@
 #ifndef JUCE_SPARSESET_H_INCLUDED
 #define JUCE_SPARSESET_H_INCLUDED
 
-#include "../maths/juce_Range.h"
-#include "../threads/juce_CriticalSection.h"
-
 
 //==============================================================================
 /**

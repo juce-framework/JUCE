@@ -29,28 +29,6 @@
 #ifndef JUCE_STRING_H_INCLUDED
 #define JUCE_STRING_H_INCLUDED
 
-#include "juce_CharacterFunctions.h"
-
-#ifndef JUCE_STRING_UTF_TYPE
- #define JUCE_STRING_UTF_TYPE 8
-#endif
-
-#if JUCE_MSVC
- #pragma warning (push)
- #pragma warning (disable: 4514 4996)
-#endif
-
-#include "../memory/juce_Atomic.h"
-#include "juce_CharPointer_UTF8.h"
-#include "juce_CharPointer_UTF16.h"
-#include "juce_CharPointer_UTF32.h"
-#include "juce_CharPointer_ASCII.h"
-
-#if JUCE_MSVC
- #pragma warning (pop)
-#endif
-
-class OutputStream;
 
 //==============================================================================
 /**

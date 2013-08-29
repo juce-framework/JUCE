@@ -25,8 +25,6 @@
 #ifndef JUCE_MIDIMESSAGECOLLECTOR_H_INCLUDED
 #define JUCE_MIDIMESSAGECOLLECTOR_H_INCLUDED
 
-#include "juce_MidiInput.h"
-
 
 //==============================================================================
 /**

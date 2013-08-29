@@ -29,8 +29,6 @@
 #ifndef JUCE_REFERENCECOUNTEDOBJECT_H_INCLUDED
 #define JUCE_REFERENCECOUNTEDOBJECT_H_INCLUDED
 
-#include "juce_Atomic.h"
-
 
 //==============================================================================
 /**

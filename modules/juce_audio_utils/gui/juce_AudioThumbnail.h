@@ -25,8 +25,6 @@
 #ifndef JUCE_AUDIOTHUMBNAIL_H_INCLUDED
 #define JUCE_AUDIOTHUMBNAIL_H_INCLUDED
 
-class AudioThumbnailCache;
-
 
 //==============================================================================
 /**

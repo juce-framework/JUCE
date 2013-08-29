@@ -25,7 +25,6 @@
 #ifndef JUCE_AUDIOPROCESSORLISTENER_H_INCLUDED
 #define JUCE_AUDIOPROCESSORLISTENER_H_INCLUDED
 
-class AudioProcessor;
 
 //==============================================================================
 /**

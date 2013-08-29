@@ -33,12 +33,14 @@
 //=============================================================================
 namespace juce
 {
- #include "gui/juce_AudioDeviceSelectorComponent.h"
- #include "gui/juce_AudioThumbnailBase.h"
- #include "gui/juce_AudioThumbnail.h"
- #include "gui/juce_AudioThumbnailCache.h"
- #include "gui/juce_MidiKeyboardComponent.h"
- #include "players/juce_AudioProcessorPlayer.h"
+
+#include "gui/juce_AudioDeviceSelectorComponent.h"
+#include "gui/juce_AudioThumbnailBase.h"
+#include "gui/juce_AudioThumbnail.h"
+#include "gui/juce_AudioThumbnailCache.h"
+#include "gui/juce_MidiKeyboardComponent.h"
+#include "players/juce_AudioProcessorPlayer.h"
+
 }
 
 #endif   // JUCE_AUDIO_UTILS_H_INCLUDED

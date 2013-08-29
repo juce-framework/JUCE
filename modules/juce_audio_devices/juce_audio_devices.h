@@ -100,8 +100,6 @@
 namespace juce
 {
 
-// START_AUTOINCLUDE audio_io, midi_io, sources, audio_cd
-#include "audio_io/juce_AudioDeviceManager.h"
 #include "audio_io/juce_AudioIODevice.h"
 #include "audio_io/juce_AudioIODeviceType.h"
 #include "audio_io/juce_SystemAudioVolume.h"
@@ -112,7 +110,7 @@ namespace juce
 #include "sources/juce_AudioTransportSource.h"
 #include "audio_cd/juce_AudioCDBurner.h"
 #include "audio_cd/juce_AudioCDReader.h"
-// END_AUTOINCLUDE
+#include "audio_io/juce_AudioDeviceManager.h"
 
 }
 

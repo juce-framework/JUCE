@@ -25,10 +25,6 @@
 #ifndef JUCE_AUDIOPROCESSORGRAPH_H_INCLUDED
 #define JUCE_AUDIOPROCESSORGRAPH_H_INCLUDED
 
-#include "juce_AudioProcessor.h"
-#include "../format/juce_AudioPluginFormatManager.h"
-#include "../scanning/juce_KnownPluginList.h"
-
 
 //==============================================================================
 /**
