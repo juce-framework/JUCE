@@ -147,8 +147,8 @@ class RenameTreeItemCallback  : public ModalComponentManager::Callback,
                                 public TextEditorListener
 {
 public:
-    RenameTreeItemCallback (JucerTreeViewBase& item_, Component& parent, const Rectangle<int>& bounds)
-        : item (item_)
+    RenameTreeItemCallback (JucerTreeViewBase& ti, Component& parent, const Rectangle<int>& bounds)
+        : item (ti)
     {
         ed.setMultiLine (false, false);
         ed.setPopupMenuEnabled (false);
@@ -162,19 +162,24 @@ public:
         ed.enterModalState (true, this);
     }
 
-    void modalStateFinished (int resultCode)
+    void modalStateFinished (int resultCode) override
     {
         if (resultCode != 0)
             item.setName (ed.getText());
     }
 
-    void textEditorTextChanged (TextEditor&)                {}
-    void textEditorReturnKeyPressed (TextEditor& editor)    { editor.exitModalState (1); }
-    void textEditorEscapeKeyPressed (TextEditor& editor)    { editor.exitModalState (0); }
-    void textEditorFocusLost (TextEditor& editor)           { editor.exitModalState (0); }
+    void textEditorTextChanged (TextEditor&) override               {}
+    void textEditorReturnKeyPressed (TextEditor& editor) override    { editor.exitModalState (1); }
+    void textEditorEscapeKeyPressed (TextEditor& editor) override    { editor.exitModalState (0); }
+    void textEditorFocusLost (TextEditor& editor) override           { editor.exitModalState (0); }
 
 private:
-    TextEditor ed;
+    struct RenameEditor   : public TextEditor
+    {
+        void inputAttemptWhenModal() override   { exitModalState (0); }
+    };
+
+    RenameEditor ed;
     JucerTreeViewBase& item;
 
     JUCE_DECLARE_NON_COPYABLE (RenameTreeItemCallback)
@@ -237,7 +242,7 @@ class JucerTreeViewBase::ItemSelectionTimer  : public Timer
 public:
     ItemSelectionTimer (JucerTreeViewBase& owner_)  : owner (owner_) {}
 
-    void timerCallback()    { owner.invokeShowDocument(); }
+    void timerCallback() override    { owner.invokeShowDocument(); }
 
 private:
     JucerTreeViewBase& owner;
