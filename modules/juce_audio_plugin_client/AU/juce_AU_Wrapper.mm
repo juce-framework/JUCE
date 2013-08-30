@@ -1236,9 +1236,11 @@ public:
             {
                 deleteUI();
 
-                AudioProcessorEditor* editorComp = juceFilter->createEditorIfNeeded();
-                editorComp->setOpaque (true);
-                windowComp = new ComponentInHIView (editorComp, mCarbonPane);
+                if (AudioProcessorEditor* editorComp = juceFilter->createEditorIfNeeded())
+                {
+                    editorComp->setOpaque (true);
+                    windowComp = new ComponentInHIView (editorComp, mCarbonPane);
+                }
             }
             else
             {
