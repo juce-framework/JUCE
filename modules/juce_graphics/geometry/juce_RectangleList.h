@@ -610,6 +610,16 @@ public:
             *r *= scaleFactor;
     }
 
+    /** Applies a transform to all the rectangles.
+        Obviously this will create a mess if the transform involves any
+        rotation or skewing.
+    */
+    void transformAll (const AffineTransform& transform) noexcept
+    {
+        for (RectangleType* r = rects.begin(), * const e = rects.end(); r != e; ++r)
+            *r = r->transformedBy (transform);
+    }
+
     //==============================================================================
     /** Creates a Path object to represent this region. */
     Path toPath() const

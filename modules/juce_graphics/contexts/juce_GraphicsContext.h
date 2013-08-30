@@ -241,33 +241,39 @@ public:
 
     //==============================================================================
     /** Fills a rectangle with the current colour or brush.
+        @see drawRect, fillRoundedRectangle
+    */
+    void fillRect (const Rectangle<int>& rectangle) const;
 
+    /** Fills a rectangle with the current colour or brush.
+        @see drawRect, fillRoundedRectangle
+    */
+    void fillRect (const Rectangle<float>& rectangle) const;
+
+    /** Fills a rectangle with the current colour or brush.
         @see drawRect, fillRoundedRectangle
     */
     void fillRect (int x, int y, int width, int height) const;
 
-    /** Fills a rectangle with the current colour or brush. */
-    void fillRect (const Rectangle<int>& rectangle) const;
-
-    /** Fills a rectangle with the current colour or brush. */
-    void fillRect (const Rectangle<float>& rectangle) const;
-
     /** Fills a rectangle with the current colour or brush.
-
-        This uses sub-pixel positioning so is slower than the fillRect method which
-        takes integer coordinates.
+        @see drawRect, fillRoundedRectangle
     */
     void fillRect (float x, float y, float width, float height) const;
 
-    /** Uses the current colour or brush to fill a rectangle with rounded corners.
+    /** Fills a set of rectangles using the current colour or brush.
+        If you have a lot of rectangles to draw, it may be more efficient
+        to create a RectangleList and use this method than to call fillRect()
+        multiple times.
+    */
+    void fillRectList (const RectangleList<float>& rectangles) const;
 
+    /** Uses the current colour or brush to fill a rectangle with rounded corners.
         @see drawRoundedRectangle, Path::addRoundedRectangle
     */
     void fillRoundedRectangle (float x, float y, float width, float height,
                                float cornerSize) const;
 
     /** Uses the current colour or brush to fill a rectangle with rounded corners.
-
         @see drawRoundedRectangle, Path::addRoundedRectangle
     */
     void fillRoundedRectangle (const Rectangle<float>& rectangle,
@@ -286,8 +292,7 @@ public:
 
         @see fillRect
     */
-    void drawRect (int x, int y, int width, int height,
-                   int lineThickness = 1) const;
+    void drawRect (int x, int y, int width, int height, int lineThickness = 1) const;
 
     /** Draws four lines to form a rectangular outline, using the current colour or brush.
 
@@ -296,8 +301,7 @@ public:
 
         @see fillRect
     */
-    void drawRect (float x, float y, float width, float height,
-                   float lineThickness = 1.0f) const;
+    void drawRect (float x, float y, float width, float height, float lineThickness = 1.0f) const;
 
     /** Draws four lines to form a rectangular outline, using the current colour or brush.
 
@@ -331,7 +335,10 @@ public:
     void drawRoundedRectangle (const Rectangle<float>& rectangle,
                                float cornerSize, float lineThickness) const;
 
-    /** Draws a 1x1 pixel using the current colour or brush. */
+    /** Draws a 1x1 pixel using the current colour or brush.
+        Note that because the context may be transformed, this is effectively the same as
+        calling fillRect (x, y, 1, 1), and the actual result may involve multiple pixels.
+    */
     void setPixel (int x, int y) const;
 
     //==============================================================================

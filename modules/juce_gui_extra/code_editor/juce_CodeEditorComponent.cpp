@@ -80,18 +80,17 @@ public:
         return true;
     }
 
-    void draw (CodeEditorComponent& owner, Graphics& g, const Font& fontToUse,
-               const float rightClip, const float x, const int y,
-               const int lineH, const float characterWidth,
-               const Colour highlightColour) const
+    void getHighlightArea (RectangleList<float>& area, float x, int y, int lineH, float characterWidth) const
     {
         if (highlightColumnStart < highlightColumnEnd)
-        {
-            g.setColour (highlightColour);
-            g.fillRect (roundToInt (x + highlightColumnStart * characterWidth), y,
-                        roundToInt ((highlightColumnEnd - highlightColumnStart) * characterWidth), lineH);
-        }
+            area.addWithoutMerging (Rectangle<float> (x + highlightColumnStart * characterWidth, (float) y,
+                                                      (highlightColumnEnd - highlightColumnStart) * characterWidth, (float) lineH));
+    }
 
+    void draw (CodeEditorComponent& owner, Graphics& g, const Font& fontToUse,
+               const float rightClip, const float x, const int y,
+               const int lineH, const float characterWidth) const
+    {
         Colour lastColour (0x00000001);
 
         AttributedString as;
@@ -466,7 +465,6 @@ void CodeEditorComponent::paint (Graphics& g)
     g.reduceClipRegion (gutterSize, 0, verticalScrollBar.getX() - gutterSize, horizontalScrollBar.getY());
 
     g.setFont (font);
-    const Colour highlightColour (findColour (CodeEditorComponent::highlightColourId));
 
     const Rectangle<int> clip (g.getClipBounds());
     const int firstLineToDraw = jmax (0, clip.getY() / lineHeight);
@@ -474,10 +472,18 @@ void CodeEditorComponent::paint (Graphics& g)
     const float x = (float) (gutterSize - xOffset * charWidth);
     const float rightClip = (float) clip.getRight();
 
+    {
+        RectangleList<float> highlightArea;
+
+        for (int i = firstLineToDraw; i < lastLineToDraw; ++i)
+            lines.getUnchecked(i)->getHighlightArea (highlightArea, x, lineHeight * i, lineHeight, charWidth);
+
+        g.setColour (findColour (CodeEditorComponent::highlightColourId));
+        g.fillRectList (highlightArea);
+    }
+
     for (int i = firstLineToDraw; i < lastLineToDraw; ++i)
-        lines.getUnchecked(i)->draw (*this, g, font, rightClip,
-                                     x, lineHeight * i, lineHeight,
-                                     charWidth, highlightColour);
+        lines.getUnchecked(i)->draw (*this, g, font, rightClip, x, lineHeight * i, lineHeight, charWidth);
 }
 
 void CodeEditorComponent::setScrollbarThickness (const int thickness)

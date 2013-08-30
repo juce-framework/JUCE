@@ -348,6 +348,11 @@ void Graphics::fillRect (const float x, const float y, const float width, const 
     fillRect (Rectangle<float> (x, y, width, height));
 }
 
+void Graphics::fillRectList (const RectangleList<float>& rectangles) const
+{
+    context.fillRectList (rectangles);
+}
+
 void Graphics::setPixel (int x, int y) const
 {
     context.fillRect (Rectangle<int> (x, y, 1, 1), false);

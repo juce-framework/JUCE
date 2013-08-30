@@ -351,7 +351,16 @@ void LowLevelGraphicsPostScriptRenderer::fillRect (const Rectangle<int>& r, cons
         p.addRectangle (r);
         fillPath (p, AffineTransform::identity);
     }
+}
 
+void LowLevelGraphicsPostScriptRenderer::fillRectList (const RectangleList<float>& list)
+{
+    for (const Rectangle<float>* r = list.begin(), * const e = list.end(); r != e; ++r)
+    {
+        Path p;
+        p.addRectangle (*r);
+        fillPath (p, AffineTransform::identity);
+    }
 }
 
 //==============================================================================

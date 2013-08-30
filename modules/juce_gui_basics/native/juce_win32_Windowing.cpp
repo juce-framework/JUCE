@@ -136,7 +136,7 @@ static bool canUseMultiTouch()
     return registerTouchWindow != nullptr;
 }
 
-static inline Rectangle<int> rectangleFromRECT (const RECT& r) noexcept
+static Rectangle<int> rectangleFromRECT (const RECT& r) noexcept
 {
     return Rectangle<int>::leftTopRightBottom ((int) r.left, (int) r.top, (int) r.right, (int) r.bottom);
 }
@@ -164,18 +164,22 @@ static void setDPIAwareness()
     if (JUCEApplication::isStandaloneApp())
     {
         if (setProcessDPIAware == nullptr)
+        {
             setProcessDPIAware = (SetProcessDPIAwareFunc) getUser32Function ("SetProcessDPIAware");
 
-        if (setProcessDPIAware != nullptr)
-            setProcessDPIAware();
+            if (setProcessDPIAware != nullptr)
+                setProcessDPIAware();
+        }
     }
 }
 
-inline double getDPI()
+static double getDPI()
 {
+    setDPIAwareness();
+
     HDC dc = GetDC (0);
     const double dpi = (GetDeviceCaps (dc, LOGPIXELSX)
-                       + GetDeviceCaps (dc, LOGPIXELSY)) / 2.0;
+                      + GetDeviceCaps (dc, LOGPIXELSY)) / 2.0;
     ReleaseDC (0, dc);
     return dpi;
 }
@@ -1366,7 +1370,7 @@ private:
         return ! component.isOpaque();
     }
 
-    inline bool hasTitleBar() const noexcept        { return (styleFlags & windowHasTitleBar) != 0; }
+    bool hasTitleBar() const noexcept        { return (styleFlags & windowHasTitleBar) != 0; }
 
 
     void setIcon (const Image& newIcon)
@@ -3234,7 +3238,7 @@ void Desktop::Displays::findDisplays (float masterScale)
         d.dpi = dpi;
 
         if (i == 0)
-            d.userArea = d.userArea.getIntersection (rectangleFromRECT (workArea));
+            d.userArea = d.userArea.getIntersection (rectangleFromRECT (workArea) / masterScale);
 
         displays.add (d);
     }

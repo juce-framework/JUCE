@@ -185,6 +185,12 @@ public:
         renderingTarget->SetTransform (D2D1::IdentityMatrix());
     }
 
+    void fillRectList (const RectangleList<float>& list)
+    {
+        for (const Rectangle<float>* r = list.begin(), * const e = list.end(); r != e; ++r)
+            fillRect (*r);
+    }
+
     void fillPath (const Path& p, const AffineTransform& transform)
     {
         currentState->createBrush();

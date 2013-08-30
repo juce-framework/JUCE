@@ -556,6 +556,34 @@ void CoreGraphicsContext::drawHorizontalLine (const int y, float left, float rig
     }
 }
 
+void CoreGraphicsContext::fillRectList (const RectangleList<float>& list)
+{
+    HeapBlock<CGRect> rects (list.getNumRectangles());
+
+    size_t num = 0;
+    for (const Rectangle<float>* r = list.begin(), * const e = list.end(); r != e; ++r)
+        rects[num++] = CGRectMake (r->getX(), flipHeight - r->getBottom(), r->getWidth(), r->getHeight());
+
+    if (state->fillType.isColour())
+    {
+        CGContextFillRects (context, rects, num);
+    }
+    else if (state->fillType.isGradient())
+    {
+        CGContextSaveGState (context);
+        CGContextFillRects (context, rects, num);
+        drawGradient();
+        CGContextRestoreGState (context);
+    }
+    else
+    {
+        CGContextSaveGState (context);
+        CGContextFillRects (context, rects, num);
+        drawImage (state->fillType.image, state->fillType.transform, true);
+        CGContextRestoreGState (context);
+    }
+}
+
 void CoreGraphicsContext::setFont (const Font& newFont)
 {
     if (state->font != newFont)

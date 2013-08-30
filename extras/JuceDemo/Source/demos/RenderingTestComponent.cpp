@@ -304,26 +304,39 @@ private:
 
     void drawLines (Graphics& g)
     {
-        g.setColour (Colours::blue.withAlpha ((float) owner.opacitySlider->getValue()));
-
-        for (int x = 0; x < getWidth(); ++x)
         {
-            float y = getHeight() * 0.3f;
-            float width = y * fabsf (sinf (x / 100.0f + 2.0f * bouncingNumber[1]));
-            g.drawVerticalLine (x, y - width, y + width);
+            RectangleList<float> verticalLines;
+
+            for (int x = 0; x < getWidth(); ++x)
+            {
+                float y = getHeight() * 0.3f;
+                float length = y * fabsf (sinf (x / 100.0f + 2.0f * bouncingNumber[1]));
+                verticalLines.addWithoutMerging (Rectangle<float> ((float) x, y - length * 0.5f, 1.0f, length));
+            }
+
+            g.setColour (Colours::blue.withAlpha ((float) owner.opacitySlider->getValue()));
+            g.fillRectList (verticalLines);
         }
 
-        g.setColour (Colours::green.withAlpha ((float) owner.opacitySlider->getValue()));
-
-        for (int y = 0; y < getHeight(); ++y)
         {
-            float x = getWidth() * 0.3f;
-            float width = x * fabsf (sinf (y / 100.0f + 2.0f * bouncingNumber[2]));
-            g.drawHorizontalLine (y, x - width, x + width);
+            RectangleList<float> horizontalLines;
+
+            for (int y = 0; y < getHeight(); ++y)
+            {
+                float x = getWidth() * 0.3f;
+                float length = x * fabsf (sinf (y / 100.0f + 2.0f * bouncingNumber[2]));
+                horizontalLines.addWithoutMerging (Rectangle<float> (x - length * 0.5f, (float) y, length, 1.0f));
+            }
+
+            g.setColour (Colours::green.withAlpha ((float) owner.opacitySlider->getValue()));
+            g.fillRectList (horizontalLines);
         }
 
         g.setColour (Colours::red.withAlpha ((float) owner.opacitySlider->getValue()));
-        g.drawLine (bouncingPointX[0], bouncingPointY[0], bouncingPointX[1], bouncingPointY[1]);
+
+        g.drawLine (bouncingPointX[0], bouncingPointY[0],
+                    bouncingPointX[1], bouncingPointY[1]);
+
         g.drawLine (getWidth() - bouncingPointX[0], getHeight() - bouncingPointY[0],
                     getWidth() - bouncingPointX[1], getHeight() - bouncingPointY[1]);
     }

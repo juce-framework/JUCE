@@ -60,15 +60,18 @@ public:
             if (backgroundGraphics != nullptr)
                 col = backgroundGraphics->getBackgroundColour().contrasting();
 
-            g.setColour (col.withAlpha (0.1f));
-
             const Rectangle<int> clip (g.getClipBounds());
 
-            for (int y = clip.getY() - (clip.getY() % snapGridSize); y < clip.getBottom(); y += snapGridSize)
-                g.drawHorizontalLine (y, 0.0f, (float) clip.getRight());
+            RectangleList<float> gridLines;
 
             for (int x = clip.getX() - (clip.getX() % snapGridSize); x < clip.getRight(); x += snapGridSize)
-                g.drawVerticalLine (x, 0.0f, (float) clip.getBottom());
+                gridLines.addWithoutMerging (Rectangle<float> ((float) x, 0.0f, 1.0f, (float) clip.getBottom()));
+
+            for (int y = clip.getY() - (clip.getY() % snapGridSize); y < clip.getBottom(); y += snapGridSize)
+                gridLines.addWithoutMerging (Rectangle<float> (0.0f, (float) y, (float) clip.getRight(), 1.0f));
+
+            g.setColour (col.withAlpha (0.1f));
+            g.fillRectList (gridLines);
         }
     }
 

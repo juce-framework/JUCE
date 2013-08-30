@@ -60,6 +60,7 @@ public:
 
     //==============================================================================
     void fillRect (const Rectangle<int>&, bool replaceExistingContents) override;
+    void fillRectList (const RectangleList<float>&) override;
     void fillPath (const Path&, const AffineTransform&) override;
     void drawImage (const Image& sourceImage, const AffineTransform&) override;
 

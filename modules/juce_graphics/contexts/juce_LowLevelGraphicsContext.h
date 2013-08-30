@@ -85,6 +85,8 @@ public:
 
     //==============================================================================
     virtual void fillRect (const Rectangle<int>&, bool replaceExistingContents) = 0;
+    virtual void fillRectList (const RectangleList<float>&) = 0;
+
     virtual void fillPath (const Path&, const AffineTransform&) = 0;
 
     virtual void drawImage (const Image&, const AffineTransform&) = 0;
