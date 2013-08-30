@@ -1288,14 +1288,14 @@ private:
     class ComponentInHIView  : public Component
     {
     public:
-        ComponentInHIView (AudioProcessorEditor* const editor_, HIViewRef parentHIView)
+        ComponentInHIView (AudioProcessorEditor* ed, HIViewRef parentHIView)
             : parentView (parentHIView),
-              editor (editor_),
+              editor (ed),
               recursive (false)
         {
             JUCE_AUTORELEASEPOOL
             {
-                jassert (editor_ != nullptr);
+                jassert (ed != nullptr);
                 addAndMakeVisible (&editor);
                 setOpaque (true);
                 setVisible (true);

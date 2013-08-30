@@ -26,7 +26,7 @@ class Button::RepeatTimer  : public Timer
 {
 public:
     RepeatTimer (Button& b) : owner (b)   {}
-    void timerCallback()    { owner.repeatTimerCallback(); }
+    void timerCallback() override    { owner.repeatTimerCallback(); }
 
 private:
     Button& owner;

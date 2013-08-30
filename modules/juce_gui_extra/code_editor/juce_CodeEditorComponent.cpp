@@ -258,8 +258,8 @@ public:
 private:
     CodeEditorComponent& owner;
 
-    void timerCallback()        { owner.newTransaction(); }
-    void handleAsyncUpdate()    { owner.rebuildLineTokens(); }
+    void timerCallback() override        { owner.newTransaction(); }
+    void handleAsyncUpdate() override    { owner.rebuildLineTokens(); }
 
     void scrollBarMoved (ScrollBar* scrollBarThatHasMoved, double newRangeStart) override
     {
@@ -271,15 +271,10 @@ private:
 
     void codeDocumentTextInserted (const String& newText, int pos) override
     {
-        codeDocumentChanged (pos, pos + newText.length());
+        owner.codeDocumentChanged (pos, pos + newText.length());
     }
 
     void codeDocumentTextDeleted (int start, int end) override
-    {
-        codeDocumentChanged (start, end);
-    }
-
-    void codeDocumentChanged (const int start, const int end)
     {
         owner.codeDocumentChanged (start, end);
     }

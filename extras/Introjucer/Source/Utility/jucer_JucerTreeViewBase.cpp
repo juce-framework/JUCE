@@ -240,7 +240,7 @@ ProjectContentComponent* JucerTreeViewBase::getProjectContentComponent() const
 class JucerTreeViewBase::ItemSelectionTimer  : public Timer
 {
 public:
-    ItemSelectionTimer (JucerTreeViewBase& owner_)  : owner (owner_) {}
+    ItemSelectionTimer (JucerTreeViewBase& tvb)  : owner (tvb) {}
 
     void timerCallback() override    { owner.invokeShowDocument(); }
 

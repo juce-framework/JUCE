@@ -73,7 +73,7 @@ void JucerDocument::changed()
 struct UserDocChangeTimer  : public Timer
 {
     UserDocChangeTimer (JucerDocument& d) : doc (d) {}
-    void timerCallback()        { doc.reloadFromDocument(); }
+    void timerCallback() override       { doc.reloadFromDocument(); }
 
     JucerDocument& doc;
 };

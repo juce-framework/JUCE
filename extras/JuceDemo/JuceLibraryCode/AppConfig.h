@@ -84,7 +84,7 @@
 #endif
 
 #ifndef    JUCE_USE_MP3AUDIOFORMAT
- #define JUCE_USE_MP3AUDIOFORMAT 1
+ //#define JUCE_USE_MP3AUDIOFORMAT
 #endif
 
 #ifndef    JUCE_USE_LAME_AUDIO_FORMAT
