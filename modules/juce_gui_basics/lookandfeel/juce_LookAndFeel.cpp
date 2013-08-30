@@ -1715,20 +1715,20 @@ void LookAndFeel::drawImageButton (Graphics& g, Image* image,
     if (! button.isEnabled())
         imageOpacity *= 0.3f;
 
+    AffineTransform t = RectanglePlacement (RectanglePlacement::stretchToFit)
+                            .getTransformToFit (image->getBounds().toFloat(),
+                                                Rectangle<int> (imageX, imageY, imageW, imageH).toFloat());
+
     if (! overlayColour.isOpaque())
     {
         g.setOpacity (imageOpacity);
-
-        g.drawImage (*image, imageX, imageY, imageW, imageH,
-                     0, 0, image->getWidth(), image->getHeight(), false);
+        g.drawImageTransformed (*image, t, false);
     }
 
     if (! overlayColour.isTransparent())
     {
         g.setColour (overlayColour);
-
-        g.drawImage (*image, imageX, imageY, imageW, imageH,
-                     0, 0, image->getWidth(), image->getHeight(), true);
+        g.drawImageTransformed (*image, t, true);
     }
 }
 

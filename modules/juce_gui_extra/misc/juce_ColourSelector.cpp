@@ -100,8 +100,11 @@ public:
         }
 
         g.setOpacity (1.0f);
-        g.drawImage (colours, edge, edge, getWidth() - edge * 2, getHeight() - edge * 2,
-                     0, 0, colours.getWidth(), colours.getHeight());
+        g.drawImageTransformed (colours,
+                                RectanglePlacement (RectanglePlacement::stretchToFit)
+                                    .getTransformToFit (colours.getBounds().toFloat(),
+                                                        getLocalBounds().reduced (edge).toFloat()),
+                                false);
     }
 
     void mouseDown (const MouseEvent& e) override

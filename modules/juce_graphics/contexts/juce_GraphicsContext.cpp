@@ -620,48 +620,24 @@ void Graphics::drawImageAt (const Image& imageToDraw,
                             const int topLeftX, const int topLeftY,
                             const bool fillAlphaChannelWithCurrentBrush) const
 {
-    const int imageW = imageToDraw.getWidth();
-    const int imageH = imageToDraw.getHeight();
-
-    drawImage (imageToDraw,
-               topLeftX, topLeftY, imageW, imageH,
-               0, 0, imageW, imageH,
-               fillAlphaChannelWithCurrentBrush);
+    drawImageTransformed (imageToDraw,
+                          AffineTransform::translation ((float) topLeftX, (float) topLeftY),
+                          fillAlphaChannelWithCurrentBrush);
 }
 
 void Graphics::drawImageWithin (const Image& imageToDraw,
-                                const int destX, const int destY,
-                                const int destW, const int destH,
+                                int dx, int dy, int dw, int dh,
                                 RectanglePlacement placementWithinTarget,
                                 const bool fillAlphaChannelWithCurrentBrush) const
 {
     // passing in a silly number can cause maths problems in rendering!
-    jassert (areCoordsSensibleNumbers (destX, destY, destW, destH));
+    jassert (areCoordsSensibleNumbers (dx, dy, dw, dh));
 
     if (imageToDraw.isValid())
-    {
-        const int imageW = imageToDraw.getWidth();
-        const int imageH = imageToDraw.getHeight();
-
-        if (imageW > 0 && imageH > 0)
-        {
-            double newX = 0.0, newY = 0.0;
-            double newW = imageW;
-            double newH = imageH;
-
-            placementWithinTarget.applyTo (newX, newY, newW, newH,
-                                           destX, destY, destW, destH);
-
-            if (newW > 0 && newH > 0)
-            {
-                drawImage (imageToDraw,
-                           roundToInt (newX), roundToInt (newY),
-                           roundToInt (newW), roundToInt (newH),
-                           0, 0, imageW, imageH,
-                           fillAlphaChannelWithCurrentBrush);
-            }
-        }
-    }
+        drawImageTransformed (imageToDraw,
+                              placementWithinTarget.getTransformToFit (imageToDraw.getBounds().toFloat(),
+                                                                       Rectangle<int> (dx, dy, dw, dh).toFloat()),
+                              fillAlphaChannelWithCurrentBrush);
 }
 
 void Graphics::drawImage (const Image& imageToDraw,
@@ -674,12 +650,10 @@ void Graphics::drawImage (const Image& imageToDraw,
     jassert (areCoordsSensibleNumbers (sx, sy, sw, sh));
 
     if (imageToDraw.isValid() && context.clipRegionIntersects  (Rectangle<int> (dx, dy, dw, dh)))
-    {
         drawImageTransformed (imageToDraw.getClippedImage (Rectangle<int> (sx, sy, sw, sh)),
                               AffineTransform::scale (dw / (float) sw, dh / (float) sh)
                                               .translated ((float) dx, (float) dy),
                               fillAlphaChannelWithCurrentBrush);
-    }
 }
 
 void Graphics::drawImageTransformed (const Image& imageToDraw,

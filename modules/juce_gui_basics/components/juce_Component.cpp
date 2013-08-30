@@ -788,8 +788,8 @@ public:
         validArea = imageBounds;
 
         g.setColour (Colours::black.withAlpha (owner.getAlpha()));
-        g.drawImage (image, 0, 0, compBounds.getWidth(), compBounds.getHeight(),
-                     0, 0, imageBounds.getWidth(), imageBounds.getHeight(), false);
+        g.drawImageTransformed (image, AffineTransform::scale (compBounds.getWidth()  / (float) imageBounds.getWidth(),
+                                                               compBounds.getHeight() / (float) imageBounds.getHeight()), false);
     }
 
     bool invalidateAll() override                            { validArea.clear(); return true; }
