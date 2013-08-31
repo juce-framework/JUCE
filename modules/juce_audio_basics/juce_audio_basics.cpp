@@ -61,7 +61,6 @@
 namespace juce
 {
 
-// START_AUTOINCLUDE buffers/*.cpp, effects/*.cpp, midi/*.cpp, sources/*.cpp, synthesisers/*.cpp
 #include "buffers/juce_AudioDataConverters.cpp"
 #include "buffers/juce_AudioSampleBuffer.cpp"
 #include "buffers/juce_FloatVectorOperations.cpp"
@@ -80,6 +79,5 @@ namespace juce
 #include "sources/juce_ReverbAudioSource.cpp"
 #include "sources/juce_ToneGeneratorAudioSource.cpp"
 #include "synthesisers/juce_Synthesiser.cpp"
-// END_AUTOINCLUDE
 
 }

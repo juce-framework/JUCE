@@ -132,7 +132,6 @@
 namespace juce
 {
 
-// START_AUTOINCLUDE audio_io/*.cpp, midi_io/*.cpp, audio_cd/*.cpp, sources/*.cpp
 #include "audio_io/juce_AudioDeviceManager.cpp"
 #include "audio_io/juce_AudioIODevice.cpp"
 #include "audio_io/juce_AudioIODeviceType.cpp"
@@ -141,16 +140,7 @@ namespace juce
 #include "audio_cd/juce_AudioCDReader.cpp"
 #include "sources/juce_AudioSourcePlayer.cpp"
 #include "sources/juce_AudioTransportSource.cpp"
-// END_AUTOINCLUDE
-
-}
-
-//==============================================================================
-using namespace juce;
-
-namespace juce
-{
- #include "native/juce_MidiDataConcatenator.h"
+#include "native/juce_MidiDataConcatenator.h"
 
 //==============================================================================
 #if JUCE_MAC

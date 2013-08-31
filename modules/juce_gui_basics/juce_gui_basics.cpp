@@ -132,13 +132,9 @@
 //==============================================================================
 namespace juce
 {
-    extern bool juce_areThereAnyAlwaysOnTopWindows();
 
+extern bool juce_areThereAnyAlwaysOnTopWindows();
 
-// START_AUTOINCLUDE components/*.cpp, mouse/*.cpp, keyboard/*.cpp, buttons/*.cpp,
-// drawables/*.cpp, filebrowser/*.cpp, layout/*.cpp, lookandfeel/*.cpp,
-// menus/*.cpp, positioning/*.cpp, properties/*.cpp, widgets/*.cpp,
-// windows/*.cpp, commands/*.cpp, application/*.cpp, misc/*.cpp
 #include "components/juce_Component.cpp"
 #include "components/juce_ComponentListener.cpp"
 #include "components/juce_Desktop.cpp"
@@ -248,15 +244,7 @@ namespace juce
 #include "application/juce_Application.cpp"
 #include "misc/juce_BubbleComponent.cpp"
 #include "misc/juce_DropShadower.cpp"
-// END_AUTOINCLUDE
 
-}
-
-using namespace juce;
-
-//==============================================================================
-namespace juce
-{
 #if JUCE_IOS || JUCE_WINDOWS
  #include "native/juce_MultiTouchMapper.h"
 #endif
