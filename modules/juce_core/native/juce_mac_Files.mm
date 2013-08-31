@@ -213,6 +213,7 @@ File File::getSpecialLocation (const SpecialLocationType type)
             case userPicturesDirectory:             resultPath = "~/Pictures"; break;
             case userApplicationDataDirectory:      resultPath = "~/Library"; break;
             case commonApplicationDataDirectory:    resultPath = "/Library"; break;
+            case commonDocumentsDirectory:          resultPath = "/Users/Shared"; break;
             case globalApplicationsDirectory:       resultPath = "/Applications"; break;
 
             case invokedExecutableFile:

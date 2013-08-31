@@ -168,11 +168,8 @@ File File::getSpecialLocation (const SpecialLocationType type)
             const char* homeDir = getenv ("HOME");
 
             if (homeDir == nullptr)
-            {
-                struct passwd* const pw = getpwuid (getuid());
-                if (pw != nullptr)
+                if (struct passwd* const pw = getpwuid (getuid()))
                     homeDir = pw->pw_dir;
-            }
 
             return File (CharPointer_UTF8 (homeDir));
         }
@@ -183,6 +180,7 @@ File File::getSpecialLocation (const SpecialLocationType type)
         case userPicturesDirectory:           return resolveXDGFolder ("XDG_PICTURES_DIR",  "~");
         case userDesktopDirectory:            return resolveXDGFolder ("XDG_DESKTOP_DIR",   "~/Desktop");
         case userApplicationDataDirectory:    return File ("~");
+        case commonDocumentsDirectory:
         case commonApplicationDataDirectory:  return File ("/var");
         case globalApplicationsDirectory:     return File ("/usr");
 

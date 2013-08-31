@@ -112,13 +112,13 @@ File File::getSpecialLocation (const SpecialLocationType type)
             return File (android.appDataDir);
 
         case commonApplicationDataDirectory:
+        case commonDocumentsDirectory:
             return File (android.appDataDir);
 
         case globalApplicationsDirectory:
             return File ("/system/app");
 
         case tempDirectory:
-            //return File (AndroidStatsHelpers::getSystemProperty ("java.io.tmpdir"));
             return File (android.appDataDir).getChildFile (".temp");
 
         case invokedExecutableFile:

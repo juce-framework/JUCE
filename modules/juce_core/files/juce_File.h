@@ -762,6 +762,15 @@ public:
         /** The folder that contains the user's desktop objects. */
         userDesktopDirectory,
 
+        /** The most likely place where a user might store their music files. */
+        userMusicDirectory,
+
+        /** The most likely place where a user might store their movie files. */
+        userMoviesDirectory,
+
+        /** The most likely place where a user might store their picture files. */
+        userPicturesDirectory,
+
         /** The folder in which applications store their persistent user-specific settings.
             On Windows, this might be "\Documents and Settings\username\Application Data".
             On the Mac, it might be "~/Library". If you're going to store your settings in here,
@@ -778,6 +787,13 @@ public:
             Depending on the setup, this folder may be read-only.
         */
         commonApplicationDataDirectory,
+
+        /** A place to put documents which are shared by all users of the machine.
+            On Windows this may be somewhere like "C:\Users\Public\Documents", on OSX it
+            will be something like "/Users/Shared". Other OSes may have no such concept
+            though, so be careful.
+        */
+        commonDocumentsDirectory,
 
         /** The folder that should be used for temporary files.
             Always delete them when you're finished, to keep the user's computer tidy!
@@ -821,16 +837,7 @@ public:
             So on windows, this would be something like "c:\program files", on the
             Mac "/Applications", or "/usr" on linux.
         */
-        globalApplicationsDirectory,
-
-        /** The most likely place where a user might store their music files. */
-        userMusicDirectory,
-
-        /** The most likely place where a user might store their movie files. */
-        userMoviesDirectory,
-
-        /** The most likely place where a user might store their picture files. */
-        userPicturesDirectory
+        globalApplicationsDirectory
     };
 
     /** Finds the location of a special type of file or directory, such as a home folder or
