@@ -421,7 +421,7 @@ public:
     */
     bool containsPoint (ValueType x, ValueType y) const noexcept
     {
-        return contains (Point<ValueType> (x, y));
+        return containsPoint (Point<ValueType> (x, y));
     }
 
     /** Checks whether the region contains the whole of a given rectangle.
