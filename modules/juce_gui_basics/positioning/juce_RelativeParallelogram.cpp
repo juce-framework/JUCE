@@ -77,7 +77,7 @@ void RelativeParallelogram::getPath (Path& path, Expression::Scope* const scope)
     path.closeSubPath();
 }
 
-const AffineTransform RelativeParallelogram::resetToPerpendicular (Expression::Scope* const scope)
+AffineTransform RelativeParallelogram::resetToPerpendicular (Expression::Scope* const scope)
 {
     Point<float> corners[3];
     resolveThreePoints (corners, scope);

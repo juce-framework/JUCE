@@ -470,10 +470,7 @@ bool XmlElement::getBoolAttribute (const String& attributeName, const bool defau
     {
         if (att->hasName (attributeName))
         {
-            juce_wchar firstChar = att->value[0];
-
-            if (CharacterFunctions::isWhitespace (firstChar))
-                firstChar = att->value.trimStart() [0];
+            const juce_wchar firstChar = *(att->value.getCharPointer().findEndOfWhitespace());
 
             return firstChar == '1'
                 || firstChar == 't'

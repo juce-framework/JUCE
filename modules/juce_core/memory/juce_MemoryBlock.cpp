@@ -88,14 +88,14 @@ MemoryBlock& MemoryBlock::operator= (const MemoryBlock& other)
 
 #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
 MemoryBlock::MemoryBlock (MemoryBlock&& other) noexcept
-    : data (static_cast <HeapBlock <char>&&> (other.data)),
+    : data (static_cast <HeapBlock<char>&&> (other.data)),
       size (other.size)
 {
 }
 
 MemoryBlock& MemoryBlock::operator= (MemoryBlock&& other) noexcept
 {
-    data = static_cast <HeapBlock <char>&&> (other.data);
+    data = static_cast <HeapBlock<char>&&> (other.data);
     size = other.size;
     return *this;
 }
@@ -352,7 +352,7 @@ void MemoryBlock::loadFromHexString (const String& hex)
 }
 
 //==============================================================================
-const char* const MemoryBlock::encodingTable = ".ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+";
+static const char* const base64EncodingTable = ".ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+";
 
 String MemoryBlock::toBase64Encoding() const
 {
@@ -367,7 +367,7 @@ String MemoryBlock::toBase64Encoding() const
     d.write ('.');
 
     for (size_t i = 0; i < numChars; ++i)
-        d.write ((juce_wchar) (uint8) encodingTable [getBitRange (i * 6, 6)]);
+        d.write ((juce_wchar) (uint8) base64EncodingTable [getBitRange (i * 6, 6)]);
 
     d.writeNull();
     return destString;
@@ -396,7 +396,7 @@ bool MemoryBlock::fromBase64Encoding (const String& s)
 
         for (int j = 0; j < 64; ++j)
         {
-            if (encodingTable[j] == c)
+            if (base64EncodingTable[j] == c)
             {
                 setBitRange ((size_t) pos, 6, j);
                 pos += 6;

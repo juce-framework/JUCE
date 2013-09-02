@@ -1101,7 +1101,7 @@ private:
         return Colours::findColourForName (s, defaultColour);
     }
 
-    static const AffineTransform parseTransform (String t)
+    static AffineTransform parseTransform (String t)
     {
         AffineTransform result;
 

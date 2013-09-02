@@ -956,7 +956,9 @@ String BigInteger::toString (const int base, const int minimumNumCharacters) con
 void BigInteger::parseString (const String& text, const int base)
 {
     clear();
-    String::CharPointerType t (text.getCharPointer());
+    String::CharPointerType t (text.getCharPointer().findEndOfWhitespace());
+
+    setNegative (*t == (juce_wchar) '-');
 
     if (base == 2 || base == 8 || base == 16)
     {
@@ -997,8 +999,6 @@ void BigInteger::parseString (const String& text, const int base)
             }
         }
     }
-
-    setNegative (text.trimStart().startsWithChar ('-'));
 }
 
 MemoryBlock BigInteger::toMemoryBlock() const

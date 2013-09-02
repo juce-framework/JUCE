@@ -47,7 +47,7 @@ public:
     void resolveFourCorners (Point<float>* points, Expression::Scope* scope) const;
     const Rectangle<float> getBounds (Expression::Scope* scope) const;
     void getPath (Path& path, Expression::Scope* scope) const;
-    const AffineTransform resetToPerpendicular (Expression::Scope* scope);
+    AffineTransform resetToPerpendicular (Expression::Scope* scope);
     bool isDynamic() const;
 
     bool operator== (const RelativeParallelogram& other) const noexcept;
