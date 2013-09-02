@@ -72,9 +72,10 @@ bool Desktop::canUseSemiTransparentWindows() noexcept
 #ifndef WM_TOUCH
  #define WM_TOUCH 0x0240
  #define TOUCH_COORD_TO_PIXEL(l)  ((l) / 100)
- #define TOUCHEVENTF_MOVE   0x0001
- #define TOUCHEVENTF_DOWN   0x0002
- #define TOUCHEVENTF_UP     0x0004
+ #define TOUCHEVENTF_MOVE    0x0001
+ #define TOUCHEVENTF_DOWN    0x0002
+ #define TOUCHEVENTF_UP      0x0004
+ #define TOUCHEVENTF_PRIMARY 0x0010
  DECLARE_HANDLE (HTOUCHINPUT);
  DECLARE_HANDLE (HGESTUREINFO);
 
@@ -1642,85 +1643,69 @@ private:
         return 1000 / 60;  // Throttling the incoming mouse-events seems to still be needed in XP..
     }
 
-    static bool isCurrentEventFromTouchScreen() noexcept
-    {
-        const LPARAM flags = GetMessageExtraInfo();
-        return (flags & 0xffffff00 /* SIGNATURE_MASK */) == 0xff515700 /* MI_WP_SIGNATURE */
-                && (flags & 0x80) != 0; // (bit 7 = 0 for pen events, 1 for touch)
-    }
-
     void doMouseMove (Point<int> position)
     {
-        if (! isCurrentEventFromTouchScreen())
+        if (! isMouseOver)
         {
-            if (! isMouseOver)
-            {
-                isMouseOver = true;
-                ModifierKeys::getCurrentModifiersRealtime(); // (This avoids a rare stuck-button problem when focus is lost unexpectedly)
-                updateKeyModifiers();
+            isMouseOver = true;
+            ModifierKeys::getCurrentModifiersRealtime(); // (This avoids a rare stuck-button problem when focus is lost unexpectedly)
+            updateKeyModifiers();
 
-                TRACKMOUSEEVENT tme;
-                tme.cbSize = sizeof (tme);
-                tme.dwFlags = TME_LEAVE;
-                tme.hwndTrack = hwnd;
-                tme.dwHoverTime = 0;
+            TRACKMOUSEEVENT tme;
+            tme.cbSize = sizeof (tme);
+            tme.dwFlags = TME_LEAVE;
+            tme.hwndTrack = hwnd;
+            tme.dwHoverTime = 0;
 
-                if (! TrackMouseEvent (&tme))
-                    jassertfalse;
+            if (! TrackMouseEvent (&tme))
+                jassertfalse;
 
-                Desktop::getInstance().getMainMouseSource().forceMouseCursorUpdate();
-            }
-            else if (! isDragging)
-            {
-                if (! contains (position, false))
-                    return;
-            }
+            Desktop::getInstance().getMainMouseSource().forceMouseCursorUpdate();
+        }
+        else if (! isDragging)
+        {
+            if (! contains (position, false))
+                return;
+        }
 
-            static uint32 lastMouseTime = 0;
-            static int minTimeBetweenMouses = getMinTimeBetweenMouseMoves();
-            const uint32 now = Time::getMillisecondCounter();
+        static uint32 lastMouseTime = 0;
+        static int minTimeBetweenMouses = getMinTimeBetweenMouseMoves();
+        const uint32 now = Time::getMillisecondCounter();
 
-            if (now >= lastMouseTime + minTimeBetweenMouses)
-            {
-                lastMouseTime = now;
-                doMouseEvent (position);
-            }
+        if (now >= lastMouseTime + minTimeBetweenMouses)
+        {
+            lastMouseTime = now;
+            doMouseEvent (position);
         }
     }
 
     void doMouseDown (Point<int> position, const WPARAM wParam)
     {
-        if (! isCurrentEventFromTouchScreen())
-        {
-            if (GetCapture() != hwnd)
-                SetCapture (hwnd);
+        if (GetCapture() != hwnd)
+            SetCapture (hwnd);
 
-            doMouseMove (position);
+        doMouseMove (position);
 
-            updateModifiersFromWParam (wParam);
-            isDragging = true;
+        updateModifiersFromWParam (wParam);
+        isDragging = true;
 
-            doMouseEvent (position);
-        }
+        doMouseEvent (position);
     }
 
     void doMouseUp (Point<int> position, const WPARAM wParam)
     {
-        if (! isCurrentEventFromTouchScreen())
-        {
-            updateModifiersFromWParam (wParam);
-            const bool wasDragging = isDragging;
-            isDragging = false;
+        updateModifiersFromWParam (wParam);
+        const bool wasDragging = isDragging;
+        isDragging = false;
 
-            // release the mouse capture if the user has released all buttons
-            if ((wParam & (MK_LBUTTON | MK_RBUTTON | MK_MBUTTON)) == 0 && hwnd == GetCapture())
-                ReleaseCapture();
+        // release the mouse capture if the user has released all buttons
+        if ((wParam & (MK_LBUTTON | MK_RBUTTON | MK_MBUTTON)) == 0 && hwnd == GetCapture())
+            ReleaseCapture();
 
-            // NB: under some circumstances (e.g. double-clicking a native title bar), a mouse-up can
-            // arrive without a mouse-down, so in that case we need to avoid sending a message.
-            if (wasDragging)
-                doMouseEvent (position);
-        }
+        // NB: under some circumstances (e.g. double-clicking a native title bar), a mouse-up can
+        // arrive without a mouse-down, so in that case we need to avoid sending a message.
+        if (wasDragging)
+            doMouseEvent (position);
     }
 
     void doCaptureChanged()
@@ -1826,7 +1811,8 @@ private:
             {
                 const DWORD flags = inputInfo[i].dwFlags;
 
-                if ((flags & (TOUCHEVENTF_DOWN | TOUCHEVENTF_MOVE | TOUCHEVENTF_UP)) != 0)
+                if ((flags & TOUCHEVENTF_PRIMARY) == 0  // primary events are handled by WM_LBUTTON etc
+                     && (flags & (TOUCHEVENTF_DOWN | TOUCHEVENTF_MOVE | TOUCHEVENTF_UP)) != 0)
                 {
                     if (! handleTouchInput (inputInfo[i], (flags & TOUCHEVENTF_DOWN) != 0,
                                                           (flags & TOUCHEVENTF_UP) != 0))
@@ -1879,7 +1865,7 @@ private:
 
         if (isUp || isCancel)
         {
-            handleMouseEvent (touchIndex + 1, Point<int> (-1, -1), currentModifiers, time);
+            handleMouseEvent (touchIndex + 1, Point<int> (-10, -10), currentModifiers, time);
             if (! isValidPeer (this))
                 return false;
         }

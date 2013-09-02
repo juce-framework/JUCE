@@ -2883,16 +2883,17 @@ void Component::sendEnablementChangeMessage()
 //==============================================================================
 bool Component::isMouseOver (const bool includeChildren) const
 {
-    const Desktop& desktop = Desktop::getInstance();
+    const OwnedArray<MouseInputSource>& mouseSources = Desktop::getInstance().getMouseSources();
 
-    for (int i = desktop.getNumMouseSources(); --i >= 0;)
+    for (MouseInputSource** i = mouseSources.begin(), ** const e = mouseSources.end(); i != e; ++i)
     {
-        const MouseInputSource* const mi = desktop.getMouseSource(i);
+        const MouseInputSource& mi = **i;
 
-        Component* const c = mi->getComponentUnderMouse();
+        Component* const c = mi.getComponentUnderMouse();
 
         if ((c == this || (includeChildren && isParentOf (c)))
-              && c->reallyContains (c->getLocalPoint (nullptr, mi->getScreenPosition()), false))
+              && c->reallyContains (c->getLocalPoint (nullptr, mi.getScreenPosition()), false)
+              && (mi.isMouse() || mi.isDragging()))
             return true;
     }
 
@@ -2901,25 +2902,22 @@ bool Component::isMouseOver (const bool includeChildren) const
 
 bool Component::isMouseButtonDown() const
 {
-    const Desktop& desktop = Desktop::getInstance();
+    const OwnedArray<MouseInputSource>& mouseSources = Desktop::getInstance().getMouseSources();
 
-    for (int i = desktop.getNumMouseSources(); --i >= 0;)
-    {
-        const MouseInputSource* const mi = desktop.getMouseSource(i);
-
-        if (mi->isDragging() && mi->getComponentUnderMouse() == this)
+    for (MouseInputSource** i = mouseSources.begin(), ** const e = mouseSources.end(); i != e; ++i)
+        if ((*i)->isDragging() && (*i)->getComponentUnderMouse() == this)
             return true;
-    }
 
     return false;
 }
 
 bool Component::isMouseOverOrDragging() const
 {
-    const Desktop& desktop = Desktop::getInstance();
+    const OwnedArray<MouseInputSource>& mouseSources = Desktop::getInstance().getMouseSources();
 
-    for (int i = desktop.getNumMouseSources(); --i >= 0;)
-        if (desktop.getMouseSource(i)->getComponentUnderMouse() == this)
+    for (MouseInputSource** i = mouseSources.begin(), ** const e = mouseSources.end(); i != e; ++i)
+        if ((*i)->getComponentUnderMouse() == this
+              && ((*i)->isMouse() || (*i)->isDragging()))
             return true;
 
     return false;
