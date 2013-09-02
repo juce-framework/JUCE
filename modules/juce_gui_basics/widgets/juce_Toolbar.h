@@ -121,9 +121,11 @@ public:
                   int itemId,
                   int insertIndex = -1);
 
-    /** Deletes one of the items from the bar.
-    */
+    /** Deletes one of the items from the bar. */
     void removeToolbarItem (int itemIndex);
+
+    /** Removes an item from the bar and returns it. */
+    ToolbarItemComponent* removeAndReturnItem (int itemIndex);
 
     /** Returns the number of items currently on the toolbar.
 
