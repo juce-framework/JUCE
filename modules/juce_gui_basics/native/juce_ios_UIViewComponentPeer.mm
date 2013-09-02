@@ -70,6 +70,9 @@ namespace Orientations
 //==============================================================================
 } // (juce namespace)
 
+using namespace juce;
+
+
 @interface JuceUIView : UIView <UITextViewDelegate>
 {
 @public

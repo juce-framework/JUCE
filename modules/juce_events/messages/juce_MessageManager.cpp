@@ -70,7 +70,7 @@ MessageManager* MessageManager::getInstance()
     return instance;
 }
 
-inline MessageManager* MessageManager::getInstanceWithoutCreating() noexcept
+MessageManager* MessageManager::getInstanceWithoutCreating() noexcept
 {
     return instance;
 }
