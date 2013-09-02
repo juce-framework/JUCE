@@ -483,18 +483,9 @@ public:
 private:
     //==============================================================================
     class Item;
-    class ItemComponent;
-    class HeaderItemComponent;
-    class NormalComponentWrapper;
-
-    friend class MenuItemIterator;
-    friend class ItemComponent;
-    friend class Window;
-    friend class CustomComponent;
+    struct HelperClasses;
+    friend struct HelperClasses;
     friend class MenuBarComponent;
-    friend struct ContainerDeletePolicy<Item>;
-    friend struct ContainerDeletePolicy<ItemComponent>;
-    friend struct ContainerDeletePolicy<Window>;
 
     OwnedArray<Item> items;
     LookAndFeel* lookAndFeel;
