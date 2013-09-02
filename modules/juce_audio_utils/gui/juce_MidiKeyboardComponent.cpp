@@ -818,14 +818,13 @@ void MidiKeyboardComponent::timerCallback()
 
     if (shouldCheckMousePos)
     {
-        Desktop& desktop = Desktop::getInstance();
+        const OwnedArray<MouseInputSource>& mouseSources = Desktop::getInstance().getMouseSources();
 
-        for (int i = desktop.getNumMouseSources(); --i >= 0;)
+        for (MouseInputSource** i = mouseSources.begin(), ** const e = mouseSources.end(); i != e; ++i)
         {
-            MouseInputSource* source = desktop.getMouseSource (i);
-            jassert (source != nullptr);
-            updateNoteUnderMouse (getLocalPoint (nullptr, source->getScreenPosition()),
-                                  source->isDragging(), source->getIndex());
+            const MouseInputSource& source = **i;
+            updateNoteUnderMouse (getLocalPoint (nullptr, source.getScreenPosition()),
+                                  source.isDragging(), source.getIndex());
         }
     }
 }

@@ -1033,8 +1033,10 @@ public:
         {
             mouseWasHidden = false;
 
-            for (int i = Desktop::getInstance().getNumMouseSources(); --i >= 0;)
-                Desktop::getInstance().getMouseSource(i)->enableUnboundedMouseMovement (false);
+            const OwnedArray<MouseInputSource>& mouseSources = Desktop::getInstance().getMouseSources();
+
+            for (MouseInputSource** i = mouseSources.begin(), ** const e = mouseSources.end(); i != e; ++i)
+                (*i)->enableUnboundedMouseMovement (false);
 
             const double pos = sliderBeingDragged == 2 ? getMaxValue()
                                                        : (sliderBeingDragged == 1 ? getMinValue()

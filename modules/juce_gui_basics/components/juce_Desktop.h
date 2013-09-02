@@ -242,6 +242,9 @@ public:
     */
     MouseInputSource* getMouseSource (int index) const noexcept     { return mouseSources [index]; }
 
+    /** Provides access to the array of mouse sources, for iteration. */
+    const OwnedArray<MouseInputSource>& getMouseSources() const     { return mouseSources; }
+
     /** Returns the main mouse input device that the system is using.
         @see getNumMouseSources()
     */

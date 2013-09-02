@@ -221,13 +221,13 @@ public:
         Desktop& desktop = Desktop::getInstance();
         int numMiceDown = 0;
 
-        for (int i = desktop.getNumMouseSources(); --i >= 0;)
-        {
-            MouseInputSource& source = *desktop.getMouseSource(i);
+        const OwnedArray<MouseInputSource>& mouseSources = desktop.getMouseSources();
 
-            if (source.isDragging())
+        for (MouseInputSource** i = mouseSources.begin(), ** const e = mouseSources.end(); i != e; ++i)
+        {
+            if ((*i)->isDragging())
             {
-                source.triggerFakeMove();
+                (*i)->triggerFakeMove();
                 ++numMiceDown;
             }
         }
