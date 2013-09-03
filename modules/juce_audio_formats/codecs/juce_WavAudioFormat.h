@@ -132,6 +132,10 @@ public:
     static const char* const acidTempo;
 
     //==============================================================================
+    /** Metadata property name used when reading an ISRC code from an AXML chunk. */
+    static const char* const ISRC;
+
+    //==============================================================================
     Array<int> getPossibleSampleRates() override;
     Array<int> getPossibleBitDepths() override;
     bool canDoStereo() override;
