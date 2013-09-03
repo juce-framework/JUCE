@@ -52,10 +52,13 @@ public:
 
     void setFile (const File& file)
     {
-        thumbnail.setSource (new FileInputSource (file));
-        startTime = 0;
-        endTime = thumbnail.getTotalLength();
-        startTimer (1000 / 40);
+        if (! file.isDirectory())
+        {
+            thumbnail.setSource (new FileInputSource (file));
+            startTime = 0;
+            endTime = thumbnail.getTotalLength();
+            startTimer (1000 / 40);
+        }
     }
 
     void setZoomFactor (double amount)
