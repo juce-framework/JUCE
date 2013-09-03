@@ -165,29 +165,29 @@ private:
 };
 
 //==============================================================================
-GZIPDecompressorInputStream::GZIPDecompressorInputStream (InputStream* const sourceStream_,
+GZIPDecompressorInputStream::GZIPDecompressorInputStream (InputStream* const source,
                                                           const bool deleteSourceWhenDestroyed,
                                                           const bool noWrap_,
                                                           const int64 uncompressedStreamLength_)
-  : sourceStream (sourceStream_, deleteSourceWhenDestroyed),
+  : sourceStream (source, deleteSourceWhenDestroyed),
     uncompressedStreamLength (uncompressedStreamLength_),
     noWrap (noWrap_),
     isEof (false),
     activeBufferSize (0),
-    originalSourcePos (sourceStream_->getPosition()),
+    originalSourcePos (source->getPosition()),
     currentPos (0),
     buffer ((size_t) GZIPDecompressHelper::gzipDecompBufferSize),
     helper (new GZIPDecompressHelper (noWrap_))
 {
 }
 
-GZIPDecompressorInputStream::GZIPDecompressorInputStream (InputStream& sourceStream_)
-  : sourceStream (&sourceStream_, false),
+GZIPDecompressorInputStream::GZIPDecompressorInputStream (InputStream& source)
+  : sourceStream (&source, false),
     uncompressedStreamLength (-1),
     noWrap (false),
     isEof (false),
     activeBufferSize (0),
-    originalSourcePos (sourceStream_.getPosition()),
+    originalSourcePos (source.getPosition()),
     currentPos (0),
     buffer ((size_t) GZIPDecompressHelper::gzipDecompBufferSize),
     helper (new GZIPDecompressHelper (false))

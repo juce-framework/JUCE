@@ -3095,11 +3095,11 @@ void Desktop::Displays::findDisplays (float masterScale)
 }
 
 //==============================================================================
-bool Desktop::addMouseInputSource()
+bool MouseInputSource::SourceList::addSource()
 {
-    if (mouseSources.size() == 0)
+    if (sources.size() == 0)
     {
-        mouseSources.add (new MouseInputSource (0, true));
+        addSource (0, true);
         return true;
     }
 

@@ -2310,7 +2310,7 @@ void Component::removeMouseListener (MouseListener* const listenerToRemove)
 }
 
 //==============================================================================
-void Component::internalMouseEnter (MouseInputSource& source, Point<int> relativePos, Time time)
+void Component::internalMouseEnter (MouseInputSource source, Point<int> relativePos, Time time)
 {
     if (isCurrentlyBlockedByAnotherModalComponent())
     {
@@ -2336,7 +2336,7 @@ void Component::internalMouseEnter (MouseInputSource& source, Point<int> relativ
     MouseListenerList::sendMouseEvent (*this, checker, &MouseListener::mouseEnter, me);
 }
 
-void Component::internalMouseExit (MouseInputSource& source, Point<int> relativePos, Time time)
+void Component::internalMouseExit (MouseInputSource source, Point<int> relativePos, Time time)
 {
     if (flags.repaintOnMouseActivityFlag)
         repaint();
@@ -2356,7 +2356,7 @@ void Component::internalMouseExit (MouseInputSource& source, Point<int> relative
     MouseListenerList::sendMouseEvent (*this, checker, &MouseListener::mouseExit, me);
 }
 
-void Component::internalMouseDown (MouseInputSource& source, Point<int> relativePos, Time time)
+void Component::internalMouseDown (MouseInputSource source, Point<int> relativePos, Time time)
 {
     Desktop& desktop = Desktop::getInstance();
     BailOutChecker checker (this);
@@ -2420,7 +2420,7 @@ void Component::internalMouseDown (MouseInputSource& source, Point<int> relative
     MouseListenerList::sendMouseEvent (*this, checker, &MouseListener::mouseDown, me);
 }
 
-void Component::internalMouseUp (MouseInputSource& source, Point<int> relativePos,
+void Component::internalMouseUp (MouseInputSource source, Point<int> relativePos,
                                  Time time, const ModifierKeys oldModifiers)
 {
     if (flags.mouseDownWasBlocked && isCurrentlyBlockedByAnotherModalComponent())
@@ -2463,7 +2463,7 @@ void Component::internalMouseUp (MouseInputSource& source, Point<int> relativePo
     }
 }
 
-void Component::internalMouseDrag (MouseInputSource& source, Point<int> relativePos, Time time)
+void Component::internalMouseDrag (MouseInputSource source, Point<int> relativePos, Time time)
 {
     if (! isCurrentlyBlockedByAnotherModalComponent())
     {
@@ -2486,7 +2486,7 @@ void Component::internalMouseDrag (MouseInputSource& source, Point<int> relative
     }
 }
 
-void Component::internalMouseMove (MouseInputSource& source, Point<int> relativePos, Time time)
+void Component::internalMouseMove (MouseInputSource source, Point<int> relativePos, Time time)
 {
     Desktop& desktop = Desktop::getInstance();
 
@@ -2512,7 +2512,7 @@ void Component::internalMouseMove (MouseInputSource& source, Point<int> relative
     }
 }
 
-void Component::internalMouseWheel (MouseInputSource& source, Point<int> relativePos,
+void Component::internalMouseWheel (MouseInputSource source, Point<int> relativePos,
                                     Time time, const MouseWheelDetails& wheel)
 {
     Desktop& desktop = Desktop::getInstance();
@@ -2540,7 +2540,7 @@ void Component::internalMouseWheel (MouseInputSource& source, Point<int> relativ
     }
 }
 
-void Component::internalMagnifyGesture (MouseInputSource& source, Point<int> relativePos,
+void Component::internalMagnifyGesture (MouseInputSource source, Point<int> relativePos,
                                         Time time, float amount)
 {
     if (! isCurrentlyBlockedByAnotherModalComponent())
@@ -2554,7 +2554,7 @@ void Component::internalMagnifyGesture (MouseInputSource& source, Point<int> rel
 
 void Component::sendFakeMouseMove() const
 {
-    MouseInputSource& mainMouse = Desktop::getInstance().getMainMouseSource();
+    MouseInputSource mainMouse = Desktop::getInstance().getMainMouseSource();
 
     if (! mainMouse.isDragging())
         mainMouse.triggerFakeMove();
@@ -2883,17 +2883,15 @@ void Component::sendEnablementChangeMessage()
 //==============================================================================
 bool Component::isMouseOver (const bool includeChildren) const
 {
-    const OwnedArray<MouseInputSource>& mouseSources = Desktop::getInstance().getMouseSources();
+    const Array<MouseInputSource>& mouseSources = Desktop::getInstance().getMouseSources();
 
-    for (MouseInputSource** i = mouseSources.begin(), ** const e = mouseSources.end(); i != e; ++i)
+    for (MouseInputSource* mi = mouseSources.begin(), * const e = mouseSources.end(); mi != e; ++mi)
     {
-        const MouseInputSource& mi = **i;
-
-        Component* const c = mi.getComponentUnderMouse();
+        Component* const c = mi->getComponentUnderMouse();
 
         if ((c == this || (includeChildren && isParentOf (c)))
-              && c->reallyContains (c->getLocalPoint (nullptr, mi.getScreenPosition()), false)
-              && (mi.isMouse() || mi.isDragging()))
+              && c->reallyContains (c->getLocalPoint (nullptr, mi->getScreenPosition()), false)
+              && (mi->isMouse() || mi->isDragging()))
             return true;
     }
 
@@ -2902,10 +2900,10 @@ bool Component::isMouseOver (const bool includeChildren) const
 
 bool Component::isMouseButtonDown() const
 {
-    const OwnedArray<MouseInputSource>& mouseSources = Desktop::getInstance().getMouseSources();
+    const Array<MouseInputSource>& mouseSources = Desktop::getInstance().getMouseSources();
 
-    for (MouseInputSource** i = mouseSources.begin(), ** const e = mouseSources.end(); i != e; ++i)
-        if ((*i)->isDragging() && (*i)->getComponentUnderMouse() == this)
+    for (MouseInputSource* mi = mouseSources.begin(), * const e = mouseSources.end(); mi != e; ++mi)
+        if (mi->isDragging() && mi->getComponentUnderMouse() == this)
             return true;
 
     return false;
@@ -2913,11 +2911,11 @@ bool Component::isMouseButtonDown() const
 
 bool Component::isMouseOverOrDragging() const
 {
-    const OwnedArray<MouseInputSource>& mouseSources = Desktop::getInstance().getMouseSources();
+    const Array<MouseInputSource>& mouseSources = Desktop::getInstance().getMouseSources();
 
-    for (MouseInputSource** i = mouseSources.begin(), ** const e = mouseSources.end(); i != e; ++i)
-        if ((*i)->getComponentUnderMouse() == this
-              && ((*i)->isMouse() || (*i)->isDragging()))
+    for (MouseInputSource* mi = mouseSources.begin(), * const e = mouseSources.end(); mi != e; ++mi)
+        if (mi->getComponentUnderMouse() == this
+              && (mi->isMouse() || mi->isDragging()))
             return true;
 
     return false;

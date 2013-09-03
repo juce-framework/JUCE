@@ -26,8 +26,8 @@ class MouseInputSourceInternal   : private AsyncUpdater
 {
 public:
     //==============================================================================
-    MouseInputSourceInternal (MouseInputSource& s, const int i, const bool isMouse)
-        : index (i), isMouseDevice (isMouse), source (s), lastPeer (nullptr),
+    MouseInputSourceInternal (const int i, const bool isMouse)
+        : index (i), isMouseDevice (isMouse), lastPeer (nullptr),
           isUnboundedMouseModeOn (false), isCursorVisibleUntilOffscreen (false), currentCursorHandle (nullptr),
           mouseEventCounter (0), mouseMovedSignificantlySincePressed (false)
     {
@@ -111,49 +111,49 @@ public:
     void sendMouseEnter (Component& comp, Point<int> screenPos, Time time)
     {
         JUCE_MOUSE_EVENT_DBG ("enter")
-        comp.internalMouseEnter (source, screenPosToLocalPos (comp, screenPos), time);
+        comp.internalMouseEnter (MouseInputSource (this), screenPosToLocalPos (comp, screenPos), time);
     }
 
     void sendMouseExit (Component& comp, Point<int> screenPos, Time time)
     {
         JUCE_MOUSE_EVENT_DBG ("exit")
-        comp.internalMouseExit (source, screenPosToLocalPos (comp, screenPos), time);
+        comp.internalMouseExit (MouseInputSource (this), screenPosToLocalPos (comp, screenPos), time);
     }
 
     void sendMouseMove (Component& comp, Point<int> screenPos, Time time)
     {
         JUCE_MOUSE_EVENT_DBG ("move")
-        comp.internalMouseMove (source, screenPosToLocalPos (comp, screenPos), time);
+        comp.internalMouseMove (MouseInputSource (this), screenPosToLocalPos (comp, screenPos), time);
     }
 
     void sendMouseDown (Component& comp, Point<int> screenPos, Time time)
     {
         JUCE_MOUSE_EVENT_DBG ("down")
-        comp.internalMouseDown (source, screenPosToLocalPos (comp, screenPos), time);
+        comp.internalMouseDown (MouseInputSource (this), screenPosToLocalPos (comp, screenPos), time);
     }
 
     void sendMouseDrag (Component& comp, Point<int> screenPos, Time time)
     {
         JUCE_MOUSE_EVENT_DBG ("drag")
-        comp.internalMouseDrag (source, screenPosToLocalPos (comp, screenPos), time);
+        comp.internalMouseDrag (MouseInputSource (this), screenPosToLocalPos (comp, screenPos), time);
     }
 
     void sendMouseUp (Component& comp, Point<int> screenPos, Time time, const ModifierKeys oldMods)
     {
         JUCE_MOUSE_EVENT_DBG ("up")
-        comp.internalMouseUp (source, screenPosToLocalPos (comp, screenPos), time, oldMods);
+        comp.internalMouseUp (MouseInputSource (this), screenPosToLocalPos (comp, screenPos), time, oldMods);
     }
 
     void sendMouseWheel (Component& comp, Point<int> screenPos, Time time, const MouseWheelDetails& wheel)
     {
         JUCE_MOUSE_EVENT_DBG ("wheel")
-        comp.internalMouseWheel (source, screenPosToLocalPos (comp, screenPos), time, wheel);
+        comp.internalMouseWheel (MouseInputSource (this), screenPosToLocalPos (comp, screenPos), time, wheel);
     }
 
     void sendMagnifyGesture (Component& comp, Point<int> screenPos, Time time, const float amount)
     {
         JUCE_MOUSE_EVENT_DBG ("magnify")
-        comp.internalMagnifyGesture (source, screenPosToLocalPos (comp, screenPos), time, amount);
+        comp.internalMagnifyGesture (MouseInputSource (this), screenPosToLocalPos (comp, screenPos), time, amount);
     }
 
     //==============================================================================
@@ -464,7 +464,6 @@ public:
     ModifierKeys buttonState;
 
 private:
-    MouseInputSource& source;
     WeakReference<Component> componentUnderMouse;
     ComponentPeer* lastPeer;
 
@@ -524,12 +523,15 @@ private:
 };
 
 //==============================================================================
-MouseInputSource::MouseInputSource (const int index, const bool isMouseDevice)
-{
-    pimpl = new MouseInputSourceInternal (*this, index, isMouseDevice);
-}
+MouseInputSource::MouseInputSource (MouseInputSourceInternal* s) noexcept   : pimpl (s)  {}
+MouseInputSource::MouseInputSource (const MouseInputSource& other) noexcept : pimpl (other.pimpl)  {}
+MouseInputSource::~MouseInputSource() noexcept {}
 
-MouseInputSource::~MouseInputSource() {}
+MouseInputSource& MouseInputSource::operator= (const MouseInputSource& other) noexcept
+{
+    pimpl = other.pimpl;
+    return *this;
+}
 
 bool MouseInputSource::isMouse() const                                  { return pimpl->isMouseDevice; }
 bool MouseInputSource::isTouch() const                                  { return ! isMouse(); }
@@ -546,7 +548,8 @@ Time MouseInputSource::getLastMouseDownTime() const noexcept            { return
 Point<int> MouseInputSource::getLastMouseDownPosition() const noexcept  { return pimpl->getLastMouseDownPosition(); }
 bool MouseInputSource::hasMouseMovedSignificantlySincePressed() const noexcept  { return pimpl->hasMouseMovedSignificantlySincePressed(); }
 bool MouseInputSource::canDoUnboundedMovement() const noexcept          { return isMouse(); }
-void MouseInputSource::enableUnboundedMouseMovement (bool isEnabled, bool keepCursorVisibleUntilOffscreen)    { pimpl->enableUnboundedMouseMovement (isEnabled, keepCursorVisibleUntilOffscreen); }
+void MouseInputSource::enableUnboundedMouseMovement (bool isEnabled, bool keepCursorVisibleUntilOffscreen) const
+                                                                        { pimpl->enableUnboundedMouseMovement (isEnabled, keepCursorVisibleUntilOffscreen); }
 bool MouseInputSource::hasMouseCursor() const noexcept                  { return isMouse(); }
 void MouseInputSource::showMouseCursor (const MouseCursor& cursor)      { pimpl->showMouseCursor (cursor, false); }
 void MouseInputSource::hideCursor()                                     { pimpl->hideCursor(); }
@@ -571,3 +574,110 @@ void MouseInputSource::handleMagnifyGesture (ComponentPeer& peer, Point<int> pos
 {
     pimpl->handleMagnifyGesture (peer, positionWithinPeer, Time (time), scaleFactor);
 }
+
+//==============================================================================
+struct MouseInputSource::SourceList  : public Timer
+{
+    SourceList()
+    {
+        addSource();
+    }
+
+    bool addSource();
+
+    void addSource (int index, bool isMouse)
+    {
+        MouseInputSourceInternal* s = new MouseInputSourceInternal (index, isMouse);
+        sources.add (s);
+        sourceArray.add (MouseInputSource (s));
+    }
+
+    MouseInputSource* getMouseSource (int index) const noexcept
+    {
+        return isPositiveAndBelow (index, sourceArray.size()) ? &sourceArray.getReference (index)
+                                                              : nullptr;
+    }
+
+    MouseInputSource* getOrCreateMouseInputSource (int touchIndex)
+    {
+        jassert (touchIndex >= 0 && touchIndex < 100); // sanity-check on number of fingers
+
+        for (;;)
+        {
+            if (MouseInputSource* mouse = getMouseSource (touchIndex))
+                return mouse;
+
+            if (! addSource())
+            {
+                jassertfalse; // not enough mouse sources!
+                return nullptr;
+            }
+        }
+    }
+
+    int getNumDraggingMouseSources() const noexcept
+    {
+        int num = 0;
+
+        for (int i = 0; i < sources.size(); ++i)
+            if (sources.getUnchecked(i)->isDragging())
+                ++num;
+
+        return num;
+    }
+
+    MouseInputSource* getDraggingMouseSource (int index) const noexcept
+    {
+        int num = 0;
+
+        for (int i = 0; i < sources.size(); ++i)
+        {
+            MouseInputSource* const mi = &(sourceArray.getReference(i));
+
+            if (mi->isDragging())
+            {
+                if (index == num)
+                    return mi;
+
+                ++num;
+            }
+        }
+
+        return nullptr;
+    }
+
+    void beginDragAutoRepeat (const int interval)
+    {
+        if (interval > 0)
+        {
+            if (getTimerInterval() != interval)
+                startTimer (interval);
+        }
+        else
+        {
+            stopTimer();
+        }
+    }
+
+    void timerCallback() override
+    {
+        int numMiceDown = 0;
+
+        for (int i = 0; i < sources.size(); ++i)
+        {
+            MouseInputSourceInternal* const mi = sources.getUnchecked(i);
+
+            if (mi->isDragging())
+            {
+                mi->triggerFakeMove();
+                ++numMiceDown;
+            }
+        }
+
+        if (numMiceDown == 0)
+            stopTimer();
+    }
+
+    OwnedArray<MouseInputSourceInternal> sources;
+    Array<MouseInputSource> sourceArray;
+};

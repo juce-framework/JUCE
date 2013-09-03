@@ -137,6 +137,7 @@ extern bool juce_areThereAnyAlwaysOnTopWindows();
 
 #include "components/juce_Component.cpp"
 #include "components/juce_ComponentListener.cpp"
+#include "mouse/juce_MouseInputSource.cpp"
 #include "components/juce_Desktop.cpp"
 #include "components/juce_ModalComponentManager.cpp"
 #include "mouse/juce_ComponentDragger.cpp"
@@ -144,7 +145,6 @@ extern bool juce_areThereAnyAlwaysOnTopWindows();
 #include "mouse/juce_MouseCursor.cpp"
 #include "mouse/juce_MouseEvent.cpp"
 #include "mouse/juce_MouseInactivityDetector.cpp"
-#include "mouse/juce_MouseInputSource.cpp"
 #include "mouse/juce_MouseListener.cpp"
 #include "keyboard/juce_CaretComponent.cpp"
 #include "keyboard/juce_KeyboardFocusTraverser.cpp"

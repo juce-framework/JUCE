@@ -504,12 +504,12 @@ public:
         return activeMenuWindows;
     }
 
-    MouseSourceState& getMouseState (MouseInputSource& source)
+    MouseSourceState& getMouseState (MouseInputSource source)
     {
         for (int i = mouseSourceStates.size(); --i >= 0;)
         {
             MouseSourceState& ms = *mouseSourceStates.getUnchecked(i);
-            if (&ms.source == &source)
+            if (ms.source == source)
                 return ms;
         }
 
@@ -961,7 +961,7 @@ public:
 class MouseSourceState  : private Timer
 {
 public:
-    MouseSourceState (MenuWindow& w, MouseInputSource& s)
+    MouseSourceState (MenuWindow& w, MouseInputSource s)
         : window (w), source (s), scrollAcceleration (1.0),
           lastScrollTime (Time::getMillisecondCounter()),
           lastMouseMoveTime (0), isDown (false)
@@ -989,7 +989,7 @@ public:
     }
 
     MenuWindow& window;
-    MouseInputSource& source;
+    MouseInputSource source;
 
 private:
     Point<int> lastMousePos;

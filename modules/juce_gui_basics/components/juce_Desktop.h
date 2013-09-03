@@ -225,14 +225,22 @@ public:
     void setDefaultLookAndFeel (LookAndFeel* newDefaultLookAndFeel);
 
     //==============================================================================
+    /** Provides access to the array of mouse sources, for iteration.
+        In a traditional single-mouse system, there might be only one MouseInputSource. On a
+        multi-touch system, there could be one input source per potential finger. The number
+        of mouse sources returned here may increase dynamically as the program runs.
+        To find out how many mouse events are currently happening, use getNumDraggingMouseSources().
+    */
+    const Array<MouseInputSource>& getMouseSources() const noexcept;
+
     /** Returns the number of MouseInputSource objects the system has at its disposal.
-        In a traditional single-mouse system, there might be only one object. On a multi-touch
-        system, there could be one input source per potential finger. The number of mouse
-        sources returned here may increase dynamically as the program runs.
+        In a traditional single-mouse system, there might be only one MouseInputSource. On a
+        multi-touch system, there could be one input source per potential finger. The number
+        of mouse sources returned here may increase dynamically as the program runs.
         To find out how many mouse events are currently happening, use getNumDraggingMouseSources().
         @see getMouseSource
     */
-    int getNumMouseSources() const noexcept                         { return mouseSources.size(); }
+    int getNumMouseSources() const noexcept;
 
     /** Returns one of the system's MouseInputSource objects.
         The index should be from 0 to getNumMouseSources() - 1. Out-of-range indexes will return
@@ -240,15 +248,12 @@ public:
         In a traditional single-mouse system, there might be only one object. On a multi-touch
         system, there could be one input source per potential finger.
     */
-    MouseInputSource* getMouseSource (int index) const noexcept     { return mouseSources [index]; }
-
-    /** Provides access to the array of mouse sources, for iteration. */
-    const OwnedArray<MouseInputSource>& getMouseSources() const     { return mouseSources; }
+    MouseInputSource* getMouseSource (int index) const noexcept;
 
     /** Returns the main mouse input device that the system is using.
         @see getNumMouseSources()
     */
-    MouseInputSource& getMainMouseSource() const noexcept           { return *mouseSources.getUnchecked(0); }
+    MouseInputSource getMainMouseSource() const noexcept;
 
     /** Returns the number of mouse-sources that are currently being dragged.
         In a traditional single-mouse system, this will be 0 or 1, depending on whether a
@@ -395,13 +400,11 @@ private:
 
     friend class Component;
     friend class ComponentPeer;
-    friend class MouseInputSource;
     friend class MouseInputSourceInternal;
     friend class DeletedAtShutdown;
     friend class TopLevelWindowManager;
 
-    OwnedArray<MouseInputSource> mouseSources;
-    bool addMouseInputSource();
+    ScopedPointer<MouseInputSource::SourceList> mouseSources;
 
     ListenerList<MouseListener> mouseListeners;
     ListenerList<FocusChangeListener> focusListeners;
@@ -418,8 +421,6 @@ private:
     void incrementMouseClickCounter() noexcept;
     void incrementMouseWheelCounter() noexcept;
 
-    ScopedPointer<Timer> dragRepeater;
-
     ScopedPointer<LookAndFeel> defaultLookAndFeel;
     WeakReference<LookAndFeel> currentLookAndFeel;
 
@@ -434,7 +435,6 @@ private:
     void timerCallback() override;
     void resetTimer();
     ListenerList<MouseListener>& getMouseListeners();
-    MouseInputSource* getOrCreateMouseInputSource (int touchIndex);
 
     void addDesktopComponent (Component*);
     void removeDesktopComponent (Component*);

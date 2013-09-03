@@ -56,7 +56,7 @@ public:
         @param numberOfClicks   how many clicks, e.g. a double-click event will be 2, a triple-click will be 3, etc
         @param mouseWasDragged  whether the mouse has been dragged significantly since the previous mouse-down
     */
-    MouseEvent (MouseInputSource& source,
+    MouseEvent (MouseInputSource source,
                 Point<int> position,
                 ModifierKeys modifiers,
                 Component* eventComponent,
@@ -126,7 +126,7 @@ public:
     const Time mouseDownTime;
 
     /** The source device that generated this event. */
-    MouseInputSource& source;
+    MouseInputSource source;
 
     //==============================================================================
     /** Returns the x coordinate of the last place that a mouse was pressed.

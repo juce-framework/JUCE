@@ -94,24 +94,23 @@ public:
 
             const Time now (Time::getCurrentTime());
 
+            MouseInputSource mouseSource = Desktop::getInstance().getMainMouseSource();
+
             if (isLeft || isRight)  // Only mouse up is sent by the OS, so simulate a down/up
             {
-                owner.mouseDown (MouseEvent (Desktop::getInstance().getMainMouseSource(),
-                                             Point<int>(),
+                owner.mouseDown (MouseEvent (mouseSource, Point<int>(),
                                              eventMods.withFlags (isLeft ? ModifierKeys::leftButtonModifier
                                                                          : ModifierKeys::rightButtonModifier),
                                              &owner, &owner, now,
                                              Point<int>(), now, 1, false));
 
-                owner.mouseUp (MouseEvent (Desktop::getInstance().getMainMouseSource(),
-                                           Point<int>(), eventMods.withoutMouseButtons(),
+                owner.mouseUp (MouseEvent (mouseSource, Point<int>(), eventMods.withoutMouseButtons(),
                                            &owner, &owner, now,
                                            Point<int>(), now, 1, false));
             }
             else if (type == NSMouseMoved)
             {
-                owner.mouseMove (MouseEvent (Desktop::getInstance().getMainMouseSource(),
-                                             Point<int>(), eventMods,
+                owner.mouseMove (MouseEvent (mouseSource, Point<int>(), eventMods,
                                              &owner, &owner, now,
                                              Point<int>(), now, 1, false));
             }

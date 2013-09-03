@@ -2280,14 +2280,14 @@ private:
     uint8 componentTransparency;
 
     //==============================================================================
-    void internalMouseEnter (MouseInputSource&, Point<int>, Time);
-    void internalMouseExit  (MouseInputSource&, Point<int>, Time);
-    void internalMouseDown  (MouseInputSource&, Point<int>, Time);
-    void internalMouseUp    (MouseInputSource&, Point<int>, Time, const ModifierKeys oldModifiers);
-    void internalMouseDrag  (MouseInputSource&, Point<int>, Time);
-    void internalMouseMove  (MouseInputSource&, Point<int>, Time);
-    void internalMouseWheel (MouseInputSource&, Point<int>, Time, const MouseWheelDetails&);
-    void internalMagnifyGesture (MouseInputSource&, Point<int>, Time, float);
+    void internalMouseEnter (MouseInputSource, Point<int>, Time);
+    void internalMouseExit  (MouseInputSource, Point<int>, Time);
+    void internalMouseDown  (MouseInputSource, Point<int>, Time);
+    void internalMouseUp    (MouseInputSource, Point<int>, Time, const ModifierKeys oldModifiers);
+    void internalMouseDrag  (MouseInputSource, Point<int>, Time);
+    void internalMouseMove  (MouseInputSource, Point<int>, Time);
+    void internalMouseWheel (MouseInputSource, Point<int>, Time, const MouseWheelDetails&);
+    void internalMagnifyGesture (MouseInputSource, Point<int>, Time, float);
     void internalBroughtToFront();
     void internalFocusGain (const FocusChangeType, const WeakReference<Component>&);
     void internalFocusGain (const FocusChangeType);
