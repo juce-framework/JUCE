@@ -65,7 +65,9 @@ public:
         FruityLoops,
         WaveBurner,
         DigitalPerformer,
-        StudioOne
+        StudioOne,
+        MergingPyramix,
+        VBVSTScanner
     };
 
     HostType type;
@@ -88,6 +90,8 @@ public:
     bool isDigitalPerformer() const noexcept { return type == DigitalPerformer; }
     bool isReaper() const noexcept           { return type == Reaper; }
     bool isStudioOne() const noexcept        { return type == StudioOne; }
+    bool isPyramix() const noexcept          { return type == MergingPyramix; }
+    bool isVBVSTScanner() const noexcept     { return type == VBVSTScanner; }
 
     //==============================================================================
     static String getHostPath()
@@ -154,7 +158,8 @@ private:
         if (hostFilename.startsWith         ("FL"))                return FruityLoops;
         if (hostPath.containsIgnoreCase     ("Studio One"))        return StudioOne;
         if (hostPath.containsIgnoreCase     ("Digital Performer")) return DigitalPerformer;
-
+        if (hostFilename.containsIgnoreCase ("VST_Scanner"))       return VBVSTScanner;
+        if (hostPath.containsIgnoreCase     ("Merging Technologies")) return MergingPyramix;
        #elif JUCE_LINUX
         jassertfalse   // not yet done!
        #else
