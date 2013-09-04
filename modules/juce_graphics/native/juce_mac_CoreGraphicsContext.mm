@@ -153,12 +153,12 @@ CoreGraphicsContext::~CoreGraphicsContext()
 }
 
 //==============================================================================
-void CoreGraphicsContext::setOrigin (int x, int y)
+void CoreGraphicsContext::setOrigin (Point<int> o)
 {
-    CGContextTranslateCTM (context, x, -y);
+    CGContextTranslateCTM (context, o.x, -o.y);
 
     if (lastClipRectIsValid)
-        lastClipRect.translate (-x, -y);
+        lastClipRect.translate (-o.x, -o.y);
 }
 
 void CoreGraphicsContext::addTransform (const AffineTransform& transform)
@@ -362,6 +362,11 @@ void CoreGraphicsContext::fillRect (const Rectangle<int>& r, const bool replaceE
     fillCGRect (CGRectMake (r.getX(), flipHeight - r.getBottom(), r.getWidth(), r.getHeight()), replaceExistingContents);
 }
 
+void CoreGraphicsContext::fillRect (const Rectangle<float>& r)
+{
+    fillCGRect (CGRectMake (r.getX(), flipHeight - r.getBottom(), r.getWidth(), r.getHeight()), false);
+}
+
 void CoreGraphicsContext::fillCGRect (const CGRect& cgRect, const bool replaceExistingContents)
 {
     if (replaceExistingContents)
@@ -517,42 +522,6 @@ void CoreGraphicsContext::drawLine (const Line<float>& line)
         Path p;
         p.addLineSegment (line, 1.0f);
         fillPath (p, AffineTransform::identity);
-    }
-}
-
-void CoreGraphicsContext::drawVerticalLine (const int x, float top, float bottom)
-{
-    if (state->fillType.isColour())
-    {
-       #if MAC_OS_X_VERSION_MIN_REQUIRED > MAC_OS_X_VERSION_10_5
-        CGContextFillRect (context, CGRectMake (x, flipHeight - bottom, 1.0f, bottom - top));
-       #else
-        // On Leopard, unless both coordinates are non-integer, it disables anti-aliasing, so nudge
-        // the x coordinate slightly to trick it..
-        CGContextFillRect (context, CGRectMake (x + 1.0f / 256.0f, flipHeight - bottom, 1.0f + 1.0f / 256.0f, bottom - top));
-       #endif
-    }
-    else
-    {
-        fillCGRect (CGRectMake ((float) x, flipHeight - bottom, 1.0f, bottom - top), false);
-    }
-}
-
-void CoreGraphicsContext::drawHorizontalLine (const int y, float left, float right)
-{
-    if (state->fillType.isColour())
-    {
-       #if MAC_OS_X_VERSION_MIN_REQUIRED > MAC_OS_X_VERSION_10_5
-        CGContextFillRect (context, CGRectMake (left, flipHeight - (y + 1.0f), right - left, 1.0f));
-       #else
-        // On Leopard, unless both coordinates are non-integer, it disables anti-aliasing, so nudge
-        // the x coordinate slightly to trick it..
-        CGContextFillRect (context, CGRectMake (left, flipHeight - (y + (1.0f + 1.0f / 256.0f)), right - left, 1.0f + 1.0f / 256.0f));
-       #endif
-    }
-    else
-    {
-        fillCGRect (CGRectMake (left, flipHeight - (y + 1), right - left, 1.0f), false);
     }
 }
 

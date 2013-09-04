@@ -66,13 +66,13 @@ public:
 
    #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
     RectangleList (RectangleList&& other) noexcept
-        : rects (static_cast <Array <RectangleType >&&> (other.rects))
+        : rects (static_cast<Array<RectangleType>&&> (other.rects))
     {
     }
 
     RectangleList& operator= (RectangleList&& other) noexcept
     {
-        rects = static_cast <Array <RectangleType >&&> (other.rects);
+        rects = static_cast<Array<RectangleType>&&> (other.rects);
         return *this;
     }
    #endif
@@ -85,17 +85,9 @@ public:
     int getNumRectangles() const noexcept                       { return rects.size(); }
 
     /** Returns one of the rectangles at a particular index.
-
-        @returns    the rectangle at the index, or an empty rectangle if the
-                    index is out-of-range.
+        @returns  the rectangle at the index, or an empty rectangle if the index is out-of-range.
     */
-    RectangleType getRectangle (int index) const noexcept
-    {
-        if (isPositiveAndBelow (index, rects.size()))
-            return rects.getReference (index);
-
-        return RectangleType();
-    }
+    RectangleType getRectangle (int index) const noexcept       { return rects[index]; }
 
     //==============================================================================
     /** Removes all rectangles to leave an empty region. */
@@ -297,7 +289,6 @@ public:
         return rects.size() > 0;
     }
 
-
     /** Removes any areas of the region that lie outside a given rectangle.
 
         Any rectangles in the list which overlap this will be clipped and subdivided
@@ -362,7 +353,6 @@ public:
         }
 
         swapWith (result);
-
         return ! isEmpty();
     }
 

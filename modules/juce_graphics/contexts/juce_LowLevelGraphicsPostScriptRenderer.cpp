@@ -89,12 +89,12 @@ bool LowLevelGraphicsPostScriptRenderer::isVectorDevice() const
     return true;
 }
 
-void LowLevelGraphicsPostScriptRenderer::setOrigin (int x, int y)
+void LowLevelGraphicsPostScriptRenderer::setOrigin (Point<int> o)
 {
-    if (x != 0 || y != 0)
+    if (! o.isOrigin())
     {
-        stateStack.getLast()->xOffset += x;
-        stateStack.getLast()->yOffset += y;
+        stateStack.getLast()->xOffset += o.x;
+        stateStack.getLast()->yOffset += o.y;
         needToClip = true;
     }
 }
@@ -336,12 +336,17 @@ void LowLevelGraphicsPostScriptRenderer::setInterpolationQuality (Graphics::Resa
 //==============================================================================
 void LowLevelGraphicsPostScriptRenderer::fillRect (const Rectangle<int>& r, const bool /*replaceExistingContents*/)
 {
+    fillRect (r.toFloat());
+}
+
+void LowLevelGraphicsPostScriptRenderer::fillRect (const Rectangle<float>& r)
+{
     if (stateStack.getLast()->fillType.isColour())
     {
         writeClip();
         writeColour (stateStack.getLast()->fillType.colour);
 
-        Rectangle<int> r2 (r.translated (stateStack.getLast()->xOffset,  stateStack.getLast()->yOffset));
+        Rectangle<float> r2 (r.translated (stateStack.getLast()->xOffset,  stateStack.getLast()->yOffset));
 
         out << r2.getX() << ' ' << -r2.getBottom() << ' ' << r2.getWidth() << ' ' << r2.getHeight() << " rectfill\n";
     }
@@ -355,12 +360,7 @@ void LowLevelGraphicsPostScriptRenderer::fillRect (const Rectangle<int>& r, cons
 
 void LowLevelGraphicsPostScriptRenderer::fillRectList (const RectangleList<float>& list)
 {
-    for (const Rectangle<float>* r = list.begin(), * const e = list.end(); r != e; ++r)
-    {
-        Path p;
-        p.addRectangle (*r);
-        fillPath (p, AffineTransform::identity);
-    }
+    fillPath (list.toPath(), AffineTransform::identity);
 }
 
 //==============================================================================
@@ -510,16 +510,6 @@ void LowLevelGraphicsPostScriptRenderer::drawLine (const Line <float>& line)
     Path p;
     p.addLineSegment (line, 1.0f);
     fillPath (p, AffineTransform::identity);
-}
-
-void LowLevelGraphicsPostScriptRenderer::drawVerticalLine (const int x, float top, float bottom)
-{
-    drawLine (Line<float> ((float) x, top, (float) x, bottom));
-}
-
-void LowLevelGraphicsPostScriptRenderer::drawHorizontalLine (const int y, float left, float right)
-{
-    drawLine (Line<float> (left, (float) y, right, (float) y));
 }
 
 //==============================================================================

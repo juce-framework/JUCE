@@ -127,11 +127,8 @@ public:
 
     void convertToPath()
     {
-        const Rectangle<int> r (getCurrentAbsoluteBounds());
-
         Path path;
-        path.addRectangle ((float) r.getX(), (float) r.getY(), (float) r.getWidth(), (float) r.getHeight());
-
+        path.addRectangle (getCurrentAbsoluteBounds());
         convertToNewPathElement (path);
     }
 

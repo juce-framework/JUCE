@@ -175,7 +175,7 @@ public:
 
         if (glRenderer != nullptr)
         {
-            Graphics g (glRenderer);
+            Graphics g (*glRenderer);
             g.addTransform (AffineTransform::scale (scale));
 
             // This stuff just creates a spinning star shape and fills it..

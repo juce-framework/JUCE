@@ -45,7 +45,7 @@ public:
 
     //==============================================================================
     bool isVectorDevice() const override;
-    void setOrigin (int x, int y) override;
+    void setOrigin (Point<int>) override;
     void addTransform (const AffineTransform&) override;
     float getPhysicalPixelScaleFactor() override;
 
@@ -72,12 +72,11 @@ public:
 
     //==============================================================================
     void fillRect (const Rectangle<int>&, bool replaceExistingContents) override;
+    void fillRect (const Rectangle<float>&) override;
     void fillRectList (const RectangleList<float>&) override;
     void fillPath (const Path&, const AffineTransform&) override;
     void drawImage (const Image&, const AffineTransform&) override;
     void drawLine (const Line <float>&) override;
-    void drawVerticalLine (int x, float top, float bottom) override;
-    void drawHorizontalLine (int x, float top, float bottom) override;
 
     //==============================================================================
     const Font& getFont() override;

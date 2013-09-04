@@ -259,7 +259,7 @@ public:
 
     void paintOwner (LowLevelGraphicsContext& llgc)
     {
-        Graphics g (&llgc);
+        Graphics g (llgc);
 
        #if JUCE_ENABLE_REPAINT_DEBUGGING
         g.saveState();

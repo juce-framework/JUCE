@@ -139,7 +139,7 @@ public:
     {
         LowLevelGraphicsContext* g = image->createLowLevelContext();
         g->clipToRectangle (area);
-        g->setOrigin (area.getX(), area.getY());
+        g->setOrigin (area.getPosition());
         return g;
     }
 

@@ -906,10 +906,8 @@ Image ListBox::createSnapshotOfSelectedRows (int& imageX, int& imageY)
 
         if (rowComp != nullptr && isRowSelected (firstRow + i))
         {
-            const Point<int> pos (getLocalPoint (rowComp, Point<int>()));
-
             Graphics g (snapshot);
-            g.setOrigin (pos.getX() - imageX, pos.getY() - imageY);
+            g.setOrigin (getLocalPoint (rowComp, Point<int>()) - imageArea.getPosition());
 
             if (g.reduceClipRegion (rowComp->getLocalBounds()))
             {

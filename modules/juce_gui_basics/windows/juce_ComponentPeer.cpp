@@ -106,7 +106,7 @@ void ComponentPeer::handlePaint (LowLevelGraphicsContext& contextToPaintTo)
 {
     ModifierKeys::updateCurrentModifiers();
 
-    Graphics g (&contextToPaintTo);
+    Graphics g (contextToPaintTo);
 
     if (component.isTransformed())
         g.addTransform (component.getTransform());

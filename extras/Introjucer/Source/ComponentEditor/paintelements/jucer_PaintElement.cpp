@@ -237,7 +237,7 @@ void PaintElement::paint (Graphics& g)
     Rectangle<int> area (((PaintRoutineEditor*) getParentComponent())->getComponentArea());
 
     g.saveState();
-    g.setOrigin (area.getX() - getX(), area.getY() - getY());
+    g.setOrigin (area.getPosition() - Component::getPosition());
     area.setPosition (0, 0);
 
     g.saveState();

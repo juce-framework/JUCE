@@ -1882,7 +1882,7 @@ void Component::paintOverChildren (Graphics&)
 //==============================================================================
 void Component::paintWithinParentContext (Graphics& g)
 {
-    g.setOrigin (getX(), getY());
+    g.setOrigin (getPosition());
 
     if (cachedImage != nullptr)
         cachedImage->paint (g);
@@ -2026,7 +2026,7 @@ Image Component::createComponentSnapshot (const Rectangle<int>& areaToGrab,
                           r.getWidth(), r.getHeight(), true);
 
     Graphics imageContext (componentImage);
-    imageContext.setOrigin (-r.getX(), -r.getY());
+    imageContext.setOrigin (-r.getPosition());
     paintEntireComponent (imageContext, true);
 
     return componentImage;
