@@ -32,7 +32,15 @@
 
 //==============================================================================
 /**
-    Holds a list of objects derived from ReferenceCountedObject.
+    Holds a list of objects derived from ReferenceCountedObject, or which implement basic
+    reference-count handling methods.
+
+    The template parameter specifies the class of the object you want to point to - the easiest
+    way to make a class reference-countable is to simply make it inherit from ReferenceCountedObject
+    or SingleThreadedReferenceCountedObject, but if you need to, you can roll your own reference-countable
+    class by implementing a set of mathods called incReferenceCount(), decReferenceCount(), and
+    decReferenceCountWithoutDeleting(). See ReferenceCountedObject for examples of how these methods
+    should behave.
 
     A ReferenceCountedArray holds objects derived from ReferenceCountedObject,
     and takes care of incrementing and decrementing their ref counts when they
@@ -125,7 +133,7 @@ public:
 
         while (numUsed > 0)
             if (ObjectClass* o = data.elements [--numUsed])
-                o->decReferenceCount();
+                releaseObject (o);
 
         jassert (numUsed == 0);
         data.setAllocatedSize (0);
@@ -387,7 +395,7 @@ public:
             if (indexToChange < numUsed)
             {
                 if (ObjectClass* o = data.elements [indexToChange])
-                    o->decReferenceCount();
+                    releaseObject (o);
 
                 data.elements [indexToChange] = newObject;
             }
@@ -537,7 +545,7 @@ public:
             ObjectClass** const e = data.elements + indexToRemove;
 
             if (ObjectClass* o = *e)
-                o->decReferenceCount();
+                releaseObject (o);
 
             --numUsed;
             const int numberToShift = numUsed - indexToRemove;
@@ -571,7 +579,7 @@ public:
             if (ObjectClass* o = *e)
             {
                 removedItem = o;
-                o->decReferenceCount();
+                releaseObject (o);
             }
 
             --numUsed;
@@ -631,7 +639,7 @@ public:
             {
                 if (ObjectClass* o = data.elements[i])
                 {
-                    o->decReferenceCount();
+                    releaseObject (o);
                     data.elements[i] = nullptr; // (in case one of the destructors accesses this array and hits a dangling pointer)
                 }
             }
@@ -863,6 +871,12 @@ private:
     //==============================================================================
     ArrayAllocationBase <ObjectClass*, TypeOfCriticalSectionToUse> data;
     int numUsed;
+
+    static void releaseObject (ObjectClass* o)
+    {
+        if (o->decReferenceCountWithoutDeleting())
+            ContainerDeletePolicy<ObjectClass>::destroy (o);
+    }
 };
 
 
