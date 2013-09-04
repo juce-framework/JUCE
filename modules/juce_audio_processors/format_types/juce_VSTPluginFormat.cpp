@@ -2863,7 +2863,7 @@ void VSTPluginFormat::setExtraFunctions (AudioPluginInstance* plugin, ExtraFunct
         vst->extraFunctions = f;
 }
 
-VstIntPtr JUCE_CALLTYPE dispatcher (AudioPluginInstance* plugin, int32 opcode, int32 index, VstIntPtr value, void* ptr, float opt)
+VstIntPtr JUCE_CALLTYPE VSTPluginFormat::dispatcher (AudioPluginInstance* plugin, int32 opcode, int32 index, VstIntPtr value, void* ptr, float opt)
 {
     if (VSTPluginInstance* vst = dynamic_cast <VSTPluginInstance*> (plugin))
         return vst->dispatch (opcode, index, value, ptr, opt);
