@@ -258,8 +258,8 @@ public:
     /** Copies another pointer.
         This will increment the object's reference-count (if it is non-null).
     */
-    template <class DerivedClass>
-    ReferenceCountedObjectPtr (const ReferenceCountedObjectPtr<DerivedClass>& other) noexcept
+    template <class Convertible>
+    ReferenceCountedObjectPtr (const ReferenceCountedObjectPtr<Convertible>& other) noexcept
         : referencedObject (static_cast <ReferencedType*> (other.get()))
     {
         incIfNotNull (referencedObject);
@@ -278,8 +278,8 @@ public:
         The reference count of the old object is decremented, and it might be
         deleted if it hits zero. The new object's count is incremented.
     */
-    template <class DerivedClass>
-    ReferenceCountedObjectPtr& operator= (const ReferenceCountedObjectPtr<DerivedClass>& other)
+    template <class Convertible>
+    ReferenceCountedObjectPtr& operator= (const ReferenceCountedObjectPtr<Convertible>& other)
     {
         return operator= (static_cast<ReferencedType*> (other.get()));
     }

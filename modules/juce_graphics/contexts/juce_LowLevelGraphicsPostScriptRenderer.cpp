@@ -346,7 +346,8 @@ void LowLevelGraphicsPostScriptRenderer::fillRect (const Rectangle<float>& r)
         writeClip();
         writeColour (stateStack.getLast()->fillType.colour);
 
-        Rectangle<float> r2 (r.translated (stateStack.getLast()->xOffset,  stateStack.getLast()->yOffset));
+        Rectangle<float> r2 (r.translated ((float) stateStack.getLast()->xOffset,
+                                           (float) stateStack.getLast()->yOffset));
 
         out << r2.getX() << ' ' << -r2.getBottom() << ' ' << r2.getWidth() << ' ' << r2.getHeight() << " rectfill\n";
     }

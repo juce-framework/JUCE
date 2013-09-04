@@ -396,17 +396,17 @@ void Graphics::strokePath (const Path& path,
 //==============================================================================
 void Graphics::drawRect (float x, float y, float width, float height, float lineThickness) const
 {
-    drawRect (coordsToRectangle (x, y, width, height).toFloat());
+    drawRect (coordsToRectangle (x, y, width, height), lineThickness);
 }
 
 void Graphics::drawRect (int x, int y, int width, int height, int lineThickness) const
 {
-    drawRect (coordsToRectangle (x, y, width, height).toFloat());
+    drawRect (coordsToRectangle (x, y, width, height), lineThickness);
 }
 
 void Graphics::drawRect (const Rectangle<int>& r, int lineThickness) const
 {
-    drawRect (r.toFloat(), lineThickness);
+    drawRect (r.toFloat(), (float) lineThickness);
 }
 
 void Graphics::drawRect (Rectangle<float> r, const float lineThickness) const
