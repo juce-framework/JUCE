@@ -1211,8 +1211,8 @@ WavAudioFormat::~WavAudioFormat()
 
 Array<int> WavAudioFormat::getPossibleSampleRates()
 {
-    const int rates[] = { 8000, 11025, 12000, 16000, 22050, 32000,
-                          44100, 48000, 88200, 96000, 176400, 192000 };
+    const int rates[] = { 8000, 11025, 12000, 16000, 22050, 32000, 44100,
+                          48000, 88200, 96000, 176400, 192000, 352800, 384000 };
 
     return Array<int> (rates, numElementsInArray (rates));
 }
