@@ -49,7 +49,7 @@ public:
 
             if (cbrBitrate == 0)
             {
-                args.add ("-vbr-new");
+                args.add ("--vbr-new");
                 args.add ("-V");
                 args.add (String (vbrLevel));
             }
@@ -103,6 +103,22 @@ private:
     ScopedPointer<AudioFormatWriter> writer;
     StringArray args;
 
+    bool runLameChildProcess (const TemporaryFile& tempMP3, const StringArray& args) const
+    {
+        ChildProcess cp;
+
+        if (cp.start (args))
+        {
+            const String childOutput (cp.readAllProcessOutput());
+            DBG (childOutput); (void) childOutput;
+
+            cp.waitForProcessToFinish (10000);
+            return tempMP3.getFile().getSize() > 0;
+        }
+
+        return false;
+    }
+
     bool convertToMP3() const
     {
         TemporaryFile tempMP3 (".mp3");
@@ -111,24 +127,16 @@ private:
         args2.add (tempWav.getFile().getFullPathName());
         args2.add (tempMP3.getFile().getFullPathName());
 
-        ChildProcess cp;
+        DBG (args2.joinIntoString (" "));
 
-        DBG (args2.joinIntoString(" "));
-
-        if (cp.start (args2))
+        if (runLameChildProcess (tempMP3, args2))
         {
-            String childOutput (cp.readAllProcessOutput());
-            DBG (childOutput);
+            FileInputStream fis (tempMP3.getFile());
 
-            if (tempMP3.getFile().getSize() > 0)
+            if (fis.openedOk() && output->writeFromInputStream (fis, -1) > 0)
             {
-                FileInputStream fis (tempMP3.getFile());
-
-                if (fis.openedOk() && output->writeFromInputStream (fis, -1) > 0)
-                {
-                    output->flush();
-                    return true;
-                }
+                output->flush();
+                return true;
             }
         }
 
