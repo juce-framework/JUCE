@@ -304,12 +304,7 @@ public:
 
     bool keyPressed (const KeyPress& key) override
     {
-        if (key.isKeyCode (KeyPress::upKey)
-            || key.isKeyCode (KeyPress::downKey)
-            || key.isKeyCode (KeyPress::pageUpKey)
-            || key.isKeyCode (KeyPress::pageDownKey)
-            || key.isKeyCode (KeyPress::homeKey)
-            || key.isKeyCode (KeyPress::endKey))
+        if (Viewport::respondsToKey (key))
         {
             const int allowableMods = owner.multipleSelection ? ModifierKeys::shiftModifier : 0;
 

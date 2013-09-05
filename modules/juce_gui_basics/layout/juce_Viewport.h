@@ -246,6 +246,8 @@ public:
     void componentMovedOrResized (Component&, bool wasMoved, bool wasResized) override;
     /** @internal */
     bool useMouseWheelMoveIfNeeded (const MouseEvent&, const MouseWheelDetails&);
+    /** @internal */
+    static bool respondsToKey (const KeyPress&);
 
 private:
     //==============================================================================
