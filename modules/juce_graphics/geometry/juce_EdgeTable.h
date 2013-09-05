@@ -188,8 +188,12 @@ public:
 private:
     //==============================================================================
     // table line format: number of points; point0 x, point0 levelDelta, point1 x, point1 levelDelta, etc
-    struct LineItem   { int x, level; };
-    struct LineSorter;
+    struct LineItem
+    {
+        int x, level;
+
+        bool operator< (const LineItem& other) const noexcept   { return x < other.x; }
+    };
 
     HeapBlock<int> table;
     Rectangle<int> bounds;

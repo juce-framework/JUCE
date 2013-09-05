@@ -29,6 +29,27 @@
 #ifndef JUCE_ELEMENTCOMPARATOR_H_INCLUDED
 #define JUCE_ELEMENTCOMPARATOR_H_INCLUDED
 
+#ifndef DOXYGEN
+
+/** This is an internal helper class which converts a juce ElementComparator style
+    class (using a "compareElements" method) into a class that's compatible with
+    std::sort (i.e. using an operator() to compare the elements)
+*/
+template <typename ElementComparator>
+struct SortFunctionConverter
+{
+    SortFunctionConverter (ElementComparator& e) : comparator (e) {}
+
+    template <typename Type>
+    bool operator() (Type a, Type b)  { return comparator.compareElements (a, b) < 0; }
+
+private:
+    ElementComparator& comparator;
+    SortFunctionConverter& operator= (const SortFunctionConverter&) JUCE_DELETED_FUNCTION;
+};
+
+#endif
+
 
 //==============================================================================
 /**
@@ -65,117 +86,12 @@ static void sortArray (ElementComparator& comparator,
                        int lastElement,
                        const bool retainOrderOfEquivalentItems)
 {
-    (void) comparator;  // if you pass in an object with a static compareElements() method, this
-                        // avoids getting warning messages about the parameter being unused
+    SortFunctionConverter<ElementComparator> converter (comparator);
 
-    if (lastElement > firstElement)
-    {
-        if (retainOrderOfEquivalentItems)
-        {
-            for (int i = firstElement; i < lastElement; ++i)
-            {
-                if (comparator.compareElements (array[i], array [i + 1]) > 0)
-                {
-                    std::swap (array[i], array[i + 1]);
-
-                    if (i > firstElement)
-                        i -= 2;
-                }
-            }
-        }
-        else
-        {
-            int fromStack[30], toStack[30];
-            int stackIndex = 0;
-
-            for (;;)
-            {
-                const int size = (lastElement - firstElement) + 1;
-
-                if (size <= 8)
-                {
-                    int j = lastElement;
-                    int maxIndex;
-
-                    while (j > firstElement)
-                    {
-                        maxIndex = firstElement;
-                        for (int k = firstElement + 1; k <= j; ++k)
-                            if (comparator.compareElements (array[k], array [maxIndex]) > 0)
-                                maxIndex = k;
-
-                        std::swap (array[j], array[maxIndex]);
-                        --j;
-                    }
-                }
-                else
-                {
-                    const int mid = firstElement + (size >> 1);
-                    std::swap (array[mid], array[firstElement]);
-
-                    int i = firstElement;
-                    int j = lastElement + 1;
-
-                    for (;;)
-                    {
-                        while (++i <= lastElement
-                                && comparator.compareElements (array[i], array [firstElement]) <= 0)
-                        {}
-
-                        while (--j > firstElement
-                                && comparator.compareElements (array[j], array [firstElement]) >= 0)
-                        {}
-
-                        if (j < i)
-                            break;
-
-                        std::swap (array[i], array[j]);
-                    }
-
-                    std::swap (array[j], array[firstElement]);
-
-                    if (j - 1 - firstElement >= lastElement - i)
-                    {
-                        if (firstElement + 1 < j)
-                        {
-                            fromStack [stackIndex] = firstElement;
-                            toStack [stackIndex] = j - 1;
-                            ++stackIndex;
-                        }
-
-                        if (i < lastElement)
-                        {
-                            firstElement = i;
-                            continue;
-                        }
-                    }
-                    else
-                    {
-                        if (i < lastElement)
-                        {
-                            fromStack [stackIndex] = i;
-                            toStack [stackIndex] = lastElement;
-                            ++stackIndex;
-                        }
-
-                        if (firstElement + 1 < j)
-                        {
-                            lastElement = j - 1;
-                            continue;
-                        }
-                    }
-                }
-
-                if (--stackIndex < 0)
-                    break;
-
-                jassert (stackIndex < numElementsInArray (fromStack));
-
-                firstElement = fromStack [stackIndex];
-                lastElement = toStack [stackIndex];
-            }
-        }
-    }
+    if (retainOrderOfEquivalentItems)
+        std::stable_sort (array + firstElement, array + lastElement + 1, converter);
+    else
+        std::sort        (array + firstElement, array + lastElement + 1, converter);
 }
 
 

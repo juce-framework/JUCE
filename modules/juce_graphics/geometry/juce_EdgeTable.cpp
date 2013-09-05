@@ -314,14 +314,6 @@ void EdgeTable::copyEdgeTableData (int* dest, const int destLineStride, const in
     }
 }
 
-struct EdgeTable::LineSorter
-{
-    static int compareElements (const LineItem& item1, const LineItem& item2) noexcept
-    {
-        return item1.x - item2.x;
-    }
-};
-
 void EdgeTable::sanitiseLevels (const bool useNonZeroWinding) noexcept
 {
     // Convert the table from relative windings to absolute levels..
@@ -335,11 +327,8 @@ void EdgeTable::sanitiseLevels (const bool useNonZeroWinding) noexcept
         {
             LineItem* items = reinterpret_cast<LineItem*> (lineStart + 1);
 
-            {
-                // sort the X coords
-                LineSorter sorter;
-                sortArray (sorter, items, 0, num - 1, false);
-            }
+            // sort the X coords
+            std::sort (items, items + num);
 
             // merge duplicate X coords
             for (int i = 0; i < num - 1; ++i)

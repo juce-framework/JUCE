@@ -71,6 +71,7 @@
 #include <cstdio>
 #include <iostream>
 #include <vector>
+#include <algorithm>
 
 #if JUCE_USE_INTRINSICS
  #include <intrin.h>
