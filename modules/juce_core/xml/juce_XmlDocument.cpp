@@ -326,7 +326,6 @@ void XmlDocument::readQuotedString (String& result)
         else
         {
             const String::CharPointerType start (input);
-            size_t numChars = 0;
 
             for (;;)
             {
@@ -334,13 +333,13 @@ void XmlDocument::readQuotedString (String& result)
 
                 if (character == quote)
                 {
-                    result.appendCharPointer (start, numChars);
+                    result.appendCharPointer (start, input);
                     ++input;
                     return;
                 }
                 else if (character == '&')
                 {
-                    result.appendCharPointer (start, numChars);
+                    result.appendCharPointer (start, input);
                     break;
                 }
                 else if (character == 0)
@@ -351,7 +350,6 @@ void XmlDocument::readQuotedString (String& result)
                 }
 
                 ++input;
-                ++numChars;
             }
         }
     }
@@ -582,17 +580,15 @@ void XmlDocument::readChildElements (XmlElement* parent)
                 else
                 {
                     const String::CharPointerType start (input);
-                    size_t len = 0;
 
                     for (;;)
                     {
                         const juce_wchar nextChar = *input;
 
                         if (nextChar == '<' || nextChar == '&')
-                        {
                             break;
-                        }
-                        else if (nextChar == 0)
+
+                        if (nextChar == 0)
                         {
                             setLastError ("unmatched tags", false);
                             outOfData = true;
@@ -600,17 +596,14 @@ void XmlDocument::readChildElements (XmlElement* parent)
                         }
 
                         ++input;
-                        ++len;
                     }
 
-                    textElementContent.appendCharPointer (start, len);
+                    textElementContent.appendCharPointer (start, input);
                 }
             }
 
             if ((! ignoreEmptyTextElements) || textElementContent.containsNonWhitespaceChars())
-            {
                 childAppender.append (XmlElement::createTextElement (textElementContent));
-            }
         }
     }
 }

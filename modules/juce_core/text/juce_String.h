@@ -219,6 +219,17 @@ public:
 
     /** Appends a string to the end of this one.
 
+        @param startOfTextToAppend  the start of the string to add. This must not be a nullptr
+        @param endOfTextToAppend    the end of the string to add. This must not be a nullptr
+    */
+    void appendCharPointer (const CharPointerType startOfTextToAppend,
+                            const CharPointerType endOfTextToAppend);
+
+    /** Appends a string to the end of this one. */
+    void appendCharPointer (const CharPointerType textToAppend);
+
+    /** Appends a string to the end of this one.
+
         @param textToAppend     the string to add
         @param maxCharsToTake   the maximum number of characters to take from the string passed in
     */

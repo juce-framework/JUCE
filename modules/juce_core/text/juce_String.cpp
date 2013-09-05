@@ -605,6 +605,30 @@ void String::append (const String& textToAppend, size_t maxCharsToTake)
     appendCharPointer (textToAppend.text, maxCharsToTake);
 }
 
+void String::appendCharPointer (const CharPointerType textToAppend)
+{
+    appendCharPointer (textToAppend, textToAppend.findTerminatingNull());
+}
+
+void String::appendCharPointer (const CharPointerType startOfTextToAppend,
+                                const CharPointerType endOfTextToAppend)
+{
+    jassert (startOfTextToAppend.getAddress() != nullptr && endOfTextToAppend.getAddress() != nullptr);
+    jassert (startOfTextToAppend.getAddress() <= endOfTextToAppend.getAddress());
+
+    const size_t extraBytesNeeded = endOfTextToAppend.getAddress() - startOfTextToAppend.getAddress();
+
+    if (extraBytesNeeded > 0)
+    {
+        const size_t byteOffsetOfNull = getByteOffsetOfEnd();
+        preallocateBytes (byteOffsetOfNull + extraBytesNeeded);
+
+        char* const newStringStart = addBytesToPointer (text.getAddress(), (int) byteOffsetOfNull);
+        memcpy (newStringStart, startOfTextToAppend.getAddress(), extraBytesNeeded);
+        CharPointerType (newStringStart + extraBytesNeeded).writeNull();
+    }
+}
+
 String& String::operator+= (const wchar_t* const t)
 {
     appendCharPointer (castToCharPointer_wchar_t (t));
@@ -628,7 +652,7 @@ String& String::operator+= (const char* const t)
     */
     jassert (t == nullptr || CharPointer_ASCII::isValidString (t, std::numeric_limits<int>::max()));
 
-    appendCharPointer (CharPointer_ASCII (t));
+    appendCharPointer (CharPointer_UTF8 (t)); // (using UTF8 here triggers a faster code-path than ascii)
     return *this;
 }
 
