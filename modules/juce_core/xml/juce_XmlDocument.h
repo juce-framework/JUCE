@@ -164,7 +164,6 @@ private:
     juce_wchar readNextChar() noexcept;
     XmlElement* readNextElement (bool alsoParseSubElements);
     void readChildElements (XmlElement* parent);
-    int findNextTokenLength() noexcept;
     void readQuotedString (String& result);
     void readEntity (String& result);
 

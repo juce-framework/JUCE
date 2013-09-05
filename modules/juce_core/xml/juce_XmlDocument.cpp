@@ -101,6 +101,14 @@ namespace XmlIdentifierChars
 
         DBG (s);
     }*/
+
+    static String::CharPointerType findEndOfToken (String::CharPointerType p)
+    {
+        while (isIdentifierChar (*p))
+            ++p;
+
+        return p;
+    }
 }
 
 XmlElement* XmlDocument::getDocumentElement (const bool onlyReadOuterDocumentElement)
@@ -187,17 +195,6 @@ juce_wchar XmlDocument::readNextChar() noexcept
     }
 
     return c;
-}
-
-int XmlDocument::findNextTokenLength() noexcept
-{
-    int len = 0;
-    juce_wchar c = *input;
-
-    while (XmlIdentifierChars::isIdentifierChar (c))
-        c = input [++len];
-
-    return len;
 }
 
 void XmlDocument::skipHeader()
@@ -373,23 +370,23 @@ XmlElement* XmlDocument::readNextElement (const bool alsoParseSubElements)
     if (openBracket >= 0)
     {
         input += openBracket + 1;
-        int tagLen = findNextTokenLength();
+        String::CharPointerType endOfToken (XmlIdentifierChars::findEndOfToken (input));
 
-        if (tagLen == 0)
+        if (endOfToken == input)
         {
             // no tag name - but allow for a gap after the '<' before giving an error
             skipNextWhiteSpace();
-            tagLen = findNextTokenLength();
+            endOfToken = XmlIdentifierChars::findEndOfToken (input);
 
-            if (tagLen == 0)
+            if (endOfToken == input)
             {
                 setLastError ("tag name missing", false);
                 return node;
             }
         }
 
-        node = new XmlElement (String (input, (size_t) tagLen));
-        input += tagLen;
+        node = new XmlElement (String (input, endOfToken));
+        input = endOfToken;
         LinkedListPointer<XmlElement::XmlAttributeNode>::Appender attributeAppender (node->attributes);
 
         // look for attributes
@@ -420,12 +417,12 @@ XmlElement* XmlDocument::readNextElement (const bool alsoParseSubElements)
             // get an attribute..
             if (XmlIdentifierChars::isIdentifierChar (c))
             {
-                const int attNameLen = findNextTokenLength();
+                String::CharPointerType attNameEnd (XmlIdentifierChars::findEndOfToken (input));
 
-                if (attNameLen > 0)
+                if (attNameEnd != input)
                 {
                     const String::CharPointerType attNameStart (input);
-                    input += attNameLen;
+                    input = attNameEnd;
 
                     skipNextWhiteSpace();
 
@@ -438,13 +435,19 @@ XmlElement* XmlDocument::readNextElement (const bool alsoParseSubElements)
                         if (nextChar == '"' || nextChar == '\'')
                         {
                             XmlElement::XmlAttributeNode* const newAtt
-                                = new XmlElement::XmlAttributeNode (String (attNameStart, (size_t) attNameLen),
+                                = new XmlElement::XmlAttributeNode (String (attNameStart, attNameEnd),
                                                                     String::empty);
 
                             readQuotedString (newAtt->value);
                             attributeAppender.append (newAtt);
                             continue;
                         }
+                    }
+                    else
+                    {
+                        setLastError ("expected '=' after attribute '"
+                                        + String (attNameStart, attNameEnd) + "'", false);
+                        return node;
                     }
                 }
             }
@@ -478,7 +481,9 @@ void XmlDocument::readChildElements (XmlElement* parent)
 
         if (*input == '<')
         {
-            if (input[1] == '/')
+            const juce_wchar c1 = input[1];
+
+            if (c1 == '/')
             {
                 // our close tag..
                 const int closeTag = input.indexOf ((juce_wchar) '>');
@@ -488,41 +493,32 @@ void XmlDocument::readChildElements (XmlElement* parent)
 
                 break;
             }
-            else if (input[1] == '!'
-                  && input[2] == '['
-                  && input[3] == 'C'
-                  && input[4] == 'D'
-                  && input[5] == 'A'
-                  && input[6] == 'T'
-                  && input[7] == 'A'
-                  && input[8] == '[')
+            else if (c1 == '!' && CharacterFunctions::compare (input + 1, CharPointer_ASCII ("[CDATA[")) == 0)
             {
                 input += 9;
                 const String::CharPointerType inputStart (input);
 
-                size_t len = 0;
-
                 for (;;)
                 {
-                    if (*input == 0)
+                    const juce_wchar c0 = *input;
+
+                    if (c0 == 0)
                     {
                         setLastError ("unterminated CDATA section", false);
                         outOfData = true;
                         break;
                     }
-                    else if (input[0] == ']'
+                    else if (c0 == ']'
                               && input[1] == ']'
                               && input[2] == '>')
                     {
+                        childAppender.append (XmlElement::createTextElement (String (inputStart, input)));
                         input += 3;
                         break;
                     }
 
                     ++input;
-                    ++len;
                 }
-
-                childAppender.append (XmlElement::createTextElement (String (inputStart, len)));
             }
             else
             {
