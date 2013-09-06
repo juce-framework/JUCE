@@ -120,7 +120,7 @@ public:
         AudioSessionSetProperty (kAudioSessionProperty_PreferredHardwareIOBufferDuration, sizeof (bufferDuration), &bufferDuration);
         actualBufferSize = preferredBufferSize;
 
-        prepareFloatBuffers();
+        prepareFloatBuffers (actualBufferSize);
 
         isRunning = true;
         routingChanged (nullptr);  // creates and starts the AU
@@ -209,11 +209,11 @@ private:
     float* outputChannels[3];
     bool monoInputChannelNumber, monoOutputChannelNumber;
 
-    void prepareFloatBuffers()
+    void prepareFloatBuffers (int bufferSize)
     {
         if (numInputChannels + numOutputChannels > 0)
         {
-            floatData.setSize (numInputChannels + numOutputChannels, actualBufferSize);
+            floatData.setSize (numInputChannels + numOutputChannels, bufferSize);
             zeromem (inputChannels, sizeof (inputChannels));
             zeromem (outputChannels, sizeof (outputChannels));
 
@@ -238,6 +238,9 @@ private:
 
         if (callback != nullptr)
         {
+            // This shouldn't ever get triggered, but please let me know if it does!
+            jassert (numFrames <= floatData.getNumSamples());
+
             if (audioInputIsAvailable && numInputChannels > 0)
             {
                 short* shortData = (short*) data->mBuffers[0].mData;
