@@ -2385,7 +2385,7 @@ String TextEditor::getText() const
     for (int i = 0; i < sections.size(); ++i)
         sections.getUnchecked (i)->appendAllText (mo);
 
-    return mo.toString();
+    return mo.toUTF8();
 }
 
 String TextEditor::getTextInRange (const Range<int>& range) const
@@ -2414,7 +2414,7 @@ String TextEditor::getTextInRange (const Range<int>& range) const
         index = nextIndex;
     }
 
-    return mo.toString();
+    return mo.toUTF8();
 }
 
 String TextEditor::getHighlightedText() const

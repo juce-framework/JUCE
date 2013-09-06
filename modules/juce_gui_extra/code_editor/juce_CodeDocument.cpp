@@ -522,7 +522,7 @@ String CodeDocument::getTextBetween (const Position& start, const Position& end)
         }
     }
 
-    return mo.toString();
+    return mo.toUTF8();
 }
 
 int CodeDocument::getNumCharacters() const noexcept

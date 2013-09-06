@@ -172,7 +172,7 @@ struct CoreAudioFormatMetatdata
         }
 
         if (tempoSequence.getDataSize() > 0)
-            midiMetadata.set ("tempo sequence", tempoSequence.toString());
+            midiMetadata.set ("tempo sequence", tempoSequence.toUTF8());
     }
 
     static double getTempoFromTempoMetaEvent (MidiMessageSequence::MidiEventHolder* holder)
@@ -217,7 +217,7 @@ struct CoreAudioFormatMetatdata
         }
 
         if (timeSigSequence.getDataSize() > 0)
-            midiMetadata.set ("time signature sequence", timeSigSequence.toString());
+            midiMetadata.set ("time signature sequence", timeSigSequence.toUTF8());
     }
 
     //==============================================================================
