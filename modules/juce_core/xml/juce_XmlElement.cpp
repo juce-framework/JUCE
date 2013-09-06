@@ -528,7 +528,7 @@ void XmlElement::setAttribute (const String& attributeName, const int number)
 
 void XmlElement::setAttribute (const String& attributeName, const double number)
 {
-    setAttribute (attributeName, String (number));
+    setAttribute (attributeName, String (number, 20));
 }
 
 void XmlElement::removeAttribute (const String& attributeName) noexcept
