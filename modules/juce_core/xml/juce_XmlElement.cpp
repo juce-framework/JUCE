@@ -788,7 +788,7 @@ String XmlElement::getAllSubText() const
     for (const XmlElement* child = firstChildElement; child != nullptr; child = child->nextListItem)
         mem << child->getAllSubText();
 
-    return mem.toString();
+    return mem.toUTF8();
 }
 
 String XmlElement::getChildElementAllSubText (const String& childTagName,

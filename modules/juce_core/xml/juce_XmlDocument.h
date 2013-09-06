@@ -158,8 +158,10 @@ private:
     bool needToLoadDTD, ignoreEmptyTextElements;
     ScopedPointer <InputSource> inputSource;
 
+    XmlElement* parseDocumentElement (String::CharPointerType, bool outer);
     void setLastError (const String& desc, bool carryOn);
-    void skipHeader();
+    bool parseHeader();
+    bool parseDTD();
     void skipNextWhiteSpace();
     juce_wchar readNextChar() noexcept;
     XmlElement* readNextElement (bool alsoParseSubElements);
