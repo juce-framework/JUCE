@@ -550,13 +550,26 @@ public:
         return CharPointer_UTF8 (reinterpret_cast <Atomic<CharType*>&> (data).exchange (newValue.data));
     }
 
-    /** These values are the byte-order-mark (BOM) values for a UTF-8 stream. */
+    /** These values are the byte-order mark (BOM) values for a UTF-8 stream. */
     enum
     {
         byteOrderMark1 = 0xef,
         byteOrderMark2 = 0xbb,
         byteOrderMark3 = 0xbf
     };
+
+    /** Returns true if the first three bytes in this pointer are the UTF8 byte-order mark (BOM).
+        The pointer must not be null, and must point to at least 3 valid bytes.
+    */
+    static bool isByteOrderMark (const void* possibleByteOrder) noexcept
+    {
+        jassert (possibleByteOrder != nullptr);
+        const uint8* const c = static_cast<const uint8*> (possibleByteOrder);
+
+        return c[0] == (uint8) byteOrderMark1
+            && c[1] == (uint8) byteOrderMark2
+            && c[2] == (uint8) byteOrderMark3;
+    }
 
 private:
     CharType* data;

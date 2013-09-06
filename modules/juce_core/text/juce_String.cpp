@@ -1914,9 +1914,9 @@ int   String::getHexValue32() const noexcept    { return HexConverter<int>  ::st
 int64 String::getHexValue64() const noexcept    { return HexConverter<int64>::stringToHex (text); }
 
 //==============================================================================
-String String::createStringFromData (const void* const data_, const int size)
+String String::createStringFromData (const void* const unknownData, const int size)
 {
-    const uint8* const data = static_cast <const uint8*> (data_);
+    const uint8* const data = static_cast<const uint8*> (unknownData);
 
     if (size <= 0 || data == nullptr)
         return empty;
@@ -1924,17 +1924,16 @@ String String::createStringFromData (const void* const data_, const int size)
     if (size == 1)
         return charToString ((juce_wchar) data[0]);
 
-    if ((data[0] == (uint8) CharPointer_UTF16::byteOrderMarkBE1 && data[1] == (uint8) CharPointer_UTF16::byteOrderMarkBE2)
-         || (data[0] == (uint8) CharPointer_UTF16::byteOrderMarkLE1 && data[1] == (uint8) CharPointer_UTF16::byteOrderMarkLE2))
+    if (CharPointer_UTF16::isByteOrderMarkBigEndian (data)
+         || CharPointer_UTF16::isByteOrderMarkLittleEndian (data))
     {
-        const bool bigEndian = (data[0] == (uint8) CharPointer_UTF16::byteOrderMarkBE1);
         const int numChars = size / 2 - 1;
 
         StringCreationHelper builder ((size_t) numChars);
 
         const uint16* const src = (const uint16*) (data + 2);
 
-        if (bigEndian)
+        if (CharPointer_UTF16::isByteOrderMarkBigEndian (data))
         {
             for (int i = 0; i < numChars; ++i)
                 builder.write ((juce_wchar) ByteOrder::swapIfLittleEndian (src[i]));
@@ -1950,16 +1949,12 @@ String String::createStringFromData (const void* const data_, const int size)
     }
 
     const uint8* start = data;
-    const uint8* end = data + size;
 
-    if (size >= 3
-          && data[0] == (uint8) CharPointer_UTF8::byteOrderMark1
-          && data[1] == (uint8) CharPointer_UTF8::byteOrderMark2
-          && data[2] == (uint8) CharPointer_UTF8::byteOrderMark3)
+    if (size >= 3 && CharPointer_UTF8::isByteOrderMark (data))
         start += 3;
 
     return String (CharPointer_UTF8 ((const char*) start),
-                   CharPointer_UTF8 ((const char*) end));
+                   CharPointer_UTF8 ((const char*) (data + size)));
 }
 
 //==============================================================================
