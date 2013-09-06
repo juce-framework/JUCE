@@ -43,7 +43,8 @@ namespace juce
 {
 
 #if ! JUCE_64BIT
-static void updateComponentPos (Component* const comp)
+void updateEditorCompBounds (Component*);
+void updateEditorCompBounds (Component* comp)
 {
     HIViewRef dummyView = (HIViewRef) (void*) (pointer_sized_int)
                             comp->getProperties() ["dummyViewRef"].toString().getHexValue64();
@@ -63,7 +64,7 @@ static void updateComponentPos (Component* const comp)
 
 static pascal OSStatus viewBoundsChangedEvent (EventHandlerCallRef, EventRef, void* user)
 {
-    updateComponentPos ((Component*) user);
+    updateEditorCompBounds ((Component*) user);
     return noErr;
 }
 #endif
@@ -140,7 +141,7 @@ void* attachComponentToWindowRef (Component* comp, void* windowRef)
         InstallEventHandler (GetControlEventTarget (dummyView), NewEventHandlerUPP (viewBoundsChangedEvent), 1, &kControlBoundsChangedEvent, (void*) comp, &ref);
         comp->getProperties().set ("boundsEventRef", String::toHexString ((pointer_sized_int) (void*) ref));
 
-        updateComponentPos (comp);
+        updateEditorCompBounds (comp);
 
        #if ! JucePlugin_EditorRequiresKeyboardFocus
         comp->addToDesktop (ComponentPeer::windowIsTemporary | ComponentPeer::windowIgnoresKeyPresses);
@@ -247,6 +248,7 @@ bool forwardCurrentKeyEventToHost (Component* comp);
 bool forwardCurrentKeyEventToHost (Component* comp)
 {
    #if JUCE_64BIT
+    (void) comp;
     return false;
    #else
     NSWindow* win = [(NSView*) comp->getWindowHandle() window];

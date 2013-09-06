@@ -115,11 +115,14 @@ namespace juce
 {
  #if JUCE_MAC
   extern void initialiseMac();
-  extern void* attachComponentToWindowRef (Component* component, void* windowRef);
-  extern void detachComponentFromWindowRef (Component* component, void* nsWindow);
-  extern void setNativeHostWindowSize (void* nsWindow, Component* editorComp, int newWidth, int newHeight);
-  extern void checkWindowVisibility (void* nsWindow, Component* component);
-  extern bool forwardCurrentKeyEventToHost (Component* component);
+  extern void* attachComponentToWindowRef (Component*, void* windowRef);
+  extern void detachComponentFromWindowRef (Component*, void* nsWindow);
+  extern void setNativeHostWindowSize (void* nsWindow, Component*, int newWidth, int newHeight);
+  extern void checkWindowVisibility (void* nsWindow, Component*);
+  extern bool forwardCurrentKeyEventToHost (Component*);
+ #if ! JUCE_64BIT
+  extern void updateEditorCompBounds (Component*);
+ #endif
  #endif
 
  #if JUCE_LINUX
@@ -1325,13 +1328,17 @@ public:
 
         AudioProcessorEditor* getEditorComp() const
         {
-            return dynamic_cast <AudioProcessorEditor*> (getChildComponent (0));
+            return dynamic_cast<AudioProcessorEditor*> (getChildComponent(0));
         }
 
         void resized() override
         {
             if (Component* const editor = getChildComponent(0))
                 editor->setBounds (getLocalBounds());
+
+           #if JUCE_MAC && ! JUCE_64BIT
+            updateEditorCompBounds (this);
+           #endif
         }
 
         void childBoundsChanged (Component* child) override
