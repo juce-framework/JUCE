@@ -614,18 +614,19 @@ void String::appendCharPointer (const CharPointerType startOfTextToAppend,
                                 const CharPointerType endOfTextToAppend)
 {
     jassert (startOfTextToAppend.getAddress() != nullptr && endOfTextToAppend.getAddress() != nullptr);
-    jassert (startOfTextToAppend.getAddress() <= endOfTextToAppend.getAddress());
 
-    const size_t extraBytesNeeded = endOfTextToAppend.getAddress() - startOfTextToAppend.getAddress();
+    const int extraBytesNeeded = getAddressDifference (endOfTextToAppend.getAddress(),
+                                                       startOfTextToAppend.getAddress());
+    jassert (extraBytesNeeded >= 0);
 
     if (extraBytesNeeded > 0)
     {
         const size_t byteOffsetOfNull = getByteOffsetOfEnd();
-        preallocateBytes (byteOffsetOfNull + extraBytesNeeded);
+        preallocateBytes (byteOffsetOfNull + (size_t) extraBytesNeeded);
 
-        char* const newStringStart = addBytesToPointer (text.getAddress(), (int) byteOffsetOfNull);
+        CharPointerType::CharType* const newStringStart = addBytesToPointer (text.getAddress(), (int) byteOffsetOfNull);
         memcpy (newStringStart, startOfTextToAppend.getAddress(), extraBytesNeeded);
-        CharPointerType (newStringStart + extraBytesNeeded).writeNull();
+        CharPointerType (addBytesToPointer (newStringStart, extraBytesNeeded)).writeNull();
     }
 }
 

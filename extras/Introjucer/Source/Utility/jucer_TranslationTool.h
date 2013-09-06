@@ -76,7 +76,8 @@ struct TranslationHelpers
                 if (c == '"')
                 {
                     out << String (start, p);
-                    parseStringLiteral (++p, out);
+                    ++p;
+                    parseStringLiteral (p, out);
                     return;
                 }
 
