@@ -315,6 +315,8 @@ public:
         {
             if (! renderFrame())
                 wait (5); // failed to render, so avoid a tight fail-loop.
+            else if (! context.continuousRepaint)
+                wait (-1);
         }
 
         shutdownOnThread();
@@ -529,7 +531,8 @@ private:
 //==============================================================================
 OpenGLContext::OpenGLContext()
     : nativeContext (nullptr), renderer (nullptr), currentRenderScale (1.0),
-      contextToShareWith (nullptr), renderComponents (true), useMultisampling (false)
+      contextToShareWith (nullptr), renderComponents (true),
+      useMultisampling (false), continuousRepaint (false)
 {
 }
 
@@ -554,6 +557,11 @@ void OpenGLContext::setComponentPaintingEnabled (bool shouldPaintComponent) noex
     jassert (nativeContext == nullptr);
 
     renderComponents = shouldPaintComponent;
+}
+
+void OpenGLContext::setContinuousRepainting (bool shouldContinuouslyRepaint) noexcept
+{
+    continuousRepaint = shouldContinuouslyRepaint;
 }
 
 void OpenGLContext::setPixelFormat (const OpenGLPixelFormat& preferredPixelFormat) noexcept
@@ -623,7 +631,7 @@ bool OpenGLContext::makeActive() const noexcept
 
     if (nativeContext != nullptr && nativeContext->makeActive())
     {
-        current = const_cast <OpenGLContext*> (this);
+        current = const_cast<OpenGLContext*> (this);
         return true;
     }
 

@@ -60,6 +60,7 @@ public:
 
         openGLContext.setRenderer (this);
         openGLContext.setComponentPaintingEnabled (true);
+        openGLContext.setContinuousRepainting (true);
         openGLContext.attachTo (*this);
 
         startTimer (1000 / 30);
@@ -197,7 +198,6 @@ public:
     {
         rotation += (float) speedSlider.getValue();
         textScrollPos += 1.4f;
-        openGLContext.triggerRepaint();
     }
 
 private:

@@ -58,23 +58,36 @@ public:
         this method with a null pointer.
         Note: This must be called BEFORE attaching your context to a target component!
     */
-    void setRenderer (OpenGLRenderer* rendererToUse) noexcept;
+    void setRenderer (OpenGLRenderer*) noexcept;
 
-    /** Enables or disables the use of the GL context to perform 2D rendering
-        of the component to which it is attached.
-        If this is false, then only your OpenGLRenderer will be used to perform
-        any rendering. If true, then each time your target's paint() method needs
-        to be called, an OpenGLGraphicsContext will be used to render it, (after
-        calling your OpenGLRenderer if there is one).
+    /** Attaches the context to a target component.
 
-        By default this is set to true. If you're not using any paint() method functionality
-        and are doing all your rendering in an OpenGLRenderer, you should disable it
-        to improve performance.
+        If the component is not fully visible, this call will wait until the component
+        is shown before actually creating a native context for it.
 
-        Note: This must be called BEFORE attaching your context to a target component!
+        When a native context is created, a thread is started, and will be used to call
+        the OpenGLRenderer methods. The context will be floated above the target component,
+        and when the target moves, it will track it. If the component is hidden/shown, the
+        context may be deleted and re-created.
     */
-    void setComponentPaintingEnabled (bool shouldPaintComponent) noexcept;
+    void attachTo (Component&);
 
+    /** Detaches the context from its target component and deletes any native resources.
+        If the context has not been attached, this will do nothing. Otherwise, it will block
+        until the context and its thread have been cleaned up.
+    */
+    void detach();
+
+    /** Returns true if the context is attached to a component and is on-screen.
+        Note that if you call attachTo() for a non-visible component, this method will
+        return false until the component is made visible.
+    */
+    bool isAttached() const noexcept;
+
+    /** Returns the component to which this context is currently attached, or nullptr. */
+    Component* getTargetComponent() const noexcept;
+
+    //==============================================================================
     /** Sets the pixel format which you'd like to use for the target GL surface.
         Note: This must be called BEFORE attaching your context to a target component!
     */
@@ -93,53 +106,36 @@ public:
     */
     void setMultisamplingEnabled (bool) noexcept;
 
-    //==============================================================================
-    /** Attaches the context to a target component.
-
-        If the component is not fully visible, this call will wait until the component
-        is shown before actually creating a native context for it.
-
-        When a native context is created, a thread is started, and will be used to call
-        the OpenGLRenderer methods. The context will be floated above the target component,
-        and when the target moves, it will track it. If the component is hidden/shown, the
-        context may be deleted and re-created.
-    */
-    void attachTo (Component& component);
-
-    /** Detaches the context from its target component and deletes any native resources.
-        If the context has not been attached, this will do nothing. Otherwise, it will block
-        until the context and its thread have been cleaned up.
-    */
-    void detach();
-
-    /** Returns true if the context is attached to a component and is on-screen.
-        Note that if you call attachTo() for a non-visible component, this method will
-        return false until the component is made visible.
-    */
-    bool isAttached() const noexcept;
-
-    /** Returns the component to which this context is currently attached, or nullptr. */
-    Component* getTargetComponent() const noexcept;
-
-    /** Returns the context that's currently in active use by the calling thread, or
-        nullptr if no context is active.
-    */
-    static OpenGLContext* getCurrentContext();
-
-    /** Asynchronously causes a repaint to be made. */
-    void triggerRepaint();
-
-    //==============================================================================
-    /** If this context is backed by a frame buffer, this returns its ID number,
-        or 0 if the context does not use a framebuffer.
-    */
-    unsigned int getFrameBufferID() const noexcept;
-
     /** Returns true if shaders can be used in this context. */
     bool areShadersAvailable() const;
 
-    /** This structure holds a set of dynamically loaded GL functions for use on this context. */
-    OpenGLExtensionFunctions extensions;
+    /** Enables or disables the use of the GL context to perform 2D rendering
+        of the component to which it is attached.
+        If this is false, then only your OpenGLRenderer will be used to perform
+        any rendering. If true, then each time your target's paint() method needs
+        to be called, an OpenGLGraphicsContext will be used to render it, (after
+        calling your OpenGLRenderer if there is one).
+
+        By default this is set to true. If you're not using any paint() method functionality
+        and are doing all your rendering in an OpenGLRenderer, you should disable it
+        to improve performance.
+
+        Note: This must be called BEFORE attaching your context to a target component!
+    */
+    void setComponentPaintingEnabled (bool shouldPaintComponent) noexcept;
+
+    /** Enables or disables continuous repainting.
+        If set to true, the context will run a loop, re-rendering itself without waiting
+        for triggerRepaint() to be called, at a frequency determined by the swap interval
+        (see setSwapInterval). If false, then after each render callback, it will wait for
+        another call to triggerRepaint() before rendering again.
+        This is disabled by default.
+        @see setSwapInterval
+    */
+    void setContinuousRepainting (bool shouldContinuouslyRepaint) noexcept;
+
+    /** Asynchronously causes a repaint to be made. */
+    void triggerRepaint();
 
     //==============================================================================
     /** This retrieves an object that was previously stored with setAssociatedObject().
@@ -175,6 +171,11 @@ public:
     */
     static void deactivateCurrentContext();
 
+    /** Returns the context that's currently in active use by the calling thread, or
+        nullptr if no context is active.
+    */
+    static OpenGLContext* getCurrentContext();
+
     //==============================================================================
     /** Swaps the buffers (if the context can do this).
         There's normally no need to call this directly - the buffers will be swapped
@@ -192,6 +193,8 @@ public:
 
         Returns true if it sets the value successfully - some platforms won't support
         this setting.
+
+        @see setContinuousRepainting
     */
     bool setSwapInterval (int numFramesPerSwap);
 
@@ -211,6 +214,11 @@ public:
     double getRenderingScale() const noexcept   { return currentRenderScale; }
 
     //==============================================================================
+    /** If this context is backed by a frame buffer, this returns its ID number,
+        or 0 if the context does not use a framebuffer.
+    */
+    unsigned int getFrameBufferID() const noexcept;
+
     /** Returns an OS-dependent handle to some kind of underlting OS-provided GL context.
 
         The exact type of the value returned will depend on the OS and may change
@@ -218,6 +226,9 @@ public:
         native code is probably the best way to find out what it is.
     */
     void* getRawContext() const noexcept;
+
+    /** This structure holds a set of dynamically loaded GL functions for use on this context. */
+    OpenGLExtensionFunctions extensions;
 
     //==============================================================================
     /** Draws the currently selected texture into this context at its original size.
@@ -253,7 +264,7 @@ private:
     ScopedPointer<Attachment> attachment;
     OpenGLPixelFormat pixelFormat;
     void* contextToShareWith;
-    bool renderComponents, useMultisampling;
+    bool renderComponents, useMultisampling, continuousRepaint;
 
     CachedImage* getCachedImage() const noexcept;
 
