@@ -287,17 +287,14 @@ public:
 
     //==============================================================================
     /** Sets a message to display when there is no item currently selected.
-
         @see getTextWhenNothingSelected
     */
     void setTextWhenNothingSelected (const String& newMessage);
 
     /** Returns the text that is shown when no item is selected.
-
         @see setTextWhenNothingSelected
     */
     String getTextWhenNothingSelected() const;
-
 
     /** Sets the message to show when there are no items in the list, and the user clicks
         on the drop-down box.
@@ -382,7 +379,7 @@ private:
     //==============================================================================
     struct ItemInfo
     {
-        ItemInfo (const String& name, int itemId, bool isEnabled, bool isHeading);
+        ItemInfo (const String&, int itemId, bool isEnabled, bool isHeading);
         bool isSeparator() const noexcept;
         bool isRealItem() const noexcept;
 
@@ -399,8 +396,8 @@ private:
     ScopedPointer<Label> label;
     String textWhenNothingSelected, noChoicesMessage;
 
-    ItemInfo* getItemForId (int itemId) const noexcept;
-    ItemInfo* getItemForIndex (int index) const noexcept;
+    ItemInfo* getItemForId (int) const noexcept;
+    ItemInfo* getItemForIndex (int) const noexcept;
     bool selectIfEnabled (int index);
     bool nudgeSelectedItem (int delta);
     void sendChange (NotificationType);

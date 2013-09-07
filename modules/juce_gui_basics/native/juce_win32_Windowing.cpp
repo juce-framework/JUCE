@@ -3182,7 +3182,7 @@ void Desktop::Displays::findDisplays (float masterScale)
 
     // make sure the first in the list is the main monitor
     for (int i = 1; i < monitors.size(); ++i)
-        if (monitors.getReference(i).getX() == 0 && monitors.getReference(i).getY() == 0)
+        if (monitors.getReference(i).getPosition().isOrigin())
             monitors.swap (i, 0);
 
     if (monitors.size() == 0)

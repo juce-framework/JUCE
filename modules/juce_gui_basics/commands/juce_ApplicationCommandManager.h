@@ -239,7 +239,7 @@ public:
         either use setFirstCommandTarget() to specify a single target, or override this method
         if you need more complex logic to choose one.
 
-        It may return 0 if no targets are available.
+        It may return nullptr if no targets are available.
 
         @see getTargetForCommand, invoke, invokeDirectly
     */
@@ -247,11 +247,11 @@ public:
 
     /** Sets a target to be returned by getFirstCommandTarget().
 
-        If this is set to 0, then getFirstCommandTarget() will by default return the
+        If this is set to nullptr, then getFirstCommandTarget() will by default return the
         result of findDefaultComponentTarget().
 
-        If you use this to set a target, make sure you call setFirstCommandTarget (0) before
-        deleting the target object.
+        If you use this to set a target, make sure you call setFirstCommandTarget(nullptr)
+        before deleting the target object.
     */
     void setFirstCommandTarget (ApplicationCommandTarget* newTarget) noexcept;
 
@@ -262,7 +262,7 @@ public:
         ApplicationCommandTarget::getNextCommandTarget() to find the next one to try, and
         so on until no more are available.
 
-        If no targets are found that can perform the command, this method will return 0.
+        If no targets are found that can perform the command, this method will return nullptr.
 
         If a target is found, then it will get the target to fill-in the upToDateInfo
         structure with the latest info about that command, so that the caller can see
@@ -292,17 +292,17 @@ public:
     /** Examines this component and all its parents in turn, looking for the first one
         which is a ApplicationCommandTarget.
 
-        Returns the first ApplicationCommandTarget that it finds, or nullptr if none of them implement
-        that class.
+        Returns the first ApplicationCommandTarget that it finds, or nullptr if none of them
+        implement that class.
     */
-    static ApplicationCommandTarget* findTargetForComponent (Component* component);
+    static ApplicationCommandTarget* findTargetForComponent (Component*);
 
 
 private:
     //==============================================================================
-    OwnedArray <ApplicationCommandInfo> commands;
-    ListenerList <ApplicationCommandManagerListener> listeners;
-    ScopedPointer <KeyPressMappingSet> keyMappings;
+    OwnedArray<ApplicationCommandInfo> commands;
+    ListenerList<ApplicationCommandManagerListener> listeners;
+    ScopedPointer<KeyPressMappingSet> keyMappings;
     ApplicationCommandTarget* firstTarget;
 
     void sendListenerInvokeCallback (const ApplicationCommandTarget::InvocationInfo&);
@@ -335,7 +335,7 @@ public:
     virtual ~ApplicationCommandManagerListener()  {}
 
     /** Called when an app command is about to be invoked. */
-    virtual void applicationCommandInvoked (const ApplicationCommandTarget::InvocationInfo& info) = 0;
+    virtual void applicationCommandInvoked (const ApplicationCommandTarget::InvocationInfo&) = 0;
 
     /** Called when commands are registered or deregistered from the
         command manager, or when commands are made active or inactive.

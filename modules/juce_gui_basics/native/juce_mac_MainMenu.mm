@@ -261,7 +261,7 @@ public:
 
             if (iter.commandManager != nullptr)
             {
-                const Array <KeyPress> keyPresses (iter.commandManager->getKeyMappings()
+                const Array<KeyPress> keyPresses (iter.commandManager->getKeyMappings()
                                                      ->getKeyPressesAssignedToCommand (iter.itemId));
 
                 if (keyPresses.size() > 0)

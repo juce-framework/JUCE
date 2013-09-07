@@ -490,7 +490,7 @@ int OggVorbisAudioFormat::estimateOggFileQuality (const File& source)
 {
     if (FileInputStream* const in = source.createInputStream())
     {
-        ScopedPointer <AudioFormatReader> r (createReaderFor (in, true));
+        ScopedPointer<AudioFormatReader> r (createReaderFor (in, true));
 
         if (r != nullptr)
         {

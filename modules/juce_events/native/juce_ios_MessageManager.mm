@@ -83,4 +83,5 @@ bool MessageManager::postMessageToSystemQueue (MessageManager::MessageBase* cons
 
 void MessageManager::broadcastMessage (const String&)
 {
+    // N/A on current iOS
 }

@@ -608,10 +608,10 @@ private:
 class AiffAudioFormatWriter  : public AudioFormatWriter
 {
 public:
-    AiffAudioFormatWriter (OutputStream* out, double sampleRate_,
+    AiffAudioFormatWriter (OutputStream* out, double rate,
                            unsigned int numChans, unsigned int bits,
                            const StringPairArray& metadataValues)
-        : AudioFormatWriter (out, TRANS (aiffFormatName), sampleRate_, numChans, bits),
+        : AudioFormatWriter (out, TRANS (aiffFormatName), rate, numChans, bits),
           lengthInSamples (0),
           bytesWritten (0),
           writeFailed (false)

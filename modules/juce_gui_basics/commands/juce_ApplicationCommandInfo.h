@@ -77,8 +77,7 @@ struct JUCE_API  ApplicationCommandInfo
         myinfo.defaultKeypresses.add (KeyPress ('s', ModifierKeys::commandModifier));
         @endcode
     */
-    void addDefaultKeypress (int keyCode,
-                             ModifierKeys modifiers) noexcept;
+    void addDefaultKeypress (int keyCode, ModifierKeys modifiers) noexcept;
 
     //==============================================================================
     /** The command's unique ID number.
@@ -123,7 +122,7 @@ struct JUCE_API  ApplicationCommandInfo
 
         @see addDefaultKeypress
     */
-    Array <KeyPress> defaultKeypresses;
+    Array<KeyPress> defaultKeypresses;
 
     //==============================================================================
     /** Flags describing the ways in which this command should be used.

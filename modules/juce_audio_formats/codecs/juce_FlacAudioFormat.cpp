@@ -247,34 +247,34 @@ public:
     static FlacNamespace::FLAC__StreamDecoderReadStatus readCallback_ (const FlacNamespace::FLAC__StreamDecoder*, FlacNamespace::FLAC__byte buffer[], size_t* bytes, void* client_data)
     {
         using namespace FlacNamespace;
-        *bytes = (size_t) static_cast <const FlacReader*> (client_data)->input->read (buffer, (int) *bytes);
+        *bytes = (size_t) static_cast<const FlacReader*> (client_data)->input->read (buffer, (int) *bytes);
         return FLAC__STREAM_DECODER_READ_STATUS_CONTINUE;
     }
 
     static FlacNamespace::FLAC__StreamDecoderSeekStatus seekCallback_ (const FlacNamespace::FLAC__StreamDecoder*, FlacNamespace::FLAC__uint64 absolute_byte_offset, void* client_data)
     {
         using namespace FlacNamespace;
-        static_cast <const FlacReader*> (client_data)->input->setPosition ((int) absolute_byte_offset);
+        static_cast<const FlacReader*> (client_data)->input->setPosition ((int) absolute_byte_offset);
         return FLAC__STREAM_DECODER_SEEK_STATUS_OK;
     }
 
     static FlacNamespace::FLAC__StreamDecoderTellStatus tellCallback_ (const FlacNamespace::FLAC__StreamDecoder*, FlacNamespace::FLAC__uint64* absolute_byte_offset, void* client_data)
     {
         using namespace FlacNamespace;
-        *absolute_byte_offset = (uint64) static_cast <const FlacReader*> (client_data)->input->getPosition();
+        *absolute_byte_offset = (uint64) static_cast<const FlacReader*> (client_data)->input->getPosition();
         return FLAC__STREAM_DECODER_TELL_STATUS_OK;
     }
 
     static FlacNamespace::FLAC__StreamDecoderLengthStatus lengthCallback_ (const FlacNamespace::FLAC__StreamDecoder*, FlacNamespace::FLAC__uint64* stream_length, void* client_data)
     {
         using namespace FlacNamespace;
-        *stream_length = (uint64) static_cast <const FlacReader*> (client_data)->input->getTotalLength();
+        *stream_length = (uint64) static_cast<const FlacReader*> (client_data)->input->getTotalLength();
         return FLAC__STREAM_DECODER_LENGTH_STATUS_OK;
     }
 
     static FlacNamespace::FLAC__bool eofCallback_ (const FlacNamespace::FLAC__StreamDecoder*, void* client_data)
     {
-        return static_cast <const FlacReader*> (client_data)->input->isExhausted();
+        return static_cast<const FlacReader*> (client_data)->input->isExhausted();
     }
 
     static FlacNamespace::FLAC__StreamDecoderWriteStatus writeCallback_ (const FlacNamespace::FLAC__StreamDecoder*,
@@ -283,7 +283,7 @@ public:
                                                                          void* client_data)
     {
         using namespace FlacNamespace;
-        static_cast <FlacReader*> (client_data)->useSamples (buffer, (int) frame->header.blocksize);
+        static_cast<FlacReader*> (client_data)->useSamples (buffer, (int) frame->header.blocksize);
         return FLAC__STREAM_DECODER_WRITE_STATUS_CONTINUE;
     }
 
@@ -291,7 +291,7 @@ public:
                                    const FlacNamespace::FLAC__StreamMetadata* metadata,
                                    void* client_data)
     {
-        static_cast <FlacReader*> (client_data)->useMetadata (metadata->data.stream_info);
+        static_cast<FlacReader*> (client_data)->useMetadata (metadata->data.stream_info);
     }
 
     static void errorCallback_ (const FlacNamespace::FLAC__StreamDecoder*, FlacNamespace::FLAC__StreamDecoderErrorStatus, void*)
@@ -312,11 +312,8 @@ private:
 class FlacWriter  : public AudioFormatWriter
 {
 public:
-    //==============================================================================
-    FlacWriter (OutputStream* const out, double sampleRate_,
-                uint32 numChannels_, uint32 bitsPerSample_, int qualityOptionIndex)
-        : AudioFormatWriter (out, TRANS (flacFormatName),
-                             sampleRate_, numChannels_, bitsPerSample_)
+    FlacWriter (OutputStream* const out, double rate, uint32 numChans, uint32 bits, int qualityOptionIndex)
+        : AudioFormatWriter (out, TRANS (flacFormatName), rate, numChans, bits)
     {
         using namespace FlacNamespace;
         encoder = FLAC__stream_encoder_new();
@@ -382,7 +379,7 @@ public:
                     destData[j] = (samplesToWrite[i][j] >> bitsToShift);
             }
 
-            samplesToWrite = const_cast <const int**> (channels.getData());
+            samplesToWrite = const_cast<const int**> (channels.getData());
         }
 
         return FLAC__stream_encoder_process (encoder, (const FLAC__int32**) samplesToWrite, (size_t) numSamples) != 0;
@@ -444,7 +441,7 @@ public:
                                                                               void* client_data)
     {
         using namespace FlacNamespace;
-        return static_cast <FlacWriter*> (client_data)->writeData (buffer, (int) bytes)
+        return static_cast<FlacWriter*> (client_data)->writeData (buffer, (int) bytes)
                 ? FLAC__STREAM_ENCODER_WRITE_STATUS_OK
                 : FLAC__STREAM_ENCODER_WRITE_STATUS_FATAL_ERROR;
     }
@@ -461,13 +458,13 @@ public:
         if (client_data == nullptr)
             return FLAC__STREAM_ENCODER_TELL_STATUS_UNSUPPORTED;
 
-        *absolute_byte_offset = (FLAC__uint64) static_cast <FlacWriter*> (client_data)->output->getPosition();
+        *absolute_byte_offset = (FLAC__uint64) static_cast<FlacWriter*> (client_data)->output->getPosition();
         return FLAC__STREAM_ENCODER_TELL_STATUS_OK;
     }
 
     static void encodeMetadataCallback (const FlacNamespace::FLAC__StreamEncoder*, const FlacNamespace::FLAC__StreamMetadata* metadata, void* client_data)
     {
-        static_cast <FlacWriter*> (client_data)->writeMetaData (metadata);
+        static_cast<FlacWriter*> (client_data)->writeMetaData (metadata);
     }
 
     bool ok;

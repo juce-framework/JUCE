@@ -68,13 +68,13 @@ public:
     const String& getButtonText() const               { return text; }
 
     //==============================================================================
-    /** Returns true if the button is currently being held down by the mouse.
+    /** Returns true if the button is currently being held down.
         @see isOver
     */
     bool isDown() const noexcept;
 
     /** Returns true if the mouse is currently over the button.
-        This will be also be true if the mouse is being held down.
+        This will be also be true if the button is being held down.
         @see isDown
     */
     bool isOver() const noexcept;
@@ -95,8 +95,7 @@ public:
                                 sendNotificationAsync is not supported
         @see getToggleState, setRadioGroupId
     */
-    void setToggleState (bool shouldBeOn,
-                         NotificationType notification);
+    void setToggleState (bool shouldBeOn, NotificationType notification);
 
     /** Returns true if the button is 'on'.
 
@@ -122,7 +121,7 @@ public:
         If set to true, then before the clicked() callback occurs, the toggle-state
         of the button is flipped.
     */
-    void setClickingTogglesState (bool shouldToggle) noexcept;
+    void setClickingTogglesState (bool shouldAutoToggleOnClick) noexcept;
 
     /** Returns true if this button is set to be an automatic toggle-button.
         This returns the last value that was passed to setClickingTogglesState().
@@ -202,7 +201,7 @@ public:
 
         Obviously be careful that the ApplicationCommandManager doesn't get deleted
         before this button is. To disable the command triggering, call this method and
-        pass 0 for the parameters.
+        pass nullptr as the command manager.
 
         If generateTooltip is true, then the button's tooltip will be automatically
         generated based on the name of this command and its current shortcut key.
@@ -226,7 +225,7 @@ public:
 
         @see clearShortcuts
     */
-    void addShortcut (const KeyPress& key);
+    void addShortcut (const KeyPress&);
 
     /** Removes all key shortcuts that had been set for this button.
         @see addShortcut
@@ -236,7 +235,7 @@ public:
     /** Returns true if the given keypress is a shortcut for this button.
         @see addShortcut
     */
-    bool isRegisteredForShortcut (const KeyPress& key) const;
+    bool isRegisteredForShortcut (const KeyPress&) const;
 
     //==============================================================================
     /** Sets an auto-repeat speed for the button when it is held down.
@@ -274,12 +273,13 @@ public:
 
     //==============================================================================
     /** Sets the tooltip for this button.
-
         @see TooltipClient, TooltipWindow
     */
     void setTooltip (const String& newTooltip) override;
 
-    // (implementation of the TooltipClient method)
+    /** Returns the tooltip set by setTooltip(), or the description corresponding to
+        the currently mapped command if one is enabled (see setCommandToTrigger).
+    */
     String getTooltip() override;
 
 
@@ -347,7 +347,7 @@ public:
         The state that you set here will only last until it is automatically changed when the mouse
         enters or exits the button, or the mouse-button is pressed or released.
     */
-    void setState (const ButtonState newState);
+    void setState (ButtonState newState);
 
     // This method's parameters have changed - see the new version.
     JUCE_DEPRECATED (void setToggleState (bool, bool));
@@ -442,10 +442,10 @@ protected:
 
 private:
     //==============================================================================
-    Array <KeyPress> shortcuts;
+    Array<KeyPress> shortcuts;
     WeakReference<Component> keySource;
     String text;
-    ListenerList <Listener> buttonListeners;
+    ListenerList<Listener> buttonListeners;
 
     class RepeatTimer;
     friend class RepeatTimer;
@@ -458,13 +458,13 @@ private:
     ButtonState buttonState;
 
     Value isOn;
-    bool lastToggleState : 1;
-    bool clickTogglesState : 1;
-    bool needsToRelease : 1;
-    bool needsRepainting : 1;
-    bool isKeyDown : 1;
-    bool triggerOnMouseDown : 1;
-    bool generateTooltip : 1;
+    bool lastToggleState;
+    bool clickTogglesState;
+    bool needsToRelease;
+    bool needsRepainting;
+    bool isKeyDown;
+    bool triggerOnMouseDown;
+    bool generateTooltip;
 
     void repeatTimerCallback();
     RepeatTimer& getRepeatTimer();

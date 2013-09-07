@@ -240,9 +240,8 @@ uint8* MidiBuffer::findEventAfter (uint8* d, const int samplePosition) const noe
 }
 
 //==============================================================================
-MidiBuffer::Iterator::Iterator (const MidiBuffer& buffer_) noexcept
-    : buffer (buffer_),
-      data (buffer_.getData())
+MidiBuffer::Iterator::Iterator (const MidiBuffer& b) noexcept
+    : buffer (b), data (b.getData())
 {
 }
 
@@ -250,7 +249,6 @@ MidiBuffer::Iterator::~Iterator() noexcept
 {
 }
 
-//==============================================================================
 void MidiBuffer::Iterator::setNextSamplePosition (const int samplePosition) noexcept
 {
     data = buffer.getData();

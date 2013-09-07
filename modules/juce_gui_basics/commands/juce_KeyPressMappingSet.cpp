@@ -29,8 +29,7 @@ KeyPressMappingSet::KeyPressMappingSet (ApplicationCommandManager& cm)
 }
 
 KeyPressMappingSet::KeyPressMappingSet (const KeyPressMappingSet& other)
-    : KeyListener(), ChangeBroadcaster(), FocusChangeListener(),
-      commandManager (other.commandManager)
+    : KeyListener(), ChangeBroadcaster(), FocusChangeListener(), commandManager (other.commandManager)
 {
     Desktop::getInstance().addFocusChangeListener (this);
 }
@@ -50,9 +49,7 @@ Array<KeyPress> KeyPressMappingSet::getKeyPressesAssignedToCommand (const Comman
     return Array<KeyPress>();
 }
 
-void KeyPressMappingSet::addKeyPress (const CommandID commandID,
-                                      const KeyPress& newKeyPress,
-                                      int insertIndex)
+void KeyPressMappingSet::addKeyPress (const CommandID commandID, const KeyPress& newKeyPress, int insertIndex)
 {
     // If you specify an upper-case letter but no shift key, how is the user supposed to press it!?
     // Stick to lower-case letters when defining a keypress, to avoid ambiguity.
@@ -88,20 +85,18 @@ void KeyPressMappingSet::addKeyPress (const CommandID commandID,
     }
 }
 
+static void addKeyPresses (KeyPressMappingSet& set, const ApplicationCommandInfo* const ci)
+{
+    for (int j = 0; j < ci->defaultKeypresses.size(); ++j)
+        set.addKeyPress (ci->commandID, ci->defaultKeypresses.getReference (j));
+}
+
 void KeyPressMappingSet::resetToDefaultMappings()
 {
     mappings.clear();
 
     for (int i = 0; i < commandManager.getNumCommands(); ++i)
-    {
-        const ApplicationCommandInfo* const ci = commandManager.getCommandForIndex (i);
-
-        for (int j = 0; j < ci->defaultKeypresses.size(); ++j)
-        {
-            addKeyPress (ci->commandID,
-                         ci->defaultKeypresses.getReference (j));
-        }
-    }
+        addKeyPresses (*this, commandManager.getCommandForIndex (i));
 
     sendChangeMessage();
 }
@@ -110,13 +105,8 @@ void KeyPressMappingSet::resetToDefaultMapping (const CommandID commandID)
 {
     clearAllKeyPresses (commandID);
 
-    const ApplicationCommandInfo* const ci = commandManager.getCommandForID (commandID);
-
-    for (int j = 0; j < ci->defaultKeypresses.size(); ++j)
-    {
-        addKeyPress (ci->commandID,
-                     ci->defaultKeypresses.getReference (j));
-    }
+    if (const ApplicationCommandInfo* const ci = commandManager.getCommandForID (commandID))
+        addKeyPresses (*this, ci);
 }
 
 void KeyPressMappingSet::clearAllKeyPresses()
@@ -333,10 +323,8 @@ bool KeyPressMappingSet::keyPressed (const KeyPress& key, Component* const origi
                             invokeCommand (cm.commandID, key, true, 0, originatingComponent);
                             return true;
                         }
-                        else
-                        {
-                            commandWasDisabled = true;
-                        }
+
+                        commandWasDisabled = true;
                     }
                 }
             }

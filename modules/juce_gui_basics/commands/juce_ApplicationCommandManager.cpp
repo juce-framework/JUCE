@@ -77,7 +77,7 @@ void ApplicationCommandManager::registerAllCommandsForTarget (ApplicationCommand
 {
     if (target != nullptr)
     {
-        Array <CommandID> commandIDs;
+        Array<CommandID> commandIDs;
         target->getAllCommands (commandIDs);
 
         for (int i = 0; i < commandIDs.size(); ++i)
@@ -99,7 +99,7 @@ void ApplicationCommandManager::removeCommand (const CommandID commandID)
             commands.remove (i);
             triggerAsyncUpdate();
 
-            const Array <KeyPress> keys (keyMappings->getKeyPressesAssignedToCommand (commandID));
+            const Array<KeyPress> keys (keyMappings->getKeyPressesAssignedToCommand (commandID));
 
             for (int j = keys.size(); --j >= 0;)
                 keyMappings->removeKeyPress (keys.getReference (j));
@@ -151,7 +151,7 @@ StringArray ApplicationCommandManager::getCommandCategories() const
 
 Array<CommandID> ApplicationCommandManager::getCommandsInCategory (const String& categoryName) const
 {
-    Array <CommandID> results;
+    Array<CommandID> results;
 
     for (int i = 0; i < commands.size(); ++i)
         if (commands.getUnchecked(i)->categoryName == categoryName)
