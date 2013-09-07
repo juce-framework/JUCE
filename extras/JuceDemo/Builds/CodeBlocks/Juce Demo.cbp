@@ -1681,6 +1681,10 @@
       <Option compile="0"/>
       <Option link="0"/>
     </Unit>
+    <Unit filename="../../../../modules/juce_events/messages/juce_Initialisation.h">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
     <Unit filename="../../../../modules/juce_events/messages/juce_Message.h">
       <Option compile="0"/>
       <Option link="0"/>
@@ -3054,10 +3058,6 @@
       <Option link="0"/>
     </Unit>
     <Unit filename="../../../../modules/juce_gui_basics/application/juce_Application.h">
-      <Option compile="0"/>
-      <Option link="0"/>
-    </Unit>
-    <Unit filename="../../../../modules/juce_gui_basics/application/juce_Initialisation.h">
       <Option compile="0"/>
       <Option link="0"/>
     </Unit>
