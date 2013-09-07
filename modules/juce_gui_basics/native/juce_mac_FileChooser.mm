@@ -118,7 +118,7 @@ void FileChooser::showPlatformDialog (Array<File>& results,
     JUCE_AUTORELEASEPOOL
     {
         ScopedPointer<TemporaryMainMenuWithStandardCommands> tempMenu;
-        if (JUCEApplication::isStandaloneApp())
+        if (JUCEApplicationBase::isStandaloneApp())
             tempMenu = new TemporaryMainMenuWithStandardCommands();
 
         StringArray* filters = new StringArray();

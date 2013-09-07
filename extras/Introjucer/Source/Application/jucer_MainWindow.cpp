@@ -369,7 +369,7 @@ void MainWindowList::closeWindow (MainWindow* w)
    #if ! JUCE_MAC
     if (windows.size() == 1)
     {
-        JUCEApplication::getInstance()->systemRequestedQuit();
+        JUCEApplicationBase::getInstance()->systemRequestedQuit();
     }
     else
    #endif

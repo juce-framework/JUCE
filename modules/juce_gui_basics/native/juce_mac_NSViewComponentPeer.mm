@@ -1388,7 +1388,7 @@ private:
 
     static void mouseDown (id self, SEL s, NSEvent* ev)
     {
-        if (JUCEApplication::isStandaloneApp())
+        if (JUCEApplicationBase::isStandaloneApp())
             asyncMouseDown (self, s, ev);
         else
             // In some host situations, the host will stop modal loops from working
@@ -1401,7 +1401,7 @@ private:
 
     static void mouseUp (id self, SEL s, NSEvent* ev)
     {
-        if (JUCEApplication::isStandaloneApp())
+        if (JUCEApplicationBase::isStandaloneApp())
             asyncMouseUp (self, s, ev);
         else
             // In some host situations, the host will stop modal loops from working

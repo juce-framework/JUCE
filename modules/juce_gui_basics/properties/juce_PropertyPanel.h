@@ -79,7 +79,7 @@ public:
     /** Calls the refresh() method of all PropertyComponents in the panel */
     void refreshAll() const;
 
-    /** Returns true if there no properties have been added. */
+    /** Returns true if the panel contains no properties. */
     bool isEmpty() const;
 
     /** Returns the height that the panel needs in order to display all of its content

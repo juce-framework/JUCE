@@ -55,7 +55,7 @@ namespace StandardApplicationCommandIDs
 
         This command is recognised by the JUCEApplication class, so if it is invoked
         and no other ApplicationCommandTarget handles the event first, the JUCEApplication
-        object will catch it and call JUCEApplication::systemRequestedQuit().
+        object will catch it and call JUCEApplicationBase::systemRequestedQuit().
     */
     static const CommandID  quit           = 0x1001;
 

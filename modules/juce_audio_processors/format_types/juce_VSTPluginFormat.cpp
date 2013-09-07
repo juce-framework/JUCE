@@ -1375,7 +1375,7 @@ public:
             {
                 String hostName ("Juce VST Host");
 
-                if (JUCEApplication* app = JUCEApplication::getInstance())
+                if (JUCEApplicationBase* app = JUCEApplicationBase::getInstance())
                     hostName = app->getApplicationName();
 
                 hostName.copyToUTF8 ((char*) ptr, (size_t) jmin (kVstMaxVendorStrLen, kVstMaxProductStrLen) - 1);

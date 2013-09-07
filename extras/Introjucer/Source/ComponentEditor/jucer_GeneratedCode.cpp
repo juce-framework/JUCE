@@ -331,7 +331,7 @@ void GeneratedCode::applyToCode (String& code,
     headerGuard << String::toHexString ((className + "xx" + fileNameRoot).hashCode64()).toUpperCase() << "__";
     replaceTemplate (code, "headerGuard", headerGuard);
 
-    replaceTemplate (code, "version", JUCEApplication::getInstance()->getApplicationVersion());
+    replaceTemplate (code, "version", JUCEApplicationBase::getInstance()->getApplicationVersion());
     replaceTemplate (code, "creationTime", Time::getCurrentTime().toString (true, true, true));
 
     replaceTemplate (code, "className", className);

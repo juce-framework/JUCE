@@ -238,7 +238,6 @@ class ApplicationCommandManagerListener;
 #include "properties/juce_SliderPropertyComponent.h"
 #include "properties/juce_TextPropertyComponent.h"
 #include "application/juce_Application.h"
-#include "application/juce_Initialisation.h"
 #include "misc/juce_BubbleComponent.h"
 
 }

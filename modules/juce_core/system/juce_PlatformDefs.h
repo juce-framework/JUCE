@@ -222,17 +222,17 @@ namespace juce
   #if ! JUCE_MODULE_AVAILABLE_juce_gui_basics
     #define JUCE_CATCH_EXCEPTION    JUCE_CATCH_ALL
   #else
-    /** Used in try-catch blocks, this macro will send exceptions to the JUCEApplication
+    /** Used in try-catch blocks, this macro will send exceptions to the JUCEApplicationBase
         object so they can be logged by the application if it wants to.
     */
     #define JUCE_CATCH_EXCEPTION \
       catch (const std::exception& e)  \
       { \
-          juce::JUCEApplication::sendUnhandledException (&e, __FILE__, __LINE__); \
+          juce::JUCEApplicationBase::sendUnhandledException (&e, __FILE__, __LINE__); \
       } \
       catch (...) \
       { \
-          juce::JUCEApplication::sendUnhandledException (nullptr, __FILE__, __LINE__); \
+          juce::JUCEApplicationBase::sendUnhandledException (nullptr, __FILE__, __LINE__); \
       }
   #endif
 

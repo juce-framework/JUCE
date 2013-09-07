@@ -31,7 +31,7 @@ extern AudioProcessor* JUCE_CALLTYPE createPluginFilter();
 /**
     A class that can be used to run a simple standalone application containing your filter.
 
-    Just create one of these objects in your JUCEApplication::initialise() method, and
+    Just create one of these objects in your JUCEApplicationBase::initialise() method, and
     let it do its work. It will create your filter object using the same createFilter() function
     that the other plugin wrappers use.
 */
@@ -63,7 +63,7 @@ public:
         if (filter == nullptr)
         {
             jassertfalse    // Your filter didn't create correctly! In a standalone app that's not too great.
-            JUCEApplication::quit();
+            JUCEApplicationBase::quit();
         }
 
         filter->setPlayConfigDetails (JucePlugin_MaxNumInputChannels,
@@ -243,7 +243,7 @@ public:
     /** @internal */
     void closeButtonPressed() override
     {
-        JUCEApplication::quit();
+        JUCEApplicationBase::quit();
     }
 
     /** @internal */

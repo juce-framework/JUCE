@@ -662,9 +662,9 @@ namespace MainMenuHelpers
     static void rebuildMainMenu (const PopupMenu* extraItems)
     {
         // this can't be used in a plugin!
-        jassert (JUCEApplication::isStandaloneApp());
+        jassert (JUCEApplicationBase::isStandaloneApp());
 
-        if (JUCEApplication* app = JUCEApplication::getInstance())
+        if (JUCEApplicationBase* app = JUCEApplicationBase::getInstance())
         {
             JUCE_AUTORELEASEPOOL
             {

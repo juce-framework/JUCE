@@ -608,7 +608,7 @@ private:
             stopTimer();
             delete this;
 
-            if (JUCEApplication::getInstance() != nullptr)
+            if (JUCEApplicationBase::getInstance() != nullptr)
                 getApp().closeModalCompsAndQuit();
         }
 

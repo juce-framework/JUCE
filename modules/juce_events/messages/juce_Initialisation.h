@@ -63,28 +63,29 @@ JUCE_API void JUCE_CALLTYPE  shutdownJuce_GUI();
     main() function, because it'll take care of shutting down whenever you return
     from the main() call.
 */
-class ScopedJuceInitialiser_GUI
+class JUCE_API  ScopedJuceInitialiser_GUI
 {
 public:
     /** The constructor simply calls initialiseJuce_GUI(). */
-    ScopedJuceInitialiser_GUI()         { initialiseJuce_GUI(); }
+    ScopedJuceInitialiser_GUI();
 
     /** The destructor simply calls shutdownJuce_GUI(). */
-    ~ScopedJuceInitialiser_GUI()        { shutdownJuce_GUI(); }
+    ~ScopedJuceInitialiser_GUI();
 };
 
 
 //==============================================================================
-/*
+/**
     To start a JUCE app, use this macro: START_JUCE_APPLICATION (AppSubClass) where
-    AppSubClass is the name of a class derived from JUCEApplication.
+    AppSubClass is the name of a class derived from JUCEApplication or JUCEApplicationBase.
 
-    See the JUCEApplication class documentation (juce_Application.h) for more details.
-
+    See the JUCEApplication and JUCEApplicationBase class documentation for more details.
 */
-#if JUCE_ANDROID
+#ifdef DOXYGEN
+ #define START_JUCE_APPLICATION(AppClass)
+#elif JUCE_ANDROID
  #define START_JUCE_APPLICATION(AppClass) \
-   juce::JUCEApplication* juce_CreateApplication() { return new AppClass(); }
+   juce::JUCEApplicationBase* juce_CreateApplication() { return new AppClass(); }
 
 #else
  #if JUCE_WINDOWS
@@ -105,8 +106,8 @@ public:
     static juce::JUCEApplicationBase* juce_CreateApplication() { return new AppClass(); } \
     extern "C" JUCE_MAIN_FUNCTION \
     { \
-        juce::JUCEApplication::createInstance = &juce_CreateApplication; \
-        return juce::JUCEApplication::main (JUCE_MAIN_FUNCTION_ARGS); \
+        juce::JUCEApplicationBase::createInstance = &juce_CreateApplication; \
+        return juce::JUCEApplicationBase::main (JUCE_MAIN_FUNCTION_ARGS); \
     }
 #endif
 

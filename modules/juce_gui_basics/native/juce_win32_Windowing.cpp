@@ -162,7 +162,7 @@ static void setWindowZOrder (HWND hwnd, HWND insertAfter)
 //==============================================================================
 static void setDPIAwareness()
 {
-    if (JUCEApplication::isStandaloneApp())
+    if (JUCEApplicationBase::isStandaloneApp())
     {
         if (setProcessDPIAware == nullptr)
         {
@@ -2457,7 +2457,7 @@ private:
                 return 0;
 
             case WM_QUERYENDSESSION:
-                if (JUCEApplication* const app = JUCEApplication::getInstance())
+                if (JUCEApplicationBase* const app = JUCEApplicationBase::getInstance())
                 {
                     app->systemRequestedQuit();
                     return MessageManager::getInstance()->hasStopMessageBeenSent();
@@ -3156,28 +3156,6 @@ String SystemClipboard::getTextFromClipboard()
     }
 
     return result;
-}
-
-//==============================================================================
-String JUCE_CALLTYPE JUCEApplication::getCommandLineParameters()
-{
-    return CharacterFunctions::findEndOfToken (CharPointer_UTF16 (GetCommandLineW()),
-                                               CharPointer_UTF16 (L" "),
-                                               CharPointer_UTF16 (L"\"")).findEndOfWhitespace();
-}
-
-StringArray JUCE_CALLTYPE JUCEApplication::getCommandLineParameterArray()
-{
-    StringArray s;
-
-    int argc = 0;
-    if (LPWSTR* const argv = CommandLineToArgvW (GetCommandLineW(), &argc))
-    {
-        s = StringArray (argv + 1, argc - 1);
-        LocalFree (argv);
-    }
-
-    return s;
 }
 
 //==============================================================================

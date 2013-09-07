@@ -36,7 +36,7 @@
     This contains methods for controlling the current application at the
     process-level.
 
-    @see Thread, JUCEApplication
+    @see Thread, JUCEApplicationBase
 */
 class JUCE_API  Process
 {
@@ -63,7 +63,7 @@ public:
         immediately - it's intended only for use only when something goes
         horribly wrong.
 
-        @see JUCEApplication::quit
+        @see JUCEApplicationBase::quit
     */
     static void JUCE_CALLTYPE terminate();
 

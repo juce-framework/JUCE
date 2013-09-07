@@ -75,7 +75,7 @@ public:
         if (mainWindow != nullptr)
             mainWindow->tryToQuitApplication();
         else
-            JUCEApplication::quit();
+            JUCEApplicationBase::quit();
     }
 
     const String getApplicationName()       { return "Juce Plug-In Host"; }
