@@ -61,7 +61,7 @@ public:
         the set so that your UI objects will know when the selection changes and
         be able to update themselves appropriately.
     */
-    virtual SelectedItemSet <SelectableItemType>& getLassoSelection() = 0;
+    virtual SelectedItemSet<SelectableItemType>& getLassoSelection() = 0;
 };
 
 
@@ -102,11 +102,6 @@ public:
     {
     }
 
-    /** Destructor. */
-    ~LassoComponent()
-    {
-    }
-
     //==============================================================================
     /** Call this in your mouseDown event, to initialise a drag.
 
@@ -118,8 +113,7 @@ public:
 
         @see dragLasso, endLasso, LassoSource
     */
-    void beginLasso (const MouseEvent& e,
-                     LassoSource <SelectableItemType>* const lassoSource)
+    void beginLasso (const MouseEvent& e, LassoSource<SelectableItemType>* lassoSource)
     {
         jassert (source == nullptr);  // this suggests that you didn't call endLasso() after the last drag...
         jassert (lassoSource != nullptr); // the source can't be null!
@@ -153,7 +147,7 @@ public:
             setBounds (Rectangle<int> (dragStartPos, e.getPosition()));
             setVisible (true);
 
-            Array <SelectableItemType> itemsInLasso;
+            Array<SelectableItemType> itemsInLasso;
             source->findLassoItemsInArea (itemsInLasso, getBounds());
 
             if (e.mods.isShiftDown())
@@ -163,19 +157,18 @@ public:
             }
             else if (e.mods.isCommandDown() || e.mods.isAltDown())
             {
-                Array <SelectableItemType> originalMinusNew (originalSelection);
+                Array<SelectableItemType> originalMinusNew (originalSelection);
                 originalMinusNew.removeValuesIn (itemsInLasso);
 
                 itemsInLasso.removeValuesIn (originalSelection);
                 itemsInLasso.addArray (originalMinusNew);
             }
 
-            source->getLassoSelection() = SelectedItemSet <SelectableItemType> (itemsInLasso);
+            source->getLassoSelection() = SelectedItemSet<SelectableItemType> (itemsInLasso);
         }
     }
 
     /** Call this in your mouseUp event, after the lasso has been dragged.
-
         @see beginLasso, dragLasso
     */
     void endLasso()
@@ -219,8 +212,8 @@ public:
 
 private:
     //==============================================================================
-    Array <SelectableItemType> originalSelection;
-    LassoSource <SelectableItemType>* source;
+    Array<SelectableItemType> originalSelection;
+    LassoSource<SelectableItemType>* source;
     Point<int> dragStartPos;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LassoComponent)

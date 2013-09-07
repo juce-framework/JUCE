@@ -312,7 +312,8 @@ void XmlDocument::skipNextWhiteSpace()
                 input += closeComment + 3;
                 continue;
             }
-            else if (input[1] == '?')
+
+            if (input[1] == '?')
             {
                 input += 2;
                 const int closeBracket = input.indexOf (CharPointer_ASCII ("?>"));

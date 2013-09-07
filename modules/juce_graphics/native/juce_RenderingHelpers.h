@@ -52,13 +52,13 @@ public:
 
     AffineTransform getTransform() const noexcept
     {
-        return isOnlyTranslated ? AffineTransform::translation ((float) offset.x, (float) offset.y)
+        return isOnlyTranslated ? AffineTransform::translation (offset)
                                 : complexTransform;
     }
 
     AffineTransform getTransformWith (const AffineTransform& userTransform) const noexcept
     {
-        return isOnlyTranslated ? userTransform.translated ((float) offset.x, (float) offset.y)
+        return isOnlyTranslated ? userTransform.translated (offset)
                                 : userTransform.followedBy (complexTransform);
     }
 
@@ -67,7 +67,7 @@ public:
         if (isOnlyTranslated)
             offset += delta;
         else
-            complexTransform = AffineTransform::translation ((float) delta.x, (float) delta.y)
+            complexTransform = AffineTransform::translation (delta)
                                                .followedBy (complexTransform);
     }
 
@@ -75,15 +75,19 @@ public:
     {
         if (isOnlyTranslated && t.isOnlyTranslation())
         {
-            offset += Point<int> ((int) t.getTranslationX(),
-                                  (int) t.getTranslationY());
+            const int tx = (int) (t.getTranslationX() * 256.0f);
+            const int ty = (int) (t.getTranslationY() * 256.0f);
+
+            if (((tx | ty) & 0xf8) == 0)
+            {
+                offset += Point<int> (tx >> 8, ty >> 8);
+                return;
+            }
         }
-        else
-        {
-            complexTransform = getTransformWith (t);
-            isOnlyTranslated = false;
-            isRotated = (complexTransform.mat01 != 0 || complexTransform.mat10 != 0);
-        }
+
+        complexTransform = getTransformWith (t);
+        isOnlyTranslated = false;
+        isRotated = (complexTransform.mat01 != 0 || complexTransform.mat10 != 0);
     }
 
     float getPhysicalPixelScaleFactor() const noexcept
@@ -96,7 +100,7 @@ public:
         if (isOnlyTranslated)
             offset += delta;
         else
-            complexTransform = complexTransform.translated ((float) delta.x, (float) delta.y);
+            complexTransform = complexTransform.translated (delta);
     }
 
     Rectangle<int> translated (const Rectangle<int>& r) const noexcept
@@ -1004,7 +1008,8 @@ namespace EdgeTableFillers
                             ++dest;
                             continue;
                         }
-                        else if (! repeatPattern)
+
+                        if (! repeatPattern)
                         {
                             // At a top or bottom edge..
                             if (loResY < 0)
@@ -1284,9 +1289,9 @@ namespace EdgeTableFillers
             public:
                 BresenhamInterpolator() noexcept {}
 
-                void set (const int n1, const int n2, const int numSteps_, const int offsetInt) noexcept
+                void set (const int n1, const int n2, const int steps, const int offsetInt) noexcept
                 {
-                    numSteps = numSteps_;
+                    numSteps = steps;
                     step = (n2 - n1) / numSteps;
                     remainder = modulo = (n2 - n1) % numSteps;
                     n = n1 + offsetInt;
@@ -1767,11 +1772,7 @@ struct ClipRegions
             return toEdgeTable()->clipToImageAlpha (image, transform, quality);
         }
 
-        void translate (Point<int> delta)
-        {
-            clip.offsetAll (delta.x, delta.y);
-        }
-
+        void translate (Point<int> delta)                           { clip.offsetAll (delta); }
         bool clipRegionIntersects (const Rectangle<int>& r) const   { return clip.intersects (r); }
         Rectangle<int> getClipBounds() const                        { return clip.getBounds(); }
 
@@ -2399,7 +2400,6 @@ public:
             s->image = Image (Image::ARGB, layerBounds.getWidth(), layerBounds.getHeight(), true);
             s->transparencyLayerAlpha = opacity;
             s->transform.moveOriginInDeviceSpace (-layerBounds.getPosition());
-
             s->cloneClipIfMultiplyReferenced();
             s->clip->translate (-layerBounds.getPosition());
         }
@@ -2415,8 +2415,7 @@ public:
 
             const ScopedPointer<LowLevelGraphicsContext> g (image.createLowLevelContext());
             g->setOpacity (finishedLayerState.transparencyLayerAlpha);
-            g->drawImage (finishedLayerState.image, AffineTransform::translation ((float) layerBounds.getX(),
-                                                                                  (float) layerBounds.getY()));
+            g->drawImage (finishedLayerState.image, AffineTransform::translation (layerBounds.getPosition()));
         }
     }
 
