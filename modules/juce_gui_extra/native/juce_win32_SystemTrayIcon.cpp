@@ -22,7 +22,6 @@
   ==============================================================================
 */
 
-// (these functions are from juce_win32_Windowing.cpp)
 extern void* getUser32Function (const char*);
 
 namespace IconConverters

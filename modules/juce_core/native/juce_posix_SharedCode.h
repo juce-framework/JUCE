@@ -34,29 +34,14 @@ CriticalSection::CriticalSection() noexcept
    #if ! JUCE_ANDROID
     pthread_mutexattr_setprotocol (&atts, PTHREAD_PRIO_INHERIT);
    #endif
-    pthread_mutex_init (&internal, &atts);
+    pthread_mutex_init (&lock, &atts);
+    pthread_mutexattr_destroy (&atts);
 }
 
-CriticalSection::~CriticalSection() noexcept
-{
-    pthread_mutex_destroy (&internal);
-}
-
-void CriticalSection::enter() const noexcept
-{
-    pthread_mutex_lock (&internal);
-}
-
-bool CriticalSection::tryEnter() const noexcept
-{
-    return pthread_mutex_trylock (&internal) == 0;
-}
-
-void CriticalSection::exit() const noexcept
-{
-    pthread_mutex_unlock (&internal);
-}
-
+CriticalSection::~CriticalSection() noexcept        { pthread_mutex_destroy (&lock); }
+void CriticalSection::enter() const noexcept        { pthread_mutex_lock (&lock); }
+bool CriticalSection::tryEnter() const noexcept     { return pthread_mutex_trylock (&lock) == 0; }
+void CriticalSection::exit() const noexcept         { pthread_mutex_unlock (&lock); }
 
 //==============================================================================
 WaitableEvent::WaitableEvent (const bool useManualReset) noexcept

@@ -28,6 +28,13 @@
 
 HWND juce_messageWindowHandle = 0;  // (this is used by other parts of the codebase)
 
+void* getUser32Function (const char* functionName)
+{
+    HMODULE module = GetModuleHandleA ("user32.dll");
+    jassert (module != 0);
+    return (void*) GetProcAddress (module, functionName);
+}
+
 //==============================================================================
 #if ! JUCE_USE_INTRINSICS
 // In newer compilers, the inline versions of these are used (in juce_Atomic.h), but in
@@ -55,59 +62,33 @@ __int64 juce_InterlockedCompareExchange64 (volatile __int64* value, __int64 newV
 CriticalSection::CriticalSection() noexcept
 {
     // (just to check the MS haven't changed this structure and broken things...)
-  #if JUCE_VC7_OR_EARLIER
+   #if JUCE_VC7_OR_EARLIER
     static_jassert (sizeof (CRITICAL_SECTION) <= 24);
-  #else
-    static_jassert (sizeof (CRITICAL_SECTION) <= sizeof (internal));
-  #endif
+   #else
+    static_jassert (sizeof (CRITICAL_SECTION) <= sizeof (lock));
+   #endif
 
-    InitializeCriticalSection ((CRITICAL_SECTION*) internal);
+    InitializeCriticalSection ((CRITICAL_SECTION*) lock);
 }
 
-CriticalSection::~CriticalSection() noexcept
-{
-    DeleteCriticalSection ((CRITICAL_SECTION*) internal);
-}
+CriticalSection::~CriticalSection() noexcept        { DeleteCriticalSection ((CRITICAL_SECTION*) lock); }
+void CriticalSection::enter() const noexcept        { EnterCriticalSection ((CRITICAL_SECTION*) lock); }
+bool CriticalSection::tryEnter() const noexcept     { return TryEnterCriticalSection ((CRITICAL_SECTION*) lock) != FALSE; }
+void CriticalSection::exit() const noexcept         { LeaveCriticalSection ((CRITICAL_SECTION*) lock); }
 
-void CriticalSection::enter() const noexcept
-{
-    EnterCriticalSection ((CRITICAL_SECTION*) internal);
-}
-
-bool CriticalSection::tryEnter() const noexcept
-{
-    return TryEnterCriticalSection ((CRITICAL_SECTION*) internal) != FALSE;
-}
-
-void CriticalSection::exit() const noexcept
-{
-    LeaveCriticalSection ((CRITICAL_SECTION*) internal);
-}
 
 //==============================================================================
 WaitableEvent::WaitableEvent (const bool manualReset) noexcept
-    : internal (CreateEvent (0, manualReset ? TRUE : FALSE, FALSE, 0))
-{
-}
+    : handle (CreateEvent (0, manualReset ? TRUE : FALSE, FALSE, 0)) {}
 
-WaitableEvent::~WaitableEvent() noexcept
-{
-    CloseHandle (internal);
-}
+WaitableEvent::~WaitableEvent() noexcept        { CloseHandle (handle); }
 
-bool WaitableEvent::wait (const int timeOutMillisecs) const noexcept
-{
-    return WaitForSingleObject (internal, (DWORD) timeOutMillisecs) == WAIT_OBJECT_0;
-}
+void WaitableEvent::signal() const noexcept     { SetEvent (handle); }
+void WaitableEvent::reset() const noexcept      { ResetEvent (handle); }
 
-void WaitableEvent::signal() const noexcept
+bool WaitableEvent::wait (const int timeOutMs) const noexcept
 {
-    SetEvent (internal);
-}
-
-void WaitableEvent::reset() const noexcept
-{
-    ResetEvent (internal);
+    return WaitForSingleObject (handle, (DWORD) timeOutMs) == WAIT_OBJECT_0;
 }
 
 //==============================================================================

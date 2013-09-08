@@ -96,7 +96,6 @@ public:
 
     //==============================================================================
     /** Resets the event to an unsignalled state.
-
         If it's not already signalled, this does nothing.
     */
     void reset() const noexcept;
@@ -105,7 +104,7 @@ public:
 private:
     //==============================================================================
    #if JUCE_WINDOWS
-    void* internal;
+    void* handle;
    #else
     mutable pthread_cond_t condition;
     mutable pthread_mutex_t mutex;

@@ -48,13 +48,7 @@ extern CheckEventBlockedByModalComps isEventBlockedByModalComps;
 
 static bool shouldDeactivateTitleBar = true;
 
-void* getUser32Function (const char* functionName) // (NB: this function also used from other modules)
-{
-    HMODULE user32Mod = GetModuleHandleA ("user32.dll");
-    jassert (user32Mod != 0);
-
-    return (void*) GetProcAddress (user32Mod, functionName);
-}
+extern void* getUser32Function (const char*);
 
 //==============================================================================
 typedef BOOL (WINAPI* UpdateLayeredWinFunc) (HWND, HDC, POINT*, SIZE*, HDC, POINT*, COLORREF, BLENDFUNCTION*, DWORD);
