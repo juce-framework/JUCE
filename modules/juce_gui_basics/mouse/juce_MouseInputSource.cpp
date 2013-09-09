@@ -27,8 +27,9 @@ class MouseInputSourceInternal   : private AsyncUpdater
 public:
     //==============================================================================
     MouseInputSourceInternal (const int i, const bool isMouse)
-        : index (i), isMouseDevice (isMouse), lastPeer (nullptr),
-          isUnboundedMouseModeOn (false), isCursorVisibleUntilOffscreen (false), currentCursorHandle (nullptr),
+        : index (i), isMouseDevice (isMouse),
+          isUnboundedMouseModeOn (false), isCursorVisibleUntilOffscreen (false),
+          lastPeer (nullptr), currentCursorHandle (nullptr),
           mouseEventCounter (0), mouseMovedSignificantlySincePressed (false)
     {
     }
@@ -463,12 +464,13 @@ public:
     Point<int> lastScreenPos;
     ModifierKeys buttonState;
 
+    Point<int> unboundedMouseOffset;
+    bool isUnboundedMouseModeOn, isCursorVisibleUntilOffscreen;
+
 private:
     WeakReference<Component> componentUnderMouse;
     ComponentPeer* lastPeer;
 
-    Point<int> unboundedMouseOffset;
-    bool isUnboundedMouseModeOn, isCursorVisibleUntilOffscreen;
     void* currentCursorHandle;
     int mouseEventCounter;
 
@@ -550,6 +552,7 @@ bool MouseInputSource::hasMouseMovedSignificantlySincePressed() const noexcept  
 bool MouseInputSource::canDoUnboundedMovement() const noexcept          { return isMouse(); }
 void MouseInputSource::enableUnboundedMouseMovement (bool isEnabled, bool keepCursorVisibleUntilOffscreen) const
                                                                         { pimpl->enableUnboundedMouseMovement (isEnabled, keepCursorVisibleUntilOffscreen); }
+bool MouseInputSource::isUnboundedMouseMovementEnabled() const          { return pimpl->isUnboundedMouseModeOn; }
 bool MouseInputSource::hasMouseCursor() const noexcept                  { return isMouse(); }
 void MouseInputSource::showMouseCursor (const MouseCursor& cursor)      { pimpl->showMouseCursor (cursor, false); }
 void MouseInputSource::hideCursor()                                     { pimpl->hideCursor(); }

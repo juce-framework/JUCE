@@ -210,17 +210,15 @@ static SleepEvent sleepEvent;
 
 void JUCE_CALLTYPE Thread::sleep (const int millisecs)
 {
+    jassert (millisecs >= 0);
+
     if (millisecs >= 10 || sleepEvent.handle == 0)
-    {
         Sleep ((DWORD) millisecs);
-    }
     else
-    {
         // unlike Sleep() this is guaranteed to return to the current thread after
         // the time expires, so we'll use this for short waits, which are more likely
         // to need to be accurate
         WaitForSingleObject (sleepEvent.handle, (DWORD) millisecs);
-    }
 }
 
 void Thread::yield()
@@ -231,7 +229,7 @@ void Thread::yield()
 //==============================================================================
 static int lastProcessPriority = -1;
 
-// called by WindowDriver because Windows does weird things to process priority
+// called when the app gains focus because Windows does weird things to process priority
 // when you swap apps, and this forces an update when the app is brought to the front.
 void juce_repeatLastProcessPriority()
 {

@@ -818,13 +818,11 @@ public:
             valueWhenLastDragged = owner.proportionOfLengthToValue (jlimit (0.0, 1.0, currentPos + speed));
 
             e.source.enableUnboundedMouseMovement (true, false);
-            mouseWasHidden = true;
         }
     }
 
     void mouseDown (const MouseEvent& e)
     {
-        mouseWasHidden = false;
         incDecDragged = false;
         useDragEvents = false;
         mouseDragStartPos = mousePosWhenLastDragged = e.getPosition();
@@ -880,9 +878,9 @@ public:
 
     void mouseDrag (const MouseEvent& e)
     {
-        if (useDragEvents
-             && maximum > minimum
-             && ! ((style == LinearBar || style == LinearBarVertical) && e.mouseWasClicked() && valueBox != nullptr && valueBox->isEditable()))
+        if (useDragEvents && maximum > minimum
+             && ! ((style == LinearBar || style == LinearBarVertical)
+                    && e.mouseWasClicked() && valueBox != nullptr && valueBox->isEditable()))
         {
             if (style == Rotary)
             {
@@ -899,10 +897,7 @@ public:
                     mouseDragStartPos = e.getPosition();
                 }
 
-                if (isVelocityBased == (userKeyOverridesVelocity && e.mods.testFlags (ModifierKeys::ctrlModifier
-                                                                                        | ModifierKeys::commandModifier
-                                                                                        | ModifierKeys::altModifier))
-                     || (maximum - minimum) / sliderRegionSize < interval)
+                if (isAbsoluteDragMode (e.mods) || (maximum - minimum) / sliderRegionSize < interval)
                     handleAbsoluteDrag (e);
                 else
                     handleVelocityDrag (e);
@@ -1019,50 +1014,54 @@ public:
 
     void modifierKeysChanged (const ModifierKeys& modifiers)
     {
-        if (style != IncDecButtons
-             && style != Rotary
-             && isVelocityBased == modifiers.isAnyModifierKeyDown())
-        {
+        if (style != IncDecButtons && style != Rotary && isAbsoluteDragMode (modifiers))
             restoreMouseIfHidden();
-        }
+    }
+
+    bool isAbsoluteDragMode (ModifierKeys mods) const
+    {
+        return isVelocityBased == (userKeyOverridesVelocity
+                                    && mods.testFlags (ModifierKeys::ctrlAltCommandModifiers));
     }
 
     void restoreMouseIfHidden()
     {
-        if (mouseWasHidden)
+        const Array<MouseInputSource>& mouseSources = Desktop::getInstance().getMouseSources();
+
+        for (MouseInputSource* mi = mouseSources.begin(), * const e = mouseSources.end(); mi != e; ++mi)
         {
-            mouseWasHidden = false;
-
-            const Array<MouseInputSource>& mouseSources = Desktop::getInstance().getMouseSources();
-
-            for (MouseInputSource* mi = mouseSources.begin(), * const e = mouseSources.end(); mi != e; ++mi)
+            if (mi->isUnboundedMouseMovementEnabled())
+            {
                 mi->enableUnboundedMouseMovement (false);
 
-            const double pos = sliderBeingDragged == 2 ? getMaxValue()
-                                                       : (sliderBeingDragged == 1 ? getMinValue()
-                                                                                  : (double) currentValue.getValue());
-            Point<int> mousePos;
+                const double pos = sliderBeingDragged == 2 ? getMaxValue()
+                                                           : (sliderBeingDragged == 1 ? getMinValue()
+                                                                                      : (double) currentValue.getValue());
+                Point<int> mousePos;
 
-            if (isRotary())
-            {
-                mousePos = Desktop::getLastMouseDownPosition();
+                if (isRotary())
+                {
+                    mousePos = mi->getLastMouseDownPosition();
 
-                const int delta = roundToInt (pixelsForFullDragExtent * (owner.valueToProportionOfLength (valueOnMouseDown)
-                                                                           - owner.valueToProportionOfLength (pos)));
+                    const int delta = roundToInt (pixelsForFullDragExtent * (owner.valueToProportionOfLength (valueOnMouseDown)
+                                                                               - owner.valueToProportionOfLength (pos)));
 
-                if (style == RotaryHorizontalDrag)      mousePos += Point<int> (-delta, 0);
-                else if (style == RotaryVerticalDrag)   mousePos += Point<int> (0, delta);
-                else                                    mousePos += Point<int> (delta / -2, delta / 2);
+                    if (style == RotaryHorizontalDrag)      mousePos += Point<int> (-delta, 0);
+                    else if (style == RotaryVerticalDrag)   mousePos += Point<int> (0, delta);
+                    else                                    mousePos += Point<int> (delta / -2, delta / 2);
+
+                    mousePos = owner.getScreenBounds().getConstrainedPoint (mousePos);
+                }
+                else
+                {
+                    const int pixelPos = (int) getLinearSliderPos (pos);
+
+                    mousePos = owner.localPointToGlobal (Point<int> (isHorizontal() ? pixelPos : (owner.getWidth() / 2),
+                                                                     isVertical()   ? pixelPos : (owner.getHeight() / 2)));
+                }
+
+                mi->setScreenPosition (mousePos);
             }
-            else
-            {
-                const int pixelPos = (int) getLinearSliderPos (pos);
-
-                mousePos = owner.localPointToGlobal (Point<int> (isHorizontal() ? pixelPos : (owner.getWidth() / 2),
-                                                                 isVertical()   ? pixelPos : (owner.getHeight() / 2)));
-            }
-
-            Desktop::setMousePosition (mousePos);
         }
     }
 
@@ -1254,7 +1253,6 @@ public:
     bool popupDisplayEnabled;
     bool menuEnabled;
     bool useDragEvents;
-    bool mouseWasHidden;
     bool incDecDragged;
     bool scrollWheelEnabled;
     bool snapsToMousePos;

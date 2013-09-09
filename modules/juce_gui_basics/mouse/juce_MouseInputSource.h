@@ -158,6 +158,9 @@ public:
     */
     void enableUnboundedMouseMovement (bool isEnabled, bool keepCursorVisibleUntilOffscreen = false) const;
 
+    /** Returns true if this source is currently in "unbounded" mode. */
+    bool isUnboundedMouseMovementEnabled() const;
+
     /** Attempts to set this mouse pointer's screen position. */
     void setScreenPosition (Point<int> newPosition);
 
