@@ -2931,14 +2931,12 @@ class WindowsMessageBox  : public AsyncUpdater
 {
 public:
     WindowsMessageBox (AlertWindow::AlertIconType iconType,
-                       const String& title_, const String& message_,
-                       Component* associatedComponent,
-                       UINT extraFlags,
-                       ModalComponentManager::Callback* callback_,
-                       const bool runAsync)
+                       const String& boxTitle, const String& m,
+                       Component* associatedComponent, UINT extraFlags,
+                       ModalComponentManager::Callback* cb, const bool runAsync)
         : flags (extraFlags | getMessageBoxFlags (iconType)),
           owner (getWindowForMessageBox (associatedComponent)),
-          title (title_), message (message_), callback (callback_)
+          title (boxTitle), message (m), callback (cb)
     {
         if (runAsync)
             triggerAsyncUpdate();
@@ -2964,7 +2962,7 @@ private:
     UINT flags;
     HWND owner;
     String title, message;
-    ModalComponentManager::Callback* callback;
+    ScopedPointer<ModalComponentManager::Callback> callback;
 
     static UINT getMessageBoxFlags (AlertWindow::AlertIconType iconType) noexcept
     {

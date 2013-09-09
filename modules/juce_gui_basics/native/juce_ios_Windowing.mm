@@ -154,7 +154,7 @@ private:
     int result;
     JuceAlertBoxDelegate* delegate;
     UIAlertView* alert;
-    ModalComponentManager::Callback* callback;
+    ScopedPointer<ModalComponentManager::Callback> callback;
     const bool isYesNo, isAsync;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (iOSMessageBox)

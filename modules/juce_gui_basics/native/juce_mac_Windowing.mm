@@ -67,7 +67,7 @@ public:
 private:
     AlertWindow::AlertIconType iconType;
     String title, message;
-    ModalComponentManager::Callback* callback;
+    ScopedPointer<ModalComponentManager::Callback> callback;
     const char* button1;
     const char* button2;
     const char* button3;

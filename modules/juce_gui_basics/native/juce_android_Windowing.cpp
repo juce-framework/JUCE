@@ -665,7 +665,10 @@ JUCE_JNI_CALLBACK (JUCE_ANDROID_ACTIVITY_CLASSNAME, alertDismissed, void, (JNIEn
                                                                            jlong callbackAsLong, jint result))
 {
     if (ModalComponentManager::Callback* callback = (ModalComponentManager::Callback*) callbackAsLong)
+    {
         callback->modalStateFinished (result);
+        delete callback;
+    }
 }
 
 //==============================================================================
