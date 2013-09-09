@@ -1232,7 +1232,7 @@ AudioFormatReader* WavAudioFormat::createReaderFor (InputStream* sourceStream,
 {
     ScopedPointer<WavAudioFormatReader> r (new WavAudioFormatReader (sourceStream));
 
-    if (r->sampleRate > 0 && r->numChannels > 0)
+    if (r->sampleRate > 0 && r->numChannels > 0 && r->bytesPerFrame > 0)
         return r.release();
 
     if (! deleteStreamIfOpeningFails)
