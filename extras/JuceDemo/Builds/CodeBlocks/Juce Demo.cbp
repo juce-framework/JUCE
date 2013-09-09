@@ -905,6 +905,10 @@
       <Option compile="0"/>
       <Option link="0"/>
     </Unit>
+    <Unit filename="../../../../modules/juce_core/text/juce_StringRef.h">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
     <Unit filename="../../../../modules/juce_core/text/juce_TextDiff.cpp">
       <Option compile="0"/>
       <Option link="0"/>

@@ -190,7 +190,7 @@ void StringArray::set (const int index, const String& newString)
     strings.set (index, newString);
 }
 
-bool StringArray::contains (const String& stringToLookFor, const bool ignoreCase) const
+bool StringArray::contains (StringRef stringToLookFor, const bool ignoreCase) const
 {
     if (ignoreCase)
     {
@@ -208,7 +208,7 @@ bool StringArray::contains (const String& stringToLookFor, const bool ignoreCase
     return false;
 }
 
-int StringArray::indexOf (const String& stringToLookFor, const bool ignoreCase, int i) const
+int StringArray::indexOf (StringRef stringToLookFor, const bool ignoreCase, int i) const
 {
     if (i < 0)
         i = 0;
@@ -245,8 +245,7 @@ void StringArray::remove (const int index)
     strings.remove (index);
 }
 
-void StringArray::removeString (const String& stringToRemove,
-                                const bool ignoreCase)
+void StringArray::removeString (StringRef stringToRemove, const bool ignoreCase)
 {
     if (ignoreCase)
     {
@@ -325,7 +324,7 @@ void StringArray::move (const int currentIndex, int newIndex) noexcept
 
 
 //==============================================================================
-String StringArray::joinIntoString (const String& separator, int start, int numberToJoin) const
+String StringArray::joinIntoString (StringRef separator, int start, int numberToJoin) const
 {
     const int last = (numberToJoin < 0) ? size()
                                         : jmin (size(), start + numberToJoin);
@@ -339,7 +338,7 @@ String StringArray::joinIntoString (const String& separator, int start, int numb
     if (start == last - 1)
         return strings.getReference (start);
 
-    const size_t separatorBytes = separator.getCharPointer().sizeInBytes() - sizeof (String::CharPointerType::CharType);
+    const size_t separatorBytes = separator.text.sizeInBytes() - sizeof (String::CharPointerType::CharType);
     size_t bytesNeeded = separatorBytes * (size_t) (last - start - 1);
 
     for (int i = start; i < last; ++i)
@@ -358,7 +357,7 @@ String StringArray::joinIntoString (const String& separator, int start, int numb
             dest.writeAll (s.getCharPointer());
 
         if (++start < last && separatorBytes > 0)
-            dest.writeAll (separator.getCharPointer());
+            dest.writeAll (separator.text);
     }
 
     dest.writeNull();
@@ -366,23 +365,22 @@ String StringArray::joinIntoString (const String& separator, int start, int numb
     return result;
 }
 
-int StringArray::addTokens (const String& text, const bool preserveQuotedStrings)
+int StringArray::addTokens (StringRef text, const bool preserveQuotedStrings)
 {
     return addTokens (text, " \n\r\t", preserveQuotedStrings ? "\"" : "");
 }
 
-int StringArray::addTokens (const String& text, const String& breakCharacters, const String& quoteCharacters)
+int StringArray::addTokens (StringRef text, StringRef breakCharacters, StringRef quoteCharacters)
 {
     int num = 0;
-    String::CharPointerType t (text.getCharPointer());
 
-    if (! t.isEmpty())
+    if (text.isNotEmpty())
     {
-        for (;;)
+        for (String::CharPointerType t (text.text);;)
         {
             String::CharPointerType tokenEnd (CharacterFunctions::findEndOfToken (t,
-                                                                                  breakCharacters.getCharPointer(),
-                                                                                  quoteCharacters.getCharPointer()));
+                                                                                  breakCharacters.text,
+                                                                                  quoteCharacters.text));
             strings.add (String (t, tokenEnd));
             ++num;
 
@@ -396,10 +394,10 @@ int StringArray::addTokens (const String& text, const String& breakCharacters, c
     return num;
 }
 
-int StringArray::addLines (const String& sourceText)
+int StringArray::addLines (StringRef sourceText)
 {
     int numLines = 0;
-    String::CharPointerType text (sourceText.getCharPointer());
+    String::CharPointerType text (sourceText.text);
     bool finished = text.isEmpty();
 
     while (! finished)
@@ -425,24 +423,23 @@ int StringArray::addLines (const String& sourceText)
     return numLines;
 }
 
-StringArray StringArray::fromTokens (const String& stringToTokenise,
-                                     bool preserveQuotedStrings)
+StringArray StringArray::fromTokens (StringRef stringToTokenise, bool preserveQuotedStrings)
 {
     StringArray s;
     s.addTokens (stringToTokenise, preserveQuotedStrings);
     return s;
 }
 
-StringArray StringArray::fromTokens (const String& stringToTokenise,
-                                     const String& breakCharacters,
-                                     const String& quoteCharacters)
+StringArray StringArray::fromTokens (StringRef stringToTokenise,
+                                     StringRef breakCharacters,
+                                     StringRef quoteCharacters)
 {
     StringArray s;
     s.addTokens (stringToTokenise, breakCharacters, quoteCharacters);
     return s;
 }
 
-StringArray StringArray::fromLines (const String& stringToBreakUp)
+StringArray StringArray::fromLines (StringRef stringToBreakUp)
 {
     StringArray s;
     s.addLines (stringToBreakUp);

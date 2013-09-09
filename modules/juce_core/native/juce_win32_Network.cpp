@@ -58,7 +58,7 @@ public:
                 if (HttpQueryInfo (request, HTTP_QUERY_RAW_HEADERS_CRLF, buffer.getData(), &bufferSizeBytes, 0))
                 {
                     StringArray headersArray;
-                    headersArray.addLines (reinterpret_cast <const WCHAR*> (buffer.getData()));
+                    headersArray.addLines (String (reinterpret_cast<const WCHAR*> (buffer.getData())));
 
                     for (int i = 0; i < headersArray.size(); ++i)
                     {

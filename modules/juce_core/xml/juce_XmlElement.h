@@ -193,10 +193,10 @@ public:
                                 determines how lists of attributes get broken up
         @see writeToStream, writeToFile
     */
-    String createDocument (const String& dtdToUse,
+    String createDocument (StringRef dtdToUse,
                            bool allOnOneLine = false,
                            bool includeXmlHeader = true,
-                           const String& encodingType = "UTF-8",
+                           StringRef encodingType = "UTF-8",
                            int lineWrapLength = 60) const;
 
     /** Writes the document to a stream as UTF-8.
@@ -215,10 +215,10 @@ public:
         @see writeToFile, createDocument
     */
     void writeToStream (OutputStream& output,
-                        const String& dtdToUse,
+                        StringRef dtdToUse,
                         bool allOnOneLine = false,
                         bool includeXmlHeader = true,
-                        const String& encodingType = "UTF-8",
+                        StringRef encodingType = "UTF-8",
                         int lineWrapLength = 60) const;
 
     /** Writes the element to a file as an XML document.
@@ -241,8 +241,8 @@ public:
         @see createDocument
     */
     bool writeToFile (const File& destinationFile,
-                      const String& dtdToUse,
-                      const String& encodingType = "UTF-8",
+                      StringRef dtdToUse,
+                      StringRef encodingType = "UTF-8",
                       int lineWrapLength = 60) const;
 
     //==============================================================================
@@ -250,7 +250,7 @@ public:
         E.g. for an element such as \<MOOSE legs="4" antlers="2">, this would return "MOOSE".
         @see hasTagName
     */
-    inline const String& getTagName() const noexcept            { return tagName; }
+    const String& getTagName() const noexcept            { return tagName; }
 
     /** Returns the namespace portion of the tag-name, or an empty string if none is specified. */
     String getNamespace() const;
@@ -262,13 +262,13 @@ public:
         @param possibleTagName  the tag name you're comparing it with
         @see getTagName
     */
-    bool hasTagName (const String& possibleTagName) const noexcept;
+    bool hasTagName (StringRef possibleTagName) const noexcept;
 
     /** Tests whether this element has a particular tag name, ignoring any XML namespace prefix.
         So a test for e.g. "xyz" will return true for "xyz" and also "foo:xyz", "bar::xyz", etc.
         @see getTagName
     */
-    bool hasTagNameIgnoringNamespace (const String& possibleTagName) const;
+    bool hasTagNameIgnoringNamespace (StringRef possibleTagName) const;
 
     //==============================================================================
     /** Returns the number of XML attributes this element contains.
@@ -300,13 +300,13 @@ public:
     // Attribute-handling methods..
 
     /** Checks whether the element contains an attribute with a certain name. */
-    bool hasAttribute (const String& attributeName) const noexcept;
+    bool hasAttribute (StringRef attributeName) const noexcept;
 
     /** Returns the value of a named attribute.
 
         @param attributeName        the name of the attribute to look up
     */
-    const String& getStringAttribute (const String& attributeName) const noexcept;
+    const String& getStringAttribute (StringRef attributeName) const noexcept;
 
     /** Returns the value of a named attribute.
 
@@ -314,8 +314,7 @@ public:
         @param defaultReturnValue   a value to return if the element doesn't have an attribute
                                     with this name
     */
-    String getStringAttribute (const String& attributeName,
-                               const String& defaultReturnValue) const;
+    String getStringAttribute (StringRef attributeName, const String& defaultReturnValue) const;
 
     /** Compares the value of a named attribute with a value passed-in.
 
@@ -325,8 +324,8 @@ public:
         @returns    true if the value of the attribute is the same as the string passed-in;
                     false if it's different (or if no such attribute exists)
     */
-    bool compareAttribute (const String& attributeName,
-                           const String& stringToCompareAgainst,
+    bool compareAttribute (StringRef attributeName,
+                           StringRef stringToCompareAgainst,
                            bool ignoreCase = false) const noexcept;
 
     /** Returns the value of a named attribute as an integer.
@@ -339,8 +338,7 @@ public:
                                     with this name
         @see setAttribute
     */
-    int getIntAttribute (const String& attributeName,
-                         int defaultReturnValue = 0) const;
+    int getIntAttribute (StringRef attributeName, int defaultReturnValue = 0) const;
 
     /** Returns the value of a named attribute as floating-point.
 
@@ -352,8 +350,7 @@ public:
                                     with this name
         @see setAttribute
     */
-    double getDoubleAttribute (const String& attributeName,
-                               double defaultReturnValue = 0.0) const;
+    double getDoubleAttribute (StringRef attributeName, double defaultReturnValue = 0.0) const;
 
     /** Returns the value of a named attribute as a boolean.
 
@@ -365,8 +362,7 @@ public:
         @param defaultReturnValue   a value to return if the element doesn't have an attribute
                                     with this name
     */
-    bool getBoolAttribute (const String& attributeName,
-                           bool defaultReturnValue = false) const;
+    bool getBoolAttribute (StringRef attributeName, bool defaultReturnValue = false) const;
 
     /** Adds a named attribute to the element.
 
@@ -381,8 +377,7 @@ public:
         @param newValue             the value to set it to
         @see removeAttribute
     */
-    void setAttribute (const String& attributeName,
-                       const String& newValue);
+    void setAttribute (const String& attributeName, const String& newValue);
 
     /** Adds a named attribute to the element, setting it to an integer value.
 
@@ -396,8 +391,7 @@ public:
         @param attributeName        the name of the attribute to set
         @param newValue             the value to set it to
     */
-    void setAttribute (const String& attributeName,
-                       int newValue);
+    void setAttribute (const String& attributeName, int newValue);
 
     /** Adds a named attribute to the element, setting it to a floating-point value.
 
@@ -411,8 +405,7 @@ public:
         @param attributeName        the name of the attribute to set
         @param newValue             the value to set it to
     */
-    void setAttribute (const String& attributeName,
-                       double newValue);
+    void setAttribute (const String& attributeName, double newValue);
 
     /** Removes a named attribute from the element.
 
@@ -421,17 +414,14 @@ public:
     */
     void removeAttribute (const String& attributeName) noexcept;
 
-    /** Removes all attributes from this element.
-    */
+    /** Removes all attributes from this element. */
     void removeAllAttributes() noexcept;
 
     //==============================================================================
     // Child element methods..
 
     /** Returns the first of this element's sub-elements.
-
         see getNextElement() for an example of how to iterate the sub-elements.
-
         @see forEachXmlChildElement
     */
     XmlElement* getFirstChildElement() const noexcept       { return firstChildElement; }
@@ -472,10 +462,9 @@ public:
 
         @see getNextElement, forEachXmlChildElementWithTagName
     */
-    XmlElement* getNextElementWithTagName (const String& requiredTagName) const;
+    XmlElement* getNextElementWithTagName (StringRef requiredTagName) const;
 
     /** Returns the number of sub-elements in this element.
-
         @see getChildElement
     */
     int getNumChildElements() const noexcept;
@@ -496,7 +485,7 @@ public:
         @returns the first element with this tag name, or nullptr if none is found
         @see getNextElement, isTextElement, getChildElement
     */
-    XmlElement* getChildByName (const String& tagNameToLookFor) const noexcept;
+    XmlElement* getChildByName (StringRef tagNameToLookFor) const noexcept;
 
     //==============================================================================
     /** Appends an element to this element's list of children.
@@ -560,16 +549,14 @@ public:
                              bool shouldDeleteTheChild) noexcept;
 
     /** Deletes all the child elements in the element.
-
         @see removeChildElement, deleteAllChildElementsWithTagName
     */
     void deleteAllChildElements() noexcept;
 
     /** Deletes all the child elements with a given tag name.
-
         @see removeChildElement
     */
-    void deleteAllChildElementsWithTagName (const String& tagName) noexcept;
+    void deleteAllChildElementsWithTagName (StringRef tagName) noexcept;
 
     /** Returns true if the given element is a child of this one. */
     bool containsChildElement (const XmlElement* possibleChild) const noexcept;
@@ -676,23 +663,20 @@ public:
 
         @see getAllSubText
     */
-    String getChildElementAllSubText (const String& childTagName,
+    String getChildElementAllSubText (StringRef childTagName,
                                       const String& defaultReturnValue) const;
 
     /** Appends a section of text to this element.
-
         @see isTextElement, getText, getAllSubText
     */
     void addTextElement (const String& text);
 
     /** Removes all the text elements from this element.
-
         @see isTextElement, getText, getAllSubText, addTextElement
     */
     void deleteAllTextElements() noexcept;
 
-    /** Creates a text element that can be added to a parent element.
-    */
+    /** Creates a text element that can be added to a parent element. */
     static XmlElement* createTextElement (const String& text);
 
     //==============================================================================
@@ -705,7 +689,7 @@ private:
         LinkedListPointer<XmlAttributeNode> nextListItem;
         String name, value;
 
-        bool hasName (const String&) const noexcept;
+        bool hasName (StringRef) const noexcept;
 
     private:
         XmlAttributeNode& operator= (const XmlAttributeNode&);
@@ -726,6 +710,7 @@ private:
     void writeElementAsText (OutputStream&, int indentationLevel, int lineWrapLength) const;
     void getChildElementsAsArray (XmlElement**) const noexcept;
     void reorderChildElements (XmlElement**, int) noexcept;
+    XmlAttributeNode* getAttribute (StringRef) const noexcept;
 
     JUCE_LEAK_DETECTOR (XmlElement)
 };

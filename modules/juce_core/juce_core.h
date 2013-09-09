@@ -145,6 +145,7 @@
 namespace juce
 {
 
+class StringRef;
 class MemoryBlock;
 class File;
 class InputStream;
@@ -179,6 +180,7 @@ extern JUCE_API void JUCE_CALLTYPE logAssertion (const char* file, int line) noe
 #endif
 
 #include "text/juce_String.h"
+#include "text/juce_StringRef.h"
 #include "logging/juce_Logger.h"
 #include "memory/juce_LeakedObjectDetector.h"
 #include "memory/juce_ContainerDeletePolicy.h"

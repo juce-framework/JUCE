@@ -69,8 +69,7 @@ public:
         @param keyName              the name of the property to retrieve
         @param defaultReturnValue   a value to return if the named property doesn't actually exist
     */
-    String getValue (const String& keyName,
-                     const String& defaultReturnValue = String::empty) const noexcept;
+    String getValue (StringRef keyName, const String& defaultReturnValue = String::empty) const noexcept;
 
     /** Returns one of the properties as an integer.
 
@@ -81,8 +80,7 @@ public:
         @param keyName              the name of the property to retrieve
         @param defaultReturnValue   a value to return if the named property doesn't actually exist
     */
-    int getIntValue (const String& keyName,
-                     const int defaultReturnValue = 0) const noexcept;
+    int getIntValue (StringRef keyName, int defaultReturnValue = 0) const noexcept;
 
     /** Returns one of the properties as an double.
 
@@ -93,8 +91,7 @@ public:
         @param keyName              the name of the property to retrieve
         @param defaultReturnValue   a value to return if the named property doesn't actually exist
     */
-    double getDoubleValue (const String& keyName,
-                           const double defaultReturnValue = 0.0) const noexcept;
+    double getDoubleValue (StringRef keyName, double defaultReturnValue = 0.0) const noexcept;
 
     /** Returns one of the properties as an boolean.
 
@@ -108,8 +105,7 @@ public:
         @param keyName              the name of the property to retrieve
         @param defaultReturnValue   a value to return if the named property doesn't actually exist
     */
-    bool getBoolValue (const String& keyName,
-                       const bool defaultReturnValue = false) const noexcept;
+    bool getBoolValue (StringRef keyName, bool defaultReturnValue = false) const noexcept;
 
     /** Returns one of the properties as an XML element.
 
@@ -122,7 +118,7 @@ public:
 
         @param keyName              the name of the property to retrieve
     */
-    XmlElement* getXmlValue (const String& keyName) const;
+    XmlElement* getXmlValue (StringRef keyName) const;
 
     //==============================================================================
     /** Sets a named property.
@@ -150,10 +146,10 @@ public:
     /** Deletes a property.
         @param keyName      the name of the property to delete. (This mustn't be an empty string)
     */
-    void removeValue (const String& keyName);
+    void removeValue (StringRef keyName);
 
     /** Returns true if the properies include the given key. */
-    bool containsKey (const String& keyName) const noexcept;
+    bool containsKey (StringRef keyName) const noexcept;
 
     /** Removes all values. */
     void clear();

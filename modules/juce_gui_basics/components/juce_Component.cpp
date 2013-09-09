@@ -1553,7 +1553,7 @@ int Component::getIndexOfChildComponent (const Component* const child) const noe
     return childComponentList.indexOf (const_cast <Component*> (child));
 }
 
-Component* Component::findChildWithID (const String& targetID) const noexcept
+Component* Component::findChildWithID (StringRef targetID) const noexcept
 {
     for (int i = childComponentList.size(); --i >= 0;)
     {

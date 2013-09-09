@@ -216,6 +216,7 @@
             </FileConfiguration>
           </File>
           <File RelativePath="..\..\..\..\modules\juce_core\text\juce_StringPool.h"/>
+          <File RelativePath="..\..\..\..\modules\juce_core\text\juce_StringRef.h"/>
           <File RelativePath="..\..\..\..\modules\juce_core\text\juce_TextDiff.cpp">
             <FileConfiguration Name="Debug|Win32"
                                ExcludedFromBuild="true">

@@ -340,66 +340,67 @@ int   File::hashCode() const    { return fullPath.hashCode(); }
 int64 File::hashCode64() const  { return fullPath.hashCode64(); }
 
 //==============================================================================
-bool File::isAbsolutePath (const String& path)
+bool File::isAbsolutePath (StringRef path)
 {
-    return path.startsWithChar (separator)
+    return path.text[0] == separator
            #if JUCE_WINDOWS
-            || (path.isNotEmpty() && path[1] == ':');
+            || (path.isNotEmpty() && path.text[1] == ':');
            #else
-            || path.startsWithChar ('~');
+            || path.text[0] == '~';
            #endif
 }
 
-File File::getChildFile (String relativePath) const
+File File::getChildFile (StringRef relativePath) const
 {
     if (isAbsolutePath (relativePath))
-        return File (relativePath);
+        return File (String (relativePath.text));
+
+    if (relativePath.text[0] != '.')
+        return File (addTrailingSeparator (fullPath) + relativePath);
 
     String path (fullPath);
 
     // It's relative, so remove any ../ or ./ bits at the start..
-    if (relativePath[0] == '.')
+   #if JUCE_WINDOWS
+    if (relativePath.text.indexOf ((juce_wchar) '/') >= 0)
+        return getChildFile (String (relativePath.text).replaceCharacter ('/', '\\'));
+   #endif
+
+    while (relativePath[0] == '.')
     {
-       #if JUCE_WINDOWS
-        relativePath = relativePath.replaceCharacter ('/', '\\');
-       #endif
+        const juce_wchar secondChar = relativePath.text[1];
 
-        while (relativePath[0] == '.')
+        if (secondChar == '.')
         {
-            const juce_wchar secondChar = relativePath[1];
+            const juce_wchar thirdChar = relativePath.text[2];
 
-            if (secondChar == '.')
+            if (thirdChar == 0 || thirdChar == separator)
             {
-                const juce_wchar thirdChar = relativePath[2];
+                const int lastSlash = path.lastIndexOfChar (separator);
+                if (lastSlash >= 0)
+                    path = path.substring (0, lastSlash);
 
-                if (thirdChar == 0 || thirdChar == separator)
-                {
-                    const int lastSlash = path.lastIndexOfChar (separator);
-                    if (lastSlash >= 0)
-                        path = path.substring (0, lastSlash);
-
-                    relativePath = relativePath.substring (3);
-                }
-                else
-                {
-                    break;
-                }
-            }
-            else if (secondChar == separator)
-            {
-                relativePath = relativePath.substring (2);
+                relativePath = relativePath.text + 3;
             }
             else
             {
                 break;
             }
         }
+        else if (secondChar == separator)
+        {
+            relativePath = relativePath.text + 2;
+        }
+        else
+        {
+            break;
+        }
     }
 
     return File (addTrailingSeparator (path) + relativePath);
 }
 
-File File::getSiblingFile (const String& fileName) const
+File File::getSiblingFile (StringRef fileName) const
 {
     return getParentDirectory().getChildFile (fileName);
 }
@@ -602,23 +603,23 @@ String File::getFileExtension() const
     return String::empty;
 }
 
-bool File::hasFileExtension (const String& possibleSuffix) const
+bool File::hasFileExtension (StringRef possibleSuffix) const
 {
     if (possibleSuffix.isEmpty())
         return fullPath.lastIndexOfChar ('.') <= fullPath.lastIndexOfChar (separator);
 
-    const int semicolon = possibleSuffix.indexOfChar (0, ';');
+    const int semicolon = possibleSuffix.text.indexOf ((juce_wchar) ';');
 
     if (semicolon >= 0)
     {
-        return hasFileExtension (possibleSuffix.substring (0, semicolon).trimEnd())
-                || hasFileExtension (possibleSuffix.substring (semicolon + 1).trimStart());
+        return hasFileExtension (String (possibleSuffix.text).substring (0, semicolon).trimEnd())
+                || hasFileExtension ((possibleSuffix.text + (semicolon + 1)).findEndOfWhitespace());
     }
     else
     {
         if (fullPath.endsWithIgnoreCase (possibleSuffix))
         {
-            if (possibleSuffix.startsWithChar ('.'))
+            if (possibleSuffix.text[0] == '.')
                 return true;
 
             const int dotPos = fullPath.length() - possibleSuffix.length() - 1;
@@ -631,7 +632,7 @@ bool File::hasFileExtension (const String& possibleSuffix) const
     return false;
 }
 
-File File::withFileExtension (const String& newExtension) const
+File File::withFileExtension (StringRef newExtension) const
 {
     if (fullPath.isEmpty())
         return File::nonexistent;
@@ -642,7 +643,7 @@ File File::withFileExtension (const String& newExtension) const
     if (i >= 0)
         filePart = filePart.substring (0, i);
 
-    if (newExtension.isNotEmpty() && ! newExtension.startsWithChar ('.'))
+    if (newExtension.isNotEmpty() && newExtension.text[0] != '.')
         filePart << '.';
 
     return getSiblingFile (filePart + newExtension);
@@ -874,7 +875,7 @@ String File::getRelativePathFrom (const File& dir)  const
 }
 
 //==============================================================================
-File File::createTempFile (const String& fileNameEnding)
+File File::createTempFile (StringRef fileNameEnding)
 {
     const File tempFile (getSpecialLocation (tempDirectory)
                             .getChildFile ("temp_" + String::toHexString (Random::getSystemRandom().nextInt()))

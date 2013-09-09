@@ -407,7 +407,7 @@ bool LibraryModule::isVSTPluginHost (const Project& project) const  { return get
 
 File LibraryModule::getInclude (const File& folder) const
 {
-    return folder.getChildFile (moduleInfo ["include"]);
+    return folder.getChildFile (moduleInfo ["include"].toString());
 }
 
 RelativePath LibraryModule::getModuleRelativeToProject (ProjectExporter& exporter) const

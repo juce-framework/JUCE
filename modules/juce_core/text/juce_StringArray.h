@@ -153,7 +153,7 @@ public:
 
         @returns    true if the string is found inside the array
     */
-    bool contains (const String& stringToLookFor,
+    bool contains (StringRef stringToLookFor,
                    bool ignoreCase = false) const;
 
     /** Searches for a string in the array.
@@ -166,7 +166,7 @@ public:
         @returns                the index of the first occurrence of the string in this array,
                                 or -1 if it isn't found.
     */
-    int indexOf (const String& stringToLookFor,
+    int indexOf (StringRef stringToLookFor,
                  bool ignoreCase = false,
                  int startIndex = 0) const;
 
@@ -214,8 +214,7 @@ public:
         @returns    the number of tokens added
         @see fromTokens
     */
-    int addTokens (const String& stringToTokenise,
-                   bool preserveQuotedStrings);
+    int addTokens (StringRef stringToTokenise, bool preserveQuotedStrings);
 
     /** Breaks up a string into tokens and adds them to this array.
 
@@ -231,9 +230,9 @@ public:
         @returns    the number of tokens added
         @see fromTokens
     */
-    int addTokens (const String& stringToTokenise,
-                   const String& breakCharacters,
-                   const String& quoteCharacters);
+    int addTokens (StringRef stringToTokenise,
+                   StringRef breakCharacters,
+                   StringRef quoteCharacters);
 
     /** Breaks up a string into lines and adds them to this array.
 
@@ -241,7 +240,7 @@ public:
         to the array. Line-break characters are omitted from the strings that are added to
         the array.
     */
-    int addLines (const String& stringToBreakUp);
+    int addLines (StringRef stringToBreakUp);
 
     /** Returns an array containing the tokens in a given string.
 
@@ -249,7 +248,7 @@ public:
         token delimiters, and return these tokens as an array.
         @see addTokens
     */
-    static StringArray fromTokens (const String& stringToTokenise,
+    static StringArray fromTokens (StringRef stringToTokenise,
                                    bool preserveQuotedStrings);
 
     /** Returns an array containing the tokens in a given string.
@@ -265,9 +264,9 @@ public:
                                     between quotes is not broken up into tokens.
         @see addTokens
     */
-    static StringArray fromTokens (const String& stringToTokenise,
-                                   const String& breakCharacters,
-                                   const String& quoteCharacters);
+    static StringArray fromTokens (StringRef stringToTokenise,
+                                   StringRef breakCharacters,
+                                   StringRef quoteCharacters);
 
     /** Returns an array containing the lines in a given string.
 
@@ -275,7 +274,7 @@ public:
         array containing these lines. Line-break characters are omitted from the strings that
         are added to the array.
     */
-    static StringArray fromLines (const String& stringToBreakUp);
+    static StringArray fromLines (StringRef stringToBreakUp);
 
     //==============================================================================
     /** Removes all elements from the array. */
@@ -295,7 +294,7 @@ public:
         This will remove the first occurrence of the given string from the array. The
         comparison may be case-insensitive depending on the ignoreCase parameter.
     */
-    void removeString (const String& stringToRemove,
+    void removeString (StringRef stringToRemove,
                        bool ignoreCase = false);
 
     /** Removes a range of elements from the array.
@@ -379,7 +378,7 @@ public:
         @param numberOfElements     how many elements to join together. If this is less
                                     than zero, all available elements will be used.
     */
-    String joinIntoString (const String& separatorString,
+    String joinIntoString (StringRef separatorString,
                            int startIndex = 0,
                            int numberOfElements = -1) const;
 
@@ -410,7 +409,7 @@ public:
 
 private:
     //==============================================================================
-    Array <String> strings;
+    Array<String> strings;
 
     JUCE_LEAK_DETECTOR (StringArray)
 };

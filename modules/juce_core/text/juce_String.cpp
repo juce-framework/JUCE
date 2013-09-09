@@ -512,9 +512,14 @@ int String::length() const noexcept
     return (int) text.length();
 }
 
-size_t String::getByteOffsetOfEnd() const noexcept
+static size_t findByteOffsetOfEnd (String::CharPointerType text) noexcept
 {
     return (size_t) (((char*) text.findTerminatingNull().getAddress()) - (char*) text.getAddress());
+}
+
+size_t String::getByteOffsetOfEnd() const noexcept
+{
+    return findByteOffsetOfEnd (text);
 }
 
 juce_wchar String::operator[] (int index) const noexcept
@@ -550,12 +555,14 @@ JUCE_API bool JUCE_CALLTYPE operator== (const String& s1, const wchar_t* const s
 JUCE_API bool JUCE_CALLTYPE operator== (const String& s1, const CharPointer_UTF8 s2) noexcept   { return s1.getCharPointer().compare (s2) == 0; }
 JUCE_API bool JUCE_CALLTYPE operator== (const String& s1, const CharPointer_UTF16 s2) noexcept  { return s1.getCharPointer().compare (s2) == 0; }
 JUCE_API bool JUCE_CALLTYPE operator== (const String& s1, const CharPointer_UTF32 s2) noexcept  { return s1.getCharPointer().compare (s2) == 0; }
+JUCE_API bool JUCE_CALLTYPE operator== (const String& s1, StringRef s2) noexcept                { return s1.getCharPointer().compare (s2.text) == 0; }
 JUCE_API bool JUCE_CALLTYPE operator!= (const String& s1, const String& s2) noexcept            { return s1.compare (s2) != 0; }
 JUCE_API bool JUCE_CALLTYPE operator!= (const String& s1, const char* const s2) noexcept        { return s1.compare (s2) != 0; }
 JUCE_API bool JUCE_CALLTYPE operator!= (const String& s1, const wchar_t* const s2) noexcept     { return s1.compare (s2) != 0; }
 JUCE_API bool JUCE_CALLTYPE operator!= (const String& s1, const CharPointer_UTF8 s2) noexcept   { return s1.getCharPointer().compare (s2) != 0; }
 JUCE_API bool JUCE_CALLTYPE operator!= (const String& s1, const CharPointer_UTF16 s2) noexcept  { return s1.getCharPointer().compare (s2) != 0; }
 JUCE_API bool JUCE_CALLTYPE operator!= (const String& s1, const CharPointer_UTF32 s2) noexcept  { return s1.getCharPointer().compare (s2) != 0; }
+JUCE_API bool JUCE_CALLTYPE operator!= (const String& s1, StringRef s2) noexcept                { return s1.getCharPointer().compare (s2.text) != 0; }
 JUCE_API bool JUCE_CALLTYPE operator>  (const String& s1, const String& s2) noexcept            { return s1.compare (s2) > 0; }
 JUCE_API bool JUCE_CALLTYPE operator<  (const String& s1, const String& s2) noexcept            { return s1.compare (s2) < 0; }
 JUCE_API bool JUCE_CALLTYPE operator>= (const String& s1, const String& s2) noexcept            { return s1.compare (s2) >= 0; }
@@ -804,7 +811,7 @@ int String::lastIndexOfChar (const juce_wchar character) const noexcept
     return last;
 }
 
-int String::indexOfAnyOf (const String& charactersToLookFor, const int startIndex, const bool ignoreCase) const noexcept
+int String::indexOfAnyOf (StringRef charactersToLookFor, const int startIndex, const bool ignoreCase) const noexcept
 {
     CharPointerType t (text);
 
@@ -824,17 +831,17 @@ int String::indexOfAnyOf (const String& charactersToLookFor, const int startInde
     return -1;
 }
 
-int String::indexOf (const String& other) const noexcept
+int String::indexOf (StringRef other) const noexcept
 {
     return other.isEmpty() ? 0 : text.indexOf (other.text);
 }
 
-int String::indexOfIgnoreCase (const String& other) const noexcept
+int String::indexOfIgnoreCase (StringRef other) const noexcept
 {
     return other.isEmpty() ? 0 : CharacterFunctions::indexOfIgnoreCase (text, other.text);
 }
 
-int String::indexOf (const int startIndex, const String& other) const noexcept
+int String::indexOf (const int startIndex, StringRef other) const noexcept
 {
     if (other.isEmpty())
         return -1;
@@ -855,7 +862,7 @@ int String::indexOf (const int startIndex, const String& other) const noexcept
     return found;
 }
 
-int String::indexOfIgnoreCase (const int startIndex, const String& other) const noexcept
+int String::indexOfIgnoreCase (const int startIndex, StringRef other) const noexcept
 {
     if (other.isEmpty())
         return -1;
@@ -876,7 +883,7 @@ int String::indexOfIgnoreCase (const int startIndex, const String& other) const 
     return found;
 }
 
-int String::lastIndexOf (const String& other) const noexcept
+int String::lastIndexOf (StringRef other) const noexcept
 {
     if (other.isNotEmpty())
     {
@@ -901,7 +908,7 @@ int String::lastIndexOf (const String& other) const noexcept
     return -1;
 }
 
-int String::lastIndexOfIgnoreCase (const String& other) const noexcept
+int String::lastIndexOfIgnoreCase (StringRef other) const noexcept
 {
     if (other.isNotEmpty())
     {
@@ -926,7 +933,7 @@ int String::lastIndexOfIgnoreCase (const String& other) const noexcept
     return -1;
 }
 
-int String::lastIndexOfAnyOf (const String& charactersToLookFor, const bool ignoreCase) const noexcept
+int String::lastIndexOfAnyOf (StringRef charactersToLookFor, const bool ignoreCase) const noexcept
 {
     CharPointerType t (text);
     int last = -1;
@@ -938,7 +945,7 @@ int String::lastIndexOfAnyOf (const String& charactersToLookFor, const bool igno
     return last;
 }
 
-bool String::contains (const String& other) const noexcept
+bool String::contains (StringRef other) const noexcept
 {
     return indexOf (other) >= 0;
 }
@@ -948,12 +955,12 @@ bool String::containsChar (const juce_wchar character) const noexcept
     return text.indexOf (character) >= 0;
 }
 
-bool String::containsIgnoreCase (const String& t) const noexcept
+bool String::containsIgnoreCase (StringRef t) const noexcept
 {
     return indexOfIgnoreCase (t) >= 0;
 }
 
-int String::indexOfWholeWord (const String& word) const noexcept
+int String::indexOfWholeWord (StringRef word) const noexcept
 {
     if (word.isNotEmpty())
     {
@@ -975,7 +982,7 @@ int String::indexOfWholeWord (const String& word) const noexcept
     return -1;
 }
 
-int String::indexOfWholeWordIgnoreCase (const String& word) const noexcept
+int String::indexOfWholeWordIgnoreCase (StringRef word) const noexcept
 {
     if (word.isNotEmpty())
     {
@@ -997,12 +1004,12 @@ int String::indexOfWholeWordIgnoreCase (const String& word) const noexcept
     return -1;
 }
 
-bool String::containsWholeWord (const String& wordToLookFor) const noexcept
+bool String::containsWholeWord (StringRef wordToLookFor) const noexcept
 {
     return indexOfWholeWord (wordToLookFor) >= 0;
 }
 
-bool String::containsWholeWordIgnoreCase (const String& wordToLookFor) const noexcept
+bool String::containsWholeWordIgnoreCase (StringRef wordToLookFor) const noexcept
 {
     return indexOfWholeWordIgnoreCase (wordToLookFor) >= 0;
 }
@@ -1044,18 +1051,18 @@ struct WildCardMatcher
     }
 };
 
-bool String::matchesWildcard (const String& wildcard, const bool ignoreCase) const noexcept
+bool String::matchesWildcard (StringRef wildcard, const bool ignoreCase) const noexcept
 {
     return WildCardMatcher<CharPointerType>::matches (wildcard.text, text, ignoreCase);
 }
 
 //==============================================================================
-String String::repeatedString (const String& stringToRepeat, int numberOfTimesToRepeat)
+String String::repeatedString (StringRef stringToRepeat, int numberOfTimesToRepeat)
 {
     if (numberOfTimesToRepeat <= 0)
         return empty;
 
-    String result (PreallocationBytes (stringToRepeat.getByteOffsetOfEnd() * (size_t) numberOfTimesToRepeat));
+    String result (PreallocationBytes (findByteOffsetOfEnd (stringToRepeat) * (size_t) numberOfTimesToRepeat));
     CharPointerType n (result.text);
 
     while (--numberOfTimesToRepeat >= 0)
@@ -1121,7 +1128,7 @@ String String::paddedRight (const juce_wchar padCharacter, int minimumLength) co
 }
 
 //==============================================================================
-String String::replaceSection (int index, int numCharsToReplace, const String& stringToInsert) const
+String String::replaceSection (int index, int numCharsToReplace, StringRef stringToInsert) const
 {
     if (index < 0)
     {
@@ -1163,10 +1170,10 @@ String String::replaceSection (int index, int numCharsToReplace, const String& s
     }
 
     if (insertPoint == text && startOfRemainder.isEmpty())
-        return stringToInsert;
+        return stringToInsert.text;
 
     const size_t initialBytes = (size_t) (((char*) insertPoint.getAddress()) - (char*) text.getAddress());
-    const size_t newStringBytes = stringToInsert.getByteOffsetOfEnd();
+    const size_t newStringBytes = findByteOffsetOfEnd (stringToInsert);
     const size_t remainderBytes = (size_t) (((char*) startOfRemainder.findTerminatingNull().getAddress()) - (char*) startOfRemainder.getAddress());
 
     const size_t newTotalBytes = initialBytes + newStringBytes + remainderBytes;
@@ -1187,7 +1194,7 @@ String String::replaceSection (int index, int numCharsToReplace, const String& s
     return result;
 }
 
-String String::replace (const String& stringToReplace, const String& stringToInsert, const bool ignoreCase) const
+String String::replace (StringRef stringToReplace, StringRef stringToInsert, const bool ignoreCase) const
 {
     const int stringToReplaceLen = stringToReplace.length();
     const int stringToInsertLen = stringToInsert.length();
@@ -1268,7 +1275,7 @@ String String::replaceCharacter (const juce_wchar charToReplace, const juce_wcha
     return builder.result;
 }
 
-String String::replaceCharacters (const String& charactersToReplace, const String& charactersToInsertInstead) const
+String String::replaceCharacters (StringRef charactersToReplace, StringRef charactersToInsertInstead) const
 {
     StringCreationHelper builder (text);
 
@@ -1276,7 +1283,7 @@ String String::replaceCharacters (const String& charactersToReplace, const Strin
     {
         juce_wchar c = builder.source.getAndAdvance();
 
-        const int index = charactersToReplace.indexOfChar (c);
+        const int index = charactersToReplace.text.indexOf (c);
         if (index >= 0)
             c = charactersToInsertInstead [index];
 
@@ -1290,12 +1297,12 @@ String String::replaceCharacters (const String& charactersToReplace, const Strin
 }
 
 //==============================================================================
-bool String::startsWith (const String& other) const noexcept
+bool String::startsWith (StringRef other) const noexcept
 {
     return text.compareUpTo (other.text, other.length()) == 0;
 }
 
-bool String::startsWithIgnoreCase (const String& other) const noexcept
+bool String::startsWithIgnoreCase (StringRef other) const noexcept
 {
     return text.compareIgnoreCaseUpTo (other.text, other.length()) == 0;
 }
@@ -1318,7 +1325,7 @@ bool String::endsWithChar (const juce_wchar character) const noexcept
     return *--t == character;
 }
 
-bool String::endsWith (const String& other) const noexcept
+bool String::endsWith (StringRef other) const noexcept
 {
     CharPointerType end (text.findTerminatingNull());
     CharPointerType otherEnd (other.text.findTerminatingNull());
@@ -1335,7 +1342,7 @@ bool String::endsWith (const String& other) const noexcept
     return otherEnd == other.text;
 }
 
-bool String::endsWithIgnoreCase (const String& other) const noexcept
+bool String::endsWithIgnoreCase (StringRef other) const noexcept
 {
     CharPointerType end (text.findTerminatingNull());
     CharPointerType otherEnd (other.text.findTerminatingNull());
@@ -1459,7 +1466,7 @@ String String::getLastCharacters (const int numCharacters) const
     return String (text + jmax (0, length() - jmax (0, numCharacters)));
 }
 
-String String::fromFirstOccurrenceOf (const String& sub,
+String String::fromFirstOccurrenceOf (StringRef sub,
                                       const bool includeSubString,
                                       const bool ignoreCase) const
 {
@@ -1471,7 +1478,7 @@ String String::fromFirstOccurrenceOf (const String& sub,
     return substring (includeSubString ? i : i + sub.length());
 }
 
-String String::fromLastOccurrenceOf (const String& sub,
+String String::fromLastOccurrenceOf (StringRef sub,
                                      const bool includeSubString,
                                      const bool ignoreCase) const
 {
@@ -1483,7 +1490,7 @@ String String::fromLastOccurrenceOf (const String& sub,
     return substring (includeSubString ? i : i + sub.length());
 }
 
-String String::upToFirstOccurrenceOf (const String& sub,
+String String::upToFirstOccurrenceOf (StringRef sub,
                                       const bool includeSubString,
                                       const bool ignoreCase) const
 {
@@ -1495,7 +1502,7 @@ String String::upToFirstOccurrenceOf (const String& sub,
     return substring (0, includeSubString ? i + sub.length() : i);
 }
 
-String String::upToLastOccurrenceOf (const String& sub,
+String String::upToLastOccurrenceOf (StringRef sub,
                                      const bool includeSubString,
                                      const bool ignoreCase) const
 {
@@ -1607,17 +1614,17 @@ String String::trimEnd() const
     return *this;
 }
 
-String String::trimCharactersAtStart (const String& charactersToTrim) const
+String String::trimCharactersAtStart (StringRef charactersToTrim) const
 {
     CharPointerType t (text);
 
-    while (charactersToTrim.containsChar (*t))
+    while (charactersToTrim.text.indexOf (*t) >= 0)
         ++t;
 
     return t == text ? *this : String (t);
 }
 
-String String::trimCharactersAtEnd (const String& charactersToTrim) const
+String String::trimCharactersAtEnd (StringRef charactersToTrim) const
 {
     if (isNotEmpty())
     {
@@ -1626,7 +1633,7 @@ String String::trimCharactersAtEnd (const String& charactersToTrim) const
 
         while (trimmedEnd > text)
         {
-            if (! charactersToTrim.containsChar (*--trimmedEnd))
+            if (charactersToTrim.text.indexOf (*--trimmedEnd) < 0)
             {
                 ++trimmedEnd;
                 break;
@@ -1641,7 +1648,7 @@ String String::trimCharactersAtEnd (const String& charactersToTrim) const
 }
 
 //==============================================================================
-String String::retainCharacters (const String& charactersToRetain) const
+String String::retainCharacters (StringRef charactersToRetain) const
 {
     if (isEmpty())
         return empty;
@@ -1652,7 +1659,7 @@ String String::retainCharacters (const String& charactersToRetain) const
     {
         juce_wchar c = builder.source.getAndAdvance();
 
-        if (charactersToRetain.containsChar (c))
+        if (charactersToRetain.text.indexOf (c) >= 0)
             builder.write (c);
 
         if (c == 0)
@@ -1663,7 +1670,7 @@ String String::retainCharacters (const String& charactersToRetain) const
     return builder.result;
 }
 
-String String::removeCharacters (const String& charactersToRemove) const
+String String::removeCharacters (StringRef charactersToRemove) const
 {
     if (isEmpty())
         return empty;
@@ -1674,7 +1681,7 @@ String String::removeCharacters (const String& charactersToRemove) const
     {
         juce_wchar c = builder.source.getAndAdvance();
 
-        if (! charactersToRemove.containsChar (c))
+        if (charactersToRemove.text.indexOf (c) < 0)
             builder.write (c);
 
         if (c == 0)
@@ -1684,13 +1691,13 @@ String String::removeCharacters (const String& charactersToRemove) const
     return builder.result;
 }
 
-String String::initialSectionContainingOnly (const String& permittedCharacters) const
+String String::initialSectionContainingOnly (StringRef permittedCharacters) const
 {
     CharPointerType t (text);
 
     while (! t.isEmpty())
     {
-        if (! permittedCharacters.containsChar (*t))
+        if (permittedCharacters.text.indexOf (*t) < 0)
             return String (text, t);
 
         ++t;
@@ -1699,13 +1706,13 @@ String String::initialSectionContainingOnly (const String& permittedCharacters) 
     return *this;
 }
 
-String String::initialSectionNotContaining (const String& charactersToStopAt) const
+String String::initialSectionNotContaining (StringRef charactersToStopAt) const
 {
     CharPointerType t (text);
 
     while (! t.isEmpty())
     {
-        if (charactersToStopAt.containsChar (*t))
+        if (charactersToStopAt.text.indexOf (*t) >= 0)
             return String (text, t);
 
         ++t;
@@ -1714,23 +1721,23 @@ String String::initialSectionNotContaining (const String& charactersToStopAt) co
     return *this;
 }
 
-bool String::containsOnly (const String& chars) const noexcept
+bool String::containsOnly (StringRef chars) const noexcept
 {
     CharPointerType t (text);
 
     while (! t.isEmpty())
-        if (! chars.containsChar (t.getAndAdvance()))
+        if (chars.text.indexOf (t.getAndAdvance()) < 0)
             return false;
 
     return true;
 }
 
-bool String::containsAnyOf (const String& chars) const noexcept
+bool String::containsAnyOf (StringRef chars) const noexcept
 {
     CharPointerType t (text);
 
     while (! t.isEmpty())
-        if (chars.containsChar (t.getAndAdvance()))
+        if (chars.text.indexOf (t.getAndAdvance()) >= 0)
             return true;
 
     return false;
@@ -2083,6 +2090,15 @@ String String::fromUTF8 (const char* const buffer, int bufferSizeBytes)
 #endif
 
 //==============================================================================
+StringRef::StringRef (const String::CharPointerType::CharType* stringLiteral) noexcept  : text (stringLiteral)
+{
+    jassert (stringLiteral != nullptr); // This must be a valid string literal, not a null pointer!!
+}
+
+StringRef::StringRef (String::CharPointerType stringLiteral) noexcept  : text (stringLiteral) {}
+StringRef::StringRef (const String& string) noexcept  : text (string.getCharPointer()) {}
+
+//==============================================================================
 //==============================================================================
 #if JUCE_UNIT_TESTS
 
@@ -2192,12 +2208,12 @@ public:
             expect (s.substring (0, 100) == s);
             expect (s.substring (-1, 100) == s);
             expect (s.substring (3) == "345678");
-            expect (s.indexOf (L"45") == 4);
+            expect (s.indexOf (String (L"45")) == 4);
             expect (String ("444445").indexOf ("45") == 4);
             expect (String ("444445").lastIndexOfChar ('4') == 4);
-            expect (String ("45454545x").lastIndexOf (L"45") == 6);
+            expect (String ("45454545x").lastIndexOf (String (L"45")) == 6);
             expect (String ("45454545x").lastIndexOfAnyOf ("456") == 7);
-            expect (String ("45454545x").lastIndexOfAnyOf (L"456x") == 8);
+            expect (String ("45454545x").lastIndexOfAnyOf (String (L"456x")) == 8);
             expect (String ("abABaBaBa").lastIndexOfIgnoreCase ("aB") == 6);
             expect (s.indexOfChar (L'4') == 4);
             expect (s + s == "012345678012345678");
@@ -2254,21 +2270,21 @@ public:
             expect (s3.compareIgnoreCase (L"ABCdeFGhiJ") == 0);
             expect (s3.containsIgnoreCase (s3.substring (3)));
             expect (s3.indexOfAnyOf ("xyzf", 2, true) == 5);
-            expect (s3.indexOfAnyOf (L"xyzf", 2, false) == -1);
+            expect (s3.indexOfAnyOf (String (L"xyzf"), 2, false) == -1);
             expect (s3.indexOfAnyOf ("xyzF", 2, false) == 5);
-            expect (s3.containsAnyOf (L"zzzFs"));
+            expect (s3.containsAnyOf (String (L"zzzFs")));
             expect (s3.startsWith ("abcd"));
-            expect (s3.startsWithIgnoreCase (L"abCD"));
+            expect (s3.startsWithIgnoreCase (String (L"abCD")));
             expect (s3.startsWith (String::empty));
             expect (s3.startsWithChar ('a'));
             expect (s3.endsWith (String ("HIJ")));
-            expect (s3.endsWithIgnoreCase (L"Hij"));
+            expect (s3.endsWithIgnoreCase (String (L"Hij")));
             expect (s3.endsWith (String::empty));
             expect (s3.endsWithChar (L'J'));
             expect (s3.indexOf ("HIJ") == 7);
-            expect (s3.indexOf (L"HIJK") == -1);
+            expect (s3.indexOf (String (L"HIJK")) == -1);
             expect (s3.indexOfIgnoreCase ("hij") == 7);
-            expect (s3.indexOfIgnoreCase (L"hijk") == -1);
+            expect (s3.indexOfIgnoreCase (String (L"hijk")) == -1);
             expect (s3.toStdString() == s3.toRawUTF8());
 
             String s4 (s3);
@@ -2285,25 +2301,25 @@ public:
             String s5 ("word word2 word3");
             expect (s5.containsWholeWord (String ("word2")));
             expect (s5.indexOfWholeWord ("word2") == 5);
-            expect (s5.containsWholeWord (L"word"));
+            expect (s5.containsWholeWord (String (L"word")));
             expect (s5.containsWholeWord ("word3"));
             expect (s5.containsWholeWord (s5));
-            expect (s5.containsWholeWordIgnoreCase (L"Word2"));
+            expect (s5.containsWholeWordIgnoreCase (String (L"Word2")));
             expect (s5.indexOfWholeWordIgnoreCase ("Word2") == 5);
-            expect (s5.containsWholeWordIgnoreCase (L"Word"));
+            expect (s5.containsWholeWordIgnoreCase (String (L"Word")));
             expect (s5.containsWholeWordIgnoreCase ("Word3"));
-            expect (! s5.containsWholeWordIgnoreCase (L"Wordx"));
+            expect (! s5.containsWholeWordIgnoreCase (String (L"Wordx")));
             expect (! s5.containsWholeWordIgnoreCase ("xWord2"));
             expect (s5.containsNonWhitespaceChars());
             expect (s5.containsOnly ("ordw23 "));
             expect (! String (" \n\r\t").containsNonWhitespaceChars());
 
-            expect (s5.matchesWildcard (L"wor*", false));
+            expect (s5.matchesWildcard (String (L"wor*"), false));
             expect (s5.matchesWildcard ("wOr*", true));
-            expect (s5.matchesWildcard (L"*word3", true));
+            expect (s5.matchesWildcard (String (L"*word3"), true));
             expect (s5.matchesWildcard ("*word?", true));
-            expect (s5.matchesWildcard (L"Word*3", true));
-            expect (! s5.matchesWildcard (L"*34", true));
+            expect (s5.matchesWildcard (String (L"Word*3"), true));
+            expect (! s5.matchesWildcard (String (L"*34"), true));
             expect (String ("xx**y").matchesWildcard ("*y", true));
             expect (String ("xx**y").matchesWildcard ("x*y", true));
             expect (String ("xx**y").matchesWildcard ("xx*y", true));
@@ -2315,23 +2331,23 @@ public:
 
             expectEquals (s5.fromFirstOccurrenceOf (String::empty, true, false), s5);
             expectEquals (s5.fromFirstOccurrenceOf ("xword2", true, false), s5.substring (100));
-            expectEquals (s5.fromFirstOccurrenceOf (L"word2", true, false), s5.substring (5));
+            expectEquals (s5.fromFirstOccurrenceOf (String (L"word2"), true, false), s5.substring (5));
             expectEquals (s5.fromFirstOccurrenceOf ("Word2", true, true), s5.substring (5));
             expectEquals (s5.fromFirstOccurrenceOf ("word2", false, false), s5.getLastCharacters (6));
-            expectEquals (s5.fromFirstOccurrenceOf (L"Word2", false, true), s5.getLastCharacters (6));
+            expectEquals (s5.fromFirstOccurrenceOf ("Word2", false, true), s5.getLastCharacters (6));
 
             expectEquals (s5.fromLastOccurrenceOf (String::empty, true, false), s5);
-            expectEquals (s5.fromLastOccurrenceOf (L"wordx", true, false), s5);
+            expectEquals (s5.fromLastOccurrenceOf ("wordx", true, false), s5);
             expectEquals (s5.fromLastOccurrenceOf ("word", true, false), s5.getLastCharacters (5));
-            expectEquals (s5.fromLastOccurrenceOf (L"worD", true, true), s5.getLastCharacters (5));
+            expectEquals (s5.fromLastOccurrenceOf ("worD", true, true), s5.getLastCharacters (5));
             expectEquals (s5.fromLastOccurrenceOf ("word", false, false), s5.getLastCharacters (1));
-            expectEquals (s5.fromLastOccurrenceOf (L"worD", false, true), s5.getLastCharacters (1));
+            expectEquals (s5.fromLastOccurrenceOf ("worD", false, true), s5.getLastCharacters (1));
 
             expect (s5.upToFirstOccurrenceOf (String::empty, true, false).isEmpty());
             expectEquals (s5.upToFirstOccurrenceOf ("word4", true, false), s5);
-            expectEquals (s5.upToFirstOccurrenceOf (L"word2", true, false), s5.substring (0, 10));
+            expectEquals (s5.upToFirstOccurrenceOf ("word2", true, false), s5.substring (0, 10));
             expectEquals (s5.upToFirstOccurrenceOf ("Word2", true, true), s5.substring (0, 10));
-            expectEquals (s5.upToFirstOccurrenceOf (L"word2", false, false), s5.substring (0, 5));
+            expectEquals (s5.upToFirstOccurrenceOf ("word2", false, false), s5.substring (0, 5));
             expectEquals (s5.upToFirstOccurrenceOf ("Word2", false, true), s5.substring (0, 5));
 
             expectEquals (s5.upToLastOccurrenceOf (String::empty, true, false), s5);
@@ -2342,15 +2358,15 @@ public:
             expectEquals (s5.upToLastOccurrenceOf ("word", false, false), s5.dropLastCharacters (5));
             expectEquals (s5.upToLastOccurrenceOf ("Word", false, true), s5.dropLastCharacters (5));
 
-            expectEquals (s5.replace ("word", L"xyz", false), String ("xyz xyz2 xyz3"));
-            expect (s5.replace (L"Word", "xyz", true) == "xyz xyz2 xyz3");
+            expectEquals (s5.replace ("word", "xyz", false), String ("xyz xyz2 xyz3"));
+            expect (s5.replace ("Word", "xyz", true) == "xyz xyz2 xyz3");
             expect (s5.dropLastCharacters (1).replace ("Word", String ("xyz"), true) == L"xyz xyz2 xyz");
             expect (s5.replace ("Word", "", true) == " 2 3");
-            expectEquals (s5.replace ("Word2", L"xyz", true), String ("word xyz word3"));
+            expectEquals (s5.replace ("Word2", "xyz", true), String ("word xyz word3"));
             expect (s5.replaceCharacter (L'w', 'x') != s5);
             expectEquals (s5.replaceCharacter ('w', L'x').replaceCharacter ('x', 'w'), s5);
             expect (s5.replaceCharacters ("wo", "xy") != s5);
-            expectEquals (s5.replaceCharacters ("wo", "xy").replaceCharacters ("xy", L"wo"), s5);
+            expectEquals (s5.replaceCharacters ("wo", "xy").replaceCharacters ("xy", "wo"), s5);
             expectEquals (s5.retainCharacters ("1wordxya"), String ("wordwordword"));
             expect (s5.retainCharacters (String::empty).isEmpty());
             expect (s5.removeCharacters ("1wordxya") == " 2 3");

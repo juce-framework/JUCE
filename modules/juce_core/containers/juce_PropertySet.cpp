@@ -65,8 +65,7 @@ void PropertySet::clear()
     }
 }
 
-String PropertySet::getValue (const String& keyName,
-                              const String& defaultValue) const noexcept
+String PropertySet::getValue (StringRef keyName, const String& defaultValue) const noexcept
 {
     const ScopedLock sl (lock);
 
@@ -79,8 +78,7 @@ String PropertySet::getValue (const String& keyName,
                                          : defaultValue;
 }
 
-int PropertySet::getIntValue (const String& keyName,
-                              const int defaultValue) const noexcept
+int PropertySet::getIntValue (StringRef keyName, const int defaultValue) const noexcept
 {
     const ScopedLock sl (lock);
     const int index = properties.getAllKeys().indexOf (keyName, ignoreCaseOfKeys);
@@ -92,8 +90,7 @@ int PropertySet::getIntValue (const String& keyName,
                                          : defaultValue;
 }
 
-double PropertySet::getDoubleValue (const String& keyName,
-                                    const double defaultValue) const noexcept
+double PropertySet::getDoubleValue (StringRef keyName, const double defaultValue) const noexcept
 {
     const ScopedLock sl (lock);
     const int index = properties.getAllKeys().indexOf (keyName, ignoreCaseOfKeys);
@@ -105,8 +102,7 @@ double PropertySet::getDoubleValue (const String& keyName,
                                          : defaultValue;
 }
 
-bool PropertySet::getBoolValue (const String& keyName,
-                                const bool defaultValue) const noexcept
+bool PropertySet::getBoolValue (StringRef keyName, const bool defaultValue) const noexcept
 {
     const ScopedLock sl (lock);
     const int index = properties.getAllKeys().indexOf (keyName, ignoreCaseOfKeys);
@@ -118,7 +114,7 @@ bool PropertySet::getBoolValue (const String& keyName,
                                          : defaultValue;
 }
 
-XmlElement* PropertySet::getXmlValue (const String& keyName) const
+XmlElement* PropertySet::getXmlValue (StringRef keyName) const
 {
     return XmlDocument::parse (getValue (keyName));
 }
@@ -142,7 +138,7 @@ void PropertySet::setValue (const String& keyName, const var& v)
     }
 }
 
-void PropertySet::removeValue (const String& keyName)
+void PropertySet::removeValue (StringRef keyName)
 {
     if (keyName.isNotEmpty())
     {
@@ -163,7 +159,7 @@ void PropertySet::setValue (const String& keyName, const XmlElement* const xml)
                                       : var (xml->createDocument (String::empty, true)));
 }
 
-bool PropertySet::containsKey (const String& keyName) const noexcept
+bool PropertySet::containsKey (StringRef keyName) const noexcept
 {
     const ScopedLock sl (lock);
     return properties.getAllKeys().contains (keyName, ignoreCaseOfKeys);

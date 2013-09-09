@@ -41,8 +41,8 @@ public:
         return dynamic_cast <SineWaveSound*> (sound) != 0;
     }
 
-    void startNote (const int midiNoteNumber, const float velocity,
-                    SynthesiserSound* /*sound*/, const int /*currentPitchWheelPosition*/)
+    void startNote (int midiNoteNumber, float velocity,
+                    SynthesiserSound* /*sound*/, int /*currentPitchWheelPosition*/)
     {
         currentAngle = 0.0;
         level = velocity * 0.15;
@@ -54,7 +54,7 @@ public:
         angleDelta = cyclesPerSample * 2.0 * double_Pi;
     }
 
-    void stopNote (const bool allowTailOff)
+    void stopNote (bool allowTailOff)
     {
         if (allowTailOff)
         {
@@ -74,12 +74,12 @@ public:
         }
     }
 
-    void pitchWheelMoved (const int /*newValue*/)
+    void pitchWheelMoved (int /*newValue*/)
     {
         // can't be bothered implementing this for the demo!
     }
 
-    void controllerMoved (const int /*controllerNumber*/, const int /*newValue*/)
+    void controllerMoved (int /*controllerNumber*/, int /*newValue*/)
     {
         // not interested in controllers in this case.
     }
