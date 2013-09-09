@@ -1485,20 +1485,20 @@ BEGIN_JUCER_METADATA
 
 <JUCER_COMPONENT documentType="Component" className="RenderingTestComponent" componentName=""
                  parentClasses="public Component" constructorParams="" variableInitialisers=""
-                 snapPixels="8" snapActive="1" snapShown="1" overlayOpacity="0.330000013"
+                 snapPixels="8" snapActive="1" snapShown="1" overlayOpacity="0.330"
                  fixedSize="0" initialWidth="600" initialHeight="400">
   <BACKGROUND backgroundColour="ffffffff"/>
   <COMBOBOX name="" id="216a392b47348589" memberName="testTypeComboBox" virtualName=""
-            explicitFocusOrder="0" pos="16.461% 16 34.362% 24" editable="0"
+            explicitFocusOrder="0" pos="16.42% 16 34.32% 24" editable="0"
             layout="33" items="Paths - Solid&#10;Paths - Linear gradient&#10;Paths - Radial gradient&#10;Paths - Stroked&#10;Images - RGB&#10;Images - ARGB&#10;Tiled Images - RGB&#10;Tiled Images - ARGB&#10;Glyphs&#10;SVG&#10;Lines"
             textWhenNonSelected="" textWhenNoItems="(no choices)"/>
   <LABEL name="" id="193cb8e961baa02a" memberName="testTypeLabel" virtualName=""
-         explicitFocusOrder="0" pos="2.881% 16 12.963% 24" edTextCol="ff000000"
+         explicitFocusOrder="0" pos="2.811% 16 13.018% 24" edTextCol="ff000000"
          edBkgCol="0" labelText="Test type:" editableSingleClick="0" editableDoubleClick="0"
          focusDiscardsChanges="0" fontname="Default font" fontsize="15"
          bold="0" italic="0" justification="34"/>
   <LABEL name="" id="c4977cdfea8776fb" memberName="speedLabel" virtualName=""
-         explicitFocusOrder="0" pos="53.498% 16 43.21% 24" edTextCol="ff000000"
+         explicitFocusOrder="0" pos="53.55% 16 43.195% 24" edTextCol="ff000000"
          edBkgCol="0" labelText="speed" editableSingleClick="0" editableDoubleClick="0"
          focusDiscardsChanges="0" fontname="Default font" fontsize="15"
          bold="0" italic="0" justification="33"/>
@@ -1506,27 +1506,27 @@ BEGIN_JUCER_METADATA
                     explicitFocusOrder="0" pos="20 56 40M 215M" class="RenderingTestCanvas"
                     params="*this"/>
   <SLIDER name="" id="e970a33ca991909e" memberName="opacitySlider" virtualName=""
-          explicitFocusOrder="0" pos="60.082% 141R 37.86% 24" min="0" max="1"
-          int="0.001" style="LinearHorizontal" textBoxPos="TextBoxLeft"
+          explicitFocusOrder="0" pos="60.059% 141R 37.87% 24" min="0" max="1"
+          int="0.0010000000000000000208" style="LinearHorizontal" textBoxPos="TextBoxLeft"
           textBoxEditable="1" textBoxWidth="70" textBoxHeight="20" skewFactor="1"/>
   <TOGGLEBUTTON name="" id="2d368b2ffc99beef" memberName="highQualityToggle"
-                virtualName="" explicitFocusOrder="0" pos="2.263% 141R 44.444% 24"
+                virtualName="" explicitFocusOrder="0" pos="2.219% 141R 44.379% 24"
                 buttonText="Higher quality image interpolation" connectedEdges="0"
                 needsCallback="0" radioGroupId="0" state="0"/>
   <TOGGLEBUTTON name="" id="3b7c06ef24935a72" memberName="animateSizeToggle"
-                virtualName="" explicitFocusOrder="0" pos="75.72% 85R 22.428% 24"
+                virtualName="" explicitFocusOrder="0" pos="75.74% 85R 22.485% 24"
                 buttonText="Animate size" connectedEdges="0" needsCallback="0"
                 radioGroupId="0" state="0"/>
   <TOGGLEBUTTON name="" id="acf40ac0130d68eb" memberName="animateRotationToggle"
-                virtualName="" explicitFocusOrder="0" pos="75.72% 61R 22.428% 24"
+                virtualName="" explicitFocusOrder="0" pos="75.74% 61R 22.485% 24"
                 buttonText="Animate rotation" connectedEdges="0" needsCallback="0"
                 radioGroupId="0" state="0"/>
   <TOGGLEBUTTON name="" id="afe7d31210a544cb" memberName="animatePositionToggle"
-                virtualName="" explicitFocusOrder="0" pos="75.72% 109R 22.428% 24"
+                virtualName="" explicitFocusOrder="0" pos="75.74% 109R 22.485% 24"
                 buttonText="Animate position" connectedEdges="0" needsCallback="0"
                 radioGroupId="0" state="0"/>
   <TOGGLEBUTTON name="" id="20466306ead4c6c2" memberName="animateFillToggle"
-                virtualName="" explicitFocusOrder="0" pos="75.72% 37R 23.663% 24"
+                virtualName="" explicitFocusOrder="0" pos="75.74% 37R 23.669% 24"
                 buttonText="Animate gradient" connectedEdges="0" needsCallback="0"
                 radioGroupId="0" state="0"/>
   <LABEL name="" id="ff3fb4acd2101aa5" memberName="opacityLabel" virtualName=""
@@ -1535,50 +1535,54 @@ BEGIN_JUCER_METADATA
          editableDoubleClick="0" focusDiscardsChanges="0" fontname="Default font"
          fontsize="15" bold="0" italic="0" justification="34"/>
   <SLIDER name="" id="549cfd1459f09c12" memberName="xSlider" virtualName=""
-          explicitFocusOrder="0" pos="36.008% 109R 37.86% 24" min="-100"
-          max="100" int="0.1" style="LinearHorizontal" textBoxPos="TextBoxLeft"
-          textBoxEditable="1" textBoxWidth="80" textBoxHeight="20" skewFactor="1"/>
+          explicitFocusOrder="0" pos="35.947% 109R 37.87% 24" min="-100"
+          max="100" int="0.10000000000000000555" style="LinearHorizontal"
+          textBoxPos="TextBoxLeft" textBoxEditable="1" textBoxWidth="80"
+          textBoxHeight="20" skewFactor="1"/>
   <SLIDER name="" id="49b53bab0eca9967" memberName="ySlider" virtualName=""
-          explicitFocusOrder="0" pos="36.008% 85R 37.86% 24" min="-100"
-          max="100" int="0.1" style="LinearHorizontal" textBoxPos="TextBoxLeft"
-          textBoxEditable="1" textBoxWidth="80" textBoxHeight="20" skewFactor="1"/>
+          explicitFocusOrder="0" pos="35.947% 85R 37.87% 24" min="-100"
+          max="100" int="0.10000000000000000555" style="LinearHorizontal"
+          textBoxPos="TextBoxLeft" textBoxEditable="1" textBoxWidth="80"
+          textBoxHeight="20" skewFactor="1"/>
   <SLIDER name="" id="d89d3e0269c1aef4" memberName="sizeSlider" virtualName=""
-          explicitFocusOrder="0" pos="36.008% 61R 37.86% 24" min="0.01"
-          max="10" int="0.01" style="LinearHorizontal" textBoxPos="TextBoxLeft"
-          textBoxEditable="1" textBoxWidth="80" textBoxHeight="20" skewFactor="0.4"/>
+          explicitFocusOrder="0" pos="35.947% 61R 37.87% 24" min="0.010000000000000000208"
+          max="10" int="0.010000000000000000208" style="LinearHorizontal"
+          textBoxPos="TextBoxLeft" textBoxEditable="1" textBoxWidth="80"
+          textBoxHeight="20" skewFactor="0.4000000000000000222"/>
   <SLIDER name="" id="a68c75ae0f41c437" memberName="angleSlider" virtualName=""
-          explicitFocusOrder="0" pos="36.008% 37R 37.86% 24" min="-180"
-          max="180" int="0.1" style="LinearHorizontal" textBoxPos="TextBoxLeft"
-          textBoxEditable="1" textBoxWidth="80" textBoxHeight="20" skewFactor="1"/>
+          explicitFocusOrder="0" pos="35.947% 37R 37.87% 24" min="-180"
+          max="180" int="0.10000000000000000555" style="LinearHorizontal"
+          textBoxPos="TextBoxLeft" textBoxEditable="1" textBoxWidth="80"
+          textBoxHeight="20" skewFactor="1"/>
   <LABEL name="" id="61972b44db6093d7" memberName="xSliderLabel" virtualName=""
-         explicitFocusOrder="0" pos="24.897% 109R 10.7% 24" edTextCol="ff000000"
+         explicitFocusOrder="0" pos="24.852% 109R 10.651% 24" edTextCol="ff000000"
          edBkgCol="0" labelText="X offset:" editableSingleClick="0" editableDoubleClick="0"
          focusDiscardsChanges="0" fontname="Default font" fontsize="15"
          bold="0" italic="0" justification="34"/>
   <LABEL name="" id="fd87229f56908c79" memberName="ySliderLabel" virtualName=""
-         explicitFocusOrder="0" pos="24.897% 85R 10.7% 24" edTextCol="ff000000"
+         explicitFocusOrder="0" pos="24.852% 85R 10.651% 24" edTextCol="ff000000"
          edBkgCol="0" labelText="Y offset:" editableSingleClick="0" editableDoubleClick="0"
          focusDiscardsChanges="0" fontname="Default font" fontsize="15"
          bold="0" italic="0" justification="34"/>
   <LABEL name="" id="889901f3d351ac41" memberName="sizeSliderLabel" virtualName=""
-         explicitFocusOrder="0" pos="24.897% 61R 10.7% 24" edTextCol="ff000000"
+         explicitFocusOrder="0" pos="24.852% 61R 10.651% 24" edTextCol="ff000000"
          edBkgCol="0" labelText="Size:" editableSingleClick="0" editableDoubleClick="0"
          focusDiscardsChanges="0" fontname="Default font" fontsize="15"
          bold="0" italic="0" justification="34"/>
   <LABEL name="" id="98c096221f161097" memberName="angleSliderLabel" virtualName=""
-         explicitFocusOrder="0" pos="24.897% 37R 10.7% 24" edTextCol="ff000000"
+         explicitFocusOrder="0" pos="24.852% 37R 10.651% 24" edTextCol="ff000000"
          edBkgCol="0" labelText="Angle:" editableSingleClick="0" editableDoubleClick="0"
          focusDiscardsChanges="0" fontname="Default font" fontsize="15"
          bold="0" italic="0" justification="34"/>
   <TOGGLEBUTTON name="" id="dc21f241b7188003" memberName="clipToRectangleToggle"
-                virtualName="" explicitFocusOrder="0" pos="2.263% 109R 144 24"
+                virtualName="" explicitFocusOrder="0" pos="2.219% 109R 144 24"
                 buttonText="Clip to rectangle" connectedEdges="0" needsCallback="0"
                 radioGroupId="0" state="0"/>
   <TOGGLEBUTTON name="" id="e242a0decedf4fbd" memberName="clipToPathToggle" virtualName=""
-                explicitFocusOrder="0" pos="2.263% 85R 144 24" buttonText="Clip to path"
+                explicitFocusOrder="0" pos="2.219% 85R 144 24" buttonText="Clip to path"
                 connectedEdges="0" needsCallback="0" radioGroupId="0" state="0"/>
   <TOGGLEBUTTON name="" id="2c40de62d77841ae" memberName="clipToImageToggle"
-                virtualName="" explicitFocusOrder="0" pos="2.263% 61R 144 24"
+                virtualName="" explicitFocusOrder="0" pos="2.219% 61R 144 24"
                 buttonText="Clip to image" connectedEdges="0" needsCallback="0"
                 radioGroupId="0" state="0"/>
 </JUCER_COMPONENT>

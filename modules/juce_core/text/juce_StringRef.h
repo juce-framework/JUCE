@@ -97,7 +97,7 @@ public:
     /** Returns true if the string is not empty. */
     bool isNotEmpty() const noexcept                                    { return ! text.isEmpty(); }
     /** Returns the number of characters in the string. */
-    int length() const noexcept                                         { return text.length(); }
+    int length() const noexcept                                         { return (int) text.length(); }
 
     /** Compares this StringRef with a String. */
     bool operator== (const String& s) const noexcept                    { return text.compare (s.getCharPointer()) == 0; }

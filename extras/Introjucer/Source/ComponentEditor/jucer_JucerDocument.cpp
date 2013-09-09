@@ -348,7 +348,7 @@ XmlElement* JucerDocument::createXml() const
     doc->setAttribute ("snapPixels", snapGridPixels);
     doc->setAttribute ("snapActive", snapActive);
     doc->setAttribute ("snapShown", snapShown);
-    doc->setAttribute ("overlayOpacity", (double) componentOverlayOpacity);
+    doc->setAttribute ("overlayOpacity", String (componentOverlayOpacity, 3));
     doc->setAttribute ("fixedSize", fixedSize);
     doc->setAttribute ("initialWidth", initialWidth);
     doc->setAttribute ("initialHeight", initialHeight);

@@ -377,7 +377,7 @@ BEGIN_JUCER_METADATA
 <JUCER_COMPONENT documentType="Component" className="AudioDemoPlaybackPage" componentName=""
                  parentClasses="public Component, public FileBrowserListener"
                  constructorParams="AudioDeviceManager&amp; deviceManager_" variableInitialisers="deviceManager (deviceManager_),&#10;thread (&quot;audio file preview&quot;),&#10;directoryList (nullptr, thread)"
-                 snapPixels="8" snapActive="1" snapShown="1" overlayOpacity="0.330000013"
+                 snapPixels="8" snapActive="1" snapShown="1" overlayOpacity="0.330"
                  fixedSize="0" initialWidth="600" initialHeight="400">
   <BACKGROUND backgroundColour="ffd3d3d3"/>
   <LABEL name="" id="d4f78f975d81c8d3" memberName="zoomLabel" virtualName=""

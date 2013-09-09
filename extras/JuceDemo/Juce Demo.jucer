@@ -8,7 +8,7 @@
               pluginWantsMidiIn="0" pluginProducesMidiOut="0" pluginSilenceInIsSilenceOut="0"
               pluginTailLength="0" pluginEditorRequiresKeys="0" pluginAUExportPrefix="JuceDemoAU"
               pluginAUViewClass="JuceDemoAU_V1" pluginRTASCategory="" icon="Duj062Top"
-              companyName="Raw Material Software Ltd.">
+              companyName="Raw Material Software Ltd." includeBinaryInAppConfig="1">
   <EXPORTFORMATS>
     <XCODE_MAC targetFolder="Builds/MacOSX" vstFolder="~/SDKs/vstsdk2.4" rtasFolder="~/SDKs/PT_80_SDK"
                juceFolder="../../../juce" objCExtraSuffix="JSLvvV6j" bigIcon="f4hwldS"

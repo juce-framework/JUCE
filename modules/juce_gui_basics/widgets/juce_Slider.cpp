@@ -1050,7 +1050,7 @@ public:
                     else if (style == RotaryVerticalDrag)   mousePos += Point<int> (0, delta);
                     else                                    mousePos += Point<int> (delta / -2, delta / 2);
 
-                    mousePos = owner.getScreenBounds().getConstrainedPoint (mousePos);
+                    mousePos = owner.getScreenBounds().reduced (4).getConstrainedPoint (mousePos);
                 }
                 else
                 {

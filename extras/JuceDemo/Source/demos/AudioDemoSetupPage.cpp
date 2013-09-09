@@ -92,7 +92,7 @@ BEGIN_JUCER_METADATA
 <JUCER_COMPONENT documentType="Component" className="AudioDemoSetupPage" componentName=""
                  parentClasses="public Component" constructorParams="AudioDeviceManager&amp; deviceManager_"
                  variableInitialisers="deviceManager (deviceManager_)" snapPixels="8"
-                 snapActive="1" snapShown="1" overlayOpacity="0.330000013" fixedSize="0"
+                 snapActive="1" snapShown="1" overlayOpacity="0.330" fixedSize="0"
                  initialWidth="600" initialHeight="400">
   <BACKGROUND backgroundColour="ffd3d3d3"/>
   <GENERICCOMPONENT name="" id="a04c56de9f3fc537" memberName="deviceSelector" virtualName=""

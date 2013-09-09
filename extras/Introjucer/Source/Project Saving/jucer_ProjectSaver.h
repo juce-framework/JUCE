@@ -432,7 +432,7 @@ private:
         for (int i = 0; i < modules.size(); ++i)
             modules.getUnchecked(i)->writeIncludes (*this, out);
 
-        if (hasBinaryData)
+        if (hasBinaryData && project.shouldIncludeBinaryInAppConfig().getValue())
             out << CodeHelpers::createIncludeStatement (project.getBinaryDataHeaderFile(), appConfigFile) << newLine;
 
         out << newLine

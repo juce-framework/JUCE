@@ -134,6 +134,7 @@ namespace Ids
     DECLARE_ID (colour);
     DECLARE_ID (userNotes);
     DECLARE_ID (maxBinaryFileSize);
+    DECLARE_ID (includeBinaryInAppConfig);
     DECLARE_ID (characterSet);
     const Identifier ID ("id");
     const Identifier class_ ("class");

@@ -127,6 +127,9 @@ void Project::setMissingDefaultValues()
     if (getBundleIdentifier().toString().isEmpty())
         getBundleIdentifier() = getDefaultBundleIdentifier();
 
+    if (shouldIncludeBinaryInAppConfig() == var::null)
+        shouldIncludeBinaryInAppConfig() = true;
+
     IntrojucerApp::getApp().updateNewlyOpenedProject (*this);
 }
 
@@ -404,6 +407,9 @@ void Project::createPropertyEditors (PropertyListBuilder& props)
                    "When splitting binary data into multiple cpp files, the Introjucer attempts to keep the file sizes below this threshold. "
                    "(Note that individual resource files which are larger than this size cannot be split across multiple cpp files).");
     }
+
+    props.add (new BooleanPropertyComponent (shouldIncludeBinaryInAppConfig(), "Include Binary",
+                                             "Include BinaryData.h in the AppConfig.h file"));
 
     props.add (new TextPropertyComponent (getProjectPreprocessorDefs(), "Preprocessor definitions", 32768, true),
                "Global preprocessor definitions. Use the form \"NAME1=value NAME2=value\", using whitespace, commas, or "
