@@ -218,7 +218,7 @@ bool WindowsRegistry::registerFileAssociation (const String& fileExtension,
         && setValue (key + "\\shell\\open\\command\\", targetExecutable.getFullPathName() + " \"%1\"", mode)
         && (iconResourceNumber == 0
               || setValue (key + "\\DefaultIcon\\",
-                           targetExecutable.getFullPathName() + "," + String (-iconResourceNumber)));
+                           targetExecutable.getFullPathName() + "," + String (iconResourceNumber)));
 }
 
 // These methods are deprecated:
