@@ -26,7 +26,7 @@ StringArray FTTypefaceList::getDefaultFontDirectories()
 {
     StringArray fontDirs;
 
-    fontDirs.addTokens (CharPointer_UTF8 (getenv ("JUCE_FONT_PATH")), ";,", String::empty);
+    fontDirs.addTokens (String (CharPointer_UTF8 (getenv ("JUCE_FONT_PATH"))), ";,", "");
     fontDirs.removeEmptyStrings (true);
 
     if (fontDirs.size() == 0)
