@@ -26,8 +26,7 @@
   ==============================================================================
 */
 
-JNIClassBase::JNIClassBase (const char* classPath_)
-    : classPath (classPath_), classRef (0)
+JNIClassBase::JNIClassBase (const char* cp)   : classPath (cp), classRef (0)
 {
     getClasses().add (this);
 }
@@ -129,8 +128,7 @@ AndroidSystem::AndroidSystem() : screenWidth (0), screenHeight (0), dpi (160)
 {
 }
 
-void AndroidSystem::initialise (JNIEnv* env, jobject activity_,
-                                jstring appFile_, jstring appDataDir_)
+void AndroidSystem::initialise (JNIEnv* env, jobject act, jstring file, jstring dataDir)
 {
     screenWidth = screenHeight = 0;
     dpi = 160;
@@ -141,9 +139,9 @@ void AndroidSystem::initialise (JNIEnv* env, jobject activity_,
     systemInitialised = true;
    #endif
 
-    activity = GlobalRef (activity_);
-    appFile = juceString (env, appFile_);
-    appDataDir = juceString (env, appDataDir_);
+    activity = GlobalRef (act);
+    appFile = juceString (env, file);
+    appDataDir = juceString (env, dataDir);
 }
 
 void AndroidSystem::shutdown (JNIEnv* env)
@@ -162,14 +160,12 @@ AndroidSystem android;
 //==============================================================================
 namespace AndroidStatsHelpers
 {
-    //==============================================================================
     #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
      STATICMETHOD (getProperty, "getProperty", "(Ljava/lang/String;)Ljava/lang/String;")
 
     DECLARE_JNI_CLASS (SystemClass, "java/lang/System");
     #undef JNI_CLASS_MEMBERS
 
-    //==============================================================================
     String getSystemProperty (const String& name)
     {
         return juceString (LocalRef<jstring> ((jstring) getEnv()->CallStaticObjectMethod (SystemClass,
@@ -177,7 +173,6 @@ namespace AndroidStatsHelpers
                                                                                           javaString (name).get())));
     }
 
-    //==============================================================================
     String getLocaleValue (bool isRegion)
     {
         return juceString (LocalRef<jstring> ((jstring) getEnv()->CallStaticObjectMethod (JuceAppActivity,
@@ -236,16 +231,13 @@ int SystemStats::getPageSize()
 //==============================================================================
 String SystemStats::getLogonName()
 {
-    const char* user = getenv ("USER");
+    if (const char* user = getenv ("USER"))
+        return CharPointer_UTF8 (user);
 
-    if (user == 0)
-    {
-        struct passwd* const pw = getpwuid (getuid());
-        if (pw != 0)
-            user = pw->pw_name;
-    }
+    if (struct passwd* const pw = getpwuid (getuid()))
+        return CharPointer_UTF8 (pw->pw_name);
 
-    return CharPointer_UTF8 (user);
+    return String::empty;
 }
 
 String SystemStats::getFullUserName()

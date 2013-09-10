@@ -645,21 +645,6 @@ String& String::operator+= (const wchar_t* const t)
 
 String& String::operator+= (const char* const t)
 {
-    /*  If you get an assertion here, then you're trying to create a string from 8-bit data
-        that contains values greater than 127. These can NOT be correctly converted to unicode
-        because there's no way for the String class to know what encoding was used to
-        create them. The source data could be UTF-8, ASCII or one of many local code-pages.
-
-        To get around this problem, you must be more explicit when you pass an ambiguous 8-bit
-        string to the String class - so for example if your source data is actually UTF-8,
-        you'd call String (CharPointer_UTF8 ("my utf8 string..")), and it would be able to
-        correctly convert the multi-byte characters to unicode. It's *highly* recommended that
-        you use UTF-8 with escape characters in your source code to represent extended characters,
-        because there's no other way to represent these strings in a way that isn't dependent on
-        the compiler, source code editor and platform.
-    */
-    jassert (t == nullptr || CharPointer_ASCII::isValidString (t, std::numeric_limits<int>::max()));
-
     appendCharPointer (CharPointer_UTF8 (t)); // (using UTF8 here triggers a faster code-path than ascii)
     return *this;
 }
@@ -2093,9 +2078,30 @@ String String::fromUTF8 (const char* const buffer, int bufferSizeBytes)
 StringRef::StringRef (const String::CharPointerType::CharType* stringLiteral) noexcept  : text (stringLiteral)
 {
     jassert (stringLiteral != nullptr); // This must be a valid string literal, not a null pointer!!
+
+   #if JUCE_NATIVE_WCHAR_IS_UTF8
+    /*  If you get an assertion here, then you're trying to create a string from 8-bit data
+        that contains values greater than 127. These can NOT be correctly converted to unicode
+        because there's no way for the String class to know what encoding was used to
+        create them. The source data could be UTF-8, ASCII or one of many local code-pages.
+
+        To get around this problem, you must be more explicit when you pass an ambiguous 8-bit
+        string to the String class - so for example if your source data is actually UTF-8,
+        you'd call String (CharPointer_UTF8 ("my utf8 string..")), and it would be able to
+        correctly convert the multi-byte characters to unicode. It's *highly* recommended that
+        you use UTF-8 with escape characters in your source code to represent extended characters,
+        because there's no other way to represent these strings in a way that isn't dependent on
+        the compiler, source code editor and platform.
+    */
+    jassert (CharPointer_ASCII::isValidString (stringLiteral, std::numeric_limits<int>::max()));
+   #endif
 }
 
-StringRef::StringRef (String::CharPointerType stringLiteral) noexcept  : text (stringLiteral) {}
+StringRef::StringRef (String::CharPointerType stringLiteral) noexcept  : text (stringLiteral)
+{
+    jassert (stringLiteral.getAddress() != nullptr); // This must be a valid string literal, not a null pointer!!
+}
+
 StringRef::StringRef (const String& string) noexcept  : text (string.getCharPointer()) {}
 
 //==============================================================================

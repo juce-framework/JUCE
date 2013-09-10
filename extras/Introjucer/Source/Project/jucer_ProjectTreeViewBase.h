@@ -42,6 +42,7 @@ protected:
 public:
     //==============================================================================
     virtual bool isRoot() const                         { return false; }
+
     virtual bool acceptsFileDrop (const StringArray& files) const = 0;
     virtual bool acceptsDragItems (const OwnedArray <Project::Item>& selectedNodes) = 0;
 

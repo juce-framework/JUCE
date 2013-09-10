@@ -165,13 +165,13 @@ File File::getSpecialLocation (const SpecialLocationType type)
     {
         case userHomeDirectory:
         {
-            const char* homeDir = getenv ("HOME");
+            if (const char* homeDir = getenv ("HOME"))
+                return File (CharPointer_UTF8 (homeDir));
 
-            if (homeDir == nullptr)
-                if (struct passwd* const pw = getpwuid (getuid()))
-                    homeDir = pw->pw_dir;
+            if (struct passwd* const pw = getpwuid (getuid()))
+                return File (CharPointer_UTF8 (pw->pw_dir));
 
-            return File (CharPointer_UTF8 (homeDir));
+            return File::nonexistent;
         }
 
         case userDocumentsDirectory:          return resolveXDGFolder ("XDG_DOCUMENTS_DIR", "~");
@@ -247,10 +247,9 @@ bool File::moveToTrash() const
 class DirectoryIterator::NativeIterator::Pimpl
 {
 public:
-    Pimpl (const File& directory, const String& wildCard_)
+    Pimpl (const File& directory, const String& wc)
         : parentDir (File::addTrailingSeparator (directory.getFullPathName())),
-          wildCard (wildCard_),
-          dir (opendir (directory.getFullPathName().toUTF8()))
+          wildCard (wc), dir (opendir (directory.getFullPathName().toUTF8()))
     {
     }
 
