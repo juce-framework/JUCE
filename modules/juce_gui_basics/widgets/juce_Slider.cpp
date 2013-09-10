@@ -1051,6 +1051,8 @@ public:
                     else                                    mousePos += Point<int> (delta / -2, delta / 2);
 
                     mousePos = owner.getScreenBounds().reduced (4).getConstrainedPoint (mousePos);
+                    mouseDragStartPos = mousePosWhenLastDragged = owner.getLocalPoint (nullptr, mousePos);
+                    valueOnMouseDown = valueWhenLastDragged;
                 }
                 else
                 {
