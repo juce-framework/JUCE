@@ -142,6 +142,9 @@ public:
     void valueTreeChildOrderChanged (ValueTree&) override {}
     void valueTreeParentChanged (ValueTree&) override {}
 
+    virtual bool isProjectSettings() const          { return false; }
+    virtual bool isModulesList() const              { return false; }
+
     static void updateSize (Component& comp, PropertyGroup& group)
     {
         const int width = jmax (550, comp.getParentWidth() - 20);

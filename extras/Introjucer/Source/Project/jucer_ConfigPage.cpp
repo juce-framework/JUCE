@@ -62,19 +62,19 @@ namespace ProjectSettingsTreeClasses
             configTree.addListener (this);
         }
 
-        bool isMissing()                        { return false; }
-        bool canBeSelected() const              { return true; }
-        bool mightContainSubItems()             { return false; }
-        String getUniqueName() const            { return "config_" + config->getName(); }
-        String getRenamingName() const          { return getDisplayName(); }
-        String getDisplayName() const           { return config->getName(); }
-        void setName (const String&)            {}
-        Icon getIcon() const                    { return Icon (getIcons().config, getContrastingColour (Colours::green, 0.5f)); }
+        bool isMissing() override                       { return false; }
+        bool canBeSelected() const override             { return true; }
+        bool mightContainSubItems() override            { return false; }
+        String getUniqueName() const override           { return "config_" + config->getName(); }
+        String getRenamingName() const override         { return getDisplayName(); }
+        String getDisplayName() const override          { return config->getName(); }
+        void setName (const String&) override           {}
+        Icon getIcon() const override                   { return Icon (getIcons().config, getContrastingColour (Colours::green, 0.5f)); }
 
-        void showDocument()                     { showSettingsPage (new SettingsComp (config, exporterName)); }
-        void itemOpennessChanged (bool)         {}
+        void showDocument() override                    { showSettingsPage (new SettingsComp (config, exporterName)); }
+        void itemOpennessChanged (bool) override        {}
 
-        void deleteItem()
+        void deleteItem() override
         {
             if (AlertWindow::showOkCancelBox (AlertWindow::WarningIcon, "Delete Configuration",
                                               "Are you sure you want to delete this configuration?"))
@@ -84,7 +84,7 @@ namespace ProjectSettingsTreeClasses
             }
         }
 
-        void showPopupMenu()
+        void showPopupMenu() override
         {
             PopupMenu menu;
             menu.addItem (1, "Create a copy of this configuration");
@@ -94,7 +94,7 @@ namespace ProjectSettingsTreeClasses
             launchPopupMenu (menu);
         }
 
-        void handlePopupMenuResult (int resultCode)
+        void handlePopupMenuResult (int resultCode) override
         {
             if (resultCode == 2)
             {
@@ -140,7 +140,7 @@ namespace ProjectSettingsTreeClasses
                 parentSizeChanged();
             }
 
-            void parentSizeChanged()  { updateSize (*this, group); }
+            void parentSizeChanged() override  { updateSize (*this, group); }
 
         private:
             PropertyGroup group;
@@ -163,15 +163,15 @@ namespace ProjectSettingsTreeClasses
             jassert (exporter != nullptr);
         }
 
-        bool canBeSelected() const              { return true; }
-        bool mightContainSubItems()             { return exporter->getNumConfigurations() > 0; }
-        String getUniqueName() const            { return "exporter_" + String (exporterIndex); }
-        String getRenamingName() const          { return getDisplayName(); }
-        String getDisplayName() const           { return exporter->getName(); }
-        void setName (const String&)            {}
-        bool isMissing()                        { return false; }
-        Icon getIcon() const                    { return Icon (getIcons().exporter, getContrastingColour (0.5f)); }
-        void showDocument()                     { showSettingsPage (new SettingsComp (exporter)); }
+        bool canBeSelected() const override       { return true; }
+        bool mightContainSubItems() override      { return exporter->getNumConfigurations() > 0; }
+        String getUniqueName() const override     { return "exporter_" + String (exporterIndex); }
+        String getRenamingName() const override   { return getDisplayName(); }
+        String getDisplayName() const override    { return exporter->getName(); }
+        void setName (const String&) override     {}
+        bool isMissing() override                 { return false; }
+        Icon getIcon() const override             { return Icon (getIcons().exporter, getContrastingColour (0.5f)); }
+        void showDocument() override              { showSettingsPage (new SettingsComp (exporter)); }
 
         void deleteItem()
         {
@@ -237,9 +237,9 @@ namespace ProjectSettingsTreeClasses
         }
 
         //==============================================================================
-        void valueTreeChildAdded (ValueTree& parentTree, ValueTree&)    { refreshIfNeeded (parentTree); }
-        void valueTreeChildRemoved (ValueTree& parentTree, ValueTree&)  { refreshIfNeeded (parentTree); }
-        void valueTreeChildOrderChanged (ValueTree& parentTree)         { refreshIfNeeded (parentTree); }
+        void valueTreeChildAdded (ValueTree& parentTree, ValueTree&) override   { refreshIfNeeded (parentTree); }
+        void valueTreeChildRemoved (ValueTree& parentTree, ValueTree&) override { refreshIfNeeded (parentTree); }
+        void valueTreeChildOrderChanged (ValueTree& parentTree) override        { refreshIfNeeded (parentTree); }
 
         void refreshIfNeeded (ValueTree& changedTree)
         {
@@ -268,7 +268,7 @@ namespace ProjectSettingsTreeClasses
                 parentSizeChanged();
             }
 
-            void parentSizeChanged()  { updateSize (*this, group); }
+            void parentSizeChanged() override  { updateSize (*this, group); }
 
         private:
             PropertyGroup group;
@@ -285,15 +285,16 @@ namespace ProjectSettingsTreeClasses
     public:
         ModulesItem (Project& p)  : project (p) {}
 
-        bool canBeSelected() const              { return true; }
-        bool mightContainSubItems()             { return false; }
-        String getUniqueName() const            { return "modules"; }
-        String getRenamingName() const          { return getDisplayName(); }
-        String getDisplayName() const           { return "Modules"; }
-        void setName (const String&)            {}
-        bool isMissing()                        { return false; }
-        Icon getIcon() const                    { return Icon (getIcons().graph, getContrastingColour (Colours::red, 0.5f)); }
-        void showDocument()                     { showSettingsPage (new SettingsComp (project)); }
+        bool isModulesList() const override     { return true; }
+        bool canBeSelected() const override     { return true; }
+        bool mightContainSubItems() override    { return false; }
+        String getUniqueName() const override   { return "modules"; }
+        String getRenamingName() const override { return getDisplayName(); }
+        String getDisplayName() const override  { return "Modules"; }
+        void setName (const String&) override   {}
+        bool isMissing() override                       { return false; }
+        Icon getIcon() const override           { return Icon (getIcons().graph, getContrastingColour (Colours::red, 0.5f)); }
+        void showDocument() override            { showSettingsPage (new SettingsComp (project)); }
 
     private:
         Project& project;
@@ -314,7 +315,7 @@ namespace ProjectSettingsTreeClasses
                 parentSizeChanged();
             }
 
-            void parentSizeChanged()
+            void parentSizeChanged() override
             {
                 updateSize (*this, group);
             }
@@ -340,17 +341,18 @@ namespace ProjectSettingsTreeClasses
             exportersTree.addListener (this);
         }
 
-        String getRenamingName() const          { return getDisplayName(); }
-        String getDisplayName() const           { return project.getTitle(); }
-        void setName (const String&)            {}
-        bool isMissing()                        { return false; }
-        Icon getIcon() const                    { return project.getMainGroup().getIcon().withContrastingColourTo (getBackgroundColour()); }
-        void showDocument()                     { showSettingsPage (new SettingsComp (project)); }
-        bool canBeSelected() const              { return true; }
-        bool mightContainSubItems()             { return project.getNumExporters() > 0; }
-        String getUniqueName() const            { return "config_root"; }
+        bool isProjectSettings() const override   { return true; }
+        String getRenamingName() const override   { return getDisplayName(); }
+        String getDisplayName() const override    { return project.getTitle(); }
+        void setName (const String&) override     {}
+        bool isMissing() override                 { return false; }
+        Icon getIcon() const override             { return project.getMainGroup().getIcon().withContrastingColourTo (getBackgroundColour()); }
+        void showDocument() override              { showSettingsPage (new SettingsComp (project)); }
+        bool canBeSelected() const override       { return true; }
+        bool mightContainSubItems() override      { return project.getNumExporters() > 0; }
+        String getUniqueName() const override     { return "config_root"; }
 
-        void addSubItems()
+        void addSubItems() override
         {
             addSubItem (new ModulesItem (project));
             IntrojucerApp::getApp().addExtraConfigItems (project, *this);
@@ -360,7 +362,7 @@ namespace ProjectSettingsTreeClasses
                 addSubItem (new ExporterItem (project, exporter.exporter.release(), i));
         }
 
-        void showPopupMenu()
+        void showPopupMenu() override
         {
             PopupMenu menu;
 
@@ -372,7 +374,7 @@ namespace ProjectSettingsTreeClasses
             launchPopupMenu (menu);
         }
 
-        void handlePopupMenuResult (int resultCode)
+        void handlePopupMenuResult (int resultCode) override
         {
             if (resultCode > 0)
             {
@@ -383,21 +385,21 @@ namespace ProjectSettingsTreeClasses
             }
         }
 
-        bool isInterestedInDragSource (const DragAndDropTarget::SourceDetails& dragSourceDetails)
+        bool isInterestedInDragSource (const DragAndDropTarget::SourceDetails& dragSourceDetails) override
         {
             return dragSourceDetails.description.toString().startsWith (getUniqueName());
         }
 
-        void itemDropped (const DragAndDropTarget::SourceDetails& dragSourceDetails, int insertIndex)
+        void itemDropped (const DragAndDropTarget::SourceDetails& dragSourceDetails, int insertIndex) override
         {
             int oldIndex = dragSourceDetails.description.toString().getTrailingIntValue();
             exportersTree.moveChild (oldIndex, jmax (0, insertIndex - 1), project.getUndoManagerFor (exportersTree));
         }
 
         //==============================================================================
-        void valueTreeChildAdded (ValueTree& parentTree, ValueTree&)    { refreshIfNeeded (parentTree); }
-        void valueTreeChildRemoved (ValueTree& parentTree, ValueTree&)  { refreshIfNeeded (parentTree); }
-        void valueTreeChildOrderChanged (ValueTree& parentTree)         { refreshIfNeeded (parentTree); }
+        void valueTreeChildAdded (ValueTree& parentTree, ValueTree&) override   { refreshIfNeeded (parentTree); }
+        void valueTreeChildRemoved (ValueTree& parentTree, ValueTree&) override { refreshIfNeeded (parentTree); }
+        void valueTreeChildOrderChanged (ValueTree& parentTree) override        { refreshIfNeeded (parentTree); }
 
         void refreshIfNeeded (ValueTree& changedTree)
         {
@@ -427,7 +429,7 @@ namespace ProjectSettingsTreeClasses
                 project.removeChangeListener (this);
             }
 
-            void parentSizeChanged()
+            void parentSizeChanged() override
             {
                 updateSize (*this, group);
             }
@@ -443,7 +445,7 @@ namespace ProjectSettingsTreeClasses
                 parentSizeChanged();
             }
 
-            void changeListenerCallback (ChangeBroadcaster*)
+            void changeListenerCallback (ChangeBroadcaster*) override
             {
                 if (lastProjectType != project.getProjectTypeValue().getValue())
                     updatePropertyList();

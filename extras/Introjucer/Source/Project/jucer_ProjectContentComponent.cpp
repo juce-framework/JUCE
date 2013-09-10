@@ -493,6 +493,38 @@ void ProjectContentComponent::closeProject()
         mw->closeCurrentProject();
 }
 
+void ProjectContentComponent::showFilesTab()
+{
+    treeViewTabs.setCurrentTabIndex (0);
+}
+
+void ProjectContentComponent::showConfigTab()
+{
+    treeViewTabs.setCurrentTabIndex (1);
+}
+
+void ProjectContentComponent::showProjectSettings()
+{
+    showConfigTab();
+
+    if (TreePanelBase* const tree = dynamic_cast<TreePanelBase*> (treeViewTabs.getCurrentContentComponent()))
+        if (SettingsTreeViewItemBase* root = dynamic_cast<SettingsTreeViewItemBase*> (tree->rootItem.get()))
+            if (root->isProjectSettings())
+                root->setSelected (true, true);
+}
+
+void ProjectContentComponent::showModules()
+{
+    showConfigTab();
+
+    if (TreePanelBase* const tree = dynamic_cast<TreePanelBase*> (treeViewTabs.getCurrentContentComponent()))
+        if (SettingsTreeViewItemBase* root = dynamic_cast<SettingsTreeViewItemBase*> (tree->rootItem.get()))
+            if (root->isProjectSettings())
+                if (SettingsTreeViewItemBase* mods = dynamic_cast<SettingsTreeViewItemBase*> (root->getSubItem (0)))
+                    if (mods->isModulesList())
+                        mods->setSelected (true, true);
+}
+
 StringArray ProjectContentComponent::getExportersWhichCanLaunch() const
 {
     StringArray s;
@@ -620,6 +652,8 @@ void ProjectContentComponent::getAllCommands (Array <CommandID>& commands)
                               CommandIDs::saveAndOpenInIDE,
                               CommandIDs::showFilePanel,
                               CommandIDs::showConfigPanel,
+                              CommandIDs::showProjectSettings,
+                              CommandIDs::showProjectModules,
                               CommandIDs::goToPreviousDoc,
                               CommandIDs::goToNextDoc,
                               CommandIDs::goToCounterpart,
@@ -742,6 +776,22 @@ void ProjectContentComponent::getCommandInfo (const CommandID commandID, Applica
         result.defaultKeypresses.add (KeyPress ('i', ModifierKeys::commandModifier, 0));
         break;
 
+    case CommandIDs::showProjectSettings:
+        result.setInfo ("Show Project Settings",
+                        "Shows the main project options page",
+                        CommandCategories::general, 0);
+        result.setActive (project != nullptr);
+        result.defaultKeypresses.add (KeyPress ('i', ModifierKeys::commandModifier | ModifierKeys::shiftModifier, 0));
+        break;
+
+    case CommandIDs::showProjectModules:
+        result.setInfo ("Show Project Modules",
+                        "Shows the project's list of modules",
+                        CommandCategories::general, 0);
+        result.setActive (project != nullptr);
+        result.defaultKeypresses.add (KeyPress ('m', ModifierKeys::commandModifier | ModifierKeys::shiftModifier, 0));
+        break;
+
     case CommandIDs::deleteSelectedItem:
         result.setInfo ("Delete Selected File", String::empty, CommandCategories::general, 0);
         result.defaultKeypresses.add (KeyPress (KeyPress::deleteKey, 0, 0));
@@ -795,8 +845,10 @@ bool ProjectContentComponent::perform (const InvocationInfo& info)
         case CommandIDs::goToNextDoc:               goToNextFile(); break;
         case CommandIDs::goToCounterpart:           goToCounterpart(); break;
 
-        case CommandIDs::showFilePanel:             treeViewTabs.setCurrentTabIndex (0); break;
-        case CommandIDs::showConfigPanel:           treeViewTabs.setCurrentTabIndex (1); break;
+        case CommandIDs::showFilePanel:             showFilesTab(); break;
+        case CommandIDs::showConfigPanel:           showConfigTab(); break;
+        case CommandIDs::showProjectSettings:       showProjectSettings(); break;
+        case CommandIDs::showProjectModules:        showModules(); break;
 
         case CommandIDs::openInIDE:                 openInIDE(); break;
 

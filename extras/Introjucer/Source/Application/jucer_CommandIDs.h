@@ -47,6 +47,8 @@ namespace CommandIDs
         showConfigPanel        = 0x200074,
         showFilePanel          = 0x200078,
         showTranslationTool    = 0x200079,
+        showProjectSettings    = 0x20007a,
+        showProjectModules     = 0x20007b,
 
         closeWindow            = 0x201001,
         closeAllDocuments      = 0x201000,

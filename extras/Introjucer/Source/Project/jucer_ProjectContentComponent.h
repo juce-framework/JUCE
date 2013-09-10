@@ -73,6 +73,11 @@ public:
     void openInIDE();
     void openInIDE (const String& exporterName);
 
+    void showFilesTab();
+    void showConfigTab();
+    void showProjectSettings();
+    void showModules();
+
     void deleteSelectedTreeItems();
 
     void updateMainWindowTitle();
@@ -82,7 +87,7 @@ public:
     virtual void deleteProjectTabs();
     void rebuildProjectTabs();
 
-    void showBubbleMessage (const Rectangle<int>& pos, const String& text);
+    void showBubbleMessage (const Rectangle<int>&, const String&);
 
     StringArray getExportersWhichCanLaunch() const;
 
