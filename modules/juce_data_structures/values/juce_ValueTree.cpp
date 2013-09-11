@@ -1019,11 +1019,10 @@ class ValueTreeTests  : public UnitTest
 public:
     ValueTreeTests() : UnitTest ("ValueTrees") {}
 
-    static String createRandomIdentifier()
+    static String createRandomIdentifier (Random& r)
     {
         char buffer[50] = { 0 };
         const char chars[] = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-:";
-        Random r;
 
         for (int i = 1 + r.nextInt (numElementsInArray (buffer) - 2); --i >= 0;)
             buffer[i] = chars [r.nextInt (sizeof (chars) - 1)];
@@ -1031,10 +1030,9 @@ public:
         return CharPointer_ASCII (buffer);
     }
 
-    static String createRandomWideCharString()
+    static String createRandomWideCharString (Random& r)
     {
         juce_wchar buffer[50] = { 0 };
-        Random r;
 
         for (int i = r.nextInt (numElementsInArray (buffer) - 1); --i >= 0;)
         {
@@ -1053,20 +1051,19 @@ public:
         return CharPointer_UTF32 (buffer);
     }
 
-    static ValueTree createRandomTree (UndoManager* undoManager, int depth)
+    static ValueTree createRandomTree (UndoManager* undoManager, int depth, Random& r)
     {
-        Random r;
-        ValueTree v (createRandomIdentifier());
+        ValueTree v (createRandomIdentifier (r));
 
         for (int i = r.nextInt (10); --i >= 0;)
         {
             switch (r.nextInt (5))
             {
-                case 0: v.setProperty (createRandomIdentifier(), createRandomWideCharString(), undoManager); break;
-                case 1: v.setProperty (createRandomIdentifier(), r.nextInt(), undoManager); break;
-                case 2: if (depth < 5) v.addChild (createRandomTree (undoManager, depth + 1), r.nextInt (v.getNumChildren() + 1), undoManager); break;
-                case 3: v.setProperty (createRandomIdentifier(), r.nextBool(), undoManager); break;
-                case 4: v.setProperty (createRandomIdentifier(), r.nextDouble(), undoManager); break;
+                case 0: v.setProperty (createRandomIdentifier (r), createRandomWideCharString (r), undoManager); break;
+                case 1: v.setProperty (createRandomIdentifier (r), r.nextInt(), undoManager); break;
+                case 2: if (depth < 5) v.addChild (createRandomTree (undoManager, depth + 1, r), r.nextInt (v.getNumChildren() + 1), undoManager); break;
+                case 3: v.setProperty (createRandomIdentifier (r), r.nextBool(), undoManager); break;
+                case 4: v.setProperty (createRandomIdentifier (r), r.nextDouble(), undoManager); break;
                 default: break;
             }
         }
@@ -1077,11 +1074,12 @@ public:
     void runTest()
     {
         beginTest ("ValueTree");
+        Random r = getRandom();
 
         for (int i = 10; --i >= 0;)
         {
             MemoryOutputStream mo;
-            ValueTree v1 (createRandomTree (nullptr, 0));
+            ValueTree v1 (createRandomTree (nullptr, 0, r));
             v1.writeToStream (mo);
 
             MemoryInputStream mi (mo.getData(), mo.getDataSize(), false);

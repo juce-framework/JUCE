@@ -191,10 +191,9 @@ class DiffTests  : public UnitTest
 public:
     DiffTests() : UnitTest ("TextDiff class") {}
 
-    static String createString()
+    static String createString (Random& r)
     {
         juce_wchar buffer[50] = { 0 };
-        Random r;
 
         for (int i = r.nextInt (49); --i >= 0;)
         {
@@ -224,6 +223,8 @@ public:
     {
         beginTest ("TextDiff");
 
+        Random r = getRandom();
+
         testDiff (String::empty, String::empty);
         testDiff ("x", String::empty);
         testDiff (String::empty, "x");
@@ -234,9 +235,9 @@ public:
 
         for (int i = 5000; --i >= 0;)
         {
-            String s (createString());
-            testDiff (s, createString());
-            testDiff (s + createString(), s + createString());
+            String s (createString (r));
+            testDiff (s, createString (r));
+            testDiff (s + createString (r), s + createString (r));
         }
     }
 };

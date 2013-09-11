@@ -141,8 +141,8 @@ public:
     class WriteThread  : public Thread
     {
     public:
-        WriteThread (AbstractFifo& fifo_, int* buffer_)
-            : Thread ("fifo writer"), fifo (fifo_), buffer (buffer_)
+        WriteThread (AbstractFifo& f, int* b, Random rng)
+            : Thread ("fifo writer"), fifo (f), buffer (b), random (rng)
         {
             startThread();
         }
@@ -155,11 +155,10 @@ public:
         void run()
         {
             int n = 0;
-            Random r;
 
             while (! threadShouldExit())
             {
-                int num = r.nextInt (2000) + 1;
+                int num = random.nextInt (2000) + 1;
 
                 int start1, size1, start2, size2;
                 fifo.prepareToWrite (num, start1, size1, start2, size2);
@@ -181,6 +180,7 @@ public:
     private:
         AbstractFifo& fifo;
         int* buffer;
+        Random random;
     };
 
     void runTest()
@@ -190,10 +190,11 @@ public:
         int buffer [5000];
         AbstractFifo fifo (numElementsInArray (buffer));
 
-        WriteThread writer (fifo, buffer);
+        WriteThread writer (fifo, buffer, getRandom());
 
         int n = 0;
-        Random r;
+        Random r = getRandom();
+        r.combineSeed (12345);
 
         for (int count = 100000; --count >= 0;)
         {

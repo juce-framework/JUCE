@@ -206,7 +206,7 @@ public:
 
         @see String::toHexString()
     */
-    void loadFromHexString (const String& sourceHexString);
+    void loadFromHexString (StringRef sourceHexString);
 
     //==============================================================================
     /** Sets a number of bits in the memory block, treating it as a long binary sequence. */
@@ -235,7 +235,7 @@ public:
 
         @see toBase64Encoding
     */
-    bool fromBase64Encoding  (const String& encodedString);
+    bool fromBase64Encoding  (StringRef encodedString);
 
 
 private:

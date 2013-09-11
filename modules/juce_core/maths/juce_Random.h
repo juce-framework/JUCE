@@ -59,7 +59,6 @@ public:
     ~Random() noexcept;
 
     /** Returns the next random 32 bit integer.
-
         @returns a random integer from the full range 0x80000000 to 0x7fffffff
     */
     int nextInt() noexcept;
@@ -71,29 +70,24 @@ public:
     int nextInt (int maxValue) noexcept;
 
     /** Returns the next 64-bit random number.
-
         @returns a random integer from the full range 0x8000000000000000 to 0x7fffffffffffffff
     */
     int64 nextInt64() noexcept;
 
     /** Returns the next random floating-point number.
-
         @returns a random value in the range 0 to 1.0
     */
     float nextFloat() noexcept;
 
     /** Returns the next random floating-point number.
-
         @returns a random value in the range 0 to 1.0
     */
     double nextDouble() noexcept;
 
-    /** Returns the next random boolean value.
-    */
+    /** Returns the next random boolean value. */
     bool nextBool() noexcept;
 
     /** Returns a BigInteger containing a random number.
-
         @returns a random value in the range 0 to (maximumValue - 1).
     */
     BigInteger nextLargeNumber (const BigInteger& maximumValue);
@@ -107,6 +101,9 @@ public:
     //==============================================================================
     /** Resets this Random object to a given seed value. */
     void setSeed (int64 newSeed) noexcept;
+
+    /** Returns the RNG's current seed. */
+    int64 getSeed() const noexcept                      { return seed; }
 
     /** Merges this object's seed with another value.
         This sets the seed to be a value created by combining the current seed and this

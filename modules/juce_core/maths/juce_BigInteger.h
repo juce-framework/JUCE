@@ -282,7 +282,7 @@ public:
         Specify a base such as 2 (binary), 8 (octal), 10 (decimal), 16 (hex).
         Any invalid characters will be ignored.
     */
-    void parseString (const String& text, int base);
+    void parseString (StringRef text, int base);
 
     //==============================================================================
     /** Turns the number into a block of binary data.

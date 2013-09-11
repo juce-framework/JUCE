@@ -163,6 +163,22 @@ public:
     */
     void logMessage (const String& message);
 
+    /** Returns a shared RNG that all unit tests should use.
+        If a test needs random numbers, it's important that when an error is found, the
+        exact circumstances can be re-created in order to re-test the problem, by
+        repeating the test with the same random seed value.
+        To make this possible, the UnitTestRunner class creates a master seed value
+        for the run, writes this number to the log, and then this method returns a
+        Random object based on that seed. All tests should only use this method to
+        create any Random objects that they need.
+
+        Note that this method will return an identical object each time it's called
+        for a given run, so if you need several different Random objects, the best
+        way to do that is to call Random::combineSeed() on the result to permute it
+        with a constant value.
+    */
+    Random getRandom() const;
+
 private:
     //==============================================================================
     const String name;
@@ -198,13 +214,19 @@ public:
 
         The tests are performed in order, and the results are logged. To run all the
         registered UnitTest objects that exist, use runAllTests().
+
+        If you want to run the tests with a predetermined seed, you can pass that into
+        the randomSeed argument, or pass 0 to have a randomly-generated seed chosen.
     */
-    void runTests (const Array<UnitTest*>& tests);
+    void runTests (const Array<UnitTest*>& tests, int64 randomSeed = 0);
 
     /** Runs all the UnitTest objects that currently exist.
         This calls runTests() for all the objects listed in UnitTest::getAllTests().
+
+        If you want to run the tests with a predetermined seed, you can pass that into
+        the randomSeed argument, or pass 0 to have a randomly-generated seed chosen.
     */
-    void runAllTests();
+    void runAllTests (int64 randomSeed = 0);
 
     /** Sets a flag to indicate whether an assertion should be triggered if a test fails.
         This is true by default.
@@ -274,6 +296,7 @@ private:
     String currentSubCategory;
     OwnedArray <TestResult, CriticalSection> results;
     bool assertOnFailure, logPasses;
+    Random randomForTest;
 
     void beginNewTest (UnitTest* test, const String& subCategory);
     void endTest();

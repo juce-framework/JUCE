@@ -317,11 +317,11 @@ void MemoryBlock::setBitRange (const size_t bitRangeStart, size_t numBits, int b
 }
 
 //==============================================================================
-void MemoryBlock::loadFromHexString (const String& hex)
+void MemoryBlock::loadFromHexString (StringRef hex)
 {
     ensureSize ((size_t) hex.length() >> 1);
     char* dest = data;
-    String::CharPointerType t (hex.getCharPointer());
+    String::CharPointerType t (hex.text);
 
     for (;;)
     {
@@ -373,26 +373,26 @@ String MemoryBlock::toBase64Encoding() const
     return destString;
 }
 
-bool MemoryBlock::fromBase64Encoding (const String& s)
+bool MemoryBlock::fromBase64Encoding (StringRef s)
 {
-    const int startPos = s.indexOfChar ('.') + 1;
+    String::CharPointerType dot (CharacterFunctions::find (s.text, CharPointer_ASCII (".")));
 
-    if (startPos <= 0)
+    if (dot.isEmpty())
         return false;
 
-    const int numBytesNeeded = s.substring (0, startPos - 1).getIntValue();
+    const int numBytesNeeded = String (s.text, dot).getIntValue();
 
     setSize ((size_t) numBytesNeeded, true);
 
-    const int numChars = s.length() - startPos;
-
-    String::CharPointerType srcChars (s.getCharPointer());
-    srcChars += startPos;
+    String::CharPointerType srcChars (dot + 1);
     int pos = 0;
 
-    for (int i = 0; i < numChars; ++i)
+    for (;;)
     {
         const char c = (char) srcChars.getAndAdvance();
+
+        if (c == 0)
+            return true;
 
         for (int j = 0; j < 64; ++j)
         {
@@ -404,6 +404,4 @@ bool MemoryBlock::fromBase64Encoding (const String& s)
             }
         }
     }
-
-    return true;
 }

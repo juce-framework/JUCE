@@ -482,17 +482,16 @@ public:
     template <class F1, class E1, class F2, class E2>
     struct Test5
     {
-        static void test (UnitTest& unitTest)
+        static void test (UnitTest& unitTest, Random& r)
         {
-            test (unitTest, false);
-            test (unitTest, true);
+            test (unitTest, false, r);
+            test (unitTest, true, r);
         }
 
-        static void test (UnitTest& unitTest, bool inPlace)
+        static void test (UnitTest& unitTest, bool inPlace, Random& r)
         {
             const int numSamples = 2048;
             int32 original [numSamples], converted [numSamples], reversed [numSamples];
-            Random r;
 
             {
                 AudioData::Pointer<F1, E1, AudioData::NonInterleaved, AudioData::NonConst> d (original);
@@ -549,49 +548,50 @@ public:
     template <class F1, class E1, class FormatType>
     struct Test3
     {
-        static void test (UnitTest& unitTest)
+        static void test (UnitTest& unitTest, Random& r)
         {
-            Test5 <F1, E1, FormatType, AudioData::BigEndian>::test (unitTest);
-            Test5 <F1, E1, FormatType, AudioData::LittleEndian>::test (unitTest);
+            Test5 <F1, E1, FormatType, AudioData::BigEndian>::test (unitTest, r);
+            Test5 <F1, E1, FormatType, AudioData::LittleEndian>::test (unitTest, r);
         }
     };
 
     template <class FormatType, class Endianness>
     struct Test2
     {
-        static void test (UnitTest& unitTest)
+        static void test (UnitTest& unitTest, Random& r)
         {
-            Test3 <FormatType, Endianness, AudioData::Int8>::test (unitTest);
-            Test3 <FormatType, Endianness, AudioData::UInt8>::test (unitTest);
-            Test3 <FormatType, Endianness, AudioData::Int16>::test (unitTest);
-            Test3 <FormatType, Endianness, AudioData::Int24>::test (unitTest);
-            Test3 <FormatType, Endianness, AudioData::Int32>::test (unitTest);
-            Test3 <FormatType, Endianness, AudioData::Float32>::test (unitTest);
+            Test3 <FormatType, Endianness, AudioData::Int8>::test (unitTest, r);
+            Test3 <FormatType, Endianness, AudioData::UInt8>::test (unitTest, r);
+            Test3 <FormatType, Endianness, AudioData::Int16>::test (unitTest, r);
+            Test3 <FormatType, Endianness, AudioData::Int24>::test (unitTest, r);
+            Test3 <FormatType, Endianness, AudioData::Int32>::test (unitTest, r);
+            Test3 <FormatType, Endianness, AudioData::Float32>::test (unitTest, r);
         }
     };
 
     template <class FormatType>
     struct Test1
     {
-        static void test (UnitTest& unitTest)
+        static void test (UnitTest& unitTest, Random& r)
         {
-            Test2 <FormatType, AudioData::BigEndian>::test (unitTest);
-            Test2 <FormatType, AudioData::LittleEndian>::test (unitTest);
+            Test2 <FormatType, AudioData::BigEndian>::test (unitTest, r);
+            Test2 <FormatType, AudioData::LittleEndian>::test (unitTest, r);
         }
     };
 
     void runTest()
     {
+        Random r = getRandom();
         beginTest ("Round-trip conversion: Int8");
-        Test1 <AudioData::Int8>::test (*this);
+        Test1 <AudioData::Int8>::test (*this, r);
         beginTest ("Round-trip conversion: Int16");
-        Test1 <AudioData::Int16>::test (*this);
+        Test1 <AudioData::Int16>::test (*this, r);
         beginTest ("Round-trip conversion: Int24");
-        Test1 <AudioData::Int24>::test (*this);
+        Test1 <AudioData::Int24>::test (*this, r);
         beginTest ("Round-trip conversion: Int32");
-        Test1 <AudioData::Int32>::test (*this);
+        Test1 <AudioData::Int32>::test (*this, r);
         beginTest ("Round-trip conversion: Float32");
-        Test1 <AudioData::Float32>::test (*this);
+        Test1 <AudioData::Float32>::test (*this, r);
     }
 };
 

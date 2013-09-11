@@ -104,12 +104,12 @@ public:
     void runTest()
     {
         beginTest ("Basics");
-        Random r;
+        Random r = getRandom();
 
         int randomInt = r.nextInt();
         int64 randomInt64 = r.nextInt64();
         double randomDouble = r.nextDouble();
-        String randomString (createRandomWideCharString());
+        String randomString (createRandomWideCharString (r));
 
         MemoryOutputStream mo;
         mo.writeInt (randomInt);
@@ -132,10 +132,9 @@ public:
         expect (mi.readDoubleBigEndian() == randomDouble);
     }
 
-    static String createRandomWideCharString()
+    static String createRandomWideCharString (Random& r)
     {
         juce_wchar buffer [50] = { 0 };
-        Random r;
 
         for (int i = 0; i < numElementsInArray (buffer) - 1; ++i)
         {

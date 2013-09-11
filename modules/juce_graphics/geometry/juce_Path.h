@@ -740,7 +740,7 @@ public:
     /** Restores this path from a string that was created with the toString() method.
         @see toString()
     */
-    void restoreFromString (const String& stringVersion);
+    void restoreFromString (StringRef stringVersion);
 
 
 private:

@@ -86,6 +86,9 @@ public:
     */
     StringRef (const String& string) noexcept;
 
+    /** Creates a StringRef pointer to an empty string. */
+    StringRef() noexcept;
+
     //==============================================================================
     /** Returns a raw pointer to the underlying string data. */
     operator const String::CharPointerType::CharType*() const noexcept  { return text.getAddress(); }

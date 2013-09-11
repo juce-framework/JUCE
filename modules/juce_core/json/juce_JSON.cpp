@@ -616,8 +616,7 @@ public:
     void runTest()
     {
         beginTest ("JSON");
-        Random r;
-        r.setSeedRandomly();
+        Random r = getRandom();
 
         expect (JSON::parse (String::empty) == var::null);
         expect (JSON::parse ("{}").isObject());

@@ -227,9 +227,9 @@ private:
 
 namespace CodeEditorHelpers
 {
-    static int findFirstNonWhitespaceChar (const String& line) noexcept
+    static int findFirstNonWhitespaceChar (StringRef line) noexcept
     {
-        String::CharPointerType t (line.getCharPointer());
+        String::CharPointerType t (line.text);
         int i = 0;
 
         while (! t.isEmpty())
@@ -1418,7 +1418,8 @@ String CodeEditorComponent::getTabString (const int numSpaces) const
 
 int CodeEditorComponent::indexToColumn (int lineNum, int index) const noexcept
 {
-    String::CharPointerType t (document.getLine (lineNum).getCharPointer());
+    const String line (document.getLine (lineNum));
+    String::CharPointerType t (line.getCharPointer());
 
     int col = 0;
     for (int i = 0; i < index; ++i)
@@ -1440,7 +1441,8 @@ int CodeEditorComponent::indexToColumn (int lineNum, int index) const noexcept
 
 int CodeEditorComponent::columnToIndex (int lineNum, int column) const noexcept
 {
-    String::CharPointerType t (document.getLine (lineNum).getCharPointer());
+    const String line (document.getLine (lineNum));
+    String::CharPointerType t (line.getCharPointer());
 
     int i = 0, col = 0;
 

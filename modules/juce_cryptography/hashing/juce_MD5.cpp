@@ -221,10 +221,10 @@ MD5::MD5 (CharPointer_UTF8 utf8) noexcept
     processData (utf8.getAddress(), utf8.sizeInBytes() - 1);
 }
 
-MD5 MD5::fromUTF32 (const String& text)
+MD5 MD5::fromUTF32 (StringRef text)
 {
     MD5Generator generator;
-    String::CharPointerType t (text.getCharPointer());
+    String::CharPointerType t (text.text);
 
     while (! t.isEmpty())
     {

@@ -2075,6 +2075,10 @@ String String::fromUTF8 (const char* const buffer, int bufferSizeBytes)
 #endif
 
 //==============================================================================
+StringRef::StringRef() noexcept  : text ("\0\0\0")
+{
+}
+
 StringRef::StringRef (const String::CharPointerType::CharType* stringLiteral) noexcept  : text (stringLiteral)
 {
     jassert (stringLiteral != nullptr); // This must be a valid string literal, not a null pointer!!
@@ -2086,8 +2090,8 @@ StringRef::StringRef (const String::CharPointerType::CharType* stringLiteral) no
         create them. The source data could be UTF-8, ASCII or one of many local code-pages.
 
         To get around this problem, you must be more explicit when you pass an ambiguous 8-bit
-        string to the String class - so for example if your source data is actually UTF-8,
-        you'd call String (CharPointer_UTF8 ("my utf8 string..")), and it would be able to
+        string to the StringRef class - so for example if your source data is actually UTF-8,
+        you'd call StringRef (CharPointer_UTF8 ("my utf8 string..")), and it would be able to
         correctly convert the multi-byte characters to unicode. It's *highly* recommended that
         you use UTF-8 with escape characters in your source code to represent extended characters,
         because there's no other way to represent these strings in a way that isn't dependent on
@@ -2116,9 +2120,9 @@ public:
     template <class CharPointerType>
     struct TestUTFConversion
     {
-        static void test (UnitTest& test)
+        static void test (UnitTest& test, Random& r)
         {
-            String s (createRandomWideCharString());
+            String s (createRandomWideCharString (r));
 
             typename CharPointerType::CharType buffer [300];
 
@@ -2138,10 +2142,9 @@ public:
         }
     };
 
-    static String createRandomWideCharString()
+    static String createRandomWideCharString (Random& r)
     {
         juce_wchar buffer[50] = { 0 };
-        Random r;
 
         for (int i = 0; i < numElementsInArray (buffer) - 1; ++i)
         {
@@ -2162,6 +2165,8 @@ public:
 
     void runTest()
     {
+        Random r = getRandom();
+
         {
             beginTest ("Basics");
 
@@ -2402,9 +2407,9 @@ public:
         {
             beginTest ("UTF conversions");
 
-            TestUTFConversion <CharPointer_UTF32>::test (*this);
-            TestUTFConversion <CharPointer_UTF8>::test (*this);
-            TestUTFConversion <CharPointer_UTF16>::test (*this);
+            TestUTFConversion <CharPointer_UTF32>::test (*this, r);
+            TestUTFConversion <CharPointer_UTF8>::test (*this, r);
+            TestUTFConversion <CharPointer_UTF16>::test (*this, r);
         }
 
         {

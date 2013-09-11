@@ -169,7 +169,7 @@ public:
     void runTest()
     {
         beginTest ("GZIP");
-        Random rng;
+        Random rng = getRandom();
 
         for (int i = 100; --i >= 0;)
         {
