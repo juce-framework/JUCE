@@ -144,9 +144,12 @@ public:
         Set the group ID back to zero if you want it to act as a normal toggle
         button again.
 
+        The notification argument lets you specify how other buttons should react
+        to being turned on or off in response to this call.
+
         @see getRadioGroupId
     */
-    void setRadioGroupId (int newGroupId);
+    void setRadioGroupId (int newGroupId, NotificationType notification = sendNotification);
 
     /** Returns the ID of the group to which this button belongs.
         (See setRadioGroupId() for an explanation of this).
