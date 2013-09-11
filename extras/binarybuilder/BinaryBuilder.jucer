@@ -8,7 +8,7 @@
               pluginWantsMidiIn="0" pluginProducesMidiOut="0" pluginSilenceInIsSilenceOut="0"
               pluginTailLength="0" pluginEditorRequiresKeys="0" pluginAUExportPrefix="BinaryBuilderAU"
               pluginAUViewClass="BinaryBuilderAU_V1" pluginRTASCategory=""
-              bundleIdentifier="com.rawmaterialsoftware.binarybuilder">
+              bundleIdentifier="com.rawmaterialsoftware.binarybuilder" includeBinaryInAppConfig="1">
   <EXPORTFORMATS>
     <XCODE_MAC targetFolder="Builds/MacOSX" vstFolder="~/SDKs/vstsdk2.4" rtasFolder="~/SDKs/PT_80_SDK"
                juceFolder="../../../juce" objCExtraSuffix="OeJtJb">

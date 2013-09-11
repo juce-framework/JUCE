@@ -150,8 +150,6 @@ bool ResourceFile::writeHeader (MemoryOutputStream& header)
             containsAnyImages = containsAnyImages
                                  || (ImageFileFormat::findImageFormatForStream (fileStream) != nullptr);
 
-            const String tempVariable ("temp_" + String::toHexString (file.hashCode()));
-
             header << "    extern const char*   " << variableName << ";" << newLine;
             header << "    const int            " << variableName << "Size = " << (int) dataSize << ";" << newLine << newLine;
         }
@@ -188,7 +186,7 @@ bool ResourceFile::writeCpp (MemoryOutputStream& cpp, const File& headerFile, in
             containsAnyImages = containsAnyImages
                                  || (ImageFileFormat::findImageFormatForStream (fileStream) != nullptr);
 
-            const String tempVariable ("temp_" + String::toHexString (file.hashCode()));
+            const String tempVariable ("temp_binary_data_" + String (i));
 
             cpp  << newLine << "//================== " << file.getFileName() << " ==================" << newLine
                 << "static const unsigned char " << tempVariable << "[] =" << newLine;
