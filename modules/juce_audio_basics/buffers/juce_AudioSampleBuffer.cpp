@@ -285,9 +285,7 @@ void AudioSampleBuffer::applyGainRamp (const int channel,
     }
 }
 
-void AudioSampleBuffer::applyGain (const int startSample,
-                                   const int numSamples,
-                                   const float gain) noexcept
+void AudioSampleBuffer::applyGain (int startSample, int numSamples, float gain) noexcept
 {
     for (int i = 0; i < numChannels; ++i)
         applyGain (i, startSample, numSamples, gain);
@@ -298,10 +296,8 @@ void AudioSampleBuffer::applyGain (const float gain) noexcept
     applyGain (0, size, gain);
 }
 
-void AudioSampleBuffer::applyGainRamp (const int startSample,
-                                       const int numSamples,
-                                       const float startGain,
-                                       const float endGain) noexcept
+void AudioSampleBuffer::applyGainRamp (int startSample, int numSamples,
+                                       float startGain, float endGain) noexcept
 {
     for (int i = 0; i < numChannels; ++i)
         applyGainRamp (i, startSample, numSamples, startGain, endGain);
@@ -399,11 +395,9 @@ void AudioSampleBuffer::copyFrom (const int destChannel,
     jassert (sourceStartSample >= 0 && sourceStartSample + numSamples <= source.size);
 
     if (numSamples > 0)
-    {
         FloatVectorOperations::copy (channels [destChannel] + destStartSample,
                                      source.channels [sourceChannel] + sourceStartSample,
                                      numSamples);
-    }
 }
 
 void AudioSampleBuffer::copyFrom (const int destChannel,
@@ -416,11 +410,7 @@ void AudioSampleBuffer::copyFrom (const int destChannel,
     jassert (source != nullptr);
 
     if (numSamples > 0)
-    {
-        FloatVectorOperations::copy (channels [destChannel] + destStartSample,
-                                     source,
-                                     numSamples);
-    }
+        FloatVectorOperations::copy (channels [destChannel] + destStartSample, source, numSamples);
 }
 
 void AudioSampleBuffer::copyFrom (const int destChannel,
@@ -482,6 +472,21 @@ void AudioSampleBuffer::copyFromWithRamp (const int destChannel,
     }
 }
 
+void AudioSampleBuffer::reverse (int channel, int startSample, int numSamples) const noexcept
+{
+    jassert (isPositiveAndBelow (channel, numChannels));
+    jassert (startSample >= 0 && startSample + numSamples <= size);
+
+    std::reverse (channels[channel] + startSample,
+                  channels[channel] + startSample + numSamples);
+}
+
+void AudioSampleBuffer::reverse (int startSample, int numSamples) const noexcept
+{
+    for (int i = 0; i < numChannels; ++i)
+        reverse (i, startSample, numSamples);
+}
+
 void AudioSampleBuffer::findMinMax (const int channel,
                                     const int startSample,
                                     int numSamples,
@@ -508,8 +513,7 @@ float AudioSampleBuffer::getMagnitude (const int channel,
     return jmax (mn, -mn, mx, -mx);
 }
 
-float AudioSampleBuffer::getMagnitude (const int startSample,
-                                       const int numSamples) const noexcept
+float AudioSampleBuffer::getMagnitude (int startSample, int numSamples) const noexcept
 {
     float mag = 0.0f;
 
