@@ -139,37 +139,31 @@ public:
 
     //==============================================================================
     /** Returns the red component of this colour.
-
         @returns a value between 0x00 and 0xff.
     */
     uint8 getRed() const noexcept                       { return argb.getRed(); }
 
     /** Returns the green component of this colour.
-
         @returns a value between 0x00 and 0xff.
     */
     uint8 getGreen() const noexcept                     { return argb.getGreen(); }
 
     /** Returns the blue component of this colour.
-
         @returns a value between 0x00 and 0xff.
     */
     uint8 getBlue() const noexcept                      { return argb.getBlue(); }
 
     /** Returns the red component of this colour as a floating point value.
-
         @returns a value between 0.0 and 1.0
     */
     float getFloatRed() const noexcept;
 
     /** Returns the green component of this colour as a floating point value.
-
         @returns a value between 0.0 and 1.0
     */
     float getFloatGreen() const noexcept;
 
     /** Returns the blue component of this colour as a floating point value.
-
         @returns a value between 0.0 and 1.0
     */
     float getFloatBlue() const noexcept;
@@ -217,21 +211,17 @@ public:
     Colour withAlpha (float newAlpha) const noexcept;
 
     /** Returns a colour that's the same colour as this one, but with a modified alpha value.
-
         The new colour's alpha will be this object's alpha multiplied by the value passed-in.
     */
     Colour withMultipliedAlpha (float alphaMultiplier) const noexcept;
 
     //==============================================================================
     /** Returns a colour that is the result of alpha-compositing a new colour over this one.
-
-        If the foreground colour is semi-transparent, it is blended onto this colour
-        accordingly.
+        If the foreground colour is semi-transparent, it is blended onto this colour accordingly.
     */
     Colour overlaidWith (Colour foregroundColour) const noexcept;
 
     /** Returns a colour that lies somewhere between this one and another.
-
         If amountOfOther is zero, the result is 100% this colour, if amountOfOther
         is 1.0, the result is 100% of the other colour.
     */
@@ -339,21 +329,18 @@ public:
 
     //==============================================================================
     /** Returns an opaque shade of grey.
-
         @param brightness the level of grey to return - 0 is black, 1.0 is white
     */
     static Colour greyLevel (float brightness) noexcept;
 
     //==============================================================================
     /** Returns a stringified version of this colour.
-
         The string can be turned back into a colour using the fromString() method.
     */
     String toString() const;
 
-    /** Reads the colour from a string that was created with toString().
-    */
-    static Colour fromString (const String& encodedColourString);
+    /** Reads the colour from a string that was created with toString(). */
+    static Colour fromString (StringRef encodedColourString);
 
     /** Returns the colour as a hex string in the form RRGGBB or AARRGGBB. */
     String toDisplayString (bool includeAlphaValue) const;

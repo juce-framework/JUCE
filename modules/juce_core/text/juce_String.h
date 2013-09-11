@@ -950,7 +950,6 @@ public:
     int getIntValue() const noexcept;
 
     /** Reads the value of the string as a decimal number (up to 64 bits in size).
-
         @returns the value of the string as a 64 bit signed base-10 integer.
     */
     int64 getLargeIntValue() const noexcept;

@@ -280,6 +280,26 @@ public:
         return isNeg ? -v : v;
     }
 
+    template <typename ResultType>
+    struct HexParser
+    {
+        template <typename CharPointerType>
+        static ResultType parse (CharPointerType t) noexcept
+        {
+            ResultType result = 0;
+
+            while (! t.isEmpty())
+            {
+                const int hexValue = CharacterFunctions::getHexDigitValue (t.getAndAdvance());
+
+                if (hexValue >= 0)
+                    result = (result << 4) | hexValue;
+            }
+
+            return result;
+        }
+    };
+
     //==============================================================================
     /** Counts the number of characters in a given string, stopping if the count exceeds
         a specified limit. */

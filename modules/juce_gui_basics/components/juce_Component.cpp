@@ -184,12 +184,30 @@ struct Component::ComponentHelpers
     }
    #endif
 
-    static Identifier getColourPropertyId (const int colourId)
+    static Identifier getColourPropertyId (int colourId)
     {
-        String s;
-        s.preallocateBytes (32);
-        s << "jcclr_" << String::toHexString (colourId);
-        return s;
+        char reversedHex[32];
+        char* t = reversedHex;
+
+        for (unsigned int v = (unsigned int) colourId;;)
+        {
+            *t++ = "0123456789abcdef" [(int) (v & 15)];
+            v >>= 4;
+
+            if (v == 0)
+                break;
+        }
+
+        char destBuffer[32];
+        char* dest = destBuffer;
+        memcpy (dest, "jcclr_", 6);
+        dest += 6;
+
+        while (t > reversedHex)
+            *dest++ = *--t;
+
+        *dest++ = 0;
+        return destBuffer;
     }
 
     //==============================================================================

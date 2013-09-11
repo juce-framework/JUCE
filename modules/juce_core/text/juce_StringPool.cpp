@@ -48,33 +48,32 @@ namespace StringPoolHelpers
                 strings.insert (start, newString);
                 return strings.getReference (start).getCharPointer();
             }
-            else
+
+            const String& startString = strings.getReference (start);
+
+            if (startString == newString)
+                return startString.getCharPointer();
+
+            const int halfway = (start + end) >> 1;
+
+            if (halfway == start)
             {
-                const String& startString = strings.getReference (start);
+                if (startString.compare (newString) < 0)
+                    ++start;
 
-                if (startString == newString)
-                    return startString.getCharPointer();
-
-                const int halfway = (start + end) >> 1;
-
-                if (halfway == start)
-                {
-                    if (startString.compare (newString) < 0)
-                        ++start;
-
-                    strings.insert (start, newString);
-                    return strings.getReference (start).getCharPointer();
-                }
-
-                const int comp = strings.getReference (halfway).compare (newString);
-
-                if (comp == 0)
-                    return strings.getReference (halfway).getCharPointer();
-                else if (comp < 0)
-                    start = halfway;
-                else
-                    end = halfway;
+                strings.insert (start, newString);
+                return strings.getReference (start).getCharPointer();
             }
+
+            const int comp = strings.getReference (halfway).compare (newString);
+
+            if (comp == 0)
+                return strings.getReference (halfway).getCharPointer();
+
+            if (comp < 0)
+                start = halfway;
+            else
+                end = halfway;
         }
     }
 }

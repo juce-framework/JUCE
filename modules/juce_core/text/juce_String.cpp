@@ -1825,55 +1825,27 @@ double String::getDoubleValue() const noexcept
 static const char hexDigits[] = "0123456789abcdef";
 
 template <typename Type>
-struct HexConverter
+static String hexToString (Type v)
 {
-    static String hexToString (Type v)
+    String::CharPointerType::CharType buffer[32];
+    String::CharPointerType::CharType* const end = buffer + numElementsInArray (buffer) - 1;
+    String::CharPointerType::CharType* t = end;
+    *t-- = 0;
+
+    do
     {
-        char buffer[32];
-        char* const end = buffer + 32;
-        char* t = end;
-        *--t = 0;
+        *--t = hexDigits [(int) (v & 15)];
+        v >>= 4;
 
-        do
-        {
-            *--t = hexDigits [(int) (v & 15)];
-            v >>= 4;
+    } while (v != 0);
 
-        } while (v != 0);
-
-        return String (t, (size_t) (end - t) - 1);
-    }
-
-    static Type stringToHex (String::CharPointerType t) noexcept
-    {
-        Type result = 0;
-
-        while (! t.isEmpty())
-        {
-            const int hexValue = CharacterFunctions::getHexDigitValue (t.getAndAdvance());
-
-            if (hexValue >= 0)
-                result = (result << 4) | hexValue;
-        }
-
-        return result;
-    }
-};
-
-String String::toHexString (const int number)
-{
-    return HexConverter <unsigned int>::hexToString ((unsigned int) number);
+    return String (String::CharPointerType (t),
+                   String::CharPointerType (end));
 }
 
-String String::toHexString (const int64 number)
-{
-    return HexConverter <uint64>::hexToString ((uint64) number);
-}
-
-String String::toHexString (const short number)
-{
-    return toHexString ((int) (unsigned short) number);
-}
+String String::toHexString (int number)       { return hexToString ((unsigned int) number); }
+String String::toHexString (int64 number)     { return hexToString ((uint64) number); }
+String String::toHexString (short number)     { return toHexString ((int) (unsigned short) number); }
 
 String String::toHexString (const void* const d, const int size, const int groupSize)
 {
@@ -1903,8 +1875,8 @@ String String::toHexString (const void* const d, const int size, const int group
     return s;
 }
 
-int   String::getHexValue32() const noexcept    { return HexConverter<int>  ::stringToHex (text); }
-int64 String::getHexValue64() const noexcept    { return HexConverter<int64>::stringToHex (text); }
+int   String::getHexValue32() const noexcept    { return CharacterFunctions::HexParser<int>  ::parse (text); }
+int64 String::getHexValue64() const noexcept    { return CharacterFunctions::HexParser<int64>::parse (text); }
 
 //==============================================================================
 String String::createStringFromData (const void* const unknownData, const int size)
