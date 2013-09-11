@@ -1830,7 +1830,7 @@ static String hexToString (Type v)
     String::CharPointerType::CharType buffer[32];
     String::CharPointerType::CharType* const end = buffer + numElementsInArray (buffer) - 1;
     String::CharPointerType::CharType* t = end;
-    *t-- = 0;
+    *t = 0;
 
     do
     {
