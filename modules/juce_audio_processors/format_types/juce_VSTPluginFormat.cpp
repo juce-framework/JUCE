@@ -2115,10 +2115,8 @@ private:
     // window is deleted more than once.
     bool shouldAvoidDeletingWindow() const
     {
-        PluginDescription desc;
-        plugin.fillInPluginDescription (desc);
-
-        return desc.manufacturerName.containsIgnoreCase ("Loud Technologies");
+        return plugin.getPluginDescription()
+            .manufacturerName.containsIgnoreCase ("Loud Technologies");
     }
 
     // This is an old workaround for some plugins that need a repaint when their
@@ -2863,7 +2861,7 @@ void VSTPluginFormat::setExtraFunctions (AudioPluginInstance* plugin, ExtraFunct
         vst->extraFunctions = f;
 }
 
-VstIntPtr JUCE_CALLTYPE VSTPluginFormat::dispatcher (AudioPluginInstance* plugin, int32 opcode, int32 index, VstIntPtr value, void* ptr, float opt)
+VSTPluginFormat::VstIntPtr JUCE_CALLTYPE VSTPluginFormat::dispatcher (AudioPluginInstance* plugin, int32 opcode, int32 index, VstIntPtr value, void* ptr, float opt)
 {
     if (VSTPluginInstance* vst = dynamic_cast <VSTPluginInstance*> (plugin))
         return vst->dispatch (opcode, index, value, ptr, opt);

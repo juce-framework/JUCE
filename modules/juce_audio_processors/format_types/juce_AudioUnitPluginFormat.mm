@@ -1614,10 +1614,7 @@ void AudioUnitPluginFormat::findAllTypesForFile (OwnedArray <PluginDescription>&
         ScopedPointer <AudioPluginInstance> createdInstance (createInstanceFromDescription (desc));
 
         if (AudioUnitPluginInstance* const auInstance = dynamic_cast <AudioUnitPluginInstance*> (createdInstance.get()))
-        {
-            auInstance->fillInPluginDescription (desc);
-            results.add (new PluginDescription (desc));
-        }
+            results.add (new PluginDescription (auInstance->getPluginDescription()));
     }
     catch (...)
     {

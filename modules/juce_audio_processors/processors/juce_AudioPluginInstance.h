@@ -50,6 +50,16 @@ public:
     /** Fills-in the appropriate parts of this plugin description object. */
     virtual void fillInPluginDescription (PluginDescription& description) const = 0;
 
+    /** Returns a PluginDescription for this plugin.
+        This is just a convenience method to avoid calling fillInPluginDescription.
+    */
+    PluginDescription getPluginDescription() const
+    {
+        PluginDescription desc;
+        fillInPluginDescription (desc);
+        return desc;
+    }
+
     /** Returns a pointer to some kind of platform-specific data about the plugin.
         E.g. For a VST, this value can be cast to an AEffect*. For an AudioUnit, it can be
         cast to an AudioUnit handle.
