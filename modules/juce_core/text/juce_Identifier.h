@@ -83,7 +83,7 @@ public:
     const String::CharPointerType getCharPointer() const noexcept       { return name; }
 
     /** Returns this identifier as a StringRef. */
-    operator StringRef() const noexcept                                 { return name.getAddress(); }
+    operator StringRef() const noexcept                                 { return name; }
 
     /** Returns true if this Identifier is not null */
     bool isValid() const noexcept                                       { return name.getAddress() != nullptr; }

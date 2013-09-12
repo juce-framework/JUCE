@@ -29,7 +29,6 @@
 #ifndef JUCE_STRINGREF_H_INCLUDED
 #define JUCE_STRINGREF_H_INCLUDED
 
-
 //==============================================================================
 /**
     A simple class for holding temporary references to a string literal or String.
@@ -71,7 +70,7 @@ public:
         ensure that the data does not change during the lifetime of the StringRef.
         Note that this pointer not be null!
     */
-    StringRef (const String::CharPointerType::CharType* stringLiteral) noexcept;
+    StringRef (const char* stringLiteral) noexcept;
 
     /** Creates a StringRef from a raw char pointer.
         The StringRef object does NOT take ownership or copy this data, so you must
@@ -115,6 +114,12 @@ public:
     //==============================================================================
     /** The text that is referenced. */
     String::CharPointerType text;
+
+    #if JUCE_STRING_UTF_TYPE != 8 && ! defined (DOXYGEN)
+     // Sorry, non-UTF8 people, you're unable to take advantage of StringRef, because
+     // you've chosen a character encoding that doesn't match C++ string literals.
+     String stringCopy;
+    #endif
 };
 
 //==============================================================================

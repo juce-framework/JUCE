@@ -738,15 +738,20 @@ JUCE_API String& JUCE_CALLTYPE operator<< (String& s1, const double number)     
 
 JUCE_API OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, const String& text)
 {
-    const size_t numBytes = text.getNumBytesAsUTF8();
+    return operator<< (stream, StringRef (text));
+}
+
+JUCE_API OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, StringRef text)
+{
+    const size_t numBytes = CharPointer_UTF8::getBytesRequiredFor (text.text);
 
    #if (JUCE_STRING_UTF_TYPE == 8)
-    stream.write (text.getCharPointer().getAddress(), numBytes);
+    stream.write (text.text.getAddress(), numBytes);
    #else
     // (This avoids using toUTF8() to prevent the memory bloat that it would leave behind
     // if lots of large, persistent strings were to be written to streams).
     HeapBlock<char> temp (numBytes + 1);
-    CharPointer_UTF8 (temp).writeAll (text.getCharPointer());
+    CharPointer_UTF8 (temp).writeAll (text.text);
     stream.write (temp, numBytes);
    #endif
 
@@ -2047,12 +2052,21 @@ String String::fromUTF8 (const char* const buffer, int bufferSizeBytes)
 #endif
 
 //==============================================================================
-StringRef::StringRef() noexcept  : text ("\0\0\0")
+StringRef::StringRef() noexcept  : text ((const String::CharPointerType::CharType*) "\0\0\0")
 {
 }
 
-StringRef::StringRef (const String::CharPointerType::CharType* stringLiteral) noexcept  : text (stringLiteral)
+StringRef::StringRef (const char* stringLiteral) noexcept
+   #if JUCE_STRING_UTF_TYPE != 8
+    : text (nullptr), stringCopy (stringLiteral)
+   #else
+    : text (stringLiteral)
+   #endif
 {
+   #if JUCE_STRING_UTF_TYPE != 8
+    text = stringCopy.getCharPointer();
+   #endif
+
     jassert (stringLiteral != nullptr); // This must be a valid string literal, not a null pointer!!
 
    #if JUCE_NATIVE_WCHAR_IS_UTF8
@@ -2079,6 +2093,7 @@ StringRef::StringRef (String::CharPointerType stringLiteral) noexcept  : text (s
 }
 
 StringRef::StringRef (const String& string) noexcept  : text (string.getCharPointer()) {}
+
 
 //==============================================================================
 //==============================================================================
