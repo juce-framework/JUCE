@@ -154,7 +154,8 @@ void Button::setToggleState (const bool shouldBeOn, const NotificationType notif
                 return;
         }
 
-        sendStateMessage();
+        if (notification != dontSendNotification)
+            sendStateMessage();
     }
 }
 
