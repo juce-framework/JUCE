@@ -179,7 +179,7 @@ File File::getSpecialLocation (const SpecialLocationType type)
         case userMoviesDirectory:             return resolveXDGFolder ("XDG_VIDEOS_DIR",    "~");
         case userPicturesDirectory:           return resolveXDGFolder ("XDG_PICTURES_DIR",  "~");
         case userDesktopDirectory:            return resolveXDGFolder ("XDG_DESKTOP_DIR",   "~/Desktop");
-        case userApplicationDataDirectory:    return File ("~");
+        case userApplicationDataDirectory:    return resolveXDGFolder ("XDG_CONFIG_HOME",   "~");
         case commonDocumentsDirectory:
         case commonApplicationDataDirectory:  return File ("/var");
         case globalApplicationsDirectory:     return File ("/usr");

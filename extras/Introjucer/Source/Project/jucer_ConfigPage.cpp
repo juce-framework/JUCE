@@ -292,7 +292,7 @@ namespace ProjectSettingsTreeClasses
         String getRenamingName() const override { return getDisplayName(); }
         String getDisplayName() const override  { return "Modules"; }
         void setName (const String&) override   {}
-        bool isMissing() override                       { return false; }
+        bool isMissing() override               { return false; }
         Icon getIcon() const override           { return Icon (getIcons().graph, getContrastingColour (Colours::red, 0.5f)); }
         void showDocument() override            { showSettingsPage (new SettingsComp (project)); }
 
