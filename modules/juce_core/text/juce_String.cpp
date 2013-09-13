@@ -580,6 +580,11 @@ bool String::equalsIgnoreCase (const char* const t) const noexcept
                         : isEmpty();
 }
 
+bool String::equalsIgnoreCase (StringRef t) const noexcept
+{
+    return text.compareIgnoreCase (t.text) == 0;
+}
+
 bool String::equalsIgnoreCase (const String& other) const noexcept
 {
     return text == other.text

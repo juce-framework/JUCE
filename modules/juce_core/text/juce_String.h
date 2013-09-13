@@ -297,6 +297,9 @@ public:
     bool equalsIgnoreCase (const String& other) const noexcept;
 
     /** Case-insensitive comparison with another string. */
+    bool equalsIgnoreCase (StringRef other) const noexcept;
+
+    /** Case-insensitive comparison with another string. */
     bool equalsIgnoreCase (const wchar_t* other) const noexcept;
 
     /** Case-insensitive comparison with another string. */
