@@ -2440,7 +2440,10 @@ private:
 
             case WM_SHOWWINDOW:
                 if (wParam != 0)
+                {
+                    component.setVisible (true);
                     handleBroughtToFront();
+                }
 
                 break;
 
