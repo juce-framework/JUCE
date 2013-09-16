@@ -380,7 +380,7 @@ File File::getChildFile (StringRef relativePath) const
                 if (lastSlash >= 0)
                     path = path.substring (0, lastSlash);
 
-                relativePath = relativePath.text + 3;
+                relativePath = relativePath.text + (thirdChar == 0 ? 2 : 3);
             }
             else
             {
