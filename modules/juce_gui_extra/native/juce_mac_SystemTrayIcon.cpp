@@ -44,6 +44,11 @@ public:
 
         statusItem = [[[NSStatusBar systemStatusBar] statusItemWithLength: NSSquareStatusItemLength] retain];
         [statusItem setView: view];
+
+        [[NSNotificationCenter defaultCenter]  addObserver: view
+                                                  selector: @selector (frameChanged:)
+                                                      name: NSWindowDidMoveNotification
+                                                    object: nil];
     }
 
     ~Pimpl()
@@ -88,10 +93,6 @@ public:
             if (([e modifierFlags] & NSCommandKeyMask) != 0)
                 eventMods = eventMods.withFlags (ModifierKeys::commandModifier);
 
-            NSRect r = [[e window] frame];
-            r.origin.y = [[[NSScreen screens] objectAtIndex: 0] frame].size.height - r.origin.y - r.size.height;
-            owner.setBounds (convertToRectInt (r));
-
             const Time now (Time::getCurrentTime());
 
             MouseInputSource mouseSource = Desktop::getInstance().getMainMouseSource();
@@ -117,9 +118,10 @@ public:
         }
     }
 
-private:
     SystemTrayIconComponent& owner;
     NSStatusItem* statusItem;
+
+private:
     NSImage* statusIcon;
     NSControl* view;
     bool isHighlighted;
@@ -139,6 +141,7 @@ private:
             addMethod (@selector (mouseDown:),      handleEventDown, "v@:@");
             addMethod (@selector (rightMouseDown:), handleEventDown, "v@:@");
             addMethod (@selector (drawRect:),       drawRect,        "v@:@");
+            addMethod (@selector (frameChanged:),   frameChanged,    "v@:@");
 
             registerClass();
         }
@@ -178,6 +181,17 @@ private:
                       fraction: 1.0f];
             }
         }
+
+        static void frameChanged (id self, SEL, NSNotification*)
+        {
+            if (Pimpl* const owner = getOwner (self))
+            {
+                NSRect r = [[[owner->statusItem view] window] frame];
+                NSRect sr = [[[NSScreen screens] objectAtIndex: 0] frame];
+                r.origin.y = sr.size.height - r.origin.y - r.size.height;
+                owner->owner.setBounds (convertToRectInt (r));
+            }
+        }
     };
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Pimpl)
@@ -203,4 +217,25 @@ void SystemTrayIconComponent::setIconImage (const Image& newImage)
 void SystemTrayIconComponent::setIconTooltip (const String&)
 {
     // xxx not yet implemented!
+}
+
+void SystemTrayIconComponent::setHighlighted (bool highlight)
+{
+    if (pimpl != nullptr)
+        pimpl->setHighlighted (highlight);
+}
+
+void SystemTrayIconComponent::showInfoBubble (const String& /*title*/, const String& /*content*/)
+{
+    // xxx Not implemented!
+}
+
+void SystemTrayIconComponent::hideInfoBubble()
+{
+    // xxx Not implemented!
+}
+
+void* SystemTrayIconComponent::getNativeHandle() const
+{
+    return pimpl != nullptr ? pimpl->statusItem : nullptr;
 }

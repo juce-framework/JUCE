@@ -42,6 +42,23 @@ namespace juce {
 #endif
 
 //==============================================================================
+static CGFloat getMainScreenHeight() noexcept
+{
+    return [[[NSScreen screens] objectAtIndex: 0] frame].size.height;
+}
+
+static void flipScreenRect (NSRect& r) noexcept
+{
+    r.origin.y = getMainScreenHeight() - (r.origin.y + r.size.height);
+}
+
+static NSRect flippedScreenRect (NSRect r) noexcept
+{
+    flipScreenRect (r);
+    return r;
+}
+
+//==============================================================================
 class NSViewComponentPeer  : public ComponentPeer
 {
 public:
@@ -107,7 +124,7 @@ public:
         {
             r.origin.x = (CGFloat) component.getX();
             r.origin.y = (CGFloat) component.getY();
-            r.origin.y = [[[NSScreen screens] objectAtIndex: 0] frame].size.height - (r.origin.y + r.size.height);
+            flipScreenRect (r);
 
             window = [createWindowInstance() initWithContentRect: r
                                                        styleMask: getNSWindowStyleMask (windowStyleFlags)
@@ -241,9 +258,7 @@ public:
         }
         else
         {
-            r.origin.y = [[[NSScreen screens] objectAtIndex: 0] frame].size.height - (r.origin.y + r.size.height);
-
-            [window setFrame: [window frameRectForContentRect: r]
+            [window setFrame: [window frameRectForContentRect: flippedScreenRect (r)]
                      display: true];
         }
     }
@@ -263,7 +278,7 @@ public:
             r.origin = [viewWindow convertBaseToScreen: r.origin];
            #endif
 
-            r.origin.y = [[[NSScreen screens] objectAtIndex: 0] frame].size.height - r.origin.y - r.size.height;
+            flipScreenRect (r);
         }
         else
         {
@@ -875,13 +890,9 @@ public:
             #endif
             )
         {
-            NSRect current = [window frame];
-            current.origin.y = [[[NSScreen screens] objectAtIndex: 0] frame].size.height - current.origin.y - current.size.height;
+            Rectangle<int> pos      (convertToRectInt (flippedScreenRect (r)));
+            Rectangle<int> original (convertToRectInt (flippedScreenRect ([window frame])));
 
-            r.origin.y = [[[NSScreen screens] objectAtIndex: 0] frame].size.height - r.origin.y - r.size.height;
-
-            Rectangle<int> pos (convertToRectInt (r));
-            Rectangle<int> original (convertToRectInt (current));
             const Rectangle<int> screenBounds (Desktop::getInstance().getDisplays().getTotalBounds (true));
 
            #if defined (MAC_OS_X_VERSION_10_6) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_6
@@ -898,15 +909,12 @@ public:
             {
                 constrainer->checkBounds (pos, original, screenBounds,
                                           pos.getY() != original.getY() && pos.getBottom() == original.getBottom(),
-                                          pos.getX() != original.getX() && pos.getRight() == original.getRight(),
+                                          pos.getX() != original.getX() && pos.getRight()  == original.getRight(),
                                           pos.getY() == original.getY() && pos.getBottom() != original.getBottom(),
-                                          pos.getX() == original.getX() && pos.getRight() != original.getRight());
+                                          pos.getX() == original.getX() && pos.getRight()  != original.getRight());
             }
 
-            r.origin.x = pos.getX();
-            r.origin.y = [[[NSScreen screens] objectAtIndex: 0] frame].size.height - r.size.height - pos.getY();
-            r.size.width = pos.getWidth();
-            r.size.height = pos.getHeight();
+            r = flippedScreenRect (makeNSRect (pos));
         }
 
         return r;
@@ -1578,17 +1586,8 @@ private:
     static NSRect firstRectForCharacterRange (id self, SEL, NSRange)
     {
         if (NSViewComponentPeer* const owner = getOwner (self))
-        {
             if (Component* const comp = dynamic_cast <Component*> (owner->findCurrentTextInputTarget()))
-            {
-                const Rectangle<int> bounds (comp->getScreenBounds());
-
-                return NSMakeRect (bounds.getX(),
-                                   [[[NSScreen screens] objectAtIndex: 0] frame].size.height - bounds.getY(),
-                                   bounds.getWidth(),
-                                   bounds.getHeight());
-            }
-        }
+                return flippedScreenRect (makeNSRect (comp->getScreenBounds()));
 
         return NSZeroRect;
     }

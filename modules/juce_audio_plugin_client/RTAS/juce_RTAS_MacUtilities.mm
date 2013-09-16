@@ -69,7 +69,7 @@ void* attachSubWindow (void* hostWindowRef, Component* comp)
         f.size.height = comp->getHeight();
         [content setFrame: f];
 
-        const int mainScreenHeight = [[[NSScreen screens] objectAtIndex: 0] frame].size.height;
+        const int mainScreenHeight = getMainScreenHeight();
 
        #if WINDOWPOSITION_BODGE
         {

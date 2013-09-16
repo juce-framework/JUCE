@@ -28,8 +28,7 @@ extern Display* display;
 class SystemTrayIconComponent::Pimpl
 {
 public:
-    Pimpl (const Image& image_, Window windowH)
-        : image (image_)
+    Pimpl (const Image& im, Window windowH)  : image (im)
     {
         ScopedXLock xlock;
 
@@ -117,7 +116,27 @@ void SystemTrayIconComponent::paint (Graphics& g)
                            RectanglePlacement::xLeft | RectanglePlacement::yTop | RectanglePlacement::onlyReduceInSize, false);
 }
 
-void SystemTrayIconComponent::setIconTooltip (const String& /* tooltip */)
+void SystemTrayIconComponent::setIconTooltip (const String& /*tooltip*/)
 {
-    // xxx not yet implemented!
+    // xxx Not implemented!
+}
+
+void SystemTrayIconComponent::setHighlighted (bool)
+{
+    // xxx Not implemented!
+}
+
+void SystemTrayIconComponent::showInfoBubble (const String& /*title*/, const String& /*content*/)
+{
+    // xxx Not implemented!
+}
+
+void SystemTrayIconComponent::hideInfoBubble()
+{
+    // xxx Not implemented!
+}
+
+void* SystemTrayIconComponent::getNativeHandle() const
+{
+    return getWindowHandle();
 }

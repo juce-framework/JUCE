@@ -48,7 +48,7 @@ public:
         iconData.uCallbackMessage = WM_TRAYNOTIFY;
         iconData.hIcon = hicon;
 
-        Shell_NotifyIcon (NIM_ADD, &iconData);
+        notify (NIM_ADD);
 
         // In order to receive the "TaskbarCreated" message, we need to request that it's not filtered out.
         // (Need to load dynamically, as ChangeWindowMessageFilter is only available in Vista and later)
@@ -64,7 +64,7 @@ public:
         SetWindowLongPtr (iconData.hWnd, GWLP_WNDPROC, (LONG_PTR) originalWndProc);
 
         iconData.uFlags = 0;
-        Shell_NotifyIcon (NIM_DELETE, &iconData);
+        notify (NIM_DELETE);
         DestroyIcon (iconData.hIcon);
     }
 
@@ -74,7 +74,7 @@ public:
 
         iconData.hIcon = hicon;
         iconData.uFlags = NIF_ICON | NIF_MESSAGE | NIF_TIP;
-        Shell_NotifyIcon (NIM_MODIFY, &iconData);
+        notify (NIM_MODIFY);
 
         DestroyIcon (oldIcon);
     }
@@ -83,7 +83,7 @@ public:
     {
         iconData.uFlags = NIF_TIP;
         toolTip.copyToUTF16 (iconData.szTip, sizeof (iconData.szTip) - 1);
-        Shell_NotifyIcon (NIM_MODIFY, &iconData);
+        notify (NIM_MODIFY);
     }
 
     void handleTaskBarEvent (const LPARAM lParam)
@@ -162,18 +162,29 @@ public:
         else if (message == taskbarCreatedMessage)
         {
             iconData.uFlags = NIF_ICON | NIF_MESSAGE | NIF_TIP;
-            Shell_NotifyIcon (NIM_ADD, &iconData);
+            notify (NIM_ADD);
         }
 
         return CallWindowProc (originalWndProc, hwnd, message, wParam, lParam);
     }
 
-private:
+    void showBubble (const String& title, const String& content)
+    {
+        iconData.uFlags = 0x10 /*NIF_INFO*/;
+        title.copyToUTF16 (iconData.szInfoTitle, sizeof (iconData.szInfoTitle) - 1);
+        content.copyToUTF16 (iconData.szInfo, sizeof (iconData.szInfo) - 1);
+        notify (NIM_MODIFY);
+    }
+
     SystemTrayIconComponent& owner;
     NOTIFYICONDATA iconData;
+
+private:
     WNDPROC originalWndProc;
     const DWORD taskbarCreatedMessage;
     enum { WM_TRAYNOTIFY = WM_USER + 100 };
+
+    void notify (DWORD message) noexcept    { Shell_NotifyIcon (message, &iconData); }
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Pimpl)
 };
@@ -200,4 +211,25 @@ void SystemTrayIconComponent::setIconTooltip (const String& tooltip)
 {
     if (pimpl != nullptr)
         pimpl->setToolTip (tooltip);
+}
+
+void SystemTrayIconComponent::setHighlighted (bool)
+{
+    // N/A on Windows.
+}
+
+void SystemTrayIconComponent::showInfoBubble (const String& title, const String& content)
+{
+    if (pimpl != nullptr)
+        pimpl->showBubble (title, content);
+}
+
+void SystemTrayIconComponent::hideInfoBubble()
+{
+    showInfoBubble (String::empty, String::empty);
+}
+
+void* SystemTrayIconComponent::getNativeHandle() const
+{
+    return pimpl != nullptr ? &(pimpl->iconData) : nullptr;
 }
