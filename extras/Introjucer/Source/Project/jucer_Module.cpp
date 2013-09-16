@@ -794,6 +794,11 @@ EnabledModuleList::EnabledModuleList (Project& p, const ValueTree& s)
 {
 }
 
+EnabledModuleList::EnabledModuleList (const EnabledModuleList& other)
+    : project (other.project), state (other.state)
+{
+}
+
 const Identifier EnabledModuleList::modulesGroupTag ("MODULES");
 const Identifier EnabledModuleList::moduleTag ("MODULE");
 

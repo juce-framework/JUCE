@@ -153,6 +153,7 @@ class EnabledModuleList
 {
 public:
     EnabledModuleList (Project&, const ValueTree&);
+    EnabledModuleList (const EnabledModuleList&);
 
     bool isModuleEnabled (const String& moduleID) const;
     Value shouldShowAllModuleFilesInProject (const String& moduleID);
@@ -175,6 +176,8 @@ private:
     ValueTree state;
 
     UndoManager* getUndoManager() const     { return project.getUndoManagerFor (state); }
+
+    EnabledModuleList& operator= (const EnabledModuleList&) JUCE_DELETED_FUNCTION;
 };
 
 
