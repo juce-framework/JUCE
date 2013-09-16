@@ -85,13 +85,13 @@ public:
         OwnedArray<LibraryModule> modules;
 
         {
-            ModuleList moduleList;
-            Result scanResult (moduleList.rescan (ModuleList::getDefaultModulesFolder (&project)));
+            AvailableModuleList moduleList;
+            Result scanResult (moduleList.rescan (AvailableModuleList::getDefaultModulesFolder (&project)));
 
             if (scanResult.failed())
                 return scanResult;
 
-            project.createRequiredModules (moduleList, modules);
+            project.getModules().createRequiredModules (moduleList, modules);
         }
 
         if (errors.size() == 0)  writeAppConfigFile (modules, appConfigUserContent);

@@ -170,12 +170,12 @@ struct TranslationHelpers
     {
         scanFilesForTranslations (strings, project.getMainGroup());
 
-        const File modulesFolder (ModuleList::getDefaultModulesFolder (&project));
+        const File modulesFolder (AvailableModuleList::getDefaultModulesFolder (&project));
 
         OwnedArray<LibraryModule> modules;
-        ModuleList moduleList;
+        AvailableModuleList moduleList;
         moduleList.rescan (modulesFolder);
-        project.createRequiredModules (moduleList, modules);
+        project.getModules().createRequiredModules (moduleList, modules);
 
         for (int j = 0; j < modules.size(); ++j)
         {

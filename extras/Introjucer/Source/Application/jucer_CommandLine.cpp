@@ -213,12 +213,12 @@ namespace
         hideDockIcon();
 
         std::cout << "Downloading list of available modules..." << std::endl;
-        ModuleList list;
+        AvailableModuleList list;
         list.loadFromWebsite();
 
         for (int i = 0; i < list.modules.size(); ++i)
         {
-            const ModuleList::Module* m = list.modules.getUnchecked(i);
+            const AvailableModuleList::Module* m = list.modules.getUnchecked(i);
 
             std::cout << m->uid << ": " << m->version << std::endl;
         }
@@ -248,13 +248,15 @@ namespace
                   << "Name: " << proj.getTitle() << std::endl
                   << "UID: " << proj.getProjectUID() << std::endl;
 
-        const int numModules = proj.getNumModules();
+        EnabledModuleList modules (proj.getModules());
+
+        const int numModules = modules.getNumModules();
         if (numModules > 0)
         {
             std::cout << "Modules:" << std::endl;
 
             for (int i = 0; i < numModules; ++i)
-                std::cout << "  " << proj.getModuleID (i) << std::endl;
+                std::cout << "  " << modules.getModuleID (i) << std::endl;
         }
 
         return 0;

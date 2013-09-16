@@ -131,7 +131,7 @@ struct NewProjectWizardClasses
                                       .withFileExtension (Project::projectFileExtension);
 
             ScopedPointer<Project> project (new Project (projectFile));
-            project->addDefaultModules (true);
+            project->getModules().addDefaultModules (true);
 
             if (failedFiles.size() == 0)
             {
@@ -359,7 +359,7 @@ struct NewProjectWizardClasses
             File editorHFile   = editorCppFile.withFileExtension (".h");
 
             project.getProjectTypeValue() = ProjectType::getAudioPluginTypeName();
-            project.addModule ("juce_audio_plugin_client", true);
+            project.getModules().addModule ("juce_audio_plugin_client", true);
 
             Project::Item sourceGroup (createSourceGroup (project));
             project.getConfigFlag ("JUCE_QUICKTIME") = Project::configFlagDisabled; // disabled because it interferes with RTAS build on PC
@@ -532,7 +532,7 @@ struct NewProjectWizardClasses
             MainWindow* mw = Component::findParentComponentOfClass<MainWindow>();
             jassert (mw != nullptr);
 
-            ScopedPointer <NewProjectWizard> wizard (createWizard());
+            ScopedPointer<NewProjectWizard> wizard (createWizard());
 
             if (wizard != nullptr)
             {
@@ -623,7 +623,7 @@ struct NewProjectWizardClasses
 
         for (int i = 0; i < getNumWizards(); ++i)
         {
-            ScopedPointer <NewProjectWizard> wiz (createWizardType (i));
+            ScopedPointer<NewProjectWizard> wiz (createWizardType (i));
             s.add (wiz->getName());
         }
 

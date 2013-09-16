@@ -34,7 +34,7 @@ public:
     ModulesPanel (Project& p)
         : PropertyComponent ("Modules", 500),
           project (p),
-          modulesLocation ("modules", ModuleList::getLocalModulesFolder (&project),
+          modulesLocation ("modules", AvailableModuleList::getLocalModulesFolder (&project),
                            true, true, false, "*", String::empty,
                            "Select a folder containing your JUCE modules..."),
           modulesLabel (String::empty, "Module source folder:"),
@@ -42,7 +42,7 @@ public:
           moduleListBox (moduleList),
           copyingMessage (p, moduleList)
     {
-        moduleList.rescan (ModuleList::getLocalModulesFolder (&project));
+        moduleList.rescan (AvailableModuleList::getLocalModulesFolder (&project));
 
         addAndMakeVisible (&modulesLocation);
         modulesLocation.addListener (this);
@@ -63,7 +63,7 @@ public:
     {
         moduleList.rescan (modulesLocation.getCurrentFile());
         modulesLocation.setCurrentFile (moduleList.getModulesFolder(), false, dontSendNotification);
-        ModuleList::setLocalModulesFolder (moduleList.getModulesFolder());
+        AvailableModuleList::setLocalModulesFolder (moduleList.getModulesFolder());
         moduleListBox.refresh();
     }
 
@@ -74,27 +74,27 @@ public:
         filenameComponentChanged (nullptr);
     }
 
-    bool isEnabled (const ModuleList::Module* m) const
+    bool isEnabled (const AvailableModuleList::Module* m) const
     {
-        return project.isModuleEnabled (m->uid);
+        return project.getModules().isModuleEnabled (m->uid);
     }
 
-    void setEnabled (const ModuleList::Module* m, bool enable)
+    void setEnabled (const AvailableModuleList::Module* m, bool enable)
     {
         if (enable)
-            project.addModule (m->uid, true);
+            project.getModules().addModule (m->uid, true);
         else
-            project.removeModule (m->uid);
+            project.getModules().removeModule (m->uid);
 
         refresh();
     }
 
-    bool areDependenciesMissing (const ModuleList::Module* m)
+    bool areDependenciesMissing (const AvailableModuleList::Module* m)
     {
         return moduleList.getExtraDependenciesNeeded (project, *m).size() > 0;
     }
 
-    void selectionChanged (const ModuleList::Module* selectedModule)
+    void selectionChanged (const AvailableModuleList::Module* selectedModule)
     {
         settings = nullptr;
 
@@ -137,7 +137,7 @@ public:
                                       public ListBoxModel
     {
     public:
-        ModuleSelectionListBox (ModuleList& ml)
+        ModuleSelectionListBox (AvailableModuleList& ml)
             : list (ml), owner (nullptr)
         {
             setColour (ListBox::backgroundColourId, Colours::white.withAlpha (0.4f));
@@ -167,7 +167,7 @@ public:
             if (rowIsSelected)
                 g.fillAll (findColour (TextEditor::highlightColourId));
 
-            if (const ModuleList::Module* const m = list.modules [rowNumber])
+            if (const AvailableModuleList::Module* const m = list.modules [rowNumber])
             {
                 const float tickSize = height * 0.7f;
 
@@ -207,12 +207,12 @@ public:
 
         void flipRow (int row)
         {
-            if (const ModuleList::Module* const m = list.modules [row])
+            if (const AvailableModuleList::Module* const m = list.modules [row])
                 owner->setEnabled (m, ! owner->isEnabled (m));
         }
 
     private:
-        ModuleList& list;
+        AvailableModuleList& list;
         ModulesPanel* owner;
     };
 
@@ -220,7 +220,7 @@ public:
     class ModuleSettingsPanel  : public PropertyPanel
     {
     public:
-        ModuleSettingsPanel (Project& p, ModuleList& list, const String& modID)
+        ModuleSettingsPanel (Project& p, AvailableModuleList& list, const String& modID)
             : project (p), moduleList (list), moduleID (modID)
         {
             refreshAll();
@@ -228,7 +228,7 @@ public:
 
         void refreshAll()
         {
-            setEnabled (project.isModuleEnabled (moduleID));
+            setEnabled (project.getModules().isModuleEnabled (moduleID));
 
             clear();
             PropertyListBuilder props;
@@ -239,20 +239,20 @@ public:
             {
                 props.add (new ModuleInfoComponent (moduleList, moduleID));
 
-                if (project.isModuleEnabled (moduleID))
+                if (project.getModules().isModuleEnabled (moduleID))
                 {
-                    if (const ModuleList::Module* m = moduleList.findModuleInfo (moduleID))
+                    if (const AvailableModuleList::Module* m = moduleList.findModuleInfo (moduleID))
                         if (moduleList.getExtraDependenciesNeeded (project, *m).size() > 0)
                             props.add (new MissingDependenciesComponent (project, moduleList, moduleID));
                 }
 
-                props.add (new BooleanPropertyComponent (project.shouldShowAllModuleFilesInProject (moduleID),
+                props.add (new BooleanPropertyComponent (project.getModules().shouldShowAllModuleFilesInProject (moduleID),
                                                          "Add source to project", "Make module files browsable in projects"),
                            "If this is enabled, then the entire source tree from this module will be shown inside your project, "
                            "making it easy to browse/edit the module's classes. If disabled, then only the minimum number of files "
                            "required to compile it will appear inside your project.");
 
-                props.add (new BooleanPropertyComponent (project.shouldCopyModuleFilesLocally (moduleID),
+                props.add (new BooleanPropertyComponent (project.getModules().shouldCopyModuleFilesLocally (moduleID),
                                                          "Create local copy", "Copy the module into the project folder"),
                            "If this is enabled, then a local copy of the entire module will be made inside your project (in the auto-generated JuceLibraryFiles folder), "
                            "so that your project will be self-contained, and won't need to contain any references to files in other folders. "
@@ -286,14 +286,14 @@ public:
 
     private:
         Project& project;
-        ModuleList& moduleList;
+        AvailableModuleList& moduleList;
         String moduleID;
 
         //==============================================================================
         class ModuleInfoComponent  : public PropertyComponent
         {
         public:
-            ModuleInfoComponent (ModuleList& list, const String& modID)
+            ModuleInfoComponent (AvailableModuleList& list, const String& modID)
                 : PropertyComponent ("Module", 100), moduleList (list), moduleID (modID)
             {
             }
@@ -305,7 +305,7 @@ public:
                 g.setColour (Colours::white.withAlpha (0.4f));
                 g.fillRect (0, 0, getWidth(), getHeight() - 1);
 
-                if (const ModuleList::Module* module = moduleList.findModuleInfo (moduleID))
+                if (const AvailableModuleList::Module* module = moduleList.findModuleInfo (moduleID))
                 {
                     AttributedString s;
                     s.setJustification (Justification::topLeft);
@@ -322,7 +322,7 @@ public:
             }
 
         private:
-            ModuleList& moduleList;
+            AvailableModuleList& moduleList;
             String moduleID;
 
             JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ModuleInfoComponent)
@@ -333,12 +333,12 @@ public:
                                               public ButtonListener
         {
         public:
-            MissingDependenciesComponent (Project& p, ModuleList& list, const String& modID)
+            MissingDependenciesComponent (Project& p, AvailableModuleList& list, const String& modID)
                 : PropertyComponent ("Dependencies", 100),
                   project (p), moduleList (list), moduleID (modID),
                   fixButton ("Enable Required Modules")
             {
-                if (const ModuleList::Module* module = moduleList.findModuleInfo (moduleID))
+                if (const AvailableModuleList::Module* module = moduleList.findModuleInfo (moduleID))
                     missingDependencies = moduleList.getExtraDependenciesNeeded (project, *module);
 
                 addAndMakeVisible (&fixButton);
@@ -365,10 +365,10 @@ public:
 
             void buttonClicked (Button*)
             {
-                bool isModuleCopiedLocally = project.shouldCopyModuleFilesLocally (moduleID).getValue();
+                bool isModuleCopiedLocally = project.getModules().shouldCopyModuleFilesLocally (moduleID).getValue();
 
                 for (int i = missingDependencies.size(); --i >= 0;)
-                    project.addModule (missingDependencies[i], isModuleCopiedLocally);
+                    project.getModules().addModule (missingDependencies[i], isModuleCopiedLocally);
 
                 if (ModulesPanel* mp = findParentComponentOfClass<ModulesPanel>())
                     mp->refresh();
@@ -381,7 +381,7 @@ public:
 
         private:
             Project& project;
-            ModuleList& moduleList;
+            AvailableModuleList& moduleList;
             String moduleID;
             StringArray missingDependencies;
             TextButton fixButton;
@@ -396,7 +396,7 @@ public:
                                public Timer
     {
     public:
-        ModuleCopyingInfo (Project& p, ModuleList& modules)
+        ModuleCopyingInfo (Project& p, AvailableModuleList& modules)
             : project (p), list (modules),
               copyModeButton ("Set Copying Mode...")
         {
@@ -432,7 +432,7 @@ public:
                           "This may create problems if some modules expect to share the same parent folder, so you may "
                           "want to make sure that they are all either copied or not.";
 
-            if (project.isAudioPluginModuleMissing())
+            if (project.getModules().isAudioPluginModuleMissing())
                 newName = "Warning! Your project is an audio plugin, but you haven't enabled the 'juce_audio_plugin_client' module!";
 
             if (newName != getName())
@@ -450,9 +450,9 @@ public:
             {
                 const String moduleID (list.modules.getUnchecked(i)->uid);
 
-                if (project.isModuleEnabled (moduleID))
+                if (project.getModules().isModuleEnabled (moduleID))
                 {
-                    if (project.shouldCopyModuleFilesLocally (moduleID).getValue())
+                    if (project.getModules().shouldCopyModuleFilesLocally (moduleID).getValue())
                         ++numCopied;
                     else
                         ++numNonCopied;
@@ -482,8 +482,8 @@ public:
             {
                 const String moduleID (list.modules.getUnchecked(i)->uid);
 
-                if (project.isModuleEnabled (moduleID))
-                    project.shouldCopyModuleFilesLocally (moduleID) = copyEnabled;
+                if (project.getModules().isModuleEnabled (moduleID))
+                    project.getModules().shouldCopyModuleFilesLocally (moduleID) = copyEnabled;
             }
 
             refresh();
@@ -496,13 +496,13 @@ public:
 
     private:
         Project& project;
-        ModuleList& list;
+        AvailableModuleList& list;
         TextButton copyModeButton;
     };
 
 private:
     Project& project;
-    ModuleList moduleList;
+    AvailableModuleList moduleList;
     FilenameComponent modulesLocation;
     Label modulesLabel;
     TextButton updateModulesButton;

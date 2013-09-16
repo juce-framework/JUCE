@@ -81,7 +81,7 @@ ProjectExporter* ProjectExporter::createNewExporter (Project& project, const int
         default:    jassertfalse; return 0;
     }
 
-    File juceFolder (ModuleList::getLocalModulesFolder (&project));
+    File juceFolder (AvailableModuleList::getLocalModulesFolder (&project));
     File target (exp->getTargetFolder());
 
     if (FileHelpers::shouldPathsBeRelative (juceFolder.getFullPathName(), project.getFile().getFullPathName()))
@@ -204,9 +204,9 @@ void ProjectExporter::createPropertyEditors (PropertyListBuilder& props)
                "filesystem of the machine you use to actually do the compiling.");
 
     OwnedArray<LibraryModule> modules;
-    ModuleList moduleList;
-    moduleList.rescan (ModuleList::getDefaultModulesFolder (&project));
-    project.createRequiredModules (moduleList, modules);
+    AvailableModuleList moduleList;
+    moduleList.rescan (AvailableModuleList::getDefaultModulesFolder (&project));
+    project.getModules().createRequiredModules (moduleList, modules);
     for (int i = 0; i < modules.size(); ++i)
         modules.getUnchecked(i)->createPropertyEditors (*this, props);
 

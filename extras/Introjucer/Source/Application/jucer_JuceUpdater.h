@@ -36,10 +36,10 @@ class JuceUpdater  : public Component,
                      private ValueTree::Listener
 {
 public:
-    JuceUpdater (ModuleList& moduleList, const String& message);
+    JuceUpdater (AvailableModuleList&, const String& message);
     ~JuceUpdater();
 
-    static void show (ModuleList& moduleList, Component* mainWindow, const String& message);
+    static void show (AvailableModuleList&, Component* mainWindow, const String& message);
 
     //==============================================================================
     void resized();
@@ -51,11 +51,11 @@ public:
     void paintListBoxItem (int rowNumber, Graphics& g, int width, int height, bool rowIsSelected);
     Component* refreshComponentForRow (int rowNumber, bool isRowSelected, Component* existingComponentToUpdate);
 
-    void backgroundUpdateComplete (const ModuleList& newList);
+    void backgroundUpdateComplete (const AvailableModuleList& newList);
 
 private:
-    ModuleList& moduleList;
-    ModuleList latestList;
+    AvailableModuleList& moduleList;
+    AvailableModuleList latestList;
 
     Label messageLabel, label, currentVersionLabel;
     FilenameComponent filenameComp;

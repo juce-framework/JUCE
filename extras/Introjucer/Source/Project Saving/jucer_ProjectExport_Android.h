@@ -256,7 +256,7 @@ private:
                 manifest->createNewChildElement ("uses-permission")->setAttribute ("android:name", permissions[i]);
         }
 
-        if (project.isModuleEnabled ("juce_opengl"))
+        if (project.getModules().isModuleEnabled ("juce_opengl"))
         {
             XmlElement* feature = manifest->createNewChildElement ("uses-feature");
             feature->setAttribute ("android:glEsVersion", "0x00020000");

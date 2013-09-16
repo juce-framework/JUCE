@@ -466,7 +466,7 @@ public:
 
     bool makeSureUserHasSelectedModuleFolder()
     {
-        if (! ModuleList::isLocalModulesFolderValid())
+        if (! AvailableModuleList::isLocalModulesFolderValid())
         {
             if (! runModuleUpdate ("Please select a location to store your local set of JUCE modules,\n"
                                    "and download the ones that you'd like to use!"))
@@ -480,7 +480,7 @@ public:
             }
         }
 
-        if (ModuleList().isLibraryNewerThanIntrojucer())
+        if (AvailableModuleList().isLibraryNewerThanIntrojucer())
         {
             AlertWindow::showMessageBox (AlertWindow::WarningIcon,
                                          "Introjucer",
@@ -494,12 +494,12 @@ public:
 
     bool runModuleUpdate (const String& message)
     {
-        ModuleList list;
-        list.rescan (ModuleList::getDefaultModulesFolder (mainWindowList.getFrontmostProject()));
+        AvailableModuleList list;
+        list.rescan (AvailableModuleList::getDefaultModulesFolder (mainWindowList.getFrontmostProject()));
         JuceUpdater::show (list, mainWindowList.windows[0], message);
 
-        ModuleList::setLocalModulesFolder (list.getModulesFolder());
-        return ModuleList::isJuceOrModulesFolder (list.getModulesFolder());
+        AvailableModuleList::setLocalModulesFolder (list.getModulesFolder());
+        return AvailableModuleList::isJuceOrModulesFolder (list.getModulesFolder());
     }
 
     //==============================================================================

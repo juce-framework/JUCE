@@ -28,8 +28,9 @@
 #include "../jucer_Headers.h"
 class ProjectExporter;
 class ProjectType;
-class ModuleList;
+class AvailableModuleList;
 class LibraryModule;
+class EnabledModuleList;
 
 //==============================================================================
 class Project  : public FileBasedDocument,
@@ -242,19 +243,7 @@ public:
     bool isConfigFlagEnabled (const String& name) const;
 
     //==============================================================================
-    bool isModuleEnabled (const String& moduleID) const;
-    Value shouldShowAllModuleFilesInProject (const String& moduleID);
-    Value shouldCopyModuleFilesLocally (const String& moduleID);
-
-    void addModule (const String& moduleID, bool shouldCopyFilesLocally);
-    void removeModule (const String& moduleID);
-    int getNumModules() const;
-    String getModuleID (int index) const;
-
-    void addDefaultModules (bool shouldCopyFilesLocally);
-    bool isAudioPluginModuleMissing() const;
-
-    void createRequiredModules (const ModuleList& availableModules, OwnedArray<LibraryModule>& modules) const;
+    EnabledModuleList getModules();
 
     //==============================================================================
     String getFileTemplate (const String& templateName);
@@ -284,7 +273,6 @@ private:
     void setMissingDefaultValues();
     ValueTree getConfigurations() const;
     ValueTree getConfigNode();
-    ValueTree getModulesNode();
 
     void updateOldStyleConfigList();
     void moveOldPropertyFromProjectToAllExporters (Identifier name);

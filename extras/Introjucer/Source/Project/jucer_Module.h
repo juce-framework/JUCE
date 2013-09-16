@@ -86,12 +86,12 @@ private:
 };
 
 //==============================================================================
-class ModuleList
+class AvailableModuleList
 {
 public:
-    ModuleList();
-    ModuleList (const ModuleList&);
-    ModuleList& operator= (const ModuleList&);
+    AvailableModuleList();
+    AvailableModuleList (const AvailableModuleList&);
+    AvailableModuleList& operator= (const AvailableModuleList&);
 
     //==============================================================================
     Result rescan (const File& newModulesFolder);
@@ -120,7 +120,7 @@ public:
 
     const Module* findModuleInfo (const String& uid) const;
 
-    bool operator== (const ModuleList&) const;
+    bool operator== (const AvailableModuleList&) const;
 
     //==============================================================================
     static bool isJuceFolder (const File& folder);
@@ -146,6 +146,35 @@ private:
     File moduleFolder;
 
     void sort();
+};
+
+//==============================================================================
+class EnabledModuleList
+{
+public:
+    EnabledModuleList (Project&, const ValueTree&);
+
+    bool isModuleEnabled (const String& moduleID) const;
+    Value shouldShowAllModuleFilesInProject (const String& moduleID);
+    Value shouldCopyModuleFilesLocally (const String& moduleID);
+    void addModule (const String& moduleID, bool shouldCopyFilesLocally);
+    void removeModule (const String& moduleID);
+    void addDefaultModules (bool shouldCopyFilesLocally);
+    bool isAudioPluginModuleMissing() const;
+
+    void createRequiredModules (const AvailableModuleList& availableModules,
+                                OwnedArray<LibraryModule>& modules) const;
+
+    int getNumModules() const               { return state.getNumChildren(); }
+    String getModuleID (int index) const    { return state.getChild (index) [Ids::ID].toString(); }
+
+    static const Identifier modulesGroupTag, moduleTag;
+
+private:
+    Project& project;
+    ValueTree state;
+
+    UndoManager* getUndoManager() const     { return project.getUndoManagerFor (state); }
 };
 
 

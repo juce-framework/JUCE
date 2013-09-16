@@ -39,8 +39,6 @@ namespace Tags
     const Identifier file              ("FILE");
     const Identifier exporters         ("EXPORTFORMATS");
     const Identifier configGroup       ("JUCEOPTIONS");
-    const Identifier modulesGroup      ("MODULES");
-    const Identifier module            ("MODULE");
 }
 
 const char* Project::projectFileExtension = ".jucer";
@@ -121,8 +119,8 @@ void Project::setMissingDefaultValues()
 
     getProjectType().setMissingProjectProperties (*this);
 
-    if (! projectRoot.getChildWithName (Tags::modulesGroup).isValid())
-        addDefaultModules (false);
+    if (! projectRoot.getChildWithName (EnabledModuleList::modulesGroupTag).isValid())
+        getModules().addDefaultModules (false);
 
     if (getBundleIdentifier().toString().isEmpty())
         getBundleIdentifier() = getDefaultBundleIdentifier();
@@ -189,34 +187,6 @@ void Project::removeDefunctExporters()
         else
             break;
     }
-}
-
-void Project::addDefaultModules (bool shouldCopyFilesLocally)
-{
-    addModule ("juce_core", shouldCopyFilesLocally);
-
-    if (! isConfigFlagEnabled ("JUCE_ONLY_BUILD_CORE_LIBRARY"))
-    {
-        addModule ("juce_events", shouldCopyFilesLocally);
-        addModule ("juce_graphics", shouldCopyFilesLocally);
-        addModule ("juce_data_structures", shouldCopyFilesLocally);
-        addModule ("juce_gui_basics", shouldCopyFilesLocally);
-        addModule ("juce_gui_extra", shouldCopyFilesLocally);
-        addModule ("juce_gui_audio", shouldCopyFilesLocally);
-        addModule ("juce_cryptography", shouldCopyFilesLocally);
-        addModule ("juce_video", shouldCopyFilesLocally);
-        addModule ("juce_opengl", shouldCopyFilesLocally);
-        addModule ("juce_audio_basics", shouldCopyFilesLocally);
-        addModule ("juce_audio_devices", shouldCopyFilesLocally);
-        addModule ("juce_audio_formats", shouldCopyFilesLocally);
-        addModule ("juce_audio_processors", shouldCopyFilesLocally);
-    }
-}
-
-bool Project::isAudioPluginModuleMissing() const
-{
-    return getProjectType().isAudioPlugin()
-            && ! isModuleEnabled ("juce_audio_plugin_client");
 }
 
 File Project::getBinaryDataCppFile (int index) const
@@ -891,75 +861,9 @@ void Project::sanitiseConfigFlags()
 }
 
 //==============================================================================
-ValueTree Project::getModulesNode()
+EnabledModuleList Project::getModules()
 {
-    return projectRoot.getOrCreateChildWithName (Tags::modulesGroup, nullptr);
-}
-
-bool Project::isModuleEnabled (const String& moduleID) const
-{
-    ValueTree modules (projectRoot.getChildWithName (Tags::modulesGroup));
-
-    for (int i = 0; i < modules.getNumChildren(); ++i)
-        if (modules.getChild(i) [Ids::ID] == moduleID)
-            return true;
-
-    return false;
-}
-
-Value Project::shouldShowAllModuleFilesInProject (const String& moduleID)
-{
-    return getModulesNode().getChildWithProperty (Ids::ID, moduleID)
-                           .getPropertyAsValue (Ids::showAllCode, getUndoManagerFor (getModulesNode()));
-}
-
-Value Project::shouldCopyModuleFilesLocally (const String& moduleID)
-{
-    return getModulesNode().getChildWithProperty (Ids::ID, moduleID)
-                           .getPropertyAsValue (Ids::useLocalCopy, getUndoManagerFor (getModulesNode()));
-}
-
-void Project::addModule (const String& moduleID, bool shouldCopyFilesLocally)
-{
-    if (! isModuleEnabled (moduleID))
-    {
-        ValueTree module (Tags::module);
-        module.setProperty (Ids::ID, moduleID, nullptr);
-
-        ValueTree modules (getModulesNode());
-        modules.addChild (module, -1, getUndoManagerFor (modules));
-
-        shouldShowAllModuleFilesInProject (moduleID) = true;
-    }
-
-    if (shouldCopyFilesLocally)
-        shouldCopyModuleFilesLocally (moduleID) = true;
-}
-
-void Project::removeModule (const String& moduleID)
-{
-    ValueTree modules (getModulesNode());
-
-    for (int i = 0; i < modules.getNumChildren(); ++i)
-        if (modules.getChild(i) [Ids::ID] == moduleID)
-            modules.removeChild (i, getUndoManagerFor (modules));
-}
-
-void Project::createRequiredModules (const ModuleList& availableModules, OwnedArray<LibraryModule>& modules) const
-{
-    for (int i = 0; i < availableModules.modules.size(); ++i)
-        if (isModuleEnabled (availableModules.modules.getUnchecked(i)->uid))
-            modules.add (availableModules.modules.getUnchecked(i)->create());
-}
-
-int Project::getNumModules() const
-{
-    return projectRoot.getChildWithName (Tags::modulesGroup).getNumChildren();
-}
-
-String Project::getModuleID (int index) const
-{
-    return projectRoot.getChildWithName (Tags::modulesGroup).getChild (index) [Ids::ID].toString();
+    return EnabledModuleList (*this, projectRoot.getOrCreateChildWithName (EnabledModuleList::modulesGroupTag, nullptr));
 }
 
 //==============================================================================

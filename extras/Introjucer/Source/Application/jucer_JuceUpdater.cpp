@@ -28,10 +28,10 @@
 
 
 //==============================================================================
-JuceUpdater::JuceUpdater (ModuleList& moduleList_, const String& message)
-    : moduleList (moduleList_),
+JuceUpdater::JuceUpdater (AvailableModuleList& l, const String& message)
+    : moduleList (l),
       messageLabel (String::empty, message),
-      filenameComp ("Juce Folder", ModuleList::getLocalModulesFolder (nullptr),
+      filenameComp ("Juce Folder", AvailableModuleList::getLocalModulesFolder (nullptr),
                     true, true, false, "*", String::empty, "Select your Juce folder"),
       checkNowButton ("Check for available updates on the JUCE website...",
                       "Contacts the website to see if new modules are available"),
@@ -73,7 +73,7 @@ JuceUpdater::~JuceUpdater()
     filenameComp.removeListener (this);
 }
 
-void JuceUpdater::show (ModuleList& moduleList, Component* mainWindow, const String& message)
+void JuceUpdater::show (AvailableModuleList& moduleList, Component* mainWindow, const String& message)
 {
     DialogWindow::LaunchOptions o;
     o.content.setOwned (new JuceUpdater (moduleList, message));
@@ -133,7 +133,7 @@ class WebsiteContacterThread  : public Thread,
                                 private AsyncUpdater
 {
 public:
-    WebsiteContacterThread (JuceUpdater& owner_, const ModuleList& latestList)
+    WebsiteContacterThread (JuceUpdater& owner_, const AvailableModuleList& latestList)
         : Thread ("Module updater"),
           owner (owner_),
           downloaded (latestList)
@@ -163,7 +163,7 @@ public:
 
 private:
     JuceUpdater& owner;
-    ModuleList downloaded;
+    AvailableModuleList downloaded;
 };
 
 void JuceUpdater::checkNow()
@@ -172,7 +172,7 @@ void JuceUpdater::checkNow()
     websiteContacterThread = new WebsiteContacterThread (*this, latestList);
 }
 
-void JuceUpdater::backgroundUpdateComplete (const ModuleList& newList)
+void JuceUpdater::backgroundUpdateComplete (const AvailableModuleList& newList)
 {
     latestList = newList;
     websiteContacterThread = nullptr;
@@ -197,8 +197,8 @@ int JuceUpdater::getNumCheckedModules() const
 
 bool JuceUpdater::isLatestVersion (const String& moduleID) const
 {
-    const ModuleList::Module* m1 = moduleList.findModuleInfo (moduleID);
-    const ModuleList::Module* m2 = latestList.findModuleInfo (moduleID);
+    const AvailableModuleList::Module* m1 = moduleList.findModuleInfo (moduleID);
+    const AvailableModuleList::Module* m2 = latestList.findModuleInfo (moduleID);
 
     return m1 != nullptr && m2 != nullptr && m1->version == m2->version;
 }
@@ -215,7 +215,7 @@ void JuceUpdater::filenameComponentChanged (FilenameComponent*)
     moduleList.rescan (filenameComp.getCurrentFile());
     filenameComp.setCurrentFile (moduleList.getModulesFolder(), true, dontSendNotification);
 
-    if (! ModuleList::isModulesFolder (moduleList.getModulesFolder()))
+    if (! AvailableModuleList::isModulesFolder (moduleList.getModulesFolder()))
         currentVersionLabel.setText ("(Not a Juce folder)", dontSendNotification);
     else
         currentVersionLabel.setText (String::empty, dontSendNotification);
@@ -259,8 +259,8 @@ public:
         setInterceptsMouseClicks (false, true);
     }
 
-    void setModule (const ModuleList::Module* newModule,
-                    const ModuleList::Module* existingModule,
+    void setModule (const AvailableModuleList::Module* newModule,
+                    const AvailableModuleList::Module* existingModule,
                     const Value& value)
     {
         if (newModule != nullptr)
@@ -322,7 +322,7 @@ Component* JuceUpdater::refreshComponentForRow (int rowNumber, bool /*isRowSelec
     if (c == nullptr)
         c = new UpdateListComponent();
 
-    if (ModuleList::Module* m = latestList.modules [rowNumber])
+    if (AvailableModuleList::Module* m = latestList.modules [rowNumber])
         c->setModule (m,
                       moduleList.findModuleInfo (m->uid),
                       versionsToDownload.getPropertyAsValue (m->uid, nullptr));
@@ -336,12 +336,12 @@ Component* JuceUpdater::refreshComponentForRow (int rowNumber, bool /*isRowSelec
 class InstallThread   : public ThreadWithProgressWindow
 {
 public:
-    InstallThread (const ModuleList& targetList_,
-                   const ModuleList& list_, const StringArray& itemsToInstall_)
+    InstallThread (const AvailableModuleList& target,
+                   const AvailableModuleList& l, const StringArray& itemsToInstall_)
         : ThreadWithProgressWindow ("Installing New Modules", true, true),
           result (Result::ok()),
-          targetList (targetList_),
-          list (list_),
+          targetList (target),
+          list (l),
           itemsToInstall (itemsToInstall_)
     {
     }
@@ -350,7 +350,7 @@ public:
     {
         for (int i = 0; i < itemsToInstall.size(); ++i)
         {
-            const ModuleList::Module* m = list.findModuleInfo (itemsToInstall[i]);
+            const AvailableModuleList::Module* m = list.findModuleInfo (itemsToInstall[i]);
 
             jassert (m != nullptr);
             if (m != nullptr)
@@ -377,7 +377,7 @@ public:
         }
     }
 
-    Result download (const ModuleList::Module& m, MemoryBlock& dest)
+    Result download (const AvailableModuleList::Module& m, MemoryBlock& dest)
     {
         setStatusMessage ("Downloading " + m.uid + "...");
 
@@ -387,7 +387,7 @@ public:
         return Result::fail ("Failed to download from: " + m.url.toString (false));
     }
 
-    Result unzip (const ModuleList::Module& m, const MemoryBlock& data)
+    Result unzip (const AvailableModuleList::Module& m, const MemoryBlock& data)
     {
         setStatusMessage ("Installing " + m.uid + "...");
 
@@ -403,7 +403,7 @@ public:
     Result result;
 
 private:
-    ModuleList targetList, list;
+    AvailableModuleList targetList, list;
     StringArray itemsToInstall;
 };
 
