@@ -42,13 +42,6 @@ namespace FloatVectorHelpers
         return (((pointer_sized_int) p) & 15) == 0;
     }
 
-    inline static void mmEmpty() noexcept
-    {
-       #if ! JUCE_64BIT
-        _mm_empty();
-       #endif
-    }
-
     static inline float findMinimumOrMaximum (const float* src, int num, const bool isMinimum) noexcept
     {
        #if JUCE_USE_SSE_INTRINSICS
@@ -84,7 +77,6 @@ namespace FloatVectorHelpers
             {
                 float vals[4];
                 _mm_storeu_ps (vals, val);
-                FloatVectorHelpers::mmEmpty();
 
                 localVal = isMinimum ? jmin (vals[0], vals[1], vals[2], vals[3])
                                      : jmax (vals[0], vals[1], vals[2], vals[3]);
@@ -111,7 +103,6 @@ namespace FloatVectorHelpers
         const int numLongOps = num / 4;
 
 #define JUCE_FINISH_SSE_OP(normalOp) \
-        FloatVectorHelpers::mmEmpty(); \
         num &= 3; \
         if (num == 0) return; \
     } \
@@ -301,7 +292,6 @@ void JUCE_CALLTYPE FloatVectorOperations::findMinAndMax (const float* src, int n
             float mns[4], mxs[4];
             _mm_storeu_ps (mns, mn);
             _mm_storeu_ps (mxs, mx);
-            FloatVectorHelpers::mmEmpty();
 
             localMin = jmin (mns[0], mns[1], mns[2], mns[3]);
             localMax = jmax (mxs[0], mxs[1], mxs[2], mxs[3]);
