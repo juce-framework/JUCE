@@ -81,6 +81,12 @@ void KeyPressMappingSet::addKeyPress (const CommandID commandID, const KeyPress&
                 mappings.add (cm);
                 sendChangeMessage();
             }
+            else
+            {
+                // If you hit this, you're trying to attach a keypress to a command ID that
+                // doesn't exist, so the key is not being attached.
+                jassertfalse;
+            }
         }
     }
 }
