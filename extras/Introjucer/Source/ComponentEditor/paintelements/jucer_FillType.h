@@ -218,7 +218,7 @@ public:
             if (toks[0] == "solid")
             {
                 mode = solidColour;
-                colour = Colour (toks[1].getHexValue32());
+                colour = Colour::fromString (toks[1]);
             }
             else if (toks[0] == "linear"
                       || toks[0] == "radial")
@@ -230,8 +230,8 @@ public:
                 gradPos2 = RelativePositionedRectangle();
                 gradPos2.rect = PositionedRectangle (toks[2]);
 
-                gradCol1 = Colour (toks[3].fromFirstOccurrenceOf ("=", false, false).getHexValue32());
-                gradCol2 = Colour (toks[4].fromFirstOccurrenceOf ("=", false, false).getHexValue32());
+                gradCol1 = Colour::fromString (toks[3].fromFirstOccurrenceOf ("=", false, false));
+                gradCol2 = Colour::fromString (toks[4].fromFirstOccurrenceOf ("=", false, false));
             }
             else if (toks[0] == "image")
             {

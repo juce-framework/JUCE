@@ -166,7 +166,7 @@ namespace JPEGHelpers
         decompStruct->src->next_input_byte += num;
 
         num = jmin (num, (long) decompStruct->src->bytes_in_buffer);
-        decompStruct->src->bytes_in_buffer -= num;
+        decompStruct->src->bytes_in_buffer -= (size_t) num;
     }
 
     static boolean jpegFill (j_decompress_ptr)

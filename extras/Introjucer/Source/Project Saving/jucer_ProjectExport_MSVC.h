@@ -434,7 +434,7 @@ protected:
             out.writeShort (1); // colour planes
             out.writeShort (32); // bits per pixel
             out.writeInt ((int) (dataBlock.getDataSize() - oldDataSize));
-            out.writeInt (dataBlockStart + oldDataSize);
+            out.writeInt (dataBlockStart + (int) oldDataSize);
         }
 
         jassert (out.getPosition() == dataBlockStart);

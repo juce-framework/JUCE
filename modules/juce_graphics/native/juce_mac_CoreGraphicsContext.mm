@@ -527,7 +527,7 @@ void CoreGraphicsContext::drawLine (const Line<float>& line)
 
 void CoreGraphicsContext::fillRectList (const RectangleList<float>& list)
 {
-    HeapBlock<CGRect> rects (list.getNumRectangles());
+    HeapBlock<CGRect> rects ((size_t) list.getNumRectangles());
 
     size_t num = 0;
     for (const Rectangle<float>* r = list.begin(), * const e = list.end(); r != e; ++r)

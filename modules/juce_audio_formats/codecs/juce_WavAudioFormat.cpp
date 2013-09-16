@@ -753,7 +753,7 @@ public:
                 else if (chunkType == chunkName ("axml"))
                 {
                     MemoryBlock axml;
-                    input->readIntoMemoryBlock (axml, (size_t) length);
+                    input->readIntoMemoryBlock (axml, (ssize_t) length);
                     AXMLChunk::addToMetadata (metadataValues, axml.toString());
                 }
                 else if (chunkType == chunkName ("LIST"))
@@ -967,13 +967,10 @@ public:
             writeFailed = true;
             return false;
         }
-        else
-        {
-            bytesWritten += bytes;
-            lengthInSamples += (uint64) numSamples;
 
-            return true;
-        }
+        bytesWritten += bytes;
+        lengthInSamples += (uint64) numSamples;
+        return true;
     }
 
 private:
@@ -1107,7 +1104,7 @@ private:
         usesFloatingPointData = (bitsPerSample == 32);
     }
 
-    static int chunkSize (const MemoryBlock& data) noexcept     { return data.getSize() > 0 ? (8 + data.getSize()) : 0; }
+    static size_t chunkSize (const MemoryBlock& data) noexcept     { return data.getSize() > 0 ? (8 + data.getSize()) : 0; }
 
     void writeChunkHeader (int chunkType, int size) const
     {

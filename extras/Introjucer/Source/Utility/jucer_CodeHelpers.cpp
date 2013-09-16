@@ -401,7 +401,7 @@ namespace CodeHelpers
     }
 
     //==============================================================================
-    static unsigned int calculateHash (const String& s, const int hashMultiplier)
+    static unsigned int calculateHash (const String& s, const unsigned int hashMultiplier)
     {
         const char* t = s.toUTF8();
         unsigned int hash = 0;
@@ -411,9 +411,9 @@ namespace CodeHelpers
         return hash;
     }
 
-    static int findBestHashMultiplier (const StringArray& strings)
+    static unsigned int findBestHashMultiplier (const StringArray& strings)
     {
-        int v = 31;
+        unsigned int v = 31;
 
         for (;;)
         {
@@ -445,19 +445,19 @@ namespace CodeHelpers
     {
         jassert (strings.size() == codeToExecute.size());
         const String indent (String::repeatedString (" ", indentLevel));
-        const int hashMultiplier = findBestHashMultiplier (strings);
+        const unsigned int hashMultiplier = findBestHashMultiplier (strings);
 
         out << indent << "unsigned int hash = 0;" << newLine
             << indent << "if (" << utf8PointerVariable << " != 0)" << newLine
             << indent << "    while (*" << utf8PointerVariable << " != 0)" << newLine
-            << indent << "        hash = " << hashMultiplier << " * hash + (unsigned int) *" << utf8PointerVariable << "++;" << newLine
+            << indent << "        hash = " << (int) hashMultiplier << " * hash + (unsigned int) *" << utf8PointerVariable << "++;" << newLine
             << newLine
             << indent << "switch (hash)" << newLine
             << indent << "{" << newLine;
 
         for (int i = 0; i < strings.size(); ++i)
         {
-            out << indent << "    case 0x" << hexString8Digits (calculateHash (strings[i], hashMultiplier))
+            out << indent << "    case 0x" << hexString8Digits ((int) calculateHash (strings[i], hashMultiplier))
                 << ":  " << codeToExecute[i] << newLine;
         }
 

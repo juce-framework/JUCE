@@ -263,7 +263,7 @@ void BinaryResources::loadFromCpp (const File& cppFileLocation, const String& cp
                 jassert (size < (int) out.getDataSize() && size > (int) out.getDataSize() - 2);
 
                 MemoryBlock mb (out.getData(), out.getDataSize());
-                mb.setSize (size);
+                mb.setSize ((size_t) size);
 
                 add (resourceName, originalFileName, mb);
             }

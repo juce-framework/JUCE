@@ -336,7 +336,7 @@ void EdgeTable::sanitiseLevels (const bool useNonZeroWinding) noexcept
                 if (items[i].x == items[i + 1].x)
                 {
                     items[i].level += items[i + 1].level;
-                    memmove (items + i + 1, items + i + 2, (num - i - 2) * sizeof (LineItem));
+                    memmove (items + i + 1, items + i + 2, (size_t) (num - i - 2) * sizeof (LineItem));
                     --num;
                     --lineStart[0];
                     --i;

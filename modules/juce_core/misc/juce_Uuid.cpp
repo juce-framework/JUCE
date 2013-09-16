@@ -26,32 +26,13 @@
   ==============================================================================
 */
 
-namespace
-{
-    int64 getRandomSeedFromMACAddresses()
-    {
-        Array<MACAddress> result;
-        MACAddress::findAllAddresses (result);
 
-        Random r;
-        for (int i = 0; i < result.size(); ++i)
-            r.combineSeed (result[i].toInt64());
-
-        return r.nextInt64();
-    }
-}
-
-//==============================================================================
 Uuid::Uuid()
 {
-    // The normal random seeding is pretty good, but we'll throw some MAC addresses
-    // into the mix too, to make it very very unlikely that two UUIDs will ever be the same..
-
-    static Random r1 (getRandomSeedFromMACAddresses());
-    Random r2;
+    Random r;
 
     for (size_t i = 0; i < sizeof (uuid); ++i)
-        uuid[i] = (uint8) (r1.nextInt() ^ r2.nextInt());
+        uuid[i] = (uint8) (r.nextInt (256));
 }
 
 Uuid::~Uuid() noexcept {}

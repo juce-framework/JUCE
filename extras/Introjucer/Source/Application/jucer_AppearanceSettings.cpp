@@ -30,7 +30,7 @@ namespace AppearanceColours
     struct ColourInfo
     {
         const char* name;
-        uint32 colourID;
+        int colourID;
         bool mustBeOpaque;
         bool applyToEditorOnly;
     };

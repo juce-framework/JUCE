@@ -200,10 +200,7 @@ bool ComponentTypeHandler::restoreFromXml (const XmlElement& xml,
         const String col (xml.getStringAttribute (colours[i]->xmlTagName, String::empty));
 
         if (col.isNotEmpty())
-        {
-            comp->setColour (colours[i]->colourId,
-                             Colour (col.getHexValue32()));
-        }
+            comp->setColour (colours[i]->colourId, Colour::fromString (col));
     }
 
     return true;

@@ -637,7 +637,7 @@ void String::appendCharPointer (const CharPointerType startOfTextToAppend,
         preallocateBytes (byteOffsetOfNull + (size_t) extraBytesNeeded);
 
         CharPointerType::CharType* const newStringStart = addBytesToPointer (text.getAddress(), (int) byteOffsetOfNull);
-        memcpy (newStringStart, startOfTextToAppend.getAddress(), extraBytesNeeded);
+        memcpy (newStringStart, startOfTextToAppend.getAddress(), (size_t) extraBytesNeeded);
         CharPointerType (addBytesToPointer (newStringStart, extraBytesNeeded)).writeNull();
     }
 }

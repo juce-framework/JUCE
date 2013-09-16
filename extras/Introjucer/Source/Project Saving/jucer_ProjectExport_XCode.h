@@ -428,7 +428,7 @@ private:
         pngFormat.writeImageToStream (image, pngData);
 
         out.write (type, 4);
-        out.writeIntBigEndian (8 + pngData.getDataSize());
+        out.writeIntBigEndian (8 + (int) pngData.getDataSize());
         out << pngData;
     }
 
@@ -457,7 +457,7 @@ private:
         jassert (data.getDataSize() > 0); // no suitable sized images?
 
         out.write ("icns", 4);
-        out.writeIntBigEndian (data.getDataSize() + 8);
+        out.writeIntBigEndian ((int) data.getDataSize() + 8);
         out << data;
     }
 
