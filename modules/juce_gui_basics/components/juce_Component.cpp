@@ -1872,9 +1872,14 @@ void Component::internalRepaintUnchecked (const Rectangle<int>& area, const bool
             CHECK_MESSAGE_MANAGER_IS_LOCKED
 
             if (ComponentPeer* const peer = getPeer())
-                peer->repaint (ComponentHelpers::scaledScreenPosToUnscaled (*this,
-                                                                            affineTransform != nullptr ? area.transformedBy (*affineTransform)
-                                                                                                       : area));
+            {
+                // Tweak the scaling so that the component's integer size exactly aligns with the peer's scaled size
+                const Rectangle<int> peerBounds (peer->getBounds());
+                const Rectangle<int> scaled (area * Point<float> (peerBounds.getWidth()  / (float) getWidth(),
+                                                                  peerBounds.getHeight() / (float) getHeight()));
+
+                peer->repaint (affineTransform != nullptr ? scaled.transformedBy (*affineTransform) : scaled);
+            }
         }
         else
         {

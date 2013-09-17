@@ -138,8 +138,7 @@ File AvailableModuleList::getModulesFolderForJuceOrModulesFolder (const File& f)
 File AvailableModuleList::getModulesFolderForExporter (const ProjectExporter& exporter)
 {
     File f (exporter.getProject().resolveFilename (exporter.getJuceFolderString()));
-    f = getModulesFolderForJuceOrModulesFolder (f);
-    return f;
+    return getModulesFolderForJuceOrModulesFolder (f);
 }
 
 File AvailableModuleList::getDefaultModulesFolder (Project* project)

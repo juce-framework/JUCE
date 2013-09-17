@@ -111,10 +111,12 @@ void ComponentPeer::handlePaint (LowLevelGraphicsContext& contextToPaintTo)
     if (component.isTransformed())
         g.addTransform (component.getTransform());
 
-    const float masterScale = component.getDesktopScaleFactor();
+    const Rectangle<int> peerBounds (getBounds());
 
-    if (masterScale != 1.0f)
-        g.addTransform (AffineTransform::scale (masterScale));
+    if (peerBounds.getWidth() != component.getWidth() || peerBounds.getHeight() != component.getHeight())
+        // Tweak the scaling so that the component's integer size exactly aligns with the peer's scaled size
+        g.addTransform (AffineTransform::scale (peerBounds.getWidth()  / (float) component.getWidth(),
+                                                peerBounds.getHeight() / (float) component.getHeight()));
 
    #if JUCE_ENABLE_REPAINT_DEBUGGING
     g.saveState();
