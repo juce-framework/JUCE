@@ -1267,7 +1267,7 @@ bool CodeEditorComponent::perform (const InvocationInfo& info)
     return performCommand (info.commandID);
 }
 
-bool CodeEditorComponent::performCommand (const int commandID)
+bool CodeEditorComponent::performCommand (const CommandID commandID)
 {
     switch (commandID)
     {

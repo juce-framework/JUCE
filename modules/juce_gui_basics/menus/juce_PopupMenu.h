@@ -133,7 +133,7 @@ public:
                                     the command's registered name
     */
     void addCommandItem (ApplicationCommandManager* commandManager,
-                         int commandID,
+                         CommandID commandID,
                          const String& displayName = String::empty);
 
 

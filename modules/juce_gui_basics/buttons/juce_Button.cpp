@@ -45,8 +45,8 @@ Button::Button (const String& name)
     autoRepeatSpeed (0),
     autoRepeatMinimumDelay (-1),
     radioGroupId (0),
-    commandID (0),
     connectedEdgeFlags (0),
+    commandID(),
     buttonState (buttonNormal),
     lastToggleState (false),
     clickTogglesState (false),
@@ -464,7 +464,7 @@ void Button::parentHierarchyChanged()
 
 //==============================================================================
 void Button::setCommandToTrigger (ApplicationCommandManager* const newCommandManager,
-                                  const int newCommandID, const bool generateTip)
+                                  const CommandID newCommandID, const bool generateTip)
 {
     commandID = newCommandID;
     generateTooltip = generateTip;

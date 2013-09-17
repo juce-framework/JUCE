@@ -212,11 +212,11 @@ public:
         @see addShortcut, getCommandID
     */
     void setCommandToTrigger (ApplicationCommandManager* commandManagerToUse,
-                              int commandID,
+                              CommandID commandID,
                               bool generateTooltip);
 
     /** Returns the command ID that was set by setCommandToTrigger(). */
-    int getCommandID() const noexcept               { return commandID; }
+    CommandID getCommandID() const noexcept             { return commandID; }
 
     //==============================================================================
     /** Assigns a shortcut key to trigger the button.
@@ -457,7 +457,8 @@ private:
     uint32 buttonPressTime, lastRepeatTime;
     ApplicationCommandManager* commandManagerToUse;
     int autoRepeatDelay, autoRepeatSpeed, autoRepeatMinimumDelay;
-    int radioGroupId, commandID, connectedEdgeFlags;
+    int radioGroupId, connectedEdgeFlags;
+    CommandID commandID;
     ButtonState buttonState;
 
     Value isOn;

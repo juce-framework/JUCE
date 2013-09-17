@@ -51,37 +51,40 @@ typedef int CommandID;
 */
 namespace StandardApplicationCommandIDs
 {
-    /** This command ID should be used to send a "Quit the App" command.
+    enum
+    {
+        /** This command ID should be used to send a "Quit the App" command.
 
-        This command is recognised by the JUCEApplication class, so if it is invoked
-        and no other ApplicationCommandTarget handles the event first, the JUCEApplication
-        object will catch it and call JUCEApplicationBase::systemRequestedQuit().
-    */
-    static const CommandID  quit           = 0x1001;
+            This command is recognised by the JUCEApplication class, so if it is invoked
+            and no other ApplicationCommandTarget handles the event first, the JUCEApplication
+            object will catch it and call JUCEApplicationBase::systemRequestedQuit().
+        */
+        quit           = 0x1001,
 
-    /** The command ID that should be used to send a "Delete" command. */
-    static const CommandID  del            = 0x1002;
+        /** The command ID that should be used to send a "Delete" command. */
+        del            = 0x1002,
 
-    /** The command ID that should be used to send a "Cut" command. */
-    static const CommandID  cut            = 0x1003;
+        /** The command ID that should be used to send a "Cut" command. */
+        cut            = 0x1003,
 
-    /** The command ID that should be used to send a "Copy to clipboard" command. */
-    static const CommandID  copy           = 0x1004;
+        /** The command ID that should be used to send a "Copy to clipboard" command. */
+        copy           = 0x1004,
 
-    /** The command ID that should be used to send a "Paste from clipboard" command. */
-    static const CommandID  paste          = 0x1005;
+        /** The command ID that should be used to send a "Paste from clipboard" command. */
+        paste          = 0x1005,
 
-    /** The command ID that should be used to send a "Select all" command. */
-    static const CommandID  selectAll      = 0x1006;
+        /** The command ID that should be used to send a "Select all" command. */
+        selectAll      = 0x1006,
 
-    /** The command ID that should be used to send a "Deselect all" command. */
-    static const CommandID  deselectAll    = 0x1007;
+        /** The command ID that should be used to send a "Deselect all" command. */
+        deselectAll    = 0x1007,
 
-    /** The command ID that should be used to send a "undo" command. */
-    static const CommandID  undo           = 0x1008;
+        /** The command ID that should be used to send a "undo" command. */
+        undo           = 0x1008,
 
-    /** The command ID that should be used to send a "redo" command. */
-    static const CommandID  redo           = 0x1009;
+        /** The command ID that should be used to send a "redo" command. */
+        redo           = 0x1009
+    };
 }
 
 

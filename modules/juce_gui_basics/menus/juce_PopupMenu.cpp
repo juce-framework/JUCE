@@ -1302,7 +1302,7 @@ void PopupMenu::addItem (const int itemResultID, const String& itemText,
 }
 
 void PopupMenu::addCommandItem (ApplicationCommandManager* commandManager,
-                                const int commandID,
+                                const CommandID commandID,
                                 const String& displayName)
 {
     jassert (commandManager != nullptr && commandID != 0);
