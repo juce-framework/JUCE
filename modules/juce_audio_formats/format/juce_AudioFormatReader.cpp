@@ -420,7 +420,7 @@ static int memoryReadDummyVariable; // used to force the compiler not to optimis
 void MemoryMappedAudioFormatReader::touchSample (int64 sample) const noexcept
 {
     if (map != nullptr && mappedSection.contains (sample))
-        memoryReadDummyVariable += *(int*) sampleToPointer (sample);
+        memoryReadDummyVariable += *(char*) sampleToPointer (sample);
     else
         jassertfalse; // you must make sure that the window contains all the samples you're going to attempt to read.
 }
