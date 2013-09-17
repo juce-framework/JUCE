@@ -60,6 +60,9 @@ public:
     /** Returns true if the ID is zero. */
     bool isNull() const noexcept;
 
+    /** A static null Uuid object. */
+    static Uuid null;
+
     bool operator== (const Uuid& other) const noexcept;
     bool operator!= (const Uuid& other) const noexcept;
 

@@ -51,6 +51,8 @@ Uuid& Uuid::operator= (const Uuid& other) noexcept
 bool Uuid::operator== (const Uuid& other) const noexcept    { return memcmp (uuid, other.uuid, sizeof (uuid)) == 0; }
 bool Uuid::operator!= (const Uuid& other) const noexcept    { return ! operator== (other); }
 
+Uuid Uuid::null ((const uint8*) nullptr);
+
 bool Uuid::isNull() const noexcept
 {
     for (size_t i = 0; i < sizeof (uuid); ++i)
