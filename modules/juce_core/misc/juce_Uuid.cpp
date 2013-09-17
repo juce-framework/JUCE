@@ -84,7 +84,7 @@ Uuid& Uuid::operator= (const String& uuidString)
     return *this;
 }
 
-Uuid::Uuid (const uint8* const rawData)
+Uuid::Uuid (const uint8* const rawData) noexcept
 {
     operator= (rawData);
 }

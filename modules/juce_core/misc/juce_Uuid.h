@@ -98,7 +98,7 @@ public:
     /** Creates a UUID from a 16-byte array.
         @see getRawData
     */
-    Uuid (const uint8* rawData);
+    Uuid (const uint8* rawData) noexcept;
 
     /** Sets this UUID from 16-bytes of raw data. */
     Uuid& operator= (const uint8* rawData) noexcept;
