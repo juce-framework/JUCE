@@ -51,20 +51,20 @@ public:
     ~Uuid() noexcept;
 
     /** Creates a copy of another UUID. */
-    Uuid (const Uuid& other) noexcept;
+    Uuid (const Uuid&) noexcept;
 
     /** Copies another UUID. */
-    Uuid& operator= (const Uuid& other) noexcept;
+    Uuid& operator= (const Uuid&) noexcept;
 
     //==============================================================================
     /** Returns true if the ID is zero. */
     bool isNull() const noexcept;
 
-    /** A static null Uuid object. */
-    static Uuid null;
+    /** Returns a null Uuid object. */
+    static Uuid null() noexcept;
 
-    bool operator== (const Uuid& other) const noexcept;
-    bool operator!= (const Uuid& other) const noexcept;
+    bool operator== (const Uuid&) const noexcept;
+    bool operator!= (const Uuid&) const noexcept;
 
     //==============================================================================
     /** Returns a stringified version of this UUID.
