@@ -99,30 +99,34 @@ public:
     Point& operator-= (Point other) noexcept                        { x -= other.x; y -= other.y; return *this; }
 
     /** Multiplies two points together */
-    Point operator* (Point other) const noexcept                    { return Point (x * other.x, y * other.y); }
+    template <typename OtherType>
+    Point operator* (Point<OtherType> other) const noexcept         { return Point ((ValueType) (x * other.x), (ValueType) (y * other.y)); }
 
     /** Multiplies another point's coordinates to this one */
-    Point& operator*= (Point other) noexcept                        { x *= other.x; y *= other.y; return *this; }
+    template <typename OtherType>
+    Point& operator*= (Point<OtherType> other) noexcept             { *this = *this * other; return *this; }
 
-    /** Divides one points from another */
-    Point operator/ (Point other) const noexcept                    { return Point (x / other.x, y / other.y); }
+    /** Divides one point by another */
+    template <typename OtherType>
+    Point operator/ (Point<OtherType> other) const noexcept         { return Point ((ValueType) (x / other.x), (ValueType) (y / other.y)); }
 
-    /** Divides another point's coordinates to this one */
-    Point& operator/= (Point other) noexcept                        { x /= other.x; y /= other.y; return *this; }
+    /** Divides this point's coordinates by another */
+    template <typename OtherType>
+    Point& operator/= (Point<OtherType> other) noexcept             { *this = *this / other; return *this; }
 
-    /** Returns a point whose coordinates are multiplied by a given value. */
+    /** Returns a point whose coordinates are multiplied by a given scalar value. */
     template <typename FloatType>
     Point operator* (FloatType multiplier) const noexcept           { return Point ((ValueType) (x * multiplier), (ValueType) (y * multiplier)); }
 
-    /** Returns a point whose coordinates are divided by a given value. */
+    /** Returns a point whose coordinates are divided by a given scalar value. */
     template <typename FloatType>
     Point operator/ (FloatType divisor) const noexcept              { return Point ((ValueType) (x / divisor), (ValueType) (y / divisor)); }
 
-    /** Multiplies the point's coordinates by a value. */
+    /** Multiplies the point's coordinates by a scalar value. */
     template <typename FloatType>
     Point& operator*= (FloatType multiplier) noexcept               { x = (ValueType) (x * multiplier); y = (ValueType) (y * multiplier); return *this; }
 
-    /** Divides the point's coordinates by a value. */
+    /** Divides the point's coordinates by a scalar value. */
     template <typename FloatType>
     Point& operator/= (FloatType divisor) noexcept                  { x = (ValueType) (x / divisor); y = (ValueType) (y / divisor); return *this; }
 

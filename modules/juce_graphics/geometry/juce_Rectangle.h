@@ -316,6 +316,21 @@ public:
         return *this;
     }
 
+    /** Scales this rectangle by the given X and Y factors, centred around the origin.
+        Note that if the rectangle has int coordinates and it's scaled by a
+        floating-point amount, then the result will be converted back to integer
+        coordinates using getSmallestIntegerContainer().
+    */
+    template <typename FloatType>
+    Rectangle operator*= (Point<FloatType> scaleFactor) noexcept
+    {
+        Rectangle<FloatType> (pos.x * scaleFactor.x,
+                              pos.y * scaleFactor.y,
+                              w * scaleFactor.x,
+                              h * scaleFactor.y).copyWithRounding (*this);
+        return *this;
+    }
+
     /** Scales this rectangle by the given amount, centred around the origin. */
     template <typename FloatType>
     Rectangle operator/ (FloatType scaleFactor) const noexcept
@@ -333,6 +348,17 @@ public:
                               pos.y / scaleFactor,
                               w / scaleFactor,
                               h / scaleFactor).copyWithRounding (*this);
+        return *this;
+    }
+
+    /** Scales this rectangle by the given X and Y factors, centred around the origin. */
+    template <typename FloatType>
+    Rectangle operator/= (Point<FloatType> scaleFactor) noexcept
+    {
+        Rectangle<FloatType> (pos.x / scaleFactor.x,
+                              pos.y / scaleFactor.y,
+                              w / scaleFactor.x,
+                              h / scaleFactor.y).copyWithRounding (*this);
         return *this;
     }
 
