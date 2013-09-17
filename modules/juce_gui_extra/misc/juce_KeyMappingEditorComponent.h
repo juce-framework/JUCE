@@ -48,7 +48,7 @@ public:
                                bool showResetToDefaultButton);
 
     /** Destructor. */
-    virtual ~KeyMappingEditorComponent();
+    ~KeyMappingEditorComponent();
 
     //==============================================================================
     /** Sets up the colours to use for parts of the component.

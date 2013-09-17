@@ -35,8 +35,8 @@ public:
         setWantsKeyboardFocus (false);
         setTriggeredOnMouseDown (keyNum >= 0);
 
-        setTooltip (keyIndex < 0 ? TRANS("adds a new key-mapping")
-                                 : TRANS("click to change this key-mapping"));
+        setTooltip (keyIndex < 0 ? TRANS("Adds a new key-mapping")
+                                 : TRANS("Click to change this key-mapping"));
     }
 
     void paintButton (Graphics& g, bool /*isOver*/, bool /*isDown*/) override
@@ -64,9 +64,9 @@ public:
         {
             // existing key clicked..
             PopupMenu m;
-            m.addItem (1, TRANS("change this key-mapping"));
+            m.addItem (1, TRANS("Change this key-mapping"));
             m.addSeparator();
-            m.addItem (2, TRANS("remove this key-mapping"));
+            m.addItem (2, TRANS("Remove this key-mapping"));
 
             m.showMenuAsync (PopupMenu::Options(),
                              ModalCallbackFunction::forComponent (menuCallback, this));
@@ -211,7 +211,7 @@ public:
 
         const bool isReadOnly = owner.isCommandReadOnly (commandID);
 
-        const Array <KeyPress> keyPresses (owner.getMappings().getKeyPressesAssignedToCommand (commandID));
+        const Array<KeyPress> keyPresses (owner.getMappings().getKeyPressesAssignedToCommand (commandID));
 
         for (int i = 0; i < jmin ((int) maxNumAssignments, keyPresses.size()); ++i)
             addKeyPressButton (owner.getDescriptionForKeyPress (keyPresses.getReference (i)), i, isReadOnly);
@@ -301,8 +301,7 @@ public:
         g.setFont (Font (height * 0.6f, Font::bold));
         g.setColour (owner.findColour (KeyMappingEditorComponent::textColourId));
 
-        g.drawText (categoryName,
-                    2, 0, width - 2, height,
+        g.drawText (TRANS (categoryName), 2, 0, width - 2, height,
                     Justification::centredLeft, true);
     }
 
@@ -312,11 +311,11 @@ public:
         {
             if (getNumSubItems() == 0)
             {
-                const Array <CommandID> commands (owner.getCommandManager().getCommandsInCategory (categoryName));
+                const Array<CommandID> commands (owner.getCommandManager().getCommandsInCategory (categoryName));
 
                 for (int i = 0; i < commands.size(); ++i)
-                    if (owner.shouldCommandBeIncluded (commands[i]))
-                        addSubItem (new MappingItem (owner, commands[i]));
+                    if (owner.shouldCommandBeIncluded (commands.getUnchecked(i)))
+                        addSubItem (new MappingItem (owner, commands.getUnchecked(i)));
             }
         }
         else
@@ -338,8 +337,7 @@ class KeyMappingEditorComponent::TopLevelItem   : public TreeViewItem,
                                                   private ChangeListener
 {
 public:
-    TopLevelItem (KeyMappingEditorComponent& kec)
-        : owner (kec)
+    TopLevelItem (KeyMappingEditorComponent& kec)   : owner (kec)
     {
         setLinesDrawnForSubItems (false);
         owner.getMappings().addChangeListener (this);
@@ -362,11 +360,11 @@ public:
 
         for (int i = 0; i < categories.size(); ++i)
         {
-            const Array <CommandID> commands (owner.getCommandManager().getCommandsInCategory (categories[i]));
+            const Array<CommandID> commands (owner.getCommandManager().getCommandsInCategory (categories[i]));
             int count = 0;
 
             for (int j = 0; j < commands.size(); ++j)
-                if (owner.shouldCommandBeIncluded (commands[j]))
+                if (owner.shouldCommandBeIncluded (commands.getUnchecked(j)))
                     ++count;
 
             if (count > 0)
