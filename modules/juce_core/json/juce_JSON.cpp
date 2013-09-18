@@ -330,7 +330,9 @@ public:
     {
         if (v.isString())
         {
+            out << '"';
             writeString (out, v.toString().getCharPointer());
+            out << '"';
         }
         else if (v.isVoid())
         {
@@ -360,9 +362,6 @@ public:
         }
     }
 
-private:
-    enum { indentSize = 2 };
-
     static void writeEscapedChar (OutputStream& out, const unsigned short value)
     {
         out << "\\u" << String::toHexString ((int) value).paddedLeft ('0', 4);
@@ -370,15 +369,13 @@ private:
 
     static void writeString (OutputStream& out, String::CharPointerType t)
     {
-        out << '"';
-
         for (;;)
         {
             const juce_wchar c (t.getAndAdvance());
 
             switch (c)
             {
-                case 0:  out << '"'; return;
+                case 0:  return;
 
                 case '\"':  out << "\\\""; break;
                 case '\\':  out << "\\\\"; break;
@@ -472,8 +469,9 @@ private:
             if (! allOnOneLine)
                 writeSpaces (out, indentLevel + indentSize);
 
+            out << '"';
             writeString (out, v->name);
-            out << ": ";
+            out << "\": ";
             write (out, v->value, indentLevel + indentSize, allOnOneLine);
 
             if (v->nextListItem.get() != nullptr)
@@ -494,6 +492,8 @@ private:
 
         out << '}';
     }
+
+    enum { indentSize = 2 };
 };
 
 //==============================================================================
@@ -533,6 +533,14 @@ void JSON::writeToStream (OutputStream& output, const var& data, const bool allO
 {
     JSONFormatter::write (output, data, 0, allOnOneLine);
 }
+
+String JSON::escapeString (StringRef s)
+{
+    MemoryOutputStream mo;
+    JSONFormatter::writeString (mo, s.text);
+    return mo.toString();
+}
+
 
 //==============================================================================
 //==============================================================================

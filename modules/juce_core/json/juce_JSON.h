@@ -103,6 +103,9 @@ public:
                                const var& objectToFormat,
                                bool allOnOneLine = false);
 
+    /** Returns a version of a string with any extended characters escaped. */
+    static String escapeString (StringRef);
+
 private:
     //==============================================================================
     JSON(); // This class can't be instantiated - just use its static methods.
