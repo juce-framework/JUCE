@@ -120,23 +120,23 @@ public:
 
     //==============================================================================
     /** Makes a list of all the tempo-change meta-events from all tracks in the midi file.
-
         Useful for finding the positions of all the tempo changes in a file.
-
         @param tempoChangeEvents    a list to which all the events will be added
     */
     void findAllTempoEvents (MidiMessageSequence& tempoChangeEvents) const;
 
     /** Makes a list of all the time-signature meta-events from all tracks in the midi file.
-
         Useful for finding the positions of all the tempo changes in a file.
-
         @param timeSigEvents        a list to which all the events will be added
     */
     void findAllTimeSigEvents (MidiMessageSequence& timeSigEvents) const;
 
-    /** Returns the latest timestamp in any of the tracks.
+    /** Makes a list of all the time-signature meta-events from all tracks in the midi file.
+        @param keySigEvents         a list to which all the events will be added
+    */
+    void findAllKeySigEvents (MidiMessageSequence& keySigEvents) const;
 
+    /** Returns the latest timestamp in any of the tracks.
         (Useful for finding the length of the file).
     */
     double getLastTimestamp() const;
@@ -171,7 +171,7 @@ public:
 
 private:
     //==============================================================================
-    OwnedArray <MidiMessageSequence> tracks;
+    OwnedArray<MidiMessageSequence> tracks;
     short timeFormat;
 
     void readNextTrack (const uint8* data, int size);

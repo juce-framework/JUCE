@@ -797,7 +797,12 @@ bool MidiMessage::isKeySignatureMetaEvent() const noexcept
 
 int MidiMessage::getKeySignatureNumberOfSharpsOrFlats() const noexcept
 {
-    return (int) *getMetaEventData();
+    return (int) getMetaEventData()[0];
+}
+
+bool MidiMessage::isKeySignatureMajorKey() const noexcept
+{
+    return getMetaEventData()[1] == 0;
 }
 
 MidiMessage MidiMessage::endOfTrack() noexcept

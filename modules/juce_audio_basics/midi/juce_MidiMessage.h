@@ -112,13 +112,11 @@ public:
 
     //==============================================================================
     /** Returns a pointer to the raw midi data.
-
         @see getRawDataSize
     */
     const uint8* getRawData() const noexcept                    { return data; }
 
     /** Returns the number of bytes of data in the message.
-
         @see getRawData
     */
     int getRawDataSize() const noexcept                         { return size; }
@@ -143,15 +141,12 @@ public:
     double getTimeStamp() const noexcept                        { return timeStamp; }
 
     /** Changes the message's associated timestamp.
-
         The units for the timestamp will be application-specific - see the notes for getTimeStamp().
-
         @see addToTimeStamp, getTimeStamp
     */
     void setTimeStamp (double newTimestamp) noexcept      { timeStamp = newTimestamp; }
 
     /** Adds a value to the message's timestamp.
-
         The units for the timestamp will be application-specific.
     */
     void addToTimeStamp (double delta) noexcept           { timeStamp += delta; }
@@ -569,7 +564,6 @@ public:
 
     //==============================================================================
     /** Returns true if this is a 'tempo' meta-event.
-
         @see getTempoMetaEventTickLength, getTempoSecondsPerQuarterNote
     */
     bool isTempoMetaEvent() const noexcept;
@@ -583,48 +577,50 @@ public:
     double getTempoMetaEventTickLength (short timeFormat) const noexcept;
 
     /** Calculates the seconds-per-quarter-note from a tempo meta-event.
-
         @see isTempoMetaEvent, getTempoMetaEventTickLength
     */
     double getTempoSecondsPerQuarterNote() const noexcept;
 
     /** Creates a tempo meta-event.
-
         @see isTempoMetaEvent
     */
     static MidiMessage tempoMetaEvent (int microsecondsPerQuarterNote) noexcept;
 
     //==============================================================================
     /** Returns true if this is a 'time-signature' meta-event.
-
         @see getTimeSignatureInfo
     */
     bool isTimeSignatureMetaEvent() const noexcept;
 
     /** Returns the time-signature values from a time-signature meta-event.
-
         @see isTimeSignatureMetaEvent
     */
     void getTimeSignatureInfo (int& numerator, int& denominator) const noexcept;
 
     /** Creates a time-signature meta-event.
-
         @see isTimeSignatureMetaEvent
     */
     static MidiMessage timeSignatureMetaEvent (int numerator, int denominator);
 
     //==============================================================================
     /** Returns true if this is a 'key-signature' meta-event.
-
-        @see getKeySignatureNumberOfSharpsOrFlats
+        @see getKeySignatureNumberOfSharpsOrFlats, isKeySignatureMajorKey
     */
     bool isKeySignatureMetaEvent() const noexcept;
 
     /** Returns the key from a key-signature meta-event.
-
-        @see isKeySignatureMetaEvent
+        This method must only be called if isKeySignatureMetaEvent() is true.
+        A positive number here indicates the number of sharps in the key signature,
+        and a negative number indicates a number of flats. So e.g. 3 = F# + C# + G#,
+        -2 = Bb + Eb
+        @see isKeySignatureMetaEvent, isKeySignatureMajorKey
     */
     int getKeySignatureNumberOfSharpsOrFlats() const noexcept;
+
+    /** Returns true if this key-signature event is major, or false if it's minor.
+        This method must only be called if isKeySignatureMetaEvent() is true.
+    */
+    bool isKeySignatureMajorKey() const noexcept;
 
     //==============================================================================
     /** Returns true if this is a 'channel' meta-event.
@@ -807,14 +803,11 @@ public:
     */
     MidiMachineControlCommand getMidiMachineControlCommand() const noexcept;
 
-    /** Creates an MMC message.
-    */
+    /** Creates an MMC message. */
     static MidiMessage midiMachineControlCommand (MidiMachineControlCommand command);
 
     /** Checks whether this is an MMC "goto" message.
-
         If it is, the parameters passed-in are set to the time that the message contains.
-
         @see midiMachineControlGoto
     */
     bool isMidiMachineControlGoto (int& hours,
@@ -823,9 +816,7 @@ public:
                                    int& frames) const noexcept;
 
     /** Creates an MMC "goto" message.
-
         This messages tells the device to go to a specific frame.
-
         @see isMidiMachineControlGoto
     */
     static MidiMessage midiMachineControlGoto (int hours,
@@ -835,14 +826,12 @@ public:
 
     //==============================================================================
     /** Creates a master-volume change message.
-
         @param volume   the volume, 0 to 1.0
     */
     static MidiMessage masterVolume (float volume);
 
     //==============================================================================
     /** Creates a system-exclusive message.
-
         The data passed in is wrapped with header and tail bytes of 0xf0 and 0xf7.
     */
     static MidiMessage createSysExMessage (const void* sysexData,
