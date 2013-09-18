@@ -205,7 +205,7 @@ File File::getSpecialLocation (const SpecialLocationType type)
             {
                 File tmp ("~/Library/Caches/" + juce_getExecutableFile().getFileNameWithoutExtension());
                 tmp.createDirectory();
-                return tmp.getFullPathName();
+                return File (tmp.getFullPathName());
             }
           #endif
             case userMusicDirectory:                resultPath = "~/Music"; break;
@@ -245,7 +245,7 @@ File File::getSpecialLocation (const SpecialLocationType type)
                 buffer.calloc (size + 8);
 
                 _NSGetExecutablePath (buffer.getData(), &size);
-                return String::fromUTF8 (buffer, (int) size);
+                return File (String::fromUTF8 (buffer, (int) size));
             }
 
             default:

@@ -44,10 +44,10 @@ public:
     StringArray() noexcept;
 
     /** Creates a copy of another string array */
-    StringArray (const StringArray& other);
+    StringArray (const StringArray&);
 
    #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
-    StringArray (StringArray&& other) noexcept;
+    StringArray (StringArray&&) noexcept;
    #endif
 
     /** Creates an array containing a single string. */
@@ -90,27 +90,27 @@ public:
     ~StringArray();
 
     /** Copies the contents of another string array into this one */
-    StringArray& operator= (const StringArray& other);
+    StringArray& operator= (const StringArray&);
 
    #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
-    StringArray& operator= (StringArray&& other) noexcept;
+    StringArray& operator= (StringArray&&) noexcept;
    #endif
 
     /** Swaps the contents of this and another StringArray. */
-    void swapWith (StringArray& other) noexcept;
+    void swapWith (StringArray&) noexcept;
 
     //==============================================================================
     /** Compares two arrays.
         Comparisons are case-sensitive.
         @returns    true only if the other array contains exactly the same strings in the same order
     */
-    bool operator== (const StringArray& other) const noexcept;
+    bool operator== (const StringArray&) const noexcept;
 
     /** Compares two arrays.
         Comparisons are case-sensitive.
         @returns    false if the other array contains exactly the same strings in the same order
     */
-    bool operator!= (const StringArray& other) const noexcept;
+    bool operator!= (const StringArray&) const noexcept;
 
     //==============================================================================
     /** Returns the number of strings in the array */

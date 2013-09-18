@@ -160,7 +160,7 @@ public:
 
     void anotherInstanceStarted (const String& commandLine) override
     {
-        openFile (commandLine.unquoted());
+        openFile (File (commandLine.unquoted()));
     }
 
     static IntrojucerApp& getApp()

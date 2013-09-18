@@ -546,11 +546,13 @@ public:
 
     /** Adds elements from an array to the end of this array.
 
-        @param elementsToAdd        the array of elements to add
+        @param elementsToAdd        an array of some kind of object from which elements
+                                    can be constructed.
         @param numElementsToAdd     how many elements are in this other array
         @see add
     */
-    void addArray (const ElementType* elementsToAdd, int numElementsToAdd)
+    template <typename Type>
+    void addArray (const Type* elementsToAdd, int numElementsToAdd)
     {
         const ScopedLockType lock (getLock());
 
@@ -564,6 +566,22 @@ public:
                 ++numUsed;
             }
         }
+    }
+
+    /** Adds elements from a null-terminated array of pointers to the end of this array.
+
+        @param elementsToAdd    an array of pointers to some kind of object from which elements
+                                can be constructed. This array must be terminated by a nullptr
+        @see addArray
+    */
+    template <typename Type>
+    void addNullTerminatedArray (const Type* const* elementsToAdd)
+    {
+        int num = 0;
+        for (const Type* const* e = elementsToAdd; *e != nullptr; ++e)
+            ++num;
+
+        addArray (elementsToAdd, num);
     }
 
     /** This swaps the contents of this array with those of another array.

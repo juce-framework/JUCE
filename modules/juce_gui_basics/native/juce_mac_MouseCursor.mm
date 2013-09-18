@@ -52,7 +52,7 @@ namespace MouseCursorHelpers
 
     static void* fromWebKitFile (const char* filename, float hx, float hy)
     {
-        FileInputStream fileStream (String ("/System/Library/Frameworks/WebKit.framework/Frameworks/WebCore.framework/Resources/") + filename);
+        FileInputStream fileStream (File ("/System/Library/Frameworks/WebKit.framework/Frameworks/WebCore.framework/Resources").getChildFile (filename));
         BufferedInputStream buf (fileStream, 4096);
 
         PNGImageFormat pngFormat;

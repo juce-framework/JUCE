@@ -209,7 +209,7 @@ bool MainWindow::openFile (const File& file)
 bool MainWindow::isInterestedInFileDrag (const StringArray& filenames)
 {
     for (int i = filenames.size(); --i >= 0;)
-        if (canOpenFile (filenames[i]))
+        if (canOpenFile (File (filenames[i])))
             return true;
 
     return false;

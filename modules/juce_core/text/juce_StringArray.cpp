@@ -47,47 +47,29 @@ StringArray::StringArray (const String& firstValue)
     strings.add (firstValue);
 }
 
-namespace StringArrayHelpers
-{
-    template <typename CharType>
-    void addArray (Array<String>& dest, const CharType* const* strings)
-    {
-        if (strings != nullptr)
-            while (*strings != nullptr)
-                dest.add (*strings++);
-    }
-
-    template <typename Type>
-    void addArray (Array<String>& dest, const Type* const strings, const int numberOfStrings)
-    {
-        for (int i = 0; i < numberOfStrings; ++i)
-            dest.add (strings [i]);
-    }
-}
-
 StringArray::StringArray (const String* initialStrings, int numberOfStrings)
 {
-    StringArrayHelpers::addArray (strings, initialStrings, numberOfStrings);
+    strings.addArray (initialStrings, numberOfStrings);
 }
 
-StringArray::StringArray (const char* const* const initialStrings)
+StringArray::StringArray (const char* const* initialStrings)
 {
-    StringArrayHelpers::addArray (strings, initialStrings);
+    strings.addNullTerminatedArray (initialStrings);
 }
 
-StringArray::StringArray (const char* const* const initialStrings, const int numberOfStrings)
+StringArray::StringArray (const char* const* initialStrings, int numberOfStrings)
 {
-    StringArrayHelpers::addArray (strings, initialStrings, numberOfStrings);
+    strings.addArray (initialStrings, numberOfStrings);
 }
 
-StringArray::StringArray (const wchar_t* const* const initialStrings)
+StringArray::StringArray (const wchar_t* const* initialStrings)
 {
-    StringArrayHelpers::addArray (strings, initialStrings);
+    strings.addNullTerminatedArray (initialStrings);
 }
 
-StringArray::StringArray (const wchar_t* const* const initialStrings, const int numberOfStrings)
+StringArray::StringArray (const wchar_t* const* initialStrings, int numberOfStrings)
 {
-    StringArrayHelpers::addArray (strings, initialStrings, numberOfStrings);
+    strings.addArray (initialStrings, numberOfStrings);
 }
 
 StringArray& StringArray::operator= (const StringArray& other)
@@ -110,14 +92,7 @@ StringArray::~StringArray()
 
 bool StringArray::operator== (const StringArray& other) const noexcept
 {
-    if (other.size() != size())
-        return false;
-
-    for (int i = size(); --i >= 0;)
-        if (other.strings.getReference(i) != strings.getReference(i))
-            return false;
-
-    return true;
+    return strings == other.strings;
 }
 
 bool StringArray::operator!= (const StringArray& other) const noexcept
@@ -150,7 +125,6 @@ const String& StringArray::operator[] (const int index) const noexcept
 
 String& StringArray::getReference (const int index) noexcept
 {
-    jassert (isPositiveAndBelow (index, strings.size()));
     return strings.getReference (index);
 }
 
@@ -192,20 +166,7 @@ void StringArray::set (const int index, const String& newString)
 
 bool StringArray::contains (StringRef stringToLookFor, const bool ignoreCase) const
 {
-    if (ignoreCase)
-    {
-        for (int i = size(); --i >= 0;)
-            if (strings.getReference(i).equalsIgnoreCase (stringToLookFor))
-                return true;
-    }
-    else
-    {
-        for (int i = size(); --i >= 0;)
-            if (stringToLookFor == strings.getReference(i))
-                return true;
-    }
-
-    return false;
+    return indexOf (stringToLookFor, ignoreCase) >= 0;
 }
 
 int StringArray::indexOf (StringRef stringToLookFor, const bool ignoreCase, int i) const
@@ -217,23 +178,15 @@ int StringArray::indexOf (StringRef stringToLookFor, const bool ignoreCase, int 
 
     if (ignoreCase)
     {
-        while (i < numElements)
-        {
+        for (; i < numElements; ++i)
             if (strings.getReference(i).equalsIgnoreCase (stringToLookFor))
                 return i;
-
-            ++i;
-        }
     }
     else
     {
-        while (i < numElements)
-        {
+        for (; i < numElements; ++i)
             if (stringToLookFor == strings.getReference (i))
                 return i;
-
-            ++i;
-        }
     }
 
     return -1;
@@ -453,9 +406,7 @@ void StringArray::removeDuplicates (const bool ignoreCase)
     {
         const String s (strings.getReference(i));
 
-        int nextIndex = i + 1;
-
-        for (;;)
+        for (int nextIndex = i + 1;;)
         {
             nextIndex = indexOf (s, ignoreCase, nextIndex);
 
