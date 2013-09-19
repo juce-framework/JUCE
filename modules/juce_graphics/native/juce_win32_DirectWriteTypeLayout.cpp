@@ -215,6 +215,9 @@ namespace DirectWriteTypeLayout
     void addAttributedRange (const AttributedString::Attribute& attr, IDWriteTextLayout* textLayout,
                              const int textLen, ID2D1RenderTarget* const renderTarget, IDWriteFontCollection* const fontCollection)
     {
+        if (textLayout == nullptr)
+            return;
+
         DWRITE_TEXT_RANGE range;
         range.startPosition = attr.range.getStart();
         range.length = jmin (attr.range.getLength(), textLen - attr.range.getStart());
