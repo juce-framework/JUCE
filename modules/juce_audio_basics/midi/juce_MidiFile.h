@@ -52,28 +52,23 @@ public:
 
     //==============================================================================
     /** Returns the number of tracks in the file.
-
         @see getTrack, addTrack
     */
     int getNumTracks() const noexcept;
 
     /** Returns a pointer to one of the tracks in the file.
-
         @returns a pointer to the track, or nullptr if the index is out-of-range
         @see getNumTracks, addTrack
     */
     const MidiMessageSequence* getTrack (int index) const noexcept;
 
     /** Adds a midi track to the file.
-
         This will make its own internal copy of the sequence that is passed-in.
-
         @see getNumTracks, getTrack
     */
     void addTrack (const MidiMessageSequence& trackSequence);
 
     /** Removes all midi tracks from the file.
-
         @see getNumTracks
     */
     void clear();
@@ -156,7 +151,6 @@ public:
     bool readFrom (InputStream& sourceStream);
 
     /** Writes the midi tracks as a standard midi file.
-
         @returns true if the operation succeeded.
     */
     bool writeTo (OutputStream& destStream);
@@ -174,8 +168,8 @@ private:
     OwnedArray<MidiMessageSequence> tracks;
     short timeFormat;
 
-    void readNextTrack (const uint8* data, int size);
-    void writeTrack (OutputStream& mainOut, int trackNum);
+    void readNextTrack (const uint8*, int size);
+    void writeTrack (OutputStream&, int trackNum);
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MidiFile)
 };

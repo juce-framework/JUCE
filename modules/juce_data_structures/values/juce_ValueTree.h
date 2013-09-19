@@ -79,16 +79,16 @@ public:
         Like an XmlElement, each ValueTree node has a type, which you can access with
         getType() and hasType().
     */
-    explicit ValueTree (const Identifier type);
+    explicit ValueTree (Identifier type);
 
     /** Creates a reference to another ValueTree. */
-    ValueTree (const ValueTree& other);
+    ValueTree (const ValueTree&);
 
     /** Makes this object reference another node. */
-    ValueTree& operator= (const ValueTree& other);
+    ValueTree& operator= (const ValueTree&);
 
    #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
-    ValueTree (ValueTree&& other) noexcept;
+    ValueTree (ValueTree&&) noexcept;
    #endif
 
     /** Destructor. */
@@ -98,13 +98,13 @@ public:
         Note that this isn't a value comparison - two independently-created trees which
         contain identical data are not considered equal.
     */
-    bool operator== (const ValueTree& other) const noexcept;
+    bool operator== (const ValueTree&) const noexcept;
 
     /** Returns true if this and the other node refer to different underlying structures.
         Note that this isn't a value comparison - two independently-created trees which
         contain identical data are not considered equal.
     */
-    bool operator!= (const ValueTree& other) const noexcept;
+    bool operator!= (const ValueTree&) const noexcept;
 
     /** Performs a deep comparison between the properties and children of two trees.
         If all the properties and children of the two trees are the same (recursively), this
@@ -112,7 +112,7 @@ public:
         The normal operator==() only checks whether two trees refer to the same shared data
         structure, so use this method if you need to do a proper value comparison.
     */
-    bool isEquivalentTo (const ValueTree& other) const;
+    bool isEquivalentTo (const ValueTree&) const;
 
     //==============================================================================
     /** Returns true if this node refers to some valid data.

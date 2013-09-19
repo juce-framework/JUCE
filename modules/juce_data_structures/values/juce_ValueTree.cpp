@@ -27,7 +27,7 @@ class ValueTree::SharedObject  : public ReferenceCountedObject
 public:
     typedef ReferenceCountedObjectPtr<SharedObject> Ptr;
 
-    explicit SharedObject (const Identifier t) noexcept
+    explicit SharedObject (Identifier t) noexcept
         : type (t), parent (nullptr)
     {
     }
@@ -57,11 +57,20 @@ public:
         }
     }
 
-    void sendPropertyChangeMessage (ValueTree& tree, const Identifier property)
+    template <typename Method>
+    void callListeners (Method method, ValueTree& tree)
     {
         for (int i = valueTreesWithListeners.size(); --i >= 0;)
             if (ValueTree* const v = valueTreesWithListeners[i])
-                v->listeners.call (&ValueTree::Listener::valueTreePropertyChanged, tree, property);
+                v->listeners.call (method, tree);
+    }
+
+    template <typename Method, typename ParamType>
+    void callListeners (Method method, ValueTree& tree, ParamType& param2)
+    {
+        for (int i = valueTreesWithListeners.size(); --i >= 0;)
+            if (ValueTree* const v = valueTreesWithListeners[i])
+                v->listeners.call (method, tree, param2);
     }
 
     void sendPropertyChangeMessage (const Identifier property)
@@ -69,14 +78,7 @@ public:
         ValueTree tree (this);
 
         for (ValueTree::SharedObject* t = this; t != nullptr; t = t->parent)
-            t->sendPropertyChangeMessage (tree, property);
-    }
-
-    void sendChildAddedMessage (ValueTree& tree, ValueTree& child)
-    {
-        for (int i = valueTreesWithListeners.size(); --i >= 0;)
-            if (ValueTree* const v = valueTreesWithListeners[i])
-                v->listeners.call (&ValueTree::Listener::valueTreeChildAdded, tree, child);
+            t->callListeners (&ValueTree::Listener::valueTreePropertyChanged, tree, property);
     }
 
     void sendChildAddedMessage (ValueTree child)
@@ -84,14 +86,7 @@ public:
         ValueTree tree (this);
 
         for (ValueTree::SharedObject* t = this; t != nullptr; t = t->parent)
-            t->sendChildAddedMessage (tree, child);
-    }
-
-    void sendChildRemovedMessage (ValueTree& tree, ValueTree& child)
-    {
-        for (int i = valueTreesWithListeners.size(); --i >= 0;)
-            if (ValueTree* const v = valueTreesWithListeners[i])
-                v->listeners.call (&ValueTree::Listener::valueTreeChildRemoved, tree, child);
+            t->callListeners (&ValueTree::Listener::valueTreeChildAdded, tree, child);
     }
 
     void sendChildRemovedMessage (ValueTree child)
@@ -99,14 +94,7 @@ public:
         ValueTree tree (this);
 
         for (ValueTree::SharedObject* t = this; t != nullptr; t = t->parent)
-            t->sendChildRemovedMessage (tree, child);
-    }
-
-    void sendChildOrderChangedMessage (ValueTree& tree)
-    {
-        for (int i = valueTreesWithListeners.size(); --i >= 0;)
-            if (ValueTree* const v = valueTreesWithListeners[i])
-                v->listeners.call (&ValueTree::Listener::valueTreeChildOrderChanged, tree);
+            t->callListeners (&ValueTree::Listener::valueTreeChildRemoved, tree, child);
     }
 
     void sendChildOrderChangedMessage()
@@ -114,7 +102,7 @@ public:
         ValueTree tree (this);
 
         for (ValueTree::SharedObject* t = this; t != nullptr; t = t->parent)
-            t->sendChildOrderChangedMessage (tree);
+            t->callListeners (&ValueTree::Listener::valueTreeChildOrderChanged, tree);
     }
 
     void sendParentChangeMessage()
@@ -125,19 +113,7 @@ public:
             if (SharedObject* const child = children.getObjectPointer (j))
                 child->sendParentChangeMessage();
 
-        for (int i = valueTreesWithListeners.size(); --i >= 0;)
-            if (ValueTree* const v = valueTreesWithListeners[i])
-                v->listeners.call (&ValueTree::Listener::valueTreeParentChanged, tree);
-    }
-
-    const var& getProperty (const Identifier name) const noexcept
-    {
-        return properties [name];
-    }
-
-    var getProperty (const Identifier name, const var& defaultReturnValue) const
-    {
-        return properties.getWithDefault (name, defaultReturnValue);
+        callListeners (&ValueTree::Listener::valueTreeParentChanged, tree);
     }
 
     void setProperty (const Identifier name, const var& newValue, UndoManager* const undoManager)
@@ -241,7 +217,7 @@ public:
         for (int i = 0; i < children.size(); ++i)
         {
             SharedObject* const s = children.getObjectPointerUnchecked (i);
-            if (s->getProperty (propertyName) == propertyValue)
+            if (s->properties[propertyName] == propertyValue)
                 return ValueTree (s);
         }
 
@@ -305,9 +281,7 @@ public:
 
     void removeChild (const int childIndex, UndoManager* const undoManager)
     {
-        const Ptr child (children.getObjectPointer (childIndex));
-
-        if (child != nullptr)
+        if (const Ptr child = children.getObjectPointer (childIndex))
         {
             if (undoManager == nullptr)
             {
@@ -615,19 +589,16 @@ ValueTree::ValueTree() noexcept
 
 const ValueTree ValueTree::invalid;
 
-ValueTree::ValueTree (const Identifier type_)
-    : object (new ValueTree::SharedObject (type_))
+ValueTree::ValueTree (Identifier type)  : object (new ValueTree::SharedObject (type))
 {
-    jassert (type_.toString().isNotEmpty()); // All objects should be given a sensible type name!
+    jassert (type.toString().isNotEmpty()); // All objects must be given a sensible type name!
 }
 
-ValueTree::ValueTree (SharedObject* const object_)
-    : object (object_)
+ValueTree::ValueTree (SharedObject* so)  : object (so)
 {
 }
 
-ValueTree::ValueTree (const ValueTree& other)
-    : object (other.object)
+ValueTree::ValueTree (const ValueTree& other)  : object (other.object)
 {
 }
 
@@ -710,18 +681,18 @@ ValueTree ValueTree::getSibling (const int delta) const
 
 const var& ValueTree::operator[] (const Identifier name) const
 {
-    return object == nullptr ? var::null : object->getProperty (name);
+    return object == nullptr ? var::null : object->properties[name];
 }
 
 const var& ValueTree::getProperty (const Identifier name) const
 {
-    return object == nullptr ? var::null : object->getProperty (name);
+    return object == nullptr ? var::null : object->properties[name];
 }
 
 var ValueTree::getProperty (const Identifier name, const var& defaultReturnValue) const
 {
     return object == nullptr ? defaultReturnValue
-                             : object->getProperty (name, defaultReturnValue);
+                             : object->properties.getWithDefault (name, defaultReturnValue);
 }
 
 ValueTree& ValueTree::setProperty (const Identifier name, const var& newValue,
@@ -798,10 +769,9 @@ private:
     const Identifier property;
     UndoManager* const undoManager;
 
-    void valueTreePropertyChanged (ValueTree& treeWhosePropertyHasChanged,
-                                   const Identifier& changedProperty) override
+    void valueTreePropertyChanged (ValueTree& changedTree, const Identifier& changedProperty) override
     {
-        if (tree == treeWhosePropertyHasChanged && property == changedProperty)
+        if (tree == changedTree && property == changedProperty)
             sendChangeMessage (false);
     }
 
