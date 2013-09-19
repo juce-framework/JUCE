@@ -66,6 +66,10 @@ namespace zlibNamespace
   #undef Byte
   #undef fdopen
   #undef local
+  #undef Freq
+  #undef Code
+  #undef Dad
+  #undef Len
 
   #if JUCE_CLANG
    #pragma clang diagnostic pop
