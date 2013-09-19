@@ -250,18 +250,19 @@ public:
 
 private:
     //==============================================================================
-    struct DelegateClass  : public ObjCClass <NSObject>
+    struct DelegateClass  : public ObjCClass<NSObject>
     {
-        DelegateClass()  : ObjCClass <NSObject> ("JUCEAppDelegate_")
+        DelegateClass()  : ObjCClass<NSObject> ("JUCEAppDelegate_")
         {
-            addIvar <URLConnectionState*> ("state");
+            addIvar<URLConnectionState*> ("state");
 
-            addMethod (@selector (connection:didReceiveResponse:), didReceiveResponse,         "v@:@@");
-            addMethod (@selector (connection:didFailWithError:),   didFailWithError,           "v@:@@");
-            addMethod (@selector (connection:didReceiveData:),     didReceiveData,             "v@:@@");
+            addMethod (@selector (connection:didReceiveResponse:), didReceiveResponse,            "v@:@@");
+            addMethod (@selector (connection:didFailWithError:),   didFailWithError,              "v@:@@");
+            addMethod (@selector (connection:didReceiveData:),     didReceiveData,                "v@:@@");
             addMethod (@selector (connection:didSendBodyData:totalBytesWritten:totalBytesExpectedToWrite:totalBytesExpectedToWrite:),
-                                                                   connectionDidSendBodyData,  "v@:@iii");
-            addMethod (@selector (connectionDidFinishLoading:),    connectionDidFinishLoading, "v@:@");
+                                                                   connectionDidSendBodyData,     "v@:@iii");
+            addMethod (@selector (connectionDidFinishLoading:),    connectionDidFinishLoading,    "v@:@");
+            addMethod (@selector (connection:willSendRequest:redirectResponse:), willSendRequest, "@@:@@");
 
             registerClass();
         }
@@ -283,6 +284,11 @@ private:
         static void didReceiveData (id self, SEL, NSURLConnection*, NSData* newData)
         {
             getState (self)->didReceiveData (newData);
+        }
+
+        static NSURLRequest* willSendRequest (id, SEL, NSURLConnection*, NSURLRequest* request, NSURLResponse*)
+        {
+            return request;
         }
 
         static void connectionDidSendBodyData (id self, SEL, NSURLConnection*, NSInteger, NSInteger totalBytesWritten, NSInteger totalBytesExpected)
@@ -317,9 +323,8 @@ public:
             if (responseHeaders != nullptr && connection != nullptr && connection->headers != nil)
             {
                 NSEnumerator* enumerator = [connection->headers keyEnumerator];
-                NSString* key;
 
-                while ((key = [enumerator nextObject]) != nil)
+                while (NSString* key = [enumerator nextObject])
                     responseHeaders->set (nsStringToJuce (key),
                                           nsStringToJuce ((NSString*) [connection->headers objectForKey: key]));
             }
@@ -341,7 +346,7 @@ public:
 
         JUCE_AUTORELEASEPOOL
         {
-            const int bytesRead = connection->read (static_cast <char*> (buffer), bytesToRead);
+            const int bytesRead = connection->read (static_cast<char*> (buffer), bytesToRead);
             position += bytesRead;
 
             if (bytesRead == 0)
@@ -379,8 +384,7 @@ private:
     const bool isPost;
     const int timeOutMs;
 
-    void createConnection (URL::OpenStreamProgressCallback* progressCallback,
-                           void* progressCallbackContext)
+    void createConnection (URL::OpenStreamProgressCallback* progressCallback, void* progressCallbackContext)
     {
         jassert (connection == nullptr);
 
@@ -424,9 +428,9 @@ InputStream* URL::createNativeStream (const String& address, bool isPost, const 
                                       OpenStreamProgressCallback* progressCallback, void* progressCallbackContext,
                                       const String& headers, const int timeOutMs, StringPairArray* responseHeaders)
 {
-    ScopedPointer <WebInputStream> wi (new WebInputStream (address, isPost, postData,
-                                                           progressCallback, progressCallbackContext,
-                                                           headers, timeOutMs, responseHeaders));
+    ScopedPointer<WebInputStream> wi (new WebInputStream (address, isPost, postData,
+                                                          progressCallback, progressCallbackContext,
+                                                          headers, timeOutMs, responseHeaders));
 
     return wi->isError() ? nullptr : wi.release();
 }
