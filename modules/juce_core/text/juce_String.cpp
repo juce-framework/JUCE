@@ -47,26 +47,34 @@ NewLine newLine;
 
 static inline CharPointer_wchar_t castToCharPointer_wchar_t (const void* t) noexcept
 {
-    return CharPointer_wchar_t (static_cast <const CharPointer_wchar_t::CharType*> (t));
+    return CharPointer_wchar_t (static_cast<const CharPointer_wchar_t::CharType*> (t));
 }
+
+//==============================================================================
+// (Mirrors the structure of StringHolder, but without the atomic member, so can be statically constructed)
+struct EmptyString
+{
+    int refCount;
+    size_t allocatedBytes;
+    String::CharPointerType::CharType text;
+};
+
+static const EmptyString emptyString = { 0x3fffffff, sizeof (String::CharPointerType::CharType), 0 };
 
 //==============================================================================
 class StringHolder
 {
 public:
-    StringHolder() noexcept
-        : refCount (0x3fffffff), allocatedNumBytes (sizeof (*text))
-    {
-        text[0] = 0;
-    }
+    StringHolder() JUCE_DELETED_FUNCTION;
 
     typedef String::CharPointerType CharPointerType;
     typedef String::CharPointerType::CharType CharType;
 
     //==============================================================================
-    static CharPointerType createUninitialisedBytes (const size_t numBytes)
+    static CharPointerType createUninitialisedBytes (size_t numBytes)
     {
-        StringHolder* const s = reinterpret_cast <StringHolder*> (new char [sizeof (StringHolder) - sizeof (CharType) + numBytes]);
+        numBytes = (numBytes + 3) & ~3;
+        StringHolder* const s = reinterpret_cast<StringHolder*> (new char [sizeof (StringHolder) - sizeof (CharType) + numBytes]);
         s->refCount.value = 0;
         s->allocatedNumBytes = numBytes;
         return CharPointerType (s->text);
@@ -76,7 +84,7 @@ public:
     static CharPointerType createFromCharPointer (const CharPointer text)
     {
         if (text.getAddress() == nullptr || text.isEmpty())
-            return getEmpty();
+            return CharPointerType (&(emptyString.text));
 
         CharPointer t (text);
         size_t bytesNeeded = sizeof (CharType);
@@ -93,7 +101,7 @@ public:
     static CharPointerType createFromCharPointer (const CharPointer text, size_t maxChars)
     {
         if (text.getAddress() == nullptr || text.isEmpty() || maxChars == 0)
-            return getEmpty();
+            return CharPointerType (&(emptyString.text));
 
         CharPointer end (text);
         size_t numChars = 0;
@@ -114,7 +122,7 @@ public:
     static CharPointerType createFromCharPointer (const CharPointer start, const CharPointer end)
     {
         if (start.getAddress() == nullptr || start.isEmpty())
-            return getEmpty();
+            return CharPointerType (&(emptyString.text));
 
         CharPointer e (start);
         int numChars = 0;
@@ -134,7 +142,7 @@ public:
     static CharPointerType createFromCharPointer (const CharPointerType start, const CharPointerType end)
     {
         if (start.getAddress() == nullptr || start.isEmpty())
-            return getEmpty();
+            return CharPointerType (&(emptyString.text));
 
         const size_t numBytes = (size_t) (reinterpret_cast<const char*> (end.getAddress())
                                            - reinterpret_cast<const char*> (start.getAddress()));
@@ -151,21 +159,20 @@ public:
         return dest;
     }
 
-    static inline CharPointerType getEmpty() noexcept
-    {
-        return CharPointerType (empty.text);
-    }
-
     //==============================================================================
     static void retain (const CharPointerType text) noexcept
     {
-        ++(bufferFromText (text)->refCount);
+        StringHolder* const b = bufferFromText (text);
+
+        if (b != (StringHolder*) &emptyString)
+            ++(b->refCount);
     }
 
     static inline void release (StringHolder* const b) noexcept
     {
-        if (--(b->refCount) == -1 && b != &empty)
-            delete[] reinterpret_cast <char*> (b);
+        if (b != (StringHolder*) &emptyString)
+            if (--(b->refCount) == -1)
+                delete[] reinterpret_cast<char*> (b);
     }
 
     static void release (const CharPointerType text) noexcept
@@ -174,25 +181,18 @@ public:
     }
 
     //==============================================================================
-    static CharPointerType makeUnique (const CharPointerType text)
-    {
-        StringHolder* const b = bufferFromText (text);
-
-        if (b->refCount.get() <= 0)
-            return text;
-
-        CharPointerType newText (createUninitialisedBytes (b->allocatedNumBytes));
-        memcpy (newText.getAddress(), text.getAddress(), b->allocatedNumBytes);
-        release (b);
-
-        return newText;
-    }
-
     static CharPointerType makeUniqueWithByteSize (const CharPointerType text, size_t numBytes)
     {
         StringHolder* const b = bufferFromText (text);
 
-        if (b->refCount.get() <= 0 && b->allocatedNumBytes >= numBytes)
+        if (b == (StringHolder*) &emptyString)
+        {
+            CharPointerType newText (createUninitialisedBytes (numBytes));
+            newText.writeNull();
+            return newText;
+        }
+
+        if (b->allocatedNumBytes >= numBytes && b->refCount.get() <= 0)
             return text;
 
         CharPointerType newText (createUninitialisedBytes (jmax (b->allocatedNumBytes, numBytes)));
@@ -211,8 +211,6 @@ public:
     Atomic<int> refCount;
     size_t allocatedNumBytes;
     CharType text[1];
-
-    static StringHolder empty;
 
 private:
     static inline StringHolder* bufferFromText (const CharPointerType text) noexcept
@@ -234,20 +232,15 @@ private:
        #else
         #error "native wchar_t size is unknown"
        #endif
+
+        static_jassert (sizeof (EmptyString) == sizeof (StringHolder));
     }
 };
 
-StringHolder StringHolder::empty;
 const String String::empty;
 
 //==============================================================================
-void String::preallocateBytes (const size_t numBytesNeeded)
-{
-    text = StringHolder::makeUniqueWithByteSize (text, numBytesNeeded + sizeof (CharPointerType::CharType));
-}
-
-//==============================================================================
-String::String() noexcept  : text (StringHolder::getEmpty())
+String::String() noexcept  : text (&(emptyString.text))
 {
 }
 
@@ -256,8 +249,7 @@ String::~String() noexcept
     StringHolder::release (text);
 }
 
-String::String (const String& other) noexcept
-    : text (other.text)
+String::String (const String& other) noexcept   : text (other.text)
 {
     StringHolder::retain (text);
 }
@@ -275,10 +267,9 @@ String& String::operator= (const String& other) noexcept
 }
 
 #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
-String::String (String&& other) noexcept
-    : text (other.text)
+String::String (String&& other) noexcept   : text (other.text)
 {
-    other.text = StringHolder::getEmpty();
+    other.text = &(emptyString.text);
 }
 
 String& String::operator= (String&& other) noexcept
@@ -293,6 +284,11 @@ inline String::PreallocationBytes::PreallocationBytes (const size_t numBytes_) :
 String::String (const PreallocationBytes& preallocationSize)
     : text (StringHolder::createUninitialisedBytes (preallocationSize.numBytes + sizeof (CharPointerType::CharType)))
 {
+}
+
+void String::preallocateBytes (const size_t numBytesNeeded)
+{
+    text = StringHolder::makeUniqueWithByteSize (text, numBytesNeeded + sizeof (CharPointerType::CharType));
 }
 
 //==============================================================================
@@ -498,12 +494,12 @@ String::String (const int number)            : text (NumberToStringConverters::c
 String::String (const unsigned int number)   : text (NumberToStringConverters::createFromInteger (number)) {}
 String::String (const short number)          : text (NumberToStringConverters::createFromInteger ((int) number)) {}
 String::String (const unsigned short number) : text (NumberToStringConverters::createFromInteger ((unsigned int) number)) {}
-String::String (const int64 number)          : text (NumberToStringConverters::createFromInteger (number)) {}
+String::String (const int64  number)         : text (NumberToStringConverters::createFromInteger (number)) {}
 String::String (const uint64 number)         : text (NumberToStringConverters::createFromInteger (number)) {}
 
-String::String (const float number)          : text (NumberToStringConverters::createFromDouble ((double) number, 0)) {}
+String::String (const float  number)         : text (NumberToStringConverters::createFromDouble ((double) number, 0)) {}
 String::String (const double number)         : text (NumberToStringConverters::createFromDouble (number, 0)) {}
-String::String (const float number, const int numberOfDecimalPlaces)   : text (NumberToStringConverters::createFromDouble ((double) number, numberOfDecimalPlaces)) {}
+String::String (const float  number, const int numberOfDecimalPlaces)  : text (NumberToStringConverters::createFromDouble ((double) number, numberOfDecimalPlaces)) {}
 String::String (const double number, const int numberOfDecimalPlaces)  : text (NumberToStringConverters::createFromDouble (number, numberOfDecimalPlaces)) {}
 
 //==============================================================================
@@ -887,15 +883,12 @@ int String::lastIndexOf (StringRef other) const noexcept
 
         if (i >= 0)
         {
-            CharPointerType n (text + i);
-
-            while (i >= 0)
+            for (CharPointerType n (text + i); i >= 0; --i)
             {
                 if (n.compareUpTo (other.text, len) == 0)
                     return i;
 
                 --n;
-                --i;
             }
         }
     }
@@ -912,15 +905,12 @@ int String::lastIndexOfIgnoreCase (StringRef other) const noexcept
 
         if (i >= 0)
         {
-            CharPointerType n (text + i);
-
-            while (i >= 0)
+            for (CharPointerType n (text + i); i >= 0; --i)
             {
                 if (n.compareIgnoreCaseUpTo (other.text, len) == 0)
                     return i;
 
                 --n;
-                --i;
             }
         }
     }
@@ -1055,7 +1045,7 @@ bool String::matchesWildcard (StringRef wildcard, const bool ignoreCase) const n
 String String::repeatedString (StringRef stringToRepeat, int numberOfTimesToRepeat)
 {
     if (numberOfTimesToRepeat <= 0)
-        return empty;
+        return String();
 
     String result (PreallocationBytes (findByteOffsetOfEnd (stringToRepeat) * (size_t) numberOfTimesToRepeat));
     CharPointerType n (result.text);
@@ -1139,10 +1129,9 @@ String String::replaceSection (int index, int numCharsToReplace, StringRef strin
         jassertfalse;
     }
 
-    int i = 0;
     CharPointerType insertPoint (text);
 
-    while (i < index)
+    for (int i = 0; i < index; ++i)
     {
         if (insertPoint.isEmpty())
         {
@@ -1152,17 +1141,12 @@ String String::replaceSection (int index, int numCharsToReplace, StringRef strin
         }
 
         ++insertPoint;
-        ++i;
     }
 
     CharPointerType startOfRemainder (insertPoint);
 
-    i = 0;
-    while (i < numCharsToReplace && ! startOfRemainder.isEmpty())
-    {
+    for (int i = 0; i < numCharsToReplace && ! startOfRemainder.isEmpty(); ++i)
         ++startOfRemainder;
-        ++i;
-    }
 
     if (insertPoint == text && startOfRemainder.isEmpty())
         return stringToInsert.text;
@@ -1173,7 +1157,7 @@ String String::replaceSection (int index, int numCharsToReplace, StringRef strin
 
     const size_t newTotalBytes = initialBytes + newStringBytes + remainderBytes;
     if (newTotalBytes <= 0)
-        return String::empty;
+        return String();
 
     String result (PreallocationBytes ((size_t) newTotalBytes));
 
@@ -1362,11 +1346,12 @@ String String::toUpperCase() const
     for (;;)
     {
         const juce_wchar c = builder.source.toUpperCase();
-        ++(builder.source);
         builder.write (c);
 
         if (c == 0)
             break;
+
+        ++(builder.source);
     }
 
     return builder.result;
@@ -1379,11 +1364,12 @@ String String::toLowerCase() const
     for (;;)
     {
         const juce_wchar c = builder.source.toLowerCase();
-        ++(builder.source);
         builder.write (c);
 
         if (c == 0)
             break;
+
+        ++(builder.source);
     }
 
     return builder.result;
@@ -1401,7 +1387,7 @@ String String::substring (int start, const int end) const
         start = 0;
 
     if (end <= start)
-        return empty;
+        return String();
 
     int i = 0;
     CharPointerType t1 (text);
@@ -1409,7 +1395,7 @@ String String::substring (int start, const int end) const
     while (i < start)
     {
         if (t1.isEmpty())
-            return empty;
+            return String();
 
         ++i;
         ++t1;
@@ -1443,7 +1429,7 @@ String String::substring (int start) const
     while (--start >= 0)
     {
         if (t.isEmpty())
-            return empty;
+            return String();
 
         ++t;
     }
@@ -1468,7 +1454,7 @@ String String::fromFirstOccurrenceOf (StringRef sub,
     const int i = ignoreCase ? indexOfIgnoreCase (sub)
                              : indexOf (sub);
     if (i < 0)
-        return empty;
+        return String();
 
     return substring (includeSubString ? i : i + sub.length());
 }
@@ -1522,7 +1508,7 @@ String String::unquoted() const
     const int len = length();
 
     if (len == 0)
-        return empty;
+        return String();
 
     const juce_wchar lastChar = text [len - 1];
     const int dropAtStart = (*text == '"' || *text == '\'') ? 1 : 0;
@@ -1573,7 +1559,7 @@ String String::trim() const
         CharPointerType trimmedEnd (findTrimmedEnd (start, end));
 
         if (trimmedEnd <= start)
-            return empty;
+            return String();
 
         if (text < start || trimmedEnd < end)
             return String (start, trimmedEnd);
@@ -1646,7 +1632,7 @@ String String::trimCharactersAtEnd (StringRef charactersToTrim) const
 String String::retainCharacters (StringRef charactersToRetain) const
 {
     if (isEmpty())
-        return empty;
+        return String();
 
     StringCreationHelper builder (text);
 
@@ -1668,7 +1654,7 @@ String String::retainCharacters (StringRef charactersToRetain) const
 String String::removeCharacters (StringRef charactersToRemove) const
 {
     if (isEmpty())
-        return empty;
+        return String();
 
     StringCreationHelper builder (text);
 
@@ -1688,39 +1674,25 @@ String String::removeCharacters (StringRef charactersToRemove) const
 
 String String::initialSectionContainingOnly (StringRef permittedCharacters) const
 {
-    CharPointerType t (text);
-
-    while (! t.isEmpty())
-    {
+    for (CharPointerType t (text); ! t.isEmpty(); ++t)
         if (permittedCharacters.text.indexOf (*t) < 0)
             return String (text, t);
-
-        ++t;
-    }
 
     return *this;
 }
 
 String String::initialSectionNotContaining (StringRef charactersToStopAt) const
 {
-    CharPointerType t (text);
-
-    while (! t.isEmpty())
-    {
+    for (CharPointerType t (text); ! t.isEmpty(); ++t)
         if (charactersToStopAt.text.indexOf (*t) >= 0)
             return String (text, t);
-
-        ++t;
-    }
 
     return *this;
 }
 
 bool String::containsOnly (StringRef chars) const noexcept
 {
-    CharPointerType t (text);
-
-    while (! t.isEmpty())
+    for (CharPointerType t (text); ! t.isEmpty();)
         if (chars.text.indexOf (t.getAndAdvance()) < 0)
             return false;
 
@@ -1729,9 +1701,7 @@ bool String::containsOnly (StringRef chars) const noexcept
 
 bool String::containsAnyOf (StringRef chars) const noexcept
 {
-    CharPointerType t (text);
-
-    while (! t.isEmpty())
+    for (CharPointerType t (text); ! t.isEmpty();)
         if (chars.text.indexOf (t.getAndAdvance()) >= 0)
             return true;
 
@@ -1740,15 +1710,9 @@ bool String::containsAnyOf (StringRef chars) const noexcept
 
 bool String::containsNonWhitespaceChars() const noexcept
 {
-    CharPointerType t (text);
-
-    while (! t.isEmpty())
-    {
+    for (CharPointerType t (text); ! t.isEmpty(); ++t)
         if (! t.isWhitespace())
             return true;
-
-        ++t;
-    }
 
     return false;
 }
@@ -1785,14 +1749,14 @@ String String::formatted (const String pf, ... )
             break;                          // returns -1 because of an error rather than because it needs more space.
     }
 
-    return empty;
+    return String();
 }
 
 //==============================================================================
-int String::getIntValue() const noexcept
-{
-    return text.getIntValue32();
-}
+int String::getIntValue() const noexcept            { return text.getIntValue32(); }
+int64 String::getLargeIntValue() const noexcept     { return text.getIntValue64(); }
+float String::getFloatValue() const noexcept        { return (float) getDoubleValue(); }
+double String::getDoubleValue() const noexcept      { return text.getDoubleValue(); }
 
 int String::getTrailingIntValue() const noexcept
 {
@@ -1815,21 +1779,6 @@ int String::getTrailingIntValue() const noexcept
     }
 
     return n;
-}
-
-int64 String::getLargeIntValue() const noexcept
-{
-    return text.getIntValue64();
-}
-
-float String::getFloatValue() const noexcept
-{
-    return (float) getDoubleValue();
-}
-
-double String::getDoubleValue() const noexcept
-{
-    return text.getDoubleValue();
 }
 
 static const char hexDigits[] = "0123456789abcdef";
@@ -1860,7 +1809,7 @@ String String::toHexString (short number)     { return toHexString ((int) (unsig
 String String::toHexString (const void* const d, const int size, const int groupSize)
 {
     if (size <= 0)
-        return empty;
+        return String();
 
     int numChars = (size * 2) + 2;
     if (groupSize > 0)
@@ -1894,7 +1843,7 @@ String String::createStringFromData (const void* const unknownData, const int si
     const uint8* const data = static_cast<const uint8*> (unknownData);
 
     if (size <= 0 || data == nullptr)
-        return empty;
+        return String();
 
     if (size == 1)
         return charToString ((juce_wchar) data[0]);
@@ -1968,26 +1917,26 @@ struct StringEncodingConverter
 };
 
 template <>
-struct StringEncodingConverter <CharPointer_UTF8, CharPointer_UTF8>
+struct StringEncodingConverter<CharPointer_UTF8, CharPointer_UTF8>
 {
     static CharPointer_UTF8 convert (const String& source) noexcept   { return CharPointer_UTF8 ((CharPointer_UTF8::CharType*) source.getCharPointer().getAddress()); }
 };
 
 template <>
-struct StringEncodingConverter <CharPointer_UTF16, CharPointer_UTF16>
+struct StringEncodingConverter<CharPointer_UTF16, CharPointer_UTF16>
 {
     static CharPointer_UTF16 convert (const String& source) noexcept  { return CharPointer_UTF16 ((CharPointer_UTF16::CharType*) source.getCharPointer().getAddress()); }
 };
 
 template <>
-struct StringEncodingConverter <CharPointer_UTF32, CharPointer_UTF32>
+struct StringEncodingConverter<CharPointer_UTF32, CharPointer_UTF32>
 {
     static CharPointer_UTF32 convert (const String& source) noexcept  { return CharPointer_UTF32 ((CharPointer_UTF32::CharType*) source.getCharPointer().getAddress()); }
 };
 
-CharPointer_UTF8  String::toUTF8()  const { return StringEncodingConverter <CharPointerType, CharPointer_UTF8 >::convert (*this); }
-CharPointer_UTF16 String::toUTF16() const { return StringEncodingConverter <CharPointerType, CharPointer_UTF16>::convert (*this); }
-CharPointer_UTF32 String::toUTF32() const { return StringEncodingConverter <CharPointerType, CharPointer_UTF32>::convert (*this); }
+CharPointer_UTF8  String::toUTF8()  const { return StringEncodingConverter<CharPointerType, CharPointer_UTF8 >::convert (*this); }
+CharPointer_UTF16 String::toUTF16() const { return StringEncodingConverter<CharPointerType, CharPointer_UTF16>::convert (*this); }
+CharPointer_UTF32 String::toUTF32() const { return StringEncodingConverter<CharPointerType, CharPointer_UTF32>::convert (*this); }
 
 const char* String::toRawUTF8() const
 {
@@ -1996,7 +1945,7 @@ const char* String::toRawUTF8() const
 
 const wchar_t* String::toWideCharPointer() const
 {
-    return StringEncodingConverter <CharPointerType, CharPointer_wchar_t>::convert (*this).getAddress();
+    return StringEncodingConverter<CharPointerType, CharPointer_wchar_t>::convert (*this).getAddress();
 }
 
 std::string String::toStdString() const
@@ -2021,17 +1970,17 @@ struct StringCopier
 
 size_t String::copyToUTF8 (CharPointer_UTF8::CharType* const buffer, size_t maxBufferSizeBytes) const noexcept
 {
-    return StringCopier <CharPointerType, CharPointer_UTF8>::copyToBuffer (text, buffer, maxBufferSizeBytes);
+    return StringCopier<CharPointerType, CharPointer_UTF8>::copyToBuffer (text, buffer, maxBufferSizeBytes);
 }
 
 size_t String::copyToUTF16 (CharPointer_UTF16::CharType* const buffer, size_t maxBufferSizeBytes) const noexcept
 {
-    return StringCopier <CharPointerType, CharPointer_UTF16>::copyToBuffer (text, buffer, maxBufferSizeBytes);
+    return StringCopier<CharPointerType, CharPointer_UTF16>::copyToBuffer (text, buffer, maxBufferSizeBytes);
 }
 
 size_t String::copyToUTF32 (CharPointer_UTF32::CharType* const buffer, size_t maxBufferSizeBytes) const noexcept
 {
-    return StringCopier <CharPointerType, CharPointer_UTF32>::copyToBuffer (text, buffer, maxBufferSizeBytes);
+    return StringCopier<CharPointerType, CharPointer_UTF32>::copyToBuffer (text, buffer, maxBufferSizeBytes);
 }
 
 //==============================================================================
@@ -2049,7 +1998,7 @@ String String::fromUTF8 (const char* const buffer, int bufferSizeBytes)
                                                 CharPointer_UTF8 (buffer + bufferSizeBytes));
     }
 
-    return String::empty;
+    return String();
 }
 
 #if JUCE_MSVC

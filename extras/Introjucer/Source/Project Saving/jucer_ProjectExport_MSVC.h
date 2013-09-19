@@ -619,7 +619,7 @@ public:
 
 protected:
     virtual String getProjectVersionString() const    { return "9.00"; }
-    virtual String getSolutionVersionString() const   { return "10.00" + newLine + "# Visual C++ Express 2008"; }
+    virtual String getSolutionVersionString() const   { return String ("10.00") + newLine + "# Visual C++ Express 2008"; }
 
     File getVCProjFile() const    { return getProjectFile (".vcproj"); }
 
@@ -937,7 +937,7 @@ public:
 
 protected:
     String getProjectVersionString() const    { return "8.00"; }
-    String getSolutionVersionString() const   { return "9.00" + newLine + "# Visual C++ Express 2005"; }
+    String getSolutionVersionString() const   { return String ("9.00") + newLine + "# Visual C++ Express 2005"; }
 
     JUCE_DECLARE_NON_COPYABLE (MSVCProjectExporterVC2005)
 };
