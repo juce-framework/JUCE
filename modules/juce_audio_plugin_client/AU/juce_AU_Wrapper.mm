@@ -45,6 +45,7 @@
 #include <AudioUnit/AUCocoaUIView.h>
 #include <AudioUnit/AudioUnit.h>
 #include <AudioToolbox/AudioUnitUtilities.h>
+#include <CoreMIDI/MIDIServices.h>
 
 #if JUCE_SUPPORT_CARBON
  #define Point CarbonDummyPointName
@@ -160,6 +161,8 @@ public:
         auEvent.mArgument.mParameter.mScope = kAudioUnitScope_Global;
         auEvent.mArgument.mParameter.mElement = 0;
 
+        zerostruct (midiCallback);
+
         CreateElements();
 
         CAStreamBasicDescription streamDescription;
@@ -206,26 +209,24 @@ public:
     {
         if (inScope == kAudioUnitScope_Global)
         {
-            if (inID == juceFilterObjectPropertyID)
+            switch (inID)
             {
+            case juceFilterObjectPropertyID:
                 outWritable = false;
                 outDataSize = sizeof (void*) * 2;
                 return noErr;
-            }
-            else if (inID == kAudioUnitProperty_OfflineRender)
-            {
+
+            case kAudioUnitProperty_OfflineRender:
                 outWritable = true;
                 outDataSize = sizeof (UInt32);
                 return noErr;
-            }
-            else if (inID == kMusicDeviceProperty_InstrumentCount)
-            {
+
+            case kMusicDeviceProperty_InstrumentCount:
                 outDataSize = sizeof (UInt32);
                 outWritable = false;
                 return noErr;
-            }
-            else if (inID == kAudioUnitProperty_CocoaUI)
-            {
+
+            case kAudioUnitProperty_CocoaUI:
                #if MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_5
                 // (On 10.4, there's a random obj-c dispatching crash when trying to load a cocoa UI)
                 if (SystemStats::getOperatingSystemType() >= SystemStats::MacOSX_10_5)
@@ -235,6 +236,22 @@ public:
                     outWritable = true;
                     return noErr;
                 }
+
+                break;
+
+           #if JucePlugin_ProducesMidiOutput
+            case kAudioUnitProperty_MIDIOutputCallbackInfo:
+                outDataSize = sizeof (CFArrayRef);
+                outWritable = false;
+                return noErr;
+
+            case kAudioUnitProperty_MIDIOutputCallback:
+                outDataSize = sizeof (AUMIDIOutputCallbackStruct);
+                outWritable = true;
+                return noErr;
+           #endif
+
+            default: break;
             }
         }
 
@@ -248,43 +265,57 @@ public:
     {
         if (inScope == kAudioUnitScope_Global)
         {
-            if (inID == juceFilterObjectPropertyID)
+            switch (inID)
             {
-                ((void**) outData)[0] = (void*) static_cast <AudioProcessor*> (juceFilter);
-                ((void**) outData)[1] = (void*) this;
-                return noErr;
-            }
-            else if (inID == kAudioUnitProperty_OfflineRender)
-            {
-                *(UInt32*) outData = (juceFilter != nullptr && juceFilter->isNonRealtime()) ? 1 : 0;
-                return noErr;
-            }
-            else if (inID == kMusicDeviceProperty_InstrumentCount)
-            {
-                *(UInt32*) outData = 1;
-                return noErr;
-            }
-            else if (inID == kAudioUnitProperty_CocoaUI)
-            {
-               #if MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_5
-                // (On 10.4, there's a random obj-c dispatching crash when trying to load a cocoa UI)
-                if (SystemStats::getOperatingSystemType() >= SystemStats::MacOSX_10_5)
-               #endif
-                {
-                    JUCE_AUTORELEASEPOOL
+                case juceFilterObjectPropertyID:
+                    ((void**) outData)[0] = (void*) static_cast <AudioProcessor*> (juceFilter);
+                    ((void**) outData)[1] = (void*) this;
+                    return noErr;
+
+                case kAudioUnitProperty_OfflineRender:
+                    *(UInt32*) outData = (juceFilter != nullptr && juceFilter->isNonRealtime()) ? 1 : 0;
+                    return noErr;
+
+                case kMusicDeviceProperty_InstrumentCount:
+                    *(UInt32*) outData = 1;
+                    return noErr;
+
+                case kAudioUnitProperty_CocoaUI:
+                   #if MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_5
+                    // (On 10.4, there's a random obj-c dispatching crash when trying to load a cocoa UI)
+                    if (SystemStats::getOperatingSystemType() >= SystemStats::MacOSX_10_5)
+                   #endif
                     {
-                        static JuceUICreationClass cls;
+                        JUCE_AUTORELEASEPOOL
+                        {
+                            static JuceUICreationClass cls;
 
-                        // (NB: this may be the host's bundle, not necessarily the component's)
-                        NSBundle* bundle = [NSBundle bundleForClass: cls.cls];
+                            // (NB: this may be the host's bundle, not necessarily the component's)
+                            NSBundle* bundle = [NSBundle bundleForClass: cls.cls];
 
-                        AudioUnitCocoaViewInfo* info = static_cast <AudioUnitCocoaViewInfo*> (outData);
-                        info->mCocoaAUViewClass[0] = (CFStringRef) [juceStringToNS (class_getName (cls.cls)) retain];
-                        info->mCocoaAUViewBundleLocation = (CFURLRef) [[NSURL fileURLWithPath: [bundle bundlePath]] retain];
+                            AudioUnitCocoaViewInfo* info = static_cast <AudioUnitCocoaViewInfo*> (outData);
+                            info->mCocoaAUViewClass[0] = (CFStringRef) [juceStringToNS (class_getName (cls.cls)) retain];
+                            info->mCocoaAUViewBundleLocation = (CFURLRef) [[NSURL fileURLWithPath: [bundle bundlePath]] retain];
+                        }
+
+                        return noErr;
                     }
 
+                    break;
+
+               #if JucePlugin_ProducesMidiOutput
+                case kAudioUnitProperty_MIDIOutputCallbackInfo:
+                {
+                    CFStringRef strs[1];
+                    strs[0] = CFSTR ("MIDI Callback");
+
+                    CFArrayRef callbackArray = CFArrayCreate (nullptr, (const void**) strs, 1, &kCFTypeArrayCallBacks);
+                    *(CFArrayRef*) outData = callbackArray;
                     return noErr;
                 }
+               #endif
+
+                default: break;
             }
         }
 
@@ -297,12 +328,29 @@ public:
                                  const void* inData,
                                  UInt32 inDataSize) override
     {
-        if (inScope == kAudioUnitScope_Global && inID == kAudioUnitProperty_OfflineRender)
+        if (inScope == kAudioUnitScope_Global)
         {
-            if (juceFilter != nullptr)
-                juceFilter->setNonRealtime ((*(UInt32*) inData) != 0);
+            switch (inID)
+            {
+               #if JucePlugin_ProducesMidiOutput
+                case kAudioUnitProperty_MIDIOutputCallback:
+                    if (inDataSize < sizeof (AUMIDIOutputCallbackStruct))
+                        return kAudioUnitErr_InvalidPropertyValue;
 
-            return noErr;
+                    if (AUMIDIOutputCallbackStruct* callbackStruct = (AUMIDIOutputCallbackStruct*) inData)
+                        midiCallback = *callbackStruct;
+
+                    return noErr;
+               #endif
+
+                case kAudioUnitProperty_OfflineRender:
+                    if (juceFilter != nullptr)
+                        juceFilter->setNonRealtime ((*(UInt32*) inData) != 0);
+
+                    return noErr;
+
+                default: break;
+            }
         }
 
         return JuceAUBaseClass::SetProperty (inID, inScope, inElement, inData, inDataSize);
@@ -504,7 +552,7 @@ public:
         info.ppqLoopStart = 0;
         info.ppqLoopEnd = 0;
 
-        switch (lastSMPTETime.mType)
+        switch (lastTimeStamp.mSMPTETime.mType)
         {
             case kSMPTETimeType24:          info.frameRate = AudioPlayHead::fps24; break;
             case kSMPTETimeType25:          info.frameRate = AudioPlayHead::fps25; break;
@@ -679,7 +727,7 @@ public:
                             const AudioTimeStamp& inTimeStamp,
                             UInt32 nFrames) override
     {
-        lastSMPTETime = inTimeStamp.mSMPTETime;
+        lastTimeStamp = inTimeStamp;
 
        #if ! JucePlugin_IsSynth
         return JuceAUBaseClass::Render (ioActionFlags, inTimeStamp, nFrames);
@@ -804,23 +852,40 @@ public:
             if (! midiEvents.isEmpty())
             {
                #if JucePlugin_ProducesMidiOutput
-                const juce::uint8* midiEventData;
-                int midiEventSize, midiEventPosition;
-                MidiBuffer::Iterator i (midiEvents);
-
-                while (i.getNextEvent (midiEventData, midiEventSize, midiEventPosition))
+                if (midiCallback.midiOutputCallback != nullptr)
                 {
-                    jassert (isPositiveAndBelow (midiEventPosition, (int) numSamples));
+                    UInt32 numPackets = 0;
+                    size_t dataSize = 0;
 
+                    const juce::uint8* midiEventData;
+                    int midiEventSize, midiEventPosition;
 
+                    for (MidiBuffer::Iterator i (midiEvents); i.getNextEvent (midiEventData, midiEventSize, midiEventPosition);)
+                    {
+                        jassert (isPositiveAndBelow (midiEventPosition, (int) numSamples));
+                        dataSize += (size_t) midiEventSize;
+                        ++numPackets;
+                    }
 
-                    //xxx
+                    const size_t packetMembersSize     = sizeof (MIDIPacket)     - sizeof (MIDIPacket::data);
+                    const size_t packetListMembersSize = sizeof (MIDIPacketList) - sizeof (MIDIPacket::data);
+
+                    HeapBlock<MIDIPacketList> packetList;
+                    packetList.malloc (packetListMembersSize + packetMembersSize * numPackets + dataSize, 1);
+                    packetList->numPackets = numPackets;
+
+                    MIDIPacket* p = packetList->packet;
+
+                    for (MidiBuffer::Iterator i (midiEvents); i.getNextEvent (midiEventData, midiEventSize, midiEventPosition);)
+                    {
+                        p->timeStamp = (MIDITimeStamp) midiEventPosition;
+                        p->length = (size_t) midiEventSize;
+                        memcpy (p->data, midiEventData, (size_t) midiEventSize);
+                        p = MIDIPacketNext (p);
+                    }
+
+                    midiCallback.midiOutputCallback (midiCallback.userData, &lastTimeStamp, 0, packetList);
                 }
-               #else
-                // if your plugin creates midi messages, you'll need to set
-                // the JucePlugin_ProducesMidiOutput macro to 1 in your
-                // JucePluginCharacteristics.h file
-                //jassert (midiEvents.getNumEvents() <= numMidiEventsComingIn);
                #endif
 
                 midiEvents.clear();
@@ -859,12 +924,7 @@ public:
         return noErr;
     }
 
-    OSStatus HandleMidiEvent (UInt8 nStatus, UInt8 inChannel, UInt8 inData1, UInt8 inData2,
-                             #if defined (MAC_OS_X_VERSION_10_5)
-                              UInt32 inStartFrame) override
-                             #else
-                              long inStartFrame) override
-                             #endif
+    OSStatus HandleMidiEvent (UInt8 nStatus, UInt8 inChannel, UInt8 inData1, UInt8 inData2, UInt32 inStartFrame) override
     {
        #if JucePlugin_WantsMidiInput
         const ScopedLock sl (incomingMidiLock);
@@ -1178,11 +1238,12 @@ private:
     HeapBlock <float*> channels;
     MidiBuffer midiEvents, incomingEvents;
     bool prepared;
-    SMPTETime lastSMPTETime;
     AUChannelInfo channelInfo [numChannelConfigs];
     AudioUnitEvent auEvent;
     mutable Array<AUPreset> presetsArray;
     CriticalSection incomingMidiLock;
+    AUMIDIOutputCallbackStruct midiCallback;
+    AudioTimeStamp lastTimeStamp;
 
     void clearPresetsArray() const
     {
