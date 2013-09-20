@@ -198,9 +198,11 @@ namespace URLHelpers
             data << getMangledParameters (url)
                  << url.getPostData();
 
-            // just a short text attachment, so use simple url encoding..
-            headers << "Content-Type: application/x-www-form-urlencoded\r\nContent-length: "
-                    << (int) data.getDataSize() << "\r\n";
+            // if the user-supplied headers didn't contain a content-type, add one now..
+            if (! headers.containsIgnoreCase ("Content-Type"))
+                headers << "Content-Type: application/x-www-form-urlencoded\r\n";
+
+            headers << "Content-length: " << (int) data.getDataSize() << "\r\n";
         }
     }
 
@@ -320,17 +322,17 @@ bool URL::isProbablyAnEmailAddress (const String& possibleEmailAddress)
 InputStream* URL::createInputStream (const bool usePostCommand,
                                      OpenStreamProgressCallback* const progressCallback,
                                      void* const progressCallbackContext,
-                                     const String& extraHeaders,
+                                     String headers,
                                      const int timeOutMs,
                                      StringPairArray* const responseHeaders) const
 {
-    String headers;
     MemoryBlock headersAndPostData;
+
+    if (! headers.endsWithChar ('\n'))
+        headers << "\r\n";
 
     if (usePostCommand)
         URLHelpers::createHeadersAndPostData (*this, headers, headersAndPostData);
-
-    headers += extraHeaders;
 
     if (! headers.endsWithChar ('\n'))
         headers << "\r\n";
