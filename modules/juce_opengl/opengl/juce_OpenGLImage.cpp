@@ -187,7 +187,7 @@ ImagePixelData::Ptr OpenGLImageType::create (Image::PixelFormat, int width, int 
     ScopedPointer<OpenGLFrameBufferImage> im (new OpenGLFrameBufferImage (*currentContext, width, height));
 
     if (! im->initialise())
-        return nullptr;
+        return ImagePixelData::Ptr();
 
     im->frameBuffer.clear (Colours::transparentBlack);
     return im.release();
