@@ -25,10 +25,8 @@
 namespace
 {
     const char* const osxVersionDefault         = "default";
-    const char* const osxVersion10_4            = "10.4 SDK";
-    const char* const osxVersion10_5            = "10.5 SDK";
-    const char* const osxVersion10_6            = "10.6 SDK";
-    const char* const osxVersion10_7            = "10.7 SDK";
+    const int oldestSDKVersion = 4;
+    const int currentSDKVersion = 9;
 
     const char* const osxArch_Default           = "default";
     const char* const osxArch_Native            = "Native";
@@ -210,15 +208,22 @@ protected:
             }
             else
             {
-                const char* osxVersions[]      = { "Use Default",     osxVersion10_5, osxVersion10_6, osxVersion10_7, 0 };
-                const char* osxVersionValues[] = { osxVersionDefault, osxVersion10_5, osxVersion10_6, osxVersion10_7, 0 };
+                StringArray versionNames;
+                Array<var> versionValues;
 
-                props.add (new ChoicePropertyComponent (getMacSDKVersionValue(), "OSX Base SDK Version",
-                                                        StringArray (osxVersions), Array<var> (osxVersionValues)),
+                versionNames.add ("Use Default");
+                versionValues.add (osxVersionDefault);
+
+                for (int ver = oldestSDKVersion; ver <= currentSDKVersion; ++ver)
+                {
+                    versionNames.add (getSDKName (ver));
+                    versionValues.add (getSDKName (ver));
+                }
+
+                props.add (new ChoicePropertyComponent (getMacSDKVersionValue(), "OSX Base SDK Version", versionNames, versionValues),
                            "The version of OSX to link against in the XCode build.");
 
-                props.add (new ChoicePropertyComponent (getMacCompatibilityVersionValue(), "OSX Compatibility Version",
-                                                        StringArray (osxVersions), Array<var> (osxVersionValues)),
+                props.add (new ChoicePropertyComponent (getMacCompatibilityVersionValue(), "OSX Compatibility Version", versionNames, versionValues),
                            "The minimum version of OSX that the target binary will be compatible with.");
 
                 const char* osxArch[] = { "Use Default", "Native architecture of build machine",
@@ -700,14 +705,11 @@ private:
             const String sdk (config.getMacSDKVersion());
             const String sdkCompat (config.getMacCompatibilityVersion());
 
-            if (sdk == osxVersion10_5)          s.add ("SDKROOT = macosx10.5");
-            else if (sdk == osxVersion10_6)     s.add ("SDKROOT = macosx10.6");
-            else if (sdk == osxVersion10_7)     s.add ("SDKROOT = macosx10.7");
-
-            if (sdkCompat == osxVersion10_4)       s.add ("MACOSX_DEPLOYMENT_TARGET = 10.4");
-            else if (sdkCompat == osxVersion10_5)  s.add ("MACOSX_DEPLOYMENT_TARGET = 10.5");
-            else if (sdkCompat == osxVersion10_6)  s.add ("MACOSX_DEPLOYMENT_TARGET = 10.6");
-            else if (sdkCompat == osxVersion10_7)  s.add ("MACOSX_DEPLOYMENT_TARGET = 10.7");
+            for (int ver = oldestSDKVersion; ver <= currentSDKVersion; ++ver)
+            {
+                if (sdk == getSDKName (ver))         s.add ("SDKROOT = macosx10." + String (ver));
+                if (sdkCompat == getSDKName (ver))   s.add ("MACOSX_DEPLOYMENT_TARGET = 10." + String (ver));
+            }
 
             s.add ("MACOSX_DEPLOYMENT_TARGET_ppc = 10.4");
             s.add ("SDKROOT_ppc = macosx10.5");
@@ -1229,5 +1231,11 @@ private:
     bool shouldFileBeCompiledByDefault (const RelativePath& file) const
     {
         return file.hasFileExtension (sourceFileExtensions);
+    }
+
+    static String getSDKName (int version)
+    {
+        jassert (version >= 4);
+        return "10." + String (version) + " SDK";
     }
 };
