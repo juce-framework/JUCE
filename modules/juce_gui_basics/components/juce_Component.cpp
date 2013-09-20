@@ -230,6 +230,24 @@ struct Component::ComponentHelpers
         return scale != 1.0f ? pos * scale : pos;
     }
 
+    // For these, we need to avoid getSmallestIntegerContainer being used, which causes
+    // judder when moving windows
+    static Rectangle<int> unscaledScreenPosToScaled (float scale, const Rectangle<int>& pos) noexcept
+    {
+        return scale != 1.0f ? Rectangle<int> (roundToInt (pos.getX() / scale),
+                                               roundToInt (pos.getY() / scale),
+                                               roundToInt (pos.getWidth() / scale),
+                                               roundToInt (pos.getHeight() / scale)) : pos;
+    }
+
+    static Rectangle<int> scaledScreenPosToUnscaled (float scale, Rectangle<int>& pos) noexcept
+    {
+        return scale != 1.0f ? Rectangle<int> (roundToInt (pos.getX() * scale),
+                                               roundToInt (pos.getY() * scale),
+                                               roundToInt (pos.getWidth() * scale),
+                                               roundToInt (pos.getHeight() * scale)) : pos;
+    }
+
     template <typename PointOrRect>
     static PointOrRect unscaledScreenPosToScaled (PointOrRect pos) noexcept
     {
