@@ -348,7 +348,6 @@ void Desktop::setKioskModeComponent (Component* componentToUse, const bool allow
         if (kioskModeComponent != nullptr)
         {
             setKioskComponent (kioskModeComponent, false, allowMenusAndBars);
-
             kioskModeComponent->setBounds (kioskComponentOriginalBounds);
         }
 
@@ -360,7 +359,6 @@ void Desktop::setKioskModeComponent (Component* componentToUse, const bool allow
             jassert (ComponentPeer::getPeerFor (kioskModeComponent) != nullptr);
 
             kioskComponentOriginalBounds = kioskModeComponent->getBounds();
-
             setKioskComponent (kioskModeComponent, true, allowMenusAndBars);
         }
     }
@@ -378,7 +376,8 @@ void Desktop::setOrientationsEnabled (const int newOrientations)
 bool Desktop::isOrientationEnabled (const DisplayOrientation orientation) const noexcept
 {
     // Make sure you only pass one valid flag in here...
-    jassert (orientation == upright || orientation == upsideDown || orientation == rotatedClockwise || orientation ==  rotatedAntiClockwise);
+    jassert (orientation == upright || orientation == upsideDown
+              || orientation == rotatedClockwise || orientation == rotatedAntiClockwise);
 
     return (allowedOrientations & orientation) != 0;
 }

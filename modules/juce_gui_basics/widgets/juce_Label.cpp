@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-Label::Label (const String& name,
-              const String& labelText)
+Label::Label (const String& name, const String& labelText)
     : Component (name),
       textValue (labelText),
       lastTextValue (labelText),

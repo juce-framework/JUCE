@@ -123,12 +123,10 @@ public:
     */
     void setBorderSize (int horizontalBorder, int verticalBorder);
 
-    /** Returns the size of the horizontal gap being left around the text.
-    */
+    /** Returns the size of the horizontal gap being left around the text. */
     int getHorizontalBorderSize() const noexcept                                { return horizontalBorderSize; }
 
-    /** Returns the size of the vertical gap being left around the text.
-    */
+    /** Returns the size of the vertical gap being left around the text. */
     int getVerticalBorderSize() const noexcept                                  { return verticalBorderSize; }
 
     /** Makes this label "stick to" another component.
@@ -319,10 +317,10 @@ private:
     WeakReference<Component> ownerComponent;
     int horizontalBorderSize, verticalBorderSize;
     float minimumHorizontalScale;
-    bool editSingleClick : 1;
-    bool editDoubleClick : 1;
-    bool lossOfFocusDiscardsChanges : 1;
-    bool leftOfOwnerComp : 1;
+    bool editSingleClick;
+    bool editDoubleClick;
+    bool lossOfFocusDiscardsChanges;
+    bool leftOfOwnerComp;
 
     bool updateFromTextEditorContents (TextEditor&);
 

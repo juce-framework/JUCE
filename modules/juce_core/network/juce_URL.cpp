@@ -30,8 +30,7 @@ URL::URL()
 {
 }
 
-URL::URL (const String& url_)
-    : url (url_)
+URL::URL (const String& u)  : url (u)
 {
     int i = url.indexOfChar ('?');
 
@@ -315,7 +314,7 @@ bool URL::isProbablyAnEmailAddress (const String& possibleEmailAddress)
 
     return atSign > 0
             && possibleEmailAddress.lastIndexOfChar ('.') > (atSign + 1)
-            && (! possibleEmailAddress.endsWithChar ('.'));
+            && ! possibleEmailAddress.endsWithChar ('.');
 }
 
 //==============================================================================
@@ -346,7 +345,7 @@ InputStream* URL::createInputStream (const bool usePostCommand,
 bool URL::readEntireBinaryStream (MemoryBlock& destData,
                                   const bool usePostCommand) const
 {
-    const ScopedPointer <InputStream> in (createInputStream (usePostCommand));
+    const ScopedPointer<InputStream> in (createInputStream (usePostCommand));
 
     if (in != nullptr)
     {
@@ -359,7 +358,7 @@ bool URL::readEntireBinaryStream (MemoryBlock& destData,
 
 String URL::readEntireTextStream (const bool usePostCommand) const
 {
-    const ScopedPointer <InputStream> in (createInputStream (usePostCommand));
+    const ScopedPointer<InputStream> in (createInputStream (usePostCommand));
 
     if (in != nullptr)
         return in->readEntireStreamAsString();
@@ -393,10 +392,10 @@ URL URL::withFileToUpload (const String& parameterName,
     return u;
 }
 
-URL URL::withPOSTData (const String& postData_) const
+URL URL::withPOSTData (const String& newPostData) const
 {
     URL u (*this);
-    u.postData = postData_;
+    u.postData = newPostData;
     return u;
 }
 

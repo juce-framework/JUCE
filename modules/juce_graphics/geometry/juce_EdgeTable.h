@@ -198,7 +198,7 @@ private:
     HeapBlock<int> table;
     Rectangle<int> bounds;
     int maxEdgesPerLine, lineStrideElements;
-    bool needToCheckEmptinesss;
+    bool needToCheckEmptiness;
 
     void allocate();
     void clearLineSizes() noexcept;

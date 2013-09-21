@@ -732,7 +732,7 @@ bool File::hasIdenticalContentTo (const File& other) const
         if (in1.openedOk() && in2.openedOk())
         {
             const int bufferSize = 4096;
-            HeapBlock <char> buffer1 (bufferSize), buffer2 (bufferSize);
+            HeapBlock<char> buffer1 (bufferSize), buffer2 (bufferSize);
 
             for (;;)
             {
