@@ -37,6 +37,7 @@ namespace PropertyFileConstants
 PropertiesFile::Options::Options()
     : commonToAllUsers (false),
       ignoreCaseOfKeyNames (false),
+      doNotSave (false),
       millisecondsBeforeSaving (3000),
       storageFormat (PropertiesFile::storeAsXML),
       processLock (nullptr)
@@ -163,7 +164,8 @@ bool PropertiesFile::save()
 
     stopTimer();
 
-    if (file == File::nonexistent
+    if (options.doNotSave
+         || file == File::nonexistent
          || file.isDirectory()
          || ! file.getParentDirectory().createDirectory())
         return false;
