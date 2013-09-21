@@ -26,32 +26,45 @@
 #include "../Application/jucer_MainWindow.h"
 #include "../Application/jucer_Application.h"
 #include "../Code Editor/jucer_SourceCodeEditor.h"
-#include "jucer_ConfigPage.h"
-#include "jucer_TreeViewTypes.h"
 #include "../Project Saving/jucer_ProjectExporter.h"
 #include "../Utility/jucer_TranslationTool.h"
+#include "../Utility/jucer_JucerTreeViewBase.h"
+#include "jucer_NewFileWizard.h"
+#include "jucer_GroupInformationComponent.h"
+#include "jucer_ModulesPanel.h"
 
 //==============================================================================
-class FileTreeTab   : public TreePanelBase
+class FileTreePanel   : public TreePanelBase
 {
 public:
-    FileTreeTab (Project& p)
+    FileTreePanel (Project& p)
         : TreePanelBase (&p, "fileTreeState")
     {
         tree.setMultiSelectEnabled (true);
-        setRoot (new GroupTreeViewItem (p.getMainGroup()));
+        setRoot (new GroupItem (p.getMainGroup()));
     }
+
+    void updateMissingFileStatuses()
+    {
+        if (ProjectTreeItemBase* p = dynamic_cast<ProjectTreeItemBase*> (rootItem.get()))
+            p->checkFileStatus();
+    }
+
+private:
+    #include "jucer_ProjectTree_Base.h"
+    #include "jucer_ProjectTree_Group.h"
+    #include "jucer_ProjectTree_File.h"
 };
 
 //==============================================================================
-class ConfigTreeTab   : public TreePanelBase
+class ConfigTreePanel   : public TreePanelBase
 {
 public:
-    ConfigTreeTab (Project& p)
+    ConfigTreePanel (Project& p)
         : TreePanelBase (&p, "settingsTreeState")
     {
         tree.setMultiSelectEnabled (false);
-        setRoot (createProjectConfigTreeViewRoot (p));
+        setRoot (new RootItem (p));
 
         if (tree.getNumSelectedItems() == 0)
             tree.getRootItem()->setSelected (true, true);
@@ -85,7 +98,28 @@ public:
         tree.setBounds (r);
     }
 
+    void showProjectSettings()
+    {
+        if (ConfigTreeItemBase* root = dynamic_cast<ConfigTreeItemBase*> (rootItem.get()))
+            if (root->isProjectSettings())
+                root->setSelected (true, true);
+    }
+
+    void showModules()
+    {
+        if (ConfigTreeItemBase* root = dynamic_cast<ConfigTreeItemBase*> (rootItem.get()))
+            if (root->isProjectSettings())
+                if (ConfigTreeItemBase* mods = dynamic_cast<ConfigTreeItemBase*> (root->getSubItem (0)))
+                    if (mods->isModulesList())
+                        mods->setSelected (true, true);
+    }
+
     TextButton openProjectButton, saveAndOpenButton;
+
+private:
+    #include "jucer_ConfigTree_Base.h"
+    #include "jucer_ConfigTree_Modules.h"
+    #include "jucer_ConfigTree_Exporter.h"
 };
 
 //==============================================================================
@@ -249,8 +283,8 @@ void ProjectContentComponent::createProjectTabs()
     jassert (project != nullptr);
     const Colour tabColour (Colours::transparentBlack);
 
-    treeViewTabs.addTab ("Files",  tabColour, new FileTreeTab (*project), true);
-    treeViewTabs.addTab ("Config", tabColour, new ConfigTreeTab (*project), true);
+    treeViewTabs.addTab ("Files",  tabColour, new FileTreePanel (*project), true);
+    treeViewTabs.addTab ("Config", tabColour, new ConfigTreePanel (*project), true);
 }
 
 void ProjectContentComponent::deleteProjectTabs()
@@ -267,22 +301,6 @@ void ProjectContentComponent::deleteProjectTabs()
     }
 
     treeViewTabs.clearTabs();
-}
-
-TreeView* ProjectContentComponent::getFilesTreeView() const
-{
-    if (FileTreeTab* ft = dynamic_cast<FileTreeTab*> (treeViewTabs.getTabContentComponent (0)))
-        return &(ft->tree);
-
-    return nullptr;
-}
-
-ProjectTreeViewBase* ProjectContentComponent::getFilesTreeRoot() const
-{
-    if (TreeView* tv = getFilesTreeView())
-        return dynamic_cast <ProjectTreeViewBase*> (tv->getRootItem());
-
-    return nullptr;
 }
 
 void ProjectContentComponent::saveTreeViewState()
@@ -329,8 +347,8 @@ void ProjectContentComponent::changeListenerCallback (ChangeBroadcaster*)
 
 void ProjectContentComponent::updateMissingFileStatuses()
 {
-    if (ProjectTreeViewBase* p = getFilesTreeRoot())
-        p->checkFileStatus();
+    if (FileTreePanel* tree = dynamic_cast<FileTreePanel*> (treeViewTabs.getTabContentComponent (0)))
+        tree->updateMissingFileStatuses();
 }
 
 bool ProjectContentComponent::showEditorForFile (const File& f, bool grabFocus)
@@ -507,22 +525,16 @@ void ProjectContentComponent::showProjectSettings()
 {
     showConfigTab();
 
-    if (TreePanelBase* const tree = dynamic_cast<TreePanelBase*> (treeViewTabs.getCurrentContentComponent()))
-        if (SettingsTreeViewItemBase* root = dynamic_cast<SettingsTreeViewItemBase*> (tree->rootItem.get()))
-            if (root->isProjectSettings())
-                root->setSelected (true, true);
+    if (ConfigTreePanel* const tree = dynamic_cast<ConfigTreePanel*> (treeViewTabs.getCurrentContentComponent()))
+        tree->showProjectSettings();
 }
 
 void ProjectContentComponent::showModules()
 {
     showConfigTab();
 
-    if (TreePanelBase* const tree = dynamic_cast<TreePanelBase*> (treeViewTabs.getCurrentContentComponent()))
-        if (SettingsTreeViewItemBase* root = dynamic_cast<SettingsTreeViewItemBase*> (tree->rootItem.get()))
-            if (root->isProjectSettings())
-                if (SettingsTreeViewItemBase* mods = dynamic_cast<SettingsTreeViewItemBase*> (root->getSubItem (0)))
-                    if (mods->isModulesList())
-                        mods->setSelected (true, true);
+    if (ConfigTreePanel* const tree = dynamic_cast<ConfigTreePanel*> (treeViewTabs.getCurrentContentComponent()))
+        tree->showModules();
 }
 
 StringArray ProjectContentComponent::getExportersWhichCanLaunch() const

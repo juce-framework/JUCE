@@ -268,9 +268,6 @@
     <ClCompile Include="..\..\Source\Application\jucer_OpenDocumentManager.cpp">
       <Filter>The Introjucer\Application</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Source\Project\jucer_ConfigPage.cpp">
-      <Filter>The Introjucer\Project</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\Source\Project\jucer_Module.cpp">
       <Filter>The Introjucer\Project</Filter>
     </ClCompile>
@@ -286,13 +283,7 @@
     <ClCompile Include="..\..\Source\Project\jucer_ProjectContentComponent.cpp">
       <Filter>The Introjucer\Project</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Source\Project\jucer_ProjectTreeViewBase.cpp">
-      <Filter>The Introjucer\Project</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\Source\Project\jucer_ProjectType.cpp">
-      <Filter>The Introjucer\Project</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\Project\jucer_TreeViewTypes.cpp">
       <Filter>The Introjucer\Project</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\Project Saving\jucer_ProjectExporter.cpp">
@@ -1332,7 +1323,13 @@
     <ClInclude Include="..\..\Source\Project\jucer_AudioPluginModule.h">
       <Filter>The Introjucer\Project</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\Project\jucer_ConfigPage.h">
+    <ClInclude Include="..\..\Source\Project\jucer_ConfigTree_Base.h">
+      <Filter>The Introjucer\Project</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Project\jucer_ConfigTree_Exporter.h">
+      <Filter>The Introjucer\Project</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Project\jucer_ConfigTree_Modules.h">
       <Filter>The Introjucer\Project</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\Project\jucer_GroupInformationComponent.h">
@@ -1356,13 +1353,16 @@
     <ClInclude Include="..\..\Source\Project\jucer_ProjectContentComponent.h">
       <Filter>The Introjucer\Project</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\Project\jucer_ProjectTreeViewBase.h">
+    <ClInclude Include="..\..\Source\Project\jucer_ProjectTree_Base.h">
+      <Filter>The Introjucer\Project</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Project\jucer_ProjectTree_File.h">
+      <Filter>The Introjucer\Project</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Project\jucer_ProjectTree_Group.h">
       <Filter>The Introjucer\Project</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\Project\jucer_ProjectType.h">
-      <Filter>The Introjucer\Project</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Project\jucer_TreeViewTypes.h">
       <Filter>The Introjucer\Project</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\Project Saving\jucer_ProjectExport_Android.h">

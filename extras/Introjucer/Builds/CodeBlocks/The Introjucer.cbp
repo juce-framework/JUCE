@@ -142,8 +142,15 @@
       <Option compile="0"/>
       <Option link="0"/>
     </Unit>
-    <Unit filename="../../Source/Project/jucer_ConfigPage.cpp"/>
-    <Unit filename="../../Source/Project/jucer_ConfigPage.h">
+    <Unit filename="../../Source/Project/jucer_ConfigTree_Base.h">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../Source/Project/jucer_ConfigTree_Exporter.h">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../Source/Project/jucer_ConfigTree_Modules.h">
       <Option compile="0"/>
       <Option link="0"/>
     </Unit>
@@ -180,18 +187,20 @@
       <Option compile="0"/>
       <Option link="0"/>
     </Unit>
-    <Unit filename="../../Source/Project/jucer_ProjectTreeViewBase.cpp"/>
-    <Unit filename="../../Source/Project/jucer_ProjectTreeViewBase.h">
+    <Unit filename="../../Source/Project/jucer_ProjectTree_Base.h">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../Source/Project/jucer_ProjectTree_File.h">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../Source/Project/jucer_ProjectTree_Group.h">
       <Option compile="0"/>
       <Option link="0"/>
     </Unit>
     <Unit filename="../../Source/Project/jucer_ProjectType.cpp"/>
     <Unit filename="../../Source/Project/jucer_ProjectType.h">
-      <Option compile="0"/>
-      <Option link="0"/>
-    </Unit>
-    <Unit filename="../../Source/Project/jucer_TreeViewTypes.cpp"/>
-    <Unit filename="../../Source/Project/jucer_TreeViewTypes.h">
       <Option compile="0"/>
       <Option link="0"/>
     </Unit>

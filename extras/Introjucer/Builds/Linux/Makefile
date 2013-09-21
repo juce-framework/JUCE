@@ -56,15 +56,12 @@ OBJECTS := \
   $(OBJDIR)/jucer_Main_f8488f5b.o \
   $(OBJDIR)/jucer_MainWindow_1e163aeb.o \
   $(OBJDIR)/jucer_OpenDocumentManager_4c72d210.o \
-  $(OBJDIR)/jucer_ConfigPage_99b07caa.o \
   $(OBJDIR)/jucer_Module_3f7666a5.o \
   $(OBJDIR)/jucer_NewFileWizard_b8a19ef8.o \
   $(OBJDIR)/jucer_NewProjectWizard_7a15bf5d.o \
   $(OBJDIR)/jucer_Project_c131864a.o \
   $(OBJDIR)/jucer_ProjectContentComponent_60de0eee.o \
-  $(OBJDIR)/jucer_ProjectTreeViewBase_63c2bdbe.o \
   $(OBJDIR)/jucer_ProjectType_1bc27a24.o \
-  $(OBJDIR)/jucer_TreeViewTypes_4a765287.o \
   $(OBJDIR)/jucer_ProjectExporter_eefe2e5b.o \
   $(OBJDIR)/jucer_ResourceFile_6af120d3.o \
   $(OBJDIR)/jucer_CodeHelpers_c317179c.o \
@@ -157,11 +154,6 @@ $(OBJDIR)/jucer_OpenDocumentManager_4c72d210.o: ../../Source/Application/jucer_O
 	@echo "Compiling jucer_OpenDocumentManager.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/jucer_ConfigPage_99b07caa.o: ../../Source/Project/jucer_ConfigPage.cpp
-	-@mkdir -p $(OBJDIR)
-	@echo "Compiling jucer_ConfigPage.cpp"
-	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
-
 $(OBJDIR)/jucer_Module_3f7666a5.o: ../../Source/Project/jucer_Module.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo "Compiling jucer_Module.cpp"
@@ -187,19 +179,9 @@ $(OBJDIR)/jucer_ProjectContentComponent_60de0eee.o: ../../Source/Project/jucer_P
 	@echo "Compiling jucer_ProjectContentComponent.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/jucer_ProjectTreeViewBase_63c2bdbe.o: ../../Source/Project/jucer_ProjectTreeViewBase.cpp
-	-@mkdir -p $(OBJDIR)
-	@echo "Compiling jucer_ProjectTreeViewBase.cpp"
-	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
-
 $(OBJDIR)/jucer_ProjectType_1bc27a24.o: ../../Source/Project/jucer_ProjectType.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo "Compiling jucer_ProjectType.cpp"
-	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
-
-$(OBJDIR)/jucer_TreeViewTypes_4a765287.o: ../../Source/Project/jucer_TreeViewTypes.cpp
-	-@mkdir -p $(OBJDIR)
-	@echo "Compiling jucer_TreeViewTypes.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/jucer_ProjectExporter_eefe2e5b.o: ../../Source/Project\ Saving/jucer_ProjectExporter.cpp

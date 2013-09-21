@@ -118,10 +118,12 @@
     <GROUP id="vGFZIJg" name="Project">
       <FILE id="a9a1b" name="jucer_AudioPluginModule.h" compile="0" resource="0"
             file="Source/Project/jucer_AudioPluginModule.h"/>
-      <FILE id="tDp9h9" name="jucer_ConfigPage.cpp" compile="1" resource="0"
-            file="Source/Project/jucer_ConfigPage.cpp"/>
-      <FILE id="tlj7HT" name="jucer_ConfigPage.h" compile="0" resource="0"
-            file="Source/Project/jucer_ConfigPage.h"/>
+      <FILE id="xYS0qQ" name="jucer_ConfigTree_Base.h" compile="0" resource="0"
+            file="Source/Project/jucer_ConfigTree_Base.h"/>
+      <FILE id="mLHZta" name="jucer_ConfigTree_Exporter.h" compile="0" resource="0"
+            file="Source/Project/jucer_ConfigTree_Exporter.h"/>
+      <FILE id="OO3lfM" name="jucer_ConfigTree_Modules.h" compile="0" resource="0"
+            file="Source/Project/jucer_ConfigTree_Modules.h"/>
       <FILE id="sQjHbVN" name="jucer_GroupInformationComponent.h" compile="0"
             resource="0" file="Source/Project/jucer_GroupInformationComponent.h"/>
       <FILE id="MJkOAX" name="jucer_Module.cpp" compile="1" resource="0"
@@ -145,18 +147,16 @@
             resource="0" file="Source/Project/jucer_ProjectContentComponent.cpp"/>
       <FILE id="mIJMR08" name="jucer_ProjectContentComponent.h" compile="0"
             resource="0" file="Source/Project/jucer_ProjectContentComponent.h"/>
-      <FILE id="TL3snCb" name="jucer_ProjectTreeViewBase.cpp" compile="1"
-            resource="0" file="Source/Project/jucer_ProjectTreeViewBase.cpp"/>
-      <FILE id="UwhAsi1" name="jucer_ProjectTreeViewBase.h" compile="0" resource="0"
-            file="Source/Project/jucer_ProjectTreeViewBase.h"/>
+      <FILE id="UwhAsi1" name="jucer_ProjectTree_Base.h" compile="0" resource="0"
+            file="Source/Project/jucer_ProjectTree_Base.h"/>
+      <FILE id="wiMMXX" name="jucer_ProjectTree_File.h" compile="0" resource="0"
+            file="Source/Project/jucer_ProjectTree_File.h"/>
+      <FILE id="WaT0B16" name="jucer_ProjectTree_Group.h" compile="0" resource="0"
+            file="Source/Project/jucer_ProjectTree_Group.h"/>
       <FILE id="WQ6fWQ" name="jucer_ProjectType.cpp" compile="1" resource="0"
             file="Source/Project/jucer_ProjectType.cpp"/>
       <FILE id="davId" name="jucer_ProjectType.h" compile="0" resource="0"
             file="Source/Project/jucer_ProjectType.h"/>
-      <FILE id="JTbTiIc" name="jucer_TreeViewTypes.cpp" compile="1" resource="0"
-            file="Source/Project/jucer_TreeViewTypes.cpp"/>
-      <FILE id="WaT0B16" name="jucer_TreeViewTypes.h" compile="0" resource="0"
-            file="Source/Project/jucer_TreeViewTypes.h"/>
     </GROUP>
     <GROUP id="{579C9644-D5C2-8469-9439-F91C81337531}" name="Project Saving">
       <FILE id="TtXohM" name="jucer_ProjectExport_Android.h" compile="0"

@@ -27,7 +27,7 @@
 
 #include "jucer_Project.h"
 #include "../Application/jucer_OpenDocumentManager.h"
-class ProjectTreeViewBase;
+
 
 //==============================================================================
 /**
@@ -119,8 +119,6 @@ protected:
 
     void documentAboutToClose (OpenDocumentManager::Document*) override;
     void changeListenerCallback (ChangeBroadcaster*) override;
-    TreeView* getFilesTreeView() const;
-    ProjectTreeViewBase* getFilesTreeRoot() const;
     void showTranslationTool();
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ProjectContentComponent)

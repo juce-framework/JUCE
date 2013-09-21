@@ -149,8 +149,9 @@
       </Filter>
       <Filter Name="Project">
         <File RelativePath="..\..\Source\Project\jucer_AudioPluginModule.h"/>
-        <File RelativePath="..\..\Source\Project\jucer_ConfigPage.cpp"/>
-        <File RelativePath="..\..\Source\Project\jucer_ConfigPage.h"/>
+        <File RelativePath="..\..\Source\Project\jucer_ConfigTree_Base.h"/>
+        <File RelativePath="..\..\Source\Project\jucer_ConfigTree_Exporter.h"/>
+        <File RelativePath="..\..\Source\Project\jucer_ConfigTree_Modules.h"/>
         <File RelativePath="..\..\Source\Project\jucer_GroupInformationComponent.h"/>
         <File RelativePath="..\..\Source\Project\jucer_Module.cpp"/>
         <File RelativePath="..\..\Source\Project\jucer_Module.h"/>
@@ -163,12 +164,11 @@
         <File RelativePath="..\..\Source\Project\jucer_Project.h"/>
         <File RelativePath="..\..\Source\Project\jucer_ProjectContentComponent.cpp"/>
         <File RelativePath="..\..\Source\Project\jucer_ProjectContentComponent.h"/>
-        <File RelativePath="..\..\Source\Project\jucer_ProjectTreeViewBase.cpp"/>
-        <File RelativePath="..\..\Source\Project\jucer_ProjectTreeViewBase.h"/>
+        <File RelativePath="..\..\Source\Project\jucer_ProjectTree_Base.h"/>
+        <File RelativePath="..\..\Source\Project\jucer_ProjectTree_File.h"/>
+        <File RelativePath="..\..\Source\Project\jucer_ProjectTree_Group.h"/>
         <File RelativePath="..\..\Source\Project\jucer_ProjectType.cpp"/>
         <File RelativePath="..\..\Source\Project\jucer_ProjectType.h"/>
-        <File RelativePath="..\..\Source\Project\jucer_TreeViewTypes.cpp"/>
-        <File RelativePath="..\..\Source\Project\jucer_TreeViewTypes.h"/>
       </Filter>
       <Filter Name="Project Saving">
         <File RelativePath="..\..\Source\Project Saving\jucer_ProjectExport_Android.h"/>
