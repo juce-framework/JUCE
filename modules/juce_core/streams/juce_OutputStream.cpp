@@ -279,14 +279,25 @@ void OutputStream::setNewLineString (const String& newLineString_)
 }
 
 //==============================================================================
+template <typename IntegerType>
+static void writeIntToStream (OutputStream& stream, IntegerType number)
+{
+    char buffer [NumberToStringConverters::charsNeededForInt];
+    char* end = buffer + numElementsInArray (buffer);
+    const char* start = NumberToStringConverters::numberToString (end, number);
+    stream.write (start, (size_t) (end - start - 1));
+}
+
 JUCE_API OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, const int number)
 {
-    return stream << String (number);
+    writeIntToStream (stream, number);
+    return stream;
 }
 
 JUCE_API OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, const int64 number)
 {
-    return stream << String (number);
+    writeIntToStream (stream, number);
+    return stream;
 }
 
 JUCE_API OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, const double number)
