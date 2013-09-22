@@ -181,7 +181,8 @@ static double getDPI()
 
 double Desktop::getDefaultMasterScale()
 {
-    return getDPI() / 96.0;
+    return JUCEApplicationBase::isStandaloneApp() ? getDPI() / 96.0
+                                                  : 1.0;
 }
 
 //==============================================================================
