@@ -215,9 +215,6 @@ namespace DirectWriteTypeLayout
     void addAttributedRange (const AttributedString::Attribute& attr, IDWriteTextLayout* textLayout,
                              const int textLen, ID2D1RenderTarget* const renderTarget, IDWriteFontCollection* const fontCollection)
     {
-        if (textLayout == nullptr)
-            return;
-
         DWRITE_TEXT_RANGE range;
         range.startPosition = attr.range.getStart();
         range.length = jmin (attr.range.getLength(), textLen - attr.range.getStart());
@@ -272,9 +269,9 @@ namespace DirectWriteTypeLayout
         }
     }
 
-    void setupLayout (const AttributedString& text, const float maxWidth, const float maxHeight,
+    bool setupLayout (const AttributedString& text, const float maxWidth, const float maxHeight,
                       ID2D1RenderTarget* const renderTarget, IDWriteFactory* const directWriteFactory,
-                      IDWriteFontCollection* const fontCollection, IDWriteTextLayout** dwTextLayout)
+                      IDWriteFontCollection* const fontCollection, ComSmartPtr<IDWriteTextLayout>& textLayout)
     {
         // To add color to text, we need to create a D2D render target
         // Since we are not actually rendering to a D2D context we create a temporary GDI render target
@@ -308,13 +305,18 @@ namespace DirectWriteTypeLayout
 
         const int textLen = text.getText().length();
 
-        hr = directWriteFactory->CreateTextLayout (text.getText().toWideCharPointer(), textLen,
-                                                   dwTextFormat, maxWidth, maxHeight, dwTextLayout);
+        hr = directWriteFactory->CreateTextLayout (text.getText().toWideCharPointer(), textLen, dwTextFormat,
+                                                   maxWidth, maxHeight, textLayout.resetAndGetPointerAddress());
+
+        if (FAILED (hr) || textLayout == nullptr)
+            return false;
 
         const int numAttributes = text.getNumAttributes();
 
         for (int i = 0; i < numAttributes; ++i)
-            addAttributedRange (*text.getAttribute (i), *dwTextLayout, textLen, renderTarget, fontCollection);
+            addAttributedRange (*text.getAttribute (i), textLayout, textLen, renderTarget, fontCollection);
+
+        return true;
     }
 
     void createLayout (TextLayout& layout, const AttributedString& text, IDWriteFactory* const directWriteFactory,
@@ -333,7 +335,9 @@ namespace DirectWriteTypeLayout
         HRESULT hr = direct2dFactory->CreateDCRenderTarget (&d2dRTProp, renderTarget.resetAndGetPointerAddress());
 
         ComSmartPtr<IDWriteTextLayout> dwTextLayout;
-        setupLayout (text, layout.getWidth(), 1.0e7f, renderTarget, directWriteFactory, fontCollection, dwTextLayout.resetAndGetPointerAddress());
+
+        if (! setupLayout (text, layout.getWidth(), 1.0e7f, renderTarget, directWriteFactory, fontCollection, dwTextLayout))
+            return;
 
         UINT32 actualLineCount = 0;
         hr = dwTextLayout->GetLineMetrics (nullptr, 0, &actualLineCount);
@@ -361,15 +365,16 @@ namespace DirectWriteTypeLayout
                            IDWriteFactory* const directWriteFactory, IDWriteFontCollection* const fontCollection)
     {
         ComSmartPtr<IDWriteTextLayout> dwTextLayout;
-        setupLayout (text, area.getWidth(), area.getHeight(), renderTarget, directWriteFactory,
-                     fontCollection, dwTextLayout.resetAndGetPointerAddress());
 
-        ComSmartPtr<ID2D1SolidColorBrush> d2dBrush;
-        renderTarget->CreateSolidColorBrush (D2D1::ColorF (D2D1::ColorF (0.0f, 0.0f, 0.0f, 1.0f)),
-                                             d2dBrush.resetAndGetPointerAddress());
+        if (setupLayout (text, area.getWidth(), area.getHeight(), renderTarget, directWriteFactory, fontCollection, dwTextLayout))
+        {
+            ComSmartPtr<ID2D1SolidColorBrush> d2dBrush;
+            renderTarget->CreateSolidColorBrush (D2D1::ColorF (D2D1::ColorF (0.0f, 0.0f, 0.0f, 1.0f)),
+                                                 d2dBrush.resetAndGetPointerAddress());
 
-        renderTarget->DrawTextLayout (D2D1::Point2F ((float) area.getX(), (float) area.getY()),
-                                      dwTextLayout, d2dBrush, D2D1_DRAW_TEXT_OPTIONS_CLIP);
+            renderTarget->DrawTextLayout (D2D1::Point2F ((float) area.getX(), (float) area.getY()),
+                                          dwTextLayout, d2dBrush, D2D1_DRAW_TEXT_OPTIONS_CLIP);
+        }
     }
 }
 #endif
