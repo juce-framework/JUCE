@@ -150,8 +150,9 @@ private:
             if (JUCEApplicationBase* const app = JUCEApplicationBase::getInstance())
             {
                 StringArray files;
-                for (unsigned int i = 0; i < [filenames count]; ++i)
-                    files.add (quotedIfContainsSpaces ((NSString*) [filenames objectAtIndex: i]));
+
+                for (NSString* f in filenames)
+                    files.add (quotedIfContainsSpaces (f));
 
                 if (files.size() > 0)
                     app->anotherInstanceStarted (files.joinIntoString (" "));

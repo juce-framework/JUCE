@@ -1114,13 +1114,11 @@ StringArray Font::findAllTypefaceNames()
     JUCE_AUTORELEASEPOOL
     {
        #if JUCE_IOS
-        NSArray* fonts = [UIFont familyNames];
+        for (NSString* name in [UIFont familyNames])
        #else
-        NSArray* fonts = [[NSFontManager sharedFontManager] availableFontFamilies];
+        for (NSString* name in [[NSFontManager sharedFontManager] availableFontFamilies])
        #endif
-
-        for (unsigned int i = 0; i < [fonts count]; ++i)
-            names.add (nsStringToJuce ((NSString*) [fonts objectAtIndex: i]));
+            names.add (nsStringToJuce (name));
 
         names.sort (true);
     }
@@ -1137,13 +1135,8 @@ StringArray Font::findAllTypefaceStyles (const String& family)
 
     JUCE_AUTORELEASEPOOL
     {
-        NSArray* styles = [[NSFontManager sharedFontManager] availableMembersOfFontFamily: juceStringToNS (family)];
-
-        for (unsigned int i = 0; i < [styles count]; ++i)
-        {
-            NSArray* style = [styles objectAtIndex: i];
+        for (NSArray* style in [[NSFontManager sharedFontManager] availableMembersOfFontFamily: juceStringToNS (family)])
             results.add (nsStringToJuce ((NSString*) [style objectAtIndex: 1]));
-        }
     }
 
     return results;

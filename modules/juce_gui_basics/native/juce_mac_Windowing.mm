@@ -360,17 +360,21 @@ void Desktop::Displays::findDisplays (const float masterScale)
     {
         DisplaySettingsChangeCallback::getInstance();
 
-        NSArray* screens = [NSScreen screens];
-        const CGFloat mainScreenBottom = [[screens objectAtIndex: 0] frame].size.height;
+        CGFloat mainScreenBottom = 0;
 
-        for (unsigned int i = 0; i < [screens count]; ++i)
+        for (NSScreen* s in [NSScreen screens])
         {
-            NSScreen* s = (NSScreen*) [screens objectAtIndex: i];
-
             Display d;
+            d.isMain = false;
+
+            if (mainScreenBottom == 0)
+            {
+                mainScreenBottom = [s frame].size.height;
+                d.isMain = true;
+            }
+
             d.userArea  = convertDisplayRect ([s visibleFrame], mainScreenBottom) / masterScale;
             d.totalArea = convertDisplayRect ([s frame], mainScreenBottom) / masterScale;
-            d.isMain = (i == 0);
             d.scale = masterScale;
 
            #if defined (MAC_OS_X_VERSION_10_7) && (MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_7)
@@ -389,17 +393,9 @@ void Desktop::Displays::findDisplays (const float masterScale)
 //==============================================================================
 bool juce_areThereAnyAlwaysOnTopWindows()
 {
-    NSArray* windows = [NSApp windows];
-
-    for (unsigned int i = 0; i < [windows count]; ++i)
-    {
-        const NSInteger level = [((NSWindow*) [windows objectAtIndex: i]) level];
-
-        if (level == NSFloatingWindowLevel
-             || level == NSStatusWindowLevel
-             || level == NSModalPanelWindowLevel)
+    for (NSWindow* window in [NSApp windows])
+        if ([window level] > NSNormalWindowLevel)
             return true;
-    }
 
     return false;
 }
