@@ -73,6 +73,11 @@ public:
 
     /** Finds the maximum value in the given array. */
     static float JUCE_CALLTYPE findMaximum (const float* src, int numValues) noexcept;
+
+    /** On Intel CPUs, this method enables or disables the SSE flush-to-zero mode.
+        Effectively, this is a wrapper around a call to _MM_SET_FLUSH_ZERO_MODE
+    */
+    static void JUCE_CALLTYPE enableFlushToZeroMode (bool shouldEnable) noexcept;
 };
 
 

@@ -332,3 +332,12 @@ float JUCE_CALLTYPE FloatVectorOperations::findMaximum (const float* src, int nu
     return juce::findMaximum (src, num);
    #endif
 }
+
+void JUCE_CALLTYPE FloatVectorOperations::enableFlushToZeroMode (bool shouldEnable) noexcept
+{
+   #if JUCE_USE_SSE_INTRINSICS
+    if (FloatVectorHelpers::isSSE2Available())
+        _MM_SET_FLUSH_ZERO_MODE (shouldEnable ? _MM_FLUSH_ZERO_ON : _MM_FLUSH_ZERO_OFF);
+   #endif
+    (void) shouldEnable;
+}
