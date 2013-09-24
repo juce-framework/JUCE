@@ -130,14 +130,16 @@ public:
     //==============================================================================
     /** Changes the properties of a rotary slider.
 
-        @param startAngleRadians        the angle (in radians, clockwise from the top) at which
-                                        the slider's minimum value is represented
-        @param endAngleRadians          the angle (in radians, clockwise from the top) at which
-                                        the slider's maximum value is represented. This must be
-                                        greater than startAngleRadians
-        @param stopAtEnd                if true, then when the slider is dragged around past the
-                                        minimum or maximum, it'll stop there; if false, it'll wrap
-                                        back to the opposite value
+        @param startAngleRadians    the angle (in radians, clockwise from the top) at which
+                                    the slider's minimum value is represented
+        @param endAngleRadians      the angle (in radians, clockwise from the top) at which
+                                    the slider's maximum value is represented. This must be
+                                    greater than startAngleRadians
+        @param stopAtEnd            determines what happens when a circular drag action rotates beyond
+                                    the minimum or maximum angle. If true, the value will stop changing
+                                    until the mouse moves back the way it came; if false, the value
+                                    will snap back to the value nearest to the mouse. Note that this has
+                                    no effect if the drag mode is vertical or horizontal.
     */
     void setRotaryParameters (float startAngleRadians,
                               float endAngleRadians,
@@ -314,7 +316,6 @@ public:
 
     /** If the text-box is editable, this will give it the focus so that the user can
         type directly into it.
-
         This is basically the effect as the user clicking on it.
     */
     void showTextBox();
@@ -591,8 +592,7 @@ public:
         transparent window, so if you're using an OS that can't do transparent windows
         you'll have to add it to a parent component instead).
     */
-    void setPopupDisplayEnabled (bool isEnabled,
-                                 Component* parentComponentToUse);
+    void setPopupDisplayEnabled (bool isEnabled, Component* parentComponentToUse);
 
     /** If a popup display is enabled and is currently visible, this returns the component
         that is being shown, or nullptr if none is currently in use.
@@ -615,8 +615,7 @@ public:
     */
     void setScrollWheelEnabled (bool enabled);
 
-    /** Returns a number to indicate which thumb is currently being dragged by the
-        mouse.
+    /** Returns a number to indicate which thumb is currently being dragged by the mouse.
 
         This will return 0 for the main thumb, 1 for the minimum-value thumb, 2 for
         the maximum-value thumb, or -1 if none is currently down.
@@ -625,19 +624,16 @@ public:
 
     //==============================================================================
     /** Callback to indicate that the user is about to start dragging the slider.
-
         @see Slider::Listener::sliderDragStarted
     */
     virtual void startedDragging();
 
     /** Callback to indicate that the user has just stopped dragging the slider.
-
         @see Slider::Listener::sliderDragEnded
     */
     virtual void stoppedDragging();
 
     /** Callback to indicate that the user has just moved the slider.
-
         @see Slider::Listener::sliderValueChanged
     */
     virtual void valueChanged();
@@ -647,8 +643,7 @@ public:
 
         When the user enters something into the text-entry box, this method is
         called to convert it to a value.
-
-        The default routine just tries to convert it to a double.
+        The default implementation just tries to convert it to a double.
 
         @see getTextFromValue
     */

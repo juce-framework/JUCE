@@ -34,9 +34,8 @@
 /**
     A universally unique 128-bit identifier.
 
-    This class generates very random unique numbers based on the system time
-    and MAC addresses if any are available. It's extremely unlikely that two identical
-    UUIDs would ever be created by chance.
+    This class generates very random unique numbers. It's vanishingly unlikely
+    that two identical UUIDs would ever be created by chance.
 
     The class includes methods for saving the ID as a string or as raw binary data.
 */
