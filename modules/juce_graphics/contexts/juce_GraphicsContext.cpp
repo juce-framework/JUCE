@@ -353,6 +353,12 @@ void Graphics::fillRectList (const RectangleList<float>& rectangles) const
     context.fillRectList (rectangles);
 }
 
+void Graphics::fillRectList (const RectangleList<int>& rects) const
+{
+    for (const Rectangle<int>* r = rects.begin(), * const e = rects.end(); r != e; ++r)
+        context.fillRect (*r, false);
+}
+
 void Graphics::setPixel (int x, int y) const
 {
     context.fillRect (Rectangle<int> (x, y, 1, 1), false);

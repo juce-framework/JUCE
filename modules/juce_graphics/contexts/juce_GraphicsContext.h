@@ -267,6 +267,13 @@ public:
     */
     void fillRectList (const RectangleList<float>& rectangles) const;
 
+    /** Fills a set of rectangles using the current colour or brush.
+        If you have a lot of rectangles to draw, it may be more efficient
+        to create a RectangleList and use this method than to call fillRect()
+        multiple times.
+    */
+    void fillRectList (const RectangleList<int>& rectangles) const;
+
     /** Uses the current colour or brush to fill a rectangle with rounded corners.
         @see drawRoundedRectangle, Path::addRoundedRectangle
     */
