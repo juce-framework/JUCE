@@ -561,8 +561,25 @@ void EdgeTable::intersectWithEdgeTableLine (const int y, const int* const otherL
                 if (destTotal >= maxEdgesPerLine)
                 {
                     srcLine[0] = destTotal;
-                    remapTableForNumEdges (jmax (256, destTotal * 2));
-                    srcLine = table + lineStrideElements * y;
+
+                    if (isUsingTempSpace)
+                    {
+                        const size_t tempSize = (size_t) (srcNum1 * 2 * sizeof (int));
+                        int* const oldTemp = static_cast<int*> (alloca (tempSize));
+                        memcpy (oldTemp, src1, tempSize);
+
+                        remapTableForNumEdges (jmax (256, destTotal * 2));
+                        srcLine = table + lineStrideElements * y;
+
+                        int* const newTemp = table + lineStrideElements * bounds.getHeight();
+                        memcpy (newTemp, oldTemp, tempSize);
+                        src1 = newTemp;
+                    }
+                    else
+                    {
+                        remapTableForNumEdges (jmax (256, destTotal * 2));
+                        srcLine = table + lineStrideElements * y;
+                    }
                 }
 
                 ++destTotal;
