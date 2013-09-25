@@ -1345,10 +1345,12 @@ public:
             ScopedXLock xlock;
             updateKeyStates (keyEvent.keycode, true);
 
-            const char* oldLocale = ::setlocale (LC_ALL, 0);
+            String oldLocale (::setlocale (LC_ALL, 0));
             ::setlocale (LC_ALL, "");
             XLookupString (&keyEvent, utf8, sizeof (utf8), &sym, 0);
-            ::setlocale (LC_ALL, oldLocale);
+
+            if (oldLocale.isNotEmpty())
+                ::setlocale (LC_ALL, oldLocale.toRawUTF8());
 
             unicodeChar = *CharPointer_UTF8 (utf8);
             keyCode = (int) unicodeChar;
