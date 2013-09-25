@@ -22,24 +22,14 @@
                        osxSDK="default" osxCompatibility="10.5 SDK" osxArchitecture="32BitUniversal"/>
       </CONFIGURATIONS>
     </XCODE_MAC>
-    <VS2005 targetFolder="Builds/VisualStudio2005" vstFolder="c:\SDKs\vstsdk2.4"
-            rtasFolder="c:\SDKs\PT_80_SDK" juceFolder="../.." libraryType="1">
+    <VS2010 targetFolder="Builds/VisualStudio2010" juceFolder="../.." vstFolder="c:\SDKs\vstsdk2.4">
       <CONFIGURATIONS>
-        <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="Plugin Host"
-                       winWarningLevel="4" generateManifest="1"/>
-        <CONFIGURATION name="Release" isDebug="0" optimisation="2" targetName="Plugin Host"
-                       winWarningLevel="4" generateManifest="1"/>
+        <CONFIGURATION name="Debug" winWarningLevel="4" generateManifest="1" winArchitecture="32-bit"
+                       isDebug="1" optimisation="1" targetName="Plugin Host"/>
+        <CONFIGURATION name="Release" winWarningLevel="4" generateManifest="1" winArchitecture="32-bit"
+                       isDebug="0" optimisation="2" targetName="Plugin Host"/>
       </CONFIGURATIONS>
-    </VS2005>
-    <VS2008 targetFolder="Builds/VisualStudio2008" vstFolder="c:\SDKs\vstsdk2.4"
-            rtasFolder="c:\SDKs\PT_80_SDK" juceFolder="../.." libraryType="1">
-      <CONFIGURATIONS>
-        <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="Plugin Host"
-                       winWarningLevel="4" generateManifest="1"/>
-        <CONFIGURATION name="Release" isDebug="0" optimisation="2" targetName="Plugin Host"
-                       winWarningLevel="4" generateManifest="1"/>
-      </CONFIGURATIONS>
-    </VS2008>
+    </VS2010>
     <LINUX_MAKE targetFolder="Builds/Linux" vstFolder="~/SDKs/vstsdk2.4" juceFolder="../..">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="Plugin Host"

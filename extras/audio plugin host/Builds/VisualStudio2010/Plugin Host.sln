@@ -1,6 +1,6 @@
-Microsoft Visual Studio Solution File, Format Version 10.00
-# Visual C++ Express 2008
-Project("{1432F632-8806-81AA-A50D-5B2696FD2BC8}") = "Plugin Host", "Plugin Host.vcproj", "{0628E63C-9BCD-C866-7DA3-ACF9F6AD986E}"
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{1432F632-8806-81AA-A50D-5B2696FD2BC8}") = "Plugin Host", "Plugin Host.vcxproj", "{0628E63C-9BCD-C866-7DA3-ACF9F6AD986E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
