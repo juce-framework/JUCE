@@ -127,7 +127,7 @@ bool AudioFormatWriter::writeFromAudioSource (AudioSource& source, int numSample
     return true;
 }
 
-bool AudioFormatWriter::writeFromFloatArrays (const float** channels, int numSourceChannels, int numSamples)
+bool AudioFormatWriter::writeFromFloatArrays (const float* const* channels, int numSourceChannels, int numSamples)
 {
     if (numSamples <= 0)
         return true;
@@ -170,7 +170,7 @@ bool AudioFormatWriter::writeFromAudioSampleBuffer (const AudioSampleBuffer& sou
     jassert (startSample >= 0 && startSample + numSamples <= source.getNumSamples() && numSourceChannels > 0);
 
     if (startSample == 0)
-        return writeFromFloatArrays ((const float**) source.getArrayOfChannels(), numSourceChannels, numSamples);
+        return writeFromFloatArrays (source.getArrayOfChannels(), numSourceChannels, numSamples);
 
     const float* chans [256];
     jassert ((int) numChannels < numElementsInArray (chans));
@@ -184,12 +184,11 @@ bool AudioFormatWriter::writeFromAudioSampleBuffer (const AudioSampleBuffer& sou
 }
 
 //==============================================================================
-class AudioFormatWriter::ThreadedWriter::Buffer   : public AbstractFifo,
-                                                    private TimeSliceClient
+class AudioFormatWriter::ThreadedWriter::Buffer   : private TimeSliceClient
 {
 public:
     Buffer (TimeSliceThread& tst, AudioFormatWriter* w, int channels, int numSamples)
-        : AbstractFifo (numSamples),
+        : fifo (numSamples),
           buffer (channels, numSamples),
           timeSliceThread (tst),
           writer (w),
@@ -209,7 +208,7 @@ public:
         {}
     }
 
-    bool write (const float** data, int numSamples)
+    bool write (const float* const* data, int numSamples)
     {
         if (numSamples <= 0 || ! isRunning)
             return true;
@@ -217,7 +216,7 @@ public:
         jassert (timeSliceThread.isThreadRunning());  // you need to get your thread running before pumping data into this!
 
         int start1, size1, start2, size2;
-        prepareToWrite (numSamples, start1, size1, start2, size2);
+        fifo.prepareToWrite (numSamples, start1, size1, start2, size2);
 
         if (size1 + size2 < numSamples)
             return false;
@@ -228,7 +227,7 @@ public:
             buffer.copyFrom (i, start2, data[i] + size1, size2);
         }
 
-        finishedWrite (size1 + size2);
+        fifo.finishedWrite (size1 + size2);
         timeSliceThread.notify();
         return true;
     }
@@ -240,10 +239,10 @@ public:
 
     int writePendingData()
     {
-        const int numToDo = getTotalSize() / 4;
+        const int numToDo = fifo.getTotalSize() / 4;
 
         int start1, size1, start2, size2;
-        prepareToRead (numToDo, start1, size1, start2, size2);
+        fifo.prepareToRead (numToDo, start1, size1, start2, size2);
 
         if (size1 <= 0)
             return 10;
@@ -266,7 +265,7 @@ public:
             samplesWritten += size2;
         }
 
-        finishedRead (size1 + size2);
+        fifo.finishedRead (size1 + size2);
         return 0;
     }
 
@@ -281,6 +280,7 @@ public:
     }
 
 private:
+    AbstractFifo fifo;
     AudioSampleBuffer buffer;
     TimeSliceThread& timeSliceThread;
     ScopedPointer<AudioFormatWriter> writer;
@@ -301,7 +301,7 @@ AudioFormatWriter::ThreadedWriter::~ThreadedWriter()
 {
 }
 
-bool AudioFormatWriter::ThreadedWriter::write (const float** data, int numSamples)
+bool AudioFormatWriter::ThreadedWriter::write (const float* const* data, int numSamples)
 {
     return buffer->write (data, numSamples);
 }
