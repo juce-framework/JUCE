@@ -620,10 +620,6 @@ public:
     */
     WrapperType wrapperType;
 
-    /** @internal */
-    static void JUCE_CALLTYPE setTypeOfNextNewPlugin (WrapperType);
-
-protected:
     //==============================================================================
     /** Helper function that just converts an xml element into a binary blob.
 
@@ -644,13 +640,17 @@ protected:
     static XmlElement* getXmlFromBinary (const void* data, int sizeInBytes);
 
     /** @internal */
+    static void JUCE_CALLTYPE setTypeOfNextNewPlugin (WrapperType);
+
+protected:
+    /** @internal */
     AudioPlayHead* playHead;
 
     /** @internal */
     void sendParamChangeMessageToListeners (int parameterIndex, float newValue);
 
 private:
-    Array <AudioProcessorListener*> listeners;
+    Array<AudioProcessorListener*> listeners;
     Component::SafePointer<AudioProcessorEditor> activeEditor;
     double sampleRate;
     int blockSize, numInputChannels, numOutputChannels, latencySamples;
