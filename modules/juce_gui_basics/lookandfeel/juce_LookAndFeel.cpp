@@ -24,10 +24,10 @@
 
 namespace LookAndFeelHelpers
 {
-    static Colour createBaseColour (const Colour& buttonColour,
-                                    const bool hasKeyboardFocus,
-                                    const bool isMouseOverButton,
-                                    const bool isButtonDown) noexcept
+    static Colour createBaseColour (Colour buttonColour,
+                                    bool hasKeyboardFocus,
+                                    bool isMouseOverButton,
+                                    bool isButtonDown) noexcept
     {
         const float sat = hasKeyboardFocus ? 1.3f : 0.9f;
         const Colour baseColour (buttonColour.withMultipliedSaturation (sat));
@@ -38,7 +38,7 @@ namespace LookAndFeelHelpers
         return baseColour;
     }
 
-    static TextLayout layoutTooltipText (const String& text, const Colour& colour) noexcept
+    static TextLayout layoutTooltipText (const String& text, Colour colour) noexcept
     {
         const float tooltipFontSize = 13.0f;
         const int maxToolTipWidth = 400;
@@ -221,35 +221,33 @@ LookAndFeel::~LookAndFeel()
 }
 
 //==============================================================================
-Colour LookAndFeel::findColour (const int colourId) const noexcept
+Colour LookAndFeel::findColour (int colourID) const noexcept
 {
-    const int index = colourIds.indexOf (colourId);
+    const ColourSetting c = { colourID, Colour() };
+    const int index = colours.indexOf (c);
 
     if (index >= 0)
-        return colours [index];
+        return colours.getReference (index).colour;
 
     jassertfalse;
     return Colours::black;
 }
 
-void LookAndFeel::setColour (const int colourId, const Colour& colour) noexcept
+void LookAndFeel::setColour (int colourID, Colour newColour) noexcept
 {
-    const int index = colourIds.indexOf (colourId);
+    const ColourSetting c = { colourID, newColour };
+    const int index = colours.indexOf (c);
 
     if (index >= 0)
-    {
-        colours.set (index, colour);
-    }
+        colours.getReference (index).colour = newColour;
     else
-    {
-        colourIds.add (colourId);
-        colours.add (colour);
-    }
+        colours.add (c);
 }
 
-bool LookAndFeel::isColourSpecified (const int colourId) const noexcept
+bool LookAndFeel::isColourSpecified (const int colourID) const noexcept
 {
-    return colourIds.contains (colourId);
+    const ColourSetting c = { colourID, Colour() };
+    return colours.contains (c);
 }
 
 //==============================================================================
@@ -1371,7 +1369,6 @@ void LookAndFeel::drawLinearSliderBackground (Graphics& g,
         indent.addRoundedRectangle (x - sliderRadius * 0.5f, iy,
                                     width + sliderRadius, ih,
                                     5.0f);
-        g.fillPath (indent);
     }
     else
     {
@@ -1384,8 +1381,9 @@ void LookAndFeel::drawLinearSliderBackground (Graphics& g,
         indent.addRoundedRectangle (ix, y - sliderRadius * 0.5f,
                                     iw, height + sliderRadius,
                                     5.0f);
-        g.fillPath (indent);
     }
+
+    g.fillPath (indent);
 
     g.setColour (Colour (0x4c000000));
     g.strokePath (indent, PathStrokeType (0.5f));
@@ -1848,8 +1846,7 @@ void LookAndFeel::drawDocumentWindowTitleBar (DocumentWindow& window,
 class LookAndFeel::GlassWindowButton   : public Button
 {
 public:
-    //==============================================================================
-    GlassWindowButton (const String& name, const Colour& col,
+    GlassWindowButton (const String& name, Colour col,
                        const Path& normalShape_,
                        const Path& toggledShape_) noexcept
         : Button (name),
@@ -1922,13 +1919,15 @@ Button* LookAndFeel::createDocumentWindowButton (int buttonType)
 
         return new GlassWindowButton ("close", Colour (0xffdd1100), shape, shape);
     }
-    else if (buttonType == DocumentWindow::minimiseButton)
+
+    if (buttonType == DocumentWindow::minimiseButton)
     {
         shape.addLineSegment (Line<float> (0.0f, 0.5f, 1.0f, 0.5f), crossThickness);
 
         return new GlassWindowButton ("minimise", Colour (0xffaa8811), shape, shape);
     }
-    else if (buttonType == DocumentWindow::maximiseButton)
+
+    if (buttonType == DocumentWindow::maximiseButton)
     {
         shape.addLineSegment (Line<float> (0.5f, 0.0f, 0.5f, 1.0f), crossThickness);
         shape.addLineSegment (Line<float> (0.0f, 0.5f, 1.0f, 0.5f), crossThickness);

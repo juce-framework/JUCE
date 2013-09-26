@@ -257,8 +257,8 @@ Rectangle<int> MidiKeyboardComponent::getWhiteNotePos (int noteNum) const
 
 int MidiKeyboardComponent::getKeyStartPosition (const int midiNoteNumber) const
 {
-    int x, y;
-    getKeyPos (midiNoteNumber, x, y);
+    int x, w;
+    getKeyPos (midiNoteNumber, x, w);
     return x;
 }
 

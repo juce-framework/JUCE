@@ -216,7 +216,7 @@ void LowLevelGraphicsPostScriptRenderer::writeClip()
     }
 }
 
-void LowLevelGraphicsPostScriptRenderer::writeColour (const Colour& colour)
+void LowLevelGraphicsPostScriptRenderer::writeColour (Colour colour)
 {
     Colour c (Colours::white.overlaidWith (colour));
 

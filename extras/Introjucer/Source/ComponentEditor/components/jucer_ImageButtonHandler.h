@@ -412,8 +412,8 @@ public:
         SetImageColourAction (ImageButton* const button,
                               ComponentLayout& layout_,
                               const ImageRole role_,
-                              const Colour& newState_)
-            : ComponentUndoableAction <ImageButton> (button, layout_),
+                              Colour newState_)
+            : ComponentUndoableAction<ImageButton> (button, layout_),
               role (role_),
               newState (newState_),
               layout (layout_)
@@ -446,7 +446,8 @@ public:
         return Colour::fromString (button->getProperties().getWithDefault ("imageColour" + String ((int) role), "0").toString());
     }
 
-    static void setImageColour (ComponentLayout& layout, ImageButton* button, const ImageRole role, const Colour& colour, const bool undoable)
+    static void setImageColour (ComponentLayout& layout, ImageButton* button,
+                                const ImageRole role, Colour colour, const bool undoable)
     {
         if (undoable)
         {
@@ -479,7 +480,7 @@ public:
             layout.getDocument()->removeChangeListener (this);
         }
 
-        void setColour (const Colour& newColour)
+        void setColour (Colour newColour)
         {
             setImageColour (layout, owner, role, newColour, true);
         }

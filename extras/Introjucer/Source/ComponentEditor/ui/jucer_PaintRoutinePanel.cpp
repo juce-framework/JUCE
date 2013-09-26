@@ -47,15 +47,15 @@ public:
         document.removeChangeListener (this);
     }
 
-    void changeListenerCallback (ChangeBroadcaster*)
+    void changeListenerCallback (ChangeBroadcaster*) override
     {
         refresh();
     }
 
-    void setColour (const Colour& newColour)    { routine.setBackgroundColour (newColour); }
-    Colour getColour() const                    { return routine.getBackgroundColour(); }
+    void setColour (Colour newColour) override    { routine.setBackgroundColour (newColour); }
+    Colour getColour() const override             { return routine.getBackgroundColour(); }
 
-    void resetToDefault()
+    void resetToDefault() override
     {
         jassertfalse; // option shouldn't be visible
     }

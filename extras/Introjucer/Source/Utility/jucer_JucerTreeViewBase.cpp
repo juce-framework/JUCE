@@ -123,7 +123,7 @@ Colour JucerTreeViewBase::getContrastingColour (float contrast) const
     return getBackgroundColour().contrasting (contrast);
 }
 
-Colour JucerTreeViewBase::getContrastingColour (const Colour& target, float minContrast) const
+Colour JucerTreeViewBase::getContrastingColour (Colour target, float minContrast) const
 {
     return getBackgroundColour().contrasting (target, minContrast);
 }

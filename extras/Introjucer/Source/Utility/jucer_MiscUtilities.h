@@ -58,8 +58,8 @@ bool reinvokeCommandAfterCancellingModalComps (const ApplicationCommandTarget::I
 struct Icon
 {
     Icon() : path (nullptr) {}
-    Icon (const Path& p, const Colour& c)  : path (&p), colour (c) {}
-    Icon (const Path* p, const Colour& c)  : path (p),  colour (c) {}
+    Icon (const Path& p, Colour c)  : path (&p), colour (c) {}
+    Icon (const Path* p, Colour c)  : path (p),  colour (c) {}
 
     void draw (Graphics& g, const Rectangle<float>& area, bool isCrossedOut) const
     {
@@ -79,7 +79,7 @@ struct Icon
         }
     }
 
-    Icon withContrastingColourTo (const Colour& background) const
+    Icon withContrastingColourTo (Colour background) const
     {
         return Icon (path, background.contrasting (colour, 0.6f));
     }
@@ -217,7 +217,7 @@ class PopupColourSelector   : public Component,
 {
 public:
     PopupColourSelector (const Value& colour,
-                         const Colour& defaultCol,
+                         Colour defaultCol,
                          const bool canResetToDefault)
         : defaultButton ("Reset to Default"),
           colourValue (colour),
@@ -260,7 +260,7 @@ public:
         return Colour::fromString (colourValue.toString());
     }
 
-    void setColour (const Colour& newColour)
+    void setColour (Colour newColour)
     {
         if (getColour() != newColour)
         {
@@ -305,7 +305,7 @@ class ColourEditorComponent    : public Component,
 {
 public:
     ColourEditorComponent (UndoManager* um, const Value& colour,
-                           const Colour& defaultCol, const bool canReset)
+                           Colour defaultCol, const bool canReset)
         : undoManager (um), colourValue (colour), defaultColour (defaultCol),
           canResetToDefault (canReset)
     {
@@ -336,7 +336,7 @@ public:
         return Colour::fromString (colourValue.toString());
     }
 
-    void setColour (const Colour& newColour)
+    void setColour (Colour newColour)
     {
         if (getColour() != newColour)
         {
@@ -394,7 +394,7 @@ class ColourPropertyComponent  : public PropertyComponent
 {
 public:
     ColourPropertyComponent (UndoManager* undoManager, const String& name, const Value& colour,
-                             const Colour& defaultColour, bool canResetToDefault)
+                             Colour defaultColour, bool canResetToDefault)
         : PropertyComponent (name),
           colourEditor (undoManager, colour, defaultColour, canResetToDefault)
     {

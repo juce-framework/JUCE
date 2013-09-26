@@ -802,7 +802,7 @@ private:
             document.removeChangeListener (this);
         }
 
-        void setColour (const Colour& newColour)
+        void setColour (Colour newColour) override
         {
             document.getUndoManager().undoCurrentTransactionOnly();
 
@@ -810,17 +810,17 @@ private:
                               "Change tab colour");
         }
 
-        Colour getColour() const
+        Colour getColour() const override
         {
             return component->getTabBackgroundColour (tabIndex);
         }
 
-        void resetToDefault()
+        void resetToDefault() override
         {
             jassertfalse; // shouldn't get called
         }
 
-        void changeListenerCallback (ChangeBroadcaster*)     { refresh(); }
+        void changeListenerCallback (ChangeBroadcaster*) override     { refresh(); }
 
     private:
         TabbedComponent* component;
@@ -830,7 +830,8 @@ private:
         class TabColourChangeAction  : public ComponentUndoableAction <TabbedComponent>
         {
         public:
-            TabColourChangeAction (TabbedComponent* const comp, ComponentLayout& layout, const int tabIndex_, const Colour& newValue_)
+            TabColourChangeAction (TabbedComponent* comp, ComponentLayout& layout,
+                                   int tabIndex_, Colour newValue_)
                 : ComponentUndoableAction <TabbedComponent> (comp, layout),
                   tabIndex (tabIndex_),
                   newValue (newValue_)

@@ -110,7 +110,7 @@ public:
     {
     }
 
-    void setColour (const Colour& newColour)
+    void setColour (Colour newColour) override
     {
         owner->getDocument()->getUndoManager().undoCurrentTransactionOnly();
 
@@ -131,7 +131,7 @@ public:
             owner->setStrokeFill (fill, true);
     }
 
-    Colour getColour() const
+    Colour getColour() const override
     {
         const JucerFillType fill (isForStroke ? owner->getStrokeType().fill
                                               : owner->getFillType());
@@ -147,7 +147,7 @@ public:
         return Colours::black;
     }
 
-    void resetToDefault()
+    void resetToDefault() override
     {
         jassertfalse; // option shouldn't be visible
     }

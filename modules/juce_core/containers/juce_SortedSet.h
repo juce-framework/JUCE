@@ -122,7 +122,6 @@ public:
     }
 
     /** Removes all elements from the set without freeing the array's allocated storage.
-
         @see clear
     */
     void clearQuick() noexcept
@@ -240,7 +239,8 @@ public:
 
             if (halfway == s)
                 return -1;
-            else if (elementToLookFor < data.getReference (halfway))
+
+            if (elementToLookFor < data.getReference (halfway))
                 e = halfway;
             else
                 s = halfway;
@@ -295,7 +295,8 @@ public:
 
                 break;
             }
-            else if (isBeforeHalfway)
+
+            if (isBeforeHalfway)
                 e = halfway;
             else
                 s = halfway;
@@ -483,7 +484,7 @@ public:
 
 private:
     //==============================================================================
-    Array <ElementType, TypeOfCriticalSectionToUse> data;
+    Array<ElementType, TypeOfCriticalSectionToUse> data;
 };
 
 #if JUCE_MSVC

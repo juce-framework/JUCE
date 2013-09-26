@@ -87,7 +87,7 @@ public:
 
         @see findColour, Component::findColour, Component::setColour
     */
-    void setColour (int colourId, const Colour& colour) noexcept;
+    void setColour (int colourId, Colour colour) noexcept;
 
     /** Returns true if the specified colour ID has been explicitly set using the
         setColour() method.
@@ -618,8 +618,16 @@ private:
     friend class WeakReference<LookAndFeel>;
     WeakReference<LookAndFeel>::Master masterReference;
 
-    Array <int> colourIds;
-    Array <Colour> colours;
+    struct ColourSetting
+    {
+        int colourID;
+        Colour colour;
+
+        bool operator<  (const ColourSetting& other) const noexcept  { return colourID <  other.colourID; }
+        bool operator== (const ColourSetting& other) const noexcept  { return colourID == other.colourID; }
+    };
+
+    SortedSet<ColourSetting> colours;
 
     // default typeface names
     String defaultSans, defaultSerif, defaultFixed;

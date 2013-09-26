@@ -99,7 +99,7 @@ protected:
 
     Colour getBackgroundColour() const;
     Colour getContrastingColour (float contrast) const;
-    Colour getContrastingColour (const Colour& targetColour, float minContrast) const;
+    Colour getContrastingColour (Colour targetColour, float minContrast) const;
 
 private:
     class ItemSelectionTimer;
