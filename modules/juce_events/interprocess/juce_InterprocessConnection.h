@@ -190,6 +190,7 @@ private:
     friend class InterprocessConnectionServer;
     void initialiseWithSocket (StreamingSocket*);
     void initialiseWithPipe (NamedPipe*);
+    void deletePipeAndSocket();
     void connectionMadeInt();
     void connectionLostInt();
     void deliverDataInt (const MemoryBlock&);
