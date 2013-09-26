@@ -133,31 +133,31 @@ public:
             trackUnitsPerFrame = GetMovieTimeScale (movie) * samplesPerFrame
                                     / GetMediaTimeScale (media);
 
-            OSStatus err = MovieAudioExtractionBegin (movie, 0, &extractor);
+            MovieAudioExtractionBegin (movie, 0, &extractor);
 
             unsigned long output_layout_size;
-            err = MovieAudioExtractionGetPropertyInfo (extractor,
-                                                       kQTPropertyClass_MovieAudioExtraction_Audio,
-                                                       kQTMovieAudioExtractionAudioPropertyID_AudioChannelLayout,
-                                                       0, &output_layout_size, 0);
+            OSStatus err = MovieAudioExtractionGetPropertyInfo (extractor,
+                                                                kQTPropertyClass_MovieAudioExtraction_Audio,
+                                                                kQTMovieAudioExtractionAudioPropertyID_AudioChannelLayout,
+                                                                0, &output_layout_size, 0);
             if (err != noErr)
                 return;
 
             HeapBlock <AudioChannelLayout> qt_audio_channel_layout;
             qt_audio_channel_layout.calloc (output_layout_size, 1);
 
-            err = MovieAudioExtractionGetProperty (extractor,
-                                                   kQTPropertyClass_MovieAudioExtraction_Audio,
-                                                   kQTMovieAudioExtractionAudioPropertyID_AudioChannelLayout,
-                                                   output_layout_size, qt_audio_channel_layout, 0);
+            MovieAudioExtractionGetProperty (extractor,
+                                             kQTPropertyClass_MovieAudioExtraction_Audio,
+                                             kQTMovieAudioExtractionAudioPropertyID_AudioChannelLayout,
+                                             output_layout_size, qt_audio_channel_layout, 0);
 
             qt_audio_channel_layout[0].mChannelLayoutTag = kAudioChannelLayoutTag_Stereo;
 
-            err = MovieAudioExtractionSetProperty (extractor,
-                                                   kQTPropertyClass_MovieAudioExtraction_Audio,
-                                                   kQTMovieAudioExtractionAudioPropertyID_AudioChannelLayout,
-                                                   output_layout_size,
-                                                   qt_audio_channel_layout);
+            MovieAudioExtractionSetProperty (extractor,
+                                             kQTPropertyClass_MovieAudioExtraction_Audio,
+                                             kQTMovieAudioExtractionAudioPropertyID_AudioChannelLayout,
+                                             output_layout_size,
+                                             qt_audio_channel_layout);
 
             err = MovieAudioExtractionGetProperty (extractor,
                                                    kQTPropertyClass_MovieAudioExtraction_Audio,

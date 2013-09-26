@@ -279,8 +279,7 @@ public:
     inline ElementType getFirst() const
     {
         const ScopedLockType lock (getLock());
-        return (numUsed > 0) ? data.elements [0]
-                             : ElementType();
+        return numUsed > 0 ? data.elements[0] : ElementType();
     }
 
     /** Returns the last element in the array, or a default value if the array is empty.
@@ -290,8 +289,7 @@ public:
     inline ElementType getLast() const
     {
         const ScopedLockType lock (getLock());
-        return (numUsed > 0) ? data.elements [numUsed - 1]
-                             : ElementType();
+        return numUsed > 0 ? data.elements[numUsed - 1] : ElementType();
     }
 
     /** Returns a pointer to the actual array data.
@@ -317,6 +315,11 @@ public:
     */
     inline ElementType* end() const noexcept
     {
+       #if JUCE_DEBUG
+        if (data.elements == nullptr || numUsed <= 0) // (to keep static analysers happy)
+            return data.elements;
+       #endif
+
         return data.elements + numUsed;
     }
 
@@ -519,6 +522,7 @@ public:
 
         if (isPositiveAndBelow (indexToChange, numUsed))
         {
+            jassert (data.elements != nullptr);
             data.elements [indexToChange] = newValue;
         }
         else if (indexToChange >= 0)

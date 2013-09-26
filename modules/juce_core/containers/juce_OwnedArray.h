@@ -167,7 +167,7 @@ public:
     {
         const ScopedLockType lock (getLock());
         return numUsed > 0 ? data.elements [0]
-                           : static_cast <ObjectClass*> (nullptr);
+                           : static_cast<ObjectClass*> (nullptr);
     }
 
     /** Returns a pointer to the last object in the array.
@@ -179,7 +179,7 @@ public:
     {
         const ScopedLockType lock (getLock());
         return numUsed > 0 ? data.elements [numUsed - 1]
-                           : static_cast <ObjectClass*> (nullptr);
+                           : static_cast<ObjectClass*> (nullptr);
     }
 
     /** Returns a pointer to the actual array data.
@@ -205,6 +205,11 @@ public:
     */
     inline ObjectClass** end() const noexcept
     {
+       #if JUCE_DEBUG
+        if (data.elements == nullptr || numUsed <= 0) // (to keep static analysers happy)
+            return data.elements;
+       #endif
+
         return data.elements + numUsed;
     }
 
