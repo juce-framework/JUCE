@@ -180,7 +180,6 @@ public:
     inline ObjectClass* getObjectPointer (const int index) const noexcept
     {
         const ScopedLockType lock (getLock());
-        jassert (isPositiveAndBelow (index, numUsed));
         return isPositiveAndBelow (index, numUsed) ? data.elements [index]
                                                    : nullptr;
     }
