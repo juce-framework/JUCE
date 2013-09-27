@@ -189,9 +189,6 @@ public:
     */
     void setMinimised (bool shouldMinimise);
 
-    /** Adds the window to the desktop using the default flags. */
-    void addToDesktop();
-
     //==============================================================================
     /** Returns a string which encodes the window's current size and position.
 

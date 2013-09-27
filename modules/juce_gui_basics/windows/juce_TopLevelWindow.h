@@ -122,6 +122,8 @@ public:
     */
     static TopLevelWindow* getActiveTopLevelWindow() noexcept;
 
+    /** Adds the window to the desktop using the default flags. */
+    void addToDesktop();
 
     //==============================================================================
     /** @internal */
@@ -149,6 +151,7 @@ protected:
 
 private:
     friend class TopLevelWindowManager;
+    friend class ResizableWindow;
     bool useDropShadow, useNativeTitleBar, isCurrentlyActive;
     ScopedPointer<DropShadower> shadower;
 

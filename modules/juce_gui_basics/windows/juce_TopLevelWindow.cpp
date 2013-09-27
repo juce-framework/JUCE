@@ -238,11 +238,11 @@ void TopLevelWindow::setDropShadowEnabled (const bool useShadow)
     }
 }
 
-void TopLevelWindow::setUsingNativeTitleBar (const bool useNativeTitleBar_)
+void TopLevelWindow::setUsingNativeTitleBar (const bool shouldUseNativeTitleBar)
 {
-    if (useNativeTitleBar != useNativeTitleBar_)
+    if (useNativeTitleBar != shouldUseNativeTitleBar)
     {
-        useNativeTitleBar = useNativeTitleBar_;
+        useNativeTitleBar = shouldUseNativeTitleBar;
         recreateDesktopWindow();
         sendLookAndFeelChange();
     }
@@ -255,6 +255,13 @@ void TopLevelWindow::recreateDesktopWindow()
         Component::addToDesktop (getDesktopWindowStyleFlags());
         toFront (true);
     }
+}
+
+void TopLevelWindow::addToDesktop()
+{
+    shadower = nullptr;
+    Component::addToDesktop (getDesktopWindowStyleFlags());
+    setDropShadowEnabled (isDropShadowEnabled()); // force an update to clear away any fake shadows if necessary.
 }
 
 void TopLevelWindow::addToDesktop (int windowStyleFlags, void* nativeWindowToAttachTo)
@@ -330,7 +337,7 @@ TopLevelWindow* TopLevelWindow::getActiveTopLevelWindow() noexcept
             int numTWLParents = 0;
 
             for (const Component* c = tlw->getParentComponent(); c != nullptr; c = c->getParentComponent())
-                if (dynamic_cast <const TopLevelWindow*> (c) != nullptr)
+                if (dynamic_cast<const TopLevelWindow*> (c) != nullptr)
                     ++numTWLParents;
 
             if (bestNumTWLParents < numTWLParents)
