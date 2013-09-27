@@ -777,22 +777,19 @@ MidiMessage MidiMessage::timeSignatureMetaEvent (const int numerator, const int 
         ++powerOfTwo;
     }
 
-    const uint8 d[] = { 0xff, 0x58, 0x04, (uint8) numerator,
-                        (uint8) powerOfTwo, 1, 96 };
-
+    const uint8 d[] = { 0xff, 0x58, 0x04, (uint8) numerator, (uint8) powerOfTwo, 1, 96 };
     return MidiMessage (d, 7, 0.0);
 }
 
 MidiMessage MidiMessage::midiChannelMetaEvent (const int channel) noexcept
 {
     const uint8 d[] = { 0xff, 0x20, 0x01, (uint8) jlimit (0, 0xff, channel - 1) };
-
     return MidiMessage (d, 4, 0.0);
 }
 
 bool MidiMessage::isKeySignatureMetaEvent() const noexcept
 {
-    return getMetaEventType() == 89;
+    return getMetaEventType() == 0x59;
 }
 
 int MidiMessage::getKeySignatureNumberOfSharpsOrFlats() const noexcept
@@ -803,6 +800,14 @@ int MidiMessage::getKeySignatureNumberOfSharpsOrFlats() const noexcept
 bool MidiMessage::isKeySignatureMajorKey() const noexcept
 {
     return getMetaEventData()[1] == 0;
+}
+
+MidiMessage MidiMessage::keySignatureMetaEvent (int numberOfSharpsOrFlats, bool isMinorKey)
+{
+    jassert (numberOfSharpsOrFlats >= -7 && numberOfSharpsOrFlats <= 7);
+
+    const uint8 d[] = { 0xff, 0x59, 0x02, (uint8) numberOfSharpsOrFlats, isMinorKey ? (uint8) 1 : (uint8) 0 };
+    return MidiMessage (d, 5, 0.0);
 }
 
 MidiMessage MidiMessage::endOfTrack() noexcept

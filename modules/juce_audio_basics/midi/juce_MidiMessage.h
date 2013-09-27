@@ -622,6 +622,14 @@ public:
     */
     bool isKeySignatureMajorKey() const noexcept;
 
+    /** Creates a key-signature meta-event.
+        @param numberOfSharpsOrFlats    if positive, this indicates the number of sharps
+                                        in the key; if negative, the number of flats
+        @param isMinorKey               if true, the key is minor; if false, it is major
+        @see isKeySignatureMetaEvent
+    */
+    static MidiMessage keySignatureMetaEvent (int numberOfSharpsOrFlats, bool isMinorKey);
+
     //==============================================================================
     /** Returns true if this is a 'channel' meta-event.
 
