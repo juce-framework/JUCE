@@ -76,8 +76,7 @@ public:
 
     String open (const BigInteger& inputChannels,
                  const BigInteger& outputChannels,
-                 double sampleRate,
-                 int bufferSize)
+                 double sampleRate, int bufferSize)
     {
         close();
 
@@ -98,17 +97,14 @@ public:
 
         AudioSessionSetActive (true);
 
-        UInt32 audioCategory = (numInputChannels > 0 && audioInputIsAvailable) ? kAudioSessionCategory_PlayAndRecord
-                                                                               : kAudioSessionCategory_MediaPlayback;
-
-        AudioSessionSetProperty (kAudioSessionProperty_AudioCategory, sizeof (audioCategory), &audioCategory);
-
-        if (audioCategory == kAudioSessionCategory_PlayAndRecord)
+        if (numInputChannels > 0 && audioInputIsAvailable)
         {
-            // (note: mustn't set this until after the audio category property has been set)
-            UInt32 allowBluetoothInput = 1;
-            AudioSessionSetProperty (kAudioSessionProperty_OverrideCategoryEnableBluetoothInput,
-                                     sizeof (allowBluetoothInput), &allowBluetoothInput);
+            setSessionUInt32Property (kAudioSessionProperty_AudioCategory, kAudioSessionCategory_PlayAndRecord);
+            setSessionUInt32Property (kAudioSessionProperty_OverrideCategoryEnableBluetoothInput, 1);
+        }
+        else
+        {
+            setSessionUInt32Property (kAudioSessionProperty_AudioCategory, kAudioSessionCategory_MediaPlayback);
         }
 
         AudioSessionAddPropertyListener (kAudioSessionProperty_AudioRouteChange, routingChangedStatic, this);
@@ -134,6 +130,9 @@ public:
         if (isRunning)
         {
             isRunning = false;
+
+            setSessionUInt32Property (kAudioSessionProperty_AudioCategory, kAudioSessionCategory_MediaPlayback);
+
             AudioSessionRemovePropertyListenerWithUserData (kAudioSessionProperty_AudioRouteChange, routingChangedStatic, this);
             AudioSessionSetActive (false);
 
@@ -494,13 +493,15 @@ private:
             //DBG ("audio route: " + nsStringToJuce (route));
 
             if ([route hasPrefix: @"Receiver"])
-            {
-                UInt32 audioRouteOverride = kAudioSessionOverrideAudioRoute_Speaker;
-                AudioSessionSetProperty (kAudioSessionProperty_OverrideAudioRoute, sizeof (audioRouteOverride), &audioRouteOverride);
-            }
+                setSessionUInt32Property (kAudioSessionProperty_OverrideAudioRoute, kAudioSessionOverrideAudioRoute_Speaker);
 
             CFRelease (audioRoute);
         }
+    }
+
+    static void setSessionUInt32Property (AudioSessionPropertyID propID, UInt32 value)
+    {
+        AudioSessionSetProperty (propID, sizeof (value), &value);
     }
 
     JUCE_DECLARE_NON_COPYABLE (iOSAudioIODevice)
