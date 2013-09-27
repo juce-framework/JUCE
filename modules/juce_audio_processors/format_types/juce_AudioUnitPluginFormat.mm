@@ -331,14 +331,15 @@ public:
         }
     }
 
-    void initialise()
+    void initialise (double rate, int blockSize)
     {
         refreshParameterList();
         updateNumChannels();
         producesMidiMessages = canProduceMidiOutput();
         setPluginCallbacks();
         setPlayConfigDetails (numInputBusChannels * numInputBusses,
-                              numOutputBusChannels * numOutputBusses, 0, 0);
+                              numOutputBusChannels * numOutputBusses,
+                              rate, blockSize);
         setLatencySamples (0);
     }
 
@@ -1611,9 +1612,9 @@ void AudioUnitPluginFormat::findAllTypesForFile (OwnedArray <PluginDescription>&
 
     try
     {
-        ScopedPointer <AudioPluginInstance> createdInstance (createInstanceFromDescription (desc));
+        ScopedPointer<AudioPluginInstance> createdInstance (createInstanceFromDescription (desc, 44100.0, 512));
 
-        if (AudioUnitPluginInstance* const auInstance = dynamic_cast <AudioUnitPluginInstance*> (createdInstance.get()))
+        if (AudioUnitPluginInstance* auInstance = dynamic_cast<AudioUnitPluginInstance*> (createdInstance.get()))
             results.add (new PluginDescription (auInstance->getPluginDescription()));
     }
     catch (...)
@@ -1622,15 +1623,15 @@ void AudioUnitPluginFormat::findAllTypesForFile (OwnedArray <PluginDescription>&
     }
 }
 
-AudioPluginInstance* AudioUnitPluginFormat::createInstanceFromDescription (const PluginDescription& desc)
+AudioPluginInstance* AudioUnitPluginFormat::createInstanceFromDescription (const PluginDescription& desc, double rate, int blockSize)
 {
     if (fileMightContainThisPluginType (desc.fileOrIdentifier))
     {
-        ScopedPointer <AudioUnitPluginInstance> result (new AudioUnitPluginInstance (desc.fileOrIdentifier));
+        ScopedPointer<AudioUnitPluginInstance> result (new AudioUnitPluginInstance (desc.fileOrIdentifier));
 
         if (result->audioUnit != nullptr)
         {
-            result->initialise();
+            result->initialise (rate, blockSize);
             return result.release();
         }
     }

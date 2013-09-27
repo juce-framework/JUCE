@@ -60,7 +60,9 @@ public:
     /** Tries to recreate a type from a previously generated PluginDescription.
         @see PluginDescription::createInstance
     */
-    virtual AudioPluginInstance* createInstanceFromDescription (const PluginDescription& desc) = 0;
+    virtual AudioPluginInstance* createInstanceFromDescription (const PluginDescription& desc,
+                                                                double initialSampleRate,
+                                                                int initialBufferSize) = 0;
 
     /** Should do a quick check to see if this file or directory might be a plugin of
         this format.

@@ -77,6 +77,8 @@ public:
         errorMessage string.
     */
     AudioPluginInstance* createPluginInstance (const PluginDescription& description,
+                                               double initialSampleRate,
+                                               int initialBufferSize,
                                                String& errorMessage) const;
 
     /** Checks that the file or component for this plugin actually still exists.

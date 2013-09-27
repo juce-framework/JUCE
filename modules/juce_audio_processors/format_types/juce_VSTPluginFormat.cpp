@@ -828,7 +828,7 @@ public:
         desc.isInstrument = (effect != nullptr && (effect->flags & effFlagsIsSynth) != 0);
     }
 
-    void initialise()
+    void initialise (double initialSampleRate, int initialBlockSize)
     {
         if (initialised || effect == nullptr)
             return;
@@ -843,6 +843,9 @@ public:
 
         JUCE_VST_LOG ("Initialising VST: " + module->pluginName);
         initialised = true;
+
+        setPlayConfigDetails (effect->numInputs, effect->numOutputs,
+                              initialSampleRate, initialBlockSize);
 
         dispatch (effIdentify, 0, 0, 0, 0);
 
@@ -922,7 +925,7 @@ public:
         vstHostTime.samplePos = 0;
         vstHostTime.flags = kVstNanosValid | kVstAutomationWriting | kVstAutomationReading;
 
-        initialise();
+        initialise (rate, samplesPerBlockExpected);
 
         if (initialised)
         {
@@ -2611,16 +2614,20 @@ VSTPluginFormat::~VSTPluginFormat() {}
 
 static VSTPluginInstance* createAndUpdateDesc (VSTPluginFormat& format, PluginDescription& desc)
 {
-    if (VSTPluginInstance* instance = dynamic_cast <VSTPluginInstance*> (format.createInstanceFromDescription (desc)))
+    if (AudioPluginInstance* p = format.createInstanceFromDescription (desc, 44100.0, 512))
     {
-       #if JUCE_MAC
-        if (instance->module->resFileId != 0)
-            UseResFile (instance->module->resFileId);
-       #endif
+        if (VSTPluginInstance* instance = dynamic_cast<VSTPluginInstance*> (p))
+        {
+           #if JUCE_MAC
+            if (instance->module->resFileId != 0)
+                UseResFile (instance->module->resFileId);
+           #endif
 
-        instance->fillInPluginDescription (desc);
+            instance->fillInPluginDescription (desc);
+            return instance;
+        }
 
-        return instance;
+        jassertfalse;
     }
 
     return nullptr;
@@ -2676,7 +2683,8 @@ void VSTPluginFormat::findAllTypesForFile (OwnedArray <PluginDescription>& resul
     }
 }
 
-AudioPluginInstance* VSTPluginFormat::createInstanceFromDescription (const PluginDescription& desc)
+AudioPluginInstance* VSTPluginFormat::createInstanceFromDescription (const PluginDescription& desc,
+                                                                     double sampleRate, int blockSize)
 {
     ScopedPointer<VSTPluginInstance> result;
 
@@ -2687,9 +2695,7 @@ AudioPluginInstance* VSTPluginFormat::createInstanceFromDescription (const Plugi
         const File previousWorkingDirectory (File::getCurrentWorkingDirectory());
         file.getParentDirectory().setAsCurrentWorkingDirectory();
 
-        const ModuleHandle::Ptr module (ModuleHandle::findOrCreateModule (file));
-
-        if (module != nullptr)
+        if (ModuleHandle::Ptr module = ModuleHandle::findOrCreateModule (file))
         {
             shellUIDToCreate = desc.uid;
 
@@ -2698,7 +2704,7 @@ AudioPluginInstance* VSTPluginFormat::createInstanceFromDescription (const Plugi
             if (result->effect != nullptr)
             {
                 result->effect->resvd2 = (VstIntPtr) (pointer_sized_int) (VSTPluginInstance*) result;
-                result->initialise();
+                result->initialise (sampleRate, blockSize);
             }
             else
             {

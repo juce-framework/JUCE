@@ -86,8 +86,8 @@ public:
 
     //==============================================================================
     String getName() const override                { return "VST"; }
-    void findAllTypesForFile (OwnedArray <PluginDescription>&, const String& fileOrIdentifier) override;
-    AudioPluginInstance* createInstanceFromDescription (const PluginDescription&) override;
+    void findAllTypesForFile (OwnedArray<PluginDescription>&, const String& fileOrIdentifier) override;
+    AudioPluginInstance* createInstanceFromDescription (const PluginDescription&, double, int) override;
     bool fileMightContainThisPluginType (const String& fileOrIdentifier) override;
     String getNameOfPluginFromIdentifier (const String& fileOrIdentifier) override;
     bool pluginNeedsRescanning (const PluginDescription&) override;

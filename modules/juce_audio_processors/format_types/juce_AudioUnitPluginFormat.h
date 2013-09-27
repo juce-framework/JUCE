@@ -38,7 +38,7 @@ public:
     //==============================================================================
     String getName() const override                { return "AudioUnit"; }
     void findAllTypesForFile (OwnedArray <PluginDescription>&, const String& fileOrIdentifier) override;
-    AudioPluginInstance* createInstanceFromDescription (const PluginDescription& desc) override;
+    AudioPluginInstance* createInstanceFromDescription (const PluginDescription& desc, double, int) override;
     bool fileMightContainThisPluginType (const String& fileOrIdentifier) override;
     String getNameOfPluginFromIdentifier (const String& fileOrIdentifier) override;
     bool pluginNeedsRescanning (const PluginDescription&) override;
