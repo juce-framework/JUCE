@@ -66,14 +66,13 @@ namespace juce
 bool juce_OpenQuickTimeMovieFromStream (InputStream* input, Movie& movie, Handle& dataHandle);
 
 static const char* const quickTimeFormatName = "QuickTime file";
-static const char* const quickTimeExtensions[] = { ".mov", ".mp3", ".mp4", ".m4a", 0 };
 
 //==============================================================================
 class QTAudioReader     : public AudioFormatReader
 {
 public:
     QTAudioReader (InputStream* const input_, const int trackNum_)
-        : AudioFormatReader (input_, TRANS (quickTimeFormatName)),
+        : AudioFormatReader (input_, quickTimeFormatName),
           ok (false),
           movie (0),
           trackNum (trackNum_),
@@ -349,8 +348,7 @@ private:
 
 
 //==============================================================================
-QuickTimeAudioFormat::QuickTimeAudioFormat()
-    : AudioFormat (TRANS (quickTimeFormatName), StringArray (quickTimeExtensions))
+QuickTimeAudioFormat::QuickTimeAudioFormat()  : AudioFormat (quickTimeFormatName, ".mov .mp3 .mp4 .m4a")
 {
 }
 
@@ -368,7 +366,7 @@ bool QuickTimeAudioFormat::canDoMono()      { return true; }
 AudioFormatReader* QuickTimeAudioFormat::createReaderFor (InputStream* sourceStream,
                                                           const bool deleteStreamIfOpeningFails)
 {
-    ScopedPointer <QTAudioReader> r (new QTAudioReader (sourceStream, 0));
+    ScopedPointer<QTAudioReader> r (new QTAudioReader (sourceStream, 0));
 
     if (r->ok)
         return r.release();

@@ -147,12 +147,9 @@ private:
 };
 
 //==============================================================================
-static const char* const lameFormatName = "MP3 file";
-static const char* const lameExtensions[] = { ".mp3", nullptr };
-
 LAMEEncoderAudioFormat::LAMEEncoderAudioFormat (const File& lameApplication)
-   : AudioFormat (TRANS (lameFormatName), StringArray (lameExtensions)),
-     lameApp (lameApplication)
+    : AudioFormat ("MP3 file", ".mp3"),
+      lameApp (lameApplication)
 {
 }
 

@@ -42,7 +42,6 @@ public:
 
     //==============================================================================
     /** Returns the name of this format.
-
         e.g. "WAV file" or "AIFF file"
     */
     const String& getFormatName() const;
@@ -157,11 +156,17 @@ protected:
     /** Creates an AudioFormat object.
 
         @param formatName       this sets the value that will be returned by getFormatName()
-        @param fileExtensions   a zero-terminated list of file extensions - this is what will
-                                be returned by getFileExtension()
+        @param fileExtensions   an array of file extensions - these will be returned by getFileExtensions()
     */
-    AudioFormat (const String& formatName,
-                 const StringArray& fileExtensions);
+    AudioFormat (String formatName, StringArray fileExtensions);
+
+    /** Creates an AudioFormat object.
+
+        @param formatName       this sets the value that will be returned by getFormatName()
+        @param fileExtensions   a whitespace-separated list of file extensions - these will
+                                be returned by getFileExtensions()
+    */
+    AudioFormat (StringRef formatName, StringRef fileExtensions);
 
 private:
     //==============================================================================

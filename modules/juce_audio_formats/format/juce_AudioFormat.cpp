@@ -22,9 +22,13 @@
   ==============================================================================
 */
 
-AudioFormat::AudioFormat (const String& name, const StringArray& extensions)
-  : formatName (name),
-    fileExtensions (extensions)
+AudioFormat::AudioFormat (String name, StringArray extensions)
+   : formatName (name), fileExtensions (extensions)
+{
+}
+
+AudioFormat::AudioFormat (StringRef name, StringRef extensions)
+   : formatName (name.text), fileExtensions (StringArray::fromTokens (extensions, false))
 {
 }
 
@@ -32,7 +36,6 @@ AudioFormat::~AudioFormat()
 {
 }
 
-//==============================================================================
 bool AudioFormat::canHandleFile (const File& f)
 {
     for (int i = 0; i < fileExtensions.size(); ++i)

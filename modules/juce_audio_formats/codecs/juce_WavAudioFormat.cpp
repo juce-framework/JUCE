@@ -23,7 +23,6 @@
 */
 
 static const char* const wavFormatName = "WAV file";
-static const char* const wavExtensions[] = { ".wav", ".bwf", 0 };
 
 //==============================================================================
 const char* const WavAudioFormat::bwavDescription      = "bwav description";
@@ -225,7 +224,7 @@ namespace WavFileHelpers
             {
                 data.setSize (roundUpSize (sizeof (SMPLChunk) + (size_t) (numLoops - 1) * sizeof (SampleLoop)), true);
 
-                SMPLChunk* const s = static_cast <SMPLChunk*> (data.getData());
+                SMPLChunk* const s = static_cast<SMPLChunk*> (data.getData());
 
                 s->manufacturer      = getValue (values, "Manufacturer", "0");
                 s->product           = getValue (values, "Product", "0");
@@ -293,7 +292,7 @@ namespace WavFileHelpers
             if (keys.contains ("LowNote", true) && keys.contains ("HighNote", true))
             {
                 data.setSize (8, true);
-                InstChunk* const inst = static_cast <InstChunk*> (data.getData());
+                InstChunk* const inst = static_cast<InstChunk*> (data.getData());
 
                 inst->baseNote      = getValue (values, "MidiUnityNote", "60");
                 inst->detune        = getValue (values, "Detune", "0");
@@ -356,7 +355,7 @@ namespace WavFileHelpers
             {
                 data.setSize (roundUpSize (sizeof (CueChunk) + (size_t) (numCues - 1) * sizeof (Cue)), true);
 
-                CueChunk* const c = static_cast <CueChunk*> (data.getData());
+                CueChunk* const c = static_cast<CueChunk*> (data.getData());
 
                 c->numCues = ByteOrder::swapIfBigEndian ((uint32) numCues);
 
@@ -605,7 +604,7 @@ class WavAudioFormatReader  : public AudioFormatReader
 {
 public:
     WavAudioFormatReader (InputStream* const in)
-        : AudioFormatReader (in, TRANS (wavFormatName)),
+        : AudioFormatReader (in, wavFormatName),
           bwavChunkStart (0),
           bwavSize (0),
           dataLength (0),
@@ -900,7 +899,7 @@ public:
     WavAudioFormatWriter (OutputStream* const out, const double rate,
                           const unsigned int numChans, const unsigned int bits,
                           const StringPairArray& metadataValues)
-        : AudioFormatWriter (out, TRANS (wavFormatName), rate, numChans, bits),
+        : AudioFormatWriter (out, wavFormatName, rate, numChans, bits),
           lengthInSamples (0),
           bytesWritten (0),
           writeFailed (false)
@@ -1197,14 +1196,8 @@ private:
 };
 
 //==============================================================================
-WavAudioFormat::WavAudioFormat()
-    : AudioFormat (TRANS (wavFormatName), StringArray (wavExtensions))
-{
-}
-
-WavAudioFormat::~WavAudioFormat()
-{
-}
+WavAudioFormat::WavAudioFormat()  : AudioFormat (wavFormatName, ".wav .bwf") {}
+WavAudioFormat::~WavAudioFormat() {}
 
 Array<int> WavAudioFormat::getPossibleSampleRates()
 {

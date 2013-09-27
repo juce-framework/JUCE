@@ -327,7 +327,7 @@ class CoreAudioReader : public AudioFormatReader
 {
 public:
     CoreAudioReader (InputStream* const inp)
-        : AudioFormatReader (inp, TRANS (coreAudioFormatName)),
+        : AudioFormatReader (inp, coreAudioFormatName),
           ok (false), lastReadPosition (0)
     {
         usesFloatingPointData = true;
@@ -487,7 +487,7 @@ private:
 
 //==============================================================================
 CoreAudioFormat::CoreAudioFormat()
-    : AudioFormat (TRANS (coreAudioFormatName), findFileExtensionsForCoreAudioCodecs())
+    : AudioFormat (coreAudioFormatName, findFileExtensionsForCoreAudioCodecs())
 {
 }
 

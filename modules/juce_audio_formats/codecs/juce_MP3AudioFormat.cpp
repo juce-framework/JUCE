@@ -2929,14 +2929,13 @@ private:
 
 //==============================================================================
 static const char* const mp3FormatName = "MP3 file";
-static const char* const mp3Extensions[] = { ".mp3", nullptr };
 
 //==============================================================================
 class MP3Reader : public AudioFormatReader
 {
 public:
     MP3Reader (InputStream* const in)
-        : AudioFormatReader (in, TRANS (mp3FormatName)),
+        : AudioFormatReader (in, mp3FormatName),
           stream (*in), currentPosition (0),
           decodedStart (0), decodedEnd (0)
     {
@@ -2953,7 +2952,6 @@ public:
         }
     }
 
-    //==============================================================================
     bool readSamples (int** destSamples, int numDestChannels, int startOffsetInDestBuffer,
                       int64 startSampleInFile, int numSamples) override
     {
@@ -3109,10 +3107,7 @@ private:
 }
 
 //==============================================================================
-MP3AudioFormat::MP3AudioFormat()
-    : AudioFormat (MP3Decoder::mp3FormatName, StringArray (MP3Decoder::mp3Extensions))
-{}
-
+MP3AudioFormat::MP3AudioFormat()  : AudioFormat (MP3Decoder::mp3FormatName, ".mp3") {}
 MP3AudioFormat::~MP3AudioFormat() {}
 
 Array<int> MP3AudioFormat::getPossibleSampleRates() { return Array<int>(); }
