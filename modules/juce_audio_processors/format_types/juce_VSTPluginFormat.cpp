@@ -378,7 +378,7 @@ public:
 
         JUCE_VST_LOG ("Attempting to load VST: " + file.getFullPathName());
 
-        ScopedPointer <ModuleHandle> m (new ModuleHandle (file));
+        ScopedPointer<ModuleHandle> m (new ModuleHandle (file));
 
         if (! m->open())
             m = nullptr;
@@ -2571,10 +2571,10 @@ private:
     };
 
     friend class InnerWrapperComponent;
-    ScopedPointer <InnerWrapperComponent> innerWrapper;
+    ScopedPointer<InnerWrapperComponent> innerWrapper;
 
    #else
-    ScopedPointer <NSViewComponent> innerWrapper;
+    ScopedPointer<NSViewComponent> innerWrapper;
    #endif
 
     void resized() override
@@ -2667,6 +2667,7 @@ void VSTPluginFormat::findAllTypesForFile (OwnedArray <PluginDescription>& resul
             {
                 jassert (desc.uid == uid);
                 desc.name = shellEffectName;
+                desc.hasSharedContainer = true;
 
                 if (! arrayContainsPlugin (results, desc))
                     results.add (new PluginDescription (desc));
@@ -2677,7 +2678,7 @@ void VSTPluginFormat::findAllTypesForFile (OwnedArray <PluginDescription>& resul
 
 AudioPluginInstance* VSTPluginFormat::createInstanceFromDescription (const PluginDescription& desc)
 {
-    ScopedPointer <VSTPluginInstance> result;
+    ScopedPointer<VSTPluginInstance> result;
 
     if (fileMightContainThisPluginType (desc.fileOrIdentifier))
     {

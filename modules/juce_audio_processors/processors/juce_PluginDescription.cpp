@@ -26,7 +26,8 @@ PluginDescription::PluginDescription()
     : uid (0),
       isInstrument (false),
       numInputChannels (0),
-      numOutputChannels (0)
+      numOutputChannels (0),
+      hasSharedContainer (false)
 {
 }
 
@@ -46,7 +47,8 @@ PluginDescription::PluginDescription (const PluginDescription& other)
       uid (other.uid),
       isInstrument (other.isInstrument),
       numInputChannels (other.numInputChannels),
-      numOutputChannels (other.numOutputChannels)
+      numOutputChannels (other.numOutputChannels),
+      hasSharedContainer (other.hasSharedContainer)
 {
 }
 
@@ -64,6 +66,7 @@ PluginDescription& PluginDescription::operator= (const PluginDescription& other)
     lastFileModTime = other.lastFileModTime;
     numInputChannels = other.numInputChannels;
     numOutputChannels = other.numOutputChannels;
+    hasSharedContainer = other.hasSharedContainer;
 
     return *this;
 }
@@ -99,6 +102,7 @@ XmlElement* PluginDescription::createXml() const
     e->setAttribute ("fileTime", String::toHexString (lastFileModTime.toMilliseconds()));
     e->setAttribute ("numInputs", numInputChannels);
     e->setAttribute ("numOutputs", numOutputChannels);
+    e->setAttribute ("isShell", hasSharedContainer);
 
     return e;
 }
@@ -119,6 +123,7 @@ bool PluginDescription::loadFromXml (const XmlElement& xml)
         lastFileModTime     = Time (xml.getStringAttribute ("fileTime").getHexValue64());
         numInputChannels    = xml.getIntAttribute ("numInputs");
         numOutputChannels   = xml.getIntAttribute ("numOutputs");
+        hasSharedContainer  = xml.getBoolAttribute ("isShell", false);
 
         return true;
     }
