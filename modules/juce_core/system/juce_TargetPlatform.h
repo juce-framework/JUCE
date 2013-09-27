@@ -124,7 +124,7 @@
 
   #if defined (__ppc__) || defined (__ppc64__)
     #define JUCE_PPC 1
-  #elif defined (__arm__)
+  #elif defined (__arm__) || defined (__arm64__)
     #define JUCE_ARM 1
   #else
     #define JUCE_INTEL 1
