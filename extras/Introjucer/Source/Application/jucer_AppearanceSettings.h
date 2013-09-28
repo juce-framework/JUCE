@@ -88,27 +88,28 @@ public:
 
     int getTabButtonOverlap (int tabDepth) override;
     int getTabButtonSpaceAroundImage() override;
-    int getTabButtonBestWidth (TabBarButton& button, int tabDepth) override;
-    static Colour getTabBackgroundColour (TabBarButton& button);
-    void drawTabButton (TabBarButton& button, Graphics& g, bool isMouseOver, bool isMouseDown) override;
+    int getTabButtonBestWidth (TabBarButton&, int tabDepth) override;
+    static Colour getTabBackgroundColour (TabBarButton&);
+    void drawTabButton (TabBarButton& button, Graphics&, bool isMouseOver, bool isMouseDown) override;
 
-    Rectangle<int> getTabButtonExtraComponentBounds (const TabBarButton& button, Rectangle<int>& textArea, Component& comp) override;
+    Rectangle<int> getTabButtonExtraComponentBounds (const TabBarButton&, Rectangle<int>& textArea, Component&) override;
     void drawTabAreaBehindFrontButton (TabbedButtonBar&, Graphics&, int, int) override {}
 
-    void drawStretchableLayoutResizerBar (Graphics& g, int /*w*/, int /*h*/, bool /*isVerticalBar*/, bool isMouseOver, bool isMouseDragging) override;
+    void drawStretchableLayoutResizerBar (Graphics&, int w, int h, bool isVerticalBar, bool isMouseOver, bool isMouseDragging) override;
     Rectangle<int> getPropertyComponentContentPosition (PropertyComponent&) override;
 
     bool areScrollbarButtonsVisible() override   { return false; }
 
-    void drawScrollbar (Graphics& g, ScrollBar& scrollbar, int x, int y, int width, int height, bool isScrollbarVertical,
-                        int thumbStartPosition, int thumbSize, bool /*isMouseOver*/, bool /*isMouseDown*/) override;
+    void drawScrollbar (Graphics&, ScrollBar&, int x, int y, int width, int height, bool isScrollbarVertical,
+                        int thumbStartPosition, int thumbSize, bool isMouseOver, bool isMouseDown) override;
 
-    void drawConcertinaPanelHeader (Graphics& g, const Rectangle<int>& area,
-                                    bool isMouseOver, bool isMouseDown,
-                                    ConcertinaPanel& concertina, Component& panel) override;
+    void drawConcertinaPanelHeader (Graphics&, const Rectangle<int>& area, bool isMouseOver, bool isMouseDown,
+                                    ConcertinaPanel&, Component&) override;
 
-    void drawButtonBackground (Graphics& g, Button& button, const Colour& backgroundColour,
+    void drawButtonBackground (Graphics&, Button&, const Colour& backgroundColour,
                                bool isMouseOverButton, bool isButtonDown) override;
+
+    void drawTableHeaderBackground (Graphics&, TableHeaderComponent&) override;
 
     static Colour getScrollbarColourForBackground (Colour background);
 

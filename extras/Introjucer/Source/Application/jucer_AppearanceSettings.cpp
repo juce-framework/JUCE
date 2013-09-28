@@ -773,3 +773,19 @@ void IntrojucerLookAndFeel::drawButtonBackground (Graphics& g,
     g.setColour (Colours::black.withAlpha (0.4f * mainAlpha));
     g.strokePath (outline, PathStrokeType (1.0f));
 }
+
+void IntrojucerLookAndFeel::drawTableHeaderBackground (Graphics& g, TableHeaderComponent& header)
+{
+    Rectangle<int> r (header.getLocalBounds());
+
+    g.setColour (Colours::black.withAlpha (0.5f));
+    g.fillRect (r.removeFromBottom (1));
+
+    g.setColour (Colours::white.withAlpha (0.6f));
+    g.fillRect (r);
+
+    g.setColour (Colours::black.withAlpha (0.5f));
+
+    for (int i = header.getNumColumns (true); --i >= 0;)
+        g.fillRect (header.getColumnPosition (i).removeFromRight (1));
+}

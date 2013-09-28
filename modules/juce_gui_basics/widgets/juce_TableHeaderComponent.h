@@ -315,12 +315,10 @@ public:
         */
         virtual void tableColumnsChanged (TableHeaderComponent* tableHeader) = 0;
 
-        /** This is called when one or more of the table's columns are resized.
-        */
+        /** This is called when one or more of the table's columns are resized. */
         virtual void tableColumnsResized (TableHeaderComponent* tableHeader) = 0;
 
-        /** This is called when the column by which the table should be sorted is changed.
-        */
+        /** This is called when the column by which the table should be sorted is changed. */
         virtual void tableSortOrderChanged (TableHeaderComponent* tableHeader) = 0;
 
         /** This is called when the user begins or ends dragging one of the columns around.

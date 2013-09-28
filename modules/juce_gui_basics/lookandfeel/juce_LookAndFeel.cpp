@@ -2365,19 +2365,19 @@ void LookAndFeel::drawTableHeaderBackground (Graphics& g, TableHeaderComponent& 
 {
     g.fillAll (Colours::white);
 
-    const int w = header.getWidth();
-    const int h = header.getHeight();
+    Rectangle<int> area (header.getLocalBounds());
+    area.removeFromTop (area.getHeight() / 2);
 
-    g.setGradientFill (ColourGradient (Colour (0xffe8ebf9), 0.0f, h * 0.5f,
-                                       Colour (0xfff6f8f9), 0.0f, h - 1.0f,
+    g.setGradientFill (ColourGradient (Colour (0xffe8ebf9), 0.0f, (float) area.getY(),
+                                       Colour (0xfff6f8f9), 0.0f, (float) area.getBottom(),
                                        false));
-    g.fillRect (0, h / 2, w, h);
+    g.fillRect (area);
 
     g.setColour (Colour (0x33000000));
-    g.fillRect (0, h - 1, w, 1);
+    g.fillRect (area.removeFromBottom (1));
 
     for (int i = header.getNumColumns (true); --i >= 0;)
-        g.fillRect (header.getColumnPosition (i).getRight() - 1, 0, 1, h - 1);
+        g.fillRect (header.getColumnPosition (i).removeFromRight (1));
 }
 
 void LookAndFeel::drawTableHeaderColumn (Graphics& g, const String& columnName, int /*columnId*/,
@@ -2390,28 +2390,25 @@ void LookAndFeel::drawTableHeaderColumn (Graphics& g, const String& columnName, 
     else if (isMouseOver)
         g.fillAll (Colour (0x5599aadd));
 
-    int rightOfText = width - 4;
+    Rectangle<int> area (width, height);
+    area.reduce (4, 0);
 
     if ((columnFlags & (TableHeaderComponent::sortedForwards | TableHeaderComponent::sortedBackwards)) != 0)
     {
-        const float top = height * ((columnFlags & TableHeaderComponent::sortedForwards) != 0 ? 0.35f : (1.0f - 0.35f));
-        const float bottom = height - top;
-
-        const float w = height * 0.5f;
-        const float x = rightOfText - (w * 1.25f);
-        rightOfText = (int) x;
-
         Path sortArrow;
-        sortArrow.addTriangle (x, bottom, x + w * 0.5f, top, x + w, bottom);
+        sortArrow.addTriangle (0.0f, 0.0f,
+                               0.5f, (columnFlags & TableHeaderComponent::sortedForwards) != 0 ? -0.8f : 0.8f,
+                               1.0f, 0.0f);
 
         g.setColour (Colour (0x99000000));
-        g.fillPath (sortArrow);
+        g.fillPath (sortArrow, RectanglePlacement (RectanglePlacement::centred)
+                                 .getTransformToFit (sortArrow.getBounds(),
+                                                     area.removeFromRight (height * 0.5f).reduced (2).toFloat()));
     }
 
     g.setColour (Colours::black);
     g.setFont (Font (height * 0.5f, Font::bold));
-    const int textX = 4;
-    g.drawFittedText (columnName, textX, 0, rightOfText - textX, height, Justification::centredLeft, 1);
+    g.drawFittedText (columnName, area, Justification::centredLeft, 1);
 }
 
 //==============================================================================
