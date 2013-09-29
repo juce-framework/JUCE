@@ -93,12 +93,12 @@ bool Random::nextBool() noexcept
 
 float Random::nextFloat() noexcept
 {
-    return static_cast <uint32> (nextInt()) / (float) 0xffffffff;
+    return static_cast<uint32> (nextInt()) / (std::numeric_limits<uint32>::max() + 1.0f);
 }
 
 double Random::nextDouble() noexcept
 {
-    return static_cast <uint32> (nextInt()) / (double) 0xffffffff;
+    return static_cast<uint32> (nextInt()) / (std::numeric_limits<uint32>::max() + 1.0);
 }
 
 BigInteger Random::nextLargeNumber (const BigInteger& maximumValue)

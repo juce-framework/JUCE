@@ -208,24 +208,6 @@ namespace
         return 0;
     }
 
-    int listModules()
-    {
-        hideDockIcon();
-
-        std::cout << "Downloading list of available modules..." << std::endl;
-        AvailableModuleList list;
-        list.loadFromWebsite();
-
-        for (int i = 0; i < list.modules.size(); ++i)
-        {
-            const AvailableModuleList::Module* m = list.modules.getUnchecked(i);
-
-            std::cout << m->uid << ": " << m->version << std::endl;
-        }
-
-        return 0;
-    }
-
     int showStatus (const StringArray& args)
     {
         hideDockIcon();
@@ -284,9 +266,6 @@ namespace
                   << " introjucer --resave-resources project_file" << std::endl
                   << "    Resaves just the binary resources for a project." << std::endl
                   << std::endl
-                  << " introjucer --listmodules" << std::endl
-                  << "    Displays a list of modules available from the website." << std::endl
-                  << std::endl
                   << " introjucer --status project_file" << std::endl
                   << "    Displays information about a project." << std::endl
                   << std::endl
@@ -313,7 +292,6 @@ int performCommandLine (const String& commandLine)
     if (matchArgument (args[0], "resave-resources"))    return resaveProject (args, true);
     if (matchArgument (args[0], "buildmodule"))         return buildModules (args, false);
     if (matchArgument (args[0], "buildallmodules"))     return buildModules (args, true);
-    if (matchArgument (args[0], "listmodules"))         return listModules();
     if (matchArgument (args[0], "status"))              return showStatus (args);
 
     return commandLineNotPerformed;
