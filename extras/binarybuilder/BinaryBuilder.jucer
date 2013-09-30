@@ -11,26 +11,35 @@
               bundleIdentifier="com.rawmaterialsoftware.binarybuilder" includeBinaryInAppConfig="1">
   <EXPORTFORMATS>
     <XCODE_MAC targetFolder="Builds/MacOSX" vstFolder="~/SDKs/vstsdk2.4" rtasFolder="~/SDKs/PT_80_SDK"
-               juceFolder="../../../juce" objCExtraSuffix="OeJtJb">
+               objCExtraSuffix="OeJtJb">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="BinaryBuilder"
                        osxSDK="1" osxCompatibility="1"/>
         <CONFIGURATION name="Release" isDebug="0" optimisation="2" targetName="BinaryBuilder"
                        osxSDK="1" osxCompatibility="1"/>
       </CONFIGURATIONS>
+      <MODULEPATHS>
+        <MODULEPATH id="juce_core" path="../../../juce/modules"/>
+      </MODULEPATHS>
     </XCODE_MAC>
     <VS2008 targetFolder="Builds/VisualStudio2008" vstFolder="c:\SDKs\vstsdk2.4"
-            rtasFolder="c:\SDKs\PT_80_SDK" juceFolder="../../../juce" libraryType="1">
+            rtasFolder="c:\SDKs\PT_80_SDK" libraryType="1">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="BinaryBuilder"/>
         <CONFIGURATION name="Release" isDebug="0" optimisation="2" targetName="BinaryBuilder"/>
       </CONFIGURATIONS>
+      <MODULEPATHS>
+        <MODULEPATH id="juce_core" path="../../../juce/modules"/>
+      </MODULEPATHS>
     </VS2008>
-    <LINUX_MAKE targetFolder="Builds/Linux" vstFolder="~/SDKs/vstsdk2.4" juceFolder="../../../juce">
+    <LINUX_MAKE targetFolder="Builds/Linux" vstFolder="~/SDKs/vstsdk2.4">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="BinaryBuilder"/>
         <CONFIGURATION name="Release" isDebug="0" optimisation="2" targetName="BinaryBuilder"/>
       </CONFIGURATIONS>
+      <MODULEPATHS>
+        <MODULEPATH id="juce_core" path="../../../juce/modules"/>
+      </MODULEPATHS>
     </LINUX_MAKE>
   </EXPORTFORMATS>
   <MAINGROUP id="TTBP5JihO" name="BinaryBuilder">
