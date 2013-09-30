@@ -482,8 +482,8 @@ public:
 
 private:
     //==============================================================================
-    class Item;
-    struct HelperClasses;
+    JUCE_PUBLIC_IN_DLL_BUILD (class Item)
+    JUCE_PUBLIC_IN_DLL_BUILD (struct HelperClasses)
     friend struct HelperClasses;
     friend class MenuBarComponent;
 

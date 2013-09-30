@@ -492,7 +492,7 @@ public:
 
 private:
     //==============================================================================
-    class SharedObject;
+    JUCE_PUBLIC_IN_DLL_BUILD (class SharedObject)
     friend class SharedObject;
 
     ReferenceCountedObjectPtr<SharedObject> object;

@@ -22,7 +22,7 @@
   ==============================================================================
 */
 
-struct MultiTimer::MultiTimerCallback    : public Timer
+struct MultiTimerCallback    : public Timer
 {
     MultiTimerCallback (const int tid, MultiTimer& mt) noexcept
         : owner (mt), timerID (tid)
@@ -51,11 +51,11 @@ MultiTimer::~MultiTimer()
 }
 
 //==============================================================================
-MultiTimer::MultiTimerCallback* MultiTimer::getCallback (int timerID) const noexcept
+Timer* MultiTimer::getCallback (int timerID) const noexcept
 {
     for (int i = timers.size(); --i >= 0;)
     {
-        MultiTimerCallback* const t = timers.getUnchecked(i);
+        MultiTimerCallback* const t = static_cast<MultiTimerCallback*> (timers.getUnchecked(i));
 
         if (t->timerID == timerID)
             return t;
@@ -68,7 +68,7 @@ void MultiTimer::startTimer (const int timerID, const int intervalInMilliseconds
 {
     const SpinLock::ScopedLockType sl (timerListLock);
 
-    MultiTimerCallback* timer = getCallback (timerID);
+    Timer* timer = getCallback (timerID);
 
     if (timer == nullptr)
         timers.add (timer = new MultiTimerCallback (timerID, *this));
@@ -80,7 +80,7 @@ void MultiTimer::stopTimer (const int timerID) noexcept
 {
     const SpinLock::ScopedLockType sl (timerListLock);
 
-    if (MultiTimerCallback* const t = getCallback (timerID))
+    if (Timer* const t = getCallback (timerID))
         t->stopTimer();
 }
 
@@ -88,7 +88,7 @@ bool MultiTimer::isTimerRunning (const int timerID) const noexcept
 {
     const SpinLock::ScopedLockType sl (timerListLock);
 
-    if (MultiTimerCallback* const t = getCallback (timerID))
+    if (Timer* const t = getCallback (timerID))
         return t->isTimerRunning();
 
     return false;
@@ -98,7 +98,7 @@ int MultiTimer::getTimerInterval (const int timerID) const noexcept
 {
     const SpinLock::ScopedLockType sl (timerListLock);
 
-    if (MultiTimerCallback* const t = getCallback (timerID))
+    if (Timer* const t = getCallback (timerID))
         return t->getTimerInterval();
 
     return 0;
