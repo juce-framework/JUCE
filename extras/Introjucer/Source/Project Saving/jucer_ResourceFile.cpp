@@ -154,7 +154,13 @@ bool ResourceFile::writeHeader (MemoryOutputStream& header)
         }
     }
 
-    header << "    // If you provide the name of one of the binary resource variables above, this function will" << newLine
+    header << "    // Points to the start of a list of resource names." << newLine
+           << "    extern const char* namedResourceList[];" << newLine
+           << newLine
+           << "    // Number of elements in the namedResourceList array." << newLine
+           << "    extern const int namedResourceListSize;" << newLine
+           << newLine
+           << "    // If you provide the name of one of the binary resource variables above, this function will" << newLine
            << "    // return the corresponding data and its size (or a null pointer if the name isn't found)." << newLine
            << "    const char* getNamedResource (const char* resourceNameUTF8, int& dataSizeInBytes) throw();" << newLine
            << "}" << newLine;
@@ -237,7 +243,17 @@ bool ResourceFile::writeCpp (MemoryOutputStream& cpp, const File& headerFile, in
 
         cpp << "    numBytes = 0;" << newLine
             << "    return 0;" << newLine
-            << "}" << newLine;
+            << "}" << newLine
+            << newLine
+            << "const int namedResourceListSize = " << files.size() <<  ";" << newLine
+            << newLine
+            << "const char* namedResourceList[] =" << newLine
+            << "{" << newLine;
+
+        for (int j = 0; j < files.size(); ++j)
+            cpp << "    " << variableNames[j].quoted() << (j < files.size() - 1 ? "," : "") << newLine;
+
+        cpp << "};" << newLine;
     }
 
     cpp << newLine

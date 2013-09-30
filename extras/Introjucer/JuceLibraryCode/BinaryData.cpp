@@ -1244,4 +1244,32 @@ const char* getNamedResource (const char* resourceNameUTF8, int& numBytes) throw
     return 0;
 }
 
+const int namedResourceListSize = 22;
+
+const char* namedResourceList[] =
+{
+    "AudioPluginXCodeScript_txt",
+    "background_tile_png",
+    "colourscheme_dark_xml",
+    "colourscheme_light_xml",
+    "jucer_AudioPluginEditorTemplate_cpp",
+    "jucer_AudioPluginEditorTemplate_h",
+    "jucer_AudioPluginFilterTemplate_cpp",
+    "jucer_AudioPluginFilterTemplate_h",
+    "jucer_ComponentTemplate_cpp",
+    "jucer_ComponentTemplate_h",
+    "jucer_ContentCompTemplate_cpp",
+    "jucer_ContentCompTemplate_h",
+    "jucer_InlineComponentTemplate_h",
+    "jucer_MainConsoleAppTemplate_cpp",
+    "jucer_MainTemplate_NoWindow_cpp",
+    "jucer_MainTemplate_Window_cpp",
+    "jucer_NewComponentTemplate_cpp",
+    "jucer_NewComponentTemplate_h",
+    "jucer_NewCppFileTemplate_cpp",
+    "jucer_NewCppFileTemplate_h",
+    "jucer_NewInlineComponentTemplate_h",
+    "RecentFilesMenuTemplate_nib"
+};
+
 }

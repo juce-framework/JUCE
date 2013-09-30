@@ -2163,4 +2163,15 @@ const char* getNamedResource (const char* resourceNameUTF8, int& numBytes) throw
     return 0;
 }
 
+const int namedResourceListSize = 5;
+
+const char* namedResourceList[] =
+{
+    "cello_wav",
+    "demo_table_data_xml",
+    "icons_zip",
+    "juce_png",
+    "treedemo_xml"
+};
+
 }
