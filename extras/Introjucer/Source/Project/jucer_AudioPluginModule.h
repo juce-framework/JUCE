@@ -115,7 +115,7 @@ namespace
 
     void writePluginCharacteristicsFile (ProjectSaver& projectSaver)
     {
-        Project& project = projectSaver.getProject();
+        Project& project = projectSaver.project;
 
         StringPairArray flags;
         //flags.set ("JUCE_MODAL_LOOPS_PERMITTED",             "0");
@@ -364,7 +364,7 @@ namespace RTASHelpers
         }
     }
 
-    static inline void prepareExporter (ProjectExporter& exporter, ProjectSaver& projectSaver, const File& /*moduleFolder*/)
+    static inline void prepareExporter (ProjectExporter& exporter, ProjectSaver& projectSaver)
     {
         if (isExporterSupported (exporter))
         {
@@ -380,29 +380,28 @@ namespace RTASHelpers
                                                         createRebasedPath (exporter,
                                                                            rtasFolder.getChildFile ("WinBag")));
 
-                RelativePath juceFolder (exporter.getJucePathFromTargetFolder());
-                if (juceFolder.getFileName() != "modules")
-                    juceFolder = juceFolder.getChildFile ("modules");
-
-                String msvcPathToRTASFolder (juceFolder.getChildFile ("juce_audio_plugin_client/RTAS")
-                                                       .toWindowsStyle() + "\\");
-
                 exporter.msvcDelayLoadedDLLs = "DAE.dll; DigiExt.dll; DSI.dll; PluginLib.dll; "
                                                "DSPManager.dll; DSPManager.dll; DSPManagerClientLib.dll; RTASClientLib.dll";
 
                 if (! exporter.getExtraLinkerFlagsString().contains ("/FORCE:multiple"))
                     exporter.getExtraLinkerFlags() = exporter.getExtraLinkerFlags().toString() + " /FORCE:multiple";
 
+                RelativePath modulePath (exporter.rebaseFromProjectFolderToBuildTarget (RelativePath (exporter.getPathForModuleString ("juce_audio_plugin_client"),
+                                                                                                      RelativePath::projectFolder)
+                                                                                           .getChildFile ("RTAS")));
+
                 for (ProjectExporter::ConfigIterator config (exporter); config.next();)
                 {
-                    config->getValue (Ids::msvcModuleDefinitionFile) = msvcPathToRTASFolder + "juce_RTAS_WinExports.def";
+                    config->getValue (Ids::msvcModuleDefinitionFile) = modulePath.getChildFile ("juce_RTAS_WinExports.def").toWindowsStyle();
 
                     if (config->getValue (Ids::useRuntimeLibDLL).getValue().isVoid())
                         config->getValue (Ids::useRuntimeLibDLL) = true;
 
                     if (config->getValue (Ids::postbuildCommand).toString().isEmpty())
-                        config->getValue (Ids::postbuildCommand) = "copy /Y \"" + msvcPathToRTASFolder + "juce_RTAS_WinResources.rsr"
-                                                                        + "\" \"$(TargetPath)\".rsr";
+                        config->getValue (Ids::postbuildCommand)
+                            = "copy /Y "
+                                + modulePath.getChildFile ("juce_RTAS_WinResources.rsr").toWindowsStyle().quoted()
+                                + " \"$(TargetPath)\".rsr";
                 }
             }
             else
@@ -568,7 +567,7 @@ namespace AAXHelpers
         exporter.addToExtraSearchPaths (aaxFolder.getChildFile ("Interfaces").getChildFile ("ACF"));
     }
 
-    static inline void prepareExporter (ProjectExporter& exporter, ProjectSaver& projectSaver, const File& /*moduleFolder*/)
+    static inline void prepareExporter (ProjectExporter& exporter, ProjectSaver& projectSaver)
     {
         if (isExporterSupported (exporter))
         {

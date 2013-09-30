@@ -2403,7 +2403,7 @@ void LookAndFeel::drawTableHeaderColumn (Graphics& g, const String& columnName, 
         g.setColour (Colour (0x99000000));
         g.fillPath (sortArrow, RectanglePlacement (RectanglePlacement::centred)
                                  .getTransformToFit (sortArrow.getBounds(),
-                                                     area.removeFromRight (height * 0.5f).reduced (2).toFloat()));
+                                                     area.removeFromRight (height / 2).reduced (2).toFloat()));
     }
 
     g.setColour (Colours::black);

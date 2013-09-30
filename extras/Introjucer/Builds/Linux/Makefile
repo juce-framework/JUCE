@@ -52,7 +52,6 @@ OBJECTS := \
   $(OBJDIR)/jucer_AppearanceSettings_788d9889.o \
   $(OBJDIR)/jucer_CommandLine_f35de107.o \
   $(OBJDIR)/jucer_DocumentEditorComponent_695dff1d.o \
-  $(OBJDIR)/jucer_JuceUpdater_cf7865c4.o \
   $(OBJDIR)/jucer_Main_f8488f5b.o \
   $(OBJDIR)/jucer_MainWindow_1e163aeb.o \
   $(OBJDIR)/jucer_OpenDocumentManager_4c72d210.o \
@@ -132,11 +131,6 @@ $(OBJDIR)/jucer_CommandLine_f35de107.o: ../../Source/Application/jucer_CommandLi
 $(OBJDIR)/jucer_DocumentEditorComponent_695dff1d.o: ../../Source/Application/jucer_DocumentEditorComponent.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo "Compiling jucer_DocumentEditorComponent.cpp"
-	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
-
-$(OBJDIR)/jucer_JuceUpdater_cf7865c4.o: ../../Source/Application/jucer_JuceUpdater.cpp
-	-@mkdir -p $(OBJDIR)
-	@echo "Compiling jucer_JuceUpdater.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/jucer_Main_f8488f5b.o: ../../Source/Application/jucer_Main.cpp

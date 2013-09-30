@@ -189,7 +189,7 @@ bool MainWindow::openFile (const File& file)
 
     if (file.hasFileExtension (Project::projectFileExtension))
     {
-        ScopedPointer <Project> newDoc (new Project (file));
+        ScopedPointer<Project> newDoc (new Project (file));
 
         if (newDoc->loadFrom (file, true)
              && closeCurrentProject())

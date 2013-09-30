@@ -30,8 +30,8 @@ public:
     {
     }
 
-    bool isRoot() const                                 { return item.isMainGroup(); }
-    bool acceptsFileDrop (const StringArray&) const     { return true; }
+    bool isRoot() const override                                 { return item.isMainGroup(); }
+    bool acceptsFileDrop (const StringArray&) const override     { return true; }
 
     void addNewGroup()
     {
@@ -39,7 +39,7 @@ public:
         triggerAsyncRename (newGroup);
     }
 
-    bool acceptsDragItems (const OwnedArray<Project::Item>& selectedNodes)
+    bool acceptsDragItems (const OwnedArray<Project::Item>& selectedNodes) override
     {
         for (int i = selectedNodes.size(); --i >= 0;)
             if (item.canContain (*selectedNodes.getUnchecked(i)))
@@ -48,7 +48,7 @@ public:
         return false;
     }
 
-    void addFiles (const StringArray& files, int insertIndex)
+    void addFiles (const StringArray& files, int insertIndex) override
     {
         for (int i = 0; i < files.size(); ++i)
         {
@@ -59,19 +59,19 @@ public:
         }
     }
 
-    void moveSelectedItemsTo (OwnedArray<Project::Item>& selectedNodes, int insertIndex)
+    void moveSelectedItemsTo (OwnedArray<Project::Item>& selectedNodes, int insertIndex) override
     {
         moveItems (selectedNodes, item, insertIndex);
     }
 
-    void checkFileStatus()
+    void checkFileStatus() override
     {
         for (int i = 0; i < getNumSubItems(); ++i)
             if (ProjectTreeItemBase* p = dynamic_cast<ProjectTreeItemBase*> (getSubItem(i)))
                 p->checkFileStatus();
     }
 
-    ProjectTreeItemBase* createSubItem (const Project::Item& child)
+    ProjectTreeItemBase* createSubItem (const Project::Item& child) override
     {
         if (child.isGroup())   return new GroupItem (child);
         if (child.isFile())    return new SourceFileItem (child);
@@ -80,7 +80,7 @@ public:
         return nullptr;
     }
 
-    void showDocument()
+    void showDocument() override
     {
         if (ProjectContentComponent* pcc = getProjectContentComponent())
             pcc->setEditorComponent (new GroupInformationComponent (item), nullptr);
@@ -104,7 +104,7 @@ public:
             setFilesToCompile (item.getChild (i), shouldCompile);
     }
 
-    void showPopupMenu()
+    void showPopupMenu() override
     {
         PopupMenu m;
         addCreateFileMenuItems (m);
@@ -132,7 +132,7 @@ public:
         launchPopupMenu (m);
     }
 
-    void handlePopupMenuResult (int resultCode)
+    void handlePopupMenuResult (int resultCode) override
     {
         switch (resultCode)
         {

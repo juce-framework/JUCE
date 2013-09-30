@@ -113,7 +113,7 @@ namespace
         jassert (targetFolder.isDirectory());
 
         const File moduleFolderParent (moduleFolder.getParentDirectory());
-        LibraryModule module (moduleFolder.getChildFile (LibraryModule::getInfoFileName()));
+        LibraryModule module (moduleFolder.getChildFile (ModuleDescription::getManifestFileName()));
 
         if (! module.isValid())
         {
@@ -174,7 +174,7 @@ namespace
 
             while (i.next())
             {
-                LibraryModule module (i.getFile().getChildFile (LibraryModule::getInfoFileName()));
+                LibraryModule module (i.getFile().getChildFile (ModuleDescription::getManifestFileName()));
 
                 if (module.isValid())
                 {
@@ -185,7 +185,7 @@ namespace
 
                     var moduleInfo (new DynamicObject());
                     moduleInfo.getDynamicObject()->setProperty ("file", getModulePackageName (module));
-                    moduleInfo.getDynamicObject()->setProperty ("info", module.moduleInfo);
+                    moduleInfo.getDynamicObject()->setProperty ("info", module.moduleInfo.moduleInfo);
                     infoList.append (moduleInfo);
                 }
             }
@@ -230,7 +230,7 @@ namespace
                   << "Name: " << proj.getTitle() << std::endl
                   << "UID: " << proj.getProjectUID() << std::endl;
 
-        EnabledModuleList modules (proj.getModules());
+        EnabledModuleList& modules = proj.getModules();
 
         const int numModules = modules.getNumModules();
         if (numModules > 0)

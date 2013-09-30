@@ -41,7 +41,6 @@ namespace CommandIDs
         openInIDE              = 0x200072,
         saveAndOpenInIDE       = 0x200073,
 
-        updateModules          = 0x200075,
         showUTF8Tool           = 0x200076,
         showAppearanceSettings = 0x200077,
         showConfigPanel        = 0x200074,

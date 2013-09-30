@@ -81,15 +81,8 @@ ProjectExporter* ProjectExporter::createNewExporter (Project& project, const int
         default:    jassertfalse; return 0;
     }
 
-    File juceFolder (AvailableModuleList::getLocalModulesFolder (&project));
-    File target (exp->getTargetFolder());
-
-    if (FileHelpers::shouldPathsBeRelative (juceFolder.getFullPathName(), project.getFile().getFullPathName()))
-        exp->getJuceFolderValue() = FileHelpers::getRelativePathFrom (juceFolder, project.getFile().getParentDirectory());
-    else
-        exp->getJuceFolderValue() = juceFolder.getFullPathName();
-
     exp->createDefaultConfigs();
+    exp->createDefaultModulePaths();
 
     return exp;
 }
@@ -158,7 +151,7 @@ ProjectExporter::ProjectExporter (Project& p, const ValueTree& settings_)
       project (p),
       projectType (p.getProjectType()),
       projectName (p.getTitle()),
-      projectFolder (p.getFile().getParentDirectory()),
+      projectFolder (p.getProjectFolder()),
       modulesGroup (nullptr)
 {
 }
@@ -172,19 +165,9 @@ File ProjectExporter::getTargetFolder() const
     return project.resolveFilename (getTargetLocationString());
 }
 
-RelativePath ProjectExporter::getJucePathFromProjectFolder() const
-{
-    return RelativePath (getJuceFolderString(), RelativePath::projectFolder);
-}
-
-RelativePath ProjectExporter::getJucePathFromTargetFolder() const
-{
-    return rebaseFromProjectFolderToBuildTarget (getJucePathFromProjectFolder());
-}
-
 RelativePath ProjectExporter::rebaseFromProjectFolderToBuildTarget (const RelativePath& path) const
 {
-    return path.rebased (project.getFile().getParentDirectory(), getTargetFolder(), RelativePath::buildTargetFolder);
+    return path.rebased (project.getProjectFolder(), getTargetFolder(), RelativePath::buildTargetFolder);
 }
 
 bool ProjectExporter::shouldFileBeCompiledByDefault (const RelativePath& file) const
@@ -198,15 +181,9 @@ void ProjectExporter::createPropertyEditors (PropertyListBuilder& props)
                "The location of the folder in which the " + name + " project will be created. "
                "This path can be absolute, but it's much more sensible to make it relative to the jucer project directory.");
 
-    props.add (new TextPropertyComponent (getJuceFolderValue(), "Local JUCE folder", 1024, false),
-               "The location of the Juce library folder that the " + name + " project will use to when compiling. "
-               "This can be an absolute path, or relative to the jucer project folder, but it must be valid on the "
-               "filesystem of the machine you use to actually do the compiling.");
-
     OwnedArray<LibraryModule> modules;
-    AvailableModuleList moduleList;
-    moduleList.rescan (AvailableModuleList::getDefaultModulesFolder (&project));
-    project.getModules().createRequiredModules (moduleList, modules);
+    project.getModules().createRequiredModules (modules);
+
     for (int i = 0; i < modules.size(); ++i)
         modules.getUnchecked(i)->createPropertyEditors (*this, props);
 
@@ -304,14 +281,121 @@ void ProjectExporter::addToExtraSearchPaths (const RelativePath& pathFromProject
     extraSearchPaths.addIfNotAlreadyThere (path, false);
 }
 
+Value ProjectExporter::getPathForModuleValue (const String& moduleID)
+{
+    UndoManager* um = project.getUndoManagerFor (settings);
+
+    ValueTree paths (settings.getOrCreateChildWithName (Ids::MODULEPATHS, um));
+    ValueTree m (paths.getChildWithProperty (Ids::ID, moduleID));
+
+    if (! m.isValid())
+    {
+        m = ValueTree (Ids::MODULEPATH);
+        m.setProperty (Ids::ID, moduleID, um);
+        paths.addChild (m, -1, um);
+    }
+
+    return m.getPropertyAsValue (Ids::path, um);
+}
+
+String ProjectExporter::getPathForModuleString (const String& moduleID) const
+{
+    return settings.getChildWithName (Ids::MODULEPATHS)
+                .getChildWithProperty (Ids::ID, moduleID) [Ids::path].toString();
+}
+
+void ProjectExporter::removePathForModule (const String& moduleID)
+{
+    ValueTree paths (settings.getChildWithName (Ids::MODULEPATHS));
+    ValueTree m (paths.getChildWithProperty (Ids::ID, moduleID));
+    paths.removeChild (m, project.getUndoManagerFor (settings));
+}
+
+RelativePath ProjectExporter::getModuleFolderRelativeToProject (const String& moduleID, ProjectSaver& projectSaver) const
+{
+    if (project.getModules().shouldCopyModuleFilesLocally (moduleID).getValue())
+        return RelativePath (project.getRelativePathForFile (projectSaver.getLocalModuleFolder (moduleID)),
+                             RelativePath::projectFolder);
+
+    String path (getPathForModuleString (moduleID));
+
+    if (path.isEmpty())
+        return getLegacyModulePath (moduleID).getChildFile (moduleID);
+
+    return RelativePath (path, RelativePath::projectFolder).getChildFile (moduleID);
+}
+
+String ProjectExporter::getLegacyModulePath() const
+{
+    return getSettingString ("juceFolder");
+}
+
+RelativePath ProjectExporter::getLegacyModulePath (const String& moduleID) const
+{
+    if (project.getModules().state.getChildWithProperty (Ids::ID, moduleID) ["useLocalCopy"])
+        return RelativePath (project.getRelativePathForFile (project.getGeneratedCodeFolder()
+                                                                .getChildFile ("modules")
+                                                                .getChildFile (moduleID)), RelativePath::projectFolder);
+
+    String oldJucePath (getLegacyModulePath());
+
+    if (oldJucePath.isEmpty())
+        return RelativePath();
+
+    RelativePath p (oldJucePath, RelativePath::projectFolder);
+    if (p.getFileName() != "modules")
+        p = p.getChildFile ("modules");
+
+    return p.getChildFile (moduleID);
+}
+
+void ProjectExporter::updateOldModulePaths()
+{
+    String oldPath (getLegacyModulePath());
+
+    if (oldPath.isNotEmpty())
+    {
+        for (int i = project.getModules().getNumModules(); --i >= 0;)
+        {
+            String modID (project.getModules().getModuleID(i));
+            getPathForModuleValue (modID) = getLegacyModulePath (modID).getParentDirectory().toUnixStyle();
+        }
+
+        settings.removeProperty ("juceFolder", nullptr);
+    }
+}
+
+static bool areCompatibleExporters (const ProjectExporter& p1, const ProjectExporter& p2)
+{
+    return (p1.isVisualStudio() && p2.isVisualStudio())
+        || (p1.isXcode() && p2.isXcode())
+        || (p1.isLinux() && p2.isLinux())
+        || (p1.isAndroid() && p2.isAndroid())
+        || (p1.isCodeBlocks() && p2.isCodeBlocks());
+}
+
+void ProjectExporter::createDefaultModulePaths()
+{
+    for (Project::ExporterIterator exporter (project); exporter.next();)
+    {
+        if (areCompatibleExporters (*this, *exporter))
+        {
+            for (int i = project.getModules().getNumModules(); --i >= 0;)
+            {
+                String modID (project.getModules().getModuleID(i));
+
+                getPathForModuleValue (modID) = exporter->getPathForModuleValue (modID).getValue();
+            }
+
+            break;
+        }
+    }
+}
 
 //==============================================================================
-const Identifier ProjectExporter::configurations ("CONFIGURATIONS");
-const Identifier ProjectExporter::configuration  ("CONFIGURATION");
-
 ValueTree ProjectExporter::getConfigurations() const
 {
-    return settings.getChildWithName (configurations);
+    return settings.getChildWithName (Ids::CONFIGURATIONS);
 }
 
 int ProjectExporter::getNumConfigurations() const
@@ -358,11 +442,11 @@ void ProjectExporter::addNewConfiguration (const BuildConfiguration* configToCop
 
     if (! configs.isValid())
     {
-        settings.addChild (ValueTree (configurations), 0, project.getUndoManagerFor (settings));
+        settings.addChild (ValueTree (Ids::CONFIGURATIONS), 0, project.getUndoManagerFor (settings));
         configs = getConfigurations();
     }
 
-    ValueTree newConfig (configuration);
+    ValueTree newConfig (Ids::CONFIGURATION);
     if (configToCopy != nullptr)
         newConfig = configToCopy->config.createCopy();
 
@@ -379,7 +463,7 @@ void ProjectExporter::BuildConfiguration::removeFromExporter()
 
 void ProjectExporter::createDefaultConfigs()
 {
-    settings.getOrCreateChildWithName (configurations, nullptr);
+    settings.getOrCreateChildWithName (Ids::CONFIGURATIONS, nullptr);
 
     for (int i = 0; i < 2; ++i)
     {

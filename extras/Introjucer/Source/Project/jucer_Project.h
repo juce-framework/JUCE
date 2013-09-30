@@ -28,7 +28,6 @@
 #include "../jucer_Headers.h"
 class ProjectExporter;
 class ProjectType;
-class AvailableModuleList;
 class LibraryModule;
 class EnabledModuleList;
 
@@ -54,6 +53,7 @@ public:
     void setTitle (const String& newTitle);
 
     //==============================================================================
+    File getProjectFolder() const                       { return getFile().getParentDirectory(); }
     ValueTree getProjectRoot() const                    { return projectRoot; }
     String getTitle() const;
     Value getProjectNameValue()                         { return getMainGroup().getNameValue(); }
@@ -243,7 +243,7 @@ public:
     bool isConfigFlagEnabled (const String& name) const;
 
     //==============================================================================
-    EnabledModuleList getModules();
+    EnabledModuleList& getModules();
 
     //==============================================================================
     String getFileTemplate (const String& templateName);
@@ -267,6 +267,7 @@ public:
 private:
     friend class Item;
     ValueTree projectRoot;
+    ScopedPointer<EnabledModuleList> enabledModulesList;
 
     void updateProjectSettings();
     void sanitiseConfigFlags();
@@ -277,6 +278,8 @@ private:
     void updateOldStyleConfigList();
     void moveOldPropertyFromProjectToAllExporters (Identifier name);
     void removeDefunctExporters();
+    void updateOldModulePaths();
+    void warnAboutOldIntrojucerVersion();
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Project)
 };

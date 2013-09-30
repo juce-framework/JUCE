@@ -256,9 +256,6 @@
     <ClCompile Include="..\..\Source\Application\jucer_DocumentEditorComponent.cpp">
       <Filter>The Introjucer\Application</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Source\Application\jucer_JuceUpdater.cpp">
-      <Filter>The Introjucer\Application</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\Source\Application\jucer_Main.cpp">
       <Filter>The Introjucer\Application</Filter>
     </ClCompile>
@@ -1309,9 +1306,6 @@
       <Filter>The Introjucer\Application</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\jucer_Headers.h">
-      <Filter>The Introjucer\Application</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Application\jucer_JuceUpdater.h">
       <Filter>The Introjucer\Application</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\Application\jucer_MainWindow.h">

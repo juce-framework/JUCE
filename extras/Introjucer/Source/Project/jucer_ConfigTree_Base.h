@@ -187,7 +187,7 @@ public:
 
     void addSubItems() override
     {
-        addSubItem (new ModulesItem (project));
+        addSubItem (new EnabledModulesItem (project));
         IntrojucerApp::getApp().addExtraConfigItems (project, *this);
 
         int i = 0;

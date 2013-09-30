@@ -122,11 +122,6 @@
       <Option compile="0"/>
       <Option link="0"/>
     </Unit>
-    <Unit filename="../../Source/Application/jucer_JuceUpdater.cpp"/>
-    <Unit filename="../../Source/Application/jucer_JuceUpdater.h">
-      <Option compile="0"/>
-      <Option link="0"/>
-    </Unit>
     <Unit filename="../../Source/Application/jucer_Main.cpp"/>
     <Unit filename="../../Source/Application/jucer_MainWindow.cpp"/>
     <Unit filename="../../Source/Application/jucer_MainWindow.h">

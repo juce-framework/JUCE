@@ -30,10 +30,10 @@ public:
     {
     }
 
-    bool acceptsFileDrop (const StringArray&) const             { return false; }
-    bool acceptsDragItems (const OwnedArray <Project::Item>&)   { return false; }
+    bool acceptsFileDrop (const StringArray&) const override             { return false; }
+    bool acceptsDragItems (const OwnedArray <Project::Item>&) override   { return false; }
 
-    String getDisplayName() const
+    String getDisplayName() const override
     {
         return getFile().getFileName();
     }
@@ -48,7 +48,7 @@ public:
         return File::nonexistent;
     }
 
-    void setName (const String& newName)
+    void setName (const String& newName) override
     {
         if (newName != File::createLegalFileName (newName))
         {
@@ -95,13 +95,13 @@ public:
         }
     }
 
-    ProjectTreeItemBase* createSubItem (const Project::Item&)
+    ProjectTreeItemBase* createSubItem (const Project::Item&) override
     {
         jassertfalse;
         return nullptr;
     }
 
-    void showDocument()
+    void showDocument() override
     {
         const File f (getFile());
 
@@ -110,7 +110,7 @@ public:
                 pcc->showEditorForFile (f, false);
     }
 
-    void showPopupMenu()
+    void showPopupMenu() override
     {
         PopupMenu m;
 
@@ -135,7 +135,7 @@ public:
         launchPopupMenu (m);
     }
 
-    void handlePopupMenuResult (int resultCode)
+    void handlePopupMenuResult (int resultCode) override
     {
         switch (resultCode)
         {

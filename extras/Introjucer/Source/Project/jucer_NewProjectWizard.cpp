@@ -98,6 +98,29 @@ struct NewProjectWizardClasses
 
         virtual bool initialiseProject (Project& project) = 0;
 
+        virtual StringArray getDefaultModules()
+        {
+            const char* mods[] =
+            {
+                "juce_core",
+                "juce_events",
+                "juce_graphics",
+                "juce_data_structures",
+                "juce_gui_basics",
+                "juce_gui_extra",
+                "juce_cryptography",
+                "juce_video",
+                "juce_opengl",
+                "juce_audio_basics",
+                "juce_audio_devices",
+                "juce_audio_formats",
+                "juce_audio_processors",
+                nullptr
+            };
+
+            return StringArray (mods);
+        }
+
         String appTitle;
         File targetFolder, projectFile;
         Component* ownerWindow;
@@ -131,7 +154,7 @@ struct NewProjectWizardClasses
                                       .withFileExtension (Project::projectFileExtension);
 
             ScopedPointer<Project> project (new Project (projectFile));
-            project->getModules().addDefaultModules (true);
+            addDefaultModules (*project);
 
             if (failedFiles.size() == 0)
             {
@@ -150,11 +173,11 @@ struct NewProjectWizardClasses
 
             if (failedFiles.size() > 0)
             {
-                AlertWindow::showMessageBox (AlertWindow::WarningIcon,
-                                             TRANS("Errors in Creating Project!"),
-                                             TRANS("The following files couldn't be written:")
-                                                + "\n\n"
-                                                + failedFiles.joinIntoString ("\n", 0, 10));
+                AlertWindow::showMessageBoxAsync (AlertWindow::WarningIcon,
+                                                  TRANS("Errors in Creating Project!"),
+                                                  TRANS("The following files couldn't be written:")
+                                                    + "\n\n"
+                                                    + failedFiles.joinIntoString ("\n", 0, 10));
                 return nullptr;
             }
 
@@ -171,6 +194,18 @@ struct NewProjectWizardClasses
         {
             if (! getSourceFilesFolder().createDirectory())
                 failedFiles.add (getSourceFilesFolder().getFullPathName());
+        }
+
+        void addDefaultModules (Project& project)
+        {
+            StringArray mods (getDefaultModules());
+
+            ModuleList list;
+            list.scanAllKnownFolders (project);
+
+            for (int i = 0; i < mods.size(); ++i)
+                if (const ModuleDescription* info = list.getModuleWithID (mods[i]))
+                    project.getModules().addModule (info->manifestFile, true);
         }
     };
 
@@ -342,10 +377,17 @@ struct NewProjectWizardClasses
     {
         AudioPluginAppWizard()  {}
 
-        String getName()          { return TRANS("Audio Plug-In"); }
-        String getDescription()   { return TRANS("Creates an audio plugin project"); }
+        String getName() override          { return TRANS("Audio Plug-In"); }
+        String getDescription() override   { return TRANS("Creates an audio plugin project"); }
 
-        bool initialiseProject (Project& project)
+        StringArray getDefaultModules() override
+        {
+            StringArray s (NewProjectWizard::getDefaultModules());
+            s.add ("juce_audio_plugin_client");
+            return s;
+        }
+
+        bool initialiseProject (Project& project) override
         {
             createSourceFolder();
 
@@ -359,7 +401,6 @@ struct NewProjectWizardClasses
             File editorHFile   = editorCppFile.withFileExtension (".h");
 
             project.getProjectTypeValue() = ProjectType::getAudioPluginTypeName();
-            project.getModules().addModule ("juce_audio_plugin_client", true);
 
             Project::Item sourceGroup (createSourceGroup (project));
             project.getConfigFlag ("JUCE_QUICKTIME") = Project::configFlagDisabled; // disabled because it interferes with RTAS build on PC
@@ -419,10 +460,10 @@ struct NewProjectWizardClasses
     {
         StaticLibraryWizard()  {}
 
-        String getName()          { return TRANS("Static Library"); }
-        String getDescription()   { return TRANS("Creates a static library"); }
+        String getName() override          { return TRANS("Static Library"); }
+        String getDescription() override   { return TRANS("Creates a static library"); }
 
-        bool initialiseProject (Project& project)
+        bool initialiseProject (Project& project) override
         {
             createSourceFolder();
             project.getProjectTypeValue() = ProjectType::getStaticLibTypeName();
@@ -439,10 +480,10 @@ struct NewProjectWizardClasses
     {
         DynamicLibraryWizard()  {}
 
-        String getName()          { return TRANS("Dynamic Library"); }
-        String getDescription()   { return TRANS("Creates a dynamic library"); }
+        String getName() override          { return TRANS("Dynamic Library"); }
+        String getDescription() override   { return TRANS("Creates a dynamic library"); }
 
-        bool initialiseProject (Project& project)
+        bool initialiseProject (Project& project) override
         {
             createSourceFolder();
             project.getProjectTypeValue() = ProjectType::getDynamicLibTypeName();
@@ -509,12 +550,12 @@ struct NewProjectWizardClasses
             updateCreateButton();
         }
 
-        void paint (Graphics& g)
+        void paint (Graphics& g) override
         {
             g.fillAll (Colour::greyLevel (0.93f));
         }
 
-        void buttonClicked (Button* b)
+        void buttonClicked (Button* b) override
         {
             if (b == &createButton)
             {
@@ -564,12 +605,12 @@ struct NewProjectWizardClasses
                 wizard->addSetupItems (*this, customItems);
         }
 
-        void comboBoxChanged (ComboBox*)
+        void comboBoxChanged (ComboBox*) override
         {
             updateCustomItems();
         }
 
-        void textEditorTextChanged (TextEditor&)
+        void textEditorTextChanged (TextEditor&) override
         {
             updateCreateButton();
 

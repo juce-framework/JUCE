@@ -23,6 +23,7 @@
 */
 
 #include "jucer_ProjectContentComponent.h"
+#include "jucer_Module.h"
 #include "../Application/jucer_MainWindow.h"
 #include "../Application/jucer_Application.h"
 #include "../Code Editor/jucer_SourceCodeEditor.h"
@@ -31,7 +32,6 @@
 #include "../Utility/jucer_JucerTreeViewBase.h"
 #include "jucer_NewFileWizard.h"
 #include "jucer_GroupInformationComponent.h"
-#include "jucer_ModulesPanel.h"
 
 //==============================================================================
 class FileTreePanel   : public TreePanelBase
@@ -107,11 +107,21 @@ public:
 
     void showModules()
     {
-        if (ConfigTreeItemBase* root = dynamic_cast<ConfigTreeItemBase*> (rootItem.get()))
-            if (root->isProjectSettings())
-                if (ConfigTreeItemBase* mods = dynamic_cast<ConfigTreeItemBase*> (root->getSubItem (0)))
-                    if (mods->isModulesList())
-                        mods->setSelected (true, true);
+        if (ConfigTreeItemBase* mods = getModulesItem())
+            mods->setSelected (true, true);
+    }
+
+    void showModule (const String& moduleID)
+    {
+        if (ConfigTreeItemBase* mods = getModulesItem())
+        {
+            mods->setOpen (true);
+
+            for (int i = mods->getNumSubItems(); --i >= 0;)
+                if (ModuleItem* m = dynamic_cast<ModuleItem*> (mods->getSubItem (i)))
+                    if (m->moduleID == moduleID)
+                        m->setSelected (true, true);
+        }
     }
 
     TextButton openProjectButton, saveAndOpenButton;
@@ -120,6 +130,18 @@ private:
     #include "jucer_ConfigTree_Base.h"
     #include "jucer_ConfigTree_Modules.h"
     #include "jucer_ConfigTree_Exporter.h"
+    #include "jucer_ModulesPanel.h"
+
+    ConfigTreeItemBase* getModulesItem()
+    {
+        if (ConfigTreeItemBase* root = dynamic_cast<ConfigTreeItemBase*> (rootItem.get()))
+            if (root->isProjectSettings())
+                if (ConfigTreeItemBase* mods = dynamic_cast<ConfigTreeItemBase*> (root->getSubItem (0)))
+                    if (mods->isModulesList())
+                        return mods;
+
+        return nullptr;
+    }
 };
 
 //==============================================================================
@@ -535,6 +557,14 @@ void ProjectContentComponent::showModules()
 
     if (ConfigTreePanel* const tree = dynamic_cast<ConfigTreePanel*> (treeViewTabs.getCurrentContentComponent()))
         tree->showModules();
+}
+
+void ProjectContentComponent::showModule (const String& moduleID)
+{
+    showConfigTab();
+
+    if (ConfigTreePanel* const tree = dynamic_cast<ConfigTreePanel*> (treeViewTabs.getCurrentContentComponent()))
+        tree->showModule (moduleID);
 }
 
 StringArray ProjectContentComponent::getExportersWhichCanLaunch() const

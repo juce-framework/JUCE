@@ -14,67 +14,126 @@
               companyName="Raw Material Software Ltd." includeBinaryInAppConfig="1">
   <EXPORTFORMATS>
     <XCODE_MAC targetFolder="Builds/MacOSX" vstFolder="~/SDKs/vstsdk2.4" rtasFolder="~/SDKs/PT_80_SDK"
-               juceFolder="../.." documentExtensions=".jucer" objCExtraSuffix="zNNCr"
-               bigIcon="rVgowdy" extraCompilerFlags="-Wall -Wshadow -Wno-missing-field-initializers -Wshadow -Wshorten-64-to-32 -Wstrict-aliasing">
+               documentExtensions=".jucer" objCExtraSuffix="zNNCr" bigIcon="rVgowdy"
+               extraCompilerFlags="-Wall -Wshadow -Wno-missing-field-initializers -Wshadow -Wshorten-64-to-32 -Wstrict-aliasing">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="Introjucer"
                        osxSDK="default" osxCompatibility="default" osxArchitecture="default"/>
         <CONFIGURATION name="Release" isDebug="0" optimisation="3" targetName="Introjucer"
                        osxSDK="default" osxCompatibility="10.5 SDK" osxArchitecture="32BitUniversal"/>
       </CONFIGURATIONS>
+      <MODULEPATHS>
+        <MODULEPATH id="juce_gui_extra" path="../../modules"/>
+        <MODULEPATH id="juce_gui_basics" path="../../modules"/>
+        <MODULEPATH id="juce_graphics" path="../../modules"/>
+        <MODULEPATH id="juce_events" path="../../modules"/>
+        <MODULEPATH id="juce_data_structures" path="../../modules"/>
+        <MODULEPATH id="juce_cryptography" path="../../modules"/>
+        <MODULEPATH id="juce_core" path="../../modules"/>
+      </MODULEPATHS>
     </XCODE_MAC>
     <VS2005 targetFolder="Builds/VisualStudio2005" vstFolder="c:\SDKs\vstsdk2.4"
-            rtasFolder="c:\SDKs\PT_80_SDK" juceFolder="../.." libraryType="1"
-            bigIcon="rVgowdy">
+            rtasFolder="c:\SDKs\PT_80_SDK" libraryType="1" bigIcon="rVgowdy">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="Introjucer"
                        winWarningLevel="4" generateManifest="1"/>
         <CONFIGURATION name="Release" isDebug="0" optimisation="3" targetName="Introjucer"
                        winWarningLevel="4" generateManifest="1"/>
       </CONFIGURATIONS>
+      <MODULEPATHS>
+        <MODULEPATH id="juce_gui_extra" path="../../modules"/>
+        <MODULEPATH id="juce_gui_basics" path="../../modules"/>
+        <MODULEPATH id="juce_graphics" path="../../modules"/>
+        <MODULEPATH id="juce_events" path="../../modules"/>
+        <MODULEPATH id="juce_data_structures" path="../../modules"/>
+        <MODULEPATH id="juce_cryptography" path="../../modules"/>
+        <MODULEPATH id="juce_core" path="../../modules"/>
+      </MODULEPATHS>
     </VS2005>
     <VS2008 targetFolder="Builds/VisualStudio2008" vstFolder="c:\SDKs\vstsdk2.4"
-            rtasFolder="c:\SDKs\PT_80_SDK" juceFolder="../.." libraryType="1"
-            bigIcon="rVgowdy">
+            rtasFolder="c:\SDKs\PT_80_SDK" libraryType="1" bigIcon="rVgowdy">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="Introjucer"
                        winWarningLevel="4" generateManifest="1"/>
         <CONFIGURATION name="Release" isDebug="0" optimisation="3" targetName="Introjucer"
                        winWarningLevel="4" generateManifest="1"/>
       </CONFIGURATIONS>
+      <MODULEPATHS>
+        <MODULEPATH id="juce_gui_extra" path="../../modules"/>
+        <MODULEPATH id="juce_gui_basics" path="../../modules"/>
+        <MODULEPATH id="juce_graphics" path="../../modules"/>
+        <MODULEPATH id="juce_events" path="../../modules"/>
+        <MODULEPATH id="juce_data_structures" path="../../modules"/>
+        <MODULEPATH id="juce_cryptography" path="../../modules"/>
+        <MODULEPATH id="juce_core" path="../../modules"/>
+      </MODULEPATHS>
     </VS2008>
-    <LINUX_MAKE targetFolder="Builds/Linux" vstFolder="~/SDKs/vstsdk2.4" juceFolder="../.."
-                bigIcon="rVgowdy">
+    <LINUX_MAKE targetFolder="Builds/Linux" vstFolder="~/SDKs/vstsdk2.4" bigIcon="rVgowdy">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="Introjucer"
                        libraryPath="/usr/X11R6/lib/"/>
         <CONFIGURATION name="Release" isDebug="0" optimisation="3" targetName="Introjucer"
                        libraryPath="/usr/X11R6/lib/"/>
       </CONFIGURATIONS>
+      <MODULEPATHS>
+        <MODULEPATH id="juce_gui_extra" path="../../modules"/>
+        <MODULEPATH id="juce_gui_basics" path="../../modules"/>
+        <MODULEPATH id="juce_graphics" path="../../modules"/>
+        <MODULEPATH id="juce_events" path="../../modules"/>
+        <MODULEPATH id="juce_data_structures" path="../../modules"/>
+        <MODULEPATH id="juce_cryptography" path="../../modules"/>
+        <MODULEPATH id="juce_core" path="../../modules"/>
+      </MODULEPATHS>
     </LINUX_MAKE>
     <VS2010 targetFolder="Builds/VisualStudio2010" vstFolder="c:\SDKs\vstsdk2.4"
-            rtasFolder="c:\SDKs\PT_80_SDK" libraryType="1" juceFolder="../.."
-            bigIcon="rVgowdy">
+            rtasFolder="c:\SDKs\PT_80_SDK" libraryType="1" bigIcon="rVgowdy">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="Introjucer"
                        winWarningLevel="4" generateManifest="1" winArchitecture="32-bit"/>
         <CONFIGURATION name="Release" isDebug="0" optimisation="3" targetName="Introjucer"
                        winWarningLevel="4" generateManifest="1" winArchitecture="32-bit"/>
       </CONFIGURATIONS>
+      <MODULEPATHS>
+        <MODULEPATH id="juce_gui_extra" path="../../modules"/>
+        <MODULEPATH id="juce_gui_basics" path="../../modules"/>
+        <MODULEPATH id="juce_graphics" path="../../modules"/>
+        <MODULEPATH id="juce_events" path="../../modules"/>
+        <MODULEPATH id="juce_data_structures" path="../../modules"/>
+        <MODULEPATH id="juce_cryptography" path="../../modules"/>
+        <MODULEPATH id="juce_core" path="../../modules"/>
+      </MODULEPATHS>
     </VS2010>
-    <VS2012 targetFolder="Builds/VisualStudio2012" juceFolder="../.." bigIcon="rVgowdy">
+    <VS2012 targetFolder="Builds/VisualStudio2012" bigIcon="rVgowdy">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" winWarningLevel="4" generateManifest="1" winArchitecture="32-bit"
                        isDebug="1" optimisation="1" targetName="The Introjucer"/>
         <CONFIGURATION name="Release" winWarningLevel="4" generateManifest="1" winArchitecture="32-bit"
                        isDebug="0" optimisation="2" targetName="The Introjucer"/>
       </CONFIGURATIONS>
+      <MODULEPATHS>
+        <MODULEPATH id="juce_gui_extra" path="../../modules"/>
+        <MODULEPATH id="juce_gui_basics" path="../../modules"/>
+        <MODULEPATH id="juce_graphics" path="../../modules"/>
+        <MODULEPATH id="juce_events" path="../../modules"/>
+        <MODULEPATH id="juce_data_structures" path="../../modules"/>
+        <MODULEPATH id="juce_cryptography" path="../../modules"/>
+        <MODULEPATH id="juce_core" path="../../modules"/>
+      </MODULEPATHS>
     </VS2012>
-    <CODEBLOCKS targetFolder="Builds/CodeBlocks" juceFolder="../..">
+    <CODEBLOCKS targetFolder="Builds/CodeBlocks">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="The Introjucer"/>
         <CONFIGURATION name="Release" isDebug="0" optimisation="2" targetName="The Introjucer"/>
       </CONFIGURATIONS>
+      <MODULEPATHS>
+        <MODULEPATH id="juce_gui_extra" path="../../modules"/>
+        <MODULEPATH id="juce_gui_basics" path="../../modules"/>
+        <MODULEPATH id="juce_graphics" path="../../modules"/>
+        <MODULEPATH id="juce_events" path="../../modules"/>
+        <MODULEPATH id="juce_data_structures" path="../../modules"/>
+        <MODULEPATH id="juce_cryptography" path="../../modules"/>
+        <MODULEPATH id="juce_core" path="../../modules"/>
+      </MODULEPATHS>
     </CODEBLOCKS>
   </EXPORTFORMATS>
   <MAINGROUP name="The Introjucer" id="NhrJq66R">
@@ -101,10 +160,6 @@
             resource="0" file="Source/Application/jucer_FilePreviewComponent.h"/>
       <FILE id="qXOJtpg" name="jucer_Headers.h" compile="0" resource="0"
             file="Source/jucer_Headers.h"/>
-      <FILE id="uXkdSAZ" name="jucer_JuceUpdater.cpp" compile="1" resource="0"
-            file="Source/Application/jucer_JuceUpdater.cpp"/>
-      <FILE id="QWUk0cM" name="jucer_JuceUpdater.h" compile="0" resource="0"
-            file="Source/Application/jucer_JuceUpdater.h"/>
       <FILE id="ga7xgxf" name="jucer_Main.cpp" compile="1" resource="0" file="Source/Application/jucer_Main.cpp"/>
       <FILE id="Glk9Bg" name="jucer_MainWindow.cpp" compile="1" resource="0"
             file="Source/Application/jucer_MainWindow.cpp"/>
@@ -129,7 +184,7 @@
       <FILE id="MJkOAX" name="jucer_Module.cpp" compile="1" resource="0"
             file="Source/Project/jucer_Module.cpp"/>
       <FILE id="VZmQQ6" name="jucer_Module.h" compile="0" resource="0" file="Source/Project/jucer_Module.h"/>
-      <FILE id="mnELwd" name="jucer_ModulesPanel.h" compile="0" resource="0"
+      <FILE id="AbVStQ" name="jucer_ModulesPanel.h" compile="0" resource="0"
             file="Source/Project/jucer_ModulesPanel.h"/>
       <FILE id="Vf0IGtm" name="jucer_NewFileWizard.cpp" compile="1" resource="0"
             file="Source/Project/jucer_NewFileWizard.cpp"/>
@@ -456,12 +511,10 @@
                JUCE_LOG_ASSERTIONS="enabled"/>
   <MODULES>
     <MODULE id="juce_core" showAllCode="1"/>
+    <MODULE id="juce_cryptography" showAllCode="1"/>
+    <MODULE id="juce_data_structures" showAllCode="1"/>
     <MODULE id="juce_events" showAllCode="1"/>
     <MODULE id="juce_graphics" showAllCode="1"/>
-    <MODULE id="juce_gui" showAllCode="1"/>
-    <MODULE id="juce_data_structures" showAllCode="1"/>
-    <MODULE id="juce_cryptography" showAllCode="1"/>
-    <MODULE id="juce_audio" showAllCode="1"/>
     <MODULE id="juce_gui_basics" showAllCode="1"/>
     <MODULE id="juce_gui_extra" showAllCode="1"/>
   </MODULES>

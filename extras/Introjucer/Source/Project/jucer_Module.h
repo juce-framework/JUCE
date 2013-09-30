@@ -31,20 +31,63 @@ class ProjectExporter;
 class ProjectSaver;
 
 //==============================================================================
+struct ModuleDescription
+{
+    ModuleDescription() {}
+    ModuleDescription (const File& manifest);
+    ModuleDescription (const var& info)       : moduleInfo (info) {}
+
+    bool isValid() const                { return getID().isNotEmpty(); }
+
+    String getID() const                { return moduleInfo [Ids::ID].toString(); }
+    String getVersion() const           { return moduleInfo [Ids::version].toString(); }
+    String getName() const              { return moduleInfo [Ids::name].toString(); }
+    String getDescription() const       { return moduleInfo [Ids::description].toString(); }
+    String getLicense() const           { return moduleInfo [Ids::license].toString(); }
+    String getHeaderName() const        { return moduleInfo [Ids::include].toString(); }
+
+    File getFolder() const              { jassert (manifestFile != File::nonexistent); return manifestFile.getParentDirectory(); }
+
+    bool isPluginClient() const         { return getID() == "juce_audio_plugin_client"; }
+
+    static const char* getManifestFileName()    { return "juce_module_info"; }
+
+    var moduleInfo;
+    File manifestFile;
+    URL url;
+};
+
+//==============================================================================
+struct ModuleList
+{
+    ModuleList();
+    ModuleList (const ModuleList&);
+
+    const ModuleDescription* getModuleWithID (const String& moduleID) const;
+    StringArray getIDs() const;
+    void sort();
+
+    Result addAllModulesInFolder (const File&);
+    Result scanAllKnownFolders (Project&);
+    bool loadFromWebsite();
+
+    OwnedArray<ModuleDescription> modules;
+};
+
+//==============================================================================
 class LibraryModule
 {
 public:
-    LibraryModule (const File& file);
-    LibraryModule (const var& moduleInfo);
+    LibraryModule (const ModuleDescription&);
 
-    bool isValid() const;
+    bool isValid() const                { return moduleInfo.isValid(); }
+    String getID() const                { return moduleInfo.getID(); }
+    String getVersion() const           { return moduleInfo.getVersion(); }
+    String getName() const              { return moduleInfo.getName(); }
+    String getDescription() const       { return moduleInfo.getDescription(); }
+    String getLicense() const           { return moduleInfo.getLicense(); }
 
-    String getID() const                { return moduleInfo ["id"].toString(); }
-    String getVersion() const           { return moduleInfo ["version"].toString(); }
-    String getName() const              { return moduleInfo ["name"].toString(); }
-    String getDescription() const       { return moduleInfo ["description"].toString(); }
-    String getLicense() const           { return moduleInfo ["license"].toString(); }
-    const File& getFolder() const       { return moduleFolder; }
+    File getFolder() const              { return moduleInfo.getFolder(); }
 
     void writeIncludes (ProjectSaver&, OutputStream&);
     void prepareExporter (ProjectExporter&, ProjectSaver&) const;
@@ -52,100 +95,22 @@ public:
     void getConfigFlags (Project&, OwnedArray<Project::ConfigFlag>& flags) const;
     void getLocalCompiledFiles (const File& localModuleFolder, Array<File>& files) const;
     void findBrowseableFiles (const File& localModuleFolder, Array<File>& files) const;
-    File getLocalFolderFor (Project&) const;
 
-    static String getInfoFileName()     { return "juce_module_info"; }
-
-    var moduleInfo;
+    ModuleDescription moduleInfo;
 
 private:
-    File moduleFile, moduleFolder;
     mutable Array<File> sourceFiles;
 
-    File getInclude (const File& folder) const;
+    File getModuleHeaderFile (const File& folder) const;
     static bool fileTargetMatches (ProjectExporter& exporter, const String& target);
-
-    struct FileSorter
-    {
-        static int compareElements (const File& f1, const File& f2)
-        {
-            return f1.getFileName().compareIgnoreCase (f2.getFileName());
-        }
-    };
 
     void findWildcardMatches (const File& localModuleFolder, const String& wildcardPath, Array<File>& result) const;
     void findAndAddCompiledCode (ProjectExporter&, ProjectSaver&, const File& localModuleFolder, Array<File>& result) const;
-    void addBrowsableCode (ProjectExporter&, const Array<File>& compiled, const File& localModuleFolder) const;
+    void addBrowsableCode (ProjectExporter&, ProjectSaver&, const Array<File>& compiled, const File& localModuleFolder) const;
     void createLocalHeaderWrapper (ProjectSaver&, const File& originalHeader, const File& localHeader) const;
-    RelativePath getModuleRelativeToProject (ProjectExporter&) const;
-    RelativePath getModuleOrLocalCopyRelativeToProject (ProjectExporter&, const File& localModuleFolder) const;
 
-    bool isPluginClient() const;
     bool isAUPluginHost (const Project&) const;
     bool isVSTPluginHost (const Project&) const;
-};
-
-//==============================================================================
-class AvailableModuleList
-{
-public:
-    AvailableModuleList();
-    AvailableModuleList (const AvailableModuleList&);
-    AvailableModuleList& operator= (const AvailableModuleList&);
-
-    //==============================================================================
-    Result rescan (const File& newModulesFolder);
-    void rescan();
-    File getModulesFolder() const     { return moduleFolder; }
-
-    bool loadFromWebsite();
-
-    LibraryModule* loadModule (const String& uid) const;
-
-    void getDependencies (const String& moduleID, StringArray& dependencies) const;
-    void createDependencies (const String& moduleID, OwnedArray<LibraryModule>& modules) const;
-
-    //==============================================================================
-    struct Module
-    {
-        LibraryModule* create() const;
-
-        String uid, version, name, description, license;
-        File file;
-        URL url;
-
-        bool operator== (const Module&) const;
-        bool operator!= (const Module&) const;
-    };
-
-    const Module* findModuleInfo (const String& uid) const;
-
-    bool operator== (const AvailableModuleList&) const;
-
-    //==============================================================================
-    static bool isJuceFolder (const File& folder);
-    static bool isModulesFolder (const File& folder);
-    static bool isJuceOrModulesFolder (const File& folder);
-
-    static File getDefaultModulesFolder (Project*);
-    static bool isLocalModulesFolderValid();
-    static bool isLibraryNewerThanIntrojucer();
-
-    static File getLocalModulesFolder (Project*);
-    static void setLocalModulesFolder (const File& newFile);
-
-    static File getModulesFolderForJuceOrModulesFolder (const File& f);
-    static File getModulesFolderForExporter (const ProjectExporter&);
-
-    StringArray getExtraDependenciesNeeded (Project&, const Module&);
-
-    //==============================================================================
-    OwnedArray<Module> modules;
-
-private:
-    File moduleFolder;
-
-    void sort();
 };
 
 //==============================================================================
@@ -153,31 +118,42 @@ class EnabledModuleList
 {
 public:
     EnabledModuleList (Project&, const ValueTree&);
-    EnabledModuleList (const EnabledModuleList&);
 
     bool isModuleEnabled (const String& moduleID) const;
     Value shouldShowAllModuleFilesInProject (const String& moduleID);
     Value shouldCopyModuleFilesLocally (const String& moduleID);
-    void addModule (const String& moduleID, bool shouldCopyFilesLocally);
     void removeModule (const String& moduleID);
-    void addDefaultModules (bool shouldCopyFilesLocally);
     bool isAudioPluginModuleMissing() const;
 
-    void createRequiredModules (const AvailableModuleList& availableModules,
-                                OwnedArray<LibraryModule>& modules) const;
+    ModuleDescription getModuleInfo (const String& moduleID);
+
+    File getModuleInfoFile (const String& moduleID);
+    File getModuleFolder (const String& moduleID);
+
+    void addModule (const File& moduleManifestFile, bool copyLocally);
+    void addModuleInteractive (const String& moduleID);
+    void addModuleFromUserSelectedFile();
+    void addModuleOfferingToCopy (const File&);
+
+    StringArray getAllModules() const;
+    StringArray getExtraDependenciesNeeded (const String& moduleID) const;
+    void createRequiredModules (OwnedArray<LibraryModule>& modules);
 
     int getNumModules() const               { return state.getNumChildren(); }
     String getModuleID (int index) const    { return state.getChild (index) [Ids::ID].toString(); }
 
-    static const Identifier modulesGroupTag, moduleTag;
+    bool areMostModulesCopiedLocally() const;
+    void sortAlphabetically();
 
-private:
+    static File findDefaultModulesFolder (Project&);
+
     Project& project;
     ValueTree state;
 
+private:
     UndoManager* getUndoManager() const     { return project.getUndoManagerFor (state); }
 
-    EnabledModuleList& operator= (const EnabledModuleList&) JUCE_DELETED_FUNCTION;
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (EnabledModuleList)
 };
 
 

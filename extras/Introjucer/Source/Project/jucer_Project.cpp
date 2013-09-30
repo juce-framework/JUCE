@@ -29,31 +29,18 @@
 #include "../Application/jucer_OpenDocumentManager.h"
 #include "../Application/jucer_Application.h"
 
-
-//==============================================================================
-namespace Tags
-{
-    const Identifier projectRoot       ("JUCERPROJECT");
-    const Identifier projectMainGroup  ("MAINGROUP");
-    const Identifier group             ("GROUP");
-    const Identifier file              ("FILE");
-    const Identifier exporters         ("EXPORTFORMATS");
-    const Identifier configGroup       ("JUCEOPTIONS");
-}
-
-const char* Project::projectFileExtension = ".jucer";
-
 //==============================================================================
 Project::Project (const File& f)
     : FileBasedDocument (projectFileExtension,
                          String ("*") + projectFileExtension,
                          "Choose a Jucer project to load",
                          "Save Jucer project"),
-      projectRoot (Tags::projectRoot)
+      projectRoot (Ids::JUCERPROJECT)
 {
     Logger::writeToLog ("Loading project: " + f.getFullPathName());
     setFile (f);
     removeDefunctExporters();
+    updateOldModulePaths();
     setMissingDefaultValues();
 
     setChangedFlag (false);
@@ -67,6 +54,8 @@ Project::~Project()
     IntrojucerApp::getApp().openDocumentManager.closeAllDocumentsUsingProject (*this, false);
 }
 
+const char* Project::projectFileExtension = ".jucer";
+
 //==============================================================================
 void Project::setTitle (const String& newTitle)
 {
@@ -76,7 +65,7 @@ void Project::setTitle (const String& newTitle)
 
 String Project::getTitle() const
 {
-    return projectRoot.getChildWithName (Tags::projectMainGroup) [Ids::name];
+    return projectRoot.getChildWithName (Ids::MAINGROUP) [Ids::name];
 }
 
 String Project::getDocumentTitle()
@@ -96,9 +85,9 @@ void Project::setMissingDefaultValues()
         projectRoot.setProperty (Ids::ID, createAlphaNumericUID(), nullptr);
 
     // Create main file group if missing
-    if (! projectRoot.getChildWithName (Tags::projectMainGroup).isValid())
+    if (! projectRoot.getChildWithName (Ids::MAINGROUP).isValid())
     {
-        Item mainGroup (*this, ValueTree (Tags::projectMainGroup));
+        Item mainGroup (*this, ValueTree (Ids::MAINGROUP));
         projectRoot.addChild (mainGroup.state, 0, 0);
     }
 
@@ -119,8 +108,7 @@ void Project::setMissingDefaultValues()
 
     getProjectType().setMissingProjectProperties (*this);
 
-    if (! projectRoot.getChildWithName (EnabledModuleList::modulesGroupTag).isValid())
-        getModules().addDefaultModules (false);
+    getModules().sortAlphabetically();
 
     if (getBundleIdentifier().toString().isEmpty())
         getBundleIdentifier() = getDefaultBundleIdentifier();
@@ -133,7 +121,7 @@ void Project::setMissingDefaultValues()
 
 void Project::updateOldStyleConfigList()
 {
-    ValueTree deprecatedConfigsList (projectRoot.getChildWithName (ProjectExporter::configurations));
+    ValueTree deprecatedConfigsList (projectRoot.getChildWithName (Ids::CONFIGURATIONS));
 
     if (deprecatedConfigsList.isValid())
     {
@@ -176,7 +164,7 @@ void Project::moveOldPropertyFromProjectToAllExporters (Identifier name)
 
 void Project::removeDefunctExporters()
 {
-    ValueTree exporters (projectRoot.getChildWithName (Tags::exporters));
+    ValueTree exporters (projectRoot.getChildWithName (Ids::EXPORTFORMATS));
 
     for (;;)
     {
@@ -189,18 +177,69 @@ void Project::removeDefunctExporters()
     }
 }
 
-File Project::getBinaryDataCppFile (int index) const
+void Project::updateOldModulePaths()
 {
-    const File cpp (getGeneratedCodeFolder().getChildFile ("BinaryData.cpp"));
-
-    if (index > 0)
-        return cpp.getSiblingFile (cpp.getFileNameWithoutExtension() + String (index + 1))
-                    .withFileExtension (cpp.getFileExtension());
-
-    return cpp;
+    for (Project::ExporterIterator exporter (*this); exporter.next();)
+        exporter->updateOldModulePaths();
 }
 
 //==============================================================================
+static int getVersionElement (const String& v, int index)
+{
+    StringArray parts;
+    parts.addTokens (v, "., ", String::empty);
+
+    return parts [parts.size() - index - 1].getIntValue();
+}
+
+static int getJuceVersion (const String& v)
+{
+    return getVersionElement (v, 2) * 100000
+         + getVersionElement (v, 1) * 1000
+         + getVersionElement (v, 0);
+}
+
+static int getBuiltJuceVersion()
+{
+    return JUCE_MAJOR_VERSION * 100000
+         + JUCE_MINOR_VERSION * 1000
+         + JUCE_BUILDNUMBER;
+}
+
+static bool isAnyModuleNewerThanIntrojucer (const OwnedArray<ModuleDescription>& modules)
+{
+    for (int i = modules.size(); --i >= 0;)
+    {
+        const ModuleDescription* m = modules.getUnchecked(i);
+
+        if (m->getID().startsWith ("juce_")
+              && getJuceVersion (m->getVersion()) > getBuiltJuceVersion())
+            return true;
+    }
+
+    return false;
+}
+
+void Project::warnAboutOldIntrojucerVersion()
+{
+    ModuleList available;
+    available.scanAllKnownFolders (*this);
+
+    if (isAnyModuleNewerThanIntrojucer (available.modules))
+        AlertWindow::showMessageBoxAsync (AlertWindow::WarningIcon,
+                                          "Introjucer",
+                                          "This version of the introjucer is out-of-date!"
+                                          "\n\n"
+                                          "Always make sure that you're running the very latest version, "
+                                          "preferably compiled directly from the JUCE repository that you're working with!");
+}
+
+//==============================================================================
+static File lastDocumentOpened;
+
+File Project::getLastDocumentOpened()                   { return lastDocumentOpened; }
+void Project::setLastDocumentOpened (const File& file)  { lastDocumentOpened = file; }
+
 static void registerRecentFile (const File& file)
 {
     RecentlyOpenedFilesList::registerRecentFileNatively (file);
@@ -208,24 +247,28 @@ static void registerRecentFile (const File& file)
     getAppSettings().flush();
 }
 
+//==============================================================================
 Result Project::loadDocument (const File& file)
 {
     ScopedPointer <XmlElement> xml (XmlDocument::parse (file));
 
-    if (xml == nullptr || ! xml->hasTagName (Tags::projectRoot.toString()))
+    if (xml == nullptr || ! xml->hasTagName (Ids::JUCERPROJECT.toString()))
         return Result::fail ("Not a valid Jucer project!");
 
     ValueTree newTree (ValueTree::fromXml (*xml));
 
-    if (! newTree.hasType (Tags::projectRoot))
+    if (! newTree.hasType (Ids::JUCERPROJECT))
         return Result::fail ("The document contains errors and couldn't be parsed!");
 
     registerRecentFile (file);
+    enabledModulesList = nullptr;
     projectRoot = newTree;
 
     removeDefunctExporters();
     setMissingDefaultValues();
+    updateOldModulePaths();
     setChangedFlag (false);
+    warnAboutOldIntrojucerVersion();
 
     return Result::ok();
 }
@@ -252,12 +295,6 @@ Result Project::saveResourcesOnly (const File& file)
     ProjectSaver saver (*this, file);
     return saver.saveResourcesOnly();
 }
-
-//==============================================================================
-static File lastDocumentOpened;
-
-File Project::getLastDocumentOpened()                   { return lastDocumentOpened; }
-void Project::setLastDocumentOpened (const File& file)  { lastDocumentOpened = file; }
 
 //==============================================================================
 void Project::valueTreePropertyChanged (ValueTree&, const Identifier& property)
@@ -389,6 +426,7 @@ void Project::createPropertyEditors (PropertyListBuilder& props)
                "Extra comments: This field is not used for code or project generation, it's just a space where you can express your thoughts.");
 }
 
+//==============================================================================
 static StringArray getConfigs (const Project& p)
 {
     StringArray configs;
@@ -422,10 +460,25 @@ StringPairArray Project::getPreprocessorDefs() const
     return parsePreprocessorDefs (projectRoot [Ids::defines]);
 }
 
-//==============================================================================
+File Project::getBinaryDataCppFile (int index) const
+{
+    const File cpp (getGeneratedCodeFolder().getChildFile ("BinaryData.cpp"));
+
+    if (index > 0)
+        return cpp.getSiblingFile (cpp.getFileNameWithoutExtension() + String (index + 1))
+                    .withFileExtension (cpp.getFileExtension());
+
+    return cpp;
+}
+
 Project::Item Project::getMainGroup()
 {
-    return Item (*this, projectRoot.getChildWithName (Tags::projectMainGroup));
+    return Item (*this, projectRoot.getChildWithName (Ids::MAINGROUP));
+}
+
+PropertiesFile& Project::getStoredProperties() const
+{
+    return getAppSettings().getProjectProperties (getProjectUID());
 }
 
 static void findImages (const Project::Item& item, OwnedArray<Project::Item>& found)
@@ -470,16 +523,16 @@ Image Project::Item::loadAsImageFile() const
 
 Project::Item Project::Item::createGroup (Project& project, const String& name, const String& uid)
 {
-    Item group (project, ValueTree (Tags::group));
+    Item group (project, ValueTree (Ids::GROUP));
     group.setID (uid);
     group.initialiseMissingProperties();
     group.getNameValue() = name;
     return group;
 }
 
-bool Project::Item::isFile() const          { return state.hasType (Tags::file); }
-bool Project::Item::isGroup() const         { return state.hasType (Tags::group) || isMainGroup(); }
-bool Project::Item::isMainGroup() const     { return state.hasType (Tags::projectMainGroup); }
+bool Project::Item::isFile() const          { return state.hasType (Ids::FILE); }
+bool Project::Item::isGroup() const         { return state.hasType (Ids::GROUP) || isMainGroup(); }
+bool Project::Item::isMainGroup() const     { return state.hasType (Ids::MAINGROUP); }
 bool Project::Item::isImageFile() const     { return isFile() && ImageFileFormat::findImageFormatForFileExtension (getFile()) != nullptr; }
 
 Project::Item Project::Item::findItemWithID (const String& targetId) const
@@ -618,7 +671,7 @@ File Project::Item::determineGroupFolder() const
     }
     else
     {
-        f = project.getFile().getParentDirectory();
+        f = project.getProjectFolder();
 
         if (f.getChildFile ("Source").isDirectory())
             f = f.getChildFile ("Source");
@@ -683,8 +736,8 @@ struct ItemSorterWithGroupsAtStart
 {
     static int compareElements (const ValueTree& first, const ValueTree& second)
     {
-        const bool firstIsGroup = first.hasType (Tags::group);
-        const bool secondIsGroup = second.hasType (Tags::group);
+        const bool firstIsGroup = first.hasType (Ids::GROUP);
+        const bool secondIsGroup = second.hasType (Ids::GROUP);
 
         if (firstIsGroup == secondIsGroup)
             return first [Ids::name].toString().compareIgnoreCase (second [Ids::name].toString());
@@ -712,7 +765,7 @@ Project::Item Project::Item::getOrCreateSubGroup (const String& name)
     for (int i = state.getNumChildren(); --i >= 0;)
     {
         const ValueTree child (state.getChild (i));
-        if (child.getProperty (Ids::name) == name && child.hasType (Tags::group))
+        if (child.getProperty (Ids::name) == name && child.hasType (Ids::GROUP))
             return Item (project, child);
     }
 
@@ -764,7 +817,7 @@ bool Project::Item::addFile (const File& file, int insertIndex, const bool shoul
 
 void Project::Item::addFileUnchecked (const File& file, int insertIndex, const bool shouldCompile)
 {
-    Item item (project, ValueTree (Tags::file));
+    Item item (project, ValueTree (Ids::FILE));
     item.initialiseMissingProperties();
     item.getNameValue() = file.getFileName();
     item.getShouldCompileValue() = shouldCompile && file.hasFileExtension ("cpp;mm;c;m;cc;cxx;r");
@@ -779,7 +832,7 @@ void Project::Item::addFileUnchecked (const File& file, int insertIndex, const b
 
 bool Project::Item::addRelativeFile (const RelativePath& file, int insertIndex, bool shouldCompile)
 {
-    Item item (project, ValueTree (Tags::file));
+    Item item (project, ValueTree (Ids::FILE));
     item.initialiseMissingProperties();
     item.getNameValue() = file.getFileName();
     item.getShouldCompileValue() = shouldCompile;
@@ -824,7 +877,7 @@ bool Project::Item::isIconCrossedOut() const
 //==============================================================================
 ValueTree Project::getConfigNode()
 {
-    return projectRoot.getOrCreateChildWithName (Tags::configGroup, nullptr);
+    return projectRoot.getOrCreateChildWithName (Ids::JUCEOPTIONS, nullptr);
 }
 
 const char* const Project::configFlagDefault = "default";
@@ -844,7 +897,7 @@ Value Project::getConfigFlag (const String& name)
 
 bool Project::isConfigFlagEnabled (const String& name) const
 {
-    return projectRoot.getChildWithName (Tags::configGroup).getProperty (name) == configFlagEnabled;
+    return projectRoot.getChildWithName (Ids::JUCEOPTIONS).getProperty (name) == configFlagEnabled;
 }
 
 void Project::sanitiseConfigFlags()
@@ -861,15 +914,18 @@ void Project::sanitiseConfigFlags()
 }
 
 //==============================================================================
-EnabledModuleList Project::getModules()
+EnabledModuleList& Project::getModules()
 {
-    return EnabledModuleList (*this, projectRoot.getOrCreateChildWithName (EnabledModuleList::modulesGroupTag, nullptr));
+    if (enabledModulesList == nullptr)
+        enabledModulesList = new EnabledModuleList (*this, projectRoot.getOrCreateChildWithName (Ids::MODULES, nullptr));
+
+    return *enabledModulesList;
 }
 
 //==============================================================================
 ValueTree Project::getExporters()
 {
-    return projectRoot.getOrCreateChildWithName (Tags::exporters, nullptr);
+    return projectRoot.getOrCreateChildWithName (Ids::EXPORTFORMATS, nullptr);
 }
 
 int Project::getNumExporters()
@@ -929,9 +985,4 @@ bool Project::ExporterIterator::next()
     }
 
     return true;
-}
-
-PropertiesFile& Project::getStoredProperties() const
-{
-    return getAppSettings().getProjectProperties (getProjectUID());
 }

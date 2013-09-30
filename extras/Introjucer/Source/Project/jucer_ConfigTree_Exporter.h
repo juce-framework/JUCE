@@ -43,7 +43,7 @@ public:
     Icon getIcon() const override             { return Icon (getIcons().exporter, getContrastingColour (0.5f)); }
     void showDocument() override              { showSettingsPage (new SettingsComp (exporter)); }
 
-    void deleteItem()
+    void deleteItem() override
     {
         if (AlertWindow::showOkCancelBox (AlertWindow::WarningIcon, "Delete Exporter",
                                           "Are you sure you want to delete this export target?"))
@@ -54,13 +54,13 @@ public:
         }
     }
 
-    void addSubItems()
+    void addSubItems() override
     {
         for (ProjectExporter::ConfigIterator config (*exporter); config.next();)
             addSubItem (new ConfigItem (config.config, exporter->getName()));
     }
 
-    void showPopupMenu()
+    void showPopupMenu() override
     {
         PopupMenu menu;
         menu.addItem (1, "Add a new configuration");
@@ -70,7 +70,7 @@ public:
         launchPopupMenu (menu);
     }
 
-    void handlePopupMenuResult (int resultCode)
+    void handlePopupMenuResult (int resultCode) override
     {
         if (resultCode == 2)
             deleteAllSelectedItems();
@@ -78,17 +78,17 @@ public:
             exporter->addNewConfiguration (nullptr);
     }
 
-    var getDragSourceDescription()
+    var getDragSourceDescription() override
     {
         return getParentItem()->getUniqueName() + "/" + String (exporterIndex);
     }
 
-    bool isInterestedInDragSource (const DragAndDropTarget::SourceDetails& dragSourceDetails)
+    bool isInterestedInDragSource (const DragAndDropTarget::SourceDetails& dragSourceDetails) override
     {
         return dragSourceDetails.description.toString().startsWith (getUniqueName());
     }
 
-    void itemDropped (const DragAndDropTarget::SourceDetails& dragSourceDetails, int insertIndex)
+    void itemDropped (const DragAndDropTarget::SourceDetails& dragSourceDetails, int insertIndex) override
     {
         const int oldIndex = indexOfConfig (dragSourceDetails.description.toString().fromLastOccurrenceOf ("||", false, false));
 
@@ -203,9 +203,9 @@ public:
         {
             for (Project::ExporterIterator exporter (config->project); exporter.next();)
             {
-                if (config->config.isAChildOf (exporter.exporter->settings))
+                if (config->config.isAChildOf (exporter->settings))
                 {
-                    exporter.exporter->addNewConfiguration (config);
+                    exporter->addNewConfiguration (config);
                     break;
                 }
             }

@@ -77,6 +77,7 @@ public:
     void showConfigTab();
     void showProjectSettings();
     void showModules();
+    void showModule (const String& moduleID);
 
     void deleteSelectedTreeItems();
 

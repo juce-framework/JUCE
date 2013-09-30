@@ -36,6 +36,10 @@ namespace Ids
     DECLARE_ID (path);
     DECLARE_ID (text);
     DECLARE_ID (version);
+    DECLARE_ID (license);
+    DECLARE_ID (include);
+    DECLARE_ID (info);
+    DECLARE_ID (description);
     DECLARE_ID (companyName);
     DECLARE_ID (position);
     DECLARE_ID (source);

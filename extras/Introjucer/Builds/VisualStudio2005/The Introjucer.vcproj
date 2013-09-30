@@ -139,8 +139,6 @@
         <File RelativePath="..\..\Source\Application\jucer_DocumentEditorComponent.h"/>
         <File RelativePath="..\..\Source\Application\jucer_FilePreviewComponent.h"/>
         <File RelativePath="..\..\Source\jucer_Headers.h"/>
-        <File RelativePath="..\..\Source\Application\jucer_JuceUpdater.cpp"/>
-        <File RelativePath="..\..\Source\Application\jucer_JuceUpdater.h"/>
         <File RelativePath="..\..\Source\Application\jucer_Main.cpp"/>
         <File RelativePath="..\..\Source\Application\jucer_MainWindow.cpp"/>
         <File RelativePath="..\..\Source\Application\jucer_MainWindow.h"/>
