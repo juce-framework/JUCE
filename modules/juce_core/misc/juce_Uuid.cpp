@@ -33,6 +33,10 @@ Uuid::Uuid()
 
     for (size_t i = 0; i < sizeof (uuid); ++i)
         uuid[i] = (uint8) (r.nextInt (256));
+
+    // To make it RFC 4122 compliant, need to force a few bits...
+    uuid[6] = (uuid[6] & 0x0f) | 0x40;
+    uuid[8] = (uuid[8] & 0x3f) | 0x80;
 }
 
 Uuid::~Uuid() noexcept {}
@@ -65,9 +69,23 @@ bool Uuid::isNull() const noexcept
     return true;
 }
 
+String Uuid::getHexRegion (int start, int length) const
+{
+    return String::toHexString (uuid + start, length, 0);
+}
+
 String Uuid::toString() const
 {
-    return String::toHexString (uuid, sizeof (uuid), 0);
+    return getHexRegion (0, 16);
+}
+
+String Uuid::toDashedString() const
+{
+    return getHexRegion (0, 4)
+            + "-" + getHexRegion (4, 2)
+            + "-" + getHexRegion (6, 2)
+            + "-" + getHexRegion (8, 2)
+            + "-" + getHexRegion (10, 6);
 }
 
 Uuid::Uuid (const String& uuidString)
