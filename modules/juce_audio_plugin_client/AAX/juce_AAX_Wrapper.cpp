@@ -518,7 +518,7 @@ struct AAXClasses
             return AAX_SUCCESS;
         }
 
-        AAX_Result SetParameterNormalizedValue (AAX_CParamID paramID, double newValue) const
+        AAX_Result SetParameterNormalizedValue (AAX_CParamID paramID, double newValue) override
         {
             if (! isBypassParam (paramID))
             {
@@ -531,7 +531,7 @@ struct AAXClasses
             return AAX_SUCCESS;
         }
 
-        AAX_Result SetParameterNormalizedRelative (AAX_CParamID paramID, double newValue) const
+        AAX_Result SetParameterNormalizedRelative (AAX_CParamID paramID, double newValue) override
         {
             if (! isBypassParam (paramID))
             {
@@ -673,7 +673,7 @@ struct AAXClasses
         }
 
         void process (const float* const* inputs, float* const* outputs, const int bufferSize,
-                      const bool bypass, AAX_IMIDINode* midiNodeIn, AAX_IMIDINode* midiNodeOut)
+                      const bool bypass, AAX_IMIDINode* midiNodeIn, AAX_IMIDINode* midiNodesOut)
         {
             const int numIns  = pluginInstance->getNumInputChannels();
             const int numOuts = pluginInstance->getNumOutputChannels();
@@ -683,7 +683,7 @@ struct AAXClasses
                 for (int i = 0; i < numIns; ++i)
                     memcpy (outputs[i], inputs[i], bufferSize * sizeof (float));
 
-                process (outputs, numOuts, bufferSize, bypass, midiNodeIn, midiNodeOut);
+                process (outputs, numOuts, bufferSize, bypass, midiNodeIn, midiNodesOut);
             }
             else
             {
@@ -701,7 +701,7 @@ struct AAXClasses
                 for (int i = numOuts; i < numIns; ++i)
                     channels[i] = const_cast <float*> (inputs[i]);
 
-                process (channels, numIns, bufferSize, bypass, midiNodeIn, midiNodeOut);
+                process (channels, numIns, bufferSize, bypass, midiNodeIn, midiNodesOut);
             }
         }
 
@@ -736,7 +736,7 @@ struct AAXClasses
         };
 
         void process (float* const* channels, const int numChans, const int bufferSize,
-                      const bool bypass, AAX_IMIDINode* midiNodeIn, AAX_IMIDINode* midiNodeOut)
+                      const bool bypass, AAX_IMIDINode* midiNodeIn, AAX_IMIDINode* midiNodesOut)
         {
             AudioSampleBuffer buffer (channels, numChans, bufferSize);
 
@@ -794,12 +794,12 @@ struct AAXClasses
                         packet.mLength      = (uint32_t) midiEventSize;
                         memcpy (packet.mData, midiEventData, midiEventSize);
 
-                        check (midiNodeOut->PostMIDIPacket (&packet));
+                        check (midiNodesOut->PostMIDIPacket (&packet));
                     }
                 }
             }
            #else
-            (void) midiNodeOut;
+            (void) midiNodesOut;
            #endif
         }
 

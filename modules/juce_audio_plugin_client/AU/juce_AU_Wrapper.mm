@@ -51,6 +51,11 @@
  #define Point CarbonDummyPointName
  #define Component CarbonDummyCompName
 #endif
+
+#ifdef __clang__
+ #pragma clang diagnostic ignored "-Wdeprecated-declarations"
+#endif
+
 #include "AUMIDIEffectBase.h"
 #include "MusicDeviceBase.h"
 #undef Point
