@@ -287,11 +287,16 @@ private:
 - (void) willRotateToInterfaceOrientation: (UIInterfaceOrientation) toInterfaceOrientation
                                  duration: (NSTimeInterval) duration
 {
+    (void) toInterfaceOrientation;
+    (void) duration;
+
     [UIView setAnimationsEnabled: NO]; // disable this because it goes the wrong way and looks like crap.
 }
 
 - (void) didRotateFromInterfaceOrientation: (UIInterfaceOrientation) fromInterfaceOrientation
 {
+    (void) fromInterfaceOrientation;
+
     JuceUIView* juceView = (JuceUIView*) [self view];
     jassert (juceView != nil && juceView->owner != nullptr);
     juceView->owner->updateTransformAndScreenBounds();
@@ -308,11 +313,13 @@ private:
 
 - (void) viewWillAppear: (BOOL) animated
 {
+    (void) animated;
     [self viewDidLoad];
 }
 
 - (void) viewDidAppear: (BOOL) animated
 {
+    (void) animated;
     [self viewDidLoad];
 }
 
@@ -354,18 +361,24 @@ private:
 //==============================================================================
 - (void) touchesBegan: (NSSet*) touches withEvent: (UIEvent*) event
 {
+    (void) touches;
+
     if (owner != nullptr)
         owner->handleTouches (event, true, false, false);
 }
 
 - (void) touchesMoved: (NSSet*) touches withEvent: (UIEvent*) event
 {
+    (void) touches;
+
     if (owner != nullptr)
         owner->handleTouches (event, false, false, false);
 }
 
 - (void) touchesEnded: (NSSet*) touches withEvent: (UIEvent*) event
 {
+    (void) touches;
+
     if (owner != nullptr)
         owner->handleTouches (event, false, true, false);
 }
@@ -402,7 +415,8 @@ private:
 
 - (BOOL) textView: (UITextView*) textView shouldChangeTextInRange: (NSRange) range replacementText: (NSString*) text
 {
-    return owner->textViewReplaceCharacters (Range<int> (range.location, range.location + range.length),
+    (void) textView;
+    return owner->textViewReplaceCharacters (Range<int> ((int) range.location, (int) (range.location + range.length)),
                                              nsStringToJuce (text));
 }
 
@@ -432,7 +446,7 @@ private:
 namespace juce
 {
 
-bool KeyPress::isKeyCurrentlyDown (const int keyCode)
+bool KeyPress::isKeyCurrentlyDown (int)
 {
     return false;
 }
@@ -534,7 +548,7 @@ void UIViewComponentPeer::setVisible (bool shouldBeVisible)
         window.hidden = ! shouldBeVisible;
 }
 
-void UIViewComponentPeer::setTitle (const String& title)
+void UIViewComponentPeer::setTitle (const String&)
 {
     // xxx is this possible?
 }
@@ -669,7 +683,7 @@ void UIViewComponentPeer::toFront (bool makeActiveWindow)
     if (isSharedWindow)
         [[view superview] bringSubviewToFront: view];
 
-    if (window != nil && component.isVisible())
+    if (makeActiveWindow && window != nil && component.isVisible())
         [window makeKeyAndVisible];
 }
 
@@ -876,14 +890,14 @@ bool UIViewComponentPeer::canBecomeKeyWindow()
 }
 
 //==============================================================================
-void Desktop::setKioskComponent (Component* kioskModeComponent, bool enableOrDisable, bool allowMenusAndBars)
+void Desktop::setKioskComponent (Component* kioskModeComp, bool enableOrDisable, bool /*allowMenusAndBars*/)
 {
     [[UIApplication sharedApplication] setStatusBarHidden: enableOrDisable
                                             withAnimation: UIStatusBarAnimationSlide];
 
     displays->refresh();
 
-    if (ComponentPeer* const peer = kioskModeComponent->getPeer())
+    if (ComponentPeer* const peer = kioskModeComp->getPeer())
         peer->setFullScreen (enableOrDisable);
 }
 

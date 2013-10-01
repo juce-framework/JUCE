@@ -80,6 +80,8 @@ private:
 - (BOOL) gestureRecognizer: (UIGestureRecognizer*) gestureRecognizer
          shouldRecognizeSimultaneouslyWithGestureRecognizer: (UIGestureRecognizer*) otherGestureRecognizer
 {
+    (void) gestureRecognizer;
+    (void) otherGestureRecognizer;
     return YES;
 }
 
@@ -106,6 +108,8 @@ private:
 
 - (BOOL) webView: (UIWebView*) webView shouldStartLoadWithRequest: (NSURLRequest*) request navigationType: (UIWebViewNavigationType) navigationType
 {
+    (void) webView;
+    (void) navigationType;
     return ownerComponent->pageAboutToLoad (nsStringToJuce (request.URL.absoluteString));
 }
 @end

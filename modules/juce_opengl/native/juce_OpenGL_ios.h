@@ -44,14 +44,14 @@ class OpenGLContext::NativeContext
 {
 public:
     NativeContext (Component& component,
-                   const OpenGLPixelFormat& pixelFormat,
-                   void* contextToShareWith,
-                   bool useMultisampling)
+                   const OpenGLPixelFormat& pixFormat,
+                   void* contextToShare,
+                   bool multisampling)
         : frameBufferHandle (0), colorBufferHandle (0), depthBufferHandle (0),
           msaaColorHandle (0), msaaBufferHandle (0),
           lastWidth (0), lastHeight (0), needToRebuildBuffers (false),
-          swapFrames (0), useDepthBuffer (pixelFormat.depthBufferBits > 0),
-          useMSAA (useMultisampling)
+          swapFrames (0), useDepthBuffer (pixFormat.depthBufferBits > 0),
+          useMSAA (multisampling)
     {
         JUCE_AUTORELEASEPOOL
         {
@@ -78,8 +78,8 @@ public:
 
             const NSUInteger type = kEAGLRenderingAPIOpenGLES2;
 
-            if (contextToShareWith != nullptr)
-                [context initWithAPI: type  sharegroup: [(EAGLContext*) contextToShareWith sharegroup]];
+            if (contextToShare != nullptr)
+                [context initWithAPI: type  sharegroup: [(EAGLContext*) contextToShare sharegroup]];
             else
                 [context initWithAPI: type];
 

@@ -146,8 +146,8 @@ void MouseCursor::showInWindow (ComponentPeer*) const
 #else
 
 void* CustomMouseCursorInfo::create() const                                              { return nullptr; }
-void* MouseCursor::createStandardMouseCursor (MouseCursor::StandardCursorType type)      { return nullptr; }
-void MouseCursor::deleteMouseCursor (void* const cursorHandle, const bool isStandard)    {}
+void* MouseCursor::createStandardMouseCursor (MouseCursor::StandardCursorType)           { return nullptr; }
+void MouseCursor::deleteMouseCursor (void*, bool)                                        {}
 void MouseCursor::showInAllWindows() const                                               {}
 void MouseCursor::showInWindow (ComponentPeer*) const                                    {}
 

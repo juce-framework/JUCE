@@ -40,7 +40,7 @@ bool MessageManager::runDispatchLoopUntil (int millisecondsToRunFor)
     {
         jassert (isThisTheMessageThread()); // must only be called by the message thread
 
-        uint32 endTime = Time::getMillisecondCounter() + millisecondsToRunFor;
+        uint32 startTime = Time::getMillisecondCounter();
         NSDate* endDate = [NSDate dateWithTimeIntervalSinceNow: millisecondsToRunFor * 0.001];
 
         while (! quitMessagePosted)
@@ -50,7 +50,8 @@ bool MessageManager::runDispatchLoopUntil (int millisecondsToRunFor)
                 [[NSRunLoop currentRunLoop] runMode: NSDefaultRunLoopMode
                                          beforeDate: endDate];
 
-                if (millisecondsToRunFor >= 0 && Time::getMillisecondCounter() >= endTime)
+                if (millisecondsToRunFor >= 0
+                     && Time::getMillisecondCounter() >= startTime + (uint32) millisecondsToRunFor)
                     break;
             }
         }

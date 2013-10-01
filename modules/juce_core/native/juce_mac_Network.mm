@@ -59,6 +59,11 @@ bool JUCE_CALLTYPE Process::openEmailWithAttachments (const String& targetEmailA
                                                       const StringArray& filesToAttach)
 {
   #if JUCE_IOS
+    (void) targetEmailAddress;
+    (void) emailSubject;
+    (void) bodyText;
+    (void) filesToAttach;
+
     //xxx probably need to use MFMailComposeViewController
     jassertfalse;
     return false;

@@ -101,7 +101,7 @@ namespace FileHelpers
     }
 
    #if JUCE_IOS
-    String getIOSSystemLocation (NSSearchPathDirectory type)
+    static String getIOSSystemLocation (NSSearchPathDirectory type)
     {
         return nsStringToJuce ([NSSearchPathForDirectoriesInDomains (type, NSUserDomainMask, YES)
                                 objectAtIndex: 0]);
@@ -392,7 +392,7 @@ bool DirectoryIterator::NativeIterator::next (String& filenameFound,
 
 
 //==============================================================================
-bool JUCE_CALLTYPE Process::openDocument (const String& fileName, const String& parameters)
+bool JUCE_CALLTYPE Process::openDocument (const String& fileName, const String& /*parameters*/)
 {
     JUCE_AUTORELEASEPOOL
     {
