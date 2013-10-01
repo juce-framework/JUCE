@@ -328,3 +328,11 @@ void MessageManager::broadcastMessage (const String& message)
                                                                    object: nil
                                                                  userInfo: info];
 }
+
+// Special function used by some plugin classes to re-post carbon events
+void repostCurrentNSEvent();
+void repostCurrentNSEvent()
+{
+    NSEvent* e = [NSApp currentEvent];
+    [[NSOperationQueue mainQueue] addOperationWithBlock: ^{ [NSApp postEvent: e atStart: YES]; }];
+}

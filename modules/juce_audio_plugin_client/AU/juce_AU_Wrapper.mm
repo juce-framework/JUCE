@@ -1479,7 +1479,7 @@ private:
                     lastEventTime = eventTime;
 
                     [[hostWindow parentWindow] makeKeyWindow];
-                    [NSApp postEvent: [NSApp currentEvent] atStart: YES];
+                    repostCurrentNSEvent();
                 }
             }
 

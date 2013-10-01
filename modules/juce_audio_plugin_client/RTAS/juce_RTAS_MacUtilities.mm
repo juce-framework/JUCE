@@ -162,7 +162,7 @@ void forwardCurrentKeyEventToHostWindow()
     if (! isJuceWindow (w))
     {
         ActivateWindow (w, true);
-        [NSApp postEvent: [NSApp currentEvent] atStart: YES];
+        repostCurrentNSEvent();
     }
 }
 

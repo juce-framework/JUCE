@@ -254,7 +254,7 @@ bool forwardCurrentKeyEventToHost (Component* comp)
    #else
     NSWindow* win = [(NSView*) comp->getWindowHandle() window];
     [[win parentWindow] makeKeyWindow];
-    [NSApp postEvent: [NSApp currentEvent] atStart: YES];
+    repostCurrentNSEvent();
     return true;
    #endif
 }

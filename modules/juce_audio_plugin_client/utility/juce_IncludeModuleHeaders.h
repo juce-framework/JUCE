@@ -29,6 +29,11 @@ using namespace juce;
 #if JUCE_MAC && ! DOXYGEN
  #define Point     juce::Point
  #define Component juce::Component
+
+ namespace juce
+ {
+    void repostCurrentNSEvent();
+ }
 #endif
 
 extern AudioProcessor* JUCE_CALLTYPE createPluginFilterOfType (AudioProcessor::WrapperType);
