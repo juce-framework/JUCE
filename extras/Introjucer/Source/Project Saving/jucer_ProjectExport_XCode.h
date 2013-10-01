@@ -931,6 +931,7 @@ private:
         if (file.hasFileExtension ("cpp;cc;cxx"))           return "sourcecode.cpp.cpp";
         if (file.hasFileExtension (".mm"))                  return "sourcecode.cpp.objcpp";
         if (file.hasFileExtension (".m"))                   return "sourcecode.c.objc";
+        if (file.hasFileExtension (".c"))                   return "sourcecode.c.c";
         if (file.hasFileExtension (headerFileExtensions))   return "sourcecode.c.h";
         if (file.hasFileExtension (".framework"))           return "wrapper.framework";
         if (file.hasFileExtension (".jpeg;.jpg"))           return "image.jpeg";
