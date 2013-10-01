@@ -183,14 +183,12 @@ void addPlistDictionaryKey (XmlElement* xml, const String& key, const String& va
                 xml->removeChildElement (e, true);
                 break;
             }
-            else
-            {
-                return; // (value already exists)
-            }
+
+            return; // (value already exists)
         }
     }
 
-    xml->createNewChildElement ("key")   ->addTextElement (key);
+    xml->createNewChildElement ("key")->addTextElement (key);
     xml->createNewChildElement ("string")->addTextElement (value);
 }
 

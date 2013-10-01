@@ -857,35 +857,6 @@ private:
         output << "\t};\n\trootObject = " << createID ("__root") << ";\n}\n";
     }
 
-    static void addPlistDictionaryKey (XmlElement* xml, const String& key, const String& value)
-    {
-        forEachXmlChildElementWithTagName (*xml, e, "key")
-        {
-            if (e->getAllSubText().trim().equalsIgnoreCase (key))
-            {
-                if (e->getNextElement() != nullptr && e->getNextElement()->hasTagName ("key"))
-                {
-                    // try to fix broken plist format..
-                    xml->removeChildElement (e, true);
-                    break;
-                }
-                else
-                {
-                    return; // (value already exists)
-                }
-            }
-        }
-
-        xml->createNewChildElement ("key")   ->addTextElement (key);
-        xml->createNewChildElement ("string")->addTextElement (value);
-    }
-
-    static void addPlistDictionaryKeyBool (XmlElement* xml, const String& key, const bool value)
-    {
-        xml->createNewChildElement ("key")->addTextElement (key);
-        xml->createNewChildElement (value ? "true" : "false");
-    }
-
     String addBuildFile (const String& path, const String& fileRefID, bool addToSourceBuildPhase, bool inhibitWarnings) const
     {
         String fileID (createID (path + "buildref"));
