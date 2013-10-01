@@ -483,9 +483,19 @@ public:
 
         @param tagNameToLookFor     the tag name of the element you want to find
         @returns the first element with this tag name, or nullptr if none is found
-        @see getNextElement, isTextElement, getChildElement
+        @see getNextElement, isTextElement, getChildElement, getChildByAttribute
     */
     XmlElement* getChildByName (StringRef tagNameToLookFor) const noexcept;
+
+    /** Returns the first sub-element which has an attribute that matches the given value.
+
+        @param attributeName     the name of the attribute to check
+        @param attributeValue    the target value of the attribute
+        @returns the first element with this attribute value, or nullptr if none is found
+        @see getChildByName
+    */
+    XmlElement* getChildByAttribute (StringRef attributeName,
+                                     StringRef attributeValue) const noexcept;
 
     //==============================================================================
     /** Appends an element to this element's list of children.

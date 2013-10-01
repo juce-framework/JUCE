@@ -562,8 +562,21 @@ XmlElement* XmlElement::getChildElement (const int index) const noexcept
 
 XmlElement* XmlElement::getChildByName (StringRef childName) const noexcept
 {
+    jassert (! childName.isEmpty());
+
     for (XmlElement* child = firstChildElement; child != nullptr; child = child->nextListItem)
         if (child->hasTagName (childName))
+            return child;
+
+    return nullptr;
+}
+
+XmlElement* XmlElement::getChildByAttribute (StringRef attributeName, StringRef attributeValue) const noexcept
+{
+    jassert (! attributeName.isEmpty());
+
+    for (XmlElement* child = firstChildElement; child != nullptr; child = child->nextListItem)
+        if (child->compareAttribute (attributeName, attributeValue))
             return child;
 
     return nullptr;
