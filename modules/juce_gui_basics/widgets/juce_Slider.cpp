@@ -428,30 +428,19 @@ public:
     {
         double pos;
 
-        if (maximum > minimum)
-        {
-            if (value < minimum)
-            {
-                pos = 0.0;
-            }
-            else if (value > maximum)
-            {
-                pos = 1.0;
-            }
-            else
-            {
-                pos = owner.valueToProportionOfLength (value);
-                jassert (pos >= 0 && pos <= 1.0);
-            }
-        }
-        else
-        {
+        if (maximum <= minimum)
             pos = 0.5;
-        }
+        else if (value < minimum)
+            pos = 0.0;
+        else if (value > maximum)
+            pos = 1.0;
+        else
+            pos = owner.valueToProportionOfLength (value);
 
         if (isVertical() || style == IncDecButtons)
             pos = 1.0 - pos;
 
+        jassert (pos >= 0 && pos <= 1.0);
         return (float) (sliderRegionStart + pos * sliderRegionSize);
     }
 
@@ -1278,7 +1267,7 @@ public:
         void paintContent (Graphics& g, int w, int h)
         {
             g.setFont (font);
-            g.setColour (findColour (TooltipWindow::textColourId, true));
+            g.setColour (owner.findColour (TooltipWindow::textColourId, true));
             g.drawFittedText (text, Rectangle<int> (w, h), Justification::centred, 1);
         }
 
@@ -1308,7 +1297,7 @@ public:
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PopupDisplayComponent)
     };
 
-    ScopedPointer <PopupDisplayComponent> popupDisplay;
+    ScopedPointer<PopupDisplayComponent> popupDisplay;
     Component* parentForPopupDisplay;
 
     //==============================================================================
