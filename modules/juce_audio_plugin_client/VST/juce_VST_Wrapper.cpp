@@ -76,6 +76,7 @@
  #pragma clang diagnostic push
  #pragma clang diagnostic ignored "-Wconversion"
  #pragma clang diagnostic ignored "-Wshadow"
+ #pragma clang diagnostic ignored "-Wunused-parameter"
 #endif
 
 // VSTSDK V2.4 includes..

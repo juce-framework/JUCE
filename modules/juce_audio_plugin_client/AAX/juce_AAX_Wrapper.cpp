@@ -42,6 +42,7 @@
 #ifdef __clang__
  #pragma clang diagnostic push
  #pragma clang diagnostic ignored "-Wnon-virtual-dtor"
+ #pragma clang diagnostic ignored "-Wsign-conversion"
 #endif
 
 #include "AAX_Exports.cpp"
@@ -428,7 +429,7 @@ struct AAXClasses
             if (tempFilterData.getSize() == 0)
                 pluginInstance->getStateInformation (tempFilterData);
 
-            oChunk->fSize = (uint32_t) tempFilterData.getSize();
+            oChunk->fSize = (int32_t) tempFilterData.getSize();
             tempFilterData.copyTo (oChunk->fData, 0, tempFilterData.getSize());
             tempFilterData.setSize (0);
 
@@ -681,7 +682,7 @@ struct AAXClasses
             if (numOuts >= numIns)
             {
                 for (int i = 0; i < numIns; ++i)
-                    memcpy (outputs[i], inputs[i], bufferSize * sizeof (float));
+                    memcpy (outputs[i], inputs[i], (size_t) bufferSize * sizeof (float));
 
                 process (outputs, numOuts, bufferSize, bypass, midiNodeIn, midiNodesOut);
             }
@@ -694,7 +695,7 @@ struct AAXClasses
 
                 for (int i = 0; i < numOuts; ++i)
                 {
-                    memcpy (outputs[i], inputs[i], bufferSize * sizeof (float));
+                    memcpy (outputs[i], inputs[i], (size_t) bufferSize * sizeof (float));
                     channels[i] = outputs[i];
                 }
 
@@ -752,7 +753,7 @@ struct AAXClasses
                     // (This 8-byte alignment is a workaround to a bug in the AAX SDK. Hopefully can be
                     // removed in future when the packet structure size is fixed)
                     const AAX_CMidiPacket& m = *addBytesToPointer (midiStream->mBuffer,
-                                                                   i * ((sizeof (AAX_CMidiPacket) + 7) & ~7));
+                                                                   i * ((sizeof (AAX_CMidiPacket) + 7) & ~(size_t) 7));
                     jassert ((int) m.mTimestamp < bufferSize);
                     midiBuffer.addEvent (m.mData, (int) m.mLength,
                                          jlimit (0, (int) bufferSize - 1, (int) m.mTimestamp));
@@ -792,7 +793,7 @@ struct AAXClasses
                     {
                         packet.mTimestamp   = (uint32_t) midiEventPosition;
                         packet.mLength      = (uint32_t) midiEventSize;
-                        memcpy (packet.mData, midiEventData, midiEventSize);
+                        memcpy (packet.mData, midiEventData, (size_t) midiEventSize);
 
                         check (midiNodesOut->PostMIDIPacket (&packet));
                     }
@@ -833,7 +834,7 @@ struct AAXClasses
                                                  audioProcessor.isParameterAutomatable (parameterIndex));
 
                 parameter->AddShortenedName (audioProcessor.getParameterName (parameterIndex, 4).toRawUTF8());
-                parameter->SetNumberOfSteps (audioProcessor.getParameterNumSteps (parameterIndex));
+                parameter->SetNumberOfSteps ((uint32_t) audioProcessor.getParameterNumSteps (parameterIndex));
                 parameter->SetType (AAX_eParameterType_Continuous);
                 mParameterManager.AddParameter (parameter);
             }

@@ -73,7 +73,7 @@ public:
     //==============================================================================
     static CharPointerType createUninitialisedBytes (size_t numBytes)
     {
-        numBytes = (numBytes + 3) & ~3;
+        numBytes = (numBytes + 3) & ~(size_t) 3;
         StringHolder* const s = reinterpret_cast<StringHolder*> (new char [sizeof (StringHolder) - sizeof (CharType) + numBytes]);
         s->refCount.value = 0;
         s->allocatedNumBytes = numBytes;

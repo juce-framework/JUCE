@@ -222,6 +222,7 @@ void setNativeHostWindowSize (void* nsWindow, Component* component, int newWidth
                                                 [hostView frame].size.height + (newHeight - component->getHeight()))];
         }
        #else
+        (void) nsWindow;
 
         if (HIViewRef dummyView = (HIViewRef) (void*) (pointer_sized_int)
                                      component->getProperties() ["dummyViewRef"].toString().getHexValue64())

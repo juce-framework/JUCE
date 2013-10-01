@@ -564,7 +564,7 @@ void EdgeTable::intersectWithEdgeTableLine (const int y, const int* const otherL
 
                     if (isUsingTempSpace)
                     {
-                        const size_t tempSize = (size_t) (srcNum1 * 2 * sizeof (int));
+                        const size_t tempSize = (size_t) srcNum1 * 2 * sizeof (int);
                         int* const oldTemp = static_cast<int*> (alloca (tempSize));
                         memcpy (oldTemp, src1, tempSize);
 
@@ -589,7 +589,7 @@ void EdgeTable::intersectWithEdgeTableLine (const int y, const int* const otherL
                 {
                     isUsingTempSpace = true;
                     int* const temp = table + lineStrideElements * bounds.getHeight();
-                    memcpy (temp, src1, (size_t) (srcNum1 * 2 * sizeof (int)));
+                    memcpy (temp, src1, (size_t) srcNum1 * 2 * sizeof (int));
                     src1 = temp;
                 }
 
