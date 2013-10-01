@@ -83,6 +83,33 @@ struct NewProjectWizardClasses
         return lastFolder;
     }
 
+    static bool isJuceModulesFolder (const File& f)
+    {
+        return f.isDirectory()
+                && f.getChildFile ("juce_core").isDirectory();
+    }
+
+    static File findDefaultModulesFolder (bool mustContainJuceCoreModule = true)
+    {
+        const MainWindowList& windows = IntrojucerApp::getApp().mainWindowList;
+
+        for (int i = windows.windows.size(); --i >= 0;)
+        {
+            if (Project* p = windows.windows.getUnchecked (i)->getProject())
+            {
+                const File f (EnabledModuleList::findDefaultModulesFolder (*p));
+
+                if (isJuceModulesFolder (f) || (f.isDirectory() && ! mustContainJuceCoreModule))
+                    return f;
+            }
+        }
+
+        if (mustContainJuceCoreModule)
+            return findDefaultModulesFolder (false);
+
+        return File::nonexistent;
+    }
+
     //==============================================================================
     struct NewProjectWizard
     {
@@ -122,7 +149,7 @@ struct NewProjectWizardClasses
         }
 
         String appTitle;
-        File targetFolder, projectFile;
+        File targetFolder, projectFile, modulesFolder;
         Component* ownerWindow;
         StringArray failedFiles;
 
@@ -154,7 +181,6 @@ struct NewProjectWizardClasses
                                       .withFileExtension (Project::projectFileExtension);
 
             ScopedPointer<Project> project (new Project (projectFile));
-            addDefaultModules (*project);
 
             if (failedFiles.size() == 0)
             {
@@ -164,6 +190,8 @@ struct NewProjectWizardClasses
 
                 if (! initialiseProject (*project))
                     return nullptr;
+
+                addDefaultModules (*project);
 
                 if (project->save (false, true) != FileBasedDocument::savedOk)
                     return nullptr;
@@ -184,6 +212,30 @@ struct NewProjectWizardClasses
             return project.release();
         }
 
+        bool selectJuceFolder()
+        {
+            for (;;)
+            {
+                FileChooser fc ("Select your JUCE modules folder...",
+                                findDefaultModulesFolder(),
+                                "*");
+
+                if (! fc.browseForDirectory())
+                    return false;
+
+                if (isJuceModulesFolder (fc.getResult()))
+                {
+                    modulesFolder = fc.getResult();
+                    return true;
+                }
+
+                AlertWindow::showMessageBox (AlertWindow::WarningIcon,
+                                             "Not a valid JUCE modules folder!",
+                                             "Please select the folder containing your juce_* modules!\n\n"
+                                             "This is required so that the new project can be given some essential core modules.");
+            }
+        }
+
         //==============================================================================
         File getSourceFilesFolder() const
         {
@@ -201,7 +253,7 @@ struct NewProjectWizardClasses
             StringArray mods (getDefaultModules());
 
             ModuleList list;
-            list.scanAllKnownFolders (project);
+            list.addAllModulesInFolder (modulesFolder);
 
             for (int i = 0; i < mods.size(); ++i)
                 if (const ModuleDescription* info = list.getModuleWithID (mods[i]))
@@ -445,9 +497,9 @@ struct NewProjectWizardClasses
                 failedFiles.add (editorHFile.getFullPathName());
 
             sourceGroup.addFile (filterCppFile, -1, true);
-            sourceGroup.addFile (filterHFile, -1, false);
+            sourceGroup.addFile (filterHFile,   -1, false);
             sourceGroup.addFile (editorCppFile, -1, true);
-            sourceGroup.addFile (editorHFile, -1, false);
+            sourceGroup.addFile (editorHFile,   -1, false);
 
             project.createExporterForCurrentPlatform();
 
@@ -587,6 +639,9 @@ struct NewProjectWizardClasses
                     return;
                 }
 
+                if (! wizard->selectJuceFolder())
+                    return;
+
                 ScopedPointer<Project> project (wizard->runWizard (mw, projectName.getText(),
                                                                    fileBrowser.getSelectedFile (0)));
 
@@ -599,7 +654,7 @@ struct NewProjectWizardClasses
         {
             customItems.clear();
 
-            ScopedPointer <NewProjectWizard> wizard (createWizard());
+            ScopedPointer<NewProjectWizard> wizard (createWizard());
 
             if (wizard != nullptr)
                 wizard->addSetupItems (*this, customItems);
@@ -655,7 +710,7 @@ struct NewProjectWizardClasses
             default:    jassertfalse; break;
         }
 
-        return 0;
+        return nullptr;
     }
 
     static StringArray getWizardNames()
