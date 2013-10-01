@@ -324,6 +324,8 @@ void LibraryModule::prepareExporter (ProjectExporter& exporter, ProjectSaver& pr
 {
     Project& project = exporter.getProject();
 
+    exporter.addToExtraSearchPaths (exporter.getModuleFolderRelativeToProject (getID(), projectSaver).getParentDirectory());
+
     {
         Array<File> compiled;
         findAndAddCompiledCode (exporter, projectSaver, moduleInfo.getFolder(), compiled);
