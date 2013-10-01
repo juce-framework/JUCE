@@ -392,13 +392,14 @@ bool DirectoryIterator::NativeIterator::next (String& filenameFound,
 
 
 //==============================================================================
-bool JUCE_CALLTYPE Process::openDocument (const String& fileName, const String& /*parameters*/)
+bool JUCE_CALLTYPE Process::openDocument (const String& fileName, const String& parameters)
 {
     JUCE_AUTORELEASEPOOL
     {
         NSURL* filenameAsURL = [NSURL URLWithString: juceStringToNS (fileName)];
 
       #if JUCE_IOS
+        (void) parameters;
         return [[UIApplication sharedApplication] openURL: filenameAsURL];
       #else
         NSWorkspace* workspace = [NSWorkspace sharedWorkspace];
