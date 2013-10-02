@@ -126,6 +126,7 @@ public:
         const int bytesRead = jmax (0, (int) recv (socketHandle, buffer, bytesToRead, MSG_WAITALL));
         if (bytesRead == 0)
             finished = true;
+
         position += bytesRead;
         return bytesRead;
     }
@@ -249,7 +250,8 @@ private:
             const MemoryBlock requestHeader (createRequestHeader (hostName, hostPort, proxyName, proxyPort,
                                                                   hostPath, address, headers, postData, isPost));
 
-            if (! sendHeader (socketHandle, requestHeader, timeOutTime, progressCallback, progressCallbackContext))
+            if (! sendHeader (socketHandle, requestHeader, timeOutTime,
+                              progressCallback, progressCallbackContext))
             {
                 closeSocket();
                 return;
@@ -257,6 +259,7 @@ private:
         }
 
         String responseHeader (readResponse (socketHandle, timeOutTime));
+        position = 0;
 
         if (responseHeader.isNotEmpty())
         {
@@ -270,7 +273,8 @@ private:
 
             String location (findHeaderItem (headerLines, "Location:"));
 
-            if (statusCode >= 300 && statusCode < 400 && location.isNotEmpty())
+            if (statusCode >= 300 && statusCode < 400
+                 && location.isNotEmpty() && location != address)
             {
                 if (! location.startsWithIgnoreCase ("http://"))
                     location = "http://" + location;
@@ -293,44 +297,32 @@ private:
     }
 
     //==============================================================================
-    static String readResponse (const int socketHandle, const uint32 timeOutTime)
+    String readResponse (const int socketHandle, const uint32 timeOutTime)
     {
-        int bytesRead = 0, numConsecutiveLFs  = 0;
-        MemoryBlock buffer (1024, true);
+        int numConsecutiveLFs  = 0;
+        MemoryOutputStream buffer;
 
-        while (numConsecutiveLFs < 2 && bytesRead < 32768
-                && Time::getMillisecondCounter() <= timeOutTime)
+        while (numConsecutiveLFs < 2
+                && buffer.getDataSize() < 32768
+                && Time::getMillisecondCounter() <= timeOutTime
+                && ! (finished || isError()))
         {
-            fd_set readbits;
-            FD_ZERO (&readbits);
-            FD_SET (socketHandle, &readbits);
-
-            struct timeval tv;
-            tv.tv_sec = jmax (1, (int) (timeOutTime - Time::getMillisecondCounter()) / 1000);
-            tv.tv_usec = 0;
-
-            if (select (socketHandle + 1, &readbits, 0, 0, &tv) <= 0)
-                return String::empty;  // (timeout)
-
-            buffer.ensureSize (bytesRead + 8, true);
-            char* const dest = (char*) buffer.getData() + bytesRead;
-
-            if (recv (socketHandle, dest, 1, 0) == -1)
+            char c = 0;
+            if (read (&c, 1) != 1)
                 return String::empty;
 
-            const char lastByte = *dest;
-            ++bytesRead;
+            buffer.writeByte (c);
 
-            if (lastByte == '\n')
+            if (c == '\n')
                 ++numConsecutiveLFs;
-            else if (lastByte != '\r')
+            else if (c != '\r')
                 numConsecutiveLFs = 0;
         }
 
-        const String header (CharPointer_UTF8 ((const char*) buffer.getData()));
+        const String header (buffer.toString().trimEnd());
 
         if (header.startsWithIgnoreCase ("HTTP/"))
-            return header.trimEnd();
+            return header;
 
         return String::empty;
     }
@@ -344,9 +336,6 @@ private:
     static void writeHost (MemoryOutputStream& dest, const bool isPost, const String& path, const String& host, const int port)
     {
         dest << (isPost ? "POST " : "GET ") << path << " HTTP/1.0\r\nHost: " << host;
-
-        if (port > 0)
-            dest << ':' << port;
     }
 
     static MemoryBlock createRequestHeader (const String& hostName, const int hostPort,
@@ -365,7 +354,7 @@ private:
         writeValueIfNotPresent (header, userHeaders, "User-Agent:", "JUCE/" JUCE_STRINGIFY(JUCE_MAJOR_VERSION)
                                                                         "." JUCE_STRINGIFY(JUCE_MINOR_VERSION)
                                                                         "." JUCE_STRINGIFY(JUCE_BUILDNUMBER));
-        writeValueIfNotPresent (header, userHeaders, "Connection:", "Close");
+        writeValueIfNotPresent (header, userHeaders, "Connection:", "close");
 
         if (isPost)
             writeValueIfNotPresent (header, userHeaders, "Content-Length:", String ((int) postData.getSize()));
@@ -453,9 +442,9 @@ InputStream* URL::createNativeStream (const String& address, bool isPost, const 
                                       OpenStreamProgressCallback* progressCallback, void* progressCallbackContext,
                                       const String& headers, const int timeOutMs, StringPairArray* responseHeaders)
 {
-    ScopedPointer <WebInputStream> wi (new WebInputStream (address, isPost, postData,
-                                                           progressCallback, progressCallbackContext,
-                                                           headers, timeOutMs, responseHeaders));
+    ScopedPointer<WebInputStream> wi (new WebInputStream (address, isPost, postData,
+                                                          progressCallback, progressCallbackContext,
+                                                          headers, timeOutMs, responseHeaders));
 
     return wi->isError() ? nullptr : wi.release();
 }
