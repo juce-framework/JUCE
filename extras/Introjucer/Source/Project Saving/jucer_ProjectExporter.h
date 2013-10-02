@@ -57,12 +57,26 @@ public:
 
     virtual bool isXcode() const                { return false; }
     virtual bool isVisualStudio() const         { return false; }
-    virtual bool isWindows() const              { return false; }
     virtual int getVisualStudioVersion() const  { return 0; }
+    virtual bool isCodeBlocks() const           { return false; }
+
+    virtual bool isAndroid() const              { return false; }
+    virtual bool isWindows() const              { return false; }
     virtual bool isLinux() const                { return false; }
     virtual bool isOSX() const                  { return false; }
-    virtual bool isAndroid() const              { return false; }
-    virtual bool isCodeBlocks() const           { return false; }
+
+    bool mayCompileOnCurrentOS() const
+    {
+       #if JUCE_MAC
+        return isOSX() || isAndroid();
+       #elif JUCE_WINDOWS
+        return isWindows() || isAndroid();
+       #elif JUCE_LINUX
+        return isLinux() || isAndroid();
+       #else
+        #error
+       #endif
+    }
 
     //==============================================================================
     String getName() const                      { return name; }

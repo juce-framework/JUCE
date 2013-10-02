@@ -124,7 +124,7 @@ static Array<File> getAllPossibleModulePaths (Project& project)
 
     for (Project::ExporterIterator exporter (project); exporter.next();)
     {
-        if (exporter->canLaunchProject())
+        if (exporter->mayCompileOnCurrentOS())
         {
             for (int i = 0; i < project.getModules().getNumModules(); ++i)
             {
@@ -185,7 +185,7 @@ bool ModuleList::loadFromWebsite()
     URL baseURL ("http://www.juce.com/juce/modules");
     URL url (baseURL.getChildURL ("modulelist.php"));
 
-    const ScopedPointer<InputStream> in (url.createInputStream (false, nullptr, nullptr, String::empty, 10000));
+    const ScopedPointer<InputStream> in (url.createInputStream (false, nullptr, nullptr, String::empty, 4000));
 
     if (in == nullptr)
         return false;
@@ -633,7 +633,7 @@ File EnabledModuleList::getModuleInfoFile (const String& moduleID)
 {
     for (Project::ExporterIterator exporter (project); exporter.next();)
     {
-        if (exporter->canLaunchProject())
+        if (exporter->mayCompileOnCurrentOS())
         {
             const String path (exporter->getPathForModuleString (moduleID));
 
