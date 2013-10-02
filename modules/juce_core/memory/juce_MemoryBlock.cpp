@@ -352,7 +352,7 @@ void MemoryBlock::loadFromHexString (StringRef hex)
 }
 
 //==============================================================================
-static const char* const base64EncodingTable = ".ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+";
+static const char base64EncodingTable[] = ".ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+";
 
 String MemoryBlock::toBase64Encoding() const
 {
@@ -373,6 +373,13 @@ String MemoryBlock::toBase64Encoding() const
     return destString;
 }
 
+static const char base64DecodingTable[] =
+{
+    63, 0, 0, 0, 0, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 0, 0, 0, 0, 0, 0, 0,
+    1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26,
+    0, 0, 0, 0, 0, 0, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52
+};
+
 bool MemoryBlock::fromBase64Encoding (StringRef s)
 {
     String::CharPointerType dot (CharacterFunctions::find (s.text, CharPointer_ASCII (".")));
@@ -389,19 +396,16 @@ bool MemoryBlock::fromBase64Encoding (StringRef s)
 
     for (;;)
     {
-        const char c = (char) srcChars.getAndAdvance();
+        int c = (int) srcChars.getAndAdvance();
 
         if (c == 0)
             return true;
 
-        for (int j = 0; j < 64; ++j)
+        c -= 43;
+        if (isPositiveAndBelow (c, numElementsInArray (base64DecodingTable)))
         {
-            if (base64EncodingTable[j] == c)
-            {
-                setBitRange ((size_t) pos, 6, j);
-                pos += 6;
-                break;
-            }
+            setBitRange ((size_t) pos, 6, base64DecodingTable [c]);
+            pos += 6;
         }
     }
 }

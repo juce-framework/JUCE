@@ -794,6 +794,9 @@ String XmlElement::getAllSubText() const
     if (isTextElement())
         return getText();
 
+    if (getNumChildElements() == 1)
+        return firstChildElement.get()->getAllSubText();
+
     MemoryOutputStream mem (1024);
 
     for (const XmlElement* child = firstChildElement; child != nullptr; child = child->nextListItem)

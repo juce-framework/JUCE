@@ -500,10 +500,9 @@ int File::findChildFiles (Array<File>& results,
                           const bool searchRecursively,
                           const String& wildCardPattern) const
 {
-    DirectoryIterator di (*this, searchRecursively, wildCardPattern, whatToLookFor);
-
     int total = 0;
-    while (di.next())
+
+    for (DirectoryIterator di (*this, searchRecursively, wildCardPattern, whatToLookFor); di.next();)
     {
         results.add (di.getFile());
         ++total;
@@ -514,10 +513,9 @@ int File::findChildFiles (Array<File>& results,
 
 int File::getNumberOfChildFiles (const int whatToLookFor, const String& wildCardPattern) const
 {
-    DirectoryIterator di (*this, false, wildCardPattern, whatToLookFor);
-
     int total = 0;
-    while (di.next())
+
+    for (DirectoryIterator di (*this, false, wildCardPattern, whatToLookFor); di.next();)
         ++total;
 
     return total;
