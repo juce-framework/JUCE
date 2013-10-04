@@ -173,7 +173,7 @@ struct DefaultFontNames
         else
         {
             defaultSans     = "Verdana";
-            defaultSerif    = "Times";
+            defaultSerif    = "Times New Roman";
             defaultFixed    = "Lucida Console";
             defaultFallback = "Tahoma";  // (contains plenty of unicode characters)
         }
