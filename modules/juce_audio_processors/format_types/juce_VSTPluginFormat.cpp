@@ -32,7 +32,7 @@
 #if JUCE_MAC
  static bool makeFSRefFromPath (FSRef* destFSRef, const String& path)
  {
-     return FSPathMakeRef (reinterpret_cast <const UInt8*> (path.toRawUTF8()), destFSRef, 0) == noErr;
+     return FSPathMakeRef (reinterpret_cast<const UInt8*> (path.toRawUTF8()), destFSRef, 0) == noErr;
  }
 #endif
 
@@ -389,10 +389,8 @@ public:
     }
 
     //==============================================================================
-    ModuleHandle (const File& file_)
-        : file (file_),
-          moduleMain (nullptr),
-          customMain (nullptr)
+    ModuleHandle (const File& f)
+        : file (f), moduleMain (nullptr), customMain (nullptr)
          #if JUCE_MAC
           #if JUCE_PPC
            , fragId (0)
@@ -403,10 +401,10 @@ public:
         getActiveModules().add (this);
 
        #if JUCE_WINDOWS || JUCE_LINUX
-        fullParentDirectoryPathName = file_.getParentDirectory().getFullPathName();
+        fullParentDirectoryPathName = f.getParentDirectory().getFullPathName();
        #elif JUCE_MAC
         FSRef ref;
-        makeFSRefFromPath (&ref, file_.getParentDirectory().getFullPathName());
+        makeFSRefFromPath (&ref, f.getParentDirectory().getFullPathName());
         FSGetCatalogInfo (&ref, kFSCatInfoNone, 0, 0, &parentDirFSSpec, 0);
        #endif
     }
@@ -1188,7 +1186,9 @@ public:
     }
 
     //==============================================================================
-    int getNumPrograms() override          { return effect != nullptr ? effect->numPrograms : 0; }
+    int getNumPrograms() override          { return effect != nullptr ? jmax (0, effect->numPrograms) : 0; }
+
+    // NB: some plugs return negative numbers from this function.
     int getCurrentProgram() override       { return (int) dispatch (effGetProgram, 0, 0, 0, 0); }
 
     void setCurrentProgram (int newIndex) override
@@ -1199,18 +1199,17 @@ public:
 
     const String getProgramName (int index) override
     {
-        if (index == getCurrentProgram())
-            return getCurrentProgramName();
-
-        if (effect != nullptr)
+        if (index >= 0)
         {
-            char nm [256] = { 0 };
+            if (index == getCurrentProgram())
+                return getCurrentProgramName();
 
-            if (dispatch (effGetProgramNameIndexed,
-                          jlimit (0, getNumPrograms(), index),
-                          -1, nm, 0) != 0)
+            if (effect != nullptr)
             {
-                return String (CharPointer_UTF8 (nm)).trim();
+                char nm[264] = { 0 };
+
+                if (dispatch (effGetProgramNameIndexed, jlimit (0, getNumPrograms(), index), -1, nm, 0) != 0)
+                    return String (CharPointer_UTF8 (nm)).trim();
             }
         }
 
@@ -1219,7 +1218,7 @@ public:
 
     void changeProgramName (int index, const String& newName) override
     {
-        if (index == getCurrentProgram())
+        if (index >= 0 && index == getCurrentProgram())
         {
             if (getNumPrograms() > 0 && newName != getCurrentProgramName())
                 dispatch (effSetProgramName, 0, 0, (void*) newName.substring (0, 24).toRawUTF8(), 0.0f);
@@ -1720,7 +1719,7 @@ private:
 
             const int index = getCurrentProgram();
 
-            if (programNames[index].isEmpty())
+            if (index >= 0 && programNames[index].isEmpty())
             {
                 while (programNames.size() < index)
                     programNames.add (String::empty);
