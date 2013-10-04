@@ -174,6 +174,11 @@ public:
     /** Appends a string at the end of the array. */
     void add (const String& stringToAdd);
 
+   #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
+    /** Appends a string at the end of the array. */
+    void add (String&& stringToAdd);
+   #endif
+
     /** Inserts a string into the array.
 
         This will insert a string into the array at the given index, moving
