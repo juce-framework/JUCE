@@ -1362,7 +1362,39 @@ private:
 
         static long JUCE_ASIOCALLBACK asioMessagesCallback (long selector, long value, void*, double*)
         {
-            return ASIOAudioIODevice::asioMessagesCallback (selector, value, deviceIndex);
+            switch (selector)
+            {
+                case kAsioSelectorSupported:
+                    if (value == kAsioResetRequest || value == kAsioEngineVersion || value == kAsioResyncRequest
+                         || value == kAsioLatenciesChanged || value == kAsioSupportsInputMonitor)
+                        return 1;
+                    break;
+
+                case kAsioBufferSizeChange: JUCE_ASIO_LOG ("kAsioBufferSizeChange"); return sendResetRequest (deviceIndex);
+                case kAsioResetRequest:     JUCE_ASIO_LOG ("kAsioResetRequest");     return sendResetRequest (deviceIndex);
+                case kAsioResyncRequest:    JUCE_ASIO_LOG ("kAsioResyncRequest");    return sendResetRequest (deviceIndex);
+                case kAsioLatenciesChanged: JUCE_ASIO_LOG ("kAsioLatenciesChanged"); return 1;
+                case kAsioEngineVersion:    return 2;
+
+                case kAsioSupportsTimeInfo:
+                case kAsioSupportsTimeCode:
+                    return 0;
+            }
+
+            return 0;
+        }
+
+        static void JUCE_ASIOCALLBACK sampleRateChangedCallback (ASIOSampleRate)
+        {
+            sendResetRequest (deviceIndex);
+        }
+
+        static long sendResetRequest (int deviceIndex)
+        {
+            if (currentASIODev[deviceIndex] != nullptr)
+                currentASIODev[deviceIndex]->resetRequest();
+
+            return 1;
         }
 
         static void setCallbacks (ASIOCallbacks& callbacks)
@@ -1370,54 +1402,16 @@ private:
             callbacks.bufferSwitch = &bufferSwitchCallback;
             callbacks.asioMessage = &asioMessagesCallback;
             callbacks.bufferSwitchTimeInfo = &bufferSwitchTimeInfoCallback;
+            callbacks.sampleRateDidChange = &sampleRateChangedCallback;
         }
     };
 
     void setCallbackFunctions()
     {
-        callbacks.sampleRateDidChange = &sampleRateChangedCallback;
-
         if      (currentASIODev[0] == this)  ASIOCallbackFunctions<0>::setCallbacks (callbacks);
         else if (currentASIODev[1] == this)  ASIOCallbackFunctions<1>::setCallbacks (callbacks);
         else if (currentASIODev[2] == this)  ASIOCallbackFunctions<2>::setCallbacks (callbacks);
         else                                 jassertfalse;
-    }
-
-    //==============================================================================
-    static long asioMessagesCallback (long selector, long value, const int deviceIndex)
-    {
-        switch (selector)
-        {
-        case kAsioSelectorSupported:
-            if (value == kAsioResetRequest || value == kAsioEngineVersion || value == kAsioResyncRequest
-                 || value == kAsioLatenciesChanged || value == kAsioSupportsInputMonitor)
-                return 1;
-            break;
-
-        case kAsioBufferSizeChange: JUCE_ASIO_LOG ("kAsioBufferSizeChange"); return sendResetRequest (deviceIndex);
-        case kAsioResetRequest:     JUCE_ASIO_LOG ("kAsioResetRequest");     return sendResetRequest (deviceIndex);
-        case kAsioResyncRequest:    JUCE_ASIO_LOG ("kAsioResyncRequest");    return sendResetRequest (deviceIndex);
-        case kAsioLatenciesChanged: JUCE_ASIO_LOG ("kAsioLatenciesChanged"); return 1;
-        case kAsioEngineVersion:    return 2;
-
-        case kAsioSupportsTimeInfo:
-        case kAsioSupportsTimeCode:
-            return 0;
-        }
-
-        return 0;
-    }
-
-    static long sendResetRequest (int deviceIndex)
-    {
-        if (currentASIODev[deviceIndex] != nullptr)
-            currentASIODev[deviceIndex]->resetRequest();
-
-        return 1;
-    }
-
-    static void JUCE_ASIOCALLBACK sampleRateChangedCallback (ASIOSampleRate)
-    {
     }
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ASIOAudioIODevice)
