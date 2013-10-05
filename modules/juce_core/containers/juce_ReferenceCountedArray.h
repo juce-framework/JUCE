@@ -180,8 +180,14 @@ public:
     inline ObjectClass* getObjectPointer (const int index) const noexcept
     {
         const ScopedLockType lock (getLock());
-        return isPositiveAndBelow (index, numUsed) ? data.elements [index]
-                                                   : nullptr;
+
+        if (isPositiveAndBelow (index, numUsed))
+        {
+            jassert (data.elements != nullptr);
+            return data.elements [index];
+        }
+
+        return ObjectClassPtr();
     }
 
     /** Returns a raw pointer to the object at this index in the array, without checking
@@ -190,7 +196,7 @@ public:
     inline ObjectClass* getObjectPointerUnchecked (const int index) const noexcept
     {
         const ScopedLockType lock (getLock());
-        jassert (isPositiveAndBelow (index, numUsed));
+        jassert (isPositiveAndBelow (index, numUsed) && data.elements != nullptr);
         return data.elements [index];
     }
 
@@ -202,8 +208,14 @@ public:
     inline ObjectClassPtr getFirst() const noexcept
     {
         const ScopedLockType lock (getLock());
-        return numUsed > 0 ? data.elements [0]
-                           : static_cast <ObjectClass*> (nullptr);
+
+        if (numUsed > 0)
+        {
+            jassert (data.elements != nullptr);
+            return data.elements [0];
+        }
+
+        return ObjectClassPtr();
     }
 
     /** Returns a pointer to the last object in the array.
@@ -214,8 +226,14 @@ public:
     inline ObjectClassPtr getLast() const noexcept
     {
         const ScopedLockType lock (getLock());
-        return numUsed > 0 ? data.elements [numUsed - 1]
-                           : static_cast <ObjectClass*> (nullptr);
+
+        if (numUsed > 0)
+        {
+            jassert (data.elements != nullptr);
+            return data.elements [numUsed - 1];
+        }
+
+        return ObjectClassPtr();
     }
 
     /** Returns a pointer to the actual array data.
@@ -325,35 +343,31 @@ public:
     ObjectClass* insert (int indexToInsertAt,
                          ObjectClass* const newObject) noexcept
     {
-        if (indexToInsertAt >= 0)
-        {
-            const ScopedLockType lock (getLock());
-
-            if (indexToInsertAt > numUsed)
-                indexToInsertAt = numUsed;
-
-            data.ensureAllocatedSize (numUsed + 1);
-            jassert (data.elements != nullptr);
-
-            ObjectClass** const e = data.elements + indexToInsertAt;
-            const int numToMove = numUsed - indexToInsertAt;
-
-            if (numToMove > 0)
-                memmove (e + 1, e, sizeof (ObjectClass*) * (size_t) numToMove);
-
-            *e = newObject;
-
-            if (newObject != nullptr)
-                newObject->incReferenceCount();
-
-            ++numUsed;
-
-            return newObject;
-        }
-        else
-        {
+        if (indexToInsertAt < 0)
             return add (newObject);
-        }
+
+        const ScopedLockType lock (getLock());
+
+        if (indexToInsertAt > numUsed)
+            indexToInsertAt = numUsed;
+
+        data.ensureAllocatedSize (numUsed + 1);
+        jassert (data.elements != nullptr);
+
+        ObjectClass** const e = data.elements + indexToInsertAt;
+        const int numToMove = numUsed - indexToInsertAt;
+
+        if (numToMove > 0)
+            memmove (e + 1, e, sizeof (ObjectClass*) * (size_t) numToMove);
+
+        *e = newObject;
+
+        if (newObject != nullptr)
+            newObject->incReferenceCount();
+
+        ++numUsed;
+
+        return newObject;
     }
 
     /** Appends a new object at the end of the array as long as the array doesn't

@@ -279,7 +279,14 @@ public:
     inline ElementType getFirst() const
     {
         const ScopedLockType lock (getLock());
-        return numUsed > 0 ? data.elements[0] : ElementType();
+
+        if (numUsed > 0)
+        {
+            jassert (data.elements != nullptr);
+            return data.elements[0];
+        }
+
+        return ElementType();
     }
 
     /** Returns the last element in the array, or a default value if the array is empty.
@@ -289,7 +296,14 @@ public:
     inline ElementType getLast() const
     {
         const ScopedLockType lock (getLock());
-        return numUsed > 0 ? data.elements[numUsed - 1] : ElementType();
+
+        if (numUsed > 0)
+        {
+            jassert (data.elements != nullptr);
+            return data.elements[numUsed - 1];
+        }
+
+        return ElementType();
     }
 
     /** Returns a pointer to the actual array data.

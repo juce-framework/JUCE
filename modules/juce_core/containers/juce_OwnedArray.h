@@ -166,8 +166,14 @@ public:
     inline ObjectClass* getFirst() const noexcept
     {
         const ScopedLockType lock (getLock());
-        return numUsed > 0 ? data.elements [0]
-                           : static_cast<ObjectClass*> (nullptr);
+
+        if (numUsed > 0)
+        {
+            jassert (data.elements != nullptr);
+            return data.elements [0];
+        }
+
+        return nullptr;
     }
 
     /** Returns a pointer to the last object in the array.
@@ -178,8 +184,14 @@ public:
     inline ObjectClass* getLast() const noexcept
     {
         const ScopedLockType lock (getLock());
-        return numUsed > 0 ? data.elements [numUsed - 1]
-                           : static_cast<ObjectClass*> (nullptr);
+
+        if (numUsed > 0)
+        {
+            jassert (data.elements != nullptr);
+            return data.elements [numUsed - 1];
+        }
+
+        return nullptr;
     }
 
     /** Returns a pointer to the actual array data.
