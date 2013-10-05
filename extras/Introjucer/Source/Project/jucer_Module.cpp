@@ -52,7 +52,14 @@ ModuleList::ModuleList()
 
 ModuleList::ModuleList (const ModuleList& other)
 {
+    operator= (other);
+}
+
+ModuleList& ModuleList::operator= (const ModuleList& other)
+{
+    modules.clear();
     modules.addCopiesOf (other.modules);
+    return *this;
 }
 
 const ModuleDescription* ModuleList::getModuleWithID (const String& moduleID) const

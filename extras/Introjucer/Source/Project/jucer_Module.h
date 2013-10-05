@@ -62,6 +62,7 @@ struct ModuleList
 {
     ModuleList();
     ModuleList (const ModuleList&);
+    ModuleList& operator= (const ModuleList&);
 
     const ModuleDescription* getModuleWithID (const String& moduleID) const;
     StringArray getIDs() const;

@@ -161,7 +161,6 @@ public:
     void webUpdateFinished (const ModuleList& newList)
     {
         listFromWebsite = new ModuleList (newList);
-        webUpdateThread = nullptr;
 
         table.updateContent();
         table.repaint();
@@ -326,8 +325,23 @@ private:
 
         void run() override
         {
-            if (list.loadFromWebsite() && ! threadShouldExit())
+            static Time lastDownloadTime;
+            static ModuleList lastList;
+
+            if (Time::getCurrentTime() < lastDownloadTime + RelativeTime::minutes (2.0))
+            {
+                list = lastList;
                 triggerAsyncUpdate();
+            }
+            else
+            {
+                if (list.loadFromWebsite() && ! threadShouldExit())
+                {
+                    lastList = list;
+                    lastDownloadTime = Time::getCurrentTime();
+                    triggerAsyncUpdate();
+                }
+            }
         }
 
         void handleAsyncUpdate() override
