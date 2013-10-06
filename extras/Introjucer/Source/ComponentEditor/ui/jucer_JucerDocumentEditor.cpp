@@ -1160,6 +1160,9 @@ void createGUIEditorMenu (PopupMenu& menu)
     menu.addCommandItem (commandManager, JucerCommandIDs::zoomNormal);
 
     menu.addSeparator();
+    menu.addCommandItem (commandManager, JucerCommandIDs::test);
+
+    menu.addSeparator();
 
     {
         PopupMenu overlays;
