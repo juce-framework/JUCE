@@ -142,8 +142,8 @@ void FileChooser::showPlatformDialog (Array<File>& results,
             else
                 tokens.add (result);
 
-            for (int i = 0; i < tokens.size(); i++)
-                results.add (File (tokens[i]));
+            for (int i = 0; i < tokens.size(); ++i)
+                results.add (File::getCurrentWorkingDirectory().getChildFile (tokens[i]));
         }
 
         child.waitForProcessToFinish (60 * 1000);
