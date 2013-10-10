@@ -489,6 +489,11 @@ bool var::equalsWithSameType (const var& other) const noexcept
     return type == other.type && equals (other);
 }
 
+bool var::hasSameTypeAs (const var& other) const noexcept
+{
+    return type == other.type;
+}
+
 bool operator== (const var& v1, const var& v2) noexcept     { return v1.equals (v2); }
 bool operator!= (const var& v1, const var& v2) noexcept     { return ! v1.equals (v2); }
 bool operator== (const var& v1, const String& v2)           { return v1.toString() == v2; }

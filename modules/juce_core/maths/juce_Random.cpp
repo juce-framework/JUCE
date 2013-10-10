@@ -81,6 +81,11 @@ int Random::nextInt (const int maxValue) noexcept
     return (int) ((((unsigned int) nextInt()) * (uint64) maxValue) >> 32);
 }
 
+int Random::nextInt (Range<int> range) noexcept
+{
+    return range.getStart() + nextInt (range.getLength());
+}
+
 int64 Random::nextInt64() noexcept
 {
     return (((int64) nextInt()) << 32) | (int64) (uint64) (uint32) nextInt();

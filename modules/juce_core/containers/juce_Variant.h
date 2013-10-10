@@ -149,6 +149,9 @@ public:
     */
     bool equalsWithSameType (const var& other) const noexcept;
 
+    /** Returns true if this var has the same type as the one supplied. */
+    bool hasSameTypeAs (const var& other) const noexcept;
+
     //==============================================================================
     /** If the var is an array, this returns the number of elements.
         If the var isn't actually an array, this will return 0.

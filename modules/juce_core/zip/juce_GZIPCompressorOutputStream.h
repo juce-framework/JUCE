@@ -78,7 +78,7 @@ public:
     bool setPosition (int64) override;
     bool write (const void*, size_t) override;
 
-    /** These are preset values that can be used for the constructor's windowBits paramter.
+    /** These are preset values that can be used for the constructor's windowBits parameter.
         For more info about this, see the zlib documentation for its windowBits parameter.
     */
     enum WindowBitsValues

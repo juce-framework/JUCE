@@ -94,10 +94,15 @@ public:
     /** Returns true if the value is 1. */
     bool isOne() const noexcept;
 
-    /** Attempts to get the lowest bits of the value as an integer.
+    /** Attempts to get the lowest 32 bits of the value as an integer.
         If the value is bigger than the integer limits, this will return only the lower bits.
     */
     int toInteger() const noexcept;
+
+    /** Attempts to get the lowest 64 bits of the value as an integer.
+        If the value is bigger than the integer limits, this will return only the lower bits.
+    */
+    int64 toInt64() const noexcept;
 
     //==============================================================================
     /** Resets the value to 0. */

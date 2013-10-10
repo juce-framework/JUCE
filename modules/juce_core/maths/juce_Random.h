@@ -69,6 +69,11 @@ public:
     */
     int nextInt (int maxValue) noexcept;
 
+    /** Returns the next random number, limited to a given range.
+        @returns a random integer between the range start (inclusive) and its end (exclusive).
+    */
+    int nextInt (Range<int> range) noexcept;
+
     /** Returns the next 64-bit random number.
         @returns a random integer from the full range 0x8000000000000000 to 0x7fffffffffffffff
     */

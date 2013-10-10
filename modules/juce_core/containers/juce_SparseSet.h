@@ -38,7 +38,7 @@
     ranges of values. It's quite a specialised class, mostly useful for things
     like keeping the set of selected rows in a listbox.
 
-    The type used as a template paramter must be an integer type, such as int, short,
+    The type used as a template parameter must be an integer type, such as int, short,
     int64, etc.
 */
 template <class Type>
