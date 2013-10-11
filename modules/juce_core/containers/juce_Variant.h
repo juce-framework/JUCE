@@ -52,9 +52,13 @@ public:
     */
     struct NativeFunctionArgs
     {
+        NativeFunctionArgs (const var& thisObject, const var* args, int numArgs) noexcept;
+
         const var& thisObject;
         const var* arguments;
         int numArguments;
+
+        JUCE_DECLARE_NON_COPYABLE (NativeFunctionArgs)
     };
 
     typedef var (*NativeFunction) (const NativeFunctionArgs&);

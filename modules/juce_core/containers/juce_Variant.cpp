@@ -573,10 +573,7 @@ var::NativeFunction var::getNativeFunction() const
 var var::invoke (Identifier method, const var* arguments, int numArguments) const
 {
     if (DynamicObject* const o = getDynamicObject())
-    {
-        const var::NativeFunctionArgs args = { *this, arguments, numArguments };
-        return o->invokeMethod (method, args);
-    }
+        return o->invokeMethod (method, var::NativeFunctionArgs (*this, arguments, numArguments));
 
     return var();
 }
@@ -745,3 +742,7 @@ var var::readFromStream (InputStream& input)
 
     return var();
 }
+
+var::NativeFunctionArgs::NativeFunctionArgs (const var& t, const var* args, int numArgs) noexcept
+    : thisObject (t), arguments (args), numArguments (numArgs)
+{}
