@@ -540,14 +540,14 @@ void CoreGraphicsContext::fillRectList (const RectangleList<float>& list)
     else if (state->fillType.isGradient())
     {
         CGContextSaveGState (context);
-        CGContextFillRects (context, rects, num);
+        CGContextClipToRects (context, rects, num);
         drawGradient();
         CGContextRestoreGState (context);
     }
     else
     {
         CGContextSaveGState (context);
-        CGContextFillRects (context, rects, num);
+        CGContextClipToRects (context, rects, num);
         drawImage (state->fillType.image, state->fillType.transform, true);
         CGContextRestoreGState (context);
     }
