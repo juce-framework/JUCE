@@ -43,6 +43,63 @@ public:
         return createFail ("Expected '{' or '['", &t);
     }
 
+    static Result parseString (const juce_wchar quoteChar, String::CharPointerType& t, var& result)
+    {
+        MemoryOutputStream buffer (256);
+
+        for (;;)
+        {
+            juce_wchar c = t.getAndAdvance();
+
+            if (c == quoteChar)
+                break;
+
+            if (c == '\\')
+            {
+                c = t.getAndAdvance();
+
+                switch (c)
+                {
+                    case '"':
+                    case '\'':
+                    case '\\':
+                    case '/':  break;
+
+                    case 'a':  c = '\a'; break;
+                    case 'b':  c = '\b'; break;
+                    case 'f':  c = '\f'; break;
+                    case 'n':  c = '\n'; break;
+                    case 'r':  c = '\r'; break;
+                    case 't':  c = '\t'; break;
+
+                    case 'u':
+                    {
+                        c = 0;
+
+                        for (int i = 4; --i >= 0;)
+                        {
+                            const int digitValue = CharacterFunctions::getHexDigitValue (t.getAndAdvance());
+                            if (digitValue < 0)
+                                return createFail ("Syntax error in unicode escape sequence");
+
+                            c = (juce_wchar) ((c << 4) + digitValue);
+                        }
+
+                        break;
+                    }
+                }
+            }
+
+            if (c == 0)
+                return createFail ("Unexpected end-of-input in string constant");
+
+            buffer.appendUTF8Char (c);
+        }
+
+        result = buffer.toUTF8();
+        return Result::ok();
+    }
+
 private:
     static Result parseAny (String::CharPointerType& t, var& result)
     {
@@ -53,7 +110,8 @@ private:
         {
             case '{':    t = t2; return parseObject (t, result);
             case '[':    t = t2; return parseArray  (t, result);
-            case '"':    t = t2; return parseString (t, result);
+            case '"':    t = t2; return parseString ('"',  t, result);
+            case '\'':   t = t2; return parseString ('\'', t, result);
 
             case '-':
                 t2 = t2.findEndOfWhitespace();
@@ -180,7 +238,7 @@ private:
             if (c == '"')
             {
                 var propertyNameVar;
-                Result r (parseString (t, propertyNameVar));
+                Result r (parseString ('"', t, propertyNameVar));
 
                 if (r.failed())
                     return r;
@@ -264,61 +322,6 @@ private:
 
         return Result::ok();
     }
-
-    static Result parseString (String::CharPointerType& t, var& result)
-    {
-        MemoryOutputStream buffer (256);
-
-        for (;;)
-        {
-            juce_wchar c = t.getAndAdvance();
-
-            if (c == '"')
-                break;
-
-            if (c == '\\')
-            {
-                c = t.getAndAdvance();
-
-                switch (c)
-                {
-                    case '"':
-                    case '\\':
-                    case '/':  break;
-
-                    case 'b':  c = '\b'; break;
-                    case 'f':  c = '\f'; break;
-                    case 'n':  c = '\n'; break;
-                    case 'r':  c = '\r'; break;
-                    case 't':  c = '\t'; break;
-
-                    case 'u':
-                    {
-                        c = 0;
-
-                        for (int i = 4; --i >= 0;)
-                        {
-                            const int digitValue = CharacterFunctions::getHexDigitValue (t.getAndAdvance());
-                            if (digitValue < 0)
-                                return createFail ("Syntax error in unicode escape sequence");
-
-                            c = (juce_wchar) ((c << 4) + digitValue);
-                        }
-
-                        break;
-                    }
-                }
-            }
-
-            if (c == 0)
-                return createFail ("Unexpected end-of-input in string constant");
-
-            buffer.appendUTF8Char (c);
-        }
-
-        result = buffer.toUTF8();
-        return Result::ok();
-    }
 };
 
 //==============================================================================
@@ -383,6 +386,7 @@ public:
 
                 case '\"':  out << "\\\""; break;
                 case '\\':  out << "\\\\"; break;
+                case '\a':  out << "\\a";  break;
                 case '\b':  out << "\\b";  break;
                 case '\f':  out << "\\f";  break;
                 case '\t':  out << "\\t";  break;
@@ -549,6 +553,15 @@ String JSON::escapeString (StringRef s)
     return mo.toString();
 }
 
+Result JSON::parseQuotedString (String::CharPointerType& t, var& result)
+{
+    const juce_wchar quote = t.getAndAdvance();
+
+    if (quote == '"' || quote == '\'')
+        return JSONParser::parseString (quote, t, result);
+
+    return Result::fail ("Not a quoted string!");
+}
 
 //==============================================================================
 //==============================================================================
