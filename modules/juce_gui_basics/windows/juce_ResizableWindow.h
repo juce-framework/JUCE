@@ -129,8 +129,9 @@ public:
         If the window's current size is outside these limits, it will be resized to
         make sure it's within them.
 
-        Calling setBounds() on the component will bypass any size checking - it's only when
-        the window is being resized by the user that these values are enforced.
+        A direct call to setBounds() will bypass any constraint checks, but when the
+        window is dragged by the user or resized by other indirect means, the constrainer
+        will limit the numbers involved.
 
         @see setResizable, setFixedAspectRatio
     */
