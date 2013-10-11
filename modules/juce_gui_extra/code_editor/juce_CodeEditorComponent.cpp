@@ -283,7 +283,7 @@ private:
 class CodeEditorComponent::GutterComponent  : public Component
 {
 public:
-    GutterComponent() : lastNumLines (0) {}
+    GutterComponent() : firstLine (0), lastNumLines (0) {}
 
     void paint (Graphics& g) override
     {
@@ -313,18 +313,20 @@ public:
         ga.draw (g);
     }
 
-    void documentChanged (CodeDocument& doc)
+    void documentChanged (CodeDocument& doc, int firstLineOnScreen)
     {
         const int newNumLines = doc.getNumLines();
-        if (newNumLines != lastNumLines)
+
+        if (newNumLines != lastNumLines || firstLineOnScreen != firstLine)
         {
+            firstLine = firstLineOnScreen;
             lastNumLines = newNumLines;
             repaint();
         }
     }
 
 private:
-    int lastNumLines;
+    int firstLine, lastNumLines;
 };
 
 
@@ -538,7 +540,7 @@ void CodeEditorComponent::rebuildLineTokens()
                  verticalScrollBar.getX(), lineHeight * (1 + maxLineToRepaint - minLineToRepaint) + 2);
 
     if (gutter != nullptr)
-        gutter->documentChanged (document);
+        gutter->documentChanged (document, firstLineOnScreen);
 }
 
 void CodeEditorComponent::codeDocumentChanged (const int startIndex, const int endIndex)
