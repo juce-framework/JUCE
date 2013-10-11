@@ -598,10 +598,7 @@ public:
             else
             {
                 incButton->setRepeatSpeed (300, 100, 20);
-                incButton->addMouseListener (decButton, false);
-
                 decButton->setRepeatSpeed (300, 100, 20);
-                decButton->addMouseListener (incButton, false);
             }
 
             const String tooltip (owner.getTooltip());
