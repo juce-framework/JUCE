@@ -313,13 +313,13 @@ public:
         ga.draw (g);
     }
 
-    void documentChanged (CodeDocument& doc, int firstLineOnScreen)
+    void documentChanged (CodeDocument& doc, int newFirstLine)
     {
         const int newNumLines = doc.getNumLines();
 
-        if (newNumLines != lastNumLines || firstLineOnScreen != firstLine)
+        if (newNumLines != lastNumLines || firstLine != newFirstLine)
         {
-            firstLine = firstLineOnScreen;
+            firstLine = newFirstLine;
             lastNumLines = newNumLines;
             repaint();
         }
