@@ -91,8 +91,6 @@ public:
                const float rightClip, const float x, const int y,
                const int lineH, const float characterWidth) const
     {
-        Colour lastColour (0x00000001);
-
         AttributedString as;
         as.setJustification (Justification::centredLeft);
 
