@@ -66,6 +66,11 @@ public:
     */
     void setStorageParameters (const PropertiesFile::Options& options);
 
+    /** Returns the current storage parameters.
+        @see setStorageParameters
+    */
+    const PropertiesFile::Options& getStorageParameters() const noexcept        { return options; }
+
     //==============================================================================
     /** Returns the user settings file.
 
