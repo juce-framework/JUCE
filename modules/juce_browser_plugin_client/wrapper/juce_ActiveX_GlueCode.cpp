@@ -229,7 +229,7 @@ public:
         log ("num IDispatch wrapper objs: " + String (--numDOWID));
     }
 
-    var getProperty (const Identifier& propertyName) const
+    var getProperty (const Identifier& propertyName) const override
     {
         const String nameCopy (propertyName.toString());
         LPCOLESTR name = nameCopy.toUTF16();
@@ -255,7 +255,7 @@ public:
         return var::null;
     }
 
-    bool hasProperty (const Identifier& propertyName) const
+    bool hasProperty (const Identifier& propertyName) const override
     {
         const String nameCopy (propertyName.toString());
         LPCOLESTR name = nameCopy.toUTF16();
@@ -263,7 +263,7 @@ public:
         return source->GetIDsOfNames (IID_NULL, (LPOLESTR*) &name, 1, 0, &id) == S_OK;
     }
 
-    void setProperty (const Identifier& propertyName, const var& newValue)
+    void setProperty (const Identifier& propertyName, const var& newValue) override
     {
         const String nameCopy (propertyName.toString());
         LPCOLESTR name = nameCopy.toUTF16();
@@ -295,12 +295,12 @@ public:
         }
     }
 
-    void removeProperty (const Identifier& propertyName)
+    void removeProperty (const Identifier& propertyName) override
     {
         setProperty (propertyName, var::null);
     }
 
-    bool hasMethod (const Identifier& methodName) const
+    bool hasMethod (const Identifier& methodName) const override
     {
         const String nameCopy (methodName.toString());
         LPCOLESTR name = nameCopy.toUTF16();
@@ -308,7 +308,7 @@ public:
         return source->GetIDsOfNames (IID_NULL, (LPOLESTR*) &name, 1, 0, &id) == S_OK;
     }
 
-    var invokeMethod (const Identifier& methodName, const var* parameters, int numParameters)
+    var invokeMethod (Identifier methodName, const var::NativeFunctionArgs& args) override
     {
         var returnValue;
         const String nameCopy (methodName.toString());
@@ -317,14 +317,14 @@ public:
         if (source->GetIDsOfNames (IID_NULL, (LPOLESTR*) &name, 1, 0, &id) == S_OK)
         {
             HeapBlock <VARIANT> params;
-            params.calloc (numParameters + 1);
+            params.calloc (args.numArguments + 1);
 
-            for (int i = 0; i < numParameters; ++i)
-                juceVarToVariant (parameters[(numParameters - 1) - i], params[i]);
+            for (int i = 0; i < args.numArguments; ++i)
+                juceVarToVariant (args.arguments[(args.numArguments - 1) - i], params[i]);
 
             DISPPARAMS dispParams;
             zerostruct (dispParams);
-            dispParams.cArgs = numParameters;
+            dispParams.cArgs = args.numArguments;
             dispParams.rgvarg = params;
 
             EXCEPINFO excepInfo;

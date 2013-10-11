@@ -616,7 +616,7 @@ public:
         DBG ("num NP wrapper objs: " + String (--numDOWNP));
     }
 
-    var getProperty (const var::identifier& propertyName) const
+    var getProperty (const var::identifier& propertyName) const override
     {
         NPVariant result;
         VOID_TO_NPVARIANT (result);
@@ -626,7 +626,7 @@ public:
         return v;
     }
 
-    bool hasProperty (const var::identifier& propertyName) const
+    bool hasProperty (const var::identifier& propertyName) const override
     {
         NPVariant result;
         VOID_TO_NPVARIANT (result);
@@ -635,7 +635,7 @@ public:
         return hasProp;
     }
 
-    void setProperty (const var::identifier& propertyName, const var& newValue)
+    void setProperty (const var::identifier& propertyName, const var& newValue) override
     {
         NPVariant value;
         createNPVariantFromValue (npp, value, newValue);
@@ -644,40 +644,38 @@ public:
         browser.releasevariantvalue (&value);
     }
 
-    void removeProperty (const var::identifier& propertyName)
+    void removeProperty (const var::identifier& propertyName) override
     {
         browser.removeproperty (npp, source, getIdentifierFromString (propertyName));
     }
 
-    bool hasMethod (const var::identifier& methodName) const
+    bool hasMethod (const var::identifier& methodName) const override
     {
         return browser.hasmethod (npp, source, getIdentifierFromString (methodName));
     }
 
-    var invokeMethod (const var::identifier& methodName,
-                      const var* parameters,
-                      int numParameters)
+    var invokeMethod (Identifier methodName, const var::NativeFunctionArgs& args) override
     {
         var returnVal;
 
         NPVariant result;
         VOID_TO_NPVARIANT (result);
 
-        if (numParameters > 0)
+        if (args.numArguments > 0)
         {
-            HeapBlock <NPVariant> params (numParameters);
+            HeapBlock<NPVariant> params (args.numArguments);
 
-            for (int i = 0; i < numParameters; ++i)
-                createNPVariantFromValue (npp, params[i], parameters[i]);
+            for (int i = 0; i < args.numArguments; ++i)
+                createNPVariantFromValue (npp, params[i], args.arguments[i]);
 
             if (browser.invoke (npp, source, getIdentifierFromString (methodName),
-                                params, numParameters, &result))
+                                params, args.numArguments, &result))
             {
                 returnVal = createValueFromNPVariant (npp, result);
                 browser.releasevariantvalue (&result);
             }
 
-            for (int i = 0; i < numParameters; ++i)
+            for (int i = 0; i < args.numArguments; ++i)
                 browser.releasevariantvalue (&params[i]);
         }
         else
@@ -705,15 +703,14 @@ public:
     }
 
 private:
-    NPObjectWrappingDynamicObject (NPP npp_)
-        : npp (npp_)
+    NPObjectWrappingDynamicObject (NPP n)  : npp (n)
     {
         DBG ("num Juce wrapper objs: " + String (++numJuceWDO));
     }
 
     //==============================================================================
     bool construct (const NPVariant *args, uint32_t argCount, NPVariant *result);
-    void invalidate()    {}
+    void invalidate() {}
 
     bool hasMethod (NPIdentifier name)
     {
@@ -742,7 +739,9 @@ private:
         for (uint32_t i = 0; i < argCount; ++i)
             params.params[i] = createValueFromNPVariant (npp, args[i]);
 
-        const var result (o->invokeMethod (methodName, params.params, argCount));
+
+        const var::NativeFunctionArgs argStruct = { object, params.params, (int) argCount };
+        const var result (o->invokeMethod (methodName, argStruct));
 
         if (out != nullptr)
             createNPVariantFromValue (npp, *out, result);

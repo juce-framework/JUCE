@@ -60,17 +60,17 @@ bool DynamicObject::hasMethod (const Identifier& methodName) const
     return getProperty (methodName).isMethod();
 }
 
-var DynamicObject::invokeMethod (const Identifier& methodName,
-                                 const var* parameters,
-                                 int numParameters)
+var DynamicObject::invokeMethod (Identifier method, const var::NativeFunctionArgs& args)
 {
-    return properties [methodName].invokeMethod (this, parameters, numParameters);
+    if (var::NativeFunction function = properties [method].getNativeFunction())
+        return function (args);
+
+    return var();
 }
 
-void DynamicObject::setMethod (const Identifier& name,
-                               var::MethodFunction methodFunction)
+void DynamicObject::setMethod (Identifier name, var::NativeFunction function)
 {
-    properties.set (name, var (methodFunction));
+    properties.set (name, var (function));
 }
 
 void DynamicObject::clear()

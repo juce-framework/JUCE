@@ -86,23 +86,16 @@ public:
         This method is virtual to allow more dynamic invocation to used for objects
         where the methods may not already be set as properies.
     */
-    virtual var invokeMethod (const Identifier& methodName,
-                              const var* parameters,
-                              int numParameters);
+    virtual var invokeMethod (Identifier methodName,
+                              const var::NativeFunctionArgs& args);
 
-    /** Sets up a method.
+    /** Adds a method to the class.
 
-        This is basically the same as calling setProperty (methodName, (var::MethodFunction) myFunction), but
+        This is basically the same as calling setProperty (methodName, (var::NativeFunction) myFunction), but
         helps to avoid accidentally invoking the wrong type of var constructor. It also makes
         the code easier to read,
-
-        The compiler will probably force you to use an explicit cast your method to a (var::MethodFunction), e.g.
-        @code
-        setMethod ("doSomething", (var::MethodFunction) &MyClass::doSomething);
-        @endcode
     */
-    void setMethod (const Identifier& methodName,
-                    var::MethodFunction methodFunction);
+    void setMethod (Identifier methodName, var::NativeFunction function);
 
     //==============================================================================
     /** Removes all properties and methods from the object. */
@@ -114,6 +107,11 @@ public:
 private:
     //==============================================================================
     NamedValueSet properties;
+
+   #if JUCE_CATCH_DEPRECATED_CODE_MISUSE
+    // These methods have been deprecated - use var::invoke instead
+    virtual void invokeMethod (const Identifier&, const var*, int) {}
+   #endif
 
     JUCE_LEAK_DETECTOR (DynamicObject)
 };

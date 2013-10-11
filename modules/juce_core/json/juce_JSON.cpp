@@ -338,6 +338,10 @@ public:
         {
             out << "null";
         }
+        else if (v.isUndefined())
+        {
+            out << "undefined";
+        }
         else if (v.isBool())
         {
             out << (static_cast<bool> (v) ? "true" : "false");
@@ -421,29 +425,33 @@ public:
                             const int indentLevel, const bool allOnOneLine)
     {
         out << '[';
-        if (! allOnOneLine)
-            out << newLine;
 
-        for (int i = 0; i < array.size(); ++i)
+        if (array.size() > 0)
         {
             if (! allOnOneLine)
-                writeSpaces (out, indentLevel + indentSize);
-
-            write (out, array.getReference(i), indentLevel + indentSize, allOnOneLine);
-
-            if (i < array.size() - 1)
-            {
-                if (allOnOneLine)
-                    out << ", ";
-                else
-                    out << ',' << newLine;
-            }
-            else if (! allOnOneLine)
                 out << newLine;
-        }
 
-        if (! allOnOneLine)
-            writeSpaces (out, indentLevel);
+            for (int i = 0; i < array.size(); ++i)
+            {
+                if (! allOnOneLine)
+                    writeSpaces (out, indentLevel + indentSize);
+
+                write (out, array.getReference(i), indentLevel + indentSize, allOnOneLine);
+
+                if (i < array.size() - 1)
+                {
+                    if (allOnOneLine)
+                        out << ", ";
+                    else
+                        out << ',' << newLine;
+                }
+                else if (! allOnOneLine)
+                    out << newLine;
+            }
+
+            if (! allOnOneLine)
+                writeSpaces (out, indentLevel);
+        }
 
         out << ']';
     }

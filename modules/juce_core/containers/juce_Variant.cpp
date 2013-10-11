@@ -35,7 +35,8 @@ enum VariantStreamMarkers
     varMarker_String    = 5,
     varMarker_Int64     = 6,
     varMarker_Array     = 7,
-    varMarker_Binary    = 8
+    varMarker_Binary    = 8,
+    varMarker_Undefined = 9
 };
 
 //==============================================================================
@@ -55,6 +56,7 @@ public:
     virtual MemoryBlock* toBinary (const ValueUnion&) const noexcept            { return nullptr; }
 
     virtual bool isVoid() const noexcept      { return false; }
+    virtual bool isUndefined() const noexcept { return false; }
     virtual bool isInt() const noexcept       { return false; }
     virtual bool isInt64() const noexcept     { return false; }
     virtual bool isBool() const noexcept      { return false; }
@@ -79,8 +81,26 @@ public:
     static const VariantType_Void instance;
 
     bool isVoid() const noexcept    { return true; }
-    bool equals (const ValueUnion&, const ValueUnion&, const VariantType& otherType) const noexcept { return otherType.isVoid(); }
+    bool equals (const ValueUnion&, const ValueUnion&, const VariantType& otherType) const noexcept { return otherType.isVoid() || otherType.isUndefined(); }
     void writeToStream (const ValueUnion&, OutputStream& output) const   { output.writeCompressedInt (0); }
+};
+
+//==============================================================================
+class var::VariantType_Undefined  : public var::VariantType
+{
+public:
+    VariantType_Undefined() noexcept {}
+    static const VariantType_Undefined instance;
+
+    bool isUndefined() const noexcept           { return true; }
+    String toString (const ValueUnion&) const   { return "undefined"; }
+    bool equals (const ValueUnion&, const ValueUnion&, const VariantType& otherType) const noexcept { return otherType.isVoid() || otherType.isUndefined(); }
+
+    void writeToStream (const ValueUnion&, OutputStream& output) const
+    {
+        output.writeCompressedInt (1);
+        output.writeByte (varMarker_Undefined);
+    }
 };
 
 //==============================================================================
@@ -264,38 +284,56 @@ public:
 };
 
 //==============================================================================
-class var::VariantType_Array   : public var::VariantType
+class var::VariantType_Array   : public var::VariantType_Object
 {
 public:
     VariantType_Array() noexcept {}
     static const VariantType_Array instance;
 
-    void cleanUp (ValueUnion& data) const noexcept                      { delete data.arrayValue; }
-    void createCopy (ValueUnion& dest, const ValueUnion& source) const  { dest.arrayValue = new Array<var> (*(source.arrayValue)); }
-
     String toString (const ValueUnion&) const                           { return "[Array]"; }
+    ReferenceCountedObject* toObject (const ValueUnion&) const noexcept { return nullptr; }
     bool isArray() const noexcept                                       { return true; }
-    Array<var>* toArray (const ValueUnion& data) const noexcept         { return data.arrayValue; }
+
+    Array<var>* toArray (const ValueUnion& data) const noexcept
+    {
+        if (RefCountedArray* a = dynamic_cast<RefCountedArray*> (data.objectValue))
+            return &(a->array);
+
+        return nullptr;
+    }
 
     bool equals (const ValueUnion& data, const ValueUnion& otherData, const VariantType& otherType) const noexcept
     {
+        const Array<var>* const thisArray = toArray (data);
         const Array<var>* const otherArray = otherType.toArray (otherData);
-        return otherArray != nullptr && *otherArray == *(data.arrayValue);
+        return thisArray == otherArray || (thisArray != nullptr && otherArray != nullptr && *otherArray == *thisArray);
     }
 
     void writeToStream (const ValueUnion& data, OutputStream& output) const
     {
-        MemoryOutputStream buffer (512);
-        const int numItems = data.arrayValue->size();
-        buffer.writeCompressedInt (numItems);
+        if (const Array<var>* array = toArray (data))
+        {
+            MemoryOutputStream buffer (512);
+            const int numItems = array->size();
+            buffer.writeCompressedInt (numItems);
 
-        for (int i = 0; i < numItems; ++i)
-            data.arrayValue->getReference(i).writeToStream (buffer);
+            for (int i = 0; i < numItems; ++i)
+                array->getReference(i).writeToStream (buffer);
 
-        output.writeCompressedInt (1 + (int) buffer.getDataSize());
-        output.writeByte (varMarker_Array);
-        output << buffer;
+            output.writeCompressedInt (1 + (int) buffer.getDataSize());
+            output.writeByte (varMarker_Array);
+            output << buffer;
+        }
     }
+
+    struct RefCountedArray  : public ReferenceCountedObject
+    {
+        RefCountedArray (const Array<var>& a)  : array (a)  { incReferenceCount(); }
+       #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
+        RefCountedArray (Array<var>&& a)  : array (static_cast<Array<var>&&> (a)) { incReferenceCount(); }
+       #endif
+        Array<var> array;
+    };
 };
 
 //==============================================================================
@@ -351,27 +389,23 @@ public:
 };
 
 //==============================================================================
-const var::VariantType_Void    var::VariantType_Void::instance;
-const var::VariantType_Int     var::VariantType_Int::instance;
-const var::VariantType_Int64   var::VariantType_Int64::instance;
-const var::VariantType_Bool    var::VariantType_Bool::instance;
-const var::VariantType_Double  var::VariantType_Double::instance;
-const var::VariantType_String  var::VariantType_String::instance;
-const var::VariantType_Object  var::VariantType_Object::instance;
-const var::VariantType_Array   var::VariantType_Array::instance;
-const var::VariantType_Binary  var::VariantType_Binary::instance;
-const var::VariantType_Method  var::VariantType_Method::instance;
+const var::VariantType_Void         var::VariantType_Void::instance;
+const var::VariantType_Undefined    var::VariantType_Undefined::instance;
+const var::VariantType_Int          var::VariantType_Int::instance;
+const var::VariantType_Int64        var::VariantType_Int64::instance;
+const var::VariantType_Bool         var::VariantType_Bool::instance;
+const var::VariantType_Double       var::VariantType_Double::instance;
+const var::VariantType_String       var::VariantType_String::instance;
+const var::VariantType_Object       var::VariantType_Object::instance;
+const var::VariantType_Array        var::VariantType_Array::instance;
+const var::VariantType_Binary       var::VariantType_Binary::instance;
+const var::VariantType_Method       var::VariantType_Method::instance;
 
 
 //==============================================================================
-var::var() noexcept : type (&VariantType_Void::instance)
-{
-}
-
-var::~var() noexcept
-{
-    type->cleanUp (value);
-}
+var::var() noexcept : type (&VariantType_Void::instance) {}
+var::var (const VariantType& t) noexcept  : type (&t) {}
+var::~var() noexcept  { type->cleanUp (value); }
 
 const var var::null;
 
@@ -385,8 +419,8 @@ var::var (const int v) noexcept       : type (&VariantType_Int::instance)    { v
 var::var (const int64 v) noexcept     : type (&VariantType_Int64::instance)  { value.int64Value = v; }
 var::var (const bool v) noexcept      : type (&VariantType_Bool::instance)   { value.boolValue = v; }
 var::var (const double v) noexcept    : type (&VariantType_Double::instance) { value.doubleValue = v; }
-var::var (MethodFunction m) noexcept  : type (&VariantType_Method::instance) { value.methodValue = m; }
-var::var (const Array<var>& v)        : type (&VariantType_Array::instance)  { value.arrayValue = new Array<var> (v); }
+var::var (NativeFunction m) noexcept  : type (&VariantType_Method::instance) { value.methodValue = m; }
+var::var (const Array<var>& v)        : type (&VariantType_Array::instance)  { value.objectValue = new VariantType_Array::RefCountedArray(v); }
 var::var (const String& v)            : type (&VariantType_String::instance) { new (value.stringValue) String (v); }
 var::var (const char* const v)        : type (&VariantType_String::instance) { new (value.stringValue) String (v); }
 var::var (const wchar_t* const v)     : type (&VariantType_String::instance) { new (value.stringValue) String (v); }
@@ -401,9 +435,11 @@ var::var (ReferenceCountedObject* const object)  : type (&VariantType_Object::in
         object->incReferenceCount();
 }
 
+var var::undefined() noexcept           { return var (VariantType_Undefined::instance); }
 
 //==============================================================================
 bool var::isVoid() const noexcept       { return type->isVoid(); }
+bool var::isUndefined() const noexcept  { return type->isUndefined(); }
 bool var::isInt() const noexcept        { return type->isInt(); }
 bool var::isInt64() const noexcept      { return type->isInt64(); }
 bool var::isBool() const noexcept       { return type->isBool(); }
@@ -443,7 +479,7 @@ var& var::operator= (const wchar_t* const v)     { type->cleanUp (value); type =
 var& var::operator= (const String& v)            { type->cleanUp (value); type = &VariantType_String::instance; new (value.stringValue) String (v); return *this; }
 var& var::operator= (const Array<var>& v)        { var v2 (v); swapWith (v2); return *this; }
 var& var::operator= (ReferenceCountedObject* v)  { var v2 (v); swapWith (v2); return *this; }
-var& var::operator= (MethodFunction v)           { var v2 (v); swapWith (v2); return *this; }
+var& var::operator= (NativeFunction v)           { var v2 (v); swapWith (v2); return *this; }
 
 #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
 var::var (var&& other) noexcept
@@ -467,6 +503,11 @@ var::var (String&& v)  : type (&VariantType_String::instance)
 var::var (MemoryBlock&& v)  : type (&VariantType_Binary::instance)
 {
     value.binaryValue = new MemoryBlock (static_cast<MemoryBlock&&> (v));
+}
+
+var::var (Array<var>&& v)  : type (&VariantType_Array::instance)
+{
+    value.objectValue = new VariantType_Array::RefCountedArray (static_cast<Array<var>&&> (v));
 }
 
 var& var::operator= (String&& v)
@@ -508,7 +549,7 @@ var var::operator[] (const Identifier propertyName) const
     if (DynamicObject* const o = getDynamicObject())
         return o->getProperty (propertyName);
 
-    return var::null;
+    return var();
 }
 
 var var::operator[] (const char* const propertyName) const
@@ -524,22 +565,20 @@ var var::getProperty (const Identifier propertyName, const var& defaultReturnVal
     return defaultReturnValue;
 }
 
-var var::invoke (const Identifier method, const var* arguments, int numArguments) const
+var::NativeFunction var::getNativeFunction() const
 {
-    if (DynamicObject* const o = getDynamicObject())
-        return o->invokeMethod (method, arguments, numArguments);
-
-    return var::null;
+    return isMethod() ? value.methodValue : nullptr;
 }
 
-var var::invokeMethod (DynamicObject* const target, const var* const arguments, const int numArguments) const
+var var::invoke (Identifier method, const var* arguments, int numArguments) const
 {
-    jassert (target != nullptr);
+    if (DynamicObject* const o = getDynamicObject())
+    {
+        const var::NativeFunctionArgs args = { *this, arguments, numArguments };
+        return o->invokeMethod (method, args);
+    }
 
-    if (isMethod())
-        return (target->*(value.methodValue)) (arguments, numArguments);
-
-    return var::null;
+    return var();
 }
 
 var var::call (const Identifier method) const
@@ -609,21 +648,15 @@ var& var::operator[] (int arrayIndex)
 
 Array<var>* var::convertToArray()
 {
-    Array<var>* array = getArray();
+    if (Array<var>* array = getArray())
+        return array;
 
-    if (array == nullptr)
-    {
-        const Array<var> tempVar;
-        var v (tempVar);
-        array = v.value.arrayValue;
+    Array<var> tempVar;
+    if (! isVoid())
+        tempVar.add (*this);
 
-        if (! isVoid())
-            array->add (*this);
-
-        swapWith (v);
-    }
-
-    return array;
+    *this = tempVar;
+    return getArray();
 }
 
 void var::append (const var& n)
@@ -710,5 +743,5 @@ var var::readFromStream (InputStream& input)
         }
     }
 
-    return var::null;
+    return var();
 }
