@@ -54,6 +54,7 @@ public:
     virtual ReferenceCountedObject* toObject (const ValueUnion&) const noexcept { return nullptr; }
     virtual Array<var>* toArray (const ValueUnion&) const noexcept              { return nullptr; }
     virtual MemoryBlock* toBinary (const ValueUnion&) const noexcept            { return nullptr; }
+    virtual var clone (const var& original) const                               { return original; }
 
     virtual bool isVoid() const noexcept      { return false; }
     virtual bool isUndefined() const noexcept { return false; }
@@ -80,9 +81,9 @@ public:
     VariantType_Void() noexcept {}
     static const VariantType_Void instance;
 
-    bool isVoid() const noexcept    { return true; }
-    bool equals (const ValueUnion&, const ValueUnion&, const VariantType& otherType) const noexcept { return otherType.isVoid() || otherType.isUndefined(); }
-    void writeToStream (const ValueUnion&, OutputStream& output) const   { output.writeCompressedInt (0); }
+    bool isVoid() const noexcept override   { return true; }
+    bool equals (const ValueUnion&, const ValueUnion&, const VariantType& otherType) const noexcept override { return otherType.isVoid() || otherType.isUndefined(); }
+    void writeToStream (const ValueUnion&, OutputStream& output) const override   { output.writeCompressedInt (0); }
 };
 
 //==============================================================================
@@ -92,11 +93,11 @@ public:
     VariantType_Undefined() noexcept {}
     static const VariantType_Undefined instance;
 
-    bool isUndefined() const noexcept           { return true; }
-    String toString (const ValueUnion&) const   { return "undefined"; }
-    bool equals (const ValueUnion&, const ValueUnion&, const VariantType& otherType) const noexcept { return otherType.isVoid() || otherType.isUndefined(); }
+    bool isUndefined() const noexcept override           { return true; }
+    String toString (const ValueUnion&) const override   { return "undefined"; }
+    bool equals (const ValueUnion&, const ValueUnion&, const VariantType& otherType) const noexcept override { return otherType.isVoid() || otherType.isUndefined(); }
 
-    void writeToStream (const ValueUnion&, OutputStream& output) const
+    void writeToStream (const ValueUnion&, OutputStream& output) const override
     {
         output.writeCompressedInt (1);
         output.writeByte (varMarker_Undefined);
@@ -110,19 +111,19 @@ public:
     VariantType_Int() noexcept {}
     static const VariantType_Int instance;
 
-    int toInt (const ValueUnion& data) const noexcept       { return data.intValue; };
-    int64 toInt64 (const ValueUnion& data) const noexcept   { return (int64) data.intValue; };
-    double toDouble (const ValueUnion& data) const noexcept { return (double) data.intValue; }
-    String toString (const ValueUnion& data) const          { return String (data.intValue); }
-    bool toBool (const ValueUnion& data) const noexcept     { return data.intValue != 0; }
-    bool isInt() const noexcept                             { return true; }
+    int toInt (const ValueUnion& data) const noexcept override       { return data.intValue; };
+    int64 toInt64 (const ValueUnion& data) const noexcept override   { return (int64) data.intValue; };
+    double toDouble (const ValueUnion& data) const noexcept override { return (double) data.intValue; }
+    String toString (const ValueUnion& data) const override          { return String (data.intValue); }
+    bool toBool (const ValueUnion& data) const noexcept override     { return data.intValue != 0; }
+    bool isInt() const noexcept override                             { return true; }
 
-    bool equals (const ValueUnion& data, const ValueUnion& otherData, const VariantType& otherType) const noexcept
+    bool equals (const ValueUnion& data, const ValueUnion& otherData, const VariantType& otherType) const noexcept override
     {
         return otherType.toInt (otherData) == data.intValue;
     }
 
-    void writeToStream (const ValueUnion& data, OutputStream& output) const
+    void writeToStream (const ValueUnion& data, OutputStream& output) const override
     {
         output.writeCompressedInt (5);
         output.writeByte (varMarker_Int);
@@ -137,19 +138,19 @@ public:
     VariantType_Int64() noexcept {}
     static const VariantType_Int64 instance;
 
-    int toInt (const ValueUnion& data) const noexcept       { return (int) data.int64Value; };
-    int64 toInt64 (const ValueUnion& data) const noexcept   { return data.int64Value; };
-    double toDouble (const ValueUnion& data) const noexcept { return (double) data.int64Value; }
-    String toString (const ValueUnion& data) const          { return String (data.int64Value); }
-    bool toBool (const ValueUnion& data) const noexcept     { return data.int64Value != 0; }
-    bool isInt64() const noexcept                           { return true; }
+    int toInt (const ValueUnion& data) const noexcept override       { return (int) data.int64Value; };
+    int64 toInt64 (const ValueUnion& data) const noexcept override   { return data.int64Value; };
+    double toDouble (const ValueUnion& data) const noexcept override { return (double) data.int64Value; }
+    String toString (const ValueUnion& data) const override          { return String (data.int64Value); }
+    bool toBool (const ValueUnion& data) const noexcept override     { return data.int64Value != 0; }
+    bool isInt64() const noexcept override                           { return true; }
 
-    bool equals (const ValueUnion& data, const ValueUnion& otherData, const VariantType& otherType) const noexcept
+    bool equals (const ValueUnion& data, const ValueUnion& otherData, const VariantType& otherType) const noexcept override
     {
         return otherType.toInt64 (otherData) == data.int64Value;
     }
 
-    void writeToStream (const ValueUnion& data, OutputStream& output) const
+    void writeToStream (const ValueUnion& data, OutputStream& output) const override
     {
         output.writeCompressedInt (9);
         output.writeByte (varMarker_Int64);
@@ -164,19 +165,19 @@ public:
     VariantType_Double() noexcept {}
     static const VariantType_Double instance;
 
-    int toInt (const ValueUnion& data) const noexcept       { return (int) data.doubleValue; };
-    int64 toInt64 (const ValueUnion& data) const noexcept   { return (int64) data.doubleValue; };
-    double toDouble (const ValueUnion& data) const noexcept { return data.doubleValue; }
-    String toString (const ValueUnion& data) const          { return String (data.doubleValue); }
-    bool toBool (const ValueUnion& data) const noexcept     { return data.doubleValue != 0; }
-    bool isDouble() const noexcept                          { return true; }
+    int toInt (const ValueUnion& data) const noexcept override       { return (int) data.doubleValue; };
+    int64 toInt64 (const ValueUnion& data) const noexcept override   { return (int64) data.doubleValue; };
+    double toDouble (const ValueUnion& data) const noexcept override { return data.doubleValue; }
+    String toString (const ValueUnion& data) const override          { return String (data.doubleValue); }
+    bool toBool (const ValueUnion& data) const noexcept override     { return data.doubleValue != 0; }
+    bool isDouble() const noexcept override                          { return true; }
 
-    bool equals (const ValueUnion& data, const ValueUnion& otherData, const VariantType& otherType) const noexcept
+    bool equals (const ValueUnion& data, const ValueUnion& otherData, const VariantType& otherType) const noexcept override
     {
         return std::abs (otherType.toDouble (otherData) - data.doubleValue) < std::numeric_limits<double>::epsilon();
     }
 
-    void writeToStream (const ValueUnion& data, OutputStream& output) const
+    void writeToStream (const ValueUnion& data, OutputStream& output) const override
     {
         output.writeCompressedInt (9);
         output.writeByte (varMarker_Double);
@@ -191,19 +192,19 @@ public:
     VariantType_Bool() noexcept {}
     static const VariantType_Bool instance;
 
-    int toInt (const ValueUnion& data) const noexcept       { return data.boolValue ? 1 : 0; };
-    int64 toInt64 (const ValueUnion& data) const noexcept   { return data.boolValue ? 1 : 0; };
-    double toDouble (const ValueUnion& data) const noexcept { return data.boolValue ? 1.0 : 0.0; }
-    String toString (const ValueUnion& data) const          { return String::charToString (data.boolValue ? (juce_wchar) '1' : (juce_wchar) '0'); }
-    bool toBool (const ValueUnion& data) const noexcept     { return data.boolValue; }
-    bool isBool() const noexcept                            { return true; }
+    int toInt (const ValueUnion& data) const noexcept override       { return data.boolValue ? 1 : 0; };
+    int64 toInt64 (const ValueUnion& data) const noexcept override   { return data.boolValue ? 1 : 0; };
+    double toDouble (const ValueUnion& data) const noexcept override { return data.boolValue ? 1.0 : 0.0; }
+    String toString (const ValueUnion& data) const override          { return String::charToString (data.boolValue ? (juce_wchar) '1' : (juce_wchar) '0'); }
+    bool toBool (const ValueUnion& data) const noexcept override     { return data.boolValue; }
+    bool isBool() const noexcept override                            { return true; }
 
-    bool equals (const ValueUnion& data, const ValueUnion& otherData, const VariantType& otherType) const noexcept
+    bool equals (const ValueUnion& data, const ValueUnion& otherData, const VariantType& otherType) const noexcept override
     {
         return otherType.toBool (otherData) == data.boolValue;
     }
 
-    void writeToStream (const ValueUnion& data, OutputStream& output) const
+    void writeToStream (const ValueUnion& data, OutputStream& output) const override
     {
         output.writeCompressedInt (1);
         output.writeByte (data.boolValue ? (char) varMarker_BoolTrue : (char) varMarker_BoolFalse);
@@ -217,24 +218,24 @@ public:
     VariantType_String() noexcept {}
     static const VariantType_String instance;
 
-    void cleanUp (ValueUnion& data) const noexcept                       { getString (data)-> ~String(); }
-    void createCopy (ValueUnion& dest, const ValueUnion& source) const   { new (dest.stringValue) String (*getString (source)); }
+    void cleanUp (ValueUnion& data) const noexcept override                       { getString (data)-> ~String(); }
+    void createCopy (ValueUnion& dest, const ValueUnion& source) const override   { new (dest.stringValue) String (*getString (source)); }
 
-    bool isString() const noexcept                          { return true; }
-    int toInt (const ValueUnion& data) const noexcept       { return getString (data)->getIntValue(); };
-    int64 toInt64 (const ValueUnion& data) const noexcept   { return getString (data)->getLargeIntValue(); };
-    double toDouble (const ValueUnion& data) const noexcept { return getString (data)->getDoubleValue(); }
-    String toString (const ValueUnion& data) const          { return *getString (data); }
-    bool toBool (const ValueUnion& data) const noexcept     { return getString (data)->getIntValue() != 0
-                                                                      || getString (data)->trim().equalsIgnoreCase ("true")
-                                                                      || getString (data)->trim().equalsIgnoreCase ("yes"); }
+    bool isString() const noexcept override                          { return true; }
+    int toInt (const ValueUnion& data) const noexcept override       { return getString (data)->getIntValue(); };
+    int64 toInt64 (const ValueUnion& data) const noexcept override   { return getString (data)->getLargeIntValue(); };
+    double toDouble (const ValueUnion& data) const noexcept override { return getString (data)->getDoubleValue(); }
+    String toString (const ValueUnion& data) const override          { return *getString (data); }
+    bool toBool (const ValueUnion& data) const noexcept override     { return getString (data)->getIntValue() != 0
+                                                                           || getString (data)->trim().equalsIgnoreCase ("true")
+                                                                           || getString (data)->trim().equalsIgnoreCase ("yes"); }
 
-    bool equals (const ValueUnion& data, const ValueUnion& otherData, const VariantType& otherType) const noexcept
+    bool equals (const ValueUnion& data, const ValueUnion& otherData, const VariantType& otherType) const noexcept override
     {
         return otherType.toString (otherData) == *getString (data);
     }
 
-    void writeToStream (const ValueUnion& data, OutputStream& output) const
+    void writeToStream (const ValueUnion& data, OutputStream& output) const override
     {
         const String* const s = getString (data);
         const size_t len = s->getNumBytesAsUTF8() + 1;
@@ -257,26 +258,35 @@ public:
     VariantType_Object() noexcept {}
     static const VariantType_Object instance;
 
-    void cleanUp (ValueUnion& data) const noexcept                      { if (data.objectValue != nullptr) data.objectValue->decReferenceCount(); }
+    void cleanUp (ValueUnion& data) const noexcept override   { if (data.objectValue != nullptr) data.objectValue->decReferenceCount(); }
 
-    void createCopy (ValueUnion& dest, const ValueUnion& source) const
+    void createCopy (ValueUnion& dest, const ValueUnion& source) const override
     {
         dest.objectValue = source.objectValue;
         if (dest.objectValue != nullptr)
             dest.objectValue->incReferenceCount();
     }
 
-    String toString (const ValueUnion& data) const                            { return "Object 0x" + String::toHexString ((int) (pointer_sized_int) data.objectValue); }
-    bool toBool (const ValueUnion& data) const noexcept                       { return data.objectValue != 0; }
-    ReferenceCountedObject* toObject (const ValueUnion& data) const noexcept  { return data.objectValue; }
-    bool isObject() const noexcept                                            { return true; }
+    String toString (const ValueUnion& data) const override                            { return "Object 0x" + String::toHexString ((int) (pointer_sized_int) data.objectValue); }
+    bool toBool (const ValueUnion& data) const noexcept override                       { return data.objectValue != 0; }
+    ReferenceCountedObject* toObject (const ValueUnion& data) const noexcept override  { return data.objectValue; }
+    bool isObject() const noexcept override                                            { return true; }
 
-    bool equals (const ValueUnion& data, const ValueUnion& otherData, const VariantType& otherType) const noexcept
+    bool equals (const ValueUnion& data, const ValueUnion& otherData, const VariantType& otherType) const noexcept override
     {
         return otherType.toObject (otherData) == data.objectValue;
     }
 
-    void writeToStream (const ValueUnion&, OutputStream& output) const
+    var clone (const var& original) const override
+    {
+        if (DynamicObject* d = original.getDynamicObject())
+            return d->clone().get();
+
+        jassertfalse; // can only clone DynamicObjects!
+        return var();
+    }
+
+    void writeToStream (const ValueUnion&, OutputStream& output) const override
     {
         jassertfalse; // Can't write an object to a stream!
         output.writeCompressedInt (0);
@@ -290,11 +300,11 @@ public:
     VariantType_Array() noexcept {}
     static const VariantType_Array instance;
 
-    String toString (const ValueUnion&) const                           { return "[Array]"; }
-    ReferenceCountedObject* toObject (const ValueUnion&) const noexcept { return nullptr; }
-    bool isArray() const noexcept                                       { return true; }
+    String toString (const ValueUnion&) const override                           { return "[Array]"; }
+    ReferenceCountedObject* toObject (const ValueUnion&) const noexcept override { return nullptr; }
+    bool isArray() const noexcept override                                       { return true; }
 
-    Array<var>* toArray (const ValueUnion& data) const noexcept
+    Array<var>* toArray (const ValueUnion& data) const noexcept override
     {
         if (RefCountedArray* a = dynamic_cast<RefCountedArray*> (data.objectValue))
             return &(a->array);
@@ -302,14 +312,25 @@ public:
         return nullptr;
     }
 
-    bool equals (const ValueUnion& data, const ValueUnion& otherData, const VariantType& otherType) const noexcept
+    bool equals (const ValueUnion& data, const ValueUnion& otherData, const VariantType& otherType) const noexcept override
     {
         const Array<var>* const thisArray = toArray (data);
         const Array<var>* const otherArray = otherType.toArray (otherData);
         return thisArray == otherArray || (thisArray != nullptr && otherArray != nullptr && *otherArray == *thisArray);
     }
 
-    void writeToStream (const ValueUnion& data, OutputStream& output) const
+    var clone (const var& original) const override
+    {
+        Array<var> arrayCopy;
+
+        if (const Array<var>* array = toArray (original.value))
+            for (int i = 0; i < array->size(); ++i)
+                arrayCopy.add (array->getReference(i).clone());
+
+        return var (arrayCopy);
+    }
+
+    void writeToStream (const ValueUnion& data, OutputStream& output) const override
     {
         if (const Array<var>* array = toArray (data))
         {
@@ -344,20 +365,20 @@ public:
 
     static const VariantType_Binary instance;
 
-    void cleanUp (ValueUnion& data) const noexcept                      { delete data.binaryValue; }
-    void createCopy (ValueUnion& dest, const ValueUnion& source) const  { dest.binaryValue = new MemoryBlock (*source.binaryValue); }
+    void cleanUp (ValueUnion& data) const noexcept override                      { delete data.binaryValue; }
+    void createCopy (ValueUnion& dest, const ValueUnion& source) const override  { dest.binaryValue = new MemoryBlock (*source.binaryValue); }
 
-    String toString (const ValueUnion& data) const                      { return data.binaryValue->toBase64Encoding(); }
-    bool isBinary() const noexcept                                      { return true; }
-    MemoryBlock* toBinary (const ValueUnion& data) const noexcept       { return data.binaryValue; }
+    String toString (const ValueUnion& data) const override                      { return data.binaryValue->toBase64Encoding(); }
+    bool isBinary() const noexcept override                                      { return true; }
+    MemoryBlock* toBinary (const ValueUnion& data) const noexcept override       { return data.binaryValue; }
 
-    bool equals (const ValueUnion& data, const ValueUnion& otherData, const VariantType& otherType) const noexcept
+    bool equals (const ValueUnion& data, const ValueUnion& otherData, const VariantType& otherType) const noexcept override
     {
         const MemoryBlock* const otherBlock = otherType.toBinary (otherData);
         return otherBlock != nullptr && *otherBlock == *data.binaryValue;
     }
 
-    void writeToStream (const ValueUnion& data, OutputStream& output) const
+    void writeToStream (const ValueUnion& data, OutputStream& output) const override
     {
         output.writeCompressedInt (1 + (int) data.binaryValue->getSize());
         output.writeByte (varMarker_Binary);
@@ -372,16 +393,16 @@ public:
     VariantType_Method() noexcept {}
     static const VariantType_Method instance;
 
-    String toString (const ValueUnion&) const               { return "Method"; }
-    bool toBool (const ValueUnion& data) const noexcept     { return data.methodValue != nullptr; }
-    bool isMethod() const noexcept                          { return true; }
+    String toString (const ValueUnion&) const override               { return "Method"; }
+    bool toBool (const ValueUnion& data) const noexcept override     { return data.methodValue != nullptr; }
+    bool isMethod() const noexcept override                          { return true; }
 
-    bool equals (const ValueUnion& data, const ValueUnion& otherData, const VariantType& otherType) const noexcept
+    bool equals (const ValueUnion& data, const ValueUnion& otherData, const VariantType& otherType) const noexcept override
     {
         return otherType.isMethod() && otherData.methodValue == data.methodValue;
     }
 
-    void writeToStream (const ValueUnion&, OutputStream& output) const
+    void writeToStream (const ValueUnion&, OutputStream& output) const override
     {
         jassertfalse; // Can't write a method to a stream!
         output.writeCompressedInt (0);
@@ -542,6 +563,11 @@ bool operator!= (const var& v1, const String& v2)           { return v1.toString
 bool operator== (const var& v1, const char* const v2)       { return v1.toString() == v2; }
 bool operator!= (const var& v1, const char* const v2)       { return v1.toString() != v2; }
 
+//==============================================================================
+var var::clone() const noexcept
+{
+    return type->clone (*this);
+}
 
 //==============================================================================
 var var::operator[] (const Identifier propertyName) const

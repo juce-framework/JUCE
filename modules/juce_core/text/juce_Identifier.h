@@ -77,10 +77,10 @@ public:
     String toString() const                                             { return name; }
 
     /** Returns this identifier's raw string pointer. */
-    operator const String::CharPointerType() const noexcept             { return name; }
+    operator String::CharPointerType() const noexcept                   { return name; }
 
     /** Returns this identifier's raw string pointer. */
-    const String::CharPointerType getCharPointer() const noexcept       { return name; }
+    String::CharPointerType getCharPointer() const noexcept             { return name; }
 
     /** Returns this identifier as a StringRef. */
     operator StringRef() const noexcept                                 { return name; }

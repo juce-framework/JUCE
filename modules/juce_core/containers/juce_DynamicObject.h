@@ -104,6 +104,15 @@ public:
     /** Returns the NamedValueSet that holds the object's properties. */
     NamedValueSet& getProperties() noexcept     { return properties; }
 
+    //==============================================================================
+    /** Returns a clone of this object.
+        The default implementation of this method just returns a new DynamicObject
+        with a (deep) copy of all of its properties. Subclasses can override this to
+        implement their own custom copy routines.
+    */
+    virtual Ptr clone();
+
+    //==============================================================================
     /** Writes this object to a text stream in JSON format.
         This method is used by JSON::toString and JSON::writeToStream, and you should
         never need to call it directly, but it's virtual so that custom object types

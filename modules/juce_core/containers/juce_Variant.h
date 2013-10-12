@@ -171,6 +171,12 @@ public:
     /** Returns true if this var has the same type as the one supplied. */
     bool hasSameTypeAs (const var& other) const noexcept;
 
+    /** Returns a deep copy of this object.
+        For simple types this just returns a copy, but if the object contains any arrays
+        or DynamicObjects, they will be cloned (recursively).
+    */
+    var clone() const noexcept;
+
     //==============================================================================
     /** If the var is an array, this returns the number of elements.
         If the var isn't actually an array, this will return 0.
