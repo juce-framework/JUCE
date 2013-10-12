@@ -51,14 +51,23 @@ public:
     */
     ~ChildProcess();
 
+    /** These flags are used by the start() methods. */
+    enum StreamFlags
+    {
+        wantStdOut = 1,
+        wantStdErr = 2
+    };
+
     /** Attempts to launch a child process command.
 
         The command should be the name of the executable file, followed by any arguments
         that are required.
         If the process has already been launched, this will launch it again. If a problem
         occurs, the method will return false.
+        The streamFlags is a combinations of values to indicate which of the child's output
+        streams should be read and returned by readProcessOutput().
     */
-    bool start (const String& command);
+    bool start (const String& command, int streamFlags = wantStdOut | wantStdErr);
 
     /** Attempts to launch a child process command.
 
@@ -66,8 +75,10 @@ public:
         arguments that are needed.
         If the process has already been launched, this will launch it again. If a problem
         occurs, the method will return false.
+        The streamFlags is a combinations of values to indicate which of the child's output
+        streams should be read and returned by readProcessOutput().
     */
-    bool start (const StringArray& arguments);
+    bool start (const StringArray& arguments, int streamFlags = wantStdOut | wantStdErr);
 
     /** Returns true if the child process is alive. */
     bool isRunning() const;

@@ -126,10 +126,9 @@ void FileChooser::showPlatformDialog (Array<File>& results,
             args.add ("--filename=" + file.getFileName());
     }
 
-    args.add ("2>/dev/null");
-
     ChildProcess child;
-    if (child.start (args))
+
+    if (child.start (args, ChildProcess::wantStdOut))
     {
         const String result (child.readAllProcessOutput().trim());
 

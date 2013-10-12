@@ -444,7 +444,7 @@ void InterProcessLock::exit()
 class ChildProcess::ActiveProcess
 {
 public:
-    ActiveProcess (const String& command)
+    ActiveProcess (const String& command, int streamFlags)
         : ok (false), readPipe (0), writePipe (0)
     {
         SECURITY_ATTRIBUTES securityAtts = { 0 };
@@ -456,8 +456,9 @@ public:
         {
             STARTUPINFOW startupInfo = { 0 };
             startupInfo.cb = sizeof (startupInfo);
-            startupInfo.hStdError  = writePipe;
-            startupInfo.hStdOutput = writePipe;
+
+            startupInfo.hStdOutput = (streamFlags | wantStdOut) != 0 ? writePipe : 0;
+            startupInfo.hStdError  = (streamFlags | wantStdErr) != 0 ? writePipe : 0;
             startupInfo.dwFlags = STARTF_USESTDHANDLES;
 
             ok = CreateProcess (nullptr, const_cast <LPWSTR> (command.toWideCharPointer()),
@@ -535,9 +536,9 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ActiveProcess)
 };
 
-bool ChildProcess::start (const String& command)
+bool ChildProcess::start (const String& command, int streamFlags)
 {
-    activeProcess = new ActiveProcess (command);
+    activeProcess = new ActiveProcess (command, streamFlags);
 
     if (! activeProcess->ok)
         activeProcess = nullptr;
@@ -545,9 +546,9 @@ bool ChildProcess::start (const String& command)
     return activeProcess != nullptr;
 }
 
-bool ChildProcess::start (const StringArray& args)
+bool ChildProcess::start (const StringArray& args, int streamFlags)
 {
-    return start (args.joinIntoString (" "));
+    return start (args.joinIntoString (" "), streamFlags);
 }
 
 bool ChildProcess::isRunning() const
