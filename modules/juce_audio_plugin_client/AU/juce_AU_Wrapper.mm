@@ -112,12 +112,12 @@ class JuceAUBaseClass   : public AUMIDIEffectBase
 public:
     JuceAUBaseClass (AudioComponentInstance comp)  : AUMIDIEffectBase (comp, false) {}
 
-    OSStatus MIDIEvent (UInt32 inStatus, UInt32 inData1, UInt32 inData2, UInt32 inOffsetSampleFrame) override
+    OSStatus MIDIEvent (UInt32 inStatus, UInt32 inData1, UInt32 inData2, UInt32 inOffsetSampleFrame)
     {
         return AUMIDIBase::MIDIEvent (inStatus, inData1, inData2, inOffsetSampleFrame);
     }
 
-    OSStatus SysEx (const UInt8* inData, UInt32 inLength) override
+    OSStatus SysEx (const UInt8* inData, UInt32 inLength)
     {
         return AUMIDIBase::SysEx (inData, inLength);
     }
@@ -645,7 +645,7 @@ public:
     // (these two slightly different versions are because the definition changed between 10.4 and 10.5)
     ComponentResult StartNote (MusicDeviceInstrumentID, MusicDeviceGroupID, NoteInstanceID&, UInt32, const MusicDeviceNoteParams&) { return noErr; }
     ComponentResult StartNote (MusicDeviceInstrumentID, MusicDeviceGroupID, NoteInstanceID*, UInt32, const MusicDeviceNoteParams&) { return noErr; }
-    ComponentResult StopNote (MusicDeviceGroupID, NoteInstanceID, UInt32) override   { return noErr; }
+    ComponentResult StopNote (MusicDeviceGroupID, NoteInstanceID, UInt32)   { return noErr; }
 
     //==============================================================================
     ComponentResult Initialize() override
