@@ -214,7 +214,8 @@ Drawable* DrawableButton::getOverImage() const noexcept
 
 Drawable* DrawableButton::getDownImage() const noexcept
 {
-    Drawable* const d = getToggleState() ? downImageOn : downImage;
+    if (Drawable* const d = getToggleState() ? downImageOn : downImage)
+        return d;
 
-    return d != nullptr ? d : getOverImage();
+    return getOverImage();
 }
