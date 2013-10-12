@@ -110,7 +110,6 @@ namespace juce
 {
 
 #include "containers/juce_AbstractFifo.cpp"
-#include "containers/juce_DynamicObject.cpp"
 #include "containers/juce_NamedValueSet.cpp"
 #include "containers/juce_PropertySet.cpp"
 #include "containers/juce_Variant.cpp"
@@ -121,6 +120,7 @@ namespace juce
 #include "files/juce_FileSearchPath.cpp"
 #include "files/juce_TemporaryFile.cpp"
 #include "json/juce_JSON.cpp"
+#include "containers/juce_DynamicObject.cpp"
 #include "logging/juce_FileLogger.cpp"
 #include "logging/juce_Logger.cpp"
 #include "maths/juce_BigInteger.cpp"

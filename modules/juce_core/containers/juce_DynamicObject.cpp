@@ -77,3 +77,43 @@ void DynamicObject::clear()
 {
     properties.clear();
 }
+
+void DynamicObject::writeAsJSON (OutputStream& out, const int indentLevel, const bool allOnOneLine)
+{
+    out << '{';
+    if (! allOnOneLine)
+        out << newLine;
+
+    for (LinkedListPointer<NamedValueSet::NamedValue>* i = &(properties.values);;)
+    {
+        if (NamedValueSet::NamedValue* const v = i->get())
+        {
+            if (! allOnOneLine)
+                JSONFormatter::writeSpaces (out, indentLevel + JSONFormatter::indentSize);
+
+            out << '"';
+            JSONFormatter::writeString (out, v->name);
+            out << "\": ";
+            JSONFormatter::write (out, v->value, indentLevel + JSONFormatter::indentSize, allOnOneLine);
+
+            if (v->nextListItem.get() != nullptr)
+            {
+                if (allOnOneLine)
+                    out << ", ";
+                else
+                    out << ',' << newLine;
+            }
+            else if (! allOnOneLine)
+                out << newLine;
+
+            i = &(v->nextListItem);
+        }
+        else
+            break;
+    }
+
+    if (! allOnOneLine)
+        JSONFormatter::writeSpaces (out, indentLevel);
+
+    out << '}';
+}

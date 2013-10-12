@@ -155,7 +155,7 @@ private:
     friend class LinkedListPointer<NamedValue>;
     LinkedListPointer<NamedValue> values;
 
-    friend class JSONFormatter;
+    friend class DynamicObject;
 };
 
 

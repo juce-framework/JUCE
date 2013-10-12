@@ -355,8 +355,8 @@ public:
         }
         else if (v.isObject())
         {
-            if (DynamicObject* const object = v.getDynamicObject())
-                writeObject (out, *object, indentLevel, allOnOneLine);
+            if (DynamicObject* object = v.getDynamicObject())
+                object->writeAsJSON (out, indentLevel, allOnOneLine);
             else
                 jassertfalse; // Only DynamicObjects can be converted to JSON!
         }
@@ -460,7 +460,7 @@ public:
         out << ']';
     }
 
-    static void writeObject (OutputStream& out, DynamicObject& object,
+/*    static void writeObject (OutputStream& out, DynamicObject& object,
                              const int indentLevel, const bool allOnOneLine)
     {
         NamedValueSet& props = object.getProperties();
@@ -503,7 +503,7 @@ public:
             writeSpaces (out, indentLevel);
 
         out << '}';
-    }
+    }*/
 
     enum { indentSize = 2 };
 };
