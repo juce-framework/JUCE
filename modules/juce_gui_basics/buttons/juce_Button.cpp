@@ -309,8 +309,8 @@ void Button::internalClickCallback (const ModifierKeys& modifiers)
 {
     if (clickTogglesState)
         setToggleState (radioGroupId != 0 || ! lastToggleState, sendNotification);
-
-    sendClickMessage (modifiers);
+    else
+        sendClickMessage (modifiers);
 }
 
 void Button::flashButtonState()
