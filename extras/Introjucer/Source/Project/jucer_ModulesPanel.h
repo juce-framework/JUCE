@@ -89,7 +89,7 @@ public:
         g.fillRect (0, 0, width, height - 1);
     }
 
-    void paintCell (Graphics& g, int rowNumber, int columnId, int width, int height, bool rowIsSelected) override
+    void paintCell (Graphics& g, int rowNumber, int columnId, int width, int height, bool /*rowIsSelected*/) override
     {
         String text;
         const String moduleID (project.getModules().getModuleID (rowNumber));

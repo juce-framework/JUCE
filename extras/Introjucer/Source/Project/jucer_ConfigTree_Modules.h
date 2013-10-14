@@ -304,7 +304,7 @@ public:
         return false;
     }
 
-    void filesDropped (const StringArray& files, int insertIndex) override
+    void filesDropped (const StringArray& files, int /*insertIndex*/) override
     {
         Array<ModuleDescription> modules;
 

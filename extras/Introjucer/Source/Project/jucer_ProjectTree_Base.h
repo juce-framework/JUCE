@@ -173,7 +173,7 @@ public:
             p->addFiles (files, insertIndex);
     }
 
-    virtual void moveSelectedItemsTo (OwnedArray <Project::Item>& selectedNodes, int insertIndex)
+    virtual void moveSelectedItemsTo (OwnedArray <Project::Item>&, int /*insertIndex*/)
     {
         jassertfalse;
     }
@@ -216,7 +216,7 @@ public:
     }
 
     //==============================================================================
-    void valueTreePropertyChanged (ValueTree& tree, const Identifier& property) override
+    void valueTreePropertyChanged (ValueTree& tree, const Identifier&) override
     {
         if (tree == item.state)
             repaintItem();
