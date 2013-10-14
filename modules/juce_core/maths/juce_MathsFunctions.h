@@ -295,6 +295,12 @@ inline int64 abs64 (const int64 n) noexcept
     return (n >= 0) ? n : -n;
 }
 
+#if JUCE_MSVC && ! defined (DOXYGEN)  // The MSVC libraries omit these functions for some reason...
+ template<typename Type> Type asinh (Type x) noexcept  { return std::log (x + std::sqrt (x * x + (Type) 1)); }
+ template<typename Type> Type acosh (Type x) noexcept  { return std::log (x + std::sqrt (x * x - (Type) 1)); }
+ template<typename Type> Type atanh (Type x) noexcept  { return (std::log (x + (Type) 1) - std::log (((Type) 1) - x)) / (Type) 2; }
+#endif
+
 //==============================================================================
 /** A predefined value for Pi, at double-precision.
     @see float_Pi
