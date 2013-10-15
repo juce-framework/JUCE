@@ -372,12 +372,17 @@ void MidiFile::writeTrack (OutputStream& mainOut, const int trackNum)
 
     int lastTick = 0;
     uint8 lastStatusByte = 0;
+    bool endOfTrackEventWritten = false;
 
     for (int i = 0; i < ms.getNumEvents(); ++i)
     {
         const MidiMessage& mm = ms.getEventPointer(i)->message;
 
-        if (! mm.isEndOfTrackMetaEvent())
+        if (mm.isEndOfTrackMetaEvent())
+        {
+            endOfTrackEventWritten = true;
+        }
+        else
         {
             const int tick = roundToInt (mm.getTimeStamp());
             const int delta = jmax (0, tick - lastTick);
@@ -412,6 +417,7 @@ void MidiFile::writeTrack (OutputStream& mainOut, const int trackNum)
         }
     }
 
+    if (! endOfTrackEventWritten)
     {
         out.writeByte (0); // (tick delta)
         const MidiMessage m (MidiMessage::endOfTrack());
