@@ -80,7 +80,7 @@ BinaryResources::BinaryResource* BinaryResources::findResource (const String& na
         if (resources.getUnchecked(i)->name == name)
             return resources.getUnchecked(i);
 
-    return 0;
+    return nullptr;
 }
 
 const BinaryResources::BinaryResource* BinaryResources::getResource (const String& name) const
@@ -94,7 +94,7 @@ const BinaryResources::BinaryResource* BinaryResources::getResourceForFile (cons
         if (resources.getUnchecked(i)->originalFilename == file.getFullPathName())
             return resources.getUnchecked(i);
 
-    return 0;
+    return nullptr;
 }
 
 bool BinaryResources::add (const String& name, const File& file)

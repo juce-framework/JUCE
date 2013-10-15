@@ -591,11 +591,10 @@ bool JucerDocument::reloadFromDocument()
 
     currentXML = newXML;
     stopTimer();
-    if (! loadFromXml (*currentXML))
-        return false;
 
     resources.loadFromCpp (getCppFile(), cppContent);
-    return true;
+
+    return loadFromXml (*currentXML);
 }
 
 XmlElement* JucerDocument::pullMetaDataFromCppFile (const String& cpp)
