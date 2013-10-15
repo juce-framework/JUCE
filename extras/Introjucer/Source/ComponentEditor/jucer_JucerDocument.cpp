@@ -54,10 +54,12 @@ JucerDocument::JucerDocument (SourceCodeDocument* c)
 
     IntrojucerApp::getCommandManager().commandStatusChanged();
     cpp->getCodeDocument().addListener (this);
+    IntrojucerApp::getApp().openDocumentManager.addListener (this);
 }
 
 JucerDocument::~JucerDocument()
 {
+    IntrojucerApp::getApp().openDocumentManager.removeListener (this);
     cpp->getCodeDocument().removeListener (this);
     IntrojucerApp::getCommandManager().commandStatusChanged();
 }
@@ -77,6 +79,11 @@ struct UserDocChangeTimer  : public Timer
 
     JucerDocument& doc;
 };
+
+bool JucerDocument::documentAboutToClose (OpenDocumentManager::Document* doc)
+{
+    return doc != cpp;
+}
 
 void JucerDocument::userEditedCpp()
 {
@@ -656,8 +663,8 @@ JucerDocument* JucerDocument::createForCppFile (Project* p, const File& file)
 {
     OpenDocumentManager& odm = IntrojucerApp::getApp().openDocumentManager;
 
-    if (SourceCodeDocument* cpp = dynamic_cast <SourceCodeDocument*> (odm.openFile (p, file)))
-        if (dynamic_cast <SourceCodeDocument*> (odm.openFile (p, file.withFileExtension (".h"))) != nullptr)
+    if (SourceCodeDocument* cpp = dynamic_cast<SourceCodeDocument*> (odm.openFile (p, file)))
+        if (dynamic_cast<SourceCodeDocument*> (odm.openFile (p, file.withFileExtension (".h"))) != nullptr)
             return createDocument (cpp);
 
     return nullptr;

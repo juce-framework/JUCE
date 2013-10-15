@@ -90,7 +90,8 @@ public:
         DocumentCloseListener() {}
         virtual ~DocumentCloseListener() {}
 
-        virtual void documentAboutToClose (Document* document) = 0;
+        // return false to force it to stop.
+        virtual bool documentAboutToClose (Document* document) = 0;
     };
 
     void addListener (DocumentCloseListener*);
@@ -143,7 +144,7 @@ public:
     XmlElement* createXML() const;
 
 private:
-    void documentAboutToClose (OpenDocumentManager::Document*);
+    bool documentAboutToClose (OpenDocumentManager::Document*);
 
     Array <OpenDocumentManager::Document*> previousDocs, nextDocs;
 };

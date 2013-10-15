@@ -41,7 +41,7 @@ public:
 
     OpenDocumentManager::Document* getDocument() const              { return document; }
 
-    void documentAboutToClose (OpenDocumentManager::Document*) override;
+    bool documentAboutToClose (OpenDocumentManager::Document*) override;
 
 protected:
     OpenDocumentManager::Document* document;

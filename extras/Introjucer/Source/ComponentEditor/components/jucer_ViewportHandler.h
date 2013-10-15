@@ -498,7 +498,7 @@ private:
             document.perform (new JucerCompFileChangeAction (component, *document.getComponentLayout(),
                                                              newFile.getRelativePathFrom (document.getCppFile().getParentDirectory())
                                                                     .replaceCharacter ('\\', '/')),
-                              "Change Jucer component file");
+                              "Change Introjucer component file");
         }
 
         File getFile() const

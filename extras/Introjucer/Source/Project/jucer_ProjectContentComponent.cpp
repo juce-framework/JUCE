@@ -357,9 +357,10 @@ void ProjectContentComponent::reloadLastOpenDocuments()
     }
 }
 
-void ProjectContentComponent::documentAboutToClose (OpenDocumentManager::Document* document)
+bool ProjectContentComponent::documentAboutToClose (OpenDocumentManager::Document* document)
 {
     hideDocument (document);
+    return true;
 }
 
 void ProjectContentComponent::changeListenerCallback (ChangeBroadcaster*)

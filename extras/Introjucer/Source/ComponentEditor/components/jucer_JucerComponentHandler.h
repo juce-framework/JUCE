@@ -37,7 +37,7 @@ class JucerComponentHandler  : public ComponentTypeHandler
 {
 public:
     JucerComponentHandler()
-        : ComponentTypeHandler ("Jucer Component", "xxx",
+        : ComponentTypeHandler ("Introjucer Component", "xxx",
                                 typeid (TestComponent), 300, 200)
     {}
 
@@ -145,11 +145,11 @@ public:
 
     static void setJucerComponentFile (JucerDocument& document, TestComponent* comp, const String& newFilename)
     {
-        jassert (comp != 0);
+        jassert (comp != nullptr);
 
-        if (comp != 0)
+        if (comp != nullptr)
             document.perform (new JucerCompFileChangeAction (comp, *document.getComponentLayout(), newFilename),
-                              "Change Jucer component file");
+                              "Change Introjucer component file");
     }
 
 private:

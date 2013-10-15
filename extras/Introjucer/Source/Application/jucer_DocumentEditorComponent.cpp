@@ -39,7 +39,7 @@ DocumentEditorComponent::~DocumentEditorComponent()
     IntrojucerApp::getApp().openDocumentManager.removeListener (this);
 }
 
-void DocumentEditorComponent::documentAboutToClose (OpenDocumentManager::Document* closingDoc)
+bool DocumentEditorComponent::documentAboutToClose (OpenDocumentManager::Document* closingDoc)
 {
     if (document == closingDoc)
     {
@@ -48,6 +48,8 @@ void DocumentEditorComponent::documentAboutToClose (OpenDocumentManager::Documen
         if (ProjectContentComponent* pcc = findParentComponentOfClass<ProjectContentComponent>())
             pcc->hideDocument (document);
     }
+
+    return true;
 }
 
 void DocumentEditorComponent::setEditedState (bool /*hasBeenEdited*/)
