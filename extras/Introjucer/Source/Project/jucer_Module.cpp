@@ -333,6 +333,11 @@ void LibraryModule::prepareExporter (ProjectExporter& exporter, ProjectSaver& pr
 
     exporter.addToExtraSearchPaths (exporter.getModuleFolderRelativeToProject (getID(), projectSaver).getParentDirectory());
 
+    const String extraDefs (moduleInfo.getPreprocessorDefs().trim());
+
+    if (extraDefs.isNotEmpty())
+        exporter.getExporterPreprocessorDefs() = exporter.getExporterPreprocessorDefsString() + "\n" + extraDefs;
+
     {
         Array<File> compiled;
         findAndAddCompiledCode (exporter, projectSaver, moduleInfo.getFolder(), compiled);

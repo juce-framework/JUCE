@@ -45,6 +45,7 @@ struct ModuleDescription
     String getDescription() const       { return moduleInfo [Ids::description].toString(); }
     String getLicense() const           { return moduleInfo [Ids::license].toString(); }
     String getHeaderName() const        { return moduleInfo [Ids::include].toString(); }
+    String getPreprocessorDefs() const  { return moduleInfo [Ids::defines].toString(); }
 
     File getFolder() const              { jassert (manifestFile != File::nonexistent); return manifestFile.getParentDirectory(); }
 
