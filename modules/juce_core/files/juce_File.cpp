@@ -352,8 +352,6 @@ bool File::isAbsolutePath (StringRef path)
 
 File File::getChildFile (StringRef relativePath) const
 {
-    jassert (! relativePath.isEmpty()); // passing in an empty filename?
-
     if (isAbsolutePath (relativePath))
         return File (String (relativePath.text));
 
