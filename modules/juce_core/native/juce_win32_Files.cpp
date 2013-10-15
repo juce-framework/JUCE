@@ -590,6 +590,11 @@ String File::getVersion() const
 }
 
 //==============================================================================
+bool File::isLink() const
+{
+    return hasFileExtension (".lnk");
+}
+
 File File::getLinkedTarget() const
 {
     File result (*this);
@@ -600,8 +605,8 @@ File File::getLinkedTarget() const
     else if (! hasFileExtension (".lnk"))
         return result;
 
-    ComSmartPtr <IShellLink> shellLink;
-    ComSmartPtr <IPersistFile> persistFile;
+    ComSmartPtr<IShellLink> shellLink;
+    ComSmartPtr<IPersistFile> persistFile;
 
     if (SUCCEEDED (shellLink.CoCreateInstance (CLSID_ShellLink))
          && SUCCEEDED (shellLink.QueryInterface (persistFile))
@@ -622,8 +627,8 @@ bool File::createLink (const String& description, const File& linkFileToCreate) 
 {
     linkFileToCreate.deleteFile();
 
-    ComSmartPtr <IShellLink> shellLink;
-    ComSmartPtr <IPersistFile> persistFile;
+    ComSmartPtr<IShellLink> shellLink;
+    ComSmartPtr<IPersistFile> persistFile;
 
     return SUCCEEDED (shellLink.CoCreateInstance (CLSID_ShellLink))
         && SUCCEEDED (shellLink->SetPath (getFullPathName().toWideCharPointer()))

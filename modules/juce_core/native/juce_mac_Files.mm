@@ -275,17 +275,25 @@ String File::getVersion() const
 }
 
 //==============================================================================
-File File::getLinkedTarget() const
+static NSString* getFileLink (const String& path)
 {
    #if JUCE_IOS || (defined (MAC_OS_X_VERSION_10_5) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_5)
-    NSString* dest = [[NSFileManager defaultManager] destinationOfSymbolicLinkAtPath: juceStringToNS (getFullPathName()) error: nil];
+    return [[NSFileManager defaultManager] destinationOfSymbolicLinkAtPath: juceStringToNS (path) error: nil];
    #else
     // (the cast here avoids a deprecation warning)
-    NSString* dest = [((id) [NSFileManager defaultManager]) pathContentOfSymbolicLinkAtPath: juceStringToNS (getFullPathName())];
+    return [((id) [NSFileManager defaultManager]) pathContentOfSymbolicLinkAtPath: juceStringToNS (path)];
    #endif
+}
 
-    if (dest != nil)
-        return File (nsStringToJuce (dest));
+bool File::isLink() const
+{
+    return getFileLink (fullPath) != nil;
+}
+
+File File::getLinkedTarget() const
+{
+    if (NSString* dest = getFileLink (fullPath))
+        return getSiblingFile (nsStringToJuce (dest));
 
     return *this;
 }

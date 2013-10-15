@@ -198,6 +198,7 @@ namespace juce
 
 //==============================================================================
 #elif JUCE_LINUX
+#include "native/juce_linux_CommonFile.cpp"
 #include "native/juce_linux_Files.cpp"
 #include "native/juce_linux_Network.cpp"
 #include "native/juce_linux_SystemStats.cpp"
@@ -205,6 +206,7 @@ namespace juce
 
 //==============================================================================
 #elif JUCE_ANDROID
+#include "native/juce_linux_CommonFile.cpp"
 #include "native/juce_android_Files.cpp"
 #include "native/juce_android_Misc.cpp"
 #include "native/juce_android_Network.cpp"
