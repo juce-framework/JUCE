@@ -89,9 +89,8 @@ MidiKeyboardComponent::MidiKeyboardComponent (MidiKeyboardState& s,
     for (int i = 0; keymap[i] != 0; ++i)
         setKeyPressForNote (KeyPress (keymap[i], 0, 0), i);
 
-    const int numSources = Desktop::getInstance().getNumMouseSources();
-    mouseOverNotes.insertMultiple (0, -1, numSources);
-    mouseDownNotes.insertMultiple (0, -1, numSources);
+    mouseOverNotes.insertMultiple (0, -1, 32);
+    mouseDownNotes.insertMultiple (0, -1, 32);
 
     setOpaque (true);
     setWantsKeyboardFocus (true);
