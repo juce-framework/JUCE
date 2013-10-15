@@ -379,42 +379,38 @@ void MidiFile::writeTrack (OutputStream& mainOut, const int trackNum)
         const MidiMessage& mm = ms.getEventPointer(i)->message;
 
         if (mm.isEndOfTrackMetaEvent())
-        {
             endOfTrackEventWritten = true;
-        }
-        else
+
+        const int tick = roundToInt (mm.getTimeStamp());
+        const int delta = jmax (0, tick - lastTick);
+        MidiFileHelpers::writeVariableLengthInt (out, (uint32) delta);
+        lastTick = tick;
+
+        const uint8* data = mm.getRawData();
+        int dataSize = mm.getRawDataSize();
+
+        const uint8 statusByte = data[0];
+
+        if (statusByte == lastStatusByte
+             && (statusByte & 0xf0) != 0xf0
+             && dataSize > 1
+             && i > 0)
         {
-            const int tick = roundToInt (mm.getTimeStamp());
-            const int delta = jmax (0, tick - lastTick);
-            MidiFileHelpers::writeVariableLengthInt (out, (uint32) delta);
-            lastTick = tick;
-
-            const uint8* data = mm.getRawData();
-            int dataSize = mm.getRawDataSize();
-
-            const uint8 statusByte = data[0];
-
-            if (statusByte == lastStatusByte
-                 && (statusByte & 0xf0) != 0xf0
-                 && dataSize > 1
-                 && i > 0)
-            {
-                ++data;
-                --dataSize;
-            }
-            else if (statusByte == 0xf0)  // Write sysex message with length bytes.
-            {
-                out.writeByte ((char) statusByte);
-
-                ++data;
-                --dataSize;
-
-                MidiFileHelpers::writeVariableLengthInt (out, (uint32) dataSize);
-            }
-
-            out.write (data, (size_t) dataSize);
-            lastStatusByte = statusByte;
+            ++data;
+            --dataSize;
         }
+        else if (statusByte == 0xf0)  // Write sysex message with length bytes.
+        {
+            out.writeByte ((char) statusByte);
+
+            ++data;
+            --dataSize;
+
+            MidiFileHelpers::writeVariableLengthInt (out, (uint32) dataSize);
+        }
+
+        out.write (data, (size_t) dataSize);
+        lastStatusByte = statusByte;
     }
 
     if (! endOfTrackEventWritten)
