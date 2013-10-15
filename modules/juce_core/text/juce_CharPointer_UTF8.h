@@ -118,6 +118,7 @@ public:
     /** Moves this pointer along to the next character in the string. */
     CharPointer_UTF8& operator++() noexcept
     {
+        jassert (*data != 0); // trying to advance past the end of the string?
         const signed char n = (signed char) *data++;
 
         if (n < 0)

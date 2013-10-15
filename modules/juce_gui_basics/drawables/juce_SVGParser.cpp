@@ -965,7 +965,7 @@ private:
 
             if (! openBrace.isEmpty())
             {
-                String::CharPointerType closeBrace = CharacterFunctions::find (openBrace, CharPointer_ASCII ("}"));
+                String::CharPointerType closeBrace = CharacterFunctions::find (openBrace, (juce_wchar) '}');
 
                 if (closeBrace != openBrace)
                 {

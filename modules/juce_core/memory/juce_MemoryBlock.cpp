@@ -382,7 +382,7 @@ static const char base64DecodingTable[] =
 
 bool MemoryBlock::fromBase64Encoding (StringRef s)
 {
-    String::CharPointerType dot (CharacterFunctions::find (s.text, CharPointer_ASCII (".")));
+    String::CharPointerType dot (CharacterFunctions::find (s.text, (juce_wchar) '.'));
 
     if (dot.isEmpty())
         return false;

@@ -428,12 +428,14 @@ public:
     {
         for (;;)
         {
-            const int c1 = (int) s1.toUpperCase(); ++s1;
-            const int c2 = (int) s2.toUpperCase(); ++s2;
+            const int c1 = (int) s1.toUpperCase();
+            const int c2 = (int) s2.toUpperCase();
             const int diff = c1 - c2;
 
             if (diff != 0)  return diff < 0 ? -1 : 1;
             if (c1 == 0)    break;
+
+             ++s1; ++s2;
         }
 
         return 0;
@@ -445,12 +447,14 @@ public:
     {
         while (--maxChars >= 0)
         {
-            const int c1 = (int) s1.toUpperCase(); ++s1;
-            const int c2 = (int) s2.toUpperCase(); ++s2;
+            const int c1 = (int) s1.toUpperCase();
+            const int c2 = (int) s2.toUpperCase();
             const int diff = c1 - c2;
 
             if (diff != 0)  return diff < 0 ? -1 : 1;
             if (c1 == 0)    break;
+
+             ++s1; ++s2;
         }
 
         return 0;
@@ -489,6 +493,24 @@ public:
         while (textToSearch.compareUpTo (substringToLookFor, substringLength) != 0
                  && ! textToSearch.isEmpty())
             ++textToSearch;
+
+        return textToSearch;
+    }
+
+    /** Returns a pointer to the first occurrence of a substring in a string.
+        If the substring is not found, this will return a pointer to the string's
+        null terminator.
+    */
+    template <typename CharPointerType>
+    static CharPointerType find (CharPointerType textToSearch, const juce_wchar charToLookFor) noexcept
+    {
+        for (;; ++textToSearch)
+        {
+            const juce_wchar c = *textToSearch;
+
+            if (c == charToLookFor || c == 0)
+                break;
+        }
 
         return textToSearch;
     }
