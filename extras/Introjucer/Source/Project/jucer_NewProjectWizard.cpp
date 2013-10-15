@@ -616,7 +616,14 @@ struct NewProjectWizardClasses
             else
             {
                 if (MainWindow* mw = dynamic_cast<MainWindow*> (getTopLevelComponent()))
-                    IntrojucerApp::getApp().mainWindowList.closeWindow (mw);
+                {
+               #if ! JUCE_MAC
+                    if (IntrojucerApp::getApp().mainWindowList.windows.size() == 1)
+                        mw->setProject (nullptr);
+                    else
+               #endif
+                        IntrojucerApp::getApp().mainWindowList.closeWindow (mw);
+                }
             }
         }
 
