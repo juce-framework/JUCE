@@ -591,7 +591,7 @@ public:
         The processor will not take ownership of the object, so the caller must delete it when
         it is no longer being used.
     */
-    void setPlayHead (AudioPlayHead* newPlayHead) noexcept;
+    virtual void setPlayHead (AudioPlayHead* newPlayHead);
 
     //==============================================================================
     /** This is called by the processor to specify its details before being played. */

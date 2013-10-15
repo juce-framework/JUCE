@@ -55,7 +55,7 @@ AudioProcessor::~AudioProcessor()
    #endif
 }
 
-void AudioProcessor::setPlayHead (AudioPlayHead* const newPlayHead) noexcept
+void AudioProcessor::setPlayHead (AudioPlayHead* const newPlayHead)
 {
     playHead = newPlayHead;
 }
