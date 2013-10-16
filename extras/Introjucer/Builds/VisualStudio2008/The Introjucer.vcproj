@@ -1132,8 +1132,8 @@
           </File>
           <File RelativePath="..\..\..\..\modules\juce_core\xml\juce_XmlElement.h"/>
         </Filter>
-        <Filter Name="json">
-          <File RelativePath="..\..\..\..\modules\juce_core\json\juce_JSON.cpp">
+        <Filter Name="javascript">
+          <File RelativePath="..\..\..\..\modules\juce_core\javascript\juce_Javascript.cpp">
             <FileConfiguration Name="Debug|Win32"
                                ExcludedFromBuild="true">
               <Tool Name="VCCLCompilerTool"/>
@@ -1143,7 +1143,18 @@
               <Tool Name="VCCLCompilerTool"/>
             </FileConfiguration>
           </File>
-          <File RelativePath="..\..\..\..\modules\juce_core\json\juce_JSON.h"/>
+          <File RelativePath="..\..\..\..\modules\juce_core\javascript\juce_Javascript.h"/>
+          <File RelativePath="..\..\..\..\modules\juce_core\javascript\juce_JSON.cpp">
+            <FileConfiguration Name="Debug|Win32"
+                               ExcludedFromBuild="true">
+              <Tool Name="VCCLCompilerTool"/>
+            </FileConfiguration>
+            <FileConfiguration Name="Release|Win32"
+                               ExcludedFromBuild="true">
+              <Tool Name="VCCLCompilerTool"/>
+            </FileConfiguration>
+          </File>
+          <File RelativePath="..\..\..\..\modules\juce_core\javascript\juce_JSON.h"/>
         </Filter>
         <Filter Name="zip">
           <File RelativePath="..\..\..\..\modules\juce_core\zip\juce_GZIPCompressorOutputStream.cpp">
@@ -1271,6 +1282,16 @@
             </FileConfiguration>
           </File>
           <File RelativePath="..\..\..\..\modules\juce_core\native\juce_BasicNativeHeaders.h"/>
+          <File RelativePath="..\..\..\..\modules\juce_core\native\juce_linux_CommonFile.cpp">
+            <FileConfiguration Name="Debug|Win32"
+                               ExcludedFromBuild="true">
+              <Tool Name="VCCLCompilerTool"/>
+            </FileConfiguration>
+            <FileConfiguration Name="Release|Win32"
+                               ExcludedFromBuild="true">
+              <Tool Name="VCCLCompilerTool"/>
+            </FileConfiguration>
+          </File>
           <File RelativePath="..\..\..\..\modules\juce_core\native\juce_linux_Files.cpp">
             <FileConfiguration Name="Debug|Win32"
                                ExcludedFromBuild="true">

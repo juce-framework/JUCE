@@ -1224,11 +1224,19 @@
       <Option compile="0"/>
       <Option link="0"/>
     </Unit>
-    <Unit filename="../../../../modules/juce_core/json/juce_JSON.cpp">
+    <Unit filename="../../../../modules/juce_core/javascript/juce_Javascript.cpp">
       <Option compile="0"/>
       <Option link="0"/>
     </Unit>
-    <Unit filename="../../../../modules/juce_core/json/juce_JSON.h">
+    <Unit filename="../../../../modules/juce_core/javascript/juce_Javascript.h">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../../../modules/juce_core/javascript/juce_JSON.cpp">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../../../modules/juce_core/javascript/juce_JSON.h">
       <Option compile="0"/>
       <Option link="0"/>
     </Unit>
@@ -1309,6 +1317,10 @@
       <Option link="0"/>
     </Unit>
     <Unit filename="../../../../modules/juce_core/native/juce_BasicNativeHeaders.h">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../../../modules/juce_core/native/juce_linux_CommonFile.cpp">
       <Option compile="0"/>
       <Option link="0"/>
     </Unit>
