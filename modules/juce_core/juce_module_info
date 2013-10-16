@@ -25,7 +25,7 @@
                       "logging/*",
                       "system/*",
                       "xml/*",
-                      "json/*",
+                      "javascript/*",
                       "zip/*",
                       "unit_tests/*",
                       "misc/*",
