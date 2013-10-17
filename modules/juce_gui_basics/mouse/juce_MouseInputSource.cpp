@@ -64,18 +64,18 @@ public:
         {
             pos = peer->globalToLocal (pos);
             Component& peerComp = peer->getComponent();
-            return comp.getLocalPoint (&peerComp, Component::ComponentHelpers::unscaledScreenPosToScaled (peerComp, pos));
+            return comp.getLocalPoint (&peerComp, ScalingHelpers::unscaledScreenPosToScaled (peerComp, pos));
         }
 
-        return comp.getLocalPoint (nullptr, Component::ComponentHelpers::unscaledScreenPosToScaled (comp, pos));
+        return comp.getLocalPoint (nullptr, ScalingHelpers::unscaledScreenPosToScaled (comp, pos));
     }
 
     Component* findComponentAt (Point<int> screenPos)
     {
         if (ComponentPeer* const peer = getPeer())
         {
-            Point<int> relativePos (Component::ComponentHelpers::unscaledScreenPosToScaled (peer->getComponent(),
-                                                                                            peer->globalToLocal (screenPos)));
+            Point<int> relativePos (ScalingHelpers::unscaledScreenPosToScaled (peer->getComponent(),
+                                                                               peer->globalToLocal (screenPos)));
             Component& comp = peer->getComponent();
 
             // (the contains() call is needed to test for overlapping desktop windows)
@@ -90,14 +90,14 @@ public:
     {
         // This needs to return the live position if possible, but it mustn't update the lastScreenPos
         // value, because that can cause continuity problems.
-        return Component::ComponentHelpers::unscaledScreenPosToScaled
+        return ScalingHelpers::unscaledScreenPosToScaled
                     (unboundedMouseOffset + (isMouseDevice ? MouseInputSource::getCurrentRawMousePosition()
                                                            : lastScreenPos));
     }
 
     void setScreenPosition (Point<int> p)
     {
-        MouseInputSource::setRawMousePosition (Component::ComponentHelpers::scaledScreenPosToUnscaled (p));
+        MouseInputSource::setRawMousePosition (ScalingHelpers::scaledScreenPosToUnscaled (p));
     }
 
     //==============================================================================
@@ -345,7 +345,7 @@ public:
 
     //==============================================================================
     Time getLastMouseDownTime() const noexcept              { return mouseDowns[0].time; }
-    Point<int> getLastMouseDownPosition() const noexcept    { return Component::ComponentHelpers::unscaledScreenPosToScaled (mouseDowns[0].position); }
+    Point<int> getLastMouseDownPosition() const noexcept    { return ScalingHelpers::unscaledScreenPosToScaled (mouseDowns[0].position); }
 
     int getNumberOfMultipleClicks() const noexcept
     {

@@ -76,7 +76,7 @@ bool ComponentPeer::isValidPeer (const ComponentPeer* const peer) noexcept
 
 void ComponentPeer::updateBounds()
 {
-    setBounds (Component::ComponentHelpers::scaledScreenPosToUnscaled (component, component.getBoundsInParent()), false);
+    setBounds (ScalingHelpers::scaledScreenPosToUnscaled (component, component.getBoundsInParent()), false);
 }
 
 //==============================================================================
@@ -295,17 +295,17 @@ void ComponentPeer::handleMovedOrResized()
     {
         const WeakReference<Component> deletionChecker (&component);
 
-        Rectangle<int> newBounds (getBounds());
+        Rectangle<int> newBounds (Component::ComponentHelpers::rawPeerPositionToLocal (component, getBounds()));
         Rectangle<int> oldBounds (component.getBounds());
 
-        oldBounds = Component::ComponentHelpers::localPositionToRawPeerPos (component, oldBounds);
+//        oldBounds = Component::ComponentHelpers::localPositionToRawPeerPos (component, oldBounds);
 
         const bool wasMoved   = (oldBounds.getPosition() != newBounds.getPosition());
         const bool wasResized = (oldBounds.getWidth() != newBounds.getWidth() || oldBounds.getHeight() != newBounds.getHeight());
 
         if (wasMoved || wasResized)
         {
-            newBounds = Component::ComponentHelpers::rawPeerPositionToLocal (component, newBounds);
+//            newBounds = Component::ComponentHelpers::rawPeerPositionToLocal (component, newBounds);
 
             component.bounds = newBounds;
 
@@ -403,7 +403,7 @@ Rectangle<int> ComponentPeer::globalToLocal (const Rectangle<int>& screenPositio
 
 Rectangle<int> ComponentPeer::getAreaCoveredBy (Component& subComponent) const
 {
-    return Component::ComponentHelpers::scaledScreenPosToUnscaled
+    return ScalingHelpers::scaledScreenPosToUnscaled
             (component, component.getLocalArea (&subComponent, subComponent.getLocalBounds()));
 }
 

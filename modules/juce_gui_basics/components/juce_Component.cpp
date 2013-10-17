@@ -173,51 +173,9 @@ private:
     JUCE_DECLARE_NON_COPYABLE (MouseListenerList)
 };
 
-
 //==============================================================================
-struct Component::ComponentHelpers
+struct ScalingHelpers
 {
-   #if JUCE_MODAL_LOOPS_PERMITTED
-    static void* runModalLoopCallback (void* userData)
-    {
-        return (void*) (pointer_sized_int) static_cast <Component*> (userData)->runModalLoop();
-    }
-   #endif
-
-    static Identifier getColourPropertyId (int colourId)
-    {
-        char reversedHex[32];
-        char* t = reversedHex;
-
-        for (unsigned int v = (unsigned int) colourId;;)
-        {
-            *t++ = "0123456789abcdef" [(int) (v & 15)];
-            v >>= 4;
-
-            if (v == 0)
-                break;
-        }
-
-        char destBuffer[32];
-        char* dest = destBuffer;
-        memcpy (dest, "jcclr_", 6);
-        dest += 6;
-
-        while (t > reversedHex)
-            *dest++ = *--t;
-
-        *dest++ = 0;
-        return destBuffer;
-    }
-
-    //==============================================================================
-    static inline bool hitTest (Component& comp, Point<int> localPoint)
-    {
-        return isPositiveAndBelow (localPoint.x, comp.getWidth())
-            && isPositiveAndBelow (localPoint.y, comp.getHeight())
-            && comp.hitTest (localPoint.x, localPoint.y);
-    }
-
     template <typename PointOrRect>
     static PointOrRect unscaledScreenPosToScaled (float scale, PointOrRect pos) noexcept
     {
@@ -271,6 +229,51 @@ struct Component::ComponentHelpers
     {
         return scaledScreenPosToUnscaled (comp.getDesktopScaleFactor(), pos);
     }
+};
+
+//==============================================================================
+struct Component::ComponentHelpers
+{
+   #if JUCE_MODAL_LOOPS_PERMITTED
+    static void* runModalLoopCallback (void* userData)
+    {
+        return (void*) (pointer_sized_int) static_cast <Component*> (userData)->runModalLoop();
+    }
+   #endif
+
+    static Identifier getColourPropertyId (int colourId)
+    {
+        char reversedHex[32];
+        char* t = reversedHex;
+
+        for (unsigned int v = (unsigned int) colourId;;)
+        {
+            *t++ = "0123456789abcdef" [(int) (v & 15)];
+            v >>= 4;
+
+            if (v == 0)
+                break;
+        }
+
+        char destBuffer[32];
+        char* dest = destBuffer;
+        memcpy (dest, "jcclr_", 6);
+        dest += 6;
+
+        while (t > reversedHex)
+            *dest++ = *--t;
+
+        *dest++ = 0;
+        return destBuffer;
+    }
+
+    //==============================================================================
+    static inline bool hitTest (Component& comp, Point<int> localPoint)
+    {
+        return isPositiveAndBelow (localPoint.x, comp.getWidth())
+            && isPositiveAndBelow (localPoint.y, comp.getHeight())
+            && comp.hitTest (localPoint.x, localPoint.y);
+    }
 
     // converts an unscaled position within a peer to the local position within that peer's component
     template <typename PointOrRect>
@@ -279,7 +282,7 @@ struct Component::ComponentHelpers
         if (comp.isTransformed())
             pos = pos.transformedBy (comp.getTransform().inverted());
 
-        return unscaledScreenPosToScaled (comp, pos);
+        return ScalingHelpers::unscaledScreenPosToScaled (comp, pos);
     }
 
     // converts a position within a peer's component to the unscaled position within the peer
@@ -289,7 +292,7 @@ struct Component::ComponentHelpers
         if (comp.isTransformed())
             pos = pos.transformedBy (comp.getTransform());
 
-        return scaledScreenPosToUnscaled (comp, pos);
+        return ScalingHelpers::scaledScreenPosToUnscaled (comp, pos);
     }
 
     template <typename PointOrRect>
@@ -301,7 +304,8 @@ struct Component::ComponentHelpers
         if (comp.isOnDesktop())
         {
             if (ComponentPeer* peer = comp.getPeer())
-                pointInParentSpace = unscaledScreenPosToScaled (comp, peer->globalToLocal (scaledScreenPosToUnscaled (pointInParentSpace)));
+                pointInParentSpace = ScalingHelpers::unscaledScreenPosToScaled
+                                        (comp, peer->globalToLocal (ScalingHelpers::scaledScreenPosToUnscaled (pointInParentSpace)));
             else
                 jassertfalse;
         }
@@ -319,7 +323,8 @@ struct Component::ComponentHelpers
         if (comp.isOnDesktop())
         {
             if (ComponentPeer* peer = comp.getPeer())
-                pointInLocalSpace = unscaledScreenPosToScaled (peer->localToGlobal (scaledScreenPosToUnscaled (comp, pointInLocalSpace)));
+                pointInLocalSpace = ScalingHelpers::unscaledScreenPosToScaled
+                                        (peer->localToGlobal (ScalingHelpers::scaledScreenPosToUnscaled (comp, pointInLocalSpace)));
             else
                 jassertfalse;
         }
