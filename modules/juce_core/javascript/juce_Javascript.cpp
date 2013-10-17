@@ -285,7 +285,7 @@ struct JavascriptEngine::RootObject   : public DynamicObject
 
     struct ReturnStatement  : public Statement
     {
-        ReturnStatement (const CodeLocation& l, ExpPtr v) noexcept : Statement (l), returnValue (v) {}
+        ReturnStatement (const CodeLocation& l, Expression* v) noexcept : Statement (l), returnValue (v) {}
 
         ResultCode perform (const Scope& s, var* ret) const override
         {
@@ -334,7 +334,7 @@ struct JavascriptEngine::RootObject   : public DynamicObject
 
     struct DotOperator  : public Expression
     {
-        DotOperator (const CodeLocation& l, ExpPtr p, Identifier c) noexcept : Expression (l), parent (p), child (c) {}
+        DotOperator (const CodeLocation& l, ExpPtr& p, Identifier c) noexcept : Expression (l), parent (p), child (c) {}
 
         var getResult (const Scope& s) const override
         {
@@ -398,7 +398,7 @@ struct JavascriptEngine::RootObject   : public DynamicObject
 
     struct BinaryOperatorBase  : public Expression
     {
-        BinaryOperatorBase (const CodeLocation& l, ExpPtr a, ExpPtr b, TokenType op) noexcept
+        BinaryOperatorBase (const CodeLocation& l, ExpPtr& a, ExpPtr& b, TokenType op) noexcept
             : Expression (l), lhs (a), rhs (b), operation (op) {}
 
         ExpPtr lhs, rhs;
@@ -407,7 +407,7 @@ struct JavascriptEngine::RootObject   : public DynamicObject
 
     struct BinaryOperator  : public BinaryOperatorBase
     {
-        BinaryOperator (const CodeLocation& l, ExpPtr a, ExpPtr b, TokenType op) noexcept
+        BinaryOperator (const CodeLocation& l, ExpPtr& a, ExpPtr& b, TokenType op) noexcept
             : BinaryOperatorBase (l, a, b, op) {}
 
         virtual var getWithUndefinedArg() const                           { return var::undefined(); }
@@ -438,7 +438,7 @@ struct JavascriptEngine::RootObject   : public DynamicObject
 
     struct EqualsOp  : public BinaryOperator
     {
-        EqualsOp (const CodeLocation& l, ExpPtr a, ExpPtr b) noexcept : BinaryOperator (l, a, b, TokenTypes::equals) {}
+        EqualsOp (const CodeLocation& l, ExpPtr& a, ExpPtr& b) noexcept : BinaryOperator (l, a, b, TokenTypes::equals) {}
         var getWithUndefinedArg() const override                               { return true; }
         var getWithDoubles (double a, double b) const override                 { return a == b; }
         var getWithInts (int64 a, int64 b) const override                      { return a == b; }
@@ -448,7 +448,7 @@ struct JavascriptEngine::RootObject   : public DynamicObject
 
     struct NotEqualsOp  : public BinaryOperator
     {
-        NotEqualsOp (const CodeLocation& l, ExpPtr a, ExpPtr b) noexcept : BinaryOperator (l, a, b, TokenTypes::notEquals) {}
+        NotEqualsOp (const CodeLocation& l, ExpPtr& a, ExpPtr& b) noexcept : BinaryOperator (l, a, b, TokenTypes::notEquals) {}
         var getWithUndefinedArg() const override                               { return false; }
         var getWithDoubles (double a, double b) const override                 { return a != b; }
         var getWithInts (int64 a, int64 b) const override                      { return a != b; }
@@ -458,7 +458,7 @@ struct JavascriptEngine::RootObject   : public DynamicObject
 
     struct LessThanOp  : public BinaryOperator
     {
-        LessThanOp (const CodeLocation& l, ExpPtr a, ExpPtr b) noexcept : BinaryOperator (l, a, b, TokenTypes::lessThan) {}
+        LessThanOp (const CodeLocation& l, ExpPtr& a, ExpPtr& b) noexcept : BinaryOperator (l, a, b, TokenTypes::lessThan) {}
         var getWithDoubles (double a, double b) const override                 { return a < b; }
         var getWithInts (int64 a, int64 b) const override                      { return a < b; }
         var getWithStrings (const String& a, const String& b) const override   { return a < b; }
@@ -466,7 +466,7 @@ struct JavascriptEngine::RootObject   : public DynamicObject
 
     struct LessThanOrEqualOp  : public BinaryOperator
     {
-        LessThanOrEqualOp (const CodeLocation& l, ExpPtr a, ExpPtr b) noexcept : BinaryOperator (l, a, b, TokenTypes::lessThanOrEqual) {}
+        LessThanOrEqualOp (const CodeLocation& l, ExpPtr& a, ExpPtr& b) noexcept : BinaryOperator (l, a, b, TokenTypes::lessThanOrEqual) {}
         var getWithDoubles (double a, double b) const override                 { return a <= b; }
         var getWithInts (int64 a, int64 b) const override                      { return a <= b; }
         var getWithStrings (const String& a, const String& b) const override   { return a <= b; }
@@ -474,7 +474,7 @@ struct JavascriptEngine::RootObject   : public DynamicObject
 
     struct GreaterThanOp  : public BinaryOperator
     {
-        GreaterThanOp (const CodeLocation& l, ExpPtr a, ExpPtr b) noexcept : BinaryOperator (l, a, b, TokenTypes::greaterThan) {}
+        GreaterThanOp (const CodeLocation& l, ExpPtr& a, ExpPtr& b) noexcept : BinaryOperator (l, a, b, TokenTypes::greaterThan) {}
         var getWithDoubles (double a, double b) const override                 { return a > b; }
         var getWithInts (int64 a, int64 b) const override                      { return a > b; }
         var getWithStrings (const String& a, const String& b) const override   { return a > b; }
@@ -482,7 +482,7 @@ struct JavascriptEngine::RootObject   : public DynamicObject
 
     struct GreaterThanOrEqualOp  : public BinaryOperator
     {
-        GreaterThanOrEqualOp (const CodeLocation& l, ExpPtr a, ExpPtr b) noexcept : BinaryOperator (l, a, b, TokenTypes::greaterThanOrEqual) {}
+        GreaterThanOrEqualOp (const CodeLocation& l, ExpPtr& a, ExpPtr& b) noexcept : BinaryOperator (l, a, b, TokenTypes::greaterThanOrEqual) {}
         var getWithDoubles (double a, double b) const override                 { return a >= b; }
         var getWithInts (int64 a, int64 b) const override                      { return a >= b; }
         var getWithStrings (const String& a, const String& b) const override   { return a >= b; }
@@ -490,7 +490,7 @@ struct JavascriptEngine::RootObject   : public DynamicObject
 
     struct AdditionOp  : public BinaryOperator
     {
-        AdditionOp (const CodeLocation& l, ExpPtr a, ExpPtr b) noexcept : BinaryOperator (l, a, b, TokenTypes::plus) {}
+        AdditionOp (const CodeLocation& l, ExpPtr& a, ExpPtr& b) noexcept : BinaryOperator (l, a, b, TokenTypes::plus) {}
         var getWithDoubles (double a, double b) const override                 { return a + b; }
         var getWithInts (int64 a, int64 b) const override                      { return a + b; }
         var getWithStrings (const String& a, const String& b) const override   { return a + b; }
@@ -498,88 +498,88 @@ struct JavascriptEngine::RootObject   : public DynamicObject
 
     struct SubtractionOp  : public BinaryOperator
     {
-        SubtractionOp (const CodeLocation& l, ExpPtr a, ExpPtr b) noexcept : BinaryOperator (l, a, b, TokenTypes::minus) {}
+        SubtractionOp (const CodeLocation& l, ExpPtr& a, ExpPtr& b) noexcept : BinaryOperator (l, a, b, TokenTypes::minus) {}
         var getWithDoubles (double a, double b) const override { return a - b; }
         var getWithInts (int64 a, int64 b) const override      { return a - b; }
     };
 
     struct MultiplyOp  : public BinaryOperator
     {
-        MultiplyOp (const CodeLocation& l, ExpPtr a, ExpPtr b) noexcept : BinaryOperator (l, a, b, TokenTypes::times) {}
+        MultiplyOp (const CodeLocation& l, ExpPtr& a, ExpPtr& b) noexcept : BinaryOperator (l, a, b, TokenTypes::times) {}
         var getWithDoubles (double a, double b) const override { return a * b; }
         var getWithInts (int64 a, int64 b) const override      { return a * b; }
     };
 
     struct DivideOp  : public BinaryOperator
     {
-        DivideOp (const CodeLocation& l, ExpPtr a, ExpPtr b) noexcept : BinaryOperator (l, a, b, TokenTypes::divide) {}
+        DivideOp (const CodeLocation& l, ExpPtr& a, ExpPtr& b) noexcept : BinaryOperator (l, a, b, TokenTypes::divide) {}
         var getWithDoubles (double a, double b) const override  { return a / b; }
         var getWithInts (int64 a, int64 b) const override       { return a / b; }
     };
 
     struct ModuloOp  : public BinaryOperator
     {
-        ModuloOp (const CodeLocation& l, ExpPtr a, ExpPtr b) noexcept : BinaryOperator (l, a, b, TokenTypes::modulo) {}
+        ModuloOp (const CodeLocation& l, ExpPtr& a, ExpPtr& b) noexcept : BinaryOperator (l, a, b, TokenTypes::modulo) {}
         var getWithInts (int64 a, int64 b) const override   { return a % b; }
     };
 
     struct BitwiseOrOp  : public BinaryOperator
     {
-        BitwiseOrOp (const CodeLocation& l, ExpPtr a, ExpPtr b) noexcept : BinaryOperator (l, a, b, TokenTypes::bitwiseOr) {}
+        BitwiseOrOp (const CodeLocation& l, ExpPtr& a, ExpPtr& b) noexcept : BinaryOperator (l, a, b, TokenTypes::bitwiseOr) {}
         var getWithInts (int64 a, int64 b) const override   { return a | b; }
     };
 
     struct BitwiseAndOp  : public BinaryOperator
     {
-        BitwiseAndOp (const CodeLocation& l, ExpPtr a, ExpPtr b) noexcept : BinaryOperator (l, a, b, TokenTypes::bitwiseAnd) {}
+        BitwiseAndOp (const CodeLocation& l, ExpPtr& a, ExpPtr& b) noexcept : BinaryOperator (l, a, b, TokenTypes::bitwiseAnd) {}
         var getWithInts (int64 a, int64 b) const override   { return a & b; }
     };
 
     struct BitwiseXorOp  : public BinaryOperator
     {
-        BitwiseXorOp (const CodeLocation& l, ExpPtr a, ExpPtr b) noexcept : BinaryOperator (l, a, b, TokenTypes::bitwiseXor) {}
+        BitwiseXorOp (const CodeLocation& l, ExpPtr& a, ExpPtr& b) noexcept : BinaryOperator (l, a, b, TokenTypes::bitwiseXor) {}
         var getWithInts (int64 a, int64 b) const override   { return a ^ b; }
     };
 
     struct LeftShiftOp  : public BinaryOperator
     {
-        LeftShiftOp (const CodeLocation& l, ExpPtr a, ExpPtr b) noexcept : BinaryOperator (l, a, b, TokenTypes::leftShift) {}
+        LeftShiftOp (const CodeLocation& l, ExpPtr& a, ExpPtr& b) noexcept : BinaryOperator (l, a, b, TokenTypes::leftShift) {}
         var getWithInts (int64 a, int64 b) const override   { return ((int) a) << (int) b; }
     };
 
     struct RightShiftOp  : public BinaryOperator
     {
-        RightShiftOp (const CodeLocation& l, ExpPtr a, ExpPtr b) noexcept : BinaryOperator (l, a, b, TokenTypes::rightShift) {}
+        RightShiftOp (const CodeLocation& l, ExpPtr& a, ExpPtr& b) noexcept : BinaryOperator (l, a, b, TokenTypes::rightShift) {}
         var getWithInts (int64 a, int64 b) const override   { return ((int) a) >> (int) b; }
     };
 
     struct RightShiftUnsignedOp  : public BinaryOperator
     {
-        RightShiftUnsignedOp (const CodeLocation& l, ExpPtr a, ExpPtr b) noexcept : BinaryOperator (l, a, b, TokenTypes::rightShiftUnsigned) {}
+        RightShiftUnsignedOp (const CodeLocation& l, ExpPtr& a, ExpPtr& b) noexcept : BinaryOperator (l, a, b, TokenTypes::rightShiftUnsigned) {}
         var getWithInts (int64 a, int64 b) const override   { return (int) (((uint32) a) >> (int) b); }
     };
 
     struct LogicalAndOp  : public BinaryOperatorBase
     {
-        LogicalAndOp (const CodeLocation& l, ExpPtr a, ExpPtr b) noexcept : BinaryOperatorBase (l, a, b, TokenTypes::logicalAnd) {}
+        LogicalAndOp (const CodeLocation& l, ExpPtr& a, ExpPtr& b) noexcept : BinaryOperatorBase (l, a, b, TokenTypes::logicalAnd) {}
         var getResult (const Scope& s) const override       { return lhs->getResult (s) && rhs->getResult (s); }
     };
 
     struct LogicalOrOp  : public BinaryOperatorBase
     {
-        LogicalOrOp (const CodeLocation& l, ExpPtr a, ExpPtr b) noexcept : BinaryOperatorBase (l, a, b, TokenTypes::logicalOr) {}
+        LogicalOrOp (const CodeLocation& l, ExpPtr& a, ExpPtr& b) noexcept : BinaryOperatorBase (l, a, b, TokenTypes::logicalOr) {}
         var getResult (const Scope& s) const override       { return lhs->getResult (s) || rhs->getResult (s); }
     };
 
     struct TypeEqualsOp  : public BinaryOperatorBase
     {
-        TypeEqualsOp (const CodeLocation& l, ExpPtr a, ExpPtr b) noexcept : BinaryOperatorBase (l, a, b, TokenTypes::typeEquals) {}
+        TypeEqualsOp (const CodeLocation& l, ExpPtr& a, ExpPtr& b) noexcept : BinaryOperatorBase (l, a, b, TokenTypes::typeEquals) {}
         var getResult (const Scope& s) const override       { return areTypeEqual (lhs->getResult (s), rhs->getResult (s)); }
     };
 
     struct TypeNotEqualsOp  : public BinaryOperatorBase
     {
-        TypeNotEqualsOp (const CodeLocation& l, ExpPtr a, ExpPtr b) noexcept : BinaryOperatorBase (l, a, b, TokenTypes::typeNotEquals) {}
+        TypeNotEqualsOp (const CodeLocation& l, ExpPtr& a, ExpPtr& b) noexcept : BinaryOperatorBase (l, a, b, TokenTypes::typeNotEquals) {}
         var getResult (const Scope& s) const override       { return ! areTypeEqual (lhs->getResult (s), rhs->getResult (s)); }
     };
 
@@ -595,7 +595,7 @@ struct JavascriptEngine::RootObject   : public DynamicObject
 
     struct Assignment  : public Expression
     {
-        Assignment (const CodeLocation& l, ExpPtr dest, ExpPtr source) noexcept : Expression (l), target (dest), newValue (source) {}
+        Assignment (const CodeLocation& l, ExpPtr& dest, ExpPtr& source) noexcept : Expression (l), target (dest), newValue (source) {}
 
         var getResult (const Scope& s) const override
         {
@@ -609,7 +609,7 @@ struct JavascriptEngine::RootObject   : public DynamicObject
 
     struct SelfAssignment  : public Expression
     {
-        SelfAssignment (const CodeLocation& l, Expression* dest, ExpPtr source) noexcept
+        SelfAssignment (const CodeLocation& l, Expression* dest, Expression* source) noexcept
             : Expression (l), target (dest), newValue (source) {}
 
         var getResult (const Scope& s) const override
@@ -626,7 +626,7 @@ struct JavascriptEngine::RootObject   : public DynamicObject
 
     struct PostAssignment  : public SelfAssignment
     {
-        PostAssignment (const CodeLocation& l, Expression* dest, ExpPtr source) noexcept : SelfAssignment (l, dest, source) {}
+        PostAssignment (const CodeLocation& l, Expression* dest, Expression* source) noexcept : SelfAssignment (l, dest, source) {}
 
         var getResult (const Scope& s) const override
         {
@@ -1002,7 +1002,7 @@ struct JavascriptEngine::RootObject   : public DynamicObject
             ExpPtr lhs (parseLogicOperator());
 
             if (matchIf (TokenTypes::question))          return parseTerneryOperator (lhs);
-            if (matchIf (TokenTypes::assign))            return new Assignment (location, lhs, parseExpression());
+            if (matchIf (TokenTypes::assign))            { ExpPtr rhs (parseExpression()); return new Assignment (location, lhs, rhs); }
             if (matchIf (TokenTypes::plusEquals))        return parseInPlaceOpExpression<AdditionOp> (lhs);
             if (matchIf (TokenTypes::minusEquals))       return parseInPlaceOpExpression<SubtractionOp> (lhs);
             if (matchIf (TokenTypes::leftShiftEquals))   return parseInPlaceOpExpression<LeftShiftOp> (lhs);
@@ -1015,11 +1015,11 @@ struct JavascriptEngine::RootObject   : public DynamicObject
         void throwError (const String& err) const  { location.throwError (err); }
 
         template <typename OpType>
-        Expression* parseInPlaceOpExpression (ExpPtr lhs)
+        Expression* parseInPlaceOpExpression (ExpPtr& lhs)
         {
             ExpPtr rhs (parseExpression());
-            Expression* bareLHS = lhs.release(); // careful - bare pointer is deliberately alised
-            return new SelfAssignment (location, bareLHS, new OpType (location, bareLHS, rhs));
+            Expression* bareLHS = lhs; // careful - bare pointer is deliberately alised
+            return new SelfAssignment (location, bareLHS, new OpType (location, lhs, rhs));
         }
 
         BlockStatement* parseBlock()
@@ -1056,8 +1056,8 @@ struct JavascriptEngine::RootObject   : public DynamicObject
             return nullptr;
         }
 
-        Expression* matchEndOfStatement (ExpPtr e)  { if (currentType != TokenTypes::eof) match (TokenTypes::semicolon); return e.release(); }
-        Expression* matchCloseParen (ExpPtr e)      { match (TokenTypes::closeParen); return e.release(); }
+        Expression* matchEndOfStatement (Expression* ex)  { ExpPtr e (ex); if (currentType != TokenTypes::eof) match (TokenTypes::semicolon); return e.release(); }
+        Expression* matchCloseParen (Expression* ex)      { ExpPtr e (ex); match (TokenTypes::closeParen); return e.release(); }
 
         Statement* parseIf()
         {
@@ -1096,7 +1096,8 @@ struct JavascriptEngine::RootObject   : public DynamicObject
             if (name.isNull())
                 throwError ("Functions defined at statement-level must have a name");
 
-            return new Assignment (location, new UnqualifiedName (location, name), new LiteralValue (location, fn));
+            ExpPtr nm (new UnqualifiedName (location, name)), value (new LiteralValue (location, fn));
+            return new Assignment (location, nm, value);
         }
 
         Statement* parseForLoop()
@@ -1164,8 +1165,9 @@ struct JavascriptEngine::RootObject   : public DynamicObject
             return var (fo.release());
         }
 
-        Expression* parseFunctionCall (ScopedPointer<FunctionCall> s, ExpPtr function)
+        Expression* parseFunctionCall (FunctionCall* call, ExpPtr& function)
         {
+            ScopedPointer<FunctionCall> s (call);
             s->object = function;
             match (TokenTypes::openParen);
 
@@ -1179,8 +1181,10 @@ struct JavascriptEngine::RootObject   : public DynamicObject
             return matchCloseParen (s.release());
         }
 
-        Expression* parseSuffixes (ExpPtr input)
+        Expression* parseSuffixes (Expression* e)
         {
+            ExpPtr input (e);
+
             if (matchIf (TokenTypes::dot))
                 return parseSuffixes (new DotOperator (location, input, parseIdentifier()));
 
@@ -1279,20 +1283,22 @@ struct JavascriptEngine::RootObject   : public DynamicObject
         Expression* parsePreIncDec()
         {
             Expression* e = parseFactor(); // careful - bare pointer is deliberately alised
-            return new SelfAssignment (location, e, new OpType (location, e, new LiteralValue (location, (int) 1)));
+            ExpPtr lhs (e), one (new LiteralValue (location, (int) 1));
+            return new SelfAssignment (location, e, new OpType (location, lhs, one));
         }
 
         template <typename OpType>
-        Expression* parsePostIncDec (ExpPtr lhs)
+        Expression* parsePostIncDec (ExpPtr& lhs)
         {
             Expression* e = lhs.release(); // careful - bare pointer is deliberately alised
-            return new PostAssignment (location, e, new OpType (location, e, new LiteralValue (location, (int) 1)));
+            ExpPtr lhs2 (e), one (new LiteralValue (location, (int) 1));
+            return new PostAssignment (location, e, new OpType (location, lhs2, one));
         }
 
         Expression* parseUnary()
         {
-            if (matchIf (TokenTypes::minus))       return new SubtractionOp   (location, new LiteralValue (location, (int) 0), parseUnary());
-            if (matchIf (TokenTypes::logicalNot))  return new EqualsOp        (location, new LiteralValue (location, (int) 0), parseUnary());
+            if (matchIf (TokenTypes::minus))       { ExpPtr a (new LiteralValue (location, (int) 0)), b (parseUnary()); return new SubtractionOp   (location, a, b); }
+            if (matchIf (TokenTypes::logicalNot))  { ExpPtr a (new LiteralValue (location, (int) 0)), b (parseUnary()); return new EqualsOp        (location, a, b); }
             if (matchIf (TokenTypes::plusplus))    return parsePreIncDec<AdditionOp>();
             if (matchIf (TokenTypes::minusminus))  return parsePreIncDec<SubtractionOp>();
 
@@ -1305,9 +1311,9 @@ struct JavascriptEngine::RootObject   : public DynamicObject
 
             for (;;)
             {
-                if (matchIf (TokenTypes::times))        a = new MultiplyOp (location, a, parseUnary());
-                else if (matchIf (TokenTypes::divide))  a = new DivideOp   (location, a, parseUnary());
-                else if (matchIf (TokenTypes::modulo))  a = new ModuloOp   (location, a, parseUnary());
+                if (matchIf (TokenTypes::times))        { ExpPtr b (parseUnary()); a = new MultiplyOp (location, a, b); }
+                else if (matchIf (TokenTypes::divide))  { ExpPtr b (parseUnary()); a = new DivideOp   (location, a, b); }
+                else if (matchIf (TokenTypes::modulo))  { ExpPtr b (parseUnary()); a = new ModuloOp   (location, a, b); }
                 else break;
             }
 
@@ -1320,8 +1326,8 @@ struct JavascriptEngine::RootObject   : public DynamicObject
 
             for (;;)
             {
-                if (matchIf (TokenTypes::plus))            a = new AdditionOp    (location, a, parseMultiplyDivide());
-                else if (matchIf (TokenTypes::minus))      a = new SubtractionOp (location, a, parseMultiplyDivide());
+                if (matchIf (TokenTypes::plus))            { ExpPtr b (parseMultiplyDivide()); a = new AdditionOp    (location, a, b); }
+                else if (matchIf (TokenTypes::minus))      { ExpPtr b (parseMultiplyDivide()); a = new SubtractionOp (location, a, b); }
                 else if (matchIf (TokenTypes::plusplus))   a = parsePostIncDec<AdditionOp> (a);
                 else if (matchIf (TokenTypes::minusminus)) a = parsePostIncDec<SubtractionOp> (a);
                 else break;
@@ -1336,9 +1342,9 @@ struct JavascriptEngine::RootObject   : public DynamicObject
 
             for (;;)
             {
-                if (matchIf (TokenTypes::leftShift))                a = new LeftShiftOp          (location, a, parseExpression());
-                else if (matchIf (TokenTypes::rightShift))          a = new RightShiftOp         (location, a, parseExpression());
-                else if (matchIf (TokenTypes::rightShiftUnsigned))  a = new RightShiftUnsignedOp (location, a, parseExpression());
+                if (matchIf (TokenTypes::leftShift))                { ExpPtr b (parseExpression()); a = new LeftShiftOp          (location, a, b); }
+                else if (matchIf (TokenTypes::rightShift))          { ExpPtr b (parseExpression()); a = new RightShiftOp         (location, a, b); }
+                else if (matchIf (TokenTypes::rightShiftUnsigned))  { ExpPtr b (parseExpression()); a = new RightShiftUnsignedOp (location, a, b); }
                 else break;
             }
 
@@ -1351,14 +1357,14 @@ struct JavascriptEngine::RootObject   : public DynamicObject
 
             for (;;)
             {
-                if (matchIf (TokenTypes::equals))                  a = new EqualsOp             (location, a, parseShiftOperator());
-                else if (matchIf (TokenTypes::notEquals))          a = new NotEqualsOp          (location, a, parseShiftOperator());
-                else if (matchIf (TokenTypes::typeEquals))         a = new TypeEqualsOp         (location, a, parseShiftOperator());
-                else if (matchIf (TokenTypes::typeNotEquals))      a = new TypeNotEqualsOp      (location, a, parseShiftOperator());
-                else if (matchIf (TokenTypes::lessThan))           a = new LessThanOp           (location, a, parseShiftOperator());
-                else if (matchIf (TokenTypes::lessThanOrEqual))    a = new LessThanOrEqualOp    (location, a, parseShiftOperator());
-                else if (matchIf (TokenTypes::greaterThan))        a = new GreaterThanOp        (location, a, parseShiftOperator());
-                else if (matchIf (TokenTypes::greaterThanOrEqual)) a = new GreaterThanOrEqualOp (location, a, parseShiftOperator());
+                if (matchIf (TokenTypes::equals))                  { ExpPtr b (parseShiftOperator()); a = new EqualsOp             (location, a, b); }
+                else if (matchIf (TokenTypes::notEquals))          { ExpPtr b (parseShiftOperator()); a = new NotEqualsOp          (location, a, b); }
+                else if (matchIf (TokenTypes::typeEquals))         { ExpPtr b (parseShiftOperator()); a = new TypeEqualsOp         (location, a, b); }
+                else if (matchIf (TokenTypes::typeNotEquals))      { ExpPtr b (parseShiftOperator()); a = new TypeNotEqualsOp      (location, a, b); }
+                else if (matchIf (TokenTypes::lessThan))           { ExpPtr b (parseShiftOperator()); a = new LessThanOp           (location, a, b); }
+                else if (matchIf (TokenTypes::lessThanOrEqual))    { ExpPtr b (parseShiftOperator()); a = new LessThanOrEqualOp    (location, a, b); }
+                else if (matchIf (TokenTypes::greaterThan))        { ExpPtr b (parseShiftOperator()); a = new GreaterThanOp        (location, a, b); }
+                else if (matchIf (TokenTypes::greaterThanOrEqual)) { ExpPtr b (parseShiftOperator()); a = new GreaterThanOrEqualOp (location, a, b); }
                 else break;
             }
 
@@ -1371,18 +1377,18 @@ struct JavascriptEngine::RootObject   : public DynamicObject
 
             for (;;)
             {
-                if (matchIf (TokenTypes::logicalAnd))       a = new LogicalAndOp (location, a, parseComparator());
-                else if (matchIf (TokenTypes::logicalOr))   a = new LogicalOrOp  (location, a, parseComparator());
-                else if (matchIf (TokenTypes::bitwiseAnd))  a = new BitwiseAndOp (location, a, parseComparator());
-                else if (matchIf (TokenTypes::bitwiseOr))   a = new BitwiseOrOp  (location, a, parseComparator());
-                else if (matchIf (TokenTypes::bitwiseXor))  a = new BitwiseXorOp (location, a, parseComparator());
+                if (matchIf (TokenTypes::logicalAnd))       { ExpPtr b (parseComparator()); a = new LogicalAndOp (location, a, b); }
+                else if (matchIf (TokenTypes::logicalOr))   { ExpPtr b (parseComparator()); a = new LogicalOrOp  (location, a, b); }
+                else if (matchIf (TokenTypes::bitwiseAnd))  { ExpPtr b (parseComparator()); a = new BitwiseAndOp (location, a, b); }
+                else if (matchIf (TokenTypes::bitwiseOr))   { ExpPtr b (parseComparator()); a = new BitwiseOrOp  (location, a, b); }
+                else if (matchIf (TokenTypes::bitwiseXor))  { ExpPtr b (parseComparator()); a = new BitwiseXorOp (location, a, b); }
                 else break;
             }
 
             return a.release();
         }
 
-        Expression* parseTerneryOperator (ExpPtr condition)
+        Expression* parseTerneryOperator (ExpPtr& condition)
         {
             ScopedPointer<ConditionalOp> e (new ConditionalOp (location));
             e->condition = condition;
