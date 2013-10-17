@@ -419,8 +419,8 @@ bool juce_OpenQuickTimeMovieFromStream (InputStream* input, Movie& movie, Handle
         // different types to get QT to try. (We should really be a bit smarter here by
         // working out in advance which one the stream contains, rather than just trying
         // each one)
-        const char* const suffixesToTry[] = { "\04.mov", "\04.mp3",
-                                              "\04.avi", "\04.m4a" };
+        static const char* const suffixesToTry[] = { "\04.mov", "\04.mp3",
+                                                     "\04.avi", "\04.m4a" };
 
         for (int i = 0; i < numElementsInArray (suffixesToTry) && ! ok; ++i)
         {

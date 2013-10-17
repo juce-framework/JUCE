@@ -132,14 +132,14 @@ namespace FileHelpers
 
 bool File::isOnCDRomDrive() const
 {
-    const char* const cdTypes[] = { "cd9660", "cdfs", "cddafs", "udf", 0 };
+    static const char* const cdTypes[] = { "cd9660", "cdfs", "cddafs", "udf", nullptr };
 
     return FileHelpers::isFileOnDriveType (*this, cdTypes);
 }
 
 bool File::isOnHardDisk() const
 {
-    const char* const nonHDTypes[] = { "nfs", "smbfs", "ramfs", 0 };
+    static const char* const nonHDTypes[] = { "nfs", "smbfs", "ramfs", nullptr };
 
     return ! (isOnCDRomDrive() || FileHelpers::isFileOnDriveType (*this, nonHDTypes));
 }

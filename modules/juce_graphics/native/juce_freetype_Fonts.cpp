@@ -235,7 +235,7 @@ private:
 
     static bool isFaceSansSerif (const String& family)
     {
-        const char* sansNames[] = { "Sans", "Verdana", "Arial", "Ubuntu" };
+        static const char* sansNames[] = { "Sans", "Verdana", "Arial", "Ubuntu" };
 
         for (int i = 0; i < numElementsInArray (sansNames); ++i)
             if (family.containsIgnoreCase (sansNames[i]))

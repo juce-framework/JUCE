@@ -889,30 +889,27 @@ public:
     */
     static double getMidiNoteInHertz (int noteNumber, const double frequencyOfA = 440.0) noexcept;
 
-    /** Returns the standard name of a GM instrument.
+    /** Returns the standard name of a GM instrument, or nullptr if unknown for this index.
 
         @param midiInstrumentNumber     the program number 0 to 127
         @see getProgramChangeNumber
     */
-    static String getGMInstrumentName (int midiInstrumentNumber);
+    static const char* getGMInstrumentName (int midiInstrumentNumber);
 
-    /** Returns the name of a bank of GM instruments.
-
+    /** Returns the name of a bank of GM instruments, or nullptr if unknown for this bank number.
         @param midiBankNumber   the bank, 0 to 15
     */
-    static String getGMInstrumentBankName (int midiBankNumber);
+    static const char* getGMInstrumentBankName (int midiBankNumber);
 
-    /** Returns the standard name of a channel 10 percussion sound.
-
+    /** Returns the standard name of a channel 10 percussion sound, or nullptr if unknown for this note number.
         @param midiNoteNumber   the key number, 35 to 81
     */
-    static String getRhythmInstrumentName (int midiNoteNumber);
+    static const char* getRhythmInstrumentName (int midiNoteNumber);
 
-    /** Returns the name of a controller type number.
-
+    /** Returns the name of a controller type number, or nullptr if unknown for this controller number.
         @see getControllerNumber
     */
-    static String getControllerName (int controllerNumber);
+    static const char* getControllerName (int controllerNumber);
 
 private:
     //==============================================================================

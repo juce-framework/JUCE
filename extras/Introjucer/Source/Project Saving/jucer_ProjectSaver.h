@@ -255,7 +255,7 @@ private:
 
     static bool shouldFileBeKept (const String& filename)
     {
-        const char* filesToKeep[] = { ".svn", ".cvs", "CMakeLists.txt" };
+        static const char* filesToKeep[] = { ".svn", ".cvs", "CMakeLists.txt" };
 
         for (int i = 0; i < numElementsInArray (filesToKeep); ++i)
             if (filename == filesToKeep[i])

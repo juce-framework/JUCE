@@ -97,7 +97,7 @@ static QTMovie* openMovieFromStream (InputStream* movieStream, File& movieFile)
         MemoryBlock temp;
         movieStream->readIntoMemoryBlock (temp);
 
-        const char* const suffixesToTry[] = { ".mov", ".mp3", ".avi", ".m4a" };
+        static const char* const suffixesToTry[] = { ".mov", ".mp3", ".avi", ".m4a" };
 
         for (int i = 0; i < numElementsInArray (suffixesToTry); ++i)
         {

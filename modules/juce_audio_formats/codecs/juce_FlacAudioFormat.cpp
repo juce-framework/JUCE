@@ -536,7 +536,7 @@ AudioFormatWriter* FlacAudioFormat::createWriterFor (OutputStream* out,
 
 StringArray FlacAudioFormat::getQualityOptions()
 {
-    const char* options[] = { "0 (Fastest)", "1", "2", "3", "4", "5 (Default)","6", "7", "8 (Highest quality)", 0 };
+    static const char* options[] = { "0 (Fastest)", "1", "2", "3", "4", "5 (Default)","6", "7", "8 (Highest quality)", 0 };
     return StringArray (options);
 }
 

@@ -55,13 +55,13 @@ public:
 
         if (file.hasFileExtension (sourceFileExtensions))
         {
-            const char* extensions[] = { "h", "hpp", "hxx", "hh", nullptr };
+            static const char* extensions[] = { "h", "hpp", "hxx", "hh", nullptr };
             return findCounterpart (file, extensions);
         }
 
         if (file.hasFileExtension (headerFileExtensions))
         {
-            const char* extensions[] = { "cpp", "mm", "cc", "cxx", "c", "m", nullptr };
+            static const char* extensions[] = { "cpp", "mm", "cc", "cxx", "c", "m", nullptr };
             return findCounterpart (file, extensions);
         }
 

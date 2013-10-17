@@ -292,7 +292,7 @@ URL URL::getChildURL (const String& subPath) const
 //==============================================================================
 bool URL::isProbablyAWebsiteURL (const String& possibleURL)
 {
-    const char* validProtocols[] = { "http:", "ftp:", "https:" };
+    static const char* validProtocols[] = { "http:", "ftp:", "https:" };
 
     for (int i = 0; i < numElementsInArray (validProtocols); ++i)
         if (possibleURL.startsWithIgnoreCase (validProtocols[i]))

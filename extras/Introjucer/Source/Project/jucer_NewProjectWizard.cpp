@@ -127,7 +127,7 @@ struct NewProjectWizardClasses
 
         virtual StringArray getDefaultModules()
         {
-            const char* mods[] =
+            static const char* mods[] =
             {
                 "juce_core",
                 "juce_events",

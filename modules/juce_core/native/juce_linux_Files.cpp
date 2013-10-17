@@ -206,8 +206,8 @@ bool Process::openDocument (const String& fileName, const String& parameters)
          || ! isFileExecutable (fileName))
     {
         // create a command that tries to launch a bunch of likely browsers
-        const char* const browserNames[] = { "xdg-open", "/etc/alternatives/x-www-browser", "firefox", "mozilla",
-                                             "google-chrome", "chromium-browser", "opera", "konqueror" };
+        static const char* const browserNames[] = { "xdg-open", "/etc/alternatives/x-www-browser", "firefox", "mozilla",
+                                                    "google-chrome", "chromium-browser", "opera", "konqueror" };
         StringArray cmdLines;
 
         for (int i = 0; i < numElementsInArray (browserNames); ++i)
