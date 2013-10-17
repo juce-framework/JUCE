@@ -63,8 +63,7 @@ public:
         You can specify a maximum time for which the program is allowed to run, and
         it'll return with an error message if this time is exceeded.
     */
-    Result execute (const String& javascriptCode,
-                    RelativeTime maximumRunTime = RelativeTime::seconds (10));
+    Result execute (const String& javascriptCode);
 
     /** Attempts to parse and run a javascript expression, and returns the result.
         If there's a syntax error, or the expression can't be evaluated, the return value
@@ -74,8 +73,15 @@ public:
         it'll return with an error message if this time is exceeded.
     */
     var evaluate (const String& javascriptCode,
-                  Result* errorMessage = nullptr,
-                  RelativeTime maximumRunTime = RelativeTime::seconds (10));
+                  Result* errorMessage = nullptr);
+
+    /** Calls a function in the root namespace, and returns the result.
+        The function arguments are passed in the same format as used by native
+        methods in the var class.
+    */
+    var callFunction (Identifier function,
+                      const var::NativeFunctionArgs& args,
+                      Result* errorMessage = nullptr);
 
     /** Adds a native object to the root namespace.
         The object passed-in is reference-counted, and will be retained by the
@@ -84,9 +90,17 @@ public:
     */
     void registerNativeObject (Identifier objectName, DynamicObject* object);
 
+    /** This value indicates how long a call to one of the evaluate methods is permitted
+        to run before timing-out and failing.
+        The default value is a number of seconds, but you can change this to whatever value
+        suits your application.
+    */
+    RelativeTime maximumExecutionTime;
+
 private:
     struct RootObject;
     ReferenceCountedObjectPtr<RootObject> root;
+    void prepareTimeout() const;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (JavascriptEngine)
 };

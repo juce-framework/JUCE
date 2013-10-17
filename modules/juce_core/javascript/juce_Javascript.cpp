@@ -68,6 +68,8 @@ struct JavascriptEngine::RootObject   : public DynamicObject
         setMethod ("parseInt",  IntegerClass::parseInt);
     }
 
+    Time timeout;
+
     typedef const var::NativeFunctionArgs& Args;
     typedef const char* TokenType;
 
@@ -83,7 +85,14 @@ struct JavascriptEngine::RootObject   : public DynamicObject
         return ExpPtr (tb.parseExpression())->getResult (Scope (nullptr, this, this));
     }
 
-    Time timeout;
+    var invoke (Identifier function, const var::NativeFunctionArgs& args)
+    {
+        if (const var* m = getProperties().getVarPointer (function))
+            if (FunctionObject* fo = dynamic_cast<FunctionObject*> (m->getObject()))
+                return fo->invoke (Scope (nullptr, this, this), args);
+
+        return var::undefined();
+    }
 
     //==============================================================================
     static bool areTypeEqual (const var& a, const var& b)
@@ -646,7 +655,7 @@ struct JavascriptEngine::RootObject   : public DynamicObject
 
             if (DotOperator* dot = dynamic_cast<DotOperator*> (object.get()))
             {
-                var thisObject = dot->parent->getResult (s);
+                var thisObject (dot->parent->getResult (s));
                 return invokeFunction (s, s.findFunctionCall (location, thisObject, dot->child), thisObject);
             }
 
@@ -655,35 +664,21 @@ struct JavascriptEngine::RootObject   : public DynamicObject
 
         var invokeFunction (const Scope& s, const var& function, const var& thisObject) const
         {
+            s.checkTimeOut (location);
+
+            Array<var> argVars;
+            for (int i = 0; i < arguments.size(); ++i)
+                argVars.add (arguments.getUnchecked(i)->getResult (s));
+
+            const var::NativeFunctionArgs args (thisObject, argVars.begin(), argVars.size());
+
             if (var::NativeFunction nativeFunction = function.getNativeFunction())
-            {
-                Array<var> args;
-
-                for (int i = 0; i < arguments.size(); ++i)
-                    args.add (arguments.getUnchecked(i)->getResult (s));
-
-                return nativeFunction (var::NativeFunctionArgs (thisObject, args.getRawDataPointer(), args.size()));
-            }
-
-            var result;
+                return nativeFunction (args);
 
             if (FunctionObject* fo = dynamic_cast<FunctionObject*> (function.getObject()))
-            {
-                s.checkTimeOut (location);
-                DynamicObject::Ptr functionRoot (new DynamicObject());
+                return fo->invoke (s, args);
 
-                static const Identifier thisIdent ("this");
-                functionRoot->setProperty (thisIdent, thisObject);
-
-                for (int i = 0; i < jmin (fo->parameters.size(), arguments.size()); ++i)
-                    functionRoot->setProperty (fo->parameters[i], arguments.getUnchecked(i)->getResult (s));
-
-                fo->body->perform (Scope (&s, s.root, functionRoot), &result);
-            }
-            else
-                location.throwError ("This expression is not a function!");
-
-            return result;
+            location.throwError ("This expression is not a function!"); return var();
         }
 
         ExpPtr object;
@@ -764,6 +759,22 @@ struct JavascriptEngine::RootObject   : public DynamicObject
         void writeAsJSON (OutputStream& out, int /*indentLevel*/, bool /*allOnOneLine*/) override
         {
             out << "function" << functionCode;
+        }
+
+        var invoke (const Scope& s, const var::NativeFunctionArgs& args) const
+        {
+            DynamicObject::Ptr functionRoot (new DynamicObject());
+
+            static const Identifier thisIdent ("this");
+            functionRoot->setProperty (thisIdent, args.thisObject);
+
+            const int numArgs = jmin (parameters.size(), args.numArguments);
+            for (int i = 0; i < numArgs; ++i)
+                functionRoot->setProperty (parameters.getReference(i), args.arguments[i]);
+
+            var result;
+            body->perform (Scope (&s, s.root, functionRoot), &result);
+            return result;
         }
 
         String functionCode;
@@ -1605,7 +1616,7 @@ struct JavascriptEngine::RootObject   : public DynamicObject
 };
 
 //==============================================================================
-JavascriptEngine::JavascriptEngine()  : root (new RootObject())
+JavascriptEngine::JavascriptEngine()  : maximumExecutionTime (15.0), root (new RootObject())
 {
     registerNativeObject (RootObject::ObjectClass  ::getClassName(),  new RootObject::ObjectClass());
     registerNativeObject (RootObject::ArrayClass   ::getClassName(),  new RootObject::ArrayClass());
@@ -1617,11 +1628,18 @@ JavascriptEngine::JavascriptEngine()  : root (new RootObject())
 
 JavascriptEngine::~JavascriptEngine() {}
 
-Result JavascriptEngine::execute (const String& code, RelativeTime maximumRunTime)
+void JavascriptEngine::prepareTimeout() const   { root->timeout = Time::getCurrentTime() + maximumExecutionTime; }
+
+void JavascriptEngine::registerNativeObject (Identifier name, DynamicObject* object)
+{
+    root->setProperty (name, object);
+}
+
+Result JavascriptEngine::execute (const String& code)
 {
     try
     {
-        root->timeout = Time::getCurrentTime() + maximumRunTime;
+        prepareTimeout();
         root->execute (code);
     }
     catch (String& error)
@@ -1632,23 +1650,34 @@ Result JavascriptEngine::execute (const String& code, RelativeTime maximumRunTim
     return Result::ok();
 }
 
-var JavascriptEngine::evaluate (const String& code, Result* message, RelativeTime maximumRunTime)
+var JavascriptEngine::evaluate (const String& code, Result* result)
 {
     try
     {
-        if (message != nullptr) *message = Result::ok();
-        root->timeout = Time::getCurrentTime() + maximumRunTime;
+        prepareTimeout();
+        if (result != nullptr) *result = Result::ok();
         return root->evaluate (code);
     }
     catch (String& error)
     {
-        if (message != nullptr) *message = Result::fail (error);
+        if (result != nullptr) *result = Result::fail (error);
     }
 
     return var::undefined();
 }
 
-void JavascriptEngine::registerNativeObject (Identifier name, DynamicObject* object)
+var JavascriptEngine::callFunction (Identifier function, const var::NativeFunctionArgs& args, Result* result)
 {
-    root->setProperty (name, object);
+    try
+    {
+        prepareTimeout();
+        if (result != nullptr) *result = Result::ok();
+        return root->invoke (function, args);
+    }
+    catch (String& error)
+    {
+        if (result != nullptr) *result = Result::fail (error);
+    }
+
+    return var::undefined();
 }
