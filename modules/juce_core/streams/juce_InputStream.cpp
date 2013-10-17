@@ -175,8 +175,7 @@ String InputStream::readString()
         }
     }
 
-    return String (CharPointer_UTF8 (data),
-                   CharPointer_UTF8 (data + i));
+    return String::fromUTF8 (data, i);
 }
 
 String InputStream::readNextLine()
