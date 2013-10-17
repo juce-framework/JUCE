@@ -43,7 +43,7 @@ public:
     static Type decibelsToGain (const Type decibels,
                                 const Type minusInfinityDb = (Type) defaultMinusInfinitydB)
     {
-        return decibels > minusInfinityDb ? powf ((Type) 10.0, decibels * (Type) 0.05)
+        return decibels > minusInfinityDb ? std::pow ((Type) 10.0, decibels * (Type) 0.05)
                                           : Type();
     }
 
