@@ -261,29 +261,29 @@ public:
 
     void filesDropped (const StringArray& files, int insertIndex) override
     {
-        addFiles (files, insertIndex);
+        if (files.size() == 1 && File (files[0]).hasFileExtension (Project::projectFileExtension))
+            IntrojucerApp::getApp().openFile (files[0]);
+        else
+            addFiles (files, insertIndex);
     }
 
     bool isInterestedInDragSource (const DragAndDropTarget::SourceDetails& dragSourceDetails) override
     {
-        if (dragSourceDetails.description != projectItemDragType)
-            return false;
-
-        OwnedArray <Project::Item> selectedNodes;
-        getAllSelectedNodesInTree (dragSourceDetails.sourceComponent, selectedNodes);
+        OwnedArray<Project::Item> selectedNodes;
+        getSelectedProjectItemsBeingDragged (dragSourceDetails, selectedNodes);
 
         return selectedNodes.size() > 0 && acceptsDragItems (selectedNodes);
     }
 
     void itemDropped (const DragAndDropTarget::SourceDetails& dragSourceDetails, int insertIndex) override
     {
-        OwnedArray <Project::Item> selectedNodes;
-        getAllSelectedNodesInTree (dragSourceDetails.sourceComponent, selectedNodes);
+        OwnedArray<Project::Item> selectedNodes;
+        getSelectedProjectItemsBeingDragged (dragSourceDetails, selectedNodes);
 
         if (selectedNodes.size() > 0)
         {
             TreeView* tree = getOwnerView();
-            ScopedPointer <XmlElement> oldOpenness (tree->getOpennessState (false));
+            ScopedPointer<XmlElement> oldOpenness (tree->getOpennessState (false));
 
             moveSelectedItemsTo (selectedNodes, insertIndex);
 
@@ -299,20 +299,24 @@ public:
         return item.isImageFile() ? 250 : JucerTreeViewBase::getMillisecsAllowedForDragGesture();
     }
 
-    static void getAllSelectedNodesInTree (Component* componentInTree, OwnedArray <Project::Item>& selectedNodes)
+    static void getSelectedProjectItemsBeingDragged (const DragAndDropTarget::SourceDetails& dragSourceDetails,
+                                                     OwnedArray<Project::Item>& selectedNodes)
     {
-        TreeView* tree = dynamic_cast<TreeView*> (componentInTree);
-
-        if (tree == nullptr)
-            tree = componentInTree->findParentComponentOfClass<TreeView>();
-
-        if (tree != nullptr)
+        if (dragSourceDetails.description == projectItemDragType)
         {
-            const int numSelected = tree->getNumSelectedItems();
+            TreeView* tree = dynamic_cast<TreeView*> (dragSourceDetails.sourceComponent.get());
 
-            for (int i = 0; i < numSelected; ++i)
-                if (const ProjectTreeItemBase* const p = dynamic_cast<ProjectTreeItemBase*> (tree->getSelectedItem (i)))
-                    selectedNodes.add (new Project::Item (p->item));
+            if (tree == nullptr)
+                tree = dragSourceDetails.sourceComponent->findParentComponentOfClass<TreeView>();
+
+            if (tree != nullptr)
+            {
+                const int numSelected = tree->getNumSelectedItems();
+
+                for (int i = 0; i < numSelected; ++i)
+                    if (const ProjectTreeItemBase* const p = dynamic_cast<ProjectTreeItemBase*> (tree->getSelectedItem (i)))
+                        selectedNodes.add (new Project::Item (p->item));
+            }
         }
     }
 

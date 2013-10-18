@@ -92,6 +92,9 @@ public:
 
     StringArray getExportersWhichCanLaunch() const;
 
+    static void getSelectedProjectItemsBeingDragged (const DragAndDropTarget::SourceDetails& dragSourceDetails,
+                                                     OwnedArray<Project::Item>& selectedNodes);
+
     //==============================================================================
     ApplicationCommandTarget* getNextCommandTarget() override;
     void getAllCommands (Array <CommandID>& commands) override;

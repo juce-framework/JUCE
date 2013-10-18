@@ -50,7 +50,6 @@ public:
             p->checkFileStatus();
     }
 
-private:
     #include "jucer_ProjectTree_Base.h"
     #include "jucer_ProjectTree_Group.h"
     #include "jucer_ProjectTree_File.h"
@@ -910,4 +909,10 @@ bool ProjectContentComponent::perform (const InvocationInfo& info)
     }
 
     return true;
+}
+
+void ProjectContentComponent::getSelectedProjectItemsBeingDragged (const DragAndDropTarget::SourceDetails& dragSourceDetails,
+                                                                   OwnedArray<Project::Item>& selectedNodes)
+{
+    FileTreePanel::ProjectTreeItemBase::getSelectedProjectItemsBeingDragged (dragSourceDetails, selectedNodes);
 }

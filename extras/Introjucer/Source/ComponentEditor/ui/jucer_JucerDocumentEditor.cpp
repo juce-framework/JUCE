@@ -438,7 +438,7 @@ ApplicationCommandTarget* JucerDocumentEditor::getNextCommandTarget()
 ComponentLayout* JucerDocumentEditor::getCurrentLayout() const
 {
     if (ComponentLayoutPanel* panel = dynamic_cast <ComponentLayoutPanel*> (tabbedComponent.getCurrentContentComponent()))
-        return &(panel->getLayout());
+        return &(panel->layout);
 
     return nullptr;
 }
@@ -577,8 +577,8 @@ void JucerDocumentEditor::addComponent (const int index)
 
         panel->xyToTargetXY (x, y);
 
-        if (Component* newOne = panel->getLayout().addNewComponent (ObjectTypes::componentTypeHandlers [index], x, y))
-            panel->getLayout().getSelectedSet().selectOnly (newOne);
+        if (Component* newOne = panel->layout.addNewComponent (ObjectTypes::componentTypeHandlers [index], x, y))
+            panel->layout.getSelectedSet().selectOnly (newOne);
 
         document->beginTransaction();
     }

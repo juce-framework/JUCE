@@ -430,7 +430,7 @@ void JucerDocument::fillInGeneratedCode (GeneratedCode& code) const
     code.initialisers.addLines (variableInitialisers);
 
     if (! componentName.isEmpty())
-        code.parentClassInitialiser = "Component (" + quotedString (code.componentName) + ")";
+        code.constructorCode << "setName (" + quotedString (componentName) + ")\n";
 
     // call these now, just to make sure they're the first two methods in the list.
     code.getCallbackCode (String::empty, "void", "paint (Graphics& g)", false)
@@ -454,8 +454,7 @@ void JucerDocument::fillInGeneratedCode (GeneratedCode& code) const
            "//[/UserPreSize]\n";
 
     if (initialWidth > 0 || initialHeight > 0)
-        code.constructorCode
-            << "\nsetSize (" << initialWidth << ", " << initialHeight << ");\n";
+        code.constructorCode << "\nsetSize (" << initialWidth << ", " << initialHeight << ");\n";
 
     code.getCallbackCode (String::empty, "void", "paint (Graphics& g)", false)
         << "//[UserPaint] Add your own custom painting code here..\n//[/UserPaint]";
@@ -471,7 +470,12 @@ void JucerDocument::fillInGeneratedCode (GeneratedCode& code) const
     {
         if (isOptionalMethodEnabled (methods[i]))
         {
-            String& s = code.getCallbackCode (baseClasses[i], returnValues[i], methods[i], false);
+            String baseClassToAdd (baseClasses[i]);
+
+            if (baseClassToAdd == "Component" || baseClassToAdd == "Button")
+                baseClassToAdd = String::empty;
+
+            String& s = code.getCallbackCode (baseClassToAdd, returnValues[i], methods[i], false);
 
             if (! s.contains ("//["))
             {
