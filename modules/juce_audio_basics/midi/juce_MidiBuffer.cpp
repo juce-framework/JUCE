@@ -26,17 +26,17 @@ namespace MidiBufferHelpers
 {
     inline int getEventTime (const void* const d) noexcept
     {
-        return *static_cast <const int*> (d);
+        return *static_cast<const int32*> (d);
     }
 
     inline uint16 getEventDataSize (const void* const d) noexcept
     {
-        return *reinterpret_cast <const uint16*> (static_cast <const char*> (d) + sizeof (int));
+        return *reinterpret_cast<const uint16*> (static_cast<const char*> (d) + sizeof (int32));
     }
 
     inline uint16 getEventTotalSize (const void* const d) noexcept
     {
-        return getEventDataSize (d) + sizeof (int) + sizeof (uint16);
+        return getEventDataSize (d) + sizeof (int32) + sizeof (uint16);
     }
 
     static int findActualEventLength (const uint8* const data, const int maxBytes) noexcept
@@ -67,68 +67,44 @@ namespace MidiBufferHelpers
 
         return size;
     }
+
+    static uint8* findEventAfter (uint8* d, uint8* endData, const int samplePosition) noexcept
+    {
+        while (d < endData && getEventTime (d) <= samplePosition)
+            d += getEventTotalSize (d);
+
+        return d;
+    }
 }
 
 //==============================================================================
-MidiBuffer::MidiBuffer() noexcept
-    : bytesUsed (0)
+MidiBuffer::MidiBuffer() noexcept {}
+MidiBuffer::~MidiBuffer() {}
+
+MidiBuffer::MidiBuffer (const MidiBuffer& other) noexcept  : data (other.data) {}
+
+MidiBuffer& MidiBuffer::operator= (const MidiBuffer& other) noexcept
 {
+    data = other.data;
+    return *this;
 }
 
 MidiBuffer::MidiBuffer (const MidiMessage& message) noexcept
-    : bytesUsed (0)
 {
     addEvent (message, 0);
 }
 
-MidiBuffer::MidiBuffer (const MidiBuffer& other) noexcept
-    : data (other.data),
-      bytesUsed (other.bytesUsed)
-{
-}
-
-MidiBuffer& MidiBuffer::operator= (const MidiBuffer& other) noexcept
-{
-    bytesUsed = other.bytesUsed;
-    data = other.data;
-
-    return *this;
-}
-
-void MidiBuffer::swapWith (MidiBuffer& other) noexcept
-{
-    data.swapWith (other.data);
-    std::swap (bytesUsed, other.bytesUsed);
-}
-
-MidiBuffer::~MidiBuffer()
-{
-}
-
-inline uint8* MidiBuffer::getData() const noexcept
-{
-    return static_cast <uint8*> (data.getData());
-}
-
-void MidiBuffer::clear() noexcept
-{
-    bytesUsed = 0;
-}
+void MidiBuffer::swapWith (MidiBuffer& other) noexcept      { data.swapWith (other.data); }
+void MidiBuffer::clear() noexcept                           { data.clearQuick(); }
+void MidiBuffer::ensureSize (size_t minimumNumBytes)        { data.ensureStorageAllocated (minimumNumBytes); }
+bool MidiBuffer::isEmpty() const noexcept                   { return data.size() == 0; }
 
 void MidiBuffer::clear (const int startSample, const int numSamples)
 {
-    uint8* const start = findEventAfter (getData(), startSample - 1);
-    uint8* const end   = findEventAfter (start, startSample + numSamples - 1);
+    uint8* const start = MidiBufferHelpers::findEventAfter (data.begin(), data.end(), startSample - 1);
+    uint8* const end   = MidiBufferHelpers::findEventAfter (start,        data.end(), startSample + numSamples - 1);
 
-    if (end > start)
-    {
-        const int bytesToMove = bytesUsed - (int) (end - getData());
-
-        if (bytesToMove > 0)
-            memmove (start, end, (size_t) bytesToMove);
-
-        bytesUsed -= (int) (end - start);
-    }
+    data.removeRange (start - data.begin(), end - data.begin());
 }
 
 void MidiBuffer::addEvent (const MidiMessage& m, const int sampleNumber)
@@ -138,27 +114,19 @@ void MidiBuffer::addEvent (const MidiMessage& m, const int sampleNumber)
 
 void MidiBuffer::addEvent (const void* const newData, const int maxBytes, const int sampleNumber)
 {
-    const int numBytes = MidiBufferHelpers::findActualEventLength (static_cast <const uint8*> (newData), maxBytes);
+    const int numBytes = MidiBufferHelpers::findActualEventLength (static_cast<const uint8*> (newData), maxBytes);
 
     if (numBytes > 0)
     {
-        size_t spaceNeeded = (size_t) bytesUsed + (size_t) numBytes + sizeof (int) + sizeof (uint16);
-        data.ensureSize ((spaceNeeded + spaceNeeded / 2 + 8) & ~(size_t) 7);
+        const size_t newItemSize = (size_t) numBytes + sizeof (int32) + sizeof (uint16);
+        const int offset = (int) (MidiBufferHelpers::findEventAfter (data.begin(), data.end(), sampleNumber) - data.begin());
 
-        uint8* d = findEventAfter (getData(), sampleNumber);
-        const int bytesToMove = bytesUsed - (int) (d - getData());
+        data.insertMultiple (offset, 0, newItemSize);
 
-        if (bytesToMove > 0)
-            memmove (d + numBytes + sizeof (int) + sizeof (uint16), d, (size_t) bytesToMove);
-
-        *reinterpret_cast <int*> (d) = sampleNumber;
-        d += sizeof (int);
-        *reinterpret_cast <uint16*> (d) = (uint16) numBytes;
-        d += sizeof (uint16);
-
-        memcpy (d, newData, (size_t) numBytes);
-
-        bytesUsed += sizeof (int) + sizeof (uint16) + (size_t) numBytes;
+        uint8* const d = data.begin() + offset;
+        *reinterpret_cast<int32*> (d) = sampleNumber;
+        *reinterpret_cast<uint16*> (d + 4) = (uint16) numBytes;
+        memcpy (d + 6, newData, (size_t) numBytes);
     }
 }
 
@@ -180,45 +148,30 @@ void MidiBuffer::addEvents (const MidiBuffer& otherBuffer,
     }
 }
 
-void MidiBuffer::ensureSize (size_t minimumNumBytes)
-{
-    data.ensureSize (minimumNumBytes);
-}
-
-bool MidiBuffer::isEmpty() const noexcept
-{
-    return bytesUsed == 0;
-}
-
 int MidiBuffer::getNumEvents() const noexcept
 {
     int n = 0;
-    const uint8* d = getData();
-    const uint8* const end = d + bytesUsed;
+    const uint8* const end = data.end();
 
-    while (d < end)
-    {
+    for (const uint8* d = data.begin(); d < end; ++n)
         d += MidiBufferHelpers::getEventTotalSize (d);
-        ++n;
-    }
 
     return n;
 }
 
 int MidiBuffer::getFirstEventTime() const noexcept
 {
-    return bytesUsed > 0 ? MidiBufferHelpers::getEventTime (data.getData()) : 0;
+    return data.size() > 0 ? MidiBufferHelpers::getEventTime (data.begin()) : 0;
 }
 
 int MidiBuffer::getLastEventTime() const noexcept
 {
-    if (bytesUsed == 0)
+    if (data.size() == 0)
         return 0;
 
-    const uint8* d = getData();
-    const uint8* const endData = d + bytesUsed;
+    const uint8* const endData = data.end();
 
-    for (;;)
+    for (const uint8* d = data.begin();;)
     {
         const uint8* const nextOne = d + MidiBufferHelpers::getEventTotalSize (d);
 
@@ -229,19 +182,9 @@ int MidiBuffer::getLastEventTime() const noexcept
     }
 }
 
-uint8* MidiBuffer::findEventAfter (uint8* d, const int samplePosition) const noexcept
-{
-    const uint8* const endData = getData() + bytesUsed;
-
-    while (d < endData && MidiBufferHelpers::getEventTime (d) <= samplePosition)
-        d += MidiBufferHelpers::getEventTotalSize (d);
-
-    return d;
-}
-
 //==============================================================================
 MidiBuffer::Iterator::Iterator (const MidiBuffer& b) noexcept
-    : buffer (b), data (b.getData())
+    : buffer (b), data (b.data.begin())
 {
 }
 
@@ -251,8 +194,8 @@ MidiBuffer::Iterator::~Iterator() noexcept
 
 void MidiBuffer::Iterator::setNextSamplePosition (const int samplePosition) noexcept
 {
-    data = buffer.getData();
-    const uint8* dataEnd = data + buffer.bytesUsed;
+    data = buffer.data.begin();
+    const uint8* const dataEnd = buffer.data.end();
 
     while (data < dataEnd && MidiBufferHelpers::getEventTime (data) < samplePosition)
         data += MidiBufferHelpers::getEventTotalSize (data);
@@ -260,27 +203,26 @@ void MidiBuffer::Iterator::setNextSamplePosition (const int samplePosition) noex
 
 bool MidiBuffer::Iterator::getNextEvent (const uint8* &midiData, int& numBytes, int& samplePosition) noexcept
 {
-    if (data >= buffer.getData() + buffer.bytesUsed)
+    if (data >= buffer.data.end())
         return false;
 
     samplePosition = MidiBufferHelpers::getEventTime (data);
-    numBytes = MidiBufferHelpers::getEventDataSize (data);
-    data += sizeof (int) + sizeof (uint16);
-    midiData = data;
-    data += numBytes;
+    const int itemSize = MidiBufferHelpers::getEventDataSize (data);
+    numBytes = itemSize;
+    midiData = data + sizeof (int32) + sizeof (uint16);
+    data += sizeof (int32) + sizeof (uint16) + itemSize;
 
     return true;
 }
 
 bool MidiBuffer::Iterator::getNextEvent (MidiMessage& result, int& samplePosition) noexcept
 {
-    if (data >= buffer.getData() + buffer.bytesUsed)
+    if (data >= buffer.data.end())
         return false;
 
     samplePosition = MidiBufferHelpers::getEventTime (data);
     const int numBytes = MidiBufferHelpers::getEventDataSize (data);
-    data += sizeof (int) + sizeof (uint16);
-    result = MidiMessage (data, numBytes, samplePosition);
+    result = MidiMessage (data + sizeof (int32) + sizeof (uint16), numBytes, samplePosition);
     data += numBytes;
 
     return true;
