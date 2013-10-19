@@ -221,9 +221,9 @@ bool MidiBuffer::Iterator::getNextEvent (MidiMessage& result, int& samplePositio
         return false;
 
     samplePosition = MidiBufferHelpers::getEventTime (data);
-    const int numBytes = MidiBufferHelpers::getEventDataSize (data);
-    result = MidiMessage (data + sizeof (int32) + sizeof (uint16), numBytes, samplePosition);
-    data += numBytes;
+    const int itemSize = MidiBufferHelpers::getEventDataSize (data);
+    result = MidiMessage (data + sizeof (int32) + sizeof (uint16), itemSize, samplePosition);
+    data += sizeof (int32) + sizeof (uint16) + itemSize;
 
     return true;
 }
