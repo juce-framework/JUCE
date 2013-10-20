@@ -733,7 +733,7 @@ public:
         return s;
     }
 
-    void changeProgramName (int index, const String& newName) override
+    void changeProgramName (int /*index*/, const String& /*newName*/) override
     {
         jassertfalse; // xxx not implemented!
     }
@@ -1005,8 +1005,8 @@ private:
     }
 
     //==============================================================================
-    OSStatus renderGetInput (AudioUnitRenderActionFlags* ioActionFlags,
-                             const AudioTimeStamp* inTimeStamp,
+    OSStatus renderGetInput (AudioUnitRenderActionFlags*,
+                             const AudioTimeStamp*,
                              UInt32 inBusNumber,
                              UInt32 inNumberFrames,
                              AudioBufferList* ioData) const
@@ -1147,7 +1147,7 @@ private:
                     ->renderGetInput (ioActionFlags, inTimeStamp, inBusNumber, inNumberFrames, ioData);
     }
 
-    static OSStatus renderMidiOutputCallback (void* hostRef, const AudioTimeStamp* timeStamp, UInt32 midiOutNum,
+    static OSStatus renderMidiOutputCallback (void* hostRef, const AudioTimeStamp*, UInt32 /*midiOutNum*/,
                                               const struct MIDIPacketList* pktlist)
     {
         return static_cast<AudioUnitPluginInstance*> (hostRef)->renderMidiOutput (pktlist);
@@ -1331,7 +1331,7 @@ public:
         startTimer (jmin (713, getTimerInterval() + 51));
     }
 
-    void childBoundsChanged (Component* child) override
+    void childBoundsChanged (Component*) override
     {
         setSize (wrapper.getWidth(), wrapper.getHeight());
         startTimer (70);

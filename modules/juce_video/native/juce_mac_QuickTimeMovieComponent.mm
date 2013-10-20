@@ -323,7 +323,7 @@ void QuickTimeMovieComponent::setBoundsWithCorrectAspectRatio (const Rectangle<i
 //==============================================================================
 #if ! (JUCE_MAC && JUCE_64BIT)
 
-bool juce_OpenQuickTimeMovieFromStream (InputStream* movieStream, Movie& result, Handle& dataHandle)
+bool juce_OpenQuickTimeMovieFromStream (InputStream* movieStream, Movie& result, Handle&)
 {
     if (movieStream == nullptr)
         return false;

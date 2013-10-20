@@ -2510,7 +2510,7 @@ private:
             deleteWindow();
         }
 
-        HIViewRef attachView (WindowRef windowRef, HIViewRef rootView) override
+        HIViewRef attachView (WindowRef windowRef, HIViewRef /*rootView*/) override
         {
             owner.openPluginWindow (windowRef);
             return 0;
