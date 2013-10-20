@@ -80,8 +80,12 @@ public:
         @param outlineColour        the colour to use
         @param outlineStrokeWidth   the thickness of line to draw
     */
-    void setOutline (Colour outlineColour,
-                     float outlineStrokeWidth);
+    void setOutline (Colour outlineColour, float outlineStrokeWidth);
+
+    /** This lets you specify a border to be left around the edge of the button when
+        drawing the shape.
+    */
+    void setBorderSize (BorderSize<int> border);
 
     /** @internal */
     void paintButton (Graphics&, bool isMouseOverButton, bool isButtonDown) override;
@@ -91,6 +95,7 @@ private:
     Colour normalColour, overColour, downColour, outlineColour;
     DropShadowEffect shadow;
     Path shape;
+    BorderSize<int> border;
     bool maintainShapeProportions;
     float outlineWidth;
 
