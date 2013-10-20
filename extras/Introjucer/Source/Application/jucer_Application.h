@@ -60,14 +60,14 @@ public:
             }
         }
 
-        initialiseLogger ("log_");
-
         if (sendCommandLineToPreexistingInstance())
         {
             DBG ("Another instance is running - quitting...");
             quit();
             return;
         }
+
+        initialiseLogger ("log_");
 
         icons = new Icons();
 
