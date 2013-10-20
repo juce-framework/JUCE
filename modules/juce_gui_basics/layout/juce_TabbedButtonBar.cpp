@@ -93,7 +93,26 @@ void TabBarButton::calcAreas (Rectangle<int>& extraComp, Rectangle<int>& textAre
     }
 
     if (extraComponent != nullptr)
+    {
         extraComp = lf.getTabButtonExtraComponentBounds (*this, textArea, *extraComponent);
+
+        const TabbedButtonBar::Orientation orientation = owner.getOrientation();
+
+        if (orientation == TabbedButtonBar::TabsAtLeft || orientation == TabbedButtonBar::TabsAtRight)
+        {
+            if (extraComp.getCentreY() > textArea.getCentreY())
+                textArea.setBottom (jmin (textArea.getBottom(), extraComp.getY()));
+            else
+                textArea.setTop (jmax (textArea.getY(), extraComp.getBottom()));
+        }
+        else
+        {
+            if (extraComp.getCentreX() > textArea.getCentreX())
+                textArea.setRight (jmin (textArea.getRight(), extraComp.getX()));
+            else
+                textArea.setLeft (jmax (textArea.getX(), extraComp.getRight()));
+        }
+    }
 }
 
 Rectangle<int> TabBarButton::getTextArea() const
