@@ -190,61 +190,73 @@ public:
     Rectangle withZeroOrigin() const noexcept                               { return Rectangle (w, h); }
 
     /** Returns a rectangle which has the same position and height as this one, but with a different width. */
-    Rectangle withWidth (const ValueType newWidth) const noexcept           { return Rectangle (pos.x, pos.y, newWidth, h); }
+    Rectangle withWidth (ValueType newWidth) const noexcept           { return Rectangle (pos.x, pos.y, newWidth, h); }
 
     /** Returns a rectangle which has the same position and width as this one, but with a different height. */
-    Rectangle withHeight (const ValueType newHeight) const noexcept         { return Rectangle (pos.x, pos.y, w, newHeight); }
+    Rectangle withHeight (ValueType newHeight) const noexcept         { return Rectangle (pos.x, pos.y, w, newHeight); }
 
     /** Returns a rectangle with the same position as this one, but a new size. */
-    Rectangle withSize (const ValueType newWidth, const ValueType newHeight) const noexcept         { return Rectangle (pos.x, pos.y, newWidth, newHeight); }
+    Rectangle withSize (ValueType newWidth, const ValueType newHeight) const noexcept         { return Rectangle (pos.x, pos.y, newWidth, newHeight); }
 
     /** Moves the x position, adjusting the width so that the right-hand edge remains in the same place.
         If the x is moved to be on the right of the current right-hand edge, the width will be set to zero.
         @see withLeft
     */
-    void setLeft (const ValueType newLeft) noexcept                   { w = jmax (ValueType(), pos.x + w - newLeft); pos.x = newLeft; }
+    void setLeft (ValueType newLeft) noexcept                   { w = jmax (ValueType(), pos.x + w - newLeft); pos.x = newLeft; }
 
     /** Returns a new rectangle with a different x position, but the same right-hand edge as this one.
         If the new x is beyond the right of the current right-hand edge, the width will be set to zero.
         @see setLeft
     */
-    Rectangle withLeft (const ValueType newLeft) const noexcept       { return Rectangle (newLeft, pos.y, jmax (ValueType(), pos.x + w - newLeft), h); }
+    Rectangle withLeft (ValueType newLeft) const noexcept       { return Rectangle (newLeft, pos.y, jmax (ValueType(), pos.x + w - newLeft), h); }
 
     /** Moves the y position, adjusting the height so that the bottom edge remains in the same place.
         If the y is moved to be below the current bottom edge, the height will be set to zero.
         @see withTop
     */
-    void setTop (const ValueType newTop) noexcept                     { h = jmax (ValueType(), pos.y + h - newTop); pos.y = newTop; }
+    void setTop (ValueType newTop) noexcept                     { h = jmax (ValueType(), pos.y + h - newTop); pos.y = newTop; }
 
     /** Returns a new rectangle with a different y position, but the same bottom edge as this one.
         If the new y is beyond the bottom of the current rectangle, the height will be set to zero.
         @see setTop
     */
-    Rectangle withTop (const ValueType newTop) const noexcept         { return Rectangle (pos.x, newTop, w, jmax (ValueType(), pos.y + h - newTop)); }
+    Rectangle withTop (ValueType newTop) const noexcept         { return Rectangle (pos.x, newTop, w, jmax (ValueType(), pos.y + h - newTop)); }
 
     /** Adjusts the width so that the right-hand edge of the rectangle has this new value.
         If the new right is below the current X value, the X will be pushed down to match it.
         @see getRight, withRight
     */
-    void setRight (const ValueType newRight) noexcept                 { pos.x = jmin (pos.x, newRight); w = newRight - pos.x; }
+    void setRight (ValueType newRight) noexcept                 { pos.x = jmin (pos.x, newRight); w = newRight - pos.x; }
 
     /** Returns a new rectangle with a different right-hand edge position, but the same left-hand edge as this one.
         If the new right edge is below the current left-hand edge, the width will be set to zero.
         @see setRight
     */
-    Rectangle withRight (const ValueType newRight) const noexcept     { return Rectangle (jmin (pos.x, newRight), pos.y, jmax (ValueType(), newRight - pos.x), h); }
+    Rectangle withRight (ValueType newRight) const noexcept     { return Rectangle (jmin (pos.x, newRight), pos.y, jmax (ValueType(), newRight - pos.x), h); }
 
     /** Adjusts the height so that the bottom edge of the rectangle has this new value.
         If the new bottom is lower than the current Y value, the Y will be pushed down to match it.
         @see getBottom, withBottom
     */
-    void setBottom (const ValueType newBottom) noexcept               { pos.y = jmin (pos.y, newBottom); h = newBottom - pos.y; }
+    void setBottom (ValueType newBottom) noexcept               { pos.y = jmin (pos.y, newBottom); h = newBottom - pos.y; }
 
     /** Returns a new rectangle with a different bottom edge position, but the same top edge as this one.
         If the new y is beyond the bottom of the current rectangle, the height will be set to zero.
         @see setBottom
     */
-    Rectangle withBottom (const ValueType newBottom) const noexcept   { return Rectangle (pos.x, jmin (pos.y, newBottom), w, jmax (ValueType(), newBottom - pos.y)); }
+    Rectangle withBottom (ValueType newBottom) const noexcept   { return Rectangle (pos.x, jmin (pos.y, newBottom), w, jmax (ValueType(), newBottom - pos.y)); }
+
+    /** Returns a version of this rectangle with the given amount removed from its left-hand edge. */
+    Rectangle withTrimmedLeft (ValueType amountToRemove) const noexcept     { return withLeft (pos.x + amountToRemove); }
+
+    /** Returns a version of this rectangle with the given amount removed from its right-hand edge. */
+    Rectangle withTrimmedRight (ValueType amountToRemove) const noexcept    { return withWidth (w - amountToRemove); }
+
+    /** Returns a version of this rectangle with the given amount removed from its top edge. */
+    Rectangle withTrimmedTop (ValueType amountToRemove) const noexcept      { return withTop (pos.y + amountToRemove); }
+
+    /** Returns a version of this rectangle with the given amount removed from its bottom edge. */
+    Rectangle withTrimmedBottom (ValueType amountToRemove) const noexcept   { return withHeight (h - amountToRemove); }
 
     //==============================================================================
     /** Moves the rectangle's position by adding amount to its x and y coordinates. */
