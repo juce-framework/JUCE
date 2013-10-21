@@ -118,7 +118,7 @@ public:
         sourceValue.addListener (this);
     }
 
-    void valueChanged (Value&)      { sendChangeMessage (true); }
+    void valueChanged (Value&) override      { sendChangeMessage (true); }
 
 protected:
     Value sourceValue;
@@ -162,7 +162,7 @@ public:
         getGlobalProperties().setValue (windowPosProperty, getWindowStateAsString());
     }
 
-    void closeButtonPressed()
+    void closeButtonPressed() override
     {
         owner = nullptr;
     }
@@ -236,19 +236,19 @@ public:
         }
     }
 
-    void buttonClicked (Button*)
+    void buttonClicked (Button*) override
     {
         setColour (defaultColour);
         selector.setCurrentColour (defaultColour);
     }
 
-    void changeListenerCallback (ChangeBroadcaster*)
+    void changeListenerCallback (ChangeBroadcaster*) override
     {
         if (selector.getCurrentColour() != getColour())
             setColour (selector.getCurrentColour());
     }
 
-    void valueChanged (Value&)
+    void valueChanged (Value&) override
     {
         selector.setCurrentColour (getColour());
     }
@@ -328,7 +328,7 @@ public:
         }
     }
 
-    void mouseDown (const MouseEvent&)
+    void mouseDown (const MouseEvent&) override
     {
         if (undoManager != nullptr)
             undoManager->beginNewTransaction();
@@ -339,7 +339,7 @@ public:
                                           getScreenBounds(), nullptr);
     }
 
-    void valueChanged (Value&)
+    void valueChanged (Value&) override
     {
         refresh();
     }
@@ -366,12 +366,12 @@ public:
         addAndMakeVisible (&colourEditor);
     }
 
-    void resized()
+    void resized() override
     {
         colourEditor.setBounds (getLookAndFeel().getPropertyComponentContentPosition (*this));
     }
 
-    void refresh() {}
+    void refresh() override {}
 
 protected:
     ColourEditorComponent colourEditor;
