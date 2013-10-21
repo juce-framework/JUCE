@@ -1686,7 +1686,7 @@ struct JuceNSWindowClass   : public ObjCClass <NSWindow>
         addMethod (@selector (canBecomeKeyWindow),            canBecomeKeyWindow,    "c@:");
         addMethod (@selector (becomeKeyWindow),               becomeKeyWindow,       "v@:");
         addMethod (@selector (windowShouldClose:),            windowShouldClose,     "c@:@");
-        addMethod (@selector (constrainFrameRect:toScreen:),  constrainFrameRect,    @encode (NSRect), "@:",  @encode (NSRect*), "@");
+        addMethod (@selector (constrainFrameRect:toScreen:),  constrainFrameRect,    @encode (NSRect), "@:",  @encode (NSRect), "@");
         addMethod (@selector (windowWillResize:toSize:),      windowWillResize,      @encode (NSSize), "@:@", @encode (NSSize));
         addMethod (@selector (zoom:),                         zoom,                  "v@:@");
         addMethod (@selector (windowWillMove:),               windowWillMove,        "v@:@");
