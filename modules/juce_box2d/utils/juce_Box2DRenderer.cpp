@@ -57,6 +57,8 @@ static void createPath (Path& p, const b2Vec2* vertices, int32 vertexCount)
 
     for (int i = 1; i < vertexCount; ++i)
         p.lineTo (vertices[i].x, vertices[i].y);
+
+    p.closeSubPath();
 }
 
 void Box2DRenderer::DrawPolygon (const b2Vec2* vertices, int32 vertexCount, const b2Color& color)
