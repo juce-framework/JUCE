@@ -298,15 +298,11 @@ void ComponentPeer::handleMovedOrResized()
         Rectangle<int> newBounds (Component::ComponentHelpers::rawPeerPositionToLocal (component, getBounds()));
         Rectangle<int> oldBounds (component.getBounds());
 
-//        oldBounds = Component::ComponentHelpers::localPositionToRawPeerPos (component, oldBounds);
-
         const bool wasMoved   = (oldBounds.getPosition() != newBounds.getPosition());
         const bool wasResized = (oldBounds.getWidth() != newBounds.getWidth() || oldBounds.getHeight() != newBounds.getHeight());
 
         if (wasMoved || wasResized)
         {
-//            newBounds = Component::ComponentHelpers::rawPeerPositionToLocal (component, newBounds);
-
             component.bounds = newBounds;
 
             if (wasResized)
