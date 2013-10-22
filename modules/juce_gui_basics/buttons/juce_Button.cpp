@@ -309,7 +309,8 @@ void Button::internalClickCallback (const ModifierKeys& modifiers)
 {
     if (clickTogglesState)
         setToggleState (radioGroupId != 0 || ! lastToggleState, sendNotification);
-    else
+
+    if (radioGroupId != 0 || ! clickTogglesState)
         sendClickMessage (modifiers);
 }
 
