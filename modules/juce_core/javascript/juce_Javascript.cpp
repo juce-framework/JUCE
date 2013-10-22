@@ -56,6 +56,11 @@ namespace TokenTypes
     JUCE_DECLARE_JS_TOKEN (identifier, "$identifier")
 }
 
+#if JUCE_MSVC
+ #pragma warning (push)
+ #pragma warning (disable: 4702)
+#endif
+
 //==============================================================================
 struct JavascriptEngine::RootObject   : public DynamicObject
 {
@@ -853,8 +858,8 @@ struct JavascriptEngine::RootObject   : public DynamicObject
 
         bool matchToken (TokenType name, const size_t len) noexcept
         {
-            if (p.compareUpTo (String::CharPointerType (name), len) != 0) return false;
-            p += len;  return true;
+            if (p.compareUpTo (String::CharPointerType (name), (int) len) != 0) return false;
+            p += (int) len;  return true;
         }
 
         void skipWhitespaceAndComments()
@@ -1429,7 +1434,7 @@ struct JavascriptEngine::RootObject   : public DynamicObject
         }
 
         static Identifier getClassName()   { static const Identifier i ("Object"); return i; }
-        static var dump  (Args a)          { DBG (JSON::toString (a.thisObject)); return var::undefined(); }
+        static var dump  (Args a)          { DBG (JSON::toString (a.thisObject)); (void) a; return var::undefined(); }
         static var clone (Args a)          { return a.thisObject.clone(); }
     };
 
@@ -1681,3 +1686,7 @@ var JavascriptEngine::callFunction (Identifier function, const var::NativeFuncti
 
     return var::undefined();
 }
+
+#if JUCE_MSVC
+ #pragma warning (pop)
+#endif

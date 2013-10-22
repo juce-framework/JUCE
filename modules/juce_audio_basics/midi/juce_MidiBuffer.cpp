@@ -96,7 +96,7 @@ MidiBuffer::MidiBuffer (const MidiMessage& message) noexcept
 
 void MidiBuffer::swapWith (MidiBuffer& other) noexcept      { data.swapWith (other.data); }
 void MidiBuffer::clear() noexcept                           { data.clearQuick(); }
-void MidiBuffer::ensureSize (size_t minimumNumBytes)        { data.ensureStorageAllocated (minimumNumBytes); }
+void MidiBuffer::ensureSize (size_t minimumNumBytes)        { data.ensureStorageAllocated ((int) minimumNumBytes); }
 bool MidiBuffer::isEmpty() const noexcept                   { return data.size() == 0; }
 
 void MidiBuffer::clear (const int startSample, const int numSamples)
@@ -104,7 +104,7 @@ void MidiBuffer::clear (const int startSample, const int numSamples)
     uint8* const start = MidiBufferHelpers::findEventAfter (data.begin(), data.end(), startSample - 1);
     uint8* const end   = MidiBufferHelpers::findEventAfter (start,        data.end(), startSample + numSamples - 1);
 
-    data.removeRange (start - data.begin(), end - data.begin());
+    data.removeRange ((int) (start - data.begin()), (int) (end - data.begin()));
 }
 
 void MidiBuffer::addEvent (const MidiMessage& m, const int sampleNumber)
@@ -121,7 +121,7 @@ void MidiBuffer::addEvent (const void* const newData, const int maxBytes, const 
         const size_t newItemSize = (size_t) numBytes + sizeof (int32) + sizeof (uint16);
         const int offset = (int) (MidiBufferHelpers::findEventAfter (data.begin(), data.end(), sampleNumber) - data.begin());
 
-        data.insertMultiple (offset, 0, newItemSize);
+        data.insertMultiple (offset, 0, (int) newItemSize);
 
         uint8* const d = data.begin() + offset;
         *reinterpret_cast<int32*> (d) = sampleNumber;

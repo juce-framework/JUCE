@@ -265,7 +265,7 @@ void MemoryBlock::copyTo (void* const dst, int offset, size_t num) const noexcep
 
 String MemoryBlock::toString() const
 {
-    return String::fromUTF8 (data, size);
+    return String::fromUTF8 (data, (int) size);
 }
 
 //==============================================================================

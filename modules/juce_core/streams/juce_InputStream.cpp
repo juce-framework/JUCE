@@ -175,7 +175,7 @@ String InputStream::readString()
         }
     }
 
-    return String::fromUTF8 (data, i);
+    return String::fromUTF8 (data, (int) i);
 }
 
 String InputStream::readNextLine()
