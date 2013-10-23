@@ -1365,14 +1365,14 @@ public:
         }
     }
 
+    typedef RenderingHelpers::GlyphCache <RenderingHelpers::CachedGlyphEdgeTable <SavedState>, SavedState> GlyphCacheType;
+
     void drawGlyph (int glyphNumber, const AffineTransform& trans)
     {
         if (clip != nullptr)
         {
             if (trans.isOnlyTranslation() && ! transform.isRotated)
             {
-                typedef RenderingHelpers::GlyphCache <RenderingHelpers::CachedGlyphEdgeTable <SavedState>, SavedState> GlyphCacheType;
-
                 GlyphCacheType& cache = GlyphCacheType::getInstance();
 
                 Point<float> pos (trans.getTranslationX(), trans.getTranslationY());
@@ -1558,4 +1558,10 @@ LowLevelGraphicsContext* createOpenGLGraphicsContext (OpenGLContext& context, un
 {
     using namespace OpenGLRendering;
     return OpenGLRendering::createOpenGLContext (OpenGLRendering::Target (context, frameBufferID, width, height));
+}
+
+void clearOpenGLGlyphCache();
+void clearOpenGLGlyphCache()
+{
+    OpenGLRendering::SavedState::GlyphCacheType::getInstance().reset();
 }

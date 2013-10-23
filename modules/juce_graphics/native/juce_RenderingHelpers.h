@@ -142,7 +142,7 @@ class GlyphCache  : private DeletedAtShutdown
 public:
     GlyphCache()
     {
-        addNewGlyphSlots (120);
+        reset();
     }
 
     ~GlyphCache()
@@ -207,6 +207,15 @@ public:
         glyph->draw (target, pos);
     }
 
+    void reset()
+    {
+        const ScopedWriteLock swl (lock);
+        glyphs.clear();
+        addNewGlyphSlots (120);
+        hits.set (0);
+        misses.set (0);
+    }
+
 private:
     friend struct ContainerDeletePolicy<CachedGlyphType>;
     OwnedArray<CachedGlyphType> glyphs;
@@ -215,6 +224,8 @@ private:
 
     void addNewGlyphSlots (int num)
     {
+        glyphs.ensureStorageAllocated (glyphs.size() + num);
+
         while (--num >= 0)
             glyphs.add (new CachedGlyphType());
     }
@@ -2419,6 +2430,13 @@ public:
         }
     }
 
+    typedef GlyphCache<CachedGlyphEdgeTable <SoftwareRendererSavedState>, SoftwareRendererSavedState> GlyphCacheType;
+
+    static void clearGlyphCache()
+    {
+        GlyphCacheType::getInstance().reset();
+    }
+
     //==============================================================================
     void drawGlyph (int glyphNumber, const AffineTransform& trans)
     {
@@ -2426,8 +2444,6 @@ public:
         {
             if (trans.isOnlyTranslation() && ! transform.isRotated)
             {
-                typedef GlyphCache <CachedGlyphEdgeTable <SoftwareRendererSavedState>, SoftwareRendererSavedState> GlyphCacheType;
-
                 GlyphCacheType& cache = GlyphCacheType::getInstance();
 
                 Point<float> pos (trans.getTranslationX(), trans.getTranslationY());
