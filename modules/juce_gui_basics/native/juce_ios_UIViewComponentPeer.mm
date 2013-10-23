@@ -499,6 +499,7 @@ UIViewComponentPeer::UIViewComponentPeer (Component& comp, const int windowStyle
         r.origin.y = [UIScreen mainScreen].bounds.size.height - (r.origin.y + r.size.height);
 
         window = [[JuceUIWindow alloc] init];
+        window.hidden = true;
         window.autoresizesSubviews = NO;
         window.transform = CGAffineTransformIdentity;
         window.frame = r;
