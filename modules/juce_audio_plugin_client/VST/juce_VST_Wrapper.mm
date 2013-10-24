@@ -36,7 +36,6 @@
 #include "../utility/juce_IncludeModuleHeaders.h"
 #include "../utility/juce_FakeMouseMoveGenerator.h"
 #include "../utility/juce_CarbonVisibility.h"
-#include "../utility/juce_PluginHostType.h"
 
 //==============================================================================
 namespace juce
