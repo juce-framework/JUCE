@@ -287,8 +287,8 @@ XmlElement* KnownPluginList::createXml() const
 {
     XmlElement* const e = new XmlElement ("KNOWNPLUGINS");
 
-    for (int i = 0; i < types.size(); ++i)
-        e->addChildElement (types.getUnchecked(i)->createXml());
+    for (int i = types.size(); --i >= 0;)
+        e->prependChildElement (types.getUnchecked(i)->createXml());
 
     for (int i = 0; i < blacklist.size(); ++i)
         e->createNewChildElement ("BLACKLISTED")->setAttribute ("id", blacklist[i]);

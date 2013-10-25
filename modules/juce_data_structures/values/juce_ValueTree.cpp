@@ -412,8 +412,9 @@ public:
         XmlElement* const xml = new XmlElement (type.toString());
         properties.copyToXmlAttributes (*xml);
 
-        for (int i = 0; i < children.size(); ++i)
-            xml->addChildElement (children.getObjectPointerUnchecked(i)->createXml());
+        // (NB: it's faster to add nodes to XML elements in reverse order)
+        for (int i = children.size(); --i >= 0;)
+            xml->prependChildElement (children.getObjectPointerUnchecked(i)->createXml());
 
         return xml;
     }

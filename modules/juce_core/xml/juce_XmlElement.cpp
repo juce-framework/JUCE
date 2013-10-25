@@ -585,15 +585,33 @@ XmlElement* XmlElement::getChildByAttribute (StringRef attributeName, StringRef 
 void XmlElement::addChildElement (XmlElement* const newNode) noexcept
 {
     if (newNode != nullptr)
+    {
+        // The element being added must not be a child of another node!
+        jassert (newNode->nextListItem == nullptr);
+
         firstChildElement.append (newNode);
+    }
 }
 
 void XmlElement::insertChildElement (XmlElement* const newNode, int indexToInsertAt) noexcept
 {
     if (newNode != nullptr)
     {
-        removeChildElement (newNode, false);
+        // The element being added must not be a child of another node!
+        jassert (newNode->nextListItem == nullptr);
+
         firstChildElement.insertAtIndex (indexToInsertAt, newNode);
+    }
+}
+
+void XmlElement::prependChildElement (XmlElement* newNode) noexcept
+{
+    if (newNode != nullptr)
+    {
+        // The element being added must not be a child of another node!
+        jassert (newNode->nextListItem == nullptr);
+
+        firstChildElement.insertNext (newNode);
     }
 }
 

@@ -1840,8 +1840,8 @@ XmlElement* TreeViewItem::getOpennessState (const bool canReturnNull) const
 
             e = new XmlElement ("OPEN");
 
-            for (int i = 0; i < subItems.size(); ++i)
-                e->addChildElement (subItems.getUnchecked(i)->getOpennessState (true));
+            for (int i = subItems.size(); --i >= 0;)
+                e->prependChildElement (subItems.getUnchecked(i)->getOpennessState (true));
         }
         else
         {

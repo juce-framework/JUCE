@@ -504,6 +504,10 @@ public:
         make sure the object that you pass in will not be deleted by anything else,
         and make sure it's not already the child of another element.
 
+        Note that due to the XmlElement using a singly-linked-list, prependChildElement()
+        is an O(1) operation, but addChildElement() is an O(N) operation - so if
+        you're adding large number of elements, you may prefer to do so in reverse order!
+
         @see getFirstChildElement, getNextElement, getNumChildElements,
              getChildElement, removeChildElement
     */
@@ -522,6 +526,21 @@ public:
     */
     void insertChildElement (XmlElement* newChildNode,
                              int indexToInsertAt) noexcept;
+
+    /** Inserts an element at the beginning of this element's list of children.
+
+        Child elements are deleted automatically when their parent is deleted, so
+        make sure the object that you pass in will not be deleted by anything else,
+        and make sure it's not already the child of another element.
+
+        Note that due to the XmlElement using a singly-linked-list, prependChildElement()
+        is an O(1) operation, but addChildElement() is an O(N) operation - so if
+        you're adding large number of elements, you may prefer to do so in reverse order!
+
+        @param newChildNode     the element to add
+        @see addChildElement, insertChildElement
+    */
+    void prependChildElement (XmlElement* newChildElement) noexcept;
 
     /** Creates a new element with the given name and returns it, after adding it
         as a child element.
