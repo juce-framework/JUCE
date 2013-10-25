@@ -858,7 +858,7 @@ struct JavascriptEngine::RootObject   : public DynamicObject
 
         bool matchToken (TokenType name, const size_t len) noexcept
         {
-            if (p.compareUpTo (String::CharPointerType (name), (int) len) != 0) return false;
+            if (p.compareUpTo (CharPointer_ASCII (name), (int) len) != 0) return false;
             p += (int) len;  return true;
         }
 
