@@ -83,6 +83,20 @@ public:
     */
     void addSubItem (TreeViewItem* newItem, int insertPosition = -1);
 
+    /** Adds a sub-item with a sort-comparator, assuming that the existing items are already sorted.
+
+        @param comparator  the comparator object for sorting - see sortSubItems() for details about
+                        the methods this class must provide.
+        @param newItem  the object to add to the item's sub-item list. Once added, these can be
+                        found using getSubItem(). When the items are later removed with
+                        removeSubItem() (or when this item is deleted), they will be deleted.
+    */
+    template <class ElementComparator>
+    void addSubItemSorted (ElementComparator& comparator, TreeViewItem* newItem)
+    {
+        addSubItem (newItem, findInsertIndexInSortedArray (comparator, subItems.begin(), newItem, 0, subItems.size()));
+    }
+
     /** Removes one of the sub-items.
 
         @param index        the item to remove
@@ -519,7 +533,7 @@ private:
     //==============================================================================
     TreeView* ownerView;
     TreeViewItem* parentItem;
-    OwnedArray <TreeViewItem> subItems;
+    OwnedArray<TreeViewItem> subItems;
     int y, itemHeight, totalHeight, itemWidth, totalWidth;
     int uid;
     bool selected           : 1;
