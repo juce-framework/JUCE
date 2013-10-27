@@ -294,6 +294,30 @@ public:
     };
 
     //==============================================================================
+    /** This abstract base class is implemented by LookAndFeel classes to provide
+        window drawing functionality.
+    */
+    struct JUCE_API  LookAndFeelMethods
+    {
+        virtual ~LookAndFeelMethods() {}
+
+        virtual int getTabButtonSpaceAroundImage() = 0;
+        virtual int getTabButtonOverlap (int tabDepth) = 0;
+        virtual int getTabButtonBestWidth (TabBarButton&, int tabDepth) = 0;
+        virtual Rectangle<int> getTabButtonExtraComponentBounds (const TabBarButton&, Rectangle<int>& textArea, Component& extraComp) = 0;
+
+        virtual void drawTabButton (TabBarButton&, Graphics&, bool isMouseOver, bool isMouseDown) = 0;
+        virtual void drawTabButtonText (TabBarButton&, Graphics&, bool isMouseOver, bool isMouseDown) = 0;
+        virtual void drawTabbedButtonBarBackground (TabbedButtonBar&, Graphics&) = 0;
+        virtual void drawTabAreaBehindFrontButton (TabbedButtonBar&, Graphics&, int w, int h) = 0;
+
+        virtual void createTabButtonShape (TabBarButton&, Path& path,  bool isMouseOver, bool isMouseDown) = 0;
+        virtual void fillTabButtonShape (TabBarButton&, Graphics&, const Path& path, bool isMouseOver, bool isMouseDown) = 0;
+
+        virtual Button* createTabBarExtrasButton() = 0;
+    };
+
+    //==============================================================================
     /** @internal */
     void paint (Graphics&) override;
     /** @internal */

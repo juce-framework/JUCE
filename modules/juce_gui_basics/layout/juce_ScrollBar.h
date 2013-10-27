@@ -293,6 +293,73 @@ public:
     void removeListener (Listener* listener);
 
     //==============================================================================
+    /** This abstract base class is implemented by LookAndFeel classes to provide
+        scrollbar-drawing functionality.
+    */
+    struct JUCE_API  LookAndFeelMethods
+    {
+        virtual ~LookAndFeelMethods() {}
+
+        virtual bool areScrollbarButtonsVisible() = 0;
+
+        /** Draws one of the buttons on a scrollbar.
+
+            @param g                    the context to draw into
+            @param scrollbar            the bar itself
+            @param width                the width of the button
+            @param height               the height of the button
+            @param buttonDirection      the direction of the button, where 0 = up, 1 = right, 2 = down, 3 = left
+            @param isScrollbarVertical  true if it's a vertical bar, false if horizontal
+            @param isMouseOverButton    whether the mouse is currently over the button (also true if it's held down)
+            @param isButtonDown         whether the mouse button's held down
+        */
+        virtual void drawScrollbarButton (Graphics& g,
+                                          ScrollBar& scrollbar,
+                                          int width, int height,
+                                          int buttonDirection,
+                                          bool isScrollbarVertical,
+                                          bool isMouseOverButton,
+                                          bool isButtonDown) = 0;
+
+        /** Draws the thumb area of a scrollbar.
+
+            @param g                    the context to draw into
+            @param scrollbar            the bar itself
+            @param x                    the x position of the left edge of the thumb area to draw in
+            @param y                    the y position of the top edge of the thumb area to draw in
+            @param width                the width of the thumb area to draw in
+            @param height               the height of the thumb area to draw in
+            @param isScrollbarVertical  true if it's a vertical bar, false if horizontal
+            @param thumbStartPosition   for vertical bars, the y coordinate of the top of the
+                                        thumb, or its x position for horizontal bars
+            @param thumbSize            for vertical bars, the height of the thumb, or its width for
+                                        horizontal bars. This may be 0 if the thumb shouldn't be drawn.
+            @param isMouseOver          whether the mouse is over the thumb area, also true if the mouse is
+                                        currently dragging the thumb
+            @param isMouseDown          whether the mouse is currently dragging the scrollbar
+        */
+        virtual void drawScrollbar (Graphics& g, ScrollBar& scrollbar,
+                                    int x, int y, int width, int height,
+                                    bool isScrollbarVertical,
+                                    int thumbStartPosition,
+                                    int thumbSize,
+                                    bool isMouseOver,
+                                    bool isMouseDown) = 0;
+
+        /** Returns the component effect to use for a scrollbar */
+        virtual ImageEffectFilter* getScrollbarEffect() = 0;
+
+        /** Returns the minimum length in pixels to use for a scrollbar thumb. */
+        virtual int getMinimumScrollbarThumbSize (ScrollBar&) = 0;
+
+        /** Returns the default thickness to use for a scrollbar. */
+        virtual int getDefaultScrollbarWidth() = 0;
+
+        /** Returns the length in pixels to use for a scrollbar button. */
+        virtual int getScrollbarButtonSize (ScrollBar&) = 0;
+    };
+
+    //==============================================================================
     /** @internal */
     bool keyPressed (const KeyPress&) override;
     /** @internal */

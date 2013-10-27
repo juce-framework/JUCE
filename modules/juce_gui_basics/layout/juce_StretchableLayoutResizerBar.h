@@ -73,6 +73,16 @@ public:
     virtual void hasBeenMoved();
 
     //==============================================================================
+    /** This abstract base class is implemented by LookAndFeel classes. */
+    struct JUCE_API  LookAndFeelMethods
+    {
+        virtual ~LookAndFeelMethods() {}
+
+        virtual void drawStretchableLayoutResizerBar (Graphics&, int w, int h,
+                                                      bool isVerticalBar, bool isMouseOver, bool isMouseDragging) = 0;
+    };
+
+    //==============================================================================
     /** @internal */
     void paint (Graphics&) override;
     /** @internal */

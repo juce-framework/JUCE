@@ -220,7 +220,7 @@ public:
         initialised = true;
     }
 
-    void didSendBodyData (int /*totalBytesWritten*/, int /*totalBytesExpected*/)
+    void didSendBodyData (NSInteger /*totalBytesWritten*/, NSInteger /*totalBytesExpected*/)
     {
     }
 

@@ -334,6 +334,25 @@ public:
     };
 
     //==============================================================================
+    /** This abstract base class is implemented by LookAndFeel classes to provide
+        ComboBox functionality.
+    */
+    struct JUCE_API  LookAndFeelMethods
+    {
+        virtual ~LookAndFeelMethods() {}
+
+        virtual void drawComboBox (Graphics&, int width, int height, bool isButtonDown,
+                                   int buttonX, int buttonY, int buttonW, int buttonH,
+                                   ComboBox&) = 0;
+
+        virtual Font getComboBoxFont (ComboBox&) = 0;
+
+        virtual Label* createComboBoxTextBox (ComboBox&) = 0;
+
+        virtual void positionComboBoxText (ComboBox&, Label& labelToPosition) = 0;
+    };
+
+    //==============================================================================
     /** @internal */
     void labelTextChanged (Label*) override;
     /** @internal */

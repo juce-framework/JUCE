@@ -340,7 +340,7 @@ namespace CoreTextTypeLayout
         CFArrayRef lines = CTFrameGetLines (frame);
         const CFIndex numLines = CFArrayGetCount (lines);
 
-        glyphLayout.ensureStorageAllocated (numLines);
+        glyphLayout.ensureStorageAllocated ((int) numLines);
 
         for (CFIndex i = 0; i < numLines; ++i)
         {

@@ -181,6 +181,16 @@ public:
     void setTooltip (const String& newTooltip) override;
 
     //==============================================================================
+    /** This abstract base class is implemented by LookAndFeel classes. */
+    struct JUCE_API  LookAndFeelMethods
+    {
+        virtual ~LookAndFeelMethods() {}
+
+        virtual Button* createFilenameComponentBrowseButton (const String& text) = 0;
+        virtual void layoutFilenameComponent (FilenameComponent&, ComboBox* filenameBox, Button* browseButton) =  0;
+    };
+
+    //==============================================================================
     /** @internal */
     void paintOverChildren (Graphics&) override;
     /** @internal */

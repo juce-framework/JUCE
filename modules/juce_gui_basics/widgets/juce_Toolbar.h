@@ -268,6 +268,24 @@ public:
                             const String& savedVersion);
 
     //==============================================================================
+    /** This abstract base class is implemented by LookAndFeel classes. */
+    struct JUCE_API  LookAndFeelMethods
+    {
+        virtual ~LookAndFeelMethods() {}
+
+        virtual void paintToolbarBackground (Graphics&, int width, int height, Toolbar&) = 0;
+
+        virtual Button* createToolbarMissingItemsButton (Toolbar&) = 0;
+
+        virtual void paintToolbarButtonBackground (Graphics&, int width, int height,
+                                                   bool isMouseOver, bool isMouseDown,
+                                                   ToolbarItemComponent&) = 0;
+
+        virtual void paintToolbarButtonLabel (Graphics&, int x, int y, int width, int height,
+                                              const String& text, ToolbarItemComponent&) = 0;
+    };
+
+    //==============================================================================
     /** @internal */
     void paint (Graphics&) override;
     /** @internal */

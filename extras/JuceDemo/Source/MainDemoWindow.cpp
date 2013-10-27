@@ -104,8 +104,9 @@ public:
         }
         else if (menuIndex == 1)
         {
-            menu.addCommandItem (commandManager, setDefaultLookAndFeel);
-            menu.addCommandItem (commandManager, setOldSchoolLookAndFeel);
+            menu.addCommandItem (commandManager, useLookAndFeelV1);
+            menu.addCommandItem (commandManager, useLookAndFeelV2);
+            menu.addCommandItem (commandManager, useLookAndFeelV3);
             menu.addSeparator();
             menu.addCommandItem (commandManager, useNativeTitleBar);
 
@@ -200,8 +201,9 @@ public:
                                   showWebBrowser,
                                   showCodeEditor,
                                   showInterprocessComms,
-                                  setDefaultLookAndFeel,
-                                  setOldSchoolLookAndFeel,
+                                  useLookAndFeelV1,
+                                  useLookAndFeelV2,
+                                  useLookAndFeelV3,
                                   useNativeTitleBar
                                  #if JUCE_MAC
                                   , useNativeMenus
@@ -329,14 +331,19 @@ public:
             result.setTicked (currentDemoId == showInterprocessComms);
             break;
 
-        case setDefaultLookAndFeel:
-            result.setInfo ("Use default look-and-feel", String::empty, generalCategory, 0);
-            result.setTicked (dynamic_cast <OldSchoolLookAndFeel*> (&getLookAndFeel()) == 0);
+        case useLookAndFeelV1:
+            result.setInfo ("Use LookAndFeel_V1", String::empty, generalCategory, 0);
+            result.setTicked (typeid (LookAndFeel_V1) == typeid (getLookAndFeel()));
             break;
 
-        case setOldSchoolLookAndFeel:
-            result.setInfo ("Use the old, original juce look-and-feel", String::empty, generalCategory, 0);
-            result.setTicked (dynamic_cast <OldSchoolLookAndFeel*> (&getLookAndFeel()) != 0);
+        case useLookAndFeelV2:
+            result.setInfo ("Use LookAndFeel_V2", String::empty, generalCategory, 0);
+            result.setTicked (typeid (LookAndFeel_V2) == typeid (getLookAndFeel()));
+            break;
+
+        case useLookAndFeelV3:
+            result.setInfo ("Use LookAndFeel_V3", String::empty, generalCategory, 0);
+            result.setTicked (typeid (LookAndFeel_V3) == typeid (getLookAndFeel()));
             break;
 
         case useNativeTitleBar:
@@ -458,13 +465,9 @@ public:
             currentDemoId = showInterprocessComms;
             break;
 
-        case setDefaultLookAndFeel:
-            LookAndFeel::setDefaultLookAndFeel (nullptr);
-            break;
-
-        case setOldSchoolLookAndFeel:
-            LookAndFeel::setDefaultLookAndFeel (&oldLookAndFeel);
-            break;
+        case useLookAndFeelV1:  LookAndFeel::setDefaultLookAndFeel (&lookAndFeelV1); break;
+        case useLookAndFeelV2:  LookAndFeel::setDefaultLookAndFeel (&lookAndFeelV2); break;
+        case useLookAndFeelV3:  LookAndFeel::setDefaultLookAndFeel (&lookAndFeelV3); break;
 
         case useNativeTitleBar:
             mainWindow.setUsingNativeTitleBar (! mainWindow.isUsingNativeTitleBar());
@@ -510,7 +513,9 @@ public:
 private:
     //==============================================================================
     MainDemoWindow& mainWindow;
-    OldSchoolLookAndFeel oldLookAndFeel;
+    LookAndFeel_V1 lookAndFeelV1;
+    LookAndFeel_V2 lookAndFeelV2;
+    LookAndFeel_V3 lookAndFeelV3;
     ScopedPointer<Component> currentDemo;
     int currentDemoId;
 
@@ -553,11 +558,12 @@ private:
         showCodeEditor             = 0x2013,
         showDirectShow             = 0x2014,
 
-        setDefaultLookAndFeel      = 0x200b,
-        setOldSchoolLookAndFeel    = 0x200c,
-        useNativeTitleBar          = 0x200d,
-        useNativeMenus             = 0x200e,
-        goToKioskMode              = 0x200f
+        useLookAndFeelV1           = 0x2020,
+        useLookAndFeelV2           = 0x2021,
+        useLookAndFeelV3           = 0x2022,
+        useNativeTitleBar          = 0x2023,
+        useNativeMenus             = 0x2024,
+        goToKioskMode              = 0x2025
     };
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ContentComp)

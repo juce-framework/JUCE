@@ -113,6 +113,7 @@ class CaretComponent;
 class BubbleComponent;
 class KeyPressMappingSet;
 class ApplicationCommandManagerListener;
+class DrawableButton;
 
 #include "mouse/juce_MouseCursor.h"
 #include "mouse/juce_MouseListener.h"
@@ -215,7 +216,6 @@ class ApplicationCommandManagerListener;
 #include "windows/juce_ThreadWithProgressWindow.h"
 #include "windows/juce_TooltipWindow.h"
 #include "layout/juce_MultiDocumentPanel.h"
-#include "lookandfeel/juce_LookAndFeel.h"
 #include "filebrowser/juce_FileFilter.h"
 #include "filebrowser/juce_WildcardFileFilter.h"
 #include "filebrowser/juce_FileBrowserListener.h"
@@ -239,6 +239,10 @@ class ApplicationCommandManagerListener;
 #include "properties/juce_TextPropertyComponent.h"
 #include "application/juce_Application.h"
 #include "misc/juce_BubbleComponent.h"
+#include "lookandfeel/juce_LookAndFeel.h"
+#include "lookandfeel/juce_LookAndFeel_V2.h"
+#include "lookandfeel/juce_LookAndFeel_V1.h"
+#include "lookandfeel/juce_LookAndFeel_V3.h"
 
 }
 

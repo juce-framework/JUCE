@@ -224,6 +224,30 @@ public:
     };
 
     //==============================================================================
+    /** This abstract base class is implemented by LookAndFeel classes to provide
+        window drawing functionality.
+    */
+    struct JUCE_API  LookAndFeelMethods
+    {
+        virtual ~LookAndFeelMethods() {}
+
+        virtual void drawDocumentWindowTitleBar (DocumentWindow&,
+                                                 Graphics&, int w, int h,
+                                                 int titleSpaceX, int titleSpaceW,
+                                                 const Image* icon,
+                                                 bool drawTitleTextOnLeft) = 0;
+
+        virtual Button* createDocumentWindowButton (int buttonType) = 0;
+
+        virtual void positionDocumentWindowButtons (DocumentWindow&,
+                                                    int titleBarX, int titleBarY, int titleBarW, int titleBarH,
+                                                    Button* minimiseButton,
+                                                    Button* maximiseButton,
+                                                    Button* closeButton,
+                                                    bool positionTitleBarButtonsOnLeft) = 0;
+    };
+
+    //==============================================================================
    #ifndef DOXYGEN
     /** @internal */
     void paint (Graphics&) override;

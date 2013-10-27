@@ -67,7 +67,7 @@ public:
 
 protected:
     JucerDocument& document;
-    LookAndFeel lookAndFeel;
+    LookAndFeel_V2 lookAndFeel;
 
     Viewport* viewport;
     MagnifierComponent* magnifier;

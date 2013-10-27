@@ -31,11 +31,8 @@ GroupComponent::GroupComponent (const String& name,
     setInterceptsMouseClicks  (false, true);
 }
 
-GroupComponent::~GroupComponent()
-{
-}
+GroupComponent::~GroupComponent() {}
 
-//==============================================================================
 void GroupComponent::setText (const String& newText)
 {
     if (text != newText)
@@ -50,7 +47,6 @@ String GroupComponent::getText() const
     return text;
 }
 
-//==============================================================================
 void GroupComponent::setTextLabelPosition (Justification newJustification)
 {
     if (justification != newJustification)
@@ -62,18 +58,9 @@ void GroupComponent::setTextLabelPosition (Justification newJustification)
 
 void GroupComponent::paint (Graphics& g)
 {
-    getLookAndFeel()
-        .drawGroupComponentOutline (g, getWidth(), getHeight(),
-                                    text, justification,
-                                    *this);
+    getLookAndFeel().drawGroupComponentOutline (g, getWidth(), getHeight(),
+                                                text, justification, *this);
 }
 
-void GroupComponent::enablementChanged()
-{
-    repaint();
-}
-
-void GroupComponent::colourChanged()
-{
-    repaint();
-}
+void GroupComponent::enablementChanged()    { repaint(); }
+void GroupComponent::colourChanged()        { repaint(); }

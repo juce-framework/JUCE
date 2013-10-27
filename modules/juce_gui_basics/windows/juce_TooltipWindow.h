@@ -96,6 +96,17 @@ public:
         outlineColourId         = 0x1001c10     /**< The colour to use to draw an outline around the tooltip. */
     };
 
+    //==============================================================================
+    /** This abstract base class is implemented by LookAndFeel classes to provide
+        window drawing functionality.
+    */
+    struct JUCE_API  LookAndFeelMethods
+    {
+        virtual ~LookAndFeelMethods() {}
+
+        virtual void getTooltipSize (const String& tipText, int& width, int& height) = 0;
+        virtual void drawTooltip (Graphics&, const String& text, int width, int height) = 0;
+    };
 
 private:
     //==============================================================================

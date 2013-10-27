@@ -2913,6 +2913,30 @@
       <Option compile="0"/>
       <Option link="0"/>
     </Unit>
+    <Unit filename="../../../../modules/juce_gui_basics/lookandfeel/juce_LookAndFeel_V1.cpp">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../../../modules/juce_gui_basics/lookandfeel/juce_LookAndFeel_V1.h">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../../../modules/juce_gui_basics/lookandfeel/juce_LookAndFeel_V2.cpp">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../../../modules/juce_gui_basics/lookandfeel/juce_LookAndFeel_V2.h">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../../../modules/juce_gui_basics/lookandfeel/juce_LookAndFeel_V3.cpp">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../../../modules/juce_gui_basics/lookandfeel/juce_LookAndFeel_V3.h">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
     <Unit filename="../../../../modules/juce_gui_basics/filebrowser/juce_DirectoryContentsDisplayComponent.cpp">
       <Option compile="0"/>
       <Option link="0"/>
@@ -3198,14 +3222,6 @@
       <Option link="0"/>
     </Unit>
     <Unit filename="../../../../modules/juce_gui_extra/embedding/juce_UIViewComponent.h">
-      <Option compile="0"/>
-      <Option link="0"/>
-    </Unit>
-    <Unit filename="../../../../modules/juce_gui_extra/lookandfeel/juce_OldSchoolLookAndFeel.cpp">
-      <Option compile="0"/>
-      <Option link="0"/>
-    </Unit>
-    <Unit filename="../../../../modules/juce_gui_extra/lookandfeel/juce_OldSchoolLookAndFeel.h">
       <Option compile="0"/>
       <Option link="0"/>
     </Unit>

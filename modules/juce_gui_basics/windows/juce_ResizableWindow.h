@@ -306,8 +306,23 @@ public:
                                                bool resizeToFit = false));
     using TopLevelWindow::addToDesktop;
 
-protected:
     //==============================================================================
+    /** This abstract base class is implemented by LookAndFeel classes to provide
+        window drawing functionality.
+    */
+    struct JUCE_API  LookAndFeelMethods
+    {
+        virtual ~LookAndFeelMethods() {}
+
+        //==============================================================================
+        virtual void drawCornerResizer (Graphics&, int w, int h, bool isMouseOver, bool isMouseDragging) = 0;
+        virtual void drawResizableFrame (Graphics&, int w, int h, const BorderSize<int>&) = 0;
+
+        virtual void fillResizableWindowBackground (Graphics&, int w, int h, const BorderSize<int>&, ResizableWindow&) = 0;
+        virtual void drawResizableWindowBorder (Graphics&, int w, int h, const BorderSize<int>& border, ResizableWindow&) = 0;
+    };
+
+protected:
     /** @internal */
     void paint (Graphics&) override;
     /** (if overriding this, make sure you call ResizableWindow::moved() in your subclass) */

@@ -294,20 +294,14 @@ public:
 
     String getUniqueName() const override       { return categoryName + "_cat"; }
     bool mightContainSubItems() override        { return true; }
-    int getItemHeight() const override          { return 24; }
+    int getItemHeight() const override          { return 22; }
 
     void paintItem (Graphics& g, int width, int height) override
     {
         g.setFont (Font (height * 0.7f, Font::bold));
         g.setColour (owner.findColour (KeyMappingEditorComponent::textColourId));
 
-        g.drawText (TRANS (categoryName), 2, 0, width - 2, height,
-                    Justification::centredLeft, true);
-    }
-
-    void paintOpenCloseButton (Graphics& g, const Rectangle<float>& area, Colour backgroundColour, bool isMouseOver) override
-    {
-        TreeViewItem::paintOpenCloseButton (g, area.reduced (4), backgroundColour, isMouseOver);
+        g.drawText (TRANS (categoryName), 2, 0, width - 2, height, Justification::centredLeft, true);
     }
 
     void itemOpennessChanged (bool isNowOpen) override
@@ -418,6 +412,7 @@ KeyMappingEditorComponent::KeyMappingEditorComponent (KeyPressMappingSet& mappin
     tree.setRootItemVisible (false);
     tree.setDefaultOpenness (true);
     tree.setRootItem (treeItem);
+    tree.setIndentSize (12);
 }
 
 KeyMappingEditorComponent::~KeyMappingEditorComponent()

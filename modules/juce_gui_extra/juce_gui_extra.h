@@ -50,7 +50,6 @@ namespace juce
 #include "embedding/juce_ActiveXControlComponent.h"
 #include "embedding/juce_NSViewComponent.h"
 #include "embedding/juce_UIViewComponent.h"
-#include "lookandfeel/juce_OldSchoolLookAndFeel.h"
 #include "misc/juce_AppleRemote.h"
 #include "misc/juce_BubbleMessageComponent.h"
 #include "misc/juce_ColourSelector.h"

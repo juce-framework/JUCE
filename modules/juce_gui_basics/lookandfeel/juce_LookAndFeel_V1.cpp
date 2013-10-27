@@ -22,7 +22,7 @@
   ==============================================================================
 */
 
-OldSchoolLookAndFeel::OldSchoolLookAndFeel()
+LookAndFeel_V1::LookAndFeel_V1()
 {
     setColour (TextButton::buttonColourId,          Colour (0xffbbbbff));
     setColour (ListBox::outlineColourId,            findColour (ComboBox::outlineColourId));
@@ -41,16 +41,13 @@ OldSchoolLookAndFeel::OldSchoolLookAndFeel()
     scrollbarShadow.setShadowProperties (DropShadow (Colours::black.withAlpha (0.5f), 2, Point<int>()));
 }
 
-OldSchoolLookAndFeel::~OldSchoolLookAndFeel()
+LookAndFeel_V1::~LookAndFeel_V1()
 {
 }
 
 //==============================================================================
-void OldSchoolLookAndFeel::drawButtonBackground (Graphics& g,
-                                                 Button& button,
-                                                 const Colour& backgroundColour,
-                                                 bool isMouseOverButton,
-                                                 bool isButtonDown)
+void LookAndFeel_V1::drawButtonBackground (Graphics& g, Button& button, const Colour& backgroundColour,
+                                           bool isMouseOverButton, bool isButtonDown)
 {
     const int width = button.getWidth();
     const int height = button.getHeight();
@@ -84,13 +81,12 @@ void OldSchoolLookAndFeel::drawButtonBackground (Graphics& g,
     g.strokePath (p, PathStrokeType ((isMouseOverButton) ? 2.0f : 1.4f));
 }
 
-void OldSchoolLookAndFeel::drawTickBox (Graphics& g,
-                                        Component& /*component*/,
-                                        float x, float y, float w, float h,
-                                        const bool ticked,
-                                        const bool isEnabled,
-                                        const bool /*isMouseOverButton*/,
-                                        const bool isButtonDown)
+void LookAndFeel_V1::drawTickBox (Graphics& g, Component& /*component*/,
+                                  float x, float y, float w, float h,
+                                  const bool ticked,
+                                  const bool isEnabled,
+                                  const bool /*isMouseOverButton*/,
+                                  const bool isButtonDown)
 {
     Path box;
     box.addRoundedRectangle (0.0f, 2.0f, 6.0f, 6.0f, 1.0f);
@@ -117,10 +113,7 @@ void OldSchoolLookAndFeel::drawTickBox (Graphics& g,
     }
 }
 
-void OldSchoolLookAndFeel::drawToggleButton (Graphics& g,
-                                             ToggleButton& button,
-                                             bool isMouseOverButton,
-                                             bool isButtonDown)
+void LookAndFeel_V1::drawToggleButton (Graphics& g, ToggleButton& button, bool isMouseOverButton, bool isButtonDown)
 {
     if (button.hasKeyboardFocus (true))
     {
@@ -151,13 +144,13 @@ void OldSchoolLookAndFeel::drawToggleButton (Graphics& g,
                       Justification::centredLeft, 10);
 }
 
-void OldSchoolLookAndFeel::drawProgressBar (Graphics& g, ProgressBar& progressBar,
-                                            int width, int height,
-                                            double progress, const String& textToShow)
+void LookAndFeel_V1::drawProgressBar (Graphics& g, ProgressBar& progressBar,
+                                      int width, int height,
+                                      double progress, const String& textToShow)
 {
     if (progress < 0 || progress >= 1.0)
     {
-        LookAndFeel::drawProgressBar (g, progressBar, width, height, progress, textToShow);
+        LookAndFeel_V2::drawProgressBar (g, progressBar, width, height, progress, textToShow);
     }
     else
     {
@@ -181,13 +174,11 @@ void OldSchoolLookAndFeel::drawProgressBar (Graphics& g, ProgressBar& progressBa
     }
 }
 
-void OldSchoolLookAndFeel::drawScrollbarButton (Graphics& g,
-                                                ScrollBar& bar,
-                                                int width, int height,
-                                                int buttonDirection,
-                                                bool isScrollbarVertical,
-                                                bool isMouseOverButton,
-                                                bool isButtonDown)
+void LookAndFeel_V1::drawScrollbarButton (Graphics& g, ScrollBar& bar,
+                                          int width, int height, int buttonDirection,
+                                          bool isScrollbarVertical,
+                                          bool isMouseOverButton,
+                                          bool isButtonDown)
 {
     if (isScrollbarVertical)
         width -= 2;
@@ -226,15 +217,10 @@ void OldSchoolLookAndFeel::drawScrollbarButton (Graphics& g,
     g.strokePath (p, PathStrokeType (0.5f));
 }
 
-void OldSchoolLookAndFeel::drawScrollbar (Graphics& g,
-                                          ScrollBar& bar,
-                                          int x, int y,
-                                          int width, int height,
-                                          bool isScrollbarVertical,
-                                          int thumbStartPosition,
-                                          int thumbSize,
-                                          bool isMouseOver,
-                                          bool isMouseDown)
+void LookAndFeel_V1::drawScrollbar (Graphics& g, ScrollBar& bar,
+                                    int x, int y, int width, int height,
+                                    bool isScrollbarVertical, int thumbStartPosition, int thumbSize,
+                                    bool isMouseOver, bool isMouseDown)
 {
     g.fillAll (bar.findColour (ScrollBar::backgroundColourId));
 
@@ -296,14 +282,14 @@ void OldSchoolLookAndFeel::drawScrollbar (Graphics& g,
     }
 }
 
-ImageEffectFilter* OldSchoolLookAndFeel::getScrollbarEffect()
+ImageEffectFilter* LookAndFeel_V1::getScrollbarEffect()
 {
     return &scrollbarShadow;
 }
 
 
 //==============================================================================
-void OldSchoolLookAndFeel::drawPopupMenuBackground (Graphics& g, int width, int height)
+void LookAndFeel_V1::drawPopupMenuBackground (Graphics& g, int width, int height)
 {
     g.fillAll (findColour (PopupMenu::backgroundColourId));
 
@@ -311,15 +297,14 @@ void OldSchoolLookAndFeel::drawPopupMenuBackground (Graphics& g, int width, int 
     g.drawRect (0, 0, width, height);
 }
 
-void OldSchoolLookAndFeel::drawMenuBarBackground (Graphics& g, int /*width*/, int /*height*/,
-                                                  bool, MenuBarComponent& menuBar)
+void LookAndFeel_V1::drawMenuBarBackground (Graphics& g, int /*width*/, int /*height*/, bool, MenuBarComponent& menuBar)
 {
     g.fillAll (menuBar.findColour (PopupMenu::backgroundColourId));
 }
 
 
 //==============================================================================
-void OldSchoolLookAndFeel::drawTextEditorOutline (Graphics& g, int width, int height, TextEditor& textEditor)
+void LookAndFeel_V1::drawTextEditorOutline (Graphics& g, int width, int height, TextEditor& textEditor)
 {
     if (textEditor.isEnabled())
     {
@@ -329,11 +314,10 @@ void OldSchoolLookAndFeel::drawTextEditorOutline (Graphics& g, int width, int he
 }
 
 //==============================================================================
-void OldSchoolLookAndFeel::drawComboBox (Graphics& g, int width, int height,
-                                         const bool isButtonDown,
-                                         int buttonX, int buttonY,
-                                         int buttonW, int buttonH,
-                                         ComboBox& box)
+void LookAndFeel_V1::drawComboBox (Graphics& g, int width, int height,
+                                   const bool isButtonDown,
+                                   int buttonX, int buttonY, int buttonW, int buttonH,
+                                   ComboBox& box)
 {
     g.fillAll (box.findColour (ComboBox::backgroundColourId));
 
@@ -364,7 +348,7 @@ void OldSchoolLookAndFeel::drawComboBox (Graphics& g, int width, int height,
     }
 }
 
-Font OldSchoolLookAndFeel::getComboBoxFont (ComboBox& box)
+Font LookAndFeel_V1::getComboBoxFont (ComboBox& box)
 {
     Font f (jmin (15.0f, box.getHeight() * 0.85f));
     f.setHorizontalScale (0.9f);
@@ -383,14 +367,11 @@ static void drawTriangle (Graphics& g, float x1, float y1, float x2, float y2, f
     g.strokePath (p, PathStrokeType (0.3f));
 }
 
-void OldSchoolLookAndFeel::drawLinearSlider (Graphics& g,
-                                             int x, int y,
-                                             int w, int h,
-                                             float sliderPos,
-                                             float minSliderPos,
-                                             float maxSliderPos,
-                                             const Slider::SliderStyle style,
-                                             Slider& slider)
+void LookAndFeel_V1::drawLinearSlider (Graphics& g,
+                                       int x, int y, int w, int h,
+                                       float sliderPos, float minSliderPos, float maxSliderPos,
+                                       const Slider::SliderStyle style,
+                                       Slider& slider)
 {
     g.fillAll (slider.findColour (Slider::backgroundColourId));
 
@@ -468,7 +449,7 @@ void OldSchoolLookAndFeel::drawLinearSlider (Graphics& g,
     }
 }
 
-Button* OldSchoolLookAndFeel::createSliderButton (const bool isIncrement)
+Button* LookAndFeel_V1::createSliderButton (const bool isIncrement)
 {
     if (isIncrement)
         return new ArrowButton ("u", 0.75f, Colours::white.withAlpha (0.8f));
@@ -476,21 +457,18 @@ Button* OldSchoolLookAndFeel::createSliderButton (const bool isIncrement)
         return new ArrowButton ("d", 0.25f, Colours::white.withAlpha (0.8f));
 }
 
-ImageEffectFilter* OldSchoolLookAndFeel::getSliderEffect()
+ImageEffectFilter* LookAndFeel_V1::getSliderEffect()
 {
     return &scrollbarShadow;
 }
 
-int OldSchoolLookAndFeel::getSliderThumbRadius (Slider&)
+int LookAndFeel_V1::getSliderThumbRadius (Slider&)
 {
     return 8;
 }
 
 //==============================================================================
-void OldSchoolLookAndFeel::drawCornerResizer (Graphics& g,
-                                              int w, int h,
-                                              bool isMouseOver,
-                                              bool isMouseDragging)
+void LookAndFeel_V1::drawCornerResizer (Graphics& g, int w, int h, bool isMouseOver, bool isMouseDragging)
 {
     g.setColour ((isMouseOver || isMouseDragging) ? Colours::lightgrey
                                                   : Colours::darkgrey);
@@ -508,7 +486,7 @@ void OldSchoolLookAndFeel::drawCornerResizer (Graphics& g,
 }
 
 //==============================================================================
-Button* OldSchoolLookAndFeel::createDocumentWindowButton (int buttonType)
+Button* LookAndFeel_V1::createDocumentWindowButton (int buttonType)
 {
     Path shape;
 
@@ -553,15 +531,12 @@ Button* OldSchoolLookAndFeel::createDocumentWindowButton (int buttonType)
     return nullptr;
 }
 
-void OldSchoolLookAndFeel::positionDocumentWindowButtons (DocumentWindow&,
-                                                          int titleBarX,
-                                                          int titleBarY,
-                                                          int titleBarW,
-                                                          int titleBarH,
-                                                          Button* minimiseButton,
-                                                          Button* maximiseButton,
-                                                          Button* closeButton,
-                                                          bool positionTitleBarButtonsOnLeft)
+void LookAndFeel_V1::positionDocumentWindowButtons (DocumentWindow&,
+                                                    int titleBarX, int titleBarY, int titleBarW, int titleBarH,
+                                                    Button* minimiseButton,
+                                                    Button* maximiseButton,
+                                                    Button* closeButton,
+                                                    bool positionTitleBarButtonsOnLeft)
 {
     titleBarY += titleBarH / 8;
     titleBarH -= titleBarH / 4;

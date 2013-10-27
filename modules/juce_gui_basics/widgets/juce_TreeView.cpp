@@ -439,7 +439,7 @@ TreeView::TreeView (const String& name)
     : Component (name),
       viewport (new TreeViewport()),
       rootItem (nullptr),
-      indentSize (24),
+      indentSize (-1),
       defaultOpenness (false),
       needsRecalculating (true),
       rootItemVisible (true),
@@ -520,6 +520,12 @@ void TreeView::setIndentSize (const int newIndentSize)
         indentSize = newIndentSize;
         resized();
     }
+}
+
+int TreeView::getIndentSize() noexcept
+{
+    return indentSize >= 0 ? indentSize
+                           : getLookAndFeel().getTreeViewIndentSize (*this);
 }
 
 void TreeView::setDefaultOpenness (const bool isOpenByDefault)
@@ -860,7 +866,7 @@ void TreeView::recalculateIfNeeded()
 //==============================================================================
 struct TreeView::InsertPoint
 {
-    InsertPoint (const TreeView& view, const StringArray& files,
+    InsertPoint (TreeView& view, const StringArray& files,
                  const DragAndDropTarget::SourceDetails& dragSourceDetails)
         : pos (dragSourceDetails.localPosition),
           item (view.getItemAt (dragSourceDetails.localPosition.y)),
@@ -1125,7 +1131,8 @@ TreeViewItem::TreeViewItem()
       totalWidth (0),
       selected (false),
       redrawNeeded (true),
-      drawLinesInside (true),
+      drawLinesInside (false),
+      drawLinesSet (false),
       drawsInLeftMargin (false),
       openness (opennessDefault)
 {
@@ -1495,6 +1502,12 @@ namespace TreeViewHelpers
     }
 }
 
+bool TreeViewItem::areLinesDrawn() const
+{
+    return drawLinesSet ? drawLinesInside
+                        : (ownerView != nullptr && ownerView->getLookAndFeel().areLinesDrawnForTreeView (*ownerView));
+}
+
 void TreeViewItem::paintRecursively (Graphics& g, int width)
 {
     jassert (ownerView != nullptr);
@@ -1526,11 +1539,12 @@ void TreeViewItem::paintRecursively (Graphics& g, int width)
     {
         float x = (depth + 0.5f) * indentWidth;
 
-        if (parentItem != nullptr && parentItem->drawLinesInside)
+        const bool parentLinesDrawn = parentItem != nullptr && parentItem->areLinesDrawn();
+
+        if (parentLinesDrawn)
             paintVerticalConnectingLine (g, Line<float> (x, 0, x, isLastOfSiblings() ? halfH : (float) itemHeight));
 
-        if ((parentItem != nullptr && parentItem->drawLinesInside)
-             || (parentItem == nullptr && drawLinesInside))
+        if (parentLinesDrawn || (parentItem == nullptr && areLinesDrawn()))
             paintHorizontalConnectingLine (g, Line<float> (x, halfH, x + indentWidth / 2, halfH));
 
         {
@@ -1541,8 +1555,7 @@ void TreeViewItem::paintRecursively (Graphics& g, int width)
             {
                 x -= (float) indentWidth;
 
-                if ((p->parentItem == nullptr || p->parentItem->drawLinesInside)
-                     && ! p->isLastOfSiblings())
+                if ((p->parentItem == nullptr || p->parentItem->areLinesDrawn()) && ! p->isLastOfSiblings())
                     p->paintVerticalConnectingLine (g, Line<float> (x, 0, x, (float) itemHeight));
 
                 p = p->parentItem;
@@ -1730,6 +1743,7 @@ int TreeViewItem::getRowNumberInTree() const noexcept
 void TreeViewItem::setLinesDrawnForSubItems (const bool drawLines) noexcept
 {
     drawLinesInside = drawLines;
+    drawLinesSet = true;
 }
 
 TreeViewItem* TreeViewItem::getNextVisibleItem (const bool recurse) const noexcept

@@ -367,6 +367,19 @@ public:
     virtual void reactToMenuItem (int menuReturnId, int columnIdClicked);
 
     //==============================================================================
+    /** This abstract base class is implemented by LookAndFeel classes. */
+    struct JUCE_API  LookAndFeelMethods
+    {
+        virtual ~LookAndFeelMethods() {}
+
+        virtual void drawTableHeaderBackground (Graphics&, TableHeaderComponent&) = 0;
+
+        virtual void drawTableHeaderColumn (Graphics&, const String& columnName, int columnId,
+                                            int width, int height,
+                                            bool isMouseOver, bool isMouseDown, int columnFlags) = 0;
+    };
+
+    //==============================================================================
     /** @internal */
     void paint (Graphics&) override;
     /** @internal */

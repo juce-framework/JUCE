@@ -124,6 +124,17 @@ public:
     */
     Image getDownImage() const;
 
+    //==============================================================================
+    /** This abstract base class is implemented by LookAndFeel classes. */
+    struct JUCE_API  LookAndFeelMethods
+    {
+        virtual ~LookAndFeelMethods() {}
+
+        virtual void drawImageButton (Graphics&, Image*,
+                                      int imageX, int imageY, int imageW, int imageH,
+                                      const Colour& overlayColour, float imageOpacity, ImageButton&) = 0;
+    };
+
 protected:
     //==============================================================================
     /** @internal */

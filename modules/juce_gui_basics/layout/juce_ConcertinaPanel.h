@@ -93,6 +93,16 @@ public:
     /** Sets the height of the header section for one of the panels. */
     void setPanelHeaderSize (Component* panelComponent, int headerSize);
 
+    //==============================================================================
+    /** This abstract base class is implemented by LookAndFeel classes. */
+    struct JUCE_API  LookAndFeelMethods
+    {
+        virtual ~LookAndFeelMethods() {}
+
+        virtual void drawConcertinaPanelHeader (Graphics&, const Rectangle<int>& area,
+                                                bool isMouseOver, bool isMouseDown, ConcertinaPanel&, Component&) = 0;
+    };
+
 private:
     void resized() override;
 

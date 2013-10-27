@@ -249,6 +249,18 @@ public:
     /** Returns the currently-visible text editor, or nullptr if none is open. */
     TextEditor* getCurrentTextEditor() const noexcept;
 
+    //==============================================================================
+    /** This abstract base class is implemented by LookAndFeel classes to provide
+        label drawing functionality.
+    */
+    struct JUCE_API  LookAndFeelMethods
+    {
+        virtual ~LookAndFeelMethods() {}
+
+        virtual void drawLabel (Graphics&, Label&) = 0;
+        virtual Font getLabelFont (Label&) = 0;
+    };
+
 protected:
     //==============================================================================
     /** Creates the TextEditor component that will be used when the user has clicked on the label.

@@ -1675,8 +1675,8 @@ private:
     void setHostTimeFrameRate (long frameRateIndex, double frameRate, double currentTime) noexcept
     {
         vstHostTime.flags |= kVstSmpteValid;
-        vstHostTime.smpteFrameRate  = frameRateIndex;
-        vstHostTime.smpteOffset     = (long) (currentTime * 80.0 * frameRate + 0.5);
+        vstHostTime.smpteFrameRate  = (VstInt32) frameRateIndex;
+        vstHostTime.smpteOffset     = (VstInt32) (currentTime * 80.0 * frameRate + 0.5);
     }
 
     bool restoreProgramSettings (const fxProgram* const prog)

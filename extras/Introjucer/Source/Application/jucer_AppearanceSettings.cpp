@@ -209,8 +209,7 @@ void AppearanceSettings::applyToLookAndFeel (LookAndFeel& lf) const
         }
     }
 
-    lf.setColour (ScrollBar::thumbColourId,
-                  IntrojucerLookAndFeel::getScrollbarColourForBackground (lf.findColour (mainBackgroundColourId)));
+    lf.setColour (ScrollBar::thumbColourId, lf.findColour (mainBackgroundColourId).contrasting().withAlpha (0.13f));
 }
 
 void AppearanceSettings::applyToCodeEditor (CodeEditorComponent& editor) const
@@ -236,8 +235,9 @@ void AppearanceSettings::applyToCodeEditor (CodeEditorComponent& editor) const
         }
     }
 
-    editor.setColour (ScrollBar::thumbColourId,
-                      IntrojucerLookAndFeel::getScrollbarColourForBackground (editor.findColour (CodeEditorComponent::backgroundColourId)));
+    editor.setColour (ScrollBar::thumbColourId, editor.findColour (CodeEditorComponent::backgroundColourId)
+                                                      .contrasting()
+                                                      .withAlpha (0.13f));
 }
 
 Font AppearanceSettings::getCodeFont() const
@@ -530,44 +530,11 @@ void AppearanceSettings::showEditorWindow (ScopedPointer<Component>& ownerPointe
 IntrojucerLookAndFeel::IntrojucerLookAndFeel()
 {
     setColour (mainBackgroundColourId, Colour::greyLevel (0.8f));
-    setColour (TreeView::selectedItemBackgroundColourId, Colour (0x401111ee));
-    setColour (TextButton::buttonColourId, Colour (0xffeeeeff));
-
-    setColour (ScrollBar::thumbColourId,
-               getScrollbarColourForBackground (findColour (mainBackgroundColourId)));
 }
 
-Colour IntrojucerLookAndFeel::getScrollbarColourForBackground (Colour background)
-{
-    return background.contrasting().withAlpha (0.13f);
-}
+int IntrojucerLookAndFeel::getTabButtonBestWidth (TabBarButton&, int)   { return 120; }
 
-Rectangle<int> IntrojucerLookAndFeel::getPropertyComponentContentPosition (PropertyComponent& component)
-{
-    if (component.findParentComponentOfClass<AppearanceEditor::EditorPanel>() != nullptr)
-        return component.getLocalBounds().reduced (1).removeFromRight (component.getWidth() / 2);
-
-    return LookAndFeel::getPropertyComponentContentPosition (component);
-}
-
-int IntrojucerLookAndFeel::getTabButtonOverlap (int /*tabDepth*/)                      { return -1; }
-int IntrojucerLookAndFeel::getTabButtonSpaceAroundImage()                              { return 1; }
-int IntrojucerLookAndFeel::getTabButtonBestWidth (TabBarButton&, int /*tabDepth*/)     { return 120; }
-
-static void createTabTextLayout (const TabBarButton& button, const Rectangle<int>& textArea,
-                                 const Colour colour, TextLayout& textLayout)
-{
-    Font font (textArea.getHeight() * 0.5f);
-    font.setUnderline (button.hasKeyboardFocus (false));
-
-    AttributedString s;
-    s.setJustification (Justification::centred);
-    s.append (button.getButtonText().trim(), font, colour);
-
-    textLayout.createLayout (s, (float) textArea.getWidth());
-}
-
-Colour IntrojucerLookAndFeel::getTabBackgroundColour (TabBarButton& button)
+static Colour getTabBackgroundColour (TabBarButton& button)
 {
     const Colour bkg (button.findColour (mainBackgroundColourId).contrasting (0.15f));
 
@@ -594,58 +561,9 @@ void IntrojucerLookAndFeel::drawTabButton (TabBarButton& button, Graphics& g, bo
     const Colour col (bkg.contrasting().withMultipliedAlpha (alpha));
 
     TextLayout textLayout;
-    createTabTextLayout (button, button.getTextArea(), col, textLayout);
+    LookAndFeel_V3::createTabTextLayout (button, (float) activeArea.getWidth(), (float) activeArea.getHeight(), col, textLayout);
 
     textLayout.draw (g, button.getTextArea().toFloat());
-}
-
-Rectangle<int> IntrojucerLookAndFeel::getTabButtonExtraComponentBounds (const TabBarButton& button, Rectangle<int>& textArea, Component& comp)
-{
-    TextLayout textLayout;
-    createTabTextLayout (button, textArea, Colours::black, textLayout);
-    const int textWidth = (int) textLayout.getWidth();
-    const int extraSpace = jmax (0, textArea.getWidth() - (textWidth + comp.getWidth())) / 2;
-
-    textArea.removeFromRight (extraSpace);
-    textArea.removeFromLeft (extraSpace);
-    return textArea.removeFromRight (comp.getWidth());
-}
-
-void IntrojucerLookAndFeel::drawStretchableLayoutResizerBar (Graphics& g, int /*w*/, int /*h*/, bool /*isVerticalBar*/, bool isMouseOver, bool isMouseDragging)
-{
-    if (isMouseOver || isMouseDragging)
-        g.fillAll (Colours::yellow.withAlpha (0.4f));
-}
-
-void IntrojucerLookAndFeel::drawScrollbar (Graphics& g, ScrollBar& scrollbar, int x, int y, int width, int height,
-                                           bool isScrollbarVertical, int thumbStartPosition, int thumbSize,
-                                           bool isMouseOver, bool isMouseDown)
-{
-    Path thumbPath;
-
-    if (thumbSize > 0)
-    {
-        const float thumbIndent = (isScrollbarVertical ? width : height) * 0.25f;
-        const float thumbIndentx2 = thumbIndent * 2.0f;
-
-        if (isScrollbarVertical)
-            thumbPath.addRoundedRectangle (x + thumbIndent, thumbStartPosition + thumbIndent,
-                                           width - thumbIndentx2, thumbSize - thumbIndentx2, (width - thumbIndentx2) * 0.5f);
-        else
-            thumbPath.addRoundedRectangle (thumbStartPosition + thumbIndent, y + thumbIndent,
-                                           thumbSize - thumbIndentx2, height - thumbIndentx2, (height - thumbIndentx2) * 0.5f);
-    }
-
-    Colour thumbCol (scrollbar.findColour (ScrollBar::thumbColourId, true));
-
-    if (isMouseOver || isMouseDown)
-        thumbCol = thumbCol.withMultipliedAlpha (2.0f);
-
-    g.setColour (thumbCol);
-    g.fillPath (thumbPath);
-
-    g.setColour (thumbCol.contrasting ((isMouseOver  || isMouseDown) ? 0.2f : 0.1f));
-    g.strokePath (thumbPath, PathStrokeType (1.0f));
 }
 
 static Range<float> getBrightnessRange (const Image& im)
@@ -704,98 +622,4 @@ void IntrojucerLookAndFeel::fillWithBackgroundTexture (Graphics& g)
 void IntrojucerLookAndFeel::fillWithBackgroundTexture (Component& c, Graphics& g)
 {
     dynamic_cast<IntrojucerLookAndFeel&> (c.getLookAndFeel()).fillWithBackgroundTexture (g);
-}
-
-void IntrojucerLookAndFeel::drawConcertinaPanelHeader (Graphics& g, const Rectangle<int>& area,
-                                                       bool isMouseOver, bool /*isMouseDown*/,
-                                                       ConcertinaPanel&, Component& panel)
-{
-    const Colour bkg (findColour (mainBackgroundColourId));
-
-    g.setGradientFill (ColourGradient (Colours::white.withAlpha (isMouseOver ? 0.4f : 0.2f), 0, (float) area.getY(),
-                                       Colours::darkgrey.withAlpha (0.2f), 0, (float) area.getBottom(), false));
-
-    g.fillAll();
-    g.setColour (bkg.contrasting().withAlpha (0.04f));
-    g.fillRect (area.withHeight (1));
-    g.fillRect (area.withTop (area.getBottom() - 1));
-
-    g.setColour (bkg.contrasting());
-    g.setFont (Font (area.getHeight() * 0.6f).boldened());
-    g.drawFittedText (panel.getName(), 4, 0, area.getWidth() - 6, area.getHeight(), Justification::centredLeft, 1);
-}
-
-void IntrojucerLookAndFeel::drawButtonBackground (Graphics& g,
-                                                  Button& button,
-                                                  const Colour& backgroundColour,
-                                                  bool isMouseOverButton,
-                                                  bool isButtonDown)
-{
-    const bool flatOnLeft   = button.isConnectedOnLeft();
-    const bool flatOnRight  = button.isConnectedOnRight();
-    const bool flatOnTop    = button.isConnectedOnTop();
-    const bool flatOnBottom = button.isConnectedOnBottom();
-
-    const float width  = (float) button.getWidth();
-    const float height = (float) button.getHeight();
-
-    const float x = 0.5f;
-    const float y = 0.5f;
-    const float w = width  - 1.0f;
-    const float h = height - 1.0f;
-    const float cornerSize = 4.0f;
-
-    Colour baseColour (backgroundColour.withMultipliedSaturation (button.hasKeyboardFocus (true)
-                                                                      ? 1.3f : 0.9f)
-                                       .withMultipliedAlpha (button.isEnabled() ? 0.9f : 0.5f));
-
-    if (isButtonDown)           baseColour = baseColour.contrasting (0.2f);
-    else if (isMouseOverButton) baseColour = baseColour.contrasting (0.1f);
-
-    const float mainBrightness = baseColour.getBrightness();
-    const float mainAlpha = baseColour.getFloatAlpha();
-
-    Path outline;
-    outline.addRoundedRectangle (x, y, w, h, cornerSize, cornerSize,
-                                 ! (flatOnLeft  || flatOnTop),
-                                 ! (flatOnRight || flatOnTop),
-                                 ! (flatOnLeft  || flatOnBottom),
-                                 ! (flatOnRight || flatOnBottom));
-
-    g.setGradientFill (ColourGradient (baseColour.brighter (0.2f), 0.0f, 0.0f,
-                                       baseColour.darker (0.25f), 0.0f, height, false));
-    g.fillPath (outline);
-
-    g.setColour (Colours::white.withAlpha (0.4f * mainAlpha * mainBrightness * mainBrightness));
-    g.strokePath (outline, PathStrokeType (1.0f), AffineTransform::translation (0.0f, 1.0f)
-                                                        .scaled (1.0f, (h - 1.6f) / h));
-
-    g.setColour (Colours::black.withAlpha (0.4f * mainAlpha));
-    g.strokePath (outline, PathStrokeType (1.0f));
-}
-
-void IntrojucerLookAndFeel::drawTableHeaderBackground (Graphics& g, TableHeaderComponent& header)
-{
-    Rectangle<int> r (header.getLocalBounds());
-
-    g.setColour (Colours::black.withAlpha (0.5f));
-    g.fillRect (r.removeFromBottom (1));
-
-    g.setColour (Colours::white.withAlpha (0.6f));
-    g.fillRect (r);
-
-    g.setColour (Colours::black.withAlpha (0.5f));
-
-    for (int i = header.getNumColumns (true); --i >= 0;)
-        g.fillRect (header.getColumnPosition (i).removeFromRight (1));
-}
-
-void IntrojucerLookAndFeel::drawTreeviewPlusMinusBox (Graphics& g, const Rectangle<float>& area,
-                                                      Colour backgroundColour, bool isOpen, bool isMouseOver)
-{
-    Path p;
-    p.addTriangle (0.0f, 0.0f, 1.0f, isOpen ? 0.0f : 0.5f, isOpen ? 0.5f : 0.0f, 1.0f);
-
-    g.setColour (backgroundColour.contrasting().withAlpha (isMouseOver ? 0.5f : 0.3f));
-    g.fillPath (p, p.getTransformToScaleToFit (area.reduced (area.getHeight() / 8), true));
 }

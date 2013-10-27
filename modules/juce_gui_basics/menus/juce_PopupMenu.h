@@ -480,6 +480,62 @@ public:
     void addCustomItem (int itemResultID, CustomComponent* customComponent,
                         const PopupMenu* optionalSubMenu = nullptr);
 
+
+    //==============================================================================
+    /** This abstract base class is implemented by LookAndFeel classes to provide
+        menu drawing functionality.
+    */
+    struct JUCE_API  LookAndFeelMethods
+    {
+        virtual ~LookAndFeelMethods() {}
+
+        /** Fills the background of a popup menu component. */
+        virtual void drawPopupMenuBackground (Graphics&, int width, int height) = 0;
+
+        /** Draws one of the items in a popup menu. */
+        virtual void drawPopupMenuItem (Graphics&, int width, int height,
+                                        bool isSeparator, bool isActive, bool isHighlighted,
+                                        bool isTicked, bool hasSubMenu,
+                                        const String& text,
+                                        const String& shortcutKeyText,
+                                        Image* icon,
+                                        const Colour* textColour) = 0;
+
+        /** Returns the size and style of font to use in popup menus. */
+        virtual Font getPopupMenuFont() = 0;
+
+        virtual void drawPopupMenuUpDownArrow (Graphics&,
+                                               int width, int height,
+                                               bool isScrollUpArrow) = 0;
+
+        /** Finds the best size for an item in a popup menu. */
+        virtual void getIdealPopupMenuItemSize (const String& text,
+                                                bool isSeparator,
+                                                int standardMenuItemHeight,
+                                                int& idealWidth,
+                                                int& idealHeight) = 0;
+
+        virtual int getMenuWindowFlags() = 0;
+
+        virtual void drawMenuBarBackground (Graphics&, int width, int height,
+                                            bool isMouseOverBar,
+                                            MenuBarComponent&) = 0;
+
+        virtual int getDefaultMenuBarHeight() = 0;
+
+        virtual int getMenuBarItemWidth (MenuBarComponent&, int itemIndex, const String& itemText) = 0;
+
+        virtual Font getMenuBarFont (MenuBarComponent&, int itemIndex, const String& itemText) = 0;
+
+        virtual void drawMenuBarItem (Graphics&, int width, int height,
+                                      int itemIndex,
+                                      const String& itemText,
+                                      bool isMouseOverItem,
+                                      bool isMenuOpen,
+                                      bool isMouseOverBar,
+                                      MenuBarComponent&) = 0;
+    };
+
 private:
     //==============================================================================
     JUCE_PUBLIC_IN_DLL_BUILD (class Item)
