@@ -109,6 +109,9 @@ public:
     void drawButtonBackground (Graphics&, Button&, const Colour& backgroundColour,
                                bool isMouseOverButton, bool isButtonDown) override;
 
+    void drawTreeviewPlusMinusBox (Graphics&, const Rectangle<float>& area,
+                                   Colour backgroundColour, bool isOpen, bool isMouseOver) override;
+
     void drawTableHeaderBackground (Graphics&, TableHeaderComponent&) override;
 
     static Colour getScrollbarColourForBackground (Colour background);

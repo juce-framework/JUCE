@@ -270,7 +270,8 @@ public:
 
     //==============================================================================
     /** Draws the + or - box in a treeview. */
-    virtual void drawTreeviewPlusMinusBox (Graphics&, int x, int y, int w, int h, bool isPlus, bool isMouseOver);
+    virtual void drawTreeviewPlusMinusBox (Graphics&, const Rectangle<float>& area,
+                                           Colour backgroundColour, bool isOpen, bool isMouseOver);
 
     //==============================================================================
     virtual void fillTextEditorBackground (Graphics&, int width, int height, TextEditor& textEditor);
@@ -657,6 +658,7 @@ private:
     virtual int drawBubble (Graphics&, float, float, float, float, float, float) { return 0; }
     virtual int getFontForTextButton (TextButton&) { return 0; }
     virtual int createFileChooserHeaderText (const String&, const String&, GlyphArrangement&, int) { return 0; }
+    virtual int drawTreeviewPlusMinusBox (Graphics&, int, int, int, int, bool, bool) { return 0; }
    #endif
 
     class GlassWindowButton;

@@ -107,6 +107,7 @@ LookAndFeel::LookAndFeel()
         TreeView::linesColourId,                    0x4c000000,
         TreeView::backgroundColourId,               0x00000000,
         TreeView::dragAndDropIndicatorColourId,     0x80ff0000,
+        TreeView::selectedItemBackgroundColourId,   0x00000000,
 
         PopupMenu::backgroundColourId,              0xffffffff,
         PopupMenu::textColourId,                    0xff000000,
@@ -913,14 +914,15 @@ Path LookAndFeel::getCrossShape (const float height)
 }
 
 //==============================================================================
-void LookAndFeel::drawTreeviewPlusMinusBox (Graphics& g, int x, int y, int w, int h, bool isPlus, bool /*isMouseOver*/)
+void LookAndFeel::drawTreeviewPlusMinusBox (Graphics& g, const Rectangle<float>& area,
+                                            Colour /*backgroundColour*/, bool isOpen, bool /*isMouseOver*/)
 {
-    const int boxSize = ((jmin (16, w, h) << 1) / 3) | 1;
+    const int boxSize = roundToInt (jmin (16.0f, area.getWidth(), area.getHeight()) * 0.7f) | 1;
 
-    x += (w - boxSize) >> 1;
-    y += (h - boxSize) >> 1;
-    w = boxSize;
-    h = boxSize;
+    const int x = ((int) area.getWidth()  - boxSize) / 2 + (int) area.getX();
+    const int y = ((int) area.getHeight() - boxSize) / 2 + (int) area.getY();
+    const int w = boxSize;
+    const int h = boxSize;
 
     g.setColour (Colour (0xe5ffffff));
     g.fillRect (x, y, w, h);
@@ -933,7 +935,7 @@ void LookAndFeel::drawTreeviewPlusMinusBox (Graphics& g, int x, int y, int w, in
 
     g.fillRect (x + (w - size) * 0.5f, y + centre, size, 1.0f);
 
-    if (isPlus)
+    if (! isOpen)
         g.fillRect (x + centre, y + (h - size) * 0.5f, 1.0f, size);
 }
 
@@ -2472,7 +2474,7 @@ void LookAndFeel::drawPropertyPanelSectionHeader (Graphics& g, const String& nam
     const int buttonSize = (height * 3) / 4;
     const int buttonIndent = (height - buttonSize) / 2;
 
-    drawTreeviewPlusMinusBox (g, buttonIndent, buttonIndent, buttonSize, buttonSize, ! isOpen, false);
+    drawTreeviewPlusMinusBox (g, buttonIndent, buttonIndent, buttonSize, buttonSize, isOpen, false);
 
     const int textX = buttonIndent * 2 + buttonSize + 2;
 

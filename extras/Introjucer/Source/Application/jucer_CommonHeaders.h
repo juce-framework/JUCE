@@ -48,7 +48,6 @@ const char* const sourceOrHeaderFileExtensions  = "cpp;mm;m;c;cc;cxx;h;hpp;hxx;h
 enum ColourIds
 {
     mainBackgroundColourId          = 0x2340000,
-    treeviewHighlightColourId       = 0x2340002,
 };
 
 #endif   // __JUCER_COMMONHEADERS_JUCEHEADER__

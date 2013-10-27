@@ -38,7 +38,7 @@ namespace AppearanceColours
     static const ColourInfo colours[] =
     {
         { "Main Window Bkgd",   mainBackgroundColourId, true, false },
-        { "Treeview Highlight", treeviewHighlightColourId, false, false },
+        { "Treeview Highlight", TreeView::selectedItemBackgroundColourId, false, false },
 
         { "Code Background",    CodeEditorComponent::backgroundColourId, true, false },
         { "Line Number Bkgd",   CodeEditorComponent::lineNumberBackgroundId, false, false },
@@ -530,7 +530,7 @@ void AppearanceSettings::showEditorWindow (ScopedPointer<Component>& ownerPointe
 IntrojucerLookAndFeel::IntrojucerLookAndFeel()
 {
     setColour (mainBackgroundColourId, Colour::greyLevel (0.8f));
-    setColour (treeviewHighlightColourId, Colour (0x401111ee));
+    setColour (TreeView::selectedItemBackgroundColourId, Colour (0x401111ee));
     setColour (TextButton::buttonColourId, Colour (0xffeeeeff));
 
     setColour (ScrollBar::thumbColourId,
@@ -788,4 +788,14 @@ void IntrojucerLookAndFeel::drawTableHeaderBackground (Graphics& g, TableHeaderC
 
     for (int i = header.getNumColumns (true); --i >= 0;)
         g.fillRect (header.getColumnPosition (i).removeFromRight (1));
+}
+
+void IntrojucerLookAndFeel::drawTreeviewPlusMinusBox (Graphics& g, const Rectangle<float>& area,
+                                                      Colour backgroundColour, bool isOpen, bool isMouseOver)
+{
+    Path p;
+    p.addTriangle (0.0f, 0.0f, 1.0f, isOpen ? 0.0f : 0.5f, isOpen ? 0.5f : 0.0f, 1.0f);
+
+    g.setColour (backgroundColour.contrasting().withAlpha (isMouseOver ? 0.5f : 0.3f));
+    g.fillPath (p, p.getTransformToScaleToFit (area.reduced (area.getHeight() / 8), true));
 }

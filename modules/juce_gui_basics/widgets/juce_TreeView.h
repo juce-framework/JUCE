@@ -313,11 +313,14 @@ public:
 
     /** Draws the item's open/close button.
 
-        If you don't implement this method, the default behaviour is to
-        call LookAndFeel::drawTreeviewPlusMinusBox(), but you can override
-        it for custom effects.
+        If you don't implement this method, the default behaviour is to call
+        LookAndFeel::drawTreeviewPlusMinusBox(), but you can override it for custom
+        effects. You may want to override it and call the base-class implementation
+        with a different backgroundColour parameter, if your implementation has a
+        background colour other than the default (white).
     */
-    virtual void paintOpenCloseButton (Graphics&, int width, int height, bool isMouseOver);
+    virtual void paintOpenCloseButton (Graphics&, const Rectangle<float>& area,
+                                       Colour backgroundColour, bool isMouseOver);
 
     /** Draws the line that connects this item to the vertical line extending below its parent. */
     virtual void paintHorizontalConnectingLine (Graphics&, const Line<float>& line);
@@ -793,9 +796,10 @@ public:
     */
     enum ColourIds
     {
-        backgroundColourId            = 0x1000500, /**< A background colour to fill the component with. */
-        linesColourId                 = 0x1000501, /**< The colour to draw the lines with.*/
-        dragAndDropIndicatorColourId  = 0x1000502  /**< The colour to use for the drag-and-drop target position indicator. */
+        backgroundColourId             = 0x1000500, /**< A background colour to fill the component with. */
+        linesColourId                  = 0x1000501, /**< The colour to draw the lines with.*/
+        dragAndDropIndicatorColourId   = 0x1000502, /**< The colour to use for the drag-and-drop target position indicator. */
+        selectedItemBackgroundColourId = 0x1000503  /**< The colour to use to fill the background of any selected items. */
     };
 
     //==============================================================================
@@ -862,6 +866,11 @@ private:
     void moveOutOfSelectedItem();
     void moveIntoSelectedItem();
     void moveByPages (int numPages);
+
+   #if JUCE_CATCH_DEPRECATED_CODE_MISUSE
+    // this method has been deprecated - see the new version..
+    virtual int paintOpenCloseButton (Graphics&, int, int, bool) { return 0; }
+   #endif
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TreeView)
 };

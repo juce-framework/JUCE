@@ -1317,10 +1317,10 @@ void TreeViewItem::paintItem (Graphics&, int, int)
 {
 }
 
-void TreeViewItem::paintOpenCloseButton (Graphics& g, int width, int height, bool isMouseOver)
+void TreeViewItem::paintOpenCloseButton (Graphics& g, const Rectangle<float>& area, Colour backgroundColour, bool isMouseOver)
 {
-    ownerView->getLookAndFeel()
-       .drawTreeviewPlusMinusBox (g, 0, 0, width, height, ! isOpen(), isMouseOver);
+    getOwnerView()->getLookAndFeel()
+       .drawTreeviewPlusMinusBox (g, area, backgroundColour, isOpen(), isMouseOver);
 }
 
 void TreeViewItem::paintHorizontalConnectingLine (Graphics& g, const Line<float>& line)
@@ -1510,7 +1510,12 @@ void TreeViewItem::paintRecursively (Graphics& g, int width)
 
         if (g.reduceClipRegion (drawsInLeftMargin ? -indent : 0, 0,
                                 drawsInLeftMargin ? itemW + indent : itemW, itemHeight))
+        {
+            if (isSelected())
+                g.fillAll (ownerView->findColour (TreeView::selectedItemBackgroundColourId));
+
             paintItem (g, itemW, itemHeight);
+        }
     }
 
     const float halfH = itemHeight * 0.5f;
@@ -1545,15 +1550,9 @@ void TreeViewItem::paintRecursively (Graphics& g, int width)
         }
 
         if (mightContainSubItems())
-        {
-            Graphics::ScopedSaveState ss (g);
-
-            g.setOrigin (depth * indentWidth, 0);
-            g.reduceClipRegion (0, 0, indentWidth, itemHeight);
-
-            paintOpenCloseButton (g, indentWidth, itemHeight,
+            paintOpenCloseButton (g, Rectangle<float> ((float) (depth * indentWidth), 0, (float) indentWidth, (float) itemHeight),
+                                  Colours::white,
                                   ownerView->viewport->getContentComp()->isMouseOverButton (this));
-        }
     }
 
     if (isOpen())

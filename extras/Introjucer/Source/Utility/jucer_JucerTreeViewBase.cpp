@@ -84,28 +84,14 @@ Font JucerTreeViewBase::getFont() const
     return Font (getItemHeight() * 0.6f);
 }
 
-void JucerTreeViewBase::paintItem (Graphics& g, int /*width*/, int /*height*/)
-{
-    if (isSelected())
-        g.fillAll (getOwnerView()->findColour (treeviewHighlightColourId));
-}
-
 float JucerTreeViewBase::getIconSize() const
 {
     return jmin (getItemHeight() - 4.0f, 18.0f);
 }
 
-void JucerTreeViewBase::paintOpenCloseButton (Graphics& g, int width, int height, bool /*isMouseOver*/)
+void JucerTreeViewBase::paintOpenCloseButton (Graphics& g, const Rectangle<float>& area, Colour /*backgroundColour*/, bool isMouseOver)
 {
-    Path p;
-
-    if (isOpen())
-        p.addTriangle (width * 0.2f,  height * 0.25f, width * 0.8f, height * 0.25f, width * 0.5f, height * 0.75f);
-    else
-        p.addTriangle (width * 0.25f, height * 0.25f, width * 0.8f, height * 0.5f,  width * 0.25f, height * 0.75f);
-
-    g.setColour (getOwnerView()->findColour (mainBackgroundColourId).contrasting (0.3f));
-    g.fillPath (p);
+    TreeViewItem::paintOpenCloseButton (g, area, getOwnerView()->findColour (mainBackgroundColourId), isMouseOver);
 }
 
 Colour JucerTreeViewBase::getBackgroundColour() const
@@ -113,7 +99,7 @@ Colour JucerTreeViewBase::getBackgroundColour() const
     Colour background (getOwnerView()->findColour (mainBackgroundColourId));
 
     if (isSelected())
-        background = background.overlaidWith (getOwnerView()->findColour (treeviewHighlightColourId));
+        background = background.overlaidWith (getOwnerView()->findColour (TreeView::selectedItemBackgroundColourId));
 
     return background;
 }
