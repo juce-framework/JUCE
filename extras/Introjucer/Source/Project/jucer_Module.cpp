@@ -699,7 +699,7 @@ void EnabledModuleList::sortAlphabetically()
     state.sort (sorter, getUndoManager(), false);
 }
 
-Value EnabledModuleList::shouldCopyModuleFilesLocally (const String& moduleID)
+Value EnabledModuleList::shouldCopyModuleFilesLocally (const String& moduleID) const
 {
     return state.getChildWithProperty (Ids::ID, moduleID)
                 .getPropertyAsValue (Ids::useLocalCopy, getUndoManager());
@@ -735,7 +735,7 @@ void EnabledModuleList::addModule (const File& moduleManifestFile, bool copyLoca
 
 void EnabledModuleList::removeModule (const String& moduleID)
 {
-    for (int i = 0; i < state.getNumChildren(); ++i)
+    for (int i = state.getNumChildren(); --i >= 0;)
         if (state.getChild(i) [Ids::ID] == moduleID)
             state.removeChild (i, getUndoManager());
 
@@ -797,7 +797,7 @@ StringArray EnabledModuleList::getExtraDependenciesNeeded (const String& moduleI
     getDependencies (project, moduleID, dependencies);
 
     for (int i = 0; i < dependencies.size(); ++i)
-        if ((! project.getModules().isModuleEnabled (dependencies[i])) && dependencies[i] != moduleID)
+        if ((! isModuleEnabled (dependencies[i])) && dependencies[i] != moduleID)
             extraDepsNeeded.add (dependencies[i]);
 
     return extraDepsNeeded;
@@ -807,15 +807,21 @@ bool EnabledModuleList::areMostModulesCopiedLocally() const
 {
     int numYes = 0, numNo = 0;
 
-    for (int i = project.getModules().getNumModules(); --i >= 0;)
+    for (int i = getNumModules(); --i >= 0;)
     {
-        if (project.getModules().shouldCopyModuleFilesLocally (project.getModules().getModuleID (i)).getValue())
+        if (shouldCopyModuleFilesLocally (getModuleID (i)).getValue())
             ++numYes;
         else
             ++numNo;
     }
 
     return numYes > numNo;
+}
+
+void EnabledModuleList::setLocalCopyModeForAllModules (bool copyLocally)
+{
+    for (int i = getNumModules(); --i >= 0;)
+        shouldCopyModuleFilesLocally (project.getModules().getModuleID (i)) = copyLocally;
 }
 
 File EnabledModuleList::findDefaultModulesFolder (Project& project)

@@ -123,7 +123,7 @@ public:
 
     bool isModuleEnabled (const String& moduleID) const;
     Value shouldShowAllModuleFilesInProject (const String& moduleID);
-    Value shouldCopyModuleFilesLocally (const String& moduleID);
+    Value shouldCopyModuleFilesLocally (const String& moduleID) const;
     void removeModule (const String& moduleID);
     bool isAudioPluginModuleMissing() const;
 
@@ -145,6 +145,7 @@ public:
     String getModuleID (int index) const    { return state.getChild (index) [Ids::ID].toString(); }
 
     bool areMostModulesCopiedLocally() const;
+    void setLocalCopyModeForAllModules (bool copyLocally);
     void sortAlphabetically();
 
     static File findDefaultModulesFolder (Project&);

@@ -33,7 +33,8 @@ public:
         : project (p),
           modulesValueTree (p.getModules().state),
           addWebModuleButton ("Download and add a module..."),
-          updateModuleButton ("Install updates to modules...")
+          updateModuleButton ("Install updates to modules..."),
+          setCopyModeButton  ("Set copy-mode for all modules...")
     {
         table.getHeader().addColumn ("Module", nameCol, 180, 100, 400, TableHeaderComponent::notSortable);
         table.getHeader().addColumn ("Installed Version", versionCol, 100, 100, 100, TableHeaderComponent::notSortable);
@@ -49,9 +50,12 @@ public:
 
         addAndMakeVisible (&addWebModuleButton);
         addAndMakeVisible (&updateModuleButton);
+        addAndMakeVisible (&setCopyModeButton);
         addWebModuleButton.addListener (this);
         updateModuleButton.addListener (this);
         updateModuleButton.setEnabled (false);
+        setCopyModeButton.addListener (this);
+        setCopyModeButton.setTriggeredOnMouseDown (true);
 
         modulesValueTree.addListener (this);
         lookAndFeelChanged();
@@ -72,9 +76,11 @@ public:
         table.setBounds (r.removeFromTop (table.getRowPosition (getNumRows() - 1, true).getBottom() + 20));
 
         Rectangle<int> buttonRow (r.removeFromTop (32).removeFromBottom (28));
-        addWebModuleButton.setBounds (buttonRow.removeFromLeft (jmin (260, r.getWidth() / 2)));
+        addWebModuleButton.setBounds (buttonRow.removeFromLeft (jmin (260, r.getWidth() / 3)));
         buttonRow.removeFromLeft (8);
-        updateModuleButton.setBounds (buttonRow.removeFromLeft (jmin (260, r.getWidth() / 2)));
+        updateModuleButton.setBounds (buttonRow.removeFromLeft (jmin (260, r.getWidth() / 3)));
+        buttonRow.removeFromLeft (8);
+        setCopyModeButton.setBounds (buttonRow.removeFromLeft (jmin (260, r.getWidth() / 3)));
     }
 
     int getNumRows() override
@@ -170,10 +176,9 @@ public:
 
     void buttonClicked (Button* b)
     {
-        if (b == &addWebModuleButton)
-            showAddModuleMenu();
-        else if (b == &updateModuleButton)
-            showUpdateModulesMenu();
+        if (b == &addWebModuleButton)       showAddModuleMenu();
+        else if (b == &updateModuleButton)  showUpdateModulesMenu();
+        else if (b == &setCopyModeButton)    showCopyModeMenu();
     }
 
 private:
@@ -189,7 +194,7 @@ private:
     Project& project;
     ValueTree modulesValueTree;
     TableListBox table;
-    TextButton addWebModuleButton, updateModuleButton;
+    TextButton addWebModuleButton, updateModuleButton, setCopyModeButton;
     ScopedPointer<ModuleList> listFromWebsite;
 
     void valueTreePropertyChanged (ValueTree&, const Identifier&) override    { itemChanged(); }
@@ -308,6 +313,18 @@ private:
         if (res > 0 && listFromWebsite != nullptr)
             if (const ModuleDescription* md = listFromWebsite->getModuleWithID (mods[res - 1]))
                 DownloadAndInstallThread::addModuleFromWebsite (project, *md);
+    }
+
+    void showCopyModeMenu()
+    {
+        PopupMenu m;
+        m.addItem (1, "Set all modules to copy locally");
+        m.addItem (2, "Set all modules to not copy locally");
+
+        int res = m.showAt (&setCopyModeButton);
+
+        if (res != 0)
+            project.getModules().setLocalCopyModeForAllModules (res == 1);
     }
 
     struct WebsiteUpdateFetchThread  : private Thread,
