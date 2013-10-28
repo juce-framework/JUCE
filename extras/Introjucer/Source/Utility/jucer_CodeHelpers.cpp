@@ -218,22 +218,52 @@ namespace CodeHelpers
             return "String::empty";
 
         StringArray lines;
-        lines.add (text);
+
+        {
+            String::CharPointerType t (text.getCharPointer());
+            bool finished = t.isEmpty();
+
+            while (! finished)
+            {
+                for (String::CharPointerType startOfLine (t);;)
+                {
+                    switch (t.getAndAdvance())
+                    {
+                        case 0:     finished = true; break;
+                        case '\n':  break;
+                        case '\r':  if (*t == '\n') ++t; break;
+                        default:    continue;
+                    }
+
+                    lines.add (String (startOfLine, t));
+                    break;
+                }
+            }
+        }
 
         if (maxLineLength > 0)
         {
-            while (lines [lines.size() - 1].length() > maxLineLength)
+            for (int i = 0; i < lines.size(); ++i)
             {
-                String& lastLine = lines.getReference (lines.size() - 1);
-                const String start (lastLine.substring (0, maxLineLength));
-                const String end (lastLine.substring (maxLineLength));
-                lastLine = start;
-                lines.add (end);
+                String& line = lines.getReference (i);
+
+                if (line.length() > maxLineLength)
+                {
+                    const String start (line.substring (0, maxLineLength));
+                    const String end (line.substring (maxLineLength));
+                    line = start;
+                    lines.insert (i + 1, end);
+                }
             }
         }
 
         for (int i = 0; i < lines.size(); ++i)
-            lines.getReference(i) = "\"" + addEscapeChars (lines.getReference(i)) + "\"";
+            lines.getReference(i) = addEscapeChars (lines.getReference(i));
+
+        lines.removeEmptyStrings();
+
+        for (int i = 0; i < lines.size(); ++i)
+            lines.getReference(i) = "\"" + lines.getReference(i) + "\"";
 
         String result (lines.joinIntoString (newLine));
 
