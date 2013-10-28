@@ -1807,13 +1807,10 @@ private:
             {
                 const DWORD flags = inputInfo[i].dwFlags;
 
-                if ((flags & TOUCHEVENTF_PRIMARY) == 0  // primary events are handled by WM_LBUTTON etc
-                     && (flags & (TOUCHEVENTF_DOWN | TOUCHEVENTF_MOVE | TOUCHEVENTF_UP)) != 0)
-                {
-                    if (! handleTouchInput (inputInfo[i], (flags & TOUCHEVENTF_DOWN) != 0,
-                                                          (flags & TOUCHEVENTF_UP) != 0))
+                if ((flags & (TOUCHEVENTF_DOWN | TOUCHEVENTF_MOVE | TOUCHEVENTF_UP)) != 0)
+                    if (! handleTouchInput (inputInfo[i], (flags & TOUCHEVENTF_PRIMARY) != 0,
+                                            (flags & TOUCHEVENTF_DOWN) != 0, (flags & TOUCHEVENTF_UP) != 0))
                         return 0;  // abandon method if this window was deleted by the callback
-                }
             }
         }
 
@@ -1821,7 +1818,7 @@ private:
         return 0;
     }
 
-    bool handleTouchInput (const TOUCHINPUT& touch, const bool isDown, const bool isUp)
+    bool handleTouchInput (const TOUCHINPUT& touch, const bool isPrimary, const bool isDown, const bool isUp)
     {
         bool isCancel = false;
         const int touchIndex = currentTouches.getIndexOfTouch (touch.dwID);
@@ -1835,10 +1832,13 @@ private:
             currentModifiers = currentModifiers.withoutMouseButtons().withFlags (ModifierKeys::leftButtonModifier);
             modsToSend = currentModifiers;
 
-            // this forces a mouse-enter/up event, in case for some reason we didn't get a mouse-up before.
-            handleMouseEvent (touchIndex + 1, pos, modsToSend.withoutMouseButtons(), time);
-            if (! isValidPeer (this)) // (in case this component was deleted by the event)
-                return false;
+            if (! isPrimary)
+            {
+                // this forces a mouse-enter/up event, in case for some reason we didn't get a mouse-up before.
+                handleMouseEvent (touchIndex, pos, modsToSend.withoutMouseButtons(), time);
+                if (! isValidPeer (this)) // (in case this component was deleted by the event)
+                    return false;
+            }
         }
         else if (isUp)
         {
@@ -1848,6 +1848,10 @@ private:
             if (! currentTouches.areAnyTouchesActive())
                 isCancel = true;
         }
+        else
+        {
+            modsToSend = currentModifiers.withoutMouseButtons().withFlags (ModifierKeys::leftButtonModifier);
+        }
 
         if (isCancel)
         {
@@ -1855,13 +1859,16 @@ private:
             currentModifiers = currentModifiers.withoutMouseButtons();
         }
 
-        handleMouseEvent (touchIndex + 1, pos, modsToSend, time);
-        if (! isValidPeer (this)) // (in case this component was deleted by the event)
-            return false;
-
-        if (isUp || isCancel)
+        if (! isPrimary)
         {
-            handleMouseEvent (touchIndex + 1, Point<int> (-10, -10), currentModifiers, time);
+            handleMouseEvent (touchIndex, pos, modsToSend, time);
+            if (! isValidPeer (this)) // (in case this component was deleted by the event)
+                return false;
+        }
+
+        if ((isUp || isCancel) && ! isPrimary)
+        {
+            handleMouseEvent (touchIndex, Point<int> (-10, -10), currentModifiers, time);
             if (! isValidPeer (this))
                 return false;
         }
