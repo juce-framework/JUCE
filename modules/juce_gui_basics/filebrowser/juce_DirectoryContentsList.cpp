@@ -56,6 +56,7 @@ void DirectoryContentsList::setDirectory (const File& directory,
     {
         clear();
         root = directory;
+        changed();
 
         // (this forces a refresh when setTypeFlags() is called, rather than triggering two refreshes)
         fileTypeFlags &= ~(File::findDirectories | File::findFiles);
