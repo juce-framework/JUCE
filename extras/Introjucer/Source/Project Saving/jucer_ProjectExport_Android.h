@@ -408,7 +408,8 @@ private:
             << "LOCAL_SRC_FILES := \\" << newLine;
 
         for (int i = 0; i < files.size(); ++i)
-            out << "  ../" << escapeSpaces (files.getReference(i).toUnixStyle()) << "\\" << newLine;
+            out << "  " << (files.getReference(i).isAbsolute() ? "" : "../")
+                << escapeSpaces (files.getReference(i).toUnixStyle()) << "\\" << newLine;
 
         String debugSettings, releaseSettings;
 

@@ -653,23 +653,26 @@ File EnabledModuleList::getModuleInfoFile (const String& moduleID)
             {
                 const File moduleFolder (project.resolveFilename (path));
 
-                File f (moduleFolder.getChildFile (ModuleDescription::getManifestFileName()));
+                if (moduleFolder.exists())
+                {
+                    File f (moduleFolder.getChildFile (ModuleDescription::getManifestFileName()));
 
-                if (f.exists())
-                    return f;
+                    if (f.exists())
+                        return f;
 
-                f = moduleFolder.getChildFile (moduleID)
-                                .getChildFile (ModuleDescription::getManifestFileName());
+                    f = moduleFolder.getChildFile (moduleID)
+                                    .getChildFile (ModuleDescription::getManifestFileName());
 
-                if (f.exists())
-                    return f;
+                    if (f.exists())
+                        return f;
 
-                f = moduleFolder.getChildFile ("modules")
-                                .getChildFile (moduleID)
-                                .getChildFile (ModuleDescription::getManifestFileName());
+                    f = moduleFolder.getChildFile ("modules")
+                                    .getChildFile (moduleID)
+                                    .getChildFile (ModuleDescription::getManifestFileName());
 
-                if (f.exists())
-                    return f;
+                    if (f.exists())
+                        return f;
+                }
             }
         }
     }
