@@ -724,8 +724,8 @@ void EnabledModuleList::addModule (const File& moduleManifestFile, bool copyLoca
             shouldShowAllModuleFilesInProject (moduleID) = true;
             shouldCopyModuleFilesLocally (moduleID) = copyLocally;
 
-            String path (moduleManifestFile.getParentDirectory().getParentDirectory()
-                            .getRelativePathFrom (project.getProjectFolder()));
+            String path (FileHelpers::getRelativePathFrom (moduleManifestFile.getParentDirectory().getParentDirectory(),
+                                                           project.getProjectFolder()));
 
             for (Project::ExporterIterator exporter (project); exporter.next();)
                 exporter->getPathForModuleValue (moduleID) = path;
