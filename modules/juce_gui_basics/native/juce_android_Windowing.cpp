@@ -315,26 +315,39 @@ public:
     }
 
     //==============================================================================
-    void handleMouseDownCallback (int index, float x, float y, int64 time)
+    void handleMouseDownCallback (int index, Point<float> pos, int64 time)
     {
-        lastMousePos.setXY ((int) x, (int) y);
-        currentModifiers = currentModifiers.withoutMouseButtons();
-        handleMouseEvent (index, lastMousePos, currentModifiers, time);
+        lastMousePos = pos;
+
+        // this forces a mouse-enter/up event, in case for some reason we didn't get a mouse-up before.
+        handleMouseEvent (index, pos.toInt(), currentModifiers.withoutMouseButtons(), time);
+
+        if (isValidPeer (this))
+            handleMouseDragCallback (index, pos, time);
+    }
+
+    void handleMouseDragCallback (int index, Point<float> pos, int64 time)
+    {
+        lastMousePos = pos;
+
+        jassert (index < 64);
+        touchesDown = (touchesDown | (1 << (index & 63)));
         currentModifiers = currentModifiers.withoutMouseButtons().withFlags (ModifierKeys::leftButtonModifier);
-        handleMouseEvent (index, lastMousePos, currentModifiers, time);
+        handleMouseEvent (index, pos.toInt(), currentModifiers.withoutMouseButtons()
+                                                  .withFlags (ModifierKeys::leftButtonModifier), time);
     }
 
-    void handleMouseDragCallback (int index, float x, float y, int64 time)
+    void handleMouseUpCallback (int index, Point<float> pos, int64 time)
     {
-        lastMousePos.setXY ((int) x, (int) y);
-        handleMouseEvent (index, lastMousePos, currentModifiers, time);
-    }
+        lastMousePos = pos;
 
-    void handleMouseUpCallback (int index, float x, float y, int64 time)
-    {
-        lastMousePos.setXY ((int) x, (int) y);
-        currentModifiers = currentModifiers.withoutMouseButtons();
-        handleMouseEvent (index, lastMousePos, currentModifiers, time);
+        jassert (index < 64);
+        touchesDown = (touchesDown & ~(1 << (index & 63)));
+
+        if (touchesDown == 0)
+            currentModifiers = currentModifiers.withoutMouseButtons();
+
+        handleMouseEvent (index, pos.toInt(), currentModifiers.withoutMouseButtons(), time);
     }
 
     void handleKeyDownCallback (int k, int kc)
@@ -461,7 +474,8 @@ public:
 
     //==============================================================================
     static ModifierKeys currentModifiers;
-    static Point<int> lastMousePos;
+    static Point<float> lastMousePos;
+    static int64 touchesDown;
 
 private:
     //==============================================================================
@@ -526,7 +540,8 @@ private:
 };
 
 ModifierKeys AndroidComponentPeer::currentModifiers = 0;
-Point<int> AndroidComponentPeer::lastMousePos;
+Point<float> AndroidComponentPeer::lastMousePos;
+int64 AndroidComponentPeer::touchesDown = 0;
 
 //==============================================================================
 #define JUCE_VIEW_CALLBACK(returnType, javaMethodName, params, juceMethodInvocation) \
@@ -537,9 +552,9 @@ Point<int> AndroidComponentPeer::lastMousePos;
   }
 
 JUCE_VIEW_CALLBACK (void, handlePaint,      (JNIEnv* env, jobject view, jlong host, jobject canvas),                          handlePaintCallback (env, canvas))
-JUCE_VIEW_CALLBACK (void, handleMouseDown,  (JNIEnv* env, jobject view, jlong host, jint i, jfloat x, jfloat y, jlong time),  handleMouseDownCallback (i, (float) x, (float) y, (int64) time))
-JUCE_VIEW_CALLBACK (void, handleMouseDrag,  (JNIEnv* env, jobject view, jlong host, jint i, jfloat x, jfloat y, jlong time),  handleMouseDragCallback (i, (float) x, (float) y, (int64) time))
-JUCE_VIEW_CALLBACK (void, handleMouseUp,    (JNIEnv* env, jobject view, jlong host, jint i, jfloat x, jfloat y, jlong time),  handleMouseUpCallback (i, (float) x, (float) y, (int64) time))
+JUCE_VIEW_CALLBACK (void, handleMouseDown,  (JNIEnv* env, jobject view, jlong host, jint i, jfloat x, jfloat y, jlong time),  handleMouseDownCallback (i, Point<float> ((float) x, (float) y), (int64) time))
+JUCE_VIEW_CALLBACK (void, handleMouseDrag,  (JNIEnv* env, jobject view, jlong host, jint i, jfloat x, jfloat y, jlong time),  handleMouseDragCallback (i, Point<float> ((float) x, (float) y), (int64) time))
+JUCE_VIEW_CALLBACK (void, handleMouseUp,    (JNIEnv* env, jobject view, jlong host, jint i, jfloat x, jfloat y, jlong time),  handleMouseUpCallback   (i, Point<float> ((float) x, (float) y), (int64) time))
 JUCE_VIEW_CALLBACK (void, viewSizeChanged,  (JNIEnv* env, jobject view, jlong host),                                          handleMovedOrResized())
 JUCE_VIEW_CALLBACK (void, focusChanged,     (JNIEnv* env, jobject view, jlong host, jboolean hasFocus),                       handleFocusChangeCallback (hasFocus))
 JUCE_VIEW_CALLBACK (void, handleKeyDown,    (JNIEnv* env, jobject view, jlong host, jint k, jint kc),                         handleKeyDownCallback ((int) k, (int) kc))
@@ -582,7 +597,7 @@ bool MouseInputSource::SourceList::addSource()
 
 Point<int> MouseInputSource::getCurrentRawMousePosition()
 {
-    return AndroidComponentPeer::lastMousePos;
+    return AndroidComponentPeer::lastMousePos.toInt();
 }
 
 void MouseInputSource::setRawMousePosition (Point<int>)
