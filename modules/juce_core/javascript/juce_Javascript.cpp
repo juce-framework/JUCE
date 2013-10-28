@@ -1216,6 +1216,9 @@ struct JavascriptEngine::RootObject   : public DynamicObject
                 return parseSuffixes (s.release());
             }
 
+            if (matchIf (TokenTypes::plusplus))   return parsePostIncDec<AdditionOp> (input);
+            if (matchIf (TokenTypes::minusminus)) return parsePostIncDec<SubtractionOp> (input);
+
             return input.release();
         }
 
@@ -1344,8 +1347,6 @@ struct JavascriptEngine::RootObject   : public DynamicObject
             {
                 if (matchIf (TokenTypes::plus))            { ExpPtr b (parseMultiplyDivide()); a = new AdditionOp    (location, a, b); }
                 else if (matchIf (TokenTypes::minus))      { ExpPtr b (parseMultiplyDivide()); a = new SubtractionOp (location, a, b); }
-                else if (matchIf (TokenTypes::plusplus))   a = parsePostIncDec<AdditionOp> (a);
-                else if (matchIf (TokenTypes::minusminus)) a = parsePostIncDec<SubtractionOp> (a);
                 else break;
             }
 
