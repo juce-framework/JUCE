@@ -67,7 +67,7 @@ bool OpenGLShaderProgram::addShader (const char* const code, GLenum type)
         context.extensions.glGetShaderInfoLog (shaderID, sizeof (infoLog), &infoLogLength, infoLog);
         errorLog = String (infoLog, (size_t) infoLogLength);
 
-       #if JUCE_DEBUG
+       #if JUCE_DEBUG && ! JUCE_DONT_ASSERT_ON_GLSL_COMPILE_ERROR
         // Your GLSL code contained compile errors!
         // Hopefully this compile log should help to explain what went wrong.
         DBG (errorLog);
@@ -97,7 +97,7 @@ bool OpenGLShaderProgram::link() noexcept
         context.extensions.glGetProgramInfoLog (programID, sizeof (infoLog), &infoLogLength, infoLog);
         errorLog = String (infoLog, (size_t) infoLogLength);
 
-       #if JUCE_DEBUG
+       #if JUCE_DEBUG && ! JUCE_DONT_ASSERT_ON_GLSL_COMPILE_ERROR
         // Your GLSL code contained link errors!
         // Hopefully this compile log should help to explain what went wrong.
         DBG (errorLog);
