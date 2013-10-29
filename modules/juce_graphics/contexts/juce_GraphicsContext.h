@@ -352,6 +352,11 @@ public:
     void drawEllipse (float x, float y, float width, float height,
                       float lineThickness) const;
 
+    /** Draws an elliptical stroke using the current colour or brush.
+        @see fillEllipse, Path::addEllipse
+    */
+    void drawEllipse (const Rectangle<float>& area, float lineThickness) const;
+
     //==============================================================================
     /** Draws a line between two points.
         The line is 1 pixel wide and drawn with the current colour or brush.

@@ -445,6 +445,11 @@ void Graphics::drawEllipse (float x, float y, float width, float height, float l
     strokePath (p, PathStrokeType (lineThickness));
 }
 
+void Graphics::drawEllipse (const Rectangle<float>& area, float lineThickness) const
+{
+    drawEllipse (area.getX(), area.getY(), area.getWidth(), area.getHeight(), lineThickness);
+}
+
 void Graphics::fillRoundedRectangle (float x, float y, float width, float height, float cornerSize) const
 {
     fillRoundedRectangle (coordsToRectangle (x, y, width, height), cornerSize);
