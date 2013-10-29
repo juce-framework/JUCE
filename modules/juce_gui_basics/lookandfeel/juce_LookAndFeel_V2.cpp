@@ -1024,7 +1024,7 @@ int LookAndFeel_V2::getMenuWindowFlags()
 }
 
 void LookAndFeel_V2::drawMenuBarBackground (Graphics& g, int width, int height,
-                                         bool, MenuBarComponent& menuBar)
+                                            bool, MenuBarComponent& menuBar)
 {
     const Colour baseColour (LookAndFeelHelpers::createBaseColour (menuBar.findColour (PopupMenu::backgroundColourId), false, false, false));
 
@@ -1055,14 +1055,10 @@ int LookAndFeel_V2::getMenuBarItemWidth (MenuBarComponent& menuBar, int itemInde
             .getStringWidth (itemText) + menuBar.getHeight();
 }
 
-void LookAndFeel_V2::drawMenuBarItem (Graphics& g,
-                                   int width, int height,
-                                   int itemIndex,
-                                   const String& itemText,
-                                   bool isMouseOverItem,
-                                   bool isMenuOpen,
-                                   bool /*isMouseOverBar*/,
-                                   MenuBarComponent& menuBar)
+void LookAndFeel_V2::drawMenuBarItem (Graphics& g, int width, int height,
+                                      int itemIndex, const String& itemText,
+                                      bool isMouseOverItem, bool isMenuOpen,
+                                      bool /*isMouseOverBar*/, MenuBarComponent& menuBar)
 {
     if (! menuBar.isEnabled())
     {
@@ -1084,8 +1080,7 @@ void LookAndFeel_V2::drawMenuBarItem (Graphics& g,
 }
 
 //==============================================================================
-void LookAndFeel_V2::fillTextEditorBackground (Graphics& g, int /*width*/, int /*height*/,
-                                            TextEditor& textEditor)
+void LookAndFeel_V2::fillTextEditorBackground (Graphics& g, int /*width*/, int /*height*/, TextEditor& textEditor)
 {
     g.fillAll (textEditor.findColour (TextEditor::backgroundColourId));
 }

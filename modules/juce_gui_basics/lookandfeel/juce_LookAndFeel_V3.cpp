@@ -29,6 +29,7 @@ LookAndFeel_V3::LookAndFeel_V3()
     const Colour textButtonColour (0xffeeeeff);
     setColour (TextButton::buttonColourId, textButtonColour);
     setColour (ComboBox::buttonColourId, textButtonColour);
+    setColour (TextEditor::outlineColourId, Colours::transparentBlack);
 
     setColour (ScrollBar::thumbColourId, Colour::greyLevel (0.8f).contrasting().withAlpha (0.13f));
 }
@@ -126,16 +127,20 @@ void LookAndFeel_V3::drawButtonBackground (Graphics& g, Button& button, const Co
 
     const float width  = button.getWidth() - 1.0f;
     const float height = button.getHeight() - 1.0f;
-    const float cornerSize = 4.0f;
 
-    Path outline;
-    outline.addRoundedRectangle (0.5f, 0.5f, width, height, cornerSize, cornerSize,
-                                 ! (flatOnLeft  || flatOnTop),
-                                 ! (flatOnRight || flatOnTop),
-                                 ! (flatOnLeft  || flatOnBottom),
-                                 ! (flatOnRight || flatOnBottom));
+    if (width > 0 && height > 0)
+    {
+        const float cornerSize = 4.0f;
 
-    drawButtonShape (g, outline, baseColour, height);
+        Path outline;
+        outline.addRoundedRectangle (0.5f, 0.5f, width, height, cornerSize, cornerSize,
+                                     ! (flatOnLeft  || flatOnTop),
+                                     ! (flatOnRight || flatOnTop),
+                                     ! (flatOnLeft  || flatOnBottom),
+                                     ! (flatOnRight || flatOnBottom));
+
+        drawButtonShape (g, outline, baseColour, height);
+    }
 }
 
 void LookAndFeel_V3::drawTableHeaderBackground (Graphics& g, TableHeaderComponent& header)
@@ -238,6 +243,23 @@ void LookAndFeel_V3::drawTabButton (TabBarButton& button, Graphics& g, bool isMo
     textLayout.draw (g, Rectangle<float> (length, depth));
 }
 
+void LookAndFeel_V3::drawTextEditorOutline (Graphics& g, int width, int height, TextEditor& textEditor)
+{
+    if (textEditor.isEnabled())
+    {
+        if (textEditor.hasKeyboardFocus (true) && ! textEditor.isReadOnly())
+        {
+            g.setColour (textEditor.findColour (TextEditor::focusedOutlineColourId));
+            g.drawRect (0, 0, width, height, 2);
+        }
+        else
+        {
+            g.setColour (textEditor.findColour (TextEditor::outlineColourId));
+            g.drawRect (0, 0, width, height);
+        }
+    }
+}
+
 void LookAndFeel_V3::drawTreeviewPlusMinusBox (Graphics& g, const Rectangle<float>& area,
                                                Colour backgroundColour, bool isOpen, bool isMouseOver)
 {
@@ -276,36 +298,20 @@ void LookAndFeel_V3::drawComboBox (Graphics& g, int width, int height, const boo
         g.drawRect (0, 0, width, height);
     }
 
-    const float outlineThickness = box.isEnabled() ? (isButtonDown ? 1.2f : 0.5f) : 0.3f;
+    const float arrowX = 0.3f;
+    const float arrowH = 0.2f;
 
-    Path buttonShape;
-    buttonShape.addRectangle (buttonX + outlineThickness,
-                              buttonY + outlineThickness,
-                              buttonW - outlineThickness * 2.0f,
-                              buttonH - outlineThickness * 2.0f);
+    Path p;
+    p.addTriangle (buttonX + buttonW * 0.5f,            buttonY + buttonH * (0.45f - arrowH),
+                   buttonX + buttonW * (1.0f - arrowX), buttonY + buttonH * 0.45f,
+                   buttonX + buttonW * arrowX,          buttonY + buttonH * 0.45f);
 
-    drawButtonShape (g, buttonShape,
-                     buttonColour.withMultipliedSaturation (box.hasKeyboardFocus (true) ? 1.3f : 0.9f)
-                                 .withMultipliedAlpha (box.isEnabled() ? 0.9f : 0.5f),
-                     (float) height);
+    p.addTriangle (buttonX + buttonW * 0.5f,            buttonY + buttonH * (0.55f + arrowH),
+                   buttonX + buttonW * (1.0f - arrowX), buttonY + buttonH * 0.55f,
+                   buttonX + buttonW * arrowX,          buttonY + buttonH * 0.55f);
 
-    if (box.isEnabled())
-    {
-        const float arrowX = 0.3f;
-        const float arrowH = 0.2f;
-
-        Path p;
-        p.addTriangle (buttonX + buttonW * 0.5f,            buttonY + buttonH * (0.45f - arrowH),
-                       buttonX + buttonW * (1.0f - arrowX), buttonY + buttonH * 0.45f,
-                       buttonX + buttonW * arrowX,          buttonY + buttonH * 0.45f);
-
-        p.addTriangle (buttonX + buttonW * 0.5f,            buttonY + buttonH * (0.55f + arrowH),
-                       buttonX + buttonW * (1.0f - arrowX), buttonY + buttonH * 0.55f,
-                       buttonX + buttonW * arrowX,          buttonY + buttonH * 0.55f);
-
-        g.setColour (box.findColour (ComboBox::arrowColourId));
-        g.fillPath (p);
-    }
+    g.setColour (box.findColour (ComboBox::arrowColourId).withMultipliedAlpha (box.isEnabled() ? 1.0f : 0.3f));
+    g.fillPath (p);
 }
 
 void LookAndFeel_V3::drawPopupMenuBackground (Graphics& g, int width, int height)
@@ -317,6 +323,21 @@ void LookAndFeel_V3::drawPopupMenuBackground (Graphics& g, int width, int height
     g.setColour (findColour (PopupMenu::textColourId).withAlpha (0.6f));
     g.drawRect (0, 0, width, height);
    #endif
+}
+
+void LookAndFeel_V3::drawMenuBarBackground (Graphics& g, int width, int height,
+                                            bool, MenuBarComponent& menuBar)
+{
+    const Colour colour (menuBar.findColour (PopupMenu::backgroundColourId));
+
+    Rectangle<int> r (width, height);
+
+    g.setColour (colour.contrasting (0.15f));
+    g.fillRect (r.removeFromTop (1));
+    g.fillRect (r.removeFromBottom (1));
+
+    g.setGradientFill (ColourGradient (colour, 0, 0, colour.darker (0.08f), 0, height, false));
+    g.fillRect (r);
 }
 
 void LookAndFeel_V3::drawKeymapChangeButton (Graphics& g, int width, int height,

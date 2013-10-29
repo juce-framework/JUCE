@@ -47,16 +47,19 @@ public:
     bool areLinesDrawnForTreeView (TreeView&) override;
     int getTreeViewIndentSize (TreeView&) override;
 
-    void drawComboBox (Graphics& g, int width, int height, bool isButtonDown,
+    void drawComboBox (Graphics&, int width, int height, bool isButtonDown,
                        int buttonX, int buttonY, int buttonW, int buttonH, ComboBox& box) override;
 
-    void drawKeymapChangeButton (Graphics& g, int width, int height, Button& button, const String& keyDescription) override;
+    void drawKeymapChangeButton (Graphics&, int width, int height, Button& button, const String& keyDescription) override;
 
-    void drawPopupMenuBackground (Graphics& g, int width, int height) override;
+    void drawPopupMenuBackground (Graphics&, int width, int height) override;
+    void drawMenuBarBackground (Graphics&, int width, int height, bool, MenuBarComponent&) override;
 
     int getTabButtonOverlap (int tabDepth) override;
     int getTabButtonSpaceAroundImage() override;
     void drawTabButton (TabBarButton&, Graphics&, bool isMouseOver, bool isMouseDown) override;
+
+    void drawTextEditorOutline (Graphics&, int width, int height, TextEditor&) override;
 
     void drawStretchableLayoutResizerBar (Graphics&, int w, int h, bool isVerticalBar, bool isMouseOver, bool isMouseDragging) override;
 
