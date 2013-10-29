@@ -283,12 +283,11 @@ public:
         glyph = glyphNumber;
 
         const float fontHeight = font.getHeight();
-        edgeTable = typeface->getEdgeTableForGlyph (glyphNumber,
-                                                    AffineTransform::scale (fontHeight * font.getHorizontalScale(), fontHeight)
-                                                                  #if JUCE_MAC || JUCE_IOS
-                                                                    .translated (0.0f, -0.5f)
-                                                                  #endif
-                                                    );
+        edgeTable = typeface->getEdgeTableForGlyph (glyphNumber, AffineTransform::scale (fontHeight * font.getHorizontalScale(),
+                                                                                         fontHeight));
+
+        if (edgeTable != nullptr)
+            edgeTable->multiplyLevels (1.5f);
     }
 
     Font font;

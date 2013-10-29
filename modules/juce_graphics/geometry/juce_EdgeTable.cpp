@@ -480,6 +480,25 @@ void EdgeTable::translate (float dx, const int dy) noexcept
     }
 }
 
+void EdgeTable::multiplyLevels (float amount)
+{
+    int* lineStart = table;
+    const int multiplier = (int) (amount * 256.0f);
+
+    for (int y = 0; y < bounds.getHeight(); ++y)
+    {
+        int numPoints = lineStart[0];
+        LineItem* item = reinterpret_cast<LineItem*> (lineStart + 1);
+        lineStart += lineStrideElements;
+
+        while (--numPoints > 0)
+        {
+            item->level = jmin (255, (item->level * multiplier) >> 8);
+            ++item;
+        }
+    }
+}
+
 void EdgeTable::intersectWithEdgeTableLine (const int y, const int* const otherLine)
 {
     jassert (y >= 0 && y < bounds.getHeight());

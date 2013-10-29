@@ -79,6 +79,9 @@ public:
     const Rectangle<int>& getMaximumBounds() const noexcept      { return bounds; }
     void translate (float dx, int dy) noexcept;
 
+    /** Scales all the alpha-levels in the table by the given multiplier. */
+    void multiplyLevels (float factor);
+
     /** Reduces the amount of space the table has allocated.
 
         This will shrink the table down to use as little memory as possible - useful for
