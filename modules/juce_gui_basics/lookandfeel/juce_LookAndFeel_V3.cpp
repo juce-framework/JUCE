@@ -30,6 +30,7 @@ LookAndFeel_V3::LookAndFeel_V3()
     setColour (TextButton::buttonColourId, textButtonColour);
     setColour (ComboBox::buttonColourId, textButtonColour);
     setColour (TextEditor::outlineColourId, Colours::transparentBlack);
+    setColour (TabbedButtonBar::tabOutlineColourId, Colour (0x50000000));
 
     setColour (ScrollBar::thumbColourId, Colour::greyLevel (0.8f).contrasting().withAlpha (0.13f));
 }
@@ -160,7 +161,7 @@ void LookAndFeel_V3::drawTableHeaderBackground (Graphics& g, TableHeaderComponen
 }
 
 int LookAndFeel_V3::getTabButtonOverlap (int /*tabDepth*/)            { return -1; }
-int LookAndFeel_V3::getTabButtonSpaceAroundImage()                    { return 1; }
+int LookAndFeel_V3::getTabButtonSpaceAroundImage()                    { return 0; }
 
 void LookAndFeel_V3::createTabTextLayout (const TabBarButton& button, float length, float depth,
                                           Colour colour, TextLayout& textLayout)
@@ -206,7 +207,8 @@ void LookAndFeel_V3::drawTabButton (TabBarButton& button, Graphics& g, bool isMo
         g.fillRect (activeArea);
     }
 
-    g.setColour (bkg.contrasting (0.3f));
+    g.setColour (button.findColour (TabbedButtonBar::tabOutlineColourId));
+
     Rectangle<int> r (activeArea);
 
     if (o != TabbedButtonBar::TabsAtBottom)   g.fillRect (r.removeFromTop (1));
@@ -280,7 +282,7 @@ int LookAndFeel_V3::getTreeViewIndentSize (TreeView&)
     return 20;
 }
 
-void LookAndFeel_V3::drawComboBox (Graphics& g, int width, int height, const bool isButtonDown,
+void LookAndFeel_V3::drawComboBox (Graphics& g, int width, int height, const bool /*isButtonDown*/,
                                    int buttonX, int buttonY, int buttonW, int buttonH, ComboBox& box)
 {
     g.fillAll (box.findColour (ComboBox::backgroundColourId));
@@ -336,7 +338,7 @@ void LookAndFeel_V3::drawMenuBarBackground (Graphics& g, int width, int height,
     g.fillRect (r.removeFromTop (1));
     g.fillRect (r.removeFromBottom (1));
 
-    g.setGradientFill (ColourGradient (colour, 0, 0, colour.darker (0.08f), 0, height, false));
+    g.setGradientFill (ColourGradient (colour, 0, 0, colour.darker (0.08f), 0, (float) height, false));
     g.fillRect (r);
 }
 

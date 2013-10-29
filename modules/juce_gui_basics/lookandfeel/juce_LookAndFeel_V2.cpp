@@ -337,7 +337,7 @@ void LookAndFeel_V2::changeToggleButtonWidthToFitText (ToggleButton& button)
 }
 
 void LookAndFeel_V2::drawDrawableButton (Graphics& g, DrawableButton& button,
-                                      bool /*isMouseOverButton*/, bool /*isButtonDown*/)
+                                         bool /*isMouseOverButton*/, bool /*isButtonDown*/)
 {
     bool toggleState = button.getToggleState();
 
@@ -364,14 +364,10 @@ void LookAndFeel_V2::drawDrawableButton (Graphics& g, DrawableButton& button,
 }
 
 //==============================================================================
-AlertWindow* LookAndFeel_V2::createAlertWindow (const String& title,
-                                             const String& message,
-                                             const String& button1,
-                                             const String& button2,
-                                             const String& button3,
-                                             AlertWindow::AlertIconType iconType,
-                                             int numButtons,
-                                             Component* associatedComponent)
+AlertWindow* LookAndFeel_V2::createAlertWindow (const String& title, const String& message,
+                                                const String& button1, const String& button2, const String& button3,
+                                                AlertWindow::AlertIconType iconType,
+                                                int numButtons, Component* associatedComponent)
 {
     AlertWindow* aw = new AlertWindow (title, message, iconType, associatedComponent);
 
@@ -404,10 +400,8 @@ AlertWindow* LookAndFeel_V2::createAlertWindow (const String& title,
     return aw;
 }
 
-void LookAndFeel_V2::drawAlertBox (Graphics& g,
-                                AlertWindow& alert,
-                                const Rectangle<int>& textArea,
-                                TextLayout& textLayout)
+void LookAndFeel_V2::drawAlertBox (Graphics& g, AlertWindow& alert,
+                                   const Rectangle<int>& textArea, TextLayout& textLayout)
 {
     g.fillAll (alert.findColour (AlertWindow::backgroundColourId));
 
@@ -497,8 +491,8 @@ Font LookAndFeel_V2::getAlertWindowFont()
 
 //==============================================================================
 void LookAndFeel_V2::drawProgressBar (Graphics& g, ProgressBar& progressBar,
-                                   int width, int height,
-                                   double progress, const String& textToShow)
+                                      int width, int height,
+                                      double progress, const String& textToShow)
 {
     const Colour background (progressBar.findColour (ProgressBar::backgroundColourId));
     const Colour foreground (progressBar.findColour (ProgressBar::foregroundColourId));
@@ -584,13 +578,11 @@ bool LookAndFeel_V2::areScrollbarButtonsVisible()
     return true;
 }
 
-void LookAndFeel_V2::drawScrollbarButton (Graphics& g,
-                                       ScrollBar& scrollbar,
-                                       int width, int height,
-                                       int buttonDirection,
-                                       bool /*isScrollbarVertical*/,
-                                       bool /*isMouseOverButton*/,
-                                       bool isButtonDown)
+void LookAndFeel_V2::drawScrollbarButton (Graphics& g, ScrollBar& scrollbar,
+                                          int width, int height, int buttonDirection,
+                                          bool /*isScrollbarVertical*/,
+                                          bool /*isMouseOverButton*/,
+                                          bool isButtonDown)
 {
     Path p;
 
@@ -847,11 +839,8 @@ Font LookAndFeel_V2::getPopupMenuFont()
     return Font (17.0f);
 }
 
-void LookAndFeel_V2::getIdealPopupMenuItemSize (const String& text,
-                                             const bool isSeparator,
-                                             int standardMenuItemHeight,
-                                             int& idealWidth,
-                                             int& idealHeight)
+void LookAndFeel_V2::getIdealPopupMenuItemSize (const String& text, const bool isSeparator,
+                                                int standardMenuItemHeight, int& idealWidth, int& idealHeight)
 {
     if (isSeparator)
     {
@@ -880,15 +869,13 @@ void LookAndFeel_V2::drawPopupMenuBackground (Graphics& g, int width, int height
     for (int i = 0; i < height; i += 3)
         g.fillRect (0, i, width, 1);
 
-#if ! JUCE_MAC
+   #if ! JUCE_MAC
     g.setColour (findColour (PopupMenu::textColourId).withAlpha (0.6f));
     g.drawRect (0, 0, width, height);
-#endif
+   #endif
 }
 
-void LookAndFeel_V2::drawPopupMenuUpDownArrow (Graphics& g,
-                                            int width, int height,
-                                            bool isScrollUpArrow)
+void LookAndFeel_V2::drawPopupMenuUpDownArrow (Graphics& g, int width, int height, bool isScrollUpArrow)
 {
     const Colour background (findColour (PopupMenu::backgroundColourId));
 
@@ -913,17 +900,12 @@ void LookAndFeel_V2::drawPopupMenuUpDownArrow (Graphics& g,
     g.fillPath (p);
 }
 
-void LookAndFeel_V2::drawPopupMenuItem (Graphics& g,
-                                     int width, int height,
-                                     const bool isSeparator,
-                                     const bool isActive,
-                                     const bool isHighlighted,
-                                     const bool isTicked,
-                                     const bool hasSubMenu,
-                                     const String& text,
-                                     const String& shortcutKeyText,
-                                     Image* image,
-                                     const Colour* const textColourToUse)
+void LookAndFeel_V2::drawPopupMenuItem (Graphics& g, int width, int height,
+                                        const bool isSeparator, const bool isActive,
+                                        const bool isHighlighted, const bool isTicked,
+                                        const bool hasSubMenu, const String& text,
+                                        const String& shortcutKeyText,
+                                        Image* image, const Colour* const textColourToUse)
 {
     const float halfH = height * 0.5f;
 
@@ -1023,25 +1005,16 @@ int LookAndFeel_V2::getMenuWindowFlags()
     return ComponentPeer::windowHasDropShadow;
 }
 
-void LookAndFeel_V2::drawMenuBarBackground (Graphics& g, int width, int height,
-                                            bool, MenuBarComponent& menuBar)
+void LookAndFeel_V2::drawMenuBarBackground (Graphics& g, int width, int height, bool, MenuBarComponent& menuBar)
 {
-    const Colour baseColour (LookAndFeelHelpers::createBaseColour (menuBar.findColour (PopupMenu::backgroundColourId), false, false, false));
+    const Colour baseColour (LookAndFeelHelpers::createBaseColour (menuBar.findColour (PopupMenu::backgroundColourId),
+                                                                   false, false, false));
 
     if (menuBar.isEnabled())
-    {
-        drawShinyButtonShape (g,
-                              -4.0f, 0.0f,
-                              width + 8.0f, (float) height,
-                              0.0f,
-                              baseColour,
-                              0.4f,
-                              true, true, true, true);
-    }
+        drawShinyButtonShape (g, -4.0f, 0.0f, width + 8.0f, (float) height,
+                              0.0f, baseColour, 0.4f, true, true, true, true);
     else
-    {
         g.fillAll (baseColour);
-    }
 }
 
 Font LookAndFeel_V2::getMenuBarFont (MenuBarComponent& menuBar, int /*itemIndex*/, const String& /*itemText*/)
@@ -1118,11 +1091,8 @@ CaretComponent* LookAndFeel_V2::createCaretComponent (Component* keyFocusOwner)
 }
 
 //==============================================================================
-void LookAndFeel_V2::drawComboBox (Graphics& g, int width, int height,
-                                const bool isButtonDown,
-                                int buttonX, int buttonY,
-                                int buttonW, int buttonH,
-                                ComboBox& box)
+void LookAndFeel_V2::drawComboBox (Graphics& g, int width, int height, const bool isButtonDown,
+                                   int buttonX, int buttonY, int buttonW, int buttonH, ComboBox& box)
 {
     g.fillAll (box.findColour (ComboBox::backgroundColourId));
 
@@ -1225,14 +1195,11 @@ void LookAndFeel_V2::drawLabel (Graphics& g, Label& label)
 }
 
 //==============================================================================
-void LookAndFeel_V2::drawLinearSliderBackground (Graphics& g,
-                                              int x, int y,
-                                              int width, int height,
+void LookAndFeel_V2::drawLinearSliderBackground (Graphics& g, int x, int y, int width, int height,
                                               float /*sliderPos*/,
                                               float /*minSliderPos*/,
                                               float /*maxSliderPos*/,
-                                              const Slider::SliderStyle /*style*/,
-                                              Slider& slider)
+                                              const Slider::SliderStyle /*style*/, Slider& slider)
 {
     const float sliderRadius = (float) (getSliderThumbRadius (slider) - 2);
 
@@ -1272,14 +1239,9 @@ void LookAndFeel_V2::drawLinearSliderBackground (Graphics& g,
     g.strokePath (indent, PathStrokeType (0.5f));
 }
 
-void LookAndFeel_V2::drawLinearSliderThumb (Graphics& g,
-                                         int x, int y,
-                                         int width, int height,
-                                         float sliderPos,
-                                         float minSliderPos,
-                                         float maxSliderPos,
-                                         const Slider::SliderStyle style,
-                                         Slider& slider)
+void LookAndFeel_V2::drawLinearSliderThumb (Graphics& g, int x, int y, int width, int height,
+                                            float sliderPos, float minSliderPos, float maxSliderPos,
+                                            const Slider::SliderStyle style, Slider& slider)
 {
     const float sliderRadius = (float) (getSliderThumbRadius (slider) - 2);
 
@@ -1354,14 +1316,9 @@ void LookAndFeel_V2::drawLinearSliderThumb (Graphics& g,
     }
 }
 
-void LookAndFeel_V2::drawLinearSlider (Graphics& g,
-                                    int x, int y,
-                                    int width, int height,
-                                    float sliderPos,
-                                    float minSliderPos,
-                                    float maxSliderPos,
-                                    const Slider::SliderStyle style,
-                                    Slider& slider)
+void LookAndFeel_V2::drawLinearSlider (Graphics& g, int x, int y, int width, int height,
+                                       float sliderPos, float minSliderPos, float maxSliderPos,
+                                       const Slider::SliderStyle style, Slider& slider)
 {
     g.fillAll (slider.findColour (Slider::backgroundColourId));
 
@@ -1400,13 +1357,8 @@ int LookAndFeel_V2::getSliderThumbRadius (Slider& slider)
                  slider.getWidth() / 2) + 2;
 }
 
-void LookAndFeel_V2::drawRotarySlider (Graphics& g,
-                                    int x, int y,
-                                    int width, int height,
-                                    float sliderPos,
-                                    const float rotaryStartAngle,
-                                    const float rotaryEndAngle,
-                                    Slider& slider)
+void LookAndFeel_V2::drawRotarySlider (Graphics& g, int x, int y, int width, int height, float sliderPos,
+                                       const float rotaryStartAngle, const float rotaryEndAngle, Slider& slider)
 {
     const float radius = jmin (width / 2, height / 2) - 2.0f;
     const float centreX = x + width * 0.5f;
@@ -1478,7 +1430,7 @@ Button* LookAndFeel_V2::createSliderButton (const bool isIncrement)
     return new TextButton (isIncrement ? "+" : "-", String::empty);
 }
 
-class LookAndFeel_V2::SliderLabelComp : public Label
+class LookAndFeel_V2::SliderLabelComp  : public Label
 {
 public:
     SliderLabelComp() : Label (String::empty, String::empty) {}
@@ -1559,8 +1511,7 @@ Button* LookAndFeel_V2::createFilenameComponentBrowseButton (const String& text)
 }
 
 void LookAndFeel_V2::layoutFilenameComponent (FilenameComponent& filenameComp,
-                                           ComboBox* filenameBox,
-                                           Button* browseButton)
+                                              ComboBox* filenameBox, Button* browseButton)
 {
     browseButton->setSize (80, filenameComp.getHeight());
 
@@ -1574,8 +1525,8 @@ void LookAndFeel_V2::layoutFilenameComponent (FilenameComponent& filenameComp,
 
 //==============================================================================
 void LookAndFeel_V2::drawConcertinaPanelHeader (Graphics& g, const Rectangle<int>& area,
-                                             bool isMouseOver, bool /*isMouseDown*/,
-                                             ConcertinaPanel&, Component& panel)
+                                                bool isMouseOver, bool /*isMouseDown*/,
+                                                ConcertinaPanel&, Component& panel)
 {
     g.fillAll (Colours::grey.withAlpha (isMouseOver ? 0.9f : 0.7f));
     g.setColour (Colours::black.withAlpha (0.5f));
@@ -1664,21 +1615,19 @@ void LookAndFeel_V2::drawResizableFrame (Graphics& g, int w, int h, const Border
 
 //==============================================================================
 void LookAndFeel_V2::fillResizableWindowBackground (Graphics& g, int /*w*/, int /*h*/,
-                                                 const BorderSize<int>& /*border*/, ResizableWindow& window)
+                                                    const BorderSize<int>& /*border*/, ResizableWindow& window)
 {
-   g.fillAll (window.getBackgroundColour());
+    g.fillAll (window.getBackgroundColour());
 }
 
 void LookAndFeel_V2::drawResizableWindowBorder (Graphics&, int /*w*/, int /*h*/,
-                                             const BorderSize<int>& /*border*/, ResizableWindow&)
+                                                const BorderSize<int>& /*border*/, ResizableWindow&)
 {
 }
 
-void LookAndFeel_V2::drawDocumentWindowTitleBar (DocumentWindow& window,
-                                              Graphics& g, int w, int h,
-                                              int titleSpaceX, int titleSpaceW,
-                                              const Image* icon,
-                                              bool drawTitleTextOnLeft)
+void LookAndFeel_V2::drawDocumentWindowTitleBar (DocumentWindow& window, Graphics& g,
+                                                 int w, int h, int titleSpaceX, int titleSpaceW,
+                                                 const Image* icon, bool drawTitleTextOnLeft)
 {
     const bool isActive = window.isActiveWindow();
 
@@ -1832,14 +1781,12 @@ Button* LookAndFeel_V2::createDocumentWindowButton (int buttonType)
 }
 
 void LookAndFeel_V2::positionDocumentWindowButtons (DocumentWindow&,
-                                                 int titleBarX,
-                                                 int titleBarY,
-                                                 int titleBarW,
-                                                 int titleBarH,
-                                                 Button* minimiseButton,
-                                                 Button* maximiseButton,
-                                                 Button* closeButton,
-                                                 bool positionTitleBarButtonsOnLeft)
+                                                    int titleBarX, int titleBarY,
+                                                    int titleBarW, int titleBarH,
+                                                    Button* minimiseButton,
+                                                    Button* maximiseButton,
+                                                    Button* closeButton,
+                                                    bool positionTitleBarButtonsOnLeft)
 {
     const int buttonW = titleBarH - titleBarH / 8;
 
@@ -1877,11 +1824,10 @@ DropShadower* LookAndFeel_V2::createDropShadowerForComponent (Component*)
 }
 
 //==============================================================================
-void LookAndFeel_V2::drawStretchableLayoutResizerBar (Graphics& g,
-                                                   int w, int h,
-                                                   bool /*isVerticalBar*/,
-                                                   bool isMouseOver,
-                                                   bool isMouseDragging)
+void LookAndFeel_V2::drawStretchableLayoutResizerBar (Graphics& g, int w, int h,
+                                                      bool /*isVerticalBar*/,
+                                                      bool isMouseOver,
+                                                      bool isMouseDragging)
 {
     float alpha = 0.5f;
 
@@ -1904,9 +1850,8 @@ void LookAndFeel_V2::drawStretchableLayoutResizerBar (Graphics& g,
 
 //==============================================================================
 void LookAndFeel_V2::drawGroupComponentOutline (Graphics& g, int width, int height,
-                                             const String& text,
-                                             const Justification& position,
-                                             GroupComponent& group)
+                                                const String& text, const Justification& position,
+                                                GroupComponent& group)
 {
     const float textH = 15.0f;
     const float indent = 3.0f;
@@ -1977,7 +1922,7 @@ int LookAndFeel_V2::getTabButtonSpaceAroundImage()
 int LookAndFeel_V2::getTabButtonBestWidth (TabBarButton& button, int tabDepth)
 {
     int width = Font (tabDepth * 0.6f).getStringWidth (button.getButtonText().trim())
-                  + getTabButtonOverlap (tabDepth) * 2;
+                   + getTabButtonOverlap (tabDepth) * 2;
 
     if (Component* const extraComponent = button.getExtraComponent())
         width += button.getTabbedButtonBar().isVertical() ? extraComponent->getHeight()
@@ -2077,7 +2022,8 @@ void LookAndFeel_V2::createTabButtonShape (TabBarButton& button, Path& p, bool /
     p = p.createPathWithRoundedCorners (3.0f);
 }
 
-void LookAndFeel_V2::fillTabButtonShape (TabBarButton& button, Graphics& g, const Path& path,  bool /*isMouseOver*/, bool /*isMouseDown*/)
+void LookAndFeel_V2::fillTabButtonShape (TabBarButton& button, Graphics& g, const Path& path,
+                                         bool /*isMouseOver*/, bool /*isMouseDown*/)
 {
     const Colour tabBackground (button.getTabBackgroundColour());
     const bool isFrontTab = button.isFrontTab();
@@ -2163,7 +2109,7 @@ void LookAndFeel_V2::drawTabAreaBehindFrontButton (TabbedButtonBar& bar, Graphic
     const float shadowSize = 0.2f;
 
     Rectangle<int> shadowRect, line;
-    ColourGradient gradient (Colours::black.withAlpha (bar.isEnabled() ? 0.3f : 0.15f), 0, 0,
+    ColourGradient gradient (Colours::black.withAlpha (bar.isEnabled() ? 0.25f : 0.15f), 0, 0,
                              Colours::transparentBlack, 0, 0, false);
 
     switch (bar.getOrientation())
@@ -2264,9 +2210,8 @@ void LookAndFeel_V2::drawTableHeaderBackground (Graphics& g, TableHeaderComponen
 }
 
 void LookAndFeel_V2::drawTableHeaderColumn (Graphics& g, const String& columnName, int /*columnId*/,
-                                         int width, int height,
-                                         bool isMouseOver, bool isMouseDown,
-                                         int columnFlags)
+                                            int width, int height, bool isMouseOver, bool isMouseDown,
+                                            int columnFlags)
 {
     if (isMouseDown)
         g.fillAll (Colour (0x8899aadd));
@@ -2324,8 +2269,8 @@ Button* LookAndFeel_V2::createToolbarMissingItemsButton (Toolbar& /*toolbar*/)
 }
 
 void LookAndFeel_V2::paintToolbarButtonBackground (Graphics& g, int /*width*/, int /*height*/,
-                                                bool isMouseOver, bool isMouseDown,
-                                                ToolbarItemComponent& component)
+                                                   bool isMouseOver, bool isMouseDown,
+                                                   ToolbarItemComponent& component)
 {
     if (isMouseDown)
         g.fillAll (component.findColour (Toolbar::buttonMouseDownBackgroundColourId, true));
@@ -2334,7 +2279,7 @@ void LookAndFeel_V2::paintToolbarButtonBackground (Graphics& g, int /*width*/, i
 }
 
 void LookAndFeel_V2::paintToolbarButtonLabel (Graphics& g, int x, int y, int width, int height,
-                                           const String& text, ToolbarItemComponent& component)
+                                              const String& text, ToolbarItemComponent& component)
 {
     g.setColour (component.findColour (Toolbar::labelTextColourId, true)
                     .withAlpha (component.isEnabled() ? 1.0f : 0.25f));
@@ -2396,7 +2341,7 @@ Rectangle<int> LookAndFeel_V2::getPropertyComponentContentPosition (PropertyComp
 
 //==============================================================================
 void LookAndFeel_V2::drawCallOutBoxBackground (CallOutBox& box, Graphics& g,
-                                            const Path& path, Image& cachedImage)
+                                               const Path& path, Image& cachedImage)
 {
     if (cachedImage.isNull())
     {
@@ -2432,13 +2377,11 @@ AttributedString LookAndFeel_V2::createFileChooserHeaderText (const String& titl
 }
 
 void LookAndFeel_V2::drawFileBrowserRow (Graphics& g, int width, int height,
-                                      const String& filename, Image* icon,
-                                      const String& fileSizeDescription,
-                                      const String& fileTimeDescription,
-                                      const bool isDirectory,
-                                      const bool isItemSelected,
-                                      const int /*itemIndex*/,
-                                      DirectoryContentsDisplayComponent& dcc)
+                                         const String& filename, Image* icon,
+                                         const String& fileSizeDescription,
+                                         const String& fileTimeDescription,
+                                         const bool isDirectory, const bool isItemSelected,
+                                         const int /*itemIndex*/, DirectoryContentsDisplayComponent& dcc)
 {
     Component* const fileListComp = dynamic_cast<Component*> (&dcc);
 
@@ -2516,11 +2459,11 @@ Button* LookAndFeel_V2::createFileBrowserGoUpButton()
 }
 
 void LookAndFeel_V2::layoutFileBrowserComponent (FileBrowserComponent& browserComp,
-                                              DirectoryContentsDisplayComponent* fileListComponent,
-                                              FilePreviewComponent* previewComp,
-                                              ComboBox* currentPathBox,
-                                              TextEditor* filenameBox,
-                                              Button* goUpButton)
+                                                 DirectoryContentsDisplayComponent* fileListComponent,
+                                                 FilePreviewComponent* previewComp,
+                                                 ComboBox* currentPathBox,
+                                                 TextEditor* filenameBox,
+                                                 Button* goUpButton)
 {
     const int x = 8;
     int w = browserComp.getWidth() - x - x;
@@ -2695,8 +2638,8 @@ void LookAndFeel_V2::drawKeymapChangeButton (Graphics& g, int width, int height,
 
 //==============================================================================
 void LookAndFeel_V2::drawBevel (Graphics& g, const int x, const int y, const int width, const int height,
-                             const int bevelThickness, const Colour& topLeftColour, const Colour& bottomRightColour,
-                             const bool useGradient, const bool sharpEdgeOnOutside)
+                                const int bevelThickness, const Colour& topLeftColour, const Colour& bottomRightColour,
+                                const bool useGradient, const bool sharpEdgeOnOutside)
 {
     if (g.clipRegionIntersects (Rectangle<int> (x, y, width, height)))
     {
@@ -2760,11 +2703,9 @@ void LookAndFeel_V2::drawShinyButtonShape (Graphics& g,
 }
 
 //==============================================================================
-void LookAndFeel_V2::drawGlassSphere (Graphics& g,
-                                   const float x, const float y,
-                                   const float diameter,
-                                   const Colour& colour,
-                                   const float outlineThickness) noexcept
+void LookAndFeel_V2::drawGlassSphere (Graphics& g, const float x, const float y,
+                                      const float diameter, const Colour& colour,
+                                      const float outlineThickness) noexcept
 {
     if (diameter <= outlineThickness)
         return;
@@ -2803,10 +2744,9 @@ void LookAndFeel_V2::drawGlassSphere (Graphics& g,
 
 //==============================================================================
 void LookAndFeel_V2::drawGlassPointer (Graphics& g,
-                                    const float x, const float y,
-                                    const float diameter,
-                                    const Colour& colour, const float outlineThickness,
-                                    const int direction) noexcept
+                                       const float x, const float y, const float diameter,
+                                       const Colour& colour, const float outlineThickness,
+                                       const int direction) noexcept
 {
     if (diameter <= outlineThickness)
         return;
@@ -2848,15 +2788,12 @@ void LookAndFeel_V2::drawGlassPointer (Graphics& g,
 
 //==============================================================================
 void LookAndFeel_V2::drawGlassLozenge (Graphics& g,
-                                    const float x, const float y,
-                                    const float width, const float height,
-                                    const Colour& colour,
-                                    const float outlineThickness,
-                                    const float cornerSize,
-                                    const bool flatOnLeft,
-                                    const bool flatOnRight,
-                                    const bool flatOnTop,
-                                    const bool flatOnBottom) noexcept
+                                       const float x, const float y, const float width, const float height,
+                                       const Colour& colour, const float outlineThickness, const float cornerSize,
+                                       const bool flatOnLeft,
+                                       const bool flatOnRight,
+                                       const bool flatOnTop,
+                                       const bool flatOnBottom) noexcept
 {
     if (width <= outlineThickness || height <= outlineThickness)
         return;
