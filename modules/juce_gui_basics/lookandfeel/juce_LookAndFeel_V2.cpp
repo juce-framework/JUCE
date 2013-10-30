@@ -1196,10 +1196,10 @@ void LookAndFeel_V2::drawLabel (Graphics& g, Label& label)
 
 //==============================================================================
 void LookAndFeel_V2::drawLinearSliderBackground (Graphics& g, int x, int y, int width, int height,
-                                              float /*sliderPos*/,
-                                              float /*minSliderPos*/,
-                                              float /*maxSliderPos*/,
-                                              const Slider::SliderStyle /*style*/, Slider& slider)
+                                                 float /*sliderPos*/,
+                                                 float /*minSliderPos*/,
+                                                 float /*maxSliderPos*/,
+                                                 const Slider::SliderStyle /*style*/, Slider& slider)
 {
     const float sliderRadius = (float) (getSliderThumbRadius (slider) - 2);
 

@@ -58,6 +58,7 @@ public:
     int getTabButtonOverlap (int tabDepth) override;
     int getTabButtonSpaceAroundImage() override;
     void drawTabButton (TabBarButton&, Graphics&, bool isMouseOver, bool isMouseDown) override;
+    void drawTabAreaBehindFrontButton (TabbedButtonBar& bar, Graphics& g, int w, int h) override;
 
     void drawTextEditorOutline (Graphics&, int width, int height, TextEditor&) override;
 
@@ -67,6 +68,14 @@ public:
 
     void drawScrollbar (Graphics&, ScrollBar&, int x, int y, int width, int height, bool isScrollbarVertical,
                         int thumbStartPosition, int thumbSize, bool isMouseOver, bool isMouseDown) override;
+
+    void drawLinearSlider (Graphics&, int x, int y, int width, int height,
+                           float sliderPos, float minSliderPos, float maxSliderPos,
+                           const Slider::SliderStyle, Slider&) override;
+
+    void drawLinearSliderBackground (Graphics&, int x, int y, int width, int height,
+                                     float sliderPos, float minSliderPos, float maxSliderPos,
+                                     const Slider::SliderStyle, Slider&) override;
 
     void drawConcertinaPanelHeader (Graphics&, const Rectangle<int>& area, bool isMouseOver, bool isMouseDown,
                                     ConcertinaPanel&, Component&) override;

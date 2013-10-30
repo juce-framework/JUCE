@@ -30,7 +30,10 @@ LookAndFeel_V3::LookAndFeel_V3()
     setColour (TextButton::buttonColourId, textButtonColour);
     setColour (ComboBox::buttonColourId, textButtonColour);
     setColour (TextEditor::outlineColourId, Colours::transparentBlack);
-    setColour (TabbedButtonBar::tabOutlineColourId, Colour (0x50000000));
+    setColour (TabbedButtonBar::tabOutlineColourId, Colour (0xff999999));
+    setColour (TabbedComponent::outlineColourId, Colour (0xff999999));
+    setColour (Slider::trackColourId, Colour (0xbbffffff));
+    setColour (Slider::thumbColourId, Colour (0xffddddff));
 
     setColour (ScrollBar::thumbColourId, Colour::greyLevel (0.8f).contrasting().withAlpha (0.13f));
 }
@@ -245,6 +248,52 @@ void LookAndFeel_V3::drawTabButton (TabBarButton& button, Graphics& g, bool isMo
     textLayout.draw (g, Rectangle<float> (length, depth));
 }
 
+void LookAndFeel_V3::drawTabAreaBehindFrontButton (TabbedButtonBar& bar, Graphics& g, const int w, const int h)
+{
+    const float shadowSize = 0.15f;
+
+    Rectangle<int> shadowRect, line;
+    ColourGradient gradient (Colours::black.withAlpha (bar.isEnabled() ? 0.08f : 0.04f), 0, 0,
+                             Colours::transparentBlack, 0, 0, false);
+
+    switch (bar.getOrientation())
+    {
+        case TabbedButtonBar::TabsAtLeft:
+            gradient.point1.x = (float) w;
+            gradient.point2.x = w * (1.0f - shadowSize);
+            shadowRect.setBounds ((int) gradient.point2.x, 0, w - (int) gradient.point2.x, h);
+            line.setBounds (w - 1, 0, 1, h);
+            break;
+
+        case TabbedButtonBar::TabsAtRight:
+            gradient.point2.x = w * shadowSize;
+            shadowRect.setBounds (0, 0, (int) gradient.point2.x, h);
+            line.setBounds (0, 0, 1, h);
+            break;
+
+        case TabbedButtonBar::TabsAtTop:
+            gradient.point1.y = (float) h;
+            gradient.point2.y = h * (1.0f - shadowSize);
+            shadowRect.setBounds (0, (int) gradient.point2.y, w, h - (int) gradient.point2.y);
+            line.setBounds (0, h - 1, w, 1);
+            break;
+
+        case TabbedButtonBar::TabsAtBottom:
+            gradient.point2.y = h * shadowSize;
+            shadowRect.setBounds (0, 0, w, (int) gradient.point2.y);
+            line.setBounds (0, 0, w, 1);
+            break;
+
+        default: break;
+    }
+
+    g.setGradientFill (gradient);
+    g.fillRect (shadowRect.expanded (2, 2));
+
+    g.setColour (bar.findColour (TabbedButtonBar::tabOutlineColourId));
+    g.fillRect (line);
+}
+
 void LookAndFeel_V3::drawTextEditorOutline (Graphics& g, int width, int height, TextEditor& textEditor)
 {
     if (textEditor.isEnabled())
@@ -314,6 +363,71 @@ void LookAndFeel_V3::drawComboBox (Graphics& g, int width, int height, const boo
 
     g.setColour (box.findColour (ComboBox::arrowColourId).withMultipliedAlpha (box.isEnabled() ? 1.0f : 0.3f));
     g.fillPath (p);
+}
+
+void LookAndFeel_V3::drawLinearSlider (Graphics& g, int x, int y, int width, int height,
+                                       float sliderPos, float minSliderPos, float maxSliderPos,
+                                       const Slider::SliderStyle style, Slider& slider)
+{
+    g.fillAll (slider.findColour (Slider::backgroundColourId));
+
+    if (style == Slider::LinearBar || style == Slider::LinearBarVertical)
+    {
+        Path p;
+
+        if (style == Slider::LinearBarVertical)
+            p.addRectangle ((float) x, sliderPos, (float) width, (height - sliderPos));
+        else
+            p.addRectangle ((float) x, (float) y, (sliderPos - x), (float) height);
+
+        drawButtonShape (g, p, slider.findColour (Slider::thumbColourId)
+                                .withMultipliedSaturation (slider.isEnabled() ? 1.0f : 0.5f)
+                                .withMultipliedAlpha (0.8f),
+                         height);
+    }
+    else
+    {
+        drawLinearSliderBackground (g, x, y, width, height, sliderPos, minSliderPos, maxSliderPos, style, slider);
+        drawLinearSliderThumb (g, x, y, width, height, sliderPos, minSliderPos, maxSliderPos, style, slider);
+    }
+}
+
+void LookAndFeel_V3::drawLinearSliderBackground (Graphics& g, int x, int y, int width, int height,
+                                                 float /*sliderPos*/,
+                                                 float /*minSliderPos*/,
+                                                 float /*maxSliderPos*/,
+                                                 const Slider::SliderStyle /*style*/, Slider& slider)
+{
+    const float sliderRadius = (float) (getSliderThumbRadius (slider) - 2);
+
+    const Colour trackColour (slider.findColour (Slider::trackColourId));
+    const Colour gradCol1 (trackColour.overlaidWith (Colour (slider.isEnabled() ? 0x13000000 : 0x09000000)));
+    const Colour gradCol2 (trackColour.overlaidWith (Colour (0x06000000)));
+    Path indent;
+
+    if (slider.isHorizontal())
+    {
+        const float iy = y + height * 0.5f - sliderRadius * 0.5f;
+
+        g.setGradientFill (ColourGradient (gradCol1, 0.0f, iy,
+                                           gradCol2, 0.0f, iy + sliderRadius, false));
+
+        indent.addRoundedRectangle (x - sliderRadius * 0.5f, iy, width + sliderRadius, sliderRadius, 5.0f);
+    }
+    else
+    {
+        const float ix = x + width * 0.5f - sliderRadius * 0.5f;
+
+        g.setGradientFill (ColourGradient (gradCol1, ix, 0.0f,
+                                           gradCol2, ix + sliderRadius, 0.0f, false));
+
+        indent.addRoundedRectangle (ix, y - sliderRadius * 0.5f, sliderRadius, height + sliderRadius, 5.0f);
+    }
+
+    g.fillPath (indent);
+
+    g.setColour (trackColour.contrasting (0.5f));
+    g.strokePath (indent, PathStrokeType (0.5f));
 }
 
 void LookAndFeel_V3::drawPopupMenuBackground (Graphics& g, int width, int height)
