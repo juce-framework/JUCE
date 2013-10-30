@@ -189,6 +189,18 @@ namespace CoreTextTypeLayout
         HeapBlock<CGPoint> local;
     };
 
+    struct LineInfo
+    {
+        LineInfo (CTFrameRef frame, CTLineRef line, CFIndex lineIndex)
+        {
+            CTFrameGetLineOrigins (frame, CFRangeMake (lineIndex, 1), &origin);
+            CTLineGetTypographicBounds (line, &ascent,  &descent, &leading);
+        }
+
+        CGPoint origin;
+        CGFloat ascent, descent, leading;
+    };
+
     static CTFontRef getOrCreateFont (const Font& f)
     {
         if (CTFontRef ctf = getCTFontFromTypeface (f))
@@ -217,15 +229,15 @@ namespace CoreTextTypeLayout
 
         for (int i = 0; i < numCharacterAttributes; ++i)
         {
-            const AttributedString::Attribute* const attr = text.getAttribute (i);
+            const AttributedString::Attribute& attr = *text.getAttribute (i);
 
-            if (attr->range.getStart() > CFAttributedStringGetLength (attribString))
+            if (attr.range.getStart() > CFAttributedStringGetLength (attribString))
                 continue;
 
-            Range<int> range (attr->range);
+            Range<int> range (attr.range);
             range.setEnd (jmin (range.getEnd(), (int) CFAttributedStringGetLength (attribString)));
 
-            if (const Font* const f = attr->getFont())
+            if (const Font* const f = attr.getFont())
             {
                 if (CTFontRef ctFontRef = getOrCreateFont (*f))
                 {
@@ -237,7 +249,7 @@ namespace CoreTextTypeLayout
                 }
             }
 
-            if (const Colour* const col = attr->getColour())
+            if (const Colour* const col = attr.getColour())
             {
                #if JUCE_IOS
                 const CGFloat components[] = { col->getFloatRed(),
@@ -303,39 +315,78 @@ namespace CoreTextTypeLayout
         return attribString;
     }
 
-    static void drawToCGContext (const AttributedString& text, const Rectangle<float>& area,
-                                 const CGContextRef& context, const float flipHeight)
+    static CTFrameRef createCTFrame (const AttributedString& text, CGRect bounds)
     {
-        CFAttributedStringRef attribString = CoreTextTypeLayout::createCFAttributedString (text);
+        CFAttributedStringRef attribString = createCFAttributedString (text);
         CTFramesetterRef framesetter = CTFramesetterCreateWithAttributedString (attribString);
         CFRelease (attribString);
 
         CGMutablePathRef path = CGPathCreateMutable();
-        CGRect bounds = CGRectMake ((CGFloat) area.getX(), flipHeight - (CGFloat) area.getBottom(),
-                                    (CGFloat) area.getWidth(), (CGFloat) area.getHeight());
         CGPathAddRect (path, nullptr, bounds);
 
         CTFrameRef frame = CTFramesetterCreateFrame (framesetter, CFRangeMake (0, 0), path, nullptr);
         CFRelease (framesetter);
         CGPathRelease (path);
 
-        CTFrameDraw (frame, context);
+        return frame;
+    }
+
+    static Range<float> getLineVerticalRange (CTFrameRef frame, CFArrayRef lines, int lineIndex)
+    {
+        LineInfo info (frame, (CTLineRef) CFArrayGetValueAtIndex (lines, lineIndex), lineIndex);
+        return Range<float> ((float) (info.origin.y - info.descent),
+                             (float) (info.origin.y + info.ascent));
+    }
+
+    static float findCTFrameHeight (CTFrameRef frame)
+    {
+        CFArrayRef lines = CTFrameGetLines (frame);
+        const CFIndex numLines = CFArrayGetCount (lines);
+
+        if (numLines == 0)
+            return 0;
+
+        Range<float> range (getLineVerticalRange (frame, lines, 0));
+
+        if (numLines > 1)
+            range = range.getUnionWith (getLineVerticalRange (frame, lines, numLines - 1));
+
+        return range.getLength();
+    }
+
+    static void drawToCGContext (const AttributedString& text, const Rectangle<float>& area,
+                                 const CGContextRef& context, const float flipHeight)
+    {
+        CTFrameRef frame = createCTFrame (text, CGRectMake ((CGFloat) area.getX(), flipHeight - (CGFloat) area.getBottom(),
+                                                            (CGFloat) area.getWidth(), (CGFloat) area.getHeight()));
+
+        const int verticalJustification = text.getJustification().getOnlyVerticalFlags();
+
+        if (verticalJustification == Justification::verticallyCentred
+             || verticalJustification == Justification::bottom)
+        {
+            float adjust = area.getHeight() - findCTFrameHeight (frame);
+
+            if (verticalJustification == Justification::verticallyCentred)
+                adjust *= 0.5f;
+
+            CGContextSaveGState (context);
+            CGContextTranslateCTM (context, 0, -adjust);
+            CTFrameDraw (frame, context);
+            CGContextRestoreGState (context);
+        }
+        else
+        {
+            CTFrameDraw (frame, context);
+        }
+
         CFRelease (frame);
     }
 
     static void createLayout (TextLayout& glyphLayout, const AttributedString& text)
     {
-        CFAttributedStringRef attribString = CoreTextTypeLayout::createCFAttributedString (text);
-        CTFramesetterRef framesetter = CTFramesetterCreateWithAttributedString (attribString);
-        CFRelease (attribString);
-
-        CGMutablePathRef path = CGPathCreateMutable();
-        const CGRect bounds = CGRectMake (0, 0, glyphLayout.getWidth(), 1.0e6f);
-        CGPathAddRect (path, nullptr, bounds);
-
-        CTFrameRef frame = CTFramesetterCreateFrame (framesetter, CFRangeMake(0, 0), path, nullptr);
-        CFRelease (framesetter);
-        CGPathRelease (path);
+        const CGFloat boundsHeight = 1.0e6f;
+        CTFrameRef frame = createCTFrame (text, CGRectMake (0, 0, glyphLayout.getWidth(), boundsHeight));
 
         CFArrayRef lines = CTFrameGetLines (frame);
         const CFIndex numLines = CFArrayGetCount (lines);
@@ -353,16 +404,14 @@ namespace CoreTextTypeLayout
             const CFIndex lineStringEnd = cfrlineStringRange.location + cfrlineStringRange.length - 1;
             const Range<int> lineStringRange ((int) cfrlineStringRange.location, (int) lineStringEnd);
 
-            CGPoint cgpLineOrigin;
-            CTFrameGetLineOrigins (frame, CFRangeMake(i, 1), &cgpLineOrigin);
+            LineInfo lineInfo (frame, line, i);
 
-            Point<float> lineOrigin ((float) cgpLineOrigin.x, bounds.size.height - (float) cgpLineOrigin.y);
-
-            CGFloat ascent, descent, leading;
-            CTLineGetTypographicBounds (line, &ascent,  &descent, &leading);
-
-            TextLayout::Line* const glyphLine = new TextLayout::Line (lineStringRange, lineOrigin,
-                                                                      (float) ascent, (float) descent, (float) leading,
+            TextLayout::Line* const glyphLine = new TextLayout::Line (lineStringRange,
+                                                                      Point<float> ((float) lineInfo.origin.x,
+                                                                                    boundsHeight - (float) lineInfo.origin.y),
+                                                                      (float) lineInfo.ascent,
+                                                                      (float) lineInfo.descent,
+                                                                      (float) lineInfo.leading,
                                                                       (int) numRuns);
             glyphLayout.addLine (glyphLine);
 
@@ -409,9 +458,9 @@ namespace CoreTextTypeLayout
                     glyphRun->colour = Colour::fromFloatRGBA (components[0], components[1], components[2], components[3]);
                 }
 
-                const CoreTextTypeLayout::Glyphs glyphs (run, (size_t) numGlyphs);
-                const CoreTextTypeLayout::Advances advances (run, numGlyphs);
-                const CoreTextTypeLayout::Positions positions (run, (size_t) numGlyphs);
+                const Glyphs glyphs (run, (size_t) numGlyphs);
+                const Advances advances (run, numGlyphs);
+                const Positions positions (run, (size_t) numGlyphs);
 
                 for (CFIndex k = 0; k < numGlyphs; ++k)
                     glyphRun->glyphs.add (TextLayout::Glyph (glyphs.glyphs[k], Point<float> (positions.points[k].x,
