@@ -180,8 +180,19 @@ private:
 
 //==============================================================================
 PropertyPanel::PropertyPanel()
-    : messageWhenEmpty (TRANS("(nothing selected)"))
 {
+    init();
+}
+
+PropertyPanel::PropertyPanel (const String& name)  : Component (name)
+{
+    init();
+}
+
+void PropertyPanel::init()
+{
+    messageWhenEmpty = TRANS("(nothing selected)");
+
     addAndMakeVisible (&viewport);
     viewport.setViewedComponent (propertyHolderComponent = new PropertyHolderComponent());
     viewport.setFocusContainer (true);
