@@ -114,12 +114,12 @@ public:
     /** Returns a pointer to the raw midi data.
         @see getRawDataSize
     */
-    const uint8* getRawData() const noexcept                    { return data; }
+    const uint8* getRawData() const noexcept            { return allocatedData != nullptr ? allocatedData : preallocatedData.asBytes; }
 
     /** Returns the number of bytes of data in the message.
         @see getRawData
     */
-    int getRawDataSize() const noexcept                         { return size; }
+    int getRawDataSize() const noexcept                 { return size; }
 
     //==============================================================================
     /** Returns the timestamp associated with this message.
@@ -138,18 +138,18 @@ public:
 
         @see setTimeStamp, addToTimeStamp
     */
-    double getTimeStamp() const noexcept                        { return timeStamp; }
+    double getTimeStamp() const noexcept                { return timeStamp; }
 
     /** Changes the message's associated timestamp.
         The units for the timestamp will be application-specific - see the notes for getTimeStamp().
         @see addToTimeStamp, getTimeStamp
     */
-    void setTimeStamp (double newTimestamp) noexcept      { timeStamp = newTimestamp; }
+    void setTimeStamp (double newTimestamp) noexcept    { timeStamp = newTimestamp; }
 
     /** Adds a value to the message's timestamp.
         The units for the timestamp will be application-specific.
     */
-    void addToTimeStamp (double delta) noexcept           { timeStamp += delta; }
+    void addToTimeStamp (double delta) noexcept         { timeStamp += delta; }
 
     //==============================================================================
     /** Returns the midi channel associated with the message.
@@ -914,7 +914,7 @@ public:
 private:
     //==============================================================================
     double timeStamp;
-    uint8* data;
+    HeapBlock<uint8> allocatedData;
     int size;
 
    #ifndef DOXYGEN
@@ -925,9 +925,7 @@ private:
     } preallocatedData;
    #endif
 
-    void freeData() noexcept;
-    void setToUseInternalData() noexcept;
-    bool usesAllocatedData() const noexcept;
+    inline uint8* getData() noexcept   { return allocatedData != nullptr ? allocatedData : preallocatedData.asBytes; }
 };
 
 #endif   // JUCE_MIDIMESSAGE_H_INCLUDED
