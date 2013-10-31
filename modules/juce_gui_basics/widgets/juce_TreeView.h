@@ -610,7 +610,7 @@ public:
         you want the tree to contain a number of root items, you should still use a single
         root item above these, but hide it using setRootItemVisible().
 
-        You can pass in 0 to this method to clear the tree and remove its current root item.
+        You can pass nullptr to this method to clear the tree and remove its current root item.
 
         The object passed in will not be deleted by the treeview, it's up to the caller
         to delete it when no longer needed. BUT make absolutely sure that you don't delete
@@ -711,17 +711,13 @@ public:
 
     //==============================================================================
     /** Returns the number of rows the tree is using.
-
         This will depend on which items are open.
-
         @see TreeViewItem::getRowNumberInTree()
     */
     int getNumRowsInTree() const;
 
     /** Returns the item on a particular row of the tree.
-
         If the index is out of range, this will return 0.
-
         @see getNumRowsInTree, TreeViewItem::getRowNumberInTree()
     */
     TreeViewItem* getItemOnRow (int index) const;

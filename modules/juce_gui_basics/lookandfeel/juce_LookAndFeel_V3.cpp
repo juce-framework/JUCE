@@ -86,10 +86,10 @@ void LookAndFeel_V3::drawConcertinaPanelHeader (Graphics& g, const Rectangle<int
     const Colour bkg (Colours::grey);
 
     g.setGradientFill (ColourGradient (Colours::white.withAlpha (isMouseOver ? 0.4f : 0.2f), 0, (float) area.getY(),
-                                       Colours::darkgrey.withAlpha (0.2f), 0, (float) area.getBottom(), false));
+                                       Colours::darkgrey.withAlpha (0.1f), 0, (float) area.getBottom(), false));
     g.fillAll();
 
-    g.setColour (bkg.contrasting().withAlpha (0.04f));
+    g.setColour (bkg.contrasting().withAlpha (0.1f));
     g.fillRect (area.withHeight (1));
     g.fillRect (area.withTop (area.getBottom() - 1));
 
