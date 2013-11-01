@@ -90,15 +90,6 @@ struct JavascriptEngine::RootObject   : public DynamicObject
         return ExpPtr (tb.parseExpression())->getResult (Scope (nullptr, this, this));
     }
 
-    var invoke (Identifier function, const var::NativeFunctionArgs& args)
-    {
-        if (const var* m = getProperties().getVarPointer (function))
-            if (FunctionObject* fo = dynamic_cast<FunctionObject*> (m->getObject()))
-                return fo->invoke (Scope (nullptr, this, this), args);
-
-        return var::undefined();
-    }
-
     //==============================================================================
     static bool areTypeEqual (const var& a, const var& b)
     {
@@ -189,6 +180,32 @@ struct JavascriptEngine::RootObject   : public DynamicObject
 
             return parent != nullptr ? parent->findSymbolInParentScopes (name)
                                      : var::undefined();
+        }
+
+        bool findAndInvokeMethod (Identifier function, const var::NativeFunctionArgs& args, var& result) const
+        {
+            const NamedValueSet& props = scope->getProperties();
+
+            DynamicObject* target = args.thisObject.getDynamicObject();
+
+            if (target == nullptr || target == scope)
+            {
+                if (const var* m = props.getVarPointer (function))
+                {
+                    if (FunctionObject* fo = dynamic_cast<FunctionObject*> (m->getObject()))
+                    {
+                        result = fo->invoke (*this, args);
+                        return true;
+                    }
+                }
+            }
+
+            for (int i = 0; i < props.size(); ++i)
+                if (DynamicObject* o = props.getValueAt (i).getDynamicObject())
+                    if (Scope (this, root, o).findAndInvokeMethod (function, args, result))
+                        return true;
+
+            return false;
         }
 
         void checkTimeOut (const CodeLocation& location) const
@@ -763,7 +780,7 @@ struct JavascriptEngine::RootObject   : public DynamicObject
 
         void writeAsJSON (OutputStream& out, int /*indentLevel*/, bool /*allOnOneLine*/) override
         {
-            out << "function" << functionCode;
+            out << "function " << functionCode;
         }
 
         var invoke (const Scope& s, const var::NativeFunctionArgs& args) const
@@ -1674,18 +1691,20 @@ var JavascriptEngine::evaluate (const String& code, Result* result)
 
 var JavascriptEngine::callFunction (Identifier function, const var::NativeFunctionArgs& args, Result* result)
 {
+    var returnVal (var::undefined());
+
     try
     {
         prepareTimeout();
         if (result != nullptr) *result = Result::ok();
-        return root->invoke (function, args);
+        RootObject::Scope (nullptr, root, root).findAndInvokeMethod (function, args, returnVal);
     }
     catch (String& error)
     {
         if (result != nullptr) *result = Result::fail (error);
     }
 
-    return var::undefined();
+    return returnVal;
 }
 
 #if JUCE_MSVC
