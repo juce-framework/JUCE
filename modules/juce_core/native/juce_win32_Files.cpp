@@ -630,6 +630,8 @@ bool File::createLink (const String& description, const File& linkFileToCreate) 
     ComSmartPtr<IShellLink> shellLink;
     ComSmartPtr<IPersistFile> persistFile;
 
+    CoInitialize (0);
+
     return SUCCEEDED (shellLink.CoCreateInstance (CLSID_ShellLink))
         && SUCCEEDED (shellLink->SetPath (getFullPathName().toWideCharPointer()))
         && SUCCEEDED (shellLink->SetDescription (description.toWideCharPointer()))
