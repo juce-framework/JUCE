@@ -210,7 +210,7 @@ public:
         will wait for it to finish.
 
         If the timeout period expires before the job finishes running, then the job will be
-        left in the pool and this will return false. It returns true if the job is sucessfully
+        left in the pool and this will return false. It returns true if the job is successfully
         stopped and removed.
 
         @param job                  the job to remove

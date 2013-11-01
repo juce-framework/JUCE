@@ -383,7 +383,7 @@ void LookAndFeel_V3::drawLinearSlider (Graphics& g, int x, int y, int width, int
         drawButtonShape (g, p, slider.findColour (Slider::thumbColourId)
                                 .withMultipliedSaturation (slider.isEnabled() ? 1.0f : 0.5f)
                                 .withMultipliedAlpha (0.8f),
-                         height);
+                         (float) height);
     }
     else
     {

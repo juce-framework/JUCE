@@ -603,7 +603,6 @@ void Project::Item::setFile (const File& file)
 
 void Project::Item::setFile (const RelativePath& file)
 {
-    jassert (file.getRoot() == RelativePath::projectFolder);
     jassert (isFile());
     state.setProperty (Ids::file, file.toUnixStyle(), getUndoManager());
     state.setProperty (Ids::name, file.getFileName(), getUndoManager());

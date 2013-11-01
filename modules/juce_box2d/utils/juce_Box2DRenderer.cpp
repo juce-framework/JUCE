@@ -87,9 +87,9 @@ void Box2DRenderer::DrawCircle (const b2Vec2& center, float32 radius, const b2Co
                            getLineThickness());
 }
 
-void Box2DRenderer::DrawSolidCircle (const b2Vec2& center, float32 radius, const b2Vec2& axis, const b2Color& color)
+void Box2DRenderer::DrawSolidCircle (const b2Vec2& center, float32 radius, const b2Vec2& /*axis*/, const b2Color& colour)
 {
-    graphics->setColour (getColour (color));
+    graphics->setColour (getColour (colour));
     graphics->fillEllipse (center.x - radius, center.y - radius,
                            radius * 2.0f, radius * 2.0f);
 }

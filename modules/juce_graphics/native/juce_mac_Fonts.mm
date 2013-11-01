@@ -349,7 +349,7 @@ namespace CoreTextTypeLayout
         Range<float> range (getLineVerticalRange (frame, lines, 0));
 
         if (numLines > 1)
-            range = range.getUnionWith (getLineVerticalRange (frame, lines, numLines - 1));
+            range = range.getUnionWith (getLineVerticalRange (frame, lines, (int) numLines - 1));
 
         return range.getLength();
     }
