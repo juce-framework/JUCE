@@ -383,12 +383,31 @@ void ProjectExporter::createDefaultModulePaths()
             for (int i = project.getModules().getNumModules(); --i >= 0;)
             {
                 String modID (project.getModules().getModuleID(i));
-
                 getPathForModuleValue (modID) = exporter->getPathForModuleValue (modID).getValue();
             }
 
-            break;
+            return;
         }
+    }
+
+    for (Project::ExporterIterator exporter (project); exporter.next();)
+    {
+        if (exporter->canLaunchProject())
+        {
+            for (int i = project.getModules().getNumModules(); --i >= 0;)
+            {
+                String modID (project.getModules().getModuleID(i));
+                getPathForModuleValue (modID) = exporter->getPathForModuleValue (modID).getValue();
+            }
+
+            return;
+        }
+    }
+
+    for (int i = project.getModules().getNumModules(); --i >= 0;)
+    {
+        String modID (project.getModules().getModuleID(i));
+        getPathForModuleValue (modID) = "../../juce";
     }
 }
 
