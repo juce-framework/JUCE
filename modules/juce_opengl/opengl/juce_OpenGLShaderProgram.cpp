@@ -51,10 +51,18 @@ double OpenGLShaderProgram::getLanguageVersion()
    #endif
 }
 
-bool OpenGLShaderProgram::addShader (const char* const code, GLenum type)
+bool OpenGLShaderProgram::addShader (StringRef code, GLenum type)
 {
     GLuint shaderID = context.extensions.glCreateShader (type);
-    context.extensions.glShaderSource (shaderID, 1, (const GLchar**) &code, nullptr);
+
+   #if JUCE_STRING_UTF_TYPE == 8
+    const GLchar* c = code.text;
+   #else
+    String codeString (code.text);
+    const GLchar* c = codeString.toRawUTF8();
+   #endif
+
+    context.extensions.glShaderSource (shaderID, 1, &c, nullptr);
     context.extensions.glCompileShader (shaderID);
 
     GLint status = GL_FALSE;
@@ -82,6 +90,9 @@ bool OpenGLShaderProgram::addShader (const char* const code, GLenum type)
     JUCE_CHECK_OPENGL_ERROR
     return true;
 }
+
+bool OpenGLShaderProgram::addVertexShader (StringRef code)    { return addShader (code, GL_VERTEX_SHADER); }
+bool OpenGLShaderProgram::addFragmentShader (StringRef code)  { return addShader (code, GL_FRAGMENT_SHADER); }
 
 bool OpenGLShaderProgram::link() noexcept
 {
