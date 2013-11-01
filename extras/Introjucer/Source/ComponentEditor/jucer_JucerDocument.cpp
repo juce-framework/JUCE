@@ -401,12 +401,8 @@ bool JucerDocument::loadFromXml (const XmlElement& xml)
         activeExtraMethods.clear();
 
         if (XmlElement* const methods = xml.getChildByName ("METHODS"))
-        {
             forEachXmlChildElementWithTagName (*methods, e, "METHOD")
-            {
                 activeExtraMethods.addIfNotAlreadyThere (e->getStringAttribute ("name"));
-            }
-        }
 
         activeExtraMethods.trim();
         activeExtraMethods.removeEmptyStrings();
@@ -430,7 +426,7 @@ void JucerDocument::fillInGeneratedCode (GeneratedCode& code) const
     code.initialisers.addLines (variableInitialisers);
 
     if (! componentName.isEmpty())
-        code.constructorCode << "setName (" + quotedString (componentName) + ")\n";
+        code.constructorCode << "setName (" + quotedString (componentName) + ");\n";
 
     // call these now, just to make sure they're the first two methods in the list.
     code.getCallbackCode (String::empty, "void", "paint (Graphics& g)", false)
@@ -482,17 +478,13 @@ void JucerDocument::fillInGeneratedCode (GeneratedCode& code) const
                 String userCommentTag ("UserCode_");
                 userCommentTag += methods[i].upToFirstOccurrenceOf ("(", false, false).trim();
 
-                s << "\n//["
-                  << userCommentTag
-                  << "] -- Add your code here...\n"
+                s << "\n//[" << userCommentTag << "] -- Add your code here...\n"
                   << initialContents[i];
 
                 if (initialContents[i].isNotEmpty() && ! initialContents[i].endsWithChar ('\n'))
                     s << '\n';
 
-                s << "//[/"
-                  << userCommentTag
-                  << "]\n";
+                s << "//[/" << userCommentTag << "]\n";
             }
         }
     }
