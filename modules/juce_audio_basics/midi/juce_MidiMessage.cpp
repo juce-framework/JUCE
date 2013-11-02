@@ -201,11 +201,8 @@ MidiMessage::MidiMessage (const void* srcData, int sz, int& numBytesUsed, const 
                         break;                  // bytes, assume it's the end of the sysex
 
                     ++numVariableLengthSysexBytes;
-                    ++d;
-                    continue;
                 }
-
-                if (! haveReadAllLengthBytes)
+                else if (! haveReadAllLengthBytes)
                 {
                     haveReadAllLengthBytes = true;
                     ++numVariableLengthSysexBytes;
@@ -220,6 +217,8 @@ MidiMessage::MidiMessage (const void* srcData, int sz, int& numBytesUsed, const 
             allocatedData.malloc (size);
             *allocatedData = (uint8) byte;
             memcpy (allocatedData + 1, src, (size_t) (size - 1));
+
+            numBytesUsed += numVariableLengthSysexBytes;  // (these aren't counted in the size)
         }
         else if (byte == 0xff)
         {
