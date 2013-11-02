@@ -177,21 +177,21 @@ public:
             : program (context)
         {
             JUCE_CHECK_OPENGL_ERROR
-            program.addShader ("attribute vec2 position;"
-                               "attribute vec4 colour;"
-                               "uniform vec4 screenBounds;"
-                               "varying " JUCE_MEDIUMP " vec4 frontColour;"
-                               "varying " JUCE_HIGHP " vec2 pixelPos;"
-                               "void main()"
-                               "{"
-                               " frontColour = colour;"
-                               " vec2 adjustedPos = position - screenBounds.xy;"
-                               " pixelPos = adjustedPos;"
-                               " vec2 scaledPos = adjustedPos / screenBounds.zw;"
-                               " gl_Position = vec4 (scaledPos.x - 1.0, 1.0 - scaledPos.y, 0, 1.0);"
-                               "}", GL_VERTEX_SHADER);
+            program.addVertexShader ("attribute vec2 position;"
+                                     "attribute vec4 colour;"
+                                     "uniform vec4 screenBounds;"
+                                     "varying " JUCE_MEDIUMP " vec4 frontColour;"
+                                     "varying " JUCE_HIGHP " vec2 pixelPos;"
+                                     "void main()"
+                                     "{"
+                                     " frontColour = colour;"
+                                     " vec2 adjustedPos = position - screenBounds.xy;"
+                                     " pixelPos = adjustedPos;"
+                                     " vec2 scaledPos = adjustedPos / screenBounds.zw;"
+                                     " gl_Position = vec4 (scaledPos.x - 1.0, 1.0 - scaledPos.y, 0, 1.0);"
+                                     "}");
 
-            program.addShader (fragmentShader, GL_FRAGMENT_SHADER);
+            program.addFragmentShader (fragmentShader);
             program.link();
             JUCE_CHECK_OPENGL_ERROR
         }
