@@ -95,7 +95,6 @@ public:
     void prepareExporter (ProjectExporter&, ProjectSaver&) const;
     void createPropertyEditors (ProjectExporter&, PropertyListBuilder&) const;
     void getConfigFlags (Project&, OwnedArray<Project::ConfigFlag>& flags) const;
-    void getLocalCompiledFiles (const File& localModuleFolder, Array<File>& files) const;
     void findBrowseableFiles (const File& localModuleFolder, Array<File>& files) const;
 
     ModuleDescription moduleInfo;

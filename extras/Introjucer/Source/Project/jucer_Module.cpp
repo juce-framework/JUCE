@@ -340,7 +340,12 @@ void LibraryModule::prepareExporter (ProjectExporter& exporter, ProjectSaver& pr
 
     {
         Array<File> compiled;
-        findAndAddCompiledCode (exporter, projectSaver, moduleInfo.getFolder(), compiled);
+
+        const File localModuleFolder = project.getModules().shouldCopyModuleFilesLocally (getID()).getValue()
+                                          ? projectSaver.getLocalModuleFolder (getID())
+                                          : moduleInfo.getFolder();
+
+        findAndAddCompiledCode (exporter, projectSaver, localModuleFolder, compiled);
 
         if (project.getModules().shouldShowAllModuleFilesInProject (getID()).getValue())
             addBrowsableCode (exporter, projectSaver, compiled, moduleInfo.getFolder());
@@ -519,33 +524,6 @@ void LibraryModule::findAndAddCompiledCode (ProjectExporter& exporter, ProjectSa
 
                 if (file ["stdcall"])
                     item.getShouldUseStdCallValue() = true;
-            }
-        }
-    }
-}
-
-void LibraryModule::getLocalCompiledFiles (const File& localModuleFolder, Array<File>& result) const
-{
-    const var compileArray (moduleInfo.moduleInfo ["compile"]); // careful to keep this alive while the array is in use!
-
-    if (const Array<var>* const files = compileArray.getArray())
-    {
-        for (int i = 0; i < files->size(); ++i)
-        {
-            const var& file = files->getReference(i);
-            const String filename (file ["file"].toString());
-
-            if (filename.isNotEmpty()
-                  #if JUCE_MAC
-                   && exporterTargetMatches ("xcode", file ["target"].toString())
-                  #elif JUCE_WINDOWS
-                   && exporterTargetMatches ("msvc",  file ["target"].toString())
-                  #elif JUCE_LINUX
-                   && exporterTargetMatches ("linux", file ["target"].toString())
-                  #endif
-                )
-            {
-                result.add (localModuleFolder.getChildFile (filename));
             }
         }
     }
