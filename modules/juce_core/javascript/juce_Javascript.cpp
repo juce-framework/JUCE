@@ -673,14 +673,13 @@ struct JavascriptEngine::RootObject   : public DynamicObject
 
         var getResult (const Scope& s) const override
         {
-            var function (object->getResult (s));
-
             if (DotOperator* dot = dynamic_cast<DotOperator*> (object.get()))
             {
                 var thisObject (dot->parent->getResult (s));
                 return invokeFunction (s, s.findFunctionCall (location, thisObject, dot->child), thisObject);
             }
 
+            var function (object->getResult (s));
             return invokeFunction (s, function, var (s.scope));
         }
 
@@ -790,9 +789,9 @@ struct JavascriptEngine::RootObject   : public DynamicObject
             static const Identifier thisIdent ("this");
             functionRoot->setProperty (thisIdent, args.thisObject);
 
-            const int numArgs = jmin (parameters.size(), args.numArguments);
-            for (int i = 0; i < numArgs; ++i)
-                functionRoot->setProperty (parameters.getReference(i), args.arguments[i]);
+            for (int i = 0; i < parameters.size(); ++i)
+                functionRoot->setProperty (parameters.getReference(i),
+                                           i < args.numArguments ? args.arguments[i] : var::undefined());
 
             var result;
             body->perform (Scope (&s, s.root, functionRoot), &result);
