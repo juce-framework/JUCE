@@ -413,36 +413,39 @@ private:
     };
 
     //==============================================================================
-    class OpacityProperty  : public SliderPropertyComponent,
-                             private ElementListenerBase <PaintElementImage>
+    class OpacityProperty  : public SliderPropertyComponent
     {
     public:
         OpacityProperty (PaintElementImage* const e)
             : SliderPropertyComponent ("opacity", 0.0, 1.0, 0.001),
-              ElementListenerBase <PaintElementImage> (e)
+              listener (e)
         {
+            listener.setPropertyToRefresh (*this);
         }
 
         void setValue (double newValue)
         {
-            owner->getDocument()->getUndoManager().undoCurrentTransactionOnly();
-            owner->setOpacity (newValue, true);
+            listener.owner->getDocument()->getUndoManager().undoCurrentTransactionOnly();
+            listener.owner->setOpacity (newValue, true);
         }
 
         double getValue() const
         {
-            return owner->getOpacity();
+            return listener.owner->getOpacity();
         }
+
+        ElementListener<PaintElementImage> listener;
     };
 
-    class StretchModeProperty  : public ChoicePropertyComponent,
-                                 private ElementListenerBase <PaintElementImage>
+    class StretchModeProperty  : public ChoicePropertyComponent
     {
     public:
         StretchModeProperty (PaintElementImage* const e)
             : ChoicePropertyComponent ("stretch mode"),
-              ElementListenerBase <PaintElementImage> (e)
+              listener (e)
         {
+            listener.setPropertyToRefresh (*this);
+
             choices.add ("Stretched to fit");
             choices.add ("Maintain aspect ratio");
             choices.add ("Maintain aspect ratio, only reduce in size");
@@ -450,13 +453,15 @@ private:
 
         void setIndex (int newIndex)
         {
-            owner->setStretchMode ((StretchMode) newIndex, true);
+            listener.owner->setStretchMode ((StretchMode) newIndex, true);
         }
 
         int getIndex() const
         {
-            return (int) owner->getStretchMode();
+            return (int) listener.owner->getStretchMode();
         }
+
+        ElementListener<PaintElementImage> listener;
     };
 
     class ResetSizeProperty   : public ButtonPropertyComponent

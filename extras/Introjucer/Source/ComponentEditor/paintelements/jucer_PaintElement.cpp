@@ -173,27 +173,29 @@ void PaintElement::updateBounds (const Rectangle<int>& parentArea)
 }
 
 //==============================================================================
-class ElementPositionProperty   : public PositionPropertyBase,
-                                  private ElementListenerBase<PaintElement>
+class ElementPositionProperty   : public PositionPropertyBase
 {
 public:
     ElementPositionProperty (PaintElement* e, const String& name,
                              ComponentPositionDimension dimension_)
        : PositionPropertyBase (e, name, dimension_, true, false,
                                e->getDocument()->getComponentLayout()),
-         ElementListenerBase<PaintElement> (e)
+         listener (e)
     {
+        listener.setPropertyToRefresh (*this);
     }
 
     void setPosition (const RelativePositionedRectangle& newPos)
     {
-        owner->setPosition (newPos, true);
+        listener.owner->setPosition (newPos, true);
     }
 
     RelativePositionedRectangle getPosition() const
     {
-        return owner->getPosition();
+        return listener.owner->getPosition();
     }
+
+    ElementListener<PaintElement> listener;
 };
 
 //==============================================================================
