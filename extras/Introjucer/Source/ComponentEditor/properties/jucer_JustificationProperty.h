@@ -88,10 +88,10 @@ public:
                               Justification::bottomLeft,
                               Justification::bottomRight };
 
-        const int flags = getJustification().getFlags();
+        const int rawFlags = getJustification().getFlags();
 
         for (int i = numElementsInArray (types); --i >= 0;)
-            if (types[i] == flags)
+            if (types[i] == rawFlags)
                 return i;
 
         return -1;

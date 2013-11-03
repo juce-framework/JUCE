@@ -68,7 +68,7 @@ public:
 
     virtual void drawExtraEditorGraphics (Graphics& g, const Rectangle<int>& relativeTo);
 
-    virtual void getEditableProperties (Array <PropertyComponent*>& properties);
+    virtual void getEditableProperties (Array<PropertyComponent*>& props);
 
     virtual void showPopupMenu();
 

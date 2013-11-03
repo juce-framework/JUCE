@@ -169,7 +169,6 @@ int vorbis_block_clear(vorbis_block *vb){
    The init is here because some of it is shared */
 
 static int _vds_shared_init(vorbis_dsp_state *v,vorbis_info *vi,int encp){
-  int i;
   codec_setup_info *ci=(codec_setup_info*)vi->codec_setup;
   private_state *b=NULL;
   int hs;
@@ -206,12 +205,12 @@ static int _vds_shared_init(vorbis_dsp_state *v,vorbis_info *vi,int encp){
     /* finish the codebooks */
     if(!ci->fullbooks){
       ci->fullbooks=(codebook*) _ogg_calloc(ci->books,sizeof(*ci->fullbooks));
-      for(i=0;i<ci->books;i++)
+      for(int i=0;i<ci->books;i++)
         vorbis_book_init_encode(ci->fullbooks+i,ci->book_param[i]);
     }
 
     b->psy=(vorbis_look_psy*)_ogg_calloc(ci->psys,sizeof(*b->psy));
-    for(i=0;i<ci->psys;i++){
+    for(int i=0;i<ci->psys;i++){
       _vp_psy_init(b->psy+i,
                    ci->psy_param[i],
                    &ci->psy_g_param,
@@ -224,7 +223,7 @@ static int _vds_shared_init(vorbis_dsp_state *v,vorbis_info *vi,int encp){
     /* finish the codebooks */
     if(!ci->fullbooks){
       ci->fullbooks=(codebook*) _ogg_calloc(ci->books,sizeof(*ci->fullbooks));
-      for(i=0;i<ci->books;i++){
+      for(int i=0;i<ci->books;i++){
         if(ci->book_param[i]==NULL)
           goto abort_books;
         if(vorbis_book_init_decode(ci->fullbooks+i,ci->book_param[i]))
@@ -261,17 +260,17 @@ static int _vds_shared_init(vorbis_dsp_state *v,vorbis_info *vi,int encp){
   b->flr=(vorbis_look_floor**)_ogg_calloc(ci->floors,sizeof(*b->flr));
   b->residue=(vorbis_look_residue**)_ogg_calloc(ci->residues,sizeof(*b->residue));
 
-  for(i=0;i<ci->floors;i++)
+  for(int i=0;i<ci->floors;i++)
     b->flr[i]=_floor_P[ci->floor_type[i]]->
       look(v,ci->floor_param[i]);
 
-  for(i=0;i<ci->residues;i++)
+  for(int i=0;i<ci->residues;i++)
     b->residue[i]=_residue_P[ci->residue_type[i]]->
       look(v,ci->residue_param[i]);
 
   return 0;
  abort_books:
-  for(i=0;i<ci->books;i++){
+  for(int i=0;i<ci->books;i++){
     if(ci->book_param[i]!=NULL){
       vorbis_staticbook_destroy(ci->book_param[i]);
       ci->book_param[i]=NULL;
@@ -850,7 +849,7 @@ int vorbis_synthesis_blockin(vorbis_dsp_state *v,vorbis_block *vb){
       if(b->sample_count>v->granulepos){
         /* corner case; if this is both the first and last audio page,
            then spec says the end is cut, not beginning */
-       long extra=b->sample_count-vb->granulepos;
+       long extra = (long) (b->sample_count-vb->granulepos);
 
         /* we use ogg_int64_t for granule positions because a
            uint64 isn't universally available.  Unfortunately,
@@ -958,7 +957,6 @@ int vorbis_synthesis_lapout(vorbis_dsp_state *v,float ***pcm){
   int n=ci->blocksizes[v->W]>>(hs+1);
   int n0=ci->blocksizes[0]>>(hs+1);
   int n1=ci->blocksizes[1]>>(hs+1);
-  int i,j;
 
   if(v->pcm_returned<0)return 0;
 
@@ -975,9 +973,9 @@ int vorbis_synthesis_lapout(vorbis_dsp_state *v,float ***pcm){
   if(v->centerW==n1){
     /* the data buffer wraps; swap the halves */
     /* slow, sure, small */
-    for(j=0;j<vi->channels;j++){
+    for(int j=0;j<vi->channels;j++){
       float *p=v->pcm[j];
-      for(i=0;i<n1;i++){
+      for(int i=0;i<n1;i++){
         float temp=p[i];
         p[i]=p[i+n1];
         p[i+n1]=temp;
@@ -992,10 +990,10 @@ int vorbis_synthesis_lapout(vorbis_dsp_state *v,float ***pcm){
   /* solidify buffer into contiguous space */
   if((v->lW^v->W)==1){
     /* long/short or short/long */
-    for(j=0;j<vi->channels;j++){
+    for(int j=0;j<vi->channels;j++){
       float *s=v->pcm[j];
       float *d=v->pcm[j]+(n1-n0)/2;
-      for(i=(n1+n0)/2-1;i>=0;--i)
+      for(int i=(n1+n0)/2-1;i>=0;--i)
         d[i]=s[i];
     }
     v->pcm_returned+=(n1-n0)/2;
@@ -1003,10 +1001,10 @@ int vorbis_synthesis_lapout(vorbis_dsp_state *v,float ***pcm){
   }else{
     if(v->lW==0){
       /* short/short */
-      for(j=0;j<vi->channels;j++){
+      for(int j=0;j<vi->channels;j++){
         float *s=v->pcm[j];
         float *d=v->pcm[j]+n1-n0;
-        for(i=n0-1;i>=0;--i)
+        for(int i=n0-1;i>=0;--i)
           d[i]=s[i];
       }
       v->pcm_returned+=n1-n0;
@@ -1015,8 +1013,7 @@ int vorbis_synthesis_lapout(vorbis_dsp_state *v,float ***pcm){
   }
 
   if(pcm){
-    int i;
-    for(i=0;i<vi->channels;i++)
+    for(int i=0;i<vi->channels;i++)
       v->pcmret[i]=v->pcm[i]+v->pcm_returned;
     *pcm=v->pcmret;
   }

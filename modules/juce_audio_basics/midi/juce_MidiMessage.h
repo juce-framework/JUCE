@@ -114,7 +114,7 @@ public:
     /** Returns a pointer to the raw midi data.
         @see getRawDataSize
     */
-    const uint8* getRawData() const noexcept            { return allocatedData != nullptr ? allocatedData : preallocatedData.asBytes; }
+    const uint8* getRawData() const noexcept            { return allocatedData != nullptr ? allocatedData.getData() : preallocatedData.asBytes; }
 
     /** Returns the number of bytes of data in the message.
         @see getRawData
@@ -925,7 +925,7 @@ private:
     } preallocatedData;
    #endif
 
-    inline uint8* getData() noexcept   { return allocatedData != nullptr ? allocatedData : preallocatedData.asBytes; }
+    inline uint8* getData() noexcept   { return allocatedData != nullptr ? allocatedData.getData() : preallocatedData.asBytes; }
 };
 
 #endif   // JUCE_MIDIMESSAGE_H_INCLUDED

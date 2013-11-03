@@ -34,8 +34,8 @@
 class PaintElementText   : public ColouredElement
 {
 public:
-    PaintElementText (PaintRoutine* owner)
-        : ColouredElement (owner, "Text", false, false),
+    PaintElementText (PaintRoutine* pr)
+        : ColouredElement (pr, "Text", false, false),
           text ("Your text goes here"),
           font (15.0f),
           typefaceName (FontPropertyComponent::getDefaultFont()),
@@ -65,16 +65,16 @@ public:
         return s;
     }
 
-    void getEditableProperties (Array <PropertyComponent*>& properties)
+    void getEditableProperties (Array<PropertyComponent*>& props)
     {
-        ColouredElement::getEditableProperties (properties);
+        ColouredElement::getEditableProperties (props);
 
-        properties.add (new TextProperty (this));
-        properties.add (new FontNameProperty (this));
-        properties.add (new FontStyleProperty (this));
-        properties.add (new FontSizeProperty (this));
-        properties.add (new TextJustificationProperty (this));
-        properties.add (new TextToPathProperty (this));
+        props.add (new TextProperty (this));
+        props.add (new FontNameProperty (this));
+        props.add (new FontStyleProperty (this));
+        props.add (new FontSizeProperty (this));
+        props.add (new TextJustificationProperty (this));
+        props.add (new TextToPathProperty (this));
     }
 
     void fillInGeneratedCode (GeneratedCode& code, String& paintMethodCode)

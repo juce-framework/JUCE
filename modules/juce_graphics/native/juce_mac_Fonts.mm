@@ -408,7 +408,7 @@ namespace CoreTextTypeLayout
 
             TextLayout::Line* const glyphLine = new TextLayout::Line (lineStringRange,
                                                                       Point<float> ((float) lineInfo.origin.x,
-                                                                                    boundsHeight - (float) lineInfo.origin.y),
+                                                                                    (float) (boundsHeight - lineInfo.origin.y)),
                                                                       (float) lineInfo.ascent,
                                                                       (float) lineInfo.descent,
                                                                       (float) lineInfo.leading,
@@ -443,7 +443,7 @@ namespace CoreTextTypeLayout
 
                     glyphRun->font = Font (String::fromCFString (cfsFontFamily),
                                            String::fromCFString (cfsFontStyle),
-                                           CTFontGetSize (ctRunFont) / fontHeightToPointsFactor);
+                                           (float) (CTFontGetSize (ctRunFont) / fontHeightToPointsFactor));
 
                     CFRelease (cfsFontStyle);
                     CFRelease (cfsFontFamily);
@@ -455,7 +455,10 @@ namespace CoreTextTypeLayout
                 {
                     const CGFloat* const components = CGColorGetComponents (cgRunColor);
 
-                    glyphRun->colour = Colour::fromFloatRGBA (components[0], components[1], components[2], components[3]);
+                    glyphRun->colour = Colour::fromFloatRGBA ((float) components[0],
+                                                              (float) components[1],
+                                                              (float) components[2],
+                                                              (float) components[3]);
                 }
 
                 const Glyphs glyphs (run, (size_t) numGlyphs);
@@ -463,9 +466,9 @@ namespace CoreTextTypeLayout
                 const Positions positions (run, (size_t) numGlyphs);
 
                 for (CFIndex k = 0; k < numGlyphs; ++k)
-                    glyphRun->glyphs.add (TextLayout::Glyph (glyphs.glyphs[k], Point<float> (positions.points[k].x,
-                                                                                             positions.points[k].y),
-                                                             advances.advances[k].width));
+                    glyphRun->glyphs.add (TextLayout::Glyph (glyphs.glyphs[k], Point<float> ((float) positions.points[k].x,
+                                                                                             (float) positions.points[k].y),
+                                                             (float) advances.advances[k].width));
             }
         }
 

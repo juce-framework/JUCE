@@ -32,8 +32,8 @@
 class PaintElementEllipse   : public ColouredElement
 {
 public:
-    PaintElementEllipse (PaintRoutine* owner)
-        : ColouredElement (owner, "Ellipse", true, false)
+    PaintElementEllipse (PaintRoutine* pr)
+        : ColouredElement (pr, "Ellipse", true, false)
     {
     }
 
@@ -53,10 +53,10 @@ public:
         }
     }
 
-    void getEditableProperties (Array <PropertyComponent*>& properties)
+    void getEditableProperties (Array<PropertyComponent*>& props)
     {
-        ColouredElement::getEditableProperties (properties);
-        properties.add (new ShapeToPathProperty (this));
+        ColouredElement::getEditableProperties (props);
+        props.add (new ShapeToPathProperty (this));
     }
 
     void fillInGeneratedCode (GeneratedCode& code, String& paintMethodCode)

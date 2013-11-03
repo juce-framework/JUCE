@@ -69,7 +69,7 @@ namespace FileHelpers
 
     bool overwriteFileWithNewDataIfDifferent (const File& file, const void* data, size_t numBytes)
     {
-        if (file.getSize() == numBytes
+        if (file.getSize() == (int64) numBytes
               && calculateMemoryHashCode (data, numBytes) == calculateFileHashCode (file))
             return true;
 

@@ -504,37 +504,37 @@ ColouredElement::~ColouredElement()
 }
 
 //==============================================================================
-void ColouredElement::getEditableProperties (Array <PropertyComponent*>& properties)
+void ColouredElement::getEditableProperties (Array <PropertyComponent*>& props)
 {
-    PaintElement::getEditableProperties (properties);
-    getColourSpecificProperties (properties);
+    PaintElement::getEditableProperties (props);
+    getColourSpecificProperties (props);
 }
 
-void ColouredElement::getColourSpecificProperties (Array <PropertyComponent*>& properties)
+void ColouredElement::getColourSpecificProperties (Array <PropertyComponent*>& props)
 {
-    properties.add (new ElementFillModeProperty (this, false));
+    props.add (new ElementFillModeProperty (this, false));
 
     switch (getFillType().mode)
     {
     case JucerFillType::solidColour:
-        properties.add (new ElementFillColourProperty ("colour", this, ElementFillColourProperty::solidColour, false));
+        props.add (new ElementFillColourProperty ("colour", this, ElementFillColourProperty::solidColour, false));
         break;
 
     case JucerFillType::linearGradient:
     case JucerFillType::radialGradient:
-        properties.add (new ElementFillColourProperty ("colour 1", this, ElementFillColourProperty::gradientColour1, false));
-        properties.add (new ElementFillPositionProperty (this, "x1", PositionPropertyBase::componentX, true, false));
-        properties.add (new ElementFillPositionProperty (this, "y1", PositionPropertyBase::componentY, true, false));
-        properties.add (new ElementFillColourProperty ("colour 2", this, ElementFillColourProperty::gradientColour2, false));
-        properties.add (new ElementFillPositionProperty (this, "x2", PositionPropertyBase::componentX, false, false));
-        properties.add (new ElementFillPositionProperty (this, "y2", PositionPropertyBase::componentY, false, false));
+        props.add (new ElementFillColourProperty ("colour 1", this, ElementFillColourProperty::gradientColour1, false));
+        props.add (new ElementFillPositionProperty (this, "x1", PositionPropertyBase::componentX, true, false));
+        props.add (new ElementFillPositionProperty (this, "y1", PositionPropertyBase::componentY, true, false));
+        props.add (new ElementFillColourProperty ("colour 2", this, ElementFillColourProperty::gradientColour2, false));
+        props.add (new ElementFillPositionProperty (this, "x2", PositionPropertyBase::componentX, false, false));
+        props.add (new ElementFillPositionProperty (this, "y2", PositionPropertyBase::componentY, false, false));
         break;
 
     case JucerFillType::imageBrush:
-        properties.add (new ImageBrushResourceProperty (this, false));
-        properties.add (new ImageBrushPositionProperty (this, "anchor x", PositionPropertyBase::componentX, false));
-        properties.add (new ImageBrushPositionProperty (this, "anchor y", PositionPropertyBase::componentY, false));
-        properties.add (new ImageBrushOpacityProperty (this, false));
+        props.add (new ImageBrushResourceProperty (this, false));
+        props.add (new ImageBrushPositionProperty (this, "anchor x", PositionPropertyBase::componentX, false));
+        props.add (new ImageBrushPositionProperty (this, "anchor y", PositionPropertyBase::componentY, false));
+        props.add (new ImageBrushOpacityProperty (this, false));
         break;
 
     default:
@@ -544,41 +544,41 @@ void ColouredElement::getColourSpecificProperties (Array <PropertyComponent*>& p
 
     if (showOutline)
     {
-        properties.add (new EnableStrokeProperty (this));
+        props.add (new EnableStrokeProperty (this));
 
         if (isStrokePresent)
         {
-            properties.add (new StrokeThicknessProperty (this));
+            props.add (new StrokeThicknessProperty (this));
 
             if (showJointAndEnd)
             {
-                properties.add (new StrokeJointProperty (this));
-                properties.add (new StrokeEndCapProperty (this));
+                props.add (new StrokeJointProperty (this));
+                props.add (new StrokeEndCapProperty (this));
             }
 
-            properties.add (new ElementFillModeProperty (this, true));
+            props.add (new ElementFillModeProperty (this, true));
 
             switch (getStrokeType().fill.mode)
             {
                 case JucerFillType::solidColour:
-                    properties.add (new ElementFillColourProperty ("colour", this, ElementFillColourProperty::solidColour, true));
+                    props.add (new ElementFillColourProperty ("colour", this, ElementFillColourProperty::solidColour, true));
                     break;
 
                 case JucerFillType::linearGradient:
                 case JucerFillType::radialGradient:
-                    properties.add (new ElementFillColourProperty ("colour 1", this, ElementFillColourProperty::gradientColour1, true));
-                    properties.add (new ElementFillPositionProperty (this, "x1", PositionPropertyBase::componentX, true, true));
-                    properties.add (new ElementFillPositionProperty (this, "y1", PositionPropertyBase::componentY, true, true));
-                    properties.add (new ElementFillColourProperty ("colour 2", this, ElementFillColourProperty::gradientColour2, true));
-                    properties.add (new ElementFillPositionProperty (this, "x2", PositionPropertyBase::componentX, false, true));
-                    properties.add (new ElementFillPositionProperty (this, "y2", PositionPropertyBase::componentY, false, true));
+                    props.add (new ElementFillColourProperty ("colour 1", this, ElementFillColourProperty::gradientColour1, true));
+                    props.add (new ElementFillPositionProperty (this, "x1", PositionPropertyBase::componentX, true, true));
+                    props.add (new ElementFillPositionProperty (this, "y1", PositionPropertyBase::componentY, true, true));
+                    props.add (new ElementFillColourProperty ("colour 2", this, ElementFillColourProperty::gradientColour2, true));
+                    props.add (new ElementFillPositionProperty (this, "x2", PositionPropertyBase::componentX, false, true));
+                    props.add (new ElementFillPositionProperty (this, "y2", PositionPropertyBase::componentY, false, true));
                     break;
 
                 case JucerFillType::imageBrush:
-                    properties.add (new ImageBrushResourceProperty (this, true));
-                    properties.add (new ImageBrushPositionProperty (this, "stroke anchor x", PositionPropertyBase::componentX, true));
-                    properties.add (new ImageBrushPositionProperty (this, "stroke anchor y", PositionPropertyBase::componentY, true));
-                    properties.add (new ImageBrushOpacityProperty (this, true));
+                    props.add (new ImageBrushResourceProperty (this, true));
+                    props.add (new ImageBrushPositionProperty (this, "stroke anchor x", PositionPropertyBase::componentX, true));
+                    props.add (new ImageBrushPositionProperty (this, "stroke anchor y", PositionPropertyBase::componentY, true));
+                    props.add (new ImageBrushOpacityProperty (this, true));
                     break;
 
                 default:
@@ -845,13 +845,13 @@ void ColouredElement::createSiblingComponents()
 
 Rectangle<int> ColouredElement::getCurrentBounds (const Rectangle<int>& parentArea) const
 {
-    int border = 0;
+    int borderSize = 0;
 
     if (isStrokePresent)
-        border = (int) strokeType.stroke.getStrokeThickness() / 2 + 1;
+        borderSize = (int) strokeType.stroke.getStrokeThickness() / 2 + 1;
 
     return position.getRectangle (parentArea, getDocument()->getComponentLayout())
-                   .expanded (border, border);
+                   .expanded (borderSize);
 }
 
 void ColouredElement::setCurrentBounds (const Rectangle<int>& newBounds,
@@ -862,8 +862,7 @@ void ColouredElement::setCurrentBounds (const Rectangle<int>& newBounds,
 
     if (isStrokePresent)
     {
-        const int border = (int) strokeType.stroke.getStrokeThickness() / 2 + 1;
-        r = r.expanded (-border, -border);
+        r = r.expanded (-((int) strokeType.stroke.getStrokeThickness() / 2 + 1));
 
         r.setSize (jmax (1, r.getWidth()), jmax (1, r.getHeight()));
     }

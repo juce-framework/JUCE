@@ -32,8 +32,8 @@
 class PaintElementRectangle     : public ColouredElement
 {
 public:
-    PaintElementRectangle (PaintRoutine* owner)
-        : ColouredElement (owner, "Rectangle", true, false)
+    PaintElementRectangle (PaintRoutine* pr)
+        : ColouredElement (pr, "Rectangle", true, false)
     {
     }
 
@@ -49,8 +49,8 @@ public:
 
     void draw (Graphics& g, const ComponentLayout* layout, const Rectangle<int>& parentArea)
     {
-        Component parentComponent;
-        parentComponent.setBounds (parentArea);
+        Component tempParentComp;
+        tempParentComp.setBounds (parentArea);
 
         fillType.setFillType (g, getDocument(), parentArea);
 
@@ -66,11 +66,11 @@ public:
         }
     }
 
-    void getEditableProperties (Array <PropertyComponent*>& properties)
+    void getEditableProperties (Array <PropertyComponent*>& props)
     {
-        ColouredElement::getEditableProperties (properties);
+        ColouredElement::getEditableProperties (props);
 
-        properties.add (new ShapeToPathProperty (this));
+        props.add (new ShapeToPathProperty (this));
     }
 
     void fillInGeneratedCode (GeneratedCode& code, String& paintMethodCode)

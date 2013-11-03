@@ -43,29 +43,29 @@ public:
         return new ImageButton ("new button");
     }
 
-    void getEditableProperties (Component* component, JucerDocument& document, Array <PropertyComponent*>& properties)
+    void getEditableProperties (Component* component, JucerDocument& document, Array<PropertyComponent*>& props)
     {
-        ButtonHandler::getEditableProperties (component, document, properties);
+        ButtonHandler::getEditableProperties (component, document, props);
 
-        addColourProperties (component, document, properties);
+        addColourProperties (component, document, props);
 
         ImageButton* const ib = (ImageButton*) component;
 
         ComponentLayout& layout = *document.getComponentLayout();
 
-        properties.add (new ImageButtonProportionProperty (layout, ib));
+        props.add (new ImageButtonProportionProperty (layout, ib));
 
-        properties.add (new ImageButtonResourceProperty (layout, ib, normalImage, "normal image"));
-        properties.add (new ImageButtonOpacityProperty (layout, ib, "opacity", normalImage));
-        properties.add (new ImageButtonColourProperty (layout, ib, "overlay col.", normalImage));
+        props.add (new ImageButtonResourceProperty (layout, ib, normalImage, "normal image"));
+        props.add (new ImageButtonOpacityProperty (layout, ib, "opacity", normalImage));
+        props.add (new ImageButtonColourProperty (layout, ib, "overlay col.", normalImage));
 
-        properties.add (new ImageButtonResourceProperty (layout, ib, overImage, "over image"));
-        properties.add (new ImageButtonOpacityProperty (layout, ib, "opacity", overImage));
-        properties.add (new ImageButtonColourProperty (layout, ib, "overlay col.", overImage));
+        props.add (new ImageButtonResourceProperty (layout, ib, overImage, "over image"));
+        props.add (new ImageButtonOpacityProperty (layout, ib, "opacity", overImage));
+        props.add (new ImageButtonColourProperty (layout, ib, "overlay col.", overImage));
 
-        properties.add (new ImageButtonResourceProperty (layout, ib, downImage, "down image"));
-        properties.add (new ImageButtonOpacityProperty (layout, ib, "opacity", downImage));
-        properties.add (new ImageButtonColourProperty (layout, ib, "overlay col.", downImage));
+        props.add (new ImageButtonResourceProperty (layout, ib, downImage, "down image"));
+        props.add (new ImageButtonOpacityProperty (layout, ib, "opacity", downImage));
+        props.add (new ImageButtonColourProperty (layout, ib, "overlay col.", downImage));
     }
 
     XmlElement* createXmlFor (Component* comp, const ComponentLayout* layout)

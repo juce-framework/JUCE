@@ -36,13 +36,13 @@ public:
         return new ToggleButton ("new toggle button");
     }
 
-    void getEditableProperties (Component* component, JucerDocument& document, Array <PropertyComponent*>& properties)
+    void getEditableProperties (Component* component, JucerDocument& document, Array<PropertyComponent*>& props)
     {
-        ButtonHandler::getEditableProperties (component, document, properties);
+        ButtonHandler::getEditableProperties (component, document, props);
 
-        properties.add (new ToggleButtonStateProperty ((ToggleButton*) component, document));
+        props.add (new ToggleButtonStateProperty ((ToggleButton*) component, document));
 
-        addColourProperties (component, document, properties);
+        addColourProperties (component, document, props);
     }
 
     XmlElement* createXmlFor (Component* comp, const ComponentLayout* layout)
@@ -107,8 +107,8 @@ private:
         class ToggleStateChangeAction  : public ComponentUndoableAction <ToggleButton>
         {
         public:
-            ToggleStateChangeAction (ToggleButton* const comp, ComponentLayout& layout, const bool newState_)
-                : ComponentUndoableAction <ToggleButton> (comp, layout),
+            ToggleStateChangeAction (ToggleButton* const comp, ComponentLayout& l, const bool newState_)
+                : ComponentUndoableAction <ToggleButton> (comp, l),
                   newState (newState_)
             {
                 oldState = comp->getToggleState();

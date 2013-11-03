@@ -35,8 +35,8 @@
 class PaintElementImage   : public PaintElement
 {
 public:
-    PaintElementImage (PaintRoutine* owner)
-        : PaintElement (owner, "Image"),
+    PaintElementImage (PaintRoutine* pr)
+        : PaintElement (pr, "Image"),
           opacity (1.0),
           mode (stretched)
     {
@@ -82,14 +82,14 @@ public:
     }
 
     //==============================================================================
-    void getEditableProperties (Array <PropertyComponent*>& properties)
+    void getEditableProperties (Array <PropertyComponent*>& props)
     {
-        PaintElement::getEditableProperties (properties);
+        PaintElement::getEditableProperties (props);
 
-        properties.add (new ImageElementResourceProperty (this));
-        properties.add (new StretchModeProperty (this));
-        properties.add (new OpacityProperty (this));
-        properties.add (new ResetSizeProperty (this));
+        props.add (new ImageElementResourceProperty (this));
+        props.add (new StretchModeProperty (this));
+        props.add (new OpacityProperty (this));
+        props.add (new ResetSizeProperty (this));
     }
 
     void fillInGeneratedCode (GeneratedCode& code, String& paintMethodCode)
@@ -297,9 +297,10 @@ public:
                 const Rectangle<int> parentArea (ed->getComponentArea());
 
                 Rectangle<int> r (getCurrentBounds (parentArea));
-                Rectangle<float> bounds (image->getDrawableBounds());
+                Rectangle<float> b (image->getDrawableBounds());
 
-                r.setSize ((int) (bounds.getWidth() + 0.999f), (int) (bounds.getHeight() + 0.999f));
+                r.setSize ((int) (b.getWidth()  + 0.999f),
+                           (int) (b.getHeight() + 0.999f));
 
                 setCurrentBounds (r, parentArea, true);
             }

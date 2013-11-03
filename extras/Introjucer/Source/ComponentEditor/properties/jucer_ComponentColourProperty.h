@@ -120,11 +120,11 @@ private:
     {
     public:
         ColourChangeAction (Component* const comp,
-                            ComponentLayout& layout,
+                            ComponentLayout& l,
                             const int colourId_,
                             Colour newColour_,
                             const bool newColourIsDefault)
-            : ComponentUndoableAction<Component> (comp, layout),
+            : ComponentUndoableAction<Component> (comp, l),
               colourId (colourId_),
               newColour (newColour_),
               isDefault (newColourIsDefault)

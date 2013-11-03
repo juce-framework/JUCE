@@ -62,15 +62,15 @@ public:
         return true;
     }
 
-    void getEditableProperties (Component* component, JucerDocument& document, Array <PropertyComponent*>& properties)
+    void getEditableProperties (Component* component, JucerDocument& document, Array<PropertyComponent*>& props)
     {
-        ComponentTypeHandler::getEditableProperties (component, document, properties);
+        ComponentTypeHandler::getEditableProperties (component, document, props);
         TreeView* const t = dynamic_cast <TreeView*> (component);
 
-        properties.add (new TreeViewRootItemProperty (t, document));
-        properties.add (new TreeViewRootOpennessProperty (t, document));
+        props.add (new TreeViewRootItemProperty (t, document));
+        props.add (new TreeViewRootOpennessProperty (t, document));
 
-        addColourProperties (t, document, properties);
+        addColourProperties (t, document, props);
     }
 
     String getCreationParameters (Component* comp)
@@ -153,8 +153,8 @@ private:
     class TreeViewRootItemProperty  : public ComponentBooleanProperty <TreeView>
     {
     public:
-        TreeViewRootItemProperty (TreeView* comp, JucerDocument& document)
-            : ComponentBooleanProperty <TreeView> ("show root item", "Root item visible", "Root item visible", comp, document)
+        TreeViewRootItemProperty (TreeView* comp, JucerDocument& doc)
+            : ComponentBooleanProperty <TreeView> ("show root item", "Root item visible", "Root item visible", comp, doc)
         {
         }
 
@@ -173,8 +173,8 @@ private:
         class TreeviewRootChangeAction  : public ComponentUndoableAction <TreeView>
         {
         public:
-            TreeviewRootChangeAction (TreeView* const comp, ComponentLayout& layout, const bool newState_)
-                : ComponentUndoableAction <TreeView> (comp, layout),
+            TreeviewRootChangeAction (TreeView* const comp, ComponentLayout& l, const bool newState_)
+                : ComponentUndoableAction <TreeView> (comp, l),
                   newState (newState_)
             {
                 oldState = comp->isRootItemVisible();
@@ -204,8 +204,8 @@ private:
     class TreeViewRootOpennessProperty  : public ComponentChoiceProperty <TreeView>
     {
     public:
-        TreeViewRootOpennessProperty (TreeView* comp, JucerDocument& document)
-            : ComponentChoiceProperty <TreeView> ("default openness", comp, document)
+        TreeViewRootOpennessProperty (TreeView* comp, JucerDocument& doc)
+            : ComponentChoiceProperty <TreeView> ("default openness", comp, doc)
         {
             choices.add ("Items open by default");
             choices.add ("Items closed by default");
@@ -226,8 +226,8 @@ private:
         class TreeviewOpennessChangeAction  : public ComponentUndoableAction <TreeView>
         {
         public:
-            TreeviewOpennessChangeAction (TreeView* const comp, ComponentLayout& layout, const bool newState_)
-                : ComponentUndoableAction <TreeView> (comp, layout),
+            TreeviewOpennessChangeAction (TreeView* const comp, ComponentLayout& l, const bool newState_)
+                : ComponentUndoableAction <TreeView> (comp, l),
                   newState (newState_)
             {
                 oldState = comp->areItemsOpenByDefault();

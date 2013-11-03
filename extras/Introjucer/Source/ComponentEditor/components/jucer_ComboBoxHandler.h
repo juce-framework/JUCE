@@ -71,18 +71,18 @@ public:
         return true;
     }
 
-    void getEditableProperties (Component* component, JucerDocument& document, Array <PropertyComponent*>& properties)
+    void getEditableProperties (Component* component, JucerDocument& document, Array<PropertyComponent*>& props)
     {
-        ComponentTypeHandler::getEditableProperties (component, document, properties);
+        ComponentTypeHandler::getEditableProperties (component, document, props);
 
         ComboBox* const c = dynamic_cast <ComboBox*> (component);
         jassert (c != nullptr);
 
-        properties.add (new ComboItemsProperty (c, document));
-        properties.add (new ComboEditableProperty (c, document));
-        properties.add (new ComboJustificationProperty (c, document));
-        properties.add (new ComboTextWhenNoneSelectedProperty (c, document));
-        properties.add (new ComboTextWhenNoItemsProperty (c, document));
+        props.add (new ComboItemsProperty (c, document));
+        props.add (new ComboEditableProperty (c, document));
+        props.add (new ComboJustificationProperty (c, document));
+        props.add (new ComboTextWhenNoneSelectedProperty (c, document));
+        props.add (new ComboTextWhenNoItemsProperty (c, document));
     }
 
     String getCreationParameters (Component* component)
@@ -193,8 +193,8 @@ private:
         class ComboEditableChangeAction  : public ComponentUndoableAction <ComboBox>
         {
         public:
-            ComboEditableChangeAction (ComboBox* const comp, ComponentLayout& layout, const bool newState_)
-                : ComponentUndoableAction <ComboBox> (comp, layout),
+            ComboEditableChangeAction (ComboBox* const comp, ComponentLayout& l, const bool newState_)
+                : ComponentUndoableAction <ComboBox> (comp, l),
                   newState (newState_)
             {
                 oldState = comp->isTextEditable();
@@ -246,8 +246,8 @@ private:
         class ComboJustifyChangeAction  : public ComponentUndoableAction <ComboBox>
         {
         public:
-            ComboJustifyChangeAction (ComboBox* const comp, ComponentLayout& layout, Justification newState_)
-                : ComponentUndoableAction <ComboBox> (comp, layout),
+            ComboJustifyChangeAction (ComboBox* const comp, ComponentLayout& l, Justification newState_)
+                : ComponentUndoableAction <ComboBox> (comp, l),
                   newState (newState_),
                   oldState (comp->getJustificationType())
             {
@@ -296,8 +296,8 @@ private:
         class ComboItemsChangeAction  : public ComponentUndoableAction <ComboBox>
         {
         public:
-            ComboItemsChangeAction (ComboBox* const comp, ComponentLayout& layout, const String& newState_)
-                : ComponentUndoableAction <ComboBox> (comp, layout),
+            ComboItemsChangeAction (ComboBox* const comp, ComponentLayout& l, const String& newState_)
+                : ComponentUndoableAction <ComboBox> (comp, l),
                   newState (newState_)
             {
                 oldState = comp->getProperties() ["items"];
@@ -348,8 +348,8 @@ private:
         class ComboNonSelTextChangeAction  : public ComponentUndoableAction <ComboBox>
         {
         public:
-            ComboNonSelTextChangeAction (ComboBox* const comp, ComponentLayout& layout, const String& newState_)
-                : ComponentUndoableAction <ComboBox> (comp, layout),
+            ComboNonSelTextChangeAction (ComboBox* const comp, ComponentLayout& l, const String& newState_)
+                : ComponentUndoableAction <ComboBox> (comp, l),
                   newState (newState_)
             {
                 oldState = comp->getTextWhenNothingSelected();
@@ -398,8 +398,8 @@ private:
         class ComboNoItemTextChangeAction  : public ComponentUndoableAction <ComboBox>
         {
         public:
-            ComboNoItemTextChangeAction (ComboBox* const comp, ComponentLayout& layout, const String& newState_)
-                : ComponentUndoableAction <ComboBox> (comp, layout),
+            ComboNoItemTextChangeAction (ComboBox* const comp, ComponentLayout& l, const String& newState_)
+                : ComponentUndoableAction <ComboBox> (comp, l),
                   newState (newState_)
             {
                 oldState = comp->getTextWhenNoChoicesAvailable();

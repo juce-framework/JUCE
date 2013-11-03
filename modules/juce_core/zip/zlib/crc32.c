@@ -251,8 +251,8 @@ unsigned long ZEXPORT crc32 (unsigned long crc, const unsigned char FAR *buf, un
 
 /* ========================================================================= */
 #define DOLIT4 c ^= *buf4++; \
-        c = crc_table[3][c & 0xff] ^ crc_table[2][(c >> 8) & 0xff] ^ \
-            crc_table[1][(c >> 16) & 0xff] ^ crc_table[0][c >> 24]
+        c = (u4) (crc_table[3][c & 0xff] ^ crc_table[2][(c >> 8) & 0xff] ^ \
+                  crc_table[1][(c >> 16) & 0xff] ^ crc_table[0][c >> 24])
 #define DOLIT32 DOLIT4; DOLIT4; DOLIT4; DOLIT4; DOLIT4; DOLIT4; DOLIT4; DOLIT4
 
 /* ========================================================================= */
@@ -264,7 +264,7 @@ local unsigned long crc32_little(unsigned long crc, const unsigned char FAR *buf
     c = (u4)crc;
     c = ~c;
     while (len && ((ptrdiff_t)buf & 3)) {
-        c = crc_table[0][(c ^ *buf++) & 0xff] ^ (c >> 8);
+        c = (u4) (crc_table[0][(c ^ *buf++) & 0xff] ^ (c >> 8));
         len--;
     }
 
@@ -280,7 +280,7 @@ local unsigned long crc32_little(unsigned long crc, const unsigned char FAR *buf
     buf = (const unsigned char FAR *)buf4;
 
     if (len) do {
-        c = crc_table[0][(c ^ *buf++) & 0xff] ^ (c >> 8);
+        c = (u4) (crc_table[0][(c ^ *buf++) & 0xff] ^ (c >> 8));
     } while (--len);
     c = ~c;
     return (unsigned long)c;
@@ -288,8 +288,8 @@ local unsigned long crc32_little(unsigned long crc, const unsigned char FAR *buf
 
 /* ========================================================================= */
 #define DOBIG4 c ^= *++buf4; \
-        c = crc_table[4][c & 0xff] ^ crc_table[5][(c >> 8) & 0xff] ^ \
-            crc_table[6][(c >> 16) & 0xff] ^ crc_table[7][c >> 24]
+        c = (u4) (crc_table[4][c & 0xff] ^ crc_table[5][(c >> 8) & 0xff] ^ \
+                  crc_table[6][(c >> 16) & 0xff] ^ crc_table[7][c >> 24])
 #define DOBIG32 DOBIG4; DOBIG4; DOBIG4; DOBIG4; DOBIG4; DOBIG4; DOBIG4; DOBIG4
 
 /* ========================================================================= */
@@ -301,7 +301,7 @@ local unsigned long crc32_big (unsigned long crc, const unsigned char FAR *buf, 
     c = REV((u4)crc);
     c = ~c;
     while (len && ((ptrdiff_t)buf & 3)) {
-        c = crc_table[4][(c >> 24) ^ *buf++] ^ (c << 8);
+        c = (u4) (crc_table[4][(c >> 24) ^ *buf++] ^ (c << 8));
         len--;
     }
 
@@ -319,7 +319,7 @@ local unsigned long crc32_big (unsigned long crc, const unsigned char FAR *buf, 
     buf = (const unsigned char FAR *)buf4;
 
     if (len) do {
-        c = crc_table[4][(c >> 24) ^ *buf++] ^ (c << 8);
+        c = (u4) (crc_table[4][(c >> 24) ^ (u4) *buf++] ^ (c << 8));
     } while (--len);
     c = ~c;
     return (unsigned long)(REV(c));

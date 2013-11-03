@@ -96,7 +96,7 @@ void FLAC__lpc_compute_autocorrelation(const FLAC__real data[], unsigned data_le
 	FLAC__ASSERT(lag <= data_len);
 
 	for(coeff = 0; coeff < lag; coeff++)
-		autoc[coeff] = 0.0;
+		autoc[coeff] = 0.0f;
 	for(sample = 0; sample <= limit; sample++) {
 		d = data[sample];
 		for(coeff = 0; coeff < lag; coeff++)

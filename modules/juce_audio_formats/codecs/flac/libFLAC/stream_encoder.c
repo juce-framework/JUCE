@@ -786,10 +786,10 @@ static FLAC__StreamEncoderInitStatus init_stream_internal_enc(
 #endif
 	/* keep track of any SEEKTABLE block */
 	if(0 != encoder->protected_->metadata && encoder->protected_->num_metadata_blocks > 0) {
-		unsigned i;
-		for(i = 0; i < encoder->protected_->num_metadata_blocks; i++) {
-			if(0 != encoder->protected_->metadata[i] && encoder->protected_->metadata[i]->type == FLAC__METADATA_TYPE_SEEKTABLE) {
-				encoder->private_->seek_table = &encoder->protected_->metadata[i]->data.seek_table;
+		unsigned j;
+		for(j = 0; j < encoder->protected_->num_metadata_blocks; j++) {
+			if(0 != encoder->protected_->metadata[j] && encoder->protected_->metadata[j]->type == FLAC__METADATA_TYPE_SEEKTABLE) {
+				encoder->private_->seek_table = &encoder->protected_->metadata[j]->data.seek_table;
 				break; /* take only the first one */
 			}
 		}
@@ -1485,7 +1485,7 @@ FLAC_API FLAC__bool FLAC__stream_encoder_set_compression_level(FLAC__StreamEncod
 #else
 	encoder->protected_->num_apodizations = 1;
 	encoder->protected_->apodizations[0].type = FLAC__APODIZATION_TUKEY;
-	encoder->protected_->apodizations[0].parameters.tukey.p = 0.5;
+	encoder->protected_->apodizations[0].parameters.tukey.p = 0.5f;
 #endif
 #endif
 	ok &= FLAC__stream_encoder_set_max_lpc_order               (encoder, compression_levels_[value].max_lpc_order);
@@ -1598,7 +1598,7 @@ FLAC_API FLAC__bool FLAC__stream_encoder_set_apodization(FLAC__StreamEncoder *en
 	if(encoder->protected_->num_apodizations == 0) {
 		encoder->protected_->num_apodizations = 1;
 		encoder->protected_->apodizations[0].type = FLAC__APODIZATION_TUKEY;
-		encoder->protected_->apodizations[0].parameters.tukey.p = 0.5;
+		encoder->protected_->apodizations[0].parameters.tukey.p = 0.5f;
 	}
 #endif
 	return true;
@@ -2139,7 +2139,7 @@ void set_defaults_enc(FLAC__StreamEncoder *encoder)
 #ifndef FLAC__INTEGER_ONLY_LIBRARY
 	encoder->protected_->num_apodizations = 1;
 	encoder->protected_->apodizations[0].type = FLAC__APODIZATION_TUKEY;
-	encoder->protected_->apodizations[0].parameters.tukey.p = 0.5;
+	encoder->protected_->apodizations[0].parameters.tukey.p = 0.5f;
 #endif
 	encoder->protected_->max_lpc_order = 0;
 	encoder->protected_->qlp_coeff_precision = 0;

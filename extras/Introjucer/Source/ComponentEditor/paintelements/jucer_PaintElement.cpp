@@ -199,12 +199,12 @@ public:
 };
 
 //==============================================================================
-void PaintElement::getEditableProperties (Array <PropertyComponent*>& properties)
+void PaintElement::getEditableProperties (Array <PropertyComponent*>& props)
 {
-    properties.add (new ElementPositionProperty (this, "x", PositionPropertyBase::componentX));
-    properties.add (new ElementPositionProperty (this, "y", PositionPropertyBase::componentY));
-    properties.add (new ElementPositionProperty (this, "width", PositionPropertyBase::componentWidth));
-    properties.add (new ElementPositionProperty (this, "height", PositionPropertyBase::componentHeight));
+    props.add (new ElementPositionProperty (this, "x", PositionPropertyBase::componentX));
+    props.add (new ElementPositionProperty (this, "y", PositionPropertyBase::componentY));
+    props.add (new ElementPositionProperty (this, "width", PositionPropertyBase::componentWidth));
+    props.add (new ElementPositionProperty (this, "height", PositionPropertyBase::componentHeight));
 }
 
 //==============================================================================
@@ -330,7 +330,7 @@ void PaintElement::resizeEnd()
 {
 }
 
-void PaintElement::checkBounds (Rectangle<int>& bounds,
+void PaintElement::checkBounds (Rectangle<int>& b,
                                 const Rectangle<int>& previousBounds,
                                 const Rectangle<int>& limits,
                                 const bool isStretchingTop,
@@ -343,7 +343,7 @@ void PaintElement::checkBounds (Rectangle<int>& bounds,
     else
         setFixedAspectRatio (0.0);
 
-    ComponentBoundsConstrainer::checkBounds (bounds, previousBounds, limits, isStretchingTop, isStretchingLeft, isStretchingBottom, isStretchingRight);
+    ComponentBoundsConstrainer::checkBounds (b, previousBounds, limits, isStretchingTop, isStretchingLeft, isStretchingBottom, isStretchingRight);
 
     JucerDocument* document = getDocument();
 
@@ -352,10 +352,10 @@ void PaintElement::checkBounds (Rectangle<int>& bounds,
         jassert (getParentComponent() != nullptr);
         const Rectangle<int> area (((PaintRoutineEditor*) getParentComponent())->getComponentArea());
 
-        int x = bounds.getX();
-        int y = bounds.getY();
-        int w = bounds.getWidth();
-        int h = bounds.getHeight();
+        int x = b.getX();
+        int y = b.getY();
+        int w = b.getWidth();
+        int h = b.getHeight();
 
         x += borderThickness - area.getX();
         y += borderThickness - area.getY();
@@ -382,19 +382,19 @@ void PaintElement::checkBounds (Rectangle<int>& bounds,
         x -= borderThickness - area.getX();
         y -= borderThickness - area.getY();
 
-        bounds = Rectangle<int> (x, y, w, h);
+        b = Rectangle<int> (x, y, w, h);
     }
 }
 
-void PaintElement::applyBoundsToComponent (Component*, const Rectangle<int>& bounds)
+void PaintElement::applyBoundsToComponent (Component*, const Rectangle<int>& newBounds)
 {
-    if (getBounds() != bounds)
+    if (getBounds() != newBounds)
     {
         getDocument()->getUndoManager().undoCurrentTransactionOnly();
 
         jassert (dynamic_cast <PaintRoutineEditor*> (getParentComponent()) != nullptr);
 
-        setCurrentBounds (bounds.expanded (-borderThickness, -borderThickness),
+        setCurrentBounds (newBounds.expanded (-borderThickness, -borderThickness),
                           ((PaintRoutineEditor*) getParentComponent())->getComponentArea(),
                           true);
     }

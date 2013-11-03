@@ -163,9 +163,9 @@ void CoreGraphicsContext::setOrigin (Point<int> o)
 
 void CoreGraphicsContext::addTransform (const AffineTransform& transform)
 {
-    applyTransform (AffineTransform::verticalFlip (flipHeight)
+    applyTransform (AffineTransform::verticalFlip ((float) flipHeight)
                                     .followedBy (transform)
-                                    .translated (0, -flipHeight)
+                                    .translated (0, (float) -flipHeight)
                                     .scaled (1.0f, -1.0f));
     lastClipRectIsValid = false;
 
@@ -620,7 +620,7 @@ void CoreGraphicsContext::drawGlyph (int glyphNumber, const AffineTransform& tra
 bool CoreGraphicsContext::drawTextLayout (const AttributedString& text, const Rectangle<float>& area)
 {
    #if JUCE_CORETEXT_AVAILABLE
-    CoreTextTypeLayout::drawToCGContext (text, area, context, flipHeight);
+    CoreTextTypeLayout::drawToCGContext (text, area, context, (float) flipHeight);
     return true;
    #else
     (void) text; (void) area;

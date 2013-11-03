@@ -126,8 +126,8 @@ private:
 
 
 //==============================================================================
-PaintElementPath::PaintElementPath (PaintRoutine* owner)
-    : ColouredElement (owner, "Path", true, true),
+PaintElementPath::PaintElementPath (PaintRoutine* pr)
+    : ColouredElement (pr, "Path", true, true),
       nonZeroWinding (true)
 {
 }
@@ -167,14 +167,14 @@ Rectangle<int> PaintElementPath::getCurrentBounds (const Rectangle<int>& parentA
 {
     updateStoredPath (getDocument()->getComponentLayout(), parentArea);
 
-    Rectangle<float> bounds (path.getBounds());
+    Rectangle<float> r (path.getBounds());
 
     const int borderSize = getBorderSize();
 
-    return Rectangle<int> ((int) bounds.getX() - borderSize,
-                           (int) bounds.getY() - borderSize,
-                           (int) bounds.getWidth() + borderSize * 2,
-                           (int) bounds.getHeight() + borderSize * 2);
+    return Rectangle<int> ((int) r.getX() - borderSize,
+                           (int) r.getY() - borderSize,
+                           (int) r.getWidth() + borderSize * 2,
+                           (int) r.getHeight() + borderSize * 2);
 }
 
 void PaintElementPath::setCurrentBounds (const Rectangle<int>& b,
@@ -347,10 +347,10 @@ void PaintElementPath::pointListChanged()
 }
 
 //==============================================================================
-void PaintElementPath::getEditableProperties (Array <PropertyComponent*>& properties)
+void PaintElementPath::getEditableProperties (Array <PropertyComponent*>& props)
 {
-    properties.add (new PathWindingModeProperty (this));
-    getColourSpecificProperties (properties);
+    props.add (new PathWindingModeProperty (this));
+    getColourSpecificProperties (props);
 }
 
 //==============================================================================
@@ -1426,7 +1426,7 @@ void PathPoint::changePointType (const Path::Iterator::PathElementType newType,
     }
 }
 
-void PathPoint::getEditableProperties (Array <PropertyComponent*>& properties)
+void PathPoint::getEditableProperties (Array<PropertyComponent*>& props)
 {
     const int index = owner->points.indexOf (this);
     jassert (index >= 0);
@@ -1434,38 +1434,38 @@ void PathPoint::getEditableProperties (Array <PropertyComponent*>& properties)
     switch (type)
     {
         case Path::Iterator::startNewSubPath:
-            properties.add (new PathPointPositionProperty (owner, index, 0, "x", PositionPropertyBase::componentX));
-            properties.add (new PathPointPositionProperty (owner, index, 0, "y", PositionPropertyBase::componentY));
+            props.add (new PathPointPositionProperty (owner, index, 0, "x", PositionPropertyBase::componentX));
+            props.add (new PathPointPositionProperty (owner, index, 0, "y", PositionPropertyBase::componentY));
 
-            properties.add (new PathPointClosedProperty (owner, index));
-            properties.add (new AddNewPointProperty (owner, index));
+            props.add (new PathPointClosedProperty (owner, index));
+            props.add (new AddNewPointProperty (owner, index));
             break;
 
         case Path::Iterator::lineTo:
-            properties.add (new PathPointTypeProperty (owner, index));
-            properties.add (new PathPointPositionProperty (owner, index, 0, "x", PositionPropertyBase::componentX));
-            properties.add (new PathPointPositionProperty (owner, index, 0, "y", PositionPropertyBase::componentY));
-            properties.add (new AddNewPointProperty (owner, index));
+            props.add (new PathPointTypeProperty (owner, index));
+            props.add (new PathPointPositionProperty (owner, index, 0, "x", PositionPropertyBase::componentX));
+            props.add (new PathPointPositionProperty (owner, index, 0, "y", PositionPropertyBase::componentY));
+            props.add (new AddNewPointProperty (owner, index));
             break;
 
         case Path::Iterator::quadraticTo:
-            properties.add (new PathPointTypeProperty (owner, index));
-            properties.add (new PathPointPositionProperty (owner, index, 0, "control pt x", PositionPropertyBase::componentX));
-            properties.add (new PathPointPositionProperty (owner, index, 0, "control pt y", PositionPropertyBase::componentY));
-            properties.add (new PathPointPositionProperty (owner, index, 1, "x", PositionPropertyBase::componentX));
-            properties.add (new PathPointPositionProperty (owner, index, 1, "y", PositionPropertyBase::componentY));
-            properties.add (new AddNewPointProperty (owner, index));
+            props.add (new PathPointTypeProperty (owner, index));
+            props.add (new PathPointPositionProperty (owner, index, 0, "control pt x", PositionPropertyBase::componentX));
+            props.add (new PathPointPositionProperty (owner, index, 0, "control pt y", PositionPropertyBase::componentY));
+            props.add (new PathPointPositionProperty (owner, index, 1, "x", PositionPropertyBase::componentX));
+            props.add (new PathPointPositionProperty (owner, index, 1, "y", PositionPropertyBase::componentY));
+            props.add (new AddNewPointProperty (owner, index));
             break;
 
         case Path::Iterator::cubicTo:
-            properties.add (new PathPointTypeProperty (owner, index));
-            properties.add (new PathPointPositionProperty (owner, index, 0, "control pt1 x", PositionPropertyBase::componentX));
-            properties.add (new PathPointPositionProperty (owner, index, 0, "control pt1 y", PositionPropertyBase::componentY));
-            properties.add (new PathPointPositionProperty (owner, index, 1, "control pt2 x", PositionPropertyBase::componentX));
-            properties.add (new PathPointPositionProperty (owner, index, 1, "control pt2 y", PositionPropertyBase::componentY));
-            properties.add (new PathPointPositionProperty (owner, index, 2, "x", PositionPropertyBase::componentX));
-            properties.add (new PathPointPositionProperty (owner, index, 2, "y", PositionPropertyBase::componentY));
-            properties.add (new AddNewPointProperty (owner, index));
+            props.add (new PathPointTypeProperty (owner, index));
+            props.add (new PathPointPositionProperty (owner, index, 0, "control pt1 x", PositionPropertyBase::componentX));
+            props.add (new PathPointPositionProperty (owner, index, 0, "control pt1 y", PositionPropertyBase::componentY));
+            props.add (new PathPointPositionProperty (owner, index, 1, "control pt2 x", PositionPropertyBase::componentX));
+            props.add (new PathPointPositionProperty (owner, index, 1, "control pt2 y", PositionPropertyBase::componentY));
+            props.add (new PathPointPositionProperty (owner, index, 2, "x", PositionPropertyBase::componentX));
+            props.add (new PathPointPositionProperty (owner, index, 2, "y", PositionPropertyBase::componentY));
+            props.add (new AddNewPointProperty (owner, index));
             break;
 
         case Path::Iterator::closePath:

@@ -51,7 +51,7 @@ public:
                           const bool undoable);
 
     void deleteFromPath();
-    void getEditableProperties (Array <PropertyComponent*>& properties);
+    void getEditableProperties (Array<PropertyComponent*>& props);
 
 private:
     PathPoint withChangedPointType (const Path::Iterator::PathElementType newType,
@@ -97,7 +97,7 @@ public:
     void setNonZeroWinding (const bool nonZero, const bool undoable);
 
     //==============================================================================
-    void getEditableProperties (Array <PropertyComponent*>& properties);
+    void getEditableProperties (Array<PropertyComponent*>& props);
 
     void fillInGeneratedCode (GeneratedCode& code, String& paintMethodCode);
 

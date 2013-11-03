@@ -32,11 +32,11 @@ class ComponentBooleanProperty  : public BooleanPropertyComponent,
 {
 public:
     ComponentBooleanProperty (const String& name,
-                              const String& onText,
-                              const String& offText,
+                              const String& onText_,
+                              const String& offText_,
                               ComponentType* comp,
                               JucerDocument& doc)
-        : BooleanPropertyComponent (name, onText, offText),
+        : BooleanPropertyComponent (name, onText_, offText_),
           component (comp),
           document (doc)
     {

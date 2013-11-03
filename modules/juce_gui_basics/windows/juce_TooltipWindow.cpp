@@ -65,11 +65,11 @@ void TooltipWindow::updatePosition (const String& tip, Point<int> pos, const Rec
     int w, h;
     getLookAndFeel().getTooltipSize (tip, w, h);
 
-    Rectangle<int> bounds (pos.x > parentArea.getCentreX() ? pos.x - (w + 12) : pos.x + 24,
-                           pos.y > parentArea.getCentreY() ? pos.y - (h + 6)  : pos.y + 6,
-                           w, h);
+    setBounds (Rectangle<int> (pos.x > parentArea.getCentreX() ? pos.x - (w + 12) : pos.x + 24,
+                               pos.y > parentArea.getCentreY() ? pos.y - (h + 6)  : pos.y + 6,
+                               w, h)
+                .constrainedWithin (parentArea));
 
-    setBounds (bounds.constrainedWithin (parentArea));
     setVisible (true);
 }
 

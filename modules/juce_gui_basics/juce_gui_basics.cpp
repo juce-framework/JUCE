@@ -35,6 +35,8 @@
 // and your header search path must make it accessible to the module's files.
 #include "AppConfig.h"
 
+#define NS_FORMAT_FUNCTION(F,A) // To avoid spurious warnings from GCC
+
 #include "../juce_core/native/juce_BasicNativeHeaders.h"
 #include "juce_gui_basics.h"
 

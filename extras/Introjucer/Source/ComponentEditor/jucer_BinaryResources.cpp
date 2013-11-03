@@ -225,12 +225,12 @@ void BinaryResources::loadFromCpp (const File& cppFileLocation, const String& cp
             tokens.removeEmptyStrings();
 
             const String resourceName (tokens[0]);
-            const int size = tokens[1].getIntValue();
+            const int resourceSize = tokens[1].getIntValue();
             const String originalFileName (cppFileLocation.getSiblingFile (tokens[2].unquoted()).getFullPathName());
 
-            jassert (resourceName.isNotEmpty() && size > 0);
+            jassert (resourceName.isNotEmpty() && resourceSize > 0);
 
-            if (resourceName.isNotEmpty() && size > 0)
+            if (resourceName.isNotEmpty() && resourceSize > 0)
             {
                 const int firstLine = i;
 
@@ -260,10 +260,10 @@ void BinaryResources::loadFromCpp (const File& cppFileLocation, const String& cp
                         break;
                 }
 
-                jassert (size < (int) out.getDataSize() && size > (int) out.getDataSize() - 2);
+                jassert (resourceSize < (int) out.getDataSize() && resourceSize > (int) out.getDataSize() - 2);
 
                 MemoryBlock mb (out.getData(), out.getDataSize());
-                mb.setSize ((size_t) size);
+                mb.setSize ((size_t) resourceSize);
 
                 add (resourceName, originalFileName, mb);
             }

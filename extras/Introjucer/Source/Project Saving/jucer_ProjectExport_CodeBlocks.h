@@ -325,9 +325,9 @@ private:
         addCompileUnits (xml);
     }
 
-    void setAddOption (XmlElement& xml, const String& name, const String& value) const
+    void setAddOption (XmlElement& xml, const String& nm, const String& value) const
     {
-        xml.createNewChildElement ("Add")->setAttribute (name, value);
+        xml.createNewChildElement ("Add")->setAttribute (nm, value);
     }
 
     JUCE_DECLARE_NON_COPYABLE (CodeBlocksProjectExporter)

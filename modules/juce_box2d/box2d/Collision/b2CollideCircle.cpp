@@ -138,11 +138,9 @@ void b2CollidePolygonAndCircle(
 	else
 	{
 		b2Vec2 faceCenter = 0.5f * (v1 + v2);
-		float32 separation = b2Dot(cLocal - faceCenter, normals[vertIndex1]);
-		if (separation > radius)
-		{
+
+		if (b2Dot (cLocal - faceCenter, normals[vertIndex1]) > radius)
 			return;
-		}
 
 		manifold->pointCount = 1;
 		manifold->type = b2Manifold::e_faceA;
