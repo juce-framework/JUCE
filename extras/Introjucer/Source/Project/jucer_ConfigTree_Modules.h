@@ -40,12 +40,7 @@ public:
     bool isMissing() override                 { return hasMissingDependencies(); }
     Icon getIcon() const override             { return Icon (getIcons().jigsaw, getContrastingColour (Colours::red, 0.5f)); }
     void showDocument() override              { showSettingsPage (new ModuleSettingsPanel (project, moduleID)); }
-
-    void deleteItem() override
-    {
-        // NB: this local string copy essential, as this object will be deleted during the call
-        project.getModules().removeModule (String (moduleID));
-    }
+    void deleteItem() override                { project.getModules().removeModule (moduleID); }
 
     void showPopupMenu() override
     {
@@ -57,7 +52,7 @@ public:
     void handlePopupMenuResult (int resultCode) override
     {
         if (resultCode == 1)
-            project.getModules().removeModule (moduleID);
+            deleteItem();
     }
 
     Project& project;

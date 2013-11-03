@@ -705,16 +705,16 @@ void EnabledModuleList::addModule (const File& moduleManifestFile, bool copyLoca
             shouldShowAllModuleFilesInProject (moduleID) = true;
             shouldCopyModuleFilesLocally (moduleID) = copyLocally;
 
-            String path (FileHelpers::getRelativePathFrom (moduleManifestFile.getParentDirectory().getParentDirectory(),
-                                                           project.getProjectFolder()));
+            RelativePath path (moduleManifestFile.getParentDirectory().getParentDirectory(),
+                               project.getProjectFolder(), RelativePath::projectFolder);
 
             for (Project::ExporterIterator exporter (project); exporter.next();)
-                exporter->getPathForModuleValue (moduleID) = path;
+                exporter->getPathForModuleValue (moduleID) = path.toUnixStyle();
         }
     }
 }
 
-void EnabledModuleList::removeModule (const String& moduleID)
+void EnabledModuleList::removeModule (String moduleID) // must be pass-by-value, and not a const ref!
 {
     for (int i = state.getNumChildren(); --i >= 0;)
         if (state.getChild(i) [Ids::ID] == moduleID)

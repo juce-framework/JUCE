@@ -191,10 +191,16 @@ bool MainWindow::openFile (const File& file)
     {
         ScopedPointer<Project> newDoc (new Project (file));
 
-        if (newDoc->loadFrom (file, true)
-             && closeCurrentProject())
+        Result result (newDoc->loadFrom (file, true));
+
+        if (result.wasOk() && closeCurrentProject())
         {
-            setProject (newDoc.release());
+            setProject (newDoc);
+            newDoc.release()->setChangedFlag (false);
+
+            jassert (getProjectContentComponent() != nullptr);
+            getProjectContentComponent()->reloadLastOpenDocuments();
+
             return true;
         }
     }
@@ -384,8 +390,7 @@ void MainWindowList::closeWindow (MainWindow* w)
 
 void MainWindowList::openDocument (OpenDocumentManager::Document* doc, bool grabFocus)
 {
-    MainWindow* w = getOrCreateFrontmostWindow();
-    w->getProjectContentComponent()->showDocument (doc, grabFocus);
+    getOrCreateFrontmostWindow()->getProjectContentComponent()->showDocument (doc, grabFocus);
 }
 
 bool MainWindowList::openFile (const File& file)
@@ -403,29 +408,17 @@ bool MainWindowList::openFile (const File& file)
 
     if (file.hasFileExtension (Project::projectFileExtension))
     {
-        ScopedPointer<Project> newDoc (new Project (file));
+        MainWindow* const w = getOrCreateEmptyWindow();
+        bool ok = w->openFile (file);
 
-        if (newDoc->loadFrom (file, true))
-        {
-            MainWindow* const w = getOrCreateEmptyWindow();
-            w->setProject (newDoc);
+        w->makeVisible();
+        avoidSuperimposedWindows (w);
 
-            newDoc.release()->setChangedFlag (false);
-
-            w->makeVisible();
-            avoidSuperimposedWindows (w);
-
-            jassert (w->getProjectContentComponent() != nullptr);
-            w->getProjectContentComponent()->reloadLastOpenDocuments();
-
-            return true;
-        }
+        return ok;
     }
-    else if (file.exists())
-    {
-        MainWindow* const w = getOrCreateFrontmostWindow();
-        return w->openFile (file);
-    }
+
+    if (file.exists())
+        return getOrCreateFrontmostWindow()->openFile (file);
 
     return false;
 }
