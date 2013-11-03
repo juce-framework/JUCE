@@ -871,14 +871,15 @@ public:
                         ++numPackets;
                     }
 
-                    const size_t packetMembersSize     = sizeof (MIDIPacket)     - sizeof (MIDIPacket::data);
-                    const size_t packetListMembersSize = sizeof (MIDIPacketList) - sizeof (MIDIPacket::data);
+                    MIDIPacket* p;
+                    const size_t packetMembersSize     = sizeof (MIDIPacket)     - sizeof (p->data); // NB: GCC chokes on "sizeof (MidiMessage::data)"
+                    const size_t packetListMembersSize = sizeof (MIDIPacketList) - sizeof (p->data);
 
                     HeapBlock<MIDIPacketList> packetList;
                     packetList.malloc (packetListMembersSize + packetMembersSize * numPackets + dataSize, 1);
                     packetList->numPackets = numPackets;
 
-                    MIDIPacket* p = packetList->packet;
+                    p = packetList->packet;
 
                     for (MidiBuffer::Iterator i (midiEvents); i.getNextEvent (midiEventData, midiEventSize, midiEventPosition);)
                     {
