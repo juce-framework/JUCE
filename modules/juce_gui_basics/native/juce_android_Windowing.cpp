@@ -703,6 +703,7 @@ void Desktop::Displays::findDisplays (float masterScale)
                                                android.screenHeight) / masterScale;
     d.isMain = true;
     d.scale = masterScale;
+    d.dpi = android.dpi;
 
     displays.add (d);
 }
@@ -715,7 +716,7 @@ JUCE_JNI_CALLBACK (JUCE_ANDROID_ACTIVITY_CLASSNAME, setScreenSize, void, (JNIEnv
     android.screenHeight = screenHeight;
     android.dpi = dpi;
 
-    const_cast <Desktop::Displays&> (Desktop::getInstance().getDisplays()).refresh();
+    const_cast<Desktop::Displays&> (Desktop::getInstance().getDisplays()).refresh();
 }
 
 //==============================================================================
