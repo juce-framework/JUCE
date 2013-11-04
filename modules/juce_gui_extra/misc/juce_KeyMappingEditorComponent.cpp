@@ -232,7 +232,7 @@ public:
     void paint (Graphics& g) override
     {
         g.setFont (getHeight() * 0.7f);
-        g.setColour (findColour (KeyMappingEditorComponent::textColourId));
+        g.setColour (owner.findColour (KeyMappingEditorComponent::textColourId));
 
         g.drawFittedText (TRANS (owner.getCommandManager().getNameOfCommand (commandID)),
                           4, 0, jmax (40, getChildComponent (0)->getX() - 5), getHeight(),
