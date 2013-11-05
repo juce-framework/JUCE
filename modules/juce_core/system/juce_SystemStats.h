@@ -83,8 +83,7 @@ public:
     */
     static String getOperatingSystemName();
 
-    /** Returns true if the OS is 64-bit, or false for a 32-bit OS.
-    */
+    /** Returns true if the OS is 64-bit, or false for a 32-bit OS. */
     static bool isOperatingSystem64Bit();
 
     /** Returns an environment variable.
@@ -121,6 +120,12 @@ public:
         The return value is a 2 or 3 letter language code (ISO 639-1 or ISO 639-2)
     */
     static String getDisplayLanguage();
+
+    /** This will attempt to return some kind of string describing the device.
+        If no description is available, it'll just return an empty string. You may
+        want to use this for things like determining the type of phone/iPad, etc.
+    */
+    static String getDeviceDescription();
 
     //==============================================================================
     // CPU and memory information..
