@@ -196,16 +196,6 @@ private:
     #define JUCE_MAC_ATOMICS_VOLATILE volatile
   #endif
 
-  #if JUCE_PPC || JUCE_IOS
-    // None of these atomics are available for PPC or for iOS 3.1 or earlier!!
-    template <typename Type> static Type OSAtomicAdd64Barrier (Type b, JUCE_MAC_ATOMICS_VOLATILE Type* a) noexcept  { jassertfalse; return *a += b; }
-    template <typename Type> static Type OSAtomicIncrement64Barrier (JUCE_MAC_ATOMICS_VOLATILE Type* a) noexcept    { jassertfalse; return ++*a; }
-    template <typename Type> static Type OSAtomicDecrement64Barrier (JUCE_MAC_ATOMICS_VOLATILE Type* a) noexcept    { jassertfalse; return --*a; }
-    template <typename Type> static bool OSAtomicCompareAndSwap64Barrier (Type old, Type newValue, JUCE_MAC_ATOMICS_VOLATILE Type* value) noexcept
-        { jassertfalse; if (old == *value) { *value = newValue; return true; } return false; }
-    #define JUCE_64BIT_ATOMICS_UNAVAILABLE 1
-  #endif
-
 //==============================================================================
 #elif JUCE_GCC
   #define JUCE_ATOMICS_GCC 1        // GCC with intrinsics
