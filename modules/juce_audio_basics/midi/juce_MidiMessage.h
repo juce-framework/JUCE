@@ -926,6 +926,7 @@ private:
    #endif
 
     inline uint8* getData() noexcept   { return allocatedData != nullptr ? allocatedData.getData() : preallocatedData.asBytes; }
+    uint8* allocateSpace (int);
 };
 
 #endif   // JUCE_MIDIMESSAGE_H_INCLUDED

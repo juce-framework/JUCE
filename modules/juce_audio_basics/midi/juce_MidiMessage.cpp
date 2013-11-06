@@ -88,16 +88,7 @@ MidiMessage::MidiMessage (const void* const d, const int dataSize, const double 
      size (dataSize)
 {
     jassert (dataSize > 0);
-
-    if (dataSize > 4)
-    {
-        allocatedData.malloc (dataSize);
-        memcpy (allocatedData, d, (size_t) dataSize);
-    }
-    else
-    {
-        memcpy (preallocatedData.asBytes, d, (size_t) dataSize);
-    }
+    memcpy (allocateSpace (dataSize), d, (size_t) dataSize);
 
     // check that the length matches the data..
     jassert (size > 3 || *(uint8*)d >= 0xf0 || getMessageLengthFromFirstByte (*(uint8*)d) == size);
@@ -136,7 +127,7 @@ MidiMessage::MidiMessage (const int byte1, const int byte2, const int byte3, con
 MidiMessage::MidiMessage (const MidiMessage& other)
    : timeStamp (other.timeStamp), size (other.size)
 {
-    if (size > 4)
+    if (other.allocatedData != nullptr)
     {
         allocatedData.malloc (size);
         memcpy (allocatedData, other.allocatedData, (size_t) size);
@@ -150,7 +141,7 @@ MidiMessage::MidiMessage (const MidiMessage& other)
 MidiMessage::MidiMessage (const MidiMessage& other, const double newTimeStamp)
    : timeStamp (newTimeStamp), size (other.size)
 {
-    if (size > 4)
+    if (other.allocatedData != nullptr)
     {
         allocatedData.malloc (size);
         memcpy (allocatedData, other.allocatedData, (size_t) size);
@@ -214,9 +205,9 @@ MidiMessage::MidiMessage (const void* srcData, int sz, int& numBytesUsed, const 
             src += numVariableLengthSysexBytes;
             size = 1 + (int) (d - src);
 
-            allocatedData.malloc (size);
-            *allocatedData = (uint8) byte;
-            memcpy (allocatedData + 1, src, (size_t) (size - 1));
+            uint8* dest = allocateSpace (size);
+            *dest = (uint8) byte;
+            memcpy (dest + 1, src, (size_t) (size - 1));
 
             numBytesUsed += numVariableLengthSysexBytes;  // (these aren't counted in the size)
         }
@@ -226,9 +217,9 @@ MidiMessage::MidiMessage (const void* srcData, int sz, int& numBytesUsed, const 
             const int bytesLeft = readVariableLengthVal (src + 1, n);
             size = jmin (sz + 1, n + 2 + bytesLeft);
 
-            allocatedData.malloc (size);
-            *allocatedData = (uint8) byte;
-            memcpy (allocatedData + 1, src, (size_t) size - 1);
+            uint8* dest = allocateSpace (size);
+            *dest = (uint8) byte;
+            memcpy (dest + 1, src, (size_t) size - 1);
         }
         else
         {
@@ -261,7 +252,7 @@ MidiMessage& MidiMessage::operator= (const MidiMessage& other)
         timeStamp = other.timeStamp;
         size = other.size;
 
-        if (size > 4)
+        if (other.allocatedData != nullptr)
         {
             allocatedData.malloc (size);
             memcpy (allocatedData, other.allocatedData, (size_t) size);
@@ -300,6 +291,17 @@ MidiMessage& MidiMessage::operator= (MidiMessage&& other) noexcept
 #endif
 
 MidiMessage::~MidiMessage() {}
+
+uint8* MidiMessage::allocateSpace (int bytes)
+{
+    if (bytes > 4)
+    {
+        allocatedData.malloc (bytes);
+        return allocatedData;
+    }
+
+    return preallocatedData.asBytes;
+}
 
 int MidiMessage::getChannel() const noexcept
 {
