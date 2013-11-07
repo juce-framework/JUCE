@@ -204,6 +204,8 @@ public:
     String& operator+= (const wchar_t* textToAppend);
     /** Appends a decimal number at the end of this string. */
     String& operator+= (int numberToAppend);
+    /** Appends a decimal number at the end of this string. */
+    String& operator+= (int64 numberToAppend);
     /** Appends a character at the end of this string. */
     String& operator+= (char characterToAppend);
     /** Appends a character at the end of this string. */
@@ -228,6 +230,32 @@ public:
     void appendCharPointer (const CharPointerType startOfTextToAppend,
                             const CharPointerType endOfTextToAppend);
 
+    /** Appends a string to the end of this one.
+
+        @param startOfTextToAppend  the start of the string to add. This must not be a nullptr
+        @param endOfTextToAppend    the end of the string to add. This must not be a nullptr
+    */
+    template <class CharPointer>
+    void appendCharPointer (const CharPointer startOfTextToAppend,
+                            const CharPointer endOfTextToAppend)
+    {
+        jassert (startOfTextToAppend.getAddress() != nullptr && endOfTextToAppend.getAddress() != nullptr);
+
+        size_t extraBytesNeeded = 0, numChars = 1;
+
+        for (CharPointer t (startOfTextToAppend); t != endOfTextToAppend && ! t.isEmpty(); ++numChars)
+            extraBytesNeeded += CharPointerType::getBytesRequiredFor (t.getAndAdvance());
+
+        if (extraBytesNeeded > 0)
+        {
+            const size_t byteOffsetOfNull = getByteOffsetOfEnd();
+
+            preallocateBytes (byteOffsetOfNull + extraBytesNeeded);
+            CharPointerType (addBytesToPointer (text.getAddress(), (int) byteOffsetOfNull))
+                .writeWithCharLimit (startOfTextToAppend, (int) numChars);
+        }
+    }
+
     /** Appends a string to the end of this one. */
     void appendCharPointer (const CharPointerType textToAppend);
 
@@ -241,21 +269,18 @@ public:
     {
         if (textToAppend.getAddress() != nullptr)
         {
-            size_t extraBytesNeeded = 0;
-            size_t numChars = 0;
+            size_t extraBytesNeeded = 0, numChars = 1;
 
-            for (CharPointer t (textToAppend); numChars < maxCharsToTake && ! t.isEmpty();)
-            {
+            for (CharPointer t (textToAppend); numChars <= maxCharsToTake && ! t.isEmpty(); ++numChars)
                 extraBytesNeeded += CharPointerType::getBytesRequiredFor (t.getAndAdvance());
-                ++numChars;
-            }
 
-            if (numChars > 0)
+            if (extraBytesNeeded > 0)
             {
                 const size_t byteOffsetOfNull = getByteOffsetOfEnd();
 
                 preallocateBytes (byteOffsetOfNull + extraBytesNeeded);
-                CharPointerType (addBytesToPointer (text.getAddress(), (int) byteOffsetOfNull)).writeWithCharLimit (textToAppend, (int) (numChars + 1));
+                CharPointerType (addBytesToPointer (text.getAddress(), (int) byteOffsetOfNull))
+                    .writeWithCharLimit (textToAppend, (int) numChars);
             }
         }
     }
@@ -264,21 +289,7 @@ public:
     template <class CharPointer>
     void appendCharPointer (const CharPointer textToAppend)
     {
-        if (textToAppend.getAddress() != nullptr)
-        {
-            size_t extraBytesNeeded = 0;
-
-            for (CharPointer t (textToAppend); ! t.isEmpty();)
-                extraBytesNeeded += CharPointerType::getBytesRequiredFor (t.getAndAdvance());
-
-            if (extraBytesNeeded > 0)
-            {
-                const size_t byteOffsetOfNull = getByteOffsetOfEnd();
-
-                preallocateBytes (byteOffsetOfNull + extraBytesNeeded);
-                CharPointerType (addBytesToPointer (text.getAddress(), (int) byteOffsetOfNull)).writeAll (textToAppend);
-            }
-        }
+        appendCharPointer (textToAppend, std::numeric_limits<size_t>::max());
     }
 
     //==============================================================================
@@ -1216,7 +1227,6 @@ private:
     };
 
     explicit String (const PreallocationBytes&); // This constructor preallocates a certain amount of memory
-    void appendFixedLength (const char* text, int numExtraChars);
     size_t getByteOffsetOfEnd() const noexcept;
     JUCE_DEPRECATED (String (const String&, size_t));
 

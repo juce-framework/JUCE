@@ -684,23 +684,28 @@ String& String::operator+= (const juce_wchar ch)
 String& String::operator+= (const int number)
 {
     char buffer [16];
-    char* const end = buffer + numElementsInArray (buffer);
-    char* const start = NumberToStringConverters::numberToString (end, number);
+    char* end = buffer + numElementsInArray (buffer);
+    char* start = NumberToStringConverters::numberToString (end, number);
 
-    const int numExtraChars = (int) (end - start);
+   #if (JUCE_STRING_UTF_TYPE == 8)
+    appendCharPointer (CharPointerType (start), CharPointerType (end));
+   #else
+    appendCharPointer (CharPointer_ASCII (start), CharPointer_ASCII (end));
+   #endif
+    return *this;
+}
 
-    if (numExtraChars > 0)
-    {
-        const size_t byteOffsetOfNull = getByteOffsetOfEnd();
-        const size_t newBytesNeeded = sizeof (CharPointerType::CharType) + byteOffsetOfNull
-                                        + sizeof (CharPointerType::CharType) * (size_t) numExtraChars;
+String& String::operator+= (int64 number)
+{
+    char buffer [32];
+    char* end = buffer + numElementsInArray (buffer);
+    char* start = NumberToStringConverters::numberToString (end, number);
 
-        text = StringHolder::makeUniqueWithByteSize (text, newBytesNeeded);
-
-        CharPointerType newEnd (addBytesToPointer (text.getAddress(), (int) byteOffsetOfNull));
-        newEnd.writeWithCharLimit (CharPointer_ASCII (start), numExtraChars);
-    }
-
+   #if (JUCE_STRING_UTF_TYPE == 8)
+    appendCharPointer (CharPointerType (start), CharPointerType (end));
+   #else
+    appendCharPointer (CharPointer_ASCII (start), CharPointer_ASCII (end));
+   #endif
     return *this;
 }
 
@@ -737,6 +742,7 @@ JUCE_API String& JUCE_CALLTYPE operator<< (String& s1, const long number)       
 JUCE_API String& JUCE_CALLTYPE operator<< (String& s1, const int64 number)          { return s1 += String (number); }
 JUCE_API String& JUCE_CALLTYPE operator<< (String& s1, const float number)          { return s1 += String (number); }
 JUCE_API String& JUCE_CALLTYPE operator<< (String& s1, const double number)         { return s1 += String (number); }
+JUCE_API String& JUCE_CALLTYPE operator<< (String& s1, const uint64 number)         { return s1 += String (number); }
 
 JUCE_API OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, const String& text)
 {
@@ -2192,6 +2198,10 @@ public:
             s2 << ((int) 4) << ((short) 5) << "678" << L"9" << '0';
             s2 += "xyz";
             expect (s2 == "1234567890xyz");
+            s2 += (int) 123;
+            expect (s2 == "1234567890xyz123");
+            s2 += (int64) 123;
+            expect (s2 == "1234567890xyz123123");
 
             beginTest ("Numeric conversions");
             expect (String::empty.getIntValue() == 0);
