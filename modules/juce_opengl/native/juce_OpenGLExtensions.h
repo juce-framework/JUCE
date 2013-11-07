@@ -122,7 +122,7 @@ struct OpenGLExtensionFunctions
     #define JUCE_DECLARE_GL_FUNCTION(name, returnType, params, callparams)      typedef returnType (JUCE_GL_STDCALL *type_ ## name) params; type_ ## name name;
     JUCE_GL_EXTENSION_FUNCTIONS (JUCE_DECLARE_GL_FUNCTION, JUCE_DECLARE_GL_FUNCTION)
    #elif JUCE_OPENGL_ES
-    #define JUCE_DECLARE_GL_FUNCTION(name, returnType, params, callparams)      inline static returnType name params;
+    #define JUCE_DECLARE_GL_FUNCTION(name, returnType, params, callparams)      static returnType name params;
     JUCE_GL_EXTENSION_FUNCTIONS (JUCE_DECLARE_GL_FUNCTION, JUCE_DECLARE_GL_FUNCTION)
    #else
     #define JUCE_DECLARE_GL_FUNCTION(name, returnType, params, callparams)      inline static returnType name params { return ::name callparams; }

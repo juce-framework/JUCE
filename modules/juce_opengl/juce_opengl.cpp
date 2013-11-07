@@ -76,7 +76,6 @@ namespace juce
 {
 
 //==============================================================================
-#include "native/juce_MissingGLDefinitions.h"
 #include "native/juce_OpenGLExtensions.h"
 
 void OpenGLExtensionFunctions::initialise()

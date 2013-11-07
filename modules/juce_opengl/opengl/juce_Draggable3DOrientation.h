@@ -117,7 +117,7 @@ public:
     /** Applies this rotation to the active OpenGL context's matrix. */
     void applyToOpenGLMatrix() const noexcept
     {
-        getRotationMatrix().applyToOpenGL();
+        OpenGLHelpers::applyMatrix (getRotationMatrix().mat);
     }
    #endif
 

@@ -80,6 +80,7 @@ namespace juce
 class OpenGLTexture;
 class OpenGLFrameBuffer;
 
+#include "native/juce_MissingGLDefinitions.h"
 #include "opengl/juce_OpenGLHelpers.h"
 #include "opengl/juce_Quaternion.h"
 #include "opengl/juce_Matrix3D.h"
