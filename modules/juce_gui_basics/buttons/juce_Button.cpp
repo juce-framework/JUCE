@@ -308,10 +308,17 @@ void Button::triggerClick()
 void Button::internalClickCallback (const ModifierKeys& modifiers)
 {
     if (clickTogglesState)
-        setToggleState (radioGroupId != 0 || ! lastToggleState, sendNotification);
+    {
+        const bool shouldBeOn = (radioGroupId != 0 || ! lastToggleState);
 
-    if (radioGroupId != 0 || ! clickTogglesState)
-        sendClickMessage (modifiers);
+        if (shouldBeOn != getToggleState())
+        {
+            setToggleState (shouldBeOn, sendNotification);
+            return;
+        }
+    }
+
+    sendClickMessage (modifiers);
 }
 
 void Button::flashButtonState()
