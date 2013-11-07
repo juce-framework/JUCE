@@ -104,7 +104,7 @@ enum MissingOpenGLDefinitions
     GL_ELEMENT_ARRAY_BUFFER         = 0x8893,
     GL_STATIC_DRAW                  = 0x88E4,
     GL_DYNAMIC_DRAW                 = 0x88E8,
-    GL_STREAM_DRAW                  = 0x88E0
+    GL_STREAM_DRAW                  = 0x88E0,
 
     WGL_NUMBER_PIXEL_FORMATS_ARB    = 0x2000,
     WGL_DRAW_TO_WINDOW_ARB          = 0x2001,
