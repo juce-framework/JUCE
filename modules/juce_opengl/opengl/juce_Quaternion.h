@@ -25,8 +25,8 @@
 #ifndef JUCE_QUATERNION_H_INCLUDED
 #define JUCE_QUATERNION_H_INCLUDED
 
-#include "juce_Matrix3D.h"
 #include "juce_Vector3D.h"
+#include "juce_Matrix3D.h"
 
 //==============================================================================
 /**

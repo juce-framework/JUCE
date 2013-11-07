@@ -37,8 +37,10 @@ class Matrix3D
 public:
     Matrix3D() noexcept
     {
-        zeromem (mat, sizeof (mat));
-        mat[0] = mat[1 + 1 * 4] = mat[2 + 2 * 4] = mat[3 + 3 * 4] = (Type) 1;
+        mat[0]  = (Type) 1; mat[1]  = 0;        mat[2]  = 0;         mat[3]  = 0;
+        mat[4]  = 0;        mat[5]  = (Type) 1; mat[6]  = 0;         mat[7]  = 0;
+        mat[8]  = 0;        mat[9]  = 0;        mat[10] = (Type) 1;  mat[11] = 0;
+        mat[12] = 0;        mat[13] = 0;        mat[14] = 0;         mat[15] = (Type) 1;
     }
 
     Matrix3D (const Matrix3D& other) noexcept
@@ -70,10 +72,74 @@ public:
         mat[12] = m03;  mat[13] = m13;  mat[14] = m23;  mat[15] = m33;
     }
 
+    Matrix3D (Vector3D<Type> vector) noexcept
+    {
+        mat[0]  = (Type) 1; mat[1]  = 0;        mat[2]  = 0;         mat[3]  = 0;
+        mat[4]  = 0;        mat[5]  = (Type) 1; mat[6]  = 0;         mat[7]  = 0;
+        mat[8]  = 0;        mat[9]  = 0;        mat[10] = (Type) 1;  mat[11] = 0;
+        mat[12] = vector.x; mat[13] = vector.y; mat[14] = vector.z;  mat[15] = (Type) 1;
+    }
+
     Matrix3D& operator= (const Matrix3D& other) noexcept
     {
         memcpy (mat, other.mat, sizeof (mat));
         return *this;
+    }
+
+    /** Returns a new matrix from the given frustrum values. */
+    static Matrix3D fromFrustum (Type left, Type right, Type bottom, Type top, Type near, Type far) noexcept
+    {
+        return Matrix3D ((2.0f * near) / (right - left), 0.0f, 0.0f, 0.0f,
+                         0.0f, (2.0f * near) / (top - bottom), 0.0f, 0.0f,
+                         (right + left) / (right - left), (top + bottom) / (top - bottom), -(far + near) / (far - near), -1.0f,
+                         0.0f, 0.0f, -(2.0f * far * near) / (far - near), 0.0f);
+    }
+
+    /** Multiplies this matrix by another. */
+    Matrix3D& operator*= (const Matrix3D& other) noexcept
+    {
+        return *this = *this * other;
+    }
+
+    /** Multiplies this matrix by another, and returns the result. */
+    Matrix3D operator* (const Matrix3D& other) const noexcept
+    {
+        const Type* const m2 = other.mat;
+
+        return Matrix3D (mat[0] * m2[0]  + mat[4] * m2[1]  + mat[8]  * m2[2]  + mat[12] * m2[3],
+                         mat[1] * m2[0]  + mat[5] * m2[1]  + mat[9]  * m2[2]  + mat[13] * m2[3],
+                         mat[2] * m2[0]  + mat[6] * m2[1]  + mat[10] * m2[2]  + mat[14] * m2[3],
+                         mat[3] * m2[0]  + mat[7] * m2[1]  + mat[11] * m2[2]  + mat[15] * m2[3],
+                         mat[0] * m2[4]  + mat[4] * m2[5]  + mat[8]  * m2[6]  + mat[12] * m2[7],
+                         mat[1] * m2[4]  + mat[5] * m2[5]  + mat[9]  * m2[6]  + mat[13] * m2[7],
+                         mat[2] * m2[4]  + mat[6] * m2[5]  + mat[10] * m2[6]  + mat[14] * m2[7],
+                         mat[3] * m2[4]  + mat[7] * m2[5]  + mat[11] * m2[6]  + mat[15] * m2[7],
+                         mat[0] * m2[8]  + mat[4] * m2[9]  + mat[8]  * m2[10] + mat[12] * m2[11],
+                         mat[1] * m2[8]  + mat[5] * m2[9]  + mat[9]  * m2[10] + mat[13] * m2[11],
+                         mat[2] * m2[8]  + mat[6] * m2[9]  + mat[10] * m2[10] + mat[14] * m2[11],
+                         mat[3] * m2[8]  + mat[7] * m2[9]  + mat[11] * m2[10] + mat[15] * m2[11],
+                         mat[0] * m2[12] + mat[4] * m2[13] + mat[8]  * m2[14] + mat[12] * m2[15],
+                         mat[1] * m2[12] + mat[5] * m2[13] + mat[9]  * m2[14] + mat[13] * m2[15],
+                         mat[2] * m2[12] + mat[6] * m2[13] + mat[10] * m2[14] + mat[14] * m2[15],
+                         mat[3] * m2[12] + mat[7] * m2[13] + mat[11] * m2[14] + mat[15] * m2[15]);
+    }
+
+    /** Returns a copy of this matrix after rotation through the Y, X and then Z angles
+        specified by the vector.
+    */
+    Matrix3D rotated (Vector3D<Type> eulerAngleRadians) const noexcept
+    {
+        const Type cx = std::cos (eulerAngleRadians.x);
+        const Type sx = std::sin (eulerAngleRadians.x);
+        const Type cy = std::cos (eulerAngleRadians.y);
+        const Type sy = std::sin (eulerAngleRadians.y);
+        const Type cz = std::cos (eulerAngleRadians.z);
+        const Type sz = std::sin (eulerAngleRadians.z);
+
+        return Matrix3D ((cy * cz) + (sx * sy * sz), cx * sz, (cy * sx * sz) - (cz * sy), 0.0f,
+                         (cz * sx * sy) - (cy * sz), cx * cz, (cy * cz * sx) + (sy * sz), 0.0f,
+                         cx * sy, -sx, cx * cy, 0.0f,
+                         0.0f, 0.0f, 0.0f, 1.0f);
     }
 
    #if JUCE_USE_OPENGL_FIXED_FUNCTION
