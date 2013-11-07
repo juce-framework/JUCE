@@ -285,6 +285,7 @@ public:
          hasShutdown (false),
          firstProcessCallback (true),
          shouldDeleteEditor (false),
+         processTempBuffer (1, 1),
          hostWindow (0)
     {
         filter->setPlayConfigDetails (numInChans, numOutChans, 0, 0);
@@ -495,16 +496,17 @@ public:
         const int numIn = numInChans;
         const int numOut = numOutChans;
 
-        AudioSampleBuffer temp (numIn, numSamples);
+        processTempBuffer.setSize (numIn, numSamples, false, false, true);
+
         for (int i = numIn; --i >= 0;)
-            memcpy (temp.getSampleData (i), outputs[i], sizeof (float) * (size_t) numSamples);
+            memcpy (processTempBuffer.getSampleData (i), outputs[i], sizeof (float) * (size_t) numSamples);
 
         processReplacing (inputs, outputs, numSamples);
 
         AudioSampleBuffer dest (outputs, numOut, numSamples);
 
         for (int i = jmin (numIn, numOut); --i >= 0;)
-            dest.addFrom (i, 0, temp, i, 0, numSamples);
+            dest.addFrom (i, 0, processTempBuffer, i, 0, numSamples);
     }
 
     void processReplacing (float** inputs, float** outputs, VstInt32 numSamples)
@@ -1408,6 +1410,7 @@ private:
     bool isProcessing, isBypassed, hasShutdown, firstProcessCallback, shouldDeleteEditor;
     HeapBlock<float*> channels;
     Array<float*> tempChannels;  // see note in processReplacing()
+    AudioSampleBuffer processTempBuffer;
 
    #if JUCE_MAC
     void* hostWindow;
@@ -1473,7 +1476,7 @@ private:
         tempChannels.clear();
 
         if (filter != nullptr)
-            tempChannels.insertMultiple (0, 0, filter->getNumInputChannels() + filter->getNumOutputChannels());
+            tempChannels.insertMultiple (0, nullptr, filter->getNumInputChannels() + filter->getNumOutputChannels());
     }
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (JuceVSTWrapper)
