@@ -594,8 +594,8 @@ public:
     /** Returns a pointer to the first character in the string which is found in
         the breakCharacters string.
     */
-    template <typename Type>
-    static Type findEndOfToken (Type text, const Type breakCharacters, const Type quoteCharacters)
+    template <typename Type, typename BreakType>
+    static Type findEndOfToken (Type text, const BreakType breakCharacters, const Type quoteCharacters)
     {
         juce_wchar currentQuoteChar = 0;
 
