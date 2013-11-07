@@ -373,20 +373,29 @@ void LookAndFeel_V3::drawLinearSlider (Graphics& g, int x, int y, int width, int
 
     if (style == Slider::LinearBar || style == Slider::LinearBarVertical)
     {
+        const float fx = (float) x, fy = (float) y, fw = (float) width, fh = (float) height;
+
         Path p;
 
         if (style == Slider::LinearBarVertical)
-            p.addRectangle ((float) x, sliderPos, (float) width, (height - sliderPos));
+            p.addRectangle (fx, sliderPos, fw, 1.0f + fh - sliderPos);
         else
-            p.addRectangle ((float) x, (float) y, (sliderPos - x), (float) height);
+            p.addRectangle (fx, fy, sliderPos - fx, fh);
 
         Colour baseColour (slider.findColour (Slider::thumbColourId)
                                 .withMultipliedSaturation (slider.isEnabled() ? 1.0f : 0.5f)
                                 .withMultipliedAlpha (0.8f));
 
-        g.setGradientFill (ColourGradient (baseColour.brighter (0.1f), 0.0f, 0.0f,
-                                           baseColour.darker (0.1f), 0.0f, (float) height, false));
+        g.setGradientFill (ColourGradient (baseColour.brighter (0.08f), 0.0f, 0.0f,
+                                           baseColour.darker (0.08f), 0.0f, (float) height, false));
         g.fillPath (p);
+
+        g.setColour (baseColour.darker (0.2f));
+
+        if (style == Slider::LinearBarVertical)
+            g.fillRect (fx, sliderPos, fw, 1.0f);
+        else
+            g.fillRect (sliderPos, fy, 1.0f, fh);
     }
     else
     {
