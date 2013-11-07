@@ -190,14 +190,11 @@ void DocumentWindow::paint (Graphics& g)
 
     if (resizableBorder == nullptr)
     {
+        RectangleList<int> border (getLocalBounds());
+        border.subtract (getBorderThickness().subtractedFrom (getLocalBounds()));
+
         g.setColour (getBackgroundColour().overlaidWith (Colour (0x80000000)));
-
-        const BorderSize<int> border (getBorderThickness());
-
-        g.fillRect (0, 0, getWidth(), border.getTop());
-        g.fillRect (0, border.getTop(), border.getLeft(), getHeight() - border.getTopAndBottom());
-        g.fillRect (getWidth() - border.getRight(), border.getTop(), border.getRight(), getHeight() - border.getTopAndBottom());
-        g.fillRect (0, getHeight() - border.getBottom(), getWidth(), border.getBottom());
+        g.fillRectList (border);
     }
 
     const Rectangle<int> titleBarArea (getTitleBarArea());
