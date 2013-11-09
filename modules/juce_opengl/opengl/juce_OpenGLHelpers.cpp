@@ -272,8 +272,8 @@ OpenGLTextureFromImage::OpenGLTextureFromImage (const Image& image)
         texture->loadImage (image);
         textureID = texture->getTextureID();
 
-        fullWidthProportion  = imageWidth  / (float) texture->getWidth();
-        fullHeightProportion = imageHeight / (float) texture->getHeight();
+        fullWidthProportion  = (imageWidth - 0.5f)  / texture->getWidth();
+        fullHeightProportion = (imageHeight - 0.5f) / texture->getHeight();
     }
 
     JUCE_CHECK_OPENGL_ERROR

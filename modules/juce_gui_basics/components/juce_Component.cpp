@@ -2023,7 +2023,8 @@ void Component::paintEntireComponent (Graphics& g, const bool ignoreAlphaLevel)
                            scaledBounds.getWidth(), scaledBounds.getHeight(), ! flags.opaqueFlag);
         {
             Graphics g2 (effectImage);
-            g2.addTransform (AffineTransform::scale (scale));
+            g2.addTransform (AffineTransform::scale (scaledBounds.getWidth()  / (float) getWidth(),
+                                                     scaledBounds.getHeight() / (float) getHeight()));
             paintComponentAndChildren (g2);
         }
 
@@ -2058,7 +2059,7 @@ void Component::setPaintingIsUnclipped (const bool shouldPaintWithoutClipping) n
 
 //==============================================================================
 Image Component::createComponentSnapshot (const Rectangle<int>& areaToGrab,
-                                          const bool clipImageToComponentBounds)
+                                          bool clipImageToComponentBounds, float scaleFactor)
 {
     Rectangle<int> r (areaToGrab);
 
@@ -2068,14 +2069,21 @@ Image Component::createComponentSnapshot (const Rectangle<int>& areaToGrab,
     if (r.isEmpty())
         return Image();
 
-    Image componentImage (flags.opaqueFlag ? Image::RGB : Image::ARGB,
-                          r.getWidth(), r.getHeight(), true);
+    const int w = roundToInt (scaleFactor * r.getWidth());
+    const int h = roundToInt (scaleFactor * r.getHeight());
 
-    Graphics imageContext (componentImage);
-    imageContext.setOrigin (-r.getPosition());
-    paintEntireComponent (imageContext, true);
+    Image image (flags.opaqueFlag ? Image::RGB : Image::ARGB, w, h, true);
 
-    return componentImage;
+    Graphics g (image);
+
+    if (w != getWidth() || h != getHeight())
+        g.addTransform (AffineTransform::scale (w / (float) r.getWidth(),
+                                                h / (float) r.getHeight()));
+    g.setOrigin (-r.getPosition());
+
+    paintEntireComponent (g, true);
+
+    return image;
 }
 
 void Component::setComponentEffect (ImageEffectFilter* const newEffect)

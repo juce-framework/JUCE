@@ -83,8 +83,8 @@ public:
     void getHighlightArea (RectangleList<float>& area, float x, int y, int lineH, float characterWidth) const
     {
         if (highlightColumnStart < highlightColumnEnd)
-            area.addWithoutMerging (Rectangle<float> (x + highlightColumnStart * characterWidth, (float) y,
-                                                      (highlightColumnEnd - highlightColumnStart) * characterWidth, (float) lineH));
+            area.add (Rectangle<float> (x + highlightColumnStart * characterWidth - 1.0f, y - 0.5f,
+                                        (highlightColumnEnd - highlightColumnStart) * characterWidth + 1.5f, lineH + 1.0f));
     }
 
     void draw (CodeEditorComponent& owner, Graphics& g, const Font& fontToUse,

@@ -1010,7 +1010,8 @@ public:
         @see paintEntireComponent
     */
     Image createComponentSnapshot (const Rectangle<int>& areaToGrab,
-                                   bool clipImageToComponentBounds = true);
+                                   bool clipImageToComponentBounds = true,
+                                   float scaleFactor = 1.0f);
 
     /** Draws this component and all its subcomponents onto the specified graphics
         context.

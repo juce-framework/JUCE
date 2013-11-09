@@ -2270,6 +2270,14 @@ public:
             renderImage (sourceImage, trans, nullptr);
     }
 
+    static bool isOnlyTranslationAllowingError (const AffineTransform& t)
+    {
+        return (std::abs (t.mat01) < 0.002)
+            && (std::abs (t.mat10) < 0.002)
+            && (std::abs (t.mat00 - 1.0f) < 0.002)
+            && (std::abs (t.mat11 - 1.0f) < 0.002);
+    }
+
     void renderImage (const Image& sourceImage, const AffineTransform& trans,
                       const BaseRegionType* const tiledFillClipRegion)
     {
@@ -2277,7 +2285,7 @@ public:
 
         const int alpha = fillType.colour.getAlpha();
 
-        if (t.isOnlyTranslation())
+        if (isOnlyTranslationAllowingError (t))
         {
             // If our translation doesn't involve any distortion, just use a simple blit..
             int tx = (int) (t.getTranslationX() * 256.0f);
