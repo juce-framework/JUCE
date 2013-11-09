@@ -72,10 +72,9 @@ public:
 
     //==============================================================================
     /** Starts timing.
-
         @see stop
     */
-    void start();
+    void start() noexcept;
 
     /** Stops timing and prints out the results.
 
@@ -84,7 +83,7 @@ public:
 
         @see start
     */
-    void stop();
+    bool stop();
 
     /** Dumps the current metrics to the debugger output and to a file.
 
@@ -94,13 +93,35 @@ public:
     */
     void printStatistics();
 
+    /** Holds the current statistics. */
+    struct Statistics
+    {
+        Statistics() noexcept;
+
+        void clear() noexcept;
+        String toString() const;
+
+        void addResult (double elapsed) noexcept;
+
+        String name;
+        double averageSeconds;
+        double maximumSeconds;
+        double minimumSeconds;
+        double totalSeconds;
+        int64 numRuns;
+    };
+
+    /** Returns a copy of the current stats, and resets the internal counter. */
+    Statistics getStatisticsAndReset();
+
 private:
     //==============================================================================
-    String name;
-    int numRuns, runsPerPrint;
-    double totalTime;
-    int64 started;
+    Statistics stats;
+    int64 runsPerPrint, startTime;
     File outputFile;
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PerformanceCounter)
 };
+
 
 #endif   // JUCE_PERFORMANCECOUNTER_H_INCLUDED
