@@ -124,6 +124,17 @@ public:
         if (err == 0)
         {
             vorbis_info* info = ov_info (&ovFile, -1);
+
+            vorbis_comment* const comment = ov_comment (&ovFile, -1);
+            addMetadataItem (comment, "ENCODER",     OggVorbisAudioFormat::encoderName);
+            addMetadataItem (comment, "TITLE",       OggVorbisAudioFormat::id3title);
+            addMetadataItem (comment, "ARTIST",      OggVorbisAudioFormat::id3artist);
+            addMetadataItem (comment, "ALBUM",       OggVorbisAudioFormat::id3album);
+            addMetadataItem (comment, "COMMENT",     OggVorbisAudioFormat::id3comment);
+            addMetadataItem (comment, "DATE",        OggVorbisAudioFormat::id3date);
+            addMetadataItem (comment, "GENRE",       OggVorbisAudioFormat::id3genre);
+            addMetadataItem (comment, "TRACKNUMBER", OggVorbisAudioFormat::id3trackNumber);
+
             lengthInSamples = (uint32) ov_pcm_total (&ovFile, -1);
             numChannels = (unsigned int) info->channels;
             bitsPerSample = 16;
@@ -137,6 +148,12 @@ public:
     ~OggReader()
     {
         OggVorbisNamespace::ov_clear (&ovFile);
+    }
+
+    void addMetadataItem (OggVorbisNamespace::vorbis_comment* comment, const char* name, const char* metadataName)
+    {
+        if (const char* value = vorbis_comment_query (comment, name, 0))
+            metadataValues.set (metadataName, value);
     }
 
     //==============================================================================
