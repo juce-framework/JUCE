@@ -584,10 +584,10 @@ public:
 
         if (style == IncDecButtons)
         {
-            owner.addAndMakeVisible (incButton = lf.createSliderButton (true));
+            owner.addAndMakeVisible (incButton = lf.createSliderButton (owner, true));
             incButton->addListener (this);
 
-            owner.addAndMakeVisible (decButton = lf.createSliderButton (false));
+            owner.addAndMakeVisible (decButton = lf.createSliderButton (owner, false));
             decButton->addListener (this);
 
             if (incDecButtonMode != incDecButtonsNotDraggable)
@@ -611,7 +611,7 @@ public:
             decButton = nullptr;
         }
 
-        owner.setComponentEffect (lf.getSliderEffect());
+        owner.setComponentEffect (lf.getSliderEffect (owner));
 
         owner.resized();
         owner.repaint();
@@ -1255,10 +1255,10 @@ public:
     public:
         PopupDisplayComponent (Slider& s)
             : owner (s),
-              font (s.getLookAndFeel().getSliderPopupFont())
+              font (s.getLookAndFeel().getSliderPopupFont (s))
         {
             setAlwaysOnTop (true);
-            setAllowedPlacement (owner.getLookAndFeel().getSliderPopupPlacement());
+            setAllowedPlacement (owner.getLookAndFeel().getSliderPopupPlacement (s));
         }
 
         void paintContent (Graphics& g, int w, int h)

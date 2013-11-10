@@ -1425,7 +1425,7 @@ void LookAndFeel_V2::drawRotarySlider (Graphics& g, int x, int y, int width, int
     }
 }
 
-Button* LookAndFeel_V2::createSliderButton (const bool isIncrement)
+Button* LookAndFeel_V2::createSliderButton (Slider&, const bool isIncrement)
 {
     return new TextButton (isIncrement ? "+" : "-", String::empty);
 }
@@ -1464,17 +1464,17 @@ Label* LookAndFeel_V2::createSliderTextBox (Slider& slider)
     return l;
 }
 
-ImageEffectFilter* LookAndFeel_V2::getSliderEffect()
+ImageEffectFilter* LookAndFeel_V2::getSliderEffect (Slider&)
 {
     return nullptr;
 }
 
-Font LookAndFeel_V2::getSliderPopupFont()
+Font LookAndFeel_V2::getSliderPopupFont (Slider&)
 {
     return Font (15.0f, Font::bold);
 }
 
-int LookAndFeel_V2::getSliderPopupPlacement()
+int LookAndFeel_V2::getSliderPopupPlacement (Slider&)
 {
     return BubbleComponent::above
             | BubbleComponent::below

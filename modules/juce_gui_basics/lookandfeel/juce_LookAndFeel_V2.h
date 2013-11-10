@@ -186,11 +186,11 @@ public:
                            Slider&) override;
 
     int getSliderThumbRadius (Slider&) override;
-    Button* createSliderButton (bool isIncrement) override;
+    Button* createSliderButton (Slider&, bool isIncrement) override;
     Label* createSliderTextBox (Slider&) override;
-    ImageEffectFilter* getSliderEffect() override;
-    Font getSliderPopupFont() override;
-    int getSliderPopupPlacement() override;
+    ImageEffectFilter* getSliderEffect (Slider&) override;
+    Font getSliderPopupFont (Slider&) override;
+    int getSliderPopupPlacement (Slider&) override;
 
     //==============================================================================
     void getTooltipSize (const String& tipText, int& width, int& height) override;

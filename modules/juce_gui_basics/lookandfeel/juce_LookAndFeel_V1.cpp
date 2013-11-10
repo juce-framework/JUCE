@@ -449,15 +449,15 @@ void LookAndFeel_V1::drawLinearSlider (Graphics& g,
     }
 }
 
-Button* LookAndFeel_V1::createSliderButton (const bool isIncrement)
+Button* LookAndFeel_V1::createSliderButton (Slider&, const bool isIncrement)
 {
     if (isIncrement)
         return new ArrowButton ("u", 0.75f, Colours::white.withAlpha (0.8f));
-    else
-        return new ArrowButton ("d", 0.25f, Colours::white.withAlpha (0.8f));
+
+    return new ArrowButton ("d", 0.25f, Colours::white.withAlpha (0.8f));
 }
 
-ImageEffectFilter* LookAndFeel_V1::getSliderEffect()
+ImageEffectFilter* LookAndFeel_V1::getSliderEffect (Slider&)
 {
     return &scrollbarShadow;
 }

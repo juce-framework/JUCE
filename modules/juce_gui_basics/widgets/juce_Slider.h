@@ -804,13 +804,21 @@ public:
                                        float rotaryEndAngle,
                                        Slider&) = 0;
 
-        virtual Button* createSliderButton (bool isIncrement) = 0;
+        virtual Button* createSliderButton (Slider&, bool isIncrement) = 0;
         virtual Label* createSliderTextBox (Slider&) = 0;
 
-        virtual ImageEffectFilter* getSliderEffect() = 0;
+        virtual ImageEffectFilter* getSliderEffect (Slider&) = 0;
 
-        virtual Font getSliderPopupFont() = 0;
-        virtual int getSliderPopupPlacement() = 0;
+        virtual Font getSliderPopupFont (Slider&) = 0;
+        virtual int getSliderPopupPlacement (Slider&) = 0;
+
+       #if JUCE_CATCH_DEPRECATED_CODE_MISUSE
+        // These methods' parameters have changed: see the new method signatures.
+        virtual void createSliderButton (bool) {}
+        virtual void getSliderEffect() {}
+        virtual void getSliderPopupFont() {}
+        virtual void getSliderPopupPlacement() {}
+       #endif
     };
 
 protected:
