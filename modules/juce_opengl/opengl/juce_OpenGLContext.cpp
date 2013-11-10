@@ -414,7 +414,12 @@ void OpenGLContext::NativeContext::renderCallback()
     isInsideGLCallback = true;
 
     if (CachedImage* const c = CachedImage::get (component))
+    {
+        if (c->context.continuousRepaint)
+            c->context.triggerRepaint();
+
         c->renderFrame();
+    }
 
     isInsideGLCallback = false;
 }
