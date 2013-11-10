@@ -49,6 +49,8 @@ public:
 
         if (ListBoxModel* m = owner.getModel())
         {
+            setMouseCursor (m->getMouseCursorForRow (row));
+
             customComponent = m->refreshComponentForRow (newRow, nowSelected, customComponent.release());
 
             if (customComponent != nullptr)
@@ -952,3 +954,4 @@ void ListBoxModel::returnKeyPressed (int) {}
 void ListBoxModel::listWasScrolled() {}
 var ListBoxModel::getDragSourceDescription (const SparseSet<int>&)      { return var::null; }
 String ListBoxModel::getTooltipForRow (int)                             { return String::empty; }
+MouseCursor ListBoxModel::getMouseCursorForRow (int)                    { return MouseCursor::NormalCursor; }
