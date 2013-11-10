@@ -189,7 +189,6 @@ public:
     void insert (int index, const String& stringToAdd);
 
     /** Adds a string to the array as long as it's not already in there.
-
         The search can optionally be case-insensitive.
     */
     void addIfNotAlreadyThere (const String& stringToAdd, bool ignoreCase = false);
@@ -325,7 +324,6 @@ public:
     void removeDuplicates (bool ignoreCase);
 
     /** Removes empty strings from the array.
-
         @param removeWhitespaceStrings  if true, strings that only contain whitespace
                                         characters will also be removed
     */
@@ -411,11 +409,12 @@ public:
     */
     void minimiseStorageOverheads();
 
-
-private:
-    //==============================================================================
+    /** This is the array holding the actual strings. This is public to allow direct access
+        to array methods that may not already be provided by the StringArray class.
+    */
     Array<String> strings;
 
+private:
     JUCE_LEAK_DETECTOR (StringArray)
 };
 
