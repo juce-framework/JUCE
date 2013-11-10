@@ -445,12 +445,12 @@ void EdgeTable::addEdgePointPair (int x1, int x2, int y, int winding)
         line = table + lineStrideElements * y;
     }
 
-    line[0] += 2;
-    int n = numPoints << 1;
-    line [n + 1] = x1;
-    line [n + 2] = winding;
-    line [n + 3] = x2;
-    line [n + 4] = -winding;
+    line[0] = numPoints + 2;
+    line += numPoints << 1;
+    line[1] = x1;
+    line[2] = winding;
+    line[3] = x2;
+    line[4] = -winding;
 }
 
 void EdgeTable::translate (float dx, const int dy) noexcept
