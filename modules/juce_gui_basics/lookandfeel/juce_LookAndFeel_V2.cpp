@@ -2229,9 +2229,7 @@ void LookAndFeel_V2::drawTableHeaderColumn (Graphics& g, const String& columnNam
                                1.0f, 0.0f);
 
         g.setColour (Colour (0x99000000));
-        g.fillPath (sortArrow, RectanglePlacement (RectanglePlacement::centred)
-                                 .getTransformToFit (sortArrow.getBounds(),
-                                                     area.removeFromRight (height / 2).reduced (2).toFloat()));
+        g.fillPath (sortArrow, sortArrow.getTransformToScaleToFit (area.removeFromRight (height / 2).reduced (2).toFloat(), true));
     }
 
     g.setColour (Colours::black);
