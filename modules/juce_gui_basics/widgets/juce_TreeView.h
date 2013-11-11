@@ -875,7 +875,7 @@ private:
     void hideDragHighlight() noexcept;
     void handleDrag (const StringArray&, const SourceDetails&);
     void handleDrop (const StringArray&, const SourceDetails&);
-    void toggleOpenSelectedItem();
+    bool toggleOpenSelectedItem();
     void moveOutOfSelectedItem();
     void moveIntoSelectedItem();
     void moveByPages (int numPages);

@@ -742,10 +742,18 @@ void TreeView::scrollToKeepItemVisible (TreeViewItem* item)
     }
 }
 
-void TreeView::toggleOpenSelectedItem()
+bool TreeView::toggleOpenSelectedItem()
 {
     if (TreeViewItem* const firstSelected = getSelectedItem (0))
-        firstSelected->setOpen (! firstSelected->isOpen());
+    {
+        if (firstSelected->mightContainSubItems())
+        {
+            firstSelected->setOpen (! firstSelected->isOpen());
+            return true;
+        }
+    }
+
+    return false;
 }
 
 void TreeView::moveOutOfSelectedItem()
@@ -822,7 +830,7 @@ bool TreeView::keyPressed (const KeyPress& key)
         if (key == KeyPress::endKey)      { moveSelectedRow (0x3fffffff);  return true; }
         if (key == KeyPress::pageUpKey)   { moveByPages (-1); return true; }
         if (key == KeyPress::pageDownKey) { moveByPages (1);  return true; }
-        if (key == KeyPress::returnKey)   { toggleOpenSelectedItem(); return true; }
+        if (key == KeyPress::returnKey)   { return toggleOpenSelectedItem(); }
         if (key == KeyPress::leftKey)     { moveOutOfSelectedItem();  return true; }
         if (key == KeyPress::rightKey)    { moveIntoSelectedItem();   return true; }
     }
