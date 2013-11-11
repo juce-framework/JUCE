@@ -35,7 +35,7 @@ public:
         button.repeatTimerCallback();
     }
 
-    bool keyStateChanged (const bool, Component*) override
+    bool keyStateChanged (bool, Component*) override
     {
         return button.keyStateChangedCallback();
     }
