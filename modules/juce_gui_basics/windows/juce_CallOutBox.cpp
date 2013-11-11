@@ -77,9 +77,7 @@ public:
     JUCE_DECLARE_NON_COPYABLE (CallOutBoxCallback)
 };
 
-CallOutBox& CallOutBox::launchAsynchronously (Component* content,
-                                              const Rectangle<int>& area,
-                                              Component* parent)
+CallOutBox& CallOutBox::launchAsynchronously (Component* content, const Rectangle<int>& area, Component* parent)
 {
     jassert (content != nullptr); // must be a valid content component!
 
@@ -170,8 +168,8 @@ void CallOutBox::updatePosition (const Rectangle<int>& newAreaToPointTo, const R
 
     const int hw = newBounds.getWidth() / 2;
     const int hh = newBounds.getHeight() / 2;
-    const float hwReduced = (float) (hw - borderSpace * 3);
-    const float hhReduced = (float) (hh - borderSpace * 3);
+    const float hwReduced = (float) (hw - borderSpace * 2);
+    const float hhReduced = (float) (hh - borderSpace * 2);
     const float arrowIndent = borderSpace - arrowSize;
 
     Point<float> targets[4] = { Point<float> ((float) targetArea.getCentreX(), (float) targetArea.getBottom()),
