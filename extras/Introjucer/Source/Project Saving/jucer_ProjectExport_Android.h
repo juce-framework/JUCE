@@ -350,21 +350,21 @@ private:
 
         LibraryModule* const coreModule = getCoreModule (modules);
 
-        if (coreModule == nullptr)
-            throw SaveError ("To build an Android app, the juce_core module must be included in your project!");
+        if (coreModule != nullptr)
+        {
+            File javaDestFile (classFolder.getChildFile (className + ".java"));
 
-        File javaDestFile (classFolder.getChildFile (className + ".java"));
+            File javaSourceFile (coreModule->getFolder().getChildFile ("native")
+                                                        .getChildFile ("java")
+                                                        .getChildFile ("JuceAppActivity.java"));
 
-        File javaSourceFile (coreModule->getFolder().getChildFile ("native")
-                                                    .getChildFile ("java")
-                                                    .getChildFile ("JuceAppActivity.java"));
+            MemoryOutputStream newFile;
+            newFile << javaSourceFile.loadFileAsString()
+                                     .replace ("JuceAppActivity", className)
+                                     .replace ("package com.juce;", "package " + package + ";");
 
-        MemoryOutputStream newFile;
-        newFile << javaSourceFile.loadFileAsString()
-                                 .replace ("JuceAppActivity", className)
-                                 .replace ("package com.juce;", "package " + package + ";");
-
-        overwriteFileIfDifferentOrThrow (javaDestFile, newFile);
+            overwriteFileIfDifferentOrThrow (javaDestFile, newFile);
+        }
     }
 
     void writeApplicationMk (const File& file) const
