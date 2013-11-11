@@ -17,7 +17,11 @@
 //==============================================================================
 // [BEGIN_USER_CODE_SECTION]
 
-// (You can add your own code in this section, and the Introjucer will not overwrite it)
+#define JUCE_DONT_ASSERT_ON_GLSL_COMPILE_ERROR 1
+
+#define JUCE_ENABLE_REPAINT_DEBUGGING 1
+#define JUCE_IS_REPAINT_DEBUGGING_ACTIVE  juceDemoRepaintDebuggingActive
+extern bool juceDemoRepaintDebuggingActive;
 
 // [END_USER_CODE_SECTION]
 
