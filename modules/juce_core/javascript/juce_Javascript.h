@@ -98,7 +98,7 @@ public:
     RelativeTime maximumExecutionTime;
 
 private:
-    struct RootObject;
+    JUCE_PUBLIC_IN_DLL_BUILD (struct RootObject)
     ReferenceCountedObjectPtr<RootObject> root;
     void prepareTimeout() const;
 

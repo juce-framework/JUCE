@@ -46,10 +46,6 @@ public:
         fileChooser.setBrowseButtonText ("browse");
     }
 
-    ~MovieComponentWithFileBrowser()
-    {
-    }
-
     void setFile (const File& file)
     {
         fileChooser.setCurrentFile (file, true);
