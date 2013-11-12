@@ -105,7 +105,11 @@ private:
     void filenameComponentChanged (FilenameComponent*) override
     {
         // this is called when the user changes the filename in the file chooser box
+       #if JUCE_QUICKTIME
         if (videoComp.loadMovie (fileChooser.getCurrentFile(), true))
+       #elif JUCE_DIRECTSHOW
+        if (videoComp.loadMovie (fileChooser.getCurrentFile()))
+       #endif
         {
             // loaded the file ok, so let's start it playing..
 
