@@ -131,21 +131,18 @@ static Array<File> getAllPossibleModulePaths (Project& project)
 
     for (Project::ExporterIterator exporter (project); exporter.next();)
     {
-        if (exporter->mayCompileOnCurrentOS())
+        for (int i = 0; i < project.getModules().getNumModules(); ++i)
         {
-            for (int i = 0; i < project.getModules().getNumModules(); ++i)
-            {
-                const String path (exporter->getPathForModuleString (project.getModules().getModuleID (i)));
+            const String path (exporter->getPathForModuleString (project.getModules().getModuleID (i)));
 
-                if (path.isNotEmpty())
-                    paths.addIfNotAlreadyThere (path);
-            }
-
-            String oldPath (exporter->getLegacyModulePath());
-
-            if (oldPath.isNotEmpty())
-                paths.addIfNotAlreadyThere (oldPath);
+            if (path.isNotEmpty())
+                paths.addIfNotAlreadyThere (path);
         }
+
+        String oldPath (exporter->getLegacyModulePath());
+
+        if (oldPath.isNotEmpty())
+            paths.addIfNotAlreadyThere (oldPath);
     }
 
     Array<File> files;
@@ -619,11 +616,11 @@ Value EnabledModuleList::shouldShowAllModuleFilesInProject (const String& module
                 .getPropertyAsValue (Ids::showAllCode, getUndoManager());
 }
 
-File EnabledModuleList::getModuleInfoFile (const String& moduleID)
+File EnabledModuleList::findLocalModuleInfoFile (const String& moduleID, bool useExportersForOtherOSes)
 {
     for (Project::ExporterIterator exporter (project); exporter.next();)
     {
-        if (exporter->mayCompileOnCurrentOS())
+        if (useExportersForOtherOSes || exporter->mayCompileOnCurrentOS())
         {
             const String path (exporter->getPathForModuleString (moduleID));
 
@@ -656,6 +653,16 @@ File EnabledModuleList::getModuleInfoFile (const String& moduleID)
     }
 
     return File::nonexistent;
+}
+
+File EnabledModuleList::getModuleInfoFile (const String& moduleID)
+{
+    const File f (findLocalModuleInfoFile (moduleID, false));
+
+    if (f != File::nonexistent)
+        return f;
+
+    return findLocalModuleInfoFile (moduleID, true);
 }
 
 File EnabledModuleList::getModuleFolder (const String& moduleID)

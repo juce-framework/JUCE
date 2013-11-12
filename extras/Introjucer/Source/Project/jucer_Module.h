@@ -155,6 +155,8 @@ public:
 private:
     UndoManager* getUndoManager() const     { return project.getUndoManagerFor (state); }
 
+    File findLocalModuleInfoFile (const String& moduleID, bool useExportersForOtherOSes);
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (EnabledModuleList)
 };
 
