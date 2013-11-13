@@ -195,7 +195,7 @@ void CallOutBox::updatePosition (const Rectangle<int>& newAreaToPointTo, const R
         const Point<float> centre (constrainedLine.findNearestPointTo (targetCentre));
         float distanceFromCentre = centre.getDistanceFrom (targets[i]);
 
-        if (! (centrePointArea.contains (lines[i].getStart()) || centrePointArea.contains (lines[i].getEnd())))
+        if (! centrePointArea.intersects (lines[i]))
             distanceFromCentre += 1000.0f;
 
         if (distanceFromCentre < nearest)
