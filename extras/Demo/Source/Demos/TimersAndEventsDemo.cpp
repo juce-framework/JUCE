@@ -201,7 +201,7 @@ public:
         const Rectangle<int> explanationArea (getLocalBounds().removeFromTop (100));
 
         AttributedString s;
-        s.append ("Click on a circle to make it flash. When it has finished flashing it will send a message which which cause the next circle to flash");
+        s.append ("Click on a circle to make it flash. When it has finished flashing it will send a message which causes the next circle to flash");
         s.append (newLine);
         s.append ("Click the \"Set Random Colour\" button to change the colour of one of the circles.");
         s.append (newLine);
