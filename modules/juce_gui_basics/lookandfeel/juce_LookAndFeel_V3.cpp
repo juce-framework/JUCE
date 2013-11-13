@@ -220,7 +220,16 @@ void LookAndFeel_V3::drawTabButton (TabBarButton& button, Graphics& g, bool isMo
     if (o != TabbedButtonBar::TabsAtLeft)     g.fillRect (r.removeFromRight (1));
 
     const float alpha = button.isEnabled() ? ((isMouseOver || isMouseDown) ? 1.0f : 0.8f) : 0.3f;
-    const Colour col (bkg.contrasting().withMultipliedAlpha (alpha));
+
+    Colour col (bkg.contrasting().withMultipliedAlpha (alpha));
+
+    if (TabbedButtonBar* bar = button.findParentComponentOfClass<TabbedButtonBar>())
+    {
+        if (button.isFrontTab() && bar->isColourSpecified (TabbedButtonBar::frontTextColourId))
+            col = bar->findColour (TabbedButtonBar::frontTextColourId);
+        else if (bar->isColourSpecified (TabbedButtonBar::tabTextColourId))
+            col = bar->findColour (TabbedButtonBar::tabTextColourId);
+    }
 
     const Rectangle<float> area (button.getTextArea().toFloat());
 
