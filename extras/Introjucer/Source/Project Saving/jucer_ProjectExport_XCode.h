@@ -564,12 +564,27 @@ private:
         overwriteFileIfDifferentOrThrow (infoPlistFile, mo);
     }
 
-    StringArray getHeaderSearchPaths (const BuildConfiguration& config) const
+    String getHeaderSearchPaths (const BuildConfiguration& config) const
     {
-        StringArray searchPaths (extraSearchPaths);
-        searchPaths.addArray (config.getHeaderSearchPaths());
-        searchPaths.removeDuplicates (false);
-        return searchPaths;
+        StringArray paths (extraSearchPaths);
+        paths.addArray (config.getHeaderSearchPaths());
+        paths.add ("$(inherited)");
+        paths.removeDuplicates (false);
+        paths.removeEmptyStrings();
+
+        for (int i = 0; i < paths.size(); ++i)
+        {
+            String& s = paths.getReference(i);
+
+            s = replacePreprocessorTokens (config, s);
+
+            if (s.containsChar (' '))
+                s = "\"\\\"" + s + "\\\"\""; // crazy double quotes required when there are spaces..
+            else if (s.containsAnyOf ("${}()@&~+-=<>\t;\r\n"))
+                s = "\"" + s + "\"";
+        }
+
+        return "(" + paths.joinIntoString (", ") + ")";
     }
 
     void getLinkerFlagsForStaticLibrary (const RelativePath& library, StringArray& flags, StringArray& librarySearchPaths) const
@@ -664,7 +679,7 @@ private:
         else if (arch == osxArch_64BitUniversal)   s.add ("ARCHS = \"$(ARCHS_STANDARD_32_64_BIT)\"");
         else if (arch == osxArch_64Bit)            s.add ("ARCHS = \"$(ARCHS_STANDARD_64_BIT)\"");
 
-        s.add ("HEADER_SEARCH_PATHS = \"" + replacePreprocessorTokens (config, getHeaderSearchPaths (config).joinIntoString (" ")) + " $(inherited)\"");
+        s.add ("HEADER_SEARCH_PATHS = " + getHeaderSearchPaths (config));
         s.add ("GCC_OPTIMIZATION_LEVEL = " + config.getGCCOptimisationFlag());
         s.add ("INFOPLIST_FILE = " + infoPlistFile.getFileName());
 
