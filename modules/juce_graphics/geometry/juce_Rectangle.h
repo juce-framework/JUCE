@@ -563,6 +563,16 @@ public:
             && other.w > ValueType() && other.h > ValueType();
     }
 
+    /** Returns true if any part of the given line lies inside this rectangle. */
+    bool intersects (const Line<ValueType>& line) const noexcept
+    {
+        return contains (line.getStart()) || contains (line.getEnd())
+                || line.intersects (Line<ValueType> (getTopLeft(),     getTopRight()))
+                || line.intersects (Line<ValueType> (getTopRight(),    getBottomRight()))
+                || line.intersects (Line<ValueType> (getBottomRight(), getBottomLeft()))
+                || line.intersects (Line<ValueType> (getBottomLeft(),  getTopLeft()));
+    }
+
     /** Returns the region that is the overlap between this and another rectangle.
         If the two rectangles don't overlap, the rectangle returned will be empty.
     */

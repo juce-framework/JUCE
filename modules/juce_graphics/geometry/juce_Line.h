@@ -155,6 +155,18 @@ public:
     //==============================================================================
     /** Finds the intersection between two lines.
 
+        @param line     the line to intersect with
+        @returns        the point at which the lines intersect, even if this lies beyond the end of the lines
+    */
+    Point<ValueType> getIntersection (const Line& line) const noexcept
+    {
+        Point<ValueType> p;
+        findIntersection (start, end, line.start, line.end, p);
+        return p;
+    }
+
+    /** Finds the intersection between two lines.
+
         @param line             the other line
         @param intersection     the position of the point where the lines meet (or
                                 where they would meet if they were infinitely long)
@@ -170,16 +182,11 @@ public:
         return findIntersection (start, end, line.start, line.end, intersection);
     }
 
-    /** Finds the intersection between two lines.
-
-        @param line     the line to intersect with
-        @returns        the point at which the lines intersect, even if this lies beyond the end of the lines
-    */
-    Point<ValueType> getIntersection (const Line& line) const noexcept
+    /** Returns true if this line intersects another. */
+    bool intersects (const Line& other) const noexcept
     {
-        Point<ValueType> p;
-        findIntersection (start, end, line.start, line.end, p);
-        return p;
+        Point<ValueType> ignored;
+        return findIntersection (start, end, other.start, other.end, ignored);
     }
 
     //==============================================================================
