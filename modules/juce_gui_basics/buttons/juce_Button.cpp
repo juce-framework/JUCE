@@ -165,13 +165,21 @@ void Button::setToggleState (const bool shouldBeOn, const NotificationType notif
 {
     if (shouldBeOn != lastToggleState)
     {
+        WeakReference<Component> deletionWatcher (this);
+
+        if (shouldBeOn)
+        {
+            turnOffOtherButtonsInGroup (dontSendNotification);
+
+            if (deletionWatcher == nullptr)
+                return;
+        }
+
         if (getToggleState() != shouldBeOn)  // this test means that if the value is void rather than explicitly set to
             isOn = shouldBeOn;               // false, it won't be changed unless the required value is true.
 
         lastToggleState = shouldBeOn;
         repaint();
-
-        WeakReference<Component> deletionWatcher (this);
 
         if (notification != dontSendNotification)
         {
@@ -179,14 +187,6 @@ void Button::setToggleState (const bool shouldBeOn, const NotificationType notif
             jassert (notification != sendNotificationAsync);
 
             sendClickMessage (ModifierKeys());
-
-            if (deletionWatcher == nullptr)
-                return;
-        }
-
-        if (lastToggleState)
-        {
-            turnOffOtherButtonsInGroup (dontSendNotification);
 
             if (deletionWatcher == nullptr)
                 return;
