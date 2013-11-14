@@ -28,10 +28,7 @@ MidiMessageSequence::MidiMessageSequence()
 
 MidiMessageSequence::MidiMessageSequence (const MidiMessageSequence& other)
 {
-    list.ensureStorageAllocated (other.list.size());
-
-    for (int i = 0; i < other.list.size(); ++i)
-        list.add (new MidiEventHolder (other.list.getUnchecked(i)->message));
+    list.addCopiesOf (other.list);
 }
 
 MidiMessageSequence& MidiMessageSequence::operator= (const MidiMessageSequence& other)
