@@ -16,6 +16,7 @@
 
 //==============================================================================
 /**
+    As the name suggest, this class does the actual audio processing.
 */
 class JuceDemoPluginAudioProcessor  : public AudioProcessor
 {
@@ -25,44 +26,45 @@ public:
     ~JuceDemoPluginAudioProcessor();
 
     //==============================================================================
-    void prepareToPlay (double sampleRate, int samplesPerBlock);
-    void releaseResources();
-    void processBlock (AudioSampleBuffer& buffer, MidiBuffer& midiMessages);
-    void reset();
+    void prepareToPlay (double sampleRate, int samplesPerBlock) override;
+    void releaseResources() override;
+    void processBlock (AudioSampleBuffer& buffer, MidiBuffer& midiMessages) override;
+    void reset() override;
 
     //==============================================================================
-    bool hasEditor() const                  { return true; }
-    AudioProcessorEditor* createEditor();
+    bool hasEditor() const override                  { return true; }
+    AudioProcessorEditor* createEditor() override;
 
     //==============================================================================
-    const String getName() const            { return JucePlugin_Name; }
+    const String getName() const override            { return JucePlugin_Name; }
 
-    int getNumParameters();
-    float getParameter (int index);
-    void setParameter (int index, float newValue);
-    const String getParameterName (int index);
-    const String getParameterText (int index);
+    int getNumParameters() override;
+    float getParameter (int index) override;
+    float getParameterDefaultValue (int index) override;
+    void setParameter (int index, float newValue) override;
+    const String getParameterName (int index) override;
+    const String getParameterText (int index) override;
 
-    const String getInputChannelName (int channelIndex) const;
-    const String getOutputChannelName (int channelIndex) const;
-    bool isInputChannelStereoPair (int index) const;
-    bool isOutputChannelStereoPair (int index) const;
+    const String getInputChannelName (int channelIndex) const override;
+    const String getOutputChannelName (int channelIndex) const override;
+    bool isInputChannelStereoPair (int index) const override;
+    bool isOutputChannelStereoPair (int index) const override;
 
-    bool acceptsMidi() const;
-    bool producesMidi() const;
-    bool silenceInProducesSilenceOut() const;
-    double getTailLengthSeconds() const;
-
-    //==============================================================================
-    int getNumPrograms()                                                { return 0; }
-    int getCurrentProgram()                                             { return 0; }
-    void setCurrentProgram (int /*index*/)                              { }
-    const String getProgramName (int /*index*/)                         { return String::empty; }
-    void changeProgramName (int /*index*/, const String& /*newName*/)   { }
+    bool acceptsMidi() const override;
+    bool producesMidi() const override;
+    bool silenceInProducesSilenceOut() const override;
+    double getTailLengthSeconds() const override;
 
     //==============================================================================
-    void getStateInformation (MemoryBlock& destData);
-    void setStateInformation (const void* data, int sizeInBytes);
+    int getNumPrograms() override                                               { return 0; }
+    int getCurrentProgram() override                                            { return 0; }
+    void setCurrentProgram (int /*index*/) override                             {}
+    const String getProgramName (int /*index*/) override                        { return String::empty; }
+    void changeProgramName (int /*index*/, const String& /*newName*/) override  {}
+
+    //==============================================================================
+    void getStateInformation (MemoryBlock& destData) override;
+    void setStateInformation (const void* data, int sizeInBytes) override;
 
     //==============================================================================
     // These properties are public so that our editor component can access them

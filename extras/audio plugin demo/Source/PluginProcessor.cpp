@@ -131,14 +131,16 @@ private:
     double currentAngle, angleDelta, level, tailOff;
 };
 
+const float defaultGain = 1.0f;
+const float defaultDelay = 0.5f;
 
 //==============================================================================
 JuceDemoPluginAudioProcessor::JuceDemoPluginAudioProcessor()
     : delayBuffer (2, 12000)
 {
     // Set up some default values..
-    gain = 1.0f;
-    delay = 0.5f;
+    gain = defaultGain;
+    delay = defaultDelay;
 
     lastUIWidth = 400;
     lastUIHeight = 200;
@@ -187,6 +189,18 @@ void JuceDemoPluginAudioProcessor::setParameter (int index, float newValue)
         case delayParam:    delay = newValue;  break;
         default:            break;
     }
+}
+
+float JuceDemoPluginAudioProcessor::getParameterDefaultValue (int index)
+{
+    switch (index)
+    {
+        case gainParam:     return defaultGain;
+        case delayParam:    return defaultDelay;
+        default:            break;
+    }
+
+    return 0.0f;
 }
 
 const String JuceDemoPluginAudioProcessor::getParameterName (int index)
