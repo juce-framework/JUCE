@@ -631,8 +631,6 @@ public:
 private:
     //==============================================================================
     Array<RectangleType> rects;
-
-    JUCE_LEAK_DETECTOR (RectangleList)
 };
 
 
