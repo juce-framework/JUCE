@@ -108,6 +108,12 @@ void DirectoryContentsList::refresh()
     }
 }
 
+void DirectoryContentsList::setFileFilter (const FileFilter* newFileFilter)
+{
+    const ScopedLock sl (fileListLock);
+    fileFilter = newFileFilter;
+}
+
 //==============================================================================
 bool DirectoryContentsList::getFileInfo (const int index,
                                          FileInfo& result) const
@@ -225,6 +231,8 @@ bool DirectoryContentsList::addFile (const File& file, const bool isDir,
                                      Time modTime, Time creationTime,
                                      const bool isReadOnly)
 {
+    const ScopedLock sl (fileListLock);
+
     if (fileFilter == nullptr
          || ((! isDir) && fileFilter->isFileSuitable (file))
          || (isDir && fileFilter->isDirectorySuitable (file)))
@@ -237,8 +245,6 @@ bool DirectoryContentsList::addFile (const File& file, const bool isDir,
         info->creationTime = creationTime;
         info->isDirectory = isDir;
         info->isReadOnly = isReadOnly;
-
-        const ScopedLock sl (fileListLock);
 
         for (int i = files.size(); --i >= 0;)
             if (files.getUnchecked(i)->filename == info->filename)
