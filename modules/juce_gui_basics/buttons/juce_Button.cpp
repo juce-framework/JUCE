@@ -169,7 +169,7 @@ void Button::setToggleState (const bool shouldBeOn, const NotificationType notif
 
         if (shouldBeOn)
         {
-            turnOffOtherButtonsInGroup (dontSendNotification);
+            turnOffOtherButtonsInGroup (notification);
 
             if (deletionWatcher == nullptr)
                 return;
