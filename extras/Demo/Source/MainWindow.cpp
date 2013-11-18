@@ -112,12 +112,6 @@ public:
         LookAndFeel::setDefaultLookAndFeel (&lookAndFeelV3);
         addAndMakeVisible (&demoList);
 
-       #if JUCE_IOS || JUCE_ANDROID
-        demoList.setRowHeight (30);
-       #else
-        demoList.setRowHeight (20);
-       #endif
-
         demoList.setModel (this);
         demoList.setColour (ListBox::backgroundColourId, Colour::greyLevel (0.7f));
         demoList.selectRow (0);
@@ -127,7 +121,16 @@ public:
     {
         Rectangle<int> r (getLocalBounds());
 
-        demoList.setBounds (r.removeFromLeft (210));
+        if (r.getWidth() > 600)
+        {
+            demoList.setBounds (r.removeFromLeft (210));
+            demoList.setRowHeight (20);
+        }
+        else
+        {
+            demoList.setBounds (r.removeFromLeft (130));
+            demoList.setRowHeight (30);
+        }
 
         if (currentDemo != nullptr)
             currentDemo->setBounds (r);
@@ -150,15 +153,25 @@ public:
             AttributedString a;
             a.setJustification (Justification::centredLeft);
 
+            String category;
+
             if (name.containsChar (':'))
             {
-                a.append (name.upToFirstOccurrenceOf (":", true, false), Font (11.0f), Colours::black);
-                name = name.fromFirstOccurrenceOf (":", false, false);
+                category = name.upToFirstOccurrenceOf (":", true, false);
+                name = name.fromFirstOccurrenceOf (":", false, false).trim();
+
+                if (height > 20)
+                    category << "\n";
+                else
+                    category << " ";
             }
 
-            a.append (name, Font (14.0f).boldened(), Colours::black);
+            if (category.isNotEmpty())
+                a.append (category, Font (10.0f), Colours::black);
 
-            a.draw (g, Rectangle<int> (width, height).reduced (6, 0).toFloat());
+            a.append (name, Font (13.0f).boldened(), Colours::black);
+
+            a.draw (g, Rectangle<int> (width + 10, height).reduced (6, 0).toFloat());
         }
     }
 

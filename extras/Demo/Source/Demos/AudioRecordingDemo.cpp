@@ -256,7 +256,7 @@ public:
         Rectangle<int> area (getLocalBounds());
         liveAudioScroller.setBounds (area.removeFromTop (80).reduced (8));
         recordingThumbnail.setBounds (area.removeFromTop (80).reduced (8));
-        recordButton.setBounds (area.removeFromLeft (140).removeFromTop (36).reduced (8));
+        recordButton.setBounds (area.removeFromTop (36).removeFromLeft (140).reduced (8));
         explanationLabel.setBounds (area.reduced (8));
     }
 
