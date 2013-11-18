@@ -240,8 +240,8 @@ private:
 
         if (callback != nullptr)
         {
-            // This shouldn't ever get triggered, but please let me know if it does!
-            jassert ((int) numFrames <= floatData.getNumSamples());
+            if ((int) numFrames > floatData.getNumSamples())
+                prepareFloatBuffers ((int) numFrames);
 
             if (audioInputIsAvailable && numInputChannels > 0)
             {
