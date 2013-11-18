@@ -172,6 +172,23 @@ public:
         }
     }
 
+    bool keyPressed (const KeyPress& key) override
+    {
+        if (key == KeyPress::escapeKey)
+        {
+            dismissWithAnimation (true);
+            delete this;
+            return true;
+        }
+
+        return false;
+    }
+
+    bool canModalEventBeSentToComponent (const Component* targetComponent) override
+    {
+        return targetComponent == mouseDragSource;
+    }
+
 private:
     DragAndDropTarget::SourceDetails sourceDetails;
     Image image;
@@ -400,6 +417,7 @@ void DragAndDropContainer::startDragging (const var& sourceDescription,
 
         static_cast <DragImageComponent*> (dragImageComponent.get())->updateLocation (false, lastMouseDown);
         dragImageComponent->setVisible (true);
+        dragImageComponent->enterModalState();
 
        #if JUCE_WINDOWS
         // Under heavy load, the layered window's paint callback can often be lost by the OS,
