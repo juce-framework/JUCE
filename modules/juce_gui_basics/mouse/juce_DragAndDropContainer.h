@@ -169,8 +169,8 @@ private:
     //==============================================================================
     class DragImageComponent;
     friend class DragImageComponent;
-    ScopedPointer <Component> dragImageComponent;
-    var currentDragDesc;
+    friend struct ContainerDeletePolicy<DragImageComponent>;
+    ScopedPointer<DragImageComponent> dragImageComponent;
 
     JUCE_DEPRECATED (virtual bool shouldDropFilesWhenDraggedExternally (const String&, Component*, StringArray&, bool&)) { return false; }
 
