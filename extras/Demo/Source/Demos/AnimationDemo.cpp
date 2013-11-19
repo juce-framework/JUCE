@@ -252,8 +252,8 @@ private:
         if (Random::getSystemRandom().nextInt (200) < 4)
         {
             BallComponent* ball = new BallComponent (ballGenerator->getBounds().getCentre().toFloat());
-            balls.add (ball);
             addAndMakeVisible (ball);
+            balls.add (ball);
         }
     }
 

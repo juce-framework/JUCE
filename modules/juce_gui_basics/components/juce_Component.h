@@ -2121,7 +2121,7 @@ public:
         const ComponentType* operator->() const noexcept    { return getComponent(); }
 
         /** If the component is valid, this deletes it and sets this pointer to null. */
-        void deleteAndZero()                                { delete getComponent(); jassert (getComponent() == nullptr); }
+        void deleteAndZero()                                { delete getComponent(); }
 
         bool operator== (ComponentType* component) const noexcept   { return weakRef == component; }
         bool operator!= (ComponentType* component) const noexcept   { return weakRef != component; }

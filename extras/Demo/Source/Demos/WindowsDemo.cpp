@@ -251,8 +251,8 @@ private:
 
     void closeAllWindows()
     {
-        for (int i = windows.size(); --i >= 0;)
-            windows.getReference (i).deleteAndZero();
+        for (int i = 0; i < windows.size(); ++i)
+            windows.getReference(i).deleteAndZero();
 
         windows.clear();
     }
@@ -261,8 +261,7 @@ private:
     {
         String m;
 
-        m << "Dialog Windows can be used to quickly show a component, usually blocking mouse input to other windows."
-          << newLine
+        m << "Dialog Windows can be used to quickly show a component, usually blocking mouse input to other windows." << newLine
           << newLine
           << "They can also be quickly closed with the escape key, try it now.";
 
