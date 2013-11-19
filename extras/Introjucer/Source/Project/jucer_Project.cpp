@@ -226,12 +226,17 @@ void Project::warnAboutOldIntrojucerVersion()
     available.scanAllKnownFolders (*this);
 
     if (isAnyModuleNewerThanIntrojucer (available.modules))
-        AlertWindow::showMessageBoxAsync (AlertWindow::WarningIcon,
-                                          "Introjucer",
-                                          "This version of the introjucer is out-of-date!"
-                                          "\n\n"
-                                          "Always make sure that you're running the very latest version, "
-                                          "preferably compiled directly from the JUCE repository that you're working with!");
+    {
+        if (IntrojucerApp::getApp().isRunningCommandLine)
+            std::cout <<  "WARNING! This version of the introjucer is out-of-date!" << std::endl;
+        else
+            AlertWindow::showMessageBoxAsync (AlertWindow::WarningIcon,
+                                              "Introjucer",
+                                              "This version of the introjucer is out-of-date!"
+                                              "\n\n"
+                                              "Always make sure that you're running the very latest version, "
+                                              "preferably compiled directly from the JUCE repository that you're working with!");
+    }
 }
 
 //==============================================================================
