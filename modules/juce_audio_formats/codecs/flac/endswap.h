@@ -1,6 +1,5 @@
 /* libFLAC - Free Lossless Audio Codec library
- * Copyright (C) 2001-2009  Josh Coalson
- * Copyright (C) 2011-2013  Xiph.Org Foundation
+ * Copyright (C) 2012  Xiph.org Foundation
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -30,10 +29,24 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef FLAC__PROTECTED__ALL_H
-#define FLAC__PROTECTED__ALL_H
+/* It is assumed that this header will be included after "config.h". */
 
-#include "stream_decoder.h"
-#include "stream_encoder.h"
+#if HAVE_BSWAP32			/* GCC and Clang */
+
+#define	ENDSWAP_32(x)		(__builtin_bswap32 (x))
+
+#elif defined _MSC_VER		/* Windows. Apparently in <stdlib.h>. */
+
+#define	ENDSWAP_32(x)		(_byteswap_ulong (x))
+
+#elif defined HAVE_BYTESWAP_H		/* Linux */
+
+#include <byteswap.h>
+
+#define	ENDSWAP_32(x)		(bswap_32 (x))
+
+#else
+
+#define	ENDSWAP_32(x)		((((x) >> 24) & 0xFF) + (((x) >> 8) & 0xFF00) + (((x) & 0xFF00) << 8) + (((x) & 0xFF) << 24))
 
 #endif

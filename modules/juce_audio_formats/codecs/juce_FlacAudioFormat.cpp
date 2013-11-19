@@ -52,6 +52,8 @@ namespace FlacNamespace
  #endif
 
  #define __STDC_LIMIT_MACROS 1
+ #define flac_max jmax
+ #define flac_min jmin
  #include "flac/all.h"
  #include "flac/libFLAC/bitmath.c"
  #include "flac/libFLAC/bitreader.c"

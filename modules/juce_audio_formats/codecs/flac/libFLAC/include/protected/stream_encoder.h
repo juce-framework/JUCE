@@ -1,5 +1,6 @@
 /* libFLAC - Free Lossless Audio Codec library
- * Copyright (C) 2001,2002,2003,2004,2005,2006,2007  Josh Coalson
+ * Copyright (C) 2001-2009  Josh Coalson
+ * Copyright (C) 2011-2013  Xiph.Org Foundation
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -34,7 +35,7 @@
 
 #include "../../../stream_encoder.h"
 #if FLAC__HAS_OGG
-#include "private/ogg_encoder_aspect.h"
+#include "../private/ogg_encoder_aspect.h"
 #endif
 
 #ifndef FLAC__INTEGER_ONLY_LIBRARY
