@@ -51,6 +51,16 @@ namespace FlacNamespace
   #pragma clang diagnostic ignored "-Wshadow"
  #endif
 
+ #if JUCE_INTEL
+  #if JUCE_32BIT
+   #define FLAC__CPU_IA32 1
+  #endif
+  #if JUCE_64BIT
+   #define FLAC__CPU_X86_64 1
+  #endif
+  #define FLAC__HAS_X86INTRIN 1
+ #endif
+
  #define __STDC_LIMIT_MACROS 1
  #define flac_max jmax
  #define flac_min jmin
