@@ -582,6 +582,11 @@ void CoreGraphicsContext::drawGlyph (int glyphNumber, const AffineTransform& tra
 {
     if (state->fontRef != 0 && state->fillType.isColour())
     {
+       #if JUCE_CLANG
+        #pragma clang diagnostic push
+        #pragma clang diagnostic ignored "-Wdeprecated-declarations"
+       #endif
+
         if (transform.isOnlyTranslation())
         {
             CGContextSetTextMatrix (context, state->fontTransform); // have to set this each time, as it's not saved as part of the state
@@ -605,6 +610,10 @@ void CoreGraphicsContext::drawGlyph (int glyphNumber, const AffineTransform& tra
 
             CGContextRestoreGState (context);
         }
+
+       #if JUCE_CLANG
+        #pragma clang diagnostic pop
+       #endif
     }
     else
     {
