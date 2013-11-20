@@ -1389,10 +1389,10 @@ private:
             sendResetRequest (deviceIndex);
         }
 
-        static long sendResetRequest (int deviceIndex)
+        static long sendResetRequest (int index)
         {
-            if (currentASIODev[deviceIndex] != nullptr)
-                currentASIODev[deviceIndex]->resetRequest();
+            if (currentASIODev[index] != nullptr)
+                currentASIODev[index]->resetRequest();
 
             return 1;
         }
