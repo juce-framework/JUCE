@@ -188,6 +188,9 @@ public:
         return targetComponent == mouseDragSource;
     }
 
+    // (overridden to avoid beeps when dragging)
+    void inputAttemptWhenModal() override {}
+
     DragAndDropTarget::SourceDetails sourceDetails;
 
 private:
