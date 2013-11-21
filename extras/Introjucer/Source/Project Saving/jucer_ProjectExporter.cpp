@@ -140,14 +140,14 @@ bool ProjectExporter::canProjectBeLaunched (Project* project)
 }
 
 //==============================================================================
-ProjectExporter::ProjectExporter (Project& p, const ValueTree& settings_)
+ProjectExporter::ProjectExporter (Project& p, const ValueTree& state)
     : xcodeIsBundle (false),
       xcodeCreatePList (false),
       xcodeCanUseDwarf (true),
       makefileIsDLL (false),
       msvcIsDLL (false),
       msvcIsWindowsSubsystem (true),
-      settings (settings_),
+      settings (state),
       project (p),
       projectType (p.getProjectType()),
       projectName (p.getTitle()),
@@ -172,7 +172,7 @@ RelativePath ProjectExporter::rebaseFromProjectFolderToBuildTarget (const Relati
 
 bool ProjectExporter::shouldFileBeCompiledByDefault (const RelativePath& file) const
 {
-    return file.hasFileExtension ("cpp;cc;c;cxx");
+    return file.hasFileExtension ("cpp;cc;c;cxx;s");
 }
 
 void ProjectExporter::createPropertyEditors (PropertyListBuilder& props)
