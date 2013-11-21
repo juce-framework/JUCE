@@ -34,22 +34,32 @@
     Enables the VST audio plugin hosting classes. This requires the Steinberg VST SDK to be
     installed on your machine.
 
-    @see VSTPluginFormat, AudioPluginFormat, AudioPluginFormatManager, JUCE_PLUGINHOST_AU
+    @see VSTPluginFormat, VST3PluginFormat, AudioPluginFormat, AudioPluginFormatManager, JUCE_PLUGINHOST_AU, JUCE_PLUGINHOST_VST3
 */
 #ifndef JUCE_PLUGINHOST_VST
  #define JUCE_PLUGINHOST_VST 0
 #endif
 
+/** Config: JUCE_PLUGINHOST_VST3
+    Enables the VST3 audio plugin hosting classes. This requires the Steinberg VST3 SDK to be
+    installed on your machine.
+
+    @see VSTPluginFormat, VVST3PluginFormat, AudioPluginFormat, AudioPluginFormatManager, JUCE_PLUGINHOST_VST, JUCE_PLUGINHOST_AU
+*/
+#ifndef JUCE_PLUGINHOST_VST3
+ #define JUCE_PLUGINHOST_VST3 0
+#endif
+
 /** Config: JUCE_PLUGINHOST_AU
     Enables the AudioUnit plugin hosting classes. This is Mac-only, of course.
 
-    @see AudioUnitPluginFormat, AudioPluginFormat, AudioPluginFormatManager, JUCE_PLUGINHOST_VST
+    @see AudioUnitPluginFormat, AudioPluginFormat, AudioPluginFormatManager, JUCE_PLUGINHOST_VST, JUCE_PLUGINHOST_VST3
 */
 #ifndef JUCE_PLUGINHOST_AU
  #define JUCE_PLUGINHOST_AU 0
 #endif
 
-#if ! (JUCE_PLUGINHOST_AU || JUCE_PLUGINHOST_VST)
+#if ! (JUCE_PLUGINHOST_AU || JUCE_PLUGINHOST_VST || JUCE_PLUGINHOST_VST3)
 // #error "You need to set either the JUCE_PLUGINHOST_AU anr/or JUCE_PLUGINHOST_VST flags if you're using this module!"
 #endif
 
@@ -78,6 +88,7 @@ class AudioProcessor;
 #include "format_types/juce_LADSPAPluginFormat.h"
 #include "format_types/juce_VSTMidiEventList.h"
 #include "format_types/juce_VSTPluginFormat.h"
+#include "format_types/juce_VST3PluginFormat.h"
 #include "scanning/juce_PluginDirectoryScanner.h"
 #include "scanning/juce_PluginListComponent.h"
 

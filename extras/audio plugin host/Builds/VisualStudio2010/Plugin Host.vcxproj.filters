@@ -526,6 +526,9 @@
     <ClCompile Include="..\..\..\..\modules\juce_audio_processors\format_types\juce_LADSPAPluginFormat.cpp">
       <Filter>Juce Modules\juce_audio_processors\format_types</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_processors\format_types\juce_VST3PluginFormat.cpp">
+      <Filter>Juce Modules\juce_audio_processors\format_types</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_audio_processors\format_types\juce_VSTPluginFormat.cpp">
       <Filter>Juce Modules\juce_audio_processors\format_types</Filter>
     </ClCompile>
@@ -1723,6 +1726,9 @@
       <Filter>Juce Modules\juce_audio_processors\format_types</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_audio_processors\format_types\juce_LADSPAPluginFormat.h">
+      <Filter>Juce Modules\juce_audio_processors\format_types</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors\format_types\juce_VST3PluginFormat.h">
       <Filter>Juce Modules\juce_audio_processors\format_types</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_audio_processors\format_types\juce_VSTMidiEventList.h">

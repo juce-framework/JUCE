@@ -112,6 +112,7 @@ private:
 
     bool isAUPluginHost (const Project&) const;
     bool isVSTPluginHost (const Project&) const;
+    bool isVST3PluginHost (const Project&) const;
 };
 
 //==============================================================================

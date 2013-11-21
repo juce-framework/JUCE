@@ -30,6 +30,7 @@
 namespace
 {
     Value shouldBuildVST (Project& project)                       { return project.getProjectValue ("buildVST"); }
+    Value shouldBuildVST3 (Project& project)                      { return project.getProjectValue ("buildVST3"); }
     Value shouldBuildAU (Project& project)                        { return project.getProjectValue ("buildAU"); }
     Value shouldBuildRTAS (Project& project)                      { return project.getProjectValue ("buildRTAS"); }
     Value shouldBuildAAX (Project& project)                       { return project.getProjectValue ("buildAAX"); }
@@ -120,6 +121,7 @@ namespace
         StringPairArray flags;
         //flags.set ("JUCE_MODAL_LOOPS_PERMITTED",             "0");
         flags.set ("JucePlugin_Build_VST",                   valueToBool (shouldBuildVST  (project)));
+        flags.set ("JucePlugin_Build_VST3",                  valueToBool (shouldBuildVST3 (project)));
         flags.set ("JucePlugin_Build_AU",                    valueToBool (shouldBuildAU   (project)));
         flags.set ("JucePlugin_Build_RTAS",                  valueToBool (shouldBuildRTAS (project)));
         flags.set ("JucePlugin_Build_AAX",                   valueToBool (shouldBuildAAX  (project)));
@@ -201,41 +203,47 @@ namespace
 //==============================================================================
 namespace VSTHelpers
 {
-    static Value getVSTFolder (ProjectExporter& exporter)         { return exporter.getSetting (Ids::vstFolder); }
-
-    static void addVSTFolderToPath (ProjectExporter& exporter, StringArray& searchPaths)
+    static Value getVSTFolder (ProjectExporter& exporter, bool isVST3)
     {
-        const String vstFolder (getVSTFolder (exporter).toString());
+        return exporter.getSetting (isVST3 ? Ids::vst3Folder
+                                           : Ids::vstFolder);
+    }
+
+    static void addVSTFolderToPath (ProjectExporter& exporter, bool isVST3)
+    {
+        const String vstFolder (getVSTFolder (exporter, isVST3).toString());
 
         if (vstFolder.isNotEmpty())
         {
             RelativePath path (exporter.rebaseFromProjectFolderToBuildTarget (RelativePath (vstFolder, RelativePath::projectFolder)));
 
             if (exporter.isVisualStudio())
-                searchPaths.add (path.toWindowsStyle());
+                exporter.extraSearchPaths.add (path.toWindowsStyle());
             else if (exporter.isLinux() || exporter.isXcode())
-                searchPaths.insert (0, path.toUnixStyle());
+                exporter.extraSearchPaths.insert (0, path.toUnixStyle());
         }
     }
 
-    static void createVSTPathEditor (ProjectExporter& exporter, PropertyListBuilder& props)
+    static void createVSTPathEditor (ProjectExporter& exporter, PropertyListBuilder& props, bool isVST3)
     {
-        props.add (new TextPropertyComponent (getVSTFolder (exporter), "VST Folder", 1024, false),
-                  "If you're building a VST, this must be the folder containing the VST SDK. This should be an absolute path.");
+        const String vstFormat (isVST3 ? "VST3" : "VST");
+
+        props.add (new TextPropertyComponent (getVSTFolder (exporter, isVST3), vstFormat + " Folder", 1024, false),
+                   "If you're building a " + vstFormat + ", this must be the folder containing the " + vstFormat + " SDK. This should be an absolute path.");
     }
 
-    static void fixMissingVSTValues (ProjectExporter& exporter)
+    static void fixMissingVSTValues (ProjectExporter& exporter, bool isVST3)
     {
-        if (getVSTFolder(exporter).toString().isEmpty())
-            getVSTFolder(exporter) = (exporter.isWindows() ? "c:\\SDKs\\vstsdk2.4"
-                                                           : "~/SDKs/vstsdk2.4");
+        if (getVSTFolder (exporter, isVST3).toString().isEmpty())
+            getVSTFolder (exporter, isVST3) = exporter.isWindows() ? (isVST3 ? "c:\\SDKs\\VST3 SDK" : "c:\\SDKs\\vstsdk2.4")
+                                                                   : (isVST3 ? "~/SDKs/VST3 SDK"    : "~/SDKs/vstsdk2.4");
 
         fixMissingXcodePostBuildScript (exporter);
     }
 
-    static inline void prepareExporter (ProjectExporter& exporter, ProjectSaver& projectSaver)
+    static inline void prepareExporter (ProjectExporter& exporter, ProjectSaver& projectSaver, bool isVST3)
     {
-        fixMissingVSTValues (exporter);
+        fixMissingVSTValues (exporter, isVST3);
         writePluginCharacteristicsFile (projectSaver);
 
         exporter.makefileTargetSuffix = ".so";
@@ -246,7 +254,7 @@ namespace VSTHelpers
         RelativePath juceWrapperFolder (exporter.getProject().getGeneratedCodeFolder(),
                                         exporter.getTargetFolder(), RelativePath::buildTargetFolder);
 
-        addVSTFolderToPath (exporter, exporter.extraSearchPaths);
+        addVSTFolderToPath (exporter, isVST3);
 
         if (exporter.isWindows())
             exporter.extraSearchPaths.add (juceWrapperFolder.toWindowsStyle());
@@ -254,10 +262,10 @@ namespace VSTHelpers
             exporter.extraSearchPaths.add (juceWrapperFolder.toUnixStyle());
     }
 
-    static inline void createPropertyEditors (ProjectExporter& exporter, PropertyListBuilder& props)
+    static inline void createPropertyEditors (ProjectExporter& exporter, PropertyListBuilder& props, bool isVST3)
     {
-        fixMissingVSTValues (exporter);
-        createVSTPathEditor (exporter, props);
+        fixMissingVSTValues (exporter, isVST3);
+        createVSTPathEditor (exporter, props, isVST3);
     }
 }
 

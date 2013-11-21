@@ -975,6 +975,17 @@
             </FileConfiguration>
           </File>
           <File RelativePath="..\..\..\..\modules\juce_audio_processors\format_types\juce_LADSPAPluginFormat.h"/>
+          <File RelativePath="..\..\..\..\modules\juce_audio_processors\format_types\juce_VST3PluginFormat.cpp">
+            <FileConfiguration Name="Debug|Win32"
+                               ExcludedFromBuild="true">
+              <Tool Name="VCCLCompilerTool"/>
+            </FileConfiguration>
+            <FileConfiguration Name="Release|Win32"
+                               ExcludedFromBuild="true">
+              <Tool Name="VCCLCompilerTool"/>
+            </FileConfiguration>
+          </File>
+          <File RelativePath="..\..\..\..\modules\juce_audio_processors\format_types\juce_VST3PluginFormat.h"/>
           <File RelativePath="..\..\..\..\modules\juce_audio_processors\format_types\juce_VSTMidiEventList.h"/>
           <File RelativePath="..\..\..\..\modules\juce_audio_processors\format_types\juce_VSTPluginFormat.cpp">
             <FileConfiguration Name="Debug|Win32"

@@ -230,6 +230,7 @@ LibraryModule::LibraryModule (const ModuleDescription& d)
 
 bool LibraryModule::isAUPluginHost (const Project& project) const   { return getID() == "juce_audio_processors" && project.isConfigFlagEnabled ("JUCE_PLUGINHOST_AU"); }
 bool LibraryModule::isVSTPluginHost (const Project& project) const  { return getID() == "juce_audio_processors" && project.isConfigFlagEnabled ("JUCE_PLUGINHOST_VST"); }
+bool LibraryModule::isVST3PluginHost (const Project& project) const { return getID() == "juce_audio_processors" && project.isConfigFlagEnabled ("JUCE_PLUGINHOST_VST3"); }
 
 File LibraryModule::getModuleHeaderFile (const File& folder) const
 {
@@ -348,8 +349,8 @@ void LibraryModule::prepareExporter (ProjectExporter& exporter, ProjectSaver& pr
             addBrowsableCode (exporter, projectSaver, compiled, moduleInfo.getFolder());
     }
 
-    if (isVSTPluginHost (project))
-        VSTHelpers::addVSTFolderToPath (exporter, exporter.extraSearchPaths);
+    if (isVSTPluginHost (project))  VSTHelpers::addVSTFolderToPath (exporter, false);
+    if (isVST3PluginHost (project)) VSTHelpers::addVSTFolderToPath (exporter, true);
 
     if (exporter.isXcode())
     {
@@ -378,7 +379,8 @@ void LibraryModule::prepareExporter (ProjectExporter& exporter, ProjectSaver& pr
 
     if (moduleInfo.isPluginClient())
     {
-        if (shouldBuildVST  (project).getValue())  VSTHelpers::prepareExporter (exporter, projectSaver);
+        if (shouldBuildVST  (project).getValue())  VSTHelpers::prepareExporter (exporter, projectSaver, false);
+        if (shouldBuildVST3 (project).getValue())  VSTHelpers::prepareExporter (exporter, projectSaver, true);
         if (shouldBuildAU   (project).getValue())  AUHelpers::prepareExporter (exporter, projectSaver);
         if (shouldBuildAAX  (project).getValue())  AAXHelpers::prepareExporter (exporter, projectSaver);
         if (shouldBuildRTAS (project).getValue())  RTASHelpers::prepareExporter (exporter, projectSaver);
@@ -389,11 +391,16 @@ void LibraryModule::createPropertyEditors (ProjectExporter& exporter, PropertyLi
 {
     if (isVSTPluginHost (exporter.getProject())
          && ! (moduleInfo.isPluginClient() && shouldBuildVST  (exporter.getProject()).getValue()))
-        VSTHelpers::createVSTPathEditor (exporter, props);
+        VSTHelpers::createVSTPathEditor (exporter, props, false);
+
+    if (isVST3PluginHost (exporter.getProject())
+         && ! (moduleInfo.isPluginClient() && shouldBuildVST3  (exporter.getProject()).getValue()))
+        VSTHelpers::createVSTPathEditor (exporter, props, true);
 
     if (moduleInfo.isPluginClient())
     {
-        if (shouldBuildVST  (exporter.getProject()).getValue())  VSTHelpers::createPropertyEditors (exporter, props);
+        if (shouldBuildVST  (exporter.getProject()).getValue())  VSTHelpers::createPropertyEditors (exporter, props, false);
+        if (shouldBuildVST3 (exporter.getProject()).getValue())  VSTHelpers::createPropertyEditors (exporter, props, true);
         if (shouldBuildRTAS (exporter.getProject()).getValue())  RTASHelpers::createPropertyEditors (exporter, props);
         if (shouldBuildAAX  (exporter.getProject()).getValue())  AAXHelpers::createPropertyEditors (exporter, props);
     }

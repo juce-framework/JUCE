@@ -53,7 +53,7 @@
     <ClCompile>
       <Optimization>Disabled</Optimization>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
-      <AdditionalIncludeDirectories>..\..\JuceLibraryCode;..\..\..\..\modules;c:\SDKs\vstsdk2.4;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\JuceLibraryCode;..\..\..\..\modules;c:\SDKs\vstsdk2.4;c:\SDKs\VST3 SDK;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_WINDOWS;DEBUG;_DEBUG;JUCER_VS2010_78A501D=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
@@ -94,7 +94,7 @@
     </Midl>
     <ClCompile>
       <Optimization>MinSpace</Optimization>
-      <AdditionalIncludeDirectories>..\..\JuceLibraryCode;..\..\..\..\modules;c:\SDKs\vstsdk2.4;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\JuceLibraryCode;..\..\..\..\modules;c:\SDKs\vstsdk2.4;c:\SDKs\VST3 SDK;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;JUCER_VS2010_78A501D=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
@@ -331,6 +331,9 @@
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_audio_processors\format_types\juce_LADSPAPluginFormat.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_processors\format_types\juce_VST3PluginFormat.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_audio_processors\format_types\juce_VSTPluginFormat.cpp">
@@ -1296,6 +1299,7 @@
     <ClInclude Include="..\..\..\..\modules\juce_audio_processors\format\juce_AudioPluginFormatManager.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_processors\format_types\juce_AudioUnitPluginFormat.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_processors\format_types\juce_LADSPAPluginFormat.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors\format_types\juce_VST3PluginFormat.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_processors\format_types\juce_VSTMidiEventList.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_processors\format_types\juce_VSTPluginFormat.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_processors\scanning\juce_KnownPluginList.h"/>

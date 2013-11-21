@@ -50,6 +50,7 @@ namespace Ids
     DECLARE_ID (targetFolder);
     DECLARE_ID (intermediatesPath);
     DECLARE_ID (vstFolder);
+    DECLARE_ID (vst3Folder);
     DECLARE_ID (rtasFolder);
     DECLARE_ID (auFolder);
     DECLARE_ID (flags);
