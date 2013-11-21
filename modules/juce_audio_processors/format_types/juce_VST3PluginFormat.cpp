@@ -26,7 +26,8 @@
 
 } // namespace juce
 
-#if JUCE_MSVC   // Wow, those VST guys really don't worry too much about compiler warnings...
+// Wow, those VST guys really don't worry too much about compiler warnings.
+#if JUCE_MSVC
  #pragma warning (disable: 4505)
  #pragma warning (push, 0)
  #pragma warning (disable: 4702)
@@ -36,34 +37,37 @@
  #pragma clang diagnostic ignored "-Wreorder"
  #pragma clang diagnostic ignored "-Wunsequenced"
  #pragma clang diagnostic ignored "-Wint-to-pointer-cast"
+ #pragma clang diagnostic ignored "-Wunused-parameter"
+ #pragma clang diagnostic ignored "-Wconversion"
+ #pragma clang diagnostic ignored "-Woverloaded-virtual"
 #endif
 
 // Got an include error here? If so, you'll need to install the VST3 SDK somewhere,
 // and use the introjucer or your IDE to add it to your include path. The introjucer
 // has a special box for specifying this path for each export target.
-#include "base/source/baseiids.cpp"
-#include "base/source/fatomic.cpp"
-#include "base/source/fbuffer.cpp"
-#include "base/source/fdebug.cpp"
-#include "base/source/fobject.cpp"
-#include "base/source/frect.cpp"
-#include "base/source/fstreamer.cpp"
-#include "base/source/fstring.cpp"
-#include "base/source/fthread.cpp"
-#include "base/source/updatehandler.cpp"
-#include "pluginterfaces/base/conststringtable.cpp"
-#include "pluginterfaces/base/funknown.cpp"
-#include "pluginterfaces/base/ustring.cpp"
-#include "public.sdk/source/main/pluginfactoryvst3.cpp"
-#include "public.sdk/source/common/memorystream.cpp"
-#include "public.sdk/source/common/pluginview.cpp"
-#include "public.sdk/source/vst/vstbus.cpp"
-#include "public.sdk/source/vst/vstinitiids.cpp"
-#include "public.sdk/source/vst/vstcomponent.cpp"
-#include "public.sdk/source/vst/vstcomponentbase.cpp"
-#include "public.sdk/source/vst/vstparameters.cpp"
-#include "public.sdk/source/vst/vstsinglecomponenteffect.cpp"
-#include "public.sdk/source/vst/hosting/hostclasses.cpp"
+#include <base/source/baseiids.cpp>
+#include <base/source/fatomic.cpp>
+#include <base/source/fbuffer.cpp>
+#include <base/source/fdebug.cpp>
+#include <base/source/fobject.cpp>
+#include <base/source/frect.cpp>
+#include <base/source/fstreamer.cpp>
+#include <base/source/fstring.cpp>
+#include <base/source/fthread.cpp>
+#include <base/source/updatehandler.cpp>
+#include <pluginterfaces/base/conststringtable.cpp>
+#include <pluginterfaces/base/funknown.cpp>
+#include <pluginterfaces/base/ustring.cpp>
+#include <public.sdk/source/main/pluginfactoryvst3.cpp>
+#include <public.sdk/source/common/memorystream.cpp>
+#include <public.sdk/source/common/pluginview.cpp>
+#include <public.sdk/source/vst/vstbus.cpp>
+#include <public.sdk/source/vst/vstinitiids.cpp>
+#include <public.sdk/source/vst/vstcomponent.cpp>
+#include <public.sdk/source/vst/vstcomponentbase.cpp>
+#include <public.sdk/source/vst/vstparameters.cpp>
+#include <public.sdk/source/vst/vstsinglecomponenteffect.cpp>
+#include <public.sdk/source/vst/hosting/hostclasses.cpp>
 
 #if JUCE_MSVC
  #pragma warning (pop)
