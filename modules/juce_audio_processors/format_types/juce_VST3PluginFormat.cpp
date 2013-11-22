@@ -268,6 +268,7 @@ static int getNumSingleDirectionBussesFor (Vst::IComponent* component,
                                          checkInputs ? Vst::kInput : Vst::kOutput);
 }
 
+/** Gives the total number of channels for a particular type of bus direction and media type */
 static int getNumSingleDirectionChannelsFor (Vst::IComponent* component,
                                              bool checkInputs,
                                              bool checkAudioChannels)
@@ -284,7 +285,7 @@ static int getNumSingleDirectionChannelsFor (Vst::IComponent* component,
     {
         Vst::BusInfo busInfo;
         warnOnFailure (component->getBusInfo (mediaType, direction, i, busInfo));
-        numChannels += busInfo.channelCount;
+        numChannels += (int) busInfo.channelCount;
     }
 
     return numChannels;
@@ -655,9 +656,9 @@ private:
 //==============================================================================
 class VST3PluginInstance;
 
-class VST3HostContext  : public Vst::IComponentHandler,  //From VST V3.0.0
-                         public Vst::IComponentHandler2, //From VST V3.1.0 (a very well named class, of course!)
-                         public Vst::IComponentHandler3, //From VST V3.5.0 (also very well named!)
+class VST3HostContext  : public Vst::IComponentHandler,  // From VST V3.0.0
+                         public Vst::IComponentHandler2, // From VST V3.1.0 (a very well named class, of course!)
+                         public Vst::IComponentHandler3, // From VST V3.5.0 (also very well named!)
                          public Vst::IContextMenuTarget,
                          public Vst::IHostApplication,
                          public Vst::IParamValueQueue,
@@ -1570,7 +1571,7 @@ public:
             dummyComponent.setBounds (0, 0, (int) rect.getWidth(), (int) rect.getHeight());
            #endif
 
-            Desktop::getInstance().getMainMouseSource().forceMouseCursorUpdate(); //Some plugins don't update their cursor correctly when mousing out the window
+            Desktop::getInstance().getMainMouseSource().forceMouseCursorUpdate(); // Some plugins don't update their cursor correctly when mousing out the window
 
             recursiveResize = false;
         }
@@ -1676,6 +1677,8 @@ public:
     VST3PluginInstance (const VST3ModuleHandle::Ptr& handle)
       : module (handle),
         result (1, 1),
+        numInputAudioBusses (0),
+        numOutputAudioBusses (0),
         inputParameterChanges (new ParameterChangeList()),
         outputParameterChanges (new ParameterChangeList()),
         midiInputs (new MidiEventList()),
@@ -1762,6 +1765,12 @@ public:
     {
         using namespace Vst;
 
+        const int numInputs = getNumInputChannels();
+        const int numOutputs = getNumOutputChannels();
+
+        // Needed for having the same sample rate in processBlock(); some plugins need this!
+        setPlayConfigDetails (numInputs, numOutputs, sampleRate, estimatedSamplesPerBlock);
+
         ProcessSetup setup;
         setup.symbolicSampleSize    = kSample32;
         setup.maxSamplesPerBlock    = estimatedSamplesPerBlock;
@@ -1778,19 +1787,23 @@ public:
         warnOnFailure (component->setActive (true));
         warnOnFailure (processor->setProcessing (true));
 
+        result.setSize (numOutputs, estimatedSamplesPerBlock, false, true, true);
+
         Array<SpeakerArrangement> inArrangements, outArrangements;
 
-        fillWithCorrespondingSpeakerArrangements (inArrangements, getNumInputChannels());
-        fillWithCorrespondingSpeakerArrangements (outArrangements, getNumOutputChannels());
+        fillWithCorrespondingSpeakerArrangements (inArrangements, numInputs);
+        fillWithCorrespondingSpeakerArrangements (outArrangements, numOutputs);
 
-        processor->setBusArrangements (inArrangements.getRawDataPointer(),
-                                       getNumSingleDirectionBussesFor (component, true, true),
-                                       outArrangements.getRawDataPointer(),
-                                       getNumSingleDirectionBussesFor (component, false, true));
+        warnOnFailure (processor->setBusArrangements (inArrangements.getRawDataPointer(),
+                                                      getNumSingleDirectionBussesFor (component, true, true),
+                                                      outArrangements.getRawDataPointer(),
+                                                      getNumSingleDirectionBussesFor (component, false, true)));
     }
 
     void releaseResources() override
     {
+        result.setSize (1, 1, false, true, true);
+
         if (processor != nullptr)
             processor->setProcessing (false);
 
@@ -1805,18 +1818,21 @@ public:
         if (processor != nullptr
              && processor->canProcessSampleSize (kSample32) == kResultTrue)
         {
+            const int numSamples = buffer.getNumSamples();
+
             ProcessData data;
-            data.processMode            = kRealtime;
+            data.processMode            = isNonRealtime() ? kOffline : kRealtime;
             data.symbolicSampleSize     = kSample32;
-            data.numInputs              = getNumInputChannels();
-            data.numOutputs             = getNumOutputChannels();
+            data.numInputs              = 1; // Number of busses, not channels!
+            data.numOutputs             = 1; // Number of busses, not channels!
             data.inputParameterChanges  = inputParameterChanges;
             data.outputParameterChanges = outputParameterChanges;
+            data.numSamples             = (Steinberg::int32) numSamples;
 
             updateTimingInformation (data, getSampleRate());
 
-            for (int i = data.numInputs; i < buffer.getNumChannels(); ++i)
-                buffer.clear (i, 0, buffer.getNumSamples());
+            for (int i = getNumInputChannels(); i < buffer.getNumChannels(); ++i)
+                buffer.clear (i, 0, numSamples);
 
             associateTo (data, buffer);
             associateTo (data, midiMessages);
@@ -2044,6 +2060,9 @@ private:
     AudioSampleBuffer result;
     Vst::AudioBusBuffers inputs, outputs;
 
+    // The number of IO busses MUST match that of the plugin's, as very poorly specified by the Steinberg SDK
+    int numInputAudioBusses, numOutputAudioBusses;
+
     //==============================================================================
     template<class Type>
     static void appendStateFrom (XmlElement& head, ComSmartPtr<Type>& object, const String& identifier)
@@ -2256,8 +2275,10 @@ private:
 
     void setupIO()
     {
-        activateAllBussesOfType (component, true, true);
-        activateAllBussesOfType (component, false, true);
+        activateAllBussesOfType (component, true, true);    // Activate audio inputs
+        activateAllBussesOfType (component, false, true);   // Activate audio outputs
+        activateAllBussesOfType (component, true, false);   // Activate MIDI inputs
+        activateAllBussesOfType (component, false, false);  // Activate MIDI outputs
 
         Vst::ProcessSetup setup;
         setup.symbolicSampleSize   = Vst::kSample32;
@@ -2266,6 +2287,9 @@ private:
         setup.processMode          = Vst::kRealtime;
 
         warnOnFailure (processor->setupProcessing (setup));
+
+        numInputAudioBusses = getNumSingleDirectionBussesFor (component, true, true);
+        numOutputAudioBusses = getNumSingleDirectionBussesFor (component, false, true);
 
         setPlayConfigDetails (getNumSingleDirectionChannelsFor (component, true, true),
                               getNumSingleDirectionChannelsFor (component, false, true),
@@ -2298,17 +2322,23 @@ private:
     }
 
     //==============================================================================
+    struct AudioBusBuffersWrapper
+    {
+        AudioBusBuffersWrapper() {}
+        ~AudioBusBuffersWrapper() {}
+
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioBusBuffersWrapper)
+    };
+
     void associateTo (Vst::ProcessData& destination, AudioSampleBuffer& buffer)
     {
-        result = buffer;
         result.clear();
 
         associateBufferTo (inputs, buffer);
         associateBufferTo (outputs, result);
 
-        destination.inputs      = &inputs;
-        destination.outputs     = &outputs;
-        destination.numSamples  = buffer.getNumSamples();
+        destination.inputs  = &inputs;
+        destination.outputs = &outputs;
     }
 
     void associateTo (Vst::ProcessData& destination, MidiBuffer& midiBuffer)
