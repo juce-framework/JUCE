@@ -2398,6 +2398,28 @@ public:
             expectEquals (toks.size(), 3);
             expectEquals (toks.joinIntoString ("-"), String ("x-'y,z'-"));
         }
+
+        {
+            beginTest ("var");
+
+            var v1 = 0;
+            var v2 = 0.1;
+            var v3 = "0.1";
+            var v4 = (int64) 0;
+            var v5 = 0.0;
+            expect (! v2.equals (v1));
+            expect (! v1.equals (v2));
+            expect (v2.equals (v3));
+            expect (v3.equals (v2));
+            expect (! v3.equals (v1));
+            expect (! v1.equals (v3));
+            expect (v1.equals (v4));
+            expect (v4.equals (v1));
+            expect (v5.equals (v4));
+            expect (v4.equals (v5));
+            expect (! v2.equals (v4));
+            expect (! v4.equals (v2));
+        }
     }
 };
 
