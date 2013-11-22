@@ -125,13 +125,13 @@ struct VST3Classes
 #endif
 
 #if JUCE_DEBUG
-static void warnOnFailure (int result)
+static int warnOnFailure (int result)
 {
     const char* message = "Unknown result!";
 
     switch (result)
     {
-        case kResultOk:         return;
+        case kResultOk:         return result;
         case kNotImplemented:   message = "kNotImplemented";  break;
         case kNoInterface:      message = "kNoInterface";     break;
         case kResultFalse:      message = "kResultFalse";     break;
@@ -143,6 +143,7 @@ static void warnOnFailure (int result)
     }
 
     DBG (message);
+    return result;
 }
 #else
  #define warnOnFailure(x) x
@@ -186,11 +187,6 @@ public:
         jassert (factory != nullptr);
         *this = nullptr;
         return factory->createInstance (uuid, ObjectType::iid, (void**) &source) == kResultOk;
-    }
-
-    bool loadFrom (IPluginFactory* factory, const PClassInfo& info)
-    {
-        return loadFrom (factory, info.cid);
     }
 
 private:
@@ -678,6 +674,8 @@ public:
 
     JUCE_DECLARE_VST3_COM_REF_METHODS
 
+    FUnknown* getFUnknown()     { return static_cast<Vst::IComponentHandler*> (this); }
+
     //==============================================================================
     tresult PLUGIN_API beginEdit (Vst::ParamID) override
     {
@@ -831,7 +829,7 @@ public:
     {
         if (doIdsMatch (iid, Vst::IAttributeList::iid))
         {
-            *obj = dynamic_cast<Vst::IAttributeList*> (attributeList.get());
+            *obj = attributeList.get();
             return kResultOk;
         }
 
@@ -1141,9 +1139,9 @@ public:
             {
                 ComSmartPtr<Vst::IComponent> component;
 
-                if (component.loadFrom (factory, info))
+                if (component.loadFrom (factory, info.cid))
                 {
-                    if (component->initialize (dynamic_cast<Vst::IComponentHandler*> (vst3HostContext.get())) == kResultOk)
+                    if (component->initialize (vst3HostContext->getFUnknown()) == kResultOk)
                     {
                         numInputs  = getNumSingleDirectionChannelsFor (component, true, true);
                         numOutputs = getNumSingleDirectionChannelsFor (component, false, true);
@@ -1678,16 +1676,14 @@ public:
     VST3PluginInstance (const VST3ModuleHandle::Ptr& handle)
       : module (handle),
         result (1, 1),
+        inputParameterChanges (new ParameterChangeList()),
+        outputParameterChanges (new ParameterChangeList()),
+        midiInputs (new MidiEventList()),
+        midiOutputs (new MidiEventList()),
         isComponentInitialised (false),
         isControllerInitialised (false)
     {
-        midiInputs = new MidiEventList();
-        midiOutputs = new MidiEventList();
-        inputParameterChanges = new ParameterChangeList();
-        outputParameterChanges = new ParameterChangeList();
-
         host = new VST3HostContext (this);
-        initialise();
     }
 
     ~VST3PluginInstance()
@@ -1709,6 +1705,36 @@ public:
 
         editController = nullptr;
         component = nullptr;
+    }
+
+    bool initialise()
+    {
+       #if JUCE_WINDOWS
+        // On Windows it's highly advisable to create your plugins using the message thread,
+        // because many plugins need a chance to create HWNDs that will get their messages
+        // delivered by the main message thread, and that's not possible from a background thread.
+        jassert (MessageManager::getInstance()->isThisTheMessageThread());
+       #endif
+
+        ComSmartPtr<IPluginFactory> factory (module->getPluginFactory());
+
+        PFactoryInfo factoryInfo;
+        factory->getFactoryInfo (&factoryInfo);
+        company = toString (factoryInfo.vendor).trim();
+
+        if (! fetchComponentAndController (factory, factory->countClasses()))
+            return false;
+
+        if (warnOnFailure (editController->initialize (host->getFUnknown())) != kResultTrue)
+            return false;
+
+        isControllerInitialised = true;
+        editController->setComponentHandler (host);
+        grabInformationObjects();
+        synchroniseStates();
+        interconnectComponentAndController();
+        setupIO();
+        return true;
     }
 
     //==============================================================================
@@ -1744,11 +1770,8 @@ public:
 
         warnOnFailure (processor->setupProcessing (setup));
 
-        if (! isControllerInitialised)
-            isControllerInitialised = editController->initialize (dynamic_cast<Vst::IComponentHandler*> (host.get())) == kResultTrue;
-
         if (! isComponentInitialised)
-            isComponentInitialised = component->initialize (dynamic_cast<Vst::IComponentHandler*> (host.get())) == kResultTrue;
+            isComponentInitialised = component->initialize (host->getFUnknown()) == kResultTrue;
 
         editController->setComponentHandler (host);
 
@@ -1768,8 +1791,11 @@ public:
 
     void releaseResources() override
     {
-        processor->setProcessing (false);
-        component->setActive (false);
+        if (processor != nullptr)
+            processor->setProcessing (false);
+
+        if (component != nullptr)
+            component->setActive (false);
     }
 
     void processBlock (AudioSampleBuffer& buffer, MidiBuffer& midiMessages) override
@@ -2081,12 +2107,10 @@ private:
     ComSmartPtr<ParameterChangeList> inputParameterChanges, outputParameterChanges;
     ComSmartPtr<MidiEventList> midiInputs, midiOutputs;
     Vst::ProcessContext timingInfo; //< Only use this in processBlock()!
-
-    bool isComponentInitialised;
-    bool isControllerInitialised;
+    bool isComponentInitialised, isControllerInitialised;
 
     //==============================================================================
-    void fetchComponentAndController (IPluginFactory* factory, const Steinberg::int32 numClasses)
+    bool fetchComponentAndController (IPluginFactory* factory, const Steinberg::int32 numClasses)
     {
         jassert (numClasses >= 0); // The plugin must provide at least an IComponent and IEditController!
 
@@ -2119,7 +2143,7 @@ private:
 
                 if (pf3.loadFrom (factory))
                 {
-                    pf3->setHostContext (dynamic_cast<Vst::IComponentHandler*> (host.get()));
+                    pf3->setHostContext (host->getFUnknown());
                     infoW = new PClassInfoW();
                     pf3->getClassInfoUnicode (i, infoW);
                 }
@@ -2131,42 +2155,38 @@ private:
 
             bool failed = true;
 
-            if (component.loadFrom (factory, *info) && component != nullptr)
+            if (component.loadFrom (factory, info->cid) && component != nullptr)
             {
                 warnOnFailure (component->setIoMode (isNonRealtime() ? Vst::kOffline : Vst::kRealtime));
 
-                if (component->initialize (dynamic_cast<Vst::IComponentHandler*> (host.get())) == kResultOk)
+                if (warnOnFailure (component->initialize (host->getFUnknown())) != kResultOk)
+                    return false;
+
+                isComponentInitialised = true;
+
+                // Get the IEditController:
+                TUID controllerCID = { 0 };
+
+                if (component->getControllerClassId (controllerCID) == kResultTrue && FUID (controllerCID).isValid())
+                    editController.loadFrom (factory, controllerCID);
+
+                if (editController == nullptr)
                 {
-                    isComponentInitialised = true;
-
-                    // Get the IEditController:
-                    TUID controllerCID = { 0 };
-
-                    if (component->getControllerClassId (controllerCID) == kResultTrue && FUID (controllerCID).isValid())
-                        editController.loadFrom (factory, controllerCID);
-
-                    if (editController == nullptr)
-                        editController.loadFrom (component);
-
-                    if (editController == nullptr)
+                    // Try finding the IEditController the long way around:
+                    for (Steinberg::int32 i = 0; i < numClasses; ++i)
                     {
-                        // Try finding the IEditController the long way around:
-                        for (Steinberg::int32 i = 0; i < numClasses; ++i)
-                        {
-                            PClassInfo classInfo;
-                            factory->getClassInfo (i, &classInfo);
+                        PClassInfo classInfo;
+                        factory->getClassInfo (i, &classInfo);
 
-                            if (std::strcmp (classInfo.category, kVstComponentControllerClass) == 0)
-                                editController.loadFrom (factory, classInfo);
-                        }
+                        if (std::strcmp (classInfo.category, kVstComponentControllerClass) == 0)
+                            editController.loadFrom (factory, classInfo.cid);
                     }
+                }
 
-                    failed = editController == nullptr;
-                }
-                else
-                {
-                    jassertfalse;
-                }
+                if (editController == nullptr)
+                    editController.loadFrom (component);
+
+                failed = editController == nullptr;
             }
 
             if (failed)
@@ -2185,11 +2205,13 @@ private:
                     editController = nullptr;
                 }
 
-                return;
+                break;
             }
 
-            break;
+            return true;
         }
+
+        return false;
     }
 
     /** Some plugins need to be "connected" to intercommunicate between their implemented classes */
@@ -2248,38 +2270,6 @@ private:
         setPlayConfigDetails (getNumSingleDirectionChannelsFor (component, true, true),
                               getNumSingleDirectionChannelsFor (component, false, true),
                               setup.sampleRate, (int) setup.maxSamplesPerBlock);
-    }
-
-    void initialise()
-    {
-        jassert (module != nullptr);
-
-       #if JUCE_WINDOWS
-        // On Windows it's highly advisable to create your plugins using the message thread,
-        // because many plugins need a chance to create HWNDs that will get their messages
-        // delivered by the main message thread, and that's not possible from a background thread.
-        jassert (MessageManager::getInstance()->isThisTheMessageThread());
-       #endif
-
-        ComSmartPtr<IPluginFactory> factory (module->getPluginFactory());
-
-        PFactoryInfo factoryInfo;
-        factory->getFactoryInfo (&factoryInfo);
-        company = toString (factoryInfo.vendor).trim();
-
-        fetchComponentAndController (factory, factory->countClasses());
-
-        jassert (info != nullptr);
-
-        isControllerInitialised = editController->initialize (dynamic_cast<Vst::IComponentHandler*> (host.get())) == kResultTrue;
-        jassert (isControllerInitialised);
-
-        editController->setComponentHandler (host);
-
-        grabInformationObjects();
-        synchroniseStates();
-        interconnectComponentAndController();
-        setupIO();
     }
 
     //==============================================================================
@@ -2387,7 +2377,12 @@ AudioPluginInstance* VST3PluginFormat::createInstanceFromDescription (const Plug
         file.getParentDirectory().setAsCurrentWorkingDirectory();
 
         if (const VST3Classes::VST3ModuleHandle::Ptr module = VST3Classes::VST3ModuleHandle::findOrCreateModule (file, description))
+        {
             result = new VST3Classes::VST3PluginInstance (module);
+
+            if (! result->initialise())
+                result = nullptr;
+        }
 
         previousWorkingDirectory.setAsCurrentWorkingDirectory();
     }
