@@ -48,6 +48,7 @@ namespace CommandIDs
         showTranslationTool    = 0x200079,
         showProjectSettings    = 0x20007a,
         showProjectModules     = 0x20007b,
+        showSVGPathTool        = 0x20007c,
 
         closeWindow            = 0x201001,
         closeAllDocuments      = 0x201000,

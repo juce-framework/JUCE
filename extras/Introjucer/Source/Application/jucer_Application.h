@@ -97,6 +97,7 @@ public:
     {
         appearanceEditorWindow = nullptr;
         utf8Window = nullptr;
+        svgPathWindow = nullptr;
 
        #if JUCE_MAC
         MenuBarModel::setMacMainMenu (nullptr);
@@ -311,6 +312,7 @@ public:
     virtual void createToolsMenu (PopupMenu& menu)
     {
         menu.addCommandItem (commandManager, CommandIDs::showUTF8Tool);
+        menu.addCommandItem (commandManager, CommandIDs::showSVGPathTool);
         menu.addCommandItem (commandManager, CommandIDs::showTranslationTool);
     }
 
@@ -348,7 +350,8 @@ public:
                                   CommandIDs::closeAllDocuments,
                                   CommandIDs::saveAll,
                                   CommandIDs::showAppearanceSettings,
-                                  CommandIDs::showUTF8Tool };
+                                  CommandIDs::showUTF8Tool,
+                                  CommandIDs::showSVGPathTool };
 
         commands.addArray (ids, numElementsInArray (ids));
     }
@@ -385,6 +388,10 @@ public:
             result.setInfo ("UTF-8 String-Literal Helper", "Shows the UTF-8 string literal utility", CommandCategories::general, 0);
             break;
 
+        case CommandIDs::showSVGPathTool:
+            result.setInfo ("SVG Path Helper", "Shows the SVG->Path data conversion utility", CommandCategories::general, 0);
+            break;
+
         default:
             JUCEApplication::getCommandInfo (commandID, result);
             break;
@@ -400,6 +407,8 @@ public:
             case CommandIDs::saveAll:                   openDocumentManager.saveAll(); break;
             case CommandIDs::closeAllDocuments:         closeAllDocuments (true); break;
             case CommandIDs::showUTF8Tool:              showUTF8ToolWindow (utf8Window); break;
+            case CommandIDs::showSVGPathTool:           showSVGPathDataToolWindow (svgPathWindow); break;
+
             case CommandIDs::showAppearanceSettings:    AppearanceSettings::showEditorWindow (appearanceEditorWindow); break;
             default:                                    return JUCEApplication::perform (info);
         }
@@ -531,7 +540,7 @@ public:
     OpenDocumentManager openDocumentManager;
     ScopedPointer<ApplicationCommandManager> commandManager;
 
-    ScopedPointer<Component> appearanceEditorWindow, utf8Window;
+    ScopedPointer<Component> appearanceEditorWindow, utf8Window, svgPathWindow;
 
     ScopedPointer<FileLogger> logger;
 
