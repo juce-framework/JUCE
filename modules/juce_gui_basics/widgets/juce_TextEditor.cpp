@@ -1609,13 +1609,9 @@ void TextEditor::drawContent (Graphics& g)
 
         Iterator i (sections, wordWrapWidth, passwordCharacter);
 
-        while (i.lineY + 200.0 < clip.getY() && i.next())
-        {}
-
         if (! selection.isEmpty())
         {
             Iterator i2 (i);
-
             RectangleList<float> selectionArea;
 
             while (i2.next() && i2.lineY < clip.getBottom())
