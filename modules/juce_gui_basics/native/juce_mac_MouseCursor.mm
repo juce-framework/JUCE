@@ -90,7 +90,6 @@ void* MouseCursor::createStandardMouseCursor (MouseCursor::StandardCursorType ty
             case WaitCursor:            c = [NSCursor arrowCursor]; break; // avoid this on the mac, let the OS provide the beachball
             case IBeamCursor:           c = [NSCursor IBeamCursor]; break;
             case PointingHandCursor:    c = [NSCursor pointingHandCursor]; break;
-            case LeftRightResizeCursor: c = [NSCursor resizeLeftRightCursor]; break;
             case LeftEdgeResizeCursor:  c = [NSCursor resizeLeftCursor]; break;
             case RightEdgeResizeCursor: c = [NSCursor resizeRightCursor]; break;
             case CrosshairCursor:       c = [NSCursor crosshairCursor]; break;
@@ -109,6 +108,13 @@ void* MouseCursor::createStandardMouseCursor (MouseCursor::StandardCursorType ty
             case TopEdgeResizeCursor:
             case BottomEdgeResizeCursor:
                 return MouseCursorHelpers::fromWebKitFile ("northSouthResizeCursor.png", 0.5f, 0.5f);
+
+            case LeftRightResizeCursor:
+                if (void* m = MouseCursorHelpers::fromWebKitFile ("eastWestResizeCursor.png", 0.5f, 0.5f))
+                    return m;
+
+                c = [NSCursor resizeLeftRightCursor];
+                break;
 
             case TopLeftCornerResizeCursor:
             case BottomRightCornerResizeCursor:
