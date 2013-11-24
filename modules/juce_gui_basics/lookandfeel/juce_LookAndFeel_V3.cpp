@@ -604,3 +604,27 @@ Button* LookAndFeel_V3::createDocumentWindowButton (int buttonType)
     jassertfalse;
     return nullptr;
 }
+
+Path LookAndFeel_V3::getTickShape (const float height)
+{
+    static const unsigned char pathData[]
+        = { 110,109,32,210,202,64,126,183,148,64,108,39,244,247,64,245,76,124,64,108,178,131,27,65,246,76,252,64,108,175,242,4,65,246,76,252,
+            64,108,236,5,68,65,0,0,160,180,108,240,150,90,65,21,136,52,63,108,48,59,16,65,0,0,32,65,108,32,210,202,64,126,183,148,64, 99,101,0,0 };
+
+    Path p;
+    p.loadPathFromData (pathData, sizeof (pathData));
+    p.scaleToFit (0, 0, height * 2.0f, height, true);
+    return p;
+}
+
+Path LookAndFeel_V3::getCrossShape (const float height)
+{
+    static const unsigned char pathData[]
+        = { 110,109,88,57,198,65,29,90,171,65,108,63,53,154,65,8,172,126,65,108,76,55,198,65,215,163,38,65,108,141,151,175,65,82,184,242,64,108,117,147,131,65,90,100,81,65,108,184,30,47,65,82,184,242,64,108,59,223,1,65,215,163,38,65,108,84,227,89,65,8,172,126,65,
+            108,35,219,1,65,29,90,171,65,108,209,34,47,65,231,251,193,65,108,117,147,131,65,207,247,149,65,108,129,149,175,65,231,251,193,65,99,101,0,0 };
+
+    Path p;
+    p.loadPathFromData (pathData, sizeof (pathData));
+    p.scaleToFit (0, 0, height * 2.0f, height, true);
+    return p;
+}
