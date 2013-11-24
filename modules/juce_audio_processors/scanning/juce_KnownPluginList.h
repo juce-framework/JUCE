@@ -132,6 +132,7 @@ public:
         sortAlphabetically,
         sortByCategory,
         sortByManufacturer,
+        sortByFormat,
         sortByFileSystemLocation
     };
 
@@ -143,7 +144,7 @@ public:
 
         Use getIndexChosenByMenu() to find out the type that was chosen.
     */
-    void addToMenu (PopupMenu& menu, const SortMethod sortMethod) const;
+    void addToMenu (PopupMenu& menu, SortMethod sortMethod) const;
 
     /** Converts a menu item index that has been chosen into its index in this list.
         Returns -1 if it's not an ID that was used.
@@ -153,7 +154,7 @@ public:
 
     //==============================================================================
     /** Sorts the list. */
-    void sort (const SortMethod method);
+    void sort (SortMethod method, bool forwards);
 
     //==============================================================================
     /** Creates some XML that can be used to store the state of this list. */
@@ -195,7 +196,7 @@ public:
 
 private:
     //==============================================================================
-    OwnedArray <PluginDescription> types;
+    OwnedArray<PluginDescription> types;
     StringArray blacklist;
     ScopedPointer<CustomScanner> scanner;
     CriticalSection scanLock;
