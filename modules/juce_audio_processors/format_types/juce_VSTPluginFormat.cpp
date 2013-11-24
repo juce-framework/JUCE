@@ -1831,8 +1831,6 @@ private:
             int versionBits[32];
             int n = 0;
 
-            const int originalValue = v;
-
             for (int vv = v; vv != 0; vv /= 10)
                 versionBits [n++] = vv % 10;
 
