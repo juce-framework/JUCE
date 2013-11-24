@@ -29,8 +29,6 @@
 #ifndef JUCE_TIME_H_INCLUDED
 #define JUCE_TIME_H_INCLUDED
 
-#include "juce_RelativeTime.h"
-
 
 //==============================================================================
 /**

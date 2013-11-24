@@ -57,6 +57,8 @@ static void createPath (Path& p, const b2Vec2* vertices, int32 vertexCount)
 
     for (int i = 1; i < vertexCount; ++i)
         p.lineTo (vertices[i].x, vertices[i].y);
+
+    p.closeSubPath();
 }
 
 void Box2DRenderer::DrawPolygon (const b2Vec2* vertices, int32 vertexCount, const b2Color& color)
@@ -85,9 +87,9 @@ void Box2DRenderer::DrawCircle (const b2Vec2& center, float32 radius, const b2Co
                            getLineThickness());
 }
 
-void Box2DRenderer::DrawSolidCircle (const b2Vec2& center, float32 radius, const b2Vec2& axis, const b2Color& color)
+void Box2DRenderer::DrawSolidCircle (const b2Vec2& center, float32 radius, const b2Vec2& /*axis*/, const b2Color& colour)
 {
-    graphics->setColour (getColour (color));
+    graphics->setColour (getColour (colour));
     graphics->fillEllipse (center.x - radius, center.y - radius,
                            radius * 2.0f, radius * 2.0f);
 }

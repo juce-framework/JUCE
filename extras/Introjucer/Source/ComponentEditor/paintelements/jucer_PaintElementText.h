@@ -34,8 +34,8 @@
 class PaintElementText   : public ColouredElement
 {
 public:
-    PaintElementText (PaintRoutine* owner)
-        : ColouredElement (owner, "Text", false, false),
+    PaintElementText (PaintRoutine* pr)
+        : ColouredElement (pr, "Text", false, false),
           text ("Your text goes here"),
           font (15.0f),
           typefaceName (FontPropertyComponent::getDefaultFont()),
@@ -65,16 +65,16 @@ public:
         return s;
     }
 
-    void getEditableProperties (Array <PropertyComponent*>& properties)
+    void getEditableProperties (Array<PropertyComponent*>& props)
     {
-        ColouredElement::getEditableProperties (properties);
+        ColouredElement::getEditableProperties (props);
 
-        properties.add (new TextProperty (this));
-        properties.add (new FontNameProperty (this));
-        properties.add (new FontStyleProperty (this));
-        properties.add (new FontSizeProperty (this));
-        properties.add (new TextJustificationProperty (this));
-        properties.add (new TextToPathProperty (this));
+        props.add (new TextProperty (this));
+        props.add (new FontNameProperty (this));
+        props.add (new FontStyleProperty (this));
+        props.add (new FontSizeProperty (this));
+        props.add (new TextJustificationProperty (this));
+        props.add (new TextToPathProperty (this));
     }
 
     void fillInGeneratedCode (GeneratedCode& code, String& paintMethodCode)
@@ -279,15 +279,15 @@ public:
         }
     }
 
-    String getTypefaceName() const noexcept                          { return typefaceName; }
+    String getTypefaceName() const noexcept                         { return typefaceName; }
 
     //==============================================================================
-    const Justification& getJustification() const noexcept           { return justification; }
+    Justification getJustification() const noexcept                 { return justification; }
 
     class SetJustifyAction   : public PaintElementUndoableAction <PaintElementText>
     {
     public:
-        SetJustifyAction (PaintElementText* const element, const Justification& newValue_)
+        SetJustifyAction (PaintElementText* const element, Justification newValue_)
             : PaintElementUndoableAction <PaintElementText> (element),
               newValue (newValue_),
               oldValue (element->getJustification())
@@ -312,7 +312,7 @@ public:
         Justification newValue, oldValue;
     };
 
-    void setJustification (const Justification& j, const bool undoable)
+    void setJustification (Justification j, const bool undoable)
     {
         if (justification.getFlags() != j.getFlags())
         {
@@ -516,12 +516,12 @@ private:
             element->getDocument()->removeChangeListener (this);
         }
 
-        void setJustification (const Justification& newJustification)
+        void setJustification (Justification newJustification)
         {
             element->setJustification (newJustification, true);
         }
 
-        const Justification getJustification() const
+        Justification getJustification() const
         {
             return element->getJustification();
         }

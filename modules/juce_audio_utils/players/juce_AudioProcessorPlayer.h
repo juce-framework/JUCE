@@ -25,8 +25,6 @@
 #ifndef JUCE_AUDIOPROCESSORPLAYER_H_INCLUDED
 #define JUCE_AUDIOPROCESSORPLAYER_H_INCLUDED
 
-#include "../../juce_audio_processors/processors/juce_AudioProcessor.h"
-
 
 //==============================================================================
 /**

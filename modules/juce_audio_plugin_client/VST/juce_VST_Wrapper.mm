@@ -36,14 +36,14 @@
 #include "../utility/juce_IncludeModuleHeaders.h"
 #include "../utility/juce_FakeMouseMoveGenerator.h"
 #include "../utility/juce_CarbonVisibility.h"
-#include "../utility/juce_PluginHostType.h"
 
 //==============================================================================
 namespace juce
 {
 
 #if ! JUCE_64BIT
-static void updateComponentPos (Component* const comp)
+void updateEditorCompBounds (Component*);
+void updateEditorCompBounds (Component* comp)
 {
     HIViewRef dummyView = (HIViewRef) (void*) (pointer_sized_int)
                             comp->getProperties() ["dummyViewRef"].toString().getHexValue64();
@@ -63,7 +63,7 @@ static void updateComponentPos (Component* const comp)
 
 static pascal OSStatus viewBoundsChangedEvent (EventHandlerCallRef, EventRef, void* user)
 {
-    updateComponentPos ((Component*) user);
+    updateEditorCompBounds ((Component*) user);
     return noErr;
 }
 #endif
@@ -140,7 +140,7 @@ void* attachComponentToWindowRef (Component* comp, void* windowRef)
         InstallEventHandler (GetControlEventTarget (dummyView), NewEventHandlerUPP (viewBoundsChangedEvent), 1, &kControlBoundsChangedEvent, (void*) comp, &ref);
         comp->getProperties().set ("boundsEventRef", String::toHexString ((pointer_sized_int) (void*) ref));
 
-        updateComponentPos (comp);
+        updateEditorCompBounds (comp);
 
        #if ! JucePlugin_EditorRequiresKeyboardFocus
         comp->addToDesktop (ComponentPeer::windowIsTemporary | ComponentPeer::windowIgnoresKeyPresses);
@@ -221,6 +221,7 @@ void setNativeHostWindowSize (void* nsWindow, Component* component, int newWidth
                                                 [hostView frame].size.height + (newHeight - component->getHeight()))];
         }
        #else
+        (void) nsWindow;
 
         if (HIViewRef dummyView = (HIViewRef) (void*) (pointer_sized_int)
                                      component->getProperties() ["dummyViewRef"].toString().getHexValue64())
@@ -247,11 +248,12 @@ bool forwardCurrentKeyEventToHost (Component* comp);
 bool forwardCurrentKeyEventToHost (Component* comp)
 {
    #if JUCE_64BIT
+    (void) comp;
     return false;
    #else
     NSWindow* win = [(NSView*) comp->getWindowHandle() window];
     [[win parentWindow] makeKeyWindow];
-    [NSApp postEvent: [NSApp currentEvent] atStart: YES];
+    repostCurrentNSEvent();
     return true;
    #endif
 }

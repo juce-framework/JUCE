@@ -25,8 +25,6 @@
 #ifndef JUCE_RELATIVERECTANGLE_H_INCLUDED
 #define JUCE_RELATIVERECTANGLE_H_INCLUDED
 
-#include "juce_RelativeCoordinate.h"
-class Component;
 
 //==============================================================================
 /**

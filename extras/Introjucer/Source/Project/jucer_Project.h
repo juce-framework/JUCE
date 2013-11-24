@@ -28,8 +28,8 @@
 #include "../jucer_Headers.h"
 class ProjectExporter;
 class ProjectType;
-class ModuleList;
 class LibraryModule;
+class EnabledModuleList;
 
 //==============================================================================
 class Project  : public FileBasedDocument,
@@ -53,6 +53,7 @@ public:
     void setTitle (const String& newTitle);
 
     //==============================================================================
+    File getProjectFolder() const                       { return getFile().getParentDirectory(); }
     ValueTree getProjectRoot() const                    { return projectRoot; }
     String getTitle() const;
     Value getProjectNameValue()                         { return getMainGroup().getNameValue(); }
@@ -107,6 +108,7 @@ public:
     File getBinaryDataCppFile (int index) const;
     File getBinaryDataHeaderFile() const                { return getBinaryDataCppFile (0).withFileExtension (".h"); }
     Value getMaxBinaryFileSize()                        { return getProjectValue (Ids::maxBinaryFileSize); }
+    Value shouldIncludeBinaryInAppConfig()              { return getProjectValue (Ids::includeBinaryInAppConfig); }
 
     //==============================================================================
     String getAmalgamatedHeaderFileName() const         { return "juce_amalgamated.h"; }
@@ -241,19 +243,7 @@ public:
     bool isConfigFlagEnabled (const String& name) const;
 
     //==============================================================================
-    bool isModuleEnabled (const String& moduleID) const;
-    Value shouldShowAllModuleFilesInProject (const String& moduleID);
-    Value shouldCopyModuleFilesLocally (const String& moduleID);
-
-    void addModule (const String& moduleID, bool shouldCopyFilesLocally);
-    void removeModule (const String& moduleID);
-    int getNumModules() const;
-    String getModuleID (int index) const;
-
-    void addDefaultModules (bool shouldCopyFilesLocally);
-    bool isAudioPluginModuleMissing() const;
-
-    void createRequiredModules (const ModuleList& availableModules, OwnedArray<LibraryModule>& modules) const;
+    EnabledModuleList& getModules();
 
     //==============================================================================
     String getFileTemplate (const String& templateName);
@@ -277,17 +267,19 @@ public:
 private:
     friend class Item;
     ValueTree projectRoot;
+    ScopedPointer<EnabledModuleList> enabledModulesList;
 
     void updateProjectSettings();
     void sanitiseConfigFlags();
     void setMissingDefaultValues();
     ValueTree getConfigurations() const;
     ValueTree getConfigNode();
-    ValueTree getModulesNode();
 
     void updateOldStyleConfigList();
     void moveOldPropertyFromProjectToAllExporters (Identifier name);
     void removeDefunctExporters();
+    void updateOldModulePaths();
+    void warnAboutOldIntrojucerVersion();
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Project)
 };

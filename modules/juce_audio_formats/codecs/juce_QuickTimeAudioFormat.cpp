@@ -66,14 +66,13 @@ namespace juce
 bool juce_OpenQuickTimeMovieFromStream (InputStream* input, Movie& movie, Handle& dataHandle);
 
 static const char* const quickTimeFormatName = "QuickTime file";
-static const char* const quickTimeExtensions[] = { ".mov", ".mp3", ".mp4", ".m4a", 0 };
 
 //==============================================================================
 class QTAudioReader     : public AudioFormatReader
 {
 public:
     QTAudioReader (InputStream* const input_, const int trackNum_)
-        : AudioFormatReader (input_, TRANS (quickTimeFormatName)),
+        : AudioFormatReader (input_, quickTimeFormatName),
           ok (false),
           movie (0),
           trackNum (trackNum_),
@@ -133,31 +132,31 @@ public:
             trackUnitsPerFrame = GetMovieTimeScale (movie) * samplesPerFrame
                                     / GetMediaTimeScale (media);
 
-            OSStatus err = MovieAudioExtractionBegin (movie, 0, &extractor);
+            MovieAudioExtractionBegin (movie, 0, &extractor);
 
             unsigned long output_layout_size;
-            err = MovieAudioExtractionGetPropertyInfo (extractor,
-                                                       kQTPropertyClass_MovieAudioExtraction_Audio,
-                                                       kQTMovieAudioExtractionAudioPropertyID_AudioChannelLayout,
-                                                       0, &output_layout_size, 0);
+            OSStatus err = MovieAudioExtractionGetPropertyInfo (extractor,
+                                                                kQTPropertyClass_MovieAudioExtraction_Audio,
+                                                                kQTMovieAudioExtractionAudioPropertyID_AudioChannelLayout,
+                                                                0, &output_layout_size, 0);
             if (err != noErr)
                 return;
 
             HeapBlock <AudioChannelLayout> qt_audio_channel_layout;
             qt_audio_channel_layout.calloc (output_layout_size, 1);
 
-            err = MovieAudioExtractionGetProperty (extractor,
-                                                   kQTPropertyClass_MovieAudioExtraction_Audio,
-                                                   kQTMovieAudioExtractionAudioPropertyID_AudioChannelLayout,
-                                                   output_layout_size, qt_audio_channel_layout, 0);
+            MovieAudioExtractionGetProperty (extractor,
+                                             kQTPropertyClass_MovieAudioExtraction_Audio,
+                                             kQTMovieAudioExtractionAudioPropertyID_AudioChannelLayout,
+                                             output_layout_size, qt_audio_channel_layout, 0);
 
             qt_audio_channel_layout[0].mChannelLayoutTag = kAudioChannelLayoutTag_Stereo;
 
-            err = MovieAudioExtractionSetProperty (extractor,
-                                                   kQTPropertyClass_MovieAudioExtraction_Audio,
-                                                   kQTMovieAudioExtractionAudioPropertyID_AudioChannelLayout,
-                                                   output_layout_size,
-                                                   qt_audio_channel_layout);
+            MovieAudioExtractionSetProperty (extractor,
+                                             kQTPropertyClass_MovieAudioExtraction_Audio,
+                                             kQTMovieAudioExtractionAudioPropertyID_AudioChannelLayout,
+                                             output_layout_size,
+                                             qt_audio_channel_layout);
 
             err = MovieAudioExtractionGetProperty (extractor,
                                                    kQTPropertyClass_MovieAudioExtraction_Audio,
@@ -349,8 +348,7 @@ private:
 
 
 //==============================================================================
-QuickTimeAudioFormat::QuickTimeAudioFormat()
-    : AudioFormat (TRANS (quickTimeFormatName), StringArray (quickTimeExtensions))
+QuickTimeAudioFormat::QuickTimeAudioFormat()  : AudioFormat (quickTimeFormatName, ".mov .mp3 .mp4 .m4a")
 {
 }
 
@@ -368,7 +366,7 @@ bool QuickTimeAudioFormat::canDoMono()      { return true; }
 AudioFormatReader* QuickTimeAudioFormat::createReaderFor (InputStream* sourceStream,
                                                           const bool deleteStreamIfOpeningFails)
 {
-    ScopedPointer <QTAudioReader> r (new QTAudioReader (sourceStream, 0));
+    ScopedPointer<QTAudioReader> r (new QTAudioReader (sourceStream, 0));
 
     if (r->ok)
         return r.release();

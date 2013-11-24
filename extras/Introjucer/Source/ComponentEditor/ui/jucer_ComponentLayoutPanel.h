@@ -62,7 +62,7 @@ public:
         return ((ComponentLayoutEditor*) editor)->createComponentLayerSnapshot();
     }
 
-    ComponentLayout& getLayout() const noexcept         { return layout;}
+    ComponentLayout& layout;
 
 private:
     class LayoutPropsPanel  : public Component,
@@ -115,8 +115,6 @@ private:
         ComponentLayout& layout;
         PropertyPanel propsPanel;
     };
-
-    ComponentLayout& layout;
 };
 
 

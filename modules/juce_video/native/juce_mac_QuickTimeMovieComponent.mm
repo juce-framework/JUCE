@@ -97,7 +97,7 @@ static QTMovie* openMovieFromStream (InputStream* movieStream, File& movieFile)
         MemoryBlock temp;
         movieStream->readIntoMemoryBlock (temp);
 
-        const char* const suffixesToTry[] = { ".mov", ".mp3", ".avi", ".m4a" };
+        static const char* const suffixesToTry[] = { ".mov", ".mp3", ".avi", ".m4a" };
 
         for (int i = 0; i < numElementsInArray (suffixesToTry); ++i)
         {
@@ -323,7 +323,7 @@ void QuickTimeMovieComponent::setBoundsWithCorrectAspectRatio (const Rectangle<i
 //==============================================================================
 #if ! (JUCE_MAC && JUCE_64BIT)
 
-bool juce_OpenQuickTimeMovieFromStream (InputStream* movieStream, Movie& result, Handle& dataHandle)
+bool juce_OpenQuickTimeMovieFromStream (InputStream* movieStream, Movie& result, Handle&)
 {
     if (movieStream == nullptr)
         return false;

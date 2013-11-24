@@ -25,8 +25,6 @@
 #ifndef JUCE_ARROWBUTTON_H_INCLUDED
 #define JUCE_ARROWBUTTON_H_INCLUDED
 
-#include "juce_Button.h"
-
 
 //==============================================================================
 /**

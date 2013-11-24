@@ -25,13 +25,6 @@
 #ifndef JUCE_ALERTWINDOW_H_INCLUDED
 #define JUCE_ALERTWINDOW_H_INCLUDED
 
-#include "juce_TopLevelWindow.h"
-#include "../buttons/juce_TextButton.h"
-#include "../widgets/juce_ComboBox.h"
-#include "../widgets/juce_TextEditor.h"
-#include "../widgets/juce_ProgressBar.h"
-#include "../mouse/juce_ComponentDragger.h"
-
 
 //==============================================================================
 /** A window that displays a message and has buttons for the user to react to it.
@@ -422,6 +415,32 @@ public:
         backgroundColourId          = 0x1001800,  /**< The background colour for the window. */
         textColourId                = 0x1001810,  /**< The colour for the text. */
         outlineColourId             = 0x1001820   /**< An optional colour to use to draw a border around the window. */
+    };
+
+    //==============================================================================
+    /** This abstract base class is implemented by LookAndFeel classes to provide
+        alert-window drawing functionality.
+    */
+    struct JUCE_API  LookAndFeelMethods
+    {
+        virtual ~LookAndFeelMethods() {}
+
+        virtual AlertWindow* createAlertWindow (const String& title, const String& message,
+                                                const String& button1,
+                                                const String& button2,
+                                                const String& button3,
+                                                AlertWindow::AlertIconType iconType,
+                                                int numButtons,
+                                                Component* associatedComponent) = 0;
+
+        virtual void drawAlertBox (Graphics&, AlertWindow&, const Rectangle<int>& textArea, TextLayout&) = 0;
+
+        virtual int getAlertBoxWindowFlags() = 0;
+
+        virtual int getAlertWindowButtonHeight() = 0;
+
+        virtual Font getAlertWindowMessageFont() = 0;
+        virtual Font getAlertWindowFont() = 0;
     };
 
 protected:

@@ -118,7 +118,7 @@ void FileChooser::showPlatformDialog (Array<File>& results,
     JUCE_AUTORELEASEPOOL
     {
         ScopedPointer<TemporaryMainMenuWithStandardCommands> tempMenu;
-        if (JUCEApplication::isStandaloneApp())
+        if (JUCEApplicationBase::isStandaloneApp())
             tempMenu = new TemporaryMainMenuWithStandardCommands();
 
         StringArray* filters = new StringArray();
@@ -209,16 +209,16 @@ bool FileChooser::isPlatformDialogAvailable()
     return false;
 }
 
-void FileChooser::showPlatformDialog (Array<File>& results,
-                                      const String& title,
-                                      const File& currentFileOrDirectory,
-                                      const String& filter,
-                                      bool selectsDirectory,
-                                      bool selectsFiles,
-                                      bool isSaveDialogue,
-                                      bool warnAboutOverwritingExistingFiles,
-                                      bool selectMultipleFiles,
-                                      FilePreviewComponent* extraInfoComponent)
+void FileChooser::showPlatformDialog (Array<File>&,
+                                      const String& /*title*/,
+                                      const File& /*currentFileOrDirectory*/,
+                                      const String& /*filter*/,
+                                      bool /*selectsDirectory*/,
+                                      bool /*selectsFiles*/,
+                                      bool /*isSaveDialogue*/,
+                                      bool /*warnAboutOverwritingExistingFiles*/,
+                                      bool /*selectMultipleFiles*/,
+                                      FilePreviewComponent*)
 {
     jassertfalse; //there's no such thing in iOS
 }

@@ -8,7 +8,7 @@
 
 
 #include "AppConfig.h"
-#include "../../../modules/juce_browser_plugin/juce_browser_plugin.h"
+#include "../../../modules/juce_browser_plugin_client/juce_browser_plugin.h"
 
 #if ! DONT_SET_USING_JUCE_NAMESPACE
  /* If you're not mixing JUCE with other libraries, then this will obviously save

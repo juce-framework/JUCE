@@ -30,6 +30,7 @@
 namespace
 {
     Value shouldBuildVST (Project& project)                       { return project.getProjectValue ("buildVST"); }
+    Value shouldBuildVST3 (Project& project)                      { return project.getProjectValue ("buildVST3"); }
     Value shouldBuildAU (Project& project)                        { return project.getProjectValue ("buildAU"); }
     Value shouldBuildRTAS (Project& project)                      { return project.getProjectValue ("buildRTAS"); }
     Value shouldBuildAAX (Project& project)                       { return project.getProjectValue ("buildAAX"); }
@@ -115,11 +116,12 @@ namespace
 
     void writePluginCharacteristicsFile (ProjectSaver& projectSaver)
     {
-        Project& project = projectSaver.getProject();
+        Project& project = projectSaver.project;
 
         StringPairArray flags;
         //flags.set ("JUCE_MODAL_LOOPS_PERMITTED",             "0");
         flags.set ("JucePlugin_Build_VST",                   valueToBool (shouldBuildVST  (project)));
+        flags.set ("JucePlugin_Build_VST3",                  valueToBool (shouldBuildVST3 (project)));
         flags.set ("JucePlugin_Build_AU",                    valueToBool (shouldBuildAU   (project)));
         flags.set ("JucePlugin_Build_RTAS",                  valueToBool (shouldBuildRTAS (project)));
         flags.set ("JucePlugin_Build_AAX",                   valueToBool (shouldBuildAAX  (project)));
@@ -201,41 +203,47 @@ namespace
 //==============================================================================
 namespace VSTHelpers
 {
-    static Value getVSTFolder (ProjectExporter& exporter)         { return exporter.getSetting (Ids::vstFolder); }
-
-    static void addVSTFolderToPath (ProjectExporter& exporter, StringArray& searchPaths)
+    static Value getVSTFolder (ProjectExporter& exporter, bool isVST3)
     {
-        const String vstFolder (getVSTFolder (exporter).toString());
+        return exporter.getSetting (isVST3 ? Ids::vst3Folder
+                                           : Ids::vstFolder);
+    }
+
+    static void addVSTFolderToPath (ProjectExporter& exporter, bool isVST3)
+    {
+        const String vstFolder (getVSTFolder (exporter, isVST3).toString());
 
         if (vstFolder.isNotEmpty())
         {
             RelativePath path (exporter.rebaseFromProjectFolderToBuildTarget (RelativePath (vstFolder, RelativePath::projectFolder)));
 
             if (exporter.isVisualStudio())
-                searchPaths.add (path.toWindowsStyle());
+                exporter.extraSearchPaths.add (path.toWindowsStyle());
             else if (exporter.isLinux() || exporter.isXcode())
-                searchPaths.insert (0, path.toUnixStyle());
+                exporter.extraSearchPaths.insert (0, path.toUnixStyle());
         }
     }
 
-    static void createVSTPathEditor (ProjectExporter& exporter, PropertyListBuilder& props)
+    static void createVSTPathEditor (ProjectExporter& exporter, PropertyListBuilder& props, bool isVST3)
     {
-        props.add (new TextPropertyComponent (getVSTFolder (exporter), "VST Folder", 1024, false),
-                  "If you're building a VST, this must be the folder containing the VST SDK. This should be an absolute path.");
+        const String vstFormat (isVST3 ? "VST3" : "VST");
+
+        props.add (new TextPropertyComponent (getVSTFolder (exporter, isVST3), vstFormat + " Folder", 1024, false),
+                   "If you're building a " + vstFormat + ", this must be the folder containing the " + vstFormat + " SDK. This should be an absolute path.");
     }
 
-    static void fixMissingVSTValues (ProjectExporter& exporter)
+    static void fixMissingVSTValues (ProjectExporter& exporter, bool isVST3)
     {
-        if (getVSTFolder(exporter).toString().isEmpty())
-            getVSTFolder(exporter) = (exporter.isWindows() ? "c:\\SDKs\\vstsdk2.4"
-                                                           : "~/SDKs/vstsdk2.4");
+        if (getVSTFolder (exporter, isVST3).toString().isEmpty())
+            getVSTFolder (exporter, isVST3) = exporter.isWindows() ? (isVST3 ? "c:\\SDKs\\VST3 SDK" : "c:\\SDKs\\vstsdk2.4")
+                                                                   : (isVST3 ? "~/SDKs/VST3 SDK"    : "~/SDKs/vstsdk2.4");
 
         fixMissingXcodePostBuildScript (exporter);
     }
 
-    static inline void prepareExporter (ProjectExporter& exporter, ProjectSaver& projectSaver)
+    static inline void prepareExporter (ProjectExporter& exporter, ProjectSaver& projectSaver, bool isVST3)
     {
-        fixMissingVSTValues (exporter);
+        fixMissingVSTValues (exporter, isVST3);
         writePluginCharacteristicsFile (projectSaver);
 
         exporter.makefileTargetSuffix = ".so";
@@ -246,7 +254,7 @@ namespace VSTHelpers
         RelativePath juceWrapperFolder (exporter.getProject().getGeneratedCodeFolder(),
                                         exporter.getTargetFolder(), RelativePath::buildTargetFolder);
 
-        addVSTFolderToPath (exporter, exporter.extraSearchPaths);
+        addVSTFolderToPath (exporter, isVST3);
 
         if (exporter.isWindows())
             exporter.extraSearchPaths.add (juceWrapperFolder.toWindowsStyle());
@@ -254,10 +262,10 @@ namespace VSTHelpers
             exporter.extraSearchPaths.add (juceWrapperFolder.toUnixStyle());
     }
 
-    static inline void createPropertyEditors (ProjectExporter& exporter, PropertyListBuilder& props)
+    static inline void createPropertyEditors (ProjectExporter& exporter, PropertyListBuilder& props, bool isVST3)
     {
-        fixMissingVSTValues (exporter);
-        createVSTPathEditor (exporter, props);
+        fixMissingVSTValues (exporter, isVST3);
+        createVSTPathEditor (exporter, props, isVST3);
     }
 }
 
@@ -294,32 +302,32 @@ namespace RTASHelpers
 
             exporter.extraSearchPaths.add (juceWrapperFolder.toWindowsStyle());
 
-            const char* p[] = { "AlturaPorts/TDMPlugins/PluginLibrary/EffectClasses",
-                                "AlturaPorts/TDMPlugins/PluginLibrary/ProcessClasses",
-                                "AlturaPorts/TDMPlugins/PluginLibrary/ProcessClasses/Interfaces",
-                                "AlturaPorts/TDMPlugins/PluginLibrary/Utilities",
-                                "AlturaPorts/TDMPlugins/PluginLibrary/RTASP_Adapt",
-                                "AlturaPorts/TDMPlugins/PluginLibrary/CoreClasses",
-                                "AlturaPorts/TDMPlugins/PluginLibrary/Controls",
-                                "AlturaPorts/TDMPlugins/PluginLibrary/Meters",
-                                "AlturaPorts/TDMPlugins/PluginLibrary/ViewClasses",
-                                "AlturaPorts/TDMPlugins/PluginLibrary/DSPClasses",
-                                "AlturaPorts/TDMPlugins/PluginLibrary/Interfaces",
-                                "AlturaPorts/TDMPlugins/common",
-                                "AlturaPorts/TDMPlugins/common/Platform",
-                                "AlturaPorts/TDMPlugins/common/Macros",
-                                "AlturaPorts/TDMPlugins/SignalProcessing/Public",
-                                "AlturaPorts/TDMPlugIns/DSPManager/Interfaces",
-                                "AlturaPorts/SADriver/Interfaces",
-                                "AlturaPorts/DigiPublic/Interfaces",
-                                "AlturaPorts/DigiPublic",
-                                "AlturaPorts/Fic/Interfaces/DAEClient",
-                                "AlturaPorts/NewFileLibs/Cmn",
-                                "AlturaPorts/NewFileLibs/DOA",
-                                "AlturaPorts/AlturaSource/PPC_H",
-                                "AlturaPorts/AlturaSource/AppSupport",
-                                "AvidCode/AVX2sdk/AVX/avx2/avx2sdk/inc",
-                                "xplat/AVX/avx2/avx2sdk/inc" };
+            static const char* p[] = { "AlturaPorts/TDMPlugins/PluginLibrary/EffectClasses",
+                                       "AlturaPorts/TDMPlugins/PluginLibrary/ProcessClasses",
+                                       "AlturaPorts/TDMPlugins/PluginLibrary/ProcessClasses/Interfaces",
+                                       "AlturaPorts/TDMPlugins/PluginLibrary/Utilities",
+                                       "AlturaPorts/TDMPlugins/PluginLibrary/RTASP_Adapt",
+                                       "AlturaPorts/TDMPlugins/PluginLibrary/CoreClasses",
+                                       "AlturaPorts/TDMPlugins/PluginLibrary/Controls",
+                                       "AlturaPorts/TDMPlugins/PluginLibrary/Meters",
+                                       "AlturaPorts/TDMPlugins/PluginLibrary/ViewClasses",
+                                       "AlturaPorts/TDMPlugins/PluginLibrary/DSPClasses",
+                                       "AlturaPorts/TDMPlugins/PluginLibrary/Interfaces",
+                                       "AlturaPorts/TDMPlugins/common",
+                                       "AlturaPorts/TDMPlugins/common/Platform",
+                                       "AlturaPorts/TDMPlugins/common/Macros",
+                                       "AlturaPorts/TDMPlugins/SignalProcessing/Public",
+                                       "AlturaPorts/TDMPlugIns/DSPManager/Interfaces",
+                                       "AlturaPorts/SADriver/Interfaces",
+                                       "AlturaPorts/DigiPublic/Interfaces",
+                                       "AlturaPorts/DigiPublic",
+                                       "AlturaPorts/Fic/Interfaces/DAEClient",
+                                       "AlturaPorts/NewFileLibs/Cmn",
+                                       "AlturaPorts/NewFileLibs/DOA",
+                                       "AlturaPorts/AlturaSource/PPC_H",
+                                       "AlturaPorts/AlturaSource/AppSupport",
+                                       "AvidCode/AVX2sdk/AVX/avx2/avx2sdk/inc",
+                                       "xplat/AVX/avx2/avx2sdk/inc" };
 
             for (int i = 0; i < numElementsInArray (p); ++i)
                 exporter.addToExtraSearchPaths (rtasFolder.getChildFile (p[i]));
@@ -329,42 +337,42 @@ namespace RTASHelpers
             exporter.extraSearchPaths.add ("$(DEVELOPER_DIR)/Headers/FlatCarbon");
             exporter.extraSearchPaths.add ("$(SDKROOT)/Developer/Headers/FlatCarbon");
 
-            const char* p[] = { "AlturaPorts/TDMPlugIns/PlugInLibrary/Controls",
-                                "AlturaPorts/TDMPlugIns/PlugInLibrary/CoreClasses",
-                                "AlturaPorts/TDMPlugIns/PlugInLibrary/DSPClasses",
-                                "AlturaPorts/TDMPlugIns/PlugInLibrary/EffectClasses",
-                                "AlturaPorts/TDMPlugIns/PlugInLibrary/MacBuild",
-                                "AlturaPorts/TDMPlugIns/PlugInLibrary/Meters",
-                                "AlturaPorts/TDMPlugIns/PlugInLibrary/ProcessClasses",
-                                "AlturaPorts/TDMPlugIns/PlugInLibrary/ProcessClasses/Interfaces",
-                                "AlturaPorts/TDMPlugIns/PlugInLibrary/RTASP_Adapt",
-                                "AlturaPorts/TDMPlugIns/PlugInLibrary/Utilities",
-                                "AlturaPorts/TDMPlugIns/PlugInLibrary/ViewClasses",
-                                "AlturaPorts/TDMPlugIns/DSPManager/**",
-                                "AlturaPorts/TDMPlugIns/SupplementalPlugInLib/Encryption",
-                                "AlturaPorts/TDMPlugIns/SupplementalPlugInLib/GraphicsExtensions",
-                                "AlturaPorts/TDMPlugIns/common/**",
-                                "AlturaPorts/TDMPlugIns/common/PI_LibInterface",
-                                "AlturaPorts/TDMPlugIns/PACEProtection/**",
-                                "AlturaPorts/TDMPlugIns/SignalProcessing/**",
-                                "AlturaPorts/OMS/Headers",
-                                "AlturaPorts/Fic/Interfaces/**",
-                                "AlturaPorts/Fic/Source/SignalNets",
-                                "AlturaPorts/DSIPublicInterface/PublicHeaders",
-                                "DAEWin/Include",
-                                "AlturaPorts/DigiPublic/Interfaces",
-                                "AlturaPorts/DigiPublic",
-                                "AlturaPorts/NewFileLibs/DOA",
-                                "AlturaPorts/NewFileLibs/Cmn",
-                                "xplat/AVX/avx2/avx2sdk/inc",
-                                "xplat/AVX/avx2/avx2sdk/utils" };
+            static const char* p[] = { "AlturaPorts/TDMPlugIns/PlugInLibrary/Controls",
+                                       "AlturaPorts/TDMPlugIns/PlugInLibrary/CoreClasses",
+                                       "AlturaPorts/TDMPlugIns/PlugInLibrary/DSPClasses",
+                                       "AlturaPorts/TDMPlugIns/PlugInLibrary/EffectClasses",
+                                       "AlturaPorts/TDMPlugIns/PlugInLibrary/MacBuild",
+                                       "AlturaPorts/TDMPlugIns/PlugInLibrary/Meters",
+                                       "AlturaPorts/TDMPlugIns/PlugInLibrary/ProcessClasses",
+                                       "AlturaPorts/TDMPlugIns/PlugInLibrary/ProcessClasses/Interfaces",
+                                       "AlturaPorts/TDMPlugIns/PlugInLibrary/RTASP_Adapt",
+                                       "AlturaPorts/TDMPlugIns/PlugInLibrary/Utilities",
+                                       "AlturaPorts/TDMPlugIns/PlugInLibrary/ViewClasses",
+                                       "AlturaPorts/TDMPlugIns/DSPManager/**",
+                                       "AlturaPorts/TDMPlugIns/SupplementalPlugInLib/Encryption",
+                                       "AlturaPorts/TDMPlugIns/SupplementalPlugInLib/GraphicsExtensions",
+                                       "AlturaPorts/TDMPlugIns/common/**",
+                                       "AlturaPorts/TDMPlugIns/common/PI_LibInterface",
+                                       "AlturaPorts/TDMPlugIns/PACEProtection/**",
+                                       "AlturaPorts/TDMPlugIns/SignalProcessing/**",
+                                       "AlturaPorts/OMS/Headers",
+                                       "AlturaPorts/Fic/Interfaces/**",
+                                       "AlturaPorts/Fic/Source/SignalNets",
+                                       "AlturaPorts/DSIPublicInterface/PublicHeaders",
+                                       "DAEWin/Include",
+                                       "AlturaPorts/DigiPublic/Interfaces",
+                                       "AlturaPorts/DigiPublic",
+                                       "AlturaPorts/NewFileLibs/DOA",
+                                       "AlturaPorts/NewFileLibs/Cmn",
+                                       "xplat/AVX/avx2/avx2sdk/inc",
+                                       "xplat/AVX/avx2/avx2sdk/utils" };
 
             for (int i = 0; i < numElementsInArray (p); ++i)
                 exporter.addToExtraSearchPaths (rtasFolder.getChildFile (p[i]));
         }
     }
 
-    static inline void prepareExporter (ProjectExporter& exporter, ProjectSaver& projectSaver, const File& /*moduleFolder*/)
+    static inline void prepareExporter (ProjectExporter& exporter, ProjectSaver& projectSaver)
     {
         if (isExporterSupported (exporter))
         {
@@ -380,29 +388,28 @@ namespace RTASHelpers
                                                         createRebasedPath (exporter,
                                                                            rtasFolder.getChildFile ("WinBag")));
 
-                RelativePath juceFolder (exporter.getJucePathFromTargetFolder());
-                if (juceFolder.getFileName() != "modules")
-                    juceFolder = juceFolder.getChildFile ("modules");
-
-                String msvcPathToRTASFolder (juceFolder.getChildFile ("juce_audio_plugin_client/RTAS")
-                                                       .toWindowsStyle() + "\\");
-
                 exporter.msvcDelayLoadedDLLs = "DAE.dll; DigiExt.dll; DSI.dll; PluginLib.dll; "
                                                "DSPManager.dll; DSPManager.dll; DSPManagerClientLib.dll; RTASClientLib.dll";
 
                 if (! exporter.getExtraLinkerFlagsString().contains ("/FORCE:multiple"))
                     exporter.getExtraLinkerFlags() = exporter.getExtraLinkerFlags().toString() + " /FORCE:multiple";
 
+                RelativePath modulePath (exporter.rebaseFromProjectFolderToBuildTarget (RelativePath (exporter.getPathForModuleString ("juce_audio_plugin_client"),
+                                                                                                      RelativePath::projectFolder)
+                                                                                           .getChildFile ("RTAS")));
+
                 for (ProjectExporter::ConfigIterator config (exporter); config.next();)
                 {
-                    config->getValue (Ids::msvcModuleDefinitionFile) = msvcPathToRTASFolder + "juce_RTAS_WinExports.def";
+                    config->getValue (Ids::msvcModuleDefinitionFile) = modulePath.getChildFile ("juce_RTAS_WinExports.def").toWindowsStyle();
 
                     if (config->getValue (Ids::useRuntimeLibDLL).getValue().isVoid())
                         config->getValue (Ids::useRuntimeLibDLL) = true;
 
                     if (config->getValue (Ids::postbuildCommand).toString().isEmpty())
-                        config->getValue (Ids::postbuildCommand) = "copy /Y \"" + msvcPathToRTASFolder + "juce_RTAS_WinResources.rsr"
-                                                                        + "\" \"$(TargetPath)\".rsr";
+                        config->getValue (Ids::postbuildCommand)
+                            = "copy /Y "
+                                + modulePath.getChildFile ("juce_RTAS_WinResources.rsr").toWindowsStyle().quoted()
+                                + " \"$(TargetPath)\".rsr";
                 }
             }
             else
@@ -454,54 +461,58 @@ namespace AUHelpers
                 #define JUCE_AU_PUBLICUTILITY   "${DEVELOPER_DIR}/Extras/CoreAudio/PublicUtility/"
                 #define JUCE_AU_PUBLIC          "${DEVELOPER_DIR}/Extras/CoreAudio/AudioUnits/AUPublic/"
 
-                const char* appleAUFiles[] = {  JUCE_AU_PUBLICUTILITY "CADebugMacros.h",
-                                                JUCE_AU_PUBLICUTILITY "CAAUParameter.cpp",
-                                                JUCE_AU_PUBLICUTILITY "CAAUParameter.h",
-                                                JUCE_AU_PUBLICUTILITY "CAAudioChannelLayout.cpp",
-                                                JUCE_AU_PUBLICUTILITY "CAAudioChannelLayout.h",
-                                                JUCE_AU_PUBLICUTILITY "CAMutex.cpp",
-                                                JUCE_AU_PUBLICUTILITY "CAMutex.h",
-                                                JUCE_AU_PUBLICUTILITY "CAStreamBasicDescription.cpp",
-                                                JUCE_AU_PUBLICUTILITY "CAStreamBasicDescription.h",
-                                                JUCE_AU_PUBLICUTILITY "CAVectorUnitTypes.h",
-                                                JUCE_AU_PUBLICUTILITY "CAVectorUnit.cpp",
-                                                JUCE_AU_PUBLICUTILITY "CAVectorUnit.h",
-                                                JUCE_AU_PUBLIC "AUViewBase/AUViewLocalizedStringKeys.h",
-                                                JUCE_AU_PUBLIC "AUCarbonViewBase/AUCarbonViewDispatch.cpp",
-                                                JUCE_AU_PUBLIC "AUCarbonViewBase/AUCarbonViewControl.cpp",
-                                                JUCE_AU_PUBLIC "AUCarbonViewBase/AUCarbonViewControl.h",
-                                                JUCE_AU_PUBLIC "AUCarbonViewBase/CarbonEventHandler.cpp",
-                                                JUCE_AU_PUBLIC "AUCarbonViewBase/CarbonEventHandler.h",
-                                                JUCE_AU_PUBLIC "AUCarbonViewBase/AUCarbonViewBase.cpp",
-                                                JUCE_AU_PUBLIC "AUCarbonViewBase/AUCarbonViewBase.h",
-                                                JUCE_AU_PUBLIC "AUBase/AUBase.cpp",
-                                                JUCE_AU_PUBLIC "AUBase/AUBase.h",
-                                                JUCE_AU_PUBLIC "AUBase/AUDispatch.cpp",
-                                                JUCE_AU_PUBLIC "AUBase/AUDispatch.h",
-                                                JUCE_AU_PUBLIC "AUBase/AUInputElement.cpp",
-                                                JUCE_AU_PUBLIC "AUBase/AUInputElement.h",
-                                                JUCE_AU_PUBLIC "AUBase/AUOutputElement.cpp",
-                                                JUCE_AU_PUBLIC "AUBase/AUOutputElement.h",
-                                                JUCE_AU_PUBLIC "AUBase/AUResources.r",
-                                                JUCE_AU_PUBLIC "AUBase/AUScopeElement.cpp",
-                                                JUCE_AU_PUBLIC "AUBase/AUScopeElement.h",
-                                                JUCE_AU_PUBLIC "AUBase/ComponentBase.cpp",
-                                                JUCE_AU_PUBLIC "AUBase/ComponentBase.h",
-                                                JUCE_AU_PUBLIC "OtherBases/AUMIDIBase.cpp",
-                                                JUCE_AU_PUBLIC "OtherBases/AUMIDIBase.h",
-                                                JUCE_AU_PUBLIC "OtherBases/AUMIDIEffectBase.cpp",
-                                                JUCE_AU_PUBLIC "OtherBases/AUMIDIEffectBase.h",
-                                                JUCE_AU_PUBLIC "OtherBases/AUOutputBase.cpp",
-                                                JUCE_AU_PUBLIC "OtherBases/AUOutputBase.h",
-                                                JUCE_AU_PUBLIC "OtherBases/MusicDeviceBase.cpp",
-                                                JUCE_AU_PUBLIC "OtherBases/MusicDeviceBase.h",
-                                                JUCE_AU_PUBLIC "OtherBases/AUEffectBase.cpp",
-                                                JUCE_AU_PUBLIC "OtherBases/AUEffectBase.h",
-                                                JUCE_AU_PUBLIC "Utility/AUBuffer.cpp",
-                                                JUCE_AU_PUBLIC "Utility/AUBuffer.h",
-                                                JUCE_AU_PUBLIC "Utility/AUInputFormatConverter.h",
-                                                JUCE_AU_PUBLIC "Utility/AUSilentTimeout.h",
-                                                JUCE_AU_PUBLIC "Utility/AUTimestampGenerator.h", 0 };
+                static const char* appleAUFiles[] =
+                {
+                    JUCE_AU_PUBLICUTILITY "CADebugMacros.h",
+                    JUCE_AU_PUBLICUTILITY "CAAUParameter.cpp",
+                    JUCE_AU_PUBLICUTILITY "CAAUParameter.h",
+                    JUCE_AU_PUBLICUTILITY "CAAudioChannelLayout.cpp",
+                    JUCE_AU_PUBLICUTILITY "CAAudioChannelLayout.h",
+                    JUCE_AU_PUBLICUTILITY "CAMutex.cpp",
+                    JUCE_AU_PUBLICUTILITY "CAMutex.h",
+                    JUCE_AU_PUBLICUTILITY "CAStreamBasicDescription.cpp",
+                    JUCE_AU_PUBLICUTILITY "CAStreamBasicDescription.h",
+                    JUCE_AU_PUBLICUTILITY "CAVectorUnitTypes.h",
+                    JUCE_AU_PUBLICUTILITY "CAVectorUnit.cpp",
+                    JUCE_AU_PUBLICUTILITY "CAVectorUnit.h",
+                    JUCE_AU_PUBLIC "AUViewBase/AUViewLocalizedStringKeys.h",
+                    JUCE_AU_PUBLIC "AUCarbonViewBase/AUCarbonViewDispatch.cpp",
+                    JUCE_AU_PUBLIC "AUCarbonViewBase/AUCarbonViewControl.cpp",
+                    JUCE_AU_PUBLIC "AUCarbonViewBase/AUCarbonViewControl.h",
+                    JUCE_AU_PUBLIC "AUCarbonViewBase/CarbonEventHandler.cpp",
+                    JUCE_AU_PUBLIC "AUCarbonViewBase/CarbonEventHandler.h",
+                    JUCE_AU_PUBLIC "AUCarbonViewBase/AUCarbonViewBase.cpp",
+                    JUCE_AU_PUBLIC "AUCarbonViewBase/AUCarbonViewBase.h",
+                    JUCE_AU_PUBLIC "AUBase/AUBase.cpp",
+                    JUCE_AU_PUBLIC "AUBase/AUBase.h",
+                    JUCE_AU_PUBLIC "AUBase/AUDispatch.cpp",
+                    JUCE_AU_PUBLIC "AUBase/AUDispatch.h",
+                    JUCE_AU_PUBLIC "AUBase/AUInputElement.cpp",
+                    JUCE_AU_PUBLIC "AUBase/AUInputElement.h",
+                    JUCE_AU_PUBLIC "AUBase/AUOutputElement.cpp",
+                    JUCE_AU_PUBLIC "AUBase/AUOutputElement.h",
+                    JUCE_AU_PUBLIC "AUBase/AUResources.r",
+                    JUCE_AU_PUBLIC "AUBase/AUScopeElement.cpp",
+                    JUCE_AU_PUBLIC "AUBase/AUScopeElement.h",
+                    JUCE_AU_PUBLIC "AUBase/ComponentBase.cpp",
+                    JUCE_AU_PUBLIC "AUBase/ComponentBase.h",
+                    JUCE_AU_PUBLIC "OtherBases/AUMIDIBase.cpp",
+                    JUCE_AU_PUBLIC "OtherBases/AUMIDIBase.h",
+                    JUCE_AU_PUBLIC "OtherBases/AUMIDIEffectBase.cpp",
+                    JUCE_AU_PUBLIC "OtherBases/AUMIDIEffectBase.h",
+                    JUCE_AU_PUBLIC "OtherBases/AUOutputBase.cpp",
+                    JUCE_AU_PUBLIC "OtherBases/AUOutputBase.h",
+                    JUCE_AU_PUBLIC "OtherBases/MusicDeviceBase.cpp",
+                    JUCE_AU_PUBLIC "OtherBases/MusicDeviceBase.h",
+                    JUCE_AU_PUBLIC "OtherBases/AUEffectBase.cpp",
+                    JUCE_AU_PUBLIC "OtherBases/AUEffectBase.h",
+                    JUCE_AU_PUBLIC "Utility/AUBuffer.cpp",
+                    JUCE_AU_PUBLIC "Utility/AUBuffer.h",
+                    JUCE_AU_PUBLIC "Utility/AUInputFormatConverter.h",
+                    JUCE_AU_PUBLIC "Utility/AUSilentTimeout.h",
+                    JUCE_AU_PUBLIC "Utility/AUTimestampGenerator.h",
+                    nullptr
+                };
 
                 for (const char** f = appleAUFiles; *f != nullptr; ++f)
                 {
@@ -568,7 +579,7 @@ namespace AAXHelpers
         exporter.addToExtraSearchPaths (aaxFolder.getChildFile ("Interfaces").getChildFile ("ACF"));
     }
 
-    static inline void prepareExporter (ProjectExporter& exporter, ProjectSaver& projectSaver, const File& /*moduleFolder*/)
+    static inline void prepareExporter (ProjectExporter& exporter, ProjectSaver& projectSaver)
     {
         if (isExporterSupported (exporter))
         {

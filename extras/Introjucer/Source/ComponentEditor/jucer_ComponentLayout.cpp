@@ -123,8 +123,8 @@ private:
 class DeleteCompAction  : public ComponentUndoableAction <Component>
 {
 public:
-    DeleteCompAction (Component* const comp, ComponentLayout& layout)
-       : ComponentUndoableAction <Component> (comp, layout),
+    DeleteCompAction (Component* const comp, ComponentLayout& l)
+       : ComponentUndoableAction <Component> (comp, l),
          oldIndex (-1)
     {
         if (ComponentTypeHandler* const h = ComponentTypeHandler::getHandlerFor (*comp))
@@ -132,7 +132,7 @@ public:
         else
             jassertfalse;
 
-        oldIndex = layout.indexOfComponent (comp);
+        oldIndex = l.indexOfComponent (comp);
     }
 
     bool perform()
@@ -181,11 +181,11 @@ void ComponentLayout::removeComponent (Component* comp, const bool undoable)
 class FrontBackCompAction  : public ComponentUndoableAction <Component>
 {
 public:
-    FrontBackCompAction (Component* const comp, ComponentLayout& layout, int newIndex_)
-       : ComponentUndoableAction <Component> (comp, layout),
+    FrontBackCompAction (Component* const comp, ComponentLayout& l, int newIndex_)
+       : ComponentUndoableAction <Component> (comp, l),
          newIndex (newIndex_)
     {
-        oldIndex = layout.indexOfComponent (comp);
+        oldIndex = l.indexOfComponent (comp);
     }
 
     bool perform()
@@ -531,12 +531,11 @@ void ComponentLayout::processRelativeTargetMenuResult (Component* comp, int whic
 class ChangeCompPositionAction  : public ComponentUndoableAction <Component>
 {
 public:
-    ChangeCompPositionAction (Component* const comp, ComponentLayout& layout,
+    ChangeCompPositionAction (Component* const comp, ComponentLayout& l,
                               const RelativePositionedRectangle& newPos_)
-       : ComponentUndoableAction <Component> (comp, layout),
-         newPos (newPos_)
+       : ComponentUndoableAction <Component> (comp, l),
+         newPos (newPos_), oldPos (ComponentTypeHandler::getComponentPosition (comp))
     {
-        oldPos = ComponentTypeHandler::getComponentPosition (comp);
     }
 
     bool perform()

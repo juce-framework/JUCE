@@ -29,9 +29,6 @@
 #ifndef JUCE_SUBREGIONSTREAM_H_INCLUDED
 #define JUCE_SUBREGIONSTREAM_H_INCLUDED
 
-#include "juce_InputStream.h"
-#include "../memory/juce_OptionalScopedPointer.h"
-
 
 //==============================================================================
 /** Wraps another input stream, and reads from a specific part of it.

@@ -32,7 +32,7 @@
     This will automatically position itself, and can be told to delete itself after
     being on-screen for a minimum length of time.
 
-    To use it, just create one of these in your JUCEApplication::initialise() method,
+    To use it, just create one of these in your JUCEApplicationBase::initialise() method,
     and when your initialisation tasks have finished running, call its deleteAfterDelay()
     method to make it automatically get rid of itself.
 
@@ -78,9 +78,9 @@ public:
         When called, the constructor will position the SplashScreen in the centre of the
         display, and after the time specified, it will automatically delete itself.
 
-        Bear in mind that if you call this during your JUCEApplication::initialise()
+        Bear in mind that if you call this during your JUCEApplicationBase::initialise()
         method and then block the message thread by performing some kind of task, then
-        obviously neither your splash screen or any other GUI won't appear until you
+        obviously neither your splash screen nor any other GUI will appear until you
         allow the message thread to resume and do its work. So if you have time-consuming
         tasks to do during startup, use a background thread for them.
 

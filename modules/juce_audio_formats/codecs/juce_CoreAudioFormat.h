@@ -50,6 +50,8 @@ public:
     static const char* const tempo;
     /** Metadata property name used when reading a caf file time signature information. */
     static const char* const timeSig;
+    /** Metadata property name used when reading a caf file time signature information. */
+    static const char* const keySig;
 
     //==============================================================================
     Array<int> getPossibleSampleRates() override;

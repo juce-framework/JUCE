@@ -29,7 +29,6 @@
 #ifndef JUCE_MEMORYMAPPEDFILE_H_INCLUDED
 #define JUCE_MEMORYMAPPEDFILE_H_INCLUDED
 
-#include "juce_File.h"
 
 //==============================================================================
 /**

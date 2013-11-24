@@ -25,10 +25,6 @@
 #ifndef JUCE_CHANGEBROADCASTER_H_INCLUDED
 #define JUCE_CHANGEBROADCASTER_H_INCLUDED
 
-#include "juce_ChangeListener.h"
-#include "juce_ListenerList.h"
-#include "juce_AsyncUpdater.h"
-
 
 //==============================================================================
 /**

@@ -25,8 +25,6 @@
 #ifndef JUCE_FILECHOOSER_H_INCLUDED
 #define JUCE_FILECHOOSER_H_INCLUDED
 
-#include "juce_FilePreviewComponent.h"
-
 
 //==============================================================================
 /**

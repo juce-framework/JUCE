@@ -25,17 +25,6 @@
 #ifndef JUCE_GRAPHICSCONTEXT_H_INCLUDED
 #define JUCE_GRAPHICSCONTEXT_H_INCLUDED
 
-#include "../fonts/juce_Font.h"
-#include "../geometry/juce_RectangleList.h"
-#include "../geometry/juce_PathStrokeType.h"
-#include "../geometry/juce_Line.h"
-#include "../colour/juce_Colours.h"
-#include "../colour/juce_ColourGradient.h"
-#include "../placement/juce_RectanglePlacement.h"
-class LowLevelGraphicsContext;
-class Image;
-class FillType;
-
 
 //==============================================================================
 /**
@@ -252,97 +241,96 @@ public:
 
     //==============================================================================
     /** Fills a rectangle with the current colour or brush.
+        @see drawRect, fillRoundedRectangle
+    */
+    void fillRect (const Rectangle<int>& rectangle) const;
 
+    /** Fills a rectangle with the current colour or brush.
+        @see drawRect, fillRoundedRectangle
+    */
+    void fillRect (const Rectangle<float>& rectangle) const;
+
+    /** Fills a rectangle with the current colour or brush.
         @see drawRect, fillRoundedRectangle
     */
     void fillRect (int x, int y, int width, int height) const;
 
-    /** Fills a rectangle with the current colour or brush. */
-    void fillRect (const Rectangle<int>& rectangle) const;
-
-    /** Fills a rectangle with the current colour or brush. */
-    void fillRect (const Rectangle<float>& rectangle) const;
-
     /** Fills a rectangle with the current colour or brush.
-
-        This uses sub-pixel positioning so is slower than the fillRect method which
-        takes integer coordinates.
+        @see drawRect, fillRoundedRectangle
     */
     void fillRect (float x, float y, float width, float height) const;
 
-    /** Uses the current colour or brush to fill a rectangle with rounded corners.
+    /** Fills a set of rectangles using the current colour or brush.
+        If you have a lot of rectangles to draw, it may be more efficient
+        to create a RectangleList and use this method than to call fillRect()
+        multiple times.
+    */
+    void fillRectList (const RectangleList<float>& rectangles) const;
 
+    /** Fills a set of rectangles using the current colour or brush.
+        If you have a lot of rectangles to draw, it may be more efficient
+        to create a RectangleList and use this method than to call fillRect()
+        multiple times.
+    */
+    void fillRectList (const RectangleList<int>& rectangles) const;
+
+    /** Uses the current colour or brush to fill a rectangle with rounded corners.
         @see drawRoundedRectangle, Path::addRoundedRectangle
     */
     void fillRoundedRectangle (float x, float y, float width, float height,
                                float cornerSize) const;
 
     /** Uses the current colour or brush to fill a rectangle with rounded corners.
-
         @see drawRoundedRectangle, Path::addRoundedRectangle
     */
     void fillRoundedRectangle (const Rectangle<float>& rectangle,
                                float cornerSize) const;
 
-    /** Fills a rectangle with a checkerboard pattern, alternating between two colours.
-    */
+    /** Fills a rectangle with a checkerboard pattern, alternating between two colours. */
     void fillCheckerBoard (const Rectangle<int>& area,
                            int checkWidth, int checkHeight,
                            Colour colour1, Colour colour2) const;
 
-    /** Draws four lines to form a rectangular outline, using the current colour or brush.
-
-        The lines are drawn inside the given rectangle, and greater line thicknesses
-        extend inwards.
-
+    /** Draws a rectangular outline, using the current colour or brush.
+        The lines are drawn inside the given rectangle, and greater line thicknesses extend inwards.
         @see fillRect
     */
-    void drawRect (int x, int y, int width, int height,
-                   int lineThickness = 1) const;
+    void drawRect (int x, int y, int width, int height, int lineThickness = 1) const;
 
-    /** Draws four lines to form a rectangular outline, using the current colour or brush.
-
-        The lines are drawn inside the given rectangle, and greater line thicknesses
-        extend inwards.
-
+    /** Draws a rectangular outline, using the current colour or brush.
+        The lines are drawn inside the given rectangle, and greater line thicknesses extend inwards.
         @see fillRect
     */
-    void drawRect (float x, float y, float width, float height,
-                   float lineThickness = 1.0f) const;
+    void drawRect (float x, float y, float width, float height, float lineThickness = 1.0f) const;
 
-    /** Draws four lines to form a rectangular outline, using the current colour or brush.
-
-        The lines are drawn inside the given rectangle, and greater line thicknesses
-        extend inwards.
-
+    /** Draws a rectangular outline, using the current colour or brush.
+        The lines are drawn inside the given rectangle, and greater line thicknesses extend inwards.
         @see fillRect
     */
     void drawRect (const Rectangle<int>& rectangle, int lineThickness = 1) const;
 
-    /** Draws four lines to form a rectangular outline, using the current colour or brush.
-
-        The lines are drawn inside the given rectangle, and greater line thicknesses
-        extend inwards.
-
+    /** Draws a rectangular outline, using the current colour or brush.
+        The lines are drawn inside the given rectangle, and greater line thicknesses extend inwards.
         @see fillRect
     */
-    void drawRect (const Rectangle<float>& rectangle, float lineThickness = 1.0f) const;
+    void drawRect (Rectangle<float> rectangle, float lineThickness = 1.0f) const;
 
     /** Uses the current colour or brush to draw the outline of a rectangle with rounded corners.
-
         @see fillRoundedRectangle, Path::addRoundedRectangle
     */
     void drawRoundedRectangle (float x, float y, float width, float height,
                                float cornerSize, float lineThickness) const;
 
     /** Uses the current colour or brush to draw the outline of a rectangle with rounded corners.
-
         @see fillRoundedRectangle, Path::addRoundedRectangle
     */
     void drawRoundedRectangle (const Rectangle<float>& rectangle,
                                float cornerSize, float lineThickness) const;
 
-    /** Draws a 1x1 pixel using the current colour or brush. */
+    /** Fills a 1x1 pixel using the current colour or brush.
+        Note that because the context may be transformed, this is effectively the same as
+        calling fillRect (x, y, 1, 1), and the actual result may involve multiple pixels.
+    */
     void setPixel (int x, int y) const;
 
     //==============================================================================
@@ -359,34 +347,33 @@ public:
     void fillEllipse (const Rectangle<float>& area) const;
 
     /** Draws an elliptical stroke using the current colour or brush.
-
         @see fillEllipse, Path::addEllipse
     */
     void drawEllipse (float x, float y, float width, float height,
                       float lineThickness) const;
 
+    /** Draws an elliptical stroke using the current colour or brush.
+        @see fillEllipse, Path::addEllipse
+    */
+    void drawEllipse (const Rectangle<float>& area, float lineThickness) const;
+
     //==============================================================================
     /** Draws a line between two points.
-
         The line is 1 pixel wide and drawn with the current colour or brush.
     */
     void drawLine (float startX, float startY, float endX, float endY) const;
 
     /** Draws a line between two points with a given thickness.
-
         @see Path::addLineSegment
     */
-    void drawLine (float startX, float startY, float endX, float endY,
-                   float lineThickness) const;
+    void drawLine (float startX, float startY, float endX, float endY, float lineThickness) const;
 
     /** Draws a line between two points.
-
         The line is 1 pixel wide and drawn with the current colour or brush.
     */
     void drawLine (const Line<float>& line) const;
 
     /** Draws a line between two points with a given thickness.
-
         @see Path::addLineSegment
     */
     void drawLine (const Line<float>& line, float lineThickness) const;
@@ -426,13 +413,11 @@ public:
     void drawHorizontalLine (int y, float left, float right) const;
 
     //==============================================================================
-    /** Fills a path using the currently selected colour or brush.
-    */
+    /** Fills a path using the currently selected colour or brush. */
     void fillPath (const Path& path,
                    const AffineTransform& transform = AffineTransform::identity) const;
 
-    /** Draws a path's outline using the currently selected colour or brush.
-    */
+    /** Draws a path's outline using the currently selected colour or brush. */
     void strokePath (const Path& path,
                      const PathStrokeType& strokeType,
                      const AffineTransform& transform = AffineTransform::identity) const;
@@ -463,9 +448,7 @@ public:
     };
 
     /** Changes the quality that will be used when resampling images.
-
         By default a Graphics object will be set to mediumRenderingQuality.
-
         @see Graphics::drawImage, Graphics::drawImageTransformed, Graphics::drawImageWithin
     */
     void setImageResamplingQuality (const ResamplingQuality newQuality);
@@ -564,7 +547,6 @@ public:
 
     //==============================================================================
     /** Returns the position of the bounding box for the current clipping region.
-
         @see getClipRegion, clipRegionIntersects
     */
     Rectangle<int> getClipBounds() const;
@@ -643,12 +625,11 @@ public:
     class ScopedSaveState
     {
     public:
-        ScopedSaveState (Graphics& g);
+        ScopedSaveState (Graphics&);
         ~ScopedSaveState();
 
     private:
         Graphics& context;
-
         JUCE_DECLARE_NON_COPYABLE (ScopedSaveState)
     };
 
@@ -669,6 +650,18 @@ public:
         See beginTransparencyLayer() for more details.
     */
     void endTransparencyLayer();
+
+    /** Moves the position of the context's origin.
+
+        This changes the position that the context considers to be (0, 0) to
+        the specified position.
+
+        So if you call setOrigin with (100, 100), then the position that was previously
+        referred to as (100, 100) will subsequently be considered to be (0, 0).
+
+        @see reduceClipRegion, addTransform
+    */
+    void setOrigin (Point<int> newOrigin);
 
     /** Moves the position of the context's origin.
 
@@ -699,11 +692,11 @@ public:
     bool isVectorDevice() const;
 
     //==============================================================================
-    /** Create a graphics that uses a given low-level renderer.
-        For internal use only.
-        NB. The context will NOT be deleted by this object when it is deleted.
+    /** Create a graphics that draws with a given low-level renderer.
+        This method is intended for use only by people who know what they're doing.
+        Note that the LowLevelGraphicsContext will NOT be deleted by this object.
     */
-    Graphics (LowLevelGraphicsContext*) noexcept;
+    Graphics (LowLevelGraphicsContext&) noexcept;
 
     /** @internal */
     LowLevelGraphicsContext& getInternalContext() const noexcept    { return context; }
@@ -711,7 +704,7 @@ public:
 private:
     //==============================================================================
     LowLevelGraphicsContext& context;
-    ScopedPointer <LowLevelGraphicsContext> contextToDelete;
+    ScopedPointer<LowLevelGraphicsContext> contextToDelete;
 
     bool saveStatePending;
     void saveStateIfPending();

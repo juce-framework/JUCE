@@ -25,8 +25,6 @@
 #ifndef JUCE_RELATIVEPOINT_H_INCLUDED
 #define JUCE_RELATIVEPOINT_H_INCLUDED
 
-#include "juce_RelativeCoordinate.h"
-
 
 //==============================================================================
 /**

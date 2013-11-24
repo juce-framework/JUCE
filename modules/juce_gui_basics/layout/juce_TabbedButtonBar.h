@@ -25,7 +25,6 @@
 #ifndef JUCE_TABBEDBUTTONBAR_H_INCLUDED
 #define JUCE_TABBEDBUTTONBAR_H_INCLUDED
 
-#include "../buttons/juce_Button.h"
 class TabbedButtonBar;
 
 
@@ -218,7 +217,7 @@ public:
     /** Moves a tab to a new index in the list.
         Pass -1 as the index to move it to the end of the list.
     */
-    void moveTab (int currentIndex, int newIndex);
+    void moveTab (int currentIndex, int newIndex, bool animate = false);
 
     /** Returns the number of tabs in the bar. */
     int getNumTabs() const;
@@ -254,6 +253,9 @@ public:
 
     /** Returns the index of a TabBarButton if it belongs to this bar. */
     int indexOfTabButton (const TabBarButton* button) const;
+
+    /** Returns the final bounds of this button if it is currently being animated. */
+    Rectangle<int> getTargetBounds (TabBarButton* button) const;
 
     //==============================================================================
     /** Callback method to indicate the selected tab has been changed.
@@ -295,6 +297,32 @@ public:
     };
 
     //==============================================================================
+    /** This abstract base class is implemented by LookAndFeel classes to provide
+        window drawing functionality.
+    */
+    struct JUCE_API  LookAndFeelMethods
+    {
+        virtual ~LookAndFeelMethods() {}
+
+        virtual int getTabButtonSpaceAroundImage() = 0;
+        virtual int getTabButtonOverlap (int tabDepth) = 0;
+        virtual int getTabButtonBestWidth (TabBarButton&, int tabDepth) = 0;
+        virtual Rectangle<int> getTabButtonExtraComponentBounds (const TabBarButton&, Rectangle<int>& textArea, Component& extraComp) = 0;
+
+        virtual void drawTabButton (TabBarButton&, Graphics&, bool isMouseOver, bool isMouseDown) = 0;
+        virtual void drawTabButtonText (TabBarButton&, Graphics&, bool isMouseOver, bool isMouseDown) = 0;
+        virtual void drawTabbedButtonBarBackground (TabbedButtonBar&, Graphics&) = 0;
+        virtual void drawTabAreaBehindFrontButton (TabbedButtonBar&, Graphics&, int w, int h) = 0;
+
+        virtual void createTabButtonShape (TabBarButton&, Path& path,  bool isMouseOver, bool isMouseDown) = 0;
+        virtual void fillTabButtonShape (TabBarButton&, Graphics&, const Path& path, bool isMouseOver, bool isMouseDown) = 0;
+
+        virtual Button* createTabBarExtrasButton() = 0;
+    };
+
+    //==============================================================================
+    /** @internal */
+    void paint (Graphics&) override;
     /** @internal */
     void resized() override;
     /** @internal */
@@ -326,12 +354,13 @@ private:
 
     class BehindFrontTabComp;
     friend class BehindFrontTabComp;
-    friend class ScopedPointer<BehindFrontTabComp>;
+    friend struct ContainerDeletePolicy<BehindFrontTabComp>;
     ScopedPointer<BehindFrontTabComp> behindFrontTab;
     ScopedPointer<Button> extraTabsButton;
 
     void showExtraItemsMenu();
     static void extraItemsMenuCallback (int, TabbedButtonBar*);
+    void updateTabPositions (bool animate);
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TabbedButtonBar)
 };

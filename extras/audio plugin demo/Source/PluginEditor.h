@@ -27,16 +27,15 @@ public:
     ~JuceDemoPluginAudioProcessorEditor();
 
     //==============================================================================
-    void timerCallback();
-    void paint (Graphics& g);
-    void resized();
-    void sliderValueChanged (Slider*);
+    void timerCallback() override;
+    void paint (Graphics&) override;
+    void resized() override;
+    void sliderValueChanged (Slider*) override;
 
 private:
     MidiKeyboardComponent midiKeyboard;
     Label infoLabel, gainLabel, delayLabel;
-    Slider gainSlider;
-    Slider delaySlider;
+    Slider gainSlider, delaySlider;
     ScopedPointer<ResizableCornerComponent> resizer;
     ComponentBoundsConstrainer resizeLimits;
 

@@ -44,8 +44,6 @@ public:
         generatedFilesGroup.setID (getGeneratedGroupID());
     }
 
-    Project& getProject() noexcept      { return project; }
-
     struct SaveThread  : public ThreadWithProgressWindow
     {
     public:
@@ -83,16 +81,7 @@ public:
         writeMainProjectFile();
 
         OwnedArray<LibraryModule> modules;
-
-        {
-            ModuleList moduleList;
-            Result scanResult (moduleList.rescan (ModuleList::getDefaultModulesFolder (&project)));
-
-            if (scanResult.failed())
-                return scanResult;
-
-            project.createRequiredModules (moduleList, modules);
-        }
+        project.getModules().createRequiredModules (modules);
 
         if (errors.size() == 0)  writeAppConfigFile (modules, appConfigUserContent);
         if (errors.size() == 0)  writeBinaryDataFiles();
@@ -165,13 +154,14 @@ public:
             << newLine;
     }
 
-    static const char* getGeneratedGroupID() noexcept       { return "__jucelibfiles"; }
-    Project::Item& getGeneratedCodeGroup()                  { return generatedFilesGroup; }
+    static const char* getGeneratedGroupID() noexcept               { return "__jucelibfiles"; }
+    Project::Item& getGeneratedCodeGroup()                          { return generatedFilesGroup; }
 
-    static String getJuceCodeGroupName()                    { return "Juce Library Code"; }
+    static String getJuceCodeGroupName()                            { return "Juce Library Code"; }
 
-    File getGeneratedCodeFolder() const                         { return generatedCodeFolder; }
-    File getLocalModuleFolder (const LibraryModule& m) const    { return generatedCodeFolder.getChildFile ("modules").getChildFile (m.getID()); }
+    File getGeneratedCodeFolder() const                             { return generatedCodeFolder; }
+    File getLocalModulesFolder() const                              { return generatedCodeFolder.getChildFile ("modules"); }
+    File getLocalModuleFolder (const String& moduleID) const        { return getLocalModulesFolder().getChildFile (moduleID); }
 
     bool replaceFileIfDifferent (const File& f, const MemoryOutputStream& newData)
     {
@@ -214,8 +204,9 @@ public:
         return false;
     }
 
-private:
     Project& project;
+
+private:
     const File projectFile, generatedCodeFolder;
     Project::Item generatedFilesGroup;
     String extraAppConfigContent;
@@ -264,7 +255,7 @@ private:
 
     static bool shouldFileBeKept (const String& filename)
     {
-        const char* filesToKeep[] = { ".svn", ".cvs", "CMakeLists.txt" };
+        static const char* filesToKeep[] = { ".svn", ".cvs", "CMakeLists.txt" };
 
         for (int i = 0; i < numElementsInArray (filesToKeep); ++i)
             if (filename == filesToKeep[i])
@@ -363,7 +354,7 @@ private:
         for (int j = 0; j < modules.size(); ++j)
         {
             LibraryModule* const m = modules.getUnchecked(j);
-            OwnedArray <Project::ConfigFlag> flags;
+            OwnedArray<Project::ConfigFlag> flags;
             m->getConfigFlags (project, flags);
 
             if (flags.size() > 0)
@@ -432,7 +423,7 @@ private:
         for (int i = 0; i < modules.size(); ++i)
             modules.getUnchecked(i)->writeIncludes (*this, out);
 
-        if (hasBinaryData)
+        if (hasBinaryData && project.shouldIncludeBinaryInAppConfig().getValue())
             out << CodeHelpers::createIncludeStatement (project.getBinaryDataHeaderFile(), appConfigFile) << newLine;
 
         out << newLine

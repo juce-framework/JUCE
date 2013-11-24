@@ -244,7 +244,7 @@ struct b2Simplex
 		{
 		case 0:
 			b2Assert(false);
-			return 0.0;
+			return 0.0f;
 
 		case 1:
 			return 0.0f;
@@ -467,7 +467,7 @@ void b2Distance(b2DistanceOutput* output,
 
 	b2Vec2 closestPoint = simplex.GetClosestPoint();
 	float32 distanceSqr1 = closestPoint.LengthSquared();
-	float32 distanceSqr2 = distanceSqr1;
+	float32 distanceSqr2;// = distanceSqr1;
 
 	// Main iteration loop.
 	int32 iter = 0;

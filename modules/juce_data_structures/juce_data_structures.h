@@ -31,14 +31,12 @@
 namespace juce
 {
 
-// START_AUTOINCLUDE values, undomanager, app_properties
-#include "values/juce_Value.h"
-#include "values/juce_ValueTree.h"
 #include "undomanager/juce_UndoableAction.h"
 #include "undomanager/juce_UndoManager.h"
-#include "app_properties/juce_ApplicationProperties.h"
+#include "values/juce_Value.h"
+#include "values/juce_ValueTree.h"
 #include "app_properties/juce_PropertiesFile.h"
-// END_AUTOINCLUDE
+#include "app_properties/juce_ApplicationProperties.h"
 
 }
 

@@ -325,6 +325,18 @@ void Toolbar::removeToolbarItem (const int itemIndex)
     resized();
 }
 
+ToolbarItemComponent* Toolbar::removeAndReturnItem (const int itemIndex)
+{
+    if (ToolbarItemComponent* const tc = items.removeAndReturn (itemIndex))
+    {
+        removeChildComponent (tc);
+        resized();
+        return tc;
+    }
+
+    return nullptr;
+}
+
 int Toolbar::getNumItems() const noexcept
 {
     return items.size();

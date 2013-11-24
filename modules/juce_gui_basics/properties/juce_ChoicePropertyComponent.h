@@ -25,9 +25,6 @@
 #ifndef JUCE_CHOICEPROPERTYCOMPONENT_H_INCLUDED
 #define JUCE_CHOICEPROPERTYCOMPONENT_H_INCLUDED
 
-#include "juce_PropertyComponent.h"
-#include "../widgets/juce_ComboBox.h"
-
 
 //==============================================================================
 /**

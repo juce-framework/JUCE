@@ -32,7 +32,7 @@
 */
 
 //==============================================================================
-bool Process::isForegroundProcess()
+JUCE_API bool JUCE_CALLTYPE Process::isForegroundProcess()
 {
    #if JUCE_MAC
     return [NSApp isActive];
@@ -41,36 +41,31 @@ bool Process::isForegroundProcess()
    #endif
 }
 
-void Process::makeForegroundProcess()
+JUCE_API void JUCE_CALLTYPE Process::makeForegroundProcess()
 {
    #if JUCE_MAC
     [NSApp activateIgnoringOtherApps: YES];
    #endif
 }
 
-void Process::hide()
+JUCE_API void JUCE_CALLTYPE Process::hide()
 {
    #if JUCE_MAC
     [NSApp hide: nil];
    #endif
 }
 
-void Process::raisePrivilege()
+JUCE_API void JUCE_CALLTYPE Process::raisePrivilege()
 {
     jassertfalse;
 }
 
-void Process::lowerPrivilege()
+JUCE_API void JUCE_CALLTYPE Process::lowerPrivilege()
 {
     jassertfalse;
 }
 
-void Process::terminate()
-{
-    std::exit (EXIT_FAILURE);
-}
-
-void Process::setPriority (ProcessPriority)
+JUCE_API void JUCE_CALLTYPE Process::setPriority (ProcessPriority)
 {
     // xxx
 }

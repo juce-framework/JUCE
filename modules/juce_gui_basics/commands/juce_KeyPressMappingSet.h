@@ -25,9 +25,6 @@
 #ifndef JUCE_KEYPRESSMAPPINGSET_H_INCLUDED
 #define JUCE_KEYPRESSMAPPINGSET_H_INCLUDED
 
-#include "../keyboard/juce_KeyListener.h"
-#include "../commands/juce_ApplicationCommandManager.h"
-
 
 //==============================================================================
 /**
@@ -102,10 +99,10 @@ public:
 
         @see ApplicationCommandManager
     */
-    explicit KeyPressMappingSet (ApplicationCommandManager& commandManager);
+    explicit KeyPressMappingSet (ApplicationCommandManager&);
 
     /** Creates an copy of a KeyPressMappingSet. */
-    KeyPressMappingSet (const KeyPressMappingSet& other);
+    KeyPressMappingSet (const KeyPressMappingSet&);
 
     /** Destructor. */
     ~KeyPressMappingSet();
@@ -138,13 +135,11 @@ public:
                       int insertIndex = -1);
 
     /** Reset all mappings to the defaults, as dictated by the ApplicationCommandManager.
-
         @see resetToDefaultMapping
     */
     void resetToDefaultMappings();
 
     /** Resets all key-mappings to the defaults for a particular command.
-
         @see resetToDefaultMappings
     */
     void resetToDefaultMapping (CommandID commandID);
@@ -156,14 +151,12 @@ public:
     void clearAllKeyPresses (CommandID commandID);
 
     /** Removes one of the keypresses that are assigned to a command.
-
         See the getKeyPressesAssignedToCommand() for the list of keypresses to
         which the keyPressIndex refers.
     */
     void removeKeyPress (CommandID commandID, int keyPressIndex);
 
-    /** Removes a keypress from any command that it may be assigned to.
-    */
+    /** Removes a keypress from any command that it may be assigned to. */
     void removeKeyPress (const KeyPress& keypress);
 
     /** Returns true if the given command is linked to this key. */
@@ -227,11 +220,11 @@ private:
     struct CommandMapping
     {
         CommandID commandID;
-        Array <KeyPress> keypresses;
+        Array<KeyPress> keypresses;
         bool wantsKeyUpDownCallbacks;
     };
 
-    OwnedArray <CommandMapping> mappings;
+    OwnedArray<CommandMapping> mappings;
 
     struct KeyPressTime
     {
@@ -239,7 +232,7 @@ private:
         uint32 timeWhenPressed;
     };
 
-    OwnedArray <KeyPressTime> keysDown;
+    OwnedArray<KeyPressTime> keysDown;
 
     void invokeCommand (const CommandID, const KeyPress&, const bool isKeyDown,
                         const int millisecsSinceKeyPressed, Component* originator) const;

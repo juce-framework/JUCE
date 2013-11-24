@@ -86,7 +86,7 @@ public:
         return component->findColour (colourId);
     }
 
-    void setColour (const Colour& newColour)
+    void setColour (Colour newColour)
     {
         if (component->findColour (colourId) != newColour)
         {
@@ -120,11 +120,11 @@ private:
     {
     public:
         ColourChangeAction (Component* const comp,
-                            ComponentLayout& layout,
+                            ComponentLayout& l,
                             const int colourId_,
-                            const Colour& newColour_,
+                            Colour newColour_,
                             const bool newColourIsDefault)
-            : ComponentUndoableAction <Component> (comp, layout),
+            : ComponentUndoableAction<Component> (comp, l),
               colourId (colourId_),
               newColour (newColour_),
               isDefault (newColourIsDefault)

@@ -25,9 +25,9 @@
 class OpenGLFrameBufferImage   : public ImagePixelData
 {
 public:
-    OpenGLFrameBufferImage (OpenGLContext& context_, int w, int h)
+    OpenGLFrameBufferImage (OpenGLContext& c, int w, int h)
         : ImagePixelData (Image::ARGB, w, h),
-          context (context_),
+          context (c),
           pixelStride (4),
           lineStride (width * pixelStride)
     {
@@ -100,8 +100,8 @@ private:
 
         static void verticalRowFlip (PixelARGB* const data, const int w, const int h)
         {
-            HeapBlock<PixelARGB> tempRow (w);
-            const int rowSize = sizeof (PixelARGB) * w;
+            HeapBlock<PixelARGB> tempRow ((size_t) w);
+            const size_t rowSize = sizeof (PixelARGB) * (size_t) w;
 
             for (int y = 0; y < h / 2; ++y)
             {
@@ -116,14 +116,14 @@ private:
 
     struct Writer
     {
-        Writer (OpenGLFrameBuffer& frameBuffer_, int x, int y, int w, int h) noexcept
-            : frameBuffer (frameBuffer_), area (x, y, w, h)
+        Writer (OpenGLFrameBuffer& fb, int x, int y, int w, int h) noexcept
+            : frameBuffer (fb), area (x, y, w, h)
         {}
 
         void write (const PixelARGB* const data) const noexcept
         {
-            HeapBlock<PixelARGB> invertedCopy (area.getWidth() * area.getHeight());
-            const int rowSize = sizeof (PixelARGB) * area.getWidth();
+            HeapBlock<PixelARGB> invertedCopy ((size_t) (area.getWidth() * area.getHeight()));
+            const size_t rowSize = sizeof (PixelARGB) * (size_t) area.getWidth();
 
             for (int y = 0; y < area.getHeight(); ++y)
                 memcpy (invertedCopy + area.getWidth() * y,
@@ -142,7 +142,7 @@ private:
     struct DataReleaser  : public Image::BitmapData::BitmapDataReleaser
     {
         DataReleaser (OpenGLFrameBuffer& fb, int x, int y, int w, int h)
-            : data (w * h),
+            : data ((size_t) (w * h)),
               writer (fb, x, y, w, h)
         {}
 
@@ -187,7 +187,7 @@ ImagePixelData::Ptr OpenGLImageType::create (Image::PixelFormat, int width, int 
     ScopedPointer<OpenGLFrameBufferImage> im (new OpenGLFrameBufferImage (*currentContext, width, height));
 
     if (! im->initialise())
-        return nullptr;
+        return ImagePixelData::Ptr();
 
     im->frameBuffer.clear (Colours::transparentBlack);
     return im.release();
@@ -195,7 +195,8 @@ ImagePixelData::Ptr OpenGLImageType::create (Image::PixelFormat, int width, int 
 
 OpenGLFrameBuffer* OpenGLImageType::getFrameBufferFrom (const Image& image)
 {
-    OpenGLFrameBufferImage* const glImage = dynamic_cast<OpenGLFrameBufferImage*> (image.getPixelData());
+    if (OpenGLFrameBufferImage* const glImage = dynamic_cast<OpenGLFrameBufferImage*> (image.getPixelData()))
+        return &(glImage->frameBuffer);
 
-    return glImage != nullptr ? &(glImage->frameBuffer) : nullptr;
+    return nullptr;
 }

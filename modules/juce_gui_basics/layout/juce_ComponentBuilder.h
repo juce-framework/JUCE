@@ -25,8 +25,6 @@
 #ifndef JUCE_COMPONENTBUILDER_H_INCLUDED
 #define JUCE_COMPONENTBUILDER_H_INCLUDED
 
-#include "../components/juce_Component.h"
-
 
 //==============================================================================
 /**

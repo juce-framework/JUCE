@@ -256,7 +256,7 @@ private:
                 manifest->createNewChildElement ("uses-permission")->setAttribute ("android:name", permissions[i]);
         }
 
-        if (project.isModuleEnabled ("juce_opengl"))
+        if (project.getModules().isModuleEnabled ("juce_opengl"))
         {
             XmlElement* feature = manifest->createNewChildElement ("uses-feature");
             feature->setAttribute ("android:glEsVersion", "0x00020000");
@@ -350,21 +350,21 @@ private:
 
         LibraryModule* const coreModule = getCoreModule (modules);
 
-        if (coreModule == nullptr)
-            throw SaveError ("To build an Android app, the juce_core module must be included in your project!");
+        if (coreModule != nullptr)
+        {
+            File javaDestFile (classFolder.getChildFile (className + ".java"));
 
-        File javaDestFile (classFolder.getChildFile (className + ".java"));
+            File javaSourceFile (coreModule->getFolder().getChildFile ("native")
+                                                        .getChildFile ("java")
+                                                        .getChildFile ("JuceAppActivity.java"));
 
-        File javaSourceFile (coreModule->getFolder().getChildFile ("native")
-                                                    .getChildFile ("java")
-                                                    .getChildFile ("JuceAppActivity.java"));
+            MemoryOutputStream newFile;
+            newFile << javaSourceFile.loadFileAsString()
+                                     .replace ("JuceAppActivity", className)
+                                     .replace ("package com.juce;", "package " + package + ";");
 
-        MemoryOutputStream newFile;
-        newFile << javaSourceFile.loadFileAsString()
-                                 .replace ("JuceAppActivity", className)
-                                 .replace ("package com.juce;", "package " + package + ";");
-
-        overwriteFileIfDifferentOrThrow (javaDestFile, newFile);
+            overwriteFileIfDifferentOrThrow (javaDestFile, newFile);
+        }
     }
 
     void writeApplicationMk (const File& file) const
@@ -408,7 +408,8 @@ private:
             << "LOCAL_SRC_FILES := \\" << newLine;
 
         for (int i = 0; i < files.size(); ++i)
-            out << "  ../" << escapeSpaces (files.getReference(i).toUnixStyle()) << "\\" << newLine;
+            out << "  " << (files.getReference(i).isAbsolute() ? "" : "../")
+                << escapeSpaces (files.getReference(i).toUnixStyle()) << "\\" << newLine;
 
         String debugSettings, releaseSettings;
 

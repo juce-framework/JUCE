@@ -46,8 +46,8 @@ public:
     ~ColouredElement();
 
     //==============================================================================
-    void getEditableProperties (Array <PropertyComponent*>& properties);
-    void getColourSpecificProperties (Array <PropertyComponent*>& properties);
+    void getEditableProperties (Array<PropertyComponent*>& props);
+    void getColourSpecificProperties (Array<PropertyComponent*>& props);
 
     //==============================================================================
     const JucerFillType& getFillType() noexcept;

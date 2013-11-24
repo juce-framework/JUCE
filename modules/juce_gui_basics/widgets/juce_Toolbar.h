@@ -25,9 +25,6 @@
 #ifndef JUCE_TOOLBAR_H_INCLUDED
 #define JUCE_TOOLBAR_H_INCLUDED
 
-#include "../mouse/juce_DragAndDropContainer.h"
-#include "../layout/juce_ComponentAnimator.h"
-#include "../buttons/juce_Button.h"
 class ToolbarItemComponent;
 class ToolbarItemFactory;
 
@@ -124,9 +121,11 @@ public:
                   int itemId,
                   int insertIndex = -1);
 
-    /** Deletes one of the items from the bar.
-    */
+    /** Deletes one of the items from the bar. */
     void removeToolbarItem (int itemIndex);
+
+    /** Removes an item from the bar and returns it. */
+    ToolbarItemComponent* removeAndReturnItem (int itemIndex);
 
     /** Returns the number of items currently on the toolbar.
 
@@ -267,6 +266,24 @@ public:
     */
     bool restoreFromString (ToolbarItemFactory& factoryToUse,
                             const String& savedVersion);
+
+    //==============================================================================
+    /** This abstract base class is implemented by LookAndFeel classes. */
+    struct JUCE_API  LookAndFeelMethods
+    {
+        virtual ~LookAndFeelMethods() {}
+
+        virtual void paintToolbarBackground (Graphics&, int width, int height, Toolbar&) = 0;
+
+        virtual Button* createToolbarMissingItemsButton (Toolbar&) = 0;
+
+        virtual void paintToolbarButtonBackground (Graphics&, int width, int height,
+                                                   bool isMouseOver, bool isMouseDown,
+                                                   ToolbarItemComponent&) = 0;
+
+        virtual void paintToolbarButtonLabel (Graphics&, int x, int y, int width, int height,
+                                              const String& text, ToolbarItemComponent&) = 0;
+    };
 
     //==============================================================================
     /** @internal */

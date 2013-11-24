@@ -25,9 +25,6 @@
 #ifndef JUCE_DRAWABLEIMAGE_H_INCLUDED
 #define JUCE_DRAWABLEIMAGE_H_INCLUDED
 
-#include "juce_Drawable.h"
-#include "../positioning/juce_RelativeParallelogram.h"
-
 
 //==============================================================================
 /**

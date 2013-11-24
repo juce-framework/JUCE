@@ -25,9 +25,6 @@
 #ifndef JUCE_DRAWABLESHAPE_H_INCLUDED
 #define JUCE_DRAWABLESHAPE_H_INCLUDED
 
-#include "juce_Drawable.h"
-#include "../positioning/juce_RelativeCoordinatePositioner.h"
-
 
 //==============================================================================
 /**

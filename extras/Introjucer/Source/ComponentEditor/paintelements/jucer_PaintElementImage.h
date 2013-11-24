@@ -35,8 +35,8 @@
 class PaintElementImage   : public PaintElement
 {
 public:
-    PaintElementImage (PaintRoutine* owner)
-        : PaintElement (owner, "Image"),
+    PaintElementImage (PaintRoutine* pr)
+        : PaintElement (pr, "Image"),
           opacity (1.0),
           mode (stretched)
     {
@@ -82,14 +82,14 @@ public:
     }
 
     //==============================================================================
-    void getEditableProperties (Array <PropertyComponent*>& properties)
+    void getEditableProperties (Array <PropertyComponent*>& props)
     {
-        PaintElement::getEditableProperties (properties);
+        PaintElement::getEditableProperties (props);
 
-        properties.add (new ImageElementResourceProperty (this));
-        properties.add (new StretchModeProperty (this));
-        properties.add (new OpacityProperty (this));
-        properties.add (new ResetSizeProperty (this));
+        props.add (new ImageElementResourceProperty (this));
+        props.add (new StretchModeProperty (this));
+        props.add (new OpacityProperty (this));
+        props.add (new ResetSizeProperty (this));
     }
 
     void fillInGeneratedCode (GeneratedCode& code, String& paintMethodCode)
@@ -297,9 +297,10 @@ public:
                 const Rectangle<int> parentArea (ed->getComponentArea());
 
                 Rectangle<int> r (getCurrentBounds (parentArea));
-                Rectangle<float> bounds (image->getDrawableBounds());
+                Rectangle<float> b (image->getDrawableBounds());
 
-                r.setSize ((int) (bounds.getWidth() + 0.999f), (int) (bounds.getHeight() + 0.999f));
+                r.setSize ((int) (b.getWidth()  + 0.999f),
+                           (int) (b.getHeight() + 0.999f));
 
                 setCurrentBounds (r, parentArea, true);
             }
@@ -413,36 +414,39 @@ private:
     };
 
     //==============================================================================
-    class OpacityProperty  : public SliderPropertyComponent,
-                             private ElementListenerBase <PaintElementImage>
+    class OpacityProperty  : public SliderPropertyComponent
     {
     public:
         OpacityProperty (PaintElementImage* const e)
             : SliderPropertyComponent ("opacity", 0.0, 1.0, 0.001),
-              ElementListenerBase <PaintElementImage> (e)
+              listener (e)
         {
+            listener.setPropertyToRefresh (*this);
         }
 
         void setValue (double newValue)
         {
-            owner->getDocument()->getUndoManager().undoCurrentTransactionOnly();
-            owner->setOpacity (newValue, true);
+            listener.owner->getDocument()->getUndoManager().undoCurrentTransactionOnly();
+            listener.owner->setOpacity (newValue, true);
         }
 
         double getValue() const
         {
-            return owner->getOpacity();
+            return listener.owner->getOpacity();
         }
+
+        ElementListener<PaintElementImage> listener;
     };
 
-    class StretchModeProperty  : public ChoicePropertyComponent,
-                                 private ElementListenerBase <PaintElementImage>
+    class StretchModeProperty  : public ChoicePropertyComponent
     {
     public:
         StretchModeProperty (PaintElementImage* const e)
             : ChoicePropertyComponent ("stretch mode"),
-              ElementListenerBase <PaintElementImage> (e)
+              listener (e)
         {
+            listener.setPropertyToRefresh (*this);
+
             choices.add ("Stretched to fit");
             choices.add ("Maintain aspect ratio");
             choices.add ("Maintain aspect ratio, only reduce in size");
@@ -450,13 +454,15 @@ private:
 
         void setIndex (int newIndex)
         {
-            owner->setStretchMode ((StretchMode) newIndex, true);
+            listener.owner->setStretchMode ((StretchMode) newIndex, true);
         }
 
         int getIndex() const
         {
-            return (int) owner->getStretchMode();
+            return (int) listener.owner->getStretchMode();
         }
+
+        ElementListener<PaintElementImage> listener;
     };
 
     class ResetSizeProperty   : public ButtonPropertyComponent

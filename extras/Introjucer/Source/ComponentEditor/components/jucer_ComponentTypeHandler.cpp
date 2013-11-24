@@ -74,9 +74,13 @@ ComponentOverlayComponent* ComponentTypeHandler::createOverlayComponent (Compone
     return new ComponentOverlayComponent (child, layout);
 }
 
+static void dummyMenuCallback (int, int) {}
+
 void ComponentTypeHandler::showPopupMenu (Component*, ComponentLayout&)
 {
     PopupMenu m;
+
+    ApplicationCommandManager* commandManager = &IntrojucerApp::getCommandManager();
 
     m.addCommandItem (commandManager, JucerCommandIDs::toFront);
     m.addCommandItem (commandManager, JucerCommandIDs::toBack);
@@ -86,7 +90,8 @@ void ComponentTypeHandler::showPopupMenu (Component*, ComponentLayout&)
     m.addCommandItem (commandManager, StandardApplicationCommandIDs::paste);
     m.addCommandItem (commandManager, StandardApplicationCommandIDs::del);
 
-    m.show();
+    m.showMenuAsync (PopupMenu::Options(),
+                     ModalCallbackFunction::create (dummyMenuCallback, 0));
 }
 
 JucerDocument* ComponentTypeHandler::findParentDocument (Component* component)
@@ -195,10 +200,7 @@ bool ComponentTypeHandler::restoreFromXml (const XmlElement& xml,
         const String col (xml.getStringAttribute (colours[i]->xmlTagName, String::empty));
 
         if (col.isNotEmpty())
-        {
-            comp->setColour (colours[i]->colourId,
-                             Colour (col.getHexValue32()));
-        }
+            comp->setColour (colours[i]->colourId, Colour::fromString (col));
     }
 
     return true;
@@ -258,8 +260,8 @@ void ComponentTypeHandler::setComponentPosition (Component* comp,
 class TooltipProperty   : public ComponentTextProperty <Component>
 {
 public:
-    TooltipProperty (Component* comp, JucerDocument& document)
-        : ComponentTextProperty <Component> ("tooltip", 1024, false, comp, document)
+    TooltipProperty (Component* comp, JucerDocument& doc)
+        : ComponentTextProperty<Component> ("tooltip", 1024, false, comp, doc)
     {
     }
 
@@ -279,8 +281,8 @@ private:
     class SetTooltipAction  : public ComponentUndoableAction <Component>
     {
     public:
-        SetTooltipAction (Component* const comp, ComponentLayout& layout, const String& newValue_)
-            : ComponentUndoableAction <Component> (comp, layout),
+        SetTooltipAction (Component* const comp, ComponentLayout& l, const String& newValue_)
+            : ComponentUndoableAction<Component> (comp, l),
               newValue (newValue_)
         {
             SettableTooltipClient* ttc = dynamic_cast <SettableTooltipClient*> (comp);
@@ -360,8 +362,8 @@ private:
 class FocusOrderProperty   : public ComponentTextProperty <Component>
 {
 public:
-    FocusOrderProperty (Component* comp, JucerDocument& document)
-        : ComponentTextProperty <Component> ("focus order", 8, false, comp, document)
+    FocusOrderProperty (Component* comp, JucerDocument& doc)
+        : ComponentTextProperty <Component> ("focus order", 8, false, comp, doc)
     {
     }
 
@@ -380,8 +382,8 @@ private:
     class SetFocusOrderAction  : public ComponentUndoableAction <Component>
     {
     public:
-        SetFocusOrderAction (Component* const comp, ComponentLayout& layout, const int newOrder_)
-            : ComponentUndoableAction <Component> (comp, layout),
+        SetFocusOrderAction (Component* const comp, ComponentLayout& l, const int newOrder_)
+            : ComponentUndoableAction <Component> (comp, l),
               newValue (newOrder_)
         {
             oldValue = comp->getExplicitFocusOrder();
@@ -410,26 +412,24 @@ private:
 //==============================================================================
 void ComponentTypeHandler::getEditableProperties (Component* component,
                                                   JucerDocument& document,
-                                                  Array <PropertyComponent*>& properties)
+                                                  Array<PropertyComponent*>& props)
 {
-    properties.add (new ComponentMemberNameProperty (component, document));
-    properties.add (new ComponentNameProperty (component, document));
-    properties.add (new ComponentVirtualClassProperty (component, document));
+    props.add (new ComponentMemberNameProperty (component, document));
+    props.add (new ComponentNameProperty (component, document));
+    props.add (new ComponentVirtualClassProperty (component, document));
 
-    properties.add (new ComponentPositionProperty (component, document, "x", ComponentPositionProperty::componentX));
-    properties.add (new ComponentPositionProperty (component, document, "y", ComponentPositionProperty::componentY));
-    properties.add (new ComponentPositionProperty (component, document, "width", ComponentPositionProperty::componentWidth));
-    properties.add (new ComponentPositionProperty (component, document, "height", ComponentPositionProperty::componentHeight));
+    props.add (new ComponentPositionProperty (component, document, "x", ComponentPositionProperty::componentX));
+    props.add (new ComponentPositionProperty (component, document, "y", ComponentPositionProperty::componentY));
+    props.add (new ComponentPositionProperty (component, document, "width", ComponentPositionProperty::componentWidth));
+    props.add (new ComponentPositionProperty (component, document, "height", ComponentPositionProperty::componentHeight));
 
     if (dynamic_cast <SettableTooltipClient*> (component) != nullptr)
-        properties.add (new TooltipProperty (component, document));
+        props.add (new TooltipProperty (component, document));
 
-    properties.add (new FocusOrderProperty (component, document));
+    props.add (new FocusOrderProperty (component, document));
 }
 
-void ComponentTypeHandler::addPropertiesToPropertyPanel (Component* comp,
-                                                         JucerDocument& document,
-                                                         PropertyPanel& panel)
+void ComponentTypeHandler::addPropertiesToPropertyPanel (Component* comp, JucerDocument& document, PropertyPanel& panel)
 {
     Array <PropertyComponent*> props;
     getEditableProperties (comp, document, props);
@@ -453,13 +453,13 @@ void ComponentTypeHandler::registerEditableColour (int colourId,
 
 void ComponentTypeHandler::addColourProperties (Component* component,
                                                 JucerDocument& document,
-                                                Array <PropertyComponent*>& properties)
+                                                Array<PropertyComponent*>& props)
 {
     for (int i = 0; i < colours.size(); ++i)
-        properties.add (new ComponentColourIdProperty (component, document,
-                                                       colours[i]->colourId,
-                                                       colours[i]->colourName,
-                                                       true));
+        props.add (new ComponentColourIdProperty (component, document,
+                                                  colours[i]->colourId,
+                                                  colours[i]->colourName,
+                                                  true));
 }
 
 String ComponentTypeHandler::getColourIntialisationCode (Component* component,

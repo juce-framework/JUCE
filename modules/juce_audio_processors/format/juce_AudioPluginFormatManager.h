@@ -25,8 +25,6 @@
 #ifndef JUCE_AUDIOPLUGINFORMATMANAGER_H_INCLUDED
 #define JUCE_AUDIOPLUGINFORMATMANAGER_H_INCLUDED
 
-#include "juce_AudioPluginFormat.h"
-
 
 //==============================================================================
 /**
@@ -79,6 +77,8 @@ public:
         errorMessage string.
     */
     AudioPluginInstance* createPluginInstance (const PluginDescription& description,
+                                               double initialSampleRate,
+                                               int initialBufferSize,
                                                String& errorMessage) const;
 
     /** Checks that the file or component for this plugin actually still exists.

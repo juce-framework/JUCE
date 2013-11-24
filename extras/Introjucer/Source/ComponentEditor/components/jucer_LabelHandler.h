@@ -157,24 +157,24 @@ public:
         }
     }
 
-    void getEditableProperties (Component* component, JucerDocument& document, Array <PropertyComponent*>& properties)
+    void getEditableProperties (Component* component, JucerDocument& document, Array<PropertyComponent*>& props)
     {
-        ComponentTypeHandler::getEditableProperties (component, document, properties);
+        ComponentTypeHandler::getEditableProperties (component, document, props);
 
         Label* const l = dynamic_cast <Label*> (component);
-        properties.add (new LabelTextProperty (l, document));
+        props.add (new LabelTextProperty (l, document));
 
-        properties.add (new LabelJustificationProperty (l, document));
-        properties.add (new FontNameProperty (l, document));
-        properties.add (new FontSizeProperty (l, document));
-        properties.add (new FontStyleProperty (l, document));
+        props.add (new LabelJustificationProperty (l, document));
+        props.add (new FontNameProperty (l, document));
+        props.add (new FontSizeProperty (l, document));
+        props.add (new FontStyleProperty (l, document));
 
-        addColourProperties (component, document, properties);
+        addColourProperties (component, document, props);
 
-        properties.add (new LabelEditableProperty (l, document));
+        props.add (new LabelEditableProperty (l, document));
 
         if (l->isEditableOnDoubleClick() || l->isEditableOnSingleClick())
-            properties.add (new LabelLossOfFocusProperty (l, document));
+            props.add (new LabelLossOfFocusProperty (l, document));
     }
 
     static bool needsCallback (Component* label)
@@ -208,8 +208,8 @@ private:
         class LabelTextChangeAction  : public ComponentUndoableAction <Label>
         {
         public:
-            LabelTextChangeAction (Label* const comp, ComponentLayout& layout, const String& newState_)
-                : ComponentUndoableAction <Label> (comp, layout),
+            LabelTextChangeAction (Label* const comp, ComponentLayout& l, const String& newState_)
+                : ComponentUndoableAction <Label> (comp, l),
                   newState (newState_)
             {
                 oldState = comp->getText();
@@ -264,8 +264,8 @@ private:
         class LabelEditableChangeAction  : public ComponentUndoableAction <Label>
         {
         public:
-            LabelEditableChangeAction (Label* const comp, ComponentLayout& layout, const int newState_)
-                : ComponentUndoableAction <Label> (comp, layout),
+            LabelEditableChangeAction (Label* const comp, ComponentLayout& l, const int newState_)
+                : ComponentUndoableAction <Label> (comp, l),
                   newState (newState_)
             {
                 oldState = comp->isEditableOnSingleClick()
@@ -321,8 +321,8 @@ private:
         class LabelFocusLossChangeAction  : public ComponentUndoableAction <Label>
         {
         public:
-            LabelFocusLossChangeAction (Label* const comp, ComponentLayout& layout, const bool newState_)
-                : ComponentUndoableAction <Label> (comp, layout),
+            LabelFocusLossChangeAction (Label* const comp, ComponentLayout& l, const bool newState_)
+                : ComponentUndoableAction <Label> (comp, l),
                   newState (newState_)
             {
                 oldState = comp->doesLossOfFocusDiscardChanges();
@@ -370,13 +370,13 @@ private:
             document.removeChangeListener (this);
         }
 
-        void setJustification (const Justification& newJustification)
+        void setJustification (Justification newJustification)
         {
             document.perform (new LabelJustifyChangeAction (label, *document.getComponentLayout(), newJustification),
                               "Change Label justification");
         }
 
-        const Justification getJustification() const
+        Justification getJustification() const
         {
             return label->getJustificationType();
         }
@@ -390,8 +390,8 @@ private:
         class LabelJustifyChangeAction  : public ComponentUndoableAction <Label>
         {
         public:
-            LabelJustifyChangeAction (Label* const comp, ComponentLayout& layout, const Justification& newState_)
-                : ComponentUndoableAction <Label> (comp, layout),
+            LabelJustifyChangeAction (Label* const comp, ComponentLayout& l, Justification newState_)
+                : ComponentUndoableAction <Label> (comp, l),
                   newState (newState_),
                   oldState (comp->getJustificationType())
             {
@@ -455,8 +455,8 @@ private:
         class FontNameChangeAction  : public ComponentUndoableAction <Label>
         {
         public:
-            FontNameChangeAction (Label* const comp, ComponentLayout& layout, const String& newState_)
-                : ComponentUndoableAction <Label> (comp, layout),
+            FontNameChangeAction (Label* const comp, ComponentLayout& l, const String& newState_)
+                : ComponentUndoableAction <Label> (comp, l),
                   newState (newState_)
             {
                 oldState = comp->getProperties().getWithDefault ("typefaceName", FontPropertyComponent::getDefaultFont());
@@ -524,8 +524,8 @@ private:
         class FontSizeChangeAction  : public ComponentUndoableAction <Label>
         {
         public:
-            FontSizeChangeAction (Label* const comp, ComponentLayout& layout, const float newState_)
-                : ComponentUndoableAction <Label> (comp, layout),
+            FontSizeChangeAction (Label* const comp, ComponentLayout& l, const float newState_)
+                : ComponentUndoableAction <Label> (comp, l),
                   newState (newState_)
             {
                 oldState = comp->getFont().getHeight();
@@ -610,8 +610,8 @@ private:
         class FontStyleChangeAction  : public ComponentUndoableAction <Label>
         {
         public:
-            FontStyleChangeAction (Label* const comp, ComponentLayout& layout, const Font& newState_)
-                : ComponentUndoableAction <Label> (comp, layout),
+            FontStyleChangeAction (Label* const comp, ComponentLayout& l, const Font& newState_)
+                : ComponentUndoableAction <Label> (comp, l),
                   newState (newState_)
             {
                 oldState = comp->getFont();

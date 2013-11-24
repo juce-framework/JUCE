@@ -42,13 +42,6 @@ namespace FloatVectorHelpers
         return (((pointer_sized_int) p) & 15) == 0;
     }
 
-    inline static void mmEmpty() noexcept
-    {
-       #if ! JUCE_64BIT
-        _mm_empty();
-       #endif
-    }
-
     static inline float findMinimumOrMaximum (const float* src, int num, const bool isMinimum) noexcept
     {
        #if JUCE_USE_SSE_INTRINSICS
@@ -84,7 +77,6 @@ namespace FloatVectorHelpers
             {
                 float vals[4];
                 _mm_storeu_ps (vals, val);
-                FloatVectorHelpers::mmEmpty();
 
                 localVal = isMinimum ? jmin (vals[0], vals[1], vals[2], vals[3])
                                      : jmax (vals[0], vals[1], vals[2], vals[3]);
@@ -111,7 +103,6 @@ namespace FloatVectorHelpers
         const int numLongOps = num / 4;
 
 #define JUCE_FINISH_SSE_OP(normalOp) \
-        FloatVectorHelpers::mmEmpty(); \
         num &= 3; \
         if (num == 0) return; \
     } \
@@ -162,7 +153,7 @@ namespace FloatVectorHelpers
 void JUCE_CALLTYPE FloatVectorOperations::clear (float* dest, int num) noexcept
 {
    #if JUCE_USE_VDSP_FRAMEWORK
-    vDSP_vclr (dest, 1, num);
+    vDSP_vclr (dest, 1, (size_t) num);
    #else
     zeromem (dest, num * sizeof (float));
    #endif
@@ -171,7 +162,7 @@ void JUCE_CALLTYPE FloatVectorOperations::clear (float* dest, int num) noexcept
 void JUCE_CALLTYPE FloatVectorOperations::fill (float* dest, float valueToFill, int num) noexcept
 {
    #if JUCE_USE_VDSP_FRAMEWORK
-    vDSP_vfill (&valueToFill, dest, 1, num);
+    vDSP_vfill (&valueToFill, dest, 1, (size_t) num);
    #else
     #if JUCE_USE_SSE_INTRINSICS
      const __m128 val = _mm_load1_ps (&valueToFill);
@@ -183,7 +174,7 @@ void JUCE_CALLTYPE FloatVectorOperations::fill (float* dest, float valueToFill, 
 
 void JUCE_CALLTYPE FloatVectorOperations::copy (float* dest, const float* src, int num) noexcept
 {
-    memcpy (dest, src, num * sizeof (float));
+    memcpy (dest, src, (size_t) num * sizeof (float));
 }
 
 void JUCE_CALLTYPE FloatVectorOperations::copyWithMultiply (float* dest, const float* src, float multiplier, int num) noexcept
@@ -260,6 +251,15 @@ void JUCE_CALLTYPE FloatVectorOperations::multiply (float* dest, float multiplie
    #endif
 }
 
+void FloatVectorOperations::negate (float* dest, const float* src, int num) noexcept
+{
+   #if JUCE_USE_VDSP_FRAMEWORK
+    vDSP_vneg ((float*) src, 1, dest, 1, (vDSP_Length) num);
+   #else
+    copyWithMultiply (dest, src, -1.0f, num);
+   #endif
+}
+
 void JUCE_CALLTYPE FloatVectorOperations::convertFixedToFloat (float* dest, const int* src, float multiplier, int num) noexcept
 {
    #if JUCE_USE_SSE_INTRINSICS
@@ -301,7 +301,6 @@ void JUCE_CALLTYPE FloatVectorOperations::findMinAndMax (const float* src, int n
             float mns[4], mxs[4];
             _mm_storeu_ps (mns, mn);
             _mm_storeu_ps (mxs, mx);
-            FloatVectorHelpers::mmEmpty();
 
             localMin = jmin (mns[0], mns[1], mns[2], mns[3]);
             localMax = jmax (mxs[0], mxs[1], mxs[2], mxs[3]);
@@ -341,4 +340,13 @@ float JUCE_CALLTYPE FloatVectorOperations::findMaximum (const float* src, int nu
    #else
     return juce::findMaximum (src, num);
    #endif
+}
+
+void JUCE_CALLTYPE FloatVectorOperations::enableFlushToZeroMode (bool shouldEnable) noexcept
+{
+   #if JUCE_USE_SSE_INTRINSICS
+    if (FloatVectorHelpers::isSSE2Available())
+        _MM_SET_FLUSH_ZERO_MODE (shouldEnable ? _MM_FLUSH_ZERO_ON : _MM_FLUSH_ZERO_OFF);
+   #endif
+    (void) shouldEnable;
 }

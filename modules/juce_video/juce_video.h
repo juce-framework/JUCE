@@ -73,11 +73,9 @@
 namespace juce
 {
 
-// START_AUTOINCLUDE playback, capture
 #include "playback/juce_DirectShowComponent.h"
 #include "playback/juce_QuickTimeMovieComponent.h"
 #include "capture/juce_CameraDevice.h"
-// END_AUTOINCLUDE
 
 }
 

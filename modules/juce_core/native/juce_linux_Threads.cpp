@@ -32,7 +32,7 @@
 */
 
 //==============================================================================
-void Process::setPriority (const ProcessPriority prior)
+JUCE_API void JUCE_CALLTYPE Process::setPriority (const ProcessPriority prior)
 {
     const int policy = (prior <= NormalPriority) ? SCHED_OTHER : SCHED_RR;
     const int minp = sched_get_priority_min (policy);
@@ -50,11 +50,6 @@ void Process::setPriority (const ProcessPriority prior)
     }
 
     pthread_setschedparam (pthread_self(), policy, &param);
-}
-
-void Process::terminate()
-{
-    std::exit (EXIT_FAILURE);
 }
 
 JUCE_API bool JUCE_CALLTYPE juce_isRunningUnderDebugger()
@@ -90,5 +85,5 @@ static void swapUserAndEffectiveUser()
     (void) setregid (getegid(), getgid());
 }
 
-void Process::raisePrivilege()  { if (geteuid() != 0 && getuid() == 0) swapUserAndEffectiveUser(); }
-void Process::lowerPrivilege()  { if (geteuid() == 0 && getuid() != 0) swapUserAndEffectiveUser(); }
+JUCE_API void JUCE_CALLTYPE Process::raisePrivilege()  { if (geteuid() != 0 && getuid() == 0) swapUserAndEffectiveUser(); }
+JUCE_API void JUCE_CALLTYPE Process::lowerPrivilege()  { if (geteuid() == 0 && getuid() != 0) swapUserAndEffectiveUser(); }

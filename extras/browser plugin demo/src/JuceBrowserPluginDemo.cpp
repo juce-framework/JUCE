@@ -87,13 +87,12 @@ public:
     class DemoBrowserObject : public DynamicObject
     {
     public:
-        DemoBrowserObject (JuceDemoBrowserPlugin* owner_)
-            : owner (owner_)
+        DemoBrowserObject (JuceDemoBrowserPlugin* bp)  : owner (bp)
         {
             // Add a couple of methods to our object..
-            setMethod ("printText", (var::MethodFunction) &DemoBrowserObject::printText);
-            setMethod ("popUpMessageBox", (var::MethodFunction) &DemoBrowserObject::popUpMessageBox);
-            setMethod ("registerCallbackObject", (var::MethodFunction) &DemoBrowserObject::registerCallbackObject);
+            setMethod ("printText", printText);
+            setMethod ("popUpMessageBox", popUpMessageBox);
+            setMethod ("registerCallbackObject", registerCallbackObject);
 
             // Add some value properties that the webpage can access
             setProperty ("property1", "testing testing...");
@@ -102,30 +101,33 @@ public:
 
         //==============================================================================
         // These methods are called by javascript in the webpage...
-        const var printText (const var* params, int numParams)
+        static var printText (const var::NativeFunctionArgs& args)
         {
-            if (numParams > 0)
-                owner->textBox.setText (owner->textBox.getText() + "\n" + params[0].toString());
+            if (DemoBrowserObject* b = dynamic_cast<DemoBrowserObject*> (args.thisObject.getObject()))
+                if (args.numArguments > 0)
+                    b->owner->textBox.setText (b->owner->textBox.getText() + "\n" + args.arguments[0].toString());
 
             return "text was printed ok!";
         }
 
-        const var popUpMessageBox (const var* params, int numParams)
+        static var popUpMessageBox (const var::NativeFunctionArgs& args)
         {
-            if (numParams > 0)
-                AlertWindow::showMessageBox (AlertWindow::InfoIcon,
-                                             "A message from the webpage",
-                                             params[0].toString(),
-                                             String::empty, owner);
-            return var::null;
+            if (DemoBrowserObject* b = dynamic_cast<DemoBrowserObject*> (args.thisObject.getObject()))
+                if (args.numArguments > 0)
+                    AlertWindow::showMessageBox (AlertWindow::InfoIcon,
+                                                 "A message from the webpage",
+                                                 args.arguments[0].toString(),
+                                                 String::empty, b->owner);
+            return var();
         }
 
-        const var registerCallbackObject (const var* params, int numParams)
+        static var registerCallbackObject (const var::NativeFunctionArgs& args)
         {
-            if (numParams > 0)
-                owner->setJavascriptObjectFromBrowser (params[0]);
+            if (DemoBrowserObject* b = dynamic_cast<DemoBrowserObject*> (args.thisObject.getObject()))
+                if (args.numArguments > 0)
+                    b->owner->setJavascriptObjectFromBrowser (args.arguments[0]);
 
-            return var::null;
+            return var();
         }
 
         //==============================================================================

@@ -25,8 +25,6 @@
 #ifndef JUCE_IMAGEBUTTON_H_INCLUDED
 #define JUCE_IMAGEBUTTON_H_INCLUDED
 
-#include "juce_Button.h"
-
 
 //==============================================================================
 /**
@@ -125,6 +123,17 @@ public:
         return the 'over' image or normal image, depending on what's available.
     */
     Image getDownImage() const;
+
+    //==============================================================================
+    /** This abstract base class is implemented by LookAndFeel classes. */
+    struct JUCE_API  LookAndFeelMethods
+    {
+        virtual ~LookAndFeelMethods() {}
+
+        virtual void drawImageButton (Graphics&, Image*,
+                                      int imageX, int imageY, int imageW, int imageH,
+                                      const Colour& overlayColour, float imageOpacity, ImageButton&) = 0;
+    };
 
 protected:
     //==============================================================================

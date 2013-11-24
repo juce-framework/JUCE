@@ -25,12 +25,6 @@
 #ifndef JUCE_TEXTEDITOR_H_INCLUDED
 #define JUCE_TEXTEDITOR_H_INCLUDED
 
-#include "../components/juce_Component.h"
-#include "../layout/juce_Viewport.h"
-#include "../menus/juce_PopupMenu.h"
-#include "../keyboard/juce_TextInputTarget.h"
-#include "../keyboard/juce_CaretComponent.h"
-
 
 //==============================================================================
 /**
@@ -585,6 +579,20 @@ public:
     */
     void setInputRestrictions (int maxTextLength,
                                const String& allowedCharacters = String::empty);
+
+    //==============================================================================
+    /** This abstract base class is implemented by LookAndFeel classes to provide
+        TextEditor drawing functionality.
+    */
+    struct JUCE_API  LookAndFeelMethods
+    {
+        virtual ~LookAndFeelMethods() {}
+
+        virtual void fillTextEditorBackground (Graphics&, int width, int height, TextEditor&) = 0;
+        virtual void drawTextEditorOutline (Graphics&, int width, int height, TextEditor&) = 0;
+
+        virtual CaretComponent* createCaretComponent (Component* keyFocusOwner) = 0;
+    };
 
     //==============================================================================
     /** @internal */

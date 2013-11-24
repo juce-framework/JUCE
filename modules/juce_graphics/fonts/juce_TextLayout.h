@@ -25,9 +25,6 @@
 #ifndef JUCE_TEXTLAYOUT_H_INCLUDED
 #define JUCE_TEXTLAYOUT_H_INCLUDED
 
-#include "juce_Font.h"
-#include "../placement/juce_Justification.h"
-class Graphics;
 
 //==============================================================================
 /**

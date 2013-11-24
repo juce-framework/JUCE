@@ -25,9 +25,6 @@
 #ifndef JUCE_KEYLISTENER_H_INCLUDED
 #define JUCE_KEYLISTENER_H_INCLUDED
 
-#include "juce_KeyPress.h"
-class Component;
-
 
 //==============================================================================
 /**

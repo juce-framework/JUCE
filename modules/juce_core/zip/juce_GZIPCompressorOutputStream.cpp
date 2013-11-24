@@ -103,7 +103,7 @@ private:
                 {
                     data += dataSize - stream.avail_in;
                     dataSize = stream.avail_in;
-                    const ssize_t bytesDone = sizeof (buffer) - (ssize_t) stream.avail_out;
+                    const ssize_t bytesDone = (ssize_t) sizeof (buffer) - (ssize_t) stream.avail_out;
                     return bytesDone <= 0 || out.write (buffer, (size_t) bytesDone);
                 }
 
@@ -169,7 +169,7 @@ public:
     void runTest()
     {
         beginTest ("GZIP");
-        Random rng;
+        Random rng = getRandom();
 
         for (int i = 100; --i >= 0;)
         {

@@ -47,7 +47,7 @@ Thread::~Thread()
     */
     jassert (! isThreadRunning());
 
-    stopThread (100);
+    stopThread (-1);
 }
 
 //==============================================================================
@@ -148,7 +148,7 @@ bool Thread::isThreadRunning() const
     return threadHandle != nullptr;
 }
 
-Thread* Thread::getCurrentThread()
+Thread* JUCE_CALLTYPE Thread::getCurrentThread()
 {
     return getCurrentThreadHolder()->value.get();
 }
@@ -177,7 +177,7 @@ bool Thread::waitForThreadToExit (const int timeOutMilliseconds) const
     return true;
 }
 
-void Thread::stopThread (const int timeOutMilliseconds)
+bool Thread::stopThread (const int timeOutMilliseconds)
 {
     // agh! You can't stop the thread that's calling this method! How on earth
     // would that work??
@@ -204,8 +204,11 @@ void Thread::stopThread (const int timeOutMilliseconds)
 
             threadHandle = nullptr;
             threadId = 0;
+            return false;
         }
     }
+
+    return true;
 }
 
 //==============================================================================

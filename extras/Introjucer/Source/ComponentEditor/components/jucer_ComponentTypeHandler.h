@@ -62,7 +62,7 @@ public:
 
     virtual void getEditableProperties (Component* component,
                                         JucerDocument& document,
-                                        Array <PropertyComponent*>& properties);
+                                        Array<PropertyComponent*>& props);
 
     virtual void addPropertiesToPropertyPanel (Component* component,
                                                JucerDocument& document,
@@ -79,7 +79,7 @@ public:
 
     void addColourProperties (Component* component,
                               JucerDocument& document,
-                              Array <PropertyComponent*>& properties);
+                              Array<PropertyComponent*>& props);
 
     String getColourIntialisationCode (Component* component,
                                        const String& objectName);

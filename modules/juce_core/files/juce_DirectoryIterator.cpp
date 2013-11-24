@@ -109,8 +109,8 @@ bool DirectoryIterator::next (bool* const isDirResult, bool* const isHiddenResul
                 matches = (whatToLookFor & File::findFiles) != 0;
             }
 
-            // if recursive, we're not relying on the OS iterator to do the wildcard match, so do it now..
-            if (matches && isRecursive)
+            // if we're not relying on the OS iterator to do the wildcard match, do it now..
+            if (matches && (isRecursive || wildCards.size() > 1))
                 matches = fileMatches (wildCards, filename);
 
             if (matches && (whatToLookFor & File::ignoreHiddenFiles) != 0)

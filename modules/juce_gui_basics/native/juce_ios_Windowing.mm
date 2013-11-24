@@ -39,29 +39,32 @@
 
 - (void) applicationDidFinishLaunching: (UIApplication*) application
 {
+    (void) application;
     initialiseJuce_GUI();
 
-    JUCEApplication* app = dynamic_cast <JUCEApplication*> (JUCEApplicationBase::createInstance());
+    JUCEApplicationBase* app = JUCEApplicationBase::createInstance();
+
     if (! app->initialiseApp())
         exit (0);
 }
 
 - (void) applicationWillTerminate: (UIApplication*) application
 {
+    (void) application;
     JUCEApplicationBase::appWillTerminateByForce();
 }
 
 - (void) applicationDidEnterBackground: (UIApplication*) application
 {
-    JUCEApplicationBase* const app = JUCEApplicationBase::getInstance();
-    if (app != nullptr)
+    (void) application;
+    if (JUCEApplicationBase* const app = JUCEApplicationBase::getInstance())
         app->suspended();
 }
 
 - (void) applicationWillEnterForeground: (UIApplication*) application
 {
-    JUCEApplicationBase* const app = JUCEApplicationBase::getInstance();
-    if (app != nullptr)
+    (void) application;
+    if (JUCEApplicationBase* const app = JUCEApplicationBase::getInstance())
         app->resumed();
 }
 
@@ -70,6 +73,7 @@
 namespace juce
 {
 
+int juce_iOSMain (int argc, const char* argv[]);
 int juce_iOSMain (int argc, const char* argv[])
 {
     return UIApplicationMain (argc, const_cast<char**> (argv), nil, @"JuceAppStartupDelegate");
@@ -87,7 +91,7 @@ class iOSMessageBox;
 
 } // (juce namespace)
 
-@interface JuceAlertBoxDelegate  : NSObject
+@interface JuceAlertBoxDelegate  : NSObject <UIAlertViewDelegate>
 {
 @public
     iOSMessageBox* owner;
@@ -155,7 +159,7 @@ private:
     int result;
     JuceAlertBoxDelegate* delegate;
     UIAlertView* alert;
-    ModalComponentManager::Callback* callback;
+    ScopedPointer<ModalComponentManager::Callback> callback;
     const bool isYesNo, isAsync;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (iOSMessageBox)
@@ -177,9 +181,10 @@ namespace juce
 {
 
 //==============================================================================
-void JUCE_CALLTYPE NativeMessageBox::showMessageBox (AlertWindow::AlertIconType iconType,
+#if JUCE_MODAL_LOOPS_PERMITTED
+void JUCE_CALLTYPE NativeMessageBox::showMessageBox (AlertWindow::AlertIconType /*iconType*/,
                                                      const String& title, const String& message,
-                                                     Component* associatedComponent)
+                                                     Component* /*associatedComponent*/)
 {
     JUCE_AUTORELEASEPOOL
     {
@@ -187,18 +192,19 @@ void JUCE_CALLTYPE NativeMessageBox::showMessageBox (AlertWindow::AlertIconType 
         (void) mb.getResult();
     }
 }
+#endif
 
-void JUCE_CALLTYPE NativeMessageBox::showMessageBoxAsync (AlertWindow::AlertIconType iconType,
+void JUCE_CALLTYPE NativeMessageBox::showMessageBoxAsync (AlertWindow::AlertIconType /*iconType*/,
                                                           const String& title, const String& message,
-                                                          Component* associatedComponent,
+                                                          Component* /*associatedComponent*/,
                                                           ModalComponentManager::Callback* callback)
 {
     new iOSMessageBox (title, message, @"OK", nil, nil, callback, true);
 }
 
-bool JUCE_CALLTYPE NativeMessageBox::showOkCancelBox (AlertWindow::AlertIconType iconType,
+bool JUCE_CALLTYPE NativeMessageBox::showOkCancelBox (AlertWindow::AlertIconType /*iconType*/,
                                                       const String& title, const String& message,
-                                                      Component* associatedComponent,
+                                                      Component* /*associatedComponent*/,
                                                       ModalComponentManager::Callback* callback)
 {
     ScopedPointer<iOSMessageBox> mb (new iOSMessageBox (title, message, @"Cancel", @"OK",
@@ -211,9 +217,9 @@ bool JUCE_CALLTYPE NativeMessageBox::showOkCancelBox (AlertWindow::AlertIconType
     return false;
 }
 
-int JUCE_CALLTYPE NativeMessageBox::showYesNoCancelBox (AlertWindow::AlertIconType iconType,
+int JUCE_CALLTYPE NativeMessageBox::showYesNoCancelBox (AlertWindow::AlertIconType /*iconType*/,
                                                         const String& title, const String& message,
-                                                        Component* associatedComponent,
+                                                        Component* /*associatedComponent*/,
                                                         ModalComponentManager::Callback* callback)
 {
     ScopedPointer<iOSMessageBox> mb (new iOSMessageBox (title, message, @"Cancel", @"Yes", @"No", callback, callback != nullptr));
@@ -226,13 +232,13 @@ int JUCE_CALLTYPE NativeMessageBox::showYesNoCancelBox (AlertWindow::AlertIconTy
 }
 
 //==============================================================================
-bool DragAndDropContainer::performExternalDragDropOfFiles (const StringArray& files, const bool canMoveFiles)
+bool DragAndDropContainer::performExternalDragDropOfFiles (const StringArray&, bool)
 {
     jassertfalse;    // no such thing on iOS!
     return false;
 }
 
-bool DragAndDropContainer::performExternalDragDropOfText (const String& text)
+bool DragAndDropContainer::performExternalDragDropOfText (const String&)
 {
     jassertfalse;    // no such thing on iOS!
     return false;
@@ -256,7 +262,7 @@ bool juce_areThereAnyAlwaysOnTopWindows()
 }
 
 //==============================================================================
-Image juce_createIconForFile (const File& file)
+Image juce_createIconForFile (const File&)
 {
     return Image::null;
 }
@@ -277,9 +283,9 @@ String SystemClipboard::getTextFromClipboard()
 }
 
 //==============================================================================
-bool Desktop::addMouseInputSource()
+bool MouseInputSource::SourceList::addSource()
 {
-    mouseSources.add (new MouseInputSource (mouseSources.size(), false));
+    addSource (sources.size(), false);
     return true;
 }
 
@@ -295,6 +301,11 @@ Point<int> MouseInputSource::getCurrentRawMousePosition()
 
 void MouseInputSource::setRawMousePosition (Point<int>)
 {
+}
+
+double Desktop::getDefaultMasterScale()
+{
+    return 1.0;
 }
 
 Desktop::DisplayOrientation Desktop::getCurrentOrientation() const

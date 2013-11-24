@@ -29,8 +29,6 @@
 #ifndef JUCE_SCOPEDREADLOCK_H_INCLUDED
 #define JUCE_SCOPEDREADLOCK_H_INCLUDED
 
-#include "juce_ReadWriteLock.h"
-
 
 //==============================================================================
 /**

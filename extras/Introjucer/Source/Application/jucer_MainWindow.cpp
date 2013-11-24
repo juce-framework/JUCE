@@ -30,8 +30,6 @@
 #include "../Project/jucer_NewProjectWizard.h"
 #include "../Utility/jucer_JucerTreeViewBase.h"
 
-ScopedPointer<ApplicationCommandManager> commandManager;
-
 
 //==============================================================================
 MainWindow::MainWindow()
@@ -50,20 +48,22 @@ MainWindow::MainWindow()
     setResizable (true, false);
     centreWithSize (800, 600);
 
+    ApplicationCommandManager& commandManager = IntrojucerApp::getCommandManager();
+
     // Register all the app commands..
-    commandManager->registerAllCommandsForTarget (this);
-    commandManager->registerAllCommandsForTarget (getProjectContentComponent());
+    commandManager.registerAllCommandsForTarget (this);
+    commandManager.registerAllCommandsForTarget (getProjectContentComponent());
 
     // update key mappings..
     {
-        commandManager->getKeyMappings()->resetToDefaultMappings();
+        commandManager.getKeyMappings()->resetToDefaultMappings();
 
         ScopedPointer <XmlElement> keys (getGlobalProperties().getXmlValue ("keyMappings"));
 
         if (keys != nullptr)
-            commandManager->getKeyMappings()->restoreFromXml (*keys);
+            commandManager.getKeyMappings()->restoreFromXml (*keys);
 
-        addKeyListener (commandManager->getKeyMappings());
+        addKeyListener (commandManager.getKeyMappings());
     }
 
     // don't want the window to take focus when the title-bar is clicked..
@@ -80,7 +80,7 @@ MainWindow::~MainWindow()
     setMenuBar (nullptr);
    #endif
 
-    removeKeyListener (commandManager->getKeyMappings());
+    removeKeyListener (IntrojucerApp::getCommandManager().getKeyMappings());
 
     // save the current size and position to our settings file..
     getGlobalProperties().setValue ("lastMainWindowPos", getWindowStateAsString());
@@ -160,7 +160,7 @@ void MainWindow::setProject (Project* newProject)
     getProjectContentComponent()->setProject (newProject);
     currentProject = newProject;
     getProjectContentComponent()->updateMainWindowTitle();
-    commandManager->commandStatusChanged();
+    IntrojucerApp::getCommandManager().commandStatusChanged();
 }
 
 void MainWindow::restoreWindowPosition()
@@ -189,12 +189,18 @@ bool MainWindow::openFile (const File& file)
 
     if (file.hasFileExtension (Project::projectFileExtension))
     {
-        ScopedPointer <Project> newDoc (new Project (file));
+        ScopedPointer<Project> newDoc (new Project (file));
 
-        if (newDoc->loadFrom (file, true)
-             && closeCurrentProject())
+        Result result (newDoc->loadFrom (file, true));
+
+        if (result.wasOk() && closeCurrentProject())
         {
-            setProject (newDoc.release());
+            setProject (newDoc);
+            newDoc.release()->setChangedFlag (false);
+
+            jassert (getProjectContentComponent() != nullptr);
+            getProjectContentComponent()->reloadLastOpenDocuments();
+
             return true;
         }
     }
@@ -209,7 +215,7 @@ bool MainWindow::openFile (const File& file)
 bool MainWindow::isInterestedInFileDrag (const StringArray& filenames)
 {
     for (int i = filenames.size(); --i >= 0;)
-        if (canOpenFile (filenames[i]))
+        if (canOpenFile (File (filenames[i])))
             return true;
 
     return false;
@@ -369,7 +375,7 @@ void MainWindowList::closeWindow (MainWindow* w)
    #if ! JUCE_MAC
     if (windows.size() == 1)
     {
-        JUCEApplication::getInstance()->systemRequestedQuit();
+        JUCEApplicationBase::getInstance()->systemRequestedQuit();
     }
     else
    #endif
@@ -384,8 +390,7 @@ void MainWindowList::closeWindow (MainWindow* w)
 
 void MainWindowList::openDocument (OpenDocumentManager::Document* doc, bool grabFocus)
 {
-    MainWindow* w = getOrCreateFrontmostWindow();
-    w->getProjectContentComponent()->showDocument (doc, grabFocus);
+    getOrCreateFrontmostWindow()->getProjectContentComponent()->showDocument (doc, grabFocus);
 }
 
 bool MainWindowList::openFile (const File& file)
@@ -403,29 +408,17 @@ bool MainWindowList::openFile (const File& file)
 
     if (file.hasFileExtension (Project::projectFileExtension))
     {
-        ScopedPointer <Project> newDoc (new Project (file));
+        MainWindow* const w = getOrCreateEmptyWindow();
+        bool ok = w->openFile (file);
 
-        if (newDoc->loadFrom (file, true))
-        {
-            MainWindow* const w = getOrCreateEmptyWindow();
-            w->setProject (newDoc);
+        w->makeVisible();
+        avoidSuperimposedWindows (w);
 
-            newDoc.release()->setChangedFlag (false);
-
-            w->makeVisible();
-            avoidSuperimposedWindows (w);
-
-            jassert (w->getProjectContentComponent() != nullptr);
-            w->getProjectContentComponent()->reloadLastOpenDocuments();
-
-            return true;
-        }
+        return ok;
     }
-    else if (file.exists())
-    {
-        MainWindow* const w = getOrCreateFrontmostWindow();
-        return w->openFile (file);
-    }
+
+    if (file.exists())
+        return getOrCreateFrontmostWindow()->openFile (file);
 
     return false;
 }

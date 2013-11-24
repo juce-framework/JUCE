@@ -10,42 +10,82 @@
               pluginSilenceInIsSilenceOut="0" pluginTailLength="0" pluginEditorRequiresKeys="0"
               pluginAUExportPrefix="JuceProjectAU" pluginAUViewClass="JuceProjectAU_V1"
               pluginRTASCategory="" bundleIdentifier="com.rawmaterialsoftware.pluginhost"
-              jucerVersion="3.1.0" companyName="Raw Material Software Ltd.">
+              jucerVersion="3.1.0" companyName="Raw Material Software Ltd."
+              includeBinaryInAppConfig="1">
   <EXPORTFORMATS>
     <XCODE_MAC targetFolder="Builds/MacOSX" vstFolder="~/SDKs/vstsdk2.4" rtasFolder="~/SDKs/PT_80_SDK"
-               juceFolder="../.." objCExtraSuffix="M73TRi">
+               objCExtraSuffix="M73TRi" vst3Folder="~/SDKs/VST3 SDK">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="Plugin Host"
                        osxSDK="default" osxCompatibility="default" osxArchitecture="default"/>
         <CONFIGURATION name="Release" isDebug="0" optimisation="2" targetName="Plugin Host"
                        osxSDK="default" osxCompatibility="10.5 SDK" osxArchitecture="32BitUniversal"/>
       </CONFIGURATIONS>
+      <MODULEPATHS>
+        <MODULEPATH id="juce_video" path="../../modules"/>
+        <MODULEPATH id="juce_opengl" path="../../modules"/>
+        <MODULEPATH id="juce_gui_extra" path="../../modules"/>
+        <MODULEPATH id="juce_gui_basics" path="../../modules"/>
+        <MODULEPATH id="juce_graphics" path="../../modules"/>
+        <MODULEPATH id="juce_events" path="../../modules"/>
+        <MODULEPATH id="juce_data_structures" path="../../modules"/>
+        <MODULEPATH id="juce_cryptography" path="../../modules"/>
+        <MODULEPATH id="juce_core" path="../../modules"/>
+        <MODULEPATH id="juce_audio_utils" path="../../modules"/>
+        <MODULEPATH id="juce_audio_processors" path="../../modules"/>
+        <MODULEPATH id="juce_audio_formats" path="../../modules"/>
+        <MODULEPATH id="juce_audio_devices" path="../../modules"/>
+        <MODULEPATH id="juce_audio_basics" path="../../modules"/>
+      </MODULEPATHS>
     </XCODE_MAC>
-    <VS2005 targetFolder="Builds/VisualStudio2005" vstFolder="c:\SDKs\vstsdk2.4"
-            rtasFolder="c:\SDKs\PT_80_SDK" juceFolder="../.." libraryType="1">
+    <VS2010 targetFolder="Builds/VisualStudio2010" vstFolder="c:\SDKs\vstsdk2.4"
+            vst3Folder="c:\SDKs\VST3 SDK">
       <CONFIGURATIONS>
-        <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="Plugin Host"
-                       winWarningLevel="4" generateManifest="1"/>
-        <CONFIGURATION name="Release" isDebug="0" optimisation="2" targetName="Plugin Host"
-                       winWarningLevel="4" generateManifest="1"/>
+        <CONFIGURATION name="Debug" winWarningLevel="4" generateManifest="1" winArchitecture="32-bit"
+                       isDebug="1" optimisation="1" targetName="Plugin Host"/>
+        <CONFIGURATION name="Release" winWarningLevel="4" generateManifest="1" winArchitecture="32-bit"
+                       isDebug="0" optimisation="2" targetName="Plugin Host"/>
       </CONFIGURATIONS>
-    </VS2005>
-    <VS2008 targetFolder="Builds/VisualStudio2008" vstFolder="c:\SDKs\vstsdk2.4"
-            rtasFolder="c:\SDKs\PT_80_SDK" juceFolder="../.." libraryType="1">
-      <CONFIGURATIONS>
-        <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="Plugin Host"
-                       winWarningLevel="4" generateManifest="1"/>
-        <CONFIGURATION name="Release" isDebug="0" optimisation="2" targetName="Plugin Host"
-                       winWarningLevel="4" generateManifest="1"/>
-      </CONFIGURATIONS>
-    </VS2008>
-    <LINUX_MAKE targetFolder="Builds/Linux" vstFolder="~/SDKs/vstsdk2.4" juceFolder="../..">
+      <MODULEPATHS>
+        <MODULEPATH id="juce_video" path="../../modules"/>
+        <MODULEPATH id="juce_opengl" path="../../modules"/>
+        <MODULEPATH id="juce_gui_extra" path="../../modules"/>
+        <MODULEPATH id="juce_gui_basics" path="../../modules"/>
+        <MODULEPATH id="juce_graphics" path="../../modules"/>
+        <MODULEPATH id="juce_events" path="../../modules"/>
+        <MODULEPATH id="juce_data_structures" path="../../modules"/>
+        <MODULEPATH id="juce_cryptography" path="../../modules"/>
+        <MODULEPATH id="juce_core" path="../../modules"/>
+        <MODULEPATH id="juce_audio_utils" path="../../modules"/>
+        <MODULEPATH id="juce_audio_processors" path="../../modules"/>
+        <MODULEPATH id="juce_audio_formats" path="../../modules"/>
+        <MODULEPATH id="juce_audio_devices" path="../../modules"/>
+        <MODULEPATH id="juce_audio_basics" path="../../modules"/>
+      </MODULEPATHS>
+    </VS2010>
+    <LINUX_MAKE targetFolder="Builds/Linux" vstFolder="~/SDKs/vstsdk2.4">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="Plugin Host"
                        libraryPath="/usr/X11R6/lib/"/>
         <CONFIGURATION name="Release" isDebug="0" optimisation="2" targetName="Plugin Host"
                        libraryPath="/usr/X11R6/lib/"/>
       </CONFIGURATIONS>
+      <MODULEPATHS>
+        <MODULEPATH id="juce_video" path="../../modules"/>
+        <MODULEPATH id="juce_opengl" path="../../modules"/>
+        <MODULEPATH id="juce_gui_extra" path="../../modules"/>
+        <MODULEPATH id="juce_gui_basics" path="../../modules"/>
+        <MODULEPATH id="juce_graphics" path="../../modules"/>
+        <MODULEPATH id="juce_events" path="../../modules"/>
+        <MODULEPATH id="juce_data_structures" path="../../modules"/>
+        <MODULEPATH id="juce_cryptography" path="../../modules"/>
+        <MODULEPATH id="juce_core" path="../../modules"/>
+        <MODULEPATH id="juce_audio_utils" path="../../modules"/>
+        <MODULEPATH id="juce_audio_processors" path="../../modules"/>
+        <MODULEPATH id="juce_audio_formats" path="../../modules"/>
+        <MODULEPATH id="juce_audio_devices" path="../../modules"/>
+        <MODULEPATH id="juce_audio_basics" path="../../modules"/>
+      </MODULEPATHS>
     </LINUX_MAKE>
   </EXPORTFORMATS>
   <MAINGROUP id="YdWL7hi7p" name="Plugin Host">
@@ -71,22 +111,22 @@
   <JUCEOPTIONS JUCE_WASAPI="enabled" JUCE_DIRECTSOUND="enabled" JUCE_ALSA="enabled"
                JUCE_QUICKTIME="disabled" JUCE_USE_FLAC="disabled" JUCE_USE_OGGVORBIS="disabled"
                JUCE_USE_CDBURNER="disabled" JUCE_USE_CDREADER="disabled" JUCE_USE_CAMERA="disabled"
-               JUCE_PLUGINHOST_VST="enabled" JUCE_PLUGINHOST_AU="enabled" JUCE_WEB_BROWSER="disabled"/>
+               JUCE_PLUGINHOST_VST="enabled" JUCE_PLUGINHOST_AU="enabled" JUCE_WEB_BROWSER="disabled"
+               JUCE_PLUGINHOST_VST3="enabled"/>
   <MODULES>
-    <MODULE id="juce_core" showAllCode="1"/>
-    <MODULE id="juce_events" showAllCode="1"/>
-    <MODULE id="juce_graphics" showAllCode="1"/>
-    <MODULE id="juce_data_structures" showAllCode="1"/>
-    <MODULE id="juce_gui_basics" showAllCode="1"/>
-    <MODULE id="juce_gui_extra" showAllCode="1"/>
-    <MODULE id="juce_gui_audio" showAllCode="1"/>
-    <MODULE id="juce_cryptography" showAllCode="1"/>
-    <MODULE id="juce_video" showAllCode="1"/>
-    <MODULE id="juce_opengl" showAllCode="1"/>
     <MODULE id="juce_audio_basics" showAllCode="1"/>
     <MODULE id="juce_audio_devices" showAllCode="1"/>
     <MODULE id="juce_audio_formats" showAllCode="1"/>
     <MODULE id="juce_audio_processors" showAllCode="1"/>
     <MODULE id="juce_audio_utils" showAllCode="1"/>
+    <MODULE id="juce_core" showAllCode="1"/>
+    <MODULE id="juce_cryptography" showAllCode="1"/>
+    <MODULE id="juce_data_structures" showAllCode="1"/>
+    <MODULE id="juce_events" showAllCode="1"/>
+    <MODULE id="juce_graphics" showAllCode="1"/>
+    <MODULE id="juce_gui_basics" showAllCode="1"/>
+    <MODULE id="juce_gui_extra" showAllCode="1"/>
+    <MODULE id="juce_opengl" showAllCode="1"/>
+    <MODULE id="juce_video" showAllCode="1"/>
   </MODULES>
 </JUCERPROJECT>

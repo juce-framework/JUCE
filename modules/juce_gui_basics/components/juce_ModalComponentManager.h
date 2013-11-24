@@ -135,8 +135,8 @@ private:
     class ReturnValueRetriever;
 
     friend class Component;
-    friend class OwnedArray <ModalItem>;
-    OwnedArray <ModalItem> stack;
+    friend struct ContainerDeletePolicy<ModalItem>;
+    OwnedArray<ModalItem> stack;
 
     void startModal (Component*, bool autoDelete);
     void endModal (Component*, int returnValue);

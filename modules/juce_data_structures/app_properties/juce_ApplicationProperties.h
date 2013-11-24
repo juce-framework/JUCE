@@ -25,7 +25,6 @@
 #ifndef JUCE_APPLICATIONPROPERTIES_H_INCLUDED
 #define JUCE_APPLICATIONPROPERTIES_H_INCLUDED
 
-#include "juce_PropertiesFile.h"
 
 //==============================================================================
 /**
@@ -66,6 +65,11 @@ public:
         See the PropertiesFile::Options class for details about what options you need to set.
     */
     void setStorageParameters (const PropertiesFile::Options& options);
+
+    /** Returns the current storage parameters.
+        @see setStorageParameters
+    */
+    const PropertiesFile::Options& getStorageParameters() const noexcept        { return options; }
 
     //==============================================================================
     /** Returns the user settings file.

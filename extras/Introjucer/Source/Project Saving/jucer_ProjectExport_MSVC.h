@@ -180,14 +180,14 @@ protected:
                        "you to use macros in this path, e.g. \"$(TEMP)\\MyAppBuildFiles\\$(Configuration)\", which is a handy way to "
                        "send them to the user's temp folder.");
 
-            const char* const warningLevelNames[] = { "Low", "Medium", "High", nullptr };
+            static const char* warningLevelNames[] = { "Low", "Medium", "High", nullptr };
             const int warningLevels[] = { 2, 3, 4 };
 
             props.add (new ChoicePropertyComponent (getWarningLevelValue(), "Warning Level",
                                                     StringArray (warningLevelNames), Array<var> (warningLevels, numElementsInArray (warningLevels))));
 
             {
-                const char* const runtimeNames[] = { "(Default)", "Use static runtime", "Use DLL runtime", nullptr };
+                static const char* runtimeNames[] = { "(Default)", "Use static runtime", "Use DLL runtime", nullptr };
                 const var runtimeValues[] = { var(), var (false), var (true) };
 
                 props.add (new ChoicePropertyComponent (getUsingRuntimeLibDLL(), "Runtime Library",
@@ -195,8 +195,8 @@ protected:
             }
 
             {
-                const char* const wpoNames[] = { "Enable link-time code generation when possible",
-                                                 "Always disable link-time code generation", nullptr };
+                static const char* wpoNames[] = { "Enable link-time code generation when possible",
+                                                  "Always disable link-time code generation", nullptr };
                 const var wpoValues[] = { var(), var (1) };
 
                 props.add (new ChoicePropertyComponent (getWholeProgramOptValue(), "Whole Program Optimisation",
@@ -211,8 +211,8 @@ protected:
             props.add (new BooleanPropertyComponent (shouldGenerateManifestValue(), "Manifest", "Generate Manifest"));
 
             {
-                const char* const characterSetNames[] = { "Default", "MultiByte", "Unicode", nullptr };
-                const var charSets[]                  = { var::null, "MultiByte", "Unicode", };
+                static const char* characterSetNames[] = { "Default", "MultiByte", "Unicode", nullptr };
+                const var charSets[]                   = { var::null, "MultiByte", "Unicode", };
 
                 props.add (new ChoicePropertyComponent (getCharacterSetValue(), "Character Set",
                                                         StringArray (characterSetNames), Array<var> (charSets, numElementsInArray (charSets))));
@@ -434,7 +434,7 @@ protected:
             out.writeShort (1); // colour planes
             out.writeShort (32); // bits per pixel
             out.writeInt ((int) (dataBlock.getDataSize() - oldDataSize));
-            out.writeInt (dataBlockStart + oldDataSize);
+            out.writeInt (dataBlockStart + (int) oldDataSize);
         }
 
         jassert (out.getPosition() == dataBlockStart);
@@ -557,9 +557,9 @@ class MSVCProjectExporterVC2008   : public MSVCProjectExporterBase
 {
 public:
     //==============================================================================
-    MSVCProjectExporterVC2008 (Project& project_, const ValueTree& settings_,
+    MSVCProjectExporterVC2008 (Project& p, const ValueTree& s,
                                const char* folderName = "VisualStudio2008")
-        : MSVCProjectExporterBase (project_, settings_, folderName)
+        : MSVCProjectExporterBase (p, s, folderName)
     {
         name = getName();
     }
@@ -619,7 +619,7 @@ public:
 
 protected:
     virtual String getProjectVersionString() const    { return "9.00"; }
-    virtual String getSolutionVersionString() const   { return "10.00" + newLine + "# Visual C++ Express 2008"; }
+    virtual String getSolutionVersionString() const   { return String ("10.00") + newLine + "# Visual C++ Express 2008"; }
 
     File getVCProjFile() const    { return getProjectFile (".vcproj"); }
 
@@ -937,7 +937,7 @@ public:
 
 protected:
     String getProjectVersionString() const    { return "8.00"; }
-    String getSolutionVersionString() const   { return "9.00" + newLine + "# Visual C++ Express 2005"; }
+    String getSolutionVersionString() const   { return String ("9.00") + newLine + "# Visual C++ Express 2005"; }
 
     JUCE_DECLARE_NON_COPYABLE (MSVCProjectExporterVC2005)
 };
@@ -1526,8 +1526,8 @@ public:
     {
         MSVCProjectExporterVC2010::createExporterProperties (props);
 
-        const char* const toolsetNames[] = { "(default)", "v110", "v110_xp", "Windows7.1SDK", nullptr };
-        const var toolsets[]             = { var(),       "v110", "v110_xp", "Windows7.1SDK" };
+        static const char* toolsetNames[] = { "(default)", "v110", "v110_xp", "Windows7.1SDK", nullptr };
+        const var toolsets[]              = { var(),       "v110", "v110_xp", "Windows7.1SDK" };
 
         props.add (new ChoicePropertyComponent (getPlatformToolsetValue(), "Platform Toolset",
                                                 StringArray (toolsetNames),
@@ -1578,8 +1578,8 @@ public:
     {
         MSVCProjectExporterVC2010::createExporterProperties (props);
 
-        const char* const toolsetNames[] = { "(default)", "v120", "v120_xp", nullptr };
-        const var toolsets[]             = { var(),       "v120", "v120_xp" };
+        static const char* toolsetNames[] = { "(default)", "v120", "v120_xp", nullptr };
+        const var toolsets[]              = { var(),       "v120", "v120_xp" };
 
         props.add (new ChoicePropertyComponent (getPlatformToolsetValue(), "Platform Toolset",
                                                 StringArray (toolsetNames),

@@ -64,7 +64,7 @@ bool PaintRoutine::perform (UndoableAction* action, const String& actionName)
     return false;
 }
 
-void PaintRoutine::setBackgroundColour (const Colour& newColour) noexcept
+void PaintRoutine::setBackgroundColour (Colour newColour) noexcept
 {
     backgroundColour = newColour;
     changed();

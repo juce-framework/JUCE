@@ -29,9 +29,6 @@
 #ifndef JUCE_LEAKEDOBJECTDETECTOR_H_INCLUDED
 #define JUCE_LEAKEDOBJECTDETECTOR_H_INCLUDED
 
-#include "../text/juce_String.h"
-#include "juce_Atomic.h"
-
 
 //==============================================================================
 /**

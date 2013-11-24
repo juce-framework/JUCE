@@ -29,8 +29,6 @@
 #ifndef JUCE_ABSTRACTFIFO_H_INCLUDED
 #define JUCE_ABSTRACTFIFO_H_INCLUDED
 
-#include "../memory/juce_Atomic.h"
-
 
 //==============================================================================
 /**

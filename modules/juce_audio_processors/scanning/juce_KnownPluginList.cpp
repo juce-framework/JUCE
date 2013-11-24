@@ -287,8 +287,8 @@ XmlElement* KnownPluginList::createXml() const
 {
     XmlElement* const e = new XmlElement ("KNOWNPLUGINS");
 
-    for (int i = 0; i < types.size(); ++i)
-        e->addChildElement (types.getUnchecked(i)->createXml());
+    for (int i = types.size(); --i >= 0;)
+        e->prependChildElement (types.getUnchecked(i)->createXml());
 
     for (int i = 0; i < blacklist.size(); ++i)
         e->createNewChildElement ("BLACKLISTED")->setAttribute ("id", blacklist[i]);
@@ -435,6 +435,18 @@ struct PluginTreeUtils
         }
     }
 
+    static bool containsDuplicateNames (const Array<const PluginDescription*>& plugins, const String& name)
+    {
+        int matches = 0;
+
+        for (int i = 0; i < plugins.size(); ++i)
+            if (plugins.getUnchecked(i)->name == name)
+                if (++matches > 1)
+                    return true;
+
+        return false;
+    }
+
     static void addToMenu (const KnownPluginList::PluginTree& tree, PopupMenu& m, const OwnedArray <PluginDescription>& allPlugins)
     {
         for (int i = 0; i < tree.subFolders.size(); ++i)
@@ -450,7 +462,12 @@ struct PluginTreeUtils
         {
             const PluginDescription* const plugin = tree.plugins.getUnchecked(i);
 
-            m.addItem (allPlugins.indexOf (plugin) + menuIdBase, plugin->name, true, false);
+            String name (plugin->name);
+
+            if (containsDuplicateNames (tree.plugins, name))
+                name << " (" << plugin->pluginFormatName << ')';
+
+            m.addItem (allPlugins.indexOf (plugin) + menuIdBase, name, true, false);
         }
     }
 };

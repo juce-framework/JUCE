@@ -24,8 +24,8 @@
 
 #if JUCE_USE_OPENGL_SHADERS
 
-OpenGLShaderProgram::OpenGLShaderProgram (const OpenGLContext& context_) noexcept
-    : context (context_)
+OpenGLShaderProgram::OpenGLShaderProgram (const OpenGLContext& c) noexcept
+    : context (c)
 {
     // This object can only be created and used when the current thread has an active OpenGL context.
     jassert (OpenGLHelpers::isContextActive());
@@ -41,7 +41,9 @@ OpenGLShaderProgram::~OpenGLShaderProgram() noexcept
 double OpenGLShaderProgram::getLanguageVersion()
 {
    #if JUCE_OPENGL_ES
-    jassertfalse; // doesn't work in ES
+    // GLES doesn't support this version number, but that shouldn't matter since
+    // on GLES you probably won't need to check it.
+    jassertfalse;
     return 0;
    #else
     return String ((const char*) glGetString (GL_SHADING_LANGUAGE_VERSION))
@@ -49,10 +51,18 @@ double OpenGLShaderProgram::getLanguageVersion()
    #endif
 }
 
-bool OpenGLShaderProgram::addShader (const char* const code, GLenum type)
+bool OpenGLShaderProgram::addShader (StringRef code, GLenum type)
 {
     GLuint shaderID = context.extensions.glCreateShader (type);
-    context.extensions.glShaderSource (shaderID, 1, (const GLchar**) &code, nullptr);
+
+   #if JUCE_STRING_UTF_TYPE == 8
+    const GLchar* c = code.text;
+   #else
+    String codeString (code.text);
+    const GLchar* c = codeString.toRawUTF8();
+   #endif
+
+    context.extensions.glShaderSource (shaderID, 1, &c, nullptr);
     context.extensions.glCompileShader (shaderID);
 
     GLint status = GL_FALSE;
@@ -65,7 +75,9 @@ bool OpenGLShaderProgram::addShader (const char* const code, GLenum type)
         context.extensions.glGetShaderInfoLog (shaderID, sizeof (infoLog), &infoLogLength, infoLog);
         errorLog = String (infoLog, (size_t) infoLogLength);
 
-       #if JUCE_DEBUG
+       #if JUCE_DEBUG && ! JUCE_DONT_ASSERT_ON_GLSL_COMPILE_ERROR
+        // Your GLSL code contained compile errors!
+        // Hopefully this compile log should help to explain what went wrong.
         DBG (errorLog);
         jassertfalse;
        #endif
@@ -78,6 +90,9 @@ bool OpenGLShaderProgram::addShader (const char* const code, GLenum type)
     JUCE_CHECK_OPENGL_ERROR
     return true;
 }
+
+bool OpenGLShaderProgram::addVertexShader (StringRef code)    { return addShader (code, GL_VERTEX_SHADER); }
+bool OpenGLShaderProgram::addFragmentShader (StringRef code)  { return addShader (code, GL_FRAGMENT_SHADER); }
 
 bool OpenGLShaderProgram::link() noexcept
 {
@@ -93,7 +108,9 @@ bool OpenGLShaderProgram::link() noexcept
         context.extensions.glGetProgramInfoLog (programID, sizeof (infoLog), &infoLogLength, infoLog);
         errorLog = String (infoLog, (size_t) infoLogLength);
 
-       #if JUCE_DEBUG
+       #if JUCE_DEBUG && ! JUCE_DONT_ASSERT_ON_GLSL_COMPILE_ERROR
+        // Your GLSL code contained link errors!
+        // Hopefully this compile log should help to explain what went wrong.
         DBG (errorLog);
         jassertfalse;
        #endif

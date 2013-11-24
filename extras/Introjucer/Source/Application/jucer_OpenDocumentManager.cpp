@@ -149,7 +149,7 @@ OpenDocumentManager::Document* OpenDocumentManager::openFile (Project* project, 
     jassert (d != nullptr);  // should always at least have been picked up by UnknownDocument
 
     documents.add (d);
-    commandManager->commandStatusChanged();
+    IntrojucerApp::getCommandManager().commandStatusChanged();
     return d;
 }
 
@@ -195,11 +195,17 @@ bool OpenDocumentManager::closeDocument (int index, bool saveIfNeeded)
             if (saveIfNeededAndUserAgrees (doc) != FileBasedDocument::savedOk)
                 return false;
 
+        bool canClose = true;
+
         for (int i = listeners.size(); --i >= 0;)
-            listeners.getUnchecked(i)->documentAboutToClose (doc);
+            if (! listeners.getUnchecked(i)->documentAboutToClose (doc))
+                canClose = false;
+
+        if (! canClose)
+            return false;
 
         documents.remove (index);
-        commandManager->commandStatusChanged();
+        IntrojucerApp::getCommandManager().commandStatusChanged();
     }
 
     return true;
@@ -359,13 +365,15 @@ OpenDocumentManager::Document* RecentDocumentList::getClosestPreviousDocOtherTha
     return nullptr;
 }
 
-void RecentDocumentList::documentAboutToClose (OpenDocumentManager::Document* document)
+bool RecentDocumentList::documentAboutToClose (OpenDocumentManager::Document* document)
 {
     previousDocs.removeAllInstancesOf (document);
     nextDocs.removeAllInstancesOf (document);
 
     jassert (! previousDocs.contains (document));
     jassert (! nextDocs.contains (document));
+
+    return true;
 }
 
 static void restoreDocList (Project& project, Array <OpenDocumentManager::Document*>& list, const XmlElement* xml)

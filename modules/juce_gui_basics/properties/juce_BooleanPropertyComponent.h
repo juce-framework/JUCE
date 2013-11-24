@@ -25,9 +25,6 @@
 #ifndef JUCE_BOOLEANPROPERTYCOMPONENT_H_INCLUDED
 #define JUCE_BOOLEANPROPERTYCOMPONENT_H_INCLUDED
 
-#include "juce_PropertyComponent.h"
-#include "../buttons/juce_ToggleButton.h"
-
 
 //==============================================================================
 /**

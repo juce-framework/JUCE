@@ -25,8 +25,6 @@
 #ifndef JUCE_INTERPROCESSCONNECTIONSERVER_H_INCLUDED
 #define JUCE_INTERPROCESSCONNECTIONSERVER_H_INCLUDED
 
-#include "juce_InterprocessConnection.h"
-
 
 //==============================================================================
 /**

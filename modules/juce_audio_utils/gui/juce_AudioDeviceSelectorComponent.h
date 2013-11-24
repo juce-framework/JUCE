@@ -92,7 +92,7 @@ private:
     const bool hideAdvancedOptionsWithButton;
 
     class MidiInputSelectorComponentListBox;
-    friend class ScopedPointer<MidiInputSelectorComponentListBox>;
+    friend struct ContainerDeletePolicy<MidiInputSelectorComponentListBox>;
     ScopedPointer<MidiInputSelectorComponentListBox> midiInputsList;
     ScopedPointer<ComboBox> midiOutputSelector;
     ScopedPointer<Label> midiInputsLabel, midiOutputLabel;

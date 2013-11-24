@@ -25,9 +25,6 @@
 #ifndef JUCE_TOOLTIPWINDOW_H_INCLUDED
 #define JUCE_TOOLTIPWINDOW_H_INCLUDED
 
-#include "../components/juce_Component.h"
-#include "../mouse/juce_TooltipClient.h"
-
 
 //==============================================================================
 /**
@@ -78,6 +75,12 @@ public:
     */
     void setMillisecondsBeforeTipAppears (int newTimeMs = 700) noexcept;
 
+    /** Can be called to manually force a tip to be shown at a particular location. */
+    void displayTip (Point<int> screenPosition, const String& text);
+
+    /** Can be called to manually hide the tip if it's showing. */
+    void hideTip();
+
     //==============================================================================
     /** A set of colour IDs to use to change the colour of various aspects of the tooltip.
 
@@ -93,6 +96,17 @@ public:
         outlineColourId         = 0x1001c10     /**< The colour to use to draw an outline around the tooltip. */
     };
 
+    //==============================================================================
+    /** This abstract base class is implemented by LookAndFeel classes to provide
+        window drawing functionality.
+    */
+    struct JUCE_API  LookAndFeelMethods
+    {
+        virtual ~LookAndFeelMethods() {}
+
+        virtual void getTooltipSize (const String& tipText, int& width, int& height) = 0;
+        virtual void drawTooltip (Graphics&, const String& text, int width, int height) = 0;
+    };
 
 private:
     //==============================================================================
@@ -106,10 +120,9 @@ private:
     void paint (Graphics&) override;
     void mouseEnter (const MouseEvent&) override;
     void timerCallback() override;
+    void updatePosition (const String&, Point<int>, const Rectangle<int>&);
 
     static String getTipFor (Component*);
-    void showFor (const String&);
-    void hide();
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TooltipWindow)
 };

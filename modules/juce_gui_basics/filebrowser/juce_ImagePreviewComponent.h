@@ -25,8 +25,6 @@
 #ifndef JUCE_IMAGEPREVIEWCOMPONENT_H_INCLUDED
 #define JUCE_IMAGEPREVIEWCOMPONENT_H_INCLUDED
 
-#include "juce_FilePreviewComponent.h"
-
 
 //==============================================================================
 /**

@@ -33,15 +33,15 @@
 
 
 //==============================================================================
-class ElementFillModeProperty   : public ChoicePropertyComponent,
-                                  private ElementListenerBase <ColouredElement>
+class ElementFillModeProperty   : public ChoicePropertyComponent
 {
 public:
-    ElementFillModeProperty (ColouredElement* const owner_, const bool isForStroke_)
-        : ChoicePropertyComponent ("fill mode"),
-          ElementListenerBase <ColouredElement> (owner_),
+    ElementFillModeProperty (ColouredElement* const e, const bool isForStroke_)
+        : ChoicePropertyComponent ("fill mode"), listener (e),
           isForStroke (isForStroke_)
     {
+        listener.setPropertyToRefresh (*this);
+
         choices.add ("Solid Colour");
         choices.add ("Linear Gradient");
         choices.add ("Radial Gradient");
@@ -50,8 +50,8 @@ public:
 
     void setIndex (int newIndex)
     {
-        JucerFillType fill (isForStroke ? owner->getStrokeType().fill
-                                        : owner->getFillType());
+        JucerFillType fill (isForStroke ? listener.owner->getStrokeType().fill
+                                        : listener.owner->getFillType());
 
         switch (newIndex)
         {
@@ -63,15 +63,15 @@ public:
         }
 
         if (! isForStroke)
-            owner->setFillType (fill, true);
+            listener.owner->setFillType (fill, true);
         else
-            owner->setStrokeFill (fill, true);
+            listener.owner->setStrokeFill (fill, true);
     }
 
     int getIndex() const
     {
-        switch (isForStroke ? owner->getStrokeType().fill.mode
-                            : owner->getFillType().mode)
+        switch (isForStroke ? listener.owner->getStrokeType().fill.mode
+                            : listener.owner->getFillType().mode)
         {
             case JucerFillType::solidColour:    return 0;
             case JucerFillType::linearGradient: return 1;
@@ -84,12 +84,12 @@ public:
     }
 
 private:
+    ElementListener<ColouredElement> listener;
     const bool isForStroke;
 };
 
 //==============================================================================
-class ElementFillColourProperty  : public JucerColourPropertyComponent,
-                                   private ElementListenerBase <ColouredElement>
+class ElementFillColourProperty  : public JucerColourPropertyComponent
 {
 public:
     enum ColourType
@@ -104,18 +104,19 @@ public:
                                const ColourType type_,
                                const bool isForStroke_)
         : JucerColourPropertyComponent (name, false),
-          ElementListenerBase <ColouredElement> (owner_),
+          listener (owner_),
           type (type_),
           isForStroke (isForStroke_)
     {
+        listener.setPropertyToRefresh (*this);
     }
 
-    void setColour (const Colour& newColour)
+    void setColour (Colour newColour) override
     {
-        owner->getDocument()->getUndoManager().undoCurrentTransactionOnly();
+        listener.owner->getDocument()->getUndoManager().undoCurrentTransactionOnly();
 
-        JucerFillType fill (isForStroke ? owner->getStrokeType().fill
-                                        : owner->getFillType());
+        JucerFillType fill (isForStroke ? listener.owner->getStrokeType().fill
+                                        : listener.owner->getFillType());
 
         switch (type)
         {
@@ -126,15 +127,15 @@ public:
         }
 
         if (! isForStroke)
-            owner->setFillType (fill, true);
+            listener.owner->setFillType (fill, true);
         else
-            owner->setStrokeFill (fill, true);
+            listener.owner->setStrokeFill (fill, true);
     }
 
-    Colour getColour() const
+    Colour getColour() const override
     {
-        const JucerFillType fill (isForStroke ? owner->getStrokeType().fill
-                                              : owner->getFillType());
+        const JucerFillType fill (isForStroke ? listener.owner->getStrokeType().fill
+                                              : listener.owner->getFillType());
 
         switch (type)
         {
@@ -147,19 +148,19 @@ public:
         return Colours::black;
     }
 
-    void resetToDefault()
+    void resetToDefault() override
     {
         jassertfalse; // option shouldn't be visible
     }
 
 private:
+    ElementListener<ColouredElement> listener;
     const ColourType type;
     const bool isForStroke;
 };
 
 //==============================================================================
-class ElementFillPositionProperty   : public PositionPropertyBase,
-                                      private ElementListenerBase <ColouredElement>
+class ElementFillPositionProperty   : public PositionPropertyBase
 {
 public:
     ElementFillPositionProperty (ColouredElement* const owner_,
@@ -169,16 +170,17 @@ public:
                                  const bool isForStroke_)
      : PositionPropertyBase (owner_, name, dimension_, false, false,
                              owner_->getDocument()->getComponentLayout()),
-       ElementListenerBase <ColouredElement> (owner_),
+       listener (owner_),
        isStart (isStart_),
        isForStroke (isForStroke_)
     {
+        listener.setPropertyToRefresh (*this);
     }
 
     void setPosition (const RelativePositionedRectangle& newPos)
     {
-        JucerFillType fill (isForStroke ? owner->getStrokeType().fill
-                                        : owner->getFillType());
+        JucerFillType fill (isForStroke ? listener.owner->getStrokeType().fill
+                                        : listener.owner->getFillType());
 
         if (isStart)
             fill.gradPos1 = newPos;
@@ -186,73 +188,79 @@ public:
             fill.gradPos2 = newPos;
 
         if (! isForStroke)
-            owner->setFillType (fill, true);
+            listener.owner->setFillType (fill, true);
         else
-            owner->setStrokeFill (fill, true);
+            listener.owner->setStrokeFill (fill, true);
     }
 
     RelativePositionedRectangle getPosition() const
     {
-        const JucerFillType fill (isForStroke ? owner->getStrokeType().fill
-                                              : owner->getFillType());
+        const JucerFillType fill (isForStroke ? listener.owner->getStrokeType().fill
+                                              : listener.owner->getFillType());
 
         return isStart ? fill.gradPos1
                        : fill.gradPos2;
     }
 
 private:
+    ElementListener<ColouredElement> listener;
     const bool isStart, isForStroke;
 };
 
 //==============================================================================
-class EnableStrokeProperty : public BooleanPropertyComponent,
-                             private ElementListenerBase <ColouredElement>
+class EnableStrokeProperty : public BooleanPropertyComponent
 {
 public:
     EnableStrokeProperty (ColouredElement* const owner_)
         : BooleanPropertyComponent ("outline", "Outline enabled", "No outline"),
-          ElementListenerBase <ColouredElement> (owner_)
+          listener (owner_)
     {
+        listener.setPropertyToRefresh (*this);
     }
 
     //==============================================================================
-    void setState (bool newState)           { owner->enableStroke (newState, true); }
-    bool getState() const                   { return owner->isStrokeEnabled(); }
+    void setState (bool newState)           { listener.owner->enableStroke (newState, true); }
+    bool getState() const                   { return listener.owner->isStrokeEnabled(); }
+
+    ElementListener<ColouredElement> listener;
 };
 
 //==============================================================================
-class StrokeThicknessProperty   : public SliderPropertyComponent,
-                                  private ElementListenerBase <ColouredElement>
+class StrokeThicknessProperty   : public SliderPropertyComponent
 {
 public:
     StrokeThicknessProperty (ColouredElement* const owner_)
         : SliderPropertyComponent ("outline thickness", 0.1, 200.0, 0.1, 0.3),
-          ElementListenerBase <ColouredElement> (owner_)
+          listener (owner_)
     {
+        listener.setPropertyToRefresh (*this);
     }
 
     void setValue (double newValue)
     {
-        owner->getDocument()->getUndoManager().undoCurrentTransactionOnly();
+        listener.owner->getDocument()->getUndoManager().undoCurrentTransactionOnly();
 
-        owner->setStrokeType (PathStrokeType ((float) newValue,
-                                              owner->getStrokeType().stroke.getJointStyle(),
-                                              owner->getStrokeType().stroke.getEndStyle()),
-                              true);
+        listener.owner->setStrokeType (PathStrokeType ((float) newValue,
+                                                       listener.owner->getStrokeType().stroke.getJointStyle(),
+                                                       listener.owner->getStrokeType().stroke.getEndStyle()),
+                                       true);
     }
 
-    double getValue() const                 { return owner->getStrokeType().stroke.getStrokeThickness(); }
+    double getValue() const                 { return listener.owner->getStrokeType().stroke.getStrokeThickness(); }
+
+    ElementListener<ColouredElement> listener;
 };
 
 //==============================================================================
-class StrokeJointProperty : public ChoicePropertyComponent,
-                            private ElementListenerBase <ColouredElement>
+class StrokeJointProperty : public ChoicePropertyComponent
 {
 public:
     StrokeJointProperty (ColouredElement* const owner_)
         : ChoicePropertyComponent ("joint style"),
-          ElementListenerBase <ColouredElement> (owner_)
+          listener (owner_)
     {
+        listener.setPropertyToRefresh (*this);
+
         choices.add ("mitered");
         choices.add ("curved");
         choices.add ("beveled");
@@ -266,15 +274,15 @@ public:
 
         jassert (newIndex >= 0 && newIndex < 3);
 
-        owner->setStrokeType (PathStrokeType (owner->getStrokeType().stroke.getStrokeThickness(),
-                                              joints [newIndex],
-                                              owner->getStrokeType().stroke.getEndStyle()),
-                              true);
+        listener.owner->setStrokeType (PathStrokeType (listener.owner->getStrokeType().stroke.getStrokeThickness(),
+                                                       joints [newIndex],
+                                                       listener.owner->getStrokeType().stroke.getEndStyle()),
+                                       true);
     }
 
     int getIndex() const
     {
-        switch (owner->getStrokeType().stroke.getJointStyle())
+        switch (listener.owner->getStrokeType().stroke.getJointStyle())
         {
             case PathStrokeType::mitered:   return 0;
             case PathStrokeType::curved:    return 1;
@@ -284,17 +292,20 @@ public:
 
         return 0;
     }
+
+    ElementListener<ColouredElement> listener;
 };
 
 //==============================================================================
-class StrokeEndCapProperty   : public ChoicePropertyComponent,
-                               private ElementListenerBase <ColouredElement>
+class StrokeEndCapProperty   : public ChoicePropertyComponent
 {
 public:
     StrokeEndCapProperty (ColouredElement* const owner_)
         : ChoicePropertyComponent ("end-cap style"),
-          ElementListenerBase <ColouredElement> (owner_)
+          listener (owner_)
     {
+        listener.setPropertyToRefresh (*this);
+
         choices.add ("butt");
         choices.add ("square");
         choices.add ("round");
@@ -308,15 +319,15 @@ public:
 
         jassert (newIndex >= 0 && newIndex < 3);
 
-        owner->setStrokeType (PathStrokeType (owner->getStrokeType().stroke.getStrokeThickness(),
-                                              owner->getStrokeType().stroke.getJointStyle(),
-                                              ends [newIndex]),
-                              true);
+        listener.owner->setStrokeType (PathStrokeType (listener.owner->getStrokeType().stroke.getStrokeThickness(),
+                                                       listener.owner->getStrokeType().stroke.getJointStyle(),
+                                                       ends [newIndex]),
+                                       true);
     }
 
     int getIndex() const
     {
-        switch (owner->getStrokeType().stroke.getEndStyle())
+        switch (listener.owner->getStrokeType().stroke.getEndStyle())
         {
             case PathStrokeType::butt:      return 0;
             case PathStrokeType::square:    return 1;
@@ -326,6 +337,8 @@ public:
 
         return 0;
     }
+
+    ElementListener<ColouredElement> listener;
 };
 
 //==============================================================================
@@ -377,8 +390,7 @@ private:
 };
 
 //==============================================================================
-class ImageBrushPositionProperty    : public PositionPropertyBase,
-                                      private ElementListenerBase <ColouredElement>
+class ImageBrushPositionProperty    : public PositionPropertyBase
 {
 public:
     ImageBrushPositionProperty (ColouredElement* const owner_,
@@ -387,86 +399,90 @@ public:
                                 const bool isForStroke_)
         : PositionPropertyBase (owner_, name, dimension_, false, false,
                                 owner_->getDocument()->getComponentLayout()),
-          ElementListenerBase <ColouredElement> (owner_),
+          listener (owner_),
           isForStroke (isForStroke_)
     {
+        listener.setPropertyToRefresh (*this);
     }
 
     void setPosition (const RelativePositionedRectangle& newPos)
     {
         if (isForStroke)
         {
-            JucerFillType type (owner->getStrokeType().fill);
+            JucerFillType type (listener.owner->getStrokeType().fill);
             type.imageAnchor = newPos;
-            owner->setStrokeFill (type, true);
+            listener.owner->setStrokeFill (type, true);
         }
         else
         {
-            JucerFillType type (owner->getFillType());
+            JucerFillType type (listener.owner->getFillType());
             type.imageAnchor = newPos;
-            owner->setFillType (type, true);
+            listener.owner->setFillType (type, true);
         }
     }
 
     RelativePositionedRectangle getPosition() const
     {
         if (isForStroke)
-            return owner->getStrokeType().fill.imageAnchor;
+            return listener.owner->getStrokeType().fill.imageAnchor;
 
-        return owner->getFillType().imageAnchor;
+        return listener.owner->getFillType().imageAnchor;
     }
 
 private:
+    ElementListener<ColouredElement> listener;
     const bool isForStroke;
 };
 
 //==============================================================================
-class ImageBrushOpacityProperty  : public SliderPropertyComponent,
-                                   private ElementListenerBase <ColouredElement>
+class ImageBrushOpacityProperty  : public SliderPropertyComponent
 {
 public:
     ImageBrushOpacityProperty (ColouredElement* const e, const bool isForStroke_)
         : SliderPropertyComponent ("opacity", 0.0, 1.0, 0.001),
-          ElementListenerBase <ColouredElement> (e),
+          listener (e),
           isForStroke (isForStroke_)
     {
+        listener.setPropertyToRefresh (*this);
     }
 
     void setValue (double newValue)
     {
-        if (owner != nullptr)
+        if (listener.owner != nullptr)
         {
-            owner->getDocument()->getUndoManager().undoCurrentTransactionOnly();
+            listener.owner->getDocument()->getUndoManager().undoCurrentTransactionOnly();
 
             if (isForStroke)
             {
-                JucerFillType type (owner->getStrokeType().fill);
+                JucerFillType type (listener.owner->getStrokeType().fill);
                 type.imageOpacity = newValue;
 
-                owner->setStrokeFill (type, true);
+                listener.owner->setStrokeFill (type, true);
             }
             else
             {
-                JucerFillType type (owner->getFillType());
+                JucerFillType type (listener.owner->getFillType());
                 type.imageOpacity = newValue;
 
-                owner->setFillType (type, true);
+                listener.owner->setFillType (type, true);
             }
         }
     }
 
     double getValue() const
     {
-        if (owner == nullptr)
+        if (listener.owner == nullptr)
             return 0;
 
         if (isForStroke)
-            return owner->getStrokeType().fill.imageOpacity;
+            return listener.owner->getStrokeType().fill.imageOpacity;
 
-        return owner->getFillType().imageOpacity;
+        return listener.owner->getFillType().imageOpacity;
     }
 
 private:
+    ElementListener<ColouredElement> listener;
+
     bool isForStroke;
 };
 
@@ -488,37 +504,37 @@ ColouredElement::~ColouredElement()
 }
 
 //==============================================================================
-void ColouredElement::getEditableProperties (Array <PropertyComponent*>& properties)
+void ColouredElement::getEditableProperties (Array <PropertyComponent*>& props)
 {
-    PaintElement::getEditableProperties (properties);
-    getColourSpecificProperties (properties);
+    PaintElement::getEditableProperties (props);
+    getColourSpecificProperties (props);
 }
 
-void ColouredElement::getColourSpecificProperties (Array <PropertyComponent*>& properties)
+void ColouredElement::getColourSpecificProperties (Array <PropertyComponent*>& props)
 {
-    properties.add (new ElementFillModeProperty (this, false));
+    props.add (new ElementFillModeProperty (this, false));
 
     switch (getFillType().mode)
     {
     case JucerFillType::solidColour:
-        properties.add (new ElementFillColourProperty ("colour", this, ElementFillColourProperty::solidColour, false));
+        props.add (new ElementFillColourProperty ("colour", this, ElementFillColourProperty::solidColour, false));
         break;
 
     case JucerFillType::linearGradient:
     case JucerFillType::radialGradient:
-        properties.add (new ElementFillColourProperty ("colour 1", this, ElementFillColourProperty::gradientColour1, false));
-        properties.add (new ElementFillPositionProperty (this, "x1", PositionPropertyBase::componentX, true, false));
-        properties.add (new ElementFillPositionProperty (this, "y1", PositionPropertyBase::componentY, true, false));
-        properties.add (new ElementFillColourProperty ("colour 2", this, ElementFillColourProperty::gradientColour2, false));
-        properties.add (new ElementFillPositionProperty (this, "x2", PositionPropertyBase::componentX, false, false));
-        properties.add (new ElementFillPositionProperty (this, "y2", PositionPropertyBase::componentY, false, false));
+        props.add (new ElementFillColourProperty ("colour 1", this, ElementFillColourProperty::gradientColour1, false));
+        props.add (new ElementFillPositionProperty (this, "x1", PositionPropertyBase::componentX, true, false));
+        props.add (new ElementFillPositionProperty (this, "y1", PositionPropertyBase::componentY, true, false));
+        props.add (new ElementFillColourProperty ("colour 2", this, ElementFillColourProperty::gradientColour2, false));
+        props.add (new ElementFillPositionProperty (this, "x2", PositionPropertyBase::componentX, false, false));
+        props.add (new ElementFillPositionProperty (this, "y2", PositionPropertyBase::componentY, false, false));
         break;
 
     case JucerFillType::imageBrush:
-        properties.add (new ImageBrushResourceProperty (this, false));
-        properties.add (new ImageBrushPositionProperty (this, "anchor x", PositionPropertyBase::componentX, false));
-        properties.add (new ImageBrushPositionProperty (this, "anchor y", PositionPropertyBase::componentY, false));
-        properties.add (new ImageBrushOpacityProperty (this, false));
+        props.add (new ImageBrushResourceProperty (this, false));
+        props.add (new ImageBrushPositionProperty (this, "anchor x", PositionPropertyBase::componentX, false));
+        props.add (new ImageBrushPositionProperty (this, "anchor y", PositionPropertyBase::componentY, false));
+        props.add (new ImageBrushOpacityProperty (this, false));
         break;
 
     default:
@@ -528,41 +544,41 @@ void ColouredElement::getColourSpecificProperties (Array <PropertyComponent*>& p
 
     if (showOutline)
     {
-        properties.add (new EnableStrokeProperty (this));
+        props.add (new EnableStrokeProperty (this));
 
         if (isStrokePresent)
         {
-            properties.add (new StrokeThicknessProperty (this));
+            props.add (new StrokeThicknessProperty (this));
 
             if (showJointAndEnd)
             {
-                properties.add (new StrokeJointProperty (this));
-                properties.add (new StrokeEndCapProperty (this));
+                props.add (new StrokeJointProperty (this));
+                props.add (new StrokeEndCapProperty (this));
             }
 
-            properties.add (new ElementFillModeProperty (this, true));
+            props.add (new ElementFillModeProperty (this, true));
 
             switch (getStrokeType().fill.mode)
             {
                 case JucerFillType::solidColour:
-                    properties.add (new ElementFillColourProperty ("colour", this, ElementFillColourProperty::solidColour, true));
+                    props.add (new ElementFillColourProperty ("colour", this, ElementFillColourProperty::solidColour, true));
                     break;
 
                 case JucerFillType::linearGradient:
                 case JucerFillType::radialGradient:
-                    properties.add (new ElementFillColourProperty ("colour 1", this, ElementFillColourProperty::gradientColour1, true));
-                    properties.add (new ElementFillPositionProperty (this, "x1", PositionPropertyBase::componentX, true, true));
-                    properties.add (new ElementFillPositionProperty (this, "y1", PositionPropertyBase::componentY, true, true));
-                    properties.add (new ElementFillColourProperty ("colour 2", this, ElementFillColourProperty::gradientColour2, true));
-                    properties.add (new ElementFillPositionProperty (this, "x2", PositionPropertyBase::componentX, false, true));
-                    properties.add (new ElementFillPositionProperty (this, "y2", PositionPropertyBase::componentY, false, true));
+                    props.add (new ElementFillColourProperty ("colour 1", this, ElementFillColourProperty::gradientColour1, true));
+                    props.add (new ElementFillPositionProperty (this, "x1", PositionPropertyBase::componentX, true, true));
+                    props.add (new ElementFillPositionProperty (this, "y1", PositionPropertyBase::componentY, true, true));
+                    props.add (new ElementFillColourProperty ("colour 2", this, ElementFillColourProperty::gradientColour2, true));
+                    props.add (new ElementFillPositionProperty (this, "x2", PositionPropertyBase::componentX, false, true));
+                    props.add (new ElementFillPositionProperty (this, "y2", PositionPropertyBase::componentY, false, true));
                     break;
 
                 case JucerFillType::imageBrush:
-                    properties.add (new ImageBrushResourceProperty (this, true));
-                    properties.add (new ImageBrushPositionProperty (this, "stroke anchor x", PositionPropertyBase::componentX, true));
-                    properties.add (new ImageBrushPositionProperty (this, "stroke anchor y", PositionPropertyBase::componentY, true));
-                    properties.add (new ImageBrushOpacityProperty (this, true));
+                    props.add (new ImageBrushResourceProperty (this, true));
+                    props.add (new ImageBrushPositionProperty (this, "stroke anchor x", PositionPropertyBase::componentX, true));
+                    props.add (new ImageBrushPositionProperty (this, "stroke anchor y", PositionPropertyBase::componentY, true));
+                    props.add (new ImageBrushOpacityProperty (this, true));
                     break;
 
                 default:
@@ -829,13 +845,13 @@ void ColouredElement::createSiblingComponents()
 
 Rectangle<int> ColouredElement::getCurrentBounds (const Rectangle<int>& parentArea) const
 {
-    int border = 0;
+    int borderSize = 0;
 
     if (isStrokePresent)
-        border = (int) strokeType.stroke.getStrokeThickness() / 2 + 1;
+        borderSize = (int) strokeType.stroke.getStrokeThickness() / 2 + 1;
 
     return position.getRectangle (parentArea, getDocument()->getComponentLayout())
-                   .expanded (border, border);
+                   .expanded (borderSize);
 }
 
 void ColouredElement::setCurrentBounds (const Rectangle<int>& newBounds,
@@ -846,8 +862,7 @@ void ColouredElement::setCurrentBounds (const Rectangle<int>& newBounds,
 
     if (isStrokePresent)
     {
-        const int border = (int) strokeType.stroke.getStrokeThickness() / 2 + 1;
-        r = r.expanded (-border, -border);
+        r = r.expanded (-((int) strokeType.stroke.getStrokeThickness() / 2 + 1));
 
         r.setSize (jmax (1, r.getWidth()), jmax (1, r.getHeight()));
     }

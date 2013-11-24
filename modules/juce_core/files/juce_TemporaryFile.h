@@ -29,8 +29,6 @@
 #ifndef JUCE_TEMPORARYFILE_H_INCLUDED
 #define JUCE_TEMPORARYFILE_H_INCLUDED
 
-#include "juce_File.h"
-
 
 //==============================================================================
 /**

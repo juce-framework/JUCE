@@ -25,10 +25,6 @@
 #ifndef JUCE_MOUSECURSOR_H_INCLUDED
 #define JUCE_MOUSECURSOR_H_INCLUDED
 
-class Image;
-class ComponentPeer;
-class Component;
-
 
 //==============================================================================
 /**

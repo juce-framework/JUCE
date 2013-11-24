@@ -139,7 +139,7 @@ public:
     {
         LowLevelGraphicsContext* g = image->createLowLevelContext();
         g->clipToRectangle (area);
-        g->setOrigin (area.getX(), area.getY());
+        g->setOrigin (area.getPosition());
         return g;
     }
 
@@ -256,7 +256,10 @@ void Image::duplicateIfShared()
 
 Image Image::createCopy() const
 {
-    return Image (image != nullptr ? image->clone() : nullptr);
+    if (image != nullptr)
+        return Image (image->clone());
+
+    return Image();
 }
 
 Image Image::rescaled (const int newWidth, const int newHeight, const Graphics::ResamplingQuality quality) const
@@ -269,8 +272,8 @@ Image Image::rescaled (const int newWidth, const int newHeight, const Graphics::
 
     Graphics g (newImage);
     g.setImageResamplingQuality (quality);
-    g.drawImage (*this, 0, 0, newWidth, newHeight, 0, 0, image->width, image->height, false);
-
+    g.drawImageTransformed (*this, AffineTransform::scale (newWidth  / (float) image->width,
+                                                           newHeight / (float) image->height), false);
     return newImage;
 }
 

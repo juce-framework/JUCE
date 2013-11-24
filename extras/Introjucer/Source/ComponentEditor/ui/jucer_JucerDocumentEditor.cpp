@@ -438,7 +438,7 @@ ApplicationCommandTarget* JucerDocumentEditor::getNextCommandTarget()
 ComponentLayout* JucerDocumentEditor::getCurrentLayout() const
 {
     if (ComponentLayoutPanel* panel = dynamic_cast <ComponentLayoutPanel*> (tabbedComponent.getCurrentContentComponent()))
-        return &(panel->getLayout());
+        return &(panel->layout);
 
     return nullptr;
 }
@@ -577,8 +577,8 @@ void JucerDocumentEditor::addComponent (const int index)
 
         panel->xyToTargetXY (x, y);
 
-        if (Component* newOne = panel->getLayout().addNewComponent (ObjectTypes::componentTypeHandlers [index], x, y))
-            panel->getLayout().getSelectedSet().selectOnly (newOne);
+        if (Component* newOne = panel->layout.addNewComponent (ObjectTypes::componentTypeHandlers [index], x, y))
+            panel->layout.getSelectedSet().selectOnly (newOne);
 
         document->beginTransaction();
     }
@@ -1075,7 +1075,7 @@ bool JucerDocumentEditor::keyPressed (const KeyPress& key)
 {
     if (key.isKeyCode (KeyPress::deleteKey) || key.isKeyCode (KeyPress::backspaceKey))
     {
-        commandManager->invokeDirectly (StandardApplicationCommandIDs::del, true);
+        IntrojucerApp::getCommandManager().invokeDirectly (StandardApplicationCommandIDs::del, true);
         return true;
     }
 
@@ -1085,7 +1085,7 @@ bool JucerDocumentEditor::keyPressed (const KeyPress& key)
 JucerDocumentEditor* JucerDocumentEditor::getActiveDocumentHolder()
 {
     ApplicationCommandInfo info (0);
-    ApplicationCommandTarget* target = commandManager->getTargetForCommand (JucerCommandIDs::editCompLayout, info);
+    ApplicationCommandTarget* target = IntrojucerApp::getCommandManager().getTargetForCommand (JucerCommandIDs::editCompLayout, info);
 
     return dynamic_cast <JucerDocumentEditor*> (target);
 }
@@ -1103,6 +1103,8 @@ const int snapSizes[] = { 2, 3, 4, 5, 6, 8, 10, 12, 16, 20, 24, 32 };
 
 void createGUIEditorMenu (PopupMenu& menu)
 {
+    ApplicationCommandManager* commandManager = &IntrojucerApp::getCommandManager();
+
     menu.addCommandItem (commandManager, JucerCommandIDs::editCompLayout);
     menu.addCommandItem (commandManager, JucerCommandIDs::editCompGraphics);
     menu.addSeparator();
@@ -1158,6 +1160,9 @@ void createGUIEditorMenu (PopupMenu& menu)
     menu.addCommandItem (commandManager, JucerCommandIDs::zoomNormal);
 
     menu.addSeparator();
+    menu.addCommandItem (commandManager, JucerCommandIDs::test);
+
+    menu.addSeparator();
 
     {
         PopupMenu overlays;
@@ -1190,5 +1195,5 @@ void handleGUIEditorMenuCommand (int menuItemID)
 void registerGUIEditorCommands()
 {
     JucerDocumentEditor dh (nullptr);
-    commandManager->registerAllCommandsForTarget (&dh);
+    IntrojucerApp::getCommandManager().registerAllCommandsForTarget (&dh);
 }

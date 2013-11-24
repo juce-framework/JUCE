@@ -80,20 +80,17 @@ public:
         return true;
     }
 
-    void draw (CodeEditorComponent& owner, Graphics& g, const Font& fontToUse,
-               const float rightClip, const float x, const int y,
-               const int lineH, const float characterWidth,
-               const Colour highlightColour) const
+    void getHighlightArea (RectangleList<float>& area, float x, int y, int lineH, float characterWidth) const
     {
         if (highlightColumnStart < highlightColumnEnd)
-        {
-            g.setColour (highlightColour);
-            g.fillRect (roundToInt (x + highlightColumnStart * characterWidth), y,
-                        roundToInt ((highlightColumnEnd - highlightColumnStart) * characterWidth), lineH);
-        }
+            area.add (Rectangle<float> (x + highlightColumnStart * characterWidth - 1.0f, y - 0.5f,
+                                        (highlightColumnEnd - highlightColumnStart) * characterWidth + 1.5f, lineH + 1.0f));
+    }
 
-        Colour lastColour (0x00000001);
-
+    void draw (CodeEditorComponent& owner, Graphics& g, const Font& fontToUse,
+               const float rightClip, const float x, const int y,
+               const int lineH, const float characterWidth) const
+    {
         AttributedString as;
         as.setJustification (Justification::centredLeft);
 
@@ -228,9 +225,9 @@ private:
 
 namespace CodeEditorHelpers
 {
-    static int findFirstNonWhitespaceChar (const String& line) noexcept
+    static int findFirstNonWhitespaceChar (StringRef line) noexcept
     {
-        String::CharPointerType t (line.getCharPointer());
+        String::CharPointerType t (line.text);
         int i = 0;
 
         while (! t.isEmpty())
@@ -258,8 +255,8 @@ public:
 private:
     CodeEditorComponent& owner;
 
-    void timerCallback()        { owner.newTransaction(); }
-    void handleAsyncUpdate()    { owner.rebuildLineTokens(); }
+    void timerCallback() override        { owner.newTransaction(); }
+    void handleAsyncUpdate() override    { owner.rebuildLineTokens(); }
 
     void scrollBarMoved (ScrollBar* scrollBarThatHasMoved, double newRangeStart) override
     {
@@ -271,15 +268,10 @@ private:
 
     void codeDocumentTextInserted (const String& newText, int pos) override
     {
-        codeDocumentChanged (pos, pos + newText.length());
+        owner.codeDocumentChanged (pos, pos + newText.length());
     }
 
     void codeDocumentTextDeleted (int start, int end) override
-    {
-        codeDocumentChanged (start, end);
-    }
-
-    void codeDocumentChanged (const int start, const int end)
     {
         owner.codeDocumentChanged (start, end);
     }
@@ -291,7 +283,7 @@ private:
 class CodeEditorComponent::GutterComponent  : public Component
 {
 public:
-    GutterComponent() : lastNumLines (0) {}
+    GutterComponent() : firstLine (0), lastNumLines (0) {}
 
     void paint (Graphics& g) override
     {
@@ -321,18 +313,20 @@ public:
         ga.draw (g);
     }
 
-    void documentChanged (CodeDocument& doc)
+    void documentChanged (CodeDocument& doc, int newFirstLine)
     {
         const int newNumLines = doc.getNumLines();
-        if (newNumLines != lastNumLines)
+
+        if (newNumLines != lastNumLines || firstLine != newFirstLine)
         {
+            firstLine = newFirstLine;
             lastNumLines = newNumLines;
             repaint();
         }
     }
 
 private:
-    int lastNumLines;
+    int firstLine, lastNumLines;
 };
 
 
@@ -471,7 +465,6 @@ void CodeEditorComponent::paint (Graphics& g)
     g.reduceClipRegion (gutterSize, 0, verticalScrollBar.getX() - gutterSize, horizontalScrollBar.getY());
 
     g.setFont (font);
-    const Colour highlightColour (findColour (CodeEditorComponent::highlightColourId));
 
     const Rectangle<int> clip (g.getClipBounds());
     const int firstLineToDraw = jmax (0, clip.getY() / lineHeight);
@@ -479,10 +472,18 @@ void CodeEditorComponent::paint (Graphics& g)
     const float x = (float) (gutterSize - xOffset * charWidth);
     const float rightClip = (float) clip.getRight();
 
+    {
+        RectangleList<float> highlightArea;
+
+        for (int i = firstLineToDraw; i < lastLineToDraw; ++i)
+            lines.getUnchecked(i)->getHighlightArea (highlightArea, x, lineHeight * i, lineHeight, charWidth);
+
+        g.setColour (findColour (CodeEditorComponent::highlightColourId));
+        g.fillRectList (highlightArea);
+    }
+
     for (int i = firstLineToDraw; i < lastLineToDraw; ++i)
-        lines.getUnchecked(i)->draw (*this, g, font, rightClip,
-                                     x, lineHeight * i, lineHeight,
-                                     charWidth, highlightColour);
+        lines.getUnchecked(i)->draw (*this, g, font, rightClip, x, lineHeight * i, lineHeight, charWidth);
 }
 
 void CodeEditorComponent::setScrollbarThickness (const int thickness)
@@ -539,7 +540,7 @@ void CodeEditorComponent::rebuildLineTokens()
                  verticalScrollBar.getX(), lineHeight * (1 + maxLineToRepaint - minLineToRepaint) + 2);
 
     if (gutter != nullptr)
-        gutter->documentChanged (document);
+        gutter->documentChanged (document, firstLineOnScreen);
 }
 
 void CodeEditorComponent::codeDocumentChanged (const int startIndex, const int endIndex)
@@ -1266,7 +1267,7 @@ bool CodeEditorComponent::perform (const InvocationInfo& info)
     return performCommand (info.commandID);
 }
 
-bool CodeEditorComponent::performCommand (const int commandID)
+bool CodeEditorComponent::performCommand (const CommandID commandID)
 {
     switch (commandID)
     {
@@ -1417,7 +1418,8 @@ String CodeEditorComponent::getTabString (const int numSpaces) const
 
 int CodeEditorComponent::indexToColumn (int lineNum, int index) const noexcept
 {
-    String::CharPointerType t (document.getLine (lineNum).getCharPointer());
+    const String line (document.getLine (lineNum));
+    String::CharPointerType t (line.getCharPointer());
 
     int col = 0;
     for (int i = 0; i < index; ++i)
@@ -1439,7 +1441,8 @@ int CodeEditorComponent::indexToColumn (int lineNum, int index) const noexcept
 
 int CodeEditorComponent::columnToIndex (int lineNum, int column) const noexcept
 {
-    String::CharPointerType t (document.getLine (lineNum).getCharPointer());
+    const String line (document.getLine (lineNum));
+    String::CharPointerType t (line.getCharPointer());
 
     int i = 0, col = 0;
 

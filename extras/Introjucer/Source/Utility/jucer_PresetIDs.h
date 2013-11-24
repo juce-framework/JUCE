@@ -33,8 +33,13 @@ namespace Ids
 
     DECLARE_ID (name);
     DECLARE_ID (file);
+    DECLARE_ID (path);
     DECLARE_ID (text);
     DECLARE_ID (version);
+    DECLARE_ID (license);
+    DECLARE_ID (include);
+    DECLARE_ID (info);
+    DECLARE_ID (description);
     DECLARE_ID (companyName);
     DECLARE_ID (position);
     DECLARE_ID (source);
@@ -42,10 +47,10 @@ namespace Ids
     DECLARE_ID (height);
     DECLARE_ID (background);
     DECLARE_ID (initialState);
-    DECLARE_ID (juceFolder);
     DECLARE_ID (targetFolder);
     DECLARE_ID (intermediatesPath);
     DECLARE_ID (vstFolder);
+    DECLARE_ID (vst3Folder);
     DECLARE_ID (rtasFolder);
     DECLARE_ID (auFolder);
     DECLARE_ID (flags);
@@ -134,7 +139,21 @@ namespace Ids
     DECLARE_ID (colour);
     DECLARE_ID (userNotes);
     DECLARE_ID (maxBinaryFileSize);
+    DECLARE_ID (includeBinaryInAppConfig);
     DECLARE_ID (characterSet);
+    DECLARE_ID (JUCERPROJECT);
+    DECLARE_ID (MAINGROUP);
+    DECLARE_ID (EXPORTFORMATS);
+    DECLARE_ID (GROUP);
+    DECLARE_ID (FILE);
+    DECLARE_ID (MODULES);
+    DECLARE_ID (MODULE);
+    DECLARE_ID (JUCEOPTIONS);
+    DECLARE_ID (CONFIGURATIONS);
+    DECLARE_ID (CONFIGURATION);
+    DECLARE_ID (MODULEPATHS);
+    DECLARE_ID (MODULEPATH);
+
     const Identifier ID ("id");
     const Identifier class_ ("class");
 

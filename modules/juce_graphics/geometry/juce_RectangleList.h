@@ -25,9 +25,6 @@
 #ifndef JUCE_RECTANGLELIST_H_INCLUDED
 #define JUCE_RECTANGLELIST_H_INCLUDED
 
-#include "juce_Rectangle.h"
-#include "juce_Path.h"
-
 
 //==============================================================================
 /**
@@ -69,13 +66,13 @@ public:
 
    #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
     RectangleList (RectangleList&& other) noexcept
-        : rects (static_cast <Array <RectangleType >&&> (other.rects))
+        : rects (static_cast<Array<RectangleType>&&> (other.rects))
     {
     }
 
     RectangleList& operator= (RectangleList&& other) noexcept
     {
-        rects = static_cast <Array <RectangleType >&&> (other.rects);
+        rects = static_cast<Array<RectangleType>&&> (other.rects);
         return *this;
     }
    #endif
@@ -88,17 +85,9 @@ public:
     int getNumRectangles() const noexcept                       { return rects.size(); }
 
     /** Returns one of the rectangles at a particular index.
-
-        @returns    the rectangle at the index, or an empty rectangle if the
-                    index is out-of-range.
+        @returns  the rectangle at the index, or an empty rectangle if the index is out-of-range.
     */
-    RectangleType getRectangle (int index) const noexcept
-    {
-        if (isPositiveAndBelow (index, rects.size()))
-            return rects.getReference (index);
-
-        return RectangleType();
-    }
+    RectangleType getRectangle (int index) const noexcept       { return rects[index]; }
 
     //==============================================================================
     /** Removes all rectangles to leave an empty region. */
@@ -300,7 +289,6 @@ public:
         return rects.size() > 0;
     }
 
-
     /** Removes any areas of the region that lie outside a given rectangle.
 
         Any rectangles in the list which overlap this will be clipped and subdivided
@@ -343,7 +331,8 @@ public:
 
         @see getIntersectionWith
     */
-    bool clipTo (const RectangleList& other)
+    template <typename OtherValueType>
+    bool clipTo (const RectangleList<OtherValueType>& other)
     {
         if (rects.size() == 0)
             return false;
@@ -354,17 +343,16 @@ public:
         {
             const RectangleType& rect = rects.getReference (j);
 
-            for (int i = other.rects.size(); --i >= 0;)
+            for (const Rectangle<OtherValueType>* r = other.begin(), * const e = other.end(); r != e; ++r)
             {
-                RectangleType r (other.rects.getReference (i));
+                RectangleType clipped (r->template toType<ValueType>());
 
-                if (rect.intersectRectangle (r))
-                    result.rects.add (r);
+                if (rect.intersectRectangle (clipped))
+                    result.rects.add (clipped);
             }
         }
 
         swapWith (result);
-
         return ! isEmpty();
     }
 
@@ -423,7 +411,7 @@ public:
     */
     bool containsPoint (ValueType x, ValueType y) const noexcept
     {
-        return contains (Point<ValueType> (x, y));
+        return containsPoint (Point<ValueType> (x, y));
     }
 
     /** Checks whether the region contains the whole of a given rectangle.
@@ -612,6 +600,16 @@ public:
             *r *= scaleFactor;
     }
 
+    /** Applies a transform to all the rectangles.
+        Obviously this will create a mess if the transform involves any
+        rotation or skewing.
+    */
+    void transformAll (const AffineTransform& transform) noexcept
+    {
+        for (RectangleType* r = rects.begin(), * const e = rects.end(); r != e; ++r)
+            *r = r->transformedBy (transform);
+    }
+
     //==============================================================================
     /** Creates a Path object to represent this region. */
     Path toPath() const
@@ -633,8 +631,6 @@ public:
 private:
     //==============================================================================
     Array<RectangleType> rects;
-
-    JUCE_LEAK_DETECTOR (RectangleList)
 };
 
 

@@ -401,10 +401,10 @@ Image PNGImageFormat::decodeImage (InputStream& in)
 
             // Load the image into a temp buffer in the pnglib format..
             const size_t lineStride = width * 4;
-            HeapBlock <uint8> tempBuffer (height * lineStride);
+            HeapBlock<uint8> tempBuffer (height * lineStride);
 
-            HeapBlock <png_bytep> rows (height);
-            for (int y = (int) height; --y >= 0;)
+            HeapBlock<png_bytep> rows (height);
+            for (size_t y = 0; y < height; ++y)
                 rows[y] = (png_bytep) (tempBuffer + lineStride * y);
 
             try

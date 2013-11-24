@@ -76,29 +76,29 @@ bool ComponentPeer::isValidPeer (const ComponentPeer* const peer) noexcept
 
 void ComponentPeer::updateBounds()
 {
-    setBounds (Component::ComponentHelpers::scaledScreenPosToUnscaled (component.getBoundsInParent()), false);
+    setBounds (ScalingHelpers::scaledScreenPosToUnscaled (component, component.getBoundsInParent()), false);
 }
 
 //==============================================================================
 void ComponentPeer::handleMouseEvent (const int touchIndex, const Point<int> positionWithinPeer,
                                       const ModifierKeys newMods, const int64 time)
 {
-    if (MouseInputSource* mouse = Desktop::getInstance().getOrCreateMouseInputSource (touchIndex))
-        mouse->handleEvent (*this, positionWithinPeer, time, newMods);
+    if (MouseInputSource* mouse = Desktop::getInstance().mouseSources->getOrCreateMouseInputSource (touchIndex))
+        MouseInputSource (*mouse).handleEvent (*this, positionWithinPeer, time, newMods);
 }
 
 void ComponentPeer::handleMouseWheel (const int touchIndex, const Point<int> positionWithinPeer,
                                       const int64 time, const MouseWheelDetails& wheel)
 {
-    if (MouseInputSource* mouse = Desktop::getInstance().getOrCreateMouseInputSource (touchIndex))
-        mouse->handleWheel (*this, positionWithinPeer, time, wheel);
+    if (MouseInputSource* mouse = Desktop::getInstance().mouseSources->getOrCreateMouseInputSource (touchIndex))
+        MouseInputSource (*mouse).handleWheel (*this, positionWithinPeer, time, wheel);
 }
 
 void ComponentPeer::handleMagnifyGesture (const int touchIndex, const Point<int> positionWithinPeer,
                                           const int64 time, const float scaleFactor)
 {
-    if (MouseInputSource* mouse = Desktop::getInstance().getOrCreateMouseInputSource (touchIndex))
-        mouse->handleMagnifyGesture (*this, positionWithinPeer, time, scaleFactor);
+    if (MouseInputSource* mouse = Desktop::getInstance().mouseSources->getOrCreateMouseInputSource (touchIndex))
+        MouseInputSource (*mouse).handleMagnifyGesture (*this, positionWithinPeer, time, scaleFactor);
 }
 
 //==============================================================================
@@ -106,19 +106,26 @@ void ComponentPeer::handlePaint (LowLevelGraphicsContext& contextToPaintTo)
 {
     ModifierKeys::updateCurrentModifiers();
 
-    Graphics g (&contextToPaintTo);
+    Graphics g (contextToPaintTo);
 
     if (component.isTransformed())
         g.addTransform (component.getTransform());
 
-    float masterScale = Desktop::getInstance().masterScaleFactor;
+    const Rectangle<int> peerBounds (getBounds());
 
-    if (masterScale != 1.0f)
-        g.addTransform (AffineTransform::scale (masterScale));
+    if (peerBounds.getWidth() != component.getWidth() || peerBounds.getHeight() != component.getHeight())
+        // Tweak the scaling so that the component's integer size exactly aligns with the peer's scaled size
+        g.addTransform (AffineTransform::scale (peerBounds.getWidth()  / (float) component.getWidth(),
+                                                peerBounds.getHeight() / (float) component.getHeight()));
 
-   #if JUCE_ENABLE_REPAINT_DEBUGGING
-    g.saveState();
+  #if JUCE_ENABLE_REPAINT_DEBUGGING
+   #ifdef JUCE_IS_REPAINT_DEBUGGING_ACTIVE
+    if (JUCE_IS_REPAINT_DEBUGGING_ACTIVE)
    #endif
+    {
+        g.saveState();
+    }
+  #endif
 
     JUCE_TRY
     {
@@ -126,18 +133,23 @@ void ComponentPeer::handlePaint (LowLevelGraphicsContext& contextToPaintTo)
     }
     JUCE_CATCH_EXCEPTION
 
-   #if JUCE_ENABLE_REPAINT_DEBUGGING
-    // enabling this code will fill all areas that get repainted with a colour overlay, to show
-    // clearly when things are being repainted.
-    g.restoreState();
-
-    static Random rng;
-
-    g.fillAll (Colour ((uint8) rng.nextInt (255),
-                       (uint8) rng.nextInt (255),
-                       (uint8) rng.nextInt (255),
-                       (uint8) 0x50));
+  #if JUCE_ENABLE_REPAINT_DEBUGGING
+   #ifdef JUCE_IS_REPAINT_DEBUGGING_ACTIVE
+    if (JUCE_IS_REPAINT_DEBUGGING_ACTIVE)
    #endif
+    {
+        // enabling this code will fill all areas that get repainted with a colour overlay, to show
+        // clearly when things are being repainted.
+        g.restoreState();
+
+        static Random rng;
+
+        g.fillAll (Colour ((uint8) rng.nextInt (255),
+                           (uint8) rng.nextInt (255),
+                           (uint8) rng.nextInt (255),
+                           (uint8) 0x50));
+    }
+  #endif
 
     /** If this fails, it's probably be because your CPU floating-point precision mode has
         been set to low.. This setting is sometimes changed by things like Direct3D, and can
@@ -293,18 +305,14 @@ void ComponentPeer::handleMovedOrResized()
     {
         const WeakReference<Component> deletionChecker (&component);
 
-        Rectangle<int> newBounds (getBounds());
+        Rectangle<int> newBounds (Component::ComponentHelpers::rawPeerPositionToLocal (component, getBounds()));
         Rectangle<int> oldBounds (component.getBounds());
-
-        oldBounds = Component::ComponentHelpers::localPositionToRawPeerPos (component, oldBounds);
 
         const bool wasMoved   = (oldBounds.getPosition() != newBounds.getPosition());
         const bool wasResized = (oldBounds.getWidth() != newBounds.getWidth() || oldBounds.getHeight() != newBounds.getHeight());
 
         if (wasMoved || wasResized)
         {
-            newBounds = Component::ComponentHelpers::rawPeerPositionToLocal (component, newBounds);
-
             component.bounds = newBounds;
 
             if (wasResized)
@@ -401,8 +409,8 @@ Rectangle<int> ComponentPeer::globalToLocal (const Rectangle<int>& screenPositio
 
 Rectangle<int> ComponentPeer::getAreaCoveredBy (Component& subComponent) const
 {
-    return Component::ComponentHelpers::scaledScreenPosToUnscaled
-            (component.getLocalArea (&subComponent, subComponent.getLocalBounds()));
+    return ScalingHelpers::scaledScreenPosToUnscaled
+            (component, component.getLocalArea (&subComponent, subComponent.getLocalBounds()));
 }
 
 //==============================================================================
@@ -574,6 +582,5 @@ void ComponentPeer::setRepresentedFile (const File&)
 }
 
 //==============================================================================
-StringArray ComponentPeer::getAvailableRenderingEngines()       { return StringArray ("Software Renderer"); }
 int ComponentPeer::getCurrentRenderingEngine() const            { return 0; }
 void ComponentPeer::setCurrentRenderingEngine (int index)       { jassert (index == 0); (void) index; }

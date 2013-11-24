@@ -29,12 +29,10 @@
 #ifndef JUCE_REFERENCECOUNTEDOBJECT_H_INCLUDED
 #define JUCE_REFERENCECOUNTEDOBJECT_H_INCLUDED
 
-#include "juce_Atomic.h"
-
 
 //==============================================================================
 /**
-    Adds reference-counting to an object.
+    A base class which provides methods for reference-counting.
 
     To add reference-counting to a class, derive it from this class, and
     use the ReferenceCountedObjectPtr class to point to it.
@@ -73,16 +71,15 @@ public:
         This is done automatically by the smart pointer, but is public just
         in case it's needed for nefarious purposes.
     */
-    inline void incReferenceCount() noexcept
+    void incReferenceCount() noexcept
     {
         ++refCount;
     }
 
     /** Decreases the object's reference count.
-
         If the count gets to zero, the object will be deleted.
     */
-    inline void decReferenceCount() noexcept
+    void decReferenceCount() noexcept
     {
         jassert (getReferenceCount() > 0);
 
@@ -90,16 +87,24 @@ public:
             delete this;
     }
 
+    /** Decreases the object's reference count.
+        If the count gets to zero, the object will not be deleted, but this method
+        will return true, allowing the caller to take care of deletion.
+    */
+    bool decReferenceCountWithoutDeleting() noexcept
+    {
+        jassert (getReferenceCount() > 0);
+        return --refCount == 0;
+    }
+
     /** Returns the object's current reference count. */
-    inline int getReferenceCount() const noexcept       { return refCount.get(); }
+    int getReferenceCount() const noexcept       { return refCount.get(); }
 
 
 protected:
     //==============================================================================
     /** Creates the reference-counted object (with an initial ref count of zero). */
-    ReferenceCountedObject()
-    {
-    }
+    ReferenceCountedObject() {}
 
     /** Destructor. */
     virtual ~ReferenceCountedObject()
@@ -120,6 +125,7 @@ private:
     //==============================================================================
     Atomic <int> refCount;
 
+    friend struct ContainerDeletePolicy<ReferenceCountedObject>;
     JUCE_DECLARE_NON_COPYABLE (ReferenceCountedObject)
 };
 
@@ -144,16 +150,15 @@ public:
         This is done automatically by the smart pointer, but is public just
         in case it's needed for nefarious purposes.
     */
-    inline void incReferenceCount() noexcept
+    void incReferenceCount() noexcept
     {
         ++refCount;
     }
 
     /** Decreases the object's reference count.
-
         If the count gets to zero, the object will be deleted.
     */
-    inline void decReferenceCount() noexcept
+    void decReferenceCount() noexcept
     {
         jassert (getReferenceCount() > 0);
 
@@ -161,8 +166,18 @@ public:
             delete this;
     }
 
+    /** Decreases the object's reference count.
+        If the count gets to zero, the object will not be deleted, but this method
+        will return true, allowing the caller to take care of deletion.
+    */
+    bool decReferenceCountWithoutDeleting() noexcept
+    {
+        jassert (getReferenceCount() > 0);
+        return --refCount == 0;
+    }
+
     /** Returns the object's current reference count. */
-    inline int getReferenceCount() const noexcept       { return refCount; }
+    int getReferenceCount() const noexcept       { return refCount; }
 
 
 protected:
@@ -181,6 +196,7 @@ private:
     //==============================================================================
     int refCount;
 
+    friend struct ContainerDeletePolicy<ReferenceCountedObject>;
     JUCE_DECLARE_NON_COPYABLE (SingleThreadedReferenceCountedObject)
 };
 
@@ -190,13 +206,20 @@ private:
     A smart-pointer class which points to a reference-counted object.
 
     The template parameter specifies the class of the object you want to point to - the easiest
-    way to make a class reference-countable is to simply make it inherit from ReferenceCountedObject,
-    but if you need to, you could roll your own reference-countable class by implementing a pair of
-    mathods called incReferenceCount() and decReferenceCount().
+    way to make a class reference-countable is to simply make it inherit from ReferenceCountedObject
+    or SingleThreadedReferenceCountedObject, but if you need to, you can roll your own reference-countable
+    class by implementing a set of mathods called incReferenceCount(), decReferenceCount(), and
+    decReferenceCountWithoutDeleting(). See ReferenceCountedObject for examples of how these methods
+    should behave.
 
     When using this class, you'll probably want to create a typedef to abbreviate the full
     templated name - e.g.
-    @code typedef ReferenceCountedObjectPtr<MyClass> MyClassPtr;@endcode
+    @code
+    struct MyClass  : public ReferenceCountedObject
+    {
+        typedef ReferenceCountedObjectPtr<MyClass> Ptr;
+        ...
+    @endcode
 
     @see ReferenceCountedObject, ReferenceCountedObjectArray
 */
@@ -209,54 +232,40 @@ public:
 
     //==============================================================================
     /** Creates a pointer to a null object. */
-    inline ReferenceCountedObjectPtr() noexcept
+    ReferenceCountedObjectPtr() noexcept
         : referencedObject (nullptr)
     {
     }
 
     /** Creates a pointer to an object.
-
-        This will increment the object's reference-count if it is non-null.
+        This will increment the object's reference-count.
     */
-    inline ReferenceCountedObjectPtr (ReferenceCountedObjectClass* const refCountedObject) noexcept
+    ReferenceCountedObjectPtr (ReferencedType* refCountedObject) noexcept
         : referencedObject (refCountedObject)
     {
-        if (refCountedObject != nullptr)
-            refCountedObject->incReferenceCount();
+        incIfNotNull (refCountedObject);
+    }
+
+    /** Copies another pointer.
+        This will increment the object's reference-count.
+    */
+    ReferenceCountedObjectPtr (const ReferenceCountedObjectPtr& other) noexcept
+        : referencedObject (other.referencedObject)
+    {
+        incIfNotNull (referencedObject);
     }
 
     /** Copies another pointer.
         This will increment the object's reference-count (if it is non-null).
     */
-    inline ReferenceCountedObjectPtr (const ReferenceCountedObjectPtr& other) noexcept
-        : referencedObject (other.referencedObject)
+    template <class Convertible>
+    ReferenceCountedObjectPtr (const ReferenceCountedObjectPtr<Convertible>& other) noexcept
+        : referencedObject (static_cast <ReferencedType*> (other.get()))
     {
-        if (referencedObject != nullptr)
-            referencedObject->incReferenceCount();
-    }
-
-   #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
-    /** Takes-over the object from another pointer. */
-    inline ReferenceCountedObjectPtr (ReferenceCountedObjectPtr&& other) noexcept
-        : referencedObject (other.referencedObject)
-    {
-        other.referencedObject = nullptr;
-    }
-   #endif
-
-    /** Copies another pointer.
-        This will increment the object's reference-count (if it is non-null).
-    */
-    template <class DerivedClass>
-    inline ReferenceCountedObjectPtr (const ReferenceCountedObjectPtr<DerivedClass>& other) noexcept
-        : referencedObject (static_cast <ReferenceCountedObjectClass*> (other.get()))
-    {
-        if (referencedObject != nullptr)
-            referencedObject->incReferenceCount();
+        incIfNotNull (referencedObject);
     }
 
     /** Changes this pointer to point at a different object.
-
         The reference count of the old object is decremented, and it might be
         deleted if it hits zero. The new object's count is incremented.
     */
@@ -266,17 +275,41 @@ public:
     }
 
     /** Changes this pointer to point at a different object.
+        The reference count of the old object is decremented, and it might be
+        deleted if it hits zero. The new object's count is incremented.
+    */
+    template <class Convertible>
+    ReferenceCountedObjectPtr& operator= (const ReferenceCountedObjectPtr<Convertible>& other)
+    {
+        return operator= (static_cast<ReferencedType*> (other.get()));
+    }
+
+    /** Changes this pointer to point at a different object.
 
         The reference count of the old object is decremented, and it might be
         deleted if it hits zero. The new object's count is incremented.
     */
-    template <class DerivedClass>
-    ReferenceCountedObjectPtr& operator= (const ReferenceCountedObjectPtr<DerivedClass>& other)
+    ReferenceCountedObjectPtr& operator= (ReferencedType* const newObject)
     {
-        return operator= (static_cast <ReferenceCountedObjectClass*> (other.get()));
+        if (referencedObject != newObject)
+        {
+            incIfNotNull (newObject);
+            ReferencedType* const oldObject = referencedObject;
+            referencedObject = newObject;
+            decIfNotNull (oldObject);
+        }
+
+        return *this;
     }
 
    #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
+    /** Takes-over the object from another pointer. */
+    ReferenceCountedObjectPtr (ReferenceCountedObjectPtr&& other) noexcept
+        : referencedObject (other.referencedObject)
+    {
+        other.referencedObject = nullptr;
+    }
+
     /** Takes-over the object from another pointer. */
     ReferenceCountedObjectPtr& operator= (ReferenceCountedObjectPtr&& other)
     {
@@ -285,75 +318,57 @@ public:
     }
    #endif
 
-    /** Changes this pointer to point at a different object.
-
-        The reference count of the old object is decremented, and it might be
-        deleted if it hits zero. The new object's count is incremented.
-    */
-    ReferenceCountedObjectPtr& operator= (ReferenceCountedObjectClass* const newObject)
-    {
-        if (referencedObject != newObject)
-        {
-            if (newObject != nullptr)
-                newObject->incReferenceCount();
-
-            ReferenceCountedObjectClass* const oldObject = referencedObject;
-            referencedObject = newObject;
-
-            if (oldObject != nullptr)
-                oldObject->decReferenceCount();
-        }
-
-        return *this;
-    }
-
     /** Destructor.
-
-        This will decrement the object's reference-count, and may delete it if it
-        gets to zero.
+        This will decrement the object's reference-count, which will cause the
+        object to be deleted when the ref-count hits zero.
     */
-    inline ~ReferenceCountedObjectPtr()
+    ~ReferenceCountedObjectPtr()
     {
-        if (referencedObject != nullptr)
-            referencedObject->decReferenceCount();
+        decIfNotNull (referencedObject);
     }
+
+    //==============================================================================
+    /** Returns the object that this pointer references.
+        The pointer returned may be zero, of course.
+    */
+    operator ReferencedType*() const noexcept       { return referencedObject; }
 
     /** Returns the object that this pointer references.
         The pointer returned may be zero, of course.
     */
-    inline operator ReferenceCountedObjectClass*() const noexcept
-    {
-        return referencedObject;
-    }
+    ReferencedType* get() const noexcept            { return referencedObject; }
+
+    /** Returns the object that this pointer references.
+        The pointer returned may be zero, of course.
+    */
+    ReferencedType* getObject() const noexcept      { return referencedObject; }
 
     // the -> operator is called on the referenced object
-    inline ReferenceCountedObjectClass* operator->() const noexcept
+    ReferencedType* operator->() const noexcept
     {
-        return referencedObject;
-    }
-
-    /** Returns the object that this pointer references.
-        The pointer returned may be zero, of course.
-    */
-    inline ReferenceCountedObjectClass* get() const noexcept
-    {
-        return referencedObject;
-    }
-
-    /** Returns the object that this pointer references.
-        The pointer returned may be zero, of course.
-    */
-    inline ReferenceCountedObjectClass* getObject() const noexcept
-    {
+        jassert (referencedObject != nullptr); // null pointer method call!
         return referencedObject;
     }
 
 private:
     //==============================================================================
-    ReferenceCountedObjectClass* referencedObject;
+    ReferencedType* referencedObject;
+
+    static void incIfNotNull (ReferencedType* o) noexcept
+    {
+        if (o != nullptr)
+            o->incReferenceCount();
+    }
+
+    static void decIfNotNull (ReferencedType* o) noexcept
+    {
+        if (o != nullptr && o->decReferenceCountWithoutDeleting())
+            ContainerDeletePolicy<ReferencedType>::destroy (o);
+    }
 };
 
 
+//==============================================================================
 /** Compares two ReferenceCountedObjectPointers. */
 template <class ReferenceCountedObjectClass>
 bool operator== (const ReferenceCountedObjectPtr<ReferenceCountedObjectClass>& object1, ReferenceCountedObjectClass* const object2) noexcept
@@ -370,7 +385,7 @@ bool operator== (const ReferenceCountedObjectPtr<ReferenceCountedObjectClass>& o
 
 /** Compares two ReferenceCountedObjectPointers. */
 template <class ReferenceCountedObjectClass>
-bool operator== (ReferenceCountedObjectClass* object1, ReferenceCountedObjectPtr<ReferenceCountedObjectClass>& object2) noexcept
+bool operator== (ReferenceCountedObjectClass* object1, const ReferenceCountedObjectPtr<ReferenceCountedObjectClass>& object2) noexcept
 {
     return object1 == object2.get();
 }
@@ -384,14 +399,14 @@ bool operator!= (const ReferenceCountedObjectPtr<ReferenceCountedObjectClass>& o
 
 /** Compares two ReferenceCountedObjectPointers. */
 template <class ReferenceCountedObjectClass>
-bool operator!= (const ReferenceCountedObjectPtr<ReferenceCountedObjectClass>& object1, ReferenceCountedObjectPtr<ReferenceCountedObjectClass>& object2) noexcept
+bool operator!= (const ReferenceCountedObjectPtr<ReferenceCountedObjectClass>& object1, const ReferenceCountedObjectPtr<ReferenceCountedObjectClass>& object2) noexcept
 {
     return object1.get() != object2.get();
 }
 
 /** Compares two ReferenceCountedObjectPointers. */
 template <class ReferenceCountedObjectClass>
-bool operator!= (ReferenceCountedObjectClass* object1, ReferenceCountedObjectPtr<ReferenceCountedObjectClass>& object2) noexcept
+bool operator!= (ReferenceCountedObjectClass* object1, const ReferenceCountedObjectPtr<ReferenceCountedObjectClass>& object2) noexcept
 {
     return object1 != object2.get();
 }

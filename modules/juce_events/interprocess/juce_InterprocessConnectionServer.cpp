@@ -64,14 +64,10 @@ void InterprocessConnectionServer::run()
 {
     while ((! threadShouldExit()) && socket != nullptr)
     {
-        ScopedPointer <StreamingSocket> clientSocket (socket->waitForNextConnection());
+        ScopedPointer<StreamingSocket> clientSocket (socket->waitForNextConnection());
 
         if (clientSocket != nullptr)
-        {
-            InterprocessConnection* newConnection = createConnectionObject();
-
-            if (newConnection != nullptr)
+            if (InterprocessConnection* newConnection = createConnectionObject())
                 newConnection->initialiseWithSocket (clientSocket.release());
-        }
     }
 }

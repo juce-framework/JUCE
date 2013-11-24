@@ -25,9 +25,6 @@
 #ifndef JUCE_SLIDERPROPERTYCOMPONENT_H_INCLUDED
 #define JUCE_SLIDERPROPERTYCOMPONENT_H_INCLUDED
 
-#include "juce_PropertyComponent.h"
-#include "../widgets/juce_Slider.h"
-
 
 //==============================================================================
 /**

@@ -87,7 +87,10 @@ public:
                     jassert (parentContentsList != nullptr);
 
                     DirectoryContentsList* const l = new DirectoryContentsList (parentContentsList->getFilter(), thread);
-                    l->setDirectory (file, true, true);
+
+                    l->setDirectory (file,
+                                     parentContentsList->isFindingDirectories(),
+                                     parentContentsList->isFindingFiles());
 
                     setSubContentsList (l, true);
                 }

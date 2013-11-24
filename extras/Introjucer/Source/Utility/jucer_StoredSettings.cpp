@@ -89,7 +89,7 @@ void StoredSettings::updateGlobalProps()
 
     props.removeValue ("keyMappings");
 
-    if (commandManager != nullptr)
+    if (ApplicationCommandManager* commandManager = IntrojucerApp::getApp().commandManager)
     {
         const ScopedPointer <XmlElement> keys (commandManager->getKeyMappings()->createXml (true));
 

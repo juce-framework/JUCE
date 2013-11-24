@@ -198,10 +198,10 @@ namespace CodeHelpers
 
     String makeHeaderGuardName (const File& file)
     {
-        return "__" + file.getFileName().toUpperCase()
-                                        .replaceCharacters (" .", "__")
-                                        .retainCharacters ("_ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
-                + "_" + String::toHexString (file.hashCode()).toUpperCase() + "__";
+        return file.getFileName().toUpperCase()
+                                 .replaceCharacters (" .", "__")
+                                 .retainCharacters ("_ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
+                + "_INCLUDED";
     }
 
     String makeBinaryDataIdentifierName (const File& file)
@@ -218,22 +218,52 @@ namespace CodeHelpers
             return "String::empty";
 
         StringArray lines;
-        lines.add (text);
+
+        {
+            String::CharPointerType t (text.getCharPointer());
+            bool finished = t.isEmpty();
+
+            while (! finished)
+            {
+                for (String::CharPointerType startOfLine (t);;)
+                {
+                    switch (t.getAndAdvance())
+                    {
+                        case 0:     finished = true; break;
+                        case '\n':  break;
+                        case '\r':  if (*t == '\n') ++t; break;
+                        default:    continue;
+                    }
+
+                    lines.add (String (startOfLine, t));
+                    break;
+                }
+            }
+        }
 
         if (maxLineLength > 0)
         {
-            while (lines [lines.size() - 1].length() > maxLineLength)
+            for (int i = 0; i < lines.size(); ++i)
             {
-                String& lastLine = lines.getReference (lines.size() - 1);
-                const String start (lastLine.substring (0, maxLineLength));
-                const String end (lastLine.substring (maxLineLength));
-                lastLine = start;
-                lines.add (end);
+                String& line = lines.getReference (i);
+
+                if (line.length() > maxLineLength)
+                {
+                    const String start (line.substring (0, maxLineLength));
+                    const String end (line.substring (maxLineLength));
+                    line = start;
+                    lines.insert (i + 1, end);
+                }
             }
         }
 
         for (int i = 0; i < lines.size(); ++i)
-            lines.getReference(i) = "\"" + addEscapeChars (lines.getReference(i)) + "\"";
+            lines.getReference(i) = addEscapeChars (lines.getReference(i));
+
+        lines.removeEmptyStrings();
+
+        for (int i = 0; i < lines.size(); ++i)
+            lines.getReference(i) = "\"" + lines.getReference(i) + "\"";
 
         String result (lines.joinIntoString (newLine));
 
@@ -401,7 +431,7 @@ namespace CodeHelpers
     }
 
     //==============================================================================
-    static unsigned int calculateHash (const String& s, const int hashMultiplier)
+    static unsigned int calculateHash (const String& s, const unsigned int hashMultiplier)
     {
         const char* t = s.toUTF8();
         unsigned int hash = 0;
@@ -411,9 +441,9 @@ namespace CodeHelpers
         return hash;
     }
 
-    static int findBestHashMultiplier (const StringArray& strings)
+    static unsigned int findBestHashMultiplier (const StringArray& strings)
     {
-        int v = 31;
+        unsigned int v = 31;
 
         for (;;)
         {
@@ -445,19 +475,19 @@ namespace CodeHelpers
     {
         jassert (strings.size() == codeToExecute.size());
         const String indent (String::repeatedString (" ", indentLevel));
-        const int hashMultiplier = findBestHashMultiplier (strings);
+        const unsigned int hashMultiplier = findBestHashMultiplier (strings);
 
         out << indent << "unsigned int hash = 0;" << newLine
             << indent << "if (" << utf8PointerVariable << " != 0)" << newLine
             << indent << "    while (*" << utf8PointerVariable << " != 0)" << newLine
-            << indent << "        hash = " << hashMultiplier << " * hash + (unsigned int) *" << utf8PointerVariable << "++;" << newLine
+            << indent << "        hash = " << (int) hashMultiplier << " * hash + (unsigned int) *" << utf8PointerVariable << "++;" << newLine
             << newLine
             << indent << "switch (hash)" << newLine
             << indent << "{" << newLine;
 
         for (int i = 0; i < strings.size(); ++i)
         {
-            out << indent << "    case 0x" << hexString8Digits (calculateHash (strings[i], hashMultiplier))
+            out << indent << "    case 0x" << hexString8Digits ((int) calculateHash (strings[i], hashMultiplier))
                 << ":  " << codeToExecute[i] << newLine;
         }
 

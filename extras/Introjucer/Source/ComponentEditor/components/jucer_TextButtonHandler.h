@@ -39,11 +39,11 @@ public:
         return new TextButton ("new button", String::empty);
     }
 
-    void getEditableProperties (Component* component, JucerDocument& document, Array <PropertyComponent*>& properties)
+    void getEditableProperties (Component* component, JucerDocument& document, Array<PropertyComponent*>& props)
     {
-        ButtonHandler::getEditableProperties (component, document, properties);
+        ButtonHandler::getEditableProperties (component, document, props);
 
-        addColourProperties (component, document, properties);
+        addColourProperties (component, document, props);
     }
 
     XmlElement* createXmlFor (Component* comp, const ComponentLayout* layout)

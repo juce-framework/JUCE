@@ -23,7 +23,7 @@
 */
 
 #include "../jucer_Headers.h"
-
+#include "../Application/jucer_Application.h"
 
 //==============================================================================
 String createAlphaNumericUID()
@@ -183,14 +183,12 @@ void addPlistDictionaryKey (XmlElement* xml, const String& key, const String& va
                 xml->removeChildElement (e, true);
                 break;
             }
-            else
-            {
-                return; // (value already exists)
-            }
+
+            return; // (value already exists)
         }
     }
 
-    xml->createNewChildElement ("key")   ->addTextElement (key);
+    xml->createNewChildElement ("key")->addTextElement (key);
     xml->createNewChildElement ("string")->addTextElement (value);
 }
 
@@ -318,6 +316,7 @@ public:
         addAndMakeVisible (&userText);
         userText.addListener (this);
 
+        resultText.setFont (getAppSettings().appearance.getCodeFont().withHeight (13.0f));
         resultText.setMultiLine (true, true);
         resultText.setColour (TextEditor::backgroundColourId, bkgd);
         resultText.setReadOnly (true);
@@ -345,9 +344,12 @@ public:
 
     void resized()
     {
-        desc.setBounds (8, 8, getWidth() - 16, 44);
-        userText.setBounds (desc.getX(), desc.getBottom() + 8, getWidth() - 16, getHeight() / 2 - desc.getBottom() - 8);
-        resultText.setBounds (desc.getX(), userText.getBottom() + 4, getWidth() - 16, getHeight() - userText.getBottom() - 12);
+        Rectangle<int> r (getLocalBounds().reduced (8));
+        desc.setBounds (r.removeFromTop (44));
+        r.removeFromTop (8);
+        userText.setBounds (r.removeFromTop (r.getHeight() / 2));
+        r.removeFromTop (8);
+        resultText.setBounds (r);
     }
 
 private:
@@ -372,9 +374,123 @@ void showUTF8ToolWindow (ScopedPointer<Component>& ownerPointer)
         new FloatingToolWindow ("UTF-8 String Literal Converter",
                                 "utf8WindowPos",
                                 new UTF8Component(), ownerPointer,
-                                400, 300,
+                                500, 500,
                                 300, 300, 1000, 1000);
     }
+}
+
+//==============================================================================
+class SVGPathDataComponent  : public Component,
+                              private TextEditorListener
+{
+public:
+    SVGPathDataComponent()
+        : desc (String::empty,
+                "Paste an SVG path string into the top box, and it'll be converted to some C++ "
+                "code that will load it as a Path object..")
+    {
+        desc.setJustificationType (Justification::centred);
+        desc.setColour (Label::textColourId, Colours::white);
+        addAndMakeVisible (&desc);
+
+        const Colour bkgd (Colours::white.withAlpha (0.6f));
+
+        userText.setFont (getAppSettings().appearance.getCodeFont().withHeight (13.0f));
+        userText.setMultiLine (true, true);
+        userText.setReturnKeyStartsNewLine (true);
+        userText.setColour (TextEditor::backgroundColourId, bkgd);
+        addAndMakeVisible (&userText);
+        userText.addListener (this);
+
+        resultText.setFont (getAppSettings().appearance.getCodeFont().withHeight (13.0f));
+        resultText.setMultiLine (true, true);
+        resultText.setColour (TextEditor::backgroundColourId, bkgd);
+        resultText.setReadOnly (true);
+        resultText.setSelectAllWhenFocused (true);
+        addAndMakeVisible (&resultText);
+
+        userText.setText (getLastText());
+    }
+
+    void textEditorTextChanged (TextEditor&)
+    {
+        update();
+    }
+
+    void textEditorEscapeKeyPressed (TextEditor&)
+    {
+        getTopLevelComponent()->exitModalState (0);
+    }
+
+    void update()
+    {
+        getLastText() = userText.getText();
+
+        path = Drawable::parseSVGPath (getLastText().trim().unquoted().trim());
+
+        String result = "No path generated.. Not a valid SVG path string?";
+
+        if (! path.isEmpty())
+        {
+            MemoryOutputStream data;
+            path.writePathToStream (data);
+
+            MemoryOutputStream out;
+
+            out << "static const unsigned char pathData[] = ";
+            CodeHelpers::writeDataAsCppLiteral (data.getMemoryBlock(), out, false, true);
+            out << newLine
+                << newLine
+                << "Path path;" << newLine
+                << "path.loadPathFromData (pathData, sizeof (pathData));" << newLine;
+
+            result = out.toString();
+        }
+
+        resultText.setText (result, false);
+        repaint (previewPathArea);
+    }
+
+    void resized()
+    {
+        Rectangle<int> r (getLocalBounds().reduced (8));
+        desc.setBounds (r.removeFromTop (44));
+        r.removeFromTop (8);
+        userText.setBounds (r.removeFromTop (r.getHeight() / 2));
+        r.removeFromTop (8);
+        previewPathArea = r.removeFromRight (r.getHeight());
+        resultText.setBounds (r);
+    }
+
+    void paint (Graphics& g)
+    {
+        g.setColour (Colours::white);
+        g.fillPath (path, path.getTransformToScaleToFit (previewPathArea.reduced (4).toFloat(), true));
+    }
+
+private:
+    Label desc;
+    TextEditor userText, resultText;
+    Rectangle<int> previewPathArea;
+    Path path;
+
+    String& getLastText()
+    {
+        static String t;
+        return t;
+    }
+};
+
+void showSVGPathDataToolWindow (ScopedPointer<Component>& ownerPointer)
+{
+    if (ownerPointer != nullptr)
+        ownerPointer->toFront (true);
+    else
+        new FloatingToolWindow ("SVG Path Converter",
+                                "svgPathWindowPos",
+                                new SVGPathDataComponent(), ownerPointer,
+                                500, 500,
+                                300, 300, 1000, 1000);
 }
 
 //==============================================================================
@@ -403,7 +519,7 @@ public:
     void timerCallback() override
     {
         stopTimer();
-        commandManager->invoke (info, true);
+        IntrojucerApp::getCommandManager().invoke (info, true);
         delete this;
     }
 

@@ -23,6 +23,7 @@
 */
 
 #include "jucer_SourceCodeEditor.h"
+#include "../Application/jucer_Application.h"
 #include "../Application/jucer_OpenDocumentManager.h"
 
 
@@ -116,8 +117,6 @@ void SourceCodeDocument::applyLastState (CodeEditorComponent& editor) const
 SourceCodeEditor::SourceCodeEditor (OpenDocumentManager::Document* doc, CodeDocument& codeDocument)
     : DocumentEditorComponent (doc)
 {
-    setOpaque (true);
-
     if (document->getFile().hasFileExtension (sourceOrHeaderFileExtensions))
         setEditor (new CppCodeEditorComponent (document->getFile(), codeDocument));
     else
@@ -208,7 +207,7 @@ GenericCodeEditorComponent::GenericCodeEditorComponent (const File& f, CodeDocum
                                                         CodeTokeniser* tokeniser)
    : CodeEditorComponent (codeDocument, tokeniser), file (f)
 {
-    setCommandManager (commandManager);
+    setCommandManager (&IntrojucerApp::getCommandManager());
 }
 
 GenericCodeEditorComponent::~GenericCodeEditorComponent() {}
@@ -381,7 +380,7 @@ public:
 
     void textEditorReturnKeyPressed (TextEditor&) override
     {
-        commandManager->invokeDirectly (CommandIDs::findNext, true);
+        IntrojucerApp::getCommandManager().invokeDirectly (CommandIDs::findNext, true);
     }
 
     void textEditorEscapeKeyPressed (TextEditor&) override
@@ -417,7 +416,7 @@ void GenericCodeEditorComponent::showFindPanel()
     if (findPanel == nullptr)
     {
         findPanel = new FindPanel();
-        findPanel->setCommandManager (commandManager);
+        findPanel->setCommandManager (&IntrojucerApp::getCommandManager());
 
         addAndMakeVisible (findPanel);
         resized();

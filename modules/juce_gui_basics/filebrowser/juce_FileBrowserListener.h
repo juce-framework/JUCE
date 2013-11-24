@@ -25,8 +25,6 @@
 #ifndef JUCE_FILEBROWSERLISTENER_H_INCLUDED
 #define JUCE_FILEBROWSERLISTENER_H_INCLUDED
 
-#include "../mouse/juce_MouseEvent.h"
-
 
 //==============================================================================
 /**

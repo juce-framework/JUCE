@@ -195,13 +195,13 @@ private:
 
     class DirectShowContext;
     friend class DirectShowContext;
-    friend class ScopedPointer <DirectShowContext>;
-    ScopedPointer <DirectShowContext> context;
+    friend struct ContainerDeletePolicy<DirectShowContext>;
+    ScopedPointer<DirectShowContext> context;
 
     class DirectShowComponentWatcher;
     friend class DirectShowComponentWatcher;
-    friend class ScopedPointer <DirectShowComponentWatcher>;
-    ScopedPointer <DirectShowComponentWatcher> componentWatcher;
+    friend struct ContainerDeletePolicy<DirectShowComponentWatcher>;
+    ScopedPointer<DirectShowComponentWatcher> componentWatcher;
 
     //==============================================================================
     void updateContextPosition();

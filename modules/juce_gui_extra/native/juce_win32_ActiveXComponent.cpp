@@ -202,9 +202,9 @@ namespace ActiveXHelpers
 class ActiveXControlComponent::Pimpl  : public ComponentMovementWatcher
 {
 public:
-    Pimpl (HWND hwnd, ActiveXControlComponent& owner_)
-        : ComponentMovementWatcher (&owner_),
-          owner (owner_),
+    Pimpl (HWND hwnd, ActiveXControlComponent& activeXComp)
+        : ComponentMovementWatcher (&activeXComp),
+          owner (activeXComp),
           controlHWND (0),
           storage (new ActiveXHelpers::JuceIStorage()),
           clientSite (new ActiveXHelpers::JuceIOleClientSite (hwnd)),
@@ -240,10 +240,8 @@ public:
     //==============================================================================
     void componentMovedOrResized (bool /*wasMoved*/, bool /*wasResized*/) override
     {
-        Component* const topComp = owner.getTopLevelComponent();
-
-        if (topComp->getPeer() != nullptr)
-            setControlBounds (topComp->getLocalArea (&owner, owner.getLocalBounds()));
+        if (ComponentPeer* const peer = owner.getTopLevelComponent()->getPeer())
+            setControlBounds (peer->getAreaCoveredBy (owner));
     }
 
     void componentPeerChanged() override
@@ -301,16 +299,12 @@ public:
         return DefWindowProc (hwnd, message, wParam, lParam);
     }
 
-private:
     ActiveXControlComponent& owner;
-
-public:
     HWND controlHWND;
     IStorage* storage;
     IOleClientSite* clientSite;
     IOleObject* control;
     WNDPROC originalWndProc;
-
 };
 
 //==============================================================================
@@ -338,7 +332,8 @@ bool ActiveXControlComponent::createControl (const void* controlIID)
 
     if (ComponentPeer* const peer = getPeer())
     {
-        const Rectangle<int> bounds (getTopLevelComponent()->getLocalArea (this, getLocalBounds()));
+        const Rectangle<int> bounds (peer->getAreaCoveredBy (*this));
+
         HWND hwnd = (HWND) peer->getNativeHandle();
 
         ScopedPointer<Pimpl> newControl (new Pimpl (hwnd, *this));
@@ -348,7 +343,7 @@ bool ActiveXControlComponent::createControl (const void* controlIID)
                              newControl->clientSite, newControl->storage,
                              (void**) &(newControl->control))) == S_OK)
         {
-            newControl->control->SetHostNames (L"Juce", 0);
+            newControl->control->SetHostNames (L"JUCE", 0);
 
             if (OleSetContainedObject (newControl->control, TRUE) == S_OK)
             {

@@ -133,23 +133,40 @@ public:
     {
         StringArray s;
 
-        for (int i = 0; i < faces.size(); i++)
+        for (int i = 0; i < faces.size(); ++i)
             s.addIfNotAlreadyThere (faces.getUnchecked(i)->family);
 
         return s;
+    }
+
+    static int indexOfRegularStyle (const StringArray& styles)
+    {
+        int i = styles.indexOf ("Regular", true);
+
+        if (i < 0)
+            for (i = 0; i < styles.size(); ++i)
+                if (! (styles[i].containsIgnoreCase ("Bold") || styles[i].containsIgnoreCase ("Italic")))
+                    break;
+
+        return i;
     }
 
     StringArray findAllTypefaceStyles (const String& family) const
     {
         StringArray s;
 
-        for (int i = 0; i < faces.size(); i++)
+        for (int i = 0; i < faces.size(); ++i)
         {
             const KnownTypeface* const face = faces.getUnchecked(i);
 
             if (face->family == family)
                 s.addIfNotAlreadyThere (face->style);
         }
+
+        // try to get a regular style to be first in the list
+        const int regular = indexOfRegularStyle (s);
+        if (regular > 0)
+            s.strings.swap (0, regular);
 
         return s;
     }
@@ -169,21 +186,21 @@ public:
 
     void getMonospacedNames (StringArray& monoSpaced) const
     {
-        for (int i = 0; i < faces.size(); i++)
+        for (int i = 0; i < faces.size(); ++i)
             if (faces.getUnchecked(i)->isMonospaced)
                 monoSpaced.addIfNotAlreadyThere (faces.getUnchecked(i)->family);
     }
 
     void getSerifNames (StringArray& serif) const
     {
-        for (int i = 0; i < faces.size(); i++)
+        for (int i = 0; i < faces.size(); ++i)
             if (! faces.getUnchecked(i)->isSansSerif)
                 serif.addIfNotAlreadyThere (faces.getUnchecked(i)->family);
     }
 
     void getSansSerifNames (StringArray& sansSerif) const
     {
-        for (int i = 0; i < faces.size(); i++)
+        for (int i = 0; i < faces.size(); ++i)
             if (faces.getUnchecked(i)->isSansSerif)
                 sansSerif.addIfNotAlreadyThere (faces.getUnchecked(i)->family);
     }
@@ -235,7 +252,7 @@ private:
 
     static bool isFaceSansSerif (const String& family)
     {
-        const char* sansNames[] = { "Sans", "Verdana", "Arial", "Ubuntu" };
+        static const char* sansNames[] = { "Sans", "Verdana", "Arial", "Ubuntu" };
 
         for (int i = 0; i < numElementsInArray (sansNames); ++i)
             if (family.containsIgnoreCase (sansNames[i]))

@@ -42,6 +42,7 @@ DrawableText::DrawableText (const DrawableText& other)
       colour (other.colour),
       justification (other.justification)
 {
+    refreshBounds();
 }
 
 DrawableText::~DrawableText()

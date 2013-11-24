@@ -25,8 +25,6 @@
 #ifndef JUCE_COMPONENTMOVEMENTWATCHER_H_INCLUDED
 #define JUCE_COMPONENTMOVEMENTWATCHER_H_INCLUDED
 
-#include "../components/juce_Component.h"
-
 
 //==============================================================================
 /** An object that watches for any movement of a component or any of its parent components.

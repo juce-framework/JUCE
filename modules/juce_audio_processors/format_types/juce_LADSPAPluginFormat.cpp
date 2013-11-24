@@ -167,8 +167,10 @@ public:
         handle = nullptr;
     }
 
-    void initialise()
+    void initialise (double initialSampleRate, int initialBlockSize)
     {
+        setPlayConfigDetails (inputs.size(), outputs.size(), initialSampleRate, initialBlockSize);
+
         if (initialised || plugin == nullptr || handle == nullptr)
             return;
 
@@ -199,9 +201,7 @@ public:
         for (int i = 0; i < parameters.size(); ++i)
             plugin->connect_port (handle, parameters[i], &(parameterValues[i].scaled));
 
-        setPlayConfigDetails (inputs.size(), outputs.size(),
-                              getSampleRate() > 0 ? getSampleRate() : 44100.0f,
-                              getBlockSize() > 0  ? getBlockSize() : 512);
+        setPlayConfigDetails (inputs.size(), outputs.size(), initialSampleRate, initialBlockSize);
 
         setCurrentProgram (0);
         setLatencySamples (0);
@@ -257,12 +257,9 @@ public:
     //==============================================================================
     void prepareToPlay (double newSampleRate, int samplesPerBlockExpected)
     {
-        setPlayConfigDetails (inputs.size(), outputs.size(),
-                              newSampleRate, samplesPerBlockExpected);
-
         setLatencySamples (0);
 
-        initialise();
+        initialise (newSampleRate, samplesPerBlockExpected);
 
         if (initialised)
         {
@@ -584,12 +581,12 @@ void LADSPAPluginFormat::findAllTypesForFile (OwnedArray <PluginDescription>& re
     desc.fileOrIdentifier = fileOrIdentifier;
     desc.uid = 0;
 
-    ScopedPointer<LADSPAPluginInstance> instance (dynamic_cast <LADSPAPluginInstance*> (createInstanceFromDescription (desc)));
+    ScopedPointer<LADSPAPluginInstance> instance (dynamic_cast<LADSPAPluginInstance*> (createInstanceFromDescription (desc, 44100.0, 512)));
 
     if (instance == nullptr || ! instance->isValid())
         return;
 
-    instance->initialise();
+    instance->initialise (44100.0, 512);
 
     instance->fillInPluginDescription (desc);
 
@@ -613,7 +610,8 @@ void LADSPAPluginFormat::findAllTypesForFile (OwnedArray <PluginDescription>& re
     }
 }
 
-AudioPluginInstance* LADSPAPluginFormat::createInstanceFromDescription (const PluginDescription& desc)
+AudioPluginInstance* LADSPAPluginFormat::createInstanceFromDescription (const PluginDescription& desc,
+                                                                        double sampleRate, int blockSize)
 {
     ScopedPointer<LADSPAPluginInstance> result;
 
@@ -633,7 +631,7 @@ AudioPluginInstance* LADSPAPluginFormat::createInstanceFromDescription (const Pl
             result = new LADSPAPluginInstance (module);
 
             if (result->plugin != nullptr && result->isValid())
-                result->initialise();
+                result->initialise (sampleRate, blockSize);
             else
                 result = nullptr;
         }

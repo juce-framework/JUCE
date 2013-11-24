@@ -25,8 +25,6 @@
 #ifndef JUCE_KEYPRESS_H_INCLUDED
 #define JUCE_KEYPRESS_H_INCLUDED
 
-#include "juce_ModifierKeys.h"
-
 
 //==============================================================================
 /**

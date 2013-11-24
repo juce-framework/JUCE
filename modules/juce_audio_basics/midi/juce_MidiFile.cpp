@@ -146,6 +146,26 @@ namespace MidiFileHelpers
             return 0;
         }
     };
+
+    template <typename MethodType>
+    static void findAllMatchingEvents (const OwnedArray<MidiMessageSequence>& tracks,
+                                       MidiMessageSequence& results,
+                                       MethodType method)
+    {
+        for (int i = 0; i < tracks.size(); ++i)
+        {
+            const MidiMessageSequence& track = *tracks.getUnchecked(i);
+            const int numEvents = track.getNumEvents();
+
+            for (int j = 0; j < numEvents; ++j)
+            {
+                const MidiMessage& m = track.getEventPointer(j)->message;
+
+                if ((m.*method)())
+                    results.addEvent (m);
+            }
+        }
+    }
 }
 
 //==============================================================================
@@ -197,36 +217,19 @@ void MidiFile::setSmpteTimeFormat (const int framesPerSecond,
 }
 
 //==============================================================================
-void MidiFile::findAllTempoEvents (MidiMessageSequence& tempoChangeEvents) const
+void MidiFile::findAllTempoEvents (MidiMessageSequence& results) const
 {
-    for (int i = tracks.size(); --i >= 0;)
-    {
-        const int numEvents = tracks.getUnchecked(i)->getNumEvents();
-
-        for (int j = 0; j < numEvents; ++j)
-        {
-            const MidiMessage& m = tracks.getUnchecked(i)->getEventPointer (j)->message;
-
-            if (m.isTempoMetaEvent())
-                tempoChangeEvents.addEvent (m);
-        }
-    }
+    MidiFileHelpers::findAllMatchingEvents (tracks, results, &MidiMessage::isTempoMetaEvent);
 }
 
-void MidiFile::findAllTimeSigEvents (MidiMessageSequence& timeSigEvents) const
+void MidiFile::findAllTimeSigEvents (MidiMessageSequence& results) const
 {
-    for (int i = tracks.size(); --i >= 0;)
-    {
-        const int numEvents = tracks.getUnchecked(i)->getNumEvents();
+    MidiFileHelpers::findAllMatchingEvents (tracks, results, &MidiMessage::isTimeSignatureMetaEvent);
+}
 
-        for (int j = 0; j < numEvents; ++j)
-        {
-            const MidiMessage& m = tracks.getUnchecked(i)->getEventPointer (j)->message;
-
-            if (m.isTimeSignatureMetaEvent())
-                timeSigEvents.addEvent (m);
-        }
-    }
+void MidiFile::findAllKeySigEvents (MidiMessageSequence& results) const
+{
+    MidiFileHelpers::findAllMatchingEvents (tracks, results, &MidiMessage::isKeySignatureMetaEvent);
 }
 
 double MidiFile::getLastTimestamp() const
@@ -340,10 +343,7 @@ void MidiFile::convertTimestampTicksToSeconds()
             for (int j = ms.getNumEvents(); --j >= 0;)
             {
                 MidiMessage& m = ms.getEventPointer(j)->message;
-
-                m.setTimeStamp (MidiFileHelpers::convertTicksToSeconds (m.getTimeStamp(),
-                                                                        tempoEvents,
-                                                                        timeFormat));
+                m.setTimeStamp (MidiFileHelpers::convertTicksToSeconds (m.getTimeStamp(), tempoEvents, timeFormat));
             }
         }
     }
@@ -372,46 +372,48 @@ void MidiFile::writeTrack (OutputStream& mainOut, const int trackNum)
 
     int lastTick = 0;
     uint8 lastStatusByte = 0;
+    bool endOfTrackEventWritten = false;
 
     for (int i = 0; i < ms.getNumEvents(); ++i)
     {
         const MidiMessage& mm = ms.getEventPointer(i)->message;
 
-        if (! mm.isEndOfTrackMetaEvent())
+        if (mm.isEndOfTrackMetaEvent())
+            endOfTrackEventWritten = true;
+
+        const int tick = roundToInt (mm.getTimeStamp());
+        const int delta = jmax (0, tick - lastTick);
+        MidiFileHelpers::writeVariableLengthInt (out, (uint32) delta);
+        lastTick = tick;
+
+        const uint8* data = mm.getRawData();
+        int dataSize = mm.getRawDataSize();
+
+        const uint8 statusByte = data[0];
+
+        if (statusByte == lastStatusByte
+             && (statusByte & 0xf0) != 0xf0
+             && dataSize > 1
+             && i > 0)
         {
-            const int tick = roundToInt (mm.getTimeStamp());
-            const int delta = jmax (0, tick - lastTick);
-            MidiFileHelpers::writeVariableLengthInt (out, (uint32) delta);
-            lastTick = tick;
-
-            const uint8* data = mm.getRawData();
-            int dataSize = mm.getRawDataSize();
-
-            const uint8 statusByte = data[0];
-
-            if (statusByte == lastStatusByte
-                 && (statusByte & 0xf0) != 0xf0
-                 && dataSize > 1
-                 && i > 0)
-            {
-                ++data;
-                --dataSize;
-            }
-            else if (statusByte == 0xf0)  // Write sysex message with length bytes.
-            {
-                out.writeByte ((char) statusByte);
-
-                ++data;
-                --dataSize;
-
-                MidiFileHelpers::writeVariableLengthInt (out, (uint32) dataSize);
-            }
-
-            out.write (data, (size_t) dataSize);
-            lastStatusByte = statusByte;
+            ++data;
+            --dataSize;
         }
+        else if (statusByte == 0xf0)  // Write sysex message with length bytes.
+        {
+            out.writeByte ((char) statusByte);
+
+            ++data;
+            --dataSize;
+
+            MidiFileHelpers::writeVariableLengthInt (out, (uint32) dataSize);
+        }
+
+        out.write (data, (size_t) dataSize);
+        lastStatusByte = statusByte;
     }
 
+    if (! endOfTrackEventWritten)
     {
         out.writeByte (0); // (tick delta)
         const MidiMessage m (MidiMessage::endOfTrack());

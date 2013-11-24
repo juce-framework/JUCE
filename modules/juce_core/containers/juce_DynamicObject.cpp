@@ -60,20 +60,79 @@ bool DynamicObject::hasMethod (const Identifier& methodName) const
     return getProperty (methodName).isMethod();
 }
 
-var DynamicObject::invokeMethod (const Identifier& methodName,
-                                 const var* parameters,
-                                 int numParameters)
+var DynamicObject::invokeMethod (Identifier method, const var::NativeFunctionArgs& args)
 {
-    return properties [methodName].invokeMethod (this, parameters, numParameters);
+    if (var::NativeFunction function = properties [method].getNativeFunction())
+        return function (args);
+
+    return var();
 }
 
-void DynamicObject::setMethod (const Identifier& name,
-                               var::MethodFunction methodFunction)
+void DynamicObject::setMethod (Identifier name, var::NativeFunction function)
 {
-    properties.set (name, var (methodFunction));
+    properties.set (name, var (function));
 }
 
 void DynamicObject::clear()
 {
     properties.clear();
+}
+
+DynamicObject::Ptr DynamicObject::clone()
+{
+    DynamicObject* newCopy = new DynamicObject();
+    newCopy->properties = properties;
+
+    for (LinkedListPointer<NamedValueSet::NamedValue>* i = &(newCopy->properties.values);;)
+    {
+        if (NamedValueSet::NamedValue* const v = i->get())
+        {
+            v->value = v->value.clone();
+            i = &(v->nextListItem);
+        }
+        else
+            break;
+    }
+
+    return newCopy;
+}
+
+void DynamicObject::writeAsJSON (OutputStream& out, const int indentLevel, const bool allOnOneLine)
+{
+    out << '{';
+    if (! allOnOneLine)
+        out << newLine;
+
+    for (LinkedListPointer<NamedValueSet::NamedValue>* i = &(properties.values);;)
+    {
+        if (NamedValueSet::NamedValue* const v = i->get())
+        {
+            if (! allOnOneLine)
+                JSONFormatter::writeSpaces (out, indentLevel + JSONFormatter::indentSize);
+
+            out << '"';
+            JSONFormatter::writeString (out, v->name);
+            out << "\": ";
+            JSONFormatter::write (out, v->value, indentLevel + JSONFormatter::indentSize, allOnOneLine);
+
+            if (v->nextListItem.get() != nullptr)
+            {
+                if (allOnOneLine)
+                    out << ", ";
+                else
+                    out << ',' << newLine;
+            }
+            else if (! allOnOneLine)
+                out << newLine;
+
+            i = &(v->nextListItem);
+        }
+        else
+            break;
+    }
+
+    if (! allOnOneLine)
+        JSONFormatter::writeSpaces (out, indentLevel);
+
+    out << '}';
 }

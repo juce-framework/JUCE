@@ -23,48 +23,62 @@
 */
 
 #include "jucer_ProjectContentComponent.h"
+#include "jucer_Module.h"
 #include "../Application/jucer_MainWindow.h"
 #include "../Application/jucer_Application.h"
 #include "../Code Editor/jucer_SourceCodeEditor.h"
-#include "jucer_ConfigPage.h"
-#include "jucer_TreeViewTypes.h"
 #include "../Project Saving/jucer_ProjectExporter.h"
 #include "../Utility/jucer_TranslationTool.h"
+#include "../Utility/jucer_JucerTreeViewBase.h"
+#include "jucer_NewFileWizard.h"
+#include "jucer_GroupInformationComponent.h"
 
 //==============================================================================
-class FileTreeTab   : public TreePanelBase
+class FileTreePanel   : public TreePanelBase
 {
 public:
-    FileTreeTab (Project& p)
+    FileTreePanel (Project& p)
         : TreePanelBase (&p, "fileTreeState")
     {
         tree.setMultiSelectEnabled (true);
-        setRoot (new GroupTreeViewItem (p.getMainGroup()));
+        setRoot (new GroupItem (p.getMainGroup()));
     }
+
+    void updateMissingFileStatuses()
+    {
+        if (ProjectTreeItemBase* p = dynamic_cast<ProjectTreeItemBase*> (rootItem.get()))
+            p->checkFileStatus();
+    }
+
+    #include "jucer_ProjectTree_Base.h"
+    #include "jucer_ProjectTree_Group.h"
+    #include "jucer_ProjectTree_File.h"
 };
 
 //==============================================================================
-class ConfigTreeTab   : public TreePanelBase
+class ConfigTreePanel   : public TreePanelBase
 {
 public:
-    ConfigTreeTab (Project& p)
+    ConfigTreePanel (Project& p)
         : TreePanelBase (&p, "settingsTreeState")
     {
         tree.setMultiSelectEnabled (false);
-        setRoot (createProjectConfigTreeViewRoot (p));
+        setRoot (new RootItem (p));
 
         if (tree.getNumSelectedItems() == 0)
             tree.getRootItem()->setSelected (true, true);
 
        #if JUCE_MAC || JUCE_WINDOWS
+        ApplicationCommandManager& commandManager = IntrojucerApp::getCommandManager();
+
         addAndMakeVisible (&openProjectButton);
-        openProjectButton.setCommandToTrigger (commandManager, CommandIDs::openInIDE, true);
-        openProjectButton.setButtonText (commandManager->getNameOfCommand (CommandIDs::openInIDE));
+        openProjectButton.setCommandToTrigger (&commandManager, CommandIDs::openInIDE, true);
+        openProjectButton.setButtonText (commandManager.getNameOfCommand (CommandIDs::openInIDE));
         openProjectButton.setColour (TextButton::buttonColourId, Colours::white.withAlpha (0.5f));
 
         addAndMakeVisible (&saveAndOpenButton);
-        saveAndOpenButton.setCommandToTrigger (commandManager, CommandIDs::saveAndOpenInIDE, true);
-        saveAndOpenButton.setButtonText (commandManager->getNameOfCommand (CommandIDs::saveAndOpenInIDE));
+        saveAndOpenButton.setCommandToTrigger (&commandManager, CommandIDs::saveAndOpenInIDE, true);
+        saveAndOpenButton.setButtonText (commandManager.getNameOfCommand (CommandIDs::saveAndOpenInIDE));
         saveAndOpenButton.setColour (TextButton::buttonColourId, Colours::white.withAlpha (0.5f));
        #endif
     }
@@ -83,7 +97,50 @@ public:
         tree.setBounds (r);
     }
 
+    void showProjectSettings()
+    {
+        if (ConfigTreeItemBase* root = dynamic_cast<ConfigTreeItemBase*> (rootItem.get()))
+            if (root->isProjectSettings())
+                root->setSelected (true, true);
+    }
+
+    void showModules()
+    {
+        if (ConfigTreeItemBase* mods = getModulesItem())
+            mods->setSelected (true, true);
+    }
+
+    void showModule (const String& moduleID)
+    {
+        if (ConfigTreeItemBase* mods = getModulesItem())
+        {
+            mods->setOpen (true);
+
+            for (int i = mods->getNumSubItems(); --i >= 0;)
+                if (ModuleItem* m = dynamic_cast<ModuleItem*> (mods->getSubItem (i)))
+                    if (m->moduleID == moduleID)
+                        m->setSelected (true, true);
+        }
+    }
+
     TextButton openProjectButton, saveAndOpenButton;
+
+private:
+    #include "jucer_ConfigTree_Base.h"
+    #include "jucer_ConfigTree_Modules.h"
+    #include "jucer_ConfigTree_Exporter.h"
+    #include "jucer_ModulesPanel.h"
+
+    ConfigTreeItemBase* getModulesItem()
+    {
+        if (ConfigTreeItemBase* root = dynamic_cast<ConfigTreeItemBase*> (rootItem.get()))
+            if (root->isProjectSettings())
+                if (ConfigTreeItemBase* mods = dynamic_cast<ConfigTreeItemBase*> (root->getSubItem (0)))
+                    if (mods->isModulesList())
+                        return mods;
+
+        return nullptr;
+    }
 };
 
 //==============================================================================
@@ -247,8 +304,8 @@ void ProjectContentComponent::createProjectTabs()
     jassert (project != nullptr);
     const Colour tabColour (Colours::transparentBlack);
 
-    treeViewTabs.addTab ("Files",  tabColour, new FileTreeTab (*project), true);
-    treeViewTabs.addTab ("Config", tabColour, new ConfigTreeTab (*project), true);
+    treeViewTabs.addTab ("Files",  tabColour, new FileTreePanel (*project), true);
+    treeViewTabs.addTab ("Config", tabColour, new ConfigTreePanel (*project), true);
 }
 
 void ProjectContentComponent::deleteProjectTabs()
@@ -265,22 +322,6 @@ void ProjectContentComponent::deleteProjectTabs()
     }
 
     treeViewTabs.clearTabs();
-}
-
-TreeView* ProjectContentComponent::getFilesTreeView() const
-{
-    if (FileTreeTab* ft = dynamic_cast<FileTreeTab*> (treeViewTabs.getTabContentComponent (0)))
-        return &(ft->tree);
-
-    return nullptr;
-}
-
-ProjectTreeViewBase* ProjectContentComponent::getFilesTreeRoot() const
-{
-    if (TreeView* tv = getFilesTreeView())
-        return dynamic_cast <ProjectTreeViewBase*> (tv->getRootItem());
-
-    return nullptr;
 }
 
 void ProjectContentComponent::saveTreeViewState()
@@ -315,9 +356,10 @@ void ProjectContentComponent::reloadLastOpenDocuments()
     }
 }
 
-void ProjectContentComponent::documentAboutToClose (OpenDocumentManager::Document* document)
+bool ProjectContentComponent::documentAboutToClose (OpenDocumentManager::Document* document)
 {
     hideDocument (document);
+    return true;
 }
 
 void ProjectContentComponent::changeListenerCallback (ChangeBroadcaster*)
@@ -327,8 +369,8 @@ void ProjectContentComponent::changeListenerCallback (ChangeBroadcaster*)
 
 void ProjectContentComponent::updateMissingFileStatuses()
 {
-    if (ProjectTreeViewBase* p = getFilesTreeRoot())
-        p->checkFileStatus();
+    if (FileTreePanel* tree = dynamic_cast<FileTreePanel*> (treeViewTabs.getTabContentComponent (0)))
+        tree->updateMissingFileStatuses();
 }
 
 bool ProjectContentComponent::showEditorForFile (const File& f, bool grabFocus)
@@ -374,7 +416,7 @@ void ProjectContentComponent::hideEditor()
     currentDocument = nullptr;
     contentView = nullptr;
     updateMainWindowTitle();
-    commandManager->commandStatusChanged();
+    IntrojucerApp::getCommandManager().commandStatusChanged();
     resized();
 }
 
@@ -401,7 +443,7 @@ bool ProjectContentComponent::setEditorComponent (Component* editor,
         resized();
 
         updateMainWindowTitle();
-        commandManager->commandStatusChanged();
+        IntrojucerApp::getCommandManager().commandStatusChanged();
         return true;
     }
 
@@ -489,6 +531,40 @@ void ProjectContentComponent::closeProject()
 {
     if (MainWindow* const mw = findParentComponentOfClass<MainWindow>())
         mw->closeCurrentProject();
+}
+
+void ProjectContentComponent::showFilesTab()
+{
+    treeViewTabs.setCurrentTabIndex (0);
+}
+
+void ProjectContentComponent::showConfigTab()
+{
+    treeViewTabs.setCurrentTabIndex (1);
+}
+
+void ProjectContentComponent::showProjectSettings()
+{
+    showConfigTab();
+
+    if (ConfigTreePanel* const tree = dynamic_cast<ConfigTreePanel*> (treeViewTabs.getCurrentContentComponent()))
+        tree->showProjectSettings();
+}
+
+void ProjectContentComponent::showModules()
+{
+    showConfigTab();
+
+    if (ConfigTreePanel* const tree = dynamic_cast<ConfigTreePanel*> (treeViewTabs.getCurrentContentComponent()))
+        tree->showModules();
+}
+
+void ProjectContentComponent::showModule (const String& moduleID)
+{
+    showConfigTab();
+
+    if (ConfigTreePanel* const tree = dynamic_cast<ConfigTreePanel*> (treeViewTabs.getCurrentContentComponent()))
+        tree->showModule (moduleID);
 }
 
 StringArray ProjectContentComponent::getExportersWhichCanLaunch() const
@@ -618,6 +694,8 @@ void ProjectContentComponent::getAllCommands (Array <CommandID>& commands)
                               CommandIDs::saveAndOpenInIDE,
                               CommandIDs::showFilePanel,
                               CommandIDs::showConfigPanel,
+                              CommandIDs::showProjectSettings,
+                              CommandIDs::showProjectModules,
                               CommandIDs::goToPreviousDoc,
                               CommandIDs::goToNextDoc,
                               CommandIDs::goToCounterpart,
@@ -740,6 +818,22 @@ void ProjectContentComponent::getCommandInfo (const CommandID commandID, Applica
         result.defaultKeypresses.add (KeyPress ('i', ModifierKeys::commandModifier, 0));
         break;
 
+    case CommandIDs::showProjectSettings:
+        result.setInfo ("Show Project Settings",
+                        "Shows the main project options page",
+                        CommandCategories::general, 0);
+        result.setActive (project != nullptr);
+        result.defaultKeypresses.add (KeyPress ('i', ModifierKeys::commandModifier | ModifierKeys::shiftModifier, 0));
+        break;
+
+    case CommandIDs::showProjectModules:
+        result.setInfo ("Show Project Modules",
+                        "Shows the project's list of modules",
+                        CommandCategories::general, 0);
+        result.setActive (project != nullptr);
+        result.defaultKeypresses.add (KeyPress ('m', ModifierKeys::commandModifier | ModifierKeys::shiftModifier, 0));
+        break;
+
     case CommandIDs::deleteSelectedItem:
         result.setInfo ("Delete Selected File", String::empty, CommandCategories::general, 0);
         result.defaultKeypresses.add (KeyPress (KeyPress::deleteKey, 0, 0));
@@ -793,8 +887,10 @@ bool ProjectContentComponent::perform (const InvocationInfo& info)
         case CommandIDs::goToNextDoc:               goToNextFile(); break;
         case CommandIDs::goToCounterpart:           goToCounterpart(); break;
 
-        case CommandIDs::showFilePanel:             treeViewTabs.setCurrentTabIndex (0); break;
-        case CommandIDs::showConfigPanel:           treeViewTabs.setCurrentTabIndex (1); break;
+        case CommandIDs::showFilePanel:             showFilesTab(); break;
+        case CommandIDs::showConfigPanel:           showConfigTab(); break;
+        case CommandIDs::showProjectSettings:       showProjectSettings(); break;
+        case CommandIDs::showProjectModules:        showModules(); break;
 
         case CommandIDs::openInIDE:                 openInIDE(); break;
 
@@ -813,4 +909,10 @@ bool ProjectContentComponent::perform (const InvocationInfo& info)
     }
 
     return true;
+}
+
+void ProjectContentComponent::getSelectedProjectItemsBeingDragged (const DragAndDropTarget::SourceDetails& dragSourceDetails,
+                                                                   OwnedArray<Project::Item>& selectedNodes)
+{
+    FileTreePanel::ProjectTreeItemBase::getSelectedProjectItemsBeingDragged (dragSourceDetails, selectedNodes);
 }

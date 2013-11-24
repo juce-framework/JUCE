@@ -25,9 +25,6 @@
 #ifndef JUCE_MARKERLIST_H_INCLUDED
 #define JUCE_MARKERLIST_H_INCLUDED
 
-#include "../positioning/juce_RelativeCoordinate.h"
-class Component;
-
 
 //==============================================================================
 /**

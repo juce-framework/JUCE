@@ -25,10 +25,6 @@
 #ifndef JUCE_RELATIVECOORDINATEPOSITIONER_H_INCLUDED
 #define JUCE_RELATIVECOORDINATEPOSITIONER_H_INCLUDED
 
-#include "juce_RelativePoint.h"
-#include "juce_MarkerList.h"
-#include "../components/juce_Component.h"
-
 
 //==============================================================================
 /**

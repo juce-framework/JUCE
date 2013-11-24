@@ -25,9 +25,6 @@
 #ifndef JUCE_COMPONENTDRAGGER_H_INCLUDED
 #define JUCE_COMPONENTDRAGGER_H_INCLUDED
 
-#include "juce_MouseEvent.h"
-#include "../layout/juce_ComponentBoundsConstrainer.h"
-
 
 //==============================================================================
 /**

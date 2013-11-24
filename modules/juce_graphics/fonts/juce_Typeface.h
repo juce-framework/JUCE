@@ -25,11 +25,6 @@
 #ifndef JUCE_TYPEFACE_H_INCLUDED
 #define JUCE_TYPEFACE_H_INCLUDED
 
-class Path;
-class Font;
-class EdgeTable;
-class AffineTransform;
-
 
 //==============================================================================
 /**

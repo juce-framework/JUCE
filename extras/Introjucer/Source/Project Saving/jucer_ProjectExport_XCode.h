@@ -25,10 +25,8 @@
 namespace
 {
     const char* const osxVersionDefault         = "default";
-    const char* const osxVersion10_4            = "10.4 SDK";
-    const char* const osxVersion10_5            = "10.5 SDK";
-    const char* const osxVersion10_6            = "10.6 SDK";
-    const char* const osxVersion10_7            = "10.7 SDK";
+    const int oldestSDKVersion = 4;
+    const int currentSDKVersion = 9;
 
     const char* const osxArch_Default           = "default";
     const char* const osxArch_Native            = "Native";
@@ -210,15 +208,22 @@ protected:
             }
             else
             {
-                const char* osxVersions[]      = { "Use Default",     osxVersion10_5, osxVersion10_6, osxVersion10_7, 0 };
-                const char* osxVersionValues[] = { osxVersionDefault, osxVersion10_5, osxVersion10_6, osxVersion10_7, 0 };
+                StringArray versionNames;
+                Array<var> versionValues;
 
-                props.add (new ChoicePropertyComponent (getMacSDKVersionValue(), "OSX Base SDK Version",
-                                                        StringArray (osxVersions), Array<var> (osxVersionValues)),
+                versionNames.add ("Use Default");
+                versionValues.add (osxVersionDefault);
+
+                for (int ver = oldestSDKVersion; ver <= currentSDKVersion; ++ver)
+                {
+                    versionNames.add (getSDKName (ver));
+                    versionValues.add (getSDKName (ver));
+                }
+
+                props.add (new ChoicePropertyComponent (getMacSDKVersionValue(), "OSX Base SDK Version", versionNames, versionValues),
                            "The version of OSX to link against in the XCode build.");
 
-                props.add (new ChoicePropertyComponent (getMacCompatibilityVersionValue(), "OSX Compatibility Version",
-                                                        StringArray (osxVersions), Array<var> (osxVersionValues)),
+                props.add (new ChoicePropertyComponent (getMacCompatibilityVersionValue(), "OSX Compatibility Version", versionNames, versionValues),
                            "The minimum version of OSX that the target binary will be compatible with.");
 
                 const char* osxArch[] = { "Use Default", "Native architecture of build machine",
@@ -428,7 +433,7 @@ private:
         pngFormat.writeImageToStream (image, pngData);
 
         out.write (type, 4);
-        out.writeIntBigEndian (8 + pngData.getDataSize());
+        out.writeIntBigEndian (8 + (int) pngData.getDataSize());
         out << pngData;
     }
 
@@ -457,7 +462,7 @@ private:
         jassert (data.getDataSize() > 0); // no suitable sized images?
 
         out.write ("icns", 4);
-        out.writeIntBigEndian (data.getDataSize() + 8);
+        out.writeIntBigEndian ((int) data.getDataSize() + 8);
         out << data;
     }
 
@@ -559,12 +564,27 @@ private:
         overwriteFileIfDifferentOrThrow (infoPlistFile, mo);
     }
 
-    StringArray getHeaderSearchPaths (const BuildConfiguration& config) const
+    String getHeaderSearchPaths (const BuildConfiguration& config) const
     {
-        StringArray searchPaths (extraSearchPaths);
-        searchPaths.addArray (config.getHeaderSearchPaths());
-        searchPaths.removeDuplicates (false);
-        return searchPaths;
+        StringArray paths (extraSearchPaths);
+        paths.addArray (config.getHeaderSearchPaths());
+        paths.add ("$(inherited)");
+        paths.removeDuplicates (false);
+        paths.removeEmptyStrings();
+
+        for (int i = 0; i < paths.size(); ++i)
+        {
+            String& s = paths.getReference(i);
+
+            s = replacePreprocessorTokens (config, s);
+
+            if (s.containsChar (' '))
+                s = "\"\\\"" + s + "\\\"\""; // crazy double quotes required when there are spaces..
+            else if (s.containsAnyOf ("${}()@&~+-=<>\t;\r\n"))
+                s = "\"" + s + "\"";
+        }
+
+        return "(" + paths.joinIntoString (", ") + ")";
     }
 
     void getLinkerFlagsForStaticLibrary (const RelativePath& library, StringArray& flags, StringArray& librarySearchPaths) const
@@ -654,12 +674,12 @@ private:
         StringArray s;
 
         const String arch (config.getMacArchitecture());
-        if (arch == osxArch_Native)                s.add ("ARCHS = \"$(ARCHS_NATIVE)\"");
+        if (arch == osxArch_Native)                s.add ("ARCHS = \"$(NATIVE_ARCH_ACTUAL)\"");
         else if (arch == osxArch_32BitUniversal)   s.add ("ARCHS = \"$(ARCHS_STANDARD_32_BIT)\"");
         else if (arch == osxArch_64BitUniversal)   s.add ("ARCHS = \"$(ARCHS_STANDARD_32_64_BIT)\"");
         else if (arch == osxArch_64Bit)            s.add ("ARCHS = \"$(ARCHS_STANDARD_64_BIT)\"");
 
-        s.add ("HEADER_SEARCH_PATHS = \"" + replacePreprocessorTokens (config, getHeaderSearchPaths (config).joinIntoString (" ")) + " $(inherited)\"");
+        s.add ("HEADER_SEARCH_PATHS = " + getHeaderSearchPaths (config));
         s.add ("GCC_OPTIMIZATION_LEVEL = " + config.getGCCOptimisationFlag());
         s.add ("INFOPLIST_FILE = " + infoPlistFile.getFileName());
 
@@ -700,14 +720,11 @@ private:
             const String sdk (config.getMacSDKVersion());
             const String sdkCompat (config.getMacCompatibilityVersion());
 
-            if (sdk == osxVersion10_5)          s.add ("SDKROOT = macosx10.5");
-            else if (sdk == osxVersion10_6)     s.add ("SDKROOT = macosx10.6");
-            else if (sdk == osxVersion10_7)     s.add ("SDKROOT = macosx10.7");
-
-            if (sdkCompat == osxVersion10_4)       s.add ("MACOSX_DEPLOYMENT_TARGET = 10.4");
-            else if (sdkCompat == osxVersion10_5)  s.add ("MACOSX_DEPLOYMENT_TARGET = 10.5");
-            else if (sdkCompat == osxVersion10_6)  s.add ("MACOSX_DEPLOYMENT_TARGET = 10.6");
-            else if (sdkCompat == osxVersion10_7)  s.add ("MACOSX_DEPLOYMENT_TARGET = 10.7");
+            for (int ver = oldestSDKVersion; ver <= currentSDKVersion; ++ver)
+            {
+                if (sdk == getSDKName (ver))         s.add ("SDKROOT = macosx10." + String (ver));
+                if (sdkCompat == getSDKName (ver))   s.add ("MACOSX_DEPLOYMENT_TARGET = 10." + String (ver));
+            }
 
             s.add ("MACOSX_DEPLOYMENT_TARGET_ppc = 10.4");
             s.add ("SDKROOT_ppc = macosx10.5");
@@ -855,35 +872,6 @@ private:
         output << "\t};\n\trootObject = " << createID ("__root") << ";\n}\n";
     }
 
-    static void addPlistDictionaryKey (XmlElement* xml, const String& key, const String& value)
-    {
-        forEachXmlChildElementWithTagName (*xml, e, "key")
-        {
-            if (e->getAllSubText().trim().equalsIgnoreCase (key))
-            {
-                if (e->getNextElement() != nullptr && e->getNextElement()->hasTagName ("key"))
-                {
-                    // try to fix broken plist format..
-                    xml->removeChildElement (e, true);
-                    break;
-                }
-                else
-                {
-                    return; // (value already exists)
-                }
-            }
-        }
-
-        xml->createNewChildElement ("key")   ->addTextElement (key);
-        xml->createNewChildElement ("string")->addTextElement (value);
-    }
-
-    static void addPlistDictionaryKeyBool (XmlElement* xml, const String& key, const bool value)
-    {
-        xml->createNewChildElement ("key")->addTextElement (key);
-        xml->createNewChildElement (value ? "true" : "false");
-    }
-
     String addBuildFile (const String& path, const String& fileRefID, bool addToSourceBuildPhase, bool inhibitWarnings) const
     {
         String fileID (createID (path + "buildref"));
@@ -958,6 +946,7 @@ private:
         if (file.hasFileExtension ("cpp;cc;cxx"))           return "sourcecode.cpp.cpp";
         if (file.hasFileExtension (".mm"))                  return "sourcecode.cpp.objcpp";
         if (file.hasFileExtension (".m"))                   return "sourcecode.c.objc";
+        if (file.hasFileExtension (".c"))                   return "sourcecode.c.c";
         if (file.hasFileExtension (headerFileExtensions))   return "sourcecode.c.h";
         if (file.hasFileExtension (".framework"))           return "wrapper.framework";
         if (file.hasFileExtension (".jpeg;.jpg"))           return "image.jpeg";
@@ -1036,9 +1025,16 @@ private:
 
     void addFramework (const String& frameworkName) const
     {
-        const String path ("System/Library/Frameworks/" + frameworkName + ".framework");
+        String path (frameworkName);
+        if (! File::isAbsolutePath (path))
+            path = "System/Library/Frameworks/" + path;
+
+        if (! path.endsWithIgnoreCase (".framework"))
+            path << ".framework";
+
         const String fileRefID (createFileRefID (path));
-        addFileReference ("${SDKROOT}/" + path);
+
+        addFileReference ((File::isAbsolutePath (frameworkName) ? "" : "${SDKROOT}/") + path);
         frameworkIDs.add (addBuildFile (path, fileRefID, false, false));
         frameworkFileIDs.add (fileRefID);
     }
@@ -1229,5 +1225,11 @@ private:
     bool shouldFileBeCompiledByDefault (const RelativePath& file) const
     {
         return file.hasFileExtension (sourceFileExtensions);
+    }
+
+    static String getSDKName (int version)
+    {
+        jassert (version >= 4);
+        return "10." + String (version) + " SDK";
     }
 };

@@ -78,7 +78,7 @@ private:
 };
 
 //==============================================================================
-class IntrojucerLookAndFeel   : public LookAndFeel
+class IntrojucerLookAndFeel   : public LookAndFeel_V3
 {
 public:
     IntrojucerLookAndFeel();
@@ -86,31 +86,10 @@ public:
     void fillWithBackgroundTexture (Graphics&);
     static void fillWithBackgroundTexture (Component&, Graphics&);
 
-    int getTabButtonOverlap (int tabDepth);
-    int getTabButtonSpaceAroundImage();
-    int getTabButtonBestWidth (TabBarButton& button, int tabDepth);
-    static Colour getTabBackgroundColour (TabBarButton& button);
-    void drawTabButton (TabBarButton& button, Graphics& g, bool isMouseOver, bool isMouseDown);
+    void drawTabButton (TabBarButton& button, Graphics&, bool isMouseOver, bool isMouseDown) override;
+    void drawTabAreaBehindFrontButton (TabbedButtonBar&, Graphics&, int, int) override {}
 
-    Rectangle<int> getTabButtonExtraComponentBounds (const TabBarButton& button, Rectangle<int>& textArea, Component& comp);
-    void drawTabAreaBehindFrontButton (TabbedButtonBar&, Graphics&, int, int) {}
-
-    void drawStretchableLayoutResizerBar (Graphics& g, int /*w*/, int /*h*/, bool /*isVerticalBar*/, bool isMouseOver, bool isMouseDragging);
-    Rectangle<int> getPropertyComponentContentPosition (PropertyComponent&);
-
-    bool areScrollbarButtonsVisible()   { return false; }
-
-    void drawScrollbar (Graphics& g, ScrollBar& scrollbar, int x, int y, int width, int height, bool isScrollbarVertical,
-                        int thumbStartPosition, int thumbSize, bool /*isMouseOver*/, bool /*isMouseDown*/);
-
-    void drawConcertinaPanelHeader (Graphics& g, const Rectangle<int>& area,
-                                    bool isMouseOver, bool isMouseDown,
-                                    ConcertinaPanel& concertina, Component& panel);
-
-    void drawButtonBackground (Graphics& g, Button& button, const Colour& backgroundColour,
-                               bool isMouseOverButton, bool isButtonDown);
-
-    static Colour getScrollbarColourForBackground (Colour background);
+    int getTabButtonBestWidth (TabBarButton&, int tabDepth) override;
 
 private:
     Image backgroundTexture;

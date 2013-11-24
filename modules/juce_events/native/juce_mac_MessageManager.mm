@@ -150,8 +150,9 @@ private:
             if (JUCEApplicationBase* const app = JUCEApplicationBase::getInstance())
             {
                 StringArray files;
-                for (unsigned int i = 0; i < [filenames count]; ++i)
-                    files.add (quotedIfContainsSpaces ((NSString*) [filenames objectAtIndex: i]));
+
+                for (NSString* f in filenames)
+                    files.add (quotedIfContainsSpaces (f));
 
                 if (files.size() > 0)
                     app->anotherInstanceStarted (files.joinIntoString (" "));
@@ -326,4 +327,24 @@ void MessageManager::broadcastMessage (const String& message)
     [[NSDistributedNotificationCenter defaultCenter] postNotificationName: AppDelegate::getBroacastEventName()
                                                                    object: nil
                                                                  userInfo: info];
+}
+
+// Special function used by some plugin classes to re-post carbon events
+void repostCurrentNSEvent();
+void repostCurrentNSEvent()
+{
+    struct EventReposter  : public CallbackMessage
+    {
+        EventReposter() : e ([[NSApp currentEvent] retain])  {}
+        ~EventReposter()  { [e release]; }
+
+        void messageCallback() override
+        {
+            [NSApp postEvent: e atStart: YES];
+        }
+
+        NSEvent* e;
+    };
+
+    (new EventReposter())->post();
 }

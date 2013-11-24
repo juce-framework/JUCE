@@ -25,6 +25,7 @@
 #ifndef JUCE_SYSTEMAUDIOVOLUME_H_INCLUDED
 #define JUCE_SYSTEMAUDIOVOLUME_H_INCLUDED
 
+
 //==============================================================================
 /**
     Contains functions to control the system's master volume.

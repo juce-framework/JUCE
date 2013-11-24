@@ -22,9 +22,7 @@
   ==============================================================================
 */
 
-//==============================================================================
 static const char* const aiffFormatName = "AIFF file";
-static const char* const aiffExtensions[] = { ".aiff", ".aif", 0 };
 
 //==============================================================================
 const char* const AiffAudioFormat::appleOneShot         = "apple one shot";
@@ -101,7 +99,7 @@ namespace AiffFileHelpers
             if (values.getAllKeys().contains ("MidiUnityNote", true))
             {
                 block.setSize ((sizeof (InstChunk) + 3) & ~(size_t) 3, true);
-                InstChunk& inst = *static_cast <InstChunk*> (block.getData());
+                InstChunk& inst = *static_cast<InstChunk*> (block.getData());
 
                 inst.baseNote      = getValue8 (values, "MidiUnityNote", "60");
                 inst.detune        = getValue8 (values, "Detune", "0");
@@ -137,13 +135,13 @@ namespace AiffFileHelpers
         {
             zerostruct (*this);
 
-            flags       = input.readIntBigEndian();
-            numBeats    = input.readIntBigEndian();
-            rootNote    = input.readShortBigEndian();
-            key         = input.readShortBigEndian();
-            timeSigNum  = input.readShortBigEndian();
-            timeSigDen  = input.readShortBigEndian();
-            oneShot     = input.readShortBigEndian();
+            flags       = (uint32) input.readIntBigEndian();
+            numBeats    = (uint32) input.readIntBigEndian();
+            rootNote    = (uint16) input.readShortBigEndian();
+            key         = (uint16) input.readShortBigEndian();
+            timeSigNum  = (uint16) input.readShortBigEndian();
+            timeSigDen  = (uint16) input.readShortBigEndian();
+            oneShot     = (uint16) input.readShortBigEndian();
             input.read (unknown, sizeof (unknown));
         }
 
@@ -199,7 +197,7 @@ namespace AiffFileHelpers
     {
         MemoryBlock mb;
         input.skipNextBytes (4);
-        input.readIntoMemoryBlock (mb, length - 4);
+        input.readIntoMemoryBlock (mb, (ssize_t) length - 4);
 
         static const char* appleGenres[] =
         {
@@ -220,7 +218,7 @@ namespace AiffFileHelpers
         StringArray tagsArray;
 
         int bytesLeft = (int) mb.getSize();
-        const char* data = static_cast <const char*> (mb.getData());
+        const char* data = static_cast<const char*> (mb.getData());
 
         while (bytesLeft > 0)
         {
@@ -365,7 +363,7 @@ class AiffAudioFormatReader  : public AudioFormatReader
 {
 public:
     AiffAudioFormatReader (InputStream* in)
-        : AudioFormatReader (in, TRANS (aiffFormatName))
+        : AudioFormatReader (in, aiffFormatName)
     {
         using namespace AiffFileHelpers;
 
@@ -608,10 +606,10 @@ private:
 class AiffAudioFormatWriter  : public AudioFormatWriter
 {
 public:
-    AiffAudioFormatWriter (OutputStream* out, double sampleRate_,
+    AiffAudioFormatWriter (OutputStream* out, double rate,
                            unsigned int numChans, unsigned int bits,
                            const StringPairArray& metadataValues)
-        : AudioFormatWriter (out, TRANS (aiffFormatName), sampleRate_, numChans, bits),
+        : AudioFormatWriter (out, aiffFormatName, rate, numChans, bits),
           lengthInSamples (0),
           bytesWritten (0),
           writeFailed (false)
@@ -879,8 +877,7 @@ private:
 };
 
 //==============================================================================
-AiffAudioFormat::AiffAudioFormat()
-    : AudioFormat (TRANS (aiffFormatName), StringArray (aiffExtensions))
+AiffAudioFormat::AiffAudioFormat()   : AudioFormat (aiffFormatName, ".aiff .aif")
 {
 }
 
@@ -910,8 +907,10 @@ bool AiffAudioFormat::canHandleFile (const File& f)
         return true;
 
     const OSType type = f.getMacOSType();
-    return type == 'AIFF' || type == 'AIFC'
-        || type == 'aiff' || type == 'aifc';
+
+    // (NB: written as hex to avoid four-char-constant warnings)
+    return type == 0x41494646 /* AIFF */ || type == 0x41494643 /* AIFC */
+        || type == 0x61696666 /* aiff */ || type == 0x61696663 /* aifc */;
 }
 #endif
 

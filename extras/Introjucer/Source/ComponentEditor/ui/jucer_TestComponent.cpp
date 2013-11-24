@@ -146,7 +146,7 @@ void TestComponent::paint (Graphics& g)
         g.drawLine (0.0f, (float) getHeight(), (float) getWidth(), 0.0f);
 
         g.setFont (14.0f);
-        g.drawText ("Jucer Component",
+        g.drawText ("Introjucer Component",
                     0, 0, getWidth(), getHeight() / 2,
                     Justification::centred, true);
         g.drawText ("(no file loaded)",

@@ -97,14 +97,14 @@ public:
         code.constructorCode += s;
     }
 
-    void getEditableProperties (Component* component, JucerDocument& document, Array <PropertyComponent*>& properties)
+    void getEditableProperties (Component* component, JucerDocument& document, Array<PropertyComponent*>& props)
     {
-        ComponentTypeHandler::getEditableProperties (component, document, properties);
+        ComponentTypeHandler::getEditableProperties (component, document, props);
 
-        properties.add (new GroupTitleProperty ((GroupComponent*) component, document));
-        properties.add (new GroupJustificationProperty ((GroupComponent*) component, document));
+        props.add (new GroupTitleProperty ((GroupComponent*) component, document));
+        props.add (new GroupJustificationProperty ((GroupComponent*) component, document));
 
-        addColourProperties (component, document, properties);
+        addColourProperties (component, document, props);
     }
 
 private:
@@ -131,8 +131,8 @@ private:
         class GroupTitleChangeAction  : public ComponentUndoableAction <GroupComponent>
         {
         public:
-            GroupTitleChangeAction (GroupComponent* const comp, ComponentLayout& layout, const String& newName_)
-                : ComponentUndoableAction <GroupComponent> (comp, layout),
+            GroupTitleChangeAction (GroupComponent* const comp, ComponentLayout& l, const String& newName_)
+                : ComponentUndoableAction <GroupComponent> (comp, l),
                   newName (newName_)
             {
                 oldName = comp->getText();
@@ -176,13 +176,13 @@ private:
             document.removeChangeListener (this);
         }
 
-        void setJustification (const Justification& newJustification)
+        void setJustification (Justification newJustification)
         {
             document.perform (new GroupJustifyChangeAction (group, *document.getComponentLayout(), newJustification),
                               "Change text label position");
         }
 
-        const Justification getJustification() const
+        Justification getJustification() const
         {
             return group->getTextLabelPosition();
         }
@@ -196,8 +196,8 @@ private:
         class GroupJustifyChangeAction  : public ComponentUndoableAction <GroupComponent>
         {
         public:
-            GroupJustifyChangeAction (GroupComponent* const comp, ComponentLayout& layout, const Justification& newState_)
-                : ComponentUndoableAction <GroupComponent> (comp, layout),
+            GroupJustifyChangeAction (GroupComponent* const comp, ComponentLayout& l, Justification newState_)
+                : ComponentUndoableAction <GroupComponent> (comp, l),
                   newState (newState_),
                   oldState (comp->getTextLabelPosition())
             {

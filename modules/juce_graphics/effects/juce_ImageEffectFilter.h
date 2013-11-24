@@ -25,8 +25,6 @@
 #ifndef JUCE_IMAGEEFFECTFILTER_H_INCLUDED
 #define JUCE_IMAGEEFFECTFILTER_H_INCLUDED
 
-#include "../contexts/juce_GraphicsContext.h"
-
 
 //==============================================================================
 /**

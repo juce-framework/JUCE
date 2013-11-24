@@ -28,10 +28,7 @@ MidiMessageSequence::MidiMessageSequence()
 
 MidiMessageSequence::MidiMessageSequence (const MidiMessageSequence& other)
 {
-    list.ensureStorageAllocated (other.list.size());
-
-    for (int i = 0; i < other.list.size(); ++i)
-        list.add (new MidiEventHolder (other.list.getUnchecked(i)->message));
+    list.addCopiesOf (other.list);
 }
 
 MidiMessageSequence& MidiMessageSequence::operator= (const MidiMessageSequence& other)
@@ -284,7 +281,7 @@ void MidiMessageSequence::createControllerUpdatesForTime (const int channelNumbe
 {
     bool doneProg = false;
     bool donePitchWheel = false;
-    Array <int> doneControllers;
+    Array<int> doneControllers;
     doneControllers.ensureStorageAllocated (32);
 
     for (int i = list.size(); --i >= 0;)
@@ -324,8 +321,7 @@ void MidiMessageSequence::createControllerUpdatesForTime (const int channelNumbe
 
 //==============================================================================
 MidiMessageSequence::MidiEventHolder::MidiEventHolder (const MidiMessage& mm)
-   : message (mm),
-     noteOffObject (nullptr)
+   : message (mm), noteOffObject (nullptr)
 {
 }
 

@@ -29,10 +29,6 @@
 #ifndef JUCE_OWNEDARRAY_H_INCLUDED
 #define JUCE_OWNEDARRAY_H_INCLUDED
 
-#include "juce_ArrayAllocationBase.h"
-#include "juce_ElementComparator.h"
-#include "../threads/juce_CriticalSection.h"
-
 
 //==============================================================================
 /** An array designed for holding objects.
@@ -170,8 +166,14 @@ public:
     inline ObjectClass* getFirst() const noexcept
     {
         const ScopedLockType lock (getLock());
-        return numUsed > 0 ? data.elements [0]
-                           : static_cast <ObjectClass*> (nullptr);
+
+        if (numUsed > 0)
+        {
+            jassert (data.elements != nullptr);
+            return data.elements [0];
+        }
+
+        return nullptr;
     }
 
     /** Returns a pointer to the last object in the array.
@@ -182,8 +184,14 @@ public:
     inline ObjectClass* getLast() const noexcept
     {
         const ScopedLockType lock (getLock());
-        return numUsed > 0 ? data.elements [numUsed - 1]
-                           : static_cast <ObjectClass*> (nullptr);
+
+        if (numUsed > 0)
+        {
+            jassert (data.elements != nullptr);
+            return data.elements [numUsed - 1];
+        }
+
+        return nullptr;
     }
 
     /** Returns a pointer to the actual array data.
@@ -209,6 +217,11 @@ public:
     */
     inline ObjectClass** end() const noexcept
     {
+       #if JUCE_DEBUG
+        if (data.elements == nullptr || numUsed <= 0) // (to keep static analysers happy)
+            return data.elements;
+       #endif
+
         return data.elements + numUsed;
     }
 
@@ -218,7 +231,7 @@ public:
         @param objectToLookFor    the object to look for
         @returns                  the index at which the object was found, or -1 if it's not found
     */
-    int indexOf (const ObjectClass* const objectToLookFor) const noexcept
+    int indexOf (const ObjectClass* objectToLookFor) const noexcept
     {
         const ScopedLockType lock (getLock());
         ObjectClass* const* e = data.elements.getData();
@@ -236,7 +249,7 @@ public:
         @param objectToLookFor      the object to look for
         @returns                    true if the object is in the array
     */
-    bool contains (const ObjectClass* const objectToLookFor) const noexcept
+    bool contains (const ObjectClass* objectToLookFor) const noexcept
     {
         const ScopedLockType lock (getLock());
         ObjectClass* const* e = data.elements.getData();
@@ -258,16 +271,17 @@ public:
         Also be careful not to add the same object to the array more than once,
         as this will obviously cause deletion of dangling pointers.
 
-        @param newObject       the new object to add to the array
+        @param newObject    the new object to add to the array
+        @returns            the new object that was added
         @see set, insert, addIfNotAlreadyThere, addSorted
     */
-    ObjectClass* add (ObjectClass* const newObject) noexcept
+    ObjectClass* add (ObjectClass* newObject) noexcept
     {
         const ScopedLockType lock (getLock());
         data.ensureAllocatedSize (numUsed + 1);
         jassert (data.elements != nullptr);
-        data.elements [numUsed++] = const_cast <ObjectClass*> (newObject);
-        return const_cast <ObjectClass*> (newObject);
+        data.elements [numUsed++] = newObject;
+        return newObject;
     }
 
     /** Inserts a new object into the array at the given index.
@@ -285,34 +299,31 @@ public:
 
         @param indexToInsertAt      the index at which the new element should be inserted
         @param newObject            the new object to add to the array
+        @returns                    the new object that was added
         @see add, addSorted, addIfNotAlreadyThere, set
     */
-    void insert (int indexToInsertAt,
-                 ObjectClass* const newObject) noexcept
+    ObjectClass* insert (int indexToInsertAt, ObjectClass* newObject) noexcept
     {
-        if (indexToInsertAt >= 0)
-        {
-            const ScopedLockType lock (getLock());
+        if (indexToInsertAt < 0)
+            return add (newObject);
 
-            if (indexToInsertAt > numUsed)
-                indexToInsertAt = numUsed;
+        const ScopedLockType lock (getLock());
 
-            data.ensureAllocatedSize (numUsed + 1);
-            jassert (data.elements != nullptr);
+        if (indexToInsertAt > numUsed)
+            indexToInsertAt = numUsed;
 
-            ObjectClass** const e = data.elements + indexToInsertAt;
-            const int numToMove = numUsed - indexToInsertAt;
+        data.ensureAllocatedSize (numUsed + 1);
+        jassert (data.elements != nullptr);
 
-            if (numToMove > 0)
-                memmove (e + 1, e, sizeof (ObjectClass*) * (size_t) numToMove);
+        ObjectClass** const e = data.elements + indexToInsertAt;
+        const int numToMove = numUsed - indexToInsertAt;
 
-            *e = const_cast <ObjectClass*> (newObject);
-            ++numUsed;
-        }
-        else
-        {
-            add (newObject);
-        }
+        if (numToMove > 0)
+            memmove (e + 1, e, sizeof (ObjectClass*) * (size_t) numToMove);
+
+        *e = newObject;
+        ++numUsed;
+        return newObject;
     }
 
     /** Inserts an array of values into this array at a given position.
@@ -361,13 +372,16 @@ public:
         If the array already contains a matching object, nothing will be done.
 
         @param newObject   the new object to add to the array
+        @returns           the new object that was added
     */
-    void addIfNotAlreadyThere (ObjectClass* const newObject) noexcept
+    ObjectClass* addIfNotAlreadyThere (ObjectClass* newObject) noexcept
     {
         const ScopedLockType lock (getLock());
 
         if (! contains (newObject))
             add (newObject);
+
+        return newObject;
     }
 
     /** Replaces an object in the array with a different one.
@@ -383,13 +397,11 @@ public:
         @param deleteOldElement     whether to delete the object that's being replaced with the new one
         @see add, insert, remove
     */
-    void set (const int indexToChange,
-              const ObjectClass* const newObject,
-              const bool deleteOldElement = true)
+    ObjectClass* set (int indexToChange, ObjectClass* newObject, bool deleteOldElement = true)
     {
         if (indexToChange >= 0)
         {
-            ObjectClass* toDelete = nullptr;
+            ScopedPointer<ObjectClass> toDelete;
 
             {
                 const ScopedLockType lock (getLock());
@@ -401,27 +413,25 @@ public:
                         toDelete = data.elements [indexToChange];
 
                         if (toDelete == newObject)
-                            toDelete = nullptr;
+                            toDelete.release();
                     }
 
-                    data.elements [indexToChange] = const_cast <ObjectClass*> (newObject);
+                    data.elements [indexToChange] = newObject;
                 }
                 else
                 {
                     data.ensureAllocatedSize (numUsed + 1);
-                    data.elements [numUsed++] = const_cast <ObjectClass*> (newObject);
+                    data.elements [numUsed++] = newObject;
                 }
             }
-
-            delete toDelete; // don't want to use a ScopedPointer here because if the
-                             // object has a private destructor, both OwnedArray and
-                             // ScopedPointer would need to be friend classes..
         }
         else
         {
             jassertfalse; // you're trying to set an object at a negative index, which doesn't have
                           // any effect - but since the object is not being added, it may be leaking..
         }
+
+        return newObject;
     }
 
     /** Adds elements from another array to the end of this array.
@@ -572,10 +582,9 @@ public:
         @param deleteObject     whether to delete the object that is removed
         @see removeObject, removeRange
     */
-    void remove (const int indexToRemove,
-                 const bool deleteObject = true)
+    void remove (int indexToRemove, bool deleteObject = true)
     {
-        ObjectClass* toDelete = nullptr;
+        ScopedPointer<ObjectClass> toDelete;
 
         {
             const ScopedLockType lock (getLock());
@@ -595,10 +604,6 @@ public:
             }
         }
 
-        delete toDelete; // don't want to use a ScopedPointer here because if the
-                         // object has a private destructor, both OwnedArray and
-                         // ScopedPointer would need to be friend classes..
-
         if ((numUsed << 1) < data.numAllocated)
             minimiseStorageOverheads();
     }
@@ -612,7 +617,7 @@ public:
         @param indexToRemove    the index of the element to remove
         @see remove, removeObject, removeRange
     */
-    ObjectClass* removeAndReturn (const int indexToRemove)
+    ObjectClass* removeAndReturn (int indexToRemove)
     {
         ObjectClass* removedItem = nullptr;
         const ScopedLockType lock (getLock());
@@ -643,8 +648,7 @@ public:
         @param deleteObject     whether to delete the object (if it's found)
         @see remove, removeRange
     */
-    void removeObject (const ObjectClass* const objectToRemove,
-                       const bool deleteObject = true)
+    void removeObject (const ObjectClass* objectToRemove, bool deleteObject = true)
     {
         const ScopedLockType lock (getLock());
         ObjectClass** const e = data.elements.getData();
@@ -672,9 +676,7 @@ public:
         @param deleteObjects    whether to delete the objects that get removed
         @see remove, removeObject
     */
-    void removeRange (int startIndex,
-                      const int numberToRemove,
-                      const bool deleteObjects = true)
+    void removeRange (int startIndex, int numberToRemove, bool deleteObjects = true)
     {
         const ScopedLockType lock (getLock());
         const int endIndex = jlimit (0, numUsed, startIndex + numberToRemove);
@@ -686,7 +688,7 @@ public:
             {
                 for (int i = startIndex; i < endIndex; ++i)
                 {
-                    delete data.elements [i];
+                    ContainerDeletePolicy<ObjectClass>::destroy (data.elements [i]);
                     data.elements [i] = nullptr; // (in case one of the destructors accesses this array and hits a dangling pointer)
                 }
             }
@@ -714,7 +716,7 @@ public:
         @see remove, removeObject, removeRange
     */
     void removeLast (int howManyToRemove = 1,
-                     const bool deleteObjects = true)
+                     bool deleteObjects = true)
     {
         const ScopedLockType lock (getLock());
 
@@ -729,8 +731,8 @@ public:
         If either of the indexes passed in is out-of-range, nothing will happen,
         otherwise the two objects at these positions will be exchanged.
     */
-    void swap (const int index1,
-               const int index2) noexcept
+    void swap (int index1,
+               int index2) noexcept
     {
         const ScopedLockType lock (getLock());
 
@@ -755,8 +757,7 @@ public:
         @param newIndex         the index at which you'd like this object to end up. If this
                                 is less than zero, it will be moved to the end of the array
     */
-    void move (const int currentIndex,
-               int newIndex) noexcept
+    void move (int currentIndex, int newIndex) noexcept
     {
         if (currentIndex != newIndex)
         {
@@ -854,7 +855,7 @@ public:
     */
     template <class ElementComparator>
     void sort (ElementComparator& comparator,
-               const bool retainOrderOfEquivalentItems = false) const noexcept
+               bool retainOrderOfEquivalentItems = false) const noexcept
     {
         (void) comparator;  // if you pass in an object with a static compareElements() method, this
                             // avoids getting warning messages about the parameter being unused
@@ -875,9 +876,11 @@ public:
 
 
     //==============================================================================
+   #ifndef DOXYGEN
     // Note that the swapWithArray method has been replaced by a more flexible templated version,
     // and renamed "swapWith" to be more consistent with the names used in other classes.
     JUCE_DEPRECATED_WITH_BODY (void swapWithArray (OwnedArray& other) noexcept, { swapWith (other); })
+   #endif
 
 private:
     //==============================================================================
@@ -887,7 +890,7 @@ private:
     void deleteAllObjects()
     {
         while (numUsed > 0)
-            delete data.elements [--numUsed];
+            ContainerDeletePolicy<ObjectClass>::destroy (data.elements [--numUsed]);
     }
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OwnedArray)

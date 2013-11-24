@@ -34,22 +34,22 @@ public:
                                 defaultWidth_, defaultHeight_)
     {}
 
-    void getEditableProperties (Component* component, JucerDocument& document, Array <PropertyComponent*>& properties)
+    void getEditableProperties (Component* component, JucerDocument& document, Array<PropertyComponent*>& props)
     {
-        ComponentTypeHandler::getEditableProperties (component, document, properties);
+        ComponentTypeHandler::getEditableProperties (component, document, props);
 
         Button* const b = dynamic_cast <Button*> (component);
 
-        properties.add (new ButtonTextProperty (b, document));
+        props.add (new ButtonTextProperty (b, document));
 
-        properties.add (new ButtonCallbackProperty (b, document));
+        props.add (new ButtonCallbackProperty (b, document));
 
-        properties.add (new ButtonRadioGroupProperty (b, document));
+        props.add (new ButtonRadioGroupProperty (b, document));
 
-        properties.add (new ButtonConnectedEdgeProperty ("connected left", Button::ConnectedOnLeft, b, document));
-        properties.add (new ButtonConnectedEdgeProperty ("connected right", Button::ConnectedOnRight, b, document));
-        properties.add (new ButtonConnectedEdgeProperty ("connected top", Button::ConnectedOnTop, b, document));
-        properties.add (new ButtonConnectedEdgeProperty ("connected bottom", Button::ConnectedOnBottom, b, document));
+        props.add (new ButtonConnectedEdgeProperty ("connected left", Button::ConnectedOnLeft, b, document));
+        props.add (new ButtonConnectedEdgeProperty ("connected right", Button::ConnectedOnRight, b, document));
+        props.add (new ButtonConnectedEdgeProperty ("connected top", Button::ConnectedOnTop, b, document));
+        props.add (new ButtonConnectedEdgeProperty ("connected bottom", Button::ConnectedOnBottom, b, document));
     }
 
     XmlElement* createXmlFor (Component* comp, const ComponentLayout* layout)
@@ -187,8 +187,8 @@ private:
         class ButtonTextChangeAction  : public ComponentUndoableAction <Button>
         {
         public:
-            ButtonTextChangeAction (Button* const comp, ComponentLayout& layout, const String& newName_)
-                : ComponentUndoableAction <Button> (comp, layout),
+            ButtonTextChangeAction (Button* const comp, ComponentLayout& l, const String& newName_)
+                : ComponentUndoableAction <Button> (comp, l),
                   newName (newName_)
             {
                 oldName = comp->getButtonText();
@@ -217,8 +217,8 @@ private:
     class ButtonCallbackProperty    : public ComponentBooleanProperty <Button>
     {
     public:
-        ButtonCallbackProperty (Button* button, JucerDocument& document)
-            : ComponentBooleanProperty <Button> ("callback", "Generate ButtonListener", "Generate ButtonListener", button, document)
+        ButtonCallbackProperty (Button* b, JucerDocument& doc)
+            : ComponentBooleanProperty <Button> ("callback", "Generate ButtonListener", "Generate ButtonListener", b, doc)
         {
         }
 
@@ -234,8 +234,8 @@ private:
         class ButtonCallbackChangeAction  : public ComponentUndoableAction <Button>
         {
         public:
-            ButtonCallbackChangeAction (Button* const comp, ComponentLayout& layout, const bool newState_)
-                : ComponentUndoableAction <Button> (comp, layout),
+            ButtonCallbackChangeAction (Button* const comp, ComponentLayout& l, const bool newState_)
+                : ComponentUndoableAction <Button> (comp, l),
                   newState (newState_)
             {
                 oldState = needsButtonListener (comp);
@@ -284,8 +284,8 @@ private:
         class ButtonRadioGroupChangeAction  : public ComponentUndoableAction <Button>
         {
         public:
-            ButtonRadioGroupChangeAction (Button* const comp, ComponentLayout& layout, const int newId_)
-                : ComponentUndoableAction <Button> (comp, layout),
+            ButtonRadioGroupChangeAction (Button* const comp, ComponentLayout& l, const int newId_)
+                : ComponentUndoableAction <Button> (comp, l),
                   newId (newId_)
             {
                 oldId = comp->getRadioGroupId();
@@ -315,8 +315,8 @@ private:
     {
     public:
         ButtonConnectedEdgeProperty (const String& name, const int flag_,
-                                     Button* button, JucerDocument& document)
-            : ComponentBooleanProperty <Button> (name, "Connected", "Connected", button, document),
+                                     Button* b, JucerDocument& doc)
+            : ComponentBooleanProperty <Button> (name, "Connected", "Connected", b, doc),
               flag (flag_)
         {
         }
@@ -338,8 +338,8 @@ private:
         class ButtonConnectedChangeAction  : public ComponentUndoableAction <Button>
         {
         public:
-            ButtonConnectedChangeAction (Button* const comp, ComponentLayout& layout, const int flag_, const bool newState_)
-                : ComponentUndoableAction <Button> (comp, layout),
+            ButtonConnectedChangeAction (Button* const comp, ComponentLayout& l, const int flag_, const bool newState_)
+                : ComponentUndoableAction <Button> (comp, l),
                   flag (flag_),
                   newState (newState_)
             {

@@ -62,8 +62,6 @@
 namespace juce
 {
 
-// START_AUTOINCLUDE messages/*.cpp, broadcasters/*.cpp,
-// timers/*.cpp, interprocess/*.cpp
 #include "messages/juce_ApplicationBase.cpp"
 #include "messages/juce_DeletedAtShutdown.cpp"
 #include "messages/juce_MessageListener.cpp"
@@ -75,7 +73,6 @@ namespace juce
 #include "timers/juce_Timer.cpp"
 #include "interprocess/juce_InterprocessConnection.cpp"
 #include "interprocess/juce_InterprocessConnectionServer.cpp"
-// END_AUTOINCLUDE
 
 //==============================================================================
 #if JUCE_MAC

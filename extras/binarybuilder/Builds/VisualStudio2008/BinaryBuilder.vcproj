@@ -31,7 +31,7 @@
             Optimization="0"
             BufferSecurityCheck=""
             DebugInformationFormat="4"
-            AdditionalIncludeDirectories="..\..\JuceLibraryCode"
+            AdditionalIncludeDirectories="..\..\JuceLibraryCode;..\..\..\..\modules"
             PreprocessorDefinitions="_CONSOLE;WIN32;_WINDOWS;DEBUG;_DEBUG;JUCER_VS2008_78A5006=1"
             RuntimeLibrary="1"
             RuntimeTypeInfo="true"
@@ -87,7 +87,7 @@
             Optimization="1"
             InlineFunctionExpansion="1"
             StringPooling="true"
-            AdditionalIncludeDirectories="..\..\JuceLibraryCode"
+            AdditionalIncludeDirectories="..\..\JuceLibraryCode;..\..\..\..\modules"
             PreprocessorDefinitions="_CONSOLE;WIN32;_WINDOWS;NDEBUG;JUCER_VS2008_78A5006=1"
             RuntimeLibrary="0"
             RuntimeTypeInfo="true"
@@ -216,6 +216,7 @@
             </FileConfiguration>
           </File>
           <File RelativePath="..\..\..\..\modules\juce_core\text\juce_StringPool.h"/>
+          <File RelativePath="..\..\..\..\modules\juce_core\text\juce_StringRef.h"/>
           <File RelativePath="..\..\..\..\modules\juce_core\text\juce_TextDiff.cpp">
             <FileConfiguration Name="Debug|Win32"
                                ExcludedFromBuild="true">
@@ -268,6 +269,7 @@
         <Filter Name="memory">
           <File RelativePath="..\..\..\..\modules\juce_core\memory\juce_Atomic.h"/>
           <File RelativePath="..\..\..\..\modules\juce_core\memory\juce_ByteOrder.h"/>
+          <File RelativePath="..\..\..\..\modules\juce_core\memory\juce_ContainerDeletePolicy.h"/>
           <File RelativePath="..\..\..\..\modules\juce_core\memory\juce_HeapBlock.h"/>
           <File RelativePath="..\..\..\..\modules\juce_core\memory\juce_LeakedObjectDetector.h"/>
           <File RelativePath="..\..\..\..\modules\juce_core\memory\juce_Memory.h"/>
@@ -738,8 +740,8 @@
           </File>
           <File RelativePath="..\..\..\..\modules\juce_core\xml\juce_XmlElement.h"/>
         </Filter>
-        <Filter Name="json">
-          <File RelativePath="..\..\..\..\modules\juce_core\json\juce_JSON.cpp">
+        <Filter Name="javascript">
+          <File RelativePath="..\..\..\..\modules\juce_core\javascript\juce_Javascript.cpp">
             <FileConfiguration Name="Debug|Win32"
                                ExcludedFromBuild="true">
               <Tool Name="VCCLCompilerTool"/>
@@ -749,7 +751,18 @@
               <Tool Name="VCCLCompilerTool"/>
             </FileConfiguration>
           </File>
-          <File RelativePath="..\..\..\..\modules\juce_core\json\juce_JSON.h"/>
+          <File RelativePath="..\..\..\..\modules\juce_core\javascript\juce_Javascript.h"/>
+          <File RelativePath="..\..\..\..\modules\juce_core\javascript\juce_JSON.cpp">
+            <FileConfiguration Name="Debug|Win32"
+                               ExcludedFromBuild="true">
+              <Tool Name="VCCLCompilerTool"/>
+            </FileConfiguration>
+            <FileConfiguration Name="Release|Win32"
+                               ExcludedFromBuild="true">
+              <Tool Name="VCCLCompilerTool"/>
+            </FileConfiguration>
+          </File>
+          <File RelativePath="..\..\..\..\modules\juce_core\javascript\juce_JSON.h"/>
         </Filter>
         <Filter Name="zip">
           <File RelativePath="..\..\..\..\modules\juce_core\zip\juce_GZIPCompressorOutputStream.cpp">
@@ -877,6 +890,16 @@
             </FileConfiguration>
           </File>
           <File RelativePath="..\..\..\..\modules\juce_core\native\juce_BasicNativeHeaders.h"/>
+          <File RelativePath="..\..\..\..\modules\juce_core\native\juce_linux_CommonFile.cpp">
+            <FileConfiguration Name="Debug|Win32"
+                               ExcludedFromBuild="true">
+              <Tool Name="VCCLCompilerTool"/>
+            </FileConfiguration>
+            <FileConfiguration Name="Release|Win32"
+                               ExcludedFromBuild="true">
+              <Tool Name="VCCLCompilerTool"/>
+            </FileConfiguration>
+          </File>
           <File RelativePath="..\..\..\..\modules\juce_core\native\juce_linux_Files.cpp">
             <FileConfiguration Name="Debug|Win32"
                                ExcludedFromBuild="true">

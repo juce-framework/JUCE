@@ -55,11 +55,10 @@ private:
     class CompNameChangeAction  : public ComponentUndoableAction <Component>
     {
     public:
-        CompNameChangeAction (Component* const comp, ComponentLayout& layout, const String& newName_)
-            : ComponentUndoableAction <Component> (comp, layout),
-              newName (newName_)
+        CompNameChangeAction (Component* const comp, ComponentLayout& l, const String& nm)
+            : ComponentUndoableAction <Component> (comp, l),
+              newName (nm), oldName (comp->getName())
         {
-            oldName = comp->getName();
         }
 
         bool perform()
@@ -106,11 +105,10 @@ private:
     class CompMemberNameChangeAction  : public ComponentUndoableAction <Component>
     {
     public:
-        CompMemberNameChangeAction (Component* const comp, ComponentLayout& layout, const String& newName_)
-            : ComponentUndoableAction <Component> (comp, layout),
-              newName (newName_)
+        CompMemberNameChangeAction (Component* const comp, ComponentLayout& l, const String& nm)
+            : ComponentUndoableAction <Component> (comp, l),
+              newName (nm), oldName (layout.getComponentMemberVariableName (comp))
         {
-            oldName = layout.getComponentMemberVariableName (comp);
         }
 
         bool perform()
@@ -156,11 +154,10 @@ private:
     class CompVirtualClassChangeAction  : public ComponentUndoableAction <Component>
     {
     public:
-        CompVirtualClassChangeAction (Component* const comp, ComponentLayout& layout, const String& newName_)
-            : ComponentUndoableAction <Component> (comp, layout),
-              newName (newName_)
+        CompVirtualClassChangeAction (Component* const comp, ComponentLayout& l, const String& nm)
+            : ComponentUndoableAction <Component> (comp, l),
+              newName (nm), oldName (layout.getComponentVirtualClassName (comp))
         {
-            oldName = layout.getComponentVirtualClassName (comp);
         }
 
         bool perform()

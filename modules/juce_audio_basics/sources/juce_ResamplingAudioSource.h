@@ -25,8 +25,6 @@
 #ifndef JUCE_RESAMPLINGAUDIOSOURCE_H_INCLUDED
 #define JUCE_RESAMPLINGAUDIOSOURCE_H_INCLUDED
 
-#include "juce_AudioSource.h"
-
 
 //==============================================================================
 /**
@@ -69,9 +67,9 @@ public:
     double getResamplingRatio() const noexcept                  { return ratio; }
 
     //==============================================================================
-    void prepareToPlay (int samplesPerBlockExpected, double sampleRate);
-    void releaseResources();
-    void getNextAudioBlock (const AudioSourceChannelInfo& bufferToFill);
+    void prepareToPlay (int samplesPerBlockExpected, double sampleRate) override;
+    void releaseResources() override;
+    void getNextAudioBlock (const AudioSourceChannelInfo&) override;
 
 private:
     //==============================================================================

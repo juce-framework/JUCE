@@ -29,14 +29,10 @@
 #ifndef JUCE_SORTEDSET_H_INCLUDED
 #define JUCE_SORTEDSET_H_INCLUDED
 
-#include "juce_ArrayAllocationBase.h"
-#include "../threads/juce_CriticalSection.h"
-
 #if JUCE_MSVC
-  #pragma warning (push)
-  #pragma warning (disable: 4512)
+ #pragma warning (push)
+ #pragma warning (disable: 4512)
 #endif
-
 
 //==============================================================================
 /**
@@ -126,7 +122,6 @@ public:
     }
 
     /** Removes all elements from the set without freeing the array's allocated storage.
-
         @see clear
     */
     void clearQuick() noexcept
@@ -244,7 +239,8 @@ public:
 
             if (halfway == s)
                 return -1;
-            else if (elementToLookFor < data.getReference (halfway))
+
+            if (elementToLookFor < data.getReference (halfway))
                 e = halfway;
             else
                 s = halfway;
@@ -299,7 +295,8 @@ public:
 
                 break;
             }
-            else if (isBeforeHalfway)
+
+            if (isBeforeHalfway)
                 e = halfway;
             else
                 s = halfway;
@@ -487,11 +484,11 @@ public:
 
 private:
     //==============================================================================
-    Array <ElementType, TypeOfCriticalSectionToUse> data;
+    Array<ElementType, TypeOfCriticalSectionToUse> data;
 };
 
 #if JUCE_MSVC
-  #pragma warning (pop)
+ #pragma warning (pop)
 #endif
 
 #endif   // JUCE_SORTEDSET_H_INCLUDED

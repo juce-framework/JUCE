@@ -222,17 +222,17 @@ namespace juce
   #if ! JUCE_MODULE_AVAILABLE_juce_gui_basics
     #define JUCE_CATCH_EXCEPTION    JUCE_CATCH_ALL
   #else
-    /** Used in try-catch blocks, this macro will send exceptions to the JUCEApplication
+    /** Used in try-catch blocks, this macro will send exceptions to the JUCEApplicationBase
         object so they can be logged by the application if it wants to.
     */
     #define JUCE_CATCH_EXCEPTION \
       catch (const std::exception& e)  \
       { \
-          juce::JUCEApplication::sendUnhandledException (&e, __FILE__, __LINE__); \
+          juce::JUCEApplicationBase::sendUnhandledException (&e, __FILE__, __LINE__); \
       } \
       catch (...) \
       { \
-          juce::JUCEApplication::sendUnhandledException (nullptr, __FILE__, __LINE__); \
+          juce::JUCEApplicationBase::sendUnhandledException (nullptr, __FILE__, __LINE__); \
       }
   #endif
 
@@ -305,7 +305,7 @@ namespace juce
 //==============================================================================
 // Here, we'll check for C++11 compiler support, and if it's not available, define
 // a few workarounds, so that we can still use some of the newer language features.
-#if defined (__GXX_EXPERIMENTAL_CXX0X__) && defined (__GNUC__) && (__GNUC__ * 100 + __GNUC_MINOR__) >= 405
+#if (__cplusplus >= 201103L || defined (__GXX_EXPERIMENTAL_CXX0X__)) && (__GNUC__ * 100 + __GNUC_MINOR__) >= 405
  #define JUCE_COMPILER_SUPPORTS_NOEXCEPT 1
  #define JUCE_COMPILER_SUPPORTS_NULLPTR 1
  #define JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS 1

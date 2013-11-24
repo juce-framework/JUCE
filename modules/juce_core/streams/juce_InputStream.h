@@ -29,9 +29,6 @@
 #ifndef JUCE_INPUTSTREAM_H_INCLUDED
 #define JUCE_INPUTSTREAM_H_INCLUDED
 
-#include "../text/juce_String.h"
-class MemoryBlock;
-
 
 //==============================================================================
 /** The base class for streams that read data.

@@ -25,6 +25,7 @@
 #ifndef JUCE_MEMORYMAPPEDAUDIOFORMATREADER_H_INCLUDED
 #define JUCE_MEMORYMAPPEDAUDIOFORMATREADER_H_INCLUDED
 
+
 //==============================================================================
 /**
     A specialised type of AudioFormatReader that uses a MemoryMappedFile to read
@@ -94,7 +95,7 @@ protected:
     {
         typedef AudioData::Pointer <SampleType, Endianness, AudioData::Interleaved, AudioData::Const> SourceType;
 
-        SourceType (addBytesToPointer (sampleToPointer (startSampleInFile), (bitsPerSample / 8) * channel), (int) numChannels)
+        SourceType (addBytesToPointer (sampleToPointer (startSampleInFile), ((int) bitsPerSample / 8) * channel), (int) numChannels)
            .findMinAndMax ((size_t) numSamples, mn, mx);
     }
 

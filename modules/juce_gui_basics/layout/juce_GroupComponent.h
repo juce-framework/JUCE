@@ -25,8 +25,6 @@
 #ifndef JUCE_GROUPCOMPONENT_H_INCLUDED
 #define JUCE_GROUPCOMPONENT_H_INCLUDED
 
-#include "../components/juce_Component.h"
-
 
 //==============================================================================
 /**
@@ -82,6 +80,16 @@ public:
     {
         outlineColourId     = 0x1005400,    /**< The colour to use for drawing the line around the edge. */
         textColourId        = 0x1005410     /**< The colour to use to draw the text label. */
+    };
+
+    //==============================================================================
+    /** This abstract base class is implemented by LookAndFeel classes. */
+    struct JUCE_API  LookAndFeelMethods
+    {
+        virtual ~LookAndFeelMethods() {}
+
+        virtual void drawGroupComponentOutline (Graphics&, int w, int h, const String& text,
+                                                const Justification&, GroupComponent&) = 0;
     };
 
     //==============================================================================

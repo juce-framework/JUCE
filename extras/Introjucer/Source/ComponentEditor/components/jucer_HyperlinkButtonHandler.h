@@ -39,12 +39,12 @@ public:
         return hb;
     }
 
-    void getEditableProperties (Component* component, JucerDocument& document, Array <PropertyComponent*>& properties)
+    void getEditableProperties (Component* component, JucerDocument& document, Array<PropertyComponent*>& props)
     {
         HyperlinkButton* const hb = (HyperlinkButton*) component;
-        ButtonHandler::getEditableProperties (component, document, properties);
-        properties.add (new HyperlinkURLProperty (hb, document));
-        addColourProperties (component, document, properties);
+        ButtonHandler::getEditableProperties (component, document, props);
+        props.add (new HyperlinkURLProperty (hb, document));
+        addColourProperties (component, document, props);
     }
 
     XmlElement* createXmlFor (Component* comp, const ComponentLayout* layout)
@@ -109,8 +109,8 @@ private:
         class HyperlinkURLChangeAction  : public ComponentUndoableAction <HyperlinkButton>
         {
         public:
-            HyperlinkURLChangeAction (HyperlinkButton* const comp, ComponentLayout& layout, const URL& newState_)
-                : ComponentUndoableAction <HyperlinkButton> (comp, layout),
+            HyperlinkURLChangeAction (HyperlinkButton* const comp, ComponentLayout& l, const URL& newState_)
+                : ComponentUndoableAction <HyperlinkButton> (comp, l),
                   newState (newState_)
             {
                 oldState = comp->getURL();

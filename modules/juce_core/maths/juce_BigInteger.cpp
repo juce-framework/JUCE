@@ -157,6 +157,12 @@ int BigInteger::toInteger() const noexcept
     return negative ? -n : n;
 }
 
+int64 BigInteger::toInt64() const noexcept
+{
+    const int64 n = (((int64) (values[1] & 0x7fffffff)) << 32) | values[0];
+    return negative ? -n : n;
+}
+
 BigInteger BigInteger::getBitRange (int startBit, int numBits) const
 {
     BigInteger r;
@@ -953,10 +959,12 @@ String BigInteger::toString (const int base, const int minimumNumCharacters) con
     return isNegative() ? "-" + s : s;
 }
 
-void BigInteger::parseString (const String& text, const int base)
+void BigInteger::parseString (StringRef text, const int base)
 {
     clear();
-    String::CharPointerType t (text.getCharPointer());
+    String::CharPointerType t (text.text.findEndOfWhitespace());
+
+    setNegative (*t == (juce_wchar) '-');
 
     if (base == 2 || base == 8 || base == 16)
     {
@@ -997,8 +1005,6 @@ void BigInteger::parseString (const String& text, const int base)
             }
         }
     }
-
-    setNegative (text.trimStart().startsWithChar ('-'));
 }
 
 MemoryBlock BigInteger::toMemoryBlock() const

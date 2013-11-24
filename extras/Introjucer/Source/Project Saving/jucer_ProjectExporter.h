@@ -28,7 +28,7 @@
 #include "../jucer_Headers.h"
 #include "../Project/jucer_Project.h"
 #include "../Project/jucer_ProjectType.h"
-
+class ProjectSaver;
 
 //==============================================================================
 class ProjectExporter
@@ -57,12 +57,26 @@ public:
 
     virtual bool isXcode() const                { return false; }
     virtual bool isVisualStudio() const         { return false; }
-    virtual bool isWindows() const              { return false; }
     virtual int getVisualStudioVersion() const  { return 0; }
+    virtual bool isCodeBlocks() const           { return false; }
+
+    virtual bool isAndroid() const              { return false; }
+    virtual bool isWindows() const              { return false; }
     virtual bool isLinux() const                { return false; }
     virtual bool isOSX() const                  { return false; }
-    virtual bool isAndroid() const              { return false; }
-    virtual bool isCodeBlocks() const           { return false; }
+
+    bool mayCompileOnCurrentOS() const
+    {
+       #if JUCE_MAC
+        return isOSX() || isAndroid();
+       #elif JUCE_WINDOWS
+        return isWindows() || isAndroid();
+       #elif JUCE_LINUX
+        return isLinux() || isAndroid();
+       #else
+        #error
+       #endif
+    }
 
     //==============================================================================
     String getName() const                      { return name; }
@@ -73,9 +87,6 @@ public:
 
     Value getSetting (const Identifier& nm)     { return settings.getPropertyAsValue (nm, project.getUndoManagerFor (settings)); }
     String getSettingString (const Identifier& nm) const  { return settings [nm]; }
-
-    Value getJuceFolderValue()                  { return getSetting (Ids::juceFolder); }
-    String getJuceFolderString() const          { return getSettingString (Ids::juceFolder); }
 
     Value getTargetLocationValue()              { return getSetting (Ids::targetFolder); }
     String getTargetLocationString() const      { return getSettingString (Ids::targetFolder); }
@@ -90,6 +101,17 @@ public:
     String getExternalLibrariesString() const   { return getSettingString (Ids::externalLibraries).replaceCharacters ("\r\n", " ;"); }
 
     Value getUserNotes()                        { return getSetting (Ids::userNotes); }
+
+    Value getPathForModuleValue (const String& moduleID);
+    String getPathForModuleString (const String& moduleID) const;
+    void removePathForModule (const String& moduleID);
+
+    RelativePath getLegacyModulePath (const String& moduleID) const;
+    String getLegacyModulePath() const;
+
+    // Returns a path to the actual module folder itself
+    RelativePath getModuleFolderRelativeToProject (const String& moduleID, ProjectSaver& projectSaver) const;
+    void updateOldModulePaths();
 
     RelativePath rebaseFromProjectFolderToBuildTarget (const RelativePath& path) const;
     void addToExtraSearchPaths (const RelativePath& pathFromProjectFolder);
@@ -119,9 +141,6 @@ public:
 
         String message;
     };
-
-    RelativePath getJucePathFromTargetFolder() const;
-    RelativePath getJucePathFromProjectFolder() const;
 
     void createPropertyEditors (PropertyListBuilder& props);
 
@@ -262,8 +281,7 @@ public:
 
     ValueTree getConfigurations() const;
     void createDefaultConfigs();
-
-    static const Identifier configurations, configuration;
+    void createDefaultModulePaths();
 
     //==============================================================================
     Value getExporterPreprocessorDefs()                 { return getSetting (Ids::extraDefs); }

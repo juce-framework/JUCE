@@ -48,16 +48,16 @@ public:
     void setLastProjects (const Array<File>& files);
 
     //==============================================================================
-    Array <Colour> swatchColours;
+    Array<Colour> swatchColours;
 
     class ColourSelectorWithSwatches    : public ColourSelector
     {
     public:
         ColourSelectorWithSwatches() {}
 
-        int getNumSwatches() const;
-        Colour getSwatchColour (int index) const;
-        void setSwatchColour (int index, const Colour& newColour) const;
+        int getNumSwatches() const override;
+        Colour getSwatchColour (int index) const override;
+        void setSwatchColour (int index, const Colour& newColour) const override;
     };
 
     //==============================================================================

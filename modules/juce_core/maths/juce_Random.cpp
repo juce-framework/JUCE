@@ -26,13 +26,11 @@
   ==============================================================================
 */
 
-Random::Random (const int64 seedValue) noexcept
-    : seed (seedValue)
+Random::Random (const int64 seedValue) noexcept   : seed (seedValue)
 {
 }
 
-Random::Random()
-    : seed (1)
+Random::Random()  : seed (1)
 {
     setSeedRandomly();
 }
@@ -83,6 +81,11 @@ int Random::nextInt (const int maxValue) noexcept
     return (int) ((((unsigned int) nextInt()) * (uint64) maxValue) >> 32);
 }
 
+int Random::nextInt (Range<int> range) noexcept
+{
+    return range.getStart() + nextInt (range.getLength());
+}
+
 int64 Random::nextInt64() noexcept
 {
     return (((int64) nextInt()) << 32) | (int64) (uint64) (uint32) nextInt();
@@ -95,12 +98,12 @@ bool Random::nextBool() noexcept
 
 float Random::nextFloat() noexcept
 {
-    return static_cast <uint32> (nextInt()) / (float) 0xffffffff;
+    return static_cast<uint32> (nextInt()) / (std::numeric_limits<uint32>::max() + 1.0f);
 }
 
 double Random::nextDouble() noexcept
 {
-    return static_cast <uint32> (nextInt()) / (double) 0xffffffff;
+    return static_cast<uint32> (nextInt()) / (std::numeric_limits<uint32>::max() + 1.0);
 }
 
 BigInteger Random::nextLargeNumber (const BigInteger& maximumValue)
@@ -163,24 +166,20 @@ public:
     {
         beginTest ("Random");
 
-        for (int j = 10; --j >= 0;)
+        Random r = getRandom();
+
+        for (int i = 2000; --i >= 0;)
         {
-            Random r;
-            r.setSeedRandomly();
+            expect (r.nextDouble() >= 0.0 && r.nextDouble() < 1.0);
+            expect (r.nextFloat() >= 0.0f && r.nextFloat() < 1.0f);
+            expect (r.nextInt (5) >= 0 && r.nextInt (5) < 5);
+            expect (r.nextInt (1) == 0);
 
-            for (int i = 20; --i >= 0;)
-            {
-                expect (r.nextDouble() >= 0.0 && r.nextDouble() < 1.0);
-                expect (r.nextFloat() >= 0.0f && r.nextFloat() < 1.0f);
-                expect (r.nextInt (5) >= 0 && r.nextInt (5) < 5);
-                expect (r.nextInt (1) == 0);
+            int n = r.nextInt (50) + 1;
+            expect (r.nextInt (n) >= 0 && r.nextInt (n) < n);
 
-                int n = r.nextInt (50) + 1;
-                expect (r.nextInt (n) >= 0 && r.nextInt (n) < n);
-
-                n = r.nextInt (0x7ffffffe) + 1;
-                expect (r.nextInt (n) >= 0 && r.nextInt (n) < n);
-            }
+            n = r.nextInt (0x7ffffffe) + 1;
+            expect (r.nextInt (n) >= 0 && r.nextInt (n) < n);
         }
     }
 };

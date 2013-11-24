@@ -115,17 +115,6 @@
   #else
     #define JUCE_BIG_ENDIAN 1
   #endif
-#endif
-
-#if JUCE_MAC
-
-  #if defined (__ppc__) || defined (__ppc64__)
-    #define JUCE_PPC 1
-  #elif defined (__arm__)
-    #define JUCE_ARM 1
-  #else
-    #define JUCE_INTEL 1
-  #endif
 
   #ifdef __LP64__
     #define JUCE_64BIT 1
@@ -133,14 +122,21 @@
     #define JUCE_32BIT 1
   #endif
 
-  #if MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_4
+  #if defined (__ppc__) || defined (__ppc64__)
+    #define JUCE_PPC 1
+  #elif defined (__arm__) || defined (__arm64__)
+    #define JUCE_ARM 1
+  #else
+    #define JUCE_INTEL 1
+  #endif
+
+  #if JUCE_MAC && MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_4
     #error "Building for OSX 10.3 is no longer supported!"
   #endif
 
-  #ifndef MAC_OS_X_VERSION_10_5
+  #if JUCE_MAC && ! defined (MAC_OS_X_VERSION_10_5)
     #error "To build with 10.4 compatibility, use a 10.5 or 10.6 SDK and set the deployment target to 10.4"
   #endif
-
 #endif
 
 //==============================================================================

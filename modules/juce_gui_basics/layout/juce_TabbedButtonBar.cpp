@@ -93,7 +93,26 @@ void TabBarButton::calcAreas (Rectangle<int>& extraComp, Rectangle<int>& textAre
     }
 
     if (extraComponent != nullptr)
+    {
         extraComp = lf.getTabButtonExtraComponentBounds (*this, textArea, *extraComponent);
+
+        const TabbedButtonBar::Orientation orientation = owner.getOrientation();
+
+        if (orientation == TabbedButtonBar::TabsAtLeft || orientation == TabbedButtonBar::TabsAtRight)
+        {
+            if (extraComp.getCentreY() > textArea.getCentreY())
+                textArea.setBottom (jmin (textArea.getBottom(), extraComp.getY()));
+            else
+                textArea.setTop (jmax (textArea.getY(), extraComp.getBottom()));
+        }
+        else
+        {
+            if (extraComp.getCentreX() > textArea.getCentreX())
+                textArea.setRight (jmin (textArea.getRight(), extraComp.getX()));
+            else
+                textArea.setLeft (jmax (textArea.getX(), extraComp.getRight()));
+        }
+    }
 }
 
 Rectangle<int> TabBarButton::getTextArea() const
@@ -151,8 +170,7 @@ class TabbedButtonBar::BehindFrontTabComp  : public Component,
                                              public ButtonListener // (can't use Button::Listener due to idiotic VC2005 bug)
 {
 public:
-    BehindFrontTabComp (TabbedButtonBar& owner_)
-        : owner (owner_)
+    BehindFrontTabComp (TabbedButtonBar& tb)  : owner (tb)
     {
         setInterceptsMouseClicks (false, false);
     }
@@ -281,12 +299,12 @@ void TabbedButtonBar::removeTab (const int tabIndex)
     resized();
 }
 
-void TabbedButtonBar::moveTab (const int currentIndex, const int newIndex)
+void TabbedButtonBar::moveTab (const int currentIndex, const int newIndex, const bool animate)
 {
     TabInfo* const currentTab = tabs [currentTabIndex];
     tabs.move (currentIndex, newIndex);
     currentTabIndex = tabs.indexOf (currentTab);
-    resized();
+    updateTabPositions (animate);
 }
 
 int TabbedButtonBar::getNumTabs() const
@@ -336,8 +354,10 @@ void TabbedButtonBar::setCurrentTabIndex (int newIndex, const bool sendChangeMes
 
 TabBarButton* TabbedButtonBar::getTabButton (const int index) const
 {
-    TabInfo* const tab = tabs[index];
-    return tab == nullptr ? nullptr : static_cast <TabBarButton*> (tab->button);
+    if (TabInfo* tab = tabs[index])
+        return static_cast<TabBarButton*> (tab->button);
+
+    return nullptr;
 }
 
 int TabbedButtonBar::indexOfTabButton (const TabBarButton* button) const
@@ -349,13 +369,34 @@ int TabbedButtonBar::indexOfTabButton (const TabBarButton* button) const
     return -1;
 }
 
+Rectangle<int> TabbedButtonBar::getTargetBounds (TabBarButton* button) const
+{
+    if (button == nullptr || indexOfTabButton (button) == -1)
+        return Rectangle<int>();
+
+    ComponentAnimator& animator = Desktop::getInstance().getAnimator();
+
+    return animator.isAnimating (button) ? animator.getComponentDestination (button) : button->getBounds();
+}
+
 void TabbedButtonBar::lookAndFeelChanged()
 {
     extraTabsButton = nullptr;
     resized();
 }
 
+void TabbedButtonBar::paint (Graphics& g)
+{
+    getLookAndFeel().drawTabbedButtonBarBackground (*this, g);
+}
+
 void TabbedButtonBar::resized()
+{
+    updateTabPositions (false);
+}
+
+//==============================================================================
+void TabbedButtonBar::updateTabPositions (bool animate)
 {
     LookAndFeel& lf = getLookAndFeel();
 
@@ -437,6 +478,7 @@ void TabbedButtonBar::resized()
     int pos = 0;
 
     TabBarButton* frontTab = nullptr;
+    ComponentAnimator& animator = Desktop::getInstance().getAnimator();
 
     for (int i = 0; i < tabs.size(); ++i)
     {
@@ -446,10 +488,18 @@ void TabbedButtonBar::resized()
 
             if (i < numVisibleButtons)
             {
-                if (isVertical())
-                    tb->setBounds (0, pos, getWidth(), bestLength);
+                const Rectangle<int> newBounds (isVertical() ? Rectangle<int> (0, pos, getWidth(), bestLength)
+                                                             : Rectangle<int> (pos, 0, bestLength, getHeight()));
+
+                if (animate)
+                {
+                    animator.animateComponent (tb, newBounds, 1.0f, 200, false, 3.0, 0.0);
+                }
                 else
-                    tb->setBounds (pos, 0, bestLength, getHeight());
+                {
+                    animator.cancelAnimation (tb, false);
+                    tb->setBounds (newBounds);
+                }
 
                 tb->toBack();
 
@@ -479,8 +529,10 @@ void TabbedButtonBar::resized()
 //==============================================================================
 Colour TabbedButtonBar::getTabBackgroundColour (const int tabIndex)
 {
-    TabInfo* const tab = tabs [tabIndex];
-    return tab == nullptr ? Colours::white : tab->colour;
+    if (TabInfo* tab = tabs [tabIndex])
+        return tab->colour;
+
+    return Colours::transparentBlack;
 }
 
 void TabbedButtonBar::setTabBackgroundColour (const int tabIndex, Colour newColour)

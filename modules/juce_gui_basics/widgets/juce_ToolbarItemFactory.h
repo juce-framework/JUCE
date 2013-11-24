@@ -25,8 +25,6 @@
 #ifndef JUCE_TOOLBARITEMFACTORY_H_INCLUDED
 #define JUCE_TOOLBARITEMFACTORY_H_INCLUDED
 
-#include "juce_ToolbarItemComponent.h"
-
 
 //==============================================================================
 /**

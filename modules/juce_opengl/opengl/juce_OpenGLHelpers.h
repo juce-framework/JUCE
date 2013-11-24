@@ -25,9 +25,6 @@
 #ifndef JUCE_OPENGLHELPERS_H_INCLUDED
 #define JUCE_OPENGLHELPERS_H_INCLUDED
 
-class OpenGLTexture;
-class OpenGLFrameBuffer;
-
 
 //==============================================================================
 /**

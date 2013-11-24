@@ -25,12 +25,6 @@
 #ifndef JUCE_FILEBROWSERCOMPONENT_H_INCLUDED
 #define JUCE_FILEBROWSERCOMPONENT_H_INCLUDED
 
-#include "juce_DirectoryContentsDisplayComponent.h"
-#include "juce_FilePreviewComponent.h"
-#include "../widgets/juce_TextEditor.h"
-#include "../widgets/juce_ComboBox.h"
-#include "../buttons/juce_DrawableButton.h"
-
 
 //==============================================================================
 /**
@@ -182,6 +176,42 @@ public:
         @see getRoots()
     */
     static void getDefaultRoots (StringArray& rootNames, StringArray& rootPaths);
+
+    //==============================================================================
+    /** This abstract base class is implemented by LookAndFeel classes to provide
+        various file-browser layout and drawing methods.
+    */
+    struct JUCE_API  LookAndFeelMethods
+    {
+        virtual ~LookAndFeelMethods() {}
+
+        // These return a pointer to an internally cached drawable - make sure you don't keep
+        // a copy of this pointer anywhere, as it may become invalid in the future.
+        virtual const Drawable* getDefaultFolderImage() = 0;
+        virtual const Drawable* getDefaultDocumentFileImage() = 0;
+
+        virtual AttributedString createFileChooserHeaderText (const String& title,
+                                                              const String& instructions) = 0;
+
+        virtual void drawFileBrowserRow (Graphics&, int width, int height,
+                                         const String& filename,
+                                         Image* optionalIcon,
+                                         const String& fileSizeDescription,
+                                         const String& fileTimeDescription,
+                                         bool isDirectory,
+                                         bool isItemSelected,
+                                         int itemIndex,
+                                         DirectoryContentsDisplayComponent&) = 0;
+
+        virtual Button* createFileBrowserGoUpButton() = 0;
+
+        virtual void layoutFileBrowserComponent (FileBrowserComponent& browserComp,
+                                                 DirectoryContentsDisplayComponent* fileListComponent,
+                                                 FilePreviewComponent* previewComp,
+                                                 ComboBox* currentPathBox,
+                                                 TextEditor* filenameBox,
+                                                 Button* goUpButton) = 0;
+    };
 
     //==============================================================================
     /** @internal */

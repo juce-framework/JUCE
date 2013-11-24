@@ -76,7 +76,8 @@ struct TranslationHelpers
                 if (c == '"')
                 {
                     out << String (start, p);
-                    parseStringLiteral (++p, out);
+                    ++p;
+                    parseStringLiteral (p, out);
                     return;
                 }
 
@@ -169,16 +170,12 @@ struct TranslationHelpers
     {
         scanFilesForTranslations (strings, project.getMainGroup());
 
-        const File modulesFolder (ModuleList::getDefaultModulesFolder (&project));
-
         OwnedArray<LibraryModule> modules;
-        ModuleList moduleList;
-        moduleList.rescan (modulesFolder);
-        project.createRequiredModules (moduleList, modules);
+        project.getModules().createRequiredModules (modules);
 
         for (int j = 0; j < modules.size(); ++j)
         {
-            const File localFolder (modules.getUnchecked(j)->getLocalFolderFor (project));
+            const File localFolder (modules.getUnchecked(j)->getFolder());
 
             Array<File> files;
             modules.getUnchecked(j)->findBrowseableFiles (localFolder, files);

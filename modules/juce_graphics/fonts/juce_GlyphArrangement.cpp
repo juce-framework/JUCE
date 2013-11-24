@@ -262,7 +262,7 @@ void GlyphArrangement::addJustifiedText (const Font& font,
                                          const String& text,
                                          float x, float y,
                                          const float maxLineWidth,
-                                         const Justification& horizontalLayout)
+                                         Justification horizontalLayout)
 {
     int lineStartIndex = glyphs.size();
     addLineOfText (font, text, x, y);
@@ -344,7 +344,7 @@ void GlyphArrangement::addFittedText (const Font& f,
                                       const String& text,
                                       const float x, const float y,
                                       const float width, const float height,
-                                      const Justification& layout,
+                                      Justification layout,
                                       int maximumLines,
                                       const float minimumHorizontalScale)
 {
@@ -541,7 +541,7 @@ void GlyphArrangement::moveRangeOfGlyphs (int startIndex, int num, const float d
 }
 
 int GlyphArrangement::fitLineIntoSpace (int start, int numGlyphs, float x, float y, float w, float h, const Font& font,
-                                        const Justification& justification, float minimumHorizontalScale)
+                                        Justification justification, float minimumHorizontalScale)
 {
     int numDeleted = 0;
     const float lineStartX = glyphs.getReference (start).getLeft();
@@ -611,7 +611,7 @@ Rectangle<float> GlyphArrangement::getBoundingBox (int startIndex, int num, cons
 
 void GlyphArrangement::justifyGlyphs (const int startIndex, const int num,
                                       const float x, const float y, const float width, const float height,
-                                      const Justification& justification)
+                                      Justification justification)
 {
     jassert (num >= 0 && startIndex >= 0);
 

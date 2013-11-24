@@ -25,9 +25,6 @@
 #ifndef JUCE_AUDIOPLUGINFORMAT_H_INCLUDED
 #define JUCE_AUDIOPLUGINFORMAT_H_INCLUDED
 
-#include "../processors/juce_AudioPluginInstance.h"
-class PluginDescription;
-
 
 //==============================================================================
 /**
@@ -63,7 +60,9 @@ public:
     /** Tries to recreate a type from a previously generated PluginDescription.
         @see PluginDescription::createInstance
     */
-    virtual AudioPluginInstance* createInstanceFromDescription (const PluginDescription& desc) = 0;
+    virtual AudioPluginInstance* createInstanceFromDescription (const PluginDescription& desc,
+                                                                double initialSampleRate,
+                                                                int initialBufferSize) = 0;
 
     /** Should do a quick check to see if this file or directory might be a plugin of
         this format.

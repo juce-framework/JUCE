@@ -25,8 +25,8 @@
 #ifndef JUCE_CODEEDITORCOMPONENT_H_INCLUDED
 #define JUCE_CODEEDITORCOMPONENT_H_INCLUDED
 
-#include "juce_CodeDocument.h"
 class CodeTokeniser;
+
 
 //==============================================================================
 /**
@@ -363,12 +363,12 @@ private:
 
     class Pimpl;
     friend class Pimpl;
-    friend class ScopedPointer<Pimpl>;
+    friend struct ContainerDeletePolicy<Pimpl>;
     ScopedPointer<Pimpl> pimpl;
 
     class GutterComponent;
     friend class GutterComponent;
-    friend class ScopedPointer<GutterComponent>;
+    friend struct ContainerDeletePolicy<GutterComponent>;
     ScopedPointer<GutterComponent> gutter;
 
     enum DragType
@@ -408,7 +408,7 @@ private:
     void cut();
     void indentSelectedLines (int spacesToAdd);
     bool skipBackwardsToPreviousTab();
-    bool performCommand (int);
+    bool performCommand (CommandID);
 
     int indexToColumn (int line, int index) const noexcept;
     int columnToIndex (int line, int column) const noexcept;

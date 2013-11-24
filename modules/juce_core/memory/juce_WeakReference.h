@@ -29,8 +29,6 @@
 #ifndef JUCE_WEAKREFERENCE_H_INCLUDED
 #define JUCE_WEAKREFERENCE_H_INCLUDED
 
-#include "juce_ReferenceCountedObject.h"
-
 
 //==============================================================================
 /**

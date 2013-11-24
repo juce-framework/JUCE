@@ -25,9 +25,6 @@
 #ifndef JUCE_STRETCHABLELAYOUTRESIZERBAR_H_INCLUDED
 #define JUCE_STRETCHABLELAYOUTRESIZERBAR_H_INCLUDED
 
-#include "../components/juce_Component.h"
-#include "juce_StretchableLayoutManager.h"
-
 
 //==============================================================================
 /**
@@ -74,6 +71,16 @@ public:
         layout, but it can be overridden for more specific needs.
     */
     virtual void hasBeenMoved();
+
+    //==============================================================================
+    /** This abstract base class is implemented by LookAndFeel classes. */
+    struct JUCE_API  LookAndFeelMethods
+    {
+        virtual ~LookAndFeelMethods() {}
+
+        virtual void drawStretchableLayoutResizerBar (Graphics&, int w, int h,
+                                                      bool isVerticalBar, bool isMouseOver, bool isMouseDragging) = 0;
+    };
 
     //==============================================================================
     /** @internal */

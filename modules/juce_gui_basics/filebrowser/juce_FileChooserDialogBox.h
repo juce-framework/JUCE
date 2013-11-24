@@ -25,11 +25,6 @@
 #ifndef JUCE_FILECHOOSERDIALOGBOX_H_INCLUDED
 #define JUCE_FILECHOOSERDIALOGBOX_H_INCLUDED
 
-#include "juce_FileBrowserComponent.h"
-#include "../windows/juce_ResizableWindow.h"
-#include "../buttons/juce_TextButton.h"
-#include "../windows/juce_AlertWindow.h"
-
 
 //==============================================================================
 /**

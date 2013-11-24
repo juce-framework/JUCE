@@ -39,7 +39,7 @@ public:
         addAndMakeVisible (colourPropEditor);
     }
 
-    virtual void setColour (const Colour& newColour) = 0;
+    virtual void setColour (Colour newColour) = 0;
     virtual Colour getColour() const = 0;
     virtual void resetToDefault() = 0;
 
@@ -73,7 +73,7 @@ public:
                               Justification::centred, 1);
         }
 
-        virtual void setColour (const Colour& newColour) = 0;
+        virtual void setColour (Colour newColour) = 0;
         virtual void resetToDefault() = 0;
         virtual Colour getColour() const = 0;
 
@@ -155,17 +155,17 @@ public:
                 {
                 }
 
-                int getNumSwatches() const
+                int getNumSwatches() const override
                 {
                     return getAppSettings().swatchColours.size();
                 }
 
-                Colour getSwatchColour (int index) const
+                Colour getSwatchColour (int index) const override
                 {
                     return getAppSettings().swatchColours [index];
                 }
 
-                void setSwatchColour (int index, const Colour& newColour) const
+                void setSwatchColour (int index, const Colour& newColour) const override
                 {
                     getAppSettings().swatchColours.set (index, newColour);
                 }
@@ -192,12 +192,12 @@ public:
               owner (owner_)
         {}
 
-        void setColour (const Colour& newColour)
+        void setColour (Colour newColour) override
         {
             owner->setColour (newColour);
         }
 
-        Colour getColour() const
+        Colour getColour() const override
         {
             return owner->getColour();
         }

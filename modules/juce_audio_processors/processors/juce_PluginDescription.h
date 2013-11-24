@@ -28,9 +28,9 @@
 
 //==============================================================================
 /**
-    A small class to represent some facts about a particular type of plugin.
+    A small class to represent some facts about a particular type of plug-in.
 
-    This class is for storing and managing the details about a plugin without
+    This class is for storing and managing the details about a plug-in without
     actually having to load an instance of it.
 
     A KnownPluginList contains a list of PluginDescription objects.
@@ -47,21 +47,19 @@ public:
     ~PluginDescription();
 
     //==============================================================================
-    /** The name of the plugin. */
+    /** The name of the plug-in. */
     String name;
 
-    /** A more descriptive name for the plugin.
-        This may be the same as the 'name' field, but some plugins may provide an
+    /** A more descriptive name for the plug-in.
+        This may be the same as the 'name' field, but some plug-ins may provide an
         alternative name.
     */
     String descriptiveName;
 
-    /** The plugin format, e.g. "VST", "AudioUnit", etc.
-    */
+    /** The plug-in format, e.g. "VST", "AudioUnit", etc. */
     String pluginFormatName;
 
-    /** A category, such as "Dynamics", "Reverbs", etc.
-    */
+    /** A category, such as "Dynamics", "Reverbs", etc. */
     String category;
 
     /** The manufacturer. */
@@ -70,20 +68,20 @@ public:
     /** The version. This string doesn't have any particular format. */
     String version;
 
-    /** Either the file containing the plugin module, or some other unique way
+    /** Either the file containing the plug-in module, or some other unique way
         of identifying it.
 
         E.g. for an AU, this would be an ID string that the component manager
-        could use to retrieve the plugin. For a VST, it's the file path.
+        could use to retrieve the plug-in. For a VST, it's the file path.
     */
     String fileOrIdentifier;
 
-    /** The last time the plugin file was changed.
-        This is handy when scanning for new or changed plugins.
+    /** The last time the plug-in file was changed.
+        This is handy when scanning for new or changed plug-ins.
     */
     Time lastFileModTime;
 
-    /** A unique ID for the plugin.
+    /** A unique ID for the plug-in.
 
         Note that this might not be unique between formats, e.g. a VST and some
         other format might actually have the same id.
@@ -92,7 +90,7 @@ public:
     */
     int uid;
 
-    /** True if the plugin identifies itself as a synthesiser. */
+    /** True if the plug-in identifies itself as a synthesiser. */
     bool isInstrument;
 
     /** The number of inputs. */
@@ -101,10 +99,13 @@ public:
     /** The number of outputs. */
     int numOutputChannels;
 
-    /** Returns true if the two descriptions refer the the same plugin.
+    /** True if the plug-in is part of a multi-type container, e.g. a VST Shell. */
+    bool hasSharedContainer;
+
+    /** Returns true if the two descriptions refer the the same plug-in.
 
         This isn't quite as simple as them just having the same file (because of
-        shell plugins).
+        shell plug-ins).
     */
     bool isDuplicateOf (const PluginDescription& other) const;
 
@@ -113,7 +114,7 @@ public:
         plugin again.
 
         This contains less info than the XML encoding, and is independent of the
-        plugin's file location, so can be used to store a plugin ID for use
+        plug-in's file location, so can be used to store a plug-in ID for use
         across different machines.
     */
     String createIdentifierString() const;
@@ -128,7 +129,7 @@ public:
     /** Reloads the info in this structure from an XML record that was previously
         saved with createXML().
 
-        Returns true if the XML was a valid plugin description.
+        Returns true if the XML was a valid plug-in description.
     */
     bool loadFromXml (const XmlElement& xml);
 

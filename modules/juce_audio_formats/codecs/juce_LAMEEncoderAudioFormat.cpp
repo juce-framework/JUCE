@@ -49,7 +49,7 @@ public:
 
             if (cbrBitrate == 0)
             {
-                args.add ("-vbr-new");
+                args.add ("--vbr-new");
                 args.add ("-V");
                 args.add (String (vbrLevel));
             }
@@ -103,6 +103,22 @@ private:
     ScopedPointer<AudioFormatWriter> writer;
     StringArray args;
 
+    bool runLameChildProcess (const TemporaryFile& tempMP3, const StringArray& args) const
+    {
+        ChildProcess cp;
+
+        if (cp.start (args))
+        {
+            const String childOutput (cp.readAllProcessOutput());
+            DBG (childOutput); (void) childOutput;
+
+            cp.waitForProcessToFinish (10000);
+            return tempMP3.getFile().getSize() > 0;
+        }
+
+        return false;
+    }
+
     bool convertToMP3() const
     {
         TemporaryFile tempMP3 (".mp3");
@@ -111,24 +127,16 @@ private:
         args2.add (tempWav.getFile().getFullPathName());
         args2.add (tempMP3.getFile().getFullPathName());
 
-        ChildProcess cp;
+        DBG (args2.joinIntoString (" "));
 
-        DBG (args2.joinIntoString(" "));
-
-        if (cp.start (args2))
+        if (runLameChildProcess (tempMP3, args2))
         {
-            String childOutput (cp.readAllProcessOutput());
-            DBG (childOutput);
+            FileInputStream fis (tempMP3.getFile());
 
-            if (tempMP3.getFile().getSize() > 0)
+            if (fis.openedOk() && output->writeFromInputStream (fis, -1) > 0)
             {
-                FileInputStream fis (tempMP3.getFile());
-
-                if (fis.openedOk() && output->writeFromInputStream (fis, -1) > 0)
-                {
-                    output->flush();
-                    return true;
-                }
+                output->flush();
+                return true;
             }
         }
 
@@ -139,12 +147,9 @@ private:
 };
 
 //==============================================================================
-static const char* const lameFormatName = "MP3 file";
-static const char* const lameExtensions[] = { ".mp3", nullptr };
-
 LAMEEncoderAudioFormat::LAMEEncoderAudioFormat (const File& lameApplication)
-   : AudioFormat (TRANS (lameFormatName), StringArray (lameExtensions)),
-     lameApp (lameApplication)
+    : AudioFormat ("MP3 file", ".mp3"),
+      lameApp (lameApplication)
 {
 }
 
@@ -175,11 +180,9 @@ bool LAMEEncoderAudioFormat::isCompressed()     { return true; }
 
 StringArray LAMEEncoderAudioFormat::getQualityOptions()
 {
-    const char* vbrOptions[] = { "VBR quality 0 (best)", "VBR quality 1", "VBR quality 2", "VBR quality 3",
-                                 "VBR quality 4 (normal)", "VBR quality 5", "VBR quality 6", "VBR quality 7", "VBR quality 8",
-                                 "VBR quality 9 (smallest)",
-                                 nullptr };
-
+    static const char* vbrOptions[] = { "VBR quality 0 (best)", "VBR quality 1", "VBR quality 2", "VBR quality 3",
+                                        "VBR quality 4 (normal)", "VBR quality 5", "VBR quality 6", "VBR quality 7",
+                                        "VBR quality 8", "VBR quality 9 (smallest)", nullptr };
     StringArray opts (vbrOptions);
 
     const int cbrRates[] = { 32, 40, 48, 56, 64, 80, 96, 112, 128, 160, 192, 224, 256, 320 };

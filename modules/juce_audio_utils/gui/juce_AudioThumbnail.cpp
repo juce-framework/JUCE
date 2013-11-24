@@ -148,7 +148,7 @@ public:
         reader = nullptr;
     }
 
-    int useTimeSlice()
+    int useTimeSlice() override
     {
         if (isFullyLoaded())
         {
@@ -390,16 +390,25 @@ public:
 
                 const MinMaxValue* cacheData = getData (channelNum, clip.getX() - area.getX());
 
-                int x = clip.getX();
+                RectangleList<float> waveform;
+
+                float x = (float) clip.getX();
+
                 for (int w = clip.getWidth(); --w >= 0;)
                 {
                     if (cacheData->isNonZero())
-                        g.drawVerticalLine (x, jmax (midY - cacheData->getMaxValue() * vscale - 0.3f, topY),
-                                               jmin (midY - cacheData->getMinValue() * vscale + 0.3f, bottomY));
+                    {
+                        const float top    = jmax (midY - cacheData->getMaxValue() * vscale - 0.3f, topY);
+                        const float bottom = jmin (midY - cacheData->getMinValue() * vscale + 0.3f, bottomY);
 
-                    ++x;
+                        waveform.addWithoutMerging (Rectangle<float> (x, top, 1.0f, bottom - top));
+                    }
+
+                    x += 1.0f;
                     ++cacheData;
                 }
+
+                g.fillRectList (waveform);
             }
         }
     }

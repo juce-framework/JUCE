@@ -25,12 +25,6 @@
 #ifndef JUCE_EDGETABLE_H_INCLUDED
 #define JUCE_EDGETABLE_H_INCLUDED
 
-#include "../geometry/juce_AffineTransform.h"
-#include "../geometry/juce_Rectangle.h"
-#include "../geometry/juce_RectangleList.h"
-class Path;
-class Image;
-
 
 //==============================================================================
 /**
@@ -61,6 +55,9 @@ public:
     /** Creates an edge table containing a rectangle list. */
     explicit EdgeTable (const RectangleList<int>& rectanglesToAdd);
 
+    /** Creates an edge table containing a rectangle list. */
+    explicit EdgeTable (const RectangleList<float>& rectanglesToAdd);
+
     /** Creates an edge table containing a rectangle. */
     explicit EdgeTable (const Rectangle<float>& rectangleToAdd);
 
@@ -81,6 +78,9 @@ public:
     bool isEmpty() noexcept;
     const Rectangle<int>& getMaximumBounds() const noexcept      { return bounds; }
     void translate (float dx, int dy) noexcept;
+
+    /** Scales all the alpha-levels in the table by the given multiplier. */
+    void multiplyLevels (float factor);
 
     /** Reduces the amount of space the table has allocated.
 
@@ -191,12 +191,22 @@ public:
 private:
     //==============================================================================
     // table line format: number of points; point0 x, point0 levelDelta, point1 x, point1 levelDelta, etc
+    struct LineItem
+    {
+        int x, level;
+
+        bool operator< (const LineItem& other) const noexcept   { return x < other.x; }
+    };
+
     HeapBlock<int> table;
     Rectangle<int> bounds;
     int maxEdgesPerLine, lineStrideElements;
-    bool needToCheckEmptinesss;
+    bool needToCheckEmptiness;
 
+    void allocate();
+    void clearLineSizes() noexcept;
     void addEdgePoint (int x, int y, int winding);
+    void addEdgePointPair (int x1, int x2, int y, int winding);
     void remapTableForNumEdges (int newNumEdgesPerLine);
     void intersectWithEdgeTableLine (int y, const int* otherLine);
     void clipEdgeTableLineToRange (int* line, int x1, int x2) noexcept;

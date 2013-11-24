@@ -64,7 +64,8 @@ JuceDemoPluginAudioProcessorEditor::~JuceDemoPluginAudioProcessorEditor()
 //==============================================================================
 void JuceDemoPluginAudioProcessorEditor::paint (Graphics& g)
 {
-    g.setGradientFill (ColourGradient (Colours::white, 0, 0, Colours::grey, 0, (float) getHeight(), false));
+    g.setGradientFill (ColourGradient (Colours::white, 0, 0,
+                                       Colours::grey, 0, (float) getHeight(), false));
     g.fillAll();
 }
 

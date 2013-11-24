@@ -25,14 +25,6 @@
 #ifndef JUCE_PATH_H_INCLUDED
 #define JUCE_PATH_H_INCLUDED
 
-#include "juce_AffineTransform.h"
-#include "juce_Line.h"
-#include "juce_Rectangle.h"
-#include "../placement/juce_Justification.h"
-class Image;
-class InputStream;
-class OutputStream;
-
 
 //==============================================================================
 /**
@@ -748,7 +740,7 @@ public:
     /** Restores this path from a string that was created with the toString() method.
         @see toString()
     */
-    void restoreFromString (const String& stringVersion);
+    void restoreFromString (StringRef stringVersion);
 
 
 private:

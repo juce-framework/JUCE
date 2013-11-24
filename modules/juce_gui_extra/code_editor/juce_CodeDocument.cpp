@@ -25,20 +25,21 @@
 class CodeDocumentLine
 {
 public:
-    CodeDocumentLine (const String::CharPointerType l,
+    CodeDocumentLine (const String::CharPointerType startOfLine,
+                      const String::CharPointerType endOfLine,
                       const int lineLen,
                       const int numNewLineChars,
                       const int startInFile)
-        : line (l, (size_t) lineLen),
+        : line (startOfLine, endOfLine),
           lineStartInFile (startInFile),
           lineLength (lineLen),
           lineLengthWithoutNewLines (lineLen - numNewLineChars)
     {
     }
 
-    static void createLines (Array <CodeDocumentLine*>& newLines, const String& text)
+    static void createLines (Array<CodeDocumentLine*>& newLines, StringRef text)
     {
-        String::CharPointerType t (text.getCharPointer());
+        String::CharPointerType t (text.text);
         int charNumInFile = 0;
         bool finished = false;
 
@@ -84,7 +85,7 @@ public:
                 }
             }
 
-            newLines.add (new CodeDocumentLine (startOfLine, lineLength,
+            newLines.add (new CodeDocumentLine (startOfLine, t, lineLength,
                                                 numNewLineChars, startOfLineInFile));
         }
 
@@ -522,7 +523,7 @@ String CodeDocument::getTextBetween (const Position& start, const Position& end)
         }
     }
 
-    return mo.toString();
+    return mo.toUTF8();
 }
 
 int CodeDocument::getNumCharacters() const noexcept
@@ -791,7 +792,8 @@ void CodeDocument::checkLastLineStatus()
     if (lastLine != nullptr && lastLine->endsWithLineBreak())
     {
         // check that there's an empty line at the end if the preceding one ends in a newline..
-        lines.add (new CodeDocumentLine (String::empty.getCharPointer(), 0, 0, lastLine->lineStartInFile + lastLine->lineLength));
+        lines.add (new CodeDocumentLine (StringRef(), StringRef(), 0, 0,
+                                         lastLine->lineStartInFile + lastLine->lineLength));
     }
 }
 

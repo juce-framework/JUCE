@@ -39,65 +39,71 @@ class JUCE_API  ByteOrder
 public:
     //==============================================================================
     /** Swaps the upper and lower bytes of a 16-bit integer. */
-    static uint16 swap (uint16 value);
+    static uint16 swap (uint16 value) noexcept;
 
     /** Reverses the order of the 4 bytes in a 32-bit integer. */
-    static uint32 swap (uint32 value);
+    static uint32 swap (uint32 value) noexcept;
 
     /** Reverses the order of the 8 bytes in a 64-bit integer. */
-    static uint64 swap (uint64 value);
+    static uint64 swap (uint64 value) noexcept;
 
     //==============================================================================
     /** Swaps the byte order of a 16-bit int if the CPU is big-endian */
-    static uint16 swapIfBigEndian (uint16 value);
+    static uint16 swapIfBigEndian (uint16 value) noexcept;
 
     /** Swaps the byte order of a 32-bit int if the CPU is big-endian */
-    static uint32 swapIfBigEndian (uint32 value);
+    static uint32 swapIfBigEndian (uint32 value) noexcept;
 
     /** Swaps the byte order of a 64-bit int if the CPU is big-endian */
-    static uint64 swapIfBigEndian (uint64 value);
+    static uint64 swapIfBigEndian (uint64 value) noexcept;
 
     /** Swaps the byte order of a 16-bit int if the CPU is little-endian */
-    static uint16 swapIfLittleEndian (uint16 value);
+    static uint16 swapIfLittleEndian (uint16 value) noexcept;
 
     /** Swaps the byte order of a 32-bit int if the CPU is little-endian */
-    static uint32 swapIfLittleEndian (uint32 value);
+    static uint32 swapIfLittleEndian (uint32 value) noexcept;
 
     /** Swaps the byte order of a 64-bit int if the CPU is little-endian */
-    static uint64 swapIfLittleEndian (uint64 value);
+    static uint64 swapIfLittleEndian (uint64 value) noexcept;
 
     //==============================================================================
     /** Turns 4 bytes into a little-endian integer. */
-    static uint32 littleEndianInt (const void* bytes);
+    static uint32 littleEndianInt (const void* bytes) noexcept;
+
+    /** Turns 8 bytes into a little-endian integer. */
+    static uint64 littleEndianInt64 (const void* bytes) noexcept;
 
     /** Turns 2 bytes into a little-endian integer. */
-    static uint16 littleEndianShort (const void* bytes);
+    static uint16 littleEndianShort (const void* bytes) noexcept;
 
     /** Turns 4 bytes into a big-endian integer. */
-    static uint32 bigEndianInt (const void* bytes);
+    static uint32 bigEndianInt (const void* bytes) noexcept;
+
+    /** Turns 8 bytes into a big-endian integer. */
+    static uint64 bigEndianInt64 (const void* bytes) noexcept;
 
     /** Turns 2 bytes into a big-endian integer. */
-    static uint16 bigEndianShort (const void* bytes);
+    static uint16 bigEndianShort (const void* bytes) noexcept;
 
     //==============================================================================
     /** Converts 3 little-endian bytes into a signed 24-bit value (which is sign-extended to 32 bits). */
-    static int littleEndian24Bit (const char* bytes);
+    static int littleEndian24Bit (const char* bytes) noexcept;
 
     /** Converts 3 big-endian bytes into a signed 24-bit value (which is sign-extended to 32 bits). */
-    static int bigEndian24Bit (const char* bytes);
+    static int bigEndian24Bit (const char* bytes) noexcept;
 
     /** Copies a 24-bit number to 3 little-endian bytes. */
-    static void littleEndian24BitToChars (int value, char* destBytes);
+    static void littleEndian24BitToChars (int value, char* destBytes) noexcept;
 
     /** Copies a 24-bit number to 3 big-endian bytes. */
-    static void bigEndian24BitToChars (int value, char* destBytes);
+    static void bigEndian24BitToChars (int value, char* destBytes) noexcept;
 
     //==============================================================================
     /** Returns true if the current CPU is big-endian. */
-    static bool isBigEndian();
+    static bool isBigEndian() noexcept;
 
 private:
-    ByteOrder();
+    ByteOrder() JUCE_DELETED_FUNCTION;
 
     JUCE_DECLARE_NON_COPYABLE (ByteOrder)
 };
@@ -108,7 +114,7 @@ private:
  #pragma intrinsic (_byteswap_ulong)
 #endif
 
-inline uint16 ByteOrder::swap (uint16 n)
+inline uint16 ByteOrder::swap (uint16 n) noexcept
 {
    #if JUCE_USE_INTRINSICSxxx // agh - the MS compiler has an internal error when you try to use this intrinsic!
     return static_cast <uint16> (_byteswap_ushort (n));
@@ -117,7 +123,7 @@ inline uint16 ByteOrder::swap (uint16 n)
    #endif
 }
 
-inline uint32 ByteOrder::swap (uint32 n)
+inline uint32 ByteOrder::swap (uint32 n) noexcept
 {
    #if JUCE_MAC || JUCE_IOS
     return OSSwapInt32 (n);
@@ -140,7 +146,7 @@ inline uint32 ByteOrder::swap (uint32 n)
    #endif
 }
 
-inline uint64 ByteOrder::swap (uint64 value)
+inline uint64 ByteOrder::swap (uint64 value) noexcept
 {
    #if JUCE_MAC || JUCE_IOS
     return OSSwapInt64 (value);
@@ -152,35 +158,39 @@ inline uint64 ByteOrder::swap (uint64 value)
 }
 
 #if JUCE_LITTLE_ENDIAN
- inline uint16 ByteOrder::swapIfBigEndian (const uint16 v)                                  { return v; }
- inline uint32 ByteOrder::swapIfBigEndian (const uint32 v)                                  { return v; }
- inline uint64 ByteOrder::swapIfBigEndian (const uint64 v)                                  { return v; }
- inline uint16 ByteOrder::swapIfLittleEndian (const uint16 v)                               { return swap (v); }
- inline uint32 ByteOrder::swapIfLittleEndian (const uint32 v)                               { return swap (v); }
- inline uint64 ByteOrder::swapIfLittleEndian (const uint64 v)                               { return swap (v); }
- inline uint32 ByteOrder::littleEndianInt (const void* const bytes)                         { return *static_cast <const uint32*> (bytes); }
- inline uint16 ByteOrder::littleEndianShort (const void* const bytes)                       { return *static_cast <const uint16*> (bytes); }
- inline uint32 ByteOrder::bigEndianInt (const void* const bytes)                            { return swap (*static_cast <const uint32*> (bytes)); }
- inline uint16 ByteOrder::bigEndianShort (const void* const bytes)                          { return swap (*static_cast <const uint16*> (bytes)); }
- inline bool ByteOrder::isBigEndian()                                                       { return false; }
+ inline uint16 ByteOrder::swapIfBigEndian (const uint16 v) noexcept                                  { return v; }
+ inline uint32 ByteOrder::swapIfBigEndian (const uint32 v) noexcept                                  { return v; }
+ inline uint64 ByteOrder::swapIfBigEndian (const uint64 v) noexcept                                  { return v; }
+ inline uint16 ByteOrder::swapIfLittleEndian (const uint16 v) noexcept                               { return swap (v); }
+ inline uint32 ByteOrder::swapIfLittleEndian (const uint32 v) noexcept                               { return swap (v); }
+ inline uint64 ByteOrder::swapIfLittleEndian (const uint64 v) noexcept                               { return swap (v); }
+ inline uint32 ByteOrder::littleEndianInt (const void* const bytes) noexcept                         { return *static_cast <const uint32*> (bytes); }
+ inline uint64 ByteOrder::littleEndianInt64 (const void* const bytes) noexcept                       { return *static_cast <const uint64*> (bytes); }
+ inline uint16 ByteOrder::littleEndianShort (const void* const bytes) noexcept                       { return *static_cast <const uint16*> (bytes); }
+ inline uint32 ByteOrder::bigEndianInt (const void* const bytes) noexcept                            { return swap (*static_cast <const uint32*> (bytes)); }
+ inline uint64 ByteOrder::bigEndianInt64 (const void* const bytes) noexcept                          { return swap (*static_cast <const uint64*> (bytes)); }
+ inline uint16 ByteOrder::bigEndianShort (const void* const bytes) noexcept                          { return swap (*static_cast <const uint16*> (bytes)); }
+ inline bool ByteOrder::isBigEndian() noexcept                                                       { return false; }
 #else
- inline uint16 ByteOrder::swapIfBigEndian (const uint16 v)                                  { return swap (v); }
- inline uint32 ByteOrder::swapIfBigEndian (const uint32 v)                                  { return swap (v); }
- inline uint64 ByteOrder::swapIfBigEndian (const uint64 v)                                  { return swap (v); }
- inline uint16 ByteOrder::swapIfLittleEndian (const uint16 v)                               { return v; }
- inline uint32 ByteOrder::swapIfLittleEndian (const uint32 v)                               { return v; }
- inline uint64 ByteOrder::swapIfLittleEndian (const uint64 v)                               { return v; }
- inline uint32 ByteOrder::littleEndianInt (const void* const bytes)                         { return swap (*static_cast <const uint32*> (bytes)); }
- inline uint16 ByteOrder::littleEndianShort (const void* const bytes)                       { return swap (*static_cast <const uint16*> (bytes)); }
- inline uint32 ByteOrder::bigEndianInt (const void* const bytes)                            { return *static_cast <const uint32*> (bytes); }
- inline uint16 ByteOrder::bigEndianShort (const void* const bytes)                          { return *static_cast <const uint16*> (bytes); }
- inline bool ByteOrder::isBigEndian()                                                       { return true; }
+ inline uint16 ByteOrder::swapIfBigEndian (const uint16 v) noexcept                                  { return swap (v); }
+ inline uint32 ByteOrder::swapIfBigEndian (const uint32 v) noexcept                                  { return swap (v); }
+ inline uint64 ByteOrder::swapIfBigEndian (const uint64 v) noexcept                                  { return swap (v); }
+ inline uint16 ByteOrder::swapIfLittleEndian (const uint16 v) noexcept                               { return v; }
+ inline uint32 ByteOrder::swapIfLittleEndian (const uint32 v) noexcept                               { return v; }
+ inline uint64 ByteOrder::swapIfLittleEndian (const uint64 v) noexcept                               { return v; }
+ inline uint32 ByteOrder::littleEndianInt (const void* const bytes) noexcept                         { return swap (*static_cast <const uint32*> (bytes)); }
+ inline uint64 ByteOrder::littleEndianInt64 (const void* const bytes) noexcept                       { return swap (*static_cast <const uint64*> (bytes)); }
+ inline uint16 ByteOrder::littleEndianShort (const void* const bytes) noexcept                       { return swap (*static_cast <const uint16*> (bytes)); }
+ inline uint32 ByteOrder::bigEndianInt (const void* const bytes) noexcept                            { return *static_cast <const uint32*> (bytes); }
+ inline uint64 ByteOrder::bigEndianInt64 (const void* const bytes) noexcept                          { return *static_cast <const uint64*> (bytes); }
+ inline uint16 ByteOrder::bigEndianShort (const void* const bytes) noexcept                          { return *static_cast <const uint16*> (bytes); }
+ inline bool ByteOrder::isBigEndian() noexcept                                                       { return true; }
 #endif
 
-inline int  ByteOrder::littleEndian24Bit (const char* const bytes)                          { return (((int) bytes[2]) << 16) | (((int) (uint8) bytes[1]) << 8) | ((int) (uint8) bytes[0]); }
-inline int  ByteOrder::bigEndian24Bit (const char* const bytes)                             { return (((int) bytes[0]) << 16) | (((int) (uint8) bytes[1]) << 8) | ((int) (uint8) bytes[2]); }
-inline void ByteOrder::littleEndian24BitToChars (const int value, char* const destBytes)    { destBytes[0] = (char)(value & 0xff); destBytes[1] = (char)((value >> 8) & 0xff); destBytes[2] = (char)((value >> 16) & 0xff); }
-inline void ByteOrder::bigEndian24BitToChars (const int value, char* const destBytes)       { destBytes[0] = (char)((value >> 16) & 0xff); destBytes[1] = (char)((value >> 8) & 0xff); destBytes[2] = (char)(value & 0xff); }
+inline int  ByteOrder::littleEndian24Bit (const char* const bytes) noexcept                          { return (((int) bytes[2]) << 16) | (((int) (uint8) bytes[1]) << 8) | ((int) (uint8) bytes[0]); }
+inline int  ByteOrder::bigEndian24Bit (const char* const bytes) noexcept                             { return (((int) bytes[0]) << 16) | (((int) (uint8) bytes[1]) << 8) | ((int) (uint8) bytes[2]); }
+inline void ByteOrder::littleEndian24BitToChars (const int value, char* const destBytes) noexcept    { destBytes[0] = (char)(value & 0xff); destBytes[1] = (char)((value >> 8) & 0xff); destBytes[2] = (char)((value >> 16) & 0xff); }
+inline void ByteOrder::bigEndian24BitToChars (const int value, char* const destBytes) noexcept       { destBytes[0] = (char)((value >> 16) & 0xff); destBytes[1] = (char)((value >> 8) & 0xff); destBytes[2] = (char)(value & 0xff); }
 
 
 #endif   // JUCE_BYTEORDER_H_INCLUDED

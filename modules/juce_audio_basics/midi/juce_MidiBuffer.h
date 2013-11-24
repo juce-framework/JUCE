@@ -25,8 +25,6 @@
 #ifndef JUCE_MIDIBUFFER_H_INCLUDED
 #define JUCE_MIDIBUFFER_H_INCLUDED
 
-#include "juce_MidiMessage.h"
-
 
 //==============================================================================
 /**
@@ -53,10 +51,10 @@ public:
     explicit MidiBuffer (const MidiMessage& message) noexcept;
 
     /** Creates a copy of another MidiBuffer. */
-    MidiBuffer (const MidiBuffer& other) noexcept;
+    MidiBuffer (const MidiBuffer&) noexcept;
 
     /** Makes a copy of another MidiBuffer. */
-    MidiBuffer& operator= (const MidiBuffer& other) noexcept;
+    MidiBuffer& operator= (const MidiBuffer&) noexcept;
 
     /** Destructor */
     ~MidiBuffer();
@@ -73,7 +71,6 @@ public:
     void clear (int start, int numSamples);
 
     /** Returns true if the buffer is empty.
-
         To actually retrieve the events, use a MidiBuffer::Iterator object
     */
     bool isEmpty() const noexcept;
@@ -139,13 +136,11 @@ public:
                     int sampleDeltaToAdd);
 
     /** Returns the sample number of the first event in the buffer.
-
         If the buffer's empty, this will just return 0.
     */
     int getFirstEventTime() const noexcept;
 
     /** Returns the sample number of the last event in the buffer.
-
         If the buffer's empty, this will just return 0.
     */
     int getLastEventTime() const noexcept;
@@ -156,7 +151,7 @@ public:
         This is a quick operation, because no memory allocating or copying is done, it
         just swaps the internal state of the two buffers.
     */
-    void swapWith (MidiBuffer& other) noexcept;
+    void swapWith (MidiBuffer&) noexcept;
 
     /** Preallocates some memory for the buffer to use.
         This helps to avoid needing to reallocate space when the buffer has messages
@@ -178,7 +173,7 @@ public:
     public:
         //==============================================================================
         /** Creates an Iterator for this MidiBuffer. */
-        Iterator (const MidiBuffer& buffer) noexcept;
+        Iterator (const MidiBuffer&) noexcept;
 
         /** Destructor. */
         ~Iterator() noexcept;
@@ -224,15 +219,13 @@ public:
         JUCE_DECLARE_NON_COPYABLE (Iterator)
     };
 
+    /** The raw data holding this buffer.
+        Obviously access to this data is provided at your own risk. Its internal format could
+        change in future, so don't write code that relies on it!
+    */
+    Array<uint8> data;
+
 private:
-    //==============================================================================
-    friend class MidiBuffer::Iterator;
-    MemoryBlock data;
-    int bytesUsed;
-
-    uint8* getData() const noexcept;
-    uint8* findEventAfter (uint8*, int samplePosition) const noexcept;
-
     JUCE_LEAK_DETECTOR (MidiBuffer)
 };
 

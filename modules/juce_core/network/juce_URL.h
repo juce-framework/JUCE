@@ -29,11 +29,6 @@
 #ifndef JUCE_URL_H_INCLUDED
 #define JUCE_URL_H_INCLUDED
 
-#include "../text/juce_StringPairArray.h"
-#include "../files/juce_File.h"
-class InputStream;
-class XmlElement;
-
 
 //==============================================================================
 /**
@@ -235,7 +230,7 @@ public:
     /** Attempts to open a stream that can read from this URL.
 
         @param usePostCommand   if true, it will try to do use a http 'POST' to pass
-                                the paramters, otherwise it'll encode them into the
+                                the parameters, otherwise it'll encode them into the
                                 URL and do a 'GET'.
         @param progressCallback if this is non-zero, it lets you supply a callback function
                                 to keep track of the operation's progress. This can be useful
@@ -256,7 +251,7 @@ public:
     InputStream* createInputStream (bool usePostCommand,
                                     OpenStreamProgressCallback* progressCallback = nullptr,
                                     void* progressCallbackContext = nullptr,
-                                    const String& extraHeaders = String::empty,
+                                    String extraHeaders = String::empty,
                                     int connectionTimeOutMs = 0,
                                     StringPairArray* responseHeaders = nullptr) const;
 

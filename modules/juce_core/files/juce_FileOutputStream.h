@@ -29,9 +29,6 @@
 #ifndef JUCE_FILEOUTPUTSTREAM_H_INCLUDED
 #define JUCE_FILEOUTPUTSTREAM_H_INCLUDED
 
-#include "juce_File.h"
-#include "../streams/juce_OutputStream.h"
-
 
 //==============================================================================
 /**
@@ -57,7 +54,7 @@ public:
         @see TemporaryFile
     */
     FileOutputStream (const File& fileToWriteTo,
-                      int bufferSizeToUse = 16384);
+                      size_t bufferSizeToUse = 16384);
 
     /** Destructor. */
     ~FileOutputStream();

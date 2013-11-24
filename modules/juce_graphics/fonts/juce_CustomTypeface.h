@@ -25,10 +25,6 @@
 #ifndef JUCE_CUSTOMTYPEFACE_H_INCLUDED
 #define JUCE_CUSTOMTYPEFACE_H_INCLUDED
 
-#include "juce_Typeface.h"
-class InputStream;
-class OutputStream;
-
 
 //==============================================================================
 /**
@@ -142,8 +138,8 @@ protected:
 private:
     //==============================================================================
     class GlyphInfo;
-    friend class OwnedArray<GlyphInfo>;
-    OwnedArray <GlyphInfo> glyphs;
+    friend struct ContainerDeletePolicy<GlyphInfo>;
+    OwnedArray<GlyphInfo> glyphs;
     short lookupTable [128];
 
     GlyphInfo* findGlyph (const juce_wchar character, bool loadIfNeeded) noexcept;

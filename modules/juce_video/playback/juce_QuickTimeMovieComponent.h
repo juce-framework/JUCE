@@ -207,8 +207,8 @@ private:
     bool isControlCreated() const;
 
     class Pimpl;
-    friend class ScopedPointer <Pimpl>;
-    ScopedPointer <Pimpl> pimpl;
+    friend struct ContainerDeletePolicy<Pimpl>;
+    ScopedPointer<Pimpl> pimpl;
    #else
     void* movie;
    #endif

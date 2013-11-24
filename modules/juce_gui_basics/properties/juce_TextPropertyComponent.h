@@ -25,9 +25,6 @@
 #ifndef JUCE_TEXTPROPERTYCOMPONENT_H_INCLUDED
 #define JUCE_TEXTPROPERTYCOMPONENT_H_INCLUDED
 
-#include "juce_PropertyComponent.h"
-#include "../widgets/juce_Label.h"
-
 
 //==============================================================================
 /**

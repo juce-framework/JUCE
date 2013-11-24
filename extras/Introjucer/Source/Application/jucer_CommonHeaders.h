@@ -37,21 +37,17 @@
 #include "jucer_CommandIDs.h"
 
 //==============================================================================
-extern ScopedPointer<ApplicationCommandManager> commandManager;
-
-//==============================================================================
 const char* const projectItemDragType   = "Project Items";
 const char* const drawableItemDragType  = "Drawable Items";
 const char* const componentItemDragType = "Components";
 
-const char* const sourceFileExtensions          = "cpp;mm;m;c;cc;cxx";
+const char* const sourceFileExtensions          = "cpp;mm;m;c;cc;cxx;s";
 const char* const headerFileExtensions          = "h;hpp;hxx;hh;inl";
-const char* const sourceOrHeaderFileExtensions  = "cpp;mm;m;c;cc;cxx;h;hpp;hxx;hh;inl";
+const char* const sourceOrHeaderFileExtensions  = "cpp;mm;m;c;cc;cxx;h;hpp;hxx;hh;s;inl";
 
 enum ColourIds
 {
     mainBackgroundColourId          = 0x2340000,
-    treeviewHighlightColourId       = 0x2340002,
 };
 
 #endif   // __JUCER_COMMONHEADERS_JUCEHEADER__

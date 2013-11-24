@@ -25,9 +25,6 @@
 #ifndef JUCE_REVERBAUDIOSOURCE_H_INCLUDED
 #define JUCE_REVERBAUDIOSOURCE_H_INCLUDED
 
-#include "juce_AudioSource.h"
-#include "../effects/juce_Reverb.h"
-
 
 //==============================================================================
 /**
@@ -61,9 +58,9 @@ public:
     bool isBypassed() const noexcept                            { return bypass; }
 
     //==============================================================================
-    void prepareToPlay (int samplesPerBlockExpected, double sampleRate);
-    void releaseResources();
-    void getNextAudioBlock (const AudioSourceChannelInfo& bufferToFill);
+    void prepareToPlay (int samplesPerBlockExpected, double sampleRate) override;
+    void releaseResources() override;
+    void getNextAudioBlock (const AudioSourceChannelInfo&) override;
 
 private:
     //==============================================================================

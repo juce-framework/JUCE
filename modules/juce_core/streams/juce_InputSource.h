@@ -29,7 +29,6 @@
 #ifndef JUCE_INPUTSOURCE_H_INCLUDED
 #define JUCE_INPUTSOURCE_H_INCLUDED
 
-#include "juce_InputStream.h"
 
 //==============================================================================
 /**

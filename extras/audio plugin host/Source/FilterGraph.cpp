@@ -41,14 +41,9 @@ FilterGraph::FilterGraph (AudioPluginFormatManager& formatManager_)
 {
     InternalPluginFormat internalFormat;
 
-    addFilter (internalFormat.getDescriptionFor (InternalPluginFormat::audioInputFilter),
-               0.5f, 0.1f);
-
-    addFilter (internalFormat.getDescriptionFor (InternalPluginFormat::midiInputFilter),
-               0.25f, 0.1f);
-
-    addFilter (internalFormat.getDescriptionFor (InternalPluginFormat::audioOutputFilter),
-               0.5f, 0.9f);
+    addFilter (internalFormat.getDescriptionFor (InternalPluginFormat::audioInputFilter),  0.5f,  0.1f);
+    addFilter (internalFormat.getDescriptionFor (InternalPluginFormat::midiInputFilter),   0.25f, 0.1f);
+    addFilter (internalFormat.getDescriptionFor (InternalPluginFormat::audioOutputFilter), 0.5f,  0.9f);
 
     setChangedFlag (false);
 }
@@ -83,13 +78,11 @@ void FilterGraph::addFilter (const PluginDescription* desc, double x, double y)
 {
     if (desc != nullptr)
     {
-        String errorMessage;
-
-        AudioPluginInstance* instance = formatManager.createPluginInstance (*desc, errorMessage);
-
         AudioProcessorGraph::Node* node = nullptr;
 
-        if (instance != nullptr)
+        String errorMessage;
+
+        if (AudioPluginInstance* instance = formatManager.createPluginInstance (*desc, graph.getSampleRate(), graph.getBlockSize(), errorMessage))
             node = graph.addNode (instance);
 
         if (node != nullptr)
@@ -307,7 +300,7 @@ void FilterGraph::createNodeFromXml (const XmlElement& xml)
 
     String errorMessage;
 
-    AudioPluginInstance* instance = formatManager.createPluginInstance (pd, errorMessage);
+    AudioPluginInstance* instance = formatManager.createPluginInstance (pd, graph.getSampleRate(), graph.getBlockSize(), errorMessage);
 
     if (instance == nullptr)
     {

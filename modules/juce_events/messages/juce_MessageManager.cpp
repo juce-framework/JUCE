@@ -70,7 +70,7 @@ MessageManager* MessageManager::getInstance()
     return instance;
 }
 
-inline MessageManager* MessageManager::getInstanceWithoutCreating() noexcept
+MessageManager* MessageManager::getInstanceWithoutCreating() noexcept
 {
     return instance;
 }
@@ -334,3 +334,6 @@ JUCE_API void JUCE_CALLTYPE shutdownJuce_GUI()
         MessageManager::deleteInstance();
     }
 }
+
+ScopedJuceInitialiser_GUI::ScopedJuceInitialiser_GUI()  { initialiseJuce_GUI(); }
+ScopedJuceInitialiser_GUI::~ScopedJuceInitialiser_GUI() { shutdownJuce_GUI(); }

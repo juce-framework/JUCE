@@ -31,19 +31,19 @@
 //==============================================================================
 IIRCoefficients::IIRCoefficients() noexcept
 {
-    zeromem (c, sizeof (c));
+    zeromem (coefficients, sizeof (coefficients));
 }
 
 IIRCoefficients::~IIRCoefficients() noexcept {}
 
 IIRCoefficients::IIRCoefficients (const IIRCoefficients& other) noexcept
 {
-    memcpy (c, other.c, sizeof (c));
+    memcpy (coefficients, other.coefficients, sizeof (coefficients));
 }
 
 IIRCoefficients& IIRCoefficients::operator= (const IIRCoefficients& other) noexcept
 {
-    memcpy (c, other.c, sizeof (c));
+    memcpy (coefficients, other.coefficients, sizeof (coefficients));
     return *this;
 }
 
@@ -52,11 +52,11 @@ IIRCoefficients::IIRCoefficients (double c1, double c2, double c3,
 {
     const double a = 1.0 / c4;
 
-    c[0] = (float) (c1 * a);
-    c[1] = (float) (c2 * a);
-    c[2] = (float) (c3 * a);
-    c[3] = (float) (c5 * a);
-    c[4] = (float) (c6 * a);
+    coefficients[0] = (float) (c1 * a);
+    coefficients[1] = (float) (c2 * a);
+    coefficients[2] = (float) (c3 * a);
+    coefficients[3] = (float) (c5 * a);
+    coefficients[4] = (float) (c6 * a);
 }
 
 IIRCoefficients IIRCoefficients::makeLowPass (const double sampleRate,
@@ -69,7 +69,7 @@ IIRCoefficients IIRCoefficients::makeLowPass (const double sampleRate,
     const double c1 = 1.0 / (1.0 + std::sqrt (2.0) * n + nSquared);
 
     return IIRCoefficients (c1,
-                            c1 * 2.0f,
+                            c1 * 2.0,
                             c1,
                             1.0,
                             c1 * 2.0 * (1.0 - nSquared),
@@ -84,7 +84,7 @@ IIRCoefficients IIRCoefficients::makeHighPass (const double sampleRate,
     const double c1 = 1.0 / (1.0 + std::sqrt (2.0) * n + nSquared);
 
     return IIRCoefficients (c1,
-                            c1 * -2.0f,
+                            c1 * -2.0,
                             c1,
                             1.0,
                             c1 * 2.0 * (nSquared - 1.0),
@@ -203,28 +203,27 @@ void IIRFilter::reset() noexcept
 
 float IIRFilter::processSingleSampleRaw (const float in) noexcept
 {
-    float out = coefficients.c[0] * in + v1;
+    float out = coefficients.coefficients[0] * in + v1;
 
     JUCE_SNAP_TO_ZERO (out);
 
-    v1 = coefficients.c[1] * in - coefficients.c[3] * out + v2;
-    v2 = coefficients.c[2] * in - coefficients.c[4] * out;
+    v1 = coefficients.coefficients[1] * in - coefficients.coefficients[3] * out + v2;
+    v2 = coefficients.coefficients[2] * in - coefficients.coefficients[4] * out;
 
     return out;
 }
 
-void IIRFilter::processSamples (float* const samples,
-                                const int numSamples) noexcept
+void IIRFilter::processSamples (float* const samples, const int numSamples) noexcept
 {
     const SpinLock::ScopedLockType sl (processLock);
 
     if (active)
     {
-        const float c0 = coefficients.c[0];
-        const float c1 = coefficients.c[1];
-        const float c2 = coefficients.c[2];
-        const float c3 = coefficients.c[3];
-        const float c4 = coefficients.c[4];
+        const float c0 = coefficients.coefficients[0];
+        const float c1 = coefficients.coefficients[1];
+        const float c2 = coefficients.coefficients[2];
+        const float c3 = coefficients.coefficients[3];
+        const float c4 = coefficients.coefficients[4];
         float lv1 = v1, lv2 = v2;
 
         for (int i = 0; i < numSamples; ++i)

@@ -532,17 +532,25 @@ void FileBrowserComponent::getDefaultRoots (StringArray& rootNames, StringArray&
     rootNames.add (String::empty);
 
     rootPaths.add (File::getSpecialLocation (File::userDocumentsDirectory).getFullPathName());
-    rootNames.add ("Documents");
+    rootNames.add (TRANS("Documents"));
+    rootPaths.add (File::getSpecialLocation (File::userMusicDirectory).getFullPathName());
+    rootNames.add (TRANS("Music"));
+    rootPaths.add (File::getSpecialLocation (File::userPicturesDirectory).getFullPathName());
+    rootNames.add (TRANS("Pictures"));
     rootPaths.add (File::getSpecialLocation (File::userDesktopDirectory).getFullPathName());
-    rootNames.add ("Desktop");
+    rootNames.add (TRANS("Desktop"));
 
    #elif JUCE_MAC
     rootPaths.add (File::getSpecialLocation (File::userHomeDirectory).getFullPathName());
-    rootNames.add ("Home folder");
+    rootNames.add (TRANS("Home folder"));
     rootPaths.add (File::getSpecialLocation (File::userDocumentsDirectory).getFullPathName());
-    rootNames.add ("Documents");
+    rootNames.add (TRANS("Documents"));
+    rootPaths.add (File::getSpecialLocation (File::userMusicDirectory).getFullPathName());
+    rootNames.add (TRANS("Music"));
+    rootPaths.add (File::getSpecialLocation (File::userPicturesDirectory).getFullPathName());
+    rootNames.add (TRANS("Pictures"));
     rootPaths.add (File::getSpecialLocation (File::userDesktopDirectory).getFullPathName());
-    rootNames.add ("Desktop");
+    rootNames.add (TRANS("Desktop"));
 
     rootPaths.add (String::empty);
     rootNames.add (String::empty);
@@ -566,9 +574,9 @@ void FileBrowserComponent::getDefaultRoots (StringArray& rootNames, StringArray&
     rootPaths.add ("/");
     rootNames.add ("/");
     rootPaths.add (File::getSpecialLocation (File::userHomeDirectory).getFullPathName());
-    rootNames.add ("Home folder");
+    rootNames.add (TRANS("Home folder"));
     rootPaths.add (File::getSpecialLocation (File::userDesktopDirectory).getFullPathName());
-    rootNames.add ("Desktop");
+    rootNames.add (TRANS("Desktop"));
    #endif
 }
 

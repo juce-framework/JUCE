@@ -29,10 +29,6 @@
 #ifndef JUCE_THREADPOOL_H_INCLUDED
 #define JUCE_THREADPOOL_H_INCLUDED
 
-#include "juce_Thread.h"
-#include "../text/juce_StringArray.h"
-#include "../containers/juce_Array.h"
-#include "../containers/juce_OwnedArray.h"
 class ThreadPool;
 class ThreadPoolThread;
 
@@ -214,7 +210,7 @@ public:
         will wait for it to finish.
 
         If the timeout period expires before the job finishes running, then the job will be
-        left in the pool and this will return false. It returns true if the job is sucessfully
+        left in the pool and this will return false. It returns true if the job is successfully
         stopped and removed.
 
         @param job                  the job to remove
@@ -295,8 +291,8 @@ private:
 
     class ThreadPoolThread;
     friend class ThreadPoolThread;
-    friend class OwnedArray <ThreadPoolThread>;
-    OwnedArray <ThreadPoolThread> threads;
+    friend struct ContainerDeletePolicy<ThreadPoolThread>;
+    OwnedArray<ThreadPoolThread> threads;
 
     CriticalSection lock;
     WaitableEvent jobFinishedSignal;

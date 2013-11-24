@@ -25,10 +25,6 @@
 #ifndef JUCE_DIRECTORYCONTENTSDISPLAYCOMPONENT_H_INCLUDED
 #define JUCE_DIRECTORYCONTENTSDISPLAYCOMPONENT_H_INCLUDED
 
-#include "../components/juce_Component.h"
-#include "juce_DirectoryContentsList.h"
-#include "juce_FileBrowserListener.h"
-
 
 //==============================================================================
 /**

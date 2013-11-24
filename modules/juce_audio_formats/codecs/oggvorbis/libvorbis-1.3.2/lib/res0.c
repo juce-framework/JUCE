@@ -426,7 +426,7 @@ static long **_01class(vorbis_block *vb,vorbis_look_residue *vl,
 
   int partvals=n/samples_per_partition;
   long **partword=(long**)_vorbis_block_alloc(vb,ch*sizeof(*partword));
-  float scale=100./samples_per_partition;
+  float scale=100.0f/samples_per_partition;
 
   /* we find the partition type for each partition of each
      channel.  We'll go back and do the interleaved encoding in a

@@ -25,9 +25,6 @@
 #ifndef JUCE_CODETOKENISER_H_INCLUDED
 #define JUCE_CODETOKENISER_H_INCLUDED
 
-#include "juce_CodeDocument.h"
-#include "juce_CodeEditorComponent.h"
-
 
 //==============================================================================
 /**

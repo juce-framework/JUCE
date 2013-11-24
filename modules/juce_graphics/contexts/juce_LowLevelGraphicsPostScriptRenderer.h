@@ -25,8 +25,6 @@
 #ifndef JUCE_LOWLEVELGRAPHICSPOSTSCRIPTRENDERER_H_INCLUDED
 #define JUCE_LOWLEVELGRAPHICSPOSTSCRIPTRENDERER_H_INCLUDED
 
-#include "juce_LowLevelGraphicsContext.h"
-
 
 //==============================================================================
 /**
@@ -47,9 +45,9 @@ public:
 
     //==============================================================================
     bool isVectorDevice() const override;
-    void setOrigin (int x, int y) override;
+    void setOrigin (Point<int>) override;
     void addTransform (const AffineTransform&) override;
-    float getScaleFactor() override;
+    float getPhysicalPixelScaleFactor() override;
 
     bool clipToRectangle (const Rectangle<int>&) override;
     bool clipToRectangleList (const RectangleList<int>&) override;
@@ -74,14 +72,11 @@ public:
 
     //==============================================================================
     void fillRect (const Rectangle<int>&, bool replaceExistingContents) override;
+    void fillRect (const Rectangle<float>&) override;
+    void fillRectList (const RectangleList<float>&) override;
     void fillPath (const Path&, const AffineTransform&) override;
-
     void drawImage (const Image&, const AffineTransform&) override;
-
     void drawLine (const Line <float>&) override;
-
-    void drawVerticalLine (int x, float top, float bottom) override;
-    void drawHorizontalLine (int x, float top, float bottom) override;
 
     //==============================================================================
     const Font& getFont() override;
@@ -112,11 +107,11 @@ protected:
     OwnedArray <SavedState> stateStack;
 
     void writeClip();
-    void writeColour (const Colour& colour);
-    void writePath (const Path& path) const;
+    void writeColour (Colour colour);
+    void writePath (const Path&) const;
     void writeXY (float x, float y) const;
-    void writeTransform (const AffineTransform& trans) const;
-    void writeImage (const Image& im, int sx, int sy, int maxW, int maxH) const;
+    void writeTransform (const AffineTransform&) const;
+    void writeImage (const Image&, int sx, int sy, int maxW, int maxH) const;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LowLevelGraphicsPostScriptRenderer)
 };

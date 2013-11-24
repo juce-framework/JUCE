@@ -25,8 +25,6 @@
 #ifndef JUCE_AUDIOFORMATWRITER_H_INCLUDED
 #define JUCE_AUDIOFORMATWRITER_H_INCLUDED
 
-#include "juce_AudioFormatReader.h"
-
 
 //==============================================================================
 /**
@@ -130,7 +128,7 @@ public:
                                      int startSample, int numSamples);
 
     /** Writes some samples from a set of float data channels. */
-    bool writeFromFloatArrays (const float** channels, int numChannels, int numSamples);
+    bool writeFromFloatArrays (const float* const* channels, int numChannels, int numSamples);
 
     //==============================================================================
     /** Returns the sample rate being used. */
@@ -179,7 +177,7 @@ public:
             The data must be an array containing the same number of channels as the
             AudioFormatWriter object is using. None of these channels can be null.
         */
-        bool write (const float** data, int numSamples);
+        bool write (const float* const* data, int numSamples);
 
         class JUCE_API  IncomingDataReceiver
         {
@@ -203,7 +201,7 @@ public:
 
     private:
         class Buffer;
-        friend class ScopedPointer<Buffer>;
+        friend struct ContainerDeletePolicy<Buffer>;
         ScopedPointer<Buffer> buffer;
     };
 
@@ -231,7 +229,7 @@ protected:
         typedef AudioData::Pointer <DestSampleType, DestEndianness, AudioData::Interleaved, AudioData::NonConst>                DestType;
         typedef AudioData::Pointer <SourceSampleType, AudioData::NativeEndian, AudioData::NonInterleaved, AudioData::Const>     SourceType;
 
-        static void write (void* destData, int numDestChannels, const int** source,
+        static void write (void* destData, int numDestChannels, const int* const* source,
                            int numSamples, const int sourceOffset = 0) noexcept
         {
             for (int i = 0; i < numDestChannels; ++i)

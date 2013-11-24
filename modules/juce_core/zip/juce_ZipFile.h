@@ -29,11 +29,6 @@
 #ifndef JUCE_ZIPFILE_H_INCLUDED
 #define JUCE_ZIPFILE_H_INCLUDED
 
-#include "../files/juce_File.h"
-#include "../streams/juce_InputSource.h"
-#include "../threads/juce_CriticalSection.h"
-#include "../containers/juce_OwnedArray.h"
-
 
 //==============================================================================
 /**
@@ -201,6 +196,21 @@ public:
         void addFile (const File& fileToAdd, int compressionLevel,
                       const String& storedPathName = String::empty);
 
+        /** Adds a file while should be added to the archive.
+
+            @param streamToRead this stream isn't read immediately - a pointer to the stream is
+                                stored, then used later when the writeToStream() method is called, and
+                                deleted by the Builder object when no longer needed, so be very careful
+                                about its lifetime and the lifetime of any objects on which it depends!
+                                This must not be null.
+            @param compressionLevel     this can be between 0 (no compression), and 9 (maximum compression).
+            @param storedPathName       the partial pathname that will be stored for this file
+            @param fileModificationTime the timestamp that will be stored as the last modification time
+                                        of this entry
+        */
+        void addEntry (InputStream* streamToRead, int compressionLevel,
+                       const String& storedPathName, Time fileModificationTime);
+
         /** Generates the zip file, writing it to the specified stream.
             If the progress parameter is non-null, it will be updated with an approximate
             progress status between 0 and 1.0
@@ -210,7 +220,7 @@ public:
         //==============================================================================
     private:
         class Item;
-        friend class OwnedArray<Item>;
+        friend struct ContainerDeletePolicy<Item>;
         OwnedArray<Item> items;
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Builder)

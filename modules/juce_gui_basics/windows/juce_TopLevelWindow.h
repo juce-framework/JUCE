@@ -25,9 +25,6 @@
 #ifndef JUCE_TOPLEVELWINDOW_H_INCLUDED
 #define JUCE_TOPLEVELWINDOW_H_INCLUDED
 
-#include "../components/juce_Component.h"
-#include "../misc/juce_DropShadower.h"
-
 
 //==============================================================================
 /**
@@ -125,6 +122,8 @@ public:
     */
     static TopLevelWindow* getActiveTopLevelWindow() noexcept;
 
+    /** Adds the window to the desktop using the default flags. */
+    void addToDesktop();
 
     //==============================================================================
     /** @internal */
@@ -152,8 +151,9 @@ protected:
 
 private:
     friend class TopLevelWindowManager;
+    friend class ResizableWindow;
     bool useDropShadow, useNativeTitleBar, isCurrentlyActive;
-    ScopedPointer <DropShadower> shadower;
+    ScopedPointer<DropShadower> shadower;
 
     void setWindowActive (bool isNowActive);
 

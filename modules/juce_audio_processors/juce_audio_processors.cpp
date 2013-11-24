@@ -71,8 +71,10 @@ static inline bool arrayContainsPlugin (const OwnedArray<PluginDescription>& lis
     return false;
 }
 
-// START_AUTOINCLUDE format/*.cpp, processors/*.cpp, format_types/*.cpp,
-// format_types/*.mm, scanning/*.cpp
+#if JUCE_CLANG
+ #pragma clang diagnostic ignored "-Wdeprecated-declarations"
+#endif
+
 #include "format/juce_AudioPluginFormat.cpp"
 #include "format/juce_AudioPluginFormatManager.cpp"
 #include "processors/juce_AudioProcessor.cpp"
@@ -82,10 +84,10 @@ static inline bool arrayContainsPlugin (const OwnedArray<PluginDescription>& lis
 #include "processors/juce_PluginDescription.cpp"
 #include "format_types/juce_LADSPAPluginFormat.cpp"
 #include "format_types/juce_VSTPluginFormat.cpp"
+#include "format_types/juce_VST3PluginFormat.cpp"
 #include "format_types/juce_AudioUnitPluginFormat.mm"
 #include "scanning/juce_KnownPluginList.cpp"
 #include "scanning/juce_PluginDirectoryScanner.cpp"
 #include "scanning/juce_PluginListComponent.cpp"
-// END_AUTOINCLUDE
 
 }

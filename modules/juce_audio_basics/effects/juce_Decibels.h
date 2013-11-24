@@ -25,6 +25,7 @@
 #ifndef JUCE_DECIBELS_H_INCLUDED
 #define JUCE_DECIBELS_H_INCLUDED
 
+
 //==============================================================================
 /**
     This class contains some helpful static methods for dealing with decibel values.
@@ -42,7 +43,7 @@ public:
     static Type decibelsToGain (const Type decibels,
                                 const Type minusInfinityDb = (Type) defaultMinusInfinitydB)
     {
-        return decibels > minusInfinityDb ? powf ((Type) 10.0, decibels * (Type) 0.05)
+        return decibels > minusInfinityDb ? std::pow ((Type) 10.0, decibels * (Type) 0.05)
                                           : Type();
     }
 

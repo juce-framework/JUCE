@@ -55,7 +55,7 @@ b2WheelJoint::b2WheelJoint(const b2WheelJointDef* def)
 
 	m_mass = 0.0f;
 	m_impulse = 0.0f;
-	m_motorMass = 0.0;
+	m_motorMass = 0.0f;
 	m_motorImpulse = 0.0f;
 	m_springMass = 0.0f;
 	m_springImpulse = 0.0f;
@@ -141,14 +141,14 @@ void b2WheelJoint::InitVelocityConstraints(const b2SolverData& data)
 			float32 omega = 2.0f * b2_pi * m_frequencyHz;
 
 			// Damping coefficient
-			float32 d = 2.0f * m_springMass * m_dampingRatio * omega;
+			float32 damp = 2.0f * m_springMass * m_dampingRatio * omega;
 
 			// Spring stiffness
 			float32 k = m_springMass * omega * omega;
 
 			// magic formulas
 			float32 h = data.step.dt;
-			m_gamma = h * (d + h * k);
+			m_gamma = h * (damp + h * k);
 			if (m_gamma > 0.0f)
 			{
 				m_gamma = 1.0f / m_gamma;

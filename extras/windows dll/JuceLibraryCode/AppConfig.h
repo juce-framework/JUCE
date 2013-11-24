@@ -3,8 +3,9 @@
     IMPORTANT! This file is auto-generated each time you save your
     project - if you alter its contents, your changes may be overwritten!
 
-    If you want to change any of these values, use the Introjucer to do so,
-    rather than editing this file directly!
+    There's a section below where you can add your own custom code safely, and the
+    Introjucer will preserve the contents of that block, but the best way to change
+    any of these definitions is by using the Introjucer's project settings.
 
     Any commented-out settings will assume their default values.
 
@@ -14,10 +15,18 @@
 #define __JUCE_APPCONFIG_IVABE4__
 
 //==============================================================================
+// [BEGIN_USER_CODE_SECTION]
+
+// (You can add your own code in this section, and the Introjucer will not overwrite it)
+
+// [END_USER_CODE_SECTION]
+
+//==============================================================================
 #define JUCE_MODULE_AVAILABLE_juce_audio_basics          1
 #define JUCE_MODULE_AVAILABLE_juce_audio_devices         1
 #define JUCE_MODULE_AVAILABLE_juce_audio_formats         1
 #define JUCE_MODULE_AVAILABLE_juce_audio_processors      1
+#define JUCE_MODULE_AVAILABLE_juce_audio_utils           1
 #define JUCE_MODULE_AVAILABLE_juce_core                  1
 #define JUCE_MODULE_AVAILABLE_juce_cryptography          1
 #define JUCE_MODULE_AVAILABLE_juce_data_structures       1
@@ -78,6 +87,10 @@
  //#define JUCE_USE_MP3AUDIOFORMAT
 #endif
 
+#ifndef    JUCE_USE_LAME_AUDIO_FORMAT
+ //#define JUCE_USE_LAME_AUDIO_FORMAT
+#endif
+
 #ifndef    JUCE_USE_WINDOWS_MEDIA_FORMAT
  //#define JUCE_USE_WINDOWS_MEDIA_FORMAT
 #endif
@@ -87,6 +100,10 @@
 
 #ifndef    JUCE_PLUGINHOST_VST
  //#define JUCE_PLUGINHOST_VST
+#endif
+
+#ifndef    JUCE_PLUGINHOST_VST3
+ //#define JUCE_PLUGINHOST_VST3
 #endif
 
 #ifndef    JUCE_PLUGINHOST_AU
@@ -110,6 +127,10 @@
 
 #ifndef    JUCE_DONT_AUTOLINK_TO_WIN32_LIBRARIES
  //#define JUCE_DONT_AUTOLINK_TO_WIN32_LIBRARIES
+#endif
+
+#ifndef    JUCE_INCLUDE_ZLIB_CODE
+ //#define JUCE_INCLUDE_ZLIB_CODE
 #endif
 
 //==============================================================================

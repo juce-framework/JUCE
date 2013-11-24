@@ -29,10 +29,6 @@
 #ifndef JUCE_MEMORYOUTPUTSTREAM_H_INCLUDED
 #define JUCE_MEMORYOUTPUTSTREAM_H_INCLUDED
 
-#include "juce_OutputStream.h"
-#include "../memory/juce_MemoryBlock.h"
-#include "../memory/juce_ScopedPointer.h"
-
 
 //==============================================================================
 /**

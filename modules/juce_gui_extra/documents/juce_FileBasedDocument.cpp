@@ -65,16 +65,14 @@ void FileBasedDocument::setFile (const File& newFile)
 }
 
 //==============================================================================
-#if JUCE_MODAL_LOOPS_PERMITTED
-bool FileBasedDocument::loadFrom (const File& newFile,
-                                  const bool showMessageOnFailure)
+Result FileBasedDocument::loadFrom (const File& newFile, const bool showMessageOnFailure)
 {
     MouseCursor::showWaitCursor();
 
     const File oldFile (documentFile);
     documentFile = newFile;
 
-    Result result (Result::fail ("The file doesn't exist"));
+    Result result (Result::fail (TRANS("The file doesn't exist")));
 
     if (newFile.existsAsFile())
     {
@@ -86,7 +84,7 @@ bool FileBasedDocument::loadFrom (const File& newFile,
             MouseCursor::hideWaitCursor();
 
             setLastDocumentOpened (newFile);
-            return true;
+            return result;
         }
     }
 
@@ -94,19 +92,18 @@ bool FileBasedDocument::loadFrom (const File& newFile,
     MouseCursor::hideWaitCursor();
 
     if (showMessageOnFailure)
-    {
-        AlertWindow::showMessageBox (AlertWindow::WarningIcon,
-                                     TRANS("Failed to open file..."),
-                                     TRANS("There was an error while trying to load the file: FLNM")
-                                        .replace ("FLNM", "\n" + newFile.getFullPathName())
-                                       + "\n\n"
-                                       + result.getErrorMessage());
-    }
+        AlertWindow::showMessageBoxAsync (AlertWindow::WarningIcon,
+                                          TRANS("Failed to open file..."),
+                                          TRANS("There was an error while trying to load the file: FLNM")
+                                              .replace ("FLNM", "\n" + newFile.getFullPathName())
+                                            + "\n\n"
+                                            + result.getErrorMessage());
 
-    return false;
+    return result;
 }
 
-bool FileBasedDocument::loadFromUserSpecifiedFile (const bool showMessageOnFailure)
+#if JUCE_MODAL_LOOPS_PERMITTED
+Result FileBasedDocument::loadFromUserSpecifiedFile (const bool showMessageOnFailure)
 {
     FileChooser fc (openFileDialogTitle,
                     getLastDocumentOpened(),
@@ -115,7 +112,7 @@ bool FileBasedDocument::loadFromUserSpecifiedFile (const bool showMessageOnFailu
     if (fc.browseForFileToOpen())
         return loadFrom (fc.getResult(), showMessageOnFailure);
 
-    return false;
+    return Result::fail (TRANS("User cancelled"));
 }
 
 static bool askToOverwriteFile (const File& newFile)
@@ -179,15 +176,13 @@ FileBasedDocument::SaveResult FileBasedDocument::saveAs (const File& newFile,
     MouseCursor::hideWaitCursor();
 
     if (showMessageOnFailure)
-    {
-        AlertWindow::showMessageBox (AlertWindow::WarningIcon,
-                                     TRANS("Error writing to file..."),
-                                     TRANS("An error occurred while trying to save \"DCNM\" to the file: FLNM")
-                                         .replace ("DCNM", getDocumentTitle())
-                                         .replace ("FLNM", "\n" + newFile.getFullPathName())
-                                        + "\n\n"
-                                        + result.getErrorMessage());
-    }
+        AlertWindow::showMessageBoxAsync (AlertWindow::WarningIcon,
+                                          TRANS("Error writing to file..."),
+                                          TRANS("An error occurred while trying to save \"DCNM\" to the file: FLNM")
+                                            .replace ("DCNM", getDocumentTitle())
+                                            .replace ("FLNM", "\n" + newFile.getFullPathName())
+                                           + "\n\n"
+                                           + result.getErrorMessage());
 
     return failedToWriteToFile;
 }

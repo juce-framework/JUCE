@@ -25,9 +25,6 @@
 #ifndef JUCE_DRAWABLEBUTTON_H_INCLUDED
 #define JUCE_DRAWABLEBUTTON_H_INCLUDED
 
-#include "juce_Button.h"
-#include "../drawables/juce_Drawable.h"
-
 
 //==============================================================================
 /**
@@ -114,6 +111,9 @@ public:
         @see ButtonStyle
     */
     void setButtonStyle (ButtonStyle newStyle);
+
+    /** Returns the current style. */
+    ButtonStyle getStyle() const noexcept       { return style; }
 
     //==============================================================================
     /** Gives the button an optional amount of space around the edge of the drawable.

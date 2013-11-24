@@ -525,15 +525,17 @@ namespace TextLayoutHelpers
                         }
                     }
 
-                    if ((i > 0 && newFontAndColour != lastFontAndColour) || i == stringLength - 1)
+                    if (i > 0 && newFontAndColour != lastFontAndColour)
                     {
-                        runAttributes.add (RunAttribute (lastFontAndColour,
-                                                         Range<int> (rangeStart, (i < stringLength - 1) ? i : (i + 1))));
+                        runAttributes.add (RunAttribute (lastFontAndColour, Range<int> (rangeStart, i)));
                         rangeStart = i;
                     }
 
                     lastFontAndColour = newFontAndColour;
                 }
+
+                if (rangeStart < stringLength)
+                    runAttributes.add (RunAttribute (lastFontAndColour, Range<int> (rangeStart, stringLength)));
             }
 
             for (int i = 0; i < runAttributes.size(); ++i)

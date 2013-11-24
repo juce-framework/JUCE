@@ -29,8 +29,6 @@
 #ifndef JUCE_IDENTIFIER_H_INCLUDED
 #define JUCE_IDENTIFIER_H_INCLUDED
 
-class StringPool;
-
 
 //==============================================================================
 /**
@@ -40,7 +38,7 @@ class StringPool;
     from a string, so it's much faster to keep a static identifier object to refer
     to frequently-used names, rather than constructing them each time you need it.
 
-    @see NamedPropertySet, ValueTree
+    @see NamedValueSet, ValueTree
 */
 class JUCE_API  Identifier
 {
@@ -70,19 +68,28 @@ public:
     ~Identifier();
 
     /** Compares two identifiers. This is a very fast operation. */
-    inline bool operator== (const Identifier other) const noexcept      { return name == other.name; }
+    inline bool operator== (Identifier other) const noexcept            { return name == other.name; }
 
     /** Compares two identifiers. This is a very fast operation. */
-    inline bool operator!= (const Identifier other) const noexcept      { return name != other.name; }
+    inline bool operator!= (Identifier other) const noexcept            { return name != other.name; }
+
+    /** Compares the identifier with a string. */
+    inline bool operator== (StringRef other) const noexcept             { return name.compare (other.text) == 0; }
+
+    /** Compares the identifier with a string. */
+    inline bool operator!= (StringRef other) const noexcept             { return name.compare (other.text) != 0; }
 
     /** Returns this identifier as a string. */
     String toString() const                                             { return name; }
 
     /** Returns this identifier's raw string pointer. */
-    operator const String::CharPointerType() const noexcept             { return name; }
+    operator String::CharPointerType() const noexcept                   { return name; }
 
     /** Returns this identifier's raw string pointer. */
-    const String::CharPointerType getCharPointer() const noexcept       { return name; }
+    String::CharPointerType getCharPointer() const noexcept             { return name; }
+
+    /** Returns this identifier as a StringRef. */
+    operator StringRef() const noexcept                                 { return name; }
 
     /** Returns true if this Identifier is not null */
     bool isValid() const noexcept                                       { return name.getAddress() != nullptr; }

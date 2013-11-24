@@ -25,8 +25,6 @@
 #ifndef JUCE_AUDIOSUBSECTIONREADER_H_INCLUDED
 #define JUCE_AUDIOSUBSECTIONREADER_H_INCLUDED
 
-#include "juce_AudioFormatReader.h"
-
 
 //==============================================================================
 /**
@@ -69,12 +67,9 @@ public:
     bool readSamples (int** destSamples, int numDestChannels, int startOffsetInDestBuffer,
                       int64 startSampleInFile, int numSamples) override;
 
-    void readMaxLevels (int64 startSample,
-                        int64 numSamples,
-                        float& lowestLeft,
-                        float& highestLeft,
-                        float& lowestRight,
-                        float& highestRight) override;
+    void readMaxLevels (int64 startSample, int64 numSamples,
+                        float& lowestLeft,  float& highestLeft,
+                        float& lowestRight, float& highestRight) override;
 
 
 private:

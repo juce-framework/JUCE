@@ -32,8 +32,8 @@
 class PaintElementRoundedRectangle  : public ColouredElement
 {
 public:
-    PaintElementRoundedRectangle (PaintRoutine* owner)
-        : ColouredElement (owner, "Rounded Rectangle", true, false)
+    PaintElementRoundedRectangle (PaintRoutine* pr)
+        : ColouredElement (pr, "Rounded Rectangle", true, false)
     {
         cornerSize = 10.0;
     }
@@ -55,13 +55,13 @@ public:
         }
     }
 
-    void getEditableProperties (Array <PropertyComponent*>& properties)
+    void getEditableProperties (Array<PropertyComponent*>& props)
     {
-        properties.add (new CornerSizeProperty (this));
+        props.add (new CornerSizeProperty (this));
 
-        ColouredElement::getEditableProperties (properties);
+        ColouredElement::getEditableProperties (props);
 
-        properties.add (new ShapeToPathProperty (this));
+        props.add (new ShapeToPathProperty (this));
     }
 
     //==============================================================================

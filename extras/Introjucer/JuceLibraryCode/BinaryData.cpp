@@ -8,7 +8,7 @@ namespace BinaryData
 {
 
 //================== AudioPluginXCodeScript.txt ==================
-static const unsigned char temp_43731c40[] =
+static const unsigned char temp_binary_data_0[] =
 "\r\n"
 "# This script takes the build product and copies it to the AU, VST, and RTAS folders, depending on \r\n"
 "# which plugin types you've built\r\n"
@@ -87,17 +87,17 @@ static const unsigned char temp_43731c40[] =
 "  fi\r\n"
 "fi\r\n";
 
-const char* AudioPluginXCodeScript_txt = (const char*) temp_43731c40;
+const char* AudioPluginXCodeScript_txt = (const char*) temp_binary_data_0;
 
 //================== background_tile.png ==================
-static const unsigned char temp_e612dbe3[] =
+static const unsigned char temp_binary_data_1[] =
 { 137,80,78,71,13,10,26,10,0,0,0,13,73,72,68,82,0,0,0,7,0,0,0,7,8,6,0,0,0,196,82,87,211,0,0,0,94,73,68,65,84,120,218,85,141,73,14,0,33,8,4,253,137,226,18,19,245,234,255,127,70,75,155,232,56,135,10,132,94,112,33,4,37,222,123,205,57,107,74,105,239,196,137,
 8,72,239,29,99,12,204,57,209,90,227,237,19,45,113,161,209,12,234,172,18,49,70,88,229,134,34,103,173,245,159,60,134,82,10,238,79,166,223,106,238,91,100,229,73,191,80,92,47,179,68,223,148,158,98,226,0,0,0,0,73,69,78,68,174,66,96,130,0,0 };
 
-const char* background_tile_png = (const char*) temp_e612dbe3;
+const char* background_tile_png = (const char*) temp_binary_data_1;
 
 //================== colourscheme_dark.xml ==================
-static const unsigned char temp_7bcdfa76[] =
+static const unsigned char temp_binary_data_2[] =
 "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n"
 "\r\n"
 "<COLOUR_SCHEME font=\"&lt;Monospaced&gt;; 13.0\">\r\n"
@@ -122,10 +122,10 @@ static const unsigned char temp_7bcdfa76[] =
 "  <COLOUR name=\"Error\" colour=\"FFE60000\"/>\r\n"
 "</COLOUR_SCHEME>\r\n";
 
-const char* colourscheme_dark_xml = (const char*) temp_7bcdfa76;
+const char* colourscheme_dark_xml = (const char*) temp_binary_data_2;
 
 //================== colourscheme_light.xml ==================
-static const unsigned char temp_97d41148[] =
+static const unsigned char temp_binary_data_3[] =
 "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n"
 "\r\n"
 "<COLOUR_SCHEME font=\"&lt;Monospaced&gt;; 13.0\">\r\n"
@@ -150,10 +150,10 @@ static const unsigned char temp_97d41148[] =
 "  <COLOUR name=\"Error\" colour=\"ffcc0000\"/>\r\n"
 "</COLOUR_SCHEME>\r\n";
 
-const char* colourscheme_light_xml = (const char*) temp_97d41148;
+const char* colourscheme_light_xml = (const char*) temp_binary_data_3;
 
 //================== jucer_AudioPluginEditorTemplate.cpp ==================
-static const unsigned char temp_6eda5614[] =
+static const unsigned char temp_binary_data_4[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
@@ -190,10 +190,10 @@ static const unsigned char temp_6eda5614[] =
 "                      Justification::centred, 1);\r\n"
 "}\r\n";
 
-const char* jucer_AudioPluginEditorTemplate_cpp = (const char*) temp_6eda5614;
+const char* jucer_AudioPluginEditorTemplate_cpp = (const char*) temp_binary_data_4;
 
 //================== jucer_AudioPluginEditorTemplate.h ==================
-static const unsigned char temp_67353d19[] =
+static const unsigned char temp_binary_data_5[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
@@ -227,10 +227,10 @@ static const unsigned char temp_67353d19[] =
 "\r\n"
 "#endif  // HEADERGUARD\r\n";
 
-const char* jucer_AudioPluginEditorTemplate_h = (const char*) temp_67353d19;
+const char* jucer_AudioPluginEditorTemplate_h = (const char*) temp_binary_data_5;
 
 //================== jucer_AudioPluginFilterTemplate.cpp ==================
-static const unsigned char temp_98c9479f[] =
+static const unsigned char temp_binary_data_6[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
@@ -419,10 +419,10 @@ static const unsigned char temp_98c9479f[] =
 "    return new FILTERCLASSNAME();\r\n"
 "}\r\n";
 
-const char* jucer_AudioPluginFilterTemplate_cpp = (const char*) temp_98c9479f;
+const char* jucer_AudioPluginFilterTemplate_cpp = (const char*) temp_binary_data_6;
 
 //================== jucer_AudioPluginFilterTemplate.h ==================
-static const unsigned char temp_62b91564[] =
+static const unsigned char temp_binary_data_7[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
@@ -498,10 +498,10 @@ static const unsigned char temp_62b91564[] =
 "\r\n"
 "#endif  // HEADERGUARD\r\n";
 
-const char* jucer_AudioPluginFilterTemplate_h = (const char*) temp_62b91564;
+const char* jucer_AudioPluginFilterTemplate_h = (const char*) temp_binary_data_7;
 
 //================== jucer_ComponentTemplate.cpp ==================
-static const unsigned char temp_8626361b[] =
+static const unsigned char temp_binary_data_8[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
@@ -574,10 +574,10 @@ static const unsigned char temp_8626361b[] =
 "//[EndFile] You can add extra defines here...\r\n"
 "//[/EndFile]";
 
-const char* jucer_ComponentTemplate_cpp = (const char*) temp_8626361b;
+const char* jucer_ComponentTemplate_cpp = (const char*) temp_binary_data_8;
 
 //================== jucer_ComponentTemplate.h ==================
-static const unsigned char temp_363772e0[] =
+static const unsigned char temp_binary_data_9[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
@@ -643,10 +643,10 @@ static const unsigned char temp_363772e0[] =
 "\r\n"
 "#endif   // %%headerGuard%%";
 
-const char* jucer_ComponentTemplate_h = (const char*) temp_363772e0;
+const char* jucer_ComponentTemplate_h = (const char*) temp_binary_data_9;
 
 //================== jucer_ContentCompTemplate.cpp ==================
-static const unsigned char temp_7e4c4c06[] =
+static const unsigned char temp_binary_data_10[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
@@ -684,10 +684,10 @@ static const unsigned char temp_7e4c4c06[] =
 "    // update their positions.\r\n"
 "}\r\n";
 
-const char* jucer_ContentCompTemplate_cpp = (const char*) temp_7e4c4c06;
+const char* jucer_ContentCompTemplate_cpp = (const char*) temp_binary_data_10;
 
 //================== jucer_ContentCompTemplate.h ==================
-static const unsigned char temp_4a30078b[] =
+static const unsigned char temp_binary_data_11[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
@@ -725,10 +725,10 @@ static const unsigned char temp_4a30078b[] =
 "\r\n"
 "#endif  // HEADERGUARD\r\n";
 
-const char* jucer_ContentCompTemplate_h = (const char*) temp_4a30078b;
+const char* jucer_ContentCompTemplate_h = (const char*) temp_binary_data_11;
 
 //================== jucer_InlineComponentTemplate.h ==================
-static const unsigned char temp_cd7c7047[] =
+static const unsigned char temp_binary_data_12[] =
 "//==============================================================================\r\n"
 "class COMPONENTCLASS    : public Component\r\n"
 "{\r\n"
@@ -770,10 +770,10 @@ static const unsigned char temp_cd7c7047[] =
 "    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (COMPONENTCLASS)\r\n"
 "};\r\n";
 
-const char* jucer_InlineComponentTemplate_h = (const char*) temp_cd7c7047;
+const char* jucer_InlineComponentTemplate_h = (const char*) temp_binary_data_12;
 
 //================== jucer_MainConsoleAppTemplate.cpp ==================
-static const unsigned char temp_794304c3[] =
+static const unsigned char temp_binary_data_13[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
@@ -797,10 +797,10 @@ static const unsigned char temp_794304c3[] =
 "    return 0;\r\n"
 "}\r\n";
 
-const char* jucer_MainConsoleAppTemplate_cpp = (const char*) temp_794304c3;
+const char* jucer_MainConsoleAppTemplate_cpp = (const char*) temp_binary_data_13;
 
 //================== jucer_MainTemplate_NoWindow.cpp ==================
-static const unsigned char temp_2f039a1[] =
+static const unsigned char temp_binary_data_14[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
@@ -856,10 +856,10 @@ static const unsigned char temp_2f039a1[] =
 "// This macro generates the main() routine that launches the app.\r\n"
 "START_JUCE_APPLICATION (APPCLASSNAME)\r\n";
 
-const char* jucer_MainTemplate_NoWindow_cpp = (const char*) temp_2f039a1;
+const char* jucer_MainTemplate_NoWindow_cpp = (const char*) temp_binary_data_14;
 
 //================== jucer_MainTemplate_Window.cpp ==================
-static const unsigned char temp_b2f1a7c0[] =
+static const unsigned char temp_binary_data_15[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
@@ -959,10 +959,10 @@ static const unsigned char temp_b2f1a7c0[] =
 "// This macro generates the main() routine that launches the app.\r\n"
 "START_JUCE_APPLICATION (APPCLASSNAME)\r\n";
 
-const char* jucer_MainTemplate_Window_cpp = (const char*) temp_b2f1a7c0;
+const char* jucer_MainTemplate_Window_cpp = (const char*) temp_binary_data_15;
 
 //================== jucer_NewComponentTemplate.cpp ==================
-static const unsigned char temp_e0f76d5d[] =
+static const unsigned char temp_binary_data_16[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
@@ -1015,10 +1015,10 @@ static const unsigned char temp_e0f76d5d[] =
 "\r\n"
 "}\r\n";
 
-const char* jucer_NewComponentTemplate_cpp = (const char*) temp_e0f76d5d;
+const char* jucer_NewComponentTemplate_cpp = (const char*) temp_binary_data_16;
 
 //================== jucer_NewComponentTemplate.h ==================
-static const unsigned char temp_5f1192a2[] =
+static const unsigned char temp_binary_data_17[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
@@ -1053,10 +1053,10 @@ static const unsigned char temp_5f1192a2[] =
 "\r\n"
 "#endif  // HEADERGUARD\r\n";
 
-const char* jucer_NewComponentTemplate_h = (const char*) temp_5f1192a2;
+const char* jucer_NewComponentTemplate_h = (const char*) temp_binary_data_17;
 
 //================== jucer_NewCppFileTemplate.cpp ==================
-static const unsigned char temp_79decf5f[] =
+static const unsigned char temp_binary_data_18[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
@@ -1069,10 +1069,10 @@ static const unsigned char temp_79decf5f[] =
 "\r\n"
 "INCLUDE_CORRESPONDING_HEADER\r\n";
 
-const char* jucer_NewCppFileTemplate_cpp = (const char*) temp_79decf5f;
+const char* jucer_NewCppFileTemplate_cpp = (const char*) temp_binary_data_18;
 
 //================== jucer_NewCppFileTemplate.h ==================
-static const unsigned char temp_70d8d24[] =
+static const unsigned char temp_binary_data_19[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
@@ -1092,10 +1092,10 @@ static const unsigned char temp_70d8d24[] =
 "\r\n"
 "#endif  // HEADERGUARD\r\n";
 
-const char* jucer_NewCppFileTemplate_h = (const char*) temp_70d8d24;
+const char* jucer_NewCppFileTemplate_h = (const char*) temp_binary_data_19;
 
 //================== jucer_NewInlineComponentTemplate.h ==================
-static const unsigned char temp_627c3689[] =
+static const unsigned char temp_binary_data_20[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
@@ -1162,10 +1162,10 @@ static const unsigned char temp_627c3689[] =
 "\r\n"
 "#endif  // HEADERGUARD\r\n";
 
-const char* jucer_NewInlineComponentTemplate_h = (const char*) temp_627c3689;
+const char* jucer_NewInlineComponentTemplate_h = (const char*) temp_binary_data_20;
 
 //================== RecentFilesMenuTemplate.nib ==================
-static const unsigned char temp_7e972a77[] =
+static const unsigned char temp_binary_data_21[] =
 { 98,112,108,105,115,116,48,48,212,0,1,0,2,0,3,0,4,0,5,0,6,1,53,1,54,88,36,118,101,114,115,105,111,110,88,36,111,98,106,101,99,116,115,89,36,97,114,99,104,105,118,101,114,84,36,116,111,112,18,0,1,134,160,175,16,74,0,7,0,8,0,31,0,35,0,36,0,42,0,46,0,50,
 0,53,0,57,0,74,0,77,0,78,0,86,0,87,0,97,0,112,0,113,0,114,0,119,0,120,0,121,0,124,0,128,0,129,0,132,0,143,0,144,0,145,0,149,0,153,0,162,0,163,0,164,0,169,0,173,0,180,0,181,0,182,0,185,0,192,0,193,0,200,0,201,0,208,0,209,0,216,0,217,0,224,0,225,0,226,
 0,229,0,230,0,232,0,249,1,11,1,29,1,30,1,31,1,32,1,33,1,34,1,35,1,36,1,37,1,38,1,39,1,40,1,41,1,42,1,43,1,44,1,47,1,50,85,36,110,117,108,108,219,0,9,0,10,0,11,0,12,0,13,0,14,0,15,0,16,0,17,0,18,0,19,0,20,0,21,0,22,0,23,0,24,0,25,0,26,0,27,0,28,0,29,0,
@@ -1202,7 +1202,7 @@ static const unsigned char temp_7e972a77[] =
 7,157,7,159,7,161,7,163,7,165,7,167,7,169,7,171,7,173,7,175,7,177,7,179,7,181,7,190,7,192,7,225,7,227,7,229,7,231,7,233,7,235,7,237,7,239,7,241,7,243,7,245,7,247,7,249,7,251,7,253,7,255,8,2,8,5,8,8,8,11,8,14,8,17,8,20,8,23,8,26,8,29,8,32,8,35,8,38,8,
 41,8,44,8,53,8,55,8,56,8,65,8,67,8,68,8,77,8,92,8,97,8,115,8,120,8,134,0,0,0,0,0,0,2,2,0,0,0,0,0,0,1,57,0,0,0,0,0,0,0,0,0,0,0,0,0,0,8,136,0,0 };
 
-const char* RecentFilesMenuTemplate_nib = (const char*) temp_7e972a77;
+const char* RecentFilesMenuTemplate_nib = (const char*) temp_binary_data_21;
 
 
 const char* getNamedResource (const char*, int&) throw();
@@ -1243,5 +1243,33 @@ const char* getNamedResource (const char* resourceNameUTF8, int& numBytes) throw
     numBytes = 0;
     return 0;
 }
+
+const int namedResourceListSize = 22;
+
+const char* namedResourceList[] =
+{
+    "AudioPluginXCodeScript_txt",
+    "background_tile_png",
+    "colourscheme_dark_xml",
+    "colourscheme_light_xml",
+    "jucer_AudioPluginEditorTemplate_cpp",
+    "jucer_AudioPluginEditorTemplate_h",
+    "jucer_AudioPluginFilterTemplate_cpp",
+    "jucer_AudioPluginFilterTemplate_h",
+    "jucer_ComponentTemplate_cpp",
+    "jucer_ComponentTemplate_h",
+    "jucer_ContentCompTemplate_cpp",
+    "jucer_ContentCompTemplate_h",
+    "jucer_InlineComponentTemplate_h",
+    "jucer_MainConsoleAppTemplate_cpp",
+    "jucer_MainTemplate_NoWindow_cpp",
+    "jucer_MainTemplate_Window_cpp",
+    "jucer_NewComponentTemplate_cpp",
+    "jucer_NewComponentTemplate_h",
+    "jucer_NewCppFileTemplate_cpp",
+    "jucer_NewCppFileTemplate_h",
+    "jucer_NewInlineComponentTemplate_h",
+    "RecentFilesMenuTemplate_nib"
+};
 
 }

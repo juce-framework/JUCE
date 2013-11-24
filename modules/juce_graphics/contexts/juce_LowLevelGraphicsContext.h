@@ -25,12 +25,6 @@
 #ifndef JUCE_LOWLEVELGRAPHICSCONTEXT_H_INCLUDED
 #define JUCE_LOWLEVELGRAPHICSCONTEXT_H_INCLUDED
 
-#include "../images/juce_Image.h"
-#include "../geometry/juce_Path.h"
-#include "../geometry/juce_RectangleList.h"
-#include "../colour/juce_ColourGradient.h"
-#include "../colour/juce_FillType.h"
-class AttributedString;
 
 //==============================================================================
 /**
@@ -64,11 +58,9 @@ public:
         The coordinates are relative to the current origin, and indicate the new position
         of (0, 0).
     */
-    virtual void setOrigin (int x, int y) = 0;
+    virtual void setOrigin (Point<int>) = 0;
     virtual void addTransform (const AffineTransform&) = 0;
-    virtual float getScaleFactor() = 0;
-
-    virtual float getTargetDeviceScaleFactor()    { return 1.0f; }
+    virtual float getPhysicalPixelScaleFactor() = 0;
 
     virtual bool clipToRectangle (const Rectangle<int>&) = 0;
     virtual bool clipToRectangleList (const RectangleList<int>&) = 0;
@@ -88,18 +80,16 @@ public:
 
     //==============================================================================
     virtual void setFill (const FillType&) = 0;
-    virtual void setOpacity (float newOpacity) = 0;
+    virtual void setOpacity (float) = 0;
     virtual void setInterpolationQuality (Graphics::ResamplingQuality) = 0;
 
     //==============================================================================
     virtual void fillRect (const Rectangle<int>&, bool replaceExistingContents) = 0;
+    virtual void fillRect (const Rectangle<float>&) = 0;
+    virtual void fillRectList (const RectangleList<float>&) = 0;
     virtual void fillPath (const Path&, const AffineTransform&) = 0;
-
     virtual void drawImage (const Image&, const AffineTransform&) = 0;
-
-    virtual void drawLine (const Line <float>&) = 0;
-    virtual void drawVerticalLine (int x, float top, float bottom) = 0;
-    virtual void drawHorizontalLine (int y, float left, float right) = 0;
+    virtual void drawLine (const Line<float>&) = 0;
 
     virtual void setFont (const Font&) = 0;
     virtual const Font& getFont() = 0;

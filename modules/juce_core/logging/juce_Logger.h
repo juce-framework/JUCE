@@ -29,8 +29,6 @@
 #ifndef JUCE_LOGGER_H_INCLUDED
 #define JUCE_LOGGER_H_INCLUDED
 
-#include "../text/juce_String.h"
-
 
 //==============================================================================
 /**

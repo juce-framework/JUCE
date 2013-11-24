@@ -25,10 +25,6 @@
 #ifndef JUCE_MOUSEINPUTSOURCE_H_INCLUDED
 #define JUCE_MOUSEINPUTSOURCE_H_INCLUDED
 
-#include "../keyboard/juce_ModifierKeys.h"
-#include "../components/juce_Desktop.h"
-class MouseInputSourceInternal;
-
 
 //==============================================================================
 /**
@@ -54,14 +50,13 @@ class JUCE_API  MouseInputSource
 {
 public:
     //==============================================================================
-    /** Creates a MouseInputSource.
-        You should never actually create a MouseInputSource in your own code - the
-        library takes care of managing these objects.
-    */
-    MouseInputSource (int index, bool isMouseDevice);
+    MouseInputSource (const MouseInputSource&) noexcept;
+    MouseInputSource& operator= (const MouseInputSource&) noexcept;
+    ~MouseInputSource() noexcept;
 
-    /** Destructor. */
-    ~MouseInputSource();
+    //==============================================================================
+    bool operator== (const MouseInputSource& other) const noexcept     { return pimpl == other.pimpl; }
+    bool operator!= (const MouseInputSource& other) const noexcept     { return pimpl != other.pimpl; }
 
     //==============================================================================
     /** Returns true if this object represents a normal desk-based mouse device. */
@@ -161,7 +156,10 @@ public:
                                                     hidden; if true, it will only be hidden when it
                                                     is moved beyond the edge of the screen
     */
-    void enableUnboundedMouseMovement (bool isEnabled, bool keepCursorVisibleUntilOffscreen = false);
+    void enableUnboundedMouseMovement (bool isEnabled, bool keepCursorVisibleUntilOffscreen = false) const;
+
+    /** Returns true if this source is currently in "unbounded" mode. */
+    bool isUnboundedMouseMovementEnabled() const;
 
     /** Attempts to set this mouse pointer's screen position. */
     void setScreenPosition (Point<int> newPosition);
@@ -169,9 +167,13 @@ public:
 private:
     //==============================================================================
     friend class ComponentPeer;
+    friend class Desktop;
     friend class MouseInputSourceInternal;
-    ScopedPointer<MouseInputSourceInternal> pimpl;
+    MouseInputSourceInternal* pimpl;
 
+    struct SourceList;
+
+    explicit MouseInputSource (MouseInputSourceInternal*) noexcept;
     void handleEvent (ComponentPeer&, Point<int>, int64 time, const ModifierKeys);
     void handleWheel (ComponentPeer&, Point<int>, int64 time, const MouseWheelDetails&);
     void handleMagnifyGesture (ComponentPeer&, Point<int>, int64 time, float scaleFactor);
@@ -179,7 +181,7 @@ private:
     static Point<int> getCurrentRawMousePosition();
     static void setRawMousePosition (Point<int>);
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MouseInputSource)
+    JUCE_LEAK_DETECTOR (MouseInputSource)
 };
 
 

@@ -62,7 +62,7 @@ public:
     void elementToBack (PaintElement* element, const bool undoable);
 
     const Colour getBackgroundColour() const noexcept                       { return backgroundColour; }
-    void setBackgroundColour (const Colour& newColour) noexcept;
+    void setBackgroundColour (Colour newColour) noexcept;
 
     void fillWithBackground (Graphics& g, const bool drawOpaqueBackground);
     void drawElements (Graphics& g, const Rectangle<int>& relativeTo);

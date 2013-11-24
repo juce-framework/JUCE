@@ -35,7 +35,8 @@
 //==============================================================================
 class JucerDocument  : public ChangeBroadcaster,
                        private Timer,
-                       private CodeDocument::Listener
+                       private CodeDocument::Listener,
+                       private OpenDocumentManager::DocumentCloseListener
 {
 public:
     JucerDocument (SourceCodeDocument* cpp);
@@ -167,6 +168,7 @@ private:
     void codeDocumentTextInserted (const String& newText, int insertIndex) override;
     void codeDocumentTextDeleted (int startIndex, int endIndex) override;
     void userEditedCpp();
+    bool documentAboutToClose (OpenDocumentManager::Document*) override;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (JucerDocument);
 };

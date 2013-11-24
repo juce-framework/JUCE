@@ -22,11 +22,6 @@
   ==============================================================================
 */
 
-#ifndef JUCE_AUDIOUNITPLUGINFORMAT_H_INCLUDED
-#define JUCE_AUDIOUNITPLUGINFORMAT_H_INCLUDED
-
-#include "../format/juce_AudioPluginFormat.h"
-
 #if (JUCE_PLUGINHOST_AU && JUCE_MAC) || DOXYGEN
 
 //==============================================================================
@@ -43,7 +38,7 @@ public:
     //==============================================================================
     String getName() const override                { return "AudioUnit"; }
     void findAllTypesForFile (OwnedArray <PluginDescription>&, const String& fileOrIdentifier) override;
-    AudioPluginInstance* createInstanceFromDescription (const PluginDescription& desc) override;
+    AudioPluginInstance* createInstanceFromDescription (const PluginDescription& desc, double, int) override;
     bool fileMightContainThisPluginType (const String& fileOrIdentifier) override;
     String getNameOfPluginFromIdentifier (const String& fileOrIdentifier) override;
     bool pluginNeedsRescanning (const PluginDescription&) override;
@@ -58,5 +53,3 @@ private:
 };
 
 #endif
-
-#endif   // JUCE_AUDIOUNITPLUGINFORMAT_H_INCLUDED

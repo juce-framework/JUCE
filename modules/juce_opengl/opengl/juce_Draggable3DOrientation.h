@@ -25,8 +25,6 @@
 #ifndef JUCE_DRAGGABLE3DORIENTATION_H_INCLUDED
 #define JUCE_DRAGGABLE3DORIENTATION_H_INCLUDED
 
-#include "juce_Quaternion.h"
-
 
 //==============================================================================
 /**
@@ -36,11 +34,20 @@ class Draggable3DOrientation
 {
 public:
     typedef Vector3D<GLfloat> VectorType;
+    typedef Quaternion<GLfloat> QuaternionType;
 
     /** Creates a Draggable3DOrientation, initially set up to be aligned along the X axis. */
     Draggable3DOrientation (float objectRadius = 0.5f) noexcept
         : radius (jmax (0.1f, objectRadius)),
           quaternion (VectorType::xAxis(), 0)
+    {
+    }
+
+    /** Creates a Draggable3DOrientation from a user-supplied quaternion. */
+    Draggable3DOrientation (const Quaternion<GLfloat>& quaternionToUse,
+                            float objectRadius = 0.5f) noexcept
+        : radius (jmax (0.1f, objectRadius)),
+          quaternion (quaternionToUse)
     {
     }
 
@@ -73,7 +80,7 @@ public:
         will be treated as being relative to the centre of the rectangle passed to setViewport().
     */
     template <typename Type>
-    void mouseDown (const Point<Type>& mousePos) noexcept
+    void mouseDown (Point<Type> mousePos) noexcept
     {
         lastMouse = mousePosToProportion (mousePos.toFloat());
     }
@@ -83,7 +90,7 @@ public:
         to continue it.
     */
     template <typename Type>
-    void mouseDrag (const Point<Type>& mousePos) noexcept
+    void mouseDrag (Point<Type> mousePos) noexcept
     {
         const VectorType oldPos (projectOnSphere (lastMouse));
         lastMouse = mousePosToProportion (mousePos.toFloat());
@@ -100,16 +107,21 @@ public:
         return quaternion.getRotationMatrix();
     }
 
+    /** Provides direct access to the quaternion. */
+    QuaternionType& getQuaternion() noexcept
+    {
+        return quaternion;
+    }
+
    #if JUCE_USE_OPENGL_FIXED_FUNCTION
     /** Applies this rotation to the active OpenGL context's matrix. */
     void applyToOpenGLMatrix() const noexcept
     {
-        getRotationMatrix().applyToOpenGL();
+        OpenGLHelpers::applyMatrix (getRotationMatrix().mat);
     }
    #endif
 
 private:
-    typedef Quaternion<GLfloat> QuaternionType;
     Rectangle<int> area;
     float radius;
     QuaternionType quaternion;

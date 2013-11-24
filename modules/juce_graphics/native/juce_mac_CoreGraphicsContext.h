@@ -35,10 +35,9 @@ public:
     //==============================================================================
     bool isVectorDevice() const override         { return false; }
 
-    void setOrigin (int x, int y) override;
+    void setOrigin (Point<int>) override;
     void addTransform (const AffineTransform&) override;
-    float getScaleFactor() override;
-    float getTargetDeviceScaleFactor() override  { return targetScale; }
+    float getPhysicalPixelScaleFactor() override;
     bool clipToRectangle (const Rectangle<int>&) override;
     bool clipToRectangleList (const RectangleList<int>&) override;
     void excludeClipRectangle (const Rectangle<int>&) override;
@@ -61,13 +60,13 @@ public:
 
     //==============================================================================
     void fillRect (const Rectangle<int>&, bool replaceExistingContents) override;
+    void fillRect (const Rectangle<float>&) override;
+    void fillRectList (const RectangleList<float>&) override;
     void fillPath (const Path&, const AffineTransform&) override;
     void drawImage (const Image& sourceImage, const AffineTransform&) override;
 
     //==============================================================================
     void drawLine (const Line<float>&) override;
-    void drawVerticalLine (const int x, float top, float bottom) override;
-    void drawHorizontalLine (const int y, float left, float right) override;
     void setFont (const Font&) override;
     const Font& getFont() override;
     void drawGlyph (int glyphNumber, const AffineTransform&) override;

@@ -33,8 +33,8 @@
 class PaintElementGroup   : public PaintElement
 {
 public:
-    PaintElementGroup (PaintRoutine* owner)
-        : PaintElement (owner, "Group")
+    PaintElementGroup (PaintRoutine* pr)
+        : PaintElement (pr, "Group")
     {
     }
 
@@ -167,9 +167,9 @@ public:
             subElements.getUnchecked(i)->draw (g, layout, parentArea);
     }
 
-    void getEditableProperties (Array <PropertyComponent*>& properties)
+    void getEditableProperties (Array<PropertyComponent*>& props)
     {
-        properties.add (new UngroupProperty (this));
+        props.add (new UngroupProperty (this));
     }
 
     void fillInGeneratedCode (GeneratedCode& code, String& paintMethodCode)

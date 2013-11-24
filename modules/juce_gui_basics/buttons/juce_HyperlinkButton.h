@@ -25,8 +25,6 @@
 #ifndef JUCE_HYPERLINKBUTTON_H_INCLUDED
 #define JUCE_HYPERLINKBUTTON_H_INCLUDED
 
-#include "juce_Button.h"
-
 
 //==============================================================================
 /**

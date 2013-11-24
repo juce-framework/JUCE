@@ -33,7 +33,7 @@
 
 //==============================================================================
 // sets the process to 0=low priority, 1=normal, 2=high, 3=realtime
-void Process::setPriority (ProcessPriority prior)
+JUCE_API void JUCE_CALLTYPE Process::setPriority (ProcessPriority prior)
 {
     // TODO
 
@@ -62,11 +62,6 @@ void Process::setPriority (ProcessPriority prior)
     pthread_setschedparam (pthread_self(), policy, &param);
 }
 
-void Process::terminate()
-{
-    std::exit (EXIT_FAILURE);
-}
-
 JUCE_API bool JUCE_CALLTYPE juce_isRunningUnderDebugger()
 {
     return false;
@@ -77,5 +72,5 @@ JUCE_API bool JUCE_CALLTYPE Process::isRunningUnderDebugger()
     return juce_isRunningUnderDebugger();
 }
 
-void Process::raisePrivilege() {}
-void Process::lowerPrivilege() {}
+JUCE_API void JUCE_CALLTYPE Process::raisePrivilege() {}
+JUCE_API void JUCE_CALLTYPE Process::lowerPrivilege() {}

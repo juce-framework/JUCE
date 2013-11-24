@@ -437,9 +437,9 @@ String Colour::toString() const
     return String::toHexString ((int) argb.getARGB());
 }
 
-Colour Colour::fromString (const String& encodedColourString)
+Colour Colour::fromString (StringRef encodedColourString)
 {
-    return Colour ((uint32) encodedColourString.getHexValue32());
+    return Colour ((uint32) CharacterFunctions::HexParser<int>::parse (encodedColourString.text));
 }
 
 String Colour::toDisplayString (const bool includeAlphaValue) const

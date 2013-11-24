@@ -24,32 +24,30 @@
 
 ShapeButton::ShapeButton (const String& t, Colour n, Colour o, Colour d)
   : Button (t),
-    normalColour (n),
-    overColour (o),
-    downColour (d),
+    normalColour (n), overColour (o), downColour (d),
     maintainShapeProportions (false),
     outlineWidth (0.0f)
 {
 }
 
-ShapeButton::~ShapeButton()
-{
-}
+ShapeButton::~ShapeButton() {}
 
-void ShapeButton::setColours (Colour newNormalColour,
-                              Colour newOverColour,
-                              Colour newDownColour)
+void ShapeButton::setColours (Colour newNormalColour, Colour newOverColour, Colour newDownColour)
 {
     normalColour = newNormalColour;
     overColour = newOverColour;
     downColour = newDownColour;
 }
 
-void ShapeButton::setOutline (Colour newOutlineColour,
-                              const float newOutlineWidth)
+void ShapeButton::setOutline (Colour newOutlineColour, const float newOutlineWidth)
 {
     outlineColour = newOutlineColour;
     outlineWidth = newOutlineWidth;
+}
+
+void ShapeButton::setBorderSize (BorderSize<int> newBorder)
+{
+    border = newBorder;
 }
 
 void ShapeButton::setShape (const Path& newShape,
@@ -73,8 +71,8 @@ void ShapeButton::setShape (const Path& newShape,
         shape.applyTransform (AffineTransform::translation (-newBounds.getX(),
                                                             -newBounds.getY()));
 
-        setSize (1 + (int) (newBounds.getWidth() + outlineWidth),
-                 1 + (int) (newBounds.getHeight() + outlineWidth));
+        setSize (1 + (int) (newBounds.getWidth()  + outlineWidth) + border.getLeftAndRight(),
+                 1 + (int) (newBounds.getHeight() + outlineWidth) + border.getTopAndBottom());
     }
 
     repaint();
@@ -88,7 +86,7 @@ void ShapeButton::paintButton (Graphics& g, bool isMouseOverButton, bool isButto
         isButtonDown = false;
     }
 
-    Rectangle<float> r (getLocalBounds().toFloat().reduced (outlineWidth * 0.5f));
+    Rectangle<float> r (border.subtractedFrom (getLocalBounds()).toFloat().reduced (outlineWidth * 0.5f));
 
     if (getComponentEffect() != nullptr)
         r = r.reduced (2.0f);

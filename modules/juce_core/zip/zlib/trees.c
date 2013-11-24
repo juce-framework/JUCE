@@ -203,7 +203,7 @@ local void send_bits (deflate_state *s, int value, int length)
         s->bi_buf |= (value << s->bi_valid);
         put_short(s, s->bi_buf);
         s->bi_buf = (ush)value >> (Buf_size - s->bi_valid);
-        s->bi_valid += length - Buf_size;
+        s->bi_valid += (int) (length - Buf_size);
     } else {
         s->bi_buf |= value << s->bi_valid;
         s->bi_valid += length;

@@ -65,7 +65,7 @@
     ListenerList::DummyBailOutChecker, which is a dummy checker that always returns false.
 */
 template <class ListenerClass,
-          class ArrayType = Array <ListenerClass*> >
+          class ArrayType = Array<ListenerClass*> >
 class ListenerList
 {
     // Horrible macros required to support VC7..

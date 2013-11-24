@@ -25,9 +25,6 @@
 #ifndef JUCE_RECTANGLEPLACEMENT_H_INCLUDED
 #define JUCE_RECTANGLEPLACEMENT_H_INCLUDED
 
-#include "../geometry/juce_AffineTransform.h"
-#include "../geometry/juce_Rectangle.h"
-
 
 //==============================================================================
 /**
@@ -43,6 +40,9 @@ public:
     //==============================================================================
     /** Creates a RectanglePlacement object using a combination of flags from the Flags enum. */
     inline RectanglePlacement (int placementFlags) noexcept  : flags (placementFlags) {}
+
+    /** Creates a default RectanglePlacement object, which is equivalent to using the 'centred' flag. */
+    inline RectanglePlacement() noexcept                     : flags (centred) {}
 
     /** Creates a copy of another RectanglePlacement object. */
     RectanglePlacement (const RectanglePlacement& other) noexcept;

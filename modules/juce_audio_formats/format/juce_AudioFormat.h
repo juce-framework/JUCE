@@ -25,9 +25,6 @@
 #ifndef JUCE_AUDIOFORMAT_H_INCLUDED
 #define JUCE_AUDIOFORMAT_H_INCLUDED
 
-#include "juce_AudioFormatReader.h"
-#include "juce_AudioFormatWriter.h"
-#include "juce_MemoryMappedAudioFormatReader.h"
 
 //==============================================================================
 /**
@@ -45,7 +42,6 @@ public:
 
     //==============================================================================
     /** Returns the name of this format.
-
         e.g. "WAV file" or "AIFF file"
     */
     const String& getFormatName() const;
@@ -112,9 +108,7 @@ public:
     virtual AudioFormatReader* createReaderFor (InputStream* sourceStream,
                                                 bool deleteStreamIfOpeningFails) = 0;
 
-    /** Attempts to create a MemoryMappedAudioFormatReader, if possible for this
-        format.
-
+    /** Attempts to create a MemoryMappedAudioFormatReader, if possible for this format.
         If the format does not support this, the method will return nullptr;
     */
     virtual MemoryMappedAudioFormatReader* createMemoryMappedReader (const File& file);
@@ -162,11 +156,17 @@ protected:
     /** Creates an AudioFormat object.
 
         @param formatName       this sets the value that will be returned by getFormatName()
-        @param fileExtensions   a zero-terminated list of file extensions - this is what will
-                                be returned by getFileExtension()
+        @param fileExtensions   an array of file extensions - these will be returned by getFileExtensions()
     */
-    AudioFormat (const String& formatName,
-                 const StringArray& fileExtensions);
+    AudioFormat (String formatName, StringArray fileExtensions);
+
+    /** Creates an AudioFormat object.
+
+        @param formatName       this sets the value that will be returned by getFormatName()
+        @param fileExtensions   a whitespace-separated list of file extensions - these will
+                                be returned by getFileExtensions()
+    */
+    AudioFormat (StringRef formatName, StringRef fileExtensions);
 
 private:
     //==============================================================================

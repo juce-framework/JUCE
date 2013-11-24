@@ -39,124 +39,99 @@ namespace RenderingHelpers
 class TranslationOrTransform
 {
 public:
-    TranslationOrTransform (int x, int y) noexcept
-        : xOffset (x), yOffset (y), isOnlyTranslated (true), isIntegerScaling (true)
+    TranslationOrTransform (Point<int> origin) noexcept
+        : offset (origin), isOnlyTranslated (true), isRotated (false)
     {
     }
 
     TranslationOrTransform (const TranslationOrTransform& other) noexcept
-        : complexTransform (other.complexTransform),
-          xOffset (other.xOffset), yOffset (other.yOffset),
-          isOnlyTranslated (other.isOnlyTranslated), isIntegerScaling (other.isIntegerScaling)
+        : complexTransform (other.complexTransform), offset (other.offset),
+          isOnlyTranslated (other.isOnlyTranslated), isRotated (other.isRotated)
     {
     }
 
     AffineTransform getTransform() const noexcept
     {
-        return isOnlyTranslated ? AffineTransform::translation ((float) xOffset, (float) yOffset)
+        return isOnlyTranslated ? AffineTransform::translation (offset)
                                 : complexTransform;
     }
 
     AffineTransform getTransformWith (const AffineTransform& userTransform) const noexcept
     {
-        return isOnlyTranslated ? userTransform.translated ((float) xOffset, (float) yOffset)
+        return isOnlyTranslated ? userTransform.translated (offset)
                                 : userTransform.followedBy (complexTransform);
     }
 
-    void setOrigin (const int x, const int y) noexcept
+    void setOrigin (Point<int> delta) noexcept
     {
         if (isOnlyTranslated)
-        {
-            xOffset += x;
-            yOffset += y;
-        }
+            offset += delta;
         else
-        {
-            complexTransform = AffineTransform::translation ((float) x, (float) y)
+            complexTransform = AffineTransform::translation (delta)
                                                .followedBy (complexTransform);
-        }
     }
 
     void addTransform (const AffineTransform& t) noexcept
     {
-        if (isOnlyTranslated
-             && t.isOnlyTranslation()
-             && isIntegerTranslation (t))
+        if (isOnlyTranslated && t.isOnlyTranslation())
         {
-            xOffset += (int) t.getTranslationX();
-            yOffset += (int) t.getTranslationY();
+            const int tx = (int) (t.getTranslationX() * 256.0f);
+            const int ty = (int) (t.getTranslationY() * 256.0f);
+
+            if (((tx | ty) & 0xf8) == 0)
+            {
+                offset += Point<int> (tx >> 8, ty >> 8);
+                return;
+            }
         }
-        else
-        {
-            complexTransform = getTransformWith (t);
-            isOnlyTranslated = false;
-            isIntegerScaling = isIntegerScale (complexTransform);
-        }
+
+        complexTransform = getTransformWith (t);
+        isOnlyTranslated = false;
+        isRotated = (complexTransform.mat01 != 0 || complexTransform.mat10 != 0);
     }
 
-    float getScaleFactor() const noexcept
+    float getPhysicalPixelScaleFactor() const noexcept
     {
-        return isOnlyTranslated ? 1.0f : complexTransform.getScaleFactor();
+        return isOnlyTranslated ? 1.0f : std::abs (complexTransform.getScaleFactor());
     }
 
-    void moveOriginInDeviceSpace (const int dx, const int dy) noexcept
+    void moveOriginInDeviceSpace (Point<int> delta) noexcept
     {
         if (isOnlyTranslated)
-        {
-            xOffset += dx;
-            yOffset += dy;
-        }
+            offset += delta;
         else
-        {
-            complexTransform = complexTransform.translated ((float) dx, (float) dy);
-        }
+            complexTransform = complexTransform.translated (delta);
     }
 
-    template <typename Type>
-    Rectangle<Type> translated (const Rectangle<Type>& r) const noexcept
+    Rectangle<int> translated (const Rectangle<int>& r) const noexcept
     {
         jassert (isOnlyTranslated);
-        return r.translated (static_cast <Type> (xOffset),
-                             static_cast <Type> (yOffset));
+        return r + offset;
     }
 
-    template <typename Type>
-    Rectangle<Type> transformed (const Rectangle<Type>& r) const noexcept
+    Rectangle<float> translated (const Rectangle<float>& r) const noexcept
     {
+        jassert (isOnlyTranslated);
+        return r + offset.toFloat();
+    }
+
+    template <typename RectangleOrPoint>
+    RectangleOrPoint transformed (const RectangleOrPoint& r) const noexcept
+    {
+        jassert (! isOnlyTranslated);
         return r.transformedBy (complexTransform);
     }
 
     template <typename Type>
     Rectangle<Type> deviceSpaceToUserSpace (const Rectangle<Type>& r) const noexcept
     {
-        return isOnlyTranslated ? r.translated (-xOffset, -yOffset)
+        return isOnlyTranslated ? r - offset
                                 : r.transformedBy (complexTransform.inverted());
     }
 
     AffineTransform complexTransform;
-    int xOffset, yOffset;
-    bool isOnlyTranslated, isIntegerScaling;
-
-private:
-    static inline bool isIntegerTranslation (const AffineTransform& t) noexcept
-    {
-        const int tx = (int) (t.getTranslationX() * 256.0f);
-        const int ty = (int) (t.getTranslationY() * 256.0f);
-        return ((tx | ty) & 0xf8) == 0;
-    }
-
-    static inline bool isIntegerScale (const AffineTransform& t) noexcept
-    {
-        if (t.mat01 != 0 || t.mat10 != 0)
-            return false;
-
-        const int tx = (int) (t.getTranslationX() * 256.0f);
-        const int ty = (int) (t.getTranslationY() * 256.0f);
-        const int txs = (int) (t.mat00 * 256.0f);
-        const int tys = (int) (t.mat11 * 256.0f);
-
-        return ((tx | ty | txs | tys) & 0xf8) == 0;
-    }
+    Point<int> offset;
+    bool isOnlyTranslated, isRotated;
 };
 
 //==============================================================================
@@ -167,7 +142,7 @@ class GlyphCache  : private DeletedAtShutdown
 public:
     GlyphCache()
     {
-        addNewGlyphSlots (120);
+        reset();
     }
 
     ~GlyphCache()
@@ -186,7 +161,7 @@ public:
     }
 
     //==============================================================================
-    void drawGlyph (RenderTargetType& target, const Font& font, const int glyphNumber, float x, float y)
+    void drawGlyph (RenderTargetType& target, const Font& font, const int glyphNumber, Point<float> pos)
     {
         ++accessCounter;
         CachedGlyphType* glyph = nullptr;
@@ -229,17 +204,28 @@ public:
         }
 
         glyph->lastAccessCount = accessCounter.value;
-        glyph->draw (target, x, y);
+        glyph->draw (target, pos);
+    }
+
+    void reset()
+    {
+        const ScopedWriteLock swl (lock);
+        glyphs.clear();
+        addNewGlyphSlots (120);
+        hits.set (0);
+        misses.set (0);
     }
 
 private:
-    friend class OwnedArray <CachedGlyphType>;
-    OwnedArray <CachedGlyphType> glyphs;
+    friend struct ContainerDeletePolicy<CachedGlyphType>;
+    OwnedArray<CachedGlyphType> glyphs;
     Atomic<int> accessCounter, hits, misses;
     ReadWriteLock lock;
 
     void addNewGlyphSlots (int num)
     {
+        glyphs.ensureStorageAllocated (glyphs.size() + num);
+
         while (--num >= 0)
             glyphs.add (new CachedGlyphType());
     }
@@ -280,13 +266,13 @@ class CachedGlyphEdgeTable
 public:
     CachedGlyphEdgeTable() : glyph (0), lastAccessCount (0) {}
 
-    void draw (RendererType& state, float x, const float y) const
+    void draw (RendererType& state, Point<float> pos) const
     {
         if (snapToIntegerCoordinate)
-            x = std::floor (x + 0.5f);
+            pos.x = std::floor (pos.x + 0.5f);
 
         if (edgeTable != nullptr)
-            state.fillEdgeTable (*edgeTable, x, roundToInt (y));
+            state.fillEdgeTable (*edgeTable, pos.x, roundToInt (pos.y));
     }
 
     void generate (const Font& newFont, const int glyphNumber)
@@ -297,12 +283,11 @@ public:
         glyph = glyphNumber;
 
         const float fontHeight = font.getHeight();
-        edgeTable = typeface->getEdgeTableForGlyph (glyphNumber,
-                                                    AffineTransform::scale (fontHeight * font.getHorizontalScale(), fontHeight)
-                                                                  #if JUCE_MAC || JUCE_IOS
-                                                                    .translated (0.0f, -0.5f)
-                                                                  #endif
-                                                    );
+        edgeTable = typeface->getEdgeTableForGlyph (glyphNumber, AffineTransform::scale (fontHeight * font.getHorizontalScale(),
+                                                                                         fontHeight));
+
+        if (edgeTable != nullptr)
+            edgeTable->multiplyLevels (1.5f);
     }
 
     Font font;
@@ -1033,7 +1018,8 @@ namespace EdgeTableFillers
                             ++dest;
                             continue;
                         }
-                        else if (! repeatPattern)
+
+                        if (! repeatPattern)
                         {
                             // At a top or bottom edge..
                             if (loResY < 0)
@@ -1313,9 +1299,9 @@ namespace EdgeTableFillers
             public:
                 BresenhamInterpolator() noexcept {}
 
-                void set (const int n1, const int n2, const int numSteps_, const int offsetInt) noexcept
+                void set (const int n1, const int n2, const int steps, const int offsetInt) noexcept
                 {
-                    numSteps = numSteps_;
+                    numSteps = steps;
                     step = (n2 - n1) / numSteps;
                     remainder = modulo = (n2 - n1) % numSteps;
                     n = n1 + offsetInt;
@@ -1578,6 +1564,7 @@ struct ClipRegions
         EdgeTableRegion (const Rectangle<int>& r)       : edgeTable (r) {}
         EdgeTableRegion (const Rectangle<float>& r)     : edgeTable (r) {}
         EdgeTableRegion (const RectangleList<int>& r)   : edgeTable (r) {}
+        EdgeTableRegion (const RectangleList<float>& r) : edgeTable (r) {}
         EdgeTableRegion (const Rectangle<int>& bounds, const Path& p, const AffineTransform& t) : edgeTable (bounds, p, t) {}
         EdgeTableRegion (const EdgeTableRegion& other)  : Base(), edgeTable (other.edgeTable) {}
 
@@ -1795,11 +1782,7 @@ struct ClipRegions
             return toEdgeTable()->clipToImageAlpha (image, transform, quality);
         }
 
-        void translate (Point<int> delta)
-        {
-            clip.offsetAll (delta.x, delta.y);
-        }
-
+        void translate (Point<int> delta)                           { clip.offsetAll (delta); }
         bool clipRegionIntersects (const Rectangle<int>& r) const   { return clip.intersects (r); }
         Rectangle<int> getClipBounds() const                        { return clip.getBounds(); }
 
@@ -1915,7 +1898,8 @@ struct ClipRegions
                     const int clipTop    = i->getY();
                     const int clipBottom = i->getBottom();
 
-                    if (f.totalBottom > clipTop && f.totalTop < clipBottom && f.totalRight > clipLeft && f.totalLeft < clipRight)
+                    if (f.totalBottom > clipTop && f.totalTop < clipBottom
+                         && f.totalRight > clipLeft && f.totalLeft < clipRight)
                     {
                         if (f.isOnePixelWide())
                         {
@@ -2000,13 +1984,13 @@ public:
     typedef typename ClipRegions<SavedStateType>::RectangleListRegion    RectangleListRegionType;
 
     SavedStateBase (const Rectangle<int>& initialClip)
-        : clip (new RectangleListRegionType (initialClip)), transform (0, 0),
+        : clip (new RectangleListRegionType (initialClip)), transform (Point<int>()),
           interpolationQuality (Graphics::mediumResamplingQuality), transparencyLayerAlpha (1.0f)
     {
     }
 
-    SavedStateBase (const RectangleList<int>& clipList, int x, int y)
-        : clip (new RectangleListRegionType (clipList)), transform (x, y),
+    SavedStateBase (const RectangleList<int>& clipList, Point<int> origin)
+        : clip (new RectangleListRegionType (clipList)), transform (origin),
           interpolationQuality (Graphics::mediumResamplingQuality), transparencyLayerAlpha (1.0f)
     {
     }
@@ -2029,7 +2013,7 @@ public:
                 cloneClipIfMultiplyReferenced();
                 clip = clip->clipToRectangle (transform.translated (r));
             }
-            else if (transform.isIntegerScaling)
+            else if (! transform.isRotated)
             {
                 cloneClipIfMultiplyReferenced();
                 clip = clip->clipToRectangle (transform.transformed (r));
@@ -2053,10 +2037,10 @@ public:
             {
                 cloneClipIfMultiplyReferenced();
                 RectangleList<int> offsetList (r);
-                offsetList.offsetAll (transform.xOffset, transform.yOffset);
+                offsetList.offsetAll (transform.offset.x, transform.offset.y);
                 clip = clip->clipToRectangleList (offsetList);
             }
-            else if (transform.isIntegerScaling)
+            else if (! transform.isRotated)
             {
                 cloneClipIfMultiplyReferenced();
                 RectangleList<int> scaledList;
@@ -2075,6 +2059,16 @@ public:
         return clip != nullptr;
     }
 
+    static Rectangle<int> getLargestIntegerWithin (Rectangle<float> r)
+    {
+        const int x1 = (int) std::ceil (r.getX());
+        const int y1 = (int) std::ceil (r.getY());
+        const int x2 = (int) std::floor (r.getRight());
+        const int y2 = (int) std::floor (r.getBottom());
+
+        return Rectangle<int> (x1, y1, x2 - x1, y2 - y1);
+    }
+
     bool excludeClipRectangle (const Rectangle<int>& r)
     {
         if (clip != nullptr)
@@ -2083,11 +2077,11 @@ public:
 
             if (transform.isOnlyTranslated)
             {
-                clip = clip->excludeClipRectangle (transform.translated (r));
+                clip = clip->excludeClipRectangle (getLargestIntegerWithin (transform.translated (r.toFloat())));
             }
-            else if (transform.isIntegerScaling)
+            else if (! transform.isRotated)
             {
-                clip = clip->excludeClipRectangle (transform.transformed (r));
+                clip = clip->excludeClipRectangle (getLargestIntegerWithin (transform.transformed (r.toFloat())));
             }
             else
             {
@@ -2197,11 +2191,18 @@ public:
         if (clip != nullptr)
         {
             if (transform.isOnlyTranslated)
+            {
                 fillTargetRect (transform.translated (r), replaceContents);
-            else if (transform.isIntegerScaling)
+            }
+            else if (! transform.isRotated)
+            {
                 fillTargetRect (transform.transformed (r), replaceContents);
+            }
             else
+            {
+                jassert (! replaceContents); // not implemented..
                 fillRectAsPath (r);
+            }
         }
     }
 
@@ -2211,10 +2212,32 @@ public:
         {
             if (transform.isOnlyTranslated)
                 fillTargetRect (transform.translated (r));
-            else if (transform.isIntegerScaling)
+            else if (! transform.isRotated)
                 fillTargetRect (transform.transformed (r));
             else
                 fillRectAsPath (r);
+        }
+    }
+
+    void fillRectList (const RectangleList<float>& list)
+    {
+        if (clip != nullptr)
+        {
+            if (! transform.isRotated)
+            {
+                RectangleList<float> transformed (list);
+
+                if (transform.isOnlyTranslated)
+                    transformed.offsetAll (transform.offset.toFloat());
+                else
+                    transformed.transformAll (transform.getTransform());
+
+                fillShape (new EdgeTableRegionType (transformed), false);
+            }
+            else
+            {
+                fillPath (list.toPath(), AffineTransform::identity);
+            }
         }
     }
 
@@ -2226,13 +2249,10 @@ public:
 
     void fillEdgeTable (const EdgeTable& edgeTable, const float x, const int y)
     {
-        jassert (transform.isOnlyTranslated);
-
         if (clip != nullptr)
         {
             EdgeTableRegionType* edgeTableClip = new EdgeTableRegionType (edgeTable);
-            edgeTableClip->edgeTable.translate (x + transform.xOffset,
-                                                y + transform.yOffset);
+            edgeTableClip->edgeTable.translate (x, y);
             fillShape (edgeTableClip, false);
         }
     }
@@ -2250,6 +2270,14 @@ public:
             renderImage (sourceImage, trans, nullptr);
     }
 
+    static bool isOnlyTranslationAllowingError (const AffineTransform& t)
+    {
+        return (std::abs (t.mat01) < 0.002)
+            && (std::abs (t.mat10) < 0.002)
+            && (std::abs (t.mat00 - 1.0f) < 0.002)
+            && (std::abs (t.mat11 - 1.0f) < 0.002);
+    }
+
     void renderImage (const Image& sourceImage, const AffineTransform& trans,
                       const BaseRegionType* const tiledFillClipRegion)
     {
@@ -2257,7 +2285,7 @@ public:
 
         const int alpha = fillType.colour.getAlpha();
 
-        if (t.isOnlyTranslation())
+        if (isOnlyTranslationAllowingError (t))
         {
             // If our translation doesn't involve any distortion, just use a simple blit..
             int tx = (int) (t.getTranslationX() * 256.0f);
@@ -2369,8 +2397,8 @@ public:
     {
     }
 
-    SoftwareRendererSavedState (const Image& im, const RectangleList<int>& clipList, int x, int y)
-        : BaseClass (clipList, x, y), image (im)
+    SoftwareRendererSavedState (const Image& im, const RectangleList<int>& clipList, Point<int> origin)
+        : BaseClass (clipList, origin), image (im)
     {
     }
 
@@ -2389,8 +2417,7 @@ public:
 
             s->image = Image (Image::ARGB, layerBounds.getWidth(), layerBounds.getHeight(), true);
             s->transparencyLayerAlpha = opacity;
-            s->transform.moveOriginInDeviceSpace (-layerBounds.getX(), -layerBounds.getY());
-
+            s->transform.moveOriginInDeviceSpace (-layerBounds.getPosition());
             s->cloneClipIfMultiplyReferenced();
             s->clip->translate (-layerBounds.getPosition());
         }
@@ -2406,9 +2433,15 @@ public:
 
             const ScopedPointer<LowLevelGraphicsContext> g (image.createLowLevelContext());
             g->setOpacity (finishedLayerState.transparencyLayerAlpha);
-            g->drawImage (finishedLayerState.image, AffineTransform::translation ((float) layerBounds.getX(),
-                                                                                  (float) layerBounds.getY()));
+            g->drawImage (finishedLayerState.image, AffineTransform::translation (layerBounds.getPosition()));
         }
+    }
+
+    typedef GlyphCache<CachedGlyphEdgeTable <SoftwareRendererSavedState>, SoftwareRendererSavedState> GlyphCacheType;
+
+    static void clearGlyphCache()
+    {
+        GlyphCacheType::getInstance().reset();
     }
 
     //==============================================================================
@@ -2416,12 +2449,29 @@ public:
     {
         if (clip != nullptr)
         {
-            if (trans.isOnlyTranslation() && transform.isOnlyTranslated)
+            if (trans.isOnlyTranslation() && ! transform.isRotated)
             {
-                GlyphCache <CachedGlyphEdgeTable <SoftwareRendererSavedState>, SoftwareRendererSavedState>::getInstance()
-                    .drawGlyph (*this, font, glyphNumber,
-                                trans.getTranslationX(),
-                                trans.getTranslationY());
+                GlyphCacheType& cache = GlyphCacheType::getInstance();
+
+                Point<float> pos (trans.getTranslationX(), trans.getTranslationY());
+
+                if (transform.isOnlyTranslated)
+                {
+                    cache.drawGlyph (*this, font, glyphNumber, pos + transform.offset.toFloat());
+                }
+                else
+                {
+                    pos = transform.transformed (pos);
+
+                    Font f (font);
+                    f.setHeight (font.getHeight() * transform.complexTransform.mat11);
+
+                    const float xScale = transform.complexTransform.mat00 / transform.complexTransform.mat11;
+                    if (std::abs (xScale - 1.0f) > 0.01f)
+                        f.setHorizontalScale (xScale);
+
+                    cache.drawGlyph (*this, f, glyphNumber, pos);
+                }
             }
             else
             {
@@ -2558,9 +2608,9 @@ class StackBasedLowLevelGraphicsContext  : public LowLevelGraphicsContext
 {
 public:
     bool isVectorDevice() const override                                         { return false; }
-    void setOrigin (int x, int y) override                                       { stack->transform.setOrigin (x, y); }
+    void setOrigin (Point<int> o) override                                       { stack->transform.setOrigin (o); }
     void addTransform (const AffineTransform& t) override                        { stack->transform.addTransform (t); }
-    float getScaleFactor() override                                              { return stack->transform.getScaleFactor(); }
+    float getPhysicalPixelScaleFactor() override                                 { return stack->transform.getPhysicalPixelScaleFactor(); }
     Rectangle<int> getClipBounds() const override                                { return stack->getClipBounds(); }
     bool isClipEmpty() const override                                            { return stack->clip == nullptr; }
     bool clipRegionIntersects (const Rectangle<int>& r) override                 { return stack->clipRegionIntersects (r); }
@@ -2577,10 +2627,10 @@ public:
     void setOpacity (float newOpacity) override                                  { stack->fillType.setOpacity (newOpacity); }
     void setInterpolationQuality (Graphics::ResamplingQuality quality) override  { stack->interpolationQuality = quality; }
     void fillRect (const Rectangle<int>& r, bool replace) override               { stack->fillRect (r, replace); }
+    void fillRect (const Rectangle<float>& r) override                           { stack->fillRect (r); }
+    void fillRectList (const RectangleList<float>& list) override                { stack->fillRectList (list); }
     void fillPath (const Path& path, const AffineTransform& t) override          { stack->fillPath (path, t); }
     void drawImage (const Image& im, const AffineTransform& t) override          { stack->drawImage (im, t); }
-    void drawVerticalLine (int x, float top, float bottom) override              { if (top < bottom) stack->fillRect (Rectangle<float> ((float) x, top, 1.0f, bottom - top)); }
-    void drawHorizontalLine (int y, float left, float right) override            { if (left < right) stack->fillRect (Rectangle<float> (left, (float) y, right - left, 1.0f)); }
     void drawGlyph (int glyphNumber, const AffineTransform& t) override          { stack->drawGlyph (glyphNumber, t); }
     void drawLine (const Line <float>& line) override                            { stack->drawLine (line); }
     void setFont (const Font& newFont) override                                  { stack->font = newFont; }

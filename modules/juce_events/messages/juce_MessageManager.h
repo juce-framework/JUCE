@@ -41,7 +41,7 @@ typedef void* (MessageCallbackFunction) (void* userData);
 /**
     This class is in charge of the application's event-dispatch loop.
 
-    @see Message, CallbackMessage, MessageManagerLock, JUCEApplication
+    @see Message, CallbackMessage, MessageManagerLock, JUCEApplication, JUCEApplicationBase
 */
 class JUCE_API  MessageManager
 {

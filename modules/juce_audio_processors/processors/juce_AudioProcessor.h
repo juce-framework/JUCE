@@ -25,10 +25,6 @@
 #ifndef JUCE_AUDIOPROCESSOR_H_INCLUDED
 #define JUCE_AUDIOPROCESSOR_H_INCLUDED
 
-#include "juce_AudioProcessorEditor.h"
-#include "juce_AudioProcessorListener.h"
-#include "juce_AudioPlayHead.h"
-
 enum ParamType {
     eParamTypeGeneric,
     eParamTypeBool,
@@ -618,7 +614,7 @@ public:
         The processor will not take ownership of the object, so the caller must delete it when
         it is no longer being used.
     */
-    void setPlayHead (AudioPlayHead* newPlayHead) noexcept;
+    virtual void setPlayHead (AudioPlayHead* newPlayHead);
 
     //==============================================================================
     /** This is called by the processor to specify its details before being played. */
@@ -647,13 +643,10 @@ public:
     */
     WrapperType wrapperType;
 
-    /** @internal */
-    static void JUCE_CALLTYPE setTypeOfNextNewPlugin (WrapperType);
 
     bool m_isInitialized;
     bool m_hasSideChain; // wrapper fills in if plugin has side-chain
 
-protected:
     //==============================================================================
     /** Helper function that just converts an xml element into a binary blob.
 
@@ -674,13 +667,17 @@ protected:
     static XmlElement* getXmlFromBinary (const void* data, int sizeInBytes);
 
     /** @internal */
+    static void JUCE_CALLTYPE setTypeOfNextNewPlugin (WrapperType);
+
+protected:
+    /** @internal */
     AudioPlayHead* playHead;
 
     /** @internal */
     void sendParamChangeMessageToListeners (int parameterIndex, float newValue);
 
 private:
-    Array <AudioProcessorListener*> listeners;
+    Array<AudioProcessorListener*> listeners;
     Component::SafePointer<AudioProcessorEditor> activeEditor;
     double sampleRate;
     int blockSize, numInputChannels, numOutputChannels, latencySamples;

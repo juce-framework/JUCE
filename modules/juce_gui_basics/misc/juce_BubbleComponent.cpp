@@ -39,7 +39,7 @@ void BubbleComponent::paint (Graphics& g)
     getLookAndFeel().drawBubble (g, *this, arrowTip.toFloat(), content.toFloat());
 
     g.reduceClipRegion (content);
-    g.setOrigin (content.getX(), content.getY());
+    g.setOrigin (content.getPosition());
 
     paintContent (g, content.getWidth(), content.getHeight());
 }

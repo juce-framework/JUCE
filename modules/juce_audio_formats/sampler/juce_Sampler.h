@@ -73,17 +73,17 @@ public:
 
     //==============================================================================
     /** Returns the sample's name */
-    const String& getName() const                           { return name; }
+    const String& getName() const noexcept                  { return name; }
 
     /** Returns the audio sample data.
-        This could be 0 if there was a problem loading it.
+        This could return nullptr if there was a problem loading the data.
     */
-    AudioSampleBuffer* getAudioData() const                 { return data; }
+    AudioSampleBuffer* getAudioData() const noexcept        { return data; }
 
 
     //==============================================================================
-    bool appliesToNote (const int midiNoteNumber);
-    bool appliesToChannel (const int midiChannel);
+    bool appliesToNote (const int midiNoteNumber) override;
+    bool appliesToChannel (const int midiChannel) override;
 
 
 private:
@@ -91,7 +91,7 @@ private:
     friend class SamplerVoice;
 
     String name;
-    ScopedPointer <AudioSampleBuffer> data;
+    ScopedPointer<AudioSampleBuffer> data;
     double sourceSampleRate;
     BigInteger midiNotes;
     int length, attackSamples, releaseSamples;
@@ -114,29 +114,22 @@ class JUCE_API  SamplerVoice    : public SynthesiserVoice
 {
 public:
     //==============================================================================
-    /** Creates a SamplerVoice.
-    */
+    /** Creates a SamplerVoice. */
     SamplerVoice();
 
     /** Destructor. */
     ~SamplerVoice();
 
-
     //==============================================================================
-    bool canPlaySound (SynthesiserSound* sound);
+    bool canPlaySound (SynthesiserSound*) override;
 
-    void startNote (const int midiNoteNumber,
-                    const float velocity,
-                    SynthesiserSound* sound,
-                    const int currentPitchWheelPosition);
+    void startNote (int midiNoteNumber, float velocity, SynthesiserSound*, int pitchWheel) override;
+    void stopNote (bool allowTailOff) override;
 
-    void stopNote (const bool allowTailOff);
+    void pitchWheelMoved (int newValue);
+    void controllerMoved (int controllerNumber, int newValue) override;
 
-    void pitchWheelMoved (const int newValue);
-    void controllerMoved (const int controllerNumber,
-                          const int newValue);
-
-    void renderNextBlock (AudioSampleBuffer& outputBuffer, int startSample, int numSamples);
+    void renderNextBlock (AudioSampleBuffer&, int startSample, int numSamples) override;
 
 
 private:

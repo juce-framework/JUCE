@@ -277,7 +277,7 @@ private:
     {
         XmlElement* const linker = xml.createNewChildElement ("Linker");
 
-        const char* defaultLibs[] = { "gdi32", "user32", "kernel32", "comctl32" };
+        static const char* defaultLibs[] = { "gdi32", "user32", "kernel32", "comctl32" };
 
         StringArray libs (defaultLibs, numElementsInArray (defaultLibs));
         libs.addTokens (getExternalLibrariesString(), ";\n", "\"'");
@@ -325,9 +325,9 @@ private:
         addCompileUnits (xml);
     }
 
-    void setAddOption (XmlElement& xml, const String& name, const String& value) const
+    void setAddOption (XmlElement& xml, const String& nm, const String& value) const
     {
-        xml.createNewChildElement ("Add")->setAttribute (name, value);
+        xml.createNewChildElement ("Add")->setAttribute (nm, value);
     }
 
     JUCE_DECLARE_NON_COPYABLE (CodeBlocksProjectExporter)

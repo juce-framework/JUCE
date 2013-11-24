@@ -25,12 +25,6 @@
 #ifndef JUCE_COMPONENTPEER_H_INCLUDED
 #define JUCE_COMPONENTPEER_H_INCLUDED
 
-#include "../components/juce_Component.h"
-#include "../mouse/juce_MouseCursor.h"
-#include "../keyboard/juce_TextInputTarget.h"
-
-class ComponentBoundsConstrainer;
-
 
 //==============================================================================
 /**
@@ -154,13 +148,13 @@ public:
     virtual Rectangle<int> getBounds() const = 0;
 
     /** Converts a position relative to the top-left of this component to screen coordinates. */
-    virtual Point<int> localToGlobal (const Point<int>& relativePosition) = 0;
+    virtual Point<int> localToGlobal (Point<int> relativePosition) = 0;
 
     /** Converts a rectangle relative to the top-left of this component to screen coordinates. */
     virtual Rectangle<int> localToGlobal (const Rectangle<int>& relativePosition);
 
     /** Converts a screen coordinate to a position relative to the top-left of this component. */
-    virtual Point<int> globalToLocal (const Point<int>& screenPosition) = 0;
+    virtual Point<int> globalToLocal (Point<int> screenPosition) = 0;
 
     /** Converts a screen area to a position relative to the top-left of this component. */
     virtual Rectangle<int> globalToLocal (const Rectangle<int>& screenPosition);
@@ -201,11 +195,11 @@ public:
 
     /** Checks if a point is in the window.
 
-        Coordinates are relative to the top-left of this window. If trueIfInAChildWindow
-        is false, then this returns false if the point is actually inside a child of this
-        window.
+        The position is relative to the top-left of this window, in unscaled peer coordinates.
+        If trueIfInAChildWindow is false, then this returns false if the point is actually
+        inside a child of this window.
     */
-    virtual bool contains (const Point<int>& position, bool trueIfInAChildWindow) const = 0;
+    virtual bool contains (Point<int> localPos, bool trueIfInAChildWindow) const = 0;
 
     /** Returns the size of the window frame that's around this window.
         Whether or not the window has a normal window frame depends on the flags
@@ -343,7 +337,7 @@ public:
     static bool isValidPeer (const ComponentPeer* peer) noexcept;
 
     //==============================================================================
-    virtual StringArray getAvailableRenderingEngines();
+    virtual StringArray getAvailableRenderingEngines() = 0;
     virtual int getCurrentRenderingEngine() const;
     virtual void setCurrentRenderingEngine (int index);
 

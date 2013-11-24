@@ -25,9 +25,6 @@
 #ifndef JUCE_COLOURGRADIENT_H_INCLUDED
 #define JUCE_COLOURGRADIENT_H_INCLUDED
 
-#include "juce_Colour.h"
-#include "../geometry/juce_Point.h"
-
 
 //==============================================================================
 /**

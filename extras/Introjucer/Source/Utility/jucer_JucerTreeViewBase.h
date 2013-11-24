@@ -36,15 +36,14 @@ public:
     JucerTreeViewBase();
     ~JucerTreeViewBase();
 
-    int getItemWidth() const                                { return -1; }
-    int getItemHeight() const                               { return 20; }
+    int getItemWidth() const override                   { return -1; }
+    int getItemHeight() const override                  { return 20; }
 
-    void paintItem (Graphics& g, int width, int height);
-    void paintOpenCloseButton (Graphics& g, int width, int height, bool isMouseOver);
-    Component* createItemComponent();
-    void itemClicked (const MouseEvent& e);
-    void itemSelectionChanged (bool isNowSelected);
-    void itemDoubleClicked (const MouseEvent&);
+    void paintOpenCloseButton (Graphics&, const Rectangle<float>& area, Colour backgroundColour, bool isMouseOver) override;
+    Component* createItemComponent() override;
+    void itemClicked (const MouseEvent& e) override;
+    void itemSelectionChanged (bool isNowSelected) override;
+    void itemDoubleClicked (const MouseEvent&) override;
 
     void cancelDelayedSelectionTimer();
 
@@ -99,7 +98,7 @@ protected:
 
     Colour getBackgroundColour() const;
     Colour getContrastingColour (float contrast) const;
-    Colour getContrastingColour (const Colour& targetColour, float minContrast) const;
+    Colour getContrastingColour (Colour targetColour, float minContrast) const;
 
 private:
     class ItemSelectionTimer;
@@ -159,13 +158,13 @@ public:
         g.drawFittedText (message, area.reduced (4, 2), Justification::centred, area.getHeight() / fontHeight);
     }
 
-    void paint (Graphics& g)
+    void paint (Graphics& g) override
     {
         if (emptyTreeMessage.isNotEmpty() && (rootItem == nullptr || rootItem->getNumSubItems() == 0))
             drawEmptyPanelMessage (*this, g, emptyTreeMessage);
     }
 
-    void resized()
+    void resized() override
     {
         tree.setBounds (getAvailableBounds());
     }
@@ -192,7 +191,7 @@ public:
         setInterceptsMouseClicks (false, true);
     }
 
-    void paint (Graphics& g)
+    void paint (Graphics& g) override
     {
         g.setColour (Colours::black);
         paintIcon (g);
@@ -205,7 +204,7 @@ public:
                              item.isIconCrossedOut());
     }
 
-    void resized()
+    void resized() override
     {
         item.textX = (int) item.getIconSize() + 8;
     }

@@ -39,16 +39,16 @@ void vorbis_bitrate_init(vorbis_info *vi,bitrate_manager_state *bm){
     bm->short_per_long=ci->blocksizes[1]/ci->blocksizes[0];
     bm->managed=1;
 
-    bm->avg_bitsper= rint(1.*bi->avg_rate*halfsamples/ratesamples);
-    bm->min_bitsper= rint(1.*bi->min_rate*halfsamples/ratesamples);
-    bm->max_bitsper= rint(1.*bi->max_rate*halfsamples/ratesamples);
+    bm->avg_bitsper= (int) rint(1.*bi->avg_rate*halfsamples/ratesamples);
+    bm->min_bitsper= (int) rint(1.*bi->min_rate*halfsamples/ratesamples);
+    bm->max_bitsper= (int) rint(1.*bi->max_rate*halfsamples/ratesamples);
 
     bm->avgfloat=PACKETBLOBS/2;
 
     /* not a necessary fix, but one that leads to a more balanced
        typical initialization */
     {
-      long desired_fill=bi->reservoir_bits*bi->reservoir_bias;
+      long desired_fill = (long) (bi->reservoir_bits*bi->reservoir_bias);
       bm->minmax_reservoir=desired_fill;
       bm->avg_reservoir=desired_fill;
     }
@@ -80,12 +80,12 @@ int vorbis_bitrate_addblock(vorbis_block *vb){
   codec_setup_info      *ci=(codec_setup_info*)vi->codec_setup;
   bitrate_manager_info  *bi=&ci->bi;
 
-  int  choice=rint(bm->avgfloat);
+  int  choice = (int) rint(bm->avgfloat);
   long this_bits=oggpack_bytes(vbi->packetblob[choice])*8;
   long min_target_bits=(vb->W?bm->min_bitsper*bm->short_per_long:bm->min_bitsper);
   long max_target_bits=(vb->W?bm->max_bitsper*bm->short_per_long:bm->max_bitsper);
   int  samples=ci->blocksizes[vb->W]>>1;
-  long desired_fill=bi->reservoir_bits*bi->reservoir_bias;
+  long desired_fill = (long) (bi->reservoir_bits*bi->reservoir_bias);
   if(!bm->managed){
     /* not a bitrate managed stream, but for API simplicity, we'll
        buffer the packet to keep the code path clean */
@@ -132,7 +132,7 @@ int vorbis_bitrate_addblock(vorbis_block *vb){
     slew=rint(choice-bm->avgfloat)/samples*vi->rate;
     if(slew<-slewlimit)slew=-slewlimit;
     if(slew>slewlimit)slew=slewlimit;
-    choice=rint(bm->avgfloat+= slew/vi->rate*samples);
+    choice = (int) rint(bm->avgfloat+= slew/vi->rate*samples);
     this_bits=oggpack_bytes(vbi->packetblob[choice])*8;
   }
 

@@ -113,7 +113,7 @@ namespace
         jassert (targetFolder.isDirectory());
 
         const File moduleFolderParent (moduleFolder.getParentDirectory());
-        LibraryModule module (moduleFolder.getChildFile (LibraryModule::getInfoFileName()));
+        LibraryModule module (moduleFolder.getChildFile (ModuleDescription::getManifestFileName()));
 
         if (! module.isValid())
         {
@@ -174,7 +174,7 @@ namespace
 
             while (i.next())
             {
-                LibraryModule module (i.getFile().getChildFile (LibraryModule::getInfoFileName()));
+                LibraryModule module (i.getFile().getChildFile (ModuleDescription::getManifestFileName()));
 
                 if (module.isValid())
                 {
@@ -185,7 +185,7 @@ namespace
 
                     var moduleInfo (new DynamicObject());
                     moduleInfo.getDynamicObject()->setProperty ("file", getModulePackageName (module));
-                    moduleInfo.getDynamicObject()->setProperty ("info", module.moduleInfo);
+                    moduleInfo.getDynamicObject()->setProperty ("info", module.moduleInfo.moduleInfo);
                     infoList.append (moduleInfo);
                 }
             }
@@ -203,24 +203,6 @@ namespace
                 if (result != 0)
                     return result;
             }
-        }
-
-        return 0;
-    }
-
-    int listModules()
-    {
-        hideDockIcon();
-
-        std::cout << "Downloading list of available modules..." << std::endl;
-        ModuleList list;
-        list.loadFromWebsite();
-
-        for (int i = 0; i < list.modules.size(); ++i)
-        {
-            const ModuleList::Module* m = list.modules.getUnchecked(i);
-
-            std::cout << m->uid << ": " << m->version << std::endl;
         }
 
         return 0;
@@ -248,13 +230,15 @@ namespace
                   << "Name: " << proj.getTitle() << std::endl
                   << "UID: " << proj.getProjectUID() << std::endl;
 
-        const int numModules = proj.getNumModules();
+        EnabledModuleList& modules = proj.getModules();
+
+        const int numModules = modules.getNumModules();
         if (numModules > 0)
         {
             std::cout << "Modules:" << std::endl;
 
             for (int i = 0; i < numModules; ++i)
-                std::cout << "  " << proj.getModuleID (i) << std::endl;
+                std::cout << "  " << modules.getModuleID (i) << std::endl;
         }
 
         return 0;
@@ -282,9 +266,6 @@ namespace
                   << " introjucer --resave-resources project_file" << std::endl
                   << "    Resaves just the binary resources for a project." << std::endl
                   << std::endl
-                  << " introjucer --listmodules" << std::endl
-                  << "    Displays a list of modules available from the website." << std::endl
-                  << std::endl
                   << " introjucer --status project_file" << std::endl
                   << "    Displays information about a project." << std::endl
                   << std::endl
@@ -311,7 +292,6 @@ int performCommandLine (const String& commandLine)
     if (matchArgument (args[0], "resave-resources"))    return resaveProject (args, true);
     if (matchArgument (args[0], "buildmodule"))         return buildModules (args, false);
     if (matchArgument (args[0], "buildallmodules"))     return buildModules (args, true);
-    if (matchArgument (args[0], "listmodules"))         return listModules();
     if (matchArgument (args[0], "status"))              return showStatus (args);
 
     return commandLineNotPerformed;

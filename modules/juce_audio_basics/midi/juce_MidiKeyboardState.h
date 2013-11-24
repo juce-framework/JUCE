@@ -25,7 +25,6 @@
 #ifndef JUCE_MIDIKEYBOARDSTATE_H_INCLUDED
 #define JUCE_MIDIKEYBOARDSTATE_H_INCLUDED
 
-#include "juce_MidiBuffer.h"
 class MidiKeyboardState;
 
 

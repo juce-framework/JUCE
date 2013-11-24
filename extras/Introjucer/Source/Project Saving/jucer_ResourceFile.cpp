@@ -23,15 +23,14 @@
 */
 
 #include "jucer_ResourceFile.h"
-#include "../Project/jucer_ProjectTreeViewBase.h"
 #include "../Application/jucer_OpenDocumentManager.h"
 
 static const char* resourceFileIdentifierString = "JUCER_BINARY_RESOURCE";
 
 
 //==============================================================================
-ResourceFile::ResourceFile (Project& project_)
-    : project (project_),
+ResourceFile::ResourceFile (Project& p)
+    : project (p),
       className ("BinaryData")
 {
     addResourcesFromProjectItem (project.getMainGroup());
@@ -150,14 +149,18 @@ bool ResourceFile::writeHeader (MemoryOutputStream& header)
             containsAnyImages = containsAnyImages
                                  || (ImageFileFormat::findImageFormatForStream (fileStream) != nullptr);
 
-            const String tempVariable ("temp_" + String::toHexString (file.hashCode()));
-
             header << "    extern const char*   " << variableName << ";" << newLine;
             header << "    const int            " << variableName << "Size = " << (int) dataSize << ";" << newLine << newLine;
         }
     }
 
-    header << "    // If you provide the name of one of the binary resource variables above, this function will" << newLine
+    header << "    // Points to the start of a list of resource names." << newLine
+           << "    extern const char* namedResourceList[];" << newLine
+           << newLine
+           << "    // Number of elements in the namedResourceList array." << newLine
+           << "    extern const int namedResourceListSize;" << newLine
+           << newLine
+           << "    // If you provide the name of one of the binary resource variables above, this function will" << newLine
            << "    // return the corresponding data and its size (or a null pointer if the name isn't found)." << newLine
            << "    const char* getNamedResource (const char* resourceNameUTF8, int& dataSizeInBytes) throw();" << newLine
            << "}" << newLine;
@@ -188,7 +191,7 @@ bool ResourceFile::writeCpp (MemoryOutputStream& cpp, const File& headerFile, in
             containsAnyImages = containsAnyImages
                                  || (ImageFileFormat::findImageFormatForStream (fileStream) != nullptr);
 
-            const String tempVariable ("temp_" + String::toHexString (file.hashCode()));
+            const String tempVariable ("temp_binary_data_" + String (i));
 
             cpp  << newLine << "//================== " << file.getFileName() << " ==================" << newLine
                 << "static const unsigned char " << tempVariable << "[] =" << newLine;
@@ -240,7 +243,17 @@ bool ResourceFile::writeCpp (MemoryOutputStream& cpp, const File& headerFile, in
 
         cpp << "    numBytes = 0;" << newLine
             << "    return 0;" << newLine
-            << "}" << newLine;
+            << "}" << newLine
+            << newLine
+            << "const int namedResourceListSize = " << files.size() <<  ";" << newLine
+            << newLine
+            << "const char* namedResourceList[] =" << newLine
+            << "{" << newLine;
+
+        for (int j = 0; j < files.size(); ++j)
+            cpp << "    " << variableNames[j].quoted() << (j < files.size() - 1 ? "," : "") << newLine;
+
+        cpp << "};" << newLine;
     }
 
     cpp << newLine

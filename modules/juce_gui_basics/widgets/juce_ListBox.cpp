@@ -49,6 +49,8 @@ public:
 
         if (ListBoxModel* m = owner.getModel())
         {
+            setMouseCursor (m->getMouseCursorForRow (row));
+
             customComponent = m->refreshComponentForRow (newRow, nowSelected, customComponent.release());
 
             if (customComponent != nullptr)
@@ -304,12 +306,7 @@ public:
 
     bool keyPressed (const KeyPress& key) override
     {
-        if (key.isKeyCode (KeyPress::upKey)
-            || key.isKeyCode (KeyPress::downKey)
-            || key.isKeyCode (KeyPress::pageUpKey)
-            || key.isKeyCode (KeyPress::pageDownKey)
-            || key.isKeyCode (KeyPress::homeKey)
-            || key.isKeyCode (KeyPress::endKey))
+        if (Viewport::respondsToKey (key))
         {
             const int allowableMods = owner.multipleSelection ? ModifierKeys::shiftModifier : 0;
 
@@ -906,10 +903,8 @@ Image ListBox::createSnapshotOfSelectedRows (int& imageX, int& imageY)
 
         if (rowComp != nullptr && isRowSelected (firstRow + i))
         {
-            const Point<int> pos (getLocalPoint (rowComp, Point<int>()));
-
             Graphics g (snapshot);
-            g.setOrigin (pos.getX() - imageX, pos.getY() - imageY);
+            g.setOrigin (getLocalPoint (rowComp, Point<int>()) - imageArea.getPosition());
 
             if (g.reduceClipRegion (rowComp->getLocalBounds()))
             {
@@ -959,3 +954,4 @@ void ListBoxModel::returnKeyPressed (int) {}
 void ListBoxModel::listWasScrolled() {}
 var ListBoxModel::getDragSourceDescription (const SparseSet<int>&)      { return var::null; }
 String ListBoxModel::getTooltipForRow (int)                             { return String::empty; }
+MouseCursor ListBoxModel::getMouseCursorForRow (int)                    { return MouseCursor::NormalCursor; }

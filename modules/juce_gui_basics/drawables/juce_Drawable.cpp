@@ -87,8 +87,7 @@ DrawableComposite* Drawable::getParent() const
 
 void Drawable::transformContextToCorrectOrigin (Graphics& g)
 {
-    g.setOrigin (originRelativeToComponent.x,
-                 originRelativeToComponent.y);
+    g.setOrigin (originRelativeToComponent);
 }
 
 void Drawable::parentHierarchyChanged()

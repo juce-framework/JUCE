@@ -82,9 +82,9 @@ public:
 
     bool isVectorDevice() const { return false; }
 
-    void setOrigin (int x, int y)
+    void setOrigin (Point<int> o)
     {
-        addTransform (AffineTransform::translation ((float) x, (float) y));
+        addTransform (AffineTransform::translation ((float) o.x, (float) o.y));
     }
 
     void addTransform (const AffineTransform& transform)
@@ -92,7 +92,7 @@ public:
         currentState->transform = transform.followedBy (currentState->transform);
     }
 
-    float getScaleFactor()
+    float getPhysicalPixelScaleFactor()
     {
         return currentState->transform.getScaleFactor();
     }
@@ -179,10 +179,21 @@ public:
 
     void fillRect (const Rectangle<int>& r, bool /*replaceExistingContents*/)
     {
+        fillRect (r.toFloat());
+    }
+
+    void fillRect (const Rectangle<float>& r)
+    {
         renderingTarget->SetTransform (transformToMatrix (currentState->transform));
         currentState->createBrush();
         renderingTarget->FillRectangle (rectangleToRectF (r), currentState->currentBrush);
         renderingTarget->SetTransform (D2D1::IdentityMatrix());
+    }
+
+    void fillRectList (const RectangleList<float>& list)
+    {
+        for (const Rectangle<float>* r = list.begin(), * const e = list.end(); r != e; ++r)
+            fillRect (*r);
     }
 
     void fillPath (const Path& p, const AffineTransform& transform)
@@ -227,30 +238,6 @@ public:
 
         renderingTarget->DrawLine (D2D1::Point2F (line.getStartX(), line.getStartY()),
                                    D2D1::Point2F (line.getEndX(), line.getEndY()),
-                                   currentState->currentBrush);
-        renderingTarget->SetTransform (D2D1::IdentityMatrix());
-    }
-
-    void drawVerticalLine (int x, float top, float bottom)
-    {
-        // xxx doesn't seem to be correctly aligned, may need nudging by 0.5 to match the software renderer's behaviour
-        renderingTarget->SetTransform (transformToMatrix (currentState->transform));
-        currentState->createBrush();
-
-        renderingTarget->DrawLine (D2D1::Point2F ((FLOAT) x, top),
-                                   D2D1::Point2F ((FLOAT) x, bottom),
-                                   currentState->currentBrush);
-        renderingTarget->SetTransform (D2D1::IdentityMatrix());
-    }
-
-    void drawHorizontalLine (int y, float left, float right)
-    {
-        // xxx doesn't seem to be correctly aligned, may need nudging by 0.5 to match the software renderer's behaviour
-        renderingTarget->SetTransform (transformToMatrix (currentState->transform));
-        currentState->createBrush();
-
-        renderingTarget->DrawLine (D2D1::Point2F (left, (FLOAT) y),
-                                   D2D1::Point2F (right, (FLOAT) y),
                                    currentState->currentBrush);
         renderingTarget->SetTransform (D2D1::IdentityMatrix());
     }
@@ -717,7 +704,8 @@ private:
     OwnedArray<SavedState> states;
 
     //==============================================================================
-    static D2D1_RECT_F rectangleToRectF (const Rectangle<int>& r)
+    template <typename Type>
+    static D2D1_RECT_F rectangleToRectF (const Rectangle<Type>& r)
     {
         return D2D1::RectF ((float) r.getX(), (float) r.getY(), (float) r.getRight(), (float) r.getBottom());
     }

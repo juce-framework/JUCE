@@ -25,8 +25,6 @@
 #ifndef JUCE_CHANNELREMAPPINGAUDIOSOURCE_H_INCLUDED
 #define JUCE_CHANNELREMAPPINGAUDIOSOURCE_H_INCLUDED
 
-#include "juce_AudioSource.h"
-
 
 //==============================================================================
 /**
@@ -113,32 +111,29 @@ public:
 
     //==============================================================================
     /** Returns an XML object to encapsulate the state of the mappings.
-
         @see restoreFromXml
     */
     XmlElement* createXml() const;
 
     /** Restores the mappings from an XML object created by createXML().
-
         @see createXml
     */
-    void restoreFromXml (const XmlElement& e);
+    void restoreFromXml (const XmlElement&);
 
     //==============================================================================
-    void prepareToPlay (int samplesPerBlockExpected, double sampleRate);
-    void releaseResources();
-    void getNextAudioBlock (const AudioSourceChannelInfo& bufferToFill);
+    void prepareToPlay (int samplesPerBlockExpected, double sampleRate) override;
+    void releaseResources() override;
+    void getNextAudioBlock (const AudioSourceChannelInfo&) override;
 
 
 private:
     //==============================================================================
     OptionalScopedPointer<AudioSource> source;
-    Array <int> remappedInputs, remappedOutputs;
+    Array<int> remappedInputs, remappedOutputs;
     int requiredNumberOfChannels;
 
     AudioSampleBuffer buffer;
     AudioSourceChannelInfo remappedInfo;
-
     CriticalSection lock;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ChannelRemappingAudioSource)

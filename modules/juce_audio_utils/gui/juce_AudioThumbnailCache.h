@@ -25,8 +25,6 @@
 #ifndef JUCE_AUDIOTHUMBNAILCACHE_H_INCLUDED
 #define JUCE_AUDIOTHUMBNAILCACHE_H_INCLUDED
 
-#include "juce_AudioThumbnailBase.h"
-
 
 //==============================================================================
 /**
@@ -105,7 +103,7 @@ private:
     TimeSliceThread thread;
 
     class ThumbnailCacheEntry;
-    friend class OwnedArray<ThumbnailCacheEntry>;
+    friend struct ContainerDeletePolicy<ThumbnailCacheEntry>;
     OwnedArray<ThumbnailCacheEntry> thumbs;
     CriticalSection lock;
     int maxNumThumbsToStore;

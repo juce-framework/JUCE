@@ -32,7 +32,7 @@ extern Image juce_createImageFromCIImage (CIImage* im, int w, int h);
 class QTCameraDeviceInternal
 {
 public:
-    QTCameraDeviceInternal (CameraDevice* owner, const int index)
+    QTCameraDeviceInternal (CameraDevice*, const int index)
         : input (nil),
           audioDevice (nil),
           audioInput (nil),
@@ -228,9 +228,8 @@ private:
         static QTCameraDeviceInternal* getOwner (id self)               { return getIvar<QTCameraDeviceInternal*> (self, "owner"); }
 
     private:
-        static void didOutputVideoFrame (id self, SEL, QTCaptureOutput* captureOutput,
-                                         CVImageBufferRef videoFrame, QTSampleBuffer* sampleBuffer,
-                                         QTCaptureConnection* connection)
+        static void didOutputVideoFrame (id self, SEL, QTCaptureOutput*, CVImageBufferRef videoFrame,
+                                         QTSampleBuffer*, QTCaptureConnection*)
         {
             QTCameraDeviceInternal* const internal = getOwner (self);
 
@@ -239,8 +238,8 @@ private:
                 JUCE_AUTORELEASEPOOL
                 {
                     internal->callListeners ([CIImage imageWithCVImageBuffer: videoFrame],
-                                             CVPixelBufferGetWidth (videoFrame),
-                                             CVPixelBufferGetHeight (videoFrame));
+                                             (int) CVPixelBufferGetWidth (videoFrame),
+                                             (int) CVPixelBufferGetHeight (videoFrame));
                 }
             }
         }
@@ -256,7 +255,7 @@ private:
 class QTCaptureViewerComp : public NSViewComponent
 {
 public:
-    QTCaptureViewerComp (CameraDevice* const cameraDevice, QTCameraDeviceInternal* const internal)
+    QTCaptureViewerComp (CameraDevice*, QTCameraDeviceInternal* internal)
     {
         JUCE_AUTORELEASEPOOL
         {
@@ -391,8 +390,8 @@ StringArray CameraDevice::getAvailableDevices()
 }
 
 CameraDevice* CameraDevice::openDevice (int index,
-                                        int minWidth, int minHeight,
-                                        int maxWidth, int maxHeight)
+                                        int /*minWidth*/, int /*minHeight*/,
+                                        int /*maxWidth*/, int /*maxHeight*/)
 {
     ScopedPointer <CameraDevice> d (new CameraDevice (getAvailableDevices() [index], index));
 

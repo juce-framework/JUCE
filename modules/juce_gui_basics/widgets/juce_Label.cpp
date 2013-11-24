@@ -26,8 +26,7 @@
  #include "../../juce_audio_plugin_client/utility/juce_PluginHostType.h"
 #endif // JUCE_LABEL_EDITOR_IN_NEW_WINDOW
 
-Label::Label (const String& name,
-              const String& labelText)
+Label::Label (const String& name, const String& labelText)
     : Component (name),
       textValue (labelText),
       lastTextValue (labelText),

@@ -89,9 +89,8 @@ MidiKeyboardComponent::MidiKeyboardComponent (MidiKeyboardState& s,
     for (int i = 0; keymap[i] != 0; ++i)
         setKeyPressForNote (KeyPress (keymap[i], 0, 0), i);
 
-    const int numSources = Desktop::getInstance().getNumMouseSources();
-    mouseOverNotes.insertMultiple (0, -1, numSources);
-    mouseDownNotes.insertMultiple (0, -1, numSources);
+    mouseOverNotes.insertMultiple (0, -1, 32);
+    mouseDownNotes.insertMultiple (0, -1, 32);
 
     setOpaque (true);
     setWantsKeyboardFocus (true);
@@ -257,8 +256,8 @@ Rectangle<int> MidiKeyboardComponent::getWhiteNotePos (int noteNum) const
 
 int MidiKeyboardComponent::getKeyStartPosition (const int midiNoteNumber) const
 {
-    int x, y;
-    getKeyPos (midiNoteNumber, x, y);
+    int x, w;
+    getKeyPos (midiNoteNumber, x, w);
     return x;
 }
 
@@ -818,15 +817,10 @@ void MidiKeyboardComponent::timerCallback()
 
     if (shouldCheckMousePos)
     {
-        Desktop& desktop = Desktop::getInstance();
+        const Array<MouseInputSource>& mouseSources = Desktop::getInstance().getMouseSources();
 
-        for (int i = desktop.getNumMouseSources(); --i >= 0;)
-        {
-            MouseInputSource* source = desktop.getMouseSource (i);
-            jassert (source != nullptr);
-            updateNoteUnderMouse (getLocalPoint (nullptr, source->getScreenPosition()),
-                                  source->isDragging(), source->getIndex());
-        }
+        for (MouseInputSource* mi = mouseSources.begin(), * const e = mouseSources.end(); mi != e; ++mi)
+            updateNoteUnderMouse (getLocalPoint (nullptr, mi->getScreenPosition()), mi->isDragging(), mi->getIndex());
     }
 }
 

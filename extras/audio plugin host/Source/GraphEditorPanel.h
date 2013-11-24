@@ -48,17 +48,17 @@ public:
 
     void createNewPlugin (const PluginDescription* desc, int x, int y);
 
-    FilterComponent* getComponentForFilter (const uint32 filterID) const;
+    FilterComponent* getComponentForFilter (uint32 filterID) const;
     ConnectorComponent* getComponentForConnection (const AudioProcessorGraph::Connection& conn) const;
-    PinComponent* findPinAt (const int x, const int y) const;
+    PinComponent* findPinAt (int x, int y) const;
 
     void resized();
     void changeListenerCallback (ChangeBroadcaster*);
     void updateComponents();
 
     //==============================================================================
-    void beginConnectorDrag (const uint32 sourceFilterID, const int sourceFilterChannel,
-                             const uint32 destFilterID, const int destFilterChannel,
+    void beginConnectorDrag (uint32 sourceFilterID, int sourceFilterChannel,
+                             uint32 destFilterID, int destFilterChannel,
                              const MouseEvent& e);
     void dragConnector (const MouseEvent& e);
     void endDraggingConnector (const MouseEvent& e);
@@ -109,30 +109,36 @@ private:
 };
 
 //==============================================================================
-/** A desktop window containing a plugin's UI.
-*/
+/** A desktop window containing a plugin's UI. */
 class PluginWindow  : public DocumentWindow
 {
-    PluginWindow (Component* const uiComp,
-                  AudioProcessorGraph::Node* owner_,
-                  const bool isGeneric_);
-
 public:
-    static PluginWindow* getWindowFor (AudioProcessorGraph::Node* node,
-                                       bool useGenericView);
+    enum WindowFormatType
+    {
+        Normal = 0,
+        Generic,
+        Programs,
+        Parameters
+    };
 
-    static void closeCurrentlyOpenWindowsFor (const uint32 nodeId);
-
-    static void closeAllCurrentlyOpenWindows();
-
+    PluginWindow (Component* pluginEditor, AudioProcessorGraph::Node*, WindowFormatType);
     ~PluginWindow();
 
-    void moved();
-    void closeButtonPressed();
+    static PluginWindow* getWindowFor (AudioProcessorGraph::Node*, WindowFormatType);
+
+    static void closeCurrentlyOpenWindowsFor (const uint32 nodeId);
+    static void closeAllCurrentlyOpenWindows();
+
+    void moved() override;
+    void closeButtonPressed() override;
 
 private:
     AudioProcessorGraph::Node* owner;
-    bool isGeneric;
+    WindowFormatType type;
+
+    float getDesktopScaleFactor() const override     { return 1.0f; }
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PluginWindow)
 };
 
 #endif   // __GRAPHEDITORPANEL_JUCEHEADER__

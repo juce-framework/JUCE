@@ -22,7 +22,7 @@
   ==============================================================================
 */
 
-MouseEvent::MouseEvent (MouseInputSource& inputSource,
+MouseEvent::MouseEvent (MouseInputSource inputSource,
                         Point<int> position,
                         ModifierKeys modKeys,
                         Component* const eventComp,

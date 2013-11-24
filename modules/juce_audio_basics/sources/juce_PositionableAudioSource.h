@@ -25,8 +25,6 @@
 #ifndef JUCE_POSITIONABLEAUDIOSOURCE_H_INCLUDED
 #define JUCE_POSITIONABLEAUDIOSOURCE_H_INCLUDED
 
-#include "juce_AudioSource.h"
-
 
 //==============================================================================
 /**

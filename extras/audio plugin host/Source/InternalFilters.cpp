@@ -46,20 +46,17 @@ InternalPluginFormat::InternalPluginFormat()
     }
 }
 
-AudioPluginInstance* InternalPluginFormat::createInstanceFromDescription (const PluginDescription& desc)
+AudioPluginInstance* InternalPluginFormat::createInstanceFromDescription (const PluginDescription& desc,
+                                                                          double /*sampleRate*/, int /*blockSize*/)
 {
     if (desc.name == audioOutDesc.name)
-    {
         return new AudioProcessorGraph::AudioGraphIOProcessor (AudioProcessorGraph::AudioGraphIOProcessor::audioOutputNode);
-    }
-    else if (desc.name == audioInDesc.name)
-    {
+
+    if (desc.name == audioInDesc.name)
         return new AudioProcessorGraph::AudioGraphIOProcessor (AudioProcessorGraph::AudioGraphIOProcessor::audioInputNode);
-    }
-    else if (desc.name == midiInDesc.name)
-    {
+
+    if (desc.name == midiInDesc.name)
         return new AudioProcessorGraph::AudioGraphIOProcessor (AudioProcessorGraph::AudioGraphIOProcessor::midiInputNode);
-    }
 
     return 0;
 }

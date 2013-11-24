@@ -177,7 +177,7 @@ public:
     ModifierKeys withFlags (int rawFlagsToSet) const noexcept           { return ModifierKeys (flags | rawFlagsToSet); }
 
     /** Tests a combination of flags and returns true if any of them are set. */
-    bool testFlags (const int flagsToTest) const noexcept               { return (flags & flagsToTest) != 0; }
+    bool testFlags (int flagsToTest) const noexcept                     { return (flags & flagsToTest) != 0; }
 
     /** Returns the total number of mouse buttons that are down. */
     int getNumMouseButtonsDown() const noexcept;

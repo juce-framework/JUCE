@@ -25,10 +25,6 @@
 #ifndef JUCE_BUTTON_H_INCLUDED
 #define JUCE_BUTTON_H_INCLUDED
 
-#include "../components/juce_Component.h"
-#include "../keyboard/juce_KeyListener.h"
-#include "../commands/juce_ApplicationCommandManager.h"
-
 
 //==============================================================================
 /**
@@ -41,10 +37,7 @@
     @see TextButton, DrawableButton, ToggleButton
 */
 class JUCE_API  Button  : public Component,
-                          public SettableTooltipClient,
-                          public ApplicationCommandManagerListener,
-                          public ValueListener,
-                          private KeyListener
+                          public SettableTooltipClient
 {
 protected:
     //==============================================================================
@@ -72,13 +65,13 @@ public:
     const String& getButtonText() const               { return text; }
 
     //==============================================================================
-    /** Returns true if the button is currently being held down by the mouse.
+    /** Returns true if the button is currently being held down.
         @see isOver
     */
     bool isDown() const noexcept;
 
     /** Returns true if the mouse is currently over the button.
-        This will be also be true if the mouse is being held down.
+        This will be also be true if the button is being held down.
         @see isDown
     */
     bool isOver() const noexcept;
@@ -99,8 +92,7 @@ public:
                                 sendNotificationAsync is not supported
         @see getToggleState, setRadioGroupId
     */
-    void setToggleState (bool shouldBeOn,
-                         NotificationType notification);
+    void setToggleState (bool shouldBeOn, NotificationType notification);
 
     /** Returns true if the button is 'on'.
 
@@ -126,7 +118,7 @@ public:
         If set to true, then before the clicked() callback occurs, the toggle-state
         of the button is flipped.
     */
-    void setClickingTogglesState (bool shouldToggle) noexcept;
+    void setClickingTogglesState (bool shouldAutoToggleOnClick) noexcept;
 
     /** Returns true if this button is set to be an automatic toggle-button.
         This returns the last value that was passed to setClickingTogglesState().
@@ -149,9 +141,12 @@ public:
         Set the group ID back to zero if you want it to act as a normal toggle
         button again.
 
+        The notification argument lets you specify how other buttons should react
+        to being turned on or off in response to this call.
+
         @see getRadioGroupId
     */
-    void setRadioGroupId (int newGroupId);
+    void setRadioGroupId (int newGroupId, NotificationType notification = sendNotification);
 
     /** Returns the ID of the group to which this button belongs.
         (See setRadioGroupId() for an explanation of this).
@@ -171,7 +166,7 @@ public:
         virtual ~Listener()  {}
 
         /** Called when the button is clicked. */
-        virtual void buttonClicked (Button* button) = 0;
+        virtual void buttonClicked (Button*) = 0;
 
         /** Called when the button's state changes. */
         virtual void buttonStateChanged (Button*)  {}
@@ -206,7 +201,7 @@ public:
 
         Obviously be careful that the ApplicationCommandManager doesn't get deleted
         before this button is. To disable the command triggering, call this method and
-        pass 0 for the parameters.
+        pass nullptr as the command manager.
 
         If generateTooltip is true, then the button's tooltip will be automatically
         generated based on the name of this command and its current shortcut key.
@@ -214,11 +209,11 @@ public:
         @see addShortcut, getCommandID
     */
     void setCommandToTrigger (ApplicationCommandManager* commandManagerToUse,
-                              int commandID,
+                              CommandID commandID,
                               bool generateTooltip);
 
     /** Returns the command ID that was set by setCommandToTrigger(). */
-    int getCommandID() const noexcept               { return commandID; }
+    CommandID getCommandID() const noexcept             { return commandID; }
 
     //==============================================================================
     /** Assigns a shortcut key to trigger the button.
@@ -230,7 +225,7 @@ public:
 
         @see clearShortcuts
     */
-    void addShortcut (const KeyPress& key);
+    void addShortcut (const KeyPress&);
 
     /** Removes all key shortcuts that had been set for this button.
         @see addShortcut
@@ -240,7 +235,7 @@ public:
     /** Returns true if the given keypress is a shortcut for this button.
         @see addShortcut
     */
-    bool isRegisteredForShortcut (const KeyPress& key) const;
+    bool isRegisteredForShortcut (const KeyPress&) const;
 
     //==============================================================================
     /** Sets an auto-repeat speed for the button when it is held down.
@@ -278,13 +273,14 @@ public:
 
     //==============================================================================
     /** Sets the tooltip for this button.
-
         @see TooltipClient, TooltipWindow
     */
-    void setTooltip (const String& newTooltip);
+    void setTooltip (const String& newTooltip) override;
 
-    // (implementation of the TooltipClient method)
-    String getTooltip();
+    /** Returns the tooltip set by setTooltip(), or the description corresponding to
+        the currently mapped command if one is enabled (see setCommandToTrigger).
+    */
+    String getTooltip() override;
 
 
     //==============================================================================
@@ -351,10 +347,37 @@ public:
         The state that you set here will only last until it is automatically changed when the mouse
         enters or exits the button, or the mouse-button is pressed or released.
     */
-    void setState (const ButtonState newState);
+    void setState (ButtonState newState);
 
     // This method's parameters have changed - see the new version.
     JUCE_DEPRECATED (void setToggleState (bool, bool));
+
+    //==============================================================================
+    /** This abstract base class is implemented by LookAndFeel classes to provide
+        button-drawing functionality.
+    */
+    struct JUCE_API  LookAndFeelMethods
+    {
+        virtual ~LookAndFeelMethods() {}
+
+        virtual void drawButtonBackground (Graphics&, Button& button, const Colour& backgroundColour,
+                                           bool isMouseOverButton, bool isButtonDown) = 0;
+
+        virtual Font getTextButtonFont (TextButton& button) = 0;
+
+        /** Draws the text for a TextButton. */
+        virtual void drawButtonText (Graphics&, TextButton&, bool isMouseOverButton, bool isButtonDown) = 0;
+
+        /** Draws the contents of a standard ToggleButton. */
+        virtual void drawToggleButton (Graphics&, ToggleButton&, bool isMouseOverButton, bool isButtonDown) = 0;
+
+        virtual void changeToggleButtonWidthToFitText (ToggleButton&) = 0;
+
+        virtual void drawTickBox (Graphics&, Component&, float x, float y, float w, float h,
+                                  bool ticked, bool isEnabled, bool isMouseOverButton, bool isButtonDown) = 0;
+
+        virtual void drawDrawableButton (Graphics&, DrawableButton&, bool isMouseOverButton, bool isButtonDown) = 0;
+    };
 
 protected:
     //==============================================================================
@@ -420,10 +443,6 @@ protected:
     /** @internal */
     bool keyPressed (const KeyPress&) override;
     /** @internal */
-    bool keyPressed (const KeyPress&, Component*) override;
-    /** @internal */
-    bool keyStateChanged (bool isKeyDown, Component*) override;
-    /** @internal */
     using Component::keyStateChanged;
     /** @internal */
     void paint (Graphics&) override;
@@ -437,41 +456,37 @@ protected:
     void focusLost (FocusChangeType) override;
     /** @internal */
     void enablementChanged() override;
-    /** @internal */
-    void applicationCommandInvoked (const ApplicationCommandTarget::InvocationInfo&) override;
-    /** @internal */
-    void applicationCommandListChanged() override;
-    /** @internal */
-    void valueChanged (Value&) override;
 
 private:
     //==============================================================================
-    Array <KeyPress> shortcuts;
+    Array<KeyPress> shortcuts;
     WeakReference<Component> keySource;
     String text;
-    ListenerList <Listener> buttonListeners;
+    ListenerList<Listener> buttonListeners;
 
-    class RepeatTimer;
-    friend class RepeatTimer;
-    friend class ScopedPointer <RepeatTimer>;
-    ScopedPointer <RepeatTimer> repeatTimer;
+    class CallbackHelper;
+    friend class CallbackHelper;
+    friend struct ContainerDeletePolicy<CallbackHelper>;
+    ScopedPointer<CallbackHelper> callbackHelper;
     uint32 buttonPressTime, lastRepeatTime;
     ApplicationCommandManager* commandManagerToUse;
     int autoRepeatDelay, autoRepeatSpeed, autoRepeatMinimumDelay;
-    int radioGroupId, commandID, connectedEdgeFlags;
+    int radioGroupId, connectedEdgeFlags;
+    CommandID commandID;
     ButtonState buttonState;
 
     Value isOn;
-    bool lastToggleState : 1;
-    bool clickTogglesState : 1;
-    bool needsToRelease : 1;
-    bool needsRepainting : 1;
-    bool isKeyDown : 1;
-    bool triggerOnMouseDown : 1;
-    bool generateTooltip : 1;
+    bool lastToggleState;
+    bool clickTogglesState;
+    bool needsToRelease;
+    bool needsRepainting;
+    bool isKeyDown;
+    bool triggerOnMouseDown;
+    bool generateTooltip;
 
     void repeatTimerCallback();
-    RepeatTimer& getRepeatTimer();
+    bool keyStateChangedCallback();
+    void applicationCommandListChangeCallback();
 
     ButtonState updateState();
     ButtonState updateState (bool isOver, bool isDown);

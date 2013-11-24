@@ -65,7 +65,7 @@ public:
 
     //==============================================================================
     /** Returns the name of this device */
-    String getName() const                { return name; }
+    const String& getName() const noexcept          { return name; }
 
     /** Creates a component that can be used to display a preview of the
         video from this camera.
@@ -89,8 +89,7 @@ public:
     */
     void startRecordingToFile (const File& file, int quality = 2);
 
-    /** Stops recording, after a call to startRecordingToFile().
-    */
+    /** Stops recording, after a call to startRecordingToFile(). */
     void stopRecording();
 
     /** Returns the file extension that should be used for the files
@@ -133,8 +132,7 @@ public:
     */
     void addListener (Listener* listenerToAdd);
 
-    /** Removes a listener that was previously added with addListener().
-    */
+    /** Removes a listener that was previously added with addListener(). */
     void removeListener (Listener* listenerToRemove);
 
 
@@ -151,9 +149,10 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CameraDevice)
 };
 
-/** This typedef is just for compatibility with old code - newer code should use the CameraDevice::Listener class directly. */
-typedef CameraDevice::Listener CameraImageListener;
-
+#ifndef DOXYGEN
+ /** This typedef is just for compatibility with VC6 - newer code should use the CameraDevice::Listener class directly. */
+ typedef CameraDevice::Listener CameraImageListener;
+#endif
 
 #endif
 #endif   // JUCE_CAMERADEVICE_H_INCLUDED

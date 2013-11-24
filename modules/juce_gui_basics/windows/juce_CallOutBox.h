@@ -25,8 +25,6 @@
 #ifndef JUCE_CALLOUTBOX_H_INCLUDED
 #define JUCE_CALLOUTBOX_H_INCLUDED
 
-#include "../components/juce_Component.h"
-
 
 //==============================================================================
 /**
@@ -119,6 +117,15 @@ public:
     static CallOutBox& launchAsynchronously (Component* contentComponent,
                                              const Rectangle<int>& areaToPointTo,
                                              Component* parentComponent);
+
+    //==============================================================================
+    /** This abstract base class is implemented by LookAndFeel classes. */
+    struct JUCE_API  LookAndFeelMethods
+    {
+        virtual ~LookAndFeelMethods() {}
+
+        virtual void drawCallOutBoxBackground (CallOutBox&, Graphics&, const Path&, Image& cachedImage) = 0;
+    };
 
     //==============================================================================
     /** @internal */

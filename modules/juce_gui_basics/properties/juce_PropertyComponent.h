@@ -25,10 +25,6 @@
 #ifndef JUCE_PROPERTYCOMPONENT_H_INCLUDED
 #define JUCE_PROPERTYCOMPONENT_H_INCLUDED
 
-class EditableProperty;
-
-#include "../components/juce_Component.h"
-#include "../mouse/juce_TooltipClient.h"
 
 //==============================================================================
 /**
@@ -105,6 +101,18 @@ public:
 
     /** By default, this just repaints the component. */
     void enablementChanged() override;
+
+    //==============================================================================
+    /** This abstract base class is implemented by LookAndFeel classes. */
+    struct JUCE_API  LookAndFeelMethods
+    {
+        virtual ~LookAndFeelMethods() {}
+
+        virtual void drawPropertyPanelSectionHeader (Graphics&, const String& name, bool isOpen, int width, int height) = 0;
+        virtual void drawPropertyComponentBackground (Graphics&, int width, int height, PropertyComponent&) = 0;
+        virtual void drawPropertyComponentLabel (Graphics&, int width, int height, PropertyComponent&) = 0;
+        virtual Rectangle<int> getPropertyComponentContentPosition (PropertyComponent&) = 0;
+    };
 
 protected:
     /** Used by the PropertyPanel to determine how high this component needs to be.

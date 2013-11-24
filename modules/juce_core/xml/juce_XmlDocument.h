@@ -29,12 +29,6 @@
 #ifndef JUCE_XMLDOCUMENT_H_INCLUDED
 #define JUCE_XMLDOCUMENT_H_INCLUDED
 
-#include "juce_XmlElement.h"
-#include "../text/juce_StringArray.h"
-#include "../files/juce_File.h"
-#include "../memory/juce_ScopedPointer.h"
-class InputSource;
-
 
 //==============================================================================
 /**
@@ -164,13 +158,14 @@ private:
     bool needToLoadDTD, ignoreEmptyTextElements;
     ScopedPointer <InputSource> inputSource;
 
+    XmlElement* parseDocumentElement (String::CharPointerType, bool outer);
     void setLastError (const String& desc, bool carryOn);
-    void skipHeader();
+    bool parseHeader();
+    bool parseDTD();
     void skipNextWhiteSpace();
     juce_wchar readNextChar() noexcept;
     XmlElement* readNextElement (bool alsoParseSubElements);
     void readChildElements (XmlElement* parent);
-    int findNextTokenLength() noexcept;
     void readQuotedString (String& result);
     void readEntity (String& result);
 

@@ -25,11 +25,6 @@
 #ifndef JUCE_DRAWABLECOMPOSITE_H_INCLUDED
 #define JUCE_DRAWABLECOMPOSITE_H_INCLUDED
 
-#include "juce_Drawable.h"
-#include "../positioning/juce_MarkerList.h"
-#include "../positioning/juce_RelativeParallelogram.h"
-#include "../positioning/juce_RelativeRectangle.h"
-
 
 //==============================================================================
 /**

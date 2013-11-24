@@ -29,9 +29,6 @@
 #ifndef JUCE_STRINGARRAY_H_INCLUDED
 #define JUCE_STRINGARRAY_H_INCLUDED
 
-#include "juce_String.h"
-#include "../containers/juce_Array.h"
-
 
 //==============================================================================
 /**
@@ -47,10 +44,10 @@ public:
     StringArray() noexcept;
 
     /** Creates a copy of another string array */
-    StringArray (const StringArray& other);
+    StringArray (const StringArray&);
 
    #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
-    StringArray (StringArray&& other) noexcept;
+    StringArray (StringArray&&) noexcept;
    #endif
 
     /** Creates an array containing a single string. */
@@ -93,27 +90,27 @@ public:
     ~StringArray();
 
     /** Copies the contents of another string array into this one */
-    StringArray& operator= (const StringArray& other);
+    StringArray& operator= (const StringArray&);
 
    #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
-    StringArray& operator= (StringArray&& other) noexcept;
+    StringArray& operator= (StringArray&&) noexcept;
    #endif
 
     /** Swaps the contents of this and another StringArray. */
-    void swapWith (StringArray& other) noexcept;
+    void swapWith (StringArray&) noexcept;
 
     //==============================================================================
     /** Compares two arrays.
         Comparisons are case-sensitive.
         @returns    true only if the other array contains exactly the same strings in the same order
     */
-    bool operator== (const StringArray& other) const noexcept;
+    bool operator== (const StringArray&) const noexcept;
 
     /** Compares two arrays.
         Comparisons are case-sensitive.
         @returns    false if the other array contains exactly the same strings in the same order
     */
-    bool operator!= (const StringArray& other) const noexcept;
+    bool operator!= (const StringArray&) const noexcept;
 
     //==============================================================================
     /** Returns the number of strings in the array */
@@ -156,7 +153,7 @@ public:
 
         @returns    true if the string is found inside the array
     */
-    bool contains (const String& stringToLookFor,
+    bool contains (StringRef stringToLookFor,
                    bool ignoreCase = false) const;
 
     /** Searches for a string in the array.
@@ -169,13 +166,18 @@ public:
         @returns                the index of the first occurrence of the string in this array,
                                 or -1 if it isn't found.
     */
-    int indexOf (const String& stringToLookFor,
+    int indexOf (StringRef stringToLookFor,
                  bool ignoreCase = false,
                  int startIndex = 0) const;
 
     //==============================================================================
     /** Appends a string at the end of the array. */
     void add (const String& stringToAdd);
+
+   #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
+    /** Appends a string at the end of the array. */
+    void add (String&& stringToAdd);
+   #endif
 
     /** Inserts a string into the array.
 
@@ -187,7 +189,6 @@ public:
     void insert (int index, const String& stringToAdd);
 
     /** Adds a string to the array as long as it's not already in there.
-
         The search can optionally be case-insensitive.
     */
     void addIfNotAlreadyThere (const String& stringToAdd, bool ignoreCase = false);
@@ -217,8 +218,7 @@ public:
         @returns    the number of tokens added
         @see fromTokens
     */
-    int addTokens (const String& stringToTokenise,
-                   bool preserveQuotedStrings);
+    int addTokens (StringRef stringToTokenise, bool preserveQuotedStrings);
 
     /** Breaks up a string into tokens and adds them to this array.
 
@@ -234,9 +234,9 @@ public:
         @returns    the number of tokens added
         @see fromTokens
     */
-    int addTokens (const String& stringToTokenise,
-                   const String& breakCharacters,
-                   const String& quoteCharacters);
+    int addTokens (StringRef stringToTokenise,
+                   StringRef breakCharacters,
+                   StringRef quoteCharacters);
 
     /** Breaks up a string into lines and adds them to this array.
 
@@ -244,7 +244,7 @@ public:
         to the array. Line-break characters are omitted from the strings that are added to
         the array.
     */
-    int addLines (const String& stringToBreakUp);
+    int addLines (StringRef stringToBreakUp);
 
     /** Returns an array containing the tokens in a given string.
 
@@ -252,7 +252,7 @@ public:
         token delimiters, and return these tokens as an array.
         @see addTokens
     */
-    static StringArray fromTokens (const String& stringToTokenise,
+    static StringArray fromTokens (StringRef stringToTokenise,
                                    bool preserveQuotedStrings);
 
     /** Returns an array containing the tokens in a given string.
@@ -268,9 +268,9 @@ public:
                                     between quotes is not broken up into tokens.
         @see addTokens
     */
-    static StringArray fromTokens (const String& stringToTokenise,
-                                   const String& breakCharacters,
-                                   const String& quoteCharacters);
+    static StringArray fromTokens (StringRef stringToTokenise,
+                                   StringRef breakCharacters,
+                                   StringRef quoteCharacters);
 
     /** Returns an array containing the lines in a given string.
 
@@ -278,7 +278,7 @@ public:
         array containing these lines. Line-break characters are omitted from the strings that
         are added to the array.
     */
-    static StringArray fromLines (const String& stringToBreakUp);
+    static StringArray fromLines (StringRef stringToBreakUp);
 
     //==============================================================================
     /** Removes all elements from the array. */
@@ -298,7 +298,7 @@ public:
         This will remove the first occurrence of the given string from the array. The
         comparison may be case-insensitive depending on the ignoreCase parameter.
     */
-    void removeString (const String& stringToRemove,
+    void removeString (StringRef stringToRemove,
                        bool ignoreCase = false);
 
     /** Removes a range of elements from the array.
@@ -324,7 +324,6 @@ public:
     void removeDuplicates (bool ignoreCase);
 
     /** Removes empty strings from the array.
-
         @param removeWhitespaceStrings  if true, strings that only contain whitespace
                                         characters will also be removed
     */
@@ -382,7 +381,7 @@ public:
         @param numberOfElements     how many elements to join together. If this is less
                                     than zero, all available elements will be used.
     */
-    String joinIntoString (const String& separatorString,
+    String joinIntoString (StringRef separatorString,
                            int startIndex = 0,
                            int numberOfElements = -1) const;
 
@@ -410,11 +409,12 @@ public:
     */
     void minimiseStorageOverheads();
 
+    /** This is the array holding the actual strings. This is public to allow direct access
+        to array methods that may not already be provided by the StringArray class.
+    */
+    Array<String> strings;
 
 private:
-    //==============================================================================
-    Array <String> strings;
-
     JUCE_LEAK_DETECTOR (StringArray)
 };
 

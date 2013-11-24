@@ -29,9 +29,6 @@
 #ifndef JUCE_TIMESLICETHREAD_H_INCLUDED
 #define JUCE_TIMESLICETHREAD_H_INCLUDED
 
-#include "juce_Thread.h"
-#include "../containers/juce_Array.h"
-#include "../time/juce_Time.h"
 class TimeSliceThread;
 
 

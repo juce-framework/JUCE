@@ -136,6 +136,19 @@ public:
         outlineColourId               = 0x1000af1  /**< The colour to use for an outline around the bubble. */
     };
 
+
+    //==============================================================================
+    /** This abstract base class is implemented by LookAndFeel classes.
+    */
+    struct JUCE_API  LookAndFeelMethods
+    {
+        virtual ~LookAndFeelMethods() {}
+
+        virtual void drawBubble (Graphics&, BubbleComponent&,
+                                 const Point<float>& positionOfTip,
+                                 const Rectangle<float>& body) = 0;
+    };
+
 protected:
     //==============================================================================
     /** Subclasses should override this to return the size of the content they

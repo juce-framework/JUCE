@@ -110,8 +110,8 @@ public:
 
 private:
     class Pimpl;
-    friend class ScopedPointer <Pimpl>;
-    ScopedPointer <Pimpl> control;
+    friend struct ContainerDeletePolicy<Pimpl>;
+    ScopedPointer<Pimpl> control;
     bool mouseEventsAllowed;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ActiveXControlComponent)

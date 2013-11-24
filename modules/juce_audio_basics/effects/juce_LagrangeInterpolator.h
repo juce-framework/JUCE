@@ -25,6 +25,7 @@
 #ifndef JUCE_LAGRANGEINTERPOLATOR_H_INCLUDED
 #define JUCE_LAGRANGEINTERPOLATOR_H_INCLUDED
 
+
 //==============================================================================
 /**
     Interpolator for resampling a stream of floats using 4-point lagrange interpolation.

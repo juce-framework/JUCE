@@ -40,6 +40,7 @@
 #include "../utility/juce_CarbonVisibility.h"
 
 //==============================================================================
+void initialiseMacRTAS();
 void initialiseMacRTAS()
 {
    #if ! JUCE_64BIT
@@ -47,6 +48,7 @@ void initialiseMacRTAS()
    #endif
 }
 
+void* attachSubWindow (void*, Component*);
 void* attachSubWindow (void* hostWindowRef, Component* comp)
 {
     JUCE_AUTORELEASEPOOL
@@ -69,7 +71,7 @@ void* attachSubWindow (void* hostWindowRef, Component* comp)
         f.size.height = comp->getHeight();
         [content setFrame: f];
 
-        const int mainScreenHeight = [[[NSScreen screens] objectAtIndex: 0] frame].size.height;
+        const CGFloat mainScreenHeight = [[[NSScreen screens] objectAtIndex: 0] frame].size.height;
 
        #if WINDOWPOSITION_BODGE
         {
@@ -110,6 +112,7 @@ void* attachSubWindow (void* hostWindowRef, Component* comp)
     }
 }
 
+void removeSubWindow (void*, Component*);
 void removeSubWindow (void* nsWindow, Component* comp)
 {
     JUCE_AUTORELEASEPOOL
@@ -142,6 +145,7 @@ namespace
     }
 }
 
+void forwardCurrentKeyEventToHostWindow();
 void forwardCurrentKeyEventToHostWindow()
 {
     WindowRef w = FrontNonFloatingWindow();
@@ -158,7 +162,7 @@ void forwardCurrentKeyEventToHostWindow()
     if (! isJuceWindow (w))
     {
         ActivateWindow (w, true);
-        [NSApp postEvent: [NSApp currentEvent] atStart: YES];
+        repostCurrentNSEvent();
     }
 }
 

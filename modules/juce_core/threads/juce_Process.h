@@ -29,8 +29,6 @@
 #ifndef JUCE_PROCESS_H_INCLUDED
 #define JUCE_PROCESS_H_INCLUDED
 
-#include "../text/juce_String.h"
-
 
 //==============================================================================
 /** Represents the current executable's process.
@@ -38,7 +36,7 @@
     This contains methods for controlling the current application at the
     process-level.
 
-    @see Thread, JUCEApplication
+    @see Thread, JUCEApplicationBase
 */
 class JUCE_API  Process
 {
@@ -57,7 +55,7 @@ public:
         @param priority     the process priority, where
                             0=low, 1=normal, 2=high, 3=realtime
     */
-    static void setPriority (const ProcessPriority priority);
+    static void JUCE_CALLTYPE setPriority (const ProcessPriority priority);
 
     /** Kills the current process immediately.
 
@@ -65,23 +63,23 @@ public:
         immediately - it's intended only for use only when something goes
         horribly wrong.
 
-        @see JUCEApplication::quit
+        @see JUCEApplicationBase::quit
     */
-    static void terminate();
+    static void JUCE_CALLTYPE terminate();
 
     //==============================================================================
     /** Returns true if this application process is the one that the user is
         currently using.
     */
-    static bool isForegroundProcess();
+    static bool JUCE_CALLTYPE isForegroundProcess();
 
     /** Attempts to make the current process the active one.
         (This is not possible on some platforms).
     */
-    static void makeForegroundProcess();
+    static void JUCE_CALLTYPE makeForegroundProcess();
 
     /** Hides the application (on an OS that supports this, e.g. OSX) */
-    static void hide();
+    static void JUCE_CALLTYPE hide();
 
     //==============================================================================
     /** Raises the current process's privilege level.
@@ -89,14 +87,14 @@ public:
         Does nothing if this isn't supported by the current OS, or if process
         privilege level is fixed.
     */
-    static void raisePrivilege();
+    static void JUCE_CALLTYPE raisePrivilege();
 
     /** Lowers the current process's privilege level.
 
         Does nothing if this isn't supported by the current OS, or if process
         privilege level is fixed.
     */
-    static void lowerPrivilege();
+    static void JUCE_CALLTYPE lowerPrivilege();
 
     //==============================================================================
     /** Returns true if this process is being hosted by a debugger. */
@@ -105,13 +103,13 @@ public:
 
     //==============================================================================
     /** Tries to launch the OS's default reader application for a given file or URL. */
-    static bool openDocument (const String& documentURL, const String& parameters);
+    static bool JUCE_CALLTYPE openDocument (const String& documentURL, const String& parameters);
 
     /** Tries to launch the OS's default email application to let the user create a message. */
-    static bool openEmailWithAttachments (const String& targetEmailAddress,
-                                          const String& emailSubject,
-                                          const String& bodyText,
-                                          const StringArray& filesToAttach);
+    static bool JUCE_CALLTYPE openEmailWithAttachments (const String& targetEmailAddress,
+                                                        const String& emailSubject,
+                                                        const String& bodyText,
+                                                        const StringArray& filesToAttach);
 
    #if JUCE_WINDOWS || DOXYGEN
     //==============================================================================

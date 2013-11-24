@@ -48,12 +48,11 @@ void ToneGeneratorAudioSource::setFrequency (const double newFrequencyHz)
 }
 
 //==============================================================================
-void ToneGeneratorAudioSource::prepareToPlay (int /*samplesPerBlockExpected*/,
-                                              double sampleRate_)
+void ToneGeneratorAudioSource::prepareToPlay (int /*samplesPerBlockExpected*/, double rate)
 {
     currentPhase = 0.0;
     phasePerSample = 0.0;
-    sampleRate = sampleRate_;
+    sampleRate = rate;
 }
 
 void ToneGeneratorAudioSource::releaseResources()

@@ -62,6 +62,9 @@ public:
     /** Multiplies each of the destination values by a fixed multiplier. */
     static void JUCE_CALLTYPE multiply (float* dest, float multiplier, int numValues) noexcept;
 
+    /** Copies a source vector to a destination, negating each value. */
+    static void JUCE_CALLTYPE negate (float* dest, const float* src, int numValues) noexcept;
+
     /** Converts a stream of integers to floats, multiplying each one by the given multiplier. */
     static void JUCE_CALLTYPE convertFixedToFloat (float* dest, const int* src, float multiplier, int numValues) noexcept;
 
@@ -73,6 +76,11 @@ public:
 
     /** Finds the maximum value in the given array. */
     static float JUCE_CALLTYPE findMaximum (const float* src, int numValues) noexcept;
+
+    /** On Intel CPUs, this method enables or disables the SSE flush-to-zero mode.
+        Effectively, this is a wrapper around a call to _MM_SET_FLUSH_ZERO_MODE
+    */
+    static void JUCE_CALLTYPE enableFlushToZeroMode (bool shouldEnable) noexcept;
 };
 
 

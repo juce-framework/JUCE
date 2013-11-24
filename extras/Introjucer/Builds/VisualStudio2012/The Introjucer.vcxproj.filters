@@ -83,8 +83,8 @@
     <Filter Include="Juce Modules\juce_core\xml">
       <UniqueIdentifier>{F2B2F310-F30F-7166-42A9-9BF9C230DA78}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Juce Modules\juce_core\json">
-      <UniqueIdentifier>{5B662103-FB59-7229-1076-6A6665724ED0}</UniqueIdentifier>
+    <Filter Include="Juce Modules\juce_core\javascript">
+      <UniqueIdentifier>{1B67A7C0-86E0-53F6-6AE3-7AD93B8DC95B}</UniqueIdentifier>
     </Filter>
     <Filter Include="Juce Modules\juce_core\zip">
       <UniqueIdentifier>{F03654BC-34D8-F975-BEA3-750CC2783D23}</UniqueIdentifier>
@@ -233,9 +233,6 @@
     <Filter Include="Juce Modules\juce_gui_extra\embedding">
       <UniqueIdentifier>{61B2920C-494D-D8CB-C0C7-5DBF3D76D164}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Juce Modules\juce_gui_extra\lookandfeel">
-      <UniqueIdentifier>{4980B18D-FEDE-B773-F254-E3B5207D81F0}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Juce Modules\juce_gui_extra\misc">
       <UniqueIdentifier>{66C9B809-8739-A217-C78D-A15D6089B8E3}</UniqueIdentifier>
     </Filter>
@@ -256,9 +253,6 @@
     <ClCompile Include="..\..\Source\Application\jucer_DocumentEditorComponent.cpp">
       <Filter>The Introjucer\Application</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Source\Application\jucer_JuceUpdater.cpp">
-      <Filter>The Introjucer\Application</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\Source\Application\jucer_Main.cpp">
       <Filter>The Introjucer\Application</Filter>
     </ClCompile>
@@ -267,9 +261,6 @@
     </ClCompile>
     <ClCompile Include="..\..\Source\Application\jucer_OpenDocumentManager.cpp">
       <Filter>The Introjucer\Application</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\Project\jucer_ConfigPage.cpp">
-      <Filter>The Introjucer\Project</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\Project\jucer_Module.cpp">
       <Filter>The Introjucer\Project</Filter>
@@ -286,13 +277,7 @@
     <ClCompile Include="..\..\Source\Project\jucer_ProjectContentComponent.cpp">
       <Filter>The Introjucer\Project</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Source\Project\jucer_ProjectTreeViewBase.cpp">
-      <Filter>The Introjucer\Project</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\Source\Project\jucer_ProjectType.cpp">
-      <Filter>The Introjucer\Project</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\Project\jucer_TreeViewTypes.cpp">
       <Filter>The Introjucer\Project</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\Project Saving\jucer_ProjectExporter.cpp">
@@ -556,8 +541,11 @@
     <ClCompile Include="..\..\..\..\modules\juce_core\xml\juce_XmlElement.cpp">
       <Filter>Juce Modules\juce_core\xml</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_core\json\juce_JSON.cpp">
-      <Filter>Juce Modules\juce_core\json</Filter>
+    <ClCompile Include="..\..\..\..\modules\juce_core\javascript\juce_Javascript.cpp">
+      <Filter>Juce Modules\juce_core\javascript</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_core\javascript\juce_JSON.cpp">
+      <Filter>Juce Modules\juce_core\javascript</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_core\zip\juce_GZIPCompressorOutputStream.cpp">
       <Filter>Juce Modules\juce_core\zip</Filter>
@@ -590,6 +578,9 @@
       <Filter>Juce Modules\juce_core\native</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_core\native\juce_android_Threads.cpp">
+      <Filter>Juce Modules\juce_core\native</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_core\native\juce_linux_CommonFile.cpp">
       <Filter>Juce Modules\juce_core\native</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_core\native\juce_linux_Files.cpp">
@@ -771,9 +762,6 @@
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_graphics\geometry\juce_PathStrokeType.cpp">
       <Filter>Juce Modules\juce_graphics\geometry</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_graphics\placement\juce_Justification.cpp">
-      <Filter>Juce Modules\juce_graphics\placement</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_graphics\placement\juce_RectanglePlacement.cpp">
       <Filter>Juce Modules\juce_graphics\placement</Filter>
@@ -1102,6 +1090,15 @@
     <ClCompile Include="..\..\..\..\modules\juce_gui_basics\lookandfeel\juce_LookAndFeel.cpp">
       <Filter>Juce Modules\juce_gui_basics\lookandfeel</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_gui_basics\lookandfeel\juce_LookAndFeel_V1.cpp">
+      <Filter>Juce Modules\juce_gui_basics\lookandfeel</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_gui_basics\lookandfeel\juce_LookAndFeel_V2.cpp">
+      <Filter>Juce Modules\juce_gui_basics\lookandfeel</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_gui_basics\lookandfeel\juce_LookAndFeel_V3.cpp">
+      <Filter>Juce Modules\juce_gui_basics\lookandfeel</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_gui_basics\filebrowser\juce_DirectoryContentsDisplayComponent.cpp">
       <Filter>Juce Modules\juce_gui_basics\filebrowser</Filter>
     </ClCompile>
@@ -1216,9 +1213,6 @@
     <ClCompile Include="..\..\..\..\modules\juce_gui_extra\documents\juce_FileBasedDocument.cpp">
       <Filter>Juce Modules\juce_gui_extra\documents</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_gui_extra\lookandfeel\juce_OldSchoolLookAndFeel.cpp">
-      <Filter>Juce Modules\juce_gui_extra\lookandfeel</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_gui_extra\misc\juce_BubbleMessageComponent.cpp">
       <Filter>Juce Modules\juce_gui_extra\misc</Filter>
     </ClCompile>
@@ -1323,9 +1317,6 @@
     <ClInclude Include="..\..\Source\jucer_Headers.h">
       <Filter>The Introjucer\Application</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\Application\jucer_JuceUpdater.h">
-      <Filter>The Introjucer\Application</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\Source\Application\jucer_MainWindow.h">
       <Filter>The Introjucer\Application</Filter>
     </ClInclude>
@@ -1335,7 +1326,13 @@
     <ClInclude Include="..\..\Source\Project\jucer_AudioPluginModule.h">
       <Filter>The Introjucer\Project</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\Project\jucer_ConfigPage.h">
+    <ClInclude Include="..\..\Source\Project\jucer_ConfigTree_Base.h">
+      <Filter>The Introjucer\Project</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Project\jucer_ConfigTree_Exporter.h">
+      <Filter>The Introjucer\Project</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Project\jucer_ConfigTree_Modules.h">
       <Filter>The Introjucer\Project</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\Project\jucer_GroupInformationComponent.h">
@@ -1359,13 +1356,16 @@
     <ClInclude Include="..\..\Source\Project\jucer_ProjectContentComponent.h">
       <Filter>The Introjucer\Project</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\Project\jucer_ProjectTreeViewBase.h">
+    <ClInclude Include="..\..\Source\Project\jucer_ProjectTree_Base.h">
+      <Filter>The Introjucer\Project</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Project\jucer_ProjectTree_File.h">
+      <Filter>The Introjucer\Project</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Project\jucer_ProjectTree_Group.h">
       <Filter>The Introjucer\Project</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\Project\jucer_ProjectType.h">
-      <Filter>The Introjucer\Project</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Project\jucer_TreeViewTypes.h">
       <Filter>The Introjucer\Project</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\Project Saving\jucer_ProjectExport_Android.h">
@@ -1680,6 +1680,9 @@
     <ClInclude Include="..\..\..\..\modules\juce_core\text\juce_StringPool.h">
       <Filter>Juce Modules\juce_core\text</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_core\text\juce_StringRef.h">
+      <Filter>Juce Modules\juce_core\text</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_core\text\juce_TextDiff.h">
       <Filter>Juce Modules\juce_core\text</Filter>
     </ClInclude>
@@ -1702,6 +1705,9 @@
       <Filter>Juce Modules\juce_core\memory</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_core\memory\juce_ByteOrder.h">
+      <Filter>Juce Modules\juce_core\memory</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_core\memory\juce_ContainerDeletePolicy.h">
       <Filter>Juce Modules\juce_core\memory</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_core\memory\juce_HeapBlock.h">
@@ -1917,8 +1923,11 @@
     <ClInclude Include="..\..\..\..\modules\juce_core\xml\juce_XmlElement.h">
       <Filter>Juce Modules\juce_core\xml</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_core\json\juce_JSON.h">
-      <Filter>Juce Modules\juce_core\json</Filter>
+    <ClInclude Include="..\..\..\..\modules\juce_core\javascript\juce_Javascript.h">
+      <Filter>Juce Modules\juce_core\javascript</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_core\javascript\juce_JSON.h">
+      <Filter>Juce Modules\juce_core\javascript</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_core\zip\juce_GZIPCompressorOutputStream.h">
       <Filter>Juce Modules\juce_core\zip</Filter>
@@ -2005,6 +2014,9 @@
       <Filter>Juce Modules\juce_events\messages</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_events\messages\juce_DeletedAtShutdown.h">
+      <Filter>Juce Modules\juce_events\messages</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_events\messages\juce_Initialisation.h">
       <Filter>Juce Modules\juce_events\messages</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_events\messages\juce_Message.h">
@@ -2484,6 +2496,15 @@
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\lookandfeel\juce_LookAndFeel.h">
       <Filter>Juce Modules\juce_gui_basics\lookandfeel</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_gui_basics\lookandfeel\juce_LookAndFeel_V1.h">
+      <Filter>Juce Modules\juce_gui_basics\lookandfeel</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_gui_basics\lookandfeel\juce_LookAndFeel_V2.h">
+      <Filter>Juce Modules\juce_gui_basics\lookandfeel</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_gui_basics\lookandfeel\juce_LookAndFeel_V3.h">
+      <Filter>Juce Modules\juce_gui_basics\lookandfeel</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\filebrowser\juce_DirectoryContentsDisplayComponent.h">
       <Filter>Juce Modules\juce_gui_basics\filebrowser</Filter>
     </ClInclude>
@@ -2550,9 +2571,6 @@
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\application\juce_Application.h">
       <Filter>Juce Modules\juce_gui_basics\application</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_gui_basics\application\juce_Initialisation.h">
-      <Filter>Juce Modules\juce_gui_basics\application</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\native\juce_MultiTouchMapper.h">
       <Filter>Juce Modules\juce_gui_basics\native</Filter>
     </ClInclude>
@@ -2585,9 +2603,6 @@
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_gui_extra\embedding\juce_UIViewComponent.h">
       <Filter>Juce Modules\juce_gui_extra\embedding</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_gui_extra\lookandfeel\juce_OldSchoolLookAndFeel.h">
-      <Filter>Juce Modules\juce_gui_extra\lookandfeel</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_gui_extra\misc\juce_AppleRemote.h">
       <Filter>Juce Modules\juce_gui_extra\misc</Filter>

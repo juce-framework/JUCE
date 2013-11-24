@@ -143,6 +143,15 @@ String SystemStats::getOperatingSystemName()
    #endif
 }
 
+String SystemStats::getDeviceDescription()
+{
+   #if JUCE_IOS
+    return nsStringToJuce ([[UIDevice currentDevice] model]);
+   #else
+    return String::empty;
+   #endif
+}
+
 bool SystemStats::isOperatingSystem64Bit()
 {
    #if JUCE_IOS

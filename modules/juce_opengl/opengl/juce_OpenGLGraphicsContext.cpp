@@ -108,7 +108,7 @@ private:
             : area (et.getMaximumBounds().withSize (nextPowerOfTwo (et.getMaximumBounds().getWidth()),
                                                     nextPowerOfTwo (et.getMaximumBounds().getHeight())))
         {
-            data.calloc (area.getWidth() * area.getHeight());
+            data.calloc ((size_t) (area.getWidth() * area.getHeight()));
             et.iterate (*this);
         }
 
@@ -129,12 +129,12 @@ private:
 
         inline void handleEdgeTableLine (int x, int width, const int alphaLevel) const noexcept
         {
-            memset (currentLine + x, (uint8) alphaLevel, width);
+            memset (currentLine + x, (uint8) alphaLevel, (size_t) width);
         }
 
         inline void handleEdgeTableLineFull (int x, int width) const noexcept
         {
-            memset (currentLine + x, 255, width);
+            memset (currentLine + x, 255, (size_t) width);
         }
 
         HeapBlock<uint8> data;
@@ -177,21 +177,21 @@ public:
             : program (context)
         {
             JUCE_CHECK_OPENGL_ERROR
-            program.addShader ("attribute vec2 position;"
-                               "attribute vec4 colour;"
-                               "uniform vec4 screenBounds;"
-                               "varying " JUCE_MEDIUMP " vec4 frontColour;"
-                               "varying " JUCE_HIGHP " vec2 pixelPos;"
-                               "void main()"
-                               "{"
-                               " frontColour = colour;"
-                               " vec2 adjustedPos = position - screenBounds.xy;"
-                               " pixelPos = adjustedPos;"
-                               " vec2 scaledPos = adjustedPos / screenBounds.zw;"
-                               " gl_Position = vec4 (scaledPos.x - 1.0, 1.0 - scaledPos.y, 0, 1.0);"
-                               "}", GL_VERTEX_SHADER);
+            program.addVertexShader ("attribute vec2 position;"
+                                     "attribute vec4 colour;"
+                                     "uniform vec4 screenBounds;"
+                                     "varying " JUCE_MEDIUMP " vec4 frontColour;"
+                                     "varying " JUCE_HIGHP " vec2 pixelPos;"
+                                     "void main()"
+                                     "{"
+                                     " frontColour = colour;"
+                                     " vec2 adjustedPos = position - screenBounds.xy;"
+                                     " pixelPos = adjustedPos;"
+                                     " vec2 scaledPos = adjustedPos / screenBounds.zw;"
+                                     " gl_Position = vec4 (scaledPos.x - 1.0, 1.0 - scaledPos.y, 0, 1.0);"
+                                     "}");
 
-            program.addShader (fragmentShader, GL_FRAGMENT_SHADER);
+            program.addFragmentShader (fragmentShader);
             program.link();
             JUCE_CHECK_OPENGL_ERROR
         }
@@ -215,16 +215,16 @@ public:
 
         void bindAttributes (OpenGLContext& context)
         {
-            context.extensions.glVertexAttribPointer (positionAttribute.attributeID, 2, GL_SHORT, GL_FALSE, 8, (void*) 0);
-            context.extensions.glVertexAttribPointer (colourAttribute.attributeID, 4, GL_UNSIGNED_BYTE, GL_TRUE, 8, (void*) 4);
-            context.extensions.glEnableVertexAttribArray (positionAttribute.attributeID);
-            context.extensions.glEnableVertexAttribArray (colourAttribute.attributeID);
+            context.extensions.glVertexAttribPointer ((GLuint) positionAttribute.attributeID, 2, GL_SHORT, GL_FALSE, 8, (void*) 0);
+            context.extensions.glVertexAttribPointer ((GLuint) colourAttribute.attributeID, 4, GL_UNSIGNED_BYTE, GL_TRUE, 8, (void*) 4);
+            context.extensions.glEnableVertexAttribArray ((GLuint) positionAttribute.attributeID);
+            context.extensions.glEnableVertexAttribArray ((GLuint) colourAttribute.attributeID);
         }
 
         void unbindAttributes (OpenGLContext& context)
         {
-            context.extensions.glDisableVertexAttribArray (positionAttribute.attributeID);
-            context.extensions.glDisableVertexAttribArray (colourAttribute.attributeID);
+            context.extensions.glDisableVertexAttribArray ((GLuint) positionAttribute.attributeID);
+            context.extensions.glDisableVertexAttribArray ((GLuint) colourAttribute.attributeID);
         }
 
         OpenGLShaderProgram::Attribute positionAttribute, colourAttribute;
@@ -446,8 +446,9 @@ public:
 
         void setMatrix (const AffineTransform& trans,
                         const int imageWidth, const int imageHeight,
-                        const float fullWidthProportion, const float fullHeightProportion,
-                        const float targetX, const float targetY) const
+                        float fullWidthProportion, float fullHeightProportion,
+                        const float targetX, const float targetY,
+                        const bool isForTiling) const
         {
             const AffineTransform t (trans.translated (-targetX, -targetY)
                                         .inverted().scaled (fullWidthProportion / imageWidth,
@@ -456,16 +457,23 @@ public:
             const GLfloat m[] = { t.mat00, t.mat01, t.mat02, t.mat10, t.mat11, t.mat12 };
             matrix.set (m, 6);
 
+            if (isForTiling)
+            {
+                fullWidthProportion -= 0.5f / imageWidth;
+                fullHeightProportion -= 0.5f / imageHeight;
+            }
+
             imageLimits.set (fullWidthProportion, fullHeightProportion);
         }
 
         void setMatrix (const AffineTransform& trans, const OpenGLTextureFromImage& im,
-                        const float targetX, const float targetY) const
+                        const float targetX, const float targetY,
+                        bool isForTiling) const
         {
             setMatrix (trans,
                        im.imageWidth, im.imageHeight,
                        im.fullWidthProportion, im.fullHeightProportion,
-                       targetX, targetY);
+                       targetX, targetY, isForTiling);
         }
 
         OpenGLShaderProgram::Uniform imageTexture, matrix, imageLimits;
@@ -813,7 +821,7 @@ struct StateHelpers
             if (currentActiveTexture != index)
             {
                 currentActiveTexture = index;
-                context.extensions.glActiveTexture (GL_TEXTURE0 + index);
+                context.extensions.glActiveTexture ((GLenum) (GL_TEXTURE0 + index));
                 JUCE_CHECK_OPENGL_ERROR
             }
         }
@@ -1029,7 +1037,7 @@ struct StateHelpers
 
         void draw() noexcept
         {
-            context.extensions.glBufferSubData (GL_ARRAY_BUFFER, 0, numVertices * sizeof (VertexInfo), vertexData);
+            context.extensions.glBufferSubData (GL_ARRAY_BUFFER, 0, (GLsizeiptr) ((size_t) numVertices * sizeof (VertexInfo)), vertexData);
             // NB: If you get a random crash in here and are running in a Parallels VM, it seems to be a bug in
             // their driver.. Can't find a workaround unfortunately.
             glDrawElements (GL_TRIANGLES, (numVertices * 3) / 2, GL_UNSIGNED_SHORT, 0);
@@ -1158,7 +1166,7 @@ public:
         {
             activeTextures.setTexturesEnabled (shaderQuadQueue, 3);
             activeTextures.setActiveTexture (1);
-            activeTextures.bindTexture (maskTextureID);
+            activeTextures.bindTexture ((GLuint) maskTextureID);
             activeTextures.setActiveTexture (0);
             textureCache.bindTextureForGradient (activeTextures, g);
         }
@@ -1248,7 +1256,7 @@ public:
     }
 
     void setShaderForTiledImageFill (const OpenGLTextureFromImage& image, const AffineTransform& transform,
-                                     const int maskTextureID, const Rectangle<int>* const maskArea, const bool clampTiledImages)
+                                     const int maskTextureID, const Rectangle<int>* const maskArea, bool isTiledFill)
     {
         blendMode.setPremultipliedBlendingMode (shaderQuadQueue);
 
@@ -1259,19 +1267,19 @@ public:
 
         if (maskArea != nullptr)
         {
-            activeTextures.setTwoTextureMode (shaderQuadQueue, image.textureID, maskTextureID);
+            activeTextures.setTwoTextureMode (shaderQuadQueue, image.textureID, (GLuint) maskTextureID);
 
-            if (clampTiledImages)
-            {
-                setShader (programs->imageMasked);
-                imageParams = &programs->imageMasked.imageParams;
-                maskParams  = &programs->imageMasked.maskParams;
-            }
-            else
+            if (isTiledFill)
             {
                 setShader (programs->tiledImageMasked);
                 imageParams = &programs->tiledImageMasked.imageParams;
                 maskParams  = &programs->tiledImageMasked.maskParams;
+            }
+            else
+            {
+                setShader (programs->imageMasked);
+                imageParams = &programs->imageMasked.imageParams;
+                maskParams  = &programs->imageMasked.maskParams;
             }
         }
         else
@@ -1279,19 +1287,19 @@ public:
             activeTextures.setSingleTextureMode (shaderQuadQueue);
             activeTextures.bindTexture (image.textureID);
 
-            if (clampTiledImages)
-            {
-                setShader (programs->image);
-                imageParams = &programs->image.imageParams;
-            }
-            else
+            if (isTiledFill)
             {
                 setShader (programs->tiledImage);
                 imageParams = &programs->tiledImage.imageParams;
             }
+            else
+            {
+                setShader (programs->image);
+                imageParams = &programs->image.imageParams;
+            }
         }
 
-        imageParams->setMatrix (transform, image, (float) target.bounds.getX(), (float) target.bounds.getY());
+        imageParams->setMatrix (transform, image, (float) target.bounds.getX(), (float) target.bounds.getY(), isTiledFill);
 
         if (maskParams != nullptr)
             maskParams->setBounds (*maskArea, target, 1);
@@ -1365,16 +1373,35 @@ public:
         }
     }
 
+    typedef RenderingHelpers::GlyphCache <RenderingHelpers::CachedGlyphEdgeTable <SavedState>, SavedState> GlyphCacheType;
+
     void drawGlyph (int glyphNumber, const AffineTransform& trans)
     {
         if (clip != nullptr)
         {
-            if (trans.isOnlyTranslation() && transform.isOnlyTranslated)
+            if (trans.isOnlyTranslation() && ! transform.isRotated)
             {
-                RenderingHelpers::GlyphCache <RenderingHelpers::CachedGlyphEdgeTable <SavedState>, SavedState>::getInstance()
-                    .drawGlyph (*this, font, glyphNumber,
-                                trans.getTranslationX(),
-                                trans.getTranslationY());
+                GlyphCacheType& cache = GlyphCacheType::getInstance();
+
+                Point<float> pos (trans.getTranslationX(), trans.getTranslationY());
+
+                if (transform.isOnlyTranslated)
+                {
+                    cache.drawGlyph (*this, font, glyphNumber, pos + transform.offset.toFloat());
+                }
+                else
+                {
+                    pos = transform.transformed (pos);
+
+                    Font f (font);
+                    f.setHeight (font.getHeight() * transform.complexTransform.mat11);
+
+                    const float xScale = transform.complexTransform.mat00 / transform.complexTransform.mat11;
+                    if (std::abs (xScale - 1.0f) > 0.01f)
+                        f.setHorizontalScale (xScale);
+
+                    cache.drawGlyph (*this, f, glyphNumber, pos);
+                }
             }
             else
             {
@@ -1406,7 +1433,7 @@ public:
     {
         state->shaderQuadQueue.flush();
         OpenGLTextureFromImage image (src);
-        state->setShaderForTiledImageFill (image, trans, 0, nullptr, ! tiledFill);
+        state->setShaderForTiledImageFill (image, trans, 0, nullptr, tiledFill);
 
         state->shaderQuadQueue.add (iter, PixelARGB ((uint8) alpha, (uint8) alpha, (uint8) alpha, (uint8) alpha));
         state->shaderQuadQueue.flush();
@@ -1539,4 +1566,10 @@ LowLevelGraphicsContext* createOpenGLGraphicsContext (OpenGLContext& context, un
 {
     using namespace OpenGLRendering;
     return OpenGLRendering::createOpenGLContext (OpenGLRendering::Target (context, frameBufferID, width, height));
+}
+
+void clearOpenGLGlyphCache();
+void clearOpenGLGlyphCache()
+{
+    OpenGLRendering::SavedState::GlyphCacheType::getInstance().reset();
 }

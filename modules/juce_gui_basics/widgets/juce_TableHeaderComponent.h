@@ -25,8 +25,6 @@
 #ifndef JUCE_TABLEHEADERCOMPONENT_H_INCLUDED
 #define JUCE_TABLEHEADERCOMPONENT_H_INCLUDED
 
-#include "../menus/juce_PopupMenu.h"
-
 
 //==============================================================================
 /**
@@ -317,12 +315,10 @@ public:
         */
         virtual void tableColumnsChanged (TableHeaderComponent* tableHeader) = 0;
 
-        /** This is called when one or more of the table's columns are resized.
-        */
+        /** This is called when one or more of the table's columns are resized. */
         virtual void tableColumnsResized (TableHeaderComponent* tableHeader) = 0;
 
-        /** This is called when the column by which the table should be sorted is changed.
-        */
+        /** This is called when the column by which the table should be sorted is changed. */
         virtual void tableSortOrderChanged (TableHeaderComponent* tableHeader) = 0;
 
         /** This is called when the user begins or ends dragging one of the columns around.
@@ -369,6 +365,19 @@ public:
         @see addMenuItems
     */
     virtual void reactToMenuItem (int menuReturnId, int columnIdClicked);
+
+    //==============================================================================
+    /** This abstract base class is implemented by LookAndFeel classes. */
+    struct JUCE_API  LookAndFeelMethods
+    {
+        virtual ~LookAndFeelMethods() {}
+
+        virtual void drawTableHeaderBackground (Graphics&, TableHeaderComponent&) = 0;
+
+        virtual void drawTableHeaderColumn (Graphics&, const String& columnName, int columnId,
+                                            int width, int height,
+                                            bool isMouseOver, bool isMouseDown, int columnFlags) = 0;
+    };
 
     //==============================================================================
     /** @internal */

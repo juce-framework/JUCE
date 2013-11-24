@@ -30,8 +30,7 @@ URL::URL()
 {
 }
 
-URL::URL (const String& url_)
-    : url (url_)
+URL::URL (const String& u)  : url (u)
 {
     int i = url.indexOfChar ('?');
 
@@ -198,9 +197,11 @@ namespace URLHelpers
             data << getMangledParameters (url)
                  << url.getPostData();
 
-            // just a short text attachment, so use simple url encoding..
-            headers << "Content-Type: application/x-www-form-urlencoded\r\nContent-length: "
-                    << (int) data.getDataSize() << "\r\n";
+            // if the user-supplied headers didn't contain a content-type, add one now..
+            if (! headers.containsIgnoreCase ("Content-Type"))
+                headers << "Content-Type: application/x-www-form-urlencoded\r\n";
+
+            headers << "Content-length: " << (int) data.getDataSize() << "\r\n";
         }
     }
 
@@ -291,7 +292,7 @@ URL URL::getChildURL (const String& subPath) const
 //==============================================================================
 bool URL::isProbablyAWebsiteURL (const String& possibleURL)
 {
-    const char* validProtocols[] = { "http:", "ftp:", "https:" };
+    static const char* validProtocols[] = { "http:", "ftp:", "https:" };
 
     for (int i = 0; i < numElementsInArray (validProtocols); ++i)
         if (possibleURL.startsWithIgnoreCase (validProtocols[i]))
@@ -313,24 +314,24 @@ bool URL::isProbablyAnEmailAddress (const String& possibleEmailAddress)
 
     return atSign > 0
             && possibleEmailAddress.lastIndexOfChar ('.') > (atSign + 1)
-            && (! possibleEmailAddress.endsWithChar ('.'));
+            && ! possibleEmailAddress.endsWithChar ('.');
 }
 
 //==============================================================================
 InputStream* URL::createInputStream (const bool usePostCommand,
                                      OpenStreamProgressCallback* const progressCallback,
                                      void* const progressCallbackContext,
-                                     const String& extraHeaders,
+                                     String headers,
                                      const int timeOutMs,
                                      StringPairArray* const responseHeaders) const
 {
-    String headers;
     MemoryBlock headersAndPostData;
+
+    if (! headers.endsWithChar ('\n'))
+        headers << "\r\n";
 
     if (usePostCommand)
         URLHelpers::createHeadersAndPostData (*this, headers, headersAndPostData);
-
-    headers += extraHeaders;
 
     if (! headers.endsWithChar ('\n'))
         headers << "\r\n";
@@ -344,7 +345,7 @@ InputStream* URL::createInputStream (const bool usePostCommand,
 bool URL::readEntireBinaryStream (MemoryBlock& destData,
                                   const bool usePostCommand) const
 {
-    const ScopedPointer <InputStream> in (createInputStream (usePostCommand));
+    const ScopedPointer<InputStream> in (createInputStream (usePostCommand));
 
     if (in != nullptr)
     {
@@ -357,7 +358,7 @@ bool URL::readEntireBinaryStream (MemoryBlock& destData,
 
 String URL::readEntireTextStream (const bool usePostCommand) const
 {
-    const ScopedPointer <InputStream> in (createInputStream (usePostCommand));
+    const ScopedPointer<InputStream> in (createInputStream (usePostCommand));
 
     if (in != nullptr)
         return in->readEntireStreamAsString();
@@ -391,10 +392,10 @@ URL URL::withFileToUpload (const String& parameterName,
     return u;
 }
 
-URL URL::withPOSTData (const String& postData_) const
+URL URL::withPOSTData (const String& newPostData) const
 {
     URL u (*this);
-    u.postData = postData_;
+    u.postData = newPostData;
     return u;
 }
 

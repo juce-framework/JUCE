@@ -23,6 +23,7 @@
 */
 
 #include "../../jucer_Headers.h"
+#include "../../Application/jucer_Application.h"
 #include "jucer_ComponentLayoutEditor.h"
 #include "../ui/jucer_JucerCommandIDs.h"
 #include "../jucer_ObjectTypes.h"
@@ -266,6 +267,8 @@ void ComponentLayoutEditor::mouseDown (const MouseEvent& e)
 {
     if (e.mods.isPopupMenu())
     {
+        ApplicationCommandManager* commandManager = &IntrojucerApp::getCommandManager();
+
         PopupMenu m;
 
         m.addCommandItem (commandManager, JucerCommandIDs::editCompLayout);
@@ -354,9 +357,9 @@ void ComponentLayoutEditor::filesDropped (const StringArray& filenames, int x, i
         JucerComponentHandler jucerDocHandler;
         layout.getDocument()->beginTransaction();
 
-        if (TestComponent* newOne = dynamic_cast <TestComponent*> (layout.addNewComponent (&jucerDocHandler,
-                                                                                           x - subCompHolder->getX(),
-                                                                                           y - subCompHolder->getY())))
+        if (TestComponent* newOne = dynamic_cast<TestComponent*> (layout.addNewComponent (&jucerDocHandler,
+                                                                                          x - subCompHolder->getX(),
+                                                                                          y - subCompHolder->getY())))
         {
             JucerComponentHandler::setJucerComponentFile (*layout.getDocument(), newOne,
                                                           f.getRelativePathFrom (document.getCppFile().getParentDirectory()));
@@ -365,6 +368,31 @@ void ComponentLayoutEditor::filesDropped (const StringArray& filenames, int x, i
 
         layout.getDocument()->beginTransaction();
     }
+}
+
+bool ComponentLayoutEditor::isInterestedInDragSource (const SourceDetails& dragSourceDetails)
+{
+    if (dragSourceDetails.description != projectItemDragType)
+        return false;
+
+    OwnedArray<Project::Item> selectedNodes;
+    ProjectContentComponent::getSelectedProjectItemsBeingDragged (dragSourceDetails, selectedNodes);
+
+    return selectedNodes.size() > 0;
+}
+
+void ComponentLayoutEditor::itemDropped (const SourceDetails& dragSourceDetails)
+{
+    OwnedArray <Project::Item> selectedNodes;
+    ProjectContentComponent::getSelectedProjectItemsBeingDragged (dragSourceDetails, selectedNodes);
+
+    StringArray filenames;
+
+    for (int i = 0; i < selectedNodes.size(); ++i)
+        if (selectedNodes.getUnchecked(i)->getFile().hasFileExtension (".cpp"))
+            filenames.add (selectedNodes.getUnchecked(i)->getFile().getFullPathName());
+
+    filesDropped (filenames, dragSourceDetails.localPosition.x, dragSourceDetails.localPosition.y);
 }
 
 ComponentOverlayComponent* ComponentLayoutEditor::getOverlayCompFor (Component* compToFind) const

@@ -30,7 +30,7 @@
 /**
     Classes derived from this will be automatically deleted when the application exits.
 
-    After JUCEApplication::shutdown() has been called, any objects derived from
+    After JUCEApplicationBase::shutdown() has been called, any objects derived from
     DeletedAtShutdown which are still in existence will be deleted in the reverse
     order to that in which they were created.
 
@@ -55,7 +55,7 @@ public:
     /** Deletes all extant objects.
 
         This shouldn't be used by applications, as it's called automatically
-        in the shutdown code of the JUCEApplication class.
+        in the shutdown code of the JUCEApplicationBase class.
     */
     static void deleteAll();
 

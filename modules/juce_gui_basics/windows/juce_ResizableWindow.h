@@ -25,11 +25,6 @@
 #ifndef JUCE_RESIZABLEWINDOW_H_INCLUDED
 #define JUCE_RESIZABLEWINDOW_H_INCLUDED
 
-#include "juce_TopLevelWindow.h"
-#include "../mouse/juce_ComponentDragger.h"
-#include "../layout/juce_ResizableBorderComponent.h"
-#include "../layout/juce_ResizableCornerComponent.h"
-
 
 //==============================================================================
 /**
@@ -124,8 +119,7 @@ public:
     void setResizable (bool shouldBeResizable,
                        bool useBottomRightCornerResizer);
 
-    /** True if resizing is enabled.
-
+    /** Returns true if resizing is enabled.
         @see setResizable
     */
     bool isResizable() const noexcept;
@@ -135,8 +129,9 @@ public:
         If the window's current size is outside these limits, it will be resized to
         make sure it's within them.
 
-        Calling setBounds() on the component will bypass any size checking - it's only when
-        the window is being resized by the user that these values are enforced.
+        A direct call to setBounds() will bypass any constraint checks, but when the
+        window is dragged by the user or resized by other indirect means, the constrainer
+        will limit the numbers involved.
 
         @see setResizable, setFixedAspectRatio
     */
@@ -146,7 +141,6 @@ public:
                           int newMaximumHeight) noexcept;
 
     /** Returns the bounds constrainer object that this window is using.
-
         You can access this to change its properties.
     */
     ComponentBoundsConstrainer* getConstrainer() noexcept           { return constrainer; }
@@ -156,13 +150,12 @@ public:
         A pointer to the object you pass in will be kept, but it won't be deleted
         by this object, so it's the caller's responsiblity to manage it.
 
-        If you pass 0, then no contraints will be placed on the positioning of the window.
+        If you pass a nullptr, then no contraints will be placed on the positioning of the window.
     */
     void setConstrainer (ComponentBoundsConstrainer* newConstrainer);
 
     /** Calls the window's setBounds method, after first checking these bounds
         with the current constrainer.
-
         @see setConstrainer
     */
     void setBoundsConstrained (const Rectangle<int>& bounds);
@@ -170,7 +163,6 @@ public:
 
     //==============================================================================
     /** Returns true if the window is currently in full-screen mode.
-
         @see setFullScreen
     */
     bool isFullScreen() const;
@@ -185,7 +177,6 @@ public:
     void setFullScreen (bool shouldBeFullScreen);
 
     /** Returns true if the window is currently minimised.
-
         @see setMinimised
     */
     bool isMinimised() const;
@@ -198,9 +189,6 @@ public:
         @see isMinimised
     */
     void setMinimised (bool shouldMinimise);
-
-    /** Adds the window to the desktop using the default flags. */
-    void addToDesktop();
 
     //==============================================================================
     /** Returns a string which encodes the window's current size and position.
@@ -318,8 +306,23 @@ public:
                                                bool resizeToFit = false));
     using TopLevelWindow::addToDesktop;
 
-protected:
     //==============================================================================
+    /** This abstract base class is implemented by LookAndFeel classes to provide
+        window drawing functionality.
+    */
+    struct JUCE_API  LookAndFeelMethods
+    {
+        virtual ~LookAndFeelMethods() {}
+
+        //==============================================================================
+        virtual void drawCornerResizer (Graphics&, int w, int h, bool isMouseOver, bool isMouseDragging) = 0;
+        virtual void drawResizableFrame (Graphics&, int w, int h, const BorderSize<int>&) = 0;
+
+        virtual void fillResizableWindowBackground (Graphics&, int w, int h, const BorderSize<int>&, ResizableWindow&) = 0;
+        virtual void drawResizableWindowBorder (Graphics&, int w, int h, const BorderSize<int>& border, ResizableWindow&) = 0;
+    };
+
+protected:
     /** @internal */
     void paint (Graphics&) override;
     /** (if overriding this, make sure you call ResizableWindow::moved() in your subclass) */
@@ -350,14 +353,14 @@ protected:
         If you know what you're doing and are sure you really want to add a component, specify
         a base-class method call to Component::addAndMakeVisible(), to side-step this warning.
     */
-    void addChildComponent (Component* child, int zOrder = -1);
+    void addChildComponent (Component*, int zOrder = -1);
     /** Overridden to warn people about adding components directly to this component
         instead of using setContentOwned().
 
         If you know what you're doing and are sure you really want to add a component, specify
         a base-class method call to Component::addAndMakeVisible(), to side-step this warning.
     */
-    void addAndMakeVisible (Component* child, int zOrder = -1);
+    void addAndMakeVisible (Component*, int zOrder = -1);
    #endif
 
     ScopedPointer <ResizableCornerComponent> resizableCorner;
@@ -365,7 +368,7 @@ protected:
 
 private:
     //==============================================================================
-    Component::SafePointer <Component> contentComponent;
+    Component::SafePointer<Component> contentComponent;
     bool ownsContentComponent, resizeToFitContent, fullscreen;
     ComponentDragger dragger;
     Rectangle<int> lastNonFullScreenPos;

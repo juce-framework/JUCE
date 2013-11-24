@@ -34,29 +34,14 @@ CriticalSection::CriticalSection() noexcept
    #if ! JUCE_ANDROID
     pthread_mutexattr_setprotocol (&atts, PTHREAD_PRIO_INHERIT);
    #endif
-    pthread_mutex_init (&internal, &atts);
+    pthread_mutex_init (&lock, &atts);
+    pthread_mutexattr_destroy (&atts);
 }
 
-CriticalSection::~CriticalSection() noexcept
-{
-    pthread_mutex_destroy (&internal);
-}
-
-void CriticalSection::enter() const noexcept
-{
-    pthread_mutex_lock (&internal);
-}
-
-bool CriticalSection::tryEnter() const noexcept
-{
-    return pthread_mutex_trylock (&internal) == 0;
-}
-
-void CriticalSection::exit() const noexcept
-{
-    pthread_mutex_unlock (&internal);
-}
-
+CriticalSection::~CriticalSection() noexcept        { pthread_mutex_destroy (&lock); }
+void CriticalSection::enter() const noexcept        { pthread_mutex_lock (&lock); }
+bool CriticalSection::tryEnter() const noexcept     { return pthread_mutex_trylock (&lock) == 0; }
+void CriticalSection::exit() const noexcept         { pthread_mutex_unlock (&lock); }
 
 //==============================================================================
 WaitableEvent::WaitableEvent (const bool useManualReset) noexcept
@@ -129,8 +114,13 @@ bool WaitableEvent::wait (const int timeOutMillisecs) const noexcept
 void WaitableEvent::signal() const noexcept
 {
     pthread_mutex_lock (&mutex);
-    triggered = true;
-    pthread_cond_broadcast (&condition);
+
+    if (! triggered)
+    {
+        triggered = true;
+        pthread_cond_broadcast (&condition);
+    }
+
     pthread_mutex_unlock (&mutex);
 }
 
@@ -150,6 +140,14 @@ void JUCE_CALLTYPE Thread::sleep (int millisecs)
     nanosleep (&time, nullptr);
 }
 
+void JUCE_CALLTYPE Process::terminate()
+{
+   #if JUCE_ANDROID
+    _exit (EXIT_FAILURE);
+   #else
+    std::_Exit (EXIT_FAILURE);
+   #endif
+}
 
 //==============================================================================
 const juce_wchar File::separator = '/';
@@ -882,7 +880,7 @@ void Thread::killThread()
     }
 }
 
-void Thread::setCurrentThreadName (const String& name)
+void JUCE_CALLTYPE Thread::setCurrentThreadName (const String& name)
 {
    #if JUCE_IOS || (JUCE_MAC && defined (MAC_OS_X_VERSION_10_5) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_5)
     JUCE_AUTORELEASEPOOL
@@ -919,12 +917,12 @@ bool Thread::setThreadPriority (void* handle, int priority)
     return pthread_setschedparam ((pthread_t) handle, policy, &param) == 0;
 }
 
-Thread::ThreadID Thread::getCurrentThreadId()
+Thread::ThreadID JUCE_CALLTYPE Thread::getCurrentThreadId()
 {
     return (ThreadID) pthread_self();
 }
 
-void Thread::yield()
+void JUCE_CALLTYPE Thread::yield()
 {
     sched_yield();
 }
@@ -938,7 +936,7 @@ void Thread::yield()
  #define SUPPORT_AFFINITIES 1
 #endif
 
-void Thread::setCurrentThreadAffinityMask (const uint32 affinityMask)
+void JUCE_CALLTYPE Thread::setCurrentThreadAffinityMask (const uint32 affinityMask)
 {
    #if SUPPORT_AFFINITIES
     cpu_set_t affinity;
@@ -995,7 +993,7 @@ void* DynamicLibrary::getFunction (const String& functionName) noexcept
 class ChildProcess::ActiveProcess
 {
 public:
-    ActiveProcess (const StringArray& arguments)
+    ActiveProcess (const StringArray& arguments, int streamFlags)
         : childPID (0), pipeHandle (0), readHandle (0)
     {
         int pipeHandles[2] = { 0 };
@@ -1013,8 +1011,17 @@ public:
             {
                 // we're the child process..
                 close (pipeHandles[0]);   // close the read handle
-                dup2 (pipeHandles[1], 1); // turns the pipe into stdout
-                dup2 (pipeHandles[1], 2); //  + stderr
+
+                if ((streamFlags | wantStdOut) != 0)
+                    dup2 (pipeHandles[1], 1); // turns the pipe into stdout
+                else
+                    close (STDOUT_FILENO);
+
+                if ((streamFlags | wantStdErr) != 0)
+                    dup2 (pipeHandles[1], 2);
+                else
+                    close (STDERR_FILENO);
+
                 close (pipeHandles[1]);
 
                 Array<char*> argv;
@@ -1089,17 +1096,17 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ActiveProcess)
 };
 
-bool ChildProcess::start (const String& command)
+bool ChildProcess::start (const String& command, int streamFlags)
 {
-    return start (StringArray::fromTokens (command, true));
+    return start (StringArray::fromTokens (command, true), streamFlags);
 }
 
-bool ChildProcess::start (const StringArray& args)
+bool ChildProcess::start (const StringArray& args, int streamFlags)
 {
     if (args.size() == 0)
         return false;
 
-    activeProcess = new ActiveProcess (args);
+    activeProcess = new ActiveProcess (args, streamFlags);
 
     if (activeProcess->childPID == 0)
         activeProcess = nullptr;
@@ -1143,7 +1150,7 @@ struct HighResolutionTimer::Pimpl
             shouldStop = false;
 
             if (pthread_create (&thread, nullptr, timerThread, this) == 0)
-                setThreadToRealtime (thread, newPeriod);
+                setThreadToRealtime (thread, (uint64) newPeriod);
             else
                 jassertfalse;
         }

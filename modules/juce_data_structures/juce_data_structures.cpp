@@ -40,12 +40,10 @@
 namespace juce
 {
 
-// START_AUTOINCLUDE values/*.cpp, undomanager/*.cpp, app_properties/*.cpp
 #include "values/juce_Value.cpp"
 #include "values/juce_ValueTree.cpp"
 #include "undomanager/juce_UndoManager.cpp"
 #include "app_properties/juce_ApplicationProperties.cpp"
 #include "app_properties/juce_PropertiesFile.cpp"
-// END_AUTOINCLUDE
 
 }

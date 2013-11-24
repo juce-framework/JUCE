@@ -27,7 +27,7 @@
 
 #include "jucer_Project.h"
 #include "../Application/jucer_OpenDocumentManager.h"
-class ProjectTreeViewBase;
+
 
 //==============================================================================
 /**
@@ -73,6 +73,12 @@ public:
     void openInIDE();
     void openInIDE (const String& exporterName);
 
+    void showFilesTab();
+    void showConfigTab();
+    void showProjectSettings();
+    void showModules();
+    void showModule (const String& moduleID);
+
     void deleteSelectedTreeItems();
 
     void updateMainWindowTitle();
@@ -82,9 +88,12 @@ public:
     virtual void deleteProjectTabs();
     void rebuildProjectTabs();
 
-    void showBubbleMessage (const Rectangle<int>& pos, const String& text);
+    void showBubbleMessage (const Rectangle<int>&, const String&);
 
     StringArray getExportersWhichCanLaunch() const;
+
+    static void getSelectedProjectItemsBeingDragged (const DragAndDropTarget::SourceDetails& dragSourceDetails,
+                                                     OwnedArray<Project::Item>& selectedNodes);
 
     //==============================================================================
     ApplicationCommandTarget* getNextCommandTarget() override;
@@ -112,10 +121,8 @@ protected:
     ComponentBoundsConstrainer treeSizeConstrainer;
     BubbleMessageComponent bubbleMessage;
 
-    void documentAboutToClose (OpenDocumentManager::Document*) override;
+    bool documentAboutToClose (OpenDocumentManager::Document*) override;
     void changeListenerCallback (ChangeBroadcaster*) override;
-    TreeView* getFilesTreeView() const;
-    ProjectTreeViewBase* getFilesTreeRoot() const;
     void showTranslationTool();
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ProjectContentComponent)

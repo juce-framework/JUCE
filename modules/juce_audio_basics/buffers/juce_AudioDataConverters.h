@@ -71,9 +71,9 @@ public:
     {
     public:
         template <class SampleFormatType> static inline float getAsFloat (SampleFormatType& s) noexcept                         { return s.getAsFloatBE(); }
-        template <class SampleFormatType> static inline void setAsFloat (SampleFormatType& s, float newValue) noexcept          { s.setAsFloatBE (newValue); }
+        template <class SampleFormatType> static inline void  setAsFloat (SampleFormatType& s, float newValue) noexcept         { s.setAsFloatBE (newValue); }
         template <class SampleFormatType> static inline int32 getAsInt32 (SampleFormatType& s) noexcept                         { return s.getAsInt32BE(); }
-        template <class SampleFormatType> static inline void setAsInt32 (SampleFormatType& s, int32 newValue) noexcept          { s.setAsInt32BE (newValue); }
+        template <class SampleFormatType> static inline void  setAsInt32 (SampleFormatType& s, int32 newValue) noexcept         { s.setAsInt32BE (newValue); }
         template <class SourceType, class DestType> static inline void copyFrom (DestType& dest, SourceType& source) noexcept   { dest.copyFromBE (source); }
         enum { isBigEndian = 1 };
     };
@@ -82,9 +82,9 @@ public:
     {
     public:
         template <class SampleFormatType> static inline float getAsFloat (SampleFormatType& s) noexcept                         { return s.getAsFloatLE(); }
-        template <class SampleFormatType> static inline void setAsFloat (SampleFormatType& s, float newValue) noexcept          { s.setAsFloatLE (newValue); }
+        template <class SampleFormatType> static inline void  setAsFloat (SampleFormatType& s, float newValue) noexcept         { s.setAsFloatLE (newValue); }
         template <class SampleFormatType> static inline int32 getAsInt32 (SampleFormatType& s) noexcept                         { return s.getAsInt32LE(); }
-        template <class SampleFormatType> static inline void setAsInt32 (SampleFormatType& s, int32 newValue) noexcept          { s.setAsInt32LE (newValue); }
+        template <class SampleFormatType> static inline void  setAsInt32 (SampleFormatType& s, int32 newValue) noexcept         { s.setAsInt32LE (newValue); }
         template <class SourceType, class DestType> static inline void copyFrom (DestType& dest, SourceType& source) noexcept   { dest.copyFromLE (source); }
         enum { isBigEndian = 0 };
     };
@@ -205,11 +205,11 @@ public:
         inline void skip (int numSamples) noexcept              { data += numSamples; }
         inline float getAsFloatLE() const noexcept              { return (float) ((1.0 / (1.0 + maxValue)) * (int32) ByteOrder::swapIfBigEndian (*data)); }
         inline float getAsFloatBE() const noexcept              { return (float) ((1.0 / (1.0 + maxValue)) * (int32) ByteOrder::swapIfLittleEndian (*data)); }
-        inline void setAsFloatLE (float newValue) noexcept      { *data = ByteOrder::swapIfBigEndian ((uint32) (maxValue * jlimit (-1.0, 1.0, (double) newValue))); }
+        inline void setAsFloatLE (float newValue) noexcept      { *data = ByteOrder::swapIfBigEndian    ((uint32) (maxValue * jlimit (-1.0, 1.0, (double) newValue))); }
         inline void setAsFloatBE (float newValue) noexcept      { *data = ByteOrder::swapIfLittleEndian ((uint32) (maxValue * jlimit (-1.0, 1.0, (double) newValue))); }
-        inline int32 getAsInt32LE() const noexcept              { return (int32) ByteOrder::swapIfBigEndian (*data); }
+        inline int32 getAsInt32LE() const noexcept              { return (int32) ByteOrder::swapIfBigEndian    (*data); }
         inline int32 getAsInt32BE() const noexcept              { return (int32) ByteOrder::swapIfLittleEndian (*data); }
-        inline void setAsInt32LE (int32 newValue) noexcept      { *data = ByteOrder::swapIfBigEndian ((uint32) newValue); }
+        inline void setAsInt32LE (int32 newValue) noexcept      { *data = ByteOrder::swapIfBigEndian    ((uint32) newValue); }
         inline void setAsInt32BE (int32 newValue) noexcept      { *data = ByteOrder::swapIfLittleEndian ((uint32) newValue); }
         inline void clear() noexcept                            { *data = 0; }
         inline void clearMultiple (int num) noexcept            { zeromem (data, (size_t) (num * bytesPerSample)) ;}
@@ -219,6 +219,27 @@ public:
 
         uint32* data;
         enum { bytesPerSample = 4, maxValue = 0x7fffffff, resolution = 1, isFloat = 0 };
+    };
+
+    /** A 32-bit integer type, of which only the bottom 24 bits are used. */
+    class Int24in32  : public Int32
+    {
+    public:
+        inline Int24in32 (void* d) noexcept  : Int32 (d)  {}
+
+        inline float getAsFloatLE() const noexcept              { return (float) ((1.0 / (1.0 + maxValue)) * (int32) ByteOrder::swapIfBigEndian (*data)); }
+        inline float getAsFloatBE() const noexcept              { return (float) ((1.0 / (1.0 + maxValue)) * (int32) ByteOrder::swapIfLittleEndian (*data)); }
+        inline void setAsFloatLE (float newValue) noexcept      { *data = ByteOrder::swapIfBigEndian    ((uint32) (maxValue * jlimit (-1.0, 1.0, (double) newValue))); }
+        inline void setAsFloatBE (float newValue) noexcept      { *data = ByteOrder::swapIfLittleEndian ((uint32) (maxValue * jlimit (-1.0, 1.0, (double) newValue))); }
+        inline int32 getAsInt32LE() const noexcept              { return (int32) ByteOrder::swapIfBigEndian    (*data) << 8; }
+        inline int32 getAsInt32BE() const noexcept              { return (int32) ByteOrder::swapIfLittleEndian (*data) << 8; }
+        inline void setAsInt32LE (int32 newValue) noexcept      { *data = ByteOrder::swapIfBigEndian    ((uint32) newValue >> 8); }
+        inline void setAsInt32BE (int32 newValue) noexcept      { *data = ByteOrder::swapIfLittleEndian ((uint32) newValue >> 8); }
+        template <class SourceType> inline void copyFromLE (SourceType& source) noexcept    { setAsInt32LE (source.getAsInt32()); }
+        template <class SourceType> inline void copyFromBE (SourceType& source) noexcept    { setAsInt32BE (source.getAsInt32()); }
+        inline void copyFromSameType (Int24in32& source) noexcept { *data = *source.data; }
+
+        enum { bytesPerSample = 4, maxValue = 0x7fffff, resolution = (1 << 8), isFloat = 0 };
     };
 
     class Float32
@@ -591,9 +612,7 @@ public:
             : sourceChannels (numSourceChannels), destChannels (numDestChannels)
         {}
 
-        ~ConverterInstance() {}
-
-        void convertSamples (void* dest, const void* source, int numSamples) const
+        void convertSamples (void* dest, const void* source, int numSamples) const override
         {
             SourceSampleType s (source, sourceChannels);
             DestSampleType d (dest, destChannels);
@@ -601,7 +620,7 @@ public:
         }
 
         void convertSamples (void* dest, int destSubChannel,
-                             const void* source, int sourceSubChannel, int numSamples) const
+                             const void* source, int sourceSubChannel, int numSamples) const override
         {
             jassert (destSubChannel < destChannels && sourceSubChannel < sourceChannels);
 

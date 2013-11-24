@@ -68,7 +68,7 @@ public:
 
     virtual void drawExtraEditorGraphics (Graphics& g, const Rectangle<int>& relativeTo);
 
-    virtual void getEditableProperties (Array <PropertyComponent*>& properties);
+    virtual void getEditableProperties (Array<PropertyComponent*>& props);
 
     virtual void showPopupMenu();
 
@@ -134,30 +134,39 @@ private:
 
 //==============================================================================
 template <typename ElementType>
-class ElementListenerBase   : public ChangeListener
+class ElementListener   : public ChangeListener
 {
 public:
-    ElementListenerBase (ElementType* const e)
-        : owner (e), broadcaster (*owner->getDocument())
+    ElementListener (ElementType* e)
+        : owner (e), broadcaster (*owner->getDocument()),
+          propToRefresh (nullptr)
     {
         broadcaster.addChangeListener (this);
     }
 
-    ~ElementListenerBase()
+    ~ElementListener()
     {
+        jassert (propToRefresh != nullptr);
         broadcaster.removeChangeListener (this);
+    }
+
+    void setPropertyToRefresh (PropertyComponent& pc)
+    {
+        propToRefresh = &pc;
     }
 
     void changeListenerCallback (ChangeBroadcaster*)
     {
-        if (PropertyComponent* pc = dynamic_cast <PropertyComponent*> (this))
-            pc->refresh();
+        jassert (propToRefresh != nullptr);
+        if (propToRefresh != nullptr)
+            propToRefresh->refresh();
     }
 
     mutable Component::SafePointer<ElementType> owner;
     ChangeBroadcaster& broadcaster;
+    PropertyComponent* propToRefresh;
 
-    JUCE_DECLARE_NON_COPYABLE (ElementListenerBase)
+    JUCE_DECLARE_NON_COPYABLE (ElementListener)
 };
 
 

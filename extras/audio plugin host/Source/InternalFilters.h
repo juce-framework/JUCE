@@ -54,16 +54,16 @@ public:
     void getAllTypes (OwnedArray <PluginDescription>& results);
 
     //==============================================================================
-    String getName() const                                      { return "Internal"; }
-    bool fileMightContainThisPluginType (const String&)         { return false; }
-    FileSearchPath getDefaultLocationsToSearch()                { return FileSearchPath(); }
-    bool canScanForPlugins() const                              { return false; }
-    void findAllTypesForFile (OwnedArray <PluginDescription>&, const String&)     {}
-    bool doesPluginStillExist (const PluginDescription&)        { return true; }
-    String getNameOfPluginFromIdentifier (const String& fileOrIdentifier)   { return fileOrIdentifier; }
-    bool pluginNeedsRescanning (const PluginDescription&)       { return false; }
-    StringArray searchPathsForPlugins (const FileSearchPath&, bool)         { return StringArray(); }
-    AudioPluginInstance* createInstanceFromDescription (const PluginDescription& desc);
+    String getName() const override                                      { return "Internal"; }
+    bool fileMightContainThisPluginType (const String&) override         { return false; }
+    FileSearchPath getDefaultLocationsToSearch() override                { return FileSearchPath(); }
+    bool canScanForPlugins() const override                              { return false; }
+    void findAllTypesForFile (OwnedArray <PluginDescription>&, const String&) override     {}
+    bool doesPluginStillExist (const PluginDescription&) override        { return true; }
+    String getNameOfPluginFromIdentifier (const String& fileOrIdentifier) override   { return fileOrIdentifier; }
+    bool pluginNeedsRescanning (const PluginDescription&) override       { return false; }
+    StringArray searchPathsForPlugins (const FileSearchPath&, bool) override         { return StringArray(); }
+    AudioPluginInstance* createInstanceFromDescription (const PluginDescription&, double, int) override;
 
 private:
     //==============================================================================
