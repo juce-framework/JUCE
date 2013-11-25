@@ -396,7 +396,7 @@ namespace RTASHelpers
 
                 RelativePath modulePath (exporter.rebaseFromProjectFolderToBuildTarget (RelativePath (exporter.getPathForModuleString ("juce_audio_plugin_client"),
                                                                                                       RelativePath::projectFolder)
-                                                                                           .getChildFile ("RTAS")));
+                                                                                           .getChildFile ("juce_audio_plugin_client/RTAS")));
 
                 for (ProjectExporter::ConfigIterator config (exporter); config.next();)
                 {
