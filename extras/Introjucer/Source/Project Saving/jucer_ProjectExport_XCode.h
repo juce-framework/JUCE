@@ -580,7 +580,7 @@ private:
 
             if (s.containsChar (' '))
                 s = "\"\\\"" + s + "\\\"\""; // crazy double quotes required when there are spaces..
-            else if (s.containsAnyOf ("${}()@&~+-=<>\t;\r\n"))
+            else
                 s = "\"" + s + "\"";
         }
 

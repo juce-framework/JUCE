@@ -1877,7 +1877,7 @@
 				92ABB8016546F41128399E9D ); name = Source; sourceTree = "<group>"; };
 		EA0BCC969703B2D179089E55 = { isa = XCBuildConfiguration; buildSettings = {
 				ARCHS = "$(NATIVE_ARCH_ACTUAL)";
-				HEADER_SEARCH_PATHS = (../../JuceLibraryCode, ../../../../modules, "$(inherited)");
+				HEADER_SEARCH_PATHS = ("../../JuceLibraryCode", "../../../../modules", "$(inherited)");
 				GCC_OPTIMIZATION_LEVEL = 0;
 				INFOPLIST_FILE = Info.plist;
 				OTHER_CPLUSPLUSFLAGS = "-Wall -Wshadow -Wno-missing-field-initializers -Wshadow -Wshorten-64-to-32 -Wstrict-aliasing -Wuninitialized -Wunused-parameter";
@@ -1897,7 +1897,7 @@
 				"JUCER_XCODE_MAC_F6D2F4CF=1"); }; name = Debug; };
 		B159CF4275B8A90122629FF4 = { isa = XCBuildConfiguration; buildSettings = {
 				ARCHS = "$(NATIVE_ARCH_ACTUAL)";
-				HEADER_SEARCH_PATHS = (../../JuceLibraryCode, ../../../../modules, "$(inherited)");
+				HEADER_SEARCH_PATHS = ("../../JuceLibraryCode", "../../../../modules", "$(inherited)");
 				GCC_OPTIMIZATION_LEVEL = 3;
 				INFOPLIST_FILE = Info.plist;
 				OTHER_CPLUSPLUSFLAGS = "-Wall -Wshadow -Wno-missing-field-initializers -Wshadow -Wshorten-64-to-32 -Wstrict-aliasing -Wuninitialized -Wunused-parameter";
