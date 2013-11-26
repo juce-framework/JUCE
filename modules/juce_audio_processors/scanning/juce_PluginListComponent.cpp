@@ -79,7 +79,7 @@ public:
                                        : columnId == nameCol ? Colours::black
                                                              : Colours::grey);
             g.setFont (Font (height * 0.7f, Font::bold));
-            g.drawFittedText (text, 4.0f, 0.0f, width - 6.0f, height, Justification::centredLeft, 1, 0.9f);
+            g.drawFittedText (text, 4, 0, width - 6, height, Justification::centredLeft, 1, 0.9f);
         }
     }
 
@@ -125,6 +125,8 @@ public:
 
     PluginListComponent& owner;
     KnownPluginList& list;
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TableModel)
 };
 
 //==============================================================================
