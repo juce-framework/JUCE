@@ -151,16 +151,7 @@ protected:
         String getIntermediatesPath() const         { return config [Ids::intermediatesPath].toString(); }
         Value getIntermediatesPathValue()           { return getValue (Ids::intermediatesPath); }
 
-        String getCharacterSet() const
-        {
-            String charSet (config [Ids::characterSet].toString());
-
-            if (charSet.isEmpty())
-                charSet = "MultiByte";
-
-            return charSet;
-        }
-
+        String getCharacterSet() const              { return config [Ids::characterSet].toString(); }
         Value getCharacterSetValue()                { return getValue (Ids::characterSet); }
 
         String getOutputFilename (const String& suffix, bool forceSuffix) const
@@ -1093,7 +1084,11 @@ protected:
             e->setAttribute ("Label", "Configuration");
             e->createNewChildElement ("ConfigurationType")->addTextElement (getProjectType());
             e->createNewChildElement ("UseOfMfc")->addTextElement ("false");
-            e->createNewChildElement ("CharacterSet")->addTextElement (config.getCharacterSet());
+
+            const String charSet (config.getCharacterSet());
+
+            if (charSet.isNotEmpty())
+                e->createNewChildElement ("CharacterSet")->addTextElement (charSet);
 
             if (! (config.isDebug() || config.shouldDisableWholeProgramOpt()))
                 e->createNewChildElement ("WholeProgramOptimization")->addTextElement ("true");

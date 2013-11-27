@@ -505,6 +505,7 @@
 		720C3CA9E28181C76434D465 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_CriticalSection.h"; path = "../../../../modules/juce_core/threads/juce_CriticalSection.h"; sourceTree = "SOURCE_ROOT"; };
 		7286D6380C74734603D098EB = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_StringArray.cpp"; path = "../../../../modules/juce_core/text/juce_StringArray.cpp"; sourceTree = "SOURCE_ROOT"; };
 		728E67FDBD3660742A33C7B6 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_CodeEditorComponent.cpp"; path = "../../../../modules/juce_gui_extra/code_editor/juce_CodeEditorComponent.cpp"; sourceTree = "SOURCE_ROOT"; };
+		73267FE8DDE50FD1E6E31ED4 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_VST3PluginFormat.h"; path = "../../../../modules/juce_audio_processors/format_types/juce_VST3PluginFormat.h"; sourceTree = "SOURCE_ROOT"; };
 		7338D006521EDC5C10EEF974 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_DrawableButton.cpp"; path = "../../../../modules/juce_gui_basics/buttons/juce_DrawableButton.cpp"; sourceTree = "SOURCE_ROOT"; };
 		734C43C3F7918061F2DDD214 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_ReferenceCountedObject.h"; path = "../../../../modules/juce_core/memory/juce_ReferenceCountedObject.h"; sourceTree = "SOURCE_ROOT"; };
 		73CF65298983B8CDC1CD84AC = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_Desktop.cpp"; path = "../../../../modules/juce_gui_basics/components/juce_Desktop.cpp"; sourceTree = "SOURCE_ROOT"; };
@@ -645,6 +646,7 @@
 		9ADA045A14202C9CF4F8CD40 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_BorderSize.h"; path = "../../../../modules/juce_graphics/geometry/juce_BorderSize.h"; sourceTree = "SOURCE_ROOT"; };
 		9B089D1649E4B5BC8AF63EC6 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_WavAudioFormat.cpp"; path = "../../../../modules/juce_audio_formats/codecs/juce_WavAudioFormat.cpp"; sourceTree = "SOURCE_ROOT"; };
 		9B37E4C205A31B36B559E613 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = VideoDemo.cpp; path = ../../Source/Demos/VideoDemo.cpp; sourceTree = "SOURCE_ROOT"; };
+		9B9E034C5761096ACB8A76C3 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_VST3PluginFormat.cpp"; path = "../../../../modules/juce_audio_processors/format_types/juce_VST3PluginFormat.cpp"; sourceTree = "SOURCE_ROOT"; };
 		9B9F578EC77AA988C919AC6F = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_FileInputSource.cpp"; path = "../../../../modules/juce_core/streams/juce_FileInputSource.cpp"; sourceTree = "SOURCE_ROOT"; };
 		9BAE20FD7E2CBA120DDA82B0 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_linux_SystemStats.cpp"; path = "../../../../modules/juce_core/native/juce_linux_SystemStats.cpp"; sourceTree = "SOURCE_ROOT"; };
 		9C734938D5FF5DA7827C74C6 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_MouseCursor.cpp"; path = "../../../../modules/juce_gui_basics/mouse/juce_MouseCursor.cpp"; sourceTree = "SOURCE_ROOT"; };
@@ -1218,6 +1220,8 @@
 				58FB0C4FE674CC5BB7B1DCA7,
 				8396EA11DD261260F1A96DF9,
 				A6FADD9A009BA1F1D36239FD,
+				9B9E034C5761096ACB8A76C3,
+				73267FE8DDE50FD1E6E31ED4,
 				8AE56D2F4E33B015C3D73EB8,
 				52A95B5754438C999343869A,
 				C8A42EE493A1DF2E283C245E ); name = "format_types"; sourceTree = "<group>"; };
@@ -2128,7 +2132,7 @@
 				9439CB46EE08D16AAA26A203,
 				9EB09FCC1FD3F263F24203C5 ); name = Source; sourceTree = "<group>"; };
 		D0259E85380471FB442A4B44 = { isa = XCBuildConfiguration; buildSettings = {
-				HEADER_SEARCH_PATHS = "../../JuceLibraryCode ../../../../modules $(inherited)";
+				HEADER_SEARCH_PATHS = ("../../JuceLibraryCode", "../../../../modules", "$(inherited)");
 				GCC_OPTIMIZATION_LEVEL = 0;
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "$(HOME)/Applications";
@@ -2146,7 +2150,7 @@
 				"JUCE_UNIT_TESTS=1",
 				"JUCER_XCODE_IPHONE_5BC26AE3=1"); }; name = Debug; };
 		80E4DBEBE0CE7D218C89F78C = { isa = XCBuildConfiguration; buildSettings = {
-				HEADER_SEARCH_PATHS = "../../JuceLibraryCode ../../../../modules $(inherited)";
+				HEADER_SEARCH_PATHS = ("../../JuceLibraryCode", "../../../../modules", "$(inherited)");
 				GCC_OPTIMIZATION_LEVEL = 3;
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "$(HOME)/Applications";
