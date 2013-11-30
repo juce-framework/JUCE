@@ -40,13 +40,6 @@
  #undef STRICT
  #define STRICT 1
  #include <windows.h>
-
- #ifdef __MINGW32__
-  struct MOUSEHOOKSTRUCTEX  : public MOUSEHOOKSTRUCT
-  {
-     DWORD mouseData;
-  };
- #endif
 #elif defined (LINUX)
  #include <X11/Xlib.h>
  #include <X11/Xutil.h>
@@ -181,7 +174,10 @@ namespace
     {
         if (nCode >= 0 && wParam == WM_MOUSEWHEEL)
         {
-            const MOUSEHOOKSTRUCTEX& hs = *(MOUSEHOOKSTRUCTEX*) lParam;
+            // using a local copy of this struct to support old mingw libraries
+            struct MOUSEHOOKSTRUCTEX_  : public MOUSEHOOKSTRUCT  { DWORD mouseData; };
+
+            const MOUSEHOOKSTRUCTEX_& hs = *(MOUSEHOOKSTRUCTEX_*) lParam;
 
             if (Component* const comp = Desktop::getInstance().findComponentAt (Point<int> (hs.pt.x, hs.pt.y)))
                 if (comp->getWindowHandle() != 0)
