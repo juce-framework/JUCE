@@ -144,7 +144,7 @@ public:
             C:\\Documents and Settings\\username\\Application Data\\[folderName]\\[applicationName].[filenameSuffix]
 
             On Linux it'll return
-            ~/.[folderName]/[applicationName].[filenameSuffix]
+            ~/[folderName]/[applicationName].[filenameSuffix]
 
             If the folderName variable is empty, it'll use the app name for this (or omit the
             folder name on the Mac).
