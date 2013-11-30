@@ -178,7 +178,7 @@ public:
         object that it is using. Otherwise, it will return the window of
         its top-level parent component.
 
-        This may return 0 if there isn't a desktop component.
+        This may return nullptr if there isn't a desktop component.
 
         @see addToDesktop, isOnDesktop
     */

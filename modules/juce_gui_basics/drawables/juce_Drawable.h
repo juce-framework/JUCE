@@ -142,7 +142,7 @@ public:
         into a Drawable tree.
 
         The object returned must be deleted by the caller. If something goes wrong
-        while parsing, it may return 0.
+        while parsing, it may return nullptr.
 
         SVG is a pretty large and complex spec, and this doesn't aim to be a full
         implementation, but it can return the basic vector objects.

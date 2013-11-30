@@ -278,7 +278,7 @@ public:
 
     /** Returns the component that currently represents a given cell.
         If the component for this cell is off-screen or if the position is out-of-range,
-        this may return 0.
+        this may return nullptr.
         @see getCellPosition
     */
     Component* getCellComponent (int columnId, int rowNumber) const;
