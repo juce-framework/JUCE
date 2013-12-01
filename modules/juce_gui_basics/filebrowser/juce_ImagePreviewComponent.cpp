@@ -58,7 +58,7 @@ void ImagePreviewComponent::timerCallback()
     stopTimer();
 
     currentThumbnail = Image::null;
-    currentDetails = String::empty;
+    currentDetails.clear();
     repaint();
 
     ScopedPointer<FileInputStream> in (fileToLoad.createInputStream());

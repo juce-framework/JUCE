@@ -190,7 +190,7 @@ public:
                        int numOutputChannelsNeeded,
                        const XmlElement* savedState,
                        bool selectDefaultDeviceOnFailure,
-                       const String& preferredDefaultDeviceName = String::empty,
+                       const String& preferredDefaultDeviceName = String(),
                        const AudioDeviceSetup* preferredSetupOptions = 0);
 
     /** Returns some XML representing the current state of the manager.

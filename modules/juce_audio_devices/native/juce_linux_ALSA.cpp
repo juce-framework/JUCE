@@ -482,7 +482,7 @@ public:
     {
         close();
 
-        error = String::empty;
+        error.clear();
         sampleRate = newSampleRate;
         bufferSize = newBufferSize;
 

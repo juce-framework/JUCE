@@ -259,6 +259,12 @@ void String::swapWith (String& other) noexcept
     std::swap (text, other.text);
 }
 
+void String::clear() noexcept
+{
+    StringHolder::release (text);
+    text = &(emptyString.text);
+}
+
 String& String::operator= (const String& other) noexcept
 {
     StringHolder::retain (other.text);

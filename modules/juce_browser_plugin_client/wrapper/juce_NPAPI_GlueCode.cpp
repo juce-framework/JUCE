@@ -1031,7 +1031,7 @@ NPError NPP_Destroy (NPP npp, NPSavedData** save)
         {
             log ("shutdownJuce_GUI()");
             shutdownJuce_GUI();
-            browserVersionDesc = String::empty;
+            browserVersionDesc.clear();
         }
     }
 

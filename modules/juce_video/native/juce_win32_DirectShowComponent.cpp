@@ -840,7 +840,7 @@ void DirectShowComponent::closeMovie()
         context->release();
 
     videoLoaded = false;
-    videoPath = String::empty;
+    videoPath.clear();
 }
 
 //======================================================================

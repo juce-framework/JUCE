@@ -105,7 +105,7 @@ public:
     {
         close();
 
-        lastError = String::empty;
+        lastError.clear();
         sampleRate = (int) requestedSampleRate;
 
         int preferredBufferSize = (bufferSize <= 0) ? getDefaultBufferSize() : bufferSize;

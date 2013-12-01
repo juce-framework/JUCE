@@ -469,7 +469,7 @@ void JucerDocument::fillInGeneratedCode (GeneratedCode& code) const
             String baseClassToAdd (baseClasses[i]);
 
             if (baseClassToAdd == "Component" || baseClassToAdd == "Button")
-                baseClassToAdd = String::empty;
+                baseClassToAdd.clear();
 
             String& s = code.getCallbackCode (baseClassToAdd, returnValues[i], methods[i], false);
 

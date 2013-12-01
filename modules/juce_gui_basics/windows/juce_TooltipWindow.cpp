@@ -115,7 +115,7 @@ String TooltipWindow::getTipFor (Component* const c)
 
 void TooltipWindow::hideTip()
 {
-    tipShowing = String::empty;
+    tipShowing.clear();
     removeFromDesktop();
     setVisible (false);
 }

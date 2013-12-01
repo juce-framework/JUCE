@@ -803,7 +803,7 @@ extern "C" BOOL WINAPI DllMain (HANDLE instance, DWORD reason, LPVOID)
 
     case DLL_PROCESS_DETACH:
         log ("DLL_PROCESS_DETACH");
-        browserVersionDesc = String::empty;
+        browserVersionDesc.clear();
 
         // IE has a tendency to leak our objects, so although none of this should be
         // necessary, it's best to make sure..

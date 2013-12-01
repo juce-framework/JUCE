@@ -159,7 +159,7 @@ public:
         if (sampleRate != (int) requestedSampleRate)
             return "Sample rate not allowed";
 
-        lastError = String::empty;
+        lastError.clear();
         int preferredBufferSize = (bufferSize <= 0) ? getDefaultBufferSize() : bufferSize;
 
         numDeviceInputChannels = 0;

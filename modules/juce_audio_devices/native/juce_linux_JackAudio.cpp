@@ -235,7 +235,7 @@ public:
             return lastError;
         }
 
-        lastError = String::empty;
+        lastError.clear();
         close();
 
         juce::jack_set_process_callback (client, processCallback, this);

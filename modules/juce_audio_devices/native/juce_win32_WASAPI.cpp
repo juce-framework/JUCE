@@ -924,7 +924,7 @@ public:
                  double sampleRate, int bufferSizeSamples)
     {
         close();
-        lastError = String::empty;
+        lastError.clear();
 
         if (sampleRates.size() == 0 && inputDevice != nullptr && outputDevice != nullptr)
         {

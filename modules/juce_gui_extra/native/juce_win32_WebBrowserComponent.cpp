@@ -225,7 +225,7 @@ void WebBrowserComponent::stop()
 
 void WebBrowserComponent::goBack()
 {
-    lastURL = String::empty;
+    lastURL.clear();
     blankPageShown = false;
 
     if (browser->browser != nullptr)
@@ -234,7 +234,7 @@ void WebBrowserComponent::goBack()
 
 void WebBrowserComponent::goForward()
 {
-    lastURL = String::empty;
+    lastURL.clear();
 
     if (browser->browser != nullptr)
         browser->browser->GoForward();
@@ -287,7 +287,7 @@ void WebBrowserComponent::reloadLastURL()
     if (lastURL.isNotEmpty())
     {
         goToURL (lastURL, &lastHeaders, &lastPostData);
-        lastURL = String::empty;
+        lastURL.clear();
     }
 }
 

@@ -456,7 +456,7 @@ public:
         updateClockSources();
         currentSampleRate = getSampleRate();
 
-        error = String::empty;
+        error.clear();
         buffersCreated = false;
 
         setSampleRate (sampleRate);
@@ -617,7 +617,7 @@ public:
 
     void close()
     {
-        error = String::empty;
+        error.clear();
         stopTimer();
         stop();
 
@@ -1181,7 +1181,7 @@ private:
         numActiveOutputChans = 0;
         currentCallback = nullptr;
 
-        error = String::empty;
+        error.clear();
 
         if (getName().isEmpty())
             return error;

@@ -361,8 +361,8 @@ void AudioDeviceManager::getAudioDeviceSetup (AudioDeviceSetup& setup)
 void AudioDeviceManager::deleteCurrentDevice()
 {
     currentAudioDevice = nullptr;
-    currentSetup.inputDeviceName = String::empty;
-    currentSetup.outputDeviceName = String::empty;
+    currentSetup.inputDeviceName.clear();
+    currentSetup.outputDeviceName.clear();
 }
 
 void AudioDeviceManager::setCurrentAudioDeviceType (const String& type,

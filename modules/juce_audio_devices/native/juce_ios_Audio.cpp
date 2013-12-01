@@ -80,7 +80,7 @@ public:
     {
         close();
 
-        lastError = String::empty;
+        lastError.clear();
         preferredBufferSize = (bufferSize <= 0) ? getDefaultBufferSize() : bufferSize;
 
         //  xxx set up channel mapping
