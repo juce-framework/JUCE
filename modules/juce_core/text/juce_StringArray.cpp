@@ -293,7 +293,7 @@ String StringArray::joinIntoString (StringRef separator, int start, int numberTo
         start = 0;
 
     if (start >= last)
-        return String::empty;
+        return String();
 
     if (start == last - 1)
         return strings.getReference (start);

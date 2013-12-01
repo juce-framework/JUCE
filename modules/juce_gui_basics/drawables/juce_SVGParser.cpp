@@ -944,7 +944,7 @@ private:
     }
 
     String getStyleAttribute (const XmlPath& xml, const String& attributeName,
-                              const String& defaultValue = String::empty) const
+                              const String& defaultValue = String()) const
     {
         if (xml->hasAttribute (attributeName))
             return xml->getStringAttribute (attributeName, defaultValue);
@@ -953,7 +953,7 @@ private:
 
         if (styleAtt.isNotEmpty())
         {
-            const String value (getAttributeFromStyleList (styleAtt, attributeName, String::empty));
+            const String value (getAttributeFromStyleList (styleAtt, attributeName, String()));
 
             if (value.isNotEmpty())
                 return value;
@@ -991,7 +991,7 @@ private:
         if (xml.parent != nullptr)
             return getInheritedAttribute  (*xml.parent, attributeName);
 
-        return String::empty;
+        return String();
     }
 
     //==============================================================================
@@ -1144,7 +1144,7 @@ private:
             StringArray tokens;
             tokens.addTokens (t.fromFirstOccurrenceOf ("(", false, false)
                                .upToFirstOccurrenceOf (")", false, false),
-                              ", ", String::empty);
+                              ", ", "");
 
             tokens.removeEmptyStrings (true);
 

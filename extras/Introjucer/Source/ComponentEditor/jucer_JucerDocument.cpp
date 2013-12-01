@@ -441,7 +441,7 @@ void JucerDocument::fillInGeneratedCode (GeneratedCode& code) const
 
     ScopedPointer<XmlElement> e (createXml());
     jassert (e != nullptr);
-    code.jucerMetadata = e->createDocument (String::empty, false, false);
+    code.jucerMetadata = e->createDocument ("", false, false);
 
     resources.fillInGeneratedCode (code);
 

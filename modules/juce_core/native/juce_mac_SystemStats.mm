@@ -124,7 +124,7 @@ SystemStats::OperatingSystemType SystemStats::getOperatingSystemType()
     return iOS;
    #else
     StringArray parts;
-    parts.addTokens (getOSXVersion(), ".", String::empty);
+    parts.addTokens (getOSXVersion(), ".", String());
 
     jassert (parts[0].getIntValue() == 10);
     const int major = parts[1].getIntValue();
@@ -148,7 +148,7 @@ String SystemStats::getDeviceDescription()
    #if JUCE_IOS
     return nsStringToJuce ([[UIDevice currentDevice] model]);
    #else
-    return String::empty;
+    return String();
    #endif
 }
 
@@ -182,7 +182,7 @@ String SystemStats::getCpuVendor()
 
     return String (reinterpret_cast <const char*> (vendor), 12);
    #else
-    return String::empty;
+    return String();
    #endif
 }
 
@@ -218,7 +218,7 @@ String SystemStats::getComputerName()
     if (gethostname (name, sizeof (name) - 1) == 0)
         return String (name).upToLastOccurrenceOf (".local", false, true);
 
-    return String::empty;
+    return String();
 }
 
 static String getLocaleValue (CFStringRef key)

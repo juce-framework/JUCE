@@ -865,7 +865,7 @@ public:
     static Rectangle fromString (StringRef stringVersion)
     {
         StringArray toks;
-        toks.addTokens (stringVersion.text.findEndOfWhitespace(), ",; \t\r\n", String::empty);
+        toks.addTokens (stringVersion.text.findEndOfWhitespace(), ",; \t\r\n", "");
 
         return Rectangle (parseIntAfterSpace (toks[0]),
                           parseIntAfterSpace (toks[1]),

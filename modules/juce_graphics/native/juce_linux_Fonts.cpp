@@ -43,7 +43,7 @@ StringArray FTTypefaceList::getDefaultFontDirectories()
                 {
                     if (e->getStringAttribute ("prefix") == "xdg")
                     {
-                        String xdgDataHome (SystemStats::getEnvironmentVariable ("XDG_DATA_HOME", String::empty));
+                        String xdgDataHome (SystemStats::getEnvironmentVariable ("XDG_DATA_HOME", String()));
 
                         if (xdgDataHome.trimStart().isEmpty())
                             xdgDataHome = "~/.local/share";

@@ -195,7 +195,7 @@ bool PropertiesFile::loadAsXml()
                 {
                     getAllProperties().set (name,
                                             e->getFirstChildElement() != nullptr
-                                                ? e->getFirstChildElement()->createDocument (String::empty, true)
+                                                ? e->getFirstChildElement()->createDocument ("", true)
                                                 : e->getStringAttribute (PropertyFileConstants::valueAttribute));
                 }
             }
@@ -234,7 +234,7 @@ bool PropertiesFile::saveAsXml()
     if (pl != nullptr && ! pl->isLocked())
         return false; // locking failure..
 
-    if (doc.writeToFile (file, String::empty))
+    if (doc.writeToFile (file, String()))
     {
         needsWriting = false;
         return true;

@@ -111,7 +111,7 @@ public:
         const KnownTypeface* ftFace = matchTypeface (fontName, fontStyle);
 
         if (ftFace == nullptr)  ftFace = matchTypeface (fontName, "Regular");
-        if (ftFace == nullptr)  ftFace = matchTypeface (fontName, String::empty);
+        if (ftFace == nullptr)  ftFace = matchTypeface (fontName, String());
 
         if (ftFace != nullptr)
         {

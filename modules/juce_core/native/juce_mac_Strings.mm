@@ -29,7 +29,7 @@
 String String::fromCFString (CFStringRef cfString)
 {
     if (cfString == 0)
-        return String::empty;
+        return String();
 
     CFRange range = { 0, CFStringGetLength (cfString) };
     HeapBlock <UniChar> u ((size_t) range.length + 1);

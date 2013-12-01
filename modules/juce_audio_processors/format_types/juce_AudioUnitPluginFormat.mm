@@ -136,7 +136,7 @@ namespace AudioUnitFormatHelpers
                                                         fileOrIdentifier.lastIndexOfChar ('/')) + 1));
 
             StringArray tokens;
-            tokens.addTokens (s, ",", String::empty);
+            tokens.addTokens (s, ",", String());
             tokens.removeEmptyStrings();
 
             if (tokens.size() == 3)
@@ -570,7 +570,7 @@ public:
         if (isPositiveAndBelow (index, getNumInputChannels()))
             return "Input " + String (index + 1);
 
-        return String::empty;
+        return String();
     }
 
     const String getOutputChannelName (int index) const override
@@ -578,7 +578,7 @@ public:
         if (isPositiveAndBelow (index, getNumOutputChannels()))
             return "Output " + String (index + 1);
 
-        return String::empty;
+        return String();
     }
 
     bool isInputChannelStereoPair (int index) const override    { return isPositiveAndBelow (index, getNumInputChannels()); }
@@ -652,7 +652,7 @@ public:
         if (const ParamInfo* p = parameters[index])
             return p->name;
 
-        return String::empty;
+        return String();
     }
 
     const String getParameterText (int index) override   { return String (getParameter (index)); }

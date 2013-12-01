@@ -444,7 +444,7 @@ public:
         }
         else
         {
-            output.writeString (String::empty);
+            output.writeString (String());
             output.writeCompressedInt (0);
             output.writeCompressedInt (0);
         }
@@ -962,7 +962,7 @@ ValueTree ValueTree::fromXml (const XmlElement& xml)
 String ValueTree::toXmlString() const
 {
     const ScopedPointer<XmlElement> xml (createXml());
-    return xml != nullptr ? xml->createDocument (String::empty) : String::empty;
+    return xml != nullptr ? xml->createDocument ("") : String();
 }
 
 //==============================================================================

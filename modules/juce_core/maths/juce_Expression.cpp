@@ -53,7 +53,7 @@ public:
     virtual String getName() const
     {
         jassertfalse; // You shouldn't call this for an expression that's not actually a function!
-        return String::empty;
+        return String();
     }
 
     virtual void renameSymbol (const Symbol& oldSymbol, const String& newName, const Scope& scope, int recursionDepth)
@@ -1181,5 +1181,5 @@ void Expression::Scope::visitRelativeScope (const String& scopeName, Visitor&) c
 
 String Expression::Scope::getScopeUID() const
 {
-    return String::empty;
+    return String();
 }

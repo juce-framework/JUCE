@@ -372,15 +372,15 @@ public:
     AudioProcessorEditor* createEditor()            { return nullptr; }
 
     int getNumParameters()                          { return 0; }
-    const String getParameterName (int)             { return String::empty; }
+    const String getParameterName (int)             { return String(); }
     float getParameter (int)                        { return 0; }
-    const String getParameterText (int)             { return String::empty; }
+    const String getParameterText (int)             { return String(); }
     void setParameter (int, float)                  { }
 
     int getNumPrograms()                            { return 0; }
     int getCurrentProgram()                         { return 0; }
     void setCurrentProgram (int)                    { }
-    const String getProgramName (int)               { return String::empty; }
+    const String getProgramName (int)               { return String(); }
     void changeProgramName (int, const String&)     { }
 
     void getStateInformation (juce::MemoryBlock&);

@@ -440,7 +440,7 @@ String TableHeaderComponent::toString() const
         e->setAttribute ("width", ci->width);
     }
 
-    return doc.createDocument (String::empty, true, false);
+    return doc.createDocument ("", true, false);
 }
 
 void TableHeaderComponent::restoreFromString (const String& storedVersion)

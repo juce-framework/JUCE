@@ -69,7 +69,7 @@ public:
         @param keyName              the name of the property to retrieve
         @param defaultReturnValue   a value to return if the named property doesn't actually exist
     */
-    String getValue (StringRef keyName, const String& defaultReturnValue = String::empty) const noexcept;
+    String getValue (StringRef keyName, const String& defaultReturnValue = String()) const noexcept;
 
     /** Returns one of the properties as an integer.
 

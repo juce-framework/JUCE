@@ -439,7 +439,7 @@ String SystemClipboard::getTextFromClipboard()
 {
     NSString* text = [[NSPasteboard generalPasteboard] stringForType: NSStringPboardType];
 
-    return text == nil ? String::empty
+    return text == nil ? String()
                        : nsStringToJuce (text);
 }
 

@@ -291,7 +291,7 @@ private:
         file = getFontFile (family, "Regular");
 
         if (! file.exists())
-            file = getFontFile (family, String::empty);
+            file = getFontFile (family, String());
 
         return file;
     }

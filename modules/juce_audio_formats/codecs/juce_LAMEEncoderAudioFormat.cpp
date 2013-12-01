@@ -72,7 +72,7 @@ public:
 
     void addMetadataArg (const StringPairArray& metadata, const char* key, const char* lameFlag)
     {
-        const String value (metadata.getValue (key, String::empty));
+        const String value (metadata.getValue (key, String()));
 
         if (value.isNotEmpty())
         {
