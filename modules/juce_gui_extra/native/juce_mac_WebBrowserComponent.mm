@@ -349,3 +349,4 @@ void WebBrowserComponent::visibilityChanged()
 
 bool WebBrowserComponent::pageAboutToLoad (const String&)  { return true; }
 void WebBrowserComponent::pageFinishedLoading (const String&) {}
+void WebBrowserComponent::windowClosing(bool createdByJs, bool &cancelClose) {}
