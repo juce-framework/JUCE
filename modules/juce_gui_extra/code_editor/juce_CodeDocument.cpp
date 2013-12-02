@@ -577,9 +577,8 @@ void CodeDocument::insertText (const int insertIndex, const String& text)
 
 void CodeDocument::replaceSection (const int start, const int end, const String& newText)
 {
-    insertText (start, newText);
-    const int newTextLen = newText.length();
-    deleteSection (start + newTextLen, end + newTextLen);
+    insertText (end, newText);
+    deleteSection (start, end);
 }
 
 void CodeDocument::applyChanges (const String& newContent)
