@@ -52,15 +52,15 @@ static void showBubbleMessage (Component* targetComponent, const String& textToS
 */
 struct SnappingSlider  : public Slider
 {
-    double snapValue (double attemptedValue, bool userIsDragging)
+    double snapValue (double attemptedValue, bool userIsDragging) override
     {
         if (! userIsDragging)
             return attemptedValue;  // if they're entering the value in the text-box, don't mess with it.
 
         if (attemptedValue > 40 && attemptedValue < 60)
             return 50.0;
-        else
-            return attemptedValue;
+
+        return attemptedValue;
     }
 };
 
@@ -88,7 +88,7 @@ public:
         CallOutBox::launchAsynchronously (colourSelector, getScreenBounds(), nullptr);
     }
 
-    void changeListenerCallback (ChangeBroadcaster* source)
+    void changeListenerCallback (ChangeBroadcaster* source) override
     {
         if (ColourSelector* cs = dynamic_cast <ColourSelector*> (source))
             setColour (TextButton::buttonColourId, cs->getCurrentColour());
@@ -402,7 +402,7 @@ private:
         return newComp;
     }
 
-    void buttonClicked (Button* button)
+    void buttonClicked (Button* button) override
     {
         showBubbleMessage (button,
                            "This is a demo of the BubbleMessageComponent, which lets you pop up a message pointing "
@@ -492,7 +492,7 @@ public:
         customiseButton.setTopLeftPosition (orientationButton.getRight() + 20, orientationButton.getY());
     }
 
-    void resized()
+    void resized() override
     {
         int toolbarThickness = (int) depthSlider.getValue();
 
@@ -502,12 +502,12 @@ public:
             toolbar.setBounds (getLocalBounds().removeFromTop  (toolbarThickness));
     }
 
-    void sliderValueChanged (Slider*)
+    void sliderValueChanged (Slider*) override
     {
         resized();
     }
 
-    void buttonClicked (Button* button)
+    void buttonClicked (Button* button) override
     {
         if (button == &orientationButton)
         {
@@ -548,7 +548,7 @@ private:
             customComboBox  = 9
         };
 
-        void getAllToolbarItemIds (Array <int>& ids)
+        void getAllToolbarItemIds (Array<int>& ids) override
         {
             // This returns the complete list of all item IDs that are allowed to
             // go in our toolbar. Any items you might want to add must be listed here. The
@@ -571,7 +571,7 @@ private:
             ids.add (flexibleSpacerId);
         }
 
-        void getDefaultItemSet (Array <int>& ids)
+        void getDefaultItemSet (Array<int>& ids) override
         {
             // This returns an ordered list of the set of items that make up a
             // toolbar's default set. Not all items need to be on this list, and
@@ -593,7 +593,7 @@ private:
             ids.add (juceLogoButton);
         }
 
-        ToolbarItemComponent* createItem (int itemId)
+        ToolbarItemComponent* createItem (int itemId) override
         {
             switch (itemId)
             {
@@ -661,7 +661,7 @@ private:
             }
 
             bool getToolbarItemSizes (int /*toolbarDepth*/, bool isVertical,
-                                      int& preferredSize, int& minSize, int& maxSize)
+                                      int& preferredSize, int& minSize, int& maxSize) override
             {
                 if (isVertical)
                     return false;
@@ -672,11 +672,11 @@ private:
                 return true;
             }
 
-            void paintButtonArea (Graphics&, int, int, bool, bool)
+            void paintButtonArea (Graphics&, int, int, bool, bool) override
             {
             }
 
-            void contentAreaChanged (const Rectangle<int>& newArea)
+            void contentAreaChanged (const Rectangle<int>& newArea) override
             {
                 comboBox.setSize (newArea.getWidth() - 2,
                                   jmin (newArea.getHeight() - 2, 22));
@@ -749,11 +749,8 @@ public:
 
     // This is overloaded from TableListBoxModel, and must paint any cells that aren't using custom
     // components.
-    void paintCell (Graphics& g,
-                    int rowNumber,
-                    int columnId,
-                    int width, int height,
-                    bool /*rowIsSelected*/) override
+    void paintCell (Graphics& g, int rowNumber, int columnId,
+                    int width, int height, bool /*rowIsSelected*/) override
     {
         g.setColour (Colours::black);
         g.setFont (font);
@@ -955,7 +952,7 @@ private:
     }
 
     // (a utility method to search our XML for the attribute that matches a column ID)
-    const String getAttributeNameForColumnId (const int columnId) const
+    String getAttributeNameForColumnId (const int columnId) const
     {
         forEachXmlChildElement (*columnList, columnXml)
         {
@@ -1000,15 +997,13 @@ private:
     {
         // The following methods implement the necessary virtual functions from ListBoxModel,
         // telling the listbox how many rows there are, painting them, etc.
-        int getNumRows()
+        int getNumRows() override
         {
             return 30;
         }
 
-        void paintListBoxItem (int rowNumber,
-                               Graphics& g,
-                               int width, int height,
-                               bool rowIsSelected)
+        void paintListBoxItem (int rowNumber, Graphics& g,
+                               int width, int height, bool rowIsSelected) override
         {
             if (rowIsSelected)
                 g.fillAll (Colours::lightblue);
@@ -1021,7 +1016,7 @@ private:
                         Justification::centredLeft, true);
         }
 
-        var getDragSourceDescription (const SparseSet<int>& selectedRows)
+        var getDragSourceDescription (const SparseSet<int>& selectedRows) override
         {
             // for our drag description, we'll just make a comma-separated list of the selected row
             // numbers - this will be picked up by the drag target and displayed in its box.
@@ -1031,12 +1026,6 @@ private:
                 rows.add (String (selectedRows[i] + 1));
 
             return rows.joinIntoString (", ");
-        }
-
-        // this just fills in the background of the listbox
-        void paint (Graphics& g)
-        {
-            g.fillAll (Colours::white.withAlpha (0.7f));
         }
     };
 
@@ -1452,7 +1441,7 @@ public:
             setSize (20, 20);
         }
 
-        void paint (Graphics& g)
+        void paint (Graphics& g) override
         {
             Path star;
             star.addStar (Point<float>(), 7, 1.0f, 2.0f);
@@ -1461,7 +1450,7 @@ public:
             g.fillPath (star, star.getTransformToScaleToFit (getLocalBounds().reduced (2).toFloat(), true));
         }
 
-        void mouseDown (const MouseEvent&)
+        void mouseDown (const MouseEvent&) override
         {
             showBubbleMessage (this,
                                "This is a custom tab component\n"
@@ -1482,12 +1471,12 @@ public:
         addAndMakeVisible (&tabs);
     }
 
-    void paint (Graphics& g)
+    void paint (Graphics& g) override
     {
         g.fillAll (Colours::white);
     }
 
-    void resized()
+    void resized() override
     {
         tabs.setBounds (getLocalBounds().reduced (4));
     }
