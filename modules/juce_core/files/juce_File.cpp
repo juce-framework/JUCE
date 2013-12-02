@@ -322,7 +322,7 @@ String File::getFileNameWithoutExtension() const
 
 bool File::isAChildOf (const File& potentialParent) const
 {
-    if (potentialParent == File::nonexistent)
+    if (potentialParent.fullPath.isEmpty())
         return false;
 
     const String ourPath (getPathUpToLastSlash());
@@ -629,7 +629,7 @@ bool File::hasFileExtension (StringRef possibleSuffix) const
 File File::withFileExtension (StringRef newExtension) const
 {
     if (fullPath.isEmpty())
-        return File::nonexistent;
+        return File();
 
     String filePart (getFileName());
 

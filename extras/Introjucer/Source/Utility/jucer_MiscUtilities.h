@@ -231,7 +231,7 @@ public:
         if (getColour() != newColour)
         {
             if (newColour == defaultColour && defaultButton.isVisible())
-                colourValue = var::null;
+                colourValue = var();
             else
                 colourValue = newColour.toDisplayString (true);
         }

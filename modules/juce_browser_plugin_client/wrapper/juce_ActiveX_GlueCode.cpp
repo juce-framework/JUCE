@@ -252,7 +252,7 @@ public:
             }
         }
 
-        return var::null;
+        return var();
     }
 
     bool hasProperty (const Identifier& propertyName) const override
@@ -297,7 +297,7 @@ public:
 
     void removeProperty (const Identifier& propertyName) override
     {
-        setProperty (propertyName, var::null);
+        setProperty (propertyName, var());
     }
 
     bool hasMethod (const Identifier& methodName) const override
@@ -401,7 +401,7 @@ var variantTojuceVar (const VARIANT& v)
         switch (v.vt & ~VT_BYREF)
         {
             case VT_VOID:
-            case VT_EMPTY:      return var::null;
+            case VT_EMPTY:      return var();
             case VT_I1:         return var ((int) v.cVal);
             case VT_I2:         return var ((int) v.iVal);
             case VT_I4:         return var ((int) v.lVal);
@@ -421,7 +421,7 @@ var variantTojuceVar (const VARIANT& v)
         }
     }
 
-    return var::null;
+    return var();
 }
 
 //==============================================================================

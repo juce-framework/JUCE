@@ -466,7 +466,7 @@ void TableListBoxModel::returnKeyPressed (int)                          {}
 void TableListBoxModel::listWasScrolled()                               {}
 
 String TableListBoxModel::getCellTooltip (int /*rowNumber*/, int /*columnId*/)    { return String::empty; }
-var TableListBoxModel::getDragSourceDescription (const SparseSet<int>&)           { return var::null; }
+var TableListBoxModel::getDragSourceDescription (const SparseSet<int>&)           { return var(); }
 
 Component* TableListBoxModel::refreshComponentForCell (int, int, bool, Component* existingComponentToUpdate)
 {

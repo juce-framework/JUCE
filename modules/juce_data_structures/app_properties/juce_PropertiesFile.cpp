@@ -90,8 +90,8 @@ File PropertiesFile::Options::getDefaultFile() const
     File dir (File::getSpecialLocation (commonToAllUsers ? File::commonApplicationDataDirectory
                                                          : File::userApplicationDataDirectory));
 
-    if (dir == File::nonexistent)
-        return File::nonexistent;
+    if (dir == File())
+        return File();
 
     dir = dir.getChildFile (folderName.isNotEmpty() ? folderName
                                                     : applicationName);
@@ -165,7 +165,7 @@ bool PropertiesFile::save()
     stopTimer();
 
     if (options.doNotSave
-         || file == File::nonexistent
+         || file == File()
          || file.isDirectory()
          || ! file.getParentDirectory().createDirectory())
         return false;

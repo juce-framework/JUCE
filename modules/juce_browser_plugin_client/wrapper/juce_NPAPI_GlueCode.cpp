@@ -896,7 +896,7 @@ static var createValueFromNPVariant (NPP npp, const NPVariant& v)
     else if (NPVARIANT_IS_OBJECT (v) && npp != nullptr)
         return var (new DynamicObjectWrappingNPObject (npp, NPVARIANT_TO_OBJECT (v)));
 
-    return var::null;
+    return var();
 }
 
 static void createNPVariantFromValue (NPP npp, NPVariant& out, const var& v)

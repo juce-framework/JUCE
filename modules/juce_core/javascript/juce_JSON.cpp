@@ -35,7 +35,7 @@ public:
 
         switch (t.getAndAdvance())
         {
-            case 0:      result = var::null; return Result::ok();
+            case 0:      result = var(); return Result::ok();
             case '{':    return parseObject (t, result);
             case '[':    return parseArray  (t, result);
         }
@@ -148,7 +148,7 @@ private:
                 if (t2.getAndAdvance() == 'u' && t2.getAndAdvance() == 'l' && t2.getAndAdvance() == 'l')
                 {
                     t = t2;
-                    result = var::null;
+                    result = var();
                     return Result::ok();
                 }
                 break;
@@ -254,7 +254,7 @@ private:
                     if (c2 != ':')
                         return createFail ("Expected ':', but found", &oldT);
 
-                    resultProperties.set (propertyName, var::null);
+                    resultProperties.set (propertyName, var());
                     var* propertyValue = resultProperties.getVarPointer (propertyName);
 
                     Result r2 (parseAny (t, *propertyValue));
@@ -300,7 +300,7 @@ private:
                 return createFail ("Unexpected end-of-input in array declaration");
 
             t = oldT;
-            destArray->add (var::null);
+            destArray->add (var());
             Result r (parseAny (t, destArray->getReference (destArray->size() - 1)));
 
             if (r.failed())
@@ -514,7 +514,7 @@ var JSON::parse (const String& text)
     var result;
 
     if (! JSONParser::parseObjectOrArray (text.getCharPointer(), result))
-        result = var::null;
+        result = var();
 
     return result;
 }
@@ -610,7 +610,7 @@ public:
     {
         switch (r.nextInt (depth > 3 ? 6 : 8))
         {
-            case 0:     return var::null;
+            case 0:     return var();
             case 1:     return r.nextInt();
             case 2:     return r.nextInt64();
             case 3:     return r.nextBool();
@@ -638,7 +638,7 @@ public:
             }
 
             default:
-                return var::null;
+                return var();
         }
     }
 
