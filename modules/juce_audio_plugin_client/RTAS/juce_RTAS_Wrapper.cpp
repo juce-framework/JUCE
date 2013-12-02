@@ -861,7 +861,7 @@ private:
         void GetNameOfLength (char* name, int maxLength, OSType inControllerType) const
         {
             // Pro-tools expects all your parameters to have valid names!
-            jassert (juceFilter->getParameterName (index).isNotEmpty());
+            jassert (juceFilter->getParameterName (index, maxLength).isNotEmpty());
 
             juceFilter->getParameterName (index, maxLength).copyToUTF8 (name, (size_t) maxLength + 1);
         }
