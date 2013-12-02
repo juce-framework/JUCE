@@ -158,6 +158,15 @@ private:
                 owner.pageFinishedLoading (getStringFromVariant (pDispParams->rgvarg[0].pvarVal));
                 return S_OK;
             }
+			else if (dispIdMember == DISPID_WINDOWCLOSING)
+            {
+				bool cancel = pDispParams->rgvarg[1].pboolVal;
+				owner.windowClosing(pDispParams->rgvarg[0].boolVal, cancel);
+				if (cancel) {
+					pDispParams->rgvarg[1].pboolVal = 0;
+				}
+                return S_OK;
+            }
 
             return E_NOTIMPL;
         }
@@ -308,3 +317,4 @@ void WebBrowserComponent::visibilityChanged()
 
 bool WebBrowserComponent::pageAboutToLoad (const String&)  { return true; }
 void WebBrowserComponent::pageFinishedLoading (const String&) {}
+void WebBrowserComponent::windowClosing(bool createdByJs, bool &cancelClose) {}
