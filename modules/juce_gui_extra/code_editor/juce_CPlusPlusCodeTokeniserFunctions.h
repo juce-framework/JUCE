@@ -46,33 +46,33 @@ struct CppTokeniserFunctions
     static bool isReservedKeyword (String::CharPointerType token, const int tokenLength) noexcept
     {
         static const char* const keywords2Char[] =
-            { "if", "do", "or", "id", 0 };
+            { "if", "do", "or", "id", nullptr };
 
         static const char* const keywords3Char[] =
-            { "for", "int", "new", "try", "xor", "and", "asm", "not", 0 };
+            { "for", "int", "new", "try", "xor", "and", "asm", "not", nullptr };
 
         static const char* const keywords4Char[] =
             { "bool", "void", "this", "true", "long", "else", "char",
-              "enum", "case", "goto", "auto", 0 };
+              "enum", "case", "goto", "auto", nullptr };
 
         static const char* const keywords5Char[] =
             {  "while", "bitor", "break", "catch", "class", "compl", "const", "false",
-                "float", "short", "throw", "union", "using", "or_eq", 0 };
+               "float", "short", "throw", "union", "using", "or_eq", "final", nullptr };
 
         static const char* const keywords6Char[] =
             { "return", "struct", "and_eq", "bitand", "delete", "double", "extern",
               "friend", "inline", "not_eq", "public", "sizeof", "static", "signed",
-              "switch", "typeid", "wchar_t", "xor_eq", 0};
+              "switch", "typeid", "wchar_t", "xor_eq", nullptr };
 
         static const char* const keywords7Char[] =
-            { "default", "mutable", "private", "typedef", "nullptr", "virtual", 0 };
+            { "default", "mutable", "private", "typedef", "nullptr", "virtual", nullptr };
 
         static const char* const keywordsOther[] =
-            { "noexcept", "const_cast", "continue", "explicit", "namespace",
+            { "noexcept", "const_cast", "continue", "explicit", "namespace", "override",
               "operator", "protected", "register", "reinterpret_cast", "static_cast",
               "template", "typename", "unsigned", "volatile", "constexpr",
               "@implementation", "@interface", "@end", "@synthesize", "@dynamic", "@public",
-              "@private", "@property", "@protected", "@class", 0 };
+              "@private", "@property", "@protected", "@class", nullptr };
 
         const char* const* k;
 
