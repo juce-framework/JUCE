@@ -22,11 +22,10 @@
   ==============================================================================
 */
 
-#ifdef __aeffect__
-
 #ifndef JUCE_VSTMIDIEVENTLIST_H_INCLUDED
 #define JUCE_VSTMIDIEVENTLIST_H_INCLUDED
 
+#ifdef __aeffect__
 
 //==============================================================================
 /** Holds a set of VSTMidiEvent objects and makes it easy to add
@@ -184,6 +183,5 @@ private:
     }
 };
 
-
-#endif   // JUCE_VSTMIDIEVENTLIST_H_INCLUDED
 #endif
+#endif   // JUCE_VSTMIDIEVENTLIST_H_INCLUDED
