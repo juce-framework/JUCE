@@ -42,7 +42,9 @@
     for that macro for more details.
 */
 #ifndef JUCE_ENABLE_LIVE_CONSTANT_EDITOR
- #define JUCE_ENABLE_LIVE_CONSTANT_EDITOR 0
+ #if JUCE_DEBUG
+  #define JUCE_ENABLE_LIVE_CONSTANT_EDITOR 1
+ #endif
 #endif
 
 //=============================================================================
