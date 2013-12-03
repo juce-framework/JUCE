@@ -342,6 +342,7 @@ CodeEditorComponent::CodeEditorComponent (CodeDocument& doc, CodeTokeniser* cons
       columnToTryToMaintain (-1),
       useSpacesForTabs (false),
       showLineNumbers (false),
+      shouldFollowDocumentChanges (false),
       xOffset (0),
       caretPos (doc, 0, 0),
       selectionStart (doc, 0, 0),
@@ -559,9 +560,10 @@ void CodeEditorComponent::codeDocumentChanged (const int startIndex, const int e
          && affectedTextStart.getPosition() <= selectionEnd.getPosition())
         deselectAll();
 
-    if (caretPos.getPosition() > affectedTextEnd.getPosition()
-         || caretPos.getPosition() < affectedTextStart.getPosition())
-        moveCaretTo (affectedTextStart, false);
+    if (shouldFollowDocumentChanges)
+        if (caretPos.getPosition() > affectedTextEnd.getPosition()
+            || caretPos.getPosition() < affectedTextStart.getPosition())
+            moveCaretTo (affectedTextStart, false);
 
     updateScrollBars();
 }
@@ -1114,6 +1116,7 @@ void CodeEditorComponent::selectRegion (const CodeDocument::Position& start,
 //==============================================================================
 bool CodeEditorComponent::undo()
 {
+    ScopedValueSetter<bool> svs (shouldFollowDocumentChanges, true, false);
     document.undo();
     scrollToKeepCaretOnScreen();
     return true;
@@ -1121,6 +1124,7 @@ bool CodeEditorComponent::undo()
 
 bool CodeEditorComponent::redo()
 {
+    ScopedValueSetter<bool> svs (shouldFollowDocumentChanges, true, false);
     document.redo();
     scrollToKeepCaretOnScreen();
     return true;

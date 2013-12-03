@@ -352,7 +352,7 @@ private:
     float charWidth;
     int lineHeight, linesOnScreen, columnsOnScreen;
     int scrollbarThickness, columnToTryToMaintain;
-    bool useSpacesForTabs, showLineNumbers;
+    bool useSpacesForTabs, showLineNumbers, shouldFollowDocumentChanges;
     double xOffset;
 
     CodeDocument::Position caretPos, selectionStart, selectionEnd;
