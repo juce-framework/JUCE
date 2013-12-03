@@ -163,10 +163,8 @@ namespace FloatVectorHelpers
                     src += 4; \
                 }
 
-            if (isMinimum)
-                JUCE_MINIMUMMAXIMUM_NEON_LOOP (vld1q_f32, vminq_f32)
-            else
-                JUCE_MINIMUMMAXIMUM_NEON_LOOP (vld1q_f32, vmaxq_f32)
+            if (isMinimum) { JUCE_MINIMUMMAXIMUM_NEON_LOOP (vld1q_f32, vminq_f32) }
+            else           { JUCE_MINIMUMMAXIMUM_NEON_LOOP (vld1q_f32, vmaxq_f32) }
 
             float localVal;
 
@@ -274,6 +272,19 @@ void JUCE_CALLTYPE FloatVectorOperations::copyWithMultiply (float* dest, const f
    #endif
 }
 
+void JUCE_CALLTYPE FloatVectorOperations::add (float* dest, float amount, int num) noexcept
+{
+   #if JUCE_USE_ARM_NEON
+    const float32x4_t amountToAdd = vld1q_dup_f32(&amount);
+    JUCE_PERFORM_NEON_OP_DEST (dest[i] += amount, vaddq_f32 (d, amountToAdd), JUCE_LOAD_DEST)
+   #else
+    #if JUCE_USE_SSE_INTRINSICS
+     const __m128 amountToAdd = _mm_load1_ps (&amount);
+    #endif
+    JUCE_PERFORM_SSE_OP_DEST (dest[i] += amount, _mm_add_ps (d, amountToAdd), JUCE_LOAD_DEST)
+   #endif
+}
+
 void JUCE_CALLTYPE FloatVectorOperations::add (float* dest, const float* src, int num) noexcept
 {
    #if JUCE_USE_VDSP_FRAMEWORK
@@ -285,16 +296,14 @@ void JUCE_CALLTYPE FloatVectorOperations::add (float* dest, const float* src, in
    #endif
 }
 
-void JUCE_CALLTYPE FloatVectorOperations::add (float* dest, float amount, int num) noexcept
+void JUCE_CALLTYPE FloatVectorOperations::subtract (float* dest, const float* src, int num) noexcept
 {
-   #if JUCE_USE_ARM_NEON
-    const float32x4_t amountToAdd = vld1q_dup_f32(&amount);
-    JUCE_PERFORM_NEON_OP_DEST (dest[i] += amount, vaddq_f32 (d, amountToAdd), JUCE_LOAD_DEST)
+   #if JUCE_USE_VDSP_FRAMEWORK
+    vDSP_vsub (src, 1, dest, 1, dest, 1, num);
+   #elif JUCE_USE_ARM_NEON
+    JUCE_PERFORM_NEON_OP_SRC_DEST (dest[i] -= src[i], vsubq_f32 (d, s), JUCE_LOAD_SRC_DEST)
    #else
-    #if JUCE_USE_SSE_INTRINSICS
-     const __m128 amountToAdd = _mm_load1_ps (&amount);
-    #endif
-     JUCE_PERFORM_SSE_OP_DEST (dest[i] += amount, _mm_add_ps (d, amountToAdd), JUCE_LOAD_DEST)
+    JUCE_PERFORM_SSE_OP_SRC_DEST (dest[i] -= src[i], _mm_sub_ps (d, s), JUCE_LOAD_SRC_DEST, JUCE_INCREMENT_SRC_DEST)
    #endif
 }
 
@@ -566,6 +575,9 @@ public:
 
             FloatVectorOperations::negate (data2, data1, num);
             expect (areAllValuesEqual (data2, num, -256.0f));
+
+            FloatVectorOperations::subtract (data1, data2, num);
+            expect (areAllValuesEqual (data1, num, 512.0f));
 
             fillRandomly (int1, num);
             FloatVectorOperations::convertFixedToFloat (data1, int1, 2.0f, num);
