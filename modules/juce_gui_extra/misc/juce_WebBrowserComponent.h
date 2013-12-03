@@ -93,6 +93,7 @@ public:
     /** This callback happens when the browser has finished loading a page. */
     virtual void pageFinishedLoading (const String& url);
 
+	virtual void windowClosing(bool createdByJs, bool &cancelClose);
     //==============================================================================
     /** @internal */
     void paint (Graphics&) override;
