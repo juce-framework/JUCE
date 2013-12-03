@@ -379,6 +379,9 @@
     <ClCompile Include="..\..\Source\Demos\KeyMappingsDemo.cpp">
       <Filter>JuceDemo\Source\Demos</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Source\Demos\LiveConstantDemo.cpp">
+      <Filter>JuceDemo\Source\Demos</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\Source\Demos\MDIDemo.cpp">
       <Filter>JuceDemo\Source\Demos</Filter>
     </ClCompile>
@@ -1496,6 +1499,9 @@
       <Filter>Juce Modules\juce_gui_extra\misc</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_gui_extra\misc\juce_KeyMappingEditorComponent.cpp">
+      <Filter>Juce Modules\juce_gui_extra\misc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_gui_extra\misc\juce_LiveConstantEditor.cpp">
       <Filter>Juce Modules\juce_gui_extra\misc</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_gui_extra\misc\juce_PreferencesPanel.cpp">
@@ -2872,6 +2878,9 @@
       <Filter>Juce Modules\juce_gui_extra\misc</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_gui_extra\misc\juce_KeyMappingEditorComponent.h">
+      <Filter>Juce Modules\juce_gui_extra\misc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_gui_extra\misc\juce_LiveConstantEditor.h">
       <Filter>Juce Modules\juce_gui_extra\misc</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_gui_extra\misc\juce_PreferencesPanel.h">

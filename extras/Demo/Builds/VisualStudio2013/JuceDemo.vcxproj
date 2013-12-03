@@ -151,6 +151,7 @@
     <ClCompile Include="..\..\Source\Demos\ImagesDemo.cpp"/>
     <ClCompile Include="..\..\Source\Demos\JavaScript.cpp"/>
     <ClCompile Include="..\..\Source\Demos\KeyMappingsDemo.cpp"/>
+    <ClCompile Include="..\..\Source\Demos\LiveConstantDemo.cpp"/>
     <ClCompile Include="..\..\Source\Demos\MDIDemo.cpp"/>
     <ClCompile Include="..\..\Source\Demos\MidiDemo.cpp"/>
     <ClCompile Include="..\..\Source\Demos\MultithreadingDemo.cpp"/>
@@ -1181,6 +1182,9 @@
     <ClCompile Include="..\..\..\..\modules\juce_gui_extra\misc\juce_KeyMappingEditorComponent.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_gui_extra\misc\juce_LiveConstantEditor.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_gui_extra\misc\juce_PreferencesPanel.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
@@ -1681,6 +1685,7 @@
     <ClInclude Include="..\..\..\..\modules\juce_gui_extra\misc\juce_BubbleMessageComponent.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_gui_extra\misc\juce_ColourSelector.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_gui_extra\misc\juce_KeyMappingEditorComponent.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_gui_extra\misc\juce_LiveConstantEditor.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_gui_extra\misc\juce_PreferencesPanel.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_gui_extra\misc\juce_RecentlyOpenedFilesList.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_gui_extra\misc\juce_SplashScreen.h"/>

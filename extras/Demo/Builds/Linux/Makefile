@@ -69,6 +69,7 @@ OBJECTS := \
   $(OBJDIR)/ImagesDemo_ecf13aa3.o \
   $(OBJDIR)/JavaScript_d6e42eb5.o \
   $(OBJDIR)/KeyMappingsDemo_cf05c709.o \
+  $(OBJDIR)/LiveConstantDemo_e3b18a9b.o \
   $(OBJDIR)/MDIDemo_c476c2d7.o \
   $(OBJDIR)/MidiDemo_75ebc30c.o \
   $(OBJDIR)/MultithreadingDemo_ff566eaa.o \
@@ -219,6 +220,11 @@ $(OBJDIR)/JavaScript_d6e42eb5.o: ../../Source/Demos/JavaScript.cpp
 $(OBJDIR)/KeyMappingsDemo_cf05c709.o: ../../Source/Demos/KeyMappingsDemo.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo "Compiling KeyMappingsDemo.cpp"
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/LiveConstantDemo_e3b18a9b.o: ../../Source/Demos/LiveConstantDemo.cpp
+	-@mkdir -p $(OBJDIR)
+	@echo "Compiling LiveConstantDemo.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/MDIDemo_c476c2d7.o: ../../Source/Demos/MDIDemo.cpp

@@ -111,8 +111,6 @@ LivePropertyEditorBase::LivePropertyEditorBase (LiveValueBase& v, CodeDocument& 
     addAndMakeVisible (&name);
     addAndMakeVisible (&valueEditor);
     addAndMakeVisible (&sourceEditor);
-    sourceEditor.setWantsKeyboardFocus (false);
-    sourceEditor.setEnabled (false);
 
     findOriginalValueInCode();
     selectOriginalValue();
@@ -121,6 +119,7 @@ LivePropertyEditorBase::LivePropertyEditorBase (LiveValueBase& v, CodeDocument& 
     name.setText (v.name, dontSendNotification);
     valueEditor.setText (v.getStringValue(), dontSendNotification);
     valueEditor.addListener (this);
+    sourceEditor.setReadOnly (true);
 }
 
 void LivePropertyEditorBase::paint (Graphics& g)
@@ -248,7 +247,7 @@ public:
 
     void resized() override
     {
-        Rectangle<int> r (getLocalBounds());
+        Rectangle<int> r (getLocalBounds().reduced (2, 0));
 
         for (int i = 0; i < editors.size(); ++i)
             editors.getUnchecked(i)->setBounds (r.removeFromTop (itemHeight));
@@ -278,8 +277,8 @@ public:
         setContentNonOwned (&viewport, true);
         setResizable (true, false);
         setResizeLimits (500, 400, 10000, 10000);
-        setVisible (true);
         centreWithSize (getWidth(), getHeight());
+        setVisible (true);
     }
 
     void closeButtonPressed() override
