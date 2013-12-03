@@ -33,6 +33,7 @@ struct DownloadClickDetectorClass  : public ObjCClass <NSObject>
         addMethod (@selector (webView:decidePolicyForNavigationAction:request:frame:decisionListener:),
                    decidePolicyForNavigationAction, "v@:@@@@@");
         addMethod (@selector (webView:didFinishLoadForFrame:), didFinishLoadForFrame, "v@:@@");
+        addMethod (@selector (webView:willCloseFrame:), willCloseFrame, "v@:@@");
 
         registerClass();
     }
@@ -59,6 +60,11 @@ private:
             NSURL* url = [[[frame dataSource] request] URL];
             getOwner (self)->pageFinishedLoading (nsStringToJuce ([url absoluteString]));
         }
+    }
+
+    static void willCloseFrame (id self, SEL, WebView*, WebFrame*)
+    {
+        getOwner (self)->windowCloseRequest();
     }
 };
 
@@ -346,6 +352,3 @@ void WebBrowserComponent::visibilityChanged()
 {
     checkWindowAssociation();
 }
-
-bool WebBrowserComponent::pageAboutToLoad (const String&)  { return true; }
-void WebBrowserComponent::pageFinishedLoading (const String&) {}
