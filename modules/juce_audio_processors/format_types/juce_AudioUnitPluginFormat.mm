@@ -58,7 +58,9 @@ namespace juce
 
 namespace AudioUnitFormatHelpers
 {
-    static int insideCallback = 0;
+   #if JUCE_DEBUG
+    static ThreadLocalValue<int> insideCallback;
+   #endif
 
     String osTypeToString (OSType type)
     {
@@ -290,7 +292,9 @@ public:
     {
         using namespace AudioUnitFormatHelpers;
 
-        ++insideCallback;
+       #if JUCE_DEBUG
+        ++*insideCallback;
+       #endif
 
         JUCE_AU_LOG ("Opening AU: " + fileOrIdentifier);
 
@@ -306,14 +310,20 @@ public:
             }
         }
 
-        --insideCallback;
+       #if JUCE_DEBUG
+        --*insideCallback;
+       #endif
     }
 
     ~AudioUnitPluginInstance()
     {
         const ScopedLock sl (lock);
 
+       #if JUCE_DEBUG
+        // this indicates that some kind of recursive call is getting triggered that's
+        // deleting this plugin while it's still under construction.
         jassert (AudioUnitFormatHelpers::insideCallback == 0);
+       #endif
 
         if (eventListenerRef != 0)
         {
