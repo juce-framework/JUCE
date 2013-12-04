@@ -322,7 +322,7 @@ public:
        #if JUCE_DEBUG
         // this indicates that some kind of recursive call is getting triggered that's
         // deleting this plugin while it's still under construction.
-        jassert (AudioUnitFormatHelpers::insideCallback == 0);
+        jassert (AudioUnitFormatHelpers::insideCallback.get() == 0);
        #endif
 
         if (eventListenerRef != 0)
