@@ -221,7 +221,7 @@
 					>
 				</File>
 				<File
-					RelativePath="..\..\..\..\modules\juce_browser_plugin\wrapper\juce_NPAPI_WinResource.rc"
+					RelativePath="..\..\..\..\modules\juce_browser_plugin_client\wrapper\juce_NPAPI_WinResource.rc"
 					>
 				</File>
 			</Filter>
