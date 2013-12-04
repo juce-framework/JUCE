@@ -739,9 +739,7 @@ private:
         for (uint32_t i = 0; i < argCount; ++i)
             params.params[i] = createValueFromNPVariant (npp, args[i]);
 
-
-        const var::NativeFunctionArgs argStruct = { object, params.params, (int) argCount };
-        const var result (o->invokeMethod (methodName, argStruct));
+        const var result (o->invokeMethod (methodName, var::NativeFunctionArgs (object, params.params, (int) argCount)));
 
         if (out != nullptr)
             createNPVariantFromValue (npp, *out, result);
