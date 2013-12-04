@@ -40,6 +40,7 @@
  #pragma clang diagnostic ignored "-Wunused-parameter"
  #pragma clang diagnostic ignored "-Wconversion"
  #pragma clang diagnostic ignored "-Woverloaded-virtual"
+ #pragma clang diagnostic ignored "-Wshadow"
 #endif
 
 // Got an include error here? If so, you'll need to install the VST3 SDK somewhere,
@@ -1448,16 +1449,16 @@ private:
     }
 
     //==============================================================================
-    bool open (const File& file, const PluginDescription& description)
+    bool open (const File& f, const PluginDescription& description)
     {
-        dllHandle = new DLLHandle (file.getFullPathName());
+        dllHandle = new DLLHandle (f.getFullPathName());
 
         ComSmartPtr<IPluginFactory> pluginFactory (dllHandle->getPluginFactory());
 
         ComSmartPtr<VST3HostContext> host (new VST3HostContext (nullptr));
         MatchingDescriptionFinder finder (host, pluginFactory, description);
 
-        const Result result (finder.findDescriptionsAndPerform (file));
+        const Result result (finder.findDescriptionsAndPerform (f));
 
         if (result.getErrorMessage() == MatchingDescriptionFinder::getSuccessString())
         {
@@ -1676,7 +1677,7 @@ class VST3PluginInstance : public AudioPluginInstance
 public:
     VST3PluginInstance (const VST3ModuleHandle::Ptr& handle)
       : module (handle),
-        result (1, 1),
+        resultBuffer (1, 1),
         numInputAudioBusses (0),
         numOutputAudioBusses (0),
         inputParameterChanges (new ParameterChangeList()),
@@ -1787,7 +1788,7 @@ public:
         warnOnFailure (component->setActive (true));
         warnOnFailure (processor->setProcessing (true));
 
-        result.setSize (numOutputs, estimatedSamplesPerBlock, false, true, true);
+        resultBuffer.setSize (numOutputs, estimatedSamplesPerBlock, false, true, true);
 
         Array<SpeakerArrangement> inArrangements, outArrangements;
 
@@ -1802,7 +1803,7 @@ public:
 
     void releaseResources() override
     {
-        result.setSize (1, 1, false, true, true);
+        resultBuffer.setSize (1, 1, false, true, true);
 
         if (processor != nullptr)
             processor->setProcessing (false);
@@ -2057,7 +2058,7 @@ private:
 
     mutable ComSmartPtr<IPlugView> view;
 
-    AudioSampleBuffer result;
+    AudioSampleBuffer resultBuffer;
     Vst::AudioBusBuffers inputs, outputs;
 
     // The number of IO busses MUST match that of the plugin's, as very poorly specified by the Steinberg SDK
@@ -2133,10 +2134,10 @@ private:
     {
         jassert (numClasses >= 0); // The plugin must provide at least an IComponent and IEditController!
 
-        for (Steinberg::int32 i = 0; i < numClasses; ++i)
+        for (Steinberg::int32 j = 0; j < numClasses; ++j)
         {
             info = new PClassInfo();
-            factory->getClassInfo (i, info);
+            factory->getClassInfo (j, info);
 
             if (std::strcmp (info->category, kVstAudioEffectClass) != 0)
                 continue;
@@ -2153,7 +2154,7 @@ private:
                 if (pf2.loadFrom (factory))
                 {
                     info2 = new PClassInfo2();
-                    pf2->getClassInfo2 (i, info2);
+                    pf2->getClassInfo2 (j, info2);
                 }
                 else
                 {
@@ -2164,7 +2165,7 @@ private:
                 {
                     pf3->setHostContext (host->getFUnknown());
                     infoW = new PClassInfoW();
-                    pf3->getClassInfoUnicode (i, infoW);
+                    pf3->getClassInfoUnicode (j, infoW);
                 }
                 else
                 {
@@ -2332,10 +2333,10 @@ private:
 
     void associateTo (Vst::ProcessData& destination, AudioSampleBuffer& buffer)
     {
-        result.clear();
+        resultBuffer.clear();
 
         associateBufferTo (inputs, buffer);
-        associateBufferTo (outputs, result);
+        associateBufferTo (outputs, resultBuffer);
 
         destination.inputs  = &inputs;
         destination.outputs = &outputs;
@@ -2360,22 +2361,22 @@ private:
 
     Vst::ParameterInfo getParameterInfoForIndex (int index) const
     {
-        Vst::ParameterInfo info = { 0 };
+        Vst::ParameterInfo paramInfo = { 0 };
 
         if (processor != nullptr)
-            editController->getParameterInfo (index, info);
+            editController->getParameterInfo (index, paramInfo);
 
-        return info;
+        return paramInfo;
     }
 
     Vst::ProgramListInfo getProgramListInfo (int index) const
     {
-        Vst::ProgramListInfo info = { 0 };
+        Vst::ProgramListInfo paramInfo = { 0 };
 
         if (unitInfo != nullptr)
-            unitInfo->getProgramListInfo (index, info);
+            unitInfo->getProgramListInfo (index, paramInfo);
 
-        return info;
+        return paramInfo;
     }
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (VST3PluginInstance)
