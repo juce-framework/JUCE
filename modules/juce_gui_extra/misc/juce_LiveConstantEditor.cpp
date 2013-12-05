@@ -42,7 +42,8 @@ public:
 
     void trigger()
     {
-        startTimer (70);
+        if (! isTimerRunning())
+            startTimer (100);
     }
 
 private:
@@ -100,7 +101,6 @@ LiveValueBase::LiveValueBase (const char* file, int line)
 LiveValueBase::~LiveValueBase()
 {
 }
-
 
 //==============================================================================
 LivePropertyEditorBase::LivePropertyEditorBase (LiveValueBase& v, CodeDocument& d)
@@ -286,10 +286,20 @@ public:
         setVisible (false);
     }
 
-    void addItem (LiveValueBase& v, CodeDocument& doc)
+    void updateItems (ValueList& list)
     {
         if (ValueListHolderComponent* l = dynamic_cast<ValueListHolderComponent*> (viewport.getViewedComponent()))
-            l->addItem (viewport.getMaximumVisibleWidth(), v, doc);
+        {
+            while (l->getNumChildComponents() < list.values.size())
+            {
+                if (LiveValueBase* v = list.values [l->getNumChildComponents()])
+                    l->addItem (viewport.getMaximumVisibleWidth(), *v, list.getDocument (v->sourceFile));
+                else
+                    break;
+            }
+
+            setVisible (true);
+        }
     }
 
     void resized() override
@@ -304,7 +314,45 @@ public:
     LookAndFeel_V3 lookAndFeel;
 };
 
+//==============================================================================
+ValueList::ValueList() {}
+ValueList::~ValueList() {}
 
+ValueList& ValueList::getInstance()
+{
+    static ValueList* i = new ValueList();
+    return *i;
+}
+
+void ValueList::addValue (LiveValueBase* v)
+{
+    values.add (v);
+    triggerAsyncUpdate();
+}
+
+void ValueList::handleAsyncUpdate()
+{
+    if (editorWindow == nullptr)
+        editorWindow = new EditorWindow (*this);
+
+    editorWindow->updateItems (*this);
+}
+
+CodeDocument& ValueList::getDocument (const File& file)
+{
+    const int index = documentFiles.indexOf (file.getFullPathName());
+
+    if (index >= 0)
+        return *documents.getUnchecked (index);
+
+    CodeDocument* doc = documents.add (new CodeDocument());
+    documentFiles.add (file);
+    doc->replaceAllContent (file.loadFileAsString());
+    doc->clearUndoHistory();
+    return *doc;
+}
+
+//==============================================================================
 struct ColourEditorComp  : public Component,
                            private ChangeListener
 {
@@ -402,42 +450,6 @@ private:
 
 Component* createIntegerSlider (LivePropertyEditorBase& editor) { return new SliderComp (editor, false); }
 Component* createFloatSlider   (LivePropertyEditorBase& editor) { return new SliderComp (editor, true);  }
-
-//==============================================================================
-ValueList::ValueList()
-{
-}
-
-ValueList& ValueList::getInstance()
-{
-    static ValueList* i = new ValueList();
-    return *i;
-}
-
-void ValueList::addValue (LiveValueBase* v)
-{
-    values.add (v);
-
-    if (editorWindow == nullptr)
-        editorWindow = new EditorWindow (*this);
-
-    editorWindow->addItem (*v, getDocument (v->sourceFile));
-    editorWindow->setVisible (true);
-}
-
-CodeDocument& ValueList::getDocument (const File& file)
-{
-    const int index = documentFiles.indexOf (file.getFullPathName());
-
-    if (index >= 0)
-        return *documents.getUnchecked (index);
-
-    CodeDocument* doc = documents.add (new CodeDocument());
-    documentFiles.add (file);
-    doc->replaceAllContent (file.loadFileAsString());
-    doc->clearUndoHistory();
-    return *doc;
-}
 
 }
 

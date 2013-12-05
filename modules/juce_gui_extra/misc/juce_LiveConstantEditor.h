@@ -80,7 +80,7 @@ namespace LiveConstantEditor
     struct LivePropertyEditorBase;
 
     //==============================================================================
-    struct LiveValueBase
+    struct JUCE_API  LiveValueBase
     {
         LiveValueBase (const char* file, int line);
         virtual ~LiveValueBase();
@@ -97,8 +97,8 @@ namespace LiveConstantEditor
     };
 
     //==============================================================================
-    struct LivePropertyEditorBase  : public Component,
-                                     private TextEditor::Listener
+    struct JUCE_API  LivePropertyEditorBase  : public Component,
+                                               private TextEditor::Listener
     {
         LivePropertyEditorBase (LiveValueBase&, CodeDocument&);
 
@@ -176,10 +176,13 @@ namespace LiveConstantEditor
     };
 
     //==============================================================================
-    class ValueList  : private DeletedAtShutdown
+    class JUCE_API ValueList  : private AsyncUpdater,
+                                private DeletedAtShutdown
     {
     public:
         ValueList();
+        ~ValueList();
+
         static ValueList& getInstance();
 
         template<typename Type>
@@ -193,8 +196,7 @@ namespace LiveConstantEditor
                 LiveValueBase* v = values.getUnchecked(i);
 
                 if (v->sourceLine == line && v->sourceFile == file)
-                    if (ValueType* vt = dynamic_cast<ValueType*> (v))
-                        return *vt;
+                    return *static_cast<ValueType*> (v);
             }
 
             ValueType* v = new ValueType (file, line, initialValue);
@@ -207,11 +209,14 @@ namespace LiveConstantEditor
         OwnedArray<CodeDocument> documents;
         Array<File> documentFiles;
         class EditorWindow;
+        friend class EditorWindow;
+        friend struct ContainerDeletePolicy<EditorWindow>;
         Component::SafePointer<EditorWindow> editorWindow;
         CriticalSection lock;
 
         CodeDocument& getDocument (const File&);
         void addValue (LiveValueBase*);
+        void handleAsyncUpdate() override;
     };
 
     template<typename Type>
