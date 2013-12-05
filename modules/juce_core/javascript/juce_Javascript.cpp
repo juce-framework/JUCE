@@ -298,11 +298,10 @@ struct JavascriptEngine::RootObject   : public DynamicObject
 
                 if (r == returnWasHit)   return r;
                 if (r == breakWasHit)    break;
-                if (r == continueWasHit) continue;
 
                 iterator->perform (s, nullptr);
 
-                if (isDoLoop && ! condition->getResult (s))
+                if (isDoLoop && r != continueWasHit && ! condition->getResult (s))
                     break;
             }
 
