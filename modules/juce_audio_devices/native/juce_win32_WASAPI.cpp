@@ -928,7 +928,7 @@ public:
 
         if (sampleRates.size() == 0 && inputDevice != nullptr && outputDevice != nullptr)
         {
-            lastError = "The input and output devices don't share a common sample rate!";
+            lastError = TRANS("The input and output devices don't share a common sample rate!");
             return lastError;
         }
 
@@ -939,14 +939,14 @@ public:
 
         if (inputDevice != nullptr && ! inputDevice->open (currentSampleRate, inputChannels))
         {
-            lastError = "Couldn't open the input device!";
+            lastError = TRANS("Couldn't open the input device!");
             return lastError;
         }
 
         if (outputDevice != nullptr && ! outputDevice->open (currentSampleRate, outputChannels))
         {
             close();
-            lastError = "Couldn't open the output device!";
+            lastError = TRANS("Couldn't open the output device!");
             return lastError;
         }
 
@@ -963,7 +963,7 @@ public:
             if (! check (inputDevice->client->Start()))
             {
                 close();
-                lastError = "Couldn't start the input device!";
+                lastError = TRANS("Couldn't start the input device!");
                 return lastError;
             }
         }
@@ -975,7 +975,7 @@ public:
             if (! check (outputDevice->client->Start()))
             {
                 close();
-                lastError = "Couldn't start the output device!";
+                lastError = TRANS("Couldn't start the output device!");
                 return lastError;
             }
         }
