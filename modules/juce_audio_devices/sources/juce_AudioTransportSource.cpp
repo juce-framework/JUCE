@@ -44,15 +44,12 @@ AudioTransportSource::AudioTransportSource()
 AudioTransportSource::~AudioTransportSource()
 {
     setSource (nullptr);
-
     releaseMasterResources();
 }
 
 void AudioTransportSource::setSource (PositionableAudioSource* const newSource,
-                                      int readAheadBufferSize_,
-                                      TimeSliceThread* readAheadThread,
-                                      double sourceSampleRateToCorrectFor,
-                                      int maxNumChannels)
+                                      int readAheadSize, TimeSliceThread* readAheadThread,
+                                      double sourceSampleRateToCorrectFor, int maxNumChannels)
 {
     if (source == newSource)
     {
@@ -62,7 +59,7 @@ void AudioTransportSource::setSource (PositionableAudioSource* const newSource,
         setSource (nullptr, 0, nullptr); // deselect and reselect to avoid releasing resources wrongly
     }
 
-    readAheadBufferSize = readAheadBufferSize_;
+    readAheadBufferSize = readAheadSize;
     sourceSampleRate = sourceSampleRateToCorrectFor;
 
     ResamplingAudioSource* newResamplerSource = nullptr;
@@ -70,15 +67,15 @@ void AudioTransportSource::setSource (PositionableAudioSource* const newSource,
     PositionableAudioSource* newPositionableSource = nullptr;
     AudioSource* newMasterSource = nullptr;
 
-    ScopedPointer <ResamplingAudioSource> oldResamplerSource (resamplerSource);
-    ScopedPointer <BufferingAudioSource> oldBufferingSource (bufferingSource);
+    ScopedPointer<ResamplingAudioSource> oldResamplerSource (resamplerSource);
+    ScopedPointer<BufferingAudioSource> oldBufferingSource (bufferingSource);
     AudioSource* oldMasterSource = masterSource;
 
     if (newSource != nullptr)
     {
         newPositionableSource = newSource;
 
-        if (readAheadBufferSize_ > 0)
+        if (readAheadSize > 0)
         {
             // If you want to use a read-ahead buffer, you must also provide a TimeSliceThread
             // for it to use!
@@ -86,7 +83,7 @@ void AudioTransportSource::setSource (PositionableAudioSource* const newSource,
 
             newPositionableSource = newBufferingSource
                 = new BufferingAudioSource (newPositionableSource, *readAheadThread,
-                                            false, readAheadBufferSize_, maxNumChannels);
+                                            false, readAheadSize, maxNumChannels);
         }
 
         newPositionableSource->setNextReadPosition (0);
@@ -115,6 +112,7 @@ void AudioTransportSource::setSource (PositionableAudioSource* const newSource,
         masterSource = newMasterSource;
         positionableSource = newPositionableSource;
 
+        inputStreamEOF = false;
         playing = false;
     }
 
@@ -170,7 +168,10 @@ double AudioTransportSource::getCurrentPosition() const
 
 double AudioTransportSource::getLengthInSeconds() const
 {
-    return getTotalLength() / sampleRate;
+    if (sampleRate > 0.0)
+        return getTotalLength() / sampleRate;
+
+    return 0.0;
 }
 
 void AudioTransportSource::setNextReadPosition (int64 newPosition)
@@ -181,6 +182,7 @@ void AudioTransportSource::setNextReadPosition (int64 newPosition)
             newPosition = (int64) (newPosition * sourceSampleRate / sampleRate);
 
         positionableSource->setNextReadPosition (newPosition);
+        inputStreamEOF = false;
     }
 }
 
@@ -189,7 +191,6 @@ int64 AudioTransportSource::getNextReadPosition() const
     if (positionableSource != nullptr)
     {
         const double ratio = (sampleRate > 0 && sourceSampleRate > 0) ? sampleRate / sourceSampleRate : 1.0;
-
         return (int64) (positionableSource->getNextReadPosition() * ratio);
     }
 
@@ -203,7 +204,6 @@ int64 AudioTransportSource::getTotalLength() const
     if (positionableSource != nullptr)
     {
         const double ratio = (sampleRate > 0 && sourceSampleRate > 0) ? sampleRate / sourceSampleRate : 1.0;
-
         return (int64) (positionableSource->getTotalLength() * ratio);
     }
 
@@ -213,9 +213,7 @@ int64 AudioTransportSource::getTotalLength() const
 bool AudioTransportSource::isLooping() const
 {
     const ScopedLock sl (callbackLock);
-
-    return positionableSource != nullptr
-            && positionableSource->isLooping();
+    return positionableSource != nullptr && positionableSource->isLooping();
 }
 
 void AudioTransportSource::setGain (const float newGain) noexcept
@@ -236,6 +234,7 @@ void AudioTransportSource::prepareToPlay (int samplesPerBlockExpected, double ne
     if (resamplerSource != nullptr && sourceSampleRate > 0)
         resamplerSource->setResamplingRatio (sourceSampleRate / sampleRate);
 
+    inputStreamEOF = false;
     isPrepared = true;
 }
 
@@ -258,8 +257,6 @@ void AudioTransportSource::getNextAudioBlock (const AudioSourceChannelInfo& info
 {
     const ScopedLock sl (callbackLock);
 
-    inputStreamEOF = false;
-
     if (masterSource != nullptr && ! stopped)
     {
         masterSource->getNextAudioBlock (info);
@@ -275,7 +272,7 @@ void AudioTransportSource::getNextAudioBlock (const AudioSourceChannelInfo& info
         }
 
         if (positionableSource->getNextReadPosition() > positionableSource->getTotalLength() + 1
-             && ! positionableSource->isLooping())
+              && ! positionableSource->isLooping())
         {
             playing = false;
             inputStreamEOF = true;
@@ -285,10 +282,7 @@ void AudioTransportSource::getNextAudioBlock (const AudioSourceChannelInfo& info
         stopped = ! playing;
 
         for (int i = info.buffer->getNumChannels(); --i >= 0;)
-        {
-            info.buffer->applyGainRamp (i, info.startSample, info.numSamples,
-                                        lastGain, gain);
-        }
+            info.buffer->applyGainRamp (i, info.startSample, info.numSamples, lastGain, gain);
     }
     else
     {
