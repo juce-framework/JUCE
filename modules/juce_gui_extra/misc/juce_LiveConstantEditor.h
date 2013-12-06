@@ -35,8 +35,8 @@ namespace LiveConstantEditor
 {
     int64 parseInt (String);
     double parseDouble (const String&);
-    String hexString (int);
-    String hexString (int64);
+    String intToString (int, bool preferHex);
+    String intToString (int64, bool preferHex);
 
     template <typename Type>
     static void setFromString (Type& v,           const String& s)    { v = static_cast<Type> (s); }
@@ -56,22 +56,22 @@ namespace LiveConstantEditor
     inline void setFromString (Colour& v,         const String& s)    { v = Colour ((int) parseInt (s)); }
 
     template <typename Type>
-    inline String getAsString (const Type& v)    { return String (v); }
-    inline String getAsString (char v)           { return hexString ((int) v); }
-    inline String getAsString (unsigned char v)  { return hexString ((int) v); }
-    inline String getAsString (short v)          { return hexString ((int) v); }
-    inline String getAsString (unsigned short v) { return hexString ((int) v); }
-    inline String getAsString (int v)            { return hexString ((int) v); }
-    inline String getAsString (unsigned int v)   { return hexString ((int) v); }
-    inline String getAsString (int64 v)          { return hexString ((int64) v); }
-    inline String getAsString (uint64 v)         { return hexString ((int64) v); }
-    inline String getAsString (Colour v)         { return hexString ((int) v.getARGB()); }
+    inline String getAsString (const Type& v, bool)              { return String (v); }
+    inline String getAsString (char v, bool preferHex)           { return intToString ((int) v, preferHex); }
+    inline String getAsString (unsigned char v, bool preferHex)  { return intToString ((int) v, preferHex); }
+    inline String getAsString (short v, bool preferHex)          { return intToString ((int) v, preferHex); }
+    inline String getAsString (unsigned short v, bool preferHex) { return intToString ((int) v, preferHex); }
+    inline String getAsString (int v, bool preferHex)            { return intToString ((int) v, preferHex); }
+    inline String getAsString (unsigned int v, bool preferHex)   { return intToString ((int) v, preferHex); }
+    inline String getAsString (int64 v, bool preferHex)          { return intToString ((int64) v, preferHex); }
+    inline String getAsString (uint64 v, bool preferHex)         { return intToString ((int64) v, preferHex); }
+    inline String getAsString (Colour v, bool)                   { return intToString ((int) v.getARGB(), true); }
 
     template <typename Type>
-    inline String getAsCode (Type& value)       { return getAsString (value); }
-    inline String getAsCode (Colour value)      { return "Colour (" + hexString ((int) value.getARGB()) + ")"; }
-    inline String getAsCode (const String& v)   { return "\"" + v + "\""; }
-    inline String getAsCode (const char* value) { return getAsCode (String (value)); }
+    inline String getAsCode (Type& v, bool preferHex)       { return getAsString (v, preferHex); }
+    inline String getAsCode (Colour v, bool)                { return "Colour (0x" + String::toHexString ((int) v.getARGB()).paddedLeft ('0', 8) + ")"; }
+    inline String getAsCode (const String& v, bool)         { return "\"" + v + "\""; }
+    inline String getAsCode (const char* v, bool)           { return getAsCode (String (v), false); }
 
     template <typename Type>
     inline const char* castToCharPointer (const Type&)      { return ""; }
@@ -86,9 +86,10 @@ namespace LiveConstantEditor
         virtual ~LiveValueBase();
 
         virtual LivePropertyEditorBase* createPropertyComponent (CodeDocument&) = 0;
-        virtual String getStringValue() const = 0;
-        virtual String getCodeValue() const = 0;
+        virtual String getStringValue (bool preferHex) const = 0;
+        virtual String getCodeValue (bool preferHex) const = 0;
         virtual void setStringValue (const String&) = 0;
+        virtual String getOriginalStringValue (bool preferHex) const = 0;
 
         String name, sourceFile;
         int sourceLine;
@@ -98,13 +99,15 @@ namespace LiveConstantEditor
 
     //==============================================================================
     struct JUCE_API  LivePropertyEditorBase  : public Component,
-                                               private TextEditor::Listener
+                                               private TextEditor::Listener,
+                                               private ButtonListener
     {
         LivePropertyEditorBase (LiveValueBase&, CodeDocument&);
 
         void paint (Graphics&) override;
         void resized() override;
         void textEditorTextChanged (TextEditor&) override;
+        void buttonClicked (Button*) override;
 
         void applyNewValue (const String&);
         void selectOriginalValue();
@@ -113,11 +116,13 @@ namespace LiveConstantEditor
         LiveValueBase& value;
         Label name;
         TextEditor valueEditor;
+        TextButton resetButton;
         CodeDocument& document;
         CPlusPlusCodeTokeniser tokeniser;
         CodeEditorComponent sourceEditor;
         CodeDocument::Position valueStart, valueEnd;
         ScopedPointer<Component> customComp;
+        bool wasHex;
 
         JUCE_DECLARE_NON_COPYABLE (LivePropertyEditorBase)
     };
@@ -155,7 +160,7 @@ namespace LiveConstantEditor
     struct LiveValue  : public LiveValueBase
     {
         LiveValue (const char* file, int line, const Type& initialValue)
-            : LiveValueBase (file, line), value (initialValue)
+            : LiveValueBase (file, line), value (initialValue), originalValue (initialValue)
         {}
 
         operator Type() const noexcept   { return value; }
@@ -166,11 +171,12 @@ namespace LiveConstantEditor
             return new LivePropertyEditor<Type> (*this, doc);
         }
 
-        String getStringValue() const override          { return getAsString (value); }
-        String getCodeValue() const override            { return getAsCode (value); }
-        void setStringValue (const String& s) override  { setFromString (value, s); }
+        String getStringValue (bool preferHex) const override           { return getAsString (value, preferHex); }
+        String getCodeValue (bool preferHex) const override             { return getAsCode (value, preferHex); }
+        String getOriginalStringValue (bool preferHex) const override   { return getAsString (originalValue, preferHex); }
+        void setStringValue (const String& s) override                  { setFromString (value, s); }
 
-        Type value;
+        Type value, originalValue;
 
         JUCE_DECLARE_NON_COPYABLE (LiveValue)
     };

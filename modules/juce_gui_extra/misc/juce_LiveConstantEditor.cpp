@@ -87,8 +87,8 @@ double parseDouble (const String& s)
     return s.retainCharacters ("0123456789.eE-").getDoubleValue();
 }
 
-String hexString (int v)    { return "0x" + String::toHexString (v); }
-String hexString (int64 v)  { return "0x" + String::toHexString (v); }
+String intToString (int   v, bool preferHex)    { return preferHex ? "0x" + String::toHexString (v) : String (v); }
+String intToString (int64 v, bool preferHex)    { return preferHex ? "0x" + String::toHexString (v) : String (v); }
 
 //==============================================================================
 LiveValueBase::LiveValueBase (const char* file, int line)
@@ -103,11 +103,12 @@ LiveValueBase::~LiveValueBase()
 
 //==============================================================================
 LivePropertyEditorBase::LivePropertyEditorBase (LiveValueBase& v, CodeDocument& d)
-    : value (v), document (d), sourceEditor (document, &tokeniser)
+    : value (v), resetButton ("reset"), document (d), sourceEditor (document, &tokeniser), wasHex (false)
 {
     setSize (600, 100);
 
     addAndMakeVisible (&name);
+    addAndMakeVisible (&resetButton);
     addAndMakeVisible (&valueEditor);
     addAndMakeVisible (&sourceEditor);
 
@@ -116,9 +117,10 @@ LivePropertyEditorBase::LivePropertyEditorBase (LiveValueBase& v, CodeDocument& 
 
     name.setFont (13.0f);
     name.setText (v.name, dontSendNotification);
-    valueEditor.setText (v.getStringValue(), dontSendNotification);
+    valueEditor.setText (v.getStringValue (wasHex), dontSendNotification);
     valueEditor.addListener (this);
     sourceEditor.setReadOnly (true);
+    resetButton.addListener (this);
 }
 
 void LivePropertyEditorBase::paint (Graphics& g)
@@ -133,7 +135,9 @@ void LivePropertyEditorBase::resized()
 
     Rectangle<int> left (r.removeFromLeft (jmax (200, r.getWidth() / 3)));
 
-    name.setBounds (left.removeFromTop (25));
+    Rectangle<int> top (left.removeFromTop (25));
+    resetButton.setBounds (top.removeFromRight (35).reduced (0, 3));
+    name.setBounds (top);
     valueEditor.setBounds (left.removeFromTop (25));
     left.removeFromTop (2);
 
@@ -149,11 +153,16 @@ void LivePropertyEditorBase::textEditorTextChanged (TextEditor&)
     applyNewValue (valueEditor.getText());
 }
 
+void LivePropertyEditorBase::buttonClicked (Button*)
+{
+    applyNewValue (value.getOriginalStringValue (wasHex));
+}
+
 void LivePropertyEditorBase::applyNewValue (const String& s)
 {
     value.setStringValue (s);
 
-    document.replaceSection (valueStart.getPosition(), valueEnd.getPosition(), value.getCodeValue());
+    document.replaceSection (valueStart.getPosition(), valueEnd.getPosition(), value.getCodeValue (wasHex));
     document.clearUndoHistory();
     selectOriginalValue();
 
@@ -219,6 +228,8 @@ void LivePropertyEditorBase::findOriginalValueInCode()
 
             valueStart.setPositionMaintained (true);
             valueEnd.setPositionMaintained (true);
+
+            wasHex = String (start, end).containsIgnoreCase ("0x");
         }
     }
 }
@@ -362,7 +373,7 @@ struct ColourEditorComp  : public Component,
 
     Colour getColour() const
     {
-        return Colour ((int) parseInt (editor.value.getStringValue()));
+        return Colour ((int) parseInt (editor.value.getStringValue (false)));
     }
 
     void paint (Graphics& g) override
@@ -387,7 +398,7 @@ struct ColourEditorComp  : public Component,
     void changeListenerCallback (ChangeBroadcaster* source) override
     {
         if (ColourSelector* cs = dynamic_cast<ColourSelector*> (source))
-            editor.applyNewValue (getAsString (cs->getCurrentColour()));
+            editor.applyNewValue (getAsString (cs->getCurrentColour(), true));
 
         repaint();
     }
@@ -416,8 +427,8 @@ public:
 
     void updateRange()
     {
-        double v = isFloat ? parseDouble (editor.value.getStringValue())
-                           : (double) parseInt (editor.value.getStringValue());
+        double v = isFloat ? parseDouble (editor.value.getStringValue (false))
+                           : (double) parseInt (editor.value.getStringValue (false));
 
         double range = isFloat ? 10 : 100;
 
@@ -432,8 +443,8 @@ private:
 
     void sliderValueChanged (Slider*)
     {
-        editor.applyNewValue (isFloat ? getAsString ((double) slider.getValue())
-                                      : getAsString ((int64)  slider.getValue()));
+        editor.applyNewValue (isFloat ? getAsString ((double) slider.getValue(), editor.wasHex)
+                                      : getAsString ((int64)  slider.getValue(), editor.wasHex));
 
     }
 

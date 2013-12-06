@@ -36,7 +36,7 @@ struct LiveConstantDemoComponent  : public Component
         g.fillAll (JUCE_LIVE_CONSTANT (Colour (0xffe5e7a7)));
 
         g.setColour (JUCE_LIVE_CONSTANT (Colours::red.withAlpha (0.2f)));
-        int blockWidth = JUCE_LIVE_CONSTANT (200);
+        int blockWidth = JUCE_LIVE_CONSTANT (0x120);
         int blockHeight = JUCE_LIVE_CONSTANT (200);
         g.fillRect ((getWidth() - blockWidth) / 2, (getHeight() - blockHeight) / 2, blockWidth, blockHeight);
 
