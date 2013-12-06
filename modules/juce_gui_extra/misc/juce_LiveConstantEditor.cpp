@@ -58,16 +58,15 @@ private:
 
     static void repaintAndResizeAllComps (Component::SafePointer<Component> c)
     {
-        for (int i = c->getNumChildComponents(); --i >= 0;)
+        if (c->isVisible())
         {
-            if (c != nullptr)
-            {
-                if (Component* child = c->getChildComponent(i))
-                {
-                    child->repaint();
-                    child->resized();
-                }
-            }
+            c->repaint();
+            c->resized();
+
+            for (int i = c->getNumChildComponents(); --i >= 0;)
+                if (c != nullptr)
+                    if (Component* child = c->getChildComponent(i))
+                        repaintAndResizeAllComps (child);
         }
     }
 };
