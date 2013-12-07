@@ -190,13 +190,17 @@ public:
     Rectangle withZeroOrigin() const noexcept                               { return Rectangle (w, h); }
 
     /** Returns a rectangle which has the same position and height as this one, but with a different width. */
-    Rectangle withWidth (ValueType newWidth) const noexcept           { return Rectangle (pos.x, pos.y, newWidth, h); }
+    Rectangle withWidth (ValueType newWidth) const noexcept                 { return Rectangle (pos.x, pos.y, newWidth, h); }
 
     /** Returns a rectangle which has the same position and width as this one, but with a different height. */
-    Rectangle withHeight (ValueType newHeight) const noexcept         { return Rectangle (pos.x, pos.y, w, newHeight); }
+    Rectangle withHeight (ValueType newHeight) const noexcept               { return Rectangle (pos.x, pos.y, w, newHeight); }
 
-    /** Returns a rectangle with the same position as this one, but a new size. */
-    Rectangle withSize (ValueType newWidth, const ValueType newHeight) const noexcept         { return Rectangle (pos.x, pos.y, newWidth, newHeight); }
+    /** Returns a rectangle with the same top-left position as this one, but a new size. */
+    Rectangle withSize (ValueType newWidth, ValueType newHeight) const noexcept               { return Rectangle (pos.x, pos.y, newWidth, newHeight); }
+
+    /** Returns a rectangle with the same centre position as this one, but a new size. */
+    Rectangle withSizeKeepingCentre (ValueType newWidth, ValueType newHeight) const noexcept  { return Rectangle (pos.x + (w - newWidth)  / (ValueType) 2,
+                                                                                                                  pos.y + (h - newHeight) / (ValueType) 2, newWidth, newHeight); }
 
     /** Moves the x position, adjusting the width so that the right-hand edge remains in the same place.
         If the x is moved to be on the right of the current right-hand edge, the width will be set to zero.
