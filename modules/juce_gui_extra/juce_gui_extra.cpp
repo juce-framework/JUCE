@@ -86,6 +86,8 @@ namespace juce
 #include "code_editor/juce_CodeDocument.cpp"
 #include "code_editor/juce_CodeEditorComponent.cpp"
 #include "code_editor/juce_CPlusPlusCodeTokeniser.cpp"
+#include "code_editor/juce_XMLCodeTokeniser.cpp"
+#include "code_editor/juce_LuaCodeTokeniser.cpp"
 #include "misc/juce_BubbleMessageComponent.cpp"
 #include "misc/juce_ColourSelector.cpp"
 #include "misc/juce_KeyMappingEditorComponent.cpp"

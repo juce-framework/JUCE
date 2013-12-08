@@ -100,7 +100,7 @@ struct CppTokeniserFunctions
         return false;
     }
 
-    template<class Iterator>
+    template <typename Iterator>
     static int parseIdentifier (Iterator& source) noexcept
     {
         int tokenLength = 0;
@@ -128,7 +128,7 @@ struct CppTokeniserFunctions
         return CPlusPlusCodeTokeniser::tokenType_identifier;
     }
 
-    template<class Iterator>
+    template <typename Iterator>
     static bool skipNumberSuffix (Iterator& source)
     {
         const juce_wchar c = source.peekNextChar();
@@ -148,7 +148,7 @@ struct CppTokeniserFunctions
                 || (c >= 'A' && c <= 'F');
     }
 
-    template<class Iterator>
+    template <typename Iterator>
     static bool parseHexLiteral (Iterator& source) noexcept
     {
         if (source.peekNextChar() == '-')
@@ -179,7 +179,7 @@ struct CppTokeniserFunctions
         return c >= '0' && c <= '7';
     }
 
-    template<class Iterator>
+    template <typename Iterator>
     static bool parseOctalLiteral (Iterator& source) noexcept
     {
         if (source.peekNextChar() == '-')
@@ -202,7 +202,7 @@ struct CppTokeniserFunctions
         return c >= '0' && c <= '9';
     }
 
-    template<class Iterator>
+    template <typename Iterator>
     static bool parseDecimalLiteral (Iterator& source) noexcept
     {
         if (source.peekNextChar() == '-')
@@ -221,7 +221,7 @@ struct CppTokeniserFunctions
         return skipNumberSuffix (source);
     }
 
-    template<class Iterator>
+    template <typename Iterator>
     static bool parseFloatLiteral (Iterator& source) noexcept
     {
         if (source.peekNextChar() == '-')
@@ -282,7 +282,7 @@ struct CppTokeniserFunctions
         return true;
     }
 
-    template<class Iterator>
+    template <typename Iterator>
     static int parseNumber (Iterator& source)
     {
         const Iterator original (source);
@@ -302,7 +302,7 @@ struct CppTokeniserFunctions
         return CPlusPlusCodeTokeniser::tokenType_error;
     }
 
-    template<class Iterator>
+    template <typename Iterator>
     static void skipQuotedString (Iterator& source) noexcept
     {
         const juce_wchar quote = source.nextChar();
@@ -319,7 +319,7 @@ struct CppTokeniserFunctions
         }
     }
 
-    template<class Iterator>
+    template <typename Iterator>
     static void skipComment (Iterator& source) noexcept
     {
         bool lastWasStar = false;
@@ -335,7 +335,7 @@ struct CppTokeniserFunctions
         }
     }
 
-    template<class Iterator>
+    template <typename Iterator>
     static void skipPreprocessorLine (Iterator& source) noexcept
     {
         bool lastWasBackslash = false;
@@ -378,14 +378,14 @@ struct CppTokeniserFunctions
         }
     }
 
-    template<class Iterator>
+    template <typename Iterator>
     static void skipIfNextCharMatches (Iterator& source, const juce_wchar c) noexcept
     {
         if (source.peekNextChar() == c)
             source.skip();
     }
 
-    template<class Iterator>
+    template <typename Iterator>
     static void skipIfNextCharMatches (Iterator& source, const juce_wchar c1, const juce_wchar c2) noexcept
     {
         const juce_wchar c = source.peekNextChar();
@@ -394,10 +394,9 @@ struct CppTokeniserFunctions
             source.skip();
     }
 
-    template<class Iterator>
+    template <typename Iterator>
     static int readNextToken (Iterator& source)
     {
-        int result = CPlusPlusCodeTokeniser::tokenType_error;
         source.skipWhitespace();
 
         const juce_wchar firstChar = source.peekNextChar();
@@ -405,135 +404,116 @@ struct CppTokeniserFunctions
         switch (firstChar)
         {
         case 0:
-            source.skip();
             break;
 
-        case '0':
-        case '1':
-        case '2':
-        case '3':
-        case '4':
-        case '5':
-        case '6':
-        case '7':
-        case '8':
-        case '9':
+        case '0':   case '1':   case '2':   case '3':   case '4':
+        case '5':   case '6':   case '7':   case '8':   case '9':
         case '.':
-            result = parseNumber (source);
+        {
+            int result = parseNumber (source);
 
             if (result == CPlusPlusCodeTokeniser::tokenType_error)
             {
                 source.skip();
 
                 if (firstChar == '.')
-                    result = CPlusPlusCodeTokeniser::tokenType_punctuation;
+                    return CPlusPlusCodeTokeniser::tokenType_punctuation;
             }
 
-            break;
+            return result;
+        }
 
         case ',':
         case ';':
         case ':':
             source.skip();
-            result = CPlusPlusCodeTokeniser::tokenType_punctuation;
-            break;
+            return CPlusPlusCodeTokeniser::tokenType_punctuation;
 
-        case '(':
-        case ')':
-        case '{':
-        case '}':
-        case '[':
-        case ']':
+        case '(':   case ')':
+        case '{':   case '}':
+        case '[':   case ']':
             source.skip();
-            result = CPlusPlusCodeTokeniser::tokenType_bracket;
-            break;
+            return CPlusPlusCodeTokeniser::tokenType_bracket;
 
         case '"':
         case '\'':
             skipQuotedString (source);
-            result = CPlusPlusCodeTokeniser::tokenType_string;
-            break;
+            return CPlusPlusCodeTokeniser::tokenType_string;
 
         case '+':
-            result = CPlusPlusCodeTokeniser::tokenType_operator;
             source.skip();
             skipIfNextCharMatches (source, '+', '=');
-            break;
+            return CPlusPlusCodeTokeniser::tokenType_operator;
 
         case '-':
+        {
             source.skip();
-            result = parseNumber (source);
+            int result = parseNumber (source);
 
             if (result == CPlusPlusCodeTokeniser::tokenType_error)
             {
-                result = CPlusPlusCodeTokeniser::tokenType_operator;
                 skipIfNextCharMatches (source, '-', '=');
+                return CPlusPlusCodeTokeniser::tokenType_operator;
             }
-            break;
 
-        case '*':
-        case '%':
-        case '=':
-        case '!':
-            result = CPlusPlusCodeTokeniser::tokenType_operator;
+            return result;
+        }
+
+        case '*':   case '%':
+        case '=':   case '!':
             source.skip();
             skipIfNextCharMatches (source, '=');
-            break;
+            return CPlusPlusCodeTokeniser::tokenType_operator;
 
         case '/':
-            result = CPlusPlusCodeTokeniser::tokenType_operator;
+        {
             source.skip();
+            juce_wchar nextChar = source.peekNextChar();
 
-            if (source.peekNextChar() == '=')
+            if (nextChar == '/')
             {
-                source.skip();
-            }
-            else if (source.peekNextChar() == '/')
-            {
-                result = CPlusPlusCodeTokeniser::tokenType_comment;
                 source.skipToEndOfLine();
-            }
-            else if (source.peekNextChar() == '*')
-            {
-                source.skip();
-                result = CPlusPlusCodeTokeniser::tokenType_comment;
-                skipComment (source);
+                return CPlusPlusCodeTokeniser::tokenType_comment;
             }
 
-            break;
+            if (nextChar == '*')
+            {
+                source.skip();
+                skipComment (source);
+                return CPlusPlusCodeTokeniser::tokenType_comment;
+            }
+
+            if (nextChar == '=')
+                source.skip();
+
+            return CPlusPlusCodeTokeniser::tokenType_operator;
+        }
 
         case '?':
         case '~':
             source.skip();
-            result = CPlusPlusCodeTokeniser::tokenType_operator;
-            break;
+            return CPlusPlusCodeTokeniser::tokenType_operator;
 
-        case '<':
-        case '>':
-        case '|':
-        case '&':
-        case '^':
+        case '<':   case '>':
+        case '|':   case '&':   case '^':
             source.skip();
-            result = CPlusPlusCodeTokeniser::tokenType_operator;
             skipIfNextCharMatches (source, firstChar);
             skipIfNextCharMatches (source, '=');
-            break;
+            return CPlusPlusCodeTokeniser::tokenType_operator;
 
         case '#':
-            result = CPlusPlusCodeTokeniser::tokenType_preprocessor;
             skipPreprocessorLine (source);
-            break;
+            return CPlusPlusCodeTokeniser::tokenType_preprocessor;
 
         default:
             if (isIdentifierStart (firstChar))
-                result = parseIdentifier (source);
-            else
-                source.skip();
+                return parseIdentifier (source);
 
+            source.skip();
             break;
         }
 
-        return result;
+        return CPlusPlusCodeTokeniser::tokenType_error;
     }
 
     /** A class that can be passed to the CppTokeniserFunctions functions in order to

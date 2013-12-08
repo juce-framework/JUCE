@@ -2065,7 +2065,7 @@ private:
     int numInputAudioBusses, numOutputAudioBusses;
 
     //==============================================================================
-    template<class Type>
+    template <typename Type>
     static void appendStateFrom (XmlElement& head, ComSmartPtr<Type>& object, const String& identifier)
     {
         if (object != nullptr)

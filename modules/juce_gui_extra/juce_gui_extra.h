@@ -57,6 +57,8 @@ namespace juce
 #include "code_editor/juce_CodeTokeniser.h"
 #include "code_editor/juce_CPlusPlusCodeTokeniser.h"
 #include "code_editor/juce_CPlusPlusCodeTokeniserFunctions.h"
+#include "code_editor/juce_XMLCodeTokeniser.h"
+#include "code_editor/juce_LuaCodeTokeniser.h"
 #include "embedding/juce_ActiveXControlComponent.h"
 #include "embedding/juce_NSViewComponent.h"
 #include "embedding/juce_UIViewComponent.h"

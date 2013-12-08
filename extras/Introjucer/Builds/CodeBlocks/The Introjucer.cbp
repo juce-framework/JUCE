@@ -3030,6 +3030,22 @@
       <Option compile="0"/>
       <Option link="0"/>
     </Unit>
+    <Unit filename="../../../../modules/juce_gui_extra/code_editor/juce_LuaCodeTokeniser.cpp">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../../../modules/juce_gui_extra/code_editor/juce_LuaCodeTokeniser.h">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../../../modules/juce_gui_extra/code_editor/juce_XMLCodeTokeniser.cpp">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../../../modules/juce_gui_extra/code_editor/juce_XMLCodeTokeniser.h">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
     <Unit filename="../../../../modules/juce_gui_extra/documents/juce_FileBasedDocument.cpp">
       <Option compile="0"/>
       <Option link="0"/>

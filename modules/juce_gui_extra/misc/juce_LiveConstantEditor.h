@@ -145,7 +145,7 @@ namespace LiveConstantEditor
     template<> struct CustomEditor<double>          { static Component* create (LivePropertyEditorBase& e) { return createFloatSlider (e); } };
     template<> struct CustomEditor<Colour>          { static Component* create (LivePropertyEditorBase& e) { return createColourEditor (e); } };
 
-    template<typename Type>
+    template <typename Type>
     struct LivePropertyEditor  : public LivePropertyEditorBase
     {
         template <typename ValueType>
@@ -156,7 +156,7 @@ namespace LiveConstantEditor
     };
 
     //==============================================================================
-    template<typename Type>
+    template <typename Type>
     struct LiveValue  : public LiveValueBase
     {
         LiveValue (const char* file, int line, const Type& initialValue)
@@ -191,7 +191,7 @@ namespace LiveConstantEditor
 
         static ValueList& getInstance();
 
-        template<typename Type>
+        template <typename Type>
         LiveValue<Type>& getValue (const char* file, int line, const Type& initialValue)
         {
             const ScopedLock sl (lock);
@@ -225,7 +225,7 @@ namespace LiveConstantEditor
         void handleAsyncUpdate() override;
     };
 
-    template<typename Type>
+    template <typename Type>
     inline LiveValue<Type>& getValue (const char* file, int line, const Type& initialValue)
     {
         return ValueList::getInstance().getValue (file, line, initialValue);
