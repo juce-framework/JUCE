@@ -116,7 +116,6 @@ public:
     virtual bool canPlaySound (SynthesiserSound*) = 0;
 
     /** Called to start a new note.
-
         This will be called during the rendering callback, so must be fast and thread-safe.
     */
     virtual void startNote (int midiNoteNumber,
@@ -186,6 +185,14 @@ public:
     */
     void setCurrentPlaybackSampleRate (double newRate);
 
+    /** Returns true if the key that triggered this voice is still held down.
+        Note that the voice may still be playing after the key was released (e.g because the
+        sostenuto pedal is down).
+    */
+    bool isKeyDown() const noexcept                             { return keyIsDown; }
+
+    /** Returns true if the sostenuto pedal is currently active for this voice. */
+    bool isSostenutoPedalDown() const noexcept                  { return sostenutoPedalDown; }
 
 protected:
     //==============================================================================
@@ -218,8 +225,7 @@ private:
     int currentlyPlayingNote;
     uint32 noteOnTime;
     SynthesiserSound::Ptr currentlyPlayingSound;
-    bool keyIsDown; // the voice may still be playing when the key is not down (i.e. sustain pedal)
-    bool sostenutoPedalDown;
+    bool keyIsDown, sostenutoPedalDown;
 
     JUCE_LEAK_DETECTOR (SynthesiserVoice)
 };
