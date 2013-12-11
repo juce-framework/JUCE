@@ -82,6 +82,14 @@ struct OpenGLDemoClasses
             }
         }
 
+        void disable (OpenGLContext& openGLContext)
+        {
+            if (position != nullptr)       openGLContext.extensions.glDisableVertexAttribArray (position->attributeID);
+            if (normal != nullptr)         openGLContext.extensions.glDisableVertexAttribArray (normal->attributeID);
+            if (sourceColour != nullptr)   openGLContext.extensions.glDisableVertexAttribArray (sourceColour->attributeID);
+            if (texureCoordIn != nullptr)  openGLContext.extensions.glDisableVertexAttribArray (texureCoordIn->attributeID);
+        }
+
         ScopedPointer<OpenGLShaderProgram::Attribute> position, normal, sourceColour, texureCoordIn;
 
     private:
@@ -145,8 +153,8 @@ struct OpenGLDemoClasses
                 vertexBuffer.bind();
 
                 attributes.enable (openGLContext);
-
                 glDrawElements (GL_TRIANGLES, vertexBuffer.numIndices, GL_UNSIGNED_INT, 0);
+                attributes.disable (openGLContext);
             }
         }
 
