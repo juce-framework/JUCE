@@ -46,7 +46,7 @@ struct CppTokeniserFunctions
     static bool isReservedKeyword (String::CharPointerType token, const int tokenLength) noexcept
     {
         static const char* const keywords2Char[] =
-            { "if", "do", "or", "id", nullptr };
+            { "if", "do", "or", nullptr };
 
         static const char* const keywords3Char[] =
             { "for", "int", "new", "try", "xor", "and", "asm", "not", nullptr };
@@ -56,23 +56,24 @@ struct CppTokeniserFunctions
               "enum", "case", "goto", "auto", nullptr };
 
         static const char* const keywords5Char[] =
-            {  "while", "bitor", "break", "catch", "class", "compl", "const", "false",
-               "float", "short", "throw", "union", "using", "or_eq", "final", nullptr };
+            { "float", "const", "while", "break", "false", "catch", "class", "bitor",
+              "compl", "or_eq", "short", "throw", "union", "using", "final", nullptr };
 
         static const char* const keywords6Char[] =
-            { "return", "struct", "and_eq", "bitand", "delete", "double", "extern",
-              "friend", "inline", "not_eq", "public", "sizeof", "static", "signed",
-              "switch", "typeid", "wchar_t", "xor_eq", nullptr };
+            { "return", "and_eq", "bitand", "delete", "double", "export", "extern",
+              "friend", "inline", "not_eq", "public", "signed", "sizeof", "static",
+              "struct", "switch", "typeid", "xor_eq", nullptr };
 
         static const char* const keywords7Char[] =
-            { "default", "mutable", "private", "typedef", "nullptr", "virtual", nullptr };
+            { "nullptr", "alignas", "alignof", "default", "mutable", "private",
+              "typedef", "virtual", "wchar_t", nullptr };
 
         static const char* const keywordsOther[] =
-            { "noexcept", "const_cast", "continue", "explicit", "namespace", "override",
-              "operator", "protected", "register", "reinterpret_cast", "static_cast",
-              "template", "typename", "unsigned", "volatile", "constexpr",
-              "@implementation", "@interface", "@end", "@synthesize", "@dynamic", "@public",
-              "@private", "@property", "@protected", "@class", nullptr };
+            { "char16_t", "char32_t", "const_cast", "constexpr", "continue", "decltype", "dynamic_cast",
+              "explicit", "namespace", "noexcept", "operator", "protected", "register", "reinterpret_cast",
+              "static_assert", "static_cast", "template", "thread_local", "typename", "unsigned", "volatile",
+              "@class", "@dynamic", "@end", "@implementation", "@interface", "@public", "@private",
+              "@protected", "@property", "@synthesize", nullptr };
 
         const char* const* k;
 
