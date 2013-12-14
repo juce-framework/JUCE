@@ -436,6 +436,11 @@ private:
             isRunning = true;
             AudioSessionSetActive (true);
             AudioOutputUnitStart (audioUnit);
+
+            const ScopedLock sl (callbackLock);
+
+            if (callback != nullptr)
+                callback->audioDeviceError ("iOS audio session resumed");
         }
     }
 
