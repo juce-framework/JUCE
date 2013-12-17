@@ -425,7 +425,8 @@ namespace NumberToStringConverters
     {
         explicit StackArrayStream (char* d)
         {
-            imbue (std::locale::classic());
+            static const std::locale classicLocale (std::locale::classic());
+            imbue (classicLocale);
             setp (d, d + charsNeededForDouble);
         }
 
