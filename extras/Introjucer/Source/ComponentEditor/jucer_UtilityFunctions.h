@@ -25,7 +25,7 @@
 #ifndef __JUCER_UTILITYFUNCTIONS_JUCEHEADER__
 #define __JUCER_UTILITYFUNCTIONS_JUCEHEADER__
 
-inline String quotedString (const String& s)
+inline String quotedString (const String& s, bool wrapInTransMacro)
 {
     const int embeddedIndex = s.indexOfIgnoreCase ("%%");
 
@@ -48,18 +48,23 @@ inline String quotedString (const String& s)
             String result;
 
             if (s1.isNotEmpty())
-                result << quotedString (s1) << " + ";
+                result << quotedString (s1, wrapInTransMacro) << " + ";
 
             result << code;
 
             if (s2.isNotEmpty())
-                result << " + " << quotedString (s2);
+                result << " + " << quotedString (s2, wrapInTransMacro);
 
             return result;
         }
     }
 
-    return CodeHelpers::stringLiteral (s);
+    String lit (CodeHelpers::stringLiteral (s));
+
+    if (wrapInTransMacro && lit.startsWithChar ('"'))
+        return "TRANS(" + lit + ")";
+
+    return lit;
 }
 
 inline String castToFloat (const String& expression)

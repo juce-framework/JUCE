@@ -85,9 +85,9 @@ public:
         return true;
     }
 
-    String getCreationParameters (Component* component)
+    String getCreationParameters (GeneratedCode& code, Component* component)
     {
-        return quotedString (component->getName());
+        return quotedString (component->getName(), code.shouldUseTransMacro());
     }
 
     void fillInCreationCode (GeneratedCode& code, Component* component, const String& memberVariableName)

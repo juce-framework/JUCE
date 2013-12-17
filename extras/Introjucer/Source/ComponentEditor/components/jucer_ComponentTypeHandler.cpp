@@ -522,14 +522,14 @@ void ComponentTypeHandler::fillInResizeCode (GeneratedCode& code, Component* com
         code.getCallbackCode (String::empty, "void", "resized()", false) += r;
 }
 
-String ComponentTypeHandler::getCreationParameters (Component*)
+String ComponentTypeHandler::getCreationParameters (GeneratedCode&, Component*)
 {
     return String::empty;
 }
 
 void ComponentTypeHandler::fillInCreationCode (GeneratedCode& code, Component* component, const String& memberVariableName)
 {
-    String params (getCreationParameters (component));
+    String params (getCreationParameters (code, component));
     const String virtualName (component->getProperties() ["virtualName"].toString());
 
     String s;
@@ -557,7 +557,7 @@ void ComponentTypeHandler::fillInCreationCode (GeneratedCode& code, Component* c
         if (ttc->getTooltip().isNotEmpty())
         {
             s << memberVariableName << "->setTooltip ("
-              << quotedString (ttc->getTooltip())
+              << quotedString (ttc->getTooltip(), code.shouldUseTransMacro())
               << ");\n";
         }
     }
