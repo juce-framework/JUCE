@@ -216,11 +216,6 @@ protected:
         return new MSVCBuildConfiguration (project, v);
     }
 
-    static int getWarningLevel (const BuildConfiguration& config)
-    {
-        return dynamic_cast <const MSVCBuildConfiguration&> (config).getWarningLevel();
-    }
-
     //==============================================================================
     String getConfigTargetPath (const BuildConfiguration& config) const
     {
@@ -775,7 +770,7 @@ protected:
             compiler->setAttribute ("AssemblerListingLocation", "$(IntDir)\\");
             compiler->setAttribute ("ObjectFile", "$(IntDir)\\");
             compiler->setAttribute ("ProgramDataBaseFileName", "$(IntDir)\\");
-            compiler->setAttribute ("WarningLevel", String (getWarningLevel (config)));
+            compiler->setAttribute ("WarningLevel", String (config.getWarningLevel()));
             compiler->setAttribute ("SuppressStartupBanner", "true");
 
             const String extraFlags (replacePreprocessorTokens (config, getExtraCompilerFlagsString()).trim());
@@ -1211,7 +1206,7 @@ protected:
                 cl->createNewChildElement ("AssemblerListingLocation")->addTextElement ("$(IntDir)\\");
                 cl->createNewChildElement ("ObjectFileName")->addTextElement ("$(IntDir)\\");
                 cl->createNewChildElement ("ProgramDataBaseFileName")->addTextElement ("$(IntDir)\\");
-                cl->createNewChildElement ("WarningLevel")->addTextElement ("Level" + String (getWarningLevel (config)));
+                cl->createNewChildElement ("WarningLevel")->addTextElement ("Level" + String (config.getWarningLevel()));
                 cl->createNewChildElement ("SuppressStartupBanner")->addTextElement ("true");
                 cl->createNewChildElement ("MultiProcessorCompilation")->addTextElement ("true");
 
