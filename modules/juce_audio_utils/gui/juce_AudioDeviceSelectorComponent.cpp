@@ -599,11 +599,11 @@ private:
             sampleRateDropDown->removeListener (this);
         }
 
-        const int numRates = currentDevice->getNumSampleRates();
+        const Array<double> rates (currentDevice->getAvailableSampleRates());
 
-        for (int i = 0; i < numRates; ++i)
+        for (int i = 0; i < rates.size(); ++i)
         {
-            const int rate = roundToInt (currentDevice->getSampleRate (i));
+            const int rate = roundToInt (rates[i]);
             sampleRateDropDown->addItem (String (rate) + " Hz", rate);
         }
 
@@ -626,19 +626,16 @@ private:
             bufferSizeDropDown->removeListener (this);
         }
 
-        const int numBufferSizes = currentDevice->getNumBufferSizesAvailable();
+        const Array<int> bufferSizes (currentDevice->getAvailableBufferSizes());
+
         double currentRate = currentDevice->getCurrentSampleRate();
         if (currentRate == 0)
             currentRate = 48000.0;
 
-        for (int i = 0; i < numBufferSizes; ++i)
+        for (int i = 0; i < bufferSizes.size(); ++i)
         {
-            const int bs = currentDevice->getBufferSizeSamples (i);
-            bufferSizeDropDown->addItem (String (bs)
-                                          + " samples ("
-                                          + String (bs * 1000.0 / currentRate, 1)
-                                          + " ms)",
-                                         bs);
+            const int bs = bufferSizes[i];
+            bufferSizeDropDown->addItem (String (bs) + " samples (" + String (bs * 1000.0 / currentRate, 1) + " ms)", bs);
         }
 
         bufferSizeDropDown->setSelectedId (currentDevice->getCurrentBufferSizeSamples(), dontSendNotification);

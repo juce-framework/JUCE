@@ -524,16 +524,16 @@ double AudioDeviceManager::chooseBestSampleRate (double rate) const
 {
     jassert (currentAudioDevice != nullptr);
 
-    if (rate > 0)
-        for (int i = currentAudioDevice->getNumSampleRates(); --i >= 0;)
-            if (currentAudioDevice->getSampleRate (i) == rate)
-                return rate;
+    const Array<double> rates (currentAudioDevice->getAvailableSampleRates());
+
+    if (rate > 0 && rates.contains (rate))
+        return rate;
 
     double lowestAbove44 = 0.0;
 
-    for (int i = currentAudioDevice->getNumSampleRates(); --i >= 0;)
+    for (int i = rates.size(); --i >= 0;)
     {
-        const double sr = currentAudioDevice->getSampleRate (i);
+        const double sr = rates[i];
 
         if (sr >= 44100.0 && (lowestAbove44 < 1.0 || sr < lowestAbove44))
             lowestAbove44 = sr;
@@ -542,17 +542,15 @@ double AudioDeviceManager::chooseBestSampleRate (double rate) const
     if (lowestAbove44 > 0.0)
         return lowestAbove44;
 
-    return currentAudioDevice->getSampleRate (0);
+    return rates[0];
 }
 
 int AudioDeviceManager::chooseBestBufferSize (int bufferSize) const
 {
     jassert (currentAudioDevice != nullptr);
 
-    if (bufferSize > 0)
-        for (int i = currentAudioDevice->getNumBufferSizesAvailable(); --i >= 0;)
-            if (currentAudioDevice->getBufferSizeSamples(i) == bufferSize)
-                return bufferSize;
+    if (bufferSize > 0 && currentAudioDevice->getAvailableBufferSizes().contains (bufferSize))
+        return bufferSize;
 
     return currentAudioDevice->getDefaultBufferSize();
 }

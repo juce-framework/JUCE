@@ -755,7 +755,7 @@ public:
 
     String open (const BigInteger& inputChannels,
                  const BigInteger& outputChannels,
-                 double sampleRate, int bufferSizeSamples)
+                 double sampleRate, int bufferSizeSamples) override
     {
         lastError = openDevice (inputChannels, outputChannels, sampleRate, bufferSizeSamples);
         isOpen_ = lastError.isEmpty();
@@ -763,7 +763,7 @@ public:
         return lastError;
     }
 
-    void close()
+    void close() override
     {
         stop();
 
@@ -774,38 +774,41 @@ public:
         }
     }
 
-    bool isOpen()                                       { return isOpen_ && isThreadRunning(); }
-    int getCurrentBufferSizeSamples()                   { return bufferSizeSamples; }
-    double getCurrentSampleRate()                       { return sampleRate; }
-    BigInteger getActiveOutputChannels() const          { return enabledOutputs; }
-    BigInteger getActiveInputChannels() const           { return enabledInputs; }
-    int getOutputLatencyInSamples()                     { return (int) (getCurrentBufferSizeSamples() * 1.5); }
-    int getInputLatencyInSamples()                      { return getOutputLatencyInSamples(); }
-    StringArray getOutputChannelNames()                 { return outChannels; }
-    StringArray getInputChannelNames()                  { return inChannels; }
+    bool isOpen() override                              { return isOpen_ && isThreadRunning(); }
+    int getCurrentBufferSizeSamples() override          { return bufferSizeSamples; }
+    double getCurrentSampleRate() override              { return sampleRate; }
+    BigInteger getActiveOutputChannels() const override { return enabledOutputs; }
+    BigInteger getActiveInputChannels() const override  { return enabledInputs; }
+    int getOutputLatencyInSamples() override            { return (int) (getCurrentBufferSizeSamples() * 1.5); }
+    int getInputLatencyInSamples() override             { return getOutputLatencyInSamples(); }
+    StringArray getOutputChannelNames() override        { return outChannels; }
+    StringArray getInputChannelNames() override         { return inChannels; }
 
-    int getNumSampleRates()                             { return 4; }
-    int getDefaultBufferSize()                          { return 2560; }
-    int getNumBufferSizesAvailable()                    { return 50; }
-
-    double getSampleRate (int index)
+    Array<double> getAvailableSampleRates() override
     {
-        const double samps[] = { 44100.0, 48000.0, 88200.0, 96000.0 };
-        return samps [jlimit (0, 3, index)];
+        static const double rates[] = { 44100.0, 48000.0, 88200.0, 96000.0 };
+        return Array<double> (rates, numElementsInArray (rates));
     }
 
-    int getBufferSizeSamples (int index)
+    Array<int> getAvailableBufferSizes() override
     {
+        Array<int> r;
         int n = 64;
-        for (int i = 0; i < index; ++i)
+
+        for (int i = 0; i < 50; ++i)
+        {
+            r.add (n);
             n += (n < 512) ? 32
                            : ((n < 1024) ? 64
                                          : ((n < 2048) ? 128 : 256));
+        }
 
-        return n;
+        return r;
     }
 
-    int getCurrentBitDepth()
+    int getDefaultBufferSize() override                 { return 2560; }
+
+    int getCurrentBitDepth() override
     {
         int bits = 256;
 
@@ -821,7 +824,7 @@ public:
         return bits;
     }
 
-    void start (AudioIODeviceCallback* call)
+    void start (AudioIODeviceCallback* call) override
     {
         if (isOpen_ && call != nullptr && ! isStarted)
         {
@@ -840,7 +843,7 @@ public:
         }
     }
 
-    void stop()
+    void stop() override
     {
         if (isStarted)
         {
@@ -856,8 +859,8 @@ public:
         }
     }
 
-    bool isPlaying()                { return isStarted && isOpen_ && isThreadRunning(); }
-    String getLastError()           { return lastError; }
+    bool isPlaying() override            { return isStarted && isOpen_ && isThreadRunning(); }
+    String getLastError() override       { return lastError; }
 
     //==============================================================================
     StringArray inChannels, outChannels;

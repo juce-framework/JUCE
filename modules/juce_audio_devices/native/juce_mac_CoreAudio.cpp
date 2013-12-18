@@ -946,24 +946,21 @@ public:
         return internal->inChanNames;
     }
 
-    bool isOpen() override                        { return isOpen_; }
+    bool isOpen() override                              { return isOpen_; }
 
-    int getNumSampleRates() override              { return internal->sampleRates.size(); }
-    double getSampleRate (int index) override     { return internal->sampleRates [index]; }
-    double getCurrentSampleRate() override        { return internal->getSampleRate(); }
+    Array<double> getAvailableSampleRates() override    { return internal->sampleRates; }
+    Array<int> getAvailableBufferSizes() override       { return internal->bufferSizes; }
 
-    int getCurrentBitDepth() override             { return 32; }  // no way to find out, so just assume it's high..
-
-    int getNumBufferSizesAvailable() override     { return internal->bufferSizes.size(); }
-    int getBufferSizeSamples (int index) override { return internal->bufferSizes [index]; }
-    int getCurrentBufferSizeSamples() override    { return internal->getBufferSize(); }
+    double getCurrentSampleRate() override              { return internal->getSampleRate(); }
+    int getCurrentBitDepth() override                   { return 32; }  // no way to find out, so just assume it's high..
+    int getCurrentBufferSizeSamples() override          { return internal->getBufferSize(); }
 
     int getDefaultBufferSize() override
     {
         int best = 0;
 
-        for (int i = 0; best < 512 && i < getNumBufferSizesAvailable(); ++i)
-            best = getBufferSizeSamples(i);
+        for (int i = 0; best < 512 && i < internal->bufferSizes.size(); ++i)
+            best = internal->bufferSizes.getUnchecked(i);
 
         if (best == 0)
             best = 512;
