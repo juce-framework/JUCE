@@ -190,8 +190,7 @@ private:
         testSound.clear();
         float* s = testSound.getSampleData (0, 0);
 
-        Random rand (0);
-        rand.setSeedRandomly();
+        Random rand;
 
         for (int i = 0; i < length; ++i)
             s[i] = (rand.nextFloat() - rand.nextFloat() + rand.nextFloat() - rand.nextFloat()) * 0.06f;
