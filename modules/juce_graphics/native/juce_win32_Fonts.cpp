@@ -319,7 +319,7 @@ public:
           ascent (1.0f), heightToPointsFactor (1.0f),
           defaultGlyph (-1)
     {
-        loadFont (name);
+        loadFont();
     }
 
     WindowsTypeface (const void* data, size_t dataSize)
@@ -335,7 +335,8 @@ public:
                                            nullptr, &numInstalled);
 
         MemoryInputStream m (data, dataSize, false);
-        loadFont (TTFNameExtractor::getTypefaceNameFromFile (m));
+        name = TTFNameExtractor::getTypefaceNameFromFile (m);
+        loadFont();
     }
 
     ~WindowsTypeface()
@@ -494,7 +495,7 @@ private:
 
     SortedSet<KerningPair> kerningPairs;
 
-    void loadFont (const String& faceName)
+    void loadFont()
     {
         SetMapperFlags (dc, 0);
         SetMapMode (dc, MM_TEXT);
@@ -508,7 +509,7 @@ private:
         lf.lfItalic = (BYTE) (style == "Italic" ? TRUE : FALSE);
         lf.lfWeight = style == "Bold" ? FW_BOLD : FW_NORMAL;
         lf.lfHeight = -256;
-        faceName.copyToUTF16 (lf.lfFaceName, sizeof (lf.lfFaceName));
+        name.copyToUTF16 (lf.lfFaceName, sizeof (lf.lfFaceName));
 
         HFONT standardSizedFont = CreateFontIndirect (&lf);
 
