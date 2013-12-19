@@ -69,6 +69,11 @@ Typeface::Ptr Typeface::createSystemTypefaceFor (const Font& font)
     return new FreeTypeTypeface (font);
 }
 
+Typeface::Ptr Typeface::createSystemTypefaceFor (const void* data, size_t dataSize)
+{
+    return new FreeTypeTypeface (data, dataSize);
+}
+
 void Typeface::scanFolderForFonts (const File& folder)
 {
     FTTypefaceList::getInstance()->scanFontPaths (StringArray (folder.getFullPathName()));

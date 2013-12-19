@@ -64,6 +64,12 @@ public:
     /** Creates a new system typeface. */
     static Ptr createSystemTypefaceFor (const Font& font);
 
+    /** Attempts to create a font from some raw font file data (e.g. a TTF or OTF file image).
+        The system will take its own internal copy of the data, so you can free the block once
+        this method has returned.
+    */
+    static Ptr createSystemTypefaceFor (const void* fontFileData, size_t fontFileDataSize);
+
     //==============================================================================
     /** Destructor. */
     virtual ~Typeface();

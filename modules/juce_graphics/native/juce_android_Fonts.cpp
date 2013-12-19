@@ -315,6 +315,12 @@ Typeface::Ptr Typeface::createSystemTypefaceFor (const Font& font)
     return new AndroidTypeface (font);
 }
 
+Typeface::Ptr Typeface::createSystemTypefaceFor (const void*, size_t)
+{
+    jassertfalse; // not yet implemented!
+    return nullptr;
+}
+
 void Typeface::scanFolderForFonts (const File&)
 {
     jassertfalse; // not available unless using FreeType
