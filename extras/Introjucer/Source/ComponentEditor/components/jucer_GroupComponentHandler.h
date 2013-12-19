@@ -67,9 +67,9 @@ public:
 
     String getCreationParameters (GeneratedCode& code, Component* component)
     {
-        GroupComponent* g = dynamic_cast <GroupComponent*> (component);
+        GroupComponent* g = dynamic_cast<GroupComponent*> (component);
 
-        return quotedString (component->getName(), code.shouldUseTransMacro())
+        return quotedString (component->getName(), false)
                 + ",\n"
                 + quotedString (g->getText(), code.shouldUseTransMacro());
     }

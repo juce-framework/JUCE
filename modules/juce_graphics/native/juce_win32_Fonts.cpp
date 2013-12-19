@@ -330,7 +330,6 @@ public:
           defaultGlyph (-1)
     {
         DWORD numInstalled = 0;
-
         memoryFont = AddFontMemResourceEx (const_cast<void*> (data), (DWORD) dataSize,
                                            nullptr, &numInstalled);
 

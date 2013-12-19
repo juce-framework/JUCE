@@ -101,7 +101,7 @@ public:
     {
         Label* const l = dynamic_cast <Label*> (component);
 
-        return quotedString (component->getName(), code.shouldUseTransMacro())
+        return quotedString (component->getName(), false)
                  + ",\n"
                  + quotedString (l->getText(), code.shouldUseTransMacro());
     }

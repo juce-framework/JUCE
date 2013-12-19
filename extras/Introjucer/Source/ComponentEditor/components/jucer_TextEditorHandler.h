@@ -96,9 +96,9 @@ public:
         addColourProperties (t, document, props);
     }
 
-    String getCreationParameters (GeneratedCode& code, Component* component)
+    String getCreationParameters (GeneratedCode&, Component* component)
     {
-        return quotedString (component->getName(), code.shouldUseTransMacro());
+        return quotedString (component->getName(), false);
     }
 
     void fillInCreationCode (GeneratedCode& code, Component* component, const String& memberVariableName)

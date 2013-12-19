@@ -426,7 +426,7 @@ void JucerDocument::fillInGeneratedCode (GeneratedCode& code) const
     code.initialisers.addLines (variableInitialisers);
 
     if (! componentName.isEmpty())
-        code.constructorCode << "setName (" + quotedString (componentName, shouldUseTransMacro()) + ");\n";
+        code.constructorCode << "setName (" + quotedString (componentName, false) + ");\n";
 
     // call these now, just to make sure they're the first two methods in the list.
     code.getCallbackCode (String::empty, "void", "paint (Graphics& g)", false)

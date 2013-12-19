@@ -122,7 +122,7 @@ public:
         if (component->getName().isNotEmpty())
             code.constructorCode
                 << memberVariableName << "->setName ("
-                << quotedString (component->getName(), code.shouldUseTransMacro())
+                << quotedString (component->getName(), false)
                 << ");\n\n";
         else
             code.constructorCode << "\n";
