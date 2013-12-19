@@ -86,11 +86,12 @@
 #undef DBPRT3
 #undef DBPRT4
 #undef DBPRT5
+#undef calloc
 #undef free
 #undef malloc
+#undef realloc
 #undef NEW
 #undef NEWVEC
-#undef realloc
 #undef VERIFY
 #undef VERIFY_IS
 #undef VERIFY_NOT
@@ -99,6 +100,7 @@
 #undef SINGLE_CREATE_FUNC
 #undef _META_CLASS
 #undef _META_CLASS_IFACE
+#undef _META_CLASS_SINGLE
 #undef META_CLASS
 #undef META_CLASS_IFACE
 #undef META_CLASS_SINGLE
@@ -307,8 +309,8 @@ static void activateAllBussesOfType (Vst::IComponent* component,
 }
 
 //==============================================================================
-/** Assigns an AudioSampleBuffer's channels to an AudioBusBuffers' */
-static void associateBufferTo (Vst::AudioBusBuffers& vstBuffers, const AudioSampleBuffer& buffer) noexcept
+/** Assigns a complete AudioSampleBuffer's channels to an AudioBusBuffers' */
+static void associateWholeBufferTo (Vst::AudioBusBuffers& vstBuffers, const AudioSampleBuffer& buffer) noexcept
 {
     vstBuffers.channelBuffers32 = buffer.getArrayOfChannels();
     vstBuffers.numChannels      = buffer.getNumChannels();
@@ -1507,14 +1509,8 @@ public:
        #endif
     }
 
-    Steinberg::uint32 PLUGIN_API addRef() override  { return 1; }
-    Steinberg::uint32 PLUGIN_API release() override { return 1; }
-
-    tresult PLUGIN_API queryInterface (const TUID, void** obj) override
-    {
-        *obj = nullptr;
-        return kNotImplemented;
-    }
+    JUCE_DECLARE_VST3_COM_REF_METHODS
+    JUCE_DECLARE_VST3_COM_QUERY_METHODS
 
     void paint (Graphics& g) override
     {
@@ -1603,13 +1599,15 @@ public:
 
 private:
     //==============================================================================
+    Atomic<int> refCount;
     ComSmartPtr<IPlugView> view;
 
    #if JUCE_WINDOWS
-    struct ChildComponent  : public Component
+    class ChildComponent  : public Component
     {
+    public:
         ChildComponent() {}
-        void paint (Graphics& g)   { g.fillAll (Colours::cornflowerblue); }
+        void paint (Graphics& g) override  { g.fillAll (Colours::cornflowerblue); }
 
         using Component::createNewPeer;
 
@@ -1677,9 +1675,9 @@ class VST3PluginInstance : public AudioPluginInstance
 public:
     VST3PluginInstance (const VST3ModuleHandle::Ptr& handle)
       : module (handle),
-        resultBuffer (1, 1),
         numInputAudioBusses (0),
         numOutputAudioBusses (0),
+        resultBuffer (1, 1),
         inputParameterChanges (new ParameterChangeList()),
         outputParameterChanges (new ParameterChangeList()),
         midiInputs (new MidiEventList()),
@@ -1762,6 +1760,62 @@ public:
         return module != nullptr ? module->name : String::empty;
     }
 
+    typedef Array<Array<float*> > BusMap;
+
+    /** Assigns a series of AudioSampleBuffer's channels to an AudioBusBuffers'
+
+        @warning For speed, does not check the channel count and offsets
+                 according to the AudioSampleBuffer
+    */
+    void associateBufferTo (Vst::AudioBusBuffers& vstBuffers,
+                            BusMap& busMap,
+                            const AudioSampleBuffer& buffer,
+                            int numChannels, int channelStartOffset,
+                            int sampleOffset = 0) noexcept
+    {
+        const int channelEnd = numChannels + channelStartOffset;
+        jassert (channelEnd >= 0 && channelEnd <= buffer.getNumChannels());
+
+        busMap.add (Array<float*>());
+        Array<float*>& chans = busMap.getReference (busMap.size() - 1);
+
+        for (int i = channelStartOffset; i < channelEnd; ++i)
+            chans.add (buffer.getSampleData (i, sampleOffset));
+
+        vstBuffers.channelBuffers32 = chans.getRawDataPointer();
+        vstBuffers.numChannels      = numChannels;
+        vstBuffers.silenceFlags     = 0;
+    }
+
+    void mapAudioSampleBufferToBusses (Array<Vst::AudioBusBuffers>& result,
+                                       AudioSampleBuffer& source,
+                                       int numBusses, bool isInput)
+    {
+        result.clearQuick();
+
+        BusMap& busMapToUse = isInput ? inputBusMap : outputBusMap;
+        busMapToUse.clearQuick();
+
+        int channelIndexOffset = 0;
+
+        for (int i = 0; i < numBusses; ++i)
+        {
+            Vst::SpeakerArrangement arrangement = 0;
+            processor->getBusArrangement (isInput ? Vst::kInput : Vst::kOutput,
+                                          (Steinberg::int32) i, arrangement);
+
+            const int numChansForBus = BigInteger ((int64) arrangement).countNumberOfSetBits();
+
+            result.add (Vst::AudioBusBuffers());
+
+            associateBufferTo (result.getReference (i), busMapToUse, source,
+                               BigInteger ((int64) arrangement).countNumberOfSetBits(),
+                               channelIndexOffset);
+
+            channelIndexOffset += numChansForBus;
+        }
+    }
+
     void prepareToPlay (double sampleRate, int estimatedSamplesPerBlock) override
     {
         using namespace Vst;
@@ -1778,6 +1832,8 @@ public:
         setup.sampleRate            = sampleRate;
         setup.processMode           = isNonRealtime() ? kOffline : kRealtime;
 
+        resultBuffer.setSize (numOutputs, estimatedSamplesPerBlock, false, true, true);
+
         warnOnFailure (processor->setupProcessing (setup));
 
         if (! isComponentInitialised)
@@ -1788,28 +1844,28 @@ public:
         warnOnFailure (component->setActive (true));
         warnOnFailure (processor->setProcessing (true));
 
-        resultBuffer.setSize (numOutputs, estimatedSamplesPerBlock, false, true, true);
-
         Array<SpeakerArrangement> inArrangements, outArrangements;
 
         fillWithCorrespondingSpeakerArrangements (inArrangements, numInputs);
         fillWithCorrespondingSpeakerArrangements (outArrangements, numOutputs);
 
-        warnOnFailure (processor->setBusArrangements (inArrangements.getRawDataPointer(),
-                                                      getNumSingleDirectionBussesFor (component, true, true),
-                                                      outArrangements.getRawDataPointer(),
-                                                      getNumSingleDirectionBussesFor (component, false, true)));
+        warnOnFailure (processor->setBusArrangements (inArrangements.getRawDataPointer(), numInputAudioBusses,
+                                                      outArrangements.getRawDataPointer(), numOutputAudioBusses));
     }
 
     void releaseResources() override
     {
-        resultBuffer.setSize (1, 1, false, true, true);
+        JUCE_TRY
+        {
+            resultBuffer.setSize (1, 1, false, true, true);
 
-        if (processor != nullptr)
-            processor->setProcessing (false);
+            if (processor != nullptr)
+                processor->setProcessing (false);
 
-        if (component != nullptr)
-            component->setActive (false);
+            if (component != nullptr)
+                component->setActive (false);
+        }
+        JUCE_CATCH_ALL_ASSERT
     }
 
     void processBlock (AudioSampleBuffer& buffer, MidiBuffer& midiMessages) override
@@ -1824,8 +1880,8 @@ public:
             ProcessData data;
             data.processMode            = isNonRealtime() ? kOffline : kRealtime;
             data.symbolicSampleSize     = kSample32;
-            data.numInputs              = 1; // Number of busses, not channels!
-            data.numOutputs             = 1; // Number of busses, not channels!
+            data.numInputs              = numInputAudioBusses;
+            data.numOutputs             = numOutputAudioBusses;
             data.inputParameterChanges  = inputParameterChanges;
             data.outputParameterChanges = outputParameterChanges;
             data.numSamples             = (Steinberg::int32) numSamples;
@@ -2058,11 +2114,14 @@ private:
 
     mutable ComSmartPtr<IPlugView> view;
 
-    AudioSampleBuffer resultBuffer;
-    Vst::AudioBusBuffers inputs, outputs;
-
-    // The number of IO busses MUST match that of the plugin's, as very poorly specified by the Steinberg SDK
+    /** The number of IO busses MUST match that of the plugin,
+        even if there aren't enough channels to process,
+        as very poorly specified by the Steinberg SDK
+    */
     int numInputAudioBusses, numOutputAudioBusses;
+    AudioSampleBuffer resultBuffer;
+    BusMap inputBusMap, outputBusMap;
+    Array<Vst::AudioBusBuffers> inputBusses, outputBusses;
 
     //==============================================================================
     template <typename Type>
@@ -2305,6 +2364,7 @@ private:
         component->getBusInfo (forAudio ? Vst::kAudio : Vst::kEvent,
                                forInput ? Vst::kInput : Vst::kOutput,
                                (Steinberg::int32) index, busInfo);
+
         return busInfo;
     }
 
@@ -2323,23 +2383,15 @@ private:
     }
 
     //==============================================================================
-    struct AudioBusBuffersWrapper
-    {
-        AudioBusBuffersWrapper() {}
-        ~AudioBusBuffersWrapper() {}
-
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioBusBuffersWrapper)
-    };
-
     void associateTo (Vst::ProcessData& destination, AudioSampleBuffer& buffer)
     {
         resultBuffer.clear();
 
-        associateBufferTo (inputs, buffer);
-        associateBufferTo (outputs, resultBuffer);
+        mapAudioSampleBufferToBusses (inputBusses, buffer, numInputAudioBusses, true);
+        mapAudioSampleBufferToBusses (outputBusses, resultBuffer, numOutputAudioBusses, false);
 
-        destination.inputs  = &inputs;
-        destination.outputs = &outputs;
+        destination.inputs  = inputBusses.getRawDataPointer();
+        destination.outputs = outputBusses.getRawDataPointer();
     }
 
     void associateTo (Vst::ProcessData& destination, MidiBuffer& midiBuffer)
