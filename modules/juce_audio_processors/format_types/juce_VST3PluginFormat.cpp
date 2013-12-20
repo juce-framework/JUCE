@@ -2342,7 +2342,8 @@ private:
         Steinberg::MemoryStream stream;
 
         if (component->getState (&stream) == kResultTrue)
-            warnOnFailure (editController->setComponentState (&stream));
+            if (stream.seek (0, Steinberg::IBStream::kIBSeekSet, nullptr) == kResultTrue)
+                warnOnFailure (editController->setComponentState (&stream));
     }
 
     void grabInformationObjects()
