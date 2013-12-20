@@ -155,8 +155,8 @@ void PropertySet::removeValue (StringRef keyName)
 
 void PropertySet::setValue (const String& keyName, const XmlElement* const xml)
 {
-    setValue (keyName, xml == nullptr ? var::null
-                                      : var (xml->createDocument (String::empty, true)));
+    setValue (keyName, xml == nullptr ? var()
+                                      : var (xml->createDocument ("", true)));
 }
 
 bool PropertySet::containsKey (StringRef keyName) const noexcept

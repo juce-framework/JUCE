@@ -147,7 +147,7 @@
              androidMinimumSDK="9" androidInternetNeeded="1" androidKeyStore="${user.home}/.android/debug.keystore"
              androidKeyStorePass="android" androidKeyAlias="androiddebugkey"
              androidKeyAliasPass="android" androidMicNeeded="1" bigIcon="xycKOk"
-             androidCpp11="1">
+             androidCpp11="1" smallIcon="BvyE0d">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" androidArchitectures="armeabi armeabi-v7a" isDebug="1"
                        optimisation="1" targetName="JuceDemo"/>
@@ -238,6 +238,8 @@
         <FILE id="L2SbwO" name="JavaScript.cpp" compile="1" resource="0" file="Source/Demos/JavaScript.cpp"/>
         <FILE id="b6ICYv" name="KeyMappingsDemo.cpp" compile="1" resource="0"
               file="Source/Demos/KeyMappingsDemo.cpp"/>
+        <FILE id="nwcgED" name="LiveConstantDemo.cpp" compile="1" resource="0"
+              file="Source/Demos/LiveConstantDemo.cpp"/>
         <FILE id="zL6QF2" name="MDIDemo.cpp" compile="1" resource="0" file="Source/Demos/MDIDemo.cpp"/>
         <FILE id="apxMrA" name="MidiDemo.cpp" compile="1" resource="0" file="Source/Demos/MidiDemo.cpp"/>
         <FILE id="aqmz1c" name="MultithreadingDemo.cpp" compile="1" resource="0"
@@ -282,7 +284,7 @@
       </GROUP>
     </GROUP>
   </MAINGROUP>
-  <JUCEOPTIONS/>
+  <JUCEOPTIONS JUCE_ENABLE_LIVE_CONSTANT_EDITOR="enabled"/>
   <MODULES>
     <MODULE id="juce_audio_basics" showAllCode="1" useLocalCopy="0"/>
     <MODULE id="juce_audio_devices" showAllCode="1" useLocalCopy="0"/>

@@ -133,6 +133,8 @@ public:
     String getTemplateFile() const                                          { return templateFile; }
     void setTemplateFile (const String&);
 
+    static bool shouldUseTransMacro() noexcept                              { return true; }
+
 protected:
     SourceCodeDocument* cpp;
 

@@ -259,6 +259,12 @@ void String::swapWith (String& other) noexcept
     std::swap (text, other.text);
 }
 
+void String::clear() noexcept
+{
+    StringHolder::release (text);
+    text = &(emptyString.text);
+}
+
 String& String::operator= (const String& other) noexcept
 {
     StringHolder::retain (other.text);
@@ -419,7 +425,8 @@ namespace NumberToStringConverters
     {
         explicit StackArrayStream (char* d)
         {
-            imbue (std::locale::classic());
+            static const std::locale classicLocale (std::locale::classic());
+            imbue (classicLocale);
             setp (d, d + charsNeededForDouble);
         }
 

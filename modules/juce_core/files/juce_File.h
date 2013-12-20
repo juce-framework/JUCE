@@ -741,7 +741,7 @@ public:
 
         @see revealToUser
     */
-    bool startAsProcess (const String& parameters = String::empty) const;
+    bool startAsProcess (const String& parameters = String()) const;
 
     /** Opens Finder, Explorer, or whatever the OS uses, to show the user this file's location.
         @see startAsProcess

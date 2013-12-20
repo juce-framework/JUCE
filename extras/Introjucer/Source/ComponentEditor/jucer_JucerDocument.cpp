@@ -426,7 +426,7 @@ void JucerDocument::fillInGeneratedCode (GeneratedCode& code) const
     code.initialisers.addLines (variableInitialisers);
 
     if (! componentName.isEmpty())
-        code.constructorCode << "setName (" + quotedString (componentName) + ");\n";
+        code.constructorCode << "setName (" + quotedString (componentName, false) + ");\n";
 
     // call these now, just to make sure they're the first two methods in the list.
     code.getCallbackCode (String::empty, "void", "paint (Graphics& g)", false)
@@ -441,7 +441,7 @@ void JucerDocument::fillInGeneratedCode (GeneratedCode& code) const
 
     ScopedPointer<XmlElement> e (createXml());
     jassert (e != nullptr);
-    code.jucerMetadata = e->createDocument (String::empty, false, false);
+    code.jucerMetadata = e->createDocument ("", false, false);
 
     resources.fillInGeneratedCode (code);
 
@@ -469,7 +469,7 @@ void JucerDocument::fillInGeneratedCode (GeneratedCode& code) const
             String baseClassToAdd (baseClasses[i]);
 
             if (baseClassToAdd == "Component" || baseClassToAdd == "Button")
-                baseClassToAdd = String::empty;
+                baseClassToAdd.clear();
 
             String& s = code.getCallbackCode (baseClassToAdd, returnValues[i], methods[i], false);
 

@@ -310,7 +310,7 @@ public:
         Point<int> position;
 
         bool isEmpty() const noexcept       { return files.size() == 0 && text.isEmpty(); }
-        void clear() noexcept               { files.clear(); text = String::empty; }
+        void clear() noexcept               { files.clear(); text.clear(); }
     };
 
     bool handleDragMove (const DragInfo&);

@@ -636,7 +636,7 @@ String File::getVolumeLabel() const
     }
    #endif
 
-    return String::empty;
+    return String();
 }
 
 int File::getVolumeSerialNumber() const

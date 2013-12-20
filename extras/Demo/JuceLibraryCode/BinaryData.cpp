@@ -2364,7 +2364,7 @@ static const unsigned char temp_binary_data_5[] =
 "{\r\n"
 "  \"id\":             \"juce_core\",\r\n"
 "  \"name\":           \"JUCE core classes\",\r\n"
-"  \"version\":        \"2.1.5\",\r\n"
+"  \"version\":        \"3.0.0\",\r\n"
 "  \"description\":    \"The essential set of basic JUCE classes, as required by all the other JUCE modules. Includes text, container, memory, threading and i/o functionality.\",\r\n"
 "  \"website\":        \"http://www.juce.com/juce\",\r\n"
 "  \"license\":        \"ISC Permissive\",\r\n"

@@ -235,7 +235,7 @@ String UndoManager::getUndoDescription() const
     if (const ActionSet* const s = getCurrentSet())
         return s->name;
 
-    return String::empty;
+    return String();
 }
 
 String UndoManager::getRedoDescription() const
@@ -243,7 +243,7 @@ String UndoManager::getRedoDescription() const
     if (const ActionSet* const s = getNextSet())
         return s->name;
 
-    return String::empty;
+    return String();
 }
 
 Time UndoManager::getTimeOfUndoTransaction() const

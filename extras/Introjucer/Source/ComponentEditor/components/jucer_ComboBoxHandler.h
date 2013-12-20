@@ -85,9 +85,9 @@ public:
         props.add (new ComboTextWhenNoItemsProperty (c, document));
     }
 
-    String getCreationParameters (Component* component)
+    String getCreationParameters (GeneratedCode&, Component* component)
     {
-        return quotedString (component->getName());
+        return quotedString (component->getName(), false);
     }
 
     void fillInCreationCode (GeneratedCode& code, Component* component, const String& memberVariableName)
@@ -100,8 +100,8 @@ public:
         String s;
         s << memberVariableName << "->setEditableText (" << CodeHelpers::boolLiteral (c->isTextEditable()) << ");\n"
           << memberVariableName << "->setJustificationType (" << CodeHelpers::justificationToCode (c->getJustificationType()) << ");\n"
-          << memberVariableName << "->setTextWhenNothingSelected (" << quotedString (c->getTextWhenNothingSelected()) << ");\n"
-          << memberVariableName << "->setTextWhenNoChoicesAvailable (" << quotedString (c->getTextWhenNoChoicesAvailable()) << ");\n";
+          << memberVariableName << "->setTextWhenNothingSelected (" << quotedString (c->getTextWhenNothingSelected(), code.shouldUseTransMacro()) << ");\n"
+          << memberVariableName << "->setTextWhenNoChoicesAvailable (" << quotedString (c->getTextWhenNoChoicesAvailable(), code.shouldUseTransMacro()) << ");\n";
 
         StringArray lines;
         lines.addLines (c->getProperties() ["items"].toString());
@@ -113,7 +113,7 @@ public:
                 s << memberVariableName << "->addSeparator();\n";
             else
                 s << memberVariableName << "->addItem ("
-                  << quotedString (lines[i]) << ", " << itemId++ << ");\n";
+                  << quotedString (lines[i], code.shouldUseTransMacro()) << ", " << itemId++ << ");\n";
         }
 
         if (needsCallback (component))

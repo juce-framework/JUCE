@@ -4,6 +4,9 @@
 
 */
 
+#ifndef BINARYDATA_H_134119534_INCLUDED
+#define BINARYDATA_H_134119534_INCLUDED
+
 namespace BinaryData
 {
     extern const char*   brushed_aluminium_png;
@@ -43,3 +46,5 @@ namespace BinaryData
     // return the corresponding data and its size (or a null pointer if the name isn't found).
     const char* getNamedResource (const char* resourceNameUTF8, int& dataSizeInBytes) throw();
 }
+
+#endif

@@ -361,8 +361,8 @@ void AudioDeviceManager::getAudioDeviceSetup (AudioDeviceSetup& setup)
 void AudioDeviceManager::deleteCurrentDevice()
 {
     currentAudioDevice = nullptr;
-    currentSetup.inputDeviceName = String::empty;
-    currentSetup.outputDeviceName = String::empty;
+    currentSetup.inputDeviceName.clear();
+    currentSetup.outputDeviceName.clear();
 }
 
 void AudioDeviceManager::setCurrentAudioDeviceType (const String& type,
@@ -408,15 +408,15 @@ String AudioDeviceManager::setAudioDeviceSetup (const AudioDeviceSetup& newSetup
     jassert (&newSetup != &currentSetup);    // this will have no effect
 
     if (newSetup == currentSetup && currentAudioDevice != nullptr)
-        return String::empty;
+        return String();
 
     if (! (newSetup == currentSetup))
         sendChangeMessage();
 
     stopDevice();
 
-    const String newInputDeviceName (numInputChansNeeded == 0 ? String::empty : newSetup.inputDeviceName);
-    const String newOutputDeviceName (numOutputChansNeeded == 0 ? String::empty : newSetup.outputDeviceName);
+    const String newInputDeviceName  (numInputChansNeeded  == 0 ? String() : newSetup.inputDeviceName);
+    const String newOutputDeviceName (numOutputChansNeeded == 0 ? String() : newSetup.outputDeviceName);
 
     String error;
     AudioIODeviceType* type = getCurrentDeviceTypeObject();
@@ -428,7 +428,7 @@ String AudioDeviceManager::setAudioDeviceSetup (const AudioDeviceSetup& newSetup
         if (treatAsChosenDevice)
             updateXml();
 
-        return String::empty;
+        return String();
     }
 
     if (currentSetup.inputDeviceName != newInputDeviceName
@@ -524,16 +524,16 @@ double AudioDeviceManager::chooseBestSampleRate (double rate) const
 {
     jassert (currentAudioDevice != nullptr);
 
-    if (rate > 0)
-        for (int i = currentAudioDevice->getNumSampleRates(); --i >= 0;)
-            if (currentAudioDevice->getSampleRate (i) == rate)
-                return rate;
+    const Array<double> rates (currentAudioDevice->getAvailableSampleRates());
+
+    if (rate > 0 && rates.contains (rate))
+        return rate;
 
     double lowestAbove44 = 0.0;
 
-    for (int i = currentAudioDevice->getNumSampleRates(); --i >= 0;)
+    for (int i = rates.size(); --i >= 0;)
     {
-        const double sr = currentAudioDevice->getSampleRate (i);
+        const double sr = rates[i];
 
         if (sr >= 44100.0 && (lowestAbove44 < 1.0 || sr < lowestAbove44))
             lowestAbove44 = sr;
@@ -542,17 +542,15 @@ double AudioDeviceManager::chooseBestSampleRate (double rate) const
     if (lowestAbove44 > 0.0)
         return lowestAbove44;
 
-    return currentAudioDevice->getSampleRate (0);
+    return rates[0];
 }
 
 int AudioDeviceManager::chooseBestBufferSize (int bufferSize) const
 {
     jassert (currentAudioDevice != nullptr);
 
-    if (bufferSize > 0)
-        for (int i = currentAudioDevice->getNumBufferSizesAvailable(); --i >= 0;)
-            if (currentAudioDevice->getBufferSizeSamples(i) == bufferSize)
-                return bufferSize;
+    if (bufferSize > 0 && currentAudioDevice->getAvailableBufferSizes().contains (bufferSize))
+        return bufferSize;
 
     return currentAudioDevice->getDefaultBufferSize();
 }

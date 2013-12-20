@@ -541,7 +541,7 @@ private:
     void writeFlagsAndSizes (OutputStream& target) const
     {
         target.writeShort (10); // version needed
-        target.writeShort (0); // flags
+        target.writeShort ((short) (1 << 11)); // this flag indicates UTF-8 filename encoding
         target.writeShort (compressionLevel > 0 ? (short) 8 : (short) 0);
         writeTimeAndDate (target, fileTime);
         target.writeInt ((int) checksum);

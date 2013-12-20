@@ -228,7 +228,7 @@ public:
 private:
     Component::SafePointer<Toolbar> owner;
     const int height;
-    Array <int> oldIndexes;
+    Array<int> oldIndexes;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MissingItemsComponent)
 };
@@ -285,7 +285,7 @@ void Toolbar::addItemInternal (ToolbarItemFactory& factory,
     if (ToolbarItemComponent* const tc = createItem (factory, itemId))
     {
        #if JUCE_DEBUG
-        Array <int> allowedIds;
+        Array<int> allowedIds;
         factory.getAllToolbarItemIds (allowedIds);
 
         // If your factory can create an item for a given ID, it must also return
@@ -308,7 +308,7 @@ void Toolbar::addItem (ToolbarItemFactory& factory,
 
 void Toolbar::addDefaultItems (ToolbarItemFactory& factoryToUse)
 {
-    Array <int> ids;
+    Array<int> ids;
     factoryToUse.getDefaultItemSet (ids);
 
     clear();
@@ -675,32 +675,27 @@ public:
     void positionNearBar()
     {
         const Rectangle<int> screenSize (toolbar.getParentMonitorArea());
-        const int tbx = toolbar.getScreenX();
-        const int tby = toolbar.getScreenY();
+        Point<int> pos (toolbar.getScreenPosition());
         const int gap = 8;
-
-        int x, y;
 
         if (toolbar.isVertical())
         {
-            y = tby;
-
-            if (tbx > screenSize.getCentreX())
-                x = tbx - getWidth() - gap;
+            if (pos.x > screenSize.getCentreX())
+                pos.x -= getWidth() - gap;
             else
-                x = tbx + toolbar.getWidth() + gap;
+                pos.x += toolbar.getWidth() + gap;
         }
         else
         {
-            x = tbx + (toolbar.getWidth() - getWidth()) / 2;
+            pos.x += (toolbar.getWidth() - getWidth()) / 2;
 
-            if (tby > screenSize.getCentreY())
-                y = tby - getHeight() - gap;
+            if (pos.y > screenSize.getCentreY())
+                pos.y -= getHeight() - gap;
             else
-                y = tby + toolbar.getHeight() + gap;
+                pos.y += toolbar.getHeight() + gap;
         }
 
-        setTopLeftPosition (x, y);
+        setTopLeftPosition (pos);
     }
 
 private:

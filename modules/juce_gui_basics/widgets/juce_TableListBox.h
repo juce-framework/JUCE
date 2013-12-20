@@ -278,7 +278,7 @@ public:
 
     /** Returns the component that currently represents a given cell.
         If the component for this cell is off-screen or if the position is out-of-range,
-        this may return 0.
+        this may return nullptr.
         @see getCellPosition
     */
     Component* getCellComponent (int columnId, int rowNumber) const;
@@ -291,31 +291,31 @@ public:
 
     //==============================================================================
     /** @internal */
-    int getNumRows();
+    int getNumRows() override;
     /** @internal */
-    void paintListBoxItem (int, Graphics&, int, int, bool);
+    void paintListBoxItem (int, Graphics&, int, int, bool) override;
     /** @internal */
-    Component* refreshComponentForRow (int rowNumber, bool isRowSelected, Component* existingComponentToUpdate);
+    Component* refreshComponentForRow (int rowNumber, bool isRowSelected, Component* existingComponentToUpdate) override;
     /** @internal */
-    void selectedRowsChanged (int lastRowSelected);
+    void selectedRowsChanged (int lastRowSelected) override;
     /** @internal */
-    void deleteKeyPressed (int currentSelectedRow);
+    void deleteKeyPressed (int currentSelectedRow) override;
     /** @internal */
-    void returnKeyPressed (int currentSelectedRow);
+    void returnKeyPressed (int currentSelectedRow) override;
     /** @internal */
-    void backgroundClicked();
+    void backgroundClicked() override;
     /** @internal */
-    void listWasScrolled();
+    void listWasScrolled() override;
     /** @internal */
-    void tableColumnsChanged (TableHeaderComponent*);
+    void tableColumnsChanged (TableHeaderComponent*) override;
     /** @internal */
-    void tableColumnsResized (TableHeaderComponent*);
+    void tableColumnsResized (TableHeaderComponent*) override;
     /** @internal */
-    void tableSortOrderChanged (TableHeaderComponent*);
+    void tableSortOrderChanged (TableHeaderComponent*) override;
     /** @internal */
-    void tableColumnDraggingChanged (TableHeaderComponent*, int);
+    void tableColumnDraggingChanged (TableHeaderComponent*, int) override;
     /** @internal */
-    void resized();
+    void resized() override;
 
 
 private:

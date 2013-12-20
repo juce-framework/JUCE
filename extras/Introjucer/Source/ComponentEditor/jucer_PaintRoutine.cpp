@@ -304,7 +304,7 @@ void PaintRoutine::copySelectedToClipboard()
         }
     }
 
-    SystemClipboard::copyTextToClipboard (clip.createDocument (String::empty, false, false));
+    SystemClipboard::copyTextToClipboard (clip.createDocument ("", false, false));
 }
 
 void PaintRoutine::paste()

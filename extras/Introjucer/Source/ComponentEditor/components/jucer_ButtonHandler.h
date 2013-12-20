@@ -80,9 +80,9 @@ public:
         return true;
     }
 
-    String getCreationParameters (Component* component)
+    String getCreationParameters (GeneratedCode&, Component* component)
     {
-        return quotedString (component->getName());
+        return quotedString (component->getName(), false);
     }
 
     void fillInCreationCode (GeneratedCode& code, Component* component, const String& memberVariableName)
@@ -95,7 +95,7 @@ public:
         {
             code.constructorCode
               << memberVariableName << "->setButtonText ("
-              << quotedString (b->getButtonText()) << ");\n";
+              << quotedString (b->getButtonText(), code.shouldUseTransMacro()) << ");\n";
         }
 
         if (b->getConnectedEdgeFlags() != 0)

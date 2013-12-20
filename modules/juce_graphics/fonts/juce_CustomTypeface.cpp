@@ -99,13 +99,13 @@ namespace CustomTypefaceHelpers
 
 //==============================================================================
 CustomTypeface::CustomTypeface()
-    : Typeface (String::empty, String::empty)
+    : Typeface (String(), String())
 {
     clear();
 }
 
 CustomTypeface::CustomTypeface (InputStream& serialisedTypefaceStream)
-    : Typeface (String::empty, String::empty)
+    : Typeface (String(), String())
 {
     clear();
 

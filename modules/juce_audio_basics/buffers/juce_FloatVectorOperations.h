@@ -47,11 +47,14 @@ public:
     /** Copies a vector of floats, multiplying each value by a given multiplier */
     static void JUCE_CALLTYPE copyWithMultiply (float* dest, const float* src, float multiplier, int numValues) noexcept;
 
+    /** Adds a fixed value to the destination values. */
+    static void JUCE_CALLTYPE add (float* dest, float amount, int numValues) noexcept;
+
     /** Adds the source values to the destination values. */
     static void JUCE_CALLTYPE add (float* dest, const float* src, int numValues) noexcept;
 
-    /** Adds a fixed value to the destination values. */
-    static void JUCE_CALLTYPE add (float* dest, float amount, int numValues) noexcept;
+    /** Subtracts the source values from the destination values. */
+    static void JUCE_CALLTYPE subtract (float* dest, const float* src, int numValues) noexcept;
 
     /** Multiplies each source value by the given multiplier, then adds it to the destination value. */
     static void JUCE_CALLTYPE addWithMultiply (float* dest, const float* src, float multiplier, int numValues) noexcept;

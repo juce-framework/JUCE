@@ -183,7 +183,7 @@ void FileChooser::showPlatformDialog (Array<File>& results, const String& title_
         if (! SHGetPathFromIDListW (list, files))
         {
             files[0] = 0;
-            info.returnedString = String::empty;
+            info.returnedString.clear();
         }
 
         LPMALLOC al;

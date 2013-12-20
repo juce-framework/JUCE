@@ -945,9 +945,10 @@ public:
                                      (juce::uint8) inData2 };
 
         incomingEvents.addEvent (data, 3, (int) inStartFrame);
-       #endif
-
         return noErr;
+       #else
+        return kAudioUnitErr_PropertyNotInUse;
+       #endif
     }
 
     OSStatus HandleSysEx (const UInt8* inData, UInt32 inLength) override
@@ -955,8 +956,10 @@ public:
        #if JucePlugin_WantsMidiInput
         const ScopedLock sl (incomingMidiLock);
         incomingEvents.addEvent (inData, (int) inLength, 0);
-       #endif
         return noErr;
+       #else
+        return kAudioUnitErr_PropertyNotInUse;
+       #endif
     }
 
     //==============================================================================

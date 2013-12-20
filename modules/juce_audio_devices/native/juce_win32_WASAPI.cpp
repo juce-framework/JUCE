@@ -882,7 +882,7 @@ public:
         return false;
     }
 
-    StringArray getOutputChannelNames()
+    StringArray getOutputChannelNames() override
     {
         StringArray outChannels;
 
@@ -893,7 +893,7 @@ public:
         return outChannels;
     }
 
-    StringArray getInputChannelNames()
+    StringArray getInputChannelNames() override
     {
         StringArray inChannels;
 
@@ -904,31 +904,29 @@ public:
         return inChannels;
     }
 
-    int getNumSampleRates()                             { return sampleRates.size(); }
-    double getSampleRate (int index)                    { return sampleRates [index]; }
-    int getNumBufferSizesAvailable()                    { return bufferSizes.size(); }
-    int getBufferSizeSamples (int index)                { return bufferSizes [index]; }
-    int getDefaultBufferSize()                          { return defaultBufferSize; }
+    Array<double> getAvailableSampleRates() override        { return sampleRates; }
+    Array<int> getAvailableBufferSizes() override           { return bufferSizes; }
+    int getDefaultBufferSize() override                     { return defaultBufferSize; }
 
-    int getCurrentBufferSizeSamples()                   { return currentBufferSizeSamples; }
-    double getCurrentSampleRate()                       { return currentSampleRate; }
-    int getCurrentBitDepth()                            { return 32; }
-    int getOutputLatencyInSamples()                     { return latencyOut; }
-    int getInputLatencyInSamples()                      { return latencyIn; }
-    BigInteger getActiveOutputChannels() const          { return outputDevice != nullptr ? outputDevice->channels : BigInteger(); }
-    BigInteger getActiveInputChannels() const           { return inputDevice  != nullptr ? inputDevice->channels  : BigInteger(); }
-    String getLastError()                               { return lastError; }
+    int getCurrentBufferSizeSamples() override              { return currentBufferSizeSamples; }
+    double getCurrentSampleRate() override                  { return currentSampleRate; }
+    int getCurrentBitDepth() override                       { return 32; }
+    int getOutputLatencyInSamples() override                { return latencyOut; }
+    int getInputLatencyInSamples() override                 { return latencyIn; }
+    BigInteger getActiveOutputChannels() const override     { return outputDevice != nullptr ? outputDevice->channels : BigInteger(); }
+    BigInteger getActiveInputChannels() const override      { return inputDevice  != nullptr ? inputDevice->channels  : BigInteger(); }
+    String getLastError() override                          { return lastError; }
 
 
     String open (const BigInteger& inputChannels, const BigInteger& outputChannels,
-                 double sampleRate, int bufferSizeSamples)
+                 double sampleRate, int bufferSizeSamples) override
     {
         close();
-        lastError = String::empty;
+        lastError.clear();
 
         if (sampleRates.size() == 0 && inputDevice != nullptr && outputDevice != nullptr)
         {
-            lastError = "The input and output devices don't share a common sample rate!";
+            lastError = TRANS("The input and output devices don't share a common sample rate!");
             return lastError;
         }
 
@@ -939,14 +937,14 @@ public:
 
         if (inputDevice != nullptr && ! inputDevice->open (currentSampleRate, inputChannels))
         {
-            lastError = "Couldn't open the input device!";
+            lastError = TRANS("Couldn't open the input device!");
             return lastError;
         }
 
         if (outputDevice != nullptr && ! outputDevice->open (currentSampleRate, outputChannels))
         {
             close();
-            lastError = "Couldn't open the output device!";
+            lastError = TRANS("Couldn't open the output device!");
             return lastError;
         }
 
@@ -963,7 +961,7 @@ public:
             if (! check (inputDevice->client->Start()))
             {
                 close();
-                lastError = "Couldn't start the input device!";
+                lastError = TRANS("Couldn't start the input device!");
                 return lastError;
             }
         }
@@ -975,7 +973,7 @@ public:
             if (! check (outputDevice->client->Start()))
             {
                 close();
-                lastError = "Couldn't start the output device!";
+                lastError = TRANS("Couldn't start the output device!");
                 return lastError;
             }
         }
@@ -984,7 +982,7 @@ public:
         return lastError;
     }
 
-    void close()
+    void close() override
     {
         stop();
         signalThreadShouldExit();
@@ -1000,10 +998,10 @@ public:
         isOpen_ = false;
     }
 
-    bool isOpen()       { return isOpen_ && isThreadRunning(); }
-    bool isPlaying()    { return isStarted && isOpen_ && isThreadRunning(); }
+    bool isOpen() override       { return isOpen_ && isThreadRunning(); }
+    bool isPlaying() override    { return isStarted && isOpen_ && isThreadRunning(); }
 
-    void start (AudioIODeviceCallback* call)
+    void start (AudioIODeviceCallback* call) override
     {
         if (isOpen_ && call != nullptr && ! isStarted)
         {
@@ -1022,7 +1020,7 @@ public:
         }
     }
 
-    void stop()
+    void stop() override
     {
         if (isStarted)
         {

@@ -91,7 +91,7 @@ public:
             r << "g.setFont ("
               << FontPropertyComponent::getCompleteFontCode (font, typefaceName)
               << ");\ng.drawText ("
-              << quotedString (text)
+              << quotedString (text, code.shouldUseTransMacro())
               << ",\n            "
               << x << ", " << y << ", " << w << ", " << h
               << ",\n            "

@@ -291,7 +291,7 @@ private:
         file = getFontFile (family, "Regular");
 
         if (! file.exists())
-            file = getFontFile (family, String::empty);
+            file = getFontFile (family, String());
 
         return file;
     }
@@ -313,6 +313,12 @@ private:
 Typeface::Ptr Typeface::createSystemTypefaceFor (const Font& font)
 {
     return new AndroidTypeface (font);
+}
+
+Typeface::Ptr Typeface::createSystemTypefaceFor (const void*, size_t)
+{
+    jassertfalse; // not yet implemented!
+    return nullptr;
 }
 
 void Typeface::scanFolderForFonts (const File&)

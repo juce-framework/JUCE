@@ -408,7 +408,12 @@ public:
     void updateText()
     {
         if (valueBox != nullptr)
-            valueBox->setText (owner.getTextFromValue (currentValue.getValue()), dontSendNotification);
+        {
+            String newValue (owner.getTextFromValue (currentValue.getValue()));
+
+            if (newValue != valueBox->getText())
+                valueBox->setText (newValue, dontSendNotification);
+        }
     }
 
     double constrainedValue (double value) const

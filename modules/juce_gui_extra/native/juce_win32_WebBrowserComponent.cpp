@@ -158,6 +158,16 @@ private:
                 owner.pageFinishedLoading (getStringFromVariant (pDispParams->rgvarg[0].pvarVal));
                 return S_OK;
             }
+            else if (dispIdMember == DISPID_WINDOWCLOSING)
+            {
+                owner.windowCloseRequest();
+
+                // setting this bool tells the browser to ignore the event - we'll handle it.
+                if (pDispParams->cArgs > 0 && pDispParams->rgvarg[0].vt == (VT_BYREF | VT_BOOL))
+                    *pDispParams->rgvarg[0].pboolVal = VARIANT_TRUE;
+
+                return S_OK;
+            }
 
             return E_NOTIMPL;
         }
@@ -225,7 +235,7 @@ void WebBrowserComponent::stop()
 
 void WebBrowserComponent::goBack()
 {
-    lastURL = String::empty;
+    lastURL.clear();
     blankPageShown = false;
 
     if (browser->browser != nullptr)
@@ -234,7 +244,7 @@ void WebBrowserComponent::goBack()
 
 void WebBrowserComponent::goForward()
 {
-    lastURL = String::empty;
+    lastURL.clear();
 
     if (browser->browser != nullptr)
         browser->browser->GoForward();
@@ -287,7 +297,7 @@ void WebBrowserComponent::reloadLastURL()
     if (lastURL.isNotEmpty())
     {
         goToURL (lastURL, &lastHeaders, &lastPostData);
-        lastURL = String::empty;
+        lastURL.clear();
     }
 }
 
@@ -305,6 +315,3 @@ void WebBrowserComponent::visibilityChanged()
 {
     checkWindowAssociation();
 }
-
-bool WebBrowserComponent::pageAboutToLoad (const String&)  { return true; }
-void WebBrowserComponent::pageFinishedLoading (const String&) {}

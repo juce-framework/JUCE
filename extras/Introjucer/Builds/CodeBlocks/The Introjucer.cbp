@@ -17,7 +17,6 @@
         <Compiler>
           <Add option="-O0"/>
           <Add option="-std=gnu++0x"/>
-          <Add option="-march=pentium4"/>
           <Add option="-mstackrealign"/>
           <Add option="-g"/>
           <Add option="-D__MINGW__=1"/>
@@ -51,7 +50,6 @@
         <Compiler>
           <Add option="-Os"/>
           <Add option="-std=gnu++0x"/>
-          <Add option="-march=pentium4"/>
           <Add option="-mstackrealign"/>
           <Add option="-D__MINGW__=1"/>
           <Add option="-D__MINGW_EXTENSION="/>
@@ -3032,6 +3030,22 @@
       <Option compile="0"/>
       <Option link="0"/>
     </Unit>
+    <Unit filename="../../../../modules/juce_gui_extra/code_editor/juce_LuaCodeTokeniser.cpp">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../../../modules/juce_gui_extra/code_editor/juce_LuaCodeTokeniser.h">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../../../modules/juce_gui_extra/code_editor/juce_XMLCodeTokeniser.cpp">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../../../modules/juce_gui_extra/code_editor/juce_XMLCodeTokeniser.h">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
     <Unit filename="../../../../modules/juce_gui_extra/documents/juce_FileBasedDocument.cpp">
       <Option compile="0"/>
       <Option link="0"/>
@@ -3077,6 +3091,14 @@
       <Option link="0"/>
     </Unit>
     <Unit filename="../../../../modules/juce_gui_extra/misc/juce_KeyMappingEditorComponent.h">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../../../modules/juce_gui_extra/misc/juce_LiveConstantEditor.cpp">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../../../modules/juce_gui_extra/misc/juce_LiveConstantEditor.h">
       <Option compile="0"/>
       <Option link="0"/>
     </Unit>

@@ -222,7 +222,7 @@ public:
         desc.lastFileModTime = module->file.getLastModificationTime();
         desc.pluginFormatName = "LADSPA";
         desc.category = getCategory();
-        desc.manufacturerName = plugin != nullptr ? String (plugin->Maker) : String::empty;
+        desc.manufacturerName = plugin != nullptr ? String (plugin->Maker) : String();
         desc.version = getVersion();
         desc.numInputChannels  = getNumInputChannels();
         desc.numOutputChannels = getNumOutputChannels();
@@ -338,7 +338,7 @@ public:
         if (isPositiveAndBelow (index, getNumInputChannels()))
             return String (plugin->PortNames [inputs [index]]).trim();
 
-        return String::empty;
+        return String();
     }
 
     const String getOutputChannelName (const int index) const
@@ -346,7 +346,7 @@ public:
         if (isPositiveAndBelow (index, getNumInputChannels()))
             return String (plugin->PortNames [outputs [index]]).trim();
 
-        return String::empty;
+        return String();
     }
 
     //==============================================================================
@@ -390,7 +390,7 @@ public:
             return String (plugin->PortNames [parameters [index]]).trim();
         }
 
-        return String::empty;
+        return String();
     }
 
     const String getParameterText (int index)
@@ -407,7 +407,7 @@ public:
             return String (parameterValues[index].scaled, 4);
         }
 
-        return String::empty;
+        return String();
     }
 
     //==============================================================================
@@ -424,7 +424,7 @@ public:
     const String getProgramName (int index)
     {
         // XXX
-        return String::empty;
+        return String();
     }
 
     void changeProgramName (int index, const String& newName)

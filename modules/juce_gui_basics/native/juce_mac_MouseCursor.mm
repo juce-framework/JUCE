@@ -52,15 +52,20 @@ namespace MouseCursorHelpers
 
     static void* fromWebKitFile (const char* filename, float hx, float hy)
     {
-        FileInputStream fileStream (File ("/System/Library/Frameworks/WebKit.framework/Frameworks/WebCore.framework/Resources").getChildFile (filename));
-        BufferedInputStream buf (fileStream, 4096);
+        FileInputStream fileStream (File ("/System/Library/Frameworks/WebKit.framework/Frameworks/WebCore.framework/Resources")
+                                        .getChildFile (filename));
 
-        PNGImageFormat pngFormat;
-        Image im (pngFormat.decodeImage (buf));
+        if (fileStream.openedOk())
+        {
+            BufferedInputStream buf (fileStream, 4096);
 
-        if (im.isValid())
-            return CustomMouseCursorInfo (im, (int) (hx * im.getWidth()),
-                                              (int) (hy * im.getHeight())).create();
+            PNGImageFormat pngFormat;
+            Image im (pngFormat.decodeImage (buf));
+
+            if (im.isValid())
+                return CustomMouseCursorInfo (im, (int) (hx * im.getWidth()),
+                                                  (int) (hy * im.getHeight())).create();
+        }
 
         return nullptr;
     }

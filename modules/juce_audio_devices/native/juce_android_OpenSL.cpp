@@ -30,9 +30,6 @@ bool isOpenSLAvailable()
     return library.open ("libOpenSLES.so");
 }
 
-const unsigned short openSLRates[]       = { 8000, 16000, 32000, 44100, 48000 };
-const unsigned short openSLBufferSizes[] = { 256, 512, 768, 1024, 1280, 1600 }; // must all be multiples of the block size
-
 //==============================================================================
 class OpenSLAudioIODevice  : public AudioIODevice,
                              public Thread
@@ -66,7 +63,7 @@ public:
 
     bool openedOk() const       { return engine.outputMixObject != nullptr; }
 
-    StringArray getOutputChannelNames()
+    StringArray getOutputChannelNames() override
     {
         StringArray s;
         s.add ("Left");
@@ -74,38 +71,33 @@ public:
         return s;
     }
 
-    StringArray getInputChannelNames()
+    StringArray getInputChannelNames() override
     {
         StringArray s;
         s.add ("Audio Input");
         return s;
     }
 
-    int getNumSampleRates()                 { return numElementsInArray (openSLRates); }
-
-    double getSampleRate (int index)
+    Array<double> getAvailableSampleRates() override
     {
-        jassert (index >= 0 && index < getNumSampleRates());
-        return (int) openSLRates [index];
+        static const double rates[]       = { 8000.0, 16000.0, 32000.0, 44100.0, 48000.0 };
+        return Array<double> (rates, numElementsInArray (rates));
     }
 
-    int getDefaultBufferSize()              { return 1024; }
-    int getNumBufferSizesAvailable()        { return numElementsInArray (openSLBufferSizes); }
-
-    int getBufferSizeSamples (int index)
+    Array<int> getAvailableBufferSizes() override
     {
-        jassert (index >= 0 && index < getNumBufferSizesAvailable());
-        return (int) openSLBufferSizes [index];
+        static const int sizes[] = { 256, 512, 768, 1024, 1280, 1600 }; // must all be multiples of the block size
+        return Array<int> (sizes, numElementsInArray (sizes));
     }
 
     String open (const BigInteger& inputChannels,
                  const BigInteger& outputChannels,
                  double requestedSampleRate,
-                 int bufferSize)
+                 int bufferSize) override
     {
         close();
 
-        lastError = String::empty;
+        lastError.clear();
         sampleRate = (int) requestedSampleRate;
 
         int preferredBufferSize = (bufferSize <= 0) ? getDefaultBufferSize() : bufferSize;
@@ -133,7 +125,7 @@ public:
         return lastError;
     }
 
-    void close()
+    void close() override
     {
         stop();
         stopThread (6000);
@@ -142,18 +134,19 @@ public:
         player = nullptr;
     }
 
-    int getOutputLatencyInSamples()                     { return outputLatency; }
-    int getInputLatencyInSamples()                      { return inputLatency; }
-    bool isOpen()                                       { return deviceOpen; }
-    int getCurrentBufferSizeSamples()                   { return actualBufferSize; }
-    int getCurrentBitDepth()                            { return 16; }
-    double getCurrentSampleRate()                       { return sampleRate; }
-    BigInteger getActiveOutputChannels() const          { return activeOutputChans; }
-    BigInteger getActiveInputChannels() const           { return activeInputChans; }
-    String getLastError()                               { return lastError; }
-    bool isPlaying()                                    { return callback != nullptr; }
+    int getDefaultBufferSize() override                 { return 1024; }
+    int getOutputLatencyInSamples() override            { return outputLatency; }
+    int getInputLatencyInSamples() override             { return inputLatency; }
+    bool isOpen() override                              { return deviceOpen; }
+    int getCurrentBufferSizeSamples() override          { return actualBufferSize; }
+    int getCurrentBitDepth() override                   { return 16; }
+    double getCurrentSampleRate() override              { return sampleRate; }
+    BigInteger getActiveOutputChannels() const override { return activeOutputChans; }
+    BigInteger getActiveInputChannels() const override  { return activeInputChans; }
+    String getLastError() override                      { return lastError; }
+    bool isPlaying() override                           { return callback != nullptr; }
 
-    void start (AudioIODeviceCallback* newCallback)
+    void start (AudioIODeviceCallback* newCallback) override
     {
         stop();
 
@@ -166,7 +159,7 @@ public:
         }
     }
 
-    void stop()
+    void stop() override
     {
         if (AudioIODeviceCallback* const oldCallback = setCallback (nullptr))
             oldCallback->audioDeviceStopped();

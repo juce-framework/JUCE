@@ -33,8 +33,10 @@ ThreadWithProgressWindow::ThreadWithProgressWindow (const String& title,
     timeOutMsWhenCancelling (timeOutMsWhenCancelling_)
 {
     alertWindow = LookAndFeel::getDefaultLookAndFeel()
-                    .createAlertWindow (title, String::empty, cancelButtonText,
-                                        String::empty, String::empty,
+                    .createAlertWindow (title, String(),
+                                        cancelButtonText.isEmpty() ? TRANS("Cancel")
+                                                                   : cancelButtonText,
+                                        String(), String(),
                                         AlertWindow::NoIcon, hasCancelButton ? 1 : 0,
                                         componentToCentreAround);
 

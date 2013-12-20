@@ -133,10 +133,10 @@ public:
     //==============================================================================
     void drawPopupMenuBackground (Graphics&, int width, int height) override;
 
-    void drawPopupMenuItem (Graphics&, int width, int height,
+    void drawPopupMenuItem (Graphics&, const Rectangle<int>& area,
                             bool isSeparator, bool isActive, bool isHighlighted, bool isTicked, bool hasSubMenu,
                             const String& text, const String& shortcutKeyText,
-                            Image* image, const Colour* textColour) override;
+                            const Drawable* icon, const Colour* textColour) override;
 
     Font getPopupMenuFont() override;
 
@@ -344,4 +344,4 @@ private:
 };
 
 
-#endif   // JUCE_LOOKANDFEEL_H_INCLUDED
+#endif   // JUCE_LOOKANDFEEL_V2_H_INCLUDED

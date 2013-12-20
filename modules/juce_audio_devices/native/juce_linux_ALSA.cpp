@@ -47,7 +47,7 @@ namespace
 
 #define JUCE_ALSA_FAILED(x)  failed (x)
 
-static void getDeviceSampleRates (snd_pcm_t* handle, Array <int>& rates)
+static void getDeviceSampleRates (snd_pcm_t* handle, Array<double>& rates)
 {
     const int ratesToTry[] = { 22050, 32000, 44100, 48000, 88200, 96000, 176400, 192000, 0 };
 
@@ -59,7 +59,7 @@ static void getDeviceSampleRates (snd_pcm_t* handle, Array <int>& rates)
         if (snd_pcm_hw_params_any (handle, hwParams) >= 0
              && snd_pcm_hw_params_test_rate (handle, hwParams, ratesToTry[i], 0) == 0)
         {
-            rates.addIfNotAlreadyThere (ratesToTry[i]);
+            rates.addIfNotAlreadyThere ((double) ratesToTry[i]);
         }
     }
 }
@@ -91,7 +91,7 @@ static void getDeviceProperties (const String& deviceID,
                                  unsigned int& maxChansOut,
                                  unsigned int& minChansIn,
                                  unsigned int& maxChansIn,
-                                 Array <int>& rates,
+                                 Array<double>& rates,
                                  bool testOutput,
                                  bool testInput)
 {
@@ -482,7 +482,7 @@ public:
     {
         close();
 
-        error = String::empty;
+        error.clear();
         sampleRate = newSampleRate;
         bufferSize = newBufferSize;
 
@@ -722,7 +722,7 @@ public:
     int bufferSize, outputLatency, inputLatency;
     BigInteger currentInputChans, currentOutputChans;
 
-    Array <int> sampleRates;
+    Array<double> sampleRates;
     StringArray channelNamesOut, channelNamesIn;
     AudioIODeviceCallback* callback;
 
@@ -798,31 +798,34 @@ public:
         close();
     }
 
-    StringArray getOutputChannelNames()             { return internal.channelNamesOut; }
-    StringArray getInputChannelNames()              { return internal.channelNamesIn; }
+    StringArray getOutputChannelNames() override            { return internal.channelNamesOut; }
+    StringArray getInputChannelNames() override             { return internal.channelNamesIn; }
 
-    int getNumSampleRates()                         { return internal.sampleRates.size(); }
-    double getSampleRate (int index)                { return internal.sampleRates [index]; }
+    Array<double> getAvailableSampleRates() override        { return internal.sampleRates; }
 
-    int getDefaultBufferSize()                      { return 512; }
-    int getNumBufferSizesAvailable()                { return 50; }
-
-    int getBufferSizeSamples (int index)
+    Array<int> getAvailableBufferSizes() override
     {
+        Array<int> r;
         int n = 16;
-        for (int i = 0; i < index; ++i)
+
+        for (int i = 0; i < 50; ++i)
+        {
+            r.add (n);
             n += n < 64 ? 16
                         : (n < 512 ? 32
                                    : (n < 1024 ? 64
                                                : (n < 2048 ? 128 : 256)));
+        }
 
-        return n;
+        return r;
     }
+
+    int getDefaultBufferSize() override                      { return 512; }
 
     String open (const BigInteger& inputChannels,
                  const BigInteger& outputChannels,
                  double sampleRate,
-                 int bufferSizeSamples)
+                 int bufferSizeSamples) override
     {
         close();
 
@@ -831,11 +834,13 @@ public:
 
         if (sampleRate <= 0)
         {
-            for (int i = 0; i < getNumSampleRates(); ++i)
+            for (int i = 0; i < internal.sampleRates.size(); ++i)
             {
-                if (getSampleRate (i) >= 44100)
+                double rate = internal.sampleRates[i];
+
+                if (rate >= 44100)
                 {
-                    sampleRate = getSampleRate (i);
+                    sampleRate = rate;
                     break;
                 }
             }
@@ -848,28 +853,28 @@ public:
         return internal.error;
     }
 
-    void close()
+    void close() override
     {
         stop();
         internal.close();
         isOpen_ = false;
     }
 
-    bool isOpen()                           { return isOpen_; }
-    bool isPlaying()                        { return isStarted && internal.error.isEmpty(); }
-    String getLastError()                   { return internal.error; }
+    bool isOpen() override                           { return isOpen_; }
+    bool isPlaying() override                        { return isStarted && internal.error.isEmpty(); }
+    String getLastError() override                   { return internal.error; }
 
-    int getCurrentBufferSizeSamples()       { return internal.bufferSize; }
-    double getCurrentSampleRate()           { return internal.sampleRate; }
-    int getCurrentBitDepth()                { return internal.getBitDepth(); }
+    int getCurrentBufferSizeSamples() override       { return internal.bufferSize; }
+    double getCurrentSampleRate() override           { return internal.sampleRate; }
+    int getCurrentBitDepth() override                { return internal.getBitDepth(); }
 
-    BigInteger getActiveOutputChannels() const    { return internal.currentOutputChans; }
-    BigInteger getActiveInputChannels() const     { return internal.currentInputChans; }
+    BigInteger getActiveOutputChannels() const override    { return internal.currentOutputChans; }
+    BigInteger getActiveInputChannels() const override     { return internal.currentInputChans; }
 
-    int getOutputLatencyInSamples()         { return internal.outputLatency; }
-    int getInputLatencyInSamples()          { return internal.inputLatency; }
+    int getOutputLatencyInSamples() override         { return internal.outputLatency; }
+    int getInputLatencyInSamples() override          { return internal.inputLatency; }
 
-    void start (AudioIODeviceCallback* callback)
+    void start (AudioIODeviceCallback* callback) override
     {
         if (! isOpen_)
             callback = nullptr;
@@ -882,7 +887,7 @@ public:
         isStarted = (callback != nullptr);
     }
 
-    void stop()
+    void stop() override
     {
         AudioIODeviceCallback* const oldCallback = internal.callback;
 
@@ -1002,7 +1007,7 @@ private:
     {
         unsigned int minChansOut = 0, maxChansOut = 0;
         unsigned int minChansIn = 0, maxChansIn = 0;
-        Array <int> rates;
+        Array<double> rates;
 
         bool isInput = inputName.isNotEmpty(), isOutput = outputName.isNotEmpty();
         getDeviceProperties (id, minChansOut, maxChansOut, minChansIn, maxChansIn, rates, isOutput, isInput);

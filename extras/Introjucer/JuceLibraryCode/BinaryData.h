@@ -4,6 +4,9 @@
 
 */
 
+#ifndef BINARYDATA_H_62491730_INCLUDED
+#define BINARYDATA_H_62491730_INCLUDED
+
 namespace BinaryData
 {
     extern const char*   AudioPluginXCodeScript_txt;
@@ -82,3 +85,5 @@ namespace BinaryData
     // return the corresponding data and its size (or a null pointer if the name isn't found).
     const char* getNamedResource (const char* resourceNameUTF8, int& dataSizeInBytes) throw();
 }
+
+#endif

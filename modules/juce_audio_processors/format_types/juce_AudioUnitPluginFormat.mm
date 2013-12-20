@@ -58,7 +58,9 @@ namespace juce
 
 namespace AudioUnitFormatHelpers
 {
-    static int insideCallback = 0;
+   #if JUCE_DEBUG
+    static ThreadLocalValue<int> insideCallback;
+   #endif
 
     String osTypeToString (OSType type)
     {
@@ -136,7 +138,7 @@ namespace AudioUnitFormatHelpers
                                                         fileOrIdentifier.lastIndexOfChar ('/')) + 1));
 
             StringArray tokens;
-            tokens.addTokens (s, ",", String::empty);
+            tokens.addTokens (s, ",", String());
             tokens.removeEmptyStrings();
 
             if (tokens.size() == 3)
@@ -290,7 +292,9 @@ public:
     {
         using namespace AudioUnitFormatHelpers;
 
-        ++insideCallback;
+       #if JUCE_DEBUG
+        ++*insideCallback;
+       #endif
 
         JUCE_AU_LOG ("Opening AU: " + fileOrIdentifier);
 
@@ -306,14 +310,20 @@ public:
             }
         }
 
-        --insideCallback;
+       #if JUCE_DEBUG
+        --*insideCallback;
+       #endif
     }
 
     ~AudioUnitPluginInstance()
     {
         const ScopedLock sl (lock);
 
-        jassert (AudioUnitFormatHelpers::insideCallback == 0);
+       #if JUCE_DEBUG
+        // this indicates that some kind of recursive call is getting triggered that's
+        // deleting this plugin while it's still under construction.
+        jassert (AudioUnitFormatHelpers::insideCallback.get() == 0);
+       #endif
 
         if (eventListenerRef != 0)
         {
@@ -570,7 +580,7 @@ public:
         if (isPositiveAndBelow (index, getNumInputChannels()))
             return "Input " + String (index + 1);
 
-        return String::empty;
+        return String();
     }
 
     const String getOutputChannelName (int index) const override
@@ -578,7 +588,7 @@ public:
         if (isPositiveAndBelow (index, getNumOutputChannels()))
             return "Output " + String (index + 1);
 
-        return String::empty;
+        return String();
     }
 
     bool isInputChannelStereoPair (int index) const override    { return isPositiveAndBelow (index, getNumInputChannels()); }
@@ -652,7 +662,7 @@ public:
         if (const ParamInfo* p = parameters[index])
             return p->name;
 
-        return String::empty;
+        return String();
     }
 
     const String getParameterText (int index) override   { return String (getParameter (index)); }

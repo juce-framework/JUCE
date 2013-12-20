@@ -496,26 +496,71 @@ public:
 
         if (ctFontRef != nullptr)
         {
-            const float ctAscent  = std::abs ((float) CTFontGetAscent (ctFontRef));
-            const float ctDescent = std::abs ((float) CTFontGetDescent (ctFontRef));
-            const float ctTotalHeight = ctAscent + ctDescent;
-
-            ascent = ctAscent / ctTotalHeight;
-            unitsToHeightScaleFactor = 1.0f / ctTotalHeight;
-            pathTransform = AffineTransform::identity.scale (unitsToHeightScaleFactor);
-
             fontRef = CTFontCopyGraphicsFont (ctFontRef, nullptr);
-            fontHeightToPointsFactor = referenceFontSize / ctTotalHeight;
-
-            const short zero = 0;
-            CFNumberRef numberRef = CFNumberCreate (0, kCFNumberShortType, &zero);
-
-            CFStringRef keys[] = { kCTFontAttributeName, kCTLigatureAttributeName };
-            CFTypeRef values[] = { ctFontRef, numberRef };
-            attributedStringAtts = CFDictionaryCreate (nullptr, (const void**) &keys, (const void**) &values, numElementsInArray (keys),
-                                                       &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
-            CFRelease (numberRef);
+            initialiseMetrics();
         }
+    }
+
+    OSXTypeface (const void* data, size_t dataSize)
+        : Typeface (String(), String()),
+          fontRef (nullptr),
+          ctFontRef (nullptr),
+          fontHeightToPointsFactor (1.0f),
+          renderingTransform (CGAffineTransformIdentity),
+          attributedStringAtts (nullptr),
+          ascent (0.0f),
+          unitsToHeightScaleFactor (0.0f)
+    {
+        CFDataRef cfData = CFDataCreate (kCFAllocatorDefault, (const UInt8*) data, (CFIndex) dataSize);
+        CGDataProviderRef provider = CGDataProviderCreateWithCFData (cfData);
+        CFRelease (cfData);
+
+        fontRef = CGFontCreateWithDataProvider (provider);
+        CGDataProviderRelease (provider);
+
+        if (fontRef != nullptr)
+        {
+            ctFontRef = CTFontCreateWithGraphicsFont (fontRef, referenceFontSize, nullptr, nullptr);
+
+            if (ctFontRef != nullptr)
+            {
+                if (CFStringRef fontName = CTFontCopyName (ctFontRef, kCTFontFamilyNameKey))
+                {
+                    name = String::fromCFString (fontName);
+                    CFRelease (fontName);
+                }
+
+                if (CFStringRef fontStyle = CTFontCopyName (ctFontRef, kCTFontStyleNameKey))
+                {
+                    style = String::fromCFString (fontStyle);
+                    CFRelease (fontStyle);
+                }
+
+                initialiseMetrics();
+            }
+        }
+    }
+
+    void initialiseMetrics()
+    {
+        const float ctAscent  = std::abs ((float) CTFontGetAscent (ctFontRef));
+        const float ctDescent = std::abs ((float) CTFontGetDescent (ctFontRef));
+        const float ctTotalHeight = ctAscent + ctDescent;
+
+        ascent = ctAscent / ctTotalHeight;
+        unitsToHeightScaleFactor = 1.0f / ctTotalHeight;
+        pathTransform = AffineTransform::identity.scale (unitsToHeightScaleFactor);
+
+        fontHeightToPointsFactor = referenceFontSize / ctTotalHeight;
+
+        const short zero = 0;
+        CFNumberRef numberRef = CFNumberCreate (0, kCFNumberShortType, &zero);
+
+        CFStringRef keys[] = { kCTFontAttributeName, kCTLigatureAttributeName };
+        CFTypeRef values[] = { ctFontRef, numberRef };
+        attributedStringAtts = CFDictionaryCreate (nullptr, (const void**) &keys, (const void**) &values, numElementsInArray (keys),
+                                                   &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
+        CFRelease (numberRef);
     }
 
     ~OSXTypeface()
@@ -730,7 +775,7 @@ StringArray Font::findAllTypefaceStyles (const String& family)
     CTFontDescriptorRef ctFontDescRef = CTFontDescriptorCreateWithAttributes (fontDescAttributes);
     CFRelease (fontDescAttributes);
 
-    CFArrayRef fontFamilyArray = CFArrayCreate(kCFAllocatorDefault, (const void**) &ctFontDescRef, 1, &kCFTypeArrayCallBacks);
+    CFArrayRef fontFamilyArray = CFArrayCreate (kCFAllocatorDefault, (const void**) &ctFontDescRef, 1, &kCFTypeArrayCallBacks);
     CFRelease (ctFontDescRef);
 
     CTFontCollectionRef fontCollectionRef = CTFontCollectionCreateWithFontDescriptors (fontFamilyArray, nullptr);
@@ -1200,6 +1245,11 @@ StringArray Font::findAllTypefaceStyles (const String& family)
 Typeface::Ptr Typeface::createSystemTypefaceFor (const Font& font)
 {
     return new OSXTypeface (font);
+}
+
+Typeface::Ptr Typeface::createSystemTypefaceFor (const void* data, size_t dataSize)
+{
+    return new OSXTypeface (data, dataSize);
 }
 
 void Typeface::scanFolderForFonts (const File&)

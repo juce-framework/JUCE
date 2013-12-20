@@ -102,6 +102,8 @@ public:
 
     Value getUserNotes()                        { return getSetting (Ids::userNotes); }
 
+    // NB: this is the path to the parent "modules" folder that contains the named module, not the
+    // module folder itself.
     Value getPathForModuleValue (const String& moduleID);
     String getPathForModuleString (const String& moduleID) const;
     void removePathForModule (const String& moduleID);

@@ -318,7 +318,7 @@ void ButtonDocument::fillInGeneratedCode (GeneratedCode& code) const
 {
     JucerDocument::fillInGeneratedCode (code);
 
-    code.parentClassInitialiser = "Button (" + quotedString (code.componentName) + ")";
+    code.parentClassInitialiser = "Button (" + quotedString (code.componentName, false) + ")";
     code.removeCallback ("void", "paint (Graphics& g)");
 }
 

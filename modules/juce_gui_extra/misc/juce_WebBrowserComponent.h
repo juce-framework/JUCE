@@ -93,6 +93,11 @@ public:
     /** This callback happens when the browser has finished loading a page. */
     virtual void pageFinishedLoading (const String& url);
 
+    /** This callback occurs when a script or other activity in the browser asks for
+        the window to be closed.
+    */
+    virtual void windowCloseRequest();
+
     //==============================================================================
     /** @internal */
     void paint (Graphics&) override;

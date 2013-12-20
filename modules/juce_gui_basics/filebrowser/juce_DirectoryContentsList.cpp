@@ -136,7 +136,7 @@ File DirectoryContentsList::getFile (const int index) const
     if (const FileInfo* const info = files [index])
         return root.getChildFile (info->filename);
 
-    return File::nonexistent;
+    return File();
 }
 
 bool DirectoryContentsList::contains (const File& targetFile) const
