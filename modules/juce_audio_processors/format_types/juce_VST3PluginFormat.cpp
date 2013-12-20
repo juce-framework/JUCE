@@ -569,30 +569,36 @@ public:
 
         for (Steinberg::int32 i = 0; i < eventList.getEventCount(); ++i)
         {
-            Event event;
+            Event e;
 
-            if (eventList.getEvent (i, event) == kResultOk)
+            if (eventList.getEvent (i, e) == kResultOk)
             {
-                switch (event.type)
+                switch (e.type)
                 {
                     case Event::kNoteOnEvent:
-                        result.addEvent (MidiMessage::noteOn (event.noteOn.channel + 1, event.noteOn.pitch, (uint8) (event.noteOn.velocity * 127.0f)),
-                                         event.sampleOffset);
+                        result.addEvent (MidiMessage::noteOn (createSafeChannel (e.noteOn.channel),
+                                                              createSafeNote (e.noteOn.pitch),
+                                                              (uint8) denormaliseToMidiValue (e.noteOn.velocity)),
+                                         e.sampleOffset);
                         break;
 
                     case Event::kNoteOffEvent:
-                        result.addEvent (MidiMessage::noteOff (event.noteOff.channel + 1, event.noteOff.pitch, (uint8) (event.noteOff.velocity * 127.0f)),
-                                         event.sampleOffset);
+                        result.addEvent (MidiMessage::noteOff (createSafeChannel (e.noteOff.channel),
+                                                               createSafeNote (e.noteOff.pitch),
+                                                               (uint8) denormaliseToMidiValue (e.noteOff.velocity)),
+                                         e.sampleOffset);
                         break;
 
                     case Event::kPolyPressureEvent:
-                        result.addEvent (MidiMessage::aftertouchChange (event.polyPressure.channel + 1, event.polyPressure.pitch, (int) (event.polyPressure.pressure * 127.0f)),
-                                         event.sampleOffset);
+                        result.addEvent (MidiMessage::aftertouchChange (createSafeChannel (e.polyPressure.channel),
+                                                                        createSafeNote (e.polyPressure.pitch),
+                                                                        denormaliseToMidiValue (e.polyPressure.pressure)),
+                                         e.sampleOffset);
                         break;
 
                     case Event::kDataEvent:
-                        result.addEvent (MidiMessage::createSysExMessage (event.data.bytes, event.data.size),
-                                         event.sampleOffset);
+                        result.addEvent (MidiMessage::createSysExMessage (e.data.bytes, e.data.size),
+                                         e.sampleOffset);
                         break;
 
                     default:
@@ -610,48 +616,73 @@ public:
         MidiMessage msg;
         int midiEventPosition = 0;
 
+        enum { maxNumEvents = 2048 }; // Steinberg's Host Checker states no more than 2048 events are allowed at once
+        int numEvents = 0;
+
         while (iterator.getNextEvent (msg, midiEventPosition))
         {
-            Event event = { 0 };
+            if (++numEvents > maxNumEvents)
+                break;
+
+            Event e = { 0 };
 
             if (msg.isNoteOn())
             {
-                event.type             = Event::kNoteOnEvent;
-                event.noteOn.channel   = (Steinberg::int16) msg.getChannel() - 1;
-                event.noteOn.pitch     = (Steinberg::int16) msg.getNoteNumber();
-                event.noteOn.velocity  = msg.getVelocity() / 127.0f;
+                e.type              = Event::kNoteOnEvent;
+                e.noteOn.channel    = createSafeChannel (msg.getChannel());
+                e.noteOn.pitch      = createSafeNote (msg.getNoteNumber());
+                e.noteOn.velocity   = normaliseMidiValue (msg.getVelocity());
+                e.noteOn.length     = 0;
+                e.noteOn.tuning     = 0.0f;
+                e.noteOn.noteId     = -1;
             }
             else if (msg.isNoteOff())
             {
-                event.type             = Event::kNoteOffEvent;
-                event.noteOff.channel  = (Steinberg::int16) msg.getChannel() - 1;
-                event.noteOff.pitch    = (Steinberg::int16) msg.getNoteNumber();
-                event.noteOff.velocity = msg.getVelocity() / 127.0f;
+                e.type              = Event::kNoteOffEvent;
+                e.noteOff.channel   = createSafeChannel (msg.getChannel());
+                e.noteOff.pitch     = createSafeNote (msg.getNoteNumber());
+                e.noteOff.velocity  = normaliseMidiValue (msg.getVelocity());
+                e.noteOff.tuning    = 0.0f;
+                e.noteOff.noteId    = -1;
             }
             else if (msg.isSysEx())
             {
-                event.type         = Event::kDataEvent;
-                event.data.bytes   = msg.getSysExData();
-                event.data.size    = msg.getSysExDataSize();
+                e.type          = Event::kDataEvent;
+                e.data.bytes    = msg.getSysExData();
+                e.data.size     = msg.getSysExDataSize();
+                e.data.type     = DataEvent::kMidiSysEx;
             }
             else if (msg.isAftertouch())
             {
-                event.type                     = Event::kPolyPressureEvent;
-                event.polyPressure.channel     = (Steinberg::int16) msg.getChannel() - 1;
-                event.polyPressure.pitch       = (Steinberg::int16) msg.getNoteNumber();
-                event.polyPressure.pressure    = msg.getAfterTouchValue() / 127.0f;
+                e.type                   = Event::kPolyPressureEvent;
+                e.polyPressure.channel   = createSafeChannel (msg.getChannel());
+                e.polyPressure.pitch     = createSafeNote (msg.getNoteNumber());
+                e.polyPressure.pressure  = normaliseMidiValue (msg.getAfterTouchValue());
+            }
+            else
+            {
+                continue;
             }
 
-            event.busIndex = 0;
-            event.sampleOffset = midiEventPosition;
+            e.busIndex = 0;
+            e.sampleOffset = midiEventPosition;
 
-            result.addEvent (event);
+            result.addEvent (e);
         }
     }
 
 private:
     Array<Vst::Event, CriticalSection> events;
     Atomic<int32> refCount;
+
+    static Steinberg::int16 createSafeChannel (int channel) noexcept  { return (Steinberg::int16) jlimit (0, 15, channel - 1); }
+    static int createSafeChannel (Steinberg::int16 channel) noexcept  { return (int) jlimit (1, 16, channel + 1); }
+
+    static Steinberg::int16 createSafeNote (int note) noexcept        { return (Steinberg::int16) jlimit (0, 127, note); }
+    static int createSafeNote (Steinberg::int16 note) noexcept        { return jlimit (0, 127, (int) note); }
+
+    static float normaliseMidiValue (int value) noexcept              { return jlimit (0.0f, 1.0f, (float) value / 127.0f); }
+    static int denormaliseToMidiValue (float value) noexcept          { return roundToInt (jlimit (0.0f, 127.0f, value * 127.0f)); }
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MidiEventList)
 };
