@@ -1328,7 +1328,7 @@ private:
         inputChans.add (nullptr);
         outputChans.add (nullptr);
 
-        const int blockSizeMs = jmax (1, (int) (numSamples / currentSampleRate));
+        const int blockSizeMs = jmax (1, (int) (1000 * numSamples / currentSampleRate));
 
         jassert (numInputChans + numOutputChans == buffer.getNumChannels());
 
