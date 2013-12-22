@@ -941,9 +941,16 @@ public:
     static const char* getName()                { return "Visual Studio 2010"; }
     static const char* getValueTreeTypeName()   { return "VS2010"; }
     int getVisualStudioVersion() const override { return 10; }
-    virtual String getPlatformToolset() const   { return "Windows7.1SDK"; }
     virtual String getSolutionComment() const   { return "# Visual Studio 2010"; }
     virtual String getToolsVersion() const      { return "4.0"; }
+    virtual String getDefaultToolset() const    { return "Windows7.1SDK"; }
+    Value getPlatformToolsetValue()             { return getSetting (Ids::toolset); }
+
+    String getPlatformToolset() const
+    {
+        const String s (settings [Ids::toolset].toString());
+        return s.isNotEmpty() ? s : getDefaultToolset();
+    }
 
     static MSVCProjectExporterVC2010* createForSettings (Project& project, const ValueTree& settings)
     {
@@ -951,6 +958,18 @@ public:
             return new MSVCProjectExporterVC2010 (project, settings);
 
         return nullptr;
+    }
+
+    void createExporterProperties (PropertyListBuilder& props) override
+    {
+        MSVCProjectExporterBase::createExporterProperties (props);
+
+        static const char* toolsetNames[] = { "(default)", "v110", "v110_xp", "Windows7.1SDK", nullptr };
+        const var toolsets[]              = { var(),       "v110", "v110_xp", "Windows7.1SDK" };
+
+        props.add (new ChoicePropertyComponent (getPlatformToolsetValue(), "Platform Toolset",
+                                                StringArray (toolsetNames),
+                                                Array<var> (toolsets, numElementsInArray (toolsets))));
     }
 
     //==============================================================================
@@ -1496,32 +1515,12 @@ public:
     String getSolutionComment() const override  { return "# Visual Studio 2012"; }
     virtual String getDefaultToolset() const    { return "v110"; }
 
-    String getPlatformToolset() const
-    {
-        const String s (settings [Ids::toolset].toString());
-        return s.isNotEmpty() ? s : getDefaultToolset();
-    }
-
-    Value getPlatformToolsetValue()             { return getSetting (Ids::toolset); }
-
     static MSVCProjectExporterVC2012* createForSettings (Project& project, const ValueTree& settings)
     {
         if (settings.hasType (getValueTreeTypeName()))
             return new MSVCProjectExporterVC2012 (project, settings);
 
         return nullptr;
-    }
-
-    void createExporterProperties (PropertyListBuilder& props) override
-    {
-        MSVCProjectExporterVC2010::createExporterProperties (props);
-
-        static const char* toolsetNames[] = { "(default)", "v110", "v110_xp", "Windows7.1SDK", nullptr };
-        const var toolsets[]              = { var(),       "v110", "v110_xp", "Windows7.1SDK" };
-
-        props.add (new ChoicePropertyComponent (getPlatformToolsetValue(), "Platform Toolset",
-                                                StringArray (toolsetNames),
-                                                Array<var> (toolsets, numElementsInArray (toolsets))));
     }
 
 private:
@@ -1566,7 +1565,7 @@ public:
 
     void createExporterProperties (PropertyListBuilder& props) override
     {
-        MSVCProjectExporterVC2010::createExporterProperties (props);
+        MSVCProjectExporterBase::createExporterProperties (props);
 
         static const char* toolsetNames[] = { "(default)", "v120", "v120_xp", nullptr };
         const var toolsets[]              = { var(),       "v120", "v120_xp" };
