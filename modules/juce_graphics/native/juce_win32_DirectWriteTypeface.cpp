@@ -178,7 +178,8 @@ public:
         unitsToHeightScaleFactor = designUnitsPerEm / totalSize;
 
         HDC tempDC = GetDC (0);
-        heightToPointsFactor = (72.0f / GetDeviceCaps (tempDC, LOGPIXELSY)) * unitsToHeightScaleFactor;
+        float dpi = (GetDeviceCaps (tempDC, LOGPIXELSX) + GetDeviceCaps (tempDC, LOGPIXELSY)) / 2.0f;
+        heightToPointsFactor = (dpi / GetDeviceCaps (tempDC, LOGPIXELSY)) * unitsToHeightScaleFactor;
         ReleaseDC (0, tempDC);
 
         const float pathAscent  = (1024.0f * dwFontMetrics.ascent)  / designUnitsPerEm;

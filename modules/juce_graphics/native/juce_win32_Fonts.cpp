@@ -533,7 +533,8 @@ private:
 
         if (GetTextMetrics (dc, &tm))
         {
-            heightToPointsFactor = (72.0f / GetDeviceCaps (dc, LOGPIXELSY)) * heightInPoints / (float) tm.tmHeight;
+            float dpi = (GetDeviceCaps (dc, LOGPIXELSX) + GetDeviceCaps (dc, LOGPIXELSY)) / 2.0f;
+            heightToPointsFactor = (dpi / GetDeviceCaps (dc, LOGPIXELSY)) * heightInPoints / (float) tm.tmHeight;
             ascent = tm.tmAscent / (float) tm.tmHeight;
             defaultGlyph = getGlyphForChar (dc, tm.tmDefaultChar);
             createKerningPairs (dc, (float) tm.tmHeight);
