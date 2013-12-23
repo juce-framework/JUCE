@@ -1831,13 +1831,22 @@ public:
         if (deviceName.isEmpty())
             deviceName = inputDeviceName;
 
+        AudioDeviceID inputDeviceID = inputIds [inputIndex];
+        AudioDeviceID outputDeviceID = outputIds [outputIndex];
+
+        if (inputDeviceID == 0 && inputDeviceID == 0)
+            return nullptr;
+
+        if (inputDeviceID == outputDeviceID)
+            return new CoreAudioIODevice (outputDeviceName, inputDeviceID, inputIndex, outputDeviceID, outputIndex);
+
         ScopedPointer<CoreAudioIODevice> in, out;
 
-        if (inputIndex >= 0)
-            in = new CoreAudioIODevice (outputDeviceName, inputIds [inputIndex], inputIndex, 0, -1);
+        if (inputDeviceID != 0)
+            in = new CoreAudioIODevice (outputDeviceName, inputDeviceID, inputIndex, 0, -1);
 
-        if (outputIndex >= 0)
-            out = new CoreAudioIODevice (inputDeviceName, 0, -1, outputIds [outputIndex], outputIndex);
+        if (outputDeviceID != 0)
+            out = new CoreAudioIODevice (inputDeviceName, 0, -1, outputDeviceID, outputIndex);
 
         if (in == nullptr)   return out.release();
         if (out == nullptr)  return in.release();
