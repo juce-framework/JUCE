@@ -1682,7 +1682,7 @@ private:
                 pluginHandle = (HandleFormat) peer->getNativeHandle();
            #elif JUCE_MAC
             dummyComponent.setBounds (getBounds().withZeroOrigin());
-            addAndMakeVisible (&dummyComponent);
+            addAndMakeVisible (dummyComponent);
             pluginHandle = [[NSView alloc] init];
             dummyComponent.setView (pluginHandle);
            #endif

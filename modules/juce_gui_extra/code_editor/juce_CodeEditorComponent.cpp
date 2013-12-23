@@ -365,10 +365,10 @@ CodeEditorComponent::CodeEditorComponent (CodeDocument& doc, CodeTokeniser* cons
 
     addAndMakeVisible (caret = getLookAndFeel().createCaretComponent (this));
 
-    addAndMakeVisible (&verticalScrollBar);
+    addAndMakeVisible (verticalScrollBar);
     verticalScrollBar.setSingleStepSize (1.0);
 
-    addAndMakeVisible (&horizontalScrollBar);
+    addAndMakeVisible (horizontalScrollBar);
     horizontalScrollBar.setSingleStepSize (1.0);
 
     Font f (12.0f);

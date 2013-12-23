@@ -354,15 +354,15 @@ struct AppearanceEditor
               saveButton ("Save Scheme...")
         {
             rebuildProperties();
-            addAndMakeVisible (&panel);
+            addAndMakeVisible (panel);
 
             loadButton.setColour (TextButton::buttonColourId, Colours::lightgrey.withAlpha (0.5f));
             saveButton.setColour (TextButton::buttonColourId, Colours::lightgrey.withAlpha (0.5f));
             loadButton.setColour (TextButton::textColourOffId, Colours::white);
             saveButton.setColour (TextButton::textColourOffId, Colours::white);
 
-            addAndMakeVisible (&loadButton);
-            addAndMakeVisible (&saveButton);
+            addAndMakeVisible (loadButton);
+            addAndMakeVisible (saveButton);
 
             loadButton.addListener (this);
             saveButton.addListener (this);

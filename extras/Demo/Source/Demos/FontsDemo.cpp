@@ -44,17 +44,17 @@ public:
     {
         setOpaque (true);
 
-        addAndMakeVisible (&listBox);
-        addAndMakeVisible (&demoTextBox);
-        addAndMakeVisible (&heightSlider);
-        addAndMakeVisible (&heightLabel);
-        addAndMakeVisible (&kerningLabel);
-        addAndMakeVisible (&kerningSlider);
-        addAndMakeVisible (&scaleLabel);
-        addAndMakeVisible (&scaleSlider);
-        addAndMakeVisible (&boldToggle);
-        addAndMakeVisible (&italicToggle);
-        addAndMakeVisible (&styleBox);
+        addAndMakeVisible (listBox);
+        addAndMakeVisible (demoTextBox);
+        addAndMakeVisible (heightSlider);
+        addAndMakeVisible (heightLabel);
+        addAndMakeVisible (kerningLabel);
+        addAndMakeVisible (kerningSlider);
+        addAndMakeVisible (scaleLabel);
+        addAndMakeVisible (scaleSlider);
+        addAndMakeVisible (boldToggle);
+        addAndMakeVisible (italicToggle);
+        addAndMakeVisible (styleBox);
 
         kerningLabel.attachToComponent (&kerningSlider, true);
         heightLabel.attachToComponent (&heightSlider, true);

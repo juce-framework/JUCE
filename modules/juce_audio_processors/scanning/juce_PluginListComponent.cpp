@@ -152,9 +152,9 @@ PluginListComponent::PluginListComponent (AudioPluginFormatManager& manager, Kno
     table.setHeaderHeight (22);
     table.setRowHeight (20);
     table.setModel (tableModel);
-    addAndMakeVisible (&table);
+    addAndMakeVisible (table);
 
-    addAndMakeVisible (&optionsButton);
+    addAndMakeVisible (optionsButton);
     optionsButton.addListener (this);
     optionsButton.setTriggeredOnMouseDown (true);
 

@@ -241,20 +241,20 @@ public:
           synthAudioSource (keyboardState),
           keyboardComponent (keyboardState, MidiKeyboardComponent::horizontalKeyboard)
     {
-        addAndMakeVisible (&keyboardComponent);
+        addAndMakeVisible (keyboardComponent);
 
-        addAndMakeVisible (&sineButton);
+        addAndMakeVisible (sineButton);
         sineButton.setButtonText ("Use sine wave");
         sineButton.setRadioGroupId (321);
         sineButton.addListener (this);
         sineButton.setToggleState (true, dontSendNotification);
 
-        addAndMakeVisible (&sampledButton);
+        addAndMakeVisible (sampledButton);
         sampledButton.setButtonText ("Use sampled sound");
         sampledButton.setRadioGroupId (321);
         sampledButton.addListener (this);
 
-        addAndMakeVisible (&liveAudioDisplayComp);
+        addAndMakeVisible (liveAudioDisplayComp);
 
         deviceManager.addAudioCallback (&liveAudioDisplayComp);
 

@@ -340,34 +340,34 @@ struct OpenGLDemoClasses
               tabbedComp (TabbedButtonBar::TabsAtLeft),
               showBackgroundToggle ("Draw 2D graphics in background")
         {
-            addAndMakeVisible (&statusLabel);
+            addAndMakeVisible (statusLabel);
             statusLabel.setJustificationType (Justification::topLeft);
             statusLabel.setColour (Label::textColourId, Colours::black);
             statusLabel.setFont (Font (14.0f));
 
-            addAndMakeVisible (&sizeSlider);
+            addAndMakeVisible (sizeSlider);
             sizeSlider.setRange (0.0, 1.0, 0.001);
             sizeSlider.addListener (this);
 
-            addAndMakeVisible (&zoomLabel);
+            addAndMakeVisible (zoomLabel);
             zoomLabel.setText ("Zoom:", dontSendNotification);
             zoomLabel.attachToComponent (&sizeSlider, true);
 
-            addAndMakeVisible (&speedSlider);
+            addAndMakeVisible (speedSlider);
             speedSlider.setRange (0.0, 0.5, 0.001);
             speedSlider.addListener (this);
             speedSlider.setSkewFactor (0.5f);
 
-            addAndMakeVisible (&speedLabel);
+            addAndMakeVisible (speedLabel);
             speedLabel.setText ("Speed:", dontSendNotification);
             speedLabel.attachToComponent (&speedSlider, true);
 
-            addAndMakeVisible (&showBackgroundToggle);
+            addAndMakeVisible (showBackgroundToggle);
             showBackgroundToggle.addListener (this);
 
             Colour editorBackground (Colours::white.withAlpha (0.6f));
 
-            addAndMakeVisible (&tabbedComp);
+            addAndMakeVisible (tabbedComp);
             tabbedComp.setTabBarDepth (25);
             tabbedComp.setColour (TabbedButtonBar::tabTextColourId, Colours::grey);
             tabbedComp.addTab ("Vertex", editorBackground, &vertexEditorComp, false);
@@ -384,11 +384,11 @@ struct OpenGLDemoClasses
             textures.add (new BuiltInTexture ("JUCE logo", BinaryData::juce_icon_png, BinaryData::juce_icon_pngSize));
             textures.add (new DynamicTexture());
 
-            addAndMakeVisible (&textureBox);
+            addAndMakeVisible (textureBox);
             textureBox.addListener (this);
             updateTexturesList();
 
-            addAndMakeVisible (&presetBox);
+            addAndMakeVisible (presetBox);
             presetBox.addListener (this);
 
             Array<ShaderPreset> presets (getPresets());
@@ -397,11 +397,11 @@ struct OpenGLDemoClasses
             for (int i = 0; i < presets.size(); ++i)
                 presetBox.addItem (presets[i].name, i + 1);
 
-            addAndMakeVisible (&presetLabel);
+            addAndMakeVisible (presetLabel);
             presetLabel.setText ("Shader Preset:", dontSendNotification);
             presetLabel.attachToComponent (&presetBox, true);
 
-            addAndMakeVisible (&textureLabel);
+            addAndMakeVisible (textureLabel);
             textureLabel.setText ("Texture:", dontSendNotification);
             textureLabel.attachToComponent (&textureBox, true);
         }

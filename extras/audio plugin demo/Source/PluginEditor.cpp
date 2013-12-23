@@ -22,12 +22,12 @@ JuceDemoPluginAudioProcessorEditor::JuceDemoPluginAudioProcessorEditor (JuceDemo
       delaySlider ("delay")
 {
     // add some sliders..
-    addAndMakeVisible (&gainSlider);
+    addAndMakeVisible (gainSlider);
     gainSlider.setSliderStyle (Slider::Rotary);
     gainSlider.addListener (this);
     gainSlider.setRange (0.0, 1.0, 0.01);
 
-    addAndMakeVisible (&delaySlider);
+    addAndMakeVisible (delaySlider);
     delaySlider.setSliderStyle (Slider::Rotary);
     delaySlider.addListener (this);
     delaySlider.setRange (0.0, 1.0, 0.01);
@@ -40,10 +40,10 @@ JuceDemoPluginAudioProcessorEditor::JuceDemoPluginAudioProcessorEditor (JuceDemo
     delayLabel.setFont (Font (11.0f));
 
     // add the midi keyboard component..
-    addAndMakeVisible (&midiKeyboard);
+    addAndMakeVisible (midiKeyboard);
 
     // add a label that will display the current timecode and status..
-    addAndMakeVisible (&infoLabel);
+    addAndMakeVisible (infoLabel);
     infoLabel.setColour (Label::textColourId, Colours::blue);
 
     // add the triangular resizer component for the bottom-right of the UI

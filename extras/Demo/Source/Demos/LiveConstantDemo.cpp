@@ -71,9 +71,9 @@ public:
                                   "the code that's invoking the demo below...",
                                   dontSendNotification);
 
-        addAndMakeVisible (&descriptionLabel);
-        addAndMakeVisible (&startButton);
-        addChildComponent (&demoComp);
+        addAndMakeVisible (descriptionLabel);
+        addAndMakeVisible (startButton);
+        addChildComponent (demoComp);
         startButton.addListener (this);
     }
 

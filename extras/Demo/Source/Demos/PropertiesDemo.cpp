@@ -149,7 +149,7 @@ public:
     PropertiesDemo()
     {
         setOpaque (true);
-        addAndMakeVisible (&propertyPanel);
+        addAndMakeVisible (propertyPanel);
 
         propertyPanel.addSection ("Text Editors", createTextEditors());
         propertyPanel.addSection ("Sliders", createSliders (3));
@@ -181,7 +181,7 @@ public:
     ConcertinaDemo()
     {
         setOpaque (true);
-        addAndMakeVisible (&concertinaPanel);
+        addAndMakeVisible (concertinaPanel);
 
         {
             PropertyPanel* panel = new PropertyPanel ("Text Editors");

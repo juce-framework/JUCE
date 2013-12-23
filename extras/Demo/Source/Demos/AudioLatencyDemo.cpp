@@ -302,7 +302,7 @@ public:
 
         addAndMakeVisible (liveAudioScroller = new LiveScrollingAudioDisplay());
 
-        addAndMakeVisible (&resultsBox);
+        addAndMakeVisible (resultsBox);
         resultsBox.setMultiLine (true);
         resultsBox.setReturnKeyStartsNewLine (true);
         resultsBox.setReadOnly (true);
@@ -318,7 +318,7 @@ public:
                             "back at the audio input. Obviously for this to work you need to have your "
                             "microphone somewhere near your speakers...");
 
-        addAndMakeVisible (&startTestButton);
+        addAndMakeVisible (startTestButton);
         startTestButton.addListener (this);
         startTestButton.setButtonText ("Test Latency");
 

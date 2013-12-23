@@ -43,11 +43,11 @@ public:
 
         fileTree.addListener (this);
         fileTree.setColour (TreeView::backgroundColourId, Colours::lightgrey.withAlpha (0.6f));
-        addAndMakeVisible (&fileTree);
+        addAndMakeVisible (fileTree);
 
-        addAndMakeVisible (&resizerBar);
+        addAndMakeVisible (resizerBar);
 
-        addAndMakeVisible (&imagePreview);
+        addAndMakeVisible (imagePreview);
 
         // we have to set up our StretchableLayoutManager so it know the limits and preferred sizes of it's contents
         stretchableManager.setItemLayout (0,            // for the fileTree

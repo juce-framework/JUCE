@@ -107,10 +107,10 @@ LivePropertyEditorBase::LivePropertyEditorBase (LiveValueBase& v, CodeDocument& 
 {
     setSize (600, 100);
 
-    addAndMakeVisible (&name);
-    addAndMakeVisible (&resetButton);
-    addAndMakeVisible (&valueEditor);
-    addAndMakeVisible (&sourceEditor);
+    addAndMakeVisible (name);
+    addAndMakeVisible (resetButton);
+    addAndMakeVisible (valueEditor);
+    addAndMakeVisible (sourceEditor);
 
     findOriginalValueInCode();
     selectOriginalValue();
@@ -420,7 +420,7 @@ public:
         : editor (e), isFloat (useFloat)
     {
         slider.setTextBoxStyle (Slider::NoTextBox, true, 0, 0);
-        addAndMakeVisible (&slider);
+        addAndMakeVisible (slider);
         updateRange();
         slider.addListener (this);
     }

@@ -218,9 +218,9 @@ public:
           recorder (recordingThumbnail.getAudioThumbnail())
     {
         setOpaque (true);
-        addAndMakeVisible (&liveAudioScroller);
+        addAndMakeVisible (liveAudioScroller);
 
-        addAndMakeVisible (&explanationLabel);
+        addAndMakeVisible (explanationLabel);
         explanationLabel.setText ("This page demonstrates how to record a wave file from the live audio input..\n\nPressing record will start recording a file in your \"Documents\" folder.", dontSendNotification);
         explanationLabel.setFont (Font (15.00f, Font::plain));
         explanationLabel.setJustificationType (Justification::topLeft);
@@ -228,13 +228,13 @@ public:
         explanationLabel.setColour (TextEditor::textColourId, Colours::black);
         explanationLabel.setColour (TextEditor::backgroundColourId, Colour (0x00000000));
 
-        addAndMakeVisible (&recordButton);
+        addAndMakeVisible (recordButton);
         recordButton.setButtonText ("Record");
         recordButton.addListener (this);
         recordButton.setColour (TextButton::buttonColourId, Colour (0xffff5c5c));
         recordButton.setColour (TextButton::textColourOnId, Colours::black);
 
-        addAndMakeVisible (&recordingThumbnail);
+        addAndMakeVisible (recordingThumbnail);
 
         deviceManager.addAudioCallback (&liveAudioScroller);
         deviceManager.addAudioCallback (&recorder);

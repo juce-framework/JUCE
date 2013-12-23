@@ -152,11 +152,11 @@ public:
             addAndMakeVisible (newFlasher);
         }
 
-        addAndMakeVisible (&stopButton);
+        addAndMakeVisible (stopButton);
         stopButton.addListener (this);
         stopButton.setButtonText ("Stop");
 
-        addAndMakeVisible (&randomColourButton);
+        addAndMakeVisible (randomColourButton);
         randomColourButton.addListener (this);
         randomColourButton.setButtonText ("Set Random Colour");
 

@@ -1372,7 +1372,7 @@ private:
             JUCE_AUTORELEASEPOOL
             {
                 jassert (ed != nullptr);
-                addAndMakeVisible (&editor);
+                addAndMakeVisible (editor);
                 setOpaque (true);
                 setVisible (true);
                 setBroughtToFrontOnMouseClick (true);

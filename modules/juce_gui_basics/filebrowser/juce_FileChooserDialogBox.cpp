@@ -33,15 +33,15 @@ public:
           newFolderButton (TRANS ("New Folder")),
           instructions (desc)
     {
-        addAndMakeVisible (&chooserComponent);
+        addAndMakeVisible (chooserComponent);
 
-        addAndMakeVisible (&okButton);
+        addAndMakeVisible (okButton);
         okButton.addShortcut (KeyPress (KeyPress::returnKey));
 
-        addAndMakeVisible (&cancelButton);
+        addAndMakeVisible (cancelButton);
         cancelButton.addShortcut (KeyPress (KeyPress::escapeKey));
 
-        addChildComponent (&newFolderButton);
+        addChildComponent (newFolderButton);
 
         setInterceptsMouseClicks (false, true);
     }

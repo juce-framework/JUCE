@@ -34,7 +34,7 @@ public:
         : keyMappingEditor (*MainAppWindow::getApplicationCommandManager().getKeyMappings(), true)
     {
         setOpaque (true);
-        addAndMakeVisible (&keyMappingEditor);
+        addAndMakeVisible (keyMappingEditor);
     }
 
     void paint (Graphics& g) override

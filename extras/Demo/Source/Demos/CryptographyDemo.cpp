@@ -32,7 +32,7 @@ class RSAComponent  : public Component,
 public:
     RSAComponent()
     {
-        addAndMakeVisible (&rsaGroup);
+        addAndMakeVisible (rsaGroup);
         rsaGroup.setText ("RSA Encryption");
         rsaGroup.setColour (GroupComponent::outlineColourId, Colours::darkgrey);
         rsaGroup.setColour (GroupComponent::textColourId, Colours::black);
@@ -40,14 +40,14 @@ public:
         bitSizeLabel.setText ("Num Bits to Use:", dontSendNotification);
         bitSizeLabel.attachToComponent (&bitSize, true);
 
-        addAndMakeVisible (&bitSize);
+        addAndMakeVisible (bitSize);
         bitSize.setText (String (256));
 
-        addAndMakeVisible (&generateRSAButton);
+        addAndMakeVisible (generateRSAButton);
         generateRSAButton.setButtonText ("Generate RSA");
         generateRSAButton.addListener (this);
 
-        addAndMakeVisible (&rsaResultBox);
+        addAndMakeVisible (rsaResultBox);
         rsaResultBox.setColour (TextEditor::backgroundColourId, Colours::white.withAlpha (0.5f));
         rsaResultBox.setReadOnly (true);
         rsaResultBox.setMultiLine (true);
@@ -122,12 +122,12 @@ class HashesComponent  : public Component,
 public:
     HashesComponent()
     {
-        addAndMakeVisible (&hashGroup);
+        addAndMakeVisible (hashGroup);
         hashGroup.setText ("Hashes");
         hashGroup.setColour (GroupComponent::outlineColourId, Colours::darkgrey);
         hashGroup.setColour (GroupComponent::textColourId, Colours::black);
 
-        addAndMakeVisible (&hashEntryBox);
+        addAndMakeVisible (hashEntryBox);
         hashEntryBox.setMultiLine (true);
         hashEntryBox.setColour (TextEditor::backgroundColourId, Colours::white.withAlpha (0.5f));
 
@@ -143,8 +143,8 @@ public:
         hashLabel2.attachToComponent (&md5Result, true);
         hashLabel3.attachToComponent (&shaResult, true);
 
-        addAndMakeVisible (&md5Result);
-        addAndMakeVisible (&shaResult);
+        addAndMakeVisible (md5Result);
+        addAndMakeVisible (shaResult);
 
         updateHashes();
     }
@@ -220,8 +220,8 @@ class CryptographyDemo  : public Component
 public:
     CryptographyDemo()
     {
-        addAndMakeVisible (&rsaDemo);
-        addAndMakeVisible (&hashDemo);
+        addAndMakeVisible (rsaDemo);
+        addAndMakeVisible (hashDemo);
     }
 
     void paint (Graphics& g) override

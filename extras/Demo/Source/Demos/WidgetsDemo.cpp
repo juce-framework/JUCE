@@ -200,7 +200,7 @@ struct SlidersPage  : public Component
         }
 
         hintLabel.setBounds (20, 245, 350, 150);
-        addAndMakeVisible (&hintLabel);
+        addAndMakeVisible (hintLabel);
     }
 
 private:
@@ -421,15 +421,15 @@ struct MiscPage   : public Component
         : textEditor2 ("Password", (juce_wchar) 0x2022),
           comboBox ("Combo")
     {
-        addAndMakeVisible (&textEditor1);
+        addAndMakeVisible (textEditor1);
         textEditor1.setBounds (10, 25, 200, 24);
         textEditor1.setText ("Single-line text box");
 
-        addAndMakeVisible (&textEditor2);
+        addAndMakeVisible (textEditor2);
         textEditor2.setBounds (10, 55, 200, 24);
         textEditor2.setText ("Password");
 
-        addAndMakeVisible (&comboBox);
+        addAndMakeVisible (comboBox);
         comboBox.setBounds (10, 85, 200, 24);
         comboBox.setEditableText (true);
         comboBox.setJustificationType (Justification::centred);
@@ -460,19 +460,19 @@ public:
           customiseButton ("Customise...")
     {
         // Create and add the toolbar...
-        addAndMakeVisible (&toolbar);
+        addAndMakeVisible (toolbar);
 
         // And use our item factory to add a set of default icons to it...
         toolbar.addDefaultItems (factory);
 
         // Now we'll just create the other sliders and buttons on the demo page, which adjust
         // the toolbar's properties...
-        addAndMakeVisible (&infoLabel);
+        addAndMakeVisible (infoLabel);
         infoLabel.setJustificationType (Justification::topLeft);
         infoLabel.setBounds (80, 80, 450, 100);
         infoLabel.setInterceptsMouseClicks (false, false);
 
-        addAndMakeVisible (&depthSlider);
+        addAndMakeVisible (depthSlider);
         depthSlider.setRange (10.0, 200.0, 1.0);
         depthSlider.setValue (50, dontSendNotification);
         depthSlider.setSliderStyle (Slider::LinearHorizontal);
@@ -481,12 +481,12 @@ public:
         depthSlider.setBounds (80, 210, 300, 22);
         depthLabel.attachToComponent (&depthSlider, false);
 
-        addAndMakeVisible (&orientationButton);
+        addAndMakeVisible (orientationButton);
         orientationButton.addListener (this);
         orientationButton.changeWidthToFitText (22);
         orientationButton.setTopLeftPosition (depthSlider.getX(), depthSlider.getBottom() + 20);
 
-        addAndMakeVisible (&customiseButton);
+        addAndMakeVisible (customiseButton);
         customiseButton.addListener (this);
         customiseButton.changeWidthToFitText (22);
         customiseButton.setTopLeftPosition (orientationButton.getRight() + 20, orientationButton.getY());
@@ -651,7 +651,7 @@ private:
                 : ToolbarItemComponent (toolbarItemId, "Custom Toolbar Item", false),
                   comboBox ("demo toolbar combo box")
             {
-                addAndMakeVisible (&comboBox);
+                addAndMakeVisible (comboBox);
 
                 for (int i = 1; i < 20; ++i)
                     comboBox.addItem ("Toolbar ComboBox item " + String (i), i);
@@ -707,7 +707,7 @@ public:
         loadData();
 
         // Create our table component and add it to this component..
-        addAndMakeVisible (&table);
+        addAndMakeVisible (table);
         table.setModel (this);
 
         // give it a border
@@ -872,7 +872,7 @@ private:
             : owner (owner_)
         {
             // just put a combo box inside this component
-            addAndMakeVisible (&comboBox);
+            addAndMakeVisible (comboBox);
             comboBox.addItem ("fab", 1);
             comboBox.addItem ("groovy", 2);
             comboBox.addItem ("hep", 3);
@@ -979,8 +979,8 @@ public:
         sourceListBox.setModel (&sourceModel);
         sourceListBox.setMultipleSelectionEnabled (true);
 
-        addAndMakeVisible (&sourceListBox);
-        addAndMakeVisible (&target);
+        addAndMakeVisible (sourceListBox);
+        addAndMakeVisible (target);
     }
 
     void resized() override
@@ -1190,7 +1190,7 @@ public:
         popupButton.setButtonText ("Show Popup Menu");
         popupButton.setTriggeredOnMouseDown (true);
         popupButton.addListener (this);
-        addAndMakeVisible (&popupButton);
+        addAndMakeVisible (popupButton);
     }
 
     ~MenusDemo()
@@ -1468,7 +1468,7 @@ public:
     WidgetsDemo()
     {
         setOpaque (true);
-        addAndMakeVisible (&tabs);
+        addAndMakeVisible (tabs);
     }
 
     void paint (Graphics& g) override

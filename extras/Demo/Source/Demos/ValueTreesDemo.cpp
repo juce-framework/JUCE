@@ -164,15 +164,15 @@ public:
         : undoButton ("Undo"),
           redoButton ("Redo")
     {
-        addAndMakeVisible (&tree);
+        addAndMakeVisible (tree);
 
         tree.setDefaultOpenness (true);
         tree.setMultiSelectEnabled (true);
         tree.setRootItem (rootItem = new ValueTreeItem (createRootValueTree(), undoManager));
         tree.setColour (TreeView::backgroundColourId, Colours::white);
 
-        addAndMakeVisible (&undoButton);
-        addAndMakeVisible (&redoButton);
+        addAndMakeVisible (undoButton);
+        addAndMakeVisible (redoButton);
         undoButton.addListener (this);
         redoButton.addListener (this);
 

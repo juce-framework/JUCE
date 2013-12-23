@@ -34,11 +34,11 @@ Viewport::Viewport (const String& name)
     horizontalScrollBar (false)
 {
     // content holder is used to clip the contents so they don't overlap the scrollbars
-    addAndMakeVisible (&contentHolder);
+    addAndMakeVisible (contentHolder);
     contentHolder.setInterceptsMouseClicks (false, true);
 
-    addChildComponent (&verticalScrollBar);
-    addChildComponent (&horizontalScrollBar);
+    addChildComponent (verticalScrollBar);
+    addChildComponent (horizontalScrollBar);
 
     verticalScrollBar.addListener (this);
     horizontalScrollBar.addListener (this);

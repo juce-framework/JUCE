@@ -96,7 +96,7 @@ ChoicePropertyComponent::~ChoicePropertyComponent()
 //==============================================================================
 void ChoicePropertyComponent::createComboBox()
 {
-    addAndMakeVisible (&comboBox);
+    addAndMakeVisible (comboBox);
 
     for (int i = 0; i < choices.size(); ++i)
     {

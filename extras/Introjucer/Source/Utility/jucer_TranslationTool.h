@@ -289,28 +289,28 @@ public:
             "\n\n"
             "First, choose whether to scan the current project for all TRANS() macros, or "
             "pick an existing translation file to load:", dontSendNotification);
-        addAndMakeVisible (&instructionsLabel);
+        addAndMakeVisible (instructionsLabel);
 
         label1.setText ("..then copy-and-paste this annotated text into Google Translate or some other translator:", dontSendNotification);
-        addAndMakeVisible (&label1);
+        addAndMakeVisible (label1);
 
         label2.setText ("...then, take the translated result and paste it into the box below:", dontSendNotification);
-        addAndMakeVisible (&label2);
+        addAndMakeVisible (label2);
 
         label3.setText ("Finally, click the 'Generate' button, and a translation file will be created below. "
                         "Remember to update its language code at the top!", dontSendNotification);
-        addAndMakeVisible (&label3);
+        addAndMakeVisible (label3);
 
-        addAndMakeVisible (&editorPre);
-        addAndMakeVisible (&editorPost);
-        addAndMakeVisible (&editorResult);
+        addAndMakeVisible (editorPre);
+        addAndMakeVisible (editorPost);
+        addAndMakeVisible (editorResult);
 
         generateButton.setButtonText (TRANS("Generate"));
-        addAndMakeVisible (&generateButton);
+        addAndMakeVisible (generateButton);
         scanButton.setButtonText ("Scan Project for TRANS macros");
-        addAndMakeVisible (&scanButton);
+        addAndMakeVisible (scanButton);
         loadButton.setButtonText ("Load existing translation File...");
-        addAndMakeVisible (&loadButton);
+        addAndMakeVisible (loadButton);
         generateButton.addListener (this);
 
         scanButton.addListener (this);

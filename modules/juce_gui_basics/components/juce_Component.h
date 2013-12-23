@@ -703,12 +703,37 @@ public:
     */
     void addChildComponent (Component* child, int zOrder = -1);
 
-    /** Adds a child component to this one, and also makes the child visible if it isn't.
+    /** Adds a child component to this one.
 
-        Quite a useful function, this is just the same as calling setVisible (true) on the child
-        and then addChildComponent(). See addChildComponent() for more details.
+        Adding a child component does not mean that the component will own or delete the child - it's
+        your responsibility to delete the component. Note that it's safe to delete a component
+        without first removing it from its parent - doing so will automatically remove it and
+        send out the appropriate notifications before the deletion completes.
+
+        If the child is already a child of this component, then no action will be taken, and its
+        z-order will be left unchanged.
+
+        @param child    the new component to add. If the component passed-in is already
+                        the child of another component, it'll first be removed from it current parent.
+        @param zOrder   The index in the child-list at which this component should be inserted.
+                        A value of -1 will insert it in front of the others, 0 is the back.
+        @see removeChildComponent, addAndMakeVisible, addChildAndSetID, getChild, ComponentListener::componentChildrenChanged
+    */
+    void addChildComponent (Component& child, int zOrder = -1);
+
+    /** Adds a child component to this one, and also makes the child visible if it isn't already.
+
+        This is the same as calling setVisible (true) on the child and then addChildComponent().
+        See addChildComponent() for more details.
     */
     void addAndMakeVisible (Component* child, int zOrder = -1);
+
+    /** Adds a child component to this one, and also makes the child visible if it isn't already.
+
+        This is the same as calling setVisible (true) on the child and then addChildComponent().
+        See addChildComponent() for more details.
+    */
+    void addAndMakeVisible (Component& child, int zOrder = -1);
 
     /** Adds a child component to this one, makes it visible, and sets its component ID.
         @see addAndMakeVisible, addChildComponent

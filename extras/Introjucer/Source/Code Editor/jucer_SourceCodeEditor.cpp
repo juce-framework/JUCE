@@ -335,20 +335,20 @@ public:
     {
         editor.setColour (CaretComponent::caretColourId, Colours::black);
 
-        addAndMakeVisible (&editor);
+        addAndMakeVisible (editor);
         label.setText ("Find:", dontSendNotification);
         label.setColour (Label::textColourId, Colours::white);
         label.attachToComponent (&editor, false);
 
-        addAndMakeVisible (&caseButton);
+        addAndMakeVisible (caseButton);
         caseButton.setColour (ToggleButton::textColourId, Colours::white);
         caseButton.setToggleState (isCaseSensitiveSearch(), dontSendNotification);
         caseButton.addListener (this);
 
         findPrev.setConnectedEdges (Button::ConnectedOnRight);
         findNext.setConnectedEdges (Button::ConnectedOnLeft);
-        addAndMakeVisible (&findPrev);
-        addAndMakeVisible (&findNext);
+        addAndMakeVisible (findPrev);
+        addAndMakeVisible (findNext);
 
         setWantsKeyboardFocus (false);
         setFocusContainer (true);

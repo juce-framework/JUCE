@@ -223,7 +223,7 @@ public:
     {
         setOpaque (true);
 
-        addAndMakeVisible (&typeBox);
+        addAndMakeVisible (typeBox);
         typeBox.addListener (this);
         typeBox.addItem ("XML", 1);
         typeBox.addItem ("JSON", 2);
@@ -231,14 +231,14 @@ public:
         comboBoxLabel.setText ("Database Type:", dontSendNotification);
         comboBoxLabel.attachToComponent (&typeBox, true);
 
-        addAndMakeVisible (&codeDocumentComponent);
+        addAndMakeVisible (codeDocumentComponent);
         codeDocument.addListener (this);
 
-        addAndMakeVisible (&resultsTree);
+        addAndMakeVisible (resultsTree);
         resultsTree.setColour (TreeView::backgroundColourId, Colours::white);
         resultsTree.setDefaultOpenness (true);
 
-        addAndMakeVisible (&errorMessage);
+        addAndMakeVisible (errorMessage);
         errorMessage.setReadOnly (true);
         errorMessage.setMultiLine (true);
         errorMessage.setCaretVisible (false);

@@ -114,14 +114,14 @@ public:
                 : owner (owner_),
                   defaultButton ("Reset to Default")
             {
-                addAndMakeVisible (&selector);
+                addAndMakeVisible (selector);
                 selector.setName ("Colour");
                 selector.setCurrentColour (owner->getColour());
                 selector.addChangeListener (owner);
 
                 if (canReset)
                 {
-                    addAndMakeVisible (&defaultButton);
+                    addAndMakeVisible (defaultButton);
                     defaultButton.addListener (this);
                 }
             }

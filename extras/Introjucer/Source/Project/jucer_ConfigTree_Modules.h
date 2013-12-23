@@ -71,7 +71,7 @@ private:
         ModuleSettingsPanel (Project& p, const String& modID)
             : project (p), moduleID (modID)
         {
-            addAndMakeVisible (&group);
+            addAndMakeVisible (group);
             group.setName ("Module: " + moduleID);
             refresh();
         }
@@ -202,7 +202,7 @@ private:
                   missingDependencies (project.getModules().getExtraDependenciesNeeded (modID)),
                   fixButton ("Add Required Modules")
             {
-                addAndMakeVisible (&fixButton);
+                addAndMakeVisible (fixButton);
                 fixButton.setColour (TextButton::buttonColourId, Colours::red);
                 fixButton.setColour (TextButton::textColourOffId, Colours::white);
                 fixButton.addListener (this);

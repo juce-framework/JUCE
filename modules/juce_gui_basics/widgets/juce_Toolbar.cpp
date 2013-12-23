@@ -713,13 +713,13 @@ private:
                                           + TRANS ("Items on the toolbar can also be dragged around to change their order, or dragged off the edge to delete them.")),
             defaultButton (TRANS ("Restore to default set of items"))
         {
-            addAndMakeVisible (&palette);
+            addAndMakeVisible (palette);
 
             if ((optionFlags & (Toolbar::allowIconsOnlyChoice
                                  | Toolbar::allowIconsWithTextChoice
                                  | Toolbar::allowTextOnlyChoice)) != 0)
             {
-                addAndMakeVisible (&styleBox);
+                addAndMakeVisible (styleBox);
                 styleBox.setEditableText (false);
 
                 if ((optionFlags & Toolbar::allowIconsOnlyChoice) != 0)     styleBox.addItem (TRANS("Show icons only"), 1);
@@ -741,11 +741,11 @@ private:
 
             if ((optionFlags & Toolbar::showResetToDefaultsButton) != 0)
             {
-                addAndMakeVisible (&defaultButton);
+                addAndMakeVisible (defaultButton);
                 defaultButton.addListener (this);
             }
 
-            addAndMakeVisible (&instructions);
+            addAndMakeVisible (instructions);
             instructions.setFont (Font (13.0f));
 
             setSize (500, 300);

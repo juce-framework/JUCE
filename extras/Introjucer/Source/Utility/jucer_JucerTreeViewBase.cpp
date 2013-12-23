@@ -144,7 +144,7 @@ public:
         ed.setText (item.getRenamingName());
         ed.setBounds (bounds);
 
-        parent.addAndMakeVisible (&ed);
+        parent.addAndMakeVisible (ed);
         ed.enterModalState (true, this);
     }
 

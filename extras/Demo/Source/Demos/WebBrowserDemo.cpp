@@ -74,7 +74,7 @@ public:
         setOpaque (true);
 
         // Create an address box..
-        addAndMakeVisible (&addressTextBox);
+        addAndMakeVisible (addressTextBox);
         addressTextBox.setTextToShowWhenEmpty ("Enter a web address, e.g. http://www.juce.com", Colours::grey);
         addressTextBox.addListener (this);
 
@@ -82,11 +82,11 @@ public:
         addAndMakeVisible (webView = new DemoBrowserComponent (addressTextBox));
 
         // add some buttons..
-        addAndMakeVisible (&goButton);
+        addAndMakeVisible (goButton);
         goButton.addListener (this);
-        addAndMakeVisible (&backButton);
+        addAndMakeVisible (backButton);
         backButton.addListener (this);
-        addAndMakeVisible (&forwardButton);
+        addAndMakeVisible (forwardButton);
         forwardButton.addListener (this);
 
         // send the browser to a start page..

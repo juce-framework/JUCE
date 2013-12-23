@@ -38,7 +38,7 @@ public:
                             = new AudioDeviceSelectorComponent (MainAppWindow::getSharedAudioDeviceManager(),
                                                                 0, 256, 0, 256, true, true, true, false));
 
-        addAndMakeVisible (&diagnosticsBox);
+        addAndMakeVisible (diagnosticsBox);
         diagnosticsBox.setMultiLine (true);
         diagnosticsBox.setReturnKeyStartsNewLine (true);
         diagnosticsBox.setReadOnly (true);
