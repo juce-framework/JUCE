@@ -215,12 +215,12 @@ public:
         pa.mScope = input ? kAudioDevicePropertyScopeInput : kAudioDevicePropertyScopeOutput;
         pa.mElement = kAudioObjectPropertyElementMaster;
 
-        if (OK (AudioObjectGetPropertyDataSize (deviceID, &pa, 0, 0, &size)))
+        if (OK (AudioObjectGetPropertyDataSize (deviceID, &pa, 0, nullptr, &size)))
         {
             HeapBlock<AudioBufferList> bufList;
             bufList.calloc (size, 1);
 
-            if (OK (AudioObjectGetPropertyData (deviceID, &pa, 0, 0, &size, bufList)))
+            if (OK (AudioObjectGetPropertyData (deviceID, &pa, 0, nullptr, &size, bufList)))
             {
                 const int numStreams = (int) bufList->mNumberBuffers;
 
@@ -234,11 +234,23 @@ public:
                         NSString* nameNSString = nil;
                         size = sizeof (nameNSString);
 
-                        if (AudioDeviceGetProperty (deviceID, chanNum + 1, input, kAudioDevicePropertyChannelNameCFString, &size, &nameNSString) == noErr)
+                       #if JUCE_CLANG
+                        // Very irritating that AudioDeviceGetProperty is marked as deprecated, since
+                        // there seems to be no replacement way of getting the channel names.
+                        #pragma clang diagnostic push
+                        #pragma clang diagnostic ignored "-Wdeprecated-declarations"
+                       #endif
+
+                        if (AudioDeviceGetProperty (deviceID, chanNum + 1, input, kAudioDevicePropertyChannelNameCFString,
+                                                    &size, &nameNSString) == noErr)
                         {
                             name = nsStringToJuce (nameNSString);
                             [nameNSString release];
                         }
+
+                       #if JUCE_CLANG
+                        #pragma clang diagnostic pop
+                       #endif
 
                         if ((input ? activeInputChans : activeOutputChans) [chanNum])
                         {
@@ -269,12 +281,12 @@ public:
         pa.mSelector = kAudioDevicePropertyAvailableNominalSampleRates;
         UInt32 size = 0;
 
-        if (OK (AudioObjectGetPropertyDataSize (deviceID, &pa, 0, 0, &size)))
+        if (OK (AudioObjectGetPropertyDataSize (deviceID, &pa, 0, nullptr, &size)))
         {
             HeapBlock <AudioValueRange> ranges;
             ranges.calloc (size, 1);
 
-            if (OK (AudioObjectGetPropertyData (deviceID, &pa, 0, 0, &size, ranges)))
+            if (OK (AudioObjectGetPropertyData (deviceID, &pa, 0, nullptr, &size, ranges)))
             {
                 static const double possibleRates[] = { 44100.0, 48000.0, 88200.0, 96000.0, 176400.0, 192000.0 };
 
@@ -308,12 +320,12 @@ public:
         pa.mSelector = kAudioDevicePropertyBufferFrameSizeRange;
         UInt32 size = 0;
 
-        if (OK (AudioObjectGetPropertyDataSize (deviceID, &pa, 0, 0, &size)))
+        if (OK (AudioObjectGetPropertyDataSize (deviceID, &pa, 0, nullptr, &size)))
         {
             HeapBlock <AudioValueRange> ranges;
             ranges.calloc (size, 1);
 
-            if (OK (AudioObjectGetPropertyData (deviceID, &pa, 0, 0, &size, ranges)))
+            if (OK (AudioObjectGetPropertyData (deviceID, &pa, 0, nullptr, &size, ranges)))
             {
                 newBufferSizes.add ((int) (ranges[0].mMinimum + 15) & ~15);
 
@@ -348,7 +360,7 @@ public:
         pa.mElement = kAudioObjectPropertyElementMaster;
         pa.mSelector = kAudioDevicePropertyLatency;
         pa.mScope = scope;
-        AudioObjectGetPropertyData (deviceID, &pa, 0, 0, &size, &lat);
+        AudioObjectGetPropertyData (deviceID, &pa, 0, nullptr, &size, &lat);
         return (int) lat;
     }
 
@@ -368,19 +380,19 @@ public:
         UInt32 isAlive;
         UInt32 size = sizeof (isAlive);
         pa.mSelector = kAudioDevicePropertyDeviceIsAlive;
-        if (OK (AudioObjectGetPropertyData (deviceID, &pa, 0, 0, &size, &isAlive)) && isAlive == 0)
+        if (OK (AudioObjectGetPropertyData (deviceID, &pa, 0, nullptr, &size, &isAlive)) && isAlive == 0)
             return;
 
         Float64 sr;
         size = sizeof (sr);
         pa.mSelector = kAudioDevicePropertyNominalSampleRate;
-        if (OK (AudioObjectGetPropertyData (deviceID, &pa, 0, 0, &size, &sr)))
+        if (OK (AudioObjectGetPropertyData (deviceID, &pa, 0, nullptr, &size, &sr)))
             sampleRate = sr;
 
         UInt32 framesPerBuf = bufferSize;
         size = sizeof (framesPerBuf);
         pa.mSelector = kAudioDevicePropertyBufferFrameSize;
-        AudioObjectGetPropertyData (deviceID, &pa, 0, 0, &size, &framesPerBuf);
+        AudioObjectGetPropertyData (deviceID, &pa, 0, nullptr, &size, &framesPerBuf);
 
         Array<int> newBufferSizes (getBufferSizesFromDevice());
         Array<double> newSampleRates (getSampleRatesFromDevice());
@@ -432,7 +444,7 @@ public:
             pa.mScope = input ? kAudioDevicePropertyScopeInput : kAudioDevicePropertyScopeOutput;
             pa.mElement = kAudioObjectPropertyElementMaster;
 
-            if (OK (AudioObjectGetPropertyData (deviceID, &pa, 0, 0, &transSize, &avt)))
+            if (OK (AudioObjectGetPropertyData (deviceID, &pa, 0, nullptr, &transSize, &avt)))
                 s.add (buffer);
         }
 
@@ -452,7 +464,7 @@ public:
 
         if (deviceID != 0)
         {
-            if (OK (AudioObjectGetPropertyData (deviceID, &pa, 0, 0, &size, &currentSourceID)))
+            if (OK (AudioObjectGetPropertyData (deviceID, &pa, 0, nullptr, &size, &currentSourceID)))
             {
                 HeapBlock <OSType> types;
                 const int num = getAllDataSourcesForDevice (deviceID, types);
@@ -635,7 +647,7 @@ public:
                 pa.mScope = kAudioObjectPropertyScopeWildcard;
                 pa.mElement = kAudioObjectPropertyElementMaster;
 
-                OK (AudioObjectGetPropertyData (deviceID, &pa, 0, 0, &size, &running));
+                OK (AudioObjectGetPropertyData (deviceID, &pa, 0, nullptr, &size, &running));
 
                 if (running == 0)
                     break;
@@ -791,7 +803,7 @@ private:
     }
 
     //==============================================================================
-    static int getAllDataSourcesForDevice (AudioDeviceID deviceID, HeapBlock <OSType>& types)
+    static int getAllDataSourcesForDevice (AudioDeviceID deviceID, HeapBlock<OSType>& types)
     {
         AudioObjectPropertyAddress pa;
         pa.mSelector = kAudioDevicePropertyDataSources;
@@ -800,11 +812,11 @@ private:
         UInt32 size = 0;
 
         if (deviceID != 0
-             && AudioObjectGetPropertyDataSize (deviceID, &pa, 0, 0, &size) == noErr)
+             && AudioObjectGetPropertyDataSize (deviceID, &pa, 0, nullptr, &size) == noErr)
         {
             types.calloc (size, 1);
 
-            if (AudioObjectGetPropertyData (deviceID, &pa, 0, 0, &size, types) == noErr)
+            if (AudioObjectGetPropertyData (deviceID, &pa, 0, nullptr, &size, types) == noErr)
                 return size / (int) sizeof (OSType);
         }
 
@@ -1698,12 +1710,12 @@ public:
         pa.mScope = kAudioObjectPropertyScopeWildcard;
         pa.mElement = kAudioObjectPropertyElementMaster;
 
-        if (AudioObjectGetPropertyDataSize (kAudioObjectSystemObject, &pa, 0, 0, &size) == noErr)
+        if (AudioObjectGetPropertyDataSize (kAudioObjectSystemObject, &pa, 0, nullptr, &size) == noErr)
         {
             HeapBlock <AudioDeviceID> devs;
             devs.calloc (size, 1);
 
-            if (AudioObjectGetPropertyData (kAudioObjectSystemObject, &pa, 0, 0, &size, devs) == noErr)
+            if (AudioObjectGetPropertyData (kAudioObjectSystemObject, &pa, 0, nullptr, &size, devs) == noErr)
             {
                 const int num = size / (int) sizeof (AudioDeviceID);
                 for (int i = 0; i < num; ++i)
@@ -1712,7 +1724,7 @@ public:
                     size = sizeof (name);
                     pa.mSelector = kAudioDevicePropertyDeviceName;
 
-                    if (AudioObjectGetPropertyData (devs[i], &pa, 0, 0, &size, name) == noErr)
+                    if (AudioObjectGetPropertyData (devs[i], &pa, 0, nullptr, &size, name) == noErr)
                     {
                         const String nameString (String::fromUTF8 (name, (int) strlen (name)));
                         const int numIns = getNumChannels (devs[i], true);
@@ -1762,7 +1774,7 @@ public:
         pa.mScope    = kAudioObjectPropertyScopeWildcard;
         pa.mElement  = kAudioObjectPropertyElementMaster;
 
-        if (AudioObjectGetPropertyData (kAudioObjectSystemObject, &pa, 0, 0, &size, &deviceID) == noErr)
+        if (AudioObjectGetPropertyData (kAudioObjectSystemObject, &pa, 0, nullptr, &size, &deviceID) == noErr)
         {
             if (forInput)
             {
@@ -1853,12 +1865,12 @@ private:
         pa.mScope = input ? kAudioDevicePropertyScopeInput : kAudioDevicePropertyScopeOutput;
         pa.mElement = kAudioObjectPropertyElementMaster;
 
-        if (AudioObjectGetPropertyDataSize (deviceID, &pa, 0, 0, &size) == noErr)
+        if (AudioObjectGetPropertyDataSize (deviceID, &pa, 0, nullptr, &size) == noErr)
         {
             HeapBlock <AudioBufferList> bufList;
             bufList.calloc (size, 1);
 
-            if (AudioObjectGetPropertyData (deviceID, &pa, 0, 0, &size, bufList) == noErr)
+            if (AudioObjectGetPropertyData (deviceID, &pa, 0, nullptr, &size, bufList) == noErr)
             {
                 const int numStreams = (int) bufList->mNumberBuffers;
 
