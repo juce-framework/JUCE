@@ -186,7 +186,7 @@ void Button::setToggleState (const bool shouldBeOn, const NotificationType notif
             // async callbacks aren't possible here
             jassert (notification != sendNotificationAsync);
 
-            sendClickMessage (ModifierKeys());
+            sendClickMessage (ModifierKeys::getCurrentModifiers());
 
             if (deletionWatcher == nullptr)
                 return;
