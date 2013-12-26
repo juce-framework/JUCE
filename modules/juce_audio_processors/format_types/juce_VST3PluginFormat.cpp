@@ -43,9 +43,14 @@
  #pragma clang diagnostic ignored "-Wshadow"
 #endif
 
-// Got an include error here? If so, you'll need to install the VST3 SDK somewhere,
-// and use the introjucer or your IDE to add it to your include path. The introjucer
-// has a special box for specifying this path for each export target.
+/*  These files come with the Steinberg VST3 SDK - to get them, you'll need to
+    visit the Steinberg website and agree to whatever is currently required to
+    get them.
+
+    Then, you'll need to make sure your include path contains your "VST SDK3"
+    directory (or whatever you've named it on your machine). The introjucer has
+    a special box for setting this path.
+*/
 #include <base/source/baseiids.cpp>
 #include <base/source/fatomic.cpp>
 #include <base/source/fbuffer.cpp>

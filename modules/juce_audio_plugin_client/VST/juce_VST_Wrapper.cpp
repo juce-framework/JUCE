@@ -55,12 +55,6 @@
 #endif
 
 //==============================================================================
-/*  These files come with the Steinberg VST SDK - to get them, you'll need to
-    visit the Steinberg website and jump through some hoops to sign up as a
-    VST developer.
-
-    Then, you'll need to make sure your include path contains your "vstsdk2.4" directory.
-*/
 #ifndef _MSC_VER
  #define __cdecl
 #endif
@@ -73,7 +67,15 @@
  #pragma clang diagnostic ignored "-Wdeprecated-writable-strings"
 #endif
 
-// VSTSDK V2.4 includes..
+/*  These files come with the Steinberg VST SDK - to get them, you'll need to
+    visit the Steinberg website and agree to whatever is currently required to
+    get them. The best version to get is the VST3 SDK, which also contains
+    the older VST2.4 files.
+
+    Then, you'll need to make sure your include path contains your "VST SDK3"
+    directory (or whatever you've named it on your machine). The introjucer has
+    a special box for setting this path.
+*/
 #include <public.sdk/source/vst2.x/audioeffectx.h>
 #include <public.sdk/source/vst2.x/aeffeditor.h>
 #include <public.sdk/source/vst2.x/audioeffectx.cpp>
