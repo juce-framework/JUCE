@@ -1827,14 +1827,10 @@ public:
         const int inputIndex  = inputDeviceNames.indexOf (inputDeviceName);
         const int outputIndex = outputDeviceNames.indexOf (outputDeviceName);
 
-        String deviceName (outputDeviceName);
-        if (deviceName.isEmpty())
-            deviceName = inputDeviceName;
-
-        AudioDeviceID inputDeviceID = inputIds [inputIndex];
+        AudioDeviceID inputDeviceID  = inputIds [inputIndex];
         AudioDeviceID outputDeviceID = outputIds [outputIndex];
 
-        if (inputDeviceID == 0 && inputDeviceID == 0)
+        if (inputDeviceID == 0 && outputDeviceID == 0)
             return nullptr;
 
         if (inputDeviceID == outputDeviceID)
@@ -1851,7 +1847,8 @@ public:
         if (in == nullptr)   return out.release();
         if (out == nullptr)  return in.release();
 
-        ScopedPointer<AudioIODeviceCombiner> combo (new AudioIODeviceCombiner (deviceName));
+        ScopedPointer<AudioIODeviceCombiner> combo (new AudioIODeviceCombiner (outputDeviceName.isEmpty() ? inputDeviceName
+                                                                                                          : outputDeviceName));
         combo->addDevice (in.release());
         combo->addDevice (out.release());
         return combo.release();
