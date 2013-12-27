@@ -1712,7 +1712,7 @@ public:
 
         if (AudioObjectGetPropertyDataSize (kAudioObjectSystemObject, &pa, 0, nullptr, &size) == noErr)
         {
-            HeapBlock <AudioDeviceID> devs;
+            HeapBlock<AudioDeviceID> devs;
             devs.calloc (size, 1);
 
             if (AudioObjectGetPropertyData (kAudioObjectSystemObject, &pa, 0, nullptr, &size, devs) == noErr)
@@ -1833,22 +1833,23 @@ public:
         if (inputDeviceID == 0 && outputDeviceID == 0)
             return nullptr;
 
+        String combinedName (outputDeviceName.isEmpty() ? inputDeviceName : outputDeviceName);
+
         if (inputDeviceID == outputDeviceID)
-            return new CoreAudioIODevice (outputDeviceName, inputDeviceID, inputIndex, outputDeviceID, outputIndex);
+            return new CoreAudioIODevice (combinedName, inputDeviceID, inputIndex, outputDeviceID, outputIndex);
 
         ScopedPointer<CoreAudioIODevice> in, out;
 
         if (inputDeviceID != 0)
-            in = new CoreAudioIODevice (outputDeviceName, inputDeviceID, inputIndex, 0, -1);
+            in = new CoreAudioIODevice (inputDeviceName, inputDeviceID, inputIndex, 0, -1);
 
         if (outputDeviceID != 0)
-            out = new CoreAudioIODevice (inputDeviceName, 0, -1, outputDeviceID, outputIndex);
+            out = new CoreAudioIODevice (outputDeviceName, 0, -1, outputDeviceID, outputIndex);
 
         if (in == nullptr)   return out.release();
         if (out == nullptr)  return in.release();
 
-        ScopedPointer<AudioIODeviceCombiner> combo (new AudioIODeviceCombiner (outputDeviceName.isEmpty() ? inputDeviceName
-                                                                                                          : outputDeviceName));
+        ScopedPointer<AudioIODeviceCombiner> combo (new AudioIODeviceCombiner (combinedName));
         combo->addDevice (in.release());
         combo->addDevice (out.release());
         return combo.release();
