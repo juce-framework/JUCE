@@ -128,7 +128,7 @@ public:
 
             if (newInt != 0)
             {
-                int v = abs ((int) (newInt * 10000000));
+                int v = std::abs (roundToInt (newInt * 10000000));
 
                 while ((v % 10) == 0)
                 {
