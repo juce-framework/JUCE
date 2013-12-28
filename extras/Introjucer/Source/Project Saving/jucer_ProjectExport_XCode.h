@@ -194,6 +194,10 @@ protected:
         String getCustomXcodeFlags() const             { return config   [Ids::customXcodeFlags]; }
         Value  getCppLibTypeValue()                    { return getValue (Ids::cppLibType); }
         String getCppLibType() const                   { return config   [Ids::cppLibType]; }
+        Value  getFastMathValue()                      { return getValue (Ids::fastMath); }
+        bool   isFastMathEnabled() const               { return config   [Ids::fastMath]; }
+        Value  getLinkTimeOptimisationValue()          { return getValue (Ids::linkTimeOptimisation); }
+        bool   isLinkTimeOptimisationEnabled() const   { return config   [Ids::linkTimeOptimisation]; }
 
         void createConfigProperties (PropertyListBuilder& props)
         {
@@ -247,6 +251,12 @@ protected:
 
             props.add (new ChoicePropertyComponent (getCppLibTypeValue(), "C++ Library", StringArray (cppLibNames), cppLibValues),
                        "The type of C++ std lib that will be linked.");
+
+            props.add (new BooleanPropertyComponent (getFastMathValue(), "Relax IEEE compliance", "Enabled"),
+                       "Enable this to use FAST_MATH non-IEEE mode. (Warning: this can have unexpected results!)");
+
+            props.add (new BooleanPropertyComponent (getLinkTimeOptimisationValue(), "Link-Time Optimisation", "Enabled"),
+                       "Enable this to perform link-time code generation. This is recommended for release builds.");
         }
 
         bool iOS;
@@ -682,6 +692,12 @@ private:
         s.add ("HEADER_SEARCH_PATHS = " + getHeaderSearchPaths (config));
         s.add ("GCC_OPTIMIZATION_LEVEL = " + config.getGCCOptimisationFlag());
         s.add ("INFOPLIST_FILE = " + infoPlistFile.getFileName());
+
+        if (config.isLinkTimeOptimisationEnabled())
+            s.add ("LLVM_LTO = YES");
+
+        if (config.isFastMathEnabled())
+            s.add ("GCC_FAST_MATH = YES");
 
         const String extraFlags (replacePreprocessorTokens (config, getExtraCompilerFlagsString()).trim());
         if (extraFlags.isNotEmpty())

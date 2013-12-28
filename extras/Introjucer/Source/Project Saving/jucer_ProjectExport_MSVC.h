@@ -1018,6 +1018,9 @@ protected:
         Value getArchitectureType()             { return getValue (Ids::winArchitecture); }
         bool is64Bit() const                    { return config [Ids::winArchitecture].toString() == get64BitArchName(); }
 
+        Value getFastMathValue()                { return getValue (Ids::fastMath); }
+        bool isFastMathEnabled() const          { return config [Ids::fastMath]; }
+
         //==============================================================================
         void createConfigProperties (PropertyListBuilder& props) override
         {
@@ -1028,6 +1031,9 @@ protected:
             props.add (new ChoicePropertyComponent (getArchitectureType(), "Architecture",
                                                     StringArray (archTypes, numElementsInArray (archTypes)),
                                                     Array<var> (archTypes, numElementsInArray (archTypes))));
+
+            props.add (new BooleanPropertyComponent (getFastMathValue(), "Relax IEEE compliance", "Enabled"),
+                       "Enable this to use FAST_MATH non-IEEE mode. (Warning: this can have unexpected results!)");
         }
     };
 
@@ -1040,7 +1046,7 @@ protected:
 
     static bool is64Bit (const BuildConfiguration& config)
     {
-        return dynamic_cast <const VC2010BuildConfiguration&> (config).is64Bit();
+        return dynamic_cast<const VC2010BuildConfiguration&> (config).is64Bit();
     }
 
     //==============================================================================
@@ -1091,7 +1097,7 @@ protected:
 
         for (ConstConfigIterator i (*this); i.next();)
         {
-            const MSVCBuildConfiguration& config = dynamic_cast <const MSVCBuildConfiguration&> (*i);
+            const VC2010BuildConfiguration& config = dynamic_cast<const VC2010BuildConfiguration&> (*i);
 
             XmlElement* e = projectXml.createNewChildElement ("PropertyGroup");
             setConditionAttribute (*e, config);
@@ -1107,7 +1113,7 @@ protected:
             if (! (config.isDebug() || config.shouldDisableWholeProgramOpt()))
                 e->createNewChildElement ("WholeProgramOptimization")->addTextElement ("true");
 
-            if (is64Bit (config))
+            if (config.is64Bit())
                 e->createNewChildElement ("PlatformToolset")->addTextElement (getPlatformToolset());
         }
 
@@ -1141,7 +1147,7 @@ protected:
 
             for (ConstConfigIterator i (*this); i.next();)
             {
-                const MSVCBuildConfiguration& config = dynamic_cast <const MSVCBuildConfiguration&> (*i);
+                const VC2010BuildConfiguration& config = dynamic_cast<const VC2010BuildConfiguration&> (*i);
 
                 {
                     XmlElement* outdir = props->createNewChildElement ("OutDir");
@@ -1181,7 +1187,7 @@ protected:
 
         for (ConstConfigIterator i (*this); i.next();)
         {
-            const MSVCBuildConfiguration& config = dynamic_cast <const MSVCBuildConfiguration&> (*i);
+            const VC2010BuildConfiguration& config = dynamic_cast<const VC2010BuildConfiguration&> (*i);
 
             const bool isDebug = config.isDebug();
 
@@ -1207,7 +1213,7 @@ protected:
 
                 if (isDebug && config.getOptimisationLevelInt() <= optimisationOff)
                 {
-                    isUsingEditAndContinue = ! is64Bit (config);
+                    isUsingEditAndContinue = ! config.is64Bit();
 
                     cl->createNewChildElement ("DebugInformationFormat")
                             ->addTextElement (isUsingEditAndContinue ? "EditAndContinue"
@@ -1228,6 +1234,9 @@ protected:
                 cl->createNewChildElement ("WarningLevel")->addTextElement ("Level" + String (config.getWarningLevel()));
                 cl->createNewChildElement ("SuppressStartupBanner")->addTextElement ("true");
                 cl->createNewChildElement ("MultiProcessorCompilation")->addTextElement ("true");
+
+                if (config.isFastMathEnabled())
+                    cl->createNewChildElement ("FloatingPointModel")->addTextElement ("Fast");
 
                 const String extraFlags (replacePreprocessorTokens (config, getExtraCompilerFlagsString()).trim());
                 if (extraFlags.isNotEmpty())
@@ -1250,7 +1259,7 @@ protected:
                 link->createNewChildElement ("ProgramDatabaseFile")->addTextElement (getIntDirFile (config.getOutputFilename (".pdb", true)));
                 link->createNewChildElement ("SubSystem")->addTextElement (msvcIsWindowsSubsystem ? "Windows" : "Console");
 
-                if (! is64Bit (config))
+                if (! config.is64Bit())
                     link->createNewChildElement ("TargetMachine")->addTextElement ("MachineX86");
 
                 if (isUsingEditAndContinue)
