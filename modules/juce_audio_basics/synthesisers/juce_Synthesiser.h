@@ -141,12 +141,17 @@ public:
     /** Called to let the voice know that the pitch wheel has been moved.
         This will be called during the rendering callback, so must be fast and thread-safe.
     */
-    virtual void pitchWheelMoved (int newValue) = 0;
+    virtual void pitchWheelMoved (int newPitchWheelValue) = 0;
 
     /** Called to let the voice know that a midi controller has been moved.
         This will be called during the rendering callback, so must be fast and thread-safe.
     */
-    virtual void controllerMoved (int controllerNumber, int newValue) = 0;
+    virtual void controllerMoved (int controllerNumber, int newControllerValue) = 0;
+
+    /** Called to let the voice know that the aftertouch has changed.
+        This will be called during the rendering callback, so must be fast and thread-safe.
+    */
+    virtual void aftertouchChanged (int newAftertouchValue);
 
     //==============================================================================
     /** Renders the next block of data for this voice.
@@ -405,6 +410,20 @@ public:
     virtual void handleController (int midiChannel,
                                    int controllerNumber,
                                    int controllerValue);
+
+    /** Sends an aftertouch message.
+
+        This will send an aftertouch message to any voices that are playing sounds on
+        the given midi channel and note number.
+
+        This method will be called automatically according to the midi data passed into
+        renderNextBlock(), but may be called explicitly too.
+
+        @param midiChannel          the midi channel, from 1 to 16 inclusive
+        @param aftertouchValue      the aftertouch value, between 0 and 127,
+                                    as returned by MidiMessage::getAftertouchValue()
+    */
+    virtual void handleAftertouch (int midiChannel, int midiNoteNumber, int aftertouchValue);
 
     /** Handles a sustain pedal event. */
     virtual void handleSustainPedal (int midiChannel, bool isDown);
