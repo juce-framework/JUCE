@@ -621,7 +621,12 @@ Typeface::Ptr Typeface::createSystemTypefaceFor (const Font& font)
     const Direct2DFactories& factories = Direct2DFactories::getInstance();
 
     if (factories.systemFonts != nullptr)
-        return new WindowsDirectWriteTypeface (font, factories.systemFonts);
+    {
+        ScopedPointer<WindowsDirectWriteTypeface> wtf (new WindowsDirectWriteTypeface (font, factories.systemFonts));
+
+        if (wtf->loadedOk())
+            return wtf.release();
+    }
    #endif
 
     return new WindowsTypeface (font);
