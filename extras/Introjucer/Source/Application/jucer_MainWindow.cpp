@@ -111,7 +111,7 @@ void MainWindow::makeVisible()
 
 ProjectContentComponent* MainWindow::getProjectContentComponent() const
 {
-    return dynamic_cast <ProjectContentComponent*> (getContentComponent());
+    return dynamic_cast<ProjectContentComponent*> (getContentComponent());
 }
 
 void MainWindow::closeButtonPressed()
@@ -235,12 +235,12 @@ void MainWindow::filesDropped (const StringArray& filenames, int /*mouseX*/, int
 bool MainWindow::shouldDropFilesWhenDraggedExternally (const DragAndDropTarget::SourceDetails& sourceDetails,
                                                        StringArray& files, bool& canMoveFiles)
 {
-    if (TreeView* tv = dynamic_cast <TreeView*> (sourceDetails.sourceComponent.get()))
+    if (TreeView* tv = dynamic_cast<TreeView*> (sourceDetails.sourceComponent.get()))
     {
         Array<JucerTreeViewBase*> selected;
 
         for (int i = tv->getNumSelectedItems(); --i >= 0;)
-            if (JucerTreeViewBase* b = dynamic_cast <JucerTreeViewBase*> (tv->getSelectedItem(i)))
+            if (JucerTreeViewBase* b = dynamic_cast<JucerTreeViewBase*> (tv->getSelectedItem(i)))
                 selected.add (b);
 
         if (selected.size() > 0)
@@ -444,7 +444,7 @@ MainWindow* MainWindowList::getOrCreateFrontmostWindow()
 
     for (int i = Desktop::getInstance().getNumComponents(); --i >= 0;)
     {
-        MainWindow* mw = dynamic_cast <MainWindow*> (Desktop::getInstance().getComponent (i));
+        MainWindow* mw = dynamic_cast<MainWindow*> (Desktop::getInstance().getComponent (i));
         if (windows.contains (mw))
             return mw;
     }
@@ -459,12 +459,19 @@ MainWindow* MainWindowList::getOrCreateEmptyWindow()
 
     for (int i = Desktop::getInstance().getNumComponents(); --i >= 0;)
     {
-        MainWindow* mw = dynamic_cast <MainWindow*> (Desktop::getInstance().getComponent (i));
+        MainWindow* mw = dynamic_cast<MainWindow*> (Desktop::getInstance().getComponent (i));
         if (windows.contains (mw) && mw->getProject() == nullptr)
             return mw;
     }
 
     return createNewMainWindow();
+}
+
+void MainWindowList::updateAllWindowTitles()
+{
+    for (int i = 0; i < windows.size(); ++i)
+        if (ProjectContentComponent* pc = windows.getUnchecked(i)->getProjectContentComponent())
+            pc->updateMainWindowTitle();
 }
 
 void MainWindowList::avoidSuperimposedWindows (MainWindow* const mw)
@@ -499,7 +506,7 @@ void MainWindowList::saveCurrentlyOpenProjectList()
     Desktop& desktop = Desktop::getInstance();
     for (int i = 0; i < desktop.getNumComponents(); ++i)
     {
-        if (MainWindow* const mw = dynamic_cast <MainWindow*> (desktop.getComponent(i)))
+        if (MainWindow* const mw = dynamic_cast<MainWindow*> (desktop.getComponent(i)))
             if (Project* p = mw->getProject())
                 projects.add (p->getFile());
     }
@@ -526,7 +533,7 @@ Project* MainWindowList::getFrontmostProject()
     Desktop& desktop = Desktop::getInstance();
 
     for (int i = desktop.getNumComponents(); --i >= 0;)
-        if (MainWindow* const mw = dynamic_cast <MainWindow*> (desktop.getComponent(i)))
+        if (MainWindow* const mw = dynamic_cast<MainWindow*> (desktop.getComponent(i)))
             if (Project* p = mw->getProject())
                 return p;
 

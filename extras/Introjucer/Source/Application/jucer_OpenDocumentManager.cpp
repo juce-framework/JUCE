@@ -257,8 +257,13 @@ bool OpenDocumentManager::anyFilesNeedSaving() const
 bool OpenDocumentManager::saveAll()
 {
     for (int i = documents.size(); --i >= 0;)
+    {
         if (! documents.getUnchecked (i)->save())
             return false;
+
+        IntrojucerApp::getApp().mainWindowList.updateAllWindowTitles();
+        IntrojucerApp::getCommandManager().commandStatusChanged();
+    }
 
     return true;
 }
