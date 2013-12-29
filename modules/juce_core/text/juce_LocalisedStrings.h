@@ -183,11 +183,18 @@ public:
     */
     void addStrings (const LocalisedStrings&);
 
+    /** Gives this object a set of strings to use as a fallback if a string isn't found.
+        The object that is passed-in will be owned and deleted by this object
+        when no longer needed. It can be nullptr to clear the existing fallback object.
+    */
+    void setFallback (LocalisedStrings* fallbackStrings);
+
 private:
     //==============================================================================
     String languageName;
     StringArray countryCodes;
     StringPairArray translations;
+    ScopedPointer<LocalisedStrings> fallback;
 
     void loadFromText (const String&, bool ignoreCase);
 
