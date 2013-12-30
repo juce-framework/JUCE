@@ -246,7 +246,7 @@ private:
                 if (anyFailed)
                     AlertWindow::showMessageBoxAsync (AlertWindow::WarningIcon,
                                                       "Adding Missing Dependencies",
-                                                      "Couldn't locate some of these modules - you'll beed to find their "
+                                                      "Couldn't locate some of these modules - you'll need to find their "
                                                       "folders manually and add them to the list.");
             }
 
