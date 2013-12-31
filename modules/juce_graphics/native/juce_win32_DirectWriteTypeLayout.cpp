@@ -165,6 +165,9 @@ namespace DirectWriteTypeLayout
         ComSmartPtr<IDWriteFontFace> dwFontFace;
         dwFont->CreateFontFace (dwFontFace.resetAndGetPointerAddress());
 
+        if (dwFontFace == nullptr)
+            return 1.0f;
+
         DWRITE_FONT_METRICS dwFontMetrics;
         dwFontFace->GetMetrics (&dwFontMetrics);
 
