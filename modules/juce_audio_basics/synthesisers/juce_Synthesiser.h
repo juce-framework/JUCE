@@ -420,6 +420,7 @@ public:
         renderNextBlock(), but may be called explicitly too.
 
         @param midiChannel          the midi channel, from 1 to 16 inclusive
+        @param midiNoteNumber       the midi note number, 0 to 127
         @param aftertouchValue      the aftertouch value, between 0 and 127,
                                     as returned by MidiMessage::getAftertouchValue()
     */
