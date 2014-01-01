@@ -36,6 +36,21 @@ LocalisedStrings::LocalisedStrings (const File& fileToLoad, bool ignoreCase)
     loadFromText (fileToLoad.loadFileAsString(), ignoreCase);
 }
 
+LocalisedStrings::LocalisedStrings (const LocalisedStrings& other)
+    : languageName (other.languageName), countryCodes (other.countryCodes),
+      translations (other.translations), fallback (createCopyIfNotNull (other.fallback.get()))
+{
+}
+
+LocalisedStrings& LocalisedStrings::operator= (const LocalisedStrings& other)
+{
+    languageName = other.languageName;
+    countryCodes = other.countryCodes;
+    translations = other.translations;
+    fallback = createCopyIfNotNull (other.fallback.get());
+    return *this;
+}
+
 LocalisedStrings::~LocalisedStrings()
 {
 }

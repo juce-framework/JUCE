@@ -82,16 +82,17 @@ public:
         When you create one of these, you can call setCurrentMappings() to make it
         the set of mappings that the system's using.
     */
-    LocalisedStrings (const String& fileContents,
-                      bool ignoreCaseOfKeys);
+    LocalisedStrings (const String& fileContents, bool ignoreCaseOfKeys);
 
     /** Creates a set of translations from a file.
 
         When you create one of these, you can call setCurrentMappings() to make it
         the set of mappings that the system's using.
     */
-    LocalisedStrings (const File& fileToLoad,
-                      bool ignoreCaseOfKeys);
+    LocalisedStrings (const File& fileToLoad, bool ignoreCaseOfKeys);
+
+    LocalisedStrings (const LocalisedStrings&);
+    LocalisedStrings& operator= (const LocalisedStrings&);
 
     /** Destructor. */
     ~LocalisedStrings();
@@ -199,7 +200,7 @@ private:
 
     void loadFromText (const String&, bool ignoreCase);
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LocalisedStrings)
+    JUCE_LEAK_DETECTOR (LocalisedStrings)
 };
 
 //==============================================================================
