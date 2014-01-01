@@ -195,10 +195,11 @@ private:
     StringArray countryCodes;
     StringPairArray translations;
     ScopedPointer<LocalisedStrings> fallback;
+    friend struct ContainerDeletePolicy<LocalisedStrings>;
 
     void loadFromText (const String&, bool ignoreCase);
 
-    JUCE_LEAK_DETECTOR (LocalisedStrings)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LocalisedStrings)
 };
 
 //==============================================================================
