@@ -52,27 +52,22 @@ public:
     /** Sets the processor that should be played.
 
         The processor that is passed in will not be deleted or owned by this object.
-        To stop anything playing, pass in 0 to this method.
+        To stop anything playing, pass a nullptr to this method.
     */
     void setProcessor (AudioProcessor* processorToPlay);
 
-    /** Returns the current audio processor that is being played.
-    */
-    AudioProcessor* getCurrentProcessor() const                     { return processor; }
+    /** Returns the current audio processor that is being played. */
+    AudioProcessor* getCurrentProcessor() const noexcept            { return processor; }
 
     /** Returns a midi message collector that you can pass midi messages to if you
         want them to be injected into the midi stream that is being sent to the
         processor.
     */
-    MidiMessageCollector& getMidiMessageCollector()                 { return messageCollector; }
+    MidiMessageCollector& getMidiMessageCollector() noexcept        { return messageCollector; }
 
     //==============================================================================
     /** @internal */
-    void audioDeviceIOCallback (const float** inputChannelData,
-                                int totalNumInputChannels,
-                                float** outputChannelData,
-                                int totalNumOutputChannels,
-                                int numSamples) override;
+    void audioDeviceIOCallback (const float**, int, float**, int, int) override;
     /** @internal */
     void audioDeviceAboutToStart (AudioIODevice*) override;
     /** @internal */
