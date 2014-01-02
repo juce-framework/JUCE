@@ -380,7 +380,7 @@ private:
         addProjectObject();
     }
 
-    static Image fixMacIconImageSize (Image& image)
+    static Image fixMacIconImageSize (Drawable& image)
     {
         const int validSizes[] = { 16, 32, 48, 128, 256, 512, 1024 };
 
@@ -392,7 +392,10 @@ private:
         for (int i = 0; i < numElementsInArray (validSizes); ++i)
         {
             if (w == h && w == validSizes[i])
-                return image;
+            {
+                bestSize = w;
+                break;
+            }
 
             if (jmax (w, h) > validSizes[i])
                 bestSize = validSizes[i];
@@ -447,13 +450,13 @@ private:
         out << pngData;
     }
 
-    void writeIcnsFile (const Array<Image>& images, OutputStream& out) const
+    void writeIcnsFile (const OwnedArray<Drawable>& images, OutputStream& out) const
     {
         MemoryOutputStream data;
 
         for (int i = 0; i < images.size(); ++i)
         {
-            const Image image (fixMacIconImageSize (images.getReference (i)));
+            const Image image (fixMacIconImageSize (*images.getUnchecked(i)));
             jassert (image.getWidth() == image.getHeight());
 
             switch (image.getWidth())
@@ -478,15 +481,15 @@ private:
 
     void createIconFile() const
     {
-        Array<Image> images;
+        OwnedArray<Drawable> images;
 
-        Image bigIcon (getBigIcon());
-        if (bigIcon.isValid())
-            images.add (bigIcon);
+        ScopedPointer<Drawable> bigIcon (getBigIcon());
+        if (bigIcon != nullptr)
+            images.add (bigIcon.release());
 
-        Image smallIcon (getSmallIcon());
-        if (smallIcon.isValid())
-            images.add (smallIcon);
+        ScopedPointer<Drawable> smallIcon (getSmallIcon());
+        if (smallIcon != nullptr)
+            images.add (smallIcon.release());
 
         if (images.size() > 0)
         {

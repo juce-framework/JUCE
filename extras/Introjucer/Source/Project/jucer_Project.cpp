@@ -520,10 +520,10 @@ Project::Item Project::Item::createCopy()         { Item i (*this); i.state = i.
 String Project::Item::getID() const               { return state [Ids::ID]; }
 void Project::Item::setID (const String& newID)   { state.setProperty (Ids::ID, newID, nullptr); }
 
-Image Project::Item::loadAsImageFile() const
+Drawable* Project::Item::loadAsImageFile() const
 {
-    return isValid() ? ImageCache::getFromFile (getFile())
-                     : Image::null;
+    return isValid() ? Drawable::createFromImageFile (getFile())
+                     : nullptr;
 }
 
 Project::Item Project::Item::createGroup (Project& project, const String& name, const String& uid)
@@ -538,7 +538,12 @@ Project::Item Project::Item::createGroup (Project& project, const String& name, 
 bool Project::Item::isFile() const          { return state.hasType (Ids::FILE); }
 bool Project::Item::isGroup() const         { return state.hasType (Ids::GROUP) || isMainGroup(); }
 bool Project::Item::isMainGroup() const     { return state.hasType (Ids::MAINGROUP); }
-bool Project::Item::isImageFile() const     { return isFile() && ImageFileFormat::findImageFormatForFileExtension (getFile()) != nullptr; }
+
+bool Project::Item::isImageFile() const
+{
+    return isFile() && (ImageFileFormat::findImageFormatForFileExtension (getFile()) != nullptr
+                          || getFile().hasFileExtension ("svg"));
+}
 
 Project::Item Project::Item::findItemWithID (const String& targetId) const
 {

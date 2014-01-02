@@ -120,8 +120,8 @@ public:
 
     Value getBigIconImageItemID()               { return getSetting (Ids::bigIcon); }
     Value getSmallIconImageItemID()             { return getSetting (Ids::smallIcon); }
-    Image getBigIcon() const;
-    Image getSmallIcon() const;
+    Drawable* getBigIcon() const;
+    Drawable* getSmallIcon() const;
     Image getBestIconForSize (int size, bool returnNullIfNothingBigEnough) const;
 
     String getExporterIdentifierMacro() const
@@ -361,7 +361,7 @@ protected:
         }
     }
 
-    static Image rescaleImageForIcon (Image image, int iconSize);
+    static Image rescaleImageForIcon (Drawable&, int iconSize);
 
 private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ProjectExporter)

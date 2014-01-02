@@ -498,68 +498,77 @@ void ProjectExporter::createDefaultConfigs()
     }
 }
 
-Image ProjectExporter::getBigIcon() const
+Drawable* ProjectExporter::getBigIcon() const
 {
     return project.getMainGroup().findItemWithID (settings [Ids::bigIcon]).loadAsImageFile();
 }
 
-Image ProjectExporter::getSmallIcon() const
+Drawable* ProjectExporter::getSmallIcon() const
 {
     return project.getMainGroup().findItemWithID (settings [Ids::smallIcon]).loadAsImageFile();
 }
 
 Image ProjectExporter::getBestIconForSize (int size, bool returnNullIfNothingBigEnough) const
 {
-    Image im;
+    Drawable* im = nullptr;
 
-    const Image im1 (getSmallIcon());
-    const Image im2 (getBigIcon());
+    ScopedPointer<Drawable> im1 (getSmallIcon());
+    ScopedPointer<Drawable> im2 (getBigIcon());
 
-    if (im1.isValid() && im2.isValid())
+    if (im1 != nullptr && im2 != nullptr)
     {
-        if (im1.getWidth() >= size && im2.getWidth() >= size)
-            im = im1.getWidth() < im2.getWidth() ? im1 : im2;
-        else if (im1.getWidth() >= size)
+        if (im1->getWidth() >= size && im2->getWidth() >= size)
+            im = im1->getWidth() < im2->getWidth() ? im1 : im2;
+        else if (im1->getWidth() >= size)
             im = im1;
-        else if (im2.getWidth() >= size)
+        else if (im2->getWidth() >= size)
             im = im2;
-        else
-            return Image::null;
     }
     else
     {
-        im = im1.isValid() ? im1 : im2;
+        im = im1 != nullptr ? im1 : im2;
     }
 
-    if (returnNullIfNothingBigEnough && im.getWidth() < size && im.getHeight() < size)
-        return Image::null;
+    if (im == nullptr)
+        return Image();
 
-    return rescaleImageForIcon (im, size);
+    if (returnNullIfNothingBigEnough && im->getWidth() < size && im->getHeight() < size)
+        return Image();
+
+    return rescaleImageForIcon (*im, size);
 }
 
-Image ProjectExporter::rescaleImageForIcon (Image im, const int size)
+Image ProjectExporter::rescaleImageForIcon (Drawable& d, const int size)
 {
-    im = SoftwareImageType().convert (im);
+    if (DrawableImage* drawableImage = dynamic_cast<DrawableImage*> (&d))
+    {
+        Image im = SoftwareImageType().convert (drawableImage->getImage());
 
-    if (size == im.getWidth() && size == im.getHeight())
-        return im;
+        if (size == im.getWidth() && size == im.getHeight())
+            return im;
 
-    // (scale it down in stages for better resampling)
-    while (im.getWidth() > 2 * size && im.getHeight() > 2 * size)
-        im = im.rescaled (im.getWidth() / 2,
-                          im.getHeight() / 2);
+        // (scale it down in stages for better resampling)
+        while (im.getWidth() > 2 * size && im.getHeight() > 2 * size)
+            im = im.rescaled (im.getWidth() / 2,
+                              im.getHeight() / 2);
 
-    Image newIm (Image::ARGB, size, size, true, SoftwareImageType());
-    Graphics g (newIm);
-    g.drawImageWithin (im, 0, 0, size, size,
-                       RectanglePlacement::centred | RectanglePlacement::onlyReduceInSize, false);
-    return newIm;
+        Image newIm (Image::ARGB, size, size, true, SoftwareImageType());
+        Graphics g (newIm);
+        g.drawImageWithin (im, 0, 0, size, size,
+                           RectanglePlacement::centred | RectanglePlacement::onlyReduceInSize, false);
+        return newIm;
+    }
+
+    Image im (Image::ARGB, size, size, true, SoftwareImageType());
+    Graphics g (im);
+    d.drawWithin (g, im.getBounds().toFloat(), RectanglePlacement::centred, 1.0f);
+    return im;
 }
 
 
 //==============================================================================
-ProjectExporter::ConfigIterator::ConfigIterator (ProjectExporter& exporter_)
-    : index (-1), exporter (exporter_)
+ProjectExporter::ConfigIterator::ConfigIterator (ProjectExporter& e)
+    : index (-1), exporter (e)
 {
 }
 
