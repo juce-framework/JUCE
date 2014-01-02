@@ -283,11 +283,9 @@ public:
         glyph = glyphNumber;
 
         const float fontHeight = font.getHeight();
-        edgeTable = typeface->getEdgeTableForGlyph (glyphNumber, AffineTransform::scale (fontHeight * font.getHorizontalScale(),
-                                                                                         fontHeight));
-
-        if (edgeTable != nullptr)
-            edgeTable->multiplyLevels (1.5f);
+        edgeTable = typeface->getEdgeTableForGlyph (glyphNumber,
+                                                    AffineTransform::scale (fontHeight * font.getHorizontalScale(), fontHeight)
+                                                        .followedBy (font.getTypeface()->getVerticalHintingTransform (fontHeight)));
     }
 
     Font font;
@@ -295,7 +293,7 @@ public:
     bool snapToIntegerCoordinate;
 
 private:
-    ScopedPointer <EdgeTable> edgeTable;
+    ScopedPointer<EdgeTable> edgeTable;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CachedGlyphEdgeTable)
 };
@@ -1351,7 +1349,7 @@ namespace EdgeTableFillers
         const int maxX, maxY;
         int y;
         DestPixelType* linePixels;
-        HeapBlock <SrcPixelType> scratchBuffer;
+        HeapBlock<SrcPixelType> scratchBuffer;
         size_t scratchSize;
 
         JUCE_DECLARE_NON_COPYABLE (TransformedImageFill)
@@ -1369,16 +1367,16 @@ namespace EdgeTableFillers
             switch (srcData.pixelFormat)
             {
             case Image::ARGB:
-                if (tiledFill)  { TransformedImageFill <PixelARGB, PixelARGB, true>  r (destData, srcData, transform, alpha, quality); iter.iterate (r); }
-                else            { TransformedImageFill <PixelARGB, PixelARGB, false> r (destData, srcData, transform, alpha, quality); iter.iterate (r); }
+                if (tiledFill)  { TransformedImageFill<PixelARGB, PixelARGB, true>  r (destData, srcData, transform, alpha, quality); iter.iterate (r); }
+                else            { TransformedImageFill<PixelARGB, PixelARGB, false> r (destData, srcData, transform, alpha, quality); iter.iterate (r); }
                 break;
             case Image::RGB:
-                if (tiledFill)  { TransformedImageFill <PixelARGB, PixelRGB, true>  r (destData, srcData, transform, alpha, quality); iter.iterate (r); }
-                else            { TransformedImageFill <PixelARGB, PixelRGB, false> r (destData, srcData, transform, alpha, quality); iter.iterate (r); }
+                if (tiledFill)  { TransformedImageFill<PixelARGB, PixelRGB, true>  r (destData, srcData, transform, alpha, quality); iter.iterate (r); }
+                else            { TransformedImageFill<PixelARGB, PixelRGB, false> r (destData, srcData, transform, alpha, quality); iter.iterate (r); }
                 break;
             default:
-                if (tiledFill)  { TransformedImageFill <PixelARGB, PixelAlpha, true>  r (destData, srcData, transform, alpha, quality); iter.iterate (r); }
-                else            { TransformedImageFill <PixelARGB, PixelAlpha, false> r (destData, srcData, transform, alpha, quality); iter.iterate (r); }
+                if (tiledFill)  { TransformedImageFill<PixelARGB, PixelAlpha, true>  r (destData, srcData, transform, alpha, quality); iter.iterate (r); }
+                else            { TransformedImageFill<PixelARGB, PixelAlpha, false> r (destData, srcData, transform, alpha, quality); iter.iterate (r); }
                 break;
             }
             break;
@@ -1387,16 +1385,16 @@ namespace EdgeTableFillers
             switch (srcData.pixelFormat)
             {
             case Image::ARGB:
-                if (tiledFill)  { TransformedImageFill <PixelRGB, PixelARGB, true>  r (destData, srcData, transform, alpha, quality); iter.iterate (r); }
-                else            { TransformedImageFill <PixelRGB, PixelARGB, false> r (destData, srcData, transform, alpha, quality); iter.iterate (r); }
+                if (tiledFill)  { TransformedImageFill<PixelRGB, PixelARGB, true>  r (destData, srcData, transform, alpha, quality); iter.iterate (r); }
+                else            { TransformedImageFill<PixelRGB, PixelARGB, false> r (destData, srcData, transform, alpha, quality); iter.iterate (r); }
                 break;
             case Image::RGB:
-                if (tiledFill)  { TransformedImageFill <PixelRGB, PixelRGB, true>  r (destData, srcData, transform, alpha, quality); iter.iterate (r); }
-                else            { TransformedImageFill <PixelRGB, PixelRGB, false> r (destData, srcData, transform, alpha, quality); iter.iterate (r); }
+                if (tiledFill)  { TransformedImageFill<PixelRGB, PixelRGB, true>  r (destData, srcData, transform, alpha, quality); iter.iterate (r); }
+                else            { TransformedImageFill<PixelRGB, PixelRGB, false> r (destData, srcData, transform, alpha, quality); iter.iterate (r); }
                 break;
             default:
-                if (tiledFill)  { TransformedImageFill <PixelRGB, PixelAlpha, true>  r (destData, srcData, transform, alpha, quality); iter.iterate (r); }
-                else            { TransformedImageFill <PixelRGB, PixelAlpha, false> r (destData, srcData, transform, alpha, quality); iter.iterate (r); }
+                if (tiledFill)  { TransformedImageFill<PixelRGB, PixelAlpha, true>  r (destData, srcData, transform, alpha, quality); iter.iterate (r); }
+                else            { TransformedImageFill<PixelRGB, PixelAlpha, false> r (destData, srcData, transform, alpha, quality); iter.iterate (r); }
                 break;
             }
             break;
@@ -1405,16 +1403,16 @@ namespace EdgeTableFillers
             switch (srcData.pixelFormat)
             {
             case Image::ARGB:
-                if (tiledFill)  { TransformedImageFill <PixelAlpha, PixelARGB, true>  r (destData, srcData, transform, alpha, quality); iter.iterate (r); }
-                else            { TransformedImageFill <PixelAlpha, PixelARGB, false> r (destData, srcData, transform, alpha, quality); iter.iterate (r); }
+                if (tiledFill)  { TransformedImageFill<PixelAlpha, PixelARGB, true>  r (destData, srcData, transform, alpha, quality); iter.iterate (r); }
+                else            { TransformedImageFill<PixelAlpha, PixelARGB, false> r (destData, srcData, transform, alpha, quality); iter.iterate (r); }
                 break;
             case Image::RGB:
-                if (tiledFill)  { TransformedImageFill <PixelAlpha, PixelRGB, true>  r (destData, srcData, transform, alpha, quality); iter.iterate (r); }
-                else            { TransformedImageFill <PixelAlpha, PixelRGB, false> r (destData, srcData, transform, alpha, quality); iter.iterate (r); }
+                if (tiledFill)  { TransformedImageFill<PixelAlpha, PixelRGB, true>  r (destData, srcData, transform, alpha, quality); iter.iterate (r); }
+                else            { TransformedImageFill<PixelAlpha, PixelRGB, false> r (destData, srcData, transform, alpha, quality); iter.iterate (r); }
                 break;
             default:
-                if (tiledFill)  { TransformedImageFill <PixelAlpha, PixelAlpha, true>  r (destData, srcData, transform, alpha, quality); iter.iterate (r); }
-                else            { TransformedImageFill <PixelAlpha, PixelAlpha, false> r (destData, srcData, transform, alpha, quality); iter.iterate (r); }
+                if (tiledFill)  { TransformedImageFill<PixelAlpha, PixelAlpha, true>  r (destData, srcData, transform, alpha, quality); iter.iterate (r); }
+                else            { TransformedImageFill<PixelAlpha, PixelAlpha, false> r (destData, srcData, transform, alpha, quality); iter.iterate (r); }
                 break;
             }
             break;
@@ -1430,16 +1428,16 @@ namespace EdgeTableFillers
             switch (srcData.pixelFormat)
             {
             case Image::ARGB:
-                if (tiledFill)  { ImageFill <PixelARGB, PixelARGB, true>  r (destData, srcData, alpha, x, y); iter.iterate (r); }
-                else            { ImageFill <PixelARGB, PixelARGB, false> r (destData, srcData, alpha, x, y); iter.iterate (r); }
+                if (tiledFill)  { ImageFill<PixelARGB, PixelARGB, true>  r (destData, srcData, alpha, x, y); iter.iterate (r); }
+                else            { ImageFill<PixelARGB, PixelARGB, false> r (destData, srcData, alpha, x, y); iter.iterate (r); }
                 break;
             case Image::RGB:
-                if (tiledFill)  { ImageFill <PixelARGB, PixelRGB, true>  r (destData, srcData, alpha, x, y); iter.iterate (r); }
-                else            { ImageFill <PixelARGB, PixelRGB, false> r (destData, srcData, alpha, x, y); iter.iterate (r); }
+                if (tiledFill)  { ImageFill<PixelARGB, PixelRGB, true>  r (destData, srcData, alpha, x, y); iter.iterate (r); }
+                else            { ImageFill<PixelARGB, PixelRGB, false> r (destData, srcData, alpha, x, y); iter.iterate (r); }
                 break;
             default:
-                if (tiledFill)  { ImageFill <PixelARGB, PixelAlpha, true>  r (destData, srcData, alpha, x, y); iter.iterate (r); }
-                else            { ImageFill <PixelARGB, PixelAlpha, false> r (destData, srcData, alpha, x, y); iter.iterate (r); }
+                if (tiledFill)  { ImageFill<PixelARGB, PixelAlpha, true>  r (destData, srcData, alpha, x, y); iter.iterate (r); }
+                else            { ImageFill<PixelARGB, PixelAlpha, false> r (destData, srcData, alpha, x, y); iter.iterate (r); }
                 break;
             }
             break;
@@ -1448,16 +1446,16 @@ namespace EdgeTableFillers
             switch (srcData.pixelFormat)
             {
             case Image::ARGB:
-                if (tiledFill)  { ImageFill <PixelRGB, PixelARGB, true>  r (destData, srcData, alpha, x, y); iter.iterate (r); }
-                else            { ImageFill <PixelRGB, PixelARGB, false> r (destData, srcData, alpha, x, y); iter.iterate (r); }
+                if (tiledFill)  { ImageFill<PixelRGB, PixelARGB, true>  r (destData, srcData, alpha, x, y); iter.iterate (r); }
+                else            { ImageFill<PixelRGB, PixelARGB, false> r (destData, srcData, alpha, x, y); iter.iterate (r); }
                 break;
             case Image::RGB:
-                if (tiledFill)  { ImageFill <PixelRGB, PixelRGB, true>  r (destData, srcData, alpha, x, y); iter.iterate (r); }
-                else            { ImageFill <PixelRGB, PixelRGB, false> r (destData, srcData, alpha, x, y); iter.iterate (r); }
+                if (tiledFill)  { ImageFill<PixelRGB, PixelRGB, true>  r (destData, srcData, alpha, x, y); iter.iterate (r); }
+                else            { ImageFill<PixelRGB, PixelRGB, false> r (destData, srcData, alpha, x, y); iter.iterate (r); }
                 break;
             default:
-                if (tiledFill)  { ImageFill <PixelRGB, PixelAlpha, true>  r (destData, srcData, alpha, x, y); iter.iterate (r); }
-                else            { ImageFill <PixelRGB, PixelAlpha, false> r (destData, srcData, alpha, x, y); iter.iterate (r); }
+                if (tiledFill)  { ImageFill<PixelRGB, PixelAlpha, true>  r (destData, srcData, alpha, x, y); iter.iterate (r); }
+                else            { ImageFill<PixelRGB, PixelAlpha, false> r (destData, srcData, alpha, x, y); iter.iterate (r); }
                 break;
             }
             break;
@@ -1466,16 +1464,16 @@ namespace EdgeTableFillers
             switch (srcData.pixelFormat)
             {
             case Image::ARGB:
-                if (tiledFill)  { ImageFill <PixelAlpha, PixelARGB, true>   r (destData, srcData, alpha, x, y); iter.iterate (r); }
-                else            { ImageFill <PixelAlpha, PixelARGB, false>  r (destData, srcData, alpha, x, y); iter.iterate (r); }
+                if (tiledFill)  { ImageFill<PixelAlpha, PixelARGB, true>   r (destData, srcData, alpha, x, y); iter.iterate (r); }
+                else            { ImageFill<PixelAlpha, PixelARGB, false>  r (destData, srcData, alpha, x, y); iter.iterate (r); }
                 break;
             case Image::RGB:
-                if (tiledFill)  { ImageFill <PixelAlpha, PixelRGB, true>    r (destData, srcData, alpha, x, y); iter.iterate (r); }
-                else            { ImageFill <PixelAlpha, PixelRGB, false>   r (destData, srcData, alpha, x, y); iter.iterate (r); }
+                if (tiledFill)  { ImageFill<PixelAlpha, PixelRGB, true>    r (destData, srcData, alpha, x, y); iter.iterate (r); }
+                else            { ImageFill<PixelAlpha, PixelRGB, false>   r (destData, srcData, alpha, x, y); iter.iterate (r); }
                 break;
             default:
-                if (tiledFill)  { ImageFill <PixelAlpha, PixelAlpha, true>  r (destData, srcData, alpha, x, y); iter.iterate (r); }
-                else            { ImageFill <PixelAlpha, PixelAlpha, false> r (destData, srcData, alpha, x, y); iter.iterate (r); }
+                if (tiledFill)  { ImageFill<PixelAlpha, PixelAlpha, true>  r (destData, srcData, alpha, x, y); iter.iterate (r); }
+                else            { ImageFill<PixelAlpha, PixelAlpha, false> r (destData, srcData, alpha, x, y); iter.iterate (r); }
                 break;
             }
             break;
@@ -1487,12 +1485,12 @@ namespace EdgeTableFillers
     {
         if (replaceContents)
         {
-            EdgeTableFillers::SolidColour <DestPixelType, true> r (destData, fillColour);
+            EdgeTableFillers::SolidColour<DestPixelType, true> r (destData, fillColour);
             iter.iterate (r);
         }
         else
         {
-            EdgeTableFillers::SolidColour <DestPixelType, false> r (destData, fillColour);
+            EdgeTableFillers::SolidColour<DestPixelType, false> r (destData, fillColour);
             iter.iterate (r);
         }
     }
@@ -1505,18 +1503,18 @@ namespace EdgeTableFillers
         {
             if (isIdentity)
             {
-                EdgeTableFillers::Gradient <DestPixelType, GradientPixelIterators::Radial> renderer (destData, g, transform, lookupTable, numLookupEntries);
+                EdgeTableFillers::Gradient<DestPixelType, GradientPixelIterators::Radial> renderer (destData, g, transform, lookupTable, numLookupEntries);
                 iter.iterate (renderer);
             }
             else
             {
-                EdgeTableFillers::Gradient <DestPixelType, GradientPixelIterators::TransformedRadial> renderer (destData, g, transform, lookupTable, numLookupEntries);
+                EdgeTableFillers::Gradient<DestPixelType, GradientPixelIterators::TransformedRadial> renderer (destData, g, transform, lookupTable, numLookupEntries);
                 iter.iterate (renderer);
             }
         }
         else
         {
-            EdgeTableFillers::Gradient <DestPixelType, GradientPixelIterators::Linear> renderer (destData, g, transform, lookupTable, numLookupEntries);
+            EdgeTableFillers::Gradient<DestPixelType, GradientPixelIterators::Linear> renderer (destData, g, transform, lookupTable, numLookupEntries);
             iter.iterate (renderer);
         }
     }
@@ -1721,7 +1719,7 @@ struct ClipRegions
         template <class SrcPixelType>
         void transformedClipImage (const Image::BitmapData& srcData, const AffineTransform& transform, const Graphics::ResamplingQuality quality, const SrcPixelType*)
         {
-            EdgeTableFillers::TransformedImageFill <SrcPixelType, SrcPixelType, false> renderer (srcData, srcData, transform, 255, quality);
+            EdgeTableFillers::TransformedImageFill<SrcPixelType, SrcPixelType, false> renderer (srcData, srcData, transform, 255, quality);
 
             for (int y = 0; y < edgeTable.getMaximumBounds().getHeight(); ++y)
                 renderer.clipEdgeTableLine (edgeTable, edgeTable.getMaximumBounds().getX(), y + edgeTable.getMaximumBounds().getY(),
@@ -1734,7 +1732,7 @@ struct ClipRegions
             Rectangle<int> r (imageX, imageY, srcData.width, srcData.height);
             edgeTable.clipToRectangle (r);
 
-            EdgeTableFillers::ImageFill <SrcPixelType, SrcPixelType, false> renderer (srcData, srcData, 255, imageX, imageY);
+            EdgeTableFillers::ImageFill<SrcPixelType, SrcPixelType, false> renderer (srcData, srcData, 255, imageX, imageY);
 
             for (int y = 0; y < r.getHeight(); ++y)
                 renderer.clipEdgeTableLine (edgeTable, r.getX(), y + r.getY(), r.getWidth());
@@ -2002,7 +2000,7 @@ public:
     {
     }
 
-    SavedStateType& getThis() noexcept  { return *static_cast <SavedStateType*> (this); }
+    SavedStateType& getThis() noexcept  { return *static_cast<SavedStateType*> (this); }
 
     bool clipToRectangle (const Rectangle<int>& r)
     {
@@ -2253,11 +2251,20 @@ public:
         {
             EdgeTableRegionType* edgeTableClip = new EdgeTableRegionType (edgeTable);
             edgeTableClip->edgeTable.translate (x, y);
+
+            if (fillType.isColour())
+            {
+                float brightness = fillType.colour.getBrightness() - 0.5f;
+
+                if (brightness > 0.0f)
+                    edgeTableClip->edgeTable.multiplyLevels (1.0f + 1.6f * brightness);
+            }
+
             fillShape (edgeTableClip, false);
         }
     }
 
-    void drawLine (const Line <float>& line)
+    void drawLine (const Line<float>& line)
     {
         Path p;
         p.addLineSegment (line, 1.0f);
@@ -2437,7 +2444,7 @@ public:
         }
     }
 
-    typedef GlyphCache<CachedGlyphEdgeTable <SoftwareRendererSavedState>, SoftwareRendererSavedState> GlyphCacheType;
+    typedef GlyphCache<CachedGlyphEdgeTable<SoftwareRendererSavedState>, SoftwareRendererSavedState> GlyphCacheType;
 
     static void clearGlyphCache()
     {
@@ -2523,7 +2530,7 @@ public:
     template <typename IteratorType>
     void fillWithGradient (IteratorType& iter, ColourGradient& gradient, const AffineTransform& trans, bool isIdentity) const
     {
-        HeapBlock <PixelARGB> lookupTable;
+        HeapBlock<PixelARGB> lookupTable;
         const int numLookupEntries = gradient.createLookupTable (trans, lookupTable);
         jassert (numLookupEntries > 0);
 
@@ -2632,7 +2639,7 @@ public:
     void fillPath (const Path& path, const AffineTransform& t) override          { stack->fillPath (path, t); }
     void drawImage (const Image& im, const AffineTransform& t) override          { stack->drawImage (im, t); }
     void drawGlyph (int glyphNumber, const AffineTransform& t) override          { stack->drawGlyph (glyphNumber, t); }
-    void drawLine (const Line <float>& line) override                            { stack->drawLine (line); }
+    void drawLine (const Line<float>& line) override                             { stack->drawLine (line); }
     void setFont (const Font& newFont) override                                  { stack->font = newFont; }
     const Font& getFont() override                                               { return stack->font; }
 

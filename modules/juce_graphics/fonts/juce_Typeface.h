@@ -134,6 +134,11 @@ public:
     */
     static void scanFolderForFonts (const File& folder);
 
+    /** Makes an attempt at estimating a good overall transform that will scale a font of
+        the given size to align vertically with the pixel grid.
+    */
+    AffineTransform getVerticalHintingTransform (float fontHeight);
+
 protected:
     //==============================================================================
     String name, style;
@@ -143,6 +148,11 @@ protected:
     static Ptr getFallbackTypeface();
 
 private:
+    struct HintingParams;
+    friend struct ContainerDeletePolicy<HintingParams>;
+    ScopedPointer<HintingParams> hintingParams;
+    CriticalSection hintingLock;
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Typeface)
 };
 
