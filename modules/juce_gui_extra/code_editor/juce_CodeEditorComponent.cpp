@@ -438,7 +438,15 @@ void CodeEditorComponent::setLineNumbersShown (const bool shouldBeShown)
 
 void CodeEditorComponent::setReadOnly (bool b) noexcept
 {
-    readOnly = b;
+    if (readOnly != b)
+    {
+        readOnly = b;
+
+        if (b)
+            removeChildComponent (caret);
+        else
+            addAndMakeVisible (caret);
+    }
 }
 
 //==============================================================================
@@ -1316,10 +1324,10 @@ bool CodeEditorComponent::performCommand (const CommandID commandID)
 //==============================================================================
 void CodeEditorComponent::addPopupMenuItems (PopupMenu& m, const MouseEvent*)
 {
-    m.addItem (StandardApplicationCommandIDs::cut,   TRANS ("Cut"));
+    m.addItem (StandardApplicationCommandIDs::cut,   TRANS ("Cut"), isHighlightActive() && ! readOnly);
     m.addItem (StandardApplicationCommandIDs::copy,  TRANS ("Copy"), ! getHighlightedRegion().isEmpty());
-    m.addItem (StandardApplicationCommandIDs::paste, TRANS ("Paste"));
-    m.addItem (StandardApplicationCommandIDs::del,   TRANS ("Delete"));
+    m.addItem (StandardApplicationCommandIDs::paste, TRANS ("Paste"), ! readOnly);
+    m.addItem (StandardApplicationCommandIDs::del,   TRANS ("Delete"), ! readOnly);
     m.addSeparator();
     m.addItem (StandardApplicationCommandIDs::selectAll, TRANS ("Select All"));
     m.addSeparator();
