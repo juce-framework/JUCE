@@ -158,7 +158,7 @@ private:
                 owner.pageFinishedLoading (getStringFromVariant (pDispParams->rgvarg[0].pvarVal));
                 return S_OK;
             }
-            else if (dispIdMember == DISPID_WINDOWCLOSING)
+            else if (dispIdMember == 263 /*DISPID_WINDOWCLOSING*/)
             {
                 owner.windowCloseRequest();
 
