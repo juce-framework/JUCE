@@ -229,7 +229,7 @@ private:
 
         float median = y[y.size() / 2];
 
-        int total = 0;
+        float total = 0;
         int num = 0;
 
         for (int i = 0; i < y.size(); ++i)
@@ -250,6 +250,9 @@ private:
 
 AffineTransform Typeface::getVerticalHintingTransform (float fontSize)
 {
+    if (fontSize < 3.0f || fontSize > 25.0f)
+        return AffineTransform();
+
     ScopedLock sl (hintingLock);
 
     if (hintingParams == nullptr)
