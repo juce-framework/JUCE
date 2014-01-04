@@ -2163,7 +2163,9 @@
 				"_DEBUG=1",
 				"DEBUG=1",
 				"JUCE_UNIT_TESTS=1",
-				"JUCER_XCODE_IPHONE_5BC26AE3=1"); }; name = Debug; };
+				"JUCER_XCODE_IPHONE_5BC26AE3=1",
+				"JUCE_APP_VERSION=3.0.0",
+				"JUCE_APP_VERSION_HEX=0x30000"); }; name = Debug; };
 		80E4DBEBE0CE7D218C89F78C = { isa = XCBuildConfiguration; buildSettings = {
 				HEADER_SEARCH_PATHS = ("../../JuceLibraryCode", "../../../../modules", "$(inherited)");
 				GCC_OPTIMIZATION_LEVEL = 3;
@@ -2181,7 +2183,9 @@
 				"_NDEBUG=1",
 				"NDEBUG=1",
 				"JUCE_UNIT_TESTS=1",
-				"JUCER_XCODE_IPHONE_5BC26AE3=1"); }; name = Release; };
+				"JUCER_XCODE_IPHONE_5BC26AE3=1",
+				"JUCE_APP_VERSION=3.0.0",
+				"JUCE_APP_VERSION_HEX=0x30000"); }; name = Release; };
 		A16C0416417EF9DF7B09973F = { isa = XCBuildConfiguration; buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				GCC_C_LANGUAGE_STANDARD = c99;

@@ -2085,7 +2085,9 @@
 				GCC_PREPROCESSOR_DEFINITIONS = (
 				"_DEBUG=1",
 				"DEBUG=1",
-				"JUCER_XCODE_MAC_F6D2F4CF=1"); }; name = Debug; };
+				"JUCER_XCODE_MAC_F6D2F4CF=1",
+				"JUCE_APP_VERSION=1.0.0",
+				"JUCE_APP_VERSION_HEX=0x10000"); }; name = Debug; };
 		76082281008CF5F891C856DA = { isa = XCBuildConfiguration; buildSettings = {
 				HEADER_SEARCH_PATHS = ("~/SDKs/vstsdk2.4", "../../JuceLibraryCode", "../../../../modules", "$(DEVELOPER_DIR)/Extras/CoreAudio/PublicUtility", "$(DEVELOPER_DIR)/Extras/CoreAudio/AudioUnits/AUPublic/Utility", "$(DEVELOPER_DIR)/Extras/CoreAudio/AudioUnits/AUPublic/AUBase", "$(inherited)");
 				GCC_OPTIMIZATION_LEVEL = s;
@@ -2111,7 +2113,9 @@
 				GCC_PREPROCESSOR_DEFINITIONS = (
 				"_NDEBUG=1",
 				"NDEBUG=1",
-				"JUCER_XCODE_MAC_F6D2F4CF=1"); }; name = Release; };
+				"JUCER_XCODE_MAC_F6D2F4CF=1",
+				"JUCE_APP_VERSION=1.0.0",
+				"JUCE_APP_VERSION_HEX=0x10000"); }; name = Release; };
 		6758D5C5D24024DB6F83E78F = { isa = XCBuildConfiguration; buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				GCC_C_LANGUAGE_STANDARD = c99;

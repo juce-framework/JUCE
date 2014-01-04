@@ -2034,7 +2034,9 @@
 				GCC_PREPROCESSOR_DEFINITIONS = (
 				"_DEBUG=1",
 				"DEBUG=1",
-				"JUCER_XCODE_MAC_F6D2F4CF=1"); }; name = Debug; };
+				"JUCER_XCODE_MAC_F6D2F4CF=1",
+				"JUCE_APP_VERSION=1.0.0",
+				"JUCE_APP_VERSION_HEX=0x10000"); }; name = Debug; };
 		20F59BC9E9ACBDF56007CE03 = { isa = XCBuildConfiguration; buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
 				HEADER_SEARCH_PATHS = ("\"~/SDKs/VST3 SDK\"", "~/SDKs/vstsdk2.4", "../../JuceLibraryCode", "../../../../modules", "$(inherited)");
@@ -2055,7 +2057,9 @@
 				GCC_PREPROCESSOR_DEFINITIONS = (
 				"_NDEBUG=1",
 				"NDEBUG=1",
-				"JUCER_XCODE_MAC_F6D2F4CF=1"); }; name = Release; };
+				"JUCER_XCODE_MAC_F6D2F4CF=1",
+				"JUCE_APP_VERSION=1.0.0",
+				"JUCE_APP_VERSION_HEX=0x10000"); }; name = Release; };
 		8D1CA827F1EFD443BDCF198A = { isa = XCBuildConfiguration; buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				GCC_C_LANGUAGE_STANDARD = c99;

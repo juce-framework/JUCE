@@ -320,14 +320,14 @@ protected:
 
     virtual BuildConfiguration::Ptr createBuildConfig (const ValueTree&) const = 0;
 
+    void addDefaultPreprocessorDefs (StringPairArray&) const;
+
     static String getDefaultBuildsRootFolder()            { return "Builds/"; }
 
     static String getLibbedFilename (String name)
     {
-        if (! name.startsWith ("lib"))
-            name = "lib" + name;
-        if (! name.endsWithIgnoreCase (".a"))
-            name = name + ".a";
+        if (! name.startsWith ("lib"))         name = "lib" + name;
+        if (! name.endsWithIgnoreCase (".a"))  name += ".a";
         return name;
     }
 

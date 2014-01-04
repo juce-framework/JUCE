@@ -470,7 +470,9 @@
 				GCC_PREPROCESSOR_DEFINITIONS = (
 				"_DEBUG=1",
 				"DEBUG=1",
-				"JUCER_XCODE_MAC_F6D2F4CF=1"); }; name = Debug; };
+				"JUCER_XCODE_MAC_F6D2F4CF=1",
+				"JUCE_APP_VERSION=1.0.0",
+				"JUCE_APP_VERSION_HEX=0x10000"); }; name = Debug; };
 		145C0C90E41D8DECE4DD66AD = { isa = XCBuildConfiguration; buildSettings = {
 				HEADER_SEARCH_PATHS = ("../../JuceLibraryCode", "../../../../modules", "$(inherited)");
 				GCC_OPTIMIZATION_LEVEL = s;
@@ -489,7 +491,9 @@
 				GCC_PREPROCESSOR_DEFINITIONS = (
 				"_NDEBUG=1",
 				"NDEBUG=1",
-				"JUCER_XCODE_MAC_F6D2F4CF=1"); }; name = Release; };
+				"JUCER_XCODE_MAC_F6D2F4CF=1",
+				"JUCE_APP_VERSION=1.0.0",
+				"JUCE_APP_VERSION_HEX=0x10000"); }; name = Release; };
 		D9552CAECBA3D7D5725848E5 = { isa = XCBuildConfiguration; buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				GCC_C_LANGUAGE_STANDARD = c99;

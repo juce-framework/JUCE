@@ -40,8 +40,8 @@
 namespace ProjectInfo
 {
     const char* const  projectName    = "JuceDemo";
-    const char* const  versionString  = "1.0.0";
-    const int          versionNumber  = 0x10000;
+    const char* const  versionString  = "3.0.0";
+    const int          versionNumber  = 0x30000;
 }
 
 #endif   // __APPHEADERFILE_SBBIZR__

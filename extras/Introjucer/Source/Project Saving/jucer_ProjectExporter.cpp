@@ -238,7 +238,7 @@ StringPairArray ProjectExporter::getAllPreprocessorDefs (const ProjectExporter::
 {
     StringPairArray defs (mergePreprocessorDefs (config.getAllPreprocessorDefs(),
                                                  parsePreprocessorDefs (getExporterPreprocessorDefsString())));
-    defs.set (getExporterIdentifierMacro(), "1");
+    addDefaultPreprocessorDefs (defs);
     return defs;
 }
 
@@ -246,8 +246,15 @@ StringPairArray ProjectExporter::getAllPreprocessorDefs() const
 {
     StringPairArray defs (mergePreprocessorDefs (project.getPreprocessorDefs(),
                                                  parsePreprocessorDefs (getExporterPreprocessorDefsString())));
-    defs.set (getExporterIdentifierMacro(), "1");
+    addDefaultPreprocessorDefs (defs);
     return defs;
+}
+
+void ProjectExporter::addDefaultPreprocessorDefs (StringPairArray& defs) const
+{
+    defs.set (getExporterIdentifierMacro(), "1");
+    defs.set ("JUCE_APP_VERSION", project.getVersionString());
+    defs.set ("JUCE_APP_VERSION_HEX", project.getVersionAsHex());
 }
 
 String ProjectExporter::replacePreprocessorTokens (const ProjectExporter::BuildConfiguration& config, const String& sourceString) const
