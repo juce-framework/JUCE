@@ -678,7 +678,7 @@ private:
         if (xcodeCanUseDwarf)
             s.add ("DEBUG_INFORMATION_FORMAT = \"dwarf\"");
 
-        s.add ("PRODUCT_NAME = \"" + config.getTargetBinaryNameString() + "\"");
+        s.add ("PRODUCT_NAME = \"" + replacePreprocessorTokens (config, config.getTargetBinaryNameString()) + "\"");
         return s;
     }
 
@@ -1080,7 +1080,9 @@ private:
     {
         jassert (xcodeFileType.isNotEmpty());
         jassert (xcodeBundleExtension.isEmpty() || xcodeBundleExtension.startsWithChar('.'));
-        String productName (getConfiguration(0)->getTargetBinaryName().toString());
+        ProjectExporter::BuildConfiguration::Ptr config = getConfiguration(0);
+        jassert (config != nullptr);
+        String productName (replacePreprocessorTokens (*config, config->getTargetBinaryNameString()));
 
         if (xcodeFileType == "archive.ar")
             productName = getLibbedFilename (productName);
