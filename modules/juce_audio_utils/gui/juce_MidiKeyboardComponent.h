@@ -52,7 +52,6 @@ class JUCE_API  MidiKeyboardComponent  : public Component,
 public:
     //==============================================================================
     /** The direction of the keyboard.
-
         @see setOrientation
     */
     enum Orientation
