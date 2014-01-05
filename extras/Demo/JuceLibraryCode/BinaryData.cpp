@@ -5777,8 +5777,6 @@ const char* getNamedResource (const char* resourceNameUTF8, int& numBytes) throw
     return 0;
 }
 
-const int namedResourceListSize = 9;
-
 const char* namedResourceList[] =
 {
     "brushed_aluminium_png",
