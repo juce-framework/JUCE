@@ -575,11 +575,11 @@ public:
             CFRelease (ctFontRef);
     }
 
-    float getAscent() const                 { return ascent; }
-    float getDescent() const                { return 1.0f - ascent; }
-    float getHeightToPointsFactor() const   { return fontHeightToPointsFactor; }
+    float getAscent() const override                 { return ascent; }
+    float getDescent() const override                { return 1.0f - ascent; }
+    float getHeightToPointsFactor() const override   { return fontHeightToPointsFactor; }
 
-    float getStringWidth (const String& text)
+    float getStringWidth (const String& text) override
     {
         float x = 0;
 
@@ -612,7 +612,7 @@ public:
         return x;
     }
 
-    void getGlyphPositions (const String& text, Array <int>& resultGlyphs, Array <float>& xOffsets)
+    void getGlyphPositions (const String& text, Array <int>& resultGlyphs, Array <float>& xOffsets) override
     {
         xOffsets.add (0);
 
@@ -648,18 +648,7 @@ public:
         }
     }
 
-    EdgeTable* getEdgeTableForGlyph (int glyphNumber, const AffineTransform& transform)
-    {
-        Path path;
-
-        if (getOutlineForGlyph (glyphNumber, path) && ! path.isEmpty())
-            return new EdgeTable (path.getBoundsTransformed (transform).getSmallestIntegerContainer().expanded (1, 0),
-                                  path, transform);
-
-        return nullptr;
-    }
-
-    bool getOutlineForGlyph (int glyphNumber, Path& path)
+    bool getOutlineForGlyph (int glyphNumber, Path& path) override
     {
         jassert (path.isEmpty());  // we might need to apply a transform to the path, so this must be empty
 
@@ -906,11 +895,11 @@ public:
    #endif
 
 
-    float getAscent() const                 { return ascent; }
-    float getDescent() const                { return 1.0f - ascent; }
-    float getHeightToPointsFactor() const   { return fontHeightToPointsFactor; }
+    float getAscent() const override                 { return ascent; }
+    float getDescent() const override                { return 1.0f - ascent; }
+    float getHeightToPointsFactor() const override   { return fontHeightToPointsFactor; }
 
-    float getStringWidth (const String& text)
+    float getStringWidth (const String& text) override
     {
         if (fontRef == 0 || text.isEmpty())
             return 0;
@@ -951,7 +940,7 @@ public:
         return x * unitsToHeightScaleFactor;
     }
 
-    void getGlyphPositions (const String& text, Array <int>& resultGlyphs, Array <float>& xOffsets)
+    void getGlyphPositions (const String& text, Array <int>& resultGlyphs, Array <float>& xOffsets) override
     {
         xOffsets.add (0);
 
@@ -1009,18 +998,7 @@ public:
 #endif
     }
 
-    EdgeTable* getEdgeTableForGlyph (int glyphNumber, const AffineTransform& transform)
-    {
-        Path path;
-
-        if (getOutlineForGlyph (glyphNumber, path) && ! path.isEmpty())
-            return new EdgeTable (path.getBoundsTransformed (transform).getSmallestIntegerContainer().expanded (1, 0),
-                                  path, transform);
-
-        return nullptr;
-    }
-
-    bool getOutlineForGlyph (int glyphNumber, Path& path)
+    bool getOutlineForGlyph (int glyphNumber, Path& path) override
     {
        #if JUCE_IOS
         return false;

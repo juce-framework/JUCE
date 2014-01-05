@@ -117,7 +117,7 @@ public:
     virtual bool getOutlineForGlyph (int glyphNumber, Path& path) = 0;
 
     /** Returns a new EdgeTable that contains the path for the givem glyph, with the specified transform applied. */
-    virtual EdgeTable* getEdgeTableForGlyph (int glyphNumber, const AffineTransform& transform);
+    virtual EdgeTable* getEdgeTableForGlyph (int glyphNumber, const AffineTransform& transform, float fontHeight);
 
     /** Returns true if the typeface uses hinting. */
     virtual bool isHinted() const                           { return false; }
@@ -134,10 +134,11 @@ public:
     */
     static void scanFolderForFonts (const File& folder);
 
-    /** Makes an attempt at estimating a good overall transform that will scale a font of
-        the given size to align vertically with the pixel grid.
+    /** Makes an attempt at performing a good overall distortion that will scale a font of
+        the given size to align vertically with the pixel grid. The path should be an unscaled
+        (i.e. normalised to height of 1.0) path for a glyph.
     */
-    AffineTransform getVerticalHintingTransform (float fontHeight);
+    void applyVerticalHintingTransform (float fontHeight, Path& path);
 
 protected:
     //==============================================================================

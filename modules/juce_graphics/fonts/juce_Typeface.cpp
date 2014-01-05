@@ -116,13 +116,17 @@ Typeface::Ptr Typeface::getFallbackTypeface()
     return fallbackFont.getTypeface();
 }
 
-EdgeTable* Typeface::getEdgeTableForGlyph (int glyphNumber, const AffineTransform& transform)
+EdgeTable* Typeface::getEdgeTableForGlyph (int glyphNumber, const AffineTransform& transform, float fontHeight)
 {
     Path path;
 
     if (getOutlineForGlyph (glyphNumber, path) && ! path.isEmpty())
+    {
+        applyVerticalHintingTransform (fontHeight, path);
+
         return new EdgeTable (path.getBoundsTransformed (transform).getSmallestIntegerContainer().expanded (1, 0),
                               path, transform);
+    }
 
     return nullptr;
 }
@@ -131,83 +135,77 @@ EdgeTable* Typeface::getEdgeTableForGlyph (int glyphNumber, const AffineTransfor
 struct Typeface::HintingParams
 {
     HintingParams (Typeface& t)
-        : top (0), middle (0), bottom (0)
+        : cachedSize (0), top (0), middle (0), bottom (0)
     {
         Font font (&t);
         font = font.withHeight ((float) standardHeight);
 
-        top = getAverageY (font, "BDEFPRTZOQC", true);
+        top = getAverageY (font, "BDEFPRTZOQ", true);
         middle = getAverageY (font, "acegmnopqrsuvwxy", true);
         bottom = getAverageY (font, "BDELZOC", false);
     }
 
-    AffineTransform getVerticalHintingTransform (float fontSize) noexcept
+    void applyVerticalHintingTransform (float fontSize, Path& path)
     {
-        if (cachedSize == fontSize)
-            return cachedTransform;
+        if (cachedSize != fontSize)
+        {
+            cachedSize = fontSize;
+            cachedScale = Scaling (top, middle, bottom, fontSize);
+        }
 
-        const float t = fontSize * top;
-        const float m = fontSize * middle;
-        const float b = fontSize * bottom;
+        if (bottom < top + 3.0f / fontSize)
+            return;
 
-        if (b < t + 2.0f)
-            return AffineTransform();
+        Path result;
 
-        Scaling s[] = { Scaling (t, m, b, 0.0f, 0.0f),
-                        Scaling (t, m, b, 1.0f, 0.0f),
-                        Scaling (t, m, b, 0.0f, 1.0f),
-                        Scaling (t, m, b, 1.0f, 1.0f) };
+        for (Path::Iterator i (path); i.next();)
+        {
+            switch (i.elementType)
+            {
+                case Path::Iterator::startNewSubPath:  result.startNewSubPath (i.x1, cachedScale.apply (i.y1)); break;
+                case Path::Iterator::lineTo:           result.lineTo (i.x1, cachedScale.apply (i.y1)); break;
+                case Path::Iterator::quadraticTo:      result.quadraticTo (i.x1, cachedScale.apply (i.y1),
+                                                                           i.x2, cachedScale.apply (i.y2)); break;
+                case Path::Iterator::cubicTo:          result.cubicTo (i.x1, cachedScale.apply (i.y1),
+                                                                       i.x2, cachedScale.apply (i.y2),
+                                                                       i.x3, cachedScale.apply (i.y3)); break;
+                case Path::Iterator::closePath:        result.closeSubPath(); break;
+                default:                               jassertfalse; break;
+            }
+        }
 
-        int best = 0;
-
-        for (int i = 1; i < numElementsInArray (s); ++i)
-            if (s[i].drift < s[best].drift)
-                best = i;
-
-        cachedSize = fontSize;
-
-        AffineTransform result (s[best].getTransform());
-        cachedTransform = result;
-        return result;
+        result.swapWithPath (path);
     }
 
 private:
-    float cachedSize;
-    AffineTransform cachedTransform;
-
     struct Scaling
     {
-        Scaling (float t, float m, float b, float direction1, float direction2) noexcept
+        Scaling() noexcept : middle(), upperScale(), upperOffset(), lowerScale(), lowerOffset() {}
+
+        Scaling (float t, float m, float b, float fontSize) noexcept  : middle (m)
         {
-            float newT = std::floor (t) + direction1;
-            float newB = std::floor (b) + direction2;
-            float newM = newT + (newB - newT) * (m - t) / (b - t);
+            const float newT = std::floor (fontSize * t + 0.5f) / fontSize;
+            const float newB = std::floor (fontSize * b + 0.5f) / fontSize;
+            const float newM = std::floor (fontSize * m + 0.5f) / fontSize;
 
-            float middleOffset = newM - std::floor (newM);
-            float nudge = middleOffset < 0.5f ? (middleOffset * -0.2f) : ((1.0f - middleOffset) * 0.2f);
-            newT += nudge;
-            newB += nudge;
+            upperScale  = jlimit (0.9f, 1.1f, (newM - newT) / (m - t));
+            lowerScale  = jlimit (0.9f, 1.1f, (newB - newM) / (b - m));
 
-            scale = (newB - newT) / (b - t);
-            offset = (newB / scale) - b;
-
-            drift = getDrift (t) + getDrift (m) + getDrift (b) + offset + 20.0f * std::abs (scale - 1.0f);
+            upperOffset = newM - m * upperScale;
+            lowerOffset = newB - b * lowerScale;
         }
 
-        AffineTransform getTransform() const noexcept
+        float apply (float y) const noexcept
         {
-            return AffineTransform::translation (0, offset).scaled (1.0f, scale);
+            return y < middle ? (y * upperScale + upperOffset)
+                              : (y * lowerScale + lowerOffset);
         }
 
-        float getDrift (float n) const noexcept
-        {
-            n = (n + offset) * scale;
-            const float diff = n - std::floor (n);
-            return jmin (diff, 1.0f - diff);
-        }
-
-        float offset, scale, drift;
+        float middle, upperScale, upperOffset, lowerScale, lowerOffset;
     };
+
+    float cachedSize;
+    Scaling cachedScale;
 
     static float getAverageY (const Font& font, const char* chars, bool getTop)
     {
@@ -248,15 +246,15 @@ private:
     float top, middle, bottom;
 };
 
-AffineTransform Typeface::getVerticalHintingTransform (float fontSize)
+void Typeface::applyVerticalHintingTransform (float fontSize, Path& path)
 {
-    if (fontSize < 3.0f || fontSize > 25.0f)
-        return AffineTransform();
+    if (fontSize > 3.0f && fontSize < 25.0f)
+    {
+        ScopedLock sl (hintingLock);
 
-    ScopedLock sl (hintingLock);
+        if (hintingParams == nullptr)
+            hintingParams = new HintingParams (*this);
 
-    if (hintingParams == nullptr)
-        hintingParams = new HintingParams (*this);
-
-    return hintingParams->getVerticalHintingTransform (fontSize);
+        return hintingParams->applyVerticalHintingTransform (fontSize, path);
+    }
 }

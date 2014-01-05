@@ -237,17 +237,6 @@ public:
         }
     }
 
-    EdgeTable* getEdgeTableForGlyph (int glyphNumber, const AffineTransform& transform)
-    {
-        Path path;
-
-        if (getOutlineForGlyph (glyphNumber, path) && ! path.isEmpty())
-            return new EdgeTable (path.getBoundsTransformed (transform).getSmallestIntegerContainer().expanded (1, 0),
-                                  path, transform);
-
-        return nullptr;
-    }
-
     bool getOutlineForGlyph (int glyphNumber, Path& path)
     {
         jassert (path.isEmpty());  // we might need to apply a transform to the path, so this must be empty
