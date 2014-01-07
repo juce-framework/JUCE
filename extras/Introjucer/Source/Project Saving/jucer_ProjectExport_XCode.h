@@ -194,6 +194,8 @@ protected:
         String getCustomXcodeFlags() const             { return config   [Ids::customXcodeFlags]; }
         Value  getCppLibTypeValue()                    { return getValue (Ids::cppLibType); }
         String getCppLibType() const                   { return config   [Ids::cppLibType]; }
+        Value  getCodeSignIdentityValue()              { return getValue (Ids::codeSigningIdentity); }
+        String getCodeSignIdentity() const             { return config   [Ids::codeSigningIdentity]; }
         Value  getFastMathValue()                      { return getValue (Ids::fastMath); }
         bool   isFastMathEnabled() const               { return config   [Ids::fastMath]; }
         Value  getLinkTimeOptimisationValue()          { return getValue (Ids::linkTimeOptimisation); }
@@ -244,13 +246,16 @@ protected:
                        "A comma-separated list of custom Xcode setting flags which will be appended to the list of generated flags, "
                        "e.g. MACOSX_DEPLOYMENT_TARGET_i386 = 10.5, VALID_ARCHS = \"ppc i386 x86_64\"");
 
-            const char* cppLibNames[] = { "Use Default", "Use LLVM libc++", 0 };
+            const char* cppLibNames[] = { "Use Default", "Use LLVM libc++", nullptr };
             Array<var> cppLibValues;
             cppLibValues.add (var::null);
             cppLibValues.add ("libc++");
 
             props.add (new ChoicePropertyComponent (getCppLibTypeValue(), "C++ Library", StringArray (cppLibNames), cppLibValues),
                        "The type of C++ std lib that will be linked.");
+
+            props.add (new TextPropertyComponent (getCodeSignIdentityValue(), "Code-signing Identity", 8192, false),
+                       "The name of a code-signing identity for Xcode to apply.");
 
             props.add (new BooleanPropertyComponent (getFastMathValue(), "Relax IEEE compliance", "Enabled"),
                        "Enable this to use FAST_MATH non-IEEE mode. (Warning: this can have unexpected results!)");
@@ -759,6 +764,9 @@ private:
         s.add ("CLANG_CXX_LANGUAGE_STANDARD = \"c++0x\"");
         s.add ("CLANG_LINK_OBJC_RUNTIME = NO");
 
+        if (config.getCodeSignIdentity().isNotEmpty())
+            s.add ("CODE_SIGN_IDENTITY = " + config.getCodeSignIdentity().quoted());
+
         if (config.getCppLibType().isNotEmpty())
             s.add ("CLANG_CXX_LIBRARY = " + config.getCppLibType().quoted());
 
@@ -823,7 +831,7 @@ private:
                 defsList.add ("\"" + def + "\"");
             }
 
-            s.add ("GCC_PREPROCESSOR_DEFINITIONS = (" + indentList (defsList, ",") + ")");
+            s.add ("GCC_PREPROCESSOR_DEFINITIONS = " + indentParenthesisedList (defsList));
         }
 
         s.addTokens (config.getCustomXcodeFlags(), ",", "\"'");
@@ -870,7 +878,7 @@ private:
         for (int i = 0; i < objects.size(); ++i)
         {
             ValueTree& o = *objects.getUnchecked(i);
-            output << "\t\t" << o.getType().toString() << " = { ";
+            output << "\t\t" << o.getType().toString() << " = {";
 
             for (int j = 0; j < o.getNumProperties(); ++j)
             {
@@ -1062,7 +1070,7 @@ private:
     {
         ValueTree* v = new ValueTree (groupID);
         v->setProperty ("isa", "PBXGroup", nullptr);
-        v->setProperty ("children", "(" + indentList (childIDs, ",") + " )", nullptr);
+        v->setProperty ("children", indentParenthesisedList (childIDs), nullptr);
         v->setProperty (Ids::name, groupName, nullptr);
         v->setProperty ("sourceTree", "<group>", nullptr);
         pbxGroups.add (v);
@@ -1107,7 +1115,7 @@ private:
     {
         ValueTree* v = new ValueTree (createID ("targetconfigid_" + configName));
         v->setProperty ("isa", "XCBuildConfiguration", nullptr);
-        v->setProperty ("buildSettings", "{" + indentList (buildSettings, ";") + " }", nullptr);
+        v->setProperty ("buildSettings", indentBracedList (buildSettings), nullptr);
         v->setProperty (Ids::name, configName, nullptr);
         targetConfigs.add (v);
     }
@@ -1116,7 +1124,7 @@ private:
     {
         ValueTree* v = new ValueTree (createID ("projectconfigid_" + configName));
         v->setProperty ("isa", "XCBuildConfiguration", nullptr);
-        v->setProperty ("buildSettings", "{" + indentList (buildSettings, ";") + " }", nullptr);
+        v->setProperty ("buildSettings", indentBracedList (buildSettings), nullptr);
         v->setProperty (Ids::name, configName, nullptr);
         projectConfigs.add (v);
     }
@@ -1130,7 +1138,7 @@ private:
 
         ValueTree* v = new ValueTree (listID);
         v->setProperty ("isa", "XCConfigurationList", nullptr);
-        v->setProperty ("buildConfigurations", "(" + indentList (configIDs, ",") + " )", nullptr);
+        v->setProperty ("buildConfigurations", indentParenthesisedList (configIDs), nullptr);
         v->setProperty ("defaultConfigurationIsVisible", (int) 0, nullptr);
 
         if (configsToUse[0] != nullptr)
@@ -1152,7 +1160,7 @@ private:
         ValueTree* v = new ValueTree (phaseId);
         v->setProperty ("isa", phaseType, nullptr);
         v->setProperty ("buildActionMask", "2147483647", nullptr);
-        v->setProperty ("files", "(" + indentList (fileIds, ",") + " )", nullptr);
+        v->setProperty ("files", indentParenthesisedList (fileIds), nullptr);
         v->setProperty ("runOnlyForDeploymentPostprocessing", (int) 0, nullptr);
         misc.add (v);
         return *v;
@@ -1163,7 +1171,7 @@ private:
         ValueTree* const v = new ValueTree (createID ("__target"));
         v->setProperty ("isa", "PBXNativeTarget", nullptr);
         v->setProperty ("buildConfigurationList", createID ("__configList"), nullptr);
-        v->setProperty ("buildPhases", "(" + indentList (buildPhaseIDs, ",") + " )", nullptr);
+        v->setProperty ("buildPhases", indentParenthesisedList (buildPhaseIDs), nullptr);
         v->setProperty ("buildRules", "( )", nullptr);
         v->setProperty ("dependencies", "( )", nullptr);
         v->setProperty (Ids::name, projectName, nullptr);
@@ -1209,13 +1217,19 @@ private:
     }
 
     //==============================================================================
-    static String indentList (const StringArray& list, const String& separator)
+    static String indentBracedList (const StringArray& list)        { return "{" + indentList (list, ";", 0) + " }"; }
+    static String indentParenthesisedList (const StringArray& list) { return "(" + indentList (list, ",", 1) + " )"; }
+
+    static String indentList (const StringArray& list, const String& separator, int extraTabs)
     {
         if (list.size() == 0)
             return " ";
 
-        return "\n\t\t\t\t" + list.joinIntoString (separator + "\n\t\t\t\t")
-                  + (separator == ";" ? separator : String::empty);
+        StringArray sorted (list);
+        sorted.sort (true);
+
+        const String tabs ("\n" + String::repeatedString ("\t", extraTabs + 4));
+        return tabs + sorted.joinIntoString (separator + tabs) + separator;
     }
 
     String createID (String rootString) const
@@ -1228,20 +1242,9 @@ private:
         return MD5 (rootString.toUTF8()).toHexString().substring (0, 24).toUpperCase();
     }
 
-    String createFileRefID (const RelativePath& path) const
-    {
-        return createFileRefID (path.toUnixStyle());
-    }
-
-    String createFileRefID (const String& path) const
-    {
-        return createID ("__fileref_" + path);
-    }
-
-    String getIDForGroup (const Project::Item& item) const
-    {
-        return createID (item.getID());
-    }
+    String createFileRefID (const RelativePath& path) const     { return createFileRefID (path.toUnixStyle()); }
+    String createFileRefID (const String& path) const           { return createID ("__fileref_" + path); }
+    String getIDForGroup (const Project::Item& item) const      { return createID (item.getID()); }
 
     bool shouldFileBeCompiledByDefault (const RelativePath& file) const
     {

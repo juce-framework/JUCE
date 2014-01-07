@@ -74,6 +74,7 @@ namespace Ids
     DECLARE_ID (libraryPath);
     DECLARE_ID (customXcodeFlags);
     DECLARE_ID (cppLibType);
+    DECLARE_ID (codeSigningIdentity);
     DECLARE_ID (fastMath);
     DECLARE_ID (linkTimeOptimisation);
     DECLARE_ID (osxSDK);
