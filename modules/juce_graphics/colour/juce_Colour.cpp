@@ -26,8 +26,7 @@ namespace ColourHelpers
 {
     static uint8 floatToUInt8 (const float n) noexcept
     {
-        // the multiplier has a small extra amount to allow for FP rounding errors.
-        return n <= 0.0f ? 0 : (n >= 1.0f ? 255 : (uint8) (n * 255.1f));
+        return n <= 0.0f ? 0 : (n >= 1.0f ? 255 : static_cast<uint8> (n * 255.996f));
     }
 
     // This is an adjusted brightness value, based on the way the human
