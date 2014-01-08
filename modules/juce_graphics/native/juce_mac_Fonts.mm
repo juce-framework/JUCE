@@ -486,8 +486,9 @@ public:
                     font.getTypefaceStyle()),
           fontRef (nullptr),
           ctFontRef (nullptr),
-          fontHeightToPointsFactor (1.0f), isMemoryFont (false),
+          fontHeightToPointsFactor (1.0f),
           renderingTransform (CGAffineTransformIdentity),
+          isMemoryFont (false),
           attributedStringAtts (nullptr),
           ascent (0.0f),
           unitsToHeightScaleFactor (0.0f)
@@ -505,8 +506,9 @@ public:
         : Typeface (String(), String()),
           fontRef (nullptr),
           ctFontRef (nullptr),
-          fontHeightToPointsFactor (1.0f), isMemoryFont (true),
+          fontHeightToPointsFactor (1.0f),
           renderingTransform (CGAffineTransformIdentity),
+          isMemoryFont (true),
           attributedStringAtts (nullptr),
           ascent (0.0f),
           unitsToHeightScaleFactor (0.0f)
