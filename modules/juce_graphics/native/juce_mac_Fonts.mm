@@ -486,7 +486,7 @@ public:
                     font.getTypefaceStyle()),
           fontRef (nullptr),
           ctFontRef (nullptr),
-          fontHeightToPointsFactor (1.0f),
+          fontHeightToPointsFactor (1.0f), isMemoryFont (false),
           renderingTransform (CGAffineTransformIdentity),
           attributedStringAtts (nullptr),
           ascent (0.0f),
@@ -505,7 +505,7 @@ public:
         : Typeface (String(), String()),
           fontRef (nullptr),
           ctFontRef (nullptr),
-          fontHeightToPointsFactor (1.0f),
+          fontHeightToPointsFactor (1.0f), isMemoryFont (true),
           renderingTransform (CGAffineTransformIdentity),
           attributedStringAtts (nullptr),
           ascent (0.0f),
@@ -672,6 +672,8 @@ public:
     float fontHeightToPointsFactor;
     CGAffineTransform renderingTransform;
 
+    bool isMemoryFont;
+
 private:
     CFDictionaryRef attributedStringAtts;
     float ascent, unitsToHeightScaleFactor;
@@ -701,12 +703,11 @@ private:
 
 CTFontRef getCTFontFromTypeface (const Font& f)
 {
-    if (OSXTypeface* tf = dynamic_cast <OSXTypeface*> (f.getTypeface()))
+    if (OSXTypeface* tf = dynamic_cast<OSXTypeface*> (f.getTypeface()))
         return tf->ctFontRef;
 
     return 0;
 }
-
 
 StringArray Font::findAllTypefaceNames()
 {
@@ -912,7 +913,7 @@ public:
 
 #if SUPPORT_ONLY_10_4_FONTS
         HeapBlock <NSSize> advances (length);
-        [nsFont getAdvancements: advances forGlyphs: reinterpret_cast <NSGlyph*> (glyphs.getData()) count: length];
+        [nsFont getAdvancements: advances forGlyphs: reinterpret_cast<NSGlyph*> (glyphs.getData()) count: length];
 
         for (int i = 0; i < length; ++i)
             x += advances[i].width;
@@ -940,7 +941,7 @@ public:
         return x * unitsToHeightScaleFactor;
     }
 
-    void getGlyphPositions (const String& text, Array <int>& resultGlyphs, Array <float>& xOffsets) override
+    void getGlyphPositions (const String& text, Array<int>& resultGlyphs, Array<float>& xOffsets) override
     {
         xOffsets.add (0);
 
@@ -1152,8 +1153,8 @@ private:
 
                     if (rangeOffset == 0)
                         return delta + c;
-                    else
-                        return getValue16 (glyphIndexes, 2 * ((rangeOffset / 2) + (c - start) - (segCount - i)));
+
+                    return getValue16 (glyphIndexes, 2 * ((rangeOffset / 2) + (c - start) - (segCount - i)));
                 }
             }
 
@@ -1271,13 +1272,33 @@ Typeface::Ptr Font::getDefaultTypefaceForFont (const Font& font)
     return Typeface::createSystemTypefaceFor (newFont);
 }
 
+#if JUCE_CORETEXT_AVAILABLE
+static bool containsNoMemoryTypefaces (const AttributedString& text)
+{
+    const int numCharacterAttributes = text.getNumAttributes();
+
+    for (int i = 0; i < numCharacterAttributes; ++i)
+        if (const Font* const f = text.getAttribute (i)->getFont())
+            if (OSXTypeface* tf = dynamic_cast<OSXTypeface*> (f->getTypeface()))
+                if (tf->isMemoryFont)
+                    return false;
+
+    return true;
+}
+#endif
+
 bool TextLayout::createNativeLayout (const AttributedString& text)
 {
    #if JUCE_CORETEXT_AVAILABLE
-    CoreTextTypeLayout::createLayout (*this, text);
-    return true;
-   #else
+    // Seems to be an unfathomable bug in CoreText which prevents the layout working with
+    // typefaces that were loaded from memory, so have to fallback if we hit any of those..
+    if (containsNoMemoryTypefaces (text))
+    {
+        CoreTextTypeLayout::createLayout (*this, text);
+        return true;
+    }
+   #endif
+
     (void) text;
     return false;
-   #endif
 }
