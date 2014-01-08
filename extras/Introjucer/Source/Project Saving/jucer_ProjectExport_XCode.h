@@ -458,11 +458,19 @@ private:
     void writeIcnsFile (const OwnedArray<Drawable>& images, OutputStream& out) const
     {
         MemoryOutputStream data;
+        int smallest = 0x7fffffff;
+        Drawable* smallestImage = nullptr;
 
         for (int i = 0; i < images.size(); ++i)
         {
             const Image image (fixMacIconImageSize (*images.getUnchecked(i)));
             jassert (image.getWidth() == image.getHeight());
+
+            if (image.getWidth() < smallest)
+            {
+                smallest = image.getWidth();
+                smallestImage = images.getUnchecked(i);
+            }
 
             switch (image.getWidth())
             {
@@ -478,6 +486,11 @@ private:
         }
 
         jassert (data.getDataSize() > 0); // no suitable sized images?
+
+        // If you only supply a 1024 image, the file doesn't work on 10.8, so we need
+        // to force a smaller one in there too..
+        if (smallest > 512 && smallestImage != nullptr)
+            writeNewIconFormat (data, rescaleImageForIcon (*smallestImage, 512), "ic09");
 
         out.write ("icns", 4);
         out.writeIntBigEndian ((int) data.getDataSize() + 8);
