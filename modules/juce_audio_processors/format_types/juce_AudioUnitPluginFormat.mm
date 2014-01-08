@@ -943,12 +943,7 @@ private:
                                       kAudioUnitScope_Global, 0, &info, sizeof (info));
             }
 
-            AUEventListenerCreate (eventListenerCallback, this,
-                                  #if MAC_OS_X_VERSION_MIN_REQUIRED > MAC_OS_X_VERSION_10_4
-                                   CFRunLoopGetMain(),
-                                  #else
-                                   nullptr,
-                                  #endif
+            AUEventListenerCreate (eventListenerCallback, this, nullptr,
                                    kCFRunLoopDefaultMode, 0, 0, &eventListenerRef);
 
             for (int i = 0; i < parameters.size(); ++i)
