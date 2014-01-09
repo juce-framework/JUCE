@@ -1230,19 +1230,25 @@ private:
     }
 
     //==============================================================================
-    static String indentBracedList (const StringArray& list)        { return "{" + indentList (list, ";", 0) + " }"; }
-    static String indentParenthesisedList (const StringArray& list) { return "(" + indentList (list, ",", 1) + " )"; }
+    static String indentBracedList (const StringArray& list)        { return "{" + indentList (list, ";", 0, true) + " }"; }
+    static String indentParenthesisedList (const StringArray& list) { return "(" + indentList (list, ",", 1, false) + " )"; }
 
-    static String indentList (const StringArray& list, const String& separator, int extraTabs)
+    static String indentList (const StringArray& list, const String& separator, int extraTabs, bool shouldSort)
     {
         if (list.size() == 0)
             return " ";
 
-        StringArray sorted (list);
-        sorted.sort (true);
-
         const String tabs ("\n" + String::repeatedString ("\t", extraTabs + 4));
-        return tabs + sorted.joinIntoString (separator + tabs) + separator;
+
+        if (shouldSort)
+        {
+            StringArray sorted (list);
+            sorted.sort (true);
+
+            return tabs + sorted.joinIntoString (separator + tabs) + separator;
+        }
+
+        return tabs + list.joinIntoString (separator + tabs) + separator;
     }
 
     String createID (String rootString) const
