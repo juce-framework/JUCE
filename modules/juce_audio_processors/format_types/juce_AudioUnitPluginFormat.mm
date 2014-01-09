@@ -653,8 +653,13 @@ public:
 
     void sendAllParametersChangedEvents()
     {
-        for (int i = 0; i < parameters.size(); ++i)
-            sendParameterChangeEvent (i);
+        jassert (audioUnit != nullptr);
+
+        AudioUnitParameter param;
+        param.mAudioUnit = audioUnit;
+        param.mParameterID = kAUParameterListener_AnyParameter;
+
+        AUParameterListenerNotify (nullptr, nullptr, &param);
     }
 
     const String getParameterName (int index) override
