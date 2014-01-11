@@ -583,14 +583,14 @@ public:
                     case Event::kNoteOnEvent:
                         result.addEvent (MidiMessage::noteOn (createSafeChannel (e.noteOn.channel),
                                                               createSafeNote (e.noteOn.pitch),
-                                                              (uint8) denormaliseToMidiValue (e.noteOn.velocity)),
+                                                              (Steinberg::uint8) denormaliseToMidiValue (e.noteOn.velocity)),
                                          e.sampleOffset);
                         break;
 
                     case Event::kNoteOffEvent:
                         result.addEvent (MidiMessage::noteOff (createSafeChannel (e.noteOff.channel),
                                                                createSafeNote (e.noteOff.pitch),
-                                                               (uint8) denormaliseToMidiValue (e.noteOff.velocity)),
+                                                               (Steinberg::uint8) denormaliseToMidiValue (e.noteOff.velocity)),
                                          e.sampleOffset);
                         break;
 
@@ -678,7 +678,7 @@ public:
 
 private:
     Array<Vst::Event, CriticalSection> events;
-    Atomic<int32> refCount;
+    Atomic<int> refCount;
 
     static Steinberg::int16 createSafeChannel (int channel) noexcept  { return (Steinberg::int16) jlimit (0, 15, channel - 1); }
     static int createSafeChannel (Steinberg::int16 channel) noexcept  { return (int) jlimit (1, 16, channel + 1); }
@@ -1763,8 +1763,7 @@ public:
         if (! fetchComponentAndController (factory, factory->countClasses()))
             return false;
 
-        if (warnOnFailure (editController->initialize (host->getFUnknown())) != kResultTrue)
-            return false;
+        editController->initialize (host->getFUnknown()); // (May return an error if the plugin combines the IComponent and IEditController implementations)
 
         isControllerInitialised = true;
         editController->setComponentHandler (host);
