@@ -229,6 +229,7 @@ public:
         menu.addCommandItem (commandManager, CommandIDs::closeDocument);
         menu.addCommandItem (commandManager, CommandIDs::saveDocument);
         menu.addCommandItem (commandManager, CommandIDs::saveDocumentAs);
+        menu.addCommandItem (commandManager, CommandIDs::saveAll);
         menu.addSeparator();
         menu.addCommandItem (commandManager, CommandIDs::closeProject);
         menu.addCommandItem (commandManager, CommandIDs::saveProject);
@@ -381,7 +382,7 @@ public:
 
         case CommandIDs::saveAll:
             result.setInfo ("Save All", "Saves all open documents", CommandCategories::general, 0);
-            result.setActive (openDocumentManager.anyFilesNeedSaving());
+            result.defaultKeypresses.add (KeyPress ('s', ModifierKeys::commandModifier | ModifierKeys::altModifier, 0));
             break;
 
         case CommandIDs::showUTF8Tool:

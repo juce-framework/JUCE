@@ -183,20 +183,20 @@ public:
         writeLocalPropertiesFile (target.getChildFile ("local.properties"));
         writeStringsFile (target.getChildFile ("res/values/strings.xml"));
 
-        const Image bigIcon (getBigIcon());
-        const Image smallIcon (getSmallIcon());
+        ScopedPointer<Drawable> bigIcon (getBigIcon());
+        ScopedPointer<Drawable> smallIcon (getSmallIcon());
 
-        if (bigIcon.isValid() && smallIcon.isValid())
+        if (bigIcon != nullptr && smallIcon != nullptr)
         {
-            const int step = jmax (bigIcon.getWidth(), bigIcon.getHeight()) / 8;
+            const int step = jmax (bigIcon->getWidth(), bigIcon->getHeight()) / 8;
             writeIcon (target.getChildFile ("res/drawable-xhdpi/icon.png"), getBestIconForSize (step * 8, false));
             writeIcon (target.getChildFile ("res/drawable-hdpi/icon.png"),  getBestIconForSize (step * 6, false));
             writeIcon (target.getChildFile ("res/drawable-mdpi/icon.png"),  getBestIconForSize (step * 4, false));
             writeIcon (target.getChildFile ("res/drawable-ldpi/icon.png"),  getBestIconForSize (step * 3, false));
         }
-        else
+        else if (Drawable* icon = bigIcon != nullptr ? bigIcon : smallIcon)
         {
-            writeIcon (target.getChildFile ("res/drawable-mdpi/icon.png"), bigIcon.isValid() ? bigIcon : smallIcon);
+            writeIcon (target.getChildFile ("res/drawable-mdpi/icon.png"), rescaleImageForIcon (*icon, icon->getWidth()));
         }
     }
 
@@ -490,7 +490,7 @@ private:
               << " -O" << config.getGCCOptimisationFlag();
 
         if (isCPP11Enabled())
-            flags << " -std=c++0x";
+            flags << " -std=c++0x -std=gnu++0x"; // these flags seem to enable slightly different things on gcc, and both seem to be needed
 
         defines = mergePreprocessorDefs (defines, getAllPreprocessorDefs (config));
         return flags + createGCCPreprocessorFlags (defines);

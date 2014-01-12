@@ -22,7 +22,6 @@
   ==============================================================================
 */
 
-
 JUCEApplication::JUCEApplication() {}
 JUCEApplication::~JUCEApplication() {}
 

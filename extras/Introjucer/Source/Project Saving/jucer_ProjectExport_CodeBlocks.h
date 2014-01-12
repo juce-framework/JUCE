@@ -132,7 +132,6 @@ private:
         StringArray flags;
         flags.add ("-O" + config.getGCCOptimisationFlag());
         flags.add ("-std=gnu++0x");
-        flags.add ("-march=pentium4");
         flags.add ("-mstackrealign");
 
         if (config.isDebug())
@@ -211,7 +210,7 @@ private:
                 outputPath ="bin/" + File::createLegalFileName (config.getName().trim());
             }
 
-            output->setAttribute ("output", outputPath + "/" + config.getTargetBinaryNameString());
+            output->setAttribute ("output", outputPath + "/" + replacePreprocessorTokens (config, config.getTargetBinaryNameString()));
 
             output->setAttribute ("prefix_auto", 1);
             output->setAttribute ("extension_auto", 1);

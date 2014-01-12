@@ -210,7 +210,7 @@ XmlElement* XmlDocument::parseDocumentElement (String::CharPointerType textToPar
     }
     else
     {
-        lastError = String::empty;
+        lastError.clear();
 
         ScopedPointer<XmlElement> result (readNextElement (! onlyReadOuterDocumentElement));
 

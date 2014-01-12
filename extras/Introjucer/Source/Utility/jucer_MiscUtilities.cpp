@@ -306,14 +306,14 @@ public:
     {
         desc.setJustificationType (Justification::centred);
         desc.setColour (Label::textColourId, Colours::white);
-        addAndMakeVisible (&desc);
+        addAndMakeVisible (desc);
 
         const Colour bkgd (Colours::white.withAlpha (0.6f));
 
         userText.setMultiLine (true, true);
         userText.setReturnKeyStartsNewLine (true);
         userText.setColour (TextEditor::backgroundColourId, bkgd);
-        addAndMakeVisible (&userText);
+        addAndMakeVisible (userText);
         userText.addListener (this);
 
         resultText.setFont (getAppSettings().appearance.getCodeFont().withHeight (13.0f));
@@ -321,7 +321,7 @@ public:
         resultText.setColour (TextEditor::backgroundColourId, bkgd);
         resultText.setReadOnly (true);
         resultText.setSelectAllWhenFocused (true);
-        addAndMakeVisible (&resultText);
+        addAndMakeVisible (resultText);
 
         userText.setText (getLastText());
     }
@@ -391,7 +391,7 @@ public:
     {
         desc.setJustificationType (Justification::centred);
         desc.setColour (Label::textColourId, Colours::white);
-        addAndMakeVisible (&desc);
+        addAndMakeVisible (desc);
 
         const Colour bkgd (Colours::white.withAlpha (0.6f));
 
@@ -399,7 +399,7 @@ public:
         userText.setMultiLine (true, true);
         userText.setReturnKeyStartsNewLine (true);
         userText.setColour (TextEditor::backgroundColourId, bkgd);
-        addAndMakeVisible (&userText);
+        addAndMakeVisible (userText);
         userText.addListener (this);
 
         resultText.setFont (getAppSettings().appearance.getCodeFont().withHeight (13.0f));
@@ -407,7 +407,7 @@ public:
         resultText.setColour (TextEditor::backgroundColourId, bkgd);
         resultText.setReadOnly (true);
         resultText.setSelectAllWhenFocused (true);
-        addAndMakeVisible (&resultText);
+        addAndMakeVisible (resultText);
 
         userText.setText (getLastText());
     }

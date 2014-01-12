@@ -214,7 +214,7 @@ public:
     {
         setOpaque (true);
 
-        addAndMakeVisible (&controlButton);
+        addAndMakeVisible (controlButton);
         controlButton.changeWidthToFitText (24);
         controlButton.setTopLeftPosition (20, 20);
         controlButton.setTriggeredOnMouseDown (true);

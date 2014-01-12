@@ -77,7 +77,7 @@ public:
 
     void initialiseToggle (ToggleButton& b, const char* name, bool on)
     {
-        addAndMakeVisible (&b);
+        addAndMakeVisible (b);
         b.setButtonText (name);
         b.setToggleState (on, dontSendNotification);
     }
@@ -627,7 +627,7 @@ public:
         demos.add (new SVGDemo (controls));
         demos.add (new LinesDemo (controls));
 
-        addAndMakeVisible (&listBox);
+        addAndMakeVisible (listBox);
         listBox.setModel (this);
         listBox.selectRow (0);
         listBox.setColour (ListBox::backgroundColourId, Colour::greyLevel (0.9f));
@@ -680,10 +680,10 @@ public:
     {
         setOpaque (true);
 
-        addAndMakeVisible (&demoHolder);
-        addAndMakeVisible (&controllersComponent);
-        addAndMakeVisible (&performanceDisplay);
-        addAndMakeVisible (&testList);
+        addAndMakeVisible (demoHolder);
+        addAndMakeVisible (controllersComponent);
+        addAndMakeVisible (performanceDisplay);
+        addAndMakeVisible (testList);
     }
 
     void paint (Graphics& g)

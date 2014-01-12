@@ -53,7 +53,7 @@ public:
     virtual String getName() const
     {
         jassertfalse; // You shouldn't call this for an expression that's not actually a function!
-        return String::empty;
+        return String();
     }
 
     virtual void renameSymbol (const Symbol& oldSymbol, const String& newName, const Scope& scope, int recursionDepth)
@@ -188,12 +188,10 @@ struct Expression::Helpers
             if (input != left && input != right)
                 return TermPtr();
 
-            const Term* const dest = findDestinationFor (topLevelTerm, this);
+            if (const Term* const dest = findDestinationFor (topLevelTerm, this))
+                return dest->createTermToEvaluateInput (scope, this, overallTarget, topLevelTerm);
 
-            if (dest == nullptr)
-                return new Constant (overallTarget, false);
-
-            return dest->createTermToEvaluateInput (scope, this, overallTarget, topLevelTerm);
+            return new Constant (overallTarget, false);
         }
     };
 
@@ -1181,5 +1179,5 @@ void Expression::Scope::visitRelativeScope (const String& scopeName, Visitor&) c
 
 String Expression::Scope::getScopeUID() const
 {
-    return String::empty;
+    return String();
 }

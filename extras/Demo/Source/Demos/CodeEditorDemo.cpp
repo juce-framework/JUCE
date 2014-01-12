@@ -51,7 +51,7 @@ public:
                              "\n");
 
         // Create a file chooser control to load files into it..
-        addAndMakeVisible (&fileChooser);
+        addAndMakeVisible (fileChooser);
         fileChooser.addListener (this);
     }
 

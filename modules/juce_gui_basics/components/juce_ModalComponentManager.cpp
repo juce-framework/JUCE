@@ -63,7 +63,9 @@ public:
         if (isActive)
         {
             isActive = false;
-            ModalComponentManager::getInstance()->triggerAsyncUpdate();
+
+            if (ModalComponentManager* mcm = ModalComponentManager::getInstanceWithoutCreating())
+                mcm->triggerAsyncUpdate();
         }
     }
 
@@ -83,6 +85,7 @@ ModalComponentManager::ModalComponentManager()
 
 ModalComponentManager::~ModalComponentManager()
 {
+    stack.clear();
     clearSingletonInstance();
 }
 

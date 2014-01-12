@@ -105,7 +105,7 @@ public:
         close();
     }
 
-    StringArray getOutputChannelNames()
+    StringArray getOutputChannelNames() override
     {
         StringArray s;
         s.add ("Left");
@@ -113,7 +113,7 @@ public:
         return s;
     }
 
-    StringArray getInputChannelNames()
+    StringArray getInputChannelNames() override
     {
         StringArray s;
 
@@ -130,36 +130,43 @@ public:
         return s;
     }
 
-    int getNumSampleRates()             { return 1;}
-    double getSampleRate (int index)    { return sampleRate; }
-
-    int getDefaultBufferSize()          { return 2048; }
-    int getNumBufferSizesAvailable()    { return 50; }
-
-    int getBufferSizeSamples (int index)
+    Array<double> getAvailableSampleRates() override
     {
+        Array<double> r;
+        r.add ((double) sampleRate);
+        return r;
+    }
+
+    Array<int> getAvailableBufferSizes() override
+    {
+        Array<int> b;
         int n = 16;
-        for (int i = 0; i < index; ++i)
+
+        for (int i = 0; i < 50; ++i)
+        {
+            b.add (n);
             n += n < 64 ? 16
                         : (n < 512 ? 32
                                    : (n < 1024 ? 64
                                                : (n < 2048 ? 128 : 256)));
+        }
 
-        return n;
+        return b;
     }
 
+    int getDefaultBufferSize() override                 { return 2048; }
 
     String open (const BigInteger& inputChannels,
                  const BigInteger& outputChannels,
                  double requestedSampleRate,
-                 int bufferSize)
+                 int bufferSize) override
     {
         close();
 
         if (sampleRate != (int) requestedSampleRate)
             return "Sample rate not allowed";
 
-        lastError = String::empty;
+        lastError.clear();
         int preferredBufferSize = (bufferSize <= 0) ? getDefaultBufferSize() : bufferSize;
 
         numDeviceInputChannels = 0;
@@ -227,7 +234,7 @@ public:
         return lastError;
     }
 
-    void close()
+    void close() override
     {
         if (isRunning)
         {
@@ -237,18 +244,18 @@ public:
         }
     }
 
-    int getOutputLatencyInSamples()                     { return (minBufferSizeOut * 3) / 4; }
-    int getInputLatencyInSamples()                      { return (minBufferSizeIn * 3) / 4; }
-    bool isOpen()                                       { return isRunning; }
-    int getCurrentBufferSizeSamples()                   { return actualBufferSize; }
-    int getCurrentBitDepth()                            { return 16; }
-    double getCurrentSampleRate()                       { return sampleRate; }
-    BigInteger getActiveOutputChannels() const          { return activeOutputChans; }
-    BigInteger getActiveInputChannels() const           { return activeInputChans; }
-    String getLastError()                               { return lastError; }
-    bool isPlaying()                                    { return isRunning && callback != 0; }
+    int getOutputLatencyInSamples() override             { return (minBufferSizeOut * 3) / 4; }
+    int getInputLatencyInSamples() override              { return (minBufferSizeIn * 3) / 4; }
+    bool isOpen() override                               { return isRunning; }
+    int getCurrentBufferSizeSamples() override           { return actualBufferSize; }
+    int getCurrentBitDepth() override                    { return 16; }
+    double getCurrentSampleRate() override               { return sampleRate; }
+    BigInteger getActiveOutputChannels() const override  { return activeOutputChans; }
+    BigInteger getActiveInputChannels() const override   { return activeInputChans; }
+    String getLastError() override                       { return lastError; }
+    bool isPlaying() override                            { return isRunning && callback != 0; }
 
-    void start (AudioIODeviceCallback* newCallback)
+    void start (AudioIODeviceCallback* newCallback) override
     {
         if (isRunning && callback != newCallback)
         {
@@ -260,7 +267,7 @@ public:
         }
     }
 
-    void stop()
+    void stop() override
     {
         if (isRunning)
         {

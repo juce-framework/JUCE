@@ -178,14 +178,14 @@ public:
 
         testsListModel.addChangeListener (this);
 
-        addAndMakeVisible (&renderComponent);
+        addAndMakeVisible (renderComponent);
 
-        addAndMakeVisible (&testsListBox);
+        addAndMakeVisible (testsListBox);
         testsListBox.setModel (&testsListModel);
         testsListBox.selectRow (dominoes);
         testsListBox.setColour (ListBox::backgroundColourId, Colours::lightgrey);
 
-        addAndMakeVisible (&instructions);
+        addAndMakeVisible (instructions);
         instructions.setMultiLine (true);
         instructions.setReadOnly (true);
         instructions.setColour (TextEditor::backgroundColourId, Colours::lightgrey);

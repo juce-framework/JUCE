@@ -102,6 +102,8 @@ public:
 
     Value getUserNotes()                        { return getSetting (Ids::userNotes); }
 
+    // NB: this is the path to the parent "modules" folder that contains the named module, not the
+    // module folder itself.
     Value getPathForModuleValue (const String& moduleID);
     String getPathForModuleString (const String& moduleID) const;
     void removePathForModule (const String& moduleID);
@@ -118,8 +120,8 @@ public:
 
     Value getBigIconImageItemID()               { return getSetting (Ids::bigIcon); }
     Value getSmallIconImageItemID()             { return getSetting (Ids::smallIcon); }
-    Image getBigIcon() const;
-    Image getSmallIcon() const;
+    Drawable* getBigIcon() const;
+    Drawable* getSmallIcon() const;
     Image getBestIconForSize (int size, bool returnNullIfNothingBigEnough) const;
 
     String getExporterIdentifierMacro() const
@@ -318,14 +320,14 @@ protected:
 
     virtual BuildConfiguration::Ptr createBuildConfig (const ValueTree&) const = 0;
 
+    void addDefaultPreprocessorDefs (StringPairArray&) const;
+
     static String getDefaultBuildsRootFolder()            { return "Builds/"; }
 
     static String getLibbedFilename (String name)
     {
-        if (! name.startsWith ("lib"))
-            name = "lib" + name;
-        if (! name.endsWithIgnoreCase (".a"))
-            name = name + ".a";
+        if (! name.startsWith ("lib"))         name = "lib" + name;
+        if (! name.endsWithIgnoreCase (".a"))  name += ".a";
         return name;
     }
 
@@ -359,7 +361,7 @@ protected:
         }
     }
 
-    static Image rescaleImageForIcon (Image image, int iconSize);
+    static Image rescaleImageForIcon (Drawable&, int iconSize);
 
 private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ProjectExporter)

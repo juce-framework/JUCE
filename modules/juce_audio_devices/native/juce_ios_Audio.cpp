@@ -48,7 +48,7 @@ public:
         close();
     }
 
-    StringArray getOutputChannelNames()
+    StringArray getOutputChannelNames() override
     {
         StringArray s;
         s.add ("Left");
@@ -56,7 +56,7 @@ public:
         return s;
     }
 
-    StringArray getInputChannelNames()
+    StringArray getInputChannelNames() override
     {
         StringArray s;
         if (audioInputIsAvailable)
@@ -67,20 +67,27 @@ public:
         return s;
     }
 
-    int getNumSampleRates()                 { return jmax (1, sampleRates.size()); }
-    double getSampleRate (int index)        { return sampleRates.size() > 0 ? sampleRates [index] : sampleRate; }
+    Array<double> getAvailableSampleRates() override    { return sampleRates; }
 
-    int getNumBufferSizesAvailable()        { return 6; }
-    int getBufferSizeSamples (int index)    { return 1 << (jlimit (0, 5, index) + 6); }
-    int getDefaultBufferSize()              { return 1024; }
+    Array<int> getAvailableBufferSizes() override
+    {
+        Array<int> r;
+
+        for (int i = 6; i < 12; ++i)
+            r.add (1 << i);
+
+        return r;
+    }
+
+    int getDefaultBufferSize() override                 { return 1024; }
 
     String open (const BigInteger& inputChannelsWanted,
                  const BigInteger& outputChannelsWanted,
-                 double targetSampleRate, int bufferSize)
+                 double targetSampleRate, int bufferSize) override
     {
         close();
 
-        lastError = String::empty;
+        lastError.clear();
         preferredBufferSize = (bufferSize <= 0) ? getDefaultBufferSize() : bufferSize;
 
         //  xxx set up channel mapping
@@ -115,7 +122,7 @@ public:
         setSessionFloat64Property (kAudioSessionProperty_PreferredHardwareSampleRate, targetSampleRate);
         updateSampleRates();
 
-        setSessionFloat64Property (kAudioSessionProperty_PreferredHardwareIOBufferDuration, preferredBufferSize / sampleRate);
+        setSessionFloat32Property (kAudioSessionProperty_PreferredHardwareIOBufferDuration, preferredBufferSize / sampleRate);
         updateCurrentBufferSize();
 
         prepareFloatBuffers (actualBufferSize);
@@ -127,7 +134,7 @@ public:
         return lastError;
     }
 
-    void close()
+    void close() override
     {
         if (isRunning)
         {
@@ -146,19 +153,19 @@ public:
         }
     }
 
-    bool isOpen()                       { return isRunning; }
+    bool isOpen() override                       { return isRunning; }
 
-    int getCurrentBufferSizeSamples()   { return actualBufferSize; }
-    double getCurrentSampleRate()       { return sampleRate; }
-    int getCurrentBitDepth()            { return 16; }
+    int getCurrentBufferSizeSamples() override   { return actualBufferSize; }
+    double getCurrentSampleRate() override       { return sampleRate; }
+    int getCurrentBitDepth() override            { return 16; }
 
-    BigInteger getActiveOutputChannels() const    { return activeOutputChans; }
-    BigInteger getActiveInputChannels() const     { return activeInputChans; }
+    BigInteger getActiveOutputChannels() const override    { return activeOutputChans; }
+    BigInteger getActiveInputChannels() const override     { return activeInputChans; }
 
-    int getOutputLatencyInSamples()               { return 0; } //xxx
-    int getInputLatencyInSamples()                { return 0; } //xxx
+    int getOutputLatencyInSamples() override               { return 0; } //xxx
+    int getInputLatencyInSamples() override                { return 0; } //xxx
 
-    void start (AudioIODeviceCallback* newCallback)
+    void start (AudioIODeviceCallback* newCallback) override
     {
         if (isRunning && callback != newCallback)
         {
@@ -170,7 +177,7 @@ public:
         }
     }
 
-    void stop()
+    void stop() override
     {
         if (isRunning)
         {
@@ -187,8 +194,8 @@ public:
         }
     }
 
-    bool isPlaying()            { return isRunning && callback != nullptr; }
-    String getLastError()       { return lastError; }
+    bool isPlaying() override            { return isRunning && callback != nullptr; }
+    String getLastError() override       { return lastError; }
 
 private:
     //==================================================================================================
@@ -436,6 +443,11 @@ private:
             isRunning = true;
             AudioSessionSetActive (true);
             AudioOutputUnitStart (audioUnit);
+
+            const ScopedLock sl (callbackLock);
+
+            if (callback != nullptr)
+                callback->audioDeviceError ("iOS audio session resumed");
         }
     }
 
@@ -541,6 +553,7 @@ private:
     }
 
     static void setSessionUInt32Property  (AudioSessionPropertyID propID, UInt32  v) noexcept  { AudioSessionSetProperty (propID, sizeof (v), &v); }
+    static void setSessionFloat32Property (AudioSessionPropertyID propID, Float32 v) noexcept  { AudioSessionSetProperty (propID, sizeof (v), &v); }
     static void setSessionFloat64Property (AudioSessionPropertyID propID, Float64 v) noexcept  { AudioSessionSetProperty (propID, sizeof (v), &v); }
 
     JUCE_DECLARE_NON_COPYABLE (iOSAudioIODevice)

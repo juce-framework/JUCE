@@ -110,7 +110,7 @@ public:
     iOSMessageBox (const String& title, const String& message,
                    NSString* button1, NSString* button2, NSString* button3,
                    ModalComponentManager::Callback* cb, const bool async)
-        : result (0), delegate (nil), alert (nil),
+        : result (0), resultReceived (false), delegate (nil), alert (nil),
           callback (cb), isYesNo (button3 != nil), isAsync (async)
     {
         delegate = [[JuceAlertBoxDelegate alloc] init];
@@ -137,7 +137,7 @@ public:
 
         JUCE_AUTORELEASEPOOL
         {
-            while (! alert.hidden && alert.superview != nil)
+            while (! (alert.hidden || resultReceived))
                 [[NSRunLoop mainRunLoop] runUntilDate: [NSDate dateWithTimeIntervalSinceNow: 0.01]];
         }
 
@@ -147,6 +147,7 @@ public:
     void buttonClicked (const int buttonIndex) noexcept
     {
         result = buttonIndex;
+        resultReceived = true;
 
         if (callback != nullptr)
             callback->modalStateFinished (result);
@@ -157,6 +158,7 @@ public:
 
 private:
     int result;
+    bool resultReceived;
     JuceAlertBoxDelegate* delegate;
     UIAlertView* alert;
     ScopedPointer<ModalComponentManager::Callback> callback;

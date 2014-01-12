@@ -307,6 +307,9 @@ public:
     */
     inline bool isNotEmpty() const noexcept                 { return text[0] != 0; }
 
+    /** Resets this string to be empty. */
+    void clear() noexcept;
+
     /** Case-insensitive comparison with another string. */
     bool equalsIgnoreCase (const String& other) const noexcept;
 

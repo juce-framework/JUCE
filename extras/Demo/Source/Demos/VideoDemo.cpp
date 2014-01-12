@@ -39,9 +39,9 @@ public:
           fileChooser ("movie", File::nonexistent, true, false, false,
                        "*", String::empty, "(choose a video file to play)")
     {
-        addAndMakeVisible (&videoComp);
+        addAndMakeVisible (videoComp);
 
-        addAndMakeVisible (&fileChooser);
+        addAndMakeVisible (fileChooser);
         fileChooser.addListener (this);
         fileChooser.setBrowseButtonText ("browse");
     }
@@ -148,9 +148,9 @@ public:
 
         fileTree.addListener (this);
         fileTree.setColour (TreeView::backgroundColourId, Colours::lightgrey);
-        addAndMakeVisible (&fileTree);
+        addAndMakeVisible (fileTree);
 
-        addAndMakeVisible (&resizerBar);
+        addAndMakeVisible (resizerBar);
 
         loadLeftButton.setButtonText ("Load Left");
         loadRightButton.setButtonText ("Load Right");
@@ -158,11 +158,11 @@ public:
         loadLeftButton.addListener (this);
         loadRightButton.addListener (this);
 
-        addAndMakeVisible (&loadLeftButton);
-        addAndMakeVisible (&loadRightButton);
+        addAndMakeVisible (loadLeftButton);
+        addAndMakeVisible (loadRightButton);
 
-        addAndMakeVisible (&movieCompLeft);
-        addAndMakeVisible (&movieCompRight);
+        addAndMakeVisible (movieCompLeft);
+        addAndMakeVisible (movieCompRight);
 
         // we have to set up our StretchableLayoutManager so it know the limits and preferred sizes of it's contents
         stretchableManager.setItemLayout (0,            // for the fileTree

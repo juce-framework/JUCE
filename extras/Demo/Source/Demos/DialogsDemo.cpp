@@ -91,7 +91,7 @@ public:
     {
         setOpaque (true);
 
-        addAndMakeVisible (&nativeButton);
+        addAndMakeVisible (nativeButton);
         nativeButton.setButtonText ("Use Native Windows");
         nativeButton.addListener (this);
 
@@ -112,7 +112,7 @@ public:
         };
 
         // warn in case we add any windows
-        jassert (numElementsInArray(windowNames) == numDialogs);
+        jassert (numElementsInArray (windowNames) == numDialogs);
 
         for (int i = 0; i < numDialogs; ++i)
         {

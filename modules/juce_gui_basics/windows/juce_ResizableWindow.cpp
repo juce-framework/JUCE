@@ -177,14 +177,14 @@ BorderSize<int> ResizableWindow::getContentComponentBorder()
 
 void ResizableWindow::moved()
 {
-    updateLastPos();
+    updateLastPosIfShowing();
 }
 
 void ResizableWindow::visibilityChanged()
 {
     TopLevelWindow::visibilityChanged();
 
-    updateLastPos();
+    updateLastPosIfShowing();
 }
 
 void ResizableWindow::resized()
@@ -227,7 +227,7 @@ void ResizableWindow::resized()
         contentComponent->setBoundsInset (getContentComponentBorder());
     }
 
-    updateLastPos();
+    updateLastPosIfShowing();
 
    #if JUCE_DEBUG
     hasBeenResized = true;
@@ -424,7 +424,7 @@ void ResizableWindow::setFullScreen (const bool shouldBeFullScreen)
 {
     if (shouldBeFullScreen != isFullScreen())
     {
-        updateLastPos();
+        updateLastPosIfShowing();
         fullscreen = shouldBeFullScreen;
 
         if (isOnDesktop())
@@ -470,7 +470,7 @@ void ResizableWindow::setMinimised (const bool shouldMinimise)
     {
         if (ComponentPeer* const peer = getPeer())
         {
-            updateLastPos();
+            updateLastPosIfShowing();
             peer->setMinimised (shouldMinimise);
         }
         else
@@ -480,9 +480,24 @@ void ResizableWindow::setMinimised (const bool shouldMinimise)
     }
 }
 
-void ResizableWindow::updateLastPos()
+bool ResizableWindow::isKioskMode() const
 {
-    if (isShowing() && ! (isFullScreen() || isMinimised()))
+    if (isOnDesktop())
+        if (ComponentPeer* peer = getPeer())
+            return peer->isKioskMode();
+
+    return Desktop::getInstance().getKioskModeComponent() == this;
+}
+
+void ResizableWindow::updateLastPosIfShowing()
+{
+    if (isShowing())
+        updateLastPosIfNotFullScreen();
+}
+
+void ResizableWindow::updateLastPosIfNotFullScreen()
+{
+    if (! (isFullScreen() || isMinimised() || isKioskMode()))
         lastNonFullScreenPos = getBounds();
 }
 
@@ -495,8 +510,8 @@ void ResizableWindow::parentSizeChanged()
 //==============================================================================
 String ResizableWindow::getWindowStateAsString()
 {
-    updateLastPos();
-    return (isFullScreen() ? "fs " : "") + lastNonFullScreenPos.toString();
+    updateLastPosIfShowing();
+    return (isFullScreen() && ! isKioskMode() ? "fs " : "") + lastNonFullScreenPos.toString();
 }
 
 bool ResizableWindow::restoreWindowStateFromString (const String& s)
@@ -548,7 +563,7 @@ bool ResizableWindow::restoreWindowStateFromString (const String& s)
         peer->setNonFullScreenBounds (newPos);
     }
 
-    lastNonFullScreenPos = newPos;
+    updateLastPosIfNotFullScreen();
     setFullScreen (fs);
 
     if (! fs)

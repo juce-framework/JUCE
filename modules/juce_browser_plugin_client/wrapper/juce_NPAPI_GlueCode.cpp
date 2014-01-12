@@ -739,9 +739,7 @@ private:
         for (uint32_t i = 0; i < argCount; ++i)
             params.params[i] = createValueFromNPVariant (npp, args[i]);
 
-
-        const var::NativeFunctionArgs argStruct = { object, params.params, (int) argCount };
-        const var result (o->invokeMethod (methodName, argStruct));
+        const var result (o->invokeMethod (methodName, var::NativeFunctionArgs (object, params.params, (int) argCount)));
 
         if (out != nullptr)
             createNPVariantFromValue (npp, *out, result);
@@ -896,7 +894,7 @@ static var createValueFromNPVariant (NPP npp, const NPVariant& v)
     else if (NPVARIANT_IS_OBJECT (v) && npp != nullptr)
         return var (new DynamicObjectWrappingNPObject (npp, NPVARIANT_TO_OBJECT (v)));
 
-    return var::null;
+    return var();
 }
 
 static void createNPVariantFromValue (NPP npp, NPVariant& out, const var& v)
@@ -1031,7 +1029,7 @@ NPError NPP_Destroy (NPP npp, NPSavedData** save)
         {
             log ("shutdownJuce_GUI()");
             shutdownJuce_GUI();
-            browserVersionDesc = String::empty;
+            browserVersionDesc.clear();
         }
     }
 

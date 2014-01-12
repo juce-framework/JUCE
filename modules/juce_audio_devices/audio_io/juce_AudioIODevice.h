@@ -157,47 +157,19 @@ public:
     virtual StringArray getInputChannelNames() = 0;
 
     //==============================================================================
-    /** Returns the number of sample-rates this device supports.
-
-        To find out which rates are available on this device, use this method to
-        find out how many there are, and getSampleRate() to get the rates.
-
-        @see getSampleRate
+    /** Returns the set of sample-rates this device supports.
+        @see getCurrentSampleRate
     */
-    virtual int getNumSampleRates() = 0;
+    virtual Array<double> getAvailableSampleRates() = 0;
 
-    /** Returns one of the sample-rates this device supports.
-
-        To find out which rates are available on this device, use getNumSampleRates() to
-        find out how many there are, and getSampleRate() to get the individual rates.
-
-        The sample rate is set by the open() method.
-
-        (Note that for DirectSound some rates might not work, depending on combinations
-        of i/o channels that are being opened).
-
-        @see getNumSampleRates
+    /** Returns the set of buffer sizes that are available.
+        @see getCurrentBufferSizeSamples, getDefaultBufferSize
     */
-    virtual double getSampleRate (int index) = 0;
-
-    /** Returns the number of sizes of buffer that are available.
-
-        @see getBufferSizeSamples, getDefaultBufferSize
-    */
-    virtual int getNumBufferSizesAvailable() = 0;
-
-    /** Returns one of the possible buffer-sizes.
-
-        @param index    the index of the buffer-size to use, from 0 to getNumBufferSizesAvailable() - 1
-        @returns a number of samples
-        @see getNumBufferSizesAvailable, getDefaultBufferSize
-    */
-    virtual int getBufferSizeSamples (int index) = 0;
+    virtual Array<int> getAvailableBufferSizes() = 0;
 
     /** Returns the default buffer-size to use.
-
         @returns a number of samples
-        @see getNumBufferSizesAvailable, getBufferSizeSamples
+        @see getAvailableBufferSizes
     */
     virtual int getDefaultBufferSize() = 0;
 
@@ -209,9 +181,9 @@ public:
         @param outputChannels       a BigInteger in which a set bit indicates that the corresponding
                                     output channel should be enabled
         @param sampleRate           the sample rate to try to use - to find out which rates are
-                                    available, see getNumSampleRates() and getSampleRate()
+                                    available, see getAvailableSampleRates()
         @param bufferSizeSamples    the size of i/o buffer to use - to find out the available buffer
-                                    sizes, see getNumBufferSizesAvailable() and getBufferSizeSamples()
+                                    sizes, see getAvailableBufferSizes()
         @returns    an error description if there's a problem, or an empty string if it succeeds in
                     opening the device
         @see close

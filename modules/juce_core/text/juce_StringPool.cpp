@@ -81,7 +81,7 @@ namespace StringPoolHelpers
 String::CharPointerType StringPool::getPooledString (const String& s)
 {
     if (s.isEmpty())
-        return String::empty.getCharPointer();
+        return String().getCharPointer();
 
     return StringPoolHelpers::getPooledStringFromArray (strings, s, lock);
 }
@@ -89,7 +89,7 @@ String::CharPointerType StringPool::getPooledString (const String& s)
 String::CharPointerType StringPool::getPooledString (const char* const s)
 {
     if (s == nullptr || *s == 0)
-        return String::empty.getCharPointer();
+        return String().getCharPointer();
 
     return StringPoolHelpers::getPooledStringFromArray (strings, s, lock);
 }
@@ -97,7 +97,7 @@ String::CharPointerType StringPool::getPooledString (const char* const s)
 String::CharPointerType StringPool::getPooledString (const wchar_t* const s)
 {
     if (s == nullptr || *s == 0)
-        return String::empty.getCharPointer();
+        return String().getCharPointer();
 
     return StringPoolHelpers::getPooledStringFromArray (strings, s, lock);
 }

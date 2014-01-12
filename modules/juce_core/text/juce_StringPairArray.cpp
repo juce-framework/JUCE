@@ -78,6 +78,11 @@ String StringPairArray::getValue (StringRef key, const String& defaultReturnValu
     return defaultReturnValue;
 }
 
+bool StringPairArray::containsKey (StringRef key) const noexcept
+{
+    return keys.contains (key);
+}
+
 void StringPairArray::set (const String& key, const String& value)
 {
     const int i = keys.indexOf (key, ignoreCase);

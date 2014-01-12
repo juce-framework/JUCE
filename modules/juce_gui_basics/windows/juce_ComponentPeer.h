@@ -176,6 +176,9 @@ public:
     /** True if the window is currently full-screen. */
     virtual bool isFullScreen() const = 0;
 
+    /** True if the window is in kiosk-mode. */
+    virtual bool isKioskMode() const;
+
     /** Sets the size to restore to if fullscreen mode is turned off. */
     void setNonFullScreenBounds (const Rectangle<int>& newBounds) noexcept;
 
@@ -310,7 +313,7 @@ public:
         Point<int> position;
 
         bool isEmpty() const noexcept       { return files.size() == 0 && text.isEmpty(); }
-        void clear() noexcept               { files.clear(); text = String::empty; }
+        void clear() noexcept               { files.clear(); text.clear(); }
     };
 
     bool handleDragMove (const DragInfo&);

@@ -36,14 +36,14 @@ public:
     {
         setOpaque (true);
 
-        addAndMakeVisible (&urlBox);
+        addAndMakeVisible (urlBox);
         urlBox.setText ("http://www.google.com");
 
-        addAndMakeVisible (&fetchButton);
+        addAndMakeVisible (fetchButton);
         fetchButton.setButtonText ("Download URL Contents");
         fetchButton.addListener (this);
 
-        addAndMakeVisible (&resultsBox);
+        addAndMakeVisible (resultsBox);
     }
 
     ~NetworkingDemo()

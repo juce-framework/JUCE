@@ -189,14 +189,14 @@ public:
           colourValue (colour),
           defaultColour (defaultCol)
     {
-        addAndMakeVisible (&selector);
+        addAndMakeVisible (selector);
         selector.setName ("Colour");
         selector.setCurrentColour (getColour());
         selector.addChangeListener (this);
 
         if (canResetToDefault)
         {
-            addAndMakeVisible (&defaultButton);
+            addAndMakeVisible (defaultButton);
             defaultButton.addListener (this);
         }
 
@@ -231,7 +231,7 @@ public:
         if (getColour() != newColour)
         {
             if (newColour == defaultColour && defaultButton.isVisible())
-                colourValue = var::null;
+                colourValue = var();
             else
                 colourValue = newColour.toDisplayString (true);
         }
@@ -364,7 +364,7 @@ public:
         : PropertyComponent (name),
           colourEditor (undoManager, colour, defaultColour, canResetToDefault)
     {
-        addAndMakeVisible (&colourEditor);
+        addAndMakeVisible (colourEditor);
     }
 
     void resized() override

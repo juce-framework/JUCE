@@ -230,7 +230,7 @@ private:
         writeHeaderPathFlags (out, config);
         out << newLine;
 
-        String targetName (config.getTargetBinaryNameString());
+        String targetName (replacePreprocessorTokens (config, config.getTargetBinaryNameString()));
 
         if (projectType.isStaticLibrary() || projectType.isDynamicLibrary())
             targetName = getLibbedFilename (targetName);

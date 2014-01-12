@@ -25,7 +25,7 @@
 CallOutBox::CallOutBox (Component& c, const Rectangle<int>& area, Component* const parent)
     : borderSpace (20), arrowSize (16.0f), content (c)
 {
-    addAndMakeVisible (&content);
+    addAndMakeVisible (content);
 
     if (parent != nullptr)
     {

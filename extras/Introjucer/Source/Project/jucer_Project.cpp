@@ -432,25 +432,25 @@ void Project::createPropertyEditors (PropertyListBuilder& props)
 }
 
 //==============================================================================
-static StringArray getConfigs (const Project& p)
+static StringArray getVersionSegments (const Project& p)
 {
-    StringArray configs;
-    configs.addTokens (p.getVersionString(), ",.", String::empty);
-    configs.trim();
-    configs.removeEmptyStrings();
-    return configs;
+    StringArray segments;
+    segments.addTokens (p.getVersionString(), ",.", "");
+    segments.trim();
+    segments.removeEmptyStrings();
+    return segments;
 }
 
 int Project::getVersionAsHexInteger() const
 {
-    const StringArray configs (getConfigs (*this));
+    const StringArray segments (getVersionSegments (*this));
 
-    int value = (configs[0].getIntValue() << 16)
-                 + (configs[1].getIntValue() << 8)
-                  + configs[2].getIntValue();
+    int value = (segments[0].getIntValue() << 16)
+                 + (segments[1].getIntValue() << 8)
+                  + segments[2].getIntValue();
 
-    if (configs.size() >= 4)
-        value = (value << 8) + configs[3].getIntValue();
+    if (segments.size() >= 4)
+        value = (value << 8) + segments[3].getIntValue();
 
     return value;
 }
@@ -520,10 +520,10 @@ Project::Item Project::Item::createCopy()         { Item i (*this); i.state = i.
 String Project::Item::getID() const               { return state [Ids::ID]; }
 void Project::Item::setID (const String& newID)   { state.setProperty (Ids::ID, newID, nullptr); }
 
-Image Project::Item::loadAsImageFile() const
+Drawable* Project::Item::loadAsImageFile() const
 {
-    return isValid() ? ImageCache::getFromFile (getFile())
-                     : Image::null;
+    return isValid() ? Drawable::createFromImageFile (getFile())
+                     : nullptr;
 }
 
 Project::Item Project::Item::createGroup (Project& project, const String& name, const String& uid)
@@ -538,7 +538,12 @@ Project::Item Project::Item::createGroup (Project& project, const String& name, 
 bool Project::Item::isFile() const          { return state.hasType (Ids::FILE); }
 bool Project::Item::isGroup() const         { return state.hasType (Ids::GROUP) || isMainGroup(); }
 bool Project::Item::isMainGroup() const     { return state.hasType (Ids::MAINGROUP); }
-bool Project::Item::isImageFile() const     { return isFile() && ImageFileFormat::findImageFormatForFileExtension (getFile()) != nullptr; }
+
+bool Project::Item::isImageFile() const
+{
+    return isFile() && (ImageFileFormat::findImageFormatForFileExtension (getFile()) != nullptr
+                          || getFile().hasFileExtension ("svg"));
+}
 
 Project::Item Project::Item::findItemWithID (const String& targetId) const
 {

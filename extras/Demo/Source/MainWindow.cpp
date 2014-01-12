@@ -110,7 +110,7 @@ public:
     ContentComponent()
     {
         LookAndFeel::setDefaultLookAndFeel (&lookAndFeelV3);
-        addAndMakeVisible (&demoList);
+        addAndMakeVisible (demoList);
 
         demoList.setModel (this);
         demoList.setColour (ListBox::backgroundColourId, Colour::greyLevel (0.7f));

@@ -46,13 +46,13 @@ public:
     {
         thumbnail.addChangeListener (this);
 
-        addAndMakeVisible (&scrollbar);
+        addAndMakeVisible (scrollbar);
         scrollbar.setRangeLimits (visibleRange);
         scrollbar.setAutoHide (false);
         scrollbar.addListener (this);
 
         currentPositionMarker.setFill (Colours::white.withAlpha (0.85f));
-        addAndMakeVisible (&currentPositionMarker);
+        addAndMakeVisible (currentPositionMarker);
     }
 
     ~DemoThumbnailComp()
@@ -240,7 +240,7 @@ public:
           directoryList (nullptr, thread),
           fileTreeComp (directoryList)
     {
-        addAndMakeVisible (&zoomLabel);
+        addAndMakeVisible (zoomLabel);
         zoomLabel.setText ("zoom:", dontSendNotification);
         zoomLabel.setFont (Font (15.00f, Font::plain));
         zoomLabel.setJustificationType (Justification::centredRight);
@@ -248,11 +248,11 @@ public:
         zoomLabel.setColour (TextEditor::textColourId, Colours::black);
         zoomLabel.setColour (TextEditor::backgroundColourId, Colour (0x00000000));
 
-        addAndMakeVisible (&followTransportButton);
+        addAndMakeVisible (followTransportButton);
         followTransportButton.setButtonText ("Follow Transport");
         followTransportButton.addListener (this);
 
-        addAndMakeVisible (&explanation);
+        addAndMakeVisible (explanation);
         explanation.setText ("Select an audio file in the treeview above, and this page will display its waveform, and let you play it..", dontSendNotification);
         explanation.setFont (Font (14.00f, Font::plain));
         explanation.setJustificationType (Justification::bottomRight);
@@ -260,7 +260,7 @@ public:
         explanation.setColour (TextEditor::textColourId, Colours::black);
         explanation.setColour (TextEditor::backgroundColourId, Colour (0x00000000));
 
-        addAndMakeVisible (&zoomSlider);
+        addAndMakeVisible (zoomSlider);
         zoomSlider.setRange (0, 1, 0);
         zoomSlider.setSliderStyle (Slider::LinearHorizontal);
         zoomSlider.setTextBoxStyle (Slider::NoTextBox, false, 80, 20);
@@ -270,12 +270,12 @@ public:
         addAndMakeVisible (thumbnail = new DemoThumbnailComp (formatManager, transportSource, zoomSlider));
         thumbnail->addChangeListener (this);
 
-        addAndMakeVisible (&startStopButton);
+        addAndMakeVisible (startStopButton);
         startStopButton.setButtonText ("Play/Stop");
         startStopButton.addListener (this);
         startStopButton.setColour (TextButton::buttonColourId, Colour (0xff79ed7f));
 
-        addAndMakeVisible (&fileTreeComp);
+        addAndMakeVisible (fileTreeComp);
 
         // audio setup
         formatManager.registerBasicFormats();

@@ -40,11 +40,17 @@
  #pragma clang diagnostic ignored "-Wunused-parameter"
  #pragma clang diagnostic ignored "-Wconversion"
  #pragma clang diagnostic ignored "-Woverloaded-virtual"
+ #pragma clang diagnostic ignored "-Wshadow"
 #endif
 
-// Got an include error here? If so, you'll need to install the VST3 SDK somewhere,
-// and use the introjucer or your IDE to add it to your include path. The introjucer
-// has a special box for specifying this path for each export target.
+/*  These files come with the Steinberg VST3 SDK - to get them, you'll need to
+    visit the Steinberg website and agree to whatever is currently required to
+    get them.
+
+    Then, you'll need to make sure your include path contains your "VST SDK3"
+    directory (or whatever you've named it on your machine). The introjucer has
+    a special box for setting this path.
+*/
 #include <base/source/baseiids.cpp>
 #include <base/source/fatomic.cpp>
 #include <base/source/fbuffer.cpp>
@@ -85,11 +91,12 @@
 #undef DBPRT3
 #undef DBPRT4
 #undef DBPRT5
+#undef calloc
 #undef free
 #undef malloc
+#undef realloc
 #undef NEW
 #undef NEWVEC
-#undef realloc
 #undef VERIFY
 #undef VERIFY_IS
 #undef VERIFY_NOT
@@ -98,6 +105,7 @@
 #undef SINGLE_CREATE_FUNC
 #undef _META_CLASS
 #undef _META_CLASS_IFACE
+#undef _META_CLASS_SINGLE
 #undef META_CLASS
 #undef META_CLASS_IFACE
 #undef META_CLASS_SINGLE
@@ -306,8 +314,8 @@ static void activateAllBussesOfType (Vst::IComponent* component,
 }
 
 //==============================================================================
-/** Assigns an AudioSampleBuffer's channels to an AudioBusBuffers' */
-static void associateBufferTo (Vst::AudioBusBuffers& vstBuffers, const AudioSampleBuffer& buffer) noexcept
+/** Assigns a complete AudioSampleBuffer's channels to an AudioBusBuffers' */
+static void associateWholeBufferTo (Vst::AudioBusBuffers& vstBuffers, const AudioSampleBuffer& buffer) noexcept
 {
     vstBuffers.channelBuffers32 = buffer.getArrayOfChannels();
     vstBuffers.numChannels      = buffer.getNumChannels();
@@ -566,30 +574,36 @@ public:
 
         for (Steinberg::int32 i = 0; i < eventList.getEventCount(); ++i)
         {
-            Event event;
+            Event e;
 
-            if (eventList.getEvent (i, event) == kResultOk)
+            if (eventList.getEvent (i, e) == kResultOk)
             {
-                switch (event.type)
+                switch (e.type)
                 {
                     case Event::kNoteOnEvent:
-                        result.addEvent (MidiMessage::noteOn (event.noteOn.channel + 1, event.noteOn.pitch, (uint8) (event.noteOn.velocity * 127.0f)),
-                                         event.sampleOffset);
+                        result.addEvent (MidiMessage::noteOn (createSafeChannel (e.noteOn.channel),
+                                                              createSafeNote (e.noteOn.pitch),
+                                                              (Steinberg::uint8) denormaliseToMidiValue (e.noteOn.velocity)),
+                                         e.sampleOffset);
                         break;
 
                     case Event::kNoteOffEvent:
-                        result.addEvent (MidiMessage::noteOff (event.noteOff.channel + 1, event.noteOff.pitch, (uint8) (event.noteOff.velocity * 127.0f)),
-                                         event.sampleOffset);
+                        result.addEvent (MidiMessage::noteOff (createSafeChannel (e.noteOff.channel),
+                                                               createSafeNote (e.noteOff.pitch),
+                                                               (Steinberg::uint8) denormaliseToMidiValue (e.noteOff.velocity)),
+                                         e.sampleOffset);
                         break;
 
                     case Event::kPolyPressureEvent:
-                        result.addEvent (MidiMessage::aftertouchChange (event.polyPressure.channel + 1, event.polyPressure.pitch, (int) (event.polyPressure.pressure * 127.0f)),
-                                         event.sampleOffset);
+                        result.addEvent (MidiMessage::aftertouchChange (createSafeChannel (e.polyPressure.channel),
+                                                                        createSafeNote (e.polyPressure.pitch),
+                                                                        denormaliseToMidiValue (e.polyPressure.pressure)),
+                                         e.sampleOffset);
                         break;
 
                     case Event::kDataEvent:
-                        result.addEvent (MidiMessage::createSysExMessage (event.data.bytes, event.data.size),
-                                         event.sampleOffset);
+                        result.addEvent (MidiMessage::createSysExMessage (e.data.bytes, e.data.size),
+                                         e.sampleOffset);
                         break;
 
                     default:
@@ -607,48 +621,73 @@ public:
         MidiMessage msg;
         int midiEventPosition = 0;
 
+        enum { maxNumEvents = 2048 }; // Steinberg's Host Checker states no more than 2048 events are allowed at once
+        int numEvents = 0;
+
         while (iterator.getNextEvent (msg, midiEventPosition))
         {
-            Event event = { 0 };
+            if (++numEvents > maxNumEvents)
+                break;
+
+            Event e = { 0 };
 
             if (msg.isNoteOn())
             {
-                event.type             = Event::kNoteOnEvent;
-                event.noteOn.channel   = (Steinberg::int16) msg.getChannel() - 1;
-                event.noteOn.pitch     = (Steinberg::int16) msg.getNoteNumber();
-                event.noteOn.velocity  = msg.getVelocity() / 127.0f;
+                e.type              = Event::kNoteOnEvent;
+                e.noteOn.channel    = createSafeChannel (msg.getChannel());
+                e.noteOn.pitch      = createSafeNote (msg.getNoteNumber());
+                e.noteOn.velocity   = normaliseMidiValue (msg.getVelocity());
+                e.noteOn.length     = 0;
+                e.noteOn.tuning     = 0.0f;
+                e.noteOn.noteId     = -1;
             }
             else if (msg.isNoteOff())
             {
-                event.type             = Event::kNoteOffEvent;
-                event.noteOff.channel  = (Steinberg::int16) msg.getChannel() - 1;
-                event.noteOff.pitch    = (Steinberg::int16) msg.getNoteNumber();
-                event.noteOff.velocity = msg.getVelocity() / 127.0f;
+                e.type              = Event::kNoteOffEvent;
+                e.noteOff.channel   = createSafeChannel (msg.getChannel());
+                e.noteOff.pitch     = createSafeNote (msg.getNoteNumber());
+                e.noteOff.velocity  = normaliseMidiValue (msg.getVelocity());
+                e.noteOff.tuning    = 0.0f;
+                e.noteOff.noteId    = -1;
             }
             else if (msg.isSysEx())
             {
-                event.type         = Event::kDataEvent;
-                event.data.bytes   = msg.getSysExData();
-                event.data.size    = msg.getSysExDataSize();
+                e.type          = Event::kDataEvent;
+                e.data.bytes    = msg.getSysExData();
+                e.data.size     = msg.getSysExDataSize();
+                e.data.type     = DataEvent::kMidiSysEx;
             }
             else if (msg.isAftertouch())
             {
-                event.type                     = Event::kPolyPressureEvent;
-                event.polyPressure.channel     = (Steinberg::int16) msg.getChannel() - 1;
-                event.polyPressure.pitch       = (Steinberg::int16) msg.getNoteNumber();
-                event.polyPressure.pressure    = msg.getAfterTouchValue() / 127.0f;
+                e.type                   = Event::kPolyPressureEvent;
+                e.polyPressure.channel   = createSafeChannel (msg.getChannel());
+                e.polyPressure.pitch     = createSafeNote (msg.getNoteNumber());
+                e.polyPressure.pressure  = normaliseMidiValue (msg.getAfterTouchValue());
+            }
+            else
+            {
+                continue;
             }
 
-            event.busIndex = 0;
-            event.sampleOffset = midiEventPosition;
+            e.busIndex = 0;
+            e.sampleOffset = midiEventPosition;
 
-            result.addEvent (event);
+            result.addEvent (e);
         }
     }
 
 private:
     Array<Vst::Event, CriticalSection> events;
-    Atomic<int32> refCount;
+    Atomic<int> refCount;
+
+    static Steinberg::int16 createSafeChannel (int channel) noexcept  { return (Steinberg::int16) jlimit (0, 15, channel - 1); }
+    static int createSafeChannel (Steinberg::int16 channel) noexcept  { return (int) jlimit (1, 16, channel + 1); }
+
+    static Steinberg::int16 createSafeNote (int note) noexcept        { return (Steinberg::int16) jlimit (0, 127, note); }
+    static int createSafeNote (Steinberg::int16 note) noexcept        { return jlimit (0, 127, (int) note); }
+
+    static float normaliseMidiValue (int value) noexcept              { return jlimit (0.0f, 1.0f, (float) value / 127.0f); }
+    static int denormaliseToMidiValue (float value) noexcept          { return roundToInt (jlimit (0.0f, 127.0f, value * 127.0f)); }
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MidiEventList)
 };
@@ -1448,16 +1487,16 @@ private:
     }
 
     //==============================================================================
-    bool open (const File& file, const PluginDescription& description)
+    bool open (const File& f, const PluginDescription& description)
     {
-        dllHandle = new DLLHandle (file.getFullPathName());
+        dllHandle = new DLLHandle (f.getFullPathName());
 
         ComSmartPtr<IPluginFactory> pluginFactory (dllHandle->getPluginFactory());
 
         ComSmartPtr<VST3HostContext> host (new VST3HostContext (nullptr));
         MatchingDescriptionFinder finder (host, pluginFactory, description);
 
-        const Result result (finder.findDescriptionsAndPerform (file));
+        const Result result (finder.findDescriptionsAndPerform (f));
 
         if (result.getErrorMessage() == MatchingDescriptionFinder::getSuccessString())
         {
@@ -1506,14 +1545,8 @@ public:
        #endif
     }
 
-    Steinberg::uint32 PLUGIN_API addRef() override  { return 1; }
-    Steinberg::uint32 PLUGIN_API release() override { return 1; }
-
-    tresult PLUGIN_API queryInterface (const TUID, void** obj) override
-    {
-        *obj = nullptr;
-        return kNotImplemented;
-    }
+    JUCE_DECLARE_VST3_COM_REF_METHODS
+    JUCE_DECLARE_VST3_COM_QUERY_METHODS
 
     void paint (Graphics& g) override
     {
@@ -1602,13 +1635,15 @@ public:
 
 private:
     //==============================================================================
+    Atomic<int> refCount;
     ComSmartPtr<IPlugView> view;
 
    #if JUCE_WINDOWS
-    struct ChildComponent  : public Component
+    class ChildComponent  : public Component
     {
+    public:
         ChildComponent() {}
-        void paint (Graphics& g)   { g.fillAll (Colours::cornflowerblue); }
+        void paint (Graphics& g) override  { g.fillAll (Colours::cornflowerblue); }
 
         using Component::createNewPeer;
 
@@ -1652,7 +1687,7 @@ private:
                 pluginHandle = (HandleFormat) peer->getNativeHandle();
            #elif JUCE_MAC
             dummyComponent.setBounds (getBounds().withZeroOrigin());
-            addAndMakeVisible (&dummyComponent);
+            addAndMakeVisible (dummyComponent);
             pluginHandle = [[NSView alloc] init];
             dummyComponent.setView (pluginHandle);
            #endif
@@ -1676,9 +1711,9 @@ class VST3PluginInstance : public AudioPluginInstance
 public:
     VST3PluginInstance (const VST3ModuleHandle::Ptr& handle)
       : module (handle),
-        result (1, 1),
         numInputAudioBusses (0),
         numOutputAudioBusses (0),
+        resultBuffer (1, 1),
         inputParameterChanges (new ParameterChangeList()),
         outputParameterChanges (new ParameterChangeList()),
         midiInputs (new MidiEventList()),
@@ -1728,8 +1763,7 @@ public:
         if (! fetchComponentAndController (factory, factory->countClasses()))
             return false;
 
-        if (warnOnFailure (editController->initialize (host->getFUnknown())) != kResultTrue)
-            return false;
+        editController->initialize (host->getFUnknown()); // (May return an error if the plugin combines the IComponent and IEditController implementations)
 
         isControllerInitialised = true;
         editController->setComponentHandler (host);
@@ -1761,6 +1795,62 @@ public:
         return module != nullptr ? module->name : String::empty;
     }
 
+    typedef Array<Array<float*> > BusMap;
+
+    /** Assigns a series of AudioSampleBuffer's channels to an AudioBusBuffers'
+
+        @warning For speed, does not check the channel count and offsets
+                 according to the AudioSampleBuffer
+    */
+    void associateBufferTo (Vst::AudioBusBuffers& vstBuffers,
+                            BusMap& busMap,
+                            const AudioSampleBuffer& buffer,
+                            int numChannels, int channelStartOffset,
+                            int sampleOffset = 0) noexcept
+    {
+        const int channelEnd = numChannels + channelStartOffset;
+        jassert (channelEnd >= 0 && channelEnd <= buffer.getNumChannels());
+
+        busMap.add (Array<float*>());
+        Array<float*>& chans = busMap.getReference (busMap.size() - 1);
+
+        for (int i = channelStartOffset; i < channelEnd; ++i)
+            chans.add (buffer.getSampleData (i, sampleOffset));
+
+        vstBuffers.channelBuffers32 = chans.getRawDataPointer();
+        vstBuffers.numChannels      = numChannels;
+        vstBuffers.silenceFlags     = 0;
+    }
+
+    void mapAudioSampleBufferToBusses (Array<Vst::AudioBusBuffers>& result,
+                                       AudioSampleBuffer& source,
+                                       int numBusses, bool isInput)
+    {
+        result.clearQuick();
+
+        BusMap& busMapToUse = isInput ? inputBusMap : outputBusMap;
+        busMapToUse.clearQuick();
+
+        int channelIndexOffset = 0;
+
+        for (int i = 0; i < numBusses; ++i)
+        {
+            Vst::SpeakerArrangement arrangement = 0;
+            processor->getBusArrangement (isInput ? Vst::kInput : Vst::kOutput,
+                                          (Steinberg::int32) i, arrangement);
+
+            const int numChansForBus = BigInteger ((int64) arrangement).countNumberOfSetBits();
+
+            result.add (Vst::AudioBusBuffers());
+
+            associateBufferTo (result.getReference (i), busMapToUse, source,
+                               BigInteger ((int64) arrangement).countNumberOfSetBits(),
+                               channelIndexOffset);
+
+            channelIndexOffset += numChansForBus;
+        }
+    }
+
     void prepareToPlay (double sampleRate, int estimatedSamplesPerBlock) override
     {
         using namespace Vst;
@@ -1777,6 +1867,8 @@ public:
         setup.sampleRate            = sampleRate;
         setup.processMode           = isNonRealtime() ? kOffline : kRealtime;
 
+        resultBuffer.setSize (numOutputs, estimatedSamplesPerBlock, false, true, true);
+
         warnOnFailure (processor->setupProcessing (setup));
 
         if (! isComponentInitialised)
@@ -1787,28 +1879,28 @@ public:
         warnOnFailure (component->setActive (true));
         warnOnFailure (processor->setProcessing (true));
 
-        result.setSize (numOutputs, estimatedSamplesPerBlock, false, true, true);
-
         Array<SpeakerArrangement> inArrangements, outArrangements;
 
         fillWithCorrespondingSpeakerArrangements (inArrangements, numInputs);
         fillWithCorrespondingSpeakerArrangements (outArrangements, numOutputs);
 
-        warnOnFailure (processor->setBusArrangements (inArrangements.getRawDataPointer(),
-                                                      getNumSingleDirectionBussesFor (component, true, true),
-                                                      outArrangements.getRawDataPointer(),
-                                                      getNumSingleDirectionBussesFor (component, false, true)));
+        warnOnFailure (processor->setBusArrangements (inArrangements.getRawDataPointer(), numInputAudioBusses,
+                                                      outArrangements.getRawDataPointer(), numOutputAudioBusses));
     }
 
     void releaseResources() override
     {
-        result.setSize (1, 1, false, true, true);
+        JUCE_TRY
+        {
+            resultBuffer.setSize (1, 1, false, true, true);
 
-        if (processor != nullptr)
-            processor->setProcessing (false);
+            if (processor != nullptr)
+                processor->setProcessing (false);
 
-        if (component != nullptr)
-            component->setActive (false);
+            if (component != nullptr)
+                component->setActive (false);
+        }
+        JUCE_CATCH_ALL_ASSERT
     }
 
     void processBlock (AudioSampleBuffer& buffer, MidiBuffer& midiMessages) override
@@ -1823,8 +1915,8 @@ public:
             ProcessData data;
             data.processMode            = isNonRealtime() ? kOffline : kRealtime;
             data.symbolicSampleSize     = kSample32;
-            data.numInputs              = 1; // Number of busses, not channels!
-            data.numOutputs             = 1; // Number of busses, not channels!
+            data.numInputs              = numInputAudioBusses;
+            data.numOutputs             = numOutputAudioBusses;
             data.inputParameterChanges  = inputParameterChanges;
             data.outputParameterChanges = outputParameterChanges;
             data.numSamples             = (Steinberg::int32) numSamples;
@@ -2057,14 +2149,17 @@ private:
 
     mutable ComSmartPtr<IPlugView> view;
 
-    AudioSampleBuffer result;
-    Vst::AudioBusBuffers inputs, outputs;
-
-    // The number of IO busses MUST match that of the plugin's, as very poorly specified by the Steinberg SDK
+    /** The number of IO busses MUST match that of the plugin,
+        even if there aren't enough channels to process,
+        as very poorly specified by the Steinberg SDK
+    */
     int numInputAudioBusses, numOutputAudioBusses;
+    AudioSampleBuffer resultBuffer;
+    BusMap inputBusMap, outputBusMap;
+    Array<Vst::AudioBusBuffers> inputBusses, outputBusses;
 
     //==============================================================================
-    template<class Type>
+    template <typename Type>
     static void appendStateFrom (XmlElement& head, ComSmartPtr<Type>& object, const String& identifier)
     {
         if (object != nullptr)
@@ -2133,10 +2228,10 @@ private:
     {
         jassert (numClasses >= 0); // The plugin must provide at least an IComponent and IEditController!
 
-        for (Steinberg::int32 i = 0; i < numClasses; ++i)
+        for (Steinberg::int32 j = 0; j < numClasses; ++j)
         {
             info = new PClassInfo();
-            factory->getClassInfo (i, info);
+            factory->getClassInfo (j, info);
 
             if (std::strcmp (info->category, kVstAudioEffectClass) != 0)
                 continue;
@@ -2153,7 +2248,7 @@ private:
                 if (pf2.loadFrom (factory))
                 {
                     info2 = new PClassInfo2();
-                    pf2->getClassInfo2 (i, info2);
+                    pf2->getClassInfo2 (j, info2);
                 }
                 else
                 {
@@ -2164,7 +2259,7 @@ private:
                 {
                     pf3->setHostContext (host->getFUnknown());
                     infoW = new PClassInfoW();
-                    pf3->getClassInfoUnicode (i, infoW);
+                    pf3->getClassInfoUnicode (j, infoW);
                 }
                 else
                 {
@@ -2251,7 +2346,8 @@ private:
         Steinberg::MemoryStream stream;
 
         if (component->getState (&stream) == kResultTrue)
-            warnOnFailure (editController->setComponentState (&stream));
+            if (stream.seek (0, Steinberg::IBStream::kIBSeekSet, nullptr) == kResultTrue)
+                warnOnFailure (editController->setComponentState (&stream));
     }
 
     void grabInformationObjects()
@@ -2304,6 +2400,7 @@ private:
         component->getBusInfo (forAudio ? Vst::kAudio : Vst::kEvent,
                                forInput ? Vst::kInput : Vst::kOutput,
                                (Steinberg::int32) index, busInfo);
+
         return busInfo;
     }
 
@@ -2322,23 +2419,15 @@ private:
     }
 
     //==============================================================================
-    struct AudioBusBuffersWrapper
-    {
-        AudioBusBuffersWrapper() {}
-        ~AudioBusBuffersWrapper() {}
-
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioBusBuffersWrapper)
-    };
-
     void associateTo (Vst::ProcessData& destination, AudioSampleBuffer& buffer)
     {
-        result.clear();
+        resultBuffer.clear();
 
-        associateBufferTo (inputs, buffer);
-        associateBufferTo (outputs, result);
+        mapAudioSampleBufferToBusses (inputBusses, buffer, numInputAudioBusses, true);
+        mapAudioSampleBufferToBusses (outputBusses, resultBuffer, numOutputAudioBusses, false);
 
-        destination.inputs  = &inputs;
-        destination.outputs = &outputs;
+        destination.inputs  = inputBusses.getRawDataPointer();
+        destination.outputs = outputBusses.getRawDataPointer();
     }
 
     void associateTo (Vst::ProcessData& destination, MidiBuffer& midiBuffer)
@@ -2360,22 +2449,22 @@ private:
 
     Vst::ParameterInfo getParameterInfoForIndex (int index) const
     {
-        Vst::ParameterInfo info = { 0 };
+        Vst::ParameterInfo paramInfo = { 0 };
 
         if (processor != nullptr)
-            editController->getParameterInfo (index, info);
+            editController->getParameterInfo (index, paramInfo);
 
-        return info;
+        return paramInfo;
     }
 
     Vst::ProgramListInfo getProgramListInfo (int index) const
     {
-        Vst::ProgramListInfo info = { 0 };
+        Vst::ProgramListInfo paramInfo = { 0 };
 
         if (unitInfo != nullptr)
-            unitInfo->getProgramListInfo (index, info);
+            unitInfo->getProgramListInfo (index, paramInfo);
 
-        return info;
+        return paramInfo;
     }
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (VST3PluginInstance)

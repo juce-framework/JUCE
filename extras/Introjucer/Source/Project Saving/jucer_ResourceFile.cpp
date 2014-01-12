@@ -128,8 +128,13 @@ static String getComment()
 
 bool ResourceFile::writeHeader (MemoryOutputStream& header)
 {
+    const String headerGuard ("BINARYDATA_H_" + String (project.getProjectUID().hashCode() & 0x7ffffff) + "_INCLUDED");
+
     header << "/* ========================================================================================="
            << getComment()
+           << "#ifndef " << headerGuard << newLine
+           << "#define " << headerGuard << newLine
+           << newLine
            << "namespace " << className << newLine
            << "{" << newLine;
 
@@ -158,12 +163,14 @@ bool ResourceFile::writeHeader (MemoryOutputStream& header)
            << "    extern const char* namedResourceList[];" << newLine
            << newLine
            << "    // Number of elements in the namedResourceList array." << newLine
-           << "    extern const int namedResourceListSize;" << newLine
+           << "    const int namedResourceListSize = " << files.size() <<  ";" << newLine
            << newLine
            << "    // If you provide the name of one of the binary resource variables above, this function will" << newLine
            << "    // return the corresponding data and its size (or a null pointer if the name isn't found)." << newLine
            << "    const char* getNamedResource (const char* resourceNameUTF8, int& dataSizeInBytes) throw();" << newLine
-           << "}" << newLine;
+           << "}" << newLine
+           << newLine
+           << "#endif" << newLine;
 
     return true;
 }
@@ -244,8 +251,6 @@ bool ResourceFile::writeCpp (MemoryOutputStream& cpp, const File& headerFile, in
         cpp << "    numBytes = 0;" << newLine
             << "    return 0;" << newLine
             << "}" << newLine
-            << newLine
-            << "const int namedResourceListSize = " << files.size() <<  ";" << newLine
             << newLine
             << "const char* namedResourceList[] =" << newLine
             << "{" << newLine;

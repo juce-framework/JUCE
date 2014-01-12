@@ -106,11 +106,11 @@ public:
     {
         setOpaque (true);
 
-        addAndMakeVisible (&midiInputListLabel);
+        addAndMakeVisible (midiInputListLabel);
         midiInputListLabel.setText ("MIDI Input:", dontSendNotification);
         midiInputListLabel.attachToComponent (&midiInputList, true);
 
-        addAndMakeVisible (&midiInputList);
+        addAndMakeVisible (midiInputList);
         midiInputList.setTextWhenNoChoicesAvailable ("No MIDI Inputs Enabled");
         const StringArray midiInputs (MidiInput::getDevices());
         midiInputList.addItemList (midiInputs, 1);
@@ -130,10 +130,10 @@ public:
         if (midiInputList.getSelectedId() == 0)
             setMidiInput (0);
 
-        addAndMakeVisible (&keyboardComponent);
+        addAndMakeVisible (keyboardComponent);
         keyboardState.addListener (this);
 
-        addAndMakeVisible (&messageListBox);
+        addAndMakeVisible (messageListBox);
         messageListBox.setModel (&midiLogListBoxModel);
         messageListBox.setColour (ListBox::backgroundColourId, Colour (0x32ffffff));
         messageListBox.setColour (ListBox::outlineColourId, Colours::black);

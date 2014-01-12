@@ -505,10 +505,7 @@ public:
         jassert (numElementsToAdd <= 0 || data.elements != nullptr);
 
         while (--numElementsToAdd >= 0)
-        {
-            data.elements [numUsed] = new ObjectClass (*arrayToAddFrom.getUnchecked (startIndex++));
-            ++numUsed;
-        }
+            data.elements [numUsed++] = createCopyIfNotNull (arrayToAddFrom.getUnchecked (startIndex++));
     }
 
     /** Inserts a new object into the array assuming that the array is sorted.

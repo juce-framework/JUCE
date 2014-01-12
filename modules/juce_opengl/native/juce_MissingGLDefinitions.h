@@ -79,7 +79,7 @@ enum MissingOpenGLDefinitions
     GL_STENCIL_ATTACHMENT           = 0x8D20,
    #endif
 
-   #if JUCE_WINDOWS
+   #if JUCE_WINDOWS && ! defined (GL_TEXTURE0)
     GL_OPERAND0_RGB                 = 0x8590,
     GL_OPERAND1_RGB                 = 0x8591,
     GL_OPERAND0_ALPHA               = 0x8598,

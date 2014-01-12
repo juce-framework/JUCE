@@ -37,9 +37,9 @@ public:
     {
         setOpaque (true);
 
-        addAndMakeVisible (&versionLabel);
-        addAndMakeVisible (&linkButton);
-        addAndMakeVisible (&logo);
+        addAndMakeVisible (versionLabel);
+        addAndMakeVisible (linkButton);
+        addAndMakeVisible (logo);
 
         versionLabel.setColour (Label::textColourId, Colours::white);
         versionLabel.setText (String ("{version}  built on {date}")

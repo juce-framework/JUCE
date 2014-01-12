@@ -1371,7 +1371,7 @@ String TreeViewItem::getTooltip()
 
 var TreeViewItem::getDragSourceDescription()
 {
-    return var::null;
+    return var();
 }
 
 bool TreeViewItem::isInterestedInFileDrag (const StringArray&)

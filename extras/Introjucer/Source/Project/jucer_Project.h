@@ -147,7 +147,7 @@ public:
         Item findItemWithID (const String& targetId) const; // (recursive search)
 
         String getImageFileID() const;
-        Image loadAsImageFile() const;
+        Drawable* loadAsImageFile() const;
 
         //==============================================================================
         Value getNameValue();

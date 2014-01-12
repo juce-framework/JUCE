@@ -71,12 +71,12 @@ public:
        #if JUCE_MAC || JUCE_WINDOWS
         ApplicationCommandManager& commandManager = IntrojucerApp::getCommandManager();
 
-        addAndMakeVisible (&openProjectButton);
+        addAndMakeVisible (openProjectButton);
         openProjectButton.setCommandToTrigger (&commandManager, CommandIDs::openInIDE, true);
         openProjectButton.setButtonText (commandManager.getNameOfCommand (CommandIDs::openInIDE));
         openProjectButton.setColour (TextButton::buttonColourId, Colours::white.withAlpha (0.5f));
 
-        addAndMakeVisible (&saveAndOpenButton);
+        addAndMakeVisible (saveAndOpenButton);
         saveAndOpenButton.setCommandToTrigger (&commandManager, CommandIDs::saveAndOpenInIDE, true);
         saveAndOpenButton.setButtonText (commandManager.getNameOfCommand (CommandIDs::saveAndOpenInIDE));
         saveAndOpenButton.setColour (TextButton::buttonColourId, Colours::white.withAlpha (0.5f));
@@ -263,7 +263,7 @@ void ProjectContentComponent::rebuildProjectTabs()
 
     if (project != nullptr)
     {
-        addAndMakeVisible (&treeViewTabs);
+        addAndMakeVisible (treeViewTabs);
 
         createProjectTabs();
 
@@ -651,7 +651,7 @@ void ProjectContentComponent::updateMainWindowTitle()
 
 void ProjectContentComponent::showBubbleMessage (const Rectangle<int>& pos, const String& text)
 {
-    addChildComponent (&bubbleMessage);
+    addChildComponent (bubbleMessage);
     bubbleMessage.setColour (BubbleComponent::backgroundColourId, Colours::white.withAlpha (0.7f));
     bubbleMessage.setColour (BubbleComponent::outlineColourId, Colours::black.withAlpha (0.8f));
     bubbleMessage.setAlwaysOnTop (true);

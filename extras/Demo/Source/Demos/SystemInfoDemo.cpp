@@ -148,7 +148,7 @@ class SystemInfoDemo  : public Component
 public:
     SystemInfoDemo()
     {
-        addAndMakeVisible (&resultsBox);
+        addAndMakeVisible (resultsBox);
         resultsBox.setReadOnly (true);
         resultsBox.setMultiLine (true);
         resultsBox.setColour (TextEditor::backgroundColourId, Colours::transparentBlack);

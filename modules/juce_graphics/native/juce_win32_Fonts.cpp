@@ -22,6 +22,115 @@
   ==============================================================================
 */
 
+/*  This is some quick-and-dirty code to extract the typeface name from a lump of TTF file data.
+    It's needed because although win32 will happily load a TTF file from in-memory data, it won't
+    tell you the name of the damned font that it just loaded.. and in order to actually use the font,
+    you need to know its name!! Anyway, this awful hack seems to work for most fonts.
+*/
+namespace TTFNameExtractor
+{
+    struct OffsetTable
+    {
+        uint32 version;
+        uint16 numTables, searchRange, entrySelector, rangeShift;
+    };
+
+    struct TableDirectory
+    {
+        char tag[4];
+        uint32 checkSum, offset, length;
+    };
+
+    struct NamingTable
+    {
+        uint16 formatSelector;
+        uint16 numberOfNameRecords;
+        uint16 offsetStartOfStringStorage;
+    };
+
+    struct NameRecord
+    {
+        uint16 platformID, encodingID, languageID;
+        uint16 nameID, stringLength, offsetFromStorageArea;
+    };
+
+    static String parseNameRecord (MemoryInputStream& input, const NameRecord& nameRecord,
+                                   const int64 directoryOffset, const int64 offsetOfStringStorage)
+    {
+        String result;
+        const int64 oldPos = input.getPosition();
+        input.setPosition (directoryOffset + offsetOfStringStorage + ByteOrder::swapIfLittleEndian (nameRecord.offsetFromStorageArea));
+        const int stringLength = (int) ByteOrder::swapIfLittleEndian (nameRecord.stringLength);
+        const int platformID = ByteOrder::swapIfLittleEndian (nameRecord.platformID);
+
+        if (platformID == 0 || platformID == 3)
+        {
+            const int numChars = stringLength / 2 + 1;
+            HeapBlock<uint16> buffer;
+            buffer.calloc (numChars + 1);
+            input.read (buffer, stringLength);
+
+            for (int i = 0; i < numChars; ++i)
+                buffer[i] = ByteOrder::swapIfLittleEndian (buffer[i]);
+
+            static_jassert (sizeof (CharPointer_UTF16::CharType) == sizeof (uint16));
+            result = CharPointer_UTF16 ((CharPointer_UTF16::CharType*) buffer.getData());
+        }
+        else
+        {
+            HeapBlock<char> buffer;
+            buffer.calloc (stringLength + 1);
+            input.read (buffer, stringLength);
+            result = CharPointer_UTF8 (buffer.getData());
+        }
+
+        input.setPosition (oldPos);
+        return result;
+    }
+
+    static String parseNameTable (MemoryInputStream& input, int64 directoryOffset)
+    {
+        input.setPosition (directoryOffset);
+
+        NamingTable namingTable = { 0 };
+        input.read (&namingTable, sizeof (namingTable));
+
+        for (int i = 0; i < (int) ByteOrder::swapIfLittleEndian (namingTable.numberOfNameRecords); ++i)
+        {
+            NameRecord nameRecord = { 0 };
+            input.read (&nameRecord, sizeof (nameRecord));
+
+            if (ByteOrder::swapIfLittleEndian (nameRecord.nameID) == 4)
+            {
+                const String result (parseNameRecord (input, nameRecord, directoryOffset,
+                                                      ByteOrder::swapIfLittleEndian (namingTable.offsetStartOfStringStorage)));
+
+                if (result.isNotEmpty())
+                    return result;
+            }
+        }
+
+        return String();
+    }
+
+    static String getTypefaceNameFromFile (MemoryInputStream& input)
+    {
+        OffsetTable offsetTable = { 0 };
+        input.read (&offsetTable, sizeof (offsetTable));
+
+        for (int i = 0; i < (int) ByteOrder::swapIfLittleEndian (offsetTable.numTables); ++i)
+        {
+            TableDirectory tableDirectory = { 0 };
+            input.read (&tableDirectory, sizeof (tableDirectory));
+
+            if (String (tableDirectory.tag, sizeof (tableDirectory.tag)).equalsIgnoreCase ("name"))
+                return parseNameTable (input, ByteOrder::swapIfLittleEndian (tableDirectory.offset));
+        }
+
+        return String();
+    }
+}
+
 namespace FontEnumerators
 {
     static int CALLBACK fontEnum2 (ENUMLOGFONTEXW* lpelfe, NEWTEXTMETRICEXW*, int type, LPARAM lParam)
@@ -204,23 +313,29 @@ class WindowsTypeface   : public Typeface
 {
 public:
     WindowsTypeface (const Font& font)
-        : Typeface (font.getTypefaceName(),
-          font.getTypefaceStyle()),
-          fontH (0),
-          previousFontH (0),
-          dc (CreateCompatibleDC (0)),
+        : Typeface (font.getTypefaceName(), font.getTypefaceStyle()),
+          fontH (0), previousFontH (0),
+          dc (CreateCompatibleDC (0)), memoryFont (0),
           ascent (1.0f), heightToPointsFactor (1.0f),
           defaultGlyph (-1)
     {
         loadFont();
+    }
 
-        if (GetTextMetrics (dc, &tm))
-        {
-            heightToPointsFactor = (72.0f / GetDeviceCaps (dc, LOGPIXELSY)) * heightInPoints / (float) tm.tmHeight;
-            ascent = tm.tmAscent / (float) tm.tmHeight;
-            defaultGlyph = getGlyphForChar (dc, tm.tmDefaultChar);
-            createKerningPairs (dc, (float) tm.tmHeight);
-        }
+    WindowsTypeface (const void* data, size_t dataSize)
+        : Typeface (String(), String()),
+          fontH (0), previousFontH (0),
+          dc (CreateCompatibleDC (0)), memoryFont (0),
+          ascent (1.0f), heightToPointsFactor (1.0f),
+          defaultGlyph (-1)
+    {
+        DWORD numInstalled = 0;
+        memoryFont = AddFontMemResourceEx (const_cast<void*> (data), (DWORD) dataSize,
+                                           nullptr, &numInstalled);
+
+        MemoryInputStream m (data, dataSize, false);
+        name = TTFNameExtractor::getTypefaceNameFromFile (m);
+        loadFont();
     }
 
     ~WindowsTypeface()
@@ -230,6 +345,9 @@ public:
 
         if (fontH != 0)
             DeleteObject (fontH);
+
+        if (memoryFont != 0)
+            RemoveFontMemResourceEx (memoryFont);
     }
 
     float getAscent() const                 { return ascent; }
@@ -353,6 +471,7 @@ private:
     HGDIOBJ previousFontH;
     HDC dc;
     TEXTMETRIC tm;
+    HANDLE memoryFont;
     float ascent, heightToPointsFactor;
     int defaultGlyph, heightInPoints;
 
@@ -410,6 +529,15 @@ private:
                     DeleteObject (standardSizedFont);
                 }
             }
+        }
+
+        if (GetTextMetrics (dc, &tm))
+        {
+            float dpi = (GetDeviceCaps (dc, LOGPIXELSX) + GetDeviceCaps (dc, LOGPIXELSY)) / 2.0f;
+            heightToPointsFactor = (dpi / GetDeviceCaps (dc, LOGPIXELSY)) * heightInPoints / (float) tm.tmHeight;
+            ascent = tm.tmAscent / (float) tm.tmHeight;
+            defaultGlyph = getGlyphForChar (dc, tm.tmDefaultChar);
+            createKerningPairs (dc, (float) tm.tmHeight);
         }
     }
 
@@ -493,10 +621,20 @@ Typeface::Ptr Typeface::createSystemTypefaceFor (const Font& font)
     const Direct2DFactories& factories = Direct2DFactories::getInstance();
 
     if (factories.systemFonts != nullptr)
-        return new WindowsDirectWriteTypeface (font, factories.systemFonts);
+    {
+        ScopedPointer<WindowsDirectWriteTypeface> wtf (new WindowsDirectWriteTypeface (font, factories.systemFonts));
+
+        if (wtf->loadedOk())
+            return wtf.release();
+    }
    #endif
 
     return new WindowsTypeface (font);
+}
+
+Typeface::Ptr Typeface::createSystemTypefaceFor (const void* data, size_t dataSize)
+{
+    return new WindowsTypeface (data, dataSize);
 }
 
 void Typeface::scanFolderForFonts (const File&)

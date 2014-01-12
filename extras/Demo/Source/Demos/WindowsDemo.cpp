@@ -201,11 +201,11 @@ public:
         setOpaque (true);
 
         showWindowsButton.setButtonText ("Show Windows");
-        addAndMakeVisible (&showWindowsButton);
+        addAndMakeVisible (showWindowsButton);
         showWindowsButton.addListener (this);
 
         closeWindowsButton.setButtonText ("Close Windows");
-        addAndMakeVisible (&closeWindowsButton);
+        addAndMakeVisible (closeWindowsButton);
         closeWindowsButton.addListener (this);
     }
 

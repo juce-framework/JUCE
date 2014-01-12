@@ -386,7 +386,7 @@ void StreamingSocket::close()
         ::close (handle);
    #endif
 
-    hostName = String::empty;
+    hostName.clear();
     portNumber = 0;
     handle = -1;
     isListener = false;
@@ -506,7 +506,7 @@ void DatagramSocket::close()
     ::close (handle);
    #endif
 
-    hostName = String::empty;
+    hostName.clear();
     portNumber = 0;
     handle = -1;
 }

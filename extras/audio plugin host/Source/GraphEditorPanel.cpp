@@ -109,7 +109,7 @@ public:
         jassert (p != nullptr);
         setOpaque (true);
 
-        addAndMakeVisible (&panel);
+        addAndMakeVisible (panel);
 
         Array<PropertyComponent*> programs;
 

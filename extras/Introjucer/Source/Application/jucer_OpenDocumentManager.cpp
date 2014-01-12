@@ -198,8 +198,9 @@ bool OpenDocumentManager::closeDocument (int index, bool saveIfNeeded)
         bool canClose = true;
 
         for (int i = listeners.size(); --i >= 0;)
-            if (! listeners.getUnchecked(i)->documentAboutToClose (doc))
-                canClose = false;
+            if (DocumentCloseListener* l = listeners[i])
+                if (! l->documentAboutToClose (doc))
+                    canClose = false;
 
         if (! canClose)
             return false;
@@ -219,12 +220,9 @@ bool OpenDocumentManager::closeDocument (Document* document, bool saveIfNeeded)
 void OpenDocumentManager::closeFile (const File& f, bool saveIfNeeded)
 {
     for (int i = documents.size(); --i >= 0;)
-    {
-        Document* d = documents.getUnchecked (i);
-
-        if (d->isForFile (f))
-            closeDocument (i, saveIfNeeded);
-    }
+        if (Document* d = documents[i])
+            if (d->isForFile (f))
+                closeDocument (i, saveIfNeeded);
 }
 
 bool OpenDocumentManager::closeAll (bool askUserToSave)
@@ -239,15 +237,10 @@ bool OpenDocumentManager::closeAll (bool askUserToSave)
 bool OpenDocumentManager::closeAllDocumentsUsingProject (Project& project, bool saveIfNeeded)
 {
     for (int i = documents.size(); --i >= 0;)
-    {
-        Document* d = documents.getUnchecked (i);
-
-        if (d->refersToProject (project))
-        {
-            if (! closeDocument (i, saveIfNeeded))
-                return false;
-        }
-    }
+        if (Document* d = documents[i])
+            if (d->refersToProject (project))
+                if (! closeDocument (i, saveIfNeeded))
+                    return false;
 
     return true;
 }
@@ -255,12 +248,8 @@ bool OpenDocumentManager::closeAllDocumentsUsingProject (Project& project, bool 
 bool OpenDocumentManager::anyFilesNeedSaving() const
 {
     for (int i = documents.size(); --i >= 0;)
-    {
-        Document* d = documents.getUnchecked (i);
-
-        if (d->needsSaving())
+        if (documents.getUnchecked (i)->needsSaving())
             return true;
-    }
 
     return false;
 }
@@ -269,10 +258,11 @@ bool OpenDocumentManager::saveAll()
 {
     for (int i = documents.size(); --i >= 0;)
     {
-        Document* d = documents.getUnchecked (i);
-
-        if (! d->save())
+        if (! documents.getUnchecked (i)->save())
             return false;
+
+        IntrojucerApp::getApp().mainWindowList.updateAllWindowTitles();
+        IntrojucerApp::getCommandManager().commandStatusChanged();
     }
 
     return true;

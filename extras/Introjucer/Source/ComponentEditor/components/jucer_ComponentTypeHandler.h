@@ -99,11 +99,11 @@ public:
 
     virtual void fillInGeneratedCode (Component* component, GeneratedCode& code);
 
-    virtual void fillInMemberVariableDeclarations (GeneratedCode& code, Component* component, const String& memberVariableName);
-    virtual void fillInResizeCode (GeneratedCode& code, Component* component, const String& memberVariableName);
-    virtual void fillInCreationCode (GeneratedCode& code, Component* component, const String& memberVariableName);
-    virtual String getCreationParameters (Component* component);
-    virtual void fillInDeletionCode (GeneratedCode& code, Component* component, const String& memberVariableName);
+    virtual void fillInMemberVariableDeclarations (GeneratedCode&, Component*, const String& memberVariableName);
+    virtual void fillInResizeCode (GeneratedCode&, Component*, const String& memberVariableName);
+    virtual void fillInCreationCode (GeneratedCode&, Component*, const String& memberVariableName);
+    virtual String getCreationParameters (GeneratedCode&, Component*);
+    virtual void fillInDeletionCode (GeneratedCode&, Component*, const String& memberVariableName);
 
     //==============================================================================
     const String& getTypeName() const noexcept                { return typeName; }
@@ -136,8 +136,7 @@ protected:
     OwnedArray <ComponentColourInfo> colours;
 
 private:
-    ComponentTypeHandler (const ComponentTypeHandler&);
-    ComponentTypeHandler& operator= (const ComponentTypeHandler&);
+    JUCE_DECLARE_NON_COPYABLE (ComponentTypeHandler)
 };
 
 

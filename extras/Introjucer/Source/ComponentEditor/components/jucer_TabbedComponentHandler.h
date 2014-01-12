@@ -134,7 +134,7 @@ public:
         }
     }
 
-    String getCreationParameters (Component* comp)
+    String getCreationParameters (GeneratedCode&, Component* comp)
     {
         TabbedComponent* const t = dynamic_cast <TabbedComponent*> (comp);
 
@@ -184,7 +184,7 @@ public:
             code.constructorCode
                 << memberVariableName
                 << "->addTab ("
-                << quotedString (t->getTabNames() [i])
+                << quotedString (t->getTabNames() [i], code.shouldUseTransMacro())
                 << ", "
                 << CodeHelpers::colourToCode (t->getTabBackgroundColour (i));
 

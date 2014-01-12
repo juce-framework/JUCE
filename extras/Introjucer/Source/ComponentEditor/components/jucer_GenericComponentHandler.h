@@ -107,12 +107,12 @@ public:
 
     String getClassName (Component* comp) const
     {
-        return ((GenericComponent*) comp)->actualClassName;
+        return static_cast<GenericComponent*> (comp)->actualClassName;
     }
 
-    String getCreationParameters (Component* comp)
+    String getCreationParameters (GeneratedCode&, Component* comp)
     {
-        return ((GenericComponent*) comp)->constructorParams;
+        return static_cast<GenericComponent*> (comp)->constructorParams;
     }
 
     void fillInCreationCode (GeneratedCode& code, Component* component, const String& memberVariableName)
@@ -122,7 +122,7 @@ public:
         if (component->getName().isNotEmpty())
             code.constructorCode
                 << memberVariableName << "->setName ("
-                << quotedString (component->getName())
+                << quotedString (component->getName(), false)
                 << ");\n\n";
         else
             code.constructorCode << "\n";

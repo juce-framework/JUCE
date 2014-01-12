@@ -403,11 +403,11 @@ KeyMappingEditorComponent::KeyMappingEditorComponent (KeyPressMappingSet& mappin
 
     if (showResetToDefaultButton)
     {
-        addAndMakeVisible (&resetButton);
+        addAndMakeVisible (resetButton);
         resetButton.addListener (treeItem);
     }
 
-    addAndMakeVisible (&tree);
+    addAndMakeVisible (tree);
     tree.setColour (TreeView::backgroundColourId, findColour (backgroundColourId));
     tree.setRootItemVisible (false);
     tree.setDefaultOpenness (true);

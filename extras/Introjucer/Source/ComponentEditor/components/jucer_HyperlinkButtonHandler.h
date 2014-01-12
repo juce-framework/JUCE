@@ -67,13 +67,13 @@ public:
         return true;
     }
 
-    String getCreationParameters (Component* comp)
+    String getCreationParameters (GeneratedCode& code, Component* comp)
     {
-        HyperlinkButton* const hb = dynamic_cast <HyperlinkButton*> (comp);
+        HyperlinkButton* const hb = dynamic_cast<HyperlinkButton*> (comp);
 
-        return quotedString (hb->getButtonText())
+        return quotedString (hb->getButtonText(), code.shouldUseTransMacro())
                 + ",\nURL ("
-                + quotedString (hb->getURL().toString (false))
+                + quotedString (hb->getURL().toString (false), false)
                 + ")";
     }
 

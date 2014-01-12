@@ -44,7 +44,7 @@ public:
         outputDisplay.setReadOnly (true);
         outputDisplay.setCaretVisible (false);
         outputDisplay.setFont (Font (Font::getDefaultMonospacedFontName(), 14.0f, Font::plain));
-        addAndMakeVisible (&outputDisplay);
+        addAndMakeVisible (outputDisplay);
 
         codeDocument.addListener (this);
 

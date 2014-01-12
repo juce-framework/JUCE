@@ -56,6 +56,8 @@ void SynthesiserVoice::clearCurrentNote()
     currentlyPlayingSound = nullptr;
 }
 
+void SynthesiserVoice::aftertouchChanged (int) {}
+
 //==============================================================================
 Synthesiser::Synthesiser()
     : sampleRate (0),
@@ -190,6 +192,10 @@ void Synthesiser::handleMidiEvent (const MidiMessage& m)
         lastPitchWheelValues [channel - 1] = wheelPos;
 
         handlePitchWheel (channel, wheelPos);
+    }
+    else if (m.isAftertouch())
+    {
+        handleAftertouch (m.getChannel(), m.getNoteNumber(), m.getAfterTouchValue());
     }
     else if (m.isController())
     {
@@ -335,6 +341,20 @@ void Synthesiser::handleController (const int midiChannel,
 
         if (midiChannel <= 0 || voice->isPlayingChannel (midiChannel))
             voice->controllerMoved (controllerNumber, controllerValue);
+    }
+}
+
+void Synthesiser::handleAftertouch (int midiChannel, int midiNoteNumber, int aftertouchValue)
+{
+    const ScopedLock sl (lock);
+
+    for (int i = voices.size(); --i >= 0;)
+    {
+        SynthesiserVoice* const voice = voices.getUnchecked (i);
+
+        if (voice->getCurrentlyPlayingNote() == midiNoteNumber
+              && (midiChannel <= 0 || voice->isPlayingChannel (midiChannel)))
+            voice->aftertouchChanged (aftertouchValue);
     }
 }
 

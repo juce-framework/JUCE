@@ -951,7 +951,7 @@ String BigInteger::toString (const int base, const int minimumNumCharacters) con
     else
     {
         jassertfalse; // can't do the specified base!
-        return String::empty;
+        return String();
     }
 
     s = s.paddedLeft ('0', minimumNumCharacters);

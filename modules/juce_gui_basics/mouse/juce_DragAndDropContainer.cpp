@@ -154,10 +154,14 @@ public:
             else if (now > lastTimeOverTarget + RelativeTime::milliseconds (700))
                 checkForExternalDrag (details, screenPos);
         }
+
+        forceMouseCursorUpdate();
     }
 
     void timerCallback() override
     {
+        forceMouseCursorUpdate();
+
         if (sourceDetails.sourceComponent == nullptr)
         {
             delete this;
@@ -200,6 +204,11 @@ private:
     const Point<int> imageOffset;
     bool hasCheckedForExternalDrag;
     Time lastTimeOverTarget;
+
+    void forceMouseCursorUpdate()
+    {
+        Desktop::getInstance().getMainMouseSource().forceMouseCursorUpdate();
+    }
 
     DragAndDropTarget* getCurrentlyOver() const noexcept
     {

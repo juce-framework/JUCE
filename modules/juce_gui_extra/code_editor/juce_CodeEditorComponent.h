@@ -204,6 +204,12 @@ public:
     /** Returns the font that the editor is using. */
     const Font& getFont() const noexcept                { return font; }
 
+    /** Makes the editor read-only. */
+    void setReadOnly (bool shouldBeReadOnly) noexcept;
+
+    /** Returns true if the editor is set to be read-only. */
+    bool isReadOnly() const noexcept                    { return readOnly; }
+
     //==============================================================================
     struct JUCE_API  ColourScheme
     {
@@ -352,7 +358,7 @@ private:
     float charWidth;
     int lineHeight, linesOnScreen, columnsOnScreen;
     int scrollbarThickness, columnToTryToMaintain;
-    bool useSpacesForTabs, showLineNumbers;
+    bool readOnly, useSpacesForTabs, showLineNumbers, shouldFollowDocumentChanges;
     double xOffset;
 
     CodeDocument::Position caretPos, selectionStart, selectionEnd;

@@ -84,19 +84,19 @@ FileBrowserComponent::FileBrowserComponent (int flags_,
 
     fileListComponent->addListener (this);
 
-    addAndMakeVisible (&currentPathBox);
+    addAndMakeVisible (currentPathBox);
     currentPathBox.setEditableText (true);
     resetRecentPaths();
     currentPathBox.addListener (this);
 
-    addAndMakeVisible (&filenameBox);
+    addAndMakeVisible (filenameBox);
     filenameBox.setMultiLine (false);
     filenameBox.setSelectAllWhenFocused (true);
     filenameBox.setText (filename, false);
     filenameBox.addListener (this);
     filenameBox.setReadOnly ((flags & (filenameBoxIsReadOnly | canSelectMultipleItems)) != 0);
 
-    addAndMakeVisible (&fileLabel);
+    addAndMakeVisible (fileLabel);
     fileLabel.attachToComponent (&filenameBox, true);
 
     addAndMakeVisible (goUpButton = getLookAndFeel().createFileBrowserGoUpButton());

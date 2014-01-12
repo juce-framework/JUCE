@@ -37,11 +37,11 @@ public:
         : textBox (String::empty),
           button ("Send a message to the webpage")
     {
-        addAndMakeVisible (&textBox);
+        addAndMakeVisible (textBox);
         textBox.setMultiLine (true);
         textBox.setBounds (8, 8, 300, 300);
 
-        addAndMakeVisible (&button);
+        addAndMakeVisible (button);
         button.setBounds (320, 8, 180, 22);
         button.addListener (this);
         button.setEnabled (false);

@@ -24,7 +24,7 @@
 
 #include "../jucer_Headers.h"
 #include "jucer_GeneratedCode.h"
-
+#include "jucer_JucerDocument.h"
 
 //==============================================================================
 GeneratedCode::GeneratedCode (const JucerDocument* const doc)
@@ -229,6 +229,11 @@ static String getIncludeFileCode (StringArray files)
     return s;
 }
 
+bool GeneratedCode::shouldUseTransMacro() const noexcept
+{
+    return document->shouldUseTransMacro();
+}
+
 //==============================================================================
 static void replaceTemplate (String& text, const String& itemName, const String& value)
 {
@@ -297,11 +302,10 @@ static void copyAcrossUserSections (String& dest, const String& src)
 
                     if (getUserSection (srcLines, tag, sourceLines))
                     {
-                        int j;
-                        for (j = endLine - i; --j > 0;)
+                        for (int j = endLine - i; --j > 0;)
                             dstLines.remove (i + 1);
 
-                        for (j = 0; j < sourceLines.size(); ++j)
+                        for (int j = 0; j < sourceLines.size(); ++j)
                             dstLines.insert (++i, sourceLines [j].trimEnd());
 
                         ++i;

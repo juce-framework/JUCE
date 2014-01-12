@@ -43,20 +43,20 @@ public:
     {
         setOpaque (true);
 
-        addAndMakeVisible (&cameraSelectorComboBox);
+        addAndMakeVisible (cameraSelectorComboBox);
         updateCameraList();
         cameraSelectorComboBox.setSelectedId (1);
         cameraSelectorComboBox.addListener (this);
 
-        addAndMakeVisible (&snapshotButton);
+        addAndMakeVisible (snapshotButton);
         snapshotButton.addListener (this);
         snapshotButton.setEnabled (false);
 
-        addAndMakeVisible (&recordMovieButton);
+        addAndMakeVisible (recordMovieButton);
         recordMovieButton.addListener (this);
         recordMovieButton.setEnabled (false);
 
-        addAndMakeVisible (&lastSnapshot);
+        addAndMakeVisible (lastSnapshot);
 
         cameraSelectorComboBox.setSelectedId (2);
     }

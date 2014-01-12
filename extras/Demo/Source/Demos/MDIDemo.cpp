@@ -48,7 +48,7 @@ public:
         editor.setMultiLine (true);
         editor.setReturnKeyStartsNewLine (true);
         editor.getTextValue().referTo (textValueObject);
-        addAndMakeVisible (&editor);
+        addAndMakeVisible (editor);
         editor.addListener (this);
     }
 
@@ -164,13 +164,13 @@ public:
         showInTabsButton.setButtonText ("Show with tabs");
         showInTabsButton.setToggleState (false, dontSendNotification);
         showInTabsButton.addListener (this);
-        addAndMakeVisible (&showInTabsButton);
+        addAndMakeVisible (showInTabsButton);
 
         addNoteButton.setButtonText ("Create a new note");
         addNoteButton.addListener (this);
-        addAndMakeVisible (&addNoteButton);
+        addAndMakeVisible (addNoteButton);
 
-        addAndMakeVisible (&multiDocumentPanel);
+        addAndMakeVisible (multiDocumentPanel);
         multiDocumentPanel.setBackgroundColour (Colours::transparentBlack);
 
         updateLayoutMode();

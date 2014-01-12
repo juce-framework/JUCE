@@ -79,6 +79,11 @@ void ComponentPeer::updateBounds()
     setBounds (ScalingHelpers::scaledScreenPosToUnscaled (component, component.getBoundsInParent()), false);
 }
 
+bool ComponentPeer::isKioskMode() const
+{
+    return Desktop::getInstance().getKioskModeComponent() == &component;
+}
+
 //==============================================================================
 void ComponentPeer::handleMouseEvent (const int touchIndex, const Point<int> positionWithinPeer,
                                       const ModifierKeys newMods, const int64 time)

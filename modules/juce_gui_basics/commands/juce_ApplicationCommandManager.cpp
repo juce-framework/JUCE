@@ -127,7 +127,7 @@ String ApplicationCommandManager::getNameOfCommand (const CommandID commandID) c
     if (const ApplicationCommandInfo* const ci = getCommandForID (commandID))
         return ci->shortName;
 
-    return String::empty;
+    return String();
 }
 
 String ApplicationCommandManager::getDescriptionOfCommand (const CommandID commandID) const noexcept
@@ -136,7 +136,7 @@ String ApplicationCommandManager::getDescriptionOfCommand (const CommandID comma
         return ci->description.isNotEmpty() ? ci->description
                                             : ci->shortName;
 
-    return String::empty;
+    return String();
 }
 
 StringArray ApplicationCommandManager::getCommandCategories() const

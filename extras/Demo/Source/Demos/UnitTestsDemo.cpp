@@ -108,8 +108,8 @@ struct UnitTestClasses
         {
             setOpaque (true);
 
-            addAndMakeVisible (&startTestButton);
-            addAndMakeVisible (&testResultsBox);
+            addAndMakeVisible (startTestButton);
+            addAndMakeVisible (testResultsBox);
             testResultsBox.setMultiLine (true);
             testResultsBox.setFont (Font (Font::getDefaultMonospacedFontName(), 12.0f, Font::plain));
 

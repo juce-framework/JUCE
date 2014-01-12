@@ -35,7 +35,7 @@ public:
           slider (p, index_)
     {
         startTimer (100);
-        addAndMakeVisible (&slider);
+        addAndMakeVisible (slider);
         owner.addListener (this);
     }
 
@@ -123,7 +123,7 @@ GenericAudioProcessorEditor::GenericAudioProcessorEditor (AudioProcessor* const 
     jassert (p != nullptr);
     setOpaque (true);
 
-    addAndMakeVisible (&panel);
+    addAndMakeVisible (panel);
 
     Array <PropertyComponent*> params;
 

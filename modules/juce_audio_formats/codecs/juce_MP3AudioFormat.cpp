@@ -3095,7 +3095,14 @@ private:
             const int64 streamSize = stream.stream.getTotalLength();
 
             if (streamSize > 0)
-                numFrames = (streamSize - streamStartPos) / (stream.frame.frameSize);
+            {
+                const int bytesPerFrame = stream.frame.frameSize + 4;
+
+                if (bytesPerFrame == 417 || bytesPerFrame == 418)
+                    numFrames = roundToInt ((streamSize - streamStartPos) / 417.95918); // more accurate for 128k
+                else
+                    numFrames = (streamSize - streamStartPos) / bytesPerFrame;
+            }
         }
 
         return numFrames * 1152;

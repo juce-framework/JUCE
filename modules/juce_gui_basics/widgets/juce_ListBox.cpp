@@ -952,6 +952,6 @@ void ListBoxModel::selectedRowsChanged (int) {}
 void ListBoxModel::deleteKeyPressed (int) {}
 void ListBoxModel::returnKeyPressed (int) {}
 void ListBoxModel::listWasScrolled() {}
-var ListBoxModel::getDragSourceDescription (const SparseSet<int>&)      { return var::null; }
+var ListBoxModel::getDragSourceDescription (const SparseSet<int>&)      { return var(); }
 String ListBoxModel::getTooltipForRow (int)                             { return String::empty; }
 MouseCursor ListBoxModel::getMouseCursorForRow (int)                    { return MouseCursor::NormalCursor; }

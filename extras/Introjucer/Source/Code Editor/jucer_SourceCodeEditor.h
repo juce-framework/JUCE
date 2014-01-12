@@ -211,7 +211,7 @@ private:
 class CppCodeEditorComponent  : public GenericCodeEditorComponent
 {
 public:
-    CppCodeEditorComponent (const File& file, CodeDocument&);
+    CppCodeEditorComponent (const File&, CodeDocument&);
     ~CppCodeEditorComponent();
 
     void addPopupMenuItems (PopupMenu&, const MouseEvent*) override;

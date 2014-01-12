@@ -59,7 +59,7 @@ public:
           includeAnchorOptions (includeAnchorOptions_),
           allowRelativeOptions (allowRelativeOptions_)
     {
-        addAndMakeVisible (&button);
+        addAndMakeVisible (button);
         button.addListener (this);
         button.setTriggeredOnMouseDown (true);
         button.setConnectedEdges (TextButton::ConnectedOnLeft | TextButton::ConnectedOnRight);
