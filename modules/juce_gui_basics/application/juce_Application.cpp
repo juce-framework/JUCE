@@ -50,7 +50,7 @@ ApplicationCommandTarget* JUCEApplication::getNextCommandTarget()
     return nullptr;
 }
 
-void JUCEApplication::getAllCommands (Array <CommandID>& commands)
+void JUCEApplication::getAllCommands (Array<CommandID>& commands)
 {
     commands.add (StandardApplicationCommandIDs::quit);
 }

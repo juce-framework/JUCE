@@ -30,7 +30,7 @@ NamedValueSet::NamedValue::NamedValue() noexcept
 {
 }
 
-inline NamedValueSet::NamedValue::NamedValue (const Identifier n, const var& v)
+inline NamedValueSet::NamedValue::NamedValue (Identifier n, const var& v)
     : name (n), value (v)
 {
 }
@@ -49,22 +49,22 @@ NamedValueSet::NamedValue& NamedValueSet::NamedValue::operator= (const NamedValu
 
 #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
 NamedValueSet::NamedValue::NamedValue (NamedValue&& other) noexcept
-    : nextListItem (static_cast <LinkedListPointer<NamedValue>&&> (other.nextListItem)),
-      name (static_cast <Identifier&&> (other.name)),
-      value (static_cast <var&&> (other.value))
+    : nextListItem (static_cast<LinkedListPointer<NamedValue>&&> (other.nextListItem)),
+      name (static_cast<Identifier&&> (other.name)),
+      value (static_cast<var&&> (other.value))
 {
 }
 
-inline NamedValueSet::NamedValue::NamedValue (const Identifier n, var&& v)
-    : name (n), value (static_cast <var&&> (v))
+inline NamedValueSet::NamedValue::NamedValue (Identifier n, var&& v)
+    : name (n), value (static_cast<var&&> (v))
 {
 }
 
 NamedValueSet::NamedValue& NamedValueSet::NamedValue::operator= (NamedValue&& other) noexcept
 {
-    nextListItem = static_cast <LinkedListPointer<NamedValue>&&> (other.nextListItem);
-    name = static_cast <Identifier&&> (other.name);
-    value = static_cast <var&&> (other.value);
+    nextListItem = static_cast<LinkedListPointer<NamedValue>&&> (other.nextListItem);
+    name = static_cast<Identifier&&> (other.name);
+    value = static_cast<var&&> (other.value);
     return *this;
 }
 #endif
@@ -268,7 +268,7 @@ void NamedValueSet::setFromXmlAttributes (const XmlElement& xml)
 
     for (int i = 0; i < numAtts; ++i)
     {
-        const String& name = xml.getAttributeName (i);
+        const String& name  = xml.getAttributeName (i);
         const String& value = xml.getAttributeValue (i);
 
         if (name.startsWith ("base64:"))

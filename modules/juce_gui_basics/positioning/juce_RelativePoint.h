@@ -54,8 +54,8 @@ public:
     */
     RelativePoint (const String& stringVersion);
 
-    bool operator== (const RelativePoint& other) const noexcept;
-    bool operator!= (const RelativePoint& other) const noexcept;
+    bool operator== (const RelativePoint&) const noexcept;
+    bool operator!= (const RelativePoint&) const noexcept;
 
     /** Calculates the absolute position of this point.
 

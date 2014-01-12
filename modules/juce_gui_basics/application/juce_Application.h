@@ -176,7 +176,7 @@ public:
     /** @internal */
     void getCommandInfo (CommandID, ApplicationCommandInfo&);
     /** @internal */
-    void getAllCommands (Array <CommandID>&);
+    void getAllCommands (Array<CommandID>&);
     /** @internal */
     bool perform (const InvocationInfo&);
 

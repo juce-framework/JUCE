@@ -79,16 +79,16 @@ public:
         y += dy;
 
         if (x < 0)
-            dx = fabsf (dx);
+            dx = std::abs (dx);
 
         if (x > parentWidth)
-            dx = -fabsf (dx);
+            dx = -std::abs (dx);
 
         if (y < 0)
-            dy = fabsf (dy);
+            dy = std::abs (dy);
 
         if (y > parentHeight)
-            dy = -fabsf (dy);
+            dy = -std::abs (dy);
 
         setBounds (((int) x) - 2,
                    ((int) y) - 2,
