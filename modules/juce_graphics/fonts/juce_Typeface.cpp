@@ -186,8 +186,8 @@ private:
         {
             const float newT = std::floor (fontSize * t + 0.5f) / fontSize;
             const float newB = std::floor (fontSize * b + 0.5f) / fontSize;
-            const float newM = std::floor (fontSize * m + 0.5f) / fontSize;
-
+            const float newM = std::floor (fontSize * m + 0.3f) / fontSize; // this is slightly biased so that lower-case letters
+                                                                            // are more likely to become taller than shorter.
             upperScale  = jlimit (0.9f, 1.1f, (newM - newT) / (m - t));
             lowerScale  = jlimit (0.9f, 1.1f, (newB - newM) / (b - m));
 
