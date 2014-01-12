@@ -659,13 +659,13 @@ struct OpenGLDemoClasses
             shader->use();
 
             if (uniforms->projectionMatrix != nullptr)
-                uniforms->projectionMatrix->setMatrix4 (getProjectionMatrix().mat, 1, 0);
+                uniforms->projectionMatrix->setMatrix4 (getProjectionMatrix().mat, 1, false);
 
             if (uniforms->viewMatrix != nullptr)
-                uniforms->viewMatrix->setMatrix4 (getViewMatrix().mat, 1, 0);
+                uniforms->viewMatrix->setMatrix4 (getViewMatrix().mat, 1, false);
 
             if (uniforms->texture != nullptr)
-                uniforms->texture->set (0);
+                uniforms->texture->set ((GLint) 0);
 
             if (uniforms->lightPosition != nullptr)
                 uniforms->lightPosition->set (-15.0f, 10.0f, 15.0f, 0.0f);
@@ -679,7 +679,7 @@ struct OpenGLDemoClasses
             openGLContext.extensions.glBindBuffer (GL_ARRAY_BUFFER, 0);
             openGLContext.extensions.glBindBuffer (GL_ELEMENT_ARRAY_BUFFER, 0);
 
-            if (! isMouseButtonDownAnywhere())
+            if (! controlsOverlay->isMouseButtonDown())
                 rotation += (float) rotationSpeed;
         }
 
