@@ -658,24 +658,20 @@ struct OpenGLDemoClasses
 
             shader->use();
 
-            // Setup our projection uniform
-            if (OpenGLShaderProgram::Uniform* uni = uniforms->projectionMatrix)
-                openGLContext.extensions.glUniformMatrix4fv (uni->uniformID, 1, 0, getProjectionMatrix().mat);
+            if (uniforms->projectionMatrix != nullptr)
+                uniforms->projectionMatrix->setMatrix4 (getProjectionMatrix().mat, 1, 0);
 
-            // And the matrix for our model view
-            if (OpenGLShaderProgram::Uniform* uni = uniforms->viewMatrix)
-                openGLContext.extensions.glUniformMatrix4fv (uni->uniformID, 1, 0, getViewMatrix().mat);
+            if (uniforms->viewMatrix != nullptr)
+                uniforms->viewMatrix->setMatrix4 (getViewMatrix().mat, 1, 0);
 
-            if (OpenGLShaderProgram::Uniform* uni = uniforms->texture)
-                openGLContext.extensions.glUniform1i (uni->uniformID, 0);
+            if (uniforms->texture != nullptr)
+                uniforms->texture->set (0);
 
-            // Set the direction of our light source
-            if (OpenGLShaderProgram::Uniform* uni = uniforms->lightPosition)
-                openGLContext.extensions.glUniform4f (uni->uniformID, -15.0f, 10.0f, 15.0f, 0.0f);
+            if (uniforms->lightPosition != nullptr)
+                uniforms->lightPosition->set (-15.0f, 10.0f, 15.0f, 0.0f);
 
-            // Set our bouncing number
-            if (OpenGLShaderProgram::Uniform* uni = uniforms->bouncingNumber)
-                openGLContext.extensions.glUniform1f (uni->uniformID, bouncingNumber.getValue());
+            if (uniforms->bouncingNumber != nullptr)
+                uniforms->bouncingNumber->set (bouncingNumber.getValue());
 
             shape->draw (openGLContext, *attributes);
 
