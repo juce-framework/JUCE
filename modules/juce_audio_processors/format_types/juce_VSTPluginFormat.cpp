@@ -2637,7 +2637,7 @@ static VSTPluginInstance* createAndUpdateDesc (VSTPluginFormat& format, PluginDe
     return nullptr;
 }
 
-void VSTPluginFormat::findAllTypesForFile (OwnedArray <PluginDescription>& results,
+void VSTPluginFormat::findAllTypesForFile (OwnedArray<PluginDescription>& results,
                                            const String& fileOrIdentifier)
 {
     if (! fileMightContainThisPluginType (fileOrIdentifier))
@@ -2671,13 +2671,15 @@ void VSTPluginFormat::findAllTypesForFile (OwnedArray <PluginDescription>& resul
                 break;
 
             desc.uid = uid;
+            desc.name = shellEffectName;
+
+            aboutToScanVSTShellPlugin (desc);
 
             ScopedPointer<VSTPluginInstance> shellInstance (createAndUpdateDesc (*this, desc));
 
             if (shellInstance != nullptr)
             {
                 jassert (desc.uid == uid);
-                desc.name = shellEffectName;
                 desc.hasSharedContainer = true;
 
                 if (! arrayContainsPlugin (results, desc))
@@ -2880,5 +2882,7 @@ VSTPluginFormat::VstIntPtr JUCE_CALLTYPE VSTPluginFormat::dispatcher (AudioPlugi
 
     return 0;
 }
+
+void VSTPluginFormat::aboutToScanVSTShellPlugin (const PluginDescription&) {}
 
 #endif
