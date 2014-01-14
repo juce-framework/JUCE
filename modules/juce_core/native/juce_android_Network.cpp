@@ -87,6 +87,10 @@ public:
 
         LocalRef<jobject> responseHeaderBuffer (env->NewObject (StringBuffer, StringBuffer.constructor));
 
+        // Annoyingly, the android HTTP functions will choke on this call if you try to do it on the message
+        // thread. You'll need to move your networking code to a background thread to keep it happy..
+        jassert (Thread::getCurrentThread() != nullptr);
+
         stream = GlobalRef (env->CallStaticObjectMethod (JuceAppActivity,
                                                          JuceAppActivity.createHTTPStream,
                                                          javaString (address).get(),
