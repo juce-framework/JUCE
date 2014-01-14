@@ -174,7 +174,7 @@ public:
 
 private:
     AudioSampleBuffer testSound, recordedSound;
-    Array <int> spikePositions;
+    Array<int> spikePositions;
     int playingSampleNum, recordedSampleNum;
     CriticalSection lock;
     double sampleRate;
@@ -220,14 +220,14 @@ private:
         const float* s = buffer.getSampleData (0, 0);
         const int spikeDriftAllowed = 5;
 
-        Array <int> spikesFound;
+        Array<int> spikesFound;
         spikesFound.ensureStorageAllocated (100);
         double runningAverage = 0;
         int lastSpike = 0;
 
         for (int i = 0; i < buffer.getNumSamples() - 10; ++i)
         {
-            const float samp = fabsf (s[i]);
+            const float samp = std::abs (s[i]);
 
             if (samp > runningAverage * minSpikeLevel && i > lastSpike + 20)
             {

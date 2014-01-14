@@ -40,7 +40,7 @@ public:
     DrawableComposite();
 
     /** Creates a copy of a DrawableComposite. */
-    DrawableComposite (const DrawableComposite& other);
+    DrawableComposite (const DrawableComposite&);
 
     /** Destructor. */
     ~DrawableComposite();

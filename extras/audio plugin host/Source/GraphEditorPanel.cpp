@@ -627,8 +627,8 @@ public:
 
         const Rectangle<int> newBounds ((int) jmin (x1, x2) - 4,
                                         (int) jmin (y1, y2) - 4,
-                                        (int) fabsf (x1 - x2) + 8,
-                                        (int) fabsf (y1 - y2) + 8);
+                                        (int) std::abs (x1 - x2) + 8,
+                                        (int) std::abs (y1 - y2) + 8);
 
         if (newBounds != getBounds())
             setBounds (newBounds);

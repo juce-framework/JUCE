@@ -238,7 +238,7 @@ private:
         return findFirstTargetParentComponent();
     }
 
-    void getAllCommands (Array <CommandID>& commands) override
+    void getAllCommands (Array<CommandID>& commands) override
     {
         // this returns the set of all commands that this target can perform..
         const CommandID ids[] = { MainAppWindow::showPreviousDemo,

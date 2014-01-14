@@ -51,10 +51,10 @@ public:
     MACAddress();
 
     /** Creates a copy of another address. */
-    MACAddress (const MACAddress& other);
+    MACAddress (const MACAddress&);
 
     /** Creates a copy of another address. */
-    MACAddress& operator= (const MACAddress& other);
+    MACAddress& operator= (const MACAddress&);
 
     /** Creates an address from 6 bytes. */
     explicit MACAddress (const uint8 bytes[6]);
@@ -75,8 +75,8 @@ public:
     /** Returns true if this address is null (00-00-00-00-00-00). */
     bool isNull() const noexcept;
 
-    bool operator== (const MACAddress& other) const noexcept;
-    bool operator!= (const MACAddress& other) const noexcept;
+    bool operator== (const MACAddress&) const noexcept;
+    bool operator!= (const MACAddress&) const noexcept;
 
     //==============================================================================
 private:

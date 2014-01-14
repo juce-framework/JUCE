@@ -244,7 +244,9 @@ private:
         else
             out << "  BLDCMD = $(CXX) -o $(OUTDIR)/$(TARGET) $(OBJECTS) $(LDFLAGS) $(RESOURCES) $(TARGET_ARCH)" << newLine;
 
-        out << "endif" << newLine << newLine;
+        out << "  CLEANCMD = rm -rf $(OUTDIR)/$(TARGET) $(OBJDIR)" << newLine
+            << "endif" << newLine
+            << newLine;
     }
 
     void writeObjects (OutputStream& out, const Array<RelativePath>& files) const
@@ -291,9 +293,7 @@ private:
 
         out << "clean:" << newLine
             << "\t@echo Cleaning " << projectName << newLine
-            << "\t-@rm -f $(OUTDIR)/$(TARGET)" << newLine
-            << "\t-@rm -rf $(OBJDIR)/*" << newLine
-            << "\t-@rm -rf $(OBJDIR)" << newLine
+            << "\t@$(CLEANCMD)" << newLine
             << newLine;
 
         out << "strip:" << newLine
