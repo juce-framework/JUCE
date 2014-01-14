@@ -131,7 +131,11 @@ String AudioProcessor::getParameterText (int parameterIndex, int maximumStringLe
 }
 
 int AudioProcessor::getParameterNumSteps (int /*parameterIndex*/)        { return 0x7fffffff; }
-float AudioProcessor::getParameterDefaultValue (int /*parameterIndex*/)  { return 0.0f; }
+
+float AudioProcessor::getParameterDefaultValue (int parameterIndex)
+{
+    return parameterValueToScaled(parameterIndex, parameterInfo(parameterIndex).defaultVal);
+}
 
 AudioProcessorListener* AudioProcessor::getListenerLocked (const int index) const noexcept
 {
