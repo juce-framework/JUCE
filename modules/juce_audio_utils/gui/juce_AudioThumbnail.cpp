@@ -461,15 +461,20 @@ private:
                 if (sample >= 0)
                 {
                     if (sample >= levelData->lengthInSamples)
-                        break;
+                    {
+                        for (int chan = 0; chan < numChannelsCached; ++chan)
+                            *getData (chan, i) = MinMaxValue();
+                    }
+                    else
+                    {
+                        levelData->getLevels (sample, jmax (1, nextSample - sample), levels);
 
-                    levelData->getLevels (sample, jmax (1, nextSample - sample), levels);
+                        const int totalChans = jmin (levels.size() / 2, numChannelsCached);
 
-                    const int totalChans = jmin (levels.size() / 2, numChannelsCached);
-
-                    for (int chan = 0; chan < totalChans; ++chan)
-                        getData (chan, i)->setFloat (levels.getUnchecked (chan * 2),
-                                                     levels.getUnchecked (chan * 2 + 1));
+                        for (int chan = 0; chan < totalChans; ++chan)
+                            getData (chan, i)->setFloat (levels.getUnchecked (chan * 2),
+                                                         levels.getUnchecked (chan * 2 + 1));
+                    }
                 }
 
                 startTime += timePerPixel;
