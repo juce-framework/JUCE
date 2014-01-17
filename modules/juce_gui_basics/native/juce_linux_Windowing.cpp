@@ -1364,7 +1364,7 @@ public:
         const ModifierKeys oldMods (currentModifiers);
         bool keyPressed = false;
 
-        if ((sym & 0xff00) == 0xff00)
+        if ((sym & 0xff00) == 0xff00 || sym == XK_ISO_Left_Tab)
         {
             switch (sym)  // Translate keypad
             {
