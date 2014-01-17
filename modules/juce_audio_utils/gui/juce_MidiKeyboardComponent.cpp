@@ -260,6 +260,12 @@ int MidiKeyboardComponent::getKeyStartPosition (const int midiNoteNumber) const
     return x;
 }
 
+int MidiKeyboardComponent::getNoteAtPosition (Point<int> p)
+{
+    float v;
+    return xyToNote (p, v);
+}
+
 const uint8 MidiKeyboardComponent::whiteNotes[] = { 0, 2, 4, 5, 7, 9, 11 };
 const uint8 MidiKeyboardComponent::blackNotes[] = { 1, 3, 6, 8, 10 };
 
