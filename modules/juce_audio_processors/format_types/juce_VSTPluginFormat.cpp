@@ -839,7 +839,7 @@ public:
         jassert (MessageManager::getInstance()->isThisTheMessageThread());
        #endif
 
-        JUCE_VST_LOG ("Initialising VST: " + module->pluginName);
+        JUCE_VST_LOG ("Initialising VST: " + module->pluginName + " (" + getVersion() + ")");
         initialised = true;
 
         setPlayConfigDetails (effect->numInputs, effect->numOutputs,
