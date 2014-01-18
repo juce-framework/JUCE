@@ -2726,7 +2726,7 @@ AudioPluginInstance* VSTPluginFormat::createInstanceFromDescription (const Plugi
 
 bool VSTPluginFormat::fileMightContainThisPluginType (const String& fileOrIdentifier)
 {
-    const File f (fileOrIdentifier);
+    const File f (File::createFileWithoutCheckingPath (fileOrIdentifier));
 
   #if JUCE_MAC
     if (f.isDirectory() && f.hasFileExtension (".vst"))
