@@ -966,7 +966,12 @@ TextEditor::~TextEditor()
 
     textValue.removeListener (textHolder);
     textValue.referTo (Value());
-    clearInternal (0);
+
+    for (int i = 0; i < sections.size(); ++i)
+        delete sections.getUnchecked(i);
+
+    sections.clear();
+
     viewport = nullptr;
     textHolder = nullptr;
 }
@@ -1183,7 +1188,7 @@ void TextEditor::setScrollBarThickness (const int newThicknessPixels)
 //==============================================================================
 void TextEditor::clear()
 {
-    clearInternal (0);
+    clearInternal (nullptr);
     updateTextHolderSize();
     undoManager.clearUndoHistory();
 }
@@ -1200,7 +1205,7 @@ void TextEditor::setText (const String& newText,
         int oldCursorPos = caretPosition;
         const bool cursorWasAtEnd = oldCursorPos >= getTotalNumChars();
 
-        clearInternal (0);
+        clearInternal (nullptr);
         insert (newText, 0, currentFont, findColour (textColourId), 0, caretPosition);
 
         // if you're adding text with line-feeds to a single-line text editor, it
