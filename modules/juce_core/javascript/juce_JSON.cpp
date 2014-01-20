@@ -100,7 +100,6 @@ public:
         return Result::ok();
     }
 
-private:
     static Result parseAny (String::CharPointerType& t, var& result)
     {
         t = t.findEndOfWhitespace();
@@ -160,6 +159,7 @@ private:
         return createFail ("Syntax error", &t);
     }
 
+private:
     static Result createFail (const char* const message, const String::CharPointerType* location = nullptr)
     {
         String m (message);
@@ -460,51 +460,6 @@ public:
         out << ']';
     }
 
-/*    static void writeObject (OutputStream& out, DynamicObject& object,
-                             const int indentLevel, const bool allOnOneLine)
-    {
-        NamedValueSet& props = object.getProperties();
-
-        out << '{';
-        if (! allOnOneLine)
-            out << newLine;
-
-        LinkedListPointer<NamedValueSet::NamedValue>* i = &(props.values);
-
-        for (;;)
-        {
-            NamedValueSet::NamedValue* const v = i->get();
-
-            if (v == nullptr)
-                break;
-
-            if (! allOnOneLine)
-                writeSpaces (out, indentLevel + indentSize);
-
-            out << '"';
-            writeString (out, v->name);
-            out << "\": ";
-            write (out, v->value, indentLevel + indentSize, allOnOneLine);
-
-            if (v->nextListItem.get() != nullptr)
-            {
-                if (allOnOneLine)
-                    out << ", ";
-                else
-                    out << ',' << newLine;
-            }
-            else if (! allOnOneLine)
-                out << newLine;
-
-            i = &(v->nextListItem);
-        }
-
-        if (! allOnOneLine)
-            writeSpaces (out, indentLevel);
-
-        out << '}';
-    }*/
-
     enum { indentSize = 2 };
 };
 
@@ -513,7 +468,17 @@ var JSON::parse (const String& text)
 {
     var result;
 
-    if (! JSONParser::parseObjectOrArray (text.getCharPointer(), result))
+    if (! parse (text, result))
+        result = var();
+
+    return result;
+}
+
+var JSON::fromString (StringRef text)
+{
+    var result;
+
+    if (! JSONParser::parseAny (text.text, result))
         result = var();
 
     return result;

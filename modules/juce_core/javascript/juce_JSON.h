@@ -53,6 +53,10 @@ public:
 
         If you're not interested in the error message, you can use one of the other
         shortcut parse methods, which simply return a var::null if the parsing fails.
+
+        Note that this will only parse valid JSON, which means that the item given must
+        be either an object or an array definition. If you want to also be able to parse
+        any kind of primitive JSON object, use the fromString() method.
     */
     static Result parse (const String& text, var& parsedResult);
 
@@ -60,6 +64,10 @@ public:
 
         If the parsing fails, this simply returns var::null - if you need to find out more
         detail about the parse error, use the alternative parse() method which returns a Result.
+
+        Note that this will only parse valid JSON, which means that the item given must
+        be either an object or an array definition. If you want to also be able to parse
+        any kind of primitive JSON object, use the fromString() method.
     */
     static var parse (const String& text);
 
@@ -94,6 +102,13 @@ public:
     static String toString (const var& objectToFormat,
                             bool allOnOneLine = false);
 
+    /** Parses a string that was created with the toString() method.
+        This is slightly different to the parse() methods because they will reject primitive
+        values and only accept array or object definitions, whereas this method will handle
+        either.
+    */
+    static var fromString (StringRef);
+
     /** Writes a JSON-formatted representation of the var object to the given stream.
         If allOnOneLine is true, the result will be compacted into a single line of text
         with no carriage-returns. If false, it will be laid-out in a more human-readable format.
@@ -106,7 +121,7 @@ public:
     /** Returns a version of a string with any extended characters escaped. */
     static String escapeString (StringRef);
 
-    /** Parses a quoted string in JSON format, returning the un-escaped result in the
+    /** Parses a quoted string-literal in JSON format, returning the un-escaped result in the
         result parameter, and an error message in case the content was illegal.
         This advances the text parameter, leaving it positioned after the closing quote.
     */
