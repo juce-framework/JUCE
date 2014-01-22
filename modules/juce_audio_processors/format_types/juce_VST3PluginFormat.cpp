@@ -1929,6 +1929,7 @@ public:
             associateTo (data, midiMessages);
 
             processor->process (data);
+            buffer = resultBuffer;
 
             MidiEventList::toMidiBuffer (midiMessages, *midiOutputs);
         }
