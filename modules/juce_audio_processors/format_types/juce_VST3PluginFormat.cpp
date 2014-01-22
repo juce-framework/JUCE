@@ -753,7 +753,6 @@ public:
     //==============================================================================
     tresult PLUGIN_API setDirty (TBool) override
     {
-        jassertfalse;
         return kResultFalse;
     }
 
