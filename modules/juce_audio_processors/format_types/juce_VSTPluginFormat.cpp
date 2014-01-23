@@ -1915,10 +1915,10 @@ public:
           recursiveResize (false),
           pluginWantsKeys (false),
           pluginRefusesToResize (false),
-          alreadyInside (false)
+          alreadyInside (false),
+          sizeCheckCount (0)
     {
        #if JUCE_WINDOWS
-        sizeCheckCount = 0;
         pluginHWND = 0;
 
        #elif JUCE_LINUX
@@ -2026,8 +2026,16 @@ public:
     void childBoundsChanged (Component*) override
     {
         if (cocoaWrapper != nullptr)
-            setSize (cocoaWrapper->getWidth(),
-                     cocoaWrapper->getHeight());
+        {
+            int w = cocoaWrapper->getWidth();
+            int h = cocoaWrapper->getHeight();
+
+            if (w != getWidth() || h != getHeight())
+            {
+                sizeCheckCount = 0;
+                setSize (w, h);
+            }
+        }
     }
    #endif
 
@@ -2076,13 +2084,19 @@ public:
     {
         if (isShowing())
         {
-           #if JUCE_WINDOWS
             if (--sizeCheckCount <= 0)
             {
                 sizeCheckCount = 10;
+
+               #if JUCE_WINDOWS
                 checkPluginWindowSize();
+               #endif
+
+               #if JUCE_MAC
+                if (cocoaWrapper != nullptr)
+                    cocoaWrapper->resizeToFitView();
+               #endif
             }
-           #endif
 
             static bool reentrant = false;
 
@@ -2132,11 +2146,11 @@ private:
     VSTPluginInstance& plugin;
     bool isOpen, recursiveResize;
     bool pluginWantsKeys, pluginRefusesToResize, alreadyInside;
+    int sizeCheckCount;
 
    #if JUCE_WINDOWS
     HWND pluginHWND;
     void* originalWndProc;
-    int sizeCheckCount;
    #elif JUCE_LINUX
     Window pluginWindow;
     EventProcPtr pluginProc;
