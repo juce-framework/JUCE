@@ -192,18 +192,24 @@ void detachComponentFromWindowRef (Component* comp, void* nsWindow)
         NSView* pluginView = (NSView*) comp->getWindowHandle();
         NSWindow* pluginWindow = [pluginView window];
 
+        [pluginView retain];
         [hostWindow removeChildWindow: pluginWindow];
+        [pluginWindow close];
         comp->removeFromDesktop();
+        [pluginView release];
 
         [hostWindow release];
 
+        static bool needToRunMessageLoop = ! PluginHostType().isReaper();
+
         // The event loop needs to be run between closing the window and deleting the plugin,
         // presumably to let the cocoa objects get tidied up. Leaving out this line causes crashes
-        // in Live and Reaper when you delete the plugin with its window open.
+        // in Live when you delete the plugin with its window open.
         // (Doing it this way rather than using a single longer timout means that we can guarantee
         // how many messages will be dispatched, which seems to be vital in Reaper)
-        for (int i = 20; --i >= 0;)
-            MessageManager::getInstance()->runDispatchLoopUntil (1);
+        if (needToRunMessageLoop)
+            for (int i = 20; --i >= 0;)
+                MessageManager::getInstance()->runDispatchLoopUntil (1);
        #endif
     }
 }
