@@ -299,9 +299,10 @@ static int getNumSingleDirectionChannelsFor (Vst::IComponent* component,
     return numChannels;
 }
 
-static void activateAllBussesOfType (Vst::IComponent* component,
-                                     bool activateInputs,
-                                     bool activateAudioChannels)
+static void setStateForAllBussesOfType (Vst::IComponent* component,
+                                        bool state,
+                                        bool activateInputs,
+                                        bool activateAudioChannels)
 {
     jassert (component != nullptr);
 
@@ -310,7 +311,7 @@ static void activateAllBussesOfType (Vst::IComponent* component,
     const Steinberg::int32 numBuses     = component->getBusCount (mediaType, direction);
 
     for (Steinberg::int32 i = numBuses; --i >= 0;)
-        warnOnFailure (component->activateBus (mediaType, direction, i, true));
+        warnOnFailure (component->activateBus (mediaType, direction, i, state));
 }
 
 //==============================================================================
@@ -1712,7 +1713,6 @@ public:
       : module (handle),
         numInputAudioBusses (0),
         numOutputAudioBusses (0),
-        resultBuffer (1, 1),
         inputParameterChanges (new ParameterChangeList()),
         outputParameterChanges (new ParameterChangeList()),
         midiInputs (new MidiEventList()),
@@ -1794,7 +1794,8 @@ public:
         return module != nullptr ? module->name : String::empty;
     }
 
-    typedef Array<Array<float*> > BusMap;
+    typedef Array<float*> ChannelMap;
+    typedef Array<ChannelMap> BusMap;
 
     /** Assigns a series of AudioSampleBuffer's channels to an AudioBusBuffers'
 
@@ -1802,7 +1803,7 @@ public:
                  according to the AudioSampleBuffer
     */
     void associateBufferTo (Vst::AudioBusBuffers& vstBuffers,
-                            BusMap& busMap,
+                            ChannelMap& channelMap,
                             const AudioSampleBuffer& buffer,
                             int numChannels, int channelStartOffset,
                             int sampleOffset = 0) noexcept
@@ -1810,13 +1811,12 @@ public:
         const int channelEnd = numChannels + channelStartOffset;
         jassert (channelEnd >= 0 && channelEnd <= buffer.getNumChannels());
 
-        busMap.add (Array<float*>());
-        Array<float*>& chans = busMap.getReference (busMap.size() - 1);
+        channelMap.clearQuick();
 
         for (int i = channelStartOffset; i < channelEnd; ++i)
-            chans.add (buffer.getSampleData (i, sampleOffset));
+            channelMap.add (buffer.getSampleData (i, sampleOffset));
 
-        vstBuffers.channelBuffers32 = chans.getRawDataPointer();
+        vstBuffers.channelBuffers32 = channelMap.getRawDataPointer();
         vstBuffers.numChannels      = numChannels;
         vstBuffers.silenceFlags     = 0;
     }
@@ -1825,10 +1825,7 @@ public:
                                        AudioSampleBuffer& source,
                                        int numBusses, bool isInput)
     {
-        result.clearQuick();
-
         BusMap& busMapToUse = isInput ? inputBusMap : outputBusMap;
-        busMapToUse.clearQuick();
 
         int channelIndexOffset = 0;
 
@@ -1840,9 +1837,13 @@ public:
 
             const int numChansForBus = BigInteger ((int64) arrangement).countNumberOfSetBits();
 
-            result.add (Vst::AudioBusBuffers());
+            if (i >= result.size())
+                result.add (Vst::AudioBusBuffers());
 
-            associateBufferTo (result.getReference (i), busMapToUse, source,
+            if (i >= busMapToUse.size())
+                busMapToUse.add (ChannelMap());
+
+            associateBufferTo (result.getReference (i), busMapToUse.getReference (i), source,
                                BigInteger ((int64) arrangement).countNumberOfSetBits(),
                                channelIndexOffset);
 
@@ -1866,8 +1867,6 @@ public:
         setup.sampleRate            = sampleRate;
         setup.processMode           = isNonRealtime() ? kOffline : kRealtime;
 
-        resultBuffer.setSize (numOutputs, estimatedSamplesPerBlock, false, true, true);
-
         warnOnFailure (processor->setupProcessing (setup));
 
         if (! isComponentInitialised)
@@ -1875,8 +1874,7 @@ public:
 
         editController->setComponentHandler (host);
 
-        warnOnFailure (component->setActive (true));
-        warnOnFailure (processor->setProcessing (true));
+        setStateForAllBusses (true);
 
         Array<SpeakerArrangement> inArrangements, outArrangements;
 
@@ -1885,13 +1883,16 @@ public:
 
         warnOnFailure (processor->setBusArrangements (inArrangements.getRawDataPointer(), numInputAudioBusses,
                                                       outArrangements.getRawDataPointer(), numOutputAudioBusses));
+
+        warnOnFailure (component->setActive (true));
+        warnOnFailure (processor->setProcessing (true));
     }
 
     void releaseResources() override
     {
         JUCE_TRY
         {
-            resultBuffer.setSize (1, 1, false, true, true);
+            setStateForAllBusses (false);
 
             if (processor != nullptr)
                 processor->setProcessing (false);
@@ -1929,7 +1930,6 @@ public:
             associateTo (data, midiMessages);
 
             processor->process (data);
-            buffer = resultBuffer;
 
             MidiEventList::toMidiBuffer (midiMessages, *midiOutputs);
         }
@@ -2154,7 +2154,6 @@ private:
         as very poorly specified by the Steinberg SDK
     */
     int numInputAudioBusses, numOutputAudioBusses;
-    AudioSampleBuffer resultBuffer;
     BusMap inputBusMap, outputBusMap;
     Array<Vst::AudioBusBuffers> inputBusses, outputBusses;
 
@@ -2369,12 +2368,17 @@ private:
         if (componentHandler2 == nullptr)   componentHandler2.loadFrom (editController);
     }
 
+    void setStateForAllBusses (bool newState)
+    {
+        setStateForAllBussesOfType (component, newState, true, true);    // Activate/deactivate audio inputs
+        setStateForAllBussesOfType (component, newState, false, true);   // Activate/deactivate audio outputs
+        setStateForAllBussesOfType (component, newState, true, false);   // Activate/deactivate MIDI inputs
+        setStateForAllBussesOfType (component, newState, false, false);  // Activate/deactivate MIDI outputs
+    }
+
     void setupIO()
     {
-        activateAllBussesOfType (component, true, true);    // Activate audio inputs
-        activateAllBussesOfType (component, false, true);   // Activate audio outputs
-        activateAllBussesOfType (component, true, false);   // Activate MIDI inputs
-        activateAllBussesOfType (component, false, false);  // Activate MIDI outputs
+        setStateForAllBusses (true);
 
         Vst::ProcessSetup setup;
         setup.symbolicSampleSize   = Vst::kSample32;
@@ -2421,10 +2425,8 @@ private:
     //==============================================================================
     void associateTo (Vst::ProcessData& destination, AudioSampleBuffer& buffer)
     {
-        resultBuffer.clear();
-
         mapAudioSampleBufferToBusses (inputBusses, buffer, numInputAudioBusses, true);
-        mapAudioSampleBufferToBusses (outputBusses, resultBuffer, numOutputAudioBusses, false);
+        mapAudioSampleBufferToBusses (outputBusses, buffer, numOutputAudioBusses, false);
 
         destination.inputs  = inputBusses.getRawDataPointer();
         destination.outputs = outputBusses.getRawDataPointer();
