@@ -718,6 +718,7 @@ public:
     VSTPluginInstance (const ModuleHandle::Ptr& module_)
         : effect (nullptr),
           module (module_),
+          usesCocoaNSView (false),
           name (module_->pluginName),
           wantsMidiMessages (false),
           initialised (false),
@@ -870,6 +871,10 @@ public:
             updateStoredProgramNames();
 
         wantsMidiMessages = dispatch (effCanDo, 0, 0, (void*) "receiveVstMidiEvent", 0) > 0;
+
+       #if JUCE_MAC && JUCE_SUPPORT_CARBON
+        usesCocoaNSView = (dispatch (effCanDo, 0, 0, (void*) "hasCockosViewAsConfig", 0) & 0xffff0000) == 0xbeef0000;
+       #endif
 
         setLatencySamples (effect->initialDelay);
     }
@@ -1659,6 +1664,7 @@ public:
     ModuleHandle::Ptr module;
 
     ScopedPointer<VSTPluginFormat::ExtraFunctions> extraFunctions;
+    bool usesCocoaNSView;
 
 private:
     String name;
@@ -1914,16 +1920,25 @@ public:
        #if JUCE_WINDOWS
         sizeCheckCount = 0;
         pluginHWND = 0;
+
        #elif JUCE_LINUX
         pluginWindow = None;
         pluginProc = None;
-       #elif JUCE_MAC && JUCE_SUPPORT_CARBON
-        addAndMakeVisible (innerWrapper = new InnerWrapperComponent (*this));
+
        #elif JUCE_MAC
-        addAndMakeVisible (innerWrapper = new NSViewComponent());
-        NSView* innerView = [[NSView alloc] init];
-        innerWrapper->setView (innerView);
-        [innerView release];
+        #if JUCE_SUPPORT_CARBON
+        if (! plug.usesCocoaNSView)
+        {
+            addAndMakeVisible (carbonWrapper = new CarbonWrapperComponent (*this));
+        }
+        else
+        #endif
+        {
+            addAndMakeVisible (cocoaWrapper = new NSViewComponent());
+            NSView* innerView = [[NSView alloc] init];
+            cocoaWrapper->setView (innerView);
+            [innerView release];
+        }
        #endif
 
         activeVSTWindows.add (this);
@@ -1938,7 +1953,10 @@ public:
         closePluginWindow();
 
        #if JUCE_MAC
-        innerWrapper = nullptr;
+        #if JUCE_SUPPORT_CARBON
+        carbonWrapper = nullptr;
+        #endif
+        cocoaWrapper = nullptr;
        #endif
 
         activeVSTWindows.removeFirstMatchingValue (this);
@@ -1993,20 +2011,23 @@ public:
     }
    #endif
 
-   #if JUCE_MAC && ! JUCE_SUPPORT_CARBON
+   #if JUCE_MAC
     void visibilityChanged() override
     {
-        if (isVisible())
-            openPluginWindow();
-        else
-            closePluginWindow();
+        if (cocoaWrapper != nullptr)
+        {
+            if (isVisible())
+                openPluginWindow ((NSView*) cocoaWrapper->getView());
+            else
+                closePluginWindow();
+        }
     }
 
     void childBoundsChanged (Component*) override
     {
-        if (innerWrapper != nullptr)
-            setSize (innerWrapper->getWidth(),
-                     innerWrapper->getHeight());
+        if (cocoaWrapper != nullptr)
+            setSize (cocoaWrapper->getWidth(),
+                     cocoaWrapper->getHeight());
     }
    #endif
 
@@ -2138,15 +2159,8 @@ private:
 
     //==============================================================================
 #if JUCE_MAC
-   #if JUCE_SUPPORT_CARBON
-    void openPluginWindow (WindowRef parentWindow)
+    void openPluginWindow (void* parentWindow)
     {
-   #else
-    void openPluginWindow()
-    {
-        NSView* parentWindow = (NSView*) innerWrapper->getView();
-   #endif
-
         if (isOpen || parentWindow == 0)
             return;
 
@@ -2500,17 +2514,17 @@ private:
     //==============================================================================
 #if JUCE_MAC
    #if JUCE_SUPPORT_CARBON
-    class InnerWrapperComponent   : public CarbonViewWrapperComponent
+    class CarbonWrapperComponent   : public CarbonViewWrapperComponent
     {
     public:
-        InnerWrapperComponent (VSTPluginWindow& w)
+        CarbonWrapperComponent (VSTPluginWindow& w)
             : owner (w), alreadyInside (false)
         {
             keepPluginWindowWhenHidden = w.shouldAvoidDeletingWindow();
             setRepaintsChildHIViewWhenCreated (w.shouldRepaintCarbonWindowWhenCreated());
         }
 
-        ~InnerWrapperComponent()
+        ~CarbonWrapperComponent()
         {
             deleteWindow();
         }
@@ -2574,20 +2588,24 @@ private:
         VSTPluginWindow& owner;
         bool alreadyInside;
 
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (InnerWrapperComponent)
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CarbonWrapperComponent)
     };
 
-    friend class InnerWrapperComponent;
-    ScopedPointer<InnerWrapperComponent> innerWrapper;
-
-   #else
-    ScopedPointer<NSViewComponent> innerWrapper;
+    friend class CarbonWrapperComponent;
+    ScopedPointer<CarbonWrapperComponent> carbonWrapper;
    #endif
+
+    ScopedPointer<NSViewComponent> cocoaWrapper;
 
     void resized() override
     {
-        if (innerWrapper != nullptr)
-            innerWrapper->setSize (getWidth(), getHeight());
+       #if JUCE_SUPPORT_CARBON
+        if (carbonWrapper != nullptr)
+            carbonWrapper->setSize (getWidth(), getHeight());
+       #endif
+
+        if (cocoaWrapper != nullptr)
+            cocoaWrapper->setSize (getWidth(), getHeight());
     }
 #endif
 
