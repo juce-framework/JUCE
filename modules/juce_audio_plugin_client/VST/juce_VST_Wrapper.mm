@@ -227,8 +227,6 @@ void detachComponentFromWindowRef (Component* comp, void* window, bool isNSView)
 void setNativeHostWindowSize (void* window, Component* component, int newWidth, int newHeight, bool isNSView);
 void setNativeHostWindowSize (void* window, Component* component, int newWidth, int newHeight, bool isNSView)
 {
-    (void) isNSView; (void) window; (void) isNSView;
-
     JUCE_AUTORELEASEPOOL
     {
        #if ! JUCE_64BIT
@@ -248,11 +246,18 @@ void setNativeHostWindowSize (void* window, Component* component, int newWidth, 
         }
        #endif
 
+        (void) isNSView;
+
         if (NSView* hostView = (NSView*) window)
         {
-            // xxx is this necessary, or do the hosts detect a change in the child view and do this automatically?
-            [hostView setFrameSize: NSMakeSize ([hostView frame].size.width + (newWidth - component->getWidth()),
-                                                [hostView frame].size.height + (newHeight - component->getHeight()))];
+            const int dx = newWidth  - component->getWidth();
+            const int dy = newHeight - component->getHeight();
+
+            NSRect r = [hostView frame];
+            r.size.width += dx;
+            r.size.height += dy;
+            r.origin.y -= dy;
+            [hostView setFrame: r];
         }
     }
 }
