@@ -1904,7 +1904,6 @@ class VSTPluginWindow   : public AudioProcessorEditor,
                           public Timer
 {
 public:
-    //==============================================================================
     VSTPluginWindow (VSTPluginInstance& plug)
         : AudioProcessorEditor (&plug),
          #if ! JUCE_MAC
@@ -1915,11 +1914,11 @@ public:
           recursiveResize (false),
           pluginWantsKeys (false),
           pluginRefusesToResize (false),
-          alreadyInside (false),
-          sizeCheckCount (0)
+          alreadyInside (false)
     {
        #if JUCE_WINDOWS
         pluginHWND = 0;
+        sizeCheckCount = 0;
 
        #elif JUCE_LINUX
         pluginWindow = None;
@@ -1934,7 +1933,7 @@ public:
         else
         #endif
         {
-            addAndMakeVisible (cocoaWrapper = new NSViewComponent());
+            addAndMakeVisible (cocoaWrapper = new AutoResizingNSViewComponent());
             NSView* innerView = [[NSView alloc] init];
             cocoaWrapper->setView (innerView);
             [innerView release];
@@ -2031,10 +2030,7 @@ public:
             int h = cocoaWrapper->getHeight();
 
             if (w != getWidth() || h != getHeight())
-            {
-                sizeCheckCount = 0;
                 setSize (w, h);
-            }
         }
     }
    #endif
@@ -2084,19 +2080,13 @@ public:
     {
         if (isShowing())
         {
+           #if JUCE_WINDOWS
             if (--sizeCheckCount <= 0)
             {
                 sizeCheckCount = 10;
-
-               #if JUCE_WINDOWS
                 checkPluginWindowSize();
-               #endif
-
-               #if JUCE_MAC
-                if (cocoaWrapper != nullptr)
-                    cocoaWrapper->resizeToFitView();
-               #endif
             }
+           #endif
 
             static bool reentrant = false;
 
@@ -2146,11 +2136,11 @@ private:
     VSTPluginInstance& plugin;
     bool isOpen, recursiveResize;
     bool pluginWantsKeys, pluginRefusesToResize, alreadyInside;
-    int sizeCheckCount;
 
    #if JUCE_WINDOWS
     HWND pluginHWND;
     void* originalWndProc;
+    int sizeCheckCount;
    #elif JUCE_LINUX
     Window pluginWindow;
     EventProcPtr pluginProc;

@@ -71,6 +71,32 @@ static inline bool arrayContainsPlugin (const OwnedArray<PluginDescription>& lis
     return false;
 }
 
+#if JUCE_MAC
+struct AutoResizingNSViewComponent  : public NSViewComponent,
+                                      private AsyncUpdater
+{
+    AutoResizingNSViewComponent() : recursive (false) {}
+
+    void childBoundsChanged (Component*) override
+    {
+        if (recursive)
+        {
+            triggerAsyncUpdate();
+        }
+        else
+        {
+            recursive = true;
+            resizeToFitView();
+            recursive = true;
+        }
+    }
+
+    void handleAsyncUpdate() override               { resizeToFitView(); }
+
+    bool recursive;
+};
+#endif
+
 #if JUCE_CLANG
  #pragma clang diagnostic ignored "-Wdeprecated-declarations"
 #endif

@@ -1300,8 +1300,7 @@ private:
 };
 
 //==============================================================================
-class AudioUnitPluginWindowCocoa    : public AudioProcessorEditor,
-                                      public Timer
+class AudioUnitPluginWindowCocoa    : public AudioProcessorEditor
 {
 public:
     AudioUnitPluginWindowCocoa (AudioUnitPluginInstance& p, bool createGenericViewIfNeeded)
@@ -1340,21 +1339,15 @@ public:
         wrapper.setSize (getWidth(), getHeight());
     }
 
-    void timerCallback() override
-    {
-        wrapper.resizeToFitView();
-        startTimer (jmin (713, getTimerInterval() + 51));
-    }
-
     void childBoundsChanged (Component*) override
     {
         setSize (wrapper.getWidth(), wrapper.getHeight());
-        startTimer (70);
     }
 
 private:
     AudioUnitPluginInstance& plugin;
-    NSViewComponent wrapper;
+
+    AutoResizingNSViewComponent wrapper;
 
     bool createView (const bool createGenericViewIfNeeded)
     {
@@ -1415,10 +1408,7 @@ private:
         wrapper.setView (pluginView);
 
         if (pluginView != nil)
-        {
-            timerCallback();
-            startTimer (70);
-        }
+            wrapper.resizeToFitView();
 
         return pluginView != nil;
     }
