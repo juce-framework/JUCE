@@ -1995,10 +1995,7 @@ public:
     //==============================================================================
     AudioProcessorEditor* createEditor() override
     {
-        if (view == nullptr)
-            view = tryCreatingView();
-
-        if (view != nullptr)
+        if (IPlugView* view = tryCreatingView())
             return new VST3PluginWindow (this, view);
 
         return nullptr;
@@ -2006,9 +2003,7 @@ public:
 
     bool hasEditor() const override
     {
-        if (view == nullptr)
-            view = tryCreatingView();
-
+        ComSmartPtr<IPlugView> view (tryCreatingView());
         return view != nullptr;
     }
 
@@ -2146,8 +2141,6 @@ private:
     ComSmartPtr<Vst::IUnitData> unitData;
     ComSmartPtr<Vst::IConnectionPoint> componentConnection;
     ComSmartPtr<Vst::IConnectionPoint> editControllerConnection;
-
-    mutable ComSmartPtr<IPlugView> view;
 
     /** The number of IO busses MUST match that of the plugin,
         even if there aren't enough channels to process,
