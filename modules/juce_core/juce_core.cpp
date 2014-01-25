@@ -165,6 +165,8 @@ namespace juce
 #include "zip/juce_GZIPDecompressorInputStream.cpp"
 #include "zip/juce_GZIPCompressorOutputStream.cpp"
 #include "zip/juce_ZipFile.cpp"
+#include "files/juce_FileFilter.cpp"
+#include "files/juce_WildcardFileFilter.cpp"
 
 //==============================================================================
 #if JUCE_MAC || JUCE_IOS

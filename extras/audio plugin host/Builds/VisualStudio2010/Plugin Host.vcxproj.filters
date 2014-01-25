@@ -640,6 +640,9 @@
     <ClCompile Include="..\..\..\..\modules\juce_core\files\juce_File.cpp">
       <Filter>Juce Modules\juce_core\files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_core\files\juce_FileFilter.cpp">
+      <Filter>Juce Modules\juce_core\files</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_core\files\juce_FileInputStream.cpp">
       <Filter>Juce Modules\juce_core\files</Filter>
     </ClCompile>
@@ -650,6 +653,9 @@
       <Filter>Juce Modules\juce_core\files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_core\files\juce_TemporaryFile.cpp">
+      <Filter>Juce Modules\juce_core\files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_core\files\juce_WildcardFileFilter.cpp">
       <Filter>Juce Modules\juce_core\files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_core\network\juce_IPAddress.cpp">
@@ -1276,9 +1282,6 @@
     <ClCompile Include="..\..\..\..\modules\juce_gui_basics\filebrowser\juce_FileChooserDialogBox.cpp">
       <Filter>Juce Modules\juce_gui_basics\filebrowser</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_gui_basics\filebrowser\juce_FileFilter.cpp">
-      <Filter>Juce Modules\juce_gui_basics\filebrowser</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_gui_basics\filebrowser\juce_FileListComponent.cpp">
       <Filter>Juce Modules\juce_gui_basics\filebrowser</Filter>
     </ClCompile>
@@ -1292,9 +1295,6 @@
       <Filter>Juce Modules\juce_gui_basics\filebrowser</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_gui_basics\filebrowser\juce_ImagePreviewComponent.cpp">
-      <Filter>Juce Modules\juce_gui_basics\filebrowser</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_gui_basics\filebrowser\juce_WildcardFileFilter.cpp">
       <Filter>Juce Modules\juce_gui_basics\filebrowser</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_gui_basics\commands\juce_ApplicationCommandInfo.cpp">
@@ -1980,6 +1980,9 @@
     <ClInclude Include="..\..\..\..\modules\juce_core\files\juce_File.h">
       <Filter>Juce Modules\juce_core\files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_core\files\juce_FileFilter.h">
+      <Filter>Juce Modules\juce_core\files</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_core\files\juce_FileInputStream.h">
       <Filter>Juce Modules\juce_core\files</Filter>
     </ClInclude>
@@ -1993,6 +1996,9 @@
       <Filter>Juce Modules\juce_core\files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_core\files\juce_TemporaryFile.h">
+      <Filter>Juce Modules\juce_core\files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_core\files\juce_WildcardFileFilter.h">
       <Filter>Juce Modules\juce_core\files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_core\network\juce_IPAddress.h">
@@ -2658,9 +2664,6 @@
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\filebrowser\juce_FileChooserDialogBox.h">
       <Filter>Juce Modules\juce_gui_basics\filebrowser</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_gui_basics\filebrowser\juce_FileFilter.h">
-      <Filter>Juce Modules\juce_gui_basics\filebrowser</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\filebrowser\juce_FileListComponent.h">
       <Filter>Juce Modules\juce_gui_basics\filebrowser</Filter>
     </ClInclude>
@@ -2677,9 +2680,6 @@
       <Filter>Juce Modules\juce_gui_basics\filebrowser</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\filebrowser\juce_ImagePreviewComponent.h">
-      <Filter>Juce Modules\juce_gui_basics\filebrowser</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_gui_basics\filebrowser\juce_WildcardFileFilter.h">
       <Filter>Juce Modules\juce_gui_basics\filebrowser</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\commands\juce_ApplicationCommandID.h">

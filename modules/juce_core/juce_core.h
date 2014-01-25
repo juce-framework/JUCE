@@ -232,6 +232,8 @@ extern JUCE_API void JUCE_CALLTYPE logAssertion (const char* file, int line) noe
 #include "files/juce_FileSearchPath.h"
 #include "files/juce_MemoryMappedFile.h"
 #include "files/juce_TemporaryFile.h"
+#include "files/juce_FileFilter.h"
+#include "files/juce_WildcardFileFilter.h"
 #include "streams/juce_FileInputSource.h"
 #include "logging/juce_FileLogger.h"
 #include "javascript/juce_JSON.h"
