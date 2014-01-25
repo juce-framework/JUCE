@@ -192,7 +192,8 @@ public:
         keyDownOverlayColourId          = 0x1005004,  /**< This colour will be overlaid on the normal note colour. */
         textLabelColourId               = 0x1005005,
         upDownButtonBackgroundColourId  = 0x1005006,
-        upDownButtonArrowColourId       = 0x1005007
+        upDownButtonArrowColourId       = 0x1005007,
+        shadowColourId                  = 0x1005008
     };
 
     /** Returns the position within the component of the left-hand edge of a key.

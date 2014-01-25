@@ -175,6 +175,7 @@ LookAndFeel_V2::LookAndFeel_V2()
         0x1005005, /*MidiKeyboardComponent::textLabelColourId*/               0xff000000,
         0x1005006, /*MidiKeyboardComponent::upDownButtonBackgroundColourId*/  0xffd3d3d3,
         0x1005007, /*MidiKeyboardComponent::upDownButtonArrowColourId*/       0xff000000,
+        0x1005008, /*MidiKeyboardComponent::shadowColourId*/                  0x4c000000,
 
         0x1004500, /*CodeEditorComponent::backgroundColourId*/                0xffffffff,
         0x1004502, /*CodeEditorComponent::highlightColourId*/                 textHighlightColour,
