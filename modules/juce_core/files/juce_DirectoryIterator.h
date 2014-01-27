@@ -32,7 +32,7 @@
 
 //==============================================================================
 /**
-    Searches through a the files in a directory, returning each file that is found.
+    Searches through the files in a directory, returning each file that is found.
 
     A DirectoryIterator will search through a directory and its subdirectories using
     a wildcard filepattern match.
