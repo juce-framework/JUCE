@@ -249,17 +249,17 @@ void DocumentWindow::resized()
 
 BorderSize<int> DocumentWindow::getBorderThickness()
 {
-    return BorderSize<int> ((isFullScreen() || isUsingNativeTitleBar())
-                                ? 0 : (resizableBorder != nullptr ? 4 : 1));
+    return ResizableWindow::getBorderThickness();
 }
 
 BorderSize<int> DocumentWindow::getContentComponentBorder()
 {
     BorderSize<int> border (getBorderThickness());
 
-    border.setTop (border.getTop()
-                    + (isUsingNativeTitleBar() ? 0 : titleBarHeight)
-                    + (menuBar != nullptr ? menuBarHeight : 0));
+    if (! isKioskMode())
+        border.setTop (border.getTop()
+                        + (isUsingNativeTitleBar() ? 0 : titleBarHeight)
+                        + (menuBar != nullptr ? menuBarHeight : 0));
 
     return border;
 }
@@ -272,6 +272,9 @@ int DocumentWindow::getTitleBarHeight() const
 Rectangle<int> DocumentWindow::getTitleBarArea()
 {
     const BorderSize<int> border (getBorderThickness());
+
+    if (isKioskMode())
+        return Rectangle<int>();
 
     return Rectangle<int> (border.getLeft(), border.getTop(),
                            getWidth() - border.getLeftAndRight(), getTitleBarHeight());

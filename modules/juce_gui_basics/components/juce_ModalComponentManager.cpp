@@ -262,7 +262,7 @@ int ModalComponentManager::runEventLoopForCurrentComponent()
 
     if (Component* currentlyModal = getModalComponent (0))
     {
-        WeakReference<Component> prevFocused (Component::getCurrentlyFocusedComponent());
+        FocusRestorer focusRestorer;
 
         bool finished = false;
         attachCallback (currentlyModal, new ReturnValueRetriever (returnValue, finished));
@@ -276,9 +276,6 @@ int ModalComponentManager::runEventLoopForCurrentComponent()
             }
         }
         JUCE_CATCH_EXCEPTION
-
-        if (prevFocused != nullptr && ! prevFocused->isCurrentlyBlockedByAnotherModalComponent())
-            prevFocused->grabKeyboardFocus();
     }
 
     return returnValue;

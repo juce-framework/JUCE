@@ -174,6 +174,22 @@ private:
 };
 
 //==============================================================================
+struct FocusRestorer
+{
+    FocusRestorer()  : lastFocus (Component::getCurrentlyFocusedComponent()) {}
+
+    ~FocusRestorer()
+    {
+        if (lastFocus != nullptr && ! lastFocus->isCurrentlyBlockedByAnotherModalComponent())
+            lastFocus->grabKeyboardFocus();
+    }
+
+    WeakReference<Component> lastFocus;
+
+    JUCE_DECLARE_NON_COPYABLE (FocusRestorer)
+};
+
+//==============================================================================
 struct ScalingHelpers
 {
     template <typename PointOrRect>
