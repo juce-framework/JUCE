@@ -74,7 +74,7 @@ namespace DirectWriteTypeLayout
                     TextLayout::Line* const newLine = new TextLayout::Line();
                     layout->addLine (newLine);
 
-                    if (! std::isnormal (baselineOriginY))
+                    if (! (baselineOriginY >= 0 || baselineOriginY <= 0))
                         baselineOriginY = 0; // DirectWrite sometimes sends NaNs in this parameter
 
                     newLine->lineOrigin = Point<float> (baselineOriginX, baselineOriginY);
