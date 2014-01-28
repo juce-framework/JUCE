@@ -2703,6 +2703,7 @@ void VSTPluginFormat::findAllTypesForFile (OwnedArray<PluginDescription>& result
             {
                 jassert (desc.uid == uid);
                 desc.hasSharedContainer = true;
+                desc.name = shellEffectName;
 
                 if (! arrayContainsPlugin (results, desc))
                     results.add (new PluginDescription (desc));
