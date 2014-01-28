@@ -87,7 +87,8 @@ public:
 
         complexTransform = getTransformWith (t);
         isOnlyTranslated = false;
-        isRotated = (complexTransform.mat01 != 0 || complexTransform.mat10 != 0);
+        isRotated = (complexTransform.mat01 != 0 || complexTransform.mat10 != 0
+                      || complexTransform.mat00 < 0 || complexTransform.mat11 < 0);
     }
 
     float getPhysicalPixelScaleFactor() const noexcept
