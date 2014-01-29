@@ -801,6 +801,8 @@ public:
 
     void setCurrentProgramStateInformation (const void* data, int sizeInBytes) override
     {
+        initialiseAudioUnit();
+
         CFReadStreamRef stream = CFReadStreamCreateWithBytesNoCopy (kCFAllocatorDefault, (const UInt8*) data,
                                                                     sizeInBytes, kCFAllocatorNull);
         CFReadStreamOpen (stream);
