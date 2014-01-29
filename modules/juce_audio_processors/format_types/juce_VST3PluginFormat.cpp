@@ -2506,7 +2506,7 @@ AudioPluginInstance* VST3PluginFormat::createInstanceFromDescription (const Plug
 
 bool VST3PluginFormat::fileMightContainThisPluginType (const String& fileOrIdentifier)
 {
-    const File f (fileOrIdentifier);
+    const File f (File::createFileWithoutCheckingPath (fileOrIdentifier));
 
     return f.hasFileExtension (".vst3")
           #if JUCE_MAC
