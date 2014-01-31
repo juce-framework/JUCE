@@ -129,7 +129,9 @@ namespace AnimatedPositionBehaviours
 
             const double snapSpeed = 10.0;
             const double velocity = (targetSnapPosition - oldPos) * snapSpeed;
-            return oldPos + velocity * elapsedSeconds;
+            const double newPos = oldPos + velocity * elapsedSeconds;
+
+            return isStopped (newPos) ? targetSnapPosition : newPos;
         }
 
         /** Called by the AnimatedPosition class to check whether the object
