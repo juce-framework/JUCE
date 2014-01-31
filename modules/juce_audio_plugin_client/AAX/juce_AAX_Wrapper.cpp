@@ -743,6 +743,9 @@ struct AAXClasses
 
             midiBuffer.clear();
 
+            (void) midiNodeIn;
+            (void) midiNodesOut;
+
            #if JucePlugin_WantsMidiInput
             {
                 AAX_CMidiStream* const midiStream = midiNodeIn->GetNodeBuffer();

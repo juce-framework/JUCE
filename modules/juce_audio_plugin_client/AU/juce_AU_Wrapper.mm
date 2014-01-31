@@ -947,6 +947,7 @@ public:
         incomingEvents.addEvent (data, 3, (int) inStartFrame);
         return noErr;
        #else
+        (void) nStatus; (void) inChannel; (void) inData1; (void) inData2; (void) inStartFrame;
         return kAudioUnitErr_PropertyNotInUse;
        #endif
     }
@@ -958,6 +959,7 @@ public:
         incomingEvents.addEvent (inData, (int) inLength, 0);
         return noErr;
        #else
+        (void) inData; (void) inLength;
         return kAudioUnitErr_PropertyNotInUse;
        #endif
     }
