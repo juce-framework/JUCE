@@ -818,6 +818,8 @@ public:
                                   0, &propertyList, sizeof (propertyList));
 
             sendAllParametersChangedEvents();
+
+            CFRelease (propertyList);
         }
     }
 
