@@ -53,6 +53,8 @@ struct TextAtom
 
         return String::repeatedString (String::charToString (passwordCharacter), numChars);
     }
+
+    JUCE_LEAK_DETECTOR (TextAtom)
 };
 
 //==============================================================================
@@ -60,7 +62,7 @@ struct TextAtom
 class TextEditor::UniformTextSection
 {
 public:
-    UniformTextSection (const String& text, const Font& f, const Colour col, const juce_wchar passwordChar)
+    UniformTextSection (const String& text, const Font& f, Colour col, juce_wchar passwordChar)
         : font (f), colour (col)
     {
         initialiseAtoms (text, passwordChar);
@@ -69,23 +71,10 @@ public:
     UniformTextSection (const UniformTextSection& other)
         : font (other.font), colour (other.colour)
     {
-        atoms.ensureStorageAllocated (other.atoms.size());
-
-        for (int i = 0; i < other.atoms.size(); ++i)
-            atoms.add (new TextAtom (*other.atoms.getUnchecked(i)));
+        atoms.addCopiesOf (other.atoms);
     }
 
-    ~UniformTextSection() {}  // (no need to delete the atoms, as they're explicitly deleted by the caller)
-
-    void clear()
-    {
-        for (int i = atoms.size(); --i >= 0;)
-            delete atoms.getUnchecked (i);
-
-        atoms.clear();
-    }
-
-    void append (const UniformTextSection& other, const juce_wchar passwordChar)
+    void append (UniformTextSection& other, const juce_wchar passwordChar)
     {
         if (other.atoms.size() > 0)
         {
@@ -115,6 +104,8 @@ public:
                 atoms.add (other.atoms.getUnchecked(i));
                 ++i;
             }
+
+            other.atoms.clear (false);
         }
     }
 
@@ -134,9 +125,7 @@ public:
                 for (int j = i; j < atoms.size(); ++j)
                     section2->atoms.add (atoms.getUnchecked (j));
 
-                for (int j = atoms.size(); --j >= i;)
-                    atoms.remove (j);
-
+                atoms.removeRange (i, atoms.size(), false);
                 break;
             }
             else if (indexToBreakAt >= index && indexToBreakAt < nextIndex)
@@ -156,9 +145,7 @@ public:
                 for (int j = i + 1; j < atoms.size(); ++j)
                     section2->atoms.add (atoms.getUnchecked (j));
 
-                for (int j = atoms.size(); --j > i;)
-                    atoms.remove (j);
-
+                atoms.removeRange (i + 1, atoms.size(), false);
                 break;
             }
 
@@ -224,7 +211,7 @@ public:
     //==============================================================================
     Font font;
     Colour colour;
-    Array <TextAtom*> atoms;
+    OwnedArray<TextAtom> atoms;
 
 private:
     void initialiseAtoms (const String& textToParse, const juce_wchar passwordChar)
@@ -274,16 +261,15 @@ private:
                 }
             }
 
-            TextAtom* const atom = new TextAtom();
+            TextAtom* const atom = atoms.add (new TextAtom());
+
             atom->atomText = String (start, numChars);
             atom->width = font.getStringWidthFloat (atom->getText (passwordChar));
             atom->numChars = (uint16) numChars;
-
-            atoms.add (atom);
         }
     }
 
-    UniformTextSection& operator= (const UniformTextSection& other);
+    UniformTextSection& operator= (const UniformTextSection&);
     JUCE_LEAK_DETECTOR (UniformTextSection)
 };
 
@@ -291,7 +277,7 @@ private:
 class TextEditor::Iterator
 {
 public:
-    Iterator (const Array <UniformTextSection*>& sectionList,
+    Iterator (const OwnedArray<UniformTextSection>& sectionList,
               const float wrapWidth,
               const juce_wchar passwordChar)
       : indexInText (0),
@@ -685,7 +671,7 @@ public:
     const UniformTextSection* currentSection;
 
 private:
-    const Array <UniformTextSection*>& sections;
+    const OwnedArray<UniformTextSection>& sections;
     int sectionIndex, atomIndex;
     const float wordWrapWidth;
     const juce_wchar passwordCharacter;
@@ -772,22 +758,13 @@ public:
                   const Range<int> rangeToRemove,
                   const int oldCaret,
                   const int newCaret,
-                  const Array <UniformTextSection*>& oldSections)
+                  const Array<UniformTextSection*>& oldSections)
         : owner (ed),
           range (rangeToRemove),
           oldCaretPos (oldCaret),
-          newCaretPos (newCaret),
-          removedSections (oldSections)
+          newCaretPos (newCaret)
     {
-    }
-
-    ~RemoveAction()
-    {
-        for (int i = removedSections.size(); --i >= 0;)
-        {
-            ScopedPointer<UniformTextSection> section (removedSections.getUnchecked (i));
-            section->clear();
-        }
+        removedSections.addArray (oldSections);
     }
 
     bool perform()
@@ -816,7 +793,7 @@ private:
     TextEditor& owner;
     const Range<int> range;
     const int oldCaretPos, newCaretPos;
-    Array <UniformTextSection*> removedSections;
+    OwnedArray<UniformTextSection> removedSections;
 
     JUCE_DECLARE_NON_COPYABLE (RemoveAction)
 };
@@ -966,11 +943,6 @@ TextEditor::~TextEditor()
 
     textValue.removeListener (textHolder);
     textValue.referTo (Value());
-
-    for (int i = 0; i < sections.size(); ++i)
-        delete sections.getUnchecked(i);
-
-    sections.clear();
 
     viewport = nullptr;
     textHolder = nullptr;
@@ -2239,8 +2211,7 @@ void TextEditor::insert (const String& text,
     }
 }
 
-void TextEditor::reinsert (const int insertIndex,
-                           const Array <UniformTextSection*>& sectionsToInsert)
+void TextEditor::reinsert (const int insertIndex, const OwnedArray<UniformTextSection>& sectionsToInsert)
 {
     int index = 0;
     int nextIndex = 0;
@@ -2280,9 +2251,7 @@ void TextEditor::reinsert (const int insertIndex,
     valueTextNeedsUpdating = true;
 }
 
-void TextEditor::remove (Range<int> range,
-                         UndoManager* const um,
-                         const int caretPositionToMoveTo)
+void TextEditor::remove (Range<int> range, UndoManager* const um, const int caretPositionToMoveTo)
 {
     if (! range.isEmpty())
     {
@@ -2315,7 +2284,7 @@ void TextEditor::remove (Range<int> range,
 
         if (um != nullptr)
         {
-            Array <UniformTextSection*> removedSections;
+            Array<UniformTextSection*> removedSections;
 
             for (int i = 0; i < sections.size(); ++i)
             {
@@ -2350,9 +2319,7 @@ void TextEditor::remove (Range<int> range,
 
                 if (remainingRange.getStart() <= index && remainingRange.getEnd() >= nextIndex)
                 {
-                    sections.remove(i);
-                    section->clear();
-                    delete section;
+                    sections.remove (i);
 
                     remainingRange.setEnd (remainingRange.getEnd() - (nextIndex - index));
                     if (remainingRange.isEmpty())
@@ -2533,8 +2500,7 @@ int TextEditor::findWordBreakBefore (const int position) const
 
 
 //==============================================================================
-void TextEditor::splitSection (const int sectionIndex,
-                               const int charToSplitAt)
+void TextEditor::splitSection (const int sectionIndex, const int charToSplitAt)
 {
     jassert (sections[sectionIndex] != nullptr);
 
@@ -2554,7 +2520,6 @@ void TextEditor::coalesceSimilarSections()
         {
             s1->append (*s2, passwordCharacter);
             sections.remove (i + 1);
-            delete s2;
             --i;
         }
     }
