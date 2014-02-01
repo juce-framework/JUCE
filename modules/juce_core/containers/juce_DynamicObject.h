@@ -46,9 +46,8 @@ class JUCE_API  DynamicObject  : public ReferenceCountedObject
 public:
     //==============================================================================
     DynamicObject();
-
-    /** Destructor. */
-    virtual ~DynamicObject();
+    DynamicObject (const DynamicObject&);
+    ~DynamicObject();
 
     typedef ReferenceCountedObjectPtr<DynamicObject> Ptr;
 

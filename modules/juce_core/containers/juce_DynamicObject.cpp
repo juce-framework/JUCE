@@ -30,6 +30,11 @@ DynamicObject::DynamicObject()
 {
 }
 
+DynamicObject::DynamicObject (const DynamicObject& other)
+    : properties (other.properties)
+{
+}
+
 DynamicObject::~DynamicObject()
 {
 }
