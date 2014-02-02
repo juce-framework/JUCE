@@ -103,6 +103,9 @@ public:
     /** Returns the NamedValueSet that holds the object's properties. */
     NamedValueSet& getProperties() noexcept     { return properties; }
 
+    /** Calls var::clone() on all the properties that this object contains. */
+    void cloneAllProperties();
+
     //==============================================================================
     /** Returns a clone of this object.
         The default implementation of this method just returns a new DynamicObject
