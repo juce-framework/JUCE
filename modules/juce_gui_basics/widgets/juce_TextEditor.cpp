@@ -1677,9 +1677,9 @@ void TextEditor::addPopupMenuItems (PopupMenu& m, const MouseEvent*)
     {
         m.addItem (StandardApplicationCommandIDs::cut,   TRANS("Cut"), writable);
         m.addItem (StandardApplicationCommandIDs::copy,  TRANS("Copy"), ! selection.isEmpty());
-        m.addItem (StandardApplicationCommandIDs::paste, TRANS("Paste"), writable);
     }
 
+    m.addItem (StandardApplicationCommandIDs::paste,     TRANS("Paste"), writable);
     m.addItem (StandardApplicationCommandIDs::del,       TRANS("Delete"), writable);
     m.addSeparator();
     m.addItem (StandardApplicationCommandIDs::selectAll, TRANS("Select All"));
