@@ -81,7 +81,6 @@ static Steinberg::Vst::SpeakerArrangement getArrangementForNumChannels (int numC
 {
     using namespace Steinberg::Vst::SpeakerArr;
 
-    if (numChannels >= 24)  return k222;
     if (numChannels >= 14)  return k131;
     if (numChannels >= 13)  return k130;
     if (numChannels >= 12)  return k111;
