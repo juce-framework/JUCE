@@ -2376,9 +2376,9 @@ private:
     {
         for (int i = activeVSTWindows.size(); --i >= 0;)
         {
-            const VSTPluginWindow* const w = activeVSTWindows.getUnchecked (i);
+            Component::SafePointer<VSTPluginWindow> w (activeVSTWindows[i]);
 
-            if (w->pluginHWND == hW)
+            if (w != nullptr && w->pluginHWND == hW)
             {
                 if (message == WM_CHAR
                     || message == WM_KEYDOWN
@@ -2391,9 +2391,10 @@ private:
                                  message, wParam, lParam);
                 }
 
-                return CallWindowProc ((WNDPROC) w->originalWndProc,
-                                       (HWND) w->pluginHWND,
-                                       message, wParam, lParam);
+                if (w != nullptr) // (may have been deleted in SendMessage callback)
+                    return CallWindowProc ((WNDPROC) w->originalWndProc,
+                                           (HWND) w->pluginHWND,
+                                           message, wParam, lParam);
             }
         }
 
