@@ -123,7 +123,6 @@ static void fillWithCorrespondingSpeakerArrangements (Array<Steinberg::Vst::Spea
         The order of the arrangement checks must be descending, since most plugins test for
         the first arrangement to match their number of specified channels.
     */
-    if (numChannels >= 24)  destination.add (k222);
     if (numChannels >= 14)  destination.add (k131);
     if (numChannels >= 13)  destination.add (k130);
     if (numChannels >= 12)  destination.add (k111);
