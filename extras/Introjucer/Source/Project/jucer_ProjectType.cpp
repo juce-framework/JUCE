@@ -194,11 +194,16 @@ public:
         const String sanitisedProjectName (CodeHelpers::makeValidIdentifier (project.getTitle(), false, true, false));
 
         setValueIfVoid (shouldBuildVST (project), true);
+        setValueIfVoid (shouldBuildVST3 (project), false);
         setValueIfVoid (shouldBuildAU (project),  true);
+        setValueIfVoid (shouldBuildRTAS (project), false);
+        setValueIfVoid (shouldBuildAAX (project), false);
 
         setValueIfVoid (getPluginName (project),                   project.getTitle());
         setValueIfVoid (getPluginDesc (project),                   project.getTitle());
         setValueIfVoid (getPluginManufacturer (project),           "yourcompany");
+        setValueIfVoid (getPluginManufacturerWebsite (project),    "www.yourcompany.com");
+        setValueIfVoid (getPluginManufacturerEmail (project),      "support@yourcompany.com");
         setValueIfVoid (getPluginManufacturerCode (project),       "Manu");
         setValueIfVoid (getPluginCode (project),                   "Plug");
         setValueIfVoid (getPluginChannelConfigs (project),         "{1, 1}, {2, 2}");
@@ -218,6 +223,8 @@ public:
     {
         props.add (new BooleanPropertyComponent (shouldBuildVST (project), "Build VST", "Enabled"),
                    "Whether the project should produce a VST plugin.");
+        props.add (new BooleanPropertyComponent (shouldBuildVST3 (project), "Build VST3", "Enabled"),
+                   "Whether the project should produce a VST3 plugin.");
         props.add (new BooleanPropertyComponent (shouldBuildAU (project), "Build AudioUnit", "Enabled"),
                    "Whether the project should produce an AudioUnit plugin.");
         props.add (new BooleanPropertyComponent (shouldBuildRTAS (project), "Build RTAS", "Enabled"),

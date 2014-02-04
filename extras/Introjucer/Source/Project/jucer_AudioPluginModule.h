@@ -38,6 +38,8 @@ namespace
     Value getPluginName (Project& project)                        { return project.getProjectValue ("pluginName"); }
     Value getPluginDesc (Project& project)                        { return project.getProjectValue ("pluginDesc"); }
     Value getPluginManufacturer (Project& project)                { return project.getProjectValue ("pluginManufacturer"); }
+    Value getPluginManufacturerWebsite (Project& project)         { return project.getProjectValue ("pluginManufacturerWebsite"); }
+    Value getPluginManufacturerEmail (Project& project)           { return project.getProjectValue ("pluginManufacturerEmail"); }
     Value getPluginManufacturerCode (Project& project)            { return project.getProjectValue ("pluginManufacturerCode"); }
     Value getPluginCode (Project& project)                        { return project.getProjectValue ("pluginCode"); }
     Value getPluginChannelConfigs (Project& project)              { return project.getProjectValue ("pluginChannelConfigs"); }
@@ -128,6 +130,8 @@ namespace
         flags.set ("JucePlugin_Name",                        getPluginName (project).toString().quoted());
         flags.set ("JucePlugin_Desc",                        getPluginDesc (project).toString().quoted());
         flags.set ("JucePlugin_Manufacturer",                getPluginManufacturer (project).toString().quoted());
+        flags.set ("JucePlugin_ManufacturerWebsite",         getPluginManufacturerWebsite (project).toString().quoted());
+        flags.set ("JucePlugin_ManufacturerEmail",           getPluginManufacturerEmail (project).toString().quoted());
         flags.set ("JucePlugin_ManufacturerCode",            getPluginManufacturerCode (project).toString().trim().substring (0, 4).quoted ('\''));
         flags.set ("JucePlugin_PluginCode",                  getPluginCode (project).toString().trim().substring (0, 4).quoted ('\''));
         flags.set ("JucePlugin_MaxNumInputChannels",         String (countMaxPluginChannels (getPluginChannelConfigs (project).toString(), true)));
@@ -260,6 +264,28 @@ namespace VSTHelpers
             exporter.extraSearchPaths.add (juceWrapperFolder.toWindowsStyle());
         else if (exporter.isLinux())
             exporter.extraSearchPaths.add (juceWrapperFolder.toUnixStyle());
+
+        if (exporter.isVisualStudio())
+        {
+            if (! exporter.getExtraLinkerFlagsString().contains ("/FORCE:multiple"))
+                exporter.getExtraLinkerFlags() = exporter.getExtraLinkerFlags().toString() + " /FORCE:multiple";
+
+            RelativePath modulePath (exporter.rebaseFromProjectFolderToBuildTarget (RelativePath (exporter.getPathForModuleString ("juce_audio_plugin_client"),
+                                                                                                  RelativePath::projectFolder)
+                                                                                      .getChildFile ("juce_audio_plugin_client")
+                                                                                      .getChildFile ("VST3")));
+
+            for (ProjectExporter::ConfigIterator config (exporter); config.next();)
+            {
+                config->getValue (Ids::msvcModuleDefinitionFile) = modulePath.getChildFile ("juce_VST3_WinExports.def").toWindowsStyle();
+
+                if (config->getValue (Ids::useRuntimeLibDLL).getValue().isVoid())
+                    config->getValue (Ids::useRuntimeLibDLL) = true;
+
+                if (config->getValue (Ids::postbuildCommand).toString().isEmpty())
+                    config->getValue (Ids::postbuildCommand) = "copy /Y $(OutDir)$(TargetFileName) $(OutDir)$(TargetName).vst3";
+            }
+        }
     }
 
     static inline void createPropertyEditors (ProjectExporter& exporter, PropertyListBuilder& props, bool isVST3)
