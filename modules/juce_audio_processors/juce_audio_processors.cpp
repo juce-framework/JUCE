@@ -57,6 +57,11 @@
  #undef KeyPress
 #endif
 
+#if ! JUCE_WINDOWS && ! JUCE_MAC
+ #undef JUCE_PLUGINHOST_VST3
+ #define JUCE_PLUGINHOST_VST3 0
+#endif
+
 //==============================================================================
 namespace juce
 {
