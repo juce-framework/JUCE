@@ -277,8 +277,6 @@ namespace VSTHelpers
 
             for (ProjectExporter::ConfigIterator config (exporter); config.next();)
             {
-                config->getValue (Ids::msvcModuleDefinitionFile) = modulePath.getChildFile ("juce_VST3_WinExports.def").toWindowsStyle();
-
                 if (config->getValue (Ids::useRuntimeLibDLL).getValue().isVoid())
                     config->getValue (Ids::useRuntimeLibDLL) = true;
 

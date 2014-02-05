@@ -31,9 +31,9 @@
             Optimization="0"
             BufferSecurityCheck=""
             DebugInformationFormat="4"
-            AdditionalIncludeDirectories="..\..\JuceLibraryCode;..\..\..\..\modules;c:\SDKs\vstsdk2.4"
+            AdditionalIncludeDirectories="..\..\JuceLibraryCode;..\..\..\..\modules;c:\SDKs\vstsdk2.4;c:\SDKs\VST3 SDK"
             PreprocessorDefinitions="WIN32;_WINDOWS;DEBUG;_DEBUG;JUCER_VS2005_78A5003=1;JUCE_APP_VERSION=1.0.0;JUCE_APP_VERSION_HEX=0x10000"
-            RuntimeLibrary="1"
+            RuntimeLibrary="3"
             RuntimeTypeInfo="true"
             UsePrecompiledHeader="0"
             PrecompiledHeaderFile="$(IntDir)\JuceDemoPlugin.pch"
@@ -54,7 +54,8 @@
             ProgramDatabaseFile="$(IntDir)\JuceDemoPlugin.pdb"
             SubSystem="2"
             GenerateManifest="true"
-            TargetMachine="1"/>
+            TargetMachine="1"
+            AdditionalOptions="/FORCE:multiple"/>
       <Tool Name="VCALinkTool"/>
       <Tool Name="VCManifestTool"/>
       <Tool Name="VCXDCMakeTool"/>
@@ -63,7 +64,9 @@
             OutputFile="$(IntDir)\JuceDemoPlugin.bsc"/>
       <Tool Name="VCFxCopTool"/>
       <Tool Name="VCAppVerifierTool"/>
-      <Tool Name="VCPostBuildEventTool"/>
+      <Tool Name="VCPostBuildEventTool"
+            Description="Post-build"
+            CommandLine="copy /Y $(OutDir)$(TargetFileName) $(OutDir)$(TargetName).vst3"/>
     </Configuration>
     <Configuration Name="Release|Win32"
                    OutputDirectory=".\Release"
@@ -87,9 +90,9 @@
             Optimization="1"
             InlineFunctionExpansion="1"
             StringPooling="true"
-            AdditionalIncludeDirectories="..\..\JuceLibraryCode;..\..\..\..\modules;c:\SDKs\vstsdk2.4"
+            AdditionalIncludeDirectories="..\..\JuceLibraryCode;..\..\..\..\modules;c:\SDKs\vstsdk2.4;c:\SDKs\VST3 SDK"
             PreprocessorDefinitions="WIN32;_WINDOWS;NDEBUG;JUCER_VS2005_78A5003=1;JUCE_APP_VERSION=1.0.0;JUCE_APP_VERSION_HEX=0x10000"
-            RuntimeLibrary="0"
+            RuntimeLibrary="2"
             RuntimeTypeInfo="true"
             UsePrecompiledHeader="0"
             PrecompiledHeaderFile="$(IntDir)\JuceDemoPlugin.pch"
@@ -112,7 +115,8 @@
             GenerateManifest="true"
             OptimizeReferences="2"
             EnableCOMDATFolding="2"
-            TargetMachine="1"/>
+            TargetMachine="1"
+            AdditionalOptions="/FORCE:multiple"/>
       <Tool Name="VCALinkTool"/>
       <Tool Name="VCManifestTool"/>
       <Tool Name="VCXDCMakeTool"/>
@@ -121,7 +125,9 @@
             OutputFile="$(IntDir)\JuceDemoPlugin.bsc"/>
       <Tool Name="VCFxCopTool"/>
       <Tool Name="VCAppVerifierTool"/>
-      <Tool Name="VCPostBuildEventTool"/>
+      <Tool Name="VCPostBuildEventTool"
+            Description="Post-build"
+            CommandLine="copy /Y $(OutDir)$(TargetFileName) $(OutDir)$(TargetName).vst3"/>
     </Configuration>
   </Configurations>
   <References/>
@@ -853,6 +859,9 @@
         <Filter Name="VST">
           <File RelativePath="..\..\..\..\modules\juce_audio_plugin_client\VST\juce_VST_Wrapper.mm"/>
         </Filter>
+        <Filter Name="VST3">
+          <File RelativePath="..\..\..\..\modules\juce_audio_plugin_client\VST3\juce_VST3_Wrapper.mm"/>
+        </Filter>
         <Filter Name="AAX">
           <File RelativePath="..\..\..\..\modules\juce_audio_plugin_client\AAX\juce_AAX_Wrapper.mm"/>
         </Filter>
@@ -975,6 +984,8 @@
             </FileConfiguration>
           </File>
           <File RelativePath="..\..\..\..\modules\juce_audio_processors\format_types\juce_LADSPAPluginFormat.h"/>
+          <File RelativePath="..\..\..\..\modules\juce_audio_processors\format_types\juce_VST3Common.h"/>
+          <File RelativePath="..\..\..\..\modules\juce_audio_processors\format_types\juce_VST3Headers.h"/>
           <File RelativePath="..\..\..\..\modules\juce_audio_processors\format_types\juce_VST3PluginFormat.cpp">
             <FileConfiguration Name="Debug|Win32"
                                ExcludedFromBuild="true">
@@ -4417,6 +4428,7 @@
                 CallingConvention="2"/>
         </FileConfiguration>
       </File>
+      <File RelativePath="..\..\..\..\modules\juce_audio_plugin_client\VST3\juce_VST3_Wrapper.cpp"/>
       <File RelativePath="..\..\..\..\modules\juce_audio_plugin_client\VST\juce_VST_Wrapper.cpp"/>
       <File RelativePath="..\..\JuceLibraryCode\JuceHeader.h"/>
       <File RelativePath="resources.rc"/>

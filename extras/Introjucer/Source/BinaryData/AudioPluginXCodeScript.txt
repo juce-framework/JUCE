@@ -7,7 +7,7 @@ original=$CONFIGURATION_BUILD_DIR/$FULL_PRODUCT_NAME
 # this looks inside the binary to detect which platforms are needed.. 
 copyAU=`nm -g "$CONFIGURATION_BUILD_DIR/$EXECUTABLE_PATH" | grep -i 'AudioUnit' | wc -l`
 copyVST=`nm -g "$CONFIGURATION_BUILD_DIR/$EXECUTABLE_PATH" | grep -i 'VSTPlugin' | wc -l`
-copyVST3=`nm -g "$CONFIGURATION_BUILD_DIR/$EXECUTABLE_PATH" | grep -i 'VST3Plugin' | wc -l`
+copyVST3=`nm -g "$CONFIGURATION_BUILD_DIR/$EXECUTABLE_PATH" | grep -i 'GetPluginFactory' | wc -l`
 copyRTAS=`nm -g "$CONFIGURATION_BUILD_DIR/$EXECUTABLE_PATH" | grep -i 'CProcess' | wc -l`
 copyAAX=`nm -g "$CONFIGURATION_BUILD_DIR/$EXECUTABLE_PATH" | grep -i 'ACFStartup' | wc -l`
 

@@ -159,7 +159,6 @@ namespace Steinberg
 #undef OBJ_METHODS
 #undef QUERY_INTERFACE
 #undef LICENCE_UID
-#undef DEF_CLASS_IID
 #undef BEGIN_FACTORY
 #undef DEF_CLASS
 #undef DEF_CLASS1
