@@ -767,7 +767,7 @@ public:
     {
         if (state != nullptr)
         {
-            MemoryBlock mem;
+            juce::MemoryBlock mem;
             pluginInstance->getStateInformation (mem);
             return state->write (mem.getData(), (Steinberg::int32) mem.getSize());
         }
@@ -1198,7 +1198,7 @@ bool shutdownModule()
     #define JUCE_EXPORTED_FUNCTION extern "C" __attribute__ ((visibility ("default")))
 
     CFBundleRef globalBundleInstance = nullptr;
-    uint32 numBundleRefs = 0;
+    juce::uint32 numBundleRefs = 0;
     juce::Array<CFBundleRef> bundleRefs;
 
     enum { MaxPathLength = 2048 };
