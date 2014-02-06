@@ -1460,7 +1460,7 @@ private:
 
 #ifndef JucePlugin_Vst3Category
    #if JucePlugin_IsSynth
-    #define JucePlugin_Vst3Category Vst::PlugType::kInstrument
+    #define JucePlugin_Vst3Category Vst::PlugType::kInstrumentSynth
    #else
     #define JucePlugin_Vst3Category Vst::PlugType::kFx
    #endif

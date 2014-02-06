@@ -281,7 +281,7 @@ namespace VSTHelpers
                     config->getValue (Ids::useRuntimeLibDLL) = true;
 
                 if (config->getValue (Ids::postbuildCommand).toString().isEmpty())
-                    config->getValue (Ids::postbuildCommand) = "copy /Y $(OutDir)$(TargetFileName) $(OutDir)$(TargetName).vst3";
+                    config->getValue (Ids::postbuildCommand) = "copy /Y \"$(OutDir)$(TargetFileName)\" \"$(OutDir)$(TargetName).vst3\"";
             }
         }
     }
