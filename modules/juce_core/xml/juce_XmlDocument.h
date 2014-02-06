@@ -156,23 +156,23 @@ private:
     String lastError, dtdText;
     StringArray tokenisedDTD;
     bool needToLoadDTD, ignoreEmptyTextElements;
-    ScopedPointer <InputSource> inputSource;
+    ScopedPointer<InputSource> inputSource;
 
     XmlElement* parseDocumentElement (String::CharPointerType, bool outer);
-    void setLastError (const String& desc, bool carryOn);
+    void setLastError (const String&, bool carryOn);
     bool parseHeader();
     bool parseDTD();
     void skipNextWhiteSpace();
     juce_wchar readNextChar() noexcept;
     XmlElement* readNextElement (bool alsoParseSubElements);
-    void readChildElements (XmlElement* parent);
-    void readQuotedString (String& result);
-    void readEntity (String& result);
+    void readChildElements (XmlElement&);
+    void readQuotedString (String&);
+    void readEntity (String&);
 
-    String getFileContents (const String& filename) const;
-    String expandEntity (const String& entity);
-    String expandExternalEntity (const String& entity);
-    String getParameterEntity (const String& entity);
+    String getFileContents (const String&) const;
+    String expandEntity (const String&);
+    String expandExternalEntity (const String&);
+    String getParameterEntity (const String&);
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (XmlDocument)
 };
