@@ -889,6 +889,9 @@ public:
     */
     static double getMidiNoteInHertz (int noteNumber, const double frequencyOfA = 440.0) noexcept;
 
+    /** Returns true if the given midi note number is a black key. */
+    static bool isMidiNoteBlack (int noteNumber) noexcept;
+
     /** Returns the standard name of a GM instrument, or nullptr if unknown for this index.
 
         @param midiInstrumentNumber     the program number 0 to 127

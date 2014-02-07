@@ -941,6 +941,11 @@ double MidiMessage::getMidiNoteInHertz (int noteNumber, const double frequencyOf
     return frequencyOfA * pow (2.0, (noteNumber - 69) / 12.0);
 }
 
+bool MidiMessage::isMidiNoteBlack (int noteNumber) noexcept
+{
+    return ((1 << (noteNumber % 12)) & 0x054a) != 0;
+}
+
 const char* MidiMessage::getGMInstrumentName (const int n)
 {
     static const char* names[] =

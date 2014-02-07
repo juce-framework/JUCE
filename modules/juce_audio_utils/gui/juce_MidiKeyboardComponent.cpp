@@ -211,19 +211,11 @@ void MidiKeyboardComponent::getKeyPosition (int midiNoteNumber, const float keyW
                                      5.0f, 6 - blackNoteWidth * 0.3f,
                                      6.0f };
 
-    static const float widths[] = { 1.0f, blackNoteWidth,
-                                    1.0f, blackNoteWidth,
-                                    1.0f,
-                                    1.0f, blackNoteWidth,
-                                    1.0f, blackNoteWidth,
-                                    1.0f, blackNoteWidth,
-                                    1.0f };
-
     const int octave = midiNoteNumber / 12;
     const int note   = midiNoteNumber % 12;
 
     x = roundToInt (octave * 7.0f * keyWidth_ + notePos [note] * keyWidth_);
-    w = roundToInt (widths [note] * keyWidth_);
+    w = roundToInt (MidiMessage::isMidiNoteBlack (note) ? blackNoteWidth * keyWidth_ : keyWidth_);
 }
 
 void MidiKeyboardComponent::getKeyPos (int midiNoteNumber, int& x, int& w) const
