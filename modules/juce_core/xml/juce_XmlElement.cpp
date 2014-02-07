@@ -55,7 +55,7 @@ XmlElement::XmlElement (const String& tag) noexcept
     jassert (tag.containsNonWhitespaceChars())
 
     // The tag can't contain spaces or other characters that would create invalid XML!
-    jassert (! tag.containsAnyOf (" <>/&"));
+    jassert (! tag.containsAnyOf (" <>/&(){}"));
 }
 
 XmlElement::XmlElement (int /*dummy*/) noexcept
