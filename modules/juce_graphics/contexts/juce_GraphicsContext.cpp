@@ -281,28 +281,30 @@ void Graphics::drawMultiLineText (const String& text, const int startX,
     }
 }
 
-void Graphics::drawText (const String& text, const Rectangle<int>& area,
-                         Justification justificationType,
-                         const bool useEllipsesIfTooBig) const
+void Graphics::drawText (const String& text, const Rectangle<float>& area,
+                         Justification justificationType, bool useEllipsesIfTooBig) const
 {
-    if (text.isNotEmpty() && context.clipRegionIntersects (area))
+    if (text.isNotEmpty() && context.clipRegionIntersects (area.getSmallestIntegerContainer()))
     {
         GlyphArrangement arr;
-        arr.addCurtailedLineOfText (context.getFont(), text,
-                                    0.0f, 0.0f, (float) area.getWidth(),
-                                    useEllipsesIfTooBig);
+        arr.addCurtailedLineOfText (context.getFont(), text, 0.0f, 0.0f,
+                                    area.getWidth(), useEllipsesIfTooBig);
 
         arr.justifyGlyphs (0, arr.getNumGlyphs(),
-                           (float) area.getX(), (float) area.getY(),
-                           (float) area.getWidth(), (float) area.getHeight(),
+                           area.getX(), area.getY(), area.getWidth(), area.getHeight(),
                            justificationType);
         arr.draw (*this);
     }
 }
 
+void Graphics::drawText (const String& text, const Rectangle<int>& area,
+                         Justification justificationType, bool useEllipsesIfTooBig) const
+{
+    drawText (text, area.toFloat(), justificationType, useEllipsesIfTooBig);
+}
+
 void Graphics::drawText (const String& text, const int x, const int y, const int width, const int height,
-                         Justification justificationType,
-                         const bool useEllipsesIfTooBig) const
+                         Justification justificationType, const bool useEllipsesIfTooBig) const
 {
     drawText (text, Rectangle<int> (x, y, width, height), justificationType, useEllipsesIfTooBig);
 }
