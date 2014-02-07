@@ -204,7 +204,7 @@ void detachComponentFromWindowRef (Component* comp, void* window, bool isNSView)
 
             [hostWindow release];
 
-            static bool needToRunMessageLoop = ! PluginHostType().isReaper();
+            static bool needToRunMessageLoop = ! getHostType().isReaper();
 
             // The event loop needs to be run between closing the window and deleting the plugin,
             // presumably to let the cocoa objects get tidied up. Leaving out this line causes crashes

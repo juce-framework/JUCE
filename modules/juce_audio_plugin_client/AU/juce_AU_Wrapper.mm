@@ -535,7 +535,7 @@ public:
    #if BUILD_AU_CARBON_UI
     int GetNumCustomUIComponents() override
     {
-        return PluginHostType().isDigitalPerformer() ? 0 : 1;
+        return getHostType().isDigitalPerformer() ? 0 : 1;
     }
 
     void GetUIComponentDescs (ComponentDescription* inDescArray) override
@@ -1095,7 +1095,7 @@ public:
 
         bool keyPressed (const KeyPress&) override
         {
-            if (PluginHostType().isAbletonLive())
+            if (getHostType().isAbletonLive())
             {
                 static NSTimeInterval lastEventTime = 0; // check we're not recursively sending the same event
                 NSTimeInterval eventTime = [[NSApp currentEvent] timestamp];

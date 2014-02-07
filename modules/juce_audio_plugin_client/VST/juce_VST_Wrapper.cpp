@@ -1281,12 +1281,6 @@ public:
         }
     }
 
-    static PluginHostType& getHostType()
-    {
-        static PluginHostType hostType;
-        return hostType;
-    }
-
     //==============================================================================
     // A component to hold the AudioProcessorEditor, and cope with some housekeeping
     // chores when it changes or repaints.
