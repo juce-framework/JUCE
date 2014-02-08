@@ -60,7 +60,7 @@ struct DefaultHashFunctions
     @code
     struct MyHashGenerator
     {
-        int generateHash (MyKeyType key, int upperLimit)
+        int generateHash (MyKeyType key, int upperLimit) const
         {
             // The function must return a value 0 <= x < upperLimit
             return someFunctionOfMyKeyType (key) % upperLimit;
