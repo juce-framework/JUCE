@@ -151,7 +151,6 @@ namespace juce
 #include "text/juce_StringPairArray.cpp"
 #include "text/juce_StringPool.cpp"
 #include "text/juce_TextDiff.cpp"
-#include "threads/juce_ChildProcess.cpp"
 #include "threads/juce_ReadWriteLock.cpp"
 #include "threads/juce_Thread.cpp"
 #include "threads/juce_ThreadPool.cpp"
@@ -218,6 +217,7 @@ namespace juce
 
 #endif
 
+#include "threads/juce_ChildProcess.cpp"
 #include "threads/juce_HighResolutionTimer.cpp"
 
 }
