@@ -231,7 +231,7 @@ public:
             const tresult result = ComponentBase::connect (other);
 
             if (! audioProcessor.loadFrom (other))
-                sendIntMessage ("JuceVST3EditController", (int64) (pointer_sized_int) this);
+                sendIntMessage ("JuceVST3EditController", (Steinberg::int64) (pointer_sized_int) this);
             else
                 setupParameters();
 
@@ -307,7 +307,7 @@ private:
         }
     }
 
-    void sendIntMessage (const char* idTag, const int64 value)
+    void sendIntMessage (const char* idTag, const Steinberg::int64 value)
     {
         jassert (hostContext != nullptr);
 
@@ -658,7 +658,7 @@ public:
     {
         if (message != nullptr && juceVST3EditController == nullptr)
         {
-            int64 value = 0;
+            Steinberg::int64 value = 0;
 
             if (message->getAttributes()->getInt ("JuceVST3EditController", value) == kResultTrue)
             {
