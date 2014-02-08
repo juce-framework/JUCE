@@ -22,14 +22,27 @@
   ==============================================================================
 */
 
+struct InterprocessConnection::ConnectionThread  : public Thread
+{
+    ConnectionThread (InterprocessConnection& c)  : Thread ("JUCE IPC"), owner (c) {}
+
+    void run() override     { owner.runThread(); }
+
+private:
+    InterprocessConnection& owner;
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ConnectionThread);
+};
+
+//==============================================================================
 InterprocessConnection::InterprocessConnection (const bool callbacksOnMessageThread,
                                                 const uint32 magicMessageHeaderNumber)
-    : Thread ("Juce IPC connection"),
-      callbackConnectionState (false),
+    : callbackConnectionState (false),
       useMessageThread (callbacksOnMessageThread),
       magicMessageHeader (magicMessageHeaderNumber),
       pipeReceiveMessageTimeout (-1)
 {
+    thread = new ConnectionThread (*this);
 }
 
 InterprocessConnection::~InterprocessConnection()
@@ -37,8 +50,8 @@ InterprocessConnection::~InterprocessConnection()
     callbackConnectionState = false;
     disconnect();
     masterReference.clear();
+    thread = nullptr;
 }
-
 
 //==============================================================================
 bool InterprocessConnection::connectToSocket (const String& hostName,
@@ -53,7 +66,7 @@ bool InterprocessConnection::connectToSocket (const String& hostName,
     if (socket->connect (hostName, portNumber, timeOutMillisecs))
     {
         connectionMadeInt();
-        startThread();
+        thread->startThread();
         return true;
     }
     else
@@ -99,7 +112,7 @@ bool InterprocessConnection::createPipe (const String& pipeName, const int timeo
 
 void InterprocessConnection::disconnect()
 {
-    signalThreadShouldExit();
+    thread->signalThreadShouldExit();
 
     {
         const ScopedLock sl (pipeAndSocketLock);
@@ -107,7 +120,7 @@ void InterprocessConnection::disconnect()
         if (pipe != nullptr)    pipe->close();
     }
 
-    stopThread (4000);
+    thread->stopThread (4000);
     deletePipeAndSocket();
     connectionLostInt();
 }
@@ -125,7 +138,7 @@ bool InterprocessConnection::isConnected() const
 
     return ((socket != nullptr && socket->isConnected())
               || (pipe != nullptr && pipe->isOpen()))
-            && isThreadRunning();
+            && thread->isThreadRunning();
 }
 
 String InterprocessConnection::getConnectedHostName() const
@@ -173,7 +186,7 @@ void InterprocessConnection::initialiseWithSocket (StreamingSocket* newSocket)
     jassert (socket == nullptr && pipe == nullptr);
     socket = newSocket;
     connectionMadeInt();
-    startThread();
+    thread->startThread();
 }
 
 void InterprocessConnection::initialiseWithPipe (NamedPipe* newPipe)
@@ -181,7 +194,7 @@ void InterprocessConnection::initialiseWithPipe (NamedPipe* newPipe)
     jassert (socket == nullptr && pipe == nullptr);
     pipe = newPipe;
     connectionMadeInt();
-    startThread();
+    thread->startThread();
 }
 
 //==============================================================================
@@ -279,7 +292,7 @@ bool InterprocessConnection::readNextMessageInt()
 
             while (bytesInMessage > 0)
             {
-                if (threadShouldExit())
+                if (thread->threadShouldExit())
                     return false;
 
                 const int numThisTime = jmin (bytesInMessage, 65536);
@@ -311,9 +324,9 @@ bool InterprocessConnection::readNextMessageInt()
     return true;
 }
 
-void InterprocessConnection::run()
+void InterprocessConnection::runThread()
 {
-    while (! threadShouldExit())
+    while (! thread->threadShouldExit())
     {
         if (socket != nullptr)
         {
@@ -328,7 +341,7 @@ void InterprocessConnection::run()
 
             if (ready == 0)
             {
-                wait (1);
+                thread->wait (1);
                 continue;
             }
         }
@@ -346,7 +359,7 @@ void InterprocessConnection::run()
             break;
         }
 
-        if (threadShouldExit() || ! readNextMessageInt())
+        if (thread->threadShouldExit() || ! readNextMessageInt())
             break;
     }
 }
