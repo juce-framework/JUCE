@@ -1424,47 +1424,40 @@ void TextEditor::scrollToMakeSureCursorIsVisible()
 
     if (keepCaretOnScreen)
     {
-        int x = viewport->getViewPositionX();
-        int y = viewport->getViewPositionY();
+        Point<int> viewPos (viewport->getViewPosition());
+        const Rectangle<int> caretRect (getCaretRectangle());
 
-        const Rectangle<int> caretPos (getCaretRectangle());
+        const Point<int> relativeCursor = caretRect.getPosition() - viewPos;
 
-        const int relativeCursorX = caretPos.getX() - x;
-        const int relativeCursorY = caretPos.getY() - y;
-
-        if (relativeCursorX < jmax (1, proportionOfWidth (0.05f)))
+        if (relativeCursor.x < jmax (1, proportionOfWidth (0.05f)))
         {
-            x += relativeCursorX - proportionOfWidth (0.2f);
+            viewPos.x += relativeCursor.x - proportionOfWidth (0.2f);
         }
-        else if (relativeCursorX > jmax (0, viewport->getMaximumVisibleWidth() - (wordWrap ? 2 : 10)))
+        else if (relativeCursor.x > jmax (0, viewport->getMaximumVisibleWidth() - (wordWrap ? 2 : 10)))
         {
-            x += relativeCursorX + (isMultiLine() ? proportionOfWidth (0.2f) : 10) - viewport->getMaximumVisibleWidth();
+            viewPos.x += relativeCursor.x + (isMultiLine() ? proportionOfWidth (0.2f) : 10) - viewport->getMaximumVisibleWidth();
         }
 
-        x = jlimit (0, jmax (0, textHolder->getWidth() + 8 - viewport->getMaximumVisibleWidth()), x);
+        viewPos.x = jlimit (0, jmax (0, textHolder->getWidth() + 8 - viewport->getMaximumVisibleWidth()), viewPos.x);
 
         if (! isMultiLine())
         {
-            y = (getHeight() - textHolder->getHeight() - topIndent) / -2;
+            viewPos.y = (getHeight() - textHolder->getHeight() - topIndent) / -2;
         }
-        else
+        else if (relativeCursor.y < 0)
         {
-            if (relativeCursorY < 0)
-            {
-                y = jmax (0, relativeCursorY + y);
-            }
-            else if (relativeCursorY > jmax (0, viewport->getMaximumVisibleHeight() - topIndent - caretPos.getHeight()))
-            {
-                y += relativeCursorY + 2 + caretPos.getHeight() + topIndent - viewport->getMaximumVisibleHeight();
-            }
+            viewPos.y = jmax (0, relativeCursor.y + viewPos.y);
+        }
+        else if (relativeCursor.y > jmax (0, viewport->getMaximumVisibleHeight() - topIndent - caretRect.getHeight()))
+        {
+            viewPos.y += relativeCursor.y + 2 + caretRect.getHeight() + topIndent - viewport->getMaximumVisibleHeight();
         }
 
-        viewport->setViewPosition (x, y);
+        viewport->setViewPosition (viewPos);
     }
 }
 
-void TextEditor::moveCaretTo (const int newPosition,
-                              const bool isSelecting)
+void TextEditor::moveCaretTo (const int newPosition, const bool isSelecting)
 {
     if (isSelecting)
     {
