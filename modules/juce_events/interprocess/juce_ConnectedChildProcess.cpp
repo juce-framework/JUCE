@@ -142,7 +142,8 @@ bool ChildProcessMaster::sendMessageToSlave (const MemoryBlock& mb)
 
 bool ChildProcessMaster::launchSlaveProcess (const File& executable, const String& commandLineUniqueID)
 {
-    jassert (! childProcess.isRunning());  // can only launch this once!
+    connection = nullptr;
+    jassert (childProcess.kill());
 
     const String pipeName ("p" + String::toHexString (Random().nextInt64()));
 
