@@ -49,6 +49,7 @@ namespace juce
 #include "timers/juce_MultiTimer.h"
 #include "interprocess/juce_InterprocessConnection.h"
 #include "interprocess/juce_InterprocessConnectionServer.h"
+#include "interprocess/juce_ConnectedChildProcess.h"
 #include "native/juce_ScopedXLock.h"
 
 }

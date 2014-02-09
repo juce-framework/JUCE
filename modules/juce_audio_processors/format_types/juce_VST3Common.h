@@ -407,4 +407,4 @@ namespace VST3BufferExchange
     }
 }
 
-#endif //JUCE_VST3COMMON_H_INCLUDED
+#endif   // JUCE_VST3COMMON_H_INCLUDED

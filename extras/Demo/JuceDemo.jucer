@@ -224,6 +224,8 @@
               file="Source/Demos/AudioSynthesiserDemo.cpp"/>
         <FILE id="nWMZgj" name="Box2DDemo.cpp" compile="1" resource="0" file="Source/Demos/Box2DDemo.cpp"/>
         <FILE id="mytllf" name="CameraDemo.cpp" compile="1" resource="0" file="Source/Demos/CameraDemo.cpp"/>
+        <FILE id="yuKDZN" name="ChildProcessDemo.cpp" compile="1" resource="0"
+              file="Source/Demos/ChildProcessDemo.cpp"/>
         <FILE id="E1AN07" name="CodeEditorDemo.cpp" compile="1" resource="0"
               file="Source/Demos/CodeEditorDemo.cpp"/>
         <FILE id="RDS9At" name="ComponentTransformsDemo.cpp" compile="1" resource="0"

@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef JUCE_VST3HEADER_H_INCLUDED
-#define JUCE_VST3HEADER_H_INCLUDED
+#ifndef JUCE_VST3HEADERS_H_INCLUDED
+#define JUCE_VST3HEADERS_H_INCLUDED
 
 #undef Point
 #undef Component
@@ -168,4 +168,4 @@ namespace Steinberg
 #undef Point
 #undef Component
 
-#endif //JUCE_VST3HEADER_H_INCLUDED
+#endif   // JUCE_VST3HEADERS_H_INCLUDED

@@ -62,6 +62,7 @@ OBJECTS := \
   $(OBJDIR)/AudioSynthesiserDemo_1b3666f6.o \
   $(OBJDIR)/Box2DDemo_51053c42.o \
   $(OBJDIR)/CameraDemo_a10f7e50.o \
+  $(OBJDIR)/ChildProcessDemo_2c2b949e.o \
   $(OBJDIR)/CodeEditorDemo_d5c17a65.o \
   $(OBJDIR)/ComponentTransformsDemo_377f7889.o \
   $(OBJDIR)/CryptographyDemo_232d46d7.o \
@@ -175,6 +176,11 @@ $(OBJDIR)/Box2DDemo_51053c42.o: ../../Source/Demos/Box2DDemo.cpp
 $(OBJDIR)/CameraDemo_a10f7e50.o: ../../Source/Demos/CameraDemo.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo "Compiling CameraDemo.cpp"
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/ChildProcessDemo_2c2b949e.o: ../../Source/Demos/ChildProcessDemo.cpp
+	-@mkdir -p $(OBJDIR)
+	@echo "Compiling ChildProcessDemo.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/CodeEditorDemo_d5c17a65.o: ../../Source/Demos/CodeEditorDemo.cpp

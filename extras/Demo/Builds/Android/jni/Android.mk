@@ -19,6 +19,7 @@ LOCAL_SRC_FILES := \
   ../../../Source/Demos/AudioSynthesiserDemo.cpp\
   ../../../Source/Demos/Box2DDemo.cpp\
   ../../../Source/Demos/CameraDemo.cpp\
+  ../../../Source/Demos/ChildProcessDemo.cpp\
   ../../../Source/Demos/CodeEditorDemo.cpp\
   ../../../Source/Demos/ComponentTransformsDemo.cpp\
   ../../../Source/Demos/CryptographyDemo.cpp\

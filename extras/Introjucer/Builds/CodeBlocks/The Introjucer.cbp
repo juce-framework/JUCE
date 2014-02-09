@@ -1622,6 +1622,14 @@
       <Option compile="0"/>
       <Option link="0"/>
     </Unit>
+    <Unit filename="../../../../modules/juce_events/interprocess/juce_ConnectedChildProcess.cpp">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../../../modules/juce_events/interprocess/juce_ConnectedChildProcess.h">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
     <Unit filename="../../../../modules/juce_events/interprocess/juce_InterprocessConnection.cpp">
       <Option compile="0"/>
       <Option link="0"/>

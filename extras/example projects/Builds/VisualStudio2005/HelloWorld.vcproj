@@ -1234,6 +1234,17 @@
           <File RelativePath="..\..\..\..\modules\juce_events\broadcasters\juce_ListenerList.h"/>
         </Filter>
         <Filter Name="interprocess">
+          <File RelativePath="..\..\..\..\modules\juce_events\interprocess\juce_ConnectedChildProcess.cpp">
+            <FileConfiguration Name="Debug|Win32"
+                               ExcludedFromBuild="true">
+              <Tool Name="VCCLCompilerTool"/>
+            </FileConfiguration>
+            <FileConfiguration Name="Release|Win32"
+                               ExcludedFromBuild="true">
+              <Tool Name="VCCLCompilerTool"/>
+            </FileConfiguration>
+          </File>
+          <File RelativePath="..\..\..\..\modules\juce_events\interprocess\juce_ConnectedChildProcess.h"/>
           <File RelativePath="..\..\..\..\modules\juce_events\interprocess\juce_InterprocessConnection.cpp">
             <FileConfiguration Name="Debug|Win32"
                                ExcludedFromBuild="true">
