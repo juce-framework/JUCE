@@ -162,6 +162,7 @@ PluginListComponent::PluginListComponent (AudioPluginFormatManager& manager, Kno
     setSize (400, 600);
     list.addChangeListener (this);
     updateList();
+    table.getHeader().reSortTable();
 
     PluginDirectoryScanner::applyBlacklistingsFromDeadMansPedal (list, deadMansPedalFile);
     deadMansPedalFile.deleteFile();
@@ -196,6 +197,7 @@ void PluginListComponent::resized()
 
 void PluginListComponent::changeListenerCallback (ChangeBroadcaster*)
 {
+    table.getHeader().reSortTable();
     updateList();
 }
 

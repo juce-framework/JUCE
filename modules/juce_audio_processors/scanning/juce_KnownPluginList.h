@@ -97,6 +97,9 @@ public:
                          OwnedArray <PluginDescription>& typesFound,
                          AudioPluginFormat& formatToUse);
 
+    /** Tells a custom scanner that a scan has finished, and it can release any resources. */
+    void scanFinished();
+
     /** Returns true if the specified file is already known about and if it
         hasn't been modified since our entry was created.
     */
@@ -170,8 +173,8 @@ public:
     struct PluginTree
     {
         String folder; /**< The name of this folder in the tree */
-        OwnedArray <PluginTree> subFolders;
-        Array <const PluginDescription*> plugins;
+        OwnedArray<PluginTree> subFolders;
+        Array<const PluginDescription*> plugins;
     };
 
     /** Creates a PluginTree object containing all the known plugins. */
@@ -190,9 +193,21 @@ public:
         virtual bool findPluginTypesFor (AudioPluginFormat& format,
                                          OwnedArray <PluginDescription>& result,
                                          const String& fileOrIdentifier) = 0;
+
+        /** Called when a scan has finished, to allow clean-up of resources. */
+        virtual void scanFinished();
+
+        /** Returns true if the current scan should be abandoned.
+            Any blocking methods should check this value repeatedly and return if
+            if becomes true.
+        */
+        bool shouldExit() const noexcept;
     };
 
-    void setCustomScanner (CustomScanner* scanner);
+    /** Supplies a custom scanner to be used in future scans.
+        The KnownPluginList will take ownership of the object passed in.
+    */
+    void setCustomScanner (CustomScanner*);
 
 private:
     //==============================================================================
