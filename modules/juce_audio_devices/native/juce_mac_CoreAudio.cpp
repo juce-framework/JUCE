@@ -231,23 +231,14 @@ public:
                         NSString* nameNSString = nil;
                         size = sizeof (nameNSString);
 
-                       #if JUCE_CLANG
-                        // Very irritating that AudioDeviceGetProperty is marked as deprecated, since
-                        // there seems to be no replacement way of getting the channel names.
-                        #pragma clang diagnostic push
-                        #pragma clang diagnostic ignored "-Wdeprecated-declarations"
-                       #endif
+                        pa.mSelector = kAudioObjectPropertyElementName;
+                        pa.mElement = chanNum + 1;
 
-                        if (AudioDeviceGetProperty (deviceID, chanNum + 1, input, kAudioDevicePropertyChannelNameCFString,
-                                                    &size, &nameNSString) == noErr)
+                        if (AudioObjectGetPropertyData (deviceID, &pa, 0, nullptr, &size, &nameNSString) == noErr)
                         {
                             name = nsStringToJuce (nameNSString);
                             [nameNSString release];
                         }
-
-                       #if JUCE_CLANG
-                        #pragma clang diagnostic pop
-                       #endif
 
                         if ((input ? activeInputChans : activeOutputChans) [chanNum])
                         {
