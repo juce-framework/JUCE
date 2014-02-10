@@ -40,12 +40,19 @@ public:
 
     void timerCallback() override
     {
-        const float newLevel = (float) manager.getCurrentInputLevel();
-
-        if (std::abs (level - newLevel) > 0.005f)
+        if (isShowing())
         {
-            level = newLevel;
-            repaint();
+            const float newLevel = (float) manager.getCurrentInputLevel();
+
+            if (std::abs (level - newLevel) > 0.005f)
+            {
+                level = newLevel;
+                repaint();
+            }
+        }
+        else
+        {
+            level = 0;
         }
     }
 
