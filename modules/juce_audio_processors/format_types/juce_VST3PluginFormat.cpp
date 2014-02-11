@@ -998,7 +998,8 @@ private:
 
     void releaseFactory()
     {
-        const Steinberg::FReleaser releaser (factory);
+        if (factory != nullptr)
+            factory->release();
     }
 
    #if JUCE_WINDOWS
@@ -1222,7 +1223,7 @@ public:
         [pluginHandle release];
        #endif
 
-       const Steinberg::FReleaser releaser (view);
+        view = nullptr;
     }
 
     JUCE_DECLARE_VST3_COM_REF_METHODS
@@ -1284,7 +1285,8 @@ public:
             dummyComponent.setBounds (0, 0, (int) rect.getWidth(), (int) rect.getHeight());
            #endif
 
-            Desktop::getInstance().getMainMouseSource().forceMouseCursorUpdate(); // Some plugins don't update their cursor correctly when mousing out the window
+            // Some plugins don't update their cursor correctly when mousing out the window
+            Desktop::getInstance().getMainMouseSource().forceMouseCursorUpdate();
 
             recursiveResize = false;
         }
@@ -1316,7 +1318,7 @@ public:
 private:
     //==============================================================================
     Atomic<int> refCount;
-    IPlugView* view; // N.B.: Don't use a ComSmartPtr here! The view should start with a refCount of 1, and does NOT need to be incremented!
+    ComSmartPtr<IPlugView> view;
 
    #if JUCE_WINDOWS
     class ChildComponent  : public Component
@@ -1452,7 +1454,8 @@ public:
         if (! fetchComponentAndController (factory, factory->countClasses()))
             return false;
 
-        editController->initialize (host->getFUnknown()); // (May return an error if the plugin combines the IComponent and IEditController implementations)
+        // (May return an error if the plugin combines the IComponent and IEditController implementations)
+        editController->initialize (host->getFUnknown());
 
         isControllerInitialised = true;
         editController->setComponentHandler (host);
