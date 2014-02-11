@@ -225,7 +225,9 @@ public:
     //==============================================================================
     static void toMidiBuffer (MidiBuffer& result, Steinberg::Vst::IEventList& eventList)
     {
-        for (Steinberg::int32 i = 0; i < eventList.getEventCount(); ++i)
+        const int32 numEvents = eventList.getEventCount();
+
+        for (Steinberg::int32 i = 0; i < numEvents; ++i)
         {
             Steinberg::Vst::Event e;
 

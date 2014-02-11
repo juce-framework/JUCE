@@ -623,10 +623,7 @@ public:
         addEventBusTo (eventOutputs, TRANS("MIDI Output"));
        #endif
 
-        {
-            const ScopedLock sl (contextLock);
-            processContext.sampleRate = processSetup.sampleRate;
-        }
+        processContext.sampleRate = processSetup.sampleRate;
 
         preparePlugin (processSetup.sampleRate, (int) processSetup.maxSamplesPerBlock);
 
@@ -735,16 +732,16 @@ public:
             double sampleRate = getPluginInstance().getSampleRate();
             int bufferSize = getPluginInstance().getBlockSize();
 
-            {
-                const ScopedLock sl (contextLock);
-                sampleRate = processSetup.sampleRate > 0.0
-                                ? processSetup.sampleRate
-                                : sampleRate;
+            sampleRate = processSetup.sampleRate > 0.0
+                            ? processSetup.sampleRate
+                            : sampleRate;
 
-                bufferSize = processSetup.maxSamplesPerBlock > 0
-                                ? (int) processSetup.maxSamplesPerBlock
-                                : bufferSize;
-            }
+            bufferSize = processSetup.maxSamplesPerBlock > 0
+                            ? (int) processSetup.maxSamplesPerBlock
+                            : bufferSize;
+
+            channelList.clear();
+            channelList.insertMultiple (0, nullptr, jmax (JucePlugin_MaxNumInputChannels, JucePlugin_MaxNumOutputChannels) + 1);
 
             preparePlugin (sampleRate, bufferSize);
         }
@@ -921,8 +918,6 @@ public:
     //==============================================================================
     bool getCurrentPosition (CurrentPositionInfo& info) override
     {
-        const ScopedLock sl (contextLock);
-
         info.timeInSamples              = jmax ((juce::int64) 0, processContext.projectTimeSamples);
         info.timeInSeconds              = processContext.projectTimeMusic;
         info.bpm                        = jmax (1.0, processContext.tempo);
@@ -1089,16 +1084,15 @@ public:
 
     tresult PLUGIN_API process (Vst::ProcessData& data) override
     {
+        if (pluginInstance == nullptr || processContext.sampleRate <= 0.0)
+            return kResultFalse;
+
+        if (data.processContext != nullptr)
+            processContext = *data.processContext;
+        else
+            zerostruct (processContext);
+
         midiBuffer.clear();
-
-        {
-            const ScopedLock sl (contextLock);
-
-            if (data.processContext != nullptr)
-                processContext = *data.processContext;
-            else
-                zerostruct (processContext);
-        }
 
        #if JucePlugin_WantsMidiInput
         if (data.inputEvents != nullptr)
@@ -1109,42 +1103,47 @@ public:
         const int numMidiEventsComingIn = midiBuffer.getNumEvents();
        #endif
 
-        if (pluginInstance != nullptr
-            && data.inputs != nullptr
-            && data.outputs != nullptr
-            && processContext.sampleRate > 0.0)
+        const int numInputChans  = data.inputs  != nullptr ? (int) data.inputs[0].numChannels : 0;
+        const int numOutputChans = data.outputs != nullptr ? (int) data.outputs[0].numChannels : 0;
+
+        int totalChans = 0;
+
+        while (totalChans < numInputChans)
+        {
+            channelList.set (totalChans, data.inputs[0].channelBuffers32[totalChans]);
+            ++totalChans;
+        }
+
+        while (totalChans < numOutputChans)
+        {
+            channelList.set (totalChans, data.outputs[0].channelBuffers32[totalChans]);
+            ++totalChans;
+        }
+
+        AudioSampleBuffer buffer (channelList.getRawDataPointer(), totalChans, (int) data.numSamples);
+
         {
             const ScopedLock sl (pluginInstance->getCallbackLock());
 
             pluginInstance->setNonRealtime (data.processMode == Vst::kOffline);
 
-            if (Vst::IParameterChanges* const paramChanges = data.inputParameterChanges)
-                processParameterChanges (*paramChanges);
-
-            const int numSamples = (int) data.numSamples;
-            const int numChannels = (int) data.inputs[0].numChannels;
-
-            AudioSampleBuffer buffer (data.inputs[0].channelBuffers32, numChannels, numSamples);
-            int startBusOffset = 1;
+            if (data.inputParameterChanges != nullptr)
+                processParameterChanges (*data.inputParameterChanges);
 
             if (pluginInstance->isSuspended())
-                startBusOffset = 0;
+                buffer.clear();
             else
                 pluginInstance->processBlock (buffer, midiBuffer);
+        }
 
-            // Copy the audio:
-            for (int i = 0; i < numChannels; ++i)
-                FloatVectorOperations::copy (data.outputs[0].channelBuffers32[i], buffer.getSampleData (i), numSamples);
+        for (int i = 0; i < numOutputChans; ++i)
+            FloatVectorOperations::copy (data.outputs[0].channelBuffers32[i], buffer.getSampleData (i), (int) data.numSamples);
 
-            // Clear the other busses:
-            for (int i = startBusOffset; i < data.numOutputs; ++i)
+        // clear extra busses..
+        if (data.outputs != nullptr)
+            for (int i = 1; i < data.numOutputs; ++i)
                 for (int f = 0; f < data.outputs[i].numChannels; ++f)
-                    FloatVectorOperations::clear (data.outputs[i].channelBuffers32[f], numSamples);
-        }
-        else
-        {
-            return kResultFalse;
-        }
+                    FloatVectorOperations::clear (data.outputs[i].channelBuffers32[f], (int) data.numSamples);
 
        #if JucePlugin_ProducesMidiOutput
         if (data.outputEvents != nullptr)
@@ -1183,12 +1182,12 @@ private:
         Since VST3 does not provide a way of knowing the buffer size and sample rate at any point,
         this object needs to be copied on every call to process() to be up-to-date...
     */
-    CriticalSection contextLock; //Not sure how necessary this is...
     Vst::ProcessContext processContext;
     Vst::ProcessSetup processSetup;
 
     Vst::BusList audioInputs, audioOutputs, eventInputs, eventOutputs;
     MidiBuffer midiBuffer;
+    Array<float*> channelList;
 
     const JuceLibraryRefCount juceCount;
 
@@ -1210,11 +1209,8 @@ private:
 
     Vst::BusList* getBusListFor (Vst::MediaType type, Vst::BusDirection dir)
     {
-        if (type == Vst::kAudio)
-            return dir == Vst::kInput ? &audioInputs : &audioOutputs;
-
-        if (type == Vst::kEvent)
-            return dir == Vst::kInput ? &eventInputs : &eventOutputs;
+        if (type == Vst::kAudio)  return dir == Vst::kInput ? &audioInputs : &audioOutputs;
+        if (type == Vst::kEvent)  return dir == Vst::kInput ? &eventInputs : &eventOutputs;
 
         return nullptr;
     }
