@@ -175,6 +175,11 @@ public:
     */
     virtual Rectangle<float> getDrawableBounds() const = 0;
 
+    /** Recursively replaces a colour that might be used for filling or stroking.
+        return true if any instances of this colour were found.
+    */
+    virtual bool replaceColour (Colour originalColour, Colour replacementColour);
+
     //==============================================================================
     /** Internal class used to manage ValueTrees that represent Drawables. */
     class ValueTreeWrapperBase

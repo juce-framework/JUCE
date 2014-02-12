@@ -108,6 +108,18 @@ void Drawable::setBoundsToEnclose (const Rectangle<float>& area)
 }
 
 //==============================================================================
+bool Drawable::replaceColour (Colour original, Colour replacement)
+{
+    bool changed = false;
+
+    for (int i = getNumChildComponents(); --i >= 0;)
+        if (Drawable* d = dynamic_cast<Drawable*> (getChildComponent(i)))
+            changed = d->replaceColour (original, replacement) || changed;
+
+    return changed;
+}
+
+//==============================================================================
 void Drawable::setOriginWithOriginalSize (Point<float> originWithinParent)
 {
     setTransform (AffineTransform::translation (originWithinParent.x, originWithinParent.y));
