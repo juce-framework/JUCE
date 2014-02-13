@@ -1220,7 +1220,6 @@ public:
 
        #if JUCE_MAC
         dummyComponent.setView (nullptr);
-        [pluginHandle release];
        #endif
 
         view = nullptr;
@@ -1337,14 +1336,14 @@ private:
     ScopedPointer<ComponentPeer> peer;
     typedef HWND HandleFormat;
    #elif JUCE_MAC
-    NSViewComponent dummyComponent;
+    AutoResizingNSViewComponentWithParent dummyComponent;
     typedef NSView* HandleFormat;
    #else
     Component dummyComponent;
     typedef void* HandleFormat;
    #endif
 
-    HandleFormat pluginHandle; // Don't delete this
+    HandleFormat pluginHandle;
     bool recursiveResize;
 
     //==============================================================================
@@ -1370,8 +1369,8 @@ private:
            #elif JUCE_MAC
             dummyComponent.setBounds (getBounds().withZeroOrigin());
             addAndMakeVisible (dummyComponent);
-            pluginHandle = [[NSView alloc] init];
-            dummyComponent.setView (pluginHandle);
+            pluginHandle = (NSView*) dummyComponent.getView();
+            jassert (pluginHandle != nil);
            #endif
 
             if (pluginHandle != nullptr)

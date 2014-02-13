@@ -1927,17 +1927,10 @@ public:
        #elif JUCE_MAC
         #if JUCE_SUPPORT_CARBON
         if (! plug.usesCocoaNSView)
-        {
             addAndMakeVisible (carbonWrapper = new CarbonWrapperComponent (*this));
-        }
         else
         #endif
-        {
-            addAndMakeVisible (cocoaWrapper = new AutoResizingNSViewComponent());
-            NSView* innerView = [[NSView alloc] init];
-            cocoaWrapper->setView (innerView);
-            [innerView release];
-        }
+            addAndMakeVisible (cocoaWrapper = new AutoResizingNSViewComponentWithParent());
        #endif
 
         activeVSTWindows.add (this);
@@ -2600,7 +2593,7 @@ private:
     ScopedPointer<CarbonWrapperComponent> carbonWrapper;
    #endif
 
-    ScopedPointer<NSViewComponent> cocoaWrapper;
+    ScopedPointer<AutoResizingNSViewComponentWithParent> cocoaWrapper;
 
     void resized() override
     {
