@@ -806,16 +806,19 @@ namespace EdgeTableFillers
             alphaLevel = (alphaLevel * extraAlpha) >> 8;
             x -= xOffset;
 
-            jassert (repeatPattern || (x >= 0 && x + width <= srcData.width));
-
-            if (alphaLevel < 0xfe)
+            if (repeatPattern)
             {
-                JUCE_PERFORM_PIXEL_OP_LOOP (blend (*getSrcPixel (repeatPattern ? (x++ % srcData.width) : x++), (uint32) alphaLevel))
+                if (alphaLevel < 0xfe)
+                    JUCE_PERFORM_PIXEL_OP_LOOP (blend (*getSrcPixel (x++ % srcData.width), (uint32) alphaLevel))
+                else
+                    JUCE_PERFORM_PIXEL_OP_LOOP (blend (*getSrcPixel (x++ % srcData.width)))
             }
             else
             {
-                if (repeatPattern)
-                    JUCE_PERFORM_PIXEL_OP_LOOP (blend (*getSrcPixel (x++ % srcData.width)))
+                jassert (x >= 0 && x + width <= srcData.width);
+
+                if (alphaLevel < 0xfe)
+                    JUCE_PERFORM_PIXEL_OP_LOOP (blend (*getSrcPixel (x++), (uint32) alphaLevel))
                 else
                     copyRow (dest, getSrcPixel (x), width);
             }
@@ -826,16 +829,19 @@ namespace EdgeTableFillers
             DestPixelType* dest = getDestPixel (x);
             x -= xOffset;
 
-            jassert (repeatPattern || (x >= 0 && x + width <= srcData.width));
-
-            if (extraAlpha < 0xfe)
+            if (repeatPattern)
             {
-                JUCE_PERFORM_PIXEL_OP_LOOP (blend (*getSrcPixel (repeatPattern ? (x++ % srcData.width) : x++), (uint32) extraAlpha))
+                if (extraAlpha < 0xfe)
+                    JUCE_PERFORM_PIXEL_OP_LOOP (blend (*getSrcPixel (x++ % srcData.width), (uint32) extraAlpha))
+                else
+                    JUCE_PERFORM_PIXEL_OP_LOOP (blend (*getSrcPixel (x++ % srcData.width)))
             }
             else
             {
-                if (repeatPattern)
-                    JUCE_PERFORM_PIXEL_OP_LOOP (blend (*getSrcPixel (x++ % srcData.width)))
+                jassert (x >= 0 && x + width <= srcData.width);
+
+                if (extraAlpha < 0xfe)
+                    JUCE_PERFORM_PIXEL_OP_LOOP (blend (*getSrcPixel (x++), (uint32) extraAlpha))
                 else
                     copyRow (dest, getSrcPixel (x), width);
             }
