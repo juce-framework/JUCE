@@ -1375,12 +1375,12 @@ private:
            #endif
 
             if (pluginHandle != nullptr)
-                view->attached (pluginHandle,
-                               #if JUCE_WINDOWS
-                                kPlatformTypeHWND);
-                               #else
-                                kPlatformTypeNSView);
-                               #endif
+                warnOnFailure (view->attached (pluginHandle,
+                                              #if JUCE_WINDOWS
+                                               kPlatformTypeHWND));
+                                              #else
+                                               kPlatformTypeNSView));
+                                              #endif
         }
     }
 
