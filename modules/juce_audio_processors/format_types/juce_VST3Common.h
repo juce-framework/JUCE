@@ -81,6 +81,7 @@ static Steinberg::Vst::SpeakerArrangement getArrangementForNumChannels (int numC
 {
     using namespace Steinberg::Vst::SpeakerArr;
 
+    if (numChannels >= 24)  return (Steinberg::Vst::SpeakerArrangement) 1929904127; // k222
     if (numChannels >= 14)  return k131;
     if (numChannels >= 13)  return k130;
     if (numChannels >= 12)  return k111;
@@ -123,6 +124,7 @@ static void fillWithCorrespondingSpeakerArrangements (Array<Steinberg::Vst::Spea
         The order of the arrangement checks must be descending, since most plugins test for
         the first arrangement to match their number of specified channels.
     */
+    if (numChannels >= 24)  destination.add ((Steinberg::Vst::SpeakerArrangement) 1929904127); // k222
     if (numChannels >= 14)  destination.add (k131);
     if (numChannels >= 13)  destination.add (k130);
     if (numChannels >= 12)  destination.add (k111);
