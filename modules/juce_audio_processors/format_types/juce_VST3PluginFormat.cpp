@@ -1374,12 +1374,7 @@ private:
            #endif
 
             if (pluginHandle != nullptr)
-                warnOnFailure (view->attached (pluginHandle,
-                                              #if JUCE_WINDOWS
-                                               kPlatformTypeHWND));
-                                              #else
-                                               kPlatformTypeNSView));
-                                              #endif
+                warnOnFailure (view->attached (pluginHandle, defaultVST3WindowType));
         }
     }
 
