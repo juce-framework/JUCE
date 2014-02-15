@@ -105,7 +105,7 @@ public:
             const int y = settings->getIntValue ("windowY", -100);
 
             if (x != -100 && y != -100)
-                setBoundsConstrained (Rectangle<int> (x, y, getWidth(), getHeight()));
+                setBoundsConstrained (juce::Rectangle<int> (x, y, getWidth(), getHeight()));
             else
                 centreWithSize (getWidth(), getHeight());
         }
