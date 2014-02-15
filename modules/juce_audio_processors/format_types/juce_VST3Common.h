@@ -27,11 +27,11 @@
 
 //==============================================================================
 #define JUCE_DECLARE_VST3_COM_REF_METHODS \
-    Steinberg::uint32 JUCE_CALLTYPE addRef() override   { return (Steinberg::uint32) ++refCount; } \
-    Steinberg::uint32 JUCE_CALLTYPE release() override  { const int r = --refCount; if (r == 0) delete this; return (Steinberg::uint32) r; }
+    Steinberg::uint32 PLUGIN_API addRef() override   { return (Steinberg::uint32) ++refCount; } \
+    Steinberg::uint32 PLUGIN_API release() override  { const int r = --refCount; if (r == 0) delete this; return (Steinberg::uint32) r; }
 
 #define JUCE_DECLARE_VST3_COM_QUERY_METHODS \
-    Steinberg::tresult PLUGIN_API JUCE_CALLTYPE queryInterface (const Steinberg::TUID, void** obj) override \
+    Steinberg::tresult PLUGIN_API queryInterface (const Steinberg::TUID, void** obj) override \
     { \
         jassertfalse; \
         *obj = nullptr; \
