@@ -173,5 +173,5 @@ void JuceDemoPluginAudioProcessorEditor::displayPositionInfo (const AudioPlayHea
     else if (pos.isPlaying)
         displayText << "  (playing)";
 
-    infoLabel.setText (displayText, dontSendNotification);
+    infoLabel.setText ("[" + SystemStats::getJUCEVersion() + "]   " + displayText, dontSendNotification);
 }
