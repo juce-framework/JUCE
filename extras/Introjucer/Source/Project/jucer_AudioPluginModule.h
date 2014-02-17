@@ -38,7 +38,6 @@ namespace
     Value getPluginName (Project& project)                        { return project.getProjectValue ("pluginName"); }
     Value getPluginDesc (Project& project)                        { return project.getProjectValue ("pluginDesc"); }
     Value getPluginManufacturer (Project& project)                { return project.getProjectValue ("pluginManufacturer"); }
-    Value getPluginManufacturerWebsite (Project& project)         { return project.getProjectValue ("pluginManufacturerWebsite"); }
     Value getPluginManufacturerEmail (Project& project)           { return project.getProjectValue ("pluginManufacturerEmail"); }
     Value getPluginManufacturerCode (Project& project)            { return project.getProjectValue ("pluginManufacturerCode"); }
     Value getPluginCode (Project& project)                        { return project.getProjectValue ("pluginCode"); }
@@ -116,6 +115,16 @@ namespace
         return static_cast<bool> (v.getValue()) ? "1" : "0";
     }
 
+    String valueToStringLiteral (const var& v)
+    {
+        return CodeHelpers::addEscapeChars (v.toString()).quoted();
+    }
+
+    String valueToCharLiteral (const var& v)
+    {
+        return CodeHelpers::addEscapeChars (v.toString().trim().substring (0, 4)).quoted ('\'');
+    }
+
     void writePluginCharacteristicsFile (ProjectSaver& projectSaver)
     {
         Project& project = projectSaver.project;
@@ -127,13 +136,13 @@ namespace
         flags.set ("JucePlugin_Build_AU",                    valueToBool (shouldBuildAU   (project)));
         flags.set ("JucePlugin_Build_RTAS",                  valueToBool (shouldBuildRTAS (project)));
         flags.set ("JucePlugin_Build_AAX",                   valueToBool (shouldBuildAAX  (project)));
-        flags.set ("JucePlugin_Name",                        getPluginName (project).toString().quoted());
-        flags.set ("JucePlugin_Desc",                        getPluginDesc (project).toString().quoted());
-        flags.set ("JucePlugin_Manufacturer",                getPluginManufacturer (project).toString().quoted());
-        flags.set ("JucePlugin_ManufacturerWebsite",         getPluginManufacturerWebsite (project).toString().quoted());
-        flags.set ("JucePlugin_ManufacturerEmail",           getPluginManufacturerEmail (project).toString().quoted());
-        flags.set ("JucePlugin_ManufacturerCode",            getPluginManufacturerCode (project).toString().trim().substring (0, 4).quoted ('\''));
-        flags.set ("JucePlugin_PluginCode",                  getPluginCode (project).toString().trim().substring (0, 4).quoted ('\''));
+        flags.set ("JucePlugin_Name",                        valueToStringLiteral (getPluginName (project)));
+        flags.set ("JucePlugin_Desc",                        valueToStringLiteral (getPluginDesc (project)));
+        flags.set ("JucePlugin_Manufacturer",                valueToStringLiteral (getPluginManufacturer (project)));
+        flags.set ("JucePlugin_ManufacturerWebsite",         valueToStringLiteral (project.getCompanyWebsite()));
+        flags.set ("JucePlugin_ManufacturerEmail",           valueToStringLiteral (getPluginManufacturerEmail (project)));
+        flags.set ("JucePlugin_ManufacturerCode",            valueToCharLiteral (getPluginManufacturerCode (project)));
+        flags.set ("JucePlugin_PluginCode",                  valueToCharLiteral (getPluginCode (project)));
         flags.set ("JucePlugin_MaxNumInputChannels",         String (countMaxPluginChannels (getPluginChannelConfigs (project).toString(), true)));
         flags.set ("JucePlugin_MaxNumOutputChannels",        String (countMaxPluginChannels (getPluginChannelConfigs (project).toString(), false)));
         flags.set ("JucePlugin_PreferredChannelConfigurations", getPluginChannelConfigs (project).toString());
@@ -144,13 +153,13 @@ namespace
         flags.set ("JucePlugin_EditorRequiresKeyboardFocus", valueToBool (getPluginEditorNeedsKeyFocus (project)));
         flags.set ("JucePlugin_Version",                     project.getVersionString());
         flags.set ("JucePlugin_VersionCode",                 project.getVersionAsHex());
-        flags.set ("JucePlugin_VersionString",               project.getVersionString().quoted());
+        flags.set ("JucePlugin_VersionString",               valueToStringLiteral (project.getVersionString()));
         flags.set ("JucePlugin_VSTUniqueID",                 "JucePlugin_PluginCode");
         flags.set ("JucePlugin_VSTCategory",                 static_cast <bool> (getPluginIsSynth (project).getValue()) ? "kPlugCategSynth" : "kPlugCategEffect");
         flags.set ("JucePlugin_AUMainType",                  getAUMainTypeString (project));
         flags.set ("JucePlugin_AUSubType",                   "JucePlugin_PluginCode");
         flags.set ("JucePlugin_AUExportPrefix",              getPluginAUExportPrefix (project).toString());
-        flags.set ("JucePlugin_AUExportPrefixQuoted",        getPluginAUExportPrefix (project).toString().quoted());
+        flags.set ("JucePlugin_AUExportPrefixQuoted",        valueToStringLiteral (getPluginAUExportPrefix (project)));
         flags.set ("JucePlugin_AUManufacturerCode",          "JucePlugin_ManufacturerCode");
         flags.set ("JucePlugin_CFBundleIdentifier",          project.getBundleIdentifier().toString());
         flags.set ("JucePlugin_RTASCategory",                getPluginRTASCategoryCode (project));
