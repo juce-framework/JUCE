@@ -1084,7 +1084,7 @@ public:
 
     tresult PLUGIN_API process (Vst::ProcessData& data) override
     {
-        if (pluginInstance == nullptr || processContext.sampleRate <= 0.0)
+        if (pluginInstance == nullptr)
             return kResultFalse;
 
         if (data.processContext != nullptr)
