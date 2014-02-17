@@ -104,6 +104,9 @@ LookAndFeel_V2::LookAndFeel_V2()
         ComboBox::backgroundColourId,               0xffffffff,
         ComboBox::arrowColourId,                    0x99000000,
 
+        PropertyComponent::backgroundColourId,      0x66ffffff,
+        PropertyComponent::labelTextColourId,       0xff000000,
+
         TextPropertyComponent::backgroundColourId,  0xffffffff,
         TextPropertyComponent::textColourId,        0xff000000,
         TextPropertyComponent::outlineColourId,     standardOutlineColour,
@@ -2302,20 +2305,16 @@ void LookAndFeel_V2::drawPropertyPanelSectionHeader (Graphics& g, const String& 
     g.drawText (name, textX, 0, width - textX - 4, height, Justification::centredLeft, true);
 }
 
-void LookAndFeel_V2::drawPropertyComponentBackground (Graphics& g, int width, int height,
-                                                   PropertyComponent&)
+void LookAndFeel_V2::drawPropertyComponentBackground (Graphics& g, int width, int height, PropertyComponent& component)
 {
-    g.setColour (Colour (0x66ffffff));
+    g.setColour (component.findColour (PropertyComponent::backgroundColourId));
     g.fillRect (0, 0, width, height - 1);
 }
 
-void LookAndFeel_V2::drawPropertyComponentLabel (Graphics& g, int, int height,
-                                              PropertyComponent& component)
+void LookAndFeel_V2::drawPropertyComponentLabel (Graphics& g, int, int height, PropertyComponent& component)
 {
-    g.setColour (Colours::black);
-
-    if (! component.isEnabled())
-        g.setOpacity (0.6f);
+    g.setColour (component.findColour (PropertyComponent::labelTextColourId)
+                    .withMultipliedAlpha (component.isEnabled() ? 1.0f : 0.6f));
 
     g.setFont (jmin (height, 24) * 0.65f);
 
