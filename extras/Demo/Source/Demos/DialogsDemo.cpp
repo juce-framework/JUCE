@@ -62,6 +62,27 @@ public:
         setStatusMessage ("Finishing off the last few bits and pieces!");
         wait (2000);
     }
+
+    // This method gets called on the message thread once our thread has finished..
+    void threadComplete (bool userPressedCancel) override
+    {
+        if (userPressedCancel)
+        {
+            AlertWindow::showMessageBoxAsync (AlertWindow::WarningIcon,
+                                              "Progress window",
+                                              "You pressed cancel!");
+        }
+        else
+        {
+            // thread finished normally..
+            AlertWindow::showMessageBoxAsync (AlertWindow::WarningIcon,
+                                              "Progress window",
+                                              "Thread finished ok!");
+        }
+
+        // ..and clean up by deleting our thread object..
+        delete this;
+    }
 };
 
 
@@ -239,24 +260,9 @@ private:
         }
         else if (type == progressWindow)
         {
-            DemoBackgroundThread demoThread;
-
-           #if JUCE_MODAL_LOOPS_PERMITTED
-            if (demoThread.runThread())
-            {
-                // thread finished normally..
-                AlertWindow::showMessageBoxAsync (AlertWindow::WarningIcon,
-                                                  "Progress window",
-                                                  "Thread finished ok!");
-            }
-            else
-            {
-                // user pressed the cancel button..
-                AlertWindow::showMessageBoxAsync (AlertWindow::WarningIcon,
-                                                  "Progress window",
-                                                  "You pressed cancel!");
-            }
-           #endif
+            // This will launch our ThreadWithProgressWindow in a modal state. (Our subclass
+            // will take care of deleting the object when the task has finished)
+            (new DemoBackgroundThread())->launchThread();
         }
         else if (type >= loadChooser && type <= saveChooser)
         {
