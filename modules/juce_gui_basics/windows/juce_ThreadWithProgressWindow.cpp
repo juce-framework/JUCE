@@ -28,7 +28,7 @@ ThreadWithProgressWindow::ThreadWithProgressWindow (const String& title,
                                                     const int cancellingTimeOutMs,
                                                     const String& cancelButtonText,
                                                     Component* componentToCentreAround)
-   : Thread ("Juce Progress Window"),
+   : Thread ("ThreadWithProgressWindow"),
      progress (0.0),
      timeOutMsWhenCancelling (cancellingTimeOutMs),
      wasCancelledByUser (false)
