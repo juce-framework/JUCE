@@ -151,7 +151,8 @@ public:
     */
     FloatType getAngleToPoint (Point other) const noexcept
     {
-        return static_cast<FloatType> (std::atan2 (other.x - x, y - other.y));
+        return static_cast<FloatType> (std::atan2 (static_cast<FloatType> (other.x - x),
+                                                   static_cast<FloatType> (y - other.y)));
     }
 
     /** Returns the point that would be reached by rotating this point clockwise
