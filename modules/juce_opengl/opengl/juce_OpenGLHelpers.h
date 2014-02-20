@@ -97,29 +97,5 @@ public:
    #endif
 };
 
-//==============================================================================
-/**
-    Used as a local object while rendering, this will create a temporary texture ID
-    from an image in the quickest way possible.
-
-    If the image is backed by an OpenGL framebuffer, it will use that directly; otherwise,
-    this object will create a temporary texture or framebuffer and copy the image.
-*/
-class JUCE_API  OpenGLTextureFromImage
-{
-public:
-    OpenGLTextureFromImage (const Image& image);
-    ~OpenGLTextureFromImage();
-
-    GLuint textureID;
-    const int imageWidth, imageHeight;
-    float fullWidthProportion, fullHeightProportion;
-
-private:
-    ScopedPointer<OpenGLTexture> texture;
-
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OpenGLTextureFromImage)
-};
-
 
 #endif   // JUCE_OPENGLHELPERS_H_INCLUDED

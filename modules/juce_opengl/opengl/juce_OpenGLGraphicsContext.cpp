@@ -25,6 +25,171 @@
 namespace OpenGLRendering
 {
 
+struct TextureInfo
+{
+    GLuint textureID;
+    int imageWidth, imageHeight;
+    float fullWidthProportion, fullHeightProportion;
+};
+
+//==============================================================================
+// This list persists in the OpenGLContext, and will re-use cached textures which
+// are created from Images.
+struct CachedImageList  : public ReferenceCountedObject,
+                          private ImagePixelData::Listener
+{
+    CachedImageList (size_t totalCacheSizeInPixels = 8 * 1024 * 1024) noexcept
+        : totalSize (0), maxCacheSize (totalCacheSizeInPixels) {}
+
+    static CachedImageList* get (OpenGLContext& context)
+    {
+        const char cacheValueID[] = "CachedImages";
+        CachedImageList* list = static_cast<CachedImageList*> (context.getAssociatedObject (cacheValueID));
+
+        if (list == nullptr)
+        {
+            list = new CachedImageList();
+            context.setAssociatedObject (cacheValueID, list);
+        }
+
+        return list;
+    }
+
+    TextureInfo getTextureFor (const Image& image)
+    {
+        ImagePixelData* const pixelData = image.getPixelData();
+
+        CachedImage* c = findCachedImage (pixelData);
+
+        if (c == nullptr)
+        {
+            if (OpenGLFrameBuffer* const fb = OpenGLImageType::getFrameBufferFrom (image))
+            {
+                TextureInfo t;
+                t.textureID = fb->getTextureID();
+                t.imageWidth = image.getWidth();
+                t.imageHeight = image.getHeight();
+                t.fullWidthProportion  = 1.0f;
+                t.fullHeightProportion = 1.0f;
+
+                return t;
+            }
+
+            c = images.add (new CachedImage (*this, pixelData));
+            totalSize += c->imageSize;
+
+            while (totalSize > maxCacheSize && images.size() > 1 && totalSize > 0)
+                removeOldestItem();
+        }
+
+        return c->getTextureInfo();
+    }
+
+    typedef ReferenceCountedObjectPtr<CachedImageList> Ptr;
+
+private:
+    void imageDataChanged (ImagePixelData* im) override
+    {
+        if (CachedImage* c = findCachedImage (im))
+            c->texture.release();
+    }
+
+    void imageDataBeingDeleted (ImagePixelData* im) override
+    {
+        for (int i = images.size(); --i >= 0;)
+        {
+            if (images.getUnchecked(i)->pixelData == im)
+            {
+                totalSize -= images.getUnchecked(i)->imageSize;
+                images.remove (i);
+                break;
+            }
+        }
+    }
+
+    struct CachedImage
+    {
+        CachedImage (CachedImageList& list, ImagePixelData* im)
+            : owner (list), pixelData (im),
+              lastUsed (Time::getCurrentTime()),
+              imageSize (im->width * im->height)
+        {
+            pixelData->listeners.add (&owner);
+        }
+
+        ~CachedImage()
+        {
+            if (pixelData != nullptr)
+                pixelData->listeners.remove (&owner);
+        }
+
+        TextureInfo getTextureInfo()
+        {
+            TextureInfo t;
+
+            if (texture.getTextureID() == 0)
+                texture.loadImage (Image (pixelData));
+
+            t.textureID = texture.getTextureID();
+            t.imageWidth = pixelData->width;
+            t.imageHeight = pixelData->height;
+            t.fullWidthProportion  = t.imageWidth  / (float) texture.getWidth();
+            t.fullHeightProportion = t.imageHeight / (float) texture.getHeight();
+
+            lastUsed = Time::getCurrentTime();
+
+            return t;
+        }
+
+        CachedImageList& owner;
+        ImagePixelData* pixelData;
+        OpenGLTexture texture;
+        Time lastUsed;
+        const size_t imageSize;
+
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CachedImage)
+    };
+
+    OwnedArray<CachedImage> images;
+    size_t totalSize, maxCacheSize;
+
+    CachedImage* findCachedImage (ImagePixelData* const pixelData) const
+    {
+        for (int i = 0; i < images.size(); ++i)
+        {
+            CachedImage* c = images.getUnchecked(i);
+
+            if (c->pixelData == pixelData)
+                return c;
+        }
+
+        return nullptr;
+    }
+
+    void removeOldestItem()
+    {
+        CachedImage* oldest = nullptr;
+
+        for (int i = 0; i < images.size(); ++i)
+        {
+            CachedImage* c = images.getUnchecked(i);
+
+            if (oldest == nullptr || c->lastUsed < oldest->lastUsed)
+                oldest = c;
+        }
+
+        if (oldest != nullptr)
+        {
+            totalSize -= oldest->imageSize;
+            images.removeObject (oldest);
+        }
+    }
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CachedImageList)
+};
+
+
+//==============================================================================
 struct Target
 {
     Target (OpenGLContext& c, GLuint fbID, int width, int height) noexcept
@@ -466,13 +631,13 @@ public:
             imageLimits.set (fullWidthProportion, fullHeightProportion);
         }
 
-        void setMatrix (const AffineTransform& trans, const OpenGLTextureFromImage& im,
+        void setMatrix (const AffineTransform& trans, const TextureInfo& textureInfo,
                         const float targetX, const float targetY,
                         bool isForTiling) const
         {
             setMatrix (trans,
-                       im.imageWidth, im.imageHeight,
-                       im.fullWidthProportion, im.fullHeightProportion,
+                       textureInfo.imageWidth, textureInfo.imageHeight,
+                       textureInfo.fullWidthProportion, textureInfo.fullHeightProportion,
                        targetX, targetY, isForTiling);
         }
 
@@ -1134,6 +1299,7 @@ public:
         JUCE_CHECK_OPENGL_ERROR
         activeTextures.clear();
         shaderQuadQueue.initialise();
+        cachedImageList = CachedImageList::get (t.context);
         JUCE_CHECK_OPENGL_ERROR
     }
 
@@ -1257,7 +1423,7 @@ public:
         JUCE_CHECK_OPENGL_ERROR
     }
 
-    void setShaderForTiledImageFill (const OpenGLTextureFromImage& image, const AffineTransform& transform,
+    void setShaderForTiledImageFill (const TextureInfo& textureInfo, const AffineTransform& transform,
                                      const int maskTextureID, const Rectangle<int>* const maskArea, bool isTiledFill)
     {
         blendMode.setPremultipliedBlendingMode (shaderQuadQueue);
@@ -1269,7 +1435,7 @@ public:
 
         if (maskArea != nullptr)
         {
-            activeTextures.setTwoTextureMode (shaderQuadQueue, image.textureID, (GLuint) maskTextureID);
+            activeTextures.setTwoTextureMode (shaderQuadQueue, textureInfo.textureID, (GLuint) maskTextureID);
 
             if (isTiledFill)
             {
@@ -1287,7 +1453,7 @@ public:
         else
         {
             activeTextures.setSingleTextureMode (shaderQuadQueue);
-            activeTextures.bindTexture (image.textureID);
+            activeTextures.bindTexture (textureInfo.textureID);
 
             if (isTiledFill)
             {
@@ -1301,7 +1467,7 @@ public:
             }
         }
 
-        imageParams->setMatrix (transform, image, (float) target.bounds.getX(), (float) target.bounds.getY(), isTiledFill);
+        imageParams->setMatrix (transform, textureInfo, (float) target.bounds.getX(), (float) target.bounds.getY(), isTiledFill);
 
         if (maskParams != nullptr)
             maskParams->setBounds (*maskArea, target, 1);
@@ -1314,6 +1480,8 @@ public:
     StateHelpers::TextureCache textureCache;
     StateHelpers::CurrentShader currentShader;
     StateHelpers::ShaderQuadQueue shaderQuadQueue;
+
+    CachedImageList::Ptr cachedImageList;
 
 private:
     GLuint previousFrameBufferTarget;
@@ -1434,8 +1602,7 @@ public:
                                  const AffineTransform& trans, Graphics::ResamplingQuality, bool tiledFill) const
     {
         state->shaderQuadQueue.flush();
-        OpenGLTextureFromImage image (src);
-        state->setShaderForTiledImageFill (image, trans, 0, nullptr, tiledFill);
+        state->setShaderForTiledImageFill (state->cachedImageList->getTextureFor (src), trans, 0, nullptr, tiledFill);
 
         state->shaderQuadQueue.add (iter, PixelARGB ((uint8) alpha, (uint8) alpha, (uint8) alpha, (uint8) alpha));
         state->shaderQuadQueue.flush();

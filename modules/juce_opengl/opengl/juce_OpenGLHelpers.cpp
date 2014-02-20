@@ -253,30 +253,3 @@ void OpenGLHelpers::fillRect (const Rectangle<int>& rect)
     glDrawArrays (GL_TRIANGLE_STRIP, 0, 4);
 }
 #endif
-
-//==============================================================================
-OpenGLTextureFromImage::OpenGLTextureFromImage (const Image& image)
-    : imageWidth (image.getWidth()),
-      imageHeight (image.getHeight())
-{
-    JUCE_CHECK_OPENGL_ERROR
-    if (OpenGLFrameBuffer* const fb = OpenGLImageType::getFrameBufferFrom (image))
-    {
-        textureID = fb->getTextureID();
-        fullWidthProportion  = 1.0f;
-        fullHeightProportion = 1.0f;
-    }
-    else
-    {
-        texture = new OpenGLTexture();
-        texture->loadImage (image);
-        textureID = texture->getTextureID();
-
-        fullWidthProportion  = imageWidth  / (float) texture->getWidth();
-        fullHeightProportion = imageHeight / (float) texture->getHeight();
-    }
-
-    JUCE_CHECK_OPENGL_ERROR
-}
-
-OpenGLTextureFromImage::~OpenGLTextureFromImage() {}

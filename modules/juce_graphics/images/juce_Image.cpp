@@ -31,6 +31,12 @@ ImagePixelData::ImagePixelData (const Image::PixelFormat format, const int w, co
 
 ImagePixelData::~ImagePixelData()
 {
+    listeners.call (&Listener::imageDataBeingDeleted, this);
+}
+
+void ImagePixelData::sendDataChangeMessage()
+{
+    listeners.call (&Listener::imageDataChanged, this);
 }
 
 //==============================================================================
@@ -69,15 +75,19 @@ public:
 
     LowLevelGraphicsContext* createLowLevelContext() override
     {
+        sendDataChangeMessage();
         return new LowLevelGraphicsSoftwareRenderer (Image (this));
     }
 
-    void initialiseBitmapData (Image::BitmapData& bitmap, int x, int y, Image::BitmapData::ReadWriteMode) override
+    void initialiseBitmapData (Image::BitmapData& bitmap, int x, int y, Image::BitmapData::ReadWriteMode mode) override
     {
         bitmap.data = imageData + x * pixelStride + y * lineStride;
         bitmap.pixelFormat = pixelFormat;
         bitmap.lineStride = lineStride;
         bitmap.pixelStride = pixelStride;
+
+        if (mode != Image::BitmapData::readOnly)
+            sendDataChangeMessage();
     }
 
     ImagePixelData* clone() override
@@ -146,6 +156,9 @@ public:
     void initialiseBitmapData (Image::BitmapData& bitmap, int x, int y, Image::BitmapData::ReadWriteMode mode) override
     {
         image->initialiseBitmapData (bitmap, x + area.getX(), y + area.getY(), mode);
+
+        if (mode != Image::BitmapData::readOnly)
+            sendDataChangeMessage();
     }
 
     ImagePixelData* clone() override

@@ -455,6 +455,19 @@ public:
 
     typedef ReferenceCountedObjectPtr<ImagePixelData> Ptr;
 
+    //==============================================================================
+    struct Listener
+    {
+        virtual ~Listener() {}
+
+        virtual void imageDataChanged (ImagePixelData*) = 0;
+        virtual void imageDataBeingDeleted (ImagePixelData*) = 0;
+    };
+
+    ListenerList<Listener> listeners;
+
+    void sendDataChangeMessage();
+
 private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ImagePixelData)
 };
