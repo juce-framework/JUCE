@@ -170,7 +170,6 @@ namespace
         flags.set ("JucePlugin_AAXIdentifier",               project.getAAXIdentifier().toString());
         flags.set ("JucePlugin_AAXManufacturerCode",         "JucePlugin_ManufacturerCode");
         flags.set ("JucePlugin_AAXProductId",                "JucePlugin_PluginCode");
-        flags.set ("JucePlugin_AAXPluginId",                 "JucePlugin_PluginCode");
         flags.set ("JucePlugin_AAXCategory",                 getPluginAAXCategory (project).toString());
         flags.set ("JucePlugin_AAXDisableBypass",            valueToBool (getPluginAAXBypassDisabled (project)));
 
