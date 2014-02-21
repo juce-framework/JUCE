@@ -119,15 +119,18 @@ struct AutoResizingNSViewComponentWithParent  : public AutoResizingNSViewCompone
     {
         if (NSView* parent = (NSView*) getView())
         {
-            if (NSView* child = [[parent subviews] objectAtIndex: 0])
+            if ([[parent subviews] count] > 0)
             {
-                NSRect f = [parent frame];
-                NSSize newSize = [child frame].size;
-
-                if (f.size.width != newSize.width || f.size.height != newSize.height)
+                if (NSView* child = [[parent subviews] objectAtIndex: 0])
                 {
-                    f.size = newSize;
-                    [parent setFrame: f];
+                    NSRect f = [parent frame];
+                    NSSize newSize = [child frame].size;
+
+                    if (f.size.width != newSize.width || f.size.height != newSize.height)
+                    {
+                        f.size = newSize;
+                        [parent setFrame: f];
+                    }
                 }
             }
         }
