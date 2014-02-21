@@ -3210,6 +3210,11 @@ void Desktop::Displays::findDisplays (float masterScale)
     if (monitors.size() == 0)
         monitors.add (MonitorInfo (rectangleFromRECT (getWindowRect (GetDesktopWindow())), true));
 
+    // make sure the first in the list is the main monitor
+    for (int i = 1; i < monitors.size(); ++i)
+        if (monitors.getReference(i).isMain)
+            monitors.swap (i, 0);
+
     RECT workArea;
     SystemParametersInfo (SPI_GETWORKAREA, 0, &workArea, 0);
 
