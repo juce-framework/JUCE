@@ -194,7 +194,7 @@ public:
                                         .getDisplayContaining (component.getScreenBounds().getCentre()).scale;
 
             Rectangle<int> newArea (peer->getComponent().getLocalArea (&component, component.getLocalBounds())
-                                                        .withPosition (0, 0)
+                                                        .withZeroOrigin()
                                      * newScale);
 
             if (scale != newScale || viewportArea != newArea)
