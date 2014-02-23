@@ -334,20 +334,6 @@ bool OpenGLFrameBuffer::writePixels (const PixelARGB* data, const Rectangle<int>
     glDisable (GL_BLEND);
     JUCE_CHECK_OPENGL_ERROR
 
-   #if JUCE_OPENGL_ES && JUCE_USE_OPENGL_FIXED_FUNCTION
-    OpenGLTexture tex;
-    tex.loadARGBFlipped (data, area.getWidth(), area.getHeight());
-
-    const int texH = tex.getHeight();
-    tex.bind();
-    const GLint cropRect[4] = { 0, texH - area.getHeight(), area.getWidth(), area.getHeight() };
-    glTexParameteriv (GL_TEXTURE_2D, GL_TEXTURE_CROP_RECT_OES, cropRect);
-    glEnable (GL_TEXTURE_2D);
-    clearGLError();
-    glColor4f (1.0f, 1.0f, 1.0f, 1.0f);
-    glDrawTexiOES (area.getX(), area.getY(), 1, area.getWidth(), area.getHeight());
-    glBindTexture (GL_TEXTURE_2D, 0);
-   #else
     OpenGLTexture tex;
     tex.loadARGB (data, area.getWidth(), area.getHeight());
 
@@ -355,69 +341,7 @@ bool OpenGLFrameBuffer::writePixels (const PixelARGB* data, const Rectangle<int>
     pimpl->context.copyTexture (area, Rectangle<int> (area.getX(), area.getY(),
                                                       tex.getWidth(), tex.getHeight()),
                                 pimpl->width, pimpl->height, true);
-   #endif
 
     JUCE_CHECK_OPENGL_ERROR
     return true;
 }
-
-#if JUCE_USE_OPENGL_FIXED_FUNCTION
-void OpenGLFrameBuffer::draw2D (float x1, float y1,
-                                float x2, float y2,
-                                float x3, float y3,
-                                float x4, float y4,
-                                Colour colour) const
-{
-    if (pimpl != nullptr)
-    {
-        glBindTexture (GL_TEXTURE_2D, pimpl->textureID);
-        OpenGLHelpers::drawQuad2D (x1, y1, x2, y2, x3, y3, x4, y4, colour);
-        glBindTexture (GL_TEXTURE_2D, 0);
-    }
-}
-
-void OpenGLFrameBuffer::draw3D (float x1, float y1, float z1,
-                                float x2, float y2, float z2,
-                                float x3, float y3, float z3,
-                                float x4, float y4, float z4,
-                                Colour colour) const
-{
-    if (pimpl != nullptr)
-    {
-        glBindTexture (GL_TEXTURE_2D, pimpl->textureID);
-        OpenGLHelpers::drawQuad3D (x1, y1, z1, x2, y2, z2, x3, y3, z3, x4, y4, z4, colour);
-        glBindTexture (GL_TEXTURE_2D, 0);
-    }
-}
-
-void OpenGLFrameBuffer::drawAt (float x1, float y1) const
-{
-    if (pimpl != nullptr)
-    {
-       #if ! JUCE_ANDROID
-        glEnable (GL_TEXTURE_2D);
-        clearGLError();
-       #endif
-        glBindTexture (GL_TEXTURE_2D, pimpl->textureID);
-
-        glDisableClientState (GL_COLOR_ARRAY);
-        glDisableClientState (GL_NORMAL_ARRAY);
-
-        const GLfloat vertices[] = { x1, y1,
-                                     x1 + pimpl->width, y1,
-                                     x1, y1 + pimpl->height,
-                                     x1 + pimpl->width, y1 + pimpl->height };
-
-        const GLfloat textureCoords[] = { 0, 0, 1.0f, 0, 0, 1.0f, 1.0f, 1.0f };
-
-        glEnableClientState (GL_VERTEX_ARRAY);
-        glVertexPointer (2, GL_FLOAT, 0, vertices);
-
-        glEnableClientState (GL_TEXTURE_COORD_ARRAY);
-        glTexCoordPointer (2, GL_FLOAT, 0, textureCoords);
-
-        glDrawArrays (GL_TRIANGLE_STRIP, 0, 4);
-        glBindTexture (GL_TEXTURE_2D, 0);
-    }
-}
-#endif

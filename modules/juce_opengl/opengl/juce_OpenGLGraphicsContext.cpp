@@ -230,8 +230,6 @@ struct Target
     Rectangle<int> bounds;
 };
 
-#if JUCE_USE_OPENGL_SHADERS
-
 //==============================================================================
 class PositionedTexture
 {
@@ -1660,8 +1658,6 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ShaderContext)
 };
 
-#endif
-
 class NonShaderContext   : public LowLevelGraphicsSoftwareRenderer
 {
 public:
@@ -1709,10 +1705,8 @@ private:
 LowLevelGraphicsContext* createOpenGLContext (const Target&);
 LowLevelGraphicsContext* createOpenGLContext (const Target& target)
 {
-   #if JUCE_USE_OPENGL_SHADERS
     if (target.context.areShadersAvailable())
         return new ShaderContext (target);
-   #endif
 
     Image tempImage (Image::ARGB, target.bounds.getWidth(), target.bounds.getHeight(), true, SoftwareImageType());
     return new NonShaderContext (target, tempImage);

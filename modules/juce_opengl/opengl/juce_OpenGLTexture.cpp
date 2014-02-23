@@ -184,27 +184,3 @@ void OpenGLTexture::unbind() const
 {
     glBindTexture (GL_TEXTURE_2D, 0);
 }
-
-#if JUCE_USE_OPENGL_FIXED_FUNCTION
-void OpenGLTexture::draw2D (float x1, float y1,
-                            float x2, float y2,
-                            float x3, float y3,
-                            float x4, float y4,
-                            Colour colour) const
-{
-    bind();
-    OpenGLHelpers::drawQuad2D (x1, y1, x2, y2, x3, y3, x4, y4, colour);
-    unbind();
-}
-
-void OpenGLTexture::draw3D (float x1, float y1, float z1,
-                            float x2, float y2, float z2,
-                            float x3, float y3, float z3,
-                            float x4, float y4, float z4,
-                            Colour colour) const
-{
-    bind();
-    OpenGLHelpers::drawQuad3D (x1, y1, z1, x2, y2, z2, x3, y3, z3, x4, y4, z4, colour);
-    unbind();
-}
-#endif

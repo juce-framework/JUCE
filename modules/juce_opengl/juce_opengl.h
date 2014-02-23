@@ -32,7 +32,6 @@
 
 #if JUCE_IOS || JUCE_ANDROID
  #define JUCE_OPENGL_ES 1
- #define JUCE_USE_OPENGL_FIXED_FUNCTION 0
 #endif
 
 #if JUCE_WINDOWS
@@ -63,14 +62,6 @@
  #include "OpenGL/glext.h"
 #elif JUCE_ANDROID
  #include <GLES2/gl2.h>
-#endif
-
-#if ! defined (JUCE_USE_OPENGL_SHADERS)
- #define JUCE_USE_OPENGL_SHADERS 1
-#endif
-
-#ifndef JUCE_USE_OPENGL_FIXED_FUNCTION
- #define JUCE_USE_OPENGL_FIXED_FUNCTION 1
 #endif
 
 //=============================================================================

@@ -32,7 +32,7 @@
 class JUCE_API  OpenGLShaderProgram
 {
 public:
-    OpenGLShaderProgram (const OpenGLContext& context) noexcept;
+    OpenGLShaderProgram (const OpenGLContext&) noexcept;
     ~OpenGLShaderProgram() noexcept;
 
     /** Returns the version of GLSL that the current context supports.

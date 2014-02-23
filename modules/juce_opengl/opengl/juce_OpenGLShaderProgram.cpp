@@ -22,8 +22,6 @@
   ==============================================================================
 */
 
-#if JUCE_USE_OPENGL_SHADERS
-
 OpenGLShaderProgram::OpenGLShaderProgram (const OpenGLContext& c) noexcept
     : context (c)
 {
@@ -148,5 +146,3 @@ void OpenGLShaderProgram::Uniform::set (const GLfloat* values, GLsizei numValues
 void OpenGLShaderProgram::Uniform::setMatrix2 (const GLfloat* v, GLint num, GLboolean trns) const noexcept { context.extensions.glUniformMatrix2fv (uniformID, num, trns, v); }
 void OpenGLShaderProgram::Uniform::setMatrix3 (const GLfloat* v, GLint num, GLboolean trns) const noexcept { context.extensions.glUniformMatrix3fv (uniformID, num, trns, v); }
 void OpenGLShaderProgram::Uniform::setMatrix4 (const GLfloat* v, GLint num, GLboolean trns) const noexcept { context.extensions.glUniformMatrix4fv (uniformID, num, trns, v); }
-
-#endif
