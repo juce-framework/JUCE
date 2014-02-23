@@ -85,7 +85,7 @@ public:
     void shutdownOnRenderThread()           { deactivateCurrentContext(); }
 
     static void deactivateCurrentContext()  { wglMakeCurrent (0, 0); }
-    bool makeActive() const noexcept        { return wglMakeCurrent (dc, renderContext) != FALSE; }
+    bool makeActive() const noexcept        { return isActive() || wglMakeCurrent (dc, renderContext) != FALSE; }
     bool isActive() const noexcept          { return wglGetCurrentContext() == renderContext; }
     void swapBuffers() const noexcept       { SwapBuffers (dc); }
 
