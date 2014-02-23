@@ -658,7 +658,7 @@ String MidiMessage::getTextFromTextMetaEvent() const
                    CharPointer_UTF8 (textData + getMetaEventLength()));
 }
 
-MidiMessage MidiMessage::textMetaEvent (int type, const StringRef& text)
+MidiMessage MidiMessage::textMetaEvent (int type, StringRef text)
 {
     jassert (type > 0 && type < 16)
 
