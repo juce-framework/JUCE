@@ -354,12 +354,13 @@ public:
                                      " gl_Position = vec4 (scaledPos.x - 1.0, 1.0 - scaledPos.y, 0, 1.0);"
                                      "}");
 
-            program.addFragmentShader (fragmentShader);
+            compiledOk = program.addFragmentShader (fragmentShader);
             program.link();
             JUCE_CHECK_OPENGL_ERROR
         }
 
         OpenGLShaderProgram program;
+        bool compiledOk;
     };
 
     struct ShaderBase   : public ShaderProgramHolder
@@ -1492,12 +1493,13 @@ class SavedState  : public RenderingHelpers::SavedStateBase<SavedState>
 
 public:
     SavedState (GLState* const s)
-        : BaseClass (s->target.bounds), state (s)
+        : BaseClass (s->target.bounds), state (s), isUsingCustomShader (false)
     {}
 
     SavedState (const SavedState& other)
         : BaseClass (other), font (other.font),
-          state (other.state), transparencyLayer (other.transparencyLayer),
+          state (other.state), isUsingCustomShader (false),
+          transparencyLayer (other.transparencyLayer),
           previousTarget (other.previousTarget.createCopy())
     {}
 
@@ -1618,9 +1620,13 @@ public:
     template <typename IteratorType>
     void fillWithSolidColour (IteratorType& iter, const PixelARGB colour, bool replaceContents) const
     {
-        state->activeTextures.disableTextures (state->shaderQuadQueue);
-        state->blendMode.setBlendMode (state->shaderQuadQueue, replaceContents);
-        state->setShader (state->currentShader.programs->solidColourProgram);
+        if (! isUsingCustomShader)
+        {
+            state->activeTextures.disableTextures (state->shaderQuadQueue);
+            state->blendMode.setBlendMode (state->shaderQuadQueue, replaceContents);
+            state->setShader (state->currentShader.programs->solidColourProgram);
+        }
+
         state->shaderQuadQueue.add (iter, colour);
     }
 
@@ -1631,16 +1637,21 @@ public:
         state->shaderQuadQueue.add (iter, fillType.colour.getPixelARGB());
     }
 
-    void fillRectWithCustomShader (OpenGLRendering::ShaderPrograms::ShaderBase& shader, const Rectangle<int>& area, Colour colour)
+    void fillRectWithCustomShader (OpenGLRendering::ShaderPrograms::ShaderBase& shader, const Rectangle<int>& area)
     {
         state->setShader (shader);
-        state->shaderQuadQueue.add (area, colour.getPixelARGB());
+        isUsingCustomShader = true;
+
+        fillRect (area, true);
+
+        isUsingCustomShader = false;
         state->currentShader.clearShader (state->shaderQuadQueue);
     }
 
     //==============================================================================
     Font font;
     GLState* state;
+    bool isUsingCustomShader;
 
 private:
     Image transparencyLayer;
@@ -1659,9 +1670,9 @@ public:
         stack.initialise (new SavedState (&glState));
     }
 
-    void fillRectWithCustomShader (ShaderPrograms::ShaderBase& shader, const Rectangle<int>& area, Colour colour)
+    void fillRectWithCustomShader (ShaderPrograms::ShaderBase& shader, const Rectangle<int>& area)
     {
-        static_cast<SavedState&> (*stack).fillRectWithCustomShader (shader, area, colour);
+        static_cast<SavedState&> (*stack).fillRectWithCustomShader (shader, area);
     }
 
     GLState glState;
@@ -1750,39 +1761,88 @@ void clearOpenGLGlyphCache()
 
 
 //==============================================================================
-struct OpenGLGraphicsContextCustomShader::Pimpl  : public OpenGLRendering::ShaderPrograms::ShaderBase
+struct CustomProgram  : public ReferenceCountedObject,
+                        public OpenGLRendering::ShaderPrograms::ShaderBase
 {
-    Pimpl (OpenGLRendering::ShaderContext& c, const String& fragmentShader)
+    CustomProgram (OpenGLRendering::ShaderContext& c, const String& fragmentShader)
         : ShaderBase (c.glState.target.context, fragmentShader.toRawUTF8())
     {
     }
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Pimpl)
-};
-
-OpenGLGraphicsContextCustomShader::OpenGLGraphicsContextCustomShader (Pimpl* p) : pimpl (p) {}
-OpenGLGraphicsContextCustomShader::~OpenGLGraphicsContextCustomShader() {}
-
-OpenGLGraphicsContextCustomShader* OpenGLGraphicsContextCustomShader::create (LowLevelGraphicsContext& gc, StringRef fragmentShaderCode)
-{
-    if (OpenGLRendering::ShaderContext* sc = dynamic_cast<OpenGLRendering::ShaderContext*> (&gc))
+    static CustomProgram* get (const String& hashName)
     {
-        ScopedPointer<Pimpl> p (new Pimpl (*sc, String (JUCE_DECLARE_VARYING_COLOUR JUCE_DECLARE_VARYING_PIXELPOS "\n") + fragmentShaderCode));
+        if (OpenGLContext* c = OpenGLContext::getCurrentContext())
+            return static_cast<CustomProgram*> (c->getAssociatedObject (hashName.toRawUTF8()));
 
-        if (! p->program.isLinked())
-            return nullptr;
-
-        return new OpenGLGraphicsContextCustomShader (p.release());
+        return nullptr;
     }
 
-    jassertfalse; // You've passed-in a non-GL context!
+    static CustomProgram* getOrCreate (LowLevelGraphicsContext& gc, const String& hashName, const String& code, String& errorMessage)
+    {
+        if (CustomProgram* c = get (hashName))
+            return c;
+
+        if (OpenGLRendering::ShaderContext* sc = dynamic_cast<OpenGLRendering::ShaderContext*> (&gc))
+        {
+            ReferenceCountedObjectPtr<CustomProgram> c (new CustomProgram (*sc, code));
+
+            if (c->compiledOk)
+            {
+                if (OpenGLContext* context = OpenGLContext::getCurrentContext())
+                {
+                    context->setAssociatedObject (hashName.toRawUTF8(), c);
+                    return c;
+                }
+            }
+
+            errorMessage = c->program.getLastError();
+        }
+
+        return nullptr;
+    }
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CustomProgram)
+};
+
+OpenGLGraphicsContextCustomShader::OpenGLGraphicsContextCustomShader (const String& fragmentShaderCode)
+    : code (String (JUCE_DECLARE_VARYING_COLOUR
+                    JUCE_DECLARE_VARYING_PIXELPOS
+                    "\nfloat pixelAlpha = frontColour.a;\n") + fragmentShaderCode),
+      hashName (String::toHexString (fragmentShaderCode.hashCode64()) + "_shader")
+{
+}
+
+OpenGLGraphicsContextCustomShader::~OpenGLGraphicsContextCustomShader()
+{
+    if (OpenGLContext* context = OpenGLContext::getCurrentContext())
+        context->setAssociatedObject (hashName.toRawUTF8(), nullptr);
+}
+
+OpenGLShaderProgram* OpenGLGraphicsContextCustomShader::getProgram (LowLevelGraphicsContext& gc) const
+{
+    String errorMessage;
+
+    if (CustomProgram* c = CustomProgram::getOrCreate (gc, hashName, code, errorMessage))
+        return &(c->program);
+
     return nullptr;
 }
 
-void OpenGLGraphicsContextCustomShader::fillRect (LowLevelGraphicsContext& gc, const Rectangle<int>& area, Colour colour) const
+void OpenGLGraphicsContextCustomShader::fillRect (LowLevelGraphicsContext& gc, const Rectangle<int>& area) const
 {
-    jassert (pimpl != nullptr);
+    String errorMessage;
 
     if (OpenGLRendering::ShaderContext* sc = dynamic_cast<OpenGLRendering::ShaderContext*> (&gc))
-        sc->fillRectWithCustomShader (*pimpl, area, colour);
+        if (CustomProgram* c = CustomProgram::getOrCreate (gc, hashName, code, errorMessage))
+            sc->fillRectWithCustomShader (*c, area);
+}
+
+Result OpenGLGraphicsContextCustomShader::checkCompilation (LowLevelGraphicsContext& gc)
+{
+    String errorMessage;
+
+    if (CustomProgram::getOrCreate (gc, hashName, code, errorMessage) != nullptr)
+        return Result::ok();
+
+    return Result::fail (errorMessage);
 }

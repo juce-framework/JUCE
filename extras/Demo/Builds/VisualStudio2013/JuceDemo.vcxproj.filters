@@ -403,6 +403,9 @@
     <ClCompile Include="..\..\Source\Demos\OpenGLDemo.cpp">
       <Filter>JuceDemo\Source\Demos</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Source\Demos\OpenGLDemo2D.cpp">
+      <Filter>JuceDemo\Source\Demos</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\Source\Demos\PropertiesDemo.cpp">
       <Filter>JuceDemo\Source\Demos</Filter>
     </ClCompile>

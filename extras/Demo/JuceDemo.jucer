@@ -250,6 +250,8 @@
         <FILE id="iii6RP" name="NetworkingDemo.cpp" compile="1" resource="0"
               file="Source/Demos/NetworkingDemo.cpp"/>
         <FILE id="r2PxPF" name="OpenGLDemo.cpp" compile="1" resource="0" file="Source/Demos/OpenGLDemo.cpp"/>
+        <FILE id="SXYKYN" name="OpenGLDemo2D.cpp" compile="1" resource="0"
+              file="Source/Demos/OpenGLDemo2D.cpp"/>
         <FILE id="b2eKRP" name="PropertiesDemo.cpp" compile="1" resource="0"
               file="Source/Demos/PropertiesDemo.cpp"/>
         <FILE id="cmVbyh" name="SystemInfoDemo.cpp" compile="1" resource="0"

@@ -739,9 +739,17 @@ void OpenGLContext::setAssociatedObject (const char* name, ReferenceCountedObjec
 
         if (index >= 0)
         {
-            c->associatedObjects.set (index, newObject);
+            if (newObject != nullptr)
+            {
+                c->associatedObjects.set (index, newObject);
+            }
+            else
+            {
+                c->associatedObjectNames.remove (index);
+                c->associatedObjects.remove (index);
+            }
         }
-        else
+        else if (newObject != nullptr)
         {
             c->associatedObjectNames.add (name);
             c->associatedObjects.add (newObject);

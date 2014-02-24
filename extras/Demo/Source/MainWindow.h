@@ -51,6 +51,7 @@ public:
     StringArray getRenderingEngines() const;
     int getActiveRenderingEngine() const;
     void setRenderingEngine (int index);
+    void setOpenGLRenderingEngine();
 
     // (returns the exploding JUCE logo path)
     static Path getJUCELogoPath();

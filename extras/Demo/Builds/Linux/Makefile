@@ -79,6 +79,7 @@ OBJECTS := \
   $(OBJDIR)/MultiTouch_595f3a2e.o \
   $(OBJDIR)/NetworkingDemo_fbd1b19f.o \
   $(OBJDIR)/OpenGLDemo_fdac55da.o \
+  $(OBJDIR)/OpenGLDemo2D_48eeadec.o \
   $(OBJDIR)/PropertiesDemo_8ff1a8de.o \
   $(OBJDIR)/SystemInfoDemo_984acd28.o \
   $(OBJDIR)/TimersAndEventsDemo_f2656547.o \
@@ -261,6 +262,11 @@ $(OBJDIR)/NetworkingDemo_fbd1b19f.o: ../../Source/Demos/NetworkingDemo.cpp
 $(OBJDIR)/OpenGLDemo_fdac55da.o: ../../Source/Demos/OpenGLDemo.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo "Compiling OpenGLDemo.cpp"
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/OpenGLDemo2D_48eeadec.o: ../../Source/Demos/OpenGLDemo2D.cpp
+	-@mkdir -p $(OBJDIR)
+	@echo "Compiling OpenGLDemo2D.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/PropertiesDemo_8ff1a8de.o: ../../Source/Demos/PropertiesDemo.cpp

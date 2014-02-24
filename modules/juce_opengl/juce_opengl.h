@@ -95,6 +95,7 @@ namespace juce
 
 class OpenGLTexture;
 class OpenGLFrameBuffer;
+class OpenGLShaderProgram;
 
 #include "native/juce_MissingGLDefinitions.h"
 #include "opengl/juce_OpenGLHelpers.h"

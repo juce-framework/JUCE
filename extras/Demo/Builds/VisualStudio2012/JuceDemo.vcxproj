@@ -159,6 +159,7 @@
     <ClCompile Include="..\..\Source\Demos\MultiTouch.cpp"/>
     <ClCompile Include="..\..\Source\Demos\NetworkingDemo.cpp"/>
     <ClCompile Include="..\..\Source\Demos\OpenGLDemo.cpp"/>
+    <ClCompile Include="..\..\Source\Demos\OpenGLDemo2D.cpp"/>
     <ClCompile Include="..\..\Source\Demos\PropertiesDemo.cpp"/>
     <ClCompile Include="..\..\Source\Demos\SystemInfoDemo.cpp"/>
     <ClCompile Include="..\..\Source\Demos\TimersAndEventsDemo.cpp"/>
