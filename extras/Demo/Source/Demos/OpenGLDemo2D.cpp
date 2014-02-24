@@ -120,8 +120,7 @@ public:
 
     void selectPreset (int preset)
     {
-        const ShaderPreset& p = getPresets()[preset];
-        fragmentDocument.replaceAllContent (p.fragmentShader);
+        fragmentDocument.replaceAllContent (getPresets()[preset].fragmentShader);
         startTimer (1);
     }
 
@@ -212,8 +211,8 @@ private:
                 "    " JUCE_MEDIUMP " vec4 colour2 = vec4 (0.0, 0.8, 0.6, 1.0);\n"
                 "    " JUCE_MEDIUMP " float distance = distance (pixelPos, vec2 (600.0, 500.0));\n"
                 "\n"
-                "    " JUCE_MEDIUMP " const float innerRadius = 200.0;\n"
-                "    " JUCE_MEDIUMP " const float outerRadius = 210.0;\n"
+                "    " JUCE_MEDIUMP " float innerRadius = 200.0;\n"
+                "    " JUCE_MEDIUMP " float outerRadius = 210.0;\n"
                 "\n"
                 "    if (distance < innerRadius)\n"
                 "        gl_FragColor = colour1;\n"

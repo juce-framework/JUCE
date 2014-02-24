@@ -354,13 +354,15 @@ public:
                                      " gl_Position = vec4 (scaledPos.x - 1.0, 1.0 - scaledPos.y, 0, 1.0);"
                                      "}");
 
-            compiledOk = program.addFragmentShader (fragmentShader);
+            if (! program.addFragmentShader (fragmentShader))
+                lastError = program.getLastError();
+
             program.link();
             JUCE_CHECK_OPENGL_ERROR
         }
 
         OpenGLShaderProgram program;
-        bool compiledOk;
+        String lastError;
     };
 
     struct ShaderBase   : public ShaderProgramHolder
@@ -1786,7 +1788,9 @@ struct CustomProgram  : public ReferenceCountedObject,
         {
             ReferenceCountedObjectPtr<CustomProgram> c (new CustomProgram (*sc, code));
 
-            if (c->compiledOk)
+            errorMessage = c->lastError;
+
+            if (errorMessage.isEmpty())
             {
                 if (OpenGLContext* context = OpenGLContext::getCurrentContext())
                 {
@@ -1794,8 +1798,6 @@ struct CustomProgram  : public ReferenceCountedObject,
                     return c;
                 }
             }
-
-            errorMessage = c->program.getLastError();
         }
 
         return nullptr;
@@ -1807,7 +1809,7 @@ struct CustomProgram  : public ReferenceCountedObject,
 OpenGLGraphicsContextCustomShader::OpenGLGraphicsContextCustomShader (const String& fragmentShaderCode)
     : code (String (JUCE_DECLARE_VARYING_COLOUR
                     JUCE_DECLARE_VARYING_PIXELPOS
-                    "\nfloat pixelAlpha = frontColour.a;\n") + fragmentShaderCode),
+                    "\n" JUCE_MEDIUMP " float pixelAlpha = frontColour.a;\n") + fragmentShaderCode),
       hashName (String::toHexString (fragmentShaderCode.hashCode64()) + "_shader")
 {
 }
