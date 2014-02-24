@@ -1230,7 +1230,12 @@ Typeface::Ptr Typeface::createSystemTypefaceFor (const Font& font)
 
 Typeface::Ptr Typeface::createSystemTypefaceFor (const void* data, size_t dataSize)
 {
+   #if JUCE_CORETEXT_AVAILABLE
     return new OSXTypeface (data, dataSize);
+   #else
+    jassertfalse; // You need CoreText enabled to use this feature!
+    return nullptr;
+   #endif
 }
 
 void Typeface::scanFolderForFonts (const File&)
