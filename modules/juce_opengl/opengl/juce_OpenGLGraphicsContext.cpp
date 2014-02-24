@@ -1631,6 +1631,13 @@ public:
         state->shaderQuadQueue.add (iter, fillType.colour.getPixelARGB());
     }
 
+    void fillRectWithCustomShader (OpenGLRendering::ShaderPrograms::ShaderBase& shader, const Rectangle<int>& area, Colour colour)
+    {
+        state->setShader (shader);
+        state->shaderQuadQueue.add (area, colour.getPixelARGB());
+        state->currentShader.clearShader (state->shaderQuadQueue);
+    }
+
     //==============================================================================
     Font font;
     GLState* state;
@@ -1644,7 +1651,7 @@ private:
 
 
 //==============================================================================
-class ShaderContext   : public RenderingHelpers::StackBasedLowLevelGraphicsContext <SavedState>
+class ShaderContext   : public RenderingHelpers::StackBasedLowLevelGraphicsContext<SavedState>
 {
 public:
     ShaderContext (const Target& target)  : glState (target)
@@ -1652,7 +1659,11 @@ public:
         stack.initialise (new SavedState (&glState));
     }
 
-private:
+    void fillRectWithCustomShader (ShaderPrograms::ShaderBase& shader, const Rectangle<int>& area, Colour colour)
+    {
+        static_cast<SavedState&> (*stack).fillRectWithCustomShader (shader, area, colour);
+    }
+
     GLState glState;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ShaderContext)
@@ -1735,4 +1746,43 @@ void clearOpenGLGlyphCache();
 void clearOpenGLGlyphCache()
 {
     OpenGLRendering::SavedState::GlyphCacheType::getInstance().reset();
+}
+
+
+//==============================================================================
+struct OpenGLGraphicsContextCustomShader::Pimpl  : public OpenGLRendering::ShaderPrograms::ShaderBase
+{
+    Pimpl (OpenGLRendering::ShaderContext& c, const String& fragmentShader)
+        : ShaderBase (c.glState.target.context, fragmentShader.toRawUTF8())
+    {
+    }
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Pimpl)
+};
+
+OpenGLGraphicsContextCustomShader::OpenGLGraphicsContextCustomShader (Pimpl* p) : pimpl (p) {}
+OpenGLGraphicsContextCustomShader::~OpenGLGraphicsContextCustomShader() {}
+
+OpenGLGraphicsContextCustomShader* OpenGLGraphicsContextCustomShader::create (LowLevelGraphicsContext& gc, StringRef fragmentShaderCode)
+{
+    if (OpenGLRendering::ShaderContext* sc = dynamic_cast<OpenGLRendering::ShaderContext*> (&gc))
+    {
+        ScopedPointer<Pimpl> p (new Pimpl (*sc, String (JUCE_DECLARE_VARYING_COLOUR JUCE_DECLARE_VARYING_PIXELPOS "\n") + fragmentShaderCode));
+
+        if (! p->program.isLinked())
+            return nullptr;
+
+        return new OpenGLGraphicsContextCustomShader (p.release());
+    }
+
+    jassertfalse; // You've passed-in a non-GL context!
+    return nullptr;
+}
+
+void OpenGLGraphicsContextCustomShader::fillRect (LowLevelGraphicsContext& gc, const Rectangle<int>& area, Colour colour) const
+{
+    jassert (pimpl != nullptr);
+
+    if (OpenGLRendering::ShaderContext* sc = dynamic_cast<OpenGLRendering::ShaderContext*> (&gc))
+        sc->fillRectWithCustomShader (*pimpl, area, colour);
 }

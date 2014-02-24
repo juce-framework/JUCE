@@ -80,7 +80,10 @@ public:
     bool link() noexcept;
 
     /** Get the output for the last shader compilation or link that failed. */
-    const String& getLastError() const noexcept            { return errorLog; }
+    const String& getLastError() const noexcept             { return errorLog; }
+
+    /** Returns true if the program is linked and ready for use. */
+    bool isLinked() const noexcept                          { return programID != 0; }
 
     /** Selects this program into the current context. */
     void use() const noexcept;

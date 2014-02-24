@@ -104,14 +104,6 @@ void OpenGLExtensionFunctions::initialise()
 
 #undef JUCE_GL_EXTENSION_FUNCTIONS
 
-#if JUCE_OPENGL_ES
- #define JUCE_MEDIUMP "mediump"
- #define JUCE_HIGHP   "highp"
-#else
- #define JUCE_MEDIUMP
- #define JUCE_HIGHP
-#endif
-
 #if JUCE_DEBUG && ! defined (JUCE_CHECK_OPENGL_ERROR)
 static const char* getGLErrorMessage (const GLenum e)
 {

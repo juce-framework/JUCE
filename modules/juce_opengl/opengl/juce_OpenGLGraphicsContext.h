@@ -46,4 +46,45 @@ LowLevelGraphicsContext* createOpenGLGraphicsContext (OpenGLContext& context,
                                                       int width, int height);
 
 
+//==============================================================================
+/** 
+    Used to create custom shaders for use with an openGL 2D rendering context.
+ 
+    Given a GL-based rendering context, you can write a fragment shader that applies some
+    kind of per-pixel effect.
+*/
+struct JUCE_API  OpenGLGraphicsContextCustomShader
+{
+    /** Destructor. */
+    ~OpenGLGraphicsContextCustomShader();
+
+    /** Attempts to compile and return a new shader object. 
+        This must be called only when an openGL context is active. It'll return nullptr
+        if the code fails to compile or some other error occurs.
+     
+        The shader code should be a normal fragment shader. As well as the usual variables, there
+        will be some extra ones: "frontColour", which is the colour that gets passed into the fillRect
+        method, and "pixelPos", which is a vec2 indicating the pixel position within the graphics context
+        of the pixel being drawn.
+    */
+    static OpenGLGraphicsContextCustomShader* create (LowLevelGraphicsContext&,
+                                                      StringRef fragmentShaderCode);
+
+    /** Applies the shader to a rectangle within the graphics context.
+        NB: This will ignore any clip region that is active.
+    */
+    void fillRect (LowLevelGraphicsContext&, const Rectangle<int>& area, Colour colour) const;
+
+private:
+    struct Pimpl;
+    friend struct Pimpl;
+    friend struct ContainerDeletePolicy<Pimpl>;
+    ScopedPointer<Pimpl> pimpl;
+
+    OpenGLGraphicsContextCustomShader (Pimpl*);
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OpenGLGraphicsContextCustomShader)
+};
+
+
 #endif   // JUCE_OPENGLGRAPHICSCONTEXT_H_INCLUDED
