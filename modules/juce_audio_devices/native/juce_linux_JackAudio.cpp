@@ -502,13 +502,9 @@ public:
         outputNames.clear();
         outputIds.clear();
 
-        if (juce_libjackHandle == nullptr)
-        {
-            juce_libjackHandle = dlopen ("libjack.so", RTLD_LAZY);
-
-            if (juce_libjackHandle == nullptr)
-                return;
-        }
+        if (juce_libjackHandle == nullptr)  juce_libjackHandle = dlopen ("libjack.so.0", RTLD_LAZY);
+        if (juce_libjackHandle == nullptr)  juce_libjackHandle = dlopen ("libjack.so",   RTLD_LAZY);
+        if (juce_libjackHandle == nullptr)  return;
 
         jack_status_t status;
 
