@@ -141,7 +141,7 @@ public:
     {
         ScopedPointer<MessageManagerLock> mmLock;
 
-        const Rectangle<int> screenBounds (component.getTopLevelComponent()->getBounds());
+        const Rectangle<int> screenBounds (component.getTopLevelComponent()->getScreenBounds());
 
         if (lastScreenBounds != screenBounds)
             updateViewportSize (false);
@@ -195,7 +195,7 @@ public:
     {
         if (ComponentPeer* peer = component.getPeer())
         {
-            lastScreenBounds = component.getTopLevelComponent()->getBounds();
+            lastScreenBounds = component.getTopLevelComponent()->getScreenBounds();
 
             const double newScale = Desktop::getInstance().getDisplays()
                                         .getDisplayContaining (lastScreenBounds.getCentre()).scale;
