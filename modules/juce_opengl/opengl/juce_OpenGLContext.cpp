@@ -141,6 +141,11 @@ public:
     {
         ScopedPointer<MessageManagerLock> mmLock;
 
+        const Rectangle<int> screenBounds (component.getTopLevelComponent()->getBounds());
+
+        if (lastScreenBounds != screenBounds)
+            updateViewportSize (false);
+
         const bool isUpdating = needsUpdate.compareAndSetBool (0, 1);
 
         if (context.renderComponents && isUpdating)
@@ -190,8 +195,10 @@ public:
     {
         if (ComponentPeer* peer = component.getPeer())
         {
+            lastScreenBounds = component.getTopLevelComponent()->getBounds();
+
             const double newScale = Desktop::getInstance().getDisplays()
-                                        .getDisplayContaining (component.getScreenBounds().getCentre()).scale;
+                                        .getDisplayContaining (lastScreenBounds.getCentre()).scale;
 
             Rectangle<int> newArea (peer->getComponent().getLocalArea (&component, component.getLocalBounds())
                                                         .withZeroOrigin()
@@ -381,7 +388,7 @@ public:
 
     OpenGLFrameBuffer cachedImageFrameBuffer;
     RectangleList<int> validArea;
-    Rectangle<int> viewportArea;
+    Rectangle<int> viewportArea, lastScreenBounds;
     double scale;
 
     StringArray associatedObjectNames;
