@@ -176,7 +176,9 @@ public:
             toString128 (info.title, p.getParameterName (index));
             toString128 (info.shortTitle, p.getParameterName (index, 8));
             toString128 (info.units, p.getParameterLabel (index));
-            info.stepCount = (Steinberg::int32) p.getParameterNumSteps (index);
+
+            const int numSteps = p.getParameterNumSteps (index);
+            info.stepCount = (Steinberg::int32) (numSteps > 0 && numSteps < 0x7fffffff ? numSteps - 1 : 0);
             info.defaultNormalizedValue = p.getParameterDefaultValue (index);
             info.unitId = Vst::kRootUnitId;
             info.flags = p.isParameterAutomatable (index) ? Vst::ParameterInfo::kCanAutomate : 0;
