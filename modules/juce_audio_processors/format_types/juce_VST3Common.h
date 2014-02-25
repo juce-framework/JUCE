@@ -51,6 +51,14 @@ static bool doUIDsMatch (const Steinberg::TUID a, const Steinberg::TUID b) noexc
         return Steinberg::kResultOk; \
     }
 
+#define TEST_FOR_COMMON_BASE_AND_RETURN_IF_VALID(CommonClassType, SourceClassType) \
+    if (doUIDsMatch (iid, CommonClassType::iid)) \
+    { \
+        addRef(); \
+        *obj = (CommonClassType*) static_cast<SourceClassType*> (this); \
+        return Steinberg::kResultOk; \
+    }
+
 //==============================================================================
 static juce::String toString (const Steinberg::char8* string) noexcept      { return juce::String (string); }
 static juce::String toString (const Steinberg::char16* string) noexcept     { return juce::String (juce::CharPointer_UTF16 ((juce::CharPointer_UTF16::CharType*) string)); }
@@ -70,19 +78,15 @@ static Steinberg::Vst::TChar* toString (const juce::String& source) noexcept
 }
 
 #if JUCE_WINDOWS
-static const Steinberg::FIDString defaultVST3WindowType = Steinberg::kPlatformTypeHWND;
+ static const Steinberg::FIDString defaultVST3WindowType = Steinberg::kPlatformTypeHWND;
 #else
-static const Steinberg::FIDString defaultVST3WindowType = Steinberg::kPlatformTypeNSView;
+ static const Steinberg::FIDString defaultVST3WindowType = Steinberg::kPlatformTypeNSView;
 #endif
 
 
 //==============================================================================
-/** The equivalent numChannels and speaker arrangements should always
-    match between this function and fillWithCorrespondingSpeakerArrangements().
-
-    There can only be 1 arrangement per channel count. (i.e.: 4 channels == k31Cine OR k40Cine)
-
-    @see fillWithCorrespondingSpeakerArrangements
+/** For the sake of simplicity, there can only be 1 arrangement type per channel count.
+    i.e.: 4 channels == k31Cine OR k40Cine
 */
 static Steinberg::Vst::SpeakerArrangement getArrangementForNumChannels (int numChannels) noexcept
 {
@@ -114,53 +118,6 @@ static Steinberg::Vst::SpeakerArrangement getArrangementForNumChannels (int numC
     juce::BigInteger bi;
     bi.setRange (0, jmin (numChannels, (int) (sizeof (Steinberg::Vst::SpeakerArrangement) * 8)), true);
     return (Steinberg::Vst::SpeakerArrangement) bi.toInt64();
-}
-
-/** The equivalent numChannels and speaker arrangements should always
-    match between this function and getArrangementForNumChannels().
-
-    There can only be 1 arrangement per channel count. (i.e.: 4 channels == k31Cine OR k40Cine)
-
-    @see getArrangementForNumChannels
-*/
-static void fillWithCorrespondingSpeakerArrangements (Array<Steinberg::Vst::SpeakerArrangement>& destination,
-                                                      int numChannels)
-{
-    using namespace Steinberg::Vst::SpeakerArr;
-
-    destination.clearQuick();
-
-    if (numChannels <= 0)
-    {
-        destination.add (kEmpty);
-        return;
-    }
-
-    // The order of the arrangement checks must be descending, since most plugins test for
-    /// the first arrangement to match their number of specified channels.
-
-    if (numChannels > 24)
-    {
-        juce::BigInteger bi;
-        bi.setRange (0, jmin (numChannels, (int) (sizeof (Steinberg::Vst::SpeakerArrangement) * 8)), true);
-        destination.add ((Steinberg::Vst::SpeakerArrangement) bi.toInt64());
-    }
-
-    if (numChannels >= 24)  destination.add ((Steinberg::Vst::SpeakerArrangement) 1929904127); // k222
-    if (numChannels >= 14)  destination.add (k131);
-    if (numChannels >= 13)  destination.add (k130);
-    if (numChannels >= 12)  destination.add (k111);
-    if (numChannels >= 11)  destination.add (k101);
-    if (numChannels >= 10)  destination.add (k91);
-    if (numChannels >= 9)   destination.add (k90);
-    if (numChannels >= 8)   destination.add (k71CineFullFront);
-    if (numChannels >= 7)   destination.add (k61Cine);
-    if (numChannels >= 6)   destination.add (k51);
-    if (numChannels >= 5)   destination.add (k50);
-    if (numChannels >= 4)   destination.add (k31Cine);
-    if (numChannels >= 3)   destination.add (k30Cine);
-    if (numChannels >= 2)   destination.add (kStereo);
-    if (numChannels >= 1)   destination.add (kMono);
 }
 
 //==============================================================================

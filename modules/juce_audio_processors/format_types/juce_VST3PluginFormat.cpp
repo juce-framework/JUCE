@@ -98,7 +98,7 @@ static void fillDescriptionWith (PluginDescription& description, ObjectType& obj
     description.version  = toString (object.version).trim();
     description.category = toString (object.subCategories).trim();
 
-    if (description.manufacturerName.isEmpty())
+    if (description.manufacturerName.trim().isEmpty())
         description.manufacturerName = toString (object.vendor).trim();
 }
 
@@ -459,13 +459,13 @@ public:
     {
         *obj = nullptr;
 
-        if (! doIdsMatch (cid, iid))
+        if (! doUIDsMatch (cid, iid))
         {
             jassertfalse;
             return kInvalidArgument;
         }
 
-        if (doIdsMatch (cid, Vst::IMessage::iid) && doIdsMatch (iid, Vst::IMessage::iid))
+        if (doUIDsMatch (cid, Vst::IMessage::iid) && doUIDsMatch (iid, Vst::IMessage::iid))
         {
             ComSmartPtr<Message> m (new Message (*this, attributeList));
             messageQueue.add (m);
@@ -473,7 +473,7 @@ public:
             *obj = m;
             return kResultOk;
         }
-        else if (doIdsMatch (cid, Vst::IAttributeList::iid) && doIdsMatch (iid, Vst::IAttributeList::iid))
+        else if (doUIDsMatch (cid, Vst::IAttributeList::iid) && doUIDsMatch (iid, Vst::IAttributeList::iid))
         {
             ComSmartPtr<AttributeList> l (new AttributeList (this));
             l->addRef();
@@ -526,7 +526,7 @@ public:
     //==============================================================================
     tresult PLUGIN_API queryInterface (const TUID iid, void** obj) override
     {
-        if (doIdsMatch (iid, Vst::IAttributeList::iid))
+        if (doUIDsMatch (iid, Vst::IAttributeList::iid))
         {
             *obj = attributeList.get();
             return kResultOk;
@@ -539,6 +539,7 @@ public:
         TEST_FOR_AND_RETURN_IF_VALID (Vst::IHostApplication)
         TEST_FOR_AND_RETURN_IF_VALID (Vst::IParamValueQueue)
         TEST_FOR_AND_RETURN_IF_VALID (Vst::IUnitHandler)
+        TEST_FOR_COMMON_BASE_AND_RETURN_IF_VALID (FUnknown, Vst::IComponentHandler)
 
         *obj = nullptr;
         return kNotImplemented;
@@ -549,12 +550,6 @@ private:
     Atomic<int32> refCount;
     String appName;
     VST3PluginInstance* owner;
-
-    //==============================================================================
-    static bool doIdsMatch (const TUID a, const TUID b) noexcept
-    {
-        return std::memcmp (a, b, sizeof (TUID)) == 0;
-    }
 
     //==============================================================================
     class Message  : public Vst::IMessage
@@ -1206,7 +1201,7 @@ public:
         setOpaque (true);
         setVisible (true);
 
-        view->setFrame (this);
+        warnOnFailure (view->setFrame (this));
 
         ViewRect rect;
         warnOnFailure (view->getSize (&rect));
@@ -1215,7 +1210,7 @@ public:
 
     ~VST3PluginWindow()
     {
-        view->removed();
+        warnOnFailure (view->removed());
         getAudioProcessor()->editorBeingDeleted (this);
 
        #if JUCE_MAC
@@ -1273,7 +1268,7 @@ public:
             }
             else
             {
-                view->getSize (&rect);
+                warnOnFailure (view->getSize (&rect));
             }
 
            #if JUCE_WINDOWS
@@ -1485,12 +1480,6 @@ public:
     {
         using namespace Vst;
 
-        const int numInputs = getNumInputChannels();
-        const int numOutputs = getNumOutputChannels();
-
-        // Needed for having the same sample rate in processBlock(); some plugins need this!
-        setPlayConfigDetails (numInputs, numOutputs, sampleRate, estimatedSamplesPerBlock);
-
         ProcessSetup setup;
         setup.symbolicSampleSize    = kSample32;
         setup.maxSamplesPerBlock    = estimatedSamplesPerBlock;
@@ -1504,15 +1493,27 @@ public:
 
         editController->setComponentHandler (host);
 
-        setStateForAllBusses (true);
-
         Array<SpeakerArrangement> inArrangements, outArrangements;
 
-        fillWithCorrespondingSpeakerArrangements (inArrangements, numInputs);
-        fillWithCorrespondingSpeakerArrangements (outArrangements, numOutputs);
+        for (int i = 0; i < numInputAudioBusses; ++i)
+            inArrangements.add (getArrangementForNumChannels (jmax (0, (int) getBusInfo (true, true, i).channelCount)));
+
+        for (int i = 0; i < numOutputAudioBusses; ++i)
+            outArrangements.add (getArrangementForNumChannels (jmax (0, (int) getBusInfo (false, true, i).channelCount)));
 
         warnOnFailure (processor->setBusArrangements (inArrangements.getRawDataPointer(), numInputAudioBusses,
                                                       outArrangements.getRawDataPointer(), numOutputAudioBusses));
+
+        // Update the num. busses in case the configuration has been modified by the plugin. (May affect number of channels!):
+        numInputAudioBusses = getNumSingleDirectionBussesFor (component, true, true);
+        numOutputAudioBusses = getNumSingleDirectionBussesFor (component, false, true);
+
+        // Needed for having the same sample rate in processBlock(); some plugins need this!
+        setPlayConfigDetails (getNumSingleDirectionChannelsFor (component, true, true),
+                              getNumSingleDirectionChannelsFor (component, false, true),
+                              sampleRate, estimatedSamplesPerBlock);
+
+        setStateForAllBusses (true);
 
         warnOnFailure (component->setActive (true));
         warnOnFailure (processor->setProcessing (true));
