@@ -102,7 +102,7 @@ public:
     /** True if the plug-in is part of a multi-type container, e.g. a VST Shell. */
     bool hasSharedContainer;
 
-    /** Returns true if the two descriptions refer the the same plug-in.
+    /** Returns true if the two descriptions refer to the same plug-in.
 
         This isn't quite as simple as them just having the same file (because of
         shell plug-ins).

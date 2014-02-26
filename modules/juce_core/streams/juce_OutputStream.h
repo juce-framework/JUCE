@@ -226,7 +226,7 @@ public:
     //==============================================================================
     /** Sets the string that will be written to the stream when the writeNewLine()
         method is called.
-        By default this will be set the the value of NewLine::getDefault().
+        By default this will be set the value of NewLine::getDefault().
     */
     void setNewLineString (const String& newLineString);
 

@@ -326,12 +326,12 @@ public:
     void getVisibleArea (RectangleList<int>& result, bool includeSiblings) const;
 
     //==============================================================================
-    /** Returns this component's x coordinate relative the the screen's top-left origin.
+    /** Returns this component's x coordinate relative the screen's top-left origin.
         @see getX, localPointToGlobal
     */
     int getScreenX() const;
 
-    /** Returns this component's y coordinate relative the the screen's top-left origin.
+    /** Returns this component's y coordinate relative the screen's top-left origin.
         @see getY, localPointToGlobal
     */
     int getScreenY() const;

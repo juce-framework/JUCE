@@ -64,7 +64,7 @@
 //=============================================================================
 /** Config: JUCE_LOG_ASSERTIONS
 
-    If this flag is enabled, the the jassert and jassertfalse macros will always use Logger::writeToLog()
+    If this flag is enabled, the jassert and jassertfalse macros will always use Logger::writeToLog()
     to write a message when an assertion happens.
 
     Enabling it will also leave this turned on in release builds. When it's disabled,

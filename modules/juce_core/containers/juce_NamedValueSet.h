@@ -76,14 +76,14 @@ public:
 
     /** Changes or adds a named value.
         @returns    true if a value was changed or added; false if the
-                    value was already set the the value passed-in.
+                    value was already set the value passed-in.
     */
     bool set (Identifier name, const var& newValue);
 
    #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
     /** Changes or adds a named value.
         @returns    true if a value was changed or added; false if the
-                    value was already set the the value passed-in.
+                    value was already set the value passed-in.
     */
     bool set (Identifier name, var&& newValue);
    #endif
