@@ -251,7 +251,7 @@ extern AndroidSystem android;
 class ThreadLocalJNIEnvHolder
 {
 public:
-    ThreadLocalJNIEnvHolder()
+    ThreadLocalJNIEnvHolder() noexcept
         : jvm (nullptr)
     {
         zeromem (threads, sizeof (threads));
@@ -269,18 +269,19 @@ public:
         addEnv (env);
     }
 
-    JNIEnv* attach()
+    JNIEnv* attach() noexcept
     {
-        JNIEnv* env = nullptr;
-        jvm->AttachCurrentThread (&env, nullptr);
+        if (JNIEnv* env = attachToCurrentThread())
+        {
+            SpinLock::ScopedLockType sl (addRemoveLock);
+            return addEnv (env);
+        }
 
-        if (env != nullptr)
-            addEnv (env);
-
-        return env;
+        jassertfalse;
+        return nullptr;
     }
 
-    void detach()
+    void detach() noexcept
     {
         jvm->DetachCurrentThread();
 
@@ -294,13 +295,43 @@ public:
 
     JNIEnv* getOrAttach() noexcept
     {
-        JNIEnv* env = get();
+        if (JNIEnv* env = get())
+            return env;
 
-        if (env == nullptr)
-            env = attach();
+        SpinLock::ScopedLockType sl (addRemoveLock);
 
-        jassert (env != nullptr);
-        return env;
+        if (JNIEnv* env = get())
+            return env;
+
+        if (JNIEnv* env = attachToCurrentThread())
+            return addEnv (env);
+
+        return nullptr;
+    }
+
+private:
+    JavaVM* jvm;
+    enum { maxThreads = 32 };
+    pthread_t threads [maxThreads];
+    JNIEnv* envs [maxThreads];
+    SpinLock addRemoveLock;
+
+    JNIEnv* addEnv (JNIEnv* env) noexcept
+    {
+        const pthread_t thisThread = pthread_self();
+
+        for (int i = 0; i < maxThreads; ++i)
+        {
+            if (threads[i] == 0)
+            {
+                envs[i] = env;
+                threads[i] = thisThread;
+                return env;
+            }
+        }
+
+        jassertfalse; // too many threads!
+        return nullptr;
     }
 
     JNIEnv* get() const noexcept
@@ -314,34 +345,11 @@ public:
         return nullptr;
     }
 
-    enum { maxThreads = 32 };
-
-private:
-    JavaVM* jvm;
-    pthread_t threads [maxThreads];
-    JNIEnv* envs [maxThreads];
-    SpinLock addRemoveLock;
-
-    void addEnv (JNIEnv* env)
+    JNIEnv* attachToCurrentThread()
     {
-        SpinLock::ScopedLockType sl (addRemoveLock);
-
-        if (get() == nullptr)
-        {
-            const pthread_t thisThread = pthread_self();
-
-            for (int i = 0; i < maxThreads; ++i)
-            {
-                if (threads[i] == 0)
-                {
-                    envs[i] = env;
-                    threads[i] = thisThread;
-                    return;
-                }
-            }
-        }
-
-        jassertfalse; // too many threads!
+        JNIEnv* env = nullptr;
+        jvm->AttachCurrentThread (&env, nullptr);
+        return env;
     }
 };
 
