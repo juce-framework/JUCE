@@ -44,7 +44,11 @@ public:
     /** Creates an empty URL. */
     URL();
 
-    /** Creates a URL from a string. */
+    /** Creates a URL from a string.
+        This will parse any embedded parameters after a '?' character and store them
+        in the list (see getParameterNames etc). If you don't want this to happen, you
+        can use createWithoutParsing().
+    */
     URL (const String& url);
 
     /** Creates a copy of another URL. */
@@ -326,12 +330,19 @@ public:
     */
     static String removeEscapeChars (const String& stringToRemoveEscapeCharsFrom);
 
+    /** Returns a URL without attempting to remove any embedded parameters from the string.
+        This may be necessary if you need to create a request that involves both POST
+        parameters and parameters which are embedded in the URL address itself.
+    */
+    static URL createWithoutParsing (const String& url);
+
 private:
     //==============================================================================
     String url, postData;
     StringArray parameterNames, parameterValues;
     StringPairArray filesToUpload, mimeTypes;
 
+    URL (const String&, int);
     void addParameter (const String&, const String&);
 
     static InputStream* createNativeStream (const String& address, bool isPost, const MemoryBlock& postData,
