@@ -203,10 +203,8 @@ public:
     {
     public:
         //==============================================================================
-        JuceCustomUIView (AudioProcessor* const filter_,
-                          JucePlugInProcess* const process_)
-            : filter (filter_),
-              process (process_)
+        JuceCustomUIView (AudioProcessor* ap, JucePlugInProcess* p)
+            : filter (ap), process (p)
         {
             // setting the size in here crashes PT for some reason, so keep it simple..
         }
@@ -237,7 +235,7 @@ public:
                 r.bottom = editorComp->getHeight();
                 SetRect (&r);
 
-                if ((oldRect.right != r.right) || (oldRect.bottom != r.bottom))
+                if (oldRect.right != r.right || oldRect.bottom != r.bottom)
                     startTimer (50);
             }
         }
@@ -269,8 +267,6 @@ public:
                    #endif
                     wrapper = nullptr;
                     wrapper = new EditorCompWrapper (hostWindow, editorComp, this);
-
-                    process->touchAllParameters();
                 }
             }
             else
@@ -774,23 +770,13 @@ protected:
         // xxx is there an RTAS equivalent?
     }
 
-    void touchAllParameters()
-    {
-        for (int i = 0; i < juceFilter->getNumParameters(); ++i)
-        {
-            audioProcessorParameterChangeGestureBegin (0, i);
-            audioProcessorParameterChanged (0, i, juceFilter->getParameter (i));
-            audioProcessorParameterChangeGestureEnd (0, i);
-        }
-    }
-
 public:
     // Need to use an intermediate class here rather than inheriting from AsyncUpdater, so that it can
     // be deleted before shutting down juce in our destructor.
     class InternalAsyncUpdater  : public AsyncUpdater
     {
     public:
-        InternalAsyncUpdater (JucePlugInProcess& owner_)  : owner (owner_) {}
+        InternalAsyncUpdater (JucePlugInProcess& p)  : owner (p) {}
         void handleAsyncUpdate()    { owner.handleAsyncUpdate(); }
 
     private:
@@ -927,29 +913,32 @@ public:
 
         for (int i = 0; i < numConfigs; ++i)
         {
-            CEffectType* const type
-                = new CEffectTypeRTAS ('jcaa' + i,
-                                       JucePlugin_RTASProductId,
-                                       JucePlugin_RTASCategory);
+            if (channelConfigs[i][0] <= 8 && channelConfigs[i][1] <= 8)
+            {
+                CEffectType* const type
+                    = new CEffectTypeRTAS ('jcaa' + i,
+                                           JucePlugin_RTASProductId,
+                                           JucePlugin_RTASCategory);
 
-            type->DefineTypeNames (createRTASName().toRawUTF8());
-            type->DefineSampleRateSupport (eSupports48kAnd96kAnd192k);
+                type->DefineTypeNames (createRTASName().toRawUTF8());
+                type->DefineSampleRateSupport (eSupports48kAnd96kAnd192k);
 
-            type->DefineStemFormats (getFormatForChans (channelConfigs [i][0] != 0 ? channelConfigs [i][0] : channelConfigs [i][1]),
-                                     getFormatForChans (channelConfigs [i][1] != 0 ? channelConfigs [i][1] : channelConfigs [i][0]));
+                type->DefineStemFormats (getFormatForChans (channelConfigs [i][0] != 0 ? channelConfigs [i][0] : channelConfigs [i][1]),
+                                         getFormatForChans (channelConfigs [i][1] != 0 ? channelConfigs [i][1] : channelConfigs [i][0]));
 
-           #if ! JucePlugin_RTASDisableBypass
-            type->AddGestalt (pluginGestalt_CanBypass);
-           #endif
+               #if ! JucePlugin_RTASDisableBypass
+                type->AddGestalt (pluginGestalt_CanBypass);
+               #endif
 
-           #if JucePlugin_RTASDisableMultiMono
-            type->AddGestalt (pluginGestalt_DoesntSupportMultiMono);
-           #endif
+               #if JucePlugin_RTASDisableMultiMono
+                type->AddGestalt (pluginGestalt_DoesntSupportMultiMono);
+               #endif
 
-            type->AddGestalt (pluginGestalt_SupportsVariableQuanta);
-            type->AttachEffectProcessCreator (createNewProcess);
+                type->AddGestalt (pluginGestalt_SupportsVariableQuanta);
+                type->AttachEffectProcessCreator (createNewProcess);
 
-            AddEffectType (type);
+                AddEffectType (type);
+            }
         }
     }
 
