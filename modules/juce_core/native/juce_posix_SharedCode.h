@@ -996,6 +996,10 @@ public:
     ActiveProcess (const StringArray& arguments, int streamFlags)
         : childPID (0), pipeHandle (0), readHandle (0)
     {
+        // Looks like you're trying to launch a non-existent exe or a folder (perhaps on OSX
+        // you're trying to launch the .app folder rather than the actual binary inside it?)
+        jassert (File::getCurrentWorkingDirectory().getChildFile (arguments[0]).existsAsFile());
+
         int pipeHandles[2] = { 0 };
 
         if (pipe (pipeHandles) == 0)
