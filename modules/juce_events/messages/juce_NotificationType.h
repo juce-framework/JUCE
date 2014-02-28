@@ -35,7 +35,7 @@ enum NotificationType
     dontSendNotification = 0,   /**< No notification message should be sent. */
     sendNotification = 1,       /**< Requests a notification message, either synchronous or not. */
     sendNotificationSync,       /**< Requests a synchronous notification. */
-    sendNotificationAsync,      /**< Requests a asynchronous notification. */
+    sendNotificationAsync,      /**< Requests an asynchronous notification. */
 };
 
 

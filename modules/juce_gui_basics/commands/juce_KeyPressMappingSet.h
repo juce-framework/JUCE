@@ -29,7 +29,7 @@
 //==============================================================================
 /**
     Manages and edits a list of keypresses, which it uses to invoke the appropriate
-    command in a ApplicationCommandManager.
+    command in an ApplicationCommandManager.
 
     Normally, you won't actually create a KeyPressMappingSet directly, because
     each ApplicationCommandManager contains its own KeyPressMappingSet, so typically
