@@ -557,7 +557,7 @@ private:
     TreeViewItem* getDeepestOpenParentItem() noexcept;
     int getNumRows() const noexcept;
     TreeViewItem* getItemOnRow (int index) noexcept;
-    void deselectAllRecursively();
+    void deselectAllRecursively (TreeViewItem* itemToIgnore);
     int countSelectedItemsRecursively (int depth) const noexcept;
     TreeViewItem* getSelectedItemWithIndex (int index) noexcept;
     TreeViewItem* getNextVisibleItem (bool recurse) const noexcept;
