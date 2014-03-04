@@ -328,15 +328,19 @@ public:
 
     LowLevelGraphicsContext* createLowLevelContext() override
     {
+        sendDataChangeMessage();
         return new LowLevelGraphicsSoftwareRenderer (Image (this));
     }
 
-    void initialiseBitmapData (Image::BitmapData& bitmap, int x, int y, Image::BitmapData::ReadWriteMode) override
+    void initialiseBitmapData (Image::BitmapData& bitmap, int x, int y, Image::BitmapData::ReadWriteMode mode) override
     {
         bitmap.data = imageData + x * pixelStride + y * lineStride;
         bitmap.pixelFormat = pixelFormat;
         bitmap.lineStride = lineStride;
         bitmap.pixelStride = pixelStride;
+
+        if (mode != Image::BitmapData::readOnly)
+            sendDataChangeMessage();
     }
 
     ImagePixelData* clone() override
@@ -3169,15 +3173,30 @@ String SystemClipboard::getTextFromClipboard()
 //==============================================================================
 void Desktop::setKioskComponent (Component* kioskModeComponent, bool enableOrDisable, bool /*allowMenusAndBars*/)
 {
+    if (TopLevelWindow* tlw = dynamic_cast<TopLevelWindow*> (kioskModeComponent))
+        tlw->setUsingNativeTitleBar (! enableOrDisable);
+
     if (enableOrDisable)
         kioskModeComponent->setBounds (getDisplays().getMainDisplay().totalArea);
 }
 
 //==============================================================================
-static BOOL CALLBACK enumMonitorsProc (HMONITOR, HDC, LPRECT r, LPARAM userInfo)
+struct MonitorInfo
 {
-    Array <Rectangle<int> >* const monitorCoords = (Array <Rectangle<int> >*) userInfo;
-    monitorCoords->add (rectangleFromRECT (*r));
+    MonitorInfo (Rectangle<int> rect, bool main) noexcept  : isMain (main), bounds (rect) {}
+
+    Rectangle<int> bounds;
+    bool isMain;
+};
+
+static BOOL CALLBACK enumMonitorsProc (HMONITOR hm, HDC, LPRECT r, LPARAM userInfo)
+{
+    MONITORINFO info = { 0 };
+    info.cbSize = sizeof (info);
+    GetMonitorInfo (hm, &info);
+    const bool isMain = (info.dwFlags & 1 /* MONITORINFOF_PRIMARY */) != 0;
+    ((Array<MonitorInfo>*) userInfo)->add (MonitorInfo (rectangleFromRECT (*r), isMain));
+
     return TRUE;
 }
 
@@ -3185,16 +3204,16 @@ void Desktop::Displays::findDisplays (float masterScale)
 {
     setDPIAwareness();
 
-    Array <Rectangle<int> > monitors;
+    Array<MonitorInfo> monitors;
     EnumDisplayMonitors (0, 0, &enumMonitorsProc, (LPARAM) &monitors);
+
+    if (monitors.size() == 0)
+        monitors.add (MonitorInfo (rectangleFromRECT (getWindowRect (GetDesktopWindow())), true));
 
     // make sure the first in the list is the main monitor
     for (int i = 1; i < monitors.size(); ++i)
-        if (monitors.getReference(i).getPosition().isOrigin())
+        if (monitors.getReference(i).isMain)
             monitors.swap (i, 0);
-
-    if (monitors.size() == 0)
-        monitors.add (rectangleFromRECT (getWindowRect (GetDesktopWindow())));
 
     RECT workArea;
     SystemParametersInfo (SPI_GETWORKAREA, 0, &workArea, 0);
@@ -3204,12 +3223,12 @@ void Desktop::Displays::findDisplays (float masterScale)
     for (int i = 0; i < monitors.size(); ++i)
     {
         Display d;
-        d.userArea = d.totalArea = monitors.getReference(i) / masterScale;
-        d.isMain = (i == 0);
-        d.scale = masterScale;
-        d.dpi = dpi;
+        d.userArea  = d.totalArea = monitors.getReference(i).bounds / masterScale;
+        d.isMain    = monitors.getReference(i).isMain;
+        d.scale     = masterScale;
+        d.dpi       = dpi;
 
-        if (i == 0)
+        if (d.isMain)
             d.userArea = d.userArea.getIntersection (rectangleFromRECT (workArea) / masterScale);
 
         displays.add (d);

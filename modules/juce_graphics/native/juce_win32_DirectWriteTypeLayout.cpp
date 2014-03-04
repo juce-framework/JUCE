@@ -63,6 +63,9 @@ namespace DirectWriteTypeLayout
         {
             TextLayout* const layout = static_cast<TextLayout*> (clientDrawingContext);
 
+            if (! (baselineOriginY >= -1.0e10f && baselineOriginY <= 1.0e10f))
+                baselineOriginY = 0; // DirectWrite sometimes sends NaNs in this parameter
+
             if (baselineOriginY != lastOriginY)
             {
                 lastOriginY = baselineOriginY;
@@ -73,6 +76,7 @@ namespace DirectWriteTypeLayout
                     jassert (currentLine == layout->getNumLines());
                     TextLayout::Line* const newLine = new TextLayout::Line();
                     layout->addLine (newLine);
+
                     newLine->lineOrigin = Point<float> (baselineOriginX, baselineOriginY);
                 }
             }

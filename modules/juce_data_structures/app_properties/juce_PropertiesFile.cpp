@@ -215,18 +215,18 @@ bool PropertiesFile::loadAsXml()
 bool PropertiesFile::saveAsXml()
 {
     XmlElement doc (PropertyFileConstants::fileTag);
+    const StringPairArray& props = getAllProperties();
 
-    for (int i = 0; i < getAllProperties().size(); ++i)
+    for (int i = 0; i < props.size(); ++i)
     {
         XmlElement* const e = doc.createNewChildElement (PropertyFileConstants::valueTag);
-        e->setAttribute (PropertyFileConstants::nameAttribute, getAllProperties().getAllKeys() [i]);
+        e->setAttribute (PropertyFileConstants::nameAttribute, props.getAllKeys() [i]);
 
         // if the value seems to contain xml, store it as such..
-        if (XmlElement* const childElement = XmlDocument::parse (getAllProperties().getAllValues() [i]))
+        if (XmlElement* const childElement = XmlDocument::parse (props.getAllValues() [i]))
             e->addChildElement (childElement);
         else
-            e->setAttribute (PropertyFileConstants::valueAttribute,
-                             getAllProperties().getAllValues() [i]);
+            e->setAttribute (PropertyFileConstants::valueAttribute, props.getAllValues() [i]);
     }
 
     ProcessScopedLock pl (createProcessLock());
@@ -311,14 +311,17 @@ bool PropertiesFile::saveAsBinary()
             out->writeInt (PropertyFileConstants::magicNumber);
         }
 
-        const int numProperties = getAllProperties().size();
+        const StringPairArray& props = getAllProperties();
+        const int numProperties   = props.size();
+        const StringArray& keys   = props.getAllKeys();
+        const StringArray& values = props.getAllValues();
 
         out->writeInt (numProperties);
 
         for (int i = 0; i < numProperties; ++i)
         {
-            out->writeString (getAllProperties().getAllKeys() [i]);
-            out->writeString (getAllProperties().getAllValues() [i]);
+            out->writeString (keys[i]);
+            out->writeString (values[i]);
         }
 
         out = nullptr;

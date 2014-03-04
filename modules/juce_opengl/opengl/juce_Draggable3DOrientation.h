@@ -113,14 +113,6 @@ public:
         return quaternion;
     }
 
-   #if JUCE_USE_OPENGL_FIXED_FUNCTION
-    /** Applies this rotation to the active OpenGL context's matrix. */
-    void applyToOpenGLMatrix() const noexcept
-    {
-        OpenGLHelpers::applyMatrix (getRotationMatrix().mat);
-    }
-   #endif
-
 private:
     Rectangle<int> area;
     float radius;

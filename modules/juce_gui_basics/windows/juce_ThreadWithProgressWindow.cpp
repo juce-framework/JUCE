@@ -25,12 +25,13 @@
 ThreadWithProgressWindow::ThreadWithProgressWindow (const String& title,
                                                     const bool hasProgressBar,
                                                     const bool hasCancelButton,
-                                                    const int timeOutMsWhenCancelling_,
+                                                    const int cancellingTimeOutMs,
                                                     const String& cancelButtonText,
                                                     Component* componentToCentreAround)
-  : Thread ("Juce Progress Window"),
-    progress (0.0),
-    timeOutMsWhenCancelling (timeOutMsWhenCancelling_)
+   : Thread ("ThreadWithProgressWindow"),
+     progress (0.0),
+     timeOutMsWhenCancelling (cancellingTimeOutMs),
+     wasCancelledByUser (false)
 {
     alertWindow = LookAndFeel::getDefaultLookAndFeel()
                     .createAlertWindow (title, String(),
@@ -52,8 +53,7 @@ ThreadWithProgressWindow::~ThreadWithProgressWindow()
     stopThread (timeOutMsWhenCancelling);
 }
 
-#if JUCE_MODAL_LOOPS_PERMITTED
-bool ThreadWithProgressWindow::runThread (const int priority)
+void ThreadWithProgressWindow::launchThread (int priority)
 {
     jassert (MessageManager::getInstance()->isThisTheMessageThread());
 
@@ -65,15 +65,8 @@ bool ThreadWithProgressWindow::runThread (const int priority)
         alertWindow->setMessage (message);
     }
 
-    const bool finishedNaturally = alertWindow->runModalLoop() != 0;
-
-    stopThread (timeOutMsWhenCancelling);
-
-    alertWindow->setVisible (false);
-
-    return finishedNaturally;
+    alertWindow->enterModalState();
 }
-#endif
 
 void ThreadWithProgressWindow::setProgress (const double newProgress)
 {
@@ -88,15 +81,34 @@ void ThreadWithProgressWindow::setStatusMessage (const String& newStatusMessage)
 
 void ThreadWithProgressWindow::timerCallback()
 {
-    if (! isThreadRunning())
+    bool threadStillRunning = isThreadRunning();
+
+    if (! (threadStillRunning && alertWindow->isCurrentlyModal()))
     {
-        // thread has finished normally..
+        stopTimer();
+        stopThread (timeOutMsWhenCancelling);
         alertWindow->exitModalState (1);
         alertWindow->setVisible (false);
+
+        wasCancelledByUser = threadStillRunning;
+        threadComplete (threadStillRunning);
+        return; // (this may be deleted now)
     }
-    else
-    {
-        const ScopedLock sl (messageLock);
-        alertWindow->setMessage (message);
-    }
+
+    const ScopedLock sl (messageLock);
+    alertWindow->setMessage (message);
 }
+
+void ThreadWithProgressWindow::threadComplete (bool) {}
+
+#if JUCE_MODAL_LOOPS_PERMITTED
+bool ThreadWithProgressWindow::runThread (const int priority)
+{
+    launchThread (priority);
+
+    while (isTimerRunning())
+        MessageManager::getInstance()->runDispatchLoopUntil (5);
+
+    return ! wasCancelledByUser;
+}
+#endif

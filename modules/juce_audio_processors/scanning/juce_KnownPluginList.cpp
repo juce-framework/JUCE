@@ -202,6 +202,14 @@ void KnownPluginList::scanAndAddDragAndDroppedFiles (AudioPluginFormatManager& f
             }
         }
     }
+
+    scanFinished();
+}
+
+void KnownPluginList::scanFinished()
+{
+    if (scanner != nullptr)
+        scanner->scanFinished();
 }
 
 const StringArray& KnownPluginList::getBlacklistedFiles() const
@@ -280,10 +288,16 @@ void KnownPluginList::sort (const SortMethod method, bool forwards)
 {
     if (method != defaultOrder)
     {
+        Array<PluginDescription*> oldOrder, newOrder;
+        oldOrder.addArray (types);
+
         PluginSorter sorter (method, forwards);
         types.sort (sorter, true);
 
-        sendChangeMessage();
+        newOrder.addArray (types);
+
+        if (oldOrder != newOrder)
+            sendChangeMessage();
     }
 }
 
@@ -523,3 +537,13 @@ int KnownPluginList::getIndexChosenByMenu (const int menuResultCode) const
 //==============================================================================
 KnownPluginList::CustomScanner::CustomScanner() {}
 KnownPluginList::CustomScanner::~CustomScanner() {}
+
+void KnownPluginList::CustomScanner::scanFinished() {}
+
+bool KnownPluginList::CustomScanner::shouldExit() const noexcept
+{
+    if (ThreadPoolJob* job = ThreadPoolJob::getCurrentThreadPoolJob())
+        return job->shouldExit();
+
+    return false;
+}

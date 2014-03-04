@@ -63,6 +63,7 @@ PluginDirectoryScanner::PluginDirectoryScanner (KnownPluginList& listToAddTo,
 
 PluginDirectoryScanner::~PluginDirectoryScanner()
 {
+    list.scanFinished();
 }
 
 //==============================================================================

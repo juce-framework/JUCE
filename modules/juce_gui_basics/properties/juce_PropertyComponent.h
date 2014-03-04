@@ -103,6 +103,22 @@ public:
     void enablementChanged() override;
 
     //==============================================================================
+    /** A set of colour IDs to use to change the colour of various aspects of the combo box.
+
+        These constants can be used either via the Component::setColour(), or LookAndFeel::setColour()
+        methods.
+
+        To change the colours of the menu that pops up
+
+        @see Component::setColour, Component::findColour, LookAndFeel::setColour, LookAndFeel::findColour
+    */
+    enum ColourIds
+    {
+        backgroundColourId     = 0x1008300,    /**< The background colour to fill the component with. */
+        labelTextColourId      = 0x1008301,    /**< The colour for the property's label text. */
+    };
+
+    //==============================================================================
     /** This abstract base class is implemented by LookAndFeel classes. */
     struct JUCE_API  LookAndFeelMethods
     {

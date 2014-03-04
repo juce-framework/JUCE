@@ -242,6 +242,7 @@ void TopLevelWindow::setUsingNativeTitleBar (const bool shouldUseNativeTitleBar)
 {
     if (useNativeTitleBar != shouldUseNativeTitleBar)
     {
+        FocusRestorer focusRestorer;
         useNativeTitleBar = shouldUseNativeTitleBar;
         recreateDesktopWindow();
         sendLookAndFeelChange();

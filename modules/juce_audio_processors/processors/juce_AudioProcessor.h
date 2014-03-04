@@ -632,6 +632,7 @@ public:
     {
         wrapperType_Undefined = 0,
         wrapperType_VST,
+        wrapperType_VST3,
         wrapperType_AudioUnit,
         wrapperType_RTAS,
         wrapperType_AAX,

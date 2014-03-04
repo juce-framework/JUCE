@@ -375,7 +375,7 @@ public:
             const double delta = (button == incButton) ? interval : -interval;
 
             DragInProgress drag (*this);
-            setValue (owner.snapValue (getValue() + delta, false), sendNotificationSync);
+            setValue (owner.snapValue (getValue() + delta, notDragging), sendNotificationSync);
         }
     }
 
@@ -394,7 +394,7 @@ public:
 
     void labelTextChanged (Label* label) override
     {
-        const double newValue = owner.snapValue (owner.getValueFromText (label->getText()), false);
+        const double newValue = owner.snapValue (owner.getValueFromText (label->getText()), notDragging);
 
         if (newValue != (double) currentValue.getValue())
         {
@@ -873,6 +873,8 @@ public:
              && ! ((style == LinearBar || style == LinearBarVertical)
                     && e.mouseWasClicked() && valueBox != nullptr && valueBox->isEditable()))
         {
+            DragMode dragMode = notDragging;
+
             if (style == Rotary)
             {
                 handleRotaryDrag (e);
@@ -889,21 +891,27 @@ public:
                 }
 
                 if (isAbsoluteDragMode (e.mods) || (maximum - minimum) / sliderRegionSize < interval)
+                {
+                    dragMode = notDragging;
                     handleAbsoluteDrag (e);
+                }
                 else
+                {
+                    dragMode = velocityDrag;
                     handleVelocityDrag (e);
+                }
             }
 
             valueWhenLastDragged = jlimit (minimum, maximum, valueWhenLastDragged);
 
             if (sliderBeingDragged == 0)
             {
-                setValue (owner.snapValue (valueWhenLastDragged, true),
+                setValue (owner.snapValue (valueWhenLastDragged, dragMode),
                           sendChangeOnlyOnRelease ? dontSendNotification : sendNotificationSync);
             }
             else if (sliderBeingDragged == 1)
             {
-                setMinValue (owner.snapValue (valueWhenLastDragged, true),
+                setMinValue (owner.snapValue (valueWhenLastDragged, dragMode),
                              sendChangeOnlyOnRelease ? dontSendNotification : sendNotificationAsync, true);
 
                 if (e.mods.isShiftDown())
@@ -913,7 +921,7 @@ public:
             }
             else if (sliderBeingDragged == 2)
             {
-                setMaxValue (owner.snapValue (valueWhenLastDragged, true),
+                setMaxValue (owner.snapValue (valueWhenLastDragged, dragMode),
                              sendChangeOnlyOnRelease ? dontSendNotification : sendNotificationAsync, true);
 
                 if (e.mods.isShiftDown())
@@ -994,7 +1002,7 @@ public:
                     delta = -delta;
 
                 DragInProgress drag (*this);
-                setValue (owner.snapValue (value + delta, false), sendNotificationSync);
+                setValue (owner.snapValue (value + delta, notDragging), sendNotificationSync);
             }
 
             return true;
@@ -1534,7 +1542,7 @@ double Slider::valueToProportionOfLength (double value)
     return skew == 1.0 ? n : pow (n, skew);
 }
 
-double Slider::snapValue (double attemptedValue, const bool)
+double Slider::snapValue (double attemptedValue, DragMode)
 {
     return attemptedValue;
 }

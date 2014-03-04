@@ -109,6 +109,12 @@ public:
     */
     CodeDocument::Position getPositionAt (int x, int y);
 
+    /** Returns the start of the selection as a position. */
+    CodeDocument::Position getSelectionStart() const            { return selectionStart; }
+
+    /** Returns the end of the selection as a position. */
+    CodeDocument::Position getSelectionEnd() const              { return selectionEnd; }
+
     /** Enables or disables the line-number display in the gutter. */
     void setLineNumbersShown (bool shouldBeShown);
 
@@ -161,13 +167,13 @@ public:
     struct State
     {
         /** Creates an object containing the state of the given editor. */
-        State (const CodeEditorComponent& editor);
+        State (const CodeEditorComponent&);
         /** Creates a state object from a string that was previously created with toString(). */
         State (const String& stringifiedVersion);
-        State (const State& other) noexcept;
+        State (const State&) noexcept;
 
         /** Updates the given editor with this saved state. */
-        void restoreState (CodeEditorComponent& editor) const;
+        void restoreState (CodeEditorComponent&) const;
 
         /** Returns a stringified version of this state that can be used to recreate it later. */
         String toString() const;
@@ -339,7 +345,7 @@ public:
     /** @internal */
     bool isTextInputActive() const override;
     /** @internal */
-    void setTemporaryUnderlining (const Array <Range<int> >&) override;
+    void setTemporaryUnderlining (const Array<Range<int> >&) override;
     /** @internal */
     ApplicationCommandTarget* getNextCommandTarget() override;
     /** @internal */
@@ -391,12 +397,12 @@ private:
     ColourScheme colourScheme;
 
     class CodeEditorLine;
-    OwnedArray <CodeEditorLine> lines;
+    OwnedArray<CodeEditorLine> lines;
     void rebuildLineTokens();
     void rebuildLineTokensAsync();
     void codeDocumentChanged (int start, int end);
 
-    OwnedArray <CodeDocument::Iterator> cachedIterators;
+    OwnedArray<CodeDocument::Iterator> cachedIterators;
     void clearCachedIterators (int firstLineToBeInvalid);
     void updateCachedIterators (int maxLineNum);
     void getIteratorForPosition (int position, CodeDocument::Iterator&);
@@ -406,7 +412,7 @@ private:
 
     //==============================================================================
     void insertText (const String&);
-    void updateCaretPosition();
+    virtual void updateCaretPosition();
     void updateScrollBars();
     void scrollToLineInternal (int line);
     void scrollToColumnInternal (double column);

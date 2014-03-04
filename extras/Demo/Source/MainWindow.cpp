@@ -215,7 +215,14 @@ public:
 
     bool isShowingOpenGLDemo() const
     {
-        return currentDemo != nullptr && currentDemo->getName().contains ("OpenGL");
+        return currentDemo != nullptr
+                && currentDemo->getName().contains ("OpenGL")
+                && ! isShowingOpenGL2DDemo();
+    }
+
+    bool isShowingOpenGL2DDemo() const
+    {
+        return currentDemo != nullptr && currentDemo->getName().contains ("OpenGL 2D");
     }
 
 private:
@@ -603,6 +610,11 @@ void MainAppWindow::setRenderingEngine (int index)
 
     if (ComponentPeer* peer = getPeer())
         peer->setCurrentRenderingEngine (index);
+}
+
+void MainAppWindow::setOpenGLRenderingEngine()
+{
+    setRenderingEngine (getRenderingEngines().indexOf (openGLRendererName));
 }
 
 int MainAppWindow::getActiveRenderingEngine() const

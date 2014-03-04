@@ -29,6 +29,26 @@
 ChildProcess::ChildProcess() {}
 ChildProcess::~ChildProcess() {}
 
+bool ChildProcess::isRunning() const
+{
+    return activeProcess != nullptr && activeProcess->isRunning();
+}
+
+int ChildProcess::readProcessOutput (void* dest, int numBytes)
+{
+    return activeProcess != nullptr ? activeProcess->read (dest, numBytes) : 0;
+}
+
+bool ChildProcess::kill()
+{
+    return activeProcess == nullptr || activeProcess->killProcess();
+}
+
+uint32 ChildProcess::getExitCode() const
+{
+    return activeProcess != nullptr ? activeProcess->getExitCode() : 0;
+}
+
 bool ChildProcess::waitForProcessToFinish (const int timeoutMs) const
 {
     const uint32 timeoutTime = Time::getMillisecondCounter() + (uint32) timeoutMs;

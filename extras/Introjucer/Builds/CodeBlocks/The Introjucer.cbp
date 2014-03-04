@@ -1038,6 +1038,14 @@
       <Option compile="0"/>
       <Option link="0"/>
     </Unit>
+    <Unit filename="../../../../modules/juce_core/files/juce_FileFilter.cpp">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../../../modules/juce_core/files/juce_FileFilter.h">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
     <Unit filename="../../../../modules/juce_core/files/juce_FileInputStream.cpp">
       <Option compile="0"/>
       <Option link="0"/>
@@ -1071,6 +1079,14 @@
       <Option link="0"/>
     </Unit>
     <Unit filename="../../../../modules/juce_core/files/juce_TemporaryFile.h">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../../../modules/juce_core/files/juce_WildcardFileFilter.cpp">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../../../modules/juce_core/files/juce_WildcardFileFilter.h">
       <Option compile="0"/>
       <Option link="0"/>
     </Unit>
@@ -1603,6 +1619,14 @@
       <Option link="0"/>
     </Unit>
     <Unit filename="../../../../modules/juce_events/broadcasters/juce_ListenerList.h">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../../../modules/juce_events/interprocess/juce_ConnectedChildProcess.cpp">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../../../modules/juce_events/interprocess/juce_ConnectedChildProcess.h">
       <Option compile="0"/>
       <Option link="0"/>
     </Unit>
@@ -2810,14 +2834,6 @@
       <Option compile="0"/>
       <Option link="0"/>
     </Unit>
-    <Unit filename="../../../../modules/juce_gui_basics/filebrowser/juce_FileFilter.cpp">
-      <Option compile="0"/>
-      <Option link="0"/>
-    </Unit>
-    <Unit filename="../../../../modules/juce_gui_basics/filebrowser/juce_FileFilter.h">
-      <Option compile="0"/>
-      <Option link="0"/>
-    </Unit>
     <Unit filename="../../../../modules/juce_gui_basics/filebrowser/juce_FileListComponent.cpp">
       <Option compile="0"/>
       <Option link="0"/>
@@ -2859,14 +2875,6 @@
       <Option link="0"/>
     </Unit>
     <Unit filename="../../../../modules/juce_gui_basics/filebrowser/juce_ImagePreviewComponent.h">
-      <Option compile="0"/>
-      <Option link="0"/>
-    </Unit>
-    <Unit filename="../../../../modules/juce_gui_basics/filebrowser/juce_WildcardFileFilter.cpp">
-      <Option compile="0"/>
-      <Option link="0"/>
-    </Unit>
-    <Unit filename="../../../../modules/juce_gui_basics/filebrowser/juce_WildcardFileFilter.h">
       <Option compile="0"/>
       <Option link="0"/>
     </Unit>

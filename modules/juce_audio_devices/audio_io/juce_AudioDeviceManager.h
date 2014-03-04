@@ -191,7 +191,11 @@ public:
                        const XmlElement* savedState,
                        bool selectDefaultDeviceOnFailure,
                        const String& preferredDefaultDeviceName = String(),
-                       const AudioDeviceSetup* preferredSetupOptions = 0);
+                       const AudioDeviceSetup* preferredSetupOptions = nullptr);
+
+    /** Resets everything to a default device setup, clearing any stored settings. */
+    String initialiseWithDefaultDevices (int numInputChannelsNeeded,
+                                         int numOutputChannelsNeeded);
 
     /** Returns some XML representing the current state of the manager.
 
@@ -383,7 +387,7 @@ public:
 
     /** Returns a list of the types of device supported.
     */
-    const OwnedArray <AudioIODeviceType>& getAvailableDeviceTypes();
+    const OwnedArray<AudioIODeviceType>& getAvailableDeviceTypes();
 
     //==============================================================================
     /** Creates a list of available types.
@@ -394,7 +398,7 @@ public:
         You can override this if your app needs to do something specific, like avoid
         using DirectSound devices, etc.
     */
-    virtual void createAudioDeviceTypes (OwnedArray <AudioIODeviceType>& types);
+    virtual void createAudioDeviceTypes (OwnedArray<AudioIODeviceType>& types);
 
     /** Adds a new device type to the list of types.
         The manager will take ownership of the object that is passed-in.
@@ -446,30 +450,30 @@ public:
 
 private:
     //==============================================================================
-    OwnedArray <AudioIODeviceType> availableDeviceTypes;
-    OwnedArray <AudioDeviceSetup> lastDeviceTypeConfigs;
+    OwnedArray<AudioIODeviceType> availableDeviceTypes;
+    OwnedArray<AudioDeviceSetup> lastDeviceTypeConfigs;
 
     AudioDeviceSetup currentSetup;
-    ScopedPointer <AudioIODevice> currentAudioDevice;
-    Array <AudioIODeviceCallback*> callbacks;
+    ScopedPointer<AudioIODevice> currentAudioDevice;
+    Array<AudioIODeviceCallback*> callbacks;
     int numInputChansNeeded, numOutputChansNeeded;
     String currentDeviceType;
     BigInteger inputChannels, outputChannels;
-    ScopedPointer <XmlElement> lastExplicitSettings;
+    ScopedPointer<XmlElement> lastExplicitSettings;
     mutable bool listNeedsScanning;
     bool useInputNames;
     Atomic<int> inputLevelMeasurementEnabledCount;
     double inputLevel;
-    ScopedPointer <AudioSampleBuffer> testSound;
+    ScopedPointer<AudioSampleBuffer> testSound;
     int testSoundPosition;
     AudioSampleBuffer tempBuffer;
 
     StringArray midiInsFromXml;
-    OwnedArray <MidiInput> enabledMidiInputs;
-    Array <MidiInputCallback*> midiCallbacks;
+    OwnedArray<MidiInput> enabledMidiInputs;
+    Array<MidiInputCallback*> midiCallbacks;
     StringArray midiCallbackDevices;
     String defaultMidiOutputName;
-    ScopedPointer <MidiOutput> defaultMidiOutput;
+    ScopedPointer<MidiOutput> defaultMidiOutput;
     CriticalSection audioCallbackLock, midiCallbackLock;
 
     double cpuUsageMs, timeToCpuScale;
@@ -500,6 +504,9 @@ private:
     double chooseBestSampleRate (double preferred) const;
     int chooseBestBufferSize (int preferred) const;
     void insertDefaultDeviceNames (AudioDeviceSetup&) const;
+    String initialiseDefault (const String& preferredDefaultDeviceName, const AudioDeviceSetup*);
+    String initialiseFromXML (const XmlElement&, bool selectDefaultDeviceOnFailure,
+                              const String& preferredDefaultDeviceName, const AudioDeviceSetup*);
 
     AudioIODeviceType* findType (const String& inputName, const String& outputName);
     AudioIODeviceType* findType (const String& typeName);

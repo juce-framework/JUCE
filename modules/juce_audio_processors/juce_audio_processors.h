@@ -44,7 +44,7 @@
     Enables the VST3 audio plugin hosting classes. This requires the Steinberg VST3 SDK to be
     installed on your machine.
 
-    @see VSTPluginFormat, VVST3PluginFormat, AudioPluginFormat, AudioPluginFormatManager, JUCE_PLUGINHOST_VST, JUCE_PLUGINHOST_AU
+    @see VSTPluginFormat, VST3PluginFormat, AudioPluginFormat, AudioPluginFormatManager, JUCE_PLUGINHOST_VST, JUCE_PLUGINHOST_AU
 */
 #ifndef JUCE_PLUGINHOST_VST3
  #define JUCE_PLUGINHOST_VST3 0
@@ -60,7 +60,7 @@
 #endif
 
 #if ! (JUCE_PLUGINHOST_AU || JUCE_PLUGINHOST_VST || JUCE_PLUGINHOST_VST3)
-// #error "You need to set either the JUCE_PLUGINHOST_AU anr/or JUCE_PLUGINHOST_VST flags if you're using this module!"
+// #error "You need to set either the JUCE_PLUGINHOST_AU and/or JUCE_PLUGINHOST_VST and/or JUCE_PLUGINHOST_VST3 flags if you're using this module!"
 #endif
 
 #if ! (defined (JUCE_SUPPORT_CARBON) || JUCE_64BIT)

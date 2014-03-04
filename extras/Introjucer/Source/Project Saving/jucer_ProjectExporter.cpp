@@ -177,7 +177,7 @@ bool ProjectExporter::shouldFileBeCompiledByDefault (const RelativePath& file) c
 
 void ProjectExporter::createPropertyEditors (PropertyListBuilder& props)
 {
-    props.add (new TextPropertyComponent (getTargetLocationValue(), "Target Project Folder", 1024, false),
+    props.add (new TextPropertyComponent (getTargetLocationValue(), "Target Project Folder", 2048, false),
                "The location of the folder in which the " + name + " project will be created. "
                "This path can be absolute, but it's much more sensible to make it relative to the jucer project directory.");
 
@@ -191,15 +191,15 @@ void ProjectExporter::createPropertyEditors (PropertyListBuilder& props)
                "Extra preprocessor definitions. Use the form \"NAME1=value NAME2=value\", using whitespace, commas, "
                "or new-lines to separate the items - to include a space or comma in a definition, precede it with a backslash.");
 
-    props.add (new TextPropertyComponent (getExtraCompilerFlags(), "Extra compiler flags", 2048, true),
+    props.add (new TextPropertyComponent (getExtraCompilerFlags(), "Extra compiler flags", 8192, true),
                "Extra command-line flags to be passed to the compiler. This string can contain references to preprocessor definitions in the "
                "form ${NAME_OF_DEFINITION}, which will be replaced with their values.");
 
-    props.add (new TextPropertyComponent (getExtraLinkerFlags(), "Extra linker flags", 2048, true),
+    props.add (new TextPropertyComponent (getExtraLinkerFlags(), "Extra linker flags", 8192, true),
                "Extra command-line flags to be passed to the linker. You might want to use this for adding additional libraries. "
                "This string can contain references to preprocessor definitions in the form ${NAME_OF_VALUE}, which will be replaced with their values.");
 
-    props.add (new TextPropertyComponent (getExternalLibraries(), "External libraries to link", 2048, true),
+    props.add (new TextPropertyComponent (getExternalLibraries(), "External libraries to link", 8192, true),
                "Additional libraries to link (one per line). You should not add any platform specific decoration to these names. "
                "This string can contain references to preprocessor definitions in the form ${NAME_OF_VALUE}, which will be replaced with their values.");
 

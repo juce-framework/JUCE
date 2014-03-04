@@ -28,10 +28,7 @@
 
 //==============================================================================
 /**
-    Receives callbacks to indicate that some kind of event has occurred.
-
-    Used by various classes, e.g. buttons when they are pressed, to tell listeners
-    about something that's happened.
+    Interface class for delivery of events that are sent by an ActionBroadcaster.
 
     @see ActionBroadcaster, ChangeListener
 */

@@ -97,6 +97,16 @@ public:
         TextBoxBelow            /**< Puts the text box below the slider, horizontally centred.  */
     };
 
+    /** Describes the type of mouse-dragging that is happening when a value is being changed.
+        @see snapValue
+     */
+    enum DragMode
+    {
+        notDragging,            /**< Dragging is not active.  */
+        absoluteDrag,           /**< The dragging corresponds directly to the value that is displayed.  */
+        velocityDrag            /**< The dragging value change is relative to the velocity of the mouse mouvement.  */
+    };
+
     //==============================================================================
     /** Creates a slider.
         When created, you can set up the slider's style and range with setSliderStyle(), setRange(), etc.
@@ -157,7 +167,7 @@ public:
     int getMouseDragSensitivity() const noexcept;
 
     //==============================================================================
-    /** Changes the way the the mouse is used when dragging the slider.
+    /** Changes the way the mouse is used when dragging the slider.
 
         If true, this will turn on velocity-sensitive dragging, so that
         the faster the mouse moves, the bigger the movement to the slider. This
@@ -720,12 +730,13 @@ public:
         a given position, and allows a subclass to sanity-check this value, possibly
         returning a different value to use instead.
 
-        @param attemptedValue       the value the user is trying to enter
-        @param userIsDragging       true if the user is dragging with the mouse; false if
-                                    they are entering the value using the text box
-        @returns                    the value to use instead
+        @param attemptedValue   the value the user is trying to enter
+        @param dragMode         indicates whether the user is dragging with
+                                the mouse; notDragging if they are entering the value
+                                using the text box or other non-dragging interaction
+        @returns                the value to use instead
     */
-    virtual double snapValue (double attemptedValue, bool userIsDragging);
+    virtual double snapValue (double attemptedValue, DragMode dragMode);
 
 
     //==============================================================================
@@ -874,6 +885,7 @@ private:
     JUCE_DEPRECATED (void setMaxValue (double, bool));
     JUCE_DEPRECATED (void setMinAndMaxValues (double, double, bool, bool));
     JUCE_DEPRECATED (void setMinAndMaxValues (double, double, bool));
+    virtual void snapValue (double, bool) {}
    #endif
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Slider)

@@ -52,9 +52,9 @@ static void showBubbleMessage (Component* targetComponent, const String& textToS
 */
 struct SnappingSlider  : public Slider
 {
-    double snapValue (double attemptedValue, bool userIsDragging) override
+    double snapValue (double attemptedValue, DragMode dragMode) override
     {
-        if (! userIsDragging)
+        if (dragMode == notDragging)
             return attemptedValue;  // if they're entering the value in the text-box, don't mess with it.
 
         if (attemptedValue > 40 && attemptedValue < 60)

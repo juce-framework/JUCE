@@ -46,9 +46,8 @@ class JUCE_API  DynamicObject  : public ReferenceCountedObject
 public:
     //==============================================================================
     DynamicObject();
-
-    /** Destructor. */
-    virtual ~DynamicObject();
+    DynamicObject (const DynamicObject&);
+    ~DynamicObject();
 
     typedef ReferenceCountedObjectPtr<DynamicObject> Ptr;
 
@@ -103,6 +102,9 @@ public:
 
     /** Returns the NamedValueSet that holds the object's properties. */
     NamedValueSet& getProperties() noexcept     { return properties; }
+
+    /** Calls var::clone() on all the properties that this object contains. */
+    void cloneAllProperties();
 
     //==============================================================================
     /** Returns a clone of this object.

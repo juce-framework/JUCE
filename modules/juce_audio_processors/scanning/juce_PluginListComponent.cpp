@@ -83,9 +83,9 @@ public:
         }
     }
 
-    void deleteKeyPressed (int lastRowSelected) override
+    void deleteKeyPressed (int) override
     {
-        removePluginItem (list, lastRowSelected);
+        owner.removeSelected();
     }
 
     void sortOrderChanged (int newSortColumnId, bool isForwards) override
@@ -152,6 +152,7 @@ PluginListComponent::PluginListComponent (AudioPluginFormatManager& manager, Kno
     table.setHeaderHeight (22);
     table.setRowHeight (20);
     table.setModel (tableModel);
+    table.setMultipleSelectionEnabled (true);
     addAndMakeVisible (table);
 
     addAndMakeVisible (optionsButton);
@@ -161,6 +162,7 @@ PluginListComponent::PluginListComponent (AudioPluginFormatManager& manager, Kno
     setSize (400, 600);
     list.addChangeListener (this);
     updateList();
+    table.getHeader().reSortTable();
 
     PluginDirectoryScanner::applyBlacklistingsFromDeadMansPedal (list, deadMansPedalFile);
     deadMansPedalFile.deleteFile();
@@ -195,6 +197,7 @@ void PluginListComponent::resized()
 
 void PluginListComponent::changeListenerCallback (ChangeBroadcaster*)
 {
+    table.getHeader().reSortTable();
     updateList();
 }
 
@@ -208,7 +211,7 @@ void PluginListComponent::removeSelected()
 {
     const SparseSet<int> selected (table.getSelectedRows());
 
-    for (int i = list.getNumTypes(); --i >= 0;)
+    for (int i = table.getNumRows(); --i >= 0;)
         if (selected.contains (i))
             TableModel::removePluginItem (list, i);
 }

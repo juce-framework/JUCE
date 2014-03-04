@@ -151,9 +151,9 @@ XmlElement* ComponentTypeHandler::createXmlFor (Component* comp, const Component
     pos.updateFromComponent (*comp, layout);
     pos.applyToXml (*e);
 
-    SettableTooltipClient* const ttc = dynamic_cast <SettableTooltipClient*> (comp);
-    if (ttc != 0 && ttc->getTooltip().isNotEmpty())
-        e->setAttribute ("tooltip", ttc->getTooltip());
+    if (SettableTooltipClient* const ttc = dynamic_cast <SettableTooltipClient*> (comp))
+        if (ttc->getTooltip().isNotEmpty())
+            e->setAttribute ("tooltip", ttc->getTooltip());
 
     for (int i = 0; i < colours.size(); ++i)
     {
@@ -191,8 +191,7 @@ bool ComponentTypeHandler::restoreFromXml (const XmlElement& xml,
     jassert (layout != 0);
     setComponentPosition (comp, rpr, layout);
 
-    SettableTooltipClient* const ttc = dynamic_cast <SettableTooltipClient*> (comp);
-    if (ttc != 0)
+    if (SettableTooltipClient* const ttc = dynamic_cast <SettableTooltipClient*> (comp))
         ttc->setTooltip (xml.getStringAttribute ("tooltip"));
 
     for (int i = 0; i < colours.size(); ++i)
@@ -261,7 +260,7 @@ class TooltipProperty   : public ComponentTextProperty <Component>
 {
 public:
     TooltipProperty (Component* comp, JucerDocument& doc)
-        : ComponentTextProperty<Component> ("tooltip", 1024, false, comp, doc)
+        : ComponentTextProperty<Component> ("tooltip", 1024, true, comp, doc)
     {
     }
 

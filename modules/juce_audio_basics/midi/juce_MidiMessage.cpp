@@ -155,7 +155,7 @@ MidiMessage::MidiMessage (const MidiMessage& other, const double newTimeStamp)
 MidiMessage::MidiMessage (const void* srcData, int sz, int& numBytesUsed, const uint8 lastStatusByte, double t)
     : timeStamp (t)
 {
-    const uint8* src = static_cast <const uint8*> (srcData);
+    const uint8* src = static_cast<const uint8*> (srcData);
     unsigned int byte = (unsigned int) *src;
 
     if (byte < 0x80)
@@ -658,6 +658,36 @@ String MidiMessage::getTextFromTextMetaEvent() const
                    CharPointer_UTF8 (textData + getMetaEventLength()));
 }
 
+MidiMessage MidiMessage::textMetaEvent (int type, StringRef text)
+{
+    jassert (type > 0 && type < 16)
+
+    MidiMessage result;
+
+    const size_t textSize = text.text.sizeInBytes() - 1;
+
+    uint8 header[8];
+    size_t n = sizeof (header);
+
+    header[--n] = (uint8) (textSize & 0x7f);
+
+    for (size_t i = textSize; (i >>= 7) != 0;)
+        header[--n] = (uint8) ((i & 0x7f) | 0x80);
+
+    header[--n] = (uint8) type;
+    header[--n] = 0xff;
+
+    const size_t headerLen = sizeof (header) - n;
+
+    uint8* const dest = result.allocateSpace ((int) (headerLen + textSize));
+    result.size = (int) (headerLen + textSize);
+
+    memcpy (dest, header + n, headerLen);
+    memcpy (dest + headerLen, text.text.getAddress(), textSize);
+
+    return result;
+}
+
 bool MidiMessage::isTrackNameEvent() const noexcept         { const uint8* data = getRawData(); return (data[1] == 3)    && (*data == 0xff); }
 bool MidiMessage::isTempoMetaEvent() const noexcept         { const uint8* data = getRawData(); return (data[1] == 81)   && (*data == 0xff); }
 bool MidiMessage::isMidiChannelMetaEvent() const noexcept   { const uint8* data = getRawData(); return (data[1] == 0x20) && (*data == 0xff) && (data[2] == 1); }
@@ -939,6 +969,11 @@ String MidiMessage::getMidiNoteName (int note, bool useSharps, bool includeOctav
 double MidiMessage::getMidiNoteInHertz (int noteNumber, const double frequencyOfA) noexcept
 {
     return frequencyOfA * pow (2.0, (noteNumber - 69) / 12.0);
+}
+
+bool MidiMessage::isMidiNoteBlack (int noteNumber) noexcept
+{
+    return ((1 << (noteNumber % 12)) & 0x054a) != 0;
 }
 
 const char* MidiMessage::getGMInstrumentName (const int n)

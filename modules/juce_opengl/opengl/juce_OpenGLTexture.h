@@ -71,27 +71,11 @@ public:
     /** Frees the texture, if there is one. */
     void release();
 
-    /** Binds the texture to the currently selected openGL context. */
+    /** Binds the texture to the currently active openGL context. */
     void bind() const;
 
-    /** Unbinds the texture to the currently selected openGL context. */
+    /** Unbinds the texture to the currently active openGL context. */
     void unbind() const;
-
-   #if JUCE_USE_OPENGL_FIXED_FUNCTION
-    /** Draws this texture into the current context, with the specified corner positions. */
-    void draw2D (float x1, float y1,
-                 float x2, float y2,
-                 float x3, float y3,
-                 float x4, float y4,
-                 Colour colour) const;
-
-    /** Draws this texture into the current context, with the specified corner positions. */
-    void draw3D (float x1, float y1, float z1,
-                 float x2, float y2, float z2,
-                 float x3, float y3, float z3,
-                 float x4, float y4, float z4,
-                 Colour colour) const;
-   #endif
 
     /** Returns the GL texture ID number. */
     GLuint getTextureID() const noexcept        { return textureID; }

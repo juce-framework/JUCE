@@ -102,7 +102,7 @@ public:
     /** Returns the raw handle to whatever kind of window is being used.
 
         On windows, this is probably a HWND, on the mac, it's likely to be a WindowRef,
-        but rememeber there's no guarantees what you'll get back.
+        but remember there's no guarantees what you'll get back.
     */
     virtual void* getNativeHandle() const = 0;
 

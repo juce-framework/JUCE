@@ -63,6 +63,13 @@ URL::URL (const String& u)  : url (u)
     }
 }
 
+URL::URL (const String& u, int)  : url (u) {}
+
+URL URL::createWithoutParsing (const String& u)
+{
+    return URL (u, 0);
+}
+
 URL::URL (const URL& other)
     : url (other.url),
       postData (other.postData),

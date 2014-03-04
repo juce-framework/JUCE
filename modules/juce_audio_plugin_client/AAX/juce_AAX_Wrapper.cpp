@@ -124,8 +124,7 @@ struct AAXClasses
             case 6:   return AAX_eStemFormat_5_1;
             case 7:   return AAX_eStemFormat_7_0_DTS;
             case 8:   return AAX_eStemFormat_7_1_DTS;
-
-            default:  jassertfalse; break; // hmm - not a valid number of chans..
+            default:  jassertfalse; break;
         }
 
         return AAX_eStemFormat_None;
@@ -139,15 +138,43 @@ struct AAXClasses
             case AAX_eStemFormat_Mono:      return 1;
             case AAX_eStemFormat_Stereo:    return 2;
             case AAX_eStemFormat_LCR:       return 3;
+            case AAX_eStemFormat_LCRS:
             case AAX_eStemFormat_Quad:      return 4;
             case AAX_eStemFormat_5_0:       return 5;
-            case AAX_eStemFormat_5_1:       return 6;
+            case AAX_eStemFormat_5_1:
+            case AAX_eStemFormat_6_0:       return 6;
+            case AAX_eStemFormat_6_1:
+            case AAX_eStemFormat_7_0_SDDS:
             case AAX_eStemFormat_7_0_DTS:   return 7;
+            case AAX_eStemFormat_7_1_SDDS:
             case AAX_eStemFormat_7_1_DTS:   return 8;
-            default:  jassertfalse; break; // hmm - not a valid number of chans..
+            default:                        jassertfalse; break;
         }
 
         return 0;
+    }
+
+    static const char* getSpeakerArrangementString (AAX_EStemFormat format) noexcept
+    {
+        switch (format)
+        {
+            case AAX_eStemFormat_Mono:      return "M";
+            case AAX_eStemFormat_Stereo:    return "L R";
+            case AAX_eStemFormat_LCR:       return "L C R";
+            case AAX_eStemFormat_LCRS:      return "L C R S";
+            case AAX_eStemFormat_Quad:      return "L R Ls Rs";
+            case AAX_eStemFormat_5_0:       return "L C R Ls Rs";
+            case AAX_eStemFormat_5_1:       return "L C R Ls Rs LFE";
+            case AAX_eStemFormat_6_0:       return "L C R Ls Cs Rs";
+            case AAX_eStemFormat_6_1:       return "L C R Ls Cs Rs LFE";
+            case AAX_eStemFormat_7_0_SDDS:  return "L Lc C Rc R Ls Rs";
+            case AAX_eStemFormat_7_1_SDDS:  return "L Lc C Rc R Ls Rs LFE";
+            case AAX_eStemFormat_7_0_DTS:   return "L C R Lss Rss Lsr Rsr";
+            case AAX_eStemFormat_7_1_DTS:   return "L C R Lss Rss Lsr Rsr LFE";
+            default:                        break;
+        }
+
+        return nullptr;
     }
 
     //==============================================================================
@@ -743,6 +770,9 @@ struct AAXClasses
 
             midiBuffer.clear();
 
+            (void) midiNodeIn;
+            (void) midiNodesOut;
+
            #if JucePlugin_WantsMidiInput
             {
                 AAX_CMidiStream* const midiStream = midiNodeIn->GetNodeBuffer();
@@ -852,6 +882,9 @@ struct AAXClasses
 
             AudioProcessor& audioProcessor = getPluginInstance();
 
+            audioProcessor.setSpeakerArrangement (getSpeakerArrangementString (inputStemFormat),
+                                                  getSpeakerArrangementString (outputStemFormat));
+
             audioProcessor.setPlayConfigDetails (numberOfInputChannels, numberOfOutputChannels, sampleRate, lastBufferSize);
             audioProcessor.prepareToPlay (sampleRate, lastBufferSize);
 
@@ -928,6 +961,13 @@ struct AAXClasses
         // This value needs to match the RTAS wrapper's Type ID, so that
         // the host knows that the RTAS/AAX plugins are equivalent.
         properties->AddProperty (AAX_eProperty_PlugInID_Native,     'jcaa' + channelConfigIndex);
+        properties->AddProperty (AAX_eProperty_PlugInID_AudioSuite, 'jyaa' + channelConfigIndex);
+
+       #if JucePlugin_AAXDisableMultiMono
+        properties->AddProperty (AAX_eProperty_Constraint_MultiMonoSupport, false);
+       #else
+        properties->AddProperty (AAX_eProperty_Constraint_MultiMonoSupport, true);
+       #endif
 
         check (desc.AddProcessProc_Native (algorithmProcessCallback, properties));
     }

@@ -478,8 +478,8 @@ public:
 
             resetBusses();
 
-            prepared = (AudioUnitInitialize (audioUnit) == noErr);
-            jassert (prepared);
+            jassert (! prepared);
+            initialiseAudioUnit();
         }
     }
 
@@ -497,6 +497,14 @@ public:
         }
 
         incomingMidi.clear();
+    }
+
+    bool initialiseAudioUnit()
+    {
+        if (! prepared)
+            prepared = (AudioUnitInitialize (audioUnit) == noErr);
+
+        return prepared;
     }
 
     void resetBusses()
@@ -804,10 +812,14 @@ public:
 
         if (propertyList != 0)
         {
+            initialiseAudioUnit();
+
             AudioUnitSetProperty (audioUnit, kAudioUnitProperty_ClassInfo, kAudioUnitScope_Global,
                                   0, &propertyList, sizeof (propertyList));
 
             sendAllParametersChangedEvents();
+
+            CFRelease (propertyList);
         }
     }
 
@@ -1300,8 +1312,7 @@ private:
 };
 
 //==============================================================================
-class AudioUnitPluginWindowCocoa    : public AudioProcessorEditor,
-                                      public Timer
+class AudioUnitPluginWindowCocoa    : public AudioProcessorEditor
 {
 public:
     AudioUnitPluginWindowCocoa (AudioUnitPluginInstance& p, bool createGenericViewIfNeeded)
@@ -1340,29 +1351,24 @@ public:
         wrapper.setSize (getWidth(), getHeight());
     }
 
-    void timerCallback() override
-    {
-        wrapper.resizeToFitView();
-        startTimer (jmin (713, getTimerInterval() + 51));
-    }
-
     void childBoundsChanged (Component*) override
     {
         setSize (wrapper.getWidth(), wrapper.getHeight());
-        startTimer (70);
     }
 
 private:
     AudioUnitPluginInstance& plugin;
-    NSViewComponent wrapper;
+
+    AutoResizingNSViewComponent wrapper;
 
     bool createView (const bool createGenericViewIfNeeded)
     {
+        if (! plugin.initialiseAudioUnit())
+            return false;
+
         NSView* pluginView = nil;
         UInt32 dataSize = 0;
         Boolean isWritable = false;
-
-        AudioUnitInitialize (plugin.audioUnit);
 
         if (AudioUnitGetPropertyInfo (plugin.audioUnit, kAudioUnitProperty_CocoaUI, kAudioUnitScope_Global,
                                       0, &dataSize, &isWritable) == noErr
@@ -1415,10 +1421,7 @@ private:
         wrapper.setView (pluginView);
 
         if (pluginView != nil)
-        {
-            timerCallback();
-            startTimer (70);
-        }
+            wrapper.resizeToFitView();
 
         return pluginView != nil;
     }
@@ -1533,16 +1536,10 @@ private:
 
             Float32Point pos = { 0, 0 };
             Float32Point size = { 250, 200 };
-
             HIViewRef pluginView = 0;
 
-            AudioUnitCarbonViewCreate (carbonView,
-                                       owner.getAudioUnit(),
-                                       windowRef,
-                                       rootView,
-                                       &pos,
-                                       &size,
-                                       (ControlRef*) &pluginView);
+            AudioUnitCarbonViewCreate (carbonView, owner.getAudioUnit(), windowRef, rootView,
+                                       &pos, &size, (ControlRef*) &pluginView);
 
             return pluginView;
         }

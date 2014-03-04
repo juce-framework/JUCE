@@ -131,9 +131,11 @@ public:
     */
     bool autoScroll (int mouseX, int mouseY, int distanceFromEdge, int maximumSpeed);
 
-    /** Returns the position within the child component of the top-left of its visible area.
-    */
+    /** Returns the position within the child component of the top-left of its visible area. */
     Point<int> getViewPosition() const noexcept             { return lastVisibleArea.getPosition(); }
+
+    /** Returns the visible area of the child component, relative to its top-left */
+    Rectangle<int> getViewArea() const noexcept             { return lastVisibleArea; }
 
     /** Returns the position within the child component of the top-left of its visible area.
         @see getViewWidth, setViewPosition

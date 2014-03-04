@@ -141,7 +141,7 @@ int NamedValueSet::size() const noexcept
     return values.size();
 }
 
-const var& NamedValueSet::operator[] (const Identifier name) const
+const var& NamedValueSet::operator[] (Identifier name) const
 {
     for (NamedValue* i = values; i != nullptr; i = i->nextListItem)
         if (i->name == name)
@@ -150,7 +150,7 @@ const var& NamedValueSet::operator[] (const Identifier name) const
     return var::null;
 }
 
-var NamedValueSet::getWithDefault (const Identifier name, const var& defaultReturnValue) const
+var NamedValueSet::getWithDefault (Identifier name, const var& defaultReturnValue) const
 {
     if (const var* const v = getVarPointer (name))
         return *v;
@@ -158,7 +158,7 @@ var NamedValueSet::getWithDefault (const Identifier name, const var& defaultRetu
     return defaultReturnValue;
 }
 
-var* NamedValueSet::getVarPointer (const Identifier name) const noexcept
+var* NamedValueSet::getVarPointer (Identifier name) const noexcept
 {
     for (NamedValue* i = values; i != nullptr; i = i->nextListItem)
         if (i->name == name)
@@ -168,7 +168,7 @@ var* NamedValueSet::getVarPointer (const Identifier name) const noexcept
 }
 
 #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
-bool NamedValueSet::set (const Identifier name, var&& newValue)
+bool NamedValueSet::set (Identifier name, var&& newValue)
 {
     LinkedListPointer<NamedValue>* i = &values;
 
@@ -193,7 +193,7 @@ bool NamedValueSet::set (const Identifier name, var&& newValue)
 }
 #endif
 
-bool NamedValueSet::set (const Identifier name, const var& newValue)
+bool NamedValueSet::set (Identifier name, const var& newValue)
 {
     LinkedListPointer<NamedValue>* i = &values;
 
@@ -217,12 +217,27 @@ bool NamedValueSet::set (const Identifier name, const var& newValue)
     return true;
 }
 
-bool NamedValueSet::contains (const Identifier name) const
+bool NamedValueSet::contains (Identifier name) const
 {
     return getVarPointer (name) != nullptr;
 }
 
-bool NamedValueSet::remove (const Identifier name)
+int NamedValueSet::indexOf (Identifier name) const noexcept
+{
+    int index = 0;
+
+    for (NamedValue* i = values; i != nullptr; i = i->nextListItem)
+    {
+        if (i->name == name)
+            return index;
+
+        ++index;
+    }
+
+    return -1;
+}
+
+bool NamedValueSet::remove (Identifier name)
 {
     LinkedListPointer<NamedValue>* i = &values;
 
@@ -245,7 +260,7 @@ bool NamedValueSet::remove (const Identifier name)
     return false;
 }
 
-const Identifier NamedValueSet::getName (const int index) const
+Identifier NamedValueSet::getName (const int index) const
 {
     const NamedValue* const v = values[index];
     jassert (v != nullptr);

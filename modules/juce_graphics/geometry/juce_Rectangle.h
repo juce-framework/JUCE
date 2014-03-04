@@ -174,6 +174,12 @@ public:
     /** Changes the rectangle's height */
     inline void setHeight (const ValueType newHeight) noexcept              { h = newHeight; }
 
+    /** Changes the position of the rectangle's centre (leaving its size unchanged). */
+    inline void setCentre (const ValueType newCentreX, const ValueType newCentreY) noexcept         { pos.x = newCentreX - w / (ValueType) 2; pos.y = newCentreY - h / (ValueType) 2; }
+
+    /** Changes the position of the rectangle's centre (leaving its size unchanged). */
+    inline void setCentre (const Point<ValueType> newCentre) noexcept                               { setCentre (newCentre.x, newCentre.y); }
+
     /** Returns a rectangle which has the same size and y-position as this one, but with a different x-position. */
     Rectangle withX (const ValueType newX) const noexcept                   { return Rectangle (newX, pos.y, w, h); }
 
@@ -188,6 +194,10 @@ public:
 
     /** Returns a rectangle whose size is the same as this one, but whose top-left position is (0, 0). */
     Rectangle withZeroOrigin() const noexcept                               { return Rectangle (w, h); }
+
+    /** Returns a rectangle with the same size as this one, but a new centre position. */
+    Rectangle withCentre (const Point<ValueType> newCentre) const noexcept  { return Rectangle (newCentre.x - w / (ValueType) 2,
+                                                                                                newCentre.y - h / (ValueType) 2, w, h); }
 
     /** Returns a rectangle which has the same position and height as this one, but with a different width. */
     Rectangle withWidth (ValueType newWidth) const noexcept                 { return Rectangle (pos.x, pos.y, newWidth, h); }

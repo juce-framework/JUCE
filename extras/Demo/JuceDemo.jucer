@@ -224,6 +224,8 @@
               file="Source/Demos/AudioSynthesiserDemo.cpp"/>
         <FILE id="nWMZgj" name="Box2DDemo.cpp" compile="1" resource="0" file="Source/Demos/Box2DDemo.cpp"/>
         <FILE id="mytllf" name="CameraDemo.cpp" compile="1" resource="0" file="Source/Demos/CameraDemo.cpp"/>
+        <FILE id="yuKDZN" name="ChildProcessDemo.cpp" compile="1" resource="0"
+              file="Source/Demos/ChildProcessDemo.cpp"/>
         <FILE id="E1AN07" name="CodeEditorDemo.cpp" compile="1" resource="0"
               file="Source/Demos/CodeEditorDemo.cpp"/>
         <FILE id="RDS9At" name="ComponentTransformsDemo.cpp" compile="1" resource="0"
@@ -248,6 +250,8 @@
         <FILE id="iii6RP" name="NetworkingDemo.cpp" compile="1" resource="0"
               file="Source/Demos/NetworkingDemo.cpp"/>
         <FILE id="r2PxPF" name="OpenGLDemo.cpp" compile="1" resource="0" file="Source/Demos/OpenGLDemo.cpp"/>
+        <FILE id="SXYKYN" name="OpenGLDemo2D.cpp" compile="1" resource="0"
+              file="Source/Demos/OpenGLDemo2D.cpp"/>
         <FILE id="b2eKRP" name="PropertiesDemo.cpp" compile="1" resource="0"
               file="Source/Demos/PropertiesDemo.cpp"/>
         <FILE id="cmVbyh" name="SystemInfoDemo.cpp" compile="1" resource="0"

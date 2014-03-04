@@ -30,6 +30,11 @@ DynamicObject::DynamicObject()
 {
 }
 
+DynamicObject::DynamicObject (const DynamicObject& other)
+    : properties (other.properties)
+{
+}
+
 DynamicObject::~DynamicObject()
 {
 }
@@ -78,12 +83,9 @@ void DynamicObject::clear()
     properties.clear();
 }
 
-DynamicObject::Ptr DynamicObject::clone()
+void DynamicObject::cloneAllProperties()
 {
-    DynamicObject* newCopy = new DynamicObject();
-    newCopy->properties = properties;
-
-    for (LinkedListPointer<NamedValueSet::NamedValue>* i = &(newCopy->properties.values);;)
+    for (LinkedListPointer<NamedValueSet::NamedValue>* i = &(properties.values);;)
     {
         if (NamedValueSet::NamedValue* const v = i->get())
         {
@@ -93,8 +95,13 @@ DynamicObject::Ptr DynamicObject::clone()
         else
             break;
     }
+}
 
-    return newCopy;
+DynamicObject::Ptr DynamicObject::clone()
+{
+    Ptr d (new DynamicObject (*this));
+    d->cloneAllProperties();
+    return d;
 }
 
 void DynamicObject::writeAsJSON (OutputStream& out, const int indentLevel, const bool allOnOneLine)

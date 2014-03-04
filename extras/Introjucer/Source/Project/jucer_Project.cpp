@@ -376,6 +376,12 @@ void Project::createPropertyEditors (PropertyListBuilder& props)
     props.add (new TextPropertyComponent (getCompanyName(), "Company Name", 256, false),
                "Your company name, which will be added to the properties of the binary where possible");
 
+    props.add (new TextPropertyComponent (getCompanyWebsite(), "Company Website", 256, false),
+               "Your company website, which will be added to the properties of the binary where possible");
+
+    props.add (new TextPropertyComponent (getCompanyEmail(), "Company E-mail", 256, false),
+               "Your company e-mail, which will be added to the properties of the binary where possible");
+
     {
         StringArray projectTypeNames;
         Array<var> projectTypeCodes;

@@ -55,6 +55,14 @@ public:
         repaint();  // (needed for correct repainting)
     }
 
+    float getDesktopScaleFactor() const override
+    {
+        if (target != nullptr)
+            return target->getDesktopScaleFactor();
+
+        return Component::getDesktopScaleFactor();
+    }
+
 private:
     WeakReference<Component> target;
     DropShadow shadow;

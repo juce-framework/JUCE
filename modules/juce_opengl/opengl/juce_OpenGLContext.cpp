@@ -141,6 +141,11 @@ public:
     {
         ScopedPointer<MessageManagerLock> mmLock;
 
+        const Rectangle<int> screenBounds (component.getTopLevelComponent()->getScreenBounds());
+
+        if (lastScreenBounds != screenBounds)
+            updateViewportSize (false);
+
         const bool isUpdating = needsUpdate.compareAndSetBool (0, 1);
 
         if (context.renderComponents && isUpdating)
@@ -190,11 +195,13 @@ public:
     {
         if (ComponentPeer* peer = component.getPeer())
         {
+            lastScreenBounds = component.getTopLevelComponent()->getScreenBounds();
+
             const double newScale = Desktop::getInstance().getDisplays()
-                                        .getDisplayContaining (component.getScreenBounds().getCentre()).scale;
+                                        .getDisplayContaining (lastScreenBounds.getCentre()).scale;
 
             Rectangle<int> newArea (peer->getComponent().getLocalArea (&component, component.getLocalBounds())
-                                                        .withPosition (0, 0)
+                                                        .withZeroOrigin()
                                      * newScale);
 
             if (scale != newScale || viewportArea != newArea)
@@ -347,7 +354,7 @@ public:
         context.extensions.initialise();
         nativeContext->setSwapInterval (1);
 
-       #if JUCE_USE_OPENGL_SHADERS && ! JUCE_OPENGL_ES
+       #if ! JUCE_OPENGL_ES
         shadersAvailable = OpenGLShaderProgram::getLanguageVersion() > 0;
        #endif
 
@@ -381,7 +388,7 @@ public:
 
     OpenGLFrameBuffer cachedImageFrameBuffer;
     RectangleList<int> validArea;
-    Rectangle<int> viewportArea;
+    Rectangle<int> viewportArea, lastScreenBounds;
     double scale;
 
     StringArray associatedObjectNames;
@@ -739,9 +746,17 @@ void OpenGLContext::setAssociatedObject (const char* name, ReferenceCountedObjec
 
         if (index >= 0)
         {
-            c->associatedObjects.set (index, newObject);
+            if (newObject != nullptr)
+            {
+                c->associatedObjects.set (index, newObject);
+            }
+            else
+            {
+                c->associatedObjectNames.remove (index);
+                c->associatedObjects.remove (index);
+            }
         }
-        else
+        else if (newObject != nullptr)
         {
             c->associatedObjectNames.add (name);
             c->associatedObjects.add (newObject);
@@ -761,7 +776,6 @@ void OpenGLContext::copyTexture (const Rectangle<int>& targetClipArea,
     glBlendFunc (GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
     glEnable (GL_BLEND);
 
-   #if JUCE_USE_OPENGL_SHADERS
     if (areShadersAvailable())
     {
         struct OverlayShaderProgram  : public ReferenceCountedObject
@@ -871,40 +885,10 @@ void OpenGLContext::copyTexture (const Rectangle<int>& targetClipArea,
         extensions.glDisableVertexAttribArray (index);
         extensions.glDeleteBuffers (1, &vertexBuffer);
     }
-    #if JUCE_USE_OPENGL_FIXED_FUNCTION
     else
-    #endif
-   #endif
-
-   #if JUCE_USE_OPENGL_FIXED_FUNCTION
     {
-        glEnable (GL_SCISSOR_TEST);
-        glScissor (targetClipArea.getX(), contextHeight - targetClipArea.getBottom(),
-                   targetClipArea.getWidth(), targetClipArea.getHeight());
-
-        JUCE_CHECK_OPENGL_ERROR
-        glColor4f (1.0f, 1.0f, 1.0f, 1.0f);
-        glDisableClientState (GL_COLOR_ARRAY);
-        glDisableClientState (GL_NORMAL_ARRAY);
-        glEnableClientState (GL_VERTEX_ARRAY);
-        glEnableClientState (GL_TEXTURE_COORD_ARRAY);
-        OpenGLHelpers::prepareFor2D (contextWidth, contextHeight);
-        JUCE_CHECK_OPENGL_ERROR
-
-        const GLfloat textureCoords[] = { 0, 0, 1.0f, 0, 0, 1.0f, 1.0f, 1.0f };
-        glTexCoordPointer (2, GL_FLOAT, 0, textureCoords);
-
-        const GLshort left   = (GLshort) anchorPosAndTextureSize.getX();
-        const GLshort right  = (GLshort) anchorPosAndTextureSize.getRight();
-        const GLshort top    = (GLshort) (contextHeight - anchorPosAndTextureSize.getY());
-        const GLshort bottom = (GLshort) (contextHeight - anchorPosAndTextureSize.getBottom());
-        const GLshort vertices[] = { left, bottom, right, bottom, left, top, right, top };
-        glVertexPointer (2, GL_SHORT, 0, vertices);
-
-        glDrawArrays (GL_TRIANGLE_STRIP, 0, 4);
-        glDisable (GL_SCISSOR_TEST);
+        jassertfalse; // Running on an old graphics card!
     }
-   #endif
 
     JUCE_CHECK_OPENGL_ERROR
 }

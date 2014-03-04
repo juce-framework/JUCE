@@ -67,45 +67,48 @@ public:
         If the name isn't found, this will return a void variant.
         @see getProperty
     */
-    const var& operator[] (const Identifier name) const;
+    const var& operator[] (Identifier name) const;
 
     /** Tries to return the named value, but if no such value is found, this will
         instead return the supplied default value.
     */
-    var getWithDefault (const Identifier name, const var& defaultReturnValue) const;
+    var getWithDefault (Identifier name, const var& defaultReturnValue) const;
 
     /** Changes or adds a named value.
         @returns    true if a value was changed or added; false if the
-                    value was already set the the value passed-in.
+                    value was already set the value passed-in.
     */
-    bool set (const Identifier name, const var& newValue);
+    bool set (Identifier name, const var& newValue);
 
    #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
     /** Changes or adds a named value.
         @returns    true if a value was changed or added; false if the
-                    value was already set the the value passed-in.
+                    value was already set the value passed-in.
     */
-    bool set (const Identifier name, var&& newValue);
+    bool set (Identifier name, var&& newValue);
    #endif
 
     /** Returns true if the set contains an item with the specified name. */
-    bool contains (const Identifier name) const;
+    bool contains (Identifier name) const;
 
     /** Removes a value from the set.
         @returns    true if a value was removed; false if there was no value
                     with the name that was given.
     */
-    bool remove (const Identifier name);
+    bool remove (Identifier name);
 
     /** Returns the name of the value at a given index.
         The index must be between 0 and size() - 1.
     */
-    const Identifier getName (int index) const;
+    Identifier getName (int index) const;
 
     /** Returns the value of the item at a given index.
         The index must be between 0 and size() - 1.
     */
     const var& getValueAt (int index) const;
+
+    /** Returns the index of the given name, or -1 if it's not found. */
+    int indexOf (Identifier name) const noexcept;
 
     /** Removes all values. */
     void clear();
@@ -117,7 +120,7 @@ public:
         Do not use this method unless you really need access to the internal var object
         for some reason - for normal reading and writing always prefer operator[]() and set().
     */
-    var* getVarPointer (const Identifier name) const noexcept;
+    var* getVarPointer (Identifier name) const noexcept;
 
     //==============================================================================
     /** Sets properties to the values of all of an XML element's attributes. */

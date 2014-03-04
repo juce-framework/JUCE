@@ -211,19 +211,11 @@ void MidiKeyboardComponent::getKeyPosition (int midiNoteNumber, const float keyW
                                      5.0f, 6 - blackNoteWidth * 0.3f,
                                      6.0f };
 
-    static const float widths[] = { 1.0f, blackNoteWidth,
-                                    1.0f, blackNoteWidth,
-                                    1.0f,
-                                    1.0f, blackNoteWidth,
-                                    1.0f, blackNoteWidth,
-                                    1.0f, blackNoteWidth,
-                                    1.0f };
-
     const int octave = midiNoteNumber / 12;
     const int note   = midiNoteNumber % 12;
 
     x = roundToInt (octave * 7.0f * keyWidth_ + notePos [note] * keyWidth_);
-    w = roundToInt (widths [note] * keyWidth_);
+    w = roundToInt (MidiMessage::isMidiNoteBlack (note) ? blackNoteWidth * keyWidth_ : keyWidth_);
 }
 
 void MidiKeyboardComponent::getKeyPos (int midiNoteNumber, int& x, int& w) const
@@ -258,6 +250,12 @@ int MidiKeyboardComponent::getKeyStartPosition (const int midiNoteNumber) const
     int x, w;
     getKeyPos (midiNoteNumber, x, w);
     return x;
+}
+
+int MidiKeyboardComponent::getNoteAtPosition (Point<int> p)
+{
+    float v;
+    return xyToNote (p, v);
 }
 
 const uint8 MidiKeyboardComponent::whiteNotes[] = { 0, 2, 4, 5, 7, 9, 11 };
@@ -382,12 +380,12 @@ void MidiKeyboardComponent::paint (Graphics& g)
     else
         y2 = 5.0f;
 
-    g.setGradientFill (ColourGradient (Colours::black.withAlpha (0.3f), x1, y1,
-                                       Colours::transparentBlack, x2, y2, false));
-
     int x, w;
     getKeyPos (rangeEnd, x, w);
     x += w;
+
+    const Colour shadowCol (findColour (shadowColourId));
+    g.setGradientFill (ColourGradient (shadowCol, x1, y1, shadowCol.withAlpha (0.0f), x2, y2, false));
 
     switch (orientation)
     {

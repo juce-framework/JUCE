@@ -32,7 +32,7 @@
 class JUCE_API  OpenGLShaderProgram
 {
 public:
-    OpenGLShaderProgram (const OpenGLContext& context) noexcept;
+    OpenGLShaderProgram (const OpenGLContext&) noexcept;
     ~OpenGLShaderProgram() noexcept;
 
     /** Returns the version of GLSL that the current context supports.
@@ -80,10 +80,13 @@ public:
     bool link() noexcept;
 
     /** Get the output for the last shader compilation or link that failed. */
-    const String& getLastError() const noexcept            { return errorLog; }
+    const String& getLastError() const noexcept             { return errorLog; }
 
     /** Selects this program into the current context. */
     void use() const noexcept;
+
+    /** Deletes the program. */
+    void release() noexcept;
 
     /** Represents an openGL uniform value.
         After a program has been linked, you can create Uniform objects to let you
@@ -151,10 +154,11 @@ public:
     };
 
     /** The ID number of the compiled program. */
-    GLuint programID;
+    GLuint getProgramID() const noexcept;
 
 private:
     const OpenGLContext& context;
+    mutable GLuint programID;
     String errorLog;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OpenGLShaderProgram)

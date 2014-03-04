@@ -25,6 +25,171 @@
 namespace OpenGLRendering
 {
 
+struct TextureInfo
+{
+    GLuint textureID;
+    int imageWidth, imageHeight;
+    float fullWidthProportion, fullHeightProportion;
+};
+
+//==============================================================================
+// This list persists in the OpenGLContext, and will re-use cached textures which
+// are created from Images.
+struct CachedImageList  : public ReferenceCountedObject,
+                          private ImagePixelData::Listener
+{
+    CachedImageList (size_t totalCacheSizeInPixels = 8 * 1024 * 1024) noexcept
+        : totalSize (0), maxCacheSize (totalCacheSizeInPixels) {}
+
+    static CachedImageList* get (OpenGLContext& context)
+    {
+        const char cacheValueID[] = "CachedImages";
+        CachedImageList* list = static_cast<CachedImageList*> (context.getAssociatedObject (cacheValueID));
+
+        if (list == nullptr)
+        {
+            list = new CachedImageList();
+            context.setAssociatedObject (cacheValueID, list);
+        }
+
+        return list;
+    }
+
+    TextureInfo getTextureFor (const Image& image)
+    {
+        ImagePixelData* const pixelData = image.getPixelData();
+
+        CachedImage* c = findCachedImage (pixelData);
+
+        if (c == nullptr)
+        {
+            if (OpenGLFrameBuffer* const fb = OpenGLImageType::getFrameBufferFrom (image))
+            {
+                TextureInfo t;
+                t.textureID = fb->getTextureID();
+                t.imageWidth = image.getWidth();
+                t.imageHeight = image.getHeight();
+                t.fullWidthProportion  = 1.0f;
+                t.fullHeightProportion = 1.0f;
+
+                return t;
+            }
+
+            c = images.add (new CachedImage (*this, pixelData));
+            totalSize += c->imageSize;
+
+            while (totalSize > maxCacheSize && images.size() > 1 && totalSize > 0)
+                removeOldestItem();
+        }
+
+        return c->getTextureInfo();
+    }
+
+    typedef ReferenceCountedObjectPtr<CachedImageList> Ptr;
+
+private:
+    void imageDataChanged (ImagePixelData* im) override
+    {
+        if (CachedImage* c = findCachedImage (im))
+            c->texture.release();
+    }
+
+    void imageDataBeingDeleted (ImagePixelData* im) override
+    {
+        for (int i = images.size(); --i >= 0;)
+        {
+            if (images.getUnchecked(i)->pixelData == im)
+            {
+                totalSize -= images.getUnchecked(i)->imageSize;
+                images.remove (i);
+                break;
+            }
+        }
+    }
+
+    struct CachedImage
+    {
+        CachedImage (CachedImageList& list, ImagePixelData* im)
+            : owner (list), pixelData (im),
+              lastUsed (Time::getCurrentTime()),
+              imageSize (im->width * im->height)
+        {
+            pixelData->listeners.add (&owner);
+        }
+
+        ~CachedImage()
+        {
+            if (pixelData != nullptr)
+                pixelData->listeners.remove (&owner);
+        }
+
+        TextureInfo getTextureInfo()
+        {
+            TextureInfo t;
+
+            if (texture.getTextureID() == 0)
+                texture.loadImage (Image (pixelData));
+
+            t.textureID = texture.getTextureID();
+            t.imageWidth = pixelData->width;
+            t.imageHeight = pixelData->height;
+            t.fullWidthProportion  = t.imageWidth  / (float) texture.getWidth();
+            t.fullHeightProportion = t.imageHeight / (float) texture.getHeight();
+
+            lastUsed = Time::getCurrentTime();
+
+            return t;
+        }
+
+        CachedImageList& owner;
+        ImagePixelData* pixelData;
+        OpenGLTexture texture;
+        Time lastUsed;
+        const size_t imageSize;
+
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CachedImage)
+    };
+
+    OwnedArray<CachedImage> images;
+    size_t totalSize, maxCacheSize;
+
+    CachedImage* findCachedImage (ImagePixelData* const pixelData) const
+    {
+        for (int i = 0; i < images.size(); ++i)
+        {
+            CachedImage* c = images.getUnchecked(i);
+
+            if (c->pixelData == pixelData)
+                return c;
+        }
+
+        return nullptr;
+    }
+
+    void removeOldestItem()
+    {
+        CachedImage* oldest = nullptr;
+
+        for (int i = 0; i < images.size(); ++i)
+        {
+            CachedImage* c = images.getUnchecked(i);
+
+            if (oldest == nullptr || c->lastUsed < oldest->lastUsed)
+                oldest = c;
+        }
+
+        if (oldest != nullptr)
+        {
+            totalSize -= oldest->imageSize;
+            images.removeObject (oldest);
+        }
+    }
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CachedImageList)
+};
+
+
+//==============================================================================
 struct Target
 {
     Target (OpenGLContext& c, GLuint fbID, int width, int height) noexcept
@@ -64,8 +229,6 @@ struct Target
     GLuint frameBufferID;
     Rectangle<int> bounds;
 };
-
-#if JUCE_USE_OPENGL_SHADERS
 
 //==============================================================================
 class PositionedTexture
@@ -191,12 +354,15 @@ public:
                                      " gl_Position = vec4 (scaledPos.x - 1.0, 1.0 - scaledPos.y, 0, 1.0);"
                                      "}");
 
-            program.addFragmentShader (fragmentShader);
+            if (! program.addFragmentShader (fragmentShader))
+                lastError = program.getLastError();
+
             program.link();
             JUCE_CHECK_OPENGL_ERROR
         }
 
         OpenGLShaderProgram program;
+        String lastError;
     };
 
     struct ShaderBase   : public ShaderProgramHolder
@@ -466,13 +632,13 @@ public:
             imageLimits.set (fullWidthProportion, fullHeightProportion);
         }
 
-        void setMatrix (const AffineTransform& trans, const OpenGLTextureFromImage& im,
+        void setMatrix (const AffineTransform& trans, const TextureInfo& textureInfo,
                         const float targetX, const float targetY,
                         bool isForTiling) const
         {
             setMatrix (trans,
-                       im.imageWidth, im.imageHeight,
-                       im.fullWidthProportion, im.fullHeightProportion,
+                       textureInfo.imageWidth, textureInfo.imageHeight,
+                       textureInfo.fullWidthProportion, textureInfo.fullHeightProportion,
                        targetX, targetY, isForTiling);
         }
 
@@ -1134,6 +1300,7 @@ public:
         JUCE_CHECK_OPENGL_ERROR
         activeTextures.clear();
         shaderQuadQueue.initialise();
+        cachedImageList = CachedImageList::get (t.context);
         JUCE_CHECK_OPENGL_ERROR
     }
 
@@ -1257,7 +1424,7 @@ public:
         JUCE_CHECK_OPENGL_ERROR
     }
 
-    void setShaderForTiledImageFill (const OpenGLTextureFromImage& image, const AffineTransform& transform,
+    void setShaderForTiledImageFill (const TextureInfo& textureInfo, const AffineTransform& transform,
                                      const int maskTextureID, const Rectangle<int>* const maskArea, bool isTiledFill)
     {
         blendMode.setPremultipliedBlendingMode (shaderQuadQueue);
@@ -1269,7 +1436,7 @@ public:
 
         if (maskArea != nullptr)
         {
-            activeTextures.setTwoTextureMode (shaderQuadQueue, image.textureID, (GLuint) maskTextureID);
+            activeTextures.setTwoTextureMode (shaderQuadQueue, textureInfo.textureID, (GLuint) maskTextureID);
 
             if (isTiledFill)
             {
@@ -1287,7 +1454,7 @@ public:
         else
         {
             activeTextures.setSingleTextureMode (shaderQuadQueue);
-            activeTextures.bindTexture (image.textureID);
+            activeTextures.bindTexture (textureInfo.textureID);
 
             if (isTiledFill)
             {
@@ -1301,7 +1468,7 @@ public:
             }
         }
 
-        imageParams->setMatrix (transform, image, (float) target.bounds.getX(), (float) target.bounds.getY(), isTiledFill);
+        imageParams->setMatrix (transform, textureInfo, (float) target.bounds.getX(), (float) target.bounds.getY(), isTiledFill);
 
         if (maskParams != nullptr)
             maskParams->setBounds (*maskArea, target, 1);
@@ -1315,6 +1482,8 @@ public:
     StateHelpers::CurrentShader currentShader;
     StateHelpers::ShaderQuadQueue shaderQuadQueue;
 
+    CachedImageList::Ptr cachedImageList;
+
 private:
     GLuint previousFrameBufferTarget;
 };
@@ -1326,12 +1495,13 @@ class SavedState  : public RenderingHelpers::SavedStateBase<SavedState>
 
 public:
     SavedState (GLState* const s)
-        : BaseClass (s->target.bounds), state (s)
+        : BaseClass (s->target.bounds), state (s), isUsingCustomShader (false)
     {}
 
     SavedState (const SavedState& other)
         : BaseClass (other), font (other.font),
-          state (other.state), transparencyLayer (other.transparencyLayer),
+          state (other.state), isUsingCustomShader (false),
+          transparencyLayer (other.transparencyLayer),
           previousTarget (other.previousTarget.createCopy())
     {}
 
@@ -1434,8 +1604,7 @@ public:
                                  const AffineTransform& trans, Graphics::ResamplingQuality, bool tiledFill) const
     {
         state->shaderQuadQueue.flush();
-        OpenGLTextureFromImage image (src);
-        state->setShaderForTiledImageFill (image, trans, 0, nullptr, tiledFill);
+        state->setShaderForTiledImageFill (state->cachedImageList->getTextureFor (src), trans, 0, nullptr, tiledFill);
 
         state->shaderQuadQueue.add (iter, PixelARGB ((uint8) alpha, (uint8) alpha, (uint8) alpha, (uint8) alpha));
         state->shaderQuadQueue.flush();
@@ -1453,9 +1622,13 @@ public:
     template <typename IteratorType>
     void fillWithSolidColour (IteratorType& iter, const PixelARGB colour, bool replaceContents) const
     {
-        state->activeTextures.disableTextures (state->shaderQuadQueue);
-        state->blendMode.setBlendMode (state->shaderQuadQueue, replaceContents);
-        state->setShader (state->currentShader.programs->solidColourProgram);
+        if (! isUsingCustomShader)
+        {
+            state->activeTextures.disableTextures (state->shaderQuadQueue);
+            state->blendMode.setBlendMode (state->shaderQuadQueue, replaceContents);
+            state->setShader (state->currentShader.programs->solidColourProgram);
+        }
+
         state->shaderQuadQueue.add (iter, colour);
     }
 
@@ -1466,9 +1639,21 @@ public:
         state->shaderQuadQueue.add (iter, fillType.colour.getPixelARGB());
     }
 
+    void fillRectWithCustomShader (OpenGLRendering::ShaderPrograms::ShaderBase& shader, const Rectangle<int>& area)
+    {
+        state->setShader (shader);
+        isUsingCustomShader = true;
+
+        fillRect (area, true);
+
+        isUsingCustomShader = false;
+        state->currentShader.clearShader (state->shaderQuadQueue);
+    }
+
     //==============================================================================
     Font font;
     GLState* state;
+    bool isUsingCustomShader;
 
 private:
     Image transparencyLayer;
@@ -1479,7 +1664,7 @@ private:
 
 
 //==============================================================================
-class ShaderContext   : public RenderingHelpers::StackBasedLowLevelGraphicsContext <SavedState>
+class ShaderContext   : public RenderingHelpers::StackBasedLowLevelGraphicsContext<SavedState>
 {
 public:
     ShaderContext (const Target& target)  : glState (target)
@@ -1487,13 +1672,15 @@ public:
         stack.initialise (new SavedState (&glState));
     }
 
-private:
+    void fillRectWithCustomShader (ShaderPrograms::ShaderBase& shader, const Rectangle<int>& area)
+    {
+        static_cast<SavedState&> (*stack).fillRectWithCustomShader (shader, area);
+    }
+
     GLState glState;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ShaderContext)
 };
-
-#endif
 
 class NonShaderContext   : public LowLevelGraphicsSoftwareRenderer
 {
@@ -1542,10 +1729,8 @@ private:
 LowLevelGraphicsContext* createOpenGLContext (const Target&);
 LowLevelGraphicsContext* createOpenGLContext (const Target& target)
 {
-   #if JUCE_USE_OPENGL_SHADERS
     if (target.context.areShadersAvailable())
         return new ShaderContext (target);
-   #endif
 
     Image tempImage (Image::ARGB, target.bounds.getWidth(), target.bounds.getHeight(), true, SoftwareImageType());
     return new NonShaderContext (target, tempImage);
@@ -1574,4 +1759,92 @@ void clearOpenGLGlyphCache();
 void clearOpenGLGlyphCache()
 {
     OpenGLRendering::SavedState::GlyphCacheType::getInstance().reset();
+}
+
+
+//==============================================================================
+struct CustomProgram  : public ReferenceCountedObject,
+                        public OpenGLRendering::ShaderPrograms::ShaderBase
+{
+    CustomProgram (OpenGLRendering::ShaderContext& c, const String& fragmentShader)
+        : ShaderBase (c.glState.target.context, fragmentShader.toRawUTF8())
+    {
+    }
+
+    static CustomProgram* get (const String& hashName)
+    {
+        if (OpenGLContext* c = OpenGLContext::getCurrentContext())
+            return static_cast<CustomProgram*> (c->getAssociatedObject (hashName.toRawUTF8()));
+
+        return nullptr;
+    }
+
+    static CustomProgram* getOrCreate (LowLevelGraphicsContext& gc, const String& hashName, const String& code, String& errorMessage)
+    {
+        if (CustomProgram* c = get (hashName))
+            return c;
+
+        if (OpenGLRendering::ShaderContext* sc = dynamic_cast<OpenGLRendering::ShaderContext*> (&gc))
+        {
+            ReferenceCountedObjectPtr<CustomProgram> c (new CustomProgram (*sc, code));
+
+            errorMessage = c->lastError;
+
+            if (errorMessage.isEmpty())
+            {
+                if (OpenGLContext* context = OpenGLContext::getCurrentContext())
+                {
+                    context->setAssociatedObject (hashName.toRawUTF8(), c);
+                    return c;
+                }
+            }
+        }
+
+        return nullptr;
+    }
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CustomProgram)
+};
+
+OpenGLGraphicsContextCustomShader::OpenGLGraphicsContextCustomShader (const String& fragmentShaderCode)
+    : code (String (JUCE_DECLARE_VARYING_COLOUR
+                    JUCE_DECLARE_VARYING_PIXELPOS
+                    "\n" JUCE_MEDIUMP " float pixelAlpha = frontColour.a;\n") + fragmentShaderCode),
+      hashName (String::toHexString (fragmentShaderCode.hashCode64()) + "_shader")
+{
+}
+
+OpenGLGraphicsContextCustomShader::~OpenGLGraphicsContextCustomShader()
+{
+    if (OpenGLContext* context = OpenGLContext::getCurrentContext())
+        context->setAssociatedObject (hashName.toRawUTF8(), nullptr);
+}
+
+OpenGLShaderProgram* OpenGLGraphicsContextCustomShader::getProgram (LowLevelGraphicsContext& gc) const
+{
+    String errorMessage;
+
+    if (CustomProgram* c = CustomProgram::getOrCreate (gc, hashName, code, errorMessage))
+        return &(c->program);
+
+    return nullptr;
+}
+
+void OpenGLGraphicsContextCustomShader::fillRect (LowLevelGraphicsContext& gc, const Rectangle<int>& area) const
+{
+    String errorMessage;
+
+    if (OpenGLRendering::ShaderContext* sc = dynamic_cast<OpenGLRendering::ShaderContext*> (&gc))
+        if (CustomProgram* c = CustomProgram::getOrCreate (gc, hashName, code, errorMessage))
+            sc->fillRectWithCustomShader (*c, area);
+}
+
+Result OpenGLGraphicsContextCustomShader::checkCompilation (LowLevelGraphicsContext& gc)
+{
+    String errorMessage;
+
+    if (CustomProgram::getOrCreate (gc, hashName, code, errorMessage) != nullptr)
+        return Result::ok();
+
+    return Result::fail (errorMessage);
 }

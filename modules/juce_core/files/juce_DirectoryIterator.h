@@ -32,16 +32,16 @@
 
 //==============================================================================
 /**
-    Searches through a the files in a directory, returning each file that is found.
+    Searches through the files in a directory, returning each file that is found.
 
     A DirectoryIterator will search through a directory and its subdirectories using
     a wildcard filepattern match.
 
-    If you may be finding a large number of files, this is better than
-    using File::findChildFiles() because it doesn't block while it finds them
-    all, and this is more memory-efficient.
+    If you may be scanning a large number of files, it's usually smarter to use this
+    class than File::findChildFiles() because it allows you to stop at any time, rather
+    than having to wait for the entire scan to finish before getting the results.
 
-    It can also guess how far it's got using a wildly inaccurate algorithm.
+    It also provides an estimate of its progress, using a (highly inaccurate!) algorithm.
 */
 class JUCE_API  DirectoryIterator
 {

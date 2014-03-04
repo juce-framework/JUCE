@@ -57,6 +57,11 @@
  #undef KeyPress
 #endif
 
+#if ! JUCE_WINDOWS && ! JUCE_MAC
+ #undef JUCE_PLUGINHOST_VST3
+ #define JUCE_PLUGINHOST_VST3 0
+#endif
+
 //==============================================================================
 namespace juce
 {
@@ -70,6 +75,68 @@ static inline bool arrayContainsPlugin (const OwnedArray<PluginDescription>& lis
 
     return false;
 }
+
+#if JUCE_MAC
+//==============================================================================
+struct AutoResizingNSViewComponent  : public NSViewComponent,
+                                      private AsyncUpdater
+{
+    AutoResizingNSViewComponent() : recursive (false) {}
+
+    void childBoundsChanged (Component*) override
+    {
+        if (recursive)
+        {
+            triggerAsyncUpdate();
+        }
+        else
+        {
+            recursive = true;
+            resizeToFitView();
+            recursive = true;
+        }
+    }
+
+    void handleAsyncUpdate() override               { resizeToFitView(); }
+
+    bool recursive;
+};
+
+//==============================================================================
+struct AutoResizingNSViewComponentWithParent  : public AutoResizingNSViewComponent,
+                                                private Timer
+{
+    AutoResizingNSViewComponentWithParent()
+    {
+        NSView* v = [[NSView alloc] init];
+        setView (v);
+        [v release];
+
+        startTimer (100);
+    }
+
+    void timerCallback() override
+    {
+        if (NSView* parent = (NSView*) getView())
+        {
+            if ([[parent subviews] count] > 0)
+            {
+                if (NSView* child = [[parent subviews] objectAtIndex: 0])
+                {
+                    NSRect f = [parent frame];
+                    NSSize newSize = [child frame].size;
+
+                    if (f.size.width != newSize.width || f.size.height != newSize.height)
+                    {
+                        f.size = newSize;
+                        [parent setFrame: f];
+                    }
+                }
+            }
+        }
+    }
+};
+#endif
 
 #if JUCE_CLANG
  #pragma clang diagnostic ignored "-Wdeprecated-declarations"

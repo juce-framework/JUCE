@@ -371,8 +371,8 @@ void XmlDocument::readQuotedString (String& result)
                 }
                 else if (character == 0)
                 {
-                    outOfData = true;
                     setLastError ("unmatched quotes", false);
+                    outOfData = true;
                     break;
                 }
 
@@ -432,7 +432,7 @@ XmlElement* XmlDocument::readNextElement (const bool alsoParseSubElements)
                 ++input;
 
                 if (alsoParseSubElements)
-                    readChildElements (node);
+                    readChildElements (*node);
 
                 break;
             }
@@ -487,9 +487,9 @@ XmlElement* XmlDocument::readNextElement (const bool alsoParseSubElements)
     return node;
 }
 
-void XmlDocument::readChildElements (XmlElement* parent)
+void XmlDocument::readChildElements (XmlElement& parent)
 {
-    LinkedListPointer<XmlElement>::Appender childAppender (parent->firstChildElement);
+    LinkedListPointer<XmlElement>::Appender childAppender (parent.firstChildElement);
 
     for (;;)
     {
@@ -563,7 +563,25 @@ void XmlDocument::readChildElements (XmlElement* parent)
                 const juce_wchar c = *input;
 
                 if (c == '<')
+                {
+                    if (input[1] == '!' && input[2] == '-' && input[3] == '-')
+                    {
+                        input += 4;
+                        const int closeComment = input.indexOf (CharPointer_ASCII ("-->"));
+
+                        if (closeComment < 0)
+                        {
+                            setLastError ("unterminated comment", false);
+                            outOfData = true;
+                            return;
+                        }
+
+                        input += closeComment + 3;
+                        continue;
+                    }
+
                     break;
+                }
 
                 if (c == 0)
                 {

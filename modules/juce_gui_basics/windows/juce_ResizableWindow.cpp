@@ -167,7 +167,10 @@ void ResizableWindow::setContentComponentSize (int width, int height)
 
 BorderSize<int> ResizableWindow::getBorderThickness()
 {
-    return BorderSize<int> (isUsingNativeTitleBar() ? 0 : ((resizableBorder != nullptr && ! isFullScreen()) ? 5 : 3));
+    if (isUsingNativeTitleBar() || isKioskMode())
+        return BorderSize<int>();
+
+    return BorderSize<int> ((resizableBorder != nullptr && ! isFullScreen()) ? 4 : 1);
 }
 
 BorderSize<int> ResizableWindow::getContentComponentBorder()
@@ -189,15 +192,11 @@ void ResizableWindow::visibilityChanged()
 
 void ResizableWindow::resized()
 {
+    const bool resizerHidden = isFullScreen() || isKioskMode() || isUsingNativeTitleBar();
+
     if (resizableBorder != nullptr)
     {
-       #if JUCE_WINDOWS || JUCE_LINUX
-        // hide the resizable border if the OS already provides one..
-        resizableBorder->setVisible (! (isFullScreen() || isUsingNativeTitleBar()));
-       #else
-        resizableBorder->setVisible (! isFullScreen());
-       #endif
-
+        resizableBorder->setVisible (! resizerHidden);
         resizableBorder->setBorderThickness (getBorderThickness());
         resizableBorder->setSize (getWidth(), getHeight());
         resizableBorder->toBack();
@@ -205,12 +204,7 @@ void ResizableWindow::resized()
 
     if (resizableCorner != nullptr)
     {
-       #if JUCE_MAC
-        // hide the resizable border if the OS already provides one..
-        resizableCorner->setVisible (! (isFullScreen() || isUsingNativeTitleBar()));
-       #else
-        resizableCorner->setVisible (! isFullScreen());
-       #endif
+        resizableCorner->setVisible (! resizerHidden);
 
         const int resizerSize = 18;
         resizableCorner->setBounds (getWidth() - resizerSize,

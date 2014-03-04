@@ -885,6 +885,17 @@
             </FileConfiguration>
           </File>
           <File RelativePath="..\..\..\..\modules\juce_core\files\juce_File.h"/>
+          <File RelativePath="..\..\..\..\modules\juce_core\files\juce_FileFilter.cpp">
+            <FileConfiguration Name="Debug|Win32"
+                               ExcludedFromBuild="true">
+              <Tool Name="VCCLCompilerTool"/>
+            </FileConfiguration>
+            <FileConfiguration Name="Release|Win32"
+                               ExcludedFromBuild="true">
+              <Tool Name="VCCLCompilerTool"/>
+            </FileConfiguration>
+          </File>
+          <File RelativePath="..\..\..\..\modules\juce_core\files\juce_FileFilter.h"/>
           <File RelativePath="..\..\..\..\modules\juce_core\files\juce_FileInputStream.cpp">
             <FileConfiguration Name="Debug|Win32"
                                ExcludedFromBuild="true">
@@ -930,6 +941,17 @@
             </FileConfiguration>
           </File>
           <File RelativePath="..\..\..\..\modules\juce_core\files\juce_TemporaryFile.h"/>
+          <File RelativePath="..\..\..\..\modules\juce_core\files\juce_WildcardFileFilter.cpp">
+            <FileConfiguration Name="Debug|Win32"
+                               ExcludedFromBuild="true">
+              <Tool Name="VCCLCompilerTool"/>
+            </FileConfiguration>
+            <FileConfiguration Name="Release|Win32"
+                               ExcludedFromBuild="true">
+              <Tool Name="VCCLCompilerTool"/>
+            </FileConfiguration>
+          </File>
+          <File RelativePath="..\..\..\..\modules\juce_core\files\juce_WildcardFileFilter.h"/>
         </Filter>
         <Filter Name="network">
           <File RelativePath="..\..\..\..\modules\juce_core\network\juce_IPAddress.cpp">
@@ -1674,6 +1696,17 @@
           <File RelativePath="..\..\..\..\modules\juce_events\broadcasters\juce_ListenerList.h"/>
         </Filter>
         <Filter Name="interprocess">
+          <File RelativePath="..\..\..\..\modules\juce_events\interprocess\juce_ConnectedChildProcess.cpp">
+            <FileConfiguration Name="Debug|Win32"
+                               ExcludedFromBuild="true">
+              <Tool Name="VCCLCompilerTool"/>
+            </FileConfiguration>
+            <FileConfiguration Name="Release|Win32"
+                               ExcludedFromBuild="true">
+              <Tool Name="VCCLCompilerTool"/>
+            </FileConfiguration>
+          </File>
+          <File RelativePath="..\..\..\..\modules\juce_events\interprocess\juce_ConnectedChildProcess.h"/>
           <File RelativePath="..\..\..\..\modules\juce_events\interprocess\juce_InterprocessConnection.cpp">
             <FileConfiguration Name="Debug|Win32"
                                ExcludedFromBuild="true">
@@ -3294,17 +3327,6 @@
             </FileConfiguration>
           </File>
           <File RelativePath="..\..\..\..\modules\juce_gui_basics\filebrowser\juce_FileChooserDialogBox.h"/>
-          <File RelativePath="..\..\..\..\modules\juce_gui_basics\filebrowser\juce_FileFilter.cpp">
-            <FileConfiguration Name="Debug|Win32"
-                               ExcludedFromBuild="true">
-              <Tool Name="VCCLCompilerTool"/>
-            </FileConfiguration>
-            <FileConfiguration Name="Release|Win32"
-                               ExcludedFromBuild="true">
-              <Tool Name="VCCLCompilerTool"/>
-            </FileConfiguration>
-          </File>
-          <File RelativePath="..\..\..\..\modules\juce_gui_basics\filebrowser\juce_FileFilter.h"/>
           <File RelativePath="..\..\..\..\modules\juce_gui_basics\filebrowser\juce_FileListComponent.cpp">
             <FileConfiguration Name="Debug|Win32"
                                ExcludedFromBuild="true">
@@ -3361,17 +3383,6 @@
             </FileConfiguration>
           </File>
           <File RelativePath="..\..\..\..\modules\juce_gui_basics\filebrowser\juce_ImagePreviewComponent.h"/>
-          <File RelativePath="..\..\..\..\modules\juce_gui_basics\filebrowser\juce_WildcardFileFilter.cpp">
-            <FileConfiguration Name="Debug|Win32"
-                               ExcludedFromBuild="true">
-              <Tool Name="VCCLCompilerTool"/>
-            </FileConfiguration>
-            <FileConfiguration Name="Release|Win32"
-                               ExcludedFromBuild="true">
-              <Tool Name="VCCLCompilerTool"/>
-            </FileConfiguration>
-          </File>
-          <File RelativePath="..\..\..\..\modules\juce_gui_basics\filebrowser\juce_WildcardFileFilter.h"/>
         </Filter>
         <Filter Name="commands">
           <File RelativePath="..\..\..\..\modules\juce_gui_basics\commands\juce_ApplicationCommandID.h"/>

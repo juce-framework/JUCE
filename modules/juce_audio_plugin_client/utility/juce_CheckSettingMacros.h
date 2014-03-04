@@ -25,7 +25,8 @@
 // The following checks should cause a compile error if you've forgotten to
 // define all your plugin settings properly..
 
-#if ! (JucePlugin_Build_VST || JucePlugin_Build_AU || JucePlugin_Build_RTAS || JucePlugin_Build_AAX \
+#if ! (JucePlugin_Build_VST || JucePlugin_Build_VST3 \
+        || JucePlugin_Build_AU || JucePlugin_Build_RTAS || JucePlugin_Build_AAX \
         || JucePlugin_Build_Standalone || JucePlugin_Build_LV2)
  #error "You need to enable at least one plugin format!"
 #endif
@@ -75,9 +76,14 @@
 #endif
 
 //==============================================================================
-#if _WIN64 || (__LP64__ && (defined(__APPLE_CPP__) || defined(__APPLE_CC__)))
+#if _WIN64 || (__LP64__ && (defined (__APPLE_CPP__) || defined (__APPLE_CC__)))
  #undef JucePlugin_Build_RTAS
  #define JucePlugin_Build_RTAS 0
+#endif
+
+#if ! (defined (_MSC_VER) || defined (__APPLE_CPP__) || defined (__APPLE_CC__))
+ #undef JucePlugin_Build_VST3
+ #define JucePlugin_Build_VST3 0
 #endif
 
 //==============================================================================

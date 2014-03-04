@@ -55,9 +55,9 @@
     <ClCompile>
       <Optimization>Disabled</Optimization>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
-      <AdditionalIncludeDirectories>..\..\JuceLibraryCode;..\..\..\..\modules;c:\SDKs\vstsdk2.4;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;_WINDOWS;DEBUG;_DEBUG;JUCER_VS2008_78A5006=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <AdditionalIncludeDirectories>..\..\JuceLibraryCode;..\..\..\..\modules;c:\SDKs\vstsdk2.4;c:\SDKs\VST3 SDK;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;DEBUG;_DEBUG;JUCER_VS2008_78A5006=1;JUCE_APP_VERSION=1.0.0;JUCE_APP_VERSION_HEX=0x10000;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
       <PrecompiledHeader>
       </PrecompiledHeader>
@@ -79,11 +79,16 @@
       <ProgramDatabaseFile>$(IntDir)JuceDemoPlugin.pdb</ProgramDatabaseFile>
       <SubSystem>Windows</SubSystem>
       <TargetMachine>MachineX86</TargetMachine>
+      <AdditionalOptions>/FORCE:multiple %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Bscmake>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <OutputFile>$(IntDir)JuceDemoPlugin.bsc</OutputFile>
     </Bscmake>
+    <PostBuildEvent>
+      <Message>Post-build</Message>
+      <Command>copy /Y $(OutDir)$(TargetFileName) $(OutDir)$(TargetName).vst3</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <Midl>
@@ -99,9 +104,9 @@
       <Optimization>MinSpace</Optimization>
       <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
       <StringPooling>true</StringPooling>
-      <AdditionalIncludeDirectories>..\..\JuceLibraryCode;..\..\..\..\modules;c:\SDKs\vstsdk2.4;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;JUCER_VS2008_78A5006=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <AdditionalIncludeDirectories>..\..\JuceLibraryCode;..\..\..\..\modules;c:\SDKs\vstsdk2.4;c:\SDKs\VST3 SDK;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;JUCER_VS2008_78A5006=1;JUCE_APP_VERSION=1.0.0;JUCE_APP_VERSION_HEX=0x10000;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
       <PrecompiledHeader>
       </PrecompiledHeader>
@@ -125,11 +130,16 @@
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <TargetMachine>MachineX86</TargetMachine>
+      <AdditionalOptions>/FORCE:multiple %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Bscmake>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <OutputFile>$(IntDir)JuceDemoPlugin.bsc</OutputFile>
     </Bscmake>
+    <PostBuildEvent>
+      <Message>Post-build</Message>
+      <Command>copy /Y $(OutDir)$(TargetFileName) $(OutDir)$(TargetName).vst3</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\..\Source\PluginProcessor.cpp" />
@@ -554,6 +564,10 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_core\files\juce_FileFilter.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_core\files\juce_FileInputStream.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
@@ -567,6 +581,10 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_core\files\juce_TemporaryFile.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_core\files\juce_WildcardFileFilter.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
     </ClCompile>
@@ -1346,10 +1364,6 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_gui_basics\filebrowser\juce_FileFilter.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_gui_basics\filebrowser\juce_FileListComponent.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
@@ -1367,10 +1381,6 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_gui_basics\filebrowser\juce_ImagePreviewComponent.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_gui_basics\filebrowser\juce_WildcardFileFilter.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
     </ClCompile>
@@ -1446,6 +1456,14 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_gui_extra\code_editor\juce_LuaCodeTokeniser.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_gui_extra\code_editor\juce_XMLCodeTokeniser.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_gui_extra\documents\juce_FileBasedDocument.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
@@ -1459,6 +1477,10 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_gui_extra\misc\juce_KeyMappingEditorComponent.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_gui_extra\misc\juce_LiveConstantEditor.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
     </ClCompile>
@@ -1539,6 +1561,7 @@
       <CallingConvention Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">StdCall</CallingConvention>
       <CallingConvention Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">StdCall</CallingConvention>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_plugin_client\VST3\juce_VST3_Wrapper.cpp" />
     <ClCompile Include="..\..\..\..\modules\juce_audio_plugin_client\VST\juce_VST_Wrapper.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -1619,6 +1642,8 @@
     <ClInclude Include="..\..\..\..\modules\juce_audio_processors\format\juce_AudioPluginFormatManager.h" />
     <ClInclude Include="..\..\..\..\modules\juce_audio_processors\format_types\juce_AudioUnitPluginFormat.h" />
     <ClInclude Include="..\..\..\..\modules\juce_audio_processors\format_types\juce_LADSPAPluginFormat.h" />
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors\format_types\juce_VST3Common.h" />
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors\format_types\juce_VST3Headers.h" />
     <ClInclude Include="..\..\..\..\modules\juce_audio_processors\format_types\juce_VST3PluginFormat.h" />
     <ClInclude Include="..\..\..\..\modules\juce_audio_processors\format_types\juce_VSTMidiEventList.h" />
     <ClInclude Include="..\..\..\..\modules\juce_audio_processors\format_types\juce_VSTPluginFormat.h" />
@@ -1700,11 +1725,13 @@
     <ClInclude Include="..\..\..\..\modules\juce_core\time\juce_Time.h" />
     <ClInclude Include="..\..\..\..\modules\juce_core\files\juce_DirectoryIterator.h" />
     <ClInclude Include="..\..\..\..\modules\juce_core\files\juce_File.h" />
+    <ClInclude Include="..\..\..\..\modules\juce_core\files\juce_FileFilter.h" />
     <ClInclude Include="..\..\..\..\modules\juce_core\files\juce_FileInputStream.h" />
     <ClInclude Include="..\..\..\..\modules\juce_core\files\juce_FileOutputStream.h" />
     <ClInclude Include="..\..\..\..\modules\juce_core\files\juce_FileSearchPath.h" />
     <ClInclude Include="..\..\..\..\modules\juce_core\files\juce_MemoryMappedFile.h" />
     <ClInclude Include="..\..\..\..\modules\juce_core\files\juce_TemporaryFile.h" />
+    <ClInclude Include="..\..\..\..\modules\juce_core\files\juce_WildcardFileFilter.h" />
     <ClInclude Include="..\..\..\..\modules\juce_core\network\juce_IPAddress.h" />
     <ClInclude Include="..\..\..\..\modules\juce_core\network\juce_MACAddress.h" />
     <ClInclude Include="..\..\..\..\modules\juce_core\network\juce_NamedPipe.h" />
@@ -1920,14 +1947,12 @@
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\filebrowser\juce_FileBrowserListener.h" />
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\filebrowser\juce_FileChooser.h" />
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\filebrowser\juce_FileChooserDialogBox.h" />
-    <ClInclude Include="..\..\..\..\modules\juce_gui_basics\filebrowser\juce_FileFilter.h" />
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\filebrowser\juce_FileListComponent.h" />
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\filebrowser\juce_FilenameComponent.h" />
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\filebrowser\juce_FilePreviewComponent.h" />
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\filebrowser\juce_FileSearchPathListComponent.h" />
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\filebrowser\juce_FileTreeComponent.h" />
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\filebrowser\juce_ImagePreviewComponent.h" />
-    <ClInclude Include="..\..\..\..\modules\juce_gui_basics\filebrowser\juce_WildcardFileFilter.h" />
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\commands\juce_ApplicationCommandID.h" />
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\commands\juce_ApplicationCommandInfo.h" />
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\commands\juce_ApplicationCommandManager.h" />
@@ -1943,6 +1968,8 @@
     <ClInclude Include="..\..\..\..\modules\juce_gui_extra\code_editor\juce_CodeTokeniser.h" />
     <ClInclude Include="..\..\..\..\modules\juce_gui_extra\code_editor\juce_CPlusPlusCodeTokeniser.h" />
     <ClInclude Include="..\..\..\..\modules\juce_gui_extra\code_editor\juce_CPlusPlusCodeTokeniserFunctions.h" />
+    <ClInclude Include="..\..\..\..\modules\juce_gui_extra\code_editor\juce_LuaCodeTokeniser.h" />
+    <ClInclude Include="..\..\..\..\modules\juce_gui_extra\code_editor\juce_XMLCodeTokeniser.h" />
     <ClInclude Include="..\..\..\..\modules\juce_gui_extra\documents\juce_FileBasedDocument.h" />
     <ClInclude Include="..\..\..\..\modules\juce_gui_extra\embedding\juce_ActiveXControlComponent.h" />
     <ClInclude Include="..\..\..\..\modules\juce_gui_extra\embedding\juce_NSViewComponent.h" />
@@ -1951,6 +1978,7 @@
     <ClInclude Include="..\..\..\..\modules\juce_gui_extra\misc\juce_BubbleMessageComponent.h" />
     <ClInclude Include="..\..\..\..\modules\juce_gui_extra\misc\juce_ColourSelector.h" />
     <ClInclude Include="..\..\..\..\modules\juce_gui_extra\misc\juce_KeyMappingEditorComponent.h" />
+    <ClInclude Include="..\..\..\..\modules\juce_gui_extra\misc\juce_LiveConstantEditor.h" />
     <ClInclude Include="..\..\..\..\modules\juce_gui_extra\misc\juce_PreferencesPanel.h" />
     <ClInclude Include="..\..\..\..\modules\juce_gui_extra\misc\juce_RecentlyOpenedFilesList.h" />
     <ClInclude Include="..\..\..\..\modules\juce_gui_extra\misc\juce_SplashScreen.h" />
@@ -1982,6 +2010,7 @@
     <None Include="..\..\..\..\modules\juce_audio_plugin_client\AU\juce_AU_Wrapper.mm" />
     <None Include="..\..\..\..\modules\juce_audio_plugin_client\RTAS\juce_RTAS_MacUtilities.mm" />
     <None Include="..\..\..\..\modules\juce_audio_plugin_client\VST\juce_VST_Wrapper.mm" />
+    <None Include="..\..\..\..\modules\juce_audio_plugin_client\VST3\juce_VST3_Wrapper.mm" />
     <None Include="..\..\..\..\modules\juce_audio_plugin_client\AAX\juce_AAX_Wrapper.mm" />
     <ClCompile Include="..\..\..\..\modules\juce_audio_plugin_client\juce_module_info">
       <FileType>Document</FileType>
