@@ -459,7 +459,6 @@ private:
    #else
     uint8 b, g, r;
    #endif
-
 }
 #ifndef DOXYGEN
  JUCE_PACKED

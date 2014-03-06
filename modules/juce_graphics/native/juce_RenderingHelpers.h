@@ -799,6 +799,7 @@ namespace EdgeTableFillers
         forcedinline void handleEdgeTablePixelFull (const int x) const noexcept
         {
             getDestPixel (x)->blend (*getSrcPixel (repeatPattern ? ((x - xOffset) % srcData.width) : (x - xOffset)), (uint32) extraAlpha);
+//            getDestPixel (x)->tween (*getSrcPixel (repeatPattern ? ((x - xOffset) % srcData.width) : (x - xOffset)), (uint32) extraAlpha);
         }
 
         void handleEdgeTableLine (int x, int width, int alphaLevel) const noexcept
@@ -873,18 +874,19 @@ namespace EdgeTableFillers
 
         forcedinline void copyRow (DestPixelType* dest, SrcPixelType const* src, int width) const noexcept
         {
-            if (srcData.pixelStride == 3 && destData.pixelStride == 3)
+            if (srcData.pixelStride == 3 && destData.pixelStride == 3) 
             {
                 memcpy (dest, src, sizeof (PixelRGB) * (size_t) width);
             }
-            else
+			else
             {
                 const int destStride = destData.pixelStride;
                 const int srcStride = srcData.pixelStride;
 
                 do
                 {
-                    dest->blend (*src);
+//                    dest->blend (*src);
+					dest->tween (*src, src->getAlpha());
                     dest = addBytesToPointer (dest, destStride);
                     src = addBytesToPointer (src, srcStride);
                 } while (--width > 0);
