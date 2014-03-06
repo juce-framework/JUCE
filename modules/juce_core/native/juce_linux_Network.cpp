@@ -72,11 +72,11 @@ public:
     WebInputStream (const String& address_, bool isPost_, const MemoryBlock& postData_,
                     URL::OpenStreamProgressCallback* progressCallback, void* progressCallbackContext,
                     const String& headers_, int timeOutMs_, StringPairArray* responseHeaders)
-      : socketHandle (-1), levelsOfRedirection (0),
+      : statusCode (0), socketHandle (-1), levelsOfRedirection (0),
         address (address_), headers (headers_), postData (postData_), position (0),
         finished (false), isPost (isPost_), timeOutMs (timeOutMs_)
     {
-        createConnection (progressCallback, progressCallbackContext);
+        statusCode = createConnection (progressCallback, progressCallbackContext);
 
         if (responseHeaders != nullptr && ! isError())
         {
@@ -144,7 +144,7 @@ public:
             {
                 closeSocket();
                 position = 0;
-                createConnection (0, 0);
+                statusCode = createConnection (0, 0);
             }
 
             skipNextBytes (wantedPos - position);
@@ -154,6 +154,8 @@ public:
     }
 
     //==============================================================================
+    int statusCode;
+
 private:
     int socketHandle, levelsOfRedirection;
     StringArray headerLines;
@@ -173,7 +175,7 @@ private:
         levelsOfRedirection = 0;
     }
 
-    void createConnection (URL::OpenStreamProgressCallback* progressCallback, void* progressCallbackContext)
+    int createConnection (URL::OpenStreamProgressCallback* progressCallback, void* progressCallbackContext)
     {
         closeSocket();
 
@@ -189,7 +191,7 @@ private:
         String hostName, hostPath;
         int hostPort;
         if (! decomposeURL (address, hostName, hostPath, hostPort))
-            return;
+            return 0;
 
         String serverName, proxyName, proxyPath;
         int proxyPort = 0;
@@ -199,7 +201,7 @@ private:
         if (proxyURL.startsWithIgnoreCase ("http://"))
         {
             if (! decomposeURL (proxyURL, proxyName, proxyPath, proxyPort))
-                return;
+                return 0;
 
             serverName = proxyName;
             port = proxyPort;
@@ -219,14 +221,14 @@ private:
 
         struct addrinfo* result = nullptr;
         if (getaddrinfo (serverName.toUTF8(), String (port).toUTF8(), &hints, &result) != 0 || result == 0)
-            return;
+            return 0;
 
         socketHandle = socket (result->ai_family, result->ai_socktype, 0);
 
         if (socketHandle == -1)
         {
             freeaddrinfo (result);
-            return;
+            return 0;
         }
 
         int receiveBufferSize = 16384;
@@ -241,7 +243,7 @@ private:
         {
             closeSocket();
             freeaddrinfo (result);
-            return;
+            return 0;
         }
 
         freeaddrinfo (result);
@@ -254,7 +256,7 @@ private:
                               progressCallback, progressCallbackContext))
             {
                 closeSocket();
-                return;
+                return 0;
             }
         }
 
@@ -265,15 +267,15 @@ private:
         {
             headerLines = StringArray::fromLines (responseHeader);
 
-            const int statusCode = responseHeader.fromFirstOccurrenceOf (" ", false, false)
-                                                 .substring (0, 3).getIntValue();
+            const int status = responseHeader.fromFirstOccurrenceOf (" ", false, false)
+                                             .substring (0, 3).getIntValue();
 
             //int contentLength = findHeaderItem (lines, "Content-Length:").getIntValue();
             //bool isChunked = findHeaderItem (lines, "Transfer-Encoding:").equalsIgnoreCase ("chunked");
 
             String location (findHeaderItem (headerLines, "Location:"));
 
-            if (statusCode >= 300 && statusCode < 400
+            if (status >= 300 && status < 400
                  && location.isNotEmpty() && location != address)
             {
                 if (! location.startsWithIgnoreCase ("http://"))
@@ -282,18 +284,18 @@ private:
                 if (++levelsOfRedirection <= 3)
                 {
                     address = location;
-                    createConnection (progressCallback, progressCallbackContext);
-                    return;
+                    return createConnection (progressCallback, progressCallbackContext);
                 }
             }
             else
             {
                 levelsOfRedirection = 0;
-                return;
+                return status;
             }
         }
 
         closeSocket();
+        return 0;
     }
 
     //==============================================================================
@@ -437,14 +439,3 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WebInputStream)
 };
-
-InputStream* URL::createNativeStream (const String& address, bool isPost, const MemoryBlock& postData,
-                                      OpenStreamProgressCallback* progressCallback, void* progressCallbackContext,
-                                      const String& headers, const int timeOutMs, StringPairArray* responseHeaders)
-{
-    ScopedPointer<WebInputStream> wi (new WebInputStream (address, isPost, postData,
-                                                          progressCallback, progressCallbackContext,
-                                                          headers, timeOutMs, responseHeaders));
-
-    return wi->isError() ? nullptr : wi.release();
-}
