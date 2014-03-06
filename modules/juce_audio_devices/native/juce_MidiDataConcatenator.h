@@ -123,6 +123,14 @@ private:
         {
             if (pendingBytes > 0 && *d >= 0x80)
             {
+                if (*d == 0xf7)
+                {
+                    *dest++ = *d++;
+                    ++pendingBytes;
+                    --numBytes;
+                    break;
+                }
+
                 if (*d >= 0xfa || *d == 0xf8)
                 {
                     callback.handleIncomingMidiMessage (input, MidiMessage (*d, time));
@@ -131,11 +139,15 @@ private:
                 }
                 else
                 {
-                    if (*d == 0xf7)
+                    pendingBytes = 0;
+                    int used = 0;
+                    const MidiMessage m (d, numBytes, used, 0, time);
+
+                    if (used > 0)
                     {
-                        *dest++ = *d++;
-                        pendingBytes++;
-                        --numBytes;
+                        callback.handleIncomingMidiMessage (input, m);
+                        numBytes -= used;
+                        d += used;
                     }
 
                     break;
@@ -144,7 +156,7 @@ private:
             else
             {
                 *dest++ = *d++;
-                pendingBytes++;
+                ++pendingBytes;
                 --numBytes;
             }
         }
