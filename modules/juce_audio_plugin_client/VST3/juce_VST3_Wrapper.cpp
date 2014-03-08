@@ -754,6 +754,60 @@ public:
     tresult PLUGIN_API setIoMode (Vst::IoMode) override { return kNotImplemented; }
     tresult PLUGIN_API getRoutingInfo (Vst::RoutingInfo&, Vst::RoutingInfo&) override { return kNotImplemented; }
 
+    bool readFromMemoryStream (IBStream* state) const
+    {
+        FUnknownPtr<MemoryStream> s (state);
+
+        if (s != nullptr
+             && s->getData() != nullptr
+             && s->getSize() > 0
+             && s->getSize() < 1024 * 1024 * 100) // (some hosts seem to return junk for the size)
+        {
+            // Adobe Audition CS6 hack to avoid trying to use corrupted streams:
+            if (getHostType().isAdobeAudition())
+                if (s->getSize() >= 5 && memcmp (s->getData(), "VC2!E", 5) == 0)
+                    return kResultFalse;
+
+            pluginInstance->setStateInformation (s->getData(), (int) s->getSize());
+            return true;
+        }
+
+        return false;
+    }
+
+    bool readFromUnknownStream (IBStream* state) const
+    {
+        MemoryOutputStream allData;
+
+        {
+            const size_t bytesPerBlock = 4096;
+            HeapBlock<char> buffer (bytesPerBlock);
+
+            for (;;)
+            {
+                int32 bytesRead = 0;
+
+                if (state->read (buffer, (int32) bytesPerBlock, &bytesRead) == kResultTrue && bytesRead > 0)
+                {
+                    allData.write (buffer, bytesRead);
+                    continue;
+                }
+
+                break;
+            }
+        }
+
+        const size_t dataSize = allData.getDataSize();
+
+        if (dataSize > 0 && dataSize < 0x7fffffff)
+        {
+            pluginInstance->setStateInformation (allData.getData(), (int) dataSize);
+            return true;
+        }
+
+        return false;
+    }
+
     tresult PLUGIN_API setState (IBStream* state) override
     {
         if (state == nullptr)
@@ -761,50 +815,9 @@ public:
 
         FUnknownPtr<IBStream> stateRefHolder (state); // just in case the caller hasn't properly ref-counted the stream object
 
-        // Reset to the beginning of the stream:
-        if (state->seek (0, IBStream::kIBSeekSet, nullptr) != kResultTrue)
-            return kResultFalse;
-
-        Steinberg::int64 streamSize = -1;
-
-        {
-            FUnknownPtr<ISizeableStream> s (state);
-
-            if (s != nullptr)
-                s->getStreamSize (streamSize);
-        }
-
-        if (streamSize < 0)
-        {
-            FUnknownPtr<MemoryStream> s (state);
-
-            if (s != nullptr)
-            {
-                streamSize = (Steinberg::int64) s->getSize();
-
-                // Adobe Audition CS6 hack to avoid trying to use corrupted streams:
-                if (getHostType().isAdobeAudition())
-                    if (s->getData() == nullptr || (streamSize >= 5 && memcmp (s->getData(), "VC2!E", 5) == 0))
-                        return kResultFalse;
-            }
-        }
-
-        if (streamSize > 0 && streamSize <= (Steinberg::int64) 0x7fffffff)
-        {
-            const Steinberg::int32 bytesWanted = (Steinberg::int32) streamSize;
-
-            HeapBlock<char> buffer ((size_t) bytesWanted);
-            int32 bytesRead = 0;
-
-            if (state->read (buffer, bytesWanted, &bytesRead) == kResultTrue)
-            {
-                if (bytesRead > 0)
-                {
-                    pluginInstance->setStateInformation (buffer, (int) bytesRead);
-                    return kResultTrue;
-                }
-            }
-        }
+        if (state->seek (0, IBStream::kIBSeekSet, nullptr) == kResultTrue)
+            if (readFromMemoryStream (state) || readFromUnknownStream (state))
+                return kResultTrue;
 
         return kResultFalse;
     }
