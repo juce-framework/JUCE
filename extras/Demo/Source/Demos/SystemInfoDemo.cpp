@@ -114,6 +114,7 @@ static String getAllSystemInfo()
       << "CPU has MMX:    " << (SystemStats::hasMMX()   ? "yes" : "no") << newLine
       << "CPU has SSE:    " << (SystemStats::hasSSE()   ? "yes" : "no") << newLine
       << "CPU has SSE2:   " << (SystemStats::hasSSE2()  ? "yes" : "no") << newLine
+      << "CPU has SSE3:   " << (SystemStats::hasSSE3()  ? "yes" : "no") << newLine
       << "CPU has 3DNOW:  " << (SystemStats::has3DNow() ? "yes" : "no") << newLine
       << newLine
       << "Current working directory:  " << File::getCurrentWorkingDirectory().getFullPathName() << newLine
