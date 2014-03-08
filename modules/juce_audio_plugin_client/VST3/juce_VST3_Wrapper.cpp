@@ -756,76 +756,57 @@ public:
 
     tresult PLUGIN_API setState (IBStream* state) override
     {
-        if (state != nullptr)
-        {
-            // Reset to the beginning of the stream:
-            if (state->seek (0, IBStream::kIBSeekSet, nullptr) != kResultTrue)
-                return kResultFalse;
+        if (state == nullptr)
+            return kInvalidArgument;
 
-            Steinberg::int64 end = -1;
+        FUnknownPtr<IBStream> stateRefHolder (state); // just in case the caller hasn't properly ref-counted the stream object
 
-            if (end < 0)
-            {
-                FUnknownPtr<ISizeableStream> s (state);
-
-                if (s != nullptr)
-                    s->getStreamSize (end);
-            }
-
-            if (end < 0)
-            {
-                FUnknownPtr<MemoryStream> s (state);
-
-                if (s != nullptr)
-                {
-                    if (getHostType().isAdobeAudition())
-                    {
-                        // Adobe Audition CS6 hack to avoid trying to use corrupted streams:
-                        bool failed = true;
-
-                        if (const char* const data = s->getData())
-                        {
-                            if (s->getSize() >= 5 && data[0] != 'V' && data[1] != 'C'
-                                 && data[2] != '2' && data[3] != '!' && data[4] != 'E')
-                            {
-                                failed = false;
-                            }
-                        }
-                        else
-                        {
-                            jassertfalse;
-                        }
-
-                        if (failed)
-                            return kResultFalse;
-                    }
-
-                    end = (Steinberg::int64) s->getSize();
-                }
-            }
-
-            if (end <= 0)
-                return kResultFalse;
-
-            // Try reading the data, and setting the plugin state:
-            Steinberg::int32 numBytes = (Steinberg::int32) jmin ((Steinberg::int64) std::numeric_limits<Steinberg::int32>::max(), end);
-
-            Array<char> buff;
-            buff.ensureStorageAllocated ((int) numBytes);
-            void* buffer = buff.getRawDataPointer();
-
-            if (state->read (buffer, numBytes, &numBytes) == kResultTrue
-                && buffer != nullptr
-                && numBytes > 0)
-            {
-                pluginInstance->setStateInformation (buffer, (int) numBytes);
-                return kResultTrue;
-            }
-
+        // Reset to the beginning of the stream:
+        if (state->seek (0, IBStream::kIBSeekSet, nullptr) != kResultTrue)
             return kResultFalse;
+
+        Steinberg::int64 streamSize = -1;
+
+        {
+            FUnknownPtr<ISizeableStream> s (state);
+
+            if (s != nullptr)
+                s->getStreamSize (streamSize);
         }
 
-        return kInvalidArgument;
+        if (streamSize < 0)
+        {
+            FUnknownPtr<MemoryStream> s (state);
+
+            if (s != nullptr)
+            {
+                streamSize = (Steinberg::int64) s->getSize();
+
+                // Adobe Audition CS6 hack to avoid trying to use corrupted streams:
+                if (getHostType().isAdobeAudition())
+                    if (s->getData() == nullptr || (streamSize >= 5 && memcmp (s->getData(), "VC2!E", 5) == 0))
+                        return kResultFalse;
+            }
+        }
+
+        if (streamSize > 0 && streamSize <= (Steinberg::int64) 0x7fffffff)
+        {
+            const Steinberg::int32 bytesWanted = (Steinberg::int32) streamSize;
+
+            HeapBlock<char> buffer ((size_t) bytesWanted);
+            int32 bytesRead = 0;
+
+            if (state->read (buffer, bytesWanted, &bytesRead) == kResultTrue)
+            {
+                if (bytesRead > 0)
+                {
+                    pluginInstance->setStateInformation (buffer, (int) bytesRead);
+                    return kResultTrue;
+                }
+            }
+        }
+
+        return kResultFalse;
     }
 
     tresult PLUGIN_API getState (IBStream* state) override
