@@ -118,6 +118,7 @@ public:
           connection (nil),
           data ([[NSMutableData data] retain]),
           headers (nil),
+          statusCode (0),
           initialised (false),
           hasFailed (false),
           hasFinished (false)
@@ -202,7 +203,11 @@ public:
         headers = nil;
 
         if ([response isKindOfClass: [NSHTTPURLResponse class]])
-            headers = [[((NSHTTPURLResponse*) response) allHeaderFields] retain];
+        {
+            NSHTTPURLResponse* httpResponse = (NSHTTPURLResponse*) response;
+            headers = [[httpResponse allHeaderFields] retain];
+            statusCode = (int) [httpResponse statusCode];
+        }
     }
 
     void didFailWithError (NSError* error)
@@ -251,6 +256,7 @@ public:
     NSURLConnection* connection;
     NSMutableData* data;
     NSDictionary* headers;
+    int statusCode;
     bool initialised, hasFailed, hasFinished;
 
 private:
@@ -318,7 +324,7 @@ public:
     WebInputStream (const String& address_, bool isPost_, const MemoryBlock& postData_,
                     URL::OpenStreamProgressCallback* progressCallback, void* progressCallbackContext,
                     const String& headers_, int timeOutMs_, StringPairArray* responseHeaders)
-      : address (address_), headers (headers_), postData (postData_), position (0),
+      : statusCode (0), address (address_), headers (headers_), postData (postData_), position (0),
         finished (false), isPost (isPost_), timeOutMs (timeOutMs_)
     {
         JUCE_AUTORELEASEPOOL
@@ -327,6 +333,8 @@ public:
 
             if (responseHeaders != nullptr && connection != nullptr && connection->headers != nil)
             {
+                statusCode = connection->statusCode;
+
                 NSEnumerator* enumerator = [connection->headers keyEnumerator];
 
                 while (NSString* key = [enumerator nextObject])
@@ -380,6 +388,8 @@ public:
         return true;
     }
 
+    int statusCode;
+
 private:
     ScopedPointer<URLConnectionState> connection;
     String address, headers;
@@ -428,14 +438,3 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WebInputStream)
 };
-
-InputStream* URL::createNativeStream (const String& address, bool isPost, const MemoryBlock& postData,
-                                      OpenStreamProgressCallback* progressCallback, void* progressCallbackContext,
-                                      const String& headers, const int timeOutMs, StringPairArray* responseHeaders)
-{
-    ScopedPointer<WebInputStream> wi (new WebInputStream (address, isPost, postData,
-                                                          progressCallback, progressCallbackContext,
-                                                          headers, timeOutMs, responseHeaders));
-
-    return wi->isError() ? nullptr : wi.release();
-}

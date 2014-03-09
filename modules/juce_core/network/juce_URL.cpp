@@ -330,7 +330,8 @@ InputStream* URL::createInputStream (const bool usePostCommand,
                                      void* const progressCallbackContext,
                                      String headers,
                                      const int timeOutMs,
-                                     StringPairArray* const responseHeaders) const
+                                     StringPairArray* const responseHeaders,
+                                     int* statusCode) const
 {
     MemoryBlock headersAndPostData;
 
@@ -343,9 +344,15 @@ InputStream* URL::createInputStream (const bool usePostCommand,
     if (! headers.endsWithChar ('\n'))
         headers << "\r\n";
 
-    return createNativeStream (toString (! usePostCommand), usePostCommand, headersAndPostData,
-                               progressCallback, progressCallbackContext,
-                               headers, timeOutMs, responseHeaders);
+    ScopedPointer<WebInputStream> wi (new WebInputStream (toString (! usePostCommand),
+                                                          usePostCommand, headersAndPostData,
+                                                          progressCallback, progressCallbackContext,
+                                                          headers, timeOutMs, responseHeaders));
+
+    if (statusCode != nullptr)
+        *statusCode = wi->statusCode;
+
+    return wi->isError() ? nullptr : wi.release();
 }
 
 //==============================================================================

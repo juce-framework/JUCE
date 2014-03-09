@@ -887,7 +887,7 @@ void OpenGLContext::copyTexture (const Rectangle<int>& targetClipArea,
     }
     else
     {
-        jassertfalse; // Running on an old graphics card!
+        jassert (attachment == nullptr); // Running on an old graphics card!
     }
 
     JUCE_CHECK_OPENGL_ERROR

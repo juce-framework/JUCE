@@ -28,11 +28,13 @@
 
 //==============================================================================
 class NetworkingDemo   : public Component,
-                         private Button::Listener
+                         private Button::Listener,
+                         private Thread
 {
 public:
     NetworkingDemo()
-        : resultsBox (resultsDocument, nullptr)
+        : Thread ("Network Demo"),
+          resultsBox (resultsDocument, nullptr)
     {
         setOpaque (true);
 
@@ -69,6 +71,37 @@ public:
         resultsBox.setBounds (area.reduced (8));
     }
 
+    void run() override
+    {
+        String result (getResultText (urlBox.getText()));
+
+        MessageManagerLock mml (this);
+
+        if (mml.lockWasGained())
+            resultsBox.loadContent (result);
+    }
+
+    String getResultText (const URL& url)
+    {
+        StringPairArray responseHeaders;
+        int statusCode = 0;
+
+        ScopedPointer<InputStream> stream (url.createInputStream (false, nullptr, nullptr, String(),
+                                                                  10000, // timeout in millisecs
+                                                                  &responseHeaders, &statusCode));
+        if (stream != nullptr)
+            return (statusCode != 0 ? "Status code: " + String (statusCode) + newLine : String())
+                    + "Response headers: " + newLine
+                    + responseHeaders.getDescription() + newLine
+                    + "----------------------------------------------------" + newLine
+                    + stream->readEntireStreamAsString();
+
+        if (statusCode != 0)
+            return "Failed to connect, status code = " + String (statusCode);
+
+        return "Failed to connect!";
+    }
+
 private:
     TextEditor urlBox;
     TextButton fetchButton;
@@ -76,16 +109,10 @@ private:
     CodeDocument resultsDocument;
     CodeEditorComponent resultsBox;
 
-    void downloadUrl()
-    {
-        URL url (urlBox.getText());
-        resultsBox.loadContent (url.readEntireTextStream());
-    }
-
     void buttonClicked (Button* button) override
     {
         if (button == &fetchButton)
-            downloadUrl();
+            startThread();
     }
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (NetworkingDemo)

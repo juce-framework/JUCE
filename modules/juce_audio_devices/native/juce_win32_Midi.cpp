@@ -478,6 +478,12 @@ void MidiOutput::sendMessageNow (const MidiMessage& message)
     }
     else
     {
-        midiOutShortMsg (handle->handle, *(unsigned int*) message.getRawData());
+        for (int i = 0; i < 50; ++i)
+        {
+            if (midiOutShortMsg (handle->handle, *(unsigned int*) message.getRawData()) != MIDIERR_NOTREADY)
+                break;
+
+            Sleep (1);
+        }
     }
 }
