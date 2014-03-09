@@ -766,7 +766,7 @@ public:
             // Adobe Audition CS6 hack to avoid trying to use corrupted streams:
             if (getHostType().isAdobeAudition())
                 if (s->getSize() >= 5 && memcmp (s->getData(), "VC2!E", 5) == 0)
-                    return kResultFalse;
+                    return false;
 
             pluginInstance->setStateInformation (s->getData(), (int) s->getSize());
             return true;
@@ -785,9 +785,9 @@ public:
 
             for (;;)
             {
-                int32 bytesRead = 0;
+                Steinberg::int32 bytesRead = 0;
 
-                if (state->read (buffer, (int32) bytesPerBlock, &bytesRead) == kResultTrue && bytesRead > 0)
+                if (state->read (buffer, (Steinberg::int32) bytesPerBlock, &bytesRead) == kResultTrue && bytesRead > 0)
                 {
                     allData.write (buffer, bytesRead);
                     continue;
