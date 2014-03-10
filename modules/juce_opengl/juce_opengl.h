@@ -34,6 +34,19 @@
  #define JUCE_OPENGL_ES 1
 #endif
 
+#if JUCE_MAC
+
+//=============================================================================
+/** Config: JUCE_OSX_USE_GL_3_2
+
+ Use OpenGL 3.2 core profile on OSX 10.7.
+ */
+#ifndef JUCE_OSX_USE_GL_3_2
+//#define JUCE_OSX_USE_GL_3_2 0
+#endif
+
+#endif
+
 #if JUCE_WINDOWS
  #ifndef APIENTRY
   #define APIENTRY __stdcall
@@ -58,8 +71,13 @@
 #elif JUCE_IOS
  #include <OpenGLES/ES2/gl.h>
 #elif JUCE_MAC
- #include <OpenGL/gl.h>
- #include "OpenGL/glext.h"
+ #if JUCE_OSX_USE_GL_3_2
+  #include <OpenGL/gl3.h>
+  #include <OpenGL/gl3ext.h>
+ #else
+  #include <OpenGL/gl.h>
+  #include "OpenGL/glext.h"
+ #endif
 #elif JUCE_ANDROID
  #include <GLES2/gl2.h>
 #endif
