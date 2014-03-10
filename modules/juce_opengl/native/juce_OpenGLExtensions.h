@@ -112,12 +112,12 @@ struct OpenGLExtensionFunctions
     JUCE_GL_EXTENSION_FUNCTIONS (JUCE_DECLARE_GL_FUNCTION, JUCE_DECLARE_GL_FUNCTION)
    #else
     #define JUCE_DECLARE_GL_FUNCTION(name, returnType, params, callparams)      inline static returnType name params { return ::name callparams; }
-#if JUCE_OSX_USE_GL_3_2
-    #define JUCE_DECLARE_GL_FUNCTION_EXT(name, returnType, params, callparams)  inline static returnType name params { return ::name callparams; }
-#else
     #define JUCE_DECLARE_GL_FUNCTION_EXT(name, returnType, params, callparams)  inline static returnType name params { return ::name ## EXT callparams; }
-#endif
+    #if JUCE_OSX_USE_GL_3_2
+    JUCE_GL_EXTENSION_FUNCTIONS (JUCE_DECLARE_GL_FUNCTION, JUCE_DECLARE_GL_FUNCTION)
+    #else
     JUCE_GL_EXTENSION_FUNCTIONS (JUCE_DECLARE_GL_FUNCTION, JUCE_DECLARE_GL_FUNCTION_EXT)
+    #endif
     #undef JUCE_DECLARE_GL_FUNCTION_EXT
    #endif
 
