@@ -344,6 +344,7 @@ Array<int> WindowsMediaAudioFormat::getPossibleBitDepths()      { return Array<i
 
 bool WindowsMediaAudioFormat::canDoStereo()     { return true; }
 bool WindowsMediaAudioFormat::canDoMono()       { return true; }
+bool WindowsMediaAudioFormat::isCompressed()    { return true; }
 
 //==============================================================================
 AudioFormatReader* WindowsMediaAudioFormat::createReaderFor (InputStream* sourceStream, bool deleteStreamIfOpeningFails)
