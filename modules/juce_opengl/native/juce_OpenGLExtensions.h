@@ -98,23 +98,28 @@ struct OpenGLExtensionFunctions
     typedef pointer_sized_int GLintptr;
    #endif
 
-   #if JUCE_WINDOWS || JUCE_LINUX
-    #if JUCE_WINDOWS
-     #define JUCE_GL_STDCALL __stdcall
-    #else
-     #define JUCE_GL_STDCALL
-    #endif
-
-    #define JUCE_DECLARE_GL_FUNCTION(name, returnType, params, callparams)      typedef returnType (JUCE_GL_STDCALL *type_ ## name) params; type_ ## name name;
+    //==============================================================================
+   #if JUCE_WINDOWS
+    #define JUCE_DECLARE_GL_FUNCTION(name, returnType, params, callparams)      typedef returnType (__stdcall *type_ ## name) params; type_ ## name name;
     JUCE_GL_EXTENSION_FUNCTIONS (JUCE_DECLARE_GL_FUNCTION, JUCE_DECLARE_GL_FUNCTION)
+    //==============================================================================
+   #elif JUCE_LINUX
+    #define JUCE_DECLARE_GL_FUNCTION(name, returnType, params, callparams)      typedef returnType (*type_ ## name) params; type_ ## name name;
+    JUCE_GL_EXTENSION_FUNCTIONS (JUCE_DECLARE_GL_FUNCTION, JUCE_DECLARE_GL_FUNCTION)
+    //==============================================================================
    #elif JUCE_OPENGL_ES
     #define JUCE_DECLARE_GL_FUNCTION(name, returnType, params, callparams)      static returnType name params;
     JUCE_GL_EXTENSION_FUNCTIONS (JUCE_DECLARE_GL_FUNCTION, JUCE_DECLARE_GL_FUNCTION)
+    //==============================================================================
    #else
     #define JUCE_DECLARE_GL_FUNCTION(name, returnType, params, callparams)      inline static returnType name params { return ::name callparams; }
-    #define JUCE_DECLARE_GL_FUNCTION_EXT(name, returnType, params, callparams)  inline static returnType name params { return ::name ## EXT callparams; }
-    JUCE_GL_EXTENSION_FUNCTIONS (JUCE_DECLARE_GL_FUNCTION, JUCE_DECLARE_GL_FUNCTION_EXT)
-    #undef JUCE_DECLARE_GL_FUNCTION_EXT
+    #if defined (MAC_OS_X_VERSION_10_7) && (MAC_OS_X_VERSION_MIN_ALLOWED >= MAC_OS_X_VERSION_10_7)
+     JUCE_GL_EXTENSION_FUNCTIONS (JUCE_DECLARE_GL_FUNCTION, JUCE_DECLARE_GL_FUNCTION)
+    #else
+     #define JUCE_DECLARE_GL_FUNCTION_EXT(name, returnType, params, callparams)  inline static returnType name params { return ::name ## EXT callparams; }
+     JUCE_GL_EXTENSION_FUNCTIONS (JUCE_DECLARE_GL_FUNCTION, JUCE_DECLARE_GL_FUNCTION_EXT)
+     #undef JUCE_DECLARE_GL_FUNCTION_EXT
+    #endif
    #endif
 
     #undef JUCE_DECLARE_GL_FUNCTION

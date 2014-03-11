@@ -109,6 +109,18 @@ public:
     /** Returns true if shaders can be used in this context. */
     bool areShadersAvailable() const;
 
+    /** OpenGL versions, used by setOpenGLVersionRequired(). */
+    enum OpenGLVersion
+    {
+        defaultGLVersion = 0,
+        openGL3_2
+    };
+
+    /** Sets a preference for the version of GL that this context should use, if possible.
+        Some platforms may ignore this value.
+    */
+    void setOpenGLVersionRequired (OpenGLVersion) noexcept;
+
     /** Enables or disables the use of the GL context to perform 2D rendering
         of the component to which it is attached.
         If this is false, then only your OpenGLRenderer will be used to perform
@@ -264,6 +276,7 @@ private:
     ScopedPointer<Attachment> attachment;
     OpenGLPixelFormat pixelFormat;
     void* contextToShareWith;
+    OpenGLVersion versionRequired;
     bool renderComponents, useMultisampling, continuousRepaint;
 
     CachedImage* getCachedImage() const noexcept;

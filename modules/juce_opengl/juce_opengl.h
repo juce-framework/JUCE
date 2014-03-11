@@ -58,8 +58,13 @@
 #elif JUCE_IOS
  #include <OpenGLES/ES2/gl.h>
 #elif JUCE_MAC
- #include <OpenGL/gl.h>
- #include "OpenGL/glext.h"
+ #if defined (MAC_OS_X_VERSION_10_7) && (MAC_OS_X_VERSION_MIN_ALLOWED >= MAC_OS_X_VERSION_10_7)
+  #include <OpenGL/gl3.h>
+  #include <OpenGL/gl3ext.h>
+ #else
+  #include <OpenGL/gl.h>
+  #include "OpenGL/glext.h"
+ #endif
 #elif JUCE_ANDROID
  #include <GLES2/gl2.h>
 #endif
