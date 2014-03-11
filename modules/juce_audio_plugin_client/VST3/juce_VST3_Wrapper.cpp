@@ -1241,11 +1241,47 @@ private:
 DECLARE_CLASS_IID (JuceAudioProcessor, 0x0101ABAB, 0xABCDEF01, JucePlugin_ManufacturerCode, JucePlugin_PluginCode)
 DEF_CLASS_IID (JuceAudioProcessor)
 
-DECLARE_CLASS_IID (JuceVST3Component, 0xABCDEF01, 0x9182FAEB, JucePlugin_ManufacturerCode, JucePlugin_PluginCode)
-DEF_CLASS_IID (JuceVST3Component)
+// Modified version of convertVST2UID_To_FUID from VST SDK docs.
+static FUID convertVST2UID_To_FUID (int myVST2UID_4Chars, const char* pluginName, bool forControllerUID = false)
+{
+    char uidString[33];
 
-DECLARE_CLASS_IID (JuceVST3EditController, 0xABCDEF01, 0x1234ABCD, JucePlugin_ManufacturerCode, JucePlugin_PluginCode)
-DEF_CLASS_IID (JuceVST3EditController)
+    {
+        int vstfxid;
+        if (forControllerUID)
+            vstfxid = (('V' << 16) | ('S' << 8) | 'E');
+        else
+            vstfxid = (('V' << 16) | ('S' << 8) | 'T');
+        char vstfxidStr[7] = {0};
+        sprintf (vstfxidStr, "%06X", vstfxid);
+        strcpy (uidString, vstfxidStr);
+    }
+
+    {
+        char uidStr[9] = {0};
+        sprintf (uidStr, "%08X", myVST2UID_4Chars);
+        strcat (uidString, uidStr);
+    }
+
+    char nameidStr[3] = {0};
+    size_t len = strlen (pluginName);
+    for (uint16 i = 0; i <= 8; i++)
+    {
+        uint8 c = i < len ? pluginName[i] : 0;
+        if (c >= 'A' && c <= 'Z')
+            c += 'a' - 'A';
+        sprintf (nameidStr, "%02X", c);
+        strcat (uidString, nameidStr);
+    }
+
+    FUID newOne;
+    newOne.fromString (uidString);
+    return newOne;
+}
+
+const ::Steinberg::FUID JuceVST3Component::iid (convertVST2UID_To_FUID (JucePlugin_VSTUniqueID, JucePlugin_Name));
+
+const ::Steinberg::FUID JuceVST3EditController::iid (convertVST2UID_To_FUID (JucePlugin_VSTUniqueID, JucePlugin_Name, true));
 
 #if JUCE_MSVC
  #pragma warning (pop)
