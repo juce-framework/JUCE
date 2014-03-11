@@ -33,6 +33,9 @@ public:
     {
         NSOpenGLPixelFormatAttribute attribs[] =
         {
+        #if JUCE_OSX_USE_GL_3_2
+            NSOpenGLPFAOpenGLProfile, NSOpenGLProfileVersion3_2Core,
+        #endif
             NSOpenGLPFADoubleBuffer,
             NSOpenGLPFAMPSafe,
             NSOpenGLPFAClosestPolicy,
