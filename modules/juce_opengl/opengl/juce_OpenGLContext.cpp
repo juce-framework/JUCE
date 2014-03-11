@@ -39,7 +39,8 @@ public:
           hasInitialised (false),
           needsUpdate (1), lastMMLockReleaseTime (0)
     {
-        nativeContext = new NativeContext (component, pixFormat, contextToShare, c.useMultisampling);
+        nativeContext = new NativeContext (component, pixFormat, contextToShare,
+                                           c.useMultisampling, c.versionRequired);
 
         if (nativeContext->createdOk())
             context.nativeContext = nativeContext;
@@ -553,8 +554,8 @@ private:
 //==============================================================================
 OpenGLContext::OpenGLContext()
     : nativeContext (nullptr), renderer (nullptr), currentRenderScale (1.0),
-      contextToShareWith (nullptr), renderComponents (true),
-      useMultisampling (false), continuousRepaint (false)
+      contextToShareWith (nullptr), versionRequired (OpenGLContext::defaultGLVersion),
+      renderComponents (true), useMultisampling (false), continuousRepaint (false)
 {
 }
 
@@ -611,6 +612,11 @@ void OpenGLContext::setMultisamplingEnabled (bool b) noexcept
     jassert (nativeContext == nullptr);
 
     useMultisampling = b;
+}
+
+void OpenGLContext::setOpenGLVersionRequired (OpenGLVersion v) noexcept
+{
+    versionRequired = v;
 }
 
 void OpenGLContext::attachTo (Component& component)

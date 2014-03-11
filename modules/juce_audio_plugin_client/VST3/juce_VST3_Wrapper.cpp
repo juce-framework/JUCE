@@ -194,7 +194,6 @@ public:
             {
                 valueNormalized = v;
                 changed();
-                owner.setParameter (paramIndex, (float) v);
                 return true;
             }
 

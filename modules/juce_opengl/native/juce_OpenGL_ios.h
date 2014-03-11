@@ -46,7 +46,8 @@ public:
     NativeContext (Component& component,
                    const OpenGLPixelFormat& pixFormat,
                    void* contextToShare,
-                   bool multisampling)
+                   bool multisampling,
+                   OpenGLVersion)
         : frameBufferHandle (0), colorBufferHandle (0), depthBufferHandle (0),
           msaaColorHandle (0), msaaBufferHandle (0),
           lastWidth (0), lastHeight (0), needToRebuildBuffers (false),
