@@ -892,7 +892,7 @@ public:
 
                 if (isAbsoluteDragMode (e.mods) || (maximum - minimum) / sliderRegionSize < interval)
                 {
-                    dragMode = notDragging;
+                    dragMode = absoluteDrag;
                     handleAbsoluteDrag (e);
                 }
                 else
