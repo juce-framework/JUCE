@@ -58,9 +58,10 @@
 #elif JUCE_IOS
  #include <OpenGLES/ES2/gl.h>
 #elif JUCE_MAC
- #if defined (MAC_OS_X_VERSION_10_7) && (MAC_OS_X_VERSION_MIN_ALLOWED >= MAC_OS_X_VERSION_10_7)
+ #if defined (MAC_OS_X_VERSION_10_7) && (MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_7)
   #include <OpenGL/gl3.h>
   #include <OpenGL/gl3ext.h>
+  #define JUCE_MAC_HAS_GL3 1
  #else
   #include <OpenGL/gl.h>
   #include "OpenGL/glext.h"

@@ -76,7 +76,32 @@ bool OpenGLShaderProgram::addShader (StringRef code, GLenum type)
     const GLchar* c = codeString.toRawUTF8();
    #endif
 
-    context.extensions.glShaderSource (shaderID, 1, &c, nullptr);
+    if (OpenGLShaderProgram::getLanguageVersion() > 1.2)
+    {
+        String code3 (c);
+        if (type == GL_VERTEX_SHADER)
+        {
+            code3 = code3.replace ("attribute", "in");
+            code3 = code3.replace ("varying", "out");
+        }
+        else if (type == GL_FRAGMENT_SHADER)
+        {
+            code3 = code3.replace ("varying", "in");
+            code3 = code3.replace ("texture2D", "texture");
+            code3 = code3.replace ("gl_FragColor", "o_FragColor");
+            code3 = "out vec4 o_FragColor;\n" + code3;
+        }
+        code3 = "#version 150\n" + code3;
+
+        c = code3.toRawUTF8();
+        //printf ("==%sSHADER==\n%s\n\n", (type == GL_VERTEX_SHADER ? "VERTEX-" : "FRAGMENT-"), c);
+        context.extensions.glShaderSource (shaderID, 1, &c, nullptr);
+    }
+    else
+    {
+        context.extensions.glShaderSource (shaderID, 1, &c, nullptr);
+    }
+
     context.extensions.glCompileShader (shaderID);
 
     GLint status = GL_FALSE;

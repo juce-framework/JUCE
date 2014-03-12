@@ -46,6 +46,9 @@ public:
             context.nativeContext = nativeContext;
         else
             nativeContext = nullptr;
+    #if JUCE_MAC_HAS_GL3
+        sharedVAO = 0;
+    #endif
     }
 
     ~CachedImage()
@@ -350,6 +353,14 @@ public:
         context.makeActive();
         nativeContext->initialiseOnRenderThread (context);
 
+    #if JUCE_MAC_HAS_GL3
+        if (OpenGLShaderProgram::getLanguageVersion() > 1.2)
+        {
+            ::glGenVertexArrays(1, &sharedVAO);
+            ::glBindVertexArray(sharedVAO);
+        }
+    #endif
+
         glViewport (0, 0, component.getWidth(), component.getHeight());
 
         context.extensions.initialise();
@@ -367,6 +378,13 @@ public:
     {
         if (context.renderer != nullptr)
             context.renderer->openGLContextClosing();
+
+    #if JUCE_MAC_HAS_GL3
+        if (sharedVAO)
+        {
+            ::glDeleteVertexArrays(1, &sharedVAO);
+        }
+    #endif
 
         cachedImageFrameBuffer.release();
         nativeContext->shutdownOnRenderThread();
@@ -391,6 +409,9 @@ public:
     RectangleList<int> validArea;
     Rectangle<int> viewportArea, lastScreenBounds;
     double scale;
+#if JUCE_MAC_HAS_GL3
+    GLuint sharedVAO;
+#endif
 
     StringArray associatedObjectNames;
     ReferenceCountedArray<ReferenceCountedObject> associatedObjects;
