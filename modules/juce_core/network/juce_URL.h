@@ -137,16 +137,33 @@ public:
     URL withParameter (const String& parameterName,
                        const String& parameterValue) const;
 
-    /** Returns a copy of this URl, with a file-upload type parameter added to it.
+    /** Returns a copy of this URL, with a file-upload type parameter added to it.
 
         When performing a POST where one of your parameters is a binary file, this
         lets you specify the file.
 
         Note that the filename is stored, but the file itself won't actually be read
-        until this URL is later used to create a network input stream.
+        until this URL is later used to create a network input stream. If you want to
+        upload data from memory, use withDataToUpload().
+
+        @see withDataToUpload
     */
     URL withFileToUpload (const String& parameterName,
                           const File& fileToUpload,
+                          const String& mimeType) const;
+
+    /** Returns a copy of this URL, with a file-upload type parameter added to it.
+
+        When performing a POST where one of your parameters is a binary file, this
+        lets you specify the file content.
+        Note that the filename parameter should not be a full path, it's just the
+        last part of the filename.
+
+        @see withFileToUpload
+    */
+    URL withDataToUpload (const String& parameterName,
+                          const String& filename,
+                          const MemoryBlock& fileContentToUpload,
                           const String& mimeType) const;
 
     /** Returns an array of the names of all the URL's parameters.
@@ -174,17 +191,6 @@ public:
         @see getParameterNames, withParameter
     */
     const StringArray& getParameterValues() const noexcept      { return parameterValues; }
-
-    /** Returns the set of files that should be uploaded as part of a POST operation.
-
-        This is the set of files that were added to the URL with the withFileToUpload()
-        method.
-    */
-    const StringPairArray& getFilesToUpload() const;
-
-    /** Returns the set of mime types associated with each of the upload files.
-    */
-    const StringPairArray& getMimeTypesOfUploadFiles() const;
 
     /** Returns a copy of this URL, with a block of data to send as the POST data.
 
@@ -343,10 +349,23 @@ private:
     //==============================================================================
     String url, postData;
     StringArray parameterNames, parameterValues;
-    StringPairArray filesToUpload, mimeTypes;
+
+    struct Upload  : public ReferenceCountedObject
+    {
+        Upload (const String&, const String&, const String&, const File&, MemoryBlock*);
+        String parameterName, filename, mimeType;
+        File file;
+        ScopedPointer<MemoryBlock> data;
+
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Upload)
+    };
+
+    ReferenceCountedArray<Upload> filesToUpload;
 
     URL (const String&, int);
     void addParameter (const String&, const String&);
+    void createHeadersAndPostData (String&, MemoryBlock&) const;
+    URL withUpload (Upload*) const;
 
     JUCE_LEAK_DETECTOR (URL)
 };
