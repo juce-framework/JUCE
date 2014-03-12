@@ -34,6 +34,8 @@
 #include "../utility/juce_IncludeModuleHeaders.h"
 #include "../../juce_audio_processors/format_types/juce_VST3Common.h"
 
+#include <pluginterfaces/vst2.x/vstfxstore.h>
+
 #undef Point
 #undef Component
 
@@ -753,7 +755,28 @@ public:
     tresult PLUGIN_API setIoMode (Vst::IoMode) override { return kNotImplemented; }
     tresult PLUGIN_API getRoutingInfo (Vst::RoutingInfo&, Vst::RoutingInfo&) override { return kNotImplemented; }
 
-    bool readFromMemoryStream (IBStream* state) const
+    void loadVst2CompatibleState (const void* data, int size)
+    {
+        const char* cData = (const char*) data;
+
+        jassert ('VstW' == htonl(*(uint32_t*)cData));
+        int headerLen = htonl(*(uint32_t*)(cData+4));
+        // version, which should be 1 according to Steinberg's docs
+        jassert (1 == htonl(*(uint32_t*)(cData+8)));
+        // TODO: htonl(*(uint32_t*)(data+12)) should be bypass flag?
+
+        struct fxBank* bank = (struct fxBank*) (cData+8+headerLen);
+        jassert (cMagic == htonl(bank->chunkMagic));
+        // TODO: validate byteSize field vs content.data.size ?
+        jassert (chunkBankMagic == htonl(bank->fxMagic));
+        const int version = htonl(bank->version);
+        jassert (version == 1 || version == 2);
+        jassert (JucePlugin_VSTUniqueID == htonl(bank->fxID));
+
+        pluginInstance->setStateInformation (bank->content.data.chunk, htonl(bank->content.data.size));
+    }
+
+    bool readFromMemoryStream (IBStream* state)
     {
         FUnknownPtr<MemoryStream> s (state);
 
@@ -767,14 +790,14 @@ public:
                 if (s->getSize() >= 5 && memcmp (s->getData(), "VC2!E", 5) == 0)
                     return false;
 
-            pluginInstance->setStateInformation (s->getData(), (int) s->getSize());
+            loadVst2CompatibleState (s->getData(), (int) s->getSize());
             return true;
         }
 
         return false;
     }
 
-    bool readFromUnknownStream (IBStream* state) const
+    bool readFromUnknownStream (IBStream* state)
     {
         MemoryOutputStream allData;
 
@@ -800,7 +823,7 @@ public:
 
         if (dataSize > 0 && dataSize < 0x7fffffff)
         {
-            pluginInstance->setStateInformation (allData.getData(), (int) dataSize);
+            loadVst2CompatibleState (allData.getData(), (int) dataSize);
             return true;
         }
 
@@ -823,14 +846,55 @@ public:
 
     tresult PLUGIN_API getState (IBStream* state) override
     {
-        if (state != nullptr)
+        if (state == nullptr)
+            return kInvalidArgument;
+
+        // Save state so that it is compatible with the VST2 wrapper.
+
+        tresult status;
         {
-            juce::MemoryBlock mem;
-            pluginInstance->getStateInformation (mem);
-            return state->write (mem.getData(), (Steinberg::int32) mem.getSize());
+            int t = htonl('VstW');
+            status = state->write(&t, 4);
+            if (kResultOk != status)
+                return status;
+
+            t = htonl(8); // Header size
+            state->write(&t, 4);
+            if (kResultOk != status)
+                return status;
+
+            t = htonl(1); // Version
+            state->write(&t, 4);
+            if (kResultOk != status)
+                return status;
+
+            t = htonl(0); // Bypass flag??
+            state->write(&t, 4);
+            if (kResultOk != status)
+                return status;
         }
 
-        return kInvalidArgument;
+        juce::MemoryBlock mem;
+        pluginInstance->getStateInformation (mem);
+
+        const int bankBlockSize = 160;
+        struct fxBank bank;
+        bank.chunkMagic = htonl(cMagic);
+        bank.byteSize = htonl(bankBlockSize - 8 + mem.getSize());
+        bank.fxMagic = htonl(chunkBankMagic);
+        bank.version = htonl(2);
+        bank.fxID = htonl(JucePlugin_VSTUniqueID);
+        bank.fxVersion = htonl(JucePlugin_VersionCode);
+        bank.numPrograms = htonl(0); // ?
+        memset(bank.future, 0, sizeof(bank.future));
+        bank.content.data.size = htonl(mem.getSize());
+
+        status =
+            state->write(&bank, bankBlockSize);
+        if (kResultOk != status)
+            return status;
+
+        return state->write (mem.getData(), (Steinberg::int32) mem.getSize());
     }
 
     //==============================================================================
