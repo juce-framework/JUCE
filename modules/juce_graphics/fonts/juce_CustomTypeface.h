@@ -36,6 +36,11 @@
     If you want to create a copy of a native face, you can use addGlyphsFromOtherTypeface()
     to copy glyphs into this face.
 
+    NOTE! For most people this class is almost certainly NOT the right tool to use!
+    If what you want to do is to embed a font into your exe, then your best plan is
+    probably to embed your TTF/OTF font file into your binary using the Introjucer,
+    and then call Typeface::createSystemTypefaceFor() to load it from memory.
+
     @see Typeface, Font
 */
 class JUCE_API  CustomTypeface  : public Typeface
@@ -108,6 +113,10 @@ public:
     /** Saves this typeface as a Juce-formatted font file.
         A CustomTypeface can be created to reload the data that is written - see the CustomTypeface
         constructor.
+
+        NOTE! Since this class was written, support was added for loading real font files from
+        memory, so for most people, using Typeface::createSystemTypefaceFor() to load a real font
+        is more appropriate than using this class to store it in a proprietory format.
     */
     bool writeToStream (OutputStream& outputStream);
 
