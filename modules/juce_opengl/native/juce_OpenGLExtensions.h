@@ -113,7 +113,7 @@ struct OpenGLExtensionFunctions
     //==============================================================================
    #else
     #define JUCE_DECLARE_GL_FUNCTION(name, returnType, params, callparams)      inline static returnType name params { return ::name callparams; }
-    #if defined (MAC_OS_X_VERSION_10_7) && (MAC_OS_X_VERSION_MIN_ALLOWED >= MAC_OS_X_VERSION_10_7)
+    #if JUCE_OPENGL3
      JUCE_GL_EXTENSION_FUNCTIONS (JUCE_DECLARE_GL_FUNCTION, JUCE_DECLARE_GL_FUNCTION)
     #else
      #define JUCE_DECLARE_GL_FUNCTION_EXT(name, returnType, params, callparams)  inline static returnType name params { return ::name ## EXT callparams; }
