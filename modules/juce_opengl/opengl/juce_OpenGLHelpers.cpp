@@ -79,21 +79,25 @@ void OpenGLHelpers::enableScissorTest (const Rectangle<int>& clip)
 
 String OpenGLHelpers::translateVertexShaderToV3 (const String& code)
 {
+   #if JUCE_OPENGL3
     if (OpenGLShaderProgram::getLanguageVersion() > 1.2)
         return "#version 150\n" + code.replace ("attribute", "in")
                                       .replace ("varying", "out");
+   #endif
 
     return code;
 }
 
 String OpenGLHelpers::translateFragmentShaderToV3 (const String& code)
 {
+   #if JUCE_OPENGL3
     if (OpenGLShaderProgram::getLanguageVersion() > 1.2)
         return "#version 150\n"
                "out vec4 fragColor;\n"
                 + code.replace ("varying", "in")
                       .replace ("texture2D", "texture")
                       .replace ("gl_FragColor", "fragColor");
+   #endif
 
     return code;
 }

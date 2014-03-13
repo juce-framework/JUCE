@@ -65,9 +65,8 @@ double OpenGLShaderProgram::getLanguageVersion()
    #endif
 }
 
-bool OpenGLShaderProgram::addShader (const String& codeString, GLenum type)
+bool OpenGLShaderProgram::addShader (const String& code, GLenum type)
 {
-    String code (codeString);
     GLuint shaderID = context.extensions.glCreateShader (type);
 
     const GLchar* c = code.toRawUTF8();
