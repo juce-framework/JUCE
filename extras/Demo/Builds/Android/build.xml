@@ -3,7 +3,9 @@
 <project name="JuceDemo" default="debug">
   <loadproperties srcFile="local.properties"/>
   <loadproperties srcFile="project.properties"/>
-  <target name="clean">
+  <target name="clean" depends="android_rules.clean">
+    <delete dir="libs"/>
+    <delete dir="obj"/>
     <exec executable="${ndk.dir}/ndk-build" dir="${basedir}" failonerror="true">
       <arg value="clean"/>
     </exec>
