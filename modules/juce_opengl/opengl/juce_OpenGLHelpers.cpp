@@ -76,3 +76,24 @@ void OpenGLHelpers::enableScissorTest (const Rectangle<int>& clip)
     glEnable (GL_SCISSOR_TEST);
     glScissor (clip.getX(), clip.getY(), clip.getWidth(), clip.getHeight());
 }
+
+String OpenGLHelpers::translateVertexShaderToV3 (const String& code)
+{
+    if (OpenGLShaderProgram::getLanguageVersion() > 1.2)
+        return "#version 150\n" + code.replace ("attribute", "in")
+                                      .replace ("varying", "out");
+
+    return code;
+}
+
+String OpenGLHelpers::translateFragmentShaderToV3 (const String& code)
+{
+    if (OpenGLShaderProgram::getLanguageVersion() > 1.2)
+        return "#version 150\n"
+               "out vec4 fragColor;\n"
+                + code.replace ("varying", "in")
+                      .replace ("texture2D", "texture")
+                      .replace ("gl_FragColor", "fragColor");
+
+    return code;
+}

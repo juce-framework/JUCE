@@ -795,8 +795,8 @@ struct OpenGLDemoClasses
                 ScopedPointer<OpenGLShaderProgram> newShader (new OpenGLShaderProgram (openGLContext));
                 String statusText;
 
-                if (newShader->addVertexShader (newVertexShader)
-                      && newShader->addFragmentShader (newFragmentShader)
+                if (newShader->addVertexShader (OpenGLHelpers::translateVertexShaderToV3 (newVertexShader))
+                      && newShader->addFragmentShader (OpenGLHelpers::translateFragmentShaderToV3 (newFragmentShader))
                       && newShader->link())
                 {
                     shape = nullptr;
