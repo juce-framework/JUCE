@@ -872,6 +872,7 @@
           <File RelativePath="..\..\..\..\modules\juce_audio_plugin_client\utility\juce_IncludeModuleHeaders.h"/>
           <File RelativePath="..\..\..\..\modules\juce_audio_plugin_client\utility\juce_IncludeSystemHeaders.h"/>
           <File RelativePath="..\..\..\..\modules\juce_audio_plugin_client\utility\juce_PluginHostType.h"/>
+          <File RelativePath="..\..\..\..\modules\juce_audio_plugin_client\utility\juce_WindowsHooks.h"/>
         </Filter>
         <File RelativePath="..\..\..\..\modules\juce_audio_plugin_client\juce_module_info">
           <FileConfiguration Name="Debug|Win32"

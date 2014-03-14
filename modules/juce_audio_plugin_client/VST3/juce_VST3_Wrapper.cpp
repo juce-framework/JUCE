@@ -32,6 +32,7 @@
 #include "../../juce_audio_processors/format_types/juce_VST3Headers.h"
 #include "../utility/juce_CheckSettingMacros.h"
 #include "../utility/juce_IncludeModuleHeaders.h"
+#include "../utility/juce_WindowsHooks.h"
 #include "../../juce_audio_processors/format_types/juce_VST3Common.h"
 
 #ifndef JUCE_VST3_CAN_REPLACE_VST2
@@ -540,6 +541,10 @@ private:
        #if JUCE_MAC
         void* macHostWindow;
         bool isNSView;
+       #endif
+
+       #if JUCE_WINDOWS
+        WindowsHooks hooks;
        #endif
 
         //==============================================================================
