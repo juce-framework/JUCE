@@ -202,7 +202,9 @@ public:
         {
             if (shouldBeVisible)
             {
+                ++insideToFrontCall;
                 [window orderFront: nil];
+                --insideToFrontCall;
                 handleBroughtToFront();
             }
             else
