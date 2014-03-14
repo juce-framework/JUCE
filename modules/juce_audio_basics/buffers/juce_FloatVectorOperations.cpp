@@ -121,14 +121,16 @@ namespace FloatVectorHelpers
     #define JUCE_LOAD_SRC(srcLoad, dstLoad)      const __m128 s = srcLoad (src);
     #define JUCE_LOAD_SRC_DEST(srcLoad, dstLoad) const __m128 d = dstLoad (dest); const __m128 s = srcLoad (src);
 
-    #define JUCE_PERFORM_SSE_OP_DEST(normalOp, sseOp, locals) \
+    #define JUCE_PERFORM_SSE_OP_DEST(normalOp, sseOp, locals, setupOp) \
         JUCE_BEGIN_SSE_OP \
+        setupOp \
         if (FloatVectorHelpers::isAligned (dest))   JUCE_SSE_LOOP (sseOp, dummy, _mm_load_ps,  _mm_store_ps,  locals, JUCE_INCREMENT_DEST) \
         else                                        JUCE_SSE_LOOP (sseOp, dummy, _mm_loadu_ps, _mm_storeu_ps, locals, JUCE_INCREMENT_DEST) \
         JUCE_FINISH_SSE_OP (normalOp)
 
-    #define JUCE_PERFORM_SSE_OP_SRC_DEST(normalOp, sseOp, locals, increment) \
+    #define JUCE_PERFORM_SSE_OP_SRC_DEST(normalOp, sseOp, locals, increment, setupOp) \
         JUCE_BEGIN_SSE_OP \
+        setupOp \
         if (FloatVectorHelpers::isAligned (dest)) \
         { \
             if (FloatVectorHelpers::isAligned (src)) JUCE_SSE_LOOP (sseOp, _mm_load_ps,  _mm_load_ps, _mm_store_ps, locals, increment) \
@@ -222,8 +224,8 @@ namespace FloatVectorHelpers
 
     //==============================================================================
     #else
-     #define JUCE_PERFORM_SSE_OP_DEST(normalOp, unused1, unused2)              for (int i = 0; i < num; ++i) normalOp;
-     #define JUCE_PERFORM_SSE_OP_SRC_DEST(normalOp, sseOp, locals, increment)  for (int i = 0; i < num; ++i) normalOp;
+     #define JUCE_PERFORM_SSE_OP_DEST(normalOp, unused1, unused2, setupOp)              for (int i = 0; i < num; ++i) normalOp;
+     #define JUCE_PERFORM_SSE_OP_SRC_DEST(normalOp, sseOp, locals, increment, setupOp)  for (int i = 0; i < num; ++i) normalOp;
     #endif
 }
 
@@ -245,10 +247,8 @@ void JUCE_CALLTYPE FloatVectorOperations::fill (float* dest, float valueToFill, 
     const float32x4_t val = vld1q_dup_f32 (&valueToFill);
     JUCE_PERFORM_NEON_OP_DEST (dest[i] = valueToFill, val, JUCE_LOAD_NONE)
    #else
-    #if JUCE_USE_SSE_INTRINSICS
-     const __m128 val = _mm_load1_ps (&valueToFill);
-    #endif
-    JUCE_PERFORM_SSE_OP_DEST (dest[i] = valueToFill, val, JUCE_LOAD_NONE)
+    JUCE_PERFORM_SSE_OP_DEST (dest[i] = valueToFill, val, JUCE_LOAD_NONE,
+                              const __m128 val = _mm_load1_ps (&valueToFill);)
    #endif
 }
 
@@ -264,11 +264,9 @@ void JUCE_CALLTYPE FloatVectorOperations::copyWithMultiply (float* dest, const f
    #elif JUCE_USE_ARM_NEON
     JUCE_PERFORM_NEON_OP_SRC_DEST (dest[i] += src[i], vmulq_n_f32(s, multiplier), JUCE_LOAD_SRC)
    #else
-    #if JUCE_USE_SSE_INTRINSICS
-     const __m128 mult = _mm_load1_ps (&multiplier);
-    #endif
     JUCE_PERFORM_SSE_OP_SRC_DEST (dest[i] = src[i] * multiplier, _mm_mul_ps (mult, s),
-                                  JUCE_LOAD_SRC, JUCE_INCREMENT_SRC_DEST)
+                                  JUCE_LOAD_SRC, JUCE_INCREMENT_SRC_DEST,
+                                  const __m128 mult = _mm_load1_ps (&multiplier);)
    #endif
 }
 
@@ -278,10 +276,8 @@ void JUCE_CALLTYPE FloatVectorOperations::add (float* dest, float amount, int nu
     const float32x4_t amountToAdd = vld1q_dup_f32(&amount);
     JUCE_PERFORM_NEON_OP_DEST (dest[i] += amount, vaddq_f32 (d, amountToAdd), JUCE_LOAD_DEST)
    #else
-    #if JUCE_USE_SSE_INTRINSICS
-     const __m128 amountToAdd = _mm_load1_ps (&amount);
-    #endif
-    JUCE_PERFORM_SSE_OP_DEST (dest[i] += amount, _mm_add_ps (d, amountToAdd), JUCE_LOAD_DEST)
+    JUCE_PERFORM_SSE_OP_DEST (dest[i] += amount, _mm_add_ps (d, amountToAdd), JUCE_LOAD_DEST,
+                              const __m128 amountToAdd = _mm_load1_ps (&amount);)
    #endif
 }
 
@@ -292,7 +288,7 @@ void JUCE_CALLTYPE FloatVectorOperations::add (float* dest, const float* src, in
    #elif JUCE_USE_ARM_NEON
     JUCE_PERFORM_NEON_OP_SRC_DEST (dest[i] += src[i], vaddq_f32 (d, s), JUCE_LOAD_SRC_DEST)
    #else
-    JUCE_PERFORM_SSE_OP_SRC_DEST (dest[i] += src[i], _mm_add_ps (d, s), JUCE_LOAD_SRC_DEST, JUCE_INCREMENT_SRC_DEST)
+    JUCE_PERFORM_SSE_OP_SRC_DEST (dest[i] += src[i], _mm_add_ps (d, s), JUCE_LOAD_SRC_DEST, JUCE_INCREMENT_SRC_DEST, )
    #endif
 }
 
@@ -303,7 +299,7 @@ void JUCE_CALLTYPE FloatVectorOperations::subtract (float* dest, const float* sr
    #elif JUCE_USE_ARM_NEON
     JUCE_PERFORM_NEON_OP_SRC_DEST (dest[i] -= src[i], vsubq_f32 (d, s), JUCE_LOAD_SRC_DEST)
    #else
-    JUCE_PERFORM_SSE_OP_SRC_DEST (dest[i] -= src[i], _mm_sub_ps (d, s), JUCE_LOAD_SRC_DEST, JUCE_INCREMENT_SRC_DEST)
+    JUCE_PERFORM_SSE_OP_SRC_DEST (dest[i] -= src[i], _mm_sub_ps (d, s), JUCE_LOAD_SRC_DEST, JUCE_INCREMENT_SRC_DEST, )
    #endif
 }
 
@@ -314,13 +310,10 @@ void JUCE_CALLTYPE FloatVectorOperations::addWithMultiply (float* dest, const fl
                                    vmlaq_n_f32 (d, s, multiplier),
                                    JUCE_LOAD_SRC_DEST)
    #else
-    #if JUCE_USE_SSE_INTRINSICS
-     const __m128 mult = _mm_load1_ps (&multiplier);
-    #endif
-
      JUCE_PERFORM_SSE_OP_SRC_DEST (dest[i] += src[i] * multiplier,
                                    _mm_add_ps (d, _mm_mul_ps (mult, s)),
-                                   JUCE_LOAD_SRC_DEST, JUCE_INCREMENT_SRC_DEST)
+                                   JUCE_LOAD_SRC_DEST, JUCE_INCREMENT_SRC_DEST,
+                                   const __m128 mult = _mm_load1_ps (&multiplier);)
    #endif
 
 }
@@ -332,7 +325,7 @@ void JUCE_CALLTYPE FloatVectorOperations::multiply (float* dest, const float* sr
    #elif JUCE_USE_ARM_NEON
     JUCE_PERFORM_NEON_OP_SRC_DEST (dest[i] *= src[i], vmulq_f32 (d, s), JUCE_LOAD_SRC_DEST)
    #else
-    JUCE_PERFORM_SSE_OP_SRC_DEST  (dest[i] *= src[i], _mm_mul_ps (d, s), JUCE_LOAD_SRC_DEST, JUCE_INCREMENT_SRC_DEST)
+    JUCE_PERFORM_SSE_OP_SRC_DEST  (dest[i] *= src[i], _mm_mul_ps (d, s), JUCE_LOAD_SRC_DEST, JUCE_INCREMENT_SRC_DEST, )
    #endif
 }
 
@@ -343,10 +336,8 @@ void JUCE_CALLTYPE FloatVectorOperations::multiply (float* dest, float multiplie
    #elif JUCE_USE_ARM_NEON
     JUCE_PERFORM_NEON_OP_DEST (dest[i] *= multiplier, vmulq_n_f32 (d, multiplier), JUCE_LOAD_DEST)
    #else
-    #if JUCE_USE_SSE_INTRINSICS
-     const __m128 mult = _mm_load1_ps (&multiplier);
-    #endif
-    JUCE_PERFORM_SSE_OP_DEST (dest[i] *= multiplier, _mm_mul_ps (d, mult), JUCE_LOAD_DEST)
+    JUCE_PERFORM_SSE_OP_DEST (dest[i] *= multiplier, _mm_mul_ps (d, mult), JUCE_LOAD_DEST,
+                              const __m128 mult = _mm_load1_ps (&multiplier);)
    #endif
 }
 
@@ -366,13 +357,10 @@ void JUCE_CALLTYPE FloatVectorOperations::convertFixedToFloat (float* dest, cons
                                    vmulq_n_f32 (vcvtq_f32_s32 (vld1q_s32 (src)), multiplier),
                                    JUCE_LOAD_NONE)
    #else
-    #if JUCE_USE_SSE_INTRINSICS
-     const __m128 mult = _mm_load1_ps (&multiplier);
-    #endif
-
      JUCE_PERFORM_SSE_OP_SRC_DEST (dest[i] = src[i] * multiplier,
                                    _mm_mul_ps (mult, _mm_cvtepi32_ps (_mm_loadu_si128 ((const __m128i*) src))),
-                                   JUCE_LOAD_NONE, JUCE_INCREMENT_SRC_DEST)
+                                   JUCE_LOAD_NONE, JUCE_INCREMENT_SRC_DEST,
+                                   const __m128 mult = _mm_load1_ps (&multiplier);)
    #endif
 }
 
