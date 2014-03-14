@@ -977,7 +977,7 @@ public:
         if (filter == nullptr)
             return 0;
 
-        chunkMemory.setSize (0);
+        chunkMemory.reset();
         if (onlyStoreCurrentProgramData)
             filter->getCurrentProgramStateInformation (chunkMemory);
         else
@@ -996,7 +996,7 @@ public:
     {
         if (filter != nullptr)
         {
-            chunkMemory.setSize (0);
+            chunkMemory.reset();
             chunkMemoryTime = 0;
 
             if (byteSize > 0 && data != nullptr)
@@ -1023,8 +1023,8 @@ public:
              && chunkMemoryTime < juce::Time::getApproximateMillisecondCounter() - 2000
              && ! recursionCheck)
         {
+            chunkMemory.reset();
             chunkMemoryTime = 0;
-            chunkMemory.setSize (0);
         }
 
        #if JUCE_MAC

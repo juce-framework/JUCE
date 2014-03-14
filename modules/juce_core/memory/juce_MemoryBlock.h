@@ -108,9 +108,9 @@ public:
 
     /** Resizes the memory block.
 
-        This will try to keep as much of the block's current content as it can,
-        and can optionally be made to clear any new space that gets allocated at
-        the end of the block.
+        Any data that is present in both the old and new sizes will be retained.
+        When enlarging the block, the new space that is allocated at the end can either be
+        cleared, or left uninitialised.
 
         @param newSize                      the new desired size for the block
         @param initialiseNewSpaceToZero     if the block gets enlarged, this determines
@@ -132,6 +132,9 @@ public:
     */
     void ensureSize (const size_t minimumSize,
                      bool initialiseNewSpaceToZero = false);
+
+    /** Frees all the blocks data, setting its size to 0. */
+    void reset();
 
     //==============================================================================
     /** Fills the entire memory block with a repeated byte value.
