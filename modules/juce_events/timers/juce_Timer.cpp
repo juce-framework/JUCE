@@ -328,6 +328,7 @@ Timer::~Timer()
     stopTimer();
 
    #if JUCE_DEBUG
+    const TimerThread::LockType::ScopedLockType sl (TimerThread::lock);
     activeTimers.removeValue (this);
    #endif
 }
