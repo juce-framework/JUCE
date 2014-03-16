@@ -164,47 +164,24 @@ public:
     //==============================================================================
     void drawGlyph (RenderTargetType& target, const Font& font, const int glyphNumber, Point<float> pos)
     {
-        ++accessCounter;
-        CachedGlyphType* glyph = nullptr;
-
         const ScopedReadLock srl (lock);
 
-        for (int i = glyphs.size(); --i >= 0;)
+        if (CachedGlyphType* glyph = findExistingGlyph (font, glyphNumber))
         {
-            CachedGlyphType* const g = glyphs.getUnchecked (i);
-
-            if (g->glyph == glyphNumber && g->font == font)
-            {
-                glyph = g;
-                ++hits;
-                break;
-            }
+            ++hits;
+            glyph->lastAccessCount = ++accessCounter;
+            glyph->draw (target, pos);
+            return;
         }
 
-        if (glyph == nullptr)
-        {
-            ++misses;
-            const ScopedWriteLock swl (lock);
+        const ScopedWriteLock swl (lock);
 
-            if (hits.value + misses.value > glyphs.size() * 16)
-            {
-                if (misses.value * 2 > hits.value)
-                    addNewGlyphSlots (32);
+        ++misses;
+        CachedGlyphType* glyph = getGlyphForReuse();
+        jassert (glyph != nullptr);
 
-                hits.set (0);
-                misses.set (0);
-                glyph = glyphs.getLast();
-            }
-            else
-            {
-                glyph = findLeastRecentlyUsedGlyph();
-            }
-
-            jassert (glyph != nullptr);
-            glyph->generate (font, glyphNumber);
-        }
-
-        glyph->lastAccessCount = accessCounter.value;
+        glyph->generate (font, glyphNumber);
+        glyph->lastAccessCount = ++accessCounter;
         glyph->draw (target, pos);
     }
 
@@ -222,6 +199,34 @@ private:
     OwnedArray<CachedGlyphType> glyphs;
     Atomic<int> accessCounter, hits, misses;
     ReadWriteLock lock;
+
+    CachedGlyphType* findExistingGlyph (const Font& font, int glyphNumber) const
+    {
+        for (int i = 0; i < glyphs.size(); ++i)
+        {
+            CachedGlyphType* const g = glyphs.getUnchecked (i);
+
+            if (g->glyph == glyphNumber && g->font == font)
+                return g;
+        }
+
+        return nullptr;
+    }
+
+    CachedGlyphType* getGlyphForReuse()
+    {
+        if (hits.value + misses.value > glyphs.size() * 16)
+        {
+            if (misses.value * 2 > hits.value)
+                addNewGlyphSlots (32);
+
+            hits.set (0);
+            misses.set (0);
+            return glyphs.getLast();
+        }
+
+        return findLeastRecentlyUsedGlyph();
+    }
 
     void addNewGlyphSlots (int num)
     {
