@@ -164,30 +164,16 @@ public:
     //==============================================================================
     void drawGlyph (RenderTargetType& target, const Font& font, const int glyphNumber, Point<float> pos)
     {
-        const ScopedReadLock srl (lock);
-
-        if (CachedGlyphType* glyph = findExistingGlyph (font, glyphNumber))
+        if (ReferenceCountedObjectPtr<CachedGlyphType> glyph = findOrCreateGlyph (font, glyphNumber))
         {
-            ++hits;
             glyph->lastAccessCount = ++accessCounter;
             glyph->draw (target, pos);
-            return;
         }
-
-        const ScopedWriteLock swl (lock);
-
-        ++misses;
-        CachedGlyphType* glyph = getGlyphForReuse();
-        jassert (glyph != nullptr);
-
-        glyph->generate (font, glyphNumber);
-        glyph->lastAccessCount = ++accessCounter;
-        glyph->draw (target, pos);
     }
 
     void reset()
     {
-        const ScopedWriteLock swl (lock);
+        const ScopedLock sl (lock);
         glyphs.clear();
         addNewGlyphSlots (120);
         hits.set (0);
@@ -196,9 +182,26 @@ public:
 
 private:
     friend struct ContainerDeletePolicy<CachedGlyphType>;
-    OwnedArray<CachedGlyphType> glyphs;
+    ReferenceCountedArray<CachedGlyphType> glyphs;
     Atomic<int> accessCounter, hits, misses;
-    ReadWriteLock lock;
+    CriticalSection lock;
+
+    ReferenceCountedObjectPtr<CachedGlyphType> findOrCreateGlyph (const Font& font, int glyphNumber)
+    {
+        const ScopedLock sl (lock);
+
+        if (CachedGlyphType* g = findExistingGlyph (font, glyphNumber))
+        {
+            ++hits;
+            return g;
+        }
+
+        ++misses;
+        CachedGlyphType* g = getGlyphForReuse();
+        jassert (g != nullptr);
+        g->generate (font, glyphNumber);
+        return g;
+    }
 
     CachedGlyphType* findExistingGlyph (const Font& font, int glyphNumber) const
     {
@@ -267,7 +270,7 @@ private:
 //==============================================================================
 /** Caches a glyph as an edge-table. */
 template <class RendererType>
-class CachedGlyphEdgeTable
+class CachedGlyphEdgeTable  : public ReferenceCountedObject
 {
 public:
     CachedGlyphEdgeTable() : glyph (0), lastAccessCount (0) {}
