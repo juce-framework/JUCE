@@ -237,6 +237,13 @@ public:
                       jmax (end, other.end));
     }
 
+    /** Returns the smallest range that contains both this one and the given value. */
+    Range getUnionWith (const ValueType valueToInclude) const noexcept
+    {
+        return Range (jmin (valueToInclude, start),
+                      jmax (valueToInclude, end));
+    }
+
     /** Returns a given range, after moving it forwards or backwards to fit it
         within this range.
 
@@ -253,6 +260,26 @@ public:
         return getLength() <= otherLen
                 ? *this
                 : rangeToConstrain.movedToStartAt (jlimit (start, end - otherLen, rangeToConstrain.getStart()));
+    }
+
+    /** Scans an array of values for its min and max, and returns these as a Range. */
+    static Range findMinAndMax (const ValueType* values, int numValues) noexcept
+    {
+        if (numValues <= 0)
+            return Range();
+
+        const ValueType first (*values++);
+        Range r (first, first);
+
+        while (--numValues > 0) // (> 0 rather than >= 0 because we've already taken the first sample)
+        {
+            const ValueType v (*values++);
+
+            if (r.end < v)    r.end = v;
+            if (v < r.start)  r.start = v;
+        }
+
+        return r;
     }
 
 private:
