@@ -795,6 +795,15 @@ public:
     }
    #endif
 
+    void loadStateData (const void* data, int size)
+    {
+       #if JUCE_VST3_CAN_REPLACE_VST2
+        loadVST2CompatibleState ((const char*) data, size);
+       #else
+        pluginInstance->setStateInformation (data, size);
+       #endif
+    }
+
     bool readFromMemoryStream (IBStream* state)
     {
         FUnknownPtr<MemoryStream> s (state);
@@ -809,12 +818,7 @@ public:
                 if (s->getSize() >= 5 && memcmp (s->getData(), "VC2!E", 5) == 0)
                     return false;
 
-           #if JUCE_VST3_CAN_REPLACE_VST2
-            loadVST2CompatibleState (s->getData(), (int) s->getSize());
-           #else
-            pluginInstance->setStateInformation (s->getData(), (int) s->getSize());
-           #endif
-
+            loadStateData (s->getData(), (int) s->getSize());
             return true;
         }
 
@@ -847,7 +851,7 @@ public:
 
         if (dataSize > 0 && dataSize < 0x7fffffff)
         {
-            pluginInstance->setStateInformation (allData.getData(), (int) dataSize);
+            loadStateData (allData.getData(), (int) dataSize);
             return true;
         }
 
