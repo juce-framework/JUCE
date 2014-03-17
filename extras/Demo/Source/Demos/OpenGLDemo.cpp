@@ -115,7 +115,7 @@ struct OpenGLDemoClasses
         {
             projectionMatrix = createUniform (openGLContext, shader, "projectionMatrix");
             viewMatrix       = createUniform (openGLContext, shader, "viewMatrix");
-            texture          = createUniform (openGLContext, shader, "texture");
+            texture          = createUniform (openGLContext, shader, "demoTexture");
             lightPosition    = createUniform (openGLContext, shader, "lightPosition");
             bouncingNumber   = createUniform (openGLContext, shader, "bouncingNumber");
         }
@@ -795,8 +795,8 @@ struct OpenGLDemoClasses
                 ScopedPointer<OpenGLShaderProgram> newShader (new OpenGLShaderProgram (openGLContext));
                 String statusText;
 
-                if (newShader->addVertexShader (newVertexShader)
-                      && newShader->addFragmentShader (newFragmentShader)
+                if (newShader->addVertexShader (OpenGLHelpers::translateVertexShaderToV3 (newVertexShader))
+                      && newShader->addFragmentShader (OpenGLHelpers::translateFragmentShaderToV3 (newFragmentShader))
                       && newShader->link())
                 {
                     shape = nullptr;
@@ -889,7 +889,7 @@ struct OpenGLDemoClasses
                 "varying float lightIntensity;\n"
                #endif
                 "\n"
-                "uniform sampler2D texture;\n"
+                "uniform sampler2D demoTexture;\n"
                 "\n"
                 "void main()\n"
                 "{\n"
@@ -900,7 +900,7 @@ struct OpenGLDemoClasses
                 "   float l = max (0.3, lightIntensity * 0.3);\n"
                 "   vec4 colour = vec4 (l, l, l, 1.0);\n"
                #endif
-                "    gl_FragColor = colour * texture2D (texture, textureCoordOut);\n"
+                "    gl_FragColor = colour * texture2D (demoTexture, textureCoordOut);\n"
                 "}\n"
             },
 
@@ -934,11 +934,11 @@ struct OpenGLDemoClasses
                 "varying vec2 textureCoordOut;\n"
                #endif
                 "\n"
-                "uniform sampler2D texture;\n"
+                "uniform sampler2D demoTexture;\n"
                 "\n"
                 "void main()\n"
                 "{\n"
-                "    gl_FragColor = texture2D (texture, textureCoordOut);\n"
+                "    gl_FragColor = texture2D (demoTexture, textureCoordOut);\n"
                 "}\n"
             },
 
@@ -971,8 +971,6 @@ struct OpenGLDemoClasses
                 "varying vec4 destinationColour;\n"
                 "varying vec2 textureCoordOut;\n"
                #endif
-                "\n"
-                "uniform sampler2D texture;\n"
                 "\n"
                 "void main()\n"
                 "{\n"

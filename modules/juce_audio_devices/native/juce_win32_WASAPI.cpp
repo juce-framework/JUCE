@@ -632,7 +632,7 @@ public:
     {
         closeClient();
         captureClient = nullptr;
-        reservoir.setSize (0);
+        reservoir.reset();
     }
 
     template <class SourceType>

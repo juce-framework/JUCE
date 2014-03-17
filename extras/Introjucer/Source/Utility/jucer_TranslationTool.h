@@ -254,19 +254,53 @@ struct TranslationHelpers
         return s.toString();
     }
 
-    static String createFinishedTranslationFile (const StringArray& preStrings,
-                                                 const StringArray& postStrings)
+    static String createLine (const String& preString, const String& postString)
     {
+        return "\"" + escapeString (preString)
+                + "\" = \""
+                + escapeString (postString) + "\"";
+    }
+
+    static String createFinishedTranslationFile (StringArray preStrings,
+                                                 StringArray postStrings,
+                                                 const LocalisedStrings& original)
+    {
+        const StringPairArray& originalStrings (original.getMappings());
+
         StringArray lines;
 
-        lines.add ("language: [enter full name of the language here!]");
-        lines.add ("countries: [enter list of 2-character country codes here!]");
-        lines.add (String::empty);
+        if (originalStrings.size() > 0)
+        {
+            lines.add ("language: " + original.getLanguageName());
+            lines.add ("countries: " + original.getCountryCodes().joinIntoString (" "));
+            lines.add (String::empty);
+
+            const StringArray& originalKeys (originalStrings.getAllKeys());
+            const StringArray& originalValues (originalStrings.getAllValues());
+            int numRemoved = 0;
+
+            for (int i = preStrings.size(); --i >= 0;)
+            {
+                if (originalKeys.contains (preStrings[i]))
+                {
+                    preStrings.remove (i);
+                    postStrings.remove (i);
+                    ++numRemoved;
+                }
+            }
+
+            for (int i = 0; i < originalStrings.size(); ++i)
+                lines.add (createLine (originalKeys[i], originalValues[i]));
+        }
+        else
+        {
+            lines.add ("language: [enter full name of the language here!]");
+            lines.add ("countries: [enter list of 2-character country codes here!]");
+            lines.add (String::empty);
+        }
 
         for (int i = 0; i < preStrings.size(); ++i)
-            lines.add ("\"" + escapeString (preStrings[i])
-                         + "\" = \""
-                         + escapeString (postStrings[i]) + "\"");
+            lines.add (createLine (preStrings[i], postStrings[i]));
 
         return lines.joinIntoString (newLine);
     }
@@ -278,7 +312,8 @@ class TranslationToolComponent  : public Component,
 {
 public:
     TranslationToolComponent()
-        : editorPre (documentPre, nullptr),
+        : editorOriginal (documentOriginal, nullptr),
+          editorPre (documentPre, nullptr),
           editorPost (documentPost, nullptr),
           editorResult (documentResult, nullptr)
     {
@@ -301,6 +336,10 @@ public:
                         "Remember to update its language code at the top!", dontSendNotification);
         addAndMakeVisible (label3);
 
+        label4.setText ("If you load an existing file the already translated strings will be removed. Ensure this box is empty to create a fresh translation", dontSendNotification);
+        addAndMakeVisible (label4);
+
+        addAndMakeVisible (editorOriginal);
         addAndMakeVisible (editorPre);
         addAndMakeVisible (editorPost);
         addAndMakeVisible (editorResult);
@@ -324,27 +363,37 @@ public:
 
     void resized()
     {
-        Rectangle<int> r (getLocalBounds());
+        const int m = 6;
+        const int textH = 44;
+        const int extraH = (7 * textH);
+        const int editorH = (getHeight() - extraH) / 4;
 
-        r.removeFromTop (120);
+        Rectangle<int> r (getLocalBounds().withTrimmedBottom (m));
+        instructionsLabel.setBounds (r.removeFromTop (textH * 2).reduced (m));
+        r.removeFromTop (m);
+        Rectangle<int> r2 (r.removeFromTop (textH - (2 * m)));
+        scanButton.setBounds (r2.removeFromLeft (r.getWidth() / 2).reduced (m, 0));
+        loadButton.setBounds (r2.reduced (m, 0));
 
-        editorPre.setBounds (10, 165, getWidth() - 20, 130);
-        editorPost.setBounds (10, 338, getWidth() - 20, 114);
-        editorResult.setBounds (10, 503, getWidth() - 20, getHeight() - 510);
+        label1.setBounds (r.removeFromTop (textH).reduced (m));
+        editorPre.setBounds (r.removeFromTop (editorH).reduced (m, 0));
 
-        generateButton.setBounds (getWidth() - 152, 462, 140, 30);
-        label1.setBounds (10, 128, getWidth() - 20, 26);
-        label2.setBounds (10, 303, getWidth() - 20, 25);
-        label3.setBounds (10, 459, generateButton.getX() - 20, 38);
-        instructionsLabel.setBounds (6, 10, getWidth() - 14, 70);
-        scanButton.setBounds (27, 86, 257, 30);
-        loadButton.setBounds (304, 86, 260, 30);
+        label2.setBounds (r.removeFromTop (textH).reduced (m));
+        editorPost.setBounds (r.removeFromTop (editorH).reduced (m, 0));
+
+        r2 = r.removeFromTop (textH);
+        generateButton.setBounds (r2.removeFromRight (152).reduced (m));
+        label3.setBounds (r2.reduced (m));
+        editorResult.setBounds (r.removeFromTop (editorH).reduced (m, 0));
+
+        label4.setBounds (r.removeFromTop (textH).reduced (m));
+        editorOriginal.setBounds (r.reduced (m, 0));
     }
 
 private:
-    CodeDocument documentPre, documentPost, documentResult;
-    CodeEditorComponent editorPre, editorPost, editorResult;
-    juce::Label label1, label2, label3;
+    CodeDocument documentOriginal, documentPre, documentPost, documentResult;
+    CodeEditorComponent editorOriginal, editorPre, editorPost, editorResult;
+    juce::Label label1, label2, label3, label4;
     juce::TextButton generateButton;
     juce::Label instructionsLabel;
     juce::TextButton scanButton;
@@ -373,7 +422,8 @@ private:
             return;
         }
 
-        documentResult.replaceAllContent (TranslationHelpers::createFinishedTranslationFile (preStrings, postStrings));
+        const LocalisedStrings originalTranslation (documentOriginal.getAllContent(), false);
+        documentResult.replaceAllContent (TranslationHelpers::createFinishedTranslationFile (preStrings, postStrings, originalTranslation));
     }
 
     void loadFile()
@@ -383,7 +433,11 @@ private:
                         "*");
 
         if (fc.browseForFileToOpen())
-            setPreTranslationText (TranslationHelpers::getPreTranslationText (LocalisedStrings (fc.getResult(), false)));
+        {
+            const LocalisedStrings loadedStrings (fc.getResult(), false);
+            documentOriginal.replaceAllContent (fc.getResult().loadFileAsString().trim());
+            setPreTranslationText (TranslationHelpers::getPreTranslationText (loadedStrings));
+        }
     }
 
     void scanProject()

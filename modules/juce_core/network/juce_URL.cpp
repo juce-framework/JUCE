@@ -75,8 +75,7 @@ URL::URL (const URL& other)
       postData (other.postData),
       parameterNames (other.parameterNames),
       parameterValues (other.parameterValues),
-      filesToUpload (other.filesToUpload),
-      mimeTypes (other.mimeTypes)
+      filesToUpload (other.filesToUpload)
 {
 }
 
@@ -87,7 +86,6 @@ URL& URL::operator= (const URL& other)
     parameterNames = other.parameterNames;
     parameterValues = other.parameterValues;
     filesToUpload = other.filesToUpload;
-    mimeTypes = other.mimeTypes;
 
     return *this;
 }
@@ -98,8 +96,7 @@ bool URL::operator== (const URL& other) const
         && postData == other.postData
         && parameterNames == other.parameterNames
         && parameterValues == other.parameterValues
-        && filesToUpload == other.filesToUpload
-        && mimeTypes == other.mimeTypes;
+        && filesToUpload == other.filesToUpload;
 }
 
 bool URL::operator!= (const URL& other) const
@@ -154,62 +151,6 @@ namespace URLHelpers
     static int findStartOfPath (const String& url)
     {
         return url.indexOfChar (findStartOfNetLocation (url), '/') + 1;
-    }
-
-    static void createHeadersAndPostData (const URL& url, String& headers, MemoryBlock& postData)
-    {
-        MemoryOutputStream data (postData, false);
-
-        if (url.getFilesToUpload().size() > 0)
-        {
-            // need to upload some files, so do it as multi-part...
-            const String boundary (String::toHexString (Random::getSystemRandom().nextInt64()));
-
-            headers << "Content-Type: multipart/form-data; boundary=" << boundary << "\r\n";
-
-            data << "--" << boundary;
-
-            for (int i = 0; i < url.getParameterNames().size(); ++i)
-            {
-                data << "\r\nContent-Disposition: form-data; name=\""
-                     << url.getParameterNames() [i]
-                     << "\"\r\n\r\n"
-                     << url.getParameterValues() [i]
-                     << "\r\n--"
-                     << boundary;
-            }
-
-            for (int i = 0; i < url.getFilesToUpload().size(); ++i)
-            {
-                const File file (url.getFilesToUpload().getAllValues() [i]);
-                const String paramName (url.getFilesToUpload().getAllKeys() [i]);
-
-                data << "\r\nContent-Disposition: form-data; name=\"" << paramName
-                     << "\"; filename=\"" << file.getFileName() << "\"\r\n";
-
-                const String mimeType (url.getMimeTypesOfUploadFiles()
-                                          .getValue (paramName, String()));
-
-                if (mimeType.isNotEmpty())
-                    data << "Content-Type: " << mimeType << "\r\n";
-
-                data << "Content-Transfer-Encoding: binary\r\n\r\n"
-                     << file << "\r\n--" << boundary;
-            }
-
-            data << "--\r\n";
-        }
-        else
-        {
-            data << getMangledParameters (url)
-                 << url.getPostData();
-
-            // if the user-supplied headers didn't contain a content-type, add one now..
-            if (! headers.containsIgnoreCase ("Content-Type"))
-                headers << "Content-Type: application/x-www-form-urlencoded\r\n";
-
-            headers << "Content-length: " << (int) data.getDataSize() << "\r\n";
-        }
     }
 
     static void concatenatePaths (String& path, const String& suffix)
@@ -296,6 +237,64 @@ URL URL::getChildURL (const String& subPath) const
     return u;
 }
 
+void URL::createHeadersAndPostData (String& headers, MemoryBlock& headersAndPostData) const
+{
+    MemoryOutputStream data (headersAndPostData, false);
+
+    data << URLHelpers::getMangledParameters (*this);
+
+    if (filesToUpload.size() > 0)
+    {
+        // (this doesn't currently support mixing custom post-data with uploads..)
+        jassert (postData.isEmpty());
+
+        const String boundary (String::toHexString (Random::getSystemRandom().nextInt64()));
+
+        headers << "Content-Type: multipart/form-data; boundary=" << boundary << "\r\n";
+
+        data << "--" << boundary;
+
+        for (int i = 0; i < parameterNames.size(); ++i)
+        {
+            data << "\r\nContent-Disposition: form-data; name=\"" << parameterNames[i]
+                 << "\"\r\n\r\n" << parameterValues[i]
+                 << "\r\n--" << boundary;
+        }
+
+        for (int i = 0; i < filesToUpload.size(); ++i)
+        {
+            const Upload& f = *filesToUpload.getObjectPointerUnchecked(i);
+
+            data << "\r\nContent-Disposition: form-data; name=\"" << f.parameterName
+                 << "\"; filename=\"" << f.filename << "\"\r\n";
+
+            if (f.mimeType.isNotEmpty())
+                data << "Content-Type: " << f.mimeType << "\r\n";
+
+            data << "Content-Transfer-Encoding: binary\r\n\r\n";
+
+            if (f.data != nullptr)
+                data << *f.data;
+            else
+                data << f.file;
+
+            data << "\r\n--" << boundary;
+        }
+
+        data << "--\r\n";
+    }
+    else
+    {
+        data << postData;
+
+        // if the user-supplied headers didn't contain a content-type, add one now..
+        if (! headers.containsIgnoreCase ("Content-Type"))
+            headers << "Content-Type: application/x-www-form-urlencoded\r\n";
+
+        headers << "Content-length: " << (int) data.getDataSize() << "\r\n";
+    }
+}
+
 //==============================================================================
 bool URL::isProbablyAWebsiteURL (const String& possibleURL)
 {
@@ -339,7 +338,7 @@ InputStream* URL::createInputStream (const bool usePostCommand,
         headers << "\r\n";
 
     if (usePostCommand)
-        URLHelpers::createHeadersAndPostData (*this, headers, headersAndPostData);
+        createHeadersAndPostData (headers, headersAndPostData);
 
     if (! headers.endsWithChar ('\n'))
         headers << "\r\n";
@@ -394,18 +393,6 @@ URL URL::withParameter (const String& parameterName,
     return u;
 }
 
-URL URL::withFileToUpload (const String& parameterName,
-                           const File& fileToUpload,
-                           const String& mimeType) const
-{
-    jassert (mimeType.isNotEmpty()); // You need to supply a mime type!
-
-    URL u (*this);
-    u.filesToUpload.set (parameterName, fileToUpload.getFullPathName());
-    u.mimeTypes.set (parameterName, mimeType);
-    return u;
-}
-
 URL URL::withPOSTData (const String& newPostData) const
 {
     URL u (*this);
@@ -413,14 +400,37 @@ URL URL::withPOSTData (const String& newPostData) const
     return u;
 }
 
-const StringPairArray& URL::getFilesToUpload() const
+URL::Upload::Upload (const String& param, const String& name,
+                     const String& mime, const File& f, MemoryBlock* mb)
+    : parameterName (param), filename (name), mimeType (mime), file (f), data (mb)
 {
-    return filesToUpload;
+    jassert (mimeType.isNotEmpty()); // You need to supply a mime type!
 }
 
-const StringPairArray& URL::getMimeTypesOfUploadFiles() const
+URL URL::withUpload (Upload* const f) const
 {
-    return mimeTypes;
+    URL u (*this);
+
+    for (int i = u.filesToUpload.size(); --i >= 0;)
+        if (u.filesToUpload.getObjectPointerUnchecked(i)->parameterName == f->parameterName)
+            u.filesToUpload.remove (i);
+
+    u.filesToUpload.add (f);
+    return u;
+}
+
+URL URL::withFileToUpload (const String& parameterName, const File& fileToUpload,
+                           const String& mimeType) const
+{
+    return withUpload (new Upload (parameterName, fileToUpload.getFileName(),
+                                   mimeType, fileToUpload, nullptr));
+}
+
+URL URL::withDataToUpload (const String& parameterName, const String& filename,
+                           const MemoryBlock& fileContentToUpload, const String& mimeType) const
+{
+    return withUpload (new Upload (parameterName, filename, mimeType, File(),
+                                   new MemoryBlock (fileContentToUpload)));
 }
 
 //==============================================================================

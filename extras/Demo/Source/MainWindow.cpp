@@ -563,17 +563,17 @@ void MainAppWindow::handleAsyncUpdate()
 
 void MainAppWindow::showMessageBubble (const String& text)
 {
-    BubbleMessageComponent* bm = new BubbleMessageComponent (500);
-    getContentComponent()->addChildComponent (bm);
+    currentBubbleMessage = new BubbleMessageComponent (500);
+    getContentComponent()->addChildComponent (currentBubbleMessage);
 
     AttributedString attString;
     attString.append (text, Font (15.0f));
 
-    bm->showAt (Rectangle<int> (getLocalBounds().getCentreX(), 10, 1, 1),
-                attString,
-                500,  // numMillisecondsBeforeRemoving
-                true,  // removeWhenMouseClicked
-                true); // deleteSelfAfterUse
+    currentBubbleMessage->showAt (Rectangle<int> (getLocalBounds().getCentreX(), 10, 1, 1),
+                                  attString,
+                                  500,  // numMillisecondsBeforeRemoving
+                                  true,  // removeWhenMouseClicked
+                                  false); // deleteSelfAfterUse
 }
 
 static const char* openGLRendererName = "OpenGL Renderer";

@@ -128,7 +128,7 @@ public:
     */
     Thread::ThreadID getCurrentMessageThread() const noexcept            { return messageThreadId; }
 
-    /** Returns true if the caller thread has currenltly got the message manager locked.
+    /** Returns true if the caller thread has currently got the message manager locked.
 
         see the MessageManagerLock class for more info about this.
 
