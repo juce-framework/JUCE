@@ -847,7 +847,11 @@ public:
 
         if (dataSize > 0 && dataSize < 0x7fffffff)
         {
+           #if JUCE_VST3_CAN_REPLACE_VST2
+            loadVST2CompatibleState ((const char*) allData.getData(), (int) dataSize);
+           #else
             pluginInstance->setStateInformation (allData.getData(), (int) dataSize);
+           #endif
             return true;
         }
 
