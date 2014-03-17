@@ -516,12 +516,21 @@ struct MP3Frame
               { 0, 8, 16, 24, 32, 40, 48, 56, 64, 80, 96, 112, 128, 144, 160 } }
         };
 
-        switch (layer)
+        if (bitrateIndex == 0)
         {
-            case 1: frameSize = (((frameSizes[lsf][0][bitrateIndex] * 12000) / getFrequency() + padding) * 4) - 4; break;
-            case 2: frameSize = (frameSizes[lsf][1][bitrateIndex] * 144000)  / getFrequency() + (padding - 4); break;
-            case 3: frameSize = (bitrateIndex == 0) ? 0 : ((frameSizes[lsf][2][bitrateIndex] * 144000) / (getFrequency() << lsf) + (padding - 4)); break;
-            default: break;
+            jassertfalse; // This means the file is using "free format". Apparently very few decoders
+                          // support this mode, and this one certainly doesn't handle it correctly!
+            frameSize = 0;
+        }
+        else
+        {
+            switch (layer)
+            {
+                case 1: frameSize = (((frameSizes[lsf][0][bitrateIndex] * 12000) / getFrequency() + padding) * 4) - 4; break;
+                case 2: frameSize = (frameSizes[lsf][1][bitrateIndex] * 144000)  / getFrequency() + (padding - 4); break;
+                case 3: frameSize = (bitrateIndex == 0) ? 0 : ((frameSizes[lsf][2][bitrateIndex] * 144000) / (getFrequency() << lsf) + (padding - 4)); break;
+                default: break;
+            }
         }
     }
 
@@ -1451,7 +1460,7 @@ struct MP3Stream
             bufferPointer = bufferSpace[bufferSpaceIndex] + 512;
             bitIndex = 0;
 
-            if (lastFrameSize == -1)
+            if (lastFrameSize < 0)
                 return 1;
         }
 
@@ -1513,8 +1522,14 @@ struct MP3Stream
             else
             {
                 const int nextFrameOffset = scanForNextFrameHeader (true);
+
+                wasFreeFormat = isFreeFormat;
+
                 if (nextFrameOffset < 0)
+                {
+                    lastFrameSize = frameSize;
                     return result;
+                }
 
                 frameSize = nextFrameOffset + sideInfoSize + dataSize;
                 lastFrameSizeNoPadding = frameSize - frame.padding;
