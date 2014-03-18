@@ -34,6 +34,9 @@
 /** A general-purpose range object, that simply represents any linear range with
     a start and end point.
 
+    Note that when checking whether values fall within the range, the start value is
+    considered to be inclusive, and the end of the range exclusive.
+
     The templated parameter is expected to be a primitive integer or floating point
     type, though class types could also be used if they behave in a number-like way.
 */
@@ -210,7 +213,10 @@ public:
         return jlimit (start, end, value);
     }
 
-    /** Returns true if the given range lies entirely inside this range. */
+    /** Returns true if the given range lies entirely inside this range.
+        When making this comparison, the start value is considered to be inclusive,
+        and the end of the range exclusive.
+     */
     bool contains (Range other) const noexcept
     {
         return start <= other.start && end >= other.end;
