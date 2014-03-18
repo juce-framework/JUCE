@@ -392,19 +392,15 @@ public:
                            float endGain) noexcept;
 
 
-    /** Finds the highest and lowest sample values in a given range.
+    /** Returns a Range indicating the lowest and highest sample values in a given section.
 
         @param channel      the channel to read from
         @param startSample  the start sample within the channel
         @param numSamples   the number of samples to check
-        @param minVal       on return, the lowest value that was found
-        @param maxVal       on return, the highest value that was found
     */
-    void findMinMax (int channel,
-                     int startSample,
-                     int numSamples,
-                     float& minVal,
-                     float& maxVal) const noexcept;
+    Range<float> findMinMax (int channel,
+                             int startSample,
+                             int numSamples) const noexcept;
 
     /** Finds the highest absolute sample value within a region of a channel. */
     float getMagnitude (int channel,

@@ -174,30 +174,29 @@ void AudioFormatReader::read (AudioSampleBuffer* buffer,
 }
 
 template <typename SampleType>
-static inline void getChannelMinAndMax (SampleType* channel, const int numSamples, SampleType& mn, SampleType& mx)
+static Range<SampleType> getChannelMinAndMax (SampleType* channel, int numSamples) noexcept
 {
-    findMinAndMax (channel, numSamples, mn, mx);
+    return Range<SampleType>::findMinAndMax (channel, numSamples);
 }
 
-static inline void getChannelMinAndMax (float* channel, const int numSamples, float& mn, float& mx)
+static Range<float> getChannelMinAndMax (float* channel, int numSamples) noexcept
 {
-    FloatVectorOperations::findMinAndMax (channel, numSamples, mn, mx);
+    return FloatVectorOperations::findMinAndMax (channel, numSamples);
 }
 
 template <typename SampleType>
 static void getStereoMinAndMax (SampleType* const* channels, const int numChannels, const int numSamples,
                                 SampleType& lmin, SampleType& lmax, SampleType& rmin, SampleType& rmax)
 {
-    SampleType bufMin, bufMax;
-    getChannelMinAndMax (channels[0], numSamples, bufMin, bufMax);
-    lmax = jmax (lmax, bufMax);
-    lmin = jmin (lmin, bufMin);
+    Range<SampleType> range (getChannelMinAndMax (channels[0], numSamples));
+    lmax = jmax (lmax, range.getEnd());
+    lmin = jmin (lmin, range.getStart());
 
     if (numChannels > 1)
     {
-        getChannelMinAndMax (channels[1], numSamples, bufMin, bufMax);
-        rmax = jmax (rmax, bufMax);
-        rmin = jmin (rmin, bufMin);
+        range = getChannelMinAndMax (channels[1], numSamples);
+        rmax = jmax (rmax, range.getEnd());
+        rmin = jmin (rmin, range.getStart());
     }
     else
     {

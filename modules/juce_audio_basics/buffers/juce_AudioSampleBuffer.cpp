@@ -487,17 +487,14 @@ void AudioSampleBuffer::reverse (int startSample, int numSamples) const noexcept
         reverse (i, startSample, numSamples);
 }
 
-void AudioSampleBuffer::findMinMax (const int channel,
-                                    const int startSample,
-                                    int numSamples,
-                                    float& minVal,
-                                    float& maxVal) const noexcept
+Range<float> AudioSampleBuffer::findMinMax (const int channel,
+                                            const int startSample,
+                                            int numSamples) const noexcept
 {
     jassert (isPositiveAndBelow (channel, numChannels));
     jassert (startSample >= 0 && startSample + numSamples <= size);
 
-    FloatVectorOperations::findMinAndMax (channels [channel] + startSample,
-                                          numSamples, minVal, maxVal);
+    return FloatVectorOperations::findMinAndMax (channels [channel] + startSample, numSamples);
 }
 
 float AudioSampleBuffer::getMagnitude (const int channel,
@@ -507,10 +504,9 @@ float AudioSampleBuffer::getMagnitude (const int channel,
     jassert (isPositiveAndBelow (channel, numChannels));
     jassert (startSample >= 0 && startSample + numSamples <= size);
 
-    float mn, mx;
-    findMinMax (channel, startSample, numSamples, mn, mx);
+    const Range<float> r (findMinMax (channel, startSample, numSamples));
 
-    return jmax (mn, -mn, mx, -mx);
+    return jmax (r.getStart(), -r.getStart(), r.getEnd(), -r.getEnd());
 }
 
 float AudioSampleBuffer::getMagnitude (int startSample, int numSamples) const noexcept
