@@ -1634,7 +1634,11 @@ public:
 
     bool hasEditor() const override
     {
-        ComSmartPtr<IPlugView> view (tryCreatingView()); //N.B.: Must use a ComSmartPtr to not delete the view from the plugin permanently!
+        // (if possible, avoid creating a second instance of the editor, because that crashes some plugins)
+        if (getActiveEditor() != nullptr)
+            return true;
+
+        ComSmartPtr<IPlugView> view (tryCreatingView());
         return view != nullptr;
     }
 
