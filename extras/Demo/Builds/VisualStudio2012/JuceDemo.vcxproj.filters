@@ -385,6 +385,9 @@
     <ClCompile Include="..\..\Source\Demos\LiveConstantDemo.cpp">
       <Filter>JuceDemo\Source\Demos</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Source\Demos\LookAndFeelDemo.cpp">
+      <Filter>JuceDemo\Source\Demos</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\Source\Demos\MDIDemo.cpp">
       <Filter>JuceDemo\Source\Demos</Filter>
     </ClCompile>

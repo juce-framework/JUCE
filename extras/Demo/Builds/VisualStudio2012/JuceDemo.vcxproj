@@ -153,6 +153,7 @@
     <ClCompile Include="..\..\Source\Demos\JavaScript.cpp"/>
     <ClCompile Include="..\..\Source\Demos\KeyMappingsDemo.cpp"/>
     <ClCompile Include="..\..\Source\Demos\LiveConstantDemo.cpp"/>
+    <ClCompile Include="..\..\Source\Demos\LookAndFeelDemo.cpp"/>
     <ClCompile Include="..\..\Source\Demos\MDIDemo.cpp"/>
     <ClCompile Include="..\..\Source\Demos\MidiDemo.cpp"/>
     <ClCompile Include="..\..\Source\Demos\MultithreadingDemo.cpp"/>
