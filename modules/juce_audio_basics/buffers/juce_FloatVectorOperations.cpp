@@ -231,12 +231,16 @@ namespace FloatVectorHelpers
         {
             const int numLongOps = num / Mode::numParallel;
 
+           #if JUCE_USE_SSE_INTRINSICS
+            if (numLongOps > 1 && isSSE2Available())
+           #else
             if (numLongOps > 1)
+           #endif
             {
                 ParallelType val;
 
                #if ! JUCE_USE_ARM_NEON
-                if (FloatVectorHelpers::isAligned (src))
+                if (isAligned (src))
                 {
                     val = Mode::loadA (src);
 
@@ -300,12 +304,16 @@ namespace FloatVectorHelpers
         {
             const int numLongOps = num / Mode::numParallel;
 
+           #if JUCE_USE_SSE_INTRINSICS
+            if (numLongOps > 1 && isSSE2Available())
+           #else
             if (numLongOps > 1)
+           #endif
             {
                 ParallelType mn, mx;
 
                #if ! JUCE_USE_ARM_NEON
-                if (FloatVectorHelpers::isAligned (src))
+                if (isAligned (src))
                 {
                     mn = Mode::loadA (src);
                     mx = mn;
