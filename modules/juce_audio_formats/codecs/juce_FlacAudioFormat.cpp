@@ -61,6 +61,7 @@ namespace FlacNamespace
   #define FLAC__HAS_X86INTRIN 1
  #endif
 
+ #undef __STDC_LIMIT_MACROS
  #define __STDC_LIMIT_MACROS 1
  #define flac_max jmax
  #define flac_min jmin

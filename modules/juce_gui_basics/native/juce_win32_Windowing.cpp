@@ -3229,11 +3229,11 @@ void Desktop::setKioskComponent (Component* kioskModeComponent, bool enableOrDis
 struct MonitorInfo
 {
     MonitorInfo (Rectangle<int> rect, bool main, double d) noexcept
-        : isMain (main), bounds (rect), dpi (d) {}
+        : bounds (rect), dpi (d), isMain (main) {}
 
     Rectangle<int> bounds;
-    bool isMain;
     double dpi;
+    bool isMain;
 };
 
 static BOOL CALLBACK enumMonitorsProc (HMONITOR hm, HDC, LPRECT r, LPARAM userInfo)
