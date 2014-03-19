@@ -1113,6 +1113,20 @@ public:
         JUCE_DECLARE_NON_COPYABLE (JuceDropTarget)
     };
 
+   #if JUCE_MODULE_AVAILABLE_juce_audio_plugin_client
+    static bool offerKeyMessageToJUCEWindow (MSG& m)
+    {
+        if (m.message == WM_KEYDOWN || m.message == WM_KEYUP)
+            if (Component::getCurrentlyFocusedComponent() != nullptr)
+                if (HWNDComponentPeer* h = getOwnerOfWindow (m.hwnd))
+                    if (m.message == WM_KEYDOWN ? h->doKeyDown (m.wParam)
+                                                : h->doKeyUp (m.wParam))
+                        return true;
+
+        return false;
+    }
+   #endif
+
 private:
     HWND hwnd, parentToAddTo;
     ScopedPointer<DropShadower> shadower;
@@ -2024,14 +2038,20 @@ private:
 
                 {
                     MSG msg;
-
                     if (! PeekMessage (&msg, hwnd, WM_CHAR, WM_DEADCHAR, PM_NOREMOVE))
                     {
                         // if there isn't a WM_CHAR or WM_DEADCHAR message pending, we need to
                         // manually generate the key-press event that matches this key-down.
+                        const UINT keyChar  = MapVirtualKey ((UINT) key, 2);
+                        const UINT scanCode = MapVirtualKey ((UINT) key, 0);
+                        BYTE keyState[256];
+                        GetKeyboardState (keyState);
 
-                        const UINT keyChar = MapVirtualKey ((UINT) key, 2);
-                        used = handleKeyPress ((int) LOWORD (keyChar), 0) || used;
+                        WCHAR text[16] = { 0 };
+                        if (ToUnicode ((UINT) key, scanCode, keyState, text, 8, 0) != 1)
+                            text[0] = 0;
+
+                        used = handleKeyPress ((int) LOWORD (keyChar), (juce_wchar) text[0]) || used;
                     }
                 }
 
@@ -2934,6 +2954,10 @@ bool KeyPress::isKeyCurrentlyDown (const int keyCode)
 
     return HWNDComponentPeer::isKeyDown (k);
 }
+
+#if JUCE_MODULE_AVAILABLE_juce_audio_plugin_client
+bool offerKeyMessageToJUCEWindow (MSG& m)   { return HWNDComponentPeer::offerKeyMessageToJUCEWindow (m); }
+#endif
 
 //==============================================================================
 bool JUCE_CALLTYPE Process::isForegroundProcess()
