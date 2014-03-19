@@ -141,7 +141,7 @@ public:
             [window setHasShadow: ((windowStyleFlags & windowHasDropShadow) != 0)];
 
             if (component.isAlwaysOnTop())
-                [window setLevel: NSFloatingWindowLevel];
+                setAlwaysOnTop (true);
 
             [window setContentView: view];
             [window setAutodisplay: YES];
@@ -441,8 +441,10 @@ public:
     bool setAlwaysOnTop (bool alwaysOnTop) override
     {
         if (! isSharedWindow)
-            [window setLevel: alwaysOnTop ? NSFloatingWindowLevel
+            [window setLevel: alwaysOnTop ? ((getStyleFlags() & windowIsTemporary) != 0 ? NSPopUpMenuWindowLevel
+                                                                                        : NSFloatingWindowLevel)
                                           : NSNormalWindowLevel];
+
         return true;
     }
 
