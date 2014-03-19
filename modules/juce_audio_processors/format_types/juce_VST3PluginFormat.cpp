@@ -224,6 +224,8 @@ static void toProcessContext (Vst::ProcessContext& context, AudioPlayHead* playH
             }
             break;
 
+            case AudioPlayHead::fpsUnknown: break;
+
             default:    jassertfalse; break; // New frame rate?
         }
 
