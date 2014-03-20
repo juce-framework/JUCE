@@ -82,10 +82,12 @@ public:
                                 has in fact been dropped.
         @param timeStamp        the time to give the midi message - this value doesn't
                                 use any particular units, so will be application-specific
+        @param isFromSMF        true if this data stream came from a SMF; the interpretation
+                                of sys-ex messages is different in this case
     */
     MidiMessage (const void* data, int maxBytesToUse,
                  int& numBytesUsed, uint8 lastStatusByte,
-                 double timeStamp = 0);
+                 double timeStamp = 0, bool isFromSMF = true);
 
     /** Creates an active-sense message.
         Since the MidiMessage has to contain a valid message, this default constructor
