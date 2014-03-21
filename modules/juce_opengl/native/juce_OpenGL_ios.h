@@ -76,7 +76,8 @@ public:
             [((UIView*) peer->getNativeHandle()) addSubview: view];
 
            #if __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_7_0
-            const NSUInteger type = (OpenGLContext::openGL3_2 == version) ? kEAGLRenderingAPIOpenGLES3 : kEAGLRenderingAPIOpenGLES2;
+            bool useGLES3 = ([[UIDevice currentDevice].systemVersion floatValue] >= 7.0) && (OpenGLContext::openGL3_2 == version);
+            const NSUInteger type = useGLES3 ? kEAGLRenderingAPIOpenGLES3 : kEAGLRenderingAPIOpenGLES2;
            #else
             const NSUInteger type = kEAGLRenderingAPIOpenGLES2;
            #endif
