@@ -350,11 +350,13 @@ void MidiFile::convertTimestampTicksToSeconds()
 }
 
 //==============================================================================
-bool MidiFile::writeTo (OutputStream& out)
+bool MidiFile::writeTo (OutputStream& out, int midiFileType)
 {
+    jassert (midiFileType >= 0 && midiFileType <= 2);
+
     out.writeIntBigEndian ((int) ByteOrder::bigEndianInt ("MThd"));
     out.writeIntBigEndian (6);
-    out.writeShortBigEndian (1); // type
+    out.writeShortBigEndian ((short) midiFileType);
     out.writeShortBigEndian ((short) tracks.size());
     out.writeShortBigEndian (timeFormat);
 
