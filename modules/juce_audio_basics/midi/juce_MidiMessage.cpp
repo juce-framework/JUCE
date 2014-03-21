@@ -175,7 +175,7 @@ MidiMessage::MidiMessage (const void* srcData, int sz, int& numBytesUsed, const 
         if (byte == 0xf0)
         {
             const uint8* d = src;
-            bool haveReadAllLengthBytes = false;
+            bool haveReadAllLengthBytes = !isFromSMF;
             int numVariableLengthSysexBytes = 0;
 
             while (d < src + sz)
