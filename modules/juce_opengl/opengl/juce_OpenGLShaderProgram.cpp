@@ -55,10 +55,11 @@ void OpenGLShaderProgram::release() noexcept
 double OpenGLShaderProgram::getLanguageVersion()
 {
    #if JUCE_OPENGL_ES
-    // GLES doesn't support this version number, but that shouldn't matter since
-    // on GLES you probably won't need to check it.
-    jassertfalse;
-    return 0;
+
+    char *c_strVer = ::strdup ((const char*) glGetString (GL_SHADING_LANGUAGE_VERSION)); // todo: find out why String() cannot handle the return value of glGetString() directly
+    String verStr = String (c_strVer).fromLastOccurrenceOf (" ", false, false); // from OpenGL ES spec c_strVer should be "OpenGL ES GLSL ES x.yz"
+    ::free (c_strVer);
+    return verStr.getDoubleValue();
    #else
     return String ((const char*) glGetString (GL_SHADING_LANGUAGE_VERSION))
             .upToFirstOccurrenceOf (" ", false, false).getDoubleValue();
@@ -78,22 +79,27 @@ bool OpenGLShaderProgram::addShader (StringRef code, GLenum type)
 
     if (OpenGLShaderProgram::getLanguageVersion() > 1.2)
     {
-        String code3 (c);
+        String codeV3 (c);
         if (type == GL_VERTEX_SHADER)
         {
-            code3 = code3.replace ("attribute", "in");
-            code3 = code3.replace ("varying", "out");
+            codeV3 = codeV3.replace ("attribute", "in");
+            codeV3 = codeV3.replace ("varying", "out");
         }
         else if (type == GL_FRAGMENT_SHADER)
         {
-            code3 = code3.replace ("varying", "in");
-            code3 = code3.replace ("texture2D", "texture");
-            code3 = code3.replace ("gl_FragColor", "o_FragColor");
-            code3 = "out vec4 o_FragColor;\n" + code3;
+            codeV3 = codeV3.replace ("varying", "in");
+            codeV3 = codeV3.replace ("texture2D", "texture");
+            codeV3 = codeV3.replace ("gl_FragColor", "o_FragColor");
+            codeV3 = "out " JUCE_LOWP " vec4 o_FragColor;\n" + codeV3;
         }
-        code3 = "#version 150\n" + code3;
 
-        c = code3.toRawUTF8();
+       #if JUCE_OPENGL_ES
+        codeV3 = "#version 300 es\n" + codeV3;
+       #else
+        codeV3 = "#version 150\n" + codeV3;
+       #endif
+
+        c = codeV3.toRawUTF8();
         //printf ("==%sSHADER==\n%s\n\n", (type == GL_VERTEX_SHADER ? "VERTEX-" : "FRAGMENT-"), c);
         context.extensions.glShaderSource (shaderID, 1, &c, nullptr);
     }
@@ -113,11 +119,11 @@ bool OpenGLShaderProgram::addShader (StringRef code, GLenum type)
         GLsizei infoLogLength = 0;
         context.extensions.glGetShaderInfoLog (shaderID, sizeof (infoLog), &infoLogLength, infoLog);
         errorLog = String (infoLog, (size_t) infoLogLength);
+        DBG (errorLog);
 
        #if JUCE_DEBUG && ! JUCE_DONT_ASSERT_ON_GLSL_COMPILE_ERROR
         // Your GLSL code contained compile errors!
         // Hopefully this compile log should help to explain what went wrong.
-        DBG (errorLog);
         jassertfalse;
        #endif
 
@@ -151,11 +157,11 @@ bool OpenGLShaderProgram::link() noexcept
         GLsizei infoLogLength = 0;
         context.extensions.glGetProgramInfoLog (progID, sizeof (infoLog), &infoLogLength, infoLog);
         errorLog = String (infoLog, (size_t) infoLogLength);
-
+        DBG (errorLog);
+        
        #if JUCE_DEBUG && ! JUCE_DONT_ASSERT_ON_GLSL_COMPILE_ERROR
         // Your GLSL code contained link errors!
         // Hopefully this compile log should help to explain what went wrong.
-        DBG (errorLog);
         jassertfalse;
        #endif
     }

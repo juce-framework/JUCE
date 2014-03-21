@@ -119,6 +119,9 @@ static const char* getGLErrorMessage (const GLenum e)
         case GL_STACK_UNDERFLOW:    return "GL_STACK_UNDERFLOW";
        #endif
         case GL_OUT_OF_MEMORY:      return "GL_OUT_OF_MEMORY";
+       #if GL_VERSION_3_2 || GL_ES_VERSION_3_0
+        case GL_INVALID_FRAMEBUFFER_OPERATION: return "GL_INVALID_FRAMEBUFFER_OPERATION";
+       #endif
         default:                    break;
     }
 

@@ -34,7 +34,7 @@ public:
     {
         NSOpenGLPixelFormatAttribute attribs[] =
         {
-        #if JUCE_MAC_HAS_GL3
+        #if GL_VERSION_3_2
             NSOpenGLPFAOpenGLProfile, version >= openGL3_2 ? NSOpenGLProfileVersion3_2Core : NSOpenGLProfileVersionLegacy,
         #endif
             NSOpenGLPFADoubleBuffer,

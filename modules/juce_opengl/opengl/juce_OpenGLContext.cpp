@@ -46,7 +46,7 @@ public:
             context.nativeContext = nativeContext;
         else
             nativeContext = nullptr;
-    #if JUCE_MAC_HAS_GL3
+    #if GL_VERSION_3_2 || GL_ES_VERSION_3_0
         sharedVAO = 0;
     #endif
     }
@@ -353,7 +353,7 @@ public:
         context.makeActive();
         nativeContext->initialiseOnRenderThread (context);
 
-    #if JUCE_MAC_HAS_GL3
+    #if GL_VERSION_3_2 || GL_ES_VERSION_3_0
         if (OpenGLShaderProgram::getLanguageVersion() > 1.2)
         {
             ::glGenVertexArrays(1, &sharedVAO);
@@ -379,7 +379,8 @@ public:
         if (context.renderer != nullptr)
             context.renderer->openGLContextClosing();
 
-    #if JUCE_MAC_HAS_GL3
+    #if GL_VERSION_3_2 || GL_ES_VERSION_3_0
+
         if (sharedVAO)
         {
             ::glDeleteVertexArrays(1, &sharedVAO);
@@ -409,7 +410,7 @@ public:
     RectangleList<int> validArea;
     Rectangle<int> viewportArea, lastScreenBounds;
     double scale;
-#if JUCE_MAC_HAS_GL3
+#if GL_VERSION_3_2 || GL_ES_VERSION_3_0
     GLuint sharedVAO;
 #endif
 
@@ -894,11 +895,13 @@ void OpenGLContext::copyTexture (const Rectangle<int>& targetClipArea,
 
         const OverlayShaderProgram& program = OverlayShaderProgram::select (*this);
         program.params.set ((float) contextWidth, (float) contextHeight, anchorPosAndTextureSize.toFloat(), flippedVertically);
+        JUCE_CHECK_OPENGL_ERROR
 
         GLuint vertexBuffer = 0;
         extensions.glGenBuffers (1, &vertexBuffer);
         extensions.glBindBuffer (GL_ARRAY_BUFFER, vertexBuffer);
         extensions.glBufferData (GL_ARRAY_BUFFER, sizeof (vertices), vertices, GL_STATIC_DRAW);
+        JUCE_CHECK_OPENGL_ERROR
 
         const GLuint index = (GLuint) program.params.positionAttribute.attributeID;
         extensions.glVertexAttribPointer (index, 2, GL_SHORT, GL_FALSE, 4, 0);
@@ -906,6 +909,7 @@ void OpenGLContext::copyTexture (const Rectangle<int>& targetClipArea,
         JUCE_CHECK_OPENGL_ERROR
 
         glDrawArrays (GL_TRIANGLE_STRIP, 0, 4);
+        JUCE_CHECK_OPENGL_ERROR
 
         extensions.glBindBuffer (GL_ARRAY_BUFFER, 0);
         extensions.glUseProgram (0);

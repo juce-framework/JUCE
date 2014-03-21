@@ -47,7 +47,7 @@ public:
                    const OpenGLPixelFormat& pixFormat,
                    void* contextToShare,
                    bool multisampling,
-                   OpenGLVersion)
+                   OpenGLVersion version)
         : frameBufferHandle (0), colorBufferHandle (0), depthBufferHandle (0),
           msaaColorHandle (0), msaaBufferHandle (0),
           lastWidth (0), lastHeight (0), needToRebuildBuffers (false),
@@ -75,14 +75,38 @@ public:
 
             [((UIView*) peer->getNativeHandle()) addSubview: view];
 
-            context = [EAGLContext alloc];
-
+           #if __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_7_0
+            const NSUInteger type = (OpenGLContext::openGL3_2 == version) ? kEAGLRenderingAPIOpenGLES3 : kEAGLRenderingAPIOpenGLES2;
+           #else
             const NSUInteger type = kEAGLRenderingAPIOpenGLES2;
+           #endif
 
             if (contextToShare != nullptr)
-                [context initWithAPI: type  sharegroup: [(EAGLContext*) contextToShare sharegroup]];
+                context = [[EAGLContext alloc] initWithAPI: type sharegroup: [(EAGLContext*) contextToShare sharegroup]];
             else
-                [context initWithAPI: type];
+                context = [[EAGLContext alloc] initWithAPI: type];
+
+            if (nil == context)
+            {
+               #if __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_7_0
+                if (kEAGLRenderingAPIOpenGLES3 == type)
+                {
+                    DBG ("OpenGL ES 3.0 is not supported, fallback to OpenGL ES 2.0");
+
+                    if (contextToShare != nullptr)
+                        context = [[EAGLContext alloc] initWithAPI: kEAGLRenderingAPIOpenGLES2 sharegroup: [(EAGLContext*) contextToShare sharegroup]];
+                    else
+                        context = [[EAGLContext alloc] initWithAPI: kEAGLRenderingAPIOpenGLES2];
+                }
+               #endif
+
+                if (nil == context)
+                {
+                    // We are running on OpenGL ES 1.1 only devices
+                    DBG ("Failed to initialize OpenGL ES Context");
+                    jassertfalse
+                }
+            }
 
             // I'd prefer to put this stuff in the initialiseOnRenderThread() call, but doing
             // so causes myserious timing-related failures.
