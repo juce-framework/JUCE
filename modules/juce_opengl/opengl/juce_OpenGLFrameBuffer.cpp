@@ -41,17 +41,17 @@ public:
        #endif
 
         context.extensions.glGenFramebuffers (1, &frameBufferID);
-        context.extensions.glBindFramebuffer (GL_FRAMEBUFFER, frameBufferID);
-        JUCE_CHECK_OPENGL_ERROR
+        bind();
 
         glGenTextures (1, &textureID);
         glBindTexture (GL_TEXTURE_2D, textureID);
         JUCE_CHECK_OPENGL_ERROR
 
-        glTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        glTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        JUCE_CHECK_OPENGL_ERROR
 
         glTexImage2D (GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
         JUCE_CHECK_OPENGL_ERROR
@@ -84,7 +84,7 @@ public:
             hasStencilBuffer = wantsStencilBuffer;
         }
 
-        context.extensions.glBindFramebuffer (GL_FRAMEBUFFER, 0);
+        unbind();
     }
 
     ~Pimpl()
@@ -117,7 +117,7 @@ public:
 
     void unbind()
     {
-        context.extensions.glBindFramebuffer (GL_FRAMEBUFFER, 0);
+        context.extensions.glBindFramebuffer (GL_FRAMEBUFFER, context.getFrameBufferID());
         JUCE_CHECK_OPENGL_ERROR
     }
 
@@ -289,7 +289,7 @@ GLuint OpenGLFrameBuffer::getCurrentFrameBufferTarget()
 void OpenGLFrameBuffer::releaseAsRenderingTarget()
 {
     if (pimpl != nullptr)
-        pimpl->context.extensions.glBindFramebuffer (GL_FRAMEBUFFER, 0);
+        pimpl->unbind();
 }
 
 void OpenGLFrameBuffer::clear (Colour colour)
@@ -318,8 +318,8 @@ bool OpenGLFrameBuffer::readPixels (PixelARGB* target, const Rectangle<int>& are
     glPixelStorei (GL_PACK_ALIGNMENT, 4);
     glReadPixels (area.getX(), area.getY(), area.getWidth(), area.getHeight(),
                   JUCE_RGBA_FORMAT, GL_UNSIGNED_BYTE, target);
-    pimpl->context.extensions.glBindFramebuffer (GL_FRAMEBUFFER, 0);
-    JUCE_CHECK_OPENGL_ERROR
+
+    pimpl->unbind();
     return true;
 }
 
