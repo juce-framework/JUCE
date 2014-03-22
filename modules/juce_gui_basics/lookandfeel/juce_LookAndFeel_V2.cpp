@@ -243,6 +243,16 @@ Font LookAndFeel_V2::getTextButtonFont (TextButton& button)
     return button.getFont();
 }
 
+void LookAndFeel_V2::changeTextButtonWidthToFitText (TextButton& b, int newHeight)
+{
+    if (newHeight >= 0)
+        b.setSize (jmax (1, b.getWidth()), newHeight);
+    else
+        newHeight = b.getHeight();
+
+    b.setSize (getTextButtonFont (b).getStringWidth (b.getButtonText()) + newHeight, newHeight);
+}
+
 void LookAndFeel_V2::drawButtonText (Graphics& g, TextButton& button, bool /*isMouseOverButton*/, bool /*isButtonDown*/)
 {
     Font font (getTextButtonFont (button));
