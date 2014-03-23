@@ -32,11 +32,13 @@ public:
                    OpenGLVersion version)
         : lastSwapTime (0), minSwapTimeMs (0), underrunCounter (0)
     {
+        (void) version;
+
         NSOpenGLPixelFormatAttribute attribs[] =
         {
-        #if GL_VERSION_3_2
+           #if JUCE_OPENGL3
             NSOpenGLPFAOpenGLProfile, version >= openGL3_2 ? NSOpenGLProfileVersion3_2Core : NSOpenGLProfileVersionLegacy,
-        #endif
+           #endif
             NSOpenGLPFADoubleBuffer,
             NSOpenGLPFAMPSafe,
             NSOpenGLPFAClosestPolicy,

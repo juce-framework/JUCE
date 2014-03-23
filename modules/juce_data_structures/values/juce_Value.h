@@ -75,8 +75,7 @@ public:
     operator var() const;
 
     /** Returns the value as a string.
-
-        This is alternative to writing things like "myValue.getValue().toString()".
+        This is a shortcut for "myValue.getValue().toString()".
     */
     String toString() const;
 

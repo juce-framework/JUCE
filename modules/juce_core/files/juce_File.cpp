@@ -754,7 +754,7 @@ String File::createLegalPathName (const String& original)
     String s (original);
     String start;
 
-    if (s[1] == ':')
+    if (s.isNotEmpty() && s[1] == ':')
     {
         start = s.substring (0, 2);
         s = s.substring (2);

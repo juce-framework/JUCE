@@ -41,8 +41,7 @@ public:
        #endif
 
         context.extensions.glGenFramebuffers (1, &frameBufferID);
-        context.extensions.glBindFramebuffer (GL_FRAMEBUFFER, frameBufferID);
-        JUCE_CHECK_OPENGL_ERROR
+        bind();
 
         glGenTextures (1, &textureID);
         glBindTexture (GL_TEXTURE_2D, textureID);
@@ -85,7 +84,7 @@ public:
             hasStencilBuffer = wantsStencilBuffer;
         }
 
-        context.extensions.glBindFramebuffer (GL_FRAMEBUFFER, context.getFrameBufferID());
+        unbind();
     }
 
     ~Pimpl()
@@ -290,7 +289,7 @@ GLuint OpenGLFrameBuffer::getCurrentFrameBufferTarget()
 void OpenGLFrameBuffer::releaseAsRenderingTarget()
 {
     if (pimpl != nullptr)
-        pimpl->context.extensions.glBindFramebuffer (GL_FRAMEBUFFER, pimpl->context.getFrameBufferID());
+        pimpl->unbind();
 }
 
 void OpenGLFrameBuffer::clear (Colour colour)
@@ -319,8 +318,8 @@ bool OpenGLFrameBuffer::readPixels (PixelARGB* target, const Rectangle<int>& are
     glPixelStorei (GL_PACK_ALIGNMENT, 4);
     glReadPixels (area.getX(), area.getY(), area.getWidth(), area.getHeight(),
                   JUCE_RGBA_FORMAT, GL_UNSIGNED_BYTE, target);
-    pimpl->context.extensions.glBindFramebuffer (GL_FRAMEBUFFER, pimpl->context.getFrameBufferID());
-    JUCE_CHECK_OPENGL_ERROR
+
+    pimpl->unbind();
     return true;
 }
 

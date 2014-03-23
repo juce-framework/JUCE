@@ -30,6 +30,7 @@ LOCAL_SRC_FILES := \
   ../../../Source/Demos/JavaScript.cpp\
   ../../../Source/Demos/KeyMappingsDemo.cpp\
   ../../../Source/Demos/LiveConstantDemo.cpp\
+  ../../../Source/Demos/LookAndFeelDemo.cpp\
   ../../../Source/Demos/MDIDemo.cpp\
   ../../../Source/Demos/MidiDemo.cpp\
   ../../../Source/Demos/MultithreadingDemo.cpp\

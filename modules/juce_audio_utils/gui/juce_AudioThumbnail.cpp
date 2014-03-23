@@ -712,10 +712,9 @@ void AudioThumbnail::addBlock (const int64 startSample, const AudioSampleBuffer&
 
             for (int i = 0; i < numToDo; ++i)
             {
-                float low, high;
                 const int start = i * samplesPerThumbSample;
-                FloatVectorOperations::findMinAndMax (sourceData + start, jmin (samplesPerThumbSample, numSamples - start), low, high);
-                dest[i].setFloat (low, high);
+                Range<float> range (FloatVectorOperations::findMinAndMax (sourceData + start, jmin (samplesPerThumbSample, numSamples - start)));
+                dest[i].setFloat (range.getStart(), range.getEnd());
             }
         }
 

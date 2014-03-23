@@ -82,10 +82,14 @@ public:
                                 has in fact been dropped.
         @param timeStamp        the time to give the midi message - this value doesn't
                                 use any particular units, so will be application-specific
+        @param sysexHasEmbeddedLength   when reading sysexes, this flag indicates whether
+                                to expect the data to begin with a variable-length field
+                                indicating its size
     */
     MidiMessage (const void* data, int maxBytesToUse,
                  int& numBytesUsed, uint8 lastStatusByte,
-                 double timeStamp = 0);
+                 double timeStamp = 0,
+                 bool sysexHasEmbeddedLength = true);
 
     /** Creates an active-sense message.
         Since the MidiMessage has to contain a valid message, this default constructor
@@ -94,10 +98,10 @@ public:
     MidiMessage() noexcept;
 
     /** Creates a copy of another midi message. */
-    MidiMessage (const MidiMessage& other);
+    MidiMessage (const MidiMessage&);
 
     /** Creates a copy of another midi message, with a different timestamp. */
-    MidiMessage (const MidiMessage& other, double newTimeStamp);
+    MidiMessage (const MidiMessage&, double newTimeStamp);
 
     /** Destructor. */
     ~MidiMessage();
@@ -106,8 +110,8 @@ public:
     MidiMessage& operator= (const MidiMessage& other);
 
    #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
-    MidiMessage (MidiMessage&& other) noexcept;
-    MidiMessage& operator= (MidiMessage&& other) noexcept;
+    MidiMessage (MidiMessage&&) noexcept;
+    MidiMessage& operator= (MidiMessage&&) noexcept;
    #endif
 
     //==============================================================================

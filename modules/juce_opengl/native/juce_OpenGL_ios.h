@@ -48,8 +48,8 @@ public:
                    void* contextToShare,
                    bool multisampling,
                    OpenGLVersion version)
-        : frameBufferHandle (0), colorBufferHandle (0), depthBufferHandle (0),
-          msaaColorHandle (0), msaaBufferHandle (0),
+        : context (nil), frameBufferHandle (0), colorBufferHandle (0),
+          depthBufferHandle (0), msaaColorHandle (0), msaaBufferHandle (0),
           lastWidth (0), lastHeight (0), needToRebuildBuffers (false),
           swapFrames (0), useDepthBuffer (pixFormat.depthBufferBits > 0),
           useMSAA (multisampling)
@@ -76,38 +76,21 @@ public:
             [((UIView*) peer->getNativeHandle()) addSubview: view];
 
            #if __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_7_0
-            bool useGLES3 = ([[UIDevice currentDevice].systemVersion floatValue] >= 7.0) && (OpenGLContext::openGL3_2 == version);
-            const NSUInteger type = useGLES3 ? kEAGLRenderingAPIOpenGLES3 : kEAGLRenderingAPIOpenGLES2;
-           #else
-            const NSUInteger type = kEAGLRenderingAPIOpenGLES2;
-           #endif
-
-            if (contextToShare != nullptr)
-                context = [[EAGLContext alloc] initWithAPI: type sharegroup: [(EAGLContext*) contextToShare sharegroup]];
-            else
-                context = [[EAGLContext alloc] initWithAPI: type];
-
-            if (nil == context)
+            if (version == OpenGLContext::openGL3_2 && [[UIDevice currentDevice].systemVersion floatValue] >= 7.0)
             {
-               #if __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_7_0
-                if (kEAGLRenderingAPIOpenGLES3 == type)
+                if (! createContext (kEAGLRenderingAPIOpenGLES3, contextToShare))
                 {
-                    DBG ("OpenGL ES 3.0 is not supported, fallback to OpenGL ES 2.0");
-
-                    if (contextToShare != nullptr)
-                        context = [[EAGLContext alloc] initWithAPI: kEAGLRenderingAPIOpenGLES2 sharegroup: [(EAGLContext*) contextToShare sharegroup]];
-                    else
-                        context = [[EAGLContext alloc] initWithAPI: kEAGLRenderingAPIOpenGLES2];
-                }
-               #endif
-
-                if (nil == context)
-                {
-                    // We are running on OpenGL ES 1.1 only devices
-                    DBG ("Failed to initialize OpenGL ES Context");
-                    jassertfalse
+                    releaseContext();
+                    createContext (kEAGLRenderingAPIOpenGLES2, contextToShare);
                 }
             }
+            else
+           #endif
+            {
+                createContext (kEAGLRenderingAPIOpenGLES2, contextToShare);
+            }
+
+            jassert (context != nil);
 
             // I'd prefer to put this stuff in the initialiseOnRenderThread() call, but doing
             // so causes myserious timing-related failures.
@@ -119,9 +102,7 @@ public:
 
     ~NativeContext()
     {
-        [context release];
-        context = nil;
-
+        releaseContext();
         [view removeFromSuperview];
         [view release];
     }
@@ -207,6 +188,24 @@ private:
     bool volatile needToRebuildBuffers;
     int swapFrames;
     bool useDepthBuffer, useMSAA;
+
+    bool createContext (NSUInteger type, void* contextToShare)
+    {
+        jassert (context == nil);
+        context = [EAGLContext alloc];
+
+        context = contextToShare != nullptr
+                    ? [context initWithAPI: type  sharegroup: [(EAGLContext*) contextToShare sharegroup]]
+                    : [context initWithAPI: type];
+
+        return context != nil;
+    }
+
+    void releaseContext()
+    {
+        [context release];
+        context = nil;
+    }
 
     //==============================================================================
     void createGLBuffers()

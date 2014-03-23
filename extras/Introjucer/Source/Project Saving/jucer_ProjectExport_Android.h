@@ -509,6 +509,10 @@ private:
         {
             XmlElement* target = proj->createNewChildElement ("target");
             target->setAttribute ("name", "clean");
+            target->setAttribute ("depends", "android_rules.clean");
+
+            target->createNewChildElement ("delete")->setAttribute ("dir", "libs");
+            target->createNewChildElement ("delete")->setAttribute ("dir", "obj");
 
             XmlElement* executable = target->createNewChildElement ("exec");
             executable->setAttribute ("executable", "${ndk.dir}/ndk-build");

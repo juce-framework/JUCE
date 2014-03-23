@@ -224,6 +224,8 @@ static void toProcessContext (Vst::ProcessContext& context, AudioPlayHead* playH
             }
             break;
 
+            case AudioPlayHead::fpsUnknown: break;
+
             default:    jassertfalse; break; // New frame rate?
         }
 
@@ -1634,7 +1636,11 @@ public:
 
     bool hasEditor() const override
     {
-        ComSmartPtr<IPlugView> view (tryCreatingView()); //N.B.: Must use a ComSmartPtr to not delete the view from the plugin permanently!
+        // (if possible, avoid creating a second instance of the editor, because that crashes some plugins)
+        if (getActiveEditor() != nullptr)
+            return true;
+
+        ComSmartPtr<IPlugView> view (tryCreatingView());
         return view != nullptr;
     }
 

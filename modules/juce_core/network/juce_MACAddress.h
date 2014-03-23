@@ -32,12 +32,7 @@
 
 //==============================================================================
 /**
-    A wrapper for a streaming (TCP) socket.
-
-    This allows low-level use of sockets; for an easier-to-use messaging layer on top of
-    sockets, you could also try the InterprocessConnection class.
-
-    @see DatagramSocket, InterprocessConnection, InterprocessConnectionServer
+    Represents a MAC network card adapter address ID.
 */
 class JUCE_API  MACAddress
 {

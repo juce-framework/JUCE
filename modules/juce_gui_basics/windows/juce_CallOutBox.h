@@ -149,10 +149,11 @@ public:
     bool keyPressed (const KeyPress&) override;
     /** @internal */
     void handleCommandMessage (int) override;
+    /** @internal */
+    int getBorderSize() const noexcept;
 
 private:
     //==============================================================================
-    int borderSpace;
     float arrowSize;
     Component& content;
     Path outline;

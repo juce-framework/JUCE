@@ -627,7 +627,7 @@ protected:
     {
         if (chunkID == juceChunkType)
         {
-            tempFilterData.setSize (0);
+            tempFilterData.reset();
             juceFilter->getStateInformation (tempFilterData);
 
             *size = sizeof (SFicPlugInChunkHeader) + tempFilterData.getSize();
@@ -647,7 +647,7 @@ protected:
             chunk->fSize = sizeof (SFicPlugInChunkHeader) + tempFilterData.getSize();
             tempFilterData.copyTo ((void*) chunk->fData, 0, tempFilterData.getSize());
 
-            tempFilterData.setSize (0);
+            tempFilterData.reset();
 
             return noErr;
         }
@@ -659,7 +659,7 @@ protected:
     {
         if (chunkID == juceChunkType)
         {
-            tempFilterData.setSize (0);
+            tempFilterData.reset();
 
             if (chunk->fSize - sizeof (SFicPlugInChunkHeader) > 0)
             {

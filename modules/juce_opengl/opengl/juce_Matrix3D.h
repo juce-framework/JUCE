@@ -94,12 +94,12 @@ public:
     }
 
     /** Returns a new matrix from the given frustrum values. */
-    static Matrix3D fromFrustum (Type left, Type right, Type bottom, Type top, Type near, Type far) noexcept
+    static Matrix3D fromFrustum (Type left, Type right, Type bottom, Type top, Type nearDistance, Type farDistance) noexcept
     {
-        return Matrix3D ((2.0f * near) / (right - left), 0.0f, 0.0f, 0.0f,
-                         0.0f, (2.0f * near) / (top - bottom), 0.0f, 0.0f,
-                         (right + left) / (right - left), (top + bottom) / (top - bottom), -(far + near) / (far - near), -1.0f,
-                         0.0f, 0.0f, -(2.0f * far * near) / (far - near), 0.0f);
+        return Matrix3D ((2.0f * nearDistance) / (right - left), 0.0f, 0.0f, 0.0f,
+                         0.0f, (2.0f * nearDistance) / (top - bottom), 0.0f, 0.0f,
+                         (right + left) / (right - left), (top + bottom) / (top - bottom), -(farDistance + nearDistance) / (farDistance - nearDistance), -1.0f,
+                         0.0f, 0.0f, -(2.0f * farDistance * nearDistance) / (farDistance - nearDistance), 0.0f);
     }
 
     /** Multiplies this matrix by another. */

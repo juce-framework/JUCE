@@ -242,6 +242,8 @@
               file="Source/Demos/KeyMappingsDemo.cpp"/>
         <FILE id="nwcgED" name="LiveConstantDemo.cpp" compile="1" resource="0"
               file="Source/Demos/LiveConstantDemo.cpp"/>
+        <FILE id="WhU1dy" name="LookAndFeelDemo.cpp" compile="1" resource="0"
+              file="Source/Demos/LookAndFeelDemo.cpp"/>
         <FILE id="zL6QF2" name="MDIDemo.cpp" compile="1" resource="0" file="Source/Demos/MDIDemo.cpp"/>
         <FILE id="apxMrA" name="MidiDemo.cpp" compile="1" resource="0" file="Source/Demos/MidiDemo.cpp"/>
         <FILE id="aqmz1c" name="MultithreadingDemo.cpp" compile="1" resource="0"

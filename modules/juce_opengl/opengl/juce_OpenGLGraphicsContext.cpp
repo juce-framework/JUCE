@@ -340,7 +340,8 @@ public:
             : program (context)
         {
             JUCE_CHECK_OPENGL_ERROR
-            program.addVertexShader ("attribute vec2 position;"
+            program.addVertexShader (OpenGLHelpers::translateVertexShaderToV3 (
+                                     "attribute vec2 position;"
                                      "attribute vec4 colour;"
                                      "uniform vec4 screenBounds;"
                                      "varying " JUCE_MEDIUMP " vec4 frontColour;"
@@ -352,9 +353,9 @@ public:
                                      " pixelPos = adjustedPos;"
                                      " vec2 scaledPos = adjustedPos / screenBounds.zw;"
                                      " gl_Position = vec4 (scaledPos.x - 1.0, 1.0 - scaledPos.y, 0, 1.0);"
-                                     "}");
+                                     "}"));
 
-            if (! program.addFragmentShader (fragmentShader))
+            if (! program.addFragmentShader (OpenGLHelpers::translateFragmentShaderToV3 (fragmentShader)))
                 lastError = program.getLastError();
 
             program.link();

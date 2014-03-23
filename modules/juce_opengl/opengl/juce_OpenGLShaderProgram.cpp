@@ -54,59 +54,16 @@ void OpenGLShaderProgram::release() noexcept
 
 double OpenGLShaderProgram::getLanguageVersion()
 {
-   #if JUCE_OPENGL_ES
-
-    char *c_strVer = ::strdup ((const char*) glGetString (GL_SHADING_LANGUAGE_VERSION)); // todo: find out why String() cannot handle the return value of glGetString() directly
-    String verStr = String (c_strVer).fromLastOccurrenceOf (" ", false, false); // from OpenGL ES spec c_strVer should be "OpenGL ES GLSL ES x.yz"
-    ::free (c_strVer);
-    return verStr.getDoubleValue();
-   #else
-    return String ((const char*) glGetString (GL_SHADING_LANGUAGE_VERSION))
-            .upToFirstOccurrenceOf (" ", false, false).getDoubleValue();
-   #endif
+    return String::fromUTF8 ((const char*) glGetString (GL_SHADING_LANGUAGE_VERSION))
+            .retainCharacters("1234567890.").getDoubleValue();
 }
 
-bool OpenGLShaderProgram::addShader (StringRef code, GLenum type)
+bool OpenGLShaderProgram::addShader (const String& code, GLenum type)
 {
     GLuint shaderID = context.extensions.glCreateShader (type);
 
-   #if JUCE_STRING_UTF_TYPE == 8
-    const GLchar* c = code.text;
-   #else
-    String codeString (code.text);
-    const GLchar* c = codeString.toRawUTF8();
-   #endif
-
-    if (OpenGLShaderProgram::getLanguageVersion() > 1.2)
-    {
-        String codeV3 (c);
-        if (type == GL_VERTEX_SHADER)
-        {
-            codeV3 = codeV3.replace ("attribute", "in");
-            codeV3 = codeV3.replace ("varying", "out");
-        }
-        else if (type == GL_FRAGMENT_SHADER)
-        {
-            codeV3 = codeV3.replace ("varying", "in");
-            codeV3 = codeV3.replace ("texture2D", "texture");
-            codeV3 = codeV3.replace ("gl_FragColor", "o_FragColor");
-            codeV3 = "out " JUCE_LOWP " vec4 o_FragColor;\n" + codeV3;
-        }
-
-       #if JUCE_OPENGL_ES
-        codeV3 = "#version 300 es\n" + codeV3;
-       #else
-        codeV3 = "#version 150\n" + codeV3;
-       #endif
-
-        c = codeV3.toRawUTF8();
-        //printf ("==%sSHADER==\n%s\n\n", (type == GL_VERTEX_SHADER ? "VERTEX-" : "FRAGMENT-"), c);
-        context.extensions.glShaderSource (shaderID, 1, &c, nullptr);
-    }
-    else
-    {
-        context.extensions.glShaderSource (shaderID, 1, &c, nullptr);
-    }
+    const GLchar* c = code.toRawUTF8();
+    context.extensions.glShaderSource (shaderID, 1, &c, nullptr);
 
     context.extensions.glCompileShader (shaderID);
 
@@ -119,11 +76,11 @@ bool OpenGLShaderProgram::addShader (StringRef code, GLenum type)
         GLsizei infoLogLength = 0;
         context.extensions.glGetShaderInfoLog (shaderID, sizeof (infoLog), &infoLogLength, infoLog);
         errorLog = String (infoLog, (size_t) infoLogLength);
-        DBG (errorLog);
 
        #if JUCE_DEBUG && ! JUCE_DONT_ASSERT_ON_GLSL_COMPILE_ERROR
         // Your GLSL code contained compile errors!
         // Hopefully this compile log should help to explain what went wrong.
+        DBG (errorLog);
         jassertfalse;
        #endif
 
@@ -136,8 +93,8 @@ bool OpenGLShaderProgram::addShader (StringRef code, GLenum type)
     return true;
 }
 
-bool OpenGLShaderProgram::addVertexShader (StringRef code)    { return addShader (code, GL_VERTEX_SHADER); }
-bool OpenGLShaderProgram::addFragmentShader (StringRef code)  { return addShader (code, GL_FRAGMENT_SHADER); }
+bool OpenGLShaderProgram::addVertexShader (const String& code)    { return addShader (code, GL_VERTEX_SHADER); }
+bool OpenGLShaderProgram::addFragmentShader (const String& code)  { return addShader (code, GL_FRAGMENT_SHADER); }
 
 bool OpenGLShaderProgram::link() noexcept
 {
@@ -157,11 +114,11 @@ bool OpenGLShaderProgram::link() noexcept
         GLsizei infoLogLength = 0;
         context.extensions.glGetProgramInfoLog (progID, sizeof (infoLog), &infoLogLength, infoLog);
         errorLog = String (infoLog, (size_t) infoLogLength);
-        DBG (errorLog);
-        
+
        #if JUCE_DEBUG && ! JUCE_DONT_ASSERT_ON_GLSL_COMPILE_ERROR
         // Your GLSL code contained link errors!
         // Hopefully this compile log should help to explain what went wrong.
+        DBG (errorLog);
         jassertfalse;
        #endif
     }

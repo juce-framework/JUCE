@@ -32,7 +32,25 @@
 #include "../../juce_audio_processors/format_types/juce_VST3Headers.h"
 #include "../utility/juce_CheckSettingMacros.h"
 #include "../utility/juce_IncludeModuleHeaders.h"
+#include "../utility/juce_WindowsHooks.h"
 #include "../../juce_audio_processors/format_types/juce_VST3Common.h"
+
+#ifndef JUCE_VST3_CAN_REPLACE_VST2
+ #define JUCE_VST3_CAN_REPLACE_VST2 1
+#endif
+
+#if JUCE_VST3_CAN_REPLACE_VST2
+ #if JUCE_MSVC
+  #pragma warning (push)
+  #pragma warning (disable: 4514 4996)
+ #endif
+
+ #include <pluginterfaces/vst2.x/vstfxstore.h>
+
+ #if JUCE_MSVC
+  #pragma warning (pop)
+ #endif
+#endif
 
 #undef Point
 #undef Component
@@ -525,6 +543,10 @@ private:
         bool isNSView;
        #endif
 
+       #if JUCE_WINDOWS
+        WindowsHooks hooks;
+       #endif
+
         //==============================================================================
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (JuceVST3Editor)
     };
@@ -750,10 +772,39 @@ public:
         return kResultOk;
     }
 
-    tresult PLUGIN_API setIoMode (Vst::IoMode) override { return kNotImplemented; }
-    tresult PLUGIN_API getRoutingInfo (Vst::RoutingInfo&, Vst::RoutingInfo&) override { return kNotImplemented; }
+    tresult PLUGIN_API setIoMode (Vst::IoMode) override                                 { return kNotImplemented; }
+    tresult PLUGIN_API getRoutingInfo (Vst::RoutingInfo&, Vst::RoutingInfo&) override   { return kNotImplemented; }
 
-    bool readFromMemoryStream (IBStream* state) const
+   #if JUCE_VST3_CAN_REPLACE_VST2
+    void loadVST2CompatibleState (const char* data, int size)
+    {
+        const int headerLen = htonl (*(juce::int32*) (data + 4));
+        const struct fxBank* bank = (const struct fxBank*) (data + (8 + headerLen));
+        const int version = htonl (bank->version); (void) version;
+
+        jassert ('VstW' == htonl (*(juce::int32*) data));
+        jassert (1 == htonl (*(juce::int32*) (data + 8))); // version should be 1 according to Steinberg's docs
+        jassert (cMagic == htonl (bank->chunkMagic));
+        jassert (chunkBankMagic == htonl (bank->fxMagic));
+        jassert (version == 1 || version == 2);
+        jassert (JucePlugin_VSTUniqueID == htonl (bank->fxID));
+
+        pluginInstance->setStateInformation (bank->content.data.chunk,
+                                             jmin ((int) (size - (bank->content.data.chunk - data)),
+                                                   (int) htonl (bank->content.data.size)));
+    }
+   #endif
+
+    void loadStateData (const void* data, int size)
+    {
+       #if JUCE_VST3_CAN_REPLACE_VST2
+        loadVST2CompatibleState ((const char*) data, size);
+       #else
+        pluginInstance->setStateInformation (data, size);
+       #endif
+    }
+
+    bool readFromMemoryStream (IBStream* state)
     {
         FUnknownPtr<MemoryStream> s (state);
 
@@ -767,14 +818,14 @@ public:
                 if (s->getSize() >= 5 && memcmp (s->getData(), "VC2!E", 5) == 0)
                     return false;
 
-            pluginInstance->setStateInformation (s->getData(), (int) s->getSize());
+            loadStateData (s->getData(), (int) s->getSize());
             return true;
         }
 
         return false;
     }
 
-    bool readFromUnknownStream (IBStream* state) const
+    bool readFromUnknownStream (IBStream* state)
     {
         MemoryOutputStream allData;
 
@@ -800,7 +851,7 @@ public:
 
         if (dataSize > 0 && dataSize < 0x7fffffff)
         {
-            pluginInstance->setStateInformation (allData.getData(), (int) dataSize);
+            loadStateData (allData.getData(), (int) dataSize);
             return true;
         }
 
@@ -821,16 +872,58 @@ public:
         return kResultFalse;
     }
 
+   #if JUCE_VST3_CAN_REPLACE_VST2
+    static tresult writeVST2Int (IBStream* state, int n)
+    {
+        juce::int32 t = (juce::int32) htonl (n);
+        return state->write (&t, 4);
+    }
+
+    static tresult writeVST2Header (IBStream* state)
+    {
+        tresult status = writeVST2Int (state, 'VstW');
+
+        if (status == kResultOk) status = writeVST2Int (state, 8); // header size
+        if (status == kResultOk) status = writeVST2Int (state, 1); // version
+        if (status == kResultOk) status = writeVST2Int (state, 0); // bypass
+
+        return status;
+    }
+   #endif
+
     tresult PLUGIN_API getState (IBStream* state) override
     {
-        if (state != nullptr)
-        {
-            juce::MemoryBlock mem;
-            pluginInstance->getStateInformation (mem);
-            return state->write (mem.getData(), (Steinberg::int32) mem.getSize());
-        }
+       if (state == nullptr)
+           return kInvalidArgument;
 
-        return kInvalidArgument;
+        juce::MemoryBlock mem;
+        pluginInstance->getStateInformation (mem);
+
+      #if JUCE_VST3_CAN_REPLACE_VST2
+        tresult status = writeVST2Header (state);
+
+        if (status != kResultOk)
+            return status;
+
+        const int bankBlockSize = 160;
+        struct fxBank bank;
+
+        zerostruct (bank);
+        bank.chunkMagic         = htonl (cMagic);
+        bank.byteSize           = htonl (bankBlockSize - 8 + (unsigned int) mem.getSize());
+        bank.fxMagic            = htonl (chunkBankMagic);
+        bank.version            = htonl (2);
+        bank.fxID               = htonl (JucePlugin_VSTUniqueID);
+        bank.fxVersion          = htonl (JucePlugin_VersionCode);
+        bank.content.data.size  = htonl ((unsigned int) mem.getSize());
+
+        status = state->write (&bank, bankBlockSize);
+
+        if (status != kResultOk)
+            return status;
+       #endif
+
+        return state->write (mem.getData(), (Steinberg::int32) mem.getSize());
     }
 
     //==============================================================================
@@ -1241,11 +1334,50 @@ private:
 DECLARE_CLASS_IID (JuceAudioProcessor, 0x0101ABAB, 0xABCDEF01, JucePlugin_ManufacturerCode, JucePlugin_PluginCode)
 DEF_CLASS_IID (JuceAudioProcessor)
 
-DECLARE_CLASS_IID (JuceVST3Component, 0xABCDEF01, 0x9182FAEB, JucePlugin_ManufacturerCode, JucePlugin_PluginCode)
-DEF_CLASS_IID (JuceVST3Component)
+#if JUCE_VST3_CAN_REPLACE_VST2
+ // NB: Nasty old-fashioned code in here because it's copied from the Steinberg example code.
+ static FUID getFUIDForVST2ID (bool forControllerUID)
+ {
+     char uidString[33];
 
-DECLARE_CLASS_IID (JuceVST3EditController, 0xABCDEF01, 0x1234ABCD, JucePlugin_ManufacturerCode, JucePlugin_PluginCode)
-DEF_CLASS_IID (JuceVST3EditController)
+     const int vstfxid = (('V' << 16) | ('S' << 8) | (forControllerUID ? 'E' : 'T'));
+     char vstfxidStr[7] = { 0 };
+     sprintf (vstfxidStr, "%06X", vstfxid);
+     strcpy (uidString, vstfxidStr);
+
+     char uidStr[9] = { 0 };
+     sprintf (uidStr, "%08X", JucePlugin_VSTUniqueID);
+     strcat (uidString, uidStr);
+
+     char nameidStr[3] = { 0 };
+     const size_t len = strlen (JucePlugin_Name);
+
+     for (size_t i = 0; i <= 8; ++i)
+     {
+         juce::uint8 c = i < len ? JucePlugin_Name[i] : 0;
+
+         if (c >= 'A' && c <= 'Z')
+             c += 'a' - 'A';
+
+         sprintf (nameidStr, "%02X", c);
+         strcat (uidString, nameidStr);
+     }
+
+     FUID newOne;
+     newOne.fromString (uidString);
+     return newOne;
+ }
+
+ const Steinberg::FUID JuceVST3Component     ::iid (getFUIDForVST2ID (false));
+ const Steinberg::FUID JuceVST3EditController::iid (getFUIDForVST2ID (true));
+
+#else
+ DECLARE_CLASS_IID (JuceVST3EditController, 0xABCDEF01, 0x1234ABCD, JucePlugin_ManufacturerCode, JucePlugin_PluginCode)
+ DEF_CLASS_IID (JuceVST3EditController)
+
+ DECLARE_CLASS_IID (JuceVST3Component, 0xABCDEF01, 0x9182FAEB, JucePlugin_ManufacturerCode, JucePlugin_PluginCode)
+ DEF_CLASS_IID (JuceVST3Component)
+#endif
 
 #if JUCE_MSVC
  #pragma warning (pop)

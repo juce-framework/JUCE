@@ -73,6 +73,7 @@ OBJECTS := \
   $(OBJDIR)/JavaScript_d6e42eb5.o \
   $(OBJDIR)/KeyMappingsDemo_cf05c709.o \
   $(OBJDIR)/LiveConstantDemo_e3b18a9b.o \
+  $(OBJDIR)/LookAndFeelDemo_25c558a3.o \
   $(OBJDIR)/MDIDemo_c476c2d7.o \
   $(OBJDIR)/MidiDemo_75ebc30c.o \
   $(OBJDIR)/MultithreadingDemo_ff566eaa.o \
@@ -232,6 +233,11 @@ $(OBJDIR)/KeyMappingsDemo_cf05c709.o: ../../Source/Demos/KeyMappingsDemo.cpp
 $(OBJDIR)/LiveConstantDemo_e3b18a9b.o: ../../Source/Demos/LiveConstantDemo.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo "Compiling LiveConstantDemo.cpp"
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/LookAndFeelDemo_25c558a3.o: ../../Source/Demos/LookAndFeelDemo.cpp
+	-@mkdir -p $(OBJDIR)
+	@echo "Compiling LookAndFeelDemo.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/MDIDemo_c476c2d7.o: ../../Source/Demos/MDIDemo.cpp

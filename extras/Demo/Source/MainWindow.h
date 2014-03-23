@@ -96,6 +96,7 @@ public:
 private:
     ScopedPointer<ContentComponent> contentComponent;
     ScopedPointer<Component> taskbarIcon;
+    ScopedPointer<BubbleMessageComponent> currentBubbleMessage;
 
     TooltipWindow tooltipWindow; // to add tooltips to an application, you
                                  // just need to create one of these and leave it

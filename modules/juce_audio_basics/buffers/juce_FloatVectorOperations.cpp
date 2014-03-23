@@ -24,9 +24,8 @@
 
 namespace FloatVectorHelpers
 {
-
-    #define JUCE_INCREMENT_SRC_DEST    dest += 4; src += 4;
-    #define JUCE_INCREMENT_DEST        dest += 4;
+    #define JUCE_INCREMENT_SRC_DEST    dest += (16 / sizeof (*dest)); src += (16 / sizeof (*dest));
+    #define JUCE_INCREMENT_DEST        dest += (16 / sizeof (*dest));
 
    #if JUCE_USE_SSE_INTRINSICS
     static bool sse2Present = false;
@@ -45,186 +44,317 @@ namespace FloatVectorHelpers
         return (((pointer_sized_int) p) & 15) == 0;
     }
 
-    static inline float findMinimumOrMaximum (const float* src, int num, const bool isMinimum) noexcept
+    struct BasicOps32
     {
-        const int numLongOps = num / 4;
+        typedef float Type;
+        typedef __m128 ParallelType;
+        enum { numParallel = 4 };
 
-        if (numLongOps > 1 && FloatVectorHelpers::isSSE2Available())
-        {
-            __m128 val;
+        static forcedinline ParallelType load1 (Type v) noexcept                        { return _mm_load1_ps (&v); }
+        static forcedinline ParallelType loadA (const Type* v) noexcept                 { return _mm_load_ps (v); }
+        static forcedinline ParallelType loadU (const Type* v) noexcept                 { return _mm_loadu_ps (v); }
+        static forcedinline void storeA (Type* dest, ParallelType a) noexcept           { return _mm_store_ps (dest, a); }
+        static forcedinline void storeU (Type* dest, ParallelType a) noexcept           { return _mm_storeu_ps (dest, a); }
 
-            #define JUCE_MINIMUMMAXIMUM_SSE_LOOP(loadOp, minMaxOp) \
-                val = loadOp (src); \
-                src += 4; \
-                for (int i = 1; i < numLongOps; ++i) \
-                { \
-                    const __m128 s = loadOp (src); \
-                    val = minMaxOp (val, s); \
-                    src += 4; \
-                }
+        static forcedinline ParallelType add (ParallelType a, ParallelType b) noexcept  { return _mm_add_ps (a, b); }
+        static forcedinline ParallelType sub (ParallelType a, ParallelType b) noexcept  { return _mm_sub_ps (a, b); }
+        static forcedinline ParallelType mul (ParallelType a, ParallelType b) noexcept  { return _mm_mul_ps (a, b); }
+        static forcedinline ParallelType max (ParallelType a, ParallelType b) noexcept  { return _mm_max_ps (a, b); }
+        static forcedinline ParallelType min (ParallelType a, ParallelType b) noexcept  { return _mm_min_ps (a, b); }
 
-            if (isMinimum)
-            {
-                if (FloatVectorHelpers::isAligned (src)) { JUCE_MINIMUMMAXIMUM_SSE_LOOP (_mm_load_ps,  _mm_min_ps) }
-                else                                     { JUCE_MINIMUMMAXIMUM_SSE_LOOP (_mm_loadu_ps, _mm_min_ps) }
-            }
-            else
-            {
-                if (FloatVectorHelpers::isAligned (src)) { JUCE_MINIMUMMAXIMUM_SSE_LOOP (_mm_load_ps, _mm_max_ps) }
-                else                                     { JUCE_MINIMUMMAXIMUM_SSE_LOOP (_mm_loadu_ps,_mm_max_ps) }
-            }
+        static forcedinline Type max (ParallelType a) noexcept { Type v[numParallel]; storeU (v, a); return jmax (v[0], v[1], v[2], v[3]); }
+        static forcedinline Type min (ParallelType a) noexcept { Type v[numParallel]; storeU (v, a); return jmin (v[0], v[1], v[2], v[3]); }
+    };
 
-            float localVal;
+    struct BasicOps64
+    {
+        typedef double Type;
+        typedef __m128d ParallelType;
+        enum { numParallel = 2 };
 
-            {
-                float vals[4];
-                _mm_storeu_ps (vals, val);
+        static forcedinline ParallelType load1 (Type v) noexcept                        { return _mm_load1_pd (&v); }
+        static forcedinline ParallelType loadA (const Type* v) noexcept                 { return _mm_load_pd (v); }
+        static forcedinline ParallelType loadU (const Type* v) noexcept                 { return _mm_loadu_pd (v); }
+        static forcedinline void storeA (Type* dest, ParallelType a) noexcept           { return _mm_store_pd (dest, a); }
+        static forcedinline void storeU (Type* dest, ParallelType a) noexcept           { return _mm_storeu_pd (dest, a); }
 
-                localVal = isMinimum ? jmin (vals[0], vals[1], vals[2], vals[3])
-                                     : jmax (vals[0], vals[1], vals[2], vals[3]);
-            }
+        static forcedinline ParallelType add (ParallelType a, ParallelType b) noexcept  { return _mm_add_pd (a, b); }
+        static forcedinline ParallelType sub (ParallelType a, ParallelType b) noexcept  { return _mm_sub_pd (a, b); }
+        static forcedinline ParallelType mul (ParallelType a, ParallelType b) noexcept  { return _mm_mul_pd (a, b); }
+        static forcedinline ParallelType max (ParallelType a, ParallelType b) noexcept  { return _mm_max_pd (a, b); }
+        static forcedinline ParallelType min (ParallelType a, ParallelType b) noexcept  { return _mm_min_pd (a, b); }
 
-            num &= 3;
+        static forcedinline Type max (ParallelType a) noexcept  { Type v[numParallel]; storeU (v, a); return jmax (v[0], v[1]); }
+        static forcedinline Type min (ParallelType a) noexcept  { Type v[numParallel]; storeU (v, a); return jmin (v[0], v[1]); }
+    };
 
-            for (int i = 0; i < num; ++i)
-                localVal = isMinimum ? jmin (localVal, src[i])
-                                     : jmax (localVal, src[i]);
-
-            return localVal;
-        }
-
-        return isMinimum ? juce::findMinimum (src, num)
-                         : juce::findMaximum (src, num);
-    }
-
-    #define JUCE_BEGIN_SSE_OP \
+    #define JUCE_BEGIN_VEC_OP \
+        typedef FloatVectorHelpers::ModeType<sizeof(*dest)>::Mode Mode; \
         if (FloatVectorHelpers::isSSE2Available()) \
         { \
-            const int numLongOps = num / 4;
+            const int numLongOps = num / Mode::numParallel;
 
-    #define JUCE_FINISH_SSE_OP(normalOp) \
-            num &= 3; \
+    #define JUCE_FINISH_VEC_OP(normalOp) \
+            num &= (Mode::numParallel - 1); \
             if (num == 0) return; \
         } \
         for (int i = 0; i < num; ++i) normalOp;
 
-    #define JUCE_SSE_LOOP(sseOp, srcLoad, dstLoad, dstStore, locals, increment) \
-        for (int i = 0; i < numLongOps; ++i) \
-        { \
-            locals (srcLoad, dstLoad); \
-            dstStore (dest, sseOp); \
-            increment; \
-        }
+    #define JUCE_PERFORM_VEC_OP_DEST(normalOp, vecOp, locals, setupOp) \
+        JUCE_BEGIN_VEC_OP \
+        setupOp \
+        if (FloatVectorHelpers::isAligned (dest))   JUCE_VEC_LOOP (vecOp, dummy, Mode::loadA, Mode::storeA, locals, JUCE_INCREMENT_DEST) \
+        else                                        JUCE_VEC_LOOP (vecOp, dummy, Mode::loadU, Mode::storeU, locals, JUCE_INCREMENT_DEST) \
+        JUCE_FINISH_VEC_OP (normalOp)
 
-    #define JUCE_LOAD_NONE(srcLoad, dstLoad)
-    #define JUCE_LOAD_DEST(srcLoad, dstLoad)     const __m128 d = dstLoad (dest);
-    #define JUCE_LOAD_SRC(srcLoad, dstLoad)      const __m128 s = srcLoad (src);
-    #define JUCE_LOAD_SRC_DEST(srcLoad, dstLoad) const __m128 d = dstLoad (dest); const __m128 s = srcLoad (src);
-
-    #define JUCE_PERFORM_SSE_OP_DEST(normalOp, sseOp, locals) \
-        JUCE_BEGIN_SSE_OP \
-        if (FloatVectorHelpers::isAligned (dest))   JUCE_SSE_LOOP (sseOp, dummy, _mm_load_ps,  _mm_store_ps,  locals, JUCE_INCREMENT_DEST) \
-        else                                        JUCE_SSE_LOOP (sseOp, dummy, _mm_loadu_ps, _mm_storeu_ps, locals, JUCE_INCREMENT_DEST) \
-        JUCE_FINISH_SSE_OP (normalOp)
-
-    #define JUCE_PERFORM_SSE_OP_SRC_DEST(normalOp, sseOp, locals, increment) \
-        JUCE_BEGIN_SSE_OP \
+    #define JUCE_PERFORM_VEC_OP_SRC_DEST(normalOp, vecOp, locals, increment, setupOp) \
+        JUCE_BEGIN_VEC_OP \
+        setupOp \
         if (FloatVectorHelpers::isAligned (dest)) \
         { \
-            if (FloatVectorHelpers::isAligned (src)) JUCE_SSE_LOOP (sseOp, _mm_load_ps,  _mm_load_ps, _mm_store_ps, locals, increment) \
-            else                                     JUCE_SSE_LOOP (sseOp, _mm_loadu_ps, _mm_load_ps, _mm_store_ps, locals, increment) \
+            if (FloatVectorHelpers::isAligned (src)) JUCE_VEC_LOOP (vecOp, Mode::loadA, Mode::loadA, Mode::storeA, locals, increment) \
+            else                                     JUCE_VEC_LOOP (vecOp, Mode::loadU, Mode::loadA, Mode::storeA, locals, increment) \
         }\
         else \
         { \
-            if (FloatVectorHelpers::isAligned (src)) JUCE_SSE_LOOP (sseOp, _mm_load_ps,  _mm_loadu_ps, _mm_storeu_ps, locals, increment) \
-            else                                     JUCE_SSE_LOOP (sseOp, _mm_loadu_ps, _mm_loadu_ps, _mm_storeu_ps, locals, increment) \
+            if (FloatVectorHelpers::isAligned (src)) JUCE_VEC_LOOP (vecOp, Mode::loadA, Mode::loadU, Mode::storeU, locals, increment) \
+            else                                     JUCE_VEC_LOOP (vecOp, Mode::loadU, Mode::loadU, Mode::storeU, locals, increment) \
         } \
-        JUCE_FINISH_SSE_OP (normalOp)
-
+        JUCE_FINISH_VEC_OP (normalOp)
 
     //==============================================================================
    #elif JUCE_USE_ARM_NEON
 
-    static inline float findMinimumOrMaximum (const float* src, int num, const bool isMinimum) noexcept
+    struct BasicOps32
     {
-        const int numLongOps = num / 4;
+        typedef float Type;
+        typedef float32x4_t ParallelType;
+        enum { numParallel = 4 };
 
-        if (numLongOps > 1)
-        {
-            float32x4_t val;
+        static forcedinline ParallelType load1 (Type v) noexcept                        { return vld1q_dup_f32 (&v); }
+        static forcedinline ParallelType loadA (const Type* v) noexcept                 { return vld1q_f32 (v); }
+        static forcedinline ParallelType loadU (const Type* v) noexcept                 { return vld1q_f32 (v); }
+        static forcedinline void storeA (Type* dest, ParallelType a) noexcept           { return vst1q_f32 (dest, a); }
+        static forcedinline void storeU (Type* dest, ParallelType a) noexcept           { return vst1q_f32 (dest, a); }
 
-            #define JUCE_MINIMUMMAXIMUM_NEON_LOOP(loadOp, minMaxOp) \
-                val = loadOp (src); \
-                src += 4; \
-                for (int i = 1; i < numLongOps; ++i) \
-                { \
-                    const float32x4_t s = loadOp (src); \
-                    val = minMaxOp (val, s); \
-                    src += 4; \
-                }
+        static forcedinline ParallelType add (ParallelType a, ParallelType b) noexcept  { return vaddq_f32 (a, b); }
+        static forcedinline ParallelType sub (ParallelType a, ParallelType b) noexcept  { return vsubq_f32 (a, b); }
+        static forcedinline ParallelType mul (ParallelType a, ParallelType b) noexcept  { return vmulq_f32 (a, b); }
+        static forcedinline ParallelType max (ParallelType a, ParallelType b) noexcept  { return vmaxq_f32 (a, b); }
+        static forcedinline ParallelType min (ParallelType a, ParallelType b) noexcept  { return vminq_f32 (a, b); }
 
-            if (isMinimum) { JUCE_MINIMUMMAXIMUM_NEON_LOOP (vld1q_f32, vminq_f32) }
-            else           { JUCE_MINIMUMMAXIMUM_NEON_LOOP (vld1q_f32, vmaxq_f32) }
+        static forcedinline Type max (ParallelType a) noexcept { Type v[numParallel]; storeU (v, a); return jmax (v[0], v[1], v[2], v[3]); }
+        static forcedinline Type min (ParallelType a) noexcept { Type v[numParallel]; storeU (v, a); return jmin (v[0], v[1], v[2], v[3]); }
+    };
 
-            float localVal;
+    struct BasicOps64
+    {
+        typedef double Type;
+        typedef double ParallelType;
+        enum { numParallel = 1 };
 
-            {
-                float vals[4];
-                vst1q_f32 (vals, val);
+        static forcedinline ParallelType load1 (Type v) noexcept                        { return v; }
+        static forcedinline ParallelType loadA (const Type* v) noexcept                 { return *v; }
+        static forcedinline ParallelType loadU (const Type* v) noexcept                 { return *v; }
+        static forcedinline void storeA (Type* dest, ParallelType a) noexcept           { return *dest = a; }
+        static forcedinline void storeU (Type* dest, ParallelType a) noexcept           { return *dest = a; }
 
-                localVal = isMinimum ? jmin (vals[0], vals[1], vals[2], vals[3])
-                                     : jmax (vals[0], vals[1], vals[2], vals[3]);
-            }
+        static forcedinline ParallelType add (ParallelType a, ParallelType b) noexcept  { return a + b; }
+        static forcedinline ParallelType sub (ParallelType a, ParallelType b) noexcept  { return a - b; }
+        static forcedinline ParallelType mul (ParallelType a, ParallelType b) noexcept  { return a * b; }
+        static forcedinline ParallelType max (ParallelType a, ParallelType b) noexcept  { return jmax (a, b); }
+        static forcedinline ParallelType min (ParallelType a, ParallelType b) noexcept  { return jmin (a, b); }
 
-            num &= 3;
+        static forcedinline Type max (ParallelType a) noexcept  { return a; }
+        static forcedinline Type min (ParallelType a) noexcept  { return a; }
+    };
 
-            for (int i = 0; i < num; ++i)
-                localVal = isMinimum ? jmin (localVal, src[i])
-                                     : jmax (localVal, src[i]);
+    #define JUCE_BEGIN_VEC_OP \
+        typedef FloatVectorHelpers::ModeType<sizeof(*dest)>::Mode Mode; \
+        if (Mode::numParallel > 1) \
+        { \
+            const int numLongOps = num / Mode::numParallel;
 
-            return localVal;
-        }
-
-        return isMinimum ? juce::findMinimum (src, num)
-                         : juce::findMaximum (src, num);
-    }
-
-    #define JUCE_BEGIN_NEON_OP \
-        const int numLongOps = num / 4;
-
-    #define JUCE_FINISH_NEON_OP(normalOp) \
-        num &= 3; \
-        if (num == 0) return; \
+    #define JUCE_FINISH_VEC_OP(normalOp) \
+            num &= (Mode::numParallel - 1); \
+            if (num == 0) return; \
+        } \
         for (int i = 0; i < num; ++i) normalOp;
 
-    #define JUCE_NEON_LOOP(neonOp, srcLoad, dstLoad, dstStore, locals, increment) \
+    #define JUCE_PERFORM_VEC_OP_DEST(normalOp, vecOp, locals, setupOp) \
+        JUCE_BEGIN_VEC_OP \
+        setupOp \
+        JUCE_VEC_LOOP (vecOp, dummy, Mode::loadU, Mode::storeU, locals, JUCE_INCREMENT_DEST) \
+        JUCE_FINISH_VEC_OP (normalOp)
+
+    #define JUCE_PERFORM_VEC_OP_SRC_DEST(normalOp, vecOp, locals, increment, setupOp) \
+        JUCE_BEGIN_VEC_OP \
+        setupOp \
+        JUCE_VEC_LOOP (vecOp, Mode::loadU, Mode::loadU, Mode::storeU, locals, increment) \
+        JUCE_FINISH_VEC_OP (normalOp)
+
+    //==============================================================================
+   #else
+    #define JUCE_PERFORM_VEC_OP_DEST(normalOp, vecOp, locals, setupOp) \
+        for (int i = 0; i < num; ++i) normalOp;
+
+    #define JUCE_PERFORM_VEC_OP_SRC_DEST(normalOp, vecOp, locals, increment, setupOp) \
+        for (int i = 0; i < num; ++i) normalOp;
+
+   #endif
+
+    //==============================================================================
+    #define JUCE_VEC_LOOP(vecOp, srcLoad, dstLoad, dstStore, locals, increment) \
         for (int i = 0; i < numLongOps; ++i) \
         { \
             locals (srcLoad, dstLoad); \
-            dstStore (dest, neonOp); \
+            dstStore (dest, vecOp); \
             increment; \
         }
 
     #define JUCE_LOAD_NONE(srcLoad, dstLoad)
-    #define JUCE_LOAD_DEST(srcLoad, dstLoad)     const float32x4_t d = dstLoad (dest);
-    #define JUCE_LOAD_SRC(srcLoad, dstLoad)      const float32x4_t s = srcLoad (src);
-    #define JUCE_LOAD_SRC_DEST(srcLoad, dstLoad) const float32x4_t d = dstLoad (dest); const float32x4_t s = srcLoad (src);
+    #define JUCE_LOAD_DEST(srcLoad, dstLoad)     const Mode::ParallelType d = dstLoad (dest);
+    #define JUCE_LOAD_SRC(srcLoad, dstLoad)      const Mode::ParallelType s = srcLoad (src);
+    #define JUCE_LOAD_SRC_DEST(srcLoad, dstLoad) const Mode::ParallelType d = dstLoad (dest), s = srcLoad (src);
 
-    #define JUCE_PERFORM_NEON_OP_DEST(normalOp, neonOp, locals) \
-        JUCE_BEGIN_NEON_OP \
-        JUCE_NEON_LOOP (neonOp, dummy, vld1q_f32,  vst1q_f32,  locals, JUCE_INCREMENT_DEST) \
-        JUCE_FINISH_NEON_OP (normalOp)
+   #if JUCE_USE_SSE_INTRINSICS || JUCE_USE_ARM_NEON
+    template<int typeSize> struct ModeType    { typedef BasicOps32 Mode; };
+    template<>             struct ModeType<8> { typedef BasicOps64 Mode; };
 
-    #define JUCE_PERFORM_NEON_OP_SRC_DEST(normalOp, neonOp, locals) \
-        JUCE_BEGIN_NEON_OP \
-        JUCE_NEON_LOOP (neonOp, vld1q_f32, vld1q_f32,  vst1q_f32,  locals, JUCE_INCREMENT_SRC_DEST) \
-        JUCE_FINISH_NEON_OP (normalOp)
+    template <typename Mode>
+    struct MinMax
+    {
+        typedef typename Mode::Type Type;
+        typedef typename Mode::ParallelType ParallelType;
 
-    //==============================================================================
-    #else
-     #define JUCE_PERFORM_SSE_OP_DEST(normalOp, unused1, unused2)              for (int i = 0; i < num; ++i) normalOp;
-     #define JUCE_PERFORM_SSE_OP_SRC_DEST(normalOp, sseOp, locals, increment)  for (int i = 0; i < num; ++i) normalOp;
-    #endif
+        static Type findMinOrMax (const Type* src, int num, const bool isMinimum) noexcept
+        {
+            const int numLongOps = num / Mode::numParallel;
+
+           #if JUCE_USE_SSE_INTRINSICS
+            if (numLongOps > 1 && isSSE2Available())
+           #else
+            if (numLongOps > 1)
+           #endif
+            {
+                ParallelType val;
+
+               #if ! JUCE_USE_ARM_NEON
+                if (isAligned (src))
+                {
+                    val = Mode::loadA (src);
+
+                    if (isMinimum)
+                    {
+                        for (int i = 1; i < numLongOps; ++i)
+                        {
+                            src += Mode::numParallel;
+                            val = Mode::min (val, Mode::loadA (src));
+                        }
+                    }
+                    else
+                    {
+                        for (int i = 1; i < numLongOps; ++i)
+                        {
+                            src += Mode::numParallel;
+                            val = Mode::max (val, Mode::loadA (src));
+                        }
+                    }
+                }
+                else
+               #endif
+                {
+                    val = Mode::loadU (src);
+
+                    if (isMinimum)
+                    {
+                        for (int i = 1; i < numLongOps; ++i)
+                        {
+                            src += Mode::numParallel;
+                            val = Mode::min (val, Mode::loadU (src));
+                        }
+                    }
+                    else
+                    {
+                        for (int i = 1; i < numLongOps; ++i)
+                        {
+                            src += Mode::numParallel;
+                            val = Mode::max (val, Mode::loadU (src));
+                        }
+                    }
+                }
+
+                Type result = isMinimum ? Mode::min (val)
+                                        : Mode::max (val);
+
+                num &= (Mode::numParallel - 1);
+
+                for (int i = 0; i < num; ++i)
+                    result = isMinimum ? jmin (result, src[i])
+                                       : jmax (result, src[i]);
+
+                return result;
+            }
+
+            return isMinimum ? juce::findMinimum (src, num)
+                             : juce::findMaximum (src, num);
+        }
+
+        static Range<Type> findMinAndMax (const Type* src, int num) noexcept
+        {
+            const int numLongOps = num / Mode::numParallel;
+
+           #if JUCE_USE_SSE_INTRINSICS
+            if (numLongOps > 1 && isSSE2Available())
+           #else
+            if (numLongOps > 1)
+           #endif
+            {
+                ParallelType mn, mx;
+
+               #if ! JUCE_USE_ARM_NEON
+                if (isAligned (src))
+                {
+                    mn = Mode::loadA (src);
+                    mx = mn;
+
+                    for (int i = 1; i < numLongOps; ++i)
+                    {
+                        src += Mode::numParallel;
+                        const ParallelType v = Mode::loadA (src);
+                        mn = Mode::min (mn, v);
+                        mx = Mode::max (mx, v);
+                    }
+                }
+                else
+               #endif
+                {
+                    mn = Mode::loadU (src);
+                    mx = mn;
+
+                    for (int i = 1; i < numLongOps; ++i)
+                    {
+                        src += Mode::numParallel;
+                        const ParallelType v = Mode::loadU (src);
+                        mn = Mode::min (mn, v);
+                        mx = Mode::max (mx, v);
+                    }
+                }
+
+                Range<Type> result (Mode::min (mn),
+                                    Mode::max (mx));
+
+                num &= 3;
+                for (int i = 0; i < num; ++i)
+                    result = result.getUnionWith (src[i]);
+
+                return result;
+            }
+
+            return Range<Type>::findMinAndMax (src, num);
+        }
+    };
+   #endif
 }
 
 //==============================================================================
@@ -237,18 +367,32 @@ void JUCE_CALLTYPE FloatVectorOperations::clear (float* dest, int num) noexcept
    #endif
 }
 
+void JUCE_CALLTYPE FloatVectorOperations::clear (double* dest, int num) noexcept
+{
+   #if JUCE_USE_VDSP_FRAMEWORK
+    vDSP_vclrD (dest, 1, (size_t) num);
+   #else
+    zeromem (dest, num * sizeof (double));
+   #endif
+}
+
 void JUCE_CALLTYPE FloatVectorOperations::fill (float* dest, float valueToFill, int num) noexcept
 {
    #if JUCE_USE_VDSP_FRAMEWORK
     vDSP_vfill (&valueToFill, dest, 1, (size_t) num);
-   #elif JUCE_USE_ARM_NEON
-    const float32x4_t val = vld1q_dup_f32 (&valueToFill);
-    JUCE_PERFORM_NEON_OP_DEST (dest[i] = valueToFill, val, JUCE_LOAD_NONE)
    #else
-    #if JUCE_USE_SSE_INTRINSICS
-     const __m128 val = _mm_load1_ps (&valueToFill);
-    #endif
-    JUCE_PERFORM_SSE_OP_DEST (dest[i] = valueToFill, val, JUCE_LOAD_NONE)
+    JUCE_PERFORM_VEC_OP_DEST (dest[i] = valueToFill, val, JUCE_LOAD_NONE,
+                              const Mode::ParallelType val = Mode::load1 (valueToFill);)
+   #endif
+}
+
+void JUCE_CALLTYPE FloatVectorOperations::fill (double* dest, double valueToFill, int num) noexcept
+{
+   #if JUCE_USE_VDSP_FRAMEWORK
+    vDSP_vfillD (&valueToFill, dest, 1, (size_t) num);
+   #else
+    JUCE_PERFORM_VEC_OP_DEST (dest[i] = valueToFill, val, JUCE_LOAD_NONE,
+                              const Mode::ParallelType val = Mode::load1 (valueToFill);)
    #endif
 }
 
@@ -257,42 +401,60 @@ void JUCE_CALLTYPE FloatVectorOperations::copy (float* dest, const float* src, i
     memcpy (dest, src, (size_t) num * sizeof (float));
 }
 
+void JUCE_CALLTYPE FloatVectorOperations::copy (double* dest, const double* src, int num) noexcept
+{
+    memcpy (dest, src, (size_t) num * sizeof (double));
+}
+
 void JUCE_CALLTYPE FloatVectorOperations::copyWithMultiply (float* dest, const float* src, float multiplier, int num) noexcept
 {
    #if JUCE_USE_VDSP_FRAMEWORK
     vDSP_vsmul (src, 1, &multiplier, dest, 1, num);
-   #elif JUCE_USE_ARM_NEON
-    JUCE_PERFORM_NEON_OP_SRC_DEST (dest[i] += src[i], vmulq_n_f32(s, multiplier), JUCE_LOAD_SRC)
    #else
-    #if JUCE_USE_SSE_INTRINSICS
-     const __m128 mult = _mm_load1_ps (&multiplier);
-    #endif
-    JUCE_PERFORM_SSE_OP_SRC_DEST (dest[i] = src[i] * multiplier, _mm_mul_ps (mult, s),
-                                  JUCE_LOAD_SRC, JUCE_INCREMENT_SRC_DEST)
+    JUCE_PERFORM_VEC_OP_SRC_DEST (dest[i] = src[i] * multiplier, Mode::mul (mult, s),
+                                  JUCE_LOAD_SRC, JUCE_INCREMENT_SRC_DEST,
+                                  const Mode::ParallelType mult = Mode::load1 (multiplier);)
+   #endif
+}
+
+void JUCE_CALLTYPE FloatVectorOperations::copyWithMultiply (double* dest, const double* src, double multiplier, int num) noexcept
+{
+   #if JUCE_USE_VDSP_FRAMEWORK
+    vDSP_vsmulD (src, 1, &multiplier, dest, 1, num);
+   #else
+    JUCE_PERFORM_VEC_OP_SRC_DEST (dest[i] = src[i] * multiplier, Mode::mul (mult, s),
+                                  JUCE_LOAD_SRC, JUCE_INCREMENT_SRC_DEST,
+                                  const Mode::ParallelType mult = Mode::load1 (multiplier);)
    #endif
 }
 
 void JUCE_CALLTYPE FloatVectorOperations::add (float* dest, float amount, int num) noexcept
 {
-   #if JUCE_USE_ARM_NEON
-    const float32x4_t amountToAdd = vld1q_dup_f32(&amount);
-    JUCE_PERFORM_NEON_OP_DEST (dest[i] += amount, vaddq_f32 (d, amountToAdd), JUCE_LOAD_DEST)
-   #else
-    #if JUCE_USE_SSE_INTRINSICS
-     const __m128 amountToAdd = _mm_load1_ps (&amount);
-    #endif
-    JUCE_PERFORM_SSE_OP_DEST (dest[i] += amount, _mm_add_ps (d, amountToAdd), JUCE_LOAD_DEST)
-   #endif
+    JUCE_PERFORM_VEC_OP_DEST (dest[i] += amount, Mode::add (d, amountToAdd), JUCE_LOAD_DEST,
+                              const Mode::ParallelType amountToAdd = Mode::load1 (amount);)
+}
+
+void JUCE_CALLTYPE FloatVectorOperations::add (double* dest, double amount, int num) noexcept
+{
+    JUCE_PERFORM_VEC_OP_DEST (dest[i] += amount, Mode::add (d, amountToAdd), JUCE_LOAD_DEST,
+                              const Mode::ParallelType amountToAdd = Mode::load1 (amount);)
 }
 
 void JUCE_CALLTYPE FloatVectorOperations::add (float* dest, const float* src, int num) noexcept
 {
    #if JUCE_USE_VDSP_FRAMEWORK
     vDSP_vadd (src, 1, dest, 1, dest, 1, num);
-   #elif JUCE_USE_ARM_NEON
-    JUCE_PERFORM_NEON_OP_SRC_DEST (dest[i] += src[i], vaddq_f32 (d, s), JUCE_LOAD_SRC_DEST)
    #else
-    JUCE_PERFORM_SSE_OP_SRC_DEST (dest[i] += src[i], _mm_add_ps (d, s), JUCE_LOAD_SRC_DEST, JUCE_INCREMENT_SRC_DEST)
+    JUCE_PERFORM_VEC_OP_SRC_DEST (dest[i] += src[i], Mode::add (d, s), JUCE_LOAD_SRC_DEST, JUCE_INCREMENT_SRC_DEST, )
+   #endif
+}
+
+void JUCE_CALLTYPE FloatVectorOperations::add (double* dest, const double* src, int num) noexcept
+{
+   #if JUCE_USE_VDSP_FRAMEWORK
+    vDSP_vaddD (src, 1, dest, 1, dest, 1, num);
+   #else
+    JUCE_PERFORM_VEC_OP_SRC_DEST (dest[i] += src[i], Mode::add (d, s), JUCE_LOAD_SRC_DEST, JUCE_INCREMENT_SRC_DEST, )
    #endif
 }
 
@@ -300,39 +462,49 @@ void JUCE_CALLTYPE FloatVectorOperations::subtract (float* dest, const float* sr
 {
    #if JUCE_USE_VDSP_FRAMEWORK
     vDSP_vsub (src, 1, dest, 1, dest, 1, num);
-   #elif JUCE_USE_ARM_NEON
-    JUCE_PERFORM_NEON_OP_SRC_DEST (dest[i] -= src[i], vsubq_f32 (d, s), JUCE_LOAD_SRC_DEST)
    #else
-    JUCE_PERFORM_SSE_OP_SRC_DEST (dest[i] -= src[i], _mm_sub_ps (d, s), JUCE_LOAD_SRC_DEST, JUCE_INCREMENT_SRC_DEST)
+    JUCE_PERFORM_VEC_OP_SRC_DEST (dest[i] -= src[i], Mode::sub (d, s), JUCE_LOAD_SRC_DEST, JUCE_INCREMENT_SRC_DEST, )
+   #endif
+}
+
+void JUCE_CALLTYPE FloatVectorOperations::subtract (double* dest, const double* src, int num) noexcept
+{
+   #if JUCE_USE_VDSP_FRAMEWORK
+    vDSP_vsubD (src, 1, dest, 1, dest, 1, num);
+   #else
+    JUCE_PERFORM_VEC_OP_SRC_DEST (dest[i] -= src[i], Mode::sub (d, s), JUCE_LOAD_SRC_DEST, JUCE_INCREMENT_SRC_DEST, )
    #endif
 }
 
 void JUCE_CALLTYPE FloatVectorOperations::addWithMultiply (float* dest, const float* src, float multiplier, int num) noexcept
 {
-   #if JUCE_USE_ARM_NEON
-    JUCE_PERFORM_NEON_OP_SRC_DEST (dest[i] += src[i] * multiplier,
-                                   vmlaq_n_f32 (d, s, multiplier),
-                                   JUCE_LOAD_SRC_DEST)
-   #else
-    #if JUCE_USE_SSE_INTRINSICS
-     const __m128 mult = _mm_load1_ps (&multiplier);
-    #endif
+    JUCE_PERFORM_VEC_OP_SRC_DEST (dest[i] += src[i] * multiplier, Mode::add (d, Mode::mul (mult, s)),
+                                  JUCE_LOAD_SRC_DEST, JUCE_INCREMENT_SRC_DEST,
+                                  const Mode::ParallelType mult = Mode::load1 (multiplier);)
+}
 
-     JUCE_PERFORM_SSE_OP_SRC_DEST (dest[i] += src[i] * multiplier,
-                                   _mm_add_ps (d, _mm_mul_ps (mult, s)),
-                                   JUCE_LOAD_SRC_DEST, JUCE_INCREMENT_SRC_DEST)
-   #endif
-
+void JUCE_CALLTYPE FloatVectorOperations::addWithMultiply (double* dest, const double* src, double multiplier, int num) noexcept
+{
+    JUCE_PERFORM_VEC_OP_SRC_DEST (dest[i] += src[i] * multiplier, Mode::add (d, Mode::mul (mult, s)),
+                                  JUCE_LOAD_SRC_DEST, JUCE_INCREMENT_SRC_DEST,
+                                  const Mode::ParallelType mult = Mode::load1 (multiplier);)
 }
 
 void JUCE_CALLTYPE FloatVectorOperations::multiply (float* dest, const float* src, int num) noexcept
 {
    #if JUCE_USE_VDSP_FRAMEWORK
     vDSP_vmul (src, 1, dest, 1, dest, 1, num);
-   #elif JUCE_USE_ARM_NEON
-    JUCE_PERFORM_NEON_OP_SRC_DEST (dest[i] *= src[i], vmulq_f32 (d, s), JUCE_LOAD_SRC_DEST)
    #else
-    JUCE_PERFORM_SSE_OP_SRC_DEST  (dest[i] *= src[i], _mm_mul_ps (d, s), JUCE_LOAD_SRC_DEST, JUCE_INCREMENT_SRC_DEST)
+    JUCE_PERFORM_VEC_OP_SRC_DEST (dest[i] *= src[i], Mode::mul (d, s), JUCE_LOAD_SRC_DEST, JUCE_INCREMENT_SRC_DEST, )
+   #endif
+}
+
+void JUCE_CALLTYPE FloatVectorOperations::multiply (double* dest, const double* src, int num) noexcept
+{
+   #if JUCE_USE_VDSP_FRAMEWORK
+    vDSP_vmulD (src, 1, dest, 1, dest, 1, num);
+   #else
+    JUCE_PERFORM_VEC_OP_SRC_DEST (dest[i] *= src[i], Mode::mul (d, s), JUCE_LOAD_SRC_DEST, JUCE_INCREMENT_SRC_DEST, )
    #endif
 }
 
@@ -340,13 +512,19 @@ void JUCE_CALLTYPE FloatVectorOperations::multiply (float* dest, float multiplie
 {
    #if JUCE_USE_VDSP_FRAMEWORK
     vDSP_vsmul (dest, 1, &multiplier, dest, 1, num);
-   #elif JUCE_USE_ARM_NEON
-    JUCE_PERFORM_NEON_OP_DEST (dest[i] *= multiplier, vmulq_n_f32 (d, multiplier), JUCE_LOAD_DEST)
    #else
-    #if JUCE_USE_SSE_INTRINSICS
-     const __m128 mult = _mm_load1_ps (&multiplier);
-    #endif
-    JUCE_PERFORM_SSE_OP_DEST (dest[i] *= multiplier, _mm_mul_ps (d, mult), JUCE_LOAD_DEST)
+    JUCE_PERFORM_VEC_OP_DEST (dest[i] *= multiplier, Mode::mul (d, mult), JUCE_LOAD_DEST,
+                              const Mode::ParallelType mult = Mode::load1 (multiplier);)
+   #endif
+}
+
+void JUCE_CALLTYPE FloatVectorOperations::multiply (double* dest, double multiplier, int num) noexcept
+{
+   #if JUCE_USE_VDSP_FRAMEWORK
+    vDSP_vsmulD (dest, 1, &multiplier, dest, 1, num);
+   #else
+    JUCE_PERFORM_VEC_OP_DEST (dest[i] *= multiplier, Mode::mul (d, mult), JUCE_LOAD_DEST,
+                              const Mode::ParallelType mult = Mode::load1 (multiplier);)
    #endif
 }
 
@@ -359,6 +537,15 @@ void FloatVectorOperations::negate (float* dest, const float* src, int num) noex
    #endif
 }
 
+void FloatVectorOperations::negate (double* dest, const double* src, int num) noexcept
+{
+   #if JUCE_USE_VDSP_FRAMEWORK
+    vDSP_vnegD ((double*) src, 1, dest, 1, (vDSP_Length) num);
+   #else
+    copyWithMultiply (dest, src, -1.0f, num);
+   #endif
+}
+
 void JUCE_CALLTYPE FloatVectorOperations::convertFixedToFloat (float* dest, const int* src, float multiplier, int num) noexcept
 {
    #if JUCE_USE_ARM_NEON
@@ -366,118 +553,44 @@ void JUCE_CALLTYPE FloatVectorOperations::convertFixedToFloat (float* dest, cons
                                    vmulq_n_f32 (vcvtq_f32_s32 (vld1q_s32 (src)), multiplier),
                                    JUCE_LOAD_NONE)
    #else
-    #if JUCE_USE_SSE_INTRINSICS
-     const __m128 mult = _mm_load1_ps (&multiplier);
-    #endif
-
-     JUCE_PERFORM_SSE_OP_SRC_DEST (dest[i] = src[i] * multiplier,
-                                   _mm_mul_ps (mult, _mm_cvtepi32_ps (_mm_loadu_si128 ((const __m128i*) src))),
-                                   JUCE_LOAD_NONE, JUCE_INCREMENT_SRC_DEST)
+    JUCE_PERFORM_VEC_OP_SRC_DEST (dest[i] = src[i] * multiplier,
+                                  Mode::mul (mult, _mm_cvtepi32_ps (_mm_loadu_si128 ((const __m128i*) src))),
+                                  JUCE_LOAD_NONE, JUCE_INCREMENT_SRC_DEST,
+                                  const Mode::ParallelType mult = Mode::load1 (multiplier);)
    #endif
 }
 
-void JUCE_CALLTYPE FloatVectorOperations::findMinAndMax (const float* src, int num, float& minResult, float& maxResult) noexcept
+Range<float> JUCE_CALLTYPE FloatVectorOperations::findMinAndMax (const float* src, int num) noexcept
 {
-   #if JUCE_USE_SSE_INTRINSICS
-    const int numLongOps = num / 4;
-
-    if (numLongOps > 1 && FloatVectorHelpers::isSSE2Available())
-    {
-        __m128 mn, mx;
-
-        #define JUCE_MINMAX_SSE_LOOP(loadOp) \
-            mn = loadOp (src); \
-            mx = mn; \
-            src += 4; \
-            for (int i = 1; i < numLongOps; ++i) \
-            { \
-                const __m128 s = loadOp (src); \
-                mn = _mm_min_ps (mn, s); \
-                mx = _mm_max_ps (mx, s); \
-                src += 4; \
-            }
-
-        if (FloatVectorHelpers::isAligned (src)) { JUCE_MINMAX_SSE_LOOP (_mm_load_ps) }
-        else                                     { JUCE_MINMAX_SSE_LOOP (_mm_loadu_ps) }
-
-        float localMin, localMax;
-
-        {
-            float mns[4], mxs[4];
-            _mm_storeu_ps (mns, mn);
-            _mm_storeu_ps (mxs, mx);
-
-            localMin = jmin (mns[0], mns[1], mns[2], mns[3]);
-            localMax = jmax (mxs[0], mxs[1], mxs[2], mxs[3]);
-        }
-
-        num &= 3;
-
-        for (int i = 0; i < num; ++i)
-        {
-            const float s = src[i];
-            localMin = jmin (localMin, s);
-            localMax = jmax (localMax, s);
-        }
-
-        minResult = localMin;
-        maxResult = localMax;
-        return;
-    }
-   #elif JUCE_USE_ARM_NEON
-    const int numLongOps = num / 4;
-
-    if (numLongOps > 1)
-    {
-        float32x4_t mn, mx;
-
-        #define JUCE_MINMAX_NEON_LOOP(loadOp) \
-            mn = loadOp (src); \
-            mx = mn; \
-            src += 4; \
-            for (int i = 1; i < numLongOps; ++i) \
-            { \
-                const float32x4_t s = loadOp (src); \
-                mn = vminq_f32 (mn, s); \
-                mx = vmaxq_f32 (mx, s); \
-                src += 4; \
-            }
-
-        JUCE_MINMAX_NEON_LOOP (vld1q_f32);
-
-        float localMin, localMax;
-
-        {
-            float mns[4], mxs[4];
-            vst1q_f32 (mns, mn);
-            vst1q_f32 (mxs, mx);
-
-            localMin = jmin (mns[0], mns[1], mns[2], mns[3]);
-            localMax = jmax (mxs[0], mxs[1], mxs[2], mxs[3]);
-        }
-
-        num &= 3;
-
-        for (int i = 0; i < num; ++i)
-        {
-            const float s = src[i];
-            localMin = jmin (localMin, s);
-            localMax = jmax (localMax, s);
-        }
-
-        minResult = localMin;
-        maxResult = localMax;
-        return;
-    }
+   #if JUCE_USE_SSE_INTRINSICS || JUCE_USE_ARM_NEON
+    return FloatVectorHelpers::MinMax<FloatVectorHelpers::BasicOps32>::findMinAndMax (src, num);
+   #else
+    return Range<float>::findMinAndMax (src, num);
    #endif
+}
 
-    juce::findMinAndMax (src, num, minResult, maxResult);
+Range<double> JUCE_CALLTYPE FloatVectorOperations::findMinAndMax (const double* src, int num) noexcept
+{
+   #if JUCE_USE_SSE_INTRINSICS || JUCE_USE_ARM_NEON
+    return FloatVectorHelpers::MinMax<FloatVectorHelpers::BasicOps64>::findMinAndMax (src, num);
+   #else
+    return Range<double>::findMinAndMax (src, num);
+   #endif
 }
 
 float JUCE_CALLTYPE FloatVectorOperations::findMinimum (const float* src, int num) noexcept
 {
    #if JUCE_USE_SSE_INTRINSICS || JUCE_USE_ARM_NEON
-    return FloatVectorHelpers::findMinimumOrMaximum (src, num, true);
+    return FloatVectorHelpers::MinMax<FloatVectorHelpers::BasicOps32>::findMinOrMax (src, num, true);
+   #else
+    return juce::findMinimum (src, num);
+   #endif
+}
+
+double JUCE_CALLTYPE FloatVectorOperations::findMinimum (const double* src, int num) noexcept
+{
+   #if JUCE_USE_SSE_INTRINSICS || JUCE_USE_ARM_NEON
+    return FloatVectorHelpers::MinMax<FloatVectorHelpers::BasicOps64>::findMinOrMax (src, num, true);
    #else
     return juce::findMinimum (src, num);
    #endif
@@ -486,7 +599,16 @@ float JUCE_CALLTYPE FloatVectorOperations::findMinimum (const float* src, int nu
 float JUCE_CALLTYPE FloatVectorOperations::findMaximum (const float* src, int num) noexcept
 {
    #if JUCE_USE_SSE_INTRINSICS || JUCE_USE_ARM_NEON
-    return FloatVectorHelpers::findMinimumOrMaximum (src, num, false);
+    return FloatVectorHelpers::MinMax<FloatVectorHelpers::BasicOps32>::findMinOrMax (src, num, false);
+   #else
+    return juce::findMaximum (src, num);
+   #endif
+}
+
+double JUCE_CALLTYPE FloatVectorOperations::findMaximum (const double* src, int num) noexcept
+{
+   #if JUCE_USE_SSE_INTRINSICS || JUCE_USE_ARM_NEON
+    return FloatVectorHelpers::MinMax<FloatVectorHelpers::BasicOps64>::findMinOrMax (src, num, false);
    #else
     return juce::findMaximum (src, num);
    #endif
@@ -510,116 +632,137 @@ class FloatVectorOperationsTests  : public UnitTest
 public:
     FloatVectorOperationsTests() : UnitTest ("FloatVectorOperations") {}
 
+    template <typename ValueType>
+    struct TestRunner
+    {
+        static void runTest (UnitTest& u, Random random)
+        {
+            const int range = random.nextBool() ? 500 : 10;
+            const int num = random.nextInt (range) + 1;
+
+            HeapBlock<ValueType> buffer1 (num + 16), buffer2 (num + 16);
+            HeapBlock<int> buffer3 (num + 16);
+
+           #if JUCE_ARM
+            ValueType* const data1 = buffer1;
+            ValueType* const data2 = buffer2;
+            int* const int1 = buffer3;
+           #else
+            ValueType* const data1 = addBytesToPointer (buffer1.getData(), random.nextInt (16));
+            ValueType* const data2 = addBytesToPointer (buffer2.getData(), random.nextInt (16));
+            int* const int1 = addBytesToPointer (buffer3.getData(), random.nextInt (16));
+           #endif
+
+            fillRandomly (random, data1, num);
+            fillRandomly (random, data2, num);
+
+            Range<ValueType> minMax1 (FloatVectorOperations::findMinAndMax (data1, num));
+            Range<ValueType> minMax2 (Range<ValueType>::findMinAndMax (data1, num));
+            u.expect (minMax1 == minMax2);
+
+            u.expect (valuesMatch (FloatVectorOperations::findMinimum (data1, num), juce::findMinimum (data1, num)));
+            u.expect (valuesMatch (FloatVectorOperations::findMaximum (data1, num), juce::findMaximum (data1, num)));
+
+            u.expect (valuesMatch (FloatVectorOperations::findMinimum (data2, num), juce::findMinimum (data2, num)));
+            u.expect (valuesMatch (FloatVectorOperations::findMaximum (data2, num), juce::findMaximum (data2, num)));
+
+            FloatVectorOperations::clear (data1, num);
+            u.expect (areAllValuesEqual (data1, num, 0));
+
+            FloatVectorOperations::fill (data1, (ValueType) 2, num);
+            u.expect (areAllValuesEqual (data1, num, (ValueType) 2));
+
+            FloatVectorOperations::add (data1, (ValueType) 2, num);
+            u.expect (areAllValuesEqual (data1, num, (ValueType) 4));
+
+            FloatVectorOperations::copy (data2, data1, num);
+            u.expect (areAllValuesEqual (data2, num, (ValueType) 4));
+
+            FloatVectorOperations::add (data2, data1, num);
+            u.expect (areAllValuesEqual (data2, num, (ValueType) 8));
+
+            FloatVectorOperations::copyWithMultiply (data2, data1, (ValueType) 4, num);
+            u.expect (areAllValuesEqual (data2, num, (ValueType) 16));
+
+            FloatVectorOperations::addWithMultiply (data2, data1, (ValueType) 4, num);
+            u.expect (areAllValuesEqual (data2, num, (ValueType) 32));
+
+            FloatVectorOperations::multiply (data1, (ValueType) 2, num);
+            u.expect (areAllValuesEqual (data1, num, (ValueType) 8));
+
+            FloatVectorOperations::multiply (data1, data2, num);
+            u.expect (areAllValuesEqual (data1, num, (ValueType) 256));
+
+            FloatVectorOperations::negate (data2, data1, num);
+            u.expect (areAllValuesEqual (data2, num, (ValueType) -256));
+
+            FloatVectorOperations::subtract (data1, data2, num);
+            u.expect (areAllValuesEqual (data1, num, (ValueType) 512));
+
+            fillRandomly (random, int1, num);
+            doConversionTest (u, data1, data2, int1, num);
+        }
+
+        static void doConversionTest (UnitTest& u, float* data1, float* data2, int* const int1, int num)
+        {
+            FloatVectorOperations::convertFixedToFloat (data1, int1, 2.0f, num);
+            convertFixed (data2, int1, 2.0f, num);
+            u.expect (buffersMatch (data1, data2, num));
+        }
+
+        static void doConversionTest (UnitTest&, double*, double*, int*, int) {}
+
+        static void fillRandomly (Random& random, ValueType* d, int num)
+        {
+            while (--num >= 0)
+                *d++ = (ValueType) (random.nextDouble() * 1000.0);
+        }
+
+        static void fillRandomly (Random& random, int* d, int num)
+        {
+            while (--num >= 0)
+                *d++ = random.nextInt();
+        }
+
+        static void convertFixed (float* d, const int* s, ValueType multiplier, int num)
+        {
+            while (--num >= 0)
+                *d++ = *s++ * multiplier;
+        }
+
+        static bool areAllValuesEqual (const ValueType* d, int num, ValueType target)
+        {
+            while (--num >= 0)
+                if (*d++ != target)
+                    return false;
+
+            return true;
+        }
+
+        static bool buffersMatch (const ValueType* d1, const ValueType* d2, int num)
+        {
+            while (--num >= 0)
+                if (! valuesMatch (*d1++, *d2++))
+                    return false;
+
+            return true;
+        }
+
+        static bool valuesMatch (ValueType v1, ValueType v2)
+        {
+            return std::abs (v1 - v2) < std::numeric_limits<ValueType>::epsilon();
+        }
+    };
+
     void runTest()
     {
         beginTest ("FloatVectorOperations");
 
-        for (int i = 100; --i >= 0;)
+        for (int i = 1000; --i >= 0;)
         {
-            const int num = getRandom().nextInt (500) + 1;
-
-            HeapBlock<float> buffer1 (num + 16), buffer2 (num + 16);
-            HeapBlock<int> buffer3 (num + 16);
-
-           #if JUCE_ARM
-            float* const data1 = buffer1;
-            float* const data2 = buffer2;
-            int* const int1 = buffer3;
-           #else
-            float* const data1 = addBytesToPointer (buffer1.getData(), getRandom().nextInt (16));
-            float* const data2 = addBytesToPointer (buffer2.getData(), getRandom().nextInt (16));
-            int* const int1 = addBytesToPointer (buffer3.getData(), getRandom().nextInt (16));
-           #endif
-
-            fillRandomly (data1, num);
-            fillRandomly (data2, num);
-
-            float mn1, mx1, mn2, mx2;
-            FloatVectorOperations::findMinAndMax (data1, num, mn1, mx1);
-            juce::findMinAndMax (data1, num, mn2, mx2);
-            expect (mn1 == mn2);
-            expect (mx1 == mx2);
-
-            expect (FloatVectorOperations::findMinimum (data1, num) == juce::findMinimum (data1, num));
-            expect (FloatVectorOperations::findMaximum (data1, num) == juce::findMaximum (data1, num));
-
-            expect (FloatVectorOperations::findMinimum (data2, num) == juce::findMinimum (data2, num));
-            expect (FloatVectorOperations::findMaximum (data2, num) == juce::findMaximum (data2, num));
-
-            FloatVectorOperations::clear (data1, num);
-            expect (areAllValuesEqual (data1, num, 0));
-
-            FloatVectorOperations::fill (data1, 2.0f, num);
-            expect (areAllValuesEqual (data1, num, 2.0f));
-
-            FloatVectorOperations::add (data1, 2.0f, num);
-            expect (areAllValuesEqual (data1, num, 4.0f));
-
-            FloatVectorOperations::copy (data2, data1, num);
-            expect (areAllValuesEqual (data2, num, 4.0f));
-
-            FloatVectorOperations::add (data2, data1, num);
-            expect (areAllValuesEqual (data2, num, 8.0f));
-
-            FloatVectorOperations::copyWithMultiply (data2, data1, 4.0f, num);
-            expect (areAllValuesEqual (data2, num, 16.0f));
-
-            FloatVectorOperations::addWithMultiply (data2, data1, 4.0f, num);
-            expect (areAllValuesEqual (data2, num, 32.0f));
-
-            FloatVectorOperations::multiply (data1, 2.0f, num);
-            expect (areAllValuesEqual (data1, num, 8.0f));
-
-            FloatVectorOperations::multiply (data1, data2, num);
-            expect (areAllValuesEqual (data1, num, 256.0f));
-
-            FloatVectorOperations::negate (data2, data1, num);
-            expect (areAllValuesEqual (data2, num, -256.0f));
-
-            FloatVectorOperations::subtract (data1, data2, num);
-            expect (areAllValuesEqual (data1, num, 512.0f));
-
-            fillRandomly (int1, num);
-            FloatVectorOperations::convertFixedToFloat (data1, int1, 2.0f, num);
-            convertFixed (data2, int1, 2.0f, num);
-            expect (buffersMatch (data1, data2, num));
+            TestRunner<float>::runTest (*this, getRandom());
+            TestRunner<double>::runTest (*this, getRandom());
         }
-    }
-
-    void fillRandomly (float* d, int num)
-    {
-        while (--num >= 0)
-            *d++ = getRandom().nextFloat() * 1000.0f;
-    }
-
-    void fillRandomly (int* d, int num)
-    {
-        while (--num >= 0)
-            *d++ = getRandom().nextInt();
-    }
-
-    static void convertFixed (float* d, const int* s, float multiplier, int num)
-    {
-        while (--num >= 0)
-            *d++ = *s++ * multiplier;
-    }
-
-    static bool areAllValuesEqual (const float* d, int num, float target)
-    {
-        while (--num >= 0)
-            if (*d++ != target)
-                return false;
-
-        return true;
-    }
-
-    static bool buffersMatch (const float* d1, const float* d2, int num)
-    {
-        while (--num >= 0)
-            if (std::abs (*d1++ - *d2++) > std::numeric_limits<float>::epsilon())
-                return false;
-
-        return true;
     }
 };
 
