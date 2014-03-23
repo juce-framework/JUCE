@@ -2024,15 +2024,6 @@ private:
                 used = handleKeyPress (extendedKeyModifier | (int) key, 0) || used;
                 break;
 
-            case VK_ADD:
-            case VK_SUBTRACT:
-            case VK_MULTIPLY:
-            case VK_DIVIDE:
-            case VK_SEPARATOR:
-            case VK_DECIMAL:
-                used = handleKeyUpOrDown (true);
-                break;
-
             default:
                 used = handleKeyUpOrDown (true);
 
