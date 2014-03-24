@@ -72,6 +72,6 @@ void IIRFilterAudioSource::getNextAudioBlock (const AudioSourceChannelInfo& buff
 
     for (int i = 0; i < numChannels; ++i)
         iirFilters.getUnchecked(i)
-            ->processSamples (bufferToFill.buffer->getSampleData (i, bufferToFill.startSample),
+            ->processSamples (bufferToFill.buffer->getWritePointer (i, bufferToFill.startSample),
                               bufferToFill.numSamples);
 }

@@ -175,9 +175,9 @@ static void setStateForAllBussesOfType (Vst::IComponent* component,
 
 //==============================================================================
 /** Assigns a complete AudioSampleBuffer's channels to an AudioBusBuffers' */
-static void associateWholeBufferTo (Vst::AudioBusBuffers& vstBuffers, const AudioSampleBuffer& buffer) noexcept
+static void associateWholeBufferTo (Vst::AudioBusBuffers& vstBuffers, AudioSampleBuffer& buffer) noexcept
 {
-    vstBuffers.channelBuffers32 = buffer.getArrayOfChannels();
+    vstBuffers.channelBuffers32 = buffer.getArrayOfWritePointers();
     vstBuffers.numChannels      = buffer.getNumChannels();
     vstBuffers.silenceFlags     = 0;
 }

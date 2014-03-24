@@ -304,7 +304,7 @@ public:
 
                 for (int chan = 0; chan < inputChannelBuffer.getNumChannels(); ++chan)
                 {
-                    AudioData::Pointer <AudioData::Float32, AudioData::NativeEndian, AudioData::NonInterleaved, AudioData::NonConst> d (inputChannelBuffer.getSampleData (chan));
+                    AudioData::Pointer <AudioData::Float32, AudioData::NativeEndian, AudioData::NonInterleaved, AudioData::NonConst> d (inputChannelBuffer.getWritePointer (chan));
 
                     if (chan < numDeviceInputChannels)
                     {
@@ -328,8 +328,8 @@ public:
 
                 if (callback != nullptr)
                 {
-                    callback->audioDeviceIOCallback ((const float**) inputChannelBuffer.getArrayOfChannels(), numClientInputChannels,
-                                                     outputChannelBuffer.getArrayOfChannels(), numClientOutputChannels,
+                    callback->audioDeviceIOCallback (inputChannelBuffer.getArrayOfReadPointers(), numClientInputChannels,
+                                                     outputChannelBuffer.getArrayOfWritePointers(), numClientOutputChannels,
                                                      actualBufferSize);
                 }
                 else
@@ -349,7 +349,7 @@ public:
                 {
                     AudioData::Pointer <AudioData::Int16, AudioData::NativeEndian, AudioData::Interleaved, AudioData::NonConst> d (dest + chan, numDeviceOutputChannels);
 
-                    const float* const sourceChanData = outputChannelBuffer.getSampleData (jmin (chan, outputChannelBuffer.getNumChannels() - 1));
+                    const float* const sourceChanData = outputChannelBuffer.getReadPointer (jmin (chan, outputChannelBuffer.getNumChannels() - 1));
                     AudioData::Pointer <AudioData::Float32, AudioData::NativeEndian, AudioData::NonInterleaved, AudioData::Const> s (sourceChanData);
                     d.convertSamples (s, actualBufferSize);
                 }

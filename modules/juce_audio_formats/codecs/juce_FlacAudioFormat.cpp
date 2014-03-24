@@ -176,7 +176,7 @@ public:
                 for (int i = jmin (numDestChannels, reservoir.getNumChannels()); --i >= 0;)
                     if (destSamples[i] != nullptr)
                         memcpy (destSamples[i] + startOffsetInDestBuffer,
-                                reservoir.getSampleData (i, (int) (startSampleInFile - reservoirStart)),
+                                reservoir.getReadPointer (i, (int) (startSampleInFile - reservoirStart)),
                                 sizeof (int) * (size_t) num);
 
                 startOffsetInDestBuffer += num;
@@ -243,7 +243,7 @@ public:
 
                 if (src != nullptr)
                 {
-                    int* const dest = reinterpret_cast<int*> (reservoir.getSampleData(i));
+                    int* const dest = reinterpret_cast<int*> (reservoir.getWritePointer(i));
 
                     for (int j = 0; j < numSamples; ++j)
                         dest[j] = src[j] << bitsToShift;

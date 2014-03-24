@@ -779,7 +779,7 @@ public:
                     needToReinterleave = true;
 
                     for (unsigned int subChan = 0; subChan < buf.mNumberChannels && numOutChans < numOut; ++subChan)
-                        channels [numOutChans++] = bufferSpace.getSampleData (nextSpareBufferChan++);
+                        channels [numOutChans++] = bufferSpace.getWritePointer (nextSpareBufferChan++);
                 }
 
                 if (numOutChans >= numOut)
@@ -814,7 +814,7 @@ public:
                         }
                         else
                         {
-                            dest = bufferSpace.getSampleData (nextSpareBufferChan++);
+                            dest = bufferSpace.getWritePointer (nextSpareBufferChan++);
                             channels [numInChans++] = dest;
                         }
 
@@ -915,7 +915,7 @@ public:
                     {
                         for (unsigned int subChan = 0; subChan < buf.mNumberChannels; ++subChan)
                         {
-                            const float* src = bufferSpace.getSampleData (nextSpareBufferChan++);
+                            const float* src = bufferSpace.getReadPointer (nextSpareBufferChan++);
                             float* dest = ((float*) buf.mData) + subChan;
 
                             for (int j = (int) numSamples; --j >= 0;)

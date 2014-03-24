@@ -339,7 +339,7 @@ namespace VST3BufferExchange
     */
     void associateBufferTo (Steinberg::Vst::AudioBusBuffers& vstBuffers,
                             Bus& bus,
-                            const AudioSampleBuffer& buffer,
+                            AudioSampleBuffer& buffer,
                             int numChannels, int channelStartOffset,
                             int sampleOffset = 0) noexcept
     {
@@ -349,7 +349,7 @@ namespace VST3BufferExchange
         bus.clearQuick();
 
         for (int i = channelStartOffset; i < channelEnd; ++i)
-            bus.add (buffer.getSampleData (i, sampleOffset));
+            bus.add (buffer.getWritePointer (i, sampleOffset));
 
         vstBuffers.channelBuffers32 = bus.getRawDataPointer();
         vstBuffers.numChannels      = numChannels;

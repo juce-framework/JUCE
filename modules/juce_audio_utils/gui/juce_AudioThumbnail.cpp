@@ -706,7 +706,7 @@ void AudioThumbnail::addBlock (const int64 startSample, const AudioSampleBuffer&
 
         for (int chan = 0; chan < numChans; ++chan)
         {
-            const float* const sourceData = incoming.getSampleData (chan, startOffsetInBuffer);
+            const float* const sourceData = incoming.getReadPointer (chan, startOffsetInBuffer);
             MinMaxValue* const dest = thumbData + numToDo * chan;
             thumbChannels [chan] = dest;
 

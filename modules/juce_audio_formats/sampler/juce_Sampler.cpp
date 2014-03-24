@@ -154,12 +154,12 @@ void SamplerVoice::renderNextBlock (AudioSampleBuffer& outputBuffer, int startSa
 {
     if (const SamplerSound* const playingSound = static_cast <SamplerSound*> (getCurrentlyPlayingSound().get()))
     {
-        const float* const inL = playingSound->data->getSampleData (0, 0);
+        const float* const inL = playingSound->data->getReadPointer (0);
         const float* const inR = playingSound->data->getNumChannels() > 1
-                                    ? playingSound->data->getSampleData (1, 0) : nullptr;
+                                    ? playingSound->data->getReadPointer (1) : nullptr;
 
-        float* outL = outputBuffer.getSampleData (0, startSample);
-        float* outR = outputBuffer.getNumChannels() > 1 ? outputBuffer.getSampleData (1, startSample) : nullptr;
+        float* outL = outputBuffer.getWritePointer (0, startSample);
+        float* outR = outputBuffer.getNumChannels() > 1 ? outputBuffer.getWritePointer (1, startSample) : nullptr;
 
         while (--numSamples >= 0)
         {
