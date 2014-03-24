@@ -34,6 +34,7 @@ namespace
 {
     static HHOOK mouseWheelHook = 0, keyboardHook = 0;
     static int numHookUsers = 0;
+    static bool keyboardHookReentrant = false;
 
     struct WindowsHooks
     {
@@ -89,6 +90,11 @@ namespace
 
         static LRESULT CALLBACK keyboardHookCallback (int nCode, WPARAM wParam, LPARAM lParam)
         {
+            if (keyboardHookReentrant)
+                return 1;
+
+            ScopedValueSetter<bool> setter (keyboardHookReentrant, true, false);
+
             MSG& msg = *(MSG*) lParam;
 
             if (nCode == HC_ACTION && offerKeyMessageToJUCEWindow (msg))
