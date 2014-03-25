@@ -452,7 +452,7 @@ public:
 
     bool writeData (OutputStream& target, const int64 overallStartPosition)
     {
-        MemoryOutputStream compressedData (file.getSize());
+        MemoryOutputStream compressedData ((size_t) file.getSize());
 
         if (compressionLevel > 0)
         {
