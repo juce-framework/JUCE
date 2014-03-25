@@ -120,7 +120,11 @@ namespace FileChooserHelpers
 //==============================================================================
 bool FileChooser::isPlatformDialogAvailable()
 {
+   #if JUCE_DISABLE_NATIVE_FILECHOOSERS
+    return false;
+   #else
     return true;
+   #endif
 }
 
 void FileChooser::showPlatformDialog (Array<File>& results, const String& title_, const File& currentFileOrDirectory,
