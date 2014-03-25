@@ -22,19 +22,12 @@
   ==============================================================================
 */
 
-#if JUCE_LABEL_EDITOR_IN_NEW_WINDOW
- #include "../../juce_audio_plugin_client/utility/juce_PluginHostType.h"
-#endif // JUCE_LABEL_EDITOR_IN_NEW_WINDOW
-
 Label::Label (const String& name, const String& labelText)
     : Component (name),
       textValue (labelText),
       lastTextValue (labelText),
       font (15.0f),
       justification (Justification::centredLeft),
-#if JUCE_LABEL_EDITOR_IN_NEW_WINDOW
-      parentBeforeOnDesktop(0),
-#endif // JUCE_LABEL_EDITOR_IN_NEW_WINDOW
       horizontalBorderSize (5),
       verticalBorderSize (1),
       minimumHorizontalScale (0.7f),
@@ -206,30 +199,8 @@ void Label::editorAboutToBeHidden (TextEditor*)
         peer->dismissPendingTextInput();
 }
 
-#if JUCE_LABEL_EDITOR_IN_NEW_WINDOW
-bool Label::hostNeedsEditorInNewWindow()
-{
-    PluginHostType pluginHostType;
-    if (pluginHostType.isSteinberg())
-        return true;
-    if (pluginHostType.type == PluginHostType::DigidesignProTools)
-        return true;
-    return false;
-}
-#endif // JUCE_LABEL_EDITOR_IN_NEW_WINDOW
-
 void Label::showEditor()
 {
-#if JUCE_LABEL_EDITOR_IN_NEW_WINDOW
-    if (!isOnDesktop() && hostNeedsEditorInNewWindow())
-    {
-        parentBeforeOnDesktop = getParentComponent();
-        boundsBeforeOnDesktop = getBounds();
-        addToDesktop(juce::ComponentPeer::windowIsTemporary);
-        grabKeyboardFocus();
-    }
-#endif // JUCE_LABEL_EDITOR_IN_NEW_WINDOW
-
     if (editor == nullptr)
     {
         addAndMakeVisible (editor = createEditorComponent());
@@ -275,17 +246,6 @@ bool Label::updateFromTextEditorContents (TextEditor& ed)
 
 void Label::hideEditor (const bool discardCurrentEditorContents)
 {
-#if JUCE_LABEL_EDITOR_IN_NEW_WINDOW
-    if (isOnDesktop() && parentBeforeOnDesktop != 0)
-    {
-        parentBeforeOnDesktop->addChildComponent(this);
-        setBounds(boundsBeforeOnDesktop);
-        parentBeforeOnDesktop->resized();
-        // If user actually put the label on desktop, avoid returning to old parent.
-        parentBeforeOnDesktop = 0;
-    }
-#endif // JUCE_LABEL_EDITOR_IN_NEW_WINDOW
-
     if (editor != nullptr)
     {
         WeakReference<Component> deletionChecker (this);
