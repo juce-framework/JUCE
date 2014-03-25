@@ -386,7 +386,7 @@ static const unsigned char temp_binary_data_6[] =
 "    // audio processing...\r\n"
 "    for (int channel = 0; channel < getNumInputChannels(); ++channel)\r\n"
 "    {\r\n"
-"        float* channelData = buffer.getSampleData (channel);\r\n"
+"        float* channelData = buffer.getWritePointer (channel);\r\n"
 "\r\n"
 "        // ..do something to the data...\r\n"
 "    }\r\n"
@@ -1234,7 +1234,7 @@ const char* getNamedResource (const char* resourceNameUTF8, int& numBytes) throw
         case 0xe8b08520:  numBytes = 1050; return colourscheme_light_xml;
         case 0x27c5a93a:  numBytes = 1008; return jucer_AudioPluginEditorTemplate_cpp;
         case 0x4d0721bf:  numBytes = 799; return jucer_AudioPluginEditorTemplate_h;
-        case 0x51b49ac5:  numBytes = 4638; return jucer_AudioPluginFilterTemplate_cpp;
+        case 0x51b49ac5:  numBytes = 4640; return jucer_AudioPluginFilterTemplate_cpp;
         case 0x488afa0a:  numBytes = 2488; return jucer_AudioPluginFilterTemplate_h;
         case 0xabad7041:  numBytes = 2083; return jucer_ComponentTemplate_cpp;
         case 0xfc72fe86:  numBytes = 2156; return jucer_ComponentTemplate_h;

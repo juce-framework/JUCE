@@ -54,15 +54,8 @@ void OpenGLShaderProgram::release() noexcept
 
 double OpenGLShaderProgram::getLanguageVersion()
 {
-   #if JUCE_OPENGL_ES
-    // GLES doesn't support this version number, but that shouldn't matter since
-    // on GLES you probably won't need to check it.
-    jassertfalse;
-    return 0;
-   #else
-    return String ((const char*) glGetString (GL_SHADING_LANGUAGE_VERSION))
-            .upToFirstOccurrenceOf (" ", false, false).getDoubleValue();
-   #endif
+    return String::fromUTF8 ((const char*) glGetString (GL_SHADING_LANGUAGE_VERSION))
+            .retainCharacters("1234567890.").getDoubleValue();
 }
 
 bool OpenGLShaderProgram::addShader (const String& code, GLenum type)

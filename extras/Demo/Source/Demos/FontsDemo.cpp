@@ -96,11 +96,15 @@ public:
 
         demoTextBox.setMultiLine (true);
         demoTextBox.setReturnKeyStartsNewLine (true);
-        demoTextBox.setText ("The Quick Brown Fox Jumped Over The Lazy Dog\n\n"
-                             "Aa Bb Cc Dd Ee Ff Gg Hh Ii\n"
+        demoTextBox.setText ("Aa Bb Cc Dd Ee Ff Gg Hh Ii\n"
                              "Jj Kk Ll Mm Nn Oo Pp Qq Rr\n"
                              "Ss Tt Uu Vv Ww Xx Yy Zz\n"
-                             "0123456789");
+                             "0123456789\n\n"
+                             "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt "
+                             "ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco "
+                             "laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in "
+                             "voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat "
+                             "non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.");
 
         demoTextBox.setCaretPosition (0);
     }
@@ -176,10 +180,10 @@ public:
         AttributedString s;
         s.setWordWrap (AttributedString::none);
         s.setJustification (Justification::centredLeft);
-        s.append (font.getTypefaceName(), font.withHeight (height * 0.8f), Colours::black);
+        s.append (font.getTypefaceName(), font.withPointHeight (height * 0.7f), Colours::black);
         s.append ("   " + font.getTypefaceName(), Font (height * 0.5f, Font::italic), Colours::grey);
 
-        s.draw (g, Rectangle<float> (4.0f, 0.0f, width - 5.0f, (float) height));
+        s.draw (g, Rectangle<int> (width, height).expanded (-4, 50).toFloat());
     }
 
     void selectedRowsChanged (int /*lastRowselected*/)
@@ -209,18 +213,19 @@ private:
 
         Font font (fonts [listBox.getSelectedRow()]);
 
-        font.setHeight ((float) heightSlider.getValue());
-        font.setBold (bold);
-        font.setItalic (italic);
-        font.setExtraKerningFactor ((float) kerningSlider.getValue());
-        font.setHorizontalScale ((float) scaleSlider.getValue());
+        font = font.withPointHeight ((float) heightSlider.getValue())
+                   .withExtraKerningFactor ((float) kerningSlider.getValue())
+                   .withHorizontalScale ((float) scaleSlider.getValue());
+
+        if (bold)    font = font.boldened();
+        if (italic)  font = font.italicised();
 
         updateStylesList (font);
 
         styleBox.setEnabled (useStyle);
 
         if (useStyle)
-            font.setTypefaceStyle (styleBox.getText());
+            font = font.withTypefaceStyle (styleBox.getText());
 
         demoTextBox.applyFontToAllText (font);
     }

@@ -248,7 +248,8 @@ private:
         {
             CachedGlyphType* const glyph = glyphs.getUnchecked(i);
 
-            if (glyph->lastAccessCount <= oldestCounter)
+            if (glyph->lastAccessCount <= oldestCounter
+                 && glyph->getReferenceCount() == 1)
             {
                 oldestCounter = glyph->lastAccessCount;
                 oldest = glyph;

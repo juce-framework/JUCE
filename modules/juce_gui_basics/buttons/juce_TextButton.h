@@ -37,17 +37,18 @@ class JUCE_API  TextButton  : public Button
 {
 public:
     //==============================================================================
-    /** Creates a TextButton.
+    /** Creates a TextButton. */
+    TextButton();
 
+    /** Creates a TextButton.
         @param buttonName           the text to put in the button (the component's name is also
                                     initially set to this string, but these can be changed later
                                     using the setName() and setButtonText() methods)
         @param toolTip              an optional string to use as a toolip
-
         @see Button
     */
-    TextButton (const String& buttonName = String::empty,
-                const String& toolTip = String::empty);
+    explicit TextButton (const String& buttonName,
+                         const String& toolTip = String::empty);
 
     /** Destructor. */
     ~TextButton();
@@ -74,19 +75,18 @@ public:
 
     //==============================================================================
     /** Resizes the button to fit neatly around its current text.
-
         If newHeight is >= 0, the button's height will be changed to this
         value. If it's less than zero, its height will be unaffected.
     */
     void changeWidthToFitText (int newHeight = -1);
 
     /** This can be overridden to use different fonts than the default one.
-
         Note that you'll need to set the font's size appropriately, too.
     */
     virtual Font getFont();
 
-protected:
+
+    //==============================================================================
     /** @internal */
     void paintButton (Graphics&, bool isMouseOverButton, bool isButtonDown) override;
     /** @internal */

@@ -141,7 +141,7 @@ public:
             [window setHasShadow: ((windowStyleFlags & windowHasDropShadow) != 0)];
 
             if (component.isAlwaysOnTop())
-                [window setLevel: NSFloatingWindowLevel];
+                setAlwaysOnTop (true);
 
             [window setContentView: view];
             [window setAutodisplay: YES];
@@ -441,8 +441,10 @@ public:
     bool setAlwaysOnTop (bool alwaysOnTop) override
     {
         if (! isSharedWindow)
-            [window setLevel: alwaysOnTop ? NSFloatingWindowLevel
+            [window setLevel: alwaysOnTop ? ((getStyleFlags() & windowIsTemporary) != 0 ? NSPopUpMenuWindowLevel
+                                                                                        : NSFloatingWindowLevel)
                                           : NSNormalWindowLevel];
+
         return true;
     }
 
@@ -474,7 +476,7 @@ public:
 
     void toBehind (ComponentPeer* other) override
     {
-        NSViewComponentPeer* const otherPeer = dynamic_cast <NSViewComponentPeer*> (other);
+        NSViewComponentPeer* const otherPeer = dynamic_cast<NSViewComponentPeer*> (other);
         jassert (otherPeer != nullptr); // wrong type of window?
 
         if (otherPeer != nullptr)
@@ -485,7 +487,7 @@ public:
                                   positioned: NSWindowBelow
                                   relativeTo: otherPeer->view];
             }
-            else
+            else if (component.isVisible())
             {
                 [window orderWindow: NSWindowBelow
                          relativeTo: [otherPeer->window windowNumber]];
@@ -1607,7 +1609,7 @@ private:
     static NSRect firstRectForCharacterRange (id self, SEL, NSRange)
     {
         if (NSViewComponentPeer* const owner = getOwner (self))
-            if (Component* const comp = dynamic_cast <Component*> (owner->findCurrentTextInputTarget()))
+            if (Component* const comp = dynamic_cast<Component*> (owner->findCurrentTextInputTarget()))
                 return flippedScreenRect (makeNSRect (comp->getScreenBounds()));
 
         return NSZeroRect;

@@ -530,7 +530,7 @@ public:
                 {
                     abl->mBuffers[j].mNumberChannels = 1;
                     abl->mBuffers[j].mDataByteSize = sizeof (float) * numSamples;
-                    abl->mBuffers[j].mData = buffer.getSampleData (i * numOutputBusChannels + j, 0);
+                    abl->mBuffers[j].mData = buffer.getWritePointer (i * numOutputBusChannels + j);
                 }
             }
 
@@ -1050,7 +1050,7 @@ private:
                 if (bufferChannel < currentBuffer->getNumChannels())
                 {
                     memcpy (ioData->mBuffers[i].mData,
-                            currentBuffer->getSampleData (bufferChannel, 0),
+                            currentBuffer->getReadPointer (bufferChannel),
                             sizeof (float) * inNumberFrames);
                 }
                 else

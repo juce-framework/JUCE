@@ -116,27 +116,58 @@ public:
     */
     int getNumSamples() const noexcept      { return size; }
 
-    /** Returns a pointer one of the buffer's channels.
+    /** Returns a pointer to an array of read-only samples in one of the buffer's channels.
         For speed, this doesn't check whether the channel number is out of range,
         so be careful when using it!
+        If you need to write to the data, do NOT call this method and const_cast the
+        result! Instead, you must call getWritePointer so that the buffer knows you're
+        planning on modifying the data.
     */
-    float* getSampleData (const int channelNumber) const noexcept
+    const float* getReadPointer (int channelNumber) const noexcept
     {
         jassert (isPositiveAndBelow (channelNumber, numChannels));
         return channels [channelNumber];
     }
 
-    /** Returns a pointer to a sample in one of the buffer's channels.
-
-        For speed, this doesn't check whether the channel and sample number
-        are out-of-range, so be careful when using it!
+    /** Returns a pointer to an array of read-only samples in one of the buffer's channels.
+        For speed, this doesn't check whether the channel number or index are out of range,
+        so be careful when using it!
+        If you need to write to the data, do NOT call this method and const_cast the
+        result! Instead, you must call getWritePointer so that the buffer knows you're
+        planning on modifying the data.
     */
-    float* getSampleData (const int channelNumber,
-                          const int sampleOffset) const noexcept
+    const float* getReadPointer (int channelNumber, int sampleIndex) const noexcept
     {
         jassert (isPositiveAndBelow (channelNumber, numChannels));
-        jassert (isPositiveAndBelow (sampleOffset, size));
-        return channels [channelNumber] + sampleOffset;
+        jassert (isPositiveAndBelow (sampleIndex, size));
+        return channels [channelNumber] + sampleIndex;
+    }
+
+    /** Returns a writeable pointer to one of the buffer's channels.
+        For speed, this doesn't check whether the channel number is out of range,
+        so be careful when using it!
+        Note that if you're not planning on writing to the data, you should always
+        use getReadPointer instead.
+    */
+    float* getWritePointer (int channelNumber) noexcept
+    {
+        jassert (isPositiveAndBelow (channelNumber, numChannels));
+        isClear = false;
+        return channels [channelNumber];
+    }
+
+    /** Returns a writeable pointer to one of the buffer's channels.
+        For speed, this doesn't check whether the channel number or index are out of range,
+        so be careful when using it!
+        Note that if you're not planning on writing to the data, you should
+        use getReadPointer instead.
+    */
+    float* getWritePointer (int channelNumber, int sampleIndex) noexcept
+    {
+        jassert (isPositiveAndBelow (channelNumber, numChannels));
+        jassert (isPositiveAndBelow (sampleIndex, size));
+        isClear = false;
+        return channels [channelNumber] + sampleIndex;
     }
 
     /** Returns an array of pointers to the channels in the buffer.
@@ -144,7 +175,14 @@ public:
         Don't modify any of the pointers that are returned, and bear in mind that
         these will become invalid if the buffer is resized.
     */
-    float** getArrayOfChannels() const noexcept         { return channels; }
+    const float** getArrayOfReadPointers() const noexcept           { return const_cast<const float**> (channels); }
+
+    /** Returns an array of pointers to the channels in the buffer.
+
+        Don't modify any of the pointers that are returned, and bear in mind that
+        these will become invalid if the buffer is resized.
+    */
+    float** getArrayOfWritePointers() noexcept                      { isClear = false; return channels; }
 
     //==============================================================================
     /** Changes the buffer's size or number of channels.
@@ -215,6 +253,36 @@ public:
     void clear (int channel,
                 int startSample,
                 int numSamples) noexcept;
+
+    /** Returns true if the buffer has been entirely cleared.
+        Note that this does not actually measure the contents of the buffer - it simply
+        returns a flag that is set when the buffer is cleared, and which is reset whenever
+        functions like getWritePointer() are invoked. That means the method does not take
+        any time, but it may return false negatives when in fact the buffer is still empty.
+    */
+    bool hasBeenCleared() const noexcept                            { return isClear; }
+
+    //==============================================================================
+    /** Returns a sample from the buffer.
+        The channel and index are not checked - they are expected to be in-range. If not,
+        an assertion will be thrown, but in a release build, you're into 'undefined behaviour'
+        territory.
+    */
+    float getSample (int channel, int sampleIndex) const noexcept;
+
+    /** Sets a sample in the buffer.
+        The channel and index are not checked - they are expected to be in-range. If not,
+        an assertion will be thrown, but in a release build, you're into 'undefined behaviour'
+        territory.
+    */
+    void setSample (int destChannel, int destSample, float newValue) noexcept;
+
+    /** Adds a value to a sample in the buffer.
+        The channel and index are not checked - they are expected to be in-range. If not,
+        an assertion will be thrown, but in a release build, you're into 'undefined behaviour'
+        territory.
+    */
+    void addSample (int destChannel, int destSample, float valueToAdd) noexcept;
 
     /** Applies a gain multiple to a region of one channel.
 
@@ -392,19 +460,15 @@ public:
                            float endGain) noexcept;
 
 
-    /** Finds the highest and lowest sample values in a given range.
+    /** Returns a Range indicating the lowest and highest sample values in a given section.
 
         @param channel      the channel to read from
         @param startSample  the start sample within the channel
         @param numSamples   the number of samples to check
-        @param minVal       on return, the lowest value that was found
-        @param maxVal       on return, the highest value that was found
     */
-    void findMinMax (int channel,
-                     int startSample,
-                     int numSamples,
-                     float& minVal,
-                     float& maxVal) const noexcept;
+    Range<float> findMinMax (int channel,
+                             int startSample,
+                             int numSamples) const noexcept;
 
     /** Finds the highest absolute sample value within a region of a channel. */
     float getMagnitude (int channel,
@@ -426,13 +490,27 @@ public:
     /** Reverses a part of the buffer. */
     void reverse (int startSample, int numSamples) const noexcept;
 
+    //==============================================================================
+   #ifndef DOXYGEN
+    // Note that these methods have now been replaced by getReadPointer() and getWritePointer()
+    JUCE_DEPRECATED (const float* getSampleData (int channel) const)            { return getReadPointer (channel); }
+    JUCE_DEPRECATED (const float* getSampleData (int channel, int index) const) { return getReadPointer (channel, index); }
+    JUCE_DEPRECATED (float* getSampleData (int channel))                        { return getWritePointer (channel); }
+    JUCE_DEPRECATED (float* getSampleData (int channel, int index))             { return getWritePointer (channel, index); }
+
+    // These have been replaced by getArrayOfReadPointers() and getArrayOfWritePointers()
+    JUCE_DEPRECATED (const float** getArrayOfChannels() const)                  { return getArrayOfReadPointers(); }
+    JUCE_DEPRECATED (float** getArrayOfChannels())                              { return getArrayOfWritePointers(); }
+   #endif
+
 private:
     //==============================================================================
     int numChannels, size;
     size_t allocatedBytes;
     float** channels;
-    HeapBlock <char, true> allocatedData;
+    HeapBlock<char, true> allocatedData;
     float* preallocatedChannelSpace [32];
+    bool isClear;
 
     void allocateData();
     void allocateChannels (float* const* dataToReferTo, int offset);

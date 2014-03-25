@@ -129,9 +129,9 @@ private:
                 typedef AudioData::Pointer <AudioData::Float32, AudioData::NativeEndian, AudioData::NonInterleaved, AudioData::Const> SourceSampleFormat;
 
                 CDSampleFormat left (buffer, 2);
-                left.convertSamples (SourceSampleFormat (tempBuffer.getSampleData (0)), numSamples);
+                left.convertSamples (SourceSampleFormat (tempBuffer.getReadPointer (0)), numSamples);
                 CDSampleFormat right (buffer + 2, 2);
-                right.convertSamples (SourceSampleFormat (tempBuffer.getSampleData (1)), numSamples);
+                right.convertSamples (SourceSampleFormat (tempBuffer.getReadPointer (1)), numSamples);
 
                 source->readPosition += numSamples;
             }

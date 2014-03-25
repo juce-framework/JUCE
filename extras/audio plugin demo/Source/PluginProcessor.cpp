@@ -95,7 +95,7 @@ public:
                     const float currentSample = (float) (sin (currentAngle) * level * tailOff);
 
                     for (int i = outputBuffer.getNumChannels(); --i >= 0;)
-                        *outputBuffer.getSampleData (i, startSample) += currentSample;
+                        outputBuffer.addSample (i, startSample, currentSample);
 
                     currentAngle += angleDelta;
                     ++startSample;
@@ -118,7 +118,7 @@ public:
                     const float currentSample = (float) (sin (currentAngle) * level);
 
                     for (int i = outputBuffer.getNumChannels(); --i >= 0;)
-                        *outputBuffer.getSampleData (i, startSample) += currentSample;
+                        outputBuffer.addSample (i, startSample, currentSample);
 
                     currentAngle += angleDelta;
                     ++startSample;
@@ -263,8 +263,8 @@ void JuceDemoPluginAudioProcessor::processBlock (AudioSampleBuffer& buffer, Midi
     // Apply our delay effect to the new output..
     for (channel = 0; channel < getNumInputChannels(); ++channel)
     {
-        float* channelData = buffer.getSampleData (channel);
-        float* delayData = delayBuffer.getSampleData (jmin (channel, delayBuffer.getNumChannels() - 1));
+        float* channelData = buffer.getWritePointer (channel);
+        float* delayData = delayBuffer.getWritePointer (jmin (channel, delayBuffer.getNumChannels() - 1));
         dp = delayPosition;
 
         for (int i = 0; i < numSamples; ++i)

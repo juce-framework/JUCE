@@ -140,7 +140,7 @@ void FILTERCLASSNAME::processBlock (AudioSampleBuffer& buffer, MidiBuffer& midiM
     // audio processing...
     for (int channel = 0; channel < getNumInputChannels(); ++channel)
     {
-        float* channelData = buffer.getSampleData (channel);
+        float* channelData = buffer.getWritePointer (channel);
 
         // ..do something to the data...
     }

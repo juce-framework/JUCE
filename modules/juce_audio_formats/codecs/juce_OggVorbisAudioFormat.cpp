@@ -173,7 +173,7 @@ public:
                 for (int i = jmin (numDestChannels, reservoir.getNumChannels()); --i >= 0;)
                     if (destSamples[i] != nullptr)
                         memcpy (destSamples[i] + startOffsetInDestBuffer,
-                                reservoir.getSampleData (i, (int) (startSampleInFile - reservoirStart)),
+                                reservoir.getReadPointer (i, (int) (startSampleInFile - reservoirStart)),
                                 sizeof (float) * (size_t) numToUse);
 
                 startSampleInFile += numToUse;
@@ -210,11 +210,7 @@ public:
                     jassert (samps <= numToRead);
 
                     for (int i = jmin ((int) numChannels, reservoir.getNumChannels()); --i >= 0;)
-                    {
-                        memcpy (reservoir.getSampleData (i, offset),
-                                dataIn[i],
-                                sizeof (float) * (size_t) samps);
-                    }
+                        memcpy (reservoir.getWritePointer (i, offset), dataIn[i], sizeof (float) * (size_t) samps);
 
                     numToRead -= samps;
                     offset += samps;

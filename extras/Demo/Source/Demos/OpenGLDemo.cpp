@@ -810,11 +810,7 @@ struct OpenGLDemoClasses
                     attributes = new Attributes (openGLContext, *shader);
                     uniforms   = new Uniforms (openGLContext, *shader);
 
-                   #if ! JUCE_OPENGL_ES
                     statusText = "GLSL: v" + String (OpenGLShaderProgram::getLanguageVersion(), 2);
-                   #else
-                    statusText = "GLSL ES";
-                   #endif
                 }
                 else
                 {

@@ -1062,17 +1062,17 @@ public:
 
             if ((effect->flags & effFlagsCanReplacing) != 0)
             {
-                effect->processReplacing (effect, buffer.getArrayOfChannels(), buffer.getArrayOfChannels(), numSamples);
+                effect->processReplacing (effect, buffer.getArrayOfWritePointers(), buffer.getArrayOfWritePointers(), numSamples);
             }
             else
             {
                 tempBuffer.setSize (effect->numOutputs, numSamples);
                 tempBuffer.clear();
 
-                effect->process (effect, buffer.getArrayOfChannels(), tempBuffer.getArrayOfChannels(), numSamples);
+                effect->process (effect, buffer.getArrayOfWritePointers(), tempBuffer.getArrayOfWritePointers(), numSamples);
 
                 for (int i = effect->numOutputs; --i >= 0;)
-                    buffer.copyFrom (i, 0, tempBuffer.getSampleData (i), numSamples);
+                    buffer.copyFrom (i, 0, tempBuffer.getReadPointer (i), numSamples);
             }
         }
         else

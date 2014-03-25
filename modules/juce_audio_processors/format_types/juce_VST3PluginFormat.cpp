@@ -175,9 +175,9 @@ static void setStateForAllBussesOfType (Vst::IComponent* component,
 
 //==============================================================================
 /** Assigns a complete AudioSampleBuffer's channels to an AudioBusBuffers' */
-static void associateWholeBufferTo (Vst::AudioBusBuffers& vstBuffers, const AudioSampleBuffer& buffer) noexcept
+static void associateWholeBufferTo (Vst::AudioBusBuffers& vstBuffers, AudioSampleBuffer& buffer) noexcept
 {
-    vstBuffers.channelBuffers32 = buffer.getArrayOfChannels();
+    vstBuffers.channelBuffers32 = buffer.getArrayOfWritePointers();
     vstBuffers.numChannels      = buffer.getNumChannels();
     vstBuffers.silenceFlags     = 0;
 }
@@ -223,6 +223,8 @@ static void toProcessContext (Vst::ProcessContext& context, AudioPlayHead* playH
                     context.frameRate.flags |= FrameRate::kPullDownRate;
             }
             break;
+
+            case AudioPlayHead::fpsUnknown: break;
 
             default:    jassertfalse; break; // New frame rate?
         }
@@ -1634,7 +1636,11 @@ public:
 
     bool hasEditor() const override
     {
-        ComSmartPtr<IPlugView> view (tryCreatingView()); //N.B.: Must use a ComSmartPtr to not delete the view from the plugin permanently!
+        // (if possible, avoid creating a second instance of the editor, because that crashes some plugins)
+        if (getActiveEditor() != nullptr)
+            return true;
+
+        ComSmartPtr<IPlugView> view (tryCreatingView());
         return view != nullptr;
     }
 

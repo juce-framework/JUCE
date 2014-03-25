@@ -24,9 +24,15 @@
 
 #if JUCE_WINDOWS
 
+namespace juce
+{
+    // This function is in juce_win32_Windowing.cpp
+    extern bool offerKeyMessageToJUCEWindow (MSG&);
+}
+
 namespace
 {
-    static HHOOK mouseWheelHook = 0;
+    static HHOOK mouseWheelHook = 0, keyboardHook = 0;
     static int numHookUsers = 0;
 
     struct WindowsHooks
@@ -39,11 +45,9 @@ namespace
                                                    (HINSTANCE) Process::getCurrentModuleInstanceHandle(),
                                                    GetCurrentThreadId());
 
-               #if 0 // XXX temporary for testing
-                keyboardHook = SetWindowsHookEx (WH_KEYBOARD, keyboardHookCallback,
+                keyboardHook = SetWindowsHookEx (WH_GETMESSAGE, keyboardHookCallback,
                                                  (HINSTANCE) Process::getCurrentModuleInstanceHandle(),
                                                  GetCurrentThreadId());
-               #endif
             }
         }
 
@@ -57,13 +61,11 @@ namespace
                     mouseWheelHook = 0;
                 }
 
-               #if 0 // XXX temporary for testing
                 if (keyboardHook != 0)
                 {
                     UnhookWindowsHookEx (keyboardHook);
                     keyboardHook = 0;
                 }
-               #endif
             }
         }
 
@@ -85,16 +87,20 @@ namespace
             return CallNextHookEx (mouseWheelHook, nCode, wParam, lParam);
         }
 
-       #if 0 // XXX temporary for testing
         static LRESULT CALLBACK keyboardHookCallback (int nCode, WPARAM wParam, LPARAM lParam)
         {
-            if (nCode >= 0 && nCode == HC_ACTION)
-                if (passKeyUpDownToPeer (GetFocus(), wParam, (lParam & (1 << 31)) == 0))
-                    return 1;
+            MSG& msg = *(MSG*) lParam;
+
+            if (nCode == HC_ACTION && wParam == PM_REMOVE
+                 && offerKeyMessageToJUCEWindow (msg))
+            {
+                zerostruct (msg);
+                msg.message = WM_USER;
+                return 1;
+            }
 
             return CallNextHookEx (keyboardHook, nCode, wParam, lParam);
         }
-       #endif
     };
 }
 

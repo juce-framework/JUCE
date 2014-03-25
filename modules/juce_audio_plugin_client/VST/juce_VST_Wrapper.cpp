@@ -472,7 +472,7 @@ public:
         processTempBuffer.setSize (numIn, numSamples, false, false, true);
 
         for (int i = numIn; --i >= 0;)
-            memcpy (processTempBuffer.getSampleData (i), outputs[i], sizeof (float) * (size_t) numSamples);
+            processTempBuffer.copyFrom (i, 0, outputs[i], numSamples);
 
         processReplacing (inputs, outputs, numSamples);
 

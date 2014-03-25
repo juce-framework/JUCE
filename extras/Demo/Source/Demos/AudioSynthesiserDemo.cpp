@@ -104,7 +104,7 @@ struct SineWaveVoice  : public SynthesiserVoice
                     const float currentSample = (float) (sin (currentAngle) * level * tailOff);
 
                     for (int i = outputBuffer.getNumChannels(); --i >= 0;)
-                        *outputBuffer.getSampleData (i, startSample) += currentSample;
+                        outputBuffer.addSample (i, startSample, currentSample);
 
                     currentAngle += angleDelta;
                     ++startSample;
@@ -127,7 +127,7 @@ struct SineWaveVoice  : public SynthesiserVoice
                     const float currentSample = (float) (sin (currentAngle) * level);
 
                     for (int i = outputBuffer.getNumChannels(); --i >= 0;)
-                        *outputBuffer.getSampleData (i, startSample) += currentSample;
+                        outputBuffer.addSample (i, startSample, currentSample);
 
                     currentAngle += angleDelta;
                     ++startSample;

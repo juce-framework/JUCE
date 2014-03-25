@@ -311,7 +311,7 @@ public:
     bool writeToOutputDevice (AudioSampleBuffer& outputChannelBuffer, const int numSamples)
     {
         jassert (numChannelsRunning <= outputChannelBuffer.getNumChannels());
-        float** const data = outputChannelBuffer.getArrayOfChannels();
+        float* const* const data = outputChannelBuffer.getArrayOfWritePointers();
         snd_pcm_sframes_t numDone = 0;
 
         if (isInterleaved)
@@ -343,7 +343,7 @@ public:
     bool readFromInputDevice (AudioSampleBuffer& inputChannelBuffer, const int numSamples)
     {
         jassert (numChannelsRunning <= inputChannelBuffer.getNumChannels());
-        float** const data = inputChannelBuffer.getArrayOfChannels();
+        float* const* const data = inputChannelBuffer.getArrayOfWritePointers();
 
         if (isInterleaved)
         {
@@ -497,7 +497,7 @@ public:
             {
                 if (inputChannels[i])
                 {
-                    inputChannelDataForCallback.add (inputChannelBuffer.getSampleData (i));
+                    inputChannelDataForCallback.add (inputChannelBuffer.getReadPointer (i));
                     currentInputChans.setBit (i);
                 }
             }
@@ -516,7 +516,7 @@ public:
             {
                 if (outputChannels[i])
                 {
-                    outputChannelDataForCallback.add (outputChannelBuffer.getSampleData (i));
+                    outputChannelDataForCallback.add (outputChannelBuffer.getWritePointer (i));
                     currentOutputChans.setBit (i);
                 }
             }
@@ -666,7 +666,7 @@ public:
 
                 if (callback != nullptr)
                 {
-                    callback->audioDeviceIOCallback ((const float**) inputChannelDataForCallback.getRawDataPointer(),
+                    callback->audioDeviceIOCallback (inputChannelDataForCallback.getRawDataPointer(),
                                                      inputChannelDataForCallback.size(),
                                                      outputChannelDataForCallback.getRawDataPointer(),
                                                      outputChannelDataForCallback.size(),
@@ -736,7 +736,8 @@ private:
     CriticalSection callbackLock;
 
     AudioSampleBuffer inputChannelBuffer, outputChannelBuffer;
-    Array<float*> inputChannelDataForCallback, outputChannelDataForCallback;
+    Array<const float*> inputChannelDataForCallback;
+    Array<float*> outputChannelDataForCallback;
 
     unsigned int minChansOut, maxChansOut;
     unsigned int minChansIn, maxChansIn;
