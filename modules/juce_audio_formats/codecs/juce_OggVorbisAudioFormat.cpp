@@ -106,7 +106,6 @@ class OggReader : public AudioFormatReader
 public:
     OggReader (InputStream* const inp)
         : AudioFormatReader (inp, oggFormatName),
-          reservoir (2, 4096),
           reservoirStart (0),
           samplesInReservoir (0)
     {
@@ -140,8 +139,7 @@ public:
             bitsPerSample = 16;
             sampleRate = info->rate;
 
-            reservoir.setSize ((int) numChannels,
-                               (int) jmin (lengthInSamples, (int64) reservoir.getNumSamples()));
+            reservoir.setSize ((int) numChannels, (int) jmin (lengthInSamples, (int64) 4096));
         }
     }
 

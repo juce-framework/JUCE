@@ -104,7 +104,6 @@ class FlacReader  : public AudioFormatReader
 public:
     FlacReader (InputStream* const in)
         : AudioFormatReader (in, flacFormatName),
-          reservoir (2, 0),
           reservoirStart (0),
           samplesInReservoir (0),
           scanningForLength (false)

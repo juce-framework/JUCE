@@ -731,8 +731,6 @@ public:
           isStarted (false),
           bufferSizeSamples (0),
           sampleRate (0.0),
-          inputBuffers (1, 1),
-          outputBuffers (1, 1),
           callback (nullptr)
     {
         if (outputDeviceIndex_ >= 0)
@@ -871,8 +869,8 @@ private:
     bool isStarted;
     String lastError;
 
-    OwnedArray <DSoundInternalInChannel> inChans;
-    OwnedArray <DSoundInternalOutChannel> outChans;
+    OwnedArray<DSoundInternalInChannel> inChans;
+    OwnedArray<DSoundInternalOutChannel> outChans;
     WaitableEvent startEvent;
 
     int bufferSizeSamples;

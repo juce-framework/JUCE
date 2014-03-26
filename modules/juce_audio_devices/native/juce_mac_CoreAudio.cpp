@@ -1026,8 +1026,7 @@ public:
     AudioIODeviceCombiner (const String& deviceName)
         : AudioIODevice (deviceName, "CoreAudio"),
           Thread (deviceName), callback (nullptr),
-          currentSampleRate (0), currentBufferSize (0), active (false),
-          fifos (1, 1)
+          currentSampleRate (0), currentBufferSize (0), active (false)
     {
     }
 

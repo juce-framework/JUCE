@@ -28,14 +28,12 @@ ResamplingAudioSource::ResamplingAudioSource (AudioSource* const inputSource,
     : input (inputSource, deleteInputWhenDeleted),
       ratio (1.0),
       lastRatio (1.0),
-      buffer (numChannels_, 0),
       bufferPos (0),
       sampsInBuffer (0),
       subSampleOffset (0),
       numChannels (numChannels_)
 {
     jassert (input != nullptr);
-
     zeromem (coefficients, sizeof (coefficients));
 }
 
