@@ -2149,7 +2149,7 @@
 				GCC_WARN_TYPECHECK_CALLS_TO_PRINTF = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				PRODUCT_NAME = "JuceDemoPlugin";
-				WARNING_CFLAGS = -Wreorder;
+				WARNING_CFLAGS = "-Wreorder -Wno-deprecated-register";
 				ZERO_LINK = NO; }; name = Debug; };
 		FDD382CE3C754F66D9DB396A = {isa = XCBuildConfiguration; buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -2164,7 +2164,7 @@
 				GCC_WARN_TYPECHECK_CALLS_TO_PRINTF = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				PRODUCT_NAME = "JuceDemoPlugin";
-				WARNING_CFLAGS = -Wreorder;
+				WARNING_CFLAGS = "-Wreorder -Wno-deprecated-register";
 				ZERO_LINK = NO; }; name = Release; };
 		0720B453F376663EAB98BF9B = {isa = XCConfigurationList; buildConfigurations = (
 					6758D5C5D24024DB6F83E78F,
