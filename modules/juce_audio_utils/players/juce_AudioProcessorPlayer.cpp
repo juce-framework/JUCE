@@ -28,8 +28,7 @@ AudioProcessorPlayer::AudioProcessorPlayer()
       blockSize (0),
       isPrepared (false),
       numInputChans (0),
-      numOutputChans (0),
-      tempBuffer (1, 1)
+      numOutputChans (0)
 {
 }
 

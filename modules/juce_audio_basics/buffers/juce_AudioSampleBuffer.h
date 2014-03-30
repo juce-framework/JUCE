@@ -35,6 +35,10 @@ class JUCE_API  AudioSampleBuffer
 {
 public:
     //==============================================================================
+    /** Creates an empty buffer with 0 channels and 0 length. */
+    AudioSampleBuffer() noexcept;
+
+    //==============================================================================
     /** Creates a buffer with a specified number of channels and samples.
 
         The contents of the buffer will initially be undefined, so use clear() to
@@ -93,12 +97,12 @@ public:
         using an external data buffer, in which case boths buffers will just point to the same
         shared block of data.
     */
-    AudioSampleBuffer (const AudioSampleBuffer& other) noexcept;
+    AudioSampleBuffer (const AudioSampleBuffer&) noexcept;
 
     /** Copies another buffer onto this one.
         This buffer's size will be changed to that of the other buffer.
     */
-    AudioSampleBuffer& operator= (const AudioSampleBuffer& other) noexcept;
+    AudioSampleBuffer& operator= (const AudioSampleBuffer&) noexcept;
 
     /** Destructor.
         This will free any memory allocated by the buffer.
@@ -493,14 +497,14 @@ public:
     //==============================================================================
    #ifndef DOXYGEN
     // Note that these methods have now been replaced by getReadPointer() and getWritePointer()
-    JUCE_DEPRECATED (const float* getSampleData (int channel) const)            { return getReadPointer (channel); }
-    JUCE_DEPRECATED (const float* getSampleData (int channel, int index) const) { return getReadPointer (channel, index); }
-    JUCE_DEPRECATED (float* getSampleData (int channel))                        { return getWritePointer (channel); }
-    JUCE_DEPRECATED (float* getSampleData (int channel, int index))             { return getWritePointer (channel, index); }
+    JUCE_DEPRECATED_WITH_BODY (const float* getSampleData (int channel) const,            { return getReadPointer (channel); })
+    JUCE_DEPRECATED_WITH_BODY (const float* getSampleData (int channel, int index) const, { return getReadPointer (channel, index); })
+    JUCE_DEPRECATED_WITH_BODY (float* getSampleData (int channel),                        { return getWritePointer (channel); })
+    JUCE_DEPRECATED_WITH_BODY (float* getSampleData (int channel, int index),             { return getWritePointer (channel, index); })
 
     // These have been replaced by getArrayOfReadPointers() and getArrayOfWritePointers()
-    JUCE_DEPRECATED (const float** getArrayOfChannels() const)                  { return getArrayOfReadPointers(); }
-    JUCE_DEPRECATED (float** getArrayOfChannels())                              { return getArrayOfWritePointers(); }
+    JUCE_DEPRECATED_WITH_BODY (const float** getArrayOfChannels() const,                  { return getArrayOfReadPointers(); })
+    JUCE_DEPRECATED_WITH_BODY (float** getArrayOfChannels(),                              { return getArrayOfWritePointers(); })
    #endif
 
 private:
@@ -513,7 +517,7 @@ private:
     bool isClear;
 
     void allocateData();
-    void allocateChannels (float* const* dataToReferTo, int offset);
+    void allocateChannels (float* const*, int offset);
 
     JUCE_LEAK_DETECTOR (AudioSampleBuffer)
 };

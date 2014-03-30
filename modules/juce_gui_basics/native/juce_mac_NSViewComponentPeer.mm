@@ -898,11 +898,7 @@ public:
 
     NSRect constrainRect (NSRect r)
     {
-        if (constrainer != nullptr
-            #if defined (MAC_OS_X_VERSION_10_7) && (MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_7)
-             && ([window styleMask] & NSFullScreenWindowMask) == 0
-            #endif
-            )
+        if (constrainer != nullptr && ! isKioskMode())
         {
             Rectangle<int> pos      (convertToRectInt (flippedScreenRect (r)));
             Rectangle<int> original (convertToRectInt (flippedScreenRect ([window frame])));

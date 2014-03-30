@@ -95,7 +95,6 @@ AudioDeviceManager::AudioDeviceManager()
       useInputNames (false),
       inputLevel (0),
       testSoundPosition (0),
-      tempBuffer (2, 2),
       cpuUsageMs (0),
       timeToCpuScale (0)
 {

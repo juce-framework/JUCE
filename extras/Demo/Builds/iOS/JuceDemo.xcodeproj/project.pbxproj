@@ -2219,7 +2219,7 @@
 				PRODUCT_NAME = "JuceDemo";
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				WARNING_CFLAGS = -Wreorder;
+				WARNING_CFLAGS = "-Wreorder -Wno-deprecated-register";
 				ZERO_LINK = NO; }; name = Debug; };
 		5D9A258B559C20D1603B9B9F = {isa = XCBuildConfiguration; buildSettings = {
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
@@ -2237,7 +2237,7 @@
 				PRODUCT_NAME = "JuceDemo";
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				WARNING_CFLAGS = -Wreorder;
+				WARNING_CFLAGS = "-Wreorder -Wno-deprecated-register";
 				ZERO_LINK = NO; }; name = Release; };
 		E3E8152B5B6326971AA2F802 = {isa = XCConfigurationList; buildConfigurations = (
 					A16C0416417EF9DF7B09973F,

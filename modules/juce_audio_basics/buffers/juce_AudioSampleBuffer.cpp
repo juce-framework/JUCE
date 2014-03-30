@@ -22,13 +22,20 @@
   ==============================================================================
 */
 
+AudioSampleBuffer::AudioSampleBuffer() noexcept
+  : numChannels (0), size (0), allocatedBytes (0),
+    channels (static_cast<float**> (preallocatedChannelSpace)),
+    isClear (false)
+{
+}
+
 AudioSampleBuffer::AudioSampleBuffer (const int numChans,
                                       const int numSamples) noexcept
   : numChannels (numChans),
     size (numSamples)
 {
     jassert (numSamples >= 0);
-    jassert (numChans > 0);
+    jassert (numChans >= 0);
 
     allocateData();
 }
@@ -63,7 +70,7 @@ void AudioSampleBuffer::allocateData()
     const size_t channelListSize = sizeof (float*) * (size_t) (numChannels + 1);
     allocatedBytes = (size_t) numChannels * (size_t) size * sizeof (float) + channelListSize + 32;
     allocatedData.malloc (allocatedBytes);
-    channels = reinterpret_cast <float**> (allocatedData.getData());
+    channels = reinterpret_cast<float**> (allocatedData.getData());
 
     float* chan = (float*) (allocatedData + channelListSize);
     for (int i = 0; i < numChannels; ++i)
@@ -83,7 +90,8 @@ AudioSampleBuffer::AudioSampleBuffer (float* const* dataToReferTo,
       size (numSamples),
       allocatedBytes (0)
 {
-    jassert (numChans > 0);
+    jassert (dataToReferTo != nullptr);
+    jassert (numChans >= 0);
     allocateChannels (dataToReferTo, 0);
 }
 
@@ -96,7 +104,8 @@ AudioSampleBuffer::AudioSampleBuffer (float* const* dataToReferTo,
       allocatedBytes (0),
       isClear (false)
 {
-    jassert (numChans > 0);
+    jassert (dataToReferTo != nullptr);
+    jassert (numChans >= 0);
     allocateChannels (dataToReferTo, startSample);
 }
 
@@ -104,7 +113,8 @@ void AudioSampleBuffer::setDataToReferTo (float** dataToReferTo,
                                           const int newNumChannels,
                                           const int newNumSamples) noexcept
 {
-    jassert (newNumChannels > 0);
+    jassert (dataToReferTo != nullptr);
+    jassert (newNumChannels >= 0);
 
     allocatedBytes = 0;
     allocatedData.free();
@@ -121,12 +131,12 @@ void AudioSampleBuffer::allocateChannels (float* const* const dataToReferTo, int
     // (try to avoid doing a malloc here, as that'll blow up things like Pro-Tools)
     if (numChannels < (int) numElementsInArray (preallocatedChannelSpace))
     {
-        channels = static_cast <float**> (preallocatedChannelSpace);
+        channels = static_cast<float**> (preallocatedChannelSpace);
     }
     else
     {
         allocatedData.malloc ((size_t) numChannels + 1, sizeof (float*));
-        channels = reinterpret_cast <float**> (allocatedData.getData());
+        channels = reinterpret_cast<float**> (allocatedData.getData());
     }
 
     for (int i = 0; i < numChannels; ++i)
@@ -171,7 +181,7 @@ void AudioSampleBuffer::setSize (const int newNumChannels,
                                  const bool clearExtraSpace,
                                  const bool avoidReallocating) noexcept
 {
-    jassert (newNumChannels > 0);
+    jassert (newNumChannels >= 0);
     jassert (newNumSamples >= 0);
 
     if (newNumSamples != size || newNumChannels != numChannels)

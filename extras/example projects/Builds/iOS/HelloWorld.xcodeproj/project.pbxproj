@@ -1498,7 +1498,7 @@
 				PRODUCT_NAME = "HelloWorld";
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				WARNING_CFLAGS = -Wreorder;
+				WARNING_CFLAGS = "-Wreorder -Wno-deprecated-register";
 				ZERO_LINK = NO; }; name = Debug; };
 		CA9F73DE863A75BEA780D77E = {isa = XCBuildConfiguration; buildSettings = {
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
@@ -1516,7 +1516,7 @@
 				PRODUCT_NAME = "HelloWorld";
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				WARNING_CFLAGS = -Wreorder;
+				WARNING_CFLAGS = "-Wreorder -Wno-deprecated-register";
 				ZERO_LINK = NO; }; name = Release; };
 		D5495970AC0AFC78DD0ADE12 = {isa = XCConfigurationList; buildConfigurations = (
 					F6DA01300C80F2338FCBD24A,

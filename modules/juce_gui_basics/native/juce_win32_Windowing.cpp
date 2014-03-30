@@ -2135,7 +2135,8 @@ private:
     bool isConstrainedNativeWindow() const
     {
         return constrainer != nullptr
-                && (styleFlags & (windowHasTitleBar | windowIsResizable)) == (windowHasTitleBar | windowIsResizable);
+                && (styleFlags & (windowHasTitleBar | windowIsResizable)) == (windowHasTitleBar | windowIsResizable)
+                && ! isKioskMode();
     }
 
     Rectangle<int> getCurrentScaledBounds (float scale) const

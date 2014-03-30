@@ -32,9 +32,7 @@ class LatencyTester  : public AudioIODeviceCallback,
 {
 public:
     LatencyTester (TextEditor& resultsBox_)
-        : testSound (1, 1),
-          recordedSound (1, 1),
-          playingSampleNum (0),
+        : playingSampleNum (0),
           recordedSampleNum (-1),
           sampleRate (0),
           testIsRunning (false),

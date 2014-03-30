@@ -355,7 +355,7 @@ File File::getChildFile (StringRef relativePath) const
     if (isAbsolutePath (relativePath))
         return File (String (relativePath.text));
 
-    if (relativePath.text[0] != '.')
+    if (relativePath[0] != '.')
         return File (addTrailingSeparator (fullPath) + relativePath);
 
     String path (fullPath);
@@ -368,11 +368,11 @@ File File::getChildFile (StringRef relativePath) const
 
     while (relativePath[0] == '.')
     {
-        const juce_wchar secondChar = relativePath.text[1];
+        const juce_wchar secondChar = relativePath[1];
 
         if (secondChar == '.')
         {
-            const juce_wchar thirdChar = relativePath.text[2];
+            const juce_wchar thirdChar = relativePath[2];
 
             if (thirdChar == 0 || thirdChar == separator)
             {

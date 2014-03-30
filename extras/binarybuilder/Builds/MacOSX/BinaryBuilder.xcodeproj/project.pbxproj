@@ -515,7 +515,7 @@
 				GCC_WARN_TYPECHECK_CALLS_TO_PRINTF = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				PRODUCT_NAME = "BinaryBuilder";
-				WARNING_CFLAGS = -Wreorder;
+				WARNING_CFLAGS = "-Wreorder -Wno-deprecated-register";
 				ZERO_LINK = NO; }; name = Debug; };
 		7545BE591FD462C37E44B903 = {isa = XCBuildConfiguration; buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -530,7 +530,7 @@
 				GCC_WARN_TYPECHECK_CALLS_TO_PRINTF = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				PRODUCT_NAME = "BinaryBuilder";
-				WARNING_CFLAGS = -Wreorder;
+				WARNING_CFLAGS = "-Wreorder -Wno-deprecated-register";
 				ZERO_LINK = NO; }; name = Release; };
 		E4C85B0464A93027D035AA1F = {isa = XCConfigurationList; buildConfigurations = (
 					D9552CAECBA3D7D5725848E5,
