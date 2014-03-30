@@ -1950,7 +1950,7 @@
 				GCC_WARN_TYPECHECK_CALLS_TO_PRINTF = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				PRODUCT_NAME = "Introjucer";
-				WARNING_CFLAGS = "-Wreorder -Wno-deprecated-register";
+				WARNING_CFLAGS = -Wreorder;
 				ZERO_LINK = NO; }; name = Debug; };
 		70135D15D7E0D8410C42BBA3 = {isa = XCBuildConfiguration; buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -1965,7 +1965,7 @@
 				GCC_WARN_TYPECHECK_CALLS_TO_PRINTF = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				PRODUCT_NAME = "Introjucer";
-				WARNING_CFLAGS = "-Wreorder -Wno-deprecated-register";
+				WARNING_CFLAGS = -Wreorder;
 				ZERO_LINK = NO; }; name = Release; };
 		F90407F24422C589DA251604 = {isa = XCConfigurationList; buildConfigurations = (
 					C42924A24AB55E6A940423EA,

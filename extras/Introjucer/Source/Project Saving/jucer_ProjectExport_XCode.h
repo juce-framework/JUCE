@@ -667,7 +667,7 @@ private:
         s.add ("GCC_WARN_MISSING_PARENTHESES = YES");
         s.add ("GCC_WARN_NON_VIRTUAL_DESTRUCTOR = YES");
         s.add ("GCC_WARN_TYPECHECK_CALLS_TO_PRINTF = YES");
-        s.add ("WARNING_CFLAGS = \"-Wreorder -Wno-deprecated-register\"");
+        s.add ("WARNING_CFLAGS = -Wreorder");
         s.add ("GCC_MODEL_TUNING = G5");
 
         if (projectType.isStaticLibrary())

@@ -40,6 +40,7 @@ namespace OggVorbisNamespace
   #pragma clang diagnostic push
   #pragma clang diagnostic ignored "-Wconversion"
   #pragma clang diagnostic ignored "-Wshadow"
+  #pragma clang diagnostic ignored "-Wdeprecated-register"
  #endif
 
  #include "oggvorbis/vorbisenc.h"
