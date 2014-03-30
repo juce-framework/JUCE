@@ -498,7 +498,9 @@ public:
 
         if (canBeAttached (comp))
         {
-            if (! isAttached (comp))
+            if (isAttached (comp))
+                comp.repaint(); // (needed when windows are un-minimised)
+            else
                 attach();
         }
         else
