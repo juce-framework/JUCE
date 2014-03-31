@@ -90,10 +90,10 @@ void Synthesiser::clearVoices()
     voices.clear();
 }
 
-void Synthesiser::addVoice (SynthesiserVoice* const newVoice)
+SynthesiserVoice* Synthesiser::addVoice (SynthesiserVoice* const newVoice)
 {
     const ScopedLock sl (lock);
-    voices.add (newVoice);
+    return voices.add (newVoice);
 }
 
 void Synthesiser::removeVoice (const int index)
@@ -108,10 +108,10 @@ void Synthesiser::clearSounds()
     sounds.clear();
 }
 
-void Synthesiser::addSound (const SynthesiserSound::Ptr& newSound)
+SynthesiserSound* Synthesiser::addSound (const SynthesiserSound::Ptr& newSound)
 {
     const ScopedLock sl (lock);
-    sounds.add (newSound);
+    return sounds.add (newSound);
 }
 
 void Synthesiser::removeSound (const int index)
