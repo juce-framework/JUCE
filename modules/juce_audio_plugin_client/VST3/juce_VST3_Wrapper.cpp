@@ -1194,6 +1194,18 @@ public:
         const int numInputChans  = data.inputs  != nullptr ? (int) data.inputs[0].numChannels : 0;
         const int numOutputChans = data.outputs != nullptr ? (int) data.outputs[0].numChannels : 0;
 
+        if (numInputChans != pluginInstance->getNumInputChannels() ||
+            numOutputChans != pluginInstance->getNumOutputChannels())
+        {
+            const double sampleRate = pluginInstance->getSampleRate();
+            const int bufferSize = (int) data.numSamples;
+            pluginInstance->setPlayConfigDetails (numInputChans,
+                                                  numOutputChans,
+                                                  sampleRate, bufferSize);
+
+            pluginInstance->prepareToPlay (sampleRate, bufferSize);
+        }
+
         int totalChans = 0;
 
         while (totalChans < numInputChans)
