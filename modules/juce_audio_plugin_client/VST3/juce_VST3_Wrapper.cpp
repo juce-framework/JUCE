@@ -135,7 +135,7 @@ public:
     //==============================================================================
     REFCOUNT_METHODS (ComponentBase)
 
-    tresult PLUGIN_API queryInterface (const TUID iid, void** obj) override
+    tresult PLUGIN_API queryInterface (const TUID targetIID, void** obj) override
     {
         TEST_FOR_AND_RETURN_IF_VALID (FObject)
         TEST_FOR_AND_RETURN_IF_VALID (JuceVST3EditController)
@@ -147,7 +147,7 @@ public:
         TEST_FOR_COMMON_BASE_AND_RETURN_IF_VALID (IDependent, Vst::IEditController)
         TEST_FOR_COMMON_BASE_AND_RETURN_IF_VALID (FUnknown, Vst::IEditController)
 
-        if (doUIDsMatch (iid, JuceAudioProcessor::iid))
+        if (doUIDsMatch (targetIID, JuceAudioProcessor::iid))
         {
             audioProcessor->addRef();
             *obj = audioProcessor;
@@ -601,7 +601,7 @@ public:
 
     JUCE_DECLARE_VST3_COM_REF_METHODS
 
-    tresult PLUGIN_API queryInterface (const TUID iid, void** obj) override
+    tresult PLUGIN_API queryInterface (const TUID targetIID, void** obj) override
     {
         TEST_FOR_AND_RETURN_IF_VALID (IPluginBase)
         TEST_FOR_AND_RETURN_IF_VALID (JuceVST3Component)
@@ -611,7 +611,7 @@ public:
         TEST_FOR_AND_RETURN_IF_VALID (Vst::IConnectionPoint)
         TEST_FOR_COMMON_BASE_AND_RETURN_IF_VALID (FUnknown, Vst::IComponent)
 
-        if (doUIDsMatch (iid, JuceAudioProcessor::iid))
+        if (doUIDsMatch (targetIID, JuceAudioProcessor::iid))
         {
             comPluginInstance->addRef();
             *obj = comPluginInstance;
@@ -1447,7 +1447,7 @@ bool shutdownModule()
         {
             if (--numBundleRefs == 0)
             {
-                for (size_t i = 0; i < bundleRefs.size(); ++i)
+                for (int i = 0; i < bundleRefs.size(); ++i)
                     CFRelease (bundleRefs.getUnchecked (i));
 
                 bundleRefs.clear();
