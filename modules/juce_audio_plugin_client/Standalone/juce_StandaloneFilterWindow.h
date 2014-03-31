@@ -93,7 +93,7 @@ public:
             if (data.fromBase64Encoding (settings->getValue ("filterState"))
                  && data.getSize() > 0)
             {
-                filter->setStateInformation (data.getData(), data.getSize());
+                filter->setStateInformation (data.getData(), (int) data.getSize());
             }
         }
 
@@ -207,7 +207,7 @@ public:
 
             if (fc.getResult().loadFileAsData (data))
             {
-                filter->setStateInformation (data.getData(), data.getSize());
+                filter->setStateInformation (data.getData(), (int) data.getSize());
             }
             else
             {
