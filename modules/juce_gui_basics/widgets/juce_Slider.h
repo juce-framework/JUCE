@@ -620,7 +620,6 @@ public:
     void setPopupMenuEnabled (bool menuEnabled);
 
     /** This can be used to stop the mouse scroll-wheel from moving the slider.
-
         By default it's enabled.
     */
     void setScrollWheelEnabled (bool enabled);

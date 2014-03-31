@@ -40,7 +40,6 @@ namespace jpeglibNamespace
     #pragma clang diagnostic ignored "-Wdeprecated-register"
    #endif
 
-
     #define JPEG_INTERNALS
     #undef FAR
     #include "jpglib/jpeglib.h"
