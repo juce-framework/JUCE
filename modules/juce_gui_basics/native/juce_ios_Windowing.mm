@@ -22,6 +22,8 @@
   ==============================================================================
 */
 
+extern bool isIOSAppActive;
+
 } // (juce namespace)
 
 @interface JuceAppStartupDelegate : NSObject <UIApplicationDelegate>
@@ -32,6 +34,8 @@
 - (void) applicationWillTerminate: (UIApplication*) application;
 - (void) applicationDidEnterBackground: (UIApplication*) application;
 - (void) applicationWillEnterForeground: (UIApplication*) application;
+- (void) applicationDidBecomeActive: (UIApplication*) application;
+- (void) applicationWillResignActive: (UIApplication*) application;
 
 @end
 
@@ -66,6 +70,18 @@
     (void) application;
     if (JUCEApplicationBase* const app = JUCEApplicationBase::getInstance())
         app->resumed();
+}
+
+- (void) applicationDidBecomeActive: (UIApplication*) application
+{
+    (void) application;
+    isIOSAppActive = true;
+}
+
+- (void) applicationWillResignActive: (UIApplication*) application
+{
+    (void) application;
+    isIOSAppActive = false;
 }
 
 @end
