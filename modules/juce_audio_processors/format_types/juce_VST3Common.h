@@ -43,16 +43,16 @@ static bool doUIDsMatch (const Steinberg::TUID a, const Steinberg::TUID b) noexc
     return std::memcmp (a, b, sizeof (Steinberg::TUID)) == 0;
 }
 
-#define TEST_FOR_AND_RETURN_IF_VALID(ClassType) \
-    if (doUIDsMatch (iid, ClassType::iid)) \
+#define TEST_FOR_AND_RETURN_IF_VALID(Iid, ClassType) \
+    if (doUIDsMatch (Iid, ClassType::iid)) \
     { \
         addRef(); \
         *obj = dynamic_cast<ClassType*> (this); \
         return Steinberg::kResultOk; \
     }
 
-#define TEST_FOR_COMMON_BASE_AND_RETURN_IF_VALID(CommonClassType, SourceClassType) \
-    if (doUIDsMatch (iid, CommonClassType::iid)) \
+#define TEST_FOR_COMMON_BASE_AND_RETURN_IF_VALID(Iid, CommonClassType, SourceClassType) \
+    if (doUIDsMatch (Iid, CommonClassType::iid)) \
     { \
         addRef(); \
         *obj = (CommonClassType*) static_cast<SourceClassType*> (this); \

@@ -109,8 +109,8 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (JuceAudioProcessor)
 };
 
-#define TEST_FOR_COMMON_BASE_AND_RETURN_IF_VALID(CommonClassType, SourceClassType) \
-    if (doUIDsMatch (iid, CommonClassType::iid)) \
+#define TEST_FOR_COMMON_BASE_AND_RETURN_IF_VALID(Iid, CommonClassType, SourceClassType) \
+    if (doUIDsMatch (Iid, CommonClassType::iid)) \
     { \
         addRef(); \
         *obj = (CommonClassType*) static_cast<SourceClassType*> (this); \
@@ -137,15 +137,15 @@ public:
 
     tresult PLUGIN_API queryInterface (const TUID targetIID, void** obj) override
     {
-        TEST_FOR_AND_RETURN_IF_VALID (FObject)
-        TEST_FOR_AND_RETURN_IF_VALID (JuceVST3EditController)
-        TEST_FOR_AND_RETURN_IF_VALID (Vst::IEditController)
-        TEST_FOR_AND_RETURN_IF_VALID (Vst::IEditController2)
-        TEST_FOR_AND_RETURN_IF_VALID (Vst::IConnectionPoint)
-        TEST_FOR_AND_RETURN_IF_VALID (Vst::IMidiMapping)
-        TEST_FOR_COMMON_BASE_AND_RETURN_IF_VALID (IPluginBase, Vst::IEditController)
-        TEST_FOR_COMMON_BASE_AND_RETURN_IF_VALID (IDependent, Vst::IEditController)
-        TEST_FOR_COMMON_BASE_AND_RETURN_IF_VALID (FUnknown, Vst::IEditController)
+        TEST_FOR_AND_RETURN_IF_VALID (targetIID, FObject)
+        TEST_FOR_AND_RETURN_IF_VALID (targetIID, JuceVST3EditController)
+        TEST_FOR_AND_RETURN_IF_VALID (targetIID, Vst::IEditController)
+        TEST_FOR_AND_RETURN_IF_VALID (targetIID, Vst::IEditController2)
+        TEST_FOR_AND_RETURN_IF_VALID (targetIID, Vst::IConnectionPoint)
+        TEST_FOR_AND_RETURN_IF_VALID (targetIID, Vst::IMidiMapping)
+        TEST_FOR_COMMON_BASE_AND_RETURN_IF_VALID (targetIID, IPluginBase, Vst::IEditController)
+        TEST_FOR_COMMON_BASE_AND_RETURN_IF_VALID (targetIID, IDependent, Vst::IEditController)
+        TEST_FOR_COMMON_BASE_AND_RETURN_IF_VALID (targetIID, FUnknown, Vst::IEditController)
 
         if (doUIDsMatch (targetIID, JuceAudioProcessor::iid))
         {
@@ -603,13 +603,13 @@ public:
 
     tresult PLUGIN_API queryInterface (const TUID targetIID, void** obj) override
     {
-        TEST_FOR_AND_RETURN_IF_VALID (IPluginBase)
-        TEST_FOR_AND_RETURN_IF_VALID (JuceVST3Component)
-        TEST_FOR_AND_RETURN_IF_VALID (Vst::IComponent)
-        TEST_FOR_AND_RETURN_IF_VALID (Vst::IAudioProcessor)
-        TEST_FOR_AND_RETURN_IF_VALID (Vst::IUnitInfo)
-        TEST_FOR_AND_RETURN_IF_VALID (Vst::IConnectionPoint)
-        TEST_FOR_COMMON_BASE_AND_RETURN_IF_VALID (FUnknown, Vst::IComponent)
+        TEST_FOR_AND_RETURN_IF_VALID (targetIID, IPluginBase)
+        TEST_FOR_AND_RETURN_IF_VALID (targetIID, JuceVST3Component)
+        TEST_FOR_AND_RETURN_IF_VALID (targetIID, Vst::IComponent)
+        TEST_FOR_AND_RETURN_IF_VALID (targetIID, Vst::IAudioProcessor)
+        TEST_FOR_AND_RETURN_IF_VALID (targetIID, Vst::IUnitInfo)
+        TEST_FOR_AND_RETURN_IF_VALID (targetIID, Vst::IConnectionPoint)
+        TEST_FOR_COMMON_BASE_AND_RETURN_IF_VALID (targetIID, FUnknown, Vst::IComponent)
 
         if (doUIDsMatch (targetIID, JuceAudioProcessor::iid))
         {
@@ -1537,12 +1537,12 @@ public:
     //==============================================================================
     JUCE_DECLARE_VST3_COM_REF_METHODS
 
-    tresult PLUGIN_API queryInterface (const TUID iid, void** obj) override
+    tresult PLUGIN_API queryInterface (const TUID targetIID, void** obj) override
     {
-        TEST_FOR_AND_RETURN_IF_VALID (IPluginFactory3)
-        TEST_FOR_AND_RETURN_IF_VALID (IPluginFactory2)
-        TEST_FOR_AND_RETURN_IF_VALID (IPluginFactory)
-        TEST_FOR_AND_RETURN_IF_VALID (FUnknown)
+        TEST_FOR_AND_RETURN_IF_VALID (targetIID, IPluginFactory3)
+        TEST_FOR_AND_RETURN_IF_VALID (targetIID, IPluginFactory2)
+        TEST_FOR_AND_RETURN_IF_VALID (targetIID, IPluginFactory)
+        TEST_FOR_AND_RETURN_IF_VALID (targetIID, FUnknown)
 
         jassertfalse; // Something new?
         *obj = nullptr;
