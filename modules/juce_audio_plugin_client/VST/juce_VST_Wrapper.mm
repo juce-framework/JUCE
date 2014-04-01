@@ -219,7 +219,7 @@ void detachComponentFromWindowRef (Component* comp, void* window, bool isNSView)
         }
        #endif
 
-        (void) isNSView;
+        (void) isNSView; (void) window;
         comp->removeFromDesktop();
     }
 }

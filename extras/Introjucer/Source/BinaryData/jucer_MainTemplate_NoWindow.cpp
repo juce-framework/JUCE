@@ -18,30 +18,30 @@ public:
     //==============================================================================
     APPCLASSNAME() {}
 
-    const String getApplicationName()       { return ProjectInfo::projectName; }
-    const String getApplicationVersion()    { return ProjectInfo::versionString; }
-    bool moreThanOneInstanceAllowed()       { return ALLOWMORETHANONEINSTANCE; }
+    const String getApplicationName() override       { return ProjectInfo::projectName; }
+    const String getApplicationVersion() override    { return ProjectInfo::versionString; }
+    bool moreThanOneInstanceAllowed() override       { return ALLOWMORETHANONEINSTANCE; }
 
     //==============================================================================
-    void initialise (const String& commandLine)
+    void initialise (const String& commandLine) override
     {
         // Add your application's initialisation code here..
     }
 
-    void shutdown()
+    void shutdown() override
     {
         // Add your application's shutdown code here..
     }
 
     //==============================================================================
-    void systemRequestedQuit()
+    void systemRequestedQuit() override
     {
         // This is called when the app is being asked to quit: you can ignore this
         // request and let the app carry on running, or call quit() to allow the app to close.
         quit();
     }
 
-    void anotherInstanceStarted (const String& commandLine)
+    void anotherInstanceStarted (const String& commandLine) override
     {
         // When another instance of the app is launched while this one is running,
         // this method is invoked, and the commandLine parameter tells you what

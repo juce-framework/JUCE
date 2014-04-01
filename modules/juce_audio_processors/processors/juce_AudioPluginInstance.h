@@ -33,6 +33,10 @@
     This derives from the AudioProcessor class, and adds some extra functionality
     that helps when wrapping dynamically loaded plugins.
 
+    This class is not needed when writing plugins, and you should never need to derive
+    your own sub-classes from it. The plugin hosting classes use it internally and will
+    return AudioPluginInstance objects which wrap external plugins.
+
     @see AudioProcessor, AudioPluginFormat
 */
 class JUCE_API  AudioPluginInstance   : public AudioProcessor
