@@ -1086,6 +1086,8 @@ public:
             return kResultFalse;
        #endif
 
+        preparePlugin (getPluginInstance().getSampleRate(), getPluginInstance().getBlockSize());
+
         return kResultTrue;
     }
 
@@ -1311,8 +1313,12 @@ private:
 
     void preparePlugin (double sampleRate, int bufferSize)
     {
-        getPluginInstance().setPlayConfigDetails (JucePlugin_MaxNumInputChannels,
-                                                  JucePlugin_MaxNumOutputChannels,
+        Steinberg::Vst::BusInfo inputBusInfo, outputBusInfo;
+        audioInputs.first()->getInfo(inputBusInfo);
+        audioOutputs.first()->getInfo(outputBusInfo);
+
+        getPluginInstance().setPlayConfigDetails (inputBusInfo.channelCount,
+                                                  outputBusInfo.channelCount,
                                                   sampleRate, bufferSize);
 
         getPluginInstance().prepareToPlay (sampleRate, bufferSize);
