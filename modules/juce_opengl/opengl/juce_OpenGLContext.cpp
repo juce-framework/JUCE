@@ -336,7 +336,11 @@ public:
         {
             if (! renderFrame())
                 wait (5); // failed to render, so avoid a tight fail-loop.
+           #if JUCE_IOS
+            else if (! (context.continuousRepaint && Process::isForegroundProcess()))
+           #else
             else if (! context.continuousRepaint)
+           #endif
                 wait (-1);
         }
 
@@ -606,6 +610,7 @@ void OpenGLContext::setComponentPaintingEnabled (bool shouldPaintComponent) noex
 void OpenGLContext::setContinuousRepainting (bool shouldContinuouslyRepaint) noexcept
 {
     continuousRepaint = shouldContinuouslyRepaint;
+    triggerRepaint();
 }
 
 void OpenGLContext::setPixelFormat (const OpenGLPixelFormat& preferredPixelFormat) noexcept
