@@ -55,6 +55,9 @@
 #undef Point
 #undef Component
 
+namespace juce
+{
+
 using namespace Steinberg;
 
 //==============================================================================
@@ -75,15 +78,12 @@ private:
 };
 
 //==============================================================================
-namespace juce
-{
- #if JUCE_MAC
-  extern void initialiseMac();
-  extern void* attachComponentToWindowRef (Component*, void* parent, bool isNSView);
-  extern void detachComponentFromWindowRef (Component*, void* window, bool isNSView);
-  extern void setNativeHostWindowSize (void* window, Component*, int newWidth, int newHeight, bool isNSView);
- #endif
-}
+#if JUCE_MAC
+ extern void initialiseMac();
+ extern void* attachComponentToWindowRef (Component*, void* parent, bool isNSView);
+ extern void detachComponentFromWindowRef (Component*, void* window, bool isNSView);
+ extern void setNativeHostWindowSize (void* window, Component*, int newWidth, int newHeight, bool isNSView);
+#endif
 
 //==============================================================================
 class JuceAudioProcessor  : public FUnknown
@@ -1323,6 +1323,11 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (JuceVST3Component)
 };
 
+#if JucePlugin_Build_VST3 && JUCE_VST3_CAN_REPLACE_VST2
+ Steinberg::FUID getJuceVST3ComponentIID();
+ Steinberg::FUID getJuceVST3ComponentIID()   { return JuceVST3Component::iid; }
+#endif
+
 //==============================================================================
 #if JUCE_MSVC
  #pragma warning (push, 0)
@@ -1477,7 +1482,7 @@ static FUnknown* createControllerInstance (Vst::IHostApplication* host)
 
 //==============================================================================
 class JucePluginFactory;
-JucePluginFactory* globalFactory = nullptr;
+static JucePluginFactory* globalFactory = nullptr;
 
 //==============================================================================
 class JucePluginFactory : public IPluginFactory3
@@ -1677,21 +1682,23 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (JucePluginFactory)
 };
 
+} // juce namespace
+
 //==============================================================================
 #ifndef JucePlugin_Vst3ComponentFlags
-   #if JucePlugin_IsSynth
-    #define JucePlugin_Vst3ComponentFlags Vst::kSimpleModeSupported
-   #else
-    #define JucePlugin_Vst3ComponentFlags 0
-   #endif
+ #if JucePlugin_IsSynth
+  #define JucePlugin_Vst3ComponentFlags Vst::kSimpleModeSupported
+ #else
+  #define JucePlugin_Vst3ComponentFlags 0
+ #endif
 #endif
 
 #ifndef JucePlugin_Vst3Category
-   #if JucePlugin_IsSynth
-    #define JucePlugin_Vst3Category Vst::PlugType::kInstrumentSynth
-   #else
-    #define JucePlugin_Vst3Category Vst::PlugType::kFx
-   #endif
+ #if JucePlugin_IsSynth
+  #define JucePlugin_Vst3Category Vst::PlugType::kInstrumentSynth
+ #else
+  #define JucePlugin_Vst3Category Vst::PlugType::kFx
+ #endif
 #endif
 
 //==============================================================================
