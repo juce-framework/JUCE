@@ -244,10 +244,11 @@ namespace juce
 
     static void setNativeHostWindowSize (void* nsWindow, Component* component, int newWidth, int newHeight, bool isHIView)
     {
+        (void) nsWindow; (void) isHIView;
+
         JUCE_AUTORELEASEPOOL
         {
            #if JUCE_64BIT
-            (void) nsWindow; (void) isHIView;
             component->setSize (newWidth, newHeight);
            #else
             if (! isHIView)
