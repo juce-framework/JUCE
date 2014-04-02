@@ -563,7 +563,6 @@ public:
         eventOutputs (Vst::kEvent, Vst::kOutput)
     {
         pluginInstance = createPluginFilterOfType (AudioProcessor::wrapperType_VST3);
-        pluginInstance->setPlayHead(this);
         comPluginInstance = new JuceAudioProcessor (pluginInstance);
 
         zerostruct (processContext);
