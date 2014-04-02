@@ -334,13 +334,19 @@ public:
 
         while (! threadShouldExit())
         {
+           #if JUCE_IOS
+            // NB: on iOS, all GL calls will crash when the app is running
+            // in the background..
+            if (! Process::isForegroundProcess())
+            {
+                wait (500);
+                continue;
+            }
+           #endif
+
             if (! renderFrame())
                 wait (5); // failed to render, so avoid a tight fail-loop.
-           #if JUCE_IOS
-            else if (! (context.continuousRepaint && Process::isForegroundProcess()))
-           #else
             else if (! context.continuousRepaint)
-           #endif
                 wait (-1);
         }
 
