@@ -220,6 +220,16 @@ juce_ImplementSingleton (SharedMessageThread)
 
 static Array<void*> activePlugins;
 
+#if JucePlugin_Build_VST3
+ #ifndef JUCE_VST3_CAN_REPLACE_VST2
+  #define JUCE_VST3_CAN_REPLACE_VST2 1
+ #endif
+ #if JUCE_VST3_CAN_REPLACE_VST2
+  #include <pluginterfaces/base/funknown.h>
+  extern const Steinberg::FUID JuceVST3ComponentIID;
+ #endif
+#endif
+
 //==============================================================================
 /**
     This is an AudioEffectX object that holds and wraps our AudioProcessor...
@@ -1244,6 +1254,18 @@ public:
             if (ComponentPeer* peer = editorComp->getPeer())
                 peer->handleMovedOrResized();
         }
+    }
+
+    VstIntPtr vendorSpecific (VstInt32 lArg, VstIntPtr lArg2, void* ptrArg, float floatArg)
+    {
+       #if JucePlugin_Build_VST3 && JUCE_VST3_CAN_REPLACE_VST2
+        if ((lArg == 'stCA' || lArg == 'stCa') && lArg2 == 'FUID' && ptrArg != nullptr)
+        {
+            memcpy ((char*)ptrArg, JuceVST3ComponentIID, 16);
+            return 1;
+        }
+       #endif
+        return 0;
     }
 
     //==============================================================================
