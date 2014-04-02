@@ -1377,9 +1377,6 @@ DEF_CLASS_IID (JuceAudioProcessor)
  const Steinberg::FUID JuceVST3Component     ::iid (getFUIDForVST2ID (false));
  const Steinberg::FUID JuceVST3EditController::iid (getFUIDForVST2ID (true));
 
- // JuceVST3ComponentIID gets used by VST2 wrapper to expose its equivalent VST3 identifier.
- extern const Steinberg::FUID JuceVST3ComponentIID; // Without a declaration VS2010 does not expose consts from the object file
- const Steinberg::FUID JuceVST3ComponentIID (JuceVST3Component::iid);
 #else
  DECLARE_CLASS_IID (JuceVST3EditController, 0xABCDEF01, 0x1234ABCD, JucePlugin_ManufacturerCode, JucePlugin_PluginCode)
  DEF_CLASS_IID (JuceVST3EditController)
