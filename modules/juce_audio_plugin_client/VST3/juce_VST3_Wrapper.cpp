@@ -109,14 +109,6 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (JuceAudioProcessor)
 };
 
-#define TEST_FOR_COMMON_BASE_AND_RETURN_IF_VALID(Iid, CommonClassType, SourceClassType) \
-    if (doUIDsMatch (Iid, CommonClassType::iid)) \
-    { \
-        addRef(); \
-        *obj = (CommonClassType*) static_cast<SourceClassType*> (this); \
-        return Steinberg::kResultOk; \
-    }
-
 //==============================================================================
 class JuceVST3EditController : public Vst::EditController,
                                public Vst::IMidiMapping,
@@ -580,6 +572,8 @@ public:
         processSetup.processMode = Vst::kRealtime;
         processSetup.sampleRate = 44100.0;
         processSetup.symbolicSampleSize = Vst::kSample32;
+
+        pluginInstance->setPlayHead (this);
     }
 
     ~JuceVST3Component()
@@ -1087,7 +1081,8 @@ public:
             return kResultFalse;
        #endif
 
-        preparePlugin (getPluginInstance().getSampleRate(), getPluginInstance().getBlockSize());
+        preparePlugin (getPluginInstance().getSampleRate(),
+                       getPluginInstance().getBlockSize());
 
         return kResultTrue;
     }
@@ -1314,9 +1309,9 @@ private:
 
     void preparePlugin (double sampleRate, int bufferSize)
     {
-        Steinberg::Vst::BusInfo inputBusInfo, outputBusInfo;
-        audioInputs.first()->getInfo(inputBusInfo);
-        audioOutputs.first()->getInfo(outputBusInfo);
+        Vst::BusInfo inputBusInfo, outputBusInfo;
+        audioInputs.first()->getInfo (inputBusInfo);
+        audioOutputs.first()->getInfo (outputBusInfo);
 
         getPluginInstance().setPlayConfigDetails (inputBusInfo.channelCount,
                                                   outputBusInfo.channelCount,
