@@ -534,14 +534,14 @@ public:
             return kResultOk;
         }
 
-        TEST_FOR_AND_RETURN_IF_VALID (Vst::IComponentHandler)
-        TEST_FOR_AND_RETURN_IF_VALID (Vst::IComponentHandler2)
-        TEST_FOR_AND_RETURN_IF_VALID (Vst::IComponentHandler3)
-        TEST_FOR_AND_RETURN_IF_VALID (Vst::IContextMenuTarget)
-        TEST_FOR_AND_RETURN_IF_VALID (Vst::IHostApplication)
-        TEST_FOR_AND_RETURN_IF_VALID (Vst::IParamValueQueue)
-        TEST_FOR_AND_RETURN_IF_VALID (Vst::IUnitHandler)
-        TEST_FOR_COMMON_BASE_AND_RETURN_IF_VALID (FUnknown, Vst::IComponentHandler)
+        TEST_FOR_AND_RETURN_IF_VALID (iid, Vst::IComponentHandler)
+        TEST_FOR_AND_RETURN_IF_VALID (iid, Vst::IComponentHandler2)
+        TEST_FOR_AND_RETURN_IF_VALID (iid, Vst::IComponentHandler3)
+        TEST_FOR_AND_RETURN_IF_VALID (iid, Vst::IContextMenuTarget)
+        TEST_FOR_AND_RETURN_IF_VALID (iid, Vst::IHostApplication)
+        TEST_FOR_AND_RETURN_IF_VALID (iid, Vst::IParamValueQueue)
+        TEST_FOR_AND_RETURN_IF_VALID (iid, Vst::IUnitHandler)
+        TEST_FOR_COMMON_BASE_AND_RETURN_IF_VALID (iid, FUnknown, Vst::IComponentHandler)
 
         *obj = nullptr;
         return kNotImplemented;

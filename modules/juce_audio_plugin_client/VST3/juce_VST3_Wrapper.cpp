@@ -109,14 +109,6 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (JuceAudioProcessor)
 };
 
-#define TEST_FOR_COMMON_BASE_AND_RETURN_IF_VALID(CommonClassType, SourceClassType) \
-    if (doUIDsMatch (iid, CommonClassType::iid)) \
-    { \
-        addRef(); \
-        *obj = (CommonClassType*) static_cast<SourceClassType*> (this); \
-        return Steinberg::kResultOk; \
-    }
-
 //==============================================================================
 class JuceVST3EditController : public Vst::EditController,
                                public Vst::IMidiMapping,
@@ -137,15 +129,15 @@ public:
 
     tresult PLUGIN_API queryInterface (const TUID targetIID, void** obj) override
     {
-        TEST_FOR_AND_RETURN_IF_VALID (FObject)
-        TEST_FOR_AND_RETURN_IF_VALID (JuceVST3EditController)
-        TEST_FOR_AND_RETURN_IF_VALID (Vst::IEditController)
-        TEST_FOR_AND_RETURN_IF_VALID (Vst::IEditController2)
-        TEST_FOR_AND_RETURN_IF_VALID (Vst::IConnectionPoint)
-        TEST_FOR_AND_RETURN_IF_VALID (Vst::IMidiMapping)
-        TEST_FOR_COMMON_BASE_AND_RETURN_IF_VALID (IPluginBase, Vst::IEditController)
-        TEST_FOR_COMMON_BASE_AND_RETURN_IF_VALID (IDependent, Vst::IEditController)
-        TEST_FOR_COMMON_BASE_AND_RETURN_IF_VALID (FUnknown, Vst::IEditController)
+        TEST_FOR_AND_RETURN_IF_VALID (targetIID, FObject)
+        TEST_FOR_AND_RETURN_IF_VALID (targetIID, JuceVST3EditController)
+        TEST_FOR_AND_RETURN_IF_VALID (targetIID, Vst::IEditController)
+        TEST_FOR_AND_RETURN_IF_VALID (targetIID, Vst::IEditController2)
+        TEST_FOR_AND_RETURN_IF_VALID (targetIID, Vst::IConnectionPoint)
+        TEST_FOR_AND_RETURN_IF_VALID (targetIID, Vst::IMidiMapping)
+        TEST_FOR_COMMON_BASE_AND_RETURN_IF_VALID (targetIID, IPluginBase, Vst::IEditController)
+        TEST_FOR_COMMON_BASE_AND_RETURN_IF_VALID (targetIID, IDependent, Vst::IEditController)
+        TEST_FOR_COMMON_BASE_AND_RETURN_IF_VALID (targetIID, FUnknown, Vst::IEditController)
 
         if (doUIDsMatch (targetIID, JuceAudioProcessor::iid))
         {
@@ -579,6 +571,8 @@ public:
         processSetup.processMode = Vst::kRealtime;
         processSetup.sampleRate = 44100.0;
         processSetup.symbolicSampleSize = Vst::kSample32;
+
+        pluginInstance->setPlayHead (this);
     }
 
     ~JuceVST3Component()
@@ -603,13 +597,13 @@ public:
 
     tresult PLUGIN_API queryInterface (const TUID targetIID, void** obj) override
     {
-        TEST_FOR_AND_RETURN_IF_VALID (IPluginBase)
-        TEST_FOR_AND_RETURN_IF_VALID (JuceVST3Component)
-        TEST_FOR_AND_RETURN_IF_VALID (Vst::IComponent)
-        TEST_FOR_AND_RETURN_IF_VALID (Vst::IAudioProcessor)
-        TEST_FOR_AND_RETURN_IF_VALID (Vst::IUnitInfo)
-        TEST_FOR_AND_RETURN_IF_VALID (Vst::IConnectionPoint)
-        TEST_FOR_COMMON_BASE_AND_RETURN_IF_VALID (FUnknown, Vst::IComponent)
+        TEST_FOR_AND_RETURN_IF_VALID (targetIID, IPluginBase)
+        TEST_FOR_AND_RETURN_IF_VALID (targetIID, JuceVST3Component)
+        TEST_FOR_AND_RETURN_IF_VALID (targetIID, Vst::IComponent)
+        TEST_FOR_AND_RETURN_IF_VALID (targetIID, Vst::IAudioProcessor)
+        TEST_FOR_AND_RETURN_IF_VALID (targetIID, Vst::IUnitInfo)
+        TEST_FOR_AND_RETURN_IF_VALID (targetIID, Vst::IConnectionPoint)
+        TEST_FOR_COMMON_BASE_AND_RETURN_IF_VALID (targetIID, FUnknown, Vst::IComponent)
 
         if (doUIDsMatch (targetIID, JuceAudioProcessor::iid))
         {
@@ -1086,6 +1080,9 @@ public:
             return kResultFalse;
        #endif
 
+        preparePlugin (getPluginInstance().getSampleRate(),
+                       getPluginInstance().getBlockSize());
+
         return kResultTrue;
     }
 
@@ -1193,15 +1190,6 @@ public:
 
         const int numInputChans  = data.inputs  != nullptr ? (int) data.inputs[0].numChannels : 0;
         const int numOutputChans = data.outputs != nullptr ? (int) data.outputs[0].numChannels : 0;
-
-        if (numInputChans != pluginInstance->getNumInputChannels()
-             || numOutputChans != pluginInstance->getNumOutputChannels())
-        {
-            const double sampleRate = pluginInstance->getSampleRate();
-            const int bufferSize = (int) data.numSamples;
-            pluginInstance->setPlayConfigDetails (numInputChans, numOutputChans, sampleRate, bufferSize);
-            pluginInstance->prepareToPlay (sampleRate, bufferSize);
-        }
 
         int totalChans = 0;
 
@@ -1320,8 +1308,12 @@ private:
 
     void preparePlugin (double sampleRate, int bufferSize)
     {
-        getPluginInstance().setPlayConfigDetails (JucePlugin_MaxNumInputChannels,
-                                                  JucePlugin_MaxNumOutputChannels,
+        Vst::BusInfo inputBusInfo, outputBusInfo;
+        audioInputs.first()->getInfo (inputBusInfo);
+        audioOutputs.first()->getInfo (outputBusInfo);
+
+        getPluginInstance().setPlayConfigDetails (inputBusInfo.channelCount,
+                                                  outputBusInfo.channelCount,
                                                   sampleRate, bufferSize);
 
         getPluginInstance().prepareToPlay (sampleRate, bufferSize);
@@ -1531,12 +1523,12 @@ public:
     //==============================================================================
     JUCE_DECLARE_VST3_COM_REF_METHODS
 
-    tresult PLUGIN_API queryInterface (const TUID iid, void** obj) override
+    tresult PLUGIN_API queryInterface (const TUID targetIID, void** obj) override
     {
-        TEST_FOR_AND_RETURN_IF_VALID (IPluginFactory3)
-        TEST_FOR_AND_RETURN_IF_VALID (IPluginFactory2)
-        TEST_FOR_AND_RETURN_IF_VALID (IPluginFactory)
-        TEST_FOR_AND_RETURN_IF_VALID (FUnknown)
+        TEST_FOR_AND_RETURN_IF_VALID (targetIID, IPluginFactory3)
+        TEST_FOR_AND_RETURN_IF_VALID (targetIID, IPluginFactory2)
+        TEST_FOR_AND_RETURN_IF_VALID (targetIID, IPluginFactory)
+        TEST_FOR_AND_RETURN_IF_VALID (targetIID, FUnknown)
 
         jassertfalse; // Something new?
         *obj = nullptr;
