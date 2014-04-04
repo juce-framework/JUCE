@@ -324,7 +324,7 @@ public:
         const ScopedLockType lock1 (getLock());
         const typename OtherHashMapType::ScopedLockType lock2 (otherHashMap.getLock());
 
-        hashSlots.swapWith (otherHashMap.slots);
+        hashSlots.swapWith (otherHashMap.hashSlots);
         std::swap (totalNumItems, otherHashMap.totalNumItems);
     }
 
@@ -400,7 +400,7 @@ public:
                 if (index >= hashMap.getNumSlots())
                     return false;
 
-                entry = hashMap.slots.getUnchecked (index++);
+                entry = hashMap.hashSlots.getUnchecked (index++);
             }
 
             return true;
