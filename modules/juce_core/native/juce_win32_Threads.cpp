@@ -555,7 +555,13 @@ bool ChildProcess::start (const String& command, int streamFlags)
 
 bool ChildProcess::start (const StringArray& args, int streamFlags)
 {
-    return start (args.joinIntoString (" "), streamFlags);
+    String escaped;
+
+    for (int i = 0; i < args.size(); ++i)
+        escaped << args[i].replace ("\"", "\\\"")
+                          .replace (" ", "\\ ") << ' ';
+
+    return start (escaped.trim(), streamFlags);
 }
 
 //==============================================================================
