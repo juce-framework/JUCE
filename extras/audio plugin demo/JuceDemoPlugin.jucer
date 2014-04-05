@@ -12,7 +12,7 @@
               companyName="Raw Material Software Ltd." aaxIdentifier="com.yourcompany.JuceDemoPlugin"
               buildAAX="0" pluginAAXCategory="AAX_ePlugInCategory_Dynamics"
               includeBinaryInAppConfig="1" buildVST3="1" pluginManufacturerEmail="support@yourcompany.com"
-              companyWebsite="www.yourcompany.com">
+              companyWebsite="www.juce.com" companyEmail="info@juce.com">
   <EXPORTFORMATS>
     <XCODE_MAC targetFolder="Builds/MacOSX" vstFolder="~/SDKs/vstsdk2.4" rtasFolder="~/SDKs/PT_80_SDK"
                objCExtraSuffix="JuceDemo" aaxFolder="~/SDKs/AAX">

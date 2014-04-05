@@ -202,7 +202,6 @@ public:
         setValueIfVoid (getPluginName (project),                   project.getTitle());
         setValueIfVoid (getPluginDesc (project),                   project.getTitle());
         setValueIfVoid (getPluginManufacturer (project),           "yourcompany");
-        setValueIfVoid (getPluginManufacturerEmail (project),      "support@yourcompany.com");
         setValueIfVoid (getPluginManufacturerCode (project),       "Manu");
         setValueIfVoid (getPluginCode (project),                   "Plug");
         setValueIfVoid (getPluginChannelConfigs (project),         "{1, 1}, {2, 2}");
