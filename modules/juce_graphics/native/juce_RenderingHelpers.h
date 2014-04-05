@@ -225,10 +225,13 @@ private:
 
             hits.set (0);
             misses.set (0);
-            return glyphs.getLast();
         }
 
-        return findLeastRecentlyUsedGlyph();
+        if (CachedGlyphType* g = findLeastRecentlyUsedGlyph())
+            return g;
+
+        addNewGlyphSlots (32);
+        return glyphs.getLast();
     }
 
     void addNewGlyphSlots (int num)
@@ -241,8 +244,8 @@ private:
 
     CachedGlyphType* findLeastRecentlyUsedGlyph() const noexcept
     {
-        CachedGlyphType* oldest = glyphs.getLast();
-        int oldestCounter = oldest->lastAccessCount;
+        CachedGlyphType* oldest = nullptr;
+        int oldestCounter = std::numeric_limits<int>::max();
 
         for (int i = glyphs.size() - 1; --i >= 0;)
         {
