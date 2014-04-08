@@ -558,8 +558,16 @@ bool ChildProcess::start (const StringArray& args, int streamFlags)
     String escaped;
 
     for (int i = 0; i < args.size(); ++i)
-        escaped << args[i].replace ("\"", "\\\"")
-                          .replace (" ", "\\ ") << ' ';
+    {
+        String arg (args[i]);
+
+        // If there are spaces, surround it with quotes. If there are quotes,
+        // replace them with \" so that CommandLineToArgv will correctly parse them.
+        if (arg.containsAnyOf ("\" "))
+            arg = arg.replace ("\"", "\\\"").quoted();
+
+        escaped << arg << ' ';
+    }
 
     return start (escaped.trim(), streamFlags);
 }
