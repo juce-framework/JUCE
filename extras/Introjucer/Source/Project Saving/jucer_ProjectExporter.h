@@ -59,6 +59,7 @@ public:
     virtual bool isVisualStudio() const         { return false; }
     virtual int getVisualStudioVersion() const  { return 0; }
     virtual bool isCodeBlocks() const           { return false; }
+    virtual bool isQtCreator() const            { return false; }
 
     virtual bool isAndroid() const              { return false; }
     virtual bool isWindows() const              { return false; }
