@@ -380,9 +380,9 @@ Colour Colour::greyLevel (const float brightness) noexcept
 //==============================================================================
 Colour Colour::contrasting (const float amount) const noexcept
 {
-   return overlaidWith (getPerceivedBrightness() >= 0.5f
-                          ? Colours::black
-                          : Colours::white).withAlpha (amount);
+   return overlaidWith ((getPerceivedBrightness() >= 0.5f
+                           ? Colours::black
+                           : Colours::white).withAlpha (amount));
 }
 
 Colour Colour::contrasting (Colour target, float minContrast) const noexcept
