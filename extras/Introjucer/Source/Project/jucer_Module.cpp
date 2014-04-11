@@ -474,6 +474,7 @@ bool LibraryModule::fileTargetMatches (ProjectExporter& exporter, const String& 
     if (exporter.isLinux())         return exporterTargetMatches ("linux", target);
     if (exporter.isAndroid())       return exporterTargetMatches ("android", target);
     if (exporter.isCodeBlocks())    return exporterTargetMatches ("mingw", target);
+    if (exporter.isQtCreator())     return exporterTargetMatches ("qtcreator", target);
     return target.isEmpty();
 }
 
