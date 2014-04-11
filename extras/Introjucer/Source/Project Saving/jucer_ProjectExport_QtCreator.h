@@ -91,12 +91,12 @@ protected:
 
         void createConfigProperties (PropertyListBuilder& props) override
         {
-            static const char* const archNames[] = { "(Default)", "32-bit (-m32)", "64-bit (-m64)", "ARM v6", "ARM v7" };
+            /*static const char* const archNames[] = { "(Default)", "32-bit (-m32)", "64-bit (-m64)", "ARM v6", "ARM v7" };
             const var archFlags[] = { var(), "-m32", "-m64", "-march=armv6", "-march=armv7" };
 
             props.add (new ChoicePropertyComponent (getArchitectureType(), "Architecture",
                                                     StringArray (archNames, numElementsInArray (archNames)),
-                                                    Array<var> (archFlags, numElementsInArray (archFlags))));
+                                                    Array<var> (archFlags, numElementsInArray (archFlags)))); */
         }
     };
 
@@ -144,32 +144,43 @@ private:
             << "# Don't edit this file! Your changes will be overwritten when you re-save the Introjucer project!" << newLine
             << newLine;
 
-        out << "Release: DESTDIR     = build/release/" << newLine
-            << "Release: OBJECTS_DIR = build/release/intermediate/" << newLine;
+        out << "TEMPLATE = app" << newLine;
 
-        out << "Debug:   DESTDIR     = build/release/" << newLine
-            << "Debug:   OBJECTS_DIR = build/release/intermediate/" << newLine;
+        out << "CONFIG(release, debug|release){" << newLine
+            << "    DESTDIR     = build/release/" << newLine
+            << "    OBJECTS_DIR = build/release/intermediate/" << newLine;
+        for (ConstConfigIterator config (*this); config.next();)
+            if (!config->isDebug())
+                out << "    TARGET = " << config->getTargetBinaryNameString() << newLine;
+        out << "}" << newLine;
+
+        out << "CONFIG(debug, debug|release){" << newLine
+            << "    DESTDIR     = build/debug/" << newLine
+            << "    OBJECTS_DIR = build/debug/intermediate/" << newLine;
+        for (ConstConfigIterator config (*this); config.next();)
+            if (config->isDebug())
+               out << "    TARGET = " << config->getTargetBinaryNameString() << newLine;
+        out << "}" << newLine;
         out << newLine;
-
 
         out << "# Compiler flags" << newLine;
 
         // general options
-        out << "QMAKE_CFLAGS := $(TARGET_ARCH) -std=gnu++0x" << newLine;
-
-        // defines
-        //out << createGCCPreprocessorFlags (getAllPreprocessorDefs (config));
-
+        out << "QMAKE_CFLAGS = -std=gnu++0x";
         if (makefileIsDLL)
             out << " -fPIC";
         out << newLine;
+
+        // defines
+        //out << createGCCPreprocessorFlags (getAllPreprocessorDefs (config));
 
         StringPairArray defines;
         for (ConstConfigIterator config (*this); config.next();) {
             if (!config->isDebug()) {
                 // Release specific defines
+                defines.clear();
                 defines.set ("NDEBUG", "1");
-                out << "QMAKE_CFLAGS_RELEASE += ";
+                out << "QMAKE_CFLAGS_RELEASE = ";
                 out << " -O" << config->getGCCOptimisationFlag();
                 out << (" "  + replacePreprocessorTokens (*config, getExtraCompilerFlagsString())).trimEnd();
                 out << createGCCPreprocessorFlags (mergePreprocessorDefs (defines, getAllPreprocessorDefs (*config)));
@@ -179,13 +190,15 @@ private:
                 StringArray searchPaths (extraSearchPaths);
                 searchPaths.addArray (config->getHeaderSearchPaths());
                 searchPaths.removeDuplicates (false);
-                out << "Debug: INCLUDEPATH := \\" << newLine;
+                out << "CONFIG(release, debug|release){" << newLine
+                    << "    INCLUDEPATH = \\" << newLine;
                 for (int i = 0; i < searchPaths.size(); ++i)
-                    out << "\t" << addQuotesIfContainsSpaces (FileHelpers::unixStylePath (replacePreprocessorTokens (*config, searchPaths[i]))) << " \\" << newLine;
-                out << newLine;
+                    out << "        " << addQuotesIfContainsSpaces (FileHelpers::unixStylePath (replacePreprocessorTokens (*config, searchPaths[i]))) << " \\" << newLine;
+                out << "}" << newLine;
 
             } else {
                 // Debug specific defines
+                defines.clear();
                 defines.set ("DEBUG", "1");
                 defines.set ("_DEBUG", "1");
                 out << "QMAKE_CFLAGS_DEBUG   = -g -ggdb ";
@@ -198,10 +211,11 @@ private:
                 StringArray searchPaths (extraSearchPaths);
                 searchPaths.addArray (config->getHeaderSearchPaths());
                 searchPaths.removeDuplicates (false);
-                out << "Release: INCLUDEPATH := \\" << newLine;
+                out << "CONFIG(debug, debug|release){" << newLine
+                    << "    INCLUDEPATH = \\" << newLine;
                 for (int i = 0; i < searchPaths.size(); ++i)
-                    out << "\t" << addQuotesIfContainsSpaces (FileHelpers::unixStylePath (replacePreprocessorTokens (*config, searchPaths[i]))) << " \\" << newLine;
-                out << newLine;
+                    out << "        " << addQuotesIfContainsSpaces (FileHelpers::unixStylePath (replacePreprocessorTokens (*config, searchPaths[i]))) << " \\" << newLine;
+                out << "}" << newLine;
             }
         }
 
@@ -222,24 +236,24 @@ private:
         out << newLine  << newLine;
 
         // Copy flags from C to CXX
-        out << "QMAKE_CXXFLAGS         += $$QMAKE_CFLAGS"         << newLine
-            << "QMAKE_CXXFLAGS_RELEASE += $$QMAKE_CFLAGS_RELEASE" << newLine
-            << "QMAKE_CXXFLAGS_DEBUG   += $$QMAKE_CFLAGS_DEBUG"   << newLine;
+        out << "QMAKE_CXXFLAGS         = $$QMAKE_CFLAGS"         << newLine
+            << "QMAKE_CXXFLAGS_RELEASE = $$QMAKE_CFLAGS_RELEASE" << newLine
+            << "QMAKE_CXXFLAGS_DEBUG   = $$QMAKE_CFLAGS_DEBUG"   << newLine;
 
         out << newLine  << newLine;
 
         // Linker flags
         out << "# Linker flags" << newLine;
-        out << "QMAKE_LFLAGS := -L$$DESTDIR";
+        out << "LIBS = -L$$DESTDIR";
         if (makefileIsDLL)
             out << " -shared";
          out << newLine;
 
         // Linux specific linker flags
-        out << "unix: QMAKE_LFLAGS += -L/usr/X11R6/lib/ -lX11 -lXext -lXinerama -ldl -lfreetype -lpthread -lrt" << newLine;
+        out << "unix: LIBS += -L/usr/X11R6/lib/ -lX11 -lXext -lXinerama -ldl -lfreetype -lpthread -lrt" << newLine;
 
         // Windows specific linker flags
-        out << "win32: QMAKE_LFLAGS += ?"  << newLine;
+        out << "win32: LIBS += ?"  << newLine;
 
         // Debug specific linker flags
         out << "QMAKE_LFLAGS_DEBUG += -fvisibility=hidden" << newLine;
