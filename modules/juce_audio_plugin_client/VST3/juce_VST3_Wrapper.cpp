@@ -770,7 +770,7 @@ public:
     tresult PLUGIN_API getRoutingInfo (Vst::RoutingInfo&, Vst::RoutingInfo&) override   { return kNotImplemented; }
 
    #if JUCE_VST3_CAN_REPLACE_VST2
-    void loadVST2CompatibleState (const char* data, int size)
+    void loadVST2VstWBlock (const char* data, int size)
     {
         const int headerLen = htonl (*(juce::int32*) (data + 4));
         const struct fxBank* bank = (const struct fxBank*) (data + (8 + headerLen));
@@ -787,14 +787,70 @@ public:
                                              jmin ((int) (size - (bank->content.data.chunk - data)),
                                                    (int) htonl (bank->content.data.size)));
     }
+
+    void loadVST3PresetFile (const char* data, int size)
+    {
+         // At offset 4 there's a little-endian version number which seems to typically be 1
+         // At offset 8 there's 32 bytes the SDK calls "ASCII-encoded class id"
+         const int chunkListOffset = (int) ByteOrder::littleEndianInt (data + 40);
+         const char* const chunkList = data + chunkListOffset;
+         jassert (memcmp (chunkList, "List", 4) == 0);
+         const int entryCount = (int) ByteOrder::littleEndianInt (chunkList + 4);
+         jassert (entryCount > 0);
+
+         for (int i = 0; i < entryCount; ++i)
+         {
+             const char* const entry = chunkList + 8 + 20 * i;
+
+             if (memcmp (entry, "Comp", 4) == 0)
+             {
+                 // "Comp" entries seem to contain the data.
+                 juce::uint64 chunkOffset = ByteOrder::littleEndianInt64 (entry + 4);
+                 juce::uint64 chunkSize   = ByteOrder::littleEndianInt64 (entry + 12);
+
+                #if JUCE_32BIT
+                 jassert (chunkOffset <= (juce::uint64) 0xffffffff);
+                #endif
+                 jassert (chunkSize <= 0x7fffffff);
+
+                 loadVST2VstWBlock (data + chunkOffset, (int) chunkSize);
+             }
+         }
+     }
+
+     bool loadVST2CompatibleState (const char* data, int size)
+     {
+         if (size < 4)
+             return false;
+
+         if ('VstW' == htonl (*(juce::int32*) data))
+         {
+             loadVST2VstWBlock (data, size);
+             return true;
+         }
+
+         if (memcmp (data, "VST3", 4) == 0)
+         {
+             // In Cubase 5, when loading VST3 .vstpreset files,
+             // we get the whole content of the files to load.
+             // In Cubase 7 we get just the contents within and
+             // we go directly to the loadVST2VstW codepath instead.
+             loadVST3PresetFile (data, size);
+             return true;
+         }
+
+         return false;
+     }
+
    #endif
 
-    void loadStateData (const void* data, int size)
+    bool loadStateData (const void* data, int size)
     {
        #if JUCE_VST3_CAN_REPLACE_VST2
-        loadVST2CompatibleState ((const char*) data, size);
+        return loadVST2CompatibleState ((const char*) data, size);
        #else
         pluginInstance->setStateInformation (data, size);
+        return true;
        #endif
     }
 
@@ -812,8 +868,7 @@ public:
                 if (s->getSize() >= 5 && memcmp (s->getData(), "VC2!E", 5) == 0)
                     return false;
 
-            loadStateData (s->getData(), (int) s->getSize());
-            return true;
+            return loadStateData (s->getData(), (int) s->getSize());
         }
 
         return false;
@@ -843,13 +898,8 @@ public:
 
         const size_t dataSize = allData.getDataSize();
 
-        if (dataSize > 0 && dataSize < 0x7fffffff)
-        {
-            loadStateData (allData.getData(), (int) dataSize);
-            return true;
-        }
-
-        return false;
+        return dataSize > 0 && dataSize < 0x7fffffff
+                && loadStateData (allData.getData(), (int) dataSize);
     }
 
     tresult PLUGIN_API setState (IBStream* state) override
