@@ -731,8 +731,6 @@ public:
           isStarted (false),
           bufferSizeSamples (0),
           sampleRate (0.0),
-          inputBuffers (1, 1),
-          outputBuffers (1, 1),
           callback (nullptr)
     {
         if (outputDeviceIndex_ >= 0)
@@ -871,8 +869,8 @@ private:
     bool isStarted;
     String lastError;
 
-    OwnedArray <DSoundInternalInChannel> inChans;
-    OwnedArray <DSoundInternalOutChannel> outChans;
+    OwnedArray<DSoundInternalInChannel> inChans;
+    OwnedArray<DSoundInternalOutChannel> outChans;
     WaitableEvent startEvent;
 
     int bufferSizeSamples;
@@ -998,10 +996,8 @@ public:
 
             if (isStarted)
             {
-                callback->audioDeviceIOCallback (const_cast <const float**> (inputBuffers.getArrayOfChannels()),
-                                                 inputBuffers.getNumChannels(),
-                                                 outputBuffers.getArrayOfChannels(),
-                                                 outputBuffers.getNumChannels(),
+                callback->audioDeviceIOCallback (inputBuffers.getArrayOfReadPointers(), inputBuffers.getNumChannels(),
+                                                 outputBuffers.getArrayOfWritePointers(), outputBuffers.getNumChannels(),
                                                  bufferSizeSamples);
             }
             else
@@ -1105,13 +1101,8 @@ String DSoundAudioIODevice::openDevice (const BigInteger& inputChannels,
 
     for (int i = 0; i <= enabledInputs.getHighestBit(); i += 2)
     {
-        float* left = nullptr;
-        if (enabledInputs[i])
-            left = inputBuffers.getSampleData (numIns++);
-
-        float* right = nullptr;
-        if (enabledInputs[i + 1])
-            right = inputBuffers.getSampleData (numIns++);
+        float* left  = enabledInputs[i]     ? inputBuffers.getWritePointer (numIns++) : nullptr;
+        float* right = enabledInputs[i + 1] ? inputBuffers.getWritePointer (numIns++) : nullptr;
 
         if (left != nullptr || right != nullptr)
             inChans.add (new DSoundInternalInChannel (dlh.inputDeviceNames [inputDeviceIndex],
@@ -1131,13 +1122,8 @@ String DSoundAudioIODevice::openDevice (const BigInteger& inputChannels,
 
     for (int i = 0; i <= enabledOutputs.getHighestBit(); i += 2)
     {
-        float* left = nullptr;
-        if (enabledOutputs[i])
-            left = outputBuffers.getSampleData (numOuts++);
-
-        float* right = nullptr;
-        if (enabledOutputs[i + 1])
-            right = outputBuffers.getSampleData (numOuts++);
+        float* left  = enabledOutputs[i]     ? outputBuffers.getWritePointer (numOuts++) : nullptr;
+        float* right = enabledOutputs[i + 1] ? outputBuffers.getWritePointer (numOuts++) : nullptr;
 
         if (left != nullptr || right != nullptr)
             outChans.add (new DSoundInternalOutChannel (dlh.outputDeviceNames[outputDeviceIndex],

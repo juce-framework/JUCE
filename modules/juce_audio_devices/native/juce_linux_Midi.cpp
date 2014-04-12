@@ -512,12 +512,14 @@ MidiOutput* MidiOutput::createNewDevice (const String& deviceName)
 
 MidiOutput::~MidiOutput()
 {
-    delete static_cast <MidiOutputDevice*> (internal);
+    stopBackgroundThread();
+
+    delete static_cast<MidiOutputDevice*> (internal);
 }
 
 void MidiOutput::sendMessageNow (const MidiMessage& message)
 {
-    static_cast <MidiOutputDevice*> (internal)->sendMessageNow (message);
+    static_cast<MidiOutputDevice*> (internal)->sendMessageNow (message);
 }
 
 //==============================================================================
@@ -529,7 +531,7 @@ MidiInput::MidiInput (const String& nm)
 MidiInput::~MidiInput()
 {
     stop();
-    delete static_cast <AlsaPortAndCallback*> (internal);
+    delete static_cast<AlsaPortAndCallback*> (internal);
 }
 
 void MidiInput::start()

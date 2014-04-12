@@ -1,7 +1,7 @@
 {
   "id":             "juce_box2d",
   "name":           "JUCE wrapper for the Box2D physics engine",
-  "version":        "3.0.4",
+  "version":        "3.0.5",
   "description":    "The Box2D physics engine and some utility classes.",
   "website":        "http://www.juce.com/juce",
   "license":        "GPL/Commercial",

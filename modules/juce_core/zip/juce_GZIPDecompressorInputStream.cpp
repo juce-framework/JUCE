@@ -38,6 +38,7 @@ namespace zlibNamespace
    #pragma clang diagnostic push
    #pragma clang diagnostic ignored "-Wconversion"
    #pragma clang diagnostic ignored "-Wshadow"
+   #pragma clang diagnostic ignored "-Wdeprecated-register"
   #endif
 
   #undef OS_CODE

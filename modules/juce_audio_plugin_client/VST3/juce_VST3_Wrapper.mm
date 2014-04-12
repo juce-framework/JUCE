@@ -84,6 +84,7 @@ namespace juce
         JUCE_AUTORELEASEPOOL
         {
            #if JUCE_64BIT
+            (void) isHIView;
             NSView* parentView = (NSView*) windowRef;
 
            #if JucePlugin_EditorRequiresKeyboardFocus
@@ -196,6 +197,7 @@ namespace juce
     static void detachComponentFromWindowRef (Component* comp, void* nsWindow, bool isHIView)
     {
        #if JUCE_64BIT
+        (void) nsWindow; (void) isHIView;
         comp->removeFromDesktop();
        #else
         //treat NSView like 64bit
@@ -242,25 +244,27 @@ namespace juce
 
     static void setNativeHostWindowSize (void* nsWindow, Component* component, int newWidth, int newHeight, bool isHIView)
     {
+        (void) nsWindow; (void) isHIView;
+
         JUCE_AUTORELEASEPOOL
         {
-       #if JUCE_64BIT
-        component->setSize (newWidth, newHeight);
-       #else
-        if (! isHIView)
-        { //Treat NSView like 64bit:
+           #if JUCE_64BIT
             component->setSize (newWidth, newHeight);
-        }
-        else if (HIViewRef dummyView = (HIViewRef) (void*) (pointer_sized_int)
-            component->getProperties() ["dummyViewRef"].toString().getHexValue64())
-        {
-            HIRect frameRect;
-            HIViewGetFrame (dummyView, &frameRect);
-            frameRect.size.width = newWidth;
-            frameRect.size.height = newHeight;
-            HIViewSetFrame (dummyView, &frameRect);
-        }
-       #endif
+           #else
+            if (! isHIView)
+            { //Treat NSView like 64bit:
+                component->setSize (newWidth, newHeight);
+            }
+            else if (HIViewRef dummyView = (HIViewRef) (void*) (pointer_sized_int)
+                component->getProperties() ["dummyViewRef"].toString().getHexValue64())
+            {
+                HIRect frameRect;
+                HIViewGetFrame (dummyView, &frameRect);
+                frameRect.size.width = newWidth;
+                frameRect.size.height = newHeight;
+                HIViewSetFrame (dummyView, &frameRect);
+            }
+           #endif
        }
     }
 } // (juce namespace)

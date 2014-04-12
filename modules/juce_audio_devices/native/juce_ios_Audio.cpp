@@ -227,10 +227,10 @@ private:
             zeromem (outputChannels, sizeof (outputChannels));
 
             for (int i = 0; i < numInputChannels; ++i)
-                inputChannels[i] = floatData.getSampleData (i);
+                inputChannels[i] = floatData.getWritePointer (i);
 
             for (int i = 0; i < numOutputChannels; ++i)
-                outputChannels[i] = floatData.getSampleData (i + numInputChannels);
+                outputChannels[i] = floatData.getWritePointer (i + numInputChannels);
         }
     }
 

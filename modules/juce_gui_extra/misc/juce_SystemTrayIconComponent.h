@@ -30,7 +30,10 @@
 
 //==============================================================================
 /**
-    On Windows and Linux only, this component sits in the taskbar tray as a small icon.
+    This component sits in the taskbar tray as a small icon.
+
+    (NB: The exact behaviour of this class will differ between OSes, and it
+    isn't fully implemented for all OSes)
 
     To use it, just create one of these components, but don't attempt to make it
     visible, add it to a parent, or put it on the desktop.

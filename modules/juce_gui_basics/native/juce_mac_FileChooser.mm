@@ -198,7 +198,11 @@ void FileChooser::showPlatformDialog (Array<File>& results,
 
 bool FileChooser::isPlatformDialogAvailable()
 {
+   #if JUCE_DISABLE_NATIVE_FILECHOOSERS
+    return false;
+   #else
     return true;
+   #endif
 }
 
 #else

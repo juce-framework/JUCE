@@ -294,13 +294,13 @@ public:
         {
             for (int i = 0; i < inputs.size(); ++i)
                 plugin->connect_port (handle, inputs[i],
-                                      i < buffer.getNumChannels() ? buffer.getSampleData (i) : nullptr);
+                                      i < buffer.getNumChannels() ? buffer.getWritePointer (i) : nullptr);
 
             if (plugin->run != nullptr)
             {
                 for (int i = 0; i < outputs.size(); ++i)
                     plugin->connect_port (handle, outputs.getUnchecked(i),
-                                          i < buffer.getNumChannels() ? buffer.getSampleData (i) : nullptr);
+                                          i < buffer.getNumChannels() ? buffer.getWritePointer (i) : nullptr);
 
                 plugin->run (handle, numSamples);
                 return;
@@ -312,7 +312,7 @@ public:
                 tempBuffer.clear();
 
                 for (int i = 0; i < outputs.size(); ++i)
-                    plugin->connect_port (handle, outputs.getUnchecked(i), tempBuffer.getSampleData (i));
+                    plugin->connect_port (handle, outputs.getUnchecked(i), tempBuffer.getWritePointer (i));
 
                 plugin->run_adding (handle, numSamples);
 

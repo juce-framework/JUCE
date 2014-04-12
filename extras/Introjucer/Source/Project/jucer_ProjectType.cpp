@@ -202,7 +202,6 @@ public:
         setValueIfVoid (getPluginName (project),                   project.getTitle());
         setValueIfVoid (getPluginDesc (project),                   project.getTitle());
         setValueIfVoid (getPluginManufacturer (project),           "yourcompany");
-        setValueIfVoid (getPluginManufacturerEmail (project),      "support@yourcompany.com");
         setValueIfVoid (getPluginManufacturerCode (project),       "Manu");
         setValueIfVoid (getPluginCode (project),                   "Plug");
         setValueIfVoid (getPluginChannelConfigs (project),         "{1, 1}, {2, 2}");
@@ -268,6 +267,9 @@ public:
 
         props.add (new TextPropertyComponent (getPluginAUMainType (project), "Plugin AU Main Type", 128, false),
                    "In an AU, this is the value that is set as JucePlugin_AUMainType. Leave it blank unless you want to use a custom value.");
+
+        props.add (new TextPropertyComponent (getPluginVSTCategory (project), "VST Category", 64, false),
+                   "In a VST, this is the value that is set as JucePlugin_VSTCategory. Leave it blank unless you want to use a custom value.");
 
         props.add (new TextPropertyComponent (getPluginRTASCategory (project), "Plugin RTAS Category", 64, false),
                    "(Leave this blank if your plugin is a synth). This is one of the RTAS categories from FicPluginEnums.h, such as: ePlugInCategory_None, ePlugInCategory_EQ, ePlugInCategory_Dynamics, "

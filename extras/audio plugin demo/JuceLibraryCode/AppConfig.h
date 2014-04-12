@@ -201,10 +201,10 @@
  #define JucePlugin_Manufacturer           "Raw Material Software"
 #endif
 #ifndef  JucePlugin_ManufacturerWebsite
- #define JucePlugin_ManufacturerWebsite    "www.yourcompany.com"
+ #define JucePlugin_ManufacturerWebsite    "www.juce.com"
 #endif
 #ifndef  JucePlugin_ManufacturerEmail
- #define JucePlugin_ManufacturerEmail      "support@yourcompany.com"
+ #define JucePlugin_ManufacturerEmail      "info@juce.com"
 #endif
 #ifndef  JucePlugin_ManufacturerCode
  #define JucePlugin_ManufacturerCode       'RawM'

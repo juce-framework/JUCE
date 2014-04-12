@@ -294,7 +294,7 @@ public:
         it later on when no longer needed. The caller should not retain a pointer to the
         voice.
     */
-    void addVoice (SynthesiserVoice* newVoice);
+    SynthesiserVoice* addVoice (SynthesiserVoice* newVoice);
 
     /** Deletes one of the voices. */
     void removeVoice (int index);
@@ -311,10 +311,10 @@ public:
 
     /** Adds a new sound to the synthesiser.
 
-        The object passed in is reference counted, so will be deleted when it is removed
-        from the synthesiser, and when no voices are still using it.
+        The object passed in is reference counted, so will be deleted when the
+        synthesiser and all voices are no longer using it.
     */
-    void addSound (const SynthesiserSound::Ptr& newSound);
+    SynthesiserSound* addSound (const SynthesiserSound::Ptr& newSound);
 
     /** Removes and deletes one of the sounds. */
     void removeSound (int index);

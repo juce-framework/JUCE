@@ -26,6 +26,7 @@ Desktop::Desktop()
     : mouseSources (new MouseInputSource::SourceList()),
       mouseClickCounter (0), mouseWheelCounter (0),
       kioskModeComponent (nullptr),
+      kioskModeReentrant (false),
       allowedOrientations (allOrientations),
       masterScaleFactor ((float) getDefaultMasterScale())
 {
@@ -340,15 +341,21 @@ void Desktop::Displays::refresh()
 //==============================================================================
 void Desktop::setKioskModeComponent (Component* componentToUse, const bool allowMenusAndBars)
 {
+    if (kioskModeReentrant)
+        return;
+
+    const ScopedValueSetter<bool> setter (kioskModeReentrant, true, false);
+
     if (kioskModeComponent != componentToUse)
     {
         // agh! Don't delete or remove a component from the desktop while it's still the kiosk component!
         jassert (kioskModeComponent == nullptr || ComponentPeer::getPeerFor (kioskModeComponent) != nullptr);
 
-        if (kioskModeComponent != nullptr)
+        if (Component* const oldKioskComp = kioskModeComponent)
         {
-            setKioskComponent (kioskModeComponent, false, allowMenusAndBars);
-            kioskModeComponent->setBounds (kioskComponentOriginalBounds);
+            kioskModeComponent = nullptr; // (to make sure that isKioskMode() returns false when resizing the old one)
+            setKioskComponent (oldKioskComp, false, allowMenusAndBars);
+            oldKioskComp->setBounds (kioskComponentOriginalBounds);
         }
 
         kioskModeComponent = componentToUse;

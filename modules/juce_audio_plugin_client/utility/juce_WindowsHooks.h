@@ -91,7 +91,8 @@ namespace
         {
             MSG& msg = *(MSG*) lParam;
 
-            if (nCode == HC_ACTION && offerKeyMessageToJUCEWindow (msg))
+            if (nCode == HC_ACTION && wParam == PM_REMOVE
+                 && offerKeyMessageToJUCEWindow (msg))
             {
                 zerostruct (msg);
                 msg.message = WM_USER;

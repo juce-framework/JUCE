@@ -95,7 +95,6 @@ AudioDeviceManager::AudioDeviceManager()
       useInputNames (false),
       inputLevel (0),
       testSoundPosition (0),
-      tempBuffer (2, 2),
       cpuUsageMs (0),
       timeToCpuScale (0)
 {
@@ -728,7 +727,7 @@ void AudioDeviceManager::audioDeviceIOCallbackInt (const float** inputChannelDat
         callbacks.getUnchecked(0)->audioDeviceIOCallback (inputChannelData, numInputChannels,
                                                           outputChannelData, numOutputChannels, numSamples);
 
-        float** const tempChans = tempBuffer.getArrayOfChannels();
+        float** const tempChans = tempBuffer.getArrayOfWritePointers();
 
         for (int i = callbacks.size(); --i > 0;)
         {
@@ -757,7 +756,7 @@ void AudioDeviceManager::audioDeviceIOCallbackInt (const float** inputChannelDat
     if (testSound != nullptr)
     {
         const int numSamps = jmin (numSamples, testSound->getNumSamples() - testSoundPosition);
-        const float* const src = testSound->getSampleData (0, testSoundPosition);
+        const float* const src = testSound->getReadPointer (0, testSoundPosition);
 
         for (int i = 0; i < numOutputChannels; ++i)
             for (int j = 0; j < numSamps; ++j)
@@ -951,16 +950,15 @@ void AudioDeviceManager::playTestSound()
         const double sampleRate = currentAudioDevice->getCurrentSampleRate();
         const int soundLength = (int) sampleRate;
 
-        AudioSampleBuffer* const newSound = new AudioSampleBuffer (1, soundLength);
-        float* samples = newSound->getSampleData (0);
-
         const double frequency = 440.0;
         const float amplitude = 0.5f;
 
         const double phasePerSample = double_Pi * 2.0 / (sampleRate / frequency);
 
+        AudioSampleBuffer* const newSound = new AudioSampleBuffer (1, soundLength);
+
         for (int i = 0; i < soundLength; ++i)
-            samples[i] = amplitude * (float) std::sin (i * phasePerSample);
+            newSound->setSample (0, i, amplitude * (float) std::sin (i * phasePerSample));
 
         newSound->applyGainRamp (0, 0, soundLength / 10, 0.0f, 1.0f);
         newSound->applyGainRamp (0, soundLength - soundLength / 4, soundLength / 4, 1.0f, 0.0f);

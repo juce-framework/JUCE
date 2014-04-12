@@ -43,6 +43,7 @@
  #pragma clang diagnostic ignored "-Wconversion"
  #pragma clang diagnostic ignored "-Woverloaded-virtual"
  #pragma clang diagnostic ignored "-Wshadow"
+ #pragma clang diagnostic ignored "-Wdeprecated-register"
 #endif
 
 /*  These files come with the Steinberg VST3 SDK - to get them, you'll need to

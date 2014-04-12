@@ -1026,8 +1026,7 @@ public:
     AudioIODeviceCombiner (const String& deviceName)
         : AudioIODevice (deviceName, "CoreAudio"),
           Thread (deviceName), callback (nullptr),
-          currentSampleRate (0), currentBufferSize (0), active (false),
-          fifos (1, 1)
+          currentSampleRate (0), currentBufferSize (0), active (false)
     {
     }
 
@@ -1319,14 +1318,15 @@ private:
         AudioSampleBuffer buffer (fifos.getNumChannels(), numSamples);
         buffer.clear();
 
-        Array<float*> inputChans, outputChans;
+        Array<const float*> inputChans;
+        Array<float*> outputChans;
 
         for (int i = 0; i < devices.size(); ++i)
         {
             DeviceWrapper& d = *devices.getUnchecked(i);
 
-            for (int j = 0; j < d.numInputChans; ++j)   inputChans.add  (buffer.getSampleData (d.inputIndex  + j));
-            for (int j = 0; j < d.numOutputChans; ++j)  outputChans.add (buffer.getSampleData (d.outputIndex + j));
+            for (int j = 0; j < d.numInputChans; ++j)   inputChans.add  (buffer.getReadPointer  (d.inputIndex  + j));
+            for (int j = 0; j < d.numOutputChans; ++j)  outputChans.add (buffer.getWritePointer (d.outputIndex + j));
         }
 
         const int numInputChans  = inputChans.size();
@@ -1535,8 +1535,8 @@ private:
             for (int i = 0; i < numInputChans; ++i)
             {
                 const int index = inputIndex + i;
-                float* const dest = destBuffer.getSampleData (index);
-                const float* const src = owner.fifos.getSampleData (index);
+                float* const dest = destBuffer.getWritePointer (index);
+                const float* const src = owner.fifos.getReadPointer (index);
 
                 if (size1 > 0)  FloatVectorOperations::copy (dest,         src + start1, size1);
                 if (size2 > 0)  FloatVectorOperations::copy (dest + size1, src + start2, size2);
@@ -1561,8 +1561,8 @@ private:
             for (int i = 0; i < numOutputChans; ++i)
             {
                 const int index = outputIndex + i;
-                float* const dest = owner.fifos.getSampleData (index);
-                const float* const src = srcBuffer.getSampleData (index);
+                float* const dest = owner.fifos.getWritePointer (index);
+                const float* const src = srcBuffer.getReadPointer (index);
 
                 if (size1 > 0)  FloatVectorOperations::copy (dest + start1, src,         size1);
                 if (size2 > 0)  FloatVectorOperations::copy (dest + start2, src + size1, size2);
@@ -1590,7 +1590,7 @@ private:
 
                 for (int i = 0; i < numInputChannels; ++i)
                 {
-                    float* const dest = buf.getSampleData (inputIndex + i);
+                    float* const dest = buf.getWritePointer (inputIndex + i);
                     const float* const src = inputChannelData[i];
 
                     if (size1 > 0)  FloatVectorOperations::copy (dest + start1, src,         size1);
@@ -1622,7 +1622,7 @@ private:
                 for (int i = 0; i < numOutputChannels; ++i)
                 {
                     float* const dest = outputChannelData[i];
-                    const float* const src = buf.getSampleData (outputIndex + i);
+                    const float* const src = buf.getReadPointer (outputIndex + i);
 
                     if (size1 > 0)  FloatVectorOperations::copy (dest,         src + start1, size1);
                     if (size2 > 0)  FloatVectorOperations::copy (dest + size1, src + start2, size2);

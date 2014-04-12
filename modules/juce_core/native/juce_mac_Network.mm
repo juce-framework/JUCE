@@ -270,7 +270,7 @@ private:
             addMethod (@selector (connection:didReceiveResponse:), didReceiveResponse,            "v@:@@");
             addMethod (@selector (connection:didFailWithError:),   didFailWithError,              "v@:@@");
             addMethod (@selector (connection:didReceiveData:),     didReceiveData,                "v@:@@");
-            addMethod (@selector (connection:didSendBodyData:totalBytesWritten:totalBytesExpectedToWrite:totalBytesExpectedToWrite:),
+            addMethod (@selector (connection:didSendBodyData:totalBytesWritten:totalBytesExpectedToWrite:),
                                                                    connectionDidSendBodyData,     "v@:@iii");
             addMethod (@selector (connectionDidFinishLoading:),    connectionDidFinishLoading,    "v@:@");
             addMethod (@selector (connection:willSendRequest:redirectResponse:), willSendRequest, "@@:@@");

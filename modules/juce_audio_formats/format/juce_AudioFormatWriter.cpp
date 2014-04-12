@@ -68,7 +68,7 @@ bool AudioFormatWriter::writeFromAudioReader (AudioFormatReader& reader,
     int* buffers [128] = { 0 };
 
     for (int i = tempBuffer.getNumChannels(); --i >= 0;)
-        buffers[i] = reinterpret_cast<int*> (tempBuffer.getSampleData (i, 0));
+        buffers[i] = reinterpret_cast<int*> (tempBuffer.getWritePointer (i, 0));
 
     if (numSamplesToRead < 0)
         numSamplesToRead = reader.lengthInSamples;
@@ -170,13 +170,13 @@ bool AudioFormatWriter::writeFromAudioSampleBuffer (const AudioSampleBuffer& sou
     jassert (startSample >= 0 && startSample + numSamples <= source.getNumSamples() && numSourceChannels > 0);
 
     if (startSample == 0)
-        return writeFromFloatArrays (source.getArrayOfChannels(), numSourceChannels, numSamples);
+        return writeFromFloatArrays (source.getArrayOfReadPointers(), numSourceChannels, numSamples);
 
     const float* chans [256];
     jassert ((int) numChannels < numElementsInArray (chans));
 
     for (int i = 0; i < numSourceChannels; ++i)
-        chans[i] = source.getSampleData (i, startSample);
+        chans[i] = source.getReadPointer (i, startSample);
 
     chans[numSourceChannels] = nullptr;
 

@@ -38,7 +38,6 @@ namespace
     Value getPluginName (Project& project)                        { return project.getProjectValue ("pluginName"); }
     Value getPluginDesc (Project& project)                        { return project.getProjectValue ("pluginDesc"); }
     Value getPluginManufacturer (Project& project)                { return project.getProjectValue ("pluginManufacturer"); }
-    Value getPluginManufacturerEmail (Project& project)           { return project.getProjectValue ("pluginManufacturerEmail"); }
     Value getPluginManufacturerCode (Project& project)            { return project.getProjectValue ("pluginManufacturerCode"); }
     Value getPluginCode (Project& project)                        { return project.getProjectValue ("pluginCode"); }
     Value getPluginChannelConfigs (Project& project)              { return project.getProjectValue ("pluginChannelConfigs"); }
@@ -47,6 +46,7 @@ namespace
     Value getPluginProducesMidiOut (Project& project)             { return project.getProjectValue ("pluginProducesMidiOut"); }
     Value getPluginSilenceInProducesSilenceOut (Project& project) { return project.getProjectValue ("pluginSilenceInIsSilenceOut"); }
     Value getPluginEditorNeedsKeyFocus (Project& project)         { return project.getProjectValue ("pluginEditorRequiresKeys"); }
+    Value getPluginVSTCategory (Project& project)                 { return project.getProjectValue ("pluginVSTCategory"); }
     Value getPluginAUExportPrefix (Project& project)              { return project.getProjectValue ("pluginAUExportPrefix"); }
     Value getPluginAUMainType (Project& project)                  { return project.getProjectValue ("pluginAUMainType"); }
     Value getPluginRTASCategory (Project& project)                { return project.getProjectValue ("pluginRTASCategory"); }
@@ -96,6 +96,16 @@ namespace
         return s;
     }
 
+    String getPluginVSTCategoryString (Project& project)
+    {
+        String s (getPluginVSTCategory (project).toString().trim());
+
+        if (s.isEmpty())
+            s = static_cast<bool> (getPluginIsSynth (project).getValue()) ? "kPlugCategSynth"
+                                                                          : "kPlugCategEffect";
+        return s;
+    }
+
     int countMaxPluginChannels (const String& configString, bool isInput)
     {
         StringArray configs;
@@ -141,7 +151,7 @@ namespace
         flags.set ("JucePlugin_Desc",                        valueToStringLiteral (getPluginDesc (project)));
         flags.set ("JucePlugin_Manufacturer",                valueToStringLiteral (getPluginManufacturer (project)));
         flags.set ("JucePlugin_ManufacturerWebsite",         valueToStringLiteral (project.getCompanyWebsite()));
-        flags.set ("JucePlugin_ManufacturerEmail",           valueToStringLiteral (getPluginManufacturerEmail (project)));
+        flags.set ("JucePlugin_ManufacturerEmail",           valueToStringLiteral (project.getCompanyEmail()));
         flags.set ("JucePlugin_ManufacturerCode",            valueToCharLiteral (getPluginManufacturerCode (project)));
         flags.set ("JucePlugin_PluginCode",                  valueToCharLiteral (getPluginCode (project)));
         flags.set ("JucePlugin_MaxNumInputChannels",         String (countMaxPluginChannels (getPluginChannelConfigs (project).toString(), true)));
@@ -156,7 +166,7 @@ namespace
         flags.set ("JucePlugin_VersionCode",                 project.getVersionAsHex());
         flags.set ("JucePlugin_VersionString",               valueToStringLiteral (project.getVersionString()));
         flags.set ("JucePlugin_VSTUniqueID",                 "JucePlugin_PluginCode");
-        flags.set ("JucePlugin_VSTCategory",                 static_cast <bool> (getPluginIsSynth (project).getValue()) ? "kPlugCategSynth" : "kPlugCategEffect");
+        flags.set ("JucePlugin_VSTCategory",                 getPluginVSTCategoryString (project));
         flags.set ("JucePlugin_AUMainType",                  getAUMainTypeString (project));
         flags.set ("JucePlugin_AUSubType",                   "JucePlugin_PluginCode");
         flags.set ("JucePlugin_AUExportPrefix",              getPluginAUExportPrefix (project).toString());

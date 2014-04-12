@@ -386,7 +386,7 @@ static const unsigned char temp_binary_data_6[] =
 "    // audio processing...\r\n"
 "    for (int channel = 0; channel < getNumInputChannels(); ++channel)\r\n"
 "    {\r\n"
-"        float* channelData = buffer.getSampleData (channel);\r\n"
+"        float* channelData = buffer.getWritePointer (channel);\r\n"
 "\r\n"
 "        // ..do something to the data...\r\n"
 "    }\r\n"
@@ -834,30 +834,30 @@ static const unsigned char temp_binary_data_14[] =
 "    //==============================================================================\r\n"
 "    APPCLASSNAME() {}\r\n"
 "\r\n"
-"    const String getApplicationName()       { return ProjectInfo::projectName; }\r\n"
-"    const String getApplicationVersion()    { return ProjectInfo::versionString; }\r\n"
-"    bool moreThanOneInstanceAllowed()       { return ALLOWMORETHANONEINSTANCE; }\r\n"
+"    const String getApplicationName() override       { return ProjectInfo::projectName; }\r\n"
+"    const String getApplicationVersion() override    { return ProjectInfo::versionString; }\r\n"
+"    bool moreThanOneInstanceAllowed() override       { return ALLOWMORETHANONEINSTANCE; }\r\n"
 "\r\n"
 "    //==============================================================================\r\n"
-"    void initialise (const String& commandLine)\r\n"
+"    void initialise (const String& commandLine) override\r\n"
 "    {\r\n"
 "        // Add your application's initialisation code here..\r\n"
 "    }\r\n"
 "\r\n"
-"    void shutdown()\r\n"
+"    void shutdown() override\r\n"
 "    {\r\n"
 "        // Add your application's shutdown code here..\r\n"
 "    }\r\n"
 "\r\n"
 "    //==============================================================================\r\n"
-"    void systemRequestedQuit()\r\n"
+"    void systemRequestedQuit() override\r\n"
 "    {\r\n"
 "        // This is called when the app is being asked to quit: you can ignore this\r\n"
 "        // request and let the app carry on running, or call quit() to allow the app to close.\r\n"
 "        quit();\r\n"
 "    }\r\n"
 "\r\n"
-"    void anotherInstanceStarted (const String& commandLine)\r\n"
+"    void anotherInstanceStarted (const String& commandLine) override\r\n"
 "    {\r\n"
 "        // When another instance of the app is launched while this one is running,\r\n"
 "        // this method is invoked, and the commandLine parameter tells you what\r\n"
@@ -893,19 +893,19 @@ static const unsigned char temp_binary_data_15[] =
 "    //==============================================================================\r\n"
 "    APPCLASSNAME() {}\r\n"
 "\r\n"
-"    const String getApplicationName()       { return ProjectInfo::projectName; }\r\n"
-"    const String getApplicationVersion()    { return ProjectInfo::versionString; }\r\n"
-"    bool moreThanOneInstanceAllowed()       { return ALLOWMORETHANONEINSTANCE; }\r\n"
+"    const String getApplicationName() override       { return ProjectInfo::projectName; }\r\n"
+"    const String getApplicationVersion() override    { return ProjectInfo::versionString; }\r\n"
+"    bool moreThanOneInstanceAllowed() override       { return ALLOWMORETHANONEINSTANCE; }\r\n"
 "\r\n"
 "    //==============================================================================\r\n"
-"    void initialise (const String& commandLine)\r\n"
+"    void initialise (const String& commandLine) override\r\n"
 "    {\r\n"
 "        // This method is where you should put your application's initialisation code..\r\n"
 "\r\n"
 "        mainWindow = new MainWindow();\r\n"
 "    }\r\n"
 "\r\n"
-"    void shutdown()\r\n"
+"    void shutdown() override\r\n"
 "    {\r\n"
 "        // Add your application's shutdown code here..\r\n"
 "\r\n"
@@ -913,14 +913,14 @@ static const unsigned char temp_binary_data_15[] =
 "    }\r\n"
 "\r\n"
 "    //==============================================================================\r\n"
-"    void systemRequestedQuit()\r\n"
+"    void systemRequestedQuit() override\r\n"
 "    {\r\n"
 "        // This is called when the app is being asked to quit: you can ignore this\r\n"
 "        // request and let the app carry on running, or call quit() to allow the app to close.\r\n"
 "        quit();\r\n"
 "    }\r\n"
 "\r\n"
-"    void anotherInstanceStarted (const String& commandLine)\r\n"
+"    void anotherInstanceStarted (const String& commandLine) override\r\n"
 "    {\r\n"
 "        // When another instance of the app is launched while this one is running,\r\n"
 "        // this method is invoked, and the commandLine parameter tells you what\r\n"
@@ -1234,7 +1234,7 @@ const char* getNamedResource (const char* resourceNameUTF8, int& numBytes) throw
         case 0xe8b08520:  numBytes = 1050; return colourscheme_light_xml;
         case 0x27c5a93a:  numBytes = 1008; return jucer_AudioPluginEditorTemplate_cpp;
         case 0x4d0721bf:  numBytes = 799; return jucer_AudioPluginEditorTemplate_h;
-        case 0x51b49ac5:  numBytes = 4638; return jucer_AudioPluginFilterTemplate_cpp;
+        case 0x51b49ac5:  numBytes = 4640; return jucer_AudioPluginFilterTemplate_cpp;
         case 0x488afa0a:  numBytes = 2488; return jucer_AudioPluginFilterTemplate_h;
         case 0xabad7041:  numBytes = 2083; return jucer_ComponentTemplate_cpp;
         case 0xfc72fe86:  numBytes = 2156; return jucer_ComponentTemplate_h;
@@ -1242,8 +1242,8 @@ const char* getNamedResource (const char* resourceNameUTF8, int& numBytes) throw
         case 0x6fa10171:  numBytes = 924; return jucer_ContentCompTemplate_h;
         case 0x28d496ad:  numBytes = 1143; return jucer_InlineComponentTemplate_h;
         case 0x8905395b:  numBytes = 470; return jucer_MainConsoleAppTemplate_cpp;
-        case 0x5e5ea047:  numBytes = 1947; return jucer_MainTemplate_NoWindow_cpp;
-        case 0x400bc026:  numBytes = 3613; return jucer_MainTemplate_Window_cpp;
+        case 0x5e5ea047:  numBytes = 2010; return jucer_MainTemplate_NoWindow_cpp;
+        case 0x400bc026:  numBytes = 3676; return jucer_MainTemplate_Window_cpp;
         case 0xf4842835:  numBytes = 1389; return jucer_NewComponentTemplate_cpp;
         case 0xe7bf237a:  numBytes = 648; return jucer_NewComponentTemplate_h;
         case 0x02a2a077:  numBytes = 262; return jucer_NewCppFileTemplate_cpp;

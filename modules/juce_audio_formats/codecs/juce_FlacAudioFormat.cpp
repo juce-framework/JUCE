@@ -49,6 +49,7 @@ namespace FlacNamespace
   #pragma clang diagnostic push
   #pragma clang diagnostic ignored "-Wconversion"
   #pragma clang diagnostic ignored "-Wshadow"
+  #pragma clang diagnostic ignored "-Wdeprecated-register"
  #endif
 
  #if JUCE_INTEL
@@ -104,7 +105,6 @@ class FlacReader  : public AudioFormatReader
 public:
     FlacReader (InputStream* const in)
         : AudioFormatReader (in, flacFormatName),
-          reservoir (2, 0),
           reservoirStart (0),
           samplesInReservoir (0),
           scanningForLength (false)
@@ -176,7 +176,7 @@ public:
                 for (int i = jmin (numDestChannels, reservoir.getNumChannels()); --i >= 0;)
                     if (destSamples[i] != nullptr)
                         memcpy (destSamples[i] + startOffsetInDestBuffer,
-                                reservoir.getSampleData (i, (int) (startSampleInFile - reservoirStart)),
+                                reservoir.getReadPointer (i, (int) (startSampleInFile - reservoirStart)),
                                 sizeof (int) * (size_t) num);
 
                 startOffsetInDestBuffer += num;
@@ -243,7 +243,7 @@ public:
 
                 if (src != nullptr)
                 {
-                    int* const dest = reinterpret_cast<int*> (reservoir.getSampleData(i));
+                    int* const dest = reinterpret_cast<int*> (reservoir.getWritePointer(i));
 
                     for (int j = 0; j < numSamples; ++j)
                         dest[j] = src[j] << bitsToShift;

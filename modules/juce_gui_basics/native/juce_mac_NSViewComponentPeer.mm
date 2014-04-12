@@ -476,7 +476,7 @@ public:
 
     void toBehind (ComponentPeer* other) override
     {
-        NSViewComponentPeer* const otherPeer = dynamic_cast <NSViewComponentPeer*> (other);
+        NSViewComponentPeer* const otherPeer = dynamic_cast<NSViewComponentPeer*> (other);
         jassert (otherPeer != nullptr); // wrong type of window?
 
         if (otherPeer != nullptr)
@@ -487,7 +487,7 @@ public:
                                   positioned: NSWindowBelow
                                   relativeTo: otherPeer->view];
             }
-            else
+            else if (component.isVisible())
             {
                 [window orderWindow: NSWindowBelow
                          relativeTo: [otherPeer->window windowNumber]];
@@ -898,11 +898,7 @@ public:
 
     NSRect constrainRect (NSRect r)
     {
-        if (constrainer != nullptr
-            #if defined (MAC_OS_X_VERSION_10_7) && (MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_7)
-             && ([window styleMask] & NSFullScreenWindowMask) == 0
-            #endif
-            )
+        if (constrainer != nullptr && ! isKioskMode())
         {
             Rectangle<int> pos      (convertToRectInt (flippedScreenRect (r)));
             Rectangle<int> original (convertToRectInt (flippedScreenRect ([window frame])));
@@ -1600,7 +1596,7 @@ private:
     static NSRect firstRectForCharacterRange (id self, SEL, NSRange)
     {
         if (NSViewComponentPeer* const owner = getOwner (self))
-            if (Component* const comp = dynamic_cast <Component*> (owner->findCurrentTextInputTarget()))
+            if (Component* const comp = dynamic_cast<Component*> (owner->findCurrentTextInputTarget()))
                 return flippedScreenRect (makeNSRect (comp->getScreenBounds()));
 
         return NSZeroRect;

@@ -85,28 +85,6 @@ struct CachedImageList  : public ReferenceCountedObject,
         return c->getTextureInfo();
     }
 
-    typedef ReferenceCountedObjectPtr<CachedImageList> Ptr;
-
-private:
-    void imageDataChanged (ImagePixelData* im) override
-    {
-        if (CachedImage* c = findCachedImage (im))
-            c->texture.release();
-    }
-
-    void imageDataBeingDeleted (ImagePixelData* im) override
-    {
-        for (int i = images.size(); --i >= 0;)
-        {
-            if (images.getUnchecked(i)->pixelData == im)
-            {
-                totalSize -= images.getUnchecked(i)->imageSize;
-                images.remove (i);
-                break;
-            }
-        }
-    }
-
     struct CachedImage
     {
         CachedImage (CachedImageList& list, ImagePixelData* im)
@@ -149,6 +127,28 @@ private:
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CachedImage)
     };
+
+    typedef ReferenceCountedObjectPtr<CachedImageList> Ptr;
+
+private:
+    void imageDataChanged (ImagePixelData* im) override
+    {
+        if (CachedImage* c = findCachedImage (im))
+            c->texture.release();
+    }
+
+    void imageDataBeingDeleted (ImagePixelData* im) override
+    {
+        for (int i = images.size(); --i >= 0;)
+        {
+            if (images.getUnchecked(i)->pixelData == im)
+            {
+                totalSize -= images.getUnchecked(i)->imageSize;
+                images.remove (i);
+                break;
+            }
+        }
+    }
 
     OwnedArray<CachedImage> images;
     size_t totalSize, maxCacheSize;

@@ -77,7 +77,7 @@ bool BufferingAudioReader::readSamples (int** destSamples, int numDestChannels, 
                     dest += startOffsetInDestBuffer;
 
                     if (j < (int) numChannels)
-                        FloatVectorOperations::copy (dest, block->buffer.getSampleData (j, offset), numToDo);
+                        FloatVectorOperations::copy (dest, block->buffer.getReadPointer (j, offset), numToDo);
                     else
                         FloatVectorOperations::clear (dest, numToDo);
                 }

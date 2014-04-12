@@ -32,9 +32,7 @@ class LatencyTester  : public AudioIODeviceCallback,
 {
 public:
     LatencyTester (TextEditor& resultsBox_)
-        : testSound (1, 1),
-          recordedSound (1, 1),
-          playingSampleNum (0),
+        : playingSampleNum (0),
           recordedSampleNum (-1),
           sampleRate (0),
           testIsRunning (false),
@@ -137,8 +135,8 @@ public:
 
         if (testIsRunning)
         {
-            float* const recordingBuffer = recordedSound.getSampleData (0, 0);
-            const float* const playBuffer = testSound.getSampleData (0, 0);
+            float* const recordingBuffer = recordedSound.getWritePointer (0);
+            const float* const playBuffer = testSound.getReadPointer (0);
 
             for (int i = 0; i < numSamples; ++i)
             {
@@ -188,12 +186,11 @@ private:
         const int length = ((int) sampleRate) / 4;
         testSound.setSize (1, length);
         testSound.clear();
-        float* s = testSound.getSampleData (0, 0);
 
         Random rand;
 
         for (int i = 0; i < length; ++i)
-            s[i] = (rand.nextFloat() - rand.nextFloat() + rand.nextFloat() - rand.nextFloat()) * 0.06f;
+            testSound.setSample (0, i, (rand.nextFloat() - rand.nextFloat() + rand.nextFloat() - rand.nextFloat()) * 0.06f);
 
         spikePositions.clear();
 
@@ -204,8 +201,8 @@ private:
         {
             spikePositions.add (spikePos);
 
-            s[spikePos] = 0.99f;
-            s[spikePos + 1] = -0.99f;
+            testSound.setSample (0, spikePos,      0.99f);
+            testSound.setSample (0, spikePos + 1, -0.99f);
 
             spikePos += spikeDelta;
             spikeDelta += spikeDelta / 6 + rand.nextInt (5);
@@ -217,7 +214,7 @@ private:
     {
         const float minSpikeLevel = 5.0f;
         const double smooth = 0.975;
-        const float* s = buffer.getSampleData (0, 0);
+        const float* s = buffer.getReadPointer (0);
         const int spikeDriftAllowed = 5;
 
         Array<int> spikesFound;

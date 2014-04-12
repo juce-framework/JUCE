@@ -28,8 +28,7 @@ AudioProcessorPlayer::AudioProcessorPlayer()
       blockSize (0),
       isPrepared (false),
       numInputChans (0),
-      numOutputChans (0),
-      tempBuffer (1, 1)
+      numOutputChans (0)
 {
 }
 
@@ -94,7 +93,7 @@ void AudioProcessorPlayer::audioDeviceIOCallback (const float** const inputChann
 
         for (int i = numOutputChannels; i < numInputChannels; ++i)
         {
-            channels[totalNumChans] = tempBuffer.getSampleData (i - numOutputChannels, 0);
+            channels[totalNumChans] = tempBuffer.getWritePointer (i - numOutputChannels);
             memcpy (channels[totalNumChans], inputChannelData[i], sizeof (float) * (size_t) numSamples);
             ++totalNumChans;
         }

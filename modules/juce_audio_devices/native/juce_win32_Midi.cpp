@@ -297,11 +297,11 @@ MidiInput::MidiInput (const String& name_)
 
 MidiInput::~MidiInput()
 {
-    delete static_cast <MidiInCollector*> (internal);
+    delete static_cast<MidiInCollector*> (internal);
 }
 
-void MidiInput::start()     { static_cast <MidiInCollector*> (internal)->start(); }
-void MidiInput::stop()      { static_cast <MidiInCollector*> (internal)->stop(); }
+void MidiInput::start()     { static_cast<MidiInCollector*> (internal)->start(); }
+void MidiInput::stop()      { static_cast<MidiInCollector*> (internal)->stop(); }
 
 
 //==============================================================================
@@ -432,7 +432,7 @@ MidiOutput::~MidiOutput()
 {
     stopBackgroundThread();
 
-    MidiOutHandle* const h = static_cast <MidiOutHandle*> (internal);
+    MidiOutHandle* const h = static_cast<MidiOutHandle*> (internal);
 
     if (MidiOutHandle::activeHandles.contains (h) && --(h->refCount) == 0)
     {
@@ -444,7 +444,7 @@ MidiOutput::~MidiOutput()
 
 void MidiOutput::sendMessageNow (const MidiMessage& message)
 {
-    const MidiOutHandle* const handle = static_cast <const MidiOutHandle*> (internal);
+    const MidiOutHandle* const handle = static_cast<const MidiOutHandle*> (internal);
 
     if (message.getRawDataSize() > 3 || message.isSysEx())
     {

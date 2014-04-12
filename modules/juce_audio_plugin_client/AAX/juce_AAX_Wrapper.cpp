@@ -865,8 +865,12 @@ struct AAXClasses
                                                  audioProcessor.isParameterAutomatable (parameterIndex));
 
                 parameter->AddShortenedName (audioProcessor.getParameterName (parameterIndex, 4).toRawUTF8());
-                parameter->SetNumberOfSteps ((uint32_t) audioProcessor.getParameterNumSteps (parameterIndex));
-                parameter->SetType (AAX_eParameterType_Continuous);
+
+                const int parameterNumSteps = audioProcessor.getParameterNumSteps (parameterIndex);
+                parameter->SetNumberOfSteps ((uint32_t) parameterNumSteps);
+                parameter->SetType (parameterNumSteps > 1000 ? AAX_eParameterType_Continuous
+                                                             : AAX_eParameterType_Discrete);
+
                 mParameterManager.AddParameter (parameter);
             }
         }

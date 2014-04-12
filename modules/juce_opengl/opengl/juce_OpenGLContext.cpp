@@ -334,6 +334,16 @@ public:
 
         while (! threadShouldExit())
         {
+           #if JUCE_IOS
+            // NB: on iOS, all GL calls will crash when the app is running
+            // in the background..
+            if (! Process::isForegroundProcess())
+            {
+                wait (500);
+                continue;
+            }
+           #endif
+
             if (! renderFrame())
                 wait (5); // failed to render, so avoid a tight fail-loop.
             else if (! context.continuousRepaint)
@@ -498,7 +508,9 @@ public:
 
         if (canBeAttached (comp))
         {
-            if (! isAttached (comp))
+            if (isAttached (comp))
+                comp.repaint(); // (needed when windows are un-minimised)
+            else
                 attach();
         }
         else
@@ -604,6 +616,7 @@ void OpenGLContext::setComponentPaintingEnabled (bool shouldPaintComponent) noex
 void OpenGLContext::setContinuousRepainting (bool shouldContinuouslyRepaint) noexcept
 {
     continuousRepaint = shouldContinuouslyRepaint;
+    triggerRepaint();
 }
 
 void OpenGLContext::setPixelFormat (const OpenGLPixelFormat& preferredPixelFormat) noexcept

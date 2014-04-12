@@ -32,7 +32,7 @@ extern AudioProcessor* JUCE_CALLTYPE createPluginFilter();
     A class that can be used to run a simple standalone application containing your filter.
 
     Just create one of these objects in your JUCEApplicationBase::initialise() method, and
-    let it do its work. It will create your filter object using the same createFilter() function
+    let it do its work. It will create your filter object using the same createPluginFilter() function
     that the other plugin wrappers use.
 */
 class StandaloneFilterWindow    : public DocumentWindow,
@@ -93,7 +93,7 @@ public:
             if (data.fromBase64Encoding (settings->getValue ("filterState"))
                  && data.getSize() > 0)
             {
-                filter->setStateInformation (data.getData(), data.getSize());
+                filter->setStateInformation (data.getData(), (int) data.getSize());
             }
         }
 
@@ -207,7 +207,7 @@ public:
 
             if (fc.getResult().loadFileAsData (data))
             {
-                filter->setStateInformation (data.getData(), data.getSize());
+                filter->setStateInformation (data.getData(), (int) data.getSize());
             }
             else
             {

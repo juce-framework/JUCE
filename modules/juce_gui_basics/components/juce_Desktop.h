@@ -426,6 +426,7 @@ private:
 
     Component* kioskModeComponent;
     Rectangle<int> kioskComponentOriginalBounds;
+    bool kioskModeReentrant;
 
     int allowedOrientations;
     float masterScaleFactor;

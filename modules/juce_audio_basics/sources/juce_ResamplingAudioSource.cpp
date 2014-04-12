@@ -28,14 +28,12 @@ ResamplingAudioSource::ResamplingAudioSource (AudioSource* const inputSource,
     : input (inputSource, deleteInputWhenDeleted),
       ratio (1.0),
       lastRatio (1.0),
-      buffer (numChannels_, 0),
       bufferPos (0),
       sampsInBuffer (0),
       subSampleOffset (0),
       numChannels (numChannels_)
 {
     jassert (input != nullptr);
-
     zeromem (coefficients, sizeof (coefficients));
 }
 
@@ -121,7 +119,7 @@ void ResamplingAudioSource::getNextAudioBlock (const AudioSourceChannelInfo& inf
             // for down-sampling, pre-apply the filter..
 
             for (int i = channelsToProcess; --i >= 0;)
-                applyFilter (buffer.getSampleData (i, endOfBufferPos), numToDo, filterStates[i]);
+                applyFilter (buffer.getWritePointer (i, endOfBufferPos), numToDo, filterStates[i]);
         }
 
         sampsInBuffer += numToDo;
@@ -130,8 +128,8 @@ void ResamplingAudioSource::getNextAudioBlock (const AudioSourceChannelInfo& inf
 
     for (int channel = 0; channel < channelsToProcess; ++channel)
     {
-        destBuffers[channel] = info.buffer->getSampleData (channel, info.startSample);
-        srcBuffers[channel] = buffer.getSampleData (channel, 0);
+        destBuffers[channel] = info.buffer->getWritePointer (channel, info.startSample);
+        srcBuffers[channel] = buffer.getReadPointer (channel);
     }
 
     int nextPos = (bufferPos + 1) % bufferSize;
@@ -163,14 +161,14 @@ void ResamplingAudioSource::getNextAudioBlock (const AudioSourceChannelInfo& inf
     {
         // for up-sampling, apply the filter after transposing..
         for (int i = channelsToProcess; --i >= 0;)
-            applyFilter (info.buffer->getSampleData (i, info.startSample), info.numSamples, filterStates[i]);
+            applyFilter (info.buffer->getWritePointer (i, info.startSample), info.numSamples, filterStates[i]);
     }
     else if (localRatio <= 1.0001 && info.numSamples > 0)
     {
         // if the filter's not currently being applied, keep it stoked with the last couple of samples to avoid discontinuities
         for (int i = channelsToProcess; --i >= 0;)
         {
-            const float* const endOfBuffer = info.buffer->getSampleData (i, info.startSample + info.numSamples - 1);
+            const float* const endOfBuffer = info.buffer->getReadPointer (i, info.startSample + info.numSamples - 1);
             FilterState& fs = filterStates[i];
 
             if (info.numSamples > 1)

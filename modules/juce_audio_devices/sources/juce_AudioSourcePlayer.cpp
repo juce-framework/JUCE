@@ -26,7 +26,6 @@ AudioSourcePlayer::AudioSourcePlayer()
     : source (nullptr),
       sampleRate (0),
       bufferSize (0),
-      tempBuffer (2, 8),
       lastGain (1.0f),
       gain (1.0f)
 {
@@ -115,7 +114,7 @@ void AudioSourcePlayer::audioDeviceIOCallback (const float** inputChannelData,
 
             for (int i = numOutputs; i < numInputs; ++i)
             {
-                channels[numActiveChans] = tempBuffer.getSampleData (i - numOutputs, 0);
+                channels[numActiveChans] = tempBuffer.getWritePointer (i - numOutputs);
                 memcpy (channels[numActiveChans], inputChans[i], sizeof (float) * (size_t) numSamples);
                 ++numActiveChans;
             }
