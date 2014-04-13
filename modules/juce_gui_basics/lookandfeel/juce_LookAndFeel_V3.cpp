@@ -225,10 +225,13 @@ void LookAndFeel_V3::drawTabButton (TabBarButton& button, Graphics& g, bool isMo
 
     if (TabbedButtonBar* bar = button.findParentComponentOfClass<TabbedButtonBar>())
     {
-        if (button.isFrontTab() && bar->isColourSpecified (TabbedButtonBar::frontTextColourId))
-            col = bar->findColour (TabbedButtonBar::frontTextColourId);
-        else if (bar->isColourSpecified (TabbedButtonBar::tabTextColourId))
-            col = bar->findColour (TabbedButtonBar::tabTextColourId);
+        TabbedButtonBar::ColourIds colID = button.isFrontTab() ? TabbedButtonBar::frontTextColourId
+                                                               : TabbedButtonBar::tabTextColourId;
+
+        if (bar->isColourSpecified (colID))
+            col = bar->findColour (colID);
+        else if (isColourSpecified (colID))
+            col = findColour (colID);
     }
 
     const Rectangle<float> area (button.getTextArea().toFloat());

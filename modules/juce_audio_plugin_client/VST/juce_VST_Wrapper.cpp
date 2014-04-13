@@ -415,7 +415,7 @@ public:
        #if JucePlugin_Build_VST3 && JUCE_VST3_CAN_REPLACE_VST2
         if ((lArg == 'stCA' || lArg == 'stCa') && lArg2 == 'FUID' && ptrArg != nullptr)
         {
-            memcpy (ptrArg, getJuceVST3ComponentIID(), 16); // sizeof(FUID) is 20 and we need to copy only 16 bytes!
+            memcpy (ptrArg, getJuceVST3ComponentIID(), 16);
             return 1;
         }
        #endif

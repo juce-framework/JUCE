@@ -317,29 +317,37 @@ void Font::checkTypefaceSuitability()
 }
 
 //==============================================================================
-const String& Font::getDefaultSansSerifFontName()
+struct FontPlaceholderNames
 {
-    static const String name ("<Sans-Serif>");
-    return name;
+    FontPlaceholderNames()
+       : sans    ("<Sans-Serif>"),
+         serif   ("<Serif>"),
+         mono    ("<Monospaced>"),
+         regular ("<Regular>")
+    {
+    }
+
+    String sans, serif, mono, regular;
+};
+
+const FontPlaceholderNames& getFontPlaceholderNames()
+{
+    static FontPlaceholderNames names;
+    return names;
 }
 
-const String& Font::getDefaultSerifFontName()
-{
-    static const String name ("<Serif>");
-    return name;
-}
+#if JUCE_MSVC
+// This is a workaround for the lack of thread-safety in MSVC's handling of function-local
+// statics - if multiple threads all try to create the first Font object at the same time,
+// it can cause a race-condition in creating these placeholder strings.
+struct FontNamePreloader { FontNamePreloader() { getFontPlaceholderNames(); } };
+static FontNamePreloader fnp;
+#endif
 
-const String& Font::getDefaultMonospacedFontName()
-{
-    static const String name ("<Monospaced>");
-    return name;
-}
-
-const String& Font::getDefaultStyle()
-{
-    static const String style ("<Regular>");
-    return style;
-}
+const String& Font::getDefaultSansSerifFontName()       { return getFontPlaceholderNames().sans; }
+const String& Font::getDefaultSerifFontName()           { return getFontPlaceholderNames().serif; }
+const String& Font::getDefaultMonospacedFontName()      { return getFontPlaceholderNames().mono; }
+const String& Font::getDefaultStyle()                   { return getFontPlaceholderNames().regular; }
 
 const String& Font::getTypefaceName() const noexcept    { return font->typefaceName; }
 const String& Font::getTypefaceStyle() const noexcept   { return font->typefaceStyle; }

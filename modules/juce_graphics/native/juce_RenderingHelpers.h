@@ -225,10 +225,13 @@ private:
 
             hits.set (0);
             misses.set (0);
-            return glyphs.getLast();
         }
 
-        return findLeastRecentlyUsedGlyph();
+        if (CachedGlyphType* g = findLeastRecentlyUsedGlyph())
+            return g;
+
+        addNewGlyphSlots (32);
+        return glyphs.getLast();
     }
 
     void addNewGlyphSlots (int num)
@@ -241,8 +244,8 @@ private:
 
     CachedGlyphType* findLeastRecentlyUsedGlyph() const noexcept
     {
-        CachedGlyphType* oldest = glyphs.getLast();
-        int oldestCounter = oldest->lastAccessCount;
+        CachedGlyphType* oldest = nullptr;
+        int oldestCounter = std::numeric_limits<int>::max();
 
         for (int i = glyphs.size() - 1; --i >= 0;)
         {
@@ -887,20 +890,22 @@ namespace EdgeTableFillers
 
         forcedinline void copyRow (DestPixelType* dest, SrcPixelType const* src, int width) const noexcept
         {
-            if (srcData.pixelStride == 3 && destData.pixelStride == 3)
+            const int destStride = destData.pixelStride;
+            const int srcStride  = srcData.pixelStride;
+
+            if (destStride == srcStride
+                 && srcData.pixelFormat  == Image::PixelFormat::RGB
+                 && destData.pixelFormat == Image::PixelFormat::RGB)
             {
-                memcpy (dest, src, sizeof (PixelRGB) * (size_t) width);
+                memcpy (dest, src, (size_t) (width * srcStride));
             }
             else
             {
-                const int destStride = destData.pixelStride;
-                const int srcStride = srcData.pixelStride;
-
                 do
                 {
                     dest->blend (*src);
                     dest = addBytesToPointer (dest, destStride);
-                    src = addBytesToPointer (src, srcStride);
+                    src  = addBytesToPointer (src, srcStride);
                 } while (--width > 0);
             }
         }

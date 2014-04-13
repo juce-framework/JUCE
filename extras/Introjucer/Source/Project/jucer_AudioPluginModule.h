@@ -38,7 +38,6 @@ namespace
     Value getPluginName (Project& project)                        { return project.getProjectValue ("pluginName"); }
     Value getPluginDesc (Project& project)                        { return project.getProjectValue ("pluginDesc"); }
     Value getPluginManufacturer (Project& project)                { return project.getProjectValue ("pluginManufacturer"); }
-    Value getPluginManufacturerEmail (Project& project)           { return project.getProjectValue ("pluginManufacturerEmail"); }
     Value getPluginManufacturerCode (Project& project)            { return project.getProjectValue ("pluginManufacturerCode"); }
     Value getPluginCode (Project& project)                        { return project.getProjectValue ("pluginCode"); }
     Value getPluginChannelConfigs (Project& project)              { return project.getProjectValue ("pluginChannelConfigs"); }
@@ -152,7 +151,7 @@ namespace
         flags.set ("JucePlugin_Desc",                        valueToStringLiteral (getPluginDesc (project)));
         flags.set ("JucePlugin_Manufacturer",                valueToStringLiteral (getPluginManufacturer (project)));
         flags.set ("JucePlugin_ManufacturerWebsite",         valueToStringLiteral (project.getCompanyWebsite()));
-        flags.set ("JucePlugin_ManufacturerEmail",           valueToStringLiteral (getPluginManufacturerEmail (project)));
+        flags.set ("JucePlugin_ManufacturerEmail",           valueToStringLiteral (project.getCompanyEmail()));
         flags.set ("JucePlugin_ManufacturerCode",            valueToCharLiteral (getPluginManufacturerCode (project)));
         flags.set ("JucePlugin_PluginCode",                  valueToCharLiteral (getPluginCode (project)));
         flags.set ("JucePlugin_MaxNumInputChannels",         String (countMaxPluginChannels (getPluginChannelConfigs (project).toString(), true)));
