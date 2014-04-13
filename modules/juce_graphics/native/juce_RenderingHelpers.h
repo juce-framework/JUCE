@@ -894,8 +894,8 @@ namespace EdgeTableFillers
             const int srcStride  = srcData.pixelStride;
 
             if (destStride == srcStride
-                 && srcData.pixelFormat  == Image::PixelFormat::RGB
-                 && destData.pixelFormat == Image::PixelFormat::RGB)
+                 && srcData.pixelFormat  == Image::RGB
+                 && destData.pixelFormat == Image::RGB)
             {
                 memcpy (dest, src, (size_t) (width * srcStride));
             }
