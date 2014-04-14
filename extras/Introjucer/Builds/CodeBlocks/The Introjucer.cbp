@@ -822,6 +822,10 @@
       <Option compile="0"/>
       <Option link="0"/>
     </Unit>
+    <Unit filename="../../../../modules/juce_core/memory/juce_SharedResourcePointer.h">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
     <Unit filename="../../../../modules/juce_core/memory/juce_Singleton.h">
       <Option compile="0"/>
       <Option link="0"/>

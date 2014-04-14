@@ -272,6 +272,7 @@ extern JUCE_API void JUCE_CALLTYPE logAssertion (const char* file, int line) noe
 #include "zip/juce_GZIPDecompressorInputStream.h"
 #include "zip/juce_ZipFile.h"
 #include "containers/juce_PropertySet.h"
+#include "memory/juce_SharedResourcePointer.h"
 
 }
 

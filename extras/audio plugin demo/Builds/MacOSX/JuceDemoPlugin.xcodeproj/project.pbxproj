@@ -381,6 +381,7 @@
 		58CEDDC16E6A5293A4F81E84 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_ScopedReadLock.h"; path = "../../../../modules/juce_core/threads/juce_ScopedReadLock.h"; sourceTree = "SOURCE_ROOT"; };
 		58E978708BAA8613A40F61E3 = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
 		58FD5A3294F6D4F415B9CA60 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_FileListComponent.h"; path = "../../../../modules/juce_gui_basics/filebrowser/juce_FileListComponent.h"; sourceTree = "SOURCE_ROOT"; };
+		595ABB3C5072077C8009AB03 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_SharedResourcePointer.h"; path = "../../../../modules/juce_core/memory/juce_SharedResourcePointer.h"; sourceTree = "SOURCE_ROOT"; };
 		598E9C9D95393B4E4699CF0B = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_BubbleMessageComponent.h"; path = "../../../../modules/juce_gui_extra/misc/juce_BubbleMessageComponent.h"; sourceTree = "SOURCE_ROOT"; };
 		59968E95CF78A0E8A03B1DA1 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_Thread.cpp"; path = "../../../../modules/juce_core/threads/juce_Thread.cpp"; sourceTree = "SOURCE_ROOT"; };
 		5A15B77FF78B76ADDF1EB203 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_Slider.h"; path = "../../../../modules/juce_gui_basics/widgets/juce_Slider.h"; sourceTree = "SOURCE_ROOT"; };
@@ -1264,6 +1265,7 @@
 					E04D8B4BAEB817D520C2EF4A,
 					86B1672E14AD6F060FF57BB1,
 					8BBD921B5A82DB52E6842A1B,
+					595ABB3C5072077C8009AB03,
 					D2724DFF5CF142D5264EE85B,
 					9F9AC54CF90FDB770E5FCA03, ); name = memory; sourceTree = "<group>"; };
 		94AD627E1726C9B93F8269D8 = {isa = PBXGroup; children = (

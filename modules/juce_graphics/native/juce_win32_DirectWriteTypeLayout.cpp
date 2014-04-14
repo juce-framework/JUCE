@@ -389,9 +389,9 @@ namespace DirectWriteTypeLayout
 bool TextLayout::createNativeLayout (const AttributedString& text)
 {
    #if JUCE_USE_DIRECTWRITE
-    const Direct2DFactories& factories = Direct2DFactories::getInstance();
+    SharedResourcePointer<Direct2DFactories> factories;
 
-    if (factories.d2dFactory != nullptr && factories.systemFonts != nullptr)
+    if (factories->d2dFactory != nullptr && factories->systemFonts != nullptr)
     {
        #if JUCE_64BIT
         // There's a mysterious bug in 64-bit Windows that causes garbage floating-point
@@ -402,13 +402,13 @@ bool TextLayout::createNativeLayout (const AttributedString& text)
         {
             hasBeenCalled = true;
             TextLayout dummy;
-            DirectWriteTypeLayout::createLayout (dummy, text, factories.directWriteFactory,
-                                                 factories.d2dFactory, factories.systemFonts);
+            DirectWriteTypeLayout::createLayout (dummy, text, factories->directWriteFactory,
+                                                 factories->d2dFactory, factories->systemFonts);
         }
        #endif
 
-        DirectWriteTypeLayout::createLayout (*this, text, factories.directWriteFactory,
-                                             factories.d2dFactory, factories.systemFonts);
+        DirectWriteTypeLayout::createLayout (*this, text, factories->directWriteFactory,
+                                             factories->d2dFactory, factories->systemFonts);
         return true;
     }
    #else

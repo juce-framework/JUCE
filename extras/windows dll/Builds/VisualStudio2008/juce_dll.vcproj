@@ -1209,6 +1209,7 @@
           <File RelativePath="..\..\..\..\modules\juce_core\memory\juce_OptionalScopedPointer.h"/>
           <File RelativePath="..\..\..\..\modules\juce_core\memory\juce_ReferenceCountedObject.h"/>
           <File RelativePath="..\..\..\..\modules\juce_core\memory\juce_ScopedPointer.h"/>
+          <File RelativePath="..\..\..\..\modules\juce_core\memory\juce_SharedResourcePointer.h"/>
           <File RelativePath="..\..\..\..\modules\juce_core\memory\juce_Singleton.h"/>
           <File RelativePath="..\..\..\..\modules\juce_core\memory\juce_WeakReference.h"/>
         </Filter>

@@ -329,17 +329,17 @@ public:
 
     //==============================================================================
     /** Returns the object that this pointer references.
-        The pointer returned may be zero, of course.
+        The pointer returned may be null, of course.
     */
     operator ReferencedType*() const noexcept       { return referencedObject; }
 
     /** Returns the object that this pointer references.
-        The pointer returned may be zero, of course.
+        The pointer returned may be null, of course.
     */
     ReferencedType* get() const noexcept            { return referencedObject; }
 
     /** Returns the object that this pointer references.
-        The pointer returned may be zero, of course.
+        The pointer returned may be null, of course.
     */
     ReferencedType* getObject() const noexcept      { return referencedObject; }
 

@@ -1180,6 +1180,7 @@
     <ClInclude Include="..\..\..\..\modules\juce_core\memory\juce_OptionalScopedPointer.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\memory\juce_ReferenceCountedObject.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\memory\juce_ScopedPointer.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_core\memory\juce_SharedResourcePointer.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\memory\juce_Singleton.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\memory\juce_WeakReference.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\containers\juce_AbstractFifo.h"/>
