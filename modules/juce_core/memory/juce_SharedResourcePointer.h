@@ -49,6 +49,38 @@
     Note: the construction/deletion of the shared object must not involve any
     code that makes recursive calls to a SharedResourcePointer, or you'll cause
     a deadlock.
+
+    Example:
+    @code
+    // An example of a class that contains the shared data you want to use.
+    struct MySharedData
+    {
+        // There's no need to ever create an instance of this class directly yourself,
+        // but it does need a public constructor that does the initialisation.
+        MySharedData()
+        {
+            sharedStuff = generateHeavyweightStuff();
+        }
+
+        Array<SomeKindOfData> sharedStuff;
+    };
+
+    struct DataUserClass
+    {
+        DataUserClass()
+        {
+            // Multiple instances of the DataUserClass will all have the same
+            // shared common instance of MySharedData referenced by their sharedData
+            // member variables.
+            useSharedStuff (sharedData->sharedStuff);
+        }
+
+        // By keeping this pointer as a member variable, the shared resource
+        // is guaranteed to be available for as long as the DataUserClass object.
+        SharedResourcePointer<MySharedData> sharedData;
+    };
+
+    @endcode
  */
 template <typename SharedObjectType>
 class SharedResourcePointer
