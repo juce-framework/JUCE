@@ -229,7 +229,7 @@ namespace FloatVectorHelpers
 
         static Type findMinOrMax (const Type* src, int num, const bool isMinimum) noexcept
         {
-            const int numLongOps = num / Mode::numParallel;
+            int numLongOps = num / Mode::numParallel;
 
            #if JUCE_USE_SSE_INTRINSICS
             if (numLongOps > 1 && isSSE2Available())
@@ -246,7 +246,7 @@ namespace FloatVectorHelpers
 
                     if (isMinimum)
                     {
-                        for (int i = 1; i < numLongOps; ++i)
+                        while (--numLongOps > 0)
                         {
                             src += Mode::numParallel;
                             val = Mode::min (val, Mode::loadA (src));
@@ -254,7 +254,7 @@ namespace FloatVectorHelpers
                     }
                     else
                     {
-                        for (int i = 1; i < numLongOps; ++i)
+                        while (--numLongOps > 0)
                         {
                             src += Mode::numParallel;
                             val = Mode::max (val, Mode::loadA (src));
@@ -268,7 +268,7 @@ namespace FloatVectorHelpers
 
                     if (isMinimum)
                     {
-                        for (int i = 1; i < numLongOps; ++i)
+                        while (--numLongOps > 0)
                         {
                             src += Mode::numParallel;
                             val = Mode::min (val, Mode::loadU (src));
@@ -276,7 +276,7 @@ namespace FloatVectorHelpers
                     }
                     else
                     {
-                        for (int i = 1; i < numLongOps; ++i)
+                        while (--numLongOps > 0)
                         {
                             src += Mode::numParallel;
                             val = Mode::max (val, Mode::loadU (src));
@@ -288,6 +288,7 @@ namespace FloatVectorHelpers
                                         : Mode::max (val);
 
                 num &= (Mode::numParallel - 1);
+                src += Mode::numParallel;
 
                 for (int i = 0; i < num; ++i)
                     result = isMinimum ? jmin (result, src[i])
@@ -302,7 +303,7 @@ namespace FloatVectorHelpers
 
         static Range<Type> findMinAndMax (const Type* src, int num) noexcept
         {
-            const int numLongOps = num / Mode::numParallel;
+            int numLongOps = num / Mode::numParallel;
 
            #if JUCE_USE_SSE_INTRINSICS
             if (numLongOps > 1 && isSSE2Available())
@@ -318,7 +319,7 @@ namespace FloatVectorHelpers
                     mn = Mode::loadA (src);
                     mx = mn;
 
-                    for (int i = 1; i < numLongOps; ++i)
+                    while (--numLongOps > 0)
                     {
                         src += Mode::numParallel;
                         const ParallelType v = Mode::loadA (src);
@@ -332,7 +333,7 @@ namespace FloatVectorHelpers
                     mn = Mode::loadU (src);
                     mx = mn;
 
-                    for (int i = 1; i < numLongOps; ++i)
+                    while (--numLongOps > 0)
                     {
                         src += Mode::numParallel;
                         const ParallelType v = Mode::loadU (src);
@@ -345,6 +346,8 @@ namespace FloatVectorHelpers
                                     Mode::max (mx));
 
                 num &= 3;
+                src += Mode::numParallel;
+
                 for (int i = 0; i < num; ++i)
                     result = result.getUnionWith (src[i]);
 
