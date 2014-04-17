@@ -150,7 +150,7 @@ public:
         o.content->setSize (500, 450);
 
         o.dialogTitle                   = TRANS("Audio Settings");
-        o.dialogBackgroundColour        = Colours::lightgrey;
+        o.dialogBackgroundColour        = Colour (0xfff0f0f0);
         o.escapeKeyTriggersCloseButton  = true;
         o.useNativeTitleBar             = true;
         o.resizable                     = false;
