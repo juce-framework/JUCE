@@ -111,6 +111,7 @@ static void createPluginDescription (PluginDescription& description,
     description.lastFileModTime     = pluginFile.getLastModificationTime();
     description.manufacturerName    = company;
     description.name                = name;
+    description.descriptiveName     = name;
     description.pluginFormatName    = "VST3";
     description.numInputChannels    = numInputs;
     description.numOutputChannels   = numOutputs;
