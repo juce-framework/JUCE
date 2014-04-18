@@ -145,11 +145,6 @@ public:
     {
         ScopedPointer<MessageManagerLock> mmLock;
 
-        const Rectangle<int> screenBounds (component.getTopLevelComponent()->getScreenBounds());
-
-        if (lastScreenBounds != screenBounds)
-            updateViewportSize (false);
-
         const bool isUpdating = needsUpdate.compareAndSetBool (0, 1);
 
         if (context.renderComponents && isUpdating)
@@ -161,6 +156,8 @@ public:
             mmLock = new MessageManagerLock (this);  // need to acquire this before locking the context.
             if (! mmLock->lockWasGained())
                 return false;
+
+            updateViewportSize (false);
         }
 
         if (! context.makeActive())
@@ -219,12 +216,18 @@ public:
         }
     }
 
+    void checkViewportBounds()
+    {
+        const Rectangle<int> screenBounds (component.getTopLevelComponent()->getScreenBounds());
+
+        if (lastScreenBounds != screenBounds)
+            updateViewportSize (true);
+    }
+
     void paintComponent()
     {
         // you mustn't set your own cached image object when attaching a GL context!
         jassert (get (component) == this);
-
-        updateViewportSize (false);
 
         if (! ensureFrameBufferSize())
             return;
@@ -463,7 +466,8 @@ void OpenGLContext::NativeContext::renderCallback()
 #endif
 
 //==============================================================================
-class OpenGLContext::Attachment  : public ComponentMovementWatcher
+class OpenGLContext::Attachment  : public ComponentMovementWatcher,
+                                   private Timer
 {
 public:
     Attachment (OpenGLContext& c, Component& comp)
@@ -564,10 +568,14 @@ private:
         comp.setCachedComponentImage (newCachedImage);
         newCachedImage->start(); // (must wait until this is attached before starting its thread)
         newCachedImage->updateViewportSize (true);
+
+        startTimer (400);
     }
 
     void detach()
     {
+        stopTimer();
+
         Component& comp = *getComponent();
 
        #if JUCE_MAC
@@ -579,6 +587,12 @@ private:
 
         comp.setCachedComponentImage (nullptr);
         context.nativeContext = nullptr;
+    }
+
+    void timerCallback() override
+    {
+        if (CachedImage* const cachedImage = CachedImage::get (*getComponent()))
+            cachedImage->checkViewportBounds();
     }
 };
 
