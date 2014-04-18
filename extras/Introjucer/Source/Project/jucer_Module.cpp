@@ -377,6 +377,26 @@ void LibraryModule::prepareExporter (ProjectExporter& exporter, ProjectSaver& pr
         exporter.mingwLibs.removeDuplicates (false);
     }
 
+
+    if (exporter.isQtCreator())
+    {
+        if (isAUPluginHost (project))
+            exporter.xcodeFrameworks.addTokens ("AudioUnit CoreAudioKit", false);
+
+        const String frameworks (moduleInfo.moduleInfo [exporter.isOSX() ? "OSXFrameworks" : "iOSFrameworks"].toString());
+        exporter.xcodeFrameworks.addTokens (frameworks, ", ", String::empty);
+
+        exporter.mingwLibs.addTokens (moduleInfo.moduleInfo ["mingwLibs"].toString(), ", ", String::empty);
+        exporter.mingwLibs.trim();
+        exporter.mingwLibs.sort (false);
+        exporter.mingwLibs.removeDuplicates (false);
+
+        exporter.linuxLibs.addTokens (moduleInfo.moduleInfo ["LinuxLibs"].toString(), ", ", String::empty);
+        exporter.linuxLibs.trim();
+        exporter.linuxLibs.sort (false);
+        exporter.linuxLibs.removeDuplicates (false);
+    }
+
     if (moduleInfo.isPluginClient())
     {
         if (shouldBuildVST  (project).getValue())  VSTHelpers::prepareExporter (exporter, projectSaver, false);

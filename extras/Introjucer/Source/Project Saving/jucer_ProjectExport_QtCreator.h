@@ -244,16 +244,22 @@ private:
 
         // Linker flags
         out << "# Linker flags" << newLine;
-        out << "LIBS = -L$$DESTDIR";
+        out << "LIBS = -L$$DESTDIR " << getExternalLibrariesString();
         if (makefileIsDLL)
             out << " -shared";
          out << newLine;
 
         // Linux specific linker flags
-        out << "unix: LIBS += -L/usr/X11R6/lib/ -lX11 -lXext -lXinerama -ldl -lfreetype -lpthread -lrt" << newLine;
+        out << "unix:  LIBS += -L/usr/X11R6/lib/";
+        for (int i = 0; i < linuxLibs.size(); ++i)
+            out << " -l" << linuxLibs[i];
+        out << newLine;
 
         // Windows specific linker flags
-        out << "win32: LIBS += -lgdi32 -luser32 -lkernel32 -lcomctl32"  << newLine;
+        out << "win32: LIBS += -lgdi32 -luser32 -lkernel32 -lcomctl32";
+        for (int i = 0; i < mingwLibs.size(); ++i)
+            out << " -l" << mingwLibs[i];
+        out << newLine;
 
         // Debug specific linker flags
         out << "QMAKE_LFLAGS_DEBUG += -fvisibility=hidden" << newLine;
