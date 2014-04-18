@@ -145,7 +145,8 @@ private:
             << newLine;
 
         out << "TEMPLATE = app" << newLine;
-
+        out << "CONFIG  -= qt" << newLine;
+        out << newLine;
         out << "CONFIG(release, debug|release){" << newLine
             << "    DESTDIR     = build/release/" << newLine
             << "    OBJECTS_DIR = build/release/intermediate/" << newLine;
