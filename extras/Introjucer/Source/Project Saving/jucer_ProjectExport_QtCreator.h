@@ -1,4 +1,4 @@
-/*
+﻿/*
   ==============================================================================
 
    This file is part of the JUCE library.
@@ -229,7 +229,7 @@ private:
 
         // Windows specific options
         defines.clear();
-        out << "win32: QMAKE_CFLAGS += ?";
+        out << "win32: QMAKE_CFLAGS += -mstackrealign -D__MINGW__=1 -D__MINGW_EXTENSION=";
         out << createGCCPreprocessorFlags (defines);
         out << newLine;
 
@@ -253,7 +253,7 @@ private:
         out << "unix: LIBS += -L/usr/X11R6/lib/ -lX11 -lXext -lXinerama -ldl -lfreetype -lpthread -lrt" << newLine;
 
         // Windows specific linker flags
-        out << "win32: LIBS += ?"  << newLine;
+        out << "win32: LIBS += -lgdi32 -luser32 -lkernel32 -lcomctl32"  << newLine;
 
         // Debug specific linker flags
         out << "QMAKE_LFLAGS_DEBUG += -fvisibility=hidden" << newLine;
