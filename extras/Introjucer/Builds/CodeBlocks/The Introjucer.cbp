@@ -201,6 +201,10 @@
       <Option compile="0"/>
       <Option link="0"/>
     </Unit>
+    <Unit filename="../../Source/Project Saving/jucer_ProjectExport_QtCreator.h">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
     <Unit filename="../../Source/Project Saving/jucer_ProjectExport_Android.h">
       <Option compile="0"/>
       <Option link="0"/>

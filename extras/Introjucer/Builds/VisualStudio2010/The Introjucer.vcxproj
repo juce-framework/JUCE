@@ -1053,6 +1053,7 @@
     <ClInclude Include="..\..\Source\Project\jucer_ProjectTree_File.h"/>
     <ClInclude Include="..\..\Source\Project\jucer_ProjectTree_Group.h"/>
     <ClInclude Include="..\..\Source\Project\jucer_ProjectType.h"/>
+    <ClInclude Include="..\..\Source\Project Saving\jucer_ProjectExport_QtCreator.h"/>
     <ClInclude Include="..\..\Source\Project Saving\jucer_ProjectExport_Android.h"/>
     <ClInclude Include="..\..\Source\Project Saving\jucer_ProjectExport_CodeBlocks.h"/>
     <ClInclude Include="..\..\Source\Project Saving\jucer_ProjectExport_Make.h"/>

@@ -153,6 +153,23 @@
         <MODULEPATH id="juce_core" path="../../modules"/>
       </MODULEPATHS>
     </CODEBLOCKS>
+    <QT_CREATOR targetFolder="Builds/QtCreator">
+      <CONFIGURATIONS>
+        <CONFIGURATION name="Debug" libraryPath="/usr/X11R6/lib/" isDebug="1" optimisation="1"
+                       targetName="Introjucer"/>
+        <CONFIGURATION name="Release" libraryPath="/usr/X11R6/lib/" isDebug="0" optimisation="3"
+                       targetName="Introjucer"/>
+      </CONFIGURATIONS>
+      <MODULEPATHS>
+        <MODULEPATH id="juce_gui_extra" path="../../modules"/>
+        <MODULEPATH id="juce_gui_basics" path="../../modules"/>
+        <MODULEPATH id="juce_graphics" path="../../modules"/>
+        <MODULEPATH id="juce_events" path="../../modules"/>
+        <MODULEPATH id="juce_data_structures" path="../../modules"/>
+        <MODULEPATH id="juce_cryptography" path="../../modules"/>
+        <MODULEPATH id="juce_core" path="../../modules"/>
+      </MODULEPATHS>
+    </QT_CREATOR>
   </EXPORTFORMATS>
   <MAINGROUP name="The Introjucer" id="NhrJq66R">
     <GROUP id="mslFIKZ" name="Application">
@@ -232,6 +249,8 @@
             file="Source/Project/jucer_ProjectType.h"/>
     </GROUP>
     <GROUP id="{579C9644-D5C2-8469-9439-F91C81337531}" name="Project Saving">
+      <FILE id="PmLRSo" name="jucer_ProjectExport_QtCreator.h" compile="0"
+            resource="0" file="Source/Project Saving/jucer_ProjectExport_QtCreator.h"/>
       <FILE id="TtXohM" name="jucer_ProjectExport_Android.h" compile="0"
             resource="0" file="Source/Project Saving/jucer_ProjectExport_Android.h"/>
       <FILE id="EkBkj1" name="jucer_ProjectExport_CodeBlocks.h" compile="0"

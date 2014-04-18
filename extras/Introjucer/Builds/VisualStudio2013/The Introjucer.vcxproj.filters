@@ -1380,6 +1380,9 @@
     <ClInclude Include="..\..\Source\Project\jucer_ProjectType.h">
       <Filter>The Introjucer\Project</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\Source\Project Saving\jucer_ProjectExport_QtCreator.h">
+      <Filter>The Introjucer\Project Saving</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\Source\Project Saving\jucer_ProjectExport_Android.h">
       <Filter>The Introjucer\Project Saving</Filter>
     </ClInclude>
