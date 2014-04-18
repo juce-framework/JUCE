@@ -680,6 +680,10 @@ private:
             s.add ("GCC_INLINES_ARE_PRIVATE_EXTERN = YES");
         }
 
+        if (config.isDebug())
+             if (config.getMacArchitecture() == osxArch_Default || config.getMacArchitecture().isEmpty())
+                 s.add ("ONLY_ACTIVE_ARCH = YES");
+
         if (iOS)
         {
             s.add ("\"CODE_SIGN_IDENTITY[sdk=iphoneos*]\" = \"iPhone Developer\"");
@@ -812,11 +816,6 @@ private:
         {
             defines.set ("_DEBUG", "1");
             defines.set ("DEBUG", "1");
-
-            if (config.getMacArchitecture() == osxArch_Default
-                 || config.getMacArchitecture().isEmpty())
-                s.add ("ONLY_ACTIVE_ARCH = YES");
-
             s.add ("COPY_PHASE_STRIP = NO");
             s.add ("GCC_DYNAMIC_NO_PIC = NO");
         }
