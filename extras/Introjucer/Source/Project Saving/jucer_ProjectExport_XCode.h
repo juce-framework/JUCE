@@ -861,6 +861,9 @@ private:
             StringArray s (xcodeFrameworks);
             s.addTokens (getExtraFrameworksString(), ",;", "\"'");
 
+            if (project.getConfigFlag ("JUCE_QUICKTIME") == Project::configFlagDisabled)
+                s.removeString ("QuickTime");
+
             s.trim();
             s.removeDuplicates (true);
             s.sort (true);
