@@ -3047,7 +3047,7 @@ void Desktop::Displays::findDisplays (float masterScale)
                                                                        screens[j].height) * masterScale;
                             d.isMain = (index == 0);
                             d.scale = masterScale;
-                            d.dpi = getDisplayDPI (index);
+                            d.dpi = getDisplayDPI (0); // (all screens share the same DPI)
 
                             displays.add (d);
                         }
