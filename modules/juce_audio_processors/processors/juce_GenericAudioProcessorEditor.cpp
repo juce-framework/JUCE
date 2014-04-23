@@ -44,15 +44,16 @@ public:
         owner.removeListener (this);
     }
 
-    void refresh()
+    void refresh() override
     {
         paramHasChanged = false;
         slider.setValue (owner.getParameter (index), dontSendNotification);
+        slider.updateText();
     }
 
-    void audioProcessorChanged (AudioProcessor*)  {}
+    void audioProcessorChanged (AudioProcessor*) override  {}
 
-    void audioProcessorParameterChanged (AudioProcessor*, int parameterIndex, float)
+    void audioProcessorParameterChanged (AudioProcessor*, int parameterIndex, float) override
     {
         if (parameterIndex == index)
             paramHasChanged = true;
@@ -77,26 +78,34 @@ private:
     {
     public:
         ParamSlider (AudioProcessor& p, const int index_)
-            : owner (p),
-              index (index_)
+            : owner (p), index (index_)
         {
-            setRange (0.0, 1.0, 0.0);
+            const int steps = owner.getParameterNumSteps (index);
+
+            if (steps <= 0 || steps == 0x7fffffff)
+                setRange (0.0, 1.0);
+            else
+                setRange (0.0, 1.0, 1.0 / (double) steps);
+
             setSliderStyle (Slider::LinearBar);
             setTextBoxIsEditable (false);
-            setScrollWheelEnabled (false);
+            setScrollWheelEnabled (true);
         }
 
-        void valueChanged()
+        void valueChanged() override
         {
             const float newVal = (float) getValue();
 
             if (owner.getParameter (index) != newVal)
+            {
                 owner.setParameterNotifyingHost (index, newVal);
+                updateText();
+            }
         }
 
-        String getTextFromValue (double /*value*/)
+        String getTextFromValue (double /*value*/) override
         {
-            return owner.getParameterText (index);
+            return owner.getParameterText (index) + " " + owner.getParameterLabel (index).trimEnd();
         }
 
     private:
