@@ -189,7 +189,7 @@ private:
 
 - (void) alertView: (UIAlertView*) alertView clickedButtonAtIndex: (NSInteger) buttonIndex
 {
-    owner->buttonClicked (buttonIndex);
+    owner->buttonClicked ((int) buttonIndex);
     alertView.hidden = true;
 }
 
