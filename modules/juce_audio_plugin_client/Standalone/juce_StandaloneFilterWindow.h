@@ -29,6 +29,209 @@ extern AudioProcessor* JUCE_CALLTYPE createPluginFilter();
 
 //==============================================================================
 /**
+    An object that creates and plays a standalone instance of an AudioProcessor.
+
+    The object will create your processor using the same createPluginFilter()
+    function that the other plugin wrappers use, and will run it through the
+    computer's audio/MIDI devices using AudioDeviceManager and AudioProcessorPlayer.
+*/
+class StandalonePluginHolder
+{
+public:
+    /** Creates an instance of the default plugin.
+
+        The settings object can be a PropertySet that the class should use to
+        store its settings - the object that is passed-in will be owned by this
+        class and deleted automatically when no longer needed. (It can also be null)
+    */
+    StandalonePluginHolder (PropertySet* settingsToUse)
+        : settings (settingsToUse)
+    {
+        createPlugin();
+        setupAudioDevices();
+        reloadPluginState();
+        startPlaying();
+    }
+
+    ~StandalonePluginHolder()
+    {
+        deletePlugin();
+        shutDownAudioDevices();
+    }
+
+    //==============================================================================
+    void createPlugin()
+    {
+        AudioProcessor::setTypeOfNextNewPlugin (AudioProcessor::wrapperType_Standalone);
+        processor = createPluginFilter();
+        jassert (processor != nullptr); // Your createPluginFilter() function must return a valid object!
+        AudioProcessor::setTypeOfNextNewPlugin (AudioProcessor::wrapperType_Undefined);
+
+        processor->setPlayConfigDetails (JucePlugin_MaxNumInputChannels,
+                                         JucePlugin_MaxNumOutputChannels,
+                                         44100, 512);
+    }
+
+    void deletePlugin()
+    {
+        stopPlaying();
+        processor = nullptr;
+    }
+
+    //==============================================================================
+    /** Pops up a dialog letting the user save the processor's state to a file. */
+    void askUserToSaveState()
+    {
+        FileChooser fc (TRANS("Save current state"),
+                        settings != nullptr ? File (settings->getValue ("lastStateFile"))
+                                            : File::nonexistent);
+
+        if (fc.browseForFileToSave (true))
+        {
+            MemoryBlock data;
+            processor->getStateInformation (data);
+
+            if (! fc.getResult().replaceWithData (data.getData(), data.getSize()))
+            {
+                AlertWindow::showMessageBox (AlertWindow::WarningIcon,
+                                             TRANS("Error whilst saving"),
+                                             TRANS("Couldn't write to the specified file!"));
+            }
+        }
+    }
+
+    /** Pops up a dialog letting the user re-load the processor's state from a file. */
+    void askUserToLoadState()
+    {
+        FileChooser fc (TRANS("Load a saved state"),
+                        settings != nullptr ? File (settings->getValue ("lastStateFile"))
+                                            : File::nonexistent);
+
+        if (fc.browseForFileToOpen())
+        {
+            MemoryBlock data;
+
+            if (fc.getResult().loadFileAsData (data))
+            {
+                processor->setStateInformation (data.getData(), (int) data.getSize());
+            }
+            else
+            {
+                AlertWindow::showMessageBox (AlertWindow::WarningIcon,
+                                             TRANS("Error whilst loading"),
+                                             TRANS("Couldn't read from the specified file!"));
+            }
+        }
+    }
+
+    //==============================================================================
+    void startPlaying()
+    {
+        player.setProcessor (processor);
+    }
+
+    void stopPlaying()
+    {
+        player.setProcessor (nullptr);
+    }
+
+    //==============================================================================
+    /** Shows an audio properties dialog box modally. */
+    void showAudioSettingsDialog()
+    {
+        DialogWindow::LaunchOptions o;
+        o.content.setOwned (new AudioDeviceSelectorComponent (deviceManager,
+                                                              processor->getNumInputChannels(),
+                                                              processor->getNumInputChannels(),
+                                                              processor->getNumOutputChannels(),
+                                                              processor->getNumOutputChannels(),
+                                                              true, false,
+                                                              true, false));
+        o.content->setSize (500, 450);
+
+        o.dialogTitle                   = TRANS("Audio Settings");
+        o.dialogBackgroundColour        = Colour (0xfff0f0f0);
+        o.escapeKeyTriggersCloseButton  = true;
+        o.useNativeTitleBar             = true;
+        o.resizable                     = false;
+
+        o.launchAsync();
+    }
+
+    void saveAudioDeviceState()
+    {
+        if (settings != nullptr)
+        {
+            ScopedPointer<XmlElement> xml (deviceManager.createStateXml());
+            settings->setValue ("audioSetup", xml);
+        }
+    }
+
+    void reloadAudioDeviceState()
+    {
+        ScopedPointer<XmlElement> savedState;
+
+        if (settings != nullptr)
+            savedState = settings->getXmlValue ("audioSetup");
+
+        deviceManager.initialise (processor->getNumInputChannels(),
+                                  processor->getNumOutputChannels(),
+                                  savedState,
+                                  true);
+    }
+
+    //==============================================================================
+    void savePluginState()
+    {
+        if (settings != nullptr && processor != nullptr)
+        {
+            MemoryBlock data;
+            processor->getStateInformation (data);
+
+            settings->setValue ("filterState", data.toBase64Encoding());
+        }
+    }
+
+    void reloadPluginState()
+    {
+        if (settings != nullptr)
+        {
+            MemoryBlock data;
+
+            if (data.fromBase64Encoding (settings->getValue ("filterState")) && data.getSize() > 0)
+                processor->setStateInformation (data.getData(), (int) data.getSize());
+        }
+    }
+
+    //==============================================================================
+    ScopedPointer<PropertySet> settings;
+    ScopedPointer<AudioProcessor> processor;
+    AudioDeviceManager deviceManager;
+    AudioProcessorPlayer player;
+
+private:
+    void setupAudioDevices()
+    {
+        deviceManager.addAudioCallback (&player);
+        deviceManager.addMidiInputCallback (String::empty, &player);
+
+        reloadAudioDeviceState();
+    }
+
+    void shutDownAudioDevices()
+    {
+        saveAudioDeviceState();
+
+        deviceManager.removeMidiInputCallback (String::empty, &player);
+        deviceManager.removeAudioCallback (&player);
+    }
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (StandalonePluginHolder)
+};
+
+
+//==============================================================================
+/**
     A class that can be used to run a simple standalone application containing your filter.
 
     Just create one of these objects in your JUCEApplicationBase::initialise() method, and
@@ -36,7 +239,7 @@ extern AudioProcessor* JUCE_CALLTYPE createPluginFilter();
     that the other plugin wrappers use.
 */
 class StandaloneFilterWindow    : public DocumentWindow,
-                                  public ButtonListener   // (can't use Button::Listener due to idiotic VC2005 bug)
+                                  public ButtonListener   // (can't use Button::Listener due to VC2005 bug)
 {
 public:
     //==============================================================================
@@ -49,7 +252,6 @@ public:
                             Colour backgroundColour,
                             PropertySet* settingsToUse)
         : DocumentWindow (title, backgroundColour, DocumentWindow::minimiseButton | DocumentWindow::closeButton),
-          settings (settingsToUse),
           optionsButton ("options")
     {
         setTitleBarButtonsRequired (DocumentWindow::minimiseButton | DocumentWindow::closeButton, false);
@@ -58,51 +260,14 @@ public:
         optionsButton.addListener (this);
         optionsButton.setTriggeredOnMouseDown (true);
 
-        createFilter();
+        pluginHolder = new StandalonePluginHolder (settingsToUse);
 
-        if (filter == nullptr)
+        createEditorComp();
+
+        if (PropertySet* props = pluginHolder->settings)
         {
-            jassertfalse    // Your filter didn't create correctly! In a standalone app that's not too great.
-            JUCEApplicationBase::quit();
-        }
-
-        filter->setPlayConfigDetails (JucePlugin_MaxNumInputChannels,
-                                      JucePlugin_MaxNumOutputChannels,
-                                      44100, 512);
-
-        deviceManager = new AudioDeviceManager();
-        deviceManager->addAudioCallback (&player);
-        deviceManager->addMidiInputCallback (String::empty, &player);
-
-        player.setProcessor (filter);
-
-        ScopedPointer<XmlElement> savedState;
-
-        if (settings != nullptr)
-            savedState = settings->getXmlValue ("audioSetup");
-
-        deviceManager->initialise (filter->getNumInputChannels(),
-                                   filter->getNumOutputChannels(),
-                                   savedState,
-                                   true);
-
-        if (settings != nullptr)
-        {
-            MemoryBlock data;
-
-            if (data.fromBase64Encoding (settings->getValue ("filterState"))
-                 && data.getSize() > 0)
-            {
-                filter->setStateInformation (data.getData(), (int) data.getSize());
-            }
-        }
-
-        setContentOwned (filter->createEditorIfNeeded(), true);
-
-        if (settings != nullptr)
-        {
-            const int x = settings->getIntValue ("windowX", -100);
-            const int y = settings->getIntValue ("windowY", -100);
+            const int x = props->getIntValue ("windowX", -100);
+            const int y = props->getIntValue ("windowY", -100);
 
             if (x != -100 && y != -100)
                 setBoundsConstrained (juce::Rectangle<int> (x, y, getWidth(), getHeight()));
@@ -117,188 +282,90 @@ public:
 
     ~StandaloneFilterWindow()
     {
-        if (settings != nullptr)
+        if (PropertySet* props = pluginHolder->settings)
         {
-            settings->setValue ("windowX", getX());
-            settings->setValue ("windowY", getY());
-
-            if (deviceManager != nullptr)
-            {
-                ScopedPointer<XmlElement> xml (deviceManager->createStateXml());
-                settings->setValue ("audioSetup", xml);
-            }
+            props->setValue ("windowX", getX());
+            props->setValue ("windowY", getY());
         }
 
-        deviceManager->removeMidiInputCallback (String::empty, &player);
-        deviceManager->removeAudioCallback (&player);
-        deviceManager = nullptr;
-
-        if (settings != nullptr && filter != nullptr)
-        {
-            MemoryBlock data;
-            filter->getStateInformation (data);
-
-            settings->setValue ("filterState", data.toBase64Encoding());
-        }
-
-        deleteFilter();
+        pluginHolder->stopPlaying();
+        deleteEditorComp();
+        pluginHolder = nullptr;
     }
 
     //==============================================================================
-    AudioProcessor* getAudioProcessor() const noexcept      { return filter; }
-    AudioDeviceManager* getDeviceManager() const noexcept   { return deviceManager; }
+    AudioProcessor* getAudioProcessor() const noexcept      { return pluginHolder->processor; }
+    AudioDeviceManager& getDeviceManager() const noexcept   { return pluginHolder->deviceManager; }
 
-    void createFilter()
+    void createEditorComp()
     {
-        AudioProcessor::setTypeOfNextNewPlugin (AudioProcessor::wrapperType_Standalone);
-        filter = createPluginFilter();
-        AudioProcessor::setTypeOfNextNewPlugin (AudioProcessor::wrapperType_Undefined);
+        setContentOwned (getAudioProcessor()->createEditorIfNeeded(), true);
     }
 
-    /** Deletes and re-creates the filter and its UI. */
-    void resetFilter()
+    void deleteEditorComp()
     {
-        deleteFilter();
-        createFilter();
-
-        if (filter != nullptr)
+        if (AudioProcessorEditor* ed = dynamic_cast<AudioProcessorEditor*> (getContentComponent()))
         {
-            if (deviceManager != nullptr)
-                player.setProcessor (filter);
-
-            setContentOwned (filter->createEditorIfNeeded(), true);
-        }
-
-        if (settings != nullptr)
-            settings->removeValue ("filterState");
-    }
-
-    /** Pops up a dialog letting the user save the filter's state to a file. */
-    void saveState()
-    {
-        FileChooser fc (TRANS("Save current state"),
-                        settings != nullptr ? File (settings->getValue ("lastStateFile"))
-                                            : File::nonexistent);
-
-        if (fc.browseForFileToSave (true))
-        {
-            MemoryBlock data;
-            filter->getStateInformation (data);
-
-            if (! fc.getResult().replaceWithData (data.getData(), data.getSize()))
-            {
-                AlertWindow::showMessageBox (AlertWindow::WarningIcon,
-                                             TRANS("Error whilst saving"),
-                                             TRANS("Couldn't write to the specified file!"));
-            }
+            pluginHolder->processor->editorBeingDeleted (ed);
+            clearContentComponent();
         }
     }
 
-    /** Pops up a dialog letting the user re-load the filter's state from a file. */
-    void loadState()
+    /** Deletes and re-creates the plugin, resetting it to its default state. */
+    void resetToDefaultState()
     {
-        FileChooser fc (TRANS("Load a saved state"),
-                        settings != nullptr ? File (settings->getValue ("lastStateFile"))
-                                            : File::nonexistent);
+        pluginHolder->stopPlaying();
+        deleteEditorComp();
+        pluginHolder->deletePlugin();
 
-        if (fc.browseForFileToOpen())
-        {
-            MemoryBlock data;
+        if (PropertySet* props = pluginHolder->settings)
+            props->removeValue ("filterState");
 
-            if (fc.getResult().loadFileAsData (data))
-            {
-                filter->setStateInformation (data.getData(), (int) data.getSize());
-            }
-            else
-            {
-                AlertWindow::showMessageBox (AlertWindow::WarningIcon,
-                                             TRANS("Error whilst loading"),
-                                             TRANS("Couldn't read from the specified file!"));
-            }
-        }
-    }
-
-    /** Shows the audio properties dialog box modally. */
-    virtual void showAudioSettingsDialog()
-    {
-        DialogWindow::LaunchOptions o;
-        o.content.setOwned (new AudioDeviceSelectorComponent (*deviceManager,
-                                                              filter->getNumInputChannels(),
-                                                              filter->getNumInputChannels(),
-                                                              filter->getNumOutputChannels(),
-                                                              filter->getNumOutputChannels(),
-                                                              true, false, true, false));
-        o.content->setSize (500, 450);
-
-        o.dialogTitle                   = TRANS("Audio Settings");
-        o.dialogBackgroundColour        = Colours::lightgrey;
-        o.escapeKeyTriggersCloseButton  = true;
-        o.useNativeTitleBar             = true;
-        o.resizable                     = false;
-
-        o.launchAsync();
+        pluginHolder->createPlugin();
+        createEditorComp();
+        pluginHolder->startPlaying();
     }
 
     //==============================================================================
-    /** @internal */
     void closeButtonPressed() override
     {
         JUCEApplicationBase::quit();
     }
 
-    /** @internal */
     void buttonClicked (Button*) override
     {
-        if (filter != nullptr)
-        {
-            PopupMenu m;
-            m.addItem (1, TRANS("Audio Settings..."));
-            m.addSeparator();
-            m.addItem (2, TRANS("Save current state..."));
-            m.addItem (3, TRANS("Load a saved state..."));
-            m.addSeparator();
-            m.addItem (4, TRANS("Reset to default state"));
+        PopupMenu m;
+        m.addItem (1, TRANS("Audio Settings..."));
+        m.addSeparator();
+        m.addItem (2, TRANS("Save current state..."));
+        m.addItem (3, TRANS("Load a saved state..."));
+        m.addSeparator();
+        m.addItem (4, TRANS("Reset to default state"));
 
-            switch (m.showAt (&optionsButton))
-            {
-                case 1:  showAudioSettingsDialog(); break;
-                case 2:  saveState(); break;
-                case 3:  loadState(); break;
-                case 4:  resetFilter(); break;
-                default: break;
-            }
+        switch (m.showAt (&optionsButton))
+        {
+            case 1:  pluginHolder->showAudioSettingsDialog(); break;
+            case 2:  pluginHolder->askUserToSaveState(); break;
+            case 3:  pluginHolder->askUserToLoadState(); break;
+            case 4:  resetToDefaultState(); break;
+            default: break;
         }
     }
 
-    /** @internal */
     void resized() override
     {
         DocumentWindow::resized();
         optionsButton.setBounds (8, 6, 60, getTitleBarHeight() - 8);
     }
 
+    ScopedPointer<StandalonePluginHolder> pluginHolder;
+
 private:
     //==============================================================================
-    ScopedPointer<PropertySet> settings;
-    ScopedPointer<AudioProcessor> filter;
-    ScopedPointer<AudioDeviceManager> deviceManager;
-    AudioProcessorPlayer player;
     TextButton optionsButton;
-
-    void deleteFilter()
-    {
-        player.setProcessor (nullptr);
-
-        if (filter != nullptr && getContentComponent() != nullptr)
-        {
-            filter->editorBeingDeleted (dynamic_cast <AudioProcessorEditor*> (getContentComponent()));
-            clearContentComponent();
-        }
-
-        filter = nullptr;
-    }
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (StandaloneFilterWindow)
 };
+
 
 #endif   // JUCE_STANDALONEFILTERWINDOW_H_INCLUDED
