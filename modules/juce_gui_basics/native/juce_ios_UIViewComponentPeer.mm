@@ -168,7 +168,7 @@ public:
     void viewFocusLoss();
     bool isFocused() const override;
     void grabFocus() override;
-    void textInputRequired (const Point<int>&) override;
+    void textInputRequired (Point<int>, TextInputTarget&) override;
 
     BOOL textViewReplaceCharacters (Range<int>, const String&);
     void updateHiddenTextContent (TextInputTarget*);
@@ -702,10 +702,7 @@ void UIViewComponentPeer::toFront (bool makeActiveWindow)
 
 void UIViewComponentPeer::toBehind (ComponentPeer* other)
 {
-    UIViewComponentPeer* const otherPeer = dynamic_cast <UIViewComponentPeer*> (other);
-    jassert (otherPeer != nullptr); // wrong type of window?
-
-    if (otherPeer != nullptr)
+    if (UIViewComponentPeer* const otherPeer = dynamic_cast<UIViewComponentPeer*> (other))
     {
         if (isSharedWindow)
         {
@@ -715,6 +712,10 @@ void UIViewComponentPeer::toBehind (ComponentPeer* other)
         {
             // don't know how to do this
         }
+    }
+    else
+    {
+        jassertfalse; // wrong type of window?
     }
 }
 
@@ -828,12 +829,28 @@ void UIViewComponentPeer::grabFocus()
     }
 }
 
-void UIViewComponentPeer::textInputRequired (const Point<int>&)
+void UIViewComponentPeer::textInputRequired (Point<int>, TextInputTarget&)
 {
+}
+
+static UIKeyboardType getUIKeyboardType (TextInputTarget::VirtualKeyboardType type) noexcept
+{
+    switch (type)
+    {
+        case TextInputTarget::textKeyboard:          return UIKeyboardTypeAlphabet;
+        case TextInputTarget::numericKeyboard:       return UIKeyboardTypeNumbersAndPunctuation;
+        case TextInputTarget::urlKeyboard:           return UIKeyboardTypeURL;
+        case TextInputTarget::emailAddressKeyboard:  return UIKeyboardTypeEmailAddress;
+        case TextInputTarget::phoneNumberKeyboard:   return UIKeyboardTypePhonePad;
+        default:                                     jassertfalse; break;
+    }
+
+    return UIKeyboardTypeDefault;
 }
 
 void UIViewComponentPeer::updateHiddenTextContent (TextInputTarget* target)
 {
+    view->hiddenTextView.keyboardType = getUIKeyboardType (target->getKeyboardType());
     view->hiddenTextView.text = juceStringToNS (target->getTextInRange (Range<int> (0, target->getHighlightedRegion().getStart())));
     view->hiddenTextView.selectedRange = NSMakeRange (target->getHighlightedRegion().getStart(), 0);
 }
