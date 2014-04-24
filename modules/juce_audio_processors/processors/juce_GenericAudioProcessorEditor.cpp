@@ -82,10 +82,10 @@ private:
         {
             const int steps = owner.getParameterNumSteps (index);
 
-            if (steps <= 0 || steps == 0x7fffffff)
-                setRange (0.0, 1.0);
+            if (steps > 1 && steps < 0x7fffffff)
+                setRange (0.0, 1.0, 1.0 / (steps - 1.0));
             else
-                setRange (0.0, 1.0, 1.0 / (double) steps);
+                setRange (0.0, 1.0);
 
             setSliderStyle (Slider::LinearBar);
             setTextBoxIsEditable (false);
