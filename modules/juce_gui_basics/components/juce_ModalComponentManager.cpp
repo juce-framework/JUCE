@@ -234,6 +234,17 @@ void ModalComponentManager::bringModalComponentsToFront (bool topOneShouldGrabFo
     }
 }
 
+bool ModalComponentManager::cancelAllModalComponents()
+{
+    const int numModal = getNumModalComponents();
+
+    for (int i = numModal; --i >= 0;)
+        if (Component* const c = getModalComponent(i))
+            c->exitModalState (0);
+
+    return numModal > 0;
+}
+
 #if JUCE_MODAL_LOOPS_PERMITTED
 class ModalComponentManager::ReturnValueRetriever     : public ModalComponentManager::Callback
 {
