@@ -1387,7 +1387,7 @@ private:
             d.done = (d.numInputChans == 0);
         }
 
-        for (int tries = 3;;)
+        for (int tries = 5;;)
         {
             bool anyRemaining = false;
 
@@ -1434,7 +1434,7 @@ private:
             d.done = (d.numOutputChans == 0);
         }
 
-        for (int tries = 3;;)
+        for (int tries = 5;;)
         {
             bool anyRemaining = false;
 
