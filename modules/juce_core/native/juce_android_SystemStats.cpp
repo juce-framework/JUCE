@@ -179,6 +179,16 @@ namespace AndroidStatsHelpers
                                                                                           JuceAppActivity.getLocaleValue,
                                                                                           isRegion)));
     }
+
+    #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD)
+    DECLARE_JNI_CLASS (BuildClass, "android/os/Build");
+    #undef JNI_CLASS_MEMBERS
+
+    String getAndroidOsBuildValue (const char* fieldName)
+    {
+        return juceString (LocalRef<jstring> ((jstring) getEnv()->GetStaticObjectField (
+                            BuildClass, getEnv()->GetStaticFieldID (BuildClass, fieldName, "Ljava/lang/String;"))));
+    }
 }
 
 //==============================================================================
@@ -194,7 +204,8 @@ String SystemStats::getOperatingSystemName()
 
 String SystemStats::getDeviceDescription()
 {
-    return String::empty;
+    return AndroidStatsHelpers::getAndroidOsBuildValue ("MODEL")
+            + "-" + AndroidStatsHelpers::getAndroidOsBuildValue ("SERIAL");
 }
 
 bool SystemStats::isOperatingSystem64Bit()
