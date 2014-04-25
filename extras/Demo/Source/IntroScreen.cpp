@@ -66,7 +66,6 @@ public:
 private:
     Label versionLabel;
     HyperlinkButton linkButton;
-    TooltipWindow tooltipWindow;
 
     //==============================================================================
     struct LogoDrawComponent  : public Component,
