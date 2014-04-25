@@ -78,13 +78,23 @@ public:
         processor = nullptr;
     }
 
+    static String getFilePatterns (const String& fileSuffix)
+    {
+        if (fileSuffix.isEmpty())
+            return String();
+
+        return (fileSuffix.startsWithChar ('.') ? "*" : "*.") + fileSuffix;
+    }
+
+
     //==============================================================================
     /** Pops up a dialog letting the user save the processor's state to a file. */
-    void askUserToSaveState()
+    void askUserToSaveState (const String& fileSuffix = String())
     {
         FileChooser fc (TRANS("Save current state"),
                         settings != nullptr ? File (settings->getValue ("lastStateFile"))
-                                            : File::nonexistent);
+                                            : File::nonexistent,
+                        getFilePatterns (fileSuffix));
 
         if (fc.browseForFileToSave (true))
         {
@@ -101,11 +111,12 @@ public:
     }
 
     /** Pops up a dialog letting the user re-load the processor's state from a file. */
-    void askUserToLoadState()
+    void askUserToLoadState (const String& fileSuffix = String())
     {
         FileChooser fc (TRANS("Load a saved state"),
                         settings != nullptr ? File (settings->getValue ("lastStateFile"))
-                                            : File::nonexistent);
+                                            : File::nonexistent,
+                        getFilePatterns (fileSuffix));
 
         if (fc.browseForFileToOpen())
         {
