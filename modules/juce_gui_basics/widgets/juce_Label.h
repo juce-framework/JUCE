@@ -117,17 +117,14 @@ public:
     /** Returns the type of justification, as set in setJustificationType(). */
     Justification getJustificationType() const noexcept                         { return justification; }
 
-    /** Changes the gap that is left between the edge of the component and the text.
+    /** Changes the border that is left between the edge of the component and the text.
         By default there's a small gap left at the sides of the component to allow for
         the drawing of the border, but you can change this if necessary.
     */
-    void setBorderSize (int horizontalBorder, int verticalBorder);
+    void setBorderSize (BorderSize<int> newBorderSize);
 
-    /** Returns the size of the horizontal gap being left around the text. */
-    int getHorizontalBorderSize() const noexcept                                { return horizontalBorderSize; }
-
-    /** Returns the size of the vertical gap being left around the text. */
-    int getVerticalBorderSize() const noexcept                                  { return verticalBorderSize; }
+    /** Returns the size of the border to be left around the text. */
+    BorderSize<int> getBorderSize() const noexcept                              { return border; }
 
     /** Makes this label "stick to" another component.
 
@@ -327,7 +324,7 @@ private:
     ScopedPointer<TextEditor> editor;
     ListenerList<Listener> listeners;
     WeakReference<Component> ownerComponent;
-    int horizontalBorderSize, verticalBorderSize;
+    BorderSize<int> border;
     float minimumHorizontalScale;
     bool editSingleClick;
     bool editDoubleClick;

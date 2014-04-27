@@ -276,7 +276,7 @@ public:
         This may cause things like a virtual on-screen keyboard to appear, depending
         on the OS.
     */
-    virtual void textInputRequired (const Point<int>& position) = 0;
+    virtual void textInputRequired (Point<int> position, TextInputTarget&) = 0;
 
     /** If there's some kind of OS input-method in progress, this should dismiss it. */
     virtual void dismissPendingTextInput();

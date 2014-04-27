@@ -891,14 +891,14 @@ public:
             for (;;)
             {
                 Steinberg::int32 bytesRead = 0;
+                Steinberg::tresult status = state->read (buffer, (Steinberg::int32) bytesPerBlock, &bytesRead);
 
-                if (state->read (buffer, (Steinberg::int32) bytesPerBlock, &bytesRead) == kResultTrue && bytesRead > 0)
-                {
-                    allData.write (buffer, bytesRead);
-                    continue;
-                }
+                if (status != kResultTrue && !getHostType().isWavelab())
+                    break;
+                if (bytesRead <= 0)
+                    break;
 
-                break;
+                allData.write (buffer, bytesRead);
             }
         }
 
@@ -1244,8 +1244,11 @@ public:
         const int numMidiEventsComingIn = midiBuffer.getNumEvents();
        #endif
 
-        const int numInputChans  = data.inputs  != nullptr ? (int) data.inputs[0].numChannels : 0;
-        const int numOutputChans = data.outputs != nullptr ? (int) data.outputs[0].numChannels : 0;
+        const int numInputChans  = (data.inputs  != nullptr && data.inputs[0].channelBuffers32 != nullptr)  ? (int) data.inputs[0].numChannels  : 0;
+        const int numOutputChans = (data.outputs != nullptr && data.outputs[0].channelBuffers32 != nullptr) ? (int) data.outputs[0].numChannels : 0;
+
+        if (numInputChans == 0 && numOutputChans == 0)
+            return kResultFalse;
 
         int totalChans = 0;
 

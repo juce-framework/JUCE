@@ -1217,7 +1217,7 @@ public:
         }
     }
 
-    void textInputRequired (const Point<int>&) override {}
+    void textInputRequired (Point<int>, TextInputTarget&) override {}
 
     void repaint (const Rectangle<int>& area) override
     {

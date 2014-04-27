@@ -877,7 +877,7 @@ public:
         shouldDeactivateTitleBar = oldDeactivate;
     }
 
-    void textInputRequired (const Point<int>&) override
+    void textInputRequired (Point<int>, TextInputTarget&) override
     {
         if (! hasCreatedCaret)
         {
