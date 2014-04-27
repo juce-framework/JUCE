@@ -891,14 +891,14 @@ public:
             for (;;)
             {
                 Steinberg::int32 bytesRead = 0;
+                Steinberg::tresult status = state->read (buffer, (Steinberg::int32) bytesPerBlock, &bytesRead);
 
-                if (state->read (buffer, (Steinberg::int32) bytesPerBlock, &bytesRead) == kResultTrue && bytesRead > 0)
-                {
-                    allData.write (buffer, bytesRead);
-                    continue;
-                }
+                if (status != kResultTrue && !getHostType().isWavelab())
+                    break;
+                if (bytesRead <= 0)
+                    break;
 
-                break;
+                allData.write (buffer, bytesRead);
             }
         }
 
