@@ -1261,6 +1261,9 @@ public:
             ++totalChans;
         }
 
+        if (totalChans == 0 && getHostType().isWavelab() && std::max (pluginInstance->getNumInputChannels(), pluginInstance->getNumOutputChannels()) > 0)
+            return kResultFalse;
+
         AudioSampleBuffer buffer;
         if (totalChans != 0)
             buffer.setDataToReferTo (channelList.getRawDataPointer(), totalChans, (int) data.numSamples);
