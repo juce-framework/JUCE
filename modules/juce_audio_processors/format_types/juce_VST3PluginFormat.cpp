@@ -398,7 +398,7 @@ public:
         if (index < 0)
             return kResultFalse;
 
-        owner->sendParamChangeMessageToListeners (index, valueNormalized);
+        owner->sendParamChangeMessageToListeners (index, (float) valueNormalized);
         return owner->editController->setParamNormalized (paramID, valueNormalized);
     }
 
