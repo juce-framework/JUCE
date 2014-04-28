@@ -380,24 +380,37 @@ public:
     FUnknown* getFUnknown()     { return static_cast<Vst::IComponentHandler*> (this); }
 
     //==============================================================================
-    tresult PLUGIN_API beginEdit (Vst::ParamID) override
+    tresult PLUGIN_API beginEdit (Vst::ParamID paramID) override
     {
-        // XXX todo..
-        return kResultFalse;
+        const int index = getIndexOfParamID (paramID);
+
+        if (index < 0)
+            return kResultFalse;
+
+        owner->beginParameterChangeGesture (index);
+        return kResultTrue;
     }
 
-    tresult PLUGIN_API performEdit (Vst::ParamID id, Vst::ParamValue valueNormalized) override
+    tresult PLUGIN_API performEdit (Vst::ParamID paramID, Vst::ParamValue valueNormalized) override
     {
-        if (owner != nullptr)
-            return owner->editController->setParamNormalized (id, valueNormalized);
+        const int index = getIndexOfParamID (paramID);
 
-        return kResultFalse;
+        if (index < 0)
+            return kResultFalse;
+
+        owner->sendParamChangeMessageToListeners (index, valueNormalized);
+        return owner->editController->setParamNormalized (paramID, valueNormalized);
     }
 
-    tresult PLUGIN_API endEdit (Vst::ParamID) override
+    tresult PLUGIN_API endEdit (Vst::ParamID paramID) override
     {
-        // XXX todo..
-        return kResultFalse;
+        const int index = getIndexOfParamID (paramID);
+
+        if (index < 0)
+            return kResultFalse;
+
+        owner->endParameterChangeGesture (index);
+        return kResultTrue;
     }
 
     tresult PLUGIN_API restartComponent (Steinberg::int32) override
@@ -550,9 +563,42 @@ public:
 
 private:
     //==============================================================================
+    VST3PluginInstance* const owner;
     Atomic<int32> refCount;
     String appName;
-    VST3PluginInstance* owner;
+
+    typedef std::map<Vst::ParamID, int> ParamMapType;
+    ParamMapType paramToIndexMap;
+
+    int getIndexOfParamID (Vst::ParamID paramID)
+    {
+        if (owner == nullptr || owner->editController == nullptr)
+            return -1;
+
+        int result = getMappedParamID (paramID);
+
+        if (result < 0)
+        {
+            const int numParams = owner->editController->getParameterCount();
+
+            for (int i = 0; i < numParams; ++i)
+            {
+                Vst::ParameterInfo paramInfo;
+                owner->editController->getParameterInfo (i, paramInfo);
+                paramToIndexMap[paramInfo.id] = i;
+            }
+
+            result = getMappedParamID (paramID);
+        }
+
+        return result;
+    }
+
+    int getMappedParamID (Vst::ParamID paramID)
+    {
+        const ParamMapType::iterator it (paramToIndexMap.find (paramID));
+        return it != paramToIndexMap.end() ? it->second : -1;
+    }
 
     //==============================================================================
     class Message  : public Vst::IMessage
