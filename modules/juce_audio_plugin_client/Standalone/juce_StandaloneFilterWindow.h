@@ -93,7 +93,7 @@ public:
     {
         FileChooser fc (TRANS("Save current state"),
                         settings != nullptr ? File (settings->getValue ("lastStateFile"))
-                                            : File::nonexistent,
+                                            : File::getSpecialLocation (File::userDocumentsDirectory),
                         getFilePatterns (fileSuffix));
 
         if (fc.browseForFileToSave (true))
@@ -115,7 +115,7 @@ public:
     {
         FileChooser fc (TRANS("Load a saved state"),
                         settings != nullptr ? File (settings->getValue ("lastStateFile"))
-                                            : File::nonexistent,
+                                            : File::getSpecialLocation (File::userDocumentsDirectory),
                         getFilePatterns (fileSuffix));
 
         if (fc.browseForFileToOpen())
