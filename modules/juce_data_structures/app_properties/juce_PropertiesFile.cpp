@@ -53,7 +53,7 @@ File PropertiesFile::Options::getDefaultFile() const
     File dir (commonToAllUsers ?  "/Library/"
                                : "~/Library/");
 
-    if (osxLibrarySubFolder != "Preferences" && osxLibrarySubFolder != "Application Support")
+    if (osxLibrarySubFolder != "Preferences" && ! osxLibrarySubFolder.startsWith ("Application Support"))
     {
         /* The PropertiesFile class always used to put its settings files in "Library/Preferences", but Apple
            have changed their advice, and now stipulate that settings should go in "Library/Application Support".
@@ -61,7 +61,8 @@ File PropertiesFile::Options::getDefaultFile() const
            Because older apps would be broken by a silent change in this class's behaviour, you must now
            explicitly set the osxLibrarySubFolder value to indicate which path you want to use.
 
-           In newer apps, you should always set this to "Application Support".
+           In newer apps, you should always set this to "Application Support"
+           or "Application Support/YourSubFolderName".
 
            If your app needs to load settings files that were created by older versions of juce and
            you want to maintain backwards-compatibility, then you can set this to "Preferences".
