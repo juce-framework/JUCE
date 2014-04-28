@@ -891,14 +891,12 @@ public:
             for (;;)
             {
                 Steinberg::int32 bytesRead = 0;
+                const Steinberg::tresult status = state->read (buffer, (Steinberg::int32) bytesPerBlock, &bytesRead);
 
-                if (state->read (buffer, (Steinberg::int32) bytesPerBlock, &bytesRead) == kResultTrue && bytesRead > 0)
-                {
-                    allData.write (buffer, bytesRead);
-                    continue;
-                }
+                if (bytesRead <= 0 || (status != kResultTrue && ! getHostType().isWavelab()))
+                    break;
 
-                break;
+                allData.write (buffer, bytesRead);
             }
         }
 
@@ -1244,8 +1242,8 @@ public:
         const int numMidiEventsComingIn = midiBuffer.getNumEvents();
        #endif
 
-        const int numInputChans  = data.inputs  != nullptr ? (int) data.inputs[0].numChannels : 0;
-        const int numOutputChans = data.outputs != nullptr ? (int) data.outputs[0].numChannels : 0;
+        const int numInputChans  = (data.inputs  != nullptr && data.inputs[0].channelBuffers32 != nullptr)  ? (int) data.inputs[0].numChannels  : 0;
+        const int numOutputChans = (data.outputs != nullptr && data.outputs[0].channelBuffers32 != nullptr) ? (int) data.outputs[0].numChannels : 0;
 
         int totalChans = 0;
 
@@ -1261,7 +1259,13 @@ public:
             ++totalChans;
         }
 
-        AudioSampleBuffer buffer (channelList.getRawDataPointer(), totalChans, (int) data.numSamples);
+        AudioSampleBuffer buffer;
+
+        if (totalChans != 0)
+            buffer.setDataToReferTo (channelList.getRawDataPointer(), totalChans, (int) data.numSamples);
+        else if (getHostType().isWavelab()
+                  && pluginInstance->getNumInputChannels() + pluginInstance->getNumOutputChannels() > 0)
+            return kResultFalse;
 
         {
             const ScopedLock sl (pluginInstance->getCallbackLock());
