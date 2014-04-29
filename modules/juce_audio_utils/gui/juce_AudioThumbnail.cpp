@@ -342,7 +342,7 @@ public:
     }
 
 private:
-    Array <MinMaxValue> data;
+    Array<MinMaxValue> data;
     int peakLevel;
 
     void ensureSize (const int thumbSamples)
@@ -414,7 +414,7 @@ public:
     }
 
 private:
-    Array <MinMaxValue> data;
+    Array<MinMaxValue> data;
     double cachedStart, cachedTimePerPixel;
     int numChannelsCached, numSamplesCached;
     bool cacheNeedsRefilling;

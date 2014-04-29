@@ -184,10 +184,10 @@ void Project::updateOldModulePaths()
 }
 
 //==============================================================================
-static int getVersionElement (const String& v, int index)
+static int getVersionElement (StringRef v, int index)
 {
     StringArray parts;
-    parts.addTokens (v, "., ", String::empty);
+    parts.addTokens (v, "., ", StringRef());
 
     return parts [parts.size() - index - 1].getIntValue();
 }

@@ -1645,7 +1645,7 @@ void CodeEditorComponent::State::restoreState (CodeEditorComponent& editor) cons
 CodeEditorComponent::State::State (const String& s)
 {
     StringArray tokens;
-    tokens.addTokens (s, ":", String::empty);
+    tokens.addTokens (s, ":", StringRef());
 
     lastTopLine      = tokens[0].getIntValue();
     lastCaretPos     = tokens[1].getIntValue();

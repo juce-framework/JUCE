@@ -124,7 +124,7 @@ SystemStats::OperatingSystemType SystemStats::getOperatingSystemType()
     return iOS;
    #else
     StringArray parts;
-    parts.addTokens (getOSXVersion(), ".", String());
+    parts.addTokens (getOSXVersion(), ".", StringRef());
 
     jassert (parts[0].getIntValue() == 10);
     const int major = parts[1].getIntValue();

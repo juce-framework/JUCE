@@ -178,9 +178,9 @@ namespace FileHelpers
             StringArray toks;
 
            #if JUCE_WINDOWS
-            toks.addTokens (p, "\\/", String::empty);
+            toks.addTokens (p, "\\/", StringRef());
            #else
-            toks.addTokens (p, "/", String::empty);
+            toks.addTokens (p, "/", StringRef());
            #endif
 
             while (toks[0] == ".")
