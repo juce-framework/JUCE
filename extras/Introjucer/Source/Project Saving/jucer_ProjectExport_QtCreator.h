@@ -144,7 +144,14 @@ private:
             << "# Don't edit this file! Your changes will be overwritten when you re-save the Introjucer project!" << newLine
             << newLine;
 
-        out << "TEMPLATE = app" << newLine;
+        if (projectType.isStaticLibrary()) {
+            out << "TEMPLATE = lib" << newLine;
+            out << "CONFIG += static" << newLine;
+        } else if (projectType.isDynamicLibrary() || projectType.isAudioPlugin())
+            out << "TEMPLATE = lib" << newLine;
+        else
+            out << "TEMPLATE = app" << newLine;
+
         out << "CONFIG  -= qt" << newLine;
         out << "CONFIG  += warn_off" << newLine;
         out << newLine;
