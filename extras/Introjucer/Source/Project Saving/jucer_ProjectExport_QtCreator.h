@@ -146,6 +146,7 @@ private:
 
         out << "TEMPLATE = app" << newLine;
         out << "CONFIG  -= qt" << newLine;
+        out << "CONFIG  += warn_off" << newLine;
         out << newLine;
         out << "CONFIG(release, debug|release){" << newLine
             << "    DESTDIR     = build/release/" << newLine
@@ -167,7 +168,7 @@ private:
         out << "# Compiler flags" << newLine;
 
         // general options
-        out << "QMAKE_CFLAGS = -std=gnu++0x";
+        out << "QMAKE_CFLAGS = -std=gnu++0x -Wall";
         out << newLine;
 
         // defines
