@@ -168,8 +168,6 @@ private:
 
         // general options
         out << "QMAKE_CFLAGS = -std=gnu++0x";
-        if (makefileIsDLL)
-            out << " -fPIC";
         out << newLine;
 
         // defines
@@ -224,6 +222,8 @@ private:
         // Linux specific options
         defines.clear();
         out << "unix:  QMAKE_CFLAGS += -I/usr/include/freetype2 -I/usr/include";
+        if (makefileIsDLL)
+            out << " -fPIC";
         defines.set ("LINUX", "1");
         out << createGCCPreprocessorFlags (defines);
         out << newLine;
