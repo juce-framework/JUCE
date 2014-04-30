@@ -1243,7 +1243,8 @@ public:
     VST3PluginWindow (AudioProcessor* owner, IPlugView* pluginView)
       : AudioProcessorEditor (owner),
         ComponentMovementWatcher (this),
-        view (pluginView),
+        refCount (1),
+        view (pluginView, false),
         pluginHandle (nullptr),
         recursiveResize (false)
     {
@@ -1545,10 +1546,11 @@ public:
 
         Array<SpeakerArrangement> inArrangements, outArrangements;
 
-        for (int i = 0; i < numInputAudioBusses; ++i)
+        // NB: Some plugins need a valid arrangement despite specifying 0 for their I/O busses
+        for (int i = 0; i < jmax (1, numInputAudioBusses); ++i)
             inArrangements.add (getArrangementForNumChannels (jmax (0, (int) getBusInfo (true, true, i).channelCount)));
 
-        for (int i = 0; i < numOutputAudioBusses; ++i)
+        for (int i = 0; i < jmax (1, numOutputAudioBusses); ++i)
             outArrangements.add (getArrangementForNumChannels (jmax (0, (int) getBusInfo (false, true, i).channelCount)));
 
         warnOnFailure (processor->setBusArrangements (inArrangements.getRawDataPointer(), numInputAudioBusses,
@@ -1688,7 +1690,7 @@ public:
         if (getActiveEditor() != nullptr)
             return true;
 
-        ComSmartPtr<IPlugView> view (tryCreatingView());
+        ComSmartPtr<IPlugView> view (tryCreatingView(), false);
         return view != nullptr;
     }
 
@@ -2079,11 +2081,11 @@ private:
     Vst::BusInfo getBusInfo (bool forInput, bool forAudio, int index = 0) const
     {
         Vst::BusInfo busInfo;
+        busInfo.mediaType = forAudio ? Vst::kAudio : Vst::kEvent;
+        busInfo.direction = forInput ? Vst::kInput : Vst::kOutput;
 
-        component->getBusInfo (forAudio ? Vst::kAudio : Vst::kEvent,
-                               forInput ? Vst::kInput : Vst::kOutput,
+        component->getBusInfo (busInfo.mediaType, busInfo.direction,
                                (Steinberg::int32) index, busInfo);
-
         return busInfo;
     }
 

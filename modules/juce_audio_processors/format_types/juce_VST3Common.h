@@ -126,9 +126,9 @@ class ComSmartPtr
 {
 public:
     ComSmartPtr() noexcept : source (nullptr) {}
-    ComSmartPtr (ObjectType* object) noexcept  : source (object)              { if (source != nullptr) source->addRef(); }
-    ComSmartPtr (const ComSmartPtr& other) noexcept : source (other.source)   { if (source != nullptr) source->addRef(); }
-    ~ComSmartPtr()                                                            { if (source != nullptr) source->release(); }
+    ComSmartPtr (ObjectType* object, bool autoAddRef = true) noexcept  : source (object)    { if (source != nullptr && autoAddRef) source->addRef(); }
+    ComSmartPtr (const ComSmartPtr& other) noexcept : source (other.source)                 { if (source != nullptr) source->addRef(); }
+    ~ComSmartPtr()                                                                          { if (source != nullptr) source->release(); }
 
     operator ObjectType*() const noexcept    { return source; }
     ObjectType* get() const noexcept         { return source; }
