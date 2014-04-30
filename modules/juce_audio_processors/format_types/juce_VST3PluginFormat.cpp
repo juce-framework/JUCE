@@ -624,9 +624,9 @@ private:
         JUCE_DECLARE_VST3_COM_REF_METHODS
         JUCE_DECLARE_VST3_COM_QUERY_METHODS
 
-        FIDString PLUGIN_API getMessageID()              { return messageId.toRawUTF8(); }
-        void PLUGIN_API setMessageID (FIDString id)      { messageId = toString (id); }
-        Vst::IAttributeList* PLUGIN_API getAttributes()  { return attributeList; }
+        FIDString PLUGIN_API getMessageID() override              { return messageId.toRawUTF8(); }
+        void PLUGIN_API setMessageID (FIDString id) override      { messageId = toString (id); }
+        Vst::IAttributeList* PLUGIN_API getAttributes() override  { return attributeList; }
 
         var value;
 
