@@ -280,6 +280,12 @@ int64 File::getSize() const
     return juce_stat (fullPath, info) ? info.st_size : 0;
 }
 
+uint64 File::getFileIdentifier() const
+{
+    juce_statStruct info;
+    return juce_stat (fullPath, info) ? (uint64) info.st_ino : 0;
+}
+
 //==============================================================================
 bool File::hasWriteAccess() const
 {

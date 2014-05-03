@@ -46,7 +46,10 @@ void MACAddress::findAllAddresses (Array<MACAddress>& result)
                  && (ifr.ifr_flags & IFF_LOOPBACK) == 0
                  && ioctl (s, SIOCGIFHWADDR, &ifr) == 0)
             {
-                result.addIfNotAlreadyThere (MACAddress ((const uint8*) ifr.ifr_hwaddr.sa_data));
+                MACAddress ma ((const uint8*) ifr.ifr_hwaddr.sa_data);
+
+                if (! ma.isNull())
+                    result.addIfNotAlreadyThere (ma);
             }
         }
 
