@@ -279,9 +279,9 @@ public:
     }
 
     //==============================================================================
-    void audioProcessorParameterChangeGestureBegin (AudioProcessor*, int index) override        { beginEdit ((Steinberg::uint32) index); }
-    void audioProcessorParameterChanged (AudioProcessor*, int index, float newValue) override   { performEdit ((Steinberg::uint32) index, (double) newValue); }
-    void audioProcessorParameterChangeGestureEnd (AudioProcessor*, int index) override          { endEdit ((Steinberg::uint32) index); }
+    void audioProcessorParameterChangeGestureBegin (AudioProcessor*, int index) override        { beginEdit ((Vst::ParamID) index); }
+    void audioProcessorParameterChanged (AudioProcessor*, int index, float newValue) override   { performEdit ((Vst::ParamID) index, (double) newValue); }
+    void audioProcessorParameterChangeGestureEnd (AudioProcessor*, int index) override          { endEdit ((Vst::ParamID) index); }
 
     void audioProcessorChanged (AudioProcessor*) override
     {
@@ -1103,10 +1103,12 @@ public:
             Steinberg::int32 counter = 0;
 
             FOREACH_CAST (IPtr<Vst::Bus>, Vst::AudioBus, bus, list)
+            {
                 if (counter < numBusses)
                     bus->setArrangement (arrangement[counter]);
 
                 counter++;
+            }
             ENDFOR
 
             return kResultTrue;
