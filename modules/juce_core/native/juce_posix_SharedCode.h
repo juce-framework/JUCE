@@ -1216,7 +1216,7 @@ private:
         {
             mach_timebase_info_data_t timebase;
             (void) mach_timebase_info (&timebase);
-            delta = (((uint64_t) (millis * 1000000.0)) * timebase.numer) / timebase.denom;
+            delta = (((uint64_t) (millis * 1000000.0)) * timebase.denom) / timebase.numer;
             time = mach_absolute_time();
         }
 
