@@ -1,0 +1,234 @@
+#ifndef ztd_ZlogfdssssssssssckfreeCircularBuffer_h__
+#define ztd_ZlogfdssssssssssckfreeCircularBuffer_h__
+
+/*
+环形缓冲区需要3种状态:
+空: startPos==writePos
+满: startPos==(writePos+1) //因此,我们最多只能往缓冲区里放入cycSize-1个元素,最后一个元素是费的
+其他...
+
+非环形缓冲区:size=writePos-startPos;
+环形缓冲区: size = (writePos<startPos)?(writePos+cycSize-startPos):(writePos-startPos);
+*/
+namespace helper {
+
+template<typename T>
+struct ZlockfreeCircularBufferNode
+{
+public:
+	ZlockfreeCircularBufferNode() = default;
+	ZlockfreeCircularBufferNode(const ZlockfreeCircularBufferNode&) = default;
+	ZlockfreeCircularBufferNode& operator=( const ZlockfreeCircularBufferNode& ) = default;
+	~ZlockfreeCircularBufferNode() = default;
+public:
+	T m_dataInNode;
+	Zatomic<int> m_stateInNode;
+};
+
+}
+
+template<typename T>
+class ZlockfreeCircularBuffer :private helper::CircularBufferBase<helper::ZlockfreeCircularBufferNode<T>>
+{
+public:
+	forcedinline ZlockfreeCircularBuffer(uint pow2Size=1u<<12);
+	forcedinline ~ZlockfreeCircularBuffer();
+	template<typename Func> forcedinline bool bound_push(const Func& func);
+	template<typename Func> forcedinline void push(const Func& func);
+	template<typename Func> forcedinline bool pop(const Func& func);
+	forcedinline bool bound_push(const T& obj);
+	forcedinline void push(const T& obj);
+	forcedinline bool pop(T& obj);
+	forcedinline bool isEmpty();
+	forcedinline bool isFull();
+private:
+	enum {
+		FreeToUse=0, //此处应为0,因为初始化Node数组和_Realloc()时初始时Node的状态必须设定为freeToUse
+		HasNode,
+		Pushing
+	};
+
+
+	uint m_pow2Size;
+	//helper::CircularBufferBase<Node> m_data;
+
+	Atomic<uint> m_readPos;
+	Atomic<uint> m_writePos;
+
+	Atomic<int> m_reallocLock;
+	ReadWriteLock m_lock;
+	SpinLock m_lock2;
+
+	forcedinline bool _isEmpty(uint writePos,uint readPos) noexcept;
+	forcedinline bool _isFull(uint writePos,uint readPos) const noexcept;
+
+	class ScopedLock
+	{
+	public:
+		STACK_CLASS(ScopedLock);
+		NONCOPYABLE_CLASS(ScopedLock);
+		forcedinline ScopedLock(Atomic<int>& reallocLock) noexcept 
+			:m_reallocLock(reallocLock)
+		{
+			int k;
+			for(int i=0;;++i) {
+				if(i == 40) { i = 0; Thread::sleep(100); } 
+				k =m_reallocLock.get();
+				jassert(k>=-1);
+				if ( k== -1 ) continue;
+				if ( m_reallocLock.compareAndSetBool(k+1,k) ) break;
+			}
+		}
+		forcedinline ~ScopedLock() noexcept
+		{
+			--m_reallocLock;
+		}
+	private:
+		Atomic<int>& m_reallocLock;
+	};
+
+	void _Realloc()
+	{
+	//	const SpinLock::ScopedLockType e2(m_lock2);
+
+		int k;
+		for(int i=0;;++i) {
+			if(i == 40) { i = 0; Thread::sleep(100); } 
+			k= m_reallocLock.compareAndSetValue(-1,0);
+			if(k==-1) return;
+			if(k==0) break;
+		}
+		uint const m=realloc(++m_pow2Size,m_readPos.get(),m_writePos.get(),true);
+		m_readPos=0;
+		m_writePos=m;
+#	if JUCE_DEBUG
+		const bool temp2=m_reallocLock.compareAndSetBool(0,-1);
+		jassert(temp2); //因为只有一个线程能修改m_reallocLock,所以此处必然成功
+#	else
+		m_reallocLock=0;
+#	endif
+	//	Logger::writeToLog("_Realloc() end");
+	}
+
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ZlockfreeCircularBuffer);
+};
+
+
+
+//------------------------------------------------------------------------------
+template<typename T>
+ZlockfreeCircularBuffer<T>::ZlockfreeCircularBuffer(uint pow2Size)
+    :helper::CircularBufferBase<helper::ZlockfreeCircularBufferNode<T>>(pow2Size)
+	,m_pow2Size(pow2Size)
+	,m_readPos()
+	,m_writePos()
+	,m_reallocLock()
+{
+	//在push发生时,我们必须初始化m_data中所有的m_stateInNode为"FreeToUse",只有这样才能
+	//保证当push发生时能够正确检测其接下来要读取的节点是FreeToUse的.
+//	static_assert(is_default_constructible<helper::ZlockfreeCircularBufferNode<T>>::value,"T must be pod!!!");
+}
+
+template<typename T>
+ZlockfreeCircularBuffer<T>::~ZlockfreeCircularBuffer(){}
+
+template<typename T>
+template<typename Func>
+bool ZlockfreeCircularBuffer<T>::bound_push(const Func& func)
+{
+	//Logger::writeToLog("bound_push() start");
+	const ScopedLock scopedLock(m_reallocLock);
+	
+	//const ScopedReadLock e(m_lock);
+	//const SpinLock::ScopedLockType e2(m_lock2);
+
+	for(;;) {
+		const uint readPos=m_readPos.get();
+		const uint k=m_writePos.get();
+		if(_isFull(k,readPos)) return false;
+		if( ! m_writePos.compareAndSetBool(k+1,k) ) continue;
+		int const p = getDataInModIndex(k).m_stateInNode.compareAndSetValue(Pushing,FreeToUse);
+		jassert( (p==FreeToUse)||(p==Pushing)||(p==HasNode) );
+		if(p != FreeToUse) { continue; }
+		func(getDataInModIndex(k).m_dataInNode);
+		getDataInModIndex(k).m_stateInNode = HasNode;
+		break;
+	}
+	return true;
+}
+
+template<typename T>
+template<typename Func>
+bool ZlockfreeCircularBuffer<T>::pop(const Func& func)
+{
+	const ScopedLock scopedLock(m_reallocLock);
+	for(;;) {
+		const uint k = m_readPos.get();
+		if(_isEmpty(m_writePos.get(),k)) { return false; }
+		int const p = getDataInModIndex(k).m_stateInNode.get();
+		if(p == Pushing) { return false; }
+		if(p == FreeToUse) { return false; }
+		jassert(p==HasNode);
+		if(!m_readPos.compareAndSetBool(k + 1,k)) continue;
+		func(getDataInModIndex(k).m_dataInNode);
+		getDataInModIndex(k).m_stateInNode=FreeToUse;
+		break;
+	}
+	return true;
+}
+
+template<typename T>
+template<typename Func>
+void ZlockfreeCircularBuffer<T>::push(const Func& func)
+{
+	while ( ! bound_push(func) ) {
+		_Realloc();
+	}
+}
+
+template<typename T>
+forcedinline bool ZlockfreeCircularBuffer<T>::bound_push(const T& obj) { return bound_push([&](T& k){ k = obj; }); }
+
+template<typename T>
+forcedinline void ZlockfreeCircularBuffer<T>::push(const T& obj) { return push([&](T& k){ k = obj; }); }
+
+template<typename T>
+forcedinline bool ZlockfreeCircularBuffer<T>::pop(T& obj) { return pop([&](const T& k){ obj = k; }); }
+
+template<typename T>
+bool ZlockfreeCircularBuffer<T>::isFull()
+{
+	const ScopedLock e(m_reallocLock);
+	return _isFull(m_writePos.get(),m_readPos.get());
+}
+
+template<typename T>
+bool ZlockfreeCircularBuffer<T>::isEmpty()
+{
+	const ScopedLock e(m_reallocLock);
+	return _isEmpty(m_writePos.get(),m_readPos.get());
+}
+
+template<typename T>
+forcedinline bool ZlockfreeCircularBuffer<T>::_isFull(uint writePos,uint startPos) const noexcept
+{
+	const uint k=mod(writePos+1);
+	startPos = mod(startPos);
+	return startPos==k;
+}
+
+template<typename T>
+forcedinline bool ZlockfreeCircularBuffer<T>::_isEmpty(uint writePos,uint startPos) noexcept
+{
+	writePos = mod(writePos);
+	startPos = mod(startPos);
+	return startPos == writePos;
+}
+
+
+
+
+
+
+
+#endif // ztd_ZlockfreeCircularBuffer_h__
