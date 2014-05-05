@@ -141,9 +141,26 @@
 #endif
 
 #include "system/juce_StandardHeader.h"
+#include "system/ztd_StandardHeader.h"
 
 namespace juce
 {
+
+//* 首先添加 ZTD MPL,这是很重要的模块 ,所以直接放在juce_core里面了
+#include "mpl/ztd_call_if.h"
+#include "mpl/ztd_call_select.h"
+#include "mpl/ztd_contain_type.h"
+#include "mpl/ztd_search_index.h"
+#include "mpl/ztd_value_if.h"
+#include "mpl/ztd_value_max.h"
+#include "mpl/ztd_value_min.h"
+#include "mpl/ztd_type_queue.h"
+#include "mpl/ztd_type_push.h"
+#include "mpl/ztd_type_pop.h"
+#include "mpl/ztd_type_select.h"
+#include "mpl/ztd_type_if.h"
+#include "mpl/ztd_search_type.h"
+
 
 class StringRef;
 class MemoryBlock;
@@ -152,6 +169,7 @@ class InputStream;
 class OutputStream;
 class DynamicObject;
 class FileInputStream;
+class FileDirectInputStream;
 class FileOutputStream;
 class XmlElement;
 class JSONFormatter;
@@ -162,6 +180,13 @@ extern JUCE_API void JUCE_CALLTYPE logAssertion (const char* file, int line) noe
 #include "memory/juce_Memory.h"
 #include "maths/juce_MathsFunctions.h"
 #include "memory/juce_ByteOrder.h"
+
+#include "memory/ztd_byte_cast.h"
+#include "memory/ztd_byte_ref_cast.h" // 这个似乎用不着
+#include "memory/ztd_ZInterlockedBase.h"
+#include "memory/ztd_ZInterlockedExchange.h"
+#include "memory/ztd_Atomic.h"
+
 #include "memory/juce_Atomic.h"
 #include "text/juce_CharacterFunctions.h"
 
@@ -182,6 +207,9 @@ extern JUCE_API void JUCE_CALLTYPE logAssertion (const char* file, int line) noe
 #include "text/juce_String.h"
 #include "text/juce_StringRef.h"
 #include "logging/juce_Logger.h"
+#include "memory/ztd_aligned_malloc.h"
+#include "memory/ztd_aligned_new.h"
+#include "memory/ztd_aligned_type.h"
 #include "memory/juce_LeakedObjectDetector.h"
 #include "memory/juce_ContainerDeletePolicy.h"
 #include "memory/juce_HeapBlock.h"
@@ -228,6 +256,7 @@ extern JUCE_API void JUCE_CALLTYPE logAssertion (const char* file, int line) noe
 #include "files/juce_File.h"
 #include "files/juce_DirectoryIterator.h"
 #include "files/juce_FileInputStream.h"
+#include "files/ztd_FileDirectInputStream.h"
 #include "files/juce_FileOutputStream.h"
 #include "files/juce_FileSearchPath.h"
 #include "files/juce_MemoryMappedFile.h"
@@ -243,6 +272,8 @@ extern JUCE_API void JUCE_CALLTYPE logAssertion (const char* file, int line) noe
 #include "maths/juce_Random.h"
 #include "misc/juce_Uuid.h"
 #include "misc/juce_WindowsRegistry.h"
+#include "misc/ztd_ScopedDenormalFlag.h"
+#include "misc/ztd_MemoryFetch.h"
 #include "system/juce_PlatformDefs.h"
 #include "system/juce_SystemStats.h"
 #include "threads/juce_ChildProcess.h"

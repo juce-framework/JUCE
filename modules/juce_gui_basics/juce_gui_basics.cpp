@@ -201,6 +201,7 @@ extern bool juce_areThereAnyAlwaysOnTopWindows();
 #include "lookandfeel/juce_LookAndFeel_V2.cpp"
 #include "lookandfeel/juce_LookAndFeel_V1.cpp"
 #include "lookandfeel/juce_LookAndFeel_V3.cpp"
+#include "lookandfeel/ztd_FreetypeLookAndFeel.cpp"
 #include "menus/juce_MenuBarComponent.cpp"
 #include "menus/juce_MenuBarModel.cpp"
 #include "menus/juce_PopupMenu.cpp"

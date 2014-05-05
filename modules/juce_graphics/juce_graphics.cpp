@@ -137,7 +137,7 @@ namespace juce
  #include "native/juce_mac_CoreGraphicsContext.mm"
 
 #elif JUCE_WINDOWS
- #include "../juce_core/native/juce_win32_ComSmartPtr.h"
+ #include "../juce_core/native/juce_win32_ComSmartPtr.h"  //TODO这里有点问题,freetype了还需要include系统自带吗?
  #include "native/juce_win32_DirectWriteTypeface.cpp"
  #include "native/juce_win32_DirectWriteTypeLayout.cpp"
  #include "native/juce_win32_Fonts.cpp"
@@ -154,6 +154,9 @@ namespace juce
  #include "native/juce_android_Fonts.cpp"
 
 #endif
+
+#include "freetype/vf_FreeTypeFaces.cpp"
+
 }
 
 //==============================================================================
@@ -169,3 +172,7 @@ namespace juce
    #include "native/freetype/FreeTypeAmalgam.c"
  }
 #endif
+
+extern "C" {
+  #include "freetype/vf_freetype.c"
+}
