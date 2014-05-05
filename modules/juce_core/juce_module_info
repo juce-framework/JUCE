@@ -15,7 +15,9 @@
 
   "browse":         [ "text/*",
                       "maths/*",
+					  "Zcontainers/*",
                       "memory/*",
+					  "mpl/*",
                       "containers/*",
                       "threads/*",
                       "time/*",

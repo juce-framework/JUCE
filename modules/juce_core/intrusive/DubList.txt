@@ -1,0 +1,85 @@
+#ifndef ztd_DubList_h__
+#define ztd_DubList_h__
+
+template<typename T,int placeholder=0>
+class DubList
+{
+public:
+	class Node
+	{
+	public:
+		bool isInchain() const;
+		void setUnchain()
+		{
+			m_prev->m_next=m_next;
+			m_next->m_prev=m_prev;
+		}
+	private:
+		Node* m_prev;
+		Node* m_next;
+	};
+public:
+	DubList():m_dummyObj()
+	{
+		m_dummyObj.m_next=&m_dummyObj;
+		m_dummyObj.m_prev=&m_dummyObj;
+		m_end=&m_dummyObj;
+	}
+	~DubList(){}
+	void pushEnd(T*const obj)
+	{
+		obj->m_next=m_end->m_next;
+		obj->m_prev=m_end;
+		m_end->m_next=obj;
+	}
+	void pushHead(T*const obj)
+	{
+		Node*const head=m_end->m_next;
+		obj->m_prev=head;
+		obj->m_next=head->m_next;
+		head->m_prev=obj;
+	}
+	bool popEnd(T*& obj)
+	{
+		bool const temp=isEmpty();
+		if (!temp) {
+			auto k=m_end->m_prev;
+			k->m_next=m_end->m_next;
+			obj=m_end;
+			m_end=k;
+		}
+		return temp;
+	}
+	bool popHead(T*& obj)
+	{
+		bool const temp = isEmpty();
+		if(!temp) {
+			auto head=m_end->m_next;
+			auto newHead = head->m_next;
+			newHead->m_prev = head->m_prev;
+			obj = head;
+			m_end->m_next=newHead;
+		}
+		return temp;
+	}
+	bool isEmpty()const { m_end==&m_dummyObj; }
+	template<typename Func> void ForEach(const Func& func)
+	{
+		auto head=m_end->m_next;
+		for(auto obj=head;obj!=&m_dummyObj;obj=obj->m_next) {
+			jassert(obj!=nullptr);
+			func(&obj);
+		}
+	}
+	int getSize() const 
+	{
+		int i=0;
+		ForEach([&](const T&){ ++i; });
+		return i;
+	}
+private:
+	Node m_dummyObj;
+	Node* m_end;
+};
+
+#endif // ztd_DubList_h__

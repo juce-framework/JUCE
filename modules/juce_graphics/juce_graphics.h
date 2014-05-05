@@ -60,6 +60,10 @@
  #define USE_COREGRAPHICS_RENDERING 1
 #endif
 
+extern "C" {
+  #include "freetype/vf_freetype.h"
+}
+
 //=============================================================================
 namespace juce
 {
@@ -107,6 +111,8 @@ class LowLevelGraphicsContext;
 #include "effects/juce_ImageEffectFilter.h"
 #include "effects/juce_DropShadowEffect.h"
 #include "effects/juce_GlowEffect.h"
+
+	//#include "freetype/vf_FreeTypeFaces.h"
 
 }
 
