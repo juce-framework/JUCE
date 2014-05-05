@@ -9,3 +9,5 @@ highly-customised GUIs, and for handling graphics and sound.
 
 For more information, visit the website:
 http://www.juce.com
+
+=======================================================================
