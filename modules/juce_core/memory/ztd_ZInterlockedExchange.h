@@ -1,7 +1,7 @@
 #ifndef ZInterlockedExchange_h__999999990000000077777777
 #define ZInterlockedExchange_h__999999990000000077777777
 
-ZTD_NAMESPACE_START;
+
 
 NAMESPACE_START(helper);
 
@@ -315,6 +315,6 @@ forcedinline void ZInterlockedStore(volatile T& ref,const T valueToStore)
 	helper::ZInterlockedeHelper<T>::store(ref,valueToStore);
 }
 
-ZTD_NAMESPACE_END;
+
 
 #endif // ZInterlockedExchange_h__

@@ -1,7 +1,7 @@
 #ifndef JUCE_THREAtrrrrrrrrrrrrrrrDPOOL_H_INCLUDED
 #define JUCE_THREAtrrrrrrrrrrrrrrrDPOOL_H_INCLUDED
 
-ZTD_NAMESPACE_START;
+
 
 
 class ZthreadPool
@@ -54,7 +54,7 @@ private:
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ZthreadPool);
 };
 
-ZTD_NAMESPACE_END;
+
 
 
 #endif   // JUCE_THREADPOOL_H_INCLUDED

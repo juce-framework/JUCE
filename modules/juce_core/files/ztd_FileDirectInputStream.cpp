@@ -1,8 +1,3 @@
-#include <wchar.h>
-#include <io.h>
-#include <fcntl.h>
-
-#include "FileDirectInputStream.h"
 
 
 #if JUCE_MSVC
@@ -10,20 +5,19 @@
 #pragma warning (disable: 4996)
 #endif
 
-
+/*
 
 FileDirectInputStream::FileDirectInputStream(const File& fileToRead)
 	:file(fileToRead)
+	,m_status(Result::ok())
 	,fileHandle(-1)
-	,m_result(Result::ok())
 	,m_fileLength(0)
 	,m_pos(0)
 	,needToSeek(false)
-	,status(Result::ok())
 {
 	fileHandle=_wopen(file.getFullPathName().toWideCharPointer(),_O_RDONLY|_O_BINARY|_O_U8TEXT);
 	if(!openedOk()) {
-		status=Result::fail("can not open file");
+		m_status=Result::fail("can not open file");
 	}
 }
 
@@ -87,7 +81,7 @@ bool FileDirectInputStream::failedToOpen() const noexcept
 {
 	return !openedOk();
 }
-
+*/
 
 #if JUCE_MSVC
 #pragma warning (pop)

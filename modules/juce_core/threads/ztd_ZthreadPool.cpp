@@ -1,6 +1,6 @@
 ﻿
 
-ZTD_NAMESPACE_START;
+
 
 class ZthreadPoolThread: public Thread
 {
@@ -114,4 +114,3 @@ void ZthreadPool::RunAllJobInThisThreadAndStopAllThread()
 }
 
 
-ZTD_NAMESPACE_END;

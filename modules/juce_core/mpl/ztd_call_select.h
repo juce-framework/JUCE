@@ -1,7 +1,7 @@
 #ifndef call_select_h__
 #define call_select_h__
 
-ZTD_NAMESPACE_START;
+
 
 #ifndef TINY_MAX_SIZE
 #  define TINY_MAX_SIZE 50
@@ -93,7 +93,5 @@ public:
 		return func4();
 	}
 };
-
-ZTD_NAMESPACE_END;
 
 #endif // call_select_h__

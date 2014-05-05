@@ -1,7 +1,7 @@
 #ifndef ztd_ZscopedSingleton_h__
 #define ztd_ZscopedSingleton_h__
 
-ZTD_NAMESPACE_START;
+
 
 /**********************************************************
 *   智能单例，在main()之前构造，在程序结束时析构
@@ -57,8 +57,8 @@ private:
 
 
 template<typename T,bool DirectConstruction>
-SELECT_ANY typename ScopedSingleton<T,DirectConstruction>::DummyInstanceUser ScopedSingleton<T,DirectConstruction>::m_dummyUser;
+SELECT_ANY typename ScopedSingleton<T,DirectConstruction>::DummyInstanceUser ScopedSingleton<T,DirectConstruction>::m_dummyUser; 
 
-ZTD_NAMESPACE_END;
+
 
 #endif // ztd_ZscopedSingleton_h__

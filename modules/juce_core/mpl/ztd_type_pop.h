@@ -1,7 +1,7 @@
 #ifndef type_container_h__type_pop
 #define type_container_h__type_pop
 
-ZTD_NAMESPACE_START;
+
 
 template<typename T>
 class type_pop
@@ -12,6 +12,6 @@ public:
 	typedef typename T::left_type left_type;
 };
 
-ZTD_NAMESPACE_END;
+
 
 #endif // type_container_h__

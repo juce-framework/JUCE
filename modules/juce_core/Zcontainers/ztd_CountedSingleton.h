@@ -1,7 +1,6 @@
 #ifndef ztd_ZcountedSingleton_h__
 #define ztd_ZcountedSingleton_h__
 
-ZTD_NAMESPACE_START;
 
 /*****************************************************************************************************************
 线程安全的引用计数单例，在第一个User创建时创建实例，在最后一个User析构时销毁实例.
@@ -69,6 +68,5 @@ SELECT_ANY Atomic<T*> CountedSingleton<T>::m_instancePtr; //Atomic默认构造成0
 template<typename T>
 SELECT_ANY Atomic<int> CountedSingleton<T>::m_counter;
 
-ZTD_NAMESPACE_END;
 
 #endif // ztd_ZcountedSingleton_h__

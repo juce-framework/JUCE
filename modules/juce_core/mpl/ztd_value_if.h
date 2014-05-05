@@ -1,8 +1,6 @@
 #ifndef value_if_h__
 #define value_if_h__
 
-ZTD_NAMESPACE_START;
-
 template<bool UsingType1,int V1,int V2>
 class value_if;
 
@@ -21,7 +19,5 @@ public:
 	FUNCTION_CLASS(value_if);
 	enum { value=V2 };
 };
-
-ZTD_NAMESPACE_END;
 
 #endif // value_if_h__

@@ -1,7 +1,7 @@
 ﻿#ifndef JUCE_HEAPBLOCK_H_INCLUDEDccaaaaaaaaaaaaaaa
 #define JUCE_HEAPBLOCK_H_INCLUDEDccaaaaaaaaaaaaaaa
 
-ZTD_NAMESPACE_START;
+
 
 /*************************************************************************
 * 动态分配的AlignedHeapBlock,可调整内存对齐尺寸,默认为64
@@ -60,7 +60,7 @@ private:
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(AlignedHeapBlock);
 };
 
-ZTD_NAMESPACE_END;
+
 
 
 #endif   // JUCE_HEAPBLOCK_H_INCLUDED

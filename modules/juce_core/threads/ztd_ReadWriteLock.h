@@ -1,7 +1,7 @@
 #ifndef ztd_ZlogfdssssssssssckfreeCircularBuffer_h__
 #define ztd_ZlogfdssssssssssckfreeCircularBuffer_h__
 
-ZTD_NAMESPACE_START;
+
 
 /************************************************************************/
 /* 读写锁,同一时间只能有1个writer,但可以同时有多个reader来读.
@@ -97,6 +97,6 @@ private:
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ReadWriteLock);
 };
 
-ZTD_NAMESPACE_END;
+
 
 #endif // ztd_ZlockfreeCircularBuffer_h__

@@ -1,9 +1,6 @@
 #ifndef ztd_align_type_h__
 #define ztd_align_type_h__
 
-#include "../../ztd_core.h"
-
-using juce::ScopedPointer;
 
 template <class ObjectType>
 class ScopedPointer;

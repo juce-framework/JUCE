@@ -1,7 +1,7 @@
 #ifndef type_container_h__
 #define type_container_h__
 
-ZTD_NAMESPACE_START;	
+	
 
 
 template<typename T,typename... Ts>
@@ -36,6 +36,6 @@ public:
 	};
 };
 
-ZTD_NAMESPACE_END;
+
 
 #endif // type_container_h__

@@ -20,12 +20,12 @@ public:
 	int64 getPosition() override;
 	bool setPosition(int64 pos) override;
 
-    const Result& getStatus() const noexcept { return status; }
+    const Result& getStatus() const noexcept { return m_status; }
     bool failedToOpen() const noexcept;
 private:
     //==============================================================================
     File file;
-    Result status;
+    Result m_status;
 	int fileHandle;
 	int64 m_fileLength;
 	int64 m_pos;

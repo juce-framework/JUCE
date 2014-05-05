@@ -155,7 +155,7 @@ namespace juce
 
 #endif
 
-#include "freetype/vf_FreeTypeFaces.cpp"
+	//#include "freetype/vf_FreeTypeFaces.cpp"
 
 }
 
@@ -174,5 +174,5 @@ namespace juce
 #endif
 
 extern "C" {
-  #include "freetype/vf_freetype.c"
+	// #include "freetype/vf_freetype.c"
 }

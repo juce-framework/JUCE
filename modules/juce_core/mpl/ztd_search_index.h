@@ -1,7 +1,7 @@
 #ifndef type_container_h__search_index
 #define type_container_h__search_index
 
-ZTD_NAMESPACE_START;
+
 
 template<typename T,typename TypeToSearch>
 class search_index
@@ -29,7 +29,5 @@ public:
 		result = -INT_MAX
 	};
 };
-
-ZTD_NAMESPACE_END;
 
 #endif // type_container_h__

@@ -1,7 +1,6 @@
 #ifndef ztd_Zatomic_h__dsdaaaaaaaaaaaaa3243222222222222
 #define ztd_Zatomic_h__dsdaaaaaaaaaaaaa3243222222222222
 
-ZTD_NAMESPACE_START;
 
 /****************************************************
 * 原子类,内部使用了C++11的原子类所以编译器要支持C++11,
@@ -205,6 +204,5 @@ forcedinline bool Zatomic<T>::compareAndSetBool(const T valueToCmp,const T newVa
 	return ZInterlockedCompareAndSetBool(m_data,valueToCmp,newValue);
 }
 
-ZTD_NAMESPACE_END;
 
 #endif // ztd_Zatomic_h__

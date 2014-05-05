@@ -1,7 +1,6 @@
 #ifndef ScopedDenormalFlag_h__
 #define ScopedDenormalFlag_h__
 
-ZTD_NAMESPACE_START;
 
 //自动设置SSE指令集切换为denormal模式
 class ScopedDenormalFlag
@@ -61,6 +60,5 @@ private:
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ScopedDenormalFlag);
 };
 
-ZTD_NAMESPACE_END;
 
 #endif // ScopedDenormalFlag_h__

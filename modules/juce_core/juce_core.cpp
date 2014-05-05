@@ -216,7 +216,7 @@ namespace juce
 
 #endif
 
-#include "files/ztd_FileDirectInputStream.cpp"
+	//#include "files/ztd_FileDirectInputStream.cpp"
 
 #include "threads/juce_ChildProcess.cpp"
 #include "threads/juce_HighResolutionTimer.cpp"

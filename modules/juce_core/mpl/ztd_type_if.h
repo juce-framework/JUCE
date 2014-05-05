@@ -1,7 +1,7 @@
 #ifndef type_if_h__
 #define type_if_h__
 
-ZTD_NAMESPACE_START;
+
 
 template<bool UsingType1,typename Type1,typename Type2>
 class type_if;
@@ -22,6 +22,6 @@ public:
 	typedef Type2 type;
 };
 
-ZTD_NAMESPACE_END;
+
 
 #endif // type_if_h__

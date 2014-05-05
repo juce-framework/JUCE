@@ -1,7 +1,6 @@
 ﻿#ifndef fetch_h__
 #define fetch_h__
 
-ZTD_NAMESPACE_START;
 
 /************************************************************************
 * 向全部缓存刷新内存地址
@@ -35,6 +34,6 @@ forcedinline void MemoryFetchT0(void*const ptr)
 	_mm_prefetch((char*)ptr,_MM_HINT_T0);
 }
 
-ZTD_NAMESPACE_END;
+
 
 #endif // fetch_h__

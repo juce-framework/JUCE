@@ -36,9 +36,6 @@
     @ingroup vf_freetype external
 */
 
-#include "AppConfig.h"
-
-#include "modules/juce_core/system/juce_TargetPlatform.h"
 
 #if JUCE_MSVC
 #pragma warning (push)

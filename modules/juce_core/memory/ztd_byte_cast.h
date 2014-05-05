@@ -1,7 +1,7 @@
 #ifndef byte_cast_h__
 #define byte_cast_h__
 
-ZTD_NAMESPACE_START;
+
 
 template<typename T1,typename T2>
 forcedinline T1 byte_cast(const T2& value)
@@ -17,6 +17,6 @@ forcedinline T1 byte_cast(const T2& value)
 	return ac.result;
 };
 
-ZTD_NAMESPACE_END;
+
 
 #endif // byte_cast_h__

@@ -1,7 +1,7 @@
 #ifndef ztd_ZthreadPoolJob_h__
 #define ztd_ZthreadPoolJob_h__
 
-ZTD_NAMESPACE_START;
+
 
 class ZthreadPoolJob
 {
@@ -44,6 +44,6 @@ private:
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ZthreadPoolJob);
 };
 
-ZTD_NAMESPACE_END;
+
 
 #endif // ztd_ZthreadPoolJob_h__

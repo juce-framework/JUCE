@@ -1,7 +1,7 @@
 #ifndef type_container_h__search_type
 #define type_container_h__search_type
 
-ZTD_NAMESPACE_START;
+
 
 template<typename T,int indexToSearch>
 class search_type
@@ -26,6 +26,6 @@ public:
 	typedef void result;
 };
 
-ZTD_NAMESPACE_END;
+
 
 #endif // type_container_h__

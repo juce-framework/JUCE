@@ -112,7 +112,7 @@ class LowLevelGraphicsContext;
 #include "effects/juce_DropShadowEffect.h"
 #include "effects/juce_GlowEffect.h"
 
-#include "freetype/vf_FreeTypeFaces.h"
+	//#include "freetype/vf_FreeTypeFaces.h"
 
 }
 

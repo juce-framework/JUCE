@@ -1,7 +1,7 @@
 #ifndef ZInterlockedExchange_h__
 #define ZInterlockedExchange_h__
 
-ZTD_NAMESPACE_START;
+
 NAMESPACE_START(helper);
 
 #if JUCE_GCC
@@ -162,6 +162,6 @@ forcedinline int64 InterlockedExchangeAdd128(volatile int128*,int128)
 #endif //64bit
 
 NAMESPACE_END;
-ZTD_NAMESPACE_END;
+
 
 #endif // ZInterlockedExchange_h__
