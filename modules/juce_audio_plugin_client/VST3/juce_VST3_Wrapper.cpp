@@ -1120,6 +1120,8 @@ public:
     tresult PLUGIN_API setBusArrangements (Vst::SpeakerArrangement* inputs, Steinberg::int32 numIns,
                                            Vst::SpeakerArrangement* outputs, Steinberg::int32 numOuts) override
     {
+        (void) inputs; (void) outputs;
+
        #if JucePlugin_MaxNumInputChannels > 0
         if (setBusArrangementFor (audioInputs, inputs, numIns) != kResultTrue)
             return kResultFalse;
