@@ -1502,6 +1502,11 @@ public:
             {
                 rect.right  = (Steinberg::int32) getWidth();
                 rect.bottom = (Steinberg::int32) getHeight();
+                view->checkSizeConstraint (&rect);
+
+                setSize ((int) rect.getWidth(),
+                         (int) rect.getHeight());
+
                 view->onSize (&rect);
             }
             else
