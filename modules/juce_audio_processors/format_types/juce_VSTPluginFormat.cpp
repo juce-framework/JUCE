@@ -2317,10 +2317,8 @@ private:
     {
         if (isOpen)
         {
-           #if ! (JUCE_MAC && JUCE_SUPPORT_CARBON)
             JUCE_VST_LOG ("Closing VST UI: " + plugin.getName());
             isOpen = false;
-
             dispatch (effEditClose, 0, 0, 0, 0);
             stopTimer();
 
@@ -2335,7 +2333,6 @@ private:
            #elif JUCE_LINUX
             pluginWindow = 0;
             pluginProc = 0;
-           #endif
            #endif
         }
     }
