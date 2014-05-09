@@ -428,8 +428,16 @@ String SystemStats::getDisplayLanguage()
     DynamicLibrary dll ("kernel32.dll");
     JUCE_LOAD_WINAPI_FUNCTION (dll, GetUserDefaultUILanguage, getUserDefaultUILanguage, LANGID, (void))
 
-    if (getUserDefaultUILanguage != nullptr)
-        return getLocaleValue (MAKELCID (getUserDefaultUILanguage(), SORT_DEFAULT), LOCALE_SISO639LANGNAME, "en");
+    if (getUserDefaultUILanguage == nullptr)
+        return "en";
 
-    return "en";
+    const DWORD langID = MAKELCID (getUserDefaultUILanguage(), SORT_DEFAULT);
+
+    String mainLang (getLocaleValue (langID, LOCALE_SISO639LANGNAME, "en"));
+    String region   (getLocaleValue (langID, LOCALE_SISO3166CTRYNAME, nullptr));
+
+    if (region.isNotEmpty())
+        mainLang << '-' << region;
+
+    return mainLang;
 }
