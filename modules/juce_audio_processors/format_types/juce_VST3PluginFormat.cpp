@@ -1632,7 +1632,8 @@ public:
         midiInputs (new MidiEventList()),
         midiOutputs (new MidiEventList()),
         isComponentInitialised (false),
-        isControllerInitialised (false)
+        isControllerInitialised (false),
+        isActive (false)
     {
         host = new VST3HostContext (this);
     }
@@ -1719,8 +1720,27 @@ public:
         return module != nullptr ? module->name : String::empty;
     }
 
+    void repopulateArrangements()
+    {
+        inputArrangements.clearQuick();
+        outputArrangements.clearQuick();
+
+        // NB: Some plugins need a valid arrangement despite specifying 0 for their I/O busses
+        for (int i = 0; i < jmax (1, numInputAudioBusses); ++i)
+            inputArrangements.add (getArrangementForBus (processor, true, i));
+
+        for (int i = 0; i < jmax (1, numOutputAudioBusses); ++i)
+            outputArrangements.add (getArrangementForBus (processor, false, i));
+    }
+
     void prepareToPlay (double sampleRate, int estimatedSamplesPerBlock) override
     {
+        // Avoid redundantly calling things like setActive, which can be a heavy-duty call for some plugins:
+        if (isActive
+              && getSampleRate() == sampleRate
+              && getBlockSize() == estimatedSamplesPerBlock)
+            return;
+
         using namespace Vst;
 
         ProcessSetup setup;
@@ -1736,21 +1756,25 @@ public:
 
         editController->setComponentHandler (host);
 
-        Array<SpeakerArrangement> inArrangements, outArrangements;
+        if (inputArrangements.size() <= 0 || outputArrangements.size() <= 0)
+            repopulateArrangements();
 
-        // NB: Some plugins need a valid arrangement despite specifying 0 for their I/O busses
-        for (int i = 0; i < jmax (1, numInputAudioBusses); ++i)
-            inArrangements.add (getArrangementForNumChannels (jmax (0, (int) getBusInfo (true, true, i).channelCount)));
-
-        for (int i = 0; i < jmax (1, numOutputAudioBusses); ++i)
-            outArrangements.add (getArrangementForNumChannels (jmax (0, (int) getBusInfo (false, true, i).channelCount)));
-
-        warnOnFailure (processor->setBusArrangements (inArrangements.getRawDataPointer(), numInputAudioBusses,
-                                                      outArrangements.getRawDataPointer(), numOutputAudioBusses));
+        warnOnFailure (processor->setBusArrangements (inputArrangements.getRawDataPointer(), numInputAudioBusses,
+                                                      outputArrangements.getRawDataPointer(), numOutputAudioBusses));
 
         // Update the num. busses in case the configuration has been modified by the plugin. (May affect number of channels!):
-        numInputAudioBusses = getNumSingleDirectionBussesFor (component, true, true);
-        numOutputAudioBusses = getNumSingleDirectionBussesFor (component, false, true);
+        const int newNumInputAudioBusses = getNumSingleDirectionBussesFor (component, true, true);
+        const int newNumOutputAudioBusses = getNumSingleDirectionBussesFor (component, false, true);
+
+        // Repopulate arrangements if the number of busses have changed:
+        if (numInputAudioBusses != newNumInputAudioBusses
+             || numOutputAudioBusses != newNumOutputAudioBusses)
+        {
+            numInputAudioBusses = newNumInputAudioBusses;
+            numOutputAudioBusses = newNumOutputAudioBusses;
+
+            repopulateArrangements();
+        }
 
         // Needed for having the same sample rate in processBlock(); some plugins need this!
         setPlayConfigDetails (getNumSingleDirectionChannelsFor (component, true, true),
@@ -1763,19 +1787,26 @@ public:
 
         warnOnFailure (component->setActive (true));
         warnOnFailure (processor->setProcessing (true));
+
+        isActive = true;
     }
 
     void releaseResources() override
     {
+        if (! isActive)
+            return; // Avoids redundantly calling things like setActive
+
         JUCE_TRY
         {
+            isActive = false;
+
             setStateForAllBusses (false);
 
             if (processor != nullptr)
-                processor->setProcessing (false);
+                warnOnFailure (processor->setProcessing (false));
 
             if (component != nullptr)
-                component->setActive (false);
+                warnOnFailure (component->setActive (false));
         }
         JUCE_CATCH_ALL_ASSERT
     }
@@ -1784,7 +1815,8 @@ public:
     {
         using namespace Vst;
 
-        if (processor != nullptr
+        if (isActive
+             && processor != nullptr
              && processor->canProcessSampleSize (kSample32) == kResultTrue)
         {
             const int numSamples = buffer.getNumSamples();
@@ -1856,15 +1888,22 @@ public:
     //==============================================================================
     bool silenceInProducesSilenceOut() const override
     {
-        return processor == nullptr;
+        if (processor != nullptr)
+            return processor->getTailSamples() == Vst::kNoTail;
+
+        return true;
     }
 
     /** May return a negative value as a means of informing us that the plugin has "infinite tail," or 0 for "no tail." */
     double getTailLengthSeconds() const override
     {
         if (processor != nullptr)
-            return (double) jmin ((int) jmax ((Steinberg::uint32) 0, processor->getTailSamples()), 0x7fffffff)
-                   * getSampleRate();
+        {
+            const double sampleRate = getSampleRate();
+
+            if (sampleRate > 0.0)
+                return jlimit (0, 0x7fffffff, (int) processor->getTailSamples()) / sampleRate;
+        }
 
         return 0.0;
     }
@@ -2039,6 +2078,7 @@ private:
         as very poorly specified by the Steinberg SDK
     */
     int numInputAudioBusses, numOutputAudioBusses;
+    Array<Vst::SpeakerArrangement> inputArrangements, outputArrangements; // Caching to improve performance and to avoid possible non-thread-safe calls to getBusArrangements().
     VST3BufferExchange::BusMap inputBusMap, outputBusMap;
     Array<Vst::AudioBusBuffers> inputBusses, outputBusses;
 
@@ -2105,7 +2145,7 @@ private:
     ComSmartPtr<ParameterChangeList> inputParameterChanges, outputParameterChanges;
     ComSmartPtr<MidiEventList> midiInputs, midiOutputs;
     Vst::ProcessContext timingInfo; //< Only use this in processBlock()!
-    bool isComponentInitialised, isControllerInitialised;
+    bool isComponentInitialised, isControllerInitialised, isActive;
 
     //==============================================================================
     bool fetchComponentAndController (IPluginFactory* factory, const Steinberg::int32 numClasses)
@@ -2310,11 +2350,8 @@ private:
     {
         using namespace VST3BufferExchange;
 
-        mapBufferToBusses (inputBusses, *processor, inputBusMap,
-                           true, numInputAudioBusses, buffer);
-
-        mapBufferToBusses (outputBusses, *processor, outputBusMap,
-                           false, numOutputAudioBusses, buffer);
+        mapBufferToBusses (inputBusses, inputBusMap, inputArrangements, buffer);
+        mapBufferToBusses (outputBusses, outputBusMap, outputArrangements, buffer);
 
         destination.inputs  = inputBusses.getRawDataPointer();
         destination.outputs = outputBusses.getRawDataPointer();
