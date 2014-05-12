@@ -80,7 +80,7 @@ public:
 
     Array<double> getAvailableSampleRates() override
     {
-        static const double rates[]       = { 8000.0, 16000.0, 32000.0, 44100.0, 48000.0 };
+        static const double rates[] = { 8000.0, 16000.0, 32000.0, 44100.0, 48000.0 };
         return Array<double> (rates, numElementsInArray (rates));
     }
 
