@@ -146,11 +146,15 @@ private:
 
         if (projectType.isStaticLibrary()) {
             out << "TEMPLATE = lib" << newLine;
-            out << "CONFIG += static" << newLine;
-        } else if (projectType.isDynamicLibrary() || projectType.isAudioPlugin())
+            out << "CONFIG  += static" << newLine;
+        } else if (projectType.isDynamicLibrary()) {
             out << "TEMPLATE = lib" << newLine;
-        else
+        } else if  (projectType.isAudioPlugin()) {
+            out << "TEMPLATE = lib" << newLine;
+            out << "CONFIG  += plugin no_plugin_name_prefix" << newLine;
+        } else {
             out << "TEMPLATE = app" << newLine;
+        }
 
         out << "CONFIG  -= qt" << newLine;
         out << "CONFIG  += warn_off" << newLine;
