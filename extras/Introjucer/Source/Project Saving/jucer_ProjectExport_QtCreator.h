@@ -274,6 +274,10 @@ private:
             out << " -l" << mingwLibs[i];
         out << newLine;
 
+        out << "QMAKE_LFLAGS += "
+            << getExtraLinkerFlagsString()
+            << newLine;
+
         // Debug specific linker flags
         out << "QMAKE_LFLAGS_DEBUG += -fvisibility=hidden" << newLine;
 
