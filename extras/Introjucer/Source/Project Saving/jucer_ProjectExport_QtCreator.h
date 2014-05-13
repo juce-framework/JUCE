@@ -138,6 +138,24 @@ private:
         }
     }
 
+    String createDefineFlags (const StringPairArray& defs) const
+    {
+        String s = "    DEFINES += \\" + newLine ;
+
+        for (int i = 0; i < defs.size(); ++i)
+        {
+            String def (defs.getAllKeys()[i]);
+            const String value (defs.getAllValues()[i]);
+            if (value.isNotEmpty()) {
+                def << "=" << value;
+                def = def.quoted();
+            }
+            s += "        " + def + " \\" + newLine;
+        }
+
+        return s;
+    }
+
     void writeMakefile (OutputStream& out, const Array<RelativePath>& sourceFiles, const Array<RelativePath>& headerFiles) const
     {
         out << "# Automatically generated qmake file, created by the Introjucer" << newLine
@@ -188,14 +206,10 @@ private:
         StringPairArray defines;
         for (ConstConfigIterator config (*this); config.next();) {
             if (!config->isDebug()) {
-                // Release specific defines
-                defines.clear();
-                defines.set ("NDEBUG", "1");
                 out << "QMAKE_CFLAGS_RELEASE = ";
                 out << " -O" << config->getGCCOptimisationFlag();
-                out << (" "  + replacePreprocessorTokens (*config, getExtraCompilerFlagsString())).trimEnd();
-                out << createGCCPreprocessorFlags (mergePreprocessorDefs (defines, getAllPreprocessorDefs (*config)));
-                out << newLine;
+                out << (" "  + replacePreprocessorTokens (*config, getExtraCompilerFlagsString())).trimEnd()
+                    << newLine;
 
                 // include paths
                 StringArray searchPaths (extraSearchPaths);
@@ -205,18 +219,20 @@ private:
                     << "    INCLUDEPATH = \\" << newLine;
                 for (int i = 0; i < searchPaths.size(); ++i)
                     out << "        " << addQuotesIfContainsSpaces (FileHelpers::unixStylePath (replacePreprocessorTokens (*config, searchPaths[i]))) << " \\" << newLine;
+                out << newLine;
+
+                defines.clear();
+                defines.set ("NDEBUG", "1");
+                out << createDefineFlags (mergePreprocessorDefs (defines, getAllPreprocessorDefs (*config)))
+                    << newLine;
                 out << "}" << newLine;
 
             } else {
-                // Debug specific defines
-                defines.clear();
-                defines.set ("DEBUG", "1");
-                defines.set ("_DEBUG", "1");
+
                 out << "QMAKE_CFLAGS_DEBUG   = -g -ggdb ";
                 out << " -O" << config->getGCCOptimisationFlag();
-                out << (" "  + replacePreprocessorTokens (*config, getExtraCompilerFlagsString())).trimEnd();
-                out << createGCCPreprocessorFlags (mergePreprocessorDefs (defines, getAllPreprocessorDefs (*config)));
-                out << newLine;
+                out << (" "  + replacePreprocessorTokens (*config, getExtraCompilerFlagsString())).trimEnd()
+                    << newLine;
 
                 // include paths
                 StringArray searchPaths (extraSearchPaths);
@@ -226,6 +242,13 @@ private:
                     << "    INCLUDEPATH = \\" << newLine;
                 for (int i = 0; i < searchPaths.size(); ++i)
                     out << "        " << addQuotesIfContainsSpaces (FileHelpers::unixStylePath (replacePreprocessorTokens (*config, searchPaths[i]))) << " \\" << newLine;
+                out << newLine;
+
+                defines.clear();
+                defines.set ("DEBUG", "1");
+                defines.set ("_DEBUG", "1");
+                out << createDefineFlags (mergePreprocessorDefs (defines, getAllPreprocessorDefs (*config)))
+                    << newLine;
                 out << "}" << newLine;
             }
         }
