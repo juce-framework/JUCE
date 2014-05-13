@@ -196,14 +196,26 @@ private:
 
         out << "# Compiler flags" << newLine;
 
+        StringPairArray defines;
         // general options
-        out << "QMAKE_CFLAGS = -std=gnu++0x -Wall";
+        out << "QMAKE_CFLAGS = -std=gnu++0x -Wall" << newLine;
+        // Linux specific options
+        defines.clear();
+        out << "unix:  QMAKE_CFLAGS += -I/usr/include/freetype2 -I/usr/include";
+        if (makefileIsDLL)
+            out << " -fPIC";
+        defines.set ("LINUX", "1");
+        out << createGCCPreprocessorFlags (defines)
+            << newLine;
+
+        // Windows specific options
+        defines.clear();
+        out << "win32: QMAKE_CFLAGS += -mstackrealign -D__MINGW__=1 -D__MINGW_EXTENSION="
+            << createGCCPreprocessorFlags (defines)
+            << newLine;
+
         out << newLine;
 
-        // defines
-        //out << createGCCPreprocessorFlags (getAllPreprocessorDefs (config));
-
-        StringPairArray defines;
         for (ConstConfigIterator config (*this); config.next();) {
             if (!config->isDebug()) {
                 out << "QMAKE_CFLAGS_RELEASE = ";
@@ -226,6 +238,7 @@ private:
                 out << createDefineFlags (mergePreprocessorDefs (defines, getAllPreprocessorDefs (*config)))
                     << newLine;
                 out << "}" << newLine;
+                out << newLine;
 
             } else {
 
@@ -250,26 +263,11 @@ private:
                 out << createDefineFlags (mergePreprocessorDefs (defines, getAllPreprocessorDefs (*config)))
                     << newLine;
                 out << "}" << newLine;
+                out << newLine;
             }
         }
 
-
-        // Linux specific options
-        defines.clear();
-        out << "unix:  QMAKE_CFLAGS += -I/usr/include/freetype2 -I/usr/include";
-        if (makefileIsDLL)
-            out << " -fPIC";
-        defines.set ("LINUX", "1");
-        out << createGCCPreprocessorFlags (defines);
         out << newLine;
-
-        // Windows specific options
-        defines.clear();
-        out << "win32: QMAKE_CFLAGS += -mstackrealign -D__MINGW__=1 -D__MINGW_EXTENSION=";
-        out << createGCCPreprocessorFlags (defines);
-        out << newLine;
-
-        out << newLine  << newLine;
 
         // Copy flags from C to CXX
         out << "QMAKE_CXXFLAGS         = $$QMAKE_CFLAGS"         << newLine
@@ -303,9 +301,11 @@ private:
 
         // Debug specific linker flags
         out << "QMAKE_LFLAGS_DEBUG += -fvisibility=hidden" << newLine;
+        out << newLine;
 
+        out << "# Source and header files" << newLine;
         // Collect all source files
-        out << newLine << "SOURCES = \\" << newLine;
+        out << "SOURCES = \\" << newLine;
         for (int i = 0; i < sourceFiles.size(); ++i)
         {
             //if (shouldFileBeCompiledByDefault (sourceFiles.getReference(i)))
