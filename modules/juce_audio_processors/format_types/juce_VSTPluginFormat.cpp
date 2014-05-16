@@ -1285,7 +1285,8 @@ public:
                     handleUpdateNowIfNeeded();
 
                     for (int i = ComponentPeer::getNumPeers(); --i >= 0;)
-                        ComponentPeer::getPeer(i)->performAnyPendingRepaintsNow();
+                        if (ComponentPeer* p = ComponentPeer::getPeer(i))
+                            p->performAnyPendingRepaintsNow();
                 }
                 break;
 

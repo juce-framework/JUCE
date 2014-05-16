@@ -1655,7 +1655,6 @@ public:
         if (isControllerInitialised)    editController->terminate();
         if (isComponentInitialised)     component->terminate();
 
-        //Deletion order appears to matter:
         componentConnection = nullptr;
         editControllerConnection = nullptr;
         unitData = nullptr;
@@ -1667,6 +1666,8 @@ public:
         editController2 = nullptr;
         editController = nullptr;
         component = nullptr;
+        host = nullptr;
+        module = nullptr;
     }
 
     bool initialise()
