@@ -391,12 +391,16 @@ public:
                            float x4, float y4);
 
     /** Adds an ellipse to the path.
-
         The shape is added as a new sub-path. (Any currently open paths will be left open).
-
         @see addArc
     */
     void addEllipse (float x, float y, float width, float height);
+
+    /** Adds an ellipse to the path.
+        The shape is added as a new sub-path. (Any currently open paths will be left open).
+        @see addArc
+    */
+    void addEllipse (Rectangle<float> area);
 
     /** Adds an elliptical arc to the current path.
 
