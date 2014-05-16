@@ -1504,23 +1504,30 @@ public:
                 rect.bottom = (Steinberg::int32) getHeight();
                 view->checkSizeConstraint (&rect);
 
-                setSize ((int) rect.getWidth(),
-                         (int) rect.getHeight());
+                setSize ((int) rect.getWidth(), (int) rect.getHeight());
+
+               #if JUCE_WINDOWS
+                SetWindowPos (pluginHandle, 0,
+                              pos.x, pos.y, rect.getWidth(), rect.getHeight(),
+                              isVisible() ? SWP_SHOWWINDOW : SWP_HIDEWINDOW);
+               #elif JUCE_MAC
+                dummyComponent.setBounds (getLocalBounds());
+               #endif
 
                 view->onSize (&rect);
             }
             else
             {
                 warnOnFailure (view->getSize (&rect));
-            }
 
-           #if JUCE_WINDOWS
-            SetWindowPos (pluginHandle, 0,
-                          pos.x, pos.y, rect.getWidth(), rect.getHeight(),
-                          isVisible() ? SWP_SHOWWINDOW : SWP_HIDEWINDOW);
-           #elif JUCE_MAC
-            dummyComponent.setBounds (0, 0, (int) rect.getWidth(), (int) rect.getHeight());
-           #endif
+               #if JUCE_WINDOWS
+                SetWindowPos (pluginHandle, 0,
+                              pos.x, pos.y, rect.getWidth(), rect.getHeight(),
+                              isVisible() ? SWP_SHOWWINDOW : SWP_HIDEWINDOW);
+               #elif JUCE_MAC
+                dummyComponent.setBounds (0, 0, (int) rect.getWidth(), (int) rect.getHeight());
+               #endif
+            }
 
             // Some plugins don't update their cursor correctly when mousing out the window
             Desktop::getInstance().getMainMouseSource().forceMouseCursorUpdate();
@@ -1605,7 +1612,7 @@ private:
             if (peer != nullptr)
                 pluginHandle = (HandleFormat) peer->getNativeHandle();
            #elif JUCE_MAC
-            dummyComponent.setBounds (getBounds().withZeroOrigin());
+            dummyComponent.setBounds (getLocalBounds());
             addAndMakeVisible (dummyComponent);
             pluginHandle = (NSView*) dummyComponent.getView();
             jassert (pluginHandle != nil);
