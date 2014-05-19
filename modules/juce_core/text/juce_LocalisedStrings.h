@@ -226,22 +226,22 @@ private:
 /** Uses the LocalisedStrings class to translate the given string literal.
     @see LocalisedStrings
 */
-String translate (const String& stringLiteral);
+JUCE_API String translate (const String& stringLiteral);
 
 /** Uses the LocalisedStrings class to translate the given string literal.
     @see LocalisedStrings
 */
-String translate (const char* stringLiteral);
+JUCE_API String translate (const char* stringLiteral);
 
 /** Uses the LocalisedStrings class to translate the given string literal.
     @see LocalisedStrings
 */
-String translate (CharPointer_UTF8 stringLiteral);
+JUCE_API String translate (CharPointer_UTF8 stringLiteral);
 
 /** Uses the LocalisedStrings class to translate the given string literal.
     @see LocalisedStrings
 */
-String translate (const String& stringLiteral, const String& resultIfNotFound);
+JUCE_API String translate (const String& stringLiteral, const String& resultIfNotFound);
 
 
 #endif   // JUCE_LOCALISEDSTRINGS_H_INCLUDED
