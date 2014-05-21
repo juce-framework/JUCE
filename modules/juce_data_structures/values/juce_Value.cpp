@@ -22,75 +22,18 @@
   ==============================================================================
 */
 
-struct SharedValueSourceUpdater  : private AsyncUpdater
-{
-public:
-    SharedValueSourceUpdater() {}
-
-    void update (Value::ValueSource* const source)
-    {
-        {
-            const ScopedLock sl (lock);
-            sourcesNeedingUpdate.addIfNotAlreadyThere (source);
-        }
-
-        triggerAsyncUpdate();
-    }
-
-    void valueDeleted (Value::ValueSource* const source)
-    {
-        const ScopedLock sl (lock);
-        sourcesNeedingUpdate.removeFirstMatchingValue (source);
-    }
-
-private:
-    Array<Value::ValueSource*> sourcesNeedingUpdate;
-    CriticalSection lock;
-
-    void handleAsyncUpdate() override
-    {
-        SharedResourcePointer<SharedValueSourceUpdater> localRef;
-
-        int maxCallbacks = sourcesNeedingUpdate.size();
-
-        for (;;)
-        {
-            ReferenceCountedObjectPtr<Value::ValueSource> toUpdate;
-
-            {
-                const ScopedLock sl (lock);
-                toUpdate = sourcesNeedingUpdate.remove (0);
-            }
-
-            if (toUpdate == nullptr)
-                break;
-
-            toUpdate->sendChangeMessage (true);
-
-            if (--maxCallbacks <= 0)
-            {
-                triggerAsyncUpdate();
-                break;
-            }
-        }
-    }
-
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SharedValueSourceUpdater)
-};
-
-struct Value::ValueSource::Pimpl
-{
-    SharedResourcePointer<SharedValueSourceUpdater> updater;
-};
-
 Value::ValueSource::ValueSource()
 {
 }
 
 Value::ValueSource::~ValueSource()
 {
-    if (pimpl != nullptr)
-        pimpl->updater->valueDeleted (this);
+    cancelPendingUpdate();
+}
+
+void Value::ValueSource::handleAsyncUpdate()
+{
+    sendChangeMessage (true);
 }
 
 void Value::ValueSource::sendChangeMessage (const bool synchronous)
@@ -103,16 +46,15 @@ void Value::ValueSource::sendChangeMessage (const bool synchronous)
         {
             const ReferenceCountedObjectPtr<ValueSource> localRef (this);
 
+            cancelPendingUpdate();
+
             for (int i = numListeners; --i >= 0;)
                 if (Value* const v = valuesWithListeners[i])
                     v->callListeners();
         }
         else
         {
-            if (pimpl == nullptr)
-                pimpl = new Pimpl();
-
-            pimpl->updater->update (this);
+            triggerAsyncUpdate();
         }
     }
 }
