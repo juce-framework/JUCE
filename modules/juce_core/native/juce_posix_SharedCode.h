@@ -397,13 +397,10 @@ void FileInputStream::openHandle()
         status = getResultForErrno();
 }
 
-void FileInputStream::closeHandle()
+FileInputStream::~FileInputStream()
 {
     if (fileHandle != 0)
-    {
         close (getFD (fileHandle));
-        fileHandle = 0;
-    }
 }
 
 size_t FileInputStream::readInternal (void* const buffer, const size_t numBytes)

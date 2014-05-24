@@ -234,7 +234,7 @@ void FileInputStream::openHandle()
         status = WindowsFileHelpers::getResultForLastError();
 }
 
-void FileInputStream::closeHandle()
+FileInputStream::~FileInputStream()
 {
     CloseHandle ((HANDLE) fileHandle);
 }
