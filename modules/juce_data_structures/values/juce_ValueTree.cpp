@@ -409,7 +409,7 @@ public:
 
     XmlElement* createXml() const
     {
-        XmlElement* const xml = new XmlElement (type.toString());
+        XmlElement* const xml = new XmlElement (type);
         properties.copyToXmlAttributes (*xml);
 
         // (NB: it's faster to add nodes to XML elements in reverse order)
