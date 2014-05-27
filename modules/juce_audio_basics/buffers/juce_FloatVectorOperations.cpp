@@ -345,7 +345,7 @@ namespace FloatVectorHelpers
                 Range<Type> result (Mode::min (mn),
                                     Mode::max (mx));
 
-                num &= 3;
+                num &= (Mode::numParallel - 1);
                 src += Mode::numParallel;
 
                 for (int i = 0; i < num; ++i)
