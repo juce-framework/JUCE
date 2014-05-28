@@ -201,9 +201,10 @@ void AudioProcessor::updateHostDisplay()
             l->audioProcessorChanged (this);
 }
 
-String AudioProcessor::getParameterLabel (int) const        { return String(); }
-bool AudioProcessor::isParameterAutomatable (int) const     { return true; }
-bool AudioProcessor::isMetaParameter (int) const            { return false; }
+String AudioProcessor::getParameterLabel (int) const            { return String(); }
+bool AudioProcessor::isParameterOrientationInverted (int) const { return false; }
+bool AudioProcessor::isParameterAutomatable (int) const         { return true; }
+bool AudioProcessor::isMetaParameter (int) const                { return false; }
 
 void AudioProcessor::suspendProcessing (const bool shouldBeSuspended)
 {
