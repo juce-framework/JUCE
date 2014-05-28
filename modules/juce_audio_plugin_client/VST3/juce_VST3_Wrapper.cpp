@@ -61,23 +61,6 @@ namespace juce
 using namespace Steinberg;
 
 //==============================================================================
-class JuceLibraryRefCount
-{
-public:
-    JuceLibraryRefCount()   { if ((getCount()++) == 0) initialiseJuce_GUI(); }
-    ~JuceLibraryRefCount()  { if ((--getCount()) == 0) shutdownJuce_GUI(); }
-
-private:
-    int& getCount() noexcept
-    {
-        static int count = 0;
-        return count;
-    }
-
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (JuceLibraryRefCount)
-};
-
-//==============================================================================
 #if JUCE_MAC
  extern void initialiseMac();
  extern void* attachComponentToWindowRef (Component*, void* parent, bool isNSView);
@@ -104,6 +87,7 @@ public:
 private:
     Atomic<int> refCount;
     ScopedPointer<AudioProcessor> audioProcessor;
+    ScopedJuceInitialiser_GUI libraryInitialiser;
 
     JuceAudioProcessor() JUCE_DELETED_FUNCTION;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (JuceAudioProcessor)
@@ -301,7 +285,7 @@ public:
 private:
     //==============================================================================
     ComSmartPtr<JuceAudioProcessor> audioProcessor;
-    const JuceLibraryRefCount juceCount;
+    ScopedJuceInitialiser_GUI libraryInitialiser;
 
     //==============================================================================
     void setupParameters()
@@ -538,6 +522,8 @@ private:
        #if JUCE_WINDOWS
         WindowsHooks hooks;
        #endif
+
+        ScopedJuceInitialiser_GUI libraryInitialiser;
 
         //==============================================================================
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (JuceVST3Editor)
@@ -1338,7 +1324,7 @@ private:
     MidiBuffer midiBuffer;
     Array<float*> channelList;
 
-    const JuceLibraryRefCount juceCount;
+    ScopedJuceInitialiser_GUI libraryInitialiser;
 
     //==============================================================================
     void addBusTo (Vst::BusList& busList, Vst::Bus* newBus)
@@ -1696,7 +1682,7 @@ public:
 
 private:
     //==============================================================================
-    const JuceLibraryRefCount juceCount;
+    ScopedJuceInitialiser_GUI libraryInitialiser;
     Atomic<int> refCount;
     const PFactoryInfo factoryInfo;
     ComSmartPtr<Vst::IHostApplication> host;

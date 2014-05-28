@@ -39,7 +39,7 @@ JUCE_JNI_CALLBACK (JUCE_ANDROID_ACTIVITY_CLASSNAME, launchApp, void, (JNIEnv* en
 
     JUCEApplicationBase::createInstance = &juce_CreateApplication;
 
-    initialiseJuce_GUI();
+    ScopedJuceInitialiser_GUI libraryInitialiser;
 
     JUCEApplicationBase* app = JUCEApplicationBase::createInstance();
     if (! app->initialiseApp())

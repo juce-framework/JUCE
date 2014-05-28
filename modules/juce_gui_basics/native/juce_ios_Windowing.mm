@@ -44,7 +44,8 @@ extern bool isIOSAppActive;
 - (void) applicationDidFinishLaunching: (UIApplication*) application
 {
     (void) application;
-    initialiseJuce_GUI();
+
+    ScopedJuceInitialiser_GUI libraryInitialiser;
 
     JUCEApplicationBase* app = JUCEApplicationBase::createInstance();
 
