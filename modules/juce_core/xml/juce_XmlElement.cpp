@@ -71,6 +71,12 @@ XmlElement::XmlElement (const char* tag)
     sanityCheckTagName (tagName);
 }
 
+XmlElement::XmlElement (StringRef tag)
+    : tagName (StringPool::getGlobalPool().getPooledString (tag.text.getAddress()))
+{
+    sanityCheckTagName (tagName);
+}
+
 XmlElement::XmlElement (const Identifier& tag)
     : tagName (tag.toString())
 {

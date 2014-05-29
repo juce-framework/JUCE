@@ -153,6 +153,9 @@ public:
     explicit XmlElement (const Identifier& tagName);
 
     /** Creates an XmlElement with this tag name. */
+    explicit XmlElement (StringRef tagName);
+
+    /** Creates an XmlElement with this tag name. */
     XmlElement (String::CharPointerType tagNameBegin, String::CharPointerType tagNameEnd);
 
     /** Creates a (deep) copy of another element. */
