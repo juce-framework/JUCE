@@ -1035,7 +1035,7 @@ public:
                 Array<char*> argv;
                 for (int i = 0; i < arguments.size(); ++i)
                     if (arguments[i].isNotEmpty())
-                        argv.add (arguments[i].toUTF8().getAddress());
+                        argv.add (const_cast<char*> (arguments[i].toUTF8().getAddress()));
 
                 argv.add (nullptr);
 

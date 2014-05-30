@@ -121,6 +121,16 @@ String StringPool::getPooledString (String::CharPointerType start, String::CharP
     return addPooledString (strings, StartEndString (start, end));
 }
 
+String StringPool::getPooledString (StringRef newString)
+{
+    if (newString.isEmpty())
+        return String();
+
+    const ScopedLock sl (lock);
+    garbageCollectIfNeeded();
+    return addPooledString (strings, newString.text);
+}
+
 String StringPool::getPooledString (const String& newString)
 {
     if (newString.isEmpty())

@@ -62,6 +62,11 @@ public:
     */
     String getPooledString (const char* original);
 
+    /** Returns a pointer to a shared copy of the string that is passed in.
+        The pool will always return the same String object when asked for a string that matches it.
+    */
+    String getPooledString (StringRef original);
+
     /** Returns a pointer to a copy of the string that is passed in.
         The pool will always return the same String object when asked for a string that matches it.
     */
