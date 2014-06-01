@@ -91,7 +91,7 @@ ApplicationCommandTarget* ApplicationCommandTarget::getTargetForCommand (const C
 
     while (target != nullptr)
     {
-        Array <CommandID> commandIDs;
+        Array<CommandID> commandIDs;
         target->getAllCommands (commandIDs);
 
         if (commandIDs.contains (commandID))
@@ -113,7 +113,7 @@ ApplicationCommandTarget* ApplicationCommandTarget::getTargetForCommand (const C
 
         if (target != nullptr)
         {
-            Array <CommandID> commandIDs;
+            Array<CommandID> commandIDs;
             target->getAllCommands (commandIDs);
 
             if (commandIDs.contains (commandID))

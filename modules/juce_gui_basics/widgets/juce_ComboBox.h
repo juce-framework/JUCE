@@ -393,6 +393,8 @@ public:
     bool keyPressed (const KeyPress&) override;
     /** @internal */
     void valueChanged (Value&) override;
+    /** @internal */
+    void parentHierarchyChanged() override;
 
     // These methods' bool parameters have changed: see their new method signatures.
     JUCE_DEPRECATED (void clear (bool));

@@ -405,7 +405,7 @@ public final class JuceAppActivity   extends Activity
 
             if (imm != null)
             {
-                if (! type.isEmpty())
+                if (type.length() > 0)
                 {
                     imm.showSoftInput (this, android.view.inputmethod.InputMethodManager.SHOW_IMPLICIT);
                     imm.setInputMethod (getWindowToken(), type);

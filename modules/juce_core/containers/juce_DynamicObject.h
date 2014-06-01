@@ -58,7 +58,7 @@ public:
     virtual bool hasProperty (const Identifier& propertyName) const;
 
     /** Returns a named property.
-        This returns a void if no such property exists.
+        This returns var::null if no such property exists.
     */
     virtual var getProperty (const Identifier& propertyName) const;
 

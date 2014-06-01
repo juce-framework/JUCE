@@ -144,20 +144,32 @@ class JUCE_API  XmlElement
 public:
     //==============================================================================
     /** Creates an XmlElement with this tag name. */
-    explicit XmlElement (const String& tagName) noexcept;
+    explicit XmlElement (const String& tagName);
+
+    /** Creates an XmlElement with this tag name. */
+    explicit XmlElement (const char* tagName);
+
+    /** Creates an XmlElement with this tag name. */
+    explicit XmlElement (const Identifier& tagName);
+
+    /** Creates an XmlElement with this tag name. */
+    explicit XmlElement (StringRef tagName);
+
+    /** Creates an XmlElement with this tag name. */
+    XmlElement (String::CharPointerType tagNameBegin, String::CharPointerType tagNameEnd);
 
     /** Creates a (deep) copy of another element. */
-    XmlElement (const XmlElement& other);
+    XmlElement (const XmlElement&);
 
     /** Creates a (deep) copy of another element. */
-    XmlElement& operator= (const XmlElement& other);
+    XmlElement& operator= (const XmlElement&);
 
    #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
-    XmlElement (XmlElement&& other) noexcept;
-    XmlElement& operator= (XmlElement&& other) noexcept;
+    XmlElement (XmlElement&&) noexcept;
+    XmlElement& operator= (XmlElement&&) noexcept;
    #endif
 
-    /** Deleting an XmlElement will also delete all its child elements. */
+    /** Deleting an XmlElement will also delete all of its child elements. */
     ~XmlElement() noexcept;
 
     //==============================================================================
@@ -303,13 +315,11 @@ public:
     bool hasAttribute (StringRef attributeName) const noexcept;
 
     /** Returns the value of a named attribute.
-
         @param attributeName        the name of the attribute to look up
     */
     const String& getStringAttribute (StringRef attributeName) const noexcept;
 
     /** Returns the value of a named attribute.
-
         @param attributeName        the name of the attribute to look up
         @param defaultReturnValue   a value to return if the element doesn't have an attribute
                                     with this name
@@ -377,7 +387,7 @@ public:
         @param newValue             the value to set it to
         @see removeAttribute
     */
-    void setAttribute (const String& attributeName, const String& newValue);
+    void setAttribute (const Identifier& attributeName, const String& newValue);
 
     /** Adds a named attribute to the element, setting it to an integer value.
 
@@ -391,7 +401,7 @@ public:
         @param attributeName        the name of the attribute to set
         @param newValue             the value to set it to
     */
-    void setAttribute (const String& attributeName, int newValue);
+    void setAttribute (const Identifier& attributeName, int newValue);
 
     /** Adds a named attribute to the element, setting it to a floating-point value.
 
@@ -405,14 +415,14 @@ public:
         @param attributeName        the name of the attribute to set
         @param newValue             the value to set it to
     */
-    void setAttribute (const String& attributeName, double newValue);
+    void setAttribute (const Identifier& attributeName, double newValue);
 
     /** Removes a named attribute from the element.
 
         @param attributeName    the name of the attribute to remove
         @see removeAllAttributes
     */
-    void removeAttribute (const String& attributeName) noexcept;
+    void removeAttribute (const Identifier& attributeName) noexcept;
 
     /** Removes all attributes from this element. */
     void removeAllAttributes() noexcept;
@@ -555,7 +565,7 @@ public:
         XmlElement* newElement = myParentElement->createNewChildElement ("foobar");
         @endcode
     */
-    XmlElement* createNewChildElement (const String& tagName);
+    XmlElement* createNewChildElement (StringRef tagName);
 
     /** Replaces one of this element's children with another node.
 
@@ -712,25 +722,26 @@ private:
     struct XmlAttributeNode
     {
         XmlAttributeNode (const XmlAttributeNode&) noexcept;
-        XmlAttributeNode (const String& name, const String& value) noexcept;
+        XmlAttributeNode (const Identifier&, const String&) noexcept;
+        XmlAttributeNode (String::CharPointerType, String::CharPointerType);
 
         LinkedListPointer<XmlAttributeNode> nextListItem;
-        String name, value;
-
-        bool hasName (StringRef) const noexcept;
+        Identifier name;
+        String value;
 
     private:
-        XmlAttributeNode& operator= (const XmlAttributeNode&);
+        XmlAttributeNode& operator= (const XmlAttributeNode&) JUCE_DELETED_FUNCTION;
     };
 
     friend class XmlDocument;
-    friend class LinkedListPointer <XmlAttributeNode>;
-    friend class LinkedListPointer <XmlElement>;
-    friend class LinkedListPointer <XmlElement>::Appender;
+    friend class LinkedListPointer<XmlAttributeNode>;
+    friend class LinkedListPointer<XmlElement>;
+    friend class LinkedListPointer<XmlElement>::Appender;
+    friend class NamedValueSet;
 
-    LinkedListPointer <XmlElement> nextListItem;
-    LinkedListPointer <XmlElement> firstChildElement;
-    LinkedListPointer <XmlAttributeNode> attributes;
+    LinkedListPointer<XmlElement> nextListItem;
+    LinkedListPointer<XmlElement> firstChildElement;
+    LinkedListPointer<XmlAttributeNode> attributes;
     String tagName;
 
     XmlElement (int) noexcept;
@@ -739,6 +750,11 @@ private:
     void getChildElementsAsArray (XmlElement**) const noexcept;
     void reorderChildElements (XmlElement**, int) noexcept;
     XmlAttributeNode* getAttribute (StringRef) const noexcept;
+
+    // Sigh.. L"" or _T("") string literals are problematic in general, and really inappropriate
+    // for XML tags. Use a UTF-8 encoded literal instead, or if you're really determined to use
+    // UTF-16, cast it to a String and use the other constructor.
+    XmlElement (const wchar_t*) JUCE_DELETED_FUNCTION;
 
     JUCE_LEAK_DETECTOR (XmlElement)
 };

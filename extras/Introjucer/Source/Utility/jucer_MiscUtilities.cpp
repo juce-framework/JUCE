@@ -164,7 +164,7 @@ String replacePreprocessorDefs (const StringPairArray& definitions, String sourc
 StringArray getSearchPathsFromString (const String& searchPath)
 {
     StringArray s;
-    s.addTokens (searchPath, ";\r\n", String::empty);
+    s.addTokens (searchPath, ";\r\n", StringRef());
     s.trim();
     s.removeEmptyStrings();
     s.removeDuplicates (false);

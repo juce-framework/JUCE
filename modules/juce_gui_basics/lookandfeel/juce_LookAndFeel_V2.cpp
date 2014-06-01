@@ -452,8 +452,7 @@ void LookAndFeel_V2::drawAlertBox (Graphics& g, AlertWindow& alert,
             colour    = alert.getAlertType() == AlertWindow::InfoIcon ? (uint32) 0x605555ff : (uint32) 0x40b69900;
             character = alert.getAlertType() == AlertWindow::InfoIcon ? 'i' : '?';
 
-            icon.addEllipse ((float) iconRect.getX(), (float) iconRect.getY(),
-                             (float) iconRect.getWidth(), (float) iconRect.getHeight());
+            icon.addEllipse (iconRect.toFloat());
         }
 
         GlyphArrangement ga;

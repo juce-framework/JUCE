@@ -445,12 +445,12 @@ struct AppearanceEditor
     public:
         FontNameValueSource (const Value& source)  : ValueSourceFilter (source) {}
 
-        var getValue() const
+        var getValue() const override
         {
             return Font::fromString (sourceValue.toString()).getTypefaceName();
         }
 
-        void setValue (const var& newValue)
+        void setValue (const var& newValue) override
         {
             Font font (Font::fromString (sourceValue.toString()));
             font.setTypefaceName (newValue.toString().isEmpty() ? Font::getDefaultMonospacedFontName()

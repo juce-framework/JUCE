@@ -1055,7 +1055,8 @@ public:
                 Timer::callPendingTimersSynchronously();
 
                 for (int i = ComponentPeer::getNumPeers(); --i >= 0;)
-                    ComponentPeer::getPeer (i)->performAnyPendingRepaintsNow();
+                    if (ComponentPeer* p = ComponentPeer::getPeer(i))
+                        p->performAnyPendingRepaintsNow();
 
                 recursionCheck = false;
             }
@@ -1164,10 +1165,8 @@ public:
                 editorComp->addToDesktop (0, ptr);
                 hostWindow = (HWND) ptr;
               #elif JUCE_LINUX
-                editorComp->addToDesktop (0);
+                editorComp->addToDesktop (0, ptr);
                 hostWindow = (Window) ptr;
-                Window editorWnd = (Window) editorComp->getWindowHandle();
-                XReparentWindow (display, editorWnd, hostWindow, 0, 0);
               #else
                 hostWindow = attachComponentToWindowRef (editorComp, ptr, useNSView);
               #endif

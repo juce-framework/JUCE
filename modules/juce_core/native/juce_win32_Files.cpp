@@ -234,7 +234,7 @@ void FileInputStream::openHandle()
         status = WindowsFileHelpers::getResultForLastError();
 }
 
-void FileInputStream::closeHandle()
+FileInputStream::~FileInputStream()
 {
     CloseHandle ((HANDLE) fileHandle);
 }
@@ -472,6 +472,28 @@ int64 File::getBytesFreeOnVolume() const
 int64 File::getVolumeTotalSize() const
 {
     return WindowsFileHelpers::getDiskSpaceInfo (getFullPathName(), true);
+}
+
+uint64 File::getFileIdentifier() const
+{
+    uint64 result = 0;
+
+    HANDLE h = CreateFile (getFullPathName().toWideCharPointer(),
+                           GENERIC_READ, FILE_SHARE_READ, nullptr,
+                           OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS, 0);
+
+    if (h != INVALID_HANDLE_VALUE)
+    {
+        BY_HANDLE_FILE_INFORMATION info;
+        zerostruct (info);
+
+        if (GetFileInformationByHandle (h, &info))
+            result = (((uint64) info.nFileIndexHigh) << 32) | info.nFileIndexLow;
+
+        CloseHandle (h);
+    }
+
+    return result;
 }
 
 //==============================================================================

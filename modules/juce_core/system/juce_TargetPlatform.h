@@ -161,7 +161,7 @@
     #define JUCE_32BIT 1
   #endif
 
-  #ifdef __arm__
+  #if defined (__arm__) || defined (__arm64__)
     #define JUCE_ARM 1
   #elif __MMX__ || __SSE__ || __amd64__
     #define JUCE_INTEL 1

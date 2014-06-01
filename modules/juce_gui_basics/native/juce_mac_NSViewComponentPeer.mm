@@ -1136,8 +1136,7 @@ public:
 
     bool isFocused() const override
     {
-        return isSharedWindow ? this == currentlyFocusedPeer
-                              : [window isKeyWindow];
+        return this == currentlyFocusedPeer;
     }
 
     void grabFocus() override

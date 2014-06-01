@@ -180,6 +180,11 @@ public:
         release (bufferFromText (text));
     }
 
+    static inline int getReferenceCount (const CharPointerType text) noexcept
+    {
+        return bufferFromText (text)->refCount.get() + 1;
+    }
+
     //==============================================================================
     static CharPointerType makeUniqueWithByteSize (const CharPointerType text, size_t numBytes)
     {
@@ -285,7 +290,7 @@ String& String::operator= (String&& other) noexcept
 }
 #endif
 
-inline String::PreallocationBytes::PreallocationBytes (const size_t numBytes_) : numBytes (numBytes_) {}
+inline String::PreallocationBytes::PreallocationBytes (const size_t num) noexcept : numBytes (num) {}
 
 String::String (const PreallocationBytes& preallocationSize)
     : text (StringHolder::createUninitialisedBytes (preallocationSize.numBytes + sizeof (CharPointerType::CharType)))
@@ -295,6 +300,11 @@ String::String (const PreallocationBytes& preallocationSize)
 void String::preallocateBytes (const size_t numBytesNeeded)
 {
     text = StringHolder::makeUniqueWithByteSize (text, numBytesNeeded + sizeof (CharPointerType::CharType));
+}
+
+int String::getReferenceCount() const noexcept
+{
+    return StringHolder::getReferenceCount (text);
 }
 
 //==============================================================================

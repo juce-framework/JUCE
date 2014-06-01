@@ -169,7 +169,7 @@ public:
     */
     static const String& getDefaultSansSerifFontName();
 
-    /** Returns a typeface font family that represents the default sans-serif font.
+    /** Returns a typeface font family that represents the default serif font.
 
         Note that this method just returns a generic placeholder string that means "the default
         serif font" - it's not the actual font family of this font.
@@ -178,7 +178,7 @@ public:
     */
     static const String& getDefaultSerifFontName();
 
-    /** Returns a typeface font family that represents the default sans-serif font.
+    /** Returns a typeface font family that represents the default monospaced font.
 
         Note that this method just returns a generic placeholder string that means "the default
         monospaced font" - it's not the actual font family of this font.
@@ -187,10 +187,10 @@ public:
     */
     static const String& getDefaultMonospacedFontName();
 
-    /** Returns a typeface font style that represents the default sans-serif font.
+    /** Returns a font style name that represents the default style.
 
         Note that this method just returns a generic placeholder string that means "the default
-        font style" - it's not the actual font style of this font.
+        font style" - it's not the actual name of the font style of any particular font.
 
         @see setTypefaceStyle
     */

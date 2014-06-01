@@ -34,7 +34,7 @@
     method. Each of the objects returned can then be used to list the available
     devices of that type. E.g.
     @code
-    OwnedArray <AudioIODeviceType> types;
+    OwnedArray<AudioIODeviceType> types;
     myAudioDeviceManager.createAudioDeviceTypes (types);
 
     for (int i = 0; i < types.size(); ++i)

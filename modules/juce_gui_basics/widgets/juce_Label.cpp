@@ -189,7 +189,12 @@ void Label::componentVisibilityChanged (Component& component)
 //==============================================================================
 void Label::textWasEdited() {}
 void Label::textWasChanged() {}
-void Label::editorShown (TextEditor*) {}
+
+void Label::editorShown (TextEditor* textEditor)
+{
+    Component::BailOutChecker checker (this);
+    listeners.callChecked (checker, &LabelListener::editorShown, this, *textEditor);
+}
 
 void Label::editorAboutToBeHidden (TextEditor*)
 {
@@ -444,3 +449,5 @@ void Label::textEditorFocusLost (TextEditor& ed)
 {
     textEditorTextChanged (ed);
 }
+
+void Label::Listener::editorShown (Label*, TextEditor&) {}

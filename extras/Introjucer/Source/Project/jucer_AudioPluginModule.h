@@ -109,7 +109,7 @@ namespace
     int countMaxPluginChannels (const String& configString, bool isInput)
     {
         StringArray configs;
-        configs.addTokens (configString, ", {}", String::empty);
+        configs.addTokens (configString, ", {}", StringRef());
         configs.trim();
         configs.removeEmptyStrings();
         jassert ((configs.size() & 1) == 0);  // looks like a syntax error in the configs?
@@ -300,8 +300,9 @@ namespace VSTHelpers
                 if (config->getValue (Ids::useRuntimeLibDLL).getValue().isVoid())
                     config->getValue (Ids::useRuntimeLibDLL) = true;
 
-                if (config->getValue (Ids::postbuildCommand).toString().isEmpty())
-                    config->getValue (Ids::postbuildCommand) = "copy /Y \"$(OutDir)\\$(TargetFileName)\" \"$(OutDir)\\$(TargetName).vst3\"";
+                if (isVST3)
+                    if (config->getValue (Ids::postbuildCommand).toString().isEmpty())
+                        config->getValue (Ids::postbuildCommand) = "copy /Y \"$(OutDir)\\$(TargetFileName)\" \"$(OutDir)\\$(TargetName).vst3\"";
             }
         }
     }

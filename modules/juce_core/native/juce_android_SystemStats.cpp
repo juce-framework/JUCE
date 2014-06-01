@@ -273,7 +273,7 @@ String SystemStats::getComputerName()
 
 String SystemStats::getUserLanguage()    { return AndroidStatsHelpers::getLocaleValue (false); }
 String SystemStats::getUserRegion()      { return AndroidStatsHelpers::getLocaleValue (true); }
-String SystemStats::getDisplayLanguage() { return getUserLanguage(); }
+String SystemStats::getDisplayLanguage() { return getUserLanguage() + "-" + getUserRegion(); }
 
 //==============================================================================
 void CPUInformation::initialise() noexcept
