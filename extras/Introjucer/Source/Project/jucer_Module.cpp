@@ -346,7 +346,7 @@ void LibraryModule::prepareExporter (ProjectExporter& exporter, ProjectSaver& pr
         findAndAddCompiledCode (exporter, projectSaver, localModuleFolder, compiled);
 
         if (project.getModules().shouldShowAllModuleFilesInProject (getID()).getValue())
-            addBrowsableCode (exporter, projectSaver, compiled, moduleInfo.getFolder());
+            addBrowsableCode (exporter, projectSaver, compiled, localModuleFolder);
     }
 
     if (isVSTPluginHost (project))  VSTHelpers::addVSTFolderToPath (exporter, false);
