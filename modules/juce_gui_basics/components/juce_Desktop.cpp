@@ -329,6 +329,7 @@ void Desktop::Displays::refresh()
     oldDisplays.swapWith (displays);
 
     init (Desktop::getInstance());
+    jassert (displays.size() > 0);
 
     if (oldDisplays != displays)
     {

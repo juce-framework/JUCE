@@ -354,6 +354,41 @@ static Rectangle<int> convertDisplayRect (NSRect r, CGFloat mainScreenBottom)
     return convertToRectInt (r);
 }
 
+static Desktop::Displays::Display getDisplayFromScreen (NSScreen* s, CGFloat& mainScreenBottom, const float masterScale)
+{
+    Desktop::Displays::Display d;
+
+    d.isMain = (mainScreenBottom == 0);
+
+    if (d.isMain)
+        mainScreenBottom = [s frame].size.height;
+
+    d.userArea  = convertDisplayRect ([s visibleFrame], mainScreenBottom) / masterScale;
+    d.totalArea = convertDisplayRect ([s frame], mainScreenBottom) / masterScale;
+    d.scale = masterScale;
+
+   #if defined (MAC_OS_X_VERSION_10_7) && (MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_7)
+    if ([s respondsToSelector: @selector (backingScaleFactor)])
+        d.scale *= s.backingScaleFactor;
+   #endif
+
+    NSSize dpi = [[[s deviceDescription] objectForKey: NSDeviceResolution] sizeValue];
+    d.dpi = (dpi.width + dpi.height) / 2.0;
+
+    return d;
+}
+
+static Desktop::Displays::Display getDummyScreen (const float masterScale)
+{
+    Desktop::Displays::Display d;
+    d.isMain = true;
+    d.scale = masterScale;
+    d.dpi = 0;
+    d.userArea = d.totalArea = Rectangle<int> (0, 0, 1024, 800);
+    return d;
+}
+
+
 void Desktop::Displays::findDisplays (const float masterScale)
 {
     JUCE_AUTORELEASEPOOL
@@ -363,29 +398,14 @@ void Desktop::Displays::findDisplays (const float masterScale)
         CGFloat mainScreenBottom = 0;
 
         for (NSScreen* s in [NSScreen screens])
+            displays.add (getDisplayFromScreen (s, mainScreenBottom, masterScale));
+
+        if (displays.size() == 0) // this can apparently happen while rearranging monitors
         {
-            Display d;
-            d.isMain = false;
-
-            if (mainScreenBottom == 0)
-            {
-                mainScreenBottom = [s frame].size.height;
-                d.isMain = true;
-            }
-
-            d.userArea  = convertDisplayRect ([s visibleFrame], mainScreenBottom) / masterScale;
-            d.totalArea = convertDisplayRect ([s frame], mainScreenBottom) / masterScale;
-            d.scale = masterScale;
-
-           #if defined (MAC_OS_X_VERSION_10_7) && (MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_7)
-            if ([s respondsToSelector: @selector (backingScaleFactor)])
-                d.scale *= s.backingScaleFactor;
-           #endif
-
-            NSSize dpi = [[[s deviceDescription] objectForKey: NSDeviceResolution] sizeValue];
-            d.dpi = (dpi.width + dpi.height) / 2.0;
-
-            displays.add (d);
+            if (NSScreen* s = [NSScreen mainScreen])
+                displays.add (getDisplayFromScreen (s, mainScreenBottom, masterScale));
+            else
+                displays.add (getDummyScreen (masterScale));
         }
     }
 }
