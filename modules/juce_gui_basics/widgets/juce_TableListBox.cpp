@@ -398,10 +398,10 @@ void TableListBox::returnKeyPressed (int row)
         model->returnKeyPressed (row);
 }
 
-void TableListBox::backgroundClicked()
+void TableListBox::backgroundClicked (const MouseEvent& e)
 {
     if (model != nullptr)
-        model->backgroundClicked();
+        model->backgroundClicked (e);
 }
 
 void TableListBox::listWasScrolled()
@@ -457,7 +457,7 @@ void TableListBox::updateColumnComponents() const
 //==============================================================================
 void TableListBoxModel::cellClicked (int, int, const MouseEvent&)       {}
 void TableListBoxModel::cellDoubleClicked (int, int, const MouseEvent&) {}
-void TableListBoxModel::backgroundClicked()                             {}
+void TableListBoxModel::backgroundClicked (const MouseEvent&)           {}
 void TableListBoxModel::sortOrderChanged (int, const bool)              {}
 int TableListBoxModel::getColumnAutoSizeWidth (int)                     { return 0; }
 void TableListBoxModel::selectedRowsChanged (int)                       {}

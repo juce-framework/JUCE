@@ -809,7 +809,7 @@ void ListBox::mouseWheelMove (const MouseEvent& e, const MouseWheelDetails& whee
 void ListBox::mouseUp (const MouseEvent& e)
 {
     if (e.mouseWasClicked() && model != nullptr)
-        model->backgroundClicked();
+        model->backgroundClicked (e);
 }
 
 //==============================================================================
@@ -947,7 +947,7 @@ Component* ListBoxModel::refreshComponentForRow (int, bool, Component* existingC
 
 void ListBoxModel::listBoxItemClicked (int, const MouseEvent&) {}
 void ListBoxModel::listBoxItemDoubleClicked (int, const MouseEvent&) {}
-void ListBoxModel::backgroundClicked() {}
+void ListBoxModel::backgroundClicked (const MouseEvent&) {}
 void ListBoxModel::selectedRowsChanged (int) {}
 void ListBoxModel::deleteKeyPressed (int) {}
 void ListBoxModel::returnKeyPressed (int) {}
