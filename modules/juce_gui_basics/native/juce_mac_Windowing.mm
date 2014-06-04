@@ -383,11 +383,10 @@ static Desktop::Displays::Display getDummyScreen (const float masterScale)
     Desktop::Displays::Display d;
     d.isMain = true;
     d.scale = masterScale;
-    d.dpi = 0;
-    d.userArea = d.totalArea = Rectangle<int> (0, 0, 1024, 800);
+    d.dpi = 96.0f;
+    d.userArea = d.totalArea = Rectangle<int> (1024, 800);
     return d;
 }
-
 
 void Desktop::Displays::findDisplays (const float masterScale)
 {
