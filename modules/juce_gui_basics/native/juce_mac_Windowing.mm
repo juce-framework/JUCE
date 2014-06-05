@@ -378,16 +378,6 @@ static Desktop::Displays::Display getDisplayFromScreen (NSScreen* s, CGFloat& ma
     return d;
 }
 
-static Desktop::Displays::Display getDummyScreen (const float masterScale)
-{
-    Desktop::Displays::Display d;
-    d.isMain = true;
-    d.scale = masterScale;
-    d.dpi = 96.0f;
-    d.userArea = d.totalArea = Rectangle<int> (1024, 800);
-    return d;
-}
-
 void Desktop::Displays::findDisplays (const float masterScale)
 {
     JUCE_AUTORELEASEPOOL
@@ -398,14 +388,6 @@ void Desktop::Displays::findDisplays (const float masterScale)
 
         for (NSScreen* s in [NSScreen screens])
             displays.add (getDisplayFromScreen (s, mainScreenBottom, masterScale));
-
-        if (displays.size() == 0) // this can apparently happen while rearranging monitors
-        {
-            if (NSScreen* s = [NSScreen mainScreen])
-                displays.add (getDisplayFromScreen (s, mainScreenBottom, masterScale));
-            else
-                displays.add (getDummyScreen (masterScale));
-        }
     }
 }
 

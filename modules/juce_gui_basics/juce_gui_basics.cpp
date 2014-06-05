@@ -135,6 +135,12 @@
 namespace juce
 {
 
+#define ASSERT_MESSAGE_MANAGER_IS_LOCKED \
+    jassert (MessageManager::getInstance()->currentThreadHasLockedMessageManager());
+
+#define ASSERT_MESSAGE_MANAGER_IS_LOCKED_OR_OFFSCREEN \
+    jassert (MessageManager::getInstance()->currentThreadHasLockedMessageManager() || getPeer() == nullptr);
+
 extern bool juce_areThereAnyAlwaysOnTopWindows();
 
 #include "components/juce_Component.cpp"

@@ -22,12 +22,6 @@
   ==============================================================================
 */
 
-#define CHECK_MESSAGE_MANAGER_IS_LOCKED \
-    jassert (MessageManager::getInstance()->currentThreadHasLockedMessageManager());
-
-#define CHECK_MESSAGE_MANAGER_IS_LOCKED_OR_OFFSCREEN \
-    jassert (MessageManager::getInstance()->currentThreadHasLockedMessageManager() || getPeer() == nullptr);
-
 Component* Component::currentlyFocusedComponent = nullptr;
 
 
@@ -524,7 +518,7 @@ void Component::setName (const String& name)
 {
     // if component methods are being called from threads other than the message
     // thread, you'll need to use a MessageManagerLock object to make sure it's thread-safe.
-    CHECK_MESSAGE_MANAGER_IS_LOCKED_OR_OFFSCREEN
+    ASSERT_MESSAGE_MANAGER_IS_LOCKED_OR_OFFSCREEN
 
     if (componentName != name)
     {
@@ -550,7 +544,7 @@ void Component::setVisible (bool shouldBeVisible)
     {
         // if component methods are being called from threads other than the message
         // thread, you'll need to use a MessageManagerLock object to make sure it's thread-safe.
-        CHECK_MESSAGE_MANAGER_IS_LOCKED_OR_OFFSCREEN
+        ASSERT_MESSAGE_MANAGER_IS_LOCKED_OR_OFFSCREEN
 
         const WeakReference<Component> safePointer (this);
         flags.visibleFlag = shouldBeVisible;
@@ -632,7 +626,7 @@ void Component::addToDesktop (int styleWanted, void* nativeWindowToAttachTo)
 {
     // if component methods are being called from threads other than the message
     // thread, you'll need to use a MessageManagerLock object to make sure it's thread-safe.
-    CHECK_MESSAGE_MANAGER_IS_LOCKED
+    ASSERT_MESSAGE_MANAGER_IS_LOCKED
 
     if (isOpaque())
         styleWanted &= ~ComponentPeer::windowIsSemiTransparent;
@@ -732,7 +726,7 @@ void Component::removeFromDesktop()
 {
     // if component methods are being called from threads other than the message
     // thread, you'll need to use a MessageManagerLock object to make sure it's thread-safe.
-    CHECK_MESSAGE_MANAGER_IS_LOCKED_OR_OFFSCREEN
+    ASSERT_MESSAGE_MANAGER_IS_LOCKED_OR_OFFSCREEN
 
     if (flags.hasHeavyweightPeerFlag)
     {
@@ -910,7 +904,7 @@ void Component::toFront (const bool setAsForeground)
 {
     // if component methods are being called from threads other than the message
     // thread, you'll need to use a MessageManagerLock object to make sure it's thread-safe.
-    CHECK_MESSAGE_MANAGER_IS_LOCKED_OR_OFFSCREEN
+    ASSERT_MESSAGE_MANAGER_IS_LOCKED_OR_OFFSCREEN
 
     if (flags.hasHeavyweightPeerFlag)
     {
@@ -1130,7 +1124,7 @@ void Component::setBounds (const int x, const int y, int w, int h)
 {
     // if component methods are being called from threads other than the message
     // thread, you'll need to use a MessageManagerLock object to make sure it's thread-safe.
-    CHECK_MESSAGE_MANAGER_IS_LOCKED_OR_OFFSCREEN
+    ASSERT_MESSAGE_MANAGER_IS_LOCKED_OR_OFFSCREEN
 
     if (w < 0) w = 0;
     if (h < 0) h = 0;
@@ -1463,7 +1457,7 @@ void Component::addChildComponent (Component& child, int zOrder)
 {
     // if component methods are being called from threads other than the message
     // thread, you'll need to use a MessageManagerLock object to make sure it's thread-safe.
-    CHECK_MESSAGE_MANAGER_IS_LOCKED_OR_OFFSCREEN
+    ASSERT_MESSAGE_MANAGER_IS_LOCKED_OR_OFFSCREEN
 
     if (child.parentComponent != this)
     {
@@ -1539,7 +1533,7 @@ Component* Component::removeChildComponent (const int index, bool sendParentEven
 {
     // if component methods are being called from threads other than the message
     // thread, you'll need to use a MessageManagerLock object to make sure it's thread-safe.
-    CHECK_MESSAGE_MANAGER_IS_LOCKED_OR_OFFSCREEN
+    ASSERT_MESSAGE_MANAGER_IS_LOCKED_OR_OFFSCREEN
 
     Component* const child = childComponentList [index];
 
@@ -1730,7 +1724,7 @@ void Component::enterModalState (const bool shouldTakeKeyboardFocus,
 {
     // if component methods are being called from threads other than the message
     // thread, you'll need to use a MessageManagerLock object to make sure it's thread-safe.
-    CHECK_MESSAGE_MANAGER_IS_LOCKED
+    ASSERT_MESSAGE_MANAGER_IS_LOCKED
 
     // Check for an attempt to make a component modal when it already is!
     // This can cause nasty problems..
@@ -1917,7 +1911,7 @@ void Component::internalRepaintUnchecked (const Rectangle<int>& area, const bool
         {
             // if component methods are being called from threads other than the message
             // thread, you'll need to use a MessageManagerLock object to make sure it's thread-safe.
-            CHECK_MESSAGE_MANAGER_IS_LOCKED
+            ASSERT_MESSAGE_MANAGER_IS_LOCKED
 
             if (ComponentPeer* const peer = getPeer())
             {
@@ -2306,7 +2300,7 @@ void Component::addComponentListener (ComponentListener* const newListener)
     // thread, you'll need to use a MessageManagerLock object to make sure it's thread-safe.
     #if JUCE_DEBUG || JUCE_LOG_ASSERTIONS
     if (getParentComponent() != nullptr)
-        CHECK_MESSAGE_MANAGER_IS_LOCKED;
+        ASSERT_MESSAGE_MANAGER_IS_LOCKED;
     #endif
 
     componentListeners.add (newListener);
@@ -2369,7 +2363,7 @@ void Component::addMouseListener (MouseListener* const newListener,
 {
     // if component methods are being called from threads other than the message
     // thread, you'll need to use a MessageManagerLock object to make sure it's thread-safe.
-    CHECK_MESSAGE_MANAGER_IS_LOCKED
+    ASSERT_MESSAGE_MANAGER_IS_LOCKED
 
     // If you register a component as a mouselistener for itself, it'll receive all the events
     // twice - once via the direct callback that all components get anyway, and then again as a listener!
@@ -2385,7 +2379,7 @@ void Component::removeMouseListener (MouseListener* const listenerToRemove)
 {
     // if component methods are being called from threads other than the message
     // thread, you'll need to use a MessageManagerLock object to make sure it's thread-safe.
-    CHECK_MESSAGE_MANAGER_IS_LOCKED
+    ASSERT_MESSAGE_MANAGER_IS_LOCKED
 
     if (mouseListeners != nullptr)
         mouseListeners->removeListener (listenerToRemove);
@@ -2850,7 +2844,7 @@ void Component::grabKeyboardFocus()
 {
     // if component methods are being called from threads other than the message
     // thread, you'll need to use a MessageManagerLock object to make sure it's thread-safe.
-    CHECK_MESSAGE_MANAGER_IS_LOCKED
+    ASSERT_MESSAGE_MANAGER_IS_LOCKED
 
     grabFocusInternal (focusChangedDirectly, true);
 }
@@ -2859,7 +2853,7 @@ void Component::moveKeyboardFocusToSibling (const bool moveToNext)
 {
     // if component methods are being called from threads other than the message
     // thread, you'll need to use a MessageManagerLock object to make sure it's thread-safe.
-    CHECK_MESSAGE_MANAGER_IS_LOCKED
+    ASSERT_MESSAGE_MANAGER_IS_LOCKED
 
     if (parentComponent != nullptr)
     {
