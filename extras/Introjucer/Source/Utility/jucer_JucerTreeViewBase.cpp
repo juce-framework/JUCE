@@ -189,6 +189,10 @@ void JucerTreeViewBase::itemClicked (const MouseEvent& e)
         else
             showPopupMenu();
     }
+    else if (isSelected())
+    {
+        itemSelectionChanged (true);
+    }
 }
 
 void JucerTreeViewBase::deleteItem()    {}
