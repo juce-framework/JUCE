@@ -955,6 +955,9 @@ XmlElement* ValueTree::createXml() const
 
 ValueTree ValueTree::fromXml (const XmlElement& xml)
 {
+    // ValueTrees don't have any equivalent to XML text elements!
+    jassert (! xml.isTextElement());
+
     ValueTree v (xml.getTagName());
     v.object->properties.setFromXmlAttributes (xml);
 
