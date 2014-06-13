@@ -1686,21 +1686,22 @@ private:
 };
 
 //==============================================================================
-struct JuceNSWindowClass   : public ObjCClass <NSWindow>
+struct JuceNSWindowClass   : public ObjCClass<NSWindow>
 {
-    JuceNSWindowClass()  : ObjCClass <NSWindow> ("JUCEWindow_")
+    JuceNSWindowClass()  : ObjCClass<NSWindow> ("JUCEWindow_")
     {
         addIvar<NSViewComponentPeer*> ("owner");
 
-        addMethod (@selector (canBecomeKeyWindow),            canBecomeKeyWindow,    "c@:");
-        addMethod (@selector (becomeKeyWindow),               becomeKeyWindow,       "v@:");
-        addMethod (@selector (windowShouldClose:),            windowShouldClose,     "c@:@");
-        addMethod (@selector (constrainFrameRect:toScreen:),  constrainFrameRect,    @encode (NSRect), "@:",  @encode (NSRect), "@");
-        addMethod (@selector (windowWillResize:toSize:),      windowWillResize,      @encode (NSSize), "@:@", @encode (NSSize));
-        addMethod (@selector (zoom:),                         zoom,                  "v@:@");
-        addMethod (@selector (windowWillMove:),               windowWillMove,        "v@:@");
+        addMethod (@selector (canBecomeKeyWindow),            canBecomeKeyWindow,        "c@:");
+        addMethod (@selector (becomeKeyWindow),               becomeKeyWindow,           "v@:");
+        addMethod (@selector (windowShouldClose:),            windowShouldClose,         "c@:@");
+        addMethod (@selector (constrainFrameRect:toScreen:),  constrainFrameRect,        @encode (NSRect), "@:",  @encode (NSRect), "@");
+        addMethod (@selector (windowWillResize:toSize:),      windowWillResize,          @encode (NSSize), "@:@", @encode (NSSize));
+        addMethod (@selector (windowDidExitFullScreen:),      windowDidExitFullScreen,   "v@:@");
+        addMethod (@selector (zoom:),                         zoom,                      "v@:@");
+        addMethod (@selector (windowWillMove:),               windowWillMove,            "v@:@");
         addMethod (@selector (windowWillStartLiveResize:),    windowWillStartLiveResize, "v@:@");
-        addMethod (@selector (windowDidEndLiveResize:),       windowDidEndLiveResize, "v@:@");
+        addMethod (@selector (windowDidEndLiveResize:),       windowDidEndLiveResize,    "v@:@");
 
        #if defined (MAC_OS_X_VERSION_10_6) && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_6
         addProtocol (@protocol (NSWindowDelegate));
@@ -1764,6 +1765,11 @@ private:
             owner->sendModalInputAttemptIfBlocked();
 
         return frameRect.size;
+    }
+
+    static void windowDidExitFullScreen (id, SEL, NSNotification*)
+    {
+        [NSApp setPresentationOptions: NSApplicationPresentationDefault];
     }
 
     static void zoom (id self, SEL, id sender)
@@ -1864,7 +1870,7 @@ bool MouseInputSource::SourceList::addSource()
 }
 
 //==============================================================================
-void Desktop::setKioskComponent (Component* kioskComp, bool enableOrDisable, bool allowMenusAndBars)
+void Desktop::setKioskComponent (Component* kioskComp, bool shouldBeEnabled, bool allowMenusAndBars)
 {
    #if defined (MAC_OS_X_VERSION_10_6) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_6
 
@@ -1875,13 +1881,15 @@ void Desktop::setKioskComponent (Component* kioskComp, bool enableOrDisable, boo
     if (peer->hasNativeTitleBar()
           && [peer->window respondsToSelector: @selector (toggleFullScreen:)])
     {
-        [peer->window performSelector: @selector (toggleFullScreen:)
-                           withObject: [NSNumber numberWithBool: (BOOL) enableOrDisable]];
+        if (shouldBeEnabled && ! allowMenusAndBars)
+            [NSApp setPresentationOptions: NSApplicationPresentationHideDock | NSApplicationPresentationHideMenuBar];
+
+        [peer->window performSelector: @selector (toggleFullScreen:) withObject: nil];
     }
     else
    #endif
     {
-        if (enableOrDisable)
+        if (shouldBeEnabled)
         {
             if (peer->hasNativeTitleBar())
                 [peer->window setStyleMask: NSBorderlessWindowMask];
@@ -1903,9 +1911,7 @@ void Desktop::setKioskComponent (Component* kioskComp, bool enableOrDisable, boo
         }
     }
    #elif JUCE_SUPPORT_CARBON
-    (void) kioskComp; (void) enableOrDisable; (void) allowMenusAndBars;
-
-    if (enableOrDisable)
+    if (shouldBeEnabled)
     {
         SetSystemUIMode (kUIModeAllSuppressed, allowMenusAndBars ? kUIOptionAutoShowMenuBar : 0);
         kioskComp->setBounds (Desktop::getInstance().getDisplays().getMainDisplay().totalArea);
@@ -1915,7 +1921,7 @@ void Desktop::setKioskComponent (Component* kioskComp, bool enableOrDisable, boo
         SetSystemUIMode (kUIModeNormal, 0);
     }
    #else
-    (void) kioskComp; (void) enableOrDisable; (void) allowMenusAndBars;
+    (void) kioskComp; (void) shouldBeEnabled; (void) allowMenusAndBars;
 
     // If you're targeting OSes earlier than 10.6 and want to use this feature,
     // you'll need to enable JUCE_SUPPORT_CARBON.

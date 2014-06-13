@@ -441,7 +441,7 @@ private:
     void removeDesktopComponent (Component*);
     void componentBroughtToFront (Component*);
 
-    void setKioskComponent (Component*, bool enableOrDisable, bool allowMenusAndBars);
+    void setKioskComponent (Component*, bool shouldBeEnabled, bool allowMenusAndBars);
 
     void triggerFocusCallback();
     void handleAsyncUpdate() override;
