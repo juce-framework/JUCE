@@ -174,10 +174,6 @@ public:
 
                     paintMethodCode += r;
                 }
-                else
-                {
-                    jassertfalse; // this resource isn't valid!
-                }
             }
         }
     }
