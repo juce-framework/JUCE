@@ -209,16 +209,16 @@ bool Desktop::canUseSemiTransparentWindows() noexcept
     return true;
 }
 
-Point<int> MouseInputSource::getCurrentRawMousePosition()
+Point<float> MouseInputSource::getCurrentRawMousePosition()
 {
     JUCE_AUTORELEASEPOOL
     {
         const NSPoint p ([NSEvent mouseLocation]);
-        return Point<int> (roundToInt (p.x), roundToInt (getMainScreenHeight() - p.y));
+        return Point<float> (p.x, getMainScreenHeight() - p.y);
     }
 }
 
-void MouseInputSource::setRawMousePosition (Point<int> newPosition)
+void MouseInputSource::setRawMousePosition (Point<float> newPosition)
 {
     // this rubbish needs to be done around the warp call, to avoid causing a
     // bizarre glitch..

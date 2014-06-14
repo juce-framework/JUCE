@@ -67,7 +67,7 @@ public:
                         selectBasedOnModifiers (item, e.mods);
 
                     if (e.x >= pos.getX())
-                        item->itemClicked (e.withNewPosition (e.getPosition() - pos.getPosition()));
+                        item->itemClicked (e.withNewPosition (e.position - pos.getPosition().toFloat()));
                 }
             }
         }
@@ -92,7 +92,7 @@ public:
             Rectangle<int> pos;
             if (TreeViewItem* const item = findItemAt (e.y, pos))
                 if (e.x >= pos.getX() || ! owner.openCloseButtonsVisible)
-                    item->itemDoubleClicked (e.withNewPosition (e.getPosition() - pos.getPosition()));
+                    item->itemDoubleClicked (e.withNewPosition (e.position - pos.getPosition().toFloat()));
         }
     }
 

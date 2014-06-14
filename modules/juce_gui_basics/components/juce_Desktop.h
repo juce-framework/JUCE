@@ -414,7 +414,7 @@ private:
 
     ScopedPointer<Displays> displays;
 
-    Point<int> lastFakeMouseMove;
+    Point<float> lastFakeMouseMove;
     void sendMouseMove();
 
     int mouseClickCounter, mouseWheelCounter;
@@ -445,6 +445,8 @@ private:
 
     void triggerFocusCallback();
     void handleAsyncUpdate() override;
+
+    static Point<float> getMousePositionFloat();
 
     static double getDefaultMasterScale();
 

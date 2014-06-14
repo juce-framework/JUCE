@@ -295,14 +295,14 @@ public:
         return getBounds (! isSharedWindow);
     }
 
-    Point<int> localToGlobal (Point<int> relativePosition) override
+    Point<float> localToGlobal (Point<float> relativePosition) override
     {
-        return relativePosition + getBounds (true).getPosition();
+        return relativePosition + getBounds (true).getPosition().toFloat();
     }
 
-    Point<int> globalToLocal (Point<int> screenPosition) override
+    Point<float> globalToLocal (Point<float> screenPosition) override
     {
-        return screenPosition - getBounds (true).getPosition();
+        return screenPosition - getBounds (true).getPosition().toFloat();
     }
 
     void setAlpha (float newAlpha) override
@@ -559,7 +559,7 @@ public:
                   belowWindowWithWindowNumber: 0] != [window windowNumber])
         {
             // moved into another window which overlaps this one, so trigger an exit
-            handleMouseEvent (0, Point<int> (-1, -1), currentModifiers, getMouseTime (ev));
+            handleMouseEvent (0, Point<float> (-1.0f, -1.0f), currentModifiers, getMouseTime (ev));
         }
         else
        #endif
@@ -936,7 +936,7 @@ public:
         MouseInputSource mouse = desktop.getMainMouseSource();
 
         if (mouse.getComponentUnderMouse() == nullptr
-             && desktop.findComponentAt (mouse.getScreenPosition()) == nullptr)
+             && desktop.findComponentAt (mouse.getScreenPosition().roundToInt()) == nullptr)
         {
             [[NSCursor arrowCursor] set];
         }
@@ -1010,10 +1010,10 @@ public:
                 + (int64) ([e timestamp] * 1000.0);
     }
 
-    static Point<int> getMousePos (NSEvent* e, NSView* view)
+    static Point<float> getMousePos (NSEvent* e, NSView* view)
     {
         NSPoint p = [view convertPoint: [e locationInWindow] fromView: nil];
-        return Point<int> ((int) p.x, (int) ([view frame].size.height - p.y));
+        return Point<float> (p.x, [view frame].size.height - p.y);
     }
 
     static int getModifierForButtonNumber (const NSInteger num)

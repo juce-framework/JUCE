@@ -353,7 +353,7 @@ void DragAndDropContainer::startDragging (const var& sourceDescription,
             return;
         }
 
-        const Point<int> lastMouseDown (draggingSource->getLastMouseDownPosition());
+        const Point<int> lastMouseDown (draggingSource->getLastMouseDownPosition().roundToInt());
         Point<int> imageOffset;
 
         if (dragImage.isNull())

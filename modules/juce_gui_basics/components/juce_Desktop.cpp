@@ -149,17 +149,22 @@ void Desktop::componentBroughtToFront (Component* const c)
 //==============================================================================
 Point<int> Desktop::getMousePosition()
 {
+    return getMousePositionFloat().roundToInt();
+}
+
+Point<float> Desktop::getMousePositionFloat()
+{
     return getInstance().getMainMouseSource().getScreenPosition();
 }
 
 void Desktop::setMousePosition (Point<int> newPosition)
 {
-    getInstance().getMainMouseSource().setScreenPosition (newPosition);
+    getInstance().getMainMouseSource().setScreenPosition (newPosition.toFloat());
 }
 
 Point<int> Desktop::getLastMouseDownPosition()
 {
-    return getInstance().getMainMouseSource().getLastMouseDownPosition();
+    return getInstance().getMainMouseSource().getLastMouseDownPosition().roundToInt();
 }
 
 int Desktop::getMouseButtonClickCounter() const noexcept    { return mouseClickCounter; }
@@ -197,7 +202,7 @@ void Desktop::resetTimer()
     else
         startTimer (100);
 
-    lastFakeMouseMove = getMousePosition();
+    lastFakeMouseMove = getMousePositionFloat();
 }
 
 ListenerList<MouseListener>& Desktop::getMouseListeners()
@@ -222,7 +227,7 @@ void Desktop::removeGlobalMouseListener (MouseListener* const listener)
 
 void Desktop::timerCallback()
 {
-    if (lastFakeMouseMove != getMousePosition())
+    if (lastFakeMouseMove != getMousePositionFloat())
         sendMouseMove();
 }
 
@@ -232,12 +237,12 @@ void Desktop::sendMouseMove()
     {
         startTimer (20);
 
-        lastFakeMouseMove = getMousePosition();
+        lastFakeMouseMove = getMousePositionFloat();
 
-        if (Component* const target = findComponentAt (lastFakeMouseMove))
+        if (Component* const target = findComponentAt (lastFakeMouseMove.roundToInt()))
         {
             Component::BailOutChecker checker (target);
-            const Point<int> pos (target->getLocalPoint (nullptr, lastFakeMouseMove));
+            const Point<float> pos (target->getLocalPoint (nullptr, lastFakeMouseMove));
             const Time now (Time::getCurrentTime());
 
             const MouseEvent me (getMainMouseSource(), pos, ModifierKeys::getCurrentModifiers(),

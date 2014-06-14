@@ -51,7 +51,7 @@ public:
                 if (Component* const comp = Desktop::getInstance().findComponentAt (screenPos))
                     if (ComponentPeer* const peer = comp->getPeer())
                         if (! peer->isFocused())
-                            peer->handleMouseEvent (0, peer->globalToLocal (screenPos), mods, Time::currentTimeMillis());
+                            peer->handleMouseEvent (0, peer->globalToLocal (screenPos.toFloat()), mods, Time::currentTimeMillis());
         }
     }
 
