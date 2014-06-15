@@ -1136,7 +1136,9 @@ public:
 
     bool isFocused() const override
     {
-        return this == currentlyFocusedPeer;
+        return (isSharedWindow || ! JUCEApplication::isStandaloneApp())
+                    ? this == currentlyFocusedPeer
+                    : [window isKeyWindow];
     }
 
     void grabFocus() override
