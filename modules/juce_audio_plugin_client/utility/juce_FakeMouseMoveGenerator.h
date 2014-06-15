@@ -40,7 +40,7 @@ public:
     void timerCallback() override
     {
         // workaround for carbon windows not getting mouse-moves..
-        const Point<int> screenPos (Desktop::getInstance().getMainMouseSource().getScreenPosition());
+        const Point<float> screenPos (Desktop::getInstance().getMainMouseSource().getScreenPosition());
 
         if (screenPos != lastScreenPos)
         {
@@ -56,7 +56,7 @@ public:
     }
 
 private:
-    Point<int> lastScreenPos;
+    Point<float> lastScreenPos;
 };
 
 #else
