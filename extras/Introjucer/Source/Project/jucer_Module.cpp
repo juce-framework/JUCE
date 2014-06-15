@@ -481,7 +481,7 @@ struct FileSorter
 {
     static int compareElements (const File& f1, const File& f2)
     {
-        return f1.getFileName().compareIgnoreCase (f2.getFileName());
+        return f1.getFileName().compareNatural (f2.getFileName());
     }
 };
 

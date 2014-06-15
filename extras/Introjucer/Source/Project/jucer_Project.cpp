@@ -743,7 +743,7 @@ struct ItemSorter
 {
     static int compareElements (const ValueTree& first, const ValueTree& second)
     {
-        return first [Ids::name].toString().compareIgnoreCase (second [Ids::name].toString());
+        return first [Ids::name].toString().compareNatural (second [Ids::name].toString());
     }
 };
 
@@ -755,7 +755,7 @@ struct ItemSorterWithGroupsAtStart
         const bool secondIsGroup = second.hasType (Ids::GROUP);
 
         if (firstIsGroup == secondIsGroup)
-            return first [Ids::name].toString().compareIgnoreCase (second [Ids::name].toString());
+            return first [Ids::name].toString().compareNatural (second [Ids::name].toString());
 
         return firstIsGroup ? -1 : 1;
     }

@@ -924,11 +924,11 @@ private:
         int compareElements (XmlElement* first, XmlElement* second) const
         {
             int result = first->getStringAttribute (attributeToSort)
-                           .compareLexicographically (second->getStringAttribute (attributeToSort));
+                           .compareNatural (second->getStringAttribute (attributeToSort));
 
             if (result == 0)
                 result = first->getStringAttribute ("ID")
-                           .compareLexicographically (second->getStringAttribute ("ID"));
+                           .compareNatural (second->getStringAttribute ("ID"));
 
             return direction * result;
         }
