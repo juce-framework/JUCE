@@ -48,10 +48,10 @@ public:
             const ModifierKeys mods (ModifierKeys::getCurrentModifiers());
 
             if (! mods.isAnyMouseButtonDown())
-                if (Component* const comp = Desktop::getInstance().findComponentAt (screenPos))
+                if (Component* const comp = Desktop::getInstance().findComponentAt (screenPos.roundToInt()))
                     if (ComponentPeer* const peer = comp->getPeer())
                         if (! peer->isFocused())
-                            peer->handleMouseEvent (0, peer->globalToLocal (screenPos.toFloat()), mods, Time::currentTimeMillis());
+                            peer->handleMouseEvent (0, peer->globalToLocal (screenPos), mods, Time::currentTimeMillis());
         }
     }
 
