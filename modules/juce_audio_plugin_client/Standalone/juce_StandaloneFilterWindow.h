@@ -44,8 +44,8 @@ public:
         store its settings - the object that is passed-in will be owned by this
         class and deleted automatically when no longer needed. (It can also be null)
     */
-    StandalonePluginHolder (PropertySet* settingsToUse)
-        : settings (settingsToUse)
+    StandalonePluginHolder (PropertySet* settingsToUse, bool takeOwnershipOfSettings)
+        : settings (settingsToUse, takeOwnershipOfSettings)
     {
         createPlugin();
         setupAudioDevices();
@@ -215,7 +215,7 @@ public:
     }
 
     //==============================================================================
-    ScopedPointer<PropertySet> settings;
+    OptionalScopedPointer<PropertySet> settings;
     ScopedPointer<AudioProcessor> processor;
     AudioDeviceManager deviceManager;
     AudioProcessorPlayer player;
@@ -271,7 +271,7 @@ public:
         optionsButton.addListener (this);
         optionsButton.setTriggeredOnMouseDown (true);
 
-        pluginHolder = new StandalonePluginHolder (settingsToUse);
+        pluginHolder = new StandalonePluginHolder (settingsToUse, false);
 
         createEditorComp();
 
