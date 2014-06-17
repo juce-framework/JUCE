@@ -52,40 +52,42 @@ public:
     ~StringPool();
 
     //==============================================================================
-    /** Returns a pointer to a copy of the string that is passed in.
-
-        The pool will always return the same pointer when asked for a string that matches it.
-        The pool will own all the pointers that it returns, deleting them when the pool itself
-        is deleted.
+    /** Returns a pointer to a shared copy of the string that is passed in.
+        The pool will always return the same String object when asked for a string that matches it.
     */
-    String::CharPointerType getPooledString (const String& original);
+    String getPooledString (const String& original);
 
     /** Returns a pointer to a copy of the string that is passed in.
-
-        The pool will always return the same pointer when asked for a string that matches it.
-        The pool will own all the pointers that it returns, deleting them when the pool itself
-        is deleted.
+        The pool will always return the same String object when asked for a string that matches it.
     */
-    String::CharPointerType getPooledString (const char* original);
+    String getPooledString (const char* original);
+
+    /** Returns a pointer to a shared copy of the string that is passed in.
+        The pool will always return the same String object when asked for a string that matches it.
+    */
+    String getPooledString (StringRef original);
 
     /** Returns a pointer to a copy of the string that is passed in.
-
-        The pool will always return the same pointer when asked for a string that matches it.
-        The pool will own all the pointers that it returns, deleting them when the pool itself
-        is deleted.
+        The pool will always return the same String object when asked for a string that matches it.
     */
-    String::CharPointerType getPooledString (const wchar_t* original);
+    String getPooledString (String::CharPointerType start, String::CharPointerType end);
 
     //==============================================================================
-    /** Returns the number of strings in the pool. */
-    int size() const noexcept;
+    /** Scans the pool, and removes any strings that are unreferenced.
+        You don't generally need to call this - it'll be called automatically when the pool grows
+        large enough to warrant it.
+    */
+    void garbageCollect();
 
-    /** Returns one of the strings in the pool, by index. */
-    String::CharPointerType operator[] (int index) const noexcept;
+    /** Returns a shared global pool which is used for things like Identifiers, XML parsing. */
+    static StringPool& getGlobalPool() noexcept;
 
 private:
-    Array <String> strings;
+    Array<String> strings;
     CriticalSection lock;
+    uint32 lastGarbageCollectionTime;
+
+    void garbageCollectIfNeeded();
 };
 
 

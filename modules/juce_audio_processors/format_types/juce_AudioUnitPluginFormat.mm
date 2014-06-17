@@ -138,7 +138,7 @@ namespace AudioUnitFormatHelpers
                                                         fileOrIdentifier.lastIndexOfChar ('/')) + 1));
 
             StringArray tokens;
-            tokens.addTokens (s, ",", String());
+            tokens.addTokens (s, ",", StringRef());
             tokens.removeEmptyStrings();
 
             if (tokens.size() == 3)
@@ -915,7 +915,7 @@ private:
         bool automatable;
     };
 
-    OwnedArray <ParamInfo> parameters;
+    OwnedArray<ParamInfo> parameters;
 
     MidiDataConcatenator midiConcatenator;
     CriticalSection midiInLock;
@@ -1600,7 +1600,7 @@ AudioUnitPluginFormat::~AudioUnitPluginFormat()
 {
 }
 
-void AudioUnitPluginFormat::findAllTypesForFile (OwnedArray <PluginDescription>& results,
+void AudioUnitPluginFormat::findAllTypesForFile (OwnedArray<PluginDescription>& results,
                                                  const String& fileOrIdentifier)
 {
     if (! fileMightContainThisPluginType (fileOrIdentifier))

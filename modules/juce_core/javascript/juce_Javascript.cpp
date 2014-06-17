@@ -768,7 +768,7 @@ struct JavascriptEngine::RootObject   : public DynamicObject
     {
         FunctionObject() noexcept {}
 
-        FunctionObject (const FunctionObject& other)  : functionCode (other.functionCode)
+        FunctionObject (const FunctionObject& other)  : DynamicObject(), functionCode (other.functionCode)
         {
             ExpressionTreeBuilder tb (functionCode);
             tb.parseFunctionParamsAndBody (*this);

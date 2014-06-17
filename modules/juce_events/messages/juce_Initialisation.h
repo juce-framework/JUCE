@@ -55,13 +55,17 @@ JUCE_API void JUCE_CALLTYPE  shutdownJuce_GUI();
 /** A utility object that helps you initialise and shutdown Juce correctly
     using an RAII pattern.
 
-    When an instance of this class is created, it calls initialiseJuce_GUI(),
-    and when it's deleted, it calls shutdownJuce_GUI(), which lets you easily
-    make sure that these functions are matched correctly.
+    When the first instance of this class is created, it calls initialiseJuce_GUI(),
+    and when the last instance is deleted, it calls shutdownJuce_GUI(), so that you
+    can easily be sure that as long as at least one instance of the class exists, the
+    library will be initialised.
 
     This class is particularly handy to use at the beginning of a console app's
     main() function, because it'll take care of shutting down whenever you return
     from the main() call.
+
+    Be careful with your threading though - to be safe, you should always make sure
+    that these objects are created and deleted on the message thread.
 */
 class JUCE_API  ScopedJuceInitialiser_GUI
 {

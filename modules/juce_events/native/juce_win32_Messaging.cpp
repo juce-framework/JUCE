@@ -100,7 +100,7 @@ bool MessageManager::dispatchNextMessageOnSystemQueue (const bool returnIfNoPend
     using namespace WindowsMessageHelpers;
     MSG m;
 
-    if (returnIfNoPendingMessages && ! PeekMessage (&m, (HWND) 0, 0, 0, 0))
+    if (returnIfNoPendingMessages && ! PeekMessage (&m, (HWND) 0, 0, 0, PM_NOREMOVE))
         return false;
 
     if (GetMessage (&m, (HWND) 0, 0, 0) >= 0)

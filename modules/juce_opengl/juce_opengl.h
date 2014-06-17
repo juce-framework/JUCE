@@ -56,7 +56,7 @@
  #include <GL/gl.h>
  #undef KeyPress
 #elif JUCE_IOS
- #if __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_7_0
+ #if defined (__IPHONE_7_0) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_7_0
   #include <OpenGLES/ES3/gl.h>
  #else
   #include <OpenGLES/ES2/gl.h>

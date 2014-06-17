@@ -238,24 +238,19 @@ void LookAndFeel_V2::drawButtonBackground (Graphics& g,
                       button.isConnectedOnBottom());
 }
 
-Font LookAndFeel_V2::getTextButtonFont (TextButton& button)
+Font LookAndFeel_V2::getTextButtonFont (TextButton&, int buttonHeight)
 {
-    return button.getFont();
+    return Font (jmin (15.0f, buttonHeight * 0.6f));
 }
 
-void LookAndFeel_V2::changeTextButtonWidthToFitText (TextButton& b, int newHeight)
+int LookAndFeel_V2::getTextButtonWidthToFitText (TextButton& b, int buttonHeight)
 {
-    if (newHeight >= 0)
-        b.setSize (jmax (1, b.getWidth()), newHeight);
-    else
-        newHeight = b.getHeight();
-
-    b.setSize (getTextButtonFont (b).getStringWidth (b.getButtonText()) + newHeight, newHeight);
+    return getTextButtonFont (b, buttonHeight).getStringWidth (b.getButtonText()) + buttonHeight;
 }
 
 void LookAndFeel_V2::drawButtonText (Graphics& g, TextButton& button, bool /*isMouseOverButton*/, bool /*isButtonDown*/)
 {
-    Font font (getTextButtonFont (button));
+    Font font (getTextButtonFont (button, button.getHeight()));
     g.setFont (font);
     g.setColour (button.findColour (button.getToggleState() ? TextButton::textColourOnId
                                                             : TextButton::textColourOffId)
@@ -452,8 +447,7 @@ void LookAndFeel_V2::drawAlertBox (Graphics& g, AlertWindow& alert,
             colour    = alert.getAlertType() == AlertWindow::InfoIcon ? (uint32) 0x605555ff : (uint32) 0x40b69900;
             character = alert.getAlertType() == AlertWindow::InfoIcon ? 'i' : '?';
 
-            icon.addEllipse ((float) iconRect.getX(), (float) iconRect.getY(),
-                             (float) iconRect.getWidth(), (float) iconRect.getHeight());
+            icon.addEllipse (iconRect.toFloat());
         }
 
         GlyphArrangement ga;
@@ -1183,13 +1177,11 @@ void LookAndFeel_V2::drawLabel (Graphics& g, Label& label)
 
         g.setColour (label.findColour (Label::textColourId).withMultipliedAlpha (alpha));
         g.setFont (font);
-        g.drawFittedText (label.getText(),
-                          label.getHorizontalBorderSize(),
-                          label.getVerticalBorderSize(),
-                          label.getWidth() - 2 * label.getHorizontalBorderSize(),
-                          label.getHeight() - 2 * label.getVerticalBorderSize(),
-                          label.getJustificationType(),
-                          jmax (1, (int) (label.getHeight() / font.getHeight())),
+
+        Rectangle<int> textArea (label.getBorderSize().subtractedFrom (label.getLocalBounds()));
+
+        g.drawFittedText (label.getText(), textArea, label.getJustificationType(),
+                          jmax (1, (int) (textArea.getHeight() / font.getHeight())),
                           label.getMinimumHorizontalScale());
 
         g.setColour (label.findColour (Label::outlineColourId).withMultipliedAlpha (alpha));

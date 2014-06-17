@@ -124,7 +124,7 @@ SystemStats::OperatingSystemType SystemStats::getOperatingSystemType()
     return iOS;
    #else
     StringArray parts;
-    parts.addTokens (getOSXVersion(), ".", String());
+    parts.addTokens (getOSXVersion(), ".", StringRef());
 
     jassert (parts[0].getIntValue() == 10);
     const int major = parts[1].getIntValue();
@@ -241,35 +241,41 @@ String SystemStats::getDisplayLanguage()
 }
 
 //==============================================================================
-class HiResCounterHandler
+/*  NB: these are kept outside the HiResCounterInfo struct and initialised to 1 to avoid
+    division-by-zero errors if some other static constructor calls us before this file's
+    static constructors have had a chance to fill them in correctly..
+*/
+static uint64 hiResCounterNumerator = 0, hiResCounterDenominator = 1;
+
+class HiResCounterInfo
 {
 public:
-    HiResCounterHandler()
+    HiResCounterInfo()
     {
         mach_timebase_info_data_t timebase;
         (void) mach_timebase_info (&timebase);
 
         if (timebase.numer % 1000000 == 0)
         {
-            numerator   = timebase.numer / 1000000;
-            denominator = timebase.denom;
+            hiResCounterNumerator   = timebase.numer / 1000000;
+            hiResCounterDenominator = timebase.denom;
         }
         else
         {
-            numerator   = timebase.numer;
-            denominator = timebase.denom * (uint64) 1000000;
+            hiResCounterNumerator   = timebase.numer;
+            hiResCounterDenominator = timebase.denom * (uint64) 1000000;
         }
 
         highResTimerFrequency = (timebase.denom * (uint64) 1000000000) / timebase.numer;
-        highResTimerToMillisecRatio = numerator / (double) denominator;
+        highResTimerToMillisecRatio = hiResCounterNumerator / (double) hiResCounterDenominator;
     }
 
-    inline uint32 millisecondsSinceStartup() const noexcept
+    uint32 millisecondsSinceStartup() const noexcept
     {
-        return (uint32) ((mach_absolute_time() * numerator) / denominator);
+        return (uint32) ((mach_absolute_time() * hiResCounterNumerator) / hiResCounterDenominator);
     }
 
-    inline double getMillisecondCounterHiRes() const noexcept
+    double getMillisecondCounterHiRes() const noexcept
     {
         return mach_absolute_time() * highResTimerToMillisecRatio;
     }
@@ -277,15 +283,14 @@ public:
     int64 highResTimerFrequency;
 
 private:
-    uint64 numerator, denominator;
     double highResTimerToMillisecRatio;
 };
 
-static HiResCounterHandler hiResCounterHandler;
+static HiResCounterInfo hiResCounterInfo;
 
-uint32 juce_millisecondsSinceStartup() noexcept         { return hiResCounterHandler.millisecondsSinceStartup(); }
-double Time::getMillisecondCounterHiRes() noexcept      { return hiResCounterHandler.getMillisecondCounterHiRes(); }
-int64  Time::getHighResolutionTicksPerSecond() noexcept { return hiResCounterHandler.highResTimerFrequency; }
+uint32 juce_millisecondsSinceStartup() noexcept         { return hiResCounterInfo.millisecondsSinceStartup(); }
+double Time::getMillisecondCounterHiRes() noexcept      { return hiResCounterInfo.getMillisecondCounterHiRes(); }
+int64  Time::getHighResolutionTicksPerSecond() noexcept { return hiResCounterInfo.highResTimerFrequency; }
 int64  Time::getHighResolutionTicks() noexcept          { return (int64) mach_absolute_time(); }
 
 bool Time::setSystemTimeToThisTime() const

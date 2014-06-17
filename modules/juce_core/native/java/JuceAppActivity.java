@@ -399,16 +399,21 @@ public final class JuceAppActivity   extends Activity
         private native void handleKeyDown (long host, int keycode, int textchar);
         private native void handleKeyUp (long host, int keycode, int textchar);
 
-        public void showKeyboard (boolean shouldShow)
+        public void showKeyboard (String type)
         {
             InputMethodManager imm = (InputMethodManager) getSystemService (Context.INPUT_METHOD_SERVICE);
 
             if (imm != null)
             {
-                if (shouldShow)
-                    imm.showSoftInput (this, InputMethodManager.SHOW_FORCED);
+                if (type.length() > 0)
+                {
+                    imm.showSoftInput (this, android.view.inputmethod.InputMethodManager.SHOW_IMPLICIT);
+                    imm.setInputMethod (getWindowToken(), type);
+                }
                 else
+                {
                     imm.hideSoftInputFromWindow (getWindowToken(), 0);
+                }
             }
         }
 

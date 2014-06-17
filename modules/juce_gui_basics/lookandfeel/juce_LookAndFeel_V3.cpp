@@ -30,8 +30,8 @@ LookAndFeel_V3::LookAndFeel_V3()
     setColour (TextButton::buttonColourId, textButtonColour);
     setColour (ComboBox::buttonColourId, textButtonColour);
     setColour (TextEditor::outlineColourId, Colours::transparentBlack);
-    setColour (TabbedButtonBar::tabOutlineColourId, Colour (0xff999999));
-    setColour (TabbedComponent::outlineColourId, Colour (0xff999999));
+    setColour (TabbedButtonBar::tabOutlineColourId, Colour (0x66000000));
+    setColour (TabbedComponent::outlineColourId, Colour (0x66000000));
     setColour (Slider::trackColourId, Colour (0xbbffffff));
     setColour (Slider::thumbColourId, Colour (0xffddddff));
     setColour (BubbleComponent::backgroundColourId, Colour (0xeeeeeedd));
@@ -225,10 +225,13 @@ void LookAndFeel_V3::drawTabButton (TabBarButton& button, Graphics& g, bool isMo
 
     if (TabbedButtonBar* bar = button.findParentComponentOfClass<TabbedButtonBar>())
     {
-        if (button.isFrontTab() && bar->isColourSpecified (TabbedButtonBar::frontTextColourId))
-            col = bar->findColour (TabbedButtonBar::frontTextColourId);
-        else if (bar->isColourSpecified (TabbedButtonBar::tabTextColourId))
-            col = bar->findColour (TabbedButtonBar::tabTextColourId);
+        TabbedButtonBar::ColourIds colID = button.isFrontTab() ? TabbedButtonBar::frontTextColourId
+                                                               : TabbedButtonBar::tabTextColourId;
+
+        if (bar->isColourSpecified (colID))
+            col = bar->findColour (colID);
+        else if (isColourSpecified (colID))
+            col = findColour (colID);
     }
 
     const Rectangle<float> area (button.getTextArea().toFloat());

@@ -659,7 +659,7 @@ void Component::addToDesktop (int styleWanted, void* nativeWindowToAttachTo)
 
         bool wasFullscreen = false;
         bool wasMinimised = false;
-        ComponentBoundsConstrainer* currentConstainer = nullptr;
+        ComponentBoundsConstrainer* currentConstrainer = nullptr;
         Rectangle<int> oldNonFullScreenBounds;
         int oldRenderingEngine = -1;
 
@@ -669,7 +669,7 @@ void Component::addToDesktop (int styleWanted, void* nativeWindowToAttachTo)
 
             wasFullscreen = peer->isFullScreen();
             wasMinimised = peer->isMinimised();
-            currentConstainer = peer->getConstrainer();
+            currentConstrainer = peer->getConstrainer();
             oldNonFullScreenBounds = peer->getNonFullScreenBounds();
             oldRenderingEngine = peer->getCurrentRenderingEngine();
 
@@ -720,7 +720,7 @@ void Component::addToDesktop (int styleWanted, void* nativeWindowToAttachTo)
                 peer->setAlwaysOnTop (true);
            #endif
 
-            peer->setConstrainer (currentConstainer);
+            peer->setConstrainer (currentConstrainer);
 
             repaint();
             internalHierarchyChanged();

@@ -205,6 +205,8 @@ public:
     void fileDragEnter (const StringArray&, int, int) override;
     /** @internal */
     void fileDragExit (const StringArray&) override;
+    /** @internal */
+    KeyboardFocusTraverser* createFocusTraverser() override;
 
 private:
     //==============================================================================

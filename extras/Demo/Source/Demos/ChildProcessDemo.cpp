@@ -77,8 +77,8 @@ public:
         testResultsBox.setMultiLine (true);
         testResultsBox.setFont (Font (Font::getDefaultMonospacedFontName(), 12.0f, Font::plain));
 
-        logMessage ("This demo uses the ChildProcessMaster and ChildProcessSlave classes to launch and communicate "
-                    "with a child process, sending messages in the form of serialised ValueTree objects." + newLine);
+        logMessage (String ("This demo uses the ChildProcessMaster and ChildProcessSlave classes to launch and communicate "
+                            "with a child process, sending messages in the form of serialised ValueTree objects.") + newLine);
     }
 
     ~ChildProcessDemo()

@@ -54,7 +54,7 @@ public:
         (e.g. VST shells) can use a single DLL to create a set of different plugin
         subtypes, so in that case, each subtype is returned as a separate object.
     */
-    virtual void findAllTypesForFile (OwnedArray <PluginDescription>& results,
+    virtual void findAllTypesForFile (OwnedArray<PluginDescription>& results,
                                       const String& fileOrIdentifier) = 0;
 
     /** Tries to recreate a type from a previously generated PluginDescription.

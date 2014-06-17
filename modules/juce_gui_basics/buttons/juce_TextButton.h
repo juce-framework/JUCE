@@ -44,11 +44,16 @@ public:
         @param buttonName           the text to put in the button (the component's name is also
                                     initially set to this string, but these can be changed later
                                     using the setName() and setButtonText() methods)
-        @param toolTip              an optional string to use as a toolip
-        @see Button
     */
-    explicit TextButton (const String& buttonName,
-                         const String& toolTip = String::empty);
+    explicit TextButton (const String& buttonName);
+
+    /** Creates a TextButton.
+        @param buttonName           the text to put in the button (the component's name is also
+                                    initially set to this string, but these can be changed later
+                                    using the setName() and setButtonText() methods)
+        @param toolTip              an optional string to use as a toolip
+    */
+    TextButton (const String& buttonName, const String& toolTip);
 
     /** Destructor. */
     ~TextButton();
@@ -74,17 +79,20 @@ public:
     };
 
     //==============================================================================
-    /** Resizes the button to fit neatly around its current text.
-        If newHeight is >= 0, the button's height will be changed to this
-        value. If it's less than zero, its height will be unaffected.
+    /** Changes this button's width to fit neatly around its current text, without
+        changing its height.
     */
-    void changeWidthToFitText (int newHeight = -1);
+    void changeWidthToFitText();
 
-    /** This can be overridden to use different fonts than the default one.
-        Note that you'll need to set the font's size appropriately, too.
+    /** Resizes the button's width to fit neatly around its current text, and gives it
+        the specified height.
     */
-    virtual Font getFont();
+    void changeWidthToFitText (int newHeight);
 
+    /** Returns the width that the LookAndFeel suggests would be best for this button if it
+        had the given height.
+    */
+    int getBestWidthForHeight (int buttonHeight);
 
     //==============================================================================
     /** @internal */
@@ -93,6 +101,11 @@ public:
     void colourChanged() override;
 
 private:
+   #if JUCE_CATCH_DEPRECATED_CODE_MISUSE
+    // Note that this method has been removed - instead, see LookAndFeel::getTextButtonWidthToFitText()
+    virtual int getFont() { return 0; }
+   #endif
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TextButton)
 };
 

@@ -1136,8 +1136,7 @@ public:
 
     bool isFocused() const override
     {
-        return isSharedWindow ? this == currentlyFocusedPeer
-                              : [window isKeyWindow];
+        return this == currentlyFocusedPeer;
     }
 
     void grabFocus() override
@@ -1151,7 +1150,7 @@ public:
         }
     }
 
-    void textInputRequired (const Point<int>&) override {}
+    void textInputRequired (Point<int>, TextInputTarget&) override {}
 
     //==============================================================================
     void repaint (const Rectangle<int>& area) override

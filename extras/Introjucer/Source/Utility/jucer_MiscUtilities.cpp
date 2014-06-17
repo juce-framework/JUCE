@@ -164,7 +164,7 @@ String replacePreprocessorDefs (const StringPairArray& definitions, String sourc
 StringArray getSearchPathsFromString (const String& searchPath)
 {
     StringArray s;
-    s.addTokens (searchPath, ";\r\n", String::empty);
+    s.addTokens (searchPath, ";\r\n", StringRef());
     s.trim();
     s.removeEmptyStrings();
     s.removeDuplicates (false);
@@ -494,18 +494,6 @@ void showSVGPathDataToolWindow (ScopedPointer<Component>& ownerPointer)
 }
 
 //==============================================================================
-bool cancelAnyModalComponents()
-{
-    ModalComponentManager& mm = *ModalComponentManager::getInstance();
-    const int numModal = mm.getNumModalComponents();
-
-    for (int i = numModal; --i >= 0;)
-        if (Component* c = mm.getModalComponent(i))
-            c->exitModalState (0);
-
-    return numModal > 0;
-}
-
 class AsyncCommandRetrier  : public Timer
 {
 public:
@@ -530,7 +518,7 @@ public:
 
 bool reinvokeCommandAfterCancellingModalComps (const ApplicationCommandTarget::InvocationInfo& info)
 {
-    if (cancelAnyModalComponents())
+    if (ModalComponentManager::getInstance()->cancelAllModalComponents())
     {
         new AsyncCommandRetrier (info);
         return true;

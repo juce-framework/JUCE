@@ -74,7 +74,7 @@ public:
         You can call Value::referTo() on this object to make the label read and control
         a Value object that you supply.
     */
-    Value& getTextValue()                               { return textValue; }
+    Value& getTextValue() noexcept                          { return textValue; }
 
     //==============================================================================
     /** Changes the font to use to draw the text.
@@ -109,25 +109,21 @@ public:
 
     //==============================================================================
     /** Sets the style of justification to be used for positioning the text.
-
         (The default is Justification::centredLeft)
     */
     void setJustificationType (Justification justification);
 
     /** Returns the type of justification, as set in setJustificationType(). */
-    Justification getJustificationType() const noexcept                         { return justification; }
+    Justification getJustificationType() const noexcept                 { return justification; }
 
-    /** Changes the gap that is left between the edge of the component and the text.
+    /** Changes the border that is left between the edge of the component and the text.
         By default there's a small gap left at the sides of the component to allow for
         the drawing of the border, but you can change this if necessary.
     */
-    void setBorderSize (int horizontalBorder, int verticalBorder);
+    void setBorderSize (BorderSize<int> newBorderSize);
 
-    /** Returns the size of the horizontal gap being left around the text. */
-    int getHorizontalBorderSize() const noexcept                                { return horizontalBorderSize; }
-
-    /** Returns the size of the vertical gap being left around the text. */
-    int getVerticalBorderSize() const noexcept                                  { return verticalBorderSize; }
+    /** Returns the size of the border to be left around the text. */
+    BorderSize<int> getBorderSize() const noexcept                      { return border; }
 
     /** Makes this label "stick to" another component.
 
@@ -152,16 +148,17 @@ public:
         Returns false if the label is above the other component. This is only relevent if
         attachToComponent() has been called.
     */
-    bool isAttachedOnLeft() const noexcept                                      { return leftOfOwnerComp; }
+    bool isAttachedOnLeft() const noexcept                              { return leftOfOwnerComp; }
 
-    /** Specifies the minimum amount that the font can be squashed horizantally before it starts
+    /** Specifies the minimum amount that the font can be squashed horizontally before it starts
         using ellipsis.
 
         @see Graphics::drawFittedText
     */
     void setMinimumHorizontalScale (float newScale);
 
-    float getMinimumHorizontalScale() const noexcept                            { return minimumHorizontalScale; }
+    /** Specifies the amount that the font can be squashed horizontally. */
+    float getMinimumHorizontalScale() const noexcept                    { return minimumHorizontalScale; }
 
     //==============================================================================
     /**
@@ -182,6 +179,9 @@ public:
 
         /** Called when a Label's text has changed. */
         virtual void labelTextChanged (Label* labelThatHasChanged) = 0;
+
+        /** Called when a Label goes into editing mode and displays a TextEditor. */
+        virtual void editorShown (Label*, TextEditor& textEditorShown);
     };
 
     /** Registers a listener that will be called when the label's text changes. */
@@ -228,7 +228,6 @@ public:
     bool isEditable() const noexcept                                    { return editSingleClick || editDoubleClick; }
 
     /** Makes the editor appear as if the label had been clicked by the user.
-
         @see textWasEdited, setEditable
     */
     void showEditor();
@@ -327,7 +326,7 @@ private:
     ScopedPointer<TextEditor> editor;
     ListenerList<Listener> listeners;
     WeakReference<Component> ownerComponent;
-    int horizontalBorderSize, verticalBorderSize;
+    BorderSize<int> border;
     float minimumHorizontalScale;
     bool editSingleClick;
     bool editDoubleClick;

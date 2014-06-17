@@ -358,12 +358,12 @@ void LibraryModule::prepareExporter (ProjectExporter& exporter, ProjectSaver& pr
             exporter.xcodeFrameworks.addTokens ("AudioUnit CoreAudioKit", false);
 
         const String frameworks (moduleInfo.moduleInfo [exporter.isOSX() ? "OSXFrameworks" : "iOSFrameworks"].toString());
-        exporter.xcodeFrameworks.addTokens (frameworks, ", ", String::empty);
+        exporter.xcodeFrameworks.addTokens (frameworks, ", ", StringRef());
     }
     else if (exporter.isLinux())
     {
         const String libs (moduleInfo.moduleInfo ["LinuxLibs"].toString());
-        exporter.linuxLibs.addTokens (libs, ", ", String::empty);
+        exporter.linuxLibs.addTokens (libs, ", ", StringRef());
         exporter.linuxLibs.trim();
         exporter.linuxLibs.sort (false);
         exporter.linuxLibs.removeDuplicates (false);
@@ -371,7 +371,7 @@ void LibraryModule::prepareExporter (ProjectExporter& exporter, ProjectSaver& pr
     else if (exporter.isCodeBlocks())
     {
         const String libs (moduleInfo.moduleInfo ["mingwLibs"].toString());
-        exporter.mingwLibs.addTokens (libs, ", ", String::empty);
+        exporter.mingwLibs.addTokens (libs, ", ", StringRef());
         exporter.mingwLibs.trim();
         exporter.mingwLibs.sort (false);
         exporter.mingwLibs.removeDuplicates (false);

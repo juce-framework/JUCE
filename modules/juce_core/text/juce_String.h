@@ -1218,6 +1218,11 @@ public:
     String convertToPrecomposedUnicode() const;
    #endif
 
+    /** Returns the number of String objects which are currently sharing the same internal
+        data as this one.
+    */
+    int getReferenceCount() const noexcept;
+
 private:
     //==============================================================================
     CharPointerType text;
@@ -1225,7 +1230,7 @@ private:
     //==============================================================================
     struct PreallocationBytes
     {
-        explicit PreallocationBytes (size_t);
+        explicit PreallocationBytes (size_t) noexcept;
         size_t numBytes;
     };
 

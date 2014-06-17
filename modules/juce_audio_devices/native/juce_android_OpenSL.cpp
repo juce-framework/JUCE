@@ -80,7 +80,7 @@ public:
 
     Array<double> getAvailableSampleRates() override
     {
-        static const double rates[]       = { 8000.0, 16000.0, 32000.0, 44100.0, 48000.0 };
+        static const double rates[] = { 8000.0, 16000.0, 32000.0, 44100.0, 48000.0 };
         return Array<double> (rates, numElementsInArray (rates));
     }
 
@@ -165,6 +165,33 @@ public:
             oldCallback->audioDeviceStopped();
     }
 
+    bool setAudioPreprocessingEnabled (bool enable) override
+    {
+        return recorder != nullptr && recorder->setAudioPreprocessingEnabled (enable);
+    }
+
+private:
+    //==================================================================================================
+    CriticalSection callbackLock;
+    AudioIODeviceCallback* callback;
+    int actualBufferSize, sampleRate;
+    int inputLatency, outputLatency;
+    bool deviceOpen;
+    String lastError;
+    BigInteger activeOutputChans, activeInputChans;
+    int numInputChannels, numOutputChannels;
+    AudioSampleBuffer inputBuffer, outputBuffer;
+    struct Player;
+    struct Recorder;
+
+    AudioIODeviceCallback* setCallback (AudioIODeviceCallback* const newCallback)
+    {
+        const ScopedLock sl (callbackLock);
+        AudioIODeviceCallback* const oldCallback = callback;
+        callback = newCallback;
+        return oldCallback;
+    }
+
     void run() override
     {
         if (recorder != nullptr)    recorder->start();
@@ -190,28 +217,6 @@ public:
         }
     }
 
-private:
-    //==================================================================================================
-    CriticalSection callbackLock;
-    AudioIODeviceCallback* callback;
-    int actualBufferSize, sampleRate;
-    int inputLatency, outputLatency;
-    bool deviceOpen;
-    String lastError;
-    BigInteger activeOutputChans, activeInputChans;
-    int numInputChannels, numOutputChannels;
-    AudioSampleBuffer inputBuffer, outputBuffer;
-    struct Player;
-    struct Recorder;
-
-    AudioIODeviceCallback* setCallback (AudioIODeviceCallback* const newCallback)
-    {
-        const ScopedLock sl (callbackLock);
-        AudioIODeviceCallback* const oldCallback = callback;
-        callback = newCallback;
-        return oldCallback;
-    }
-
     //==================================================================================================
     struct Engine
     {
@@ -230,6 +235,7 @@ private:
                     SL_IID_ANDROIDSIMPLEBUFFERQUEUE = (SLInterfaceID*) library.getFunction ("SL_IID_ANDROIDSIMPLEBUFFERQUEUE");
                     SL_IID_PLAY                     = (SLInterfaceID*) library.getFunction ("SL_IID_PLAY");
                     SL_IID_RECORD                   = (SLInterfaceID*) library.getFunction ("SL_IID_RECORD");
+                    SL_IID_ANDROIDCONFIGURATION     = (SLInterfaceID*) library.getFunction ("SL_IID_ANDROIDCONFIGURATION");
 
                     check ((*engineObject)->Realize (engineObject, SL_BOOLEAN_FALSE));
                     check ((*engineObject)->GetInterface (engineObject, *SL_IID_ENGINE, &engineInterface));
@@ -271,6 +277,7 @@ private:
         SLInterfaceID* SL_IID_ANDROIDSIMPLEBUFFERQUEUE;
         SLInterfaceID* SL_IID_PLAY;
         SLInterfaceID* SL_IID_RECORD;
+        SLInterfaceID* SL_IID_ANDROIDCONFIGURATION;
 
     private:
         DynamicLibrary library;
@@ -434,7 +441,8 @@ private:
     struct Recorder
     {
         Recorder (int numChannels, int sampleRate, Engine& engine)
-            : recorderObject (nullptr), recorderRecord (nullptr), recorderBufferQueue (nullptr),
+            : recorderObject (nullptr), recorderRecord (nullptr),
+              recorderBufferQueue (nullptr), configObject (nullptr),
               bufferList (numChannels)
         {
             jassert (numChannels == 1); // STEREO doesn't always work!!
@@ -466,6 +474,7 @@ private:
                 {
                     check ((*recorderObject)->GetInterface (recorderObject, *engine.SL_IID_RECORD, &recorderRecord));
                     check ((*recorderObject)->GetInterface (recorderObject, *engine.SL_IID_ANDROIDSIMPLEBUFFERQUEUE, &recorderBufferQueue));
+                    check ((*recorderObject)->GetInterface (recorderObject, *engine.SL_IID_ANDROIDCONFIGURATION, &configObject));
                     check ((*recorderBufferQueue)->RegisterCallback (recorderBufferQueue, staticCallback, this));
                     check ((*recorderRecord)->SetRecordState (recorderRecord, SL_RECORDSTATE_STOPPED));
 
@@ -532,10 +541,20 @@ private:
             }
         }
 
+        bool setAudioPreprocessingEnabled (bool enable)
+        {
+            SLuint32 mode = enable ? SL_ANDROID_RECORDING_PRESET_GENERIC
+                                   : SL_ANDROID_RECORDING_PRESET_VOICE_RECOGNITION;
+
+            return configObject != nullptr
+                     && check ((*configObject)->SetConfiguration (configObject, SL_ANDROID_KEY_RECORDING_PRESET, &mode, sizeof (mode)));
+        }
+
     private:
         SLObjectItf recorderObject;
         SLRecordItf recorderRecord;
         SLAndroidSimpleBufferQueueItf recorderBufferQueue;
+        SLAndroidConfigurationItf configObject;
 
         BufferList bufferList;
 

@@ -388,11 +388,11 @@ public:
 
 private:
     //==============================================================================
-    ReferenceCountedArray <Node> nodes;
-    OwnedArray <Connection> connections;
+    ReferenceCountedArray<Node> nodes;
+    OwnedArray<Connection> connections;
     uint32 lastNodeId;
     AudioSampleBuffer renderingBuffers;
-    OwnedArray <MidiBuffer> midiBuffers;
+    OwnedArray<MidiBuffer> midiBuffers;
     Array<void*> renderingOps;
 
     friend class AudioGraphIOProcessor;

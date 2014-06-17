@@ -205,8 +205,8 @@ protected:
         {
             if (iOS)
             {
-                const char* iosVersions[]      = { "Use Default",     "3.2", "4.0", "4.1", "4.2", "4.3", "5.0", "5.1", 0 };
-                const char* iosVersionValues[] = { osxVersionDefault, "3.2", "4.0", "4.1", "4.2", "4.3", "5.0", "5.1", 0 };
+                const char* iosVersions[]      = { "Use Default",     "3.2", "4.0", "4.1", "4.2", "4.3", "5.0", "5.1", "6.0", "6.1", "7.0", "7.1", 0 };
+                const char* iosVersionValues[] = { osxVersionDefault, "3.2", "4.0", "4.1", "4.2", "4.3", "5.0", "5.1", "6.0", "6.1", "7.0", "7.1", 0 };
 
                 props.add (new ChoicePropertyComponent (getiOSCompatibilityVersionValue(), "iOS Deployment Target",
                                                         StringArray (iosVersions), Array<var> (iosVersionValues)),
@@ -680,6 +680,10 @@ private:
             s.add ("GCC_INLINES_ARE_PRIVATE_EXTERN = YES");
         }
 
+        if (config.isDebug())
+             if (config.getMacArchitecture() == osxArch_Default || config.getMacArchitecture().isEmpty())
+                 s.add ("ONLY_ACTIVE_ARCH = YES");
+
         if (iOS)
         {
             s.add ("\"CODE_SIGN_IDENTITY[sdk=iphoneos*]\" = \"iPhone Developer\"");
@@ -812,11 +816,6 @@ private:
         {
             defines.set ("_DEBUG", "1");
             defines.set ("DEBUG", "1");
-
-            if (config.getMacArchitecture() == osxArch_Default
-                 || config.getMacArchitecture().isEmpty())
-                s.add ("ONLY_ACTIVE_ARCH = YES");
-
             s.add ("COPY_PHASE_STRIP = NO");
             s.add ("GCC_DYNAMIC_NO_PIC = NO");
         }
@@ -861,6 +860,9 @@ private:
         {
             StringArray s (xcodeFrameworks);
             s.addTokens (getExtraFrameworksString(), ",;", "\"'");
+
+            if (project.getConfigFlag ("JUCE_QUICKTIME") == Project::configFlagDisabled)
+                s.removeString ("QuickTime");
 
             s.trim();
             s.removeDuplicates (true);

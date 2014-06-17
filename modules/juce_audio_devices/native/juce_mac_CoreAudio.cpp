@@ -144,6 +144,7 @@ public:
        : owner (d),
          inputLatency (0),
          outputLatency (0),
+         bitDepth (32),
          callback (nullptr),
         #if MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_5
          audioProcID (0),
@@ -352,6 +353,22 @@ public:
         return (int) lat;
     }
 
+    int getBitDepthFromDevice (AudioObjectPropertyScope scope) const
+    {
+        AudioObjectPropertyAddress pa;
+        pa.mElement = kAudioObjectPropertyElementMaster;
+        pa.mSelector = kAudioStreamPropertyPhysicalFormat;
+        pa.mScope = scope;
+
+        AudioStreamBasicDescription asbd;
+        UInt32 size = sizeof (asbd);
+
+        if (OK (AudioObjectGetPropertyData (deviceID, &pa, 0, nullptr, &size, &asbd)))
+            return (int) asbd.mBitsPerChannel;
+
+        return 0;
+    }
+
     void updateDetailsFromDevice()
     {
         stopTimer();
@@ -391,6 +408,13 @@ public:
         Array<CallbackDetailsForChannel> newInChans, newOutChans;
         StringArray newInNames  (getChannelInfo (true,  newInChans));
         StringArray newOutNames (getChannelInfo (false, newOutChans));
+
+        const int inputBitDepth = getBitDepthFromDevice (kAudioDevicePropertyScopeInput);
+        const int outputBitDepth = getBitDepthFromDevice (kAudioDevicePropertyScopeOutput);
+
+        bitDepth = jmax (inputBitDepth, outputBitDepth);
+        if (bitDepth <= 0)
+            bitDepth = 32;
 
         // after getting the new values, lock + apply them
         const ScopedLock sl (callbackLock);
@@ -728,6 +752,7 @@ public:
     //==============================================================================
     CoreAudioIODevice& owner;
     int inputLatency, outputLatency;
+    int bitDepth;
     BigInteger activeInputChans, activeOutputChans;
     StringArray inChanNames, outChanNames;
     Array<double> sampleRates;
@@ -886,7 +911,7 @@ public:
     Array<int> getAvailableBufferSizes() override       { return internal->bufferSizes; }
 
     double getCurrentSampleRate() override              { return internal->getSampleRate(); }
-    int getCurrentBitDepth() override                   { return 32; }  // no way to find out, so just assume it's high..
+    int getCurrentBitDepth() override                   { return internal->bitDepth; }
     int getCurrentBufferSizeSamples() override          { return internal->getBufferSize(); }
 
     int getDefaultBufferSize() override
@@ -1387,7 +1412,7 @@ private:
             d.done = (d.numInputChans == 0);
         }
 
-        for (int tries = 3;;)
+        for (int tries = 5;;)
         {
             bool anyRemaining = false;
 
@@ -1434,7 +1459,7 @@ private:
             d.done = (d.numOutputChans == 0);
         }
 
-        for (int tries = 3;;)
+        for (int tries = 5;;)
         {
             bool anyRemaining = false;
 

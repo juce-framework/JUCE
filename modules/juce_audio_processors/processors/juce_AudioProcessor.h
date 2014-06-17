@@ -44,11 +44,7 @@ class JUCE_API  AudioProcessor
 {
 protected:
     //==============================================================================
-    /** Constructor.
-
-        You can also do your initialisation tasks in the initialiseFilterInfo()
-        call, which will be made after this object has been created.
-    */
+    /** Constructor. */
     AudioProcessor();
 
 public:
@@ -435,6 +431,11 @@ public:
     */
     virtual String getParameterLabel (int index) const;
 
+    /** This can be overridden to tell the host that particular parameters operate in the
+        reverse direction. (Not all plugin formats or hosts will actually use this information).
+    */
+    virtual bool isParameterOrientationInverted (int index) const;
+
     /** The host will call this method to change the value of one of the filter's parameters.
 
         The host may call this at any time, including during the audio processing
@@ -463,16 +464,13 @@ public:
     void setParameterNotifyingHost (int parameterIndex, float newValue);
 
     /** Returns true if the host can automate this parameter.
-
         By default, this returns true for all parameters.
     */
     virtual bool isParameterAutomatable (int parameterIndex) const;
 
     /** Should return true if this parameter is a "meta" parameter.
-
         A meta-parameter is a parameter that changes other params. It is used
         by some hosts (e.g. AudioUnit hosts).
-
         By default this returns false.
     */
     virtual bool isMetaParameter (int parameterIndex) const;
