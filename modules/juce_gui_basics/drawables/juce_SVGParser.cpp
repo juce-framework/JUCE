@@ -54,7 +54,7 @@ public:
 
         DrawableComposite* const drawable = new DrawableComposite();
 
-        drawable->setName (xml->getStringAttribute ("id"));
+        setDrawableID (*drawable, xml);
 
         SVGState newState (*this);
 
@@ -363,6 +363,13 @@ private:
     AffineTransform transform;
     String cssStyleText;
 
+    static void setDrawableID (Drawable& d, const XmlPath& xml)
+    {
+        String compID (xml->getStringAttribute ("id"));
+        d.setName (compID);
+        d.setComponentID (compID);
+    }
+
     //==============================================================================
     void parseSubElements (const XmlPath& xml, DrawableComposite& parentDrawable)
     {
@@ -402,7 +409,7 @@ private:
     {
         DrawableComposite* const drawable = new DrawableComposite();
 
-        drawable->setName (xml->getStringAttribute ("id"));
+        setDrawableID (*drawable, xml);
 
         if (xml->hasAttribute ("transform"))
         {
@@ -547,7 +554,7 @@ private:
         }
 
         DrawablePath* dp = new DrawablePath();
-        dp->setName (xml->getStringAttribute ("id"));
+        setDrawableID (*dp, xml);
         dp->setFill (Colours::transparentBlack);
 
         path.applyTransform (transform);
