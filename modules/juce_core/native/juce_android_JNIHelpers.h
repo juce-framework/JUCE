@@ -271,26 +271,33 @@ public:
 
     JNIEnv* attach() noexcept
     {
-        if (JNIEnv* env = attachToCurrentThread())
+        if (android.activity != nullptr)
         {
-            SpinLock::ScopedLockType sl (addRemoveLock);
-            return addEnv (env);
+            if (JNIEnv* env = attachToCurrentThread())
+            {
+                SpinLock::ScopedLockType sl (addRemoveLock);
+                return addEnv (env);
+            }
+
+            jassertfalse;
         }
 
-        jassertfalse;
         return nullptr;
     }
 
     void detach() noexcept
     {
-        jvm->DetachCurrentThread();
+        if (android.activity != nullptr)
+        {
+            jvm->DetachCurrentThread();
 
-        const pthread_t thisThread = pthread_self();
+            const pthread_t thisThread = pthread_self();
 
-        SpinLock::ScopedLockType sl (addRemoveLock);
-        for (int i = 0; i < maxThreads; ++i)
-            if (threads[i] == thisThread)
-                threads[i] = 0;
+            SpinLock::ScopedLockType sl (addRemoveLock);
+            for (int i = 0; i < maxThreads; ++i)
+                if (threads[i] == thisThread)
+                    threads[i] = 0;
+        }
     }
 
     JNIEnv* getOrAttach() noexcept
