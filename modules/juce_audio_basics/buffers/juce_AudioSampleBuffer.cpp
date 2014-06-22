@@ -163,6 +163,8 @@ AudioSampleBuffer& AudioSampleBuffer::operator= (const AudioSampleBuffer& other)
         }
         else
         {
+            isClear = false;
+
             for (int i = 0; i < numChannels; ++i)
                 FloatVectorOperations::copy (channels[i], other.channels[i], size);
         }
