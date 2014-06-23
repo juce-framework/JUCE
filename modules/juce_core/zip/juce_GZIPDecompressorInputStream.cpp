@@ -90,7 +90,7 @@ namespace zlibNamespace
 class GZIPDecompressorInputStream::GZIPDecompressHelper
 {
 public:
-    GZIPDecompressHelper (const bool dontWrap)
+    GZIPDecompressHelper()
         : finished (true),
           needsDictionary (false),
           error (true),
@@ -100,7 +100,7 @@ public:
     {
         using namespace zlibNamespace;
         zerostruct (stream);
-        streamIsValid = (inflateInit2 (&stream, dontWrap ? -MAX_WBITS : MAX_WBITS) == Z_OK);
+        streamIsValid = (inflateInit2 (&stream, MAX_WBITS + 32 /* auto-detect gzip encoding */) == Z_OK);
         finished = error = ! streamIsValid;
     }
 
@@ -172,30 +172,27 @@ private:
 //==============================================================================
 GZIPDecompressorInputStream::GZIPDecompressorInputStream (InputStream* const source,
                                                           const bool deleteSourceWhenDestroyed,
-                                                          const bool noWrap_,
-                                                          const int64 uncompressedStreamLength_)
+                                                          const int64 uncompressedLength)
   : sourceStream (source, deleteSourceWhenDestroyed),
-    uncompressedStreamLength (uncompressedStreamLength_),
-    noWrap (noWrap_),
+    uncompressedStreamLength (uncompressedLength),
     isEof (false),
     activeBufferSize (0),
     originalSourcePos (source->getPosition()),
     currentPos (0),
     buffer ((size_t) GZIPDecompressHelper::gzipDecompBufferSize),
-    helper (new GZIPDecompressHelper (noWrap_))
+    helper (new GZIPDecompressHelper())
 {
 }
 
 GZIPDecompressorInputStream::GZIPDecompressorInputStream (InputStream& source)
   : sourceStream (&source, false),
     uncompressedStreamLength (-1),
-    noWrap (false),
     isEof (false),
     activeBufferSize (0),
     originalSourcePos (source.getPosition()),
     currentPos (0),
     buffer ((size_t) GZIPDecompressHelper::gzipDecompBufferSize),
-    helper (new GZIPDecompressHelper (false))
+    helper (new GZIPDecompressHelper())
 {
 }
 
@@ -278,7 +275,7 @@ bool GZIPDecompressorInputStream::setPosition (int64 newPos)
         isEof = false;
         activeBufferSize = 0;
         currentPos = 0;
-        helper = new GZIPDecompressHelper (noWrap);
+        helper = new GZIPDecompressHelper();
 
         sourceStream->setPosition (originalSourcePos);
     }
