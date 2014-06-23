@@ -1449,6 +1449,8 @@ public:
     ~VST3PluginWindow()
     {
         warnOnFailure (view->removed());
+        warnOnFailure (view->setFrame (nullptr));
+
         getAudioProcessor()->editorBeingDeleted (this);
 
        #if JUCE_MAC

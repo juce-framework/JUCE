@@ -312,12 +312,12 @@ bool Desktop::canUseSemiTransparentWindows() noexcept
     return true;
 }
 
-Point<int> MouseInputSource::getCurrentRawMousePosition()
+Point<float> MouseInputSource::getCurrentRawMousePosition()
 {
     return juce_lastMousePos;
 }
 
-void MouseInputSource::setRawMousePosition (Point<int>)
+void MouseInputSource::setRawMousePosition (Point<float>)
 {
 }
 

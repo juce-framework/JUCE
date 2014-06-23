@@ -222,7 +222,7 @@ struct FileInfoComparator
             return first->isDirectory ? -1 : 1;
        #endif
 
-        return first->filename.compareIgnoreCase (second->filename);
+        return first->filename.compareNatural (second->filename);
     }
 };
 

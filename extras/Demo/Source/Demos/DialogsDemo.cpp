@@ -209,7 +209,7 @@ private:
             AlertWindow::showMessageBoxAsync (icon,
                                               "This is an AlertWindow",
                                               "And this is the AlertWindow's message. Blah blah blah blah blah blah blah blah blah blah blah blah blah.",
-                                              "ok");
+                                              "OK");
         }
         else if (type == okCancelAlertWindow)
         {
@@ -243,8 +243,8 @@ private:
             const char* options[] = { "option 1", "option 2", "option 3", "option 4", nullptr };
             w.addComboBox ("option", StringArray (options), "some options");
 
-            w.addButton ("ok",     1, KeyPress (KeyPress::returnKey, 0, 0));
-            w.addButton ("cancel", 0, KeyPress (KeyPress::escapeKey, 0, 0));
+            w.addButton ("OK",     1, KeyPress (KeyPress::returnKey, 0, 0));
+            w.addButton ("Cancel", 0, KeyPress (KeyPress::escapeKey, 0, 0));
 
             if (w.runModalLoop() != 0) // is they picked 'ok'
             {

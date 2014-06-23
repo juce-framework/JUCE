@@ -295,14 +295,14 @@ public:
         return getBounds (! isSharedWindow);
     }
 
-    Point<int> localToGlobal (Point<int> relativePosition) override
+    Point<float> localToGlobal (Point<float> relativePosition) override
     {
-        return relativePosition + getBounds (true).getPosition();
+        return relativePosition + getBounds (true).getPosition().toFloat();
     }
 
-    Point<int> globalToLocal (Point<int> screenPosition) override
+    Point<float> globalToLocal (Point<float> screenPosition) override
     {
-        return screenPosition - getBounds (true).getPosition();
+        return screenPosition - getBounds (true).getPosition().toFloat();
     }
 
     void setAlpha (float newAlpha) override
@@ -559,7 +559,7 @@ public:
                   belowWindowWithWindowNumber: 0] != [window windowNumber])
         {
             // moved into another window which overlaps this one, so trigger an exit
-            handleMouseEvent (0, Point<int> (-1, -1), currentModifiers, getMouseTime (ev));
+            handleMouseEvent (0, Point<float> (-1.0f, -1.0f), currentModifiers, getMouseTime (ev));
         }
         else
        #endif
@@ -936,7 +936,7 @@ public:
         MouseInputSource mouse = desktop.getMainMouseSource();
 
         if (mouse.getComponentUnderMouse() == nullptr
-             && desktop.findComponentAt (mouse.getScreenPosition()) == nullptr)
+             && desktop.findComponentAt (mouse.getScreenPosition().roundToInt()) == nullptr)
         {
             [[NSCursor arrowCursor] set];
         }
@@ -1010,10 +1010,10 @@ public:
                 + (int64) ([e timestamp] * 1000.0);
     }
 
-    static Point<int> getMousePos (NSEvent* e, NSView* view)
+    static Point<float> getMousePos (NSEvent* e, NSView* view)
     {
         NSPoint p = [view convertPoint: [e locationInWindow] fromView: nil];
-        return Point<int> ((int) p.x, (int) ([view frame].size.height - p.y));
+        return Point<float> (p.x, [view frame].size.height - p.y);
     }
 
     static int getModifierForButtonNumber (const NSInteger num)
@@ -1136,7 +1136,9 @@ public:
 
     bool isFocused() const override
     {
-        return this == currentlyFocusedPeer;
+        return (isSharedWindow || ! JUCEApplication::isStandaloneApp())
+                    ? this == currentlyFocusedPeer
+                    : [window isKeyWindow];
     }
 
     void grabFocus() override
@@ -1686,21 +1688,22 @@ private:
 };
 
 //==============================================================================
-struct JuceNSWindowClass   : public ObjCClass <NSWindow>
+struct JuceNSWindowClass   : public ObjCClass<NSWindow>
 {
-    JuceNSWindowClass()  : ObjCClass <NSWindow> ("JUCEWindow_")
+    JuceNSWindowClass()  : ObjCClass<NSWindow> ("JUCEWindow_")
     {
         addIvar<NSViewComponentPeer*> ("owner");
 
-        addMethod (@selector (canBecomeKeyWindow),            canBecomeKeyWindow,    "c@:");
-        addMethod (@selector (becomeKeyWindow),               becomeKeyWindow,       "v@:");
-        addMethod (@selector (windowShouldClose:),            windowShouldClose,     "c@:@");
-        addMethod (@selector (constrainFrameRect:toScreen:),  constrainFrameRect,    @encode (NSRect), "@:",  @encode (NSRect), "@");
-        addMethod (@selector (windowWillResize:toSize:),      windowWillResize,      @encode (NSSize), "@:@", @encode (NSSize));
-        addMethod (@selector (zoom:),                         zoom,                  "v@:@");
-        addMethod (@selector (windowWillMove:),               windowWillMove,        "v@:@");
+        addMethod (@selector (canBecomeKeyWindow),            canBecomeKeyWindow,        "c@:");
+        addMethod (@selector (becomeKeyWindow),               becomeKeyWindow,           "v@:");
+        addMethod (@selector (windowShouldClose:),            windowShouldClose,         "c@:@");
+        addMethod (@selector (constrainFrameRect:toScreen:),  constrainFrameRect,        @encode (NSRect), "@:",  @encode (NSRect), "@");
+        addMethod (@selector (windowWillResize:toSize:),      windowWillResize,          @encode (NSSize), "@:@", @encode (NSSize));
+        addMethod (@selector (windowDidExitFullScreen:),      windowDidExitFullScreen,   "v@:@");
+        addMethod (@selector (zoom:),                         zoom,                      "v@:@");
+        addMethod (@selector (windowWillMove:),               windowWillMove,            "v@:@");
         addMethod (@selector (windowWillStartLiveResize:),    windowWillStartLiveResize, "v@:@");
-        addMethod (@selector (windowDidEndLiveResize:),       windowDidEndLiveResize, "v@:@");
+        addMethod (@selector (windowDidEndLiveResize:),       windowDidEndLiveResize,    "v@:@");
 
        #if defined (MAC_OS_X_VERSION_10_6) && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_6
         addProtocol (@protocol (NSWindowDelegate));
@@ -1764,6 +1767,11 @@ private:
             owner->sendModalInputAttemptIfBlocked();
 
         return frameRect.size;
+    }
+
+    static void windowDidExitFullScreen (id, SEL, NSNotification*)
+    {
+        [NSApp setPresentationOptions: NSApplicationPresentationDefault];
     }
 
     static void zoom (id self, SEL, id sender)
@@ -1864,7 +1872,7 @@ bool MouseInputSource::SourceList::addSource()
 }
 
 //==============================================================================
-void Desktop::setKioskComponent (Component* kioskComp, bool enableOrDisable, bool allowMenusAndBars)
+void Desktop::setKioskComponent (Component* kioskComp, bool shouldBeEnabled, bool allowMenusAndBars)
 {
    #if defined (MAC_OS_X_VERSION_10_6) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_6
 
@@ -1875,13 +1883,15 @@ void Desktop::setKioskComponent (Component* kioskComp, bool enableOrDisable, boo
     if (peer->hasNativeTitleBar()
           && [peer->window respondsToSelector: @selector (toggleFullScreen:)])
     {
-        [peer->window performSelector: @selector (toggleFullScreen:)
-                           withObject: [NSNumber numberWithBool: (BOOL) enableOrDisable]];
+        if (shouldBeEnabled && ! allowMenusAndBars)
+            [NSApp setPresentationOptions: NSApplicationPresentationHideDock | NSApplicationPresentationHideMenuBar];
+
+        [peer->window performSelector: @selector (toggleFullScreen:) withObject: nil];
     }
     else
    #endif
     {
-        if (enableOrDisable)
+        if (shouldBeEnabled)
         {
             if (peer->hasNativeTitleBar())
                 [peer->window setStyleMask: NSBorderlessWindowMask];
@@ -1903,9 +1913,7 @@ void Desktop::setKioskComponent (Component* kioskComp, bool enableOrDisable, boo
         }
     }
    #elif JUCE_SUPPORT_CARBON
-    (void) kioskComp; (void) enableOrDisable; (void) allowMenusAndBars;
-
-    if (enableOrDisable)
+    if (shouldBeEnabled)
     {
         SetSystemUIMode (kUIModeAllSuppressed, allowMenusAndBars ? kUIOptionAutoShowMenuBar : 0);
         kioskComp->setBounds (Desktop::getInstance().getDisplays().getMainDisplay().totalArea);
@@ -1915,7 +1923,7 @@ void Desktop::setKioskComponent (Component* kioskComp, bool enableOrDisable, boo
         SetSystemUIMode (kUIModeNormal, 0);
     }
    #else
-    (void) kioskComp; (void) enableOrDisable; (void) allowMenusAndBars;
+    (void) kioskComp; (void) shouldBeEnabled; (void) allowMenusAndBars;
 
     // If you're targeting OSes earlier than 10.6 and want to use this feature,
     // you'll need to enable JUCE_SUPPORT_CARBON.

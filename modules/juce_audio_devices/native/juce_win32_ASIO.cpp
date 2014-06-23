@@ -365,7 +365,7 @@ public:
     void updateSampleRates()
     {
         // find a list of sample rates..
-        const int possibleSampleRates[] = { 44100, 48000, 88200, 96000, 176400, 192000 };
+        const int possibleSampleRates[] = { 44100, 48000, 88200, 96000, 176400, 192000, 352800, 384000 };
         Array<double> newRates;
 
         if (asioObject != nullptr)

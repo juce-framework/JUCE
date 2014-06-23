@@ -346,7 +346,7 @@ void LibraryModule::prepareExporter (ProjectExporter& exporter, ProjectSaver& pr
         findAndAddCompiledCode (exporter, projectSaver, localModuleFolder, compiled);
 
         if (project.getModules().shouldShowAllModuleFilesInProject (getID()).getValue())
-            addBrowsableCode (exporter, projectSaver, compiled, moduleInfo.getFolder());
+            addBrowsableCode (exporter, projectSaver, compiled, localModuleFolder);
     }
 
     if (isVSTPluginHost (project))  VSTHelpers::addVSTFolderToPath (exporter, false);
@@ -481,7 +481,7 @@ struct FileSorter
 {
     static int compareElements (const File& f1, const File& f2)
     {
-        return f1.getFileName().compareIgnoreCase (f2.getFileName());
+        return f1.getFileName().compareNatural (f2.getFileName());
     }
 };
 

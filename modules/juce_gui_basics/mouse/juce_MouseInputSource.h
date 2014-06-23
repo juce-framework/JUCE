@@ -88,7 +88,7 @@ public:
     bool isDragging() const;
 
     /** Returns the last-known screen position of this source. */
-    Point<int> getScreenPosition() const;
+    Point<float> getScreenPosition() const;
 
     /** Returns a set of modifiers that indicate which buttons are currently
         held down on this device.
@@ -114,7 +114,7 @@ public:
     Time getLastMouseDownTime() const noexcept;
 
     /** Returns the screen position at which the last mouse-down occurred. */
-    Point<int> getLastMouseDownPosition() const noexcept;
+    Point<float> getLastMouseDownPosition() const noexcept;
 
     /** Returns true if this mouse is currently down, and if it has been dragged more
         than a couple of pixels from the place it was pressed.
@@ -162,7 +162,7 @@ public:
     bool isUnboundedMouseMovementEnabled() const;
 
     /** Attempts to set this mouse pointer's screen position. */
-    void setScreenPosition (Point<int> newPosition);
+    void setScreenPosition (Point<float> newPosition);
 
 private:
     //==============================================================================
@@ -174,12 +174,12 @@ private:
     struct SourceList;
 
     explicit MouseInputSource (MouseInputSourceInternal*) noexcept;
-    void handleEvent (ComponentPeer&, Point<int>, int64 time, const ModifierKeys);
-    void handleWheel (ComponentPeer&, Point<int>, int64 time, const MouseWheelDetails&);
-    void handleMagnifyGesture (ComponentPeer&, Point<int>, int64 time, float scaleFactor);
+    void handleEvent (ComponentPeer&, Point<float>, int64 time, ModifierKeys);
+    void handleWheel (ComponentPeer&, Point<float>, int64 time, const MouseWheelDetails&);
+    void handleMagnifyGesture (ComponentPeer&, Point<float>, int64 time, float scaleFactor);
 
-    static Point<int> getCurrentRawMousePosition();
-    static void setRawMousePosition (Point<int>);
+    static Point<float> getCurrentRawMousePosition();
+    static void setRawMousePosition (Point<float>);
 
     JUCE_LEAK_DETECTOR (MouseInputSource)
 };
