@@ -57,6 +57,7 @@ public:
     */
     GZIPDecompressorInputStream (InputStream* sourceStream,
                                  bool deleteSourceWhenDestroyed,
+                                 bool noWrap = false,
                                  int64 uncompressedStreamLength = -1);
 
     /** Creates a decompressor stream.
@@ -79,7 +80,8 @@ public:
 private:
     //==============================================================================
     OptionalScopedPointer<InputStream> sourceStream;
-    int64 uncompressedStreamLength;
+    const int64 uncompressedStreamLength;
+    const bool noWrap;
     bool isEof;
     int activeBufferSize;
     int64 originalSourcePos, currentPos;
@@ -88,9 +90,6 @@ private:
     class GZIPDecompressHelper;
     friend struct ContainerDeletePolicy<GZIPDecompressHelper>;
     ScopedPointer<GZIPDecompressHelper> helper;
-
-    // NB: The old 'noWrap' parameter is no longer needed in the constructor
-    JUCE_DEPRECATED (GZIPDecompressorInputStream (InputStream*, bool, bool));
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (GZIPDecompressorInputStream)
 };
