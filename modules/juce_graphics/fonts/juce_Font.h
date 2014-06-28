@@ -449,7 +449,7 @@ public:
 private:
     //==============================================================================
     class SharedFontInternal;
-    ReferenceCountedObjectPtr <SharedFontInternal> font;
+    ReferenceCountedObjectPtr<SharedFontInternal> font;
     void dupeInternalIfShared();
     void checkTypefaceSuitability();
     float getHeightToPointsFactor() const;
