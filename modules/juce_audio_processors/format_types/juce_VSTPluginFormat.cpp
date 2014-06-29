@@ -2233,10 +2233,11 @@ private:
         #pragma warning (push)
         #pragma warning (disable: 4244)
 
-        originalWndProc = (void*) GetWindowLongPtr (pluginHWND, GWLP_WNDPROC);
-
         if (! pluginWantsKeys)
+        {
+            originalWndProc = (void*) GetWindowLongPtr (pluginHWND, GWLP_WNDPROC);
             SetWindowLongPtr (pluginHWND, GWLP_WNDPROC, (LONG_PTR) vstHookWndProc);
+        }
 
         #pragma warning (pop)
 
@@ -2326,10 +2327,11 @@ private:
            #if JUCE_WINDOWS
             #pragma warning (push)
             #pragma warning (disable: 4244)
-            if (pluginHWND != 0 && IsWindow (pluginHWND))
+            if (originalWndProc != 0 && pluginHWND != 0 && IsWindow (pluginHWND))
                 SetWindowLongPtr (pluginHWND, GWLP_WNDPROC, (LONG_PTR) originalWndProc);
             #pragma warning (pop)
 
+            originalWndProc = 0;
             pluginHWND = 0;
            #elif JUCE_LINUX
             pluginWindow = 0;
