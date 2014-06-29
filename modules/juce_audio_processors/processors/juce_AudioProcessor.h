@@ -62,9 +62,9 @@ protected:
     AudioProcessor();
 
 public:
-    virtual ParamInfo parameterInfo(int i) const = 0;
-    virtual float getParameterValue(int index) const = 0;
-    virtual void setParameterValue(int index, float value) = 0;
+    virtual ParamInfo parameterInfo(int i) const;
+    virtual float getParameterValue(int index) const;
+    virtual void setParameterValue(int index, float value);
     virtual float parameterValueFromScaled(int param, float scaled) const;
     virtual float parameterValueToScaled(int param, float val) const;
     // We should get these contributed back to the juce.

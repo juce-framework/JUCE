@@ -380,3 +380,35 @@ float AudioProcessor::getParameter(int index) {
 void AudioProcessor::setParameter(int index, float value) {
     setParameterValue(index, parameterValueFromScaled(index, value));
 }
+
+// Default implementations to Sound Radix extensions to JUCE's AudioProcessor.
+// Note that these use JUCE's methods and the default implementation for those use these extensions,
+// causing an infinite loop + crash when not implementing either.
+
+ParamInfo AudioProcessor::parameterInfo(int i) const
+{
+    ParamInfo result;
+
+    // Override constness..
+    result.name = ((AudioProcessor*)this)->getParameterName(i).toStdString();
+
+    result.key = juce::String(i).toStdString();
+    result.defaultVal = 0.0f;
+    result.minVal = 0.0f;
+    result.maxVal = 1.0f;
+    result.paramType = eParamTypeGeneric;
+    return result;
+};
+
+float AudioProcessor::getParameterValue(int index) const
+{
+    // Override constness..
+    float val = ((AudioProcessor*)this)->getParameter(index);
+
+    return parameterValueFromScaled(index, val);
+}
+
+void AudioProcessor::setParameterValue(int index, float value)
+{
+    setParameter(index, parameterValueToScaled(index, value));
+}
