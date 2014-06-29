@@ -1222,6 +1222,8 @@ private:
         const Rectangle<int> clipBounds (clipW, clipH);
         const CGFloat viewH = [view frame].size.height;
 
+        clip.ensureStorageAllocated ((int) numRects);
+
         for (int i = 0; i < numRects; ++i)
             clip.addWithoutMerging (clipBounds.getIntersection (Rectangle<int> (roundToInt (rects[i].origin.x) + offset.x,
                                                                                 roundToInt (viewH - (rects[i].origin.y + rects[i].size.height)) + offset.y,

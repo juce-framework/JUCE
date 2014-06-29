@@ -99,6 +99,7 @@ private:
         int samplesAgo = (nextSample + numElementsInArray (samples) - 1);
 
         RectangleList<float> waveform;
+        waveform.ensureStorageAllocated ((int) numElementsInArray (samples));
 
         for (int x = jmin (getWidth(), (int) numElementsInArray (samples)); --x >= 0;)
         {
