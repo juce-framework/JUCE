@@ -256,12 +256,13 @@ public:
     //==============================================================================
     /** Creates a window with a given title and colour.
         The settings object can be a PropertySet that the class should use to
-        store its settings - the object that is passed-in will be owned by this
-        class and deleted automatically when no longer needed. (It can also be null)
+        store its settings (it can also be null). If takeOwnershipOfSettings is
+        true, then the settings object will be owned and deleted by this object.
     */
     StandaloneFilterWindow (const String& title,
                             Colour backgroundColour,
-                            PropertySet* settingsToUse)
+                            PropertySet* settingsToUse,
+                            bool takeOwnershipOfSettings)
         : DocumentWindow (title, backgroundColour, DocumentWindow::minimiseButton | DocumentWindow::closeButton),
           optionsButton ("options")
     {
@@ -271,7 +272,7 @@ public:
         optionsButton.addListener (this);
         optionsButton.setTriggeredOnMouseDown (true);
 
-        pluginHolder = new StandalonePluginHolder (settingsToUse, false);
+        pluginHolder = new StandalonePluginHolder (settingsToUse, takeOwnershipOfSettings);
 
         createEditorComp();
 
