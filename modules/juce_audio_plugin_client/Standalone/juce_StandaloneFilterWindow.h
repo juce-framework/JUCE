@@ -271,7 +271,7 @@ public:
         optionsButton.addListener (this);
         optionsButton.setTriggeredOnMouseDown (true);
 
-        pluginHolder = new StandalonePluginHolder (settingsToUse, false);
+        pluginHolder = new StandalonePluginHolder (settingsToUse, true);
 
         createEditorComp();
 
