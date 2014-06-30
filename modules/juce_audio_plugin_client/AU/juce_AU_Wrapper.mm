@@ -819,11 +819,6 @@ public:
             }
             lastTimeStamp = inTimeStamp;
 
-            theOutput->SetBufferList(theInput->GetBufferList() );
-
-            if (0 == juceFilter)
-                return noErr;
-
             const AudioBufferList& inBuffer = theInput->GetBufferList();
             AudioBufferList& outBuffer = theOutput->GetBufferList();
 
