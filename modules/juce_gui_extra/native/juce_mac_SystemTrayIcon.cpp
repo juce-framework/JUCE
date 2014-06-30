@@ -53,7 +53,10 @@ public:
 
     ~Pimpl()
     {
+        [[NSNotificationCenter defaultCenter]  removeObserver: view];
         [[NSStatusBar systemStatusBar] removeStatusItem: statusItem];
+        SystemTrayViewClass::setOwner (view, nullptr);
+        SystemTrayViewClass::setImage (view, nil);
         [statusItem release];
         [view release];
         [statusIcon release];
