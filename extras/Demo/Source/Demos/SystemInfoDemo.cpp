@@ -97,6 +97,7 @@ static String getAllSystemInfo()
       << newLine
       << "Time and date:    " << Time::getCurrentTime().toString (true, true) << newLine
       << "System up-time:   " << RelativeTime::milliseconds ((int64) Time::getMillisecondCounterHiRes()).getDescription() << newLine
+      << "Compilation date: " << Time::getCompilationDate().toString (true, false) << newLine
       << newLine
       << "Operating system: " << SystemStats::getOperatingSystemName() << newLine
       << "Host name:        " << SystemStats::getComputerName() << newLine
