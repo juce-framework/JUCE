@@ -428,7 +428,7 @@ void GlyphArrangement::moveRangeOfGlyphs (int startIndex, int num, const float d
 }
 
 void GlyphArrangement::addLinesWithLineBreaks (const String& text, const Font& f,
-                                               int x, int y, int width, int height, Justification layout)
+                                               float x, float y, float width, float height, Justification layout)
 {
     GlyphArrangement ga;
     ga.addJustifiedText (f, text, x, y, width, layout);
@@ -609,7 +609,7 @@ void GlyphArrangement::spreadOutLine (const int start, const int num, const floa
 
 
 void GlyphArrangement::splitLines (const String& text, Font font, int startIndex,
-                                   int x, int y, int width, int height, int maximumLines,
+                                   float x, float y, float width, float height, int maximumLines,
                                    float lineWidth, Justification layout, float minimumHorizontalScale)
 {
     const int length = text.length();
