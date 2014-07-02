@@ -2209,6 +2209,22 @@ private:
         return 0;
     }
 
+    bool handlePositionChanged()
+    {
+        const Point<float> pos (getCurrentMousePos());
+
+        if (contains (pos.roundToInt(), false))
+        {
+            doMouseEvent (pos);
+
+            if (! isValidPeer (this))
+                return true;
+        }
+
+        handleMovedOrResized();
+        return ! dontRepaint; // to allow non-accelerated openGL windows to draw themselves correctly..
+    }
+
     void handleAppActivation (const WPARAM wParam)
     {
         modifiersAtLastCallback = -1;
@@ -2219,7 +2235,7 @@ private:
             component.repaint();
             handleMovedOrResized();
 
-            if (! ComponentPeer::isValidPeer (this))
+            if (! isValidPeer (this))
                 return;
         }
 
@@ -2418,18 +2434,10 @@ private:
             case WM_WINDOWPOSCHANGING:     return handlePositionChanging (*(WINDOWPOS*) lParam);
 
             case WM_WINDOWPOSCHANGED:
-                {
-                    const Point<float> pos (getCurrentMousePos());
-                    if (contains (pos.roundToInt(), false))
-                        doMouseEvent (pos);
-                }
+                if (handlePositionChanged())
+                    return 0;
 
-                handleMovedOrResized();
-
-                if (dontRepaint)
-                    break;  // needed for non-accelerated openGL windows to draw themselves correctly..
-
-                return 0;
+                break;
 
             //==============================================================================
             case WM_KEYDOWN:
