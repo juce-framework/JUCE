@@ -608,12 +608,18 @@ struct OpenGLDemoClasses
         {
             // nothing to do in this case - we'll initialise our shaders + textures
             // on demand, during the render callback.
+            freeAllContextObjects();
         }
 
         void openGLContextClosing() override
         {
             // When the context is about to close, you must use this callback to delete
             // any GPU resources while the context is still current.
+            freeAllContextObjects();
+        }
+
+        void freeAllContextObjects()
+        {
             shape = nullptr;
             shader = nullptr;
             attributes = nullptr;
