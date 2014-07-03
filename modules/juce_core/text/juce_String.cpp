@@ -683,11 +683,16 @@ static int naturalStringCompare (String::CharPointerType s1, String::CharPointer
                 return result;
         }
 
-        const juce_wchar c1 = s1.getAndAdvance();
-        const juce_wchar c2 = s2.getAndAdvance();
+        juce_wchar c1 = s1.getAndAdvance();
+        juce_wchar c2 = s2.getAndAdvance();
 
-        if (c1 == c2 || CharacterFunctions::toUpperCase (c1)
-                          == CharacterFunctions::toUpperCase (c2))
+        if (c1 != c2)
+        {
+            c1 = CharacterFunctions::toUpperCase (c1);
+            c2 = CharacterFunctions::toUpperCase (c2);
+        }
+
+        if (c1 == c2)
         {
             if (c1 == 0)
                 return 0;
@@ -2268,6 +2273,12 @@ public:
             expect (s.compare (String ("012345678")) == 0);
             expect (s.compare (String ("012345679")) < 0);
             expect (s.compare (String ("012345676")) > 0);
+            expect (String("a").compareNatural ("A") == 0);
+            expect (String("A").compareNatural ("B") < 0);
+            expect (String("a").compareNatural ("B") < 0);
+            expect (String("10").compareNatural ("2") > 0);
+            expect (String("Abc 10").compareNatural ("aBC 2") > 0);
+            expect (String("Abc 1").compareNatural ("aBC 2") < 0);
             expect (s.substring (2, 3) == String::charToString (s[2]));
             expect (s.substring (0, 1) == String::charToString (s[0]));
             expect (s.getLastCharacter() == s [s.length() - 1]);
