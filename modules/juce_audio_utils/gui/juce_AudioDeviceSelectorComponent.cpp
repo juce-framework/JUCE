@@ -210,7 +210,6 @@ public:
         type.scanForDevices();
 
         setup.manager->addChangeListener (this);
-        updateAllControls();
     }
 
     ~AudioDeviceSettingsPanel()
@@ -220,83 +219,101 @@ public:
 
     void resized() override
     {
-        const int lx = proportionOfWidth (0.35f);
-        const int w = proportionOfWidth (0.4f);
-        const int h = 24;
-        const int space = 6;
-        const int dh = h + space;
-        int y = 0;
-
-        if (outputDeviceDropDown != nullptr)
+        if (AudioDeviceSelectorComponent* parent = findParentComponentOfClass<AudioDeviceSelectorComponent>())
         {
-            outputDeviceDropDown->setBounds (lx, y, w, h);
+            Rectangle<int> r (proportionOfWidth (0.35f), 0, proportionOfWidth (0.6f), 3000);
 
-            if (testButton != nullptr)
-                testButton->setBounds (proportionOfWidth (0.77f),
-                                       outputDeviceDropDown->getY(),
-                                       proportionOfWidth (0.18f),
-                                       h);
-            y += dh;
+            const int maxListBoxHeight = 100;
+            const int h = parent->getItemHeight();
+            const int space = h / 4;
+
+            if (outputDeviceDropDown != nullptr)
+            {
+                Rectangle<int> row (r.removeFromTop (h));
+
+                if (testButton != nullptr)
+                {
+                    testButton->changeWidthToFitText (h);
+                    testButton->setBounds (row.removeFromRight (testButton->getWidth()));
+                    row.removeFromRight (space);
+                }
+
+                outputDeviceDropDown->setBounds (row);
+                r.removeFromTop (space);
+            }
+
+            if (inputDeviceDropDown != nullptr)
+            {
+                Rectangle<int> row (r.removeFromTop (h));
+
+                inputLevelMeter->setBounds (row.removeFromRight (testButton != nullptr ? testButton->getWidth() : row.getWidth() / 6));
+                row.removeFromRight (space);
+                inputDeviceDropDown->setBounds (row);
+                r.removeFromTop (space);
+            }
+
+            if (outputChanList != nullptr)
+            {
+                outputChanList->setBounds (r.removeFromTop (outputChanList->getBestHeight (maxListBoxHeight)));
+                outputChanLabel->setBounds (0, outputChanList->getBounds().getCentreY() - h / 2, r.getX(), h);
+                r.removeFromTop (space);
+            }
+
+            if (inputChanList != nullptr)
+            {
+                inputChanList->setBounds (r.removeFromTop (inputChanList->getBestHeight (maxListBoxHeight)));
+                inputChanLabel->setBounds (0, inputChanList->getBounds().getCentreY() - h / 2, r.getX(), h);
+                r.removeFromTop (space);
+            }
+
+            r.removeFromTop (space * 2);
+
+            if (showAdvancedSettingsButton != nullptr)
+            {
+                showAdvancedSettingsButton->setBounds (r.withHeight (h));
+                showAdvancedSettingsButton->changeWidthToFitText();
+            }
+
+            const bool advancedSettingsVisible = showAdvancedSettingsButton == nullptr
+                                                    || ! showAdvancedSettingsButton->isVisible();
+
+            if (sampleRateDropDown != nullptr)
+            {
+                sampleRateDropDown->setVisible (advancedSettingsVisible);
+                sampleRateDropDown->setBounds (r.removeFromTop (h));
+                r.removeFromTop (space);
+            }
+
+            if (bufferSizeDropDown != nullptr)
+            {
+                bufferSizeDropDown->setVisible (advancedSettingsVisible);
+                bufferSizeDropDown->setBounds (r.removeFromTop (h));
+                r.removeFromTop (space);
+            }
+
+            r.removeFromTop (space * 2);
+            Rectangle<int> buttons (r.removeFromTop (h));
+
+            if (showUIButton != nullptr)
+            {
+                showUIButton->setVisible (advancedSettingsVisible);
+                showUIButton->changeWidthToFitText (h);
+                showUIButton->setBounds (buttons.removeFromLeft (showUIButton->getWidth()));
+                buttons.removeFromLeft (space);
+            }
+
+            if (resetDeviceButton != nullptr)
+            {
+                resetDeviceButton->setVisible (advancedSettingsVisible);
+                resetDeviceButton->changeWidthToFitText (h);
+                resetDeviceButton->setBounds (buttons.removeFromLeft (showUIButton->getWidth()));
+            }
+
+            setSize (getWidth(), r.getHeight());
         }
-
-        if (inputDeviceDropDown != nullptr)
+        else
         {
-            inputDeviceDropDown->setBounds (lx, y, w, h);
-
-            inputLevelMeter->setBounds (proportionOfWidth (0.77f),
-                                        inputDeviceDropDown->getY(),
-                                        proportionOfWidth (0.18f),
-                                        h);
-            y += dh;
-        }
-
-        const int maxBoxHeight = 100;
-
-        if (outputChanList != nullptr)
-        {
-            const int bh = outputChanList->getBestHeight (maxBoxHeight);
-            outputChanList->setBounds (lx, y, proportionOfWidth (0.55f), bh);
-            y += bh + space;
-        }
-
-        if (inputChanList != nullptr)
-        {
-            const int bh = inputChanList->getBestHeight (maxBoxHeight);
-            inputChanList->setBounds (lx, y, proportionOfWidth (0.55f), bh);
-            y += bh + space;
-        }
-
-        y += space * 2;
-
-        if (showAdvancedSettingsButton != nullptr)
-        {
-            showAdvancedSettingsButton->changeWidthToFitText (h);
-            showAdvancedSettingsButton->setTopLeftPosition (lx, y);
-        }
-
-        if (sampleRateDropDown != nullptr)
-        {
-            sampleRateDropDown->setVisible (showAdvancedSettingsButton == nullptr
-                                             || ! showAdvancedSettingsButton->isVisible());
-
-            sampleRateDropDown->setBounds (lx, y, w, h);
-            y += dh;
-        }
-
-        if (bufferSizeDropDown != nullptr)
-        {
-            bufferSizeDropDown->setVisible (showAdvancedSettingsButton == nullptr
-                                             || ! showAdvancedSettingsButton->isVisible());
-            bufferSizeDropDown->setBounds (lx, y, w, h);
-            y += dh;
-        }
-
-        if (showUIButton != nullptr)
-        {
-            showUIButton->setVisible (showAdvancedSettingsButton == nullptr
-                                        || ! showAdvancedSettingsButton->isVisible());
-            showUIButton->changeWidthToFitText (h);
-            showUIButton->setTopLeftPosition (lx, y);
+            jassertfalse;
         }
     }
 
@@ -394,6 +411,10 @@ public:
         {
             setup.manager->playTestSound();
         }
+        else if (button == resetDeviceButton)
+        {
+            resetDevice();
+        }
     }
 
     void updateAllControls()
@@ -402,6 +423,7 @@ public:
         updateInputsComboBox();
 
         updateControlPanelButton();
+        updateResetButton();
 
         if (AudioIODevice* const currentDevice = setup.manager->getCurrentAudioDevice())
         {
@@ -414,6 +436,7 @@ public:
                         = new ChannelSelectorListBox (setup, ChannelSelectorListBox::audioOutputType,
                                                       TRANS ("(no audio output channels found)")));
                     outputChanLabel = new Label (String::empty, TRANS("Active output channels:"));
+                    outputChanLabel->setJustificationType (Justification::centredRight);
                     outputChanLabel->attachToComponent (outputChanList, true);
                 }
 
@@ -434,6 +457,7 @@ public:
                         = new ChannelSelectorListBox (setup, ChannelSelectorListBox::audioInputType,
                                                       TRANS("(no audio input channels found)")));
                     inputChanLabel = new Label (String::empty, TRANS("Active input channels:"));
+                    inputChanLabel->setJustificationType (Justification::centredRight);
                     inputChanLabel->attachToComponent (inputChanList, true);
                 }
 
@@ -473,6 +497,12 @@ public:
         updateAllControls();
     }
 
+    void resetDevice()
+    {
+        setup.manager->closeAudioDevice();
+        setup.manager->restartLastAudioDevice();
+    }
+
 private:
     AudioIODeviceType& type;
     const AudioDeviceSetupDetails setup;
@@ -481,7 +511,7 @@ private:
     ScopedPointer<Label> outputDeviceLabel, inputDeviceLabel, sampleRateLabel, bufferSizeLabel, inputChanLabel, outputChanLabel;
     ScopedPointer<TextButton> testButton;
     ScopedPointer<Component> inputLevelMeter;
-    ScopedPointer<TextButton> showUIButton, showAdvancedSettingsButton;
+    ScopedPointer<TextButton> showUIButton, showAdvancedSettingsButton, resetDeviceButton;
 
     void showCorrectDeviceName (ComboBox* const box, const bool isInput)
     {
@@ -528,12 +558,34 @@ private:
 
         if (currentDevice != nullptr && currentDevice->hasControlPanel())
         {
-            addAndMakeVisible (showUIButton = new TextButton (TRANS ("Show this device's control panel"),
+            addAndMakeVisible (showUIButton = new TextButton (TRANS ("Control panel"),
                                                               TRANS ("Opens the device's own control panel")));
             showUIButton->addListener (this);
         }
 
         resized();
+    }
+
+    void updateResetButton()
+    {
+        if (AudioIODevice* const currentDevice = setup.manager->getCurrentAudioDevice())
+        {
+            if (currentDevice->hasControlPanel())
+            {
+                if (resetDeviceButton == nullptr)
+                {
+                    addAndMakeVisible (resetDeviceButton = new TextButton (TRANS ("Reset device"),
+                        TRANS ("Resets the audio interface - sometimes needed after changing a device's properties in its custom control panel")));
+
+                    resetDeviceButton->addListener (this);
+                    resized();
+                }
+
+                return;
+            }
+        }
+
+        resetDeviceButton = nullptr;
     }
 
     void updateOutputsComboBox()
@@ -553,7 +605,8 @@ private:
 
                 if (setup.maxNumOutputChannels > 0)
                 {
-                    addAndMakeVisible (testButton = new TextButton (TRANS("Test")));
+                    addAndMakeVisible (testButton = new TextButton (TRANS("Test"),
+                                                                    TRANS("Plays a test tone")));
                     testButton->addListener (this);
                 }
             }
@@ -914,6 +967,7 @@ AudioDeviceSelectorComponent::AudioDeviceSelectorComponent (AudioDeviceManager& 
                                                             const bool showChannelsAsStereoPairs_,
                                                             const bool hideAdvancedOptionsWithButton_)
     : deviceManager (dm),
+      itemHeight (24),
       minOutputChannels (minOutputChannels_),
       maxOutputChannels (maxOutputChannels_),
       minInputChannels (minInputChannels_),
@@ -980,42 +1034,40 @@ AudioDeviceSelectorComponent::~AudioDeviceSelectorComponent()
     deviceManager.removeChangeListener (this);
 }
 
+void AudioDeviceSelectorComponent::setItemHeight (int newItemHeight)
+{
+    itemHeight = newItemHeight;
+    resized();
+}
+
 void AudioDeviceSelectorComponent::resized()
 {
-    const int lx = proportionOfWidth (0.35f);
-    const int w = proportionOfWidth (0.4f);
-    const int h = 24;
-    const int space = 6;
-    const int dh = h + space;
-    int y = 15;
+    Rectangle<int> r (proportionOfWidth (0.35f), 15, proportionOfWidth (0.6f), 3000);
+    const int space = itemHeight / 4;
 
     if (deviceTypeDropDown != nullptr)
     {
-        deviceTypeDropDown->setBounds (lx, y, proportionOfWidth (0.3f), h);
-        y += dh + space * 2;
+        deviceTypeDropDown->setBounds (r.removeFromTop (itemHeight));
+        r.removeFromTop (space * 3);
     }
 
     if (audioDeviceSettingsComp != nullptr)
     {
-        audioDeviceSettingsComp->setBounds (0, y, getWidth(), audioDeviceSettingsComp->getHeight());
-        y += audioDeviceSettingsComp->getHeight() + space;
+        audioDeviceSettingsComp->resized();
+        audioDeviceSettingsComp->setBounds (r.removeFromTop (audioDeviceSettingsComp->getHeight())
+                                                .withX (0).withWidth (getWidth()));
+        r.removeFromTop (space);
     }
 
     if (midiInputsList != nullptr)
     {
-        const int bh = midiInputsList->getBestHeight (jmin (h * 8, getHeight() - y - space - h));
-        midiInputsList->setBounds (lx, y, w, bh);
-        y += bh + space;
+        midiInputsList->setBounds (r.removeFromTop (midiInputsList->getBestHeight (jmin (itemHeight * 8,
+                                                                                         getHeight() - r.getY() - space - itemHeight))));
+        r.removeFromTop (space);
     }
 
     if (midiOutputSelector != nullptr)
-        midiOutputSelector->setBounds (lx, y, w, h);
-}
-
-void AudioDeviceSelectorComponent::childBoundsChanged (Component* child)
-{
-    if (child == audioDeviceSettingsComp)
-        resized();
+        midiOutputSelector->setBounds (r.removeFromTop (itemHeight));
 }
 
 void AudioDeviceSelectorComponent::comboBoxChanged (ComboBox* comboBoxThatHasChanged)
@@ -1065,13 +1117,10 @@ void AudioDeviceSelectorComponent::updateAllControls()
             details.maxNumOutputChannels = maxOutputChannels;
             details.useStereoPairs = showChannelsAsStereoPairs;
 
-            audioDeviceSettingsComp = new AudioDeviceSettingsPanel (*type, details, hideAdvancedOptionsWithButton);
-
-            if (audioDeviceSettingsComp != nullptr)
-            {
-                addAndMakeVisible (audioDeviceSettingsComp);
-                audioDeviceSettingsComp->resized();
-            }
+            AudioDeviceSettingsPanel* sp = new AudioDeviceSettingsPanel (*type, details, hideAdvancedOptionsWithButton);
+            audioDeviceSettingsComp = sp;
+            addAndMakeVisible (sp);
+            sp->updateAllControls();
         }
     }
 
