@@ -183,6 +183,11 @@ bool AudioFormatWriter::writeFromAudioSampleBuffer (const AudioSampleBuffer& sou
     return writeFromFloatArrays (chans, numSourceChannels, numSamples);
 }
 
+bool AudioFormatWriter::flush()
+{
+    return false;
+}
+
 //==============================================================================
 class AudioFormatWriter::ThreadedWriter::Buffer   : private TimeSliceClient
 {
