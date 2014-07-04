@@ -513,7 +513,7 @@ protected:
     {
         if (value.isNotEmpty())
             mo << "      VALUE \"" << name << "\",  \""
-               << CodeHelpers::addEscapeChars (value) << "\\0\"" << newLine;
+               << CppTokeniserFunctions::addEscapeChars (value) << "\\0\"" << newLine;
     }
 
     static String getCommaSeparatedVersionNumber (const String& version)

@@ -341,7 +341,7 @@ struct NewProjectWizardClasses
                                                                        : "jucer_MainTemplate_NoWindow_cpp")
                                     .replace ("APPHEADERS", appHeaders, false)
                                     .replace ("APPCLASSNAME", CodeHelpers::makeValidIdentifier (appTitle + "Application", false, true, false), false)
-                                    .replace ("APPNAME", CodeHelpers::addEscapeChars (appTitle), false)
+                                    .replace ("APPNAME", CppTokeniserFunctions::addEscapeChars (appTitle), false)
                                     .replace ("CONTENTCOMPCLASS", contentCompName, false)
                                     .replace ("ALLOWMORETHANONEINSTANCE", "true", false);
 
