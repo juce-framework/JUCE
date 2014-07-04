@@ -70,7 +70,7 @@ namespace LiveConstantEditor
     template <typename Type>
     inline String getAsCode (Type& v, bool preferHex)       { return getAsString (v, preferHex); }
     inline String getAsCode (Colour v, bool)                { return "Colour (0x" + String::toHexString ((int) v.getARGB()).paddedLeft ('0', 8) + ")"; }
-    inline String getAsCode (const String& v, bool)         { return "\"" + v + "\""; }
+    inline String getAsCode (const String& v, bool)         { return CppTokeniserFunctions::addEscapeChars(v).quoted(); }
     inline String getAsCode (const char* v, bool)           { return getAsCode (String (v), false); }
 
     template <typename Type>

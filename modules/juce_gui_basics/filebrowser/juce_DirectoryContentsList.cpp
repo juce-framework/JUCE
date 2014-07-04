@@ -115,8 +115,7 @@ void DirectoryContentsList::setFileFilter (const FileFilter* newFileFilter)
 }
 
 //==============================================================================
-bool DirectoryContentsList::getFileInfo (const int index,
-                                         FileInfo& result) const
+bool DirectoryContentsList::getFileInfo (const int index, FileInfo& result) const
 {
     const ScopedLock sl (fileListLock);
 
