@@ -207,7 +207,12 @@ public:
 
             The object passed-in must not be deleted while this writer is still using it.
         */
-        void setDataReceiver (IncomingDataReceiver* receiver);
+        void setDataReceiver (IncomingDataReceiver*);
+
+        /** Sets how many samples should be written before calling the AudioFormatWriter::flush method.
+            Set this to 0 to disable flushing (this is the default).
+        */
+        void setFlushInterval (int numSamplesPerFlush) noexcept;
 
     private:
         class Buffer;
