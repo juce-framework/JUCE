@@ -1007,10 +1007,7 @@ private:
     void writeHeader()
     {
         if ((bytesWritten & 1) != 0) // pad to an even length
-        {
-            ++bytesWritten;
             output->writeByte (0);
-        }
 
         using namespace WavFileHelpers;
 
