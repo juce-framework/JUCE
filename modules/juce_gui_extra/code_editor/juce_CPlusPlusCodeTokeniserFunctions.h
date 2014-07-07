@@ -629,11 +629,11 @@ struct CppTokeniserFunctions
 
         @see writeEscapeChars
     */
-    static String addEscapeChars (StringRef s)
+    static String addEscapeChars (const String& s)
     {
-        MemoryOutputStream out;
-        writeEscapeChars (out, s.text, -1, -1, false, true, true);
-        return out.toUTF8();
+        MemoryOutputStream mo;
+        writeEscapeChars (mo, s.toRawUTF8(), -1, -1, false, true, true);
+        return mo.toString();
     }
 };
 
