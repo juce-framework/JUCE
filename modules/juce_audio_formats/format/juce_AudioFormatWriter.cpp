@@ -276,7 +276,7 @@ public:
 
         if (samplesPerFlush > 0)
         {
-            flushSampleCounter -= numToDo;
+            flushSampleCounter -= size1 + size2;
 
             if (flushSampleCounter <= 0)
             {
