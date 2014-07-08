@@ -844,6 +844,11 @@ public:
         /** In a plugin, this will return the path of the host executable. */
         hostApplicationPath,
 
+       #if JUCE_WINDOWS
+        /** On a Windows machine, returns the location of the Windows/System32 folder. */
+        windowsSystemDirectory,
+       #endif
+
         /** The directory in which applications normally get installed.
             So on windows, this would be something like "c:\program files", on the
             Mac "/Applications", or "/usr" on linux.
