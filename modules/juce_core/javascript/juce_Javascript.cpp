@@ -843,7 +843,7 @@ struct JavascriptEngine::RootObject   : public DynamicObject
                 String::CharPointerType end (p);
                 while (isIdentifierBody (*++end)) {}
 
-                const size_t len = end - p;
+                const size_t len = (size_t) (end - p);
                 #define JUCE_JS_COMPARE_KEYWORD(name, str) if (len == sizeof (str) - 1 && matchToken (TokenTypes::name, len)) return TokenTypes::name;
                 JUCE_JS_KEYWORDS (JUCE_JS_COMPARE_KEYWORD)
 

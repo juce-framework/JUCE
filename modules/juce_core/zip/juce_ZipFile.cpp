@@ -135,7 +135,7 @@ public:
         char buffer [30];
 
         if (inputStream != nullptr
-             && inputStream->setPosition (zei.streamOffset)
+             && inputStream->setPosition ((int64) zei.streamOffset)
              && inputStream->read (buffer, 30) == 30
              && ByteOrder::littleEndianInt (buffer) == 0x04034b50)
         {
@@ -154,7 +154,7 @@ public:
 
     int64 getTotalLength()
     {
-        return zipEntryHolder.compressedSize;
+        return (int64) zipEntryHolder.compressedSize;
     }
 
     int read (void* buffer, int howMany)
@@ -162,7 +162,7 @@ public:
         if (headerSize <= 0)
             return 0;
 
-        howMany = (int) jmin ((int64) howMany, (int64) (zipEntryHolder.compressedSize - pos));
+        howMany = (int) jmin ((int64) howMany, ((int64) zipEntryHolder.compressedSize) - pos);
 
         if (inputStream == nullptr)
             return 0;
@@ -172,12 +172,12 @@ public:
         if (inputStream == file.inputStream)
         {
             const ScopedLock sl (file.lock);
-            inputStream->setPosition (pos + zipEntryHolder.streamOffset + headerSize);
+            inputStream->setPosition (pos + (int64) zipEntryHolder.streamOffset + headerSize);
             num = inputStream->read (buffer, howMany);
         }
         else
         {
-            inputStream->setPosition (pos + zipEntryHolder.streamOffset + headerSize);
+            inputStream->setPosition (pos + (int64) zipEntryHolder.streamOffset + headerSize);
             num = inputStream->read (buffer, howMany);
         }
 

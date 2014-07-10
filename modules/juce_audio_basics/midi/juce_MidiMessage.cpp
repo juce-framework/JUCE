@@ -129,7 +129,7 @@ MidiMessage::MidiMessage (const MidiMessage& other)
 {
     if (other.allocatedData != nullptr)
     {
-        allocatedData.malloc (size);
+        allocatedData.malloc ((size_t) size);
         memcpy (allocatedData, other.allocatedData, (size_t) size);
     }
     else
@@ -143,7 +143,7 @@ MidiMessage::MidiMessage (const MidiMessage& other, const double newTimeStamp)
 {
     if (other.allocatedData != nullptr)
     {
-        allocatedData.malloc (size);
+        allocatedData.malloc ((size_t) size);
         memcpy (allocatedData, other.allocatedData, (size_t) size);
     }
     else
@@ -255,7 +255,7 @@ MidiMessage& MidiMessage::operator= (const MidiMessage& other)
 
         if (other.allocatedData != nullptr)
         {
-            allocatedData.malloc (size);
+            allocatedData.malloc ((size_t) size);
             memcpy (allocatedData, other.allocatedData, (size_t) size);
         }
         else
@@ -297,7 +297,7 @@ uint8* MidiMessage::allocateSpace (int bytes)
 {
     if (bytes > 4)
     {
-        allocatedData.malloc (bytes);
+        allocatedData.malloc ((size_t) bytes);
         return allocatedData;
     }
 

@@ -667,7 +667,7 @@ public:
 
         if (isTwoValue || isThreeValue)
         {
-            const float mousePos = (float) (isVertical() ? e.y : e.x);
+            const float mousePos = isVertical() ? e.position.y : e.position.x;
 
             const float normalPosDistance = std::abs (getLinearSliderPos (currentValue.getValue()) - mousePos);
             const float minPosDistance    = std::abs (getLinearSliderPos (valueMin.getValue()) - 0.1f - mousePos);
@@ -689,10 +689,10 @@ public:
     //==============================================================================
     void handleRotaryDrag (const MouseEvent& e)
     {
-        const int dx = e.x - sliderRect.getCentreX();
-        const int dy = e.y - sliderRect.getCentreY();
+        const float dx = e.position.x - sliderRect.getCentreX();
+        const float dy = e.position.y - sliderRect.getCentreY();
 
-        if (dx * dx + dy * dy > 25)
+        if (dx * dx + dy * dy > 25.0f)
         {
             double angle = std::atan2 ((double) dx, (double) -dy);
             while (angle < 0.0)
@@ -736,7 +736,7 @@ public:
 
     void handleAbsoluteDrag (const MouseEvent& e)
     {
-        const int mousePos = (isHorizontal() || style == RotaryHorizontalDrag) ? e.x : e.y;
+        const float mousePos = (isHorizontal() || style == RotaryHorizontalDrag) ? e.position.x : e.position.y;
         double newPos = (mousePos - sliderRegionStart) / (double) sliderRegionSize;
 
         if (style == RotaryHorizontalDrag
@@ -781,7 +781,7 @@ public:
     void handleVelocityDrag (const MouseEvent& e)
     {
         const float mouseDiff = style == RotaryHorizontalVerticalDrag
-                                   ? (e.x - mousePosWhenLastDragged.x) + (mousePosWhenLastDragged.y - e.y)
+                                   ? (e.position.x - mousePosWhenLastDragged.x) + (mousePosWhenLastDragged.y - e.position.y)
                                    : (isHorizontal()
                                        || style == RotaryHorizontalDrag
                                        || (style == IncDecButtons && incDecDragDirectionIsHorizontal()))
@@ -789,7 +789,7 @@ public:
                                          : e.position.y - mousePosWhenLastDragged.y;
 
         const double maxSpeed = jmax (200, sliderRegionSize);
-        double speed = jlimit (0.0, maxSpeed, (double) abs (mouseDiff));
+        double speed = jlimit (0.0, maxSpeed, (double) std::abs (mouseDiff));
 
         if (speed != 0)
         {

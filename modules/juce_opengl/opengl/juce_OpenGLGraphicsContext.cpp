@@ -90,7 +90,7 @@ struct CachedImageList  : public ReferenceCountedObject,
         CachedImage (CachedImageList& list, ImagePixelData* im)
             : owner (list), pixelData (im),
               lastUsed (Time::getCurrentTime()),
-              imageSize (im->width * im->height)
+              imageSize ((size_t) (im->width * im->height))
         {
             pixelData->listeners.add (&owner);
         }

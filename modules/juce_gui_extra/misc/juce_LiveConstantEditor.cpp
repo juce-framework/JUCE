@@ -381,7 +381,7 @@ struct ColourEditorComp  : public Component,
 
     Colour getColour() const
     {
-        return Colour ((int) parseInt (editor.value.getStringValue (false)));
+        return Colour ((uint32) parseInt (editor.value.getStringValue (false)));
     }
 
     void paint (Graphics& g) override

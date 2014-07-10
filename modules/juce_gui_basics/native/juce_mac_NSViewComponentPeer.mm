@@ -1013,7 +1013,7 @@ public:
     static Point<float> getMousePos (NSEvent* e, NSView* view)
     {
         NSPoint p = [view convertPoint: [e locationInWindow] fromView: nil];
-        return Point<float> (p.x, [view frame].size.height - p.y);
+        return Point<float> ((float) p.x, (float) ([view frame].size.height - p.y));
     }
 
     static int getModifierForButtonNumber (const NSInteger num)

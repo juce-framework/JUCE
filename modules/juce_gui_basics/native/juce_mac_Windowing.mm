@@ -214,7 +214,7 @@ Point<float> MouseInputSource::getCurrentRawMousePosition()
     JUCE_AUTORELEASEPOOL
     {
         const NSPoint p ([NSEvent mouseLocation]);
-        return Point<float> (p.x, getMainScreenHeight() - p.y);
+        return Point<float> ((float) p.x, (float) (getMainScreenHeight() - p.y));
     }
 }
 
