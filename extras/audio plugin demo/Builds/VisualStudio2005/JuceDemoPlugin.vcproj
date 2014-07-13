@@ -1145,9 +1145,9 @@
           </File>
           <File RelativePath="..\..\..\..\modules\juce_core\text\juce_CharacterFunctions.h"/>
           <File RelativePath="..\..\..\..\modules\juce_core\text\juce_CharPointer_ASCII.h"/>
+          <File RelativePath="..\..\..\..\modules\juce_core\text\juce_CharPointer_UTF8.h"/>
           <File RelativePath="..\..\..\..\modules\juce_core\text\juce_CharPointer_UTF16.h"/>
           <File RelativePath="..\..\..\..\modules\juce_core\text\juce_CharPointer_UTF32.h"/>
-          <File RelativePath="..\..\..\..\modules\juce_core\text\juce_CharPointer_UTF8.h"/>
           <File RelativePath="..\..\..\..\modules\juce_core\text\juce_Identifier.cpp">
             <FileConfiguration Name="Debug|Win32"
                                ExcludedFromBuild="true">
@@ -4441,8 +4441,8 @@
                 CallingConvention="2"/>
         </FileConfiguration>
       </File>
-      <File RelativePath="..\..\..\..\modules\juce_audio_plugin_client\VST3\juce_VST3_Wrapper.cpp"/>
       <File RelativePath="..\..\..\..\modules\juce_audio_plugin_client\VST\juce_VST_Wrapper.cpp"/>
+      <File RelativePath="..\..\..\..\modules\juce_audio_plugin_client\VST3\juce_VST3_Wrapper.cpp"/>
       <File RelativePath="..\..\JuceLibraryCode\JuceHeader.h"/>
       <File RelativePath="resources.rc"/>
     </Filter>

@@ -326,6 +326,7 @@
 		3D8A83C53BAF22EEEA014D90 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_HighResolutionTimer.cpp"; path = "../../../../modules/juce_core/threads/juce_HighResolutionTimer.cpp"; sourceTree = "SOURCE_ROOT"; };
 		3DA95E7AE1D0DC64AF09EB66 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_Image.cpp"; path = "../../../../modules/juce_graphics/images/juce_Image.cpp"; sourceTree = "SOURCE_ROOT"; };
 		3E27B6E7641EFD605545DF18 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_LowLevelGraphicsSoftwareRenderer.cpp"; path = "../../../../modules/juce_graphics/contexts/juce_LowLevelGraphicsSoftwareRenderer.cpp"; sourceTree = "SOURCE_ROOT"; };
+		3EC73BE7C098A631E5D5107D = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_CameraDevice.cpp"; path = "../../../../modules/juce_video/capture/juce_CameraDevice.cpp"; sourceTree = "SOURCE_ROOT"; };
 		3ED5A2B64359FED05CF309C2 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_MidiDataConcatenator.h"; path = "../../../../modules/juce_audio_devices/native/juce_MidiDataConcatenator.h"; sourceTree = "SOURCE_ROOT"; };
 		3EF890CB40C6FFCAE055B7B1 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_UnitTest.h"; path = "../../../../modules/juce_core/unit_tests/juce_UnitTest.h"; sourceTree = "SOURCE_ROOT"; };
 		3F2BBE4509B19BFAC929D8DF = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_NotificationType.h"; path = "../../../../modules/juce_events/messages/juce_NotificationType.h"; sourceTree = "SOURCE_ROOT"; };
@@ -1297,9 +1298,9 @@
 					651D48BCCD81AC8B5BC3AAA4,
 					EC8A992EA9CFA558DB9F950E,
 					58E53BE69281E3105C66FF07,
+					C411A91DC3B306E2C417F1BF,
 					03707F35E5DB4BC6F1FAC8D6,
 					569187442B514D114A483D29,
-					C411A91DC3B306E2C417F1BF,
 					01F2CB80C1B14450528F0FA8,
 					49C275C319B36AC86512E34F,
 					D6B8E586D30632EA07C48D6F,
@@ -2093,6 +2094,7 @@
 					29930414E0C7FD5EFC7F2095,
 					36C9E79611229727DF5E5836, ); name = playback; sourceTree = "<group>"; };
 		DBDA6BAA1B84CA0C6F838008 = {isa = PBXGroup; children = (
+					3EC73BE7C098A631E5D5107D,
 					29C7AE377B006C00D4293C59, ); name = capture; sourceTree = "<group>"; };
 		75E1163D29EDCDF203433D84 = {isa = PBXGroup; children = (
 					3009F5CB4D15119D2C680F98,

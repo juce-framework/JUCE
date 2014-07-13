@@ -1068,9 +1068,9 @@
           </File>
           <File RelativePath="..\..\..\..\modules\juce_core\text\juce_CharacterFunctions.h"/>
           <File RelativePath="..\..\..\..\modules\juce_core\text\juce_CharPointer_ASCII.h"/>
+          <File RelativePath="..\..\..\..\modules\juce_core\text\juce_CharPointer_UTF8.h"/>
           <File RelativePath="..\..\..\..\modules\juce_core\text\juce_CharPointer_UTF16.h"/>
           <File RelativePath="..\..\..\..\modules\juce_core\text\juce_CharPointer_UTF32.h"/>
-          <File RelativePath="..\..\..\..\modules\juce_core\text\juce_CharPointer_UTF8.h"/>
           <File RelativePath="..\..\..\..\modules\juce_core\text\juce_Identifier.cpp">
             <FileConfiguration Name="Debug|Win32"
                                ExcludedFromBuild="true">
@@ -4483,6 +4483,16 @@
           <File RelativePath="..\..\..\..\modules\juce_video\playback\juce_QuickTimeMovieComponent.h"/>
         </Filter>
         <Filter Name="capture">
+          <File RelativePath="..\..\..\..\modules\juce_video\capture\juce_CameraDevice.cpp">
+            <FileConfiguration Name="Debug|Win32"
+                               ExcludedFromBuild="true">
+              <Tool Name="VCCLCompilerTool"/>
+            </FileConfiguration>
+            <FileConfiguration Name="Release|Win32"
+                               ExcludedFromBuild="true">
+              <Tool Name="VCCLCompilerTool"/>
+            </FileConfiguration>
+          </File>
           <File RelativePath="..\..\..\..\modules\juce_video\capture\juce_CameraDevice.h"/>
         </Filter>
         <Filter Name="native">
