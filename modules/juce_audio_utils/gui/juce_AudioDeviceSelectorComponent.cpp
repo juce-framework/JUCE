@@ -488,6 +488,7 @@ public:
                 inputDeviceDropDown->setSelectedId (-1, dontSendNotification);
         }
 
+        sendLookAndFeelChange();
         resized();
         setSize (getWidth(), getLowestY() + 4);
     }
