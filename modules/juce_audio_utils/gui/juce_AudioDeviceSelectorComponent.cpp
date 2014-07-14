@@ -309,7 +309,7 @@ public:
                 resetDeviceButton->setBounds (buttons.removeFromLeft (showUIButton->getWidth()));
             }
 
-            setSize (getWidth(), r.getHeight());
+            setSize (getWidth(), r.getY());
         }
         else
         {
