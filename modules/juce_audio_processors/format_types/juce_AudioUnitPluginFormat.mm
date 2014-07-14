@@ -972,16 +972,11 @@ private:
 
             for (int i = 0; i < parameters.size(); ++i)
             {
-                const ParamInfo& p = *parameters.getUnchecked(i);
-
-                AudioUnitParameter paramToAdd;
-                paramToAdd.mAudioUnit = audioUnit;
-                paramToAdd.mParameterID = p.paramID;
-                paramToAdd.mScope = kAudioUnitScope_Global;
-                paramToAdd.mElement = 0;
-
                 AudioUnitEvent event;
-                event.mArgument.mParameter = paramToAdd;
+                event.mArgument.mParameter.mAudioUnit = audioUnit;
+                event.mArgument.mParameter.mParameterID = parameters.getUnchecked(i)->paramID;
+                event.mArgument.mParameter.mScope = kAudioUnitScope_Global;
+                event.mArgument.mParameter.mElement = 0;
 
                 event.mEventType = kAudioUnitEvent_ParameterValueChange;
                 AUEventListenerAddEventType (eventListenerRef, nullptr, &event);
@@ -992,6 +987,16 @@ private:
                 event.mEventType = kAudioUnitEvent_EndParameterChangeGesture;
                 AUEventListenerAddEventType (eventListenerRef, nullptr, &event);
             }
+
+            // Add a listener for program changes
+            AudioUnitEvent event;
+            event.mArgument.mProperty.mAudioUnit = audioUnit;
+            event.mArgument.mProperty.mPropertyID = kAudioUnitProperty_PresentPreset;
+            event.mArgument.mProperty.mScope = kAudioUnitScope_Global;
+            event.mArgument.mProperty.mElement = 0;
+
+            event.mEventType = kAudioUnitEvent_PropertyChange;
+            AUEventListenerAddEventType (eventListenerRef, nullptr, &event);
         }
     }
 
@@ -1022,6 +1027,7 @@ private:
                 break;
 
             default:
+                sendAllParametersChangedEvents();
                 break;
         }
     }
