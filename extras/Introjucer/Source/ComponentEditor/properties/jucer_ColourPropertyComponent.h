@@ -90,11 +90,8 @@ public:
 
         void mouseDown (const MouseEvent&)
         {
-            ColourSelectorComp colourSelector (this, canResetToDefault);
-
-            PopupMenu m;
-            m.addCustomItem (1234, &colourSelector, 300, 400, false);
-            m.showAt (this);
+            CallOutBox::launchAsynchronously (new ColourSelectorComp (this, canResetToDefault),
+                                              getScreenBounds(), nullptr);
         }
 
         void changeListenerCallback (ChangeBroadcaster* source)
@@ -124,6 +121,8 @@ public:
                     addAndMakeVisible (defaultButton);
                     defaultButton.addListener (this);
                 }
+
+                setSize (300, 400);
             }
 
             void resized()
