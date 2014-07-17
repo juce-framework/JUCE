@@ -213,6 +213,9 @@ public:
     /** Casts this point to a Point<double> object. */
     Point<double> toDouble() const noexcept                       { return Point<double> (static_cast<double> (x), static_cast<double> (y)); }
 
+    /** Casts this point to a Point<int> object using roundToInt() to convert the values. */
+    Point<int> roundToInt() const noexcept                        { return Point<int> (juce::roundToInt (x), juce::roundToInt (y)); }
+
     /** Returns the point as a string in the form "x, y". */
     String toString() const                                       { return String (x) + ", " + String (y); }
 

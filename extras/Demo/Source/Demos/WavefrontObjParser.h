@@ -117,7 +117,7 @@ private:
             if (it != map.end())
                 return it->second;
 
-            const Index index = newMesh.vertices.size();
+            const Index index = (Index) newMesh.vertices.size();
 
             if (isPositiveAndBelow (i.vertexIndex, srcMesh.vertices.size()))
                 newMesh.vertices.add (srcMesh.vertices.getReference (i.vertexIndex));

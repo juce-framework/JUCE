@@ -364,6 +364,11 @@ inline int roundToInt (const FloatType value) noexcept
    #endif
 }
 
+inline int roundToInt (int value) noexcept
+{
+    return value;
+}
+
 #if JUCE_MSVC
  #ifndef __INTEL_COMPILER
   #pragma float_control (pop)

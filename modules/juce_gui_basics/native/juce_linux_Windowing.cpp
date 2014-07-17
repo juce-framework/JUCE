@@ -971,14 +971,14 @@ public:
 
     Rectangle<int> getBounds() const override          { return bounds; }
 
-    Point<int> localToGlobal (Point<int> relativePosition) override
+    Point<float> localToGlobal (Point<float> relativePosition) override
     {
-        return relativePosition + bounds.getPosition();
+        return relativePosition + bounds.getPosition().toFloat();
     }
 
-    Point<int> globalToLocal (Point<int> screenPosition) override
+    Point<float> globalToLocal (Point<float> screenPosition) override
     {
-        return screenPosition - bounds.getPosition();
+        return screenPosition - bounds.getPosition().toFloat();
     }
 
     void setAlpha (float /* newAlpha */) override
@@ -1491,9 +1491,9 @@ public:
     }
 
     template <typename EventType>
-    static Point<int> getMousePos (const EventType& e) noexcept
+    static Point<float> getMousePos (const EventType& e) noexcept
     {
-        return Point<int> (e.x, e.y);
+        return Point<float> ((float) e.x, (float) e.y);
     }
 
     void handleWheelEvent (const XButtonPressedEvent& buttonPressEvent, const float amount)
@@ -3123,7 +3123,7 @@ bool Desktop::canUseSemiTransparentWindows() noexcept
              && (matchedDepth == desiredDepth);
 }
 
-Point<int> MouseInputSource::getCurrentRawMousePosition()
+Point<float> MouseInputSource::getCurrentRawMousePosition()
 {
     Window root, child;
     int x, y, winx, winy;
@@ -3140,14 +3140,14 @@ Point<int> MouseInputSource::getCurrentRawMousePosition()
         x = y = -1;
     }
 
-    return Point<int> (x, y);
+    return Point<float> ((float) x, (float) y);
 }
 
-void MouseInputSource::setRawMousePosition (Point<int> newPosition)
+void MouseInputSource::setRawMousePosition (Point<float> newPosition)
 {
     ScopedXLock xlock;
     Window root = RootWindow (display, DefaultScreen (display));
-    XWarpPointer (display, None, root, 0, 0, 0, 0, newPosition.getX(), newPosition.getY());
+    XWarpPointer (display, None, root, 0, 0, 0, 0, roundToInt (newPosition.getX()), roundToInt (newPosition.getY()));
 }
 
 double Desktop::getDefaultMasterScale()

@@ -49,7 +49,7 @@ void ComponentDragger::dragComponent (Component* const componentToDrag, const Mo
         // so their coordinates become wrong after the first one moves the window, so in that case, we'll use
         // the current mouse position instead of the one that the event contains...
         if (componentToDrag->isOnDesktop())
-            bounds += componentToDrag->getLocalPoint (nullptr, e.source.getScreenPosition()) - mouseDownWithinTarget;
+            bounds += componentToDrag->getLocalPoint (nullptr, e.source.getScreenPosition()).roundToInt() - mouseDownWithinTarget;
         else
             bounds += e.getEventRelativeTo (componentToDrag).getPosition() - mouseDownWithinTarget;
 

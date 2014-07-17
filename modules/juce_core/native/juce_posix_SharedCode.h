@@ -1150,10 +1150,11 @@ struct HighResolutionTimer::Pimpl
 
     void start (int newPeriod)
     {
-        periodMs = newPeriod;
-
-        if (thread == 0)
+        if (periodMs != newPeriod)
         {
+            stop();
+            periodMs = newPeriod;
+
             shouldStop = false;
 
             if (pthread_create (&thread, nullptr, timerThread, this) == 0)

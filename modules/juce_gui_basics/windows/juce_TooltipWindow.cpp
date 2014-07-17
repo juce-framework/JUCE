@@ -138,7 +138,7 @@ void TooltipWindow::timerCallback()
     mouseClicks = clickCount;
     mouseWheelMoves = wheelCount;
 
-    const Point<int> mousePos (mouseSource.getScreenPosition());
+    const Point<float> mousePos (mouseSource.getScreenPosition());
     const bool mouseMovedQuickly = mousePos.getDistanceFrom (lastMousePos) > 12;
     lastMousePos = mousePos;
 
@@ -159,7 +159,7 @@ void TooltipWindow::timerCallback()
         }
         else if (tipChanged)
         {
-            displayTip (mousePos, newTip);
+            displayTip (mousePos.roundToInt(), newTip);
         }
     }
     else
@@ -170,7 +170,7 @@ void TooltipWindow::timerCallback()
              && newTip != tipShowing
              && now > lastCompChangeTime + (unsigned int) millisecondsBeforeTipAppears)
         {
-            displayTip (mousePos, newTip);
+            displayTip (mousePos.roundToInt(), newTip);
         }
     }
 }

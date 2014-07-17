@@ -115,8 +115,7 @@ void DirectoryContentsList::setFileFilter (const FileFilter* newFileFilter)
 }
 
 //==============================================================================
-bool DirectoryContentsList::getFileInfo (const int index,
-                                         FileInfo& result) const
+bool DirectoryContentsList::getFileInfo (const int index, FileInfo& result) const
 {
     const ScopedLock sl (fileListLock);
 
@@ -222,7 +221,7 @@ struct FileInfoComparator
             return first->isDirectory ? -1 : 1;
        #endif
 
-        return first->filename.compareIgnoreCase (second->filename);
+        return first->filename.compareNatural (second->filename);
     }
 };
 

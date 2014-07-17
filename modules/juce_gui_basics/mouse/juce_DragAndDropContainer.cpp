@@ -212,7 +212,7 @@ private:
 
     DragAndDropTarget* getCurrentlyOver() const noexcept
     {
-        return dynamic_cast <DragAndDropTarget*> (currentlyOverComp.get());
+        return dynamic_cast<DragAndDropTarget*> (currentlyOverComp.get());
     }
 
     DragAndDropTarget* findTarget (Point<int> screenPos, Point<int>& relativePos,
@@ -231,7 +231,7 @@ private:
 
         while (hit != nullptr)
         {
-            if (DragAndDropTarget* const ddt = dynamic_cast <DragAndDropTarget*> (hit))
+            if (DragAndDropTarget* const ddt = dynamic_cast<DragAndDropTarget*> (hit))
             {
                 if (ddt->isInterestedInDragSource (details))
                 {
@@ -353,7 +353,7 @@ void DragAndDropContainer::startDragging (const var& sourceDescription,
             return;
         }
 
-        const Point<int> lastMouseDown (draggingSource->getLastMouseDownPosition());
+        const Point<int> lastMouseDown (draggingSource->getLastMouseDownPosition().roundToInt());
         Point<int> imageOffset;
 
         if (dragImage.isNull())
@@ -383,7 +383,7 @@ void DragAndDropContainer::startDragging (const var& sourceDescription,
                     {
                         const float alpha = (distance > hi) ? 0
                                                             : (hi - distance) / (float) (hi - lo)
-                                                               + random.nextFloat() * 0.008f;
+                                                                + random.nextFloat() * 0.008f;
 
                         dragImage.multiplyAlphaAt (x, y, alpha);
                     }
@@ -414,7 +414,7 @@ void DragAndDropContainer::startDragging (const var& sourceDescription,
         }
         else
         {
-            if (Component* const thisComp = dynamic_cast <Component*> (this))
+            if (Component* const thisComp = dynamic_cast<Component*> (this))
             {
                 thisComp->addChildComponent (dragImageComponent);
             }
@@ -425,8 +425,7 @@ void DragAndDropContainer::startDragging (const var& sourceDescription,
             }
         }
 
-        static_cast <DragImageComponent*> (dragImageComponent.get())->updateLocation (false, lastMouseDown);
-        dragImageComponent->setVisible (true);
+        static_cast<DragImageComponent*> (dragImageComponent.get())->updateLocation (false, lastMouseDown);
         dragImageComponent->enterModalState();
 
        #if JUCE_WINDOWS

@@ -94,7 +94,7 @@ public:
         @param newItemId        an associated ID number that can be set or retrieved - see
                                 getSelectedId() and setSelectedId(). Note that this value can not
                                 be 0!
-        @see setItemEnabled, addSeparator, addSectionHeading, removeItem, getNumItems, getItemText, getItemId
+        @see setItemEnabled, addSeparator, addSectionHeading, getNumItems, getItemText, getItemId
     */
     void addItem (const String& newItemText, int newItemId);
 
@@ -142,7 +142,7 @@ public:
         If this call causes the content to be cleared, and a change-message
         will be broadcast according to the notification parameter.
 
-        @see addItem, removeItem, getNumItems
+        @see addItem, getNumItems
     */
     void clear (NotificationType notification = sendNotificationAsync);
 
@@ -257,8 +257,11 @@ public:
     */
     void showEditor();
 
-    /** Pops up the combo box's list. */
-    void showPopup();
+    /** Pops up the combo box's list.
+        This is virtual so that you can override it with your own custom popup
+        mechanism if you need some really unusual behaviour.
+    */
+    virtual void showPopup();
 
     //==============================================================================
     /**

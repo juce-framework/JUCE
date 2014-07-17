@@ -183,6 +183,11 @@ bool AudioFormatWriter::writeFromAudioSampleBuffer (const AudioSampleBuffer& sou
     return writeFromFloatArrays (chans, numSourceChannels, numSamples);
 }
 
+bool AudioFormatWriter::flush()
+{
+    return false;
+}
+
 //==============================================================================
 class AudioFormatWriter::ThreadedWriter::Buffer   : private TimeSliceClient
 {
@@ -194,6 +199,8 @@ public:
           writer (w),
           receiver (nullptr),
           samplesWritten (0),
+          samplesPerFlush (0),
+          flushSampleCounter (0),
           isRunning (true)
     {
         timeSliceThread.addTimeSliceClient (this);
@@ -266,6 +273,18 @@ public:
         }
 
         fifo.finishedRead (size1 + size2);
+
+        if (samplesPerFlush > 0)
+        {
+            flushSampleCounter -= size1 + size2;
+
+            if (flushSampleCounter <= 0)
+            {
+                flushSampleCounter = samplesPerFlush;
+                writer->flush();
+            }
+        }
+
         return 0;
     }
 
@@ -279,6 +298,11 @@ public:
         samplesWritten = 0;
     }
 
+    void setFlushInterval (int numSamples) noexcept
+    {
+        samplesPerFlush = numSamples;
+    }
+
 private:
     AbstractFifo fifo;
     AudioSampleBuffer buffer;
@@ -287,6 +311,7 @@ private:
     CriticalSection thumbnailLock;
     IncomingDataReceiver* receiver;
     int64 samplesWritten;
+    int samplesPerFlush, flushSampleCounter;
     volatile bool isRunning;
 
     JUCE_DECLARE_NON_COPYABLE (Buffer)
@@ -309,4 +334,9 @@ bool AudioFormatWriter::ThreadedWriter::write (const float* const* data, int num
 void AudioFormatWriter::ThreadedWriter::setDataReceiver (AudioFormatWriter::ThreadedWriter::IncomingDataReceiver* receiver)
 {
     buffer->setDataReceiver (receiver);
+}
+
+void AudioFormatWriter::ThreadedWriter::setFlushInterval (int numSamplesPerFlush) noexcept
+{
+    buffer->setFlushInterval (numSamplesPerFlush);
 }

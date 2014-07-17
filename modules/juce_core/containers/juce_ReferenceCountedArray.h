@@ -72,7 +72,7 @@ public:
         const ScopedLockType lock (other.getLock());
         numUsed = other.size();
         data.setAllocatedSize (numUsed);
-        memcpy (data.elements, other.getRawDataPointer(), numUsed * sizeof (ObjectClass*));
+        memcpy (data.elements, other.getRawDataPointer(), (size_t) numUsed * sizeof (ObjectClass*));
 
         for (int i = numUsed; --i >= 0;)
             if (ObjectClass* o = data.elements[i])

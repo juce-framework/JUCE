@@ -91,7 +91,7 @@ AudioSampleBuffer::AudioSampleBuffer (float* const* dataToReferTo,
       allocatedBytes (0)
 {
     jassert (dataToReferTo != nullptr);
-    jassert (numChans >= 0);
+    jassert (numChans >= 0 && numSamples >= 0);
     allocateChannels (dataToReferTo, 0);
 }
 
@@ -105,7 +105,7 @@ AudioSampleBuffer::AudioSampleBuffer (float* const* dataToReferTo,
       isClear (false)
 {
     jassert (dataToReferTo != nullptr);
-    jassert (numChans >= 0);
+    jassert (numChans >= 0 && startSample >= 0 && numSamples >= 0);
     allocateChannels (dataToReferTo, startSample);
 }
 
@@ -114,7 +114,7 @@ void AudioSampleBuffer::setDataToReferTo (float** dataToReferTo,
                                           const int newNumSamples) noexcept
 {
     jassert (dataToReferTo != nullptr);
-    jassert (newNumChannels >= 0);
+    jassert (newNumChannels >= 0 && newNumSamples >= 0);
 
     allocatedBytes = 0;
     allocatedData.free();
@@ -128,6 +128,8 @@ void AudioSampleBuffer::setDataToReferTo (float** dataToReferTo,
 
 void AudioSampleBuffer::allocateChannels (float* const* const dataToReferTo, int offset)
 {
+    jassert (offset >= 0);
+
     // (try to avoid doing a malloc here, as that'll blow up things like Pro-Tools)
     if (numChannels < (int) numElementsInArray (preallocatedChannelSpace))
     {
@@ -163,6 +165,8 @@ AudioSampleBuffer& AudioSampleBuffer::operator= (const AudioSampleBuffer& other)
         }
         else
         {
+            isClear = false;
+
             for (int i = 0; i < numChannels; ++i)
                 FloatVectorOperations::copy (channels[i], other.channels[i], size);
         }

@@ -221,8 +221,8 @@ private:
     static inline StringHolder* bufferFromText (const CharPointerType text) noexcept
     {
         // (Can't use offsetof() here because of warnings about this not being a POD)
-        return reinterpret_cast <StringHolder*> (reinterpret_cast <char*> (text.getAddress())
-                    - (reinterpret_cast <size_t> (reinterpret_cast <StringHolder*> (1)->text) - 1));
+        return reinterpret_cast<StringHolder*> (reinterpret_cast<char*> (text.getAddress())
+                    - (reinterpret_cast<size_t> (reinterpret_cast<StringHolder*> (1)->text) - 1));
     }
 
     void compileTimeChecks()
@@ -558,7 +558,7 @@ struct HashGenerator
         Type result = Type();
 
         while (! t.isEmpty())
-            result = multiplier * result + t.getAndAdvance();
+            result = ((Type) multiplier) * result + (Type) t.getAndAdvance();
 
         return result;
     }
@@ -618,19 +618,103 @@ int String::compare (const char* const other) const noexcept       { return text
 int String::compare (const wchar_t* const other) const noexcept    { return text.compare (castToCharPointer_wchar_t (other)); }
 int String::compareIgnoreCase (const String& other) const noexcept { return (text == other.text) ? 0 : text.compareIgnoreCase (other.text); }
 
-int String::compareLexicographically (const String& other) const noexcept
+static int stringCompareRight (String::CharPointerType s1, String::CharPointerType s2) noexcept
 {
-    CharPointerType s1 (text);
+    for (int bias = 0;;)
+    {
+        const juce_wchar c1 = s1.getAndAdvance();
+        const bool isDigit1 = CharacterFunctions::isDigit (c1);
 
-    while (! (s1.isEmpty() || s1.isLetterOrDigit()))
-        ++s1;
+        const juce_wchar c2 = s2.getAndAdvance();
+        const bool isDigit2 = CharacterFunctions::isDigit (c2);
 
-    CharPointerType s2 (other.text);
+        if (! (isDigit1 || isDigit2))   return bias;
+        if (! isDigit1)                 return -1;
+        if (! isDigit2)                 return 1;
 
-    while (! (s2.isEmpty() || s2.isLetterOrDigit()))
-        ++s2;
+        if (c1 != c2 && bias == 0)
+            bias = c1 < c2 ? -1 : 1;
 
-    return s1.compareIgnoreCase (s2);
+        jassert (c1 != 0 && c2 != 0);
+    }
+}
+
+static int stringCompareLeft (String::CharPointerType s1, String::CharPointerType s2) noexcept
+{
+    for (;;)
+    {
+        const juce_wchar c1 = s1.getAndAdvance();
+        const bool isDigit1 = CharacterFunctions::isDigit (c1);
+
+        const juce_wchar c2 = s2.getAndAdvance();
+        const bool isDigit2 = CharacterFunctions::isDigit (c2);
+
+        if (! (isDigit1 || isDigit2))   return 0;
+        if (! isDigit1)                 return -1;
+        if (! isDigit2)                 return 1;
+        if (c1 < c2)                    return -1;
+        if (c1 > c2)                    return 1;
+    }
+}
+
+static int naturalStringCompare (String::CharPointerType s1, String::CharPointerType s2) noexcept
+{
+    bool firstLoop = true;
+
+    for (;;)
+    {
+        const bool hasSpace1 = s1.isWhitespace();
+        const bool hasSpace2 = s2.isWhitespace();
+
+        if ((! firstLoop) && (hasSpace1 ^ hasSpace2))
+            return hasSpace2 ? 1 : -1;
+
+        firstLoop = false;
+
+        if (hasSpace1)  s1 = s1.findEndOfWhitespace();
+        if (hasSpace2)  s2 = s2.findEndOfWhitespace();
+
+        if (s1.isDigit() && s2.isDigit())
+        {
+            const int result = (*s1 == '0' || *s2 == '0') ? stringCompareLeft  (s1, s2)
+                                                          : stringCompareRight (s1, s2);
+
+            if (result != 0)
+                return result;
+        }
+
+        juce_wchar c1 = s1.getAndAdvance();
+        juce_wchar c2 = s2.getAndAdvance();
+
+        if (c1 != c2)
+        {
+            c1 = CharacterFunctions::toUpperCase (c1);
+            c2 = CharacterFunctions::toUpperCase (c2);
+        }
+
+        if (c1 == c2)
+        {
+            if (c1 == 0)
+                return 0;
+        }
+        else
+        {
+            const bool isAlphaNum1 = CharacterFunctions::isLetterOrDigit (c1);
+            const bool isAlphaNum2 = CharacterFunctions::isLetterOrDigit (c2);
+
+            if (isAlphaNum2 && ! isAlphaNum1) return -1;
+            if (isAlphaNum1 && ! isAlphaNum2) return 1;
+
+            return c1 < c2 ? -1 : 1;
+        }
+
+        jassert (c1 != 0 && c2 != 0);
+    }
+}
+
+int String::compareNatural (StringRef other) const noexcept
+{
+    return naturalStringCompare (getCharPointer(), other.text);
 }
 
 //==============================================================================
@@ -1760,13 +1844,13 @@ String String::formatted (const String pf, ... )
         va_start (args, pf);
 
        #if JUCE_WINDOWS
-        HeapBlock <wchar_t> temp (bufferSize);
+        HeapBlock<wchar_t> temp (bufferSize);
         const int num = (int) _vsnwprintf (temp.getData(), bufferSize - 1, pf.toWideCharPointer(), args);
        #elif JUCE_ANDROID
-        HeapBlock <char> temp (bufferSize);
+        HeapBlock<char> temp (bufferSize);
         const int num = (int) vsnprintf (temp.getData(), bufferSize - 1, pf.toUTF8(), args);
        #else
-        HeapBlock <wchar_t> temp (bufferSize);
+        HeapBlock<wchar_t> temp (bufferSize);
         const int num = (int) vswprintf (temp.getData(), bufferSize - 1, pf.toWideCharPointer(), args);
        #endif
 
@@ -1921,12 +2005,12 @@ struct StringEncodingConverter
 {
     static CharPointerType_Dest convert (const String& s)
     {
-        String& source = const_cast <String&> (s);
+        String& source = const_cast<String&> (s);
 
         typedef typename CharPointerType_Dest::CharType DestChar;
 
         if (source.isEmpty())
-            return CharPointerType_Dest (reinterpret_cast <const DestChar*> (&emptyChar));
+            return CharPointerType_Dest (reinterpret_cast<const DestChar*> (&emptyChar));
 
         CharPointerType_Src text (source.getCharPointer());
         const size_t extraBytesNeeded = CharPointerType_Dest::getBytesRequiredFor (text) + sizeof (typename CharPointerType_Dest::CharType);
@@ -1936,7 +2020,7 @@ struct StringEncodingConverter
         text = source.getCharPointer();
 
         void* const newSpace = addBytesToPointer (text.getAddress(), (int) endOffset);
-        const CharPointerType_Dest extraSpace (static_cast <DestChar*> (newSpace));
+        const CharPointerType_Dest extraSpace (static_cast<DestChar*> (newSpace));
 
        #if JUCE_DEBUG // (This just avoids spurious warnings from valgrind about the uninitialised bytes at the end of the buffer..)
         const size_t bytesToClear = (size_t) jmin ((int) extraBytesNeeded, 4);
@@ -2189,6 +2273,12 @@ public:
             expect (s.compare (String ("012345678")) == 0);
             expect (s.compare (String ("012345679")) < 0);
             expect (s.compare (String ("012345676")) > 0);
+            expect (String("a").compareNatural ("A") == 0);
+            expect (String("A").compareNatural ("B") < 0);
+            expect (String("a").compareNatural ("B") < 0);
+            expect (String("10").compareNatural ("2") > 0);
+            expect (String("Abc 10").compareNatural ("aBC 2") > 0);
+            expect (String("Abc 1").compareNatural ("aBC 2") < 0);
             expect (s.substring (2, 3) == String::charToString (s[2]));
             expect (s.substring (0, 1) == String::charToString (s[0]));
             expect (s.getLastCharacter() == s [s.length() - 1]);

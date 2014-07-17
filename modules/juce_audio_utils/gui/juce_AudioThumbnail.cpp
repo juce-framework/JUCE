@@ -391,6 +391,7 @@ public:
                 const MinMaxValue* cacheData = getData (channelNum, clip.getX() - area.getX());
 
                 RectangleList<float> waveform;
+                waveform.ensureStorageAllocated (clip.getWidth());
 
                 float x = (float) clip.getX();
 

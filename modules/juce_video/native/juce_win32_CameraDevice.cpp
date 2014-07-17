@@ -44,27 +44,29 @@ static const IID IID_ISampleGrabber    = { 0x6B652FFF, 0x11FE, 0x4fce, { 0x92, 0
 static const CLSID CLSID_SampleGrabber = { 0xC1F400A0, 0x3F08, 0x11d3, { 0x9F, 0x0B, 0x00, 0x60, 0x08, 0x03, 0x9E, 0x37 } };
 static const CLSID CLSID_NullRenderer  = { 0xC1F400A4, 0x3F08, 0x11d3, { 0x9F, 0x0B, 0x00, 0x60, 0x08, 0x03, 0x9E, 0x37 } };
 
-//==============================================================================
-class DShowCameraDeviceInteral  : public ChangeBroadcaster
+
+struct CameraDevice::Pimpl  : public ChangeBroadcaster
 {
-public:
-    DShowCameraDeviceInteral (CameraDevice* const owner_,
-                              const ComSmartPtr <ICaptureGraphBuilder2>& captureGraphBuilder_,
-                              const ComSmartPtr <IBaseFilter>& filter_,
-                              int minWidth, int minHeight,
-                              int maxWidth, int maxHeight)
-      : owner (owner_),
-        captureGraphBuilder (captureGraphBuilder_),
-        filter (filter_),
-        ok (false),
-        imageNeedsFlipping (false),
-        width (0),
-        height (0),
-        activeUsers (0),
-        recordNextFrameTime (false),
-        previewMaxFPS (60)
+    Pimpl (const String&, int index,
+           int minWidth, int minHeight,
+           int maxWidth, int maxHeight)
+       : isRecording (false),
+         openedSuccessfully (false),
+         imageNeedsFlipping (false),
+         width (0), height (0),
+         activeUsers (0),
+         recordNextFrameTime (false),
+         previewMaxFPS (60)
     {
-        HRESULT hr = graphBuilder.CoCreateInstance (CLSID_FilterGraph);
+        HRESULT hr = captureGraphBuilder.CoCreateInstance (CLSID_CaptureGraphBuilder2);
+        if (FAILED (hr))
+            return;
+
+        filter = enumerateCameras (nullptr, index);
+        if (filter == nullptr)
+            return;
+
+        hr = graphBuilder.CoCreateInstance (CLSID_FilterGraph);
         if (FAILED (hr))
             return;
 
@@ -77,7 +79,7 @@ public:
             return;
 
         {
-            ComSmartPtr <IAMStreamConfig> streamConfig;
+            ComSmartPtr<IAMStreamConfig> streamConfig;
 
             hr = captureGraphBuilder->FindInterface (&PIN_CATEGORY_CAPTURE, 0, filter,
                                                      IID_IAMStreamConfig, (void**) streamConfig.resetAndGetPointerAddress());
@@ -106,7 +108,7 @@ public:
         if (! connectFilters (filter, smartTee))
             return;
 
-        ComSmartPtr <IBaseFilter> sampleGrabberBase;
+        ComSmartPtr<IBaseFilter> sampleGrabberBase;
         hr = sampleGrabberBase.CoCreateInstance (CLSID_SampleGrabber);
         if (FAILED (hr))
             return;
@@ -130,7 +132,7 @@ public:
         if (FAILED (hr))
             return;
 
-        ComSmartPtr <IPin> grabberInputPin;
+        ComSmartPtr<IPin> grabberInputPin;
         if (! (getPin (smartTee, PINDIR_OUTPUT, smartTeeCaptureOutputPin, "capture")
                 && getPin (smartTee, PINDIR_OUTPUT, smartTeePreviewOutputPin, "preview")
                 && getPin (sampleGrabberBase, PINDIR_INPUT, grabberInputPin)))
@@ -146,7 +148,7 @@ public:
         width = pVih->bmiHeader.biWidth;
         height = pVih->bmiHeader.biHeight;
 
-        ComSmartPtr <IBaseFilter> nullFilter;
+        ComSmartPtr<IBaseFilter> nullFilter;
         hr = nullFilter.CoCreateInstance (CLSID_NullRenderer);
         hr = graphBuilder->AddFilter (nullFilter, _T("Null Renderer"));
 
@@ -156,19 +158,17 @@ public:
             activeImage = Image (Image::RGB, width, height, true);
             loadingImage = Image (Image::RGB, width, height, true);
 
-            ok = true;
+            openedSuccessfully = true;
         }
     }
 
-    ~DShowCameraDeviceInteral()
+    ~Pimpl()
     {
         if (mediaControl != nullptr)
             mediaControl->Stop();
 
         removeGraphFromRot();
-
-        for (int i = viewerComps.size(); --i >= 0;)
-            viewerComps.getUnchecked(i)->ownerDeleted();
+        disconnectAnyViewers();
 
         if (sampleGrabber != nullptr)
         {
@@ -187,21 +187,67 @@ public:
         asfWriter = nullptr;
     }
 
+    bool openedOk() const noexcept       { return openedSuccessfully; }
+
+    void startRecordingToFile (const File& file, int quality)
+    {
+        addUser();
+        isRecording = createFileCaptureFilter (file, quality);
+    }
+
+    void stopRecording()
+    {
+        if (isRecording)
+        {
+            removeFileCaptureFilter();
+            removeUser();
+            isRecording = false;
+        }
+    }
+
+    Time getTimeOfFirstRecordedFrame() const
+    {
+        return firstRecordedTime;
+    }
+
+    void addListener (CameraDevice::Listener* listenerToAdd)
+    {
+        const ScopedLock sl (listenerLock);
+
+        if (listeners.size() == 0)
+            addUser();
+
+        listeners.addIfNotAlreadyThere (listenerToAdd);
+    }
+
+    void removeListener (CameraDevice::Listener* listenerToRemove)
+    {
+        const ScopedLock sl (listenerLock);
+        listeners.removeAllInstancesOf (listenerToRemove);
+
+        if (listeners.size() == 0)
+            removeUser();
+    }
+
+    void callListeners (const Image& image)
+    {
+        const ScopedLock sl (listenerLock);
+
+        for (int i = listeners.size(); --i >= 0;)
+            if (CameraDevice::Listener* const l = listeners[i])
+                l->imageReceived (image);
+    }
+
     void addUser()
     {
-        if (ok && activeUsers++ == 0)
+        if (openedSuccessfully && activeUsers++ == 0)
             mediaControl->Run();
     }
 
     void removeUser()
     {
-        if (ok && --activeUsers == 0)
+        if (openedSuccessfully && --activeUsers == 0)
             mediaControl->Stop();
-    }
-
-    int getPreviewMaxFPS() const
-    {
-        return previewMaxFPS;
     }
 
     void handleFrame (double /*time*/, BYTE* buffer, long /*bufferSize*/)
@@ -213,10 +259,10 @@ public:
             firstRecordedTime = Time::getCurrentTime() - RelativeTime (defaultCameraLatency);
             recordNextFrameTime = false;
 
-            ComSmartPtr <IPin> pin;
+            ComSmartPtr<IPin> pin;
             if (getPin (filter, PINDIR_OUTPUT, pin))
             {
-                ComSmartPtr <IAMPushSource> pushSource;
+                ComSmartPtr<IAMPushSource> pushSource;
                 HRESULT hr = pin.QueryInterface (pushSource);
 
                 if (pushSource != nullptr)
@@ -234,6 +280,7 @@ public:
             const ScopedLock sl (imageSwapLock);
 
             {
+                loadingImage.duplicateIfShared();
                 const Image::BitmapData destData (loadingImage, 0, 0, width, height, Image::BitmapData::writeOnly);
 
                 for (int i = 0; i < height; ++i)
@@ -251,7 +298,7 @@ public:
         sendChangeMessage();
     }
 
-    void drawCurrentImage (Graphics& g, int x, int y, int w, int h)
+    void drawCurrentImage (Graphics& g, Rectangle<int> area)
     {
         if (imageNeedsFlipping)
         {
@@ -260,20 +307,16 @@ public:
             imageNeedsFlipping = false;
         }
 
-        RectanglePlacement rp (RectanglePlacement::centred);
-        double dx = 0, dy = 0, dw = width, dh = height;
-        rp.applyTo (dx, dy, dw, dh, x, y, w, h);
-        const int rx = roundToInt (dx), ry = roundToInt (dy);
-        const int rw = roundToInt (dw), rh = roundToInt (dh);
+        Rectangle<int> centred (RectanglePlacement (RectanglePlacement::centred)
+                                    .appliedTo (Rectangle<int> (width, height), area));
 
-        {
-            Graphics::ScopedSaveState ss (g);
+        RectangleList<int> borders (area);
+        borders.subtract (centred);
+        g.setColour (Colours::black);
+        g.fillRectList (borders);
 
-            g.excludeClipRegion (Rectangle<int> (rx, ry, rw, rh));
-            g.fillAll (Colours::black);
-        }
-
-        g.drawImage (activeImage, rx, ry, rw, rh, 0, 0, width, height);
+        g.drawImage (activeImage, centred.getX(), centred.getY(),
+                     centred.getWidth(), centred.getHeight(), 0, 0, width, height);
     }
 
     bool createFileCaptureFilter (const File& file, int quality)
@@ -289,7 +332,7 @@ public:
 
         if (SUCCEEDED (hr))
         {
-            ComSmartPtr <IFileSinkFilter> fileSink;
+            ComSmartPtr<IFileSinkFilter> fileSink;
             hr = asfWriter.QueryInterface (fileSink);
 
             if (SUCCEEDED (hr))
@@ -302,10 +345,10 @@ public:
 
                     if (SUCCEEDED (hr))
                     {
-                        ComSmartPtr <IConfigAsfWriter> asfConfig;
+                        ComSmartPtr<IConfigAsfWriter> asfConfig;
                         hr = asfWriter.QueryInterface (asfConfig);
                         asfConfig->SetIndexMode (true);
-                        ComSmartPtr <IWMProfileManager> profileManager;
+                        ComSmartPtr<IWMProfileManager> profileManager;
                         hr = WMCreateProfileManager (profileManager.resetAndGetPointerAddress());
 
                         // This gibberish is the DirectShow profile for a video-only wmv file.
@@ -337,19 +380,19 @@ public:
                                    .replace ("$HEIGHT", String (height))
                                    .replace ("$AVGTIMEPERFRAME", String (10000000 / maxFramesPerSecond));
 
-                        ComSmartPtr <IWMProfile> currentProfile;
+                        ComSmartPtr<IWMProfile> currentProfile;
                         hr = profileManager->LoadProfileByData (prof.toWideCharPointer(), currentProfile.resetAndGetPointerAddress());
                         hr = asfConfig->ConfigureFilterUsingProfile (currentProfile);
 
                         if (SUCCEEDED (hr))
                         {
-                            ComSmartPtr <IPin> asfWriterInputPin;
+                            ComSmartPtr<IPin> asfWriterInputPin;
 
                             if (getPin (asfWriter, PINDIR_INPUT, asfWriterInputPin, "Video Input 01"))
                             {
                                 hr = graphBuilder->Connect (smartTeeCaptureOutputPin, asfWriterInputPin);
 
-                                if (SUCCEEDED (hr) && ok && activeUsers > 0
+                                if (SUCCEEDED (hr) && openedSuccessfully && activeUsers > 0
                                      && SUCCEEDED (mediaControl->Run()))
                                 {
                                     previewMaxFPS = (quality < 2) ? 15 : 25; // throttle back the preview comps to try to leave the cpu free for encoding
@@ -368,7 +411,7 @@ public:
 
         removeFileCaptureFilter();
 
-        if (ok && activeUsers > 0)
+        if (openedSuccessfully && activeUsers > 0)
             mediaControl->Run();
 
         return false;
@@ -384,132 +427,127 @@ public:
             asfWriter = nullptr;
         }
 
-        if (ok && activeUsers > 0)
+        if (openedSuccessfully && activeUsers > 0)
             mediaControl->Run();
 
         previewMaxFPS = 60;
     }
 
-    //==============================================================================
-    void addListener (CameraDevice::Listener* listenerToAdd)
+    static ComSmartPtr<IBaseFilter> enumerateCameras (StringArray* names, const int deviceIndexToOpen)
     {
-        const ScopedLock sl (listenerLock);
+        int index = 0;
+        ComSmartPtr<ICreateDevEnum> pDevEnum;
 
-        if (listeners.size() == 0)
-            addUser();
+        if (SUCCEEDED (pDevEnum.CoCreateInstance (CLSID_SystemDeviceEnum)))
+        {
+            ComSmartPtr<IEnumMoniker> enumerator;
+            HRESULT hr = pDevEnum->CreateClassEnumerator (CLSID_VideoInputDeviceCategory, enumerator.resetAndGetPointerAddress(), 0);
 
-        listeners.addIfNotAlreadyThere (listenerToAdd);
+            if (SUCCEEDED (hr) && enumerator != nullptr)
+            {
+                ComSmartPtr<IMoniker> moniker;
+                ULONG fetched;
+
+                while (enumerator->Next (1, moniker.resetAndGetPointerAddress(), &fetched) == S_OK)
+                {
+                    ComSmartPtr<IBaseFilter> captureFilter;
+                    hr = moniker->BindToObject (0, 0, IID_IBaseFilter, (void**) captureFilter.resetAndGetPointerAddress());
+
+                    if (SUCCEEDED (hr))
+                    {
+                        ComSmartPtr<IPropertyBag> propertyBag;
+                        hr = moniker->BindToStorage (0, 0, IID_IPropertyBag, (void**) propertyBag.resetAndGetPointerAddress());
+
+                        if (SUCCEEDED (hr))
+                        {
+                            VARIANT var;
+                            var.vt = VT_BSTR;
+
+                            hr = propertyBag->Read (_T("FriendlyName"), &var, 0);
+                            propertyBag = nullptr;
+
+                            if (SUCCEEDED (hr))
+                            {
+                                if (names != nullptr)
+                                    names->add (var.bstrVal);
+
+                                if (index == deviceIndexToOpen)
+                                    return captureFilter;
+
+                                ++index;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return nullptr;
     }
 
-    void removeListener (CameraDevice::Listener* listenerToRemove)
+    static StringArray getAvailableDevices()
     {
-        const ScopedLock sl (listenerLock);
-        listeners.removeFirstMatchingValue (listenerToRemove);
-
-        if (listeners.size() == 0)
-            removeUser();
+        StringArray devs;
+        enumerateCameras (&devs, -1);
+        return devs;
     }
 
-    void callListeners (const Image& image)
-    {
-        const ScopedLock sl (listenerLock);
-
-        for (int i = listeners.size(); --i >= 0;)
-            if (CameraDevice::Listener* const l = listeners[i])
-                l->imageReceived (image);
-    }
-
-    //==============================================================================
-    class DShowCaptureViewerComp   : public Component,
-                                     public ChangeListener
+    class GrabberCallback   : public ComBaseClassHelperBase<ISampleGrabberCB>
     {
     public:
-        DShowCaptureViewerComp (DShowCameraDeviceInteral* const owner_)
-            : owner (owner_), maxFPS (15), lastRepaintTime (0)
+        GrabberCallback (Pimpl& p)
+            : ComBaseClassHelperBase<ISampleGrabberCB> (0), owner (p) {}
+
+        JUCE_COMRESULT QueryInterface (REFIID refId, void** result)
         {
-            setOpaque (true);
-            owner->addChangeListener (this);
-            owner->addUser();
-            owner->viewerComps.add (this);
-            setSize (owner->width, owner->height);
+            if (refId == IID_ISampleGrabberCB)
+                return castToType<ISampleGrabberCB> (result);
+
+            return ComBaseClassHelperBase<ISampleGrabberCB>::QueryInterface (refId, result);
         }
 
-        ~DShowCaptureViewerComp()
+        STDMETHODIMP SampleCB (double, IMediaSample*)  { return E_FAIL; }
+
+        STDMETHODIMP BufferCB (double time, BYTE* buffer, long bufferSize)
         {
-            if (owner != nullptr)
-            {
-                owner->viewerComps.removeFirstMatchingValue (this);
-                owner->removeUser();
-                owner->removeChangeListener (this);
-            }
-        }
-
-        void ownerDeleted()
-        {
-            owner = nullptr;
-        }
-
-        void paint (Graphics& g) override
-        {
-            g.setColour (Colours::black);
-            g.setImageResamplingQuality (Graphics::lowResamplingQuality);
-
-            if (owner != nullptr)
-                owner->drawCurrentImage (g, 0, 0, getWidth(), getHeight());
-            else
-                g.fillAll (Colours::black);
-        }
-
-        void changeListenerCallback (ChangeBroadcaster*) override
-        {
-            const int64 now = Time::currentTimeMillis();
-
-            if (now >= lastRepaintTime + (1000 / maxFPS))
-            {
-                lastRepaintTime = now;
-                repaint();
-
-                if (owner != nullptr)
-                    maxFPS = owner->getPreviewMaxFPS();
-            }
+            owner.handleFrame (time, buffer, bufferSize);
+            return S_OK;
         }
 
     private:
-        DShowCameraDeviceInteral* owner;
-        int maxFPS;
-        int64 lastRepaintTime;
+        Pimpl& owner;
+
+        JUCE_DECLARE_NON_COPYABLE (GrabberCallback)
     };
 
-    //==============================================================================
-    bool ok;
+    ComSmartPtr<GrabberCallback> callback;
+    Array<CameraDevice::Listener*> listeners;
+    CriticalSection listenerLock;
+
+    bool isRecording, openedSuccessfully;
     int width, height;
     Time firstRecordedTime;
 
-    Array <DShowCaptureViewerComp*> viewerComps;
+    Array<ViewerComponent*> viewerComps;
 
-private:
-    CameraDevice* const owner;
-    ComSmartPtr <ICaptureGraphBuilder2> captureGraphBuilder;
-    ComSmartPtr <IBaseFilter> filter;
-    ComSmartPtr <IBaseFilter> smartTee;
-    ComSmartPtr <IGraphBuilder> graphBuilder;
-    ComSmartPtr <ISampleGrabber> sampleGrabber;
-    ComSmartPtr <IMediaControl> mediaControl;
-    ComSmartPtr <IPin> smartTeePreviewOutputPin;
-    ComSmartPtr <IPin> smartTeeCaptureOutputPin;
-    ComSmartPtr <IBaseFilter> asfWriter;
+    ComSmartPtr<ICaptureGraphBuilder2> captureGraphBuilder;
+    ComSmartPtr<IBaseFilter> filter, smartTee, asfWriter;
+    ComSmartPtr<IGraphBuilder> graphBuilder;
+    ComSmartPtr<ISampleGrabber> sampleGrabber;
+    ComSmartPtr<IMediaControl> mediaControl;
+    ComSmartPtr<IPin> smartTeePreviewOutputPin, smartTeeCaptureOutputPin;
     int activeUsers;
-    Array <int> widths, heights;
+    Array<int> widths, heights;
     DWORD graphRegistrationID;
 
     CriticalSection imageSwapLock;
     bool imageNeedsFlipping;
-    Image loadingImage;
-    Image activeImage;
+    Image loadingImage, activeImage;
 
     bool recordNextFrameTime;
     int previewMaxFPS;
 
+private:
     void getVideoSizes (IAMStreamConfig* const streamConfig)
     {
         widths.clear();
@@ -607,8 +645,8 @@ private:
     static bool getPin (IBaseFilter* filter, const PIN_DIRECTION wantedDirection,
                         ComSmartPtr<IPin>& result, const char* pinName = nullptr)
     {
-        ComSmartPtr <IEnumPins> enumerator;
-        ComSmartPtr <IPin> pin;
+        ComSmartPtr<IEnumPins> enumerator;
+        ComSmartPtr<IPin> pin;
 
         filter->EnumPins (enumerator.resetAndGetPointerAddress());
 
@@ -635,7 +673,7 @@ private:
 
     bool connectFilters (IBaseFilter* const first, IBaseFilter* const second) const
     {
-        ComSmartPtr <IPin> in, out;
+        ComSmartPtr<IPin> in, out;
 
         return getPin (first, PINDIR_OUTPUT, out)
                 && getPin (second, PINDIR_INPUT, in)
@@ -644,11 +682,11 @@ private:
 
     bool addGraphToRot()
     {
-        ComSmartPtr <IRunningObjectTable> rot;
+        ComSmartPtr<IRunningObjectTable> rot;
         if (FAILED (GetRunningObjectTable (0, rot.resetAndGetPointerAddress())))
             return false;
 
-        ComSmartPtr <IMoniker> moniker;
+        ComSmartPtr<IMoniker> moniker;
         WCHAR buffer[128];
         HRESULT hr = CreateItemMoniker (_T("!"), buffer, moniker.resetAndGetPointerAddress());
         if (FAILED (hr))
@@ -660,11 +698,13 @@ private:
 
     void removeGraphFromRot()
     {
-        ComSmartPtr <IRunningObjectTable> rot;
+        ComSmartPtr<IRunningObjectTable> rot;
 
         if (SUCCEEDED (GetRunningObjectTable (0, rot.resetAndGetPointerAddress())))
             rot->Revoke (graphRegistrationID);
     }
+
+    void disconnectAnyViewers();
 
     static void deleteMediaType (AM_MEDIA_TYPE* const pmt)
     {
@@ -677,209 +717,76 @@ private:
         CoTaskMemFree (pmt);
     }
 
-    //==============================================================================
-    class GrabberCallback   : public ComBaseClassHelperBase <ISampleGrabberCB>
-    {
-    public:
-        GrabberCallback (DShowCameraDeviceInteral& cam)
-            : ComBaseClassHelperBase <ISampleGrabberCB> (0), owner (cam) {}
-
-        JUCE_COMRESULT QueryInterface (REFIID refId, void** result)
-        {
-            if (refId == IID_ISampleGrabberCB)
-                return castToType <ISampleGrabberCB> (result);
-
-            return ComBaseClassHelperBase<ISampleGrabberCB>::QueryInterface (refId, result);
-        }
-
-        STDMETHODIMP SampleCB (double, IMediaSample*)  { return E_FAIL; }
-
-        STDMETHODIMP BufferCB (double time, BYTE* buffer, long bufferSize)
-        {
-            owner.handleFrame (time, buffer, bufferSize);
-            return S_OK;
-        }
-
-    private:
-        DShowCameraDeviceInteral& owner;
-
-        JUCE_DECLARE_NON_COPYABLE (GrabberCallback)
-    };
-
-    ComSmartPtr <GrabberCallback> callback;
-    Array <CameraDevice::Listener*> listeners;
-    CriticalSection listenerLock;
-
-    //==============================================================================
-    JUCE_DECLARE_NON_COPYABLE (DShowCameraDeviceInteral)
+    JUCE_DECLARE_NON_COPYABLE (Pimpl)
 };
 
-
 //==============================================================================
-CameraDevice::CameraDevice (const String& nm, int /*index*/)
-    : name (nm)
+struct CameraDevice::ViewerComponent  : public Component,
+                                        public ChangeListener
 {
-    isRecording = false;
-}
+    ViewerComponent (CameraDevice& d)
+       : owner (d.pimpl), maxFPS (15), lastRepaintTime (0)
+    {
+        setOpaque (true);
+        owner->addChangeListener (this);
+        owner->addUser();
+        owner->viewerComps.add (this);
+        setSize (owner->width, owner->height);
+    }
 
-CameraDevice::~CameraDevice()
-{
-    stopRecording();
-    delete static_cast <DShowCameraDeviceInteral*> (internal);
-    internal = nullptr;
-}
+    ~ViewerComponent()
+    {
+        if (owner != nullptr)
+        {
+            owner->viewerComps.removeFirstMatchingValue (this);
+            owner->removeUser();
+            owner->removeChangeListener (this);
+        }
+    }
 
-Component* CameraDevice::createViewerComponent()
+    void ownerDeleted()
+    {
+        owner = nullptr;
+    }
+
+    void paint (Graphics& g) override
+    {
+        g.setColour (Colours::black);
+        g.setImageResamplingQuality (Graphics::lowResamplingQuality);
+
+        if (owner != nullptr)
+            owner->drawCurrentImage (g, getLocalBounds());
+        else
+            g.fillAll();
+    }
+
+    void changeListenerCallback (ChangeBroadcaster*) override
+    {
+        const int64 now = Time::currentTimeMillis();
+
+        if (now >= lastRepaintTime + (1000 / maxFPS))
+        {
+            lastRepaintTime = now;
+            repaint();
+
+            if (owner != nullptr)
+                maxFPS = owner->previewMaxFPS;
+        }
+    }
+
+private:
+    Pimpl* owner;
+    int maxFPS;
+    int64 lastRepaintTime;
+};
+
+void CameraDevice::Pimpl::disconnectAnyViewers()
 {
-    return new DShowCameraDeviceInteral::DShowCaptureViewerComp (static_cast <DShowCameraDeviceInteral*> (internal));
+    for (int i = viewerComps.size(); --i >= 0;)
+        viewerComps.getUnchecked(i)->ownerDeleted();
 }
 
 String CameraDevice::getFileExtension()
 {
     return ".wmv";
-}
-
-void CameraDevice::startRecordingToFile (const File& file, int quality)
-{
-    stopRecording();
-
-    DShowCameraDeviceInteral* const d = (DShowCameraDeviceInteral*) internal;
-    d->addUser();
-    isRecording = d->createFileCaptureFilter (file, quality);
-}
-
-Time CameraDevice::getTimeOfFirstRecordedFrame() const
-{
-    DShowCameraDeviceInteral* const d = (DShowCameraDeviceInteral*) internal;
-    return d->firstRecordedTime;
-}
-
-void CameraDevice::stopRecording()
-{
-    if (isRecording)
-    {
-        DShowCameraDeviceInteral* const d = (DShowCameraDeviceInteral*) internal;
-        d->removeFileCaptureFilter();
-        d->removeUser();
-        isRecording = false;
-    }
-}
-
-void CameraDevice::addListener (Listener* listenerToAdd)
-{
-    DShowCameraDeviceInteral* const d = (DShowCameraDeviceInteral*) internal;
-
-    if (listenerToAdd != nullptr)
-        d->addListener (listenerToAdd);
-}
-
-void CameraDevice::removeListener (Listener* listenerToRemove)
-{
-    DShowCameraDeviceInteral* const d = (DShowCameraDeviceInteral*) internal;
-
-    if (listenerToRemove != nullptr)
-        d->removeListener (listenerToRemove);
-}
-
-
-//==============================================================================
-namespace
-{
-    ComSmartPtr <IBaseFilter> enumerateCameras (StringArray* const names,
-                                                const int deviceIndexToOpen,
-                                                String& name)
-    {
-        int index = 0;
-        ComSmartPtr <IBaseFilter> result;
-
-        ComSmartPtr <ICreateDevEnum> pDevEnum;
-        HRESULT hr = pDevEnum.CoCreateInstance (CLSID_SystemDeviceEnum);
-
-        if (SUCCEEDED (hr))
-        {
-            ComSmartPtr <IEnumMoniker> enumerator;
-            hr = pDevEnum->CreateClassEnumerator (CLSID_VideoInputDeviceCategory, enumerator.resetAndGetPointerAddress(), 0);
-
-            if (SUCCEEDED (hr) && enumerator != nullptr)
-            {
-                ComSmartPtr <IMoniker> moniker;
-                ULONG fetched;
-
-                while (enumerator->Next (1, moniker.resetAndGetPointerAddress(), &fetched) == S_OK)
-                {
-                    ComSmartPtr <IBaseFilter> captureFilter;
-                    hr = moniker->BindToObject (0, 0, IID_IBaseFilter, (void**) captureFilter.resetAndGetPointerAddress());
-
-                    if (SUCCEEDED (hr))
-                    {
-                        ComSmartPtr <IPropertyBag> propertyBag;
-                        hr = moniker->BindToStorage (0, 0, IID_IPropertyBag, (void**) propertyBag.resetAndGetPointerAddress());
-
-                        if (SUCCEEDED (hr))
-                        {
-                            VARIANT var;
-                            var.vt = VT_BSTR;
-
-                            hr = propertyBag->Read (_T("FriendlyName"), &var, 0);
-                            propertyBag = nullptr;
-
-                            if (SUCCEEDED (hr))
-                            {
-                                if (names != nullptr)
-                                    names->add (var.bstrVal);
-
-                                if (index == deviceIndexToOpen)
-                                {
-                                    name = var.bstrVal;
-                                    result = captureFilter;
-                                    break;
-                                }
-
-                                ++index;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        return result;
-    }
-}
-
-StringArray CameraDevice::getAvailableDevices()
-{
-    StringArray devs;
-    String dummy;
-    enumerateCameras (&devs, -1, dummy);
-    return devs;
-}
-
-CameraDevice* CameraDevice::openDevice (int index,
-                                        int minWidth, int minHeight,
-                                        int maxWidth, int maxHeight)
-{
-    ComSmartPtr <ICaptureGraphBuilder2> captureGraphBuilder;
-    HRESULT hr = captureGraphBuilder.CoCreateInstance (CLSID_CaptureGraphBuilder2);
-
-    if (SUCCEEDED (hr))
-    {
-        String name;
-        const ComSmartPtr <IBaseFilter> filter (enumerateCameras (0, index, name));
-
-        if (filter != nullptr)
-        {
-            ScopedPointer <CameraDevice> cam (new CameraDevice (name, index));
-
-            DShowCameraDeviceInteral* const intern
-                = new DShowCameraDeviceInteral (cam, captureGraphBuilder, filter,
-                                                minWidth, minHeight, maxWidth, maxHeight);
-            cam->internal = intern;
-
-            if (intern->ok)
-                return cam.release();
-        }
-    }
-
-    return nullptr;
 }

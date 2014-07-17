@@ -259,15 +259,15 @@ struct PluginSorter
 
         switch (method)
         {
-            case KnownPluginList::sortByCategory:           diff = first->category.compareLexicographically (second->category); break;
-            case KnownPluginList::sortByManufacturer:       diff = first->manufacturerName.compareLexicographically (second->manufacturerName); break;
+            case KnownPluginList::sortByCategory:           diff = first->category.compareNatural (second->category); break;
+            case KnownPluginList::sortByManufacturer:       diff = first->manufacturerName.compareNatural (second->manufacturerName); break;
             case KnownPluginList::sortByFormat:             diff = first->pluginFormatName.compare (second->pluginFormatName); break;
             case KnownPluginList::sortByFileSystemLocation: diff = lastPathPart (first->fileOrIdentifier).compare (lastPathPart (second->fileOrIdentifier)); break;
             default: break;
         }
 
         if (diff == 0)
-            diff = first->name.compareLexicographically (second->name);
+            diff = first->name.compareNatural (second->name);
 
         return diff * direction;
     }

@@ -64,7 +64,8 @@ public:
         WinXP       = 0x4106,
         WinVista    = 0x4107,
         Windows7    = 0x4108,
-        Windows8    = 0x4109,
+        Windows8_0  = 0x4109,
+        Windows8_1  = 0x410a,
 
         Windows     = 0x4000,   /**< To test whether any version of Windows is running,
                                      you can use the expression ((getOperatingSystemType() & Windows) != 0). */

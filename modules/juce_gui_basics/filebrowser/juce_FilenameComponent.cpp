@@ -162,9 +162,14 @@ void FilenameComponent::fileDragExit (const StringArray&)
 }
 
 //==============================================================================
+String FilenameComponent::getCurrentFileText() const
+{
+    return filenameBox.getText();
+}
+
 File FilenameComponent::getCurrentFile() const
 {
-    File f (File::getCurrentWorkingDirectory().getChildFile (filenameBox.getText()));
+    File f (File::getCurrentWorkingDirectory().getChildFile (getCurrentFileText()));
 
     if (enforcedSuffix.isNotEmpty())
         f = f.withFileExtension (enforcedSuffix);

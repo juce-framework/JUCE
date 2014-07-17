@@ -103,6 +103,9 @@ public:
     /** Returns the currently displayed filename. */
     File getCurrentFile() const;
 
+    /** Returns the raw text that the user has entered. */
+    String getCurrentFileText() const;
+
     /** Changes the current filename.
 
         @param newFile                the new filename to use

@@ -674,15 +674,15 @@
       <Option compile="0"/>
       <Option link="0"/>
     </Unit>
+    <Unit filename="../../../../modules/juce_core/text/juce_CharPointer_UTF8.h">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
     <Unit filename="../../../../modules/juce_core/text/juce_CharPointer_UTF16.h">
       <Option compile="0"/>
       <Option link="0"/>
     </Unit>
     <Unit filename="../../../../modules/juce_core/text/juce_CharPointer_UTF32.h">
-      <Option compile="0"/>
-      <Option link="0"/>
-    </Unit>
-    <Unit filename="../../../../modules/juce_core/text/juce_CharPointer_UTF8.h">
       <Option compile="0"/>
       <Option link="0"/>
     </Unit>

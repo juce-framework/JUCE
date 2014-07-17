@@ -628,6 +628,17 @@ public:
     /** Standard method for iterating the rectangles in the list. */
     const RectangleType* end() const noexcept       { return rects.end(); }
 
+    /** Increases the internal storage to hold a minimum number of rectangles.
+        Calling this before adding a large number of rectangles means that
+        the array won't have to keep dynamically resizing itself as the elements
+        are added, and it'll therefore be more efficient.
+        @see Array::ensureStorageAllocated
+    */
+    void ensureStorageAllocated (int minNumRectangles)
+    {
+        rects.ensureStorageAllocated (minNumRectangles);
+    }
+
 private:
     //==============================================================================
     Array<RectangleType> rects;

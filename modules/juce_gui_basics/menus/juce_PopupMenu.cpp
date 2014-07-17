@@ -980,12 +980,12 @@ public:
     void timerCallback() override
     {
         if (window.windowIsStillValid())
-            handleMousePosition (source.getScreenPosition());
+            handleMousePosition (source.getScreenPosition().roundToInt());
     }
 
     bool isOver() const
     {
-        return window.reallyContains (window.getLocalPoint (nullptr, source.getScreenPosition()), true);
+        return window.reallyContains (window.getLocalPoint (nullptr, source.getScreenPosition()).roundToInt(), true);
     }
 
     MenuWindow& window;

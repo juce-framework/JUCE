@@ -490,6 +490,11 @@ public:
     */
     static const ValueTree invalid;
 
+    /** Returns the total number of references to the shared underlying data structure that this
+        ValueTree is using.
+    */
+    int getReferenceCount() const noexcept;
+
 private:
     //==============================================================================
     JUCE_PUBLIC_IN_DLL_BUILD (class SharedObject)

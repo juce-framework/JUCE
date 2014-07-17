@@ -148,13 +148,19 @@ public:
     virtual Rectangle<int> getBounds() const = 0;
 
     /** Converts a position relative to the top-left of this component to screen coordinates. */
-    virtual Point<int> localToGlobal (Point<int> relativePosition) = 0;
+    virtual Point<float> localToGlobal (Point<float> relativePosition) = 0;
+
+    /** Converts a screen coordinate to a position relative to the top-left of this component. */
+    virtual Point<float> globalToLocal (Point<float> screenPosition) = 0;
+
+    /** Converts a position relative to the top-left of this component to screen coordinates. */
+    Point<int> localToGlobal (Point<int> relativePosition);
+
+    /** Converts a screen coordinate to a position relative to the top-left of this component. */
+    Point<int> globalToLocal (Point<int> screenPosition);
 
     /** Converts a rectangle relative to the top-left of this component to screen coordinates. */
     virtual Rectangle<int> localToGlobal (const Rectangle<int>& relativePosition);
-
-    /** Converts a screen coordinate to a position relative to the top-left of this component. */
-    virtual Point<int> globalToLocal (Point<int> screenPosition) = 0;
 
     /** Converts a screen area to a position relative to the top-left of this component. */
     virtual Rectangle<int> globalToLocal (const Rectangle<int>& screenPosition);
@@ -300,9 +306,9 @@ public:
     virtual void setAlpha (float newAlpha) = 0;
 
     //==============================================================================
-    void handleMouseEvent (int touchIndex, const Point<int> positionWithinPeer, const ModifierKeys newMods, int64 time);
-    void handleMouseWheel (int touchIndex, const Point<int> positionWithinPeer, int64 time, const MouseWheelDetails&);
-    void handleMagnifyGesture (int touchIndex, const Point<int> positionWithinPeer, int64 time, float scaleFactor);
+    void handleMouseEvent (int touchIndex, Point<float> positionWithinPeer, ModifierKeys newMods, int64 time);
+    void handleMouseWheel (int touchIndex, Point<float> positionWithinPeer, int64 time, const MouseWheelDetails&);
+    void handleMagnifyGesture (int touchIndex, Point<float> positionWithinPeer, int64 time, float scaleFactor);
 
     void handleUserClosingWindow();
 

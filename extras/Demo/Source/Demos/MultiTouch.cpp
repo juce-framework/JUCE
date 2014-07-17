@@ -55,11 +55,11 @@ public:
         if (t == nullptr)
         {
             t = new Trail (e.source);
-            t->path.startNewSubPath (e.getPosition().toFloat());
+            t->path.startNewSubPath (e.position);
             trails.add (t);
         }
 
-        t->pushPoint (e.getPosition().toFloat(), e.mods);
+        t->pushPoint (e.position, e.mods);
         repaint();
     }
 

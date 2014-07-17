@@ -146,9 +146,9 @@
           </File>
           <File RelativePath="..\..\..\..\modules\juce_core\text\juce_CharacterFunctions.h"/>
           <File RelativePath="..\..\..\..\modules\juce_core\text\juce_CharPointer_ASCII.h"/>
+          <File RelativePath="..\..\..\..\modules\juce_core\text\juce_CharPointer_UTF8.h"/>
           <File RelativePath="..\..\..\..\modules\juce_core\text\juce_CharPointer_UTF16.h"/>
           <File RelativePath="..\..\..\..\modules\juce_core\text\juce_CharPointer_UTF32.h"/>
-          <File RelativePath="..\..\..\..\modules\juce_core\text\juce_CharPointer_UTF8.h"/>
           <File RelativePath="..\..\..\..\modules\juce_core\text\juce_Identifier.cpp">
             <FileConfiguration Name="Debug|Win32"
                                ExcludedFromBuild="true">

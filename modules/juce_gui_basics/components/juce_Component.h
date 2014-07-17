@@ -355,6 +355,15 @@ public:
     Point<int> getLocalPoint (const Component* sourceComponent,
                               Point<int> pointRelativeToSourceComponent) const;
 
+    /** Converts a point to be relative to this component's coordinate space.
+
+        This takes a point relative to a different component, and returns its position relative to this
+        component. If the sourceComponent parameter is null, the source point is assumed to be a global
+        screen coordinate.
+    */
+    Point<float> getLocalPoint (const Component* sourceComponent,
+                                Point<float> pointRelativeToSourceComponent) const;
+
     /** Converts a rectangle to be relative to this component's coordinate space.
 
         This takes a rectangle that is relative to a different component, and returns its position relative
@@ -372,6 +381,11 @@ public:
         @see getLocalPoint, localAreaToGlobal
     */
     Point<int> localPointToGlobal (Point<int> localPoint) const;
+
+    /** Converts a point relative to this component's top-left into a screen coordinate.
+        @see getLocalPoint, localAreaToGlobal
+    */
+    Point<float> localPointToGlobal (Point<float> localPoint) const;
 
     /** Converts a rectangle from this component's coordinate space to a screen coordinate.
 
@@ -2306,18 +2320,18 @@ private:
     uint8 componentTransparency;
 
     //==============================================================================
-    void internalMouseEnter (MouseInputSource, Point<int>, Time);
-    void internalMouseExit  (MouseInputSource, Point<int>, Time);
-    void internalMouseDown  (MouseInputSource, Point<int>, Time);
-    void internalMouseUp    (MouseInputSource, Point<int>, Time, const ModifierKeys oldModifiers);
-    void internalMouseDrag  (MouseInputSource, Point<int>, Time);
-    void internalMouseMove  (MouseInputSource, Point<int>, Time);
-    void internalMouseWheel (MouseInputSource, Point<int>, Time, const MouseWheelDetails&);
-    void internalMagnifyGesture (MouseInputSource, Point<int>, Time, float);
+    void internalMouseEnter (MouseInputSource, Point<float>, Time);
+    void internalMouseExit  (MouseInputSource, Point<float>, Time);
+    void internalMouseDown  (MouseInputSource, Point<float>, Time);
+    void internalMouseUp    (MouseInputSource, Point<float>, Time, const ModifierKeys oldModifiers);
+    void internalMouseDrag  (MouseInputSource, Point<float>, Time);
+    void internalMouseMove  (MouseInputSource, Point<float>, Time);
+    void internalMouseWheel (MouseInputSource, Point<float>, Time, const MouseWheelDetails&);
+    void internalMagnifyGesture (MouseInputSource, Point<float>, Time, float);
     void internalBroughtToFront();
-    void internalFocusGain (const FocusChangeType, const WeakReference<Component>&);
-    void internalFocusGain (const FocusChangeType);
-    void internalFocusLoss (const FocusChangeType);
+    void internalFocusGain (FocusChangeType, const WeakReference<Component>&);
+    void internalFocusGain (FocusChangeType);
+    void internalFocusLoss (FocusChangeType);
     void internalChildFocusChange (FocusChangeType, const WeakReference<Component>&);
     void internalModalInputAttempt();
     void internalModifierKeysChanged();
