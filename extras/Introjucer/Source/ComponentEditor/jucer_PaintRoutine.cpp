@@ -134,15 +134,13 @@ PaintElement* PaintRoutine::addElementFromXml (const XmlElement& xml, const int 
 
         return elements [action->indexAdded];
     }
-    else
-    {
-        if (PaintElement* const newElement = ObjectTypes::createElementForXml (&xml, this))
-        {
-            elements.insert (index, newElement);
-            changed();
 
-            return newElement;
-        }
+    if (PaintElement* const newElement = ObjectTypes::createElementForXml (&xml, this))
+    {
+        elements.insert (index, newElement);
+        changed();
+
+        return newElement;
     }
 
     return nullptr;
@@ -390,10 +388,10 @@ void PaintRoutine::groupSelected()
 
 void PaintRoutine::ungroupSelected()
 {
-    const SelectedItemSet <PaintElement*> temp (selectedElements);
+    const SelectedItemSet<PaintElement*> temp (selectedElements);
 
     for (int i = 0; i < temp.getNumSelected(); ++i)
-        if (PaintElementGroup* const pg = dynamic_cast <PaintElementGroup*> (temp.getSelectedItem (i)))
+        if (PaintElementGroup* const pg = dynamic_cast<PaintElementGroup*> (temp.getSelectedItem (i)))
             pg->ungroup (true);
 }
 
