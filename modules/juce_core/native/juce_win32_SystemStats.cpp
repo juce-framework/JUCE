@@ -253,9 +253,23 @@ public:
     HiResCounterHandler()
         : hiResTicksOffset (0)
     {
-        const MMRESULT res = timeBeginPeriod (1);
+        // This macro allows you to override the default timer-period
+        // used on Windows. By default this is set to 1, because that has
+        // always been the value used in JUCE apps, and changing it could
+        // affect the behaviour of existing code, but you may wish to make
+        // it larger (or set it to 0 to use the system default) to make your
+        // app less demanding on the CPU.
+        // For more info, see win32 documentation about the timeBeginPeriod
+        // function.
+       #ifndef JUCE_WIN32_TIMER_PERIOD
+        #define JUCE_WIN32_TIMER_PERIOD 1
+       #endif
+
+       #if JUCE_WIN32_TIMER_PERIOD > 0
+        const MMRESULT res = timeBeginPeriod (JUCE_WIN32_TIMER_PERIOD);
         (void) res;
         jassert (res == TIMERR_NOERROR);
+       #endif
 
         LARGE_INTEGER f;
         QueryPerformanceFrequency (&f);
