@@ -212,7 +212,7 @@ public:
     void setTabName (int tabIndex, const String& newName);
 
     /** Gets rid of one of the tabs. */
-    void removeTab (int tabIndex);
+    void removeTab (int tabIndex, bool animate = false);
 
     /** Moves a tab to a new index in the list.
         Pass -1 as the index to move it to the end of the list.
