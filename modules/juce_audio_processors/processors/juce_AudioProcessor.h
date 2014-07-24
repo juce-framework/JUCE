@@ -289,9 +289,9 @@ public:
         filter will return an empty buffer, but won't block the audio thread like it would
         do if you use the getCallbackLock() critical section to synchronise access.
 
-        If you're going to use this, your processBlock() method must call isSuspended() and
-        check whether it's suspended or not. If it is, then it should skip doing any real
-        processing, either emitting silence or passing the input through unchanged.
+        Any code that calls processBlock() should call isSuspended() before doing so, and
+        if the processor is suspended, it should avoid the call and emit silence or
+        whatever is appropriate.
 
         @see getCallbackLock
     */
