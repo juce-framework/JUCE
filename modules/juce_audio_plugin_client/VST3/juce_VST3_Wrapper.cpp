@@ -1356,14 +1356,21 @@ private:
         paramPreset = 'prst'
     };
 
+    static int getNumChannels (Vst::BusList& busList)
+    {
+        Vst::BusInfo info;
+        info.channelCount = 0;
+
+        if (Vst::Bus* bus = busList.first())
+            bus->getInfo (info);
+
+        return (int) info.channelCount;
+    }
+
     void preparePlugin (double sampleRate, int bufferSize)
     {
-        Vst::BusInfo inputBusInfo, outputBusInfo;
-        audioInputs.first()->getInfo (inputBusInfo);
-        audioOutputs.first()->getInfo (outputBusInfo);
-
-        getPluginInstance().setPlayConfigDetails (inputBusInfo.channelCount,
-                                                  outputBusInfo.channelCount,
+        getPluginInstance().setPlayConfigDetails (getNumChannels (audioInputs),
+                                                  getNumChannels (audioOutputs),
                                                   sampleRate, bufferSize);
 
         getPluginInstance().prepareToPlay (sampleRate, bufferSize);
