@@ -117,8 +117,8 @@ LivePropertyEditorBase::LivePropertyEditorBase (LiveValueBase& v, CodeDocument& 
 
     name.setFont (13.0f);
     name.setText (v.name, dontSendNotification);
-    valueEditor.setMultiLine (true);
-    valueEditor.setReturnKeyStartsNewLine (true);
+    valueEditor.setMultiLine (v.isString());
+    valueEditor.setReturnKeyStartsNewLine (v.isString());
     valueEditor.setText (v.getStringValue (wasHex), dontSendNotification);
     valueEditor.addListener (this);
     sourceEditor.setReadOnly (true);
