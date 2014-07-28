@@ -1182,11 +1182,25 @@ void Component::setBounds (const int x, const int y, int w, int h)
             cachedImage->invalidateAll();
         }
 
+        flags.isMoveCallbackPending = wasMoved;
+        flags.isResizeCallbackPending = wasResized;
+
         if (flags.hasHeavyweightPeerFlag)
             if (ComponentPeer* const peer = getPeer())
                 peer->updateBounds();
 
-        sendMovedResizedMessages (wasMoved, wasResized);
+        sendMovedResizedMessagesIfPending();
+    }
+}
+
+void Component::sendMovedResizedMessagesIfPending()
+{
+    if (flags.isMoveCallbackPending || flags.isResizeCallbackPending)
+    {
+        sendMovedResizedMessages (flags.isMoveCallbackPending, flags.isResizeCallbackPending);
+
+        flags.isMoveCallbackPending = false;
+        flags.isResizeCallbackPending = false;
     }
 }
 
@@ -2047,6 +2061,11 @@ void Component::paintComponentAndChildren (Graphics& g)
 
 void Component::paintEntireComponent (Graphics& g, const bool ignoreAlphaLevel)
 {
+    // If sizing a top-level-window and the OS paint message is delivered synchronously
+    // before resized() is called, then we'll invoke the callback here, to make sure
+    // the components inside have had a chance to sort their sizes out..
+    sendMovedResizedMessagesIfPending();
+
    #if JUCE_DEBUG
     flags.isInsidePaintCall = true;
    #endif

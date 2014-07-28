@@ -2306,6 +2306,8 @@ private:
         bool childCompFocusedFlag       : 1;
         bool dontClipGraphicsFlag       : 1;
         bool mouseDownWasBlocked        : 1;
+        bool isMoveCallbackPending      : 1;
+        bool isResizeCallbackPending    : 1;
       #if JUCE_DEBUG
         bool isInsidePaintCall          : 1;
       #endif
@@ -2344,6 +2346,7 @@ private:
     void paintComponentAndChildren (Graphics&);
     void paintWithinParentContext (Graphics&);
     void sendMovedResizedMessages (bool wasMoved, bool wasResized);
+    void sendMovedResizedMessagesIfPending();
     void repaintParent();
     void sendFakeMouseMove() const;
     void takeKeyboardFocus (const FocusChangeType);
