@@ -294,6 +294,16 @@ TextEditor* Label::createEditorComponent()
     TextEditor* const ed = new TextEditor (getName());
     ed->applyFontToAllText (getLookAndFeel().getLabelFont (*this));
     copyAllExplicitColoursTo (*ed);
+
+    if (isColourSpecified (textWhenEditingColourId))
+        ed->setColour (TextEditor::textColourId, findColour (textWhenEditingColourId));
+
+    if (isColourSpecified (backgroundWhenEditingColourId))
+        ed->setColour (TextEditor::backgroundColourId, findColour (backgroundWhenEditingColourId));
+
+    if (isColourSpecified (outlineWhenEditingColourId))
+        ed->setColour (TextEditor::outlineColourId, findColour (outlineWhenEditingColourId));
+
     return ed;
 }
 
