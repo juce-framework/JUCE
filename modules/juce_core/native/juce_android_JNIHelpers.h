@@ -362,6 +362,12 @@ private:
 
 extern ThreadLocalJNIEnvHolder threadLocalJNIEnvHolder;
 
+struct AndroidThreadScope
+{
+    AndroidThreadScope()   { threadLocalJNIEnvHolder.attach(); }
+    ~AndroidThreadScope()  { threadLocalJNIEnvHolder.detach(); }
+};
+
 //==============================================================================
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
  METHOD (createNewView,          "createNewView",        "(ZJ)L" JUCE_ANDROID_ACTIVITY_CLASSPATH "$ComponentPeerView;") \
