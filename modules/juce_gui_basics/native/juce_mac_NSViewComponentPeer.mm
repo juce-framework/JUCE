@@ -390,16 +390,36 @@ public:
         return ComponentPeer::isKioskMode();
     }
 
+    static bool isWindowAtPoint (NSWindow* w, NSPoint screenPoint)
+    {
+       #if defined (MAC_OS_X_VERSION_10_6) && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_6
+        if ([NSWindow respondsToSelector: @selector (windowNumberAtPoint:belowWindowWithWindowNumber:)])
+            return [NSWindow windowNumberAtPoint: screenPoint belowWindowWithWindowNumber: 0] == [w windowNumber];
+       #endif
+
+        return true;
+    }
+
     bool contains (Point<int> localPos, bool trueIfInAChildWindow) const override
     {
-        NSRect frameRect = [view frame];
+        NSRect viewFrame = [view frame];
 
-        if (! (isPositiveAndBelow (localPos.getX(), (int) frameRect.size.width)
-             && isPositiveAndBelow (localPos.getY(), (int) frameRect.size.height)))
+        if (! (isPositiveAndBelow (localPos.getX(), (int) viewFrame.size.width)
+             && isPositiveAndBelow (localPos.getY(), (int) viewFrame.size.height)))
             return false;
 
-        NSView* v = [view hitTest: NSMakePoint (frameRect.origin.x + localPos.getX(),
-                                                frameRect.origin.y + frameRect.size.height - localPos.getY())];
+        if (NSWindow* const viewWindow = [view window])
+        {
+            const NSRect windowFrame = [viewWindow frame];
+            const NSPoint screenPoint = NSMakePoint (windowFrame.origin.x + localPos.getX(),
+                                                     windowFrame.origin.y + windowFrame.size.height - localPos.getY());
+
+            if (! isWindowAtPoint (viewWindow, screenPoint))
+                return false;
+        }
+
+        NSView* v = [view hitTest: NSMakePoint (viewFrame.origin.x + localPos.getX(),
+                                                viewFrame.origin.y + viewFrame.size.height - localPos.getY())];
 
         return trueIfInAChildWindow ? (v != nil)
                                     : (v == view);
@@ -553,19 +573,11 @@ public:
     {
         currentModifiers = currentModifiers.withoutMouseButtons();
 
-       #if defined (MAC_OS_X_VERSION_10_6) && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_6
-        if ([NSWindow respondsToSelector: @selector (windowNumberAtPoint:belowWindowWithWindowNumber:)]
-             && [NSWindow windowNumberAtPoint: [[ev window] convertBaseToScreen: [ev locationInWindow]]
-                  belowWindowWithWindowNumber: 0] != [window windowNumber])
-        {
+        if (isWindowAtPoint ([ev window], [[ev window] convertBaseToScreen: [ev locationInWindow]]))
+            sendMouseEvent (ev);
+        else
             // moved into another window which overlaps this one, so trigger an exit
             handleMouseEvent (0, Point<float> (-1.0f, -1.0f), currentModifiers, getMouseTime (ev));
-        }
-        else
-       #endif
-        {
-            sendMouseEvent (ev);
-        }
 
         showArrowCursorIfNeeded();
     }
