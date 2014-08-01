@@ -66,6 +66,9 @@ public:
     */
     double getResamplingRatio() const noexcept                  { return ratio; }
 
+    /** Clears any buffers and filters that the resampler is using. */
+    void flushBuffers();
+
     //==============================================================================
     void prepareToPlay (int samplesPerBlockExpected, double sampleRate) override;
     void releaseResources() override;
