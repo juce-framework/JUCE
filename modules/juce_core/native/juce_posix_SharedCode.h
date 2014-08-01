@@ -1146,15 +1146,23 @@ struct HighResolutionTimer::Pimpl
     {
         if (periodMs != newPeriod)
         {
-            stop();
-            periodMs = newPeriod;
+            if (thread != pthread_self())
+            {
+                stop();
 
-            shouldStop = false;
+                periodMs = newPeriod;
+                shouldStop = false;
 
-            if (pthread_create (&thread, nullptr, timerThread, this) == 0)
-                setThreadToRealtime (thread, (uint64) newPeriod);
+                if (pthread_create (&thread, nullptr, timerThread, this) == 0)
+                    setThreadToRealtime (thread, (uint64) newPeriod);
+                else
+                    jassertfalse;
+            }
             else
-                jassertfalse;
+            {
+                periodMs = newPeriod;
+                shouldStop = false;
+            }
         }
     }
 
@@ -1191,12 +1199,19 @@ private:
 
     void timerThread()
     {
-        Clock clock (periodMs);
+        int lastPeriod = periodMs;
+        Clock clock (lastPeriod);
 
         while (! shouldStop)
         {
             clock.wait();
             owner.hiResTimerCallback();
+
+            if (lastPeriod != periodMs)
+            {
+                lastPeriod = periodMs;
+                clock = Clock (lastPeriod);
+            }
         }
 
         periodMs = 0;
