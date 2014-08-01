@@ -92,7 +92,7 @@ public:
    juce::JUCEApplicationBase* juce_CreateApplication() { return new AppClass(); }
 
 #else
- #if JUCE_WINDOWS
+ #if JUCE_WINDOWS && ! defined (_CONSOLE)
   #if defined (WINAPI) || defined (_WINDOWS_)
    #define JUCE_MAIN_FUNCTION       int __stdcall WinMain (HINSTANCE, HINSTANCE, const LPSTR, int)
   #elif defined (_UNICODE)
