@@ -378,7 +378,7 @@ bool Viewport::useMouseWheelMoveIfNeeded (const MouseEvent& e, const MouseWheelD
             }
             else if (canScrollHorz && (wheelIncrementX != 0 || e.mods.isShiftDown() || ! canScrollVert))
             {
-                if (wheelIncrementX == 0 && ! canScrollVert)
+                if (wheelIncrementX == 0 && (e.mods.isShiftDown() || ! canScrollVert))
                     wheelIncrementX = wheelIncrementY;
 
                 pos.setX (pos.x - roundToInt (wheelIncrementX));
