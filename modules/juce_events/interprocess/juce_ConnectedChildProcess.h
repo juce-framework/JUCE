@@ -73,7 +73,7 @@ public:
     */
     bool initialiseFromCommandLine (const String& commandLine,
                                     const String& commandLineUniqueID,
-                                    int timeoutMs);
+                                    int timeoutMs = 0);
 
     //==============================================================================
     /** This will be called to deliver messages from the master process.
