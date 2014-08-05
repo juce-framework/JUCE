@@ -217,6 +217,7 @@ private:
     ListenerList<Listener> listeners;
 
     void callListeners();
+    void removeFromListenerList();
 
     // This is disallowed to avoid confusion about whether it should
     // do a by-value or by-reference copy.
