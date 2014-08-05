@@ -3049,7 +3049,7 @@ void Desktop::Displays::findDisplays (float masterScale)
                             d.userArea = d.totalArea = Rectangle<int> (screens[j].x_org,
                                                                        screens[j].y_org,
                                                                        screens[j].width,
-                                                                       screens[j].height) * masterScale;
+                                                                       screens[j].height) / masterScale;
                             d.isMain = (index == 0);
                             d.scale = masterScale;
                             d.dpi = getDisplayDPI (0); // (all screens share the same DPI)
