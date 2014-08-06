@@ -118,6 +118,17 @@ private:
         StringPairArray defines;
         defines.set ("__MINGW__", "1");
         defines.set ("__MINGW_EXTENSION", String::empty);
+
+        if (config.isDebug())
+        {
+            defines.set ("DEBUG", "1");
+            defines.set ("_DEBUG", "1");
+        }
+        else
+        {
+            defines.set ("NDEBUG", "1");
+        }
+
         defines = mergePreprocessorDefs (defines, getAllPreprocessorDefs (config));
 
         StringArray defs;
