@@ -1180,17 +1180,20 @@ public:
 
         static void shutdown (id self)
         {
-            // there's some kind of component currently modal, but the host
-            // is trying to delete our plugin..
-            jassert (Component::getCurrentlyModalComponent() == nullptr);
-
             [[NSNotificationCenter defaultCenter] removeObserver: self];
             deleteEditor (self);
 
             jassert (activeUIs.contains (self));
             activeUIs.removeFirstMatchingValue (self);
+
             if (activePlugins.size() + activeUIs.size() == 0)
+            {
+                // there's some kind of component currently modal, but the host
+                // is trying to delete our plugin..
+                jassert (Component::getCurrentlyModalComponent() == nullptr);
+
                 shutdownJuce_GUI();
+            }
         }
 
         static void viewDidMoveToWindow (id self, SEL)
