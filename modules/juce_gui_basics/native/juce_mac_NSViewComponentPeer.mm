@@ -411,9 +411,10 @@ public:
         if (NSWindow* const viewWindow = [view window])
         {
             const NSRect windowFrame = [viewWindow frame];
-            const NSPoint screenPoint = NSMakePoint (windowFrame.origin.x + localPos.getX(),
-                                                     windowFrame.origin.y + windowFrame.size.height - localPos.getY());
-
+            const NSPoint localPoint = NSMakePoint (localPos.x, localPos.y);
+            const NSPoint windowPoint = [view convertPoint: localPoint toView: nil];
+            const NSPoint screenPoint = NSMakePoint (windowFrame.origin.x + windowPoint.x,
+                                                     windowFrame.origin.y + windowFrame.size.height - windowPoint.y);
             if (! isWindowAtPoint (viewWindow, screenPoint))
                 return false;
         }
