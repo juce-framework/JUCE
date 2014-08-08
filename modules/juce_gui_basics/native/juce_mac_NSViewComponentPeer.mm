@@ -369,7 +369,7 @@ public:
 
                     // (can't call the component's setBounds method because that'll reset our fullscreen flag)
                     if (r != component.getBounds() && ! r.isEmpty())
-                        setBounds (r, shouldBeFullScreen);
+                        setBounds (ScalingHelpers::scaledScreenPosToUnscaled (component, r), shouldBeFullScreen);
                 }
             }
         }

@@ -1045,7 +1045,7 @@ public:
                 r = Desktop::getInstance().getDisplays().getMainDisplay().userArea;
 
             if (! r.isEmpty())
-                setBounds (r, shouldBeFullScreen);
+                setBounds (ScalingHelpers::scaledScreenPosToUnscaled (component, r), shouldBeFullScreen);
 
             component.repaint();
         }
@@ -1115,9 +1115,9 @@ public:
             if (c == &component)
                 break;
 
-            // TODO: needs scaling correctly
-            if (c->contains (localPos + bounds.getPosition() - c->getScreenPosition()))
-                return false;
+            if (ComponentPeer* peer = c->getPeer())
+                if (peer->contains (localPos + bounds.getPosition() - peer->getBounds().getPosition(), true))
+                    return false;
         }
 
         if (trueIfInAChildWindow)
