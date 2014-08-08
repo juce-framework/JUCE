@@ -540,6 +540,8 @@ public:
     /** @internal */
     void colourChanged() override;
     /** @internal */
+    void parentHierarchyChanged() override;
+    /** @internal */
     void startDragAndDrop (const MouseEvent&, const var& dragDescription, bool allowDraggingToOtherWindows);
 
 private:
