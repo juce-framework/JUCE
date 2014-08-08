@@ -231,9 +231,6 @@ AudioProcessorEditor* AudioProcessor::createEditorIfNeeded()
 
     AudioProcessorEditor* const ed = createEditor();
 
-    // You must make your hasEditor() method return a consistent result!
-    jassert (hasEditor() == (ed != nullptr));
-
     if (ed != nullptr)
     {
         // you must give your editor comp a size before returning it..
@@ -242,6 +239,9 @@ AudioProcessorEditor* AudioProcessor::createEditorIfNeeded()
         const ScopedLock sl (callbackLock);
         activeEditor = ed;
     }
+
+    // You must make your hasEditor() method return a consistent result!
+    jassert (hasEditor() == (ed != nullptr));
 
     return ed;
 }
