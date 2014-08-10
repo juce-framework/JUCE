@@ -325,7 +325,7 @@ public:
     /** Called by the host to tell this processor whether it's being used in a non-realtime
         capacity for offline rendering or bouncing.
     */
-    void setNonRealtime (bool isNonRealtime) noexcept;
+    virtual void setNonRealtime (bool isNonRealtime) noexcept;
 
     //==============================================================================
     /** Creates the filter's UI.
