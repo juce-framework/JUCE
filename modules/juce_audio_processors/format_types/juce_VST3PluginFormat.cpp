@@ -428,16 +428,11 @@ public:
 
             if (hasFlag (flags, Vst::kIoChanged))
             {
-                double sampleRate = owner->getSampleRate();
-                int numSamples = owner->getBlockSize();
+                const double sampleRate = owner->getSampleRate();
+                const int blockSize = owner->getBlockSize();
 
-                if (sampleRate <= 8000.0)
-                    sampleRate = 44100.0;
-
-                if (numSamples <= 0)
-                    numSamples = 1024;
-
-                owner->prepareToPlay (owner->getSampleRate(), owner->getBlockSize());
+                owner->prepareToPlay (sampleRate >= 8000 ? sampleRate : 44100.0,
+                                      blockSize > 0 ? blockSize : 1024);
             }
 
             if (hasFlag (flags, Vst::kLatencyChanged))
