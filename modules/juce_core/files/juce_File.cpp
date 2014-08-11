@@ -476,7 +476,7 @@ bool File::loadFileAsData (MemoryBlock& destBlock) const
         return false;
 
     FileInputStream in (*this);
-    return in.openedOk() && getSize() == in.readIntoMemoryBlock (destBlock);
+    return in.openedOk() && getSize() == (int64) in.readIntoMemoryBlock (destBlock);
 }
 
 String File::loadFileAsString() const
