@@ -320,12 +320,12 @@ public:
     {
         if (notification != dontSendNotification)
         {
+            owner.valueChanged();
+
             if (notification == sendNotificationSync)
                 handleAsyncUpdate();
             else
                 triggerAsyncUpdate();
-
-            owner.valueChanged();
         }
     }
 
