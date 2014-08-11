@@ -2064,7 +2064,10 @@ void Component::paintEntireComponent (Graphics& g, const bool ignoreAlphaLevel)
     // If sizing a top-level-window and the OS paint message is delivered synchronously
     // before resized() is called, then we'll invoke the callback here, to make sure
     // the components inside have had a chance to sort their sizes out..
-    sendMovedResizedMessagesIfPending();
+   #if JUCE_DEBUG
+    if (! flags.isInsidePaintCall) // (avoids an assertion in plugins hosted in WaveLab)
+   #endif
+        sendMovedResizedMessagesIfPending();
 
    #if JUCE_DEBUG
     flags.isInsidePaintCall = true;
