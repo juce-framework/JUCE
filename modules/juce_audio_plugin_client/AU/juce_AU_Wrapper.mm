@@ -519,6 +519,10 @@ public:
         return AUBase::SetParameter (inID, inScope, inElement, inValue, inBufferOffsetInFrames);
     }
 
+    // No idea what this method actually does or what it should return. Current Apple docs say nothing about it.
+    // (Note that this isn't marked 'override' in case older versions of the SDK don't include it)
+    bool CanScheduleParameters() const                   { return false; }
+
     //==============================================================================
     ComponentResult Version() override                   { return JucePlugin_VersionCode; }
     bool SupportsTail() override                         { return true; }
