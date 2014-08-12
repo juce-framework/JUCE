@@ -73,7 +73,6 @@
     USE_FUNCTION (glVertexAttribPointer,    void, (GLuint p1, GLint p2, GLenum p3, GLboolean p4, GLsizei p5, const GLvoid* p6), (p1, p2, p3, p4, p5, p6))\
     USE_FUNCTION (glEnableVertexAttribArray,  void, (GLuint p1), (p1))\
     USE_FUNCTION (glDisableVertexAttribArray, void, (GLuint p1), (p1))\
-    USE_FUNCTION (glDrawBuffers,            void, (GLsizei p1, const GLenum* p2), (p1, p2)) \
     USE_FUNCTION (glUniform1f,              void, (GLint p1, GLfloat p2), (p1, p2))\
     USE_FUNCTION (glUniform1i,              void, (GLint p1, GLint p2), (p1, p2))\
     USE_FUNCTION (glUniform2f,              void, (GLint p1, GLfloat p2, GLfloat p3), (p1, p2, p3))\
