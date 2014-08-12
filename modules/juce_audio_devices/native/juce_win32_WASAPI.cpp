@@ -33,8 +33,8 @@ namespace WasapiClasses
 void logFailure (HRESULT hr)
 {
     (void) hr;
-    jassert (hr != 0x800401f0); // If you hit this, it means you're trying to call from
-                                // a thread which hasn't been initialised with CoInitialize().
+    jassert (hr != (HRESULT) 0x800401f0); // If you hit this, it means you're trying to call from
+                                          // a thread which hasn't been initialised with CoInitialize().
 
    #if JUCE_WASAPI_LOGGING
     if (FAILED (hr))
