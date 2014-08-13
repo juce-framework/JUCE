@@ -506,8 +506,8 @@ private:
         lf.lfOutPrecision = OUT_OUTLINE_PRECIS;
         lf.lfPitchAndFamily = DEFAULT_PITCH | FF_DONTCARE;
         lf.lfQuality = PROOF_QUALITY;
-        lf.lfItalic = (BYTE) (style == "Italic" ? TRUE : FALSE);
-        lf.lfWeight = style == "Bold" ? FW_BOLD : FW_NORMAL;
+        lf.lfItalic = (BYTE) (style.contains ("Italic") ? TRUE : FALSE);
+        lf.lfWeight = style.contains ("Bold") ? FW_BOLD : FW_NORMAL;
         lf.lfHeight = -256;
         name.copyToUTF16 (lf.lfFaceName, sizeof (lf.lfFaceName));
 
