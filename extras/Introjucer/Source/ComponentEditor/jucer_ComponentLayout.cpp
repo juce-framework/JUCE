@@ -800,6 +800,11 @@ void ComponentLayout::addToXml (XmlElement& xml) const
             xml.addChildElement (h->createXmlFor (components [i], this));
 }
 
+static String bracketIfNeeded (const String& s)
+{
+    return s.containsAnyOf ("+-*/%") ? "(" + s + ")" : s;
+}
+
 //==============================================================================
 void positionToCode (const RelativePositionedRectangle& position,
                      const ComponentLayout* layout,
@@ -831,21 +836,21 @@ void positionToCode (const RelativePositionedRectangle& position,
     if (position.rect.getWidthMode() == PositionedRectangle::proportionalSize)
     {
         if (wrw.isNotEmpty())
-            w << "roundFloatToInt ((" << wrw << ") * " << CodeHelpers::floatLiteral (position.rect.getWidth(), 4) << ")";
+            w << "roundFloatToInt (" << bracketIfNeeded (wrw) << " * " << CodeHelpers::floatLiteral (position.rect.getWidth(), 4) << ")";
         else
             w << "proportionOfWidth (" << CodeHelpers::floatLiteral (position.rect.getWidth(), 4) << ")";
     }
     else if (position.rect.getWidthMode() == PositionedRectangle::parentSizeMinusAbsolute)
     {
         if (wrw.isNotEmpty())
-            w << "(" << wrw << ") - " << roundToInt (position.rect.getWidth());
+            w << bracketIfNeeded (wrw) << " - " << roundToInt (position.rect.getWidth());
         else
             w << "getWidth() - " << roundToInt (position.rect.getWidth());
     }
     else
     {
         if (wrw.isNotEmpty())
-            w << "(" << wrw << ") + ";
+            w << bracketIfNeeded (wrw) << " + ";
 
         w << roundToInt (position.rect.getWidth());
     }
@@ -854,21 +859,21 @@ void positionToCode (const RelativePositionedRectangle& position,
     if (position.rect.getHeightMode() == PositionedRectangle::proportionalSize)
     {
         if (hrh.isNotEmpty())
-            h << "roundFloatToInt ((" << hrh << ") * " << CodeHelpers::floatLiteral (position.rect.getHeight(), 4) << ")";
+            h << "roundFloatToInt (" << bracketIfNeeded (hrh) << " * " << CodeHelpers::floatLiteral (position.rect.getHeight(), 4) << ")";
         else
             h << "proportionOfHeight (" << CodeHelpers::floatLiteral (position.rect.getHeight(), 4) << ")";
     }
     else if (position.rect.getHeightMode() == PositionedRectangle::parentSizeMinusAbsolute)
     {
         if (hrh.isNotEmpty())
-            h << "(" << hrh << ") - " << roundToInt (position.rect.getHeight());
+            h << bracketIfNeeded (hrh) << " - " << roundToInt (position.rect.getHeight());
         else
             h << "getHeight() - " << roundToInt (position.rect.getHeight());
     }
     else
     {
         if (hrh.isNotEmpty())
-            h << "(" << hrh << ") + ";
+            h << bracketIfNeeded (hrh) << " + ";
 
         h << roundToInt (position.rect.getHeight());
     }
@@ -877,21 +882,21 @@ void positionToCode (const RelativePositionedRectangle& position,
     if (position.rect.getPositionModeX() == PositionedRectangle::proportionOfParentSize)
     {
         if (xrx.isNotEmpty() && xrw.isNotEmpty())
-            x << "(" << xrx << ") + roundFloatToInt ((" << xrw << ") * " << CodeHelpers::floatLiteral (position.rect.getX(), 4) << ")";
+            x << bracketIfNeeded (xrx) << " + roundFloatToInt (" << bracketIfNeeded (xrw) << " * " << CodeHelpers::floatLiteral (position.rect.getX(), 4) << ")";
         else
             x << "proportionOfWidth (" << CodeHelpers::floatLiteral (position.rect.getX(), 4) << ")";
     }
     else if (position.rect.getPositionModeX() == PositionedRectangle::absoluteFromParentTopLeft)
     {
         if (xrx.isNotEmpty())
-            x << "(" << xrx << ") + ";
+            x << bracketIfNeeded (xrx) << " + ";
 
         x << roundToInt (position.rect.getX());
     }
     else if (position.rect.getPositionModeX() == PositionedRectangle::absoluteFromParentBottomRight)
     {
         if (xrx.isNotEmpty())
-            x << "(" << xrx << ") + (" << xrw << ")";
+            x << bracketIfNeeded (xrx) << " + " << bracketIfNeeded (xrw);
         else
             x << "getWidth()";
 
@@ -902,7 +907,7 @@ void positionToCode (const RelativePositionedRectangle& position,
     else if (position.rect.getPositionModeX() == PositionedRectangle::absoluteFromParentCentre)
     {
         if (xrx.isNotEmpty())
-            x << "(" << xrx << ") + (" << xrw << ") / 2";
+            x << bracketIfNeeded (xrx) << " + " << bracketIfNeeded (xrw) << " / 2";
         else
             x << "(getWidth() / 2)";
 
@@ -914,30 +919,30 @@ void positionToCode (const RelativePositionedRectangle& position,
     if (w != "0")
     {
         if (position.rect.getAnchorPointX() == PositionedRectangle::anchorAtRightOrBottom)
-            x << " - " << w;
+            x << " - " << bracketIfNeeded (w);
         else if (position.rect.getAnchorPointX() == PositionedRectangle::anchorAtCentre)
-            x << " - ((" << w << ") / 2)";
+            x << " - (" << bracketIfNeeded (w) << " / 2)";
     }
 
     // y-pos
     if (position.rect.getPositionModeY() == PositionedRectangle::proportionOfParentSize)
     {
         if (yry.isNotEmpty() && yrh.isNotEmpty())
-            y << "(" << yry << ") + roundFloatToInt ((" << yrh << ") * " << CodeHelpers::floatLiteral (position.rect.getY(), 4) << ")";
+            y << bracketIfNeeded (yry) << " + roundFloatToInt (" << bracketIfNeeded (yrh) << " * " << CodeHelpers::floatLiteral (position.rect.getY(), 4) << ")";
         else
             y << "proportionOfHeight (" << CodeHelpers::floatLiteral (position.rect.getY(), 4) << ")";
     }
     else if (position.rect.getPositionModeY() == PositionedRectangle::absoluteFromParentTopLeft)
     {
         if (yry.isNotEmpty())
-            y << "(" << yry << ") + ";
+            y << bracketIfNeeded (yry) << " + ";
 
         y << roundToInt (position.rect.getY());
     }
     else if (position.rect.getPositionModeY() == PositionedRectangle::absoluteFromParentBottomRight)
     {
         if (yry.isNotEmpty())
-            y << "(" << yry << ") + (" << yrh << ")";
+            y << bracketIfNeeded (yry) << " + " << bracketIfNeeded (yrh);
         else
             y << "getHeight()";
 
@@ -948,7 +953,7 @@ void positionToCode (const RelativePositionedRectangle& position,
     else if (position.rect.getPositionModeY() == PositionedRectangle::absoluteFromParentCentre)
     {
         if (yry.isNotEmpty())
-            y << "(" << yry << ") + (" << yrh << ") / 2";
+            y << bracketIfNeeded (yry) << " + " << bracketIfNeeded (yrh) << " / 2";
         else
             y << "(getHeight() / 2)";
 
@@ -960,8 +965,8 @@ void positionToCode (const RelativePositionedRectangle& position,
     if (h != "0")
     {
         if (position.rect.getAnchorPointY() == PositionedRectangle::anchorAtRightOrBottom)
-            y << " - " << h;
+            y << " - " << bracketIfNeeded (h);
         else if (position.rect.getAnchorPointY() == PositionedRectangle::anchorAtCentre)
-            y << " - ((" << h << ") / 2)";
+            y << " - (" << bracketIfNeeded (h) << " / 2)";
     }
 }

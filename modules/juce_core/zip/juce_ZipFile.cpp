@@ -347,7 +347,7 @@ void ZipFile::init()
             in->setPosition (pos);
             MemoryBlock headerData;
 
-            if (in->readIntoMemoryBlock (headerData, size) == size)
+            if (in->readIntoMemoryBlock (headerData, size) == (size_t) size)
             {
                 pos = 0;
 

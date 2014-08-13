@@ -147,9 +147,9 @@ public:
         The listener is added to this specific Value object, and not to the shared
         object that it refers to. When this object is deleted, all the listeners will
         be lost, even if other references to the same Value still exist. So when you're
-        adding a listener, make sure that you add it to a ValueTree instance that will last
+        adding a listener, make sure that you add it to a Value instance that will last
         for as long as you need the listener. In general, you'd never want to add a listener
-        to a local stack-based ValueTree, but more likely to one that's a member variable.
+        to a local stack-based Value, but more likely to one that's a member variable.
 
         @see removeListener
     */
@@ -217,6 +217,7 @@ private:
     ListenerList<Listener> listeners;
 
     void callListeners();
+    void removeFromListenerList();
 
     // This is disallowed to avoid confusion about whether it should
     // do a by-value or by-reference copy.

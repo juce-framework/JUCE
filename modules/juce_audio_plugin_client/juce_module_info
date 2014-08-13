@@ -1,7 +1,7 @@
 {
   "id":             "juce_audio_plugin_client",
   "name":           "JUCE audio plugin wrapper classes",
-  "version":        "3.0.7",
+  "version":        "3.0.8",
   "description":    "Classes for building VST, VST3, RTAS, AAX and AU plugins.",
   "website":        "http://www.juce.com/juce",
   "license":        "GPL/Commercial",

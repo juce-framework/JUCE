@@ -208,25 +208,7 @@ StringArray TracktionMarketplaceStatus::getLocalMachineIDs()
     // folder or windows directory.
 
    #if JUCE_WINDOWS
-    Array<File> roots;
-    File::findFileSystemRoots (roots);
-    uint64 num = 0;
-
-    for (int i = 0; i < roots.size(); ++i)
-    {
-        const File& f = roots.getReference (i);
-
-        if ((! (f.getFullPathName().startsWithIgnoreCase ("a:")
-                || f.getFullPathName().startsWithIgnoreCase ("b:")))
-             && f.isOnHardDisk())
-        {
-            num = (uint64) f.getVolumeSerialNumber();
-            break;
-        }
-    }
-
-    if (num == 0)
-        num = File::getSpecialLocation (File::userHomeDirectory).getFileIdentifier();
+    uint64 num = File::getSpecialLocation (File::windowsSystemDirectory).getFileIdentifier();
    #else
     uint64 num = File ("~").getFileIdentifier();
    #endif

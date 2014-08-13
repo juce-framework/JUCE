@@ -33,17 +33,18 @@ struct Atoms
 {
     Atoms()
     {
-        Protocols                       = getIfExists ("WM_PROTOCOLS");
-        ProtocolList [TAKE_FOCUS]       = getIfExists ("WM_TAKE_FOCUS");
-        ProtocolList [DELETE_WINDOW]    = getIfExists ("WM_DELETE_WINDOW");
-        ProtocolList [PING]             = getIfExists ("_NET_WM_PING");
-        ChangeState                     = getIfExists ("WM_CHANGE_STATE");
-        State                           = getIfExists ("WM_STATE");
-        UserTime                        = getCreating ("_NET_WM_USER_TIME");
-        ActiveWin                       = getCreating ("_NET_ACTIVE_WINDOW");
-        Pid                             = getCreating ("_NET_WM_PID");
-        WindowType                      = getIfExists ("_NET_WM_WINDOW_TYPE");
-        WindowState                     = getIfExists ("_NET_WM_STATE");
+        protocols                       = getIfExists ("WM_PROTOCOLS");
+        protocolList [TAKE_FOCUS]       = getIfExists ("WM_TAKE_FOCUS");
+        protocolList [DELETE_WINDOW]    = getIfExists ("WM_DELETE_WINDOW");
+        protocolList [PING]             = getIfExists ("_NET_WM_PING");
+        changeState                     = getIfExists ("WM_CHANGE_STATE");
+        state                           = getIfExists ("WM_STATE");
+        userTime                        = getCreating ("_NET_WM_USER_TIME");
+        activeWin                       = getCreating ("_NET_ACTIVE_WINDOW");
+        pid                             = getCreating ("_NET_WM_PID");
+        windowType                      = getIfExists ("_NET_WM_WINDOW_TYPE");
+        windowState                     = getIfExists ("_NET_WM_STATE");
+        compositingManager              = getCreating ("_NET_WM_CM_S0");
 
         XdndAware                       = getCreating ("XdndAware");
         XdndEnter                       = getCreating ("XdndEnter");
@@ -88,8 +89,8 @@ struct Atoms
         PING = 2
     };
 
-    Atom Protocols, ProtocolList[3], ChangeState, State, UserTime,
-         ActiveWin, Pid, WindowType, WindowState,
+    Atom protocols, protocolList[3], changeState, state, userTime,
+         activeWin, pid, windowType, windowState, compositingManager,
          XdndAware, XdndEnter, XdndLeave, XdndPosition, XdndStatus,
          XdndDrop, XdndFinished, XdndSelection, XdndTypeList, XdndActionList,
          XdndActionDescription, XdndActionCopy, XdndActionPrivate,
@@ -312,6 +313,11 @@ namespace XRender
         }
 
         return xRenderQueryVersion != nullptr;
+    }
+
+    static bool hasCompositingWindowManager()
+    {
+        return XGetSelectionOwner (display, Atoms::get().compositingManager) != 0;
     }
 
     static XRenderPictFormat* findPictureFormat()
@@ -915,7 +921,7 @@ public:
                 clientMsg.window = windowH;
                 clientMsg.type = ClientMessage;
                 clientMsg.format = 32;
-                clientMsg.message_type = Atoms::get().WindowState;
+                clientMsg.message_type = Atoms::get().windowState;
                 clientMsg.data.l[0] = 0;  // Remove
                 clientMsg.data.l[1] = fs;
                 clientMsg.data.l[2] = 0;
@@ -1002,7 +1008,7 @@ public:
             clientMsg.window = windowH;
             clientMsg.type = ClientMessage;
             clientMsg.format = 32;
-            clientMsg.message_type = Atoms::get().ChangeState;
+            clientMsg.message_type = Atoms::get().changeState;
             clientMsg.data.l[0] = IconicState;
 
             ScopedXLock xlock;
@@ -1018,10 +1024,10 @@ public:
     {
         ScopedXLock xlock;
         const Atoms& atoms = Atoms::get();
-        GetXProperty prop (windowH, atoms.State, 0, 64, false, atoms.State);
+        GetXProperty prop (windowH, atoms.state, 0, 64, false, atoms.state);
 
         return prop.success
-                && prop.actualType == atoms.State
+                && prop.actualType == atoms.state
                 && prop.actualFormat == 32
                 && prop.numItems > 0
                 && ((unsigned long*) prop.data)[0] == IconicState;
@@ -1039,7 +1045,7 @@ public:
                 r = Desktop::getInstance().getDisplays().getMainDisplay().userArea;
 
             if (! r.isEmpty())
-                setBounds (r, shouldBeFullScreen);
+                setBounds (ScalingHelpers::scaledScreenPosToUnscaled (component, r), shouldBeFullScreen);
 
             component.repaint();
         }
@@ -1109,9 +1115,9 @@ public:
             if (c == &component)
                 break;
 
-            // TODO: needs scaling correctly
-            if (c->contains (localPos + bounds.getPosition() - c->getScreenPosition()))
-                return false;
+            if (ComponentPeer* peer = c->getPeer())
+                if (peer->contains (localPos + bounds.getPosition() - peer->getBounds().getPosition(), true))
+                    return false;
         }
 
         if (trueIfInAChildWindow)
@@ -1152,7 +1158,7 @@ public:
             ev.xclient.type = ClientMessage;
             ev.xclient.serial = 0;
             ev.xclient.send_event = True;
-            ev.xclient.message_type = Atoms::get().ActiveWin;
+            ev.xclient.message_type = Atoms::get().activeWin;
             ev.xclient.window = windowH;
             ev.xclient.format = 32;
             ev.xclient.data.l[0] = 2;
@@ -1178,10 +1184,7 @@ public:
 
     void toBehind (ComponentPeer* other) override
     {
-        LinuxComponentPeer* const otherPeer = dynamic_cast <LinuxComponentPeer*> (other);
-        jassert (otherPeer != nullptr); // wrong type of window?
-
-        if (otherPeer != nullptr)
+        if (LinuxComponentPeer* const otherPeer = dynamic_cast<LinuxComponentPeer*> (other))
         {
             setMinimised (false);
 
@@ -1190,6 +1193,8 @@ public:
             ScopedXLock xlock;
             XRestackWindows (display, newStack, 2);
         }
+        else
+            jassertfalse; // wrong type of window?
     }
 
     bool isFocused() const override
@@ -1221,7 +1226,7 @@ public:
 
     void repaint (const Rectangle<int>& area) override
     {
-        repainter->repaint (area.getIntersection (component.getLocalBounds()));
+        repainter->repaint (area.getIntersection (bounds.withZeroOrigin()));
     }
 
     void performAnyPendingRepaintsNow() override
@@ -1699,11 +1704,11 @@ public:
     {
         const Atoms& atoms = Atoms::get();
 
-        if (clientMsg.message_type == atoms.Protocols && clientMsg.format == 32)
+        if (clientMsg.message_type == atoms.protocols && clientMsg.format == 32)
         {
             const Atom atom = (Atom) clientMsg.data.l[0];
 
-            if (atom == atoms.ProtocolList [Atoms::PING])
+            if (atom == atoms.protocolList [Atoms::PING])
             {
                 Window root = RootWindow (display, DefaultScreen (display));
 
@@ -1712,7 +1717,7 @@ public:
                 XSendEvent (display, root, False, NoEventMask, &event);
                 XFlush (display);
             }
-            else if (atom == atoms.ProtocolList [Atoms::TAKE_FOCUS])
+            else if (atom == atoms.protocolList [Atoms::TAKE_FOCUS])
             {
                 if ((getStyleFlags() & juce::ComponentPeer::windowIgnoresKeyPresses) == 0)
                 {
@@ -1727,7 +1732,7 @@ public:
                     }
                 }
             }
-            else if (atom == atoms.ProtocolList [Atoms::DELETE_WINDOW])
+            else if (atom == atoms.protocolList [Atoms::DELETE_WINDOW])
             {
                 handleUserClosingWindow();
             }
@@ -2168,7 +2173,7 @@ private:
 
         netHints[1] = Atoms::getIfExists ("_KDE_NET_WM_WINDOW_TYPE_OVERRIDE");
 
-        xchangeProperty (windowH, Atoms::get().WindowType, XA_ATOM, 32, &netHints, 2);
+        xchangeProperty (windowH, Atoms::get().windowType, XA_ATOM, 32, &netHints, 2);
 
         int numHints = 0;
 
@@ -2179,7 +2184,7 @@ private:
             netHints [numHints++] = Atoms::getIfExists ("_NET_WM_STATE_ABOVE");
 
         if (numHints > 0)
-            xchangeProperty (windowH, Atoms::get().WindowState, XA_ATOM, 32, &netHints, numHints);
+            xchangeProperty (windowH, Atoms::get().windowState, XA_ATOM, 32, &netHints, numHints);
     }
 
     void createWindow (Window parentToAddTo)
@@ -2256,10 +2261,10 @@ private:
 
         // Associate the PID, allowing to be shut down when something goes wrong
         unsigned long pid = getpid();
-        xchangeProperty (windowH, atoms.Pid, XA_CARDINAL, 32, &pid, 1);
+        xchangeProperty (windowH, atoms.pid, XA_CARDINAL, 32, &pid, 1);
 
         // Set window manager protocols
-        xchangeProperty (windowH, atoms.Protocols, XA_ATOM, 32, atoms.ProtocolList, 2);
+        xchangeProperty (windowH, atoms.protocols, XA_ATOM, 32, atoms.protocolList, 2);
 
         // Set drag and drop flags
         xchangeProperty (windowH, atoms.XdndTypeList, XA_ATOM, 32, atoms.allowedMimeTypes, numElementsInArray (atoms.allowedMimeTypes));
@@ -2316,7 +2321,7 @@ private:
 
     long getUserTime() const
     {
-        GetXProperty prop (windowH, Atoms::get().UserTime, 0, 65536, false, XA_CARDINAL);
+        GetXProperty prop (windowH, Atoms::get().userTime, 0, 65536, false, XA_CARDINAL);
         return prop.success ? *(long*) prop.data : 0;
     }
 
@@ -3044,7 +3049,7 @@ void Desktop::Displays::findDisplays (float masterScale)
                             d.userArea = d.totalArea = Rectangle<int> (screens[j].x_org,
                                                                        screens[j].y_org,
                                                                        screens[j].width,
-                                                                       screens[j].height) * masterScale;
+                                                                       screens[j].height) / masterScale;
                             d.isMain = (index == 0);
                             d.scale = masterScale;
                             d.dpi = getDisplayDPI (0); // (all screens share the same DPI)
@@ -3116,11 +3121,17 @@ bool MouseInputSource::SourceList::addSource()
 
 bool Desktop::canUseSemiTransparentWindows() noexcept
 {
-    int matchedDepth = 0;
-    const int desiredDepth = 32;
+   #if JUCE_USE_XRENDER
+    if (XRender::hasCompositingWindowManager())
+    {
+        int matchedDepth = 0, desiredDepth = 32;
 
-    return Visuals::findVisualFormat (desiredDepth, matchedDepth) != 0
-             && (matchedDepth == desiredDepth);
+        return Visuals::findVisualFormat (desiredDepth, matchedDepth) != 0
+                 && matchedDepth == desiredDepth;
+    }
+   #endif
+
+    return false;
 }
 
 Point<float> MouseInputSource::getCurrentRawMousePosition()
@@ -3366,7 +3377,7 @@ void* MouseCursor::createStandardMouseCursor (MouseCursor::StandardCursorType ty
 
 void MouseCursor::showInWindow (ComponentPeer* peer) const
 {
-    if (LinuxComponentPeer* const lp = dynamic_cast <LinuxComponentPeer*> (peer))
+    if (LinuxComponentPeer* const lp = dynamic_cast<LinuxComponentPeer*> (peer))
         lp->showMouseCursor ((Cursor) getHandle());
 }
 
@@ -3390,7 +3401,7 @@ bool DragAndDropContainer::performExternalDragDropOfFiles (const StringArray& fi
 
     if (MouseInputSource* draggingSource = Desktop::getInstance().getDraggingMouseSource(0))
         if (Component* sourceComp = draggingSource->getComponentUnderMouse())
-            if (LinuxComponentPeer* const lp = dynamic_cast <LinuxComponentPeer*> (sourceComp->getPeer()))
+            if (LinuxComponentPeer* const lp = dynamic_cast<LinuxComponentPeer*> (sourceComp->getPeer()))
                 return lp->externalDragFileInit (files, canMoveFiles);
 
     // This method must be called in response to a component's mouseDown or mouseDrag event!
@@ -3405,7 +3416,7 @@ bool DragAndDropContainer::performExternalDragDropOfText (const String& text)
 
     if (MouseInputSource* draggingSource = Desktop::getInstance().getDraggingMouseSource(0))
         if (Component* sourceComp = draggingSource->getComponentUnderMouse())
-            if (LinuxComponentPeer* const lp = dynamic_cast <LinuxComponentPeer*> (sourceComp->getPeer()))
+            if (LinuxComponentPeer* const lp = dynamic_cast<LinuxComponentPeer*> (sourceComp->getPeer()))
                 return lp->externalDragTextInit (text);
 
     // This method must be called in response to a component's mouseDown or mouseDrag event!

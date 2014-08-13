@@ -589,6 +589,10 @@ namespace EdgeTableFillers
                 filler[2].set (sourceColour);
                 filler[3].set (sourceColour);
             }
+            else
+            {
+                areRGBComponentsEqual = false;
+            }
         }
 
         forcedinline void setEdgeTableYPos (const int y) noexcept

@@ -378,7 +378,7 @@ void StreamingSocket::close()
         {
             // need to do this to interrupt the accept() function..
             StreamingSocket temp;
-            temp.connect ("localhost", portNumber, 1000);
+            temp.connect (IPAddress::local().toString(), portNumber, 1000);
         }
     }
 

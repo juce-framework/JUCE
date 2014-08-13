@@ -2357,6 +2357,10 @@ void LookAndFeel_V2::drawCallOutBoxBackground (CallOutBox& box, Graphics& g,
     g.strokePath (path, PathStrokeType (2.0f));
 }
 
+int LookAndFeel_V2::getCallOutBoxBorderSize (const CallOutBox&)
+{
+    return 20;
+}
 
 //==============================================================================
 AttributedString LookAndFeel_V2::createFileChooserHeaderText (const String& title,

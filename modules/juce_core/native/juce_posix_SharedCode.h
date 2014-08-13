@@ -837,12 +837,6 @@ extern "C" void* threadEntryProc (void* userData)
     JUCE_AUTORELEASEPOOL
     {
        #if JUCE_ANDROID
-        struct AndroidThreadScope
-        {
-            AndroidThreadScope()   { threadLocalJNIEnvHolder.attach(); }
-            ~AndroidThreadScope()  { threadLocalJNIEnvHolder.detach(); }
-        };
-
         const AndroidThreadScope androidEnv;
        #endif
 
@@ -1152,15 +1146,23 @@ struct HighResolutionTimer::Pimpl
     {
         if (periodMs != newPeriod)
         {
-            stop();
-            periodMs = newPeriod;
+            if (thread != pthread_self())
+            {
+                stop();
 
-            shouldStop = false;
+                periodMs = newPeriod;
+                shouldStop = false;
 
-            if (pthread_create (&thread, nullptr, timerThread, this) == 0)
-                setThreadToRealtime (thread, (uint64) newPeriod);
+                if (pthread_create (&thread, nullptr, timerThread, this) == 0)
+                    setThreadToRealtime (thread, (uint64) newPeriod);
+                else
+                    jassertfalse;
+            }
             else
-                jassertfalse;
+            {
+                periodMs = newPeriod;
+                shouldStop = false;
+            }
         }
     }
 
@@ -1184,7 +1186,9 @@ private:
 
     static void* timerThread (void* param)
     {
-       #if ! JUCE_ANDROID
+       #if JUCE_ANDROID
+        const AndroidThreadScope androidEnv;
+       #else
         int dummy;
         pthread_setcancelstate (PTHREAD_CANCEL_ENABLE, &dummy);
        #endif
@@ -1195,12 +1199,19 @@ private:
 
     void timerThread()
     {
-        Clock clock (periodMs);
+        int lastPeriod = periodMs;
+        Clock clock (lastPeriod);
 
         while (! shouldStop)
         {
             clock.wait();
             owner.hiResTimerCallback();
+
+            if (lastPeriod != periodMs)
+            {
+                lastPeriod = periodMs;
+                clock = Clock (lastPeriod);
+            }
         }
 
         periodMs = 0;

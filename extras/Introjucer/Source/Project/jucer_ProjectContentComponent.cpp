@@ -571,25 +571,29 @@ StringArray ProjectContentComponent::getExportersWhichCanLaunch() const
 {
     StringArray s;
 
-    for (Project::ExporterIterator exporter (*project); exporter.next();)
-        if (exporter->canLaunchProject())
-            s.add (exporter->getName());
+    if (project != nullptr)
+        for (Project::ExporterIterator exporter (*project); exporter.next();)
+            if (exporter->canLaunchProject())
+                s.add (exporter->getName());
 
     return s;
 }
 
-void ProjectContentComponent::openInIDE (const String& exporterName)
+void ProjectContentComponent::openInIDE (int exporterIndex)
 {
+    int i = 0;
+
     if (project != nullptr)
         for (Project::ExporterIterator exporter (*project); exporter.next();)
-            if (exporter->getName() == exporterName && exporter->launchProject())
-                break;
+            if (exporter->canLaunchProject())
+                if (i++ == exporterIndex && exporter->launchProject())
+                    break;
 }
 
 static void openIDEMenuCallback (int result, ProjectContentComponent* comp)
 {
     if (comp != nullptr && result > 0)
-        comp->openInIDE (comp->getExportersWhichCanLaunch() [result - 1]);
+        comp->openInIDE (result - 1);
 }
 
 void ProjectContentComponent::openInIDE()
@@ -610,7 +614,7 @@ void ProjectContentComponent::openInIDE()
         }
         else
         {
-            openInIDE (possibleExporters[0]);
+            openInIDE (0);
         }
     }
 }

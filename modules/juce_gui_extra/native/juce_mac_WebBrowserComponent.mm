@@ -70,6 +70,7 @@ private:
 
     static void runOpenPanel (id, SEL, WebView*, id<WebOpenPanelResultListener> resultListener, BOOL allowMultipleFiles)
     {
+       #if JUCE_MODAL_LOOPS_PERMITTED
         FileChooser chooser (TRANS("Select the file you want to upload..."),
                              File::getSpecialLocation (File::userHomeDirectory), "*");
 
@@ -81,6 +82,10 @@ private:
             for (int i = 0; i < files.size(); ++i)
                 [resultListener chooseFilename: juceStringToNS (files.getReference(i).getFullPathName())];
         }
+       #else
+        (void) resultListener; (void) allowMultipleFiles;
+        jassertfalse; // Can't use this without modal loops being enabled!
+       #endif
     }
 };
 

@@ -92,18 +92,12 @@ public:
    juce::JUCEApplicationBase* juce_CreateApplication() { return new AppClass(); }
 
 #else
- #if JUCE_WINDOWS
-  #if defined (WINAPI) || defined (_WINDOWS_)
-   #define JUCE_MAIN_FUNCTION       int __stdcall WinMain (HINSTANCE, HINSTANCE, const LPSTR, int)
-  #elif defined (_UNICODE)
-   #define JUCE_MAIN_FUNCTION       int __stdcall WinMain (void*, void*, const wchar_t*, int)
-  #else
-   #define JUCE_MAIN_FUNCTION       int __stdcall WinMain (void*, void*, const char*, int)
-  #endif
-  #define  JUCE_MAIN_FUNCTION_ARGS
+ #if JUCE_WINDOWS && ! defined (_CONSOLE)
+  #define JUCE_MAIN_FUNCTION       int __stdcall WinMain (struct HINSTANCE__*, struct HINSTANCE__*, char*, int)
+  #define JUCE_MAIN_FUNCTION_ARGS
  #else
-  #define  JUCE_MAIN_FUNCTION       int main (int argc, char* argv[])
-  #define  JUCE_MAIN_FUNCTION_ARGS  argc, (const char**) argv
+  #define JUCE_MAIN_FUNCTION       int main (int argc, char* argv[])
+  #define JUCE_MAIN_FUNCTION_ARGS  argc, (const char**) argv
  #endif
 
  #define START_JUCE_APPLICATION(AppClass) \

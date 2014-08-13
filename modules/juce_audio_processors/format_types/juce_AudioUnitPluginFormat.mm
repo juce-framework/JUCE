@@ -62,7 +62,7 @@ namespace AudioUnitFormatHelpers
     static ThreadLocalValue<int> insideCallback;
    #endif
 
-    String osTypeToString (OSType type)
+    String osTypeToString (OSType type) noexcept
     {
         const juce_wchar s[4] = { (juce_wchar) ((type >> 24) & 0xff),
                                   (juce_wchar) ((type >> 16) & 0xff),
@@ -88,9 +88,6 @@ namespace AudioUnitFormatHelpers
 
     String createPluginIdentifier (const AudioComponentDescription& desc)
     {
-        jassert (osTypeToString ('abcd') == "abcd"); // agh, must have got the endianness wrong..
-        jassert (stringToOSType ("abcd") == (OSType) 'abcd'); // ditto
-
         String s (auIdentifierPrefix);
 
         if (desc.componentType == kAudioUnitType_MusicDevice)
@@ -215,9 +212,11 @@ namespace AudioUnitFormatHelpers
                 const short resFileId = CFBundleOpenBundleResourceMap (bundleRef);
                 UseResFile (resFileId);
 
-                for (ResourceIndex i = 1; i <= Count1Resources ('thng'); ++i)
+                const OSType thngType = stringToOSType ("thng");
+
+                for (ResourceIndex i = 1; i <= Count1Resources (thngType); ++i)
                 {
-                    if (Handle h = Get1IndResource ('thng', i))
+                    if (Handle h = Get1IndResource (thngType, i))
                     {
                         HLock (h);
                         const uint32* const types = (const uint32*) *h;
@@ -972,16 +971,11 @@ private:
 
             for (int i = 0; i < parameters.size(); ++i)
             {
-                const ParamInfo& p = *parameters.getUnchecked(i);
-
-                AudioUnitParameter paramToAdd;
-                paramToAdd.mAudioUnit = audioUnit;
-                paramToAdd.mParameterID = p.paramID;
-                paramToAdd.mScope = kAudioUnitScope_Global;
-                paramToAdd.mElement = 0;
-
                 AudioUnitEvent event;
-                event.mArgument.mParameter = paramToAdd;
+                event.mArgument.mParameter.mAudioUnit = audioUnit;
+                event.mArgument.mParameter.mParameterID = parameters.getUnchecked(i)->paramID;
+                event.mArgument.mParameter.mScope = kAudioUnitScope_Global;
+                event.mArgument.mParameter.mElement = 0;
 
                 event.mEventType = kAudioUnitEvent_ParameterValueChange;
                 AUEventListenerAddEventType (eventListenerRef, nullptr, &event);
@@ -992,6 +986,16 @@ private:
                 event.mEventType = kAudioUnitEvent_EndParameterChangeGesture;
                 AUEventListenerAddEventType (eventListenerRef, nullptr, &event);
             }
+
+            // Add a listener for program changes
+            AudioUnitEvent event;
+            event.mArgument.mProperty.mAudioUnit = audioUnit;
+            event.mArgument.mProperty.mPropertyID = kAudioUnitProperty_PresentPreset;
+            event.mArgument.mProperty.mScope = kAudioUnitScope_Global;
+            event.mArgument.mProperty.mElement = 0;
+
+            event.mEventType = kAudioUnitEvent_PropertyChange;
+            AUEventListenerAddEventType (eventListenerRef, nullptr, &event);
         }
     }
 
@@ -1022,6 +1026,7 @@ private:
                 break;
 
             default:
+                sendAllParametersChangedEvents();
                 break;
         }
     }

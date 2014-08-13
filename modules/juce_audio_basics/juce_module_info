@@ -1,7 +1,7 @@
 {
   "id":             "juce_audio_basics",
   "name":           "JUCE audio and midi data classes",
-  "version":        "3.0.7",
+  "version":        "3.0.8",
   "description":    "Classes for audio buffer manipulation, midi message handling, synthesis, etc",
   "website":        "http://www.juce.com/juce",
   "license":        "GPL/Commercial",

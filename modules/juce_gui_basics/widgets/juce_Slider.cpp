@@ -320,12 +320,12 @@ public:
     {
         if (notification != dontSendNotification)
         {
+            owner.valueChanged();
+
             if (notification == sendNotificationSync)
                 handleAsyncUpdate();
             else
                 triggerAsyncUpdate();
-
-            owner.valueChanged();
         }
     }
 
@@ -981,29 +981,45 @@ public:
         }
     }
 
+    double getMouseWheelDelta (double value, double wheelAmount)
+    {
+        if (style == IncDecButtons)
+            return interval * wheelAmount;
+
+        const double proportionDelta = wheelAmount * 0.15f;
+        const double currentPos = owner.valueToProportionOfLength (value);
+        return owner.proportionOfLengthToValue (jlimit (0.0, 1.0, currentPos + proportionDelta)) - value;
+    }
+
     bool mouseWheelMove (const MouseEvent& e, const MouseWheelDetails& wheel)
     {
         if (scrollWheelEnabled
              && style != TwoValueHorizontal
              && style != TwoValueVertical)
         {
-            if (maximum > minimum && ! e.mods.isAnyMouseButtonDown())
+            // sometimes duplicate wheel events seem to be sent, so since we're going to
+            // bump the value by a minimum of the interval, avoid doing this twice..
+            if (e.eventTime != lastMouseWheelTime)
             {
-                if (valueBox != nullptr)
-                    valueBox->hideEditor (false);
+                lastMouseWheelTime = e.eventTime;
 
-                const double value = (double) currentValue.getValue();
-                const double proportionDelta = (wheel.deltaX != 0 ? -wheel.deltaX : wheel.deltaY)
-                                                   * (wheel.isReversed ? -0.15f : 0.15f);
-                const double currentPos = owner.valueToProportionOfLength (value);
-                const double newValue = owner.proportionOfLengthToValue (jlimit (0.0, 1.0, currentPos + proportionDelta));
+                if (maximum > minimum && ! e.mods.isAnyMouseButtonDown())
+                {
+                    if (valueBox != nullptr)
+                        valueBox->hideEditor (false);
 
-                double delta = (newValue != value) ? jmax (std::abs (newValue - value), interval) : 0;
-                if (value > newValue)
-                    delta = -delta;
+                    const double value = (double) currentValue.getValue();
+                    const double delta = getMouseWheelDelta (value, (wheel.deltaX != 0 ? -wheel.deltaX : wheel.deltaY)
+                                                                        * (wheel.isReversed ? -1.0f : 1.0f));
 
-                DragInProgress drag (*this);
-                setValue (owner.snapValue (value + delta, notDragging), sendNotificationSync);
+                    if (delta != 0)
+                    {
+                        const double newValue = value + jmax (interval, std::abs (delta)) * (delta < 0 ? -1.0 : 1.0);
+
+                        DragInProgress drag (*this);
+                        setValue (owner.snapValue (newValue, notDragging), sendNotificationSync);
+                    }
+                }
             }
 
             return true;
@@ -1236,6 +1252,7 @@ public:
     int sliderRegionStart, sliderRegionSize;
     int sliderBeingDragged;
     int pixelsForFullDragExtent;
+    Time lastMouseWheelTime;
     Rectangle<int> sliderRect;
     ScopedPointer<DragInProgress> currentDrag;
 

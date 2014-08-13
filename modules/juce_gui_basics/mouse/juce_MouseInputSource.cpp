@@ -274,7 +274,7 @@ public:
                     sendMouseDrag (*current, newScreenPos + unboundedMouseOffset, time);
 
                     if (isUnboundedMouseModeOn)
-                        handleUnboundedDrag (current);
+                        handleUnboundedDrag (*current);
                 }
                 else
                 {
@@ -399,7 +399,8 @@ public:
             {
                 // when released, return the mouse to within the component's bounds
                 if (Component* current = getComponentUnderMouse())
-                    setScreenPosition (current->getScreenBounds().toFloat().getConstrainedPoint (lastScreenPos));
+                    setScreenPosition (current->getScreenBounds().toFloat()
+                                          .getConstrainedPoint (ScalingHelpers::unscaledScreenPosToScaled (lastScreenPos)));
             }
 
             isUnboundedMouseModeOn = enable;
@@ -409,21 +410,22 @@ public:
         }
     }
 
-    void handleUnboundedDrag (Component* current)
+    void handleUnboundedDrag (Component& current)
     {
-        const Rectangle<float> screenArea (current->getParentMonitorArea().expanded (-2, -2).toFloat());
+        const Rectangle<float> componentScreenBounds
+                = ScalingHelpers::scaledScreenPosToUnscaled (current.getParentMonitorArea().reduced (2, 2).toFloat());
 
-        if (! screenArea.contains (lastScreenPos))
+        if (! componentScreenBounds.contains (lastScreenPos))
         {
-            const Point<float> componentCentre (current->getScreenBounds().toFloat().getCentre());
-            unboundedMouseOffset += (lastScreenPos - componentCentre);
+            const Point<float> componentCentre (current.getScreenBounds().toFloat().getCentre());
+            unboundedMouseOffset += (lastScreenPos - ScalingHelpers::scaledScreenPosToUnscaled (componentCentre));
             setScreenPosition (componentCentre);
         }
         else if (isCursorVisibleUntilOffscreen
                   && (! unboundedMouseOffset.isOrigin())
-                  && screenArea.contains (lastScreenPos + unboundedMouseOffset))
+                  && componentScreenBounds.contains (lastScreenPos + unboundedMouseOffset))
         {
-            setScreenPosition (lastScreenPos + unboundedMouseOffset);
+            MouseInputSource::setRawMousePosition (lastScreenPos + unboundedMouseOffset);
             unboundedMouseOffset = Point<float>();
         }
     }
@@ -462,10 +464,9 @@ public:
     //==============================================================================
     const int index;
     const bool isMouseDevice;
-    Point<float> lastScreenPos;
+    Point<float> lastScreenPos, unboundedMouseOffset; // NB: these are unscaled coords
     ModifierKeys buttonState;
 
-    Point<float> unboundedMouseOffset;
     bool isUnboundedMouseModeOn, isCursorVisibleUntilOffscreen;
 
 private:

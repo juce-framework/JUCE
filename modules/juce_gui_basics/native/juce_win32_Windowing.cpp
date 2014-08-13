@@ -763,7 +763,7 @@ public:
                     ShowWindow (hwnd, SW_SHOWNORMAL);
 
                 if (! boundsCopy.isEmpty())
-                    setBounds (boundsCopy, false);
+                    setBounds (ScalingHelpers::scaledScreenPosToUnscaled (component, boundsCopy), false);
             }
             else
             {
