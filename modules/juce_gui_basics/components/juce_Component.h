@@ -46,7 +46,7 @@ public:
         subclass of Component or use one of the other types of component from
         the library.
     */
-    Component();
+    Component() noexcept;
 
     /** Destructor.
 
@@ -66,7 +66,7 @@ public:
     /** Creates a component, setting its name at the same time.
         @see getName, setName
     */
-    explicit Component (const String& componentName);
+    explicit Component (const String& componentName) noexcept;
 
     /** Returns the name of this component.
         @see setName
@@ -807,7 +807,7 @@ public:
     TargetClass* findParentComponentOfClass() const
     {
         for (Component* p = parentComponent; p != nullptr; p = p->parentComponent)
-            if (TargetClass* const target = dynamic_cast <TargetClass*> (p))
+            if (TargetClass* const target = dynamic_cast<TargetClass*> (p))
                 return target;
 
         return nullptr;
@@ -2136,31 +2136,31 @@ public:
         SafePointer() noexcept {}
 
         /** Creates a SafePointer that points at the given component. */
-        SafePointer (ComponentType* const component)        : weakRef (component) {}
+        SafePointer (ComponentType* component)                : weakRef (component) {}
 
         /** Creates a copy of another SafePointer. */
-        SafePointer (const SafePointer& other) noexcept     : weakRef (other.weakRef) {}
+        SafePointer (const SafePointer& other) noexcept       : weakRef (other.weakRef) {}
 
         /** Copies another pointer to this one. */
-        SafePointer& operator= (const SafePointer& other)           { weakRef = other.weakRef; return *this; }
+        SafePointer& operator= (const SafePointer& other)     { weakRef = other.weakRef; return *this; }
 
         /** Copies another pointer to this one. */
-        SafePointer& operator= (ComponentType* const newComponent)  { weakRef = newComponent; return *this; }
+        SafePointer& operator= (ComponentType* newComponent)  { weakRef = newComponent; return *this; }
 
         /** Returns the component that this pointer refers to, or null if the component no longer exists. */
-        ComponentType* getComponent() const noexcept        { return dynamic_cast <ComponentType*> (weakRef.get()); }
+        ComponentType* getComponent() const noexcept          { return dynamic_cast<ComponentType*> (weakRef.get()); }
 
         /** Returns the component that this pointer refers to, or null if the component no longer exists. */
-        operator ComponentType*() const noexcept            { return getComponent(); }
+        operator ComponentType*() const noexcept              { return getComponent(); }
 
         /** Returns the component that this pointer refers to, or null if the component no longer exists. */
-        ComponentType* operator->() noexcept                { return getComponent(); }
+        ComponentType* operator->() noexcept                  { return getComponent(); }
 
         /** Returns the component that this pointer refers to, or null if the component no longer exists. */
-        const ComponentType* operator->() const noexcept    { return getComponent(); }
+        const ComponentType* operator->() const noexcept      { return getComponent(); }
 
         /** If the component is valid, this deletes it and sets this pointer to null. */
-        void deleteAndZero()                                { delete getComponent(); }
+        void deleteAndZero()                                  { delete getComponent(); }
 
         bool operator== (ComponentType* component) const noexcept   { return weakRef == component; }
         bool operator!= (ComponentType* component) const noexcept   { return weakRef != component; }
@@ -2268,20 +2268,20 @@ private:
     String componentName, componentID;
     Component* parentComponent;
     Rectangle<int> bounds;
-    ScopedPointer <Positioner> positioner;
-    ScopedPointer <AffineTransform> affineTransform;
-    Array <Component*> childComponentList;
+    ScopedPointer<Positioner> positioner;
+    ScopedPointer<AffineTransform> affineTransform;
+    Array<Component*> childComponentList;
     LookAndFeel* lookAndFeel;
     MouseCursor cursor;
     ImageEffectFilter* effect;
-    ScopedPointer <CachedComponentImage> cachedImage;
+    ScopedPointer<CachedComponentImage> cachedImage;
 
     class MouseListenerList;
     friend class MouseListenerList;
     friend struct ContainerDeletePolicy<MouseListenerList>;
-    ScopedPointer <MouseListenerList> mouseListeners;
-    ScopedPointer <Array <KeyListener*> > keyListeners;
-    ListenerList <ComponentListener> componentListeners;
+    ScopedPointer<MouseListenerList> mouseListeners;
+    ScopedPointer<Array<KeyListener*> > keyListeners;
+    ListenerList<ComponentListener> componentListeners;
     NamedValueSet properties;
 
     friend class WeakReference<Component>;

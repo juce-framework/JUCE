@@ -141,7 +141,7 @@ public:
     }
 
 private:
-    Array <MouseListener*> listeners;
+    Array<MouseListener*> listeners;
     int numDeepMouseListeners;
 
     class BailOutChecker2
@@ -256,7 +256,7 @@ struct Component::ComponentHelpers
    #if JUCE_MODAL_LOOPS_PERMITTED
     static void* runModalLoopCallback (void* userData)
     {
-        return (void*) (pointer_sized_int) static_cast <Component*> (userData)->runModalLoop();
+        return (void*) (pointer_sized_int) static_cast<Component*> (userData)->runModalLoop();
     }
    #endif
 
@@ -480,7 +480,7 @@ struct Component::ComponentHelpers
 };
 
 //==============================================================================
-Component::Component()
+Component::Component() noexcept
   : parentComponent (nullptr),
     lookAndFeel (nullptr),
     effect (nullptr),
@@ -489,7 +489,7 @@ Component::Component()
 {
 }
 
-Component::Component (const String& name)
+Component::Component (const String& name) noexcept
   : componentName (name),
     parentComponent (nullptr),
     lookAndFeel (nullptr),
@@ -880,7 +880,7 @@ void Component::setBufferedToImage (const bool shouldBeBuffered)
     // so by calling setBufferedToImage, you'll be deleting the custom one - this is almost certainly
     // not what you wanted to happen... If you really do know what you're doing here, and want to
     // avoid this assertion, just call setCachedComponentImage (nullptr) before setBufferedToImage().
-    jassert (cachedImage == nullptr || dynamic_cast <StandardCachedComponentImage*> (cachedImage.get()) != nullptr);
+    jassert (cachedImage == nullptr || dynamic_cast<StandardCachedComponentImage*> (cachedImage.get()) != nullptr);
 
     if (shouldBeBuffered)
     {
@@ -1643,7 +1643,7 @@ Component* Component::getChildComponent (const int index) const noexcept
 
 int Component::getIndexOfChildComponent (const Component* const child) const noexcept
 {
-    return childComponentList.indexOf (const_cast <Component*> (child));
+    return childComponentList.indexOf (const_cast<Component*> (child));
 }
 
 Component* Component::findChildWithID (StringRef targetID) const noexcept
@@ -1665,7 +1665,7 @@ Component* Component::getTopLevelComponent() const noexcept
     while (comp->parentComponent != nullptr)
         comp = comp->parentComponent;
 
-    return const_cast <Component*> (comp);
+    return const_cast<Component*> (comp);
 }
 
 bool Component::isParentOf (const Component* possibleChild) const noexcept
@@ -2205,7 +2205,7 @@ void Component::sendLookAndFeelChange()
 Colour Component::findColour (const int colourId, const bool inheritFromParent) const
 {
     if (const var* const v = properties.getVarPointer (ComponentHelpers::getColourPropertyId (colourId)))
-        return Colour ((uint32) static_cast <int> (*v));
+        return Colour ((uint32) static_cast<int> (*v));
 
     if (inheritFromParent && parentComponent != nullptr
          && (lookAndFeel == nullptr || ! lookAndFeel->isColourSpecified (colourId)))
@@ -2856,7 +2856,7 @@ void Component::grabFocusInternal (const FocusChangeType cause, const bool canTr
             else
             {
                 // find the default child component..
-                ScopedPointer <KeyboardFocusTraverser> traverser (createFocusTraverser());
+                ScopedPointer<KeyboardFocusTraverser> traverser (createFocusTraverser());
 
                 if (traverser != nullptr)
                 {
@@ -2898,7 +2898,7 @@ void Component::moveKeyboardFocusToSibling (const bool moveToNext)
 
     if (parentComponent != nullptr)
     {
-        ScopedPointer <KeyboardFocusTraverser> traverser (createFocusTraverser());
+        ScopedPointer<KeyboardFocusTraverser> traverser (createFocusTraverser());
 
         if (traverser != nullptr)
         {
@@ -3052,7 +3052,7 @@ Point<int> Component::getMouseXYRelative() const
 void Component::addKeyListener (KeyListener* const newListener)
 {
     if (keyListeners == nullptr)
-        keyListeners = new Array <KeyListener*>();
+        keyListeners = new Array<KeyListener*>();
 
     keyListeners->addIfNotAlreadyThere (newListener);
 }
