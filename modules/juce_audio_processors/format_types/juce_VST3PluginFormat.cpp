@@ -1446,7 +1446,7 @@ public:
         warnOnFailure (view->removed());
         warnOnFailure (view->setFrame (nullptr));
 
-        getAudioProcessor()->editorBeingDeleted (this);
+        processor.editorBeingDeleted (this);
 
        #if JUCE_MAC
         dummyComponent.setView (nullptr);
