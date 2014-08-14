@@ -787,7 +787,7 @@ public:
             char buffer [512] = { 0 };
             dispatch (effGetEffectName, 0, 0, buffer, 0);
 
-            desc.descriptiveName = String (buffer).trim();
+            desc.descriptiveName = String::fromUTF8 (buffer).trim();
 
             if (desc.descriptiveName.isEmpty())
                 desc.descriptiveName = name;
@@ -802,7 +802,7 @@ public:
         {
             char buffer [kVstMaxVendorStrLen + 8] = { 0 };
             dispatch (effGetVendorString, 0, 0, buffer, 0);
-            desc.manufacturerName = buffer;
+            desc.manufacturerName = String::fromUTF8 (buffer);
         }
 
         desc.version = getVersion();
@@ -1197,7 +1197,7 @@ public:
                 char nm[264] = { 0 };
 
                 if (dispatch (effGetProgramNameIndexed, jlimit (0, getNumPrograms(), index), -1, nm, 0) != 0)
-                    return String (CharPointer_UTF8 (nm)).trim();
+                    return String::fromUTF8 (nm).trim();
             }
         }
 
