@@ -1528,10 +1528,14 @@ private:
         // if something in a paint handler calls, e.g. a message box, this can become reentrant and
         // corrupt the image it's using to paint into, so do a check here.
         static bool reentrant = false;
-        if (! (reentrant || dontRepaint))
+        if (! reentrant)
         {
             const ScopedValueSetter<bool> setter (reentrant, true, false);
-            performPaint (dc, rgn, regionType, paintStruct);
+
+            if (dontRepaint)
+                component.handleCommandMessage (0); // (this triggers a repaint in the openGL context)
+            else
+                performPaint (dc, rgn, regionType, paintStruct);
         }
 
         DeleteObject (rgn);
@@ -2896,18 +2900,15 @@ private:
 ModifierKeys HWNDComponentPeer::currentModifiers;
 ModifierKeys HWNDComponentPeer::modifiersAtLastCallback;
 
-ComponentPeer* Component::createNewPeer (int styleFlags, void* nativeWindowToAttachTo)
+ComponentPeer* Component::createNewPeer (int styleFlags, void* parentHWND)
 {
-    return new HWNDComponentPeer (*this, styleFlags,
-                                  (HWND) nativeWindowToAttachTo, false);
+    return new HWNDComponentPeer (*this, styleFlags, (HWND) parentHWND, false);
 }
 
-ComponentPeer* createNonRepaintingEmbeddedWindowsPeer (Component* component, void* parent)
+ComponentPeer* createNonRepaintingEmbeddedWindowsPeer (Component& component, void* parentHWND)
 {
-    jassert (component != nullptr);
-
-    return new HWNDComponentPeer (*component, ComponentPeer::windowIgnoresMouseClicks,
-                                  (HWND) parent, true);
+    return new HWNDComponentPeer (component, ComponentPeer::windowIgnoresMouseClicks,
+                                  (HWND) parentHWND, true);
 }
 
 
