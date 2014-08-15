@@ -253,9 +253,9 @@ public:
 
     //==============================================================================
     /** Adds a RelativeTime to this time. */
-    Time& operator+= (RelativeTime delta);
+    Time& operator+= (RelativeTime delta) noexcept;
     /** Subtracts a RelativeTime from this time. */
-    Time& operator-= (RelativeTime delta);
+    Time& operator-= (RelativeTime delta) noexcept;
 
     //==============================================================================
     /** Tries to set the computer's clock.
@@ -272,8 +272,7 @@ public:
         @param threeLetterVersion   if true, it'll return a 3-letter abbreviation, e.g. "Tue"; if
                                     false, it'll return the full version, e.g. "Tuesday".
     */
-    static String getWeekdayName (int dayNumber,
-                                  bool threeLetterVersion);
+    static String getWeekdayName (int dayNumber, bool threeLetterVersion);
 
     /** Returns the name of one of the months.
 
@@ -281,8 +280,7 @@ public:
         @param threeLetterVersion   if true, it'll be a 3-letter abbreviation, e.g. "Jan"; if false
                                     it'll return the long form, e.g. "January"
     */
-    static String getMonthName (int monthNumber,
-                                bool threeLetterVersion);
+    static String getMonthName (int monthNumber, bool threeLetterVersion);
 
     //==============================================================================
     // Static methods for getting system timers directly..
@@ -370,6 +368,8 @@ public:
     */
     static int64 secondsToHighResolutionTicks (double seconds) noexcept;
 
+    /** Returns a Time based on the value of the __DATE__ macro when this module was compiled */
+    static Time getCompilationDate();
 
 private:
     //==============================================================================
@@ -378,27 +378,27 @@ private:
 
 //==============================================================================
 /** Adds a RelativeTime to a Time. */
-JUCE_API Time operator+ (Time time, RelativeTime delta);
+JUCE_API Time operator+ (Time time, RelativeTime delta) noexcept;
 /** Adds a RelativeTime to a Time. */
-JUCE_API Time operator+ (RelativeTime delta, Time time);
+JUCE_API Time operator+ (RelativeTime delta, Time time) noexcept;
 
 /** Subtracts a RelativeTime from a Time. */
-JUCE_API Time operator- (Time time, RelativeTime delta);
+JUCE_API Time operator- (Time time, RelativeTime delta) noexcept;
 /** Returns the relative time difference between two times. */
-JUCE_API const RelativeTime operator- (Time time1, Time time2);
+JUCE_API const RelativeTime operator- (Time time1, Time time2) noexcept;
 
 /** Compares two Time objects. */
-JUCE_API bool operator== (Time time1, Time time2);
+JUCE_API bool operator== (Time time1, Time time2) noexcept;
 /** Compares two Time objects. */
-JUCE_API bool operator!= (Time time1, Time time2);
+JUCE_API bool operator!= (Time time1, Time time2) noexcept;
 /** Compares two Time objects. */
-JUCE_API bool operator<  (Time time1, Time time2);
+JUCE_API bool operator<  (Time time1, Time time2) noexcept;
 /** Compares two Time objects. */
-JUCE_API bool operator<= (Time time1, Time time2);
+JUCE_API bool operator<= (Time time1, Time time2) noexcept;
 /** Compares two Time objects. */
-JUCE_API bool operator>  (Time time1, Time time2);
+JUCE_API bool operator>  (Time time1, Time time2) noexcept;
 /** Compares two Time objects. */
-JUCE_API bool operator>= (Time time1, Time time2);
+JUCE_API bool operator>= (Time time1, Time time2) noexcept;
 
 
 #endif   // JUCE_TIME_H_INCLUDED

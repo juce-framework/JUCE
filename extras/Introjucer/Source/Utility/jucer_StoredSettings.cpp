@@ -117,8 +117,12 @@ void StoredSettings::reload()
     recentFiles.removeNonExistentFiles();
 
     ScopedPointer<XmlElement> xml (getGlobalProperties().getXmlValue ("editorColours"));
+
     if (xml == nullptr)
+    {
         xml = XmlDocument::parse (BinaryData::colourscheme_dark_xml);
+        jassert (xml != nullptr);
+    }
 
     appearance.readFromXML (*xml);
 

@@ -457,7 +457,7 @@ void ListBox::updateContent()
 
     if (selected.size() > 0 && selected [selected.size() - 1] >= totalItems)
     {
-        selected.removeRange (Range <int> (totalItems, std::numeric_limits<int>::max()));
+        selected.removeRange (Range<int> (totalItems, std::numeric_limits<int>::max()));
         lastRowSelected = getSelectedRow (0);
         selectionChanged = true;
     }
@@ -516,7 +516,7 @@ void ListBox::deselectRow (const int row)
 {
     if (selected.contains (row))
     {
-        selected.removeRange (Range <int> (row, row + 1));
+        selected.removeRange (Range<int> (row, row + 1));
 
         if (row == lastRowSelected)
             lastRowSelected = getSelectedRow (0);
@@ -530,7 +530,7 @@ void ListBox::setSelectedRows (const SparseSet<int>& setOfRowsToBeSelected,
                                const NotificationType sendNotificationEventToModel)
 {
     selected = setOfRowsToBeSelected;
-    selected.removeRange (Range <int> (totalItems, std::numeric_limits<int>::max()));
+    selected.removeRange (Range<int> (totalItems, std::numeric_limits<int>::max()));
 
     if (! isRowSelected (lastRowSelected))
         lastRowSelected = getSelectedRow (0);
@@ -554,10 +554,10 @@ void ListBox::selectRangeOfRows (int firstRow, int lastRow)
         firstRow = jlimit (0, jmax (0, numRows), firstRow);
         lastRow  = jlimit (0, jmax (0, numRows), lastRow);
 
-        selected.addRange (Range <int> (jmin (firstRow, lastRow),
-                                        jmax (firstRow, lastRow) + 1));
+        selected.addRange (Range<int> (jmin (firstRow, lastRow),
+                                       jmax (firstRow, lastRow) + 1));
 
-        selected.removeRange (Range <int> (lastRow, lastRow + 1));
+        selected.removeRange (Range<int> (lastRow, lastRow + 1));
     }
 
     selectRowInternal (lastRow, false, false, true);
@@ -652,7 +652,7 @@ int ListBox::getInsertionIndexForPosition (const int x, const int y) const noexc
 Component* ListBox::getComponentForRowNumber (const int row) const noexcept
 {
     if (RowComponent* const listRowComp = viewport->getComponentForRowIfOnscreen (row))
-        return static_cast <Component*> (listRowComp->customComponent);
+        return static_cast<Component*> (listRowComp->customComponent);
 
     return nullptr;
 }
@@ -809,7 +809,7 @@ void ListBox::mouseWheelMove (const MouseEvent& e, const MouseWheelDetails& whee
 void ListBox::mouseUp (const MouseEvent& e)
 {
     if (e.mouseWasClicked() && model != nullptr)
-        model->backgroundClicked();
+        model->backgroundClicked (e);
 }
 
 //==============================================================================
@@ -851,6 +851,11 @@ void ListBox::colourChanged()
     setOpaque (findColour (backgroundColourId).isOpaque());
     viewport->setOpaque (isOpaque());
     repaint();
+}
+
+void ListBox::parentHierarchyChanged()
+{
+    colourChanged();
 }
 
 void ListBox::setOutlineThickness (const int newThickness)
@@ -947,7 +952,7 @@ Component* ListBoxModel::refreshComponentForRow (int, bool, Component* existingC
 
 void ListBoxModel::listBoxItemClicked (int, const MouseEvent&) {}
 void ListBoxModel::listBoxItemDoubleClicked (int, const MouseEvent&) {}
-void ListBoxModel::backgroundClicked() {}
+void ListBoxModel::backgroundClicked (const MouseEvent&) {}
 void ListBoxModel::selectedRowsChanged (int) {}
 void ListBoxModel::deleteKeyPressed (int) {}
 void ListBoxModel::returnKeyPressed (int) {}

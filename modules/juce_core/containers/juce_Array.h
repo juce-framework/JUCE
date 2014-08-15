@@ -42,7 +42,7 @@
     - it must be able to be relocated in memory by a memcpy without this causing any problems - so
       objects whose functionality relies on external pointers or references to themselves can not be used.
 
-    You can of course have an array of pointers to any kind of object, e.g. Array <MyClass*>, but if
+    You can of course have an array of pointers to any kind of object, e.g. Array<MyClass*>, but if
     you do this, the array doesn't take any ownership of the objects - see the OwnedArray class or the
     ReferenceCountedArray class for more powerful ways of holding lists of objects.
 

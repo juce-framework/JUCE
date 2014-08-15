@@ -175,7 +175,7 @@ bool MemoryOutputStream::setPosition (int64 newPosition)
     return false;
 }
 
-int MemoryOutputStream::writeFromInputStream (InputStream& source, int64 maxNumBytesToWrite)
+int64 MemoryOutputStream::writeFromInputStream (InputStream& source, int64 maxNumBytesToWrite)
 {
     // before writing from an input, see if we can preallocate to make it more efficient..
     int64 availableData = source.getTotalLength() - source.getPosition();

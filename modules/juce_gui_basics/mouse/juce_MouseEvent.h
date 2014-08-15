@@ -57,12 +57,12 @@ public:
         @param mouseWasDragged  whether the mouse has been dragged significantly since the previous mouse-down
     */
     MouseEvent (MouseInputSource source,
-                Point<int> position,
+                Point<float> position,
                 ModifierKeys modifiers,
                 Component* eventComponent,
                 Component* originator,
                 Time eventTime,
-                Point<int> mouseDownPos,
+                Point<float> mouseDownPos,
                 Time mouseDownTime,
                 int numberOfClicks,
                 bool mouseWasDragged) noexcept;
@@ -71,10 +71,22 @@ public:
     ~MouseEvent() noexcept;
 
     //==============================================================================
+    /** The position of the mouse when the event occurred.
+
+        This value is relative to the top-left of the component to which the
+        event applies (as indicated by the MouseEvent::eventComponent field).
+
+        This is a more accurate floating-point version of the position returned by
+        getPosition() and the integer x and y member variables.
+    */
+    const Point<float> position;
+
     /** The x-position of the mouse when the event occurred.
 
         This value is relative to the top-left of the component to which the
         event applies (as indicated by the MouseEvent::eventComponent field).
+
+        For a floating-point coordinate, see MouseEvent::position
     */
     const int x;
 
@@ -82,6 +94,8 @@ public:
 
         This value is relative to the top-left of the component to which the
         event applies (as indicated by the MouseEvent::eventComponent field).
+
+        For a floating-point coordinate, see MouseEvent::position
     */
     const int y;
 
@@ -130,25 +144,19 @@ public:
 
     //==============================================================================
     /** Returns the x coordinate of the last place that a mouse was pressed.
-
         The coordinate is relative to the component specified in MouseEvent::component.
-
         @see getDistanceFromDragStart, getDistanceFromDragStartX, mouseWasClicked
     */
     int getMouseDownX() const noexcept;
 
     /** Returns the y coordinate of the last place that a mouse was pressed.
-
         The coordinate is relative to the component specified in MouseEvent::component.
-
         @see getDistanceFromDragStart, getDistanceFromDragStartX, mouseWasClicked
     */
     int getMouseDownY() const noexcept;
 
     /** Returns the coordinates of the last place that a mouse was pressed.
-
         The coordinates are relative to the component specified in MouseEvent::component.
-
         @see getDistanceFromDragStart, getDistanceFromDragStartX, mouseWasClicked
     */
     Point<int> getMouseDownPosition() const noexcept;
@@ -221,6 +229,8 @@ public:
 
         This position is relative to the top-left of the component to which the
         event applies (as indicated by the MouseEvent::eventComponent field).
+
+        For a floating-point position, see MouseEvent::position
     */
     Point<int> getPosition() const noexcept;
 
@@ -273,6 +283,12 @@ public:
         All other members of the event object are the same, but the x and y are
         replaced with these new values.
     */
+    MouseEvent withNewPosition (Point<float> newPosition) const noexcept;
+
+    /** Creates a copy of this event with a different position.
+        All other members of the event object are the same, but the x and y are
+        replaced with these new values.
+    */
     MouseEvent withNewPosition (Point<int> newPosition) const noexcept;
 
     //==============================================================================
@@ -297,7 +313,7 @@ public:
 
 private:
     //==============================================================================
-    const Point<int> mouseDownPos;
+    const Point<float> mouseDownPos;
     const uint8 numberOfClicks, wasMovedSinceMouseDown;
 
     MouseEvent& operator= (const MouseEvent&);

@@ -91,47 +91,47 @@ public:
     void clear();
 
     /** Returns the number of events in the sequence. */
-    int getNumEvents() const;
+    int getNumEvents() const noexcept;
 
     /** Returns a pointer to one of the events. */
-    MidiEventHolder* getEventPointer (int index) const;
+    MidiEventHolder* getEventPointer (int index) const noexcept;
 
     /** Returns the time of the note-up that matches the note-on at this index.
         If the event at this index isn't a note-on, it'll just return 0.
         @see MidiMessageSequence::MidiEventHolder::noteOffObject
     */
-    double getTimeOfMatchingKeyUp (int index) const;
+    double getTimeOfMatchingKeyUp (int index) const noexcept;
 
     /** Returns the index of the note-up that matches the note-on at this index.
         If the event at this index isn't a note-on, it'll just return -1.
         @see MidiMessageSequence::MidiEventHolder::noteOffObject
     */
-    int getIndexOfMatchingKeyUp (int index) const;
+    int getIndexOfMatchingKeyUp (int index) const noexcept;
 
     /** Returns the index of an event. */
-    int getIndexOf (MidiEventHolder* event) const;
+    int getIndexOf (MidiEventHolder* event) const noexcept;
 
     /** Returns the index of the first event on or after the given timestamp.
         If the time is beyond the end of the sequence, this will return the
         number of events.
     */
-    int getNextIndexAtTime (double timeStamp) const;
+    int getNextIndexAtTime (double timeStamp) const noexcept;
 
     //==============================================================================
     /** Returns the timestamp of the first event in the sequence.
         @see getEndTime
     */
-    double getStartTime() const;
+    double getStartTime() const noexcept;
 
     /** Returns the timestamp of the last event in the sequence.
         @see getStartTime
     */
-    double getEndTime() const;
+    double getEndTime() const noexcept;
 
     /** Returns the timestamp of the event at a given index.
         If the index is out-of-range, this will return 0.0
     */
-    double getEventTime (int index) const;
+    double getEventTime (int index) const noexcept;
 
     //==============================================================================
     /** Inserts a midi message into the sequence.
@@ -185,13 +185,13 @@ public:
         will scan the list and make sure all the note-offs in the MidiEventHolder
         structures are pointing at the correct ones.
     */
-    void updateMatchedPairs();
+    void updateMatchedPairs() noexcept;
 
     /** Forces a sort of the sequence.
         You may need to call this if you've manually modified the timestamps of some
         events such that the overall order now needs updating.
     */
-    void sort();
+    void sort() noexcept;
 
     //==============================================================================
     /** Copies all the messages for a particular midi channel to another sequence.
@@ -224,7 +224,7 @@ public:
     /** Adds an offset to the timestamps of all events in the sequence.
         @param deltaTime    the amount to add to each timestamp.
     */
-    void addTimeToMessages (double deltaTime);
+    void addTimeToMessages (double deltaTime) noexcept;
 
     //==============================================================================
     /** Scans through the sequence to determine the state of any midi controllers at

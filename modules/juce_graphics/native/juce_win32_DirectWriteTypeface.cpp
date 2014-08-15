@@ -107,15 +107,9 @@ public:
         systemFonts = nullptr;
     }
 
-    static const Direct2DFactories& getInstance()
-    {
-        static Direct2DFactories instance;
-        return instance;
-    }
-
-    ComSmartPtr <ID2D1Factory> d2dFactory;
-    ComSmartPtr <IDWriteFactory> directWriteFactory;
-    ComSmartPtr <IDWriteFontCollection> systemFonts;
+    ComSmartPtr<ID2D1Factory> d2dFactory;
+    ComSmartPtr<IDWriteFactory> directWriteFactory;
+    ComSmartPtr<IDWriteFontCollection> systemFonts;
 
 private:
     DynamicLibrary direct2dDll, directWriteDll;
@@ -145,26 +139,26 @@ public:
         hr = fontCollection->GetFontFamily (fontIndex, dwFontFamily.resetAndGetPointerAddress());
 
         // Get a specific font in the font family using typeface style
-        ComSmartPtr<IDWriteFont> dwFont;
-        uint32 fontFacesCount = 0;
-        fontFacesCount = dwFontFamily->GetFontCount();
-
-        for (int i = fontFacesCount; --i >= 0;)
         {
-            hr = dwFontFamily->GetFont (i, dwFont.resetAndGetPointerAddress());
+            ComSmartPtr<IDWriteFont> dwFont;
 
-            if (i == 0)
-                break;
+            for (int i = (int) dwFontFamily->GetFontCount(); --i >= 0;)
+            {
+                hr = dwFontFamily->GetFont (i, dwFont.resetAndGetPointerAddress());
 
-            ComSmartPtr<IDWriteLocalizedStrings> faceNames;
-            hr = dwFont->GetFaceNames (faceNames.resetAndGetPointerAddress());
+                if (i == 0)
+                    break;
 
-            if (font.getTypefaceStyle() == getLocalisedName (faceNames))
-                break;
+                ComSmartPtr<IDWriteLocalizedStrings> faceNames;
+                hr = dwFont->GetFaceNames (faceNames.resetAndGetPointerAddress());
+
+                if (font.getTypefaceStyle() == getLocalisedName (faceNames))
+                    break;
+            }
+
+            jassert (dwFont != nullptr);
+            hr = dwFont->CreateFontFace (dwFontFace.resetAndGetPointerAddress());
         }
-
-        jassert (dwFont != nullptr);
-        hr = dwFont->CreateFontFace (dwFontFace.resetAndGetPointerAddress());
 
         if (dwFontFace != nullptr)
         {
@@ -255,6 +249,7 @@ public:
     IDWriteFontFace* getIDWriteFontFace() const noexcept    { return dwFontFace; }
 
 private:
+    SharedResourcePointer<Direct2DFactories> factories;
     ComSmartPtr<IDWriteFontFace> dwFontFace;
     float unitsToHeightScaleFactor, heightToPointsFactor, ascent;
     int designUnitsPerEm;

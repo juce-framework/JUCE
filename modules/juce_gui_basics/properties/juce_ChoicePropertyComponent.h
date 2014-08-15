@@ -70,7 +70,7 @@ public:
     ChoicePropertyComponent (const Value& valueToControl,
                              const String& propertyName,
                              const StringArray& choices,
-                             const Array <var>& correspondingValues);
+                             const Array<var>& correspondingValues);
 
     /** Destructor. */
     ~ChoicePropertyComponent();

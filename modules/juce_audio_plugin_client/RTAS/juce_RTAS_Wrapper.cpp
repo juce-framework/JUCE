@@ -856,8 +856,9 @@ private:
 
         long GetOrientation() const
         {
-            return kDAE_LeftMinRightMax | kDAE_BottomMinTopMax
-                | kDAE_RotarySingleDotMode | kDAE_RotaryLeftMinRightMax;
+            return juceFilter->isParameterOrientationInverted (index)
+                     ? kDAE_RightMinLeftMax | kDAE_TopMinBottomMax | kDAE_RotarySingleDotMode | kDAE_RotaryRightMinLeftMax
+                     : kDAE_LeftMinRightMax | kDAE_BottomMinTopMax | kDAE_RotarySingleDotMode | kDAE_RotaryLeftMinRightMax;
         }
 
         long GetControlType() const     { return kDAE_ContinuousValues; }

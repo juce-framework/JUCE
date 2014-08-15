@@ -229,7 +229,7 @@ namespace FloatVectorHelpers
 
         static Type findMinOrMax (const Type* src, int num, const bool isMinimum) noexcept
         {
-            const int numLongOps = num / Mode::numParallel;
+            int numLongOps = num / Mode::numParallel;
 
            #if JUCE_USE_SSE_INTRINSICS
             if (numLongOps > 1 && isSSE2Available())
@@ -246,7 +246,7 @@ namespace FloatVectorHelpers
 
                     if (isMinimum)
                     {
-                        for (int i = 1; i < numLongOps; ++i)
+                        while (--numLongOps > 0)
                         {
                             src += Mode::numParallel;
                             val = Mode::min (val, Mode::loadA (src));
@@ -254,7 +254,7 @@ namespace FloatVectorHelpers
                     }
                     else
                     {
-                        for (int i = 1; i < numLongOps; ++i)
+                        while (--numLongOps > 0)
                         {
                             src += Mode::numParallel;
                             val = Mode::max (val, Mode::loadA (src));
@@ -268,7 +268,7 @@ namespace FloatVectorHelpers
 
                     if (isMinimum)
                     {
-                        for (int i = 1; i < numLongOps; ++i)
+                        while (--numLongOps > 0)
                         {
                             src += Mode::numParallel;
                             val = Mode::min (val, Mode::loadU (src));
@@ -276,7 +276,7 @@ namespace FloatVectorHelpers
                     }
                     else
                     {
-                        for (int i = 1; i < numLongOps; ++i)
+                        while (--numLongOps > 0)
                         {
                             src += Mode::numParallel;
                             val = Mode::max (val, Mode::loadU (src));
@@ -288,6 +288,7 @@ namespace FloatVectorHelpers
                                         : Mode::max (val);
 
                 num &= (Mode::numParallel - 1);
+                src += Mode::numParallel;
 
                 for (int i = 0; i < num; ++i)
                     result = isMinimum ? jmin (result, src[i])
@@ -302,7 +303,7 @@ namespace FloatVectorHelpers
 
         static Range<Type> findMinAndMax (const Type* src, int num) noexcept
         {
-            const int numLongOps = num / Mode::numParallel;
+            int numLongOps = num / Mode::numParallel;
 
            #if JUCE_USE_SSE_INTRINSICS
             if (numLongOps > 1 && isSSE2Available())
@@ -318,7 +319,7 @@ namespace FloatVectorHelpers
                     mn = Mode::loadA (src);
                     mx = mn;
 
-                    for (int i = 1; i < numLongOps; ++i)
+                    while (--numLongOps > 0)
                     {
                         src += Mode::numParallel;
                         const ParallelType v = Mode::loadA (src);
@@ -332,7 +333,7 @@ namespace FloatVectorHelpers
                     mn = Mode::loadU (src);
                     mx = mn;
 
-                    for (int i = 1; i < numLongOps; ++i)
+                    while (--numLongOps > 0)
                     {
                         src += Mode::numParallel;
                         const ParallelType v = Mode::loadU (src);
@@ -344,7 +345,9 @@ namespace FloatVectorHelpers
                 Range<Type> result (Mode::min (mn),
                                     Mode::max (mx));
 
-                num &= 3;
+                num &= (Mode::numParallel - 1);
+                src += Mode::numParallel;
+
                 for (int i = 0; i < num; ++i)
                     result = result.getUnionWith (src[i]);
 
@@ -409,7 +412,7 @@ void JUCE_CALLTYPE FloatVectorOperations::copy (double* dest, const double* src,
 void JUCE_CALLTYPE FloatVectorOperations::copyWithMultiply (float* dest, const float* src, float multiplier, int num) noexcept
 {
    #if JUCE_USE_VDSP_FRAMEWORK
-    vDSP_vsmul (src, 1, &multiplier, dest, 1, num);
+    vDSP_vsmul (src, 1, &multiplier, dest, 1, (vDSP_Length) num);
    #else
     JUCE_PERFORM_VEC_OP_SRC_DEST (dest[i] = src[i] * multiplier, Mode::mul (mult, s),
                                   JUCE_LOAD_SRC, JUCE_INCREMENT_SRC_DEST,
@@ -420,7 +423,7 @@ void JUCE_CALLTYPE FloatVectorOperations::copyWithMultiply (float* dest, const f
 void JUCE_CALLTYPE FloatVectorOperations::copyWithMultiply (double* dest, const double* src, double multiplier, int num) noexcept
 {
    #if JUCE_USE_VDSP_FRAMEWORK
-    vDSP_vsmulD (src, 1, &multiplier, dest, 1, num);
+    vDSP_vsmulD (src, 1, &multiplier, dest, 1, (vDSP_Length) num);
    #else
     JUCE_PERFORM_VEC_OP_SRC_DEST (dest[i] = src[i] * multiplier, Mode::mul (mult, s),
                                   JUCE_LOAD_SRC, JUCE_INCREMENT_SRC_DEST,
@@ -443,7 +446,7 @@ void JUCE_CALLTYPE FloatVectorOperations::add (double* dest, double amount, int 
 void JUCE_CALLTYPE FloatVectorOperations::add (float* dest, const float* src, int num) noexcept
 {
    #if JUCE_USE_VDSP_FRAMEWORK
-    vDSP_vadd (src, 1, dest, 1, dest, 1, num);
+    vDSP_vadd (src, 1, dest, 1, dest, 1, (vDSP_Length) num);
    #else
     JUCE_PERFORM_VEC_OP_SRC_DEST (dest[i] += src[i], Mode::add (d, s), JUCE_LOAD_SRC_DEST, JUCE_INCREMENT_SRC_DEST, )
    #endif
@@ -452,7 +455,7 @@ void JUCE_CALLTYPE FloatVectorOperations::add (float* dest, const float* src, in
 void JUCE_CALLTYPE FloatVectorOperations::add (double* dest, const double* src, int num) noexcept
 {
    #if JUCE_USE_VDSP_FRAMEWORK
-    vDSP_vaddD (src, 1, dest, 1, dest, 1, num);
+    vDSP_vaddD (src, 1, dest, 1, dest, 1, (vDSP_Length) num);
    #else
     JUCE_PERFORM_VEC_OP_SRC_DEST (dest[i] += src[i], Mode::add (d, s), JUCE_LOAD_SRC_DEST, JUCE_INCREMENT_SRC_DEST, )
    #endif
@@ -461,7 +464,7 @@ void JUCE_CALLTYPE FloatVectorOperations::add (double* dest, const double* src, 
 void JUCE_CALLTYPE FloatVectorOperations::subtract (float* dest, const float* src, int num) noexcept
 {
    #if JUCE_USE_VDSP_FRAMEWORK
-    vDSP_vsub (src, 1, dest, 1, dest, 1, num);
+    vDSP_vsub (src, 1, dest, 1, dest, 1, (vDSP_Length) num);
    #else
     JUCE_PERFORM_VEC_OP_SRC_DEST (dest[i] -= src[i], Mode::sub (d, s), JUCE_LOAD_SRC_DEST, JUCE_INCREMENT_SRC_DEST, )
    #endif
@@ -470,7 +473,7 @@ void JUCE_CALLTYPE FloatVectorOperations::subtract (float* dest, const float* sr
 void JUCE_CALLTYPE FloatVectorOperations::subtract (double* dest, const double* src, int num) noexcept
 {
    #if JUCE_USE_VDSP_FRAMEWORK
-    vDSP_vsubD (src, 1, dest, 1, dest, 1, num);
+    vDSP_vsubD (src, 1, dest, 1, dest, 1, (vDSP_Length) num);
    #else
     JUCE_PERFORM_VEC_OP_SRC_DEST (dest[i] -= src[i], Mode::sub (d, s), JUCE_LOAD_SRC_DEST, JUCE_INCREMENT_SRC_DEST, )
    #endif
@@ -493,7 +496,7 @@ void JUCE_CALLTYPE FloatVectorOperations::addWithMultiply (double* dest, const d
 void JUCE_CALLTYPE FloatVectorOperations::multiply (float* dest, const float* src, int num) noexcept
 {
    #if JUCE_USE_VDSP_FRAMEWORK
-    vDSP_vmul (src, 1, dest, 1, dest, 1, num);
+    vDSP_vmul (src, 1, dest, 1, dest, 1, (vDSP_Length) num);
    #else
     JUCE_PERFORM_VEC_OP_SRC_DEST (dest[i] *= src[i], Mode::mul (d, s), JUCE_LOAD_SRC_DEST, JUCE_INCREMENT_SRC_DEST, )
    #endif
@@ -502,7 +505,7 @@ void JUCE_CALLTYPE FloatVectorOperations::multiply (float* dest, const float* sr
 void JUCE_CALLTYPE FloatVectorOperations::multiply (double* dest, const double* src, int num) noexcept
 {
    #if JUCE_USE_VDSP_FRAMEWORK
-    vDSP_vmulD (src, 1, dest, 1, dest, 1, num);
+    vDSP_vmulD (src, 1, dest, 1, dest, 1, (vDSP_Length) num);
    #else
     JUCE_PERFORM_VEC_OP_SRC_DEST (dest[i] *= src[i], Mode::mul (d, s), JUCE_LOAD_SRC_DEST, JUCE_INCREMENT_SRC_DEST, )
    #endif
@@ -511,7 +514,7 @@ void JUCE_CALLTYPE FloatVectorOperations::multiply (double* dest, const double* 
 void JUCE_CALLTYPE FloatVectorOperations::multiply (float* dest, float multiplier, int num) noexcept
 {
    #if JUCE_USE_VDSP_FRAMEWORK
-    vDSP_vsmul (dest, 1, &multiplier, dest, 1, num);
+    vDSP_vsmul (dest, 1, &multiplier, dest, 1, (vDSP_Length) num);
    #else
     JUCE_PERFORM_VEC_OP_DEST (dest[i] *= multiplier, Mode::mul (d, mult), JUCE_LOAD_DEST,
                               const Mode::ParallelType mult = Mode::load1 (multiplier);)
@@ -521,7 +524,7 @@ void JUCE_CALLTYPE FloatVectorOperations::multiply (float* dest, float multiplie
 void JUCE_CALLTYPE FloatVectorOperations::multiply (double* dest, double multiplier, int num) noexcept
 {
    #if JUCE_USE_VDSP_FRAMEWORK
-    vDSP_vsmulD (dest, 1, &multiplier, dest, 1, num);
+    vDSP_vsmulD (dest, 1, &multiplier, dest, 1, (vDSP_Length) num);
    #else
     JUCE_PERFORM_VEC_OP_DEST (dest[i] *= multiplier, Mode::mul (d, mult), JUCE_LOAD_DEST,
                               const Mode::ParallelType mult = Mode::load1 (multiplier);)
@@ -640,8 +643,8 @@ public:
             const int range = random.nextBool() ? 500 : 10;
             const int num = random.nextInt (range) + 1;
 
-            HeapBlock<ValueType> buffer1 (num + 16), buffer2 (num + 16);
-            HeapBlock<int> buffer3 (num + 16);
+            HeapBlock<ValueType> buffer1 ((size_t) num + 16), buffer2 ((size_t) num + 16);
+            HeapBlock<int> buffer3 ((size_t) num + 16);
 
            #if JUCE_ARM
             ValueType* const data1 = buffer1;

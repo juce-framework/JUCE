@@ -31,7 +31,7 @@ DynamicObject::DynamicObject()
 }
 
 DynamicObject::DynamicObject (const DynamicObject& other)
-    : properties (other.properties)
+   : ReferenceCountedObject(), properties (other.properties)
 {
 }
 
@@ -85,16 +85,9 @@ void DynamicObject::clear()
 
 void DynamicObject::cloneAllProperties()
 {
-    for (LinkedListPointer<NamedValueSet::NamedValue>* i = &(properties.values);;)
-    {
-        if (NamedValueSet::NamedValue* const v = i->get())
-        {
-            v->value = v->value.clone();
-            i = &(v->nextListItem);
-        }
-        else
-            break;
-    }
+    for (int i = properties.size(); --i >= 0;)
+        if (var* v = properties.getVarPointerAt (i))
+            *v = v->clone();
 }
 
 DynamicObject::Ptr DynamicObject::clone()
@@ -110,32 +103,27 @@ void DynamicObject::writeAsJSON (OutputStream& out, const int indentLevel, const
     if (! allOnOneLine)
         out << newLine;
 
-    for (LinkedListPointer<NamedValueSet::NamedValue>* i = &(properties.values);;)
+    const int numValues = properties.size();
+
+    for (int i = 0; i < numValues; ++i)
     {
-        if (NamedValueSet::NamedValue* const v = i->get())
+        if (! allOnOneLine)
+            JSONFormatter::writeSpaces (out, indentLevel + JSONFormatter::indentSize);
+
+        out << '"';
+        JSONFormatter::writeString (out, properties.getName (i));
+        out << "\": ";
+        JSONFormatter::write (out, properties.getValueAt (i), indentLevel + JSONFormatter::indentSize, allOnOneLine);
+
+        if (i < numValues - 1)
         {
-            if (! allOnOneLine)
-                JSONFormatter::writeSpaces (out, indentLevel + JSONFormatter::indentSize);
-
-            out << '"';
-            JSONFormatter::writeString (out, v->name);
-            out << "\": ";
-            JSONFormatter::write (out, v->value, indentLevel + JSONFormatter::indentSize, allOnOneLine);
-
-            if (v->nextListItem.get() != nullptr)
-            {
-                if (allOnOneLine)
-                    out << ", ";
-                else
-                    out << ',' << newLine;
-            }
-            else if (! allOnOneLine)
-                out << newLine;
-
-            i = &(v->nextListItem);
+            if (allOnOneLine)
+                out << ", ";
+            else
+                out << ',' << newLine;
         }
-        else
-            break;
+        else if (! allOnOneLine)
+            out << newLine;
     }
 
     if (! allOnOneLine)

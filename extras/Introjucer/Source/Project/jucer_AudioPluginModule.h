@@ -109,7 +109,7 @@ namespace
     int countMaxPluginChannels (const String& configString, bool isInput)
     {
         StringArray configs;
-        configs.addTokens (configString, ", {}", String::empty);
+        configs.addTokens (configString, ", {}", StringRef());
         configs.trim();
         configs.removeEmptyStrings();
         jassert ((configs.size() & 1) == 0);  // looks like a syntax error in the configs?
@@ -128,12 +128,12 @@ namespace
 
     String valueToStringLiteral (const var& v)
     {
-        return CodeHelpers::addEscapeChars (v.toString()).quoted();
+        return CppTokeniserFunctions::addEscapeChars (v.toString()).quoted();
     }
 
     String valueToCharLiteral (const var& v)
     {
-        return CodeHelpers::addEscapeChars (v.toString().trim().substring (0, 4)).quoted ('\'');
+        return CppTokeniserFunctions::addEscapeChars (v.toString().trim().substring (0, 4)).quoted ('\'');
     }
 
     void writePluginCharacteristicsFile (ProjectSaver& projectSaver)
@@ -212,8 +212,8 @@ namespace
     String createEscapedStringForVersion (ProjectExporter& exporter, const String& text)
     {
         // (VS10 automatically adds escape characters to the quotes for this definition)
-        return exporter.getVisualStudioVersion() < 10 ? CodeHelpers::addEscapeChars (text.quoted())
-                                                      : CodeHelpers::addEscapeChars (text).quoted();
+        return exporter.getVisualStudioVersion() < 10 ? CppTokeniserFunctions::addEscapeChars (text.quoted())
+                                                      : CppTokeniserFunctions::addEscapeChars (text).quoted();
     }
 
     String createRebasedPath (ProjectExporter& exporter, const RelativePath& path)
@@ -300,8 +300,9 @@ namespace VSTHelpers
                 if (config->getValue (Ids::useRuntimeLibDLL).getValue().isVoid())
                     config->getValue (Ids::useRuntimeLibDLL) = true;
 
-                if (config->getValue (Ids::postbuildCommand).toString().isEmpty())
-                    config->getValue (Ids::postbuildCommand) = "copy /Y \"$(OutDir)\\$(TargetFileName)\" \"$(OutDir)\\$(TargetName).vst3\"";
+                if (isVST3)
+                    if (config->getValue (Ids::postbuildCommand).toString().isEmpty())
+                        config->getValue (Ids::postbuildCommand) = "copy /Y \"$(OutDir)\\$(TargetFileName)\" \"$(OutDir)\\$(TargetName).vst3\"";
             }
         }
     }

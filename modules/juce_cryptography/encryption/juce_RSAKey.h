@@ -32,6 +32,62 @@
 
     An object of this type makes up one half of a public/private RSA key pair. Use the
     createKeyPair() method to create a matching pair for encoding/decoding.
+
+    If you need to use this class in conjunction with a compatible enc/decryption
+    algorithm on a webserver, you can achieve the same thing in PHP like this:
+
+    @code
+    include ('Math/BigInteger.php');  // get this from: phpseclib.sourceforge.net
+
+    function applyToValue ($message, $key_part1, $key_part2)
+    {
+        $result = new Math_BigInteger();
+        $zero  = new Math_BigInteger();
+        $value = new Math_BigInteger (strrev ($message), 256);
+        $part1 = new Math_BigInteger ($key_part1, 16);
+        $part2 = new Math_BigInteger ($key_part2, 16);
+
+        while (! $value->equals ($zero))
+        {
+            $result = $result->multiply ($part2);
+            list ($value, $remainder) = $value->divide ($part2);
+            $result = $result->add ($remainder->modPow ($part1, $part2));
+        }
+
+        return strrev ($result->toBytes());
+    }
+    @endcode
+
+    ..or in Java with something like this:
+
+    @code
+    public class RSAKey
+    {
+        static BigInteger applyToValue (BigInteger value, String key_part1, String key_part2)
+        {
+            BigInteger result = BigInteger.ZERO;
+            BigInteger part1 = new BigInteger (key_part1, 16);
+            BigInteger part2 = new BigInteger (key_part2, 16);
+
+            if (part1.equals (BigInteger.ZERO) || part2.equals (BigInteger.ZERO)
+                 || value.compareTo (BigInteger.ZERO) <= 0)
+                return result;
+
+            while (! value.equals (BigInteger.ZERO))
+            {
+                result = result.multiply (part2);
+                BigInteger[] div = value.divideAndRemainder (part2);
+                value = div[0];
+                result = result.add (div[1].modPow (part1, part2));
+            }
+
+            return result;
+        }
+    }
+    @endcode
+
+    Disclaimer: neither of the code snippets above are tested! Please let me know if you have
+    any corrections for them!
 */
 class JUCE_API  RSAKey
 {

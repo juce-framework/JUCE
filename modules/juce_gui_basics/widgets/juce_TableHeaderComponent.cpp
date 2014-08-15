@@ -623,7 +623,7 @@ void TableHeaderComponent::mouseDrag (const MouseEvent& e)
                         minWidthOnRight += columns.getUnchecked (i)->minimumWidth;
 
                 const Rectangle<int> currentPos (getColumnPosition (getIndexOfColumnId (columnIdBeingResized, true)));
-                w = jmax (ci->minimumWidth, jmin (w, getWidth() - minWidthOnRight - currentPos.getX()));
+                w = jmax (ci->minimumWidth, jmin (w, lastDeliberateWidth - minWidthOnRight - currentPos.getX()));
             }
 
             setColumnWidth (columnIdBeingResized, w);

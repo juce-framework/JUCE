@@ -103,21 +103,21 @@ public:
         The mouse event's coordinates will be relative to the entire table row.
         @see cellDoubleClicked, backgroundClicked
     */
-    virtual void cellClicked (int rowNumber, int columnId, const MouseEvent& e);
+    virtual void cellClicked (int rowNumber, int columnId, const MouseEvent&);
 
     /** This callback is made when the user clicks on one of the cells in the table.
 
         The mouse event's coordinates will be relative to the entire table row.
         @see cellClicked, backgroundClicked
     */
-    virtual void cellDoubleClicked (int rowNumber, int columnId, const MouseEvent& e);
+    virtual void cellDoubleClicked (int rowNumber, int columnId, const MouseEvent&);
 
     /** This can be overridden to react to the user double-clicking on a part of the list where
         there are no rows.
 
         @see cellClicked
     */
-    virtual void backgroundClicked();
+    virtual void backgroundClicked (const MouseEvent&);
 
     //==============================================================================
     /** This callback is made when the table's sort order is changed.
@@ -182,6 +182,12 @@ public:
         @see getDragSourceCustomData, DragAndDropContainer::startDragging
     */
     virtual var getDragSourceDescription (const SparseSet<int>& currentlySelectedRows);
+
+private:
+   #if JUCE_CATCH_DEPRECATED_CODE_MISUSE
+    // This method's signature has changed to take a MouseEvent parameter - please update your code!
+    JUCE_DEPRECATED_WITH_BODY (virtual int backgroundClicked(), { return 0; })
+   #endif
 };
 
 
@@ -303,7 +309,7 @@ public:
     /** @internal */
     void returnKeyPressed (int currentSelectedRow) override;
     /** @internal */
-    void backgroundClicked() override;
+    void backgroundClicked (const MouseEvent&) override;
     /** @internal */
     void listWasScrolled() override;
     /** @internal */

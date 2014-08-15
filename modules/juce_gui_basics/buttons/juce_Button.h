@@ -363,9 +363,8 @@ public:
         virtual void drawButtonBackground (Graphics&, Button&, const Colour& backgroundColour,
                                            bool isMouseOverButton, bool isButtonDown) = 0;
 
-        virtual Font getTextButtonFont (TextButton&) = 0;
-
-        virtual void changeTextButtonWidthToFitText (TextButton&, int newHeight) = 0;
+        virtual Font getTextButtonFont (TextButton&, int buttonHeight) = 0;
+        virtual int getTextButtonWidthToFitText (TextButton&, int buttonHeight) = 0;
 
         /** Draws the text for a TextButton. */
         virtual void drawButtonText (Graphics&, TextButton&, bool isMouseOverButton, bool isButtonDown) = 0;
@@ -379,6 +378,13 @@ public:
                                   bool ticked, bool isEnabled, bool isMouseOverButton, bool isButtonDown) = 0;
 
         virtual void drawDrawableButton (Graphics&, DrawableButton&, bool isMouseOverButton, bool isButtonDown) = 0;
+
+    private:
+       #if JUCE_CATCH_DEPRECATED_CODE_MISUSE
+        // These method have been deprecated: see their replacements above.
+        virtual int getTextButtonFont (TextButton&) { return 0; }
+        virtual int changeTextButtonWidthToFitText (TextButton&, int) { return 0; }
+       #endif
     };
 
 protected:

@@ -543,14 +543,14 @@ struct JavascriptEngine::RootObject   : public DynamicObject
     struct DivideOp  : public BinaryOperator
     {
         DivideOp (const CodeLocation& l, ExpPtr& a, ExpPtr& b) noexcept : BinaryOperator (l, a, b, TokenTypes::divide) {}
-        var getWithDoubles (double a, double b) const override  { return a / b; }
-        var getWithInts (int64 a, int64 b) const override       { return a / b; }
+        var getWithDoubles (double a, double b) const override  { return b != 0 ? a / b : std::numeric_limits<double>::infinity(); }
+        var getWithInts (int64 a, int64 b) const override       { return b != 0 ? var (a / b) : var (std::numeric_limits<double>::infinity()); }
     };
 
     struct ModuloOp  : public BinaryOperator
     {
         ModuloOp (const CodeLocation& l, ExpPtr& a, ExpPtr& b) noexcept : BinaryOperator (l, a, b, TokenTypes::modulo) {}
-        var getWithInts (int64 a, int64 b) const override   { return a % b; }
+        var getWithInts (int64 a, int64 b) const override   { return b != 0 ? var (a % b) : var (std::numeric_limits<double>::infinity()); }
     };
 
     struct BitwiseOrOp  : public BinaryOperator
@@ -768,7 +768,7 @@ struct JavascriptEngine::RootObject   : public DynamicObject
     {
         FunctionObject() noexcept {}
 
-        FunctionObject (const FunctionObject& other)  : functionCode (other.functionCode)
+        FunctionObject (const FunctionObject& other)  : DynamicObject(), functionCode (other.functionCode)
         {
             ExpressionTreeBuilder tb (functionCode);
             tb.parseFunctionParamsAndBody (*this);
@@ -843,7 +843,7 @@ struct JavascriptEngine::RootObject   : public DynamicObject
                 String::CharPointerType end (p);
                 while (isIdentifierBody (*++end)) {}
 
-                const size_t len = end - p;
+                const size_t len = (size_t) (end - p);
                 #define JUCE_JS_COMPARE_KEYWORD(name, str) if (len == sizeof (str) - 1 && matchToken (TokenTypes::name, len)) return TokenTypes::name;
                 JUCE_JS_KEYWORDS (JUCE_JS_COMPARE_KEYWORD)
 

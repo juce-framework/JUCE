@@ -52,6 +52,11 @@ public:
 
     /** Loads a typeface from a previously saved stream.
         The stream must have been created by writeToStream().
+
+        NOTE! Since this class was written, support was added for loading real font files from
+        memory, so for most people, using Typeface::createSystemTypefaceFor() to load a real font
+        is more appropriate than using this class to store it in a proprietary format.
+
         @see writeToStream
     */
     explicit CustomTypeface (InputStream& serialisedTypefaceStream);
@@ -116,7 +121,7 @@ public:
 
         NOTE! Since this class was written, support was added for loading real font files from
         memory, so for most people, using Typeface::createSystemTypefaceFor() to load a real font
-        is more appropriate than using this class to store it in a proprietory format.
+        is more appropriate than using this class to store it in a proprietary format.
     */
     bool writeToStream (OutputStream& outputStream);
 

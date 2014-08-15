@@ -704,8 +704,8 @@ public:
                            r.top  + windowBorder.getTop());
     }
 
-    Point<int> localToGlobal (Point<int> relativePosition) override  { return relativePosition + getScreenPosition(); }
-    Point<int> globalToLocal (Point<int> screenPosition) override    { return screenPosition   - getScreenPosition(); }
+    Point<float> localToGlobal (Point<float> relativePosition) override  { return relativePosition + getScreenPosition().toFloat(); }
+    Point<float> globalToLocal (Point<float> screenPosition) override    { return screenPosition   - getScreenPosition().toFloat(); }
 
     void setAlpha (float newAlpha) override
     {
@@ -763,7 +763,7 @@ public:
                     ShowWindow (hwnd, SW_SHOWNORMAL);
 
                 if (! boundsCopy.isEmpty())
-                    setBounds (boundsCopy, false);
+                    setBounds (ScalingHelpers::scaledScreenPosToUnscaled (component, boundsCopy), false);
             }
             else
             {
@@ -877,7 +877,7 @@ public:
         shouldDeactivateTitleBar = oldDeactivate;
     }
 
-    void textInputRequired (const Point<int>&) override
+    void textInputRequired (Point<int>, TextInputTarget&) override
     {
         if (! hasCreatedCaret)
         {
@@ -902,10 +902,15 @@ public:
 
     void performAnyPendingRepaintsNow() override
     {
-        MSG m;
-        if (component.isVisible()
-             && (PeekMessage (&m, hwnd, WM_PAINT, WM_PAINT, PM_REMOVE) || isUsingUpdateLayeredWindow()))
-            handlePaintMessage();
+        if (component.isVisible())
+        {
+            WeakReference<Component> localRef (&component);
+            MSG m;
+
+            if (isUsingUpdateLayeredWindow() || PeekMessage (&m, hwnd, WM_PAINT, WM_PAINT, PM_REMOVE))
+                if (localRef != nullptr) // (the PeekMessage call can dispatch messages, which may delete this comp)
+                    handlePaintMessage();
+        }
     }
 
     //==============================================================================
@@ -988,7 +993,7 @@ public:
             if (ownerInfo == nullptr)
                 return S_FALSE;
 
-            ownerInfo->dragInfo.position = ownerInfo->getMousePos (mousePos);
+            ownerInfo->dragInfo.position = ownerInfo->getMousePos (mousePos).roundToInt();
             const bool wasWanted = ownerInfo->owner.handleDragMove (ownerInfo->dragInfo);
             *pdwEffect = wasWanted ? (DWORD) DROPEFFECT_COPY : (DWORD) DROPEFFECT_NONE;
             return S_OK;
@@ -999,7 +1004,7 @@ public:
             HRESULT hr = updateFileList (pDataObject);
             if (SUCCEEDED (hr))
             {
-                ownerInfo->dragInfo.position = ownerInfo->getMousePos (mousePos);
+                ownerInfo->dragInfo.position = ownerInfo->getMousePos (mousePos).roundToInt();
                 const bool wasWanted = ownerInfo->owner.handleDragDrop (ownerInfo->dragInfo);
                 *pdwEffect = wasWanted ? (DWORD) DROPEFFECT_COPY : (DWORD) DROPEFFECT_NONE;
                 hr = S_OK;
@@ -1013,9 +1018,10 @@ public:
         {
             OwnerInfo (HWNDComponentPeer& p) : owner (p) {}
 
-            Point<int> getMousePos (const POINTL& mousePos) const
+            Point<float> getMousePos (const POINTL& mousePos) const
             {
-                return owner.globalToLocal (Point<int> (mousePos.x, mousePos.y));
+                return owner.globalToLocal (Point<float> (static_cast<float> (mousePos.x),
+                                                          static_cast<float> (mousePos.y)));
             }
 
             template <typename CharType>
@@ -1522,10 +1528,14 @@ private:
         // if something in a paint handler calls, e.g. a message box, this can become reentrant and
         // corrupt the image it's using to paint into, so do a check here.
         static bool reentrant = false;
-        if (! (reentrant || dontRepaint))
+        if (! reentrant)
         {
             const ScopedValueSetter<bool> setter (reentrant, true, false);
-            performPaint (dc, rgn, regionType, paintStruct);
+
+            if (dontRepaint)
+                component.handleCommandMessage (0); // (this triggers a repaint in the openGL context)
+            else
+                performPaint (dc, rgn, regionType, paintStruct);
         }
 
         DeleteObject (rgn);
@@ -1643,7 +1653,7 @@ private:
     }
 
     //==============================================================================
-    void doMouseEvent (Point<int> position)
+    void doMouseEvent (Point<float> position)
     {
         handleMouseEvent (0, position, currentModifiers, getMouseEventTime());
     }
@@ -1694,7 +1704,7 @@ private:
         return 1000 / 60;  // Throttling the incoming mouse-events seems to still be needed in XP..
     }
 
-    void doMouseMove (Point<int> position)
+    void doMouseMove (Point<float> position)
     {
         if (! isMouseOver)
         {
@@ -1715,7 +1725,7 @@ private:
         }
         else if (! isDragging)
         {
-            if (! contains (position, false))
+            if (! contains (position.roundToInt(), false))
                 return;
         }
 
@@ -1730,7 +1740,7 @@ private:
         }
     }
 
-    void doMouseDown (Point<int> position, const WPARAM wParam)
+    void doMouseDown (Point<float> position, const WPARAM wParam)
     {
         if (GetCapture() != hwnd)
             SetCapture (hwnd);
@@ -1743,7 +1753,7 @@ private:
         doMouseEvent (position);
     }
 
-    void doMouseUp (Point<int> position, const WPARAM wParam)
+    void doMouseUp (Point<float> position, const WPARAM wParam)
     {
         updateModifiersFromWParam (wParam);
         const bool wasDragging = isDragging;
@@ -1779,9 +1789,9 @@ private:
         doMouseEvent (getCurrentMousePos());
     }
 
-    ComponentPeer* findPeerUnderMouse (Point<int>& localPos)
+    ComponentPeer* findPeerUnderMouse (Point<float>& localPos)
     {
-        const Point<int> globalPos (getCurrentMousePosGlobal());
+        const Point<int> globalPos (getCurrentMousePosGlobal().roundToInt());
 
         // Because Windows stupidly sends all wheel events to the window with the keyboard
         // focus, we have to redirect them here according to the mouse pos..
@@ -1791,7 +1801,7 @@ private:
         if (peer == nullptr)
             peer = this;
 
-        localPos = peer->globalToLocal (globalPos);
+        localPos = peer->globalToLocal (globalPos.toFloat());
         return peer;
     }
 
@@ -1806,7 +1816,7 @@ private:
         wheel.isReversed = false;
         wheel.isSmooth = false;
 
-        Point<int> localPos;
+        Point<float> localPos;
         if (ComponentPeer* const peer = findPeerUnderMouse (localPos))
             peer->handleMouseWheel (0, localPos, getMouseEventTime(), wheel);
     }
@@ -1820,7 +1830,7 @@ private:
         if (getGestureInfo != nullptr && getGestureInfo ((HGESTUREINFO) lParam, &gi))
         {
             updateKeyModifiers();
-            Point<int> localPos;
+            Point<float> localPos;
 
             if (ComponentPeer* const peer = findPeerUnderMouse (localPos))
             {
@@ -1878,8 +1888,8 @@ private:
         bool isCancel = false;
         const int touchIndex = currentTouches.getIndexOfTouch (touch.dwID);
         const int64 time = getMouseEventTime();
-        const Point<int> pos (globalToLocal (Point<int> ((int) TOUCH_COORD_TO_PIXEL (touch.x),
-                                                         (int) TOUCH_COORD_TO_PIXEL (touch.y))));
+        const Point<float> pos (globalToLocal (Point<float> (static_cast<float> (TOUCH_COORD_TO_PIXEL (touch.x)),
+                                                             static_cast<float> (TOUCH_COORD_TO_PIXEL (touch.y)))));
         ModifierKeys modsToSend (currentModifiers);
 
         if (isDown)
@@ -1890,7 +1900,7 @@ private:
             if (! isPrimary)
             {
                 // this forces a mouse-enter/up event, in case for some reason we didn't get a mouse-up before.
-                handleMouseEvent (touchIndex, pos, modsToSend.withoutMouseButtons(), time);
+                handleMouseEvent (touchIndex, pos.toFloat(), modsToSend.withoutMouseButtons(), time);
                 if (! isValidPeer (this)) // (in case this component was deleted by the event)
                     return false;
             }
@@ -1916,14 +1926,14 @@ private:
 
         if (! isPrimary)
         {
-            handleMouseEvent (touchIndex, pos, modsToSend, time);
+            handleMouseEvent (touchIndex, pos.toFloat(), modsToSend, time);
             if (! isValidPeer (this)) // (in case this component was deleted by the event)
                 return false;
         }
 
         if ((isUp || isCancel) && ! isPrimary)
         {
-            handleMouseEvent (touchIndex, Point<int> (-10, -10), currentModifiers, time);
+            handleMouseEvent (touchIndex, Point<float> (-10.0f, -10.0f), currentModifiers, time);
             if (! isValidPeer (this))
                 return false;
         }
@@ -2203,6 +2213,22 @@ private:
         return 0;
     }
 
+    bool handlePositionChanged()
+    {
+        const Point<float> pos (getCurrentMousePos());
+
+        if (contains (pos.roundToInt(), false))
+        {
+            doMouseEvent (pos);
+
+            if (! isValidPeer (this))
+                return true;
+        }
+
+        handleMovedOrResized();
+        return ! dontRepaint; // to allow non-accelerated openGL windows to draw themselves correctly..
+    }
+
     void handleAppActivation (const WPARAM wParam)
     {
         modifiersAtLastCallback = -1;
@@ -2213,7 +2239,7 @@ private:
             component.repaint();
             handleMovedOrResized();
 
-            if (! ComponentPeer::isValidPeer (this))
+            if (! isValidPeer (this))
                 return;
         }
 
@@ -2321,17 +2347,18 @@ private:
         return MessageManager::getInstance()->callFunctionOnMessageThread (callback, userData);
     }
 
-    static Point<int> getPointFromLParam (LPARAM lParam) noexcept
+    static Point<float> getPointFromLParam (LPARAM lParam) noexcept
     {
-        return Point<int> (GET_X_LPARAM (lParam), GET_Y_LPARAM (lParam));
+        return Point<float> (static_cast<float> (GET_X_LPARAM (lParam)),
+                             static_cast<float> (GET_Y_LPARAM (lParam)));
     }
 
-    static Point<int> getCurrentMousePosGlobal() noexcept
+    static Point<float> getCurrentMousePosGlobal() noexcept
     {
         return getPointFromLParam (GetMessagePos());
     }
 
-    Point<int> getCurrentMousePos() noexcept
+    Point<float> getCurrentMousePos() noexcept
     {
         return globalToLocal (getCurrentMousePosGlobal());
     }
@@ -2411,18 +2438,10 @@ private:
             case WM_WINDOWPOSCHANGING:     return handlePositionChanging (*(WINDOWPOS*) lParam);
 
             case WM_WINDOWPOSCHANGED:
-                {
-                    const Point<int> pos (getCurrentMousePos());
-                    if (contains (pos, false))
-                        doMouseEvent (pos);
-                }
+                if (handlePositionChanged())
+                    return 0;
 
-                handleMovedOrResized();
-
-                if (dontRepaint)
-                    break;  // needed for non-accelerated openGL windows to draw themselves correctly..
-
-                return 0;
+                break;
 
             //==============================================================================
             case WM_KEYDOWN:
@@ -2881,18 +2900,15 @@ private:
 ModifierKeys HWNDComponentPeer::currentModifiers;
 ModifierKeys HWNDComponentPeer::modifiersAtLastCallback;
 
-ComponentPeer* Component::createNewPeer (int styleFlags, void* nativeWindowToAttachTo)
+ComponentPeer* Component::createNewPeer (int styleFlags, void* parentHWND)
 {
-    return new HWNDComponentPeer (*this, styleFlags,
-                                  (HWND) nativeWindowToAttachTo, false);
+    return new HWNDComponentPeer (*this, styleFlags, (HWND) parentHWND, false);
 }
 
-ComponentPeer* createNonRepaintingEmbeddedWindowsPeer (Component* component, void* parent)
+ComponentPeer* createNonRepaintingEmbeddedWindowsPeer (Component& component, void* parentHWND)
 {
-    jassert (component != nullptr);
-
-    return new HWNDComponentPeer (*component, ComponentPeer::windowIgnoresMouseClicks,
-                                  (HWND) parent, true);
+    return new HWNDComponentPeer (component, ComponentPeer::windowIgnoresMouseClicks,
+                                  (HWND) parentHWND, true);
 }
 
 
@@ -3126,16 +3142,17 @@ bool MouseInputSource::SourceList::addSource()
     return false;
 }
 
-Point<int> MouseInputSource::getCurrentRawMousePosition()
+Point<float> MouseInputSource::getCurrentRawMousePosition()
 {
     POINT mousePos;
     GetCursorPos (&mousePos);
-    return Point<int> (mousePos.x, mousePos.y);
+    return Point<float> ((float) mousePos.x, (float) mousePos.y);
 }
 
-void MouseInputSource::setRawMousePosition (Point<int> newPosition)
+void MouseInputSource::setRawMousePosition (Point<float> newPosition)
 {
-    SetCursorPos (newPosition.x, newPosition.y);
+    SetCursorPos (roundToInt (newPosition.x),
+                  roundToInt (newPosition.y));
 }
 
 //==============================================================================

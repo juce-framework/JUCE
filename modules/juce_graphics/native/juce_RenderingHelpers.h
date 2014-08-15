@@ -589,6 +589,10 @@ namespace EdgeTableFillers
                 filler[2].set (sourceColour);
                 filler[3].set (sourceColour);
             }
+            else
+            {
+                areRGBComponentsEqual = false;
+            }
         }
 
         forcedinline void setEdgeTableYPos (const int y) noexcept
@@ -890,20 +894,22 @@ namespace EdgeTableFillers
 
         forcedinline void copyRow (DestPixelType* dest, SrcPixelType const* src, int width) const noexcept
         {
-            if (srcData.pixelStride == 3 && destData.pixelStride == 3)
+            const int destStride = destData.pixelStride;
+            const int srcStride  = srcData.pixelStride;
+
+            if (destStride == srcStride
+                 && srcData.pixelFormat  == Image::RGB
+                 && destData.pixelFormat == Image::RGB)
             {
-                memcpy (dest, src, sizeof (PixelRGB) * (size_t) width);
+                memcpy (dest, src, (size_t) (width * srcStride));
             }
             else
             {
-                const int destStride = destData.pixelStride;
-                const int srcStride = srcData.pixelStride;
-
                 do
                 {
                     dest->blend (*src);
                     dest = addBytesToPointer (dest, destStride);
-                    src = addBytesToPointer (src, srcStride);
+                    src  = addBytesToPointer (src, srcStride);
                 } while (--width > 0);
             }
         }

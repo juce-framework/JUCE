@@ -120,12 +120,7 @@ public:
     //==============================================================================
     void systemRequestedQuit() override
     {
-        closeModalCompsAndQuit();
-    }
-
-    void closeModalCompsAndQuit()
-    {
-        if (cancelAnyModalComponents())
+        if (ModalComponentManager::getInstance()->cancelAllModalComponents())
         {
             new AsyncQuitRetrier();
         }
@@ -558,8 +553,8 @@ private:
             stopTimer();
             delete this;
 
-            if (JUCEApplicationBase::getInstance() != nullptr)
-                getApp().closeModalCompsAndQuit();
+            if (JUCEApplicationBase* app = JUCEApplicationBase::getInstance())
+                app->systemRequestedQuit();
         }
 
         JUCE_DECLARE_NON_COPYABLE (AsyncQuitRetrier)

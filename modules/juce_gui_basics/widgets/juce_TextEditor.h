@@ -568,6 +568,9 @@ public:
     */
     void setInputFilter (InputFilter* newFilter, bool takeOwnership);
 
+    /** Returns the current InputFilter, as set by setInputFilter(). */
+    InputFilter* getInputFilter() const noexcept            { return inputFilter; }
+
     /** Sets limits on the characters that can be entered.
         This is just a shortcut that passes an instance of the LengthAndCharacterRestriction
         class to setInputFilter().

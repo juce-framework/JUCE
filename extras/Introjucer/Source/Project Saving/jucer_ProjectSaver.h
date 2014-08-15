@@ -435,8 +435,8 @@ private:
             << newLine
             << "namespace ProjectInfo" << newLine
             << "{" << newLine
-            << "    const char* const  projectName    = " << CodeHelpers::addEscapeChars (project.getTitle()).quoted() << ";" << newLine
-            << "    const char* const  versionString  = " << CodeHelpers::addEscapeChars (project.getVersionString()).quoted() << ";" << newLine
+            << "    const char* const  projectName    = " << CppTokeniserFunctions::addEscapeChars (project.getTitle()).quoted() << ";" << newLine
+            << "    const char* const  versionString  = " << CppTokeniserFunctions::addEscapeChars (project.getVersionString()).quoted() << ";" << newLine
             << "    const int          versionNumber  = " << project.getVersionAsHex() << ";" << newLine
             << "}" << newLine
             << newLine

@@ -30,8 +30,8 @@ LookAndFeel_V3::LookAndFeel_V3()
     setColour (TextButton::buttonColourId, textButtonColour);
     setColour (ComboBox::buttonColourId, textButtonColour);
     setColour (TextEditor::outlineColourId, Colours::transparentBlack);
-    setColour (TabbedButtonBar::tabOutlineColourId, Colour (0xff999999));
-    setColour (TabbedComponent::outlineColourId, Colour (0xff999999));
+    setColour (TabbedButtonBar::tabOutlineColourId, Colour (0x66000000));
+    setColour (TabbedComponent::outlineColourId, Colour (0x66000000));
     setColour (Slider::trackColourId, Colour (0xbbffffff));
     setColour (Slider::thumbColourId, Colour (0xffddddff));
     setColour (BubbleComponent::backgroundColourId, Colour (0xeeeeeedd));

@@ -42,7 +42,7 @@ public:
     }
 
     //==============================================================================
-    void closeButtonPressed()
+    void closeButtonPressed() override
     {
         // When the user presses the close button, we'll tell the app to quit. This
         // HelloWorldWindow object will be deleted by the JUCEHelloWorldApplication class.
@@ -61,7 +61,7 @@ public:
     JUCEHelloWorldApplication() {}
 
     //==============================================================================
-    void initialise (const String& commandLine)
+    void initialise (const String& commandLine) override
     {
         // For this demo, we'll just create the main window...
         helloWorldWindow = new HelloWorldWindow();
@@ -75,7 +75,7 @@ public:
         */
     }
 
-    void shutdown()
+    void shutdown() override
     {
         // This method is where you should clear-up your app's resources..
 
@@ -85,24 +85,24 @@ public:
     }
 
     //==============================================================================
-    const String getApplicationName()
+    const String getApplicationName() override
     {
         return "Hello World for JUCE";
     }
 
-    const String getApplicationVersion()
+    const String getApplicationVersion() override
     {
         // The ProjectInfo::versionString value is automatically updated by the Jucer, and
         // can be found in the JuceHeader.h file that it generates for our project.
         return ProjectInfo::versionString;
     }
 
-    bool moreThanOneInstanceAllowed()
+    bool moreThanOneInstanceAllowed() override
     {
         return true;
     }
 
-    void anotherInstanceStarted (const String& commandLine)
+    void anotherInstanceStarted (const String& commandLine) override
     {
     }
 

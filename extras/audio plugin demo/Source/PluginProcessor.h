@@ -56,10 +56,10 @@ public:
     double getTailLengthSeconds() const override;
 
     //==============================================================================
-    int getNumPrograms() override                                               { return 0; }
+    int getNumPrograms() override                                               { return 1; }
     int getCurrentProgram() override                                            { return 0; }
     void setCurrentProgram (int /*index*/) override                             {}
-    const String getProgramName (int /*index*/) override                        { return String::empty; }
+    const String getProgramName (int /*index*/) override                        { return "Default"; }
     void changeProgramName (int /*index*/, const String& /*newName*/) override  {}
 
     //==============================================================================

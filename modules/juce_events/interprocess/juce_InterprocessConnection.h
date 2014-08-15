@@ -201,6 +201,7 @@ private:
     friend struct ContainerDeletePolicy<ConnectionThread>;
     ScopedPointer<ConnectionThread> thread;
     void runThread();
+    int writeData (void*, int);
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (InterprocessConnection)
 };

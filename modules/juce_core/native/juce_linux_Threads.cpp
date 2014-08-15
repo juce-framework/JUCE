@@ -79,10 +79,11 @@ JUCE_API bool JUCE_CALLTYPE Process::isRunningUnderDebugger()
     return juce_isRunningUnderDebugger();
 }
 
-static void swapUserAndEffectiveUser()
+static bool swapUserAndEffectiveUser()
 {
-    (void) setreuid (geteuid(), getuid());
-    (void) setregid (getegid(), getgid());
+    int result1 = setreuid (geteuid(), getuid());
+    int result2 = setregid (getegid(), getgid());
+    return result1 == 0 && result2 == 0;
 }
 
 JUCE_API void JUCE_CALLTYPE Process::raisePrivilege()  { if (geteuid() != 0 && getuid() == 0) swapUserAndEffectiveUser(); }

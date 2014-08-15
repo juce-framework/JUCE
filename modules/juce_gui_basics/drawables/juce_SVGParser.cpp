@@ -54,7 +54,7 @@ public:
 
         DrawableComposite* const drawable = new DrawableComposite();
 
-        drawable->setName (xml->getStringAttribute ("id"));
+        setDrawableID (*drawable, xml);
 
         SVGState newState (*this);
 
@@ -349,6 +349,11 @@ public:
             if (! carryOn)
                 break;
         }
+
+        // paths that finish back at their start position often seem to be
+        // left without a 'z', so need to be closed explicitly..
+        if (path.getCurrentPosition() == subpathStart)
+            path.closeSubPath();
     }
 
 private:
@@ -357,6 +362,13 @@ private:
     float elementX, elementY, width, height, viewBoxW, viewBoxH;
     AffineTransform transform;
     String cssStyleText;
+
+    static void setDrawableID (Drawable& d, const XmlPath& xml)
+    {
+        String compID (xml->getStringAttribute ("id"));
+        d.setName (compID);
+        d.setComponentID (compID);
+    }
 
     //==============================================================================
     void parseSubElements (const XmlPath& xml, DrawableComposite& parentDrawable)
@@ -397,7 +409,7 @@ private:
     {
         DrawableComposite* const drawable = new DrawableComposite();
 
-        drawable->setName (xml->getStringAttribute ("id"));
+        setDrawableID (*drawable, xml);
 
         if (xml->hasAttribute ("transform"))
         {
@@ -542,7 +554,7 @@ private:
         }
 
         DrawablePath* dp = new DrawablePath();
-        dp->setName (xml->getStringAttribute ("id"));
+        setDrawableID (*dp, xml);
         dp->setFill (Colours::transparentBlack);
 
         path.applyTransform (transform);

@@ -46,7 +46,7 @@ public:
         subclass of Component or use one of the other types of component from
         the library.
     */
-    Component();
+    Component() noexcept;
 
     /** Destructor.
 
@@ -66,7 +66,7 @@ public:
     /** Creates a component, setting its name at the same time.
         @see getName, setName
     */
-    explicit Component (const String& componentName);
+    explicit Component (const String& componentName) noexcept;
 
     /** Returns the name of this component.
         @see setName
@@ -355,6 +355,15 @@ public:
     Point<int> getLocalPoint (const Component* sourceComponent,
                               Point<int> pointRelativeToSourceComponent) const;
 
+    /** Converts a point to be relative to this component's coordinate space.
+
+        This takes a point relative to a different component, and returns its position relative to this
+        component. If the sourceComponent parameter is null, the source point is assumed to be a global
+        screen coordinate.
+    */
+    Point<float> getLocalPoint (const Component* sourceComponent,
+                                Point<float> pointRelativeToSourceComponent) const;
+
     /** Converts a rectangle to be relative to this component's coordinate space.
 
         This takes a rectangle that is relative to a different component, and returns its position relative
@@ -372,6 +381,11 @@ public:
         @see getLocalPoint, localAreaToGlobal
     */
     Point<int> localPointToGlobal (Point<int> localPoint) const;
+
+    /** Converts a point relative to this component's top-left into a screen coordinate.
+        @see getLocalPoint, localAreaToGlobal
+    */
+    Point<float> localPointToGlobal (Point<float> localPoint) const;
 
     /** Converts a rectangle from this component's coordinate space to a screen coordinate.
 
@@ -793,7 +807,7 @@ public:
     TargetClass* findParentComponentOfClass() const
     {
         for (Component* p = parentComponent; p != nullptr; p = p->parentComponent)
-            if (TargetClass* const target = dynamic_cast <TargetClass*> (p))
+            if (TargetClass* const target = dynamic_cast<TargetClass*> (p))
                 return target;
 
         return nullptr;
@@ -2122,31 +2136,31 @@ public:
         SafePointer() noexcept {}
 
         /** Creates a SafePointer that points at the given component. */
-        SafePointer (ComponentType* const component)        : weakRef (component) {}
+        SafePointer (ComponentType* component)                : weakRef (component) {}
 
         /** Creates a copy of another SafePointer. */
-        SafePointer (const SafePointer& other) noexcept     : weakRef (other.weakRef) {}
+        SafePointer (const SafePointer& other) noexcept       : weakRef (other.weakRef) {}
 
         /** Copies another pointer to this one. */
-        SafePointer& operator= (const SafePointer& other)           { weakRef = other.weakRef; return *this; }
+        SafePointer& operator= (const SafePointer& other)     { weakRef = other.weakRef; return *this; }
 
         /** Copies another pointer to this one. */
-        SafePointer& operator= (ComponentType* const newComponent)  { weakRef = newComponent; return *this; }
+        SafePointer& operator= (ComponentType* newComponent)  { weakRef = newComponent; return *this; }
 
         /** Returns the component that this pointer refers to, or null if the component no longer exists. */
-        ComponentType* getComponent() const noexcept        { return dynamic_cast <ComponentType*> (weakRef.get()); }
+        ComponentType* getComponent() const noexcept          { return dynamic_cast<ComponentType*> (weakRef.get()); }
 
         /** Returns the component that this pointer refers to, or null if the component no longer exists. */
-        operator ComponentType*() const noexcept            { return getComponent(); }
+        operator ComponentType*() const noexcept              { return getComponent(); }
 
         /** Returns the component that this pointer refers to, or null if the component no longer exists. */
-        ComponentType* operator->() noexcept                { return getComponent(); }
+        ComponentType* operator->() noexcept                  { return getComponent(); }
 
         /** Returns the component that this pointer refers to, or null if the component no longer exists. */
-        const ComponentType* operator->() const noexcept    { return getComponent(); }
+        const ComponentType* operator->() const noexcept      { return getComponent(); }
 
         /** If the component is valid, this deletes it and sets this pointer to null. */
-        void deleteAndZero()                                { delete getComponent(); }
+        void deleteAndZero()                                  { delete getComponent(); }
 
         bool operator== (ComponentType* component) const noexcept   { return weakRef == component; }
         bool operator!= (ComponentType* component) const noexcept   { return weakRef != component; }
@@ -2254,20 +2268,20 @@ private:
     String componentName, componentID;
     Component* parentComponent;
     Rectangle<int> bounds;
-    ScopedPointer <Positioner> positioner;
-    ScopedPointer <AffineTransform> affineTransform;
-    Array <Component*> childComponentList;
+    ScopedPointer<Positioner> positioner;
+    ScopedPointer<AffineTransform> affineTransform;
+    Array<Component*> childComponentList;
     LookAndFeel* lookAndFeel;
     MouseCursor cursor;
     ImageEffectFilter* effect;
-    ScopedPointer <CachedComponentImage> cachedImage;
+    ScopedPointer<CachedComponentImage> cachedImage;
 
     class MouseListenerList;
     friend class MouseListenerList;
     friend struct ContainerDeletePolicy<MouseListenerList>;
-    ScopedPointer <MouseListenerList> mouseListeners;
-    ScopedPointer <Array <KeyListener*> > keyListeners;
-    ListenerList <ComponentListener> componentListeners;
+    ScopedPointer<MouseListenerList> mouseListeners;
+    ScopedPointer<Array<KeyListener*> > keyListeners;
+    ListenerList<ComponentListener> componentListeners;
     NamedValueSet properties;
 
     friend class WeakReference<Component>;
@@ -2292,6 +2306,8 @@ private:
         bool childCompFocusedFlag       : 1;
         bool dontClipGraphicsFlag       : 1;
         bool mouseDownWasBlocked        : 1;
+        bool isMoveCallbackPending      : 1;
+        bool isResizeCallbackPending    : 1;
       #if JUCE_DEBUG
         bool isInsidePaintCall          : 1;
       #endif
@@ -2306,18 +2322,18 @@ private:
     uint8 componentTransparency;
 
     //==============================================================================
-    void internalMouseEnter (MouseInputSource, Point<int>, Time);
-    void internalMouseExit  (MouseInputSource, Point<int>, Time);
-    void internalMouseDown  (MouseInputSource, Point<int>, Time);
-    void internalMouseUp    (MouseInputSource, Point<int>, Time, const ModifierKeys oldModifiers);
-    void internalMouseDrag  (MouseInputSource, Point<int>, Time);
-    void internalMouseMove  (MouseInputSource, Point<int>, Time);
-    void internalMouseWheel (MouseInputSource, Point<int>, Time, const MouseWheelDetails&);
-    void internalMagnifyGesture (MouseInputSource, Point<int>, Time, float);
+    void internalMouseEnter (MouseInputSource, Point<float>, Time);
+    void internalMouseExit  (MouseInputSource, Point<float>, Time);
+    void internalMouseDown  (MouseInputSource, Point<float>, Time);
+    void internalMouseUp    (MouseInputSource, Point<float>, Time, const ModifierKeys oldModifiers);
+    void internalMouseDrag  (MouseInputSource, Point<float>, Time);
+    void internalMouseMove  (MouseInputSource, Point<float>, Time);
+    void internalMouseWheel (MouseInputSource, Point<float>, Time, const MouseWheelDetails&);
+    void internalMagnifyGesture (MouseInputSource, Point<float>, Time, float);
     void internalBroughtToFront();
-    void internalFocusGain (const FocusChangeType, const WeakReference<Component>&);
-    void internalFocusGain (const FocusChangeType);
-    void internalFocusLoss (const FocusChangeType);
+    void internalFocusGain (FocusChangeType, const WeakReference<Component>&);
+    void internalFocusGain (FocusChangeType);
+    void internalFocusLoss (FocusChangeType);
     void internalChildFocusChange (FocusChangeType, const WeakReference<Component>&);
     void internalModalInputAttempt();
     void internalModifierKeysChanged();
@@ -2330,6 +2346,7 @@ private:
     void paintComponentAndChildren (Graphics&);
     void paintWithinParentContext (Graphics&);
     void sendMovedResizedMessages (bool wasMoved, bool wasResized);
+    void sendMovedResizedMessagesIfPending();
     void repaintParent();
     void sendFakeMouseMove() const;
     void takeKeyboardFocus (const FocusChangeType);

@@ -53,7 +53,10 @@ public:
 
     ~Pimpl()
     {
+        [[NSNotificationCenter defaultCenter]  removeObserver: view];
         [[NSStatusBar systemStatusBar] removeStatusItem: statusItem];
+        SystemTrayViewClass::setOwner (view, nullptr);
+        SystemTrayViewClass::setImage (view, nil);
         [statusItem release];
         [view release];
         [statusIcon release];
@@ -99,21 +102,21 @@ public:
 
             if (isLeft || isRight)  // Only mouse up is sent by the OS, so simulate a down/up
             {
-                owner.mouseDown (MouseEvent (mouseSource, Point<int>(),
+                owner.mouseDown (MouseEvent (mouseSource, Point<float>(),
                                              eventMods.withFlags (isLeft ? ModifierKeys::leftButtonModifier
                                                                          : ModifierKeys::rightButtonModifier),
                                              &owner, &owner, now,
-                                             Point<int>(), now, 1, false));
+                                             Point<float>(), now, 1, false));
 
-                owner.mouseUp (MouseEvent (mouseSource, Point<int>(), eventMods.withoutMouseButtons(),
+                owner.mouseUp (MouseEvent (mouseSource, Point<float>(), eventMods.withoutMouseButtons(),
                                            &owner, &owner, now,
-                                           Point<int>(), now, 1, false));
+                                           Point<float>(), now, 1, false));
             }
             else if (type == NSMouseMoved)
             {
-                owner.mouseMove (MouseEvent (mouseSource, Point<int>(), eventMods,
+                owner.mouseMove (MouseEvent (mouseSource, Point<float>(), eventMods,
                                              &owner, &owner, now,
-                                             Point<int>(), now, 1, false));
+                                             Point<float>(), now, 1, false));
             }
         }
     }

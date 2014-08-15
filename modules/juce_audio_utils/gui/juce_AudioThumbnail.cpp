@@ -342,7 +342,7 @@ public:
     }
 
 private:
-    Array <MinMaxValue> data;
+    Array<MinMaxValue> data;
     int peakLevel;
 
     void ensureSize (const int thumbSamples)
@@ -391,6 +391,7 @@ public:
                 const MinMaxValue* cacheData = getData (channelNum, clip.getX() - area.getX());
 
                 RectangleList<float> waveform;
+                waveform.ensureStorageAllocated (clip.getWidth());
 
                 float x = (float) clip.getX();
 
@@ -414,7 +415,7 @@ public:
     }
 
 private:
-    Array <MinMaxValue> data;
+    Array<MinMaxValue> data;
     double cachedStart, cachedTimePerPixel;
     int numChannelsCached, numSamplesCached;
     bool cacheNeedsRefilling;

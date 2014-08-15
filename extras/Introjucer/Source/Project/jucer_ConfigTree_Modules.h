@@ -295,10 +295,18 @@ public:
             pcc->setEditorComponent (new ModulesPanel (project), nullptr);
     }
 
+    static File getManifestFile (const File& draggedFile)
+    {
+        if (draggedFile.getFileName() == ModuleDescription::getManifestFileName())
+            return draggedFile;
+
+        return draggedFile.getChildFile (ModuleDescription::getManifestFileName());
+    }
+
     bool isInterestedInFileDrag (const StringArray& files) override
     {
         for (int i = files.size(); --i >= 0;)
-            if (ModuleDescription (File (files[i]).getChildFile (ModuleDescription::getManifestFileName())).isValid())
+            if (ModuleDescription (getManifestFile (files[i])).isValid())
                 return true;
 
         return false;
@@ -310,7 +318,8 @@ public:
 
         for (int i = files.size(); --i >= 0;)
         {
-            ModuleDescription m (File (files[i]).getChildFile (ModuleDescription::getManifestFileName()));
+            ModuleDescription m (getManifestFile (files[i]));
+
             if (m.isValid())
                 modules.add (m);
         }

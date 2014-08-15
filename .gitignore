@@ -94,5 +94,17 @@ extras/binarybuilder/Builds/VisualStudio2012/Debug
 extras/binarybuilder/Builds/VisualStudio2012/Release
 extras/binarybuilder/Builds/VisualStudio2013/Debug
 extras/binarybuilder/Builds/VisualStudio2013/Release
+extras/example projects/Builds/MacOSX/build
+extras/example projects/Builds/Linux/build
+extras/example projects/Builds/VisualStudio2005/Debug
+extras/example projects/Builds/VisualStudio2005/Release
+extras/example projects/Builds/VisualStudio2008/Debug
+extras/example projects/Builds/VisualStudio2008/Release
+extras/example projects/Builds/VisualStudio2010/Debug
+extras/example projects/Builds/VisualStudio2010/Release
+extras/example projects/Builds/VisualStudio2012/Debug
+extras/example projects/Builds/VisualStudio2012/Release
+extras/example projects/Builds/VisualStudio2013/Debug
+extras/example projects/Builds/VisualStudio2013/Release
 extras/windows dll/Builds/VisualStudio2008/Debug
 extras/windows dll/Builds/VisualStudio2008/Release

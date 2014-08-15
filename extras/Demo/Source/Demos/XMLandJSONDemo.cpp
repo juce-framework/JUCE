@@ -149,7 +149,7 @@ public:
                     {
                         var& child (json[i]);
                         jassert (! child.isVoid());
-                        addSubItem (new JsonTreeItem (Identifier::null, child));
+                        addSubItem (new JsonTreeItem (Identifier(), child));
                     }
                 }
                 else if (DynamicObject* obj = json.getDynamicObject())
@@ -349,7 +349,7 @@ private:
             return nullptr;
         }
 
-        return new JsonTreeItem (Identifier::null, parsedJson);
+        return new JsonTreeItem (Identifier(), parsedJson);
     }
 
     /** Clears the editor and loads some default text. */

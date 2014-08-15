@@ -37,7 +37,7 @@ class PluginHostApp  : public JUCEApplication
 public:
     PluginHostApp() {}
 
-    void initialise (const String& commandLine)
+    void initialise (const String& commandLine) override
     {
         // initialise our settings file..
 
@@ -66,14 +66,14 @@ public:
                                                             .getChildFile (commandLine), true);
     }
 
-    void shutdown()
+    void shutdown() override
     {
         mainWindow = nullptr;
         appProperties = nullptr;
         LookAndFeel::setDefaultLookAndFeel (nullptr);
     }
 
-    void systemRequestedQuit()
+    void systemRequestedQuit() override
     {
         if (mainWindow != nullptr)
             mainWindow->tryToQuitApplication();
@@ -81,9 +81,9 @@ public:
             JUCEApplicationBase::quit();
     }
 
-    const String getApplicationName()       { return "Juce Plug-In Host"; }
-    const String getApplicationVersion()    { return ProjectInfo::versionString; }
-    bool moreThanOneInstanceAllowed()       { return true; }
+    const String getApplicationName() override       { return "Juce Plug-In Host"; }
+    const String getApplicationVersion() override    { return ProjectInfo::versionString; }
+    bool moreThanOneInstanceAllowed() override       { return true; }
 
     ApplicationCommandManager commandManager;
     ScopedPointer<ApplicationProperties> appProperties;

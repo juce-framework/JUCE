@@ -181,7 +181,7 @@ public:
             for (int j = 0; j < numAllPasses; ++j)  // run the allpass filters in series
                 output = allPass[0][j].process (output);
 
-            samples[i] = output * wet1 + input * dry;
+            samples[i] = output * wet1 + samples[i] * dry;
         }
     }
 

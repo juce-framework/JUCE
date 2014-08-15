@@ -170,7 +170,7 @@ public:
         virtual ~MessageBase() {}
 
         virtual void messageCallback() = 0;
-        void post();
+        bool post();
 
         typedef ReferenceCountedObjectPtr<MessageBase> Ptr;
 

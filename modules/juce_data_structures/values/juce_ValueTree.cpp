@@ -409,7 +409,7 @@ public:
 
     XmlElement* createXml() const
     {
-        XmlElement* const xml = new XmlElement (type.toString());
+        XmlElement* const xml = new XmlElement (type);
         properties.copyToXmlAttributes (*xml);
 
         // (NB: it's faster to add nodes to XML elements in reverse order)
@@ -789,6 +789,11 @@ void ValueTree::copyPropertiesFrom (const ValueTree& source, UndoManager* const 
         object->copyPropertiesFrom (*(source.object), undoManager);
 }
 
+int ValueTree::getReferenceCount() const noexcept
+{
+    return object != nullptr ? object->getReferenceCount() : 0;
+}
+
 //==============================================================================
 class ValueTreePropertyValueSource  : public Value::ValueSource,
                                       private ValueTree::Listener
@@ -950,6 +955,9 @@ XmlElement* ValueTree::createXml() const
 
 ValueTree ValueTree::fromXml (const XmlElement& xml)
 {
+    // ValueTrees don't have any equivalent to XML text elements!
+    jassert (! xml.isTextElement());
+
     ValueTree v (xml.getTagName());
     v.object->properties.setFromXmlAttributes (xml);
 

@@ -280,6 +280,12 @@ int64 File::getSize() const
     return juce_stat (fullPath, info) ? info.st_size : 0;
 }
 
+uint64 File::getFileIdentifier() const
+{
+    juce_statStruct info;
+    return juce_stat (fullPath, info) ? (uint64) info.st_ino : 0;
+}
+
 //==============================================================================
 bool File::hasWriteAccess() const
 {
@@ -391,13 +397,10 @@ void FileInputStream::openHandle()
         status = getResultForErrno();
 }
 
-void FileInputStream::closeHandle()
+FileInputStream::~FileInputStream()
 {
     if (fileHandle != 0)
-    {
         close (getFD (fileHandle));
-        fileHandle = 0;
-    }
 }
 
 size_t FileInputStream::readInternal (void* const buffer, const size_t numBytes)
@@ -834,12 +837,6 @@ extern "C" void* threadEntryProc (void* userData)
     JUCE_AUTORELEASEPOOL
     {
        #if JUCE_ANDROID
-        struct AndroidThreadScope
-        {
-            AndroidThreadScope()   { threadLocalJNIEnvHolder.attach(); }
-            ~AndroidThreadScope()  { threadLocalJNIEnvHolder.detach(); }
-        };
-
         const AndroidThreadScope androidEnv;
        #endif
 
@@ -1017,12 +1014,12 @@ public:
                 // we're the child process..
                 close (pipeHandles[0]);   // close the read handle
 
-                if ((streamFlags | wantStdOut) != 0)
+                if ((streamFlags & wantStdOut) != 0)
                     dup2 (pipeHandles[1], 1); // turns the pipe into stdout
                 else
                     close (STDOUT_FILENO);
 
-                if ((streamFlags | wantStdErr) != 0)
+                if ((streamFlags & wantStdErr) != 0)
                     dup2 (pipeHandles[1], 2);
                 else
                     close (STDERR_FILENO);
@@ -1032,7 +1029,7 @@ public:
                 Array<char*> argv;
                 for (int i = 0; i < arguments.size(); ++i)
                     if (arguments[i].isNotEmpty())
-                        argv.add (arguments[i].toUTF8().getAddress());
+                        argv.add (const_cast<char*> (arguments[i].toUTF8().getAddress()));
 
                 argv.add (nullptr);
 
@@ -1147,16 +1144,25 @@ struct HighResolutionTimer::Pimpl
 
     void start (int newPeriod)
     {
-        periodMs = newPeriod;
-
-        if (thread == 0)
+        if (periodMs != newPeriod)
         {
-            shouldStop = false;
+            if (thread != pthread_self())
+            {
+                stop();
 
-            if (pthread_create (&thread, nullptr, timerThread, this) == 0)
-                setThreadToRealtime (thread, (uint64) newPeriod);
+                periodMs = newPeriod;
+                shouldStop = false;
+
+                if (pthread_create (&thread, nullptr, timerThread, this) == 0)
+                    setThreadToRealtime (thread, (uint64) newPeriod);
+                else
+                    jassertfalse;
+            }
             else
-                jassertfalse;
+            {
+                periodMs = newPeriod;
+                shouldStop = false;
+            }
         }
     }
 
@@ -1180,7 +1186,9 @@ private:
 
     static void* timerThread (void* param)
     {
-       #if ! JUCE_ANDROID
+       #if JUCE_ANDROID
+        const AndroidThreadScope androidEnv;
+       #else
         int dummy;
         pthread_setcancelstate (PTHREAD_CANCEL_ENABLE, &dummy);
        #endif
@@ -1191,12 +1199,19 @@ private:
 
     void timerThread()
     {
-        Clock clock (periodMs);
+        int lastPeriod = periodMs;
+        Clock clock (lastPeriod);
 
         while (! shouldStop)
         {
             clock.wait();
             owner.hiResTimerCallback();
+
+            if (lastPeriod != periodMs)
+            {
+                lastPeriod = periodMs;
+                clock = Clock (lastPeriod);
+            }
         }
 
         periodMs = 0;
@@ -1210,7 +1225,7 @@ private:
         {
             mach_timebase_info_data_t timebase;
             (void) mach_timebase_info (&timebase);
-            delta = (((uint64_t) (millis * 1000000.0)) * timebase.numer) / timebase.denom;
+            delta = (((uint64_t) (millis * 1000000.0)) * timebase.denom) / timebase.numer;
             time = mach_absolute_time();
         }
 

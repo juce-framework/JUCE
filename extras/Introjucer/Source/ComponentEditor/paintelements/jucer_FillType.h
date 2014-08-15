@@ -212,7 +212,7 @@ public:
         if (s.isNotEmpty())
         {
             StringArray toks;
-            toks.addTokens (s, ",:", String::empty);
+            toks.addTokens (s, ",:", StringRef());
             toks.trim();
 
             if (toks[0] == "solid")

@@ -196,76 +196,76 @@ namespace juce
 
     static void detachComponentFromWindowRef (Component* comp, void* nsWindow, bool isHIView)
     {
-       #if JUCE_64BIT
-        (void) nsWindow; (void) isHIView;
-        comp->removeFromDesktop();
-       #else
-        //treat NSView like 64bit
-        if (! isHIView)
+        JUCE_AUTORELEASEPOOL
         {
+           #if ! JUCE_64BIT
+            if (isHIView)
+            {
+                JUCE_AUTORELEASEPOOL
+                {
+                    EventHandlerRef ref = (EventHandlerRef) (void*) (pointer_sized_int)
+                    comp->getProperties() ["boundsEventRef"].toString().getHexValue64();
+                    RemoveEventHandler (ref);
+
+                    removeWindowHidingHooks (comp);
+
+                    HIViewRef dummyView = (HIViewRef) (void*) (pointer_sized_int)
+                    comp->getProperties() ["dummyViewRef"].toString().getHexValue64();
+
+                    if (HIViewIsValid (dummyView))
+                        CFRelease (dummyView);
+
+                    NSWindow* hostWindow = (NSWindow*) nsWindow;
+                    NSView* pluginView = (NSView*) comp->getWindowHandle();
+                    NSWindow* pluginWindow = [pluginView window];
+
+                    [hostWindow removeChildWindow: pluginWindow];
+                    comp->removeFromDesktop();
+
+                    [hostWindow release];
+                }
+
+                // The event loop needs to be run between closing the window and deleting the plugin,
+                // presumably to let the cocoa objects get tidied up. Leaving out this line causes crashes
+                // in Live and Reaper when you delete the plugin with its window open.
+                // (Doing it this way rather than using a single longer timout means that we can guarantee
+                // how many messages will be dispatched, which seems to be vital in Reaper)
+                for (int i = 20; --i >= 0;)
+                    MessageManager::getInstance()->runDispatchLoopUntil (1);
+
+                return;
+            }
+           #endif
+
+            (void) nsWindow; (void) isHIView;
             comp->removeFromDesktop();
         }
-        else
-        {
-            JUCE_AUTORELEASEPOOL
-            {
-                EventHandlerRef ref = (EventHandlerRef) (void*) (pointer_sized_int)
-                comp->getProperties() ["boundsEventRef"].toString().getHexValue64();
-                RemoveEventHandler (ref);
-
-                removeWindowHidingHooks (comp);
-
-                HIViewRef dummyView = (HIViewRef) (void*) (pointer_sized_int)
-                comp->getProperties() ["dummyViewRef"].toString().getHexValue64();
-
-                if (HIViewIsValid (dummyView))
-                    CFRelease (dummyView);
-
-                NSWindow* hostWindow = (NSWindow*) nsWindow;
-                NSView* pluginView = (NSView*) comp->getWindowHandle();
-                NSWindow* pluginWindow = [pluginView window];
-
-                [hostWindow removeChildWindow: pluginWindow];
-                comp->removeFromDesktop();
-
-                [hostWindow release];
-            }
-
-            // The event loop needs to be run between closing the window and deleting the plugin,
-            // presumably to let the cocoa objects get tidied up. Leaving out this line causes crashes
-            // in Live and Reaper when you delete the plugin with its window open.
-            // (Doing it this way rather than using a single longer timout means that we can guarantee
-            // how many messages will be dispatched, which seems to be vital in Reaper)
-            for (int i = 20; --i >= 0;)
-                MessageManager::getInstance()->runDispatchLoopUntil (1);
-        }
-       #endif
     }
 
     static void setNativeHostWindowSize (void* nsWindow, Component* component, int newWidth, int newHeight, bool isHIView)
     {
-        (void) nsWindow; (void) isHIView;
-
         JUCE_AUTORELEASEPOOL
         {
-           #if JUCE_64BIT
-            component->setSize (newWidth, newHeight);
-           #else
-            if (! isHIView)
-            { //Treat NSView like 64bit:
-                component->setSize (newWidth, newHeight);
-            }
-            else if (HIViewRef dummyView = (HIViewRef) (void*) (pointer_sized_int)
-                component->getProperties() ["dummyViewRef"].toString().getHexValue64())
+           #if ! JUCE_64BIT
+            if (isHIView)
             {
-                HIRect frameRect;
-                HIViewGetFrame (dummyView, &frameRect);
-                frameRect.size.width = newWidth;
-                frameRect.size.height = newHeight;
-                HIViewSetFrame (dummyView, &frameRect);
+                if (HIViewRef dummyView = (HIViewRef) (void*) (pointer_sized_int)
+                                            component->getProperties() ["dummyViewRef"].toString().getHexValue64())
+                {
+                    HIRect frameRect;
+                    HIViewGetFrame (dummyView, &frameRect);
+                    frameRect.size.width = newWidth;
+                    frameRect.size.height = newHeight;
+                    HIViewSetFrame (dummyView, &frameRect);
+                }
+
+                return;
             }
            #endif
-       }
+
+            (void) nsWindow; (void) isHIView;
+            component->setSize (newWidth, newHeight);
+        }
     }
 } // (juce namespace)
 

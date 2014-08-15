@@ -29,7 +29,7 @@ class CoreGraphicsImage : public ImagePixelData
 {
 public:
     CoreGraphicsImage (const Image::PixelFormat format, const int w, const int h, const bool clearImage)
-        : ImagePixelData (format, w, h)
+        : ImagePixelData (format, w, h), cachedImageRef (0)
     {
         pixelStride = format == Image::RGB ? 3 : ((format == Image::ARGB) ? 4 : 1);
         lineStride = (pixelStride * jmax (1, width) + 3) & ~3;
@@ -47,11 +47,13 @@ public:
 
     ~CoreGraphicsImage()
     {
+        freeCachedImageRef();
         CGContextRelease (context);
     }
 
     LowLevelGraphicsContext* createLowLevelContext() override
     {
+        freeCachedImageRef();
         sendDataChangeMessage();
         return new CoreGraphicsContext (context, height, 1.0f);
     }
@@ -64,7 +66,10 @@ public:
         bitmap.pixelStride = pixelStride;
 
         if (mode != Image::BitmapData::readOnly)
+        {
+            freeCachedImageRef();
             sendDataChangeMessage();
+        }
     }
 
     ImagePixelData* clone() override
@@ -77,6 +82,27 @@ public:
     ImageType* createType() const override    { return new NativeImageType(); }
 
     //==============================================================================
+    static CGImageRef getCachedImageRef (const Image& juceImage, CGColorSpaceRef colourSpace)
+    {
+        CoreGraphicsImage* const cgim = dynamic_cast<CoreGraphicsImage*> (juceImage.getPixelData());
+
+        if (cgim != nullptr && cgim->cachedImageRef != 0)
+        {
+            CGImageRetain (cgim->cachedImageRef);
+            return cgim->cachedImageRef;
+        }
+
+        CGImageRef ref = createImage (juceImage, colourSpace, false);
+
+        if (cgim != nullptr)
+        {
+            CGImageRetain (ref);
+            cgim->cachedImageRef = ref;
+        }
+
+        return ref;
+    }
+
     static CGImageRef createImage (const Image& juceImage, CGColorSpaceRef colourSpace, const bool mustOutliveSource)
     {
         const Image::BitmapData srcData (juceImage, Image::BitmapData::readOnly);
@@ -106,10 +132,20 @@ public:
 
     //==============================================================================
     CGContextRef context;
+    CGImageRef cachedImageRef;
     HeapBlock<uint8> imageData;
     int pixelStride, lineStride;
 
 private:
+    void freeCachedImageRef()
+    {
+        if (cachedImageRef != 0)
+        {
+            CGImageRelease (cachedImageRef);
+            cachedImageRef = 0;
+        }
+    }
+
     static CGBitmapInfo getCGImageFlags (const Image::PixelFormat& format)
     {
        #if JUCE_BIG_ENDIAN
@@ -454,7 +490,7 @@ void CoreGraphicsContext::drawImage (const Image& sourceImage, const AffineTrans
 {
     const int iw = sourceImage.getWidth();
     const int ih = sourceImage.getHeight();
-    CGImageRef image = CoreGraphicsImage::createImage (sourceImage, rgbColourSpace, false);
+    CGImageRef image = CoreGraphicsImage::getCachedImageRef (sourceImage, rgbColourSpace);
 
     CGContextSaveGState (context);
     CGContextSetAlpha (context, state->fillType.getOpacity());

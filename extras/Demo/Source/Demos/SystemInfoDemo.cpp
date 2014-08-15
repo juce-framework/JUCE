@@ -49,6 +49,19 @@ static String getFileSystemRoots()
     return rootList.joinIntoString (", ");
 }
 
+static String getIPAddressList()
+{
+    Array<IPAddress> addresses;
+    IPAddress::findAllAddresses (addresses);
+
+    String addressList;
+
+    for (int i = 0; i < addresses.size(); ++i)
+        addressList << "   " << addresses[i].toString() << newLine;
+
+    return addressList;
+}
+
 static const char* getDisplayOrientation()
 {
     switch (Desktop::getInstance().getCurrentOrientation())
@@ -97,6 +110,7 @@ static String getAllSystemInfo()
       << newLine
       << "Time and date:    " << Time::getCurrentTime().toString (true, true) << newLine
       << "System up-time:   " << RelativeTime::milliseconds ((int64) Time::getMillisecondCounterHiRes()).getDescription() << newLine
+      << "Compilation date: " << Time::getCompilationDate().toString (true, false) << newLine
       << newLine
       << "Operating system: " << SystemStats::getOperatingSystemName() << newLine
       << "Host name:        " << SystemStats::getComputerName() << newLine
@@ -138,6 +152,7 @@ static String getAllSystemInfo()
                                                                                 .getBytesFreeOnVolume()) << newLine
       << newLine
       << getDisplayInfo() << newLine
+      << "Network IP addresses: " << newLine << getIPAddressList() << newLine
       << "Network card MAC addresses: " << newLine << getMacAddressList() << newLine;
 
     DBG (systemInfo);

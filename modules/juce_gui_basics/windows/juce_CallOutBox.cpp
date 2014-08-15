@@ -91,7 +91,7 @@ void CallOutBox::setArrowSize (const float newSize)
 
 int CallOutBox::getBorderSize() const noexcept
 {
-    return jmax (20, (int) arrowSize);
+    return jmax (getLookAndFeel().getCallOutBoxBorderSize (*this), (int) arrowSize);
 }
 
 void CallOutBox::paint (Graphics& g)

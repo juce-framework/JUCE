@@ -145,8 +145,8 @@ public:
 
     Rectangle<int> getBounds() const override               { return getBounds (! isSharedWindow); }
     Rectangle<int> getBounds (bool global) const;
-    Point<int> localToGlobal (Point<int> relativePosition) override;
-    Point<int> globalToLocal (Point<int> screenPosition) override;
+    Point<float> localToGlobal (Point<float> relativePosition) override;
+    Point<float> globalToLocal (Point<float> screenPosition) override;
     void setAlpha (float newAlpha) override;
     void setMinimised (bool) override                       {}
     bool isMinimised() const override                       { return false; }
@@ -168,7 +168,7 @@ public:
     void viewFocusLoss();
     bool isFocused() const override;
     void grabFocus() override;
-    void textInputRequired (const Point<int>&) override;
+    void textInputRequired (Point<int>, TextInputTarget&) override;
 
     BOOL textViewReplaceCharacters (Range<int>, const String&);
     void updateHiddenTextContent (TextInputTarget*);
@@ -477,7 +477,7 @@ void ModifierKeys::updateCurrentModifiers() noexcept
     currentModifiers = UIViewComponentPeer::currentModifiers;
 }
 
-Point<int> juce_lastMousePos;
+Point<float> juce_lastMousePos;
 
 //==============================================================================
 UIViewComponentPeer::UIViewComponentPeer (Component& comp, const int windowStyleFlags, UIView* viewToAttachTo)
@@ -603,14 +603,14 @@ Rectangle<int> UIViewComponentPeer::getBounds (const bool global) const
     return convertToRectInt (r);
 }
 
-Point<int> UIViewComponentPeer::localToGlobal (Point<int> relativePosition)
+Point<float> UIViewComponentPeer::localToGlobal (Point<float> relativePosition)
 {
-    return relativePosition + getBounds (true).getPosition();
+    return relativePosition + getBounds (true).getPosition().toFloat();
 }
 
-Point<int> UIViewComponentPeer::globalToLocal (Point<int> screenPosition)
+Point<float> UIViewComponentPeer::globalToLocal (Point<float> screenPosition)
 {
-    return screenPosition - getBounds (true).getPosition();
+    return screenPosition - getBounds (true).getPosition().toFloat();
 }
 
 void UIViewComponentPeer::setAlpha (float newAlpha)
@@ -702,10 +702,7 @@ void UIViewComponentPeer::toFront (bool makeActiveWindow)
 
 void UIViewComponentPeer::toBehind (ComponentPeer* other)
 {
-    UIViewComponentPeer* const otherPeer = dynamic_cast <UIViewComponentPeer*> (other);
-    jassert (otherPeer != nullptr); // wrong type of window?
-
-    if (otherPeer != nullptr)
+    if (UIViewComponentPeer* const otherPeer = dynamic_cast<UIViewComponentPeer*> (other))
     {
         if (isSharedWindow)
         {
@@ -715,6 +712,10 @@ void UIViewComponentPeer::toBehind (ComponentPeer* other)
         {
             // don't know how to do this
         }
+    }
+    else
+    {
+        jassertfalse; // wrong type of window?
     }
 }
 
@@ -736,8 +737,8 @@ void UIViewComponentPeer::handleTouches (UIEvent* event, const bool isDown, cons
             continue;
 
         CGPoint p = [touch locationInView: view];
-        const Point<int> pos ((int) p.x, (int) p.y);
-        juce_lastMousePos = pos + getBounds (true).getPosition();
+        const Point<float> pos (p.x, p.y);
+        juce_lastMousePos = pos + getBounds (true).getPosition().toFloat();
 
         const int64 time = getMouseTime (event);
         const int touchIndex = currentTouches.getIndexOfTouch (touch);
@@ -781,7 +782,7 @@ void UIViewComponentPeer::handleTouches (UIEvent* event, const bool isDown, cons
 
         if (isUp || isCancel)
         {
-            handleMouseEvent (touchIndex, Point<int> (-1, -1), modsToSend, time);
+            handleMouseEvent (touchIndex, Point<float> (-1.0f, -1.0f), modsToSend, time);
             if (! isValidPeer (this))
                 return;
         }
@@ -828,12 +829,28 @@ void UIViewComponentPeer::grabFocus()
     }
 }
 
-void UIViewComponentPeer::textInputRequired (const Point<int>&)
+void UIViewComponentPeer::textInputRequired (Point<int>, TextInputTarget&)
 {
+}
+
+static UIKeyboardType getUIKeyboardType (TextInputTarget::VirtualKeyboardType type) noexcept
+{
+    switch (type)
+    {
+        case TextInputTarget::textKeyboard:          return UIKeyboardTypeAlphabet;
+        case TextInputTarget::numericKeyboard:       return UIKeyboardTypeNumbersAndPunctuation;
+        case TextInputTarget::urlKeyboard:           return UIKeyboardTypeURL;
+        case TextInputTarget::emailAddressKeyboard:  return UIKeyboardTypeEmailAddress;
+        case TextInputTarget::phoneNumberKeyboard:   return UIKeyboardTypePhonePad;
+        default:                                     jassertfalse; break;
+    }
+
+    return UIKeyboardTypeDefault;
 }
 
 void UIViewComponentPeer::updateHiddenTextContent (TextInputTarget* target)
 {
+    view->hiddenTextView.keyboardType = getUIKeyboardType (target->getKeyboardType());
     view->hiddenTextView.text = juceStringToNS (target->getTextInRange (Range<int> (0, target->getHighlightedRegion().getStart())));
     view->hiddenTextView.selectedRange = NSMakeRange (target->getHighlightedRegion().getStart(), 0);
 }

@@ -22,7 +22,6 @@
   ==============================================================================
 */
 
-
 struct NSViewResizeWatcher
 {
     NSViewResizeWatcher() : callback (nil) {}

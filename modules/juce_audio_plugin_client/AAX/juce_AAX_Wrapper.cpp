@@ -177,29 +177,19 @@ struct AAXClasses
         return nullptr;
     }
 
-    //==============================================================================
-    struct JUCELibraryRefCount
+    static Colour getColourFromHighlightEnum (AAX_EHighlightColor colour) noexcept
     {
-        JUCELibraryRefCount()    { if (getCount()++ == 0) initialise(); }
-        ~JUCELibraryRefCount()   { if (--getCount() == 0) shutdown(); }
-
-    private:
-        static void initialise()
+        switch (colour)
         {
-            initialiseJuce_GUI();
+            case AAX_eHighlightColor_Red:       return Colours::red;
+            case AAX_eHighlightColor_Blue:      return Colours::blue;
+            case AAX_eHighlightColor_Green:     return Colours::green;
+            case AAX_eHighlightColor_Yellow:    return Colours::yellow;
+            default:                            jassertfalse; break;
         }
 
-        static void shutdown()
-        {
-            shutdownJuce_GUI();
-        }
-
-        int& getCount() noexcept
-        {
-            static int count = 0;
-            return count;
-        }
-    };
+        return Colours::black;
+    }
 
     //==============================================================================
     class JuceAAX_Processor;
@@ -330,27 +320,40 @@ struct AAXClasses
             return AAX_ERROR_NULL_OBJECT;
         }
 
-        AAX_Result ParameterUpdated (AAX_CParamID /*paramID*/) override
+        AAX_Result ParameterUpdated (AAX_CParamID) override
         {
             return AAX_SUCCESS;
         }
 
-        AAX_Result SetControlHighlightInfo (AAX_CParamID /*paramID*/, AAX_CBoolean /*isHighlighted*/, AAX_EHighlightColor) override
+        AAX_Result SetControlHighlightInfo (AAX_CParamID paramID, AAX_CBoolean isHighlighted, AAX_EHighlightColor colour) override
         {
-            return AAX_SUCCESS;
+            if (component != nullptr && component->pluginEditor != nullptr)
+            {
+                AudioProcessorEditor::ParameterControlHighlightInfo info;
+                info.parameterIndex  = getParamIndexFromID (paramID);
+                info.isHighlighted   = isHighlighted;
+                info.suggestedColour = getColourFromHighlightEnum (colour);
+
+                component->pluginEditor->setControlHighlight (info);
+                return AAX_SUCCESS;
+            }
+
+            return AAX_ERROR_NULL_OBJECT;
         }
 
     private:
-        class ContentWrapperComponent  : public juce::Component
+        struct ContentWrapperComponent  : public juce::Component
         {
-        public:
             ContentWrapperComponent (JuceAAX_GUI& gui, AudioProcessor& plugin)
                 : owner (gui)
             {
                 setOpaque (true);
-                addAndMakeVisible (pluginEditor = plugin.createEditorIfNeeded());
-                setBounds (pluginEditor->getLocalBounds());
                 setBroughtToFrontOnMouseClick (true);
+
+                addAndMakeVisible (pluginEditor = plugin.createEditorIfNeeded());
+
+                if (pluginEditor != nullptr)
+                    setBounds (pluginEditor->getLocalBounds());
             }
 
             ~ContentWrapperComponent()
@@ -358,7 +361,7 @@ struct AAXClasses
                 if (pluginEditor != nullptr)
                 {
                     PopupMenu::dismissAllActiveMenus();
-                    pluginEditor->getAudioProcessor()->editorBeingDeleted (pluginEditor);
+                    pluginEditor->processor.editorBeingDeleted (pluginEditor);
                 }
             }
 
@@ -380,7 +383,6 @@ struct AAXClasses
                 }
             }
 
-        private:
             ScopedPointer<AudioProcessorEditor> pluginEditor;
             JuceAAX_GUI& owner;
 
@@ -389,7 +391,7 @@ struct AAXClasses
 
         ScopedPointer<ContentWrapperComponent> component;
 
-        JUCELibraryRefCount juceCount;
+        ScopedJuceInitialiser_GUI libraryInitialiser;
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (JuceAAX_GUI)
     };
 
@@ -859,7 +861,7 @@ struct AAXClasses
                 AAX_IParameter* parameter
                     = new AAX_CParameter<float> (IndexAsParamID (parameterIndex),
                                                  audioProcessor.getParameterName (parameterIndex, 31).toRawUTF8(),
-                                                 audioProcessor.getParameter (parameterIndex),
+                                                 audioProcessor.getParameterDefaultValue (parameterIndex),
                                                  AAX_CLinearTaperDelegate<float, 0>(),
                                                  AAX_CNumberDisplayDelegate<float, 3>(),
                                                  audioProcessor.isParameterAutomatable (parameterIndex));
@@ -870,6 +872,12 @@ struct AAXClasses
                 parameter->SetNumberOfSteps ((uint32_t) parameterNumSteps);
                 parameter->SetType (parameterNumSteps > 1000 ? AAX_eParameterType_Continuous
                                                              : AAX_eParameterType_Discrete);
+
+                parameter->SetOrientation (audioProcessor.isParameterOrientationInverted (parameterIndex)
+                                            ? (AAX_eParameterOrientation_RightMinLeftMax | AAX_eParameterOrientation_TopMinBottomMax
+                                                | AAX_eParameterOrientation_RotarySingleDotMode | AAX_eParameterOrientation_RotaryRightMinLeftMax)
+                                            : (AAX_eParameterOrientation_LeftMinRightMax | AAX_eParameterOrientation_BottomMinTopMax
+                                                | AAX_eParameterOrientation_RotarySingleDotMode | AAX_eParameterOrientation_RotaryLeftMinRightMax));
 
                 mParameterManager.AddParameter (parameter);
             }
@@ -896,7 +904,7 @@ struct AAXClasses
             check (Controller()->SetSignalLatency (audioProcessor.getLatencySamples()));
         }
 
-        JUCELibraryRefCount juceCount;
+        ScopedJuceInitialiser_GUI libraryInitialiser;
 
         ScopedPointer<AudioProcessor> pluginInstance;
         MidiBuffer midiBuffer;
@@ -1020,7 +1028,7 @@ struct AAXClasses
 AAX_Result JUCE_CDECL GetEffectDescriptions (AAX_ICollection*);
 AAX_Result JUCE_CDECL GetEffectDescriptions (AAX_ICollection* collection)
 {
-    AAXClasses::JUCELibraryRefCount libraryRefCount;
+    ScopedJuceInitialiser_GUI libraryInitialiser;
 
     if (AAX_IEffectDescriptor* const descriptor = collection->NewDescriptor())
     {

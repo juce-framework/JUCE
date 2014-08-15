@@ -37,7 +37,7 @@ const char* const AiffAudioFormat::appleKey             = "apple key";
 //==============================================================================
 namespace AiffFileHelpers
 {
-    inline int chunkName (const char* const name)   { return (int) ByteOrder::littleEndianInt (name); }
+    inline int chunkName (const char* name) noexcept    { return (int) ByteOrder::littleEndianInt (name); }
 
    #if JUCE_MSVC
     #pragma pack (push, 1)
@@ -888,13 +888,13 @@ AiffAudioFormat::~AiffAudioFormat()
 Array<int> AiffAudioFormat::getPossibleSampleRates()
 {
     const int rates[] = { 22050, 32000, 44100, 48000, 88200, 96000, 176400, 192000, 0 };
-    return Array <int> (rates);
+    return Array<int> (rates);
 }
 
 Array<int> AiffAudioFormat::getPossibleBitDepths()
 {
     const int depths[] = { 8, 16, 24, 0 };
-    return Array <int> (depths);
+    return Array<int> (depths);
 }
 
 bool AiffAudioFormat::canDoStereo() { return true; }

@@ -39,12 +39,17 @@ void MACAddress::findAllAddresses (Array<MACAddress>& result)
             {
                 const sockaddr_dl* const sadd = (const sockaddr_dl*) cursor->ifa_addr;
 
-                #ifndef IFT_ETHER
-                 #define IFT_ETHER 6
-                #endif
+               #ifndef IFT_ETHER
+                enum { IFT_ETHER = 6 };
+               #endif
 
                 if (sadd->sdl_type == IFT_ETHER)
-                    result.addIfNotAlreadyThere (MACAddress (((const uint8*) sadd->sdl_data) + sadd->sdl_nlen));
+                {
+                    MACAddress ma (MACAddress (((const uint8*) sadd->sdl_data) + sadd->sdl_nlen));
+
+                    if (! ma.isNull())
+                        result.addIfNotAlreadyThere (ma);
+                }
             }
         }
 

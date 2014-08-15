@@ -927,12 +927,6 @@ public:
 
     ~WavAudioFormatWriter()
     {
-        if ((bytesWritten & 1) != 0) // pad to an even length
-        {
-            ++bytesWritten;
-            output->writeByte (0);
-        }
-
         writeHeader();
     }
 
@@ -972,6 +966,20 @@ public:
         return true;
     }
 
+    bool flush() override
+    {
+        const int64 lastWritePos = output->getPosition();
+        writeHeader();
+
+        if (output->setPosition (lastWritePos))
+            return true;
+
+        // if this fails, you've given it an output stream that can't seek! It needs
+        // to be able to seek back to write the header
+        jassertfalse;
+        return false;
+    }
+
 private:
     MemoryBlock tempBlock, bwavChunk, axmlChunk, smplChunk, instChunk, cueChunk, listChunk;
     uint64 lengthInSamples, bytesWritten;
@@ -998,13 +1006,18 @@ private:
 
     void writeHeader()
     {
-        using namespace WavFileHelpers;
-        const bool seekedOk = output->setPosition (headerPosition);
-        (void) seekedOk;
+        if ((bytesWritten & 1) != 0) // pad to an even length
+            output->writeByte (0);
 
-        // if this fails, you've given it an output stream that can't seek! It needs
-        // to be able to seek back to write the header
-        jassert (seekedOk);
+        using namespace WavFileHelpers;
+
+        if (headerPosition != output->getPosition() && ! output->setPosition (headerPosition))
+        {
+            // if this fails, you've given it an output stream that can't seek! It needs to be
+            // able to seek back to go back and write the header after the data has been written.
+            jassertfalse;
+            return;
+        }
 
         const size_t bytesPerFrame = numChannels * bitsPerSample / 8;
         uint64 audioDataSize = bytesPerFrame * lengthInSamples;

@@ -320,12 +320,12 @@ public:
     {
         if (notification != dontSendNotification)
         {
+            owner.valueChanged();
+
             if (notification == sendNotificationSync)
                 handleAsyncUpdate();
             else
                 triggerAsyncUpdate();
-
-            owner.valueChanged();
         }
     }
 
@@ -667,7 +667,7 @@ public:
 
         if (isTwoValue || isThreeValue)
         {
-            const float mousePos = (float) (isVertical() ? e.y : e.x);
+            const float mousePos = isVertical() ? e.position.y : e.position.x;
 
             const float normalPosDistance = std::abs (getLinearSliderPos (currentValue.getValue()) - mousePos);
             const float minPosDistance    = std::abs (getLinearSliderPos (valueMin.getValue()) - 0.1f - mousePos);
@@ -689,10 +689,10 @@ public:
     //==============================================================================
     void handleRotaryDrag (const MouseEvent& e)
     {
-        const int dx = e.x - sliderRect.getCentreX();
-        const int dy = e.y - sliderRect.getCentreY();
+        const float dx = e.position.x - sliderRect.getCentreX();
+        const float dy = e.position.y - sliderRect.getCentreY();
 
-        if (dx * dx + dy * dy > 25)
+        if (dx * dx + dy * dy > 25.0f)
         {
             double angle = std::atan2 ((double) dx, (double) -dy);
             while (angle < 0.0)
@@ -736,7 +736,7 @@ public:
 
     void handleAbsoluteDrag (const MouseEvent& e)
     {
-        const int mousePos = (isHorizontal() || style == RotaryHorizontalDrag) ? e.x : e.y;
+        const float mousePos = (isHorizontal() || style == RotaryHorizontalDrag) ? e.position.x : e.position.y;
         double newPos = (mousePos - sliderRegionStart) / (double) sliderRegionSize;
 
         if (style == RotaryHorizontalDrag
@@ -745,12 +745,12 @@ public:
             || ((style == LinearHorizontal || style == LinearVertical || style == LinearBar || style == LinearBarVertical)
                 && ! snapsToMousePos))
         {
-            const int mouseDiff = (style == RotaryHorizontalDrag
-                                     || style == LinearHorizontal
-                                     || style == LinearBar
-                                     || (style == IncDecButtons && incDecDragDirectionIsHorizontal()))
-                                    ? e.x - mouseDragStartPos.x
-                                    : mouseDragStartPos.y - e.y;
+            const float mouseDiff = (style == RotaryHorizontalDrag
+                                        || style == LinearHorizontal
+                                        || style == LinearBar
+                                        || (style == IncDecButtons && incDecDragDirectionIsHorizontal()))
+                                      ? e.position.x - mouseDragStartPos.x
+                                      : mouseDragStartPos.y - e.position.y;
 
             newPos = owner.valueToProportionOfLength (valueOnMouseDown)
                        + mouseDiff * (1.0 / pixelsForFullDragExtent);
@@ -763,7 +763,8 @@ public:
         }
         else if (style == RotaryHorizontalVerticalDrag)
         {
-            const int mouseDiff = (e.x - mouseDragStartPos.x) + (mouseDragStartPos.y - e.y);
+            const float mouseDiff = (e.position.x - mouseDragStartPos.x)
+                                      + (mouseDragStartPos.y - e.position.y);
 
             newPos = owner.valueToProportionOfLength (valueOnMouseDown)
                        + mouseDiff * (1.0 / pixelsForFullDragExtent);
@@ -779,16 +780,16 @@ public:
 
     void handleVelocityDrag (const MouseEvent& e)
     {
-        const int mouseDiff = style == RotaryHorizontalVerticalDrag
-                                ? (e.x - mousePosWhenLastDragged.x) + (mousePosWhenLastDragged.y - e.y)
-                                : (isHorizontal()
-                                    || style == RotaryHorizontalDrag
-                                    || (style == IncDecButtons && incDecDragDirectionIsHorizontal()))
-                                      ? e.x - mousePosWhenLastDragged.x
-                                      : e.y - mousePosWhenLastDragged.y;
+        const float mouseDiff = style == RotaryHorizontalVerticalDrag
+                                   ? (e.position.x - mousePosWhenLastDragged.x) + (mousePosWhenLastDragged.y - e.position.y)
+                                   : (isHorizontal()
+                                       || style == RotaryHorizontalDrag
+                                       || (style == IncDecButtons && incDecDragDirectionIsHorizontal()))
+                                         ? e.position.x - mousePosWhenLastDragged.x
+                                         : e.position.y - mousePosWhenLastDragged.y;
 
         const double maxSpeed = jmax (200, sliderRegionSize);
-        double speed = jlimit (0.0, maxSpeed, (double) abs (mouseDiff));
+        double speed = jlimit (0.0, maxSpeed, (double) std::abs (mouseDiff));
 
         if (speed != 0)
         {
@@ -816,7 +817,7 @@ public:
     {
         incDecDragged = false;
         useDragEvents = false;
-        mouseDragStartPos = mousePosWhenLastDragged = e.getPosition();
+        mouseDragStartPos = mousePosWhenLastDragged = e.position;
         currentDrag = nullptr;
 
         if (owner.isEnabled())
@@ -887,7 +888,7 @@ public:
                         return;
 
                     incDecDragged = true;
-                    mouseDragStartPos = e.getPosition();
+                    mouseDragStartPos = e.position;
                 }
 
                 if (isAbsoluteDragMode (e.mods) || (maximum - minimum) / sliderRegionSize < interval)
@@ -930,7 +931,7 @@ public:
                     minMaxDiff = (double) valueMax.getValue() - (double) valueMin.getValue();
             }
 
-            mousePosWhenLastDragged = e.getPosition();
+            mousePosWhenLastDragged = e.position;
         }
     }
 
@@ -980,29 +981,45 @@ public:
         }
     }
 
+    double getMouseWheelDelta (double value, double wheelAmount)
+    {
+        if (style == IncDecButtons)
+            return interval * wheelAmount;
+
+        const double proportionDelta = wheelAmount * 0.15f;
+        const double currentPos = owner.valueToProportionOfLength (value);
+        return owner.proportionOfLengthToValue (jlimit (0.0, 1.0, currentPos + proportionDelta)) - value;
+    }
+
     bool mouseWheelMove (const MouseEvent& e, const MouseWheelDetails& wheel)
     {
         if (scrollWheelEnabled
              && style != TwoValueHorizontal
              && style != TwoValueVertical)
         {
-            if (maximum > minimum && ! e.mods.isAnyMouseButtonDown())
+            // sometimes duplicate wheel events seem to be sent, so since we're going to
+            // bump the value by a minimum of the interval, avoid doing this twice..
+            if (e.eventTime != lastMouseWheelTime)
             {
-                if (valueBox != nullptr)
-                    valueBox->hideEditor (false);
+                lastMouseWheelTime = e.eventTime;
 
-                const double value = (double) currentValue.getValue();
-                const double proportionDelta = (wheel.deltaX != 0 ? -wheel.deltaX : wheel.deltaY)
-                                                   * (wheel.isReversed ? -0.15f : 0.15f);
-                const double currentPos = owner.valueToProportionOfLength (value);
-                const double newValue = owner.proportionOfLengthToValue (jlimit (0.0, 1.0, currentPos + proportionDelta));
+                if (maximum > minimum && ! e.mods.isAnyMouseButtonDown())
+                {
+                    if (valueBox != nullptr)
+                        valueBox->hideEditor (false);
 
-                double delta = (newValue != value) ? jmax (std::abs (newValue - value), interval) : 0;
-                if (value > newValue)
-                    delta = -delta;
+                    const double value = (double) currentValue.getValue();
+                    const double delta = getMouseWheelDelta (value, (wheel.deltaX != 0 ? -wheel.deltaX : wheel.deltaY)
+                                                                        * (wheel.isReversed ? -1.0f : 1.0f));
 
-                DragInProgress drag (*this);
-                setValue (owner.snapValue (value + delta, notDragging), sendNotificationSync);
+                    if (delta != 0)
+                    {
+                        const double newValue = value + jmax (interval, std::abs (delta)) * (delta < 0 ? -1.0 : 1.0);
+
+                        DragInProgress drag (*this);
+                        setValue (owner.snapValue (newValue, notDragging), sendNotificationSync);
+                    }
+                }
             }
 
             return true;
@@ -1036,29 +1053,29 @@ public:
                 const double pos = sliderBeingDragged == 2 ? getMaxValue()
                                                            : (sliderBeingDragged == 1 ? getMinValue()
                                                                                       : (double) currentValue.getValue());
-                Point<int> mousePos;
+                Point<float> mousePos;
 
                 if (isRotary())
                 {
                     mousePos = mi->getLastMouseDownPosition();
 
-                    const int delta = roundToInt (pixelsForFullDragExtent * (owner.valueToProportionOfLength (valueOnMouseDown)
-                                                                               - owner.valueToProportionOfLength (pos)));
+                    const float delta = (float) (pixelsForFullDragExtent * (owner.valueToProportionOfLength (valueOnMouseDown)
+                                                                                - owner.valueToProportionOfLength (pos)));
 
-                    if (style == RotaryHorizontalDrag)      mousePos += Point<int> (-delta, 0);
-                    else if (style == RotaryVerticalDrag)   mousePos += Point<int> (0, delta);
-                    else                                    mousePos += Point<int> (delta / -2, delta / 2);
+                    if (style == RotaryHorizontalDrag)      mousePos += Point<float> (-delta, 0.0f);
+                    else if (style == RotaryVerticalDrag)   mousePos += Point<float> (0.0f, delta);
+                    else                                    mousePos += Point<float> (delta / -2.0f, delta / 2.0f);
 
-                    mousePos = owner.getScreenBounds().reduced (4).getConstrainedPoint (mousePos);
+                    mousePos = owner.getScreenBounds().reduced (4).toFloat().getConstrainedPoint (mousePos);
                     mouseDragStartPos = mousePosWhenLastDragged = owner.getLocalPoint (nullptr, mousePos);
                     valueOnMouseDown = valueWhenLastDragged;
                 }
                 else
                 {
-                    const int pixelPos = (int) getLinearSliderPos (pos);
+                    const float pixelPos = (float) getLinearSliderPos (pos);
 
-                    mousePos = owner.localPointToGlobal (Point<int> (isHorizontal() ? pixelPos : (owner.getWidth() / 2),
-                                                                     isVertical()   ? pixelPos : (owner.getHeight() / 2)));
+                    mousePos = owner.localPointToGlobal (Point<float> (isHorizontal() ? pixelPos : (owner.getWidth() / 2.0f),
+                                                                       isVertical()   ? pixelPos : (owner.getHeight() / 2.0f)));
                 }
 
                 mi->setScreenPosition (mousePos);
@@ -1231,10 +1248,11 @@ public:
     double velocityModeSensitivity, velocityModeOffset, minMaxDiff;
     int velocityModeThreshold;
     float rotaryStart, rotaryEnd;
-    Point<int> mouseDragStartPos, mousePosWhenLastDragged;
+    Point<float> mouseDragStartPos, mousePosWhenLastDragged;
     int sliderRegionStart, sliderRegionSize;
     int sliderBeingDragged;
     int pixelsForFullDragExtent;
+    Time lastMouseWheelTime;
     Rectangle<int> sliderRect;
     ScopedPointer<DragInProgress> currentDrag;
 

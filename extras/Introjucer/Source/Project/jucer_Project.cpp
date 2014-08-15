@@ -184,10 +184,10 @@ void Project::updateOldModulePaths()
 }
 
 //==============================================================================
-static int getVersionElement (const String& v, int index)
+static int getVersionElement (StringRef v, int index)
 {
     StringArray parts;
-    parts.addTokens (v, "., ", String::empty);
+    parts.addTokens (v, "., ", StringRef());
 
     return parts [parts.size() - index - 1].getIntValue();
 }
@@ -743,7 +743,7 @@ struct ItemSorter
 {
     static int compareElements (const ValueTree& first, const ValueTree& second)
     {
-        return first [Ids::name].toString().compareIgnoreCase (second [Ids::name].toString());
+        return first [Ids::name].toString().compareNatural (second [Ids::name].toString());
     }
 };
 
@@ -755,7 +755,7 @@ struct ItemSorterWithGroupsAtStart
         const bool secondIsGroup = second.hasType (Ids::GROUP);
 
         if (firstIsGroup == secondIsGroup)
-            return first [Ids::name].toString().compareIgnoreCase (second [Ids::name].toString());
+            return first [Ids::name].toString().compareNatural (second [Ids::name].toString());
 
         return firstIsGroup ? -1 : 1;
     }

@@ -23,7 +23,7 @@ class JuceDemoPluginAudioProcessorEditor  : public AudioProcessorEditor,
                                             public Timer
 {
 public:
-    JuceDemoPluginAudioProcessorEditor (JuceDemoPluginAudioProcessor* ownerFilter);
+    JuceDemoPluginAudioProcessorEditor (JuceDemoPluginAudioProcessor&);
     ~JuceDemoPluginAudioProcessorEditor();
 
     //==============================================================================
@@ -41,9 +41,9 @@ private:
 
     AudioPlayHead::CurrentPositionInfo lastDisplayedPosition;
 
-    JuceDemoPluginAudioProcessor* getProcessor() const
+    JuceDemoPluginAudioProcessor& getProcessor() const
     {
-        return static_cast <JuceDemoPluginAudioProcessor*> (getAudioProcessor());
+        return static_cast<JuceDemoPluginAudioProcessor&> (processor);
     }
 
     void displayPositionInfo (const AudioPlayHead::CurrentPositionInfo& pos);
