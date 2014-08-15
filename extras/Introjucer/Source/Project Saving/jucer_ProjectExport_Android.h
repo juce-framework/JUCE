@@ -394,6 +394,25 @@ private:
             mo << " -Wno-psabi";
         
         mo << newLine;
+        
+        // APP_ABI
+        String debugABIs, releaseABIs;
+        
+        for (ConstConfigIterator config (*this); config.next();)
+        {
+            const AndroidBuildConfiguration& androidConfig = dynamic_cast <const AndroidBuildConfiguration&> (*config);
+            
+            if (config->isDebug())
+                debugABIs = androidConfig.getArchitectures();
+            else
+                releaseABIs = androidConfig.getArchitectures();
+        }
+        
+        mo << "ifeq ($(NDK_DEBUG),1)" << newLine
+           << "    APP_ABI := " << debugABIs << newLine
+           << "else" << newLine
+           << "    APP_ABI := " << releaseABIs << newLine
+           << "endif" << newLine;
 
         overwriteFileIfDifferentOrThrow (file, mo);
     }
@@ -433,7 +452,7 @@ private:
         String debugSettings, releaseSettings;
 
         out << newLine
-            << "ifeq ($(CONFIG),Debug)" << newLine;
+            << "ifeq ($(NDK_DEBUG),1)" << newLine;
         writeConfigSettings (out, true);
         out << "else" << newLine;
         writeConfigSettings (out, false);
