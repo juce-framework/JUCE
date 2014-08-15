@@ -50,6 +50,7 @@ public:
 
         if (getSDKPathString().isEmpty())       getSDKPathValue() = "${user.home}/SDKs/android-sdk";
         if (getNDKPathString().isEmpty())       getNDKPathValue() = "${user.home}/SDKs/android-ndk";
+        if (getNDKToolchainVersionString().isEmpty()) getNDKToolchainVersionValue() = "4.8";
 
         if (getMinimumSDKVersionString().isEmpty())
             getMinimumSDKVersionValue() = 8;
@@ -83,8 +84,11 @@ public:
 
         props.add (new TextPropertyComponent (getMinimumSDKVersionValue(), "Minimum SDK version", 32, false),
                    "The number of the minimum version of the Android SDK that the app requires");
+        
+        props.add (new TextPropertyComponent (getNDKToolchainVersionValue(), "NDK Toolchain version", 32, false),
+                   "The variable NDK_TOOLCHAIN_VERSION in Application.mk");
 
-        props.add (new BooleanPropertyComponent (getCPP11EnabledValue(), "Enable C++11 features", "Enable the -std=c++0x flag"),
+        props.add (new BooleanPropertyComponent (getCPP11EnabledValue(), "Enable C++11 features", "Enable the -std=c++11 flag"),
                    "If enabled, this will set the -std=c++0x flag for the build.");
 
         props.add (new BooleanPropertyComponent (getInternetNeededValue(), "Internet Access", "Specify internet access permission in the manifest"),
@@ -112,6 +116,8 @@ public:
     String getSDKPathString() const        { return settings [Ids::androidSDKPath]; }
     Value getNDKPathValue()                { return getSetting (Ids::androidNDKPath); }
     String getNDKPathString() const        { return settings [Ids::androidNDKPath]; }
+    Value getNDKToolchainVersionValue()    { return getSetting (Ids::toolset); }
+    String getNDKToolchainVersionString() const { return settings [Ids::toolset]; }
 
     Value getKeyStoreValue()               { return getSetting (Ids::androidKeyStore); }
     String getKeyStoreString() const       { return settings [Ids::androidKeyStore]; }
@@ -265,7 +271,12 @@ private:
 
         XmlElement* app = manifest->createNewChildElement ("application");
         app->setAttribute ("android:label", "@string/app_name");
-        app->setAttribute ("android:icon", "@drawable/icon");
+        
+        ScopedPointer<Drawable> bigIcon (getBigIcon());
+        ScopedPointer<Drawable> smallIcon (getSmallIcon());
+        
+        if (bigIcon != nullptr && smallIcon != nullptr)
+            app->setAttribute ("android:icon", "@drawable/icon");
 
         if (getMinimumSDKVersionString().getIntValue() >= 11)
             app->setAttribute ("android:hardwareAccelerated", "false"); // (using the 2D acceleration slows down openGL)
@@ -375,8 +386,14 @@ private:
            << "# Don't edit this file! Your changes will be overwritten when you re-save the Introjucer project!" << newLine
            << newLine
            << "APP_STL := gnustl_static" << newLine
-           << "APP_CPPFLAGS += -fsigned-char -fexceptions -frtti -Wno-psabi" << newLine
-           << "APP_PLATFORM := " << getAppPlatform() << newLine;
+           << "APP_PLATFORM := " << getAppPlatform() << newLine
+           << "NDK_TOOLCHAIN_VERSION := " << getNDKToolchainVersionString() << newLine
+           << "APP_CPPFLAGS += -fsigned-char -fexceptions -frtti";
+        
+        if (!getNDKToolchainVersionString().startsWith ("clang"))
+            mo << " -Wno-psabi";
+        
+        mo << newLine;
 
         overwriteFileIfDifferentOrThrow (file, mo);
     }
@@ -403,7 +420,9 @@ private:
             << newLine
             << "include $(CLEAR_VARS)" << newLine
             << newLine
-            << "LOCAL_ARM_MODE := arm" << newLine
+            << "ifeq ($(TARGET_ARCH_ABI), armeabi-v7a)" << newLine
+            << "    LOCAL_ARM_MODE := arm" << newLine
+            << "endif" << newLine
             << "LOCAL_MODULE := juce_jni" << newLine
             << "LOCAL_SRC_FILES := \\" << newLine;
 
@@ -490,7 +509,7 @@ private:
               << " -O" << config.getGCCOptimisationFlag();
 
         if (isCPP11Enabled())
-            flags << " -std=c++0x -std=gnu++0x"; // these flags seem to enable slightly different things on gcc, and both seem to be needed
+            flags << " -std=c++11 -std=gnu++11"; // these flags seem to enable slightly different things on gcc, and both seem to be needed
 
         defines = mergePreprocessorDefs (defines, getAllPreprocessorDefs (config));
         return flags + createGCCPreprocessorFlags (defines);
