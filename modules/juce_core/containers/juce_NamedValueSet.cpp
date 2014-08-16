@@ -88,9 +88,8 @@ NamedValueSet& NamedValueSet::operator= (NamedValueSet&& other) noexcept
 }
 #endif
 
-NamedValueSet::~NamedValueSet()
+NamedValueSet::~NamedValueSet() noexcept
 {
-    clear();
 }
 
 void NamedValueSet::clear()
@@ -113,7 +112,7 @@ int NamedValueSet::size() const noexcept
     return values.size();
 }
 
-const var& NamedValueSet::operator[] (const Identifier& name) const
+const var& NamedValueSet::operator[] (const Identifier& name) const noexcept
 {
     if (const var* v = getVarPointer (name))
         return *v;
@@ -170,7 +169,7 @@ bool NamedValueSet::set (Identifier name, const var& newValue)
     return true;
 }
 
-bool NamedValueSet::contains (const Identifier& name) const
+bool NamedValueSet::contains (const Identifier& name) const noexcept
 {
     return getVarPointer (name) != nullptr;
 }

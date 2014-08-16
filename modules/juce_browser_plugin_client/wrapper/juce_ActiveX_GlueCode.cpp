@@ -785,8 +785,10 @@ private:
 //==============================================================================
 String getActiveXBrowserURL (const BrowserPluginComponent* comp)
 {
-    AXBrowserPluginHolderComponent* const ax = dynamic_cast <AXBrowserPluginHolderComponent*> (comp->getParentComponent());
-    return ax != nullptr ? ax->getBrowserURL() : String::empty;
+    if (AXBrowserPluginHolderComponent* ax = dynamic_cast<AXBrowserPluginHolderComponent*> (comp->getParentComponent()))
+        return ax->getBrowserURL();
+
+    return String();
 }
 
 //==============================================================================

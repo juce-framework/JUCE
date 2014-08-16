@@ -271,7 +271,7 @@ struct AAXClasses
         {
             if (component == nullptr)
             {
-                if (JuceAAX_Processor* params = dynamic_cast <JuceAAX_Processor*> (GetEffectParameters()))
+                if (JuceAAX_Processor* params = dynamic_cast<JuceAAX_Processor*> (GetEffectParameters()))
                     component = new ContentWrapperComponent (*this, params->getPluginInstance());
                 else
                     jassertfalse;
@@ -481,7 +481,7 @@ struct AAXClasses
                 case JUCEAlgorithmIDs::pluginInstance:
                 {
                     const size_t numObjects = dataSize / sizeof (PluginInstanceInfo);
-                    PluginInstanceInfo* const objects = static_cast <PluginInstanceInfo*> (data);
+                    PluginInstanceInfo* const objects = static_cast<PluginInstanceInfo*> (data);
 
                     jassert (numObjects == 1); // not sure how to handle more than one..
 
@@ -496,7 +496,7 @@ struct AAXClasses
                     const_cast<JuceAAX_Processor*>(this)->preparePlugin();
 
                     const size_t numObjects = dataSize / sizeof (uint32_t);
-                    uint32_t* const objects = static_cast <uint32_t*> (data);
+                    uint32_t* const objects = static_cast<uint32_t*> (data);
 
                     for (size_t i = 0; i < numObjects; ++i)
                         new (objects + i) uint32_t (1);
@@ -730,7 +730,7 @@ struct AAXClasses
                 }
 
                 for (int i = numOuts; i < numIns; ++i)
-                    channels[i] = const_cast <float*> (inputs[i]);
+                    channels[i] = const_cast<float*> (inputs[i]);
 
                 process (channels, numIns, bufferSize, bypass, midiNodeIn, midiNodesOut);
             }
@@ -756,7 +756,7 @@ struct AAXClasses
 
                 } while (v > 0);
 
-                return static_cast <AAX_CParamID> (t);
+                return static_cast<AAX_CParamID> (t);
             }
 
         private:

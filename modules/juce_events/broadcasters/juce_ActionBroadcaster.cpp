@@ -25,12 +25,11 @@
 class ActionBroadcaster::ActionMessage  : public MessageManager::MessageBase
 {
 public:
-    ActionMessage (const ActionBroadcaster* const broadcaster_,
-                   const String& messageText,
-                   ActionListener* const listener_) noexcept
-        : broadcaster (const_cast <ActionBroadcaster*> (broadcaster_)),
+    ActionMessage (const ActionBroadcaster* ab,
+                   const String& messageText, ActionListener* l) noexcept
+        : broadcaster (const_cast<ActionBroadcaster*> (ab)),
           message (messageText),
-          listener (listener_)
+          listener (l)
     {}
 
     void messageCallback() override

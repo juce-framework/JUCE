@@ -2308,9 +2308,9 @@ private:
         bool mouseDownWasBlocked        : 1;
         bool isMoveCallbackPending      : 1;
         bool isResizeCallbackPending    : 1;
-      #if JUCE_DEBUG
+       #if JUCE_DEBUG
         bool isInsidePaintCall          : 1;
-      #endif
+       #endif
     };
 
     union

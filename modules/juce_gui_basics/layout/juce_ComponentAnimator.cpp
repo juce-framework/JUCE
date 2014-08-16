@@ -25,8 +25,7 @@
 class ComponentAnimator::AnimationTask
 {
 public:
-    AnimationTask (Component* const comp)
-        : component (comp)
+    AnimationTask (Component* const comp) noexcept  : component (comp)
     {
     }
 
@@ -34,7 +33,7 @@ public:
                 float finalAlpha,
                 int millisecondsToSpendMoving,
                 bool useProxyComponent,
-                double startSpeed_, double endSpeed_)
+                double startSpd, double endSpd)
     {
         msElapsed = 0;
         msTotal = jmax (1, millisecondsToSpendMoving);
@@ -51,10 +50,10 @@ public:
         bottom  = component->getBottom();
         alpha   = component->getAlpha();
 
-        const double invTotalDistance = 4.0 / (startSpeed_ + endSpeed_ + 2.0);
-        startSpeed = jmax (0.0, startSpeed_ * invTotalDistance);
+        const double invTotalDistance = 4.0 / (startSpd + endSpd + 2.0);
+        startSpeed = jmax (0.0, startSpd * invTotalDistance);
         midSpeed = invTotalDistance;
-        endSpeed = jmax (0.0, endSpeed_ * invTotalDistance);
+        endSpeed = jmax (0.0, endSpd * invTotalDistance);
 
         if (useProxyComponent)
             proxy = new ProxyComponent (*component);
