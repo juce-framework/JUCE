@@ -315,16 +315,6 @@ public:
     */
     Rectangle<int> getBoundsInParent() const noexcept;
 
-    /** Returns the region of this component that's not obscured by other, opaque components.
-
-        The RectangleList that is returned represents the area of this component
-        which isn't covered by opaque child components.
-
-        If includeSiblings is true, it will also take into account any siblings
-        that may be overlapping the component.
-    */
-    void getVisibleArea (RectangleList<int>& result, bool includeSiblings) const;
-
     //==============================================================================
     /** Returns this component's x coordinate relative the screen's top-left origin.
         @see getX, localPointToGlobal
@@ -1166,7 +1156,7 @@ public:
         By default, components are considered transparent, unless this is used to
         make it otherwise.
 
-        @see isOpaque, getVisibleArea
+        @see isOpaque
     */
     void setOpaque (bool shouldBeOpaque);
 

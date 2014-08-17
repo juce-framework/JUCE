@@ -399,16 +399,6 @@ struct Component::ComponentHelpers
         return convertFromDistantParentSpace (topLevelComp, *target, p);
     }
 
-    static Rectangle<int> getUnclippedArea (const Component& comp)
-    {
-        Rectangle<int> r (comp.getLocalBounds());
-
-        if (Component* const p = comp.getParentComponent())
-            r = r.getIntersection (convertFromParentSpace (comp, getUnclippedArea (*p)));
-
-        return r;
-    }
-
     static bool clipObscuredRegions (const Component& comp, Graphics& g, const Rectangle<int>& clipRect, Point<int> delta)
     {
         bool nothingChanged = true;
@@ -439,35 +429,6 @@ struct Component::ComponentHelpers
         }
 
         return nothingChanged;
-    }
-
-    static void subtractObscuredRegions (const Component& comp, RectangleList<int>& result,
-                                         Point<int> delta, const Rectangle<int>& clipRect,
-                                         const Component* const compToAvoid)
-    {
-        for (int i = comp.childComponentList.size(); --i >= 0;)
-        {
-            const Component* const c = comp.childComponentList.getUnchecked(i);
-
-            if (c != compToAvoid && c->isVisible())
-            {
-                if (c->isOpaque() && c->componentTransparency == 0)
-                {
-                    Rectangle<int> childBounds (c->bounds.getIntersection (clipRect));
-                    childBounds.translate (delta.x, delta.y);
-
-                    result.subtract (childBounds);
-                }
-                else
-                {
-                    Rectangle<int> newClip (clipRect.getIntersection (c->bounds));
-                    newClip.translate (-c->getX(), -c->getY());
-
-                    subtractObscuredRegions (*c, result, c->getPosition() + delta,
-                                             newClip, compToAvoid);
-                }
-            }
-        }
     }
 
     static Rectangle<int> getParentOrMainMonitorBounds (const Component& comp)
@@ -619,7 +580,6 @@ bool Component::isShowing() const
 
     return false;
 }
-
 
 //==============================================================================
 void* Component::getWindowHandle() const
@@ -2282,28 +2242,6 @@ Rectangle<int> Component::getBoundsInParent() const noexcept
 {
     return affineTransform == nullptr ? bounds
                                       : bounds.transformedBy (*affineTransform);
-}
-
-void Component::getVisibleArea (RectangleList<int>& result, const bool includeSiblings) const
-{
-    result.clear();
-    const Rectangle<int> unclipped (ComponentHelpers::getUnclippedArea (*this));
-
-    if (! unclipped.isEmpty())
-    {
-        result.add (unclipped);
-
-        if (includeSiblings)
-        {
-            const Component* const c = getTopLevelComponent();
-
-            ComponentHelpers::subtractObscuredRegions (*c, result, getLocalPoint (c, Point<int>()),
-                                                       c->getLocalBounds(), this);
-        }
-
-        ComponentHelpers::subtractObscuredRegions (*this, result, Point<int>(), unclipped, nullptr);
-        result.consolidate();
-    }
 }
 
 //==============================================================================
