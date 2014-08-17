@@ -81,8 +81,8 @@ String OpenGLHelpers::translateVertexShaderToV3 (const String& code)
 {
    #if JUCE_OPENGL3
     if (OpenGLShaderProgram::getLanguageVersion() > 1.2)
-        return "#version 150\n" + code.replace ("attribute", "in")
-                                      .replace ("varying", "out");
+        return JUCE_GLSL_VERSION "\n" + code.replace ("attribute", "in")
+                                            .replace ("varying", "out");
    #endif
 
     return code;
@@ -92,7 +92,7 @@ String OpenGLHelpers::translateFragmentShaderToV3 (const String& code)
 {
    #if JUCE_OPENGL3
     if (OpenGLShaderProgram::getLanguageVersion() > 1.2)
-        return "#version 150\n"
+        return JUCE_GLSL_VERSION "\n"
                "out vec4 fragColor;\n"
                 + code.replace ("varying", "in")
                       .replace ("texture2D", "texture")
