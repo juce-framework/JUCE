@@ -192,7 +192,7 @@
   #endif
 
   #if JUCE_64BIT || ! JUCE_VC7_OR_EARLIER
-    #define JUCE_USE_INTRINSICS 1
+    #define JUCE_USE_MSVC_INTRINSICS 1
   #endif
 #else
   #error unknown compiler
