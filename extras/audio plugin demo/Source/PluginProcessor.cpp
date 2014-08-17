@@ -21,8 +21,8 @@ class SineWaveSound : public SynthesiserSound
 public:
     SineWaveSound() {}
 
-    bool appliesToNote (const int /*midiNoteNumber*/)           { return true; }
-    bool appliesToChannel (const int /*midiChannel*/)           { return true; }
+    bool appliesToNote (const int /*midiNoteNumber*/) override  { return true; }
+    bool appliesToChannel (const int /*midiChannel*/) override  { return true; }
 };
 
 //==============================================================================
@@ -36,13 +36,13 @@ public:
     {
     }
 
-    bool canPlaySound (SynthesiserSound* sound)
+    bool canPlaySound (SynthesiserSound* sound) override
     {
         return dynamic_cast <SineWaveSound*> (sound) != 0;
     }
 
     void startNote (int midiNoteNumber, float velocity,
-                    SynthesiserSound* /*sound*/, int /*currentPitchWheelPosition*/)
+                    SynthesiserSound* /*sound*/, int /*currentPitchWheelPosition*/) override
     {
         currentAngle = 0.0;
         level = velocity * 0.15;
@@ -54,7 +54,7 @@ public:
         angleDelta = cyclesPerSample * 2.0 * double_Pi;
     }
 
-    void stopNote (bool allowTailOff)
+    void stopNote (bool allowTailOff) override
     {
         if (allowTailOff)
         {
@@ -74,17 +74,17 @@ public:
         }
     }
 
-    void pitchWheelMoved (int /*newValue*/)
+    void pitchWheelMoved (int /*newValue*/) override
     {
         // can't be bothered implementing this for the demo!
     }
 
-    void controllerMoved (int /*controllerNumber*/, int /*newValue*/)
+    void controllerMoved (int /*controllerNumber*/, int /*newValue*/) override
     {
         // not interested in controllers in this case.
     }
 
-    void renderNextBlock (AudioSampleBuffer& outputBuffer, int startSample, int numSamples)
+    void renderNextBlock (AudioSampleBuffer& outputBuffer, int startSample, int numSamples) override
     {
         if (angleDelta != 0.0)
         {
@@ -303,7 +303,7 @@ void JuceDemoPluginAudioProcessor::processBlock (AudioSampleBuffer& buffer, Midi
 //==============================================================================
 AudioProcessorEditor* JuceDemoPluginAudioProcessor::createEditor()
 {
-    return new JuceDemoPluginAudioProcessorEditor (this);
+    return new JuceDemoPluginAudioProcessorEditor (*this);
 }
 
 //==============================================================================

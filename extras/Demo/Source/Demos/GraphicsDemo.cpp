@@ -508,6 +508,8 @@ public:
     {
         {
             RectangleList<float> verticalLines;
+            verticalLines.ensureStorageAllocated (getWidth());
+
             float pos = offset.getValue();
 
             for (int x = 0; x < getWidth(); ++x)
@@ -523,6 +525,8 @@ public:
 
         {
             RectangleList<float> horizontalLines;
+            horizontalLines.ensureStorageAllocated (getHeight());
+
             float pos = offset.getValue();
 
             for (int y = 0; y < getHeight(); ++y)

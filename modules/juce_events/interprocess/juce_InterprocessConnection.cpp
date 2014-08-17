@@ -31,7 +31,7 @@ struct InterprocessConnection::ConnectionThread  : public Thread
 private:
     InterprocessConnection& owner;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ConnectionThread);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ConnectionThread)
 };
 
 //==============================================================================
@@ -69,11 +69,9 @@ bool InterprocessConnection::connectToSocket (const String& hostName,
         thread->startThread();
         return true;
     }
-    else
-    {
-        socket = nullptr;
-        return false;
-    }
+
+    socket = nullptr;
+    return false;
 }
 
 bool InterprocessConnection::connectToPipe (const String& pipeName, const int timeoutMs)
@@ -143,41 +141,43 @@ bool InterprocessConnection::isConnected() const
 
 String InterprocessConnection::getConnectedHostName() const
 {
-    if (pipe != nullptr)
-        return "localhost";
-
-    if (socket != nullptr)
     {
-        if (! socket->isLocal())
-            return socket->getHostName();
+        const ScopedLock sl (pipeAndSocketLock);
 
-        return "localhost";
+        if (pipe == nullptr && socket == nullptr)
+            return String();
+
+        if (socket != nullptr && ! socket->isLocal())
+            return socket->getHostName();
     }
 
-    return String();
+    return IPAddress::local().toString();
 }
 
 //==============================================================================
 bool InterprocessConnection::sendMessage (const MemoryBlock& message)
 {
-    uint32 messageHeader[2];
-    messageHeader [0] = ByteOrder::swapIfBigEndian (magicMessageHeader);
-    messageHeader [1] = ByteOrder::swapIfBigEndian ((uint32) message.getSize());
+    uint32 messageHeader[2] = { ByteOrder::swapIfBigEndian (magicMessageHeader),
+                                ByteOrder::swapIfBigEndian ((uint32) message.getSize()) };
 
     MemoryBlock messageData (sizeof (messageHeader) + message.getSize());
     messageData.copyFrom (messageHeader, 0, sizeof (messageHeader));
     messageData.copyFrom (message.getData(), sizeof (messageHeader), message.getSize());
 
-    int bytesWritten = 0;
+    return writeData (messageData.getData(), (int) messageData.getSize()) == (int) messageData.getSize();
+}
 
+int InterprocessConnection::writeData (void* data, int dataSize)
+{
     const ScopedLock sl (pipeAndSocketLock);
 
     if (socket != nullptr)
-        bytesWritten = socket->write (messageData.getData(), (int) messageData.getSize());
-    else if (pipe != nullptr)
-        bytesWritten = pipe->write (messageData.getData(), (int) messageData.getSize(), pipeReceiveMessageTimeout);
+        return socket->write (data, dataSize);
 
-    return bytesWritten == (int) messageData.getSize();
+    if (pipe != nullptr)
+        return pipe->write (data, dataSize, pipeReceiveMessageTimeout);
+
+    return 0;
 }
 
 //==============================================================================

@@ -233,7 +233,7 @@ public:
                         size = sizeof (nameNSString);
 
                         pa.mSelector = kAudioObjectPropertyElementName;
-                        pa.mElement = chanNum + 1;
+                        pa.mElement = (AudioObjectPropertyElement) chanNum + 1;
 
                         if (AudioObjectGetPropertyData (deviceID, &pa, 0, nullptr, &size, &nameNSString) == noErr)
                         {
@@ -394,7 +394,7 @@ public:
         if (OK (AudioObjectGetPropertyData (deviceID, &pa, 0, nullptr, &size, &sr)))
             sampleRate = sr;
 
-        UInt32 framesPerBuf = bufferSize;
+        UInt32 framesPerBuf = (UInt32) bufferSize;
         size = sizeof (framesPerBuf);
         pa.mSelector = kAudioDevicePropertyBufferFrameSize;
         AudioObjectGetPropertyData (deviceID, &pa, 0, nullptr, &size, &framesPerBuf);

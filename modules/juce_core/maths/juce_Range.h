@@ -77,6 +77,13 @@ public:
                                      : Range (position2, position1);
     }
 
+    /** Returns a range with a given start and length. */
+    static Range withStartAndLength (const ValueType startValue, const ValueType length) noexcept
+    {
+        jassert (length >= ValueType());
+        return Range (startValue, startValue + length);
+    }
+
     /** Returns a range with the specified start position and a length of zero. */
     static Range emptyRange (const ValueType start) noexcept
     {

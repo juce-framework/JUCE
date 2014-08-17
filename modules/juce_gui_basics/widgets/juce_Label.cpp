@@ -289,11 +289,22 @@ bool Label::isBeingEdited() const noexcept
     return editor != nullptr;
 }
 
+static void copyColourIfSpecified (Label& l, TextEditor& ed, int colourID, int targetColourID)
+{
+    if (l.isColourSpecified (colourID) || l.getLookAndFeel().isColourSpecified (colourID))
+        ed.setColour (targetColourID, l.findColour (colourID));
+}
+
 TextEditor* Label::createEditorComponent()
 {
     TextEditor* const ed = new TextEditor (getName());
     ed->applyFontToAllText (getLookAndFeel().getLabelFont (*this));
     copyAllExplicitColoursTo (*ed);
+
+    copyColourIfSpecified (*this, *ed, textWhenEditingColourId, TextEditor::textColourId);
+    copyColourIfSpecified (*this, *ed, backgroundWhenEditingColourId, TextEditor::backgroundColourId);
+    copyColourIfSpecified (*this, *ed, outlineWhenEditingColourId, TextEditor::outlineColourId);
+
     return ed;
 }
 

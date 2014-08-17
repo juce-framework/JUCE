@@ -1,0 +1,17 @@
+{
+  "id":             "juce_tracktion_marketplace",
+  "name":           "JUCE Tracktion marketplace support",
+  "version":        "3.0.8",
+  "description":    "JUCE classes for online product authentication via the Tracktion marketplace.",
+  "website":        "http://www.juce.com/juce",
+  "license":        "GPL/Commercial",
+
+  "dependencies":   [ { "id": "juce_data_structures",  "version": "matching" } ],
+
+  "include":        "juce_tracktion_marketplace.h",
+
+  "compile":        [ { "file": "juce_tracktion_marketplace.cpp" } ],
+
+  "browse":         [ "marketplace/*" ]
+
+}

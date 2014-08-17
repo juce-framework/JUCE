@@ -42,98 +42,133 @@ bool FileChooser::isPlatformDialogAvailable()
    #endif
 }
 
-void FileChooser::showPlatformDialog (Array<File>& results,
-                                      const String& title,
-                                      const File& file,
-                                      const String& filters,
-                                      bool isDirectory,
-                                      bool /* selectsFiles */,
-                                      bool isSave,
-                                      bool /* warnAboutOverwritingExistingFiles */,
-                                      bool selectMultipleFiles,
-                                      FilePreviewComponent* /* previewComponent */)
+static uint64 getTopWindowID() noexcept
 {
-    String separator;
-    StringArray args;
+    if (TopLevelWindow* top = TopLevelWindow::getActiveTopLevelWindow())
+        return (uint64) (pointer_sized_uint) top->getWindowHandle();
 
-    const File previousWorkingDirectory (File::getCurrentWorkingDirectory());
-    const bool isKdeFullSession = SystemStats::getEnvironmentVariable ("KDE_FULL_SESSION", String::empty)
-                                    .equalsIgnoreCase ("true");
+    return 0;
+}
 
-    if (exeIsAvailable ("kdialog") && (isKdeFullSession || ! exeIsAvailable ("zenity")))
+static bool isKdeFullSession()
+{
+    return SystemStats::getEnvironmentVariable ("KDE_FULL_SESSION", String())
+             .equalsIgnoreCase ("true");
+}
+
+static void addKDialogArgs (StringArray& args, String& separator,
+                            const String& title, const File& file, const String& filters,
+                            bool isDirectory, bool isSave, bool selectMultipleFiles)
+{
+    args.add ("kdialog");
+
+    if (title.isNotEmpty())
+        args.add ("--title=" + title);
+
+    if (selectMultipleFiles)
     {
-        // use kdialog for KDE sessions or if zenity is missing
-        args.add ("kdialog");
-
-        if (title.isNotEmpty())
-            args.add ("--title=" + title);
-
-        if (selectMultipleFiles)
-        {
-            separator = "\n";
-            args.add ("--multiple");
-            args.add ("--separate-output");
-            args.add ("--getopenfilename");
-        }
-        else
-        {
-            if (isSave)             args.add ("--getsavefilename");
-            else if (isDirectory)   args.add ("--getexistingdirectory");
-            else                    args.add ("--getopenfilename");
-        }
-
-        String startPath;
-
-        if (file.exists())
-        {
-            startPath = file.getFullPathName();
-        }
-        else if (file.getParentDirectory().exists())
-        {
-            startPath = file.getParentDirectory().getFullPathName();
-        }
-        else
-        {
-            startPath = File::getSpecialLocation (File::userHomeDirectory).getFullPathName();
-
-            if (isSave)
-                startPath += "/" + file.getFileName();
-        }
-
-        args.add (startPath);
-        args.add (filters.replaceCharacter (';', ' '));
+        separator = "\n";
+        args.add ("--multiple");
+        args.add ("--separate-output");
+        args.add ("--getopenfilename");
     }
     else
     {
-        // zenity
-        args.add ("zenity");
-        args.add ("--file-selection");
-
-        if (title.isNotEmpty())
-            args.add ("--title=" + title);
-
-        if (selectMultipleFiles)
-        {
-            separator = ":";
-            args.add ("--multiple");
-            args.add ("--separator=" + separator);
-        }
-        else
-        {
-            if (isDirectory)  args.add ("--directory");
-            if (isSave)       args.add ("--save");
-        }
-
-        if (file.isDirectory())
-            file.setAsCurrentWorkingDirectory();
-        else if (file.getParentDirectory().exists())
-            file.getParentDirectory().setAsCurrentWorkingDirectory();
-        else
-            File::getSpecialLocation (File::userHomeDirectory).setAsCurrentWorkingDirectory();
-
-        if (! file.getFileName().isEmpty())
-            args.add ("--filename=" + file.getFileName());
+        if (isSave)             args.add ("--getsavefilename");
+        else if (isDirectory)   args.add ("--getexistingdirectory");
+        else                    args.add ("--getopenfilename");
     }
+
+    if (uint64 topWindowID = getTopWindowID())
+    {
+        args.add ("--attach");
+        args.add (String (topWindowID));
+    }
+
+    File startPath;
+
+    if (file.exists())
+    {
+        startPath = file;
+    }
+    else if (file.getParentDirectory().exists())
+    {
+        startPath = file.getParentDirectory();
+    }
+    else
+    {
+        startPath = File::getSpecialLocation (File::userHomeDirectory);
+
+        if (isSave)
+            startPath = startPath.getChildFile (file.getFileName());
+    }
+
+    args.add (startPath.getFullPathName());
+    args.add (filters.replaceCharacter (';', ' '));
+}
+
+static void addZenityArgs (StringArray& args, String& separator,
+                           const String& title, const File& file, const String& filters,
+                           bool isDirectory, bool isSave, bool selectMultipleFiles)
+{
+    args.add ("zenity");
+    args.add ("--file-selection");
+
+    if (title.isNotEmpty())
+        args.add ("--title=" + title);
+
+    if (selectMultipleFiles)
+    {
+        separator = ":";
+        args.add ("--multiple");
+        args.add ("--separator=" + separator);
+    }
+    else
+    {
+        if (isDirectory)  args.add ("--directory");
+        if (isSave)       args.add ("--save");
+    }
+
+    if (filters.isNotEmpty() && filters != "*" && filters != "*.*")
+    {
+        args.add ("--file-filter");
+        args.add (filters.replaceCharacter (';', ' '));
+
+        args.add ("--file-filter");
+        args.add ("All files | *");
+    }
+
+    if (file.isDirectory())
+        file.setAsCurrentWorkingDirectory();
+    else if (file.getParentDirectory().exists())
+        file.getParentDirectory().setAsCurrentWorkingDirectory();
+    else
+        File::getSpecialLocation (File::userHomeDirectory).setAsCurrentWorkingDirectory();
+
+    if (! file.getFileName().isEmpty())
+        args.add ("--filename=" + file.getFileName());
+
+    // supplying the window ID of the topmost window makes sure that Zenity pops up..
+    if (uint64 topWindowID = getTopWindowID())
+        setenv ("WINDOWID", String (topWindowID).toRawUTF8(), true);
+}
+
+void FileChooser::showPlatformDialog (Array<File>& results,
+                                      const String& title, const File& file, const String& filters,
+                                      bool isDirectory, bool /* selectsFiles */,
+                                      bool isSave, bool /* warnAboutOverwritingExistingFiles */,
+                                      bool selectMultipleFiles, FilePreviewComponent*)
+{
+    const File previousWorkingDirectory (File::getCurrentWorkingDirectory());
+
+    StringArray args;
+    String separator;
+
+    // use kdialog for KDE sessions or if zenity is missing
+    if (exeIsAvailable ("kdialog") && (isKdeFullSession() || ! exeIsAvailable ("zenity")))
+        addKDialogArgs (args, separator, title, file, filters, isDirectory, isSave, selectMultipleFiles);
+    else
+        addZenityArgs (args, separator, title, file, filters, isDirectory, isSave, selectMultipleFiles);
 
     args.add ("2>/dev/null"); // (to avoid logging info ending up in the results)
 

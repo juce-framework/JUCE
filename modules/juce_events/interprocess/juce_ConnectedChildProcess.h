@@ -64,10 +64,16 @@ public:
         The commandLineUniqueID should be a short alphanumeric identifier (no spaces!)
         that matches the string passed to ChildProcessMaster::launchSlaveProcess().
 
+        The timeoutMs parameter lets you specify how long the child process is allowed
+        to run without receiving a ping from the master before the master is considered to
+        have died, and handleConnectionLost() will be called. Passing <= 0 for this timeout
+        makes it use a default value.
+
         Returns true if the command-line matches and the connection is made successfully.
     */
     bool initialiseFromCommandLine (const String& commandLine,
-                                    const String& commandLineUniqueID);
+                                    const String& commandLineUniqueID,
+                                    int timeoutMs = 0);
 
     //==============================================================================
     /** This will be called to deliver messages from the master process.
@@ -141,11 +147,17 @@ public:
         that gets launched must respond by calling ChildProcessSlave::initialiseFromCommandLine()
         in its startup code, and must use a matching ID to commandLineUniqueID.
 
+        The timeoutMs parameter lets you specify how long the child process is allowed
+        to go without sending a ping before it is considered to have died and
+        handleConnectionLost() will be called. Passing <= 0 for this timeout makes
+        it use a default value.
+
         If this all works, the method returns true, and you can begin sending and
         receiving messages with the slave process.
     */
     bool launchSlaveProcess (const File& executableToLaunch,
-                             const String& commandLineUniqueID);
+                             const String& commandLineUniqueID,
+                             int timeoutMs = 0);
 
     /** This will be called to deliver a message from the slave process.
         The call will probably be made on a background thread, so be careful with your thread-safety!

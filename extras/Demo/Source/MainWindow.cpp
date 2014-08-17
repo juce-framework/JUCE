@@ -117,6 +117,11 @@ public:
         demoList.selectRow (0);
     }
 
+    void clearCurrentDemo()
+    {
+        currentDemo = nullptr;
+    }
+
     void resized() override
     {
         Rectangle<int> r (getLocalBounds());
@@ -509,6 +514,7 @@ MainAppWindow::MainAppWindow()
 
 MainAppWindow::~MainAppWindow()
 {
+    contentComponent->clearCurrentDemo();
     clearContentComponent();
     contentComponent = nullptr;
     applicationCommandManager = nullptr;

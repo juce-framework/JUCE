@@ -554,6 +554,14 @@ File JUCE_CALLTYPE File::getSpecialLocation (const SpecialLocationType type)
             return File (String (dest));
         }
 
+        case windowsSystemDirectory:
+        {
+            WCHAR dest [2048];
+            dest[0] = 0;
+            GetSystemDirectoryW (dest, (UINT) numElementsInArray (dest));
+            return File (String (dest));
+        }
+
         case invokedExecutableFile:
         case currentExecutableFile:
         case currentApplicationFile:

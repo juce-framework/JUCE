@@ -210,7 +210,7 @@ bool MidiBuffer::Iterator::getNextEvent (const uint8* &midiData, int& numBytes, 
     const int itemSize = MidiBufferHelpers::getEventDataSize (data);
     numBytes = itemSize;
     midiData = data + sizeof (int32) + sizeof (uint16);
-    data += sizeof (int32) + sizeof (uint16) + itemSize;
+    data += sizeof (int32) + sizeof (uint16) + (size_t) itemSize;
 
     return true;
 }
@@ -223,7 +223,7 @@ bool MidiBuffer::Iterator::getNextEvent (MidiMessage& result, int& samplePositio
     samplePosition = MidiBufferHelpers::getEventTime (data);
     const int itemSize = MidiBufferHelpers::getEventDataSize (data);
     result = MidiMessage (data + sizeof (int32) + sizeof (uint16), itemSize, samplePosition);
-    data += sizeof (int32) + sizeof (uint16) + itemSize;
+    data += sizeof (int32) + sizeof (uint16) + (size_t) itemSize;
 
     return true;
 }

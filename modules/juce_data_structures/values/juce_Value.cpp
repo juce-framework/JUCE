@@ -94,24 +94,20 @@ private:
 
 
 //==============================================================================
-Value::Value()
-    : value (new SimpleValueSource())
+Value::Value()  : value (new SimpleValueSource())
 {
 }
 
-Value::Value (ValueSource* const v)
-    : value (v)
+Value::Value (ValueSource* const v)  : value (v)
 {
     jassert (v != nullptr);
 }
 
-Value::Value (const var& initialValue)
-    : value (new SimpleValueSource (initialValue))
+Value::Value (const var& initialValue)  : value (new SimpleValueSource (initialValue))
 {
 }
 
-Value::Value (const Value& other)
-    : value (other.value)
+Value::Value (const Value& other)  : value (other.value)
 {
 }
 
@@ -123,12 +119,22 @@ Value& Value::operator= (const Value& other)
 
 #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
 Value::Value (Value&& other) noexcept
-    : value (static_cast<ReferenceCountedObjectPtr<ValueSource>&&> (other.value))
 {
+    // moving a Value with listeners will lose those listeners, which
+    // probably isn't what you wanted to happen!
+    jassert (other.listeners.size() == 0);
+
+    other.removeFromListenerList();
+    value = static_cast<ReferenceCountedObjectPtr<ValueSource>&&> (other.value);
 }
 
 Value& Value::operator= (Value&& other) noexcept
 {
+    // moving a Value with listeners will lose those listeners, which
+    // probably isn't what you wanted to happen!
+    jassert (other.listeners.size() == 0);
+
+    other.removeFromListenerList();
     value = static_cast<ReferenceCountedObjectPtr<ValueSource>&&> (other.value);
     return *this;
 }
@@ -136,7 +142,12 @@ Value& Value::operator= (Value&& other) noexcept
 
 Value::~Value()
 {
-    if (listeners.size() > 0)
+    removeFromListenerList();
+}
+
+void Value::removeFromListenerList()
+{
+    if (listeners.size() > 0 && value != nullptr) // may be nullptr after a move operation
         value->valuesWithListeners.removeValue (this);
 }
 

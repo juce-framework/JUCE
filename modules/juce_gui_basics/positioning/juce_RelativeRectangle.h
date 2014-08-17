@@ -81,8 +81,9 @@ public:
     bool isDynamic() const;
 
     /** Returns a string which represents this point.
-        This returns a comma-separated list of coordinates, in the order left, top, right, bottom. For details of
-        the string syntax used by the coordinates, see the RelativeCoordinate constructor notes.
+        This returns a comma-separated list of coordinates, in the order left, top, right, bottom.
+        If you're using this to position a Component, then see the notes for
+        Component::setBounds (const RelativeRectangle&) for details of the syntax used.
         The string that is returned can be passed to the RelativeRectangle constructor to recreate the rectangle.
     */
     String toString() const;

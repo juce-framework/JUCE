@@ -65,8 +65,7 @@ private:
 public:
     //==============================================================================
     /** Creates an empty array. */
-    Array() noexcept
-       : numUsed (0)
+    Array() noexcept   : numUsed (0)
     {
     }
 

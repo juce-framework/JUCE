@@ -21,6 +21,8 @@
           <Add option="-g"/>
           <Add option="-D__MINGW__=1"/>
           <Add option="-D__MINGW_EXTENSION="/>
+          <Add option="-DDEBUG=1"/>
+          <Add option="-D_DEBUG=1"/>
           <Add option="-DJUCER_CODEBLOCKS_20734A5D=1"/>
           <Add option="-DJUCE_APP_VERSION=3.1.0"/>
           <Add option="-DJUCE_APP_VERSION_HEX=0x30100"/>
@@ -55,6 +57,7 @@
           <Add option="-mstackrealign"/>
           <Add option="-D__MINGW__=1"/>
           <Add option="-D__MINGW_EXTENSION="/>
+          <Add option="-DNDEBUG=1"/>
           <Add option="-DJUCER_CODEBLOCKS_20734A5D=1"/>
           <Add option="-DJUCE_APP_VERSION=3.1.0"/>
           <Add option="-DJUCE_APP_VERSION_HEX=0x30100"/>
@@ -670,15 +673,15 @@
       <Option compile="0"/>
       <Option link="0"/>
     </Unit>
+    <Unit filename="../../../../modules/juce_core/text/juce_CharPointer_UTF8.h">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
     <Unit filename="../../../../modules/juce_core/text/juce_CharPointer_UTF16.h">
       <Option compile="0"/>
       <Option link="0"/>
     </Unit>
     <Unit filename="../../../../modules/juce_core/text/juce_CharPointer_UTF32.h">
-      <Option compile="0"/>
-      <Option link="0"/>
-    </Unit>
-    <Unit filename="../../../../modules/juce_core/text/juce_CharPointer_UTF8.h">
       <Option compile="0"/>
       <Option link="0"/>
     </Unit>

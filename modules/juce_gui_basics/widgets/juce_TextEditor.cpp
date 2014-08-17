@@ -1931,7 +1931,7 @@ bool TextEditor::deleteBackwards (bool moveInWholeWordSteps)
     if (moveInWholeWordSteps)
         moveCaretTo (findWordBreakBefore (getCaretPosition()), true);
     else if (selection.isEmpty() && selection.getStart() > 0)
-        selection.setStart (selection.getEnd() - 1);
+        selection = Range<int> (selection.getEnd() - 1, selection.getEnd());
 
     cut();
     return true;
@@ -1940,7 +1940,7 @@ bool TextEditor::deleteBackwards (bool moveInWholeWordSteps)
 bool TextEditor::deleteForwards (bool /*moveInWholeWordSteps*/)
 {
     if (selection.isEmpty() && selection.getStart() < getTotalNumChars())
-        selection.setEnd (selection.getStart() + 1);
+        selection = Range<int> (selection.getStart(), selection.getStart() + 1);
 
     cut();
     return true;

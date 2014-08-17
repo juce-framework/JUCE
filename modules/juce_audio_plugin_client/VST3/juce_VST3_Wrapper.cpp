@@ -458,7 +458,7 @@ private:
                 if (pluginEditor != nullptr)
                 {
                     PopupMenu::dismissAllActiveMenus();
-                    pluginEditor->getAudioProcessor()->editorBeingDeleted (pluginEditor);
+                    pluginEditor->processor.editorBeingDeleted (pluginEditor);
                 }
             }
 
@@ -488,7 +488,7 @@ private:
                    #if JUCE_WINDOWS
                     setSize (w, h);
                    #else
-                    if (owner.macHostWindow != nullptr)
+                    if (owner.macHostWindow != nullptr && ! getHostType().isWavelab())
                         juce::setNativeHostWindowSize (owner.macHostWindow, this, w, h, owner.isNSView);
                    #endif
 
@@ -496,6 +496,9 @@ private:
                     {
                         ViewRect newSize (0, 0, w, h);
                         owner.plugFrame->resizeView (&owner, &newSize);
+
+                        if (getHostType().isWavelab())
+                            setBounds (0, 0, w, h);
                     }
                 }
             }
@@ -1356,14 +1359,21 @@ private:
         paramPreset = 'prst'
     };
 
+    static int getNumChannels (Vst::BusList& busList)
+    {
+        Vst::BusInfo info;
+        info.channelCount = 0;
+
+        if (Vst::Bus* bus = busList.first())
+            bus->getInfo (info);
+
+        return (int) info.channelCount;
+    }
+
     void preparePlugin (double sampleRate, int bufferSize)
     {
-        Vst::BusInfo inputBusInfo, outputBusInfo;
-        audioInputs.first()->getInfo (inputBusInfo);
-        audioOutputs.first()->getInfo (outputBusInfo);
-
-        getPluginInstance().setPlayConfigDetails (inputBusInfo.channelCount,
-                                                  outputBusInfo.channelCount,
+        getPluginInstance().setPlayConfigDetails (getNumChannels (audioInputs),
+                                                  getNumChannels (audioOutputs),
                                                   sampleRate, bufferSize);
 
         getPluginInstance().prepareToPlay (sampleRate, bufferSize);

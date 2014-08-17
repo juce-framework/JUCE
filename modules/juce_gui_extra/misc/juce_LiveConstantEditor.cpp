@@ -117,6 +117,8 @@ LivePropertyEditorBase::LivePropertyEditorBase (LiveValueBase& v, CodeDocument& 
 
     name.setFont (13.0f);
     name.setText (v.name, dontSendNotification);
+    valueEditor.setMultiLine (v.isString());
+    valueEditor.setReturnKeyStartsNewLine (v.isString());
     valueEditor.setText (v.getStringValue (wasHex), dontSendNotification);
     valueEditor.addListener (this);
     sourceEditor.setReadOnly (true);
@@ -138,11 +140,17 @@ void LivePropertyEditorBase::resized()
     Rectangle<int> top (left.removeFromTop (25));
     resetButton.setBounds (top.removeFromRight (35).reduced (0, 3));
     name.setBounds (top);
-    valueEditor.setBounds (left.removeFromTop (25));
-    left.removeFromTop (2);
 
     if (customComp != nullptr)
+    {
+        valueEditor.setBounds (left.removeFromTop (25));
+        left.removeFromTop (2);
         customComp->setBounds (left);
+    }
+    else
+    {
+        valueEditor.setBounds (left);
+    }
 
     r.removeFromLeft (4);
     sourceEditor.setBounds (r);
@@ -373,7 +381,7 @@ struct ColourEditorComp  : public Component,
 
     Colour getColour() const
     {
-        return Colour ((int) parseInt (editor.value.getStringValue (false)));
+        return Colour ((uint32) parseInt (editor.value.getStringValue (false)));
     }
 
     void paint (Graphics& g) override

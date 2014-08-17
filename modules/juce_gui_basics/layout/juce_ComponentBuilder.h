@@ -226,7 +226,7 @@ public:
 
 private:
     //=============================================================================
-    OwnedArray <TypeHandler> types;
+    OwnedArray<TypeHandler> types;
     ScopedPointer<Component> component;
     ImageProvider* imageProvider;
    #if JUCE_DEBUG

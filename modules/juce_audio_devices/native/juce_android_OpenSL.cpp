@@ -341,8 +341,8 @@ private:
             SLDataFormat_PCM pcmFormat =
             {
                 SL_DATAFORMAT_PCM,
-                numChannels,
-                sampleRate * 1000, // (sample rate units are millihertz)
+                (SLuint32) numChannels,
+                (SLuint32) (sampleRate * 1000), // (sample rate units are millihertz)
                 SL_PCMSAMPLEFORMAT_FIXED_16,
                 SL_PCMSAMPLEFORMAT_FIXED_16,
                 SL_SPEAKER_FRONT_LEFT | SL_SPEAKER_FRONT_RIGHT,
@@ -450,8 +450,8 @@ private:
             SLDataFormat_PCM pcmFormat =
             {
                 SL_DATAFORMAT_PCM,
-                numChannels,
-                sampleRate * 1000, // (sample rate units are millihertz)
+                (SLuint32) numChannels,
+                (SLuint32) (sampleRate * 1000), // (sample rate units are millihertz)
                 SL_PCMSAMPLEFORMAT_FIXED_16,
                 SL_PCMSAMPLEFORMAT_FIXED_16,
                 (numChannels == 1) ? SL_SPEAKER_FRONT_CENTER : (SL_SPEAKER_FRONT_LEFT | SL_SPEAKER_FRONT_RIGHT),

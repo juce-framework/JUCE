@@ -443,6 +443,23 @@ inline int nextPowerOfTwo (int n) noexcept
     return n + 1;
 }
 
+/** Returns the number of bits in a 32-bit integer. */
+inline int countNumberOfBits (uint32 n) noexcept
+{
+    n -= ((n >> 1) & 0x55555555);
+    n =  (((n >> 2) & 0x33333333) + (n & 0x33333333));
+    n =  (((n >> 4) + n) & 0x0f0f0f0f);
+    n += (n >> 8);
+    n += (n >> 16);
+    return (int) (n & 0x3f);
+}
+
+/** Returns the number of bits in a 64-bit integer. */
+inline int countNumberOfBits (uint64 n) noexcept
+{
+    return countNumberOfBits ((uint32) n) + countNumberOfBits ((uint32) (n >> 32));
+}
+
 /** Performs a modulo operation, but can cope with the dividend being negative.
     The divisor must be greater than zero.
 */

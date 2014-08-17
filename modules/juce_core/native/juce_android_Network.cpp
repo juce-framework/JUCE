@@ -166,7 +166,7 @@ public:
         int numBytes = stream.callIntMethod (HTTPStream.read, javaArray, (jint) bytesToRead);
 
         if (numBytes > 0)
-            env->GetByteArrayRegion (javaArray, 0, numBytes, static_cast <jbyte*> (buffer));
+            env->GetByteArrayRegion (javaArray, 0, numBytes, static_cast<jbyte*> (buffer));
 
         env->DeleteLocalRef (javaArray);
         return numBytes;

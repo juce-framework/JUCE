@@ -36,7 +36,7 @@
 */
 #define JUCE_MAJOR_VERSION      3
 #define JUCE_MINOR_VERSION      0
-#define JUCE_BUILDNUMBER        6
+#define JUCE_BUILDNUMBER        8
 
 /** Current Juce version number.
 
@@ -73,7 +73,7 @@
 #include <vector>
 #include <algorithm>
 
-#if JUCE_USE_INTRINSICS
+#if JUCE_USE_MSVC_INTRINSICS
  #include <intrin.h>
 #endif
 

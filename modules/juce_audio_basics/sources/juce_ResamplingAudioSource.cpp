@@ -47,23 +47,28 @@ void ResamplingAudioSource::setResamplingRatio (const double samplesInPerOutputS
     ratio = jmax (0.0, samplesInPerOutputSample);
 }
 
-void ResamplingAudioSource::prepareToPlay (int samplesPerBlockExpected,
-                                           double sampleRate)
+void ResamplingAudioSource::prepareToPlay (int samplesPerBlockExpected, double sampleRate)
 {
     const SpinLock::ScopedLockType sl (ratioLock);
 
     input->prepareToPlay (samplesPerBlockExpected, sampleRate);
 
     buffer.setSize (numChannels, roundToInt (samplesPerBlockExpected * ratio) + 32);
-    buffer.clear();
-    sampsInBuffer = 0;
-    bufferPos = 0;
-    subSampleOffset = 0.0;
 
     filterStates.calloc ((size_t) numChannels);
     srcBuffers.calloc ((size_t) numChannels);
     destBuffers.calloc ((size_t) numChannels);
     createLowPass (ratio);
+
+    flushBuffers();
+}
+
+void ResamplingAudioSource::flushBuffers()
+{
+    buffer.clear();
+    bufferPos = 0;
+    sampsInBuffer = 0;
+    subSampleOffset = 0.0;
     resetFilters();
 }
 

@@ -278,13 +278,13 @@ Font& Font::operator= (const Font& other) noexcept
 
 #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
 Font::Font (Font&& other) noexcept
-    : font (static_cast <ReferenceCountedObjectPtr <SharedFontInternal>&&> (other.font))
+    : font (static_cast<ReferenceCountedObjectPtr<SharedFontInternal>&&> (other.font))
 {
 }
 
 Font& Font::operator= (Font&& other) noexcept
 {
-    font = static_cast <ReferenceCountedObjectPtr <SharedFontInternal>&&> (other.font);
+    font = static_cast<ReferenceCountedObjectPtr<SharedFontInternal>&&> (other.font);
     return *this;
 }
 #endif
@@ -640,7 +640,7 @@ float Font::getStringWidthFloat (const String& text) const
     return w * font->height * font->horizontalScale;
 }
 
-void Font::getGlyphPositions (const String& text, Array <int>& glyphs, Array <float>& xOffsets) const
+void Font::getGlyphPositions (const String& text, Array<int>& glyphs, Array<float>& xOffsets) const
 {
     getTypeface()->getGlyphPositions (text, glyphs, xOffsets);
 

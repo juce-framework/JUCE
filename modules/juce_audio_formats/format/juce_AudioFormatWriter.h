@@ -91,8 +91,18 @@ public:
                                 to pass it into the method.
         @param numSamples       the number of samples to write
     */
-    virtual bool write (const int** samplesToWrite,
-                        int numSamples) = 0;
+    virtual bool write (const int** samplesToWrite, int numSamples) = 0;
+
+    /** Some formats may support a flush operation that makes sure the file is in a
+        valid state before carrying on.
+        If supported, this means that by calling flush periodically when writing data
+        to a large file, then it should still be left in a readable state if your program
+        crashes.
+        It goes without saying that this method must be called from the same thread that's
+        calling write()!
+        If the format supports flushing and the operation succeeds, this returns true.
+    */
+    virtual bool flush();
 
     //==============================================================================
     /** Reads a section of samples from an AudioFormatReader, and writes these to
@@ -197,7 +207,12 @@ public:
 
             The object passed-in must not be deleted while this writer is still using it.
         */
-        void setDataReceiver (IncomingDataReceiver* receiver);
+        void setDataReceiver (IncomingDataReceiver*);
+
+        /** Sets how many samples should be written before calling the AudioFormatWriter::flush method.
+            Set this to 0 to disable flushing (this is the default).
+        */
+        void setFlushInterval (int numSamplesPerFlush) noexcept;
 
     private:
         class Buffer;

@@ -118,8 +118,8 @@ class LADSPAPluginInstance     : public AudioPluginInstance
 {
 public:
     LADSPAPluginInstance (const LADSPAModuleHandle::Ptr& m)
-        : plugin (nullptr), handle (nullptr), initialised (false),
-          tempBuffer (1, 1), module (m)
+        : module (m), plugin (nullptr), handle (nullptr),
+          initialised (false), tempBuffer (1, 1)
     {
         ++insideLADSPACallback;
 

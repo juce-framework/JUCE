@@ -346,15 +346,15 @@ void Viewport::mouseWheelMove (const MouseEvent& e, const MouseWheelDetails& whe
         Component::mouseWheelMove (e, wheel);
 }
 
-static float rescaleMouseWheelDistance (float distance, int singleStepSize) noexcept
+static int rescaleMouseWheelDistance (float distance, int singleStepSize) noexcept
 {
     if (distance == 0)
         return 0;
 
     distance *= 14.0f * singleStepSize;
 
-    return distance < 0 ? jmin (distance, -1.0f)
-                        : jmax (distance,  1.0f);
+    return roundToInt (distance < 0 ? jmin (distance, -1.0f)
+                                    : jmax (distance,  1.0f));
 }
 
 bool Viewport::useMouseWheelMoveIfNeeded (const MouseEvent& e, const MouseWheelDetails& wheel)
@@ -366,26 +366,23 @@ bool Viewport::useMouseWheelMoveIfNeeded (const MouseEvent& e, const MouseWheelD
 
         if (canScrollHorz || canScrollVert)
         {
-            float wheelIncrementX = rescaleMouseWheelDistance (wheel.deltaX, singleStepX);
-            float wheelIncrementY = rescaleMouseWheelDistance (wheel.deltaY, singleStepY);
+            const int deltaX = rescaleMouseWheelDistance (wheel.deltaX, singleStepX);
+            const int deltaY = rescaleMouseWheelDistance (wheel.deltaY, singleStepY);
 
             Point<int> pos (getViewPosition());
 
-            if (wheelIncrementX != 0 && wheelIncrementY != 0 && canScrollHorz && canScrollVert)
+            if (deltaX != 0 && deltaY != 0 && canScrollHorz && canScrollVert)
             {
-                pos.setX (pos.x - roundToInt (wheelIncrementX));
-                pos.setY (pos.y - roundToInt (wheelIncrementY));
+                pos.x -= deltaX;
+                pos.y -= deltaY;
             }
-            else if (canScrollHorz && (wheelIncrementX != 0 || e.mods.isShiftDown() || ! canScrollVert))
+            else if (canScrollHorz && (deltaX != 0 || e.mods.isShiftDown() || ! canScrollVert))
             {
-                if (wheelIncrementX == 0 && ! canScrollVert)
-                    wheelIncrementX = wheelIncrementY;
-
-                pos.setX (pos.x - roundToInt (wheelIncrementX));
+                pos.x -= deltaX != 0 ? deltaX : deltaY;
             }
-            else if (canScrollVert && wheelIncrementY != 0)
+            else if (canScrollVert && deltaY != 0)
             {
-                pos.setY (pos.y - roundToInt (wheelIncrementY));
+                pos.y -= deltaY;
             }
 
             if (pos != getViewPosition())

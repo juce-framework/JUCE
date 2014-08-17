@@ -418,7 +418,7 @@ private:
         bool isEnabled : 1, isHeading : 1;
     };
 
-    OwnedArray <ItemInfo> items;
+    OwnedArray<ItemInfo> items;
     Value currentId;
     int lastCurrentId;
     bool isButtonDown, separatorPending, menuActive, scrollWheelEnabled;

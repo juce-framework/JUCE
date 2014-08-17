@@ -252,12 +252,12 @@ bool OutputStream::writeText (const String& text, const bool asUTF16,
     return true;
 }
 
-int OutputStream::writeFromInputStream (InputStream& source, int64 numBytesToWrite)
+int64 OutputStream::writeFromInputStream (InputStream& source, int64 numBytesToWrite)
 {
     if (numBytesToWrite < 0)
         numBytesToWrite = std::numeric_limits<int64>::max();
 
-    int numWritten = 0;
+    int64 numWritten = 0;
 
     while (numBytesToWrite > 0)
     {

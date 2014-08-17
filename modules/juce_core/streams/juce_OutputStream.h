@@ -221,7 +221,7 @@ public:
                                     is exhausted)
         @returns the number of bytes written
     */
-    virtual int writeFromInputStream (InputStream& source, int64 maxNumBytesToWrite);
+    virtual int64 writeFromInputStream (InputStream& source, int64 maxNumBytesToWrite);
 
     //==============================================================================
     /** Sets the string that will be written to the stream when the writeNewLine()
