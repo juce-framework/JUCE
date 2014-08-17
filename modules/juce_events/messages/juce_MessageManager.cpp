@@ -288,7 +288,10 @@ bool MessageManagerLock::attemptLock (Thread* const threadToCheck, ThreadPoolJob
     blockingMessage = new BlockingMessage();
 
     if (! blockingMessage->post())
+    {
+        blockingMessage = nullptr;
         return false;
+    }
 
     while (! blockingMessage->lockedEvent.wait (20))
     {
