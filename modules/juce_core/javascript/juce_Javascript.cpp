@@ -1145,8 +1145,14 @@ struct JavascriptEngine::RootObject   : public DynamicObject
                 match (TokenTypes::semicolon);
             }
 
-            s->iterator = parseExpression();
-            match (TokenTypes::closeParen);
+            if (matchIf (TokenTypes::closeParen))
+                s->iterator = new Statement (location);
+            else
+            {
+                s->iterator = parseExpression();
+                match (TokenTypes::closeParen);
+            }
+
             s->body = parseStatement();
             return s.release();
         }
