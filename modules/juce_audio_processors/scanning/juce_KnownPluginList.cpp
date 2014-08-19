@@ -46,7 +46,7 @@ PluginDescription* KnownPluginList::getTypeForFile (const String& fileOrIdentifi
 PluginDescription* KnownPluginList::getTypeForIdentifierString (const String& identifierString) const
 {
     for (int i = 0; i < types.size(); ++i)
-        if (types.getUnchecked(i)->createIdentifierString() == identifierString)
+        if (types.getUnchecked(i)->matchesIdentifierString (identifierString))
             return types.getUnchecked(i);
 
     return nullptr;
