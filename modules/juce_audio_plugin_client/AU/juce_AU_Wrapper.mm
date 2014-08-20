@@ -492,7 +492,8 @@ public:
 
         if (inScope == kAudioUnitScope_Global
              && juceFilter != nullptr
-             && index < juceFilter->getNumParameters())
+             && index < juceFilter->getNumParameters()
+             && index >= 0)
         {
             outParameterInfo.flags = (UInt32) (kAudioUnitParameterFlag_IsWritable
                                                 | kAudioUnitParameterFlag_IsReadable
