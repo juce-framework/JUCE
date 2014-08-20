@@ -666,8 +666,12 @@ public:
         {
             info.isPlaying = playing;
             info.timeInSamples = (int64) outCurrentSampleInTimeLine;
-            info.timeInSeconds = outCurrentSampleInTimeLine / getSampleRate();
         }
+        else
+        {
+            info.timeInSamples = lastTimeStamp.mSampleTime;
+        }
+        info.timeInSeconds = info.timeInSamples / getSampleRate();
 
         return true;
     }
