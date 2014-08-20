@@ -714,7 +714,7 @@ bool XmlElement::isEquivalentTo (const XmlElement* const other,
             {
                 if (thisAtt == nullptr || otherAtt == nullptr)
                 {
-                    if (thisAtt == otherAtt) // both 0, so it's a match
+                    if (thisAtt == otherAtt) // both nullptr, so it's a match
                         break;
 
                     return false;
