@@ -558,11 +558,8 @@ public:
     {
         info.timeSigNumerator = 0;
         info.timeSigDenominator = 0;
-        info.timeInSamples = 0;
-        info.timeInSeconds = 0;
         info.editOriginTime = 0;
         info.ppqPositionOfLastBarStart = 0;
-        info.isPlaying = false;
         info.isRecording = false;
         info.isLooping = false;
         info.ppqLoopStart = 0;
@@ -601,19 +598,22 @@ public:
         }
 
         double outCurrentSampleInTimeLine, outCycleStartBeat, outCycleEndBeat;
-        Boolean playing, playchanged, looping;
+        Boolean playing = false, playchanged, looping;
 
         if (CallHostTransportState (&playing,
                                     &playchanged,
                                     &outCurrentSampleInTimeLine,
                                     &looping,
                                     &outCycleStartBeat,
-                                    &outCycleEndBeat) == noErr)
+                                    &outCycleEndBeat) != noErr)
         {
-            info.isPlaying = playing;
-            info.timeInSamples = (int64) outCurrentSampleInTimeLine;
-            info.timeInSeconds = outCurrentSampleInTimeLine / getSampleRate();
+            // If the host doesn't support this callback, use the sample time from lastTimeStamp:
+            outCurrentSampleInTimeLine = lastTimeStamp.mSampleTime;
         }
+
+        info.isPlaying = playing;
+        info.timeInSamples = (int64) (outCurrentSampleInTimeLine + 0.5);
+        info.timeInSeconds = info.timeInSamples / getSampleRate();
 
         return true;
     }
