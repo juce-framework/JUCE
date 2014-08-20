@@ -566,6 +566,7 @@ public:
 
             valueBox->setWantsKeyboardFocus (false);
             valueBox->setText (previousTextBoxContent, dontSendNotification);
+            valueBox->setTooltip (owner.getTooltip());
 
             if (valueBox->isEditable() != editableText) // (avoid overriding the single/double click flags unless we have to)
                 valueBox->setEditable (editableText && owner.isEnabled());
@@ -576,10 +577,6 @@ public:
             {
                 valueBox->addMouseListener (&owner, false);
                 valueBox->setMouseCursor (MouseCursor::ParentCursor);
-            }
-            else
-            {
-                valueBox->setTooltip (owner.getTooltip());
             }
         }
         else
