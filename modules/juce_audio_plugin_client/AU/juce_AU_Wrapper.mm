@@ -665,12 +665,15 @@ public:
                                     &outCycleEndBeat) == noErr)
         {
             info.isPlaying = playing;
-            info.timeInSamples = (int64) outCurrentSampleInTimeLine;
         }
         else
         {
-            info.timeInSamples = lastTimeStamp.mSampleTime;
+            // Take sample time from lastTimeStamp if HostTransportState callback not available (Ableton Live 9.0.6)
+            outCurrentSampleInTimeLine = lastTimeStamp.mSampleTime;
         }
+        // Use rounded mSampleTime as in some hosts (Ableton Live 9.1.4)
+        // this can be a float value that is slightly below the integer.
+        info.timeInSamples = (int64) (outCurrentSampleInTimeLine + 0.5);
         info.timeInSeconds = info.timeInSamples / getSampleRate();
 
         return true;
