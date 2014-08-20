@@ -40,3 +40,4 @@ AudioProcessorEditor::~AudioProcessorEditor()
 }
 
 void AudioProcessorEditor::setControlHighlight (ParameterControlHighlightInfo) {}
+int AudioProcessorEditor::getControlParameterIndex (Component&)  { return -1; }

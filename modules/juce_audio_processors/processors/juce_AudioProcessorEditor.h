@@ -75,6 +75,15 @@ public:
     */
     virtual void setControlHighlight (ParameterControlHighlightInfo);
 
+    /** Called by certain plug-in wrappers to find out whether a component is used
+        to control a parameter.
+
+        If the given component represents a particular plugin parameter, then this
+        method should return the index of that parameter. If not, it should return -1.
+        Currently only AAX plugins will call this, and implementing it is optional.
+    */
+    virtual int getControlParameterIndex (Component&);
+
 private:
     JUCE_DECLARE_NON_COPYABLE (AudioProcessorEditor)
 };

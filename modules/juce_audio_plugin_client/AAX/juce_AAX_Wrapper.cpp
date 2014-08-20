@@ -353,7 +353,10 @@ struct AAXClasses
                 addAndMakeVisible (pluginEditor = plugin.createEditorIfNeeded());
 
                 if (pluginEditor != nullptr)
+                {
                     setBounds (pluginEditor->getLocalBounds());
+                    pluginEditor->addMouseListener (this, true);
+                }
             }
 
             ~ContentWrapperComponent()
@@ -361,6 +364,7 @@ struct AAXClasses
                 if (pluginEditor != nullptr)
                 {
                     PopupMenu::dismissAllActiveMenus();
+                    pluginEditor->removeMouseListener (this);
                     pluginEditor->processor.editorBeingDeleted (pluginEditor);
                 }
             }
@@ -369,6 +373,26 @@ struct AAXClasses
             {
                 g.fillAll (Colours::black);
             }
+
+            template <typename MethodType>
+            void callMouseMethod (const MouseEvent& e, MethodType method)
+            {
+                if (AAX_IViewContainer* vc = owner.GetViewContainer())
+                {
+                    const int parameterIndex = pluginEditor->getControlParameterIndex (*e.eventComponent);
+
+                    if (parameterIndex >= 0)
+                    {
+                        uint32_t mods = 0;
+                        vc->GetModifiers (&mods);
+                        (vc->*method) (IndexAsParamID (parameterIndex), mods);
+                    }
+                }
+            }
+
+            void mouseDown (const MouseEvent& e) override  { callMouseMethod (e, &AAX_IViewContainer::HandleParameterMouseDown); }
+            void mouseUp   (const MouseEvent& e) override  { callMouseMethod (e, &AAX_IViewContainer::HandleParameterMouseUp); }
+            void mouseDrag (const MouseEvent& e) override  { callMouseMethod (e, &AAX_IViewContainer::HandleParameterMouseDrag); }
 
             void childBoundsChanged (Component*) override
             {
@@ -737,35 +761,6 @@ struct AAXClasses
         }
 
     private:
-        struct IndexAsParamID
-        {
-            inline explicit IndexAsParamID (int i) noexcept : index (i) {}
-
-            operator AAX_CParamID() noexcept
-            {
-                jassert (index >= 0);
-
-                char* t = name + sizeof (name);
-                *--t = 0;
-                int v = index;
-
-                do
-                {
-                    *--t = (char) ('0' + (v % 10));
-                    v /= 10;
-
-                } while (v > 0);
-
-                return static_cast<AAX_CParamID> (t);
-            }
-
-        private:
-            int index;
-            char name[32];
-
-            JUCE_DECLARE_NON_COPYABLE (IndexAsParamID)
-        };
-
         void process (float* const* channels, const int numChans, const int bufferSize,
                       const bool bypass, AAX_IMIDINode* midiNodeIn, AAX_IMIDINode* midiNodesOut)
         {
@@ -918,6 +913,36 @@ struct AAXClasses
         mutable juce::MemoryBlock tempFilterData;
 
         JUCE_DECLARE_NON_COPYABLE (JuceAAX_Processor)
+    };
+
+    //==============================================================================
+    struct IndexAsParamID
+    {
+        inline explicit IndexAsParamID (int i) noexcept : index (i) {}
+
+        operator AAX_CParamID() noexcept
+        {
+            jassert (index >= 0);
+
+            char* t = name + sizeof (name);
+            *--t = 0;
+            int v = index;
+
+            do
+            {
+                *--t = (char) ('0' + (v % 10));
+                v /= 10;
+
+            } while (v > 0);
+
+            return static_cast<AAX_CParamID> (t);
+        }
+
+    private:
+        int index;
+        char name[32];
+
+        JUCE_DECLARE_NON_COPYABLE (IndexAsParamID)
     };
 
     //==============================================================================

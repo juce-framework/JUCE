@@ -71,18 +71,26 @@ PluginDescription& PluginDescription::operator= (const PluginDescription& other)
     return *this;
 }
 
-bool PluginDescription::isDuplicateOf (const PluginDescription& other) const
+bool PluginDescription::isDuplicateOf (const PluginDescription& other) const noexcept
 {
     return fileOrIdentifier == other.fileOrIdentifier
             && uid == other.uid;
 }
 
+static String getPluginDescSuffix (const PluginDescription& d)
+{
+    return "-" + String::toHexString (d.fileOrIdentifier.hashCode())
+         + "-" + String::toHexString (d.uid);
+}
+
+bool PluginDescription::matchesIdentifierString (const String& identifierString) const
+{
+    return identifierString.endsWithIgnoreCase (getPluginDescSuffix (*this));
+}
+
 String PluginDescription::createIdentifierString() const
 {
-    return pluginFormatName
-            + "-" + name
-            + "-" + String::toHexString (fileOrIdentifier.hashCode())
-            + "-" + String::toHexString (uid);
+    return pluginFormatName + "-" + name + getPluginDescSuffix (*this);
 }
 
 XmlElement* PluginDescription::createXml() const
