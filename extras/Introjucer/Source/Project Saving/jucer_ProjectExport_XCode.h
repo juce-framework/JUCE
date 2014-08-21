@@ -985,7 +985,7 @@ public:
 private:
     static String getFileType (const RelativePath& file)
     {
-        if (file.hasFileExtension ("cpp;cc;cxx"))           return "sourcecode.cpp.cpp";
+        if (file.hasFileExtension (cppFileExtensions))      return "sourcecode.cpp.cpp";
         if (file.hasFileExtension (".mm"))                  return "sourcecode.cpp.objcpp";
         if (file.hasFileExtension (".m"))                   return "sourcecode.c.objc";
         if (file.hasFileExtension (".c"))                   return "sourcecode.c.c";
