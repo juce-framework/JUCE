@@ -990,6 +990,7 @@ private:
         if (file.hasFileExtension (".m"))                   return "sourcecode.c.objc";
         if (file.hasFileExtension (".c"))                   return "sourcecode.c.c";
         if (file.hasFileExtension (headerFileExtensions))   return "sourcecode.c.h";
+        if (file.hasFileExtension (asmFileExtensions))      return "sourcecode.c.asm";
         if (file.hasFileExtension (".framework"))           return "wrapper.framework";
         if (file.hasFileExtension (".jpeg;.jpg"))           return "image.jpeg";
         if (file.hasFileExtension ("png;gif"))              return "image" + file.getFileExtension();

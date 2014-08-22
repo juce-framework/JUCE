@@ -46,9 +46,9 @@ const char* const headerFileExtensions          = "h;hpp;hxx;hh;inl";
 const char* const cOrCppFileExtensions          = "cpp;cc;cxx;c";
 const char* const cppFileExtensions             = "cpp;cc;cxx";
 const char* const objCFileExtensions            = "mm;m";
-const char* const asmFileExtensions             = "s;asm";
-const char* const sourceOrHeaderFileExtensions  = "cpp;mm;m;c;cc;cxx;s;asm;h;hpp;hxx;hh;inl";
-const char* const fileTypesToCompileByDefault   = "cpp;mm;c;m;cc;cxx;s;asm;r";
+const char* const asmFileExtensions             = "s;S;asm";
+const char* const sourceOrHeaderFileExtensions  = "cpp;mm;m;c;cc;cxx;s;S;asm;h;hpp;hxx;hh;inl";
+const char* const fileTypesToCompileByDefault   = "cpp;mm;c;m;cc;cxx;s;S;asm;r";
 
 enum ColourIds
 {
