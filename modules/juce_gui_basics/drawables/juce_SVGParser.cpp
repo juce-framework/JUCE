@@ -798,7 +798,7 @@ private:
 
     PathStrokeType getStrokeFor (const XmlPath& xml) const
     {
-        const String strokeWidth (getStyleAttribute (xml, "stroke-width"));
+        const String strokeWidth (getStyleAttribute (xml, "stroke-width", "1"));
         const String cap (getStyleAttribute (xml, "stroke-linecap"));
         const String join (getStyleAttribute (xml, "stroke-linejoin"));
 
@@ -823,7 +823,7 @@ private:
         float x = getCoordLength (strokeWidth, viewBoxW), y = 0.0f;
         transform.transformPoints (ox, oy, x, y);
 
-        return PathStrokeType (strokeWidth.isNotEmpty() ? juce_hypot (x - ox, y - oy) : 1.0f,
+        return PathStrokeType (juce_hypot (x - ox, y - oy),
                                joinStyle, capStyle);
     }
 
