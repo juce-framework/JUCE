@@ -105,11 +105,6 @@ public:
                     else if (aspect.containsIgnoreCase ("yMax"))    placementFlags |= RectanglePlacement::yBottom;
                     else                                            placementFlags |= RectanglePlacement::yMid;
                 }
-
-                newState.transform = RectanglePlacement (placementFlags)
-                                        .getTransformToFit (Rectangle<float> (viewboxXY.x, viewboxXY.y, vwh.x, vwh.y),
-                                                            Rectangle<float> (newState.width, newState.height))
-                                        .followedBy (newState.transform);
             }
         }
         else
