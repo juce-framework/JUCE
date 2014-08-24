@@ -40,23 +40,6 @@ ResourceFile::~ResourceFile()
 {
 }
 
-bool ResourceFile::isResourceFile (const File& file)
-{
-    if (file.hasFileExtension ("cpp;cc;h"))
-    {
-        ScopedPointer <InputStream> in (file.createInputStream());
-
-        if (in != nullptr)
-        {
-            MemoryBlock mb;
-            in->readIntoMemoryBlock (mb, 256);
-            return mb.toString().contains (resourceFileIdentifierString);
-        }
-    }
-
-    return false;
-}
-
 //==============================================================================
 void ResourceFile::addResourcesFromProjectItem (const Project::Item& projectItem)
 {

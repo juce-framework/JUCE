@@ -172,7 +172,8 @@ RelativePath ProjectExporter::rebaseFromProjectFolderToBuildTarget (const Relati
 
 bool ProjectExporter::shouldFileBeCompiledByDefault (const RelativePath& file) const
 {
-    return file.hasFileExtension ("cpp;cc;c;cxx;s");
+    return file.hasFileExtension (cOrCppFileExtensions)
+        || file.hasFileExtension (asmFileExtensions);
 }
 
 void ProjectExporter::createPropertyEditors (PropertyListBuilder& props)

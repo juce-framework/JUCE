@@ -1389,7 +1389,7 @@ protected:
 
             jassert (path.getRoot() == RelativePath::buildTargetFolder);
 
-            if (path.hasFileExtension ("cpp;cc;cxx;c"))
+            if (path.hasFileExtension (cOrCppFileExtensions))
             {
                 XmlElement* e = cpps.createNewChildElement ("ClCompile");
                 e->setAttribute ("Include", path.toWindowsStyle());
@@ -1404,7 +1404,7 @@ protected:
             {
                 headers.createNewChildElement ("ClInclude")->setAttribute ("Include", path.toWindowsStyle());
             }
-            else if (! path.hasFileExtension ("mm;m"))
+            else if (! path.hasFileExtension (objCFileExtensions))
             {
                 otherFiles.createNewChildElement ("None")->setAttribute ("Include", path.toWindowsStyle());
             }

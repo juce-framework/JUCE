@@ -26,7 +26,7 @@ class TableListBox::RowComp   : public Component,
                                 public TooltipClient
 {
 public:
-    RowComp (TableListBox& tlb)  : owner (tlb), row (-1), isSelected (false)
+    RowComp (TableListBox& tlb) noexcept  : owner (tlb), row (-1), isSelected (false)
     {
     }
 
@@ -192,7 +192,7 @@ public:
             if (TableListBoxModel* m = owner.getModel())
                 return m->getCellTooltip (row, columnId);
 
-        return String::empty;
+        return String();
     }
 
     Component* findChildComponentForColumn (const int columnId) const
@@ -275,7 +275,7 @@ void TableListBox::setHeader (TableHeaderComponent* newHeader)
 {
     jassert (newHeader != nullptr); // you need to supply a real header for a table!
 
-    Rectangle<int> newBounds (0, 0, 100, 28);
+    Rectangle<int> newBounds (100, 28);
     if (header != nullptr)
         newBounds = header->getBounds();
 
@@ -287,7 +287,7 @@ void TableListBox::setHeader (TableHeaderComponent* newHeader)
     header->addListener (this);
 }
 
-int TableListBox::getHeaderHeight() const
+int TableListBox::getHeaderHeight() const noexcept
 {
     return header->getHeight();
 }
@@ -312,14 +312,9 @@ void TableListBox::autoSizeAllColumns()
         autoSizeColumn (header->getColumnIdOfIndex (i, true));
 }
 
-void TableListBox::setAutoSizeMenuOptionShown (const bool shouldBeShown)
+void TableListBox::setAutoSizeMenuOptionShown (const bool shouldBeShown) noexcept
 {
     autoSizeOptionsShown = shouldBeShown;
-}
-
-bool TableListBox::isAutoSizeMenuOptionShown() const
-{
-    return autoSizeOptionsShown;
 }
 
 Rectangle<int> TableListBox::getCellPosition (const int columnId, const int rowNumber,
@@ -337,7 +332,7 @@ Rectangle<int> TableListBox::getCellPosition (const int columnId, const int rowN
 
 Component* TableListBox::getCellComponent (int columnId, int rowNumber) const
 {
-    if (RowComp* const rowComp = dynamic_cast <RowComp*> (getComponentForRowNumber (rowNumber)))
+    if (RowComp* const rowComp = dynamic_cast<RowComp*> (getComponentForRowNumber (rowNumber)))
         return rowComp->findChildComponentForColumn (columnId);
 
     return nullptr;
@@ -370,12 +365,12 @@ void TableListBox::paintListBoxItem (int, Graphics&, int, int, bool)
 {
 }
 
-Component* TableListBox::refreshComponentForRow (int rowNumber, bool isRowSelected_, Component* existingComponentToUpdate)
+Component* TableListBox::refreshComponentForRow (int rowNumber, bool rowSelected, Component* existingComponentToUpdate)
 {
     if (existingComponentToUpdate == nullptr)
         existingComponentToUpdate = new RowComp (*this);
 
-    static_cast <RowComp*> (existingComponentToUpdate)->update (rowNumber, isRowSelected_);
+    static_cast<RowComp*> (existingComponentToUpdate)->update (rowNumber, rowSelected);
 
     return existingComponentToUpdate;
 }
@@ -450,7 +445,7 @@ void TableListBox::updateColumnComponents() const
     const int firstRow = getRowContainingPosition (0, 0);
 
     for (int i = firstRow + getNumRowsOnScreen() + 2; --i >= firstRow;)
-        if (RowComp* const rowComp = dynamic_cast <RowComp*> (getComponentForRowNumber (i)))
+        if (RowComp* const rowComp = dynamic_cast<RowComp*> (getComponentForRowNumber (i)))
             rowComp->resized();
 }
 
@@ -465,7 +460,7 @@ void TableListBoxModel::deleteKeyPressed (int)                          {}
 void TableListBoxModel::returnKeyPressed (int)                          {}
 void TableListBoxModel::listWasScrolled()                               {}
 
-String TableListBoxModel::getCellTooltip (int /*rowNumber*/, int /*columnId*/)    { return String::empty; }
+String TableListBoxModel::getCellTooltip (int /*rowNumber*/, int /*columnId*/)    { return String(); }
 var TableListBoxModel::getDragSourceDescription (const SparseSet<int>&)           { return var(); }
 
 Component* TableListBoxModel::refreshComponentForCell (int, int, bool, Component* existingComponentToUpdate)
