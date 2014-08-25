@@ -85,31 +85,13 @@ public:
                 newState.viewBoxW = vwh.x;
                 newState.viewBoxH = vwh.y;
 
-                int placementFlags = 0;
+                const int placementFlags = parsePlacementFlags (xml->getStringAttribute ("preserveAspectRatio").trim());
 
-                const String aspect (xml->getStringAttribute ("preserveAspectRatio"));
-
-                if (aspect.containsIgnoreCase ("none"))
-                {
-                    placementFlags = RectanglePlacement::stretchToFit;
-                }
-                else
-                {
-                    if (aspect.containsIgnoreCase ("slice"))        placementFlags |= RectanglePlacement::fillDestination;
-
-                    if (aspect.containsIgnoreCase ("xMin"))         placementFlags |= RectanglePlacement::xLeft;
-                    else if (aspect.containsIgnoreCase ("xMax"))    placementFlags |= RectanglePlacement::xRight;
-                    else                                            placementFlags |= RectanglePlacement::xMid;
-
-                    if (aspect.containsIgnoreCase ("yMin"))         placementFlags |= RectanglePlacement::yTop;
-                    else if (aspect.containsIgnoreCase ("yMax"))    placementFlags |= RectanglePlacement::yBottom;
-                    else                                            placementFlags |= RectanglePlacement::yMid;
-                }
-
-                newState.transform = RectanglePlacement (placementFlags)
-                                        .getTransformToFit (Rectangle<float> (viewboxXY.x, viewboxXY.y, vwh.x, vwh.y),
-                                                            Rectangle<float> (newState.width, newState.height))
-                                        .followedBy (newState.transform);
+                if (placementFlags != 0)
+                    newState.transform = RectanglePlacement (placementFlags)
+                                            .getTransformToFit (Rectangle<float> (viewboxXY.x, viewboxXY.y, vwh.x, vwh.y),
+                                                                Rectangle<float> (newState.width, newState.height))
+                                            .followedBy (newState.transform);
             }
         }
         else
@@ -1002,6 +984,23 @@ private:
             return getInheritedAttribute  (*xml.parent, attributeName);
 
         return String();
+    }
+
+    static int parsePlacementFlags (const String& align) noexcept
+    {
+        if (align.isEmpty())
+            return 0;
+
+        if (align.containsIgnoreCase ("none"))
+            return RectanglePlacement::stretchToFit;
+
+        return (align.containsIgnoreCase ("slice") ? RectanglePlacement::fillDestination : 0)
+             | (align.containsIgnoreCase ("xMin")  ? RectanglePlacement::xLeft
+                                                   : (align.containsIgnoreCase ("xMax") ? RectanglePlacement::xRight
+                                                                                        : RectanglePlacement::xMid))
+             | (align.containsIgnoreCase ("yMin")  ? RectanglePlacement::yTop
+                                                   : (align.containsIgnoreCase ("yMax") ? RectanglePlacement::yBottom
+                                                                                        : RectanglePlacement::yMid));
     }
 
     //==============================================================================
