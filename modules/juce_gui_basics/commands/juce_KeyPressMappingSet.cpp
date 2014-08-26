@@ -252,7 +252,7 @@ bool KeyPressMappingSet::restoreFromXml (const XmlElement& xmlVersion)
 
 XmlElement* KeyPressMappingSet::createXml (const bool saveDifferencesFromDefaultSet) const
 {
-    ScopedPointer <KeyPressMappingSet> defaultSet;
+    ScopedPointer<KeyPressMappingSet> defaultSet;
 
     if (saveDifferencesFromDefaultSet)
     {
