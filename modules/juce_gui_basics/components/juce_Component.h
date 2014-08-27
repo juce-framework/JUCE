@@ -1747,11 +1747,14 @@ public:
     */
     virtual void focusLost (FocusChangeType cause);
 
-    /** Called to indicate that one of this component's children has been focused or unfocused.
+    /** Called to indicate a change in whether or not this component is the parent of the
+        currently-focused component.
 
-        Essentially this means that the return value of a call to hasKeyboardFocus (true) has
+        Essentially this is called when the return value of a call to hasKeyboardFocus (true) has
         changed. It happens when focus moves from one of this component's children (at any depth)
         to a component that isn't contained in this one, (or vice-versa).
+        Note that this method does NOT get called to when focus simply moves from one of its
+        child components to another.
 
         @see focusGained, setWantsKeyboardFocus, getCurrentlyFocusedComponent, hasKeyboardFocus
     */
@@ -1786,9 +1789,7 @@ public:
     bool isMouseButtonDown() const;
 
     /** True if the mouse is over this component, or if it's being dragged in this component.
-
         This is a handy equivalent to (isMouseOver() || isMouseButtonDown()).
-
         @see isMouseOver, isMouseButtonDown, isMouseButtonDownAnywhere
     */
     bool isMouseOverOrDragging() const;
