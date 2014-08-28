@@ -464,9 +464,9 @@ public:
                               const bool stopAtEnd)
     {
         // make sure the values are sensible..
-        jassert (rotaryStart >= 0 && rotaryEnd >= 0);
-        jassert (rotaryStart < float_Pi * 4.0f && rotaryEnd < float_Pi * 4.0f);
-        jassert (rotaryStart < rotaryEnd);
+        jassert (startAngleRadians >= 0 && endAngleRadians >= 0);
+        jassert (startAngleRadians < float_Pi * 4.0f && endAngleRadians < float_Pi * 4.0f);
+        jassert (startAngleRadians < endAngleRadians);
 
         rotaryStart = startAngleRadians;
         rotaryEnd = endAngleRadians;
