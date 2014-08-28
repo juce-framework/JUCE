@@ -173,13 +173,6 @@ public:
                                   int startSample,
                                   int numSamples) = 0;
 
-    /** Returns true if the voice is currently playing a sound which is mapped to the given
-        midi channel.
-
-        If it's not currently playing, this will return false.
-    */
-    bool isPlayingChannel (int midiChannel) const;
-
     /** Changes the voice's reference sample rate.
 
         The rate is set so that subclasses know the output rate and can set their pitch
@@ -188,7 +181,14 @@ public:
         This method is called by the synth, and subclasses can access the current rate with
         the currentSampleRate member.
     */
-    void setCurrentPlaybackSampleRate (double newRate);
+    virtual void setCurrentPlaybackSampleRate (double newRate);
+
+    /** Returns true if the voice is currently playing a sound which is mapped to the given
+        midi channel.
+
+        If it's not currently playing, this will return false.
+    */
+    bool isPlayingChannel (int midiChannel) const;
 
     /** Returns true if the key that triggered this voice is still held down.
         Note that the voice may still be playing after the key was released (e.g because the
@@ -444,7 +444,7 @@ public:
         This value is propagated to the voices so that they can use it to render the correct
         pitches.
     */
-    void setCurrentPlaybackSampleRate (double sampleRate);
+    virtual void setCurrentPlaybackSampleRate (double sampleRate);
 
     /** Creates the next block of audio output.
 
