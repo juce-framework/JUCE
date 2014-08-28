@@ -40,9 +40,9 @@ public:
     //==============================================================================
     /** Creates a menu bar.
 
-        @param model        the model object to use to control this bar. You can
-                            pass 0 into this if you like, and set the model later
-                            using the setModel() method
+        @param model    the model object to use to control this bar. You can
+                        pass nullptr into this if you like, and set the model
+                        later using the setModel() method
     */
     MenuBarComponent (MenuBarModel* model);
 
@@ -57,8 +57,7 @@ public:
     */
     void setModel (MenuBarModel* newModel);
 
-    /** Returns the current menu bar model being used.
-    */
+    /** Returns the current menu bar model being used. */
     MenuBarModel* getModel() const noexcept;
 
     //==============================================================================
