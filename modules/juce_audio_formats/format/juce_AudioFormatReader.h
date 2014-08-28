@@ -127,6 +127,25 @@ public:
         highest and lowest sample levels from the channels in that section, returning
         these as normalised floating-point levels.
 
+        @param startSample  the offset into the audio stream to start reading from. It's
+                            ok for this to be beyond the start or end of the stream.
+        @param numSamples   how many samples to read
+        @param results      this array will be filled with Range values for each channel.
+                            The array must contain numChannels elements.
+        @param numChannelsToRead  the number of channels of data to scan. This must be
+                            more than zero, but not more than the total number of channels
+                            that the reader contains
+        @see read
+    */
+    virtual void readMaxLevels (int64 startSample, int64 numSamples,
+                                Range<float>* results, int numChannelsToRead);
+
+    /** Finds the highest and lowest sample levels from a section of the audio stream.
+
+        This will read a block of samples from the stream, and measure the
+        highest and lowest sample levels from the channels in that section, returning
+        these as normalised floating-point levels.
+
         @param startSample          the offset into the audio stream to start reading from. It's
                                     ok for this to be beyond the start or end of the stream.
         @param numSamples           how many samples to read
@@ -138,12 +157,9 @@ public:
                                     channel (if there is one)
         @see read
     */
-    virtual void readMaxLevels (int64 startSample,
-                                int64 numSamples,
-                                float& lowestLeft,
-                                float& highestLeft,
-                                float& lowestRight,
-                                float& highestRight);
+    virtual void readMaxLevels (int64 startSample, int64 numSamples,
+                                float& lowestLeft,  float& highestLeft,
+                                float& lowestRight, float& highestRight);
 
     /** Scans the source looking for a sample whose magnitude is in a specified range.
 
