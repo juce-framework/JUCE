@@ -81,6 +81,7 @@
 
  #if JUCE_LINUX
   #include <langinfo.h>
+  #include <ifaddrs.h>
  #endif
 
  #include <pwd.h>
