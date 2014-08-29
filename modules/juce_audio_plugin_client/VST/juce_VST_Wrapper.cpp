@@ -852,6 +852,15 @@ public:
         }
     }
 
+    void getParameterLabel (VstInt32 index, char* text) override
+    {
+        if (filter != nullptr)
+        {
+            jassert (isPositiveAndBelow (index, filter->getNumParameters()));
+            filter->getParameterLabel (index).copyToUTF8 (text, 24); // length should technically be kVstMaxParamStrLen, which is 8, but hosts will normally allow a bit more.
+        }
+    }
+
     void audioProcessorParameterChanged (AudioProcessor*, int index, float newValue) override
     {
         if (audioMaster != nullptr)
