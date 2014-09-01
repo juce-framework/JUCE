@@ -287,8 +287,8 @@ public:
 
     void paint (Graphics& g) override
     {
-        jassert (dynamic_cast <CodeEditorComponent*> (getParentComponent()) != nullptr);
-        const CodeEditorComponent& editor = *static_cast <CodeEditorComponent*> (getParentComponent());
+        jassert (dynamic_cast<CodeEditorComponent*> (getParentComponent()) != nullptr);
+        const CodeEditorComponent& editor = *static_cast<CodeEditorComponent*> (getParentComponent());
 
         g.fillAll (editor.findColour (CodeEditorComponent::backgroundColourId)
                     .overlaidWith (editor.findColour (lineNumberBackgroundId)));
@@ -1569,7 +1569,7 @@ void CodeEditorComponent::updateCachedIterators (int maxLineNum)
 
             CodeDocument::Iterator* t = new CodeDocument::Iterator (last);
             cachedIterators.add (t);
-            const int targetLine = last.getLine() + linesBetweenCachedSources;
+            const int targetLine = jmin (maxLineNum, last.getLine() + linesBetweenCachedSources);
 
             for (;;)
             {
