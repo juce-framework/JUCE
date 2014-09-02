@@ -176,7 +176,7 @@ void AudioFormatReader::read (AudioSampleBuffer* buffer,
 void AudioFormatReader::readMaxLevels (int64 startSampleInFile, int64 numSamples,
                                        Range<float>* const results, const int channelsToRead)
 {
-    jassert (channelsToRead > 0 && channelsToRead <= numChannels);
+    jassert (channelsToRead > 0 && channelsToRead <= (int) numChannels);
 
     if (numSamples <= 0)
     {
