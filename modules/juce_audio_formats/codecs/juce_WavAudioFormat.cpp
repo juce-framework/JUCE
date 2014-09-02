@@ -482,6 +482,38 @@ namespace WavFileHelpers
             input.read (this, (int) jmin (sizeof (*this), length));
         }
 
+        AcidChunk (const StringPairArray& values)
+        {
+            zerostruct (*this);
+
+            flags = getFlagIfPresent (values, WavAudioFormat::acidOneShot,   0x01)
+                  | getFlagIfPresent (values, WavAudioFormat::acidRootSet,   0x02)
+                  | getFlagIfPresent (values, WavAudioFormat::acidStretch,   0x04)
+                  | getFlagIfPresent (values, WavAudioFormat::acidDiskBased, 0x08)
+                  | getFlagIfPresent (values, WavAudioFormat::acidizerFlag,  0x10);
+
+            if (values[WavAudioFormat::acidRootSet].getIntValue() != 0)
+                rootNote = ByteOrder::swapIfBigEndian ((uint16) values[WavAudioFormat::acidRootNote].getIntValue());
+
+            numBeats          = ByteOrder::swapIfBigEndian ((uint32) values[WavAudioFormat::acidBeats].getIntValue());
+            meterDenominator  = ByteOrder::swapIfBigEndian ((uint16) values[WavAudioFormat::acidDenominator].getIntValue());
+            meterNumerator    = ByteOrder::swapIfBigEndian ((uint16) values[WavAudioFormat::acidNumerator].getIntValue());
+
+            if (values.containsKey (WavAudioFormat::acidTempo))
+                tempo = swapFloatByteOrder (values[WavAudioFormat::acidTempo].getFloatValue());
+        }
+
+        static MemoryBlock createFrom (const StringPairArray& values)
+        {
+            return AcidChunk (values).toMemoryBlock();
+        }
+
+        MemoryBlock toMemoryBlock() const
+        {
+            return (flags != 0 || rootNote != 0 || numBeats != 0 || meterDenominator != 0 || meterNumerator != 0)
+                      ? MemoryBlock (this, sizeof (*this)) : MemoryBlock();
+        }
+
         void addToMetadata (StringPairArray& values) const
         {
             setBoolFlag (values, WavAudioFormat::acidOneShot,   0x01);
@@ -504,13 +536,6 @@ namespace WavFileHelpers
             values.set (name, (flags & ByteOrder::swapIfBigEndian (mask)) ? "1" : "0");
         }
 
-        template<typename IntType>
-        static void setIntFlagIfPresent (IntType& flag, const StringPairArray& values, const char* name)
-        {
-            if (values.containsKey (name))
-                flag = ByteOrder::swapIfBigEndian ((IntType) values[name].getIntValue());
-        }
-
         static uint32 getFlagIfPresent (const StringPairArray& values, const char* name, uint32 flag)
         {
             return values[name].getIntValue() != 0 ? ByteOrder::swapIfBigEndian (flag) : 0;
@@ -526,34 +551,6 @@ namespace WavFileHelpers
            #else
             return x;
            #endif
-        }
-
-        static MemoryBlock createFrom (const StringPairArray& values)
-        {
-            MemoryBlock data (sizeof (AcidChunk), true);
-            AcidChunk* const acid = static_cast<AcidChunk*> (data.getData());
-
-            acid->flags = getFlagIfPresent (values, WavAudioFormat::acidOneShot,   0x01)
-                        | getFlagIfPresent (values, WavAudioFormat::acidRootSet,   0x02)
-                        | getFlagIfPresent (values, WavAudioFormat::acidStretch,   0x04)
-                        | getFlagIfPresent (values, WavAudioFormat::acidDiskBased, 0x08)
-                        | getFlagIfPresent (values, WavAudioFormat::acidizerFlag,  0x10);
-
-            if (values[WavAudioFormat::acidRootSet].getIntValue() != 0)
-                setIntFlagIfPresent (acid->rootNote, values, WavAudioFormat::acidRootNote);
-
-            setIntFlagIfPresent (acid->numBeats,         values, WavAudioFormat::acidBeats);
-            setIntFlagIfPresent (acid->meterDenominator, values, WavAudioFormat::acidDenominator);
-            setIntFlagIfPresent (acid->meterNumerator,   values, WavAudioFormat::acidNumerator);
-
-            if (values.containsKey (WavAudioFormat::acidTempo))
-                acid->tempo = swapFloatByteOrder (values[WavAudioFormat::acidTempo].getFloatValue());
-
-            if (acid->flags == 0 && acid->rootNote == 0 && acid->numBeats == 0
-                 && acid->meterDenominator == 0 && acid->meterNumerator == 0)
-                return MemoryBlock();
-
-            return data;
         }
 
         uint32 flags;
