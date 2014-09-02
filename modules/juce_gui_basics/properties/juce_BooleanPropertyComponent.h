@@ -56,6 +56,10 @@ protected:
 public:
     /** Creates a button component.
 
+        Note that if you call this constructor then you must use the Value to interact with the
+        button state, and you can't override the class with your own setState or getState methods.
+        If you want to use getState and setState, call the other constructor instead.
+
         @param valueToControl       a Value object that this property should refer to.
         @param propertyName         the property name to be passed to the PropertyComponent
         @param buttonText           the text shown in the ToggleButton component
