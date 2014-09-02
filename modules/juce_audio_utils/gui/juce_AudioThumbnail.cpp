@@ -132,7 +132,7 @@ public:
 
         if (reader != nullptr)
         {
-            if (levels.size() < reader->numChannels)
+            if (levels.size() < (int) reader->numChannels)
                 levels.insertMultiple (0, Range<float>(), (int) (reader->numChannels - levels.size()));
 
             reader->readMaxLevels (startSample, numSamples, levels.getRawDataPointer(), (int) reader->numChannels);
@@ -232,7 +232,7 @@ private:
                 HeapBlock<MinMaxValue> levelData ((size_t) numThumbSamps * numChannels);
                 HeapBlock<MinMaxValue*> levels (numChannels);
 
-                for (int i = 0; i < numChannels; ++i)
+                for (int i = 0; i < (int) numChannels; ++i)
                     levels[i] = levelData + i * numThumbSamps;
 
                 HeapBlock<Range<float> > levelsRead (numChannels);
@@ -242,7 +242,7 @@ private:
                     reader->readMaxLevels ((firstThumbIndex + i) * owner.samplesPerThumbSample,
                                            owner.samplesPerThumbSample, levelsRead, numChannels);
 
-                    for (int j = 0; j < numChannels; ++j)
+                    for (int j = 0; j < (int) numChannels; ++j)
                         levels[j][i].setFloat (levelsRead[j]);
                 }
 
