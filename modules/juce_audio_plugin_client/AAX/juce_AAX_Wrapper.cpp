@@ -574,28 +574,27 @@ struct AAXClasses
 
         AAX_Result SetParameterNormalizedValue (AAX_CParamID paramID, double newValue) override
         {
-            if (! isBypassParam (paramID))
-            {
-                if (AAX_IParameter* p = const_cast<AAX_IParameter*> (mParameterManager.GetParameterByID (paramID)))
-                    p->SetValueWithFloat ((float) newValue);
+            if (isBypassParam (paramID))
+                return AAX_CEffectParameters::SetParameterNormalizedValue (paramID, newValue);
 
-                pluginInstance->setParameter (getParamIndexFromID (paramID), (float) newValue);
-            }
+            if (AAX_IParameter* p = const_cast<AAX_IParameter*> (mParameterManager.GetParameterByID (paramID)))
+                p->SetValueWithFloat ((float) newValue);
 
+            pluginInstance->setParameter (getParamIndexFromID (paramID), (float) newValue);
             return AAX_SUCCESS;
         }
 
-        AAX_Result SetParameterNormalizedRelative (AAX_CParamID paramID, double newValue) override
+        AAX_Result SetParameterNormalizedRelative (AAX_CParamID paramID, double newDeltaValue) override
         {
-            if (! isBypassParam (paramID))
-            {
-                const int paramIndex = getParamIndexFromID (paramID);
-                const float oldValue = pluginInstance->getParameter (paramIndex);
-                pluginInstance->setParameter (paramIndex, jlimit (0.0f, 1.0f, (float) (oldValue + newValue)));
+            if (isBypassParam (paramID))
+                return AAX_CEffectParameters::SetParameterNormalizedRelative (paramID, newDeltaValue);
 
-                if (AAX_IParameter* p = const_cast<AAX_IParameter*> (mParameterManager.GetParameterByID (paramID)))
-                    p->SetValueWithFloat ((float) newValue);
-            }
+            const int paramIndex = getParamIndexFromID (paramID);
+            const float newValue = pluginInstance->getParameter (paramIndex) + (float) newDeltaValue;
+            pluginInstance->setParameter (paramIndex, jlimit (0.0f, 1.0f, newValue));
+
+            if (AAX_IParameter* p = const_cast<AAX_IParameter*> (mParameterManager.GetParameterByID (paramID)))
+                p->SetValueWithFloat (newValue);
 
             return AAX_SUCCESS;
         }
