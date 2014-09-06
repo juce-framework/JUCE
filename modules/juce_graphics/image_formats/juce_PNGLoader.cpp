@@ -488,12 +488,13 @@ bool PNGImageFormat::writeImageToStream (const Image& image, OutputStream& out)
                   PNG_COMPRESSION_TYPE_BASE,
                   PNG_FILTER_TYPE_BASE);
 
-    HeapBlock <uint8> rowData ((size_t) width * 4);
+    HeapBlock<uint8> rowData ((size_t) width * 4);
 
     png_color_8 sig_bit;
-    sig_bit.red = 8;
+    sig_bit.red   = 8;
     sig_bit.green = 8;
-    sig_bit.blue = 8;
+    sig_bit.blue  = 8;
+    sig_bit.gray  = 0;
     sig_bit.alpha = 8;
     png_set_sBIT (pngWriteStruct, pngInfoStruct, &sig_bit);
 
