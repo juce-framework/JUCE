@@ -179,6 +179,11 @@ String URL::toString (const bool includeGetParameters) const
     return url;
 }
 
+bool URL::isEmpty() const noexcept
+{
+    return url.isEmpty();
+}
+
 bool URL::isWellFormed() const
 {
     //xxx TODO
