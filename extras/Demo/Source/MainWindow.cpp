@@ -302,47 +302,47 @@ private:
                 break;
 
             case MainAppWindow::welcome:
-                result.setInfo ("Welcome Demo", "Shows the first demo in the list", demosCategory, 0);
+                result.setInfo ("Welcome Demo", "Shows the 'Welcome' demo", demosCategory, 0);
                 result.addDefaultKeypress ('1', ModifierKeys::commandModifier);
                 break;
 
             case MainAppWindow::componentsAnimation:
-                result.setInfo ("Animation Demo", "Shows the second demo in the list", demosCategory, 0);
+                result.setInfo ("Animation Demo", "Shows the 'Animation' demo", demosCategory, 0);
                 result.addDefaultKeypress ('2', ModifierKeys::commandModifier);
                 break;
 
             case MainAppWindow::componentsDialogBoxes:
-                result.setInfo ("Dialog Boxes Demo", "Shows the third demo in the list", demosCategory, 0);
+                result.setInfo ("Dialog Boxes Demo", "Shows the 'Dialog Boxes' demo", demosCategory, 0);
                 result.addDefaultKeypress ('3', ModifierKeys::commandModifier);
                 break;
 
             case MainAppWindow::componentsKeyMappings:
-                result.setInfo ("Key Mappings Demo", "Shows the fourth demo in the list", demosCategory, 0);
+                result.setInfo ("Key Mappings Demo", "Shows the 'Key Mappings' demo", demosCategory, 0);
                 result.addDefaultKeypress ('4', ModifierKeys::commandModifier);
                 break;
 
             case MainAppWindow::componentsMDI:
-                result.setInfo ("Multi-Document Demo", "Shows the fith demo in the list", demosCategory, 0);
+                result.setInfo ("Multi-Document Demo", "Shows the 'Multi-Document' demo", demosCategory, 0);
                 result.addDefaultKeypress ('5', ModifierKeys::commandModifier);
                 break;
 
             case MainAppWindow::componentsPropertyEditors:
-                result.setInfo ("Property Editor Demo", "Shows the sixth demo in the list", demosCategory, 0);
+                result.setInfo ("Property Editor Demo", "Shows the 'Property Editor' demo", demosCategory, 0);
                 result.addDefaultKeypress ('6', ModifierKeys::commandModifier);
                 break;
 
             case MainAppWindow::componentsTransforms:
-                result.setInfo ("Component Transforms Demo", "Shows the sevent demo in the list", demosCategory, 0);
+                result.setInfo ("Component Transforms Demo", "Shows the 'Transforms' demo", demosCategory, 0);
                 result.addDefaultKeypress ('7', ModifierKeys::commandModifier);
                 break;
 
             case MainAppWindow::componentsWebBrowsers:
-                result.setInfo ("Web Browser Demo", "Shows the eight demo in the list", demosCategory, 0);
+                result.setInfo ("Web Browser Demo", "Shows the 'Web Browser' demo", demosCategory, 0);
                 result.addDefaultKeypress ('8', ModifierKeys::commandModifier);
                 break;
 
             case MainAppWindow::componentsWidgets:
-                result.setInfo ("Widgets Demo", "Shows the ninth demo in the list", demosCategory, 0);
+                result.setInfo ("Widgets Demo", "Shows the 'Widgets' demo", demosCategory, 0);
                 result.addDefaultKeypress ('9', ModifierKeys::commandModifier);
                 break;
 
