@@ -263,7 +263,7 @@ private:
             }
         }
 
-        String responseHeader (readResponse (socketHandle, timeOutTime));
+        String responseHeader (readResponse (timeOutTime));
         position = 0;
 
         if (responseHeader.isNotEmpty())
@@ -302,7 +302,7 @@ private:
     }
 
     //==============================================================================
-    String readResponse (const int socketHandle, const uint32 timeOutTime)
+    String readResponse (const uint32 timeOutTime)
     {
         int numConsecutiveLFs  = 0;
         MemoryOutputStream buffer;
@@ -338,7 +338,8 @@ private:
             dest << "\r\n" << key << ' ' << value;
     }
 
-    static void writeHost (MemoryOutputStream& dest, const bool isPost, const String& path, const String& host, const int port)
+    static void writeHost (MemoryOutputStream& dest, const bool isPost,
+                           const String& path, const String& host, int /*port*/)
     {
         dest << (isPost ? "POST " : "GET ") << path << " HTTP/1.0\r\nHost: " << host;
     }
