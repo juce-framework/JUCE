@@ -152,7 +152,7 @@ void* attachComponentToWindowRef (Component* comp, void* parentWindowOrView, boo
        #endif
 
         (void) isNSView;
-        NSView* parentView = (NSView*) parentWindowOrView;
+        NSView* parentView = [(NSView*) parentWindowOrView retain];
 
        #if JucePlugin_EditorRequiresKeyboardFocus
         comp->addToDesktop (0, parentView);
@@ -221,6 +221,7 @@ void detachComponentFromWindowRef (Component* comp, void* window, bool isNSView)
 
         (void) isNSView; (void) window;
         comp->removeFromDesktop();
+        [window release];
     }
 }
 
