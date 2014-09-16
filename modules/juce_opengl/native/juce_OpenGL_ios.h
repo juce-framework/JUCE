@@ -144,9 +144,14 @@ public:
     {
         if (useMSAA)
         {
-            glBindFramebuffer (GL_DRAW_FRAMEBUFFER_APPLE, frameBufferHandle);
-            glBindFramebuffer (GL_READ_FRAMEBUFFER_APPLE, msaaBufferHandle);
+            glBindFramebuffer (GL_DRAW_FRAMEBUFFER, frameBufferHandle);
+            glBindFramebuffer (GL_READ_FRAMEBUFFER, msaaBufferHandle);
+
+           #if defined (__IPHONE_8_0) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_8_0
+            glResolveMultisampleFramebuffer();
+           #else
             glResolveMultisampleFramebufferAPPLE();
+           #endif
         }
 
         glBindRenderbuffer (GL_RENDERBUFFER, colorBufferHandle);
@@ -240,7 +245,7 @@ private:
             glBindFramebuffer (GL_FRAMEBUFFER, msaaBufferHandle);
             glBindRenderbuffer (GL_RENDERBUFFER, msaaColorHandle);
 
-            glRenderbufferStorageMultisample (GL_RENDERBUFFER, 4, GL_RGBA8_OES, width, height);
+            glRenderbufferStorageMultisample (GL_RENDERBUFFER, 4, GL_RGBA8, width, height);
 
             glFramebufferRenderbuffer (GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, msaaColorHandle);
         }
