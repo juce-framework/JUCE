@@ -1087,9 +1087,7 @@ public:
         {
             for (int i = windowListSize; --i >= 0;)
             {
-                LinuxComponentPeer* const peer = LinuxComponentPeer::getPeerFor (windowList[i]);
-
-                if (peer != 0)
+                if (LinuxComponentPeer* const peer = LinuxComponentPeer::getPeerFor (windowList[i]))
                 {
                     result = (peer == this);
                     break;
