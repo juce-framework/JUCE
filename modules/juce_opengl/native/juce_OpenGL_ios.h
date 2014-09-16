@@ -118,7 +118,7 @@ public:
 
     bool createdOk() const noexcept             { return getRawContext() != nullptr; }
     void* getRawContext() const noexcept        { return context; }
-    GLuint getFrameBufferID() const noexcept    { return frameBufferHandle; }
+    GLuint getFrameBufferID() const noexcept    { return useMSAA ? msaaBufferHandle : frameBufferHandle; }
 
     bool makeActive() const noexcept
     {
@@ -142,6 +142,13 @@ public:
 
     void swapBuffers()
     {
+        if (useMSAA)
+        {
+            glBindFramebuffer (GL_DRAW_FRAMEBUFFER_APPLE, frameBufferHandle);
+            glBindFramebuffer (GL_READ_FRAMEBUFFER_APPLE, msaaBufferHandle);
+            glResolveMultisampleFramebufferAPPLE();
+        }
+
         glBindRenderbuffer (GL_RENDERBUFFER, colorBufferHandle);
         [context presentRenderbuffer: GL_RENDERBUFFER];
 
