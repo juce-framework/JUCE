@@ -196,7 +196,7 @@ private:
     int swapFrames;
     bool useDepthBuffer, useMSAA;
 
-    bool createContext (NSUInteger type, void* contextToShare)
+    bool createContext (EAGLRenderingAPI type, void* contextToShare)
     {
         jassert (context == nil);
         context = [EAGLContext alloc];
@@ -240,7 +240,7 @@ private:
             glBindFramebuffer (GL_FRAMEBUFFER, msaaBufferHandle);
             glBindRenderbuffer (GL_RENDERBUFFER, msaaColorHandle);
 
-            glRenderbufferStorageMultisampleAPPLE (GL_RENDERBUFFER, 4, GL_RGBA8_OES, width, height);
+            glRenderbufferStorageMultisample (GL_RENDERBUFFER, 4, GL_RGBA8_OES, width, height);
 
             glFramebufferRenderbuffer (GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, msaaColorHandle);
         }
@@ -251,7 +251,7 @@ private:
             glBindRenderbuffer (GL_RENDERBUFFER, depthBufferHandle);
 
             if (useMSAA)
-                glRenderbufferStorageMultisampleAPPLE (GL_RENDERBUFFER, 4, GL_DEPTH_COMPONENT16, width, height);
+                glRenderbufferStorageMultisample (GL_RENDERBUFFER, 4, GL_DEPTH_COMPONENT16, width, height);
             else
                 glRenderbufferStorage (GL_RENDERBUFFER, GL_DEPTH_COMPONENT16, width, height);
 
