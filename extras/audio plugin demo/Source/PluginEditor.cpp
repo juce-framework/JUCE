@@ -119,9 +119,9 @@ void JuceDemoPluginAudioProcessorEditor::sliderValueChanged (Slider* slider)
 
 //==============================================================================
 // quick-and-dirty function to format a timecode string
-static const String timeToTimecodeString (const double seconds)
+static String timeToTimecodeString (const double seconds)
 {
-    const double absSecs = fabs (seconds);
+    const double absSecs = std::abs (seconds);
 
     const int hours =  (int) (absSecs / (60.0 * 60.0));
     const int mins  = ((int) (absSecs / 60.0)) % 60;
@@ -138,7 +138,7 @@ static const String timeToTimecodeString (const double seconds)
 }
 
 // quick-and-dirty function to format a bars/beats string
-static const String ppqToBarsBeatsString (double ppq, double /*lastBarPPQ*/, int numerator, int denominator)
+static String ppqToBarsBeatsString (double ppq, double /*lastBarPPQ*/, int numerator, int denominator)
 {
     if (numerator == 0 || denominator == 0)
         return "1|1|0";
