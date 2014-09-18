@@ -63,7 +63,7 @@ struct SineWaveVoice  : public SynthesiserVoice
         angleDelta = cyclesPerSample * 2.0 * double_Pi;
     }
 
-    void stopNote (bool allowTailOff) override
+    void stopNote (float /*velocity*/, bool allowTailOff) override
     {
         if (allowTailOff)
         {

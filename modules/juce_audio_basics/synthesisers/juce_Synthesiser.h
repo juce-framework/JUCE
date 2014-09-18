@@ -127,6 +127,8 @@ public:
 
         This will be called during the rendering callback, so must be fast and thread-safe.
 
+        The velocity indicates how quickly the note was released - 0 is slowly, 1 is quickly.
+
         If allowTailOff is false or the voice doesn't want to tail-off, then it must stop all
         sound immediately, and must call clearCurrentNote() to reset the state of this voice
         and allow the synth to reassign it another sound.
@@ -136,7 +138,7 @@ public:
         finishes playing (during the rendering callback), it must make sure that it calls
         clearCurrentNote().
     */
-    virtual void stopNote (bool allowTailOff) = 0;
+    virtual void stopNote (float velocity, bool allowTailOff) = 0;
 
     /** Called to let the voice know that the pitch wheel has been moved.
         This will be called during the rendering callback, so must be fast and thread-safe.
@@ -234,6 +236,11 @@ private:
     uint32 noteOnTime;
     SynthesiserSound::Ptr currentlyPlayingSound;
     bool keyIsDown, sostenutoPedalDown;
+
+   #if JUCE_CATCH_DEPRECATED_CODE_MISUSE
+    // Note the new parameters for this method.
+    virtual int stopNote (bool) { return 0; }
+   #endif
 
     JUCE_LEAK_DETECTOR (SynthesiserVoice)
 };
@@ -365,6 +372,7 @@ public:
     */
     virtual void noteOff (int midiChannel,
                           int midiNoteNumber,
+                          float velocity,
                           bool allowTailOff);
 
     /** Turns off all notes.
@@ -474,6 +482,13 @@ protected:
     /** The last pitch-wheel values for each midi channel. */
     int lastPitchWheelValues [16];
 
+    /** Renders the voices for the given range.
+        By default this just calls renderNextBlock() on each voice, but you may need
+        to override it to handle custom cases.
+    */
+    virtual void renderVoices (AudioSampleBuffer& outputAudio,
+                               int startSample, int numSamples);
+
     /** Searches through the voices to find one that's not currently playing, and which
         can play the given sound.
 
@@ -511,11 +526,12 @@ private:
     bool shouldStealNotes;
     BigInteger sustainPedalsDown;
 
-    void stopVoice (SynthesiserVoice*, bool allowTailOff);
+    void stopVoice (SynthesiserVoice*, float velocity, bool allowTailOff);
 
    #if JUCE_CATCH_DEPRECATED_CODE_MISUSE
-    // Note the new parameters for this method.
+    // Note the new parameters for these methods.
     virtual int findFreeVoice (const bool) const { return 0; }
+    virtual int noteOff (int, int, int) { return 0; }
    #endif
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Synthesiser)
