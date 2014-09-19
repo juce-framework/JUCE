@@ -311,7 +311,7 @@ void Synthesiser::allNotesOff (const int midiChannel, const bool allowTailOff)
         SynthesiserVoice* const voice = voices.getUnchecked (i);
 
         if (midiChannel <= 0 || voice->isPlayingChannel (midiChannel))
-            voice->stopNote (allowTailOff);
+            voice->stopNote (1.0f, allowTailOff);
     }
 
     sustainPedalsDown.clear();
