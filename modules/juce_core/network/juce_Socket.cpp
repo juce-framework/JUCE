@@ -418,8 +418,10 @@ bool StreamingSocket::createListener (const int newPortNumber, const String& loc
     if (handle < 0)
         return false;
 
+   #if ! JUCE_WINDOWS // on windows, adding this option produces behaviour different to posix
     const int reuse = 1;
     setsockopt (handle, SOL_SOCKET, SO_REUSEADDR, (const char*) &reuse, sizeof (reuse));
+   #endif
 
     if (bind (handle, (struct sockaddr*) &servTmpAddr, sizeof (struct sockaddr_in)) < 0
          || listen (handle, SOMAXCONN) < 0)
