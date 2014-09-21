@@ -226,6 +226,9 @@ void WebBrowserComponent::goToURL (const String& url,
 
     blankPageShown = false;
 
+    if (browser->browser == nullptr)
+        checkWindowAssociation();
+
     browser->goToURL (url, headers, postData);
 }
 
@@ -262,7 +265,10 @@ void WebBrowserComponent::refresh()
 void WebBrowserComponent::paint (Graphics& g)
 {
     if (browser->browser == nullptr)
+    {
         g.fillAll (Colours::white);
+        checkWindowAssociation();
+    }
 }
 
 void WebBrowserComponent::checkWindowAssociation()
