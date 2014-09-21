@@ -41,7 +41,7 @@ namespace
     return err;
  }
 #else
- #define JUCE_ALSA_LOG(x)
+ #define JUCE_ALSA_LOG(x)         {}
  #define JUCE_CHECKED_RESULT(x)   (x)
 #endif
 

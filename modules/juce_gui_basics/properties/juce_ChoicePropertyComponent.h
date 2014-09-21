@@ -50,14 +50,16 @@ class JUCE_API  ChoicePropertyComponent    : public PropertyComponent,
 {
 protected:
     /** Creates the component.
-
-        Your subclass's constructor must add a list of options to the choices
-        member variable.
+        Your subclass's constructor must add a list of options to the choices member variable.
     */
     ChoicePropertyComponent (const String& propertyName);
 
 public:
     /** Creates the component.
+
+        Note that if you call this constructor then you must use the Value to interact with the
+        index, and you can't override the class with your own setIndex or getIndex methods.
+        If you want to use those methods, call the other constructor instead.
 
         @param valueToControl       the value that the combo box will read and control
         @param propertyName         the name of the property

@@ -163,10 +163,7 @@ void Synthesiser::renderNextBlock (AudioSampleBuffer& outputBuffer, const MidiBu
                                          : numSamples;
 
         if (numThisTime > 0)
-        {
-            for (int i = voices.size(); --i >= 0;)
-                voices.getUnchecked (i)->renderNextBlock (outputBuffer, startSample, numThisTime);
-        }
+            renderVoices (outputBuffer, startSample, numThisTime);
 
         if (useEvent)
             handleMidiEvent (m);
@@ -174,6 +171,12 @@ void Synthesiser::renderNextBlock (AudioSampleBuffer& outputBuffer, const MidiBu
         startSample += numThisTime;
         numSamples -= numThisTime;
     }
+}
+
+void Synthesiser::renderVoices (AudioSampleBuffer& buffer, int startSample, int numSamples)
+{
+    for (int i = voices.size(); --i >= 0;)
+        voices.getUnchecked (i)->renderNextBlock (buffer, startSample, numSamples);
 }
 
 void Synthesiser::handleMidiEvent (const MidiMessage& m)
@@ -184,7 +187,7 @@ void Synthesiser::handleMidiEvent (const MidiMessage& m)
     }
     else if (m.isNoteOff())
     {
-        noteOff (m.getChannel(), m.getNoteNumber(), true);
+        noteOff (m.getChannel(), m.getNoteNumber(), m.getFloatVelocity(), true);
     }
     else if (m.isAllNotesOff() || m.isAllSoundOff())
     {
@@ -230,7 +233,7 @@ void Synthesiser::noteOn (const int midiChannel,
 
                 if (voice->getCurrentlyPlayingNote() == midiNoteNumber
                      && voice->isPlayingChannel (midiChannel))
-                    stopVoice (voice, true);
+                    stopVoice (voice, 1.0f, true);
             }
 
             startVoice (findFreeVoice (sound, shouldStealNotes),
@@ -248,7 +251,7 @@ void Synthesiser::startVoice (SynthesiserVoice* const voice,
     if (voice != nullptr && sound != nullptr)
     {
         if (voice->currentlyPlayingSound != nullptr)
-            voice->stopNote (false);
+            voice->stopNote (0.0f, false);
 
         voice->startNote (midiNoteNumber, velocity, sound,
                           lastPitchWheelValues [midiChannel - 1]);
@@ -261,11 +264,11 @@ void Synthesiser::startVoice (SynthesiserVoice* const voice,
     }
 }
 
-void Synthesiser::stopVoice (SynthesiserVoice* voice, const bool allowTailOff)
+void Synthesiser::stopVoice (SynthesiserVoice* voice, float velocity, const bool allowTailOff)
 {
     jassert (voice != nullptr);
 
-    voice->stopNote (allowTailOff);
+    voice->stopNote (velocity, allowTailOff);
 
     // the subclass MUST call clearCurrentNote() if it's not tailing off! RTFM for stopNote()!
     jassert (allowTailOff || (voice->getCurrentlyPlayingNote() < 0 && voice->getCurrentlyPlayingSound() == 0));
@@ -273,6 +276,7 @@ void Synthesiser::stopVoice (SynthesiserVoice* voice, const bool allowTailOff)
 
 void Synthesiser::noteOff (const int midiChannel,
                            const int midiNoteNumber,
+                           const float velocity,
                            const bool allowTailOff)
 {
     const ScopedLock sl (lock);
@@ -291,7 +295,7 @@ void Synthesiser::noteOff (const int midiChannel,
                     voice->keyIsDown = false;
 
                     if (! (sustainPedalsDown [midiChannel] || voice->sostenutoPedalDown))
-                        stopVoice (voice, allowTailOff);
+                        stopVoice (voice, velocity, allowTailOff);
                 }
             }
         }
@@ -307,7 +311,7 @@ void Synthesiser::allNotesOff (const int midiChannel, const bool allowTailOff)
         SynthesiserVoice* const voice = voices.getUnchecked (i);
 
         if (midiChannel <= 0 || voice->isPlayingChannel (midiChannel))
-            voice->stopNote (allowTailOff);
+            voice->stopNote (1.0f, allowTailOff);
     }
 
     sustainPedalsDown.clear();
@@ -379,7 +383,7 @@ void Synthesiser::handleSustainPedal (int midiChannel, bool isDown)
             SynthesiserVoice* const voice = voices.getUnchecked (i);
 
             if (voice->isPlayingChannel (midiChannel) && ! voice->keyIsDown)
-                stopVoice (voice, true);
+                stopVoice (voice, 1.0f, true);
         }
 
         sustainPedalsDown.clearBit (midiChannel);
@@ -400,7 +404,7 @@ void Synthesiser::handleSostenutoPedal (int midiChannel, bool isDown)
             if (isDown)
                 voice->sostenutoPedalDown = true;
             else if (voice->sostenutoPedalDown)
-                stopVoice (voice, true);
+                stopVoice (voice, 1.0f, true);
         }
     }
 }

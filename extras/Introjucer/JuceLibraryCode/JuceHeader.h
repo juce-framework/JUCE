@@ -29,11 +29,13 @@
  using namespace juce;
 #endif
 
+#if ! JUCE_DONT_DECLARE_PROJECTINFO
 namespace ProjectInfo
 {
     const char* const  projectName    = "The Introjucer";
     const char* const  versionString  = "3.1.0";
     const int          versionNumber  = 0x30100;
 }
+#endif
 
 #endif   // __APPHEADERFILE_M70QFTRRK__

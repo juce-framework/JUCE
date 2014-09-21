@@ -38,11 +38,12 @@ public:
 
     bool canPlaySound (SynthesiserSound* sound) override
     {
-        return dynamic_cast <SineWaveSound*> (sound) != 0;
+        return dynamic_cast<SineWaveSound*> (sound) != nullptr;
     }
 
     void startNote (int midiNoteNumber, float velocity,
-                    SynthesiserSound* /*sound*/, int /*currentPitchWheelPosition*/) override
+                    SynthesiserSound* /*sound*/,
+                    int /*currentPitchWheelPosition*/) override
     {
         currentAngle = 0.0;
         level = velocity * 0.15;
@@ -54,7 +55,7 @@ public:
         angleDelta = cyclesPerSample * 2.0 * double_Pi;
     }
 
-    void stopNote (bool allowTailOff) override
+    void stopNote (float velocity, bool allowTailOff) override
     {
         if (allowTailOff)
         {

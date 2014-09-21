@@ -591,8 +591,8 @@ void Toolbar::itemDragMove (const SourceDetails& dragSourceDetails)
             {
                 const Rectangle<int> previousPos (animator.getComponentDestination (prev));
 
-                if (abs (dragObjectLeft - (vertical ? previousPos.getY() : previousPos.getX())
-                      < abs (dragObjectRight - (vertical ? current.getBottom() : current.getRight()))))
+                if (std::abs (dragObjectLeft - (vertical ? previousPos.getY() : previousPos.getX()))
+                     < std::abs (dragObjectRight - (vertical ? current.getBottom() : current.getRight())))
                 {
                     newIndex = getIndexOfChildComponent (prev);
                 }
@@ -602,8 +602,8 @@ void Toolbar::itemDragMove (const SourceDetails& dragSourceDetails)
             {
                 const Rectangle<int> nextPos (animator.getComponentDestination (next));
 
-                if (abs (dragObjectLeft - (vertical ? current.getY() : current.getX())
-                     > abs (dragObjectRight - (vertical ? nextPos.getBottom() : nextPos.getRight()))))
+                if (std::abs (dragObjectLeft - (vertical ? current.getY() : current.getX()))
+                     > std::abs (dragObjectRight - (vertical ? nextPos.getBottom() : nextPos.getRight())))
                 {
                     newIndex = getIndexOfChildComponent (next) + 1;
                 }

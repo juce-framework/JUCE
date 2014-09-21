@@ -464,9 +464,9 @@ public:
                               const bool stopAtEnd)
     {
         // make sure the values are sensible..
-        jassert (rotaryStart >= 0 && rotaryEnd >= 0);
-        jassert (rotaryStart < float_Pi * 4.0f && rotaryEnd < float_Pi * 4.0f);
-        jassert (rotaryStart < rotaryEnd);
+        jassert (startAngleRadians >= 0 && endAngleRadians >= 0);
+        jassert (startAngleRadians < float_Pi * 4.0f && endAngleRadians < float_Pi * 4.0f);
+        jassert (startAngleRadians < endAngleRadians);
 
         rotaryStart = startAngleRadians;
         rotaryEnd = endAngleRadians;
@@ -1006,9 +1006,9 @@ public:
                         valueBox->hideEditor (false);
 
                     const double value = (double) currentValue.getValue();
-                    const double delta = getMouseWheelDelta (value, (wheel.deltaX != 0 ? -wheel.deltaX : wheel.deltaY)
-                                                                        * (wheel.isReversed ? -1.0f : 1.0f));
-
+                    const double delta = getMouseWheelDelta (value, (std::abs (wheel.deltaX) > std::abs (wheel.deltaY)
+                                                                        ? -wheel.deltaX : wheel.deltaY)
+                                                                      * (wheel.isReversed ? -1.0f : 1.0f));
                     if (delta != 0)
                     {
                         const double newValue = value + jmax (interval, std::abs (delta)) * (delta < 0 ? -1.0 : 1.0);

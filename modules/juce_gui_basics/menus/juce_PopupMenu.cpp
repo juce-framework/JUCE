@@ -1216,12 +1216,7 @@ public:
 
     void paint (Graphics& g) override
     {
-        g.setFont (getLookAndFeel().getPopupMenuFont().boldened());
-        g.setColour (findColour (PopupMenu::headerTextColourId));
-
-        g.drawFittedText (getName(),
-                          12, 0, getWidth() - 16, proportionOfHeight (0.8f),
-                          Justification::bottomLeft, 1);
+        getLookAndFeel().drawPopupMenuSectionHeader (g, getLocalBounds(), getName());
     }
 
     void getIdealSize (int& idealWidth, int& idealHeight)

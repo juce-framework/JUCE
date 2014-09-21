@@ -2112,7 +2112,11 @@ private:
             MemoryBlock mem;
 
             if (mem.fromBase64Encoding (state->getAllSubText()))
-                stream = new Steinberg::MemoryStream (mem.getData(), (TSize) mem.getSize());
+            {
+                stream = new Steinberg::MemoryStream();
+                stream->setSize ((TSize) mem.getSize());
+                mem.copyTo (stream->getData(), 0, mem.getSize());
+            }
         }
 
         return stream;
