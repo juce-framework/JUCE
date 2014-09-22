@@ -414,11 +414,17 @@ public:
     virtual String getParameterText (int parameterIndex, int maximumStringLength);
 
     /** Returns the number of discrete steps that this parameter can represent.
-        The default return value if you don't implement this method is 0x7fffffff.
+        The default return value if you don't implement this method is
+        AudioProcessor::getDefaultNumParameterSteps().
         If your parameter is boolean, then you may want to make this return 2.
         The value that is returned may or may not be used, depending on the host.
     */
     virtual int getParameterNumSteps (int parameterIndex);
+
+    /** Returns the default number of steps for a parameter.
+        @see getParameterNumSteps
+    */
+    static int getDefaultNumParameterSteps() noexcept;
 
     /** Returns the default value for the parameter.
         By default, this just returns 0.

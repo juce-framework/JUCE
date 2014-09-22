@@ -128,7 +128,8 @@ String AudioProcessor::getParameterText (int parameterIndex, int maximumStringLe
     return getParameterText (parameterIndex).substring (0, maximumStringLength);
 }
 
-int AudioProcessor::getParameterNumSteps (int /*parameterIndex*/)        { return 0x7fffffff; }
+int AudioProcessor::getDefaultNumParameterSteps() noexcept               { return 0x7fffffff; }
+int AudioProcessor::getParameterNumSteps (int /*parameterIndex*/)        { return getDefaultNumParameterSteps(); }
 float AudioProcessor::getParameterDefaultValue (int /*parameterIndex*/)  { return 0.0f; }
 
 AudioProcessorListener* AudioProcessor::getListenerLocked (const int index) const noexcept
