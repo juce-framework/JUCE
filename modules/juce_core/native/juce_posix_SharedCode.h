@@ -664,6 +664,7 @@ int File::getVolumeSerialNumber() const
 }
 
 //==============================================================================
+#if ! JUCE_IOS
 void juce_runSystemCommand (const String&);
 void juce_runSystemCommand (const String& command)
 {
@@ -684,7 +685,7 @@ String juce_getOutputFromCommand (const String& command)
     tempFile.deleteFile();
     return result;
 }
-
+#endif
 
 //==============================================================================
 #if JUCE_IOS
