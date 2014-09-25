@@ -460,5 +460,3 @@ void Label::textEditorFocusLost (TextEditor& ed)
 {
     textEditorTextChanged (ed);
 }
-
-void Label::Listener::editorShown (Label*, TextEditor&) {}
