@@ -21,8 +21,8 @@ class SineWaveSound : public SynthesiserSound
 public:
     SineWaveSound() {}
 
-    bool appliesToNote (const int /*midiNoteNumber*/) override  { return true; }
-    bool appliesToChannel (const int /*midiChannel*/) override  { return true; }
+    bool appliesToNote (int /*midiNoteNumber*/) override  { return true; }
+    bool appliesToChannel (int /*midiChannel*/) override  { return true; }
 };
 
 //==============================================================================

@@ -32,8 +32,8 @@ struct SineWaveSound : public SynthesiserSound
 {
     SineWaveSound() {}
 
-    bool appliesToNote (const int /*midiNoteNumber*/)           { return true; }
-    bool appliesToChannel (const int /*midiChannel*/)           { return true; }
+    bool appliesToNote (int /*midiNoteNumber*/)           { return true; }
+    bool appliesToChannel (int /*midiChannel*/)           { return true; }
 };
 
 

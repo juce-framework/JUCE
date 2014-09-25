@@ -55,14 +55,14 @@ public:
         The Synthesiser will use this information when deciding which sounds to trigger
         for a given note.
     */
-    virtual bool appliesToNote (const int midiNoteNumber) = 0;
+    virtual bool appliesToNote (int midiNoteNumber) = 0;
 
     /** Returns true if the sound should be triggered by midi events on a given channel.
 
         The Synthesiser will use this information when deciding which sounds to trigger
         for a given note.
     */
-    virtual bool appliesToChannel (const int midiChannel) = 0;
+    virtual bool appliesToChannel (int midiChannel) = 0;
 
     /** The class is reference-counted, so this is a handy pointer class for it. */
     typedef ReferenceCountedObjectPtr<SynthesiserSound> Ptr;
