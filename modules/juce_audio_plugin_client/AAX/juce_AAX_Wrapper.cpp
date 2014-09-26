@@ -308,7 +308,7 @@ struct AAXClasses
             }
         }
 
-        virtual AAX_Result GetViewSize (AAX_Point* viewSize) const override
+        AAX_Result GetViewSize (AAX_Point* viewSize) const override
         {
             if (component != nullptr)
             {
