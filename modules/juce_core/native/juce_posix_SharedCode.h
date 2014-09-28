@@ -236,7 +236,7 @@ namespace
             if (modTime != nullptr)       *modTime      = Time (statOk ? (int64) info.st_mtime * 1000 : 0);
 
             if (creationTime != nullptr)  *creationTime = Time ((! statOk) ? 0 : (int64) (1000 *
-                                                                    #if JUCE_MAC || JUCE_IOS
+                                                                    #if (JUCE_MAC || JUCE_IOS) && MAC_OS_X_VERSION_MIN_REQUIRED > MAC_OS_X_VERSION_10_5
                                                                      info.st_birthtime));
                                                                     #else
                                                                      info.st_ctime));
