@@ -100,7 +100,8 @@ double FILTERCLASSNAME::getTailLengthSeconds() const
 
 int FILTERCLASSNAME::getNumPrograms()
 {
-    return 0;
+    return 1;   // NB: some hosts don't cope very well if you tell them there are 0 programs,
+                // so this should be at least 1, even if you're not really implementing programs.
 }
 
 int FILTERCLASSNAME::getCurrentProgram()

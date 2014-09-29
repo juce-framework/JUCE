@@ -346,7 +346,8 @@ static const unsigned char temp_binary_data_6[] =
 "\r\n"
 "int FILTERCLASSNAME::getNumPrograms()\r\n"
 "{\r\n"
-"    return 0;\r\n"
+"    return 1;   // NB: some hosts don't cope very well if you tell them there are 0 programs,\r\n"
+"                // so this should be at least 1, even if you're not really implementing programs.\r\n"
 "}\r\n"
 "\r\n"
 "int FILTERCLASSNAME::getCurrentProgram()\r\n"
@@ -1235,7 +1236,7 @@ const char* getNamedResource (const char* resourceNameUTF8, int& numBytes) throw
         case 0xe8b08520:  numBytes = 1050; return colourscheme_light_xml;
         case 0x27c5a93a:  numBytes = 1008; return jucer_AudioPluginEditorTemplate_cpp;
         case 0x4d0721bf:  numBytes = 799; return jucer_AudioPluginEditorTemplate_h;
-        case 0x51b49ac5:  numBytes = 4849; return jucer_AudioPluginFilterTemplate_cpp;
+        case 0x51b49ac5:  numBytes = 5028; return jucer_AudioPluginFilterTemplate_cpp;
         case 0x488afa0a:  numBytes = 2488; return jucer_AudioPluginFilterTemplate_h;
         case 0xabad7041:  numBytes = 2083; return jucer_ComponentTemplate_cpp;
         case 0xfc72fe86:  numBytes = 2156; return jucer_ComponentTemplate_h;
