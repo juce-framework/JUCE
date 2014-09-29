@@ -22,16 +22,16 @@ namespace BinaryData
     const int            colourscheme_light_xmlSize = 1050;
 
     extern const char*   jucer_AudioPluginEditorTemplate_cpp;
-    const int            jucer_AudioPluginEditorTemplate_cppSize = 1008;
+    const int            jucer_AudioPluginEditorTemplate_cppSize = 1180;
 
     extern const char*   jucer_AudioPluginEditorTemplate_h;
-    const int            jucer_AudioPluginEditorTemplate_hSize = 799;
+    const int            jucer_AudioPluginEditorTemplate_hSize = 1012;
 
     extern const char*   jucer_AudioPluginFilterTemplate_cpp;
-    const int            jucer_AudioPluginFilterTemplate_cppSize = 5028;
+    const int            jucer_AudioPluginFilterTemplate_cppSize = 5039;
 
     extern const char*   jucer_AudioPluginFilterTemplate_h;
-    const int            jucer_AudioPluginFilterTemplate_hSize = 2488;
+    const int            jucer_AudioPluginFilterTemplate_hSize = 2727;
 
     extern const char*   jucer_ComponentTemplate_cpp;
     const int            jucer_ComponentTemplate_cppSize = 2083;
