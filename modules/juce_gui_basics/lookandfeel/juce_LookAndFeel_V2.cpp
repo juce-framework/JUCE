@@ -111,6 +111,9 @@ LookAndFeel_V2::LookAndFeel_V2()
         TextPropertyComponent::textColourId,        0xff000000,
         TextPropertyComponent::outlineColourId,     standardOutlineColour,
 
+        BooleanPropertyComponent::backgroundColourId, 0xffffffff,
+        BooleanPropertyComponent::outlineColourId,  standardOutlineColour,
+
         ListBox::backgroundColourId,                0xffffffff,
         ListBox::outlineColourId,                   standardOutlineColour,
         ListBox::textColourId,                      0xff000000,
