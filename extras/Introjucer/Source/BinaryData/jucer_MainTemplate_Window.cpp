@@ -27,7 +27,7 @@ public:
     {
         // This method is where you should put your application's initialisation code..
 
-        mainWindow = new MainWindow();
+        mainWindow = new MainWindow (getApplicationName());
     }
 
     void shutdown() override
@@ -60,17 +60,18 @@ public:
     class MainWindow    : public DocumentWindow
     {
     public:
-        MainWindow()  : DocumentWindow ("MainWindow",
-                                        Colours::lightgrey,
-                                        DocumentWindow::allButtons)
+        MainWindow (String name)  : DocumentWindow (name,
+                                                    Colours::lightgrey,
+                                                    DocumentWindow::allButtons)
         {
+            setUsingNativeTitleBar (true);
             setContentOwned (new CONTENTCOMPCLASS(), true);
 
             centreWithSize (getWidth(), getHeight());
             setVisible (true);
         }
 
-        void closeButtonPressed()
+        void closeButtonPressed() override
         {
             // This is called when the user tries to close this window. Here, we'll just
             // ask the app to quit when this happens, but you can change this to do

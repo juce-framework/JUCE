@@ -917,7 +917,7 @@ static const unsigned char temp_binary_data_15[] =
 "    {\r\n"
 "        // This method is where you should put your application's initialisation code..\r\n"
 "\r\n"
-"        mainWindow = new MainWindow();\r\n"
+"        mainWindow = new MainWindow (getApplicationName());\r\n"
 "    }\r\n"
 "\r\n"
 "    void shutdown() override\r\n"
@@ -950,17 +950,18 @@ static const unsigned char temp_binary_data_15[] =
 "    class MainWindow    : public DocumentWindow\r\n"
 "    {\r\n"
 "    public:\r\n"
-"        MainWindow()  : DocumentWindow (\"MainWindow\",\r\n"
-"                                        Colours::lightgrey,\r\n"
-"                                        DocumentWindow::allButtons)\r\n"
+"        MainWindow (String name)  : DocumentWindow (name,\r\n"
+"                                                    Colours::lightgrey,\r\n"
+"                                                    DocumentWindow::allButtons)\r\n"
 "        {\r\n"
+"            setUsingNativeTitleBar (true);\r\n"
 "            setContentOwned (new CONTENTCOMPCLASS(), true);\r\n"
 "\r\n"
 "            centreWithSize (getWidth(), getHeight());\r\n"
 "            setVisible (true);\r\n"
 "        }\r\n"
 "\r\n"
-"        void closeButtonPressed()\r\n"
+"        void closeButtonPressed() override\r\n"
 "        {\r\n"
 "            // This is called when the user tries to close this window. Here, we'll just\r\n"
 "            // ask the app to quit when this happens, but you can change this to do\r\n"
@@ -1258,7 +1259,7 @@ const char* getNamedResource (const char* resourceNameUTF8, int& numBytes) throw
         case 0x28d496ad:  numBytes = 1143; return jucer_InlineComponentTemplate_h;
         case 0x8905395b:  numBytes = 470; return jucer_MainConsoleAppTemplate_cpp;
         case 0x5e5ea047:  numBytes = 2010; return jucer_MainTemplate_NoWindow_cpp;
-        case 0x400bc026:  numBytes = 3676; return jucer_MainTemplate_Window_cpp;
+        case 0x400bc026:  numBytes = 3778; return jucer_MainTemplate_Window_cpp;
         case 0xf4842835:  numBytes = 1389; return jucer_NewComponentTemplate_cpp;
         case 0xe7bf237a:  numBytes = 648; return jucer_NewComponentTemplate_h;
         case 0x02a2a077:  numBytes = 262; return jucer_NewCppFileTemplate_cpp;
