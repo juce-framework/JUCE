@@ -55,7 +55,7 @@ public:
         angleDelta = cyclesPerSample * 2.0 * double_Pi;
     }
 
-    void stopNote (float velocity, bool allowTailOff) override
+    void stopNote (float /*velocity*/, bool allowTailOff) override
     {
         if (allowTailOff)
         {
