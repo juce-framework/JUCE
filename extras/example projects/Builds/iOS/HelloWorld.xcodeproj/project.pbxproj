@@ -11,6 +11,7 @@
 		9C737750FC4663FBFDF8C048 = {isa = PBXBuildFile; fileRef = FB6FA17C00AB569935B5CFF8; };
 		EAA5A5EECF04D2B7FCF768FC = {isa = PBXBuildFile; fileRef = EF932865774E86525CE7FC55; };
 		ACB6DFC6389AFB78A7EF0A61 = {isa = PBXBuildFile; fileRef = 07D50D8347ED27B84F822D6C; };
+		7AA2F50DAEF3BA88A7C9C97E = {isa = PBXBuildFile; fileRef = B700739654886DC8E7C1293B; };
 		535A340E26E5D6766D1780CA = {isa = PBXBuildFile; fileRef = B3978067F1432E1A2618A5DB; };
 		31E87C6EC193B9C408D16F20 = {isa = PBXBuildFile; fileRef = 0EDDB91E8D84944C3EBACFFE; };
 		F1FECDFA7E29BD6B703AF52B = {isa = PBXBuildFile; fileRef = 116E9A279FB25AE32174C42F; };
@@ -479,6 +480,7 @@
 		B6AC99C26F679771A2F942B5 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_ThreadLocalValue.h"; path = "../../../../modules/juce_core/threads/juce_ThreadLocalValue.h"; sourceTree = "SOURCE_ROOT"; };
 		B6C28B2DAE4802FA291E3487 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_DrawablePath.h"; path = "../../../../modules/juce_gui_basics/drawables/juce_DrawablePath.h"; sourceTree = "SOURCE_ROOT"; };
 		B6C345F16BFAD37B64A5605A = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_ReferenceCountedArray.h"; path = "../../../../modules/juce_core/containers/juce_ReferenceCountedArray.h"; sourceTree = "SOURCE_ROOT"; };
+		B700739654886DC8E7C1293B = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = HelloWorld/Images.xcassets; sourceTree = "SOURCE_ROOT"; };
 		B78154B28539A2E8152D2B9C = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_AsyncUpdater.h"; path = "../../../../modules/juce_events/broadcasters/juce_AsyncUpdater.h"; sourceTree = "SOURCE_ROOT"; };
 		B7F363708A0CDC05D9C04876 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_Typeface.cpp"; path = "../../../../modules/juce_graphics/fonts/juce_Typeface.cpp"; sourceTree = "SOURCE_ROOT"; };
 		B86F88CBFF4E577BCCF8D620 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_TextEditor.cpp"; path = "../../../../modules/juce_gui_basics/widgets/juce_TextEditor.cpp"; sourceTree = "SOURCE_ROOT"; };
@@ -1430,7 +1432,8 @@
 					F21F13BF684528EB7041BD67,
 					F6CA8CB0E2135154E38E9707, ); name = "Juce Library Code"; sourceTree = "<group>"; };
 		F75EB749D5026E5AC86B6C4B = {isa = PBXGroup; children = (
-					B531D38613FDEC368336A51E, ); name = Resources; sourceTree = "<group>"; };
+					B531D38613FDEC368336A51E,
+					B700739654886DC8E7C1293B, ); name = Resources; sourceTree = "<group>"; };
 		C581D34B32A781E9AED7F7B0 = {isa = PBXGroup; children = (
 					AF0CC5F28EB37B1FABBDD5DD,
 					FE9531D38CA4C273B6FB87A7,
@@ -1447,6 +1450,8 @@
 					C581D34B32A781E9AED7F7B0,
 					1C83313FCFBC3FAFA8CDB087, ); name = Source; sourceTree = "<group>"; };
 		34AEE2803DA0D6192C299422 = {isa = XCBuildConfiguration; buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
 				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
 				CLANG_LINK_OBJC_RUNTIME = NO;
 				COMBINE_HIDPI_IMAGES = YES;
@@ -1465,6 +1470,8 @@
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "$(HOME)/Applications"; }; name = Debug; };
 		339C95D5B2E96DD37B176D75 = {isa = XCBuildConfiguration; buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
 				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
 				CLANG_LINK_OBJC_RUNTIME = NO;
 				COMBINE_HIDPI_IMAGES = YES;
@@ -1526,7 +1533,8 @@
 		D2ABD8290ABA5095AE85F9A6 = {isa = XCConfigurationList; buildConfigurations = (
 					34AEE2803DA0D6192C299422,
 					339C95D5B2E96DD37B176D75, ); defaultConfigurationIsVisible = 0; defaultConfigurationName = Debug; };
-		7B2C68FAAB7FB794B44BA476 = {isa = PBXResourcesBuildPhase; buildActionMask = 2147483647; files = (  ); runOnlyForDeploymentPostprocessing = 0; };
+		7B2C68FAAB7FB794B44BA476 = {isa = PBXResourcesBuildPhase; buildActionMask = 2147483647; files = (
+					7AA2F50DAEF3BA88A7C9C97E, ); runOnlyForDeploymentPostprocessing = 0; };
 		5C249F77DD3C907CDA919026 = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (
 					535A340E26E5D6766D1780CA,
 					31E87C6EC193B9C408D16F20,

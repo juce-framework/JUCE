@@ -302,7 +302,11 @@ private:
             resourceFileRefs.add (createFileRefID (plistPath));
         }
 
-        if (! iOS)
+        if (iOS)
+        {
+            createiOSAssetsFolder();
+        }
+        else
         {
             MemoryOutputStream nib;
             nib.write (BinaryData::RecentFilesMenuTemplate_nib, BinaryData::RecentFilesMenuTemplate_nibSize);
@@ -756,7 +760,12 @@ private:
 
         String gccVersion ("com.apple.compilers.llvm.clang.1_0");
 
-        if (! iOS)
+        if (iOS)
+        {
+            s.add ("ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon");
+            s.add ("ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage");
+        }
+        else
         {
             const String sdk (config.getMacSDKVersion());
             const String sdkCompat (config.getMacCompatibilityVersion());
@@ -1002,6 +1011,7 @@ private:
         if (file.hasFileExtension ("component;vst;plugin")) return "wrapper.cfbundle";
         if (file.hasFileExtension ("xcodeproj"))            return "wrapper.pb-project";
         if (file.hasFileExtension ("a"))                    return "archive.ar";
+        if (file.hasFileExtension ("xcassets"))             return "folder.assetcatalog";
 
         return "file" + file.getFileExtension();
     }
@@ -1230,6 +1240,98 @@ private:
                                                 .replace ("\r\n", "\\n")
                                                 .replace ("\n", "\\n"), nullptr);
         }
+    }
+
+    String getiOSAssetContents (var images) const
+    {
+        DynamicObject::Ptr v (new DynamicObject());
+
+        var info (new DynamicObject());
+        info.getDynamicObject()->setProperty ("version", 1);
+        info.getDynamicObject()->setProperty ("author", "xcode");
+
+        v->setProperty ("images", images);
+        v->setProperty ("info", info);
+
+        return JSON::toString (var (v));
+    }
+
+    String getiOSAppIconContents() const
+    {
+        struct ImageType
+        {
+            const char* idiom;
+            const char* size;
+            const char* scale;
+        };
+
+        const ImageType types[] = { { "iphone", "29x29", "2x" },
+                                    { "iphone", "40x40", "2x" },
+                                    { "iphone", "60x60", "2x" },
+                                    { "iphone", "60x60", "3x" },
+                                    { "ipad",   "29x29", "1x" },
+                                    { "ipad",   "29x29", "2x" },
+                                    { "ipad",   "40x40", "1x" },
+                                    { "ipad",   "40x40", "2x" },
+                                    { "ipad",   "76x76", "1x" },
+                                    { "ipad",   "76x76", "2x" } };
+        var images;
+
+        for (int i = 0; i < numElementsInArray (types); ++i)
+        {
+            DynamicObject::Ptr d = new DynamicObject();
+            d->setProperty ("idiom", types[i].idiom);
+            d->setProperty ("size",  types[i].size);
+            d->setProperty ("scale", types[i].scale);
+            images.append (var (d));
+        }
+
+        return getiOSAssetContents (images);
+    }
+
+    String getiOSLaunchImageContents() const
+    {
+        struct ImageType
+        {
+            const char* orientation;
+            const char* idiom;
+            const char* extent;
+            const char* scale;
+        };
+
+        const ImageType types[] = { { "portrait",  "iphone", "full-screen", "2x" },
+                                    { "portrait",  "iphone", "full-screen", "2x" },
+                                    { "portrait",  "ipad",   "full-screen", "1x" },
+                                    { "landscape", "ipad",   "full-screen", "1x" },
+                                    { "portrait",  "ipad",   "full-screen", "2x" },
+                                    { "landscape", "ipad",   "full-screen", "2x" } };
+        var images;
+
+        for (int i = 0; i < numElementsInArray (types); ++i)
+        {
+            DynamicObject::Ptr d = new DynamicObject();
+            d->setProperty ("orientation", types[i].orientation);
+            d->setProperty ("idiom", types[i].idiom);
+            d->setProperty ("extent",  types[i].extent);
+            d->setProperty ("minimum-system-version",  "7.0");
+            d->setProperty ("scale", types[i].scale);
+            images.append (var (d));
+        }
+
+        return getiOSAssetContents (images);
+    }
+
+    void createiOSAssetsFolder() const
+    {
+        File assets (getTargetFolder().getChildFile (project.getProjectFilenameRoot()).getChildFile ("Images.xcassets"));
+
+        overwriteFileIfDifferentOrThrow (assets.getChildFile ("AppIcon.appiconset")     .getChildFile ("Contents.json"), getiOSAppIconContents());
+        overwriteFileIfDifferentOrThrow (assets.getChildFile ("LaunchImage.launchimage").getChildFile ("Contents.json"), getiOSLaunchImageContents());
+
+        RelativePath assetsPath (assets, getTargetFolder(), RelativePath::buildTargetFolder);
+        addFileReference (assetsPath.toUnixStyle());
+        resourceIDs.add (addBuildFile (assetsPath, false, false));
+        resourceFileRefs.add (createFileRefID (assetsPath));
     }
 
     //==============================================================================

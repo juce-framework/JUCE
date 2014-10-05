@@ -182,7 +182,7 @@ int64 MemoryOutputStream::writeFromInputStream (InputStream& source, int64 maxNu
 
     if (availableData > 0)
     {
-        if (maxNumBytesToWrite > availableData)
+        if (maxNumBytesToWrite > availableData || maxNumBytesToWrite < 0)
             maxNumBytesToWrite = availableData;
 
         if (blockToUse != nullptr)

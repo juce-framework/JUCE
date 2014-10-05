@@ -242,7 +242,7 @@ public:
         props.add (new TextPropertyComponent (getPluginCode (project), "Plugin Code", 4, false),
                    "A four-character unique ID for your plugin. Note that for AU compatibility, this must contain at least one upper-case letter!");
 
-        props.add (new TextPropertyComponent (getPluginChannelConfigs (project), "Plugin Channel Configurations", 256, false),
+        props.add (new TextPropertyComponent (getPluginChannelConfigs (project), "Plugin Channel Configurations", 1024, false),
                    "This is the set of input/output channel configurations that your plugin can handle.  The list is a comma-separated set of pairs of values in the form { numInputs, numOutputs }, and each "
                    "pair indicates a valid configuration that the plugin can handle. So for example, {1, 1}, {2, 2} means that the plugin can be used in just two configurations: either with 1 input "
                    "and 1 output, or with 2 inputs and 2 outputs.");

@@ -729,7 +729,7 @@ public:
 
     tresult PLUGIN_API setActive (TBool state) override
     {
-        if (state == kResultFalse)
+        if (! state)
         {
             getPluginInstance().releaseResources();
         }
@@ -1172,7 +1172,7 @@ public:
 
     tresult PLUGIN_API setProcessing (TBool state) override
     {
-        if (state == kResultFalse)
+        if (! state)
             getPluginInstance().reset();
 
         return kResultTrue;

@@ -59,12 +59,12 @@ SamplerSound::~SamplerSound()
 {
 }
 
-bool SamplerSound::appliesToNote (const int midiNoteNumber)
+bool SamplerSound::appliesToNote (int midiNoteNumber)
 {
     return midiNotes [midiNoteNumber];
 }
 
-bool SamplerSound::appliesToChannel (const int /*midiChannel*/)
+bool SamplerSound::appliesToChannel (int /*midiChannel*/)
 {
     return true;
 }

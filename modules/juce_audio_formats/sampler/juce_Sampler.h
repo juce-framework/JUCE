@@ -82,8 +82,8 @@ public:
 
 
     //==============================================================================
-    bool appliesToNote (const int midiNoteNumber) override;
-    bool appliesToChannel (const int midiChannel) override;
+    bool appliesToNote (int midiNoteNumber) override;
+    bool appliesToChannel (int midiChannel) override;
 
 
 private:

@@ -79,6 +79,20 @@ public:
     virtual bool getState() const;
 
     //==============================================================================
+    /** A set of colour IDs to use to change the colour of various aspects of the component.
+
+        These constants can be used either via the Component::setColour(), or LookAndFeel::setColour()
+        methods.
+
+        @see Component::setColour, Component::findColour, LookAndFeel::setColour, LookAndFeel::findColour
+    */
+    enum ColourIds
+    {
+        backgroundColourId          = 0x100e801,    /**< The colour to fill the background of the button area. */
+        outlineColourId             = 0x100e803,    /**< The colour to use to draw an outline around the text area. */
+    };
+
+    //==============================================================================
     /** @internal */
     void paint (Graphics&) override;
     /** @internal */

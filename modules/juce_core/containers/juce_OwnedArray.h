@@ -830,7 +830,7 @@ public:
         This will use a comparator object to sort the elements into order. The object
         passed must have a method of the form:
         @code
-        int compareElements (ElementType first, ElementType second);
+        int compareElements (ElementType* first, ElementType* second);
         @endcode
 
         ..and this method must return:

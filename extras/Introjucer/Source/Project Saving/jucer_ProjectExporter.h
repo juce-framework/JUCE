@@ -338,6 +338,12 @@ protected:
             throw SaveError (file);
     }
 
+    static void overwriteFileIfDifferentOrThrow (const File& file, const String& newData)
+    {
+        if (! FileHelpers::overwriteFileWithNewDataIfDifferent (file, newData))
+            throw SaveError (file);
+    }
+
     static void createDirectoryOrThrow (const File& dirToCreate)
     {
         if (! dirToCreate.createDirectory())
