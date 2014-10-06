@@ -1287,6 +1287,7 @@ public:
         {
             setAlwaysOnTop (true);
             setAllowedPlacement (owner.getLookAndFeel().getSliderPopupPlacement (s));
+            setLookAndFeel (&s.getLookAndFeel());
         }
 
         void paintContent (Graphics& g, int w, int h)
