@@ -277,12 +277,6 @@ public:
     */
     void setTooltip (const String& newTooltip) override;
 
-    /** Returns the tooltip set by setTooltip(), or the description corresponding to
-        the currently mapped command if one is enabled (see setCommandToTrigger).
-    */
-    String getTooltip() override;
-
-
     //==============================================================================
     /** A combination of these flags are used by setConnectedEdges(). */
     enum ConnectedEdgeFlags
@@ -495,6 +489,7 @@ private:
     void repeatTimerCallback();
     bool keyStateChangedCallback();
     void applicationCommandListChangeCallback();
+    void updateAutomaticTooltip (const ApplicationCommandInfo&);
 
     ButtonState updateState();
     ButtonState updateState (bool isOver, bool isDown);
