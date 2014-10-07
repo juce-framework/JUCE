@@ -165,6 +165,12 @@ protected:
     virtual bool shouldDropFilesWhenDraggedExternally (const DragAndDropTarget::SourceDetails& sourceDetails,
                                                        StringArray& files, bool& canMoveFiles);
 
+    /** Subclasses can override this to be told when a drag starts. */
+    virtual void dragOperationStarted();
+
+    /** Subclasses can override this to be told when a drag finishes. */
+    virtual void dragOperationEnded();
+
 private:
     //==============================================================================
     class DragImageComponent;
