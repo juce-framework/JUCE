@@ -185,6 +185,11 @@ public:
     */
     virtual void setCurrentPlaybackSampleRate (double newRate);
 
+    /** Returns the current target sample rate at which rendering is being done.
+        Subclasses may need to know this so that they can pitch things correctly.
+    */
+    double getSampleRate() const noexcept                       { return currentSampleRate; }
+
     /** Returns true if the voice is currently playing a sound which is mapped to the given
         midi channel.
 
@@ -205,13 +210,6 @@ public:
     bool wasStartedBefore (const SynthesiserVoice& other) const noexcept;
 
 protected:
-    //==============================================================================
-    /** Returns the current target sample rate at which rendering is being done.
-
-        This is available for subclasses so they can pitch things correctly.
-    */
-    double getSampleRate() const                                { return currentSampleRate; }
-
     /** Resets the state of this voice after a sound has finished playing.
 
         The subclass must call this when it finishes playing a note and becomes available
@@ -275,8 +273,7 @@ class JUCE_API  Synthesiser
 public:
     //==============================================================================
     /** Creates a new synthesiser.
-
-        You'll need to add some sounds and voices before it'll make any sound..
+        You'll need to add some sounds and voices before it'll make any sound.
     */
     Synthesiser();
 
@@ -471,6 +468,11 @@ public:
                           int startSample,
                           int numSamples);
 
+    /** Returns the current target sample rate at which rendering is being done.
+        Subclasses may need to know this so that they can pitch things correctly.
+    */
+    double getSampleRate() const noexcept                       { return sampleRate; }
+
 protected:
     //==============================================================================
     /** This is used to control access to the rendering callback and the note trigger methods. */
@@ -489,21 +491,27 @@ protected:
     virtual void renderVoices (AudioSampleBuffer& outputAudio,
                                int startSample, int numSamples);
 
-    /** Searches through the voices to find one that's not currently playing, and which
-        can play the given sound.
+    /** Searches through the voices to find one that's not currently playing, and
+        which can play the given sound.
 
         Returns nullptr if all voices are busy and stealing isn't enabled.
 
-        This can be overridden to implement custom voice-stealing algorithms.
+        To implement a custom note-stealing algorithm, you can either override this
+        method, or (preferably) override findVoiceToSteal().
     */
     virtual SynthesiserVoice* findFreeVoice (SynthesiserSound* soundToPlay,
-                                             const bool stealIfNoneAvailable) const;
+                                             int midiChannel,
+                                             int midiNoteNumber,
+                                             bool stealIfNoneAvailable) const;
 
     /** Chooses a voice that is most suitable for being re-used.
-        The default method returns the one that has been playing for the longest, but
-        you may want to override this and do something more cunning instead.
+        The default method will attempt to find the oldest voice that isn't the
+        bottom or top note being played. If that's not suitable for your synth,
+        you can override this method and do something more cunning instead.
     */
-    virtual SynthesiserVoice* findVoiceToSteal (SynthesiserSound* soundToPlay) const;
+    virtual SynthesiserVoice* findVoiceToSteal (SynthesiserSound* soundToPlay,
+                                                int midiChannel,
+                                                int midiNoteNumber) const;
 
     /** Starts a specified voice playing a particular sound.
 
@@ -532,6 +540,8 @@ private:
     // Note the new parameters for these methods.
     virtual int findFreeVoice (const bool) const { return 0; }
     virtual int noteOff (int, int, int) { return 0; }
+    virtual int findFreeVoice (SynthesiserSound*, const bool) { return 0; }
+    virtual int findVoiceToSteal (SynthesiserSound*) const { return 0; }
    #endif
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Synthesiser)

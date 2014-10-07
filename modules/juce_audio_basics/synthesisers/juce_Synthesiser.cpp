@@ -236,7 +236,7 @@ void Synthesiser::noteOn (const int midiChannel,
                     stopVoice (voice, 1.0f, true);
             }
 
-            startVoice (findFreeVoice (sound, shouldStealNotes),
+            startVoice (findFreeVoice (sound, midiChannel, midiNoteNumber, shouldStealNotes),
                         sound, midiChannel, midiNoteNumber, velocity);
         }
     }
@@ -416,7 +416,9 @@ void Synthesiser::handleSoftPedal (int midiChannel, bool /*isDown*/)
 }
 
 //==============================================================================
-SynthesiserVoice* Synthesiser::findFreeVoice (SynthesiserSound* soundToPlay, const bool stealIfNoneAvailable) const
+SynthesiserVoice* Synthesiser::findFreeVoice (SynthesiserSound* soundToPlay,
+                                              int midiChannel, int midiNoteNumber,
+                                              const bool stealIfNoneAvailable) const
 {
     const ScopedLock sl (lock);
 
@@ -429,25 +431,68 @@ SynthesiserVoice* Synthesiser::findFreeVoice (SynthesiserSound* soundToPlay, con
     }
 
     if (stealIfNoneAvailable)
-        return findVoiceToSteal (soundToPlay);
+        return findVoiceToSteal (soundToPlay, midiChannel, midiNoteNumber);
 
     return nullptr;
 }
 
-SynthesiserVoice* Synthesiser::findVoiceToSteal (SynthesiserSound* soundToPlay) const
+struct VoiceAgeSorter
 {
-    // currently this just steals the one that's been playing the longest, but could be made a bit smarter..
-    SynthesiserVoice* oldest = nullptr;
+    static int compareElements (SynthesiserVoice* v1, SynthesiserVoice* v2) noexcept
+    {
+        return v1->wasStartedBefore (*v2) ? 1 : (v2->wasStartedBefore (*v1) ? -1 : 0);
+    }
+};
+
+SynthesiserVoice* Synthesiser::findVoiceToSteal (SynthesiserSound* soundToPlay,
+                                                 int /*midiChannel*/, int midiNoteNumber) const
+{
+    SynthesiserVoice* bottom = nullptr;
+    SynthesiserVoice* top    = nullptr;
+
+    // this is a list of voices we can steal, sorted by how long they've been running
+    Array<SynthesiserVoice*> usableVoices;
+    usableVoices.ensureStorageAllocated (voices.size());
 
     for (int i = 0; i < voices.size(); ++i)
     {
         SynthesiserVoice* const voice = voices.getUnchecked (i);
 
-        if (voice->canPlaySound (soundToPlay)
-             && (oldest == nullptr || voice->wasStartedBefore (*oldest)))
-            oldest = voice;
+        if (voice->canPlaySound (soundToPlay))
+        {
+            VoiceAgeSorter sorter;
+            usableVoices.addSorted (sorter, voice);
+
+            const int note = voice->getCurrentlyPlayingNote();
+
+            if (bottom == nullptr || note < bottom->getCurrentlyPlayingNote())
+                bottom = voice;
+
+            if (top == nullptr || note > top->getCurrentlyPlayingNote())
+                top = voice;
+        }
     }
 
-    jassert (oldest != nullptr);
-    return oldest;
+    jassert (bottom != nullptr && top != nullptr);
+
+    // The oldest note that's playing with the target pitch playing is ideal..
+    for (int i = 0; i < usableVoices.size(); ++i)
+    {
+        SynthesiserVoice* const voice = usableVoices.getUnchecked (i);
+
+        if (voice->getCurrentlyPlayingNote() == midiNoteNumber)
+            return voice;
+    }
+
+    // ..otherwise, look for the oldest note that isn't the top or bottom note..
+    for (int i = 0; i < usableVoices.size(); ++i)
+    {
+        SynthesiserVoice* const voice = usableVoices.getUnchecked (i);
+
+        if (voice != bottom && voice != top)
+            return voice;
+    }
+
+    // ..otherwise, there's only one or two voices to choose from - we'll return the top one..
+    return top;
 }
