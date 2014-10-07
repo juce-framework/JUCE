@@ -334,6 +334,10 @@ static void sendScreenBoundsUpdate (JuceUIViewController* c)
 {
     [super viewWillTransitionToSize: size withTransitionCoordinator: coordinator];
     sendScreenBoundsUpdate (self);
+
+    // On some devices the screen-size isn't yet updated at this point, so also trigger another
+    // async update to double-check..
+    MessageManager::callAsync ([=]() { sendScreenBoundsUpdate (self); });
 }
 
 - (void) viewDidLoad
