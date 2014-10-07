@@ -123,7 +123,7 @@ namespace FloatVectorHelpers
         } \
         JUCE_FINISH_VEC_OP (normalOp)
 
-#define JUCE_PERFORM_VEC_OP_SRC1_SRC2_DEST(normalOp, vecOp, locals, increment, setupOp) \
+    #define JUCE_PERFORM_VEC_OP_SRC1_SRC2_DEST(normalOp, vecOp, locals, increment, setupOp) \
         JUCE_BEGIN_VEC_OP \
         setupOp \
         { \
@@ -205,6 +205,12 @@ namespace FloatVectorHelpers
         JUCE_VEC_LOOP (vecOp, Mode::loadU, Mode::loadU, Mode::storeU, locals, increment) \
         JUCE_FINISH_VEC_OP (normalOp)
 
+    #define JUCE_PERFORM_VEC_OP_SRC1_SRC2_DEST(normalOp, vecOp, locals, increment, setupOp) \
+        JUCE_BEGIN_VEC_OP \
+        setupOp \
+        JUCE_VEC_LOOP_TWO_SOURCES (vecOp, Mode::loadU, Mode::loadU, Mode::storeU, locals, increment) \
+        JUCE_FINISH_VEC_OP (normalOp)
+
     //==============================================================================
    #else
     #define JUCE_PERFORM_VEC_OP_DEST(normalOp, vecOp, locals, setupOp) \
@@ -213,6 +219,8 @@ namespace FloatVectorHelpers
     #define JUCE_PERFORM_VEC_OP_SRC_DEST(normalOp, vecOp, locals, increment, setupOp) \
         for (int i = 0; i < num; ++i) normalOp;
 
+    #define JUCE_PERFORM_VEC_OP_SRC1_SRC2_DEST(normalOp, vecOp, locals, increment, setupOp) \
+        for (int i = 0; i < num; ++i) normalOp;
    #endif
 
     //==============================================================================
