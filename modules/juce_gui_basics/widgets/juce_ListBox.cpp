@@ -367,6 +367,7 @@ ListBox::ListBox (const String& name, ListBoxModel* const m)
       outlineThickness (0),
       lastRowSelected (-1),
       multipleSelection (false),
+      alwaysFlipSelection (false),
       hasDoneInitialUpdate (false)
 {
     addAndMakeVisible (viewport = new ListViewport (*this));
@@ -391,9 +392,14 @@ void ListBox::setModel (ListBoxModel* const newModel)
     }
 }
 
-void ListBox::setMultipleSelectionEnabled (bool b)
+void ListBox::setMultipleSelectionEnabled (bool b) noexcept
 {
     multipleSelection = b;
+}
+
+void ListBox::setClickingTogglesRowSelection (bool b) noexcept
+{
+    alwaysFlipSelection = b;
 }
 
 void ListBox::setMouseMoveSelectsRows (bool b)
@@ -470,9 +476,7 @@ void ListBox::updateContent()
 }
 
 //==============================================================================
-void ListBox::selectRow (const int row,
-                         bool dontScroll,
-                         bool deselectOthersFirst)
+void ListBox::selectRow (int row, bool dontScroll, bool deselectOthersFirst)
 {
     selectRowInternal (row, dontScroll, deselectOthersFirst, false);
 }
@@ -589,7 +593,7 @@ void ListBox::selectRowsBasedOnModifierKeys (const int row,
                                              ModifierKeys mods,
                                              const bool isMouseUpEvent)
 {
-    if (multipleSelection && mods.isCommandDown())
+    if (multipleSelection && (mods.isCommandDown() || alwaysFlipSelection))
     {
         flipRowSelection (row);
     }
