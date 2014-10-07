@@ -473,6 +473,46 @@ namespace WavFileHelpers
     }
 
     //==============================================================================
+    namespace ListInfoChunk
+    {
+        static bool writeValue (const StringPairArray& values, MemoryOutputStream& out, const char* paramName)
+        {
+            const String value (values.getValue (paramName, String()));
+
+            if (value.isEmpty())
+                return false;
+
+            const int valueLength = (int) value.getNumBytesAsUTF8() + 1;
+            const int chunkLength = valueLength + (valueLength & 1);
+
+            out.writeInt (chunkName (paramName));
+            out.writeInt (chunkLength);
+            out.write (value.toUTF8(), (size_t) valueLength);
+
+            if ((out.getDataSize() & 1) != 0)
+                out.writeByte (0);
+
+            return true;
+        }
+
+        static MemoryBlock createFrom (const StringPairArray& values)
+        {
+            static const char* params[] = { "INAM", "IART", "IPRD", "IPRT", "ISFT",
+                                            "ISRC", "IGNR", "ICMT", "ICOP", "ICRD" };
+
+            MemoryOutputStream out;
+            out.writeInt (chunkName ("INFO"));
+            bool anyParamsDefined = false;
+
+            for (int i = 0; i < numElementsInArray (params); ++i)
+                if (writeValue (values, out, params[i]))
+                    anyParamsDefined = true;
+
+            return anyParamsDefined ? out.getMemoryBlock() : MemoryBlock();
+        }
+    }
+
+    //==============================================================================
     struct AcidChunk
     {
         /** Reads an acid RIFF chunk from a stream positioned just after the size byte. */
@@ -987,14 +1027,15 @@ public:
             // key should be removed (or set to "WAV") once this has been done
             jassert (metadataValues.getValue ("MetaDataSource", "None") != "AIFF");
 
-            bwavChunk = BWAVChunk::createFrom (metadataValues);
-            axmlChunk = AXMLChunk::createFrom (metadataValues);
-            smplChunk = SMPLChunk::createFrom (metadataValues);
-            instChunk = InstChunk::createFrom (metadataValues);
-            cueChunk  = CueChunk ::createFrom (metadataValues);
-            listChunk = ListChunk::createFrom (metadataValues);
-            acidChunk = AcidChunk::createFrom (metadataValues);
-            trckChunk = TracktionChunk::createFrom (metadataValues);
+            bwavChunk     = BWAVChunk::createFrom (metadataValues);
+            axmlChunk     = AXMLChunk::createFrom (metadataValues);
+            smplChunk     = SMPLChunk::createFrom (metadataValues);
+            instChunk     = InstChunk::createFrom (metadataValues);
+            cueChunk      = CueChunk ::createFrom (metadataValues);
+            listChunk     = ListChunk::createFrom (metadataValues);
+            listInfoChunk = ListInfoChunk::createFrom (metadataValues);
+            acidChunk     = AcidChunk::createFrom (metadataValues);
+            trckChunk     = TracktionChunk::createFrom (metadataValues);
         }
 
         headerPosition = out->getPosition();
@@ -1057,7 +1098,7 @@ public:
     }
 
 private:
-    MemoryBlock tempBlock, bwavChunk, axmlChunk, smplChunk, instChunk, cueChunk, listChunk, acidChunk, trckChunk;
+    MemoryBlock tempBlock, bwavChunk, axmlChunk, smplChunk, instChunk, cueChunk, listChunk, listInfoChunk, acidChunk, trckChunk;
     uint64 lengthInSamples, bytesWritten;
     int64 headerPosition;
     bool writeFailed;
@@ -1109,6 +1150,7 @@ private:
                                        + chunkSize (instChunk)
                                        + chunkSize (cueChunk)
                                        + chunkSize (listChunk)
+                                       + chunkSize (listInfoChunk)
                                        + chunkSize (acidChunk)
                                        + chunkSize (trckChunk)
                                        + (8 + 28)); // (ds64 chunk)
@@ -1184,14 +1226,15 @@ private:
             output->write (subFormat.data4, sizeof (subFormat.data4));
         }
 
-        writeChunk (bwavChunk, chunkName ("bext"));
-        writeChunk (axmlChunk, chunkName ("axml"));
-        writeChunk (smplChunk, chunkName ("smpl"));
-        writeChunk (instChunk, chunkName ("inst"), 7);
-        writeChunk (cueChunk,  chunkName ("cue "));
-        writeChunk (listChunk, chunkName ("LIST"));
-        writeChunk (acidChunk, chunkName ("acid"));
-        writeChunk (trckChunk, chunkName ("Trkn"));
+        writeChunk (bwavChunk,     chunkName ("bext"));
+        writeChunk (axmlChunk,     chunkName ("axml"));
+        writeChunk (smplChunk,     chunkName ("smpl"));
+        writeChunk (instChunk,     chunkName ("inst"), 7);
+        writeChunk (cueChunk,      chunkName ("cue "));
+        writeChunk (listChunk,     chunkName ("LIST"));
+        writeChunk (listInfoChunk, chunkName ("LIST"));
+        writeChunk (acidChunk,     chunkName ("acid"));
+        writeChunk (trckChunk,     chunkName ("Trkn"));
 
         writeChunkHeader (chunkName ("data"), isRF64 ? -1 : (int) (lengthInSamples * bytesPerFrame));
 
