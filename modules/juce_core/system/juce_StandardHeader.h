@@ -72,6 +72,7 @@
 #include <iostream>
 #include <vector>
 #include <algorithm>
+#include <functional>
 
 #if JUCE_USE_MSVC_INTRINSICS
  #include <intrin.h>
