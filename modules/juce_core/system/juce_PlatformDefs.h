@@ -337,6 +337,10 @@ namespace juce
  #if (__GNUC__ * 100 + __GNUC_MINOR__) >= 407 && ! defined (JUCE_DELETED_FUNCTION)
   #define JUCE_DELETED_FUNCTION = delete
  #endif
+
+ #if (__GNUC__ * 100 + __GNUC_MINOR__) >= 406 && ! defined (JUCE_COMPILER_SUPPORTS_LAMBDAS)
+  #define JUCE_COMPILER_SUPPORTS_LAMBDAS 1
+ #endif
 #endif
 
 #if JUCE_CLANG && defined (__has_feature)
@@ -356,6 +360,10 @@ namespace juce
   #define JUCE_DELETED_FUNCTION = delete
  #endif
 
+ #if __has_feature (cxx_lambdas)
+  #define JUCE_COMPILER_SUPPORTS_LAMBDAS 1
+ #endif
+
  #ifndef JUCE_COMPILER_SUPPORTS_OVERRIDE_AND_FINAL
   #define JUCE_COMPILER_SUPPORTS_OVERRIDE_AND_FINAL 1
  #endif
@@ -372,6 +380,7 @@ namespace juce
 
 #if defined (_MSC_VER) && _MSC_VER >= 1700
  #define JUCE_COMPILER_SUPPORTS_OVERRIDE_AND_FINAL 1
+ #define JUCE_COMPILER_SUPPORTS_LAMBDAS 1
 #endif
 
 #ifndef JUCE_DELETED_FUNCTION

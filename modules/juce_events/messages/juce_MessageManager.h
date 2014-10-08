@@ -91,10 +91,12 @@ public:
    #endif
 
     //==============================================================================
+   #if JUCE_COMPILER_SUPPORTS_LAMBDAS
     /** Asynchronously invokes a function or C++11 lambda on the message thread.
         Internally this uses the CallbackMessage class to invoke the callback.
     */
     static void callAsync (std::function<void(void)>);
+   #endif
 
     /** Calls a function using the message-thread.
 

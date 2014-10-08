@@ -131,6 +131,7 @@ void MessageManager::stopDispatchLoop()
 #endif
 
 //==============================================================================
+#if JUCE_COMPILER_SUPPORTS_LAMBDAS
 struct AsyncFunction  : private MessageManager::MessageBase
 {
     AsyncFunction (std::function<void(void)> f)  : fn (f)  { post(); }
@@ -146,7 +147,9 @@ void MessageManager::callAsync (std::function<void(void)> f)
 {
     new AsyncFunction (f);
 }
+#endif
 
+//==============================================================================
 class AsyncFunctionCallback   : public MessageManager::MessageBase
 {
 public:
