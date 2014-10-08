@@ -360,7 +360,7 @@ namespace juce
   #define JUCE_DELETED_FUNCTION = delete
  #endif
 
- #if __has_feature (cxx_lambdas)
+ #if __has_feature (cxx_lambdas) && ((! JUCE_MAC) || MAC_OS_X_VERSION_MIN_REQUIRED > MAC_OS_X_VERSION_10_5)
   #define JUCE_COMPILER_SUPPORTS_LAMBDAS 1
  #endif
 
