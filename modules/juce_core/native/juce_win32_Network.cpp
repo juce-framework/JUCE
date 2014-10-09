@@ -45,13 +45,14 @@ public:
         address (address_), headers (headers_), postData (postData_), position (0),
         finished (false), isPost (isPost_), timeOutMs (timeOutMs_)
     {
-        createConnection (progressCallback, progressCallbackContext);
-
-        if (! isError())
+        for (int maxRedirects = 10; --maxRedirects >= 0;)
         {
-            if (responseHeaders != nullptr)
+            createConnection (progressCallback, progressCallbackContext);
+
+            if (! isError())
             {
                 DWORD bufferSizeBytes = 4096;
+                StringPairArray headers (false);
 
                 for (;;)
                 {
@@ -65,11 +66,10 @@ public:
                         for (int i = 0; i < headersArray.size(); ++i)
                         {
                             const String& header = headersArray[i];
-                            const String key (header.upToFirstOccurrenceOf (": ", false, false));
+                            const String key   (header.upToFirstOccurrenceOf (": ", false, false));
                             const String value (header.fromFirstOccurrenceOf (": ", false, false));
-                            const String previousValue ((*responseHeaders) [key]);
-
-                            responseHeaders->set (key, previousValue.isEmpty() ? value : (previousValue + "," + value));
+                            const String previousValue (headers[key]);
+                            headers.set (key, previousValue.isEmpty() ? value : (previousValue + "," + value));
                         }
 
                         break;
@@ -77,14 +77,34 @@ public:
 
                     if (GetLastError() != ERROR_INSUFFICIENT_BUFFER)
                         break;
+
+                    bufferSizeBytes += 4096;
                 }
+
+                DWORD status = 0;
+                DWORD statusSize = sizeof (status);
+
+                if (HttpQueryInfo (request, HTTP_QUERY_STATUS_CODE | HTTP_QUERY_FLAG_NUMBER, &status, &statusSize, 0))
+                {
+                    statusCode = (int) status;
+
+                    if (status == 301 || status == 302 || status == 303 || status == 307)
+                    {
+                        const String newLocation (headers["Location"]);
+
+                        if (newLocation.isNotEmpty() && newLocation != address)
+                        {
+                            address = newLocation;
+                            continue;
+                        }
+                    }
+                }
+
+                if (responseHeaders != nullptr)
+                    responseHeaders->addArray (headers);
             }
 
-            DWORD status = 0;
-            DWORD statusSize = sizeof (status);
-
-            if (HttpQueryInfo (request, HTTP_QUERY_STATUS_CODE | HTTP_QUERY_FLAG_NUMBER, &status, &statusSize, 0))
-                statusCode = (int) status;
+            break;
         }
     }
 
