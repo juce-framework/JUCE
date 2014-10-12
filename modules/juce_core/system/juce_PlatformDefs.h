@@ -360,7 +360,10 @@ namespace juce
   #define JUCE_DELETED_FUNCTION = delete
  #endif
 
- #if __has_feature (cxx_lambdas) && ((! JUCE_MAC) || (defined (MAC_OS_X_VERSION_10_8) && MAC_OS_X_VERSION_MIN_REQUIRED > MAC_OS_X_VERSION_10_8))
+ #if __has_feature (cxx_lambdas) \
+      && ((JUCE_MAC && defined (MAC_OS_X_VERSION_10_8) && MAC_OS_X_VERSION_MIN_REQUIRED > MAC_OS_X_VERSION_10_8) \
+           || (JUCE_IOS && defined (__IPHONE_7_0) && __IPHONE_OS_VERSION_MIN_REQUIRED >= __IPHONE_7_0) \
+           || ! (JUCE_MAC || JUCE_IOS))
   #define JUCE_COMPILER_SUPPORTS_LAMBDAS 1
  #endif
 
