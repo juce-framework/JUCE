@@ -377,10 +377,10 @@ public:
     /** This must return the correct value immediately after the object has been
         created, and mustn't change the number of parameters later.
     */
-    virtual int getNumParameters() = 0;
+    virtual int getNumParameters();
 
     /** Returns the name of a particular parameter. */
-    virtual const String getParameterName (int parameterIndex) = 0;
+    virtual const String getParameterName (int parameterIndex);
 
     /** Called by the host to find out the value of one of the filter's parameters.
 
@@ -390,10 +390,10 @@ public:
         It's also likely to be called by non-UI threads, so the code in here should
         be thread-aware.
     */
-    virtual float getParameter (int parameterIndex) = 0;
+    virtual float getParameter (int parameterIndex);
 
     /** Returns the value of a parameter as a text string. */
-    virtual const String getParameterText (int parameterIndex) = 0;
+    virtual const String getParameterText (int parameterIndex);
 
     /** Returns the name of a parameter as a text string with a preferred maximum length.
         If you want to provide customised short versions of your parameter names that
@@ -455,7 +455,7 @@ public:
 
         The value passed will be between 0 and 1.0.
     */
-    virtual void setParameter (int parameterIndex, float newValue) = 0;
+    virtual void setParameter (int parameterIndex, float newValue);
 
     /** Your filter can call this when it needs to change one of its parameters.
 
@@ -506,6 +506,16 @@ public:
         etc, has changed, and that it should update itself.
     */
     void updateHostDisplay();
+
+    //==============================================================================
+    /** Adds a parameter to the list.
+        The parameter object will be managed and deleted automatically by the list
+        when no longer needed.
+    */
+    void addParameter (AudioProcessorParameter*);
+
+    /** Returns the current list of parameters. */
+    const OwnedArray<AudioProcessorParameter>& getParameters() const noexcept;
 
     //==============================================================================
     /** Returns the number of preset programs the filter supports.
@@ -662,6 +672,9 @@ private:
     bool suspended, nonRealtime;
     CriticalSection callbackLock, listenerLock;
     String inputSpeakerArrangement, outputSpeakerArrangement;
+
+    OwnedArray<AudioProcessorParameter> managedParameters;
+    AudioProcessorParameter* getParamChecked (int) const noexcept;
 
    #if JUCE_DEBUG
     BigInteger changingParams;
