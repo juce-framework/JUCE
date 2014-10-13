@@ -253,6 +253,7 @@
           </File>
           <File RelativePath="..\..\..\..\modules\juce_core\maths\juce_Expression.h"/>
           <File RelativePath="..\..\..\..\modules\juce_core\maths\juce_MathsFunctions.h"/>
+          <File RelativePath="..\..\..\..\modules\juce_core\maths\juce_NormalisableRange.h"/>
           <File RelativePath="..\..\..\..\modules\juce_core\maths\juce_Random.cpp">
             <FileConfiguration Name="Debug|Win32"
                                ExcludedFromBuild="true">

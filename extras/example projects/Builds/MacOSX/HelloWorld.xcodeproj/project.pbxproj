@@ -50,6 +50,7 @@
 		09A3E1630BFC67C63AFEDE3A = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_Memory.h"; path = "../../../../modules/juce_core/memory/juce_Memory.h"; sourceTree = "SOURCE_ROOT"; };
 		0A421597B03EA9CA355D8BD1 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_NamedPipe.cpp"; path = "../../../../modules/juce_core/network/juce_NamedPipe.cpp"; sourceTree = "SOURCE_ROOT"; };
 		0A82B6536AC2C02E099AB0AB = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_ShapeButton.h"; path = "../../../../modules/juce_gui_basics/buttons/juce_ShapeButton.h"; sourceTree = "SOURCE_ROOT"; };
+		0B62C1B2DFE2EE1C8E1EB5B6 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_NormalisableRange.h"; path = "../../../../modules/juce_core/maths/juce_NormalisableRange.h"; sourceTree = "SOURCE_ROOT"; };
 		0B92355966B36E2B913BC8EE = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_MemoryBlock.h"; path = "../../../../modules/juce_core/memory/juce_MemoryBlock.h"; sourceTree = "SOURCE_ROOT"; };
 		0C1C8C5879770EF4E8824EF3 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_Button.h"; path = "../../../../modules/juce_gui_basics/buttons/juce_Button.h"; sourceTree = "SOURCE_ROOT"; };
 		0C36123881F7A4B6A144F272 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_UnitTest.h"; path = "../../../../modules/juce_core/unit_tests/juce_UnitTest.h"; sourceTree = "SOURCE_ROOT"; };
@@ -700,6 +701,7 @@
 					403E7E9949CFE8BD73DDD909,
 					AB625562B978102C10FD5311,
 					39F7F5DC827150D2E57F1DBF,
+					0B62C1B2DFE2EE1C8E1EB5B6,
 					26341A8D55A799AC0ED8B33F,
 					38E5FF4A3CBEA8C42D9F14CD,
 					F83EC8D59072A524F5DA56B0, ); name = maths; sourceTree = "<group>"; };

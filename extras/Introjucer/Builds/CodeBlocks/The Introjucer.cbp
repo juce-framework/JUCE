@@ -769,6 +769,10 @@
       <Option compile="0"/>
       <Option link="0"/>
     </Unit>
+    <Unit filename="../../../../modules/juce_core/maths/juce_NormalisableRange.h">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
     <Unit filename="../../../../modules/juce_core/maths/juce_Random.cpp">
       <Option compile="0"/>
       <Option link="0"/>
