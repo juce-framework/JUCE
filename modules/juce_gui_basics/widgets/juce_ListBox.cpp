@@ -887,7 +887,7 @@ void ListBox::repaintRow (const int rowNumber) noexcept
 Image ListBox::createSnapshotOfSelectedRows (int& imageX, int& imageY)
 {
     Rectangle<int> imageArea;
-    const int firstRow = getRowContainingPosition (0, 0);
+    const int firstRow = getRowContainingPosition (0, viewport->getY());
 
     for (int i = getNumRowsOnScreen() + 2; --i >= 0;)
     {
