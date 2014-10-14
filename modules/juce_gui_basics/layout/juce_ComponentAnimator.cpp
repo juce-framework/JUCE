@@ -217,7 +217,7 @@ void ComponentAnimator::animateComponent (Component* const component,
                                           const double endSpeed)
 {
     // the speeds must be 0 or greater!
-    jassert (startSpeed >= 0 && endSpeed >= 0)
+    jassert (startSpeed >= 0 && endSpeed >= 0);
 
     if (component != nullptr)
     {

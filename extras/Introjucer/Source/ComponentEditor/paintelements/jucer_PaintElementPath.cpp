@@ -1380,7 +1380,7 @@ PathPoint PathPoint::withChangedPointType (const Path::Iterator::PathElementType
             const int index = owner->points.indexOf (this);
             PathPoint* lastPoint = owner->points [index - 1];
 
-            jassert (lastPoint != nullptr)
+            jassert (lastPoint != nullptr);
             if (lastPoint != nullptr)
             {
                 lastPoint->pos [lastPoint->getNumPoints() - 1]
