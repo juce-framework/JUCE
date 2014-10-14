@@ -343,6 +343,9 @@ public:
     */
     void setState (ButtonState newState);
 
+    /** Returns the button's current over/down/up state. */
+    ButtonState getState() const noexcept               { return buttonState; }
+
     // This method's parameters have changed - see the new version.
     JUCE_DEPRECATED (void setToggleState (bool, bool));
 
