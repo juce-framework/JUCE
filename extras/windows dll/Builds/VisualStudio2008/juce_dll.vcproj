@@ -847,6 +847,7 @@
           </File>
           <File RelativePath="..\..\..\..\modules\juce_audio_processors\processors\juce_AudioProcessorGraph.h"/>
           <File RelativePath="..\..\..\..\modules\juce_audio_processors\processors\juce_AudioProcessorListener.h"/>
+          <File RelativePath="..\..\..\..\modules\juce_audio_processors\processors\juce_AudioProcessorParameter.h"/>
           <File RelativePath="..\..\..\..\modules\juce_audio_processors\processors\juce_GenericAudioProcessorEditor.cpp">
             <FileConfiguration Name="Debug|Win32"
                                ExcludedFromBuild="true">
