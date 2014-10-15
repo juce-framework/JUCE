@@ -143,7 +143,7 @@
   #if JUCE_LOG_ASSERTIONS
    #define jassert(expression)      MACRO_WITH_FORCED_SEMICOLON (if (! (expression)) jassertfalse;)
   #else
-   #define jassert(a)               MACRO_WITH_FORCED_SEMICOLON ()
+   #define jassert(a)               MACRO_WITH_FORCED_SEMICOLON ( ; )
   #endif
 
 #endif
