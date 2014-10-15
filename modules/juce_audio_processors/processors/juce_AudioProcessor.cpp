@@ -349,26 +349,26 @@ const String AudioProcessor::getParameterText(int index)
 static inline float roundf(float val) { return floorf(val + 0.5f); }
 #endif // _MSC_VER
 
-float AudioProcessor::parameterValueFromScaled(int param, float scaled) const {
+double AudioProcessor::parameterValueFromScaled(int param, float scaled) const {
     ParamInfo info = parameterInfo(param);
-    float minVal = info.minVal, maxVal = info.maxVal;
+    double minVal = info.minVal, maxVal = info.maxVal;
     if (info.paramType == eParamTypeHz) {
-        minVal = logf(minVal);
-        maxVal = logf(maxVal);
+        minVal = log(minVal);
+        maxVal = log(maxVal);
     }
-    float val = minVal + scaled * (maxVal - minVal);
+    double val = minVal + (double)scaled * (maxVal - minVal);
     if (info.paramType == eParamTypeHz)
-        val = roundf(expf(val));
+        val = exp(val);
     return val;
 }
 
-float AudioProcessor::parameterValueToScaled(int param, float value) const {
+float AudioProcessor::parameterValueToScaled(int param, double value) const {
     ParamInfo info = parameterInfo(param);
-    float minVal = info.minVal, maxVal = info.maxVal;
+    double minVal = info.minVal, maxVal = info.maxVal;
     if (info.paramType == eParamTypeHz) {
-        value = logf(value);
-        minVal = logf(minVal);
-        maxVal = logf(maxVal);
+        value = log(value);
+        minVal = log(minVal);
+        maxVal = log(maxVal);
     }
     return (value - minVal) / (maxVal - minVal);
 }
@@ -400,7 +400,7 @@ ParamInfo AudioProcessor::parameterInfo(int i) const
     return result;
 };
 
-float AudioProcessor::getParameterValue(int index) const
+double AudioProcessor::getParameterValue(int index) const
 {
     // Override constness..
     float val = ((AudioProcessor*)this)->getParameter(index);
@@ -408,7 +408,7 @@ float AudioProcessor::getParameterValue(int index) const
     return parameterValueFromScaled(index, val);
 }
 
-void AudioProcessor::setParameterValue(int index, float value)
+void AudioProcessor::setParameterValue(int index, double value)
 {
     setParameter(index, parameterValueToScaled(index, value));
 }

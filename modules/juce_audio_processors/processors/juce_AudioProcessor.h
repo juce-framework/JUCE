@@ -63,10 +63,10 @@ protected:
 
 public:
     virtual ParamInfo parameterInfo(int i) const;
-    virtual float getParameterValue(int index) const;
-    virtual void setParameterValue(int index, float value);
-    virtual float parameterValueFromScaled(int param, float scaled) const;
-    virtual float parameterValueToScaled(int param, float val) const;
+    virtual double getParameterValue(int index) const;
+    virtual void setParameterValue(int index, double value);
+    virtual double parameterValueFromScaled(int param, float scaled) const;
+    virtual float parameterValueToScaled(int param, double val) const;
     // We should get these contributed back to the juce.
     virtual String parameterValueToText(int param, float value) const;
     virtual float parameterTextToValue(int param, const String& text) const;
