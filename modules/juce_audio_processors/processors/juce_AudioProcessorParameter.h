@@ -72,10 +72,25 @@ public:
         value, and will then send a message to the host telling it about the change.
 
         Note that to make sure the host correctly handles automation, you should call
-        the beginParameterChangeGesture() and endParameterChangeGesture() methods to
-        tell the host when the user has started and stopped changing the parameter.
+        the beginChangeGesture() and endChangeGesture() methods to tell the host when
+        the user has started and stopped changing the parameter.
     */
     void setValueNotifyingHost (float newValue);
+
+    /** Sends a signal to the host to tell it that the user is about to start changing this
+        parameter.
+        This allows the host to know when a parameter is actively being held by the user, and
+        it may use this information to help it record automation.
+        If you call this, it must be matched by a later call to endChangeGesture().
+    */
+    void beginChangeGesture();
+
+    /** Tells the host that the user has finished changing this parameter.
+        This allows the host to know when a parameter is actively being held by the user,
+        and it may use this information to help it record automation.
+        A call to this method must follow a call to beginChangeGesture().
+    */
+    void endChangeGesture();
 
     /** This should return the default value for this parameter. */
     virtual float getDefaultValue() const = 0;

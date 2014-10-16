@@ -416,6 +416,22 @@ void AudioProcessorParameter::setValueNotifyingHost (float newValue)
     return processor->setParameterNotifyingHost (parameterIndex, newValue);
 }
 
+void AudioProcessorParameter::beginChangeGesture()
+{
+    // This method can't be used until the parameter has been attached to a processor!
+    jassert (processor != nullptr && parameterIndex >= 0);
+
+    processor->beginParameterChangeGesture (parameterIndex);
+}
+
+void AudioProcessorParameter::endChangeGesture()
+{
+    // This method can't be used until the parameter has been attached to a processor!
+    jassert (processor != nullptr && parameterIndex >= 0);
+
+    processor->endParameterChangeGesture (parameterIndex);
+}
+
 bool AudioProcessorParameter::isOrientationInverted() const { return false; }
 bool AudioProcessorParameter::isAutomatable() const         { return true; }
 bool AudioProcessorParameter::isMetaParameter() const       { return false; }
