@@ -51,6 +51,7 @@
 
 //==============================================================================
 #include "juce_PlatformDefs.h"
+#include "juce_CompilerSupport.h"
 
 //==============================================================================
 // Now we'll include some common OS headers..
