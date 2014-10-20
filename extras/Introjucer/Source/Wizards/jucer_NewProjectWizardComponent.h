@@ -31,20 +31,20 @@ class PlatformTargetsComp       : public Component,
                                 private ListBoxModel
 {
 public:
-    
+
     PlatformTargetsComp()
     {
         setOpaque (false);
-        
+
         addAndMakeVisible (listBox);
-        
+
         listBox.setRowHeight (360 / getNumRows());
         listBox.setModel (this);
         listBox.setOpaque (false);
         listBox.setMultipleSelectionEnabled (true);
         listBox.setClickingTogglesRowSelection (true);
         listBox.setColour (ListBox::ColourIds::backgroundColourId, Colours::white.withAlpha (0.0f));
-    
+
         platforms.add (new PlatformType (ImageCache::getFromMemory (BinaryData::projectIconXcode_png, BinaryData::projectIconXcode_pngSize), "Create a new XCode target"));
         platforms.add (new PlatformType (ImageCache::getFromMemory (BinaryData::projectIconXcodeIOS_png, BinaryData::projectIconXcodeIOS_pngSize), "Create a new XCode IOS target"));
         platforms.add (new PlatformType (ImageCache::getFromMemory (BinaryData::projectIconVisualStudio13_png, BinaryData::projectIconVisualStudio13_pngSize), "Create a new Visual Studio 2013 target"));
@@ -55,20 +55,20 @@ public:
         platforms.add (new PlatformType (ImageCache::getFromMemory (BinaryData::projectIconAndroid_png, BinaryData::projectIconAndroid_pngSize), "Create a new Android target"));
         platforms.add (new PlatformType (ImageCache::getFromMemory (BinaryData::projectIconCodeblocks_png, BinaryData::projectIconCodeblocks_pngSize), "Create a new Codeblocks target"));
         platforms.add (new PlatformType (ImageCache::getFromMemory (BinaryData::projectIconLinuxMakefile_png, BinaryData::projectIconLinuxMakefile_pngSize), "Create a new linux makefile target"));
-    
-        
+
+
     }
-    
+
     ~PlatformTargetsComp()
     {
     }
-    
+
     void resized()
     {
         listBox.setBounds (getLocalBounds());
     }
-    
-    
+
+
     // these add the ListBoxModel virtual functions
     int getNumRows()
     {
@@ -83,7 +83,7 @@ public:
 
         g.setColour (Colours::white);
         g.drawEllipse (dotSelect, 1);
-        
+
         if (rowIsSelected)
         {
             g.fillAll (Colour(243, 145, 0));
@@ -95,9 +95,9 @@ public:
         g.drawText (platforms.getUnchecked (rowNumber)->name, 90, 0, width, height, Justification::left);
     }
 
-    
+
 private:
-    
+
     struct PlatformType {
         PlatformType (const Image& platformIcon, const String& platformName){
             icon = platformIcon;
@@ -108,9 +108,9 @@ private:
     };
 
     ListBox listBox;
-    
+
     OwnedArray<PlatformType> platforms;
-    
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PlatformTargetsComp)
 
 };
@@ -142,33 +142,33 @@ public:
           platformTargets()
     {
         setOpaque (false);
-        
+
         addChildAndSetID (&projectName, "projectName");
         projectName.setText ("NewProject");
         projectName.setBounds ("120, 34, parent.width / 2 - 10, top + 22");
         nameLabel.attachToComponent (&projectName, true);
         projectName.addListener (this);
-        
+
         addChildAndSetID (&projectType, "projectType");
         projectType.addItemList (getWizardNames(), 1);
         projectType.setSelectedId (1, dontSendNotification);
         projectType.setBounds ("120, projectName.bottom + 4, projectName.right, top + 22");
         typeLabel.attachToComponent (&projectType, true);
         projectType.addListener (this);
-        
+
         addChildAndSetID (&fileOutline, "fileOutline");
         fileOutline.setColour (GroupComponent::outlineColourId, Colours::black.withAlpha (0.2f));
         fileOutline.setTextLabelPosition (Justification::centred);
         fileOutline.setBounds ("30, projectType.bottom + 20, projectType.right, parent.height - 30");
-        
+
         addChildAndSetID (&targetsOutline, "targetsOutline");
         targetsOutline.setColour (GroupComponent::outlineColourId, Colours::black.withAlpha (0.2f));
         targetsOutline.setTextLabelPosition (Justification::centred);
         targetsOutline.setBounds ("fileOutline.right + 20, projectType.bottom + 20, parent.width - 30, parent.height - 70");
-        
+
         addChildAndSetID (&platformTargets, "platformTargets");
         platformTargets.setBounds ("targetsOutline.left + 15, projectType.bottom + 45, parent.width - 40, parent.height - 90");
-        
+
         addChildAndSetID (&fileBrowser, "fileBrowser");
         fileBrowser.setBounds ("fileOutline.left + 10, fileOutline.top + 20, fileOutline.right - 10, fileOutline.bottom - 32");
         fileBrowser.setFilenameBoxLabel ("Folder:");
@@ -176,20 +176,20 @@ public:
         addChildAndSetID (&createButton, "createButton");
         createButton.setBounds ("right - 130, bottom - 34, parent.width - 30, parent.height - 30");
         createButton.addListener (this);
-        
+
         addChildAndSetID (&cancelButton, "cancelButton");
         cancelButton.addShortcut (KeyPress (KeyPress::escapeKey));
         cancelButton.setBounds ("right - 130, createButton.top, createButton.left - 10, createButton.bottom");
         cancelButton.addListener (this);
-        
+
         updateCustomItems();
         updateCreateButton();
     }
-    
+
     void paint (Graphics& g) override
     {
         Rectangle<int> rect = getLocalBounds().reduced (10, 10);
-    
+
         g.setColour (Colours::white.withAlpha(0.3f));
         g.fillRect (rect);
         g.fillRect (rect.reduced (10, 10));
@@ -214,13 +214,13 @@ public:
     {
         MainWindow* mw = Component::findParentComponentOfClass<MainWindow>();
         jassert (mw != nullptr);
-        
+
         ScopedPointer<NewProjectWizardClasses::NewProjectWizard> wizard (createWizard());
-        
+
         if (wizard != nullptr)
         {
             Result result (wizard->processResultsFromSetupItems (*this));
-            
+
             if (result.failed())
             {
                 AlertWindow::showMessageBox (AlertWindow::WarningIcon,
@@ -228,13 +228,13 @@ public:
                                              result.getErrorMessage());
                 return;
             }
-            
+
             if (! wizard->selectJuceFolder())
                 return;
-            
+
             ScopedPointer<Project> project (wizard->runWizard (mw, projectName.getText(),
                                                                fileBrowser.getSelectedFile (0)));
-            
+
             if (project != nullptr)
                 mw->setProject (project.release());
         }
@@ -243,9 +243,9 @@ public:
     void updateCustomItems()
     {
         customItems.clear();
-        
+
         ScopedPointer<NewProjectWizardClasses::NewProjectWizard> wizard (createWizard());
-        
+
         if (wizard != nullptr)
             wizard->addSetupItems (*this, customItems);
     }
@@ -304,20 +304,20 @@ static NewProjectWizardClasses::NewProjectWizard* createWizardType (int index)
         case 4:     return new NewProjectWizardClasses::DynamicLibraryWizard();
         default:    jassertfalse; break;
     }
-    
+
     return nullptr;
 }
 
 static StringArray getWizardNames()
 {
     StringArray s;
-    
+
     for (int i = 0; i < getNumWizards(); ++i)
     {
         ScopedPointer<NewProjectWizardClasses::NewProjectWizard> wiz (createWizardType (i));
         s.add (wiz->getName());
     }
-    
+
     return s;
 }
 

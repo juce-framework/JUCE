@@ -39,7 +39,7 @@ MainWindow::MainWindow()
                       false)
 {
     setUsingNativeTitleBar (true);
-    
+
    #if ! JUCE_MAC
     setMenuBar (IntrojucerApp::getApp().menuModel);
    #endif
@@ -59,7 +59,7 @@ MainWindow::MainWindow()
     {
         commandManager.getKeyMappings()->resetToDefaultMappings();
 
-        ScopedPointer <XmlElement> keys (getGlobalProperties().getXmlValue ("keyMappings"));
+        ScopedPointer<XmlElement> keys (getGlobalProperties().getXmlValue ("keyMappings"));
 
         if (keys != nullptr)
             commandManager.getKeyMappings()->restoreFromXml (*keys);

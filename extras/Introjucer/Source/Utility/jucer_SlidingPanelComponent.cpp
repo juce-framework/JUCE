@@ -32,7 +32,7 @@
 namespace TabbedComponentHelpers
 {
     const Identifier deleteComponentId ("deleteByTabComp_");
-    
+
     static void deleteIfNecessary (Component* const comp)
     {
         if (comp != nullptr && (bool) comp->getProperties() [deleteComponentId])
@@ -64,40 +64,40 @@ void SlidingPanelComponent::addTab (const String& tabName,
                                       const int insertIndex)
 {
     contentComponents.insert (insertIndex, WeakReference<Component> (contentComponent));
-    
+
     tabNames.insert (insertIndex, tabName);
-    
+
     if (deleteComponentWhenNotNeeded && contentComponent != nullptr)
         contentComponent->getProperties().set (TabbedComponentHelpers::deleteComponentId, true);
-    
+
     slide.addAndMakeVisible (contentComponent);
 
     numTabs++;
-    
+
     resized();
 }
 
 void SlidingPanelComponent::goToTab (int targetTabIndex)
 {
     int xTranslation = (currentTabIndex - targetTabIndex) * getWidth();
-    
+
     currentTabIndex = targetTabIndex;
-    
+
     Desktop::getInstance().getAnimator().animateComponent (&slide, slide.getBounds().translated(xTranslation, 0), 1.0f, 600, false, 0.0, 0.0);
-    
+
     repaint();
 }
 
 void SlidingPanelComponent::paint (Graphics& g)
 {
-    
+
     Rectangle<int> dotHolder = getLocalBounds();
-    
+
     dotHolder.reduce ((getWidth() - dotSize * numTabs)/2, 20);
     dotHolder = dotHolder.removeFromBottom (dotSize);
-    
+
     g.setColour (Colours::white);
-    
+
     for (int i = 0; i < numTabs; i++)
     {
         if (i == currentTabIndex)
@@ -114,13 +114,12 @@ void SlidingPanelComponent::paint (Graphics& g)
 void SlidingPanelComponent::resized()
 {
     slide.setBounds (-currentTabIndex*getWidth(), slide.getPosition().y, numTabs * getWidth(), getHeight());
-    
+
     Rectangle<int> content (getLocalBounds());
-    
+
     content.removeFromBottom (20 + 2 * dotSize);
-    
+
     for (int i = contentComponents.size(); --i >= 0;)
         if (Component* c = contentComponents.getReference(i))
             c->setBounds (content.translated (i*content.getWidth(), 0));
 }
-

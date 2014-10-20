@@ -34,9 +34,9 @@ StartPageComponent()
     panel = new SlidingPanelComponent();
 
     WizardComp* projectWizard = new WizardComp();
-    
+
     setSize (800, 650);
-    
+
     panel->addTab ("Create New Project", new TemplateTileBrowser (projectWizard), true);
     panel->addTab ("New Project Options", projectWizard, true);
 
@@ -57,10 +57,10 @@ void resized()
 {
     panel->setBounds (getBounds());
 }
-    
+
 private:
     ScopedPointer<SlidingPanelComponent> panel;
-    
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (StartPageComponent)
 };
 

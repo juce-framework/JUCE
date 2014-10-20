@@ -34,43 +34,43 @@ class SlidingPanelComponent     : public Component
 public:
     SlidingPanelComponent ();
     ~SlidingPanelComponent();
-    
+
     /** Adds a new tab to the panel slider. */
     void addTab (const String& tabName,
                  Component* contentComponent,
                  bool deleteComponentWhenNotNeeded,
                  int insertIndex = -1);
-    
+
     /** Gets rid of one of the tabs. */
     void removeTab (int tabIndex);
-    
+
     /** Gets index of current tab. */
     int getCurrentTabIndex (){return currentTabIndex;};
-    
+
     /** Returns the number of tabs. */
     int getNumTabs (){return numTabs;};
-    
+
     /** Animates the window to the desired tab. */
     void goToTab (int targetTabIndex);
-    
-    
+
+
     //==============================================================================
     /** @internal */
     void paint (Graphics&);
     /** @internal */
     void resized();
-    
+
 private:
     Array <WeakReference<Component>> contentComponents;
     Array <String> tabNames;
-    
+
     Component slide;
-    
+
     int currentTabIndex;
     int numTabs;
-    
+
     int dotSize;
-    
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SlidingPanelComponent);
 };
 

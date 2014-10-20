@@ -28,7 +28,7 @@
 //=====================================================================================================
 /**
 Template option tile button.
-the drawable button object class for the tile icons and buttons in the TemplateTileBrowser 
+the drawable button object class for the tile icons and buttons in the TemplateTileBrowser
 */
 class TemplateOptionButton   : public DrawableButton
 {
@@ -39,17 +39,17 @@ public:
         // svg for thumbnail icon
         ScopedPointer<XmlElement> svg (XmlDocument::parse (thumbSvg));
         assert (svg != nullptr);
-        
+
         thumb = Drawable::createFromSVG (*svg);
-        
+
         // svg for thumbnail background highlight
         ScopedPointer<XmlElement> backSvg (XmlDocument::parse (BinaryData::iconHighlight_svg));
         assert (backSvg != nullptr);
-        
+
         hoverBackground = Drawable::createFromSVG (*backSvg);
-        
+
         name = buttonName;
-        
+
         description = "<insert description>";
     }
 
@@ -82,10 +82,10 @@ public:
                 g.drawRoundedRectangle (getLocalBounds().toFloat().reduced (2,2), 10.0f, 2.0f);
             }
         }
-        
-        
+
+
         Rectangle<float> textTarget;
-        
+
         // center the text for the text buttons or position the text in the image buttons
         if (getStyle() != ButtonStyle::ImageFitted)
         {
@@ -96,36 +96,36 @@ public:
             textTarget = RectanglePlacement (RectanglePlacement::centred).appliedTo(thumb->getDrawableBounds(), getLocalBounds().toFloat());
         textTarget = textTarget.removeFromBottom(textTarget.getHeight() * 0.3);
         }
-        
+
         g.setColour (Colours::white);
         g.drawText (name, textTarget, Justification::centred, true);
-    
+
     }
-    
+
     void resized()
     {
         thumb->setBoundsToFit (0, 0, getWidth(), getHeight(), Justification::centred, false);
     }
-    
+
     void setDescription (String descript)
     {
         description = descript;
     }
-    
+
     String getDescription()
     {
         return description;
     }
-    
+
 private:
     ScopedPointer<Drawable> thumb;
     ScopedPointer<Drawable> hoverBackground;
-    
+
     String name;
-    
+
     String description;
-    
-    
+
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TemplateOptionButton)
 };
 
@@ -151,7 +151,7 @@ public:
         addAndMakeVisible (optionButtons.add (new TemplateOptionButton ("Console Application", TemplateOptionButton::ButtonStyle::ImageFitted, BinaryData::iconConsole_svg)));
         addAndMakeVisible (optionButtons.add (new TemplateOptionButton ("Static Library", TemplateOptionButton::ButtonStyle::ImageFitted, BinaryData::iconStatic_svg)));
         addAndMakeVisible (optionButtons.add (new TemplateOptionButton ("Dynamic Library", TemplateOptionButton::ButtonStyle::ImageFitted, BinaryData::iconDynamic_svg)));
-        
+
         // Add the descriptions for each button
         optionButtons.getUnchecked(0)->setDescription ("Creates a blank JUCE application with a single window component.");
         optionButtons.getUnchecked(1)->setDescription ("Creates a blank JUCE application with a single window component and Audio and MIDI in/out functions.");
@@ -161,50 +161,50 @@ public:
         optionButtons.getUnchecked(5)->setDescription ("Creates a blank console application with support for all JUCE features.");
         optionButtons.getUnchecked(6)->setDescription ("Creates a Static Library template with support for all JUCE features");
         optionButtons.getUnchecked(7)->setDescription ("Creates a Dynamic Library template with support for all JUCE features");
-        
-        
+
+
         // Handle Open Project button functionality
         ApplicationCommandManager& commandManager = IntrojucerApp::getCommandManager();
-        
+
         blankProjectButton = new TemplateOptionButton ("Create Blank Project", TemplateOptionButton::ButtonStyle::ImageOnButtonBackground, BinaryData::iconOpenfile_svg);
-        
+
         openProjectButton = new TemplateOptionButton ("Open Existing Project", TemplateOptionButton::ButtonStyle::ImageOnButtonBackground, BinaryData::iconOpenfile_svg);
         openProjectButton->setCommandToTrigger (&commandManager, CommandIDs::open, true);
-        
+
         exampleProjectButton = new TemplateOptionButton ("Open Example Project", TemplateOptionButton::ButtonStyle::ImageOnButtonBackground, BinaryData::iconOpenfile_svg);
         exampleProjectButton->setCommandToTrigger (&commandManager, CommandIDs::open, true);
-        
+
         addAndMakeVisible (blankProjectButton);
         addAndMakeVisible (openProjectButton);
         addAndMakeVisible (exampleProjectButton);
-        
-        
+
+
         for (TemplateOptionButton* t : optionButtons)
         {
             t->addListener (this);
         }
-        
+
         newProjectWizard = projectWizard;
     }
 
-    
+
     void paint (Graphics& g) override
     {
         g.setColour (Colours::black.withAlpha (0.2f));
         g.fillRect (0, 0, getWidth(), 60);
-        
+
         g.setColour (Colours::white);
         g.setFont (20);
         g.drawText ("Create New Project", 0, 0, getWidth(), 60, Justification::centred, true);
-    
+
         // draw the descriptions of each template if hovered;
         // (repaint is called by the button listener on change state)
         Rectangle<int> descriptionBox = getBounds().reduced (30, 30);
         descriptionBox = descriptionBox.removeFromBottom (50);
-    
+
         g.setColour (Colours::white.withAlpha (0.4f));
         g.setFont(15);
-    
+
         for ( int i = 0; i < 8; i++ )
         {
             if (optionButtons.getUnchecked (i)->getState() == TemplateOptionButton::ButtonState::buttonOver)
@@ -218,28 +218,28 @@ public:
     {
         Rectangle<int> allOpts = getBounds().reduced (40, 60);
         allOpts.removeFromBottom (allOpts.getHeight() * 0.25);
-        
+
         int numHorizIcons = 4;
-        
+
         int optStep = allOpts.getWidth()/numHorizIcons;
-        
+
         for (int i = 0; i < 8; i++)
         {
             int yShift = i < numHorizIcons ? 0 : 1;
-            
+
             Rectangle<int> bounds;
-            
+
             bounds = Rectangle<int> (allOpts.getX() + i%numHorizIcons*optStep, allOpts.getY() + yShift * allOpts.getHeight() / 2, optStep, allOpts.getHeight() / 2);
             bounds.reduce (10, 10);
-            
+
             optionButtons.getUnchecked (i)->setBounds (bounds);
         }
-        
+
         Rectangle<int> openButtonBounds = getBounds();
         openButtonBounds.removeFromBottom (getHeight() * 0.12);
         openButtonBounds = openButtonBounds.removeFromBottom (120);
         openButtonBounds.reduce (50, 40);
-        
+
         blankProjectButton->setBounds (openButtonBounds.removeFromLeft (optStep - 20));
         exampleProjectButton->setBounds (openButtonBounds.removeFromRight (optStep - 20));
         openProjectButton->setBounds (openButtonBounds.reduced (18, 0));

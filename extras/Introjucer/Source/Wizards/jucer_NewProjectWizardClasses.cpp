@@ -33,7 +33,7 @@
 struct NewProjectWizardClasses
 {
     #include "jucer_NewProjectWizard.h"
-        
+
     #include "jucer_GUIAppWizard.h"
     #include "jucer_ConsoleAppWizard.h"
     #include "jucer_AudioPluginAppWizard.h"
@@ -52,18 +52,3 @@ Component* createNewProjectWizardComponent()
 {
     return new NewProjectWizardComponents::StartPageComponent();
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
