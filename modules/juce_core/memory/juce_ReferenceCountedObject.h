@@ -208,7 +208,7 @@ private:
     The template parameter specifies the class of the object you want to point to - the easiest
     way to make a class reference-countable is to simply make it inherit from ReferenceCountedObject
     or SingleThreadedReferenceCountedObject, but if you need to, you can roll your own reference-countable
-    class by implementing a set of mathods called incReferenceCount(), decReferenceCount(), and
+    class by implementing a set of methods called incReferenceCount(), decReferenceCount(), and
     decReferenceCountWithoutDeleting(). See ReferenceCountedObject for examples of how these methods
     should behave.
 
