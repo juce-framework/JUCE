@@ -42,16 +42,13 @@ namespace TabbedComponentHelpers
 
 
 //==============================================================================
-SlidingPanelComponent::SlidingPanelComponent ()
+SlidingPanelComponent::SlidingPanelComponent()
+    : currentTabIndex (0), dotSize (20)
 {
-    dotSize = 20;
-    numTabs = 0;
-    currentTabIndex = 0;
-
-    addAndMakeVisible (&slide);
+    addAndMakeVisible (slide);
 }
 
-SlidingPanelComponent::~SlidingPanelComponent ()
+SlidingPanelComponent::~SlidingPanelComponent()
 {
     for (int i = contentComponents.size(); --i >= 0;)
         if (Component* c = contentComponents.getReference(i))
@@ -59,12 +56,11 @@ SlidingPanelComponent::~SlidingPanelComponent ()
 }
 
 void SlidingPanelComponent::addTab (const String& tabName,
-                                      Component* const contentComponent,
-                                      const bool deleteComponentWhenNotNeeded,
-                                      const int insertIndex)
+                                    Component* const contentComponent,
+                                    const bool deleteComponentWhenNotNeeded,
+                                    const int insertIndex)
 {
     contentComponents.insert (insertIndex, WeakReference<Component> (contentComponent));
-
     tabNames.insert (insertIndex, tabName);
 
     if (deleteComponentWhenNotNeeded && contentComponent != nullptr)
@@ -72,48 +68,46 @@ void SlidingPanelComponent::addTab (const String& tabName,
 
     slide.addAndMakeVisible (contentComponent);
 
-    numTabs++;
-
     resized();
 }
 
 void SlidingPanelComponent::goToTab (int targetTabIndex)
 {
-    int xTranslation = (currentTabIndex - targetTabIndex) * getWidth();
+    const int xTranslation = (currentTabIndex - targetTabIndex) * getWidth();
 
     currentTabIndex = targetTabIndex;
 
-    Desktop::getInstance().getAnimator().animateComponent (&slide, slide.getBounds().translated(xTranslation, 0), 1.0f, 600, false, 0.0, 0.0);
+    Desktop::getInstance().getAnimator()
+        .animateComponent (&slide, slide.getBounds().translated (xTranslation, 0),
+                           1.0f, 600, false, 0.0, 0.0);
 
     repaint();
 }
 
 void SlidingPanelComponent::paint (Graphics& g)
 {
-
     Rectangle<int> dotHolder = getLocalBounds();
 
-    dotHolder.reduce ((getWidth() - dotSize * numTabs)/2, 20);
+    dotHolder.reduce ((getWidth() - dotSize * getNumTabs()) / 2, 20);
     dotHolder = dotHolder.removeFromBottom (dotSize);
 
     g.setColour (Colours::white);
 
-    for (int i = 0; i < numTabs; i++)
+    for (int i = 0; i < getNumTabs(); ++i)
     {
+        const Rectangle<float> r (dotHolder.removeFromLeft (dotSize).reduced (5, 5).toFloat());
+
         if (i == currentTabIndex)
-        {
-            g.fillEllipse (dotHolder.removeFromLeft (dotSize).reduced (5, 5).toFloat());
-        }
+            g.fillEllipse (r);
         else
-        {
-            g.drawEllipse (dotHolder.removeFromLeft (dotSize).reduced (5, 5).toFloat(), 1.0f);
-        }
+            g.drawEllipse (r, 1.0f);
     }
 }
 
 void SlidingPanelComponent::resized()
 {
-    slide.setBounds (-currentTabIndex*getWidth(), slide.getPosition().y, numTabs * getWidth(), getHeight());
+    slide.setBounds (-currentTabIndex * getWidth(), slide.getPosition().y,
+                     getNumTabs() * getWidth(), getHeight());
 
     Rectangle<int> content (getLocalBounds());
 
@@ -121,5 +115,5 @@ void SlidingPanelComponent::resized()
 
     for (int i = contentComponents.size(); --i >= 0;)
         if (Component* c = contentComponents.getReference(i))
-            c->setBounds (content.translated (i*content.getWidth(), 0));
+            c->setBounds (content.translated (i * content.getWidth(), 0));
 }

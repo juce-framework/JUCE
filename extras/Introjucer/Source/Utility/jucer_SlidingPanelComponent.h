@@ -29,10 +29,11 @@
 #include "../Application/jucer_Application.h"
 
 
-class SlidingPanelComponent     : public Component
+//==============================================================================
+class SlidingPanelComponent   : public Component
 {
 public:
-    SlidingPanelComponent ();
+    SlidingPanelComponent();
     ~SlidingPanelComponent();
 
     /** Adds a new tab to the panel slider. */
@@ -45,10 +46,10 @@ public:
     void removeTab (int tabIndex);
 
     /** Gets index of current tab. */
-    int getCurrentTabIndex (){return currentTabIndex;};
+    int getCurrentTabIndex() const noexcept         { return currentTabIndex; }
 
     /** Returns the number of tabs. */
-    int getNumTabs (){return numTabs;};
+    int getNumTabs() const noexcept                 { return contentComponents.size(); }
 
     /** Animates the window to the desired tab. */
     void goToTab (int targetTabIndex);
@@ -56,22 +57,19 @@ public:
 
     //==============================================================================
     /** @internal */
-    void paint (Graphics&);
+    void paint (Graphics&) override;
     /** @internal */
-    void resized();
+    void resized() override;
 
 private:
-    Array <WeakReference<Component>> contentComponents;
-    Array <String> tabNames;
+    Array<WeakReference<Component> > contentComponents;
+    StringArray tabNames;
 
     Component slide;
+    int currentTabIndex, dotSize;
 
-    int currentTabIndex;
-    int numTabs;
-
-    int dotSize;
-
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SlidingPanelComponent);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SlidingPanelComponent);
 };
+
 
 #endif  // JUCER_SLIDINGPANELCOMPONENT_H_INCLUDED

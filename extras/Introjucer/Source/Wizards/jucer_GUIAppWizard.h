@@ -25,7 +25,6 @@
 #ifndef GUIAPPWIZARD_H_INCLUDED
 #define GUIAPPWIZARD_H_INCLUDED
 
-#include "jucer_NewProjectWizard.h"
 
 //==============================================================================
 struct GUIAppWizard   : public NewProjectWizard

@@ -27,16 +27,13 @@
 
 
 /** The target platforms chooser for the chosen template. */
-class PlatformTargetsComp       : public Component,
-                                private ListBoxModel
+class PlatformTargetsComp    : public Component,
+                               private ListBoxModel
 {
 public:
-
     PlatformTargetsComp()
     {
         setOpaque (false);
-
-        addAndMakeVisible (listBox);
 
         listBox.setRowHeight (360 / getNumRows());
         listBox.setModel (this);
@@ -44,39 +41,37 @@ public:
         listBox.setMultipleSelectionEnabled (true);
         listBox.setClickingTogglesRowSelection (true);
         listBox.setColour (ListBox::ColourIds::backgroundColourId, Colours::white.withAlpha (0.0f));
+        addAndMakeVisible (listBox);
 
-        platforms.add (new PlatformType (ImageCache::getFromMemory (BinaryData::projectIconXcode_png, BinaryData::projectIconXcode_pngSize), "Create a new XCode target"));
-        platforms.add (new PlatformType (ImageCache::getFromMemory (BinaryData::projectIconXcodeIOS_png, BinaryData::projectIconXcodeIOS_pngSize), "Create a new XCode IOS target"));
-        platforms.add (new PlatformType (ImageCache::getFromMemory (BinaryData::projectIconVisualStudio13_png, BinaryData::projectIconVisualStudio13_pngSize), "Create a new Visual Studio 2013 target"));
-        platforms.add (new PlatformType (ImageCache::getFromMemory (BinaryData::projectIconVisualStudio12_png, BinaryData::projectIconVisualStudio12_pngSize), "Create a new Visual Studio 2012 target"));
-        platforms.add (new PlatformType (ImageCache::getFromMemory (BinaryData::projectIconVisualStudio10_png, BinaryData::projectIconVisualStudio10_pngSize), "Create a new Visual Studio 2010 target"));
-        platforms.add (new PlatformType (ImageCache::getFromMemory (BinaryData::projectIconVisualStudio08_png, BinaryData::projectIconVisualStudio08_pngSize), "Create a new Visual Studio 2008 target"));
-        platforms.add (new PlatformType (ImageCache::getFromMemory (BinaryData::projectIconVisualStudio05_png, BinaryData::projectIconVisualStudio05_pngSize), "Create a new Visual Studio 2005 target"));
-        platforms.add (new PlatformType (ImageCache::getFromMemory (BinaryData::projectIconAndroid_png, BinaryData::projectIconAndroid_pngSize), "Create a new Android target"));
-        platforms.add (new PlatformType (ImageCache::getFromMemory (BinaryData::projectIconCodeblocks_png, BinaryData::projectIconCodeblocks_pngSize), "Create a new Codeblocks target"));
-        platforms.add (new PlatformType (ImageCache::getFromMemory (BinaryData::projectIconLinuxMakefile_png, BinaryData::projectIconLinuxMakefile_pngSize), "Create a new linux makefile target"));
-
-
+        addPlatformType (BinaryData::projectIconXcode_png,          BinaryData::projectIconXcode_pngSize,           "Create a new XCode target");
+        addPlatformType (BinaryData::projectIconXcodeIOS_png,       BinaryData::projectIconXcodeIOS_pngSize,        "Create a new XCode IOS target");
+        addPlatformType (BinaryData::projectIconVisualStudio13_png, BinaryData::projectIconVisualStudio13_pngSize,  "Create a new Visual Studio 2013 target");
+        addPlatformType (BinaryData::projectIconVisualStudio12_png, BinaryData::projectIconVisualStudio12_pngSize,  "Create a new Visual Studio 2012 target");
+        addPlatformType (BinaryData::projectIconVisualStudio10_png, BinaryData::projectIconVisualStudio10_pngSize,  "Create a new Visual Studio 2010 target");
+        addPlatformType (BinaryData::projectIconVisualStudio08_png, BinaryData::projectIconVisualStudio08_pngSize,  "Create a new Visual Studio 2008 target");
+        addPlatformType (BinaryData::projectIconVisualStudio05_png, BinaryData::projectIconVisualStudio05_pngSize,  "Create a new Visual Studio 2005 target");
+        addPlatformType (BinaryData::projectIconAndroid_png,        BinaryData::projectIconAndroid_pngSize,         "Create a new Android target");
+        addPlatformType (BinaryData::projectIconCodeblocks_png,     BinaryData::projectIconCodeblocks_pngSize,      "Create a new Codeblocks target");
+        addPlatformType (BinaryData::projectIconLinuxMakefile_png,  BinaryData::projectIconLinuxMakefile_pngSize,   "Create a new linux makefile target");
     }
 
-    ~PlatformTargetsComp()
+    void addPlatformType (const void* imgData, int imgSize, const char* name)
     {
+        platforms.add (new PlatformType (ImageCache::getFromMemory (imgData, imgSize), name));
     }
 
-    void resized()
+    void resized() override
     {
         listBox.setBounds (getLocalBounds());
     }
 
-
-    // these add the ListBoxModel virtual functions
-    int getNumRows()
+    int getNumRows() override
     {
         return 10;
     }
 
     void paintListBoxItem (int rowNumber, Graphics& g,
-                           int width, int height, bool rowIsSelected)
+                           int width, int height, bool rowIsSelected) override
     {
         Rectangle<float> dotSelect = Rectangle<float> (0, 0, height, height);
         dotSelect.reduce (12, 12);
@@ -97,32 +92,31 @@ public:
 
 
 private:
-
-    struct PlatformType {
-        PlatformType (const Image& platformIcon, const String& platformName){
-            icon = platformIcon;
-            name = platformName;
+    struct PlatformType
+    {
+        PlatformType (const Image& platformIcon, const String& platformName)
+            : icon (platformIcon), name (platformName)
+        {
         }
+
         Image icon;
         String name;
     };
 
     ListBox listBox;
-
     OwnedArray<PlatformType> platforms;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PlatformTargetsComp)
-
 };
 
 
 
-/**
- The Component for project creation.
- Features a file browser to select project destination and
- a list box of platform targets to generate.
-*/
 //==============================================================================
+/**
+    The Component for project creation.
+    Features a file browser to select project destination and
+    a list box of platform targets to generate.
+*/
 class WizardComp  : public Component,
                     private ButtonListener,
                     private ComboBoxListener,
@@ -203,10 +197,20 @@ public:
         }
         else if (b == &cancelButton)
         {
-            // returns to template icon page on cancel
-            SlidingPanelComponent* parent = findParentComponentOfClass<SlidingPanelComponent>();
+            returnToTemplatesPage();
+        }
+    }
 
-            if (parent->getNumTabs() > 0) parent->goToTab (parent->getCurrentTabIndex() - 1);
+    void returnToTemplatesPage()
+    {
+        if (SlidingPanelComponent* parent = findParentComponentOfClass<SlidingPanelComponent>())
+        {
+            if (parent->getNumTabs() > 0)
+                parent->goToTab (parent->getCurrentTabIndex() - 1);
+        }
+        else
+        {
+            jassertfalse;
         }
     }
 
@@ -252,20 +256,19 @@ public:
 
     void comboBoxChanged (ComboBox*) override
     {
-    updateCustomItems();
+        updateCustomItems();
     }
 
     void textEditorTextChanged (TextEditor&) override
     {
-    updateCreateButton();
-
-    fileBrowser.setFileName (File::createLegalFileName (projectName.getText()));
+        updateCreateButton();
+        fileBrowser.setFileName (File::createLegalFileName (projectName.getText()));
     }
 
     // projectType box is public so it can be set by the introjucer front page icons
     ComboBox projectType;
 
-    private:
+private:
     TextEditor projectName;
     Label nameLabel, typeLabel;
     FileBrowserComponent fileBrowser;
@@ -320,7 +323,6 @@ static StringArray getWizardNames()
 
     return s;
 }
-
 
 
 #endif  // NEWPROJECTWIZARDCOMPONENTS_H_INCLUDED

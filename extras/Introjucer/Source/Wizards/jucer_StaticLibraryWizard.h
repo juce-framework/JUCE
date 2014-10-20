@@ -21,6 +21,7 @@
 
   ==============================================================================
 */
+
 #ifndef JUCER_STATICLIBRARYWIZARD_H_INCLUDED
 #define JUCER_STATICLIBRARYWIZARD_H_INCLUDED
 

@@ -27,7 +27,7 @@
 
 
 //==============================================================================
-static inline void createFileCreationOptionComboBox (Component& setupComp,
+static void createFileCreationOptionComboBox (Component& setupComp,
                                               OwnedArray<Component>& itemsCreated,
                                               const StringArray& fileOptions)
 {
@@ -45,7 +45,7 @@ static inline void createFileCreationOptionComboBox (Component& setupComp,
     c->setBounds ("parent.width / 2 + 160, 30, parent.width - 30, top + 22");
 }
 
-static inline int getFileCreationComboResult (Component& setupComp)
+static int getFileCreationComboResult (Component& setupComp)
 {
     if (ComboBox* cb = dynamic_cast<ComboBox*> (setupComp.findChildWithID ("filesToCreate")))
         return cb->getSelectedItemIndex();
@@ -54,19 +54,19 @@ static inline int getFileCreationComboResult (Component& setupComp)
     return 0;
 }
 
-static inline void setExecutableNameForAllTargets (Project& project, const String& exeName)
+static void setExecutableNameForAllTargets (Project& project, const String& exeName)
 {
     for (Project::ExporterIterator exporter (project); exporter.next();)
         for (ProjectExporter::ConfigIterator config (*exporter); config.next();)
             config->getTargetBinaryName() = exeName;
 }
 
-static inline Project::Item createSourceGroup (Project& project)
+static Project::Item createSourceGroup (Project& project)
 {
     return project.getMainGroup().addNewSubGroup ("Source", 0);
 }
 
-static inline File& getLastWizardFolder()
+static File& getLastWizardFolder()
 {
    #if JUCE_WINDOWS
     static File lastFolder (File::getSpecialLocation (File::userDocumentsDirectory));

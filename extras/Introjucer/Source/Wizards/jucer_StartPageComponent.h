@@ -28,38 +28,30 @@
 class StartPageComponent    : public Component
 {
 public:
+    StartPageComponent()
+    {
+        setSize (800, 650);
 
-StartPageComponent()
-{
-    panel = new SlidingPanelComponent();
+        WizardComp* projectWizard = new WizardComp();
 
-    WizardComp* projectWizard = new WizardComp();
+        panel.addTab ("Create New Project", new TemplateTileBrowser (projectWizard), true);
+        panel.addTab ("New Project Options", projectWizard, true);
 
-    setSize (800, 650);
+        addAndMakeVisible (panel);
+    }
 
-    panel->addTab ("Create New Project", new TemplateTileBrowser (projectWizard), true);
-    panel->addTab ("New Project Options", projectWizard, true);
+    void paint (Graphics& g)
+    {
+        IntrojucerLookAndFeel::fillWithBackgroundTexture (*this, g);
+    }
 
-    addAndMakeVisible (panel);
-}
-
-~StartPageComponent()
-{
-    panel = nullptr;
-}
-
-void paint (Graphics& g)
-{
-    IntrojucerLookAndFeel::fillWithBackgroundTexture (*this, g);
-}
-
-void resized()
-{
-    panel->setBounds (getBounds());
-}
+    void resized()
+    {
+        panel.setBounds (getLocalBounds());
+    }
 
 private:
-    ScopedPointer<SlidingPanelComponent> panel;
+    SlidingPanelComponent panel;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (StartPageComponent)
 };
