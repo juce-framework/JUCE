@@ -204,14 +204,6 @@
       <FILE id="VZmQQ6" name="jucer_Module.h" compile="0" resource="0" file="Source/Project/jucer_Module.h"/>
       <FILE id="AbVStQ" name="jucer_ModulesPanel.h" compile="0" resource="0"
             file="Source/Project/jucer_ModulesPanel.h"/>
-      <FILE id="Vf0IGtm" name="jucer_NewFileWizard.cpp" compile="1" resource="0"
-            file="Source/Project/jucer_NewFileWizard.cpp"/>
-      <FILE id="VRwC9Js" name="jucer_NewFileWizard.h" compile="0" resource="0"
-            file="Source/Project/jucer_NewFileWizard.h"/>
-      <FILE id="zOpCNRX" name="jucer_NewProjectWizard.cpp" compile="1" resource="0"
-            file="Source/Project/jucer_NewProjectWizard.cpp"/>
-      <FILE id="QLdtoIl" name="jucer_NewProjectWizard.h" compile="0" resource="0"
-            file="Source/Project/jucer_NewProjectWizard.h"/>
       <FILE id="o4UdN4D" name="jucer_Project.cpp" compile="1" resource="0"
             file="Source/Project/jucer_Project.cpp"/>
       <FILE id="aFopF9G" name="jucer_Project.h" compile="0" resource="0"
@@ -254,6 +246,10 @@
             file="Source/Project Saving/jucer_ResourceFile.h"/>
     </GROUP>
     <GROUP id="Ga8fLmv" name="Utility">
+      <FILE id="w40H5T" name="jucer_SlidingPanelComponent.cpp" compile="1"
+            resource="0" file="Source/Utility/jucer_SlidingPanelComponent.cpp"/>
+      <FILE id="a5dZ4L" name="jucer_SlidingPanelComponent.h" compile="0"
+            resource="0" file="Source/Utility/jucer_SlidingPanelComponent.h"/>
       <FILE id="mceJWJc" name="jucer_CodeHelpers.cpp" compile="1" resource="0"
             file="Source/Utility/jucer_CodeHelpers.cpp"/>
       <FILE id="BBRteob" name="jucer_CodeHelpers.h" compile="0" resource="0"
@@ -286,6 +282,34 @@
             file="Source/Utility/jucer_TranslationTool.h"/>
       <FILE id="lZ9s99o" name="jucer_ValueSourceHelpers.h" compile="0" resource="0"
             file="Source/Utility/jucer_ValueSourceHelpers.h"/>
+    </GROUP>
+    <GROUP id="{8B3486A1-A1FE-D1F3-DC93-A9648E7A0B81}" name="Wizards">
+      <FILE id="mwwjfj" name="jucer_StartPageComponent.h" compile="0" resource="0"
+            file="Source/Wizards/jucer_StartPageComponent.h"/>
+      <FILE id="z1x9qC" name="jucer_NewProjectWizard.h" compile="0" resource="0"
+            file="Source/Wizards/jucer_NewProjectWizard.h"/>
+      <FILE id="BlL6EA" name="jucer_TemplateThumbnailsComponent.h" compile="0"
+            resource="0" file="Source/Wizards/jucer_TemplateThumbnailsComponent.h"/>
+      <FILE id="MSY7Sv" name="jucer_DynamicLibraryWizard.h" compile="0" resource="0"
+            file="Source/Wizards/jucer_DynamicLibraryWizard.h"/>
+      <FILE id="NEahcu" name="jucer_StaticLibraryWizard.h" compile="0" resource="0"
+            file="Source/Wizards/jucer_StaticLibraryWizard.h"/>
+      <FILE id="VslsJm" name="jucer_AudioPluginAppWizard.h" compile="0" resource="0"
+            file="Source/Wizards/jucer_AudioPluginAppWizard.h"/>
+      <FILE id="ZGv05z" name="jucer_ConsoleAppWizard.h" compile="0" resource="0"
+            file="Source/Wizards/jucer_ConsoleAppWizard.h"/>
+      <FILE id="DLKmUb" name="jucer_GUIAppWizard.h" compile="0" resource="0"
+            file="Source/Wizards/jucer_GUIAppWizard.h"/>
+      <FILE id="gANG6q" name="jucer_NewProjectWizardComponent.h" compile="0"
+            resource="0" file="Source/Wizards/jucer_NewProjectWizardComponent.h"/>
+      <FILE id="jNmG53" name="jucer_NewFileWizard.cpp" compile="1" resource="0"
+            file="Source/Wizards/jucer_NewFileWizard.cpp"/>
+      <FILE id="hDWsJe" name="jucer_NewFileWizard.h" compile="0" resource="0"
+            file="Source/Wizards/jucer_NewFileWizard.h"/>
+      <FILE id="Qj5Pic" name="jucer_NewProjectWizardClasses.cpp" compile="1"
+            resource="0" file="Source/Wizards/jucer_NewProjectWizardClasses.cpp"/>
+      <FILE id="EorFIT" name="jucer_NewProjectWizardClasses.h" compile="0"
+            resource="0" file="Source/Wizards/jucer_NewProjectWizardClasses.h"/>
     </GROUP>
     <GROUP id="i1s14uV" name="Code Editor">
       <FILE id="36CkPUf" name="jucer_SourceCodeEditor.cpp" compile="1" resource="0"
@@ -474,6 +498,39 @@
             file="Source/ComponentEditor/jucer_UtilityFunctions.h"/>
     </GROUP>
     <GROUP id="KPIRFfz" name="BinaryData">
+      <FILE id="b8Brir" name="projectIconAndroid.png" compile="0" resource="1"
+            file="Source/BinaryData/projectIconAndroid.png"/>
+      <FILE id="wdeicV" name="projectIconCodeblocks.png" compile="0" resource="1"
+            file="Source/BinaryData/projectIconCodeblocks.png"/>
+      <FILE id="xwPVtR" name="projectIconLinuxMakefile.png" compile="0" resource="1"
+            file="Source/BinaryData/projectIconLinuxMakefile.png"/>
+      <FILE id="WE1dv3" name="projectIconVisualStudio05.png" compile="0"
+            resource="1" file="Source/BinaryData/projectIconVisualStudio05.png"/>
+      <FILE id="kib8GE" name="projectIconVisualStudio08.png" compile="0"
+            resource="1" file="Source/BinaryData/projectIconVisualStudio08.png"/>
+      <FILE id="w1tMpa" name="projectIconVisualStudio10.png" compile="0"
+            resource="1" file="Source/BinaryData/projectIconVisualStudio10.png"/>
+      <FILE id="VKIiCG" name="projectIconVisualStudio12.png" compile="0"
+            resource="1" file="Source/BinaryData/projectIconVisualStudio12.png"/>
+      <FILE id="mOyDWX" name="projectIconVisualStudio13.png" compile="0"
+            resource="1" file="Source/BinaryData/projectIconVisualStudio13.png"/>
+      <FILE id="WFftCh" name="projectIconXcode.png" compile="0" resource="1"
+            file="Source/BinaryData/projectIconXcode.png"/>
+      <FILE id="FZNKix" name="projectIconXcodeIOS.png" compile="0" resource="1"
+            file="Source/BinaryData/projectIconXcodeIOS.png"/>
+      <FILE id="MvraQX" name="iconOpenfile.svg" compile="0" resource="1"
+            file="Source/BinaryData/iconOpenfile.svg"/>
+      <FILE id="khQDTB" name="iconAnimation.svg" compile="0" resource="1"
+            file="Source/BinaryData/iconAnimation.svg"/>
+      <FILE id="b59ILn" name="iconAudio.svg" compile="0" resource="1" file="Source/BinaryData/iconAudio.svg"/>
+      <FILE id="qDz5HP" name="iconConsole.svg" compile="0" resource="1" file="Source/BinaryData/iconConsole.svg"/>
+      <FILE id="Oqscrn" name="iconDynamic.svg" compile="0" resource="1" file="Source/BinaryData/iconDynamic.svg"/>
+      <FILE id="tTa6MB" name="iconGui.svg" compile="0" resource="1" file="Source/BinaryData/iconGui.svg"/>
+      <FILE id="X6oRVj" name="iconHighlight.svg" compile="0" resource="1"
+            file="Source/BinaryData/iconHighlight.svg"/>
+      <FILE id="SvQOsO" name="iconOpengl.svg" compile="0" resource="1" file="Source/BinaryData/iconOpengl.svg"/>
+      <FILE id="KRfxLR" name="iconPlugin.svg" compile="0" resource="1" file="Source/BinaryData/iconPlugin.svg"/>
+      <FILE id="l1q1aL" name="iconStatic.svg" compile="0" resource="1" file="Source/BinaryData/iconStatic.svg"/>
       <FILE id="RSJcrRl" name="AudioPluginXCodeScript.txt" compile="0" resource="1"
             file="Source/BinaryData/AudioPluginXCodeScript.txt"/>
       <FILE id="eYn4jB" name="background_tile.png" compile="0" resource="1"

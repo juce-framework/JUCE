@@ -167,16 +167,6 @@
       <Option compile="0"/>
       <Option link="0"/>
     </Unit>
-    <Unit filename="../../Source/Project/jucer_NewFileWizard.cpp"/>
-    <Unit filename="../../Source/Project/jucer_NewFileWizard.h">
-      <Option compile="0"/>
-      <Option link="0"/>
-    </Unit>
-    <Unit filename="../../Source/Project/jucer_NewProjectWizard.cpp"/>
-    <Unit filename="../../Source/Project/jucer_NewProjectWizard.h">
-      <Option compile="0"/>
-      <Option link="0"/>
-    </Unit>
     <Unit filename="../../Source/Project/jucer_Project.cpp"/>
     <Unit filename="../../Source/Project/jucer_Project.h">
       <Option compile="0"/>
@@ -238,6 +228,11 @@
       <Option compile="0"/>
       <Option link="0"/>
     </Unit>
+    <Unit filename="../../Source/Utility/jucer_SlidingPanelComponent.cpp"/>
+    <Unit filename="../../Source/Utility/jucer_SlidingPanelComponent.h">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
     <Unit filename="../../Source/Utility/jucer_CodeHelpers.cpp"/>
     <Unit filename="../../Source/Utility/jucer_CodeHelpers.h">
       <Option compile="0"/>
@@ -285,6 +280,52 @@
       <Option link="0"/>
     </Unit>
     <Unit filename="../../Source/Utility/jucer_ValueSourceHelpers.h">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../Source/Wizards/jucer_StartPageComponent.h">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../Source/Wizards/jucer_NewProjectWizard.h">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../Source/Wizards/jucer_TemplateThumbnailsComponent.h">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../Source/Wizards/jucer_DynamicLibraryWizard.h">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../Source/Wizards/jucer_StaticLibraryWizard.h">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../Source/Wizards/jucer_AudioPluginAppWizard.h">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../Source/Wizards/jucer_ConsoleAppWizard.h">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../Source/Wizards/jucer_GUIAppWizard.h">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../Source/Wizards/jucer_NewProjectWizardComponent.h">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../Source/Wizards/jucer_NewFileWizard.cpp"/>
+    <Unit filename="../../Source/Wizards/jucer_NewFileWizard.h">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../Source/Wizards/jucer_NewProjectWizardClasses.cpp"/>
+    <Unit filename="../../Source/Wizards/jucer_NewProjectWizardClasses.h">
       <Option compile="0"/>
       <Option link="0"/>
     </Unit>
@@ -566,6 +607,86 @@
       <Option link="0"/>
     </Unit>
     <Unit filename="../../Source/ComponentEditor/jucer_UtilityFunctions.h">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../Source/BinaryData/projectIconAndroid.png">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../Source/BinaryData/projectIconCodeblocks.png">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../Source/BinaryData/projectIconLinuxMakefile.png">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../Source/BinaryData/projectIconVisualStudio05.png">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../Source/BinaryData/projectIconVisualStudio08.png">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../Source/BinaryData/projectIconVisualStudio10.png">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../Source/BinaryData/projectIconVisualStudio12.png">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../Source/BinaryData/projectIconVisualStudio13.png">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../Source/BinaryData/projectIconXcode.png">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../Source/BinaryData/projectIconXcodeIOS.png">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../Source/BinaryData/iconOpenfile.svg">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../Source/BinaryData/iconAnimation.svg">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../Source/BinaryData/iconAudio.svg">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../Source/BinaryData/iconConsole.svg">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../Source/BinaryData/iconDynamic.svg">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../Source/BinaryData/iconGui.svg">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../Source/BinaryData/iconHighlight.svg">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../Source/BinaryData/iconOpengl.svg">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../Source/BinaryData/iconPlugin.svg">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../Source/BinaryData/iconStatic.svg">
       <Option compile="0"/>
       <Option link="0"/>
     </Unit>

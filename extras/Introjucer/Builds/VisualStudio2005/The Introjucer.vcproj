@@ -154,10 +154,6 @@
         <File RelativePath="..\..\Source\Project\jucer_Module.cpp"/>
         <File RelativePath="..\..\Source\Project\jucer_Module.h"/>
         <File RelativePath="..\..\Source\Project\jucer_ModulesPanel.h"/>
-        <File RelativePath="..\..\Source\Project\jucer_NewFileWizard.cpp"/>
-        <File RelativePath="..\..\Source\Project\jucer_NewFileWizard.h"/>
-        <File RelativePath="..\..\Source\Project\jucer_NewProjectWizard.cpp"/>
-        <File RelativePath="..\..\Source\Project\jucer_NewProjectWizard.h"/>
         <File RelativePath="..\..\Source\Project\jucer_Project.cpp"/>
         <File RelativePath="..\..\Source\Project\jucer_Project.h"/>
         <File RelativePath="..\..\Source\Project\jucer_ProjectContentComponent.cpp"/>
@@ -181,6 +177,8 @@
         <File RelativePath="..\..\Source\Project Saving\jucer_ResourceFile.h"/>
       </Filter>
       <Filter Name="Utility">
+        <File RelativePath="..\..\Source\Utility\jucer_SlidingPanelComponent.cpp"/>
+        <File RelativePath="..\..\Source\Utility\jucer_SlidingPanelComponent.h"/>
         <File RelativePath="..\..\Source\Utility\jucer_CodeHelpers.cpp"/>
         <File RelativePath="..\..\Source\Utility\jucer_CodeHelpers.h"/>
         <File RelativePath="..\..\Source\Utility\jucer_Colours.h"/>
@@ -198,6 +196,21 @@
         <File RelativePath="..\..\Source\Utility\jucer_StoredSettings.h"/>
         <File RelativePath="..\..\Source\Utility\jucer_TranslationTool.h"/>
         <File RelativePath="..\..\Source\Utility\jucer_ValueSourceHelpers.h"/>
+      </Filter>
+      <Filter Name="Wizards">
+        <File RelativePath="..\..\Source\Wizards\jucer_StartPageComponent.h"/>
+        <File RelativePath="..\..\Source\Wizards\jucer_NewProjectWizard.h"/>
+        <File RelativePath="..\..\Source\Wizards\jucer_TemplateThumbnailsComponent.h"/>
+        <File RelativePath="..\..\Source\Wizards\jucer_DynamicLibraryWizard.h"/>
+        <File RelativePath="..\..\Source\Wizards\jucer_StaticLibraryWizard.h"/>
+        <File RelativePath="..\..\Source\Wizards\jucer_AudioPluginAppWizard.h"/>
+        <File RelativePath="..\..\Source\Wizards\jucer_ConsoleAppWizard.h"/>
+        <File RelativePath="..\..\Source\Wizards\jucer_GUIAppWizard.h"/>
+        <File RelativePath="..\..\Source\Wizards\jucer_NewProjectWizardComponent.h"/>
+        <File RelativePath="..\..\Source\Wizards\jucer_NewFileWizard.cpp"/>
+        <File RelativePath="..\..\Source\Wizards\jucer_NewFileWizard.h"/>
+        <File RelativePath="..\..\Source\Wizards\jucer_NewProjectWizardClasses.cpp"/>
+        <File RelativePath="..\..\Source\Wizards\jucer_NewProjectWizardClasses.h"/>
       </Filter>
       <Filter Name="Code Editor">
         <File RelativePath="..\..\Source\Code Editor\jucer_SourceCodeEditor.cpp"/>
@@ -300,6 +313,206 @@
         <File RelativePath="..\..\Source\ComponentEditor\jucer_UtilityFunctions.h"/>
       </Filter>
       <Filter Name="BinaryData">
+        <File RelativePath="..\..\Source\BinaryData\projectIconAndroid.png">
+          <FileConfiguration Name="Debug|Win32"
+                             ExcludedFromBuild="true">
+            <Tool Name="VCCLCompilerTool"/>
+          </FileConfiguration>
+          <FileConfiguration Name="Release|Win32"
+                             ExcludedFromBuild="true">
+            <Tool Name="VCCLCompilerTool"/>
+          </FileConfiguration>
+        </File>
+        <File RelativePath="..\..\Source\BinaryData\projectIconCodeblocks.png">
+          <FileConfiguration Name="Debug|Win32"
+                             ExcludedFromBuild="true">
+            <Tool Name="VCCLCompilerTool"/>
+          </FileConfiguration>
+          <FileConfiguration Name="Release|Win32"
+                             ExcludedFromBuild="true">
+            <Tool Name="VCCLCompilerTool"/>
+          </FileConfiguration>
+        </File>
+        <File RelativePath="..\..\Source\BinaryData\projectIconLinuxMakefile.png">
+          <FileConfiguration Name="Debug|Win32"
+                             ExcludedFromBuild="true">
+            <Tool Name="VCCLCompilerTool"/>
+          </FileConfiguration>
+          <FileConfiguration Name="Release|Win32"
+                             ExcludedFromBuild="true">
+            <Tool Name="VCCLCompilerTool"/>
+          </FileConfiguration>
+        </File>
+        <File RelativePath="..\..\Source\BinaryData\projectIconVisualStudio05.png">
+          <FileConfiguration Name="Debug|Win32"
+                             ExcludedFromBuild="true">
+            <Tool Name="VCCLCompilerTool"/>
+          </FileConfiguration>
+          <FileConfiguration Name="Release|Win32"
+                             ExcludedFromBuild="true">
+            <Tool Name="VCCLCompilerTool"/>
+          </FileConfiguration>
+        </File>
+        <File RelativePath="..\..\Source\BinaryData\projectIconVisualStudio08.png">
+          <FileConfiguration Name="Debug|Win32"
+                             ExcludedFromBuild="true">
+            <Tool Name="VCCLCompilerTool"/>
+          </FileConfiguration>
+          <FileConfiguration Name="Release|Win32"
+                             ExcludedFromBuild="true">
+            <Tool Name="VCCLCompilerTool"/>
+          </FileConfiguration>
+        </File>
+        <File RelativePath="..\..\Source\BinaryData\projectIconVisualStudio10.png">
+          <FileConfiguration Name="Debug|Win32"
+                             ExcludedFromBuild="true">
+            <Tool Name="VCCLCompilerTool"/>
+          </FileConfiguration>
+          <FileConfiguration Name="Release|Win32"
+                             ExcludedFromBuild="true">
+            <Tool Name="VCCLCompilerTool"/>
+          </FileConfiguration>
+        </File>
+        <File RelativePath="..\..\Source\BinaryData\projectIconVisualStudio12.png">
+          <FileConfiguration Name="Debug|Win32"
+                             ExcludedFromBuild="true">
+            <Tool Name="VCCLCompilerTool"/>
+          </FileConfiguration>
+          <FileConfiguration Name="Release|Win32"
+                             ExcludedFromBuild="true">
+            <Tool Name="VCCLCompilerTool"/>
+          </FileConfiguration>
+        </File>
+        <File RelativePath="..\..\Source\BinaryData\projectIconVisualStudio13.png">
+          <FileConfiguration Name="Debug|Win32"
+                             ExcludedFromBuild="true">
+            <Tool Name="VCCLCompilerTool"/>
+          </FileConfiguration>
+          <FileConfiguration Name="Release|Win32"
+                             ExcludedFromBuild="true">
+            <Tool Name="VCCLCompilerTool"/>
+          </FileConfiguration>
+        </File>
+        <File RelativePath="..\..\Source\BinaryData\projectIconXcode.png">
+          <FileConfiguration Name="Debug|Win32"
+                             ExcludedFromBuild="true">
+            <Tool Name="VCCLCompilerTool"/>
+          </FileConfiguration>
+          <FileConfiguration Name="Release|Win32"
+                             ExcludedFromBuild="true">
+            <Tool Name="VCCLCompilerTool"/>
+          </FileConfiguration>
+        </File>
+        <File RelativePath="..\..\Source\BinaryData\projectIconXcodeIOS.png">
+          <FileConfiguration Name="Debug|Win32"
+                             ExcludedFromBuild="true">
+            <Tool Name="VCCLCompilerTool"/>
+          </FileConfiguration>
+          <FileConfiguration Name="Release|Win32"
+                             ExcludedFromBuild="true">
+            <Tool Name="VCCLCompilerTool"/>
+          </FileConfiguration>
+        </File>
+        <File RelativePath="..\..\Source\BinaryData\iconOpenfile.svg">
+          <FileConfiguration Name="Debug|Win32"
+                             ExcludedFromBuild="true">
+            <Tool Name="VCCLCompilerTool"/>
+          </FileConfiguration>
+          <FileConfiguration Name="Release|Win32"
+                             ExcludedFromBuild="true">
+            <Tool Name="VCCLCompilerTool"/>
+          </FileConfiguration>
+        </File>
+        <File RelativePath="..\..\Source\BinaryData\iconAnimation.svg">
+          <FileConfiguration Name="Debug|Win32"
+                             ExcludedFromBuild="true">
+            <Tool Name="VCCLCompilerTool"/>
+          </FileConfiguration>
+          <FileConfiguration Name="Release|Win32"
+                             ExcludedFromBuild="true">
+            <Tool Name="VCCLCompilerTool"/>
+          </FileConfiguration>
+        </File>
+        <File RelativePath="..\..\Source\BinaryData\iconAudio.svg">
+          <FileConfiguration Name="Debug|Win32"
+                             ExcludedFromBuild="true">
+            <Tool Name="VCCLCompilerTool"/>
+          </FileConfiguration>
+          <FileConfiguration Name="Release|Win32"
+                             ExcludedFromBuild="true">
+            <Tool Name="VCCLCompilerTool"/>
+          </FileConfiguration>
+        </File>
+        <File RelativePath="..\..\Source\BinaryData\iconConsole.svg">
+          <FileConfiguration Name="Debug|Win32"
+                             ExcludedFromBuild="true">
+            <Tool Name="VCCLCompilerTool"/>
+          </FileConfiguration>
+          <FileConfiguration Name="Release|Win32"
+                             ExcludedFromBuild="true">
+            <Tool Name="VCCLCompilerTool"/>
+          </FileConfiguration>
+        </File>
+        <File RelativePath="..\..\Source\BinaryData\iconDynamic.svg">
+          <FileConfiguration Name="Debug|Win32"
+                             ExcludedFromBuild="true">
+            <Tool Name="VCCLCompilerTool"/>
+          </FileConfiguration>
+          <FileConfiguration Name="Release|Win32"
+                             ExcludedFromBuild="true">
+            <Tool Name="VCCLCompilerTool"/>
+          </FileConfiguration>
+        </File>
+        <File RelativePath="..\..\Source\BinaryData\iconGui.svg">
+          <FileConfiguration Name="Debug|Win32"
+                             ExcludedFromBuild="true">
+            <Tool Name="VCCLCompilerTool"/>
+          </FileConfiguration>
+          <FileConfiguration Name="Release|Win32"
+                             ExcludedFromBuild="true">
+            <Tool Name="VCCLCompilerTool"/>
+          </FileConfiguration>
+        </File>
+        <File RelativePath="..\..\Source\BinaryData\iconHighlight.svg">
+          <FileConfiguration Name="Debug|Win32"
+                             ExcludedFromBuild="true">
+            <Tool Name="VCCLCompilerTool"/>
+          </FileConfiguration>
+          <FileConfiguration Name="Release|Win32"
+                             ExcludedFromBuild="true">
+            <Tool Name="VCCLCompilerTool"/>
+          </FileConfiguration>
+        </File>
+        <File RelativePath="..\..\Source\BinaryData\iconOpengl.svg">
+          <FileConfiguration Name="Debug|Win32"
+                             ExcludedFromBuild="true">
+            <Tool Name="VCCLCompilerTool"/>
+          </FileConfiguration>
+          <FileConfiguration Name="Release|Win32"
+                             ExcludedFromBuild="true">
+            <Tool Name="VCCLCompilerTool"/>
+          </FileConfiguration>
+        </File>
+        <File RelativePath="..\..\Source\BinaryData\iconPlugin.svg">
+          <FileConfiguration Name="Debug|Win32"
+                             ExcludedFromBuild="true">
+            <Tool Name="VCCLCompilerTool"/>
+          </FileConfiguration>
+          <FileConfiguration Name="Release|Win32"
+                             ExcludedFromBuild="true">
+            <Tool Name="VCCLCompilerTool"/>
+          </FileConfiguration>
+        </File>
+        <File RelativePath="..\..\Source\BinaryData\iconStatic.svg">
+          <FileConfiguration Name="Debug|Win32"
+                             ExcludedFromBuild="true">
+            <Tool Name="VCCLCompilerTool"/>
+          </FileConfiguration>
+          <FileConfiguration Name="Release|Win32"
+                             ExcludedFromBuild="true">
+            <Tool Name="VCCLCompilerTool"/>
+          </FileConfiguration>
+        </File>
         <File RelativePath="..\..\Source\BinaryData\AudioPluginXCodeScript.txt">
           <FileConfiguration Name="Debug|Win32"
                              ExcludedFromBuild="true">

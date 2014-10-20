@@ -22,12 +22,46 @@
   ==============================================================================
 */
 
-#ifndef __JUCER_NEWPROJECTWIZARD_JUCEHEADER__
-#define __JUCER_NEWPROJECTWIZARD_JUCEHEADER__
+#ifndef JUCER_STARTPAGECOMPONENT_H_INCLUDED
+#define JUCER_STARTPAGECOMPONENT_H_INCLUDED
 
-#include "../jucer_Headers.h"
+class StartPageComponent    : public Component
+{
+public:
 
-Component* createNewProjectWizardComponent();
+StartPageComponent()
+{
+    panel = new SlidingPanelComponent();
 
+    WizardComp* projectWizard = new WizardComp();
+    
+    setSize (800, 650);
+    
+    panel->addTab ("Create New Project", new TemplateTileBrowser (projectWizard), true);
+    panel->addTab ("New Project Options", projectWizard, true);
 
-#endif   // __JUCER_NEWPROJECTWIZARD_JUCEHEADER__
+    addAndMakeVisible (panel);
+}
+
+~StartPageComponent()
+{
+    panel = nullptr;
+}
+
+void paint (Graphics& g)
+{
+    IntrojucerLookAndFeel::fillWithBackgroundTexture (*this, g);
+}
+
+void resized()
+{
+    panel->setBounds (getBounds());
+}
+    
+private:
+    ScopedPointer<SlidingPanelComponent> panel;
+    
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (StartPageComponent)
+};
+
+#endif //JUCER_STARTPAGECOMPONENT_H_INCLUDED

@@ -1,0 +1,130 @@
+/*
+  ==============================================================================
+
+   This file is part of the JUCE library.
+   Copyright (c) 2013 - Raw Material Software Ltd.
+
+   Permission is granted to use this software under the terms of either:
+   a) the GPL v2 (or any later version)
+   b) the Affero GPL v3
+
+   Details of these licenses can be found at: www.gnu.org/licenses
+
+   JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+   A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+
+   ------------------------------------------------------------------------------
+
+   To release a closed-source product which uses JUCE, commercial licenses are
+   available: visit www.juce.com for more information.
+
+  ==============================================================================
+*/
+
+#ifndef GUIAPPWIZARD_H_INCLUDED
+#define GUIAPPWIZARD_H_INCLUDED
+
+#include "jucer_NewProjectWizard.h"
+
+//==============================================================================
+struct GUIAppWizard   : public NewProjectWizard
+{
+    GUIAppWizard()  {}
+
+    String getName()          { return TRANS("GUI Application"); }
+    String getDescription()   { return TRANS("Creates a standard application"); }
+
+    void addSetupItems (Component& setupComp, OwnedArray<Component>& itemsCreated)
+    {
+        const String fileOptions[] = { TRANS("Create a Main.cpp file"),
+                                       TRANS("Create a Main.cpp file and a basic window"),
+                                       TRANS("Don't create any files") };
+
+        createFileCreationOptionComboBox (setupComp, itemsCreated,
+                                          StringArray (fileOptions, numElementsInArray (fileOptions)));
+    }
+
+    Result processResultsFromSetupItems (Component& setupComp)
+    {
+        createMainCpp = createWindow = false;
+
+        switch (getFileCreationComboResult (setupComp))
+        {
+            case 0:     createMainCpp = true;  break;
+            case 1:     createMainCpp = createWindow = true;  break;
+            case 2:     break;
+            default:    jassertfalse; break;
+        }
+
+        return Result::ok();
+    }
+
+    bool initialiseProject (Project& project)
+    {
+        createSourceFolder();
+
+        File mainCppFile    = getSourceFilesFolder().getChildFile ("Main.cpp");
+        File contentCompCpp = getSourceFilesFolder().getChildFile ("MainComponent.cpp");
+        File contentCompH   = contentCompCpp.withFileExtension (".h");
+        String contentCompName = "MainContentComponent";
+
+        project.getProjectTypeValue() = ProjectType::getGUIAppTypeName();
+
+        Project::Item sourceGroup (createSourceGroup (project));
+
+        setExecutableNameForAllTargets (project, File::createLegalFileName (appTitle));
+
+        String appHeaders (CodeHelpers::createIncludeStatement (project.getAppIncludeFile(), mainCppFile));
+
+        if (createWindow)
+        {
+            appHeaders << newLine << CodeHelpers::createIncludeStatement (contentCompH, mainCppFile);
+
+            String windowH = project.getFileTemplate ("jucer_ContentCompTemplate_h")
+                                .replace ("INCLUDE_JUCE", CodeHelpers::createIncludeStatement (project.getAppIncludeFile(), contentCompH), false)
+                                .replace ("CONTENTCOMPCLASS", contentCompName, false)
+                                .replace ("HEADERGUARD", CodeHelpers::makeHeaderGuardName (contentCompH), false);
+
+            String windowCpp = project.getFileTemplate ("jucer_ContentCompTemplate_cpp")
+                                .replace ("INCLUDE_JUCE", CodeHelpers::createIncludeStatement (project.getAppIncludeFile(), contentCompCpp), false)
+                                .replace ("INCLUDE_CORRESPONDING_HEADER", CodeHelpers::createIncludeStatement (contentCompH, contentCompCpp), false)
+                                .replace ("CONTENTCOMPCLASS", contentCompName, false);
+
+            if (! FileHelpers::overwriteFileWithNewDataIfDifferent (contentCompH, windowH))
+                failedFiles.add (contentCompH.getFullPathName());
+
+            if (! FileHelpers::overwriteFileWithNewDataIfDifferent (contentCompCpp, windowCpp))
+                failedFiles.add (contentCompCpp.getFullPathName());
+
+            sourceGroup.addFile (contentCompCpp, -1, true);
+            sourceGroup.addFile (contentCompH, -1, false);
+        }
+
+        if (createMainCpp)
+        {
+            String mainCpp = project.getFileTemplate (createWindow ? "jucer_MainTemplate_Window_cpp"
+                                                                   : "jucer_MainTemplate_NoWindow_cpp")
+                                .replace ("APPHEADERS", appHeaders, false)
+                                .replace ("APPCLASSNAME", CodeHelpers::makeValidIdentifier (appTitle + "Application", false, true, false), false)
+                                .replace ("APPNAME", CppTokeniserFunctions::addEscapeChars (appTitle), false)
+                                .replace ("CONTENTCOMPCLASS", contentCompName, false)
+                                .replace ("ALLOWMORETHANONEINSTANCE", "true", false);
+
+            if (! FileHelpers::overwriteFileWithNewDataIfDifferent (mainCppFile, mainCpp))
+                failedFiles.add (mainCppFile.getFullPathName());
+
+            sourceGroup.addFile (mainCppFile, -1, true);
+        }
+
+        project.createExporterForCurrentPlatform();
+
+        return true;
+    }
+
+private:
+    bool createMainCpp, createWindow;
+};
+
+
+#endif  // GUIAPPWIZARD_H_INCLUDED

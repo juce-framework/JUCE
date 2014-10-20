@@ -27,7 +27,7 @@
 #include "jucer_MainWindow.h"
 #include "jucer_OpenDocumentManager.h"
 #include "../Code Editor/jucer_SourceCodeEditor.h"
-#include "../Project/jucer_NewProjectWizard.h"
+#include "../Wizards/jucer_NewProjectWizardClasses.h"
 #include "../Utility/jucer_JucerTreeViewBase.h"
 
 
@@ -39,11 +39,12 @@ MainWindow::MainWindow()
                       false)
 {
     setUsingNativeTitleBar (true);
-    createProjectContentCompIfNeeded();
-
+    
    #if ! JUCE_MAC
     setMenuBar (IntrojucerApp::getApp().menuModel);
    #endif
+
+    createProjectContentCompIfNeeded();
 
     setResizable (true, false);
     centreWithSize (800, 600);
@@ -291,7 +292,10 @@ void MainWindow::showNewProjectWizard()
 {
     jassert (currentProject == nullptr);
     setContentOwned (createNewProjectWizardComponent(), true);
-    makeVisible();
+    setSize (800, 650);
+    setVisible (true);
+    addToDesktop();
+    getContentComponent()->grabKeyboardFocus();
 }
 
 //==============================================================================
@@ -365,7 +369,7 @@ bool MainWindowList::askAllWindowsToClose()
 void MainWindowList::createWindowIfNoneAreOpen()
 {
     if (windows.size() == 0)
-        createNewMainWindow()->makeVisible();
+        createNewMainWindow()->showNewProjectWizard();
 }
 
 void MainWindowList::closeWindow (MainWindow* w)

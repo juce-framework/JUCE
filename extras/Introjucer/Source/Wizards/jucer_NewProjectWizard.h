@@ -1,0 +1,260 @@
+/*
+  ==============================================================================
+
+   This file is part of the JUCE library.
+   Copyright (c) 2013 - Raw Material Software Ltd.
+
+   Permission is granted to use this software under the terms of either:
+   a) the GPL v2 (or any later version)
+   b) the Affero GPL v3
+
+   Details of these licenses can be found at: www.gnu.org/licenses
+
+   JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+   A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+
+   ------------------------------------------------------------------------------
+
+   To release a closed-source product which uses JUCE, commercial licenses are
+   available: visit www.juce.com for more information.
+
+  ==============================================================================
+*/
+
+#ifndef JUCER_NEWPROJECTWIZARD_H_INCLUDED
+#define JUCER_NEWPROJECTWIZARD_H_INCLUDED
+
+
+//==============================================================================
+static inline void createFileCreationOptionComboBox (Component& setupComp,
+                                              OwnedArray<Component>& itemsCreated,
+                                              const StringArray& fileOptions)
+{
+    ComboBox* c = new ComboBox();
+    itemsCreated.add (c);
+    setupComp.addChildAndSetID (c, "filesToCreate");
+
+    c->addItemList (fileOptions, 1);
+    c->setSelectedId (1, dontSendNotification);
+
+    Label* l = new Label (String::empty, TRANS("Files to Auto-Generate") + ":");
+    l->attachToComponent (c, true);
+    itemsCreated.add (l);
+
+    c->setBounds ("parent.width / 2 + 160, 30, parent.width - 30, top + 22");
+}
+
+static inline int getFileCreationComboResult (Component& setupComp)
+{
+    if (ComboBox* cb = dynamic_cast<ComboBox*> (setupComp.findChildWithID ("filesToCreate")))
+        return cb->getSelectedItemIndex();
+
+    jassertfalse;
+    return 0;
+}
+
+static inline void setExecutableNameForAllTargets (Project& project, const String& exeName)
+{
+    for (Project::ExporterIterator exporter (project); exporter.next();)
+        for (ProjectExporter::ConfigIterator config (*exporter); config.next();)
+            config->getTargetBinaryName() = exeName;
+}
+
+static inline Project::Item createSourceGroup (Project& project)
+{
+    return project.getMainGroup().addNewSubGroup ("Source", 0);
+}
+
+static inline File& getLastWizardFolder()
+{
+   #if JUCE_WINDOWS
+    static File lastFolder (File::getSpecialLocation (File::userDocumentsDirectory));
+   #else
+    static File lastFolder (File::getSpecialLocation (File::userHomeDirectory));
+   #endif
+
+    return lastFolder;
+}
+
+static bool isJuceModulesFolder (const File& f)
+{
+    return f.isDirectory()
+            && f.getChildFile ("juce_core").isDirectory();
+}
+
+static File findDefaultModulesFolder (bool mustContainJuceCoreModule = true)
+{
+    const MainWindowList& windows = IntrojucerApp::getApp().mainWindowList;
+
+    for (int i = windows.windows.size(); --i >= 0;)
+    {
+        if (Project* p = windows.windows.getUnchecked (i)->getProject())
+        {
+            const File f (EnabledModuleList::findDefaultModulesFolder (*p));
+
+            if (isJuceModulesFolder (f) || (f.isDirectory() && ! mustContainJuceCoreModule))
+                return f;
+        }
+    }
+
+    if (mustContainJuceCoreModule)
+        return findDefaultModulesFolder (false);
+
+    return File::nonexistent;
+}
+
+
+//==============================================================================
+struct NewProjectWizard
+{
+    NewProjectWizard() {}
+    virtual ~NewProjectWizard() {}
+
+    //==============================================================================
+    virtual String getName() = 0;
+    virtual String getDescription() = 0;
+
+    virtual void addSetupItems (Component&, OwnedArray<Component>&)     {}
+    virtual Result processResultsFromSetupItems (Component&)            { return Result::ok(); }
+
+    virtual bool initialiseProject (Project& project) = 0;
+
+    virtual StringArray getDefaultModules()
+    {
+        static const char* mods[] =
+        {
+            "juce_core",
+            "juce_events",
+            "juce_graphics",
+            "juce_data_structures",
+            "juce_gui_basics",
+            "juce_gui_extra",
+            "juce_cryptography",
+            "juce_video",
+            "juce_opengl",
+            "juce_audio_basics",
+            "juce_audio_devices",
+            "juce_audio_formats",
+            "juce_audio_processors",
+            nullptr
+        };
+
+        return StringArray (mods);
+    }
+
+    String appTitle;
+    File targetFolder, projectFile, modulesFolder;
+    Component* ownerWindow;
+    StringArray failedFiles;
+
+    //==============================================================================
+    Project* runWizard (Component* window,
+                        const String& projectName,
+                        const File& target)
+    {
+        ownerWindow = window;
+        appTitle = projectName;
+        targetFolder = target;
+
+        if (! targetFolder.exists())
+        {
+            if (! targetFolder.createDirectory())
+                failedFiles.add (targetFolder.getFullPathName());
+        }
+        else if (FileHelpers::containsAnyNonHiddenFiles (targetFolder))
+        {
+            if (! AlertWindow::showOkCancelBox (AlertWindow::InfoIcon,
+                                                TRANS("New Juce Project"),
+                                                TRANS("The folder you chose isn't empty - are you sure you want to create the project there?")
+                                                  + "\n\n"
+                                                  + TRANS("Any existing files with the same names may be overwritten by the new files.")))
+                return nullptr;
+        }
+
+        projectFile = targetFolder.getChildFile (File::createLegalFileName (appTitle))
+                                  .withFileExtension (Project::projectFileExtension);
+
+        ScopedPointer<Project> project (new Project (projectFile));
+
+        if (failedFiles.size() == 0)
+        {
+            project->setFile (projectFile);
+            project->setTitle (appTitle);
+            project->getBundleIdentifier() = project->getDefaultBundleIdentifier();
+
+            if (! initialiseProject (*project))
+                return nullptr;
+
+            addDefaultModules (*project);
+
+            if (project->save (false, true) != FileBasedDocument::savedOk)
+                return nullptr;
+
+            project->setChangedFlag (false);
+        }
+
+        if (failedFiles.size() > 0)
+        {
+            AlertWindow::showMessageBoxAsync (AlertWindow::WarningIcon,
+                                              TRANS("Errors in Creating Project!"),
+                                              TRANS("The following files couldn't be written:")
+                                                + "\n\n"
+                                                + failedFiles.joinIntoString ("\n", 0, 10));
+            return nullptr;
+        }
+
+        return project.release();
+    }
+
+    bool selectJuceFolder()
+    {
+        for (;;)
+        {
+            FileChooser fc ("Select your JUCE modules folder...",
+                            findDefaultModulesFolder(),
+                            "*");
+
+            if (! fc.browseForDirectory())
+                return false;
+
+            if (isJuceModulesFolder (fc.getResult()))
+            {
+                modulesFolder = fc.getResult();
+                return true;
+            }
+
+            AlertWindow::showMessageBox (AlertWindow::WarningIcon,
+                                         "Not a valid JUCE modules folder!",
+                                         "Please select the folder containing your juce_* modules!\n\n"
+                                         "This is required so that the new project can be given some essential core modules.");
+        }
+    }
+
+    //==============================================================================
+    File getSourceFilesFolder() const
+    {
+        return projectFile.getSiblingFile ("Source");
+    }
+
+    void createSourceFolder()
+    {
+        if (! getSourceFilesFolder().createDirectory())
+            failedFiles.add (getSourceFilesFolder().getFullPathName());
+    }
+
+    void addDefaultModules (Project& project)
+    {
+        StringArray mods (getDefaultModules());
+
+        ModuleList list;
+        list.addAllModulesInFolder (modulesFolder);
+
+        for (int i = 0; i < mods.size(); ++i)
+            if (const ModuleDescription* info = list.getModuleWithID (mods[i]))
+                project.getModules().addModule (info->manifestFile, true);
+    }
+};
+
+
+#endif  // JUCER_NEWPROJECTWIZARD_H_INCLUDED
