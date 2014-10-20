@@ -353,6 +353,9 @@ private:
             if (parent == nullptr || isPlatformTypeSupported (type) == kResultFalse)
                 return kResultFalse;
 
+            if (component == nullptr)
+                component = new ContentWrapperComponent (*this, pluginInstance);
+
            #if JUCE_WINDOWS
             component->addToDesktop (0, parent);
             component->setOpaque (true);
