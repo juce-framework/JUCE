@@ -40,7 +40,6 @@ struct StaticLibraryWizard   : public NewProjectWizard
         project.getProjectTypeValue() = ProjectType::getStaticLibTypeName();
         createSourceGroup (project);
         setExecutableNameForAllTargets (project, File::createLegalFileName (appTitle));
-        project.createExporterForCurrentPlatform();
 
         return true;
     }

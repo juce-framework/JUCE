@@ -45,7 +45,7 @@ static void createFileCreationOptionComboBox (Component& setupComp,
     c->setBounds ("parent.width / 2 + 160, 30, parent.width - 30, top + 22");
 }
 
-static int getFileCreationComboResult (Component& setupComp)
+static int getFileCreationComboResult (WizardComp& setupComp)
 {
     if (ComboBox* cb = dynamic_cast<ComboBox*> (setupComp.findChildWithID ("filesToCreate")))
         return cb->getSelectedItemIndex();
@@ -104,7 +104,6 @@ static File findDefaultModulesFolder (bool mustContainJuceCoreModule = true)
     return File::nonexistent;
 }
 
-
 //==============================================================================
 struct NewProjectWizard
 {
@@ -116,7 +115,7 @@ struct NewProjectWizard
     virtual String getDescription() = 0;
 
     virtual void addSetupItems (Component&, OwnedArray<Component>&)     {}
-    virtual Result processResultsFromSetupItems (Component&)            { return Result::ok(); }
+    virtual Result processResultsFromSetupItems (WizardComp&)           { return Result::ok(); }
 
     virtual bool initialiseProject (Project& project) = 0;
 
@@ -145,15 +144,15 @@ struct NewProjectWizard
 
     String appTitle;
     File targetFolder, projectFile, modulesFolder;
-    Component* ownerWindow;
+    WizardComp* ownerWizardComp;
     StringArray failedFiles;
 
     //==============================================================================
-    Project* runWizard (Component* window,
+    Project* runWizard (WizardComp& wc,
                         const String& projectName,
                         const File& target)
     {
-        ownerWindow = window;
+        ownerWizardComp = &wc;
         appTitle = projectName;
         targetFolder = target;
 
@@ -186,6 +185,7 @@ struct NewProjectWizard
             if (! initialiseProject (*project))
                 return nullptr;
 
+            addExporters (*project, wc);
             addDefaultModules (*project);
 
             if (project->save (false, true) != FileBasedDocument::savedOk)
@@ -253,6 +253,17 @@ struct NewProjectWizard
         for (int i = 0; i < mods.size(); ++i)
             if (const ModuleDescription* info = list.getModuleWithID (mods[i]))
                 project.getModules().addModule (info->manifestFile, true);
+    }
+
+    void addExporters (Project& project, WizardComp& wizardComp)
+    {
+        StringArray types (wizardComp.platformTargets.getSelectedPlatforms());
+
+        for (int i = 0; i < types.size(); ++i)
+            project.addNewExporter (types[i]);
+
+        if (project.getNumExporters() == 0)
+            project.createExporterForCurrentPlatform();
     }
 };
 

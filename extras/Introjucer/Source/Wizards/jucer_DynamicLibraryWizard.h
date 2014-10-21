@@ -40,7 +40,6 @@ struct DynamicLibraryWizard   : public NewProjectWizard
         project.getProjectTypeValue() = ProjectType::getDynamicLibTypeName();
         createSourceGroup (project);
         setExecutableNameForAllTargets (project, File::createLegalFileName (appTitle));
-        project.createExporterForCurrentPlatform();
 
         return true;
     }

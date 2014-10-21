@@ -103,8 +103,6 @@ struct AudioPluginAppWizard   : public NewProjectWizard
         sourceGroup.addFile (editorCppFile, -1, true);
         sourceGroup.addFile (editorHFile,   -1, false);
 
-        project.createExporterForCurrentPlatform();
-
         return true;
     }
 };

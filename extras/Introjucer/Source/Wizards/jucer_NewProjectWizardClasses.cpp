@@ -32,6 +32,7 @@
 
 struct NewProjectWizardClasses
 {
+    class WizardComp;
     #include "jucer_NewProjectWizard.h"
 
     #include "jucer_GUIAppWizard.h"
@@ -39,10 +40,7 @@ struct NewProjectWizardClasses
     #include "jucer_AudioPluginAppWizard.h"
     #include "jucer_StaticLibraryWizard.h"
     #include "jucer_DynamicLibraryWizard.h"
-};
 
-struct NewProjectWizardComponents
-{
     #include "jucer_NewProjectWizardComponent.h"
     #include "jucer_TemplateThumbnailsComponent.h"
     #include "jucer_StartPageComponent.h"
@@ -50,5 +48,5 @@ struct NewProjectWizardComponents
 
 Component* createNewProjectWizardComponent()
 {
-    return new NewProjectWizardComponents::StartPageComponent();
+    return new NewProjectWizardClasses::StartPageComponent();
 }

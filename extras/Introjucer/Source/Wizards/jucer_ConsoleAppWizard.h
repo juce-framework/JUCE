@@ -43,7 +43,7 @@ struct ConsoleAppWizard   : public NewProjectWizard
                                           StringArray (fileOptions, numElementsInArray (fileOptions)));
     }
 
-    Result processResultsFromSetupItems (Component& setupComp)
+    Result processResultsFromSetupItems (WizardComp& setupComp)
     {
         createMainCpp = false;
 
@@ -80,8 +80,6 @@ struct ConsoleAppWizard   : public NewProjectWizard
 
             sourceGroup.addFile (mainCppFile, -1, true);
         }
-
-        project.createExporterForCurrentPlatform();
 
         return true;
     }

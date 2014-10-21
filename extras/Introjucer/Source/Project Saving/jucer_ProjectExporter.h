@@ -37,7 +37,15 @@ public:
     ProjectExporter (Project&, const ValueTree& settings);
     virtual ~ProjectExporter();
 
+    struct ExporterTypeInfo
+    {
+        String name;
+        const void* iconData;
+        int iconDataSize;
+    };
+
     static StringArray getExporterNames();
+    static Array<ExporterTypeInfo> getExporterTypes();
 
     static ProjectExporter* createNewExporter (Project&, const int index);
     static ProjectExporter* createNewExporter (Project&, const String& name);

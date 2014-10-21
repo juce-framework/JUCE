@@ -136,7 +136,7 @@ class TemplateTileBrowser   : public Component,
                               private Button::Listener
 {
 public:
-    TemplateTileBrowser (NewProjectWizardComponents::WizardComp* projectWizard)
+    TemplateTileBrowser (NewProjectWizardClasses::WizardComp* projectWizard)
     {
         addOptionButton ("GUI Application",      BinaryData::iconGui_svg,       "Creates a blank JUCE application with a single window component.");
         addOptionButton ("Audio Application",    BinaryData::iconAudio_svg,     "Creates a blank JUCE application with a single window component and Audio and MIDI in/out functions.");
@@ -262,7 +262,7 @@ public:
 
 private:
     OwnedArray<TemplateOptionButton> optionButtons;
-    NewProjectWizardComponents::WizardComp* newProjectWizard;
+    NewProjectWizardClasses::WizardComp* newProjectWizard;
     ScopedPointer<TemplateOptionButton> blankProjectButton, openProjectButton, exampleProjectButton;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TemplateTileBrowser)

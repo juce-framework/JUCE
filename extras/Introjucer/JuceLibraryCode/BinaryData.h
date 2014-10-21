@@ -16,7 +16,7 @@ namespace BinaryData
     const int            projectIconCodeblocks_pngSize = 11917;
 
     extern const char*   projectIconLinuxMakefile_png;
-    const int            projectIconLinuxMakefile_pngSize = 7576;
+    const int            projectIconLinuxMakefile_pngSize = 16444;
 
     extern const char*   projectIconVisualStudio05_png;
     const int            projectIconVisualStudio05_pngSize = 6986;

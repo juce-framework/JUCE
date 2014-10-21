@@ -35,29 +35,32 @@ public:
     {
         setOpaque (false);
 
-        listBox.setRowHeight (360 / getNumRows());
+        const Array<ProjectExporter::ExporterTypeInfo> types (ProjectExporter::getExporterTypes());
+
+        for (int i = 0; i < types.size(); ++i)
+        {
+            const ProjectExporter::ExporterTypeInfo& type = types.getReference (i);
+            platforms.add (new PlatformType (ImageCache::getFromMemory (type.iconData, type.iconDataSize), type.name));
+        }
+
+        listBox.setRowHeight (35);
         listBox.setModel (this);
         listBox.setOpaque (false);
         listBox.setMultipleSelectionEnabled (true);
         listBox.setClickingTogglesRowSelection (true);
         listBox.setColour (ListBox::ColourIds::backgroundColourId, Colours::white.withAlpha (0.0f));
         addAndMakeVisible (listBox);
-
-        addPlatformType (BinaryData::projectIconXcode_png,          BinaryData::projectIconXcode_pngSize,           "Create a new XCode target");
-        addPlatformType (BinaryData::projectIconXcodeIOS_png,       BinaryData::projectIconXcodeIOS_pngSize,        "Create a new XCode IOS target");
-        addPlatformType (BinaryData::projectIconVisualStudio13_png, BinaryData::projectIconVisualStudio13_pngSize,  "Create a new Visual Studio 2013 target");
-        addPlatformType (BinaryData::projectIconVisualStudio12_png, BinaryData::projectIconVisualStudio12_pngSize,  "Create a new Visual Studio 2012 target");
-        addPlatformType (BinaryData::projectIconVisualStudio10_png, BinaryData::projectIconVisualStudio10_pngSize,  "Create a new Visual Studio 2010 target");
-        addPlatformType (BinaryData::projectIconVisualStudio08_png, BinaryData::projectIconVisualStudio08_pngSize,  "Create a new Visual Studio 2008 target");
-        addPlatformType (BinaryData::projectIconVisualStudio05_png, BinaryData::projectIconVisualStudio05_pngSize,  "Create a new Visual Studio 2005 target");
-        addPlatformType (BinaryData::projectIconAndroid_png,        BinaryData::projectIconAndroid_pngSize,         "Create a new Android target");
-        addPlatformType (BinaryData::projectIconCodeblocks_png,     BinaryData::projectIconCodeblocks_pngSize,      "Create a new Codeblocks target");
-        addPlatformType (BinaryData::projectIconLinuxMakefile_png,  BinaryData::projectIconLinuxMakefile_pngSize,   "Create a new linux makefile target");
     }
 
-    void addPlatformType (const void* imgData, int imgSize, const char* name)
+    StringArray getSelectedPlatforms() const
     {
-        platforms.add (new PlatformType (ImageCache::getFromMemory (imgData, imgSize), name));
+        StringArray list;
+
+        for (int i = 0; i < platforms.size(); ++i)
+            if (listBox.isRowSelected (i))
+                list.add (platforms.getUnchecked(i)->name);
+
+        return list;
     }
 
     void resized() override
@@ -67,27 +70,40 @@ public:
 
     int getNumRows() override
     {
-        return 10;
+        return platforms.size();
     }
 
-    void paintListBoxItem (int rowNumber, Graphics& g,
-                           int width, int height, bool rowIsSelected) override
+    void paintListBoxItem (int rowNumber, Graphics& g, int width, int height, bool rowIsSelected) override
     {
-        Rectangle<float> dotSelect = Rectangle<float> (0, 0, height, height);
-        dotSelect.reduce (12, 12);
-
-        g.setColour (Colours::white);
-        g.drawEllipse (dotSelect, 1);
-
-        if (rowIsSelected)
+        if (PlatformType* platform = platforms[rowNumber])
         {
-            g.fillAll (Colour(243, 145, 0));
-            g.fillEllipse (dotSelect);
-        }
+            if (rowIsSelected)
+                g.fillAll (Colour (0x99f29000));
 
-        g.drawImageWithin (platforms.getUnchecked(rowNumber)->icon, 40, 0, height, height, RectanglePlacement::stretchToFit);
-        g.setColour (Colours::black);
-        g.drawText (platforms.getUnchecked (rowNumber)->name, 90, 0, width, height, Justification::left);
+            Rectangle<float> dotSelect = Rectangle<float> (0, 0, height, height);
+            dotSelect.reduce (12, 12);
+
+            g.setColour (Colour (0x33ffffff));
+            g.fillEllipse (dotSelect);
+
+            if (rowIsSelected)
+            {
+                const float tx = dotSelect.getCentreX();
+                const float ty = dotSelect.getCentreY() + 1.0f;
+
+                Path tick;
+                tick.startNewSubPath (tx - 5.0f, ty - 6.0f);
+                tick.lineTo (tx, ty);
+                tick.lineTo (tx + 8.0f, ty - 13.0f);
+
+                g.setColour (Colours::white);
+                g.strokePath (tick, PathStrokeType (3.0f));
+            }
+
+            g.setColour (Colours::black);
+            g.drawImageWithin (platform->icon, 40, 0, height, height, RectanglePlacement::stretchToFit);
+            g.drawText (platform->name, 90, 0, width, height, Justification::left);
+        }
     }
 
 
@@ -130,7 +146,7 @@ public:
           fileBrowser (FileBrowserComponent::saveMode | FileBrowserComponent::canSelectDirectories,
                        NewProjectWizardClasses::getLastWizardFolder(), nullptr, nullptr),
           fileOutline (String::empty, TRANS("Project Folder") + ":"),
-          targetsOutline (String::empty, TRANS("Project Targets") + ":"),
+          targetsOutline (String::empty, TRANS("Target Platforms") + ":"),
           createButton (TRANS("Create") + "..."),
           cancelButton (TRANS("Cancel")),
           platformTargets()
@@ -236,7 +252,7 @@ public:
             if (! wizard->selectJuceFolder())
                 return;
 
-            ScopedPointer<Project> project (wizard->runWizard (mw, projectName.getText(),
+            ScopedPointer<Project> project (wizard->runWizard (*this, projectName.getText(),
                                                                fileBrowser.getSelectedFile (0)));
 
             if (project != nullptr)
@@ -265,8 +281,8 @@ public:
         fileBrowser.setFileName (File::createLegalFileName (projectName.getText()));
     }
 
-    // projectType box is public so it can be set by the introjucer front page icons
     ComboBox projectType;
+    PlatformTargetsComp platformTargets;
 
 private:
     TextEditor projectName;
@@ -276,7 +292,6 @@ private:
     GroupComponent targetsOutline;
     TextButton createButton, cancelButton;
     OwnedArray<Component> customItems;
-    PlatformTargetsComp platformTargets;
 
     NewProjectWizardClasses::NewProjectWizard* createWizard()
     {
