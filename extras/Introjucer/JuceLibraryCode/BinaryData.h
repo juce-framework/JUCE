@@ -9,66 +9,6 @@
 
 namespace BinaryData
 {
-    extern const char*   projectIconAndroid_png;
-    const int            projectIconAndroid_pngSize = 8150;
-
-    extern const char*   projectIconCodeblocks_png;
-    const int            projectIconCodeblocks_pngSize = 11917;
-
-    extern const char*   projectIconLinuxMakefile_png;
-    const int            projectIconLinuxMakefile_pngSize = 16444;
-
-    extern const char*   projectIconVisualStudio05_png;
-    const int            projectIconVisualStudio05_pngSize = 6986;
-
-    extern const char*   projectIconVisualStudio08_png;
-    const int            projectIconVisualStudio08_pngSize = 7099;
-
-    extern const char*   projectIconVisualStudio10_png;
-    const int            projectIconVisualStudio10_pngSize = 6712;
-
-    extern const char*   projectIconVisualStudio12_png;
-    const int            projectIconVisualStudio12_pngSize = 6637;
-
-    extern const char*   projectIconVisualStudio13_png;
-    const int            projectIconVisualStudio13_pngSize = 6719;
-
-    extern const char*   projectIconXcode_png;
-    const int            projectIconXcode_pngSize = 18281;
-
-    extern const char*   projectIconXcodeIOS_png;
-    const int            projectIconXcodeIOS_pngSize = 18111;
-
-    extern const char*   iconOpenfile_svg;
-    const int            iconOpenfile_svgSize = 686;
-
-    extern const char*   iconAnimation_svg;
-    const int            iconAnimation_svgSize = 2963;
-
-    extern const char*   iconAudio_svg;
-    const int            iconAudio_svgSize = 9802;
-
-    extern const char*   iconConsole_svg;
-    const int            iconConsole_svgSize = 1204;
-
-    extern const char*   iconDynamic_svg;
-    const int            iconDynamic_svgSize = 3588;
-
-    extern const char*   iconGui_svg;
-    const int            iconGui_svgSize = 3448;
-
-    extern const char*   iconHighlight_svg;
-    const int            iconHighlight_svgSize = 638;
-
-    extern const char*   iconOpengl_svg;
-    const int            iconOpengl_svgSize = 2497;
-
-    extern const char*   iconPlugin_svg;
-    const int            iconPlugin_svgSize = 10809;
-
-    extern const char*   iconStatic_svg;
-    const int            iconStatic_svgSize = 3563;
-
     extern const char*   AudioPluginXCodeScript_txt;
     const int            AudioPluginXCodeScript_txtSize = 2916;
 
@@ -132,8 +72,68 @@ namespace BinaryData
     extern const char*   jucer_NewInlineComponentTemplate_h;
     const int            jucer_NewInlineComponentTemplate_hSize = 1626;
 
+    extern const char*   projectIconAndroid_png;
+    const int            projectIconAndroid_pngSize = 8150;
+
+    extern const char*   projectIconCodeblocks_png;
+    const int            projectIconCodeblocks_pngSize = 11917;
+
+    extern const char*   projectIconLinuxMakefile_png;
+    const int            projectIconLinuxMakefile_pngSize = 16444;
+
+    extern const char*   projectIconVisualStudio05_png;
+    const int            projectIconVisualStudio05_pngSize = 6986;
+
+    extern const char*   projectIconVisualStudio08_png;
+    const int            projectIconVisualStudio08_pngSize = 7099;
+
+    extern const char*   projectIconVisualStudio10_png;
+    const int            projectIconVisualStudio10_pngSize = 6712;
+
+    extern const char*   projectIconVisualStudio12_png;
+    const int            projectIconVisualStudio12_pngSize = 6637;
+
+    extern const char*   projectIconVisualStudio13_png;
+    const int            projectIconVisualStudio13_pngSize = 6719;
+
+    extern const char*   projectIconXcode_png;
+    const int            projectIconXcode_pngSize = 18281;
+
+    extern const char*   projectIconXcodeIOS_png;
+    const int            projectIconXcodeIOS_pngSize = 18111;
+
     extern const char*   RecentFilesMenuTemplate_nib;
     const int            RecentFilesMenuTemplate_nibSize = 2842;
+
+    extern const char*   wizard_AnimatedApp_svg;
+    const int            wizard_AnimatedApp_svgSize = 2963;
+
+    extern const char*   wizard_AudioApp_svg;
+    const int            wizard_AudioApp_svgSize = 9802;
+
+    extern const char*   wizard_AudioPlugin_svg;
+    const int            wizard_AudioPlugin_svgSize = 10809;
+
+    extern const char*   wizard_ConsoleApp_svg;
+    const int            wizard_ConsoleApp_svgSize = 1204;
+
+    extern const char*   wizard_DLL_svg;
+    const int            wizard_DLL_svgSize = 3588;
+
+    extern const char*   wizard_GUI_svg;
+    const int            wizard_GUI_svgSize = 3448;
+
+    extern const char*   wizard_Highlight_svg;
+    const int            wizard_Highlight_svgSize = 638;
+
+    extern const char*   wizard_Openfile_svg;
+    const int            wizard_Openfile_svgSize = 686;
+
+    extern const char*   wizard_OpenGL_svg;
+    const int            wizard_OpenGL_svgSize = 2497;
+
+    extern const char*   wizard_StaticLibrary_svg;
+    const int            wizard_StaticLibrary_svgSize = 3563;
 
     // Points to the start of a list of resource names.
     extern const char* namedResourceList[];

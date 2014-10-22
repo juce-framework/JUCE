@@ -29,7 +29,7 @@ NewFileWizard::Type* createGUIComponentWizard();
 //==============================================================================
 namespace
 {
-    inline String fillInBasicTemplateFields (const File& file, const Project::Item& item, const char* templateName)
+    static String fillInBasicTemplateFields (const File& file, const Project::Item& item, const char* templateName)
     {
         return item.project.getFileTemplate (templateName)
                       .replace ("FILENAME", file.getFileName(), false)
@@ -39,7 +39,7 @@ namespace
                       .replace ("INCLUDE_CORRESPONDING_HEADER", CodeHelpers::createIncludeStatement (file.withFileExtension (".h"), file));
     }
 
-    bool fillInNewCppFileTemplate (const File& file, const Project::Item& item, const char* templateName)
+    static bool fillInNewCppFileTemplate (const File& file, const Project::Item& item, const char* templateName)
     {
         return FileHelpers::overwriteFileWithNewDataIfDifferent (file, fillInBasicTemplateFields (file, item, templateName));
     }

@@ -346,9 +346,6 @@
     <ClCompile Include="..\..\Source\Project\jucer_ProjectType.cpp">
       <Filter>The Introjucer\Project</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Source\Utility\jucer_SlidingPanelComponent.cpp">
-      <Filter>The Introjucer\Utility</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\Source\Utility\jucer_CodeHelpers.cpp">
       <Filter>The Introjucer\Utility</Filter>
     </ClCompile>
@@ -362,6 +359,9 @@
       <Filter>The Introjucer\Utility</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\Utility\jucer_MiscUtilities.cpp">
+      <Filter>The Introjucer\Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Utility\jucer_SlidingPanelComponent.cpp">
       <Filter>The Introjucer\Utility</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\Utility\jucer_StoredSettings.cpp">
@@ -1599,9 +1599,6 @@
     <ClInclude Include="..\..\Source\Project\jucer_ProjectType.h">
       <Filter>The Introjucer\Project</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\Utility\jucer_SlidingPanelComponent.h">
-      <Filter>The Introjucer\Utility</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\Source\Utility\jucer_CodeHelpers.h">
       <Filter>The Introjucer\Utility</Filter>
     </ClInclude>
@@ -1626,6 +1623,9 @@
     <ClInclude Include="..\..\Source\Utility\jucer_RelativePath.h">
       <Filter>The Introjucer\Utility</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\Source\Utility\jucer_SlidingPanelComponent.h">
+      <Filter>The Introjucer\Utility</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\Source\Utility\jucer_StoredSettings.h">
       <Filter>The Introjucer\Utility</Filter>
     </ClInclude>
@@ -1635,37 +1635,46 @@
     <ClInclude Include="..\..\Source\Utility\jucer_ValueSourceHelpers.h">
       <Filter>The Introjucer\Utility</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\Wizards\jucer_StartPageComponent.h">
+    <ClInclude Include="..\..\Source\Wizards\jucer_NewFileWizard.h">
       <Filter>The Introjucer\Wizards</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\Wizards\jucer_NewProjectWizard.h">
       <Filter>The Introjucer\Wizards</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\Wizards\jucer_TemplateThumbnailsComponent.h">
-      <Filter>The Introjucer\Wizards</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Wizards\jucer_DynamicLibraryWizard.h">
-      <Filter>The Introjucer\Wizards</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Wizards\jucer_StaticLibraryWizard.h">
-      <Filter>The Introjucer\Wizards</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Wizards\jucer_AudioPluginAppWizard.h">
-      <Filter>The Introjucer\Wizards</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Wizards\jucer_ConsoleAppWizard.h">
-      <Filter>The Introjucer\Wizards</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Wizards\jucer_GUIAppWizard.h">
+    <ClInclude Include="..\..\Source\Wizards\jucer_NewProjectWizardClasses.h">
       <Filter>The Introjucer\Wizards</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\Wizards\jucer_NewProjectWizardComponent.h">
       <Filter>The Introjucer\Wizards</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\Wizards\jucer_NewFileWizard.h">
+    <ClInclude Include="..\..\Source\Wizards\jucer_ProjectWizard_Animated.h">
       <Filter>The Introjucer\Wizards</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\Wizards\jucer_NewProjectWizardClasses.h">
+    <ClInclude Include="..\..\Source\Wizards\jucer_ProjectWizard_AudioApp.h">
+      <Filter>The Introjucer\Wizards</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Wizards\jucer_ProjectWizard_AudioPlugin.h">
+      <Filter>The Introjucer\Wizards</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Wizards\jucer_ProjectWizard_Console.h">
+      <Filter>The Introjucer\Wizards</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Wizards\jucer_ProjectWizard_DLL.h">
+      <Filter>The Introjucer\Wizards</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Wizards\jucer_ProjectWizard_GUIApp.h">
+      <Filter>The Introjucer\Wizards</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Wizards\jucer_ProjectWizard_openGL.h">
+      <Filter>The Introjucer\Wizards</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Wizards\jucer_ProjectWizard_StaticLibrary.h">
+      <Filter>The Introjucer\Wizards</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Wizards\jucer_StartPageComponent.h">
+      <Filter>The Introjucer\Wizards</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Wizards\jucer_TemplateThumbnailsComponent.h">
       <Filter>The Introjucer\Wizards</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\BinaryData\jucer_AudioPluginEditorTemplate.h">
@@ -2717,6 +2726,21 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\..\Source\BinaryData\AudioPluginXCodeScript.txt">
+      <Filter>The Introjucer\BinaryData</Filter>
+    </None>
+    <None Include="..\..\Source\BinaryData\background_tile.png">
+      <Filter>The Introjucer\BinaryData</Filter>
+    </None>
+    <None Include="..\..\Source\BinaryData\colourscheme_dark.xml">
+      <Filter>The Introjucer\BinaryData</Filter>
+    </None>
+    <None Include="..\..\Source\BinaryData\colourscheme_light.xml">
+      <Filter>The Introjucer\BinaryData</Filter>
+    </None>
+    <None Include="..\..\Source\BinaryData\juce_icon.png">
+      <Filter>The Introjucer\BinaryData</Filter>
+    </None>
     <None Include="..\..\Source\BinaryData\projectIconAndroid.png">
       <Filter>The Introjucer\BinaryData</Filter>
     </None>
@@ -2747,52 +2771,37 @@
     <None Include="..\..\Source\BinaryData\projectIconXcodeIOS.png">
       <Filter>The Introjucer\BinaryData</Filter>
     </None>
-    <None Include="..\..\Source\BinaryData\iconOpenfile.svg">
-      <Filter>The Introjucer\BinaryData</Filter>
-    </None>
-    <None Include="..\..\Source\BinaryData\iconAnimation.svg">
-      <Filter>The Introjucer\BinaryData</Filter>
-    </None>
-    <None Include="..\..\Source\BinaryData\iconAudio.svg">
-      <Filter>The Introjucer\BinaryData</Filter>
-    </None>
-    <None Include="..\..\Source\BinaryData\iconConsole.svg">
-      <Filter>The Introjucer\BinaryData</Filter>
-    </None>
-    <None Include="..\..\Source\BinaryData\iconDynamic.svg">
-      <Filter>The Introjucer\BinaryData</Filter>
-    </None>
-    <None Include="..\..\Source\BinaryData\iconGui.svg">
-      <Filter>The Introjucer\BinaryData</Filter>
-    </None>
-    <None Include="..\..\Source\BinaryData\iconHighlight.svg">
-      <Filter>The Introjucer\BinaryData</Filter>
-    </None>
-    <None Include="..\..\Source\BinaryData\iconOpengl.svg">
-      <Filter>The Introjucer\BinaryData</Filter>
-    </None>
-    <None Include="..\..\Source\BinaryData\iconPlugin.svg">
-      <Filter>The Introjucer\BinaryData</Filter>
-    </None>
-    <None Include="..\..\Source\BinaryData\iconStatic.svg">
-      <Filter>The Introjucer\BinaryData</Filter>
-    </None>
-    <None Include="..\..\Source\BinaryData\AudioPluginXCodeScript.txt">
-      <Filter>The Introjucer\BinaryData</Filter>
-    </None>
-    <None Include="..\..\Source\BinaryData\background_tile.png">
-      <Filter>The Introjucer\BinaryData</Filter>
-    </None>
-    <None Include="..\..\Source\BinaryData\colourscheme_dark.xml">
-      <Filter>The Introjucer\BinaryData</Filter>
-    </None>
-    <None Include="..\..\Source\BinaryData\colourscheme_light.xml">
-      <Filter>The Introjucer\BinaryData</Filter>
-    </None>
-    <None Include="..\..\Source\BinaryData\juce_icon.png">
-      <Filter>The Introjucer\BinaryData</Filter>
-    </None>
     <None Include="..\..\Source\BinaryData\RecentFilesMenuTemplate.nib">
+      <Filter>The Introjucer\BinaryData</Filter>
+    </None>
+    <None Include="..\..\Source\BinaryData\wizard_AnimatedApp.svg">
+      <Filter>The Introjucer\BinaryData</Filter>
+    </None>
+    <None Include="..\..\Source\BinaryData\wizard_AudioApp.svg">
+      <Filter>The Introjucer\BinaryData</Filter>
+    </None>
+    <None Include="..\..\Source\BinaryData\wizard_AudioPlugin.svg">
+      <Filter>The Introjucer\BinaryData</Filter>
+    </None>
+    <None Include="..\..\Source\BinaryData\wizard_ConsoleApp.svg">
+      <Filter>The Introjucer\BinaryData</Filter>
+    </None>
+    <None Include="..\..\Source\BinaryData\wizard_DLL.svg">
+      <Filter>The Introjucer\BinaryData</Filter>
+    </None>
+    <None Include="..\..\Source\BinaryData\wizard_GUI.svg">
+      <Filter>The Introjucer\BinaryData</Filter>
+    </None>
+    <None Include="..\..\Source\BinaryData\wizard_Highlight.svg">
+      <Filter>The Introjucer\BinaryData</Filter>
+    </None>
+    <None Include="..\..\Source\BinaryData\wizard_Openfile.svg">
+      <Filter>The Introjucer\BinaryData</Filter>
+    </None>
+    <None Include="..\..\Source\BinaryData\wizard_OpenGL.svg">
+      <Filter>The Introjucer\BinaryData</Filter>
+    </None>
+    <None Include="..\..\Source\BinaryData\wizard_StaticLibrary.svg">
       <Filter>The Introjucer\BinaryData</Filter>
     </None>
     <None Include="..\..\..\..\modules\juce_core\juce_module_info">

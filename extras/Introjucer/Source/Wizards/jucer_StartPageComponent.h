@@ -22,8 +22,6 @@
   ==============================================================================
 */
 
-#ifndef JUCER_STARTPAGECOMPONENT_H_INCLUDED
-#define JUCER_STARTPAGECOMPONENT_H_INCLUDED
 
 class StartPageComponent    : public Component
 {
@@ -56,4 +54,3 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (StartPageComponent)
 };
 
-#endif //JUCER_STARTPAGECOMPONENT_H_INCLUDED

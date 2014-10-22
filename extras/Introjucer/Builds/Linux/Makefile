@@ -84,12 +84,12 @@ OBJECTS := \
   $(OBJDIR)/jucer_Project_c131864a.o \
   $(OBJDIR)/jucer_ProjectContentComponent_60de0eee.o \
   $(OBJDIR)/jucer_ProjectType_1bc27a24.o \
-  $(OBJDIR)/jucer_SlidingPanelComponent_9aa7a2ab.o \
   $(OBJDIR)/jucer_CodeHelpers_c317179c.o \
   $(OBJDIR)/jucer_FileHelpers_f98ed0ad.o \
   $(OBJDIR)/jucer_Icons_9db2f51e.o \
   $(OBJDIR)/jucer_JucerTreeViewBase_d043309d.o \
   $(OBJDIR)/jucer_MiscUtilities_25b68c82.o \
+  $(OBJDIR)/jucer_SlidingPanelComponent_9aa7a2ab.o \
   $(OBJDIR)/jucer_StoredSettings_26078d2c.o \
   $(OBJDIR)/jucer_NewFileWizard_fac97f47.o \
   $(OBJDIR)/jucer_NewProjectWizardClasses_891f6fa2.o \
@@ -284,11 +284,6 @@ $(OBJDIR)/jucer_ProjectType_1bc27a24.o: ../../Source/Project/jucer_ProjectType.c
 	@echo "Compiling jucer_ProjectType.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/jucer_SlidingPanelComponent_9aa7a2ab.o: ../../Source/Utility/jucer_SlidingPanelComponent.cpp
-	-@mkdir -p $(OBJDIR)
-	@echo "Compiling jucer_SlidingPanelComponent.cpp"
-	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
-
 $(OBJDIR)/jucer_CodeHelpers_c317179c.o: ../../Source/Utility/jucer_CodeHelpers.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo "Compiling jucer_CodeHelpers.cpp"
@@ -312,6 +307,11 @@ $(OBJDIR)/jucer_JucerTreeViewBase_d043309d.o: ../../Source/Utility/jucer_JucerTr
 $(OBJDIR)/jucer_MiscUtilities_25b68c82.o: ../../Source/Utility/jucer_MiscUtilities.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo "Compiling jucer_MiscUtilities.cpp"
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/jucer_SlidingPanelComponent_9aa7a2ab.o: ../../Source/Utility/jucer_SlidingPanelComponent.cpp
+	-@mkdir -p $(OBJDIR)
+	@echo "Compiling jucer_SlidingPanelComponent.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/jucer_StoredSettings_26078d2c.o: ../../Source/Utility/jucer_StoredSettings.cpp

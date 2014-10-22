@@ -23,4 +23,21 @@
 */
 
 
-Component* createNewProjectWizardComponent();
+struct AudioAppWizard   : public NewProjectWizard
+{
+    AudioAppWizard()  {}
+
+    String getName() const override         { return TRANS("Audio Application"); }
+    String getDescription() const override  { return TRANS("Creates a JUCE application with a single window component and audio and MIDI in/out functions."); }
+    const char* getIcon() const override    { return BinaryData::wizard_AudioApp_svg; }
+
+    bool initialiseProject (Project& project) override
+    {
+        createSourceFolder();
+        project.getProjectTypeValue() = ProjectType::getGUIAppTypeName();
+        createSourceGroup (project);
+        setExecutableNameForAllTargets (project, File::createLegalFileName (appTitle));
+
+        return true;
+    }
+};

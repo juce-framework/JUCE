@@ -50,6 +50,8 @@ public:
         listBox.setClickingTogglesRowSelection (true);
         listBox.setColour (ListBox::ColourIds::backgroundColourId, Colours::white.withAlpha (0.0f));
         addAndMakeVisible (listBox);
+
+        selectDefaultExporterIfNoneSelected();
     }
 
     StringArray getSelectedPlatforms() const
@@ -61,6 +63,21 @@ public:
                 list.add (platforms.getUnchecked(i)->name);
 
         return list;
+    }
+
+    void selectDefaultExporterIfNoneSelected()
+    {
+        if (listBox.getNumSelectedRows() == 0)
+        {
+            for (int i = platforms.size(); --i >= 0;)
+            {
+                if (platforms.getUnchecked(i)->name == ProjectExporter::getCurrentPlatformExporterName())
+                {
+                    listBox.selectRow (i);
+                    break;
+                }
+            }
+        }
     }
 
     void resized() override
@@ -80,7 +97,7 @@ public:
             if (rowIsSelected)
                 g.fillAll (Colour (0x99f29000));
 
-            Rectangle<float> dotSelect = Rectangle<float> (0, 0, height, height);
+            Rectangle<float> dotSelect (height, height);
             dotSelect.reduce (12, 12);
 
             g.setColour (Colour (0x33ffffff));
@@ -106,6 +123,10 @@ public:
         }
     }
 
+    void selectedRowsChanged (int) override
+    {
+        selectDefaultExporterIfNoneSelected();
+    }
 
 private:
     struct PlatformType
@@ -140,7 +161,8 @@ class WizardComp  : public Component,
 {
 public:
     WizardComp()
-        : projectName (TRANS("Project name")),
+        : platformTargets(),
+          projectName (TRANS("Project name")),
           nameLabel (String::empty, TRANS("Project Name") + ":"),
           typeLabel (String::empty, TRANS("Project Type") + ":"),
           fileBrowser (FileBrowserComponent::saveMode | FileBrowserComponent::canSelectDirectories,
@@ -148,8 +170,7 @@ public:
           fileOutline (String::empty, TRANS("Project Folder") + ":"),
           targetsOutline (String::empty, TRANS("Target Platforms") + ":"),
           createButton (TRANS("Create") + "..."),
-          cancelButton (TRANS("Cancel")),
-          platformTargets()
+          cancelButton (TRANS("Cancel"))
     {
         setOpaque (false);
 
@@ -200,7 +221,7 @@ public:
     {
         Rectangle<int> rect = getLocalBounds().reduced (10, 10);
 
-        g.setColour (Colours::white.withAlpha(0.3f));
+        g.setColour (Colours::white.withAlpha (0.3f));
         g.fillRect (rect);
         g.fillRect (rect.reduced (10, 10));
     }
@@ -303,41 +324,6 @@ private:
         createButton.setEnabled (projectName.getText().trim().isNotEmpty());
     }
 };
-
-
-//==============================================================================
-static int getNumWizards()
-{
-    return 5;
-}
-
-static NewProjectWizardClasses::NewProjectWizard* createWizardType (int index)
-{
-    switch (index)
-    {
-        case 0:     return new NewProjectWizardClasses::GUIAppWizard();
-        case 1:     return new NewProjectWizardClasses::ConsoleAppWizard();
-        case 2:     return new NewProjectWizardClasses::AudioPluginAppWizard();
-        case 3:     return new NewProjectWizardClasses::StaticLibraryWizard();
-        case 4:     return new NewProjectWizardClasses::DynamicLibraryWizard();
-        default:    jassertfalse; break;
-    }
-
-    return nullptr;
-}
-
-static StringArray getWizardNames()
-{
-    StringArray s;
-
-    for (int i = 0; i < getNumWizards(); ++i)
-    {
-        ScopedPointer<NewProjectWizardClasses::NewProjectWizard> wiz (createWizardType (i));
-        s.add (wiz->getName());
-    }
-
-    return s;
-}
 
 
 #endif  // NEWPROJECTWIZARDCOMPONENTS_H_INCLUDED

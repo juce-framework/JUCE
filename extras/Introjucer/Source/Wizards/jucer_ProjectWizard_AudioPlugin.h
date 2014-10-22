@@ -22,17 +22,14 @@
   ==============================================================================
 */
 
-#ifndef JUCER_AUDIOPLUGINAPPWIZARD_H_INCLUDED
-#define JUCER_AUDIOPLUGINAPPWIZARD_H_INCLUDED
 
-
-//==============================================================================
 struct AudioPluginAppWizard   : public NewProjectWizard
 {
     AudioPluginAppWizard()  {}
 
-    String getName() override          { return TRANS("Audio Plug-In"); }
-    String getDescription() override   { return TRANS("Creates an audio plugin project"); }
+    String getName() const override         { return TRANS("Audio Plug-In"); }
+    String getDescription() const override  { return TRANS("Creates a VST/AU/RTAS/AAX audio plug-in. This template features a single window GUI and Audio/MIDI IO functions."); }
+    const char* getIcon() const override    { return BinaryData::wizard_AudioPlugin_svg; }
 
     StringArray getDefaultModules() override
     {
@@ -108,4 +105,3 @@ struct AudioPluginAppWizard   : public NewProjectWizard
 };
 
 
-#endif  // JUCER_AUDIOPLUGINAPPWIZARD_H_INCLUDED

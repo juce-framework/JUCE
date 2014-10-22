@@ -22,17 +22,14 @@
   ==============================================================================
 */
 
-#ifndef CONSOLEAPPWIZARD_H_INCLUDED
-#define CONSOLEAPPWIZARD_H_INCLUDED
 
-
-//==============================================================================
 struct ConsoleAppWizard   : public NewProjectWizard
 {
     ConsoleAppWizard()  {}
 
-    String getName()          { return TRANS("Console Application"); }
-    String getDescription()   { return TRANS("Creates a command-line application with no GUI features"); }
+    String getName() const override         { return TRANS("Console Application"); }
+    String getDescription() const override  { return TRANS("Creates a command-line application without GUI support."); }
+    const char* getIcon() const override    { return BinaryData::wizard_ConsoleApp_svg; }
 
     void addSetupItems (Component& setupComp, OwnedArray<Component>& itemsCreated)
     {
@@ -88,5 +85,3 @@ private:
     bool createMainCpp;
 };
 
-
-#endif  // CONSOLEAPPWIZARD_H_INCLUDED

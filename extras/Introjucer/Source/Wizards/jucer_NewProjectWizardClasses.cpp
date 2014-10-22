@@ -22,6 +22,7 @@
   ==============================================================================
 */
 
+#include "../jucer_Headers.h"
 #include "jucer_NewProjectWizardClasses.h"
 #include "jucer_ProjectType.h"
 #include "jucer_Module.h"
@@ -35,15 +36,55 @@ struct NewProjectWizardClasses
     class WizardComp;
     #include "jucer_NewProjectWizard.h"
 
-    #include "jucer_GUIAppWizard.h"
-    #include "jucer_ConsoleAppWizard.h"
-    #include "jucer_AudioPluginAppWizard.h"
-    #include "jucer_StaticLibraryWizard.h"
-    #include "jucer_DynamicLibraryWizard.h"
+    #include "jucer_ProjectWizard_GUIApp.h"
+    #include "jucer_ProjectWizard_Console.h"
+    #include "jucer_ProjectWizard_AudioPlugin.h"
+    #include "jucer_ProjectWizard_StaticLibrary.h"
+    #include "jucer_ProjectWizard_DLL.h"
+    #include "jucer_ProjectWizard_openGL.h"
+    #include "jucer_ProjectWizard_Animated.h"
+    #include "jucer_ProjectWizard_AudioApp.h"
 
     #include "jucer_NewProjectWizardComponent.h"
     #include "jucer_TemplateThumbnailsComponent.h"
     #include "jucer_StartPageComponent.h"
+
+    //==============================================================================
+    static int getNumWizards() noexcept
+    {
+        return 8;
+    }
+
+    static NewProjectWizard* createWizardType (int index)
+    {
+        switch (index)
+        {
+            case 0:     return new NewProjectWizardClasses::GUIAppWizard();
+            case 1:     return new NewProjectWizardClasses::OpenGLAppWizard();
+            case 2:     return new NewProjectWizardClasses::AnimatedAppWizard();
+            case 3:     return new NewProjectWizardClasses::AudioPluginAppWizard();
+            case 4:     return new NewProjectWizardClasses::AudioAppWizard();
+            case 5:     return new NewProjectWizardClasses::ConsoleAppWizard();
+            case 6:     return new NewProjectWizardClasses::StaticLibraryWizard();
+            case 7:     return new NewProjectWizardClasses::DynamicLibraryWizard();
+            default:    jassertfalse; break;
+        }
+
+        return nullptr;
+    }
+
+    static StringArray getWizardNames()
+    {
+        StringArray s;
+
+        for (int i = 0; i < getNumWizards(); ++i)
+        {
+            ScopedPointer<NewProjectWizard> wiz (createWizardType (i));
+            s.add (wiz->getName());
+        }
+
+        return s;
+    }
 };
 
 Component* createNewProjectWizardComponent()

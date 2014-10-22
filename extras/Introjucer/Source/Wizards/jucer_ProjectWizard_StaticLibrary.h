@@ -22,22 +22,19 @@
   ==============================================================================
 */
 
-#ifndef JUCER_DYNAMICLIBRARYWIZARD_H_INCLUDED
-#define JUCER_DYNAMICLIBRARYWIZARD_H_INCLUDED
 
-
-//==============================================================================
-struct DynamicLibraryWizard   : public NewProjectWizard
+struct StaticLibraryWizard   : public NewProjectWizard
 {
-    DynamicLibraryWizard()  {}
+    StaticLibraryWizard()  {}
 
-    String getName() override          { return TRANS("Dynamic Library"); }
-    String getDescription() override   { return TRANS("Creates a dynamic library"); }
+    String getName() const override         { return TRANS("Static Library"); }
+    String getDescription() const override  { return TRANS("Creates a static library."); }
+    const char* getIcon() const override    { return BinaryData::wizard_StaticLibrary_svg; }
 
     bool initialiseProject (Project& project) override
     {
         createSourceFolder();
-        project.getProjectTypeValue() = ProjectType::getDynamicLibTypeName();
+        project.getProjectTypeValue() = ProjectType::getStaticLibTypeName();
         createSourceGroup (project);
         setExecutableNameForAllTargets (project, File::createLegalFileName (appTitle));
 
@@ -45,5 +42,3 @@ struct DynamicLibraryWizard   : public NewProjectWizard
     }
 };
 
-
-#endif  // JUCER_DYNAMICLIBRARYWIZARD_H_INCLUDED

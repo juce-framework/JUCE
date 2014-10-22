@@ -7,8 +7,1194 @@
 namespace BinaryData
 {
 
-//================== projectIconAndroid.png ==================
+//================== AudioPluginXCodeScript.txt ==================
 static const unsigned char temp_binary_data_0[] =
+"\r\n"
+"# This script takes the build product and copies it to the AU, VST, VST3, RTAS and AAX folders, depending on \r\n"
+"# which plugin types you've built\r\n"
+"\r\n"
+"original=$CONFIGURATION_BUILD_DIR/$FULL_PRODUCT_NAME\r\n"
+"\r\n"
+"# this looks inside the binary to detect which platforms are needed.. \r\n"
+"copyAU=`nm -g \"$CONFIGURATION_BUILD_DIR/$EXECUTABLE_PATH\" | grep -i 'AudioUnit' | wc -l`\r\n"
+"copyVST=`nm -g \"$CONFIGURATION_BUILD_DIR/$EXECUTABLE_PATH\" | grep -i 'VSTPlugin' | wc -l`\r\n"
+"copyVST3=`nm -g \"$CONFIGURATION_BUILD_DIR/$EXECUTABLE_PATH\" | grep -i 'GetPluginFactory' | wc -l`\r\n"
+"copyRTAS=`nm -g \"$CONFIGURATION_BUILD_DIR/$EXECUTABLE_PATH\" | grep -i 'CProcess' | wc -l`\r\n"
+"copyAAX=`nm -g \"$CONFIGURATION_BUILD_DIR/$EXECUTABLE_PATH\" | grep -i 'ACFStartup' | wc -l`\r\n"
+"\r\n"
+"if [ $copyAU -gt 0 ]; then\r\n"
+"  echo \"Copying to AudioUnit folder...\"\r\n"
+"  AU=~/Library/Audio/Plug-Ins/Components/$PRODUCT_NAME.component\r\n"
+"  if [ -d \"$AU\" ]; then \r\n"
+"    rm -r \"$AU\"\r\n"
+"  fi\r\n"
+"\r\n"
+"  cp -r \"$original\" \"$AU\"\r\n"
+"  sed -i \"\" -e 's/TDMwPTul/BNDLPTul/g' \"$AU/Contents/PkgInfo\"\r\n"
+"  sed -i \"\" -e 's/TDMw/BNDL/g' \"$AU/Contents/$INFOPLIST_FILE\"\r\n"
+"\r\n"
+"  # Fix info.plist for AUs built with Xcode 3\r\n"
+"  if [ -f \"$DEVELOPER_DIR/Library/Developer/CoreAudio/AudioUnits/AUPublic/AUBase/AUPlugInDispatch.cpp\" ]; then\r\n"
+"    echo\r\n"
+"  else\r\n"
+"    echo \"Removing AudioComponents entry from Info.plist because this is not a new-format AU\"\r\n"
+"    /usr/libexec/PlistBuddy -c \"Delete AudioComponents\" \"$AU/Contents/Info.plist\"\r\n"
+"  fi\r\n"
+"fi\r\n"
+"\r\n"
+"if [ $copyVST -gt 0 ]; then\r\n"
+"  echo \"Copying to VST folder...\"\r\n"
+"  VST=~/Library/Audio/Plug-Ins/VST/$PRODUCT_NAME.vst\r\n"
+"  if [ -d \"$VST\" ]; then \r\n"
+"    rm -r \"$VST\"\r\n"
+"  fi\r\n"
+"\r\n"
+"  cp -r \"$original\" \"$VST\"\r\n"
+"  sed -i \"\" -e 's/TDMwPTul/BNDLPTul/g' \"$VST/Contents/PkgInfo\"\r\n"
+"  sed -i \"\" -e 's/TDMw/BNDL/g' \"$VST/Contents/$INFOPLIST_FILE\"\r\n"
+"fi\r\n"
+"\r\n"
+"if [ $copyVST3 -gt 0 ]; then\r\n"
+"  echo \"Copying to VST3 folder...\"\r\n"
+"  VST3=~/Library/Audio/Plug-Ins/VST3/$PRODUCT_NAME.vst3\r\n"
+"  if [ -d \"$VST3\" ]; then \r\n"
+"    rm -r \"$VST3\"\r\n"
+"  fi\r\n"
+"\r\n"
+"  cp -r \"$original\" \"$VST3\"\r\n"
+"  sed -i \"\" -e 's/TDMwPTul/BNDLPTul/g' \"$VST3/Contents/PkgInfo\"\r\n"
+"  sed -i \"\" -e 's/TDMw/BNDL/g' \"$VST3/Contents/$INFOPLIST_FILE\"\r\n"
+"fi\r\n"
+"\r\n"
+"if [ $copyRTAS -gt 0 ]; then\r\n"
+"  echo \"Copying to RTAS folder...\"\r\n"
+"  RTAS=/Library/Application\\ Support/Digidesign/Plug-Ins/$PRODUCT_NAME.dpm\r\n"
+"  if [ -d \"$RTAS\" ]; then\r\n"
+"    rm -r \"$RTAS\"\r\n"
+"  fi\r\n"
+"\r\n"
+"  cp -r \"$original\" \"$RTAS\"\r\n"
+"fi\r\n"
+"\r\n"
+"if [ $copyAAX -gt 0 ]; then\r\n"
+"  echo \"Copying to AAX folder...\"\r\n"
+"\r\n"
+"  if [ -d \"/Applications/ProTools_3PDev/Plug-Ins\" ]; then\r\n"
+"    AAX1=\"/Applications/ProTools_3PDev/Plug-Ins/$PRODUCT_NAME.aaxplugin\"\r\n"
+"\r\n"
+"    if [ -d \"$AAX1\" ]; then\r\n"
+"      rm -r \"$AAX1\"\r\n"
+"    fi\r\n"
+"\r\n"
+"    cp -r \"$original\" \"$AAX1\"\r\n"
+"  fi\r\n"
+"\r\n"
+"  if [ -d \"/Library/Application Support/Avid/Audio/Plug-Ins\" ]; then\r\n"
+"    AAX2=\"/Library/Application Support/Avid/Audio/Plug-Ins/$PRODUCT_NAME.aaxplugin\"\r\n"
+"\r\n"
+"    if [ -d \"$AAX2\" ]; then\r\n"
+"      rm -r \"$AAX2\"\r\n"
+"    fi\r\n"
+"\r\n"
+"    cp -r \"$original\" \"$AAX2\"\r\n"
+"  fi\r\n"
+"fi\r\n";
+
+const char* AudioPluginXCodeScript_txt = (const char*) temp_binary_data_0;
+
+//================== background_tile.png ==================
+static const unsigned char temp_binary_data_1[] =
+{ 137,80,78,71,13,10,26,10,0,0,0,13,73,72,68,82,0,0,0,7,0,0,0,7,8,6,0,0,0,196,82,87,211,0,0,0,94,73,68,65,84,120,218,85,141,73,14,0,33,8,4,253,137,226,18,19,245,234,255,127,70,75,155,232,56,135,10,132,94,112,33,4,37,222,123,205,57,107,74,105,239,196,137,
+8,72,239,29,99,12,204,57,209,90,227,237,19,45,113,161,209,12,234,172,18,49,70,88,229,134,34,103,173,245,159,60,134,82,10,238,79,166,223,106,238,91,100,229,73,191,80,92,47,179,68,223,148,158,98,226,0,0,0,0,73,69,78,68,174,66,96,130,0,0 };
+
+const char* background_tile_png = (const char*) temp_binary_data_1;
+
+//================== colourscheme_dark.xml ==================
+static const unsigned char temp_binary_data_2[] =
+"<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n"
+"\r\n"
+"<COLOUR_SCHEME font=\"&lt;Monospaced&gt;; 13.0\">\r\n"
+"  <COLOUR name=\"Main Window Bkgd\" colour=\"FF29292A\"/>\r\n"
+"  <COLOUR name=\"Treeview Highlight\" colour=\"2BFFFEC3\"/>\r\n"
+"  <COLOUR name=\"Code Background\" colour=\"FF222222\"/>\r\n"
+"  <COLOUR name=\"Line Number Bkgd\" colour=\"44C1C1C1\"/>\r\n"
+"  <COLOUR name=\"Line Numbers\" colour=\"E9B2B2B2\"/>\r\n"
+"  <COLOUR name=\"Plain Text\" colour=\"FFCECECE\"/>\r\n"
+"  <COLOUR name=\"Selected Text Bkgd\" colour=\"FF2859AC\"/>\r\n"
+"  <COLOUR name=\"Caret\" colour=\"FFFFFFFF\"/>\r\n"
+"  <COLOUR name=\"Preprocessor Text\" colour=\"FFF8F631\"/>\r\n"
+"  <COLOUR name=\"Punctuation\" colour=\"FFCFBEFF\"/>\r\n"
+"  <COLOUR name=\"Bracket\" colour=\"FF058202\"/>\r\n"
+"  <COLOUR name=\"String\" colour=\"FFBC45DD\"/>\r\n"
+"  <COLOUR name=\"Float\" colour=\"ff885500\"/>\r\n"
+"  <COLOUR name=\"Integer\" colour=\"FF42C8C4\"/>\r\n"
+"  <COLOUR name=\"Identifier\" colour=\"FFCFCFCF\"/>\r\n"
+"  <COLOUR name=\"Operator\" colour=\"FFC4EB19\"/>\r\n"
+"  <COLOUR name=\"Keyword\" colour=\"FFEE6F6F\"/>\r\n"
+"  <COLOUR name=\"Comment\" colour=\"FF72D20C\"/>\r\n"
+"  <COLOUR name=\"Error\" colour=\"FFE60000\"/>\r\n"
+"</COLOUR_SCHEME>\r\n";
+
+const char* colourscheme_dark_xml = (const char*) temp_binary_data_2;
+
+//================== colourscheme_light.xml ==================
+static const unsigned char temp_binary_data_3[] =
+"<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n"
+"\r\n"
+"<COLOUR_SCHEME font=\"&lt;Monospaced&gt;; 13.0\">\r\n"
+"  <COLOUR name=\"Main Window Bkgd\" colour=\"FFE6E7E9\"/>\r\n"
+"  <COLOUR name=\"Treeview Highlight\" colour=\"401111ee\"/>\r\n"
+"  <COLOUR name=\"Code Background\" colour=\"ffffffff\"/>\r\n"
+"  <COLOUR name=\"Line Number Bkgd\" colour=\"44999999\"/>\r\n"
+"  <COLOUR name=\"Line Numbers\" colour=\"44000000\"/>\r\n"
+"  <COLOUR name=\"Plain Text\" colour=\"ff000000\"/>\r\n"
+"  <COLOUR name=\"Selected Text Bkgd\" colour=\"401111ee\"/>\r\n"
+"  <COLOUR name=\"Caret\" colour=\"ff000000\"/>\r\n"
+"  <COLOUR name=\"Preprocessor Text\" colour=\"ff660000\"/>\r\n"
+"  <COLOUR name=\"Punctuation\" colour=\"ff004400\"/>\r\n"
+"  <COLOUR name=\"Bracket\" colour=\"ff000055\"/>\r\n"
+"  <COLOUR name=\"String\" colour=\"ff990099\"/>\r\n"
+"  <COLOUR name=\"Float\" colour=\"ff885500\"/>\r\n"
+"  <COLOUR name=\"Integer\" colour=\"ff880000\"/>\r\n"
+"  <COLOUR name=\"Identifier\" colour=\"ff000000\"/>\r\n"
+"  <COLOUR name=\"Operator\" colour=\"ff225500\"/>\r\n"
+"  <COLOUR name=\"Keyword\" colour=\"ff0000cc\"/>\r\n"
+"  <COLOUR name=\"Comment\" colour=\"ff00aa00\"/>\r\n"
+"  <COLOUR name=\"Error\" colour=\"ffcc0000\"/>\r\n"
+"</COLOUR_SCHEME>\r\n";
+
+const char* colourscheme_light_xml = (const char*) temp_binary_data_3;
+
+//================== jucer_AudioPluginEditorTemplate.cpp ==================
+static const unsigned char temp_binary_data_4[] =
+"/*\r\n"
+"  ==============================================================================\r\n"
+"\r\n"
+"    This file was auto-generated by the Introjucer!\r\n"
+"\r\n"
+"    It contains the basic framework code for a JUCE plugin editor.\r\n"
+"\r\n"
+"  ==============================================================================\r\n"
+"*/\r\n"
+"\r\n"
+"EDITORCPPHEADERS\r\n"
+"\r\n"
+"\r\n"
+"//==============================================================================\r\n"
+"EDITORCLASSNAME::EDITORCLASSNAME (FILTERCLASSNAME& p)\r\n"
+"    : AudioProcessorEditor (&p), processor (p)\r\n"
+"{\r\n"
+"    // Make sure that before the constructor has finished, you've set the\r\n"
+"    // editor's size to whatever you need it to be.\r\n"
+"    setSize (400, 300);\r\n"
+"}\r\n"
+"\r\n"
+"EDITORCLASSNAME::~EDITORCLASSNAME()\r\n"
+"{\r\n"
+"}\r\n"
+"\r\n"
+"//==============================================================================\r\n"
+"void EDITORCLASSNAME::paint (Graphics& g)\r\n"
+"{\r\n"
+"    g.fillAll (Colours::white);\r\n"
+"\r\n"
+"    g.setColour (Colours::black);\r\n"
+"    g.setFont (15.0f);\r\n"
+"    g.drawFittedText (\"Hello World!\", getLocalBounds(), Justification::centred, 1);\r\n"
+"}\r\n"
+"\r\n"
+"void EDITORCLASSNAME::resized()\r\n"
+"{\r\n"
+"    // This is generally where you'll want to lay out the positions of any\r\n"
+"    // subcomponents in your editor..\r\n"
+"}\r\n";
+
+const char* jucer_AudioPluginEditorTemplate_cpp = (const char*) temp_binary_data_4;
+
+//================== jucer_AudioPluginEditorTemplate.h ==================
+static const unsigned char temp_binary_data_5[] =
+"/*\r\n"
+"  ==============================================================================\r\n"
+"\r\n"
+"    This file was auto-generated by the Introjucer!\r\n"
+"\r\n"
+"    It contains the basic framework code for a JUCE plugin editor.\r\n"
+"\r\n"
+"  ==============================================================================\r\n"
+"*/\r\n"
+"\r\n"
+"#ifndef HEADERGUARD\r\n"
+"#define HEADERGUARD\r\n"
+"\r\n"
+"EDITORHEADERS\r\n"
+"\r\n"
+"\r\n"
+"//==============================================================================\r\n"
+"/**\r\n"
+"*/\r\n"
+"class EDITORCLASSNAME  : public AudioProcessorEditor\r\n"
+"{\r\n"
+"public:\r\n"
+"    EDITORCLASSNAME (FILTERCLASSNAME&);\r\n"
+"    ~EDITORCLASSNAME();\r\n"
+"\r\n"
+"    //==============================================================================\r\n"
+"    void paint (Graphics&) override;\r\n"
+"    void resized() override;\r\n"
+"\r\n"
+"private:\r\n"
+"    // This reference is provided as a quick way for your editor to\r\n"
+"    // access the processor object that created it.\r\n"
+"    FILTERCLASSNAME& processor;\r\n"
+"\r\n"
+"    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (EDITORCLASSNAME)\r\n"
+"};\r\n"
+"\r\n"
+"\r\n"
+"#endif  // HEADERGUARD\r\n";
+
+const char* jucer_AudioPluginEditorTemplate_h = (const char*) temp_binary_data_5;
+
+//================== jucer_AudioPluginFilterTemplate.cpp ==================
+static const unsigned char temp_binary_data_6[] =
+"/*\r\n"
+"  ==============================================================================\r\n"
+"\r\n"
+"    This file was auto-generated by the Introjucer!\r\n"
+"\r\n"
+"    It contains the basic framework code for a JUCE plugin processor.\r\n"
+"\r\n"
+"  ==============================================================================\r\n"
+"*/\r\n"
+"\r\n"
+"FILTERHEADERS\r\n"
+"\r\n"
+"\r\n"
+"//==============================================================================\r\n"
+"FILTERCLASSNAME::FILTERCLASSNAME()\r\n"
+"{\r\n"
+"}\r\n"
+"\r\n"
+"FILTERCLASSNAME::~FILTERCLASSNAME()\r\n"
+"{\r\n"
+"}\r\n"
+"\r\n"
+"//==============================================================================\r\n"
+"const String FILTERCLASSNAME::getName() const\r\n"
+"{\r\n"
+"    return JucePlugin_Name;\r\n"
+"}\r\n"
+"\r\n"
+"int FILTERCLASSNAME::getNumParameters()\r\n"
+"{\r\n"
+"    return 0;\r\n"
+"}\r\n"
+"\r\n"
+"float FILTERCLASSNAME::getParameter (int index)\r\n"
+"{\r\n"
+"    return 0.0f;\r\n"
+"}\r\n"
+"\r\n"
+"void FILTERCLASSNAME::setParameter (int index, float newValue)\r\n"
+"{\r\n"
+"}\r\n"
+"\r\n"
+"const String FILTERCLASSNAME::getParameterName (int index)\r\n"
+"{\r\n"
+"    return String();\r\n"
+"}\r\n"
+"\r\n"
+"const String FILTERCLASSNAME::getParameterText (int index)\r\n"
+"{\r\n"
+"    return String();\r\n"
+"}\r\n"
+"\r\n"
+"const String FILTERCLASSNAME::getInputChannelName (int channelIndex) const\r\n"
+"{\r\n"
+"    return String (channelIndex + 1);\r\n"
+"}\r\n"
+"\r\n"
+"const String FILTERCLASSNAME::getOutputChannelName (int channelIndex) const\r\n"
+"{\r\n"
+"    return String (channelIndex + 1);\r\n"
+"}\r\n"
+"\r\n"
+"bool FILTERCLASSNAME::isInputChannelStereoPair (int index) const\r\n"
+"{\r\n"
+"    return true;\r\n"
+"}\r\n"
+"\r\n"
+"bool FILTERCLASSNAME::isOutputChannelStereoPair (int index) const\r\n"
+"{\r\n"
+"    return true;\r\n"
+"}\r\n"
+"\r\n"
+"bool FILTERCLASSNAME::acceptsMidi() const\r\n"
+"{\r\n"
+"   #if JucePlugin_WantsMidiInput\r\n"
+"    return true;\r\n"
+"   #else\r\n"
+"    return false;\r\n"
+"   #endif\r\n"
+"}\r\n"
+"\r\n"
+"bool FILTERCLASSNAME::producesMidi() const\r\n"
+"{\r\n"
+"   #if JucePlugin_ProducesMidiOutput\r\n"
+"    return true;\r\n"
+"   #else\r\n"
+"    return false;\r\n"
+"   #endif\r\n"
+"}\r\n"
+"\r\n"
+"bool FILTERCLASSNAME::silenceInProducesSilenceOut() const\r\n"
+"{\r\n"
+"    return false;\r\n"
+"}\r\n"
+"\r\n"
+"double FILTERCLASSNAME::getTailLengthSeconds() const\r\n"
+"{\r\n"
+"    return 0.0;\r\n"
+"}\r\n"
+"\r\n"
+"int FILTERCLASSNAME::getNumPrograms()\r\n"
+"{\r\n"
+"    return 1;   // NB: some hosts don't cope very well if you tell them there are 0 programs,\r\n"
+"                // so this should be at least 1, even if you're not really implementing programs.\r\n"
+"}\r\n"
+"\r\n"
+"int FILTERCLASSNAME::getCurrentProgram()\r\n"
+"{\r\n"
+"    return 0;\r\n"
+"}\r\n"
+"\r\n"
+"void FILTERCLASSNAME::setCurrentProgram (int index)\r\n"
+"{\r\n"
+"}\r\n"
+"\r\n"
+"const String FILTERCLASSNAME::getProgramName (int index)\r\n"
+"{\r\n"
+"    return String();\r\n"
+"}\r\n"
+"\r\n"
+"void FILTERCLASSNAME::changeProgramName (int index, const String& newName)\r\n"
+"{\r\n"
+"}\r\n"
+"\r\n"
+"//==============================================================================\r\n"
+"void FILTERCLASSNAME::prepareToPlay (double sampleRate, int samplesPerBlock)\r\n"
+"{\r\n"
+"    // Use this method as the place to do any pre-playback\r\n"
+"    // initialisation that you need..\r\n"
+"}\r\n"
+"\r\n"
+"void FILTERCLASSNAME::releaseResources()\r\n"
+"{\r\n"
+"    // When playback stops, you can use this as an opportunity to free up any\r\n"
+"    // spare memory, etc.\r\n"
+"}\r\n"
+"\r\n"
+"void FILTERCLASSNAME::processBlock (AudioSampleBuffer& buffer, MidiBuffer& midiMessages)\r\n"
+"{\r\n"
+"    // In case we have more outputs than inputs, this code clears any output\r\n"
+"    // channels that didn't contain input data, (because these aren't\r\n"
+"    // guaranteed to be empty - they may contain garbage).\r\n"
+"    // I've added this to avoid people getting screaming feedback\r\n"
+"    // when they first compile the plugin, but obviously you don't need to\r\n"
+"    // this code if your algorithm already fills all the output channels.\r\n"
+"    for (int i = getNumInputChannels(); i < getNumOutputChannels(); ++i)\r\n"
+"        buffer.clear (i, 0, buffer.getNumSamples());\r\n"
+"\r\n"
+"    // This is the place where you'd normally do the guts of your plugin's\r\n"
+"    // audio processing...\r\n"
+"    for (int channel = 0; channel < getNumInputChannels(); ++channel)\r\n"
+"    {\r\n"
+"        float* channelData = buffer.getWritePointer (channel);\r\n"
+"\r\n"
+"        // ..do something to the data...\r\n"
+"    }\r\n"
+"}\r\n"
+"\r\n"
+"//==============================================================================\r\n"
+"bool FILTERCLASSNAME::hasEditor() const\r\n"
+"{\r\n"
+"    return true; // (change this to false if you choose to not supply an editor)\r\n"
+"}\r\n"
+"\r\n"
+"AudioProcessorEditor* FILTERCLASSNAME::createEditor()\r\n"
+"{\r\n"
+"    return new EDITORCLASSNAME (*this);\r\n"
+"}\r\n"
+"\r\n"
+"//==============================================================================\r\n"
+"void FILTERCLASSNAME::getStateInformation (MemoryBlock& destData)\r\n"
+"{\r\n"
+"    // You should use this method to store your parameters in the memory block.\r\n"
+"    // You could do that either as raw data, or use the XML or ValueTree classes\r\n"
+"    // as intermediaries to make it easy to save and load complex data.\r\n"
+"}\r\n"
+"\r\n"
+"void FILTERCLASSNAME::setStateInformation (const void* data, int sizeInBytes)\r\n"
+"{\r\n"
+"    // You should use this method to restore your parameters from this memory block,\r\n"
+"    // whose contents will have been created by the getStateInformation() call.\r\n"
+"}\r\n"
+"\r\n"
+"//==============================================================================\r\n"
+"// This creates new instances of the plugin..\r\n"
+"AudioProcessor* JUCE_CALLTYPE createPluginFilter()\r\n"
+"{\r\n"
+"    return new FILTERCLASSNAME();\r\n"
+"}\r\n";
+
+const char* jucer_AudioPluginFilterTemplate_cpp = (const char*) temp_binary_data_6;
+
+//================== jucer_AudioPluginFilterTemplate.h ==================
+static const unsigned char temp_binary_data_7[] =
+"/*\r\n"
+"  ==============================================================================\r\n"
+"\r\n"
+"    This file was auto-generated by the Introjucer!\r\n"
+"\r\n"
+"    It contains the basic framework code for a JUCE plugin processor.\r\n"
+"\r\n"
+"  ==============================================================================\r\n"
+"*/\r\n"
+"\r\n"
+"#ifndef HEADERGUARD\r\n"
+"#define HEADERGUARD\r\n"
+"\r\n"
+"APPHEADERS\r\n"
+"\r\n"
+"\r\n"
+"//==============================================================================\r\n"
+"/**\r\n"
+"*/\r\n"
+"class FILTERCLASSNAME  : public AudioProcessor\r\n"
+"{\r\n"
+"public:\r\n"
+"    //==============================================================================\r\n"
+"    FILTERCLASSNAME();\r\n"
+"    ~FILTERCLASSNAME();\r\n"
+"\r\n"
+"    //==============================================================================\r\n"
+"    void prepareToPlay (double sampleRate, int samplesPerBlock) override;\r\n"
+"    void releaseResources() override;\r\n"
+"\r\n"
+"    void processBlock (AudioSampleBuffer&, MidiBuffer&) override;\r\n"
+"\r\n"
+"    //==============================================================================\r\n"
+"    AudioProcessorEditor* createEditor() override;\r\n"
+"    bool hasEditor() const override;\r\n"
+"\r\n"
+"    //==============================================================================\r\n"
+"    const String getName() const override;\r\n"
+"\r\n"
+"    int getNumParameters() override;\r\n"
+"    float getParameter (int index) override;\r\n"
+"    void setParameter (int index, float newValue) override;\r\n"
+"\r\n"
+"    const String getParameterName (int index) override;\r\n"
+"    const String getParameterText (int index) override;\r\n"
+"\r\n"
+"    const String getInputChannelName (int channelIndex) const override;\r\n"
+"    const String getOutputChannelName (int channelIndex) const override;\r\n"
+"    bool isInputChannelStereoPair (int index) const override;\r\n"
+"    bool isOutputChannelStereoPair (int index) const override;\r\n"
+"\r\n"
+"    bool acceptsMidi() const override;\r\n"
+"    bool producesMidi() const override;\r\n"
+"    bool silenceInProducesSilenceOut() const override;\r\n"
+"    double getTailLengthSeconds() const override;\r\n"
+"\r\n"
+"    //==============================================================================\r\n"
+"    int getNumPrograms() override;\r\n"
+"    int getCurrentProgram() override;\r\n"
+"    void setCurrentProgram (int index) override;\r\n"
+"    const String getProgramName (int index) override;\r\n"
+"    void changeProgramName (int index, const String& newName) override;\r\n"
+"\r\n"
+"    //==============================================================================\r\n"
+"    void getStateInformation (MemoryBlock& destData) override;\r\n"
+"    void setStateInformation (const void* data, int sizeInBytes) override;\r\n"
+"\r\n"
+"private:\r\n"
+"    //==============================================================================\r\n"
+"    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FILTERCLASSNAME)\r\n"
+"};\r\n"
+"\r\n"
+"\r\n"
+"#endif  // HEADERGUARD\r\n";
+
+const char* jucer_AudioPluginFilterTemplate_h = (const char*) temp_binary_data_7;
+
+//================== jucer_ComponentTemplate.cpp ==================
+static const unsigned char temp_binary_data_8[] =
+"/*\r\n"
+"  ==============================================================================\r\n"
+"\r\n"
+"  This is an automatically generated GUI class created by the Introjucer!\r\n"
+"\r\n"
+"  Be careful when adding custom code to these files, as only the code within\r\n"
+"  the \"//[xyz]\" and \"//[/xyz]\" sections will be retained when the file is loaded\r\n"
+"  and re-saved.\r\n"
+"\r\n"
+"  Created with Introjucer version: %%version%%\r\n"
+"\r\n"
+"  ------------------------------------------------------------------------------\r\n"
+"\r\n"
+"  The Introjucer is part of the JUCE library - \"Jules' Utility Class Extensions\"\r\n"
+"  Copyright 2004-13 by Raw Material Software Ltd.\r\n"
+"\r\n"
+"  ==============================================================================\r\n"
+"*/\r\n"
+"\r\n"
+"//[Headers] You can add your own extra header files here...\r\n"
+"//[/Headers]\r\n"
+"\r\n"
+"%%includeFilesCPP%%\r\n"
+"\r\n"
+"//[MiscUserDefs] You can add your own user definitions and misc code here...\r\n"
+"//[/MiscUserDefs]\r\n"
+"\r\n"
+"//==============================================================================\r\n"
+"%%className%%::%%className%% (%%constructorParams%%)\r\n"
+"%%initialisers%%{\r\n"
+"    %%constructor%%\r\n"
+"\r\n"
+"    //[Constructor] You can add your own custom stuff here..\r\n"
+"    //[/Constructor]\r\n"
+"}\r\n"
+"\r\n"
+"%%className%%::~%%className%%()\r\n"
+"{\r\n"
+"    //[Destructor_pre]. You can add your own custom destruction code here..\r\n"
+"    //[/Destructor_pre]\r\n"
+"\r\n"
+"    %%destructor%%\r\n"
+"\r\n"
+"    //[Destructor]. You can add your own custom destruction code here..\r\n"
+"    //[/Destructor]\r\n"
+"}\r\n"
+"\r\n"
+"//==============================================================================\r\n"
+"%%methodDefinitions%%\r\n"
+"\r\n"
+"//[MiscUserCode] You can add your own definitions of your custom methods or any other code here...\r\n"
+"//[/MiscUserCode]\r\n"
+"\r\n"
+"\r\n"
+"//==============================================================================\r\n"
+"#if 0\r\n"
+"/*  -- Introjucer information section --\r\n"
+"\r\n"
+"    This is where the Introjucer stores the metadata that describe this GUI layout, so \r\n"
+"    make changes in here at your peril!\r\n"
+"\r\n"
+"BEGIN_JUCER_METADATA\r\n"
+"\r\n"
+"%%metadata%%\r\n"
+"END_JUCER_METADATA\r\n"
+"*/\r\n"
+"#endif\r\n"
+"\r\n"
+"%%staticMemberDefinitions%%\r\n"
+"//[EndFile] You can add extra defines here...\r\n"
+"//[/EndFile]";
+
+const char* jucer_ComponentTemplate_cpp = (const char*) temp_binary_data_8;
+
+//================== jucer_ComponentTemplate.h ==================
+static const unsigned char temp_binary_data_9[] =
+"/*\r\n"
+"  ==============================================================================\r\n"
+"\r\n"
+"  This is an automatically generated GUI class created by the Introjucer!\r\n"
+"\r\n"
+"  Be careful when adding custom code to these files, as only the code within\r\n"
+"  the \"//[xyz]\" and \"//[/xyz]\" sections will be retained when the file is loaded\r\n"
+"  and re-saved.\r\n"
+"\r\n"
+"  Created with Introjucer version: %%version%%\r\n"
+"\r\n"
+"  ------------------------------------------------------------------------------\r\n"
+"\r\n"
+"  The Introjucer is part of the JUCE library - \"Jules' Utility Class Extensions\"\r\n"
+"  Copyright 2004-13 by Raw Material Software Ltd.\r\n"
+"\r\n"
+"  ==============================================================================\r\n"
+"*/\r\n"
+"\r\n"
+"#ifndef %%headerGuard%%\r\n"
+"#define %%headerGuard%%\r\n"
+"\r\n"
+"//[Headers]     -- You can add your own extra header files here --\r\n"
+"#include \"JuceHeader.h\"\r\n"
+"//[/Headers]\r\n"
+"\r\n"
+"%%includeFilesH%%\r\n"
+"\r\n"
+"//==============================================================================\r\n"
+"/**\r\n"
+"                                                                    //[Comments]\r\n"
+"    An auto-generated component, created by the Introjucer.\r\n"
+"\r\n"
+"    Describe your class and how it works here!\r\n"
+"                                                                    //[/Comments]\r\n"
+"*/\r\n"
+"%%classDeclaration%%\r\n"
+"{\r\n"
+"public:\r\n"
+"    //==============================================================================\r\n"
+"    %%className%% (%%constructorParams%%);\r\n"
+"    ~%%className%%();\r\n"
+"\r\n"
+"    //==============================================================================\r\n"
+"    //[UserMethods]     -- You can add your own custom methods in this section.\r\n"
+"    //[/UserMethods]\r\n"
+"\r\n"
+"    %%publicMemberDeclarations%%\r\n"
+"\r\n"
+"private:\r\n"
+"    //[UserVariables]   -- You can add your own custom variables in this section.\r\n"
+"    //[/UserVariables]\r\n"
+"\r\n"
+"    //==============================================================================\r\n"
+"    %%privateMemberDeclarations%%\r\n"
+"\r\n"
+"    //==============================================================================\r\n"
+"    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (%%className%%)\r\n"
+"};\r\n"
+"\r\n"
+"//[EndFile] You can add extra defines here...\r\n"
+"//[/EndFile]\r\n"
+"\r\n"
+"#endif   // %%headerGuard%%";
+
+const char* jucer_ComponentTemplate_h = (const char*) temp_binary_data_9;
+
+//================== jucer_ContentCompTemplate.cpp ==================
+static const unsigned char temp_binary_data_10[] =
+"/*\r\n"
+"  ==============================================================================\r\n"
+"\r\n"
+"    This file was auto-generated!\r\n"
+"\r\n"
+"  ==============================================================================\r\n"
+"*/\r\n"
+"\r\n"
+"INCLUDE_CORRESPONDING_HEADER\r\n"
+"\r\n"
+"\r\n"
+"//==============================================================================\r\n"
+"CONTENTCOMPCLASS::CONTENTCOMPCLASS()\r\n"
+"{\r\n"
+"    setSize (500, 400);\r\n"
+"}\r\n"
+"\r\n"
+"CONTENTCOMPCLASS::~CONTENTCOMPCLASS()\r\n"
+"{\r\n"
+"}\r\n"
+"\r\n"
+"void CONTENTCOMPCLASS::paint (Graphics& g)\r\n"
+"{\r\n"
+"    g.fillAll (Colour (0xffeeddff));\r\n"
+"\r\n"
+"    g.setFont (Font (16.0f));\r\n"
+"    g.setColour (Colours::black);\r\n"
+"    g.drawText (\"Hello World!\", getLocalBounds(), Justification::centred, true);\r\n"
+"}\r\n"
+"\r\n"
+"void CONTENTCOMPCLASS::resized()\r\n"
+"{\r\n"
+"    // This is called when the CONTENTCOMPCLASS is resized.\r\n"
+"    // If you add any child components, this is where you should\r\n"
+"    // update their positions.\r\n"
+"}\r\n";
+
+const char* jucer_ContentCompTemplate_cpp = (const char*) temp_binary_data_10;
+
+//================== jucer_ContentCompTemplate.h ==================
+static const unsigned char temp_binary_data_11[] =
+"/*\r\n"
+"  ==============================================================================\r\n"
+"\r\n"
+"    This file was auto-generated!\r\n"
+"\r\n"
+"  ==============================================================================\r\n"
+"*/\r\n"
+"\r\n"
+"#ifndef HEADERGUARD\r\n"
+"#define HEADERGUARD\r\n"
+"\r\n"
+"INCLUDE_JUCE\r\n"
+"\r\n"
+"\r\n"
+"//==============================================================================\r\n"
+"/*\r\n"
+"    This component lives inside our window, and this is where you should put all\r\n"
+"    your controls and content.\r\n"
+"*/\r\n"
+"class CONTENTCOMPCLASS   : public Component\r\n"
+"{\r\n"
+"public:\r\n"
+"    //==============================================================================\r\n"
+"    CONTENTCOMPCLASS();\r\n"
+"    ~CONTENTCOMPCLASS();\r\n"
+"\r\n"
+"    void paint (Graphics&);\r\n"
+"    void resized();\r\n"
+"\r\n"
+"private:\r\n"
+"    //==============================================================================\r\n"
+"    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CONTENTCOMPCLASS)\r\n"
+"};\r\n"
+"\r\n"
+"\r\n"
+"#endif  // HEADERGUARD\r\n";
+
+const char* jucer_ContentCompTemplate_h = (const char*) temp_binary_data_11;
+
+//================== jucer_InlineComponentTemplate.h ==================
+static const unsigned char temp_binary_data_12[] =
+"//==============================================================================\r\n"
+"class COMPONENTCLASS    : public Component\r\n"
+"{\r\n"
+"public:\r\n"
+"    COMPONENTCLASS()\r\n"
+"    {\r\n"
+"        // In your constructor, you should add any child components, and\r\n"
+"        // initialise any special settings that your component needs.\r\n"
+"\r\n"
+"    }\r\n"
+"\r\n"
+"    ~COMPONENTCLASS()\r\n"
+"    {\r\n"
+"    }\r\n"
+"\r\n"
+"    void paint (Graphics& g)\r\n"
+"    {\r\n"
+"        // You should replace everything in this method with your own drawing code..\r\n"
+"\r\n"
+"        g.fillAll (Colours::white);   // clear the background\r\n"
+"\r\n"
+"        g.setColour (Colours::grey);\r\n"
+"        g.drawRect (getLocalBounds(), 1);   // draw an outline around the component\r\n"
+"\r\n"
+"        g.setColour (Colours::lightblue);\r\n"
+"        g.setFont (14.0f);\r\n"
+"        g.drawText (\"COMPONENTCLASS\", getLocalBounds(),\r\n"
+"                    Justification::centred, true);   // draw some placeholder text\r\n"
+"    }\r\n"
+"\r\n"
+"    void resized()\r\n"
+"    {\r\n"
+"        // This method is where you should set the bounds of any child\r\n"
+"        // components that your component contains..\r\n"
+"\r\n"
+"    }\r\n"
+"\r\n"
+"private:\r\n"
+"    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (COMPONENTCLASS)\r\n"
+"};\r\n";
+
+const char* jucer_InlineComponentTemplate_h = (const char*) temp_binary_data_12;
+
+//================== jucer_MainConsoleAppTemplate.cpp ==================
+static const unsigned char temp_binary_data_13[] =
+"/*\r\n"
+"  ==============================================================================\r\n"
+"\r\n"
+"    This file was auto-generated!\r\n"
+"\r\n"
+"    It contains the basic startup code for a Juce application.\r\n"
+"\r\n"
+"  ==============================================================================\r\n"
+"*/\r\n"
+"\r\n"
+"APPHEADERS\r\n"
+"\r\n"
+"\r\n"
+"//==============================================================================\r\n"
+"int main (int argc, char* argv[])\r\n"
+"{\r\n"
+"\r\n"
+"    // ..your code goes here!\r\n"
+"\r\n"
+"\r\n"
+"    return 0;\r\n"
+"}\r\n";
+
+const char* jucer_MainConsoleAppTemplate_cpp = (const char*) temp_binary_data_13;
+
+//================== jucer_MainTemplate_NoWindow.cpp ==================
+static const unsigned char temp_binary_data_14[] =
+"/*\r\n"
+"  ==============================================================================\r\n"
+"\r\n"
+"    This file was auto-generated by the Introjucer!\r\n"
+"\r\n"
+"    It contains the basic startup code for a Juce application.\r\n"
+"\r\n"
+"  ==============================================================================\r\n"
+"*/\r\n"
+"\r\n"
+"APPHEADERS\r\n"
+"\r\n"
+"\r\n"
+"//==============================================================================\r\n"
+"class APPCLASSNAME  : public JUCEApplication\r\n"
+"{\r\n"
+"public:\r\n"
+"    //==============================================================================\r\n"
+"    APPCLASSNAME() {}\r\n"
+"\r\n"
+"    const String getApplicationName() override       { return ProjectInfo::projectName; }\r\n"
+"    const String getApplicationVersion() override    { return ProjectInfo::versionString; }\r\n"
+"    bool moreThanOneInstanceAllowed() override       { return ALLOWMORETHANONEINSTANCE; }\r\n"
+"\r\n"
+"    //==============================================================================\r\n"
+"    void initialise (const String& commandLine) override\r\n"
+"    {\r\n"
+"        // Add your application's initialisation code here..\r\n"
+"    }\r\n"
+"\r\n"
+"    void shutdown() override\r\n"
+"    {\r\n"
+"        // Add your application's shutdown code here..\r\n"
+"    }\r\n"
+"\r\n"
+"    //==============================================================================\r\n"
+"    void systemRequestedQuit() override\r\n"
+"    {\r\n"
+"        // This is called when the app is being asked to quit: you can ignore this\r\n"
+"        // request and let the app carry on running, or call quit() to allow the app to close.\r\n"
+"        quit();\r\n"
+"    }\r\n"
+"\r\n"
+"    void anotherInstanceStarted (const String& commandLine) override\r\n"
+"    {\r\n"
+"        // When another instance of the app is launched while this one is running,\r\n"
+"        // this method is invoked, and the commandLine parameter tells you what\r\n"
+"        // the other instance's command-line arguments were.\r\n"
+"    }\r\n"
+"};\r\n"
+"\r\n"
+"//==============================================================================\r\n"
+"// This macro generates the main() routine that launches the app.\r\n"
+"START_JUCE_APPLICATION (APPCLASSNAME)\r\n";
+
+const char* jucer_MainTemplate_NoWindow_cpp = (const char*) temp_binary_data_14;
+
+//================== jucer_MainTemplate_Window.cpp ==================
+static const unsigned char temp_binary_data_15[] =
+"/*\r\n"
+"  ==============================================================================\r\n"
+"\r\n"
+"    This file was auto-generated by the Introjucer!\r\n"
+"\r\n"
+"    It contains the basic startup code for a Juce application.\r\n"
+"\r\n"
+"  ==============================================================================\r\n"
+"*/\r\n"
+"\r\n"
+"APPHEADERS\r\n"
+"\r\n"
+"\r\n"
+"//==============================================================================\r\n"
+"class APPCLASSNAME  : public JUCEApplication\r\n"
+"{\r\n"
+"public:\r\n"
+"    //==============================================================================\r\n"
+"    APPCLASSNAME() {}\r\n"
+"\r\n"
+"    const String getApplicationName() override       { return ProjectInfo::projectName; }\r\n"
+"    const String getApplicationVersion() override    { return ProjectInfo::versionString; }\r\n"
+"    bool moreThanOneInstanceAllowed() override       { return ALLOWMORETHANONEINSTANCE; }\r\n"
+"\r\n"
+"    //==============================================================================\r\n"
+"    void initialise (const String& commandLine) override\r\n"
+"    {\r\n"
+"        // This method is where you should put your application's initialisation code..\r\n"
+"\r\n"
+"        mainWindow = new MainWindow (getApplicationName());\r\n"
+"    }\r\n"
+"\r\n"
+"    void shutdown() override\r\n"
+"    {\r\n"
+"        // Add your application's shutdown code here..\r\n"
+"\r\n"
+"        mainWindow = nullptr; // (deletes our window)\r\n"
+"    }\r\n"
+"\r\n"
+"    //==============================================================================\r\n"
+"    void systemRequestedQuit() override\r\n"
+"    {\r\n"
+"        // This is called when the app is being asked to quit: you can ignore this\r\n"
+"        // request and let the app carry on running, or call quit() to allow the app to close.\r\n"
+"        quit();\r\n"
+"    }\r\n"
+"\r\n"
+"    void anotherInstanceStarted (const String& commandLine) override\r\n"
+"    {\r\n"
+"        // When another instance of the app is launched while this one is running,\r\n"
+"        // this method is invoked, and the commandLine parameter tells you what\r\n"
+"        // the other instance's command-line arguments were.\r\n"
+"    }\r\n"
+"\r\n"
+"    //==============================================================================\r\n"
+"    /*\r\n"
+"        This class implements the desktop window that contains an instance of\r\n"
+"        our CONTENTCOMPCLASS class.\r\n"
+"    */\r\n"
+"    class MainWindow    : public DocumentWindow\r\n"
+"    {\r\n"
+"    public:\r\n"
+"        MainWindow (String name)  : DocumentWindow (name,\r\n"
+"                                                    Colours::lightgrey,\r\n"
+"                                                    DocumentWindow::allButtons)\r\n"
+"        {\r\n"
+"            setUsingNativeTitleBar (true);\r\n"
+"            setContentOwned (new CONTENTCOMPCLASS(), true);\r\n"
+"\r\n"
+"            centreWithSize (getWidth(), getHeight());\r\n"
+"            setVisible (true);\r\n"
+"        }\r\n"
+"\r\n"
+"        void closeButtonPressed() override\r\n"
+"        {\r\n"
+"            // This is called when the user tries to close this window. Here, we'll just\r\n"
+"            // ask the app to quit when this happens, but you can change this to do\r\n"
+"            // whatever you need.\r\n"
+"            JUCEApplication::getInstance()->systemRequestedQuit();\r\n"
+"        }\r\n"
+"\r\n"
+"        /* Note: Be careful if you override any DocumentWindow methods - the base\r\n"
+"           class uses a lot of them, so by overriding you might break its functionality.\r\n"
+"           It's best to do all your work in your content component instead, but if\r\n"
+"           you really have to override any DocumentWindow methods, make sure your\r\n"
+"           subclass also calls the superclass's method.\r\n"
+"        */\r\n"
+"\r\n"
+"    private:\r\n"
+"        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainWindow)\r\n"
+"    };\r\n"
+"\r\n"
+"private:\r\n"
+"    ScopedPointer<MainWindow> mainWindow;\r\n"
+"};\r\n"
+"\r\n"
+"//==============================================================================\r\n"
+"// This macro generates the main() routine that launches the app.\r\n"
+"START_JUCE_APPLICATION (APPCLASSNAME)\r\n";
+
+const char* jucer_MainTemplate_Window_cpp = (const char*) temp_binary_data_15;
+
+//================== jucer_NewComponentTemplate.cpp ==================
+static const unsigned char temp_binary_data_16[] =
+"/*\r\n"
+"  ==============================================================================\r\n"
+"\r\n"
+"    FILENAME\r\n"
+"    Created: DATE\r\n"
+"    Author:  AUTHOR\r\n"
+"\r\n"
+"  ==============================================================================\r\n"
+"*/\r\n"
+"\r\n"
+"INCLUDE_JUCE\r\n"
+"INCLUDE_CORRESPONDING_HEADER\r\n"
+"\r\n"
+"//==============================================================================\r\n"
+"COMPONENTCLASS::COMPONENTCLASS()\r\n"
+"{\r\n"
+"    // In your constructor, you should add any child components, and\r\n"
+"    // initialise any special settings that your component needs.\r\n"
+"\r\n"
+"}\r\n"
+"\r\n"
+"COMPONENTCLASS::~COMPONENTCLASS()\r\n"
+"{\r\n"
+"}\r\n"
+"\r\n"
+"void COMPONENTCLASS::paint (Graphics& g)\r\n"
+"{\r\n"
+"    /* This demo code just fills the component's background and\r\n"
+"       draws some placeholder text to get you started.\r\n"
+"\r\n"
+"       You should replace everything in this method with your own\r\n"
+"       drawing code..\r\n"
+"    */\r\n"
+"\r\n"
+"    g.fillAll (Colours::white);   // clear the background\r\n"
+"\r\n"
+"    g.setColour (Colours::grey);\r\n"
+"    g.drawRect (getLocalBounds(), 1);   // draw an outline around the component\r\n"
+"\r\n"
+"    g.setColour (Colours::lightblue);\r\n"
+"    g.setFont (14.0f);\r\n"
+"    g.drawText (\"COMPONENTCLASS\", getLocalBounds(),\r\n"
+"                Justification::centred, true);   // draw some placeholder text\r\n"
+"}\r\n"
+"\r\n"
+"void COMPONENTCLASS::resized()\r\n"
+"{\r\n"
+"    // This method is where you should set the bounds of any child\r\n"
+"    // components that your component contains..\r\n"
+"\r\n"
+"}\r\n";
+
+const char* jucer_NewComponentTemplate_cpp = (const char*) temp_binary_data_16;
+
+//================== jucer_NewComponentTemplate.h ==================
+static const unsigned char temp_binary_data_17[] =
+"/*\r\n"
+"  ==============================================================================\r\n"
+"\r\n"
+"    FILENAME\r\n"
+"    Created: DATE\r\n"
+"    Author:  AUTHOR\r\n"
+"\r\n"
+"  ==============================================================================\r\n"
+"*/\r\n"
+"\r\n"
+"#ifndef HEADERGUARD\r\n"
+"#define HEADERGUARD\r\n"
+"\r\n"
+"INCLUDE_JUCE\r\n"
+"\r\n"
+"//==============================================================================\r\n"
+"/*\r\n"
+"*/\r\n"
+"class COMPONENTCLASS    : public Component\r\n"
+"{\r\n"
+"public:\r\n"
+"    COMPONENTCLASS();\r\n"
+"    ~COMPONENTCLASS();\r\n"
+"\r\n"
+"    void paint (Graphics&);\r\n"
+"    void resized();\r\n"
+"\r\n"
+"private:\r\n"
+"    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (COMPONENTCLASS)\r\n"
+"};\r\n"
+"\r\n"
+"\r\n"
+"#endif  // HEADERGUARD\r\n";
+
+const char* jucer_NewComponentTemplate_h = (const char*) temp_binary_data_17;
+
+//================== jucer_NewCppFileTemplate.cpp ==================
+static const unsigned char temp_binary_data_18[] =
+"/*\r\n"
+"  ==============================================================================\r\n"
+"\r\n"
+"    FILENAME\r\n"
+"    Created: DATE\r\n"
+"    Author:  AUTHOR\r\n"
+"\r\n"
+"  ==============================================================================\r\n"
+"*/\r\n"
+"\r\n"
+"INCLUDE_CORRESPONDING_HEADER\r\n";
+
+const char* jucer_NewCppFileTemplate_cpp = (const char*) temp_binary_data_18;
+
+//================== jucer_NewCppFileTemplate.h ==================
+static const unsigned char temp_binary_data_19[] =
+"/*\r\n"
+"  ==============================================================================\r\n"
+"\r\n"
+"    FILENAME\r\n"
+"    Created: DATE\r\n"
+"    Author:  AUTHOR\r\n"
+"\r\n"
+"  ==============================================================================\r\n"
+"*/\r\n"
+"\r\n"
+"#ifndef HEADERGUARD\r\n"
+"#define HEADERGUARD\r\n"
+"\r\n"
+"\r\n"
+"\r\n"
+"\r\n"
+"\r\n"
+"#endif  // HEADERGUARD\r\n";
+
+const char* jucer_NewCppFileTemplate_h = (const char*) temp_binary_data_19;
+
+//================== jucer_NewInlineComponentTemplate.h ==================
+static const unsigned char temp_binary_data_20[] =
+"/*\r\n"
+"  ==============================================================================\r\n"
+"\r\n"
+"    FILENAME\r\n"
+"    Created: DATE\r\n"
+"    Author:  AUTHOR\r\n"
+"\r\n"
+"  ==============================================================================\r\n"
+"*/\r\n"
+"\r\n"
+"#ifndef HEADERGUARD\r\n"
+"#define HEADERGUARD\r\n"
+"\r\n"
+"INCLUDE_JUCE\r\n"
+"\r\n"
+"//==============================================================================\r\n"
+"/*\r\n"
+"*/\r\n"
+"class COMPONENTCLASS    : public Component\r\n"
+"{\r\n"
+"public:\r\n"
+"    COMPONENTCLASS()\r\n"
+"    {\r\n"
+"        // In your constructor, you should add any child components, and\r\n"
+"        // initialise any special settings that your component needs.\r\n"
+"\r\n"
+"    }\r\n"
+"\r\n"
+"    ~COMPONENTCLASS()\r\n"
+"    {\r\n"
+"    }\r\n"
+"\r\n"
+"    void paint (Graphics& g)\r\n"
+"    {\r\n"
+"        /* This demo code just fills the component's background and\r\n"
+"           draws some placeholder text to get you started.\r\n"
+"\r\n"
+"           You should replace everything in this method with your own\r\n"
+"           drawing code..\r\n"
+"        */\r\n"
+"\r\n"
+"        g.fillAll (Colours::white);   // clear the background\r\n"
+"\r\n"
+"        g.setColour (Colours::grey);\r\n"
+"        g.drawRect (getLocalBounds(), 1);   // draw an outline around the component\r\n"
+"\r\n"
+"        g.setColour (Colours::lightblue);\r\n"
+"        g.setFont (14.0f);\r\n"
+"        g.drawText (\"COMPONENTCLASS\", getLocalBounds(),\r\n"
+"                    Justification::centred, true);   // draw some placeholder text\r\n"
+"    }\r\n"
+"\r\n"
+"    void resized()\r\n"
+"    {\r\n"
+"        // This method is where you should set the bounds of any child\r\n"
+"        // components that your component contains..\r\n"
+"\r\n"
+"    }\r\n"
+"\r\n"
+"private:\r\n"
+"    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (COMPONENTCLASS)\r\n"
+"};\r\n"
+"\r\n"
+"\r\n"
+"#endif  // HEADERGUARD\r\n";
+
+const char* jucer_NewInlineComponentTemplate_h = (const char*) temp_binary_data_20;
+
+//================== projectIconAndroid.png ==================
+static const unsigned char temp_binary_data_21[] =
 { 137,80,78,71,13,10,26,10,0,0,0,13,73,72,68,82,0,0,0,128,0,0,0,128,8,6,0,0,0,195,62,97,203,0,0,0,25,116,69,88,116,83,111,102,116,119,97,114,101,0,65,100,111,98,101,32,73,109,97,103,101,82,101,97,100,121,113,201,101,60,0,0,3,134,105,84,88,116,88,77,76,
 58,99,111,109,46,97,100,111,98,101,46,120,109,112,0,0,0,0,0,60,63,120,112,97,99,107,101,116,32,98,101,103,105,110,61,34,239,187,191,34,32,105,100,61,34,87,53,77,48,77,112,67,101,104,105,72,122,114,101,83,122,78,84,99,122,107,99,57,100,34,63,62,32,60,
 120,58,120,109,112,109,101,116,97,32,120,109,108,110,115,58,120,61,34,97,100,111,98,101,58,110,115,58,109,101,116,97,47,34,32,120,58,120,109,112,116,107,61,34,65,100,111,98,101,32,88,77,80,32,67,111,114,101,32,53,46,54,45,99,48,49,52,32,55,57,46,49,53,
@@ -125,10 +1311,10 @@ static const unsigned char temp_binary_data_0[] =
 139,240,165,4,64,57,166,132,157,54,246,220,165,230,39,27,156,211,4,232,176,247,44,193,125,203,174,137,229,132,198,114,231,150,74,124,238,9,19,9,244,154,7,0,175,121,0,240,154,7,0,175,121,0,240,154,7,0,175,121,0,240,154,7,0,175,189,235,246,255,2,12,0,158,
 137,39,54,252,6,9,64,0,0,0,0,73,69,78,68,174,66,96,130,0,0 };
 
-const char* projectIconAndroid_png = (const char*) temp_binary_data_0;
+const char* projectIconAndroid_png = (const char*) temp_binary_data_21;
 
 //================== projectIconCodeblocks.png ==================
-static const unsigned char temp_binary_data_1[] =
+static const unsigned char temp_binary_data_22[] =
 { 137,80,78,71,13,10,26,10,0,0,0,13,73,72,68,82,0,0,0,128,0,0,0,128,8,6,0,0,0,195,62,97,203,0,0,0,25,116,69,88,116,83,111,102,116,119,97,114,101,0,65,100,111,98,101,32,73,109,97,103,101,82,101,97,100,121,113,201,101,60,0,0,3,134,105,84,88,116,88,77,76,
 58,99,111,109,46,97,100,111,98,101,46,120,109,112,0,0,0,0,0,60,63,120,112,97,99,107,101,116,32,98,101,103,105,110,61,34,239,187,191,34,32,105,100,61,34,87,53,77,48,77,112,67,101,104,105,72,122,114,101,83,122,78,84,99,122,107,99,57,100,34,63,62,32,60,
 120,58,120,109,112,109,101,116,97,32,120,109,108,110,115,58,120,61,34,97,100,111,98,101,58,110,115,58,109,101,116,97,47,34,32,120,58,120,109,112,116,107,61,34,65,100,111,98,101,32,88,77,80,32,67,111,114,101,32,53,46,54,45,99,48,49,52,32,55,57,46,49,53,
@@ -298,10 +1484,10 @@ static const unsigned char temp_binary_data_1[] =
 202,84,15,91,2,120,13,161,41,237,191,111,130,252,4,17,176,224,208,111,140,253,56,221,147,207,16,11,238,233,234,37,192,250,248,241,59,248,122,10,214,12,176,62,214,12,176,62,214,12,176,62,214,12,176,62,214,12,176,62,214,12,176,62,214,12,176,62,214,12,176,
 62,214,12,176,62,214,12,176,62,214,12,176,62,214,12,176,62,214,12,176,62,214,12,176,62,126,28,143,255,39,192,0,238,147,31,89,162,25,31,21,0,0,0,0,73,69,78,68,174,66,96,130,0,0 };
 
-const char* projectIconCodeblocks_png = (const char*) temp_binary_data_1;
+const char* projectIconCodeblocks_png = (const char*) temp_binary_data_22;
 
 //================== projectIconLinuxMakefile.png ==================
-static const unsigned char temp_binary_data_2[] =
+static const unsigned char temp_binary_data_23[] =
 { 137,80,78,71,13,10,26,10,0,0,0,13,73,72,68,82,0,0,0,110,0,0,0,128,8,6,0,0,0,234,21,92,9,0,0,10,65,105,67,67,80,73,67,67,32,80,114,111,102,105,108,101,0,0,72,13,157,150,119,84,83,217,22,135,207,189,55,189,208,18,34,32,37,244,26,122,9,32,210,59,72,21,4,
 81,137,73,128,80,2,134,132,38,118,68,5,70,20,17,41,86,100,84,192,1,71,135,34,99,69,20,11,131,130,98,215,9,242,16,80,198,193,81,68,69,229,221,140,107,9,239,173,53,243,222,154,253,199,89,223,217,231,183,215,217,103,239,125,215,186,0,80,252,130,4,194,116,
 88,1,128,52,161,88,20,238,235,193,92,18,19,203,196,247,2,24,16,1,14,88,1,192,225,102,102,4,71,248,68,2,212,252,189,61,153,153,168,72,198,179,246,238,46,128,100,187,219,44,191,80,38,115,214,255,127,145,34,55,67,36,6,0,10,69,213,54,60,126,38,23,229,2,148,
@@ -537,10 +1723,10 @@ static const unsigned char temp_binary_data_2[] =
 194,72,142,254,249,31,79,111,60,173,241,241,124,82,34,189,246,233,251,163,179,223,129,178,15,181,97,103,68,217,251,253,17,198,63,35,254,218,150,109,129,235,236,183,141,63,16,97,60,125,157,93,199,211,219,217,245,128,211,250,223,12,238,70,210,82,169,25,
 10,0,0,0,0,73,69,78,68,174,66,96,130,0,0 };
 
-const char* projectIconLinuxMakefile_png = (const char*) temp_binary_data_2;
+const char* projectIconLinuxMakefile_png = (const char*) temp_binary_data_23;
 
 //================== projectIconVisualStudio05.png ==================
-static const unsigned char temp_binary_data_3[] =
+static const unsigned char temp_binary_data_24[] =
 { 137,80,78,71,13,10,26,10,0,0,0,13,73,72,68,82,0,0,0,128,0,0,0,128,8,6,0,0,0,195,62,97,203,0,0,0,25,116,69,88,116,83,111,102,116,119,97,114,101,0,65,100,111,98,101,32,73,109,97,103,101,82,101,97,100,121,113,201,101,60,0,0,3,134,105,84,88,116,88,77,76,
 58,99,111,109,46,97,100,111,98,101,46,120,109,112,0,0,0,0,0,60,63,120,112,97,99,107,101,116,32,98,101,103,105,110,61,34,239,187,191,34,32,105,100,61,34,87,53,77,48,77,112,67,101,104,105,72,122,114,101,83,122,78,84,99,122,107,99,57,100,34,63,62,32,60,
 120,58,120,109,112,109,101,116,97,32,120,109,108,110,115,58,120,61,34,97,100,111,98,101,58,110,115,58,109,101,116,97,47,34,32,120,58,120,109,112,116,107,61,34,65,100,111,98,101,32,88,77,80,32,67,111,114,101,32,53,46,54,45,99,48,49,52,32,55,57,46,49,53,
@@ -640,10 +1826,10 @@ static const unsigned char temp_binary_data_3[] =
 73,204,23,99,183,154,198,54,56,169,79,167,35,83,201,246,65,181,112,51,36,204,107,104,221,97,177,24,95,170,133,168,18,52,112,209,213,118,205,156,90,165,98,84,50,197,232,2,101,225,198,95,193,235,251,84,2,108,84,45,69,189,18,237,246,180,81,35,128,148,122,
 66,28,57,5,146,0,82,36,1,164,72,2,72,145,4,144,34,9,32,69,18,64,138,36,128,20,73,0,41,146,0,82,26,128,252,79,128,1,0,0,135,102,225,168,168,144,240,0,0,0,0,73,69,78,68,174,66,96,130,0,0 };
 
-const char* projectIconVisualStudio05_png = (const char*) temp_binary_data_3;
+const char* projectIconVisualStudio05_png = (const char*) temp_binary_data_24;
 
 //================== projectIconVisualStudio08.png ==================
-static const unsigned char temp_binary_data_4[] =
+static const unsigned char temp_binary_data_25[] =
 { 137,80,78,71,13,10,26,10,0,0,0,13,73,72,68,82,0,0,0,128,0,0,0,128,8,6,0,0,0,195,62,97,203,0,0,0,25,116,69,88,116,83,111,102,116,119,97,114,101,0,65,100,111,98,101,32,73,109,97,103,101,82,101,97,100,121,113,201,101,60,0,0,3,134,105,84,88,116,88,77,76,
 58,99,111,109,46,97,100,111,98,101,46,120,109,112,0,0,0,0,0,60,63,120,112,97,99,107,101,116,32,98,101,103,105,110,61,34,239,187,191,34,32,105,100,61,34,87,53,77,48,77,112,67,101,104,105,72,122,114,101,83,122,78,84,99,122,107,99,57,100,34,63,62,32,60,
 120,58,120,109,112,109,101,116,97,32,120,109,108,110,115,58,120,61,34,97,100,111,98,101,58,110,115,58,109,101,116,97,47,34,32,120,58,120,109,112,116,107,61,34,65,100,111,98,101,32,88,77,80,32,67,111,114,101,32,53,46,54,45,99,48,49,52,32,55,57,46,49,53,
@@ -745,10 +1931,10 @@ static const unsigned char temp_binary_data_4[] =
 56,165,102,130,123,32,176,112,227,171,226,245,189,10,0,182,42,150,162,65,17,181,170,213,103,165,85,35,167,105,52,110,210,202,83,32,1,32,73,2,64,146,4,128,36,9,0,73,18,0,146,36,0,36,73,0,72,146,0,144,36,1,32,169,17,208,255,11,48,0,11,74,131,33,163,168,
 64,251,0,0,0,0,73,69,78,68,174,66,96,130,0,0 };
 
-const char* projectIconVisualStudio08_png = (const char*) temp_binary_data_4;
+const char* projectIconVisualStudio08_png = (const char*) temp_binary_data_25;
 
 //================== projectIconVisualStudio10.png ==================
-static const unsigned char temp_binary_data_5[] =
+static const unsigned char temp_binary_data_26[] =
 { 137,80,78,71,13,10,26,10,0,0,0,13,73,72,68,82,0,0,0,128,0,0,0,128,8,6,0,0,0,195,62,97,203,0,0,0,25,116,69,88,116,83,111,102,116,119,97,114,101,0,65,100,111,98,101,32,73,109,97,103,101,82,101,97,100,121,113,201,101,60,0,0,3,148,105,84,88,116,88,77,76,
 58,99,111,109,46,97,100,111,98,101,46,120,109,112,0,0,0,0,0,60,63,120,112,97,99,107,101,116,32,98,101,103,105,110,61,34,239,187,191,34,32,105,100,61,34,87,53,77,48,77,112,67,101,104,105,72,122,114,101,83,122,78,84,99,122,107,99,57,100,34,63,62,32,60,
 120,58,120,109,112,109,101,116,97,32,120,109,108,110,115,58,120,61,34,97,100,111,98,101,58,110,115,58,109,101,116,97,47,34,32,120,58,120,109,112,116,107,61,34,65,100,111,98,101,32,88,77,80,32,67,111,114,101,32,53,46,54,45,99,48,49,52,32,55,57,46,49,53,
@@ -844,10 +2030,10 @@ static const unsigned char temp_binary_data_5[] =
 126,181,184,117,218,81,107,154,142,76,37,219,255,82,11,55,19,34,28,67,235,14,171,5,191,175,22,162,170,113,154,147,174,185,107,230,45,125,191,187,38,136,238,198,124,1,148,133,27,127,29,175,239,83,1,176,77,181,20,173,138,168,85,173,57,43,173,58,57,77,67,
 90,0,121,21,36,0,36,73,0,72,146,0,144,36,1,32,73,2,64,146,4,128,36,9,0,73,18,0,146,36,0,36,181,118,250,127,1,6,0,62,63,16,222,252,173,80,185,0,0,0,0,73,69,78,68,174,66,96,130,0,0 };
 
-const char* projectIconVisualStudio10_png = (const char*) temp_binary_data_5;
+const char* projectIconVisualStudio10_png = (const char*) temp_binary_data_26;
 
 //================== projectIconVisualStudio12.png ==================
-static const unsigned char temp_binary_data_6[] =
+static const unsigned char temp_binary_data_27[] =
 { 137,80,78,71,13,10,26,10,0,0,0,13,73,72,68,82,0,0,0,128,0,0,0,128,8,6,0,0,0,195,62,97,203,0,0,0,25,116,69,88,116,83,111,102,116,119,97,114,101,0,65,100,111,98,101,32,73,109,97,103,101,82,101,97,100,121,113,201,101,60,0,0,3,148,105,84,88,116,88,77,76,
 58,99,111,109,46,97,100,111,98,101,46,120,109,112,0,0,0,0,0,60,63,120,112,97,99,107,101,116,32,98,101,103,105,110,61,34,239,187,191,34,32,105,100,61,34,87,53,77,48,77,112,67,101,104,105,72,122,114,101,83,122,78,84,99,122,107,99,57,100,34,63,62,32,60,
 120,58,120,109,112,109,101,116,97,32,120,109,108,110,115,58,120,61,34,97,100,111,98,101,58,110,115,58,109,101,116,97,47,34,32,120,58,120,109,112,116,107,61,34,65,100,111,98,101,32,88,77,80,32,67,111,114,101,32,53,46,54,45,99,48,49,52,32,55,57,46,49,53,
@@ -942,10 +2128,10 @@ static const unsigned char temp_binary_data_6[] =
 124,144,215,208,190,195,90,193,31,43,133,168,74,180,112,82,53,118,207,188,41,239,117,119,22,106,45,248,119,240,109,220,184,107,121,125,151,2,128,31,20,75,17,83,68,173,106,141,217,105,85,201,105,26,45,155,212,114,9,36,0,36,73,0,72,146,0,144,36,1,32,73,
 2,64,146,4,128,36,9,0,73,18,0,146,36,0,36,181,0,250,127,1,6,0,186,116,150,177,255,33,3,190,0,0,0,0,73,69,78,68,174,66,96,130,0,0 };
 
-const char* projectIconVisualStudio12_png = (const char*) temp_binary_data_6;
+const char* projectIconVisualStudio12_png = (const char*) temp_binary_data_27;
 
 //================== projectIconVisualStudio13.png ==================
-static const unsigned char temp_binary_data_7[] =
+static const unsigned char temp_binary_data_28[] =
 { 137,80,78,71,13,10,26,10,0,0,0,13,73,72,68,82,0,0,0,128,0,0,0,128,8,6,0,0,0,195,62,97,203,0,0,0,25,116,69,88,116,83,111,102,116,119,97,114,101,0,65,100,111,98,101,32,73,109,97,103,101,82,101,97,100,121,113,201,101,60,0,0,3,148,105,84,88,116,88,77,76,
 58,99,111,109,46,97,100,111,98,101,46,120,109,112,0,0,0,0,0,60,63,120,112,97,99,107,101,116,32,98,101,103,105,110,61,34,239,187,191,34,32,105,100,61,34,87,53,77,48,77,112,67,101,104,105,72,122,114,101,83,122,78,84,99,122,107,99,57,100,34,63,62,32,60,
 120,58,120,109,112,109,101,116,97,32,120,109,108,110,115,58,120,61,34,97,100,111,98,101,58,110,115,58,109,101,116,97,47,34,32,120,58,120,109,112,116,107,61,34,65,100,111,98,101,32,88,77,80,32,67,111,114,101,32,53,46,54,45,99,48,49,52,32,55,57,46,49,53,
@@ -1041,10 +2227,10 @@ static const unsigned char temp_binary_data_7[] =
 6,175,167,170,217,22,181,38,177,92,240,1,181,184,117,209,81,93,154,142,76,37,219,255,86,11,55,67,34,188,134,246,29,86,8,94,172,22,162,202,112,145,147,166,182,123,230,212,42,149,160,212,64,112,39,40,27,55,190,74,94,223,171,2,224,39,213,82,212,41,10,222,
 158,54,110,0,144,84,71,128,35,151,64,2,64,146,4,128,36,9,0,73,18,0,146,36,0,36,73,0,72,146,0,144,36,1,32,73,2,64,210,69,64,255,17,96,0,83,68,210,44,174,238,131,143,0,0,0,0,73,69,78,68,174,66,96,130,0,0 };
 
-const char* projectIconVisualStudio13_png = (const char*) temp_binary_data_7;
+const char* projectIconVisualStudio13_png = (const char*) temp_binary_data_28;
 
 //================== projectIconXcode.png ==================
-static const unsigned char temp_binary_data_8[] =
+static const unsigned char temp_binary_data_29[] =
 { 137,80,78,71,13,10,26,10,0,0,0,13,73,72,68,82,0,0,0,128,0,0,0,128,8,6,0,0,0,195,62,97,203,0,0,0,25,116,69,88,116,83,111,102,116,119,97,114,101,0,65,100,111,98,101,32,73,109,97,103,101,82,101,97,100,121,113,201,101,60,0,0,3,40,105,84,88,116,88,77,76,58,
 99,111,109,46,97,100,111,98,101,46,120,109,112,0,0,0,0,0,60,63,120,112,97,99,107,101,116,32,98,101,103,105,110,61,34,239,187,191,34,32,105,100,61,34,87,53,77,48,77,112,67,101,104,105,72,122,114,101,83,122,78,84,99,122,107,99,57,100,34,63,62,32,60,120,
 58,120,109,112,109,101,116,97,32,120,109,108,110,115,58,120,61,34,97,100,111,98,101,58,110,115,58,109,101,116,97,47,34,32,120,58,120,109,112,116,107,61,34,65,100,111,98,101,32,88,77,80,32,67,111,114,101,32,53,46,54,45,99,48,49,52,32,55,57,46,49,53,54,
@@ -1304,10 +2490,10 @@ static const unsigned char temp_binary_data_8[] =
 94,156,0,232,23,120,134,102,179,249,235,17,128,9,19,38,192,59,223,249,206,152,182,172,169,75,67,169,119,178,110,237,223,246,242,196,143,188,48,28,50,88,157,63,127,254,175,124,82,161,71,186,231,200,203,63,99,234,231,229,216,252,127,248,207,255,19,96,0,
 221,83,18,25,240,8,112,38,0,0,0,0,73,69,78,68,174,66,96,130,0,0 };
 
-const char* projectIconXcode_png = (const char*) temp_binary_data_8;
+const char* projectIconXcode_png = (const char*) temp_binary_data_29;
 
 //================== projectIconXcodeIOS.png ==================
-static const unsigned char temp_binary_data_9[] =
+static const unsigned char temp_binary_data_30[] =
 { 137,80,78,71,13,10,26,10,0,0,0,13,73,72,68,82,0,0,0,128,0,0,0,128,8,6,0,0,0,195,62,97,203,0,0,0,25,116,69,88,116,83,111,102,116,119,97,114,101,0,65,100,111,98,101,32,73,109,97,103,101,82,101,97,100,121,113,201,101,60,0,0,3,134,105,84,88,116,88,77,76,
 58,99,111,109,46,97,100,111,98,101,46,120,109,112,0,0,0,0,0,60,63,120,112,97,99,107,101,116,32,98,101,103,105,110,61,34,239,187,191,34,32,105,100,61,34,87,53,77,48,77,112,67,101,104,105,72,122,114,101,83,122,78,84,99,122,107,99,57,100,34,63,62,32,60,
 120,58,120,109,112,109,101,116,97,32,120,109,108,110,115,58,120,61,34,97,100,111,98,101,58,110,115,58,109,101,116,97,47,34,32,120,58,120,109,112,116,107,61,34,65,100,111,98,101,32,88,77,80,32,67,111,114,101,32,53,46,54,45,99,48,49,52,32,55,57,46,49,53,
@@ -1565,23 +2751,50 @@ static const unsigned char temp_binary_data_9[] =
 4,97,9,162,191,203,0,199,198,0,162,157,87,213,105,220,35,12,64,131,146,62,249,201,79,186,117,103,130,86,133,76,84,14,16,185,67,123,223,37,252,241,103,134,146,206,234,228,201,147,143,250,164,172,171,29,174,239,254,252,101,253,188,235,155,255,31,255,249,
 255,2,12,0,235,154,52,248,249,240,115,28,0,0,0,0,73,69,78,68,174,66,96,130,0,0 };
 
-const char* projectIconXcodeIOS_png = (const char*) temp_binary_data_9;
+const char* projectIconXcodeIOS_png = (const char*) temp_binary_data_30;
 
-//================== iconOpenfile.svg ==================
-static const unsigned char temp_binary_data_10[] =
-"<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n"
-"<!-- Generator: Adobe Illustrator 18.0.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->\r\n"
-"<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">\r\n"
-"<svg version=\"1.1\" id=\"Layer_1\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" x=\"0px\" y=\"0px\"\r\n"
-"\t viewBox=\"0 0 177.9 114.8\" enable-background=\"new 0 0 177.9 114.8\" xml:space=\"preserve\">\r\n"
-"<path fill=\"none\" stroke=\"#F29100\" stroke-width=\"1.3469\" stroke-miterlimit=\"10\" d=\"M164.7,71.4H13.2c-3.8,0-6.9-3.1-6.9-6.9V43.6\r\n"
-"\tc0-3.8,3.1-6.9,6.9-6.9h151.5c3.8,0,6.9,3.1,6.9,6.9v20.9C171.6,68.3,168.5,71.4,164.7,71.4z\"/>\r\n"
-"</svg>\r\n";
+//================== RecentFilesMenuTemplate.nib ==================
+static const unsigned char temp_binary_data_31[] =
+{ 98,112,108,105,115,116,48,48,212,0,1,0,2,0,3,0,4,0,5,0,6,1,53,1,54,88,36,118,101,114,115,105,111,110,88,36,111,98,106,101,99,116,115,89,36,97,114,99,104,105,118,101,114,84,36,116,111,112,18,0,1,134,160,175,16,74,0,7,0,8,0,31,0,35,0,36,0,42,0,46,0,50,
+0,53,0,57,0,74,0,77,0,78,0,86,0,87,0,97,0,112,0,113,0,114,0,119,0,120,0,121,0,124,0,128,0,129,0,132,0,143,0,144,0,145,0,149,0,153,0,162,0,163,0,164,0,169,0,173,0,180,0,181,0,182,0,185,0,192,0,193,0,200,0,201,0,208,0,209,0,216,0,217,0,224,0,225,0,226,
+0,229,0,230,0,232,0,249,1,11,1,29,1,30,1,31,1,32,1,33,1,34,1,35,1,36,1,37,1,38,1,39,1,40,1,41,1,42,1,43,1,44,1,47,1,50,85,36,110,117,108,108,219,0,9,0,10,0,11,0,12,0,13,0,14,0,15,0,16,0,17,0,18,0,19,0,20,0,21,0,22,0,23,0,24,0,25,0,26,0,27,0,28,0,29,0,
+29,95,16,16,78,83,86,105,115,105,98,108,101,87,105,110,100,111,119,115,93,78,83,79,98,106,101,99,116,115,75,101,121,115,86,78,83,82,111,111,116,92,78,83,79,105,100,115,86,97,108,117,101,115,86,36,99,108,97,115,115,90,78,83,79,105,100,115,75,101,121,115,
+93,78,83,67,111,110,110,101,99,116,105,111,110,115,95,16,15,78,83,79,98,106,101,99,116,115,86,97,108,117,101,115,95,16,25,78,83,65,99,99,101,115,115,105,98,105,108,105,116,121,67,111,110,110,101,99,116,111,114,115,95,16,23,78,83,65,99,99,101,115,115,
+105,98,105,108,105,116,121,79,105,100,115,75,101,121,115,95,16,25,78,83,65,99,99,101,115,115,105,98,105,108,105,116,121,79,105,100,115,86,97,108,117,101,115,128,5,128,9,128,2,128,55,128,73,128,54,128,7,128,53,128,71,128,72,128,72,210,0,13,0,32,0,33,0,
+34,91,78,83,67,108,97,115,115,78,97,109,101,128,4,128,3,93,78,83,65,112,112,108,105,99,97,116,105,111,110,210,0,37,0,38,0,39,0,40,90,36,99,108,97,115,115,110,97,109,101,88,36,99,108,97,115,115,101,115,94,78,83,67,117,115,116,111,109,79,98,106,101,99,
+116,162,0,39,0,41,88,78,83,79,98,106,101,99,116,210,0,13,0,43,0,44,0,45,90,78,83,46,111,98,106,101,99,116,115,128,6,160,210,0,37,0,38,0,47,0,48,92,78,83,77,117,116,97,98,108,101,83,101,116,163,0,47,0,49,0,41,85,78,83,83,101,116,210,0,13,0,43,0,51,0,52,
+128,8,160,210,0,37,0,38,0,54,0,55,94,78,83,77,117,116,97,98,108,101,65,114,114,97,121,163,0,54,0,56,0,41,87,78,83,65,114,114,97,121,210,0,13,0,43,0,58,0,59,128,52,174,0,60,0,61,0,62,0,63,0,64,0,65,0,66,0,67,0,68,0,69,0,70,0,71,0,72,0,73,128,10,128,12,
+128,45,128,15,128,39,128,25,128,28,128,30,128,33,128,35,128,43,128,41,128,47,128,50,210,0,13,0,32,0,33,0,76,128,4,128,11,93,78,83,65,112,112,108,105,99,97,116,105,111,110,212,0,79,0,13,0,80,0,81,0,82,0,83,0,84,0,85,91,78,83,77,101,110,117,73,116,101,
+109,115,86,78,83,78,97,109,101,87,78,83,84,105,116,108,101,128,14,128,38,128,49,128,13,89,65,77,97,105,110,77,101,110,117,210,0,13,0,43,0,51,0,89,128,8,167,0,63,0,65,0,64,0,71,0,70,0,62,0,72,128,15,128,25,128,39,128,41,128,43,128,45,128,47,216,0,98,0,
+99,0,100,0,13,0,101,0,102,0,103,0,81,0,104,0,61,0,106,0,107,0,108,0,109,0,110,0,111,95,16,17,78,83,75,101,121,69,113,117,105,118,77,111,100,77,97,115,107,86,78,83,77,101,110,117,89,78,83,79,110,73,109,97,103,101,90,78,83,75,101,121,69,113,117,105,118,
+93,78,83,77,110,101,109,111,110,105,99,76,111,99,92,78,83,77,105,120,101,100,73,109,97,103,101,18,0,16,0,0,128,12,128,18,128,24,128,17,18,127,255,255,255,128,22,128,16,91,100,101,108,109,101,65,112,112,75,105,116,80,211,0,13,0,115,0,32,0,116,0,117,0,
+118,94,78,83,82,101,115,111,117,114,99,101,78,97,109,101,128,21,128,20,128,19,87,78,83,73,109,97,103,101,95,16,15,78,83,77,101,110,117,67,104,101,99,107,109,97,114,107,210,0,37,0,38,0,122,0,123,95,16,16,78,83,67,117,115,116,111,109,82,101,115,111,117,
+114,99,101,162,0,122,0,41,211,0,13,0,115,0,32,0,116,0,126,0,118,128,21,128,23,128,19,95,16,16,78,83,77,101,110,117,77,105,120,101,100,83,116,97,116,101,210,0,37,0,38,0,130,0,131,90,78,83,77,101,110,117,73,116,101,109,162,0,130,0,41,218,0,133,0,98,0,134,
+0,99,0,100,0,13,0,101,0,102,0,103,0,81,0,135,0,104,0,66,0,61,0,106,0,107,0,108,0,109,0,110,0,142,88,78,83,65,99,116,105,111,110,89,78,83,83,117,98,109,101,110,117,128,27,128,28,128,12,128,18,128,24,128,17,128,22,128,26,84,70,105,108,101,94,115,117,98,
+109,101,110,117,65,99,116,105,111,110,58,211,0,79,0,13,0,81,0,146,0,83,0,142,128,29,128,38,128,26,210,0,13,0,43,0,51,0,151,128,8,161,0,67,128,30,218,0,133,0,98,0,134,0,99,0,100,0,13,0,101,0,102,0,103,0,81,0,154,0,104,0,68,0,66,0,106,0,107,0,108,0,109,
+0,110,0,161,128,32,128,33,128,28,128,18,128,24,128,17,128,22,128,31,91,79,112,101,110,32,82,101,99,101,110,116,94,115,117,98,109,101,110,117,65,99,116,105,111,110,58,212,0,79,0,13,0,80,0,81,0,165,0,83,0,167,0,161,128,34,128,38,128,37,128,31,210,0,13,
+0,43,0,51,0,171,128,8,161,0,69,128,35,216,0,98,0,99,0,100,0,13,0,101,0,102,0,103,0,81,0,104,0,68,0,106,0,107,0,108,0,109,0,110,0,179,128,33,128,18,128,24,128,17,128,22,128,36,90,67,108,101,97,114,32,77,101,110,117,95,16,22,95,78,83,82,101,99,101,110,
+116,68,111,99,117,109,101,110,116,115,77,101,110,117,210,0,37,0,38,0,183,0,184,86,78,83,77,101,110,117,162,0,183,0,41,216,0,98,0,99,0,100,0,13,0,101,0,102,0,103,0,81,0,104,0,61,0,106,0,107,0,108,0,109,0,110,0,191,128,12,128,18,128,24,128,17,128,22,128,
+40,84,69,100,105,116,215,0,99,0,100,0,13,0,101,0,102,0,103,0,81,0,61,0,106,0,107,0,108,0,109,0,110,0,199,128,12,128,18,128,24,128,17,128,22,128,42,86,70,111,114,109,97,116,216,0,98,0,99,0,100,0,13,0,101,0,102,0,103,0,81,0,104,0,61,0,106,0,107,0,108,0,
+109,0,110,0,207,128,12,128,18,128,24,128,17,128,22,128,44,84,86,105,101,119,216,0,98,0,99,0,100,0,13,0,101,0,102,0,103,0,81,0,104,0,61,0,106,0,107,0,108,0,109,0,110,0,215,128,12,128,18,128,24,128,17,128,22,128,46,86,87,105,110,100,111,119,215,0,99,0,
+100,0,13,0,101,0,102,0,103,0,81,0,61,0,106,0,107,0,108,0,109,0,110,0,223,128,12,128,18,128,24,128,17,128,22,128,48,84,72,101,108,112,91,95,78,83,77,97,105,110,77,101,110,117,210,0,13,0,32,0,33,0,228,128,4,128,51,93,78,83,70,111,110,116,77,97,110,97,103,
+101,114,210,0,37,0,38,0,56,0,231,162,0,56,0,41,210,0,13,0,43,0,58,0,234,128,52,174,0,22,0,22,0,61,0,61,0,61,0,61,0,65,0,66,0,67,0,68,0,61,0,61,0,61,0,22,128,2,128,2,128,12,128,12,128,12,128,12,128,25,128,28,128,30,128,33,128,12,128,12,128,12,128,2,210,
+0,13,0,43,0,58,0,251,128,52,175,16,15,0,22,0,60,0,61,0,62,0,63,0,64,0,65,0,66,0,67,0,68,0,69,0,70,0,71,0,72,0,73,128,2,128,10,128,12,128,45,128,15,128,39,128,25,128,28,128,30,128,33,128,35,128,43,128,41,128,47,128,50,210,0,13,0,43,0,58,1,13,128,52,175,
+16,15,1,14,1,15,1,16,1,17,1,18,1,19,1,20,1,21,1,22,1,23,1,24,1,25,1,26,1,27,1,28,128,56,128,57,128,58,128,59,128,60,128,61,128,62,128,63,128,64,128,65,128,66,128,67,128,68,128,69,128,70,17,2,22,17,2,23,17,2,24,17,2,25,17,2,26,17,2,27,17,2,28,17,2,29,
+17,2,30,17,2,31,17,2,32,17,2,33,17,2,34,17,2,35,17,2,36,210,0,13,0,43,0,51,1,46,128,8,160,210,0,13,0,43,0,58,1,49,128,52,160,210,0,37,0,38,1,51,1,52,94,78,83,73,66,79,98,106,101,99,116,68,97,116,97,162,1,51,0,41,95,16,15,78,83,75,101,121,101,100,65,114,
+99,104,105,118,101,114,209,1,55,1,56,93,73,66,46,111,98,106,101,99,116,100,97,116,97,128,1,0,8,0,25,0,34,0,43,0,53,0,58,0,63,0,214,0,220,1,9,1,28,1,42,1,49,1,62,1,69,1,80,1,94,1,112,1,140,1,166,1,194,1,196,1,198,1,200,1,202,1,204,1,206,1,208,1,210,1,
+212,1,214,1,216,1,225,1,237,1,239,1,241,1,255,2,8,2,19,2,28,2,43,2,48,2,57,2,66,2,77,2,79,2,80,2,89,2,102,2,109,2,115,2,124,2,126,2,127,2,136,2,151,2,158,2,166,2,175,2,177,2,206,2,208,2,210,2,212,2,214,2,216,2,218,2,220,2,222,2,224,2,226,2,228,2,230,
+2,232,2,234,2,243,2,245,2,247,3,5,3,22,3,34,3,41,3,49,3,51,3,53,3,55,3,57,3,67,3,76,3,78,3,93,3,95,3,97,3,99,3,101,3,103,3,105,3,107,3,140,3,160,3,167,3,177,3,188,3,202,3,215,3,220,3,222,3,224,3,226,3,228,3,233,3,235,3,237,3,249,3,250,4,7,4,22,4,24,4,
+26,4,28,4,36,4,54,4,63,4,82,4,87,4,100,4,102,4,104,4,106,4,125,4,134,4,145,4,150,4,191,4,200,4,210,4,212,4,214,4,216,4,218,4,220,4,222,4,224,4,226,4,231,4,246,5,3,5,5,5,7,5,9,5,18,5,20,5,23,5,25,5,66,5,68,5,70,5,72,5,74,5,76,5,78,5,80,5,82,5,94,5,109,
+5,126,5,128,5,130,5,132,5,134,5,143,5,145,5,148,5,150,5,183,5,185,5,187,5,189,5,191,5,193,5,195,5,206,5,231,5,240,5,247,5,252,6,29,6,31,6,33,6,35,6,37,6,39,6,41,6,46,6,75,6,77,6,79,6,81,6,83,6,85,6,87,6,94,6,127,6,129,6,131,6,133,6,135,6,137,6,139,6,
+144,6,177,6,179,6,181,6,183,6,185,6,187,6,189,6,196,6,225,6,227,6,229,6,231,6,233,6,235,6,237,6,242,6,254,7,7,7,9,7,11,7,25,7,34,7,39,7,48,7,50,7,79,7,81,7,83,7,85,7,87,7,89,7,91,7,93,7,95,7,97,7,99,7,101,7,103,7,105,7,107,7,116,7,118,7,151,7,153,7,155,
+7,157,7,159,7,161,7,163,7,165,7,167,7,169,7,171,7,173,7,175,7,177,7,179,7,181,7,190,7,192,7,225,7,227,7,229,7,231,7,233,7,235,7,237,7,239,7,241,7,243,7,245,7,247,7,249,7,251,7,253,7,255,8,2,8,5,8,8,8,11,8,14,8,17,8,20,8,23,8,26,8,29,8,32,8,35,8,38,8,
+41,8,44,8,53,8,55,8,56,8,65,8,67,8,68,8,77,8,92,8,97,8,115,8,120,8,134,0,0,0,0,0,0,2,2,0,0,0,0,0,0,1,57,0,0,0,0,0,0,0,0,0,0,0,0,0,0,8,136,0,0 };
 
-const char* iconOpenfile_svg = (const char*) temp_binary_data_10;
+const char* RecentFilesMenuTemplate_nib = (const char*) temp_binary_data_31;
 
-//================== iconAnimation.svg ==================
-static const unsigned char temp_binary_data_11[] =
+//================== wizard_AnimatedApp.svg ==================
+static const unsigned char temp_binary_data_32[] =
 "<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n"
 "<!-- Generator: Adobe Illustrator 18.0.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->\r\n"
 "<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">\r\n"
@@ -1628,10 +2841,10 @@ static const unsigned char temp_binary_data_11[] =
 "<line opacity=\"0.7\" fill=\"none\" stroke=\"#F29100\" stroke-width=\"1.3469\" stroke-miterlimit=\"10\" x1=\"57.7\" y1=\"48.4\" x2=\"34.2\" y2=\"48.4\"/>\r\n"
 "</svg>\r\n";
 
-const char* iconAnimation_svg = (const char*) temp_binary_data_11;
+const char* wizard_AnimatedApp_svg = (const char*) temp_binary_data_32;
 
-//================== iconAudio.svg ==================
-static const unsigned char temp_binary_data_12[] =
+//================== wizard_AudioApp.svg ==================
+static const unsigned char temp_binary_data_33[] =
 "<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n"
 "<!-- Generator: Adobe Illustrator 18.0.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->\r\n"
 "<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">\r\n"
@@ -1705,180 +2918,10 @@ static const unsigned char temp_binary_data_12[] =
 "<line fill=\"none\" stroke=\"#F29300\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-miterlimit=\"10\" x1=\"118.8\" y1=\"43.8\" x2=\"118.8\" y2=\"44.5\"/>\r\n"
 "</svg>\r\n";
 
-const char* iconAudio_svg = (const char*) temp_binary_data_12;
+const char* wizard_AudioApp_svg = (const char*) temp_binary_data_33;
 
-//================== iconConsole.svg ==================
-static const unsigned char temp_binary_data_13[] =
-"<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n"
-"<!-- Generator: Adobe Illustrator 18.0.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->\r\n"
-"<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">\r\n"
-"<svg version=\"1.1\" id=\"Layer_1\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" x=\"0px\" y=\"0px\"\r\n"
-"\t viewBox=\"0 0 136.9 114.8\" enable-background=\"new 0 0 136.9 114.8\" xml:space=\"preserve\">\r\n"
-"<path fill=\"none\" stroke=\"#F29100\" stroke-width=\"1.3469\" stroke-miterlimit=\"10\" d=\"M130,114.8H6.9c-3.8,0-6.9-3.1-6.9-6.9V6.9\r\n"
-"\tC0,3.1,3.1,0,6.9,0H130c3.8,0,6.9,3.1,6.9,6.9v101.1C136.9,111.7,133.9,114.8,130,114.8z\"/>\r\n"
-"<g id=\"Layer_1_22_\">\r\n"
-"\t<rect x=\"16.3\" y=\"10.9\" fill=\"none\" stroke=\"#F29100\" stroke-width=\"1.3469\" stroke-miterlimit=\"10\" width=\"102.9\" height=\"67.5\"/>\r\n"
-"</g>\r\n"
-"<g id=\"Layer_3_3_\">\r\n"
-"\t<g opacity=\"0.8\">\r\n"
-"\t\t<path fill=\"#F29300\" d=\"M40.6,28.3l-14.4-6.6v-2.3l17.3,7.8v2.1l-17.3,7.8v-2.3L40.6,28.3z\"/>\r\n"
-"\t\t<path fill=\"#F29300\" d=\"M62,39.5v1.7H45v-1.7H62z\"/>\r\n"
-"\t</g>\r\n"
-"\t<g>\r\n"
-"\t\t<path fill=\"#F29300\" d=\"M40.6,28.3l-14.4-6.6v-2.3l17.3,7.8v2.1l-17.3,7.8v-2.3L40.6,28.3z\"/>\r\n"
-"\t\t<path fill=\"#F29300\" d=\"M62,39.5v1.7H45v-1.7H62z\"/>\r\n"
-"\t</g>\r\n"
-"</g>\r\n"
-"</svg>\r\n";
-
-const char* iconConsole_svg = (const char*) temp_binary_data_13;
-
-//================== iconDynamic.svg ==================
-static const unsigned char temp_binary_data_14[] =
-"<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n"
-"<!-- Generator: Adobe Illustrator 18.0.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->\r\n"
-"<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">\r\n"
-"<svg version=\"1.1\" id=\"Layer_1\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" x=\"0px\" y=\"0px\"\r\n"
-"\t viewBox=\"0 0 136.9 114.8\" enable-background=\"new 0 0 136.9 114.8\" xml:space=\"preserve\">\r\n"
-"<path fill=\"none\" stroke=\"#F29100\" stroke-width=\"1.3469\" stroke-miterlimit=\"10\" d=\"M130,114.9H6.9c-3.8,0-6.9-3.1-6.9-6.9V7\r\n"
-"\tc0-3.8,3.1-6.9,6.9-6.9H130c3.8,0,6.9,3.1,6.9,6.9V108C136.9,111.8,133.9,114.9,130,114.9z\"/>\r\n"
-"<g id=\"Layer_1_19_\">\r\n"
-"\t<rect x=\"16.3\" y=\"11\" fill=\"none\" stroke=\"#F29100\" stroke-width=\"1.3469\" stroke-miterlimit=\"10\" width=\"102.9\" height=\"67.5\"/>\r\n"
-"</g>\r\n"
-"<g>\r\n"
-"\t<line fill=\"none\" stroke=\"#F29100\" stroke-width=\"0.4307\" stroke-miterlimit=\"10\" x1=\"39.6\" y1=\"25\" x2=\"39.6\" y2=\"62.3\"/>\r\n"
-"\t<line fill=\"none\" stroke=\"#F29100\" stroke-width=\"0.4307\" stroke-miterlimit=\"10\" x1=\"41.2\" y1=\"25\" x2=\"41.2\" y2=\"62.3\"/>\r\n"
-"\t<line fill=\"none\" stroke=\"#F29100\" stroke-width=\"0.4307\" stroke-miterlimit=\"10\" x1=\"42.8\" y1=\"25\" x2=\"42.8\" y2=\"62.3\"/>\r\n"
-"\t<line fill=\"none\" stroke=\"#F29100\" stroke-width=\"0.4307\" stroke-miterlimit=\"10\" x1=\"44.5\" y1=\"25\" x2=\"44.5\" y2=\"62.3\"/>\r\n"
-"\t<line fill=\"none\" stroke=\"#F29100\" stroke-width=\"0.4307\" stroke-miterlimit=\"10\" x1=\"46.1\" y1=\"25\" x2=\"46.1\" y2=\"62.3\"/>\r\n"
-"\t<line fill=\"none\" stroke=\"#F29100\" stroke-width=\"0.4307\" stroke-miterlimit=\"10\" x1=\"47.7\" y1=\"25\" x2=\"47.7\" y2=\"62.3\"/>\r\n"
-"</g>\r\n"
-"<path fill=\"none\" stroke=\"#F29100\" stroke-width=\"1.0853\" stroke-miterlimit=\"10\" d=\"M49.9,23.9v38.6c0,0.9-0.7,1.6-1.6,1.6H39\r\n"
-"\tc-0.9,0-1.6-0.7-1.6-1.6V23.9\"/>\r\n"
-"<g>\r\n"
-"\t<line fill=\"none\" stroke=\"#F29100\" stroke-width=\"0.4307\" stroke-miterlimit=\"10\" x1=\"54.8\" y1=\"27.5\" x2=\"67.4\" y2=\"62.6\"/>\r\n"
-"\t<line fill=\"none\" stroke=\"#F29100\" stroke-width=\"0.4307\" stroke-miterlimit=\"10\" x1=\"56.3\" y1=\"27\" x2=\"69\" y2=\"62\"/>\r\n"
-"\t<line fill=\"none\" stroke=\"#F29100\" stroke-width=\"0.4307\" stroke-miterlimit=\"10\" x1=\"57.8\" y1=\"26.4\" x2=\"70.5\" y2=\"61.5\"/>\r\n"
-"\t<line fill=\"none\" stroke=\"#F29100\" stroke-width=\"0.4307\" stroke-miterlimit=\"10\" x1=\"59.4\" y1=\"25.9\" x2=\"72.1\" y2=\"60.9\"/>\r\n"
-"\t<line fill=\"none\" stroke=\"#F29100\" stroke-width=\"0.4307\" stroke-miterlimit=\"10\" x1=\"60.9\" y1=\"25.3\" x2=\"73.6\" y2=\"60.4\"/>\r\n"
-"\t<line fill=\"none\" stroke=\"#F29100\" stroke-width=\"0.4307\" stroke-miterlimit=\"10\" x1=\"62.4\" y1=\"24.8\" x2=\"75.1\" y2=\"59.8\"/>\r\n"
-"</g>\r\n"
-"<path fill=\"none\" stroke=\"#F29100\" stroke-width=\"1.0853\" stroke-miterlimit=\"10\" d=\"M64.1,23l13.1,36.3c0.3,0.8-0.1,1.7-0.9,2\r\n"
-"\tl-8.8,3.2c-0.8,0.3-1.7-0.1-2-0.9L52.4,27.2\"/>\r\n"
-"<g>\r\n"
-"\t<line fill=\"none\" stroke=\"#F29100\" stroke-width=\"0.4307\" stroke-miterlimit=\"10\" x1=\"72.5\" y1=\"30.6\" x2=\"93.5\" y2=\"61.4\"/>\r\n"
-"\t<line fill=\"none\" stroke=\"#F29100\" stroke-width=\"0.4307\" stroke-miterlimit=\"10\" x1=\"73.8\" y1=\"29.7\" x2=\"94.9\" y2=\"60.5\"/>\r\n"
-"\t<line fill=\"none\" stroke=\"#F29100\" stroke-width=\"0.4307\" stroke-miterlimit=\"10\" x1=\"75.2\" y1=\"28.8\" x2=\"96.2\" y2=\"59.6\"/>\r\n"
-"\t<line fill=\"none\" stroke=\"#F29100\" stroke-width=\"0.4307\" stroke-miterlimit=\"10\" x1=\"76.5\" y1=\"27.9\" x2=\"97.6\" y2=\"58.6\"/>\r\n"
-"\t<line fill=\"none\" stroke=\"#F29100\" stroke-width=\"0.4307\" stroke-miterlimit=\"10\" x1=\"77.9\" y1=\"27\" x2=\"98.9\" y2=\"57.7\"/>\r\n"
-"\t<line fill=\"none\" stroke=\"#F29100\" stroke-width=\"0.4307\" stroke-miterlimit=\"10\" x1=\"79.2\" y1=\"26\" x2=\"100.3\" y2=\"56.8\"/>\r\n"
-"</g>\r\n"
-"<path fill=\"none\" stroke=\"#F29100\" stroke-width=\"1.0853\" stroke-miterlimit=\"10\" d=\"M80.4,23.9l21.8,31.9c0.5,0.7,0.3,1.7-0.4,2.2\r\n"
-"\tl-7.7,5.3c-0.7,0.5-1.7,0.3-2.2-0.4L70.1,31\"/>\r\n"
-"</svg>\r\n";
-
-const char* iconDynamic_svg = (const char*) temp_binary_data_14;
-
-//================== iconGui.svg ==================
-static const unsigned char temp_binary_data_15[] =
-"<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n"
-"<!-- Generator: Adobe Illustrator 18.0.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->\r\n"
-"<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">\r\n"
-"<svg version=\"1.1\" id=\"Layer_1\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" x=\"0px\" y=\"0px\"\r\n"
-"\t viewBox=\"0 0 136.9 114.8\" enable-background=\"new 0 0 136.9 114.8\" xml:space=\"preserve\">\r\n"
-"<rect x=\"16.3\" y=\"10.9\" fill=\"none\" stroke=\"#F29100\" stroke-width=\"1.3469\" stroke-miterlimit=\"10\" width=\"103.6\" height=\"67.5\"/>\r\n"
-"<path fill=\"none\" stroke=\"#F29300\" stroke-width=\"0.7078\" stroke-miterlimit=\"10\" d=\"M55.2,62.5H23.4c-0.4,0-0.7-0.4-0.7-0.9l0,0\r\n"
-"\tc0-0.5,0.3-0.9,0.7-0.9h31.8c0.4,0,0.7,0.4,0.7,0.9l0,0C55.9,62.1,55.5,62.5,55.2,62.5z\"/>\r\n"
-"<path fill=\"#F29300\" d=\"M38.1,62.5H23.4c-0.4,0-0.7-0.4-0.7-0.9l0,0c0-0.5,0.3-0.9,0.7-0.9h14.7c0.4,0,0.7,0.4,0.7,0.9l0,0\r\n"
-"\tC38.7,62.1,38.4,62.5,38.1,62.5z\"/>\r\n"
-"<path fill=\"none\" stroke=\"#F29300\" stroke-width=\"0.7078\" stroke-miterlimit=\"10\" d=\"M55.2,67.8H23.4c-0.4,0-0.7-0.4-0.7-0.9l0,0\r\n"
-"\tc0-0.5,0.3-0.9,0.7-0.9h31.8c0.4,0,0.7,0.4,0.7,0.9l0,0C55.9,67.4,55.5,67.8,55.2,67.8z\"/>\r\n"
-"<path fill=\"#F29300\" d=\"M44.2,67.8H23.4c-0.4,0-0.7-0.4-0.7-0.9l0,0c0-0.5,0.3-0.9,0.7-0.9h20.8c0.4,0,0.7,0.4,0.7,0.9l0,0\r\n"
-"\tC44.8,67.4,44.6,67.8,44.2,67.8z\"/>\r\n"
-"<path fill=\"none\" stroke=\"#F29300\" stroke-width=\"0.7078\" stroke-miterlimit=\"10\" d=\"M55.2,73H23.4c-0.4,0-0.7-0.4-0.7-0.9l0,0\r\n"
-"\tc0-0.5,0.3-0.9,0.7-0.9h31.8c0.4,0,0.7,0.4,0.7,0.9l0,0C55.9,72.6,55.5,73,55.2,73z\"/>\r\n"
-"<path fill=\"#F29300\" d=\"M49.4,73h-26c-0.4,0-0.7-0.4-0.7-0.9l0,0c0-0.5,0.3-0.9,0.7-0.9h26c0.4,0,0.7,0.4,0.7,0.9l0,0\r\n"
-"\tC50.1,72.6,49.8,73,49.4,73z\"/>\r\n"
-"<rect x=\"16.3\" y=\"10.9\" fill=\"none\" stroke=\"#F29300\" stroke-width=\"1.3469\" stroke-miterlimit=\"10\" width=\"103.6\" height=\"2.4\"/>\r\n"
-"<circle fill=\"none\" stroke=\"#F29300\" stroke-width=\"1.3469\" stroke-miterlimit=\"10\" cx=\"69.3\" cy=\"39.6\" r=\"13.9\"/>\r\n"
-"<g>\r\n"
-"\t<g>\r\n"
-"\t\t<path fill=\"none\" stroke=\"#F29300\" stroke-width=\"1.2523\" stroke-miterlimit=\"10\" d=\"M79.8,33.5c1.1,1.9,1.3,5.2,0,5.7\r\n"
-"\t\t\tc-1.3,0.5-7.2,0.3-10.2,0.2c1.3-2.7,4.1-7.9,5.2-8.8C75.9,29.7,78.7,31.6,79.8,33.5z\"/>\r\n"
-"\t</g>\r\n"
-"\t<g>\r\n"
-"\t\t<path fill=\"none\" stroke=\"#F29300\" stroke-width=\"1.2523\" stroke-miterlimit=\"10\" d=\"M79.8,45.6c-1.1,1.9-3.8,3.7-4.9,2.9\r\n"
-"\t\t\tc-1.1-0.9-3.9-6.1-5.2-8.8c3-0.2,8.9-0.4,10.2,0.1C81.2,40.4,80.9,43.7,79.8,45.6z\"/>\r\n"
-"\t</g>\r\n"
-"\t<g>\r\n"
-"\t\t<path fill=\"none\" stroke=\"#F29300\" stroke-width=\"1.2523\" stroke-miterlimit=\"10\" d=\"M69.3,51.7c-2.2,0-5.2-1.5-5-2.8\r\n"
-"\t\t\ts3.3-6.4,5-8.9c1.7,2.5,4.8,7.5,5,8.9S71.5,51.7,69.3,51.7z\"/>\r\n"
-"\t</g>\r\n"
-"\t<g>\r\n"
-"\t\t<path fill=\"none\" stroke=\"#F29300\" stroke-width=\"1.2523\" stroke-miterlimit=\"10\" d=\"M58.9,45.6c-1.1-1.9-1.3-5.2,0-5.7\r\n"
-"\t\t\tc1.3-0.5,7.2-0.3,10.2-0.2c-1.3,2.7-4.1,7.9-5.2,8.8C62.8,49.4,60,47.6,58.9,45.6z\"/>\r\n"
-"\t</g>\r\n"
-"\t<g>\r\n"
-"\t\t<path fill=\"none\" stroke=\"#F29300\" stroke-width=\"1.2523\" stroke-miterlimit=\"10\" d=\"M58.9,33.5c1.1-1.9,3.8-3.7,4.9-2.9\r\n"
-"\t\t\tc1.1,0.9,3.9,6.1,5.2,8.8c-3,0.2-8.9,0.4-10.2-0.1C57.5,38.8,57.8,35.5,58.9,33.5z\"/>\r\n"
-"\t</g>\r\n"
-"\t<g>\r\n"
-"\t\t<path fill=\"none\" stroke=\"#F29300\" stroke-width=\"1.2523\" stroke-miterlimit=\"10\" d=\"M69.3,27.5c2.2,0,5.2,1.5,5,2.8\r\n"
-"\t\t\ts-3.3,6.4-5,8.9c-1.7-2.5-4.8-7.5-5-8.9S67.1,27.5,69.3,27.5z\"/>\r\n"
-"\t</g>\r\n"
-"</g>\r\n"
-"<path fill=\"none\" stroke=\"#F29100\" stroke-width=\"1.3469\" stroke-miterlimit=\"10\" d=\"M130,114.8H6.9c-3.8,0-6.9-3.1-6.9-6.9V6.9\r\n"
-"\tC0,3.1,3.1,0,6.9,0H130c3.8,0,6.9,3.1,6.9,6.9v101.1C136.9,111.7,133.9,114.8,130,114.8z\"/>\r\n"
-"</svg>\r\n";
-
-const char* iconGui_svg = (const char*) temp_binary_data_15;
-
-//================== iconHighlight.svg ==================
-static const unsigned char temp_binary_data_16[] =
-"<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n"
-"<!-- Generator: Adobe Illustrator 18.0.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->\r\n"
-"<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">\r\n"
-"<svg version=\"1.1\" id=\"Layer_1\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" x=\"0px\" y=\"0px\"\r\n"
-"\t viewBox=\"0 0 136.9 114.8\" enable-background=\"new 0 0 136.9 114.8\" xml:space=\"preserve\">\r\n"
-"<path opacity=\"0.2\" fill=\"#F29300\" d=\"M130.1,114.8H6.9c-3.8,0-6.9-3.1-6.9-6.9V6.9C0,3.1,3.1,0,6.9,0h123.2c3.8,0,6.9,3.1,6.9,6.9\r\n"
-"\tV108C136.9,111.8,133.9,114.8,130.1,114.8z\"/>\r\n"
-"</svg>\r\n";
-
-const char* iconHighlight_svg = (const char*) temp_binary_data_16;
-
-//================== iconOpengl.svg ==================
-static const unsigned char temp_binary_data_17[] =
-"<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n"
-"<!-- Generator: Adobe Illustrator 18.0.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->\r\n"
-"<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">\r\n"
-"<svg version=\"1.1\" id=\"Layer_1\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" x=\"0px\" y=\"0px\"\r\n"
-"\t viewBox=\"0 0 136.9 114.8\" enable-background=\"new 0 0 136.9 114.8\" xml:space=\"preserve\">\r\n"
-"<rect x=\"16.3\" y=\"10.9\" fill=\"none\" stroke=\"#F29100\" stroke-width=\"1.3469\" stroke-miterlimit=\"10\" width=\"103.6\" height=\"67.5\"/>\r\n"
-"<rect x=\"16.3\" y=\"10.9\" fill=\"none\" stroke=\"#F29300\" stroke-width=\"1.3469\" stroke-miterlimit=\"10\" width=\"103.6\" height=\"2.4\"/>\r\n"
-"<path fill=\"none\" stroke=\"#F29100\" stroke-width=\"1.3469\" stroke-miterlimit=\"10\" d=\"M75.8,31.5c8.7,4.7,14.8,13.2,13.5,20\r\n"
-"\tc-1.6,8.5-13.8,11.4-26.8,4.3S45.3,36.9,51.6,30.9C56.7,26.1,67.1,26.7,75.8,31.5z\"/>\r\n"
-"<path fill=\"none\" stroke=\"#F29100\" stroke-width=\"1.3469\" stroke-miterlimit=\"10\" d=\"M86.1,43.6c1,2.4,0.5,5.5-1.3,5\r\n"
-"\tc-1.9-0.5-9.8-5-13.8-7.4c2.9-1.2,8.2-3.2,9.8-3.2C82.2,38.2,85.2,41.4,86.1,43.6z\"/>\r\n"
-"<path fill=\"none\" stroke=\"#F29100\" stroke-width=\"1.3469\" stroke-miterlimit=\"10\" d=\"M83,55.3c-2.3,1.3-7.3,1.2-8.6-0.7\r\n"
-"\tc-1.2-1.9-2.9-9.5-3.5-12.9c4.2,2.1,12.2,6.3,13.8,7.7C86.3,50.7,85.2,54,83,55.3z\"/>\r\n"
-"<path fill=\"none\" stroke=\"#F29100\" stroke-width=\"1.3469\" stroke-miterlimit=\"10\" d=\"M63.6,53.5c-3.6-2-7.3-6.3-5.9-7.6\r\n"
-"\tc1.3-1.2,9-3.5,12.5-4.4c1.2,3.5,3.4,11.2,3.1,13C73,56.3,67.3,55.5,63.6,53.5z\"/>\r\n"
-"<path fill=\"none\" stroke=\"#F29100\" stroke-width=\"1.3469\" stroke-miterlimit=\"10\" d=\"M51.9,38.3c-0.1-2.5,2-5.2,4.1-4.6\r\n"
-"\tc2.1,0.6,9.9,5.1,13.9,7.5c-3.2,1.3-10.5,4.1-12.8,4.1C54.9,45.1,52,40.9,51.9,38.3z\"/>\r\n"
-"<path fill=\"none\" stroke=\"#F29100\" stroke-width=\"1.3469\" stroke-miterlimit=\"10\" d=\"M60,29.3c2.4-0.4,6.6,0.3,7.5,1.5\r\n"
-"\tc0.9,1.2,2.1,6.8,2.6,9.9c-4.2-2.1-12.3-6.3-13.7-7.6C55,31.8,57.4,29.8,60,29.3z\"/>\r\n"
-"<path fill=\"none\" stroke=\"#F29100\" stroke-width=\"1.3469\" stroke-miterlimit=\"10\" d=\"M75.2,32.5c2.5,1.4,5.6,4.3,5,5\r\n"
-"\tc-0.7,0.8-6.3,2.5-9.5,3.3c-1.1-3.2-2.7-8.9-2.4-9.9C68.6,30,72.6,31.1,75.2,32.5z\"/>\r\n"
-"<path fill=\"none\" stroke=\"#F29100\" stroke-width=\"1.3469\" stroke-miterlimit=\"10\" d=\"M130,114.8H6.9c-3.8,0-6.9-3.1-6.9-6.9V6.9\r\n"
-"\tC0,3.1,3.1,0,6.9,0H130c3.8,0,6.9,3.1,6.9,6.9v101.1C136.9,111.7,133.9,114.8,130,114.8z\"/>\r\n"
-"<path fill=\"none\" stroke=\"#F29100\" stroke-width=\"1.3469\" stroke-miterlimit=\"10\" d=\"M87.4,55.5c-6.6,10.4-20.4,14.6-30.8,8\r\n"
-"\ts-13.4-19.6-6.9-30\"/>\r\n"
-"</svg>\r\n";
-
-const char* iconOpengl_svg = (const char*) temp_binary_data_17;
-
-//================== iconPlugin.svg ==================
-static const unsigned char temp_binary_data_18[] =
+//================== wizard_AudioPlugin.svg ==================
+static const unsigned char temp_binary_data_34[] =
 "<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n"
 "<!-- Generator: Adobe Illustrator 18.0.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->\r\n"
 "<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">\r\n"
@@ -1989,10 +3032,193 @@ static const unsigned char temp_binary_data_18[] =
 "</g>\r\n"
 "</svg>\r\n";
 
-const char* iconPlugin_svg = (const char*) temp_binary_data_18;
+const char* wizard_AudioPlugin_svg = (const char*) temp_binary_data_34;
 
-//================== iconStatic.svg ==================
-static const unsigned char temp_binary_data_19[] =
+//================== wizard_ConsoleApp.svg ==================
+static const unsigned char temp_binary_data_35[] =
+"<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n"
+"<!-- Generator: Adobe Illustrator 18.0.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->\r\n"
+"<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">\r\n"
+"<svg version=\"1.1\" id=\"Layer_1\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" x=\"0px\" y=\"0px\"\r\n"
+"\t viewBox=\"0 0 136.9 114.8\" enable-background=\"new 0 0 136.9 114.8\" xml:space=\"preserve\">\r\n"
+"<path fill=\"none\" stroke=\"#F29100\" stroke-width=\"1.3469\" stroke-miterlimit=\"10\" d=\"M130,114.8H6.9c-3.8,0-6.9-3.1-6.9-6.9V6.9\r\n"
+"\tC0,3.1,3.1,0,6.9,0H130c3.8,0,6.9,3.1,6.9,6.9v101.1C136.9,111.7,133.9,114.8,130,114.8z\"/>\r\n"
+"<g id=\"Layer_1_22_\">\r\n"
+"\t<rect x=\"16.3\" y=\"10.9\" fill=\"none\" stroke=\"#F29100\" stroke-width=\"1.3469\" stroke-miterlimit=\"10\" width=\"102.9\" height=\"67.5\"/>\r\n"
+"</g>\r\n"
+"<g id=\"Layer_3_3_\">\r\n"
+"\t<g opacity=\"0.8\">\r\n"
+"\t\t<path fill=\"#F29300\" d=\"M40.6,28.3l-14.4-6.6v-2.3l17.3,7.8v2.1l-17.3,7.8v-2.3L40.6,28.3z\"/>\r\n"
+"\t\t<path fill=\"#F29300\" d=\"M62,39.5v1.7H45v-1.7H62z\"/>\r\n"
+"\t</g>\r\n"
+"\t<g>\r\n"
+"\t\t<path fill=\"#F29300\" d=\"M40.6,28.3l-14.4-6.6v-2.3l17.3,7.8v2.1l-17.3,7.8v-2.3L40.6,28.3z\"/>\r\n"
+"\t\t<path fill=\"#F29300\" d=\"M62,39.5v1.7H45v-1.7H62z\"/>\r\n"
+"\t</g>\r\n"
+"</g>\r\n"
+"</svg>\r\n";
+
+const char* wizard_ConsoleApp_svg = (const char*) temp_binary_data_35;
+
+//================== wizard_DLL.svg ==================
+static const unsigned char temp_binary_data_36[] =
+"<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n"
+"<!-- Generator: Adobe Illustrator 18.0.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->\r\n"
+"<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">\r\n"
+"<svg version=\"1.1\" id=\"Layer_1\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" x=\"0px\" y=\"0px\"\r\n"
+"\t viewBox=\"0 0 136.9 114.8\" enable-background=\"new 0 0 136.9 114.8\" xml:space=\"preserve\">\r\n"
+"<path fill=\"none\" stroke=\"#F29100\" stroke-width=\"1.3469\" stroke-miterlimit=\"10\" d=\"M130,114.9H6.9c-3.8,0-6.9-3.1-6.9-6.9V7\r\n"
+"\tc0-3.8,3.1-6.9,6.9-6.9H130c3.8,0,6.9,3.1,6.9,6.9V108C136.9,111.8,133.9,114.9,130,114.9z\"/>\r\n"
+"<g id=\"Layer_1_19_\">\r\n"
+"\t<rect x=\"16.3\" y=\"11\" fill=\"none\" stroke=\"#F29100\" stroke-width=\"1.3469\" stroke-miterlimit=\"10\" width=\"102.9\" height=\"67.5\"/>\r\n"
+"</g>\r\n"
+"<g>\r\n"
+"\t<line fill=\"none\" stroke=\"#F29100\" stroke-width=\"0.4307\" stroke-miterlimit=\"10\" x1=\"39.6\" y1=\"25\" x2=\"39.6\" y2=\"62.3\"/>\r\n"
+"\t<line fill=\"none\" stroke=\"#F29100\" stroke-width=\"0.4307\" stroke-miterlimit=\"10\" x1=\"41.2\" y1=\"25\" x2=\"41.2\" y2=\"62.3\"/>\r\n"
+"\t<line fill=\"none\" stroke=\"#F29100\" stroke-width=\"0.4307\" stroke-miterlimit=\"10\" x1=\"42.8\" y1=\"25\" x2=\"42.8\" y2=\"62.3\"/>\r\n"
+"\t<line fill=\"none\" stroke=\"#F29100\" stroke-width=\"0.4307\" stroke-miterlimit=\"10\" x1=\"44.5\" y1=\"25\" x2=\"44.5\" y2=\"62.3\"/>\r\n"
+"\t<line fill=\"none\" stroke=\"#F29100\" stroke-width=\"0.4307\" stroke-miterlimit=\"10\" x1=\"46.1\" y1=\"25\" x2=\"46.1\" y2=\"62.3\"/>\r\n"
+"\t<line fill=\"none\" stroke=\"#F29100\" stroke-width=\"0.4307\" stroke-miterlimit=\"10\" x1=\"47.7\" y1=\"25\" x2=\"47.7\" y2=\"62.3\"/>\r\n"
+"</g>\r\n"
+"<path fill=\"none\" stroke=\"#F29100\" stroke-width=\"1.0853\" stroke-miterlimit=\"10\" d=\"M49.9,23.9v38.6c0,0.9-0.7,1.6-1.6,1.6H39\r\n"
+"\tc-0.9,0-1.6-0.7-1.6-1.6V23.9\"/>\r\n"
+"<g>\r\n"
+"\t<line fill=\"none\" stroke=\"#F29100\" stroke-width=\"0.4307\" stroke-miterlimit=\"10\" x1=\"54.8\" y1=\"27.5\" x2=\"67.4\" y2=\"62.6\"/>\r\n"
+"\t<line fill=\"none\" stroke=\"#F29100\" stroke-width=\"0.4307\" stroke-miterlimit=\"10\" x1=\"56.3\" y1=\"27\" x2=\"69\" y2=\"62\"/>\r\n"
+"\t<line fill=\"none\" stroke=\"#F29100\" stroke-width=\"0.4307\" stroke-miterlimit=\"10\" x1=\"57.8\" y1=\"26.4\" x2=\"70.5\" y2=\"61.5\"/>\r\n"
+"\t<line fill=\"none\" stroke=\"#F29100\" stroke-width=\"0.4307\" stroke-miterlimit=\"10\" x1=\"59.4\" y1=\"25.9\" x2=\"72.1\" y2=\"60.9\"/>\r\n"
+"\t<line fill=\"none\" stroke=\"#F29100\" stroke-width=\"0.4307\" stroke-miterlimit=\"10\" x1=\"60.9\" y1=\"25.3\" x2=\"73.6\" y2=\"60.4\"/>\r\n"
+"\t<line fill=\"none\" stroke=\"#F29100\" stroke-width=\"0.4307\" stroke-miterlimit=\"10\" x1=\"62.4\" y1=\"24.8\" x2=\"75.1\" y2=\"59.8\"/>\r\n"
+"</g>\r\n"
+"<path fill=\"none\" stroke=\"#F29100\" stroke-width=\"1.0853\" stroke-miterlimit=\"10\" d=\"M64.1,23l13.1,36.3c0.3,0.8-0.1,1.7-0.9,2\r\n"
+"\tl-8.8,3.2c-0.8,0.3-1.7-0.1-2-0.9L52.4,27.2\"/>\r\n"
+"<g>\r\n"
+"\t<line fill=\"none\" stroke=\"#F29100\" stroke-width=\"0.4307\" stroke-miterlimit=\"10\" x1=\"72.5\" y1=\"30.6\" x2=\"93.5\" y2=\"61.4\"/>\r\n"
+"\t<line fill=\"none\" stroke=\"#F29100\" stroke-width=\"0.4307\" stroke-miterlimit=\"10\" x1=\"73.8\" y1=\"29.7\" x2=\"94.9\" y2=\"60.5\"/>\r\n"
+"\t<line fill=\"none\" stroke=\"#F29100\" stroke-width=\"0.4307\" stroke-miterlimit=\"10\" x1=\"75.2\" y1=\"28.8\" x2=\"96.2\" y2=\"59.6\"/>\r\n"
+"\t<line fill=\"none\" stroke=\"#F29100\" stroke-width=\"0.4307\" stroke-miterlimit=\"10\" x1=\"76.5\" y1=\"27.9\" x2=\"97.6\" y2=\"58.6\"/>\r\n"
+"\t<line fill=\"none\" stroke=\"#F29100\" stroke-width=\"0.4307\" stroke-miterlimit=\"10\" x1=\"77.9\" y1=\"27\" x2=\"98.9\" y2=\"57.7\"/>\r\n"
+"\t<line fill=\"none\" stroke=\"#F29100\" stroke-width=\"0.4307\" stroke-miterlimit=\"10\" x1=\"79.2\" y1=\"26\" x2=\"100.3\" y2=\"56.8\"/>\r\n"
+"</g>\r\n"
+"<path fill=\"none\" stroke=\"#F29100\" stroke-width=\"1.0853\" stroke-miterlimit=\"10\" d=\"M80.4,23.9l21.8,31.9c0.5,0.7,0.3,1.7-0.4,2.2\r\n"
+"\tl-7.7,5.3c-0.7,0.5-1.7,0.3-2.2-0.4L70.1,31\"/>\r\n"
+"</svg>\r\n";
+
+const char* wizard_DLL_svg = (const char*) temp_binary_data_36;
+
+//================== wizard_GUI.svg ==================
+static const unsigned char temp_binary_data_37[] =
+"<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n"
+"<!-- Generator: Adobe Illustrator 18.0.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->\r\n"
+"<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">\r\n"
+"<svg version=\"1.1\" id=\"Layer_1\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" x=\"0px\" y=\"0px\"\r\n"
+"\t viewBox=\"0 0 136.9 114.8\" enable-background=\"new 0 0 136.9 114.8\" xml:space=\"preserve\">\r\n"
+"<rect x=\"16.3\" y=\"10.9\" fill=\"none\" stroke=\"#F29100\" stroke-width=\"1.3469\" stroke-miterlimit=\"10\" width=\"103.6\" height=\"67.5\"/>\r\n"
+"<path fill=\"none\" stroke=\"#F29300\" stroke-width=\"0.7078\" stroke-miterlimit=\"10\" d=\"M55.2,62.5H23.4c-0.4,0-0.7-0.4-0.7-0.9l0,0\r\n"
+"\tc0-0.5,0.3-0.9,0.7-0.9h31.8c0.4,0,0.7,0.4,0.7,0.9l0,0C55.9,62.1,55.5,62.5,55.2,62.5z\"/>\r\n"
+"<path fill=\"#F29300\" d=\"M38.1,62.5H23.4c-0.4,0-0.7-0.4-0.7-0.9l0,0c0-0.5,0.3-0.9,0.7-0.9h14.7c0.4,0,0.7,0.4,0.7,0.9l0,0\r\n"
+"\tC38.7,62.1,38.4,62.5,38.1,62.5z\"/>\r\n"
+"<path fill=\"none\" stroke=\"#F29300\" stroke-width=\"0.7078\" stroke-miterlimit=\"10\" d=\"M55.2,67.8H23.4c-0.4,0-0.7-0.4-0.7-0.9l0,0\r\n"
+"\tc0-0.5,0.3-0.9,0.7-0.9h31.8c0.4,0,0.7,0.4,0.7,0.9l0,0C55.9,67.4,55.5,67.8,55.2,67.8z\"/>\r\n"
+"<path fill=\"#F29300\" d=\"M44.2,67.8H23.4c-0.4,0-0.7-0.4-0.7-0.9l0,0c0-0.5,0.3-0.9,0.7-0.9h20.8c0.4,0,0.7,0.4,0.7,0.9l0,0\r\n"
+"\tC44.8,67.4,44.6,67.8,44.2,67.8z\"/>\r\n"
+"<path fill=\"none\" stroke=\"#F29300\" stroke-width=\"0.7078\" stroke-miterlimit=\"10\" d=\"M55.2,73H23.4c-0.4,0-0.7-0.4-0.7-0.9l0,0\r\n"
+"\tc0-0.5,0.3-0.9,0.7-0.9h31.8c0.4,0,0.7,0.4,0.7,0.9l0,0C55.9,72.6,55.5,73,55.2,73z\"/>\r\n"
+"<path fill=\"#F29300\" d=\"M49.4,73h-26c-0.4,0-0.7-0.4-0.7-0.9l0,0c0-0.5,0.3-0.9,0.7-0.9h26c0.4,0,0.7,0.4,0.7,0.9l0,0\r\n"
+"\tC50.1,72.6,49.8,73,49.4,73z\"/>\r\n"
+"<rect x=\"16.3\" y=\"10.9\" fill=\"none\" stroke=\"#F29300\" stroke-width=\"1.3469\" stroke-miterlimit=\"10\" width=\"103.6\" height=\"2.4\"/>\r\n"
+"<circle fill=\"none\" stroke=\"#F29300\" stroke-width=\"1.3469\" stroke-miterlimit=\"10\" cx=\"69.3\" cy=\"39.6\" r=\"13.9\"/>\r\n"
+"<g>\r\n"
+"\t<g>\r\n"
+"\t\t<path fill=\"none\" stroke=\"#F29300\" stroke-width=\"1.2523\" stroke-miterlimit=\"10\" d=\"M79.8,33.5c1.1,1.9,1.3,5.2,0,5.7\r\n"
+"\t\t\tc-1.3,0.5-7.2,0.3-10.2,0.2c1.3-2.7,4.1-7.9,5.2-8.8C75.9,29.7,78.7,31.6,79.8,33.5z\"/>\r\n"
+"\t</g>\r\n"
+"\t<g>\r\n"
+"\t\t<path fill=\"none\" stroke=\"#F29300\" stroke-width=\"1.2523\" stroke-miterlimit=\"10\" d=\"M79.8,45.6c-1.1,1.9-3.8,3.7-4.9,2.9\r\n"
+"\t\t\tc-1.1-0.9-3.9-6.1-5.2-8.8c3-0.2,8.9-0.4,10.2,0.1C81.2,40.4,80.9,43.7,79.8,45.6z\"/>\r\n"
+"\t</g>\r\n"
+"\t<g>\r\n"
+"\t\t<path fill=\"none\" stroke=\"#F29300\" stroke-width=\"1.2523\" stroke-miterlimit=\"10\" d=\"M69.3,51.7c-2.2,0-5.2-1.5-5-2.8\r\n"
+"\t\t\ts3.3-6.4,5-8.9c1.7,2.5,4.8,7.5,5,8.9S71.5,51.7,69.3,51.7z\"/>\r\n"
+"\t</g>\r\n"
+"\t<g>\r\n"
+"\t\t<path fill=\"none\" stroke=\"#F29300\" stroke-width=\"1.2523\" stroke-miterlimit=\"10\" d=\"M58.9,45.6c-1.1-1.9-1.3-5.2,0-5.7\r\n"
+"\t\t\tc1.3-0.5,7.2-0.3,10.2-0.2c-1.3,2.7-4.1,7.9-5.2,8.8C62.8,49.4,60,47.6,58.9,45.6z\"/>\r\n"
+"\t</g>\r\n"
+"\t<g>\r\n"
+"\t\t<path fill=\"none\" stroke=\"#F29300\" stroke-width=\"1.2523\" stroke-miterlimit=\"10\" d=\"M58.9,33.5c1.1-1.9,3.8-3.7,4.9-2.9\r\n"
+"\t\t\tc1.1,0.9,3.9,6.1,5.2,8.8c-3,0.2-8.9,0.4-10.2-0.1C57.5,38.8,57.8,35.5,58.9,33.5z\"/>\r\n"
+"\t</g>\r\n"
+"\t<g>\r\n"
+"\t\t<path fill=\"none\" stroke=\"#F29300\" stroke-width=\"1.2523\" stroke-miterlimit=\"10\" d=\"M69.3,27.5c2.2,0,5.2,1.5,5,2.8\r\n"
+"\t\t\ts-3.3,6.4-5,8.9c-1.7-2.5-4.8-7.5-5-8.9S67.1,27.5,69.3,27.5z\"/>\r\n"
+"\t</g>\r\n"
+"</g>\r\n"
+"<path fill=\"none\" stroke=\"#F29100\" stroke-width=\"1.3469\" stroke-miterlimit=\"10\" d=\"M130,114.8H6.9c-3.8,0-6.9-3.1-6.9-6.9V6.9\r\n"
+"\tC0,3.1,3.1,0,6.9,0H130c3.8,0,6.9,3.1,6.9,6.9v101.1C136.9,111.7,133.9,114.8,130,114.8z\"/>\r\n"
+"</svg>\r\n";
+
+const char* wizard_GUI_svg = (const char*) temp_binary_data_37;
+
+//================== wizard_Highlight.svg ==================
+static const unsigned char temp_binary_data_38[] =
+"<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n"
+"<!-- Generator: Adobe Illustrator 18.0.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->\r\n"
+"<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">\r\n"
+"<svg version=\"1.1\" id=\"Layer_1\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" x=\"0px\" y=\"0px\"\r\n"
+"\t viewBox=\"0 0 136.9 114.8\" enable-background=\"new 0 0 136.9 114.8\" xml:space=\"preserve\">\r\n"
+"<path opacity=\"0.2\" fill=\"#F29300\" d=\"M130.1,114.8H6.9c-3.8,0-6.9-3.1-6.9-6.9V6.9C0,3.1,3.1,0,6.9,0h123.2c3.8,0,6.9,3.1,6.9,6.9\r\n"
+"\tV108C136.9,111.8,133.9,114.8,130.1,114.8z\"/>\r\n"
+"</svg>\r\n";
+
+const char* wizard_Highlight_svg = (const char*) temp_binary_data_38;
+
+//================== wizard_Openfile.svg ==================
+static const unsigned char temp_binary_data_39[] =
+"<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n"
+"<!-- Generator: Adobe Illustrator 18.0.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->\r\n"
+"<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">\r\n"
+"<svg version=\"1.1\" id=\"Layer_1\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" x=\"0px\" y=\"0px\"\r\n"
+"\t viewBox=\"0 0 177.9 114.8\" enable-background=\"new 0 0 177.9 114.8\" xml:space=\"preserve\">\r\n"
+"<path fill=\"none\" stroke=\"#F29100\" stroke-width=\"1.3469\" stroke-miterlimit=\"10\" d=\"M164.7,71.4H13.2c-3.8,0-6.9-3.1-6.9-6.9V43.6\r\n"
+"\tc0-3.8,3.1-6.9,6.9-6.9h151.5c3.8,0,6.9,3.1,6.9,6.9v20.9C171.6,68.3,168.5,71.4,164.7,71.4z\"/>\r\n"
+"</svg>\r\n";
+
+const char* wizard_Openfile_svg = (const char*) temp_binary_data_39;
+
+//================== wizard_OpenGL.svg ==================
+static const unsigned char temp_binary_data_40[] =
+"<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n"
+"<!-- Generator: Adobe Illustrator 18.0.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->\r\n"
+"<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">\r\n"
+"<svg version=\"1.1\" id=\"Layer_1\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" x=\"0px\" y=\"0px\"\r\n"
+"\t viewBox=\"0 0 136.9 114.8\" enable-background=\"new 0 0 136.9 114.8\" xml:space=\"preserve\">\r\n"
+"<rect x=\"16.3\" y=\"10.9\" fill=\"none\" stroke=\"#F29100\" stroke-width=\"1.3469\" stroke-miterlimit=\"10\" width=\"103.6\" height=\"67.5\"/>\r\n"
+"<rect x=\"16.3\" y=\"10.9\" fill=\"none\" stroke=\"#F29300\" stroke-width=\"1.3469\" stroke-miterlimit=\"10\" width=\"103.6\" height=\"2.4\"/>\r\n"
+"<path fill=\"none\" stroke=\"#F29100\" stroke-width=\"1.3469\" stroke-miterlimit=\"10\" d=\"M75.8,31.5c8.7,4.7,14.8,13.2,13.5,20\r\n"
+"\tc-1.6,8.5-13.8,11.4-26.8,4.3S45.3,36.9,51.6,30.9C56.7,26.1,67.1,26.7,75.8,31.5z\"/>\r\n"
+"<path fill=\"none\" stroke=\"#F29100\" stroke-width=\"1.3469\" stroke-miterlimit=\"10\" d=\"M86.1,43.6c1,2.4,0.5,5.5-1.3,5\r\n"
+"\tc-1.9-0.5-9.8-5-13.8-7.4c2.9-1.2,8.2-3.2,9.8-3.2C82.2,38.2,85.2,41.4,86.1,43.6z\"/>\r\n"
+"<path fill=\"none\" stroke=\"#F29100\" stroke-width=\"1.3469\" stroke-miterlimit=\"10\" d=\"M83,55.3c-2.3,1.3-7.3,1.2-8.6-0.7\r\n"
+"\tc-1.2-1.9-2.9-9.5-3.5-12.9c4.2,2.1,12.2,6.3,13.8,7.7C86.3,50.7,85.2,54,83,55.3z\"/>\r\n"
+"<path fill=\"none\" stroke=\"#F29100\" stroke-width=\"1.3469\" stroke-miterlimit=\"10\" d=\"M63.6,53.5c-3.6-2-7.3-6.3-5.9-7.6\r\n"
+"\tc1.3-1.2,9-3.5,12.5-4.4c1.2,3.5,3.4,11.2,3.1,13C73,56.3,67.3,55.5,63.6,53.5z\"/>\r\n"
+"<path fill=\"none\" stroke=\"#F29100\" stroke-width=\"1.3469\" stroke-miterlimit=\"10\" d=\"M51.9,38.3c-0.1-2.5,2-5.2,4.1-4.6\r\n"
+"\tc2.1,0.6,9.9,5.1,13.9,7.5c-3.2,1.3-10.5,4.1-12.8,4.1C54.9,45.1,52,40.9,51.9,38.3z\"/>\r\n"
+"<path fill=\"none\" stroke=\"#F29100\" stroke-width=\"1.3469\" stroke-miterlimit=\"10\" d=\"M60,29.3c2.4-0.4,6.6,0.3,7.5,1.5\r\n"
+"\tc0.9,1.2,2.1,6.8,2.6,9.9c-4.2-2.1-12.3-6.3-13.7-7.6C55,31.8,57.4,29.8,60,29.3z\"/>\r\n"
+"<path fill=\"none\" stroke=\"#F29100\" stroke-width=\"1.3469\" stroke-miterlimit=\"10\" d=\"M75.2,32.5c2.5,1.4,5.6,4.3,5,5\r\n"
+"\tc-0.7,0.8-6.3,2.5-9.5,3.3c-1.1-3.2-2.7-8.9-2.4-9.9C68.6,30,72.6,31.1,75.2,32.5z\"/>\r\n"
+"<path fill=\"none\" stroke=\"#F29100\" stroke-width=\"1.3469\" stroke-miterlimit=\"10\" d=\"M130,114.8H6.9c-3.8,0-6.9-3.1-6.9-6.9V6.9\r\n"
+"\tC0,3.1,3.1,0,6.9,0H130c3.8,0,6.9,3.1,6.9,6.9v101.1C136.9,111.7,133.9,114.8,130,114.8z\"/>\r\n"
+"<path fill=\"none\" stroke=\"#F29100\" stroke-width=\"1.3469\" stroke-miterlimit=\"10\" d=\"M87.4,55.5c-6.6,10.4-20.4,14.6-30.8,8\r\n"
+"\ts-13.4-19.6-6.9-30\"/>\r\n"
+"</svg>\r\n";
+
+const char* wizard_OpenGL_svg = (const char*) temp_binary_data_40;
+
+//================== wizard_StaticLibrary.svg ==================
+static const unsigned char temp_binary_data_41[] =
 "<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n"
 "<!-- Generator: Adobe Illustrator 18.0.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->\r\n"
 "<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">\r\n"
@@ -2035,1233 +3261,7 @@ static const unsigned char temp_binary_data_19[] =
 "\tc-1,0-1.8-0.8-1.8-1.8V20.8\"/>\r\n"
 "</svg>\r\n";
 
-const char* iconStatic_svg = (const char*) temp_binary_data_19;
-
-//================== AudioPluginXCodeScript.txt ==================
-static const unsigned char temp_binary_data_20[] =
-"\r\n"
-"# This script takes the build product and copies it to the AU, VST, VST3, RTAS and AAX folders, depending on \r\n"
-"# which plugin types you've built\r\n"
-"\r\n"
-"original=$CONFIGURATION_BUILD_DIR/$FULL_PRODUCT_NAME\r\n"
-"\r\n"
-"# this looks inside the binary to detect which platforms are needed.. \r\n"
-"copyAU=`nm -g \"$CONFIGURATION_BUILD_DIR/$EXECUTABLE_PATH\" | grep -i 'AudioUnit' | wc -l`\r\n"
-"copyVST=`nm -g \"$CONFIGURATION_BUILD_DIR/$EXECUTABLE_PATH\" | grep -i 'VSTPlugin' | wc -l`\r\n"
-"copyVST3=`nm -g \"$CONFIGURATION_BUILD_DIR/$EXECUTABLE_PATH\" | grep -i 'GetPluginFactory' | wc -l`\r\n"
-"copyRTAS=`nm -g \"$CONFIGURATION_BUILD_DIR/$EXECUTABLE_PATH\" | grep -i 'CProcess' | wc -l`\r\n"
-"copyAAX=`nm -g \"$CONFIGURATION_BUILD_DIR/$EXECUTABLE_PATH\" | grep -i 'ACFStartup' | wc -l`\r\n"
-"\r\n"
-"if [ $copyAU -gt 0 ]; then\r\n"
-"  echo \"Copying to AudioUnit folder...\"\r\n"
-"  AU=~/Library/Audio/Plug-Ins/Components/$PRODUCT_NAME.component\r\n"
-"  if [ -d \"$AU\" ]; then \r\n"
-"    rm -r \"$AU\"\r\n"
-"  fi\r\n"
-"\r\n"
-"  cp -r \"$original\" \"$AU\"\r\n"
-"  sed -i \"\" -e 's/TDMwPTul/BNDLPTul/g' \"$AU/Contents/PkgInfo\"\r\n"
-"  sed -i \"\" -e 's/TDMw/BNDL/g' \"$AU/Contents/$INFOPLIST_FILE\"\r\n"
-"\r\n"
-"  # Fix info.plist for AUs built with Xcode 3\r\n"
-"  if [ -f \"$DEVELOPER_DIR/Library/Developer/CoreAudio/AudioUnits/AUPublic/AUBase/AUPlugInDispatch.cpp\" ]; then\r\n"
-"    echo\r\n"
-"  else\r\n"
-"    echo \"Removing AudioComponents entry from Info.plist because this is not a new-format AU\"\r\n"
-"    /usr/libexec/PlistBuddy -c \"Delete AudioComponents\" \"$AU/Contents/Info.plist\"\r\n"
-"  fi\r\n"
-"fi\r\n"
-"\r\n"
-"if [ $copyVST -gt 0 ]; then\r\n"
-"  echo \"Copying to VST folder...\"\r\n"
-"  VST=~/Library/Audio/Plug-Ins/VST/$PRODUCT_NAME.vst\r\n"
-"  if [ -d \"$VST\" ]; then \r\n"
-"    rm -r \"$VST\"\r\n"
-"  fi\r\n"
-"\r\n"
-"  cp -r \"$original\" \"$VST\"\r\n"
-"  sed -i \"\" -e 's/TDMwPTul/BNDLPTul/g' \"$VST/Contents/PkgInfo\"\r\n"
-"  sed -i \"\" -e 's/TDMw/BNDL/g' \"$VST/Contents/$INFOPLIST_FILE\"\r\n"
-"fi\r\n"
-"\r\n"
-"if [ $copyVST3 -gt 0 ]; then\r\n"
-"  echo \"Copying to VST3 folder...\"\r\n"
-"  VST3=~/Library/Audio/Plug-Ins/VST3/$PRODUCT_NAME.vst3\r\n"
-"  if [ -d \"$VST3\" ]; then \r\n"
-"    rm -r \"$VST3\"\r\n"
-"  fi\r\n"
-"\r\n"
-"  cp -r \"$original\" \"$VST3\"\r\n"
-"  sed -i \"\" -e 's/TDMwPTul/BNDLPTul/g' \"$VST3/Contents/PkgInfo\"\r\n"
-"  sed -i \"\" -e 's/TDMw/BNDL/g' \"$VST3/Contents/$INFOPLIST_FILE\"\r\n"
-"fi\r\n"
-"\r\n"
-"if [ $copyRTAS -gt 0 ]; then\r\n"
-"  echo \"Copying to RTAS folder...\"\r\n"
-"  RTAS=/Library/Application\\ Support/Digidesign/Plug-Ins/$PRODUCT_NAME.dpm\r\n"
-"  if [ -d \"$RTAS\" ]; then\r\n"
-"    rm -r \"$RTAS\"\r\n"
-"  fi\r\n"
-"\r\n"
-"  cp -r \"$original\" \"$RTAS\"\r\n"
-"fi\r\n"
-"\r\n"
-"if [ $copyAAX -gt 0 ]; then\r\n"
-"  echo \"Copying to AAX folder...\"\r\n"
-"\r\n"
-"  if [ -d \"/Applications/ProTools_3PDev/Plug-Ins\" ]; then\r\n"
-"    AAX1=\"/Applications/ProTools_3PDev/Plug-Ins/$PRODUCT_NAME.aaxplugin\"\r\n"
-"\r\n"
-"    if [ -d \"$AAX1\" ]; then\r\n"
-"      rm -r \"$AAX1\"\r\n"
-"    fi\r\n"
-"\r\n"
-"    cp -r \"$original\" \"$AAX1\"\r\n"
-"  fi\r\n"
-"\r\n"
-"  if [ -d \"/Library/Application Support/Avid/Audio/Plug-Ins\" ]; then\r\n"
-"    AAX2=\"/Library/Application Support/Avid/Audio/Plug-Ins/$PRODUCT_NAME.aaxplugin\"\r\n"
-"\r\n"
-"    if [ -d \"$AAX2\" ]; then\r\n"
-"      rm -r \"$AAX2\"\r\n"
-"    fi\r\n"
-"\r\n"
-"    cp -r \"$original\" \"$AAX2\"\r\n"
-"  fi\r\n"
-"fi\r\n";
-
-const char* AudioPluginXCodeScript_txt = (const char*) temp_binary_data_20;
-
-//================== background_tile.png ==================
-static const unsigned char temp_binary_data_21[] =
-{ 137,80,78,71,13,10,26,10,0,0,0,13,73,72,68,82,0,0,0,7,0,0,0,7,8,6,0,0,0,196,82,87,211,0,0,0,94,73,68,65,84,120,218,85,141,73,14,0,33,8,4,253,137,226,18,19,245,234,255,127,70,75,155,232,56,135,10,132,94,112,33,4,37,222,123,205,57,107,74,105,239,196,137,
-8,72,239,29,99,12,204,57,209,90,227,237,19,45,113,161,209,12,234,172,18,49,70,88,229,134,34,103,173,245,159,60,134,82,10,238,79,166,223,106,238,91,100,229,73,191,80,92,47,179,68,223,148,158,98,226,0,0,0,0,73,69,78,68,174,66,96,130,0,0 };
-
-const char* background_tile_png = (const char*) temp_binary_data_21;
-
-//================== colourscheme_dark.xml ==================
-static const unsigned char temp_binary_data_22[] =
-"<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n"
-"\r\n"
-"<COLOUR_SCHEME font=\"&lt;Monospaced&gt;; 13.0\">\r\n"
-"  <COLOUR name=\"Main Window Bkgd\" colour=\"FF29292A\"/>\r\n"
-"  <COLOUR name=\"Treeview Highlight\" colour=\"2BFFFEC3\"/>\r\n"
-"  <COLOUR name=\"Code Background\" colour=\"FF222222\"/>\r\n"
-"  <COLOUR name=\"Line Number Bkgd\" colour=\"44C1C1C1\"/>\r\n"
-"  <COLOUR name=\"Line Numbers\" colour=\"E9B2B2B2\"/>\r\n"
-"  <COLOUR name=\"Plain Text\" colour=\"FFCECECE\"/>\r\n"
-"  <COLOUR name=\"Selected Text Bkgd\" colour=\"FF2859AC\"/>\r\n"
-"  <COLOUR name=\"Caret\" colour=\"FFFFFFFF\"/>\r\n"
-"  <COLOUR name=\"Preprocessor Text\" colour=\"FFF8F631\"/>\r\n"
-"  <COLOUR name=\"Punctuation\" colour=\"FFCFBEFF\"/>\r\n"
-"  <COLOUR name=\"Bracket\" colour=\"FF058202\"/>\r\n"
-"  <COLOUR name=\"String\" colour=\"FFBC45DD\"/>\r\n"
-"  <COLOUR name=\"Float\" colour=\"ff885500\"/>\r\n"
-"  <COLOUR name=\"Integer\" colour=\"FF42C8C4\"/>\r\n"
-"  <COLOUR name=\"Identifier\" colour=\"FFCFCFCF\"/>\r\n"
-"  <COLOUR name=\"Operator\" colour=\"FFC4EB19\"/>\r\n"
-"  <COLOUR name=\"Keyword\" colour=\"FFEE6F6F\"/>\r\n"
-"  <COLOUR name=\"Comment\" colour=\"FF72D20C\"/>\r\n"
-"  <COLOUR name=\"Error\" colour=\"FFE60000\"/>\r\n"
-"</COLOUR_SCHEME>\r\n";
-
-const char* colourscheme_dark_xml = (const char*) temp_binary_data_22;
-
-//================== colourscheme_light.xml ==================
-static const unsigned char temp_binary_data_23[] =
-"<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n"
-"\r\n"
-"<COLOUR_SCHEME font=\"&lt;Monospaced&gt;; 13.0\">\r\n"
-"  <COLOUR name=\"Main Window Bkgd\" colour=\"FFE6E7E9\"/>\r\n"
-"  <COLOUR name=\"Treeview Highlight\" colour=\"401111ee\"/>\r\n"
-"  <COLOUR name=\"Code Background\" colour=\"ffffffff\"/>\r\n"
-"  <COLOUR name=\"Line Number Bkgd\" colour=\"44999999\"/>\r\n"
-"  <COLOUR name=\"Line Numbers\" colour=\"44000000\"/>\r\n"
-"  <COLOUR name=\"Plain Text\" colour=\"ff000000\"/>\r\n"
-"  <COLOUR name=\"Selected Text Bkgd\" colour=\"401111ee\"/>\r\n"
-"  <COLOUR name=\"Caret\" colour=\"ff000000\"/>\r\n"
-"  <COLOUR name=\"Preprocessor Text\" colour=\"ff660000\"/>\r\n"
-"  <COLOUR name=\"Punctuation\" colour=\"ff004400\"/>\r\n"
-"  <COLOUR name=\"Bracket\" colour=\"ff000055\"/>\r\n"
-"  <COLOUR name=\"String\" colour=\"ff990099\"/>\r\n"
-"  <COLOUR name=\"Float\" colour=\"ff885500\"/>\r\n"
-"  <COLOUR name=\"Integer\" colour=\"ff880000\"/>\r\n"
-"  <COLOUR name=\"Identifier\" colour=\"ff000000\"/>\r\n"
-"  <COLOUR name=\"Operator\" colour=\"ff225500\"/>\r\n"
-"  <COLOUR name=\"Keyword\" colour=\"ff0000cc\"/>\r\n"
-"  <COLOUR name=\"Comment\" colour=\"ff00aa00\"/>\r\n"
-"  <COLOUR name=\"Error\" colour=\"ffcc0000\"/>\r\n"
-"</COLOUR_SCHEME>\r\n";
-
-const char* colourscheme_light_xml = (const char*) temp_binary_data_23;
-
-//================== jucer_AudioPluginEditorTemplate.cpp ==================
-static const unsigned char temp_binary_data_24[] =
-"/*\r\n"
-"  ==============================================================================\r\n"
-"\r\n"
-"    This file was auto-generated by the Introjucer!\r\n"
-"\r\n"
-"    It contains the basic framework code for a JUCE plugin editor.\r\n"
-"\r\n"
-"  ==============================================================================\r\n"
-"*/\r\n"
-"\r\n"
-"EDITORCPPHEADERS\r\n"
-"\r\n"
-"\r\n"
-"//==============================================================================\r\n"
-"EDITORCLASSNAME::EDITORCLASSNAME (FILTERCLASSNAME& p)\r\n"
-"    : AudioProcessorEditor (&p), processor (p)\r\n"
-"{\r\n"
-"    // Make sure that before the constructor has finished, you've set the\r\n"
-"    // editor's size to whatever you need it to be.\r\n"
-"    setSize (400, 300);\r\n"
-"}\r\n"
-"\r\n"
-"EDITORCLASSNAME::~EDITORCLASSNAME()\r\n"
-"{\r\n"
-"}\r\n"
-"\r\n"
-"//==============================================================================\r\n"
-"void EDITORCLASSNAME::paint (Graphics& g)\r\n"
-"{\r\n"
-"    g.fillAll (Colours::white);\r\n"
-"\r\n"
-"    g.setColour (Colours::black);\r\n"
-"    g.setFont (15.0f);\r\n"
-"    g.drawFittedText (\"Hello World!\", getLocalBounds(), Justification::centred, 1);\r\n"
-"}\r\n"
-"\r\n"
-"void EDITORCLASSNAME::resized()\r\n"
-"{\r\n"
-"    // This is generally where you'll want to lay out the positions of any\r\n"
-"    // subcomponents in your editor..\r\n"
-"}\r\n";
-
-const char* jucer_AudioPluginEditorTemplate_cpp = (const char*) temp_binary_data_24;
-
-//================== jucer_AudioPluginEditorTemplate.h ==================
-static const unsigned char temp_binary_data_25[] =
-"/*\r\n"
-"  ==============================================================================\r\n"
-"\r\n"
-"    This file was auto-generated by the Introjucer!\r\n"
-"\r\n"
-"    It contains the basic framework code for a JUCE plugin editor.\r\n"
-"\r\n"
-"  ==============================================================================\r\n"
-"*/\r\n"
-"\r\n"
-"#ifndef HEADERGUARD\r\n"
-"#define HEADERGUARD\r\n"
-"\r\n"
-"EDITORHEADERS\r\n"
-"\r\n"
-"\r\n"
-"//==============================================================================\r\n"
-"/**\r\n"
-"*/\r\n"
-"class EDITORCLASSNAME  : public AudioProcessorEditor\r\n"
-"{\r\n"
-"public:\r\n"
-"    EDITORCLASSNAME (FILTERCLASSNAME&);\r\n"
-"    ~EDITORCLASSNAME();\r\n"
-"\r\n"
-"    //==============================================================================\r\n"
-"    void paint (Graphics&) override;\r\n"
-"    void resized() override;\r\n"
-"\r\n"
-"private:\r\n"
-"    // This reference is provided as a quick way for your editor to\r\n"
-"    // access the processor object that created it.\r\n"
-"    FILTERCLASSNAME& processor;\r\n"
-"\r\n"
-"    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (EDITORCLASSNAME)\r\n"
-"};\r\n"
-"\r\n"
-"\r\n"
-"#endif  // HEADERGUARD\r\n";
-
-const char* jucer_AudioPluginEditorTemplate_h = (const char*) temp_binary_data_25;
-
-//================== jucer_AudioPluginFilterTemplate.cpp ==================
-static const unsigned char temp_binary_data_26[] =
-"/*\r\n"
-"  ==============================================================================\r\n"
-"\r\n"
-"    This file was auto-generated by the Introjucer!\r\n"
-"\r\n"
-"    It contains the basic framework code for a JUCE plugin processor.\r\n"
-"\r\n"
-"  ==============================================================================\r\n"
-"*/\r\n"
-"\r\n"
-"FILTERHEADERS\r\n"
-"\r\n"
-"\r\n"
-"//==============================================================================\r\n"
-"FILTERCLASSNAME::FILTERCLASSNAME()\r\n"
-"{\r\n"
-"}\r\n"
-"\r\n"
-"FILTERCLASSNAME::~FILTERCLASSNAME()\r\n"
-"{\r\n"
-"}\r\n"
-"\r\n"
-"//==============================================================================\r\n"
-"const String FILTERCLASSNAME::getName() const\r\n"
-"{\r\n"
-"    return JucePlugin_Name;\r\n"
-"}\r\n"
-"\r\n"
-"int FILTERCLASSNAME::getNumParameters()\r\n"
-"{\r\n"
-"    return 0;\r\n"
-"}\r\n"
-"\r\n"
-"float FILTERCLASSNAME::getParameter (int index)\r\n"
-"{\r\n"
-"    return 0.0f;\r\n"
-"}\r\n"
-"\r\n"
-"void FILTERCLASSNAME::setParameter (int index, float newValue)\r\n"
-"{\r\n"
-"}\r\n"
-"\r\n"
-"const String FILTERCLASSNAME::getParameterName (int index)\r\n"
-"{\r\n"
-"    return String();\r\n"
-"}\r\n"
-"\r\n"
-"const String FILTERCLASSNAME::getParameterText (int index)\r\n"
-"{\r\n"
-"    return String();\r\n"
-"}\r\n"
-"\r\n"
-"const String FILTERCLASSNAME::getInputChannelName (int channelIndex) const\r\n"
-"{\r\n"
-"    return String (channelIndex + 1);\r\n"
-"}\r\n"
-"\r\n"
-"const String FILTERCLASSNAME::getOutputChannelName (int channelIndex) const\r\n"
-"{\r\n"
-"    return String (channelIndex + 1);\r\n"
-"}\r\n"
-"\r\n"
-"bool FILTERCLASSNAME::isInputChannelStereoPair (int index) const\r\n"
-"{\r\n"
-"    return true;\r\n"
-"}\r\n"
-"\r\n"
-"bool FILTERCLASSNAME::isOutputChannelStereoPair (int index) const\r\n"
-"{\r\n"
-"    return true;\r\n"
-"}\r\n"
-"\r\n"
-"bool FILTERCLASSNAME::acceptsMidi() const\r\n"
-"{\r\n"
-"   #if JucePlugin_WantsMidiInput\r\n"
-"    return true;\r\n"
-"   #else\r\n"
-"    return false;\r\n"
-"   #endif\r\n"
-"}\r\n"
-"\r\n"
-"bool FILTERCLASSNAME::producesMidi() const\r\n"
-"{\r\n"
-"   #if JucePlugin_ProducesMidiOutput\r\n"
-"    return true;\r\n"
-"   #else\r\n"
-"    return false;\r\n"
-"   #endif\r\n"
-"}\r\n"
-"\r\n"
-"bool FILTERCLASSNAME::silenceInProducesSilenceOut() const\r\n"
-"{\r\n"
-"    return false;\r\n"
-"}\r\n"
-"\r\n"
-"double FILTERCLASSNAME::getTailLengthSeconds() const\r\n"
-"{\r\n"
-"    return 0.0;\r\n"
-"}\r\n"
-"\r\n"
-"int FILTERCLASSNAME::getNumPrograms()\r\n"
-"{\r\n"
-"    return 1;   // NB: some hosts don't cope very well if you tell them there are 0 programs,\r\n"
-"                // so this should be at least 1, even if you're not really implementing programs.\r\n"
-"}\r\n"
-"\r\n"
-"int FILTERCLASSNAME::getCurrentProgram()\r\n"
-"{\r\n"
-"    return 0;\r\n"
-"}\r\n"
-"\r\n"
-"void FILTERCLASSNAME::setCurrentProgram (int index)\r\n"
-"{\r\n"
-"}\r\n"
-"\r\n"
-"const String FILTERCLASSNAME::getProgramName (int index)\r\n"
-"{\r\n"
-"    return String();\r\n"
-"}\r\n"
-"\r\n"
-"void FILTERCLASSNAME::changeProgramName (int index, const String& newName)\r\n"
-"{\r\n"
-"}\r\n"
-"\r\n"
-"//==============================================================================\r\n"
-"void FILTERCLASSNAME::prepareToPlay (double sampleRate, int samplesPerBlock)\r\n"
-"{\r\n"
-"    // Use this method as the place to do any pre-playback\r\n"
-"    // initialisation that you need..\r\n"
-"}\r\n"
-"\r\n"
-"void FILTERCLASSNAME::releaseResources()\r\n"
-"{\r\n"
-"    // When playback stops, you can use this as an opportunity to free up any\r\n"
-"    // spare memory, etc.\r\n"
-"}\r\n"
-"\r\n"
-"void FILTERCLASSNAME::processBlock (AudioSampleBuffer& buffer, MidiBuffer& midiMessages)\r\n"
-"{\r\n"
-"    // In case we have more outputs than inputs, this code clears any output\r\n"
-"    // channels that didn't contain input data, (because these aren't\r\n"
-"    // guaranteed to be empty - they may contain garbage).\r\n"
-"    // I've added this to avoid people getting screaming feedback\r\n"
-"    // when they first compile the plugin, but obviously you don't need to\r\n"
-"    // this code if your algorithm already fills all the output channels.\r\n"
-"    for (int i = getNumInputChannels(); i < getNumOutputChannels(); ++i)\r\n"
-"        buffer.clear (i, 0, buffer.getNumSamples());\r\n"
-"\r\n"
-"    // This is the place where you'd normally do the guts of your plugin's\r\n"
-"    // audio processing...\r\n"
-"    for (int channel = 0; channel < getNumInputChannels(); ++channel)\r\n"
-"    {\r\n"
-"        float* channelData = buffer.getWritePointer (channel);\r\n"
-"\r\n"
-"        // ..do something to the data...\r\n"
-"    }\r\n"
-"}\r\n"
-"\r\n"
-"//==============================================================================\r\n"
-"bool FILTERCLASSNAME::hasEditor() const\r\n"
-"{\r\n"
-"    return true; // (change this to false if you choose to not supply an editor)\r\n"
-"}\r\n"
-"\r\n"
-"AudioProcessorEditor* FILTERCLASSNAME::createEditor()\r\n"
-"{\r\n"
-"    return new EDITORCLASSNAME (*this);\r\n"
-"}\r\n"
-"\r\n"
-"//==============================================================================\r\n"
-"void FILTERCLASSNAME::getStateInformation (MemoryBlock& destData)\r\n"
-"{\r\n"
-"    // You should use this method to store your parameters in the memory block.\r\n"
-"    // You could do that either as raw data, or use the XML or ValueTree classes\r\n"
-"    // as intermediaries to make it easy to save and load complex data.\r\n"
-"}\r\n"
-"\r\n"
-"void FILTERCLASSNAME::setStateInformation (const void* data, int sizeInBytes)\r\n"
-"{\r\n"
-"    // You should use this method to restore your parameters from this memory block,\r\n"
-"    // whose contents will have been created by the getStateInformation() call.\r\n"
-"}\r\n"
-"\r\n"
-"//==============================================================================\r\n"
-"// This creates new instances of the plugin..\r\n"
-"AudioProcessor* JUCE_CALLTYPE createPluginFilter()\r\n"
-"{\r\n"
-"    return new FILTERCLASSNAME();\r\n"
-"}\r\n";
-
-const char* jucer_AudioPluginFilterTemplate_cpp = (const char*) temp_binary_data_26;
-
-//================== jucer_AudioPluginFilterTemplate.h ==================
-static const unsigned char temp_binary_data_27[] =
-"/*\r\n"
-"  ==============================================================================\r\n"
-"\r\n"
-"    This file was auto-generated by the Introjucer!\r\n"
-"\r\n"
-"    It contains the basic framework code for a JUCE plugin processor.\r\n"
-"\r\n"
-"  ==============================================================================\r\n"
-"*/\r\n"
-"\r\n"
-"#ifndef HEADERGUARD\r\n"
-"#define HEADERGUARD\r\n"
-"\r\n"
-"APPHEADERS\r\n"
-"\r\n"
-"\r\n"
-"//==============================================================================\r\n"
-"/**\r\n"
-"*/\r\n"
-"class FILTERCLASSNAME  : public AudioProcessor\r\n"
-"{\r\n"
-"public:\r\n"
-"    //==============================================================================\r\n"
-"    FILTERCLASSNAME();\r\n"
-"    ~FILTERCLASSNAME();\r\n"
-"\r\n"
-"    //==============================================================================\r\n"
-"    void prepareToPlay (double sampleRate, int samplesPerBlock) override;\r\n"
-"    void releaseResources() override;\r\n"
-"\r\n"
-"    void processBlock (AudioSampleBuffer&, MidiBuffer&) override;\r\n"
-"\r\n"
-"    //==============================================================================\r\n"
-"    AudioProcessorEditor* createEditor() override;\r\n"
-"    bool hasEditor() const override;\r\n"
-"\r\n"
-"    //==============================================================================\r\n"
-"    const String getName() const override;\r\n"
-"\r\n"
-"    int getNumParameters() override;\r\n"
-"    float getParameter (int index) override;\r\n"
-"    void setParameter (int index, float newValue) override;\r\n"
-"\r\n"
-"    const String getParameterName (int index) override;\r\n"
-"    const String getParameterText (int index) override;\r\n"
-"\r\n"
-"    const String getInputChannelName (int channelIndex) const override;\r\n"
-"    const String getOutputChannelName (int channelIndex) const override;\r\n"
-"    bool isInputChannelStereoPair (int index) const override;\r\n"
-"    bool isOutputChannelStereoPair (int index) const override;\r\n"
-"\r\n"
-"    bool acceptsMidi() const override;\r\n"
-"    bool producesMidi() const override;\r\n"
-"    bool silenceInProducesSilenceOut() const override;\r\n"
-"    double getTailLengthSeconds() const override;\r\n"
-"\r\n"
-"    //==============================================================================\r\n"
-"    int getNumPrograms() override;\r\n"
-"    int getCurrentProgram() override;\r\n"
-"    void setCurrentProgram (int index) override;\r\n"
-"    const String getProgramName (int index) override;\r\n"
-"    void changeProgramName (int index, const String& newName) override;\r\n"
-"\r\n"
-"    //==============================================================================\r\n"
-"    void getStateInformation (MemoryBlock& destData) override;\r\n"
-"    void setStateInformation (const void* data, int sizeInBytes) override;\r\n"
-"\r\n"
-"private:\r\n"
-"    //==============================================================================\r\n"
-"    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FILTERCLASSNAME)\r\n"
-"};\r\n"
-"\r\n"
-"\r\n"
-"#endif  // HEADERGUARD\r\n";
-
-const char* jucer_AudioPluginFilterTemplate_h = (const char*) temp_binary_data_27;
-
-//================== jucer_ComponentTemplate.cpp ==================
-static const unsigned char temp_binary_data_28[] =
-"/*\r\n"
-"  ==============================================================================\r\n"
-"\r\n"
-"  This is an automatically generated GUI class created by the Introjucer!\r\n"
-"\r\n"
-"  Be careful when adding custom code to these files, as only the code within\r\n"
-"  the \"//[xyz]\" and \"//[/xyz]\" sections will be retained when the file is loaded\r\n"
-"  and re-saved.\r\n"
-"\r\n"
-"  Created with Introjucer version: %%version%%\r\n"
-"\r\n"
-"  ------------------------------------------------------------------------------\r\n"
-"\r\n"
-"  The Introjucer is part of the JUCE library - \"Jules' Utility Class Extensions\"\r\n"
-"  Copyright 2004-13 by Raw Material Software Ltd.\r\n"
-"\r\n"
-"  ==============================================================================\r\n"
-"*/\r\n"
-"\r\n"
-"//[Headers] You can add your own extra header files here...\r\n"
-"//[/Headers]\r\n"
-"\r\n"
-"%%includeFilesCPP%%\r\n"
-"\r\n"
-"//[MiscUserDefs] You can add your own user definitions and misc code here...\r\n"
-"//[/MiscUserDefs]\r\n"
-"\r\n"
-"//==============================================================================\r\n"
-"%%className%%::%%className%% (%%constructorParams%%)\r\n"
-"%%initialisers%%{\r\n"
-"    %%constructor%%\r\n"
-"\r\n"
-"    //[Constructor] You can add your own custom stuff here..\r\n"
-"    //[/Constructor]\r\n"
-"}\r\n"
-"\r\n"
-"%%className%%::~%%className%%()\r\n"
-"{\r\n"
-"    //[Destructor_pre]. You can add your own custom destruction code here..\r\n"
-"    //[/Destructor_pre]\r\n"
-"\r\n"
-"    %%destructor%%\r\n"
-"\r\n"
-"    //[Destructor]. You can add your own custom destruction code here..\r\n"
-"    //[/Destructor]\r\n"
-"}\r\n"
-"\r\n"
-"//==============================================================================\r\n"
-"%%methodDefinitions%%\r\n"
-"\r\n"
-"//[MiscUserCode] You can add your own definitions of your custom methods or any other code here...\r\n"
-"//[/MiscUserCode]\r\n"
-"\r\n"
-"\r\n"
-"//==============================================================================\r\n"
-"#if 0\r\n"
-"/*  -- Introjucer information section --\r\n"
-"\r\n"
-"    This is where the Introjucer stores the metadata that describe this GUI layout, so \r\n"
-"    make changes in here at your peril!\r\n"
-"\r\n"
-"BEGIN_JUCER_METADATA\r\n"
-"\r\n"
-"%%metadata%%\r\n"
-"END_JUCER_METADATA\r\n"
-"*/\r\n"
-"#endif\r\n"
-"\r\n"
-"%%staticMemberDefinitions%%\r\n"
-"//[EndFile] You can add extra defines here...\r\n"
-"//[/EndFile]";
-
-const char* jucer_ComponentTemplate_cpp = (const char*) temp_binary_data_28;
-
-//================== jucer_ComponentTemplate.h ==================
-static const unsigned char temp_binary_data_29[] =
-"/*\r\n"
-"  ==============================================================================\r\n"
-"\r\n"
-"  This is an automatically generated GUI class created by the Introjucer!\r\n"
-"\r\n"
-"  Be careful when adding custom code to these files, as only the code within\r\n"
-"  the \"//[xyz]\" and \"//[/xyz]\" sections will be retained when the file is loaded\r\n"
-"  and re-saved.\r\n"
-"\r\n"
-"  Created with Introjucer version: %%version%%\r\n"
-"\r\n"
-"  ------------------------------------------------------------------------------\r\n"
-"\r\n"
-"  The Introjucer is part of the JUCE library - \"Jules' Utility Class Extensions\"\r\n"
-"  Copyright 2004-13 by Raw Material Software Ltd.\r\n"
-"\r\n"
-"  ==============================================================================\r\n"
-"*/\r\n"
-"\r\n"
-"#ifndef %%headerGuard%%\r\n"
-"#define %%headerGuard%%\r\n"
-"\r\n"
-"//[Headers]     -- You can add your own extra header files here --\r\n"
-"#include \"JuceHeader.h\"\r\n"
-"//[/Headers]\r\n"
-"\r\n"
-"%%includeFilesH%%\r\n"
-"\r\n"
-"//==============================================================================\r\n"
-"/**\r\n"
-"                                                                    //[Comments]\r\n"
-"    An auto-generated component, created by the Introjucer.\r\n"
-"\r\n"
-"    Describe your class and how it works here!\r\n"
-"                                                                    //[/Comments]\r\n"
-"*/\r\n"
-"%%classDeclaration%%\r\n"
-"{\r\n"
-"public:\r\n"
-"    //==============================================================================\r\n"
-"    %%className%% (%%constructorParams%%);\r\n"
-"    ~%%className%%();\r\n"
-"\r\n"
-"    //==============================================================================\r\n"
-"    //[UserMethods]     -- You can add your own custom methods in this section.\r\n"
-"    //[/UserMethods]\r\n"
-"\r\n"
-"    %%publicMemberDeclarations%%\r\n"
-"\r\n"
-"private:\r\n"
-"    //[UserVariables]   -- You can add your own custom variables in this section.\r\n"
-"    //[/UserVariables]\r\n"
-"\r\n"
-"    //==============================================================================\r\n"
-"    %%privateMemberDeclarations%%\r\n"
-"\r\n"
-"    //==============================================================================\r\n"
-"    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (%%className%%)\r\n"
-"};\r\n"
-"\r\n"
-"//[EndFile] You can add extra defines here...\r\n"
-"//[/EndFile]\r\n"
-"\r\n"
-"#endif   // %%headerGuard%%";
-
-const char* jucer_ComponentTemplate_h = (const char*) temp_binary_data_29;
-
-//================== jucer_ContentCompTemplate.cpp ==================
-static const unsigned char temp_binary_data_30[] =
-"/*\r\n"
-"  ==============================================================================\r\n"
-"\r\n"
-"    This file was auto-generated!\r\n"
-"\r\n"
-"  ==============================================================================\r\n"
-"*/\r\n"
-"\r\n"
-"INCLUDE_CORRESPONDING_HEADER\r\n"
-"\r\n"
-"\r\n"
-"//==============================================================================\r\n"
-"CONTENTCOMPCLASS::CONTENTCOMPCLASS()\r\n"
-"{\r\n"
-"    setSize (500, 400);\r\n"
-"}\r\n"
-"\r\n"
-"CONTENTCOMPCLASS::~CONTENTCOMPCLASS()\r\n"
-"{\r\n"
-"}\r\n"
-"\r\n"
-"void CONTENTCOMPCLASS::paint (Graphics& g)\r\n"
-"{\r\n"
-"    g.fillAll (Colour (0xffeeddff));\r\n"
-"\r\n"
-"    g.setFont (Font (16.0f));\r\n"
-"    g.setColour (Colours::black);\r\n"
-"    g.drawText (\"Hello World!\", getLocalBounds(), Justification::centred, true);\r\n"
-"}\r\n"
-"\r\n"
-"void CONTENTCOMPCLASS::resized()\r\n"
-"{\r\n"
-"    // This is called when the CONTENTCOMPCLASS is resized.\r\n"
-"    // If you add any child components, this is where you should\r\n"
-"    // update their positions.\r\n"
-"}\r\n";
-
-const char* jucer_ContentCompTemplate_cpp = (const char*) temp_binary_data_30;
-
-//================== jucer_ContentCompTemplate.h ==================
-static const unsigned char temp_binary_data_31[] =
-"/*\r\n"
-"  ==============================================================================\r\n"
-"\r\n"
-"    This file was auto-generated!\r\n"
-"\r\n"
-"  ==============================================================================\r\n"
-"*/\r\n"
-"\r\n"
-"#ifndef HEADERGUARD\r\n"
-"#define HEADERGUARD\r\n"
-"\r\n"
-"INCLUDE_JUCE\r\n"
-"\r\n"
-"\r\n"
-"//==============================================================================\r\n"
-"/*\r\n"
-"    This component lives inside our window, and this is where you should put all\r\n"
-"    your controls and content.\r\n"
-"*/\r\n"
-"class CONTENTCOMPCLASS   : public Component\r\n"
-"{\r\n"
-"public:\r\n"
-"    //==============================================================================\r\n"
-"    CONTENTCOMPCLASS();\r\n"
-"    ~CONTENTCOMPCLASS();\r\n"
-"\r\n"
-"    void paint (Graphics&);\r\n"
-"    void resized();\r\n"
-"\r\n"
-"private:\r\n"
-"    //==============================================================================\r\n"
-"    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CONTENTCOMPCLASS)\r\n"
-"};\r\n"
-"\r\n"
-"\r\n"
-"#endif  // HEADERGUARD\r\n";
-
-const char* jucer_ContentCompTemplate_h = (const char*) temp_binary_data_31;
-
-//================== jucer_InlineComponentTemplate.h ==================
-static const unsigned char temp_binary_data_32[] =
-"//==============================================================================\r\n"
-"class COMPONENTCLASS    : public Component\r\n"
-"{\r\n"
-"public:\r\n"
-"    COMPONENTCLASS()\r\n"
-"    {\r\n"
-"        // In your constructor, you should add any child components, and\r\n"
-"        // initialise any special settings that your component needs.\r\n"
-"\r\n"
-"    }\r\n"
-"\r\n"
-"    ~COMPONENTCLASS()\r\n"
-"    {\r\n"
-"    }\r\n"
-"\r\n"
-"    void paint (Graphics& g)\r\n"
-"    {\r\n"
-"        // You should replace everything in this method with your own drawing code..\r\n"
-"\r\n"
-"        g.fillAll (Colours::white);   // clear the background\r\n"
-"\r\n"
-"        g.setColour (Colours::grey);\r\n"
-"        g.drawRect (getLocalBounds(), 1);   // draw an outline around the component\r\n"
-"\r\n"
-"        g.setColour (Colours::lightblue);\r\n"
-"        g.setFont (14.0f);\r\n"
-"        g.drawText (\"COMPONENTCLASS\", getLocalBounds(),\r\n"
-"                    Justification::centred, true);   // draw some placeholder text\r\n"
-"    }\r\n"
-"\r\n"
-"    void resized()\r\n"
-"    {\r\n"
-"        // This method is where you should set the bounds of any child\r\n"
-"        // components that your component contains..\r\n"
-"\r\n"
-"    }\r\n"
-"\r\n"
-"private:\r\n"
-"    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (COMPONENTCLASS)\r\n"
-"};\r\n";
-
-const char* jucer_InlineComponentTemplate_h = (const char*) temp_binary_data_32;
-
-//================== jucer_MainConsoleAppTemplate.cpp ==================
-static const unsigned char temp_binary_data_33[] =
-"/*\r\n"
-"  ==============================================================================\r\n"
-"\r\n"
-"    This file was auto-generated!\r\n"
-"\r\n"
-"    It contains the basic startup code for a Juce application.\r\n"
-"\r\n"
-"  ==============================================================================\r\n"
-"*/\r\n"
-"\r\n"
-"APPHEADERS\r\n"
-"\r\n"
-"\r\n"
-"//==============================================================================\r\n"
-"int main (int argc, char* argv[])\r\n"
-"{\r\n"
-"\r\n"
-"    // ..your code goes here!\r\n"
-"\r\n"
-"\r\n"
-"    return 0;\r\n"
-"}\r\n";
-
-const char* jucer_MainConsoleAppTemplate_cpp = (const char*) temp_binary_data_33;
-
-//================== jucer_MainTemplate_NoWindow.cpp ==================
-static const unsigned char temp_binary_data_34[] =
-"/*\r\n"
-"  ==============================================================================\r\n"
-"\r\n"
-"    This file was auto-generated by the Introjucer!\r\n"
-"\r\n"
-"    It contains the basic startup code for a Juce application.\r\n"
-"\r\n"
-"  ==============================================================================\r\n"
-"*/\r\n"
-"\r\n"
-"APPHEADERS\r\n"
-"\r\n"
-"\r\n"
-"//==============================================================================\r\n"
-"class APPCLASSNAME  : public JUCEApplication\r\n"
-"{\r\n"
-"public:\r\n"
-"    //==============================================================================\r\n"
-"    APPCLASSNAME() {}\r\n"
-"\r\n"
-"    const String getApplicationName() override       { return ProjectInfo::projectName; }\r\n"
-"    const String getApplicationVersion() override    { return ProjectInfo::versionString; }\r\n"
-"    bool moreThanOneInstanceAllowed() override       { return ALLOWMORETHANONEINSTANCE; }\r\n"
-"\r\n"
-"    //==============================================================================\r\n"
-"    void initialise (const String& commandLine) override\r\n"
-"    {\r\n"
-"        // Add your application's initialisation code here..\r\n"
-"    }\r\n"
-"\r\n"
-"    void shutdown() override\r\n"
-"    {\r\n"
-"        // Add your application's shutdown code here..\r\n"
-"    }\r\n"
-"\r\n"
-"    //==============================================================================\r\n"
-"    void systemRequestedQuit() override\r\n"
-"    {\r\n"
-"        // This is called when the app is being asked to quit: you can ignore this\r\n"
-"        // request and let the app carry on running, or call quit() to allow the app to close.\r\n"
-"        quit();\r\n"
-"    }\r\n"
-"\r\n"
-"    void anotherInstanceStarted (const String& commandLine) override\r\n"
-"    {\r\n"
-"        // When another instance of the app is launched while this one is running,\r\n"
-"        // this method is invoked, and the commandLine parameter tells you what\r\n"
-"        // the other instance's command-line arguments were.\r\n"
-"    }\r\n"
-"};\r\n"
-"\r\n"
-"//==============================================================================\r\n"
-"// This macro generates the main() routine that launches the app.\r\n"
-"START_JUCE_APPLICATION (APPCLASSNAME)\r\n";
-
-const char* jucer_MainTemplate_NoWindow_cpp = (const char*) temp_binary_data_34;
-
-//================== jucer_MainTemplate_Window.cpp ==================
-static const unsigned char temp_binary_data_35[] =
-"/*\r\n"
-"  ==============================================================================\r\n"
-"\r\n"
-"    This file was auto-generated by the Introjucer!\r\n"
-"\r\n"
-"    It contains the basic startup code for a Juce application.\r\n"
-"\r\n"
-"  ==============================================================================\r\n"
-"*/\r\n"
-"\r\n"
-"APPHEADERS\r\n"
-"\r\n"
-"\r\n"
-"//==============================================================================\r\n"
-"class APPCLASSNAME  : public JUCEApplication\r\n"
-"{\r\n"
-"public:\r\n"
-"    //==============================================================================\r\n"
-"    APPCLASSNAME() {}\r\n"
-"\r\n"
-"    const String getApplicationName() override       { return ProjectInfo::projectName; }\r\n"
-"    const String getApplicationVersion() override    { return ProjectInfo::versionString; }\r\n"
-"    bool moreThanOneInstanceAllowed() override       { return ALLOWMORETHANONEINSTANCE; }\r\n"
-"\r\n"
-"    //==============================================================================\r\n"
-"    void initialise (const String& commandLine) override\r\n"
-"    {\r\n"
-"        // This method is where you should put your application's initialisation code..\r\n"
-"\r\n"
-"        mainWindow = new MainWindow (getApplicationName());\r\n"
-"    }\r\n"
-"\r\n"
-"    void shutdown() override\r\n"
-"    {\r\n"
-"        // Add your application's shutdown code here..\r\n"
-"\r\n"
-"        mainWindow = nullptr; // (deletes our window)\r\n"
-"    }\r\n"
-"\r\n"
-"    //==============================================================================\r\n"
-"    void systemRequestedQuit() override\r\n"
-"    {\r\n"
-"        // This is called when the app is being asked to quit: you can ignore this\r\n"
-"        // request and let the app carry on running, or call quit() to allow the app to close.\r\n"
-"        quit();\r\n"
-"    }\r\n"
-"\r\n"
-"    void anotherInstanceStarted (const String& commandLine) override\r\n"
-"    {\r\n"
-"        // When another instance of the app is launched while this one is running,\r\n"
-"        // this method is invoked, and the commandLine parameter tells you what\r\n"
-"        // the other instance's command-line arguments were.\r\n"
-"    }\r\n"
-"\r\n"
-"    //==============================================================================\r\n"
-"    /*\r\n"
-"        This class implements the desktop window that contains an instance of\r\n"
-"        our CONTENTCOMPCLASS class.\r\n"
-"    */\r\n"
-"    class MainWindow    : public DocumentWindow\r\n"
-"    {\r\n"
-"    public:\r\n"
-"        MainWindow (String name)  : DocumentWindow (name,\r\n"
-"                                                    Colours::lightgrey,\r\n"
-"                                                    DocumentWindow::allButtons)\r\n"
-"        {\r\n"
-"            setUsingNativeTitleBar (true);\r\n"
-"            setContentOwned (new CONTENTCOMPCLASS(), true);\r\n"
-"\r\n"
-"            centreWithSize (getWidth(), getHeight());\r\n"
-"            setVisible (true);\r\n"
-"        }\r\n"
-"\r\n"
-"        void closeButtonPressed() override\r\n"
-"        {\r\n"
-"            // This is called when the user tries to close this window. Here, we'll just\r\n"
-"            // ask the app to quit when this happens, but you can change this to do\r\n"
-"            // whatever you need.\r\n"
-"            JUCEApplication::getInstance()->systemRequestedQuit();\r\n"
-"        }\r\n"
-"\r\n"
-"        /* Note: Be careful if you override any DocumentWindow methods - the base\r\n"
-"           class uses a lot of them, so by overriding you might break its functionality.\r\n"
-"           It's best to do all your work in your content component instead, but if\r\n"
-"           you really have to override any DocumentWindow methods, make sure your\r\n"
-"           subclass also calls the superclass's method.\r\n"
-"        */\r\n"
-"\r\n"
-"    private:\r\n"
-"        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainWindow)\r\n"
-"    };\r\n"
-"\r\n"
-"private:\r\n"
-"    ScopedPointer<MainWindow> mainWindow;\r\n"
-"};\r\n"
-"\r\n"
-"//==============================================================================\r\n"
-"// This macro generates the main() routine that launches the app.\r\n"
-"START_JUCE_APPLICATION (APPCLASSNAME)\r\n";
-
-const char* jucer_MainTemplate_Window_cpp = (const char*) temp_binary_data_35;
-
-//================== jucer_NewComponentTemplate.cpp ==================
-static const unsigned char temp_binary_data_36[] =
-"/*\r\n"
-"  ==============================================================================\r\n"
-"\r\n"
-"    FILENAME\r\n"
-"    Created: DATE\r\n"
-"    Author:  AUTHOR\r\n"
-"\r\n"
-"  ==============================================================================\r\n"
-"*/\r\n"
-"\r\n"
-"INCLUDE_JUCE\r\n"
-"INCLUDE_CORRESPONDING_HEADER\r\n"
-"\r\n"
-"//==============================================================================\r\n"
-"COMPONENTCLASS::COMPONENTCLASS()\r\n"
-"{\r\n"
-"    // In your constructor, you should add any child components, and\r\n"
-"    // initialise any special settings that your component needs.\r\n"
-"\r\n"
-"}\r\n"
-"\r\n"
-"COMPONENTCLASS::~COMPONENTCLASS()\r\n"
-"{\r\n"
-"}\r\n"
-"\r\n"
-"void COMPONENTCLASS::paint (Graphics& g)\r\n"
-"{\r\n"
-"    /* This demo code just fills the component's background and\r\n"
-"       draws some placeholder text to get you started.\r\n"
-"\r\n"
-"       You should replace everything in this method with your own\r\n"
-"       drawing code..\r\n"
-"    */\r\n"
-"\r\n"
-"    g.fillAll (Colours::white);   // clear the background\r\n"
-"\r\n"
-"    g.setColour (Colours::grey);\r\n"
-"    g.drawRect (getLocalBounds(), 1);   // draw an outline around the component\r\n"
-"\r\n"
-"    g.setColour (Colours::lightblue);\r\n"
-"    g.setFont (14.0f);\r\n"
-"    g.drawText (\"COMPONENTCLASS\", getLocalBounds(),\r\n"
-"                Justification::centred, true);   // draw some placeholder text\r\n"
-"}\r\n"
-"\r\n"
-"void COMPONENTCLASS::resized()\r\n"
-"{\r\n"
-"    // This method is where you should set the bounds of any child\r\n"
-"    // components that your component contains..\r\n"
-"\r\n"
-"}\r\n";
-
-const char* jucer_NewComponentTemplate_cpp = (const char*) temp_binary_data_36;
-
-//================== jucer_NewComponentTemplate.h ==================
-static const unsigned char temp_binary_data_37[] =
-"/*\r\n"
-"  ==============================================================================\r\n"
-"\r\n"
-"    FILENAME\r\n"
-"    Created: DATE\r\n"
-"    Author:  AUTHOR\r\n"
-"\r\n"
-"  ==============================================================================\r\n"
-"*/\r\n"
-"\r\n"
-"#ifndef HEADERGUARD\r\n"
-"#define HEADERGUARD\r\n"
-"\r\n"
-"INCLUDE_JUCE\r\n"
-"\r\n"
-"//==============================================================================\r\n"
-"/*\r\n"
-"*/\r\n"
-"class COMPONENTCLASS    : public Component\r\n"
-"{\r\n"
-"public:\r\n"
-"    COMPONENTCLASS();\r\n"
-"    ~COMPONENTCLASS();\r\n"
-"\r\n"
-"    void paint (Graphics&);\r\n"
-"    void resized();\r\n"
-"\r\n"
-"private:\r\n"
-"    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (COMPONENTCLASS)\r\n"
-"};\r\n"
-"\r\n"
-"\r\n"
-"#endif  // HEADERGUARD\r\n";
-
-const char* jucer_NewComponentTemplate_h = (const char*) temp_binary_data_37;
-
-//================== jucer_NewCppFileTemplate.cpp ==================
-static const unsigned char temp_binary_data_38[] =
-"/*\r\n"
-"  ==============================================================================\r\n"
-"\r\n"
-"    FILENAME\r\n"
-"    Created: DATE\r\n"
-"    Author:  AUTHOR\r\n"
-"\r\n"
-"  ==============================================================================\r\n"
-"*/\r\n"
-"\r\n"
-"INCLUDE_CORRESPONDING_HEADER\r\n";
-
-const char* jucer_NewCppFileTemplate_cpp = (const char*) temp_binary_data_38;
-
-//================== jucer_NewCppFileTemplate.h ==================
-static const unsigned char temp_binary_data_39[] =
-"/*\r\n"
-"  ==============================================================================\r\n"
-"\r\n"
-"    FILENAME\r\n"
-"    Created: DATE\r\n"
-"    Author:  AUTHOR\r\n"
-"\r\n"
-"  ==============================================================================\r\n"
-"*/\r\n"
-"\r\n"
-"#ifndef HEADERGUARD\r\n"
-"#define HEADERGUARD\r\n"
-"\r\n"
-"\r\n"
-"\r\n"
-"\r\n"
-"\r\n"
-"#endif  // HEADERGUARD\r\n";
-
-const char* jucer_NewCppFileTemplate_h = (const char*) temp_binary_data_39;
-
-//================== jucer_NewInlineComponentTemplate.h ==================
-static const unsigned char temp_binary_data_40[] =
-"/*\r\n"
-"  ==============================================================================\r\n"
-"\r\n"
-"    FILENAME\r\n"
-"    Created: DATE\r\n"
-"    Author:  AUTHOR\r\n"
-"\r\n"
-"  ==============================================================================\r\n"
-"*/\r\n"
-"\r\n"
-"#ifndef HEADERGUARD\r\n"
-"#define HEADERGUARD\r\n"
-"\r\n"
-"INCLUDE_JUCE\r\n"
-"\r\n"
-"//==============================================================================\r\n"
-"/*\r\n"
-"*/\r\n"
-"class COMPONENTCLASS    : public Component\r\n"
-"{\r\n"
-"public:\r\n"
-"    COMPONENTCLASS()\r\n"
-"    {\r\n"
-"        // In your constructor, you should add any child components, and\r\n"
-"        // initialise any special settings that your component needs.\r\n"
-"\r\n"
-"    }\r\n"
-"\r\n"
-"    ~COMPONENTCLASS()\r\n"
-"    {\r\n"
-"    }\r\n"
-"\r\n"
-"    void paint (Graphics& g)\r\n"
-"    {\r\n"
-"        /* This demo code just fills the component's background and\r\n"
-"           draws some placeholder text to get you started.\r\n"
-"\r\n"
-"           You should replace everything in this method with your own\r\n"
-"           drawing code..\r\n"
-"        */\r\n"
-"\r\n"
-"        g.fillAll (Colours::white);   // clear the background\r\n"
-"\r\n"
-"        g.setColour (Colours::grey);\r\n"
-"        g.drawRect (getLocalBounds(), 1);   // draw an outline around the component\r\n"
-"\r\n"
-"        g.setColour (Colours::lightblue);\r\n"
-"        g.setFont (14.0f);\r\n"
-"        g.drawText (\"COMPONENTCLASS\", getLocalBounds(),\r\n"
-"                    Justification::centred, true);   // draw some placeholder text\r\n"
-"    }\r\n"
-"\r\n"
-"    void resized()\r\n"
-"    {\r\n"
-"        // This method is where you should set the bounds of any child\r\n"
-"        // components that your component contains..\r\n"
-"\r\n"
-"    }\r\n"
-"\r\n"
-"private:\r\n"
-"    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (COMPONENTCLASS)\r\n"
-"};\r\n"
-"\r\n"
-"\r\n"
-"#endif  // HEADERGUARD\r\n";
-
-const char* jucer_NewInlineComponentTemplate_h = (const char*) temp_binary_data_40;
-
-//================== RecentFilesMenuTemplate.nib ==================
-static const unsigned char temp_binary_data_41[] =
-{ 98,112,108,105,115,116,48,48,212,0,1,0,2,0,3,0,4,0,5,0,6,1,53,1,54,88,36,118,101,114,115,105,111,110,88,36,111,98,106,101,99,116,115,89,36,97,114,99,104,105,118,101,114,84,36,116,111,112,18,0,1,134,160,175,16,74,0,7,0,8,0,31,0,35,0,36,0,42,0,46,0,50,
-0,53,0,57,0,74,0,77,0,78,0,86,0,87,0,97,0,112,0,113,0,114,0,119,0,120,0,121,0,124,0,128,0,129,0,132,0,143,0,144,0,145,0,149,0,153,0,162,0,163,0,164,0,169,0,173,0,180,0,181,0,182,0,185,0,192,0,193,0,200,0,201,0,208,0,209,0,216,0,217,0,224,0,225,0,226,
-0,229,0,230,0,232,0,249,1,11,1,29,1,30,1,31,1,32,1,33,1,34,1,35,1,36,1,37,1,38,1,39,1,40,1,41,1,42,1,43,1,44,1,47,1,50,85,36,110,117,108,108,219,0,9,0,10,0,11,0,12,0,13,0,14,0,15,0,16,0,17,0,18,0,19,0,20,0,21,0,22,0,23,0,24,0,25,0,26,0,27,0,28,0,29,0,
-29,95,16,16,78,83,86,105,115,105,98,108,101,87,105,110,100,111,119,115,93,78,83,79,98,106,101,99,116,115,75,101,121,115,86,78,83,82,111,111,116,92,78,83,79,105,100,115,86,97,108,117,101,115,86,36,99,108,97,115,115,90,78,83,79,105,100,115,75,101,121,115,
-93,78,83,67,111,110,110,101,99,116,105,111,110,115,95,16,15,78,83,79,98,106,101,99,116,115,86,97,108,117,101,115,95,16,25,78,83,65,99,99,101,115,115,105,98,105,108,105,116,121,67,111,110,110,101,99,116,111,114,115,95,16,23,78,83,65,99,99,101,115,115,
-105,98,105,108,105,116,121,79,105,100,115,75,101,121,115,95,16,25,78,83,65,99,99,101,115,115,105,98,105,108,105,116,121,79,105,100,115,86,97,108,117,101,115,128,5,128,9,128,2,128,55,128,73,128,54,128,7,128,53,128,71,128,72,128,72,210,0,13,0,32,0,33,0,
-34,91,78,83,67,108,97,115,115,78,97,109,101,128,4,128,3,93,78,83,65,112,112,108,105,99,97,116,105,111,110,210,0,37,0,38,0,39,0,40,90,36,99,108,97,115,115,110,97,109,101,88,36,99,108,97,115,115,101,115,94,78,83,67,117,115,116,111,109,79,98,106,101,99,
-116,162,0,39,0,41,88,78,83,79,98,106,101,99,116,210,0,13,0,43,0,44,0,45,90,78,83,46,111,98,106,101,99,116,115,128,6,160,210,0,37,0,38,0,47,0,48,92,78,83,77,117,116,97,98,108,101,83,101,116,163,0,47,0,49,0,41,85,78,83,83,101,116,210,0,13,0,43,0,51,0,52,
-128,8,160,210,0,37,0,38,0,54,0,55,94,78,83,77,117,116,97,98,108,101,65,114,114,97,121,163,0,54,0,56,0,41,87,78,83,65,114,114,97,121,210,0,13,0,43,0,58,0,59,128,52,174,0,60,0,61,0,62,0,63,0,64,0,65,0,66,0,67,0,68,0,69,0,70,0,71,0,72,0,73,128,10,128,12,
-128,45,128,15,128,39,128,25,128,28,128,30,128,33,128,35,128,43,128,41,128,47,128,50,210,0,13,0,32,0,33,0,76,128,4,128,11,93,78,83,65,112,112,108,105,99,97,116,105,111,110,212,0,79,0,13,0,80,0,81,0,82,0,83,0,84,0,85,91,78,83,77,101,110,117,73,116,101,
-109,115,86,78,83,78,97,109,101,87,78,83,84,105,116,108,101,128,14,128,38,128,49,128,13,89,65,77,97,105,110,77,101,110,117,210,0,13,0,43,0,51,0,89,128,8,167,0,63,0,65,0,64,0,71,0,70,0,62,0,72,128,15,128,25,128,39,128,41,128,43,128,45,128,47,216,0,98,0,
-99,0,100,0,13,0,101,0,102,0,103,0,81,0,104,0,61,0,106,0,107,0,108,0,109,0,110,0,111,95,16,17,78,83,75,101,121,69,113,117,105,118,77,111,100,77,97,115,107,86,78,83,77,101,110,117,89,78,83,79,110,73,109,97,103,101,90,78,83,75,101,121,69,113,117,105,118,
-93,78,83,77,110,101,109,111,110,105,99,76,111,99,92,78,83,77,105,120,101,100,73,109,97,103,101,18,0,16,0,0,128,12,128,18,128,24,128,17,18,127,255,255,255,128,22,128,16,91,100,101,108,109,101,65,112,112,75,105,116,80,211,0,13,0,115,0,32,0,116,0,117,0,
-118,94,78,83,82,101,115,111,117,114,99,101,78,97,109,101,128,21,128,20,128,19,87,78,83,73,109,97,103,101,95,16,15,78,83,77,101,110,117,67,104,101,99,107,109,97,114,107,210,0,37,0,38,0,122,0,123,95,16,16,78,83,67,117,115,116,111,109,82,101,115,111,117,
-114,99,101,162,0,122,0,41,211,0,13,0,115,0,32,0,116,0,126,0,118,128,21,128,23,128,19,95,16,16,78,83,77,101,110,117,77,105,120,101,100,83,116,97,116,101,210,0,37,0,38,0,130,0,131,90,78,83,77,101,110,117,73,116,101,109,162,0,130,0,41,218,0,133,0,98,0,134,
-0,99,0,100,0,13,0,101,0,102,0,103,0,81,0,135,0,104,0,66,0,61,0,106,0,107,0,108,0,109,0,110,0,142,88,78,83,65,99,116,105,111,110,89,78,83,83,117,98,109,101,110,117,128,27,128,28,128,12,128,18,128,24,128,17,128,22,128,26,84,70,105,108,101,94,115,117,98,
-109,101,110,117,65,99,116,105,111,110,58,211,0,79,0,13,0,81,0,146,0,83,0,142,128,29,128,38,128,26,210,0,13,0,43,0,51,0,151,128,8,161,0,67,128,30,218,0,133,0,98,0,134,0,99,0,100,0,13,0,101,0,102,0,103,0,81,0,154,0,104,0,68,0,66,0,106,0,107,0,108,0,109,
-0,110,0,161,128,32,128,33,128,28,128,18,128,24,128,17,128,22,128,31,91,79,112,101,110,32,82,101,99,101,110,116,94,115,117,98,109,101,110,117,65,99,116,105,111,110,58,212,0,79,0,13,0,80,0,81,0,165,0,83,0,167,0,161,128,34,128,38,128,37,128,31,210,0,13,
-0,43,0,51,0,171,128,8,161,0,69,128,35,216,0,98,0,99,0,100,0,13,0,101,0,102,0,103,0,81,0,104,0,68,0,106,0,107,0,108,0,109,0,110,0,179,128,33,128,18,128,24,128,17,128,22,128,36,90,67,108,101,97,114,32,77,101,110,117,95,16,22,95,78,83,82,101,99,101,110,
-116,68,111,99,117,109,101,110,116,115,77,101,110,117,210,0,37,0,38,0,183,0,184,86,78,83,77,101,110,117,162,0,183,0,41,216,0,98,0,99,0,100,0,13,0,101,0,102,0,103,0,81,0,104,0,61,0,106,0,107,0,108,0,109,0,110,0,191,128,12,128,18,128,24,128,17,128,22,128,
-40,84,69,100,105,116,215,0,99,0,100,0,13,0,101,0,102,0,103,0,81,0,61,0,106,0,107,0,108,0,109,0,110,0,199,128,12,128,18,128,24,128,17,128,22,128,42,86,70,111,114,109,97,116,216,0,98,0,99,0,100,0,13,0,101,0,102,0,103,0,81,0,104,0,61,0,106,0,107,0,108,0,
-109,0,110,0,207,128,12,128,18,128,24,128,17,128,22,128,44,84,86,105,101,119,216,0,98,0,99,0,100,0,13,0,101,0,102,0,103,0,81,0,104,0,61,0,106,0,107,0,108,0,109,0,110,0,215,128,12,128,18,128,24,128,17,128,22,128,46,86,87,105,110,100,111,119,215,0,99,0,
-100,0,13,0,101,0,102,0,103,0,81,0,61,0,106,0,107,0,108,0,109,0,110,0,223,128,12,128,18,128,24,128,17,128,22,128,48,84,72,101,108,112,91,95,78,83,77,97,105,110,77,101,110,117,210,0,13,0,32,0,33,0,228,128,4,128,51,93,78,83,70,111,110,116,77,97,110,97,103,
-101,114,210,0,37,0,38,0,56,0,231,162,0,56,0,41,210,0,13,0,43,0,58,0,234,128,52,174,0,22,0,22,0,61,0,61,0,61,0,61,0,65,0,66,0,67,0,68,0,61,0,61,0,61,0,22,128,2,128,2,128,12,128,12,128,12,128,12,128,25,128,28,128,30,128,33,128,12,128,12,128,12,128,2,210,
-0,13,0,43,0,58,0,251,128,52,175,16,15,0,22,0,60,0,61,0,62,0,63,0,64,0,65,0,66,0,67,0,68,0,69,0,70,0,71,0,72,0,73,128,2,128,10,128,12,128,45,128,15,128,39,128,25,128,28,128,30,128,33,128,35,128,43,128,41,128,47,128,50,210,0,13,0,43,0,58,1,13,128,52,175,
-16,15,1,14,1,15,1,16,1,17,1,18,1,19,1,20,1,21,1,22,1,23,1,24,1,25,1,26,1,27,1,28,128,56,128,57,128,58,128,59,128,60,128,61,128,62,128,63,128,64,128,65,128,66,128,67,128,68,128,69,128,70,17,2,22,17,2,23,17,2,24,17,2,25,17,2,26,17,2,27,17,2,28,17,2,29,
-17,2,30,17,2,31,17,2,32,17,2,33,17,2,34,17,2,35,17,2,36,210,0,13,0,43,0,51,1,46,128,8,160,210,0,13,0,43,0,58,1,49,128,52,160,210,0,37,0,38,1,51,1,52,94,78,83,73,66,79,98,106,101,99,116,68,97,116,97,162,1,51,0,41,95,16,15,78,83,75,101,121,101,100,65,114,
-99,104,105,118,101,114,209,1,55,1,56,93,73,66,46,111,98,106,101,99,116,100,97,116,97,128,1,0,8,0,25,0,34,0,43,0,53,0,58,0,63,0,214,0,220,1,9,1,28,1,42,1,49,1,62,1,69,1,80,1,94,1,112,1,140,1,166,1,194,1,196,1,198,1,200,1,202,1,204,1,206,1,208,1,210,1,
-212,1,214,1,216,1,225,1,237,1,239,1,241,1,255,2,8,2,19,2,28,2,43,2,48,2,57,2,66,2,77,2,79,2,80,2,89,2,102,2,109,2,115,2,124,2,126,2,127,2,136,2,151,2,158,2,166,2,175,2,177,2,206,2,208,2,210,2,212,2,214,2,216,2,218,2,220,2,222,2,224,2,226,2,228,2,230,
-2,232,2,234,2,243,2,245,2,247,3,5,3,22,3,34,3,41,3,49,3,51,3,53,3,55,3,57,3,67,3,76,3,78,3,93,3,95,3,97,3,99,3,101,3,103,3,105,3,107,3,140,3,160,3,167,3,177,3,188,3,202,3,215,3,220,3,222,3,224,3,226,3,228,3,233,3,235,3,237,3,249,3,250,4,7,4,22,4,24,4,
-26,4,28,4,36,4,54,4,63,4,82,4,87,4,100,4,102,4,104,4,106,4,125,4,134,4,145,4,150,4,191,4,200,4,210,4,212,4,214,4,216,4,218,4,220,4,222,4,224,4,226,4,231,4,246,5,3,5,5,5,7,5,9,5,18,5,20,5,23,5,25,5,66,5,68,5,70,5,72,5,74,5,76,5,78,5,80,5,82,5,94,5,109,
-5,126,5,128,5,130,5,132,5,134,5,143,5,145,5,148,5,150,5,183,5,185,5,187,5,189,5,191,5,193,5,195,5,206,5,231,5,240,5,247,5,252,6,29,6,31,6,33,6,35,6,37,6,39,6,41,6,46,6,75,6,77,6,79,6,81,6,83,6,85,6,87,6,94,6,127,6,129,6,131,6,133,6,135,6,137,6,139,6,
-144,6,177,6,179,6,181,6,183,6,185,6,187,6,189,6,196,6,225,6,227,6,229,6,231,6,233,6,235,6,237,6,242,6,254,7,7,7,9,7,11,7,25,7,34,7,39,7,48,7,50,7,79,7,81,7,83,7,85,7,87,7,89,7,91,7,93,7,95,7,97,7,99,7,101,7,103,7,105,7,107,7,116,7,118,7,151,7,153,7,155,
-7,157,7,159,7,161,7,163,7,165,7,167,7,169,7,171,7,173,7,175,7,177,7,179,7,181,7,190,7,192,7,225,7,227,7,229,7,231,7,233,7,235,7,237,7,239,7,241,7,243,7,245,7,247,7,249,7,251,7,253,7,255,8,2,8,5,8,8,8,11,8,14,8,17,8,20,8,23,8,26,8,29,8,32,8,35,8,38,8,
-41,8,44,8,53,8,55,8,56,8,65,8,67,8,68,8,77,8,92,8,97,8,115,8,120,8,134,0,0,0,0,0,0,2,2,0,0,0,0,0,0,1,57,0,0,0,0,0,0,0,0,0,0,0,0,0,0,8,136,0,0 };
-
-const char* RecentFilesMenuTemplate_nib = (const char*) temp_binary_data_41;
+const char* wizard_StaticLibrary_svg = (const char*) temp_binary_data_41;
 
 
 const char* getNamedResource (const char*, int&) throw();
@@ -3274,26 +3274,6 @@ const char* getNamedResource (const char* resourceNameUTF8, int& numBytes) throw
 
     switch (hash)
     {
-        case 0x507a15c7:  numBytes = 8150; return projectIconAndroid_png;
-        case 0xe8e2796f:  numBytes = 11917; return projectIconCodeblocks_png;
-        case 0x90374ad6:  numBytes = 16444; return projectIconLinuxMakefile_png;
-        case 0x517aa477:  numBytes = 6986; return projectIconVisualStudio05_png;
-        case 0x51a4eafa:  numBytes = 7099; return projectIconVisualStudio08_png;
-        case 0x52e90791:  numBytes = 6712; return projectIconVisualStudio10_png;
-        case 0x53053693:  numBytes = 6637; return projectIconVisualStudio12_png;
-        case 0x53134e14:  numBytes = 6719; return projectIconVisualStudio13_png;
-        case 0xecc12a3d:  numBytes = 18281; return projectIconXcode_png;
-        case 0x9d3ae124:  numBytes = 18111; return projectIconXcodeIOS_png;
-        case 0x1e94a484:  numBytes = 686; return iconOpenfile_svg;
-        case 0xfd3a6730:  numBytes = 2963; return iconAnimation_svg;
-        case 0xd6d78a02:  numBytes = 9802; return iconAudio_svg;
-        case 0xde056543:  numBytes = 1204; return iconConsole_svg;
-        case 0x40ec2c2b:  numBytes = 3588; return iconDynamic_svg;
-        case 0xf0177aa7:  numBytes = 3448; return iconGui_svg;
-        case 0xdff8c060:  numBytes = 638; return iconHighlight_svg;
-        case 0xde2f5c2d:  numBytes = 2497; return iconOpengl_svg;
-        case 0x90b420b1:  numBytes = 10809; return iconPlugin_svg;
-        case 0xa1326a6c:  numBytes = 3563; return iconStatic_svg;
         case 0x44be9398:  numBytes = 2916; return AudioPluginXCodeScript_txt;
         case 0x4a0cfd09:  numBytes = 151; return background_tile_png;
         case 0x763d39dc:  numBytes = 1050; return colourscheme_dark_xml;
@@ -3315,7 +3295,27 @@ const char* getNamedResource (const char* resourceNameUTF8, int& numBytes) throw
         case 0x02a2a077:  numBytes = 262; return jucer_NewCppFileTemplate_cpp;
         case 0x0842c43c:  numBytes = 308; return jucer_NewCppFileTemplate_h;
         case 0x36e634a1:  numBytes = 1626; return jucer_NewInlineComponentTemplate_h;
+        case 0x507a15c7:  numBytes = 8150; return projectIconAndroid_png;
+        case 0xe8e2796f:  numBytes = 11917; return projectIconCodeblocks_png;
+        case 0x90374ad6:  numBytes = 16444; return projectIconLinuxMakefile_png;
+        case 0x517aa477:  numBytes = 6986; return projectIconVisualStudio05_png;
+        case 0x51a4eafa:  numBytes = 7099; return projectIconVisualStudio08_png;
+        case 0x52e90791:  numBytes = 6712; return projectIconVisualStudio10_png;
+        case 0x53053693:  numBytes = 6637; return projectIconVisualStudio12_png;
+        case 0x53134e14:  numBytes = 6719; return projectIconVisualStudio13_png;
+        case 0xecc12a3d:  numBytes = 18281; return projectIconXcode_png;
+        case 0x9d3ae124:  numBytes = 18111; return projectIconXcodeIOS_png;
         case 0xa41e649d:  numBytes = 2842; return RecentFilesMenuTemplate_nib;
+        case 0x1f3b6d2f:  numBytes = 2963; return wizard_AnimatedApp_svg;
+        case 0x60296d04:  numBytes = 9802; return wizard_AudioApp_svg;
+        case 0x1115ccda:  numBytes = 10809; return wizard_AudioPlugin_svg;
+        case 0x1d65d363:  numBytes = 1204; return wizard_ConsoleApp_svg;
+        case 0xba5a4595:  numBytes = 3588; return wizard_DLL_svg;
+        case 0x683e4e6c:  numBytes = 3448; return wizard_GUI_svg;
+        case 0x2e6bf065:  numBytes = 638; return wizard_Highlight_svg;
+        case 0x52a8dfdf:  numBytes = 686; return wizard_Openfile_svg;
+        case 0x58e2ae48:  numBytes = 2497; return wizard_OpenGL_svg;
+        case 0xb1da6f9e:  numBytes = 3563; return wizard_StaticLibrary_svg;
         default: break;
     }
 
@@ -3325,26 +3325,6 @@ const char* getNamedResource (const char* resourceNameUTF8, int& numBytes) throw
 
 const char* namedResourceList[] =
 {
-    "projectIconAndroid_png",
-    "projectIconCodeblocks_png",
-    "projectIconLinuxMakefile_png",
-    "projectIconVisualStudio05_png",
-    "projectIconVisualStudio08_png",
-    "projectIconVisualStudio10_png",
-    "projectIconVisualStudio12_png",
-    "projectIconVisualStudio13_png",
-    "projectIconXcode_png",
-    "projectIconXcodeIOS_png",
-    "iconOpenfile_svg",
-    "iconAnimation_svg",
-    "iconAudio_svg",
-    "iconConsole_svg",
-    "iconDynamic_svg",
-    "iconGui_svg",
-    "iconHighlight_svg",
-    "iconOpengl_svg",
-    "iconPlugin_svg",
-    "iconStatic_svg",
     "AudioPluginXCodeScript_txt",
     "background_tile_png",
     "colourscheme_dark_xml",
@@ -3366,7 +3346,27 @@ const char* namedResourceList[] =
     "jucer_NewCppFileTemplate_cpp",
     "jucer_NewCppFileTemplate_h",
     "jucer_NewInlineComponentTemplate_h",
-    "RecentFilesMenuTemplate_nib"
+    "projectIconAndroid_png",
+    "projectIconCodeblocks_png",
+    "projectIconLinuxMakefile_png",
+    "projectIconVisualStudio05_png",
+    "projectIconVisualStudio08_png",
+    "projectIconVisualStudio10_png",
+    "projectIconVisualStudio12_png",
+    "projectIconVisualStudio13_png",
+    "projectIconXcode_png",
+    "projectIconXcodeIOS_png",
+    "RecentFilesMenuTemplate_nib",
+    "wizard_AnimatedApp_svg",
+    "wizard_AudioApp_svg",
+    "wizard_AudioPlugin_svg",
+    "wizard_ConsoleApp_svg",
+    "wizard_DLL_svg",
+    "wizard_GUI_svg",
+    "wizard_Highlight_svg",
+    "wizard_Openfile_svg",
+    "wizard_OpenGL_svg",
+    "wizard_StaticLibrary_svg"
 };
 
 }

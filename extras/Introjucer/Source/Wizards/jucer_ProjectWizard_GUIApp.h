@@ -22,17 +22,14 @@
   ==============================================================================
 */
 
-#ifndef GUIAPPWIZARD_H_INCLUDED
-#define GUIAPPWIZARD_H_INCLUDED
 
-
-//==============================================================================
 struct GUIAppWizard   : public NewProjectWizard
 {
     GUIAppWizard()  {}
 
-    String getName()          { return TRANS("GUI Application"); }
-    String getDescription()   { return TRANS("Creates a standard application"); }
+    String getName() const override         { return TRANS("GUI Application"); }
+    String getDescription() const override  { return TRANS("Creates a blank JUCE application with a single window component."); }
+    const char* getIcon() const override    { return BinaryData::wizard_GUI_svg; }
 
     void addSetupItems (Component& setupComp, OwnedArray<Component>& itemsCreated)
     {
@@ -123,5 +120,3 @@ private:
     bool createMainCpp, createWindow;
 };
 
-
-#endif  // GUIAPPWIZARD_H_INCLUDED

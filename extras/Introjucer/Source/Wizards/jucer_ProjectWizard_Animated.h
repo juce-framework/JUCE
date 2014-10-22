@@ -23,4 +23,21 @@
 */
 
 
-Component* createNewProjectWizardComponent();
+struct AnimatedAppWizard   : public NewProjectWizard
+{
+    AnimatedAppWizard()  {}
+
+    String getName() const override         { return TRANS("Animated Application"); }
+    String getDescription() const override  { return TRANS("Creates an application which draws an animated graphical display."); }
+    const char* getIcon() const override    { return BinaryData::wizard_AnimatedApp_svg; }
+
+    bool initialiseProject (Project& project) override
+    {
+        createSourceFolder();
+        project.getProjectTypeValue() = ProjectType::getGUIAppTypeName();
+        createSourceGroup (project);
+        setExecutableNameForAllTargets (project, File::createLegalFileName (appTitle));
+
+        return true;
+    }
+};

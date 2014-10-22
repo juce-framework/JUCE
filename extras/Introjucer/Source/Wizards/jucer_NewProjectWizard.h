@@ -111,8 +111,9 @@ struct NewProjectWizard
     virtual ~NewProjectWizard() {}
 
     //==============================================================================
-    virtual String getName() = 0;
-    virtual String getDescription() = 0;
+    virtual String getName() const = 0;
+    virtual String getDescription() const = 0;
+    virtual const char* getIcon() const = 0;
 
     virtual void addSetupItems (Component&, OwnedArray<Component>&)     {}
     virtual Result processResultsFromSetupItems (WizardComp&)           { return Result::ok(); }

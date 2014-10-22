@@ -23,4 +23,22 @@
 */
 
 
-Component* createNewProjectWizardComponent();
+struct OpenGLAppWizard   : public NewProjectWizard
+{
+    OpenGLAppWizard()  {}
+
+    String getName() const override         { return TRANS("OpenGL Application"); }
+    String getDescription() const override  { return TRANS("Creates a blank JUCE application with a single window component. This component supports openGL drawing features including 3D model import and GLSL shaders."); }
+    const char* getIcon() const override    { return BinaryData::wizard_OpenGL_svg; }
+
+    bool initialiseProject (Project& project) override
+    {
+        createSourceFolder();
+        project.getProjectTypeValue() = ProjectType::getGUIAppTypeName();
+        createSourceGroup (project);
+        setExecutableNameForAllTargets (project, File::createLegalFileName (appTitle));
+
+        return true;
+    }
+};
+

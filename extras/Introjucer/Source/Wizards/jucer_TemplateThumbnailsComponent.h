@@ -43,7 +43,7 @@ public:
         thumb = Drawable::createFromSVG (*svg);
 
         // svg for thumbnail background highlight
-        ScopedPointer<XmlElement> backSvg (XmlDocument::parse (BinaryData::iconHighlight_svg));
+        ScopedPointer<XmlElement> backSvg (XmlDocument::parse (BinaryData::wizard_Highlight_svg));
         assert (backSvg != nullptr);
 
         hoverBackground = Drawable::createFromSVG (*backSvg);
@@ -136,25 +136,29 @@ class TemplateTileBrowser   : public Component,
                               private Button::Listener
 {
 public:
-    TemplateTileBrowser (NewProjectWizardClasses::WizardComp* projectWizard)
+    TemplateTileBrowser (WizardComp* projectWizard)
     {
-        addOptionButton ("GUI Application",      BinaryData::iconGui_svg,       "Creates a blank JUCE application with a single window component.");
-        addOptionButton ("Audio Application",    BinaryData::iconAudio_svg,     "Creates a blank JUCE application with a single window component and Audio and MIDI in/out functions.");
-        addOptionButton ("Audio Plug-in",        BinaryData::iconPlugin_svg,    "Creates a VST or AU audio plug-in for use within a host program. This template features a single window component and Audio/MIDI IO functions");
-        addOptionButton ("Animated Application", BinaryData::iconAnimation_svg, "Creates a blank JUCE application with a single window component that updates and draws at 60fps.");
-        addOptionButton ("Opengl Application",   BinaryData::iconOpengl_svg,    "Creates a blank JUCE application with a single window component. This component supports all OPENGL drawing features including 3D model import and glsl shaders.");
-        addOptionButton ("Console Application",  BinaryData::iconConsole_svg,   "Creates a blank console application with support for all JUCE features.");
-        addOptionButton ("Static Library",       BinaryData::iconStatic_svg,    "Creates a Static Library template with support for all JUCE features");
-        addOptionButton ("Dynamic Library",      BinaryData::iconDynamic_svg,   "Creates a Dynamic Library template with support for all JUCE features");
+        for (int i = 0; i < getNumWizards(); ++i)
+        {
+            ScopedPointer<NewProjectWizard> wizard (createWizardType (i));
+
+            TemplateOptionButton* b = new TemplateOptionButton (wizard->getName(),
+                                                                TemplateOptionButton::ButtonStyle::ImageFitted,
+                                                                wizard->getIcon());
+            optionButtons.add (b);
+            addAndMakeVisible (b);
+            b->setDescription (wizard->getDescription());
+            b->addListener (this);
+        }
 
         // Handle Open Project button functionality
         ApplicationCommandManager& commandManager = IntrojucerApp::getCommandManager();
 
-        blankProjectButton = new TemplateOptionButton ("Create Blank Project", TemplateOptionButton::ButtonStyle::ImageOnButtonBackground, BinaryData::iconOpenfile_svg);
-        openProjectButton  = new TemplateOptionButton ("Open Existing Project", TemplateOptionButton::ButtonStyle::ImageOnButtonBackground, BinaryData::iconOpenfile_svg);
+        blankProjectButton = new TemplateOptionButton ("Create Blank Project",  TemplateOptionButton::ButtonStyle::ImageOnButtonBackground, BinaryData::wizard_Openfile_svg);
+        openProjectButton  = new TemplateOptionButton ("Open Existing Project", TemplateOptionButton::ButtonStyle::ImageOnButtonBackground, BinaryData::wizard_Openfile_svg);
         openProjectButton->setCommandToTrigger (&commandManager, CommandIDs::open, true);
 
-        exampleProjectButton = new TemplateOptionButton ("Open Example Project", TemplateOptionButton::ButtonStyle::ImageOnButtonBackground, BinaryData::iconOpenfile_svg);
+        exampleProjectButton = new TemplateOptionButton ("Open Example Project", TemplateOptionButton::ButtonStyle::ImageOnButtonBackground, BinaryData::wizard_Openfile_svg);
         exampleProjectButton->setCommandToTrigger (&commandManager, CommandIDs::open, true);
 
         addAndMakeVisible (blankProjectButton);
@@ -162,15 +166,6 @@ public:
         addAndMakeVisible (exampleProjectButton);
 
         newProjectWizard = projectWizard;
-    }
-
-    void addOptionButton (const char* name, const char* svg, const char* desc)
-    {
-        TemplateOptionButton* b = new TemplateOptionButton (name, TemplateOptionButton::ButtonStyle::ImageFitted, svg);
-        optionButtons.add (b);
-        addAndMakeVisible (b);
-        b->setDescription (desc);
-        b->addListener (this);
     }
 
     void paint (Graphics& g) override
@@ -223,26 +218,9 @@ public:
         openProjectButton->setBounds (openButtonBounds.reduced (18, 0));
     }
 
-    static int getIndexOfButton (const String& buttonText)
-    {
-        if (buttonText == "GUI Application")        return 0;
-        if (buttonText == "Console Application")    return 1;
-        if (buttonText == "Audio Plug-in")          return 2;
-        if (buttonText == "Static Library")         return 3;
-        if (buttonText == "Dynamic Library")        return 4;
-
-        // new templates without actual templates yet
-        if (buttonText == "Animated Application")   return 0;
-        if (buttonText == "Audio Application")      return 0;
-        if (buttonText == "Opengl Application")     return 0;
-
-        jassertfalse;
-        return 0;
-    }
-
     void buttonClicked (Button* b) override
     {
-        newProjectWizard->projectType.setSelectedItemIndex (getIndexOfButton (b->getButtonText()));
+        newProjectWizard->projectType.setText (b->getButtonText());
 
         if (SlidingPanelComponent* parent = findParentComponentOfClass<SlidingPanelComponent>())
         {
