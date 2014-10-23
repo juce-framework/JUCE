@@ -46,10 +46,10 @@ public:
     void removeTab (int tabIndex);
 
     /** Gets index of current tab. */
-    int getCurrentTabIndex() const noexcept         { return currentTabIndex; }
+    int getCurrentTabIndex() const noexcept         { return currentIndex; }
 
     /** Returns the number of tabs. */
-    int getNumTabs() const noexcept                 { return contentComponents.size(); }
+    int getNumTabs() const noexcept                 { return pages.size(); }
 
     /** Animates the window to the desired tab. */
     void goToTab (int targetTabIndex);
@@ -57,16 +57,26 @@ public:
 
     //==============================================================================
     /** @internal */
-    void paint (Graphics&) override;
-    /** @internal */
     void resized() override;
 
 private:
-    Array<WeakReference<Component> > contentComponents;
-    StringArray tabNames;
+    struct DotButton;
+    friend struct DotButton;
 
-    Component slide;
-    int currentTabIndex, dotSize;
+    struct PageInfo
+    {
+        ~PageInfo();
+
+        Component::SafePointer<Component> content;
+        ScopedPointer<DotButton> dotButton;
+        String name;
+        bool shouldDelete;
+    };
+
+    OwnedArray<PageInfo> pages;
+
+    Component pageHolder;
+    int currentIndex, dotSize;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SlidingPanelComponent);
 };

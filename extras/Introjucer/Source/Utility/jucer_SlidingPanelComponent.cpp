@@ -25,34 +25,47 @@
 
 #include "jucer_SlidingPanelComponent.h"
 
-//==============================================================================
-// TEMPORARY COPY OF TAB HELPERS FOR SLIDER PROTOTYPE, REMOVE BEFORE RELEASE ///
-//==============================================================================
 
-namespace TabbedComponentHelpers
+struct SlidingPanelComponent::DotButton  : public Button
 {
-    const Identifier deleteComponentId ("deleteByTabComp_");
+    DotButton (SlidingPanelComponent& sp, int pageIndex)
+        : Button (String()), owner (sp), index (pageIndex) {}
 
-    static void deleteIfNecessary (Component* const comp)
+    void paintButton (Graphics& g, bool /*isMouseOverButton*/, bool /*isButtonDown*/) override
     {
-        if (comp != nullptr && (bool) comp->getProperties() [deleteComponentId])
-            delete comp;
-    }
-}
+        g.setColour (Colours::white);
+        const Rectangle<float> r (getLocalBounds().reduced (getWidth() / 4).toFloat());
 
+        if (index == owner.getCurrentTabIndex())
+            g.fillEllipse (r);
+        else
+            g.drawEllipse (r, 1.0f);
+    }
+
+    void clicked() override
+    {
+        owner.goToTab (index);
+    }
+
+    SlidingPanelComponent& owner;
+    int index;
+};
 
 //==============================================================================
 SlidingPanelComponent::SlidingPanelComponent()
-    : currentTabIndex (0), dotSize (20)
+    : currentIndex (0), dotSize (20)
 {
-    addAndMakeVisible (slide);
+    addAndMakeVisible (pageHolder);
 }
 
 SlidingPanelComponent::~SlidingPanelComponent()
 {
-    for (int i = contentComponents.size(); --i >= 0;)
-        if (Component* c = contentComponents.getReference(i))
-            TabbedComponentHelpers::deleteIfNecessary (c);
+}
+
+SlidingPanelComponent::PageInfo::~PageInfo()
+{
+    if (shouldDelete)
+        content.deleteAndZero();
 }
 
 void SlidingPanelComponent::addTab (const String& tabName,
@@ -60,60 +73,44 @@ void SlidingPanelComponent::addTab (const String& tabName,
                                     const bool deleteComponentWhenNotNeeded,
                                     const int insertIndex)
 {
-    contentComponents.insert (insertIndex, WeakReference<Component> (contentComponent));
-    tabNames.insert (insertIndex, tabName);
+    PageInfo* page = new PageInfo();
+    pages.insert (insertIndex, page);
+    page->content = contentComponent;
+    addAndMakeVisible (page->dotButton = new DotButton (*this, pages.indexOf (page)));
+    page->name = tabName;
+    page->shouldDelete = deleteComponentWhenNotNeeded;
 
-    if (deleteComponentWhenNotNeeded && contentComponent != nullptr)
-        contentComponent->getProperties().set (TabbedComponentHelpers::deleteComponentId, true);
-
-    slide.addAndMakeVisible (contentComponent);
-
+    pageHolder.addAndMakeVisible (contentComponent);
     resized();
 }
 
 void SlidingPanelComponent::goToTab (int targetTabIndex)
 {
-    const int xTranslation = (currentTabIndex - targetTabIndex) * getWidth();
+    const int xTranslation = (currentIndex - targetTabIndex) * getWidth();
 
-    currentTabIndex = targetTabIndex;
+    currentIndex = targetTabIndex;
 
     Desktop::getInstance().getAnimator()
-        .animateComponent (&slide, slide.getBounds().translated (xTranslation, 0),
+        .animateComponent (&pageHolder, pageHolder.getBounds().translated (xTranslation, 0),
                            1.0f, 600, false, 0.0, 0.0);
 
     repaint();
 }
 
-void SlidingPanelComponent::paint (Graphics& g)
-{
-    Rectangle<int> dotHolder = getLocalBounds();
-
-    dotHolder.reduce ((getWidth() - dotSize * getNumTabs()) / 2, 20);
-    dotHolder = dotHolder.removeFromBottom (dotSize);
-
-    g.setColour (Colours::white);
-
-    for (int i = 0; i < getNumTabs(); ++i)
-    {
-        const Rectangle<float> r (dotHolder.removeFromLeft (dotSize).reduced (5, 5).toFloat());
-
-        if (i == currentTabIndex)
-            g.fillEllipse (r);
-        else
-            g.drawEllipse (r, 1.0f);
-    }
-}
-
 void SlidingPanelComponent::resized()
 {
-    slide.setBounds (-currentTabIndex * getWidth(), slide.getPosition().y,
-                     getNumTabs() * getWidth(), getHeight());
+    pageHolder.setBounds (-currentIndex * getWidth(), pageHolder.getPosition().y,
+                          getNumTabs() * getWidth(), getHeight());
 
     Rectangle<int> content (getLocalBounds());
 
-    content.removeFromBottom (20 + 2 * dotSize);
+    Rectangle<int> dotHolder = content.removeFromBottom (20 + dotSize)
+                                 .reduced ((content.getWidth() - dotSize * getNumTabs()) / 2, 10);
 
-    for (int i = contentComponents.size(); --i >= 0;)
-        if (Component* c = contentComponents.getReference(i))
+    for (int i = 0; i < getNumTabs(); ++i)
+        pages.getUnchecked(i)->dotButton->setBounds (dotHolder.removeFromLeft (dotSize));
+
+    for (int i = pages.size(); --i >= 0;)
+        if (Component* c = pages.getUnchecked(i)->content)
             c->setBounds (content.translated (i * content.getWidth(), 0));
 }
