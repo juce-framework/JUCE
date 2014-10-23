@@ -103,5 +103,3 @@ struct AudioPluginAppWizard   : public NewProjectWizard
         return true;
     }
 };
-
-

@@ -84,4 +84,3 @@ struct ConsoleAppWizard   : public NewProjectWizard
 private:
     bool createMainCpp;
 };
-

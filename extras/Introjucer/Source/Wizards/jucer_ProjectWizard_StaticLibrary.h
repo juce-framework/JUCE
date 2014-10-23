@@ -41,4 +41,3 @@ struct StaticLibraryWizard   : public NewProjectWizard
         return true;
     }
 };
-

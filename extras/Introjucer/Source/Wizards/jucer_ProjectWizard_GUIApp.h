@@ -119,4 +119,3 @@ struct GUIAppWizard   : public NewProjectWizard
 private:
     bool createMainCpp, createWindow;
 };
-

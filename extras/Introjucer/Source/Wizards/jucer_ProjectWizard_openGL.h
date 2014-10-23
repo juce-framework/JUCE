@@ -41,4 +41,3 @@ struct OpenGLAppWizard   : public NewProjectWizard
         return true;
     }
 };
-
