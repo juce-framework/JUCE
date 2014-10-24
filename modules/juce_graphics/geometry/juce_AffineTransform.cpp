@@ -193,9 +193,9 @@ AffineTransform AffineTransform::sheared (const float shearX, const float shearY
     return AffineTransform (mat00 + shearX * mat10,
                             mat01 + shearX * mat11,
                             mat02 + shearX * mat12,
-                            shearY * mat00 + mat10,
-                            shearY * mat01 + mat11,
-                            shearY * mat02 + mat12);
+                            mat10 + shearY * mat00,
+                            mat11 + shearY * mat01,
+                            mat12 + shearY * mat02);
 }
 
 AffineTransform AffineTransform::verticalFlip (const float height) noexcept
@@ -211,10 +211,10 @@ AffineTransform AffineTransform::inverted() const noexcept
     {
         determinant = 1.0 / determinant;
 
-        const float dst00 = (float) (mat11 * determinant);
+        const float dst00 = (float) ( mat11 * determinant);
         const float dst10 = (float) (-mat10 * determinant);
         const float dst01 = (float) (-mat01 * determinant);
-        const float dst11 = (float) (mat00 * determinant);
+        const float dst11 = (float) ( mat00 * determinant);
 
         return AffineTransform (dst00, dst01, -mat02 * dst00 - mat12 * dst01,
                                 dst10, dst11, -mat02 * dst10 - mat12 * dst11);
@@ -258,5 +258,5 @@ bool AffineTransform::isOnlyTranslation() const noexcept
 
 float AffineTransform::getScaleFactor() const noexcept
 {
-    return (mat00 + mat11) / 2.0f;
+    return (std::abs (mat00) + std::abs (mat11)) / 2.0f;
 }
