@@ -4365,8 +4365,6 @@
       </Filter>
       <Filter Name="juce_opengl">
         <Filter Name="opengl">
-          <File RelativePath="..\..\..\..\modules\juce_opengl\opengl\juce_Draggable3DOrientation.h"/>
-          <File RelativePath="..\..\..\..\modules\juce_opengl\opengl\juce_Matrix3D.h"/>
           <File RelativePath="..\..\..\..\modules\juce_opengl\opengl\juce_OpenGLContext.cpp">
             <FileConfiguration Name="Debug|Win32"
                                ExcludedFromBuild="true">
@@ -4456,8 +4454,12 @@
             </FileConfiguration>
           </File>
           <File RelativePath="..\..\..\..\modules\juce_opengl\opengl\juce_OpenGLTexture.h"/>
-          <File RelativePath="..\..\..\..\modules\juce_opengl\opengl\juce_Quaternion.h"/>
-          <File RelativePath="..\..\..\..\modules\juce_opengl\opengl\juce_Vector3D.h"/>
+        </Filter>
+        <Filter Name="geometry">
+          <File RelativePath="..\..\..\..\modules\juce_opengl\geometry\juce_Draggable3DOrientation.h"/>
+          <File RelativePath="..\..\..\..\modules\juce_opengl\geometry\juce_Matrix3D.h"/>
+          <File RelativePath="..\..\..\..\modules\juce_opengl\geometry\juce_Quaternion.h"/>
+          <File RelativePath="..\..\..\..\modules\juce_opengl\geometry\juce_Vector3D.h"/>
         </Filter>
         <Filter Name="native">
           <File RelativePath="..\..\..\..\modules\juce_opengl\native\juce_MissingGLDefinitions.h"/>
