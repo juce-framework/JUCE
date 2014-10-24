@@ -140,6 +140,12 @@ public:
     */
     virtual void stopNote (float velocity, bool allowTailOff) = 0;
 
+    /** Returns true if this voice is currently busy playing a sound.
+        By default this just checks the getCurrentlyPlayingNote() value, but can
+        be overridden for more advanced checking.
+    */
+    virtual bool isVoiceActive() const;
+
     /** Called to let the voice know that the pitch wheel has been moved.
         This will be called during the rendering callback, so must be fast and thread-safe.
     */
