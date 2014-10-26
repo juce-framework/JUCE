@@ -135,13 +135,17 @@ void OpenGLShaderProgram::use() const noexcept
 OpenGLShaderProgram::Uniform::Uniform (const OpenGLShaderProgram& program, const char* const name)
     : uniformID (program.context.extensions.glGetUniformLocation (program.getProgramID(), name)), context (program.context)
 {
+   #if JUCE_DEBUG && ! JUCE_DONT_ASSERT_ON_GLSL_COMPILE_ERROR
     jassert (uniformID >= 0);
+   #endif
 }
 
 OpenGLShaderProgram::Attribute::Attribute (const OpenGLShaderProgram& program, const char* name)
     : attributeID (program.context.extensions.glGetAttribLocation (program.getProgramID(), name))
 {
+   #if JUCE_DEBUG && ! JUCE_DONT_ASSERT_ON_GLSL_COMPILE_ERROR
     jassert (attributeID >= 0);
+   #endif
 }
 
 void OpenGLShaderProgram::Uniform::set (GLfloat n1) const noexcept                                    { context.extensions.glUniform1f (uniformID, n1); }

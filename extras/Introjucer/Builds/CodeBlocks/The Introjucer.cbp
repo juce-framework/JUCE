@@ -1218,6 +1218,10 @@
       <Option compile="0"/>
       <Option link="0"/>
     </Unit>
+    <Unit filename="../../../../modules/juce_core/files/juce_MountedVolumeListChangeDetector.h">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
     <Unit filename="../../../../modules/juce_core/files/juce_TemporaryFile.cpp">
       <Option compile="0"/>
       <Option link="0"/>
