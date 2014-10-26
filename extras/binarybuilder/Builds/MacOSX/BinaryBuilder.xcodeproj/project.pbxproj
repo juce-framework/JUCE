@@ -191,7 +191,6 @@
 		E567893A13638D89E587A05F = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_HashMap.h"; path = "../../../../modules/juce_core/containers/juce_HashMap.h"; sourceTree = "SOURCE_ROOT"; };
 		E65C9F48923EBD7095AC22BE = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_Time.h"; path = "../../../../modules/juce_core/time/juce_Time.h"; sourceTree = "SOURCE_ROOT"; };
 		E78ABDF9EE10A85BCFFE6547 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_ReadWriteLock.h"; path = "../../../../modules/juce_core/threads/juce_ReadWriteLock.h"; sourceTree = "SOURCE_ROOT"; };
-		E81CF0C0DBC2F446E7F5DE22 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_MountedVolumeListChangeDetector.h"; path = "../../../../modules/juce_core/files/juce_MountedVolumeListChangeDetector.h"; sourceTree = "SOURCE_ROOT"; };
 		E8B73F6E0763B9DF3750FAB3 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_ScopedPointer.h"; path = "../../../../modules/juce_core/memory/juce_ScopedPointer.h"; sourceTree = "SOURCE_ROOT"; };
 		E8B77D4E2961231D77CF4335 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_XmlElement.cpp"; path = "../../../../modules/juce_core/xml/juce_XmlElement.cpp"; sourceTree = "SOURCE_ROOT"; };
 		E8DBF269C8CA4C66F025EAFC = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_win32_SystemStats.cpp"; path = "../../../../modules/juce_core/native/juce_win32_SystemStats.cpp"; sourceTree = "SOURCE_ROOT"; };
@@ -331,7 +330,6 @@
 					2CABCBBC0306C649739EB0E1,
 					D80D6FEE7D4BFF3981A82259,
 					5C3BCD09CD3AD887041C5E8D,
-					E81CF0C0DBC2F446E7F5DE22,
 					2D0CC061BF40931BC88D5DB0,
 					44AD87BBBC83CEEE8C9BAC8C,
 					86DAAF05DA38EA19AEE4FAA3,

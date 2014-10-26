@@ -102,7 +102,6 @@
 		0BEDB3FD70AB61D3E7891D74 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_ComponentListener.cpp"; path = "../../../../modules/juce_gui_basics/components/juce_ComponentListener.cpp"; sourceTree = "SOURCE_ROOT"; };
 		0C747328CDADAE15E86E5E93 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = "juce_mac_FileChooser.mm"; path = "../../../../modules/juce_gui_basics/native/juce_mac_FileChooser.mm"; sourceTree = "SOURCE_ROOT"; };
 		0C956209A61542371A7A5257 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_Colour.h"; path = "../../../../modules/juce_graphics/colour/juce_Colour.h"; sourceTree = "SOURCE_ROOT"; };
-		0CAA9DB945FC784F3309F3EC = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_MountedVolumeListChangeDetector.h"; path = "../../../../modules/juce_core/files/juce_MountedVolumeListChangeDetector.h"; sourceTree = "SOURCE_ROOT"; };
 		0CC9026D5056CA9C1FE64A64 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_ArrowButton.h"; path = "../../../../modules/juce_gui_basics/buttons/juce_ArrowButton.h"; sourceTree = "SOURCE_ROOT"; };
 		0CEF14D37EC664CA49A2B04D = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_ComponentPeer.cpp"; path = "../../../../modules/juce_gui_basics/windows/juce_ComponentPeer.cpp"; sourceTree = "SOURCE_ROOT"; };
 		0D100A1B27A72355323CB637 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_win32_Windowing.cpp"; path = "../../../../modules/juce_gui_basics/native/juce_win32_Windowing.cpp"; sourceTree = "SOURCE_ROOT"; };
@@ -518,6 +517,7 @@
 		8C52A3DDA62A746AA7A68535 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "jucer_Main.cpp"; path = "../../Source/Application/jucer_Main.cpp"; sourceTree = "SOURCE_ROOT"; };
 		8D12E5100E73E3B7DAA10261 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_events.h"; path = "../../../../modules/juce_events/juce_events.h"; sourceTree = "SOURCE_ROOT"; };
 		8DDA82E1200B61D3B6C526E8 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_graphics.h"; path = "../../../../modules/juce_graphics/juce_graphics.h"; sourceTree = "SOURCE_ROOT"; };
+		8DEFBFC3BEDCCF29BA577EE9 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_MountedVolumeListChangeDetector.h"; path = "../../../../modules/juce_events/messages/juce_MountedVolumeListChangeDetector.h"; sourceTree = "SOURCE_ROOT"; };
 		8E00CF4CE2305C5CE5B60E37 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_TopLevelWindow.h"; path = "../../../../modules/juce_gui_basics/windows/juce_TopLevelWindow.h"; sourceTree = "SOURCE_ROOT"; };
 		8F30A53C7FE4BC65171FB3E2 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "jucer_JucerDocument.h"; path = "../../Source/ComponentEditor/jucer_JucerDocument.h"; sourceTree = "SOURCE_ROOT"; };
 		8F8BF1A7130D858E0A239F9E = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "jucer_ConfigTree_Base.h"; path = "../../Source/Project/jucer_ConfigTree_Base.h"; sourceTree = "SOURCE_ROOT"; };
@@ -1208,7 +1208,6 @@
 					2C7A9B2EDC724657EBF9FA83,
 					C4FA33B08560AD0D000EB498,
 					83056E8F17A0365667EBEA82,
-					0CAA9DB945FC784F3309F3EC,
 					AAB313919EE298E25D2EAD19,
 					3A2888667372BA896AACFBDB,
 					66069653FDEA4CB7C2B4B02F,
@@ -1374,6 +1373,7 @@
 					8FF39B6B0D9DEB5BBE388A6F,
 					C56C7577E65C0BFA449E71FE,
 					1116222363E600327FC672A0,
+					8DEFBFC3BEDCCF29BA577EE9,
 					863A117E6B25D1FF3AEE8F0F, ); name = messages; sourceTree = "<group>"; };
 		83DEE68BC6A9B685C3E75FEA = {isa = PBXGroup; children = (
 					C9DCA94BF8A4C583E5392755,
