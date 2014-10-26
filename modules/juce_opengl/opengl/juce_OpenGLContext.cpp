@@ -262,7 +262,16 @@ public:
         glEnable (GL_TEXTURE_2D);
         clearGLError();
        #endif
-        context.extensions.glActiveTexture (GL_TEXTURE0);
+
+       #if JUCE_WINDOWS
+        // some stupidly old drivers are missing this function, so try to at least avoid a crash here,
+        // but if you hit this assertion you may want to have your own version check before using the
+        // component rendering stuff on such old drivers.
+        jassert (glActiveTexture.context.extensions != nullptr);
+        if (glActiveTexture.context.extensions != nullptr)
+       #endif
+            context.extensions.glActiveTexture (GL_TEXTURE0);
+
         glBindTexture (GL_TEXTURE_2D, cachedImageFrameBuffer.getTextureID());
 
         const Rectangle<int> cacheBounds (cachedImageFrameBuffer.getWidth(), cachedImageFrameBuffer.getHeight());
