@@ -304,7 +304,8 @@ private:
 
         if (iOS)
         {
-            createiOSAssetsFolder();
+            if (! projectType.isStaticLibrary())
+                createiOSAssetsFolder();
         }
         else
         {

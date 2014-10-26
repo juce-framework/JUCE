@@ -1353,6 +1353,7 @@
     <ClInclude Include="..\..\..\..\modules\juce_audio_processors\processors\juce_AudioProcessorEditor.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_processors\processors\juce_AudioProcessorGraph.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_processors\processors\juce_AudioProcessorListener.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors\processors\juce_AudioProcessorParameter.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_processors\processors\juce_GenericAudioProcessorEditor.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_processors\processors\juce_PluginDescription.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_processors\format\juce_AudioPluginFormat.h"/>
@@ -1395,6 +1396,7 @@
     <ClInclude Include="..\..\..\..\modules\juce_core\maths\juce_BigInteger.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\maths\juce_Expression.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\maths\juce_MathsFunctions.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_core\maths\juce_NormalisableRange.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\maths\juce_Random.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\maths\juce_Range.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\memory\juce_Atomic.h"/>
@@ -1468,6 +1470,7 @@
     <ClInclude Include="..\..\..\..\modules\juce_core\streams\juce_SubregionStream.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\logging\juce_FileLogger.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\logging\juce_Logger.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_core\system\juce_CompilerSupport.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\system\juce_PlatformDefs.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\system\juce_StandardHeader.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\system\juce_SystemStats.h"/>
@@ -1509,6 +1512,7 @@
     <ClInclude Include="..\..\..\..\modules\juce_events\messages\juce_Message.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_events\messages\juce_MessageListener.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_events\messages\juce_MessageManager.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_events\messages\juce_MountedVolumeListChangeDetector.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_events\messages\juce_NotificationType.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_events\timers\juce_MultiTimer.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_events\timers\juce_Timer.h"/>
@@ -1714,8 +1718,6 @@
     <ClInclude Include="..\..\..\..\modules\juce_gui_extra\misc\juce_WebBrowserComponent.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_gui_extra\native\juce_mac_CarbonViewWrapperComponent.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_gui_extra\juce_gui_extra.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_opengl\opengl\juce_Draggable3DOrientation.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_opengl\opengl\juce_Matrix3D.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_opengl\opengl\juce_OpenGLContext.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_opengl\opengl\juce_OpenGLFrameBuffer.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_opengl\opengl\juce_OpenGLGraphicsContext.h"/>
@@ -1725,8 +1727,10 @@
     <ClInclude Include="..\..\..\..\modules\juce_opengl\opengl\juce_OpenGLRenderer.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_opengl\opengl\juce_OpenGLShaderProgram.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_opengl\opengl\juce_OpenGLTexture.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_opengl\opengl\juce_Quaternion.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_opengl\opengl\juce_Vector3D.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_opengl\geometry\juce_Draggable3DOrientation.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_opengl\geometry\juce_Matrix3D.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_opengl\geometry\juce_Quaternion.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_opengl\geometry\juce_Vector3D.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_opengl\native\juce_MissingGLDefinitions.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_opengl\native\juce_OpenGL_android.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_opengl\native\juce_OpenGL_ios.h"/>

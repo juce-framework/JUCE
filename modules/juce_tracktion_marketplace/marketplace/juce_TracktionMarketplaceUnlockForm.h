@@ -22,7 +22,6 @@
   ==============================================================================
 */
 
-
 /** Acts as a GUI which asks the user for their details, and calls the approriate
     methods on your TracktionMarketplaceStatus object to attempt to register the app.
 

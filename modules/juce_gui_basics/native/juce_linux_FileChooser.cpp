@@ -65,6 +65,12 @@ static void addKDialogArgs (StringArray& args, String& separator,
     if (title.isNotEmpty())
         args.add ("--title=" + title);
 
+    if (uint64 topWindowID = getTopWindowID())
+    {
+        args.add ("--attach");
+        args.add (String (topWindowID));
+    }
+
     if (selectMultipleFiles)
     {
         separator = "\n";
@@ -77,12 +83,6 @@ static void addKDialogArgs (StringArray& args, String& separator,
         if (isSave)             args.add ("--getsavefilename");
         else if (isDirectory)   args.add ("--getexistingdirectory");
         else                    args.add ("--getopenfilename");
-    }
-
-    if (uint64 topWindowID = getTopWindowID())
-    {
-        args.add ("--attach");
-        args.add (String (topWindowID));
     }
 
     File startPath;

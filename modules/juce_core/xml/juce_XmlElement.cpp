@@ -53,7 +53,7 @@ static void sanityCheckTagName (const String& tag)
     (void) tag;
 
     // the tag name mustn't be empty, or it'll look like a text element!
-    jassert (tag.containsNonWhitespaceChars())
+    jassert (tag.containsNonWhitespaceChars());
 
     // The tag can't contain spaces or other characters that would create invalid XML!
     jassert (! tag.containsAnyOf (" <>/&(){}"));

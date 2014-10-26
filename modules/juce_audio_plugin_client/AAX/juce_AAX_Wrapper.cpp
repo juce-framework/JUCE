@@ -624,7 +624,11 @@ struct AAXClasses
         AAX_Result GetParameterDefaultNormalizedValue (AAX_CParamID paramID, double* result) const override
         {
             if (! isBypassParam (paramID))
+            {
                 *result = (double) pluginInstance->getParameterDefaultValue (getParamIndexFromID (paramID));
+
+                jassert (*result >= 0 && *result <= 1.0f);
+            }
 
             return AAX_SUCCESS;
         }

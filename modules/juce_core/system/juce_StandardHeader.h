@@ -51,6 +51,7 @@
 
 //==============================================================================
 #include "juce_PlatformDefs.h"
+#include "juce_CompilerSupport.h"
 
 //==============================================================================
 // Now we'll include some common OS headers..
@@ -72,6 +73,7 @@
 #include <iostream>
 #include <vector>
 #include <algorithm>
+#include <functional>
 
 #if JUCE_USE_MSVC_INTRINSICS
  #include <intrin.h>

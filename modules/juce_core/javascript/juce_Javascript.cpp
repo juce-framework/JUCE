@@ -1659,7 +1659,7 @@ JavascriptEngine::JavascriptEngine()  : maximumExecutionTime (15.0), root (new R
 
 JavascriptEngine::~JavascriptEngine() {}
 
-void JavascriptEngine::prepareTimeout() const   { root->timeout = Time::getCurrentTime() + maximumExecutionTime; }
+void JavascriptEngine::prepareTimeout() const noexcept   { root->timeout = Time::getCurrentTime() + maximumExecutionTime; }
 
 void JavascriptEngine::registerNativeObject (Identifier name, DynamicObject* object)
 {
@@ -1713,6 +1713,11 @@ var JavascriptEngine::callFunction (Identifier function, const var::NativeFuncti
     }
 
     return returnVal;
+}
+
+const NamedValueSet& JavascriptEngine::getRootObjectProperties() const noexcept
+{
+    return root->getProperties();
 }
 
 #if JUCE_MSVC

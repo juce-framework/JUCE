@@ -142,7 +142,7 @@ private:
     {
         StringArray flags;
         flags.add ("-O" + config.getGCCOptimisationFlag());
-        flags.add ("-std=gnu++0x");
+        flags.add ("-std=c++11");
         flags.add ("-mstackrealign");
 
         if (config.isDebug())

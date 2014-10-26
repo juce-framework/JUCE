@@ -202,7 +202,7 @@ private:
             },
 
             {
-                "Cicle",
+                "Circle",
 
                 SHADER_DEMO_HEADER
                 "void main()\n"

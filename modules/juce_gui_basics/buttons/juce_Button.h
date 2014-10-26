@@ -277,12 +277,6 @@ public:
     */
     void setTooltip (const String& newTooltip) override;
 
-    /** Returns the tooltip set by setTooltip(), or the description corresponding to
-        the currently mapped command if one is enabled (see setCommandToTrigger).
-    */
-    String getTooltip() override;
-
-
     //==============================================================================
     /** A combination of these flags are used by setConnectedEdges(). */
     enum ConnectedEdgeFlags
@@ -348,6 +342,9 @@ public:
         enters or exits the button, or the mouse-button is pressed or released.
     */
     void setState (ButtonState newState);
+
+    /** Returns the button's current over/down/up state. */
+    ButtonState getState() const noexcept               { return buttonState; }
 
     // This method's parameters have changed - see the new version.
     JUCE_DEPRECATED (void setToggleState (bool, bool));
@@ -495,6 +492,7 @@ private:
     void repeatTimerCallback();
     bool keyStateChangedCallback();
     void applicationCommandListChangeCallback();
+    void updateAutomaticTooltip (const ApplicationCommandInfo&);
 
     ButtonState updateState();
     ButtonState updateState (bool isOver, bool isDown);

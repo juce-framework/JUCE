@@ -61,6 +61,7 @@ public:
         if (getKeyStorePassValue().getValue().isVoid())     getKeyStorePassValue()  = "android";
         if (getKeyAliasValue().getValue().isVoid())         getKeyAliasValue()      = "androiddebugkey";
         if (getKeyAliasPassValue().getValue().isVoid())     getKeyAliasPassValue()  = "android";
+        if (getCPP11EnabledValue().getValue().isVoid())     getCPP11EnabledValue()  = true;
     }
 
     //==============================================================================

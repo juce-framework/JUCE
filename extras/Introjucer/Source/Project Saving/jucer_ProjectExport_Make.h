@@ -151,7 +151,7 @@ private:
 
     void writeCppFlags (OutputStream& out, const BuildConfiguration& config) const
     {
-        out << "  CPPFLAGS := $(DEPFLAGS)";
+        out << "  CPPFLAGS := $(DEPFLAGS) -std=c++11";
         writeDefineFlags (out, config);
         writeHeaderPathFlags (out, config);
         out << newLine;

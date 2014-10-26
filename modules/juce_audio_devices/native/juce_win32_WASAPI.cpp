@@ -1418,7 +1418,7 @@ private:
     }
 
     //==============================================================================
-    void systemDeviceChanged()
+    void systemDeviceChanged() override
     {
         StringArray newOutNames, newInNames, newOutIds, newInIds;
         scan (newOutNames, newInNames, newOutIds, newInIds);

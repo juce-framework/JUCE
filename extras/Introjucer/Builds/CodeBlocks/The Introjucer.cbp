@@ -16,7 +16,7 @@
         <Option compiler="gcc"/>
         <Compiler>
           <Add option="-O0"/>
-          <Add option="-std=gnu++0x"/>
+          <Add option="-std=c++11"/>
           <Add option="-mstackrealign"/>
           <Add option="-g"/>
           <Add option="-D__MINGW__=1"/>
@@ -53,7 +53,7 @@
         <Option compiler="gcc"/>
         <Compiler>
           <Add option="-Os"/>
-          <Add option="-std=gnu++0x"/>
+          <Add option="-std=c++11"/>
           <Add option="-mstackrealign"/>
           <Add option="-D__MINGW__=1"/>
           <Add option="-D__MINGW_EXTENSION="/>
@@ -769,6 +769,10 @@
       <Option compile="0"/>
       <Option link="0"/>
     </Unit>
+    <Unit filename="../../../../modules/juce_core/maths/juce_NormalisableRange.h">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
     <Unit filename="../../../../modules/juce_core/maths/juce_Random.cpp">
       <Option compile="0"/>
       <Option link="0"/>
@@ -1213,6 +1217,10 @@
       <Option compile="0"/>
       <Option link="0"/>
     </Unit>
+    <Unit filename="../../../../modules/juce_core/system/juce_CompilerSupport.h">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
     <Unit filename="../../../../modules/juce_core/system/juce_PlatformDefs.h">
       <Option compile="0"/>
       <Option link="0"/>
@@ -1570,6 +1578,10 @@
       <Option link="0"/>
     </Unit>
     <Unit filename="../../../../modules/juce_events/messages/juce_MessageManager.h">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../../../modules/juce_events/messages/juce_MountedVolumeListChangeDetector.h">
       <Option compile="0"/>
       <Option link="0"/>
     </Unit>

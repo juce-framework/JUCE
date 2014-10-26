@@ -400,10 +400,10 @@ public:
     /** This must return the correct value immediately after the object has been
         created, and mustn't change the number of parameters later.
     */
-    virtual int getNumParameters() = 0;
+    virtual int getNumParameters();
 
     /** Returns the name of a particular parameter. */
-    virtual const String getParameterName (int parameterIndex) = 0;
+    virtual const String getParameterName (int parameterIndex);
 
     /** Called by the host to find out the value of one of the filter's parameters.
 
@@ -529,6 +529,16 @@ public:
         etc, has changed, and that it should update itself.
     */
     void updateHostDisplay();
+
+    //==============================================================================
+    /** Adds a parameter to the list.
+        The parameter object will be managed and deleted automatically by the list
+        when no longer needed.
+    */
+    void addParameter (AudioProcessorParameter*);
+
+    /** Returns the current list of parameters. */
+    const OwnedArray<AudioProcessorParameter>& getParameters() const noexcept;
 
     //==============================================================================
     /** Returns the number of preset programs the filter supports.
@@ -689,6 +699,9 @@ private:
     bool suspended, nonRealtime;
     CriticalSection callbackLock, listenerLock;
     String inputSpeakerArrangement, outputSpeakerArrangement;
+
+    OwnedArray<AudioProcessorParameter> managedParameters;
+    AudioProcessorParameter* getParamChecked (int) const noexcept;
 
    #if JUCE_DEBUG
     BigInteger changingParams;

@@ -740,7 +740,7 @@ public:
 
     void ensureItemIsVisible (const int itemID, int wantedY)
     {
-        jassert (itemID != 0)
+        jassert (itemID != 0);
 
         for (int i = items.size(); --i >= 0;)
         {

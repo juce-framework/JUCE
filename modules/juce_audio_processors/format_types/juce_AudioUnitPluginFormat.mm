@@ -345,11 +345,21 @@ public:
         refreshParameterList();
         updateNumChannels();
         producesMidiMessages = canProduceMidiOutput();
-        setPluginCallbacks();
         setPlayConfigDetails (numInputBusChannels * numInputBusses,
                               numOutputBusChannels * numOutputBusses,
                               rate, blockSize);
         setLatencySamples (0);
+
+        if (parameters.size() == 0)
+        {
+            // some plugins crash if initialiseAudioUnit() is called too soon (sigh..), so we'll
+            // only call it here if it seems like they it's one of the awkward plugins that can
+            // only create their parameters after it has been initialised.
+            initialiseAudioUnit();
+            refreshParameterList();
+        }
+
+        setPluginCallbacks();
     }
 
     //==============================================================================

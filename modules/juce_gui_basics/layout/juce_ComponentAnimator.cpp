@@ -25,9 +25,7 @@
 class ComponentAnimator::AnimationTask
 {
 public:
-    AnimationTask (Component* const comp) noexcept  : component (comp)
-    {
-    }
+    AnimationTask (Component* c) noexcept  : component (c) {}
 
     void reset (const Rectangle<int>& finalBounds,
                 float finalAlpha,
@@ -65,8 +63,8 @@ public:
 
     bool useTimeslice (const int elapsed)
     {
-        if (Component* const c = proxy != nullptr ? static_cast <Component*> (proxy)
-                                                  : static_cast <Component*> (component))
+        if (Component* const c = proxy != nullptr ? static_cast<Component*> (proxy)
+                                                  : static_cast<Component*> (component))
         {
             msElapsed += elapsed;
             double newProgress = msElapsed / (double) msTotal;
@@ -149,7 +147,10 @@ public:
             else
                 jassertfalse; // seem to be trying to animate a component that's not visible..
 
-            image = c.createComponentSnapshot (c.getLocalBounds(), false, getDesktopScaleFactor());
+            const float scale = (float) Desktop::getInstance().getDisplays()
+                                            .getDisplayContaining (getScreenBounds().getCentre()).scale;
+
+            image = c.createComponentSnapshot (c.getLocalBounds(), false, scale);
 
             setVisible (true);
             toBehind (&c);
@@ -189,14 +190,8 @@ private:
 };
 
 //==============================================================================
-ComponentAnimator::ComponentAnimator()
-    : lastTime (0)
-{
-}
-
-ComponentAnimator::~ComponentAnimator()
-{
-}
+ComponentAnimator::ComponentAnimator()  : lastTime (0) {}
+ComponentAnimator::~ComponentAnimator() {}
 
 //==============================================================================
 ComponentAnimator::AnimationTask* ComponentAnimator::findTaskFor (Component* const component) const noexcept
@@ -217,7 +212,7 @@ void ComponentAnimator::animateComponent (Component* const component,
                                           const double endSpeed)
 {
     // the speeds must be 0 or greater!
-    jassert (startSpeed >= 0 && endSpeed >= 0)
+    jassert (startSpeed >= 0 && endSpeed >= 0);
 
     if (component != nullptr)
     {

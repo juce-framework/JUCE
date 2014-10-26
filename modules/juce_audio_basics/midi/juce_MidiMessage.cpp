@@ -661,7 +661,7 @@ String MidiMessage::getTextFromTextMetaEvent() const
 
 MidiMessage MidiMessage::textMetaEvent (int type, StringRef text)
 {
-    jassert (type > 0 && type < 16)
+    jassert (type > 0 && type < 16);
 
     MidiMessage result;
 
