@@ -540,6 +540,7 @@
           </File>
           <File RelativePath="..\..\..\..\modules\juce_core\files\juce_FileSearchPath.h"/>
           <File RelativePath="..\..\..\..\modules\juce_core\files\juce_MemoryMappedFile.h"/>
+          <File RelativePath="..\..\..\..\modules\juce_core\files\juce_MountedVolumeListChangeDetector.h"/>
           <File RelativePath="..\..\..\..\modules\juce_core\files\juce_TemporaryFile.cpp">
             <FileConfiguration Name="Debug|Win32"
                                ExcludedFromBuild="true">

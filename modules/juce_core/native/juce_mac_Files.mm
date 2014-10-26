@@ -398,6 +398,55 @@ bool DirectoryIterator::NativeIterator::next (String& filenameFound,
     return pimpl->next (filenameFound, isDir, isHidden, fileSize, modTime, creationTime, isReadOnly);
 }
 
+//==============================================================================
+#if JUCE_MAC
+struct MountedVolumeListChangeDetector::Pimpl
+{
+    Pimpl (MountedVolumeListChangeDetector& d)  : owner (d)
+    {
+        static ObserverClass cls;
+        delegate = [cls.createInstance() init];
+        ObserverClass::setOwner (delegate, this);
+
+        NSNotificationCenter* nc = [[NSWorkspace sharedWorkspace] notificationCenter];
+
+        [nc addObserver: delegate selector: @selector (changed:) name: NSWorkspaceDidMountNotification   object: nil];
+        [nc addObserver: delegate selector: @selector (changed:) name: NSWorkspaceDidUnmountNotification object: nil];
+    }
+
+    ~Pimpl()
+    {
+        [[[NSWorkspace sharedWorkspace] notificationCenter] removeObserver: delegate];
+        [delegate release];
+    }
+
+private:
+    MountedVolumeListChangeDetector& owner;
+    id delegate;
+
+    struct ObserverClass   : public ObjCClass<NSObject>
+    {
+        ObserverClass()  : ObjCClass<NSObject> ("JUCEDriveObserver_")
+        {
+            addIvar<Pimpl*> ("owner");
+            addMethod (@selector (changed:), changed, "v@:@");
+            addProtocol (@protocol (NSTextInput));
+            registerClass();
+        }
+
+        static Pimpl* getOwner (id self)                { return getIvar<Pimpl*> (self, "owner"); }
+        static void setOwner (id self, Pimpl* owner)    { object_setInstanceVariable (self, "owner", owner); }
+
+        static void changed (id self, SEL, NSNotification*)
+        {
+            getOwner (self)->owner.mountedVolumeListChanged();
+        }
+    };
+};
+
+MountedVolumeListChangeDetector::MountedVolumeListChangeDetector()  { pimpl = new Pimpl (*this); }
+MountedVolumeListChangeDetector::~MountedVolumeListChangeDetector() {}
+#endif
 
 //==============================================================================
 bool JUCE_CALLTYPE Process::openDocument (const String& fileName, const String& parameters)
