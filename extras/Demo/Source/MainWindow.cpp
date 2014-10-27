@@ -109,12 +109,17 @@ class ContentComponent   : public Component,
 public:
     ContentComponent()
     {
+        // set lookAndFeel colour properties
+        lookAndFeelV3.setColour (Label::textColourId, Colours::white);
+        lookAndFeelV3.setColour (Label::textColourId, Colours::white);
+        lookAndFeelV3.setColour (ToggleButton::textColourId, Colours::white);
         LookAndFeel::setDefaultLookAndFeel (&lookAndFeelV3);
+        
+        demoList.setModel (this);
+        demoList.setColour (ListBox::backgroundColourId, Colour::greyLevel (0.3f));
+        demoList.selectRow (0);
         addAndMakeVisible (demoList);
 
-        demoList.setModel (this);
-        demoList.setColour (ListBox::backgroundColourId, Colour::greyLevel (0.7f));
-        demoList.selectRow (0);
     }
 
     void clearCurrentDemo()
@@ -149,7 +154,7 @@ public:
     void paintListBoxItem (int rowNumber, Graphics& g, int width, int height, bool rowIsSelected) override
     {
         if (rowIsSelected)
-            g.fillAll (findColour (TextEditor::highlightColourId));
+            g.fillAll (Colours::deepskyblue);
 
         if (JuceDemoTypeBase* type = JuceDemoTypeBase::getDemoTypeList() [rowNumber])
         {
@@ -172,9 +177,9 @@ public:
             }
 
             if (category.isNotEmpty())
-                a.append (category, Font (10.0f), Colours::black);
+                a.append (category, Font (10.0f), Colour::greyLevel (0.5f));
 
-            a.append (name, Font (13.0f).boldened(), Colours::black);
+            a.append (name, Font (13.0f), Colours::white.withAlpha (0.9f));
 
             a.draw (g, Rectangle<int> (width + 10, height).reduced (6, 0).toFloat());
         }

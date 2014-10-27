@@ -37,18 +37,15 @@ public:
     void paint (Graphics& g) override
     {
         Rectangle<float> area (getLocalBounds().toFloat().reduced (2.0f));
-        g.setColour (Colours::orange.withAlpha (0.6f));
-        g.fillRoundedRectangle (area, 10.0f);
 
-        g.setColour (Colours::darkgrey);
+        g.setColour (Colours::orange);
         g.drawRoundedRectangle (area, 10.0f, 2.0f);
 
         AttributedString s;
         s.setJustification (Justification::centred);
         s.setWordWrap (AttributedString::none);
-        s.append ("Balls!\n"
-                  "(Drag Me)");
-        s.setColour (Colours::black);
+        s.append ("Drag Me!");
+        s.setColour (Colours::white);
         s.draw (g, area);
     }
 
@@ -85,7 +82,7 @@ struct BallComponent  : public Component
         : position (pos),
           speed (Random::getSystemRandom().nextFloat() *  4.0f - 2.0f,
                  Random::getSystemRandom().nextFloat() * -6.0f - 2.0f),
-          colour (getRandomBrightColour().withAlpha (0.4f))
+            colour (Colours::white)
     {
         setSize (20, 20);
         step();
@@ -94,7 +91,7 @@ struct BallComponent  : public Component
     bool step()
     {
         position += speed;
-        speed.y += 0.05f;
+        speed.y += 0.1f;
 
         setCentrePosition ((int) position.x,
                            (int) position.y);
@@ -130,26 +127,43 @@ public:
     AnimationDemo()
     {
         setOpaque (true);
+        setSize (620, 620);
 
         for (int i = 11; --i >= 0;)
         {
-            Button* b = createRandomButton();
+            Button* b = createButton();
             componentsToAnimate.add (b);
             addAndMakeVisible (b);
             b->addListener (this);
         }
 
         ballGenerator = new BallGeneratorComponent();
-        componentsToAnimate.add (ballGenerator);
         addAndMakeVisible (ballGenerator);
-        ballGenerator->setBounds (200, 500, 70, 50);
-
-        int w = 160, h = 80;
+        ballGenerator->setBounds (getWidth()/2 - 40, getHeight()/2 - 25, 80, 50);
+        
+        cycleCount = 2;
 
         for (int i = 0; i < componentsToAnimate.size(); ++i)
         {
-            Rectangle<int> r (w * (i % 3), h * (i / 3), w, h);
-            componentsToAnimate.getUnchecked(i)->setBounds (r.reduced (10));
+            Rectangle<int> r (getLocalBounds().reduced (250, 250));
+            componentsToAnimate.getUnchecked (i)->setBounds (r);
+        }
+        
+        for (int i = 0; i < componentsToAnimate.size(); ++i)
+        {
+            int newIndex = (i + 3) % componentsToAnimate.size();
+            float angle = newIndex * 2.0f * M_PI / componentsToAnimate.size();
+            float radius = getWidth() * 0.35f;
+
+            Rectangle<int> r (getWidth() / 2 + radius * sin (angle) - 50, getHeight() / 2 + radius * cos (angle) - 50, 100, 100);
+
+            animator.animateComponent (componentsToAnimate.getUnchecked(i),
+                                       r.reduced (10),
+                                       1.0f,
+                                       500 + i * 100,
+                                       false,
+                                       0.0,
+                                       0.0);
         }
 
         startTimer (1000 / 60);
@@ -157,7 +171,7 @@ public:
 
     void paint (Graphics& g) override
     {
-        fillBrushedAluminiumBackground (g);
+        fillTiledBackground (g);
     }
 
 private:
@@ -166,6 +180,8 @@ private:
     BallGeneratorComponent* ballGenerator;
 
     ComponentAnimator animator;
+    
+    int cycleCount;
 
     Button* createRandomButton()
     {
@@ -219,26 +235,40 @@ private:
                       0.5f);
         return b;
     }
+    
+    Button* createButton()
+    {
+        ImageButton* b = new ImageButton ("ImageButton");
+
+        Image image = ImageCache::getFromMemory (BinaryData::juce_icon_png, BinaryData::juce_icon_pngSize);
+        b->setImages (true, true, true,
+                      image, 0.7f, Colours::transparentBlack,
+                      image, 1.0f, Colours::white,
+                      image, 1.0f, Colours::white,
+                      0.5f);
+        
+        return b;
+    }
 
     void buttonClicked (Button*) override
     {
         for (int i = 0; i < componentsToAnimate.size(); ++i)
-            componentsToAnimate.swap (i, Random::getSystemRandom().nextInt (componentsToAnimate.size()));
-
-        int w = 160, h = 80;
-
-        for (int i = 0; i < componentsToAnimate.size(); ++i)
         {
-            Rectangle<int> r (w * (i % 3), h * (i / 3), w, h);
+            int newIndex = (i + 3*cycleCount)%componentsToAnimate.size();
+            float angle = newIndex*2.0f*M_PI/componentsToAnimate.size();
+            float radius = getWidth() * 0.35f;
+
+            Rectangle<int> r (getWidth()/2 + radius * sin (angle) - 50, getHeight()/2 + radius * cos (angle) - 50, 100, 100);
 
             animator.animateComponent (componentsToAnimate.getUnchecked(i),
                                        r.reduced (10),
-                                       Random::getSystemRandom().nextBool() ? 1.0f : 0.4f,
-                                       500 + Random::getSystemRandom().nextInt (2000),
+                                       1.0f,
+                                       900 + 300 * sin (angle),
                                        false,
-                                       Random::getSystemRandom().nextDouble(),
-                                       Random::getSystemRandom().nextDouble());
+                                       0.0,
+                                       0.0);
         }
+        cycleCount++;
     }
 
     void timerCallback() override
@@ -249,7 +279,7 @@ private:
                 balls.remove (i);
 
         // Randomly generate new balls
-        if (Random::getSystemRandom().nextInt (200) < 4)
+        if (Random::getSystemRandom().nextInt (100) < 4)
         {
             BallComponent* ball = new BallComponent (ballGenerator->getBounds().getCentre().toFloat());
             addAndMakeVisible (ball);

@@ -226,7 +226,7 @@ public:
 
     void paint (Graphics& g) override
     {
-        fillBrushedAluminiumBackground (g);
+        g.fillAll (Colour::greyLevel (0.4f));
     }
 
     void resized() override

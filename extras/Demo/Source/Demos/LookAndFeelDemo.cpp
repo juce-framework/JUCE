@@ -529,7 +529,7 @@ public:
 
     void paint (Graphics& g) override
     {
-        g.fillAll (Colour::greyLevel (0.85f));
+        g.fillAll (Colour::greyLevel (0.4f));
     }
 
     void resized() override

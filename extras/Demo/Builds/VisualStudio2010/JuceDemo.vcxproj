@@ -1447,7 +1447,6 @@
     <ClInclude Include="..\..\..\..\modules\juce_core\files\juce_FileOutputStream.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\files\juce_FileSearchPath.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\files\juce_MemoryMappedFile.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_core\files\juce_MountedVolumeListChangeDetector.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\files\juce_TemporaryFile.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\files\juce_WildcardFileFilter.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\network\juce_IPAddress.h"/>
@@ -1507,6 +1506,7 @@
     <ClInclude Include="..\..\..\..\modules\juce_events\messages\juce_Message.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_events\messages\juce_MessageListener.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_events\messages\juce_MessageManager.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_events\messages\juce_MountedVolumeListChangeDetector.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_events\messages\juce_NotificationType.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_events\timers\juce_MultiTimer.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_events\timers\juce_Timer.h"/>
@@ -1742,7 +1742,7 @@
     <ClInclude Include="..\..\JuceLibraryCode\JuceHeader.h"/>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\Resources\brushed_aluminium.png"/>
+    <None Include="..\..\Resources\tile_background.png"/>
     <None Include="..\..\Resources\cello.wav"/>
     <None Include="..\..\Resources\demo table data.xml"/>
     <None Include="..\..\Resources\icons.zip"/>

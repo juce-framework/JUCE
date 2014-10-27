@@ -49,7 +49,7 @@ public:
 
     void paint (Graphics& g)
     {
-        fillBrushedAluminiumBackground (g);
+        fillTiledBackground (g);
 
         g.setColour (Colours::white);
         g.setFont (15.0f);
