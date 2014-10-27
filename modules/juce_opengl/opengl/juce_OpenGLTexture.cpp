@@ -164,14 +164,21 @@ void OpenGLTexture::loadARGBFlipped (const PixelARGB* pixels, int w, int h)
 
 void OpenGLTexture::release()
 {
-    if (textureID != 0
-         && ownerContext == OpenGLContext::getCurrentContext())
+    if (textureID != 0)
     {
-        glDeleteTextures (1, &textureID);
+        // If the texture is deleted while the owner context is not active, it's
+        // impossible to delete it, so this will be a leak until the context itself
+        // is deleted.
+        jassert (ownerContext == OpenGLContext::getCurrentContext());
 
-        textureID = 0;
-        width = 0;
-        height = 0;
+        if (ownerContext == OpenGLContext::getCurrentContext())
+        {
+            glDeleteTextures (1, &textureID);
+
+            textureID = 0;
+            width = 0;
+            height = 0;
+        }
     }
 }
 
