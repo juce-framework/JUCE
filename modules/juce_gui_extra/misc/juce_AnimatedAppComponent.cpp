@@ -23,7 +23,7 @@
 */
 
 AnimatedAppComponent::AnimatedAppComponent()
-    : lastPaintTime (Time::getCurrentTime()), elapsedFrames (0)
+    : lastUpdateTime (Time::getCurrentTime()), totalUpdates (0)
 {
     setOpaque (true);
 }
@@ -34,24 +34,15 @@ void AnimatedAppComponent::setFramesPerSecond (int framesPerSecond)
     startTimer (1000 / framesPerSecond);
 }
 
-int AnimatedAppComponent::getFrameCounter() const noexcept
+int AnimatedAppComponent::getMillisecondsSinceLastUpdate() const noexcept
 {
-    return elapsedFrames;
+    return (int) (Time::getCurrentTime() - lastUpdateTime).inMilliseconds();
 }
 
-int AnimatedAppComponent::getMillisecondsSinceLastPaint() const noexcept
+void AnimatedAppComponent::timerCallback()
 {
-    return (Time::getCurrentTime() - lastPaintTime).toMilliseconds();
-}
-
-void AnimatedAppComponent::timerCallback() override
-{
-    ++elapsedFrames;
+    ++totalUpdates;
     update();
     repaint();
-}
-
-void AnimatedAppComponent::paintOverChildren (Graphics&)
-{
-    lastPaintTime = Time::getCurrentTime();
+    lastUpdateTime = Time::getCurrentTime();
 }

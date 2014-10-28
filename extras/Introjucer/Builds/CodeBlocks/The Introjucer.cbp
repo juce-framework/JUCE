@@ -3230,6 +3230,14 @@
       <Option compile="0"/>
       <Option link="0"/>
     </Unit>
+    <Unit filename="../../../../modules/juce_gui_extra/misc/juce_AnimatedAppComponent.cpp">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../../../modules/juce_gui_extra/misc/juce_AnimatedAppComponent.h">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
     <Unit filename="../../../../modules/juce_gui_extra/misc/juce_AppleRemote.h">
       <Option compile="0"/>
       <Option link="0"/>

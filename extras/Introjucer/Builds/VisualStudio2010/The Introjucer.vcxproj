@@ -974,6 +974,9 @@
     <ClCompile Include="..\..\..\..\modules\juce_gui_extra\documents\juce_FileBasedDocument.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_gui_extra\misc\juce_AnimatedAppComponent.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_gui_extra\misc\juce_BubbleMessageComponent.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
@@ -1486,6 +1489,7 @@
     <ClInclude Include="..\..\..\..\modules\juce_gui_extra\embedding\juce_ActiveXControlComponent.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_gui_extra\embedding\juce_NSViewComponent.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_gui_extra\embedding\juce_UIViewComponent.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_gui_extra\misc\juce_AnimatedAppComponent.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_gui_extra\misc\juce_AppleRemote.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_gui_extra\misc\juce_BubbleMessageComponent.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_gui_extra\misc\juce_ColourSelector.h"/>

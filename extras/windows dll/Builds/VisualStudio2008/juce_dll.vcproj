@@ -984,6 +984,17 @@
       </Filter>
       <Filter Name="juce_audio_utils">
         <Filter Name="gui">
+          <File RelativePath="..\..\..\..\modules\juce_audio_utils\gui\juce_AudioAppComponent.cpp">
+            <FileConfiguration Name="Debug|Win32"
+                               ExcludedFromBuild="true">
+              <Tool Name="VCCLCompilerTool"/>
+            </FileConfiguration>
+            <FileConfiguration Name="Release|Win32"
+                               ExcludedFromBuild="true">
+              <Tool Name="VCCLCompilerTool"/>
+            </FileConfiguration>
+          </File>
+          <File RelativePath="..\..\..\..\modules\juce_audio_utils\gui\juce_AudioAppComponent.h"/>
           <File RelativePath="..\..\..\..\modules\juce_audio_utils\gui\juce_AudioDeviceSelectorComponent.cpp">
             <FileConfiguration Name="Debug|Win32"
                                ExcludedFromBuild="true">
@@ -4184,6 +4195,17 @@
           <File RelativePath="..\..\..\..\modules\juce_gui_extra\embedding\juce_UIViewComponent.h"/>
         </Filter>
         <Filter Name="misc">
+          <File RelativePath="..\..\..\..\modules\juce_gui_extra\misc\juce_AnimatedAppComponent.cpp">
+            <FileConfiguration Name="Debug|Win32"
+                               ExcludedFromBuild="true">
+              <Tool Name="VCCLCompilerTool"/>
+            </FileConfiguration>
+            <FileConfiguration Name="Release|Win32"
+                               ExcludedFromBuild="true">
+              <Tool Name="VCCLCompilerTool"/>
+            </FileConfiguration>
+          </File>
+          <File RelativePath="..\..\..\..\modules\juce_gui_extra\misc\juce_AnimatedAppComponent.h"/>
           <File RelativePath="..\..\..\..\modules\juce_gui_extra\misc\juce_AppleRemote.h"/>
           <File RelativePath="..\..\..\..\modules\juce_gui_extra\misc\juce_BubbleMessageComponent.cpp">
             <FileConfiguration Name="Debug|Win32"
@@ -4461,6 +4483,19 @@
           <File RelativePath="..\..\..\..\modules\juce_opengl\geometry\juce_Matrix3D.h"/>
           <File RelativePath="..\..\..\..\modules\juce_opengl\geometry\juce_Quaternion.h"/>
           <File RelativePath="..\..\..\..\modules\juce_opengl\geometry\juce_Vector3D.h"/>
+        </Filter>
+        <Filter Name="utils">
+          <File RelativePath="..\..\..\..\modules\juce_opengl\utils\juce_OpenGLAppComponent.cpp">
+            <FileConfiguration Name="Debug|Win32"
+                               ExcludedFromBuild="true">
+              <Tool Name="VCCLCompilerTool"/>
+            </FileConfiguration>
+            <FileConfiguration Name="Release|Win32"
+                               ExcludedFromBuild="true">
+              <Tool Name="VCCLCompilerTool"/>
+            </FileConfiguration>
+          </File>
+          <File RelativePath="..\..\..\..\modules\juce_opengl\utils\juce_OpenGLAppComponent.h"/>
         </Filter>
         <Filter Name="native">
           <File RelativePath="..\..\..\..\modules\juce_opengl\native\juce_MissingGLDefinitions.h"/>

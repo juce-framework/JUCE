@@ -45,24 +45,29 @@ public:
     */
     void setFramesPerSecond (int framesPerSecond);
 
-    /** Returns the number of elapsed frames since the component started running. */
-    int getFrameCounter() const noexcept;
-
-    /**
+    /** Called periodically, at the frequency specified by setFramesPerSecond().
+        This is a the best place to do things like advancing animation parameters,
+        checking the mouse position, etc.
     */
-    int getMillisecondsSinceLastPaint() const noexcept;
+    virtual void update() = 0;
 
-    /**
+    /** Returns the number of times that update() has been called since the component
+        started running.
     */
-    void update() = 0;
+    int getFrameCounter() const noexcept        { return totalUpdates; }
+
+    /** When called from update(), this returns the number of milliseconds since the
+        last update call.
+        This might be useful for accurately timing animations, etc.
+    */
+    int getMillisecondsSinceLastUpdate() const noexcept;
 
 private:
     //==============================================================================
-    Time lastPaintTime;
-    int elapsedFrames;
+    Time lastUpdateTime;
+    int totalUpdates;
 
     void timerCallback() override;
-    void paintOverChildren (Graphics&) override;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AnimatedAppComponent)
 };

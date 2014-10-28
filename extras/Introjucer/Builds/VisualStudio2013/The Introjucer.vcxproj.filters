@@ -1228,6 +1228,9 @@
     <ClCompile Include="..\..\..\..\modules\juce_gui_extra\documents\juce_FileBasedDocument.cpp">
       <Filter>Juce Modules\juce_gui_extra\documents</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_gui_extra\misc\juce_AnimatedAppComponent.cpp">
+      <Filter>Juce Modules\juce_gui_extra\misc</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_gui_extra\misc\juce_BubbleMessageComponent.cpp">
       <Filter>Juce Modules\juce_gui_extra\misc</Filter>
     </ClCompile>
@@ -2681,6 +2684,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_gui_extra\embedding\juce_UIViewComponent.h">
       <Filter>Juce Modules\juce_gui_extra\embedding</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_gui_extra\misc\juce_AnimatedAppComponent.h">
+      <Filter>Juce Modules\juce_gui_extra\misc</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_gui_extra\misc\juce_AppleRemote.h">
       <Filter>Juce Modules\juce_gui_extra\misc</Filter>

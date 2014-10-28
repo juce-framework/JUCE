@@ -91,6 +91,7 @@ namespace juce
 #include "misc/juce_SplashScreen.cpp"
 #include "misc/juce_SystemTrayIconComponent.cpp"
 #include "misc/juce_LiveConstantEditor.cpp"
+#include "misc/juce_AnimatedAppComponent.cpp"
 
 }
 
