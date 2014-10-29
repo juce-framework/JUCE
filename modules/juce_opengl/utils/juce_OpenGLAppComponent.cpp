@@ -22,36 +22,31 @@
   ==============================================================================
 */
 
-AnimatedAppComponent::AnimatedAppComponent()
-    : lastPaintTime (Time::getCurrentTime()), elapsedFrames (0)
+OpenGLAppComponent::OpenGLAppComponent()   : frameCounter (0)
 {
     setOpaque (true);
+    openGLContext.setRenderer (this);
+    openGLContext.attachTo (*this);
+    openGLContext.setContinuousRepainting (true);
 }
 
-void AnimatedAppComponent::setFramesPerSecond (int framesPerSecond)
+OpenGLAppComponent::~OpenGLAppComponent()
 {
-    jassert (framesPerSecond > 0 && framesPerSecond < 1000);
-    startTimer (1000 / framesPerSecond);
+    openGLContext.detach();
 }
 
-int AnimatedAppComponent::getFrameCounter() const noexcept
+void OpenGLAppComponent::newOpenGLContextCreated()
 {
-    return elapsedFrames;
+    initialise();
 }
 
-int AnimatedAppComponent::getMillisecondsSinceLastPaint() const noexcept
+void OpenGLAppComponent::renderOpenGL()
 {
-    return (Time::getCurrentTime() - lastPaintTime).toMilliseconds();
+    ++frameCounter;
+    render();
 }
 
-void AnimatedAppComponent::timerCallback() override
+void OpenGLAppComponent::openGLContextClosing()
 {
-    ++elapsedFrames;
-    update();
-    repaint();
-}
-
-void AnimatedAppComponent::paintOverChildren (Graphics&)
-{
-    lastPaintTime = Time::getCurrentTime();
+    shutdown();
 }

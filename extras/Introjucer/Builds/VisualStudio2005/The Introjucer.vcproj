@@ -1148,7 +1148,6 @@
           </File>
           <File RelativePath="..\..\..\..\modules\juce_core\files\juce_FileSearchPath.h"/>
           <File RelativePath="..\..\..\..\modules\juce_core\files\juce_MemoryMappedFile.h"/>
-          <File RelativePath="..\..\..\..\modules\juce_core\files\juce_MountedVolumeListChangeDetector.h"/>
           <File RelativePath="..\..\..\..\modules\juce_core\files\juce_TemporaryFile.cpp">
             <FileConfiguration Name="Debug|Win32"
                                ExcludedFromBuild="true">
@@ -1851,6 +1850,7 @@
             </FileConfiguration>
           </File>
           <File RelativePath="..\..\..\..\modules\juce_events\messages\juce_MessageManager.h"/>
+          <File RelativePath="..\..\..\..\modules\juce_events\messages\juce_MountedVolumeListChangeDetector.h"/>
           <File RelativePath="..\..\..\..\modules\juce_events\messages\juce_NotificationType.h"/>
         </Filter>
         <Filter Name="timers">
@@ -3869,6 +3869,17 @@
           <File RelativePath="..\..\..\..\modules\juce_gui_extra\embedding\juce_UIViewComponent.h"/>
         </Filter>
         <Filter Name="misc">
+          <File RelativePath="..\..\..\..\modules\juce_gui_extra\misc\juce_AnimatedAppComponent.cpp">
+            <FileConfiguration Name="Debug|Win32"
+                               ExcludedFromBuild="true">
+              <Tool Name="VCCLCompilerTool"/>
+            </FileConfiguration>
+            <FileConfiguration Name="Release|Win32"
+                               ExcludedFromBuild="true">
+              <Tool Name="VCCLCompilerTool"/>
+            </FileConfiguration>
+          </File>
+          <File RelativePath="..\..\..\..\modules\juce_gui_extra\misc\juce_AnimatedAppComponent.h"/>
           <File RelativePath="..\..\..\..\modules\juce_gui_extra\misc\juce_AppleRemote.h"/>
           <File RelativePath="..\..\..\..\modules\juce_gui_extra\misc\juce_BubbleMessageComponent.cpp">
             <FileConfiguration Name="Debug|Win32"

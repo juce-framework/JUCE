@@ -381,6 +381,9 @@
     <ClCompile Include="..\..\..\..\modules\juce_audio_processors\scanning\juce_PluginListComponent.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_utils\gui\juce_AudioAppComponent.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_audio_utils\gui\juce_AudioDeviceSelectorComponent.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
@@ -1179,6 +1182,9 @@
     <ClCompile Include="..\..\..\..\modules\juce_gui_extra\documents\juce_FileBasedDocument.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_gui_extra\misc\juce_AnimatedAppComponent.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_gui_extra\misc\juce_BubbleMessageComponent.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
@@ -1246,6 +1252,9 @@
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_opengl\opengl\juce_OpenGLTexture.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_opengl\utils\juce_OpenGLAppComponent.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_video\capture\juce_CameraDevice.cpp">
@@ -1363,6 +1372,7 @@
     <ClInclude Include="..\..\..\..\modules\juce_audio_processors\scanning\juce_PluginDirectoryScanner.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_processors\scanning\juce_PluginListComponent.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_processors\juce_audio_processors.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_utils\gui\juce_AudioAppComponent.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_utils\gui\juce_AudioDeviceSelectorComponent.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_utils\gui\juce_AudioThumbnail.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_utils\gui\juce_AudioThumbnailBase.h"/>
@@ -1700,6 +1710,7 @@
     <ClInclude Include="..\..\..\..\modules\juce_gui_extra\embedding\juce_ActiveXControlComponent.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_gui_extra\embedding\juce_NSViewComponent.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_gui_extra\embedding\juce_UIViewComponent.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_gui_extra\misc\juce_AnimatedAppComponent.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_gui_extra\misc\juce_AppleRemote.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_gui_extra\misc\juce_BubbleMessageComponent.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_gui_extra\misc\juce_ColourSelector.h"/>
@@ -1725,6 +1736,7 @@
     <ClInclude Include="..\..\..\..\modules\juce_opengl\geometry\juce_Matrix3D.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_opengl\geometry\juce_Quaternion.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_opengl\geometry\juce_Vector3D.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_opengl\utils\juce_OpenGLAppComponent.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_opengl\native\juce_MissingGLDefinitions.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_opengl\native\juce_OpenGL_android.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_opengl\native\juce_OpenGL_ios.h"/>

@@ -33,11 +33,11 @@ AudioAppComponent::~AudioAppComponent()
     deviceManager.closeAudioDevice();
 }
 
-void AudioAppComponent::initialise (int numInputChannels, int numOutputChannels)
+void AudioAppComponent::setAudioChannels (int numInputChannels, int numOutputChannels)
 {
     String audioError = deviceManager.initialise (numInputChannels, numOutputChannels, nullptr, true);
     jassert (audioError.isEmpty());
 
     deviceManager.addAudioCallback (&audioSourcePlayer);
-    audioSourcePlayer.setSource (&transportSource);
+    audioSourcePlayer.setSource (this);
 }

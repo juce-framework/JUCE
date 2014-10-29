@@ -302,6 +302,9 @@
     <Filter Include="Juce Modules\juce_opengl\geometry">
       <UniqueIdentifier>{B3141847-8F13-F67D-45B2-E3ECF6E09088}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Juce Modules\juce_opengl\utils">
+      <UniqueIdentifier>{9E586194-C056-101C-5311-F2AF5191AC80}</UniqueIdentifier>
+    </Filter>
     <Filter Include="Juce Modules\juce_opengl\native">
       <UniqueIdentifier>{151B49D8-6102-F802-1C07-D59931BC0574}</UniqueIdentifier>
     </Filter>
@@ -666,6 +669,9 @@
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_audio_processors\scanning\juce_PluginListComponent.cpp">
       <Filter>Juce Modules\juce_audio_processors\scanning</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_utils\gui\juce_AudioAppComponent.cpp">
+      <Filter>Juce Modules\juce_audio_utils\gui</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_audio_utils\gui\juce_AudioDeviceSelectorComponent.cpp">
       <Filter>Juce Modules\juce_audio_utils\gui</Filter>
@@ -1513,6 +1519,9 @@
     <ClCompile Include="..\..\..\..\modules\juce_gui_extra\documents\juce_FileBasedDocument.cpp">
       <Filter>Juce Modules\juce_gui_extra\documents</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_gui_extra\misc\juce_AnimatedAppComponent.cpp">
+      <Filter>Juce Modules\juce_gui_extra\misc</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_gui_extra\misc\juce_BubbleMessageComponent.cpp">
       <Filter>Juce Modules\juce_gui_extra\misc</Filter>
     </ClCompile>
@@ -1593,6 +1602,9 @@
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_opengl\opengl\juce_OpenGLTexture.cpp">
       <Filter>Juce Modules\juce_opengl\opengl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_opengl\utils\juce_OpenGLAppComponent.cpp">
+      <Filter>Juce Modules\juce_opengl\utils</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_video\capture\juce_CameraDevice.cpp">
       <Filter>Juce Modules\juce_video\capture</Filter>
@@ -1910,6 +1922,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_audio_processors\juce_audio_processors.h">
       <Filter>Juce Modules\juce_audio_processors</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_utils\gui\juce_AudioAppComponent.h">
+      <Filter>Juce Modules\juce_audio_utils\gui</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_audio_utils\gui\juce_AudioDeviceSelectorComponent.h">
       <Filter>Juce Modules\juce_audio_utils\gui</Filter>
@@ -2922,6 +2937,9 @@
     <ClInclude Include="..\..\..\..\modules\juce_gui_extra\embedding\juce_UIViewComponent.h">
       <Filter>Juce Modules\juce_gui_extra\embedding</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_gui_extra\misc\juce_AnimatedAppComponent.h">
+      <Filter>Juce Modules\juce_gui_extra\misc</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_gui_extra\misc\juce_AppleRemote.h">
       <Filter>Juce Modules\juce_gui_extra\misc</Filter>
     </ClInclude>
@@ -2996,6 +3014,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_opengl\geometry\juce_Vector3D.h">
       <Filter>Juce Modules\juce_opengl\geometry</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_opengl\utils\juce_OpenGLAppComponent.h">
+      <Filter>Juce Modules\juce_opengl\utils</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_opengl\native\juce_MissingGLDefinitions.h">
       <Filter>Juce Modules\juce_opengl\native</Filter>

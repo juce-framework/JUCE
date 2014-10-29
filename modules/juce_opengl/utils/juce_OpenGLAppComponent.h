@@ -34,39 +34,44 @@
     paint() and mouse-handling. The base class provides some simple abstractions
     to take care of continuously repainting itself.
 */
-class AnimatedAppComponent   : public Component,
-                               private Timer
+class OpenGLAppComponent   : public Component,
+                             private OpenGLRenderer
 {
 public:
-    AnimatedAppComponent();
+    OpenGLAppComponent();
+    ~OpenGLAppComponent();
 
-    /** Your subclass can call this to start a timer running which will
-        call update() and repaint the component at the given frequency.
+    /** Returns the number of times that the render method has been called since
+        the component started running.
     */
-    void setFramesPerSecond (int framesPerSecond);
+    int getFrameCounter() const noexcept        { return frameCounter; }
 
-    /** Returns the number of elapsed frames since the component started running. */
-    int getFrameCounter() const noexcept;
+    /** Implement this method to set up any GL objects that you need for rendering.
+        The GL context will be active when this method is called.
+    */
+    virtual void initialise() = 0;
+
+    /** Implement this method to free any GL objects that you created during rendering.
+        The GL context will still be active when this method is called.
+    */
+    virtual void shutdown() = 0;
 
     /**
     */
-    int getMillisecondsSinceLastPaint() const noexcept;
+    virtual void render() = 0;
 
-    /**
-    */
-    void update() = 0;
 
 private:
     //==============================================================================
-    Time lastPaintTime;
-    int elapsedFrames;
+    OpenGLContext openGLContext;
+    int frameCounter;
 
-    void timerCallback() override;
-    void paintOverChildren (Graphics&) override;
+    void newOpenGLContextCreated() override;
+    void renderOpenGL() override;
+    void openGLContextClosing() override;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AnimatedAppComponent)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OpenGLAppComponent)
 };
-
 
 
 #endif   // JUCE_OPENGLAPPCOMPONENT_H_INCLUDED

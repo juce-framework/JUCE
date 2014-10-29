@@ -974,6 +974,9 @@
     <ClCompile Include="..\..\..\..\modules\juce_gui_extra\documents\juce_FileBasedDocument.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_gui_extra\misc\juce_AnimatedAppComponent.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_gui_extra\misc\juce_BubbleMessageComponent.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
@@ -1233,7 +1236,6 @@
     <ClInclude Include="..\..\..\..\modules\juce_core\files\juce_FileOutputStream.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\files\juce_FileSearchPath.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\files\juce_MemoryMappedFile.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_core\files\juce_MountedVolumeListChangeDetector.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\files\juce_TemporaryFile.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\files\juce_WildcardFileFilter.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\network\juce_IPAddress.h"/>
@@ -1293,6 +1295,7 @@
     <ClInclude Include="..\..\..\..\modules\juce_events\messages\juce_Message.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_events\messages\juce_MessageListener.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_events\messages\juce_MessageManager.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_events\messages\juce_MountedVolumeListChangeDetector.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_events\messages\juce_NotificationType.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_events\timers\juce_MultiTimer.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_events\timers\juce_Timer.h"/>
@@ -1486,6 +1489,7 @@
     <ClInclude Include="..\..\..\..\modules\juce_gui_extra\embedding\juce_ActiveXControlComponent.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_gui_extra\embedding\juce_NSViewComponent.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_gui_extra\embedding\juce_UIViewComponent.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_gui_extra\misc\juce_AnimatedAppComponent.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_gui_extra\misc\juce_AppleRemote.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_gui_extra\misc\juce_BubbleMessageComponent.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_gui_extra\misc\juce_ColourSelector.h"/>

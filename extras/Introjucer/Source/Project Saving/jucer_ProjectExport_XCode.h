@@ -26,7 +26,7 @@ namespace
 {
     const char* const osxVersionDefault         = "default";
     const int oldestSDKVersion = 4;
-    const int currentSDKVersion = 9;
+    const int currentSDKVersion = 10;
 
     const char* const osxArch_Default           = "default";
     const char* const osxArch_Native            = "Native";
