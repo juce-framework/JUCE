@@ -622,6 +622,14 @@
       <Option compile="0"/>
       <Option link="0"/>
     </Unit>
+    <Unit filename="../../Source/BinaryData/jucer_MainTemplate_SimpleWindow.cpp">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../Source/BinaryData/jucer_AnimatedComponentTemplate.cpp">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
     <Unit filename="../../Source/BinaryData/AudioPluginXCodeScript.txt">
       <Option compile="0"/>
       <Option link="0"/>

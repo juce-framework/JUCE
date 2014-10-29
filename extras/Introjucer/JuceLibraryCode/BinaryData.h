@@ -9,6 +9,12 @@
 
 namespace BinaryData
 {
+    extern const char*   jucer_MainTemplate_SimpleWindow_cpp;
+    const int            jucer_MainTemplate_SimpleWindow_cppSize = 3866;
+
+    extern const char*   jucer_AnimatedComponentTemplate_cpp;
+    const int            jucer_AnimatedComponentTemplate_cppSize = 1546;
+
     extern const char*   AudioPluginXCodeScript_txt;
     const int            AudioPluginXCodeScript_txtSize = 2916;
 
@@ -139,7 +145,7 @@ namespace BinaryData
     extern const char* namedResourceList[];
 
     // Number of elements in the namedResourceList array.
-    const int namedResourceListSize = 42;
+    const int namedResourceListSize = 44;
 
     // If you provide the name of one of the binary resource variables above, this function will
     // return the corresponding data and its size (or a null pointer if the name isn't found).

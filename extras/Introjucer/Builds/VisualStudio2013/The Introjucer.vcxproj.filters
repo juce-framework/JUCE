@@ -373,6 +373,12 @@
     <ClCompile Include="..\..\Source\Wizards\jucer_NewProjectWizardClasses.cpp">
       <Filter>The Introjucer\Wizards</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Source\BinaryData\jucer_MainTemplate_SimpleWindow.cpp">
+      <Filter>The Introjucer\BinaryData</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\BinaryData\jucer_AnimatedComponentTemplate.cpp">
+      <Filter>The Introjucer\BinaryData</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\Source\BinaryData\jucer_AudioPluginEditorTemplate.cpp">
       <Filter>The Introjucer\BinaryData</Filter>
     </ClCompile>

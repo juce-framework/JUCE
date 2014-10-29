@@ -1,0 +1,21 @@
+{
+  "id":             "juce_video",
+  "name":           "JUCE video playback and capture classes",
+  "version":        "3.0.8",
+  "description":    "Classes for playing video and capturing camera input.",
+  "website":        "http://www.juce.com/juce",
+  "license":        "GPL/Commercial",
+
+  "dependencies":   [ { "id": "juce_gui_extra",   "version": "matching" } ],
+
+  "include":        "juce_video.h",
+
+  "compile":        [ { "file": "juce_video.cpp", "target": "! xcode" },
+                      { "file": "juce_video.mm",  "target": "xcode" } ],
+
+  "browse":         [ "playback/*",
+                      "capture/*",
+                      "native/*" ],
+
+  "OSXFrameworks":  "QTKit QuickTime"
+}
