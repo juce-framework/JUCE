@@ -25,28 +25,38 @@ public:
     MainContentComponent()
     {
         setSize (500, 400);
+        
         // the the input and output channels (currently Mono in and out)
         setAudioChannels (1, 1);
     }
 
     ~MainContentComponent()
     {
+        shutdownAudio();
     }
+    
+    //=======================================================================
+    // HANDLE AUDIO
     
     void prepareToPlay (int samplesPerBlockExpected, double sampleRate)
     {
-        
-    }
-    
-    void releaseResources()
-    {
-        
+        // This is called externally with the native paramters when the
+        // device is ready.
     }
     
     void getNextAudioBlock (const AudioSourceChannelInfo& bufferToFill)
     {
-        
+        // Process your Audio here.
     }
+    
+    void releaseResources()
+    {
+        // This gets automatically called when audio device paramters change
+        // or device is restarted.
+    }
+    
+    //=======================================================================
+    // HANDLE DRAWING
     
     void paint (Graphics& g)
     {
