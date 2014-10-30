@@ -373,6 +373,9 @@
     <ClCompile Include="..\..\Source\Wizards\jucer_NewProjectWizardClasses.cpp">
       <Filter>The Introjucer\Wizards</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Source\BinaryData\jucer_OpenglComponentTemplate.cpp">
+      <Filter>The Introjucer\BinaryData</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\Source\BinaryData\jucer_AudioComponentTemplate.cpp">
       <Filter>The Introjucer\BinaryData</Filter>
     </ClCompile>

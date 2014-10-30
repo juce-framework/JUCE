@@ -7,8 +7,77 @@
 namespace BinaryData
 {
 
-//================== jucer_AudioComponentTemplate.cpp ==================
+//================== jucer_OpenglComponentTemplate.cpp ==================
 static const unsigned char temp_binary_data_0[] =
+"/*\r\n"
+"  ==============================================================================\r\n"
+"\r\n"
+"    This file was auto-generated!\r\n"
+"\r\n"
+"  ==============================================================================\r\n"
+"*/\r\n"
+"\r\n"
+"#ifndef MAINCOMPONENT_H_INCLUDED\r\n"
+"#define MAINCOMPONENT_H_INCLUDED\r\n"
+"\r\n"
+"INCLUDE_JUCE\r\n"
+"\r\n"
+"//==============================================================================\r\n"
+"/*\r\n"
+"    This component lives inside our window, and this is where you should put all\r\n"
+"    your controls and content.\r\n"
+"*/\r\n"
+"class MainContentComponent   : public OpenGLAppComponent\r\n"
+"{\r\n"
+"public:\r\n"
+"    //==============================================================================\r\n"
+"\r\n"
+"\r\n"
+"    MainContentComponent()\r\n"
+"    {\r\n"
+"        setSize (500, 400);\r\n"
+"        \r\n"
+"    }\r\n"
+"\r\n"
+"    ~MainContentComponent()\r\n"
+"    {\r\n"
+"        shutdownAudio();\r\n"
+"    }\r\n"
+"\r\n"
+"    void paint (Graphics& g)\r\n"
+"    {\r\n"
+"        // fill background\r\n"
+"        g.fillAll (Colours::black);\r\n"
+"\r\n"
+"    }\r\n"
+"\r\n"
+"    void resized()\r\n"
+"    {\r\n"
+"        // This is called when the MainContentComponent is resized.\r\n"
+"        // If you add any child components, this is where you should\r\n"
+"        // update their positions.\r\n"
+"    }\r\n"
+"\r\n"
+"\r\n"
+"private:\r\n"
+"    //==============================================================================\r\n"
+"    \r\n"
+"    // private member variables\r\n"
+"    \r\n"
+"    \r\n"
+"    \r\n"
+"    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainContentComponent)\r\n"
+"};\r\n"
+"\r\n"
+"\r\n"
+"Component* createMainContentComponent() { return new MainContentComponent(); };\r\n"
+"\r\n"
+"#endif  // MAINCOMPONENT_H_INCLUDED";
+
+const char* jucer_OpenglComponentTemplate_cpp = (const char*) temp_binary_data_0;
+
+//================== jucer_AudioComponentTemplate.cpp ==================
+static const unsigned char temp_binary_data_1[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
@@ -36,28 +105,38 @@ static const unsigned char temp_binary_data_0[] =
 "    MainContentComponent()\r\n"
 "    {\r\n"
 "        setSize (500, 400);\r\n"
+"        \r\n"
 "        // the the input and output channels (currently Mono in and out)\r\n"
 "        setAudioChannels (1, 1);\r\n"
 "    }\r\n"
 "\r\n"
 "    ~MainContentComponent()\r\n"
 "    {\r\n"
+"        shutdownAudio();\r\n"
 "    }\r\n"
+"    \r\n"
+"    //=======================================================================\r\n"
+"    // HANDLE AUDIO\r\n"
 "    \r\n"
 "    void prepareToPlay (int samplesPerBlockExpected, double sampleRate)\r\n"
 "    {\r\n"
-"        \r\n"
-"    }\r\n"
-"    \r\n"
-"    void releaseResources()\r\n"
-"    {\r\n"
-"        \r\n"
+"        // This is called externally with the native paramters when the\r\n"
+"        // device is ready.\r\n"
 "    }\r\n"
 "    \r\n"
 "    void getNextAudioBlock (const AudioSourceChannelInfo& bufferToFill)\r\n"
 "    {\r\n"
-"        \r\n"
+"        // Process your Audio here.\r\n"
 "    }\r\n"
+"    \r\n"
+"    void releaseResources()\r\n"
+"    {\r\n"
+"        // This gets automatically called when audio device paramters change\r\n"
+"        // or device is restarted.\r\n"
+"    }\r\n"
+"    \r\n"
+"    //=======================================================================\r\n"
+"    // HANDLE DRAWING\r\n"
 "    \r\n"
 "    void paint (Graphics& g)\r\n"
 "    {\r\n"
@@ -89,10 +168,10 @@ static const unsigned char temp_binary_data_0[] =
 "\r\n"
 "#endif  // MAINCOMPONENT_H_INCLUDED";
 
-const char* jucer_AudioComponentTemplate_cpp = (const char*) temp_binary_data_0;
+const char* jucer_AudioComponentTemplate_cpp = (const char*) temp_binary_data_1;
 
 //================== jucer_MainTemplate_SimpleWindow.cpp ==================
-static const unsigned char temp_binary_data_1[] =
+static const unsigned char temp_binary_data_2[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
@@ -195,10 +274,10 @@ static const unsigned char temp_binary_data_1[] =
 "// This macro generates the main() routine that launches the app.\r\n"
 "START_JUCE_APPLICATION (APPCLASSNAME)\r\n";
 
-const char* jucer_MainTemplate_SimpleWindow_cpp = (const char*) temp_binary_data_1;
+const char* jucer_MainTemplate_SimpleWindow_cpp = (const char*) temp_binary_data_2;
 
 //================== jucer_AnimatedComponentTemplate.cpp ==================
-static const unsigned char temp_binary_data_2[] =
+static const unsigned char temp_binary_data_3[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
@@ -268,10 +347,10 @@ static const unsigned char temp_binary_data_2[] =
 "\r\n"
 "#endif  // MAINCOMPONENT_H_INCLUDED\r\n";
 
-const char* jucer_AnimatedComponentTemplate_cpp = (const char*) temp_binary_data_2;
+const char* jucer_AnimatedComponentTemplate_cpp = (const char*) temp_binary_data_3;
 
 //================== AudioPluginXCodeScript.txt ==================
-static const unsigned char temp_binary_data_3[] =
+static const unsigned char temp_binary_data_4[] =
 "\r\n"
 "# This script takes the build product and copies it to the AU, VST, VST3, RTAS and AAX folders, depending on \r\n"
 "# which plugin types you've built\r\n"
@@ -363,17 +442,17 @@ static const unsigned char temp_binary_data_3[] =
 "  fi\r\n"
 "fi\r\n";
 
-const char* AudioPluginXCodeScript_txt = (const char*) temp_binary_data_3;
+const char* AudioPluginXCodeScript_txt = (const char*) temp_binary_data_4;
 
 //================== background_tile.png ==================
-static const unsigned char temp_binary_data_4[] =
+static const unsigned char temp_binary_data_5[] =
 { 137,80,78,71,13,10,26,10,0,0,0,13,73,72,68,82,0,0,0,7,0,0,0,7,8,6,0,0,0,196,82,87,211,0,0,0,94,73,68,65,84,120,218,85,141,73,14,0,33,8,4,253,137,226,18,19,245,234,255,127,70,75,155,232,56,135,10,132,94,112,33,4,37,222,123,205,57,107,74,105,239,196,137,
 8,72,239,29,99,12,204,57,209,90,227,237,19,45,113,161,209,12,234,172,18,49,70,88,229,134,34,103,173,245,159,60,134,82,10,238,79,166,223,106,238,91,100,229,73,191,80,92,47,179,68,223,148,158,98,226,0,0,0,0,73,69,78,68,174,66,96,130,0,0 };
 
-const char* background_tile_png = (const char*) temp_binary_data_4;
+const char* background_tile_png = (const char*) temp_binary_data_5;
 
 //================== colourscheme_dark.xml ==================
-static const unsigned char temp_binary_data_5[] =
+static const unsigned char temp_binary_data_6[] =
 "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n"
 "\r\n"
 "<COLOUR_SCHEME font=\"&lt;Monospaced&gt;; 13.0\">\r\n"
@@ -398,10 +477,10 @@ static const unsigned char temp_binary_data_5[] =
 "  <COLOUR name=\"Error\" colour=\"FFE60000\"/>\r\n"
 "</COLOUR_SCHEME>\r\n";
 
-const char* colourscheme_dark_xml = (const char*) temp_binary_data_5;
+const char* colourscheme_dark_xml = (const char*) temp_binary_data_6;
 
 //================== colourscheme_light.xml ==================
-static const unsigned char temp_binary_data_6[] =
+static const unsigned char temp_binary_data_7[] =
 "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n"
 "\r\n"
 "<COLOUR_SCHEME font=\"&lt;Monospaced&gt;; 13.0\">\r\n"
@@ -426,10 +505,10 @@ static const unsigned char temp_binary_data_6[] =
 "  <COLOUR name=\"Error\" colour=\"ffcc0000\"/>\r\n"
 "</COLOUR_SCHEME>\r\n";
 
-const char* colourscheme_light_xml = (const char*) temp_binary_data_6;
+const char* colourscheme_light_xml = (const char*) temp_binary_data_7;
 
 //================== jucer_AudioPluginEditorTemplate.cpp ==================
-static const unsigned char temp_binary_data_7[] =
+static const unsigned char temp_binary_data_8[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
@@ -472,10 +551,10 @@ static const unsigned char temp_binary_data_7[] =
 "    // subcomponents in your editor..\r\n"
 "}\r\n";
 
-const char* jucer_AudioPluginEditorTemplate_cpp = (const char*) temp_binary_data_7;
+const char* jucer_AudioPluginEditorTemplate_cpp = (const char*) temp_binary_data_8;
 
 //================== jucer_AudioPluginEditorTemplate.h ==================
-static const unsigned char temp_binary_data_8[] =
+static const unsigned char temp_binary_data_9[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
@@ -516,10 +595,10 @@ static const unsigned char temp_binary_data_8[] =
 "\r\n"
 "#endif  // HEADERGUARD\r\n";
 
-const char* jucer_AudioPluginEditorTemplate_h = (const char*) temp_binary_data_8;
+const char* jucer_AudioPluginEditorTemplate_h = (const char*) temp_binary_data_9;
 
 //================== jucer_AudioPluginFilterTemplate.cpp ==================
-static const unsigned char temp_binary_data_9[] =
+static const unsigned char temp_binary_data_10[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
@@ -710,10 +789,10 @@ static const unsigned char temp_binary_data_9[] =
 "    return new FILTERCLASSNAME();\r\n"
 "}\r\n";
 
-const char* jucer_AudioPluginFilterTemplate_cpp = (const char*) temp_binary_data_9;
+const char* jucer_AudioPluginFilterTemplate_cpp = (const char*) temp_binary_data_10;
 
 //================== jucer_AudioPluginFilterTemplate.h ==================
-static const unsigned char temp_binary_data_10[] =
+static const unsigned char temp_binary_data_11[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
@@ -789,10 +868,10 @@ static const unsigned char temp_binary_data_10[] =
 "\r\n"
 "#endif  // HEADERGUARD\r\n";
 
-const char* jucer_AudioPluginFilterTemplate_h = (const char*) temp_binary_data_10;
+const char* jucer_AudioPluginFilterTemplate_h = (const char*) temp_binary_data_11;
 
 //================== jucer_ComponentTemplate.cpp ==================
-static const unsigned char temp_binary_data_11[] =
+static const unsigned char temp_binary_data_12[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
@@ -865,10 +944,10 @@ static const unsigned char temp_binary_data_11[] =
 "//[EndFile] You can add extra defines here...\r\n"
 "//[/EndFile]";
 
-const char* jucer_ComponentTemplate_cpp = (const char*) temp_binary_data_11;
+const char* jucer_ComponentTemplate_cpp = (const char*) temp_binary_data_12;
 
 //================== jucer_ComponentTemplate.h ==================
-static const unsigned char temp_binary_data_12[] =
+static const unsigned char temp_binary_data_13[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
@@ -934,10 +1013,10 @@ static const unsigned char temp_binary_data_12[] =
 "\r\n"
 "#endif   // %%headerGuard%%";
 
-const char* jucer_ComponentTemplate_h = (const char*) temp_binary_data_12;
+const char* jucer_ComponentTemplate_h = (const char*) temp_binary_data_13;
 
 //================== jucer_ContentCompTemplate.cpp ==================
-static const unsigned char temp_binary_data_13[] =
+static const unsigned char temp_binary_data_14[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
@@ -975,10 +1054,10 @@ static const unsigned char temp_binary_data_13[] =
 "    // update their positions.\r\n"
 "}\r\n";
 
-const char* jucer_ContentCompTemplate_cpp = (const char*) temp_binary_data_13;
+const char* jucer_ContentCompTemplate_cpp = (const char*) temp_binary_data_14;
 
 //================== jucer_ContentCompTemplate.h ==================
-static const unsigned char temp_binary_data_14[] =
+static const unsigned char temp_binary_data_15[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
@@ -1016,10 +1095,10 @@ static const unsigned char temp_binary_data_14[] =
 "\r\n"
 "#endif  // HEADERGUARD\r\n";
 
-const char* jucer_ContentCompTemplate_h = (const char*) temp_binary_data_14;
+const char* jucer_ContentCompTemplate_h = (const char*) temp_binary_data_15;
 
 //================== jucer_InlineComponentTemplate.h ==================
-static const unsigned char temp_binary_data_15[] =
+static const unsigned char temp_binary_data_16[] =
 "//==============================================================================\r\n"
 "class COMPONENTCLASS    : public Component\r\n"
 "{\r\n"
@@ -1061,10 +1140,10 @@ static const unsigned char temp_binary_data_15[] =
 "    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (COMPONENTCLASS)\r\n"
 "};\r\n";
 
-const char* jucer_InlineComponentTemplate_h = (const char*) temp_binary_data_15;
+const char* jucer_InlineComponentTemplate_h = (const char*) temp_binary_data_16;
 
 //================== jucer_MainConsoleAppTemplate.cpp ==================
-static const unsigned char temp_binary_data_16[] =
+static const unsigned char temp_binary_data_17[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
@@ -1088,10 +1167,10 @@ static const unsigned char temp_binary_data_16[] =
 "    return 0;\r\n"
 "}\r\n";
 
-const char* jucer_MainConsoleAppTemplate_cpp = (const char*) temp_binary_data_16;
+const char* jucer_MainConsoleAppTemplate_cpp = (const char*) temp_binary_data_17;
 
 //================== jucer_MainTemplate_NoWindow.cpp ==================
-static const unsigned char temp_binary_data_17[] =
+static const unsigned char temp_binary_data_18[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
@@ -1147,10 +1226,10 @@ static const unsigned char temp_binary_data_17[] =
 "// This macro generates the main() routine that launches the app.\r\n"
 "START_JUCE_APPLICATION (APPCLASSNAME)\r\n";
 
-const char* jucer_MainTemplate_NoWindow_cpp = (const char*) temp_binary_data_17;
+const char* jucer_MainTemplate_NoWindow_cpp = (const char*) temp_binary_data_18;
 
 //================== jucer_MainTemplate_Window.cpp ==================
-static const unsigned char temp_binary_data_18[] =
+static const unsigned char temp_binary_data_19[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
@@ -1251,10 +1330,10 @@ static const unsigned char temp_binary_data_18[] =
 "// This macro generates the main() routine that launches the app.\r\n"
 "START_JUCE_APPLICATION (APPCLASSNAME)\r\n";
 
-const char* jucer_MainTemplate_Window_cpp = (const char*) temp_binary_data_18;
+const char* jucer_MainTemplate_Window_cpp = (const char*) temp_binary_data_19;
 
 //================== jucer_NewComponentTemplate.cpp ==================
-static const unsigned char temp_binary_data_19[] =
+static const unsigned char temp_binary_data_20[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
@@ -1307,10 +1386,10 @@ static const unsigned char temp_binary_data_19[] =
 "\r\n"
 "}\r\n";
 
-const char* jucer_NewComponentTemplate_cpp = (const char*) temp_binary_data_19;
+const char* jucer_NewComponentTemplate_cpp = (const char*) temp_binary_data_20;
 
 //================== jucer_NewComponentTemplate.h ==================
-static const unsigned char temp_binary_data_20[] =
+static const unsigned char temp_binary_data_21[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
@@ -1345,10 +1424,10 @@ static const unsigned char temp_binary_data_20[] =
 "\r\n"
 "#endif  // HEADERGUARD\r\n";
 
-const char* jucer_NewComponentTemplate_h = (const char*) temp_binary_data_20;
+const char* jucer_NewComponentTemplate_h = (const char*) temp_binary_data_21;
 
 //================== jucer_NewCppFileTemplate.cpp ==================
-static const unsigned char temp_binary_data_21[] =
+static const unsigned char temp_binary_data_22[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
@@ -1361,10 +1440,10 @@ static const unsigned char temp_binary_data_21[] =
 "\r\n"
 "INCLUDE_CORRESPONDING_HEADER\r\n";
 
-const char* jucer_NewCppFileTemplate_cpp = (const char*) temp_binary_data_21;
+const char* jucer_NewCppFileTemplate_cpp = (const char*) temp_binary_data_22;
 
 //================== jucer_NewCppFileTemplate.h ==================
-static const unsigned char temp_binary_data_22[] =
+static const unsigned char temp_binary_data_23[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
@@ -1384,10 +1463,10 @@ static const unsigned char temp_binary_data_22[] =
 "\r\n"
 "#endif  // HEADERGUARD\r\n";
 
-const char* jucer_NewCppFileTemplate_h = (const char*) temp_binary_data_22;
+const char* jucer_NewCppFileTemplate_h = (const char*) temp_binary_data_23;
 
 //================== jucer_NewInlineComponentTemplate.h ==================
-static const unsigned char temp_binary_data_23[] =
+static const unsigned char temp_binary_data_24[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
@@ -1454,10 +1533,10 @@ static const unsigned char temp_binary_data_23[] =
 "\r\n"
 "#endif  // HEADERGUARD\r\n";
 
-const char* jucer_NewInlineComponentTemplate_h = (const char*) temp_binary_data_23;
+const char* jucer_NewInlineComponentTemplate_h = (const char*) temp_binary_data_24;
 
 //================== projectIconAndroid.png ==================
-static const unsigned char temp_binary_data_24[] =
+static const unsigned char temp_binary_data_25[] =
 { 137,80,78,71,13,10,26,10,0,0,0,13,73,72,68,82,0,0,0,128,0,0,0,128,8,6,0,0,0,195,62,97,203,0,0,0,25,116,69,88,116,83,111,102,116,119,97,114,101,0,65,100,111,98,101,32,73,109,97,103,101,82,101,97,100,121,113,201,101,60,0,0,3,134,105,84,88,116,88,77,76,
 58,99,111,109,46,97,100,111,98,101,46,120,109,112,0,0,0,0,0,60,63,120,112,97,99,107,101,116,32,98,101,103,105,110,61,34,239,187,191,34,32,105,100,61,34,87,53,77,48,77,112,67,101,104,105,72,122,114,101,83,122,78,84,99,122,107,99,57,100,34,63,62,32,60,
 120,58,120,109,112,109,101,116,97,32,120,109,108,110,115,58,120,61,34,97,100,111,98,101,58,110,115,58,109,101,116,97,47,34,32,120,58,120,109,112,116,107,61,34,65,100,111,98,101,32,88,77,80,32,67,111,114,101,32,53,46,54,45,99,48,49,52,32,55,57,46,49,53,
@@ -1574,10 +1653,10 @@ static const unsigned char temp_binary_data_24[] =
 139,240,165,4,64,57,166,132,157,54,246,220,165,230,39,27,156,211,4,232,176,247,44,193,125,203,174,137,229,132,198,114,231,150,74,124,238,9,19,9,244,154,7,0,175,121,0,240,154,7,0,175,121,0,240,154,7,0,175,121,0,240,154,7,0,175,189,235,246,255,2,12,0,158,
 137,39,54,252,6,9,64,0,0,0,0,73,69,78,68,174,66,96,130,0,0 };
 
-const char* projectIconAndroid_png = (const char*) temp_binary_data_24;
+const char* projectIconAndroid_png = (const char*) temp_binary_data_25;
 
 //================== projectIconCodeblocks.png ==================
-static const unsigned char temp_binary_data_25[] =
+static const unsigned char temp_binary_data_26[] =
 { 137,80,78,71,13,10,26,10,0,0,0,13,73,72,68,82,0,0,0,128,0,0,0,128,8,6,0,0,0,195,62,97,203,0,0,0,25,116,69,88,116,83,111,102,116,119,97,114,101,0,65,100,111,98,101,32,73,109,97,103,101,82,101,97,100,121,113,201,101,60,0,0,3,134,105,84,88,116,88,77,76,
 58,99,111,109,46,97,100,111,98,101,46,120,109,112,0,0,0,0,0,60,63,120,112,97,99,107,101,116,32,98,101,103,105,110,61,34,239,187,191,34,32,105,100,61,34,87,53,77,48,77,112,67,101,104,105,72,122,114,101,83,122,78,84,99,122,107,99,57,100,34,63,62,32,60,
 120,58,120,109,112,109,101,116,97,32,120,109,108,110,115,58,120,61,34,97,100,111,98,101,58,110,115,58,109,101,116,97,47,34,32,120,58,120,109,112,116,107,61,34,65,100,111,98,101,32,88,77,80,32,67,111,114,101,32,53,46,54,45,99,48,49,52,32,55,57,46,49,53,
@@ -1747,10 +1826,10 @@ static const unsigned char temp_binary_data_25[] =
 202,84,15,91,2,120,13,161,41,237,191,111,130,252,4,17,176,224,208,111,140,253,56,221,147,207,16,11,238,233,234,37,192,250,248,241,59,248,122,10,214,12,176,62,214,12,176,62,214,12,176,62,214,12,176,62,214,12,176,62,214,12,176,62,214,12,176,62,214,12,176,
 62,214,12,176,62,214,12,176,62,214,12,176,62,214,12,176,62,214,12,176,62,214,12,176,62,126,28,143,255,39,192,0,238,147,31,89,162,25,31,21,0,0,0,0,73,69,78,68,174,66,96,130,0,0 };
 
-const char* projectIconCodeblocks_png = (const char*) temp_binary_data_25;
+const char* projectIconCodeblocks_png = (const char*) temp_binary_data_26;
 
 //================== projectIconLinuxMakefile.png ==================
-static const unsigned char temp_binary_data_26[] =
+static const unsigned char temp_binary_data_27[] =
 { 137,80,78,71,13,10,26,10,0,0,0,13,73,72,68,82,0,0,0,110,0,0,0,128,8,6,0,0,0,234,21,92,9,0,0,10,65,105,67,67,80,73,67,67,32,80,114,111,102,105,108,101,0,0,72,13,157,150,119,84,83,217,22,135,207,189,55,189,208,18,34,32,37,244,26,122,9,32,210,59,72,21,4,
 81,137,73,128,80,2,134,132,38,118,68,5,70,20,17,41,86,100,84,192,1,71,135,34,99,69,20,11,131,130,98,215,9,242,16,80,198,193,81,68,69,229,221,140,107,9,239,173,53,243,222,154,253,199,89,223,217,231,183,215,217,103,239,125,215,186,0,80,252,130,4,194,116,
 88,1,128,52,161,88,20,238,235,193,92,18,19,203,196,247,2,24,16,1,14,88,1,192,225,102,102,4,71,248,68,2,212,252,189,61,153,153,168,72,198,179,246,238,46,128,100,187,219,44,191,80,38,115,214,255,127,145,34,55,67,36,6,0,10,69,213,54,60,126,38,23,229,2,148,
@@ -1986,10 +2065,10 @@ static const unsigned char temp_binary_data_26[] =
 194,72,142,254,249,31,79,111,60,173,241,241,124,82,34,189,246,233,251,163,179,223,129,178,15,181,97,103,68,217,251,253,17,198,63,35,254,218,150,109,129,235,236,183,141,63,16,97,60,125,157,93,199,211,219,217,245,128,211,250,223,12,238,70,210,82,169,25,
 10,0,0,0,0,73,69,78,68,174,66,96,130,0,0 };
 
-const char* projectIconLinuxMakefile_png = (const char*) temp_binary_data_26;
+const char* projectIconLinuxMakefile_png = (const char*) temp_binary_data_27;
 
 //================== projectIconVisualStudio05.png ==================
-static const unsigned char temp_binary_data_27[] =
+static const unsigned char temp_binary_data_28[] =
 { 137,80,78,71,13,10,26,10,0,0,0,13,73,72,68,82,0,0,0,128,0,0,0,128,8,6,0,0,0,195,62,97,203,0,0,0,25,116,69,88,116,83,111,102,116,119,97,114,101,0,65,100,111,98,101,32,73,109,97,103,101,82,101,97,100,121,113,201,101,60,0,0,3,134,105,84,88,116,88,77,76,
 58,99,111,109,46,97,100,111,98,101,46,120,109,112,0,0,0,0,0,60,63,120,112,97,99,107,101,116,32,98,101,103,105,110,61,34,239,187,191,34,32,105,100,61,34,87,53,77,48,77,112,67,101,104,105,72,122,114,101,83,122,78,84,99,122,107,99,57,100,34,63,62,32,60,
 120,58,120,109,112,109,101,116,97,32,120,109,108,110,115,58,120,61,34,97,100,111,98,101,58,110,115,58,109,101,116,97,47,34,32,120,58,120,109,112,116,107,61,34,65,100,111,98,101,32,88,77,80,32,67,111,114,101,32,53,46,54,45,99,48,49,52,32,55,57,46,49,53,
@@ -2089,10 +2168,10 @@ static const unsigned char temp_binary_data_27[] =
 73,204,23,99,183,154,198,54,56,169,79,167,35,83,201,246,65,181,112,51,36,204,107,104,221,97,177,24,95,170,133,168,18,52,112,209,213,118,205,156,90,165,98,84,50,197,232,2,101,225,198,95,193,235,251,84,2,108,84,45,69,189,18,237,246,180,81,35,128,148,122,
 66,28,57,5,146,0,82,36,1,164,72,2,72,145,4,144,34,9,32,69,18,64,138,36,128,20,73,0,41,146,0,82,26,128,252,79,128,1,0,0,135,102,225,168,168,144,240,0,0,0,0,73,69,78,68,174,66,96,130,0,0 };
 
-const char* projectIconVisualStudio05_png = (const char*) temp_binary_data_27;
+const char* projectIconVisualStudio05_png = (const char*) temp_binary_data_28;
 
 //================== projectIconVisualStudio08.png ==================
-static const unsigned char temp_binary_data_28[] =
+static const unsigned char temp_binary_data_29[] =
 { 137,80,78,71,13,10,26,10,0,0,0,13,73,72,68,82,0,0,0,128,0,0,0,128,8,6,0,0,0,195,62,97,203,0,0,0,25,116,69,88,116,83,111,102,116,119,97,114,101,0,65,100,111,98,101,32,73,109,97,103,101,82,101,97,100,121,113,201,101,60,0,0,3,134,105,84,88,116,88,77,76,
 58,99,111,109,46,97,100,111,98,101,46,120,109,112,0,0,0,0,0,60,63,120,112,97,99,107,101,116,32,98,101,103,105,110,61,34,239,187,191,34,32,105,100,61,34,87,53,77,48,77,112,67,101,104,105,72,122,114,101,83,122,78,84,99,122,107,99,57,100,34,63,62,32,60,
 120,58,120,109,112,109,101,116,97,32,120,109,108,110,115,58,120,61,34,97,100,111,98,101,58,110,115,58,109,101,116,97,47,34,32,120,58,120,109,112,116,107,61,34,65,100,111,98,101,32,88,77,80,32,67,111,114,101,32,53,46,54,45,99,48,49,52,32,55,57,46,49,53,
@@ -2194,10 +2273,10 @@ static const unsigned char temp_binary_data_28[] =
 56,165,102,130,123,32,176,112,227,171,226,245,189,10,0,182,42,150,162,65,17,181,170,213,103,165,85,35,167,105,52,110,210,202,83,32,1,32,73,2,64,146,4,128,36,9,0,73,18,0,146,36,0,36,73,0,72,146,0,144,36,1,32,169,17,208,255,11,48,0,11,74,131,33,163,168,
 64,251,0,0,0,0,73,69,78,68,174,66,96,130,0,0 };
 
-const char* projectIconVisualStudio08_png = (const char*) temp_binary_data_28;
+const char* projectIconVisualStudio08_png = (const char*) temp_binary_data_29;
 
 //================== projectIconVisualStudio10.png ==================
-static const unsigned char temp_binary_data_29[] =
+static const unsigned char temp_binary_data_30[] =
 { 137,80,78,71,13,10,26,10,0,0,0,13,73,72,68,82,0,0,0,128,0,0,0,128,8,6,0,0,0,195,62,97,203,0,0,0,25,116,69,88,116,83,111,102,116,119,97,114,101,0,65,100,111,98,101,32,73,109,97,103,101,82,101,97,100,121,113,201,101,60,0,0,3,148,105,84,88,116,88,77,76,
 58,99,111,109,46,97,100,111,98,101,46,120,109,112,0,0,0,0,0,60,63,120,112,97,99,107,101,116,32,98,101,103,105,110,61,34,239,187,191,34,32,105,100,61,34,87,53,77,48,77,112,67,101,104,105,72,122,114,101,83,122,78,84,99,122,107,99,57,100,34,63,62,32,60,
 120,58,120,109,112,109,101,116,97,32,120,109,108,110,115,58,120,61,34,97,100,111,98,101,58,110,115,58,109,101,116,97,47,34,32,120,58,120,109,112,116,107,61,34,65,100,111,98,101,32,88,77,80,32,67,111,114,101,32,53,46,54,45,99,48,49,52,32,55,57,46,49,53,
@@ -2293,10 +2372,10 @@ static const unsigned char temp_binary_data_29[] =
 126,181,184,117,218,81,107,154,142,76,37,219,255,82,11,55,19,34,28,67,235,14,171,5,191,175,22,162,170,113,154,147,174,185,107,230,45,125,191,187,38,136,238,198,124,1,148,133,27,127,29,175,239,83,1,176,77,181,20,173,138,168,85,173,57,43,173,58,57,77,67,
 90,0,121,21,36,0,36,73,0,72,146,0,144,36,1,32,73,2,64,146,4,128,36,9,0,73,18,0,146,36,0,36,181,118,250,127,1,6,0,62,63,16,222,252,173,80,185,0,0,0,0,73,69,78,68,174,66,96,130,0,0 };
 
-const char* projectIconVisualStudio10_png = (const char*) temp_binary_data_29;
+const char* projectIconVisualStudio10_png = (const char*) temp_binary_data_30;
 
 //================== projectIconVisualStudio12.png ==================
-static const unsigned char temp_binary_data_30[] =
+static const unsigned char temp_binary_data_31[] =
 { 137,80,78,71,13,10,26,10,0,0,0,13,73,72,68,82,0,0,0,128,0,0,0,128,8,6,0,0,0,195,62,97,203,0,0,0,25,116,69,88,116,83,111,102,116,119,97,114,101,0,65,100,111,98,101,32,73,109,97,103,101,82,101,97,100,121,113,201,101,60,0,0,3,148,105,84,88,116,88,77,76,
 58,99,111,109,46,97,100,111,98,101,46,120,109,112,0,0,0,0,0,60,63,120,112,97,99,107,101,116,32,98,101,103,105,110,61,34,239,187,191,34,32,105,100,61,34,87,53,77,48,77,112,67,101,104,105,72,122,114,101,83,122,78,84,99,122,107,99,57,100,34,63,62,32,60,
 120,58,120,109,112,109,101,116,97,32,120,109,108,110,115,58,120,61,34,97,100,111,98,101,58,110,115,58,109,101,116,97,47,34,32,120,58,120,109,112,116,107,61,34,65,100,111,98,101,32,88,77,80,32,67,111,114,101,32,53,46,54,45,99,48,49,52,32,55,57,46,49,53,
@@ -2391,10 +2470,10 @@ static const unsigned char temp_binary_data_30[] =
 124,144,215,208,190,195,90,193,31,43,133,168,74,180,112,82,53,118,207,188,41,239,117,119,22,106,45,248,119,240,109,220,184,107,121,125,151,2,128,31,20,75,17,83,68,173,106,141,217,105,85,201,105,26,45,155,212,114,9,36,0,36,73,0,72,146,0,144,36,1,32,73,
 2,64,146,4,128,36,9,0,73,18,0,146,36,0,36,181,0,250,127,1,6,0,186,116,150,177,255,33,3,190,0,0,0,0,73,69,78,68,174,66,96,130,0,0 };
 
-const char* projectIconVisualStudio12_png = (const char*) temp_binary_data_30;
+const char* projectIconVisualStudio12_png = (const char*) temp_binary_data_31;
 
 //================== projectIconVisualStudio13.png ==================
-static const unsigned char temp_binary_data_31[] =
+static const unsigned char temp_binary_data_32[] =
 { 137,80,78,71,13,10,26,10,0,0,0,13,73,72,68,82,0,0,0,128,0,0,0,128,8,6,0,0,0,195,62,97,203,0,0,0,25,116,69,88,116,83,111,102,116,119,97,114,101,0,65,100,111,98,101,32,73,109,97,103,101,82,101,97,100,121,113,201,101,60,0,0,3,148,105,84,88,116,88,77,76,
 58,99,111,109,46,97,100,111,98,101,46,120,109,112,0,0,0,0,0,60,63,120,112,97,99,107,101,116,32,98,101,103,105,110,61,34,239,187,191,34,32,105,100,61,34,87,53,77,48,77,112,67,101,104,105,72,122,114,101,83,122,78,84,99,122,107,99,57,100,34,63,62,32,60,
 120,58,120,109,112,109,101,116,97,32,120,109,108,110,115,58,120,61,34,97,100,111,98,101,58,110,115,58,109,101,116,97,47,34,32,120,58,120,109,112,116,107,61,34,65,100,111,98,101,32,88,77,80,32,67,111,114,101,32,53,46,54,45,99,48,49,52,32,55,57,46,49,53,
@@ -2490,10 +2569,10 @@ static const unsigned char temp_binary_data_31[] =
 6,175,167,170,217,22,181,38,177,92,240,1,181,184,117,209,81,93,154,142,76,37,219,255,86,11,55,67,34,188,134,246,29,86,8,94,172,22,162,202,112,145,147,166,182,123,230,212,42,149,160,212,64,112,39,40,27,55,190,74,94,223,171,2,224,39,213,82,212,41,10,222,
 158,54,110,0,144,84,71,128,35,151,64,2,64,146,4,128,36,9,0,73,18,0,146,36,0,36,73,0,72,146,0,144,36,1,32,73,2,64,210,69,64,255,17,96,0,83,68,210,44,174,238,131,143,0,0,0,0,73,69,78,68,174,66,96,130,0,0 };
 
-const char* projectIconVisualStudio13_png = (const char*) temp_binary_data_31;
+const char* projectIconVisualStudio13_png = (const char*) temp_binary_data_32;
 
 //================== projectIconXcode.png ==================
-static const unsigned char temp_binary_data_32[] =
+static const unsigned char temp_binary_data_33[] =
 { 137,80,78,71,13,10,26,10,0,0,0,13,73,72,68,82,0,0,0,128,0,0,0,128,8,6,0,0,0,195,62,97,203,0,0,0,25,116,69,88,116,83,111,102,116,119,97,114,101,0,65,100,111,98,101,32,73,109,97,103,101,82,101,97,100,121,113,201,101,60,0,0,3,40,105,84,88,116,88,77,76,58,
 99,111,109,46,97,100,111,98,101,46,120,109,112,0,0,0,0,0,60,63,120,112,97,99,107,101,116,32,98,101,103,105,110,61,34,239,187,191,34,32,105,100,61,34,87,53,77,48,77,112,67,101,104,105,72,122,114,101,83,122,78,84,99,122,107,99,57,100,34,63,62,32,60,120,
 58,120,109,112,109,101,116,97,32,120,109,108,110,115,58,120,61,34,97,100,111,98,101,58,110,115,58,109,101,116,97,47,34,32,120,58,120,109,112,116,107,61,34,65,100,111,98,101,32,88,77,80,32,67,111,114,101,32,53,46,54,45,99,48,49,52,32,55,57,46,49,53,54,
@@ -2753,10 +2832,10 @@ static const unsigned char temp_binary_data_32[] =
 94,156,0,232,23,120,134,102,179,249,235,17,128,9,19,38,192,59,223,249,206,152,182,172,169,75,67,169,119,178,110,237,223,246,242,196,143,188,48,28,50,88,157,63,127,254,175,124,82,161,71,186,231,200,203,63,99,234,231,229,216,252,127,248,207,255,19,96,0,
 221,83,18,25,240,8,112,38,0,0,0,0,73,69,78,68,174,66,96,130,0,0 };
 
-const char* projectIconXcode_png = (const char*) temp_binary_data_32;
+const char* projectIconXcode_png = (const char*) temp_binary_data_33;
 
 //================== projectIconXcodeIOS.png ==================
-static const unsigned char temp_binary_data_33[] =
+static const unsigned char temp_binary_data_34[] =
 { 137,80,78,71,13,10,26,10,0,0,0,13,73,72,68,82,0,0,0,128,0,0,0,128,8,6,0,0,0,195,62,97,203,0,0,0,25,116,69,88,116,83,111,102,116,119,97,114,101,0,65,100,111,98,101,32,73,109,97,103,101,82,101,97,100,121,113,201,101,60,0,0,3,134,105,84,88,116,88,77,76,
 58,99,111,109,46,97,100,111,98,101,46,120,109,112,0,0,0,0,0,60,63,120,112,97,99,107,101,116,32,98,101,103,105,110,61,34,239,187,191,34,32,105,100,61,34,87,53,77,48,77,112,67,101,104,105,72,122,114,101,83,122,78,84,99,122,107,99,57,100,34,63,62,32,60,
 120,58,120,109,112,109,101,116,97,32,120,109,108,110,115,58,120,61,34,97,100,111,98,101,58,110,115,58,109,101,116,97,47,34,32,120,58,120,109,112,116,107,61,34,65,100,111,98,101,32,88,77,80,32,67,111,114,101,32,53,46,54,45,99,48,49,52,32,55,57,46,49,53,
@@ -3014,10 +3093,10 @@ static const unsigned char temp_binary_data_33[] =
 4,97,9,162,191,203,0,199,198,0,162,157,87,213,105,220,35,12,64,131,146,62,249,201,79,186,117,103,130,86,133,76,84,14,16,185,67,123,223,37,252,241,103,134,146,206,234,228,201,147,143,250,164,172,171,29,174,239,254,252,101,253,188,235,155,255,31,255,249,
 255,2,12,0,235,154,52,248,249,240,115,28,0,0,0,0,73,69,78,68,174,66,96,130,0,0 };
 
-const char* projectIconXcodeIOS_png = (const char*) temp_binary_data_33;
+const char* projectIconXcodeIOS_png = (const char*) temp_binary_data_34;
 
 //================== RecentFilesMenuTemplate.nib ==================
-static const unsigned char temp_binary_data_34[] =
+static const unsigned char temp_binary_data_35[] =
 { 98,112,108,105,115,116,48,48,212,0,1,0,2,0,3,0,4,0,5,0,6,1,53,1,54,88,36,118,101,114,115,105,111,110,88,36,111,98,106,101,99,116,115,89,36,97,114,99,104,105,118,101,114,84,36,116,111,112,18,0,1,134,160,175,16,74,0,7,0,8,0,31,0,35,0,36,0,42,0,46,0,50,
 0,53,0,57,0,74,0,77,0,78,0,86,0,87,0,97,0,112,0,113,0,114,0,119,0,120,0,121,0,124,0,128,0,129,0,132,0,143,0,144,0,145,0,149,0,153,0,162,0,163,0,164,0,169,0,173,0,180,0,181,0,182,0,185,0,192,0,193,0,200,0,201,0,208,0,209,0,216,0,217,0,224,0,225,0,226,
 0,229,0,230,0,232,0,249,1,11,1,29,1,30,1,31,1,32,1,33,1,34,1,35,1,36,1,37,1,38,1,39,1,40,1,41,1,42,1,43,1,44,1,47,1,50,85,36,110,117,108,108,219,0,9,0,10,0,11,0,12,0,13,0,14,0,15,0,16,0,17,0,18,0,19,0,20,0,21,0,22,0,23,0,24,0,25,0,26,0,27,0,28,0,29,0,
@@ -3054,10 +3133,10 @@ static const unsigned char temp_binary_data_34[] =
 7,157,7,159,7,161,7,163,7,165,7,167,7,169,7,171,7,173,7,175,7,177,7,179,7,181,7,190,7,192,7,225,7,227,7,229,7,231,7,233,7,235,7,237,7,239,7,241,7,243,7,245,7,247,7,249,7,251,7,253,7,255,8,2,8,5,8,8,8,11,8,14,8,17,8,20,8,23,8,26,8,29,8,32,8,35,8,38,8,
 41,8,44,8,53,8,55,8,56,8,65,8,67,8,68,8,77,8,92,8,97,8,115,8,120,8,134,0,0,0,0,0,0,2,2,0,0,0,0,0,0,1,57,0,0,0,0,0,0,0,0,0,0,0,0,0,0,8,136,0,0 };
 
-const char* RecentFilesMenuTemplate_nib = (const char*) temp_binary_data_34;
+const char* RecentFilesMenuTemplate_nib = (const char*) temp_binary_data_35;
 
 //================== wizard_AnimatedApp.svg ==================
-static const unsigned char temp_binary_data_35[] =
+static const unsigned char temp_binary_data_36[] =
 "<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n"
 "<!-- Generator: Adobe Illustrator 18.0.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->\r\n"
 "<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">\r\n"
@@ -3104,10 +3183,10 @@ static const unsigned char temp_binary_data_35[] =
 "<line opacity=\"0.7\" fill=\"none\" stroke=\"#F29100\" stroke-width=\"1.3469\" stroke-miterlimit=\"10\" x1=\"57.7\" y1=\"48.4\" x2=\"34.2\" y2=\"48.4\"/>\r\n"
 "</svg>\r\n";
 
-const char* wizard_AnimatedApp_svg = (const char*) temp_binary_data_35;
+const char* wizard_AnimatedApp_svg = (const char*) temp_binary_data_36;
 
 //================== wizard_AudioApp.svg ==================
-static const unsigned char temp_binary_data_36[] =
+static const unsigned char temp_binary_data_37[] =
 "<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n"
 "<!-- Generator: Adobe Illustrator 18.0.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->\r\n"
 "<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">\r\n"
@@ -3181,10 +3260,10 @@ static const unsigned char temp_binary_data_36[] =
 "<line fill=\"none\" stroke=\"#F29300\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-miterlimit=\"10\" x1=\"118.8\" y1=\"43.8\" x2=\"118.8\" y2=\"44.5\"/>\r\n"
 "</svg>\r\n";
 
-const char* wizard_AudioApp_svg = (const char*) temp_binary_data_36;
+const char* wizard_AudioApp_svg = (const char*) temp_binary_data_37;
 
 //================== wizard_AudioPlugin.svg ==================
-static const unsigned char temp_binary_data_37[] =
+static const unsigned char temp_binary_data_38[] =
 "<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n"
 "<!-- Generator: Adobe Illustrator 18.0.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->\r\n"
 "<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">\r\n"
@@ -3295,10 +3374,10 @@ static const unsigned char temp_binary_data_37[] =
 "</g>\r\n"
 "</svg>\r\n";
 
-const char* wizard_AudioPlugin_svg = (const char*) temp_binary_data_37;
+const char* wizard_AudioPlugin_svg = (const char*) temp_binary_data_38;
 
 //================== wizard_ConsoleApp.svg ==================
-static const unsigned char temp_binary_data_38[] =
+static const unsigned char temp_binary_data_39[] =
 "<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n"
 "<!-- Generator: Adobe Illustrator 18.0.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->\r\n"
 "<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">\r\n"
@@ -3321,10 +3400,10 @@ static const unsigned char temp_binary_data_38[] =
 "</g>\r\n"
 "</svg>\r\n";
 
-const char* wizard_ConsoleApp_svg = (const char*) temp_binary_data_38;
+const char* wizard_ConsoleApp_svg = (const char*) temp_binary_data_39;
 
 //================== wizard_DLL.svg ==================
-static const unsigned char temp_binary_data_39[] =
+static const unsigned char temp_binary_data_40[] =
 "<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n"
 "<!-- Generator: Adobe Illustrator 18.0.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->\r\n"
 "<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">\r\n"
@@ -3367,10 +3446,10 @@ static const unsigned char temp_binary_data_39[] =
 "\tl-7.7,5.3c-0.7,0.5-1.7,0.3-2.2-0.4L70.1,31\"/>\r\n"
 "</svg>\r\n";
 
-const char* wizard_DLL_svg = (const char*) temp_binary_data_39;
+const char* wizard_DLL_svg = (const char*) temp_binary_data_40;
 
 //================== wizard_GUI.svg ==================
-static const unsigned char temp_binary_data_40[] =
+static const unsigned char temp_binary_data_41[] =
 "<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n"
 "<!-- Generator: Adobe Illustrator 18.0.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->\r\n"
 "<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">\r\n"
@@ -3421,10 +3500,10 @@ static const unsigned char temp_binary_data_40[] =
 "\tC0,3.1,3.1,0,6.9,0H130c3.8,0,6.9,3.1,6.9,6.9v101.1C136.9,111.7,133.9,114.8,130,114.8z\"/>\r\n"
 "</svg>\r\n";
 
-const char* wizard_GUI_svg = (const char*) temp_binary_data_40;
+const char* wizard_GUI_svg = (const char*) temp_binary_data_41;
 
 //================== wizard_Highlight.svg ==================
-static const unsigned char temp_binary_data_41[] =
+static const unsigned char temp_binary_data_42[] =
 "<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n"
 "<!-- Generator: Adobe Illustrator 18.0.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->\r\n"
 "<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">\r\n"
@@ -3434,10 +3513,10 @@ static const unsigned char temp_binary_data_41[] =
 "\tV108C136.9,111.8,133.9,114.8,130.1,114.8z\"/>\r\n"
 "</svg>\r\n";
 
-const char* wizard_Highlight_svg = (const char*) temp_binary_data_41;
+const char* wizard_Highlight_svg = (const char*) temp_binary_data_42;
 
 //================== wizard_Openfile.svg ==================
-static const unsigned char temp_binary_data_42[] =
+static const unsigned char temp_binary_data_43[] =
 "<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n"
 "<!-- Generator: Adobe Illustrator 18.0.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->\r\n"
 "<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">\r\n"
@@ -3447,10 +3526,10 @@ static const unsigned char temp_binary_data_42[] =
 "\tc0-3.8,3.1-6.9,6.9-6.9h151.5c3.8,0,6.9,3.1,6.9,6.9v20.9C171.6,68.3,168.5,71.4,164.7,71.4z\"/>\r\n"
 "</svg>\r\n";
 
-const char* wizard_Openfile_svg = (const char*) temp_binary_data_42;
+const char* wizard_Openfile_svg = (const char*) temp_binary_data_43;
 
 //================== wizard_OpenGL.svg ==================
-static const unsigned char temp_binary_data_43[] =
+static const unsigned char temp_binary_data_44[] =
 "<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n"
 "<!-- Generator: Adobe Illustrator 18.0.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->\r\n"
 "<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">\r\n"
@@ -3478,10 +3557,10 @@ static const unsigned char temp_binary_data_43[] =
 "\ts-13.4-19.6-6.9-30\"/>\r\n"
 "</svg>\r\n";
 
-const char* wizard_OpenGL_svg = (const char*) temp_binary_data_43;
+const char* wizard_OpenGL_svg = (const char*) temp_binary_data_44;
 
 //================== wizard_StaticLibrary.svg ==================
-static const unsigned char temp_binary_data_44[] =
+static const unsigned char temp_binary_data_45[] =
 "<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n"
 "<!-- Generator: Adobe Illustrator 18.0.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->\r\n"
 "<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">\r\n"
@@ -3524,7 +3603,7 @@ static const unsigned char temp_binary_data_44[] =
 "\tc-1,0-1.8-0.8-1.8-1.8V20.8\"/>\r\n"
 "</svg>\r\n";
 
-const char* wizard_StaticLibrary_svg = (const char*) temp_binary_data_44;
+const char* wizard_StaticLibrary_svg = (const char*) temp_binary_data_45;
 
 
 const char* getNamedResource (const char*, int&) throw();
@@ -3537,7 +3616,8 @@ const char* getNamedResource (const char* resourceNameUTF8, int& numBytes) throw
 
     switch (hash)
     {
-        case 0xafccbd3f:  numBytes = 1835; return jucer_AudioComponentTemplate_cpp;
+        case 0x96a53e52:  numBytes = 1495; return jucer_OpenglComponentTemplate_cpp;
+        case 0xafccbd3f:  numBytes = 2308; return jucer_AudioComponentTemplate_cpp;
         case 0xda2391f8:  numBytes = 3866; return jucer_MainTemplate_SimpleWindow_cpp;
         case 0x6cf2645e:  numBytes = 1546; return jucer_AnimatedComponentTemplate_cpp;
         case 0x44be9398:  numBytes = 2916; return AudioPluginXCodeScript_txt;
@@ -3591,6 +3671,7 @@ const char* getNamedResource (const char* resourceNameUTF8, int& numBytes) throw
 
 const char* namedResourceList[] =
 {
+    "jucer_OpenglComponentTemplate_cpp",
     "jucer_AudioComponentTemplate_cpp",
     "jucer_MainTemplate_SimpleWindow_cpp",
     "jucer_AnimatedComponentTemplate_cpp",

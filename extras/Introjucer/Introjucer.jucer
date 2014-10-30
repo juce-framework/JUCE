@@ -504,6 +504,8 @@
             resource="0" file="Source/Wizards/jucer_TemplateThumbnailsComponent.h"/>
     </GROUP>
     <GROUP id="KPIRFfz" name="BinaryData">
+      <FILE id="MMiar4" name="jucer_OpenglComponentTemplate.cpp" compile="0"
+            resource="1" file="Source/BinaryData/jucer_OpenglComponentTemplate.cpp"/>
       <FILE id="zI7KxE" name="jucer_AudioComponentTemplate.cpp" compile="0"
             resource="1" file="Source/BinaryData/jucer_AudioComponentTemplate.cpp"/>
       <FILE id="R7OBsx" name="jucer_MainTemplate_SimpleWindow.cpp" compile="0"

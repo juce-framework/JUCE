@@ -622,6 +622,10 @@
       <Option compile="0"/>
       <Option link="0"/>
     </Unit>
+    <Unit filename="../../Source/BinaryData/jucer_OpenglComponentTemplate.cpp">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
     <Unit filename="../../Source/BinaryData/jucer_AudioComponentTemplate.cpp">
       <Option compile="0"/>
       <Option link="0"/>
