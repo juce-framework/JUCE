@@ -16,7 +16,7 @@
         <Option compiler="gcc"/>
         <Compiler>
           <Add option="-O0"/>
-          <Add option="-std=c++11"/>
+          <Add option="-std=gnu++0x"/>
           <Add option="-mstackrealign"/>
           <Add option="-g"/>
           <Add option="-D__MINGW__=1"/>
@@ -53,7 +53,7 @@
         <Option compiler="gcc"/>
         <Compiler>
           <Add option="-Os"/>
-          <Add option="-std=c++11"/>
+          <Add option="-std=gnu++0x"/>
           <Add option="-mstackrealign"/>
           <Add option="-D__MINGW__=1"/>
           <Add option="-D__MINGW_EXTENSION="/>
@@ -619,6 +619,10 @@
       <Option link="0"/>
     </Unit>
     <Unit filename="../../Source/Wizards/jucer_TemplateThumbnailsComponent.h">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../Source/BinaryData/jucer_AudioComponentTemplate.cpp">
       <Option compile="0"/>
       <Option link="0"/>
     </Unit>
