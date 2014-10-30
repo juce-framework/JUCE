@@ -573,8 +573,11 @@ public:
     void redirectMouseMove (NSEvent* ev)
     {
         currentModifiers = currentModifiers.withoutMouseButtons();
-
-        if (isWindowAtPoint ([ev window], [[ev window] convertBaseToScreen: [ev locationInWindow]]))
+        NSRect evRect;
+        evRect.origin = [ev locationInWindow];
+        evRect.size = NSMakeSize(1, 1);
+        evRect = [[ev window] convertRectToScreen:evRect];
+        if (isWindowAtPoint ([ev window], evRect.origin))
             sendMouseEvent (ev);
         else
             // moved into another window which overlaps this one, so trigger an exit

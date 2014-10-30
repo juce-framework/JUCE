@@ -40,7 +40,7 @@ public:
             NSOpenGLPFAOpenGLProfile, version >= openGL3_2 ? NSOpenGLProfileVersion3_2Core : NSOpenGLProfileVersionLegacy,
            #endif
             NSOpenGLPFADoubleBuffer,
-            NSOpenGLPFAMPSafe,
+            /*NSOpenGLPFAMPSafe,*/
             NSOpenGLPFAClosestPolicy,
             NSOpenGLPFANoRecovery,
             NSOpenGLPFAColorSize,   (NSOpenGLPixelFormatAttribute) (pixFormat.redBits + pixFormat.greenBits + pixFormat.blueBits),
