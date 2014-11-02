@@ -175,7 +175,7 @@ void FileChooser::showPlatformDialog (Array<File>& results,
         if ([panel runModal] == 1 /*NSModalResponseOK*/)
        #else
         if ([panel runModalForDirectory: juceStringToNS (directory)
-                                   file: juceStringToNS (filename)] == NSModalResponseOK)
+                                   file: juceStringToNS (filename)] == 1 /*NSModalResponseOK*/)
        #endif
         {
             if (isSaveDialogue)
