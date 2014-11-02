@@ -75,7 +75,7 @@ if [ $copyAAX -gt 0 ]; then
       rm -r "$AAX1"
     fi
 
-    cp -r "$original" "$AAX1"
+    cp -R -H "$original" "$AAX1"
   fi
 
   if [ -d "/Library/Application Support/Avid/Audio/Plug-Ins" ]; then
@@ -85,6 +85,6 @@ if [ $copyAAX -gt 0 ]; then
       rm -r "$AAX2"
     fi
 
-    cp -r "$original" "$AAX2"
+    cp -R -H "$original" "$AAX2"
   fi
 fi
