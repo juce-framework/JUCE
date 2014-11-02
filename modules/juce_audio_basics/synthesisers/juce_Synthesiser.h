@@ -191,17 +191,17 @@ public:
     */
     virtual void setCurrentPlaybackSampleRate (double newRate);
 
-    /** Returns the current target sample rate at which rendering is being done.
-        Subclasses may need to know this so that they can pitch things correctly.
-    */
-    double getSampleRate() const noexcept                       { return currentSampleRate; }
-
     /** Returns true if the voice is currently playing a sound which is mapped to the given
         midi channel.
 
         If it's not currently playing, this will return false.
     */
-    bool isPlayingChannel (int midiChannel) const;
+    virtual bool isPlayingChannel (int midiChannel) const;
+
+    /** Returns the current target sample rate at which rendering is being done.
+        Subclasses may need to know this so that they can pitch things correctly.
+    */
+    double getSampleRate() const noexcept                       { return currentSampleRate; }
 
     /** Returns true if the key that triggered this voice is still held down.
         Note that the voice may still be playing after the key was released (e.g because the

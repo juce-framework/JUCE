@@ -267,8 +267,8 @@ public:
         // some stupidly old drivers are missing this function, so try to at least avoid a crash here,
         // but if you hit this assertion you may want to have your own version check before using the
         // component rendering stuff on such old drivers.
-        jassert (glActiveTexture.context.extensions != nullptr);
-        if (glActiveTexture.context.extensions != nullptr)
+        jassert (context.extensions.glActiveTexture != nullptr);
+        if (context.extensions.glActiveTexture != nullptr)
        #endif
             context.extensions.glActiveTexture (GL_TEXTURE0);
 

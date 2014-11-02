@@ -573,11 +573,15 @@ public:
     void redirectMouseMove (NSEvent* ev)
     {
         currentModifiers = currentModifiers.withoutMouseButtons();
-        NSRect evRect;
-        evRect.origin = [ev locationInWindow];
-        evRect.size = NSMakeSize(1, 1);
-        evRect = [[ev window] convertRectToScreen:evRect];
-        if (isWindowAtPoint ([ev window], evRect.origin))
+        NSPoint windowPos = [ev locationInWindow];
+
+       #if defined (MAC_OS_X_VERSION_10_7) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_7
+        NSPoint screenPos = [[ev window] convertRectToScreen: NSMakeRect (windowPos.x, windowPos.y, 1.0f, 1.0f)].origin;
+       #else
+        NSPoint screenPos = [[ev window] convertBaseToScreen: windowPos];
+       #endif
+
+        if (isWindowAtPoint ([ev window], screenPos))
             sendMouseEvent (ev);
         else
             // moved into another window which overlaps this one, so trigger an exit

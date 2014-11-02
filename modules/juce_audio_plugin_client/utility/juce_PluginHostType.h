@@ -219,6 +219,7 @@ private:
         if (hostFilename.containsIgnoreCase ("TestHost"))          return SteinbergTestHost;
         if (hostFilename.containsIgnoreCase ("rm-host"))           return MuseReceptorGeneric;
         if (hostFilename.startsWith         ("FL"))                return FruityLoops;
+        if (hostFilename.contains           ("ilbridge."))         return FruityLoops;
         if (hostPath.containsIgnoreCase     ("Studio One"))        return StudioOne;
         if (hostPath.containsIgnoreCase     ("Digital Performer")) return DigitalPerformer;
         if (hostFilename.containsIgnoreCase ("VST_Scanner"))       return VBVSTScanner;
