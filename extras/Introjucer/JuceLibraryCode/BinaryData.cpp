@@ -86,7 +86,7 @@ static const unsigned char temp_binary_data_0[] =
 "      rm -r \"$AAX1\"\r\n"
 "    fi\r\n"
 "\r\n"
-"    cp -r \"$original\" \"$AAX1\"\r\n"
+"    cp -R -H \"$original\" \"$AAX1\"\r\n"
 "  fi\r\n"
 "\r\n"
 "  if [ -d \"/Library/Application Support/Avid/Audio/Plug-Ins\" ]; then\r\n"
@@ -96,7 +96,7 @@ static const unsigned char temp_binary_data_0[] =
 "      rm -r \"$AAX2\"\r\n"
 "    fi\r\n"
 "\r\n"
-"    cp -r \"$original\" \"$AAX2\"\r\n"
+"    cp -R -H \"$original\" \"$AAX2\"\r\n"
 "  fi\r\n"
 "fi\r\n";
 
@@ -1244,7 +1244,7 @@ const char* getNamedResource (const char* resourceNameUTF8, int& numBytes) throw
 
     switch (hash)
     {
-        case 0x44be9398:  numBytes = 2916; return AudioPluginXCodeScript_txt;
+        case 0x44be9398:  numBytes = 2922; return AudioPluginXCodeScript_txt;
         case 0x4a0cfd09:  numBytes = 151; return background_tile_png;
         case 0x763d39dc:  numBytes = 1050; return colourscheme_dark_xml;
         case 0xe8b08520:  numBytes = 1050; return colourscheme_light_xml;
