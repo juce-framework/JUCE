@@ -714,7 +714,7 @@ public:
 
     int findNumInputChannels()
     {
-       #if JucePlugin_IsSynth
+       #if ! JucePlugin_IsSynth
         if (AUInputElement* e = GetInput(0))
             return (int) e->GetStreamFormat().mChannelsPerFrame;
        #endif
