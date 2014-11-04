@@ -910,7 +910,7 @@ private:
                 const Identifier propertyName (o.getPropertyName(j));
                 String val (o.getProperty (propertyName).toString());
 
-                if (val.isEmpty() || (val.containsAnyOf (" \t;<>()=,&+-_@~\r\n")
+                if (val.isEmpty() || (val.containsAnyOf (" \t;<>()=,&+-_@~\r\n\\#%^`*")
                                         && ! (val.trimStart().startsWithChar ('(')
                                                 || val.trimStart().startsWithChar ('{'))))
                     val = "\"" + val + "\"";
