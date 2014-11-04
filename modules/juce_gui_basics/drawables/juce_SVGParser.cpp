@@ -1218,8 +1218,8 @@ private:
         const double midX = (x1 - x2) * 0.5;
         const double midY = (y1 - y2) * 0.5;
 
-        const double cosAngle = cos (angle);
-        const double sinAngle = sin (angle);
+        const double cosAngle = std::cos (angle);
+        const double sinAngle = std::sin (angle);
         const double xp = cosAngle * midX + sinAngle * midY;
         const double yp = cosAngle * midY - sinAngle * midX;
         const double xp2 = xp * xp;

@@ -64,7 +64,7 @@ IIRCoefficients IIRCoefficients::makeLowPass (const double sampleRate,
 {
     jassert (sampleRate > 0);
 
-    const double n = 1.0 / tan (double_Pi * frequency / sampleRate);
+    const double n = 1.0 / std::tan (double_Pi * frequency / sampleRate);
     const double nSquared = n * n;
     const double c1 = 1.0 / (1.0 + std::sqrt (2.0) * n + nSquared);
 
@@ -79,7 +79,7 @@ IIRCoefficients IIRCoefficients::makeLowPass (const double sampleRate,
 IIRCoefficients IIRCoefficients::makeHighPass (const double sampleRate,
                                                const double frequency) noexcept
 {
-    const double n = tan (double_Pi * frequency / sampleRate);
+    const double n = std::tan (double_Pi * frequency / sampleRate);
     const double nSquared = n * n;
     const double c1 = 1.0 / (1.0 + std::sqrt (2.0) * n + nSquared);
 
