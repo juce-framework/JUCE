@@ -46,6 +46,8 @@ public:
     */
     int getFrameCounter() const noexcept        { return frameCounter; }
 
+    void shutdownOpenGL();
+
     /** Implement this method to set up any GL objects that you need for rendering.
         The GL context will be active when this method is called.
     */

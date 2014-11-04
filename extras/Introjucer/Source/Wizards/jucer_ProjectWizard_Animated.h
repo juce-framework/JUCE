@@ -50,7 +50,7 @@ struct AnimatedAppWizard   : public NewProjectWizard
 
         // create main window
         String windowCpp = project.getFileTemplate ("jucer_AnimatedComponentTemplate_cpp")
-                                .replace ("INCLUDE_JUCE", CodeHelpers::createIncludeStatement (project.getAppIncludeFile(), contentCompCpp), false);
+                            .replace ("INCLUDE_JUCE", CodeHelpers::createIncludeStatement (project.getAppIncludeFile(), contentCompCpp), false);
 
         if (! FileHelpers::overwriteFileWithNewDataIfDifferent (contentCompCpp, windowCpp))
             failedFiles.add (contentCompCpp.getFullPathName());

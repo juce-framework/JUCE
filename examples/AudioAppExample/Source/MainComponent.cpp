@@ -22,7 +22,8 @@ public:
           phaseDelta (0.0f),
           frequency (5000.0f),
           amplitude (0.2f),
-          sampleRate (0.0)
+          sampleRate (0.0),
+          expectedSamplesPerBlock (0)
     {
         setSize (500, 400);
 
@@ -39,6 +40,7 @@ public:
     void prepareToPlay (int samplesPerBlockExpected, double newSampleRate) override
     {
         sampleRate = newSampleRate;
+        expectedSamplesPerBlock = samplesPerBlockExpected;
     }
 
     /*  This method generates the actual audio samples.
@@ -140,6 +142,7 @@ private:
     float amplitude;
 
     double sampleRate;
+    int expectedSamplesPerBlock;
     Point<float> lastMousePosition;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainContentComponent)

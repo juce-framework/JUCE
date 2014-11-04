@@ -44,7 +44,7 @@ static const unsigned char temp_binary_data_0[] =
 "    void update() override\r\n"
 "    {\r\n"
 "        // This function is called at the frequency specified by the setFramesPerSecond() call\r\n"
-"        // in the constructor. You can use it\r\n"
+"        // in the constructor. You can use it to update counters, animate values, etc.\r\n"
 "    }\r\n"
 "\r\n"
 "    void paint (Graphics& g) override\r\n"
@@ -111,8 +111,8 @@ static const unsigned char temp_binary_data_1[] =
 "    {\r\n"
 "        setSize (500, 400);\r\n"
 "\r\n"
-"        // specify the number of input and output channels needed\r\n"
-"        setAudioChannels (1, 1);\r\n"
+"        // specify the number of input and output channels that we want to open\r\n"
+"        setAudioChannels (2, 2);\r\n"
 "    }\r\n"
 "\r\n"
 "    ~MainContentComponent()\r\n"
@@ -1344,15 +1344,26 @@ static const unsigned char temp_binary_data_20[] =
 "    MainContentComponent()\r\n"
 "    {\r\n"
 "        setSize (500, 400);\r\n"
-"\r\n"
 "    }\r\n"
 "\r\n"
 "    ~MainContentComponent()\r\n"
 "    {\r\n"
-"        shutdownAudio();\r\n"
+"        shutdownOpenGL();\r\n"
 "    }\r\n"
 "\r\n"
-"    void paint (Graphics& g)\r\n"
+"    void initialise() override\r\n"
+"    {\r\n"
+"    }\r\n"
+"\r\n"
+"    void shutdown() override\r\n"
+"    {\r\n"
+"    }\r\n"
+"\r\n"
+"    void render() override\r\n"
+"    {\r\n"
+"    }\r\n"
+"\r\n"
+"    void paint (Graphics& g) override\r\n"
 "    {\r\n"
 "        // (Our component is opaque, so we must completely fill the background with a solid colour)\r\n"
 "        g.fillAll (Colours::black);\r\n"
@@ -1361,7 +1372,7 @@ static const unsigned char temp_binary_data_20[] =
 "        // You can add your drawing code here!\r\n"
 "    }\r\n"
 "\r\n"
-"    void resized()\r\n"
+"    void resized() override\r\n"
 "    {\r\n"
 "        // This is called when the MainContentComponent is resized.\r\n"
 "        // If you add any child components, this is where you should\r\n"
@@ -3627,8 +3638,8 @@ const char* getNamedResource (const char* resourceNameUTF8, int& numBytes) throw
 
     switch (hash)
     {
-        case 0x6cf2645e:  numBytes = 1908; return jucer_AnimatedComponentTemplate_cpp;
-        case 0xafccbd3f:  numBytes = 2977; return jucer_AudioComponentTemplate_cpp;
+        case 0x6cf2645e:  numBytes = 1949; return jucer_AnimatedComponentTemplate_cpp;
+        case 0xafccbd3f:  numBytes = 2991; return jucer_AudioComponentTemplate_cpp;
         case 0x27c5a93a:  numBytes = 1180; return jucer_AudioPluginEditorTemplate_cpp;
         case 0x4d0721bf:  numBytes = 1012; return jucer_AudioPluginEditorTemplate_h;
         case 0x51b49ac5:  numBytes = 5039; return jucer_AudioPluginFilterTemplate_cpp;
@@ -3647,7 +3658,7 @@ const char* getNamedResource (const char* resourceNameUTF8, int& numBytes) throw
         case 0x02a2a077:  numBytes = 262; return jucer_NewCppFileTemplate_cpp;
         case 0x0842c43c:  numBytes = 308; return jucer_NewCppFileTemplate_h;
         case 0x36e634a1:  numBytes = 1626; return jucer_NewInlineComponentTemplate_h;
-        case 0x7fbac252:  numBytes = 1679; return jucer_OpenGLComponentTemplate_cpp;
+        case 0x7fbac252:  numBytes = 1834; return jucer_OpenGLComponentTemplate_cpp;
         case 0x44be9398:  numBytes = 2922; return AudioPluginXCodeScript_txt;
         case 0x4a0cfd09:  numBytes = 151; return background_tile_png;
         case 0x763d39dc:  numBytes = 1050; return colourscheme_dark_xml;

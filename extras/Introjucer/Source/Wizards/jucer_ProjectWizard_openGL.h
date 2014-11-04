@@ -49,8 +49,7 @@ struct OpenGLAppWizard   : public NewProjectWizard
         String appHeaders (CodeHelpers::createIncludeStatement (project.getAppIncludeFile(), mainCppFile));
 
         // create main window
-
-        String windowCpp = project.getFileTemplate ("jucer_OpenglComponentTemplate_cpp")
+        String windowCpp = project.getFileTemplate ("jucer_OpenGLComponentTemplate_cpp")
                             .replace ("INCLUDE_JUCE", CodeHelpers::createIncludeStatement (project.getAppIncludeFile(), contentCompCpp), false);
 
         if (! FileHelpers::overwriteFileWithNewDataIfDifferent (contentCompCpp, windowCpp))
