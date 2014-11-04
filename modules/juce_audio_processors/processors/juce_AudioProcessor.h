@@ -485,7 +485,7 @@ public:
     void setParameterNotifyingHost (int parameterIndex, float newValue);
 
     /** SoundRadix addition. Set raw (non-scaled) parameter value and notify the host application on parameter altered. @see setParameterNotifyingHost for details. */
-    virtual void setParameterValueNotifyingHost (int parameterIndex, double newValue);
+    void setParameterValueNotifyingHost (int parameterIndex, double newValue);
 
     /** Returns true if the host can automate this parameter.
         By default, this returns true for all parameters.
