@@ -82,7 +82,7 @@ private:
         {
             Path wavePath;
 
-            float waveStep = 10.0f;
+            const float waveStep = 10.0f;
             int i = 0;
 
             for (float x = waveStep * 0.5f; x < getWidth(); x += waveStep)

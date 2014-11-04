@@ -9,29 +9,11 @@
 
 namespace BinaryData
 {
-    extern const char*   jucer_OpenglComponentTemplate_cpp;
-    const int            jucer_OpenglComponentTemplate_cppSize = 1495;
+    extern const char*   jucer_AnimatedComponentTemplate_cpp;
+    const int            jucer_AnimatedComponentTemplate_cppSize = 1908;
 
     extern const char*   jucer_AudioComponentTemplate_cpp;
-    const int            jucer_AudioComponentTemplate_cppSize = 2308;
-
-    extern const char*   jucer_MainTemplate_SimpleWindow_cpp;
-    const int            jucer_MainTemplate_SimpleWindow_cppSize = 3866;
-
-    extern const char*   jucer_AnimatedComponentTemplate_cpp;
-    const int            jucer_AnimatedComponentTemplate_cppSize = 1546;
-
-    extern const char*   AudioPluginXCodeScript_txt;
-    const int            AudioPluginXCodeScript_txtSize = 2922;
-
-    extern const char*   background_tile_png;
-    const int            background_tile_pngSize = 151;
-
-    extern const char*   colourscheme_dark_xml;
-    const int            colourscheme_dark_xmlSize = 1050;
-
-    extern const char*   colourscheme_light_xml;
-    const int            colourscheme_light_xmlSize = 1050;
+    const int            jucer_AudioComponentTemplate_cppSize = 2977;
 
     extern const char*   jucer_AudioPluginEditorTemplate_cpp;
     const int            jucer_AudioPluginEditorTemplate_cppSize = 1180;
@@ -66,6 +48,9 @@ namespace BinaryData
     extern const char*   jucer_MainTemplate_NoWindow_cpp;
     const int            jucer_MainTemplate_NoWindow_cppSize = 2010;
 
+    extern const char*   jucer_MainTemplate_SimpleWindow_cpp;
+    const int            jucer_MainTemplate_SimpleWindow_cppSize = 3866;
+
     extern const char*   jucer_MainTemplate_Window_cpp;
     const int            jucer_MainTemplate_Window_cppSize = 3778;
 
@@ -83,6 +68,21 @@ namespace BinaryData
 
     extern const char*   jucer_NewInlineComponentTemplate_h;
     const int            jucer_NewInlineComponentTemplate_hSize = 1626;
+
+    extern const char*   jucer_OpenGLComponentTemplate_cpp;
+    const int            jucer_OpenGLComponentTemplate_cppSize = 1679;
+
+    extern const char*   AudioPluginXCodeScript_txt;
+    const int            AudioPluginXCodeScript_txtSize = 2922;
+
+    extern const char*   background_tile_png;
+    const int            background_tile_pngSize = 151;
+
+    extern const char*   colourscheme_dark_xml;
+    const int            colourscheme_dark_xmlSize = 1050;
+
+    extern const char*   colourscheme_light_xml;
+    const int            colourscheme_light_xmlSize = 1050;
 
     extern const char*   projectIconAndroid_png;
     const int            projectIconAndroid_pngSize = 8150;

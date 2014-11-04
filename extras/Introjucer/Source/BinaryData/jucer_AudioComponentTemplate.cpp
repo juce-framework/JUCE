@@ -20,13 +20,11 @@ class MainContentComponent   : public AudioAppComponent
 {
 public:
     //==============================================================================
-
-
     MainContentComponent()
     {
         setSize (500, 400);
 
-        // the the input and output channels (currently Mono in and out)
+        // specify the number of input and output channels needed
         setAudioChannels (1, 1);
     }
 
@@ -36,36 +34,43 @@ public:
     }
 
     //=======================================================================
-    // HANDLE AUDIO
-
-    void prepareToPlay (int samplesPerBlockExpected, double sampleRate)
+    void prepareToPlay (int samplesPerBlockExpected, double sampleRate) override
     {
-        // This is called externally with the native paramters when the
-        // device is ready.
+        // This function will be called when the audio device is started, or when
+        // its settings (i.e. sample rate, block size, etc) are changed.
+
+        // You can use this function to initialise any resources you might need,
+        // but be careful - it will be called on the audio thread, not the GUI thread.
+
+        // For more details, see the help for AudioProcessor::prepareToPlay()
     }
 
-    void getNextAudioBlock (const AudioSourceChannelInfo& bufferToFill)
+    void getNextAudioBlock (const AudioSourceChannelInfo& bufferToFill) override
     {
-        // Process your Audio here.
+        // Your audio-processing code goes here!
+
+        // For more details, see the help for AudioProcessor::getNextAudioBlock()
     }
 
-    void releaseResources()
+    void releaseResources() override
     {
-        // This gets automatically called when audio device paramters change
-        // or device is restarted.
+        // This will be called when the audio device stops, or when it is being
+        // restarted due to a setting change.
+
+        // For more details, see the help for AudioProcessor::releaseResources()
     }
 
     //=======================================================================
-    // HANDLE DRAWING
-
-    void paint (Graphics& g)
+    void paint (Graphics& g) override
     {
-        // fill background
+        // (Our component is opaque, so we must completely fill the background with a solid colour)
         g.fillAll (Colours::black);
 
+
+        // You can add your drawing code here!
     }
 
-    void resized()
+    void resized() override
     {
         // This is called when the MainContentComponent is resized.
         // If you add any child components, this is where you should
@@ -76,14 +81,15 @@ public:
 private:
     //==============================================================================
 
-    // private member variables
-
+    // Your private member variables go here...
 
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainContentComponent)
 };
 
 
-Component* createMainContentComponent() { return new MainContentComponent(); };
+// (This function is called by the app startup code to create our main component)
+Component* createMainContentComponent()     { return new MainContentComponent(); }
+
 
 #endif  // MAINCOMPONENT_H_INCLUDED

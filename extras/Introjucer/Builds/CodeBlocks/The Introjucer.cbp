@@ -622,39 +622,11 @@
       <Option compile="0"/>
       <Option link="0"/>
     </Unit>
-    <Unit filename="../../Source/BinaryData/jucer_OpenglComponentTemplate.cpp">
-      <Option compile="0"/>
-      <Option link="0"/>
-    </Unit>
-    <Unit filename="../../Source/BinaryData/jucer_AudioComponentTemplate.cpp">
-      <Option compile="0"/>
-      <Option link="0"/>
-    </Unit>
-    <Unit filename="../../Source/BinaryData/jucer_MainTemplate_SimpleWindow.cpp">
-      <Option compile="0"/>
-      <Option link="0"/>
-    </Unit>
     <Unit filename="../../Source/BinaryData/jucer_AnimatedComponentTemplate.cpp">
       <Option compile="0"/>
       <Option link="0"/>
     </Unit>
-    <Unit filename="../../Source/BinaryData/AudioPluginXCodeScript.txt">
-      <Option compile="0"/>
-      <Option link="0"/>
-    </Unit>
-    <Unit filename="../../Source/BinaryData/background_tile.png">
-      <Option compile="0"/>
-      <Option link="0"/>
-    </Unit>
-    <Unit filename="../../Source/BinaryData/colourscheme_dark.xml">
-      <Option compile="0"/>
-      <Option link="0"/>
-    </Unit>
-    <Unit filename="../../Source/BinaryData/colourscheme_light.xml">
-      <Option compile="0"/>
-      <Option link="0"/>
-    </Unit>
-    <Unit filename="../../Source/BinaryData/juce_icon.png">
+    <Unit filename="../../Source/BinaryData/jucer_AudioComponentTemplate.cpp">
       <Option compile="0"/>
       <Option link="0"/>
     </Unit>
@@ -702,6 +674,10 @@
       <Option compile="0"/>
       <Option link="0"/>
     </Unit>
+    <Unit filename="../../Source/BinaryData/jucer_MainTemplate_SimpleWindow.cpp">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
     <Unit filename="../../Source/BinaryData/jucer_MainTemplate_Window.cpp">
       <Option compile="0"/>
       <Option link="0"/>
@@ -723,6 +699,30 @@
       <Option link="0"/>
     </Unit>
     <Unit filename="../../Source/BinaryData/jucer_NewInlineComponentTemplate.h">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../Source/BinaryData/jucer_OpenGLComponentTemplate.cpp">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../Source/BinaryData/AudioPluginXCodeScript.txt">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../Source/BinaryData/background_tile.png">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../Source/BinaryData/colourscheme_dark.xml">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../Source/BinaryData/colourscheme_light.xml">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../Source/BinaryData/juce_icon.png">
       <Option compile="0"/>
       <Option link="0"/>
     </Unit>

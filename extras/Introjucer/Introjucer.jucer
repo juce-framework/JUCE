@@ -502,16 +502,52 @@
             file="Source/Wizards/jucer_StartPageComponent.h"/>
       <FILE id="BlL6EA" name="jucer_TemplateThumbnailsComponent.h" compile="0"
             resource="0" file="Source/Wizards/jucer_TemplateThumbnailsComponent.h"/>
+      <GROUP id="{2EFFC5F3-CE4A-FCEB-391B-A644E7394EE3}" name="templates">
+        <FILE id="Ksvdgw" name="jucer_AnimatedComponentTemplate.cpp" compile="0"
+              resource="1" file="Source/BinaryData/jucer_AnimatedComponentTemplate.cpp"/>
+        <FILE id="zI7KxE" name="jucer_AudioComponentTemplate.cpp" compile="0"
+              resource="1" file="Source/BinaryData/jucer_AudioComponentTemplate.cpp"/>
+        <FILE id="8H7vztx" name="jucer_AudioPluginEditorTemplate.cpp" compile="0"
+              resource="1" file="Source/BinaryData/jucer_AudioPluginEditorTemplate.cpp"/>
+        <FILE id="908LsXi" name="jucer_AudioPluginEditorTemplate.h" compile="0"
+              resource="1" file="Source/BinaryData/jucer_AudioPluginEditorTemplate.h"/>
+        <FILE id="AfHjhZ9" name="jucer_AudioPluginFilterTemplate.cpp" compile="0"
+              resource="1" file="Source/BinaryData/jucer_AudioPluginFilterTemplate.cpp"/>
+        <FILE id="pvgTmND" name="jucer_AudioPluginFilterTemplate.h" compile="0"
+              resource="1" file="Source/BinaryData/jucer_AudioPluginFilterTemplate.h"/>
+        <FILE id="gM9qyy" name="jucer_ComponentTemplate.cpp" compile="0" resource="1"
+              file="Source/BinaryData/jucer_ComponentTemplate.cpp"/>
+        <FILE id="TSDD99" name="jucer_ComponentTemplate.h" compile="0" resource="1"
+              file="Source/BinaryData/jucer_ComponentTemplate.h"/>
+        <FILE id="xl685P" name="jucer_ContentCompTemplate.cpp" compile="0"
+              resource="1" file="Source/BinaryData/jucer_ContentCompTemplate.cpp"/>
+        <FILE id="gFj8Jl" name="jucer_ContentCompTemplate.h" compile="0" resource="1"
+              file="Source/BinaryData/jucer_ContentCompTemplate.h"/>
+        <FILE id="BnCgp2" name="jucer_InlineComponentTemplate.h" compile="0"
+              resource="1" file="Source/BinaryData/jucer_InlineComponentTemplate.h"/>
+        <FILE id="pizYtv9" name="jucer_MainConsoleAppTemplate.cpp" compile="0"
+              resource="1" file="Source/BinaryData/jucer_MainConsoleAppTemplate.cpp"/>
+        <FILE id="tZCXSl" name="jucer_MainTemplate_NoWindow.cpp" compile="0"
+              resource="1" file="Source/BinaryData/jucer_MainTemplate_NoWindow.cpp"/>
+        <FILE id="R7OBsx" name="jucer_MainTemplate_SimpleWindow.cpp" compile="0"
+              resource="1" file="Source/BinaryData/jucer_MainTemplate_SimpleWindow.cpp"/>
+        <FILE id="W9iwHx" name="jucer_MainTemplate_Window.cpp" compile="0"
+              resource="1" file="Source/BinaryData/jucer_MainTemplate_Window.cpp"/>
+        <FILE id="fWEsCu" name="jucer_NewComponentTemplate.cpp" compile="0"
+              resource="1" file="Source/BinaryData/jucer_NewComponentTemplate.cpp"/>
+        <FILE id="ljPBjw" name="jucer_NewComponentTemplate.h" compile="0" resource="1"
+              file="Source/BinaryData/jucer_NewComponentTemplate.h"/>
+        <FILE id="cI2ImgX" name="jucer_NewCppFileTemplate.cpp" compile="0"
+              resource="1" file="Source/BinaryData/jucer_NewCppFileTemplate.cpp"/>
+        <FILE id="YDcz5P" name="jucer_NewCppFileTemplate.h" compile="0" resource="1"
+              file="Source/BinaryData/jucer_NewCppFileTemplate.h"/>
+        <FILE id="teqnin" name="jucer_NewInlineComponentTemplate.h" compile="0"
+              resource="1" file="Source/BinaryData/jucer_NewInlineComponentTemplate.h"/>
+        <FILE id="MMiar4" name="jucer_OpenGLComponentTemplate.cpp" compile="0"
+              resource="1" file="Source/BinaryData/jucer_OpenGLComponentTemplate.cpp"/>
+      </GROUP>
     </GROUP>
     <GROUP id="KPIRFfz" name="BinaryData">
-      <FILE id="MMiar4" name="jucer_OpenglComponentTemplate.cpp" compile="0"
-            resource="1" file="Source/BinaryData/jucer_OpenglComponentTemplate.cpp"/>
-      <FILE id="zI7KxE" name="jucer_AudioComponentTemplate.cpp" compile="0"
-            resource="1" file="Source/BinaryData/jucer_AudioComponentTemplate.cpp"/>
-      <FILE id="R7OBsx" name="jucer_MainTemplate_SimpleWindow.cpp" compile="0"
-            resource="1" file="Source/BinaryData/jucer_MainTemplate_SimpleWindow.cpp"/>
-      <FILE id="Ksvdgw" name="jucer_AnimatedComponentTemplate.cpp" compile="0"
-            resource="1" file="Source/BinaryData/jucer_AnimatedComponentTemplate.cpp"/>
       <FILE id="RSJcrRl" name="AudioPluginXCodeScript.txt" compile="0" resource="1"
             file="Source/BinaryData/AudioPluginXCodeScript.txt"/>
       <FILE id="eYn4jB" name="background_tile.png" compile="0" resource="1"
@@ -521,40 +557,6 @@
       <FILE id="Rm5UQS" name="colourscheme_light.xml" compile="0" resource="1"
             file="Source/BinaryData/colourscheme_light.xml"/>
       <FILE id="rVgowdy" name="juce_icon.png" compile="0" resource="0" file="Source/BinaryData/juce_icon.png"/>
-      <FILE id="8H7vztx" name="jucer_AudioPluginEditorTemplate.cpp" compile="0"
-            resource="1" file="Source/BinaryData/jucer_AudioPluginEditorTemplate.cpp"/>
-      <FILE id="908LsXi" name="jucer_AudioPluginEditorTemplate.h" compile="0"
-            resource="1" file="Source/BinaryData/jucer_AudioPluginEditorTemplate.h"/>
-      <FILE id="AfHjhZ9" name="jucer_AudioPluginFilterTemplate.cpp" compile="0"
-            resource="1" file="Source/BinaryData/jucer_AudioPluginFilterTemplate.cpp"/>
-      <FILE id="pvgTmND" name="jucer_AudioPluginFilterTemplate.h" compile="0"
-            resource="1" file="Source/BinaryData/jucer_AudioPluginFilterTemplate.h"/>
-      <FILE id="gM9qyy" name="jucer_ComponentTemplate.cpp" compile="0" resource="1"
-            file="Source/BinaryData/jucer_ComponentTemplate.cpp"/>
-      <FILE id="TSDD99" name="jucer_ComponentTemplate.h" compile="0" resource="1"
-            file="Source/BinaryData/jucer_ComponentTemplate.h"/>
-      <FILE id="xl685P" name="jucer_ContentCompTemplate.cpp" compile="0"
-            resource="1" file="Source/BinaryData/jucer_ContentCompTemplate.cpp"/>
-      <FILE id="gFj8Jl" name="jucer_ContentCompTemplate.h" compile="0" resource="1"
-            file="Source/BinaryData/jucer_ContentCompTemplate.h"/>
-      <FILE id="BnCgp2" name="jucer_InlineComponentTemplate.h" compile="0"
-            resource="1" file="Source/BinaryData/jucer_InlineComponentTemplate.h"/>
-      <FILE id="pizYtv9" name="jucer_MainConsoleAppTemplate.cpp" compile="0"
-            resource="1" file="Source/BinaryData/jucer_MainConsoleAppTemplate.cpp"/>
-      <FILE id="tZCXSl" name="jucer_MainTemplate_NoWindow.cpp" compile="0"
-            resource="1" file="Source/BinaryData/jucer_MainTemplate_NoWindow.cpp"/>
-      <FILE id="W9iwHx" name="jucer_MainTemplate_Window.cpp" compile="0"
-            resource="1" file="Source/BinaryData/jucer_MainTemplate_Window.cpp"/>
-      <FILE id="fWEsCu" name="jucer_NewComponentTemplate.cpp" compile="0"
-            resource="1" file="Source/BinaryData/jucer_NewComponentTemplate.cpp"/>
-      <FILE id="ljPBjw" name="jucer_NewComponentTemplate.h" compile="0" resource="1"
-            file="Source/BinaryData/jucer_NewComponentTemplate.h"/>
-      <FILE id="cI2ImgX" name="jucer_NewCppFileTemplate.cpp" compile="0"
-            resource="1" file="Source/BinaryData/jucer_NewCppFileTemplate.cpp"/>
-      <FILE id="YDcz5P" name="jucer_NewCppFileTemplate.h" compile="0" resource="1"
-            file="Source/BinaryData/jucer_NewCppFileTemplate.h"/>
-      <FILE id="teqnin" name="jucer_NewInlineComponentTemplate.h" compile="0"
-            resource="1" file="Source/BinaryData/jucer_NewInlineComponentTemplate.h"/>
       <FILE id="b8Brir" name="projectIconAndroid.png" compile="0" resource="1"
             file="Source/BinaryData/projectIconAndroid.png"/>
       <FILE id="wdeicV" name="projectIconCodeblocks.png" compile="0" resource="1"

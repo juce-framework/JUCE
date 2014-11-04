@@ -20,8 +20,6 @@ class MainContentComponent   : public OpenGLAppComponent
 {
 public:
     //==============================================================================
-
-
     MainContentComponent()
     {
         setSize (500, 400);
@@ -35,9 +33,11 @@ public:
 
     void paint (Graphics& g)
     {
-        // fill background
+        // (Our component is opaque, so we must completely fill the background with a solid colour)
         g.fillAll (Colours::black);
 
+
+        // You can add your drawing code here!
     }
 
     void resized()
@@ -59,6 +59,8 @@ private:
 };
 
 
-Component* createMainContentComponent() { return new MainContentComponent(); };
+// (This function is called by the app startup code to create our main component)
+Component* createMainContentComponent()    { return new MainContentComponent(); }
+
 
 #endif  // MAINCOMPONENT_H_INCLUDED

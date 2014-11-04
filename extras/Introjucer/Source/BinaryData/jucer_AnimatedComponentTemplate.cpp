@@ -20,8 +20,6 @@ class MainContentComponent   : public AnimatedAppComponent
 {
 public:
     //==============================================================================
-
-
     MainContentComponent()
     {
         setSize (500, 400);
@@ -32,19 +30,22 @@ public:
     {
     }
 
-    void update()
+    void update() override
     {
-
+        // This function is called at the frequency specified by the setFramesPerSecond() call
+        // in the constructor. You can use it
     }
 
-    void paint (Graphics& g)
+    void paint (Graphics& g) override
     {
-        // fill background
+        // (Our component is opaque, so we must completely fill the background with a solid colour)
         g.fillAll (Colours::black);
 
+
+        // You can add your drawing code here!
     }
 
-    void resized()
+    void resized() override
     {
         // This is called when the MainContentComponent is resized.
         // If you add any child components, this is where you should
@@ -55,7 +56,7 @@ public:
 private:
     //==============================================================================
 
-    // private member variables
+    // Your private member variables go here...
 
 
 
@@ -63,6 +64,8 @@ private:
 };
 
 
-Component* createMainContentComponent() { return new MainContentComponent(); };
+// (This function is called by the app startup code to create our main component)
+Component* createMainContentComponent()    { return new MainContentComponent(); }
+
 
 #endif  // MAINCOMPONENT_H_INCLUDED

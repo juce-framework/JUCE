@@ -57,13 +57,13 @@ public:
     };
 
     //==============================================================================
-    void addWizardsToMenu (PopupMenu& m) const;
+    void addWizardsToMenu (PopupMenu&) const;
     bool runWizardFromMenu (int chosenMenuItemID, const Project::Item& projectGroupToAddTo) const;
 
-    void registerWizard (Type* newWizard);
+    void registerWizard (Type*);
 
 private:
-    OwnedArray <Type> wizards;
+    OwnedArray<Type> wizards;
 };
 
 

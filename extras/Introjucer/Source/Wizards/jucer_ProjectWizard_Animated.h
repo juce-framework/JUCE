@@ -49,9 +49,8 @@ struct AnimatedAppWizard   : public NewProjectWizard
         String appHeaders (CodeHelpers::createIncludeStatement (project.getAppIncludeFile(), mainCppFile));
 
         // create main window
-
         String windowCpp = project.getFileTemplate ("jucer_AnimatedComponentTemplate_cpp")
-.replace ("INCLUDE_JUCE", CodeHelpers::createIncludeStatement (project.getAppIncludeFile(), contentCompCpp), false);
+                                .replace ("INCLUDE_JUCE", CodeHelpers::createIncludeStatement (project.getAppIncludeFile(), contentCompCpp), false);
 
         if (! FileHelpers::overwriteFileWithNewDataIfDifferent (contentCompCpp, windowCpp))
             failedFiles.add (contentCompCpp.getFullPathName());
@@ -71,7 +70,6 @@ struct AnimatedAppWizard   : public NewProjectWizard
             failedFiles.add (mainCppFile.getFullPathName());
 
         sourceGroup.addFile (mainCppFile, -1, true);
-
 
         return true;
     }

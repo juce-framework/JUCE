@@ -7,7 +7,7 @@
 namespace BinaryData
 {
 
-//================== jucer_OpenglComponentTemplate.cpp ==================
+//================== jucer_AnimatedComponentTemplate.cpp ==================
 static const unsigned char temp_binary_data_0[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
@@ -27,31 +27,36 @@ static const unsigned char temp_binary_data_0[] =
 "    This component lives inside our window, and this is where you should put all\r\n"
 "    your controls and content.\r\n"
 "*/\r\n"
-"class MainContentComponent   : public OpenGLAppComponent\r\n"
+"class MainContentComponent   : public AnimatedAppComponent\r\n"
 "{\r\n"
 "public:\r\n"
 "    //==============================================================================\r\n"
-"\r\n"
-"\r\n"
 "    MainContentComponent()\r\n"
 "    {\r\n"
 "        setSize (500, 400);\r\n"
-"        \r\n"
+"        setFramesPerSecond (60);\r\n"
 "    }\r\n"
 "\r\n"
 "    ~MainContentComponent()\r\n"
 "    {\r\n"
-"        shutdownAudio();\r\n"
 "    }\r\n"
 "\r\n"
-"    void paint (Graphics& g)\r\n"
+"    void update() override\r\n"
 "    {\r\n"
-"        // fill background\r\n"
+"        // This function is called at the frequency specified by the setFramesPerSecond() call\r\n"
+"        // in the constructor. You can use it\r\n"
+"    }\r\n"
+"\r\n"
+"    void paint (Graphics& g) override\r\n"
+"    {\r\n"
+"        // (Our component is opaque, so we must completely fill the background with a solid colour)\r\n"
 "        g.fillAll (Colours::black);\r\n"
 "\r\n"
+"\r\n"
+"        // You can add your drawing code here!\r\n"
 "    }\r\n"
 "\r\n"
-"    void resized()\r\n"
+"    void resized() override\r\n"
 "    {\r\n"
 "        // This is called when the MainContentComponent is resized.\r\n"
 "        // If you add any child components, this is where you should\r\n"
@@ -61,20 +66,22 @@ static const unsigned char temp_binary_data_0[] =
 "\r\n"
 "private:\r\n"
 "    //==============================================================================\r\n"
-"    \r\n"
-"    // private member variables\r\n"
-"    \r\n"
-"    \r\n"
-"    \r\n"
+"\r\n"
+"    // Your private member variables go here...\r\n"
+"\r\n"
+"\r\n"
+"\r\n"
 "    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainContentComponent)\r\n"
 "};\r\n"
 "\r\n"
 "\r\n"
-"Component* createMainContentComponent() { return new MainContentComponent(); };\r\n"
+"// (This function is called by the app startup code to create our main component)\r\n"
+"Component* createMainContentComponent()    { return new MainContentComponent(); }\r\n"
 "\r\n"
-"#endif  // MAINCOMPONENT_H_INCLUDED";
+"\r\n"
+"#endif  // MAINCOMPONENT_H_INCLUDED\r\n";
 
-const char* jucer_OpenglComponentTemplate_cpp = (const char*) temp_binary_data_0;
+const char* jucer_AnimatedComponentTemplate_cpp = (const char*) temp_binary_data_0;
 
 //================== jucer_AudioComponentTemplate.cpp ==================
 static const unsigned char temp_binary_data_1[] =
@@ -100,13 +107,11 @@ static const unsigned char temp_binary_data_1[] =
 "{\r\n"
 "public:\r\n"
 "    //==============================================================================\r\n"
-"\r\n"
-"\r\n"
 "    MainContentComponent()\r\n"
 "    {\r\n"
 "        setSize (500, 400);\r\n"
-"        \r\n"
-"        // the the input and output channels (currently Mono in and out)\r\n"
+"\r\n"
+"        // specify the number of input and output channels needed\r\n"
 "        setAudioChannels (1, 1);\r\n"
 "    }\r\n"
 "\r\n"
@@ -114,38 +119,45 @@ static const unsigned char temp_binary_data_1[] =
 "    {\r\n"
 "        shutdownAudio();\r\n"
 "    }\r\n"
-"    \r\n"
+"\r\n"
 "    //=======================================================================\r\n"
-"    // HANDLE AUDIO\r\n"
-"    \r\n"
-"    void prepareToPlay (int samplesPerBlockExpected, double sampleRate)\r\n"
+"    void prepareToPlay (int samplesPerBlockExpected, double sampleRate) override\r\n"
 "    {\r\n"
-"        // This is called externally with the native paramters when the\r\n"
-"        // device is ready.\r\n"
+"        // This function will be called when the audio device is started, or when\r\n"
+"        // its settings (i.e. sample rate, block size, etc) are changed.\r\n"
+"\r\n"
+"        // You can use this function to initialise any resources you might need,\r\n"
+"        // but be careful - it will be called on the audio thread, not the GUI thread.\r\n"
+"\r\n"
+"        // For more details, see the help for AudioProcessor::prepareToPlay()\r\n"
 "    }\r\n"
-"    \r\n"
-"    void getNextAudioBlock (const AudioSourceChannelInfo& bufferToFill)\r\n"
+"\r\n"
+"    void getNextAudioBlock (const AudioSourceChannelInfo& bufferToFill) override\r\n"
 "    {\r\n"
-"        // Process your Audio here.\r\n"
+"        // Your audio-processing code goes here!\r\n"
+"\r\n"
+"        // For more details, see the help for AudioProcessor::getNextAudioBlock()\r\n"
 "    }\r\n"
-"    \r\n"
-"    void releaseResources()\r\n"
+"\r\n"
+"    void releaseResources() override\r\n"
 "    {\r\n"
-"        // This gets automatically called when audio device paramters change\r\n"
-"        // or device is restarted.\r\n"
+"        // This will be called when the audio device stops, or when it is being\r\n"
+"        // restarted due to a setting change.\r\n"
+"\r\n"
+"        // For more details, see the help for AudioProcessor::releaseResources()\r\n"
 "    }\r\n"
-"    \r\n"
+"\r\n"
 "    //=======================================================================\r\n"
-"    // HANDLE DRAWING\r\n"
-"    \r\n"
-"    void paint (Graphics& g)\r\n"
+"    void paint (Graphics& g) override\r\n"
 "    {\r\n"
-"        // fill background\r\n"
+"        // (Our component is opaque, so we must completely fill the background with a solid colour)\r\n"
 "        g.fillAll (Colours::black);\r\n"
 "\r\n"
+"\r\n"
+"        // You can add your drawing code here!\r\n"
 "    }\r\n"
 "\r\n"
-"    void resized()\r\n"
+"    void resized() override\r\n"
 "    {\r\n"
 "        // This is called when the MainContentComponent is resized.\r\n"
 "        // If you add any child components, this is where you should\r\n"
@@ -155,360 +167,24 @@ static const unsigned char temp_binary_data_1[] =
 "\r\n"
 "private:\r\n"
 "    //==============================================================================\r\n"
-"    \r\n"
-"    // private member variables\r\n"
-"    \r\n"
-"    \r\n"
-"    \r\n"
+"\r\n"
+"    // Your private member variables go here...\r\n"
+"\r\n"
+"\r\n"
 "    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainContentComponent)\r\n"
 "};\r\n"
 "\r\n"
 "\r\n"
-"Component* createMainContentComponent() { return new MainContentComponent(); };\r\n"
+"// (This function is called by the app startup code to create our main component)\r\n"
+"Component* createMainContentComponent()     { return new MainContentComponent(); }\r\n"
 "\r\n"
-"#endif  // MAINCOMPONENT_H_INCLUDED";
-
-const char* jucer_AudioComponentTemplate_cpp = (const char*) temp_binary_data_1;
-
-//================== jucer_MainTemplate_SimpleWindow.cpp ==================
-static const unsigned char temp_binary_data_2[] =
-"/*\r\n"
-"  ==============================================================================\r\n"
-"\r\n"
-"    This file was auto-generated by the Introjucer!\r\n"
-"\r\n"
-"    It contains the basic startup code for a Juce application.\r\n"
-"\r\n"
-"  ==============================================================================\r\n"
-"*/\r\n"
-"\r\n"
-"APPHEADERS\r\n"
-"\r\n"
-"Component* createMainContentComponent();\r\n"
-"\r\n"
-"//==============================================================================\r\n"
-"class APPCLASSNAME  : public JUCEApplication\r\n"
-"{\r\n"
-"public:\r\n"
-"    //==============================================================================\r\n"
-"    APPCLASSNAME() {}\r\n"
-"\r\n"
-"    const String getApplicationName() override       { return ProjectInfo::projectName; }\r\n"
-"    const String getApplicationVersion() override    { return ProjectInfo::versionString; }\r\n"
-"    bool moreThanOneInstanceAllowed() override       { return ALLOWMORETHANONEINSTANCE; }\r\n"
-"\r\n"
-"    //==============================================================================\r\n"
-"    void initialise (const String& commandLine) override\r\n"
-"    {\r\n"
-"        // This method is where you should put your application's initialisation code..\r\n"
-"\r\n"
-"        mainWindow = new MainWindow (getApplicationName());\r\n"
-"    }\r\n"
-"\r\n"
-"    void shutdown() override\r\n"
-"    {\r\n"
-"        // Add your application's shutdown code here..\r\n"
-"\r\n"
-"        mainWindow = nullptr; // (deletes our window)\r\n"
-"    }\r\n"
-"\r\n"
-"    //==============================================================================\r\n"
-"    void systemRequestedQuit() override\r\n"
-"    {\r\n"
-"        // This is called when the app is being asked to quit: you can ignore this\r\n"
-"        // request and let the app carry on running, or call quit() to allow the app to close.\r\n"
-"        quit();\r\n"
-"    }\r\n"
-"\r\n"
-"    void anotherInstanceStarted (const String& commandLine) override\r\n"
-"    {\r\n"
-"        // When another instance of the app is launched while this one is running,\r\n"
-"        // this method is invoked, and the commandLine parameter tells you what\r\n"
-"        // the other instance's command-line arguments were.\r\n"
-"    }\r\n"
-"\r\n"
-"    //==============================================================================\r\n"
-"    /*\r\n"
-"        This class implements the desktop window that contains an instance of\r\n"
-"        our CONTENTCOMPCLASS class.\r\n"
-"    */\r\n"
-"    class MainWindow    : public DocumentWindow\r\n"
-"    {\r\n"
-"    public:\r\n"
-"        MainWindow (String name)  : DocumentWindow (name,\r\n"
-"                                                    Colours::lightgrey,\r\n"
-"                                                    DocumentWindow::allButtons)\r\n"
-"        {\r\n"
-"            setUsingNativeTitleBar (true);\r\n"
-"            setContentOwned (createMainContentComponent(), true);\r\n"
-"            setResizable (true, true);\r\n"
-"\r\n"
-"            centreWithSize (getWidth(), getHeight());\r\n"
-"            setVisible (true);\r\n"
-"        }\r\n"
-"\r\n"
-"        void closeButtonPressed() override\r\n"
-"        {\r\n"
-"            // This is called when the user tries to close this window. Here, we'll just\r\n"
-"            // ask the app to quit when this happens, but you can change this to do\r\n"
-"            // whatever you need.\r\n"
-"            JUCEApplication::getInstance()->systemRequestedQuit();\r\n"
-"        }\r\n"
-"\r\n"
-"        /* Note: Be careful if you override any DocumentWindow methods - the base\r\n"
-"           class uses a lot of them, so by overriding you might break its functionality.\r\n"
-"           It's best to do all your work in your content component instead, but if\r\n"
-"           you really have to override any DocumentWindow methods, make sure your\r\n"
-"           subclass also calls the superclass's method.\r\n"
-"        */\r\n"
-"\r\n"
-"    private:\r\n"
-"        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainWindow)\r\n"
-"    };\r\n"
-"\r\n"
-"private:\r\n"
-"    ScopedPointer<MainWindow> mainWindow;\r\n"
-"};\r\n"
-"\r\n"
-"//==============================================================================\r\n"
-"// This macro generates the main() routine that launches the app.\r\n"
-"START_JUCE_APPLICATION (APPCLASSNAME)\r\n";
-
-const char* jucer_MainTemplate_SimpleWindow_cpp = (const char*) temp_binary_data_2;
-
-//================== jucer_AnimatedComponentTemplate.cpp ==================
-static const unsigned char temp_binary_data_3[] =
-"/*\r\n"
-"  ==============================================================================\r\n"
-"\r\n"
-"    This file was auto-generated!\r\n"
-"\r\n"
-"  ==============================================================================\r\n"
-"*/\r\n"
-"\r\n"
-"#ifndef MAINCOMPONENT_H_INCLUDED\r\n"
-"#define MAINCOMPONENT_H_INCLUDED\r\n"
-"\r\n"
-"INCLUDE_JUCE\r\n"
-"\r\n"
-"//==============================================================================\r\n"
-"/*\r\n"
-"    This component lives inside our window, and this is where you should put all\r\n"
-"    your controls and content.\r\n"
-"*/\r\n"
-"class MainContentComponent   : public AnimatedAppComponent\r\n"
-"{\r\n"
-"public:\r\n"
-"    //==============================================================================\r\n"
-"\r\n"
-"\r\n"
-"    MainContentComponent()\r\n"
-"    {\r\n"
-"        setSize (500, 400);\r\n"
-"        setFramesPerSecond (60);\r\n"
-"    }\r\n"
-"\r\n"
-"    ~MainContentComponent()\r\n"
-"    {\r\n"
-"    }\r\n"
-"\r\n"
-"    void update()\r\n"
-"    {\r\n"
-"        \r\n"
-"    }\r\n"
-"    \r\n"
-"    void paint (Graphics& g)\r\n"
-"    {\r\n"
-"        // fill background\r\n"
-"        g.fillAll (Colours::black);\r\n"
-"\r\n"
-"    }\r\n"
-"\r\n"
-"    void resized()\r\n"
-"    {\r\n"
-"        // This is called when the MainContentComponent is resized.\r\n"
-"        // If you add any child components, this is where you should\r\n"
-"        // update their positions.\r\n"
-"    }\r\n"
-"\r\n"
-"\r\n"
-"private:\r\n"
-"    //==============================================================================\r\n"
-"    \r\n"
-"    // private member variables\r\n"
-"    \r\n"
-"    \r\n"
-"    \r\n"
-"    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainContentComponent)\r\n"
-"};\r\n"
-"\r\n"
-"\r\n"
-"Component* createMainContentComponent() { return new MainContentComponent(); };\r\n"
 "\r\n"
 "#endif  // MAINCOMPONENT_H_INCLUDED\r\n";
 
-const char* jucer_AnimatedComponentTemplate_cpp = (const char*) temp_binary_data_3;
-
-//================== AudioPluginXCodeScript.txt ==================
-static const unsigned char temp_binary_data_4[] =
-"\r\n"
-"# This script takes the build product and copies it to the AU, VST, VST3, RTAS and AAX folders, depending on \r\n"
-"# which plugin types you've built\r\n"
-"\r\n"
-"original=$CONFIGURATION_BUILD_DIR/$FULL_PRODUCT_NAME\r\n"
-"\r\n"
-"# this looks inside the binary to detect which platforms are needed.. \r\n"
-"copyAU=`nm -g \"$CONFIGURATION_BUILD_DIR/$EXECUTABLE_PATH\" | grep -i 'AudioUnit' | wc -l`\r\n"
-"copyVST=`nm -g \"$CONFIGURATION_BUILD_DIR/$EXECUTABLE_PATH\" | grep -i 'VSTPlugin' | wc -l`\r\n"
-"copyVST3=`nm -g \"$CONFIGURATION_BUILD_DIR/$EXECUTABLE_PATH\" | grep -i 'GetPluginFactory' | wc -l`\r\n"
-"copyRTAS=`nm -g \"$CONFIGURATION_BUILD_DIR/$EXECUTABLE_PATH\" | grep -i 'CProcess' | wc -l`\r\n"
-"copyAAX=`nm -g \"$CONFIGURATION_BUILD_DIR/$EXECUTABLE_PATH\" | grep -i 'ACFStartup' | wc -l`\r\n"
-"\r\n"
-"if [ $copyAU -gt 0 ]; then\r\n"
-"  echo \"Copying to AudioUnit folder...\"\r\n"
-"  AU=~/Library/Audio/Plug-Ins/Components/$PRODUCT_NAME.component\r\n"
-"  if [ -d \"$AU\" ]; then \r\n"
-"    rm -r \"$AU\"\r\n"
-"  fi\r\n"
-"\r\n"
-"  cp -r \"$original\" \"$AU\"\r\n"
-"  sed -i \"\" -e 's/TDMwPTul/BNDLPTul/g' \"$AU/Contents/PkgInfo\"\r\n"
-"  sed -i \"\" -e 's/TDMw/BNDL/g' \"$AU/Contents/$INFOPLIST_FILE\"\r\n"
-"\r\n"
-"  # Fix info.plist for AUs built with Xcode 3\r\n"
-"  if [ -f \"$DEVELOPER_DIR/Library/Developer/CoreAudio/AudioUnits/AUPublic/AUBase/AUPlugInDispatch.cpp\" ]; then\r\n"
-"    echo\r\n"
-"  else\r\n"
-"    echo \"Removing AudioComponents entry from Info.plist because this is not a new-format AU\"\r\n"
-"    /usr/libexec/PlistBuddy -c \"Delete AudioComponents\" \"$AU/Contents/Info.plist\"\r\n"
-"  fi\r\n"
-"fi\r\n"
-"\r\n"
-"if [ $copyVST -gt 0 ]; then\r\n"
-"  echo \"Copying to VST folder...\"\r\n"
-"  VST=~/Library/Audio/Plug-Ins/VST/$PRODUCT_NAME.vst\r\n"
-"  if [ -d \"$VST\" ]; then \r\n"
-"    rm -r \"$VST\"\r\n"
-"  fi\r\n"
-"\r\n"
-"  cp -r \"$original\" \"$VST\"\r\n"
-"  sed -i \"\" -e 's/TDMwPTul/BNDLPTul/g' \"$VST/Contents/PkgInfo\"\r\n"
-"  sed -i \"\" -e 's/TDMw/BNDL/g' \"$VST/Contents/$INFOPLIST_FILE\"\r\n"
-"fi\r\n"
-"\r\n"
-"if [ $copyVST3 -gt 0 ]; then\r\n"
-"  echo \"Copying to VST3 folder...\"\r\n"
-"  VST3=~/Library/Audio/Plug-Ins/VST3/$PRODUCT_NAME.vst3\r\n"
-"  if [ -d \"$VST3\" ]; then \r\n"
-"    rm -r \"$VST3\"\r\n"
-"  fi\r\n"
-"\r\n"
-"  cp -r \"$original\" \"$VST3\"\r\n"
-"  sed -i \"\" -e 's/TDMwPTul/BNDLPTul/g' \"$VST3/Contents/PkgInfo\"\r\n"
-"  sed -i \"\" -e 's/TDMw/BNDL/g' \"$VST3/Contents/$INFOPLIST_FILE\"\r\n"
-"fi\r\n"
-"\r\n"
-"if [ $copyRTAS -gt 0 ]; then\r\n"
-"  echo \"Copying to RTAS folder...\"\r\n"
-"  RTAS=/Library/Application\\ Support/Digidesign/Plug-Ins/$PRODUCT_NAME.dpm\r\n"
-"  if [ -d \"$RTAS\" ]; then\r\n"
-"    rm -r \"$RTAS\"\r\n"
-"  fi\r\n"
-"\r\n"
-"  cp -r \"$original\" \"$RTAS\"\r\n"
-"fi\r\n"
-"\r\n"
-"if [ $copyAAX -gt 0 ]; then\r\n"
-"  echo \"Copying to AAX folder...\"\r\n"
-"\r\n"
-"  if [ -d \"/Applications/ProTools_3PDev/Plug-Ins\" ]; then\r\n"
-"    AAX1=\"/Applications/ProTools_3PDev/Plug-Ins/$PRODUCT_NAME.aaxplugin\"\r\n"
-"\r\n"
-"    if [ -d \"$AAX1\" ]; then\r\n"
-"      rm -r \"$AAX1\"\r\n"
-"    fi\r\n"
-"\r\n"
-"    cp -R -H \"$original\" \"$AAX1\"\r\n"
-"  fi\r\n"
-"\r\n"
-"  if [ -d \"/Library/Application Support/Avid/Audio/Plug-Ins\" ]; then\r\n"
-"    AAX2=\"/Library/Application Support/Avid/Audio/Plug-Ins/$PRODUCT_NAME.aaxplugin\"\r\n"
-"\r\n"
-"    if [ -d \"$AAX2\" ]; then\r\n"
-"      rm -r \"$AAX2\"\r\n"
-"    fi\r\n"
-"\r\n"
-"    cp -R -H \"$original\" \"$AAX2\"\r\n"
-"  fi\r\n"
-"fi\r\n";
-
-const char* AudioPluginXCodeScript_txt = (const char*) temp_binary_data_4;
-
-//================== background_tile.png ==================
-static const unsigned char temp_binary_data_5[] =
-{ 137,80,78,71,13,10,26,10,0,0,0,13,73,72,68,82,0,0,0,7,0,0,0,7,8,6,0,0,0,196,82,87,211,0,0,0,94,73,68,65,84,120,218,85,141,73,14,0,33,8,4,253,137,226,18,19,245,234,255,127,70,75,155,232,56,135,10,132,94,112,33,4,37,222,123,205,57,107,74,105,239,196,137,
-8,72,239,29,99,12,204,57,209,90,227,237,19,45,113,161,209,12,234,172,18,49,70,88,229,134,34,103,173,245,159,60,134,82,10,238,79,166,223,106,238,91,100,229,73,191,80,92,47,179,68,223,148,158,98,226,0,0,0,0,73,69,78,68,174,66,96,130,0,0 };
-
-const char* background_tile_png = (const char*) temp_binary_data_5;
-
-//================== colourscheme_dark.xml ==================
-static const unsigned char temp_binary_data_6[] =
-"<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n"
-"\r\n"
-"<COLOUR_SCHEME font=\"&lt;Monospaced&gt;; 13.0\">\r\n"
-"  <COLOUR name=\"Main Window Bkgd\" colour=\"FF29292A\"/>\r\n"
-"  <COLOUR name=\"Treeview Highlight\" colour=\"2BFFFEC3\"/>\r\n"
-"  <COLOUR name=\"Code Background\" colour=\"FF222222\"/>\r\n"
-"  <COLOUR name=\"Line Number Bkgd\" colour=\"44C1C1C1\"/>\r\n"
-"  <COLOUR name=\"Line Numbers\" colour=\"E9B2B2B2\"/>\r\n"
-"  <COLOUR name=\"Plain Text\" colour=\"FFCECECE\"/>\r\n"
-"  <COLOUR name=\"Selected Text Bkgd\" colour=\"FF2859AC\"/>\r\n"
-"  <COLOUR name=\"Caret\" colour=\"FFFFFFFF\"/>\r\n"
-"  <COLOUR name=\"Preprocessor Text\" colour=\"FFF8F631\"/>\r\n"
-"  <COLOUR name=\"Punctuation\" colour=\"FFCFBEFF\"/>\r\n"
-"  <COLOUR name=\"Bracket\" colour=\"FF058202\"/>\r\n"
-"  <COLOUR name=\"String\" colour=\"FFBC45DD\"/>\r\n"
-"  <COLOUR name=\"Float\" colour=\"ff885500\"/>\r\n"
-"  <COLOUR name=\"Integer\" colour=\"FF42C8C4\"/>\r\n"
-"  <COLOUR name=\"Identifier\" colour=\"FFCFCFCF\"/>\r\n"
-"  <COLOUR name=\"Operator\" colour=\"FFC4EB19\"/>\r\n"
-"  <COLOUR name=\"Keyword\" colour=\"FFEE6F6F\"/>\r\n"
-"  <COLOUR name=\"Comment\" colour=\"FF72D20C\"/>\r\n"
-"  <COLOUR name=\"Error\" colour=\"FFE60000\"/>\r\n"
-"</COLOUR_SCHEME>\r\n";
-
-const char* colourscheme_dark_xml = (const char*) temp_binary_data_6;
-
-//================== colourscheme_light.xml ==================
-static const unsigned char temp_binary_data_7[] =
-"<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n"
-"\r\n"
-"<COLOUR_SCHEME font=\"&lt;Monospaced&gt;; 13.0\">\r\n"
-"  <COLOUR name=\"Main Window Bkgd\" colour=\"FFE6E7E9\"/>\r\n"
-"  <COLOUR name=\"Treeview Highlight\" colour=\"401111ee\"/>\r\n"
-"  <COLOUR name=\"Code Background\" colour=\"ffffffff\"/>\r\n"
-"  <COLOUR name=\"Line Number Bkgd\" colour=\"44999999\"/>\r\n"
-"  <COLOUR name=\"Line Numbers\" colour=\"44000000\"/>\r\n"
-"  <COLOUR name=\"Plain Text\" colour=\"ff000000\"/>\r\n"
-"  <COLOUR name=\"Selected Text Bkgd\" colour=\"401111ee\"/>\r\n"
-"  <COLOUR name=\"Caret\" colour=\"ff000000\"/>\r\n"
-"  <COLOUR name=\"Preprocessor Text\" colour=\"ff660000\"/>\r\n"
-"  <COLOUR name=\"Punctuation\" colour=\"ff004400\"/>\r\n"
-"  <COLOUR name=\"Bracket\" colour=\"ff000055\"/>\r\n"
-"  <COLOUR name=\"String\" colour=\"ff990099\"/>\r\n"
-"  <COLOUR name=\"Float\" colour=\"ff885500\"/>\r\n"
-"  <COLOUR name=\"Integer\" colour=\"ff880000\"/>\r\n"
-"  <COLOUR name=\"Identifier\" colour=\"ff000000\"/>\r\n"
-"  <COLOUR name=\"Operator\" colour=\"ff225500\"/>\r\n"
-"  <COLOUR name=\"Keyword\" colour=\"ff0000cc\"/>\r\n"
-"  <COLOUR name=\"Comment\" colour=\"ff00aa00\"/>\r\n"
-"  <COLOUR name=\"Error\" colour=\"ffcc0000\"/>\r\n"
-"</COLOUR_SCHEME>\r\n";
-
-const char* colourscheme_light_xml = (const char*) temp_binary_data_7;
+const char* jucer_AudioComponentTemplate_cpp = (const char*) temp_binary_data_1;
 
 //================== jucer_AudioPluginEditorTemplate.cpp ==================
-static const unsigned char temp_binary_data_8[] =
+static const unsigned char temp_binary_data_2[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
@@ -551,10 +227,10 @@ static const unsigned char temp_binary_data_8[] =
 "    // subcomponents in your editor..\r\n"
 "}\r\n";
 
-const char* jucer_AudioPluginEditorTemplate_cpp = (const char*) temp_binary_data_8;
+const char* jucer_AudioPluginEditorTemplate_cpp = (const char*) temp_binary_data_2;
 
 //================== jucer_AudioPluginEditorTemplate.h ==================
-static const unsigned char temp_binary_data_9[] =
+static const unsigned char temp_binary_data_3[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
@@ -595,10 +271,10 @@ static const unsigned char temp_binary_data_9[] =
 "\r\n"
 "#endif  // HEADERGUARD\r\n";
 
-const char* jucer_AudioPluginEditorTemplate_h = (const char*) temp_binary_data_9;
+const char* jucer_AudioPluginEditorTemplate_h = (const char*) temp_binary_data_3;
 
 //================== jucer_AudioPluginFilterTemplate.cpp ==================
-static const unsigned char temp_binary_data_10[] =
+static const unsigned char temp_binary_data_4[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
@@ -789,10 +465,10 @@ static const unsigned char temp_binary_data_10[] =
 "    return new FILTERCLASSNAME();\r\n"
 "}\r\n";
 
-const char* jucer_AudioPluginFilterTemplate_cpp = (const char*) temp_binary_data_10;
+const char* jucer_AudioPluginFilterTemplate_cpp = (const char*) temp_binary_data_4;
 
 //================== jucer_AudioPluginFilterTemplate.h ==================
-static const unsigned char temp_binary_data_11[] =
+static const unsigned char temp_binary_data_5[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
@@ -868,10 +544,10 @@ static const unsigned char temp_binary_data_11[] =
 "\r\n"
 "#endif  // HEADERGUARD\r\n";
 
-const char* jucer_AudioPluginFilterTemplate_h = (const char*) temp_binary_data_11;
+const char* jucer_AudioPluginFilterTemplate_h = (const char*) temp_binary_data_5;
 
 //================== jucer_ComponentTemplate.cpp ==================
-static const unsigned char temp_binary_data_12[] =
+static const unsigned char temp_binary_data_6[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
@@ -944,10 +620,10 @@ static const unsigned char temp_binary_data_12[] =
 "//[EndFile] You can add extra defines here...\r\n"
 "//[/EndFile]";
 
-const char* jucer_ComponentTemplate_cpp = (const char*) temp_binary_data_12;
+const char* jucer_ComponentTemplate_cpp = (const char*) temp_binary_data_6;
 
 //================== jucer_ComponentTemplate.h ==================
-static const unsigned char temp_binary_data_13[] =
+static const unsigned char temp_binary_data_7[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
@@ -1013,10 +689,10 @@ static const unsigned char temp_binary_data_13[] =
 "\r\n"
 "#endif   // %%headerGuard%%";
 
-const char* jucer_ComponentTemplate_h = (const char*) temp_binary_data_13;
+const char* jucer_ComponentTemplate_h = (const char*) temp_binary_data_7;
 
 //================== jucer_ContentCompTemplate.cpp ==================
-static const unsigned char temp_binary_data_14[] =
+static const unsigned char temp_binary_data_8[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
@@ -1054,10 +730,10 @@ static const unsigned char temp_binary_data_14[] =
 "    // update their positions.\r\n"
 "}\r\n";
 
-const char* jucer_ContentCompTemplate_cpp = (const char*) temp_binary_data_14;
+const char* jucer_ContentCompTemplate_cpp = (const char*) temp_binary_data_8;
 
 //================== jucer_ContentCompTemplate.h ==================
-static const unsigned char temp_binary_data_15[] =
+static const unsigned char temp_binary_data_9[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
@@ -1095,10 +771,10 @@ static const unsigned char temp_binary_data_15[] =
 "\r\n"
 "#endif  // HEADERGUARD\r\n";
 
-const char* jucer_ContentCompTemplate_h = (const char*) temp_binary_data_15;
+const char* jucer_ContentCompTemplate_h = (const char*) temp_binary_data_9;
 
 //================== jucer_InlineComponentTemplate.h ==================
-static const unsigned char temp_binary_data_16[] =
+static const unsigned char temp_binary_data_10[] =
 "//==============================================================================\r\n"
 "class COMPONENTCLASS    : public Component\r\n"
 "{\r\n"
@@ -1140,10 +816,10 @@ static const unsigned char temp_binary_data_16[] =
 "    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (COMPONENTCLASS)\r\n"
 "};\r\n";
 
-const char* jucer_InlineComponentTemplate_h = (const char*) temp_binary_data_16;
+const char* jucer_InlineComponentTemplate_h = (const char*) temp_binary_data_10;
 
 //================== jucer_MainConsoleAppTemplate.cpp ==================
-static const unsigned char temp_binary_data_17[] =
+static const unsigned char temp_binary_data_11[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
@@ -1167,10 +843,10 @@ static const unsigned char temp_binary_data_17[] =
 "    return 0;\r\n"
 "}\r\n";
 
-const char* jucer_MainConsoleAppTemplate_cpp = (const char*) temp_binary_data_17;
+const char* jucer_MainConsoleAppTemplate_cpp = (const char*) temp_binary_data_11;
 
 //================== jucer_MainTemplate_NoWindow.cpp ==================
-static const unsigned char temp_binary_data_18[] =
+static const unsigned char temp_binary_data_12[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
@@ -1226,10 +902,116 @@ static const unsigned char temp_binary_data_18[] =
 "// This macro generates the main() routine that launches the app.\r\n"
 "START_JUCE_APPLICATION (APPCLASSNAME)\r\n";
 
-const char* jucer_MainTemplate_NoWindow_cpp = (const char*) temp_binary_data_18;
+const char* jucer_MainTemplate_NoWindow_cpp = (const char*) temp_binary_data_12;
+
+//================== jucer_MainTemplate_SimpleWindow.cpp ==================
+static const unsigned char temp_binary_data_13[] =
+"/*\r\n"
+"  ==============================================================================\r\n"
+"\r\n"
+"    This file was auto-generated by the Introjucer!\r\n"
+"\r\n"
+"    It contains the basic startup code for a Juce application.\r\n"
+"\r\n"
+"  ==============================================================================\r\n"
+"*/\r\n"
+"\r\n"
+"APPHEADERS\r\n"
+"\r\n"
+"Component* createMainContentComponent();\r\n"
+"\r\n"
+"//==============================================================================\r\n"
+"class APPCLASSNAME  : public JUCEApplication\r\n"
+"{\r\n"
+"public:\r\n"
+"    //==============================================================================\r\n"
+"    APPCLASSNAME() {}\r\n"
+"\r\n"
+"    const String getApplicationName() override       { return ProjectInfo::projectName; }\r\n"
+"    const String getApplicationVersion() override    { return ProjectInfo::versionString; }\r\n"
+"    bool moreThanOneInstanceAllowed() override       { return ALLOWMORETHANONEINSTANCE; }\r\n"
+"\r\n"
+"    //==============================================================================\r\n"
+"    void initialise (const String& commandLine) override\r\n"
+"    {\r\n"
+"        // This method is where you should put your application's initialisation code..\r\n"
+"\r\n"
+"        mainWindow = new MainWindow (getApplicationName());\r\n"
+"    }\r\n"
+"\r\n"
+"    void shutdown() override\r\n"
+"    {\r\n"
+"        // Add your application's shutdown code here..\r\n"
+"\r\n"
+"        mainWindow = nullptr; // (deletes our window)\r\n"
+"    }\r\n"
+"\r\n"
+"    //==============================================================================\r\n"
+"    void systemRequestedQuit() override\r\n"
+"    {\r\n"
+"        // This is called when the app is being asked to quit: you can ignore this\r\n"
+"        // request and let the app carry on running, or call quit() to allow the app to close.\r\n"
+"        quit();\r\n"
+"    }\r\n"
+"\r\n"
+"    void anotherInstanceStarted (const String& commandLine) override\r\n"
+"    {\r\n"
+"        // When another instance of the app is launched while this one is running,\r\n"
+"        // this method is invoked, and the commandLine parameter tells you what\r\n"
+"        // the other instance's command-line arguments were.\r\n"
+"    }\r\n"
+"\r\n"
+"    //==============================================================================\r\n"
+"    /*\r\n"
+"        This class implements the desktop window that contains an instance of\r\n"
+"        our CONTENTCOMPCLASS class.\r\n"
+"    */\r\n"
+"    class MainWindow    : public DocumentWindow\r\n"
+"    {\r\n"
+"    public:\r\n"
+"        MainWindow (String name)  : DocumentWindow (name,\r\n"
+"                                                    Colours::lightgrey,\r\n"
+"                                                    DocumentWindow::allButtons)\r\n"
+"        {\r\n"
+"            setUsingNativeTitleBar (true);\r\n"
+"            setContentOwned (createMainContentComponent(), true);\r\n"
+"            setResizable (true, true);\r\n"
+"\r\n"
+"            centreWithSize (getWidth(), getHeight());\r\n"
+"            setVisible (true);\r\n"
+"        }\r\n"
+"\r\n"
+"        void closeButtonPressed() override\r\n"
+"        {\r\n"
+"            // This is called when the user tries to close this window. Here, we'll just\r\n"
+"            // ask the app to quit when this happens, but you can change this to do\r\n"
+"            // whatever you need.\r\n"
+"            JUCEApplication::getInstance()->systemRequestedQuit();\r\n"
+"        }\r\n"
+"\r\n"
+"        /* Note: Be careful if you override any DocumentWindow methods - the base\r\n"
+"           class uses a lot of them, so by overriding you might break its functionality.\r\n"
+"           It's best to do all your work in your content component instead, but if\r\n"
+"           you really have to override any DocumentWindow methods, make sure your\r\n"
+"           subclass also calls the superclass's method.\r\n"
+"        */\r\n"
+"\r\n"
+"    private:\r\n"
+"        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainWindow)\r\n"
+"    };\r\n"
+"\r\n"
+"private:\r\n"
+"    ScopedPointer<MainWindow> mainWindow;\r\n"
+"};\r\n"
+"\r\n"
+"//==============================================================================\r\n"
+"// This macro generates the main() routine that launches the app.\r\n"
+"START_JUCE_APPLICATION (APPCLASSNAME)\r\n";
+
+const char* jucer_MainTemplate_SimpleWindow_cpp = (const char*) temp_binary_data_13;
 
 //================== jucer_MainTemplate_Window.cpp ==================
-static const unsigned char temp_binary_data_19[] =
+static const unsigned char temp_binary_data_14[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
@@ -1330,10 +1112,10 @@ static const unsigned char temp_binary_data_19[] =
 "// This macro generates the main() routine that launches the app.\r\n"
 "START_JUCE_APPLICATION (APPCLASSNAME)\r\n";
 
-const char* jucer_MainTemplate_Window_cpp = (const char*) temp_binary_data_19;
+const char* jucer_MainTemplate_Window_cpp = (const char*) temp_binary_data_14;
 
 //================== jucer_NewComponentTemplate.cpp ==================
-static const unsigned char temp_binary_data_20[] =
+static const unsigned char temp_binary_data_15[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
@@ -1386,10 +1168,10 @@ static const unsigned char temp_binary_data_20[] =
 "\r\n"
 "}\r\n";
 
-const char* jucer_NewComponentTemplate_cpp = (const char*) temp_binary_data_20;
+const char* jucer_NewComponentTemplate_cpp = (const char*) temp_binary_data_15;
 
 //================== jucer_NewComponentTemplate.h ==================
-static const unsigned char temp_binary_data_21[] =
+static const unsigned char temp_binary_data_16[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
@@ -1424,10 +1206,10 @@ static const unsigned char temp_binary_data_21[] =
 "\r\n"
 "#endif  // HEADERGUARD\r\n";
 
-const char* jucer_NewComponentTemplate_h = (const char*) temp_binary_data_21;
+const char* jucer_NewComponentTemplate_h = (const char*) temp_binary_data_16;
 
 //================== jucer_NewCppFileTemplate.cpp ==================
-static const unsigned char temp_binary_data_22[] =
+static const unsigned char temp_binary_data_17[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
@@ -1440,10 +1222,10 @@ static const unsigned char temp_binary_data_22[] =
 "\r\n"
 "INCLUDE_CORRESPONDING_HEADER\r\n";
 
-const char* jucer_NewCppFileTemplate_cpp = (const char*) temp_binary_data_22;
+const char* jucer_NewCppFileTemplate_cpp = (const char*) temp_binary_data_17;
 
 //================== jucer_NewCppFileTemplate.h ==================
-static const unsigned char temp_binary_data_23[] =
+static const unsigned char temp_binary_data_18[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
@@ -1463,10 +1245,10 @@ static const unsigned char temp_binary_data_23[] =
 "\r\n"
 "#endif  // HEADERGUARD\r\n";
 
-const char* jucer_NewCppFileTemplate_h = (const char*) temp_binary_data_23;
+const char* jucer_NewCppFileTemplate_h = (const char*) temp_binary_data_18;
 
 //================== jucer_NewInlineComponentTemplate.h ==================
-static const unsigned char temp_binary_data_24[] =
+static const unsigned char temp_binary_data_19[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
@@ -1533,7 +1315,236 @@ static const unsigned char temp_binary_data_24[] =
 "\r\n"
 "#endif  // HEADERGUARD\r\n";
 
-const char* jucer_NewInlineComponentTemplate_h = (const char*) temp_binary_data_24;
+const char* jucer_NewInlineComponentTemplate_h = (const char*) temp_binary_data_19;
+
+//================== jucer_OpenGLComponentTemplate.cpp ==================
+static const unsigned char temp_binary_data_20[] =
+"/*\r\n"
+"  ==============================================================================\r\n"
+"\r\n"
+"    This file was auto-generated!\r\n"
+"\r\n"
+"  ==============================================================================\r\n"
+"*/\r\n"
+"\r\n"
+"#ifndef MAINCOMPONENT_H_INCLUDED\r\n"
+"#define MAINCOMPONENT_H_INCLUDED\r\n"
+"\r\n"
+"INCLUDE_JUCE\r\n"
+"\r\n"
+"//==============================================================================\r\n"
+"/*\r\n"
+"    This component lives inside our window, and this is where you should put all\r\n"
+"    your controls and content.\r\n"
+"*/\r\n"
+"class MainContentComponent   : public OpenGLAppComponent\r\n"
+"{\r\n"
+"public:\r\n"
+"    //==============================================================================\r\n"
+"    MainContentComponent()\r\n"
+"    {\r\n"
+"        setSize (500, 400);\r\n"
+"\r\n"
+"    }\r\n"
+"\r\n"
+"    ~MainContentComponent()\r\n"
+"    {\r\n"
+"        shutdownAudio();\r\n"
+"    }\r\n"
+"\r\n"
+"    void paint (Graphics& g)\r\n"
+"    {\r\n"
+"        // (Our component is opaque, so we must completely fill the background with a solid colour)\r\n"
+"        g.fillAll (Colours::black);\r\n"
+"\r\n"
+"\r\n"
+"        // You can add your drawing code here!\r\n"
+"    }\r\n"
+"\r\n"
+"    void resized()\r\n"
+"    {\r\n"
+"        // This is called when the MainContentComponent is resized.\r\n"
+"        // If you add any child components, this is where you should\r\n"
+"        // update their positions.\r\n"
+"    }\r\n"
+"\r\n"
+"\r\n"
+"private:\r\n"
+"    //==============================================================================\r\n"
+"\r\n"
+"    // private member variables\r\n"
+"\r\n"
+"\r\n"
+"\r\n"
+"    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainContentComponent)\r\n"
+"};\r\n"
+"\r\n"
+"\r\n"
+"// (This function is called by the app startup code to create our main component)\r\n"
+"Component* createMainContentComponent()    { return new MainContentComponent(); }\r\n"
+"\r\n"
+"\r\n"
+"#endif  // MAINCOMPONENT_H_INCLUDED\r\n";
+
+const char* jucer_OpenGLComponentTemplate_cpp = (const char*) temp_binary_data_20;
+
+//================== AudioPluginXCodeScript.txt ==================
+static const unsigned char temp_binary_data_21[] =
+"\r\n"
+"# This script takes the build product and copies it to the AU, VST, VST3, RTAS and AAX folders, depending on \r\n"
+"# which plugin types you've built\r\n"
+"\r\n"
+"original=$CONFIGURATION_BUILD_DIR/$FULL_PRODUCT_NAME\r\n"
+"\r\n"
+"# this looks inside the binary to detect which platforms are needed.. \r\n"
+"copyAU=`nm -g \"$CONFIGURATION_BUILD_DIR/$EXECUTABLE_PATH\" | grep -i 'AudioUnit' | wc -l`\r\n"
+"copyVST=`nm -g \"$CONFIGURATION_BUILD_DIR/$EXECUTABLE_PATH\" | grep -i 'VSTPlugin' | wc -l`\r\n"
+"copyVST3=`nm -g \"$CONFIGURATION_BUILD_DIR/$EXECUTABLE_PATH\" | grep -i 'GetPluginFactory' | wc -l`\r\n"
+"copyRTAS=`nm -g \"$CONFIGURATION_BUILD_DIR/$EXECUTABLE_PATH\" | grep -i 'CProcess' | wc -l`\r\n"
+"copyAAX=`nm -g \"$CONFIGURATION_BUILD_DIR/$EXECUTABLE_PATH\" | grep -i 'ACFStartup' | wc -l`\r\n"
+"\r\n"
+"if [ $copyAU -gt 0 ]; then\r\n"
+"  echo \"Copying to AudioUnit folder...\"\r\n"
+"  AU=~/Library/Audio/Plug-Ins/Components/$PRODUCT_NAME.component\r\n"
+"  if [ -d \"$AU\" ]; then \r\n"
+"    rm -r \"$AU\"\r\n"
+"  fi\r\n"
+"\r\n"
+"  cp -r \"$original\" \"$AU\"\r\n"
+"  sed -i \"\" -e 's/TDMwPTul/BNDLPTul/g' \"$AU/Contents/PkgInfo\"\r\n"
+"  sed -i \"\" -e 's/TDMw/BNDL/g' \"$AU/Contents/$INFOPLIST_FILE\"\r\n"
+"\r\n"
+"  # Fix info.plist for AUs built with Xcode 3\r\n"
+"  if [ -f \"$DEVELOPER_DIR/Library/Developer/CoreAudio/AudioUnits/AUPublic/AUBase/AUPlugInDispatch.cpp\" ]; then\r\n"
+"    echo\r\n"
+"  else\r\n"
+"    echo \"Removing AudioComponents entry from Info.plist because this is not a new-format AU\"\r\n"
+"    /usr/libexec/PlistBuddy -c \"Delete AudioComponents\" \"$AU/Contents/Info.plist\"\r\n"
+"  fi\r\n"
+"fi\r\n"
+"\r\n"
+"if [ $copyVST -gt 0 ]; then\r\n"
+"  echo \"Copying to VST folder...\"\r\n"
+"  VST=~/Library/Audio/Plug-Ins/VST/$PRODUCT_NAME.vst\r\n"
+"  if [ -d \"$VST\" ]; then \r\n"
+"    rm -r \"$VST\"\r\n"
+"  fi\r\n"
+"\r\n"
+"  cp -r \"$original\" \"$VST\"\r\n"
+"  sed -i \"\" -e 's/TDMwPTul/BNDLPTul/g' \"$VST/Contents/PkgInfo\"\r\n"
+"  sed -i \"\" -e 's/TDMw/BNDL/g' \"$VST/Contents/$INFOPLIST_FILE\"\r\n"
+"fi\r\n"
+"\r\n"
+"if [ $copyVST3 -gt 0 ]; then\r\n"
+"  echo \"Copying to VST3 folder...\"\r\n"
+"  VST3=~/Library/Audio/Plug-Ins/VST3/$PRODUCT_NAME.vst3\r\n"
+"  if [ -d \"$VST3\" ]; then \r\n"
+"    rm -r \"$VST3\"\r\n"
+"  fi\r\n"
+"\r\n"
+"  cp -r \"$original\" \"$VST3\"\r\n"
+"  sed -i \"\" -e 's/TDMwPTul/BNDLPTul/g' \"$VST3/Contents/PkgInfo\"\r\n"
+"  sed -i \"\" -e 's/TDMw/BNDL/g' \"$VST3/Contents/$INFOPLIST_FILE\"\r\n"
+"fi\r\n"
+"\r\n"
+"if [ $copyRTAS -gt 0 ]; then\r\n"
+"  echo \"Copying to RTAS folder...\"\r\n"
+"  RTAS=/Library/Application\\ Support/Digidesign/Plug-Ins/$PRODUCT_NAME.dpm\r\n"
+"  if [ -d \"$RTAS\" ]; then\r\n"
+"    rm -r \"$RTAS\"\r\n"
+"  fi\r\n"
+"\r\n"
+"  cp -r \"$original\" \"$RTAS\"\r\n"
+"fi\r\n"
+"\r\n"
+"if [ $copyAAX -gt 0 ]; then\r\n"
+"  echo \"Copying to AAX folder...\"\r\n"
+"\r\n"
+"  if [ -d \"/Applications/ProTools_3PDev/Plug-Ins\" ]; then\r\n"
+"    AAX1=\"/Applications/ProTools_3PDev/Plug-Ins/$PRODUCT_NAME.aaxplugin\"\r\n"
+"\r\n"
+"    if [ -d \"$AAX1\" ]; then\r\n"
+"      rm -r \"$AAX1\"\r\n"
+"    fi\r\n"
+"\r\n"
+"    cp -R -H \"$original\" \"$AAX1\"\r\n"
+"  fi\r\n"
+"\r\n"
+"  if [ -d \"/Library/Application Support/Avid/Audio/Plug-Ins\" ]; then\r\n"
+"    AAX2=\"/Library/Application Support/Avid/Audio/Plug-Ins/$PRODUCT_NAME.aaxplugin\"\r\n"
+"\r\n"
+"    if [ -d \"$AAX2\" ]; then\r\n"
+"      rm -r \"$AAX2\"\r\n"
+"    fi\r\n"
+"\r\n"
+"    cp -R -H \"$original\" \"$AAX2\"\r\n"
+"  fi\r\n"
+"fi\r\n";
+
+const char* AudioPluginXCodeScript_txt = (const char*) temp_binary_data_21;
+
+//================== background_tile.png ==================
+static const unsigned char temp_binary_data_22[] =
+{ 137,80,78,71,13,10,26,10,0,0,0,13,73,72,68,82,0,0,0,7,0,0,0,7,8,6,0,0,0,196,82,87,211,0,0,0,94,73,68,65,84,120,218,85,141,73,14,0,33,8,4,253,137,226,18,19,245,234,255,127,70,75,155,232,56,135,10,132,94,112,33,4,37,222,123,205,57,107,74,105,239,196,137,
+8,72,239,29,99,12,204,57,209,90,227,237,19,45,113,161,209,12,234,172,18,49,70,88,229,134,34,103,173,245,159,60,134,82,10,238,79,166,223,106,238,91,100,229,73,191,80,92,47,179,68,223,148,158,98,226,0,0,0,0,73,69,78,68,174,66,96,130,0,0 };
+
+const char* background_tile_png = (const char*) temp_binary_data_22;
+
+//================== colourscheme_dark.xml ==================
+static const unsigned char temp_binary_data_23[] =
+"<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n"
+"\r\n"
+"<COLOUR_SCHEME font=\"&lt;Monospaced&gt;; 13.0\">\r\n"
+"  <COLOUR name=\"Main Window Bkgd\" colour=\"FF29292A\"/>\r\n"
+"  <COLOUR name=\"Treeview Highlight\" colour=\"2BFFFEC3\"/>\r\n"
+"  <COLOUR name=\"Code Background\" colour=\"FF222222\"/>\r\n"
+"  <COLOUR name=\"Line Number Bkgd\" colour=\"44C1C1C1\"/>\r\n"
+"  <COLOUR name=\"Line Numbers\" colour=\"E9B2B2B2\"/>\r\n"
+"  <COLOUR name=\"Plain Text\" colour=\"FFCECECE\"/>\r\n"
+"  <COLOUR name=\"Selected Text Bkgd\" colour=\"FF2859AC\"/>\r\n"
+"  <COLOUR name=\"Caret\" colour=\"FFFFFFFF\"/>\r\n"
+"  <COLOUR name=\"Preprocessor Text\" colour=\"FFF8F631\"/>\r\n"
+"  <COLOUR name=\"Punctuation\" colour=\"FFCFBEFF\"/>\r\n"
+"  <COLOUR name=\"Bracket\" colour=\"FF058202\"/>\r\n"
+"  <COLOUR name=\"String\" colour=\"FFBC45DD\"/>\r\n"
+"  <COLOUR name=\"Float\" colour=\"ff885500\"/>\r\n"
+"  <COLOUR name=\"Integer\" colour=\"FF42C8C4\"/>\r\n"
+"  <COLOUR name=\"Identifier\" colour=\"FFCFCFCF\"/>\r\n"
+"  <COLOUR name=\"Operator\" colour=\"FFC4EB19\"/>\r\n"
+"  <COLOUR name=\"Keyword\" colour=\"FFEE6F6F\"/>\r\n"
+"  <COLOUR name=\"Comment\" colour=\"FF72D20C\"/>\r\n"
+"  <COLOUR name=\"Error\" colour=\"FFE60000\"/>\r\n"
+"</COLOUR_SCHEME>\r\n";
+
+const char* colourscheme_dark_xml = (const char*) temp_binary_data_23;
+
+//================== colourscheme_light.xml ==================
+static const unsigned char temp_binary_data_24[] =
+"<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n"
+"\r\n"
+"<COLOUR_SCHEME font=\"&lt;Monospaced&gt;; 13.0\">\r\n"
+"  <COLOUR name=\"Main Window Bkgd\" colour=\"FFE6E7E9\"/>\r\n"
+"  <COLOUR name=\"Treeview Highlight\" colour=\"401111ee\"/>\r\n"
+"  <COLOUR name=\"Code Background\" colour=\"ffffffff\"/>\r\n"
+"  <COLOUR name=\"Line Number Bkgd\" colour=\"44999999\"/>\r\n"
+"  <COLOUR name=\"Line Numbers\" colour=\"44000000\"/>\r\n"
+"  <COLOUR name=\"Plain Text\" colour=\"ff000000\"/>\r\n"
+"  <COLOUR name=\"Selected Text Bkgd\" colour=\"401111ee\"/>\r\n"
+"  <COLOUR name=\"Caret\" colour=\"ff000000\"/>\r\n"
+"  <COLOUR name=\"Preprocessor Text\" colour=\"ff660000\"/>\r\n"
+"  <COLOUR name=\"Punctuation\" colour=\"ff004400\"/>\r\n"
+"  <COLOUR name=\"Bracket\" colour=\"ff000055\"/>\r\n"
+"  <COLOUR name=\"String\" colour=\"ff990099\"/>\r\n"
+"  <COLOUR name=\"Float\" colour=\"ff885500\"/>\r\n"
+"  <COLOUR name=\"Integer\" colour=\"ff880000\"/>\r\n"
+"  <COLOUR name=\"Identifier\" colour=\"ff000000\"/>\r\n"
+"  <COLOUR name=\"Operator\" colour=\"ff225500\"/>\r\n"
+"  <COLOUR name=\"Keyword\" colour=\"ff0000cc\"/>\r\n"
+"  <COLOUR name=\"Comment\" colour=\"ff00aa00\"/>\r\n"
+"  <COLOUR name=\"Error\" colour=\"ffcc0000\"/>\r\n"
+"</COLOUR_SCHEME>\r\n";
+
+const char* colourscheme_light_xml = (const char*) temp_binary_data_24;
 
 //================== projectIconAndroid.png ==================
 static const unsigned char temp_binary_data_25[] =
@@ -3616,14 +3627,8 @@ const char* getNamedResource (const char* resourceNameUTF8, int& numBytes) throw
 
     switch (hash)
     {
-        case 0x96a53e52:  numBytes = 1495; return jucer_OpenglComponentTemplate_cpp;
-        case 0xafccbd3f:  numBytes = 2308; return jucer_AudioComponentTemplate_cpp;
-        case 0xda2391f8:  numBytes = 3866; return jucer_MainTemplate_SimpleWindow_cpp;
-        case 0x6cf2645e:  numBytes = 1546; return jucer_AnimatedComponentTemplate_cpp;
-        case 0x44be9398:  numBytes = 2922; return AudioPluginXCodeScript_txt;
-        case 0x4a0cfd09:  numBytes = 151; return background_tile_png;
-        case 0x763d39dc:  numBytes = 1050; return colourscheme_dark_xml;
-        case 0xe8b08520:  numBytes = 1050; return colourscheme_light_xml;
+        case 0x6cf2645e:  numBytes = 1908; return jucer_AnimatedComponentTemplate_cpp;
+        case 0xafccbd3f:  numBytes = 2977; return jucer_AudioComponentTemplate_cpp;
         case 0x27c5a93a:  numBytes = 1180; return jucer_AudioPluginEditorTemplate_cpp;
         case 0x4d0721bf:  numBytes = 1012; return jucer_AudioPluginEditorTemplate_h;
         case 0x51b49ac5:  numBytes = 5039; return jucer_AudioPluginFilterTemplate_cpp;
@@ -3635,12 +3640,18 @@ const char* getNamedResource (const char* resourceNameUTF8, int& numBytes) throw
         case 0x28d496ad:  numBytes = 1143; return jucer_InlineComponentTemplate_h;
         case 0x8905395b:  numBytes = 470; return jucer_MainConsoleAppTemplate_cpp;
         case 0x5e5ea047:  numBytes = 2010; return jucer_MainTemplate_NoWindow_cpp;
+        case 0xda2391f8:  numBytes = 3866; return jucer_MainTemplate_SimpleWindow_cpp;
         case 0x400bc026:  numBytes = 3778; return jucer_MainTemplate_Window_cpp;
         case 0xf4842835:  numBytes = 1389; return jucer_NewComponentTemplate_cpp;
         case 0xe7bf237a:  numBytes = 648; return jucer_NewComponentTemplate_h;
         case 0x02a2a077:  numBytes = 262; return jucer_NewCppFileTemplate_cpp;
         case 0x0842c43c:  numBytes = 308; return jucer_NewCppFileTemplate_h;
         case 0x36e634a1:  numBytes = 1626; return jucer_NewInlineComponentTemplate_h;
+        case 0x7fbac252:  numBytes = 1679; return jucer_OpenGLComponentTemplate_cpp;
+        case 0x44be9398:  numBytes = 2922; return AudioPluginXCodeScript_txt;
+        case 0x4a0cfd09:  numBytes = 151; return background_tile_png;
+        case 0x763d39dc:  numBytes = 1050; return colourscheme_dark_xml;
+        case 0xe8b08520:  numBytes = 1050; return colourscheme_light_xml;
         case 0x507a15c7:  numBytes = 8150; return projectIconAndroid_png;
         case 0xe8e2796f:  numBytes = 11917; return projectIconCodeblocks_png;
         case 0x90374ad6:  numBytes = 16444; return projectIconLinuxMakefile_png;
@@ -3671,14 +3682,8 @@ const char* getNamedResource (const char* resourceNameUTF8, int& numBytes) throw
 
 const char* namedResourceList[] =
 {
-    "jucer_OpenglComponentTemplate_cpp",
-    "jucer_AudioComponentTemplate_cpp",
-    "jucer_MainTemplate_SimpleWindow_cpp",
     "jucer_AnimatedComponentTemplate_cpp",
-    "AudioPluginXCodeScript_txt",
-    "background_tile_png",
-    "colourscheme_dark_xml",
-    "colourscheme_light_xml",
+    "jucer_AudioComponentTemplate_cpp",
     "jucer_AudioPluginEditorTemplate_cpp",
     "jucer_AudioPluginEditorTemplate_h",
     "jucer_AudioPluginFilterTemplate_cpp",
@@ -3690,12 +3695,18 @@ const char* namedResourceList[] =
     "jucer_InlineComponentTemplate_h",
     "jucer_MainConsoleAppTemplate_cpp",
     "jucer_MainTemplate_NoWindow_cpp",
+    "jucer_MainTemplate_SimpleWindow_cpp",
     "jucer_MainTemplate_Window_cpp",
     "jucer_NewComponentTemplate_cpp",
     "jucer_NewComponentTemplate_h",
     "jucer_NewCppFileTemplate_cpp",
     "jucer_NewCppFileTemplate_h",
     "jucer_NewInlineComponentTemplate_h",
+    "jucer_OpenGLComponentTemplate_cpp",
+    "AudioPluginXCodeScript_txt",
+    "background_tile_png",
+    "colourscheme_dark_xml",
+    "colourscheme_light_xml",
     "projectIconAndroid_png",
     "projectIconCodeblocks_png",
     "projectIconLinuxMakefile_png",

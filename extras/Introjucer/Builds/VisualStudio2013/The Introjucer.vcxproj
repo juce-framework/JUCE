@@ -173,16 +173,10 @@
     <ClCompile Include="..\..\Source\Utility\jucer_StoredSettings.cpp"/>
     <ClCompile Include="..\..\Source\Wizards\jucer_NewFileWizard.cpp"/>
     <ClCompile Include="..\..\Source\Wizards\jucer_NewProjectWizardClasses.cpp"/>
-    <ClCompile Include="..\..\Source\BinaryData\jucer_OpenglComponentTemplate.cpp">
+    <ClCompile Include="..\..\Source\BinaryData\jucer_AnimatedComponentTemplate.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\Source\BinaryData\jucer_AudioComponentTemplate.cpp">
-      <ExcludedFromBuild>true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\BinaryData\jucer_MainTemplate_SimpleWindow.cpp">
-      <ExcludedFromBuild>true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\BinaryData\jucer_AnimatedComponentTemplate.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\Source\BinaryData\jucer_AudioPluginEditorTemplate.cpp">
@@ -203,6 +197,9 @@
     <ClCompile Include="..\..\Source\BinaryData\jucer_MainTemplate_NoWindow.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="..\..\Source\BinaryData\jucer_MainTemplate_SimpleWindow.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="..\..\Source\BinaryData\jucer_MainTemplate_Window.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
@@ -210,6 +207,9 @@
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\Source\BinaryData\jucer_NewCppFileTemplate.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\BinaryData\jucer_OpenGLComponentTemplate.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_core\text\juce_CharacterFunctions.cpp">
