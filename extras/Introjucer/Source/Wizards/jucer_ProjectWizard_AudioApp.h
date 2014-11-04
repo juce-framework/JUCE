@@ -33,7 +33,7 @@ struct AudioAppWizard   : public NewProjectWizard
 
     bool initialiseProject (Project& project) override
     {
-                createSourceFolder();
+        createSourceFolder();
 
         File mainCppFile    = getSourceFilesFolder().getChildFile ("Main.cpp");
         File contentCompCpp = getSourceFilesFolder().getChildFile ("MainComponent.cpp");

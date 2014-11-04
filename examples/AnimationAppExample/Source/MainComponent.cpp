@@ -20,56 +20,45 @@ class MainContentComponent   : public AnimatedAppComponent
 {
 public:
     //==============================================================================
-
-
     MainContentComponent()
     {
         setSize (500, 400);
         setFramesPerSecond (60);
     }
 
-    ~MainContentComponent()
+    void update() override
     {
+        // This function is called at the frequency specified by the setFramesPerSecond() call
+        // in the constructor. You can use it to update counters, animate values, etc.
     }
 
-    void update()
+    void paint (Graphics& g) override
     {
-
-    }
-
-    void paint (Graphics& g)
-    {
-        // fill background
+        // (Our component is opaque, so we must completely fill the background with a solid colour)
         g.fillAll (Colours::black);
 
-        int fishLength = 15;
-
-        // set the drawing colour
         g.setColour (Colours::white);
+        const int fishLength = 15;
 
-        // Create a new path object for the spine
-        Path p;
+        Path spinePath;
 
-        //
         for (int i = 0; i < fishLength; ++i)
         {
-            float radius = 100 + 10 * sin (getFrameCounter() * 0.1 + i * 0.5f);
-            float x = getWidth()/2 + 1.5f * radius * sin (getFrameCounter() * 0.02f + i * 0.12f);
-            float y = getHeight()/2 + radius * cos (getFrameCounter() * 0.04f + i * 0.12f);
+            const float radius = 100 + 10 * std::sin (getFrameCounter() * 0.1f + i * 0.5f);
+            const float x = getWidth()  / 2.0f + 1.5f * radius * std::sin (getFrameCounter() * 0.02f + i * 0.12f);
+            const float y = getHeight() / 2.0f + radius * std::cos (getFrameCounter() * 0.04f + i * 0.12f);
 
-            // draw the ellipses of the fish
-            g.fillEllipse(x - i, y - i, 2 + 2*i, 2 + 2*i);
+            // draw the circles along the fish
+            g.fillEllipse (x - i, y - i, 2.0f + 2.0f * i, 2.0f + 2.0f * i);
 
-            // start a new path at the beginning otherwise add the next point
             if (i == 0)
-                p.startNewSubPath(x, y);
+                spinePath.startNewSubPath (x, y);  // if this is the first point, start a new path..
             else
-                p.lineTo (x, y);
+                spinePath.lineTo (x, y);           // ...otherwise add the next point
         }
 
-        // stroke the path that we have created
-        g.strokePath (p, PathStrokeType (4));
-
+        // draw an outline around the path that we have created
+        g.strokePath (spinePath, PathStrokeType (4));
     }
 
     void resized()
@@ -83,16 +72,15 @@ public:
 private:
     //==============================================================================
 
-    // private member variables
-
-
-
+    // Your private member variables go here...
 
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainContentComponent)
 };
 
 
-Component* createMainContentComponent() { return new MainContentComponent(); };
+// (This function is called by the app startup code to create our main component)
+Component* createMainContentComponent()    { return new MainContentComponent(); }
+
 
 #endif  // MAINCOMPONENT_H_INCLUDED

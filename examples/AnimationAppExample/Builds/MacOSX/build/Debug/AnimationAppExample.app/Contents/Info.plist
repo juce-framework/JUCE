@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>BuildMachineOSBuild</key>
-	<string>13F34</string>
+	<string>14A389</string>
 	<key>CFBundleExecutable</key>
 	<string>AnimationAppExample</string>
 	<key>CFBundleIdentifier</key>
@@ -21,17 +21,17 @@
 	<key>DTCompiler</key>
 	<string>com.apple.compilers.llvm.clang.1_0</string>
 	<key>DTPlatformBuild</key>
-	<string>6A317</string>
+	<string>6A1052d</string>
 	<key>DTPlatformVersion</key>
 	<string>GM</string>
 	<key>DTSDKBuild</key>
-	<string>13F26</string>
+	<string>14A382</string>
 	<key>DTSDKName</key>
-	<string>macosx10.9</string>
+	<string>macosx10.10</string>
 	<key>DTXcode</key>
-	<string>0600</string>
+	<string>0610</string>
 	<key>DTXcodeBuild</key>
-	<string>6A317</string>
+	<string>6A1052d</string>
 	<key>NSHighResolutionCapable</key>
 	<true/>
 	<key>NSHumanReadableCopyright</key>

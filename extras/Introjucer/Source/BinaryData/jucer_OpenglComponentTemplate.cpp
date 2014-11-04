@@ -23,7 +23,6 @@ public:
     MainContentComponent()
     {
         setSize (500, 400);
-
     }
 
     ~MainContentComponent()

@@ -33,7 +33,7 @@ public:
     void update() override
     {
         // This function is called at the frequency specified by the setFramesPerSecond() call
-        // in the constructor. You can use it
+        // in the constructor. You can use it to update counters, animate values, etc.
     }
 
     void paint (Graphics& g) override

@@ -31,9 +31,9 @@ struct OpenGLAppWizard   : public NewProjectWizard
     String getDescription() const override  { return TRANS("Creates a blank JUCE application with a single window component. This component supports openGL drawing features including 3D model import and GLSL shaders."); }
     const char* getIcon() const override    { return BinaryData::wizard_OpenGL_svg; }
 
-        bool initialiseProject (Project& project) override
+    bool initialiseProject (Project& project) override
     {
-                createSourceFolder();
+        createSourceFolder();
 
         File mainCppFile    = getSourceFilesFolder().getChildFile ("Main.cpp");
         File contentCompCpp = getSourceFilesFolder().getChildFile ("MainComponent.cpp");
@@ -51,7 +51,7 @@ struct OpenGLAppWizard   : public NewProjectWizard
         // create main window
 
         String windowCpp = project.getFileTemplate ("jucer_OpenglComponentTemplate_cpp")
-.replace ("INCLUDE_JUCE", CodeHelpers::createIncludeStatement (project.getAppIncludeFile(), contentCompCpp), false);
+                            .replace ("INCLUDE_JUCE", CodeHelpers::createIncludeStatement (project.getAppIncludeFile(), contentCompCpp), false);
 
         if (! FileHelpers::overwriteFileWithNewDataIfDifferent (contentCompCpp, windowCpp))
             failedFiles.add (contentCompCpp.getFullPathName());
@@ -71,7 +71,6 @@ struct OpenGLAppWizard   : public NewProjectWizard
             failedFiles.add (mainCppFile.getFullPathName());
 
         sourceGroup.addFile (mainCppFile, -1, true);
-
 
         return true;
     }
