@@ -97,7 +97,7 @@ MidiKeyboardComponent::MidiKeyboardComponent (MidiKeyboardState& s,
 
     state.addListener (this);
 
-    startTimer (1000 / 20);
+    startTimerHz (20);
 }
 
 MidiKeyboardComponent::~MidiKeyboardComponent()

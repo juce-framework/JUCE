@@ -190,7 +190,7 @@ public:
         instructions.setReadOnly (true);
         instructions.setColour (TextEditor::backgroundColourId, Colours::lightgrey);
 
-        startTimer (1000 / 60);
+        startTimerHz (60);
     }
 
     ~Box2DDemo()

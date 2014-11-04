@@ -592,10 +592,7 @@ public:
         if (currentDemo != nullptr)
         {
             addAndMakeVisible (currentDemo);
-
-            const int fps = 60;
-            startTimer (1000 / fps);
-
+            startTimerHz (60);
             resized();
         }
     }

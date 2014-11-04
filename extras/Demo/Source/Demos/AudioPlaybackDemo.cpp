@@ -70,7 +70,7 @@ public:
             scrollbar.setRangeLimits (newRange);
             setRange (newRange);
 
-            startTimer (1000 / 40);
+            startTimerHz (40);
         }
     }
 

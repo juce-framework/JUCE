@@ -71,53 +71,39 @@ private:
     struct LogoDrawComponent  : public Component,
                                 private Timer
     {
-        LogoDrawComponent()   : logoPath (MainAppWindow::getJUCELogoPath())
+        LogoDrawComponent()   : logoPath (MainAppWindow::getJUCELogoPath()), elapsed (0.0f)
         {
             setBounds (logoPath.getBounds().withPosition (Point<float>()).getSmallestIntegerContainer());
 
-            startTimer (1000 / 60); // try to repaint at 60 fps
-
-            elapsed = 0.0f;
+            startTimerHz (60); // try to repaint at 60 fps
         }
 
         void paint (Graphics& g) override
         {
-            //g.setGradientFill (getGradient());
-            g.setColour (Colour::greyLevel (0.3f));
+            Path wavePath;
 
             float waveStep = 10.0f;
+            int i = 0;
 
-            for (int i = 0; i < getWidth()/waveStep; ++i)
+            for (float x = waveStep * 0.5f; x < getWidth(); x += waveStep)
             {
-                float x = waveStep*0.5f + waveStep * i;
-                float y1 = getHeight() * 0.5f + getHeight() * 0.05f * sin (i * 0.38f + elapsed);
-                float y2 = getHeight() * 0.5 + getHeight() * 0.1f * sin (i * 0.2f + elapsed * 2.0f);
-                g.drawLine (x, y1, x, y2, 2.0f);
-                g.fillEllipse (x - waveStep * 0.3f, y1 - waveStep * 0.3f, waveStep*0.6f, waveStep*0.6f);
-                g.fillEllipse (x - waveStep * 0.3f, y2 - waveStep * 0.3f, waveStep*0.6f, waveStep*0.6f);
+                const float y1 = getHeight() * 0.5f + getHeight() * 0.05f * std::sin (i * 0.38f + elapsed);
+                const float y2 = getHeight() * 0.5f + getHeight() * 0.10f * std::sin (i * 0.20f + elapsed * 2.0f);
+
+                wavePath.addLineSegment (Line<float> (x, y1, x, y2), 2.0f);
+                wavePath.addEllipse (x - waveStep * 0.3f, y1 - waveStep * 0.3f, waveStep * 0.6f, waveStep * 0.6f);
+                wavePath.addEllipse (x - waveStep * 0.3f, y2 - waveStep * 0.3f, waveStep * 0.6f, waveStep * 0.6f);
+
+                ++i;
             }
+
+            g.setColour (Colour::greyLevel (0.3f));
+            g.fillPath (wavePath);
 
             g.setColour (Colours::orange);
             g.fillPath (logoPath, RectanglePlacement (RectanglePlacement::stretchToFit)
-                                    .getTransformToFit (logoPath.getBounds(), getLocalBounds().toFloat().reduced (30, 30)));
-        }
-
-        ColourGradient getGradient() const
-        {
-            Colour c1 = Colour::fromHSV (hues[0].getValue(), 0.9f, 0.9f, 1.0f);
-            Colour c2 = Colour::fromHSV (hues[1].getValue(), 0.9f, 0.9f, 1.0f);
-            Colour c3 = Colour::fromHSV (hues[2].getValue(), 0.9f, 0.9f, 1.0f);
-
-            float x1 = getWidth()  * gradientPos[0].getValue();
-            float x2 = getWidth()  * gradientPos[1].getValue();
-            float y1 = getHeight() * gradientPos[2].getValue();
-            float y2 = getHeight() * gradientPos[3].getValue();
-
-            ColourGradient gradient (c1, x1, y1,
-                                     c2, x2, y2, false);
-
-            gradient.addColour (0.5, c3);
-            return gradient;
+                                    .getTransformToFit (logoPath.getBounds(),
+                                                        getLocalBounds().toFloat().reduced (30, 30)));
         }
 
         void updateTransform()
@@ -138,13 +124,11 @@ private:
     private:
         void timerCallback() override
         {
-            //updateTransform();
             repaint();
             elapsed += 0.01f;
         }
 
         Path logoPath;
-        BouncingNumber gradientPos[4], hues[3], size, angle;
         float elapsed;
     };
 

@@ -31,7 +31,7 @@ AnimatedAppComponent::AnimatedAppComponent()
 void AnimatedAppComponent::setFramesPerSecond (int framesPerSecond)
 {
     jassert (framesPerSecond > 0 && framesPerSecond < 1000);
-    startTimer (1000 / framesPerSecond);
+    startTimerHz (framesPerSecond);
 }
 
 int AnimatedAppComponent::getMillisecondsSinceLastUpdate() const noexcept

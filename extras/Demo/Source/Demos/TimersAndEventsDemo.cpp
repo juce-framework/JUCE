@@ -68,7 +68,7 @@ public:
     void startFlashing()
     {
         flashAlpha = 1.0f;
-        startTimer (1000 / 25);
+        startTimerHz (25);
     }
 
     /** Stops this component flashing without sending a change message. */

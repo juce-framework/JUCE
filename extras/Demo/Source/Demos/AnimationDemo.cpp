@@ -147,11 +147,13 @@ public:
 
         for (int i = 0; i < componentsToAnimate.size(); ++i)
         {
-            int newIndex = (i + 3) % componentsToAnimate.size();
-            float angle = newIndex * 2.0f * float_Pi / componentsToAnimate.size();
-            float radius = getWidth() * 0.35f;
+            const int newIndex = (i + 3) % componentsToAnimate.size();
+            const float angle = newIndex * 2.0f * float_Pi / componentsToAnimate.size();
+            const float radius = getWidth() * 0.35f;
 
-            Rectangle<int> r (getWidth() / 2 + radius * sin (angle) - 50, getHeight() / 2 + radius * cos (angle) - 50, 100, 100);
+            Rectangle<int> r (getWidth()  / 2 + (int) (radius * std::sin (angle)) - 50,
+                              getHeight() / 2 + (int) (radius * std::cos (angle)) - 50,
+                              100, 100);
 
             animator.animateComponent (componentsToAnimate.getUnchecked(i),
                                        r.reduced (10),
@@ -162,7 +164,7 @@ public:
                                        0.0);
         }
 
-        startTimer (1000 / 60);
+        startTimerHz (60);
     }
 
     void paint (Graphics& g) override
@@ -253,12 +255,12 @@ private:
     {
         for (int i = 0; i < componentsToAnimate.size(); ++i)
         {
-            int newIndex = (i + 3 * cycleCount) % componentsToAnimate.size();
-            float angle = newIndex * 2.0f * float_Pi / componentsToAnimate.size();
-            float radius = getWidth() * 0.35f;
+            const int newIndex = (i + 3 * cycleCount) % componentsToAnimate.size();
+            const float angle = newIndex * 2.0f * float_Pi / componentsToAnimate.size();
+            const float radius = getWidth() * 0.35f;
 
-            Rectangle<int> r (getWidth()  / 2 + (int) (radius * sin (angle) - 50),
-                              getHeight() / 2 + (int) (radius * cos (angle) - 50),
+            Rectangle<int> r (getWidth()  / 2 + (int) (radius * std::sin (angle)) - 50,
+                              getHeight() / 2 + (int) (radius * std::cos (angle)) - 50,
                               100, 100);
 
             animator.animateComponent (componentsToAnimate.getUnchecked(i),
@@ -269,7 +271,8 @@ private:
                                        0.0,
                                        0.0);
         }
-        cycleCount++;
+
+        ++cycleCount;
     }
 
     void timerCallback() override
