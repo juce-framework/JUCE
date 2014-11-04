@@ -108,3 +108,4 @@ extras/example projects/Builds/VisualStudio2013/Debug
 extras/example projects/Builds/VisualStudio2013/Release
 extras/windows dll/Builds/VisualStudio2008/Debug
 extras/windows dll/Builds/VisualStudio2008/Release
+examples/*/*.app
