@@ -1,0 +1,72 @@
+
+AnimationComponent template:
+
+	base class for constantly repainting window.
+
+	member variables for getElapsedFrames() etc.
+
+
+
+OPENGLComponent template:
+
+	methods for load / draw object.
+
+	3D Camera object and mousehandling.
+
+
+
+AudioTemplate
+
+	simplest waveform drawing of input.
+
+
+07719784(0)995
+
+
+
+
+DEMO CHANGES:
+
+Sidebar:
+	dark grey background white text;
+
+Welcome:
+	Bouncy logo
+	Colours
+
+Animation:
+	background (to texture/dark grey)
+	content
+
+Code Editor:
+	dark grey background, white text
+
+Dialog Boxes:
+	replace aluminium with texture background
+
+MDI:
+	replace aluminium with texture background
+
+Multi-touch:
+	darker grey background
+
+Transforms:
+	replace aluminium with texture background
+
+Windows:
+	texture background
+
+2D Rendering:
+Fonts:
+Image formats:
+Settings:
+FilePlayback:
+Latency detector:
+Recording:
+Synthesisers:
+MIDI i/o:
+Cryptography:
+HTTP:
+Multithreading:
+XML & JSON:
+	replace aluminium with texture background

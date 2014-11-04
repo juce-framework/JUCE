@@ -46,7 +46,7 @@ public:
 
     void paint (Graphics& g)
     {
-        fillBrushedAluminiumBackground (g);
+        fillTiledBackground (g);
     }
 
     void resized() override

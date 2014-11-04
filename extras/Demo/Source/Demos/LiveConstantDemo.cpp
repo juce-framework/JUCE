@@ -79,7 +79,7 @@ public:
 
     void paint (Graphics& g) override
     {
-        g.fillAll (Colour::greyLevel (0.93f));
+        fillTiledBackground (g);
     }
 
     void resized() override

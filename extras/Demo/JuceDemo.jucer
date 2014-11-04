@@ -275,8 +275,8 @@
               file="Source/Demos/XMLandJSONDemo.cpp"/>
       </GROUP>
       <GROUP id="rsbEqp" name="Resources">
-        <FILE id="fiPhJS" name="brushed_aluminium.png" compile="0" resource="1"
-              file="Resources/brushed_aluminium.png"/>
+        <FILE id="fiPhJS" name="tile_background.png" compile="0" resource="1"
+              file="Resources/tile_background.png"/>
         <FILE id="OmjAzt" name="cello.wav" compile="0" resource="1" file="Resources/cello.wav"/>
         <FILE id="L1n4sU" name="demo table data.xml" compile="0" resource="1"
               file="Resources/demo table data.xml"/>

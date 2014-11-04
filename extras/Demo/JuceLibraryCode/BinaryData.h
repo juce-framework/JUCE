@@ -9,8 +9,8 @@
 
 namespace BinaryData
 {
-    extern const char*   brushed_aluminium_png;
-    const int            brushed_aluminium_pngSize = 14724;
+    extern const char*   tile_background_png;
+    const int            tile_background_pngSize = 151;
 
     extern const char*   cello_wav;
     const int            cello_wavSize = 46348;

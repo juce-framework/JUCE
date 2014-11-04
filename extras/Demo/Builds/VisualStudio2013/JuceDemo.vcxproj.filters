@@ -3065,7 +3065,7 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\Resources\brushed_aluminium.png">
+    <None Include="..\..\Resources\tile_background.png">
       <Filter>JuceDemo\Source\Resources</Filter>
     </None>
     <None Include="..\..\Resources\cello.wav">

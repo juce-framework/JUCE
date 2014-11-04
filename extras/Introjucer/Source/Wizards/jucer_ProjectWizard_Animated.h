@@ -34,9 +34,44 @@ struct AnimatedAppWizard   : public NewProjectWizard
     bool initialiseProject (Project& project) override
     {
         createSourceFolder();
+
+        File mainCppFile    = getSourceFilesFolder().getChildFile ("Main.cpp");
+        File contentCompCpp = getSourceFilesFolder().getChildFile ("MainComponent.cpp");
+        File contentCompH   = contentCompCpp.withFileExtension (".h");
+        String contentCompName = "MainContentComponent";
+
         project.getProjectTypeValue() = ProjectType::getGUIAppTypeName();
-        createSourceGroup (project);
+
+        Project::Item sourceGroup (createSourceGroup (project));
+
         setExecutableNameForAllTargets (project, File::createLegalFileName (appTitle));
+
+        String appHeaders (CodeHelpers::createIncludeStatement (project.getAppIncludeFile(), mainCppFile));
+
+        // create main window
+
+        String windowCpp = project.getFileTemplate ("jucer_AnimatedComponentTemplate_cpp")
+.replace ("INCLUDE_JUCE", CodeHelpers::createIncludeStatement (project.getAppIncludeFile(), contentCompCpp), false);
+
+        if (! FileHelpers::overwriteFileWithNewDataIfDifferent (contentCompCpp, windowCpp))
+            failedFiles.add (contentCompCpp.getFullPathName());
+
+        sourceGroup.addFile (contentCompCpp, -1, true);
+
+
+        // create main cpp
+        String mainCpp = project.getFileTemplate ("jucer_MainTemplate_SimpleWindow_cpp")
+                            .replace ("APPHEADERS", appHeaders, false)
+                            .replace ("APPCLASSNAME", CodeHelpers::makeValidIdentifier (appTitle + "Application", false, true, false), false)
+                            .replace ("APPNAME", CppTokeniserFunctions::addEscapeChars (appTitle), false)
+                            .replace ("CONTENTCOMPCLASS", contentCompName, false)
+                            .replace ("ALLOWMORETHANONEINSTANCE", "true", false);
+
+        if (! FileHelpers::overwriteFileWithNewDataIfDifferent (mainCppFile, mainCpp))
+            failedFiles.add (mainCppFile.getFullPathName());
+
+        sourceGroup.addFile (mainCppFile, -1, true);
+
 
         return true;
     }

@@ -76,21 +76,37 @@ private:
             setBounds (logoPath.getBounds().withPosition (Point<float>()).getSmallestIntegerContainer());
 
             startTimer (1000 / 60); // try to repaint at 60 fps
+
+            elapsed = 0.0f;
         }
 
         void paint (Graphics& g) override
         {
-            g.setGradientFill (getGradient());
+            //g.setGradientFill (getGradient());
+            g.setColour (Colour::greyLevel (0.3f));
 
+            float waveStep = 10.0f;
+
+            for (int i = 0; i < getWidth()/waveStep; ++i)
+            {
+                float x = waveStep*0.5f + waveStep * i;
+                float y1 = getHeight() * 0.5f + getHeight() * 0.05f * sin (i * 0.38f + elapsed);
+                float y2 = getHeight() * 0.5 + getHeight() * 0.1f * sin (i * 0.2f + elapsed * 2.0f);
+                g.drawLine (x, y1, x, y2, 2.0f);
+                g.fillEllipse (x - waveStep * 0.3f, y1 - waveStep * 0.3f, waveStep*0.6f, waveStep*0.6f);
+                g.fillEllipse (x - waveStep * 0.3f, y2 - waveStep * 0.3f, waveStep*0.6f, waveStep*0.6f);
+            }
+
+            g.setColour (Colours::orange);
             g.fillPath (logoPath, RectanglePlacement (RectanglePlacement::stretchToFit)
-                                    .getTransformToFit (logoPath.getBounds(), getLocalBounds().toFloat()));
+                                    .getTransformToFit (logoPath.getBounds(), getLocalBounds().toFloat().reduced (30, 30)));
         }
 
         ColourGradient getGradient() const
         {
-            Colour c1 = Colour::fromHSV (hues[0].getValue(), 0.3f, 0.9f, 1.0f);
-            Colour c2 = Colour::fromHSV (hues[1].getValue(), 0.3f, 0.9f, 1.0f);
-            Colour c3 = Colour::fromHSV (hues[2].getValue(), 0.3f, 0.9f, 1.0f);
+            Colour c1 = Colour::fromHSV (hues[0].getValue(), 0.9f, 0.9f, 1.0f);
+            Colour c2 = Colour::fromHSV (hues[1].getValue(), 0.9f, 0.9f, 1.0f);
+            Colour c3 = Colour::fromHSV (hues[2].getValue(), 0.9f, 0.9f, 1.0f);
 
             float x1 = getWidth()  * gradientPos[0].getValue();
             float x2 = getWidth()  * gradientPos[1].getValue();
@@ -112,14 +128,7 @@ private:
 
                 AffineTransform transform = RectanglePlacement (RectanglePlacement::centred)
                                                     .getTransformToFit (getLocalBounds().toFloat(),
-                                                                        parentArea.reduced (50.0f, 50.0f));
-
-                float scaleFactor = 1.0f + size.getValue() * 0.2f;
-                float rotationAngle = (angle.getValue() - 0.5f) * 0.1f;
-
-                transform = transform.scaled (scaleFactor, scaleFactor, parentArea.getCentreX(), parentArea.getCentreY())
-                                     .rotated (rotationAngle, parentArea.getCentreX(), parentArea.getCentreY());
-
+                                                                        parentArea);
                 setTransform (transform);
             }
 
@@ -129,14 +138,18 @@ private:
     private:
         void timerCallback() override
         {
-            updateTransform();
+            //updateTransform();
+            repaint();
+            elapsed += 0.01f;
         }
 
         Path logoPath;
         BouncingNumber gradientPos[4], hues[3], size, angle;
+        float elapsed;
     };
 
     LogoDrawComponent logo;
+
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (IntroScreen)
 };

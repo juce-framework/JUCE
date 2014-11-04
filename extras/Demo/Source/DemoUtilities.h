@@ -41,11 +41,12 @@ inline Colour getRandomColour (float brightness)
 inline Colour getRandomBrightColour()   { return getRandomColour (0.8f); }
 inline Colour getRandomDarkColour()     { return getRandomColour (0.3f); }
 
-inline void fillBrushedAluminiumBackground (Graphics& g)
+inline void fillTiledBackground (Graphics& g)
 {
-    g.setFillType (FillType (ImageCache::getFromMemory (BinaryData::brushed_aluminium_png,
-                                                        BinaryData::brushed_aluminium_pngSize),
+    g.setFillType (FillType (ImageCache::getFromMemory (BinaryData::tile_background_png,
+                                                        BinaryData::tile_background_pngSize),
                              AffineTransform::identity));
+    //g.setColour (Colour::greyLevel (0.2f));
     g.fillAll();
 }
 
