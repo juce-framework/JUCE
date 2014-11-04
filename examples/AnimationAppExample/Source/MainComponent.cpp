@@ -45,20 +45,21 @@ public:
         for (int i = 0; i < fishLength; ++i)
         {
             const float radius = 100 + 10 * std::sin (getFrameCounter() * 0.1f + i * 0.5f);
-            const float x = getWidth()  / 2.0f + 1.5f * radius * std::sin (getFrameCounter() * 0.02f + i * 0.12f);
-            const float y = getHeight() / 2.0f + radius * std::cos (getFrameCounter() * 0.04f + i * 0.12f);
+
+            Point<float> p (getWidth()  / 2.0f + 1.5f * radius * std::sin (getFrameCounter() * 0.02f + i * 0.12f),
+                            getHeight() / 2.0f + 1.0f * radius * std::cos (getFrameCounter() * 0.04f + i * 0.12f));
 
             // draw the circles along the fish
-            g.fillEllipse (x - i, y - i, 2.0f + 2.0f * i, 2.0f + 2.0f * i);
+            g.fillEllipse (p.x - i, p.y - i, 2.0f + 2.0f * i, 2.0f + 2.0f * i);
 
             if (i == 0)
-                spinePath.startNewSubPath (x, y);  // if this is the first point, start a new path..
+                spinePath.startNewSubPath (p);  // if this is the first point, start a new path..
             else
-                spinePath.lineTo (x, y);           // ...otherwise add the next point
+                spinePath.lineTo (p);           // ...otherwise add the next point
         }
 
         // draw an outline around the path that we have created
-        g.strokePath (spinePath, PathStrokeType (4));
+        g.strokePath (spinePath, PathStrokeType (4.0f));
     }
 
     void resized()

@@ -11,27 +11,23 @@
 
 #include "../JuceLibraryCode/JuceHeader.h"
 
+
 //==============================================================================
-/*
-    This component lives inside our window, and this is where you should put all
-    your controls and content.
-*/
 class MainContentComponent   : public AudioAppComponent
 {
 public:
     //==============================================================================
-
-
-    MainContentComponent()   : phase (0.0f),
-                            delta (0.0f),
-                            frequency (5000.0f),
-                            amplitude (0.2f),
-                            sampleRate (0.0)
-
+    MainContentComponent()
+        : phase (0.0f),
+          phaseDelta (0.0f),
+          frequency (5000.0f),
+          amplitude (0.2f),
+          sampleRate (0.0)
     {
         setSize (500, 400);
-        // the the input and output channels (currently Mono in and out)
-        setAudioChannels (1, 1);
+
+        // specify the number of input and output channels that we want to open
+        setAudioChannels (2, 2);
     }
 
     ~MainContentComponent()
@@ -40,33 +36,33 @@ public:
     }
 
     //=======================================================================
-    // HANDLE AUDIO
-
     void prepareToPlay (int samplesPerBlockExpected, double newSampleRate) override
     {
         sampleRate = newSampleRate;
     }
 
-
-    /* This is where the audio is created. In this example we
-     fill the audio buffer with a sine wave whose frequency is
-     controlled by the mouse Y position and whose volume is
-     controlled by the mouse X potition.
+    /*  This method generates the actual audio samples.
+        In this example the buffer is filled with a sine wave whose frequency and
+        amplitude are controlled by the mouse position.
      */
-    void getNextAudioBlock (const AudioSourceChannelInfo& bufferToFill)
+    void getNextAudioBlock (const AudioSourceChannelInfo& bufferToFill) override
     {
         bufferToFill.clearActiveBufferRegion();
+        const float originalPhase = phase;
 
-        // iterate over each sample of the sample buffer
-        for (int i = bufferToFill.startSample; i < bufferToFill.numSamples + bufferToFill.startSample; ++i)
+        for (int chan = 0; chan < bufferToFill.buffer->getNumChannels(); ++chan)
         {
-            bufferToFill.buffer->getWritePointer (0)[i] = amplitude * sinf (phase);
+            phase = originalPhase;
 
-            // increment the phase step for the next sample
-            phase += delta;
+            float* const channelData = bufferToFill.buffer->getWritePointer (chan, bufferToFill.startSample);
 
-            // reset the phase when it reaches 2PI to avoid large numbers
-            while (phase >= 2.0f * float_Pi) phase -= 2.0f * float_Pi;
+            for (int i = 0; i < bufferToFill.numSamples ; ++i)
+            {
+                channelData[i] = amplitude * std::sin (phase);
+
+                // increment the phase step for the next sample
+                phase = std::fmod (phase + phaseDelta, float_Pi * 2.0f);
+            }
         }
     }
 
@@ -78,37 +74,33 @@ public:
 
 
     //=======================================================================
-    // HANDLE DRAWING
-
-    void paint (Graphics& g)
+    void paint (Graphics& g) override
     {
-        // fill background
+        // (Our component is opaque, so we must completely fill the background with a solid colour)
         g.fillAll (Colours::black);
 
-        // Set the drawing colour to white
-        g.setColour (Colours::white);
+        const float centreY = getHeight() / 2.0f;
+        const float radius = amplitude * 200.0f;
 
         // Draw an ellipse based on the mouse position and audio volume
-        int radius = amplitude * 200;
-        g.fillEllipse  (mouse.x - radius/2, mouse.y - radius/2, radius, radius);
+        g.setColour (Colours::lightgreen);
+        g.fillEllipse  (lastMousePosition.x - radius / 2.0f,
+                        lastMousePosition.y - radius / 2.0f,
+                        radius, radius);
 
         // draw a representative sinewave
-        Path wave;
-        for (int i = 0; i < getWidth(); i++)
-        {
-            if (i == 0) wave.startNewSubPath (0, getHeight()/2);
-            else wave.lineTo (i, getHeight()/2 + amplitude * getHeight() * 2.0f * sin (i*frequency*0.0001f));
-        }
-        g.strokePath (wave, PathStrokeType (2));
+        Path wavePath;
+        wavePath.startNewSubPath (0, centreY);
 
+        for (float x = 1.0f; x < getWidth(); ++x)
+            wavePath.lineTo (x, centreY + amplitude * getHeight() * 2.0f
+                                            * std::sin (x * frequency * 0.0001f));
+
+        g.setColour (Colours::grey);
+        g.strokePath (wavePath, PathStrokeType (2.0f));
     }
 
-    // Mouse handling
-    void mouseUp(const MouseEvent& e) override
-    {
-        amplitude = 0.0f;
-    }
-
+    // Mouse handling..
     void mouseDown (const MouseEvent& e) override
     {
         mouseDrag (e);
@@ -116,18 +108,23 @@ public:
 
     void mouseDrag (const MouseEvent& e) override
     {
-        // Update the mouse position variable
-        mouse.setXY (e.x, e.y);
-        repaint();
+        lastMousePosition = e.position;
 
         frequency = (getHeight() - e.y) * 10.0f;
-        amplitude = e.x/float(getWidth()) * 0.2f;
+        amplitude = jmin (0.9f, 0.2f * e.position.x / getWidth());
 
-        delta = 2.0f * float_Pi * frequency / sampleRate;
+        phaseDelta = 2.0f * float_Pi * frequency / sampleRate;
+
+        repaint();
     }
 
+    void mouseUp (const MouseEvent&) override
+    {
+        amplitude = 0.0f;
+        repaint();
+    }
 
-    void resized()
+    void resized() override
     {
         // This is called when the MainContentComponent is resized.
         // If you add any child components, this is where you should
@@ -137,18 +134,13 @@ public:
 
 private:
     //==============================================================================
-
-    // private member variables
-
     float phase;
-    float delta;
+    float phaseDelta;
     float frequency;
     float amplitude;
 
     double sampleRate;
-
-    Point<int> mouse;
-
+    Point<float> lastMousePosition;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainContentComponent)
 };
