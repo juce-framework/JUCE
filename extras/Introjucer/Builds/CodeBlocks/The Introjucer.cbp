@@ -594,6 +594,10 @@
       <Option compile="0"/>
       <Option link="0"/>
     </Unit>
+    <Unit filename="../../Source/Wizards/jucer_ProjectWizard_Blank.h">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
     <Unit filename="../../Source/Wizards/jucer_ProjectWizard_Console.h">
       <Option compile="0"/>
       <Option link="0"/>

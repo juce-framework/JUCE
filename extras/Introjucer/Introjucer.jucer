@@ -488,6 +488,8 @@
             resource="0" file="Source/Wizards/jucer_ProjectWizard_AudioApp.h"/>
       <FILE id="VslsJm" name="jucer_ProjectWizard_AudioPlugin.h" compile="0"
             resource="0" file="Source/Wizards/jucer_ProjectWizard_AudioPlugin.h"/>
+      <FILE id="YnNfnf" name="jucer_ProjectWizard_Blank.h" compile="0" resource="0"
+            file="Source/Wizards/jucer_ProjectWizard_Blank.h"/>
       <FILE id="ZGv05z" name="jucer_ProjectWizard_Console.h" compile="0"
             resource="0" file="Source/Wizards/jucer_ProjectWizard_Console.h"/>
       <FILE id="MSY7Sv" name="jucer_ProjectWizard_DLL.h" compile="0" resource="0"

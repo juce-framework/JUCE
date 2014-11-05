@@ -83,4 +83,6 @@ struct ConsoleAppWizard   : public NewProjectWizard
 
 private:
     bool createMainCpp;
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ConsoleAppWizard)
 };

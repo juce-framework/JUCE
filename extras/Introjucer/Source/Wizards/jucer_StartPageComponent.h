@@ -38,12 +38,12 @@ public:
         addAndMakeVisible (panel);
     }
 
-    void paint (Graphics& g)
+    void paint (Graphics& g) override
     {
         IntrojucerLookAndFeel::fillWithBackgroundTexture (*this, g);
     }
 
-    void resized()
+    void resized() override
     {
         panel.setBounds (getLocalBounds());
     }

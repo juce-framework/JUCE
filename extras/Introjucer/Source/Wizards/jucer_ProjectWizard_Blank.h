@@ -23,23 +23,23 @@
 */
 
 
-struct StaticLibraryWizard   : public NewProjectWizard
+struct BlankAppWizard   : public NewProjectWizard
 {
-    StaticLibraryWizard()  {}
+    BlankAppWizard()  {}
 
-    String getName() const override         { return TRANS("Static Library"); }
-    String getDescription() const override  { return TRANS("Creates a static library."); }
-    const char* getIcon() const override    { return BinaryData::wizard_StaticLibrary_svg; }
+    String getName() const override         { return TRANS("Empty Application"); }
+    String getDescription() const override  { return TRANS("Creates a blank JUCE GUI application."); }
+    const char* getIcon() const override    { return BinaryData::wizard_GUI_svg; }
 
-    bool initialiseProject (Project& project) override
+    bool initialiseProject (Project& project)
     {
         createSourceFolder();
-        project.getProjectTypeValue() = ProjectType::getStaticLibTypeName();
-        createSourceGroup (project);
+        project.getProjectTypeValue() = ProjectType::getGUIAppTypeName();
+        Project::Item sourceGroup (createSourceGroup (project));
         setExecutableNameForAllTargets (project, File::createLegalFileName (appTitle));
 
         return true;
     }
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (StaticLibraryWizard)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (BlankAppWizard)
 };

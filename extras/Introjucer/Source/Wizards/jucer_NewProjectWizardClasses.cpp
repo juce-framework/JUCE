@@ -44,6 +44,7 @@ struct NewProjectWizardClasses
     #include "jucer_ProjectWizard_openGL.h"
     #include "jucer_ProjectWizard_Animated.h"
     #include "jucer_ProjectWizard_AudioApp.h"
+    #include "jucer_ProjectWizard_Blank.h"
 
     #include "jucer_NewProjectWizardComponent.h"
     #include "jucer_TemplateThumbnailsComponent.h"
@@ -52,7 +53,7 @@ struct NewProjectWizardClasses
     //==============================================================================
     static int getNumWizards() noexcept
     {
-        return 8;
+        return 9;
     }
 
     static NewProjectWizard* createWizardType (int index)
@@ -67,6 +68,7 @@ struct NewProjectWizardClasses
             case 5:     return new NewProjectWizardClasses::ConsoleAppWizard();
             case 6:     return new NewProjectWizardClasses::StaticLibraryWizard();
             case 7:     return new NewProjectWizardClasses::DynamicLibraryWizard();
+            case 8:     return new NewProjectWizardClasses::BlankAppWizard();
             default:    jassertfalse; break;
         }
 

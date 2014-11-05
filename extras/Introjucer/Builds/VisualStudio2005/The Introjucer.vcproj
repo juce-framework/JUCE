@@ -307,6 +307,7 @@
         <File RelativePath="..\..\Source\Wizards\jucer_ProjectWizard_Animated.h"/>
         <File RelativePath="..\..\Source\Wizards\jucer_ProjectWizard_AudioApp.h"/>
         <File RelativePath="..\..\Source\Wizards\jucer_ProjectWizard_AudioPlugin.h"/>
+        <File RelativePath="..\..\Source\Wizards\jucer_ProjectWizard_Blank.h"/>
         <File RelativePath="..\..\Source\Wizards\jucer_ProjectWizard_Console.h"/>
         <File RelativePath="..\..\Source\Wizards\jucer_ProjectWizard_DLL.h"/>
         <File RelativePath="..\..\Source\Wizards\jucer_ProjectWizard_GUIApp.h"/>

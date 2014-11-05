@@ -138,7 +138,9 @@ class TemplateTileBrowser   : public Component,
 public:
     TemplateTileBrowser (WizardComp* projectWizard)
     {
-        for (int i = 0; i < getNumWizards(); ++i)
+        const int numWizardButtons = getNumWizards() - 1; // ( - 1 because the last one is blank)
+
+        for (int i = 0; i < numWizardButtons; ++i)
         {
             ScopedPointer<NewProjectWizard> wizard (createWizardType (i));
 
@@ -154,16 +156,13 @@ public:
         // Handle Open Project button functionality
         ApplicationCommandManager& commandManager = IntrojucerApp::getCommandManager();
 
-        blankProjectButton = new TemplateOptionButton ("Create Blank Project",  TemplateOptionButton::ButtonStyle::ImageOnButtonBackground, BinaryData::wizard_Openfile_svg);
-        openProjectButton  = new TemplateOptionButton ("Open Existing Project", TemplateOptionButton::ButtonStyle::ImageOnButtonBackground, BinaryData::wizard_Openfile_svg);
+        addAndMakeVisible (blankProjectButton   = new TemplateOptionButton ("Create Blank Project",  TemplateOptionButton::ButtonStyle::ImageOnButtonBackground, BinaryData::wizard_Openfile_svg));
+        addAndMakeVisible (exampleProjectButton = new TemplateOptionButton ("Open Example Project",  TemplateOptionButton::ButtonStyle::ImageOnButtonBackground, BinaryData::wizard_Openfile_svg));
+        addAndMakeVisible (openProjectButton    = new TemplateOptionButton ("Open Existing Project", TemplateOptionButton::ButtonStyle::ImageOnButtonBackground, BinaryData::wizard_Openfile_svg));
+
+        blankProjectButton->addListener (this);
+        exampleProjectButton->addListener (this);
         openProjectButton->setCommandToTrigger (&commandManager, CommandIDs::open, true);
-
-        exampleProjectButton = new TemplateOptionButton ("Open Example Project", TemplateOptionButton::ButtonStyle::ImageOnButtonBackground, BinaryData::wizard_Openfile_svg);
-        exampleProjectButton->setCommandToTrigger (&commandManager, CommandIDs::open, true);
-
-        addAndMakeVisible (blankProjectButton);
-        addAndMakeVisible (openProjectButton);
-        addAndMakeVisible (exampleProjectButton);
 
         newProjectWizard = projectWizard;
     }
@@ -171,32 +170,31 @@ public:
     void paint (Graphics& g) override
     {
         g.setColour (Colours::black.withAlpha (0.2f));
-        g.fillRect (0, 0, getWidth(), 60);
+        g.fillRect (getLocalBounds().removeFromTop (60));
 
         g.setColour (Colours::white);
-        g.setFont (20);
+        g.setFont (20.0f);
         g.drawText ("Create New Project", 0, 0, getWidth(), 60, Justification::centred, true);
 
         // draw the descriptions of each template if hovered;
         // (repaint is called by the button listener on change state)
-        Rectangle<int> descriptionBox = getBounds().reduced (30, 30);
-        descriptionBox = descriptionBox.removeFromBottom (50);
+        Rectangle<int> descriptionBox (getLocalBounds().reduced (30).removeFromBottom (50));
 
         g.setColour (Colours::white.withAlpha (0.4f));
-        g.setFont (15);
+        g.setFont (15.0f);
 
-        for (int i = 0; i < 8; ++i)
-            if (optionButtons.getUnchecked(i)->getState() == TemplateOptionButton::ButtonState::buttonOver)
+        for (int i = 0; i < optionButtons.size(); ++i)
+            if (optionButtons.getUnchecked(i)->isOver())
                 g.drawFittedText (optionButtons.getUnchecked(i)->getDescription(), descriptionBox, Justification::centred, 5, 1.0f);
     }
 
     void resized() override
     {
-        Rectangle<int> allOpts = getBounds().reduced (40, 60);
+        Rectangle<int> allOpts = getLocalBounds().reduced (40, 60);
         allOpts.removeFromBottom (allOpts.getHeight() * 0.25);
 
         const int numHorizIcons = 4;
-        const int optStep = allOpts.getWidth()/numHorizIcons;
+        const int optStep = allOpts.getWidth() / numHorizIcons;
 
         for (int i = 0; i < optionButtons.size(); ++i)
         {
@@ -208,7 +206,7 @@ public:
                                                         .reduced (10, 10));
         }
 
-        Rectangle<int> openButtonBounds = getBounds();
+        Rectangle<int> openButtonBounds = getLocalBounds();
         openButtonBounds.removeFromBottom (proportionOfHeight (0.12f));
         openButtonBounds = openButtonBounds.removeFromBottom (120);
         openButtonBounds.reduce (50, 40);
@@ -218,30 +216,66 @@ public:
         openProjectButton->setBounds (openButtonBounds.reduced (18, 0));
     }
 
-    void buttonClicked (Button* b) override
+    void showWizard (const String& name)
     {
-        newProjectWizard->projectType.setText (b->getButtonText());
+        newProjectWizard->projectType.setText (name);
 
         if (SlidingPanelComponent* parent = findParentComponentOfClass<SlidingPanelComponent>())
-        {
-            if (parent->getNumTabs() > 0 && b->getButtonText() != "Open Existing Project")
-                parent->goToTab (parent->getCurrentTabIndex() + 1);
-        }
+            parent->goToTab (1);
         else
-        {
             jassertfalse;
-        }
     }
 
-    void buttonStateChanged (Button*) override
+    void createBlankProject()
     {
-        repaint();
+        showWizard (BlankAppWizard().getName());
+    }
+
+    void openExampleProject()
+    {
+        FileChooser fc ("Open File", findExamplesFolder());
+
+        if (fc.browseForFileToOpen())
+            IntrojucerApp::getApp().openFile (fc.getResult());
+    }
+
+    static File findExamplesFolder()
+    {
+        File appFolder (File::getSpecialLocation (File::currentApplicationFile));
+
+        while (appFolder.exists()
+                && appFolder.getParentDirectory() != appFolder)
+        {
+            File examples (appFolder.getSiblingFile ("examples"));
+
+            if (examples.exists())
+                return examples;
+
+            appFolder = appFolder.getParentDirectory();
+        }
+
+        return File::nonexistent;
     }
 
 private:
     OwnedArray<TemplateOptionButton> optionButtons;
     NewProjectWizardClasses::WizardComp* newProjectWizard;
     ScopedPointer<TemplateOptionButton> blankProjectButton, openProjectButton, exampleProjectButton;
+
+    void buttonClicked (Button* b) override
+    {
+        if (b == blankProjectButton)
+            createBlankProject();
+        else if (b == exampleProjectButton)
+            openExampleProject();
+        else if (dynamic_cast<TemplateOptionButton*> (b) != nullptr)
+            showWizard (b->getButtonText());
+    }
+
+    void buttonStateChanged (Button*) override
+    {
+        repaint();
+    }
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TemplateTileBrowser)
 };

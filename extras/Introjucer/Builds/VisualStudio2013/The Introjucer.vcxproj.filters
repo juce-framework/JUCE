@@ -1674,6 +1674,9 @@
     <ClInclude Include="..\..\Source\Wizards\jucer_ProjectWizard_AudioPlugin.h">
       <Filter>The Introjucer\Wizards</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\Source\Wizards\jucer_ProjectWizard_Blank.h">
+      <Filter>The Introjucer\Wizards</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\Source\Wizards\jucer_ProjectWizard_Console.h">
       <Filter>The Introjucer\Wizards</Filter>
     </ClInclude>

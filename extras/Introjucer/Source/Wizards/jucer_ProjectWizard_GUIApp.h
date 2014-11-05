@@ -118,4 +118,6 @@ struct GUIAppWizard   : public NewProjectWizard
 
 private:
     bool createMainCpp, createWindow;
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (GUIAppWizard)
 };

@@ -80,4 +80,6 @@ struct AudioAppWizard   : public NewProjectWizard
         s.addIfNotAlreadyThere ("juce_audio_utils");
         return s;
     }
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioAppWizard)
 };
