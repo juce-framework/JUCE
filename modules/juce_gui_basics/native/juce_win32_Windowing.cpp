@@ -1749,10 +1749,13 @@ private:
 
         doMouseMove (position);
 
-        updateModifiersFromWParam (wParam);
-        isDragging = true;
+        if (isValidPeer (this))
+        {
+            updateModifiersFromWParam (wParam);
+            isDragging = true;
 
-        doMouseEvent (position);
+            doMouseEvent (position);
+        }
     }
 
     void doMouseUp (Point<float> position, const WPARAM wParam)
