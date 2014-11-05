@@ -37,13 +37,12 @@ class DemoBrowserComponent  : public WebBrowserComponent
 {
 public:
     //==============================================================================
-    DemoBrowserComponent (TextEditor& addressTextBox_)
-        : addressTextBox (addressTextBox_)
+    DemoBrowserComponent (TextEditor& addressBox)  : addressTextBox (addressBox)
     {
     }
 
     // This method gets called when the browser is about to go to a new URL..
-    bool pageAboutToLoad (const String& newURL)
+    bool pageAboutToLoad (const String& newURL) override
     {
         // We'll just update our address box to reflect the new location..
         addressTextBox.setText (newURL, false);
@@ -51,6 +50,13 @@ public:
         // we could return false here to tell the browser not to go ahead with
         // loading the page.
         return true;
+    }
+
+    // This method gets called when the browser is requested to launch a new window
+    void newWindowAttemptingToLoad (const String& newURL) override
+    {
+        // We'll just load the URL into the main window
+        goToURL (newURL);
     }
 
 private:
@@ -93,7 +99,7 @@ public:
         webView->goToURL ("http://www.juce.com");
     }
 
-    void paint (Graphics& g)
+    void paint (Graphics& g) override
     {
         g.fillAll (Colours::grey);
     }
