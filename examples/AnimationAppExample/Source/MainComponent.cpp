@@ -22,7 +22,7 @@ public:
     //==============================================================================
     MainContentComponent()
     {
-        setSize (500, 400);
+        setSize (800, 600);
         setFramesPerSecond (60);
     }
 

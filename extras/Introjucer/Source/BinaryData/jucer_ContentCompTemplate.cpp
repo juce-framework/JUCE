@@ -12,7 +12,7 @@ INCLUDE_CORRESPONDING_HEADER
 //==============================================================================
 CONTENTCOMPCLASS::CONTENTCOMPCLASS()
 {
-    setSize (500, 400);
+    setSize (600, 400);
 }
 
 CONTENTCOMPCLASS::~CONTENTCOMPCLASS()
