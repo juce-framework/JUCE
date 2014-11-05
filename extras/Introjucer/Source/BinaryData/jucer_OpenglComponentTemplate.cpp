@@ -27,6 +27,8 @@ public:
 
     ~MainContentComponent()
     {
+        // (Your class must call this in its destructor to stop the
+        // rendering callbacks happening after your class has been deleted)
         shutdownOpenGL();
     }
 
@@ -40,15 +42,13 @@ public:
 
     void render() override
     {
+        OpenGLHelpers::clear (Colours::lightblue);
     }
 
     void paint (Graphics& g) override
     {
-        // (Our component is opaque, so we must completely fill the background with a solid colour)
-        g.fillAll (Colours::black);
-
-
-        // You can add your drawing code here!
+        // You can add normal 2D drawing code here, which will be
+        // drawn over the GL content.
     }
 
     void resized() override
