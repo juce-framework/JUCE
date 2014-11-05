@@ -37,6 +37,7 @@ DrawableImage::DrawableImage (const DrawableImage& other)
       overlayColour (other.overlayColour),
       bounds (other.bounds)
 {
+    setBounds (other.getBounds());
 }
 
 DrawableImage::~DrawableImage()
