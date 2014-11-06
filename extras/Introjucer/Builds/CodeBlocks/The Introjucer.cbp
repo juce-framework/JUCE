@@ -101,6 +101,10 @@
       <Option compile="0"/>
       <Option link="0"/>
     </Unit>
+    <Unit filename="../../Source/Application/jucer_AutoUpdater.h">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
     <Unit filename="../../Source/Application/jucer_CommandIDs.h">
       <Option compile="0"/>
       <Option link="0"/>

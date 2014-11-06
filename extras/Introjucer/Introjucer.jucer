@@ -162,6 +162,8 @@
             file="Source/Application/jucer_AppearanceSettings.h"/>
       <FILE id="PXX8Yi" name="jucer_Application.h" compile="0" resource="0"
             file="Source/Application/jucer_Application.h"/>
+      <FILE id="RWf1Jy" name="jucer_AutoUpdater.h" compile="0" resource="0"
+            file="Source/Application/jucer_AutoUpdater.h"/>
       <FILE id="lHd3UQJ" name="jucer_CommandIDs.h" compile="0" resource="0"
             file="Source/Application/jucer_CommandIDs.h"/>
       <FILE id="MyVf4S" name="jucer_CommandLine.cpp" compile="1" resource="0"

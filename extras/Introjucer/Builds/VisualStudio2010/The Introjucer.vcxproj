@@ -1046,6 +1046,7 @@
   <ItemGroup>
     <ClInclude Include="..\..\Source\Application\jucer_AppearanceSettings.h"/>
     <ClInclude Include="..\..\Source\Application\jucer_Application.h"/>
+    <ClInclude Include="..\..\Source\Application\jucer_AutoUpdater.h"/>
     <ClInclude Include="..\..\Source\Application\jucer_CommandIDs.h"/>
     <ClInclude Include="..\..\Source\Application\jucer_CommandLine.h"/>
     <ClInclude Include="..\..\Source\Application\jucer_CommonHeaders.h"/>

@@ -1335,6 +1335,9 @@
     <ClInclude Include="..\..\Source\Application\jucer_Application.h">
       <Filter>The Introjucer\Application</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\Source\Application\jucer_AutoUpdater.h">
+      <Filter>The Introjucer\Application</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\Source\Application\jucer_CommandIDs.h">
       <Filter>The Introjucer\Application</Filter>
     </ClInclude>
