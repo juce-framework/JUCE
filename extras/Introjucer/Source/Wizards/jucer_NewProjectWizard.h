@@ -187,7 +187,7 @@ struct NewProjectWizard
                 return nullptr;
 
             addExporters (*project, wc);
-            addDefaultModules (*project);
+            addDefaultModules (*project, false);
 
             if (project->save (false, true) != FileBasedDocument::savedOk)
                 return nullptr;
@@ -244,7 +244,7 @@ struct NewProjectWizard
             failedFiles.add (getSourceFilesFolder().getFullPathName());
     }
 
-    void addDefaultModules (Project& project)
+    void addDefaultModules (Project& project, bool areModulesCopiedLocally)
     {
         StringArray mods (getDefaultModules());
 
@@ -253,7 +253,7 @@ struct NewProjectWizard
 
         for (int i = 0; i < mods.size(); ++i)
             if (const ModuleDescription* info = list.getModuleWithID (mods[i]))
-                project.getModules().addModule (info->manifestFile, true);
+                project.getModules().addModule (info->manifestFile, areModulesCopiedLocally);
     }
 
     void addExporters (Project& project, WizardComp& wizardComp)
