@@ -964,8 +964,8 @@ public:
     {
         MSVCProjectExporterBase::createExporterProperties (props);
 
-        static const char* toolsetNames[] = { "(default)", "v100", "v100_xp", "Windows7.1SDK", nullptr };
-        const var toolsets[]              = { var(),       "v100", "v100_xp", "Windows7.1SDK" };
+        static const char* toolsetNames[] = { "(default)", "v100", "v100_xp", "Windows7.1SDK", "CTP_Nov2013", nullptr };
+        const var toolsets[]              = { var(),       "v100", "v100_xp", "Windows7.1SDK", "CTP_Nov2013" };
 
         props.add (new ChoicePropertyComponent (getPlatformToolsetValue(), "Platform Toolset",
                                                 StringArray (toolsetNames),
