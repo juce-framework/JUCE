@@ -26,6 +26,7 @@
 #define JUCER_AUTOUPDATER_H_INCLUDED
 
 
+
 //==============================================================================
 class LatestVersionChecker  : private Thread,
                               private Timer
@@ -47,13 +48,44 @@ public:
         return URL ("http://www.juce.com/juce/updates/updatelist.php");
     }
 
+    void checkForNewVersion()
+    {
+        hasAttemptedToReadWebsite = true;
+
+        {
+            const ScopedPointer<InputStream> in (getLatestVersionURL().createInputStream (false));
+
+            if (in == nullptr || threadShouldExit())
+                return;  // can't connect: fail silently.
+
+            jsonReply = JSON::parse (in->readEntireStreamAsString());
+        }
+
+        if (threadShouldExit())
+            return;
+
+        if (jsonReply.isArray() || jsonReply.isObject())
+            startTimer (100);
+    }
+
+    void downloadNewVersion (URL url)
+    {
+        const ScopedPointer<InputStream> in (getLatestVersionURL().createInputStream (false));
+
+        if (in == nullptr || threadShouldExit())
+            return;  // can't connect: fail silently.
+
+            jsonReply = JSON::parse (in->readEntireStreamAsString());
+
+    }
+
     void processResult (var reply)
     {
         DBG (JSON::toString (reply));
 
         if (reply.isArray())
         {
-            checkVersion (VersionInfo (reply[0]));
+            askUserAboutNewVersion (VersionInfo (reply[0]));
         }
         else if (reply.isObject())
         {
@@ -92,7 +124,7 @@ public:
         URL url;
     };
 
-    void checkVersion (const VersionInfo& info)
+    void askUserAboutNewVersion (const VersionInfo& info)
     {
         if (info.version != SystemStats::getJUCEVersion()
              && info.version.containsChar ('.')
@@ -104,12 +136,24 @@ public:
             if (isRunningFromZipFolder())
             {
 JUCE_COMPILER_WARNING("todo")
+
+//                startDownload (info.url);
             }
             else
             {
+JUCE_COMPILER_WARNING("todo")
+
+//                startDownload (info.url);
 
             }
         }
+    }
+
+    void startDownload (URL url)
+    {
+        jassert (! isThreadRunning());
+        newVersionToDownload = url;
+        startThread (3);
     }
 
     bool isRunningFromZipFolder() const
@@ -118,9 +162,9 @@ JUCE_COMPILER_WARNING("todo")
 
         return appParentFolder.getChildFile ("modules").isDirectory()
             && appParentFolder.getChildFile ("extras").isDirectory()
-            && appParentFolder.getChildFile ("examples").isDirectory();
+            && appParentFolder.getChildFile ("examples").isDirectory()
+            && ! appParentFolder.getChildFile (".git").isDirectory();
     }
-
 
 private:
     void timerCallback() override
@@ -135,26 +179,88 @@ private:
 
     void run() override
     {
-        hasAttemptedToReadWebsite = true;
-
-        {
-            const ScopedPointer<InputStream> in (getLatestVersionURL().createInputStream (false));
-
-            if (in == nullptr || threadShouldExit())
-                return;  // can't connect: fail silently.
-
-            jsonReply = JSON::parse (in->readEntireStreamAsString());
-        }
-
-        if (threadShouldExit())
-            return;
-
-        if (jsonReply.isArray() || jsonReply.isObject())
-            startTimer (100);
+        if (newVersionToDownload.isEmpty())
+            checkForNewVersion();
+        else
+            downloadNewVersion (newVersionToDownload);
     }
 
     var jsonReply;
     bool hasAttemptedToReadWebsite;
+    URL newVersionToDownload;
+
+    //==============================================================================
+    class DownloadNewVersionThread   : public ThreadWithProgressWindow
+    {
+    public:
+        DownloadNewVersionThread (URL u)
+            : ThreadWithProgressWindow ("Downloading New Version", true, true),
+              result (Result::ok()),
+              url (u)
+        {
+        }
+
+        static void update (URL u)
+        {
+            DownloadNewVersionThread d (u);
+
+            if (d.runThread())
+            {
+                if (d.result.failed())
+                {
+                    AlertWindow::showMessageBoxAsync (AlertWindow::WarningIcon,
+                                                      "Installation Failed",
+                                                      d.result.getErrorMessage());
+                }
+                else
+                {
+JUCE_COMPILER_WARNING("todo")
+                }
+            }
+        }
+
+        void run() override
+        {
+            MemoryBlock zipData;
+            result = download (zipData);
+
+            if (result.wasOk() && ! threadShouldExit())
+                result = unzip (zipData);
+        }
+
+        Result download (MemoryBlock& dest)
+        {
+            setStatusMessage ("Downloading...");
+
+            const ScopedPointer<InputStream> in (url.createInputStream (false, nullptr, nullptr, String::empty, 10000));
+
+            if (in != nullptr && in->readIntoMemoryBlock (dest))
+                return Result::ok();
+
+            return Result::fail ("Failed to download from: " + url.toString (false));
+        }
+
+        Result unzip (const MemoryBlock& data)
+        {
+            setStatusMessage ("Installing...");
+
+            MemoryInputStream input (data, false);
+            ZipFile zip (input);
+
+            if (zip.getNumEntries() == 0)
+                return Result::fail ("The downloaded file wasn't a valid JUCE file!");
+
+//            if (! m.getFolder().deleteRecursively())
+//                return Result::fail ("Couldn't delete the existing folder:\n" + m.getFolder().getFullPathName());
+//
+//            return zip.uncompressTo (m.getFolder().getParentDirectory(), true);
+        }
+
+        Result result;
+        URL url;
+
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DownloadNewVersionThread)
+    };
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LatestVersionChecker)
 };
