@@ -68,21 +68,8 @@ public:
             startTimer (100);
     }
 
-    void downloadNewVersion (URL url)
-    {
-        const ScopedPointer<InputStream> in (getLatestVersionURL().createInputStream (false));
-
-        if (in == nullptr || threadShouldExit())
-            return;  // can't connect: fail silently.
-
-            jsonReply = JSON::parse (in->readEntireStreamAsString());
-
-    }
-
     void processResult (var reply)
     {
-        DBG (JSON::toString (reply));
-
         if (reply.isArray())
         {
             askUserAboutNewVersion (VersionInfo (reply[0]));
@@ -120,50 +107,72 @@ public:
                                  var()).toString();
         }
 
+        bool isDifferentVersionToCurrent() const
+        {
+JUCE_COMPILER_WARNING("testing")
+return true;
+            return version != JUCE_STRINGIFY(JUCE_MAJOR_VERSION)
+                               "." JUCE_STRINGIFY(JUCE_MINOR_VERSION)
+                               "." JUCE_STRINGIFY(JUCE_BUILDNUMBER)
+                    && version.containsChar ('.')
+                    && version.length() > 2;
+        }
+
         String version;
         URL url;
     };
 
     void askUserAboutNewVersion (const VersionInfo& info)
     {
-        if (info.version != SystemStats::getJUCEVersion()
-             && info.version.containsChar ('.')
-             && info.version.length() > 2)
+        if (info.isDifferentVersionToCurrent())
         {
-            DBG (info.version);
-            DBG (info.url.toString (true));
-
             if (isRunningFromZipFolder())
             {
-JUCE_COMPILER_WARNING("todo")
-
-//                startDownload (info.url);
+                if (AlertWindow::showOkCancelBox (AlertWindow::WarningIcon,
+                                                  TRANS("Download JUCE version 123?").replace ("123", info.version),
+                                                  TRANS("A new version of JUCE is available - would you like to overwrite the folder:\n\n"
+                                                        "xfldrx\n\n"
+                                                        " ..with the latest version from juce.com?\n\n"
+                                                        "(Please note that this will overwrite everything in that folder!)")
+                                                    .replace ("xfldrx", getZipFolder().getFullPathName())))
+                {
+                    DownloadNewVersionThread::performDownload (info.url, getZipFolder());
+                }
             }
             else
             {
 JUCE_COMPILER_WARNING("todo")
 
-//                startDownload (info.url);
+                File targetFolder;
+
+//                FileChooser f;
+
+                    DownloadNewVersionThread::performDownload (info.url, targetFolder);
 
             }
         }
     }
 
-    void startDownload (URL url)
+    static bool isZipFolder (const File& f)
     {
-        jassert (! isThreadRunning());
-        newVersionToDownload = url;
-        startThread (3);
+JUCE_COMPILER_WARNING("testing")
+return true;
+
+        return f.getChildFile ("modules").isDirectory()
+            && f.getChildFile ("extras").isDirectory()
+            && f.getChildFile ("examples").isDirectory()
+            && ! f.getChildFile (".git").isDirectory();
     }
 
-    bool isRunningFromZipFolder() const
+    static File getZipFolder()
     {
-        File appParentFolder (File::getSpecialLocation (File::currentApplicationFile));
+        File appParentFolder (File::getSpecialLocation (File::currentApplicationFile).getParentDirectory());
+        return isZipFolder (appParentFolder) ? appParentFolder : File::nonexistent;
+    }
 
-        return appParentFolder.getChildFile ("modules").isDirectory()
-            && appParentFolder.getChildFile ("extras").isDirectory()
-            && appParentFolder.getChildFile ("examples").isDirectory()
-            && ! appParentFolder.getChildFile (".git").isDirectory();
+    static bool isRunningFromZipFolder()
+    {
+        return getZipFolder() != File::nonexistent;
     }
 
 private:
@@ -179,10 +188,7 @@ private:
 
     void run() override
     {
-        if (newVersionToDownload.isEmpty())
-            checkForNewVersion();
-        else
-            downloadNewVersion (newVersionToDownload);
+        checkForNewVersion();
     }
 
     var jsonReply;
@@ -193,16 +199,16 @@ private:
     class DownloadNewVersionThread   : public ThreadWithProgressWindow
     {
     public:
-        DownloadNewVersionThread (URL u)
+        DownloadNewVersionThread (URL u, File target)
             : ThreadWithProgressWindow ("Downloading New Version", true, true),
               result (Result::ok()),
-              url (u)
+              url (u), targetFolder (target)
         {
         }
 
-        static void update (URL u)
+        static void performDownload (URL u, File targetFolder)
         {
-            DownloadNewVersionThread d (u);
+            DownloadNewVersionThread d (u, targetFolder);
 
             if (d.runThread())
             {
@@ -221,6 +227,8 @@ JUCE_COMPILER_WARNING("todo")
 
         void run() override
         {
+            setProgress (-1.0);
+
             MemoryBlock zipData;
             result = download (zipData);
 
@@ -234,8 +242,29 @@ JUCE_COMPILER_WARNING("todo")
 
             const ScopedPointer<InputStream> in (url.createInputStream (false, nullptr, nullptr, String::empty, 10000));
 
-            if (in != nullptr && in->readIntoMemoryBlock (dest))
+            if (in != nullptr)
+            {
+                int64 total = 0;
+                MemoryOutputStream mo (dest, true);
+
+                for (;;)
+                {
+                    if (threadShouldExit())
+                        return Result::fail ("cancel");
+
+                    size_t written = mo.writeFromInputStream (*in, 8192);
+
+                    if (written == 0)
+                        break;
+
+                    total += written;
+
+                    setStatusMessage (String (TRANS ("Downloading...  (123)"))
+                                        .replace ("123", File::descriptionOfSizeInBytes (total)));
+                }
+
                 return Result::ok();
+            }
 
             return Result::fail ("Failed to download from: " + url.toString (false));
         }
@@ -244,20 +273,49 @@ JUCE_COMPILER_WARNING("todo")
         {
             setStatusMessage ("Installing...");
 
-            MemoryInputStream input (data, false);
-            ZipFile zip (input);
+            File tempUnzipped;
 
-            if (zip.getNumEntries() == 0)
-                return Result::fail ("The downloaded file wasn't a valid JUCE file!");
+            {
+                MemoryInputStream input (data, false);
+                ZipFile zip (input);
 
-//            if (! m.getFolder().deleteRecursively())
-//                return Result::fail ("Couldn't delete the existing folder:\n" + m.getFolder().getFullPathName());
-//
-//            return zip.uncompressTo (m.getFolder().getParentDirectory(), true);
+                if (zip.getNumEntries() == 0)
+                    return Result::fail ("The downloaded file wasn't a valid JUCE file!");
+
+                tempUnzipped = targetFolder.getNonexistentSibling();
+
+                if (! tempUnzipped.createDirectory())
+                    return Result::fail ("Couldn't create a folder to unzip the new version!");
+
+                Result r (zip.uncompressTo (tempUnzipped));
+
+                if (r.failed())
+                {
+                    tempUnzipped.deleteRecursively();
+                    return r;
+                }
+            }
+
+            File oldFolder (targetFolder.getSiblingFile (targetFolder.getFileNameWithoutExtension() + "_old").getNonexistentSibling());
+
+            if (! targetFolder.moveFileTo (targetFolder.getNonexistentSibling()))
+            {
+                tempUnzipped.deleteRecursively();
+                return Result::fail ("Could not remove the existing folder!");
+            }
+
+            if (! tempUnzipped.moveFileTo (targetFolder))
+            {
+                tempUnzipped.deleteRecursively();
+                return Result::fail ("Could not overwrite the existing folder!");
+            }
+
+            return Result::ok();
         }
 
         Result result;
         URL url;
+        File targetFolder;
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DownloadNewVersionThread)
     };
