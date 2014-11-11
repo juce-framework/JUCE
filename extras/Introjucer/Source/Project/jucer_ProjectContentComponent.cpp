@@ -241,7 +241,8 @@ void ProjectContentComponent::resized()
     if (contentView != nullptr)
         contentView->setBounds (r);
 
-    logo->setBounds (r.reduced (r.getWidth() / 4, r.getHeight() / 4));
+    if (logo != nullptr)
+        logo->setBounds (r.reduced (r.getWidth() / 4, r.getHeight() / 4));
 }
 
 void ProjectContentComponent::lookAndFeelChanged()

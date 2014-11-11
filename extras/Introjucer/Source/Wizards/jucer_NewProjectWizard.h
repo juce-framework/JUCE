@@ -77,33 +77,6 @@ static File& getLastWizardFolder()
     return lastFolder;
 }
 
-static bool isJuceModulesFolder (const File& f)
-{
-    return f.isDirectory()
-            && f.getChildFile ("juce_core").isDirectory();
-}
-
-static File findDefaultModulesFolder (bool mustContainJuceCoreModule = true)
-{
-    const MainWindowList& windows = IntrojucerApp::getApp().mainWindowList;
-
-    for (int i = windows.windows.size(); --i >= 0;)
-    {
-        if (Project* p = windows.windows.getUnchecked (i)->getProject())
-        {
-            const File f (EnabledModuleList::findDefaultModulesFolder (*p));
-
-            if (isJuceModulesFolder (f) || (f.isDirectory() && ! mustContainJuceCoreModule))
-                return f;
-        }
-    }
-
-    if (mustContainJuceCoreModule)
-        return findDefaultModulesFolder (false);
-
-    return File::nonexistent;
-}
-
 //==============================================================================
 struct NewProjectWizard
 {
