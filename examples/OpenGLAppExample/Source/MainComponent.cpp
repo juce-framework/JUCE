@@ -57,12 +57,7 @@ public:
     Matrix3D<float> getViewMatrix() const
     {
         Matrix3D<float> viewMatrix (Vector3D<float> (0.0f, 0.0f, -10.0f));
-
-        //viewMatrix *= draggableOrientation.getRotationMatrix();
-
-//        Matrix3D<float> rotationMatrix = viewMatrix.rotated (Vector3D<float> (rotation, rotation, -0.3f));
         Matrix3D<float> rotationMatrix = viewMatrix.rotated (Vector3D<float> (-0.3f, 5.0f*sin(getFrameCounter()*0.01f), 0.0f));
-
 
         return viewMatrix * rotationMatrix;
     }
@@ -72,31 +67,29 @@ public:
         
         jassert (OpenGLHelpers::isContextActive());
 
-            const float desktopScale = (float) openGLContext.getRenderingScale();
-            OpenGLHelpers::clear (Colour::greyLevel(0.1));
+        const float desktopScale = (float) openGLContext.getRenderingScale();
+        OpenGLHelpers::clear (Colour::greyLevel(0.1));
 
-            glEnable (GL_DEPTH_TEST);
-            glDepthFunc (GL_LESS);
-            glEnable (GL_BLEND);
-            glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-            openGLContext.extensions.glActiveTexture (GL_TEXTURE0);
-            glEnable (GL_TEXTURE_2D);
+        //glEnable (GL_DEPTH_TEST);
+        //glDepthFunc (GL_LESS);
+        glEnable (GL_BLEND);
+        glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-            glViewport (0, 0, roundToInt (desktopScale * getWidth()), roundToInt (desktopScale * getHeight()));
+        glViewport (0, 0, roundToInt (desktopScale * getWidth()), roundToInt (desktopScale * getHeight()));
 
-            shader->use();
+        shader->use();
 
-            if (uniforms->projectionMatrix != nullptr)
-                uniforms->projectionMatrix->setMatrix4 (getProjectionMatrix().mat, 1, false);
+        if (uniforms->projectionMatrix != nullptr)
+            uniforms->projectionMatrix->setMatrix4 (getProjectionMatrix().mat, 1, false);
 
-            if (uniforms->viewMatrix != nullptr)
-                uniforms->viewMatrix->setMatrix4 (getViewMatrix().mat, 1, false);
+        if (uniforms->viewMatrix != nullptr)
+            uniforms->viewMatrix->setMatrix4 (getViewMatrix().mat, 1, false);
 
-            shape->draw (openGLContext, *attributes);
+        shape->draw (openGLContext, *attributes);
 
-            // Reset the element buffers so child Components draw correctly
-            openGLContext.extensions.glBindBuffer (GL_ARRAY_BUFFER, 0);
-            openGLContext.extensions.glBindBuffer (GL_ELEMENT_ARRAY_BUFFER, 0);
+        // Reset the element buffers so child Components draw correctly
+        openGLContext.extensions.glBindBuffer (GL_ARRAY_BUFFER, 0);
+        openGLContext.extensions.glBindBuffer (GL_ELEMENT_ARRAY_BUFFER, 0);
 
     }
 
@@ -105,8 +98,11 @@ public:
         // You can add your component specific drawing code here!
         // This will draw over the top of the openGL background.
         
-//        g.setColour(Colours::white);
-//        g.drawEllipse (100, 100, 50, 50, 2);
+        g.setColour(Colours::white);
+        g.setFont (20);
+        g.drawText ("OpenGL Example", 25, 20, 300, 30, Justification::left);
+        g.drawLine (20, 20, 170, 20);
+        g.drawLine (20, 50, 170, 50);
     }
 
     void resized() override
@@ -148,7 +144,7 @@ public:
                 "\n"
                 "void main()\n"
                 "{\n"
-                "    vec4 colour = vec4(0.95, 0.57, 0.03, 0.8);\n"
+                "    vec4 colour = vec4(0.95, 0.57, 0.03, 0.7);\n"
                 "    gl_FragColor = colour;\n"
             "}\n" };
         
@@ -195,7 +191,7 @@ struct Vertex
     };
 
     //==============================================================================
-    // This class just manages the attributes that the demo shaders use.
+    // This class just manages the attributes that the shaders use.
     struct Attributes
     {
         Attributes (OpenGLContext& openGLContext, OpenGLShaderProgram& shader)
@@ -263,12 +259,9 @@ struct Vertex
         {
             projectionMatrix = createUniform (openGLContext, shader, "projectionMatrix");
             viewMatrix       = createUniform (openGLContext, shader, "viewMatrix");
-            texture          = createUniform (openGLContext, shader, "demoTexture");
-            lightPosition    = createUniform (openGLContext, shader, "lightPosition");
-            bouncingNumber   = createUniform (openGLContext, shader, "bouncingNumber");
         }
 
-        ScopedPointer<OpenGLShaderProgram::Uniform> projectionMatrix, viewMatrix, texture, lightPosition, bouncingNumber;
+        ScopedPointer<OpenGLShaderProgram::Uniform> projectionMatrix, viewMatrix;
 
     private:
         static OpenGLShaderProgram::Uniform* createUniform (OpenGLContext& openGLContext,
