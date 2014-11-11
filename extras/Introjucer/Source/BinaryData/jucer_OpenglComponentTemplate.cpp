@@ -40,15 +40,14 @@ public:
 
     void render() override
     {
+        OpenGLHelpers::clear (Colours::black);
+        
     }
 
     void paint (Graphics& g) override
     {
-        // (Our component is opaque, so we must completely fill the background with a solid colour)
-        g.fillAll (Colours::black);
-
-
-        // You can add your drawing code here!
+        // You can add your component specific drawing code here!
+        // This will draw over the top of the openGL background.
     }
 
     void resized() override
