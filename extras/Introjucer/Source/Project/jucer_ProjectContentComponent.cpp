@@ -30,7 +30,7 @@
 #include "../Project Saving/jucer_ProjectExporter.h"
 #include "../Utility/jucer_TranslationTool.h"
 #include "../Utility/jucer_JucerTreeViewBase.h"
-#include "jucer_NewFileWizard.h"
+#include "../Wizards/jucer_NewFileWizard.h"
 #include "jucer_GroupInformationComponent.h"
 
 //==============================================================================

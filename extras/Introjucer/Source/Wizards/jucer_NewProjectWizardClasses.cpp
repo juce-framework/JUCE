@@ -24,8 +24,8 @@
 
 #include "../jucer_Headers.h"
 #include "jucer_NewProjectWizardClasses.h"
-#include "jucer_ProjectType.h"
-#include "jucer_Module.h"
+#include "../Project/jucer_ProjectType.h"
+#include "../Project/jucer_Module.h"
 #include "../Project Saving/jucer_ProjectExporter.h"
 #include "../Application/jucer_Application.h"
 #include "../Application/jucer_MainWindow.h"

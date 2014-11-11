@@ -109,8 +109,6 @@ public:
 
         bool isDifferentVersionToCurrent() const
         {
-JUCE_COMPILER_WARNING("testing")
-return true;
             return version != JUCE_STRINGIFY(JUCE_MAJOR_VERSION)
                                "." JUCE_STRINGIFY(JUCE_MINOR_VERSION)
                                "." JUCE_STRINGIFY(JUCE_BUILDNUMBER)
@@ -298,7 +296,7 @@ private:
                     if (threadShouldExit())
                         return Result::fail ("cancel");
 
-                    size_t written = mo.writeFromInputStream (*in, 8192);
+                    int64 written = mo.writeFromInputStream (*in, 8192);
 
                     if (written == 0)
                         break;
