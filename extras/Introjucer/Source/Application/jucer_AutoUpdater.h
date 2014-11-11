@@ -141,12 +141,19 @@ return true;
             }
             else
             {
+                if (! AlertWindow::showOkCancelBox (AlertWindow::WarningIcon,
+                                                    TRANS("Download JUCE version 123?").replace ("123", info.version),
+                                                    TRANS("A new version of JUCE is available - would you like to download it?")))
+                {
+                    return;
+                }
+
                 File targetFolder (findDefaultModulesFolder());
 
                 if (isJuceModulesFolder (targetFolder))
                     targetFolder = targetFolder.getParentDirectory();
 
-                FileChooser chooser (TRANS("Please select the location into which you'd like to download the new version"),
+                FileChooser chooser (TRANS("Please select the location into which you'd like to install the new version"),
                                      targetFolder);
 
                 if (chooser.browseForDirectory())
@@ -197,9 +204,6 @@ return true;
 
     static bool isZipFolder (const File& f)
     {
-JUCE_COMPILER_WARNING("testing")
-return true;
-
         return f.getChildFile ("modules").isDirectory()
             && f.getChildFile ("extras").isDirectory()
             && f.getChildFile ("examples").isDirectory()
