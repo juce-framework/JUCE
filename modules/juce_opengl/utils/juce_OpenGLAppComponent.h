@@ -62,10 +62,11 @@ public:
     */
     virtual void render() = 0;
 
+    OpenGLContext openGLContext;
 
 private:
     //==============================================================================
-    OpenGLContext openGLContext;
+
     int frameCounter;
 
     void newOpenGLContextCreated() override;

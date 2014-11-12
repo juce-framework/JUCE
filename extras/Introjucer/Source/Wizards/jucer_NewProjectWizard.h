@@ -181,30 +181,6 @@ struct NewProjectWizard
         return project.release();
     }
 
-    bool selectJuceFolder()
-    {
-        for (;;)
-        {
-            FileChooser fc ("Select your JUCE modules folder...",
-                            findDefaultModulesFolder(),
-                            "*");
-
-            if (! fc.browseForDirectory())
-                return false;
-
-            if (isJuceModulesFolder (fc.getResult()))
-            {
-                modulesFolder = fc.getResult();
-                return true;
-            }
-
-            AlertWindow::showMessageBox (AlertWindow::WarningIcon,
-                                         "Not a valid JUCE modules folder!",
-                                         "Please select the folder containing your juce_* modules!\n\n"
-                                         "This is required so that the new project can be given some essential core modules.");
-        }
-    }
-
     //==============================================================================
     File getSourceFilesFolder() const
     {
