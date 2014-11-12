@@ -30,7 +30,7 @@
 #include "../Project Saving/jucer_ProjectExporter.h"
 #include "../Utility/jucer_TranslationTool.h"
 #include "../Utility/jucer_JucerTreeViewBase.h"
-#include "jucer_NewFileWizard.h"
+#include "../Wizards/jucer_NewFileWizard.h"
 #include "jucer_GroupInformationComponent.h"
 
 //==============================================================================
@@ -241,7 +241,8 @@ void ProjectContentComponent::resized()
     if (contentView != nullptr)
         contentView->setBounds (r);
 
-    logo->setBounds (r.reduced (r.getWidth() / 4, r.getHeight() / 4));
+    if (logo != nullptr)
+        logo->setBounds (r.reduced (r.getWidth() / 4, r.getHeight() / 4));
 }
 
 void ProjectContentComponent::lookAndFeelChanged()

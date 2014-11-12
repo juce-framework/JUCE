@@ -38,13 +38,13 @@ public:
     {
         // svg for thumbnail icon
         ScopedPointer<XmlElement> svg (XmlDocument::parse (thumbSvg));
-        assert (svg != nullptr);
+        jassert (svg != nullptr);
 
         thumb = Drawable::createFromSVG (*svg);
 
         // svg for thumbnail background highlight
         ScopedPointer<XmlElement> backSvg (XmlDocument::parse (BinaryData::wizard_Highlight_svg));
-        assert (backSvg != nullptr);
+        jassert (backSvg != nullptr);
 
         hoverBackground = Drawable::createFromSVG (*backSvg);
 
@@ -60,7 +60,7 @@ public:
 
         if (isMouseOverButton)
         {
-            if (getStyle() == ButtonStyle::ImageFitted)
+            if (getStyle() == ImageFitted)
             {
                 hoverBackground->drawWithin (g, bounds, RectanglePlacement::centred, 1.0);
                 thumb->drawWithin (g, bounds, RectanglePlacement::centred, 1.0);
@@ -75,7 +75,7 @@ public:
         }
         else
         {
-            if (getStyle() == ButtonStyle::ImageFitted)
+            if (getStyle() == ImageFitted)
             {
                 thumb->drawWithin (g, bounds, RectanglePlacement::centred, 1.0);
             }
@@ -89,7 +89,7 @@ public:
         Rectangle<float> textTarget;
 
         // center the text for the text buttons or position the text in the image buttons
-        if (getStyle() != ButtonStyle::ImageFitted)
+        if (getStyle() != ImageFitted)
         {
             textTarget = getLocalBounds().toFloat();
         }
@@ -145,7 +145,7 @@ public:
             ScopedPointer<NewProjectWizard> wizard (createWizardType (i));
 
             TemplateOptionButton* b = new TemplateOptionButton (wizard->getName(),
-                                                                TemplateOptionButton::ButtonStyle::ImageFitted,
+                                                                TemplateOptionButton::ImageFitted,
                                                                 wizard->getIcon());
             optionButtons.add (b);
             addAndMakeVisible (b);
@@ -156,9 +156,9 @@ public:
         // Handle Open Project button functionality
         ApplicationCommandManager& commandManager = IntrojucerApp::getCommandManager();
 
-        addAndMakeVisible (blankProjectButton   = new TemplateOptionButton ("Create Blank Project",  TemplateOptionButton::ButtonStyle::ImageOnButtonBackground, BinaryData::wizard_Openfile_svg));
-        addAndMakeVisible (exampleProjectButton = new TemplateOptionButton ("Open Example Project",  TemplateOptionButton::ButtonStyle::ImageOnButtonBackground, BinaryData::wizard_Openfile_svg));
-        addAndMakeVisible (openProjectButton    = new TemplateOptionButton ("Open Existing Project", TemplateOptionButton::ButtonStyle::ImageOnButtonBackground, BinaryData::wizard_Openfile_svg));
+        addAndMakeVisible (blankProjectButton   = new TemplateOptionButton ("Create Blank Project",  TemplateOptionButton::ImageOnButtonBackground, BinaryData::wizard_Openfile_svg));
+        addAndMakeVisible (exampleProjectButton = new TemplateOptionButton ("Open Example Project",  TemplateOptionButton::ImageOnButtonBackground, BinaryData::wizard_Openfile_svg));
+        addAndMakeVisible (openProjectButton    = new TemplateOptionButton ("Open Existing Project", TemplateOptionButton::ImageOnButtonBackground, BinaryData::wizard_Openfile_svg));
 
         blankProjectButton->addListener (this);
         exampleProjectButton->addListener (this);
@@ -191,7 +191,7 @@ public:
     void resized() override
     {
         Rectangle<int> allOpts = getLocalBounds().reduced (40, 60);
-        allOpts.removeFromBottom (allOpts.getHeight() * 0.25);
+        allOpts.removeFromBottom (allOpts.getHeight() / 4);
 
         const int numHorizIcons = 4;
         const int optStep = allOpts.getWidth() / numHorizIcons;

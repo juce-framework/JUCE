@@ -109,8 +109,6 @@ public:
 
         bool isDifferentVersionToCurrent() const
         {
-JUCE_COMPILER_WARNING("testing")
-return true;
             return version != JUCE_STRINGIFY(JUCE_MAJOR_VERSION)
                                "." JUCE_STRINGIFY(JUCE_MINOR_VERSION)
                                "." JUCE_STRINGIFY(JUCE_BUILDNUMBER)
@@ -141,23 +139,69 @@ return true;
             }
             else
             {
-JUCE_COMPILER_WARNING("todo")
+                if (! AlertWindow::showOkCancelBox (AlertWindow::WarningIcon,
+                                                    TRANS("Download JUCE version 123?").replace ("123", info.version),
+                                                    TRANS("A new version of JUCE is available - would you like to download it?")))
+                {
+                    return;
+                }
 
-                File targetFolder;
+                File targetFolder (findDefaultModulesFolder());
 
-//                FileChooser f;
+                if (isJuceModulesFolder (targetFolder))
+                    targetFolder = targetFolder.getParentDirectory();
+
+                FileChooser chooser (TRANS("Please select the location into which you'd like to install the new version"),
+                                     targetFolder);
+
+                if (chooser.browseForDirectory())
+                {
+                    targetFolder = chooser.getResult();
+
+                    if (isJuceModulesFolder (targetFolder))
+                        targetFolder = targetFolder.getParentDirectory();
+
+                    if (targetFolder.getChildFile ("JUCE").isDirectory())
+                        targetFolder = targetFolder.getChildFile ("JUCE");
+
+                    if (targetFolder.getChildFile (".git").isDirectory())
+                    {
+                        AlertWindow::showMessageBox (AlertWindow::WarningIcon,
+                                                     TRANS ("Downloading new JUCE version"),
+                                                     TRANS ("This folder is a GIT repository!\n\n"
+                                                            "You should use a \"git pull\" to update it to the latest version. "
+                                                            "Or to use the Introjucer to get an update, you should select an empty "
+                                                            "folder into which you'd like to download the new code."));
+
+                        return;
+                    }
+
+                    if (isJuceFolder (targetFolder))
+                    {
+                        if (! AlertWindow::showOkCancelBox (AlertWindow::WarningIcon,
+                                                            TRANS("Overwrite existing JUCE folder?"),
+                                                            TRANS("Do you want to overwrite the folder:\n\n"
+                                                                  "xfldrx\n\n"
+                                                                  " ..with the latest version from juce.com?\n\n"
+                                                                  "(Please note that this will overwrite everything in that folder!)")
+                                                                .replace ("xfldrx", targetFolder.getFullPathName())))
+                        {
+                            return;
+                        }
+                    }
+                    else
+                    {
+                        targetFolder = targetFolder.getChildFile ("JUCE").getNonexistentSibling();
+                    }
 
                     DownloadNewVersionThread::performDownload (info.url, targetFolder);
-
+                }
             }
         }
     }
 
     static bool isZipFolder (const File& f)
     {
-JUCE_COMPILER_WARNING("testing")
-return true;
-
         return f.getChildFile ("modules").isDirectory()
             && f.getChildFile ("extras").isDirectory()
             && f.getChildFile ("examples").isDirectory()
@@ -220,7 +264,7 @@ private:
                 }
                 else
                 {
-JUCE_COMPILER_WARNING("todo")
+                    new RelaunchTimer (targetFolder);
                 }
             }
         }
@@ -252,7 +296,7 @@ JUCE_COMPILER_WARNING("todo")
                     if (threadShouldExit())
                         return Result::fail ("cancel");
 
-                    size_t written = mo.writeFromInputStream (*in, 8192);
+                    int64 written = mo.writeFromInputStream (*in, 8192);
 
                     if (written == 0)
                         break;
@@ -273,7 +317,8 @@ JUCE_COMPILER_WARNING("todo")
         {
             setStatusMessage ("Installing...");
 
-            File tempUnzipped;
+            File unzipTarget;
+            bool isUsingTempFolder = false;
 
             {
                 MemoryInputStream input (data, false);
@@ -282,32 +327,43 @@ JUCE_COMPILER_WARNING("todo")
                 if (zip.getNumEntries() == 0)
                     return Result::fail ("The downloaded file wasn't a valid JUCE file!");
 
-                tempUnzipped = targetFolder.getNonexistentSibling();
+                unzipTarget = targetFolder;
 
-                if (! tempUnzipped.createDirectory())
-                    return Result::fail ("Couldn't create a folder to unzip the new version!");
+                if (unzipTarget.exists())
+                {
+                    isUsingTempFolder = true;
+                    unzipTarget = targetFolder.getNonexistentSibling();
 
-                Result r (zip.uncompressTo (tempUnzipped));
+                    if (! unzipTarget.createDirectory())
+                        return Result::fail ("Couldn't create a folder to unzip the new version!");
+                }
+
+                Result r (zip.uncompressTo (unzipTarget));
 
                 if (r.failed())
                 {
-                    tempUnzipped.deleteRecursively();
+                    if (isUsingTempFolder)
+                        unzipTarget.deleteRecursively();
+
                     return r;
                 }
             }
 
-            File oldFolder (targetFolder.getSiblingFile (targetFolder.getFileNameWithoutExtension() + "_old").getNonexistentSibling());
-
-            if (! targetFolder.moveFileTo (targetFolder.getNonexistentSibling()))
+            if (isUsingTempFolder)
             {
-                tempUnzipped.deleteRecursively();
-                return Result::fail ("Could not remove the existing folder!");
-            }
+                File oldFolder (targetFolder.getSiblingFile (targetFolder.getFileNameWithoutExtension() + "_old").getNonexistentSibling());
 
-            if (! tempUnzipped.moveFileTo (targetFolder))
-            {
-                tempUnzipped.deleteRecursively();
-                return Result::fail ("Could not overwrite the existing folder!");
+                if (! targetFolder.moveFileTo (oldFolder))
+                {
+                    unzipTarget.deleteRecursively();
+                    return Result::fail ("Could not remove the existing folder!");
+                }
+
+                if (! unzipTarget.moveFileTo (targetFolder))
+                {
+                    unzipTarget.deleteRecursively();
+                    return Result::fail ("Could not overwrite the existing folder!");
+                }
             }
 
             return Result::ok();
@@ -318,6 +374,37 @@ JUCE_COMPILER_WARNING("todo")
         File targetFolder;
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DownloadNewVersionThread)
+    };
+
+    struct RelaunchTimer  : private Timer
+    {
+        RelaunchTimer (const File& f)  : parentFolder (f)
+        {
+            startTimer (1500);
+        }
+
+        void timerCallback() override
+        {
+            stopTimer();
+
+            File app = parentFolder.getChildFile (
+                        #if JUCE_MAC
+                         "Introjucer.app");
+                        #elif JUCE_WINDOWS
+                         "Introjucer.exe");
+                         #elif JUCE_LINUX
+                         "Introjucer");
+                        #endif
+
+            JUCEApplication::quit();
+
+            if (app.exists())
+                app.startAsProcess();
+
+            delete this;
+        }
+
+        File parentFolder;
     };
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LatestVersionChecker)

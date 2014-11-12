@@ -543,3 +543,24 @@ Project* MainWindowList::getFrontmostProject()
 
     return nullptr;
 }
+
+File findDefaultModulesFolder (bool mustContainJuceCoreModule)
+{
+    const MainWindowList& windows = IntrojucerApp::getApp().mainWindowList;
+
+    for (int i = windows.windows.size(); --i >= 0;)
+    {
+        if (Project* p = windows.windows.getUnchecked (i)->getProject())
+        {
+            const File f (EnabledModuleList::findDefaultModulesFolder (*p));
+
+            if (isJuceModulesFolder (f) || (f.isDirectory() && ! mustContainJuceCoreModule))
+                return f;
+        }
+    }
+
+    if (mustContainJuceCoreModule)
+        return findDefaultModulesFolder (false);
+
+    return File::nonexistent;
+}

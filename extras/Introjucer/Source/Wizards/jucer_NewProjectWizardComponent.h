@@ -154,7 +154,7 @@ public:
         listBox.setOpaque (false);
         listBox.setMultipleSelectionEnabled (true);
         listBox.setClickingTogglesRowSelection (true);
-        listBox.setColour (ListBox::ColourIds::backgroundColourId, Colours::white.withAlpha (0.0f));
+        listBox.setColour (ListBox::backgroundColourId, Colours::white.withAlpha (0.0f));
         addAndMakeVisible (listBox);
 
         selectDefaultExporterIfNoneSelected();
@@ -203,7 +203,7 @@ public:
             if (rowIsSelected)
                 g.fillAll (Colour (0x99f29000));
 
-            Rectangle<float> dotSelect (height, height);
+            Rectangle<float> dotSelect ((float) height, (float) height);
             dotSelect.reduce (12, 12);
 
             g.setColour (Colour (0x33ffffff));
