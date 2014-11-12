@@ -399,7 +399,17 @@ private:
             JUCEApplication::quit();
 
             if (app.exists())
+            {
+                app.setExecutePermission (true);
+
+               #if JUCE_MAC
+                app.getChildFile("Contents")
+                   .getChildFile("MacOS")
+                   .getChildFile("Introjucer").setExecutePermission (true);
+               #endif
+
                 app.startAsProcess();
+            }
 
             delete this;
         }
