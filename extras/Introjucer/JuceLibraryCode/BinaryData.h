@@ -70,7 +70,7 @@ namespace BinaryData
     const int            jucer_NewInlineComponentTemplate_hSize = 1626;
 
     extern const char*   jucer_OpenGLComponentTemplate_cpp;
-    const int            jucer_OpenGLComponentTemplate_cppSize = 1834;
+    const int            jucer_OpenGLComponentTemplate_cppSize = 1835;
 
     extern const char*   AudioPluginXCodeScript_txt;
     const int            AudioPluginXCodeScript_txtSize = 2922;

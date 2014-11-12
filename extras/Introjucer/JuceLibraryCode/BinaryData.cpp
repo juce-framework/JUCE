@@ -1361,15 +1361,14 @@ static const unsigned char temp_binary_data_20[] =
 "\r\n"
 "    void render() override\r\n"
 "    {\r\n"
+"        OpenGLHelpers::clear (Colours::black);\r\n"
+"        \r\n"
 "    }\r\n"
 "\r\n"
 "    void paint (Graphics& g) override\r\n"
 "    {\r\n"
-"        // (Our component is opaque, so we must completely fill the background with a solid colour)\r\n"
-"        g.fillAll (Colours::black);\r\n"
-"\r\n"
-"\r\n"
-"        // You can add your drawing code here!\r\n"
+"        // You can add your component specific drawing code here!\r\n"
+"        // This will draw over the top of the openGL background.\r\n"
 "    }\r\n"
 "\r\n"
 "    void resized() override\r\n"
@@ -3658,7 +3657,7 @@ const char* getNamedResource (const char* resourceNameUTF8, int& numBytes) throw
         case 0x02a2a077:  numBytes = 262; return jucer_NewCppFileTemplate_cpp;
         case 0x0842c43c:  numBytes = 308; return jucer_NewCppFileTemplate_h;
         case 0x36e634a1:  numBytes = 1626; return jucer_NewInlineComponentTemplate_h;
-        case 0x7fbac252:  numBytes = 1834; return jucer_OpenGLComponentTemplate_cpp;
+        case 0x7fbac252:  numBytes = 1835; return jucer_OpenGLComponentTemplate_cpp;
         case 0x44be9398:  numBytes = 2922; return AudioPluginXCodeScript_txt;
         case 0x4a0cfd09:  numBytes = 151; return background_tile_png;
         case 0x763d39dc:  numBytes = 1050; return colourscheme_dark_xml;
