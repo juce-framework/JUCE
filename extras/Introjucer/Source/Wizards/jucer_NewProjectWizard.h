@@ -121,6 +121,11 @@ struct NewProjectWizard
     WizardComp* ownerWizardComp;
     StringArray failedFiles;
 
+    bool selectJuceFolder()
+    {
+        return ModulesFolderPathBox::selectJuceFolder (modulesFolder);
+    }
+
     //==============================================================================
     Project* runWizard (WizardComp& wc,
                         const String& projectName,
@@ -138,8 +143,9 @@ struct NewProjectWizard
         else if (FileHelpers::containsAnyNonHiddenFiles (targetFolder))
         {
             if (! AlertWindow::showOkCancelBox (AlertWindow::InfoIcon,
-                                                TRANS("New Juce Project"),
-                                                TRANS("The folder you chose isn't empty - are you sure you want to create the project there?")
+                                                TRANS("New JUCE Project"),
+                                                TRANS("You chose the folder:\n\nXFLDRX\n\n").replace ("XFLDRX", targetFolder.getFullPathName())
+                                                  + TRANS("This folder isn't empty - are you sure you want to create the project there?")
                                                   + "\n\n"
                                                   + TRANS("Any existing files with the same names may be overwritten by the new files.")))
                 return nullptr;

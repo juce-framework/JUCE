@@ -25,58 +25,47 @@
 #ifndef NEWPROJECTWIZARDCOMPONENTS_H_INCLUDED
 #define NEWPROJECTWIZARDCOMPONENTS_H_INCLUDED
 
+
 class ModulesFolderPathBox  : public Component,
                               private ButtonListener,
                               private ComboBoxListener
 {
 public:
-    
-    ModulesFolderPathBox(const File& initialFileOrDirectory)
-            :   currentPathBox ("currentPathBox"),
-                openFolderButton (TRANS("...")),
-                modulesLabel (String::empty, TRANS("Modules Folder") + ":")
+    ModulesFolderPathBox (File initialFileOrDirectory)
+        : currentPathBox ("currentPathBox"),
+          openFolderButton (TRANS("...")),
+          modulesLabel (String::empty, TRANS("Modules Folder") + ":")
     {
-
         if (initialFileOrDirectory == File::nonexistent)
-        {
-            currentPathBox.setText ("couldnt open file", dontSendNotification);
-            setRoot(findDefaultModulesFolder());
-        }
-        else if (initialFileOrDirectory.isDirectory())
-        {
-            setRoot(initialFileOrDirectory);
-        }
+            initialFileOrDirectory = findDefaultModulesFolder();
+
+        setModulesFolder (initialFileOrDirectory);
 
         addAndMakeVisible (currentPathBox);
         currentPathBox.setEditableText (true);
         currentPathBox.addListener (this);
-        
+
         addAndMakeVisible (openFolderButton);
         openFolderButton.addListener (this);
         openFolderButton.setTooltip (TRANS ("Select JUCE modules folder"));
-        
+
         addAndMakeVisible (modulesLabel);
         modulesLabel.attachToComponent (&currentPathBox, true);
-        
-    }
-    
-    ~ModulesFolderPathBox()
-    {
     }
 
     void resized() override
     {
         Rectangle<int> bounds = getLocalBounds();
-    
+
         modulesLabel.setBounds (bounds.removeFromLeft (110));
-    
+
         openFolderButton.setBounds (bounds.removeFromRight (40));
         bounds.removeFromRight (5);
 
         currentPathBox.setBounds (bounds);
     }
 
-    bool selectJuceFolder()
+    static bool selectJuceFolder (File& result)
     {
         for (;;)
         {
@@ -89,8 +78,7 @@ public:
 
             if (isJuceModulesFolder (fc.getResult()))
             {
-                modulesFolder = fc.getResult();
-                setRoot (modulesFolder);
+                result = fc.getResult();
                 return true;
             }
 
@@ -101,32 +89,37 @@ public:
         }
     }
 
-    void setRoot (const File& newRootDirectory)
+    void selectJuceFolder()
     {
-        if (currentRoot != newRootDirectory)
-        {
-            currentRoot = newRootDirectory;
-            
-            String currentRootName (currentRoot.getFullPathName());
-            if (currentRootName.isEmpty())
-                currentRootName = File::separatorString;
+        File result;
 
-            currentPathBox.setText (currentRootName, dontSendNotification);
+        if (selectJuceFolder (result))
+            setModulesFolder (result);
+    }
+
+    void setModulesFolder (const File& newFolder)
+    {
+        if (modulesFolder != newFolder)
+        {
+            modulesFolder = newFolder;
+            currentPathBox.setText (modulesFolder.getFullPathName(), dontSendNotification);
         }
     }
-    
+
     void buttonClicked (Button*) override
     {
         selectJuceFolder();
     }
 
-    void comboBoxChanged (ComboBox* comboBoxThatHasChanged) override
+    void comboBoxChanged (ComboBox*) override
     {
+        setModulesFolder (File::getCurrentWorkingDirectory().getChildFile (currentPathBox.getText()));
     }
-    
+
+    File modulesFolder;
+
 private:
     ComboBox currentPathBox;
-    File currentRoot, modulesFolder;
     TextButton openFolderButton;
     Label modulesLabel;
 };
@@ -319,10 +312,10 @@ public:
         cancelButton.addShortcut (KeyPress (KeyPress::escapeKey));
         cancelButton.setBounds ("right - 130, createButton.top, createButton.left - 10, createButton.bottom");
         cancelButton.addListener (this);
-        
+
         addChildAndSetID (&modulesPathBox, "modulesPathBox");
         modulesPathBox.setBounds ("targetsOutline.left, targetsOutline.top - 45, targetsOutline.right, targetsOutline.top - 20");
-        
+
 
         updateCustomItems();
         updateCreateButton();
@@ -381,6 +374,11 @@ public:
                 return;
             }
 
+            wizard->modulesFolder = modulesPathBox.modulesFolder;
+
+            if (! isJuceModulesFolder (wizard->modulesFolder))
+                if (! wizard->selectJuceFolder())
+                    return;
 
             ScopedPointer<Project> project (wizard->runWizard (*this, projectName.getText(),
                                                                fileBrowser.getSelectedFile (0)));

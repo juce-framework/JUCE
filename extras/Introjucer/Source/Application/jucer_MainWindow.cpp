@@ -562,5 +562,20 @@ File findDefaultModulesFolder (bool mustContainJuceCoreModule)
     if (mustContainJuceCoreModule)
         return findDefaultModulesFolder (false);
 
+    File f (File::getSpecialLocation (File::currentApplicationFile));
+
+    for (;;)
+    {
+        File parent (f.getParentDirectory());
+
+        if (parent == f || ! parent.isDirectory())
+            break;
+
+        if (isJuceFolder (parent))
+            return parent.getChildFile ("modules");
+
+        f = parent;
+    }
+
     return File::nonexistent;
 }

@@ -45,8 +45,8 @@ public:
         attributes = nullptr;
         uniforms = nullptr;
     }
-    
-    
+
+
     Matrix3D<float> getProjectionMatrix() const
         {
             float w = 1.0f / (0.5 + 0.1f);
@@ -64,7 +64,7 @@ public:
 
     void render() override
     {
-        
+
         jassert (OpenGLHelpers::isContextActive());
 
         const float desktopScale = (float) openGLContext.getRenderingScale();
@@ -97,7 +97,7 @@ public:
     {
         // You can add your component specific drawing code here!
         // This will draw over the top of the openGL background.
-        
+
         g.setColour(Colours::white);
         g.setFont (20);
         g.drawText ("OpenGL Example", 25, 20, 300, 30, Justification::left);
@@ -110,9 +110,9 @@ public:
         // This is called when the MainContentComponent is resized.
         // If you add any child components, this is where you should
         // update their positions.
-        
+
     }
-    
+
     void setShaders()
     {
         vertexShader = {
@@ -147,9 +147,9 @@ public:
                 "    vec4 colour = vec4(0.95, 0.57, 0.03, 0.7);\n"
                 "    gl_FragColor = colour;\n"
             "}\n" };
-        
-        
-        
+
+
+
         ScopedPointer<OpenGLShaderProgram> newShader (new OpenGLShaderProgram (openGLContext));
         String statusText;
 
@@ -181,8 +181,8 @@ private:
     //==============================================================================
 
     // private member variables
-    
-struct Vertex
+
+    struct Vertex
     {
         float position[3];
         float normal[3];

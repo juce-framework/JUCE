@@ -41,7 +41,7 @@ public:
     void render() override
     {
         OpenGLHelpers::clear (Colours::black);
-        
+
     }
 
     void paint (Graphics& g) override
