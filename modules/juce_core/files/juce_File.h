@@ -348,6 +348,13 @@ public:
     bool setReadOnly (bool shouldBeReadOnly,
                       bool applyRecursively = false) const;
 
+    /** Changes the execute-permissions of a file.
+
+        @param shouldBeExecutable   whether to add or remove execute-permission
+        @returns    true if it manages to change the file's permissions.
+    */
+    bool setExecutePermission (bool shouldBeExecutable) const;
+
     /** Returns true if this file is a hidden or system file.
         The criteria for deciding whether a file is hidden are platform-dependent.
     */
@@ -968,6 +975,7 @@ private:
     bool setFileTimesInternal (int64 m, int64 a, int64 c) const;
     void getFileTimesInternal (int64& m, int64& a, int64& c) const;
     bool setFileReadOnlyInternal (bool) const;
+    bool setFileExecutableInternal (bool) const;
 };
 
 #endif   // JUCE_FILE_H_INCLUDED
