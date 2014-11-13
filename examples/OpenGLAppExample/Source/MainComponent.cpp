@@ -10,7 +10,7 @@
 #define MAINCOMPONENT_H_INCLUDED
 
 #include "../JuceLibraryCode/JuceHeader.h"
-#include "WavefrontObjParser.h"
+#include "Resources/WavefrontObjParser.h"
 
 
 
