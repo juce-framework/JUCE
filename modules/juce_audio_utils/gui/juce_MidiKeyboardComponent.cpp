@@ -26,11 +26,8 @@ class MidiKeyboardUpDownButton  : public Button
 {
 public:
     MidiKeyboardUpDownButton (MidiKeyboardComponent& comp, const int d)
-        : Button (String::empty),
-          owner (comp),
-          delta (d)
+        : Button (String::empty), owner (comp), delta (d)
     {
-        setOpaque (true);
     }
 
     void clicked() override
@@ -60,8 +57,7 @@ private:
 };
 
 //==============================================================================
-MidiKeyboardComponent::MidiKeyboardComponent (MidiKeyboardState& s,
-                                              const Orientation o)
+MidiKeyboardComponent::MidiKeyboardComponent (MidiKeyboardState& s, Orientation o)
     : state (s),
       xOffset (0),
       blackNoteLength (1),
