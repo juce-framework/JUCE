@@ -38,7 +38,10 @@ struct GUIAppWizard   : public NewProjectWizard
                                        TRANS("Don't create any files") };
 
         createFileCreationOptionComboBox (setupComp, itemsCreated,
-                                          StringArray (fileOptions, numElementsInArray (fileOptions)));
+                                          StringArray (fileOptions, numElementsInArray (fileOptions)))
+            .setSelectedId (2);
+        
+        
     }
 
     Result processResultsFromSetupItems (WizardComp& setupComp)

@@ -570,7 +570,16 @@
             <Tool Name="VCCLCompilerTool"/>
           </FileConfiguration>
         </File>
-        <File RelativePath="..\..\Source\BinaryData\juce_icon.png"/>
+        <File RelativePath="..\..\Source\BinaryData\juce_icon.png">
+          <FileConfiguration Name="Debug|Win32"
+                             ExcludedFromBuild="true">
+            <Tool Name="VCCLCompilerTool"/>
+          </FileConfiguration>
+          <FileConfiguration Name="Release|Win32"
+                             ExcludedFromBuild="true">
+            <Tool Name="VCCLCompilerTool"/>
+          </FileConfiguration>
+        </File>
         <File RelativePath="..\..\Source\BinaryData\projectIconAndroid.png">
           <FileConfiguration Name="Debug|Win32"
                              ExcludedFromBuild="true">

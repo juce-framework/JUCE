@@ -28,7 +28,7 @@ class StartPageComponent    : public Component
 public:
     StartPageComponent()
     {
-        setSize (800, 650);
+        setSize (900, 650);
 
         WizardComp* projectWizard = new WizardComp();
 

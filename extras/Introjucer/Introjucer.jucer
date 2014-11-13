@@ -560,7 +560,7 @@
             file="Source/BinaryData/colourscheme_dark.xml"/>
       <FILE id="Rm5UQS" name="colourscheme_light.xml" compile="0" resource="1"
             file="Source/BinaryData/colourscheme_light.xml"/>
-      <FILE id="rVgowdy" name="juce_icon.png" compile="0" resource="0" file="Source/BinaryData/juce_icon.png"/>
+      <FILE id="rVgowdy" name="juce_icon.png" compile="0" resource="1" file="Source/BinaryData/juce_icon.png"/>
       <FILE id="b8Brir" name="projectIconAndroid.png" compile="0" resource="1"
             file="Source/BinaryData/projectIconAndroid.png"/>
       <FILE id="wdeicV" name="projectIconCodeblocks.png" compile="0" resource="1"

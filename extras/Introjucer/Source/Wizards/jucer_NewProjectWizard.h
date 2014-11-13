@@ -27,7 +27,7 @@
 
 
 //==============================================================================
-static void createFileCreationOptionComboBox (Component& setupComp,
+static ComboBox& createFileCreationOptionComboBox (Component& setupComp,
                                               OwnedArray<Component>& itemsCreated,
                                               const StringArray& fileOptions)
 {
@@ -43,6 +43,8 @@ static void createFileCreationOptionComboBox (Component& setupComp,
     itemsCreated.add (l);
 
     c->setBounds ("parent.width / 2 + 160, 30, parent.width - 30, top + 22");
+    
+    return *c;
 }
 
 static int getFileCreationComboResult (WizardComp& setupComp)
