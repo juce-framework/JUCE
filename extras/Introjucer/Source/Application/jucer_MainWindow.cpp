@@ -292,7 +292,7 @@ void MainWindow::showNewProjectWizard()
 {
     jassert (currentProject == nullptr);
     setContentOwned (createNewProjectWizardComponent(), true);
-    setSize (900, 630);
+    centreWithSize(900, 630);
     setVisible (true);
     addToDesktop();
     getContentComponent()->grabKeyboardFocus();
