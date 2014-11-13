@@ -126,77 +126,84 @@ public:
         {
             if (isRunningFromZipFolder())
             {
-                if (AlertWindow::showOkCancelBox (AlertWindow::WarningIcon,
+                int result = AlertWindow::showYesNoCancelBox (AlertWindow::InfoIcon,
                                                   TRANS("Download JUCE version 123?").replace ("123", info.version),
                                                   TRANS("A new version of JUCE is available - would you like to overwrite the folder:\n\n"
                                                         "xfldrx\n\n"
                                                         " ..with the latest version from juce.com?\n\n"
                                                         "(Please note that this will overwrite everything in that folder!)")
-                                                    .replace ("xfldrx", getZipFolder().getFullPathName())))
-                {
+                                                    .replace ("xfldrx", getZipFolder().getFullPathName()),
+                                                  TRANS("Overwrite"),
+                                                  TRANS("Choose another folder..."),
+                                                  TRANS("Cancel"));
+
+                if (result == 1)
                     DownloadNewVersionThread::performDownload (info.url, getZipFolder());
+
+                if (result == 2)
+                    askUserForLocationToDownload (info);
+            }
+            else
+            {
+                if (AlertWindow::showOkCancelBox (AlertWindow::InfoIcon,
+                                                  TRANS("Download JUCE version 123?").replace ("123", info.version),
+                                                  TRANS("A new version of JUCE is available - would you like to download it?")))
+                    askUserForLocationToDownload (info);
+            }
+        }
+    }
+
+    void askUserForLocationToDownload (const VersionInfo& info)
+    {
+        File targetFolder (findDefaultModulesFolder());
+
+        if (isJuceModulesFolder (targetFolder))
+            targetFolder = targetFolder.getParentDirectory();
+
+        FileChooser chooser (TRANS("Please select the location into which you'd like to install the new version"),
+                             targetFolder);
+
+        if (chooser.browseForDirectory())
+        {
+            targetFolder = chooser.getResult();
+
+            if (isJuceModulesFolder (targetFolder))
+                targetFolder = targetFolder.getParentDirectory();
+
+            if (targetFolder.getChildFile ("JUCE").isDirectory())
+                targetFolder = targetFolder.getChildFile ("JUCE");
+
+            if (targetFolder.getChildFile (".git").isDirectory())
+            {
+                AlertWindow::showMessageBox (AlertWindow::WarningIcon,
+                                             TRANS ("Downloading new JUCE version"),
+                                             TRANS ("This folder is a GIT repository!\n\n"
+                                                    "You should use a \"git pull\" to update it to the latest version. "
+                                                    "Or to use the Introjucer to get an update, you should select an empty "
+                                                    "folder into which you'd like to download the new code."));
+
+                return;
+            }
+
+            if (isJuceFolder (targetFolder))
+            {
+                if (! AlertWindow::showOkCancelBox (AlertWindow::WarningIcon,
+                                                    TRANS("Overwrite existing JUCE folder?"),
+                                                    TRANS("Do you want to overwrite the folder:\n\n"
+                                                          "xfldrx\n\n"
+                                                          " ..with the latest version from juce.com?\n\n"
+                                                          "(Please note that this will overwrite everything in that folder!)")
+                                                        .replace ("xfldrx", targetFolder.getFullPathName())))
+                {
+                    return;
                 }
             }
             else
             {
-                if (! AlertWindow::showOkCancelBox (AlertWindow::WarningIcon,
-                                                    TRANS("Download JUCE version 123?").replace ("123", info.version),
-                                                    TRANS("A new version of JUCE is available - would you like to download it?")))
-                {
-                    return;
-                }
-
-                File targetFolder (findDefaultModulesFolder());
-
-                if (isJuceModulesFolder (targetFolder))
-                    targetFolder = targetFolder.getParentDirectory();
-
-                FileChooser chooser (TRANS("Please select the location into which you'd like to install the new version"),
-                                     targetFolder);
-
-                if (chooser.browseForDirectory())
-                {
-                    targetFolder = chooser.getResult();
-
-                    if (isJuceModulesFolder (targetFolder))
-                        targetFolder = targetFolder.getParentDirectory();
-
-                    if (targetFolder.getChildFile ("JUCE").isDirectory())
-                        targetFolder = targetFolder.getChildFile ("JUCE");
-
-                    if (targetFolder.getChildFile (".git").isDirectory())
-                    {
-                        AlertWindow::showMessageBox (AlertWindow::WarningIcon,
-                                                     TRANS ("Downloading new JUCE version"),
-                                                     TRANS ("This folder is a GIT repository!\n\n"
-                                                            "You should use a \"git pull\" to update it to the latest version. "
-                                                            "Or to use the Introjucer to get an update, you should select an empty "
-                                                            "folder into which you'd like to download the new code."));
-
-                        return;
-                    }
-
-                    if (isJuceFolder (targetFolder))
-                    {
-                        if (! AlertWindow::showOkCancelBox (AlertWindow::WarningIcon,
-                                                            TRANS("Overwrite existing JUCE folder?"),
-                                                            TRANS("Do you want to overwrite the folder:\n\n"
-                                                                  "xfldrx\n\n"
-                                                                  " ..with the latest version from juce.com?\n\n"
-                                                                  "(Please note that this will overwrite everything in that folder!)")
-                                                                .replace ("xfldrx", targetFolder.getFullPathName())))
-                        {
-                            return;
-                        }
-                    }
-                    else
-                    {
-                        targetFolder = targetFolder.getChildFile ("JUCE").getNonexistentSibling();
-                    }
-
-                    DownloadNewVersionThread::performDownload (info.url, targetFolder);
-                }
+                targetFolder = targetFolder.getChildFile ("JUCE").getNonexistentSibling();
             }
+
+            DownloadNewVersionThread::performDownload (info.url, targetFolder);
         }
     }
 
