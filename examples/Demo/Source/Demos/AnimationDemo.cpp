@@ -243,7 +243,7 @@ private:
         ImageButton* b = new ImageButton ("ImageButton");
 
         b->setImages (true, true, true,
-                      juceIcon, 0.7f, Colours::transparentBlack,
+                      juceIcon, 1.0f, Colours::transparentBlack,
                       juceIcon, 1.0f, Colours::white,
                       juceIcon, 1.0f, Colours::white,
                       0.5f);
