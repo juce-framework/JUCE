@@ -40,8 +40,6 @@ struct GUIAppWizard   : public NewProjectWizard
         createFileCreationOptionComboBox (setupComp, itemsCreated,
                                           StringArray (fileOptions, numElementsInArray (fileOptions)))
             .setSelectedId (2);
-        
-        
     }
 
     Result processResultsFromSetupItems (WizardComp& setupComp)
