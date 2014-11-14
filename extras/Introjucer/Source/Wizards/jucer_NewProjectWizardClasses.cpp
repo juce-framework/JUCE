@@ -61,11 +61,11 @@ struct NewProjectWizardClasses
         switch (index)
         {
             case 0:     return new NewProjectWizardClasses::GUIAppWizard();
-            case 1:     return new NewProjectWizardClasses::OpenGLAppWizard();
-            case 2:     return new NewProjectWizardClasses::AnimatedAppWizard();
-            case 3:     return new NewProjectWizardClasses::AudioPluginAppWizard();
+            case 1:     return new NewProjectWizardClasses::AnimatedAppWizard();
+            case 2:     return new NewProjectWizardClasses::OpenGLAppWizard();
+            case 3:     return new NewProjectWizardClasses::ConsoleAppWizard();
             case 4:     return new NewProjectWizardClasses::AudioAppWizard();
-            case 5:     return new NewProjectWizardClasses::ConsoleAppWizard();
+            case 5:     return new NewProjectWizardClasses::AudioPluginAppWizard();
             case 6:     return new NewProjectWizardClasses::StaticLibraryWizard();
             case 7:     return new NewProjectWizardClasses::DynamicLibraryWizard();
             case 8:     return new NewProjectWizardClasses::BlankAppWizard();
