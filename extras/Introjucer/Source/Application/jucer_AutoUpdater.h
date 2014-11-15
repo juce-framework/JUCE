@@ -124,7 +124,9 @@ public:
     {
         if (info.isDifferentVersionToCurrent())
         {
-            if (isRunningFromZipFolder())
+            File appParentFolder (File::getSpecialLocation (File::currentApplicationFile).getParentDirectory());
+
+            if (isZipFolder (appParentFolder))
             {
                 int result = AlertWindow::showYesNoCancelBox (AlertWindow::InfoIcon,
                                                   TRANS("Download JUCE version 123?").replace ("123", info.version),
@@ -132,13 +134,13 @@ public:
                                                         "xfldrx\n\n"
                                                         " ..with the latest version from juce.com?\n\n"
                                                         "(Please note that this will overwrite everything in that folder!)")
-                                                    .replace ("xfldrx", getZipFolder().getFullPathName()),
+                                                    .replace ("xfldrx", appParentFolder.getFullPathName()),
                                                   TRANS("Overwrite"),
                                                   TRANS("Choose another folder..."),
                                                   TRANS("Cancel"));
 
                 if (result == 1)
-                    DownloadNewVersionThread::performDownload (info.url, getZipFolder());
+                    DownloadNewVersionThread::performDownload (info.url, appParentFolder);
 
                 if (result == 2)
                     askUserForLocationToDownload (info);
@@ -213,17 +215,6 @@ public:
             && f.getChildFile ("extras").isDirectory()
             && f.getChildFile ("examples").isDirectory()
             && ! f.getChildFile (".git").isDirectory();
-    }
-
-    static File getZipFolder()
-    {
-        File appParentFolder (File::getSpecialLocation (File::currentApplicationFile).getParentDirectory());
-        return isZipFolder (appParentFolder) ? appParentFolder : File::nonexistent;
-    }
-
-    static bool isRunningFromZipFolder()
-    {
-        return getZipFolder() != File::nonexistent;
     }
 
 private:
