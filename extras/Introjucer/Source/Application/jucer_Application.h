@@ -99,15 +99,15 @@ public:
         utf8Window = nullptr;
         svgPathWindow = nullptr;
 
-       #if JUCE_MAC
-        MenuBarModel::setMacMainMenu (nullptr);
-       #endif
-        menuModel = nullptr;
-
         mainWindowList.forceCloseAllWindows();
         openDocumentManager.clear();
         commandManager = nullptr;
         settings = nullptr;
+
+       #if JUCE_MAC
+        MenuBarModel::setMacMainMenu (nullptr);
+       #endif
+        menuModel = nullptr;
 
         LookAndFeel::setDefaultLookAndFeel (nullptr);
 
@@ -168,19 +168,19 @@ public:
             setApplicationCommandManagerToWatch (&getCommandManager());
         }
 
-        StringArray getMenuBarNames()
+        StringArray getMenuBarNames() override
         {
             return getApp().getMenuNames();
         }
 
-        PopupMenu getMenuForIndex (int /*topLevelMenuIndex*/, const String& menuName)
+        PopupMenu getMenuForIndex (int /*topLevelMenuIndex*/, const String& menuName) override
         {
             PopupMenu menu;
             getApp().createMenu (menu, menuName);
             return menu;
         }
 
-        void menuItemSelected (int menuItemID, int /*topLevelMenuIndex*/)
+        void menuItemSelected (int menuItemID, int /*topLevelMenuIndex*/) override
         {
             getApp().handleMainMenuCommand (menuItemID);
         }
