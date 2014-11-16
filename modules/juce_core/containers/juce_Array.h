@@ -474,7 +474,11 @@ public:
             numUsed += numberOfTimesToInsertIt;
 
             while (--numberOfTimesToInsertIt >= 0)
-                new (insertPos++) ElementType (newElement);
+            {
+                new (insertPos) ElementType (newElement);
+                ++insertPos; // NB: this increment is done separately from the
+                             // new statement to avoid a compiler bug in VS2014
+            }
         }
     }
 
