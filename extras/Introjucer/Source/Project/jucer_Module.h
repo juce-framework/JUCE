@@ -31,6 +31,11 @@ class ProjectExporter;
 class ProjectSaver;
 
 //==============================================================================
+File findDefaultModulesFolder (bool mustContainJuceCoreModule = true);
+bool isJuceModulesFolder (const File&);
+bool isJuceFolder (const File&);
+
+//==============================================================================
 struct ModuleDescription
 {
     ModuleDescription() {}

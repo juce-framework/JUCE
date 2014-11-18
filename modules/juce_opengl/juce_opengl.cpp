@@ -207,5 +207,6 @@ private:
 #endif
 
 #include "opengl/juce_OpenGLContext.cpp"
+#include "utils/juce_OpenGLAppComponent.cpp"
 
 }

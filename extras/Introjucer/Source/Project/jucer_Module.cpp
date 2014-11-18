@@ -895,3 +895,13 @@ void EnabledModuleList::addModuleOfferingToCopy (const File& f)
 
     addModule (m.manifestFile, areMostModulesCopiedLocally());
 }
+
+bool isJuceFolder (const File& f)
+{
+    return isJuceModulesFolder (f.getChildFile ("modules"));
+}
+
+bool isJuceModulesFolder (const File& f)
+{
+    return f.isDirectory() && f.getChildFile ("juce_core").isDirectory();
+}
