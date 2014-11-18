@@ -964,8 +964,8 @@ public:
     {
         MSVCProjectExporterBase::createExporterProperties (props);
 
-        static const char* toolsetNames[] = { "(default)", "v100", "v100_xp", "Windows7.1SDK", nullptr };
-        const var toolsets[]              = { var(),       "v100", "v100_xp", "Windows7.1SDK" };
+        static const char* toolsetNames[] = { "(default)", "v100", "v100_xp", "Windows7.1SDK", "CTP_Nov2013", nullptr };
+        const var toolsets[]              = { var(),       "v100", "v100_xp", "Windows7.1SDK", "CTP_Nov2013" };
 
         props.add (new ChoicePropertyComponent (getPlatformToolsetValue(), "Platform Toolset",
                                                 StringArray (toolsetNames),
@@ -1598,4 +1598,45 @@ public:
 
 private:
     JUCE_DECLARE_NON_COPYABLE (MSVCProjectExporterVC2013)
+};
+
+//==============================================================================
+class MSVCProjectExporterVC2015 : public MSVCProjectExporterVC2012
+{
+public:
+    MSVCProjectExporterVC2015 (Project& p, const ValueTree& t)
+        : MSVCProjectExporterVC2012 (p, t, "VisualStudio2015")
+    {
+        name = getName();
+    }
+
+    static const char* getName()                { return "Visual Studio 2015"; }
+    static const char* getValueTreeTypeName()   { return "VS2015"; }
+    int getVisualStudioVersion() const override { return 14; }
+    String getSolutionComment() const override  { return "# Visual Studio 2015"; }
+    String getToolsVersion() const override     { return "14.0"; }
+    String getDefaultToolset() const override   { return "v140"; }
+
+    static MSVCProjectExporterVC2015* createForSettings (Project& project, const ValueTree& settings)
+    {
+        if (settings.hasType (getValueTreeTypeName()))
+            return new MSVCProjectExporterVC2015 (project, settings);
+
+        return nullptr;
+    }
+
+    void createExporterProperties (PropertyListBuilder& props) override
+    {
+        MSVCProjectExporterBase::createExporterProperties (props);
+
+        static const char* toolsetNames[] = { "(default)", "v140", "v140_xp", nullptr };
+        const var toolsets[]              = { var(),       "v140", "v140_xp" };
+
+        props.add (new ChoicePropertyComponent (getPlatformToolsetValue(), "Platform Toolset",
+                                                StringArray (toolsetNames),
+                                                Array<var> (toolsets, numElementsInArray (toolsets))));
+    }
+
+private:
+    JUCE_DECLARE_NON_COPYABLE (MSVCProjectExporterVC2015)
 };

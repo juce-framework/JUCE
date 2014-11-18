@@ -1278,7 +1278,7 @@ private:
                                     { "ipad",   "76x76", "2x" } };
         var images;
 
-        for (int i = 0; i < numElementsInArray (types); ++i)
+        for (size_t i = 0; i < sizeof (types) / sizeof (types[0]); ++i)
         {
             DynamicObject::Ptr d = new DynamicObject();
             d->setProperty ("idiom", types[i].idiom);
@@ -1308,7 +1308,7 @@ private:
                                     { "landscape", "ipad",   "full-screen", "2x" } };
         var images;
 
-        for (int i = 0; i < numElementsInArray (types); ++i)
+        for (size_t i = 0; i < sizeof (types) / sizeof (types[0]); ++i)
         {
             DynamicObject::Ptr d = new DynamicObject();
             d->setProperty ("orientation", types[i].orientation);

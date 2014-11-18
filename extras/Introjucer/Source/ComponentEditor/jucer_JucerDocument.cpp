@@ -24,7 +24,7 @@
 
 #include "../jucer_Headers.h"
 #include "../Application/jucer_Application.h"
-#include "../Project/jucer_NewFileWizard.h"
+#include "../Wizards/jucer_NewFileWizard.h"
 #include "jucer_JucerDocument.h"
 #include "jucer_ObjectTypes.h"
 #include "ui/jucer_JucerDocumentEditor.h"

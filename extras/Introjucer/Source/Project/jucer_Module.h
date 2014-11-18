@@ -31,6 +31,11 @@ class ProjectExporter;
 class ProjectSaver;
 
 //==============================================================================
+File findDefaultModulesFolder (bool mustContainJuceCoreModule = true);
+bool isJuceModulesFolder (const File&);
+bool isJuceFolder (const File&);
+
+//==============================================================================
 struct ModuleDescription
 {
     ModuleDescription() {}
@@ -103,7 +108,6 @@ private:
     mutable Array<File> sourceFiles;
 
     File getModuleHeaderFile (const File& folder) const;
-    static bool fileTargetMatches (ProjectExporter& exporter, const String& target);
 
     void findWildcardMatches (const File& localModuleFolder, const String& wildcardPath, Array<File>& result) const;
     void findAndAddCompiledCode (ProjectExporter&, ProjectSaver&, const File& localModuleFolder, Array<File>& result) const;

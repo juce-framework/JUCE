@@ -153,6 +153,13 @@ private:
                                                                                                     : VARIANT_TRUE;
                 return S_OK;
             }
+            else if (dispIdMember == DISPID_NEWWINDOW3)
+            {
+                owner.newWindowAttemptingToLoad (pDispParams->rgvarg[0].bstrVal);
+                *pDispParams->rgvarg[3].pboolVal = VARIANT_TRUE;
+
+                return S_OK;
+            }
             else if (dispIdMember == DISPID_DOCUMENTCOMPLETE)
             {
                 owner.pageFinishedLoading (getStringFromVariant (pDispParams->rgvarg[0].pvarVal));

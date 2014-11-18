@@ -41,7 +41,7 @@
     @code
 
     XmlDocument myDocument (File ("myfile.xml"));
-    XmlElement* mainElement = myDocument.getDocumentElement();
+    ScopedPointer<XmlElement> mainElement (myDocument.getDocumentElement());
 
     if (mainElement == nullptr)
     {
@@ -57,7 +57,7 @@
     Or you can use the static helper methods for quick parsing..
 
     @code
-    XmlElement* xml = XmlDocument::parse (myXmlFile);
+    ScopedPointer<XmlElement> xml (XmlDocument::parse (myXmlFile));
 
     if (xml != nullptr && xml->hasTagName ("foobar"))
     {

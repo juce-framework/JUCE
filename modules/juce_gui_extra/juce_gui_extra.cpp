@@ -91,6 +91,7 @@ namespace juce
 #include "misc/juce_SplashScreen.cpp"
 #include "misc/juce_SystemTrayIconComponent.cpp"
 #include "misc/juce_LiveConstantEditor.cpp"
+#include "misc/juce_AnimatedAppComponent.cpp"
 
 }
 
@@ -146,5 +147,6 @@ namespace juce
  bool WebBrowserComponent::pageAboutToLoad (const String&)  { return true; }
  void WebBrowserComponent::pageFinishedLoading (const String&) {}
  void WebBrowserComponent::windowCloseRequest() {}
+ void WebBrowserComponent::newWindowAttemptingToLoad (const String&) {}
 #endif
 }

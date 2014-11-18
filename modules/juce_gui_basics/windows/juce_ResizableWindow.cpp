@@ -558,6 +558,10 @@ bool ResizableWindow::restoreWindowStateFromString (const String& s)
     }
 
     updateLastPosIfNotFullScreen();
+
+    if (fs)
+        setBoundsConstrained (newPos);
+
     setFullScreen (fs);
 
     if (! fs)

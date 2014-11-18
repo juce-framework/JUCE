@@ -332,6 +332,14 @@ void Timer::startTimer (const int interval) noexcept
     }
 }
 
+void Timer::startTimerHz (int timerFrequencyHz) noexcept
+{
+    if (timerFrequencyHz > 0)
+        startTimer (1000 / timerFrequencyHz);
+    else
+        stopTimer();
+}
+
 void Timer::stopTimer() noexcept
 {
     const TimerThread::LockType::ScopedLockType sl (TimerThread::lock);

@@ -1162,9 +1162,9 @@ double Expression::Scope::evaluateFunction (const String& functionName, const do
 
         if (numParams == 1)
         {
-            if (functionName == "sin")  return sin (parameters[0]);
-            if (functionName == "cos")  return cos (parameters[0]);
-            if (functionName == "tan")  return tan (parameters[0]);
+            if (functionName == "sin")  return std::sin (parameters[0]);
+            if (functionName == "cos")  return std::cos (parameters[0]);
+            if (functionName == "tan")  return std::tan (parameters[0]);
             if (functionName == "abs")  return std::abs (parameters[0]);
         }
     }

@@ -9,17 +9,11 @@
 
 namespace BinaryData
 {
-    extern const char*   AudioPluginXCodeScript_txt;
-    const int            AudioPluginXCodeScript_txtSize = 2922;
+    extern const char*   jucer_AnimatedComponentTemplate_cpp;
+    const int            jucer_AnimatedComponentTemplate_cppSize = 1949;
 
-    extern const char*   background_tile_png;
-    const int            background_tile_pngSize = 151;
-
-    extern const char*   colourscheme_dark_xml;
-    const int            colourscheme_dark_xmlSize = 1050;
-
-    extern const char*   colourscheme_light_xml;
-    const int            colourscheme_light_xmlSize = 1050;
+    extern const char*   jucer_AudioComponentTemplate_cpp;
+    const int            jucer_AudioComponentTemplate_cppSize = 2991;
 
     extern const char*   jucer_AudioPluginEditorTemplate_cpp;
     const int            jucer_AudioPluginEditorTemplate_cppSize = 1180;
@@ -54,6 +48,9 @@ namespace BinaryData
     extern const char*   jucer_MainTemplate_NoWindow_cpp;
     const int            jucer_MainTemplate_NoWindow_cppSize = 2010;
 
+    extern const char*   jucer_MainTemplate_SimpleWindow_cpp;
+    const int            jucer_MainTemplate_SimpleWindow_cppSize = 3866;
+
     extern const char*   jucer_MainTemplate_Window_cpp;
     const int            jucer_MainTemplate_Window_cppSize = 3778;
 
@@ -72,14 +69,92 @@ namespace BinaryData
     extern const char*   jucer_NewInlineComponentTemplate_h;
     const int            jucer_NewInlineComponentTemplate_hSize = 1626;
 
+    extern const char*   jucer_OpenGLComponentTemplate_cpp;
+    const int            jucer_OpenGLComponentTemplate_cppSize = 1827;
+
+    extern const char*   AudioPluginXCodeScript_txt;
+    const int            AudioPluginXCodeScript_txtSize = 2922;
+
+    extern const char*   background_tile_png;
+    const int            background_tile_pngSize = 151;
+
+    extern const char*   colourscheme_dark_xml;
+    const int            colourscheme_dark_xmlSize = 1050;
+
+    extern const char*   colourscheme_light_xml;
+    const int            colourscheme_light_xmlSize = 1050;
+
+    extern const char*   juce_icon_png;
+    const int            juce_icon_pngSize = 83091;
+
+    extern const char*   projectIconAndroid_png;
+    const int            projectIconAndroid_pngSize = 8150;
+
+    extern const char*   projectIconCodeblocks_png;
+    const int            projectIconCodeblocks_pngSize = 11917;
+
+    extern const char*   projectIconLinuxMakefile_png;
+    const int            projectIconLinuxMakefile_pngSize = 16444;
+
+    extern const char*   projectIconVisualStudio05_png;
+    const int            projectIconVisualStudio05_pngSize = 6986;
+
+    extern const char*   projectIconVisualStudio08_png;
+    const int            projectIconVisualStudio08_pngSize = 7099;
+
+    extern const char*   projectIconVisualStudio10_png;
+    const int            projectIconVisualStudio10_pngSize = 6712;
+
+    extern const char*   projectIconVisualStudio12_png;
+    const int            projectIconVisualStudio12_pngSize = 6637;
+
+    extern const char*   projectIconVisualStudio13_png;
+    const int            projectIconVisualStudio13_pngSize = 6719;
+
+    extern const char*   projectIconXcode_png;
+    const int            projectIconXcode_pngSize = 18281;
+
+    extern const char*   projectIconXcodeIOS_png;
+    const int            projectIconXcodeIOS_pngSize = 18111;
+
     extern const char*   RecentFilesMenuTemplate_nib;
     const int            RecentFilesMenuTemplate_nibSize = 2842;
+
+    extern const char*   wizard_AnimatedApp_svg;
+    const int            wizard_AnimatedApp_svgSize = 2963;
+
+    extern const char*   wizard_AudioApp_svg;
+    const int            wizard_AudioApp_svgSize = 9802;
+
+    extern const char*   wizard_AudioPlugin_svg;
+    const int            wizard_AudioPlugin_svgSize = 10809;
+
+    extern const char*   wizard_ConsoleApp_svg;
+    const int            wizard_ConsoleApp_svgSize = 1204;
+
+    extern const char*   wizard_DLL_svg;
+    const int            wizard_DLL_svgSize = 3588;
+
+    extern const char*   wizard_GUI_svg;
+    const int            wizard_GUI_svgSize = 3448;
+
+    extern const char*   wizard_Highlight_svg;
+    const int            wizard_Highlight_svgSize = 638;
+
+    extern const char*   wizard_Openfile_svg;
+    const int            wizard_Openfile_svgSize = 686;
+
+    extern const char*   wizard_OpenGL_svg;
+    const int            wizard_OpenGL_svgSize = 2497;
+
+    extern const char*   wizard_StaticLibrary_svg;
+    const int            wizard_StaticLibrary_svgSize = 3563;
 
     // Points to the start of a list of resource names.
     extern const char* namedResourceList[];
 
     // Number of elements in the namedResourceList array.
-    const int namedResourceListSize = 22;
+    const int namedResourceListSize = 47;
 
     // If you provide the name of one of the binary resource variables above, this function will
     // return the corresponding data and its size (or a null pointer if the name isn't found).

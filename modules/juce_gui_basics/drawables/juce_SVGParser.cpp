@@ -1157,9 +1157,9 @@ private:
 
             tokens.removeEmptyStrings (true);
 
-            float numbers [6];
+            float numbers[6];
 
-            for (int i = 0; i < 6; ++i)
+            for (int i = 0; i < numElementsInArray (numbers); ++i)
                 numbers[i] = tokens[i].getFloatValue();
 
             AffineTransform trans;
@@ -1171,33 +1171,23 @@ private:
             }
             else if (t.startsWithIgnoreCase ("translate"))
             {
-                jassert (tokens.size() == 2);
                 trans = AffineTransform::translation (numbers[0], numbers[1]);
             }
             else if (t.startsWithIgnoreCase ("scale"))
             {
-                if (tokens.size() == 1)
-                    trans = AffineTransform::scale (numbers[0]);
-                else
-                    trans = AffineTransform::scale (numbers[0], numbers[1]);
+                trans = AffineTransform::scale (numbers[0], numbers[tokens.size() > 1 ? 1 : 0]);
             }
             else if (t.startsWithIgnoreCase ("rotate"))
             {
-                if (tokens.size() != 3)
-                    trans = AffineTransform::rotation (numbers[0] / (180.0f / float_Pi));
-                else
-                    trans = AffineTransform::rotation (numbers[0] / (180.0f / float_Pi),
-                                                       numbers[1], numbers[2]);
+                trans = AffineTransform::rotation (numbers[0] / (180.0f / float_Pi), numbers[1], numbers[2]);
             }
             else if (t.startsWithIgnoreCase ("skewX"))
             {
-                trans = AffineTransform (1.0f, std::tan (numbers[0] * (float_Pi / 180.0f)), 0.0f,
-                                         0.0f, 1.0f, 0.0f);
+                trans = AffineTransform::shear (std::tan (numbers[0] * (float_Pi / 180.0f)), 0.0f);
             }
             else if (t.startsWithIgnoreCase ("skewY"))
             {
-                trans = AffineTransform (1.0f, 0.0f, 0.0f,
-                                         std::tan (numbers[0] * (float_Pi / 180.0f)), 1.0f, 0.0f);
+                trans = AffineTransform::shear (0.0f, std::tan (numbers[0] * (float_Pi / 180.0f)));
             }
 
             result = trans.followedBy (result);
@@ -1218,8 +1208,8 @@ private:
         const double midX = (x1 - x2) * 0.5;
         const double midY = (y1 - y2) * 0.5;
 
-        const double cosAngle = cos (angle);
-        const double sinAngle = sin (angle);
+        const double cosAngle = std::cos (angle);
+        const double sinAngle = std::sin (angle);
         const double xp = cosAngle * midX + sinAngle * midY;
         const double yp = cosAngle * midY - sinAngle * midX;
         const double xp2 = xp * xp;

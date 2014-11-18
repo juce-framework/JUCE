@@ -501,13 +501,20 @@ void Path::addRoundedRectangle (float x, float y, float w, float h, float cs)
     addRoundedRectangle (x, y, w, h, cs, cs);
 }
 
-void Path::addTriangle (const float x1, const float y1,
-                        const float x2, const float y2,
-                        const float x3, const float y3)
+void Path::addTriangle (float x1, float y1,
+                        float x2, float y2,
+                        float x3, float y3)
 {
-    startNewSubPath (x1, y1);
-    lineTo (x2, y2);
-    lineTo (x3, y3);
+    addTriangle (Point<float> (x1, y1),
+                 Point<float> (x2, y2),
+                 Point<float> (x3, y3));
+}
+
+void Path::addTriangle (Point<float> p1, Point<float> p2, Point<float> p3)
+{
+    startNewSubPath (p1);
+    lineTo (p2);
+    lineTo (p3);
     closeSubPath();
 }
 
