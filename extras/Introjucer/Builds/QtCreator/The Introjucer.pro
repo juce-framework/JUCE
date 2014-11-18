@@ -3,6 +3,8 @@
 
 TEMPLATE = app
 CONFIG  -= qt
+CONFIG  += warn_off
+
 CONFIG(release, debug|release){
     DESTDIR     = build/release/
     OBJECTS_DIR = build/release/intermediate/
@@ -15,21 +17,38 @@ CONFIG(debug, debug|release){
 }
 
 # Compiler flags
-QMAKE_CFLAGS = -std=gnu++0x
-QMAKE_CFLAGS_DEBUG   = -g -ggdb  -O0 -D "DEBUG=1" -D "_DEBUG=1" -D "USE_FLOAT" -D "JUCER_QT_CREATOR_D5F46ABF=1" -D "JUCE_APP_VERSION=3.1.0" -D "JUCE_APP_VERSION_HEX=0x30100"
+QMAKE_CFLAGS = -std=gnu++0x -Wall
+unix:  QMAKE_CFLAGS += -I/usr/include/freetype2 -I/usr/include -D "LINUX=1"
+win32: QMAKE_CFLAGS += -mstackrealign -D__MINGW__=1 -D__MINGW_EXTENSION=
+
+QMAKE_CFLAGS_DEBUG   = -g -ggdb  -O0
 CONFIG(debug, debug|release){
     INCLUDEPATH = \
         ../../JuceLibraryCode \
         ../../../../modules \
+
+    DEFINES += \
+        "DEBUG=1" \
+        "_DEBUG=1" \
+        "JUCER_QT_CREATOR_D5F46ABF=1" \
+        "JUCE_APP_VERSION=3.1.0" \
+        "JUCE_APP_VERSION_HEX=0x30100" \
+
 }
-QMAKE_CFLAGS_RELEASE =  -O3 -D "NDEBUG=1" -D "USE_FLOAT" -D "JUCER_QT_CREATOR_D5F46ABF=1" -D "JUCE_APP_VERSION=3.1.0" -D "JUCE_APP_VERSION_HEX=0x30100"
+
+QMAKE_CFLAGS_RELEASE =  -O3
 CONFIG(release, debug|release){
     INCLUDEPATH = \
         ../../JuceLibraryCode \
         ../../../../modules \
+
+    DEFINES += \
+        "NDEBUG=1" \
+        "JUCER_QT_CREATOR_D5F46ABF=1" \
+        "JUCE_APP_VERSION=3.1.0" \
+        "JUCE_APP_VERSION_HEX=0x30100" \
+
 }
-unix:  QMAKE_CFLAGS += -I/usr/include/freetype2 -I/usr/include -D "LINUX=1"
-win32: QMAKE_CFLAGS += -mstackrealign -D__MINGW__=1 -D__MINGW_EXTENSION=
 
 
 QMAKE_CXXFLAGS         = $$QMAKE_CFLAGS
@@ -40,9 +59,12 @@ QMAKE_CXXFLAGS_DEBUG   = $$QMAKE_CFLAGS_DEBUG
 # Linker flags
 LIBS = -L$$DESTDIR 
 unix:  LIBS += -L/usr/X11R6/lib/ -lX11 -lXext -lXinerama -ldl -lfreetype -lpthread -lrt
-win32: LIBS += -lgdi32 -luser32 -lkernel32 -lcomctl32 -lcomdlg32 -limm32 -lole32 -loleaut32 -lrpcrt4 -lshlwapi -luuid -lversion -lwininet -lwinmm -lws2_32 -lwsock32
+win32: LIBS += -lgdi32 -luser32 -lkernel32 -lcomctl32 -lcomdlg32 -limm32 -lole32 -loleaut32 -lrpcrt4 -lshlwapi -luuid -lversion -lwininet -lwinmm -lws2_32 -lwsock32 -lpthread
+win32: QMAKE_LFLAGS +=  -static-libstdc++ -static-libgcc
+QMAKE_LFLAGS += 
 QMAKE_LFLAGS_DEBUG += -fvisibility=hidden
 
+# Source and header files
 SOURCES = \
 	"../../Source/Application/jucer_AppearanceSettings.cpp" \
 	"../../Source/Application/jucer_CommandLine.cpp" \
@@ -216,9 +238,9 @@ HEADERS = \
 	"../../Source/BinaryData/jucer_NewInlineComponentTemplate.h" \
 	"../../../../modules/juce_core/text/juce_CharacterFunctions.h" \
 	"../../../../modules/juce_core/text/juce_CharPointer_ASCII.h" \
+	"../../../../modules/juce_core/text/juce_CharPointer_UTF8.h" \
 	"../../../../modules/juce_core/text/juce_CharPointer_UTF16.h" \
 	"../../../../modules/juce_core/text/juce_CharPointer_UTF32.h" \
-	"../../../../modules/juce_core/text/juce_CharPointer_UTF8.h" \
 	"../../../../modules/juce_core/text/juce_Identifier.h" \
 	"../../../../modules/juce_core/text/juce_LocalisedStrings.h" \
 	"../../../../modules/juce_core/text/juce_NewLine.h" \
@@ -243,6 +265,7 @@ HEADERS = \
 	"../../../../modules/juce_core/memory/juce_OptionalScopedPointer.h" \
 	"../../../../modules/juce_core/memory/juce_ReferenceCountedObject.h" \
 	"../../../../modules/juce_core/memory/juce_ScopedPointer.h" \
+	"../../../../modules/juce_core/memory/juce_SharedResourcePointer.h" \
 	"../../../../modules/juce_core/memory/juce_Singleton.h" \
 	"../../../../modules/juce_core/memory/juce_WeakReference.h" \
 	"../../../../modules/juce_core/containers/juce_AbstractFifo.h" \
