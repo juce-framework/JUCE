@@ -28,6 +28,8 @@
 #include "../jucer_Headers.h"
 #include "jucer_MainWindow.h"
 #include "jucer_CommandLine.h"
+#include "../project/jucer_Module.h"
+#include "jucer_AutoUpdater.h"
 #include "../Code Editor/jucer_SourceCodeEditor.h"
 
 void createGUIEditorMenu (PopupMenu&);
@@ -91,10 +93,13 @@ public:
        #if JUCE_MAC
         MenuBarModel::setMacMainMenu (menuModel, nullptr, "Open Recent");
        #endif
+
+        versionChecker = new LatestVersionChecker();
     }
 
     void shutdown() override
     {
+        versionChecker = nullptr;
         appearanceEditorWindow = nullptr;
         utf8Window = nullptr;
         svgPathWindow = nullptr;
@@ -543,6 +548,8 @@ public:
     bool isRunningCommandLine;
 
 private:
+    ScopedPointer<LatestVersionChecker> versionChecker;
+
     class AsyncQuitRetrier  : private Timer
     {
     public:
