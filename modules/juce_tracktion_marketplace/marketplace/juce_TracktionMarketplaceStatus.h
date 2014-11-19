@@ -128,7 +128,7 @@ public:
     */
     void setUserEmail (const String& usernameOrEmail);
 
-    /** Returns the user name if known. */
+    /** Returns the user's email address if known. */
     String getUserEmail() const;
 
     /** Attempts to perform an unlock using a block of key-file data provided.
