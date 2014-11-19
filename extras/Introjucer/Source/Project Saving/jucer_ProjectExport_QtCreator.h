@@ -198,10 +198,10 @@ private:
 
         StringPairArray defines;
         // general options
-        out << "QMAKE_CFLAGS = -std=gnu++0x -Wall" << newLine;
+        out << "QMAKE_CXXFLAGS = -std=c++11 -Wall" << newLine;
         // Linux specific options
         defines.clear();
-        out << "unix:  QMAKE_CFLAGS += -I/usr/include/freetype2 -I/usr/include";
+        out << "unix:  QMAKE_CXXFLAGS += -I/usr/include/freetype2 -I/usr/include";
         if (makefileIsDLL)
             out << " -fPIC";
         defines.set ("LINUX", "1");
@@ -210,7 +210,7 @@ private:
 
         // Windows specific options
         defines.clear();
-        out << "win32: QMAKE_CFLAGS += -mstackrealign -D__MINGW__=1 -D__MINGW_EXTENSION="
+        out << "win32: QMAKE_CXXFLAGS += -mstackrealign -D__MINGW__=1 -D__MINGW_EXTENSION="
             << createGCCPreprocessorFlags (defines)
             << newLine;
 
@@ -218,7 +218,7 @@ private:
 
         for (ConstConfigIterator config (*this); config.next();) {
             if (!config->isDebug()) {
-                out << "QMAKE_CFLAGS_RELEASE = ";
+                out << "QMAKE_CXXFLAGS_RELEASE = ";
                 out << " -O" << config->getGCCOptimisationFlag();
                 out << (" "  + replacePreprocessorTokens (*config, getExtraCompilerFlagsString())).trimEnd()
                     << newLine;
@@ -242,7 +242,7 @@ private:
 
             } else {
 
-                out << "QMAKE_CFLAGS_DEBUG   = -g -ggdb ";
+                out << "QMAKE_CXXFLAGS_DEBUG   = -g -ggdb ";
                 out << " -O" << config->getGCCOptimisationFlag();
                 out << (" "  + replacePreprocessorTokens (*config, getExtraCompilerFlagsString())).trimEnd()
                     << newLine;
@@ -270,9 +270,9 @@ private:
         out << newLine;
 
         // Copy flags from C to CXX
-        out << "QMAKE_CXXFLAGS         = $$QMAKE_CFLAGS"         << newLine
-            << "QMAKE_CXXFLAGS_RELEASE = $$QMAKE_CFLAGS_RELEASE" << newLine
-            << "QMAKE_CXXFLAGS_DEBUG   = $$QMAKE_CFLAGS_DEBUG"   << newLine;
+        out << "QMAKE_CFLAGS         = $$QMAKE_CXXFLAGS"         << newLine
+            << "QMAKE_CFLAGS_RELEASE = $$QMAKE_CXXFLAGS_RELEASE" << newLine
+            << "QMAKE_CFLAGS_DEBUG   = $$QMAKE_CXXFLAGS_DEBUG"   << newLine;
 
         out << newLine  << newLine;
 
