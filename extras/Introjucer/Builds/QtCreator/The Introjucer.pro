@@ -59,7 +59,7 @@ QMAKE_CFLAGS_DEBUG   = $$QMAKE_CXXFLAGS_DEBUG
 # Linker flags
 LIBS = -L$$DESTDIR 
 unix:  LIBS += -L/usr/X11R6/lib/ -lX11 -lXext -lXinerama -ldl -lfreetype -lpthread -lrt
-win32: LIBS += -lgdi32 -luser32 -lkernel32 -lcomctl32 -lpthread -lcomdlg32 -limm32 -lole32 -loleaut32 -lrpcrt4 -lshlwapi -luuid -lversion -lwininet -lwinmm -lws2_32 -lwsock32
+win32: LIBS += -lgdi32 -luser32 -lkernel32 -lcomctl32 -lcomdlg32 -limm32 -lole32 -loleaut32 -lrpcrt4 -lshlwapi -luuid -lversion -lwininet -lwinmm -lws2_32 -lwsock32 -static -lpthread
 win32: QMAKE_LFLAGS += -static-libstdc++ -static-libgcc
 QMAKE_LFLAGS += 
 QMAKE_LFLAGS_DEBUG += -fvisibility=hidden

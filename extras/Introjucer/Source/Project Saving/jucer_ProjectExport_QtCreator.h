@@ -290,10 +290,11 @@ private:
         out << newLine;
 
         // Windows specific linker flags
-        out << "win32: LIBS += -lgdi32 -luser32 -lkernel32 -lcomctl32 -lpthread";
+        out << "win32: LIBS += -lgdi32 -luser32 -lkernel32 -lcomctl32";
         for (int i = 0; i < mingwLibs.size(); ++i)
             out << " -l" << mingwLibs[i];
-        out << newLine;
+        // statically link pthread as it usually is not in the path on windows
+        out << " -static -lpthread" << newLine;
 
         // statically link some libraries on windows, so we can easily
         // run the program even if the compiler libraries are not
