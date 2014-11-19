@@ -574,7 +574,15 @@ public:
     {
         currentModifiers = currentModifiers.withoutMouseButtons();
 
-        if (isWindowAtPoint ([ev window], [[ev window] convertBaseToScreen: [ev locationInWindow]]))
+        NSPoint windowPos = [ev locationInWindow];
+
+       #if defined (MAC_OS_X_VERSION_10_7) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_7
+        NSPoint screenPos = [[ev window] convertRectToScreen: NSMakeRect (windowPos.x, windowPos.y, 1.0f, 1.0f)].origin;
+       #else
+        NSPoint screenPos = [[ev window] convertBaseToScreen: windowPos];
+       #endif
+
+        if (isWindowAtPoint ([ev window], screenPos))
             sendMouseEvent (ev);
         else
             // moved into another window which overlaps this one, so trigger an exit
@@ -1786,7 +1794,9 @@ private:
 
     static void windowDidExitFullScreen (id, SEL, NSNotification*)
     {
+       #if defined (MAC_OS_X_VERSION_10_6) && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_6
         [NSApp setPresentationOptions: NSApplicationPresentationDefault];
+       #endif
     }
 
     static void zoom (id self, SEL, id sender)

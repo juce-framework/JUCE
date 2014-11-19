@@ -135,6 +135,9 @@ public:
     /** Metadata property name used when reading an ISRC code from an AXML chunk. */
     static const char* const ISRC;
 
+    /** Metadata property name used when reading a WAV file with a Tracktion chunk. */
+    static const char* const tracktionLoopInfo;
+
     //==============================================================================
     Array<int> getPossibleSampleRates() override;
     Array<int> getPossibleBitDepths() override;

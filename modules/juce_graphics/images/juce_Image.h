@@ -67,7 +67,7 @@ public:
 
     //==============================================================================
     /** Creates a null image. */
-    Image();
+    Image() noexcept;
 
     /** Creates an image with a specified size and format.
 
@@ -106,7 +106,7 @@ public:
         point to the same shared image data. To make sure that an Image object has its own unique,
         unshared internal data, call duplicateIfShared().
     */
-    Image (const Image&);
+    Image (const Image&) noexcept;
 
     /** Makes this image refer to the same underlying image as another object.
 
@@ -408,7 +408,7 @@ public:
     ImagePixelData* getPixelData() const noexcept       { return image; }
 
     /** @internal */
-    explicit Image (ImagePixelData*);
+    explicit Image (ImagePixelData*) noexcept;
 
 private:
     //==============================================================================

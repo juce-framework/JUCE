@@ -536,9 +536,9 @@ private:
         return AudioSessionGetProperty (propID, &valueSize, &result);
     }
 
-    static bool setSessionUInt32Property  (AudioSessionPropertyID propID, UInt32  v) noexcept  { AudioSessionSetProperty (propID, sizeof (v), &v) == kAudioSessionNoError; }
-    static bool setSessionFloat32Property (AudioSessionPropertyID propID, Float32 v) noexcept  { AudioSessionSetProperty (propID, sizeof (v), &v) == kAudioSessionNoError; }
-    static bool setSessionFloat64Property (AudioSessionPropertyID propID, Float64 v) noexcept  { AudioSessionSetProperty (propID, sizeof (v), &v) == kAudioSessionNoError; }
+    static bool setSessionUInt32Property  (AudioSessionPropertyID propID, UInt32  v) noexcept  { return AudioSessionSetProperty (propID, sizeof (v), &v) == kAudioSessionNoError; }
+    static bool setSessionFloat32Property (AudioSessionPropertyID propID, Float32 v) noexcept  { return AudioSessionSetProperty (propID, sizeof (v), &v) == kAudioSessionNoError; }
+    static bool setSessionFloat64Property (AudioSessionPropertyID propID, Float64 v) noexcept  { return AudioSessionSetProperty (propID, sizeof (v), &v) == kAudioSessionNoError; }
 
     JUCE_DECLARE_NON_COPYABLE (iOSAudioIODevice)
 };

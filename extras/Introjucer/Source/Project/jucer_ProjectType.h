@@ -57,6 +57,7 @@ public:
     static const char* getDynamicLibTypeName();
     static const char* getAudioPluginTypeName();
 
+
     virtual void setMissingProjectProperties (Project&) const = 0;
     virtual void createPropertyEditors (Project&, PropertyListBuilder&) const = 0;
     virtual void prepareExporter (ProjectExporter&) const = 0;

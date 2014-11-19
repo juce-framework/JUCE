@@ -238,7 +238,7 @@ void ComponentBuilder::updateChildComponents (Component& parent, const ValueTree
 
     const int numExistingChildComps = parent.getNumChildComponents();
 
-    Array <Component*> componentsInOrder;
+    Array<Component*> componentsInOrder;
     componentsInOrder.ensureStorageAllocated (numExistingChildComps);
 
     {

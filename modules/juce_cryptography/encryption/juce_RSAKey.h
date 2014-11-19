@@ -113,10 +113,14 @@ public:
 
     //==============================================================================
     /** Turns the key into a string representation.
-
         This can be reloaded using the constructor that takes a string.
     */
     String toString() const;
+
+    /** Returns true if the object is a valid key, or false if it was created by
+        the default constructor.
+    */
+    bool isValid() const noexcept;
 
     //==============================================================================
     /** Encodes or decodes a value.

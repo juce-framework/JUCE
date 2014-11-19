@@ -145,7 +145,7 @@ private:
     ScopedPointer<Slider> sliders[4];
     ScopedPointer<ColourSpaceView> colourSpace;
     ScopedPointer<HueSelectorComp> hueSelector;
-    OwnedArray <SwatchComponent> swatchComponents;
+    OwnedArray<SwatchComponent> swatchComponents;
     const int flags;
     int edgeGap;
     Rectangle<int> previewArea;

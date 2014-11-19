@@ -46,7 +46,7 @@ public:
         subclass of Component or use one of the other types of component from
         the library.
     */
-    Component();
+    Component() noexcept;
 
     /** Destructor.
 
@@ -66,7 +66,7 @@ public:
     /** Creates a component, setting its name at the same time.
         @see getName, setName
     */
-    explicit Component (const String& componentName);
+    explicit Component (const String& componentName) noexcept;
 
     /** Returns the name of this component.
         @see setName
@@ -314,16 +314,6 @@ public:
         If this component has no parent, the return value will simply be the same as getBounds().
     */
     Rectangle<int> getBoundsInParent() const noexcept;
-
-    /** Returns the region of this component that's not obscured by other, opaque components.
-
-        The RectangleList that is returned represents the area of this component
-        which isn't covered by opaque child components.
-
-        If includeSiblings is true, it will also take into account any siblings
-        that may be overlapping the component.
-    */
-    void getVisibleArea (RectangleList<int>& result, bool includeSiblings) const;
 
     //==============================================================================
     /** Returns this component's x coordinate relative the screen's top-left origin.
@@ -807,7 +797,7 @@ public:
     TargetClass* findParentComponentOfClass() const
     {
         for (Component* p = parentComponent; p != nullptr; p = p->parentComponent)
-            if (TargetClass* const target = dynamic_cast <TargetClass*> (p))
+            if (TargetClass* const target = dynamic_cast<TargetClass*> (p))
                 return target;
 
         return nullptr;
@@ -1166,7 +1156,7 @@ public:
         By default, components are considered transparent, unless this is used to
         make it otherwise.
 
-        @see isOpaque, getVisibleArea
+        @see isOpaque
     */
     void setOpaque (bool shouldBeOpaque);
 
@@ -1757,11 +1747,14 @@ public:
     */
     virtual void focusLost (FocusChangeType cause);
 
-    /** Called to indicate that one of this component's children has been focused or unfocused.
+    /** Called to indicate a change in whether or not this component is the parent of the
+        currently-focused component.
 
-        Essentially this means that the return value of a call to hasKeyboardFocus (true) has
+        Essentially this is called when the return value of a call to hasKeyboardFocus (true) has
         changed. It happens when focus moves from one of this component's children (at any depth)
         to a component that isn't contained in this one, (or vice-versa).
+        Note that this method does NOT get called to when focus simply moves from one of its
+        child components to another.
 
         @see focusGained, setWantsKeyboardFocus, getCurrentlyFocusedComponent, hasKeyboardFocus
     */
@@ -1796,9 +1789,7 @@ public:
     bool isMouseButtonDown() const;
 
     /** True if the mouse is over this component, or if it's being dragged in this component.
-
         This is a handy equivalent to (isMouseOver() || isMouseButtonDown()).
-
         @see isMouseOver, isMouseButtonDown, isMouseButtonDownAnywhere
     */
     bool isMouseOverOrDragging() const;
@@ -2136,31 +2127,31 @@ public:
         SafePointer() noexcept {}
 
         /** Creates a SafePointer that points at the given component. */
-        SafePointer (ComponentType* const component)        : weakRef (component) {}
+        SafePointer (ComponentType* component)                : weakRef (component) {}
 
         /** Creates a copy of another SafePointer. */
-        SafePointer (const SafePointer& other) noexcept     : weakRef (other.weakRef) {}
+        SafePointer (const SafePointer& other) noexcept       : weakRef (other.weakRef) {}
 
         /** Copies another pointer to this one. */
-        SafePointer& operator= (const SafePointer& other)           { weakRef = other.weakRef; return *this; }
+        SafePointer& operator= (const SafePointer& other)     { weakRef = other.weakRef; return *this; }
 
         /** Copies another pointer to this one. */
-        SafePointer& operator= (ComponentType* const newComponent)  { weakRef = newComponent; return *this; }
+        SafePointer& operator= (ComponentType* newComponent)  { weakRef = newComponent; return *this; }
 
         /** Returns the component that this pointer refers to, or null if the component no longer exists. */
-        ComponentType* getComponent() const noexcept        { return dynamic_cast <ComponentType*> (weakRef.get()); }
+        ComponentType* getComponent() const noexcept          { return dynamic_cast<ComponentType*> (weakRef.get()); }
 
         /** Returns the component that this pointer refers to, or null if the component no longer exists. */
-        operator ComponentType*() const noexcept            { return getComponent(); }
+        operator ComponentType*() const noexcept              { return getComponent(); }
 
         /** Returns the component that this pointer refers to, or null if the component no longer exists. */
-        ComponentType* operator->() noexcept                { return getComponent(); }
+        ComponentType* operator->() noexcept                  { return getComponent(); }
 
         /** Returns the component that this pointer refers to, or null if the component no longer exists. */
-        const ComponentType* operator->() const noexcept    { return getComponent(); }
+        const ComponentType* operator->() const noexcept      { return getComponent(); }
 
         /** If the component is valid, this deletes it and sets this pointer to null. */
-        void deleteAndZero()                                { delete getComponent(); }
+        void deleteAndZero()                                  { delete getComponent(); }
 
         bool operator== (ComponentType* component) const noexcept   { return weakRef == component; }
         bool operator!= (ComponentType* component) const noexcept   { return weakRef != component; }
@@ -2268,20 +2259,20 @@ private:
     String componentName, componentID;
     Component* parentComponent;
     Rectangle<int> bounds;
-    ScopedPointer <Positioner> positioner;
-    ScopedPointer <AffineTransform> affineTransform;
-    Array <Component*> childComponentList;
+    ScopedPointer<Positioner> positioner;
+    ScopedPointer<AffineTransform> affineTransform;
+    Array<Component*> childComponentList;
     LookAndFeel* lookAndFeel;
     MouseCursor cursor;
     ImageEffectFilter* effect;
-    ScopedPointer <CachedComponentImage> cachedImage;
+    ScopedPointer<CachedComponentImage> cachedImage;
 
     class MouseListenerList;
     friend class MouseListenerList;
     friend struct ContainerDeletePolicy<MouseListenerList>;
-    ScopedPointer <MouseListenerList> mouseListeners;
-    ScopedPointer <Array <KeyListener*> > keyListeners;
-    ListenerList <ComponentListener> componentListeners;
+    ScopedPointer<MouseListenerList> mouseListeners;
+    ScopedPointer<Array<KeyListener*> > keyListeners;
+    ListenerList<ComponentListener> componentListeners;
     NamedValueSet properties;
 
     friend class WeakReference<Component>;
@@ -2308,9 +2299,9 @@ private:
         bool mouseDownWasBlocked        : 1;
         bool isMoveCallbackPending      : 1;
         bool isResizeCallbackPending    : 1;
-      #if JUCE_DEBUG
+       #if JUCE_DEBUG
         bool isInsidePaintCall          : 1;
-      #endif
+       #endif
     };
 
     union

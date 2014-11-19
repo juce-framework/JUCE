@@ -29,10 +29,6 @@ struct UndoManager::ActionSet
           time (Time::getCurrentTime())
     {}
 
-    OwnedArray <UndoableAction> actions;
-    String name;
-    Time time;
-
     bool perform() const
     {
         for (int i = 0; i < actions.size(); ++i)
@@ -60,6 +56,10 @@ struct UndoManager::ActionSet
 
         return total;
     }
+
+    OwnedArray<UndoableAction> actions;
+    String name;
+    Time time;
 };
 
 //==============================================================================
@@ -102,6 +102,19 @@ void UndoManager::setMaxNumberOfStoredUnits (const int maxNumberOfUnitsToKeep,
 //==============================================================================
 bool UndoManager::perform (UndoableAction* const newAction, const String& actionName)
 {
+    if (perform (newAction))
+    {
+        if (actionName.isNotEmpty())
+            setCurrentTransactionName (actionName);
+
+        return true;
+    }
+
+    return false;
+}
+
+bool UndoManager::perform (UndoableAction* const newAction)
+{
     if (newAction != nullptr)
     {
         ScopedPointer<UndoableAction> action (newAction);
@@ -112,9 +125,6 @@ bool UndoManager::perform (UndoableAction* const newAction, const String& action
                            // or undo() methods, or else these actions will be discarded!
             return false;
         }
-
-        if (actionName.isNotEmpty())
-            currentTransactionName = actionName;
 
         if (action->perform())
         {
@@ -134,7 +144,7 @@ bool UndoManager::perform (UndoableAction* const newAction, const String& action
             }
             else
             {
-                actionSet = new ActionSet (currentTransactionName);
+                actionSet = new ActionSet (newTransactionName);
                 transactions.insert (nextIndex, actionSet);
                 ++nextIndex;
             }
@@ -174,23 +184,31 @@ void UndoManager::clearFutureTransactions()
     }
 }
 
-void UndoManager::beginNewTransaction (const String& actionName)
+void UndoManager::beginNewTransaction() noexcept
 {
-    newTransaction = true;
-    currentTransactionName = actionName;
+    beginNewTransaction (String());
 }
 
-void UndoManager::setCurrentTransactionName (const String& newName)
+void UndoManager::beginNewTransaction (const String& actionName) noexcept
 {
-    currentTransactionName = newName;
+    newTransaction = true;
+    newTransactionName = actionName;
+}
+
+void UndoManager::setCurrentTransactionName (const String& newName) noexcept
+{
+    if (newTransaction)
+        newTransactionName = newName;
+    else if (ActionSet* action = getCurrentSet())
+        action->name = newName;
 }
 
 //==============================================================================
 UndoManager::ActionSet* UndoManager::getCurrentSet() const noexcept     { return transactions [nextIndex - 1]; }
 UndoManager::ActionSet* UndoManager::getNextSet() const noexcept        { return transactions [nextIndex]; }
 
-bool UndoManager::canUndo() const   { return getCurrentSet() != nullptr; }
-bool UndoManager::canRedo() const   { return getNextSet()    != nullptr; }
+bool UndoManager::canUndo() const noexcept   { return getCurrentSet() != nullptr; }
+bool UndoManager::canRedo() const noexcept   { return getNextSet()    != nullptr; }
 
 bool UndoManager::undo()
 {
@@ -267,7 +285,7 @@ bool UndoManager::undoCurrentTransactionOnly()
     return newTransaction ? false : undo();
 }
 
-void UndoManager::getActionsInCurrentTransaction (Array <const UndoableAction*>& actionsFound) const
+void UndoManager::getActionsInCurrentTransaction (Array<const UndoableAction*>& actionsFound) const
 {
     if (! newTransaction)
         if (const ActionSet* const s = getCurrentSet())

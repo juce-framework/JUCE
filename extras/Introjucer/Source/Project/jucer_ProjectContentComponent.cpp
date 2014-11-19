@@ -30,7 +30,7 @@
 #include "../Project Saving/jucer_ProjectExporter.h"
 #include "../Utility/jucer_TranslationTool.h"
 #include "../Utility/jucer_JucerTreeViewBase.h"
-#include "jucer_NewFileWizard.h"
+#include "../Wizards/jucer_NewFileWizard.h"
 #include "jucer_GroupInformationComponent.h"
 
 //==============================================================================
@@ -144,20 +144,34 @@ private:
 };
 
 //==============================================================================
-class LogoComponent  : public Component
+struct LogoComponent  : public Component
 {
-public:
-    LogoComponent() {}
-
     void paint (Graphics& g)
     {
-        const Path& logo = getIcons().mainJuceLogo;
-        const AffineTransform trans (RectanglePlacement (RectanglePlacement::centred)
-                                        .getTransformToFit (logo.getBounds(),
-                                                            getLocalBounds().toFloat()));
-
         g.setColour (findColour (mainBackgroundColourId).contrasting (0.3f));
-        g.fillPath (logo, trans);
+
+        Rectangle<int> r (getLocalBounds());
+
+        g.setFont (15.0f);
+        g.drawFittedText (getVersionInfo(), r.removeFromBottom (30), Justification::centred, 2);
+
+        const Path& logo = getIcons().mainJuceLogo;
+        g.fillPath (logo, RectanglePlacement (RectanglePlacement::centred)
+                             .getTransformToFit (logo.getBounds(), r.toFloat()));
+    }
+
+    static String getVersionInfo()
+    {
+        const Time buildDate (Time::getCompilationDate());
+
+        String s;
+
+        s << SystemStats::getJUCEVersion() << newLine
+          << "Introjucer built: " << buildDate.getDayOfMonth()
+          << " " << Time::getMonthName (buildDate.getMonth(), true)
+          << " " << buildDate.getYear();
+
+        return s;
     }
 };
 
@@ -227,7 +241,8 @@ void ProjectContentComponent::resized()
     if (contentView != nullptr)
         contentView->setBounds (r);
 
-    logo->setBounds (r.reduced (r.getWidth() / 4, r.getHeight() / 4));
+    if (logo != nullptr)
+        logo->setBounds (r.reduced (r.getWidth() / 4, r.getHeight() / 4));
 }
 
 void ProjectContentComponent::lookAndFeelChanged()

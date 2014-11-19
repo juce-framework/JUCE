@@ -53,7 +53,7 @@ static void sanityCheckTagName (const String& tag)
     (void) tag;
 
     // the tag name mustn't be empty, or it'll look like a text element!
-    jassert (tag.containsNonWhitespaceChars())
+    jassert (tag.containsNonWhitespaceChars());
 
     // The tag can't contain spaces or other characters that would create invalid XML!
     jassert (! tag.containsAnyOf (" <>/&(){}"));
@@ -714,7 +714,7 @@ bool XmlElement::isEquivalentTo (const XmlElement* const other,
             {
                 if (thisAtt == nullptr || otherAtt == nullptr)
                 {
-                    if (thisAtt == otherAtt) // both 0, so it's a match
+                    if (thisAtt == otherAtt) // both nullptr, so it's a match
                         break;
 
                     return false;

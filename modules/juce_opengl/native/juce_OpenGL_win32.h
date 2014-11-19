@@ -22,7 +22,7 @@
   ==============================================================================
 */
 
-extern ComponentPeer* createNonRepaintingEmbeddedWindowsPeer (Component*, void* parent);
+extern ComponentPeer* createNonRepaintingEmbeddedWindowsPeer (Component&, void* parent);
 
 //==============================================================================
 class OpenGLContext::NativeContext
@@ -33,7 +33,9 @@ public:
                    void* contextToShareWith,
                    bool /*useMultisampling*/,
                    OpenGLVersion)
+        : context (nullptr)
     {
+        dummyComponent = new DummyComponent (*this);
         createNativeWindow (component);
 
         PIXELFORMATDESCRIPTOR pfd;
@@ -82,8 +84,8 @@ public:
         releaseDC();
     }
 
-    void initialiseOnRenderThread (OpenGLContext&) {}
-    void shutdownOnRenderThread()           { deactivateCurrentContext(); }
+    void initialiseOnRenderThread (OpenGLContext& c) { context = &c; }
+    void shutdownOnRenderThread()           { deactivateCurrentContext(); context = nullptr; }
 
     static void deactivateCurrentContext()  { wglMakeCurrent (0, 0); }
     bool makeActive() const noexcept        { return isActive() || wglMakeCurrent (dc, renderContext) != FALSE; }
@@ -114,13 +116,30 @@ public:
     void* getRawContext() const noexcept            { return renderContext; }
     unsigned int getFrameBufferID() const noexcept  { return 0; }
 
+    void triggerRepaint()
+    {
+        if (context != nullptr)
+            context->triggerRepaint();
+    }
+
     struct Locker { Locker (NativeContext&) {} };
 
 private:
-    Component dummyComponent;
+    struct DummyComponent  : public Component
+    {
+        DummyComponent (NativeContext& c) : context (c) {}
+
+        // The windowing code will call this when a paint callback happens
+        void handleCommandMessage (int) override   { context.triggerRepaint(); }
+
+        NativeContext& context;
+    };
+
+    ScopedPointer<DummyComponent> dummyComponent;
     ScopedPointer<ComponentPeer> nativeWindow;
     HGLRC renderContext;
     HDC dc;
+    OpenGLContext* context;
 
     #define JUCE_DECLARE_WGL_EXTENSION_FUNCTION(name, returnType, params) \
         typedef returnType (__stdcall *type_ ## name) params; type_ ## name name;
@@ -142,7 +161,7 @@ private:
     void createNativeWindow (Component& component)
     {
         Component* topComp = component.getTopLevelComponent();
-        nativeWindow = createNonRepaintingEmbeddedWindowsPeer (&dummyComponent, topComp->getWindowHandle());
+        nativeWindow = createNonRepaintingEmbeddedWindowsPeer (*dummyComponent, topComp->getWindowHandle());
 
         if (ComponentPeer* peer = topComp->getPeer())
             updateWindowPosition (peer->getAreaCoveredBy (component));

@@ -22,7 +22,7 @@
   ==============================================================================
 */
 
-#if _MSC_VER || JUCE_MINGW
+#if _MSC_VER || defined (__MINGW32__) || defined (__MINGW64__)
  #include <windows.h>
 #endif
 

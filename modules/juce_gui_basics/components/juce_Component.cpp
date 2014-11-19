@@ -141,7 +141,7 @@ public:
     }
 
 private:
-    Array <MouseListener*> listeners;
+    Array<MouseListener*> listeners;
     int numDeepMouseListeners;
 
     class BailOutChecker2
@@ -256,7 +256,7 @@ struct Component::ComponentHelpers
    #if JUCE_MODAL_LOOPS_PERMITTED
     static void* runModalLoopCallback (void* userData)
     {
-        return (void*) (pointer_sized_int) static_cast <Component*> (userData)->runModalLoop();
+        return (void*) (pointer_sized_int) static_cast<Component*> (userData)->runModalLoop();
     }
    #endif
 
@@ -399,16 +399,6 @@ struct Component::ComponentHelpers
         return convertFromDistantParentSpace (topLevelComp, *target, p);
     }
 
-    static Rectangle<int> getUnclippedArea (const Component& comp)
-    {
-        Rectangle<int> r (comp.getLocalBounds());
-
-        if (Component* const p = comp.getParentComponent())
-            r = r.getIntersection (convertFromParentSpace (comp, getUnclippedArea (*p)));
-
-        return r;
-    }
-
     static bool clipObscuredRegions (const Component& comp, Graphics& g, const Rectangle<int>& clipRect, Point<int> delta)
     {
         bool nothingChanged = true;
@@ -441,35 +431,6 @@ struct Component::ComponentHelpers
         return nothingChanged;
     }
 
-    static void subtractObscuredRegions (const Component& comp, RectangleList<int>& result,
-                                         Point<int> delta, const Rectangle<int>& clipRect,
-                                         const Component* const compToAvoid)
-    {
-        for (int i = comp.childComponentList.size(); --i >= 0;)
-        {
-            const Component* const c = comp.childComponentList.getUnchecked(i);
-
-            if (c != compToAvoid && c->isVisible())
-            {
-                if (c->isOpaque() && c->componentTransparency == 0)
-                {
-                    Rectangle<int> childBounds (c->bounds.getIntersection (clipRect));
-                    childBounds.translate (delta.x, delta.y);
-
-                    result.subtract (childBounds);
-                }
-                else
-                {
-                    Rectangle<int> newClip (clipRect.getIntersection (c->bounds));
-                    newClip.translate (-c->getX(), -c->getY());
-
-                    subtractObscuredRegions (*c, result, c->getPosition() + delta,
-                                             newClip, compToAvoid);
-                }
-            }
-        }
-    }
-
     static Rectangle<int> getParentOrMainMonitorBounds (const Component& comp)
     {
         if (Component* p = comp.getParentComponent())
@@ -480,7 +441,7 @@ struct Component::ComponentHelpers
 };
 
 //==============================================================================
-Component::Component()
+Component::Component() noexcept
   : parentComponent (nullptr),
     lookAndFeel (nullptr),
     effect (nullptr),
@@ -489,7 +450,7 @@ Component::Component()
 {
 }
 
-Component::Component (const String& name)
+Component::Component (const String& name) noexcept
   : componentName (name),
     parentComponent (nullptr),
     lookAndFeel (nullptr),
@@ -619,7 +580,6 @@ bool Component::isShowing() const
 
     return false;
 }
-
 
 //==============================================================================
 void* Component::getWindowHandle() const
@@ -880,7 +840,7 @@ void Component::setBufferedToImage (const bool shouldBeBuffered)
     // so by calling setBufferedToImage, you'll be deleting the custom one - this is almost certainly
     // not what you wanted to happen... If you really do know what you're doing here, and want to
     // avoid this assertion, just call setCachedComponentImage (nullptr) before setBufferedToImage().
-    jassert (cachedImage == nullptr || dynamic_cast <StandardCachedComponentImage*> (cachedImage.get()) != nullptr);
+    jassert (cachedImage == nullptr || dynamic_cast<StandardCachedComponentImage*> (cachedImage.get()) != nullptr);
 
     if (shouldBeBuffered)
     {
@@ -1643,7 +1603,7 @@ Component* Component::getChildComponent (const int index) const noexcept
 
 int Component::getIndexOfChildComponent (const Component* const child) const noexcept
 {
-    return childComponentList.indexOf (const_cast <Component*> (child));
+    return childComponentList.indexOf (const_cast<Component*> (child));
 }
 
 Component* Component::findChildWithID (StringRef targetID) const noexcept
@@ -1665,7 +1625,7 @@ Component* Component::getTopLevelComponent() const noexcept
     while (comp->parentComponent != nullptr)
         comp = comp->parentComponent;
 
-    return const_cast <Component*> (comp);
+    return const_cast<Component*> (comp);
 }
 
 bool Component::isParentOf (const Component* possibleChild) const noexcept
@@ -2205,7 +2165,7 @@ void Component::sendLookAndFeelChange()
 Colour Component::findColour (const int colourId, const bool inheritFromParent) const
 {
     if (const var* const v = properties.getVarPointer (ComponentHelpers::getColourPropertyId (colourId)))
-        return Colour ((uint32) static_cast <int> (*v));
+        return Colour ((uint32) static_cast<int> (*v));
 
     if (inheritFromParent && parentComponent != nullptr
          && (lookAndFeel == nullptr || ! lookAndFeel->isColourSpecified (colourId)))
@@ -2282,28 +2242,6 @@ Rectangle<int> Component::getBoundsInParent() const noexcept
 {
     return affineTransform == nullptr ? bounds
                                       : bounds.transformedBy (*affineTransform);
-}
-
-void Component::getVisibleArea (RectangleList<int>& result, const bool includeSiblings) const
-{
-    result.clear();
-    const Rectangle<int> unclipped (ComponentHelpers::getUnclippedArea (*this));
-
-    if (! unclipped.isEmpty())
-    {
-        result.add (unclipped);
-
-        if (includeSiblings)
-        {
-            const Component* const c = getTopLevelComponent();
-
-            ComponentHelpers::subtractObscuredRegions (*c, result, getLocalPoint (c, Point<int>()),
-                                                       c->getLocalBounds(), this);
-        }
-
-        ComponentHelpers::subtractObscuredRegions (*this, result, Point<int>(), unclipped, nullptr);
-        result.consolidate();
-    }
 }
 
 //==============================================================================
@@ -2856,7 +2794,7 @@ void Component::grabFocusInternal (const FocusChangeType cause, const bool canTr
             else
             {
                 // find the default child component..
-                ScopedPointer <KeyboardFocusTraverser> traverser (createFocusTraverser());
+                ScopedPointer<KeyboardFocusTraverser> traverser (createFocusTraverser());
 
                 if (traverser != nullptr)
                 {
@@ -2898,7 +2836,7 @@ void Component::moveKeyboardFocusToSibling (const bool moveToNext)
 
     if (parentComponent != nullptr)
     {
-        ScopedPointer <KeyboardFocusTraverser> traverser (createFocusTraverser());
+        ScopedPointer<KeyboardFocusTraverser> traverser (createFocusTraverser());
 
         if (traverser != nullptr)
         {
@@ -3052,7 +2990,7 @@ Point<int> Component::getMouseXYRelative() const
 void Component::addKeyListener (KeyListener* const newListener)
 {
     if (keyListeners == nullptr)
-        keyListeners = new Array <KeyListener*>();
+        keyListeners = new Array<KeyListener*>();
 
     keyListeners->addIfNotAlreadyThere (newListener);
 }

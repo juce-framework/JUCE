@@ -487,17 +487,6 @@ static bool exporterTargetMatches (const String& test, String target)
     return false;
 }
 
-bool LibraryModule::fileTargetMatches (ProjectExporter& exporter, const String& target)
-{
-    if (exporter.isXcode())         return exporterTargetMatches ("xcode", target);
-    if (exporter.isWindows())       return exporterTargetMatches ("msvc", target);
-    if (exporter.isLinux())         return exporterTargetMatches ("linux", target);
-    if (exporter.isAndroid())       return exporterTargetMatches ("android", target);
-    if (exporter.isCodeBlocks())    return exporterTargetMatches ("mingw", target);
-    if (exporter.isQtCreator())     return exporterTargetMatches ("qtcreator", target);
-    return target.isEmpty();
-}
-
 struct FileSorter
 {
     static int compareElements (const File& f1, const File& f2)
@@ -524,6 +513,30 @@ void LibraryModule::findWildcardMatches (const File& localModuleFolder, const St
     result.addArray (tempList);
 }
 
+static bool fileTargetMatches (ProjectExporter& exporter, const String& target)
+{
+    if (exporter.isXcode())         return exporterTargetMatches ("xcode", target);
+    if (exporter.isWindows())       return exporterTargetMatches ("msvc", target);
+    if (exporter.isLinux())         return exporterTargetMatches ("linux", target);
+    if (exporter.isAndroid())       return exporterTargetMatches ("android", target);
+    if (exporter.isCodeBlocks())    return exporterTargetMatches ("mingw", target);
+    return target.isEmpty();
+}
+
+static bool fileShouldBeAdded (ProjectExporter& exporter, const var& properties)
+{
+    if (! fileTargetMatches (exporter, properties["target"].toString()))
+        return false;
+
+    if (properties["RTASOnly"] && ! shouldBuildRTAS (exporter.getProject()).getValue())
+        return false;
+
+    if (properties["AudioUnitOnly"] && ! shouldBuildAU (exporter.getProject()).getValue())
+        return false;
+
+    return true;
+}
+
 void LibraryModule::findAndAddCompiledCode (ProjectExporter& exporter, ProjectSaver& projectSaver,
                                             const File& localModuleFolder, Array<File>& result) const
 {
@@ -536,8 +549,7 @@ void LibraryModule::findAndAddCompiledCode (ProjectExporter& exporter, ProjectSa
             const var& file = files->getReference(i);
             const String filename (file ["file"].toString());
 
-            if (filename.isNotEmpty()
-                 && fileTargetMatches (exporter, file ["target"].toString()))
+            if (filename.isNotEmpty() && fileShouldBeAdded (exporter, file))
             {
                 const File compiledFile (localModuleFolder.getChildFile (filename));
                 result.add (compiledFile);
@@ -902,4 +914,14 @@ void EnabledModuleList::addModuleOfferingToCopy (const File& f)
     }
 
     addModule (m.manifestFile, areMostModulesCopiedLocally());
+}
+
+bool isJuceFolder (const File& f)
+{
+    return isJuceModulesFolder (f.getChildFile ("modules"));
+}
+
+bool isJuceModulesFolder (const File& f)
+{
+    return f.isDirectory() && f.getChildFile ("juce_core").isDirectory();
 }

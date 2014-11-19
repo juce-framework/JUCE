@@ -165,13 +165,13 @@ bool LAMEEncoderAudioFormat::canHandleFile (const File&)
 Array<int> LAMEEncoderAudioFormat::getPossibleSampleRates()
 {
     const int rates[] = { 32000, 44100, 48000, 0 };
-    return Array <int> (rates);
+    return Array<int> (rates);
 }
 
 Array<int> LAMEEncoderAudioFormat::getPossibleBitDepths()
 {
     const int depths[] = { 16, 0 };
-    return Array <int> (depths);
+    return Array<int> (depths);
 }
 
 bool LAMEEncoderAudioFormat::canDoStereo()      { return true; }

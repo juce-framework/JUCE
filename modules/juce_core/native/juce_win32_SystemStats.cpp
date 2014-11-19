@@ -38,7 +38,7 @@ void Logger::outputDebugString (const String& text)
 #endif
 
 //==============================================================================
-#if JUCE_USE_INTRINSICS
+#if JUCE_USE_MSVC_INTRINSICS
 
 // CPU info functions using intrinsics...
 
@@ -313,7 +313,7 @@ double Time::getMillisecondCounterHiRes() noexcept       { return hiResCounterHa
 //==============================================================================
 static int64 juce_getClockCycleCounter() noexcept
 {
-   #if JUCE_USE_INTRINSICS
+   #if JUCE_USE_MSVC_INTRINSICS
     // MS intrinsics version...
     return (int64) __rdtsc();
 

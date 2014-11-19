@@ -22,7 +22,6 @@
   ==============================================================================
 */
 
-
 CameraDevice::CameraDevice (const String& nm, int index, int minWidth, int minHeight, int maxWidth, int maxHeight)
    : name (nm), pimpl (new Pimpl (name, index, minWidth, minHeight, maxWidth, maxHeight))
 {

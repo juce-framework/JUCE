@@ -21,6 +21,8 @@
           <Add option="-g"/>
           <Add option="-D__MINGW__=1"/>
           <Add option="-D__MINGW_EXTENSION="/>
+          <Add option="-DDEBUG=1"/>
+          <Add option="-D_DEBUG=1"/>
           <Add option="-DJUCER_CODEBLOCKS_20734A5D=1"/>
           <Add option="-DJUCE_APP_VERSION=3.1.0"/>
           <Add option="-DJUCE_APP_VERSION_HEX=0x30100"/>
@@ -55,6 +57,7 @@
           <Add option="-mstackrealign"/>
           <Add option="-D__MINGW__=1"/>
           <Add option="-D__MINGW_EXTENSION="/>
+          <Add option="-DNDEBUG=1"/>
           <Add option="-DJUCER_CODEBLOCKS_20734A5D=1"/>
           <Add option="-DJUCE_APP_VERSION=3.1.0"/>
           <Add option="-DJUCE_APP_VERSION_HEX=0x30100"/>
@@ -98,6 +101,10 @@
       <Option compile="0"/>
       <Option link="0"/>
     </Unit>
+    <Unit filename="../../Source/Application/jucer_AutoUpdater.h">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
     <Unit filename="../../Source/Application/jucer_CommandIDs.h">
       <Option compile="0"/>
       <Option link="0"/>
@@ -132,160 +139,6 @@
     </Unit>
     <Unit filename="../../Source/Application/jucer_OpenDocumentManager.cpp"/>
     <Unit filename="../../Source/Application/jucer_OpenDocumentManager.h">
-      <Option compile="0"/>
-      <Option link="0"/>
-    </Unit>
-    <Unit filename="../../Source/Project/jucer_AudioPluginModule.h">
-      <Option compile="0"/>
-      <Option link="0"/>
-    </Unit>
-    <Unit filename="../../Source/Project/jucer_ConfigTree_Base.h">
-      <Option compile="0"/>
-      <Option link="0"/>
-    </Unit>
-    <Unit filename="../../Source/Project/jucer_ConfigTree_Exporter.h">
-      <Option compile="0"/>
-      <Option link="0"/>
-    </Unit>
-    <Unit filename="../../Source/Project/jucer_ConfigTree_Modules.h">
-      <Option compile="0"/>
-      <Option link="0"/>
-    </Unit>
-    <Unit filename="../../Source/Project/jucer_GroupInformationComponent.h">
-      <Option compile="0"/>
-      <Option link="0"/>
-    </Unit>
-    <Unit filename="../../Source/Project/jucer_Module.cpp"/>
-    <Unit filename="../../Source/Project/jucer_Module.h">
-      <Option compile="0"/>
-      <Option link="0"/>
-    </Unit>
-    <Unit filename="../../Source/Project/jucer_ModulesPanel.h">
-      <Option compile="0"/>
-      <Option link="0"/>
-    </Unit>
-    <Unit filename="../../Source/Project/jucer_NewFileWizard.cpp"/>
-    <Unit filename="../../Source/Project/jucer_NewFileWizard.h">
-      <Option compile="0"/>
-      <Option link="0"/>
-    </Unit>
-    <Unit filename="../../Source/Project/jucer_NewProjectWizard.cpp"/>
-    <Unit filename="../../Source/Project/jucer_NewProjectWizard.h">
-      <Option compile="0"/>
-      <Option link="0"/>
-    </Unit>
-    <Unit filename="../../Source/Project/jucer_Project.cpp"/>
-    <Unit filename="../../Source/Project/jucer_Project.h">
-      <Option compile="0"/>
-      <Option link="0"/>
-    </Unit>
-    <Unit filename="../../Source/Project/jucer_ProjectContentComponent.cpp"/>
-    <Unit filename="../../Source/Project/jucer_ProjectContentComponent.h">
-      <Option compile="0"/>
-      <Option link="0"/>
-    </Unit>
-    <Unit filename="../../Source/Project/jucer_ProjectTree_Base.h">
-      <Option compile="0"/>
-      <Option link="0"/>
-    </Unit>
-    <Unit filename="../../Source/Project/jucer_ProjectTree_File.h">
-      <Option compile="0"/>
-      <Option link="0"/>
-    </Unit>
-    <Unit filename="../../Source/Project/jucer_ProjectTree_Group.h">
-      <Option compile="0"/>
-      <Option link="0"/>
-    </Unit>
-    <Unit filename="../../Source/Project/jucer_ProjectType.cpp"/>
-    <Unit filename="../../Source/Project/jucer_ProjectType.h">
-      <Option compile="0"/>
-      <Option link="0"/>
-    </Unit>
-    <Unit filename="../../Source/Project Saving/jucer_ProjectExport_QtCreator.h">
-      <Option compile="0"/>
-      <Option link="0"/>
-    </Unit>
-    <Unit filename="../../Source/Project Saving/jucer_ProjectExport_Android.h">
-      <Option compile="0"/>
-      <Option link="0"/>
-    </Unit>
-    <Unit filename="../../Source/Project Saving/jucer_ProjectExport_CodeBlocks.h">
-      <Option compile="0"/>
-      <Option link="0"/>
-    </Unit>
-    <Unit filename="../../Source/Project Saving/jucer_ProjectExport_Make.h">
-      <Option compile="0"/>
-      <Option link="0"/>
-    </Unit>
-    <Unit filename="../../Source/Project Saving/jucer_ProjectExport_MSVC.h">
-      <Option compile="0"/>
-      <Option link="0"/>
-    </Unit>
-    <Unit filename="../../Source/Project Saving/jucer_ProjectExport_XCode.h">
-      <Option compile="0"/>
-      <Option link="0"/>
-    </Unit>
-    <Unit filename="../../Source/Project Saving/jucer_ProjectExporter.cpp"/>
-    <Unit filename="../../Source/Project Saving/jucer_ProjectExporter.h">
-      <Option compile="0"/>
-      <Option link="0"/>
-    </Unit>
-    <Unit filename="../../Source/Project Saving/jucer_ProjectSaver.h">
-      <Option compile="0"/>
-      <Option link="0"/>
-    </Unit>
-    <Unit filename="../../Source/Project Saving/jucer_ResourceFile.cpp"/>
-    <Unit filename="../../Source/Project Saving/jucer_ResourceFile.h">
-      <Option compile="0"/>
-      <Option link="0"/>
-    </Unit>
-    <Unit filename="../../Source/Utility/jucer_CodeHelpers.cpp"/>
-    <Unit filename="../../Source/Utility/jucer_CodeHelpers.h">
-      <Option compile="0"/>
-      <Option link="0"/>
-    </Unit>
-    <Unit filename="../../Source/Utility/jucer_Colours.h">
-      <Option compile="0"/>
-      <Option link="0"/>
-    </Unit>
-    <Unit filename="../../Source/Utility/jucer_FileHelpers.cpp"/>
-    <Unit filename="../../Source/Utility/jucer_FileHelpers.h">
-      <Option compile="0"/>
-      <Option link="0"/>
-    </Unit>
-    <Unit filename="../../Source/Utility/jucer_Icons.cpp"/>
-    <Unit filename="../../Source/Utility/jucer_Icons.h">
-      <Option compile="0"/>
-      <Option link="0"/>
-    </Unit>
-    <Unit filename="../../Source/Utility/jucer_JucerTreeViewBase.cpp"/>
-    <Unit filename="../../Source/Utility/jucer_JucerTreeViewBase.h">
-      <Option compile="0"/>
-      <Option link="0"/>
-    </Unit>
-    <Unit filename="../../Source/Utility/jucer_MiscUtilities.cpp"/>
-    <Unit filename="../../Source/Utility/jucer_MiscUtilities.h">
-      <Option compile="0"/>
-      <Option link="0"/>
-    </Unit>
-    <Unit filename="../../Source/Utility/jucer_PresetIDs.h">
-      <Option compile="0"/>
-      <Option link="0"/>
-    </Unit>
-    <Unit filename="../../Source/Utility/jucer_RelativePath.h">
-      <Option compile="0"/>
-      <Option link="0"/>
-    </Unit>
-    <Unit filename="../../Source/Utility/jucer_StoredSettings.cpp"/>
-    <Unit filename="../../Source/Utility/jucer_StoredSettings.h">
-      <Option compile="0"/>
-      <Option link="0"/>
-    </Unit>
-    <Unit filename="../../Source/Utility/jucer_TranslationTool.h">
-      <Option compile="0"/>
-      <Option link="0"/>
-    </Unit>
-    <Unit filename="../../Source/Utility/jucer_ValueSourceHelpers.h">
       <Option compile="0"/>
       <Option link="0"/>
     </Unit>
@@ -570,23 +423,218 @@
       <Option compile="0"/>
       <Option link="0"/>
     </Unit>
-    <Unit filename="../../Source/BinaryData/AudioPluginXCodeScript.txt">
+    <Unit filename="../../Source/Project Saving/jucer_ProjectExport_Android.h">
       <Option compile="0"/>
       <Option link="0"/>
     </Unit>
-    <Unit filename="../../Source/BinaryData/background_tile.png">
+    <Unit filename="../../Source/Project Saving/jucer_ProjectExport_CodeBlocks.h">
       <Option compile="0"/>
       <Option link="0"/>
     </Unit>
-    <Unit filename="../../Source/BinaryData/colourscheme_dark.xml">
+    <Unit filename="../../Source/Project Saving/jucer_ProjectExport_Make.h">
       <Option compile="0"/>
       <Option link="0"/>
     </Unit>
-    <Unit filename="../../Source/BinaryData/colourscheme_light.xml">
+    <Unit filename="../../Source/Project Saving/jucer_ProjectExport_MSVC.h">
       <Option compile="0"/>
       <Option link="0"/>
     </Unit>
-    <Unit filename="../../Source/BinaryData/juce_icon.png">
+    <Unit filename="../../Source/Project Saving/jucer_ProjectExport_XCode.h">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../Source/Project Saving/jucer_ProjectExporter.cpp"/>
+    <Unit filename="../../Source/Project Saving/jucer_ProjectExporter.h">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../Source/Project Saving/jucer_ProjectSaver.h">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../Source/Project Saving/jucer_ResourceFile.cpp"/>
+    <Unit filename="../../Source/Project Saving/jucer_ResourceFile.h">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../Source/Project/jucer_AudioPluginModule.h">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../Source/Project/jucer_ConfigTree_Base.h">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../Source/Project/jucer_ConfigTree_Exporter.h">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../Source/Project/jucer_ConfigTree_Modules.h">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../Source/Project/jucer_GroupInformationComponent.h">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../Source/Project/jucer_Module.cpp"/>
+    <Unit filename="../../Source/Project/jucer_Module.h">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../Source/Project/jucer_ModulesPanel.h">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../Source/Project/jucer_Project.cpp"/>
+    <Unit filename="../../Source/Project/jucer_Project.h">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../Source/Project/jucer_ProjectContentComponent.cpp"/>
+    <Unit filename="../../Source/Project/jucer_ProjectContentComponent.h">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../Source/Project/jucer_ProjectTree_Base.h">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../Source/Project/jucer_ProjectTree_File.h">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../Source/Project/jucer_ProjectTree_Group.h">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../Source/Project/jucer_ProjectType.cpp"/>
+    <Unit filename="../../Source/Project/jucer_ProjectType.h">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../Source/Utility/jucer_CodeHelpers.cpp"/>
+    <Unit filename="../../Source/Utility/jucer_CodeHelpers.h">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../Source/Utility/jucer_Colours.h">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../Source/Utility/jucer_FileHelpers.cpp"/>
+    <Unit filename="../../Source/Utility/jucer_FileHelpers.h">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../Source/Utility/jucer_Icons.cpp"/>
+    <Unit filename="../../Source/Utility/jucer_Icons.h">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../Source/Utility/jucer_JucerTreeViewBase.cpp"/>
+    <Unit filename="../../Source/Utility/jucer_JucerTreeViewBase.h">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../Source/Utility/jucer_MiscUtilities.cpp"/>
+    <Unit filename="../../Source/Utility/jucer_MiscUtilities.h">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../Source/Utility/jucer_PresetIDs.h">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../Source/Utility/jucer_RelativePath.h">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../Source/Utility/jucer_SlidingPanelComponent.cpp"/>
+    <Unit filename="../../Source/Utility/jucer_SlidingPanelComponent.h">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../Source/Utility/jucer_StoredSettings.cpp"/>
+    <Unit filename="../../Source/Utility/jucer_StoredSettings.h">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../Source/Utility/jucer_TranslationTool.h">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../Source/Utility/jucer_ValueSourceHelpers.h">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../Source/Wizards/jucer_NewFileWizard.cpp"/>
+    <Unit filename="../../Source/Wizards/jucer_NewFileWizard.h">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../Source/Wizards/jucer_NewProjectWizard.h">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../Source/Wizards/jucer_NewProjectWizardClasses.cpp"/>
+    <Unit filename="../../Source/Wizards/jucer_NewProjectWizardClasses.h">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../Source/Wizards/jucer_NewProjectWizardComponent.h">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../Source/Wizards/jucer_ProjectWizard_Animated.h">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../Source/Wizards/jucer_ProjectWizard_AudioApp.h">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../Source/Wizards/jucer_ProjectWizard_AudioPlugin.h">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../Source/Wizards/jucer_ProjectWizard_Blank.h">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../Source/Wizards/jucer_ProjectWizard_Console.h">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../Source/Wizards/jucer_ProjectWizard_DLL.h">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../Source/Wizards/jucer_ProjectWizard_GUIApp.h">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../Source/Wizards/jucer_ProjectWizard_openGL.h">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../Source/Wizards/jucer_ProjectWizard_StaticLibrary.h">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../Source/Wizards/jucer_StartPageComponent.h">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../Source/Wizards/jucer_TemplateThumbnailsComponent.h">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../Source/BinaryData/jucer_AnimatedComponentTemplate.cpp">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../Source/BinaryData/jucer_AudioComponentTemplate.cpp">
       <Option compile="0"/>
       <Option link="0"/>
     </Unit>
@@ -634,6 +682,10 @@
       <Option compile="0"/>
       <Option link="0"/>
     </Unit>
+    <Unit filename="../../Source/BinaryData/jucer_MainTemplate_SimpleWindow.cpp">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
     <Unit filename="../../Source/BinaryData/jucer_MainTemplate_Window.cpp">
       <Option compile="0"/>
       <Option link="0"/>
@@ -658,7 +710,111 @@
       <Option compile="0"/>
       <Option link="0"/>
     </Unit>
+    <Unit filename="../../Source/BinaryData/jucer_OpenGLComponentTemplate.cpp">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../Source/BinaryData/AudioPluginXCodeScript.txt">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../Source/BinaryData/background_tile.png">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../Source/BinaryData/colourscheme_dark.xml">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../Source/BinaryData/colourscheme_light.xml">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../Source/BinaryData/juce_icon.png">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../Source/BinaryData/projectIconAndroid.png">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../Source/BinaryData/projectIconCodeblocks.png">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../Source/BinaryData/projectIconLinuxMakefile.png">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../Source/BinaryData/projectIconVisualStudio05.png">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../Source/BinaryData/projectIconVisualStudio08.png">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../Source/BinaryData/projectIconVisualStudio10.png">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../Source/BinaryData/projectIconVisualStudio12.png">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../Source/BinaryData/projectIconVisualStudio13.png">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../Source/BinaryData/projectIconXcode.png">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../Source/BinaryData/projectIconXcodeIOS.png">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
     <Unit filename="../../Source/BinaryData/RecentFilesMenuTemplate.nib">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../Source/BinaryData/wizard_AnimatedApp.svg">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../Source/BinaryData/wizard_AudioApp.svg">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../Source/BinaryData/wizard_AudioPlugin.svg">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../Source/BinaryData/wizard_ConsoleApp.svg">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../Source/BinaryData/wizard_DLL.svg">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../Source/BinaryData/wizard_GUI.svg">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../Source/BinaryData/wizard_Highlight.svg">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../Source/BinaryData/wizard_Openfile.svg">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../Source/BinaryData/wizard_OpenGL.svg">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../Source/BinaryData/wizard_StaticLibrary.svg">
       <Option compile="0"/>
       <Option link="0"/>
     </Unit>
@@ -767,6 +923,10 @@
       <Option link="0"/>
     </Unit>
     <Unit filename="../../../../modules/juce_core/maths/juce_MathsFunctions.h">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../../../modules/juce_core/maths/juce_NormalisableRange.h">
       <Option compile="0"/>
       <Option link="0"/>
     </Unit>
@@ -1214,6 +1374,10 @@
       <Option compile="0"/>
       <Option link="0"/>
     </Unit>
+    <Unit filename="../../../../modules/juce_core/system/juce_CompilerSupport.h">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
     <Unit filename="../../../../modules/juce_core/system/juce_PlatformDefs.h">
       <Option compile="0"/>
       <Option link="0"/>
@@ -1571,6 +1735,10 @@
       <Option link="0"/>
     </Unit>
     <Unit filename="../../../../modules/juce_events/messages/juce_MessageManager.h">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../../../modules/juce_events/messages/juce_MountedVolumeListChangeDetector.h">
       <Option compile="0"/>
       <Option link="0"/>
     </Unit>
@@ -3083,6 +3251,14 @@
       <Option link="0"/>
     </Unit>
     <Unit filename="../../../../modules/juce_gui_extra/embedding/juce_UIViewComponent.h">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../../../modules/juce_gui_extra/misc/juce_AnimatedAppComponent.cpp">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../../../modules/juce_gui_extra/misc/juce_AnimatedAppComponent.h">
       <Option compile="0"/>
       <Option link="0"/>
     </Unit>

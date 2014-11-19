@@ -127,7 +127,7 @@ public:
 
     //==============================================================================
     /** @internal */
-    virtual void addToDesktop (int windowStyleFlags, void* nativeWindowToAttachTo = nullptr) override;
+    void addToDesktop (int windowStyleFlags, void* nativeWindowToAttachTo = nullptr) override;
 
 protected:
     //==============================================================================

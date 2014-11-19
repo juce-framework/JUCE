@@ -54,7 +54,7 @@ public:
    #endif
 
     /** Destructor. */
-    ~NamedValueSet();
+    ~NamedValueSet() noexcept;
 
     bool operator== (const NamedValueSet&) const;
     bool operator!= (const NamedValueSet&) const;
@@ -67,7 +67,7 @@ public:
         If the name isn't found, this will return a void variant.
         @see getProperty
     */
-    const var& operator[] (const Identifier& name) const;
+    const var& operator[] (const Identifier& name) const noexcept;
 
     /** Tries to return the named value, but if no such value is found, this will
         instead return the supplied default value.
@@ -89,7 +89,7 @@ public:
    #endif
 
     /** Returns true if the set contains an item with the specified name. */
-    bool contains (const Identifier& name) const;
+    bool contains (const Identifier& name) const noexcept;
 
     /** Removes a value from the set.
         @returns    true if a value was removed; false if there was no value

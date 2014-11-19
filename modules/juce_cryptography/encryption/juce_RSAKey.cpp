@@ -54,6 +54,11 @@ bool RSAKey::operator!= (const RSAKey& other) const noexcept
     return ! operator== (other);
 }
 
+bool RSAKey::isValid() const noexcept
+{
+    return operator!= (RSAKey());
+}
+
 String RSAKey::toString() const
 {
     return part1.toString (16) + "," + part2.toString (16);

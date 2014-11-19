@@ -21,90 +21,24 @@ contents.xcworkspacedata
 .DS_Store
 .svn
 profile
-extras/Demo/Builds/MacOSX/build
-extras/Demo/Builds/Linux/build
-extras/Demo/Builds/VisualStudio2005/Debug
-extras/Demo/Builds/VisualStudio2005/Release
-extras/Demo/Builds/VisualStudio2008/Debug
-extras/Demo/Builds/VisualStudio2008/Release
-extras/Demo/Builds/VisualStudio2010/Debug
-extras/Demo/Builds/VisualStudio2010/Release
-extras/Demo/Builds/VisualStudio2012/Debug
-extras/Demo/Builds/VisualStudio2012/Release
-extras/Demo/Builds/VisualStudio2013/Debug
-extras/Demo/Builds/VisualStudio2013/Release
-extras/Demo/Builds/Android/bin
-extras/Demo/Builds/Android/libs
-extras/Demo/Builds/Android/gen
-extras/Demo/Builds/Android/obj
-extras/Demo/Builds/iOS/build
-extras/Demo/Builds/CodeBlocks/bin
-extras/Demo/Builds/CodeBlocks/obj
-extras/Demo/Builds/CodeBlocks/*.depend
-extras/Demo/Builds/CodeBlocks/*.layout
-extras/Introjucer/Builds/MacOSX/build
-extras/Introjucer/Builds/Linux/build
-extras/Introjucer/Builds/VisualStudio2005/Debug
-extras/Introjucer/Builds/VisualStudio2005/Release
-extras/Introjucer/Builds/VisualStudio2008/Debug
-extras/Introjucer/Builds/VisualStudio2008/Release
-extras/Introjucer/Builds/VisualStudio2010/Debug
-extras/Introjucer/Builds/VisualStudio2010/Release
-extras/Introjucer/Builds/VisualStudio2012/Debug
-extras/Introjucer/Builds/VisualStudio2012/Release
-extras/Introjucer/Builds/VisualStudio2013/Debug
-extras/Introjucer/Builds/VisualStudio2013/Release
-extras/Introjucer/Builds/CodeBlocks/bin
-extras/Introjucer/Builds/CodeBlocks/obj
-extras/Introjucer/Builds/CodeBlocks/*.depend
-extras/Introjucer/Builds/CodeBlocks/*.layout
-extras/audio plugin demo/Builds/MacOSX/build
-extras/audio plugin demo/Builds/Linux/build
-extras/audio plugin demo/Builds/VisualStudio2005/Debug
-extras/audio plugin demo/Builds/VisualStudio2005/Release
-extras/audio plugin demo/Builds/VisualStudio2008/Debug
-extras/audio plugin demo/Builds/VisualStudio2008/Release
-extras/audio plugin demo/Builds/VisualStudio2010/Debug
-extras/audio plugin demo/Builds/VisualStudio2010/Release
-extras/audio plugin demo/Builds/VisualStudio2012/Debug
-extras/audio plugin demo/Builds/VisualStudio2012/Release
-extras/audio plugin demo/Builds/VisualStudio2013/Debug
-extras/audio plugin demo/Builds/VisualStudio2013/Release
-extras/audio plugin host/Builds/MacOSX/build
-extras/audio plugin host/Builds/Linux/build
-extras/audio plugin host/Builds/VisualStudio2005/Debug
-extras/audio plugin host/Builds/VisualStudio2005/Release
-extras/audio plugin host/Builds/VisualStudio2008/Debug
-extras/audio plugin host/Builds/VisualStudio2008/Release
-extras/audio plugin host/Builds/VisualStudio2010/Debug
-extras/audio plugin host/Builds/VisualStudio2010/Release
-extras/audio plugin host/Builds/VisualStudio2012/Debug
-extras/audio plugin host/Builds/VisualStudio2012/Release
-extras/audio plugin host/Builds/VisualStudio2013/Debug
-extras/audio plugin host/Builds/VisualStudio2013/Release
-extras/binarybuilder/Builds/MacOSX/build
-extras/binarybuilder/Builds/Linux/build
-extras/binarybuilder/Builds/VisualStudio2005/Debug
-extras/binarybuilder/Builds/VisualStudio2005/Release
-extras/binarybuilder/Builds/VisualStudio2008/Debug
-extras/binarybuilder/Builds/VisualStudio2008/Release
-extras/binarybuilder/Builds/VisualStudio2010/Debug
-extras/binarybuilder/Builds/VisualStudio2010/Release
-extras/binarybuilder/Builds/VisualStudio2012/Debug
-extras/binarybuilder/Builds/VisualStudio2012/Release
-extras/binarybuilder/Builds/VisualStudio2013/Debug
-extras/binarybuilder/Builds/VisualStudio2013/Release
-extras/example projects/Builds/MacOSX/build
-extras/example projects/Builds/Linux/build
-extras/example projects/Builds/VisualStudio2005/Debug
-extras/example projects/Builds/VisualStudio2005/Release
-extras/example projects/Builds/VisualStudio2008/Debug
-extras/example projects/Builds/VisualStudio2008/Release
-extras/example projects/Builds/VisualStudio2010/Debug
-extras/example projects/Builds/VisualStudio2010/Release
-extras/example projects/Builds/VisualStudio2012/Debug
-extras/example projects/Builds/VisualStudio2012/Release
-extras/example projects/Builds/VisualStudio2013/Debug
-extras/example projects/Builds/VisualStudio2013/Release
-extras/windows dll/Builds/VisualStudio2008/Debug
-extras/windows dll/Builds/VisualStudio2008/Release
+**/MacOSX/build
+**/iOS/build
+**/Linux/build
+**/VisualStudio2005/Debug
+**/VisualStudio2005/Release
+**/VisualStudio2008/Debug
+**/VisualStudio2008/Release
+**/VisualStudio2010/Debug
+**/VisualStudio2010/Release
+**/VisualStudio2012/Debug
+**/VisualStudio2012/Release
+**/VisualStudio2013/Debug
+**/VisualStudio2013/Release
+**/Android/bin
+**/Android/libs
+**/Android/gen
+**/Android/obj
+**/CodeBlocks/bin
+**/CodeBlocks/obj
+**/CodeBlocks/*.depend
+**/CodeBlocks/*.layout

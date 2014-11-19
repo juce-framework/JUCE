@@ -30,7 +30,7 @@ namespace
 #endif
 
 #if JUCE_ALSA_LOGGING
- #define JUCE_ALSA_LOG(dbgtext)   { juce::String tempDbgBuf ("ALSA: "); tempDbgBuf << dbgtext; Logger::writeToLog (tempDbgBuf); DBG (tempDbgBuf) }
+ #define JUCE_ALSA_LOG(dbgtext)   { juce::String tempDbgBuf ("ALSA: "); tempDbgBuf << dbgtext; Logger::writeToLog (tempDbgBuf); DBG (tempDbgBuf); }
  #define JUCE_CHECKED_RESULT(x)   (logErrorMessage (x, __LINE__))
 
  static int logErrorMessage (int err, int lineNum)
@@ -41,7 +41,7 @@ namespace
     return err;
  }
 #else
- #define JUCE_ALSA_LOG(x)
+ #define JUCE_ALSA_LOG(x)         {}
  #define JUCE_CHECKED_RESULT(x)   (x)
 #endif
 

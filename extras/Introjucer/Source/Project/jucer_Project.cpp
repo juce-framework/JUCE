@@ -835,7 +835,7 @@ void Project::Item::addFileUnchecked (const File& file, int insertIndex, const b
     Item item (project, ValueTree (Ids::FILE));
     item.initialiseMissingProperties();
     item.getNameValue() = file.getFileName();
-    item.getShouldCompileValue() = shouldCompile && file.hasFileExtension ("cpp;mm;c;m;cc;cxx;r");
+    item.getShouldCompileValue() = shouldCompile && file.hasFileExtension (fileTypesToCompileByDefault);
     item.getShouldAddToResourceValue() = project.shouldBeAddedToBinaryResourcesByDefault (file);
 
     if (canContain (item))

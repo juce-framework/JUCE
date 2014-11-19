@@ -22,16 +22,22 @@
   ==============================================================================
 */
 
-AudioProcessorEditor::AudioProcessorEditor (AudioProcessor* const p)
-    : owner (p)
+AudioProcessorEditor::AudioProcessorEditor (AudioProcessor& p) noexcept  : processor (p)
+{
+}
+
+AudioProcessorEditor::AudioProcessorEditor (AudioProcessor* p) noexcept  : processor (*p)
 {
     // the filter must be valid..
-    jassert (owner != nullptr);
+    jassert (p != nullptr);
 }
 
 AudioProcessorEditor::~AudioProcessorEditor()
 {
     // if this fails, then the wrapper hasn't called editorBeingDeleted() on the
     // filter for some reason..
-    jassert (owner->getActiveEditor() != this);
+    jassert (processor.getActiveEditor() != this);
 }
+
+void AudioProcessorEditor::setControlHighlight (ParameterControlHighlightInfo) {}
+int AudioProcessorEditor::getControlParameterIndex (Component&)  { return -1; }

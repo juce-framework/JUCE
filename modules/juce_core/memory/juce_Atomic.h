@@ -218,7 +218,7 @@ private:
 #else
   #define JUCE_ATOMICS_WINDOWS 1    // Windows with intrinsics
 
-  #if JUCE_USE_INTRINSICS
+  #if JUCE_USE_MSVC_INTRINSICS
     #ifndef __INTEL_COMPILER
      #pragma intrinsic (_InterlockedExchange, _InterlockedIncrement, _InterlockedDecrement, _InterlockedCompareExchange, \
                         _InterlockedCompareExchange64, _InterlockedExchangeAdd, _ReadWriteBarrier)

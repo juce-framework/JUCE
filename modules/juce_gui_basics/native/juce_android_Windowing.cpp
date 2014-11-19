@@ -43,7 +43,7 @@ JUCE_JNI_CALLBACK (JUCE_ANDROID_ACTIVITY_CLASSNAME, launchApp, void, (JNIEnv* en
 
     JUCEApplicationBase* app = JUCEApplicationBase::createInstance();
     if (! app->initialiseApp())
-        exit (0);
+        exit (app->getApplicationReturnValue());
 
     jassert (MessageManager::getInstance()->isThisTheMessageThread());
 }

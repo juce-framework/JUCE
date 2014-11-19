@@ -51,7 +51,20 @@ void ApplicationCommandManager::registerCommand (const ApplicationCommandInfo& n
     // the name isn't optional!
     jassert (newCommand.shortName.isNotEmpty());
 
-    if (getCommandForID (newCommand.commandID) == 0)
+    if (ApplicationCommandInfo* command = getMutableCommandForID (newCommand.commandID))
+    {
+        // Trying to re-register the same command ID with different parameters can often indicate a typo.
+        // This assertion is here because I've found it useful catching some mistakes, but it may also cause
+        // false alarms if you're deliberately updating some flags for a command.
+        jassert (newCommand.shortName == getCommandForID (newCommand.commandID)->shortName
+                  && newCommand.categoryName == getCommandForID (newCommand.commandID)->categoryName
+                  && newCommand.defaultKeypresses == getCommandForID (newCommand.commandID)->defaultKeypresses
+                  && (newCommand.flags & (ApplicationCommandInfo::wantsKeyUpDownCallbacks | ApplicationCommandInfo::hiddenFromKeyEditor | ApplicationCommandInfo::readOnlyInKeyEditor))
+                       == (getCommandForID (newCommand.commandID)->flags & (ApplicationCommandInfo::wantsKeyUpDownCallbacks | ApplicationCommandInfo::hiddenFromKeyEditor | ApplicationCommandInfo::readOnlyInKeyEditor)));
+
+        *command = newCommand;
+    }
+    else
     {
         ApplicationCommandInfo* const newInfo = new ApplicationCommandInfo (newCommand);
         newInfo->flags &= ~ApplicationCommandInfo::isTicked;
@@ -60,16 +73,6 @@ void ApplicationCommandManager::registerCommand (const ApplicationCommandInfo& n
         keyMappings->resetToDefaultMapping (newCommand.commandID);
 
         triggerAsyncUpdate();
-    }
-    else
-    {
-        // trying to re-register the same command ID with different parameters?
-        jassert (newCommand.shortName == getCommandForID (newCommand.commandID)->shortName
-                  && (newCommand.description == getCommandForID (newCommand.commandID)->description || newCommand.description.isEmpty())
-                  && newCommand.categoryName == getCommandForID (newCommand.commandID)->categoryName
-                  && newCommand.defaultKeypresses == getCommandForID (newCommand.commandID)->defaultKeypresses
-                  && (newCommand.flags & (ApplicationCommandInfo::wantsKeyUpDownCallbacks | ApplicationCommandInfo::hiddenFromKeyEditor | ApplicationCommandInfo::readOnlyInKeyEditor))
-                       == (getCommandForID (newCommand.commandID)->flags & (ApplicationCommandInfo::wantsKeyUpDownCallbacks | ApplicationCommandInfo::hiddenFromKeyEditor | ApplicationCommandInfo::readOnlyInKeyEditor)));
     }
 }
 
@@ -113,13 +116,18 @@ void ApplicationCommandManager::commandStatusChanged()
 }
 
 //==============================================================================
-const ApplicationCommandInfo* ApplicationCommandManager::getCommandForID (const CommandID commandID) const noexcept
+ApplicationCommandInfo* ApplicationCommandManager::getMutableCommandForID (CommandID commandID) const noexcept
 {
     for (int i = commands.size(); --i >= 0;)
         if (commands.getUnchecked(i)->commandID == commandID)
             return commands.getUnchecked(i);
 
     return nullptr;
+}
+
+const ApplicationCommandInfo* ApplicationCommandManager::getCommandForID (const CommandID commandID) const noexcept
+{
+    return getMutableCommandForID (commandID);
 }
 
 String ApplicationCommandManager::getNameOfCommand (const CommandID commandID) const noexcept
@@ -215,7 +223,10 @@ ApplicationCommandTarget* ApplicationCommandManager::getTargetForCommand (const 
         target = target->getTargetForCommand (commandID);
 
     if (target != nullptr)
+    {
+        upToDateInfo.commandID = commandID;
         target->getCommandInfo (commandID, upToDateInfo);
+    }
 
     return target;
 }
@@ -223,7 +234,7 @@ ApplicationCommandTarget* ApplicationCommandManager::getTargetForCommand (const 
 //==============================================================================
 ApplicationCommandTarget* ApplicationCommandManager::findTargetForComponent (Component* c)
 {
-    ApplicationCommandTarget* target = dynamic_cast <ApplicationCommandTarget*> (c);
+    ApplicationCommandTarget* target = dynamic_cast<ApplicationCommandTarget*> (c);
 
     if (target == nullptr && c != nullptr)
         target = c->findParentComponentOfClass<ApplicationCommandTarget>();
@@ -263,7 +274,7 @@ ApplicationCommandTarget* ApplicationCommandManager::findDefaultComponentTarget(
         // component that really should get the event. And if not, the event will
         // still be passed up to the top level window anyway, so let's send it to the
         // content comp.
-        if (ResizableWindow* const resizableWindow = dynamic_cast <ResizableWindow*> (c))
+        if (ResizableWindow* const resizableWindow = dynamic_cast<ResizableWindow*> (c))
             if (Component* const content = resizableWindow->getContentComponent())
                 c = content;
 

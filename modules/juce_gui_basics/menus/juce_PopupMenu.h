@@ -562,6 +562,9 @@ public:
                                         const Drawable* icon,
                                         const Colour* textColour) = 0;
 
+        virtual void drawPopupMenuSectionHeader (Graphics&, const Rectangle<int>& area,
+                                                 const String& sectionName) = 0;
+
         /** Returns the size and style of font to use in popup menus. */
         virtual Font getPopupMenuFont() = 0;
 

@@ -174,7 +174,7 @@ public:
 
     int getRowNumberOfComponent (Component* const rowComponent) const noexcept
     {
-        const int index = getIndexOfChildComponent (rowComponent);
+        const int index = getViewedComponent()->getIndexOfChildComponent (rowComponent);
         const int num = rows.size();
 
         for (int i = num; --i >= 0;)
@@ -196,15 +196,16 @@ public:
     {
         hasUpdated = false;
 
-        const int newX = getViewedComponent()->getX();
-        int newY = getViewedComponent()->getY();
+        Component& content = *getViewedComponent();
+        const int newX = content.getX();
+        int newY = content.getY();
         const int newW = jmax (owner.minimumRowWidth, getMaximumVisibleWidth());
         const int newH = owner.totalItems * owner.getRowHeight();
 
         if (newY + newH < getMaximumVisibleHeight() && newH > getMaximumVisibleHeight())
             newY = getMaximumVisibleHeight() - newH;
 
-        getViewedComponent()->setBounds (newX, newY, newW, newH);
+        content.setBounds (newX, newY, newW, newH);
 
         if (makeSureItUpdatesContent && ! hasUpdated)
             updateContents();
@@ -214,11 +215,12 @@ public:
     {
         hasUpdated = true;
         const int rowH = owner.getRowHeight();
+        Component& content = *getViewedComponent();
 
         if (rowH > 0)
         {
             const int y = getViewPositionY();
-            const int w = getViewedComponent()->getWidth();
+            const int w = content.getWidth();
 
             const int numNeeded = 2 + getMaximumVisibleHeight() / rowH;
             rows.removeRange (numNeeded, rows.size());
@@ -227,7 +229,7 @@ public:
             {
                 RowComponent* newRow = new RowComponent (owner);
                 rows.add (newRow);
-                getViewedComponent()->addAndMakeVisible (newRow);
+                content.addAndMakeVisible (newRow);
             }
 
             firstIndex = y / rowH;
@@ -247,10 +249,10 @@ public:
         }
 
         if (owner.headerComponent != nullptr)
-            owner.headerComponent->setBounds (owner.outlineThickness + getViewedComponent()->getX(),
+            owner.headerComponent->setBounds (owner.outlineThickness + content.getX(),
                                               owner.outlineThickness,
                                               jmax (owner.getWidth() - owner.outlineThickness * 2,
-                                                    getViewedComponent()->getWidth()),
+                                                    content.getWidth()),
                                               owner.headerComponent->getHeight());
     }
 
@@ -367,6 +369,7 @@ ListBox::ListBox (const String& name, ListBoxModel* const m)
       outlineThickness (0),
       lastRowSelected (-1),
       multipleSelection (false),
+      alwaysFlipSelection (false),
       hasDoneInitialUpdate (false)
 {
     addAndMakeVisible (viewport = new ListViewport (*this));
@@ -391,9 +394,14 @@ void ListBox::setModel (ListBoxModel* const newModel)
     }
 }
 
-void ListBox::setMultipleSelectionEnabled (bool b)
+void ListBox::setMultipleSelectionEnabled (bool b) noexcept
 {
     multipleSelection = b;
+}
+
+void ListBox::setClickingTogglesRowSelection (bool b) noexcept
+{
+    alwaysFlipSelection = b;
 }
 
 void ListBox::setMouseMoveSelectsRows (bool b)
@@ -470,9 +478,7 @@ void ListBox::updateContent()
 }
 
 //==============================================================================
-void ListBox::selectRow (const int row,
-                         bool dontScroll,
-                         bool deselectOthersFirst)
+void ListBox::selectRow (int row, bool dontScroll, bool deselectOthersFirst)
 {
     selectRowInternal (row, dontScroll, deselectOthersFirst, false);
 }
@@ -589,7 +595,7 @@ void ListBox::selectRowsBasedOnModifierKeys (const int row,
                                              ModifierKeys mods,
                                              const bool isMouseUpEvent)
 {
-    if (multipleSelection && mods.isCommandDown())
+    if (multipleSelection && (mods.isCommandDown() || alwaysFlipSelection))
     {
         flipRowSelection (row);
     }
@@ -883,7 +889,7 @@ void ListBox::repaintRow (const int rowNumber) noexcept
 Image ListBox::createSnapshotOfSelectedRows (int& imageX, int& imageY)
 {
     Rectangle<int> imageArea;
-    const int firstRow = getRowContainingPosition (0, 0);
+    const int firstRow = getRowContainingPosition (0, viewport->getY());
 
     for (int i = getNumRowsOnScreen() + 2; --i >= 0;)
     {

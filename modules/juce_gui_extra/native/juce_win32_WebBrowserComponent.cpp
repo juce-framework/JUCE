@@ -153,6 +153,13 @@ private:
                                                                                                     : VARIANT_TRUE;
                 return S_OK;
             }
+            else if (dispIdMember == DISPID_NEWWINDOW3)
+            {
+                owner.newWindowAttemptingToLoad (pDispParams->rgvarg[0].bstrVal);
+                *pDispParams->rgvarg[3].pboolVal = VARIANT_TRUE;
+
+                return S_OK;
+            }
             else if (dispIdMember == DISPID_DOCUMENTCOMPLETE)
             {
                 owner.pageFinishedLoading (getStringFromVariant (pDispParams->rgvarg[0].pvarVal));
@@ -226,6 +233,9 @@ void WebBrowserComponent::goToURL (const String& url,
 
     blankPageShown = false;
 
+    if (browser->browser == nullptr)
+        checkWindowAssociation();
+
     browser->goToURL (url, headers, postData);
 }
 
@@ -262,7 +272,10 @@ void WebBrowserComponent::refresh()
 void WebBrowserComponent::paint (Graphics& g)
 {
     if (browser->browser == nullptr)
+    {
         g.fillAll (Colours::white);
+        checkWindowAssociation();
+    }
 }
 
 void WebBrowserComponent::checkWindowAssociation()

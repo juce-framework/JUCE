@@ -131,6 +131,25 @@ void MessageManager::stopDispatchLoop()
 #endif
 
 //==============================================================================
+#if JUCE_COMPILER_SUPPORTS_LAMBDAS
+struct AsyncFunction  : private MessageManager::MessageBase
+{
+    AsyncFunction (std::function<void(void)> f)  : fn (f)  { post(); }
+
+private:
+    std::function<void(void)> fn;
+    void messageCallback() override    { fn(); }
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AsyncFunction)
+};
+
+void MessageManager::callAsync (std::function<void(void)> f)
+{
+    new AsyncFunction (f);
+}
+#endif
+
+//==============================================================================
 class AsyncFunctionCallback   : public MessageManager::MessageBase
 {
 public:
@@ -288,7 +307,10 @@ bool MessageManagerLock::attemptLock (Thread* const threadToCheck, ThreadPoolJob
     blockingMessage = new BlockingMessage();
 
     if (! blockingMessage->post())
+    {
+        blockingMessage = nullptr;
         return false;
+    }
 
     while (! blockingMessage->lockedEvent.wait (20))
     {

@@ -118,7 +118,7 @@ public:
 
     bool createdOk() const noexcept             { return getRawContext() != nullptr; }
     void* getRawContext() const noexcept        { return context; }
-    GLuint getFrameBufferID() const noexcept    { return frameBufferHandle; }
+    GLuint getFrameBufferID() const noexcept    { return useMSAA ? msaaBufferHandle : frameBufferHandle; }
 
     bool makeActive() const noexcept
     {
@@ -142,6 +142,18 @@ public:
 
     void swapBuffers()
     {
+        if (useMSAA)
+        {
+            glBindFramebuffer (GL_DRAW_FRAMEBUFFER, frameBufferHandle);
+            glBindFramebuffer (GL_READ_FRAMEBUFFER, msaaBufferHandle);
+
+           #if defined (__IPHONE_7_0) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_7_0
+            glBlitFramebuffer (0, 0, lastWidth, lastHeight, 0, 0, lastWidth, lastHeight, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+           #else
+            glResolveMultisampleFramebufferAPPLE();
+           #endif
+        }
+
         glBindRenderbuffer (GL_RENDERBUFFER, colorBufferHandle);
         [context presentRenderbuffer: GL_RENDERBUFFER];
 
@@ -189,7 +201,7 @@ private:
     int swapFrames;
     bool useDepthBuffer, useMSAA;
 
-    bool createContext (NSUInteger type, void* contextToShare)
+    bool createContext (EAGLRenderingAPI type, void* contextToShare)
     {
         jassert (context == nil);
         context = [EAGLContext alloc];
@@ -233,7 +245,7 @@ private:
             glBindFramebuffer (GL_FRAMEBUFFER, msaaBufferHandle);
             glBindRenderbuffer (GL_RENDERBUFFER, msaaColorHandle);
 
-            glRenderbufferStorageMultisampleAPPLE (GL_RENDERBUFFER, 4, GL_RGBA8_OES, width, height);
+            glRenderbufferStorageMultisample (GL_RENDERBUFFER, 4, GL_RGBA8, width, height);
 
             glFramebufferRenderbuffer (GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, msaaColorHandle);
         }
@@ -244,7 +256,7 @@ private:
             glBindRenderbuffer (GL_RENDERBUFFER, depthBufferHandle);
 
             if (useMSAA)
-                glRenderbufferStorageMultisampleAPPLE (GL_RENDERBUFFER, 4, GL_DEPTH_COMPONENT16, width, height);
+                glRenderbufferStorageMultisample (GL_RENDERBUFFER, 4, GL_DEPTH_COMPONENT16, width, height);
             else
                 glRenderbufferStorage (GL_RENDERBUFFER, GL_DEPTH_COMPONENT16, width, height);
 

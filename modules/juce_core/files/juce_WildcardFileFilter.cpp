@@ -26,32 +26,7 @@
   ==============================================================================
 */
 
-WildcardFileFilter::WildcardFileFilter (const String& fileWildcardPatterns,
-                                        const String& directoryWildcardPatterns,
-                                        const String& desc)
-    : FileFilter (desc.isEmpty() ? fileWildcardPatterns
-                                 : (desc + " (" + fileWildcardPatterns + ")"))
-{
-    parse (fileWildcardPatterns, fileWildcards);
-    parse (directoryWildcardPatterns, directoryWildcards);
-}
-
-WildcardFileFilter::~WildcardFileFilter()
-{
-}
-
-bool WildcardFileFilter::isFileSuitable (const File& file) const
-{
-    return match (file, fileWildcards);
-}
-
-bool WildcardFileFilter::isDirectorySuitable (const File& file) const
-{
-    return match (file, directoryWildcards);
-}
-
-//==============================================================================
-void WildcardFileFilter::parse (const String& pattern, StringArray& result)
+static void parseWildcard (const String& pattern, StringArray& result)
 {
     result.addTokens (pattern.toLowerCase(), ";,", "\"'");
 
@@ -65,7 +40,7 @@ void WildcardFileFilter::parse (const String& pattern, StringArray& result)
             result.set (i, "*");
 }
 
-bool WildcardFileFilter::match (const File& file, const StringArray& wildcards)
+static bool matchWildcard (const File& file, const StringArray& wildcards)
 {
     const String filename (file.getFileName());
 
@@ -74,4 +49,28 @@ bool WildcardFileFilter::match (const File& file, const StringArray& wildcards)
             return true;
 
     return false;
+}
+
+WildcardFileFilter::WildcardFileFilter (const String& fileWildcardPatterns,
+                                        const String& directoryWildcardPatterns,
+                                        const String& desc)
+    : FileFilter (desc.isEmpty() ? fileWildcardPatterns
+                                 : (desc + " (" + fileWildcardPatterns + ")"))
+{
+    parseWildcard (fileWildcardPatterns, fileWildcards);
+    parseWildcard (directoryWildcardPatterns, directoryWildcards);
+}
+
+WildcardFileFilter::~WildcardFileFilter()
+{
+}
+
+bool WildcardFileFilter::isFileSuitable (const File& file) const
+{
+    return matchWildcard (file, fileWildcards);
+}
+
+bool WildcardFileFilter::isDirectorySuitable (const File& file) const
+{
+    return matchWildcard (file, directoryWildcards);
 }

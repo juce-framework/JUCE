@@ -35,7 +35,7 @@ public:
                  const CodeDocument::Position& selStart,
                  const CodeDocument::Position& selEnd)
     {
-        Array <SyntaxToken> newTokens;
+        Array<SyntaxToken> newTokens;
         newTokens.ensureStorageAllocated (8);
 
         if (tokeniser == nullptr)
@@ -129,13 +129,13 @@ private:
         int tokenType;
     };
 
-    Array <SyntaxToken> tokens;
+    Array<SyntaxToken> tokens;
     int highlightColumnStart, highlightColumnEnd;
 
     static void createTokens (int startPosition, const String& lineText,
                               CodeDocument::Iterator& source,
                               CodeTokeniser& tokeniser,
-                              Array <SyntaxToken>& newTokens)
+                              Array<SyntaxToken>& newTokens)
     {
         CodeDocument::Iterator lastIterator (source);
         const int lineLength = lineText.length();
@@ -168,7 +168,7 @@ private:
         source = lastIterator;
     }
 
-    static void replaceTabsWithSpaces (Array <SyntaxToken>& tokens, const int spacesPerTab)
+    static void replaceTabsWithSpaces (Array<SyntaxToken>& tokens, const int spacesPerTab)
     {
         int x = 0;
         for (int i = 0; i < tokens.size(); ++i)
@@ -287,8 +287,8 @@ public:
 
     void paint (Graphics& g) override
     {
-        jassert (dynamic_cast <CodeEditorComponent*> (getParentComponent()) != nullptr);
-        const CodeEditorComponent& editor = *static_cast <CodeEditorComponent*> (getParentComponent());
+        jassert (dynamic_cast<CodeEditorComponent*> (getParentComponent()) != nullptr);
+        const CodeEditorComponent& editor = *static_cast<CodeEditorComponent*> (getParentComponent());
 
         g.fillAll (editor.findColour (CodeEditorComponent::backgroundColourId)
                     .overlaidWith (editor.findColour (lineNumberBackgroundId)));
@@ -412,7 +412,7 @@ bool CodeEditorComponent::isTextInputActive() const
     return true;
 }
 
-void CodeEditorComponent::setTemporaryUnderlining (const Array <Range<int> >&)
+void CodeEditorComponent::setTemporaryUnderlining (const Array<Range<int> >&)
 {
     jassertfalse; // TODO Windows IME not yet supported for this comp..
 }
@@ -1235,7 +1235,7 @@ ApplicationCommandTarget* CodeEditorComponent::getNextCommandTarget()
     return findFirstTargetParentComponent();
 }
 
-void CodeEditorComponent::getAllCommands (Array <CommandID>& commands)
+void CodeEditorComponent::getAllCommands (Array<CommandID>& commands)
 {
     const CommandID ids[] = { StandardApplicationCommandIDs::cut,
                               StandardApplicationCommandIDs::copy,
@@ -1569,7 +1569,7 @@ void CodeEditorComponent::updateCachedIterators (int maxLineNum)
 
             CodeDocument::Iterator* t = new CodeDocument::Iterator (last);
             cachedIterators.add (t);
-            const int targetLine = last.getLine() + linesBetweenCachedSources;
+            const int targetLine = jmin (maxLineNum, last.getLine() + linesBetweenCachedSources);
 
             for (;;)
             {

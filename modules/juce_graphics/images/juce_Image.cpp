@@ -197,11 +197,11 @@ Image Image::getClippedImage (const Rectangle<int>& area) const
 
 
 //==============================================================================
-Image::Image()
+Image::Image() noexcept
 {
 }
 
-Image::Image (ImagePixelData* const instance)
+Image::Image (ImagePixelData* const instance) noexcept
     : image (instance)
 {
 }
@@ -216,7 +216,7 @@ Image::Image (const PixelFormat format, int width, int height, bool clearImage, 
 {
 }
 
-Image::Image (const Image& other)
+Image::Image (const Image& other) noexcept
     : image (other.image)
 {
 }

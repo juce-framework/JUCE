@@ -174,6 +174,7 @@ public:
             const int numSteps = p.getParameterNumSteps (index);
             info.stepCount = (Steinberg::int32) (numSteps > 0 && numSteps < 0x7fffffff ? numSteps - 1 : 0);
             info.defaultNormalizedValue = p.getParameterDefaultValue (index);
+            jassert (info.defaultNormalizedValue >= 0 && info.defaultNormalizedValue <= 1.0f);
             info.unitId = Vst::kRootUnitId;
             info.flags = p.isParameterAutomatable (index) ? Vst::ParameterInfo::kCanAutomate : 0;
         }
@@ -352,6 +353,9 @@ private:
             if (parent == nullptr || isPlatformTypeSupported (type) == kResultFalse)
                 return kResultFalse;
 
+            if (component == nullptr)
+                component = new ContentWrapperComponent (*this, pluginInstance);
+
            #if JUCE_WINDOWS
             component->addToDesktop (0, parent);
             component->setOpaque (true);
@@ -458,7 +462,7 @@ private:
                 if (pluginEditor != nullptr)
                 {
                     PopupMenu::dismissAllActiveMenus();
-                    pluginEditor->getAudioProcessor()->editorBeingDeleted (pluginEditor);
+                    pluginEditor->processor.editorBeingDeleted (pluginEditor);
                 }
             }
 
@@ -729,7 +733,7 @@ public:
 
     tresult PLUGIN_API setActive (TBool state) override
     {
-        if (state == kResultFalse)
+        if (! state)
         {
             getPluginInstance().releaseResources();
         }
@@ -1172,7 +1176,7 @@ public:
 
     tresult PLUGIN_API setProcessing (TBool state) override
     {
-        if (state == kResultFalse)
+        if (! state)
             getPluginInstance().reset();
 
         return kResultTrue;

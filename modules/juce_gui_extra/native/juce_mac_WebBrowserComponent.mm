@@ -32,6 +32,8 @@ struct DownloadClickDetectorClass  : public ObjCClass <NSObject>
 
         addMethod (@selector (webView:decidePolicyForNavigationAction:request:frame:decisionListener:),
                    decidePolicyForNavigationAction, "v@:@@@@@");
+        addMethod (@selector (webView:decidePolicyForNewWindowAction:request:newFrameName:decisionListener:),
+                   decidePolicyForNewWindowAction, "v@:@@@@@");
         addMethod (@selector (webView:didFinishLoadForFrame:), didFinishLoadForFrame, "v@:@@");
         addMethod (@selector (webView:willCloseFrame:), willCloseFrame, "v@:@@");
         addMethod (@selector (webView:runOpenPanelForFileButtonWithResultListener:allowMultipleFiles:), runOpenPanel, "v@:@@", @encode (BOOL));
@@ -43,15 +45,28 @@ struct DownloadClickDetectorClass  : public ObjCClass <NSObject>
     static WebBrowserComponent* getOwner (id self)               { return getIvar<WebBrowserComponent*> (self, "owner"); }
 
 private:
+    static String getOriginalURL (NSDictionary* actionInformation)
+    {
+        if (NSURL* url = [actionInformation valueForKey: nsStringLiteral ("WebActionOriginalURLKey")])
+            return nsStringToJuce ([url absoluteString]);
+
+        return String();
+    }
+
     static void decidePolicyForNavigationAction (id self, SEL, WebView*, NSDictionary* actionInformation,
                                                  NSURLRequest*, WebFrame*, id <WebPolicyDecisionListener> listener)
     {
-        NSURL* url = [actionInformation valueForKey: nsStringLiteral ("WebActionOriginalURLKey")];
-
-        if (getOwner (self)->pageAboutToLoad (nsStringToJuce ([url absoluteString])))
+        if (getOwner (self)->pageAboutToLoad (getOriginalURL (actionInformation)))
             [listener use];
         else
             [listener ignore];
+    }
+
+    static void decidePolicyForNewWindowAction (id self, SEL, WebView*, NSDictionary* actionInformation,
+                                                NSURLRequest*, NSString*, id <WebPolicyDecisionListener> listener)
+    {
+        getOwner (self)->newWindowAttemptingToLoad (getOriginalURL (actionInformation));
+        [listener ignore];
     }
 
     static void didFinishLoadForFrame (id self, SEL, WebView* sender, WebFrame* frame)

@@ -177,6 +177,20 @@ struct AAXClasses
         return nullptr;
     }
 
+    static Colour getColourFromHighlightEnum (AAX_EHighlightColor colour) noexcept
+    {
+        switch (colour)
+        {
+            case AAX_eHighlightColor_Red:       return Colours::red;
+            case AAX_eHighlightColor_Blue:      return Colours::blue;
+            case AAX_eHighlightColor_Green:     return Colours::green;
+            case AAX_eHighlightColor_Yellow:    return Colours::yellow;
+            default:                            jassertfalse; break;
+        }
+
+        return Colours::black;
+    }
+
     //==============================================================================
     class JuceAAX_Processor;
 
@@ -257,7 +271,7 @@ struct AAXClasses
         {
             if (component == nullptr)
             {
-                if (JuceAAX_Processor* params = dynamic_cast <JuceAAX_Processor*> (GetEffectParameters()))
+                if (JuceAAX_Processor* params = dynamic_cast<JuceAAX_Processor*> (GetEffectParameters()))
                     component = new ContentWrapperComponent (*this, params->getPluginInstance());
                 else
                     jassertfalse;
@@ -294,7 +308,7 @@ struct AAXClasses
             }
         }
 
-        virtual AAX_Result GetViewSize (AAX_Point* viewSize) const override
+        AAX_Result GetViewSize (AAX_Point* viewSize) const override
         {
             if (component != nullptr)
             {
@@ -306,27 +320,43 @@ struct AAXClasses
             return AAX_ERROR_NULL_OBJECT;
         }
 
-        AAX_Result ParameterUpdated (AAX_CParamID /*paramID*/) override
+        AAX_Result ParameterUpdated (AAX_CParamID) override
         {
             return AAX_SUCCESS;
         }
 
-        AAX_Result SetControlHighlightInfo (AAX_CParamID /*paramID*/, AAX_CBoolean /*isHighlighted*/, AAX_EHighlightColor) override
+        AAX_Result SetControlHighlightInfo (AAX_CParamID paramID, AAX_CBoolean isHighlighted, AAX_EHighlightColor colour) override
         {
-            return AAX_SUCCESS;
+            if (component != nullptr && component->pluginEditor != nullptr)
+            {
+                AudioProcessorEditor::ParameterControlHighlightInfo info;
+                info.parameterIndex  = getParamIndexFromID (paramID);
+                info.isHighlighted   = isHighlighted;
+                info.suggestedColour = getColourFromHighlightEnum (colour);
+
+                component->pluginEditor->setControlHighlight (info);
+                return AAX_SUCCESS;
+            }
+
+            return AAX_ERROR_NULL_OBJECT;
         }
 
     private:
-        class ContentWrapperComponent  : public juce::Component
+        struct ContentWrapperComponent  : public juce::Component
         {
-        public:
             ContentWrapperComponent (JuceAAX_GUI& gui, AudioProcessor& plugin)
                 : owner (gui)
             {
                 setOpaque (true);
-                addAndMakeVisible (pluginEditor = plugin.createEditorIfNeeded());
-                setBounds (pluginEditor->getLocalBounds());
                 setBroughtToFrontOnMouseClick (true);
+
+                addAndMakeVisible (pluginEditor = plugin.createEditorIfNeeded());
+
+                if (pluginEditor != nullptr)
+                {
+                    setBounds (pluginEditor->getLocalBounds());
+                    pluginEditor->addMouseListener (this, true);
+                }
             }
 
             ~ContentWrapperComponent()
@@ -334,7 +364,8 @@ struct AAXClasses
                 if (pluginEditor != nullptr)
                 {
                     PopupMenu::dismissAllActiveMenus();
-                    pluginEditor->getAudioProcessor()->editorBeingDeleted (pluginEditor);
+                    pluginEditor->removeMouseListener (this);
+                    pluginEditor->processor.editorBeingDeleted (pluginEditor);
                 }
             }
 
@@ -342,6 +373,26 @@ struct AAXClasses
             {
                 g.fillAll (Colours::black);
             }
+
+            template <typename MethodType>
+            void callMouseMethod (const MouseEvent& e, MethodType method)
+            {
+                if (AAX_IViewContainer* vc = owner.GetViewContainer())
+                {
+                    const int parameterIndex = pluginEditor->getControlParameterIndex (*e.eventComponent);
+
+                    if (parameterIndex >= 0)
+                    {
+                        uint32_t mods = 0;
+                        vc->GetModifiers (&mods);
+                        (vc->*method) (IndexAsParamID (parameterIndex), mods);
+                    }
+                }
+            }
+
+            void mouseDown (const MouseEvent& e) override  { callMouseMethod (e, &AAX_IViewContainer::HandleParameterMouseDown); }
+            void mouseUp   (const MouseEvent& e) override  { callMouseMethod (e, &AAX_IViewContainer::HandleParameterMouseUp); }
+            void mouseDrag (const MouseEvent& e) override  { callMouseMethod (e, &AAX_IViewContainer::HandleParameterMouseDrag); }
 
             void childBoundsChanged (Component*) override
             {
@@ -356,7 +407,6 @@ struct AAXClasses
                 }
             }
 
-        private:
             ScopedPointer<AudioProcessorEditor> pluginEditor;
             JuceAAX_GUI& owner;
 
@@ -455,7 +505,7 @@ struct AAXClasses
                 case JUCEAlgorithmIDs::pluginInstance:
                 {
                     const size_t numObjects = dataSize / sizeof (PluginInstanceInfo);
-                    PluginInstanceInfo* const objects = static_cast <PluginInstanceInfo*> (data);
+                    PluginInstanceInfo* const objects = static_cast<PluginInstanceInfo*> (data);
 
                     jassert (numObjects == 1); // not sure how to handle more than one..
 
@@ -470,7 +520,7 @@ struct AAXClasses
                     const_cast<JuceAAX_Processor*>(this)->preparePlugin();
 
                     const size_t numObjects = dataSize / sizeof (uint32_t);
-                    uint32_t* const objects = static_cast <uint32_t*> (data);
+                    uint32_t* const objects = static_cast<uint32_t*> (data);
 
                     for (size_t i = 0; i < numObjects; ++i)
                         new (objects + i) uint32_t (1);
@@ -524,28 +574,27 @@ struct AAXClasses
 
         AAX_Result SetParameterNormalizedValue (AAX_CParamID paramID, double newValue) override
         {
-            if (! isBypassParam (paramID))
-            {
-                if (AAX_IParameter* p = const_cast<AAX_IParameter*> (mParameterManager.GetParameterByID (paramID)))
-                    p->SetValueWithFloat ((float) newValue);
+            if (isBypassParam (paramID))
+                return AAX_CEffectParameters::SetParameterNormalizedValue (paramID, newValue);
 
-                pluginInstance->setParameter (getParamIndexFromID (paramID), (float) newValue);
-            }
+            if (AAX_IParameter* p = const_cast<AAX_IParameter*> (mParameterManager.GetParameterByID (paramID)))
+                p->SetValueWithFloat ((float) newValue);
 
+            pluginInstance->setParameter (getParamIndexFromID (paramID), (float) newValue);
             return AAX_SUCCESS;
         }
 
-        AAX_Result SetParameterNormalizedRelative (AAX_CParamID paramID, double newValue) override
+        AAX_Result SetParameterNormalizedRelative (AAX_CParamID paramID, double newDeltaValue) override
         {
-            if (! isBypassParam (paramID))
-            {
-                const int paramIndex = getParamIndexFromID (paramID);
-                const float oldValue = pluginInstance->getParameter (paramIndex);
-                pluginInstance->setParameter (paramIndex, jlimit (0.0f, 1.0f, (float) (oldValue + newValue)));
+            if (isBypassParam (paramID))
+                return AAX_CEffectParameters::SetParameterNormalizedRelative (paramID, newDeltaValue);
 
-                if (AAX_IParameter* p = const_cast<AAX_IParameter*> (mParameterManager.GetParameterByID (paramID)))
-                    p->SetValueWithFloat ((float) newValue);
-            }
+            const int paramIndex = getParamIndexFromID (paramID);
+            const float newValue = pluginInstance->getParameter (paramIndex) + (float) newDeltaValue;
+            pluginInstance->setParameter (paramIndex, jlimit (0.0f, 1.0f, newValue));
+
+            if (AAX_IParameter* p = const_cast<AAX_IParameter*> (mParameterManager.GetParameterByID (paramID)))
+                p->SetValueWithFloat (newValue);
 
             return AAX_SUCCESS;
         }
@@ -575,7 +624,11 @@ struct AAXClasses
         AAX_Result GetParameterDefaultNormalizedValue (AAX_CParamID paramID, double* result) const override
         {
             if (! isBypassParam (paramID))
+            {
                 *result = (double) pluginInstance->getParameterDefaultValue (getParamIndexFromID (paramID));
+
+                jassert (*result >= 0 && *result <= 1.0f);
+            }
 
             return AAX_SUCCESS;
         }
@@ -704,42 +757,13 @@ struct AAXClasses
                 }
 
                 for (int i = numOuts; i < numIns; ++i)
-                    channels[i] = const_cast <float*> (inputs[i]);
+                    channels[i] = const_cast<float*> (inputs[i]);
 
                 process (channels, numIns, bufferSize, bypass, midiNodeIn, midiNodesOut);
             }
         }
 
     private:
-        struct IndexAsParamID
-        {
-            inline explicit IndexAsParamID (int i) noexcept : index (i) {}
-
-            operator AAX_CParamID() noexcept
-            {
-                jassert (index >= 0);
-
-                char* t = name + sizeof (name);
-                *--t = 0;
-                int v = index;
-
-                do
-                {
-                    *--t = (char) ('0' + (v % 10));
-                    v /= 10;
-
-                } while (v > 0);
-
-                return static_cast <AAX_CParamID> (t);
-            }
-
-        private:
-            int index;
-            char name[32];
-
-            JUCE_DECLARE_NON_COPYABLE (IndexAsParamID)
-        };
-
         void process (float* const* channels, const int numChans, const int bufferSize,
                       const bool bypass, AAX_IMIDINode* midiNodeIn, AAX_IMIDINode* midiNodesOut)
         {
@@ -772,6 +796,9 @@ struct AAXClasses
                 if (lastBufferSize != bufferSize)
                 {
                     lastBufferSize = bufferSize;
+                    pluginInstance->setPlayConfigDetails (pluginInstance->getNumInputChannels(),
+                                                          pluginInstance->getNumOutputChannels(),
+                                                          sampleRate, bufferSize);
                     pluginInstance->prepareToPlay (sampleRate, bufferSize);
                 }
 
@@ -895,6 +922,36 @@ struct AAXClasses
     };
 
     //==============================================================================
+    struct IndexAsParamID
+    {
+        inline explicit IndexAsParamID (int i) noexcept : index (i) {}
+
+        operator AAX_CParamID() noexcept
+        {
+            jassert (index >= 0);
+
+            char* t = name + sizeof (name);
+            *--t = 0;
+            int v = index;
+
+            do
+            {
+                *--t = (char) ('0' + (v % 10));
+                v /= 10;
+
+            } while (v > 0);
+
+            return static_cast<AAX_CParamID> (t);
+        }
+
+    private:
+        int index;
+        char name[32];
+
+        JUCE_DECLARE_NON_COPYABLE (IndexAsParamID)
+    };
+
+    //==============================================================================
     static void AAX_CALLBACK algorithmProcessCallback (JUCEAlgorithmContext* const instancesBegin[],
                                                        const void* const instancesEnd)
     {
@@ -948,7 +1005,10 @@ struct AAXClasses
         // This value needs to match the RTAS wrapper's Type ID, so that
         // the host knows that the RTAS/AAX plugins are equivalent.
         properties->AddProperty (AAX_eProperty_PlugInID_Native,     'jcaa' + channelConfigIndex);
+
+       #if ! JucePlugin_AAXDisableAudioSuite
         properties->AddProperty (AAX_eProperty_PlugInID_AudioSuite, 'jyaa' + channelConfigIndex);
+       #endif
 
        #if JucePlugin_AAXDisableMultiMono
         properties->AddProperty (AAX_eProperty_Constraint_MultiMonoSupport, false);

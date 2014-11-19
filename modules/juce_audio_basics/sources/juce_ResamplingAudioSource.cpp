@@ -230,7 +230,8 @@ void ResamplingAudioSource::setFilterCoefficients (double c1, double c2, double 
 
 void ResamplingAudioSource::resetFilters()
 {
-    filterStates.clear ((size_t) numChannels);
+    if (filterStates != nullptr)
+        filterStates.clear ((size_t) numChannels);
 }
 
 void ResamplingAudioSource::applyFilter (float* samples, int num, FilterState& fs)

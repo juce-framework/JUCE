@@ -102,9 +102,7 @@ public:
         lineLength = 0;
         lineLengthWithoutNewLines = 0;
 
-        String::CharPointerType t (line.getCharPointer());
-
-        for (;;)
+        for (String::CharPointerType t (line.getCharPointer());;)
         {
             const juce_wchar c = t.getAndAdvance();
 
@@ -242,16 +240,16 @@ CodeDocument::Position::Position() noexcept
 }
 
 CodeDocument::Position::Position (const CodeDocument& ownerDocument,
-                                  const int line_, const int indexInLine_) noexcept
-    : owner (const_cast <CodeDocument*> (&ownerDocument)),
-      characterPos (0), line (line_),
-      indexInLine (indexInLine_), positionMaintained (false)
+                                  const int lineNum, const int index) noexcept
+    : owner (const_cast<CodeDocument*> (&ownerDocument)),
+      characterPos (0), line (lineNum),
+      indexInLine (index), positionMaintained (false)
 {
-    setLineAndIndex (line_, indexInLine_);
+    setLineAndIndex (lineNum, index);
 }
 
 CodeDocument::Position::Position (const CodeDocument& ownerDocument, const int characterPos_) noexcept
-    : owner (const_cast <CodeDocument*> (&ownerDocument)),
+    : owner (const_cast<CodeDocument*> (&ownerDocument)),
       positionMaintained (false)
 {
     setPosition (characterPos_);
@@ -858,7 +856,7 @@ void CodeDocument::insert (const String& text, const int insertPos, const bool u
             }
 
             maximumLineLength = -1;
-            Array <CodeDocumentLine*> newLines;
+            Array<CodeDocumentLine*> newLines;
             CodeDocumentLine::createLines (newLines, textInsideOriginalLine);
             jassert (newLines.size() > 0);
 

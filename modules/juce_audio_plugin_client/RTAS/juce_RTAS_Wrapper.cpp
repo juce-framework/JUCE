@@ -157,10 +157,8 @@ class JucePlugInProcess  : public CEffectProcessMIDI,
 public:
     //==============================================================================
     JucePlugInProcess()
-        : prepared (false),
-          sampleRate (44100.0)
+        : sampleRate (44100.0)
     {
-        asyncUpdater = new InternalAsyncUpdater (*this);
         juceFilter = createPluginFilterOfType (AudioProcessor::wrapperType_RTAS);
 
         AddChunk (juceChunkType, "Juce Audio Plugin Data");
@@ -178,11 +176,11 @@ public:
             midiBufferNode = nullptr;
             midiTransport = nullptr;
 
-            if (prepared)
+            if (juceFilter != nullptr)
+            {
                 juceFilter->releaseResources();
-
-            juceFilter = nullptr;
-            asyncUpdater = nullptr;
+                juceFilter = nullptr;
+            }
 
             if (--numInstances == 0)
             {
@@ -426,7 +424,7 @@ public:
         return dynamic_cast <JuceCustomUIView*> (fOurPlugInView);
     }
 
-    void GetViewRect (Rect* size)
+    void GetViewRect (Rect* size) override
     {
         if (JuceCustomUIView* const v = getView())
             v->updateSize();
@@ -434,12 +432,12 @@ public:
         CEffectProcessRTAS::GetViewRect (size);
     }
 
-    CPlugInView* CreateCPlugInView()
+    CPlugInView* CreateCPlugInView() override
     {
         return new JuceCustomUIView (juceFilter, this);
     }
 
-    void SetViewPort (GrafPtr port)
+    void SetViewPort (GrafPtr port) override
     {
         CEffectProcessRTAS::SetViewPort (port);
 
@@ -449,7 +447,7 @@ public:
 
     //==============================================================================
 protected:
-    ComponentResult GetDelaySamplesLong (long* aNumSamples)
+    ComponentResult GetDelaySamplesLong (long* aNumSamples) override
     {
         if (aNumSamples != nullptr)
             *aNumSamples = juceFilter != nullptr ? juceFilter->getLatencySamples() : 0;
@@ -458,13 +456,17 @@ protected:
     }
 
     //==============================================================================
-    void EffectInit()
+    void EffectInit() override
     {
+        sampleRate = (double) GetSampleRate();
+        jassert (sampleRate > 0);
+        const int maxBlockSize = (int) CEffectProcessRTAS::GetMaximumRTASQuantum();
+        jassert (maxBlockSize > 0);
+
         SFicPlugInStemFormats stems;
         GetProcessType()->GetStemFormats (&stems);
 
-        juceFilter->setPlayConfigDetails (fNumInputs, fNumOutputs,
-                                          juceFilter->getSampleRate(), juceFilter->getBlockSize());
+        juceFilter->setPlayConfigDetails (fNumInputs, fNumOutputs, sampleRate, maxBlockSize);
 
         AddControl (new CPluginControl_OnOff ('bypa', "Master Bypass\nMastrByp\nMByp\nByp", false, true));
         DefineMasterBypassControlIndex (bypassControlIndex);
@@ -495,41 +497,19 @@ protected:
         }
 
         midiTransport = new CEffectMIDITransport (&mMIDIWorld);
+        midiEvents.ensureSize (2048);
+
+        channels.calloc (jmax (juceFilter->getNumInputChannels(),
+                               juceFilter->getNumOutputChannels()));
 
         juceFilter->setPlayHead (this);
         juceFilter->addListener (this);
 
-        midiEvents.ensureSize (2048);
+        juceFilter->prepareToPlay (sampleRate, maxBlockSize);
     }
 
-    void handleAsyncUpdate()
+    void RenderAudio (float** inputs, float** outputs, long numSamples) override
     {
-        if (! prepared)
-        {
-            sampleRate = gProcessGroup->GetSampleRate();
-            jassert (sampleRate > 0);
-
-            channels.calloc (jmax (juceFilter->getNumInputChannels(),
-                                   juceFilter->getNumOutputChannels()));
-
-            juceFilter->setPlayConfigDetails (fNumInputs, fNumOutputs,
-                                              sampleRate, mRTGlobals->mHWBufferSizeInSamples);
-
-            juceFilter->prepareToPlay (sampleRate, mRTGlobals->mHWBufferSizeInSamples);
-
-            prepared = true;
-        }
-    }
-
-    void RenderAudio (float** inputs, float** outputs, long numSamples)
-    {
-        if (! prepared)
-        {
-            asyncUpdater->triggerAsyncUpdate();
-            bypassBuffers (inputs, outputs, numSamples);
-            return;
-        }
-
        #if JucePlugin_WantsMidiInput
         midiEvents.clear();
 
@@ -623,7 +603,7 @@ protected:
     }
 
     //==============================================================================
-    ComponentResult GetChunkSize (OSType chunkID, long* size)
+    ComponentResult GetChunkSize (OSType chunkID, long* size) override
     {
         if (chunkID == juceChunkType)
         {
@@ -637,7 +617,7 @@ protected:
         return CEffectProcessMIDI::GetChunkSize (chunkID, size);
     }
 
-    ComponentResult GetChunk (OSType chunkID, SFicPlugInChunk* chunk)
+    ComponentResult GetChunk (OSType chunkID, SFicPlugInChunk* chunk) override
     {
         if (chunkID == juceChunkType)
         {
@@ -655,7 +635,7 @@ protected:
         return CEffectProcessMIDI::GetChunk (chunkID, chunk);
     }
 
-    ComponentResult SetChunk (OSType chunkID, SFicPlugInChunk* chunk)
+    ComponentResult SetChunk (OSType chunkID, SFicPlugInChunk* chunk) override
     {
         if (chunkID == juceChunkType)
         {
@@ -674,7 +654,7 @@ protected:
     }
 
     //==============================================================================
-    ComponentResult UpdateControlValue (long controlIndex, long value)
+    ComponentResult UpdateControlValue (long controlIndex, long value) override
     {
         if (controlIndex != bypassControlIndex)
             juceFilter->setParameter (controlIndex - 2, longToFloat (value));
@@ -685,11 +665,8 @@ protected:
     }
 
     //==============================================================================
-    bool getCurrentPosition (AudioPlayHead::CurrentPositionInfo& info)
+    bool getCurrentPosition (AudioPlayHead::CurrentPositionInfo& info) override
     {
-        // this method can only be called while the plugin is running
-        jassert (prepared);
-
         Cmn_Float64 bpm = 120.0;
         Cmn_Int32 num = 4, denom = 4;
         Cmn_Int64 ticks = 0;
@@ -750,40 +727,26 @@ protected:
         return true;
     }
 
-    void audioProcessorParameterChanged (AudioProcessor*, int index, float newValue)
+    void audioProcessorParameterChanged (AudioProcessor*, int index, float newValue) override
     {
         SetControlValue (index + 2, floatToLong (newValue));
     }
 
-    void audioProcessorParameterChangeGestureBegin (AudioProcessor*, int index)
+    void audioProcessorParameterChangeGestureBegin (AudioProcessor*, int index) override
     {
         TouchControl (index + 2);
     }
 
-    void audioProcessorParameterChangeGestureEnd (AudioProcessor*, int index)
+    void audioProcessorParameterChangeGestureEnd (AudioProcessor*, int index) override
     {
         ReleaseControl (index + 2);
     }
 
-    void audioProcessorChanged (AudioProcessor*)
+    void audioProcessorChanged (AudioProcessor*) override
     {
         // xxx is there an RTAS equivalent?
     }
 
-public:
-    // Need to use an intermediate class here rather than inheriting from AsyncUpdater, so that it can
-    // be deleted before shutting down juce in our destructor.
-    class InternalAsyncUpdater  : public AsyncUpdater
-    {
-    public:
-        InternalAsyncUpdater (JucePlugInProcess& p)  : owner (p) {}
-        void handleAsyncUpdate()    { owner.handleAsyncUpdate(); }
-
-    private:
-        JucePlugInProcess& owner;
-    };
-
-    //==============================================================================
 private:
     ScopedPointer<AudioProcessor> juceFilter;
     MidiBuffer midiEvents;
@@ -791,11 +754,8 @@ private:
     ScopedPointer<CEffectMIDITransport> midiTransport;
     DirectMidiPacket midiBuffer [midiBufferSize];
 
-    ScopedPointer<InternalAsyncUpdater> asyncUpdater;
-
     juce::MemoryBlock tempFilterData;
-    HeapBlock <float*> channels;
-    bool prepared;
+    HeapBlock<float*> channels;
     double sampleRate;
 
     static float longToFloat (const long n) noexcept

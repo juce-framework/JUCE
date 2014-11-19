@@ -40,17 +40,12 @@
 
 //==============================================================================
 #if JUCE_MAC
- #define Point CarbonDummyPointName
- #define Component CarbonDummyCompName
  #import <WebKit/WebKit.h>
  #import <IOKit/IOKitLib.h>
  #import <IOKit/IOCFPlugIn.h>
  #import <IOKit/hid/IOHIDLib.h>
  #import <IOKit/hid/IOHIDKeys.h>
  #import <IOKit/pwr_mgt/IOPMLib.h>
- #import <Carbon/Carbon.h> // still needed for SetSystemUIMode()
- #undef Point
- #undef Component
 
 #elif JUCE_IOS
 
@@ -96,6 +91,7 @@ namespace juce
 #include "misc/juce_SplashScreen.cpp"
 #include "misc/juce_SystemTrayIconComponent.cpp"
 #include "misc/juce_LiveConstantEditor.cpp"
+#include "misc/juce_AnimatedAppComponent.cpp"
 
 }
 
@@ -151,5 +147,6 @@ namespace juce
  bool WebBrowserComponent::pageAboutToLoad (const String&)  { return true; }
  void WebBrowserComponent::pageFinishedLoading (const String&) {}
  void WebBrowserComponent::windowCloseRequest() {}
+ void WebBrowserComponent::newWindowAttemptingToLoad (const String&) {}
 #endif
 }

@@ -24,6 +24,14 @@
 
 class UIViewComponentPeer;
 
+// The way rotation works changed in iOS8..
+static bool isUsingOldRotationMethod() noexcept
+{
+    static bool isPreV8 = ([[[UIDevice currentDevice] systemVersion] compare: @"8.0"
+                                                                     options: NSNumericSearch] == NSOrderedAscending);
+    return isPreV8;
+}
+
 namespace Orientations
 {
     static Desktop::DisplayOrientation convertToJuce (UIInterfaceOrientation orientation)
@@ -42,12 +50,15 @@ namespace Orientations
 
     static CGAffineTransform getCGTransformFor (const Desktop::DisplayOrientation orientation) noexcept
     {
-        switch (orientation)
+        if (isUsingOldRotationMethod())
         {
-            case Desktop::upsideDown:             return CGAffineTransformMake (-1, 0,  0, -1, 0, 0);
-            case Desktop::rotatedClockwise:       return CGAffineTransformMake (0, -1,  1,  0, 0, 0);
-            case Desktop::rotatedAntiClockwise:   return CGAffineTransformMake (0,  1, -1,  0, 0, 0);
-            default: break;
+            switch (orientation)
+            {
+                case Desktop::upsideDown:             return CGAffineTransformMake (-1, 0,  0, -1, 0, 0);
+                case Desktop::rotatedClockwise:       return CGAffineTransformMake (0, -1,  1,  0, 0, 0);
+                case Desktop::rotatedAntiClockwise:   return CGAffineTransformMake (0,  1, -1,  0, 0, 0);
+                default: break;
+            }
         }
 
         return CGAffineTransformIdentity;
@@ -85,10 +96,10 @@ using namespace juce;
 
 - (void) drawRect: (CGRect) r;
 
-- (void) touchesBegan: (NSSet*) touches withEvent: (UIEvent*) event;
-- (void) touchesMoved: (NSSet*) touches withEvent: (UIEvent*) event;
-- (void) touchesEnded: (NSSet*) touches withEvent: (UIEvent*) event;
-- (void) touchesCancelled: (NSSet*) touches withEvent: (UIEvent*) event;
+- (void) touchesBegan:     (NSSet*) touches  withEvent: (UIEvent*) event;
+- (void) touchesMoved:     (NSSet*) touches  withEvent: (UIEvent*) event;
+- (void) touchesEnded:     (NSSet*) touches  withEvent: (UIEvent*) event;
+- (void) touchesCancelled: (NSSet*) touches  withEvent: (UIEvent*) event;
 
 - (BOOL) becomeFirstResponder;
 - (BOOL) resignFirstResponder;
@@ -106,6 +117,7 @@ using namespace juce;
 - (BOOL) shouldAutorotateToInterfaceOrientation: (UIInterfaceOrientation) interfaceOrientation;
 - (void) willRotateToInterfaceOrientation: (UIInterfaceOrientation) toInterfaceOrientation duration: (NSTimeInterval) duration;
 - (void) didRotateFromInterfaceOrientation: (UIInterfaceOrientation) fromInterfaceOrientation;
+- (void) viewWillTransitionToSize: (CGSize) size withTransitionCoordinator: (id<UIViewControllerTransitionCoordinator>) coordinator;
 
 - (void) viewDidLoad;
 - (void) viewWillAppear: (BOOL) animated;
@@ -189,7 +201,7 @@ public:
     bool isSharedWindow, fullScreen, insideDrawRect;
     static ModifierKeys currentModifiers;
 
-    static int64 getMouseTime (UIEvent* e)
+    static int64 getMouseTime (UIEvent* e) noexcept
     {
         return (Time::currentTimeMillis() - Time::getMillisecondCounter())
                 + (int64) ([e timestamp] * 1000.0);
@@ -197,26 +209,29 @@ public:
 
     static Rectangle<int> rotatedScreenPosToReal (const Rectangle<int>& r)
     {
-        const Rectangle<int> screen (convertToRectInt ([UIScreen mainScreen].bounds));
-
-        switch ([[UIApplication sharedApplication] statusBarOrientation])
+        if (isUsingOldRotationMethod())
         {
-            case UIInterfaceOrientationPortrait:
-                return r;
+            const Rectangle<int> screen (convertToRectInt ([UIScreen mainScreen].bounds));
 
-            case UIInterfaceOrientationPortraitUpsideDown:
-                return Rectangle<int> (screen.getWidth() - r.getRight(), screen.getHeight() - r.getBottom(),
-                                       r.getWidth(), r.getHeight());
+            switch ([[UIApplication sharedApplication] statusBarOrientation])
+            {
+                case UIInterfaceOrientationPortrait:
+                    return r;
 
-            case UIInterfaceOrientationLandscapeLeft:
-                return Rectangle<int> (r.getY(), screen.getHeight() - r.getRight(),
-                                       r.getHeight(), r.getWidth());
+                case UIInterfaceOrientationPortraitUpsideDown:
+                    return Rectangle<int> (screen.getWidth() - r.getRight(), screen.getHeight() - r.getBottom(),
+                                           r.getWidth(), r.getHeight());
 
-            case UIInterfaceOrientationLandscapeRight:
-                return Rectangle<int> (screen.getWidth() - r.getBottom(), r.getX(),
-                                       r.getHeight(), r.getWidth());
+                case UIInterfaceOrientationLandscapeLeft:
+                    return Rectangle<int> (r.getY(), screen.getHeight() - r.getRight(),
+                                           r.getHeight(), r.getWidth());
 
-            default: jassertfalse; // unknown orientation!
+                case UIInterfaceOrientationLandscapeRight:
+                    return Rectangle<int> (screen.getWidth() - r.getBottom(), r.getX(),
+                                           r.getHeight(), r.getWidth());
+
+                default: jassertfalse; // unknown orientation!
+            }
         }
 
         return r;
@@ -224,26 +239,29 @@ public:
 
     static Rectangle<int> realScreenPosToRotated (const Rectangle<int>& r)
     {
-        const Rectangle<int> screen (convertToRectInt ([UIScreen mainScreen].bounds));
-
-        switch ([[UIApplication sharedApplication] statusBarOrientation])
+        if (isUsingOldRotationMethod())
         {
-            case UIInterfaceOrientationPortrait:
-                return r;
+            const Rectangle<int> screen (convertToRectInt ([UIScreen mainScreen].bounds));
 
-            case UIInterfaceOrientationPortraitUpsideDown:
-                return Rectangle<int> (screen.getWidth() - r.getRight(), screen.getHeight() - r.getBottom(),
-                                       r.getWidth(), r.getHeight());
+            switch ([[UIApplication sharedApplication] statusBarOrientation])
+            {
+                case UIInterfaceOrientationPortrait:
+                    return r;
 
-            case UIInterfaceOrientationLandscapeLeft:
-                return Rectangle<int> (screen.getHeight() - r.getBottom(), r.getX(),
-                                       r.getHeight(), r.getWidth());
+                case UIInterfaceOrientationPortraitUpsideDown:
+                    return Rectangle<int> (screen.getWidth() - r.getRight(), screen.getHeight() - r.getBottom(),
+                                           r.getWidth(), r.getHeight());
 
-            case UIInterfaceOrientationLandscapeRight:
-                return Rectangle<int> (r.getY(), screen.getWidth() - r.getRight(),
-                                       r.getHeight(), r.getWidth());
+                case UIInterfaceOrientationLandscapeLeft:
+                    return Rectangle<int> (screen.getHeight() - r.getBottom(), r.getX(),
+                                           r.getHeight(), r.getWidth());
 
-            default: jassertfalse; // unknown orientation!
+                case UIInterfaceOrientationLandscapeRight:
+                    return Rectangle<int> (r.getY(), screen.getWidth() - r.getRight(),
+                                           r.getHeight(), r.getWidth());
+
+                default: jassertfalse; // unknown orientation!
+            }
         }
 
         return r;
@@ -273,6 +291,13 @@ private:
     };
 };
 
+static void sendScreenBoundsUpdate (JuceUIViewController* c)
+{
+    JuceUIView* juceView = (JuceUIView*) [c view];
+    jassert (juceView != nil && juceView->owner != nullptr);
+    juceView->owner->updateTransformAndScreenBounds();
+}
+
 } // (juce namespace)
 
 //==============================================================================
@@ -301,19 +326,23 @@ private:
 - (void) didRotateFromInterfaceOrientation: (UIInterfaceOrientation) fromInterfaceOrientation
 {
     (void) fromInterfaceOrientation;
-
-    JuceUIView* juceView = (JuceUIView*) [self view];
-    jassert (juceView != nil && juceView->owner != nullptr);
-    juceView->owner->updateTransformAndScreenBounds();
-
+    sendScreenBoundsUpdate (self);
     [UIView setAnimationsEnabled: YES];
+}
+
+- (void) viewWillTransitionToSize: (CGSize) size withTransitionCoordinator: (id<UIViewControllerTransitionCoordinator>) coordinator
+{
+    [super viewWillTransitionToSize: size withTransitionCoordinator: coordinator];
+    sendScreenBoundsUpdate (self);
+
+    // On some devices the screen-size isn't yet updated at this point, so also trigger another
+    // async update to double-check..
+    MessageManager::callAsync ([=]() { sendScreenBoundsUpdate (self); });
 }
 
 - (void) viewDidLoad
 {
-    JuceUIView* juceView = (JuceUIView*) [self view];
-    jassert (juceView != nil && juceView->owner != nullptr);
-    juceView->owner->updateTransformAndScreenBounds();
+    sendScreenBoundsUpdate (self);
 }
 
 - (void) viewWillAppear: (BOOL) animated

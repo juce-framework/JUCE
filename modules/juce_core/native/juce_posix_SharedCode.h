@@ -223,6 +223,12 @@ namespace
         return statfs (f.getFullPathName().toUTF8(), &result) == 0;
     }
 
+   #if (JUCE_MAC && MAC_OS_X_VERSION_MIN_REQUIRED > MAC_OS_X_VERSION_10_5) || JUCE_IOS
+    static int64 getCreationTime (const juce_statStruct& s) noexcept     { return (int64) s.st_birthtime; }
+   #else
+    static int64 getCreationTime (const juce_statStruct& s) noexcept     { return (int64) s.st_ctime; }
+   #endif
+
     void updateStatInfoForFile (const String& path, bool* const isDir, int64* const fileSize,
                                 Time* const modTime, Time* const creationTime, bool* const isReadOnly)
     {
@@ -232,9 +238,9 @@ namespace
             const bool statOk = juce_stat (path, info);
 
             if (isDir != nullptr)         *isDir        = statOk && ((info.st_mode & S_IFDIR) != 0);
-            if (fileSize != nullptr)      *fileSize     = statOk ? info.st_size : 0;
-            if (modTime != nullptr)       *modTime      = Time (statOk ? (int64) info.st_mtime * 1000 : 0);
-            if (creationTime != nullptr)  *creationTime = Time (statOk ? (int64) info.st_ctime * 1000 : 0);
+            if (fileSize != nullptr)      *fileSize     = statOk ? (int64) info.st_size : 0;
+            if (modTime != nullptr)       *modTime      = Time (statOk ? (int64) info.st_mtime  * 1000 : 0);
+            if (creationTime != nullptr)  *creationTime = Time (statOk ? getCreationTime (info) * 1000 : 0);
         }
 
         if (isReadOnly != nullptr)
@@ -298,21 +304,31 @@ bool File::hasWriteAccess() const
     return false;
 }
 
-bool File::setFileReadOnlyInternal (const bool shouldBeReadOnly) const
+static bool setFileModeFlags (const String& fullPath, mode_t flags, bool shouldSet) noexcept
 {
     juce_statStruct info;
     if (! juce_stat (fullPath, info))
         return false;
 
-    info.st_mode &= 0777;   // Just permissions
+    info.st_mode &= 0777;
 
-    if (shouldBeReadOnly)
-        info.st_mode &= ~(S_IWUSR | S_IWGRP | S_IWOTH);
+    if (shouldSet)
+        info.st_mode |= flags;
     else
-        // Give everybody write permission?
-        info.st_mode |= S_IWUSR | S_IWGRP | S_IWOTH;
+        info.st_mode &= ~flags;
 
     return chmod (fullPath.toUTF8(), info.st_mode) == 0;
+}
+
+bool File::setFileReadOnlyInternal (bool shouldBeReadOnly) const
+{
+    // Hmm.. should we give global write permission or just the current user?
+    return setFileModeFlags (fullPath, S_IWUSR | S_IWGRP | S_IWOTH, ! shouldBeReadOnly);
+}
+
+bool File::setFileExecutableInternal (bool shouldBeExecutable) const
+{
+    return setFileModeFlags (fullPath, S_IXUSR | S_IXGRP | S_IXOTH, shouldBeExecutable);
 }
 
 void File::getFileTimesInternal (int64& modificationTime, int64& accessTime, int64& creationTime) const
@@ -322,11 +338,12 @@ void File::getFileTimesInternal (int64& modificationTime, int64& accessTime, int
     creationTime = 0;
 
     juce_statStruct info;
+
     if (juce_stat (fullPath, info))
     {
-        modificationTime = (int64) info.st_mtime * 1000;
-        accessTime = (int64) info.st_atime * 1000;
-        creationTime = (int64) info.st_ctime * 1000;
+        modificationTime  = (int64) info.st_mtime * 1000;
+        accessTime        = (int64) info.st_atime * 1000;
+        creationTime      = (int64) info.st_ctime * 1000;
     }
 }
 
@@ -664,6 +681,7 @@ int File::getVolumeSerialNumber() const
 }
 
 //==============================================================================
+#if ! JUCE_IOS
 void juce_runSystemCommand (const String&);
 void juce_runSystemCommand (const String& command)
 {
@@ -684,7 +702,7 @@ String juce_getOutputFromCommand (const String& command)
     tempFile.deleteFile();
     return result;
 }
-
+#endif
 
 //==============================================================================
 #if JUCE_IOS

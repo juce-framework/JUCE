@@ -263,6 +263,9 @@ public:
     */
     virtual void showPopup();
 
+    /** Adds the items in this ComboBox to the given menu. */
+    void addItemsToMenu (PopupMenu&) const;
+
     //==============================================================================
     /**
         A class for receiving events from a ComboBox.
@@ -418,7 +421,7 @@ private:
         bool isEnabled : 1, isHeading : 1;
     };
 
-    OwnedArray <ItemInfo> items;
+    OwnedArray<ItemInfo> items;
     Value currentId;
     int lastCurrentId;
     bool isButtonDown, separatorPending, menuActive, scrollWheelEnabled;
@@ -432,6 +435,7 @@ private:
     bool selectIfEnabled (int index);
     bool nudgeSelectedItem (int delta);
     void sendChange (NotificationType);
+    void showPopupIfNotActive();
     static void popupMenuFinishedCallback (int, ComboBox*);
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ComboBox)

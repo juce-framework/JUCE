@@ -144,13 +144,16 @@ namespace juce
 
 namespace
 {
-    HWND findMDIParentOf (HWND w)
+    // Returns the actual container window, unlike GetParent, which can also return a separate owner window.
+    static HWND getWindowParent (HWND w) noexcept    { return GetAncestor (w, GA_PARENT); }
+
+    static HWND findMDIParentOf (HWND w)
     {
         const int frameThickness = GetSystemMetrics (SM_CYFIXEDFRAME);
 
         while (w != 0)
         {
-            HWND parent = GetParent (w);
+            HWND parent = getWindowParent (w);
 
             if (parent == 0)
                 break;
@@ -852,6 +855,15 @@ public:
         }
     }
 
+    void getParameterLabel (VstInt32 index, char* text) override
+    {
+        if (filter != nullptr)
+        {
+            jassert (isPositiveAndBelow (index, filter->getNumParameters()));
+            filter->getParameterLabel (index).copyToUTF8 (text, 24); // length should technically be kVstMaxParamStrLen, which is 8, but hosts will normally allow a bit more.
+        }
+    }
+
     void audioProcessorParameterChanged (AudioProcessor*, int index, float newValue) override
     {
         if (audioMaster != nullptr)
@@ -1235,7 +1247,7 @@ public:
 
                 while (w != 0)
                 {
-                    HWND parent = GetParent (w);
+                    HWND parent = getWindowParent (w);
 
                     if (parent == 0)
                         break;

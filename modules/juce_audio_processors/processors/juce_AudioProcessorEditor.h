@@ -39,9 +39,11 @@ class JUCE_API  AudioProcessorEditor  : public Component
 {
 protected:
     //==============================================================================
-    /** Creates an editor for the specified processor.
-    */
-    AudioProcessorEditor (AudioProcessor* owner);
+    /** Creates an editor for the specified processor. */
+    AudioProcessorEditor (AudioProcessor&) noexcept;
+
+    /** Creates an editor for the specified processor. */
+    AudioProcessorEditor (AudioProcessor*) noexcept;
 
 public:
     /** Destructor. */
@@ -49,14 +51,40 @@ public:
 
 
     //==============================================================================
-    /** Returns a pointer to the processor that this editor represents. */
-    AudioProcessor* getAudioProcessor() const noexcept        { return owner; }
+    /** The AudioProcessor that this editor represents. */
+    AudioProcessor& processor;
 
+    /** Returns a pointer to the processor that this editor represents.
+        This method is here to support legacy code, but it's easier to just use the
+        AudioProcessorEditor::processor member variable directly to get this object.
+    */
+    AudioProcessor* getAudioProcessor() const noexcept        { return &processor; }
+
+    //==============================================================================
+    /** Used by the setParameterHighlighting() method. */
+    struct ParameterControlHighlightInfo
+    {
+        int parameterIndex;
+        bool isHighlighted;
+        Colour suggestedColour;
+    };
+
+    /** Some types of plugin can call this to suggest that the control for a particular
+        parameter should be highlighted.
+        Currently only AAX plugins will call this, and implementing it is optional.
+    */
+    virtual void setControlHighlight (ParameterControlHighlightInfo);
+
+    /** Called by certain plug-in wrappers to find out whether a component is used
+        to control a parameter.
+
+        If the given component represents a particular plugin parameter, then this
+        method should return the index of that parameter. If not, it should return -1.
+        Currently only AAX plugins will call this, and implementing it is optional.
+    */
+    virtual int getControlParameterIndex (Component&);
 
 private:
-    //==============================================================================
-    AudioProcessor* const owner;
-
     JUCE_DECLARE_NON_COPYABLE (AudioProcessorEditor)
 };
 

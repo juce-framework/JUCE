@@ -96,10 +96,13 @@ public:
     */
     RelativeTime maximumExecutionTime;
 
+    /** Provides access to the set of properties of the root namespace object. */
+    const NamedValueSet& getRootObjectProperties() const noexcept;
+
 private:
     JUCE_PUBLIC_IN_DLL_BUILD (struct RootObject)
-    ReferenceCountedObjectPtr<RootObject> root;
-    void prepareTimeout() const;
+    const ReferenceCountedObjectPtr<RootObject> root;
+    void prepareTimeout() const noexcept;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (JavascriptEngine)
 };

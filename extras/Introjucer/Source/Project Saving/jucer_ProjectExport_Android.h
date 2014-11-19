@@ -61,6 +61,7 @@ public:
         if (getKeyStorePassValue().getValue().isVoid())     getKeyStorePassValue()  = "android";
         if (getKeyAliasValue().getValue().isVoid())         getKeyAliasValue()      = "androiddebugkey";
         if (getKeyAliasPassValue().getValue().isVoid())     getKeyAliasPassValue()  = "android";
+        if (getCPP11EnabledValue().getValue().isVoid())     getCPP11EnabledValue()  = true;
     }
 
     //==============================================================================
@@ -84,8 +85,11 @@ public:
         props.add (new TextPropertyComponent (getMinimumSDKVersionValue(), "Minimum SDK version", 32, false),
                    "The number of the minimum version of the Android SDK that the app requires");
 
-        props.add (new BooleanPropertyComponent (getCPP11EnabledValue(), "Enable C++11 features", "Enable the -std=c++0x flag"),
-                   "If enabled, this will set the -std=c++0x flag for the build.");
+        props.add (new TextPropertyComponent (getNDKToolchainVersionValue(), "NDK Toolchain version", 32, false),
+                   "The variable NDK_TOOLCHAIN_VERSION in Application.mk - leave blank for a default value");
+
+        props.add (new BooleanPropertyComponent (getCPP11EnabledValue(), "Enable C++11 features", "Enable the -std=c++11 flag"),
+                   "If enabled, this will set the -std=c++11 flag for the build.");
 
         props.add (new BooleanPropertyComponent (getInternetNeededValue(), "Internet Access", "Specify internet access permission in the manifest"),
                    "If enabled, this will set the android.permission.INTERNET flag in the manifest.");
@@ -106,33 +110,35 @@ public:
                    "The key.alias password, used when signing the package.");
     }
 
-    Value getActivityClassPathValue()      { return getSetting (Ids::androidActivityClass); }
-    String getActivityClassPath() const    { return settings [Ids::androidActivityClass]; }
-    Value getSDKPathValue()                { return getSetting (Ids::androidSDKPath); }
-    String getSDKPathString() const        { return settings [Ids::androidSDKPath]; }
-    Value getNDKPathValue()                { return getSetting (Ids::androidNDKPath); }
-    String getNDKPathString() const        { return settings [Ids::androidNDKPath]; }
+    Value getActivityClassPathValue()           { return getSetting (Ids::androidActivityClass); }
+    String getActivityClassPath() const         { return settings [Ids::androidActivityClass]; }
+    Value getSDKPathValue()                     { return getSetting (Ids::androidSDKPath); }
+    String getSDKPathString() const             { return settings [Ids::androidSDKPath]; }
+    Value getNDKPathValue()                     { return getSetting (Ids::androidNDKPath); }
+    String getNDKPathString() const             { return settings [Ids::androidNDKPath]; }
+    Value getNDKToolchainVersionValue()         { return getSetting (Ids::toolset); }
+    String getNDKToolchainVersionString() const { return settings [Ids::toolset]; }
 
-    Value getKeyStoreValue()               { return getSetting (Ids::androidKeyStore); }
-    String getKeyStoreString() const       { return settings [Ids::androidKeyStore]; }
-    Value getKeyStorePassValue()           { return getSetting (Ids::androidKeyStorePass); }
-    String getKeyStorePassString() const   { return settings [Ids::androidKeyStorePass]; }
-    Value getKeyAliasValue()               { return getSetting (Ids::androidKeyAlias); }
-    String getKeyAliasString() const       { return settings [Ids::androidKeyAlias]; }
-    Value getKeyAliasPassValue()           { return getSetting (Ids::androidKeyAliasPass); }
-    String getKeyAliasPassString() const   { return settings [Ids::androidKeyAliasPass]; }
+    Value getKeyStoreValue()                    { return getSetting (Ids::androidKeyStore); }
+    String getKeyStoreString() const            { return settings [Ids::androidKeyStore]; }
+    Value getKeyStorePassValue()                { return getSetting (Ids::androidKeyStorePass); }
+    String getKeyStorePassString() const        { return settings [Ids::androidKeyStorePass]; }
+    Value getKeyAliasValue()                    { return getSetting (Ids::androidKeyAlias); }
+    String getKeyAliasString() const            { return settings [Ids::androidKeyAlias]; }
+    Value getKeyAliasPassValue()                { return getSetting (Ids::androidKeyAliasPass); }
+    String getKeyAliasPassString() const        { return settings [Ids::androidKeyAliasPass]; }
 
-    Value getInternetNeededValue()         { return getSetting (Ids::androidInternetNeeded); }
-    bool getInternetNeeded() const         { return settings [Ids::androidInternetNeeded]; }
-    Value getAudioRecordNeededValue()      { return getSetting (Ids::androidMicNeeded); }
-    bool getAudioRecordNeeded() const      { return settings [Ids::androidMicNeeded]; }
-    Value getMinimumSDKVersionValue()      { return getSetting (Ids::androidMinimumSDK); }
-    String getMinimumSDKVersionString() const { return settings [Ids::androidMinimumSDK]; }
-    Value getOtherPermissionsValue()       { return getSetting (Ids::androidOtherPermissions); }
-    String getOtherPermissions() const     { return settings [Ids::androidOtherPermissions]; }
+    Value getInternetNeededValue()              { return getSetting (Ids::androidInternetNeeded); }
+    bool getInternetNeeded() const              { return settings [Ids::androidInternetNeeded]; }
+    Value getAudioRecordNeededValue()           { return getSetting (Ids::androidMicNeeded); }
+    bool getAudioRecordNeeded() const           { return settings [Ids::androidMicNeeded]; }
+    Value getMinimumSDKVersionValue()           { return getSetting (Ids::androidMinimumSDK); }
+    String getMinimumSDKVersionString() const   { return settings [Ids::androidMinimumSDK]; }
+    Value getOtherPermissionsValue()            { return getSetting (Ids::androidOtherPermissions); }
+    String getOtherPermissions() const          { return settings [Ids::androidOtherPermissions]; }
 
-    Value getCPP11EnabledValue()           { return getSetting (Ids::androidCpp11); }
-    bool isCPP11Enabled() const            { return settings [Ids::androidCpp11]; }
+    Value getCPP11EnabledValue()                { return getSetting (Ids::androidCpp11); }
+    bool isCPP11Enabled() const                 { return settings [Ids::androidCpp11]; }
 
     String createDefaultClassName() const
     {
@@ -265,7 +271,13 @@ private:
 
         XmlElement* app = manifest->createNewChildElement ("application");
         app->setAttribute ("android:label", "@string/app_name");
-        app->setAttribute ("android:icon", "@drawable/icon");
+
+        {
+            ScopedPointer<Drawable> bigIcon (getBigIcon()), smallIcon (getSmallIcon());
+
+            if (bigIcon != nullptr || smallIcon != nullptr)
+                app->setAttribute ("android:icon", "@drawable/icon");
+        }
 
         if (getMinimumSDKVersionString().getIntValue() >= 11)
             app->setAttribute ("android:hardwareAccelerated", "false"); // (using the 2D acceleration slows down openGL)
@@ -367,6 +379,35 @@ private:
         }
     }
 
+    String getABIs (bool forDebug) const
+    {
+        for (ConstConfigIterator config (*this); config.next();)
+        {
+            const AndroidBuildConfiguration& androidConfig = dynamic_cast<const AndroidBuildConfiguration&> (*config);
+
+            if (config->isDebug() == forDebug)
+                return androidConfig.getArchitectures();
+        }
+
+        return String();
+    }
+
+    String getCppFlags() const
+    {
+       String flags ("-fsigned-char -fexceptions -frtti");
+
+        if (! getNDKToolchainVersionString().startsWithIgnoreCase ("clang"))
+            flags << " -Wno-psabi";
+
+        return flags;
+    }
+
+    String getToolchainVersion() const
+    {
+        String v (getNDKToolchainVersionString());
+        return v.isNotEmpty() ? v : "4.8";
+    }
+
     void writeApplicationMk (const File& file) const
     {
         MemoryOutputStream mo;
@@ -375,8 +416,15 @@ private:
            << "# Don't edit this file! Your changes will be overwritten when you re-save the Introjucer project!" << newLine
            << newLine
            << "APP_STL := gnustl_static" << newLine
-           << "APP_CPPFLAGS += -fsigned-char -fexceptions -frtti -Wno-psabi" << newLine
-           << "APP_PLATFORM := " << getAppPlatform() << newLine;
+           << "APP_CPPFLAGS += " << getCppFlags() << newLine
+           << "APP_PLATFORM := " << getAppPlatform() << newLine
+           << "NDK_TOOLCHAIN_VERSION := " << getToolchainVersion() << newLine
+           << newLine
+           << "ifeq ($(NDK_DEBUG),1)" << newLine
+           << "    APP_ABI := " << getABIs (true) << newLine
+           << "else" << newLine
+           << "    APP_ABI := " << getABIs (false) << newLine
+           << "endif" << newLine;
 
         overwriteFileIfDifferentOrThrow (file, mo);
     }
@@ -403,7 +451,10 @@ private:
             << newLine
             << "include $(CLEAR_VARS)" << newLine
             << newLine
-            << "LOCAL_ARM_MODE := arm" << newLine
+            << "ifeq ($(TARGET_ARCH_ABI), armeabi-v7a)" << newLine
+            << "    LOCAL_ARM_MODE := arm" << newLine
+            << "endif" << newLine
+            << newLine
             << "LOCAL_MODULE := juce_jni" << newLine
             << "LOCAL_SRC_FILES := \\" << newLine;
 
@@ -414,7 +465,7 @@ private:
         String debugSettings, releaseSettings;
 
         out << newLine
-            << "ifeq ($(CONFIG),Debug)" << newLine;
+            << "ifeq ($(NDK_DEBUG),1)" << newLine;
         writeConfigSettings (out, true);
         out << "else" << newLine;
         writeConfigSettings (out, false);
@@ -429,7 +480,7 @@ private:
         {
             if (config->isDebug() == forDebug)
             {
-                const AndroidBuildConfiguration& androidConfig = dynamic_cast <const AndroidBuildConfiguration&> (*config);
+                const AndroidBuildConfiguration& androidConfig = dynamic_cast<const AndroidBuildConfiguration&> (*config);
 
                 String cppFlags;
                 cppFlags << createCPPFlags (androidConfig)
@@ -490,7 +541,7 @@ private:
               << " -O" << config.getGCCOptimisationFlag();
 
         if (isCPP11Enabled())
-            flags << " -std=c++0x -std=gnu++0x"; // these flags seem to enable slightly different things on gcc, and both seem to be needed
+            flags << " -std=c++11 -std=gnu++11"; // these flags seem to enable slightly different things on gcc, and both seem to be needed
 
         defines = mergePreprocessorDefs (defines, getAllPreprocessorDefs (config));
         return flags + createGCCPreprocessorFlags (defines);
@@ -533,7 +584,7 @@ private:
 
             for (ConstConfigIterator config (*this); config.next();)
             {
-                const AndroidBuildConfiguration& androidConfig = dynamic_cast <const AndroidBuildConfiguration&> (*config);
+                const AndroidBuildConfiguration& androidConfig = dynamic_cast<const AndroidBuildConfiguration&> (*config);
 
                 if (config->isDebug())
                     debugABIs = androidConfig.getArchitectures();

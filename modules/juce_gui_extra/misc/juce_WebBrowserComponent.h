@@ -98,6 +98,12 @@ public:
     */
     virtual void windowCloseRequest();
 
+    /** This callback occurs when the browser attempts to load a URL in a new window.
+        This won't actually load the window but gives you a chance to either launch a
+        new window yourself or just load the URL into the current window with goToURL().
+     */
+    virtual void newWindowAttemptingToLoad (const String& newURL);
+
     //==============================================================================
     /** @internal */
     void paint (Graphics&) override;

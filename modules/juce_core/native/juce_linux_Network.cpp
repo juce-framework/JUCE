@@ -31,26 +31,26 @@ void MACAddress::findAllAddresses (Array<MACAddress>& result)
     const int s = socket (AF_INET, SOCK_DGRAM, 0);
     if (s != -1)
     {
-        char buf [1024];
-        struct ifconf ifc;
-        ifc.ifc_len = sizeof (buf);
-        ifc.ifc_buf = buf;
-        ioctl (s, SIOCGIFCONF, &ifc);
+        struct ifaddrs* addrs = nullptr;
 
-        for (unsigned int i = 0; i < ifc.ifc_len / sizeof (struct ifreq); ++i)
+        if (getifaddrs (&addrs) != -1)
         {
-            struct ifreq ifr;
-            strcpy (ifr.ifr_name, ifc.ifc_req[i].ifr_name);
-
-            if (ioctl (s, SIOCGIFFLAGS, &ifr) == 0
-                 && (ifr.ifr_flags & IFF_LOOPBACK) == 0
-                 && ioctl (s, SIOCGIFHWADDR, &ifr) == 0)
+            for (struct ifaddrs* i = addrs; i != nullptr; i = i->ifa_next)
             {
-                MACAddress ma ((const uint8*) ifr.ifr_hwaddr.sa_data);
+                struct ifreq ifr;
+                strcpy (ifr.ifr_name, i->ifa_name);
+                ifr.ifr_addr.sa_family = AF_INET;
 
-                if (! ma.isNull())
-                    result.addIfNotAlreadyThere (ma);
+                if (ioctl (s, SIOCGIFHWADDR, &ifr) == 0)
+                {
+                    MACAddress ma ((const uint8*) ifr.ifr_hwaddr.sa_data);
+
+                    if (! ma.isNull())
+                        result.addIfNotAlreadyThere (ma);
+                }
             }
+
+            freeifaddrs (addrs);
         }
 
         close (s);
@@ -263,7 +263,7 @@ private:
             }
         }
 
-        String responseHeader (readResponse (socketHandle, timeOutTime));
+        String responseHeader (readResponse (timeOutTime));
         position = 0;
 
         if (responseHeader.isNotEmpty())
@@ -302,7 +302,7 @@ private:
     }
 
     //==============================================================================
-    String readResponse (const int socketHandle, const uint32 timeOutTime)
+    String readResponse (const uint32 timeOutTime)
     {
         int numConsecutiveLFs  = 0;
         MemoryOutputStream buffer;
@@ -338,7 +338,8 @@ private:
             dest << "\r\n" << key << ' ' << value;
     }
 
-    static void writeHost (MemoryOutputStream& dest, const bool isPost, const String& path, const String& host, const int port)
+    static void writeHost (MemoryOutputStream& dest, const bool isPost,
+                           const String& path, const String& host, int /*port*/)
     {
         dest << (isPost ? "POST " : "GET ") << path << " HTTP/1.0\r\nHost: " << host;
     }

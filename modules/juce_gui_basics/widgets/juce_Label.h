@@ -184,7 +184,7 @@ public:
         virtual void labelTextChanged (Label* labelThatHasChanged) = 0;
 
         /** Called when a Label goes into editing mode and displays a TextEditor. */
-        virtual void editorShown (Label*, TextEditor& textEditorShown);
+        virtual void editorShown (Label*, TextEditor&) {}
     };
 
     /** Registers a listener that will be called when the label's text changes. */

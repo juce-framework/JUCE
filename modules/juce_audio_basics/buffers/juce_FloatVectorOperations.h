@@ -65,17 +65,35 @@ public:
     /** Adds a fixed value to the destination values. */
     static void JUCE_CALLTYPE add (double* dest, double amountToAdd, int numValues) noexcept;
 
+    /** Adds a fixed value to each source value and stores it in the destination array. */
+    static void JUCE_CALLTYPE add (float* dest, float* src, float amount, int numValues) noexcept;
+
+    /** Adds a fixed value to each source value and stores it in the destination array. */
+    static void JUCE_CALLTYPE add (double* dest, double* src, double amount, int numValues) noexcept;
+
     /** Adds the source values to the destination values. */
     static void JUCE_CALLTYPE add (float* dest, const float* src, int numValues) noexcept;
 
     /** Adds the source values to the destination values. */
     static void JUCE_CALLTYPE add (double* dest, const double* src, int numValues) noexcept;
 
+    /** Adds each source1 value to the corresponding source2 value and stores the result in the destination array. */
+    static void JUCE_CALLTYPE add (float* dest, const float* src1, const float* src2, int num) noexcept;
+
+    /** Adds each source1 value to the corresponding source2 value and stores the result in the destination array. */
+    static void JUCE_CALLTYPE add (double* dest, const double* src1, const double* src2, int num) noexcept;
+
     /** Subtracts the source values from the destination values. */
     static void JUCE_CALLTYPE subtract (float* dest, const float* src, int numValues) noexcept;
 
     /** Subtracts the source values from the destination values. */
     static void JUCE_CALLTYPE subtract (double* dest, const double* src, int numValues) noexcept;
+
+    /** Subtracts each source2 value from the corresponding source1 value and stores the result in the destination array. */
+    static void JUCE_CALLTYPE subtract (float* dest, const float* src1, const float* src2, int num) noexcept;
+
+    /** Subtracts each source2 value from the corresponding source1 value and stores the result in the destination array. */
+    static void JUCE_CALLTYPE subtract (double* dest, const double* src1, const double* src2, int num) noexcept;
 
     /** Multiplies each source value by the given multiplier, then adds it to the destination value. */
     static void JUCE_CALLTYPE addWithMultiply (float* dest, const float* src, float multiplier, int numValues) noexcept;
@@ -89,11 +107,23 @@ public:
     /** Multiplies the destination values by the source values. */
     static void JUCE_CALLTYPE multiply (double* dest, const double* src, int numValues) noexcept;
 
+    /** Multiplies each source1 value by the correspinding source2 value, then stores it in the destination array. */
+    static void JUCE_CALLTYPE multiply (float* dest, const float* src1, const float* src2, int numValues) noexcept;
+
+    /** Multiplies each source1 value by the correspinding source2 value, then stores it in the destination array. */
+    static void JUCE_CALLTYPE multiply (double* dest, const double* src1, const double* src2, int numValues) noexcept;
+
     /** Multiplies each of the destination values by a fixed multiplier. */
     static void JUCE_CALLTYPE multiply (float* dest, float multiplier, int numValues) noexcept;
 
     /** Multiplies each of the destination values by a fixed multiplier. */
     static void JUCE_CALLTYPE multiply (double* dest, double multiplier, int numValues) noexcept;
+
+    /** Multiplies each of the source values by a fixed multiplier and stores the result in the destination array. */
+    static void JUCE_CALLTYPE multiply (float* dest, const float* src, float multiplier, int num) noexcept;
+
+    /** Multiplies each of the source values by a fixed multiplier and stores the result in the destination array. */
+    static void JUCE_CALLTYPE multiply (double* dest, const double* src, double multiplier, int num) noexcept;
 
     /** Copies a source vector to a destination, negating each value. */
     static void JUCE_CALLTYPE negate (float* dest, const float* src, int numValues) noexcept;

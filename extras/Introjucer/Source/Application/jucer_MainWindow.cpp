@@ -27,7 +27,7 @@
 #include "jucer_MainWindow.h"
 #include "jucer_OpenDocumentManager.h"
 #include "../Code Editor/jucer_SourceCodeEditor.h"
-#include "../Project/jucer_NewProjectWizard.h"
+#include "../Wizards/jucer_NewProjectWizardClasses.h"
 #include "../Utility/jucer_JucerTreeViewBase.h"
 
 
@@ -39,11 +39,12 @@ MainWindow::MainWindow()
                       false)
 {
     setUsingNativeTitleBar (true);
-    createProjectContentCompIfNeeded();
 
    #if ! JUCE_MAC
     setMenuBar (IntrojucerApp::getApp().menuModel);
    #endif
+
+    createProjectContentCompIfNeeded();
 
     setResizable (true, false);
     centreWithSize (800, 600);
@@ -58,7 +59,7 @@ MainWindow::MainWindow()
     {
         commandManager.getKeyMappings()->resetToDefaultMappings();
 
-        ScopedPointer <XmlElement> keys (getGlobalProperties().getXmlValue ("keyMappings"));
+        ScopedPointer<XmlElement> keys (getGlobalProperties().getXmlValue ("keyMappings"));
 
         if (keys != nullptr)
             commandManager.getKeyMappings()->restoreFromXml (*keys);
@@ -291,7 +292,10 @@ void MainWindow::showNewProjectWizard()
 {
     jassert (currentProject == nullptr);
     setContentOwned (createNewProjectWizardComponent(), true);
-    makeVisible();
+    centreWithSize (900, 630);
+    setVisible (true);
+    addToDesktop();
+    getContentComponent()->grabKeyboardFocus();
 }
 
 //==============================================================================
@@ -365,7 +369,7 @@ bool MainWindowList::askAllWindowsToClose()
 void MainWindowList::createWindowIfNoneAreOpen()
 {
     if (windows.size() == 0)
-        createNewMainWindow()->makeVisible();
+        createNewMainWindow()->showNewProjectWizard();
 }
 
 void MainWindowList::closeWindow (MainWindow* w)
@@ -538,4 +542,40 @@ Project* MainWindowList::getFrontmostProject()
                 return p;
 
     return nullptr;
+}
+
+File findDefaultModulesFolder (bool mustContainJuceCoreModule)
+{
+    const MainWindowList& windows = IntrojucerApp::getApp().mainWindowList;
+
+    for (int i = windows.windows.size(); --i >= 0;)
+    {
+        if (Project* p = windows.windows.getUnchecked (i)->getProject())
+        {
+            const File f (EnabledModuleList::findDefaultModulesFolder (*p));
+
+            if (isJuceModulesFolder (f) || (f.isDirectory() && ! mustContainJuceCoreModule))
+                return f;
+        }
+    }
+
+    if (mustContainJuceCoreModule)
+        return findDefaultModulesFolder (false);
+
+    File f (File::getSpecialLocation (File::currentApplicationFile));
+
+    for (;;)
+    {
+        File parent (f.getParentDirectory());
+
+        if (parent == f || ! parent.isDirectory())
+            break;
+
+        if (isJuceFolder (parent))
+            return parent.getChildFile ("modules");
+
+        f = parent;
+    }
+
+    return File::nonexistent;
 }

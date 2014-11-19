@@ -59,12 +59,12 @@ SamplerSound::~SamplerSound()
 {
 }
 
-bool SamplerSound::appliesToNote (const int midiNoteNumber)
+bool SamplerSound::appliesToNote (int midiNoteNumber)
 {
     return midiNotes [midiNoteNumber];
 }
 
-bool SamplerSound::appliesToChannel (const int /*midiChannel*/)
+bool SamplerSound::appliesToChannel (int /*midiChannel*/)
 {
     return true;
 }
@@ -119,7 +119,7 @@ void SamplerVoice::startNote (const int midiNoteNumber,
         if (sound->releaseSamples > 0)
             releaseDelta = (float) (-pitchRatio / sound->releaseSamples);
         else
-            releaseDelta = 0.0f;
+            releaseDelta = -1.0f;
     }
     else
     {
@@ -127,7 +127,7 @@ void SamplerVoice::startNote (const int midiNoteNumber,
     }
 }
 
-void SamplerVoice::stopNote (const bool allowTailOff)
+void SamplerVoice::stopNote (float /*velocity*/, bool allowTailOff)
 {
     if (allowTailOff)
     {
@@ -197,7 +197,7 @@ void SamplerVoice::renderNextBlock (AudioSampleBuffer& outputBuffer, int startSa
 
                 if (attackReleaseLevel <= 0.0f)
                 {
-                    stopNote (false);
+                    stopNote (0.0f, false);
                     break;
                 }
             }
@@ -216,7 +216,7 @@ void SamplerVoice::renderNextBlock (AudioSampleBuffer& outputBuffer, int startSa
 
             if (sourceSamplePosition > playingSound->length)
             {
-                stopNote (false);
+                stopNote (0.0f, false);
                 break;
             }
         }

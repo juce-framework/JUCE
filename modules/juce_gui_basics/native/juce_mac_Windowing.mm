@@ -164,37 +164,29 @@ bool DragAndDropContainer::performExternalDragDropOfFiles (const StringArray& fi
 
     JUCE_AUTORELEASEPOOL
     {
-        NSView* view = (NSView*) sourceComp->getWindowHandle();
+        if (NSView* view = (NSView*) sourceComp->getWindowHandle())
+        {
+            if (NSEvent* event = [[view window] currentEvent])
+            {
+                NSPoint eventPos = [event locationInWindow];
+                NSRect dragRect = [view convertRect: NSMakeRect (eventPos.x - 16.0f, eventPos.y - 16.0f, 32.0f, 32.0f)
+                                           fromView: nil];
 
-        if (view == nil)
-            return false;
+                for (int i = 0; i < files.size(); ++i)
+                {
+                    if (! [view dragFile: juceStringToNS (files[i])
+                                fromRect: dragRect
+                               slideBack: YES
+                                   event: event])
+                        return false;
+                }
 
-        NSPasteboard* pboard = [NSPasteboard pasteboardWithName: NSDragPboard];
-        [pboard declareTypes: [NSArray arrayWithObject: NSFilenamesPboardType]
-                       owner: nil];
-
-        NSMutableArray* filesArray = [NSMutableArray arrayWithCapacity: 4];
-        for (int i = 0; i < files.size(); ++i)
-            [filesArray addObject: juceStringToNS (files[i])];
-
-        [pboard setPropertyList: filesArray
-                        forType: NSFilenamesPboardType];
-
-        NSPoint dragPosition = [view convertPoint: [[[view window] currentEvent] locationInWindow]
-                                         fromView: nil];
-        dragPosition.x -= 16;
-        dragPosition.y -= 16;
-
-        [view dragImage: [[NSWorkspace sharedWorkspace] iconForFile: juceStringToNS (files[0])]
-                     at: dragPosition
-                 offset: NSMakeSize (0, 0)
-                  event: [[view window] currentEvent]
-             pasteboard: pboard
-                 source: view
-              slideBack: YES];
+                return true;
+            }
+        }
     }
 
-    return true;
+    return false;
 }
 
 bool DragAndDropContainer::performExternalDragDropOfText (const String& /*text*/)

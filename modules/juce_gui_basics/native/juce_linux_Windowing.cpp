@@ -1087,9 +1087,7 @@ public:
         {
             for (int i = windowListSize; --i >= 0;)
             {
-                LinuxComponentPeer* const peer = LinuxComponentPeer::getPeerFor (windowList[i]);
-
-                if (peer != 0)
+                if (LinuxComponentPeer* const peer = LinuxComponentPeer::getPeerFor (windowList[i]))
                 {
                     result = (peer == this);
                     break;
@@ -1374,7 +1372,7 @@ public:
         const ModifierKeys oldMods (currentModifiers);
         bool keyPressed = false;
 
-        if ((sym & 0xff00) == 0xff00 || sym == XK_ISO_Left_Tab)
+        if ((sym & 0xff00) == 0xff00 || keyCode == XK_ISO_Left_Tab)
         {
             switch (sym)  // Translate keypad
             {
@@ -1431,6 +1429,11 @@ public:
                 case XK_BackSpace:
                     keyPressed = true;
                     keyCode &= 0xff;
+                    break;
+
+                case XK_ISO_Left_Tab:
+                    keyPressed = true;
+                    keyCode = XK_Tab & 0xff;
                     break;
 
                 default:

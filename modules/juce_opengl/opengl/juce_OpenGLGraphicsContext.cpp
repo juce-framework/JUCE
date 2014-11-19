@@ -38,18 +38,18 @@ struct TextureInfo
 struct CachedImageList  : public ReferenceCountedObject,
                           private ImagePixelData::Listener
 {
-    CachedImageList (size_t totalCacheSizeInPixels = 8 * 1024 * 1024) noexcept
-        : totalSize (0), maxCacheSize (totalCacheSizeInPixels) {}
+    CachedImageList (OpenGLContext& c, size_t totalCacheSizeInPixels = 8 * 1024 * 1024) noexcept
+        : context (c), totalSize (0), maxCacheSize (totalCacheSizeInPixels) {}
 
-    static CachedImageList* get (OpenGLContext& context)
+    static CachedImageList* get (OpenGLContext& c)
     {
         const char cacheValueID[] = "CachedImages";
-        CachedImageList* list = static_cast<CachedImageList*> (context.getAssociatedObject (cacheValueID));
+        CachedImageList* list = static_cast<CachedImageList*> (c.getAssociatedObject (cacheValueID));
 
         if (list == nullptr)
         {
-            list = new CachedImageList();
-            context.setAssociatedObject (cacheValueID, list);
+            list = new CachedImageList (c);
+            c.setAssociatedObject (cacheValueID, list);
         }
 
         return list;
@@ -131,27 +131,44 @@ struct CachedImageList  : public ReferenceCountedObject,
     typedef ReferenceCountedObjectPtr<CachedImageList> Ptr;
 
 private:
+    OpenGLContext& context;
+    OwnedArray<CachedImage> images;
+    size_t totalSize, maxCacheSize;
+
+    bool canUseContext() const noexcept
+    {
+        return OpenGLContext::getCurrentContext() == &context;
+    }
+
     void imageDataChanged (ImagePixelData* im) override
     {
         if (CachedImage* c = findCachedImage (im))
-            c->texture.release();
+            if (canUseContext())
+                c->texture.release();
     }
 
     void imageDataBeingDeleted (ImagePixelData* im) override
     {
         for (int i = images.size(); --i >= 0;)
         {
-            if (images.getUnchecked(i)->pixelData == im)
+            CachedImage& ci = *images.getUnchecked(i);
+
+            if (ci.pixelData == im)
             {
-                totalSize -= images.getUnchecked(i)->imageSize;
-                images.remove (i);
+                if (canUseContext())
+                {
+                    totalSize -= ci.imageSize;
+                    images.remove (i);
+                }
+                else
+                {
+                    ci.pixelData = nullptr;
+                }
+
                 break;
             }
         }
     }
-
-    OwnedArray<CachedImage> images;
-    size_t totalSize, maxCacheSize;
 
     CachedImage* findCachedImage (ImagePixelData* const pixelData) const
     {

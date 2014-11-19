@@ -65,6 +65,7 @@ const char* const WavAudioFormat::acidNumerator        = "acid numerator";
 const char* const WavAudioFormat::acidTempo            = "acid tempo";
 
 const char* const WavAudioFormat::ISRC                 = "ISRC";
+const char* const WavAudioFormat::tracktionLoopInfo    = "tracktion loop info";
 
 //==============================================================================
 namespace WavFileHelpers
@@ -472,6 +473,46 @@ namespace WavFileHelpers
     }
 
     //==============================================================================
+    namespace ListInfoChunk
+    {
+        static bool writeValue (const StringPairArray& values, MemoryOutputStream& out, const char* paramName)
+        {
+            const String value (values.getValue (paramName, String()));
+
+            if (value.isEmpty())
+                return false;
+
+            const int valueLength = (int) value.getNumBytesAsUTF8() + 1;
+            const int chunkLength = valueLength + (valueLength & 1);
+
+            out.writeInt (chunkName (paramName));
+            out.writeInt (chunkLength);
+            out.write (value.toUTF8(), (size_t) valueLength);
+
+            if ((out.getDataSize() & 1) != 0)
+                out.writeByte (0);
+
+            return true;
+        }
+
+        static MemoryBlock createFrom (const StringPairArray& values)
+        {
+            static const char* params[] = { "INAM", "IART", "IPRD", "IPRT", "ISFT",
+                                            "ISRC", "IGNR", "ICMT", "ICOP", "ICRD" };
+
+            MemoryOutputStream out;
+            out.writeInt (chunkName ("INFO"));
+            bool anyParamsDefined = false;
+
+            for (int i = 0; i < numElementsInArray (params); ++i)
+                if (writeValue (values, out, params[i]))
+                    anyParamsDefined = true;
+
+            return anyParamsDefined ? out.getMemoryBlock() : MemoryBlock();
+        }
+    }
+
+    //==============================================================================
     struct AcidChunk
     {
         /** Reads an acid RIFF chunk from a stream positioned just after the size byte. */
@@ -479,6 +520,38 @@ namespace WavFileHelpers
         {
             zerostruct (*this);
             input.read (this, (int) jmin (sizeof (*this), length));
+        }
+
+        AcidChunk (const StringPairArray& values)
+        {
+            zerostruct (*this);
+
+            flags = getFlagIfPresent (values, WavAudioFormat::acidOneShot,   0x01)
+                  | getFlagIfPresent (values, WavAudioFormat::acidRootSet,   0x02)
+                  | getFlagIfPresent (values, WavAudioFormat::acidStretch,   0x04)
+                  | getFlagIfPresent (values, WavAudioFormat::acidDiskBased, 0x08)
+                  | getFlagIfPresent (values, WavAudioFormat::acidizerFlag,  0x10);
+
+            if (values[WavAudioFormat::acidRootSet].getIntValue() != 0)
+                rootNote = ByteOrder::swapIfBigEndian ((uint16) values[WavAudioFormat::acidRootNote].getIntValue());
+
+            numBeats          = ByteOrder::swapIfBigEndian ((uint32) values[WavAudioFormat::acidBeats].getIntValue());
+            meterDenominator  = ByteOrder::swapIfBigEndian ((uint16) values[WavAudioFormat::acidDenominator].getIntValue());
+            meterNumerator    = ByteOrder::swapIfBigEndian ((uint16) values[WavAudioFormat::acidNumerator].getIntValue());
+
+            if (values.containsKey (WavAudioFormat::acidTempo))
+                tempo = swapFloatByteOrder (values[WavAudioFormat::acidTempo].getFloatValue());
+        }
+
+        static MemoryBlock createFrom (const StringPairArray& values)
+        {
+            return AcidChunk (values).toMemoryBlock();
+        }
+
+        MemoryBlock toMemoryBlock() const
+        {
+            return (flags != 0 || rootNote != 0 || numBeats != 0 || meterDenominator != 0 || meterNumerator != 0)
+                      ? MemoryBlock (this, sizeof (*this)) : MemoryBlock();
         }
 
         void addToMetadata (StringPairArray& values) const
@@ -490,29 +563,64 @@ namespace WavFileHelpers
             setBoolFlag (values, WavAudioFormat::acidizerFlag,  0x10);
 
             if (flags & 0x02) // root note set
-                values.set (WavAudioFormat::acidRootNote, String (rootNote));
+                values.set (WavAudioFormat::acidRootNote, String (ByteOrder::swapIfBigEndian (rootNote)));
 
-            values.set (WavAudioFormat::acidBeats,       String (numBeats));
-            values.set (WavAudioFormat::acidDenominator, String (meterDenominator));
-            values.set (WavAudioFormat::acidNumerator,   String (meterNumerator));
-            values.set (WavAudioFormat::acidTempo,       String (tempo));
+            values.set (WavAudioFormat::acidBeats,       String (ByteOrder::swapIfBigEndian (numBeats)));
+            values.set (WavAudioFormat::acidDenominator, String (ByteOrder::swapIfBigEndian (meterDenominator)));
+            values.set (WavAudioFormat::acidNumerator,   String (ByteOrder::swapIfBigEndian (meterNumerator)));
+            values.set (WavAudioFormat::acidTempo,       String (swapFloatByteOrder (tempo)));
         }
 
-        void setBoolFlag (StringPairArray& values, const char* name, int32 mask) const
+        void setBoolFlag (StringPairArray& values, const char* name, uint32 mask) const
         {
-            values.set (name, (flags & mask) ? "1" : "0");
+            values.set (name, (flags & ByteOrder::swapIfBigEndian (mask)) ? "1" : "0");
         }
 
-        int32 flags;
-        int16 rootNote;
-        int16 reserved1;
+        static uint32 getFlagIfPresent (const StringPairArray& values, const char* name, uint32 flag)
+        {
+            return values[name].getIntValue() != 0 ? ByteOrder::swapIfBigEndian (flag) : 0;
+        }
+
+        static float swapFloatByteOrder (const float x) noexcept
+        {
+           #ifdef JUCE_BIG_ENDIAN
+            union { uint32 asInt; float asFloat; } n;
+            n.asFloat = x;
+            n.asInt = ByteOrder::swap (n.asInt);
+            return n.asFloat;
+           #else
+            return x;
+           #endif
+        }
+
+        uint32 flags;
+        uint16 rootNote;
+        uint16 reserved1;
         float reserved2;
-        int32 numBeats;
-        int16 meterDenominator;
-        int16 meterNumerator;
+        uint32 numBeats;
+        uint16 meterDenominator;
+        uint16 meterNumerator;
         float tempo;
 
     } JUCE_PACKED;
+
+    //==============================================================================
+    struct TracktionChunk
+    {
+        static MemoryBlock createFrom (const StringPairArray& values)
+        {
+            const String s = values[WavAudioFormat::tracktionLoopInfo];
+            MemoryBlock data;
+
+            if (s.isNotEmpty())
+            {
+                MemoryOutputStream os (data, false);
+                os.writeString (s);
+            }
+
+            return data;
+        }
+    };
 
     //==============================================================================
     namespace AXMLChunk
@@ -816,6 +924,12 @@ public:
                 {
                     AcidChunk (*input, length).addToMetadata (metadataValues);
                 }
+                else if (chunkType == chunkName ("Trkn"))
+                {
+                    MemoryBlock tracktion;
+                    input->readIntoMemoryBlock (tracktion, (ssize_t) length);
+                    metadataValues.set (WavAudioFormat::tracktionLoopInfo, tracktion.toString());
+                }
                 else if (chunkEnd <= input->getPosition())
                 {
                     break;
@@ -913,12 +1027,15 @@ public:
             // key should be removed (or set to "WAV") once this has been done
             jassert (metadataValues.getValue ("MetaDataSource", "None") != "AIFF");
 
-            bwavChunk = BWAVChunk::createFrom (metadataValues);
-            axmlChunk = AXMLChunk::createFrom (metadataValues);
-            smplChunk = SMPLChunk::createFrom (metadataValues);
-            instChunk = InstChunk::createFrom (metadataValues);
-            cueChunk  = CueChunk ::createFrom (metadataValues);
-            listChunk = ListChunk::createFrom (metadataValues);
+            bwavChunk     = BWAVChunk::createFrom (metadataValues);
+            axmlChunk     = AXMLChunk::createFrom (metadataValues);
+            smplChunk     = SMPLChunk::createFrom (metadataValues);
+            instChunk     = InstChunk::createFrom (metadataValues);
+            cueChunk      = CueChunk ::createFrom (metadataValues);
+            listChunk     = ListChunk::createFrom (metadataValues);
+            listInfoChunk = ListInfoChunk::createFrom (metadataValues);
+            acidChunk     = AcidChunk::createFrom (metadataValues);
+            trckChunk     = TracktionChunk::createFrom (metadataValues);
         }
 
         headerPosition = out->getPosition();
@@ -981,7 +1098,7 @@ public:
     }
 
 private:
-    MemoryBlock tempBlock, bwavChunk, axmlChunk, smplChunk, instChunk, cueChunk, listChunk;
+    MemoryBlock tempBlock, bwavChunk, axmlChunk, smplChunk, instChunk, cueChunk, listChunk, listInfoChunk, acidChunk, trckChunk;
     uint64 lengthInSamples, bytesWritten;
     int64 headerPosition;
     bool writeFailed;
@@ -1033,6 +1150,9 @@ private:
                                        + chunkSize (instChunk)
                                        + chunkSize (cueChunk)
                                        + chunkSize (listChunk)
+                                       + chunkSize (listInfoChunk)
+                                       + chunkSize (acidChunk)
+                                       + chunkSize (trckChunk)
                                        + (8 + 28)); // (ds64 chunk)
 
         riffChunkSize += (riffChunkSize & 1);
@@ -1106,12 +1226,15 @@ private:
             output->write (subFormat.data4, sizeof (subFormat.data4));
         }
 
-        writeChunk (bwavChunk, chunkName ("bext"));
-        writeChunk (axmlChunk, chunkName ("axml"));
-        writeChunk (smplChunk, chunkName ("smpl"));
-        writeChunk (instChunk, chunkName ("inst"), 7);
-        writeChunk (cueChunk,  chunkName ("cue "));
-        writeChunk (listChunk, chunkName ("LIST"));
+        writeChunk (bwavChunk,     chunkName ("bext"));
+        writeChunk (axmlChunk,     chunkName ("axml"));
+        writeChunk (smplChunk,     chunkName ("smpl"));
+        writeChunk (instChunk,     chunkName ("inst"), 7);
+        writeChunk (cueChunk,      chunkName ("cue "));
+        writeChunk (listChunk,     chunkName ("LIST"));
+        writeChunk (listInfoChunk, chunkName ("LIST"));
+        writeChunk (acidChunk,     chunkName ("acid"));
+        writeChunk (trckChunk,     chunkName ("Trkn"));
 
         writeChunkHeader (chunkName ("data"), isRF64 ? -1 : (int) (lengthInSamples * bytesPerFrame));
 

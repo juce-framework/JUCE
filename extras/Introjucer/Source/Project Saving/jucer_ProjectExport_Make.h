@@ -151,7 +151,7 @@ private:
 
     void writeCppFlags (OutputStream& out, const BuildConfiguration& config) const
     {
-        out << "  CPPFLAGS := $(DEPFLAGS)";
+        out << "  CPPFLAGS := $(DEPFLAGS) -std=c++11";
         writeDefineFlags (out, config);
         writeHeaderPathFlags (out, config);
         out << newLine;
@@ -311,8 +311,8 @@ private:
                     << ": " << escapeSpaces (files.getReference(i).toUnixStyle()) << newLine
                     << "\t-@mkdir -p $(OBJDIR)" << newLine
                     << "\t@echo \"Compiling " << files.getReference(i).getFileName() << "\"" << newLine
-                    << (files.getReference(i).hasFileExtension (".c") ? "\t@$(CC) $(CFLAGS) -o \"$@\" -c \"$<\""
-                                                                      : "\t@$(CXX) $(CXXFLAGS) -o \"$@\" -c \"$<\"")
+                    << (files.getReference(i).hasFileExtension ("c;s;S") ? "\t@$(CC) $(CFLAGS) -o \"$@\" -c \"$<\""
+                                                                         : "\t@$(CXX) $(CXXFLAGS) -o \"$@\" -c \"$<\"")
                     << newLine << newLine;
             }
         }

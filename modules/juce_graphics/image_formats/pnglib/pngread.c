@@ -1026,7 +1026,7 @@ png_read_png(png_structrp png_ptr, png_inforp info_ptr,
    if ((transforms & PNG_TRANSFORM_SHIFT)
        && png_get_valid(png_ptr, info_ptr, PNG_INFO_sBIT))
    {
-      png_color_8p sig_bit;
+      png_color_8p sig_bit = 0;
 
       png_get_sBIT(png_ptr, info_ptr, &sig_bit);
       png_set_shift(png_ptr, sig_bit);

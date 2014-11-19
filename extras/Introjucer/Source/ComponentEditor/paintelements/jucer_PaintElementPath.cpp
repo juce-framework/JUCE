@@ -1378,16 +1378,15 @@ PathPoint PathPoint::withChangedPointType (const Path::Iterator::PathElementType
             p.pos [numPoints - 1].getRectangleDouble (x, y, w, h, parentArea, owner->getDocument()->getComponentLayout());
 
             const int index = owner->points.indexOf (this);
-            PathPoint* lastPoint = owner->points [index - 1];
 
-            jassert (lastPoint != nullptr)
-            if (lastPoint != nullptr)
+            if (PathPoint* lastPoint = owner->points [index - 1])
             {
                 lastPoint->pos [lastPoint->getNumPoints() - 1]
                             .getRectangleDouble (lastX, lastY, w, h, parentArea, owner->getDocument()->getComponentLayout());
             }
             else
             {
+                jassertfalse;
                 lastX = x;
                 lastY = y;
             }

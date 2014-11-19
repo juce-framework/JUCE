@@ -53,6 +53,8 @@
 
 #if JUCE_WINDOWS
  #include <ctime>
+
+ #define _WINSOCK_DEPRECATED_NO_WARNINGS 1
  #include <winsock2.h>
  #include <ws2tcpip.h>
 
@@ -79,6 +81,7 @@
 
  #if JUCE_LINUX
   #include <langinfo.h>
+  #include <ifaddrs.h>
  #endif
 
  #include <pwd.h>
