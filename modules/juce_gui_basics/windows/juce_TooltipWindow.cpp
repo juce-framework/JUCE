@@ -24,11 +24,11 @@
 
 TooltipWindow::TooltipWindow (Component* const parentComp, const int delayMs)
     : Component ("tooltip"),
+      lastComponentUnderMouse (nullptr),
       millisecondsBeforeTipAppears (delayMs),
-      mouseClicks (0),
-      mouseWheelMoves (0),
-      lastHideTime (0),
-      lastComponentUnderMouse (nullptr)
+      mouseClicks (0), mouseWheelMoves (0),
+      lastCompChangeTime (0), lastHideTime (0),
+      reentrant (false)
 {
     if (Desktop::getInstance().getMainMouseSource().canHover())
         startTimer (123);
@@ -76,27 +76,34 @@ void TooltipWindow::updatePosition (const String& tip, Point<int> pos, const Rec
 void TooltipWindow::displayTip (Point<int> screenPos, const String& tip)
 {
     jassert (tip.isNotEmpty());
-    if (tipShowing != tip)
-        repaint();
 
-    tipShowing = tip;
-
-    if (Component* const parent = getParentComponent())
+    if (! reentrant)
     {
-        updatePosition (tip, parent->getLocalPoint (nullptr, screenPos),
-                        parent->getLocalBounds());
-    }
-    else
-    {
-        updatePosition (tip, screenPos, Desktop::getInstance().getDisplays()
-                                            .getDisplayContaining (screenPos).userArea);
+        ScopedValueSetter<bool> setter (reentrant, true, false);
 
-        addToDesktop (ComponentPeer::windowHasDropShadow
-                        | ComponentPeer::windowIsTemporary
-                        | ComponentPeer::windowIgnoresKeyPresses);
-    }
+        if (tipShowing != tip)
+        {
+            tipShowing = tip;
+            repaint();
+        }
 
-    toFront (false);
+        if (Component* const parent = getParentComponent())
+        {
+            updatePosition (tip, parent->getLocalPoint (nullptr, screenPos),
+                            parent->getLocalBounds());
+        }
+        else
+        {
+            updatePosition (tip, screenPos, Desktop::getInstance().getDisplays()
+                                                .getDisplayContaining (screenPos).userArea);
+
+            addToDesktop (ComponentPeer::windowHasDropShadow
+                            | ComponentPeer::windowIsTemporary
+                            | ComponentPeer::windowIgnoresKeyPresses);
+        }
+
+        toFront (false);
+    }
 }
 
 String TooltipWindow::getTipFor (Component* const c)
@@ -110,14 +117,17 @@ String TooltipWindow::getTipFor (Component* const c)
                 return ttc->getTooltip();
     }
 
-    return String::empty;
+    return String();
 }
 
 void TooltipWindow::hideTip()
 {
-    tipShowing.clear();
-    removeFromDesktop();
-    setVisible (false);
+    if (! reentrant)
+    {
+        tipShowing.clear();
+        removeFromDesktop();
+        setVisible (false);
+    }
 }
 
 void TooltipWindow::timerCallback()
