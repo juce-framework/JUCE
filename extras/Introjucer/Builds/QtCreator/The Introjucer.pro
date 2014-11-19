@@ -17,11 +17,11 @@ CONFIG(debug, debug|release){
 }
 
 # Compiler flags
-QMAKE_CFLAGS = -std=gnu++0x -Wall
-unix:  QMAKE_CFLAGS += -I/usr/include/freetype2 -I/usr/include -D "LINUX=1"
-win32: QMAKE_CFLAGS += -mstackrealign -D__MINGW__=1 -D__MINGW_EXTENSION=
+QMAKE_CXXFLAGS = -std=c++11 -Wall
+unix:  QMAKE_CXXFLAGS += -I/usr/include/freetype2 -I/usr/include -D "LINUX=1"
+win32: QMAKE_CXXFLAGS += -mstackrealign -D__MINGW__=1 -D__MINGW_EXTENSION=
 
-QMAKE_CFLAGS_DEBUG   = -g -ggdb  -O0
+QMAKE_CXXFLAGS_DEBUG   = -g -ggdb  -O0
 CONFIG(debug, debug|release){
     INCLUDEPATH = \
         ../../JuceLibraryCode \
@@ -36,7 +36,7 @@ CONFIG(debug, debug|release){
 
 }
 
-QMAKE_CFLAGS_RELEASE =  -O3
+QMAKE_CXXFLAGS_RELEASE =  -O3
 CONFIG(release, debug|release){
     INCLUDEPATH = \
         ../../JuceLibraryCode \
@@ -51,16 +51,16 @@ CONFIG(release, debug|release){
 }
 
 
-QMAKE_CXXFLAGS         = $$QMAKE_CFLAGS
-QMAKE_CXXFLAGS_RELEASE = $$QMAKE_CFLAGS_RELEASE
-QMAKE_CXXFLAGS_DEBUG   = $$QMAKE_CFLAGS_DEBUG
+QMAKE_CFLAGS         = $$QMAKE_CXXFLAGS
+QMAKE_CFLAGS_RELEASE = $$QMAKE_CXXFLAGS_RELEASE
+QMAKE_CFLAGS_DEBUG   = $$QMAKE_CXXFLAGS_DEBUG
 
 
 # Linker flags
 LIBS = -L$$DESTDIR 
 unix:  LIBS += -L/usr/X11R6/lib/ -lX11 -lXext -lXinerama -ldl -lfreetype -lpthread -lrt
-win32: LIBS += -lgdi32 -luser32 -lkernel32 -lcomctl32 -lcomdlg32 -limm32 -lole32 -loleaut32 -lrpcrt4 -lshlwapi -luuid -lversion -lwininet -lwinmm -lws2_32 -lwsock32 -lpthread
-win32: QMAKE_LFLAGS +=  -static-libstdc++ -static-libgcc
+win32: LIBS += -lgdi32 -luser32 -lkernel32 -lcomctl32 -lpthread -lcomdlg32 -limm32 -lole32 -loleaut32 -lrpcrt4 -lshlwapi -luuid -lversion -lwininet -lwinmm -lws2_32 -lwsock32
+win32: QMAKE_LFLAGS += -static-libstdc++ -static-libgcc
 QMAKE_LFLAGS += 
 QMAKE_LFLAGS_DEBUG += -fvisibility=hidden
 
@@ -72,20 +72,6 @@ SOURCES = \
 	"../../Source/Application/jucer_Main.cpp" \
 	"../../Source/Application/jucer_MainWindow.cpp" \
 	"../../Source/Application/jucer_OpenDocumentManager.cpp" \
-	"../../Source/Project/jucer_Module.cpp" \
-	"../../Source/Project/jucer_NewFileWizard.cpp" \
-	"../../Source/Project/jucer_NewProjectWizard.cpp" \
-	"../../Source/Project/jucer_Project.cpp" \
-	"../../Source/Project/jucer_ProjectContentComponent.cpp" \
-	"../../Source/Project/jucer_ProjectType.cpp" \
-	"../../Source/Project Saving/jucer_ProjectExporter.cpp" \
-	"../../Source/Project Saving/jucer_ResourceFile.cpp" \
-	"../../Source/Utility/jucer_CodeHelpers.cpp" \
-	"../../Source/Utility/jucer_FileHelpers.cpp" \
-	"../../Source/Utility/jucer_Icons.cpp" \
-	"../../Source/Utility/jucer_JucerTreeViewBase.cpp" \
-	"../../Source/Utility/jucer_MiscUtilities.cpp" \
-	"../../Source/Utility/jucer_StoredSettings.cpp" \
 	"../../Source/Code Editor/jucer_SourceCodeEditor.cpp" \
 	"../../Source/ComponentEditor/components/jucer_ComponentTypeHandler.cpp" \
 	"../../Source/ComponentEditor/documents/jucer_ButtonDocument.cpp" \
@@ -107,6 +93,21 @@ SOURCES = \
 	"../../Source/ComponentEditor/jucer_JucerDocument.cpp" \
 	"../../Source/ComponentEditor/jucer_ObjectTypes.cpp" \
 	"../../Source/ComponentEditor/jucer_PaintRoutine.cpp" \
+	"../../Source/Project Saving/jucer_ProjectExporter.cpp" \
+	"../../Source/Project Saving/jucer_ResourceFile.cpp" \
+	"../../Source/Project/jucer_Module.cpp" \
+	"../../Source/Project/jucer_Project.cpp" \
+	"../../Source/Project/jucer_ProjectContentComponent.cpp" \
+	"../../Source/Project/jucer_ProjectType.cpp" \
+	"../../Source/Utility/jucer_CodeHelpers.cpp" \
+	"../../Source/Utility/jucer_FileHelpers.cpp" \
+	"../../Source/Utility/jucer_Icons.cpp" \
+	"../../Source/Utility/jucer_JucerTreeViewBase.cpp" \
+	"../../Source/Utility/jucer_MiscUtilities.cpp" \
+	"../../Source/Utility/jucer_SlidingPanelComponent.cpp" \
+	"../../Source/Utility/jucer_StoredSettings.cpp" \
+	"../../Source/Wizards/jucer_NewFileWizard.cpp" \
+	"../../Source/Wizards/jucer_NewProjectWizardClasses.cpp" \
 	"../../JuceLibraryCode/BinaryData.cpp" \
 	"../../../../modules/juce_core/juce_core.cpp" \
 	"../../../../modules/juce_cryptography/juce_cryptography.cpp" \
@@ -120,6 +121,7 @@ SOURCES = \
 HEADERS = \
 	"../../Source/Application/jucer_AppearanceSettings.h" \
 	"../../Source/Application/jucer_Application.h" \
+	"../../Source/Application/jucer_AutoUpdater.h" \
 	"../../Source/Application/jucer_CommandIDs.h" \
 	"../../Source/Application/jucer_CommandLine.h" \
 	"../../Source/Application/jucer_CommonHeaders.h" \
@@ -128,41 +130,6 @@ HEADERS = \
 	"../../Source/jucer_Headers.h" \
 	"../../Source/Application/jucer_MainWindow.h" \
 	"../../Source/Application/jucer_OpenDocumentManager.h" \
-	"../../Source/Project/jucer_AudioPluginModule.h" \
-	"../../Source/Project/jucer_ConfigTree_Base.h" \
-	"../../Source/Project/jucer_ConfigTree_Exporter.h" \
-	"../../Source/Project/jucer_ConfigTree_Modules.h" \
-	"../../Source/Project/jucer_GroupInformationComponent.h" \
-	"../../Source/Project/jucer_Module.h" \
-	"../../Source/Project/jucer_ModulesPanel.h" \
-	"../../Source/Project/jucer_NewFileWizard.h" \
-	"../../Source/Project/jucer_NewProjectWizard.h" \
-	"../../Source/Project/jucer_Project.h" \
-	"../../Source/Project/jucer_ProjectContentComponent.h" \
-	"../../Source/Project/jucer_ProjectTree_Base.h" \
-	"../../Source/Project/jucer_ProjectTree_File.h" \
-	"../../Source/Project/jucer_ProjectTree_Group.h" \
-	"../../Source/Project/jucer_ProjectType.h" \
-	"../../Source/Project Saving/jucer_ProjectExport_QtCreator.h" \
-	"../../Source/Project Saving/jucer_ProjectExport_Android.h" \
-	"../../Source/Project Saving/jucer_ProjectExport_CodeBlocks.h" \
-	"../../Source/Project Saving/jucer_ProjectExport_Make.h" \
-	"../../Source/Project Saving/jucer_ProjectExport_MSVC.h" \
-	"../../Source/Project Saving/jucer_ProjectExport_XCode.h" \
-	"../../Source/Project Saving/jucer_ProjectExporter.h" \
-	"../../Source/Project Saving/jucer_ProjectSaver.h" \
-	"../../Source/Project Saving/jucer_ResourceFile.h" \
-	"../../Source/Utility/jucer_CodeHelpers.h" \
-	"../../Source/Utility/jucer_Colours.h" \
-	"../../Source/Utility/jucer_FileHelpers.h" \
-	"../../Source/Utility/jucer_Icons.h" \
-	"../../Source/Utility/jucer_JucerTreeViewBase.h" \
-	"../../Source/Utility/jucer_MiscUtilities.h" \
-	"../../Source/Utility/jucer_PresetIDs.h" \
-	"../../Source/Utility/jucer_RelativePath.h" \
-	"../../Source/Utility/jucer_StoredSettings.h" \
-	"../../Source/Utility/jucer_TranslationTool.h" \
-	"../../Source/Utility/jucer_ValueSourceHelpers.h" \
 	"../../Source/Code Editor/jucer_SourceCodeEditor.h" \
 	"../../Source/ComponentEditor/components/jucer_ButtonHandler.h" \
 	"../../Source/ComponentEditor/components/jucer_ComboBoxHandler.h" \
@@ -228,6 +195,54 @@ HEADERS = \
 	"../../Source/ComponentEditor/jucer_ObjectTypes.h" \
 	"../../Source/ComponentEditor/jucer_PaintRoutine.h" \
 	"../../Source/ComponentEditor/jucer_UtilityFunctions.h" \
+	"../../Source/Project Saving/jucer_ProjectExport_Android.h" \
+	"../../Source/Project Saving/jucer_ProjectExport_CodeBlocks.h" \
+	"../../Source/Project Saving/jucer_ProjectExport_Make.h" \
+	"../../Source/Project Saving/jucer_ProjectExport_MSVC.h" \
+	"../../Source/Project Saving/jucer_ProjectExport_XCode.h" \
+	"../../Source/Project Saving/jucer_ProjectExporter.h" \
+	"../../Source/Project Saving/jucer_ProjectSaver.h" \
+	"../../Source/Project Saving/jucer_ResourceFile.h" \
+	"../../Source/Project/jucer_AudioPluginModule.h" \
+	"../../Source/Project/jucer_ConfigTree_Base.h" \
+	"../../Source/Project/jucer_ConfigTree_Exporter.h" \
+	"../../Source/Project/jucer_ConfigTree_Modules.h" \
+	"../../Source/Project/jucer_GroupInformationComponent.h" \
+	"../../Source/Project/jucer_Module.h" \
+	"../../Source/Project/jucer_ModulesPanel.h" \
+	"../../Source/Project/jucer_Project.h" \
+	"../../Source/Project/jucer_ProjectContentComponent.h" \
+	"../../Source/Project/jucer_ProjectTree_Base.h" \
+	"../../Source/Project/jucer_ProjectTree_File.h" \
+	"../../Source/Project/jucer_ProjectTree_Group.h" \
+	"../../Source/Project/jucer_ProjectType.h" \
+	"../../Source/Utility/jucer_CodeHelpers.h" \
+	"../../Source/Utility/jucer_Colours.h" \
+	"../../Source/Utility/jucer_FileHelpers.h" \
+	"../../Source/Utility/jucer_Icons.h" \
+	"../../Source/Utility/jucer_JucerTreeViewBase.h" \
+	"../../Source/Utility/jucer_MiscUtilities.h" \
+	"../../Source/Utility/jucer_PresetIDs.h" \
+	"../../Source/Utility/jucer_RelativePath.h" \
+	"../../Source/Utility/jucer_SlidingPanelComponent.h" \
+	"../../Source/Utility/jucer_StoredSettings.h" \
+	"../../Source/Utility/jucer_TranslationTool.h" \
+	"../../Source/Utility/jucer_ValueSourceHelpers.h" \
+	"../../Source/Wizards/jucer_NewFileWizard.h" \
+	"../../Source/Wizards/jucer_NewProjectWizard.h" \
+	"../../Source/Wizards/jucer_NewProjectWizardClasses.h" \
+	"../../Source/Wizards/jucer_NewProjectWizardComponent.h" \
+	"../../Source/Wizards/jucer_ProjectWizard_Animated.h" \
+	"../../Source/Wizards/jucer_ProjectWizard_AudioApp.h" \
+	"../../Source/Wizards/jucer_ProjectWizard_AudioPlugin.h" \
+	"../../Source/Wizards/jucer_ProjectWizard_Blank.h" \
+	"../../Source/Wizards/jucer_ProjectWizard_Console.h" \
+	"../../Source/Wizards/jucer_ProjectWizard_DLL.h" \
+	"../../Source/Wizards/jucer_ProjectWizard_GUIApp.h" \
+	"../../Source/Wizards/jucer_ProjectWizard_openGL.h" \
+	"../../Source/Wizards/jucer_ProjectWizard_StaticLibrary.h" \
+	"../../Source/Wizards/jucer_StartPageComponent.h" \
+	"../../Source/Wizards/jucer_TemplateThumbnailsComponent.h" \
 	"../../Source/BinaryData/jucer_AudioPluginEditorTemplate.h" \
 	"../../Source/BinaryData/jucer_AudioPluginFilterTemplate.h" \
 	"../../Source/BinaryData/jucer_ComponentTemplate.h" \
@@ -253,6 +268,7 @@ HEADERS = \
 	"../../../../modules/juce_core/maths/juce_BigInteger.h" \
 	"../../../../modules/juce_core/maths/juce_Expression.h" \
 	"../../../../modules/juce_core/maths/juce_MathsFunctions.h" \
+	"../../../../modules/juce_core/maths/juce_NormalisableRange.h" \
 	"../../../../modules/juce_core/maths/juce_Random.h" \
 	"../../../../modules/juce_core/maths/juce_Range.h" \
 	"../../../../modules/juce_core/memory/juce_Atomic.h" \
@@ -326,6 +342,7 @@ HEADERS = \
 	"../../../../modules/juce_core/streams/juce_SubregionStream.h" \
 	"../../../../modules/juce_core/logging/juce_FileLogger.h" \
 	"../../../../modules/juce_core/logging/juce_Logger.h" \
+	"../../../../modules/juce_core/system/juce_CompilerSupport.h" \
 	"../../../../modules/juce_core/system/juce_PlatformDefs.h" \
 	"../../../../modules/juce_core/system/juce_StandardHeader.h" \
 	"../../../../modules/juce_core/system/juce_SystemStats.h" \
@@ -367,6 +384,7 @@ HEADERS = \
 	"../../../../modules/juce_events/messages/juce_Message.h" \
 	"../../../../modules/juce_events/messages/juce_MessageListener.h" \
 	"../../../../modules/juce_events/messages/juce_MessageManager.h" \
+	"../../../../modules/juce_events/messages/juce_MountedVolumeListChangeDetector.h" \
 	"../../../../modules/juce_events/messages/juce_NotificationType.h" \
 	"../../../../modules/juce_events/timers/juce_MultiTimer.h" \
 	"../../../../modules/juce_events/timers/juce_Timer.h" \
@@ -560,6 +578,7 @@ HEADERS = \
 	"../../../../modules/juce_gui_extra/embedding/juce_ActiveXControlComponent.h" \
 	"../../../../modules/juce_gui_extra/embedding/juce_NSViewComponent.h" \
 	"../../../../modules/juce_gui_extra/embedding/juce_UIViewComponent.h" \
+	"../../../../modules/juce_gui_extra/misc/juce_AnimatedAppComponent.h" \
 	"../../../../modules/juce_gui_extra/misc/juce_AppleRemote.h" \
 	"../../../../modules/juce_gui_extra/misc/juce_BubbleMessageComponent.h" \
 	"../../../../modules/juce_gui_extra/misc/juce_ColourSelector.h" \
