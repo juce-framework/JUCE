@@ -1529,11 +1529,7 @@
     <None Include="..\..\Source\BinaryData\projectIconAndroid.png"/>
     <None Include="..\..\Source\BinaryData\projectIconCodeblocks.png"/>
     <None Include="..\..\Source\BinaryData\projectIconLinuxMakefile.png"/>
-    <None Include="..\..\Source\BinaryData\projectIconVisualStudio05.png"/>
-    <None Include="..\..\Source\BinaryData\projectIconVisualStudio08.png"/>
-    <None Include="..\..\Source\BinaryData\projectIconVisualStudio10.png"/>
-    <None Include="..\..\Source\BinaryData\projectIconVisualStudio12.png"/>
-    <None Include="..\..\Source\BinaryData\projectIconVisualStudio13.png"/>
+    <None Include="..\..\Source\BinaryData\projectIconVisualStudio.png"/>
     <None Include="..\..\Source\BinaryData\projectIconXcode.png"/>
     <None Include="..\..\Source\BinaryData\projectIconXcodeIOS.png"/>
     <None Include="..\..\Source\BinaryData\RecentFilesMenuTemplate.nib"/>

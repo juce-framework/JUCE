@@ -96,20 +96,8 @@ namespace BinaryData
     extern const char*   projectIconLinuxMakefile_png;
     const int            projectIconLinuxMakefile_pngSize = 16444;
 
-    extern const char*   projectIconVisualStudio05_png;
-    const int            projectIconVisualStudio05_pngSize = 6986;
-
-    extern const char*   projectIconVisualStudio08_png;
-    const int            projectIconVisualStudio08_pngSize = 7099;
-
-    extern const char*   projectIconVisualStudio10_png;
-    const int            projectIconVisualStudio10_pngSize = 6712;
-
-    extern const char*   projectIconVisualStudio12_png;
-    const int            projectIconVisualStudio12_pngSize = 6637;
-
-    extern const char*   projectIconVisualStudio13_png;
-    const int            projectIconVisualStudio13_pngSize = 6719;
+    extern const char*   projectIconVisualStudio_png;
+    const int            projectIconVisualStudio_pngSize = 7194;
 
     extern const char*   projectIconXcode_png;
     const int            projectIconXcode_pngSize = 18281;
@@ -154,7 +142,7 @@ namespace BinaryData
     extern const char* namedResourceList[];
 
     // Number of elements in the namedResourceList array.
-    const int namedResourceListSize = 47;
+    const int namedResourceListSize = 43;
 
     // If you provide the name of one of the binary resource variables above, this function will
     // return the corresponding data and its size (or a null pointer if the name isn't found).
