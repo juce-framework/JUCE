@@ -106,13 +106,14 @@ public:
 
         mainWindowList.forceCloseAllWindows();
         openDocumentManager.clear();
-        commandManager = nullptr;
-        settings = nullptr;
 
        #if JUCE_MAC
         MenuBarModel::setMacMainMenu (nullptr);
        #endif
+
         menuModel = nullptr;
+        commandManager = nullptr;
+        settings = nullptr;
 
         LookAndFeel::setDefaultLookAndFeel (nullptr);
 
