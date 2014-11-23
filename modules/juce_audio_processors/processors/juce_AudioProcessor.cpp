@@ -205,19 +205,24 @@ float AudioProcessor::getParameter (int index)
     if (AudioProcessorParameter* p = getParamChecked (index))
         return p->getValue();
 
-    return 0;
+    return parameterValueToScaled(index, getParameterValue(index));
 }
 
 void AudioProcessor::setParameter (int index, float newValue)
 {
     if (AudioProcessorParameter* p = getParamChecked (index))
         p->setValue (newValue);
+    else
+    {
+        // Sound Radix branch code:
+        setParameterValue(index, parameterValueFromScaled(index, newValue));
+    }
 }
 
 float AudioProcessor::getParameterDefaultValue (int index)
 {
     if (AudioProcessorParameter* p = managedParameters[index])
-        return parameterValueToScaled(parameterIndex, parameterInfo(index).defaultVal);
+        return p->getDefaultValue();
 
     return 0;
 }
@@ -240,7 +245,8 @@ String AudioProcessor::getParameterName (int index, int maximumStringLength)
 
 const String AudioProcessor::getParameterText (int index)
 {
-    return getParameterText (index, 1024);
+    // SR branch code:
+    return parameterValueToText (index, getParameter (index));
 }
 
 String AudioProcessor::getParameterText (int index, int maximumStringLength)
@@ -483,11 +489,6 @@ float AudioProcessor::parameterTextToValue(int param, const String& text) const 
     return parameterValueToScaled(param, text.getFloatValue());
 }
 
-const String AudioProcessor::getParameterText(int index)
-{
-    return parameterValueToText(index, getParameter(index));
-}
-
 #if _MSC_VER
 static inline float roundf(float val) { return floorf(val + 0.5f); }
 #endif // _MSC_VER
@@ -514,14 +515,6 @@ float AudioProcessor::parameterValueToScaled(int param, double value) const {
         maxVal = log(maxVal);
     }
     return (value - minVal) / (maxVal - minVal);
-}
-
-float AudioProcessor::getParameter(int index) {
-    return parameterValueToScaled(index, getParameterValue(index));
-}
-
-void AudioProcessor::setParameter(int index, float value) {
-    setParameterValue(index, parameterValueFromScaled(index, value));
 }
 
 // Default implementations to Sound Radix extensions to JUCE's AudioProcessor.
