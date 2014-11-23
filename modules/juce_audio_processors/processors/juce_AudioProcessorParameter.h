@@ -197,10 +197,12 @@ public:
     /** SoundRadix addition. Get parameter description info. */
     virtual const AudioProcessorParamInfo* getInfo() const = 0;
 
-    /** SoundRadix addition. Convert raw parameter value to scaled [0..1] value. */
+protected:
+    
+    /** SoundRadix addition. Convert scaled [0..1] parameter value to raw value. */
     virtual float scaledValueFromRaw(double value) const;
 
-    /** SoundRadix addition. Convert scaled [0..1] parameter value to non-scaled raw value. */
+    /** SoundRadix addition. Convert raw parameter value to scaled [0..1] value. */
     virtual double rawValueFromScaled(float value) const;
     
 private:
