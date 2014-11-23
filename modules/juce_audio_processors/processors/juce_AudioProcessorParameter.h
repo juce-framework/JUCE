@@ -114,10 +114,10 @@ public:
         the beginChangeGesture() and endChangeGesture() methods to tell the host when
         the user has started and stopped changing the parameter.
     */
-    virtual void setValueNotifyingHost(float newValue) { setRawValueNotifyingHost(rawValueFromScaled(newValue)); }
+    virtual void setValueNotifyingHost(float newValue);
 
     /** SoundRadix addition. Assign non-scaled value to the parameter and notify the host application. */
-    virtual void setRawValueNotifyingHost(double newValue);
+    virtual void setRawValueNotifyingHost(double newValue)   { setValueNotifyingHost(scaledValueFromRaw(newValue)); }
 
     /** Sends a signal to the host to tell it that the user is about to start changing this
         parameter.

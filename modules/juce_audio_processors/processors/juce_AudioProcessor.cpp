@@ -74,10 +74,10 @@ void AudioProcessor::removeListener (AudioProcessorListener* const listenerToRem
     listeners.removeFirstMatchingValue (listenerToRemove);
 }
 
-void AudioProcessor::setPlayConfigDetails (int newNumIns,
-                                           int newNumOuts,
-                                           double newSampleRate,
-                                           int newBlockSize) noexcept
+void AudioProcessor::setPlayConfigDetails (const int newNumIns,
+                                           const int newNumOuts,
+                                           const double newSampleRate,
+                                           const int newBlockSize) noexcept
 {
     sampleRate = newSampleRate;
     blockSize  = newBlockSize;
@@ -99,12 +99,12 @@ void AudioProcessor::setSpeakerArrangement (const String& inputs, const String& 
     outputSpeakerArrangement = outputs;
 }
 
-void AudioProcessor::setNonRealtime (bool newNonRealtime) noexcept
+void AudioProcessor::setNonRealtime (const bool newNonRealtime) noexcept
 {
     nonRealtime = newNonRealtime;
 }
 
-void AudioProcessor::setLatencySamples (int newLatency)
+void AudioProcessor::setLatencySamples (const int newLatency)
 {
     if (latencySamples != newLatency)
     {
@@ -113,21 +113,20 @@ void AudioProcessor::setLatencySamples (int newLatency)
     }
 }
 
-void AudioProcessor::setParameterNotifyingHost (int parameterIndex, float newValue)
+void AudioProcessor::setParameterNotifyingHost (const int parameterIndex,
+                                                const float newValue)
 {
-    if (AudioProcessorParameter* p = getParamChecked(parameterIndex))
-    {
-        p->setValueNotifyingHost(newValue);
-    }
+    setParameter (parameterIndex, newValue);
+    sendParamChangeMessageToListeners (parameterIndex, newValue);
 }
 
-AudioProcessorListener* AudioProcessor::getListenerLocked (int index) const noexcept
+AudioProcessorListener* AudioProcessor::getListenerLocked (const int index) const noexcept
 {
     const ScopedLock sl (listenerLock);
     return listeners [index];
 }
 
-void AudioProcessor::sendParamChangeMessageToListeners (int parameterIndex, float newValue)
+void AudioProcessor::sendParamChangeMessageToListeners (const int parameterIndex, const float newValue)
 {
     if (isPositiveAndBelow (parameterIndex, getNumParameters()))
     {
@@ -326,7 +325,7 @@ void AudioProcessor::addParameter (AudioProcessorParameter* p)
     managedParameters.add (p);
 }
 
-void AudioProcessor::suspendProcessing (bool shouldBeSuspended)
+void AudioProcessor::suspendProcessing (const bool shouldBeSuspended)
 {
     const ScopedLock sl (callbackLock);
     suspended = shouldBeSuspended;
@@ -396,7 +395,7 @@ void AudioProcessor::copyXmlToBinary (const XmlElement& xml, juce::MemoryBlock& 
         = ByteOrder::swapIfBigEndian ((uint32) destData.getSize() - 9);
 }
 
-XmlElement* AudioProcessor::getXmlFromBinary (const void* data, int sizeInBytes)
+XmlElement* AudioProcessor::getXmlFromBinary (const void* data, const int sizeInBytes)
 {
     if (sizeInBytes > 8
          && ByteOrder::littleEndianInt (data) == magicXmlNumber)
@@ -422,12 +421,12 @@ AudioProcessorParameter::AudioProcessorParameter() noexcept
 
 AudioProcessorParameter::~AudioProcessorParameter() {}
 
-void AudioProcessorParameter::setRawValueNotifyingHost(double newValue)
+void AudioProcessorParameter::setValueNotifyingHost (float newValue)
 {
     // This method can't be used until the parameter has been attached to a processor!
     jassert (processor != nullptr && parameterIndex >= 0);
 
-    return processor->setParameterValueNotifyingHost(parameterIndex, newValue);
+    return processor->setParameterNotifyingHost (parameterIndex, newValue);
 }
 
 void AudioProcessorParameter::beginChangeGesture()
@@ -568,12 +567,14 @@ void AudioProcessor::setParameterValue(int index, double value)
 {
     if (AudioProcessorParameter* p = getParamChecked(index))
     {
-        p->setRawValue(value);
+        return p->setRawValue(value);
     }
 }
 
 void AudioProcessor::setParameterValueNotifyingHost(int index, double value)
 {
-    setParameterValue(index, value);
-    sendParamChangeMessageToListeners (index, getParameter(index));
+    if (AudioProcessorParameter* p = getParamChecked(index))
+    {
+        return p->setRawValueNotifyingHost(value);
+    }
 }
