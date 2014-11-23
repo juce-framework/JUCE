@@ -27,45 +27,12 @@
 
 
 //==============================================================================
-/** SoundRadix addition. Audio processor parameter description. Contains real-world (non-scaled) parameter boundaries. */
-struct AudioProcessorParamInfo
-{
-    enum ParamType
-    {
-        eParamTypeGeneric,
-        eParamTypeBool,
-        eParamTypeHz
-    };
-
-    /** Parameter name. */
-    ::std::string name;
-    
-    /** Default non-scaled parameter value. */
-    double defaultVal;
-
-    /** Low non-scaled boundary for the parameter value. */
-    double minVal;
-
-    /** Upper non-scaled boundary for the parameter value. */
-    double maxVal;
-    
-    /** Textual representation for enumerated parameter values. Values are the indexies in the list. */
-    ::std::vector<std::string> enumValues;
-
-    /** Parameter value type. */
-    ParamType paramType;
-    
-    /** Default constructor for the parameter description objects. */
-    AudioProcessorParamInfo() : defaultVal(0.5), minVal(0.0), maxVal(1.0), paramType(eParamTypeGeneric) {}
-};
-
-//==============================================================================
 /** An abstract base class for parameter objects that can be added to an
     AudioProcessor.
 
     @see AudioProcessor::addParameter
 */
-class JUCE_API AudioProcessorParameter
+class JUCE_API  AudioProcessorParameter
 {
 public:
     AudioProcessorParameter() noexcept;
@@ -81,10 +48,7 @@ public:
         It's also likely to be called by non-UI threads, so the code in here should
         be thread-aware.
     */
-    virtual float getValue() const    { return scaledValueFromRaw(getRawValue()); }
-
-    /** SoundRadix addition. Get non-scaled parameter value. */
-    virtual double getRawValue() const = 0;
+    virtual float getValue() const = 0;
 
     /** The host will call this method to change the value of one of the filter's parameters.
 
@@ -99,10 +63,7 @@ public:
 
         The value passed will be between 0 and 1.0.
     */
-    virtual void setValue(float newValue)    { setRawValue(rawValueFromScaled(newValue)); }
-
-    /** SoundRadix addition. Assign non-scaled value to the parameter. */
-    virtual void setRawValue(double newValue) = 0;
+    virtual void setValue (float newValue) = 0;
 
     /** Your filter can call this when it needs to change one of its parameters.
 
@@ -114,10 +75,7 @@ public:
         the beginChangeGesture() and endChangeGesture() methods to tell the host when
         the user has started and stopped changing the parameter.
     */
-    virtual void setValueNotifyingHost(float newValue);
-
-    /** SoundRadix addition. Assign non-scaled value to the parameter and notify the host application. */
-    virtual void setRawValueNotifyingHost(double newValue)   { setValueNotifyingHost(scaledValueFromRaw(newValue)); }
+    void setValueNotifyingHost (float newValue);
 
     /** Sends a signal to the host to tell it that the user is about to start changing this
         parameter.
@@ -135,15 +93,12 @@ public:
     void endChangeGesture();
 
     /** This should return the default value for this parameter. */
-    virtual float getDefaultValue() const    { return scaledValueFromRaw(getInfo()->defaultVal); }
-
-    /** SoundRadix addition. Get raw (non-scaled) default value for this parameter. */
-    virtual double getRawDefaultValue() const    { return getInfo()->defaultVal; }
+    virtual float getDefaultValue() const = 0;
 
     /** Returns the name to display for this parameter, which should be made
         to fit within the given string length.
     */
-    virtual String getName(int maximumStringLength) const   { return getInfo()->name.c_str(); }
+    virtual String getName (int maximumStringLength) const = 0;
 
     /** Some parameters may be able to return a label string for
         their units. For example "Hz" or "%".
@@ -165,13 +120,10 @@ public:
         as a string, but this could do anything you need for a custom type
         of value.
     */
-    virtual String getText(float value, int /*maximumStringLength*/) const;
+    virtual String getText (float value, int /*maximumStringLength*/) const;
 
     /** Should parse a string and return the appropriate value for it. */
-    virtual float getValueForText(const String& text) const     { return scaledValueFromRaw(getRawValueForText(text)); }
-
-    /** SoundRadix addition. Parse a string and return the appropriate non-scaled value for it. */
-    virtual double getRawValueForText(const String& text) const = 0;
+    virtual float getValueForText (const String& text) const = 0;
 
     /** This can be overridden to tell the host that this parameter operates in the
         reverse direction.
@@ -194,17 +146,6 @@ public:
     /** Returns the index of this parameter in its parent processor's parameter list. */
     int getParameterIndex() const noexcept              { return parameterIndex; }
 
-    /** SoundRadix addition. Get parameter description info. */
-    virtual const AudioProcessorParamInfo* getInfo() const = 0;
-
-protected:
-    
-    /** SoundRadix addition. Convert scaled [0..1] parameter value to raw value. */
-    virtual float scaledValueFromRaw(double value) const;
-
-    /** SoundRadix addition. Convert raw parameter value to scaled [0..1] value. */
-    virtual double rawValueFromScaled(float value) const;
-    
 private:
     friend class AudioProcessor;
     AudioProcessor* processor;

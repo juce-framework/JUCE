@@ -211,35 +211,30 @@ float AudioProcessor::getParameter (int index)
 void AudioProcessor::setParameter (int index, float newValue)
 {
     if (AudioProcessorParameter* p = getParamChecked (index))
-    {
         p->setValue (newValue);
-    }
 }
 
 float AudioProcessor::getParameterDefaultValue (int index)
 {
     if (AudioProcessorParameter* p = managedParameters[index])
-    {
-        return p->getDefaultValue();
-    }
+        return parameterValueToScaled(parameterIndex, parameterInfo(index).defaultVal);
+
     return 0;
 }
 
 const String AudioProcessor::getParameterName (int index)
 {
     if (AudioProcessorParameter* p = getParamChecked (index))
-    {
         return p->getName (512);
-    }
+
     return String();
 }
 
 String AudioProcessor::getParameterName (int index, int maximumStringLength)
 {
     if (AudioProcessorParameter* p = managedParameters[index])
-    {
         return p->getName (maximumStringLength);
-    }
+
     return getParameterName (index).substring (0, maximumStringLength);
 }
 
@@ -251,18 +246,16 @@ const String AudioProcessor::getParameterText (int index)
 String AudioProcessor::getParameterText (int index, int maximumStringLength)
 {
     if (AudioProcessorParameter* p = managedParameters[index])
-    {
         return p->getText (p->getValue(), maximumStringLength);
-    }
-    return String(0.0f);
+
+    return getParameterText (index).substring (0, maximumStringLength);
 }
 
 int AudioProcessor::getParameterNumSteps (int index)
 {
     if (AudioProcessorParameter* p = managedParameters[index])
-    {
         return p->getNumSteps();
-    }
+
     return AudioProcessor::getDefaultNumParameterSteps();
 }
 
@@ -274,36 +267,32 @@ int AudioProcessor::getDefaultNumParameterSteps() noexcept
 String AudioProcessor::getParameterLabel (int index) const
 {
     if (AudioProcessorParameter* p = managedParameters[index])
-    {
         return p->getLabel();
-    }
+
     return String();
 }
 
 bool AudioProcessor::isParameterAutomatable (int index) const
 {
     if (AudioProcessorParameter* p = managedParameters[index])
-    {
         return p->isAutomatable();
-    }
+
     return true;
 }
 
 bool AudioProcessor::isParameterOrientationInverted (int index) const
 {
     if (AudioProcessorParameter* p = managedParameters[index])
-    {
         return p->isOrientationInverted();
-    }
+
     return false;
 }
 
 bool AudioProcessor::isMetaParameter (int index) const
 {
     if (AudioProcessorParameter* p = managedParameters[index])
-    {
         return p->isMetaParameter();
-    }
+
     return false;
 }
 
@@ -450,40 +439,9 @@ bool AudioProcessorParameter::isAutomatable() const         { return true; }
 bool AudioProcessorParameter::isMetaParameter() const       { return false; }
 int AudioProcessorParameter::getNumSteps() const            { return AudioProcessor::getDefaultNumParameterSteps(); }
 
-String AudioProcessorParameter::getText(float value, int /*maximumStringLength*/) const
+String AudioProcessorParameter::getText (float value, int /*maximumStringLength*/) const
 {
-    return String(rawValueFromScaled(value), 2);
-}
-
-float AudioProcessorParameter::scaledValueFromRaw(double value) const
-{
-    const AudioProcessorParamInfo* info = getInfo();
-    double minVal = info->minVal, maxVal = info->maxVal;
-    if (info->paramType == AudioProcessorParamInfo::eParamTypeHz)
-    {
-        value = ::std::log(value);
-        minVal = ::std::log(minVal);
-        maxVal = ::std::log(maxVal);
-    }
-    return (value - minVal) / (maxVal - minVal);
-}
-
-double AudioProcessorParameter::rawValueFromScaled(float value) const
-{
-    const AudioProcessorParamInfo* info = getInfo();
-    double minVal = info->minVal, maxVal = info->maxVal;
-    bool isTypeHz = info->paramType == AudioProcessorParamInfo::eParamTypeHz;
-    if (isTypeHz)
-    {
-        minVal = ::std::log(minVal);
-        maxVal = ::std::log(maxVal);
-    }
-    float val = minVal + value * (maxVal - minVal);
-    if (isTypeHz)
-    {
-        val = ::std::exp(val);
-    }
-    return val;
+    return String (value, 2);
 }
 
 //==============================================================================
@@ -517,64 +475,83 @@ void AudioPlayHead::CurrentPositionInfo::resetToDefault()
     bpm = 120;
 }
 
-String AudioProcessor::parameterValueToText(int index, float value) const
-{
-    if (AudioProcessorParameter* p = getParamChecked(index))
-    {
-        return p->getText(value, 32);
-    }
-    return String("0");
+String AudioProcessor::parameterValueToText(int param, float value) const {
+    return String(parameterValueFromScaled(param, value), 2);
 }
 
-double AudioProcessor::parameterTextToValue(int index, const String& text) const
+float AudioProcessor::parameterTextToValue(int param, const String& text) const {
+    return parameterValueToScaled(param, text.getFloatValue());
+}
+
+const String AudioProcessor::getParameterText(int index)
 {
-    if (AudioProcessorParameter* p = getParamChecked(index))
-    {
-        return p->getRawValueForText(text);
-    }
-    return 0.0f;
+    return parameterValueToText(index, getParameter(index));
 }
 
 #if _MSC_VER
 static inline float roundf(float val) { return floorf(val + 0.5f); }
 #endif // _MSC_VER
 
+double AudioProcessor::parameterValueFromScaled(int param, float scaled) const {
+    ParamInfo info = parameterInfo(param);
+    double minVal = info.minVal, maxVal = info.maxVal;
+    if (info.paramType == eParamTypeHz) {
+        minVal = log(minVal);
+        maxVal = log(maxVal);
+    }
+    double val = minVal + (double)scaled * (maxVal - minVal);
+    if (info.paramType == eParamTypeHz)
+        val = exp(val);
+    return val;
+}
+
+float AudioProcessor::parameterValueToScaled(int param, double value) const {
+    ParamInfo info = parameterInfo(param);
+    double minVal = info.minVal, maxVal = info.maxVal;
+    if (info.paramType == eParamTypeHz) {
+        value = log(value);
+        minVal = log(minVal);
+        maxVal = log(maxVal);
+    }
+    return (value - minVal) / (maxVal - minVal);
+}
+
+float AudioProcessor::getParameter(int index) {
+    return parameterValueToScaled(index, getParameterValue(index));
+}
+
+void AudioProcessor::setParameter(int index, float value) {
+    setParameterValue(index, parameterValueFromScaled(index, value));
+}
+
 // Default implementations to Sound Radix extensions to JUCE's AudioProcessor.
 // Note that these use JUCE's methods and the default implementation for those use these extensions,
 // causing an infinite loop + crash when not implementing either.
 
-const AudioProcessorParamInfo* AudioProcessor::parameterInfo(int index) const
+ParamInfo AudioProcessor::parameterInfo(int i) const
 {
-    if (AudioProcessorParameter* p = getParamChecked(index))
-    {
-        return p->getInfo();
-    }
+    ParamInfo result;
 
-    return NULL;
+    // Override constness..
+    result.name = ((AudioProcessor*)this)->getParameterName(i).toStdString();
+
+    result.key = juce::String(i).toStdString();
+    result.defaultVal = 0.0f;
+    result.minVal = 0.0f;
+    result.maxVal = 1.0f;
+    result.paramType = eParamTypeGeneric;
+    return result;
 };
 
 double AudioProcessor::getParameterValue(int index) const
 {
-    if (AudioProcessorParameter* p = getParamChecked(index))
-    {
-        return p->getRawValue();
-    }
-    
-    return 0.0f;
+    // Override constness..
+    float val = ((AudioProcessor*)this)->getParameter(index);
+
+    return parameterValueFromScaled(index, val);
 }
 
 void AudioProcessor::setParameterValue(int index, double value)
 {
-    if (AudioProcessorParameter* p = getParamChecked(index))
-    {
-        return p->setRawValue(value);
-    }
-}
-
-void AudioProcessor::setParameterValueNotifyingHost(int index, double value)
-{
-    if (AudioProcessorParameter* p = getParamChecked(index))
-    {
-        return p->setRawValueNotifyingHost(value);
-    }
+    setParameter(index, parameterValueToScaled(index, value));
 }

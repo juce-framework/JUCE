@@ -25,6 +25,21 @@
 #ifndef JUCE_AUDIOPROCESSOR_H_INCLUDED
 #define JUCE_AUDIOPROCESSOR_H_INCLUDED
 
+enum ParamType {
+    eParamTypeGeneric,
+    eParamTypeBool,
+    eParamTypeHz
+};
+
+struct ParamInfo {
+    std::string name;
+    std::string key;
+    float defaultVal;
+    float minVal;
+    float maxVal;
+    ParamType paramType;
+};
+
 //==============================================================================
 /**
     Base class for audio processing filters or plugins.
@@ -47,7 +62,15 @@ protected:
     AudioProcessor();
 
 public:
-    
+    virtual ParamInfo parameterInfo(int i) const;
+    virtual double getParameterValue(int index) const;
+    virtual void setParameterValue(int index, double value);
+    virtual double parameterValueFromScaled(int param, float scaled) const;
+    virtual float parameterValueToScaled(int param, double val) const;
+    // We should get these contributed back to the juce.
+    virtual String parameterValueToText(int param, float value) const;
+    virtual float parameterTextToValue(int param, const String& text) const;
+
     /** Destructor. */
     virtual ~AudioProcessor();
 
@@ -379,9 +402,6 @@ public:
     */
     virtual int getNumParameters();
 
-    /** SoundRadix addition. Get processor parameter description by the parameter index. */
-    virtual const juce::AudioProcessorParamInfo* parameterInfo (int parameterIndex) const;
-    
     /** Returns the name of a particular parameter. */
     virtual const String getParameterName (int parameterIndex);
 
@@ -395,17 +415,8 @@ public:
     */
     virtual float getParameter (int parameterIndex);
 
-    /** SoundRadix addition. Get processor parameter raw (non-scaled) value. @see getParameter for details. */
-    virtual double getParameterValue (int index) const;
-
     /** Returns the value of a parameter as a text string. */
     virtual const String getParameterText (int parameterIndex);
-    
-    /** SoundRadix addition. Get textual representation of a parameter value (raw, non-scaled). */
-    virtual String parameterValueToText (int parameterIndex, float value) const;
-    
-    /** SoundRadix addition. Get raw (non-scaled) parameter value for given textual representation. */
-    virtual double parameterTextToValue (int parameterIndex, const String& text) const;
 
     /** Returns the name of a parameter as a text string with a preferred maximum length.
         If you want to provide customised short versions of your parameter names that
@@ -447,12 +458,12 @@ public:
     /** Some plugin types may be able to return a label string for a
         parameter's units.
     */
-    virtual String getParameterLabel (int parameterIndex) const;
+    virtual String getParameterLabel (int index) const;
 
     /** This can be overridden to tell the host that particular parameters operate in the
         reverse direction. (Not all plugin formats or hosts will actually use this information).
     */
-    virtual bool isParameterOrientationInverted (int parameterIndex) const;
+    virtual bool isParameterOrientationInverted (int index) const;
 
     /** The host will call this method to change the value of one of the filter's parameters.
 
@@ -469,9 +480,6 @@ public:
     */
     virtual void setParameter (int parameterIndex, float newValue);
 
-    /** SoundRadix addition. Set raw (non-scaled) parameter value. @see setParameter for details. */
-    virtual void setParameterValue (int parameterIndex, double value);
-    
     /** Your filter can call this when it needs to change one of its parameters.
 
         This could happen when the editor or some other internal operation changes
@@ -483,9 +491,6 @@ public:
         tell the host when the user has started and stopped changing the parameter.
     */
     void setParameterNotifyingHost (int parameterIndex, float newValue);
-
-    /** SoundRadix addition. Set raw (non-scaled) parameter value and notify the host application on parameter altered. @see setParameterNotifyingHost for details. */
-    virtual void setParameterValueNotifyingHost (int parameterIndex, double newValue);
 
     /** Returns true if the host can automate this parameter.
         By default, this returns true for all parameters.
