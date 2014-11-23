@@ -202,21 +202,20 @@ int AudioProcessor::getNumParameters()
 
 float AudioProcessor::getParameter (int index)
 {
-    if (AudioProcessorParameter* p = getParamChecked (index))
-        return p->getValue();
+    // Vanilla juce code:
+//    if (AudioProcessorParameter* p = getParamChecked (index))
+//        return p->getValue();
 
     return parameterValueToScaled(index, getParameterValue(index));
 }
 
 void AudioProcessor::setParameter (int index, float newValue)
 {
-    if (AudioProcessorParameter* p = getParamChecked (index))
-        p->setValue (newValue);
-    else
-    {
-        // Sound Radix branch code:
-        setParameterValue(index, parameterValueFromScaled(index, newValue));
-    }
+    // Vanilla juce code:
+//    if (AudioProcessorParameter* p = getParamChecked (index))
+//        p->setValue (newValue);
+    // Sound Radix branch code:
+    setParameterValue(index, parameterValueFromScaled(index, newValue));
 }
 
 float AudioProcessor::getParameterDefaultValue (int index)
