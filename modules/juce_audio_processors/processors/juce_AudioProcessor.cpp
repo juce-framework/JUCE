@@ -205,7 +205,7 @@ float AudioProcessor::getParameter (int index)
     // Vanilla juce code:
 //    if (AudioProcessorParameter* p = getParamChecked (index))
 //        return p->getValue();
-
+    // Sound Radix branch code:
     return parameterValueToScaled(index, getParameterValue(index));
 }
 
@@ -220,10 +220,11 @@ void AudioProcessor::setParameter (int index, float newValue)
 
 float AudioProcessor::getParameterDefaultValue (int index)
 {
-    if (AudioProcessorParameter* p = managedParameters[index])
-        return p->getDefaultValue();
-
-    return 0;
+    // Vanilla juce code:
+//    if (AudioProcessorParameter* p = managedParameters[index])
+//        return p->getDefaultValue();
+    // Sound Radix branch code:
+    return parameterValueToScaled (index, parameterInfo (index).defaultVal);
 }
 
 const String AudioProcessor::getParameterName (int index)
