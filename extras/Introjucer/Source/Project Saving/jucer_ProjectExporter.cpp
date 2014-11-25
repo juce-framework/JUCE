@@ -70,8 +70,8 @@ ProjectExporter* ProjectExporter::createNewExporter (Project& project, const int
         case 3:     exp = new MSVCProjectExporterVC2013 (project, ValueTree (MSVCProjectExporterVC2013::getValueTreeTypeName())); break;
         case 4:     exp = new MSVCProjectExporterVC2012 (project, ValueTree (MSVCProjectExporterVC2012::getValueTreeTypeName())); break;
         case 5:     exp = new MSVCProjectExporterVC2010 (project, ValueTree (MSVCProjectExporterVC2010::getValueTreeTypeName())); break;
-        case 6:     exp = new MSVCProjectExporterVC2008 (project, ValueTree (MSVCProjectExporterVC2012::getValueTreeTypeName())); break;
-        case 7:     exp = new MSVCProjectExporterVC2005 (project, ValueTree (MSVCProjectExporterVC2013::getValueTreeTypeName())); break;
+        case 6:     exp = new MSVCProjectExporterVC2008 (project, ValueTree (MSVCProjectExporterVC2008::getValueTreeTypeName())); break;
+        case 7:     exp = new MSVCProjectExporterVC2005 (project, ValueTree (MSVCProjectExporterVC2005::getValueTreeTypeName())); break;
         case 8:     exp = new MakefileProjectExporter   (project, ValueTree (MakefileProjectExporter  ::getValueTreeTypeName())); break;
         case 9:     exp = new AndroidProjectExporter    (project, ValueTree (AndroidProjectExporter   ::getValueTreeTypeName())); break;
         case 10:    exp = new CodeBlocksProjectExporter (project, ValueTree (CodeBlocksProjectExporter::getValueTreeTypeName())); break;
