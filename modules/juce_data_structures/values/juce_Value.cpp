@@ -111,12 +111,6 @@ Value::Value (const Value& other)  : value (other.value)
 {
 }
 
-Value& Value::operator= (const Value& other)
-{
-    value = other.value;
-    return *this;
-}
-
 #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
 Value::Value (Value&& other) noexcept
 {
