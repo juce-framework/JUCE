@@ -225,7 +225,7 @@ private:
 
     // This declaration prevents accidental construction from an integer of 0,
     // which is possible in some compilers via an implicit cast to a pointer.
-    Value (void*) JUCE_DELETED_FUNCTION;
+    explicit Value (void*) JUCE_DELETED_FUNCTION;
 };
 
 /** Writes a Value to an OutputStream as a UTF8 string. */
