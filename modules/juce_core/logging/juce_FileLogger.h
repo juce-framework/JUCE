@@ -121,12 +121,16 @@ public:
     // (implementation of the Logger virtual method)
     void logMessage (const String&);
 
+    //==============================================================================
+    /** This is a utility function which removes lines from the start of a text
+        file to make sure that its total size is below the given size.
+    */
+    static void trimFileSize (const File& file, int64 maxFileSize);
+
 private:
     //==============================================================================
     File logFile;
     CriticalSection logLock;
-
-    void trimFileSize (int64 maxFileSizeBytes) const;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FileLogger)
 };
