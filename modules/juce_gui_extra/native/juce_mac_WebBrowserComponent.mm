@@ -136,23 +136,31 @@ private:
 }
 
 - (WebViewURLChangeDetector*) initWithWebBrowserOwner: (juce::WebBrowserComponent*) ownerComponent;
-- (BOOL) webView: (UIWebView*) webView shouldStartLoadWithRequest: (NSURLRequest*) request navigationType: (UIWebViewNavigationType) navigationType;
+- (BOOL) webView: (UIWebView*) webView shouldStartLoadWithRequest: (NSURLRequest*) request
+                                                   navigationType: (UIWebViewNavigationType) navigationType;
+- (void) webViewDidFinishLoad: (UIWebView*) webView;
 @end
 
 @implementation WebViewURLChangeDetector
 
-- (WebViewURLChangeDetector*) initWithWebBrowserOwner: (juce::WebBrowserComponent*) ownerComponent_
+- (WebViewURLChangeDetector*) initWithWebBrowserOwner: (juce::WebBrowserComponent*) ownerComp
 {
     [super init];
-    ownerComponent = ownerComponent_;
+    ownerComponent = ownerComp;
     return self;
 }
 
-- (BOOL) webView: (UIWebView*) webView shouldStartLoadWithRequest: (NSURLRequest*) request navigationType: (UIWebViewNavigationType) navigationType
+- (BOOL) webView: (UIWebView*) webView shouldStartLoadWithRequest: (NSURLRequest*) request
+                                                   navigationType: (UIWebViewNavigationType) navigationType
 {
     (void) webView;
     (void) navigationType;
     return ownerComponent->pageAboutToLoad (nsStringToJuce (request.URL.absoluteString));
+}
+
+- (void) webViewDidFinishLoad: (UIWebView*) webView
+{
+    ownerComponent->pageFinishedLoading (nsStringToJuce (webView.request.URL.absoluteString));
 }
 @end
 
