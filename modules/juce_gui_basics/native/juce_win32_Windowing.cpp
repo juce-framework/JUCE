@@ -1226,7 +1226,7 @@ private:
 
         LPCTSTR getWindowClassName() const noexcept     { return (LPCTSTR) MAKELONG (atom, 0); }
 
-        juce_DeclareSingleton_SingleThreaded_Minimal (WindowClassHolder);
+        juce_DeclareSingleton_SingleThreaded_Minimal (WindowClassHolder)
 
     private:
         ATOM atom;
@@ -2939,7 +2939,7 @@ ComponentPeer* createNonRepaintingEmbeddedWindowsPeer (Component& component, voi
 }
 
 
-juce_ImplementSingleton_SingleThreaded (HWNDComponentPeer::WindowClassHolder);
+juce_ImplementSingleton_SingleThreaded (HWNDComponentPeer::WindowClassHolder)
 
 
 //==============================================================================

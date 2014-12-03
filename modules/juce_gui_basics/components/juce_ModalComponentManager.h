@@ -120,7 +120,7 @@ public:
    #endif
 
     //==============================================================================
-    juce_DeclareSingleton_SingleThreaded_Minimal (ModalComponentManager);
+    juce_DeclareSingleton_SingleThreaded_Minimal (ModalComponentManager)
 
 protected:
     /** Creates a ModalComponentManager.

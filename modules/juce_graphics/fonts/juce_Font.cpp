@@ -51,7 +51,7 @@ public:
         clearSingletonInstance();
     }
 
-    juce_DeclareSingleton (TypefaceCache, false);
+    juce_DeclareSingleton (TypefaceCache, false)
 
     void setSize (const int numToCache)
     {
