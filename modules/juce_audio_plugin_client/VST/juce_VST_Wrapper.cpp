@@ -409,7 +409,7 @@ public:
         if (strcmp (text, "hasCockosViewAsConfig") == 0)
         {
             useNSView = true;
-            return 0xbeef0000;
+            return (VstInt32) 0xbeef0000;
         }
        #endif
 
