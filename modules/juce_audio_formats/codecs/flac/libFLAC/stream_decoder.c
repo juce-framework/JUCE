@@ -1344,12 +1344,12 @@ FLAC__bool has_id_filtered_(FLAC__StreamDecoder *decoder, FLAC__byte *id)
 FLAC__bool find_metadata_(FLAC__StreamDecoder *decoder)
 {
 	FLAC__uint32 x;
-	unsigned i, id;
+	unsigned i, id_;
 	FLAC__bool first = true;
 
 	FLAC__ASSERT(FLAC__bitreader_is_consumed_byte_aligned(decoder->private_->input));
 
-	for(i = id = 0; i < 4; ) {
+	for(i = id_ = 0; i < 4; ) {
 		if(decoder->private_->cached) {
 			x = (FLAC__uint32)decoder->private_->lookahead;
 			decoder->private_->cached = false;
@@ -1361,23 +1361,23 @@ FLAC__bool find_metadata_(FLAC__StreamDecoder *decoder)
 		if(x == FLAC__STREAM_SYNC_STRING[i]) {
 			first = true;
 			i++;
-			id = 0;
+			id_ = 0;
 			continue;
 		}
 
-		if(id >= 3)
+		if(id_ >= 3)
 			return false;
 
-		if(x == ID3V2_TAG_[id]) {
-			id++;
+		if(x == ID3V2_TAG_[id_]) {
+			id_++;
 			i = 0;
-			if(id == 3) {
+			if(id_ == 3) {
 				if(!skip_id3v2_tag_(decoder))
 					return false; /* skip_id3v2_tag_ sets the state for us */
 			}
 			continue;
 		}
-		id = 0;
+		id_ = 0;
 		if(x == 0xff) { /* MAGIC NUMBER for the first 8 frame sync bits */
 			decoder->private_->header_warmup[0] = (FLAC__byte)x;
 			if(!FLAC__bitreader_read_raw_uint32(decoder->private_->input, &x, 8))
