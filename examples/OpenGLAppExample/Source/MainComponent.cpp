@@ -35,7 +35,7 @@ public:
 
     void initialise() override
     {
-        setShaders();
+        createShaders();
     }
 
     void shutdown() override
@@ -46,18 +46,18 @@ public:
         uniforms = nullptr;
     }
 
-
     Matrix3D<float> getProjectionMatrix() const
-        {
-            float w = 1.0f / (0.5 + 0.1f);
-            float h = w * getLocalBounds().toFloat().getAspectRatio (false);
-            return Matrix3D<float>::fromFrustum (-w, w, -h, h, 4.0f, 30.0f);
-        }
+    {
+        float w = 1.0f / (0.5f + 0.1f);
+        float h = w * getLocalBounds().toFloat().getAspectRatio (false);
+        return Matrix3D<float>::fromFrustum (-w, w, -h, h, 4.0f, 30.0f);
+    }
 
     Matrix3D<float> getViewMatrix() const
     {
         Matrix3D<float> viewMatrix (Vector3D<float> (0.0f, 0.0f, -10.0f));
-        Matrix3D<float> rotationMatrix = viewMatrix.rotated (Vector3D<float> (-0.3f, 5.0f*sin(getFrameCounter()*0.01f), 0.0f));
+        Matrix3D<float> rotationMatrix
+            = viewMatrix.rotated (Vector3D<float> (-0.3f, 5.0f * std::sin (getFrameCounter() * 0.01f), 0.0f));
 
         return viewMatrix * rotationMatrix;
     }
@@ -68,10 +68,8 @@ public:
         jassert (OpenGLHelpers::isContextActive());
 
         const float desktopScale = (float) openGLContext.getRenderingScale();
-        OpenGLHelpers::clear (Colour::greyLevel(0.1));
+        OpenGLHelpers::clear (Colour::greyLevel (0.1f));
 
-        //glEnable (GL_DEPTH_TEST);
-        //glDepthFunc (GL_LESS);
         glEnable (GL_BLEND);
         glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
@@ -113,42 +111,40 @@ public:
 
     }
 
-    void setShaders()
+    void createShaders()
     {
-        vertexShader = {
-                "attribute vec4 position;\n"
-                "attribute vec4 sourceColour;\n"
-                "attribute vec2 texureCoordIn;\n"
-                "\n"
-                "uniform mat4 projectionMatrix;\n"
-                "uniform mat4 viewMatrix;\n"
-                "\n"
-                "varying vec4 destinationColour;\n"
-                "varying vec2 textureCoordOut;\n"
-                "\n"
-                "void main()\n"
-                "{\n"
-                "    destinationColour = sourceColour;\n"
-                "    textureCoordOut = texureCoordIn;\n"
-                "    gl_Position = projectionMatrix * viewMatrix * position;\n"
-            "}\n"};
+        vertexShader =
+            "attribute vec4 position;\n"
+            "attribute vec4 sourceColour;\n"
+            "attribute vec2 texureCoordIn;\n"
+            "\n"
+            "uniform mat4 projectionMatrix;\n"
+            "uniform mat4 viewMatrix;\n"
+            "\n"
+            "varying vec4 destinationColour;\n"
+            "varying vec2 textureCoordOut;\n"
+            "\n"
+            "void main()\n"
+            "{\n"
+            "    destinationColour = sourceColour;\n"
+            "    textureCoordOut = texureCoordIn;\n"
+            "    gl_Position = projectionMatrix * viewMatrix * position;\n"
+            "}\n";
 
-        fragmentShader = {
-               #if JUCE_OPENGL_ES
-                "varying lowp vec4 destinationColour;\n"
-                "varying lowp vec2 textureCoordOut;\n"
-               #else
-                "varying vec4 destinationColour;\n"
-                "varying vec2 textureCoordOut;\n"
-               #endif
-                "\n"
-                "void main()\n"
-                "{\n"
-                "    vec4 colour = vec4(0.95, 0.57, 0.03, 0.7);\n"
-                "    gl_FragColor = colour;\n"
-            "}\n" };
-
-
+        fragmentShader =
+           #if JUCE_OPENGL_ES
+            "varying lowp vec4 destinationColour;\n"
+            "varying lowp vec2 textureCoordOut;\n"
+           #else
+            "varying vec4 destinationColour;\n"
+            "varying vec2 textureCoordOut;\n"
+           #endif
+            "\n"
+            "void main()\n"
+            "{\n"
+            "    vec4 colour = vec4(0.95, 0.57, 0.03, 0.7);\n"
+            "    gl_FragColor = colour;\n"
+            "}\n";
 
         ScopedPointer<OpenGLShaderProgram> newShader (new OpenGLShaderProgram (openGLContext));
         String statusText;
@@ -179,9 +175,6 @@ public:
 
 private:
     //==============================================================================
-
-    // private member variables
-
     struct Vertex
     {
         float position[3];

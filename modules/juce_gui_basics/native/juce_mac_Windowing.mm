@@ -332,13 +332,13 @@ public:
         const_cast <Desktop::Displays&> (Desktop::getInstance().getDisplays()).refresh();
     }
 
-    juce_DeclareSingleton_SingleThreaded_Minimal (DisplaySettingsChangeCallback);
+    juce_DeclareSingleton_SingleThreaded_Minimal (DisplaySettingsChangeCallback)
 
 private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DisplaySettingsChangeCallback)
 };
 
-juce_ImplementSingleton_SingleThreaded (DisplaySettingsChangeCallback);
+juce_ImplementSingleton_SingleThreaded (DisplaySettingsChangeCallback)
 
 static Rectangle<int> convertDisplayRect (NSRect r, CGFloat mainScreenBottom)
 {

@@ -93,7 +93,7 @@ void ResamplingAudioSource::getNextAudioBlock (const AudioSourceChannelInfo& inf
         lastRatio = localRatio;
     }
 
-    const int sampsNeeded = roundToInt (info.numSamples * localRatio) + 2;
+    const int sampsNeeded = roundToInt (info.numSamples * localRatio) + 3;
 
     int bufferSize = buffer.getNumSamples();
 
@@ -138,8 +138,11 @@ void ResamplingAudioSource::getNextAudioBlock (const AudioSourceChannelInfo& inf
     }
 
     int nextPos = (bufferPos + 1) % bufferSize;
+
     for (int m = info.numSamples; --m >= 0;)
     {
+        jassert (sampsInBuffer > 0 && nextPos != endOfBufferPos);
+
         const float alpha = (float) subSampleOffset;
 
         for (int channel = 0; channel < channelsToProcess; ++channel)
@@ -147,8 +150,6 @@ void ResamplingAudioSource::getNextAudioBlock (const AudioSourceChannelInfo& inf
                                         + alpha * (srcBuffers[channel][nextPos] - srcBuffers[channel][bufferPos]);
 
         subSampleOffset += localRatio;
-
-        jassert (sampsInBuffer > 0);
 
         while (subSampleOffset >= 1.0)
         {

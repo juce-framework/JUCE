@@ -89,7 +89,7 @@ ModalComponentManager::~ModalComponentManager()
     clearSingletonInstance();
 }
 
-juce_ImplementSingleton_SingleThreaded (ModalComponentManager);
+juce_ImplementSingleton_SingleThreaded (ModalComponentManager)
 
 
 //==============================================================================

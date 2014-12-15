@@ -28,7 +28,7 @@
 #include "../jucer_Headers.h"
 #include "jucer_MainWindow.h"
 #include "jucer_CommandLine.h"
-#include "../project/jucer_Module.h"
+#include "../Project/jucer_Module.h"
 #include "jucer_AutoUpdater.h"
 #include "../Code Editor/jucer_SourceCodeEditor.h"
 
@@ -106,13 +106,14 @@ public:
 
         mainWindowList.forceCloseAllWindows();
         openDocumentManager.clear();
-        commandManager = nullptr;
-        settings = nullptr;
 
        #if JUCE_MAC
         MenuBarModel::setMacMainMenu (nullptr);
        #endif
+
         menuModel = nullptr;
+        commandManager = nullptr;
+        settings = nullptr;
 
         LookAndFeel::setDefaultLookAndFeel (nullptr);
 

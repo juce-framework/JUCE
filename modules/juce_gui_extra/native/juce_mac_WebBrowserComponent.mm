@@ -24,11 +24,11 @@
 
 #if JUCE_MAC
 
-struct DownloadClickDetectorClass  : public ObjCClass <NSObject>
+struct DownloadClickDetectorClass  : public ObjCClass<NSObject>
 {
-    DownloadClickDetectorClass()  : ObjCClass <NSObject> ("JUCEWebClickDetector_")
+    DownloadClickDetectorClass()  : ObjCClass<NSObject> ("JUCEWebClickDetector_")
     {
-        addIvar <WebBrowserComponent*> ("owner");
+        addIvar<WebBrowserComponent*> ("owner");
 
         addMethod (@selector (webView:decidePolicyForNavigationAction:request:frame:decisionListener:),
                    decidePolicyForNavigationAction, "v@:@@@@@");
@@ -54,7 +54,7 @@ private:
     }
 
     static void decidePolicyForNavigationAction (id self, SEL, WebView*, NSDictionary* actionInformation,
-                                                 NSURLRequest*, WebFrame*, id <WebPolicyDecisionListener> listener)
+                                                 NSURLRequest*, WebFrame*, id<WebPolicyDecisionListener> listener)
     {
         if (getOwner (self)->pageAboutToLoad (getOriginalURL (actionInformation)))
             [listener use];
@@ -63,7 +63,7 @@ private:
     }
 
     static void decidePolicyForNewWindowAction (id self, SEL, WebView*, NSDictionary* actionInformation,
-                                                NSURLRequest*, NSString*, id <WebPolicyDecisionListener> listener)
+                                                NSURLRequest*, NSString*, id<WebPolicyDecisionListener> listener)
     {
         getOwner (self)->newWindowAttemptingToLoad (getOriginalURL (actionInformation));
         [listener ignore];
@@ -109,7 +109,7 @@ private:
 } // (juce namespace)
 
 //==============================================================================
-@interface WebViewTapDetector  : NSObject <UIGestureRecognizerDelegate>
+@interface WebViewTapDetector  : NSObject<UIGestureRecognizerDelegate>
 {
 }
 
@@ -130,29 +130,37 @@ private:
 @end
 
 //==============================================================================
-@interface WebViewURLChangeDetector : NSObject <UIWebViewDelegate>
+@interface WebViewURLChangeDetector : NSObject<UIWebViewDelegate>
 {
     juce::WebBrowserComponent* ownerComponent;
 }
 
 - (WebViewURLChangeDetector*) initWithWebBrowserOwner: (juce::WebBrowserComponent*) ownerComponent;
-- (BOOL) webView: (UIWebView*) webView shouldStartLoadWithRequest: (NSURLRequest*) request navigationType: (UIWebViewNavigationType) navigationType;
+- (BOOL) webView: (UIWebView*) webView shouldStartLoadWithRequest: (NSURLRequest*) request
+                                                   navigationType: (UIWebViewNavigationType) navigationType;
+- (void) webViewDidFinishLoad: (UIWebView*) webView;
 @end
 
 @implementation WebViewURLChangeDetector
 
-- (WebViewURLChangeDetector*) initWithWebBrowserOwner: (juce::WebBrowserComponent*) ownerComponent_
+- (WebViewURLChangeDetector*) initWithWebBrowserOwner: (juce::WebBrowserComponent*) ownerComp
 {
     [super init];
-    ownerComponent = ownerComponent_;
+    ownerComponent = ownerComp;
     return self;
 }
 
-- (BOOL) webView: (UIWebView*) webView shouldStartLoadWithRequest: (NSURLRequest*) request navigationType: (UIWebViewNavigationType) navigationType
+- (BOOL) webView: (UIWebView*) webView shouldStartLoadWithRequest: (NSURLRequest*) request
+                                                   navigationType: (UIWebViewNavigationType) navigationType
 {
     (void) webView;
     (void) navigationType;
     return ownerComponent->pageAboutToLoad (nsStringToJuce (request.URL.absoluteString));
+}
+
+- (void) webViewDidFinishLoad: (UIWebView*) webView
+{
+    ownerComponent->pageFinishedLoading (nsStringToJuce (webView.request.URL.absoluteString));
 }
 @end
 
@@ -216,37 +224,45 @@ public:
                   const StringArray* headers,
                   const MemoryBlock* postData)
     {
-        NSMutableURLRequest* r
-            = [NSMutableURLRequest requestWithURL: [NSURL URLWithString: juceStringToNS (url)]
-                                      cachePolicy: NSURLRequestUseProtocolCachePolicy
-                                  timeoutInterval: 30.0];
-
-        if (postData != nullptr && postData->getSize() > 0)
-        {
-            [r setHTTPMethod: nsStringLiteral ("POST")];
-            [r setHTTPBody: [NSData dataWithBytes: postData->getData()
-                                           length: postData->getSize()]];
-        }
-
-        if (headers != nullptr)
-        {
-            for (int i = 0; i < headers->size(); ++i)
-            {
-                const String headerName  ((*headers)[i].upToFirstOccurrenceOf (":", false, false).trim());
-                const String headerValue ((*headers)[i].fromFirstOccurrenceOf (":", false, false).trim());
-
-                [r setValue: juceStringToNS (headerValue)
-                   forHTTPHeaderField: juceStringToNS (headerName)];
-            }
-        }
-
         stop();
 
-       #if JUCE_MAC
-        [[webView mainFrame] loadRequest: r];
-       #else
-        [webView loadRequest: r];
-       #endif
+        if (url.trimStart().startsWithIgnoreCase ("javascript:"))
+        {
+            [webView stringByEvaluatingJavaScriptFromString:
+                juceStringToNS (url.fromFirstOccurrenceOf (":", false, false))];
+        }
+        else
+        {
+            NSMutableURLRequest* r
+                = [NSMutableURLRequest requestWithURL: [NSURL URLWithString: juceStringToNS (url)]
+                                          cachePolicy: NSURLRequestUseProtocolCachePolicy
+                                      timeoutInterval: 30.0];
+
+            if (postData != nullptr && postData->getSize() > 0)
+            {
+                [r setHTTPMethod: nsStringLiteral ("POST")];
+                [r setHTTPBody: [NSData dataWithBytes: postData->getData()
+                                               length: postData->getSize()]];
+            }
+
+            if (headers != nullptr)
+            {
+                for (int i = 0; i < headers->size(); ++i)
+                {
+                    const String headerName  ((*headers)[i].upToFirstOccurrenceOf (":", false, false).trim());
+                    const String headerValue ((*headers)[i].fromFirstOccurrenceOf (":", false, false).trim());
+
+                    [r setValue: juceStringToNS (headerValue)
+                       forHTTPHeaderField: juceStringToNS (headerName)];
+                }
+            }
+
+           #if JUCE_MAC
+            [[webView mainFrame] loadRequest: r];
+           #else
+            [webView loadRequest: r];
+           #endif
+        }
     }
 
     void goBack()       { [webView goBack]; }
@@ -391,4 +407,8 @@ void WebBrowserComponent::resized()
 void WebBrowserComponent::visibilityChanged()
 {
     checkWindowAssociation();
+}
+
+void WebBrowserComponent::focusGained (FocusChangeType)
+{
 }

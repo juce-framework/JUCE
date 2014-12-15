@@ -16,7 +16,7 @@
         <Option compiler="gcc"/>
         <Compiler>
           <Add option="-O0"/>
-          <Add option="-std=gnu++0x"/>
+          <Add option="-std=c++11"/>
           <Add option="-mstackrealign"/>
           <Add option="-g"/>
           <Add option="-D__MINGW__=1"/>
@@ -53,7 +53,7 @@
         <Option compiler="gcc"/>
         <Compiler>
           <Add option="-Os"/>
-          <Add option="-std=gnu++0x"/>
+          <Add option="-std=c++11"/>
           <Add option="-mstackrealign"/>
           <Add option="-D__MINGW__=1"/>
           <Add option="-D__MINGW_EXTENSION="/>
@@ -746,23 +746,7 @@
       <Option compile="0"/>
       <Option link="0"/>
     </Unit>
-    <Unit filename="../../Source/BinaryData/projectIconVisualStudio05.png">
-      <Option compile="0"/>
-      <Option link="0"/>
-    </Unit>
-    <Unit filename="../../Source/BinaryData/projectIconVisualStudio08.png">
-      <Option compile="0"/>
-      <Option link="0"/>
-    </Unit>
-    <Unit filename="../../Source/BinaryData/projectIconVisualStudio10.png">
-      <Option compile="0"/>
-      <Option link="0"/>
-    </Unit>
-    <Unit filename="../../Source/BinaryData/projectIconVisualStudio12.png">
-      <Option compile="0"/>
-      <Option link="0"/>
-    </Unit>
-    <Unit filename="../../Source/BinaryData/projectIconVisualStudio13.png">
+    <Unit filename="../../Source/BinaryData/projectIconVisualStudio.png">
       <Option compile="0"/>
       <Option link="0"/>
     </Unit>

@@ -278,7 +278,7 @@ String SystemStats::getDisplayLanguage() { return getUserLanguage() + "-" + getU
 //==============================================================================
 void CPUInformation::initialise() noexcept
 {
-    numCpus = jmax (1, sysconf (_SC_NPROCESSORS_ONLN));
+    numCpus = jmax (1, (int) sysconf (_SC_NPROCESSORS_ONLN));
 }
 
 //==============================================================================

@@ -266,7 +266,7 @@ private:
             animator.animateComponent (componentsToAnimate.getUnchecked(i),
                                        r.reduced (10),
                                        1.0f,
-                                       900 + 300 * std::sin (angle),
+                                       900 + (int) (300 * std::sin (angle)),
                                        false,
                                        0.0,
                                        0.0);

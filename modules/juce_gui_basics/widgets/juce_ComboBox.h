@@ -264,7 +264,7 @@ public:
     virtual void showPopup();
 
     /** Adds the items in this ComboBox to the given menu. */
-    void addItemsToMenu (PopupMenu&) const;
+    virtual void addItemsToMenu (PopupMenu&) const;
 
     //==============================================================================
     /**

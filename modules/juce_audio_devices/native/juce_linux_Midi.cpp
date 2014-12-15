@@ -419,7 +419,7 @@ public:
         port.deletePort();
     }
 
-    void sendMessageNow (const MidiMessage& message)
+    bool sendMessageNow (const MidiMessage& message)
     {
         if (message.getRawDataSize() > maxEventSize)
         {
@@ -435,12 +435,17 @@ public:
         const uint8* data = message.getRawData();
 
         snd_seq_t* seqHandle = port.client->get();
+        bool success = true;
 
         while (numBytes > 0)
         {
             const long numSent = snd_midi_event_encode (midiParser, data, numBytes, &event);
+
             if (numSent <= 0)
+            {
+                success = numSent == 0;
                 break;
+            }
 
             numBytes -= numSent;
             data += numSent;
@@ -449,11 +454,15 @@ public:
             snd_seq_ev_set_subs (&event);
             snd_seq_ev_set_direct (&event);
 
-            snd_seq_event_output (seqHandle, &event);
+            if (snd_seq_event_output_direct (seqHandle, &event) < 0)
+            {
+                success = false;
+                break;
+            }
         }
 
-        snd_seq_drain_output (seqHandle);
         snd_midi_event_reset_encode (midiParser);
+        return success;
     }
 
 private:

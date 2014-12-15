@@ -482,8 +482,8 @@ String URL::addEscapeChars (const String& s, const bool isParameter)
                  || legalChars.indexOf ((juce_wchar) c) >= 0))
         {
             utf8.set (i, '%');
-            utf8.insert (++i, "0123456789abcdef" [((uint8) c) >> 4]);
-            utf8.insert (++i, "0123456789abcdef" [c & 15]);
+            utf8.insert (++i, "0123456789ABCDEF" [((uint8) c) >> 4]);
+            utf8.insert (++i, "0123456789ABCDEF" [c & 15]);
         }
     }
 

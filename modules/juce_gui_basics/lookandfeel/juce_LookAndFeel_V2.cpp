@@ -1397,7 +1397,6 @@ void LookAndFeel_V2::drawRotarySlider (Graphics& g, int x, int y, int width, int
             g.fillPath (filledArc);
         }
 
-        if (thickness > 0)
         {
             const float innerRadius = radius * 0.2f;
             Path p;

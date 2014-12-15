@@ -58,27 +58,30 @@ namespace AppearanceColours
 AppearanceSettings::AppearanceSettings (bool updateAppWhenChanged)
     : settings ("COLOUR_SCHEME")
 {
-    IntrojucerLookAndFeel lf;
-
-    for (int i = 0; i < AppearanceColours::numColours; ++i)
-        getColourValue (AppearanceColours::colours[i].name) = lf.findColour (AppearanceColours::colours[i].colourID).toString();
-
-    CodeDocument doc;
-    CPlusPlusCodeTokeniser tokeniser;
-    CodeEditorComponent editor (doc, &tokeniser);
-
-    const CodeEditorComponent::ColourScheme cs (editor.getColourScheme());
-
-    for (int i = cs.types.size(); --i >= 0;)
+    if (! IntrojucerApp::getApp().isRunningCommandLine)
     {
-        CodeEditorComponent::ColourScheme::TokenType& t = cs.types.getReference(i);
-        getColourValue (t.name) = t.colour.toString();
+        IntrojucerLookAndFeel lf;
+
+        for (int i = 0; i < AppearanceColours::numColours; ++i)
+            getColourValue (AppearanceColours::colours[i].name) = lf.findColour (AppearanceColours::colours[i].colourID).toString();
+
+        CodeDocument doc;
+        CPlusPlusCodeTokeniser tokeniser;
+        CodeEditorComponent editor (doc, &tokeniser);
+
+        const CodeEditorComponent::ColourScheme cs (editor.getColourScheme());
+
+        for (int i = cs.types.size(); --i >= 0;)
+        {
+            CodeEditorComponent::ColourScheme::TokenType& t = cs.types.getReference(i);
+            getColourValue (t.name) = t.colour.toString();
+        }
+
+        getCodeFontValue() = getDefaultCodeFont().toString();
+
+        if (updateAppWhenChanged)
+            settings.addListener (this);
     }
-
-    getCodeFontValue() = getDefaultCodeFont().toString();
-
-    if (updateAppWhenChanged)
-        settings.addListener (this);
 }
 
 File AppearanceSettings::getSchemesFolder()

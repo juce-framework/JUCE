@@ -113,6 +113,8 @@ public:
     void parentHierarchyChanged() override;
     /** @internal */
     void visibilityChanged() override;
+    /** @internal */
+    void focusGained (FocusChangeType) override;
 
 private:
     //==============================================================================
