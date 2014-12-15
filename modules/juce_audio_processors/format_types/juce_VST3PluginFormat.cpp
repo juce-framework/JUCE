@@ -2025,6 +2025,100 @@ public:
         (void) sizeInBytes;
     }
 
+    //==============================================================================
+    // NB: this class and its subclasses must be public to avoid problems in
+    // DLL builds under MSVC.
+    class ParameterChangeList  : public Vst::IParameterChanges
+    {
+    public:
+        ParameterChangeList() {}
+        virtual ~ParameterChangeList() {}
+
+        JUCE_DECLARE_VST3_COM_REF_METHODS
+        JUCE_DECLARE_VST3_COM_QUERY_METHODS
+
+        Steinberg::int32 PLUGIN_API getParameterCount() override                                { return (Steinberg::int32) queues.size(); }
+        Vst::IParamValueQueue* PLUGIN_API getParameterData (Steinberg::int32 index) override    { return queues[(int) index]; }
+
+        Vst::IParamValueQueue* PLUGIN_API addParameterData (const Vst::ParamID& id, Steinberg::int32& index) override
+        {
+            for (int i = queues.size(); --i >= 0;)
+            {
+                if (queues.getUnchecked (i)->getParameterId() == id)
+                {
+                    index = (Steinberg::int32) i;
+                    return queues.getUnchecked (i);
+                }
+            }
+
+            ParamValueQueue* q = queues.add (new ParamValueQueue (id));
+            index = getParameterCount() - 1;
+            return q;
+        }
+
+        struct ParamValueQueue  : public Vst::IParamValueQueue
+        {
+            ParamValueQueue (Vst::ParamID parameterID) : paramID (parameterID)
+            {
+                points.ensureStorageAllocated (1024);
+            }
+
+            virtual ~ParamValueQueue() {}
+
+            JUCE_DECLARE_VST3_COM_REF_METHODS
+            JUCE_DECLARE_VST3_COM_QUERY_METHODS
+
+            Steinberg::Vst::ParamID PLUGIN_API getParameterId() override    { return paramID; }
+            Steinberg::int32 PLUGIN_API getPointCount() override            { return (Steinberg::int32) points.size(); }
+
+            Steinberg::tresult PLUGIN_API getPoint (Steinberg::int32 index,
+                                                    Steinberg::int32& sampleOffset,
+                                                    Steinberg::Vst::ParamValue& value) override
+            {
+                if (isPositiveAndBelow ((int) index, points.size()))
+                {
+                    ParamPoint e (points.getUnchecked ((int) index));
+                    sampleOffset = e.sampleOffset;
+                    value = e.value;
+                    return kResultTrue;
+                }
+
+                sampleOffset = -1;
+                value = 0.0;
+                return kResultFalse;
+            }
+
+            Steinberg::tresult PLUGIN_API addPoint (Steinberg::int32 sampleOffset,
+                                                    Steinberg::Vst::ParamValue value,
+                                                    Steinberg::int32& index) override
+            {
+                // XXX this may need to be made thread-safe..
+                ParamPoint p = { sampleOffset, value };
+                points.add (p);
+                index = (Steinberg::int32) points.size();
+                return kResultTrue;
+            }
+
+        private:
+            struct ParamPoint
+            {
+                Steinberg::int32 sampleOffset;
+                Steinberg::Vst::ParamValue value;
+            };
+
+            Atomic<int> refCount;
+            const Vst::ParamID paramID;
+            Array<ParamPoint> points;
+
+            JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ParamValueQueue)
+        };
+
+        Atomic<int> refCount;
+        OwnedArray<ParamValueQueue> queues;
+
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ParameterChangeList)
+    };
+
 private:
     //==============================================================================
     VST3ModuleHandle::Ptr module;
@@ -2094,99 +2188,6 @@ private:
 
         return stream;
     }
-
-    //==============================================================================
-    class ParameterChangeList  : public Vst::IParameterChanges
-    {
-    public:
-        ParameterChangeList() {}
-        virtual ~ParameterChangeList() {}
-
-        JUCE_DECLARE_VST3_COM_REF_METHODS
-        JUCE_DECLARE_VST3_COM_QUERY_METHODS
-
-        Steinberg::int32 PLUGIN_API getParameterCount() override                                { return (Steinberg::int32) queues.size(); }
-        Vst::IParamValueQueue* PLUGIN_API getParameterData (Steinberg::int32 index) override    { return queues[(int) index]; }
-
-        Vst::IParamValueQueue* PLUGIN_API addParameterData (const Vst::ParamID& id, Steinberg::int32& index) override
-        {
-            for (int i = queues.size(); --i >= 0;)
-            {
-                if (queues.getUnchecked (i)->getParameterId() == id)
-                {
-                    index = (Steinberg::int32) i;
-                    return queues.getUnchecked (i);
-                }
-            }
-
-            ParamValueQueue* q = queues.add (new ParamValueQueue (id));
-            index = getParameterCount() - 1;
-            return q;
-        }
-
-    private:
-        struct ParamValueQueue  : public Vst::IParamValueQueue
-        {
-            ParamValueQueue (Vst::ParamID parameterID) : paramID (parameterID)
-            {
-                points.ensureStorageAllocated (1024);
-            }
-
-            virtual ~ParamValueQueue() {}
-
-            JUCE_DECLARE_VST3_COM_REF_METHODS
-            JUCE_DECLARE_VST3_COM_QUERY_METHODS
-
-            Steinberg::Vst::ParamID PLUGIN_API getParameterId() override    { return paramID; }
-            Steinberg::int32 PLUGIN_API getPointCount() override            { return (Steinberg::int32) points.size(); }
-
-            Steinberg::tresult PLUGIN_API getPoint (Steinberg::int32 index,
-                                                    Steinberg::int32& sampleOffset,
-                                                    Steinberg::Vst::ParamValue& value) override
-            {
-                if (isPositiveAndBelow ((int) index, points.size()))
-                {
-                    ParamPoint e (points.getUnchecked ((int) index));
-                    sampleOffset = e.sampleOffset;
-                    value = e.value;
-                    return kResultTrue;
-                }
-
-                sampleOffset = -1;
-                value = 0.0;
-                return kResultFalse;
-            }
-
-            Steinberg::tresult PLUGIN_API addPoint (Steinberg::int32 sampleOffset,
-                                                    Steinberg::Vst::ParamValue value,
-                                                    Steinberg::int32& index) override
-            {
-                // XXX this may need to be made thread-safe..
-                ParamPoint p = { sampleOffset, value };
-                points.add (p);
-                index = (Steinberg::int32) points.size();
-                return kResultTrue;
-            }
-
-        private:
-            struct ParamPoint
-            {
-                Steinberg::int32 sampleOffset;
-                Steinberg::Vst::ParamValue value;
-            };
-
-            Atomic<int> refCount;
-            const Vst::ParamID paramID;
-            Array<ParamPoint> points;
-
-            JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ParamValueQueue)
-        };
-
-        Atomic<int> refCount;
-        OwnedArray<ParamValueQueue> queues;
-
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ParameterChangeList)
-    };
 
     ComSmartPtr<ParameterChangeList> inputParameterChanges, outputParameterChanges;
     ComSmartPtr<MidiEventList> midiInputs, midiOutputs;
