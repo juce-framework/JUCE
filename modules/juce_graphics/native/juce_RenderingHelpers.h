@@ -2335,10 +2335,12 @@ public:
                 else
                 {
                     Rectangle<int> area (tx, ty, sourceImage.getWidth(), sourceImage.getHeight());
-                    area = area.getIntersection (getThis().getMaximumBounds());
+                    Rectangle<int> intersect = area.getIntersection (getThis().getMaximumBounds());
 
-                    if (! area.isEmpty())
-                        if (typename BaseRegionType::Ptr c = clip->applyClipTo (new EdgeTableRegionType (area)))
+                    if (intersect == area)
+                        clip->renderImageUntransformed (getThis(), sourceImage, alpha, tx, ty, false);
+                    else if (! intersect.isEmpty())
+                        if (typename BaseRegionType::Ptr c = clip->applyClipTo (new EdgeTableRegionType (intersect)))
                             c->renderImageUntransformed (getThis(), sourceImage, alpha, tx, ty, false);
                 }
 
