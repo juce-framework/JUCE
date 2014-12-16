@@ -397,6 +397,17 @@ URL URL::withParameter (const String& parameterName,
     return u;
 }
 
+URL URL::withParameters (const StringPairArray& parametersToAdd) const
+{
+    URL u (*this);
+
+    for (int i = 0; i < parametersToAdd.size(); ++i)
+        u.addParameter (parametersToAdd.getAllKeys()[i],
+                        parametersToAdd.getAllValues()[i]);
+
+    return u;
+}
+
 URL URL::withPOSTData (const String& newPostData) const
 {
     URL u (*this);
