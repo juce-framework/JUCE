@@ -15,6 +15,7 @@
 *.o
 *.d
 *.sdf
+*.opensdf
 xcuserdata
 *.xccheckout
 contents.xcworkspacedata
