@@ -540,7 +540,10 @@ private:
             dict = plist->createNewChildElement ("dict");
 
         if (iOS)
+        {
             addPlistDictionaryKeyBool (dict, "LSRequiresIPhoneOS", true);
+            addPlistDictionaryKeyBool (dict, "UIViewControllerBasedStatusBarAppearance", false);
+        }
 
         addPlistDictionaryKey (dict, "CFBundleExecutable",          "${EXECUTABLE_NAME}");
         addPlistDictionaryKey (dict, "CFBundleIconFile",            iconFile.exists() ? iconFile.getFileName() : String::empty);
