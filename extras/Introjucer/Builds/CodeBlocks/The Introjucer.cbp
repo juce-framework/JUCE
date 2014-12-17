@@ -24,8 +24,8 @@
           <Add option="-DDEBUG=1"/>
           <Add option="-D_DEBUG=1"/>
           <Add option="-DJUCER_CODEBLOCKS_20734A5D=1"/>
-          <Add option="-DJUCE_APP_VERSION=3.1.0"/>
-          <Add option="-DJUCE_APP_VERSION_HEX=0x30100"/>
+          <Add option="-DJUCE_APP_VERSION=3.1.1"/>
+          <Add option="-DJUCE_APP_VERSION_HEX=0x30101"/>
           <Add directory="."/>
           <Add directory="..\..\JuceLibraryCode"/>
         </Compiler>
@@ -59,8 +59,8 @@
           <Add option="-D__MINGW_EXTENSION="/>
           <Add option="-DNDEBUG=1"/>
           <Add option="-DJUCER_CODEBLOCKS_20734A5D=1"/>
-          <Add option="-DJUCE_APP_VERSION=3.1.0"/>
-          <Add option="-DJUCE_APP_VERSION_HEX=0x30100"/>
+          <Add option="-DJUCE_APP_VERSION=3.1.1"/>
+          <Add option="-DJUCE_APP_VERSION_HEX=0x30101"/>
           <Add directory="."/>
           <Add directory="..\..\JuceLibraryCode"/>
         </Compiler>
